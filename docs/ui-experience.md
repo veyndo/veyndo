@@ -1,8 +1,36 @@
 # Shop by intent: the storefront and Studio experience
 
-**Personal workspace and standard-shop editor:** [Illustrated workflow, shared models, rights, history, forms and publication](personal-workspace-and-shop-design.md).
+A shopper describes what they are looking for and gets a selection of real
+products. A merchant asks for help next to the screen they are working on.
+Both use the shop's current data, and neither changes anything until a person
+submits or approves it.
 
-VEYNDO's interface follows one path: **workspace → evidence → conversation → reviewed change → live result**. The assistant belongs beside the task. Opening help must preserve an unsaved product editor; suggestions must not invoke a model or apply a change until the merchant explicitly submits or approves it.
+## Try it
+
+**As a shopper** (needs a configured model):
+
+1. Open the storefront and find **Ask VEYNDO**.
+2. Pick a starter for a budget, a gift or a comparison, or type your own
+   request. A starter only fills the input.
+3. Submit. You get product cards with the catalog's images, descriptions,
+   stock and current prices.
+4. Remove suggestions or restore the selection. This does not touch the basket.
+5. Open a product to choose a variant, then use the normal basket and checkout.
+
+**As a merchant:**
+
+1. Open any workspace in Studio and choose **Ask VEYNDO** in the header.
+2. The dialog opens beside your screen with an editable question that names
+   the workspace and the selected record.
+3. Submit it. The answer arrives in the existing conversation, and a change
+   arrives as a proposal you review.
+
+Opening help keeps an unsaved product editor intact. A suggestion does not call
+a model or apply a change until you submit or approve it.
+
+The rest of this page records how these two entries are built and tested. For
+the shop editor see
+[personal workspace and shop design](personal-workspace-and-shop-design.md).
 
 ![Current native storefront with a catalogue-based assistant](assets/product-tour-20261102/storefront.jpg)
 

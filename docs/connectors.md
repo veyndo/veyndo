@@ -1,15 +1,32 @@
 # Connect OpenAI, Claude and other chat clients
 
-There are two distinct connections. Both use the same commerce capabilities.
+There are two different connections, and they are easy to confuse.
+
+| You want | Connection | Section |
+| --- | --- | --- |
+| The assistant **inside Studio** to use a model | A model provider configured on the server | [Models inside the merchant chat](#models-inside-the-merchant-chat) |
+| Claude Desktop or another **local** client to use your shop | The stdio bridge to your shop's MCP endpoint | [Claude Desktop / local MCP clients](#claude-desktop--local-mcp-clients) |
+| ChatGPT or Claude **in the cloud** to use your shop | The shop's HTTPS `/mcp` endpoint | [ChatGPT / Claude remote connectors](#chatgpt--claude-remote-connectors) |
+
+Both directions use the same commerce operations and the same permission
+checks. To see the tool calls an agent makes before you connect one, follow
+[Let an agent buy](agent-purchase.md).
 
 ## Models inside the merchant chat
 
-Operators can configure encrypted global provider settings and shop overrides
-in **VEYNDO Platform → AI providers**; ordinary shops inherit that selection.
-Configured flags are not provider-health checks. See [provider inheritance](platform.md#central-ai-inherited-by-all-shops).
+1. **Configure a provider.** Operators set encrypted global provider settings
+   and shop overrides in **VEYNDO Platform → AI providers**. Ordinary shops
+   inherit that selection. See
+   [provider inheritance](platform.md#central-ai-inherited-by-all-shops).
+   For a local setup, use the `.env` entries below.
+2. **Choose it in Studio.** In `/#merchant`, sign in with a personal member
+   account and open the assistant model settings. Choose Local, OpenAI or
+   Claude. You can override the model ID per turn.
+3. **Ask for a bounded change** and inspect the stored fields before you
+   approve.
 
-For a local environment-based setup, set credentials in the private, ignored
-`.env`, then restart the server:
+Local setup: put the credentials into the private, ignored `.env` and restart
+the server.
 
 ```dotenv
 OPENAI_API_KEY=your-api-key
@@ -18,32 +35,38 @@ ANTHROPIC_API_KEY=your-api-key
 ANTHROPIC_MODEL=claude-sonnet-5-5
 ```
 
-In `/#merchant`, sign in with a personal member account and open the assistant
-model settings. Choose Local, OpenAI, or Claude. You can override
-the model ID per turn. The server uses OpenAI **Responses** with structured
-outputs, or Anthropic **Messages** with `output_config.format`. No subscription
-cookies, ChatGPT browser automation, or Claude subscription tokens are used.
-These APIs require separate provider credentials/access and may incur charges.
-The database and local-model route do not require a paid service.
+What to know before you choose a cloud provider:
 
-Credentials are never returned to the frontend or stored in conversations.
-Cloud selection sends the bounded catalog, graph context and conversation
-history to that provider. No silent provider fallback occurs. Failures are
-stored as explicit error messages; they never create an executable proposal.
-The server validates IDs, ranges and trusted revisions for every provider.
-Merchant planning uses bounded native provider tool-call rounds for authorized
-reads before producing the final structured proposal: OpenAI Responses/Chat,
-Claude Messages and Ollama share the native operation authorization. A tool result
-does not grant additional permissions or approve a write.
+- These APIs need their own provider credentials and may incur charges. No
+  subscription cookies, ChatGPT browser automation or Claude subscription
+  tokens are used. The database and the local-model route need no paid service.
+- Cloud selection sends the bounded catalog, graph context and conversation
+  history to that provider.
+- A configured flag is not a health check of the provider.
+- Credentials are never returned to the frontend or stored in conversations.
+- There is no silent fallback to another provider. A failure is stored as an
+  explicit error message and never creates an executable proposal.
+
+How the server uses the model: OpenAI **Responses** with structured outputs,
+or Anthropic **Messages** with `output_config.format`. The server validates
+IDs, ranges and trusted revisions for every provider. Merchant planning uses
+bounded native provider tool-call rounds for authorized reads before producing
+the final structured proposal: OpenAI Responses/Chat, Claude Messages and
+Ollama share the native operation authorization. A tool result does not grant
+additional permissions or approve a write.
 
 Official references: [OpenAI structured outputs](https://developers.openai.com/api/docs/guides/structured-outputs),
 [Claude structured outputs](https://platform.claude.com/docs/en/build-with-claude/structured-outputs).
 
 ## Claude Desktop / local MCP clients
 
-The Python bridge forwards real JSON-RPC requests over stdio to the running
-Rust MCP endpoint. Add this entry to your client's MCP configuration, replacing
-the absolute checkout path. Preserve existing entries in your config.
+A small bridge forwards JSON-RPC requests over stdio to your running shop. It
+is transport only and contains no commerce logic.
+
+1. Start your shop ([first tour](first-tour.md) or [quickstart](quickstart.md)).
+2. Add this entry to your client's MCP configuration and replace the absolute
+   checkout path. Keep the entries that are already there.
+3. Restart the client. It now lists the customer and read tools.
 
 ```json
 {
@@ -60,18 +83,19 @@ the absolute checkout path. Preserve existing entries in your config.
 }
 ```
 
-This configuration exposes the customer/read tools. For delegated merchant
-planning, create a **Dedicated agent** access under **Developer → API & integrations**
-using [explicit model/token/USD allowances and read scopes](agent-authority-controls.md).
-Set `COMMERCE_SESSION_TOKEN` privately to that credential and `COMMERCE_TENANT` to
-its shop. Ordinary integration keys cannot start unbudgeted native AI planning.
-Do not commit a filled credential/config. The bounded key prepares a preview;
-the merchant reviews and approves business changes through their personal Studio
-session. Interactive personal MCP sessions remain available for appropriately
-authorized native operations: `merchant.plan` → inspect the stored preview →
-`merchant.apply` with explicit approval. A delegated planning key cannot perform
-that final apply. `knowledge.graph` and `knowledge.search` expose the actual graph and
-retrieval route. The bridge is transport, not another commerce implementation.
+This configuration exposes the customer and read tools. Merchant work needs a
+credential:
+
+| Goal | Credential | What it can do |
+| --- | --- | --- |
+| Let an agent plan merchant changes | A **Dedicated agent** access from **Developer → API & integrations**, with [explicit model, token and USD allowances and read scopes](agent-authority-controls.md) | Prepares a preview. It cannot perform the final apply. |
+| Work interactively as yourself | Your personal session, see [credentials](#personal-and-delegated-workspace-credentials) | `merchant.plan` → inspect the stored preview → `merchant.apply` with explicit approval, within your rights. |
+
+Set `COMMERCE_SESSION_TOKEN` privately to the credential and `COMMERCE_TENANT`
+to its shop. Do not commit a filled configuration. Ordinary integration keys
+cannot start unbudgeted native AI planning. The merchant reviews and approves
+business changes through their personal Studio session. `knowledge.graph` and
+`knowledge.search` expose the actual graph and retrieval route.
 
 The allowance covers calls to Veyndo's central model boundary. A separate model
 run by an external MCP client has its own provider billing; these counters do not
@@ -79,11 +103,12 @@ measure or cap that client's independent token use.
 
 ## ChatGPT / Claude remote connectors
 
-The Rust endpoint is `/mcp`, a stateless JSON-response subset of Streamable
-HTTP. GET returns 405 because this prototype offers no SSE subscription.
-Localhost is not directly reachable by ChatGPT or Claude's hosted services.
-Use a supported secure tunnel or a deployed HTTPS endpoint for remote access.
-Keep the local demo bound to loopback until its production identity layer exists.
+Hosted ChatGPT and Claude cannot reach localhost. You need a deployed HTTPS
+endpoint or a supported secure tunnel. Keep the local demo bound to loopback
+until its production identity layer exists.
+
+The endpoint is `/mcp`, a stateless JSON-response subset of Streamable HTTP.
+GET returns 405 because this prototype offers no SSE subscription.
 
 For an authorized OpenAI API client, the remote MCP tool configuration is:
 

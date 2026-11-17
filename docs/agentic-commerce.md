@@ -1,23 +1,43 @@
 # Shopping agents, cart transfer and shop imports
 
-Veyndo accepts a shopping agent’s cart and brings existing shop catalogues into
-its own native commerce workflow. **The merchant retains the checkout, prices,
-stock, order, permissions and publication decision.** There is no automatic
-export into Shopify and no purchase at a supplier’s checkout.
+A shopping agent can search your catalog, fill a cart and hand the buyer over
+to your checkout. You keep the checkout, prices, stock, order, permissions and
+the decision to publish. Veyndo does not export into Shopify and does not buy
+at a supplier's checkout.
 
-See [current status](status.md) and the [18 October public acceptance](evidence/agentic-commerce-hosted-2026-10-18.md)
-for actual cart-transfer, embedded checkout, private import and simulation results.
+## Which path do you need?
+
+| You want | Use | Section |
+| --- | --- | --- |
+| An agent to search, quote and order through tool calls | MCP tools of your shop | [Let an agent buy](agent-purchase.md) |
+| A platform to hand over a filled cart to your checkout | UCP Cart Transfer | [UCP Cart Transfer](#ucp-cart-transfer) |
+| A platform to pass the buyer's consent choices | UCP buyer consent | [Explicit buyer consent](#explicit-buyer-consent) |
+| An agent inside the shopper's browser to use your storefront | WebMCP tools | [Browser agents](#browser-agents-share-the-actual-cart-commands) |
+| Products from another shop or a supplier in your catalog | Reviewed imports | [Merchant entry](#merchant-entry) |
+
+All paths end in the same native cart and checkout. The
+[current status](status.md) and the
+[18 October public acceptance](evidence/agentic-commerce-hosted-2026-10-18.md)
+record which of them ran on the hosted shop.
 
 ## Merchant entry
 
-Open **Sales channels → AI channels & imports**. Select the sales channel to
-inspect native Cart Transfer and buyer-consent support, configured payment modes
-and links to the external onboarding instructions. Technical support is not
-Google approval; the screen explicitly reports external approval as unverified.
-Readiness needs `catalog.read`. Product import also needs current `catalog.write`
-and the existing private environment grants. Changing channels never grants rights.
+Open **Sales channels → AI channels & imports** and select a sales channel. The
+screen shows whether Cart Transfer and buyer consent are supported for that
+channel, which payment modes are configured and where the external onboarding
+instructions are.
 
-Choose an import source:
+Technical support is not an approval by Google. The screen reports external
+approval as unverified. Reading readiness needs `catalog.read`. Importing
+products also needs `catalog.write` and access to a private environment.
+Changing the channel never grants a right.
+
+### Import products
+
+1. Choose a source from the table below.
+2. Review and edit each draft.
+3. Select a private sandbox and approve creation.
+4. Set stock and fulfilment, then publish the changes you selected.
 
 | Source | What happens | Boundary |
 | --- | --- | --- |
@@ -26,13 +46,14 @@ Choose an import source:
 | Generic CSV | Upload the native name/description/price/product-number/image format | Existing deterministic import, no model required |
 | Shop URL / product description | Use the existing bounded AI preparation | Requires configured inference and `assistant.use`; external text is untrusted |
 
-Review and edit each draft, select a private sandbox, then approve creation.
-The existing native save owner records revision/history/events and an idempotency
-digest. Imported products start with **zero stock**. Explicitly check your right
-to use the supplier’s text/images and sell the products, configure inventory and
-fulfilment, then publish selected changes. Provenance identifies the source; it
-is neither an authenticity certificate nor permission to resell. There is no
-background supplier stock, order or price synchronisation in this importer.
+Imported products start with **zero stock**. Before you publish, check that you
+may use the supplier's text and images and sell the products. The recorded
+source tells you where a product came from. It is not a certificate of
+authenticity and not a permission to resell. The importer does not synchronise
+supplier stock, orders or prices in the background.
+
+The native save records revision, history, events and an idempotency digest, so
+repeating an approval does not create duplicates.
 
 Provider-specific parsers and network code live in
 [`extensions/apps/catalog-import/`](../extensions/apps/catalog-import/README.md).
@@ -43,58 +64,80 @@ No per-app or per-shop database table is created.
 
 ## UCP Cart Transfer
 
-`POST /ucp/v1/carts` accepts native product IDs in `line_items[].item.id`, positive
-integer quantities and an optional supported currency/buyer. It recalculates
-through the native channel, catalogue, stock, tax and price owners. Caller-supplied
-prices or return origins have no authority.
+A platform sends a cart, your shop recalculates it and returns a link where the
+buyer finishes in your normal checkout.
 
-The response contains native totals, an expiry and a canonical `continue_url`.
-The browser continuation uses the existing ten-minute, single-use handoff in a
-URL **fragment**, not a query-string bearer. The native consume endpoint rotates
-the cart capability; foreign-tenant consumption and replay fail. The continuation pins the cart’s content language, so native names and shipping/payment
-labels survive the handoff. The browser finishes in Veyndo’s existing checkout and payment lifecycle. Repeated order
-submission retains the native idempotency contract.
+1. The platform discovers the shop at `/.well-known/ucp`.
+2. It sends `POST /ucp/v1/carts` with native product IDs in
+   `line_items[].item.id`, positive integer quantities and optionally a
+   supported currency and buyer.
+3. The shop recalculates through the native channel, catalogue, stock, tax and
+   price owners. Prices or return origins supplied by the caller have no
+   authority.
+4. The response contains the native totals, an expiry and a canonical
+   `continue_url`.
+5. The buyer opens that link and completes the order in the existing checkout
+   and payment lifecycle.
 
-Discovery is `/.well-known/ucp`. A `UCP-Agent` public HTTPS profile must intersect
-the requested base capability: cart-only platforms need not claim checkout.
-Profiles never grant merchant or customer authority. The existing separately
-versioned Veyndo B2B negotiation extension remains optional and independently gated.
+What protects the handoff:
 
-Google’s merchant enrolment and regional availability still apply. Shipping this
-endpoint does not mean Veyndo has been admitted to Google surfaces. See the
-[Google Cart overview](https://developers.google.com/merchant/ucp/guides/overview/cart-overview)
+- The continuation uses the existing ten-minute, single-use handoff in a URL
+  **fragment**, not a bearer in the query string.
+- Consuming it rotates the cart capability. Consumption by another tenant and
+  replay both fail.
+- The continuation pins the cart's content language, so native names and
+  shipping and payment labels survive the handoff.
+- Repeated order submission keeps the native idempotency contract.
+
+A `UCP-Agent` public HTTPS profile must intersect the requested base
+capability. A cart-only platform does not need to claim checkout. Profiles
+never grant merchant or customer authority. The separately versioned
+[B2B negotiation extension](b2b-ucp-negotiation.md) stays optional and has its
+own gate.
+
+Google's merchant enrolment and regional availability still apply. Shipping
+this endpoint does not mean Veyndo has been admitted to Google surfaces. See
+the [Google Cart overview](https://developers.google.com/merchant/ucp/guides/overview/cart-overview)
 and [Merchant Center guidance](https://developers.google.com/merchant/ucp/guides/tools/merchant-center/overview).
 
 ## Explicit buyer consent
 
-The optional negotiated `dev.ucp.shopping.buyer_consent` extension accepts four
-registered purposes: analytics, preferences, marketing and sale/sharing. Requests
-supply explicit `source: "platform"` boolean decisions, with the registered email
-and SMS marketing segments. Descriptions and policy metadata belong to the server;
-unknown purposes/segments and asserted business grants are rejected. Sale/sharing
-is always disabled because Veyndo has no corresponding processing purpose.
+A platform can pass the buyer's consent choices together with the cart. The
+optional extension `dev.ucp.shopping.buyer_consent` accepts four registered
+purposes: analytics, preferences, marketing and sale/sharing.
 
-Omitting consent preserves it; replacing an explicit purpose replaces its segment
-choices. A PUT without a buyer replaces earlier buyer contact fields while retaining
-explicit consent choices; required missing contacts block completion. An unrelated
-update cannot revive a withdrawn or expired native grant.
-Clearing the buyer revokes native optional processing. Consent and cart mutation
-commit atomically through the native cart/privacy owners. Native merchant policy
-can withhold a purpose even when a platform requests it. Required marketing contact
-information must be present before completion. Completed orders retain an immutable
-policy/consent snapshot; later revocation governs future processing without rewriting
-historical orders. Consent is disabled unless a compatible platform profile selects it. Native
-clients can explicitly pre-negotiate with `x-veyndo-ucp-consent-version: 2026-08-25`;
-the legacy B2B version header alone never enables consent. An unnegotiated caller
-receives no consent extension and cannot submit choices under it. No implicit tracking grant is created.
+| Rule | Behavior |
+| --- | --- |
+| Who decides | Requests supply explicit `source: "platform"` boolean decisions, with the registered email and SMS marketing segments. |
+| Who describes | Descriptions and policy metadata belong to the server. Unknown purposes or segments and asserted business grants are rejected. |
+| Sale/sharing | Always disabled, because Veyndo has no corresponding processing purpose. |
+| Omitting consent | Preserves the earlier choice. Replacing an explicit purpose replaces its segment choices. |
+| Clearing the buyer | Revokes native optional processing. |
+| Merchant policy | Can withhold a purpose even when a platform requests it. |
+| Completed orders | Keep an immutable policy and consent snapshot. A later revocation governs future processing and does not rewrite historical orders. |
+
+Details that matter when you integrate:
+
+- A PUT without a buyer replaces earlier buyer contact fields and keeps explicit
+  consent choices. Required contacts that are missing block completion, and
+  required marketing contact information must be present before completion.
+- An unrelated update cannot revive a withdrawn or expired native grant.
+- Consent and cart mutation commit atomically through the native cart and
+  privacy owners.
+- Consent is disabled unless a compatible platform profile selects it. Native
+  clients can pre-negotiate with `x-veyndo-ucp-consent-version: 2026-08-25`.
+  The legacy B2B version header alone never enables consent.
+- An unnegotiated caller receives no consent extension and cannot submit
+  choices under it. No implicit tracking grant is created.
 
 See the [UCP buyer-consent schema](https://ucp.dev/2026-08-25/schemas/shopping/buyer_consent.json)
 and Veyndo’s [legal/privacy owner](european-operation.md).
 
 ## Browser agents share the actual cart commands
 
-The standard storefront’s buttons and supported WebMCP tools share the same native
-cart commands and serialized current revisions. Supported browsers can discover:
+An agent running in the shopper's browser can use the storefront through
+WebMCP. The tools and the storefront's own buttons share the same native cart
+commands and serialized current revisions. Supported browsers can discover:
 
 - `veyndo_search_catalog`: bounded public product search in the current shop/channel.
 - `veyndo_get_cart`: product IDs/names, quantities and totals; no bearer or buyer details.

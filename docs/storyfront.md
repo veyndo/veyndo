@@ -1,5 +1,17 @@
 # Storyfront: cinematic storefronts on the same checkout
 
+Storyfront is a separate frontend that presents products as a cinematic,
+scene-based experience. It uses Veyndo as its catalog and checkout: the bag in
+the experience is the same native cart, and the buyer finishes in the same
+checkout as in the standard storefront. The Storyfront source is private and
+runs as its own service.
+
+| Your situation | What to do |
+| --- | --- |
+| You have a shop and want to add Storyfront | Add the app from Studio, first path below |
+| Your shop was created through Experience onboarding | Nothing to install, second path below |
+| You operate Storyfront as an independent companion | Follow the rest of this guide, third path below |
+
 ## Choose the integration path
 
 **Adding the app from Studio:** the Storyfront workspace's **Add Storyfront
