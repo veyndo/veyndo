@@ -1,4 +1,4 @@
-# The VEYNDO app platform
+# The app platform
 
 **Implementation status:** [Delivered foundations and remaining business-capability gates](app-system-status.md).
 

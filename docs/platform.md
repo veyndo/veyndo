@@ -1,4 +1,4 @@
-# SaaS operator console
+# Operator console
 
 Open [admin.veyndo.ai](https://admin.veyndo.ai/) for the service directory, then choose **Platform operator**. Locally, open `/#platform`. This is a separate,
 multilingual control plane for the platform operator, with a light blue workspace,

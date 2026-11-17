@@ -1,11 +1,10 @@
-# Run a Rust ecommerce prototype locally
+# Run Veyndo locally
 
-Start with commerce, then add AI or an MCP client when you need it.
+Build and run Veyndo from source. This is the development path. If you only
+want to try the product, the [first tour](first-tour.md) starts a prepared
+image without a Rust or Node build.
 
-For a prepared image without the Rust/Node build, use the [container first tour](first-tour.md).
-The source workflow below remains the development path.
-
-## Requirements
+## What you need
 
 - Rust stable 1.96+ (`cargo` on your PATH)
 - Node.js 22 or newer and npm
@@ -13,9 +12,9 @@ The source workflow below remains the development path.
 - Python 3
 - Free ports 8787 (application), 15487 (database) and 16333 (private Qdrant)
 
-Ollama and API credentials are optional for the initial commerce tour.
+Ollama and API credentials are optional. Commerce works without a model.
 
-## Start commerce without a model download
+## 1. Start commerce
 
 ```sh
 git clone https://github.com/veyndo/veyndo.git
@@ -23,89 +22,78 @@ cd veyndo
 ./scripts/dev.sh
 ```
 
-The first start pulls PostgreSQL/Qdrant images and builds the frontend and Rust application.
-Keep the terminal open while the server runs. Open http://127.0.0.1:8787/.
-The storefront, SKU selection, quantity pricing, cart and simulated checkout
-work without a running LLM. Chat planning and vector indexing require their
-respective model services and report errors when unavailable.
+The first start pulls the PostgreSQL and Qdrant images and builds the frontend
+and the Rust application. Keep the terminal open and open
+http://127.0.0.1:8787/.
 
-Open VEYNDO Studio (`/#merchant`). The login page offers **Create shop** for
-a new personal owner account, **Sign in** for an existing account and invitation
-acceptance. Select **Create shop** for the first local tour.
-Create a personal owner account and a synthetic shop. One identity can belong
-to multiple shops. The generated global `MERCHANT_TOKEN` is an instance bootstrap
-credential, not an invitation or a merchant credential to distribute.
+The storefront, variant selection, quantity pricing, cart and simulated
+checkout work without a running model. Chat planning and vector indexing need
+their model services and report an error when those are unavailable.
 
-The default Nord Atelier storefront has 12 parent products, 34 purchasable
-SKUs and bundled generated photographs. [Current fashion tour](fashion-demo.md).
-The legacy `atelier`/`workshop` compatibility shops can contain synthetic B2B
-`buyer@example.test` / `demo-business` when demo seeding is enabled; this is
-separate from merchant accounts and is not a universal login for every new shop. The default tour uses simulated/manual payments.
-A separately configured native PayPal adapter supports Sandbox and Live. See
-[hosted PayPal acceptance](shopware-payments-acceptance.md) for the observed
-Sandbox journeys and their scope.
+## 2. Create your shop
 
-Stop the app with Ctrl+C. Restart with `./scripts/dev.sh`; database data is
-retained. Stop the database with `docker compose -p veyndo stop`.
-Do not remove its volume if you want to retain orders and accounts.
+Open Studio at `/#merchant` and choose **Create shop**. Create a personal owner
+account and a synthetic shop. One identity can belong to several shops.
 
-## Add the connected playground
+The default Nord Atelier storefront has 12 parent products, 34 purchasable SKUs
+and bundled generated photographs. [Fashion tour](fashion-demo.md). Payments in
+the default tour are simulated or manual.
 
-The CLI below is the **legacy furniture compatibility tour**, with mug/lamp
-IDs. Before creating its playground, set `DEMO_CATALOG=legacy-furniture` in the
-private `.env` and restart the local app. Existing shops are not rewritten.
-For the current Nord Atelier walkthrough, use [the illustrated feature guide](features.md)
-with the normal `DEMO_CATALOG=fashion` default.
+## 3. Stop and restart
 
-After creating your personal merchant account on the compatibility instance:
+Stop the app with Ctrl+C and start it again with `./scripts/dev.sh`. Database
+data is kept. Stop the database with `docker compose -p veyndo stop`. Do not
+remove its volume if you want to keep orders and accounts.
 
-```sh
-python3 scripts/playground.py --email your-personal-merchant@example.test
-```
+## Add AI (optional)
 
-Enter that account's password privately. This creates a separate **Commerce
-Playground** with a rule, `TRY10` coupon, Home collection sales channel, engraving
-app and active branching invoice flow. The script prints its Studio/storefront
-links. Repeating setup preserves your edits. No AI/provider calls or orders are
-made by setup. [Follow the ten-minute walkthrough](playground.md).
-
-## Add local AI (optional)
-
-Install and start Ollama, then explicitly download the documented models:
+**Local models.** Install and start Ollama, then download the documented models:
 
 ```sh
 ollama pull qwen3.6:35b
 ollama pull qwen3-embedding:0.6b
 ```
 
-The Qwen3.6-35B-A3B artifact is about 24 GB; runtime/context need additional
-memory. This is not a lightweight default for every laptop. A compatible
-installed model can be selected with `OLLAMA_MODEL` in the private `.env`.
-Smaller alternatives are not claimed as verified by this project.
-An existing `.env` keeps its previous model selection.
+The Qwen3.6-35B-A3B artifact is about 24 GB, and runtime and context need more
+memory. It is not a lightweight default for every laptop. Select a compatible
+installed model with `OLLAMA_MODEL` in the private `.env`. Smaller alternatives
+are not claimed as verified by this project. An existing `.env` keeps its
+previous model selection.
 
-Restart the app after changing `.env`. In Studio, choose Local in **Settings**.
-Select **Refresh shop knowledge** when the embedding service is ready.
+Restart the app after changing `.env`. In Studio, choose Local in **Settings**,
+then **Refresh shop knowledge** when the embedding service is ready.
 
 Try a bounded request such as: “Propose a price of EUR 159 for the bag. Do not
-apply it yet.” Inspect the actual change fields before approving; the model's
+apply it yet.” Inspect the actual change fields before approving. The model's
 summary alone is not an execution guarantee.
 
-## Use OpenAI or Claude (optional)
+**OpenAI or Claude.** Configure your own server-side API credentials with the
+[provider guide](connectors.md). API access is separate from consumer chat
+subscriptions and may incur charges.
 
-Configure your own server-side API credentials following [the provider guide](connectors.md).
-API access is separate from consumer chat subscriptions and may incur charges.
-No cloud credentials are needed for ordinary commerce or local Ollama inference.
-
-## Connect an MCP client
+## Connect an MCP client (optional)
 
 Follow [Claude Desktop and local MCP clients](connectors.md#claude-desktop--local-mcp-clients).
-The bridge connects to your running Rust app. It does not start the server.
-Remote hosted clients cannot connect directly to localhost; their setup remains separate.
+The bridge connects to your running Rust app and does not start the server.
+Hosted clients cannot reach localhost; their setup is separate. To see the
+calls an agent makes, try the [agent purchase](agent-purchase.md) first.
 
-## Run a separate development instance
+## Troubleshooting
 
-Use a different Compose project and database/application ports on a fresh checkout:
+| Symptom | Fix |
+| --- | --- |
+| `cargo: command not found` | Install Rust or put the existing toolchain on PATH. |
+| Cannot connect to Docker | Start Docker and check that `docker info` succeeds. |
+| Port already allocated | Run a [separate instance](#run-a-second-instance) on other ports. |
+| AI unavailable | Commerce still works. Check the chosen provider and model service. |
+| First build is slow | Images are downloaded and Rust and frontend dependencies are built. |
+
+## Advanced
+
+### Run a second instance
+
+Use a different Compose project and other database and application ports on a
+fresh checkout:
 
 ```sh
 DB_PORT=15489 QDRANT_PORT=16335 BIND_ADDR=127.0.0.1:8789 \
@@ -114,21 +102,11 @@ COMPOSE_PROJECT_NAME=veyndo-second ./scripts/dev.sh
 
 `DB_PORT` is used when generating a new `.env`. For an existing `.env`, update
 its `DATABASE_URL` to the chosen port and keep `QDRANT_URL` consistent with
-`QDRANT_PORT` if it is already configured. Use the same project name/ports when
-restarting; stop its database with `docker compose -p veyndo-second stop`.
+`QDRANT_PORT` if it is already configured. Use the same project name and ports
+when restarting; stop its database with `docker compose -p veyndo-second stop`.
 Never point a test run at a shop whose data you need to preserve.
 
-## Troubleshooting
-
-- **`cargo: command not found`:** install Rust or put the existing toolchain on PATH.
-- **Cannot connect to Docker:** start Docker and check that `docker info` succeeds.
-- **Port already allocated:** use the separate-instance settings above.
-- **AI unavailable:** commerce still works; check the chosen provider and model service.
-- **First build is slow:** images are downloaded and Rust/frontend dependencies are built.
-
-[Project overview](../README.md) · [Full feature tour](features.md) · [Security scope](security.md)
-
-## Separate setup, HTTP and workers
+### Run setup, HTTP and workers separately
 
 Local development defaults to `BOOTSTRAP_MODE=auto` and `PROCESS_ROLE=all`.
 For independently operated processes, run setup once before starting replicas:
@@ -151,12 +129,48 @@ when running setup; keep applied source immutable and add new migration files.
 Plan the initial index build before serving a large existing database. This
 process separation is a foundation, not a production deployment recipe.
 
-## Upgrading an existing pre-VEYNDO checkout
+### Accounts and credentials in a local instance
+
+The generated global `MERCHANT_TOKEN` is an instance bootstrap credential. It
+is not an invitation and not a merchant credential to distribute.
+
+The legacy `atelier`/`workshop` compatibility shops can contain the synthetic
+B2B customer `buyer@example.test` / `demo-business` when demo seeding is
+enabled. This is separate from merchant accounts and is not a universal login
+for every new shop.
+
+A separately configured native PayPal adapter supports Sandbox and Live. See
+[hosted PayPal acceptance](shopware-payments-acceptance.md) for the observed
+Sandbox journeys and their scope.
+
+### The legacy furniture playground
+
+The playground CLI is the **legacy furniture compatibility tour**, with
+mug and lamp IDs. Set `DEMO_CATALOG=legacy-furniture` in the private `.env` and
+restart the app before creating it. Existing shops are not rewritten. For the
+current Nord Atelier walkthrough, use the [feature guide](features.md) with the
+normal `DEMO_CATALOG=fashion` default.
+
+After creating your personal merchant account on the compatibility instance:
+
+```sh
+python3 scripts/playground.py --email your-personal-merchant@example.test
+```
+
+Enter that account's password privately. This creates a separate **Commerce
+Playground** with a rule, `TRY10` coupon, Home collection sales channel,
+engraving app and active branching invoice flow. The script prints its Studio
+and storefront links. Repeating setup preserves your edits. Setup makes no AI
+or provider calls and places no orders. [Ten-minute playground walkthrough](playground.md).
+
+### Upgrade a pre-VEYNDO checkout
 
 The repository and binaries are now named **VEYNDO**. An old checkout directory
 can stay in place. `scripts/dev.sh` reuses a detected legacy Compose database
 project; an explicit `COMPOSE_PROJECT_NAME` overrides detection. Use that actual
 project name when stopping it. Never remove the old data volume to rename the
 app. Rebuild frontend and Rust before starting the new `target/debug/veyndo`
-binary. Existing shop IDs and browser sessions remain valid. See [branding and
-compatibility](branding.md).
+binary. Existing shop IDs and browser sessions remain valid. See
+[branding and compatibility](branding.md).
+
+[Project overview](../README.md) · [Feature guide](features.md) · [Security scope](security.md)

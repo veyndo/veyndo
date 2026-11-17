@@ -1,4 +1,4 @@
-# Reproduce the million-product commerce measurement
+# Benchmarks you can reproduce
 
 The [published benchmark page](https://veyndo.github.io/veyndo/benchmarks.html)
 contains the current bounded million-product workloads and the earlier full-catalog

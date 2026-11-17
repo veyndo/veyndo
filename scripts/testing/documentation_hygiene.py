@@ -24,7 +24,8 @@ def main():
         assert len(path.read_bytes())<=16000,(path,'Split scoped rules by owner')
     nav=json.loads((ROOT/'site/docs-navigation.json').read_text())
     sources=[s for g in nav['groups'] for s in g['sources']]
-    assert sources[0]=='docs/status.md' and sources.count('docs/status.md')==1
+    # Status stays the one canonical entry of the opening chapter; the story introduction may precede it.
+    assert 'docs/status.md' in nav['groups'][0]['sources'] and sources.count('docs/status.md')==1
     assert 'status.md' in (ROOT/'docs/current-release.md').read_text().splitlines()[2]
     print('PASS bounded README, release-note negative controls, scoped instructions and canonical status entry')
 if __name__=='__main__':main()

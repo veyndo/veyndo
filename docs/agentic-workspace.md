@@ -1,4 +1,4 @@
-# A connected AI-first workspace
+# The AI workspace
 
 The merchant agent now carries the current editor into a conversation, discovers
 installed apps by relevance and prepares bounded work that the merchant can

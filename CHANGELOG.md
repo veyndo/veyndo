@@ -1,5 +1,11 @@
 # Changelog
 
+## Lead the handbook with one story
+
+- Open the handbook with "one shop for people and agents" and three entries: agents buy, work and build.
+- Add a start page and a replayable agent purchase over MCP against the public demo shop.
+- Reorder the reading paths by intent and give guides short, task-based titles.
+
 ## Connect to the hosted component API
 
 - Serve a JSON API profile on the API hostname and support API-only Core deployments.

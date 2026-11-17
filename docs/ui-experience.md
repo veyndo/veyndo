@@ -1,4 +1,4 @@
-# Connected Studio and storefront experience
+# Shop by intent: the storefront and Studio experience
 
 **Personal workspace and standard-shop editor:** [Illustrated workflow, shared models, rights, history, forms and publication](personal-workspace-and-shop-design.md).
 

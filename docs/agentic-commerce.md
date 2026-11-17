@@ -1,4 +1,4 @@
-# AI channels and inward shop imports
+# Shopping agents, cart transfer and shop imports
 
 Veyndo accepts a shopping agent’s cart and brings existing shop catalogues into
 its own native commerce workflow. **The merchant retains the checkout, prices,

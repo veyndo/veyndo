@@ -6,8 +6,7 @@ ordinary work and return to the same step later.
 
 The first visit to an unconfigured personal workspace in a shop without orders
 also offers a welcome. The guide and its controls support English, German, French
-and Spanish. Its source and local acceptance are recorded below; public deployment
-of this addition has not been observed.
+and Spanish.
 
 ![Optional welcome in the existing Studio](assets/shop-setup-20261102/welcome.png)
 
@@ -66,6 +65,9 @@ Test those through the existing configuration and commerce paths and inspect the
 actual result. The guide remains available through the sidebar.
 
 ## Source owners and local acceptance
+
+The source and local acceptance are recorded here; public deployment of this
+addition has not been observed.
 
 The guide adds optional progress to the existing revisioned personal workspace.
 It creates no additional table, API operation or onboarding execution service.

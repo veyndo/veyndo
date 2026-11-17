@@ -1,14 +1,22 @@
-# Veyndo: current status
+# Current status: what is live and tested
 
-For the whole-shop architecture, public repositories and independent
-entry points, see [One shop, composable parts](one-shop-components.md).
+This page is the record of what is deployed and what was actually observed.
+It is long on purpose. Read [Platform at a glance](#platform-at-a-glance)
+for the summary, then jump to the section you need.
+
+| You want to know | Go to |
+| --- | --- |
+| The idea and where to begin | [Start here](start-here.md) |
+| What runs in the hosted pilot | [Platform at a glance](#platform-at-a-glance) and [Pinned Lumen composition](#pinned-lumen-composition) |
+| Whether checkout and payments were accepted | [Private Checkout live in the Lumen test shop](#private-checkout-live-in-the-lumen-test-shop) |
+| How the parts fit together | [One shop, composable parts](one-shop-components.md) |
+
+Updated 12 November 2026. Source code, passing tests and a successful public
+journey are tracked separately. The 4 November PayPal journeys use the actual provider Sandbox; earlier purchases retain their stated simulation scope.
+
 The local Checkout comparison records equivalent quote results and catalog
 availability across a Checkout restart. Hosted capacity remains a separate
 test. [Measurement](evidence/checkout-composition-performance-2026-11-08.md).
-
-Updated 12 November 2026. Start here for the public product, observed journeys and
-remaining delivery work. Source code, passing tests and a successful public
-journey are tracked separately. The 4 November PayPal journeys use the actual provider Sandbox; earlier purchases retain their stated simulation scope.
 
 ## Hosted component API
 

@@ -1,4 +1,4 @@
-# Lean-checked commerce contracts
+# What the Lean proofs cover
 
 The current source declares **63 extracted policies used in production Rust paths**
 and **150 named properties**. This is **not a certificate that the entire commerce

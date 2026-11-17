@@ -1,4 +1,4 @@
-# OpenAI, Claude and external chat clients
+# Connect OpenAI, Claude and other chat clients
 
 There are two distinct connections. Both use the same commerce capabilities.
 

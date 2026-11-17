@@ -1,15 +1,16 @@
 # The connected Veyndo handbook
 
-The [public handbook](https://veyndo.ai/docs/) follows a deliberate reading path:
-understand and try the product → connect intelligence → shape experiences → build
-apps and automation → operate commerce → control changes → inspect the foundation.
-It opens on the Veyndo website and uses the repository's Markdown as its source.
+The [public handbook](https://veyndo.ai/docs/) follows one story: agents buy,
+work and build on the same core that serves the storefront. Its reading path is
+start here → agents buy → agents work → build → run the shop → stay in control →
+why you can trust it. It opens on the Veyndo website and uses the repository's
+Markdown as its source.
 
 ## Find the right starting point
 
 | Your goal | Start here |
 | --- | --- |
-| Understand what Veyndo does | [Feature guide](features.md) and [connected cognition](cognitive-commerce.md) |
+| Understand what Veyndo does | [Start here](start-here.md), then [let an agent buy](agent-purchase.md) |
 | See what is online and actually tested | [Current status](status.md): one entry point for the deployed version, observed journeys and remaining work |
 | Try a complete working round | [First tour](first-tour.md) |
 | Give an agent a bounded job | [Agent workshop](agent-workshop.md) |

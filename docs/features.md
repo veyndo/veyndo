@@ -1,4 +1,4 @@
-# Veyndo Commerce feature guide
+# Feature guide
 
 Build a shop, work with an agent, design the storefront and create apps on the
 same native commerce foundation. This guide follows the storefront, Studio,

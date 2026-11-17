@@ -4,117 +4,118 @@
     {
       "id": "start",
       "title": {
-        "en": "Understand & try",
-        "de": "Verstehen & ausprobieren",
-        "fr": "Comprendre et essayer",
-        "es": "Comprender y probar"
+        "en": "Start here",
+        "de": "Hier starten",
+        "fr": "Commencer ici",
+        "es": "Empieza aquí"
       },
       "description": {
-        "en": "Start with the idea, then complete your first real workflow.",
-        "de": "Beginne mit der Idee und probiere dann einen vollständigen Ablauf aus.",
-        "fr": "Découvrez l’idée, puis réalisez votre premier parcours complet.",
-        "es": "Descubre la idea y completa tu primer flujo real."
+        "en": "The idea in five minutes, one agent purchase and your first complete round.",
+        "de": "Die Idee in fünf Minuten, ein Agentenkauf und dein erster vollständiger Durchlauf.",
+        "fr": "L’idée en cinq minutes, un achat par un agent et votre premier parcours complet.",
+        "es": "La idea en cinco minutos, una compra hecha por un agente y tu primer recorrido completo."
       },
       "sources": [
+        "docs/start-here.md",
+        "docs/agent-purchase.md",
+        "docs/first-tour.md",
+        "docs/hosted-component-api.md",
+        "docs/one-shop-components.md",
+        "docs/quickstart.md",
         "docs/status.md",
         "docs/platform-overview.md",
-        "docs/one-shop-components.md",
-        "docs/hosted-component-api.md",
-        "docs/first-tour.md",
-        "docs/shop-setup.md",
         "docs/features.md",
-        "docs/quickstart.md",
-        "docs/playground.md",
-        "docs/video-tours.md",
-        "docs/early-contributors.md",
-        "docs/documentation-site.md"
+        "docs/shop-setup.md",
+        "docs/video-tours.md"
       ]
     },
     {
-      "id": "intelligence",
+      "id": "buy",
       "title": {
-        "en": "Intelligence comes first",
-        "de": "Intelligenz zuerst",
-        "fr": "L’intelligence d’abord",
-        "es": "Inteligencia primero"
+        "en": "Agents buy",
+        "de": "Agenten kaufen",
+        "fr": "Les agents achètent",
+        "es": "Los agentes compran"
       },
       "description": {
-        "en": "Connect knowledge, review proposals and give agents permission to act.",
-        "de": "Verbinde Wissen, prüfe Vorschläge und gib Agenten gezielte Handlungsmöglichkeiten.",
-        "fr": "Reliez les connaissances, examinez les propositions et autorisez les agents.",
-        "es": "Conecta conocimiento, revisa propuestas y autoriza a los agentes."
+        "en": "Shopping agents and people use the same catalog, quote and checkout.",
+        "de": "Einkaufsagenten und Menschen nutzen denselben Katalog, dasselbe Angebot und denselben Checkout.",
+        "fr": "Agents d’achat et clients utilisent le même catalogue, le même devis et le même checkout.",
+        "es": "Agentes de compra y personas usan el mismo catálogo, presupuesto y checkout."
+      },
+      "sources": [
+        "docs/agentic-commerce.md",
+        "docs/connectors.md",
+        "docs/ui-experience.md",
+        "docs/product-guide-mcp-app.md",
+        "docs/checkout.md",
+        "docs/b2b-ucp-negotiation.md",
+        "docs/storyfront.md",
+        "docs/experience-integration.md",
+        "docs/fashion-demo.md",
+        "docs/shopware-payments-acceptance.md"
+      ]
+    },
+    {
+      "id": "work",
+      "title": {
+        "en": "Agents work",
+        "de": "Agenten arbeiten",
+        "fr": "Les agents travaillent",
+        "es": "Los agentes trabajan"
+      },
+      "description": {
+        "en": "Merchant agents prepare changes in private. You approve them or set the limits.",
+        "de": "Händleragenten bereiten Änderungen privat vor. Du gibst sie frei oder setzt die Grenzen.",
+        "fr": "Les agents marchands préparent les changements en privé. Vous les validez ou fixez les limites.",
+        "es": "Los agentes del comerciante preparan cambios en privado. Tú los apruebas o fijas los límites."
       },
       "sources": [
         "docs/agentic-workspace.md",
-        "docs/merchant-reports.md",
-        "docs/cognitive-commerce.md",
         "docs/durable-agent-runs.md",
         "docs/agent-authority-controls.md",
-        "docs/knowledge-workspace.md",
-        "docs/knowledge-component.md",
-        "docs/customer-scenarios.md",
         "docs/agent-workshop.md",
-        "docs/connectors.md",
+        "docs/knowledge-workspace.md",
+        "docs/customer-scenarios.md",
+        "docs/automation.md",
+        "docs/merchant-reports.md",
+        "docs/personal-workspace-and-shop-design.md",
+        "docs/visual-workspace-canvas.md",
+        "docs/agentic-migration.md",
+        "docs/cognitive-commerce.md",
         "docs/behavior-intelligence.md",
         "docs/agentic-grids.md",
         "docs/connected-workbench.md"
       ]
     },
     {
-      "id": "experiences",
+      "id": "build",
       "title": {
-        "en": "Shape the experience",
-        "de": "Erlebnisse gestalten",
-        "fr": "Créer des expériences",
-        "es": "Diseñar experiencias"
+        "en": "Build",
+        "de": "Bauen",
+        "fr": "Construire",
+        "es": "Construir"
       },
       "description": {
-        "en": "Follow a product from discovery to the same authoritative checkout.",
-        "de": "Vom Produkt bis zum Checkout: ein Erlebnis auf derselben Commerce-Grundlage.",
-        "fr": "Du produit au paiement, sur la même base commerce.",
-        "es": "Del descubrimiento al checkout sobre la misma base de comercio."
+        "en": "The SDK, the components and one app contract for visual editing and coding agents.",
+        "de": "Das SDK, die Komponenten und ein App-Vertrag für visuelle Bearbeitung und Coding-Agenten.",
+        "fr": "Le SDK, les composants et un contrat d’app pour l’édition visuelle et les agents de code.",
+        "es": "El SDK, los componentes y un contrato de app para la edición visual y los agentes de código."
       },
       "sources": [
-        "docs/personal-workspace-and-shop-design.md",
-        "docs/visual-workspace-canvas.md",
-        "docs/ui-experience.md",
-        "docs/fashion-demo.md",
-        "docs/experience-integration.md",
-        "docs/storyfront.md",
-        "docs/checkout.md",
-        "docs/shopware-payments-acceptance.md",
-        "docs/agentic-commerce.md",
-        "docs/agentic-migration.md",
-        "docs/channel-setup.md",
-        "docs/channel-management.md",
-        "docs/localization.md"
-      ]
-    },
-    {
-      "id": "apps",
-      "title": {
-        "en": "Build apps & automate",
-        "de": "Apps bauen & automatisieren",
-        "fr": "Créer des apps et automatiser",
-        "es": "Crear apps y automatizar"
-      },
-      "description": {
-        "en": "One visual and agentic app contract, real records, events and controlled releases.",
-        "de": "Ein Vertrag für visuellen Bau und Agenten: echte Daten, Ereignisse und geprüfte Freigaben.",
-        "fr": "Un contrat visuel et agentique : données réelles, événements et publications contrôlées.",
-        "es": "Un contrato visual y agentico: datos reales, eventos y publicaciones controladas."
-      },
-      "sources": [
-        "docs/app-system-status.md",
-        "docs/product-guide-mcp-app.md",
-        "docs/business-capabilities.md",
         "docs/app-studio.md",
-        "docs/furniture-configurator.md",
-        "docs/app-studio-workspace.md",
-        "docs/app-assistants.md",
         "docs/app-tutorials/README.md",
         "docs/app-platform.md",
         "docs/agentic-component-ui.md",
+        "docs/checkout-component.md",
+        "docs/knowledge-component.md",
+        "docs/automation-component.md",
+        "docs/connector-component.md",
+        "docs/app-system-status.md",
+        "docs/business-capabilities.md",
+        "docs/furniture-configurator.md",
+        "docs/app-studio-workspace.md",
+        "docs/app-assistants.md",
         "docs/app-runtime-service.md",
         "docs/app-data-service.md",
         "docs/app-data-writes.md",
@@ -124,44 +125,46 @@
         "docs/app-data-storage.md",
         "docs/app-core-extensions.md",
         "docs/app-native-lifecycles.md",
-        "docs/automation.md",
         "docs/connected-apps.md",
-        "docs/email-delivery.md",
         "docs/payment-provider-api.md",
-        "docs/payment-transaction-details.md",
-        "docs/payment-invoice-checkout.md",
-        "docs/payment-saved-methods.md",
-        "docs/payment-capture-management.md",
         "docs/studio-api-and-channels.md",
         "docs/service-integrations.md",
-        "docs/plugin-ownership.md"
+        "docs/plugin-ownership.md",
+        "docs/early-contributors.md"
       ]
     },
     {
-      "id": "commerce",
+      "id": "run",
       "title": {
-        "en": "Run connected commerce",
-        "de": "Commerce gemeinsam betreiben",
-        "fr": "Exploiter un commerce connecté",
-        "es": "Operar comercio conectado"
+        "en": "Run the shop",
+        "de": "Den Shop betreiben",
+        "fr": "Exploiter la boutique",
+        "es": "Operar la tienda"
       },
       "description": {
-        "en": "Catalog, customers, orders and new channels share native business operations.",
-        "de": "Katalog, Kunden, Bestellungen und neue Kanäle nutzen gemeinsame Geschäftsaktionen.",
-        "fr": "Catalogue, clients, commandes et canaux partagent les opérations natives.",
-        "es": "Catálogo, clientes, pedidos y canales comparten operaciones nativas."
+        "en": "Catalog, orders, payments, countries and channels in daily operation.",
+        "de": "Katalog, Bestellungen, Zahlungen, Länder und Kanäle im täglichen Betrieb.",
+        "fr": "Catalogue, commandes, paiements, pays et canaux au quotidien.",
+        "es": "Catálogo, pedidos, pagos, países y canales en el día a día."
       },
       "sources": [
         "docs/admin-workflows.md",
         "docs/product-management.md",
         "docs/merchant-operations.md",
         "docs/shipping-workflows.md",
+        "docs/payment-transaction-details.md",
+        "docs/payment-invoice-checkout.md",
+        "docs/payment-saved-methods.md",
+        "docs/payment-capture-management.md",
+        "docs/email-delivery.md",
         "docs/currencies.md",
         "docs/international-commerce.md",
+        "docs/localization.md",
         "docs/company-settings.md",
+        "docs/channel-setup.md",
+        "docs/channel-management.md",
         "docs/pos.md",
         "docs/b2b-commerce.md",
-        "docs/b2b-ucp-negotiation.md",
         "docs/edi.md",
         "docs/marketplaces.md",
         "docs/european-operation.md"
@@ -170,24 +173,24 @@
     {
       "id": "control",
       "title": {
-        "en": "Control, stage & operate",
-        "de": "Kontrollieren, testen & betreiben",
-        "fr": "Contrôler, tester et exploiter",
-        "es": "Controlar, probar y operar"
+        "en": "Stay in control",
+        "de": "Die Kontrolle behalten",
+        "fr": "Garder le contrôle",
+        "es": "Mantener el control"
       },
       "description": {
-        "en": "Keep identities, history, private environments and publication boundaries explicit.",
-        "de": "Identitäten, Historie, private Umgebungen und Veröffentlichung bleiben nachvollziehbar.",
-        "fr": "Gardez des identités, un historique et des limites de publication explicites.",
-        "es": "Mantén identidades, historial y límites de publicación explícitos."
+        "en": "Rights, private sandboxes, history, releases and hosting.",
+        "de": "Rechte, private Sandboxes, Verlauf, Freigaben und Hosting.",
+        "fr": "Droits, bacs à sable privés, historique, publications et hébergement.",
+        "es": "Permisos, sandboxes privados, historial, publicaciones y alojamiento."
       },
       "sources": [
+        "docs/security.md",
         "docs/workbench.md",
         "docs/entity-history.md",
         "docs/account-security.md",
         "docs/tenant-isolation.md",
         "docs/app-security.md",
-        "docs/security.md",
         "docs/authenticated-database-scope.md",
         "docs/platform.md",
         "docs/managed-hosting.md",
@@ -196,31 +199,31 @@
       ]
     },
     {
-      "id": "foundation",
+      "id": "trust",
       "title": {
-        "en": "Inside the foundation",
-        "de": "Das Fundament verstehen",
-        "fr": "Comprendre les fondations",
-        "es": "Comprender los fundamentos"
+        "en": "Why you can trust it",
+        "de": "Warum du dich darauf verlassen kannst",
+        "fr": "Pourquoi vous pouvez vous y fier",
+        "es": "Por qué puedes confiar"
       },
       "description": {
-        "en": "Architecture, source ownership, measured evidence and current limitations.",
-        "de": "Architektur, Code-Verantwortung, gemessene Ergebnisse und aktuelle Grenzen.",
-        "fr": "Architecture, responsabilité du code, résultats mesurés et limites actuelles.",
-        "es": "Arquitectura, responsabilidad del código, resultados medidos y límites actuales."
+        "en": "Architecture, tests, Lean proofs, measurements and the current limits.",
+        "de": "Architektur, Tests, Lean-Beweise, Messungen und die aktuellen Grenzen.",
+        "fr": "Architecture, tests, preuves Lean, mesures et limites actuelles.",
+        "es": "Arquitectura, pruebas, demostraciones en Lean, mediciones y límites actuales."
       },
       "sources": [
         "docs/production-architecture.md",
+        "docs/formal-verification.md",
+        "docs/benchmarks.md",
+        "docs/testing.md",
         "docs/architecture.md",
         "docs/source-map.md",
         "docs/rust-services.md",
-        "docs/connector-component.md",
-        "docs/testing.md",
-        "docs/formal-verification.md",
         "docs/shopware-parity.md",
-        "docs/benchmarks.md",
         "docs/system-consistency-audit.md",
-        "docs/licensing.md"
+        "docs/licensing.md",
+        "docs/documentation-site.md"
       ]
     }
   ]
