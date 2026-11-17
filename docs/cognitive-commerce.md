@@ -1,4 +1,4 @@
-# Cognitive commerce: connected implementation and remaining work
+# How the intelligence layer works
 
 **Merchant catalogue setup:** [CSV upload, URL extraction, described demo products, private image jobs and native staged review](merchant-catalogue-setup.md).
 

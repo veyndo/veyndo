@@ -13,7 +13,7 @@
 [![Working prototype](https://img.shields.io/badge/status-working_prototype-189EFF)](#current-boundaries)
 [![Sustainable Use License](https://img.shields.io/badge/license-Sustainable_Use-189EFF)](LICENSE)
 
-[Try a shop](https://start.veyndo.ai/start) · [Watch the overview](docs/video-tours.md) · [Build an app](docs/app-tutorials/README.md) · [Read the docs](https://www.veyndo.ai/docs/)
+[Start here](docs/start-here.md) · [Let an agent buy](docs/agent-purchase.md) · [Try a shop](https://start.veyndo.ai/start) · [Watch the overview](docs/video-tours.md) · [Build an app](docs/app-tutorials/README.md) · [Read the docs](https://www.veyndo.ai/docs/)
 
 </div>
 

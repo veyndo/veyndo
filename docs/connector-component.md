@@ -1,4 +1,4 @@
-# Connectors
+# Connectors: provider adapters as a service
 
 Connect order email, Slack notifications, analytics, search and other providers
 through one Rust service. Use it directly from another application or connect it

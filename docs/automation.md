@@ -1,4 +1,4 @@
-# Rules and durable flow graphs
+# Rules and flows
 
 This is an executable migration increment against **shopware/core 6.7.14.2**, not a claim that every Shopware plugin, commercial extension or DAL/API is compatible. The pinned MIT PHP classes remain an independent behavioral reference.
 

@@ -1,4 +1,4 @@
-# Native point of sale
+# Point of sale
 
 [17 October hosted acceptance](evidence/buyer-pos-hosted-2026-10-17.md) records
 channel creation, parked/resumed carts, preserved cart across rollout, fictional

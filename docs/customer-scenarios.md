@@ -1,4 +1,4 @@
-# Customer scenario simulator
+# Test with fictional customers
 
 Test a private shop change with a small group of fictional customers. Give them a
 shopping goal, adjust their budgets and languages, and inspect what actually

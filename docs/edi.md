@@ -1,4 +1,4 @@
-# EDI is an independent app, not another commerce engine
+# EDI for B2B purchasing
 
 The app at `extensions/apps/edi/` contains its own Manifest, mappings, Rust process,
 codecs and tests. It uses the existing app gateway and immutable native callbacks.

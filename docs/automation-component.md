@@ -1,4 +1,4 @@
-# Independent Automation component
+# Use Automation as a separate service
 
 The independent `veyndo/automation` repository contains the deterministic rule
 registry, input validation, comparison, container, calendar and time-zone logic,

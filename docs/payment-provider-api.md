@@ -1,4 +1,4 @@
-# Payment providers · API 1
+# Build a payment provider
 
 Payment apps declare their methods in the same versioned manifest edited in App Studio and produced by coding agents. The public core owns tenant/customer authorization, authoritative minor-unit invoices with explicit currency precision, immutable attempts, reservations, durable jobs, refund admission, verified receipts and order events. An isolated provider owns onboarding, provider-specific conversion, credentials and PSP calls. Shopware Payments implementations and partner attribution live exclusively in the private connector repository.
 

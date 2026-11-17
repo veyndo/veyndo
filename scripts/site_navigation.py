@@ -72,13 +72,21 @@ def hub(records):
                      f'{html.escape(group["description"]["en"])}</p></div></div><ol>{rows}</ol></section>')
     archive = ''.join('<li>' + link(r, '../') + '<small>' + html.escape(r['source']) + '</small></li>'
                       for r in records if r['source'] not in selected)
+    acts = ''.join(
+        f'<a class="docs-act" href="{href}"><span>{number}</span><b data-docs-copy="{key}Title">{title}</b>'
+        f'<p data-docs-copy="{key}Text">{text}</p><i data-docs-copy="{key}Link">{action}</i></a>'
+        for number, key, href, title, text, action in [
+            ('01', 'buy', 'agent-purchase.html', 'Agents buy', 'A shopping agent searches, gets a binding quote and orders through the same checkout as your storefront.', 'Watch an agent buy →'),
+            ('02', 'work', 'agentic-workspace.html', 'Agents work', 'A merchant agent prepares changes in private and runs only what you approve.', 'Open the AI workspace →'),
+            ('03', 'build', 'app-studio.html', 'Agents build', 'Describe an app. Studio and coding agents share one versioned definition.', 'Build an app →')])
     return ('<div class="docs-index"><section class="docs-hero"><p class="eyebrow" data-docs-copy="eyebrow">THE VEYNDO HANDBOOK</p>'
-            '<h1><span data-docs-copy="titleA">Think AI.</span> <span data-docs-copy="titleB">Build commerce.</span></h1>'
-            '<p class="lead" data-docs-copy="intro">Understand the idea. Try one complete round. Connect knowledge, agents and apps. Then operate with control.</p>'
-            '<div class="docs-hero-actions"><a class="docs-primary" href="first-tour.html" data-docs-copy="firstTour">Start the first tour →</a>'
-            '<a href="cognitive-commerce.html" data-docs-copy="understand">Explore the intelligence →</a>'
+            '<h1><span data-docs-copy="titleA">One shop.</span> <span data-docs-copy="titleB">For people and agents.</span></h1>'
+            '<p class="lead" data-docs-copy="intro">Agents buy, work and build on the same core that serves your storefront. The core decides price, stock and order.</p>'
+            '<div class="docs-hero-actions"><a class="docs-primary" href="start-here.html" data-docs-copy="firstTour">Start here →</a>'
+            '<a href="first-tour.html" data-docs-copy="understand">Take the first tour →</a>'
             '<a href="platform-overview.html" lang="de">Überblick auf Deutsch</a></div>'
             '<p class="docs-language-note" data-docs-copy="sourceLanguage">The navigation is available in four languages. Each guide identifies the language of its source.</p></section>'
+            '<section class="docs-acts" aria-label="What agents do in Veyndo">' + acts + '</section>'
             '<section class="docs-discovery"><label for="docs-search" data-docs-copy="search">Search the complete handbook</label>'
             '<div class="docs-search-wrap"><span aria-hidden="true">⌕</span><input id="docs-search" type="search" '
             'placeholder="Knowledge, checkout, apps, sandbox…" autocomplete="off" aria-describedby="docs-count" /></div>'

@@ -1,4 +1,4 @@
-# Independent checkout service
+# Use Checkout as a separate service
 
 The local reference storefront completes a simulated purchase through the
 independent Checkout service and a separate commerce host. The

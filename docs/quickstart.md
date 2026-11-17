@@ -1,4 +1,4 @@
-# Run a Rust ecommerce prototype locally
+# Run Veyndo locally
 
 Start with commerce, then add AI or an MCP client when you need it.
 

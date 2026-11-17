@@ -1,4 +1,4 @@
-# Agentic Studio grids
+# Ask your lists: agentic grids
 
 See the [connected AI workspace](agentic-workspace.md) for the 20 October context,
 reviewed private execution, complete app composition, real preview, editable list

@@ -1,4 +1,4 @@
-# Veyndo: current status
+# Current status: what is live and tested
 
 For the whole-shop architecture, public repositories and independent
 entry points, see [One shop, composable parts](one-shop-components.md).

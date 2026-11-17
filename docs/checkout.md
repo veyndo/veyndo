@@ -1,4 +1,4 @@
-# One-page checkout and payment boundary
+# Checkout and the payment boundary
 
 Customers edit contact, structured billing/shipping addresses, delivery and
 payment in one page. Existing customer accounts and saved default addresses

@@ -1,4 +1,4 @@
-# Knowledge workspace
+# Shop knowledge
 
 See the [connected AI workspace](agentic-workspace.md) for current editor context,
 reviewed private execution, complete app composition, real preview, editable list

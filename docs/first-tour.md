@@ -1,4 +1,4 @@
-# Your first Veyndo Commerce round: change, review, publish
+# Your first tour: change, review, publish
 
 Explore one connected workflow before reading the complete feature list. This is
 a working prototype; use synthetic data and simulated payments.

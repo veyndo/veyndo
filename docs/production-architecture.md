@@ -1,4 +1,4 @@
-# How VEYNDO works: production architecture
+# How Veyndo works: the architecture
 
 VEYNDO has one deterministic Rust commerce core. The storefront, merchant Studio,
 API clients and MCP/UCP adapters call that same core. AI helps find information,

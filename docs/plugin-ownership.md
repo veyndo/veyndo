@@ -1,4 +1,4 @@
-# App/package ownership
+# Who owns an app or package
 
 Every plugin keeps its own code and resources beneath its package root. Human,
 visual and coding-agent edits use the same versioned Manifest. Installation never

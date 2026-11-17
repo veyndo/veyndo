@@ -1,4 +1,4 @@
-# Storyfront connector
+# Storyfront: cinematic storefronts on the same checkout
 
 ## Choose the integration path
 
