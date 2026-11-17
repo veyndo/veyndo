@@ -6,121 +6,37 @@ Stand 12. November 2026.
 Die [Statusseite](status.md) ordnet Implementierung, öffentliche Auslieferung und
 tatsächlich durchgespielte Abläufe ein.
 
+Veyndo ist ein Shop für Menschen und Agenten. Ein Kunde klickt sich durch das
+Storefront oder lässt einen Assistenten suchen, vergleichen und bestellen. Ein
+Händler bearbeitet ein Produkt in Studio oder lässt einen Agenten die Änderung
+vorbereiten. Eine Entwicklerin baut eine App von Hand oder beschreibt sie einem
+Coding-Agenten. In allen Fällen entscheidet derselbe Rust-Kern über Preis,
+Bestand, Rechte und Bestellung.
+
+| Agenten … | Was passiert | Einstieg |
+| --- | --- | --- |
+| **kaufen** | Ein Einkaufsagent liest den Katalog, erhält ein verbindliches Angebot und bestellt über denselben Checkout wie das Storefront. | [Einen Agenten einkaufen lassen](agent-purchase.md) |
+| **arbeiten** | Ein Händleragent stellt eine Arbeitsansicht zusammen, bereitet Änderungen privat vor und führt nur freigegebene Schritte aus. | [KI-Arbeitsbereich](agentic-workspace.md) |
+| **bauen** | Du beschreibst eine App. Studio und Coding-Agenten teilen eine versionierte Definition mit eigenen Daten, Ansichten und Aktionen. | [App Studio](app-studio.md) |
+
+Die verlinkten Anleitungen sind auf Englisch. Die [Startseite des Handbuchs](start-here.md)
+führt in fünf Minuten durch die Idee.
+
+## So liest du diese Seite
+
+- **Abschnitte 1 und 2** erklären den Aufbau, den Shop und den Kauf.
+- **Abschnitte 3 bis 5** beschreiben das App-System.
+- **Abschnitte 6 und 7** zeigen, wie KI, Agenten und Automatisierung eingebunden sind.
+- **Abschnitte 8 und 9** behandeln Kanäle, Betrieb und offene Punkte.
+- **Abschnitt 10** sammelt datierte Beobachtungen aus Tests und dem gehosteten Betrieb.
+
+## Die Idee an einem Beispiel
+
 Veyndo verbindet einen Shop, eine Händlerverwaltung, erweiterbare Apps und Agenten
 auf einem gemeinsamen Commerce-Kern. Ein Ziel wie „Bereite die Kollektion für
 Frankreich vor“ kann dadurch Produkte, Übersetzungen, Kategorien und eine
 Landingpage zusammenführen. Preise, Bestand und Bestellungen bleiben bei den
 zuständigen Geschäftsoperationen.
-
-Veyndo lässt sich als ein Shop betreiben. Wer nur ein Modul braucht, kann
-beispielsweise das SDK, die App-Laufzeit oder den Marktplatzdienst mit einem
-bestehenden System einsetzen. In beiden Fällen bleibt der Commerce-Kern
-zuständig für den verbindlichen Preis, die Bestandsbuchung und die Bestellung.
-Checkout führt durch den Kauf. Hintergrunddienste übernehmen Aufgaben wie
-E-Mail, Synchronisierung und Suche. [Komponenten und Einstiege](one-shop-components.md).
-
-Eine installierte App kann ihre Ansicht direkt in eine Antwort einbetten. Im
-Shop kann jemand zum Beispiel Pflegehinweise filtern, im Studio kann das Team
-private Sortimentsnotizen durchsehen. Der Chat vermittelt den Aufruf, und die
-App prüft die Rechte mit dem aktuellen Shopkontext. MCP Apps beschreibt diese
-Verbindung. OpenUI kann eine passende Ansicht während einer Modellantwort
-zusammenbauen. A2UI zeigt in Studio die jeweils freigegebene Arbeitsansicht
-für Produkte, Bestellungen oder Kunden. Die Bearbeitung nutzt die vorhandenen
-Rechte und Aktionen des Shops. Externe Anwendungen können dieselbe A2UI
-Anbindung aus dem SDK verwenden. [Arbeitsansicht in Studio](agentic-component-ui.md#open-an-a2ui-working-view-in-studio).
-Im öffentlichen Lumen Shop hat der Produktratgeber Preis und Lieferung für
-einen konkreten Artikel prüfen lassen. Erst der Klick legte ihn in den
-Warenkorb. In Studio las der Agent eine private Sortimentsnotiz und schlug
-einen neuen Pflegesatz vor. Nach Freigabe erschien der Satz in der Sandbox.
-
-![Freigegebener Vorschlag im privaten Studio](assets/apps/product-guide-sandbox-applied-20261111.jpg)
-
-Die [englische Abnahme](status.md#product-guide-actions-in-the-hosted-shop)
-zeigt beide Abläufe. [Interaktive Ansichten und Dienstgrenzen](agentic-component-ui.md#one-capability-two-ways-to-present-it).
-
-Ein Entwickler kann den Checkout auch mit einer eigenen Shopoberfläche
-verbinden. Der lokale Beispielshop hat den Kauf über das JavaScript SDK
-durchgespielt und die ursprüngliche Bestellung nach einer unterbrochenen
-Antwort wiedergefunden. Der separate Rust Dienst führt durch die Kaufschritte.
-Core berechnet den Preis, bucht den Bestand und speichert die Bestellung.
-Im gehosteten Lumen Pilot liefen beide Kaufwege über diesen Checkout bis zur
-Rückkehr mit leerem Warenkorb und zur Erstattung in der PayPal Sandbox. Für
-die durchgehende Abnahme fehlt noch die zugestellte Bestellmail zum selben
-bezahlten Kauf. [Beispielshop](checkout-component.md#external-reference-storefront) ·
-[Stand der Abnahme](status.md#platform-at-a-glance).
-Für diesen Weg bietet das SDK typisierte Aufrufe an. Geht die Antwort
-auf eine Bestätigung verloren, kann die Oberfläche den ursprünglichen
-Beleg über Core abrufen. [Checkout im SDK](checkout-component.md#use-the-checkout-relay-from-the-sdk).
-Vor dem Kauf kann eine eigene Oberfläche Preis und Lieferung einer
-Warenkorbänderung anzeigen. Core übernimmt die Änderung, wenn der geprüfte
-Stand noch gilt. [Warenkorb im SDK](checkout-component.md#review-a-cart-change-from-the-sdk).
-Die Oberfläche kann auch Versand und Zahlungsart auswählen. Danach liefert
-Core den Betrag und den Liefertermin für die gewählte Kombination.
-[Versand und Zahlung im SDK](checkout-component.md#choose-shipping-and-payment-from-the-sdk).
-Connected Shop zeigt die SDK Aufrufe zusammen mit einem Produktratgeber.
-Der Beispielshop prüft eine Variante und zeigt nach dem simulierten Kauf
-den ursprünglichen Beleg. [Connected Shop starten](agentic-component-ui.md#run-a-guide-and-checkout-in-an-external-host).
-Für ein eigenes Kundenkonto kann die Oberfläche die Bestellungen des
-angemeldeten Käufers samt sichtbaren Belegen abrufen.
-[Bestellhistorie im SDK](merchant-operations.md#read-order-history-with-the-sdk).
-Mit dem Katalogclient im JavaScript SDK liest eine eigene Oberfläche dieselben
-Produkte und Varianten wie der öffentliche Shop. Core liefert die passende
-Sprache, Währung und das Sortiment des Verkaufskanals. Der Checkout prüft
-beim Kauf den aktuellen Preis und Bestand.
-Das SDK Paket enthält ein Browserbeispiel, das sich lokal starten lässt
-und direkt im öffentlichen Lumen Sortiment sucht.
-[Browserbeispiel starten](one-shop-components.md#run-the-browser-example).
-Bei Storyfront ist der Warenkorb Teil der Experience. Nach der Zahlung fragt
-Storyfront den Stand der ursprünglichen Bestellung bei Core ab. Erst die
-bestätigte Bestellung leert den Warenkorb. [Abnahme für den Betrieb](storyfront.md#accept-a-hosted-release).
-Für Firmenkäufe prüft Commerce beim Bestellen die aktuelle Freigabe,
-Mitgliedschaft und das Budget. Diese Regeln gelten auch für einen Checkout,
-der in einem eigenen Prozess läuft. [Geprüfte Fälle](checkout-component.md#current-buyer-channel-and-company-authority).
-Im lokalen Ausfalltest konnten der normale Shop und die Storyfront Übergabe
-weiter Bestellungen anlegen. Core wickelte den bereits gestarteten
-Zahlungsversuch ab. Nach dem Neustart war derselbe Beleg wieder abrufbar.
-[Ablauf und Rückweg](checkout-component.md#pause-and-resume-checkout-confirmation).
-
-Der Wissensdienst hat eine eigene Suche über Dokumente und Produkttexte. Im
-Ausfalltest konnte der Shop weiter verkaufen. Die Produktänderung blieb in
-der Warteschlange und war nach dem Neustart als aktuelle Quelle verfügbar.
-[Wissensdienst und Schnittstellen](knowledge-component.md).
-
-Ein Agent kann Regeln mit Beispieldaten im separaten Dienst ausprobieren.
-Der Shop wertet dieselben Regeln mit seinem aktuellen Warenkorb aus. Im
-Ausfalltest hat der Shop den Rabatt berechnet, die Bestellung angelegt und
-die Rechnung über den Flow erstellt. [Regeln und Ausfalltest](automation-component.md).
-Für externe Anwendungen kann der Vorschauprozess denselben Shopzugang prüfen.
-Der Händler erstellt dafür einen eigenen Schlüssel mit Leserecht für Regeln.
-Im lokalen Test wirkte der Widerruf bereits beim nächsten Aufruf.
-[Einrichtung und Rechte](automation-component.md#connect-the-service-to-veyndo-core).
-Beim Speichern und beim späteren Ausführen prüft dieselbe Rust Bibliothek,
-ob alle Schritte im Flow erreichbar sind und ihre Verbindungen gültig sind.
-Nach einer Wartezeit findet der Worker den nächsten Schritt direkt über
-seine Kennung. [Flow Graph](automation-component.md#flow-graph-contract).
-Entwickler finden die eingebauten Flow Ereignisse und Aktionen über HTTP,
-MCP und dieselbe Rust Bibliothek. Core prüft pro Shop, welche Apps
-installiert sind und welche Aktionen der aktuelle Nutzer ausführen darf.
-[Flow Katalog](automation-component.md#built-in-flow-catalog).
-Nach dem Kauf übernimmt ein Worker den Flow aus der Warteschlange.
-Bei einer Wartezeit speichert er die Frist und gibt den Auftrag frei.
-Beim Fortsetzen prüft er die aktuellen Rechte und speichert Fortschritt
-nur für den Versuch, den er übernommen hat.
-[Wie Flow Aufträge gespeichert werden](automation-component.md#durable-flow-job-storage).
-Die Rust Bibliothek liefert dem Worker die nächste Anweisung aus der
-gespeicherten Definition. So kann ein separat laufender Worker nach einem
-Neustart beim richtigen Schritt weitermachen, während der Shop Bestellungen
-weiter annimmt. Core kann die App Verarbeitung gezielt an einen eigenen
-Prozess übergeben. Dazu zählen Flows, geplante App Aufgaben und
-Zustellungen. Beide Prozesse greifen auf dieselben gespeicherten Aufträge
-zu. So bleiben auch beim Wechsel und bei der Rückkehr zum gemeinsamen
-Betrieb die Aufträge erhalten.
-[Anweisungen und Prozessgrenzen](automation-component.md#portable-flow-directives) ·
-[Worker einrichten](automation-component.md#move-the-app-worker-out-of-core).
-Der App Prozess misst das Alter der ältesten fälligen Aufträge und
-Zustellungen. So lässt sich beim Wechsel erkennen, ob Arbeit liegen
-bleibt. Die Messung läuft im Hintergrund und enthält keine Auftragsdaten.
-[Warteschlange prüfen](automation-component.md#read-the-worker-queue-logs).
 
 ## 1. Der Aufbau
 
@@ -367,3 +283,119 @@ agentisch zusammengestellte Arbeitsansichten.
 
 [Status und Abnahmen](status.md), [Architekturentwicklung](platform-hardening.md),
 [Lastmessungen](benchmarks.md), [Verifikation](formal-verification.md).
+
+## 10. Beobachtungen aus Tests und Betrieb
+
+Die folgenden Absätze halten fest, was in lokalen Tests und im gehosteten
+Lumen-Pilot tatsächlich durchgespielt wurde. Sie ergänzen die Abschnitte oben
+um den jeweiligen Beleg.
+
+Veyndo lässt sich als ein Shop betreiben. Wer nur ein Modul braucht, kann
+beispielsweise das SDK, die App-Laufzeit oder den Marktplatzdienst mit einem
+bestehenden System einsetzen. In beiden Fällen bleibt der Commerce-Kern
+zuständig für den verbindlichen Preis, die Bestandsbuchung und die Bestellung.
+Checkout führt durch den Kauf. Hintergrunddienste übernehmen Aufgaben wie
+E-Mail, Synchronisierung und Suche. [Komponenten und Einstiege](one-shop-components.md).
+
+Eine installierte App kann ihre Ansicht direkt in eine Antwort einbetten. Im
+Shop kann jemand zum Beispiel Pflegehinweise filtern, im Studio kann das Team
+private Sortimentsnotizen durchsehen. Der Chat vermittelt den Aufruf, und die
+App prüft die Rechte mit dem aktuellen Shopkontext. MCP Apps beschreibt diese
+Verbindung. OpenUI kann eine passende Ansicht während einer Modellantwort
+zusammenbauen. A2UI zeigt in Studio die jeweils freigegebene Arbeitsansicht
+für Produkte, Bestellungen oder Kunden. Die Bearbeitung nutzt die vorhandenen
+Rechte und Aktionen des Shops. Externe Anwendungen können dieselbe A2UI
+Anbindung aus dem SDK verwenden. [Arbeitsansicht in Studio](agentic-component-ui.md#open-an-a2ui-working-view-in-studio).
+Im öffentlichen Lumen Shop hat der Produktratgeber Preis und Lieferung für
+einen konkreten Artikel prüfen lassen. Erst der Klick legte ihn in den
+Warenkorb. In Studio las der Agent eine private Sortimentsnotiz und schlug
+einen neuen Pflegesatz vor. Nach Freigabe erschien der Satz in der Sandbox.
+
+![Freigegebener Vorschlag im privaten Studio](assets/apps/product-guide-sandbox-applied-20261111.jpg)
+
+Die [englische Abnahme](status.md#product-guide-actions-in-the-hosted-shop)
+zeigt beide Abläufe. [Interaktive Ansichten und Dienstgrenzen](agentic-component-ui.md#one-capability-two-ways-to-present-it).
+
+Ein Entwickler kann den Checkout auch mit einer eigenen Shopoberfläche
+verbinden. Der lokale Beispielshop hat den Kauf über das JavaScript SDK
+durchgespielt und die ursprüngliche Bestellung nach einer unterbrochenen
+Antwort wiedergefunden. Der separate Rust Dienst führt durch die Kaufschritte.
+Core berechnet den Preis, bucht den Bestand und speichert die Bestellung.
+Im gehosteten Lumen Pilot liefen beide Kaufwege über diesen Checkout bis zur
+Rückkehr mit leerem Warenkorb und zur Erstattung in der PayPal Sandbox. Für
+die durchgehende Abnahme fehlt noch die zugestellte Bestellmail zum selben
+bezahlten Kauf. [Beispielshop](checkout-component.md#external-reference-storefront) ·
+[Stand der Abnahme](status.md#platform-at-a-glance).
+Für diesen Weg bietet das SDK typisierte Aufrufe an. Geht die Antwort
+auf eine Bestätigung verloren, kann die Oberfläche den ursprünglichen
+Beleg über Core abrufen. [Checkout im SDK](checkout-component.md#use-the-checkout-relay-from-the-sdk).
+Vor dem Kauf kann eine eigene Oberfläche Preis und Lieferung einer
+Warenkorbänderung anzeigen. Core übernimmt die Änderung, wenn der geprüfte
+Stand noch gilt. [Warenkorb im SDK](checkout-component.md#review-a-cart-change-from-the-sdk).
+Die Oberfläche kann auch Versand und Zahlungsart auswählen. Danach liefert
+Core den Betrag und den Liefertermin für die gewählte Kombination.
+[Versand und Zahlung im SDK](checkout-component.md#choose-shipping-and-payment-from-the-sdk).
+Connected Shop zeigt die SDK Aufrufe zusammen mit einem Produktratgeber.
+Der Beispielshop prüft eine Variante und zeigt nach dem simulierten Kauf
+den ursprünglichen Beleg. [Connected Shop starten](agentic-component-ui.md#run-a-guide-and-checkout-in-an-external-host).
+Für ein eigenes Kundenkonto kann die Oberfläche die Bestellungen des
+angemeldeten Käufers samt sichtbaren Belegen abrufen.
+[Bestellhistorie im SDK](merchant-operations.md#read-order-history-with-the-sdk).
+Mit dem Katalogclient im JavaScript SDK liest eine eigene Oberfläche dieselben
+Produkte und Varianten wie der öffentliche Shop. Core liefert die passende
+Sprache, Währung und das Sortiment des Verkaufskanals. Der Checkout prüft
+beim Kauf den aktuellen Preis und Bestand.
+Das SDK Paket enthält ein Browserbeispiel, das sich lokal starten lässt
+und direkt im öffentlichen Lumen Sortiment sucht.
+[Browserbeispiel starten](one-shop-components.md#run-the-browser-example).
+Bei Storyfront ist der Warenkorb Teil der Experience. Nach der Zahlung fragt
+Storyfront den Stand der ursprünglichen Bestellung bei Core ab. Erst die
+bestätigte Bestellung leert den Warenkorb. [Abnahme für den Betrieb](storyfront.md#accept-a-hosted-release).
+Für Firmenkäufe prüft Commerce beim Bestellen die aktuelle Freigabe,
+Mitgliedschaft und das Budget. Diese Regeln gelten auch für einen Checkout,
+der in einem eigenen Prozess läuft. [Geprüfte Fälle](checkout-component.md#current-buyer-channel-and-company-authority).
+Im lokalen Ausfalltest konnten der normale Shop und die Storyfront Übergabe
+weiter Bestellungen anlegen. Core wickelte den bereits gestarteten
+Zahlungsversuch ab. Nach dem Neustart war derselbe Beleg wieder abrufbar.
+[Ablauf und Rückweg](checkout-component.md#pause-and-resume-checkout-confirmation).
+
+Der Wissensdienst hat eine eigene Suche über Dokumente und Produkttexte. Im
+Ausfalltest konnte der Shop weiter verkaufen. Die Produktänderung blieb in
+der Warteschlange und war nach dem Neustart als aktuelle Quelle verfügbar.
+[Wissensdienst und Schnittstellen](knowledge-component.md).
+
+Ein Agent kann Regeln mit Beispieldaten im separaten Dienst ausprobieren.
+Der Shop wertet dieselben Regeln mit seinem aktuellen Warenkorb aus. Im
+Ausfalltest hat der Shop den Rabatt berechnet, die Bestellung angelegt und
+die Rechnung über den Flow erstellt. [Regeln und Ausfalltest](automation-component.md).
+Für externe Anwendungen kann der Vorschauprozess denselben Shopzugang prüfen.
+Der Händler erstellt dafür einen eigenen Schlüssel mit Leserecht für Regeln.
+Im lokalen Test wirkte der Widerruf bereits beim nächsten Aufruf.
+[Einrichtung und Rechte](automation-component.md#connect-the-service-to-veyndo-core).
+Beim Speichern und beim späteren Ausführen prüft dieselbe Rust Bibliothek,
+ob alle Schritte im Flow erreichbar sind und ihre Verbindungen gültig sind.
+Nach einer Wartezeit findet der Worker den nächsten Schritt direkt über
+seine Kennung. [Flow Graph](automation-component.md#flow-graph-contract).
+Entwickler finden die eingebauten Flow Ereignisse und Aktionen über HTTP,
+MCP und dieselbe Rust Bibliothek. Core prüft pro Shop, welche Apps
+installiert sind und welche Aktionen der aktuelle Nutzer ausführen darf.
+[Flow Katalog](automation-component.md#built-in-flow-catalog).
+Nach dem Kauf übernimmt ein Worker den Flow aus der Warteschlange.
+Bei einer Wartezeit speichert er die Frist und gibt den Auftrag frei.
+Beim Fortsetzen prüft er die aktuellen Rechte und speichert Fortschritt
+nur für den Versuch, den er übernommen hat.
+[Wie Flow Aufträge gespeichert werden](automation-component.md#durable-flow-job-storage).
+Die Rust Bibliothek liefert dem Worker die nächste Anweisung aus der
+gespeicherten Definition. So kann ein separat laufender Worker nach einem
+Neustart beim richtigen Schritt weitermachen, während der Shop Bestellungen
+weiter annimmt. Core kann die App Verarbeitung gezielt an einen eigenen
+Prozess übergeben. Dazu zählen Flows, geplante App Aufgaben und
+Zustellungen. Beide Prozesse greifen auf dieselben gespeicherten Aufträge
+zu. So bleiben auch beim Wechsel und bei der Rückkehr zum gemeinsamen
+Betrieb die Aufträge erhalten.
+[Anweisungen und Prozessgrenzen](automation-component.md#portable-flow-directives) ·
+[Worker einrichten](automation-component.md#move-the-app-worker-out-of-core).
+Der App Prozess misst das Alter der ältesten fälligen Aufträge und
+Zustellungen. So lässt sich beim Wechsel erkennen, ob Arbeit liegen
+bleibt. Die Messung läuft im Hintergrund und enthält keine Auftragsdaten.
+[Warteschlange prüfen](automation-component.md#read-the-worker-queue-logs).
