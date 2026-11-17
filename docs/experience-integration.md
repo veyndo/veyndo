@@ -1,6 +1,19 @@
 # Bring your own frontend: identity and hosting
 
-VEYNDO exposes a generic integration boundary. No Storyfront source or provider credentials belong in this public repository. A separately operated private experience service can verify a merchant, create an owned tenant, inherit the operator model and mount a public storefront.
+This page is for engineers who operate their own frontend service in front of
+Veyndo, such as Storyfront. Your service keeps its own source and credentials.
+Veyndo gives it four contracts:
+
+| Contract | What your service can do | Section |
+| --- | --- | --- |
+| Identity exchange | Sign a verified merchant in and create a shop they own | [Identity and inference](#identity-and-inference) |
+| Inherited inference | Use the operator's model without holding provider keys | [Identity and inference](#identity-and-inference) |
+| Studio entry | Send a signed-in merchant into Studio without a password in the link | [Secure Studio entry](#secure-studio-entry) |
+| Storefront binding | Mount your frontend on a shop address and hand carts to the native checkout | [Storefront binding](#storefront-binding) |
+
+If you only want to call the shop from a storefront you host yourself, start
+with the [hosted API](hosted-component-api.md) instead. No Storyfront source or
+provider credentials belong in this public repository.
 
 ## Identity and inference
 

@@ -11,6 +11,13 @@ address edits survive quantity/coupon updates. Native form validation, visible
 errors, pending-state locks and small-screen layout cover the browser path.
 This is implemented behavior, not a measured conversion advantage over Shopify.
 
+| You want | Section |
+| --- | --- |
+| PayPal in the checkout that already exists | [Add a one-page PayPal checkout](#add-a-one-page-paypal-checkout-to-your-frontend) |
+| Your own checkout page | [Add a one-page PayPal checkout](#add-a-one-page-paypal-checkout-to-your-frontend), second part, and the [API contract](#api-contract) |
+| Address suggestions | [Optional Google address suggestions](#optional-google-address-suggestions) |
+| The legal acknowledgement step | [Legal acknowledgement](#legal-acknowledgement) |
+
 ## Add a one-page PayPal checkout to your frontend
 
 **Use the checkout that already exists.** In Veyndo Studio, connect a PayPal

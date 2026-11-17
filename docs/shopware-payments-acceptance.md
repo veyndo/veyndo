@@ -1,5 +1,17 @@
 # Shopware Payments: integration and test acceptance
 
+This page is a dated test record for the Shopware Payments connector. Read it
+to find out what was actually tested, where and with which result. To build or
+deploy a payment provider, use [the provider contract](payment-provider-api.md).
+To add PayPal to your checkout, start with [checkout](checkout.md).
+
+| You want to know | Jump to |
+| --- | --- |
+| Whether real PayPal Sandbox purchases and refunds worked | [4 November 2026](#actual-paypal-sandbox-purchases-and-refunds-4-november-2026) |
+| What you can test yourself today | [What can be tested now](#what-can-be-tested-now) |
+| How the connector compares with Shopware | [Comparison with Shopware](#comparison-with-shopware) |
+| How to repeat the local test | [Repeating the local test](#repeating-the-local-test) |
+
 Updated 10 November 2026. The private Rust connector implements the provider path;
 the public Core owns the order and payment ledger. The public catalogue now ships
 the versioned 1.6.0 contract for all 17 methods. Install or upgrade it through the

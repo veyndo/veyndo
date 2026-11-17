@@ -1,5 +1,11 @@
 # Changelog
 
+## Make the "Agents buy" chapter task-first
+
+- Open shopping agents, connectors, Storyfront, own frontends, checkout and the payment test record with what the reader wants to do and where to go.
+- Turn cart transfer, product import and model setup into numbered steps; keep limits and dated evidence unchanged below them.
+- Add shopper and merchant "Try it" steps to the shop-by-intent guide.
+
 ## Lead the handbook with one story
 
 - Open the handbook with "one shop for people and agents" and three entries: agents buy, work and build.
