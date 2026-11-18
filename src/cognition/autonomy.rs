@@ -1,4 +1,4 @@
-//! Price-only optional autonomy, atomic unique-SKU daily quotas and a non-compounding day baseline.
+//! Price-only optional autonomy, atomic unique-SKU daily quotas, a non-compounding day baseline and a daily exposure ceiling.
 use super::*;
 pub(crate) async fn reserve(
     tx: &mut sqlx::Transaction<'_, sqlx::Postgres>,
@@ -64,5 +64,117 @@ pub(crate) async fn reserve(
             ));
         }
     }
+    if let Some(limit) = s.ai_policy.autonomy.max_daily_exposure_minor {
+        let mut proposed = Vec::new();
+        for c in &p.changes {
+            let product = products
+                .iter()
+                .find(|p| p.id == c.product_id)
+                .ok_or(bad("Product unavailable"))?;
+            let code = product.extra["priceCurrency"]
+                .as_str()
+                .unwrap_or(&s.currencies.pricing_currency);
+            if code != s.currencies.pricing_currency {
+                return Err(conflict(
+                    "The daily exposure limit only covers products priced in the shop's pricing currency",
+                ));
+            }
+            proposed.push((
+                product.id.clone(),
+                minor(s, code, c.price.unwrap_or(product.price))?,
+            ));
+        }
+        let (total, _) = today(&mut **tx, t, s, &proposed).await?;
+        // The exposure ceiling joins the unique-product quota as the proved daily-budget conjunct.
+        if !verified_kernel::ai_autonomy_admissible(
+            s.ai_policy.autonomy.enabled,
+            true,
+            true,
+            total <= u128::from(limit),
+            true,
+        ) {
+            return Err(conflict(
+                "Autonomy would exceed today's exposure limit for price reductions",
+            ));
+        }
+    }
     Ok(())
+}
+/// Revenue given up if the whole current stock sold at the lower price; increases cost nothing here.
+pub(crate) fn exposure(baseline_minor: i64, price_minor: i64, stock: i64) -> u128 {
+    (baseline_minor.saturating_sub(price_minor).max(0) as u128) * (stock.max(0) as u128)
+}
+fn minor(s: &commerce::Settings, code: &str, price: f64) -> Result<i64> {
+    let scale = s
+        .currencies
+        .definitions
+        .iter()
+        .find(|d| d.code == code)
+        .ok_or(bad("Currency missing"))?
+        .scale;
+    Ok(currencies::amount(price, code, scale)?.minor())
+}
+/// Today's autonomous price rows with live price and stock; `proposed` replaces the live price of products about to change.
+pub(crate) async fn today<'e>(
+    db: impl sqlx::PgExecutor<'e>,
+    t: &str,
+    s: &commerce::Settings,
+    proposed: &[(String, i64)],
+) -> Result<(u128, Vec<Value>)> {
+    let rows = sqlx::query("SELECT b.product_id,b.baseline_minor,b.currency,p.name,p.price,p.stock FROM ai_price_budget b JOIN products p ON p.tenant=b.tenant AND p.id=b.product_id WHERE b.tenant=$1 AND b.day=(now() AT TIME ZONE 'UTC')::date ORDER BY b.product_id")
+        .bind(t).fetch_all(db).await?;
+    let (mut total, mut changes) = (0u128, Vec::new());
+    for row in rows {
+        let (id, code): (String, String) = (row.get("product_id"), row.get("currency"));
+        let (baseline, stock): (i64, i32) = (row.get("baseline_minor"), row.get("stock"));
+        let current = match proposed.iter().find(|(p, _)| p == &id) {
+            Some((_, price)) => *price,
+            None => minor(s, &code, row.get("price"))?,
+        };
+        let counted = code == s.currencies.pricing_currency;
+        let amount = exposure(baseline, current, i64::from(stock));
+        if counted {
+            total = total.saturating_add(amount);
+        }
+        changes.push(json!({"productId":id,"name":row.get::<String,_>("name"),"currency":code,"baselineMinor":baseline,"currentMinor":current,"stock":stock,"exposureMinor":amount.min(u128::from(u64::MAX)) as u64,"counted":counted}));
+    }
+    Ok((total, changes))
+}
+/// Read model of the autopilot: level, limits and today's use. Reading reserves nothing.
+pub(crate) async fn status(a: &App, t: &str, h: &RequestContext) -> Result<Value> {
+    auth::permit(h, "settings.read")?;
+    let (s, revision) = commerce::config(a, t).await?;
+    let policy = &s.ai_policy.autonomy;
+    let (total, changes) = today(&a.db, t, &s, &[]).await?;
+    let scale = s
+        .currencies
+        .definitions
+        .iter()
+        .find(|d| d.code == s.currencies.pricing_currency)
+        .ok_or(bad("Currency missing"))?
+        .scale;
+    Ok(
+        json!({"area":"prices","level":if policy.enabled {1} else {0},"enabled":policy.enabled,"settingsRevision":revision,
+        "currency":s.currencies.pricing_currency,"scale":scale,"maxChangeBps":policy.max_change_bps,
+        "productsPerDay":policy.products_per_day,"productsUsed":changes.len(),
+        "maxDailyExposureMinor":policy.max_daily_exposure_minor,"exposureMinor":total.min(u128::from(u64::MAX)) as u64,
+        "corridors":s.ai_policy.corridors.len(),"changes":changes}),
+    )
+}
+#[cfg(test)]
+mod tests {
+    use super::exposure;
+    #[test]
+    fn exposure_counts_reductions_times_stock_and_never_increases_or_negative_stock() {
+        assert_eq!(exposure(8000, 7600, 30), 12_000);
+        assert_eq!(exposure(8000, 8400, 30), 0);
+        assert_eq!(exposure(8000, 8000, 30), 0);
+        assert_eq!(exposure(8000, 7600, 0), 0);
+        assert_eq!(exposure(8000, 7600, -5), 0);
+        assert_eq!(
+            exposure(i64::MAX, 0, i64::MAX),
+            (i64::MAX as u128) * (i64::MAX as u128)
+        );
+        assert_eq!(exposure(i64::MIN, i64::MAX, 10), 0);
+    }
 }

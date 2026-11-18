@@ -161,6 +161,33 @@ try:
     call('/api/intelligence/autonomy.apply',{'taskId':draft['taskId']},expected=409)
     assert next(p for p in call('/api/search/product',{})['elements'] if p['id']=='lamp')['price']==72.5
     passed('Autonomy applies once within native settings and cannot compound beyond its original daily price baseline or affect foreign shops')
+    # Daily exposure ceiling: reductions times current stock, summed over today's autonomous price rows.
+    lamp=lambda: next(p for p in call('/api/search/product',{})['elements'] if p['id']=='lamp')
+    def reduce(limit, expected=200):
+        limited=copy.deepcopy(enabled);limited['autonomy']['maxDailyExposureMinor']=limit;policy(limited)
+        proposal['changes']=[{'product_id':'lamp','price':70}]
+        draft=call('/api/agent/chat',{'message':'Reduction against the exposure limit','inference':{'provider':'openai'}})['messages'][-1]['data']
+        return call('/api/intelligence/autonomy.apply',{'taskId':draft['taskId']},expected=expected)
+    reduce(1,409)
+    status=call('/api/intelligence/autonomy.status',{})
+    assert status['level']==1 and status['productsUsed']==1 and status['exposureMinor']==0 and status['maxDailyExposureMinor']==1,status
+    baseline,stock=status['changes'][0]['baselineMinor'],lamp()['stock']
+    need=(baseline-7000)*stock
+    assert need>1 and status['changes'][0]['currentMinor']==7250 and lamp()['price']==72.5,(status,stock)
+    reduce(need-1,409)
+    assert lamp()['price']==72.5,'A refused autonomous reduction must leave the price unchanged'
+    assert reduce(need)['applied'] and lamp()['price']==70
+    status=call('/api/intelligence/autonomy.status',{})
+    assert status['exposureMinor']==need and status['changes'][0]['exposureMinor']==need and status['changes'][0]['currentMinor']==7000,status
+    tool=call('/mcp',{'jsonrpc':'2.0','id':7,'method':'tools/call','params':{'name':'knowledge.autonomy.status','arguments':{}}})
+    assert tool['result']['structuredContent']['exposureMinor']==need,tool
+    other=call('/api/intelligence/autonomy.status',{},headers={**ah,'x-tenant':'atelier'})
+    assert other['changes']==[] and other['productsUsed']==0 and other['exposureMinor']==0,'Another shop must only see its own autopilot use'
+    over=copy.deepcopy(enabled);over['autonomy']['maxDailyExposureMinor']=1_000_000_000_001
+    snapshot=call('/api/merchant/commerce');data=copy.deepcopy(snapshot['data']);data['aiPolicy']=over
+    call('/api/merchant/commerce',{'revision':snapshot['revision'],'data':data},method='PUT',expected=400)
+    policy(enabled)
+    passed('Autonomy refuses price reductions beyond the daily exposure limit, applies at the exact limit and reports today\'s use over HTTP and MCP')
     proposal['changes']=[{'product_id':'lamp','price':73}]
     draft=call('/api/agent/chat',{'message':'Policy revision test','inference':{'provider':'openai'}})['messages'][-1]['data']
     locked=copy.deepcopy(enabled);locked['corridors'][0]['priceLocked']=True;policy(locked)

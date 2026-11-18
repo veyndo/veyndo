@@ -12,6 +12,8 @@ import ScenarioSuggestions from "./ScenarioSuggestions";
 import ScenarioReport from "./ScenarioReport";
 import ScenarioComparison from "./ScenarioComparison";
 import ScenarioSource from "./ScenarioSource";
+import ScenarioAttacks from "./ScenarioAttacks";
+import ScenarioTwin from "./ScenarioTwin";
 import type {
   Profile,
   Configuration,
@@ -271,6 +273,12 @@ export default function ScenarioStudio({
               onClear={() => setSource(undefined)}
             />
           )}
+          <ScenarioTwin
+            request={request}
+            refresh={scenarios.length + refresh}
+            access={access}
+            onOpen={selectTab}
+          />
           <label className="scenario-brief">
             {t("goal")}
             <textarea
@@ -312,6 +320,7 @@ export default function ScenarioStudio({
               {t(busy ? "starting" : "start")}
             </button>
           </footer>
+          <ScenarioAttacks request={request} />
           {!!scenarios.length && (
             <ScenarioHistory
               scenarios={scenarios}

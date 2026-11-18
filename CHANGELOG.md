@@ -1,5 +1,29 @@
 # Changelog
 
+## Autopilot levels and a daily limit for price reductions
+
+- Add an optional daily limit to automatic prices: reduction times current
+  stock, summed over the products the autopilot changed today. A change that
+  would exceed it is refused and the price stays unchanged.
+- Show the level per area, the limits and today's use above the price
+  boundaries in Studio, over HTTP and the MCP tool `knowledge.autonomy.status`.
+
+## Shop twin readiness in the customer simulator
+
+- Show for the selected private sandbox whether catalog, test stock, simulated
+  checkout and saved customer tests are ready, with a link to the owning
+  workspace for each open step. HTTP and the MCP tool
+  `merchant.scenario.readiness` return the same read-only figures.
+- Add the guide "Test a twin of your existing shop".
+
+## Attack test in the customer simulator
+
+- Run nine scripted cart and checkout attacks against a private sandbox from
+  **Shop knowledge → Customer simulator**, over HTTP or the MCP tool
+  `merchant.scenario.probe`. No model is used and the live shop is not touched.
+- Add one roadmap source, `docs/roadmap.json`, that renders the handbook roadmap,
+  the README line and the website data. The quick check rejects drift.
+
 ## Make the "Agents buy" chapter task-first
 
 - Open shopping agents, connectors, Storyfront, own frontends, checkout and the payment test record with what the reader wants to do and where to go.

@@ -69,6 +69,50 @@ checks the policy actually reaching the model read transcript, rejected proposal
 autonomy budgets and settings-revision invalidation. These are synthetic provider
 contracts, not proof of real-model interpretation or measured revenue benefit.
 
+## Autopilot levels and the daily limit
+
+The **Autopilot** panel above the price boundaries shows how far an agent may go
+in each area and what it did today.
+
+![Autopilot in Studio: prices on level 1 with today's use](assets/roadmap/autopilot-studio.jpg)
+
+*Local Studio, synthetic shop, 18 November 2026.*
+
+| Level | What an agent may do | Available for |
+| --- | --- | --- |
+| **0 · Suggests** | Prepare a change. You review and approve it. | Every area |
+| **1 · Acts within the budget** | Apply a price change by itself, inside all limits below. | Prices only |
+
+Stock, texts and translations, shop design, rules, flows and apps stay on level 0.
+There is no level on which an agent acts without limits.
+
+On level 1 every automatic price change must pass all of these:
+
+| Limit | You set | Meaning |
+| --- | --- | --- |
+| Price boundary per product | Minimum, maximum, optional margin and discount | Only listed products can change at all |
+| Daily movement | Up to 5 % | Measured against the price at the start of the day, so steps cannot add up |
+| Products per day | 1 to 100 | Unique products per UTC day |
+| **Daily limit for price reductions** | An amount in the pricing currency, or empty | See below |
+
+**How the daily limit is counted.** For each product the autopilot changed today:
+reduction per unit times the current stock. A bag that goes from 169 to 165 with
+30 in stock counts 4 × 30 = 120. That is the most revenue you give up if the
+whole stock sells at the lower price. Price increases count as zero. When stock
+sells, the remaining figure shrinks. A change that would push today's total over
+the limit is refused and the price stays as it was.
+
+To set it, choose **Allow limited automatic prices**, enter the **Daily limit for
+price reductions** and save. Leave the field empty for no limit.
+
+Not included: the autopilot does not take a change back by itself when sales
+drop, the limit covers only products priced in the shop's pricing currency, and
+it is a ceiling on given-up revenue, not a forecast of loss or margin.
+
+`knowledge.autonomy.status` (`POST /api/intelligence/autonomy.status`, also an MCP
+tool) returns the level, the limits and today's changes. It needs
+`knowledge.read` and `settings.read` and reserves nothing.
+
 ## Connected knowledge and testing views
 
 - **Overview**: whole-shop product/source/active-app counts, publication coverage,

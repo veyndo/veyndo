@@ -17,6 +17,7 @@
       },
       "sources": [
         "docs/start-here.md",
+        "docs/roadmap.md",
         "docs/agent-purchase.md",
         "docs/first-tour.md",
         "docs/hosted-component-api.md",
@@ -76,6 +77,7 @@
         "docs/agent-authority-controls.md",
         "docs/agent-workshop.md",
         "docs/knowledge-workspace.md",
+        "docs/shop-twin.md",
         "docs/customer-scenarios.md",
         "docs/automation.md",
         "docs/merchant-reports.md",

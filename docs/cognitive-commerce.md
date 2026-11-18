@@ -270,7 +270,7 @@ current base price, brand price lock and available stock. Tax conversion uses th
 native product tax basis. The margin excludes payment fees, shipping and returns;
 it is not contribution margin.
 
-Autonomy is disabled by default. When explicitly enabled, it is price-only,
+An optional daily exposure ceiling (price reduction times current stock, summed over today's autonomous rows) joins the unique-product quota; see [the guide](knowledge-workspace.md#autopilot-levels-and-the-daily-limit). Autonomy is disabled by default. When explicitly enabled, it is price-only,
 requires current catalog/settings rights, an explicit product corridor and a daily
 unique-SKU quota. Default limits are ±5% and 20 products per UTC day. The original
 daily price and currency prevent repeatedly compounding a permitted adjustment.

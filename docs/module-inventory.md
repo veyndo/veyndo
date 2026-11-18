@@ -32,6 +32,8 @@ This lists every checked-in source module in these roots, including files with n
 | [src/agent_runs/scenarios/evidence.rs](../src/agent_runs/scenarios/evidence.rs) | Scenario evidence uses the release owner's configuration projection, never orders or inventory. |
 | [src/agent_runs/scenarios/journey.rs](../src/agent_runs/scenarios/journey.rs) | Each fictional customer has an independent durable provider journal and an authoritative native journey. |
 | [src/agent_runs/scenarios/mod.rs](../src/agent_runs/scenarios/mod.rs) | Fictional shopper cohorts reuse native task authority, checkpoints and private commerce operations. |
+| [src/agent_runs/scenarios/probes.rs](../src/agent_runs/scenarios/probes.rs) | Scripted hostile shoppers probe native cart and checkout fences in a private sandbox; no model call, no live effect. |
+| [src/agent_runs/scenarios/readiness.rs](../src/agent_runs/scenarios/readiness.rs) | Read-only readiness of a private sandbox as a shop twin: catalogue, stock, simulated checkout and saved customer tests. |
 | [src/agent_runs/scenarios/shopper.rs](../src/agent_runs/scenarios/shopper.rs) | A closed shopper adapter uses native carts and exact reviewed totals; no model-supplied authority or payment mode. |
 | [src/agent_runs/scenarios/source.rs](../src/agent_runs/scenarios/source.rs) | A customer test can reference only its actor's completed, applied native proposal in this sandbox. |
 | [src/agent_runs/translation.rs](../src/agent_runs/translation.rs) | Translation child work reuses native draft storage, original authority and the existing task scheduler. |
@@ -255,7 +257,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/checkout_products.rs](../src/checkout_products.rs) | Localized immutable checkout SKU snapshots read under the purchase transaction's locks. |
 | [src/checkout_review.rs](../src/checkout_review.rs) | Bind the reviewed revision and exact total for every checkout transport. |
 | [src/cognition/advisor.rs](../src/cognition/advisor.rs) | Buyer-admitted initial catalog/evidence context and bounded native response revalidation; no extra truth store. |
-| [src/cognition/autonomy.rs](../src/cognition/autonomy.rs) | Price-only optional autonomy, atomic unique-SKU daily quotas and a non-compounding day baseline. |
+| [src/cognition/autonomy.rs](../src/cognition/autonomy.rs) | Price-only optional autonomy, atomic unique-SKU daily quotas, a non-compounding day baseline and a daily exposure ceiling. |
 | [src/cognition/behavior/capture.rs](../src/cognition/behavior/capture.rs) | Cart-locked writes serialize with withdrawal; customer association is derived from authenticated native identity. |
 | [src/cognition/behavior/geography.rs](../src/cognition/behavior/geography.rs) | Optional trusted ingress geography. Ordinary country headers never establish visitor location. |
 | [src/cognition/behavior/input.rs](../src/cognition/behavior/input.rs) | Minimal behavioral envelope: no URLs, search text, raw user agents, IPs or caller customer identities. |
@@ -945,6 +947,7 @@ This lists every checked-in source module in these roots, including files with n
 | [frontend/src/admin/environments/release-preview.css](../frontend/src/admin/environments/release-preview.css) | Native shop preview stays contained in the release review at both viewport sizes. |
 | [frontend/src/admin/environments/release-tests-i18n.ts](../frontend/src/admin/environments/release-tests-i18n.ts) | Release review vocabulary keeps simulated commerce evidence distinct from publication approval. |
 | [frontend/src/admin/environments/release-tests.css](../frontend/src/admin/environments/release-tests.css) | Existing release workbench typography with bounded, responsive test controls. |
+| [frontend/src/admin/intelligence/AutopilotToday.tsx](../frontend/src/admin/intelligence/AutopilotToday.tsx) | Read-only autopilot summary: level per area, daily limits and today's native use; settings stay with the guardrail editor. |
 | [frontend/src/admin/intelligence/EvidenceReview.tsx](../frontend/src/admin/intelligence/EvidenceReview.tsx) | Review source-bound candidates through shared HTTP/MCP contracts; changed sources block publication. |
 | [frontend/src/admin/intelligence/ExperimentStudio.tsx](../frontend/src/admin/intelligence/ExperimentStudio.tsx) | Immutable experiment designs and lifecycle controls share the core HTTP/MCP owner and current settings rights. |
 | [frontend/src/admin/intelligence/ExternalKnowledge.tsx](../frontend/src/admin/intelligence/ExternalKnowledge.tsx) | Private connected-app evidence browser shows active-source provenance without exposing it to shoppers. |
@@ -961,6 +964,7 @@ This lists every checked-in source module in these roots, including files with n
 | [frontend/src/admin/intelligence/MemoryView.tsx](../frontend/src/admin/intelligence/MemoryView.tsx) | Durable co-purchase evidence and revision-bound merchant decisions, with simulation labels and explicit confirmation. |
 | [frontend/src/admin/intelligence/MerchantSourceIntake.tsx](../frontend/src/admin/intelligence/MerchantSourceIntake.tsx) | Conversation intake reuses the real private versioned source editor and existing upload API. |
 | [frontend/src/admin/intelligence/SourceEditor.tsx](../frontend/src/admin/intelligence/SourceEditor.tsx) | Single-language source editor with inherited fields, product lookup and private-first API/file ingestion. |
+| [frontend/src/admin/intelligence/autopilot-i18n.ts](../frontend/src/admin/intelligence/autopilot-i18n.ts) | Autopilot vocabulary: levels per area, daily limits and today's use in EN/DE/FR/ES; amounts are parameters. |
 | [frontend/src/admin/intelligence/behavior/BehaviorGraph.tsx](../frontend/src/admin/intelligence/behavior/BehaviorGraph.tsx) | A derived graph connects coarse browsers to native products and existing semantic product relations. |
 | [frontend/src/admin/intelligence/behavior/BehaviorJourney.tsx](../frontend/src/admin/intelligence/behavior/BehaviorJourney.tsx) | Authorized journey timeline links to native product, customer and order views, through permission-bound native CRM references. |
 | [frontend/src/admin/intelligence/behavior/BehaviorView.tsx](../frontend/src/admin/intelligence/behavior/BehaviorView.tsx) | Behavioral workspace makes consent, channel/window, guest journeys and semantic projections inspectable. |
@@ -1022,6 +1026,7 @@ This lists every checked-in source module in these roots, including files with n
 | [frontend/src/admin/reports/model.ts](../frontend/src/admin/reports/model.ts) | Saved report definitions contain presentation/filter choices only; the server remains the source of every value. |
 | [frontend/src/admin/reports/report-i18n.ts](../frontend/src/admin/reports/report-i18n.ts) | Studio report vocabulary; amounts, names and dates come from the native report snapshot. |
 | [frontend/src/admin/reports/reports.css](../frontend/src/admin/reports/reports.css) | Report workspace extends Studio tokens with readable charts, restrained controls and explicit reordering. |
+| [frontend/src/admin/scenarios/ScenarioAttacks.tsx](../frontend/src/admin/scenarios/ScenarioAttacks.tsx) | Scripted attack results for the selected private sandbox; outcomes come from native refusals, never from a model. |
 | [frontend/src/admin/scenarios/ScenarioComparison.tsx](../frontend/src/admin/scenarios/ScenarioComparison.tsx) | Matching test inputs and changed observed snapshots are separate evidence. |
 | [frontend/src/admin/scenarios/ScenarioEvidence.tsx](../frontend/src/admin/scenarios/ScenarioEvidence.tsx) | Configuration freshness is independent of whether a fictional purchase succeeded. |
 | [frontend/src/admin/scenarios/ScenarioHistory.tsx](../frontend/src/admin/scenarios/ScenarioHistory.tsx) | Distinguishable saved-run and comparison selection for the customer lab. |
@@ -1031,9 +1036,13 @@ This lists every checked-in source module in these roots, including files with n
 | [frontend/src/admin/scenarios/ScenarioSource.tsx](../frontend/src/admin/scenarios/ScenarioSource.tsx) | Explicit source attribution; removing it does not change or undo the approved proposal. |
 | [frontend/src/admin/scenarios/ScenarioStudio.tsx](../frontend/src/admin/scenarios/ScenarioStudio.tsx) | A compact private customer lab on the existing Studio scope and durable run controls. |
 | [frontend/src/admin/scenarios/ScenarioSuggestions.tsx](../frontend/src/admin/scenarios/ScenarioSuggestions.tsx) | Catalogue-derived drafts are previewed before adoption; native commerce still decides actual prices and purchases. |
+| [frontend/src/admin/scenarios/ScenarioTwin.tsx](../frontend/src/admin/scenarios/ScenarioTwin.tsx) | Readiness of the selected private copy as a shop twin; every figure is a native read and each open step links to its owner. |
 | [frontend/src/admin/scenarios/scenario-access.ts](../frontend/src/admin/scenarios/scenario-access.ts) | Keep every scenario entry aligned with the native compound admission. |
+| [frontend/src/admin/scenarios/scenario-attack-i18n.ts](../frontend/src/admin/scenarios/scenario-attack-i18n.ts) | Attack test vocabulary: closed probe titles and finding texts in EN/DE/FR/ES; native refusal details stay verbatim. |
 | [frontend/src/admin/scenarios/scenario-history.ts](../frontend/src/admin/scenarios/scenario-history.ts) | Saved-test labels and reload links share the existing Studio URL without storing briefs or customer data. |
 | [frontend/src/admin/scenarios/scenario-i18n.ts](../frontend/src/admin/scenarios/scenario-i18n.ts) | Simulator vocabulary distinguishes actual native outcomes from fictional customer reasoning. |
+| [frontend/src/admin/scenarios/scenario-labs.css](../frontend/src/admin/scenarios/scenario-labs.css) | Attack test and shop twin panels beside the customer lab. |
+| [frontend/src/admin/scenarios/scenario-twin-i18n.ts](../frontend/src/admin/scenarios/scenario-twin-i18n.ts) | Shop twin vocabulary: readiness steps of a private copy in EN/DE/FR/ES; counts and country names are parameters. |
 | [frontend/src/admin/scenarios/scenario-types.ts](../frontend/src/admin/scenarios/scenario-types.ts) | Safe public projections; cart tokens and provider checkpoints are never part of this contract. |
 | [frontend/src/admin/scenarios/scenarios.css](../frontend/src/admin/scenarios/scenarios.css) | Private customer lab: compact profiles, scoped progress and evidence comparison. |
 | [frontend/src/admin/scenarios/useScenarioNavigation.ts](../frontend/src/admin/scenarios/useScenarioNavigation.ts) | Scope-fenced entry from native design, app and migration workspaces. |
@@ -1123,6 +1132,7 @@ This lists every checked-in source module in these roots, including files with n
 | [frontend/src/admin/styles/assistant-layout.css](../frontend/src/admin/styles/assistant-layout.css) | One reading column connects merchant context, conversation and intake in full Studio and the copilot. |
 | [frontend/src/admin/styles/automation-lifecycle.css](../frontend/src/admin/styles/automation-lifecycle.css) | Configuration workspace: readable definitions, clear selection and contextual actions. |
 | [frontend/src/admin/styles/automation.css](../frontend/src/admin/styles/automation.css) | Actual graph nodes and original rule forms use the Studio theme and independent responsive columns. |
+| [frontend/src/admin/styles/autopilot.css](../frontend/src/admin/styles/autopilot.css) | Autopilot summary: level per area, daily meters and today's autonomous price changes. |
 | [frontend/src/admin/styles/b2b-settings.css](../frontend/src/admin/styles/b2b-settings.css) | Revisioned B2B settings cards, accessible switches and responsive spacing. |
 | [frontend/src/admin/styles/behavior.css](../frontend/src/admin/styles/behavior.css) | Consent-bound insights use the existing Studio tokens and a responsive, inspectable visual hierarchy. |
 | [frontend/src/admin/styles/canvas-commerce-editor.css](../frontend/src/admin/styles/canvas-commerce-editor.css) | Shared native commerce handoff spacing loads with its Canvas editor in every workspace. |
@@ -1432,6 +1442,7 @@ This lists every checked-in source module in these roots, including files with n
 | [frontend/src/shared/operations/inputs-14.ts](../frontend/src/shared/operations/inputs-14.ts) | Generated native operation input contracts; do not edit. |
 | [frontend/src/shared/operations/inputs-15.ts](../frontend/src/shared/operations/inputs-15.ts) | Generated native operation input contracts; do not edit. |
 | [frontend/src/shared/operations/inputs-16.ts](../frontend/src/shared/operations/inputs-16.ts) | Generated native operation input contracts; do not edit. |
+| [frontend/src/shared/operations/inputs-17.ts](../frontend/src/shared/operations/inputs-17.ts) | Generated native operation input contracts; do not edit. |
 | [frontend/src/shared/operations/inputs-2.ts](../frontend/src/shared/operations/inputs-2.ts) | Generated native operation input contracts; do not edit. |
 | [frontend/src/shared/operations/inputs-3.ts](../frontend/src/shared/operations/inputs-3.ts) | Generated native operation input contracts; do not edit. |
 | [frontend/src/shared/operations/inputs-4.ts](../frontend/src/shared/operations/inputs-4.ts) | Generated native operation input contracts; do not edit. |
@@ -2215,6 +2226,7 @@ This lists every checked-in source module in these roots, including files with n
 | [scripts/providers.py](../scripts/providers.py) | Cloud wire-contract tests using local HTTP servers, NOT live cloud inference. |
 | [scripts/read_performance.py](../scripts/read_performance.py) | Two real Rust replicas test coherent read caches; optional matched local HTTP baseline probe. |
 | [scripts/restart.py](../scripts/restart.py) | Persist an API snapshot, restart server+DB externally, verify exact state. |
+| [scripts/roadmap.py](../scripts/roadmap.py) | Render the one roadmap source into the handbook page, the README line and the website data module; --check rejects drift. |
 | [scripts/rule_catalog.py](../scripts/rule_catalog.py) | Inventory original Shopware conditions without claiming unsupported scopes are implemented. |
 | [scripts/rule_differential.py](../scripts/rule_differential.py) | Execute original Shopware numeric comparisons, including epsilon, null and unsupported operator semantics. |
 | [scripts/rust_connectors.py](../scripts/rust_connectors.py) | Actual Rust/PostgreSQL multi-process notification, OAuth/import and adversarial fixtures; no external accounts. |

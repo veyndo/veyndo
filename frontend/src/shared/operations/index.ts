@@ -17,6 +17,7 @@ import type { Inputs13 } from "./inputs-13";
 import type { Inputs14 } from "./inputs-14";
 import type { Inputs15 } from "./inputs-15";
 import type { Inputs16 } from "./inputs-16";
+import type { Inputs17 } from "./inputs-17";
 export type OperationInputs = Inputs0 &
   Inputs1 &
   Inputs2 &
@@ -33,7 +34,8 @@ export type OperationInputs = Inputs0 &
   Inputs13 &
   Inputs14 &
   Inputs15 &
-  Inputs16;
+  Inputs16 &
+  Inputs17;
 export type OperationName = keyof OperationInputs;
 export type OperationCall<N extends OperationName> = {
   name: N;

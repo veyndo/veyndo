@@ -1,0 +1,189 @@
+{
+  "version": 1,
+  "thesis": {
+    "en": "The shop that changes itself and demonstrably breaks nothing.",
+    "de": "Der Shop, der sich selbst verändert und dabei nachweislich nichts kaputt macht.",
+    "fr": "La boutique qui se modifie elle-même sans rien casser, preuves à l’appui.",
+    "es": "La tienda que se cambia a sí misma y demuestra que no rompe nada."
+  },
+  "statuses": {
+    "planned": {
+      "en": "Planned",
+      "de": "Geplant",
+      "fr": "Prévu",
+      "es": "Planificado"
+    },
+    "building": {
+      "en": "In progress",
+      "de": "In Arbeit",
+      "fr": "En cours",
+      "es": "En curso"
+    },
+    "local": {
+      "en": "Works locally",
+      "de": "Läuft lokal",
+      "fr": "Fonctionne en local",
+      "es": "Funciona en local"
+    },
+    "hosted": {
+      "en": "Live in the hosted pilot",
+      "de": "Live im gehosteten Pilot",
+      "fr": "En ligne dans le pilote hébergé",
+      "es": "En vivo en el piloto alojado"
+    }
+  },
+  "stages": [
+    {
+      "id": "stress-test",
+      "status": "local",
+      "title": {
+        "en": "Test customers that attack",
+        "de": "Testkunden, die angreifen",
+        "fr": "Des clients de test qui attaquent",
+        "es": "Clientes de prueba que atacan"
+      },
+      "summary": {
+        "en": "Before a change goes live, scripted attackers try forged totals, stale carts, impossible quantities and replayed orders against the private copy.",
+        "de": "Bevor eine Änderung live geht, versuchen feste Angreifer gefälschte Summen, veraltete Warenkörbe, unmögliche Mengen und wiederholte Bestellungen an der privaten Kopie.",
+        "fr": "Avant la mise en ligne, des attaquants scriptés essaient totaux falsifiés, paniers périmés, quantités impossibles et commandes rejouées sur la copie privée.",
+        "es": "Antes de publicar un cambio, atacantes guionizados prueban totales falsificados, carritos obsoletos, cantidades imposibles y pedidos repetidos en la copia privada."
+      },
+      "buildsOn": "Customer simulator, private sandboxes, native cart and checkout operations",
+      "guide": "docs/customer-scenarios.md#attack-test",
+      "evidence": "docs/evidence/attack-test-2026-11-18.md"
+    },
+    {
+      "id": "shop-twin",
+      "status": "local",
+      "title": {
+        "en": "A twin of your existing shop",
+        "de": "Ein Zwilling deines bestehenden Shops",
+        "fr": "Un jumeau de votre boutique existante",
+        "es": "Un gemelo de tu tienda actual"
+      },
+      "summary": {
+        "en": "A private copy shows whether catalog, test stock and checkout are ready, then test customers and attackers try it. Bring the catalog from Shopware, Shopify, WooCommerce or CSV. Nobody has to migrate first.",
+        "de": "Eine private Kopie zeigt, ob Katalog, Testbestand und Checkout bereit sind, dann probieren Testkunden und Angreifer sie aus. Hol den Katalog aus Shopware, Shopify, WooCommerce oder CSV. Niemand muss vorher umziehen.",
+        "fr": "Une copie privée indique si catalogue, stock de test et paiement sont prêts, puis clients de test et attaquants l’essaient. Importez le catalogue depuis Shopware, Shopify, WooCommerce ou CSV. Aucune migration préalable.",
+        "es": "Una copia privada muestra si catálogo, stock de prueba y pago están listos; después la prueban clientes de prueba y atacantes. Trae el catálogo desde Shopware, Shopify, WooCommerce o CSV. Sin migrar antes."
+      },
+      "buildsOn": "Migration Assistant, catalog import, customer simulator",
+      "guide": "docs/shop-twin.md",
+      "evidence": "docs/evidence/shop-twin-2026-11-18.md"
+    },
+    {
+      "id": "autopilot",
+      "status": "local",
+      "title": {
+        "en": "Autopilot levels with a daily limit",
+        "de": "Autopilot-Stufen mit Tageslimit",
+        "fr": "Niveaux de pilote automatique avec limite quotidienne",
+        "es": "Niveles de piloto automático con límite diario"
+      },
+      "summary": {
+        "en": "See per area whether an agent suggests or acts. For prices it may act within a budget: price boundaries, a daily movement, a number of products and a daily limit for price reductions. An automatic rollback is not built yet.",
+        "de": "Sieh pro Bereich, ob ein Agent vorschlägt oder handelt. Bei Preisen darf er im Budget handeln: Preisgrenzen, Tagesbewegung, Anzahl Produkte und ein Tageslimit für Preissenkungen. Eine automatische Rücknahme ist noch nicht gebaut.",
+        "fr": "Voyez par domaine si un agent propose ou agit. Pour les prix, il peut agir dans un budget : bornes de prix, variation quotidienne, nombre de produits et limite quotidienne des baisses. Le retour arrière automatique n’existe pas encore.",
+        "es": "Mira por área si un agente propone o actúa. En precios puede actuar dentro de un presupuesto: límites de precio, variación diaria, número de productos y un límite diario de bajadas. La reversión automática aún no existe."
+      },
+      "buildsOn": "Existing price autonomy with daily product budget, price corridors, agent credentials with allowances",
+      "guide": "docs/knowledge-workspace.md#autopilot-levels-and-the-daily-limit",
+      "evidence": "docs/evidence/autopilot-2026-11-18.md"
+    },
+    {
+      "id": "experiments",
+      "status": "planned",
+      "title": {
+        "en": "Experiments that run themselves",
+        "de": "Experimente, die von selbst laufen",
+        "fr": "Des expériences qui se lancent seules",
+        "es": "Experimentos que se ejecutan solos"
+      },
+      "summary": {
+        "en": "An agent states a hypothesis, test customers screen it, a share of real visitors decides, and the result is published or withdrawn.",
+        "de": "Ein Agent stellt eine Hypothese auf, Testkunden sortieren vor, ein Anteil echter Besucher entscheidet, und das Ergebnis wird veröffentlicht oder zurückgenommen.",
+        "fr": "Un agent formule une hypothèse, des clients de test la filtrent, une part de vrais visiteurs décide, puis le résultat est publié ou retiré.",
+        "es": "Un agente formula una hipótesis, los clientes de prueba la filtran, una parte de visitantes reales decide y el resultado se publica o se retira."
+      },
+      "buildsOn": "Existing preregistered layout experiments with consent-bound assignment and payment-ledger readout",
+      "guide": null,
+      "evidence": null
+    },
+    {
+      "id": "signed-offers",
+      "status": "planned",
+      "title": {
+        "en": "Signed offers for buying agents",
+        "de": "Signierte Angebote für Kaufagenten",
+        "fr": "Offres signées pour les agents d’achat",
+        "es": "Ofertas firmadas para agentes de compra"
+      },
+      "summary": {
+        "en": "A buying agent receives a binding quote with a signature it can check, instead of a price it has to trust.",
+        "de": "Ein Kaufagent erhält ein verbindliches Angebot mit prüfbarer Signatur statt eines Preises, dem er vertrauen muss.",
+        "fr": "Un agent d’achat reçoit un devis ferme avec une signature vérifiable, au lieu d’un prix à croire sur parole.",
+        "es": "Un agente de compra recibe una oferta vinculante con firma verificable, en lugar de un precio en el que debe confiar."
+      },
+      "buildsOn": "Binding quotes over HTTP, MCP and UCP; short-lived signed native facts",
+      "guide": null,
+      "evidence": null
+    },
+    {
+      "id": "trade-network",
+      "status": "planned",
+      "title": {
+        "en": "A trade network between shops",
+        "de": "Ein Handelsnetz zwischen Shops",
+        "fr": "Un réseau d’échange entre boutiques",
+        "es": "Una red comercial entre tiendas"
+      },
+      "summary": {
+        "en": "Every shop is seller and buyer. A purchasing agent reorders from suppliers within a budget you set.",
+        "de": "Jeder Shop ist Verkäufer und Einkäufer. Ein Einkaufsagent bestellt innerhalb deines Budgets bei Lieferanten nach.",
+        "fr": "Chaque boutique vend et achète. Un agent d’approvisionnement recommande chez les fournisseurs dans le budget fixé.",
+        "es": "Cada tienda vende y compra. Un agente de compras repone con proveedores dentro del presupuesto que fijes."
+      },
+      "buildsOn": "Read-only supplier catalog import, B2B quotes and negotiation over UCP",
+      "guide": null,
+      "evidence": null
+    },
+    {
+      "id": "proof-coverage",
+      "status": "planned",
+      "title": {
+        "en": "Proof coverage you can read",
+        "de": "Beweisabdeckung zum Nachlesen",
+        "fr": "Une couverture de preuves lisible",
+        "es": "Cobertura de pruebas legible"
+      },
+      "summary": {
+        "en": "A public page shows which rules are machine-proved, which are tested and which are neither, starting with the money path.",
+        "de": "Eine öffentliche Seite zeigt, welche Regeln maschinell bewiesen, welche getestet und welche keins von beidem sind, beginnend beim Geldpfad.",
+        "fr": "Une page publique montre quelles règles sont prouvées par machine, lesquelles sont testées et lesquelles ne le sont pas, en commençant par l’argent.",
+        "es": "Una página pública muestra qué reglas están demostradas por máquina, cuáles probadas y cuáles ninguna, empezando por el dinero."
+      },
+      "buildsOn": "63 extracted Lean policies, proof manifest, differential checks against original PHP",
+      "guide": null,
+      "evidence": null
+    },
+    {
+      "id": "sovereign-ai",
+      "status": "planned",
+      "title": {
+        "en": "Sovereign AI mode",
+        "de": "Souveräner KI-Betrieb",
+        "fr": "Mode IA souveraine",
+        "es": "Modo de IA soberana"
+      },
+      "summary": {
+        "en": "One switch keeps every model call on models you host yourself. Studio shows that no shop data leaves your servers.",
+        "de": "Ein Schalter hält jeden Modellaufruf auf selbst betriebenen Modellen. Studio zeigt, dass keine Shopdaten deine Server verlassen.",
+        "fr": "Un seul réglage garde chaque appel sur des modèles que vous hébergez. Studio montre qu’aucune donnée ne quitte vos serveurs.",
+        "es": "Un interruptor mantiene cada llamada en modelos que alojas tú. Studio muestra que ningún dato sale de tus servidores."
+      },
+      "buildsOn": "Local model route, central provider settings, per-task model routing",
+      "guide": null,
+      "evidence": null
+    }
+  ]
+}

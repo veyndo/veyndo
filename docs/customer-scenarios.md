@@ -195,6 +195,44 @@ See [App Studio](app-studio.md), [migration](agentic-migration.md),
 [shop design](personal-workspace-and-shop-design.md) and
 [recorded rule comparison](rule-history-comparison.md) for the adjacent workflows.
 
+## Attack test
+
+The attack test asks a different question from the fictional customers: not
+"would someone buy this?" but "can someone cheat this?". Nine scripted attackers
+try the cart and checkout of the selected private sandbox. No model is used, so
+the same shop gives the same result every time.
+
+![Attack test in Studio: nine attacks refused, each with the shop's own answer](assets/roadmap/attack-test-studio.jpg)
+
+*Local Studio, synthetic shop, 18 November 2026.*
+
+1. Open a **private sandbox** with at least one product in stock.
+2. Open **Shop knowledge → Customer simulator** and scroll to **Attack test**.
+3. Choose **Run attacks**. The result appears in a few seconds.
+
+| Attack | The shop should |
+| --- | --- |
+| Put a negative quantity in the cart | Refuse the input |
+| Add a product that does not exist | Refuse the product |
+| Order more than is in stock | Limit the cart, or refuse the sale at checkout |
+| Change the cart with an outdated version | Refuse the stale revision |
+| Send an own price with the cart item | Ignore it and charge the native price |
+| Open a cart with a guessed key | Find no cart |
+| Confirm the order with a forged total | Refuse; the reviewed total does not match |
+| Confirm an older cart version than the one reviewed | Refuse; the reviewed revision does not match |
+| Send the same order twice | Return the same order and reduce stock once |
+
+Each line shows **Refused**, **Got through** or **Check**, with the shop's own
+answer where it refused. **Check** means the shop behaved in a way you should
+decide about, for example it sold more than the current stock because
+backorders are allowed. A server error also counts as **Check**, not as a refusal.
+
+The honest replayed order is a real private, simulated order in the sandbox, like
+any other test order. The live shop is not touched. Results are shown once and
+are **not saved** with the release review yet. Nine scripted attacks are a
+regression check for these fences, not a penetration test or a security
+certificate for the shop.
+
 ## Shared contract and isolation
 
 | Operation | HTTP | Purpose |
@@ -202,6 +240,7 @@ See [App Studio](app-studio.md), [migration](agentic-migration.md),
 | `merchant.scenario.create` | `POST /api/agent/scenarios` | Idempotently enqueue one to six profiles in a private environment. |
 | `merchant.scenario.list` | `GET /api/agent/scenarios` | Actor-private history and selected channel configuration. |
 | `merchant.scenario.status` | `GET /api/agent/scenarios/{id}` | Current saved observations and customer task states. |
+| `merchant.scenario.probe` | `POST /api/agent/scenario-probes` | Run the nine scripted cart and checkout attacks in a private environment; no model call. |
 
 MCP and HTTP share the capability registry and handlers. Existing
 `merchant.run.cancel` / `merchant.run.resume` operations control the individual

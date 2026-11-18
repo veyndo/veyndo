@@ -2,6 +2,8 @@
 /** Native input DTOs; opaque JSON fields remain explicit. */
 import type { JsonValue } from "./value";
 export interface Inputs8 {
+  "merchant.scenario.readiness": JsonValue;
+  "merchant.scenario.probe": JsonValue;
   "merchant.apps.search": { after?: string; limit?: number; query?: string };
   "merchant.apps.read": { action: string; app: string; arguments: JsonValue };
   "merchant.agents.status": JsonValue;
@@ -192,6 +194,4 @@ export interface Inputs8 {
     id?: string;
     revision?: number;
   };
-  "knowledge.behavior": { days?: number; salesChannelId?: string };
-  "knowledge.behavior.journey": { session?: string };
 }

@@ -127,6 +127,38 @@ with (ROOT / 'artifacts/scenarios.log').open('w') as log:
         assert mcp['result']['structuredContent']['configuration']['catalogue'] == channel_sample, mcp
         assert not calls, 'Profile suggestions must not create an inference request or customer task'
         print('PASS native channel-only product samples, exact prices, HTTP/MCP parity and no extra inference', flush=True)
+        # Scripted attackers use the same native cart/checkout owners; the live shop and the model stay untouched.
+        range_ = call('/api/environments', {'name': 'Attack isolated shop'}, live)['id']
+        attacker = {**live, 'x-tenant': range_}
+        untouched = "SELECT jsonb_build_array((SELECT count(*) FROM orders WHERE tenant='workshop'),(SELECT coalesce(sum(stock),0) FROM products WHERE tenant='workshop'))::text"
+        live_before, stage_orders = sql(untouched), int(sql(f"SELECT count(*) FROM orders WHERE tenant='{range_}'"))
+        twin = call('/api/agent/scenario-readiness', headers=attacker)
+        assert twin['ready'] is True and twin['blockers'] == [] and twin['sandbox']['name'] == 'Attack isolated shop', twin
+        assert twin['catalogue']['products'] >= twin['catalogue']['withStock'] > 0 and twin['tests']['customerTests'] == 0, twin
+        assert twin['checkout']['simulatedPayment'] and twin['checkout']['shipping'], twin
+        tool = call('/mcp', {'jsonrpc':'2.0','id':3,'method':'tools/call','params':{'name':'merchant.scenario.readiness','arguments':{}}}, attacker)
+        assert tool['result']['structuredContent']['catalogue'] == twin['catalogue'], tool
+        call('/api/agent/scenario-readiness', headers=live, expected=409)
+        call('/api/agent/scenario-readiness', headers={'x-tenant': range_}, expected=401)
+        attack = call('/api/agent/scenario-probes', {}, attacker, method='POST')
+        outcomes = {probe['id']: probe['outcome'] for probe in attack['probes']}
+        assert list(outcomes) == ['negative_quantity','unknown_product','excess_quantity','stale_cart','price_injection','guessed_cart','forged_total','stale_review','replayed_order'], attack
+        assert attack['summary'] == {'held': 9, 'breached': 0, 'review': 0} and attack['synthetic'] is True, attack
+        assert not any('token' in json.dumps(probe).lower() for probe in attack['probes']), 'Cart capabilities must not enter the report'
+        assert int(sql(f"SELECT count(*) FROM orders WHERE tenant='{range_}'")) == stage_orders + 1, 'Only the honest replayed order may exist'
+        assert sql(untouched) == live_before and not calls, 'Attack tests must not change the live shop or call a model'
+        call('/api/agent/scenario-probes', {}, live, 409, method='POST')
+        call('/api/agent/scenario-probes', {}, {'x-tenant': range_}, 401, method='POST')
+        tool = call('/mcp', {'jsonrpc':'2.0','id':2,'method':'tools/call','params':{'name':'merchant.scenario.probe','arguments':{}}}, attacker)
+        assert tool['result']['structuredContent']['summary']['breached'] == 0, tool
+        print('PASS nine scripted cart/checkout attacks refused in the sandbox; live shop, model and anonymous callers untouched', flush=True)
+        # An imported catalogue starts without stock: the twin must say so instead of letting tests fail silently.
+        sql(f"UPDATE products SET stock=0 WHERE tenant='{range_}'")
+        empty = call('/api/agent/scenario-readiness', headers=attacker)
+        assert empty['ready'] is False and empty['blockers'] == ['no_stock'] and empty['catalogue']['withStock'] == 0, empty
+        call('/api/agent/scenario-probes', {}, attacker, 409, method='POST')
+        assert sql(untouched) == live_before, 'Twin readiness must not change the live shop'
+        print('PASS twin readiness: ready copy, HTTP/MCP parity, zero-stock blocker, live and anonymous callers denied', flush=True)
         body = {'requestId': suffix, 'title': 'Lamp purchase', 'instruction': 'Buy one lamp within your budget.', 'inference': {'provider': 'openai'}, 'profiles': [{'id': 'budget', 'name': 'Budget shopper', 'goal': 'Buy a lamp', 'budgetMinor': 100000, 'locale': 'en-GB', 'country': 'DE'}]}
         call('/api/agent/scenarios', body, scoped, 400)
         call('/api/agent/scenarios', body, live, 409)

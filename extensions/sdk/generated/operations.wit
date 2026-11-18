@@ -1708,6 +1708,8 @@ interface inputs {
   merchant-scenario-create: func(input: merchant-scenario-create-input) -> result<string, string>;
   merchant-scenario-status: func(input: merchant-scenario-status-input) -> result<string, string>;
   merchant-scenario-list: func(input: string) -> result<string, string>;
+  merchant-scenario-readiness: func(input: string) -> result<string, string>;
+  merchant-scenario-probe: func(input: string) -> result<string, string>;
   merchant-apps-search: func(input: merchant-apps-search-input) -> result<string, string>;
   merchant-apps-read: func(input: merchant-apps-read-input) -> result<string, string>;
   merchant-agents-status: func(input: string) -> result<string, string>;
@@ -1728,6 +1730,7 @@ interface inputs {
   knowledge-experiment-report: func(input: knowledge-experiment-report-input) -> result<string, string>;
   catalog-facts: func(input: catalog-facts-input) -> result<string, string>;
   knowledge-autonomy-apply: func(input: knowledge-autonomy-apply-input) -> result<string, string>;
+  knowledge-autonomy-status: func(input: string) -> result<string, string>;
   knowledge-claims: func(input: knowledge-claims-input) -> result<string, string>;
   knowledge-claim-propose: func(input: knowledge-claim-propose-input) -> result<string, string>;
   knowledge-claim-review: func(input: knowledge-claim-review-input) -> result<string, string>;

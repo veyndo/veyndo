@@ -40,6 +40,8 @@ jobs:
       - name: Verify production Rust image compile-time inputs and negative control
         run: python3 scripts/testing/image_context.py
       - run: python3 scripts/testing/documentation_hygiene.py
+      - name: Check roadmap page, README line and claimed stages against the one source
+        run: python3 scripts/roadmap.py --check
       - name: Check exact source inventory before compiling or integration tests
         run: python3 scripts/testing/source_inventory.py
       - name: Check reviewed source and build inputs before compiling

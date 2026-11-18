@@ -58,6 +58,8 @@ pub(crate) static OPERATIONS: LazyLock<Vec<Operation>> = LazyLock::new(|| {
                 || name == "merchant.run.status"
                 || name == "merchant.scenario.status"
                 || name == "merchant.scenario.list"
+                || name == "merchant.scenario.readiness"
+                || name == "knowledge.autonomy.status"
                 || name == "merchant.agents.status"
                 || [
                     "merchant.payment.details",

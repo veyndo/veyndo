@@ -13,7 +13,12 @@ export type Corridor = {
 };
 export type Policy = {
   corridors: Corridor[];
-  autonomy: { enabled: boolean; maxChangeBps: number; productsPerDay: number };
+  autonomy: {
+    enabled: boolean;
+    maxChangeBps: number;
+    productsPerDay: number;
+    maxDailyExposureMinor?: number | null;
+  };
 };
 export type Settings = Config & { aiPolicy?: Policy };
 export const defaultPolicy: Policy = {
@@ -29,6 +34,10 @@ export function validPolicy(policy: Policy, settings: Settings) {
     Number.isInteger(a.productsPerDay) &&
     a.productsPerDay >= 1 &&
     a.productsPerDay <= 100 &&
+    (a.maxDailyExposureMinor == null ||
+      (Number.isSafeInteger(a.maxDailyExposureMinor) &&
+        a.maxDailyExposureMinor >= 0 &&
+        a.maxDailyExposureMinor <= 1e12)) &&
     policy.corridors.length <= 1000 &&
     new Set(policy.corridors.map((r) => r.productId)).size ===
       policy.corridors.length &&

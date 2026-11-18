@@ -2,6 +2,51 @@
 /** Native input DTOs; opaque JSON fields remain explicit. */
 import type { JsonValue } from "./value";
 export interface Inputs16 {
+  "b2b.list.apply": {
+    cartRevision?: number;
+    companyId?: string;
+    customerId?: string;
+    data?: JsonValue;
+    id?: string;
+    lines?: Array<{ quantity: number; sku: string }>;
+    message?: string;
+    parentId?: string | null;
+    productIds?: Array<string>;
+    purchaseOrder?: string;
+    revision?: number;
+    state?: "approved" | "rejected";
+    unitId?: string;
+  };
+  "b2b.quick-order": {
+    cartRevision?: number;
+    companyId?: string;
+    customerId?: string;
+    data?: JsonValue;
+    id?: string;
+    lines?: Array<{ quantity: number; sku: string }>;
+    message?: string;
+    parentId?: string | null;
+    productIds?: Array<string>;
+    purchaseOrder?: string;
+    revision?: number;
+    state?: "approved" | "rejected";
+    unitId?: string;
+  };
+  "b2b.companies": {
+    cartRevision?: number;
+    companyId?: string;
+    customerId?: string;
+    data?: JsonValue;
+    id?: string;
+    lines?: Array<{ quantity: number; sku: string }>;
+    message?: string;
+    parentId?: string | null;
+    productIds?: Array<string>;
+    purchaseOrder?: string;
+    revision?: number;
+    state?: "approved" | "rejected";
+    unitId?: string;
+  };
   "b2b.company": {
     cartRevision?: number;
     companyId?: string;
@@ -137,12 +182,4 @@ export interface Inputs16 {
     state?: "approved" | "rejected";
     unitId?: string;
   };
-  "automation.compare_history": {
-    condition: JsonValue;
-    flowId: string;
-    limit: number;
-    revision: number;
-    ruleId: string;
-  };
-  "automation.validate_flow": { data: JsonValue; id: string; revision: number };
 }

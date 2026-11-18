@@ -53,6 +53,42 @@ Studio and the public Lumen storefront responded on their existing origins.
   promotion remain open. [Measured workloads](benchmarks.md) ·
   [Component tasks](commerce-components.md).
 
+## Autopilot levels and daily limit
+
+**Shop knowledge → AI boundaries** opens with an Autopilot panel: prices can be
+on level 0 (suggests) or level 1 (acts within the budget); every other area
+stays on level 0. Level 1 has a new optional daily limit for price reductions,
+counted as reduction times current stock. Locally the autopilot reduced one
+price inside a 200 EUR limit and was refused a further reduction that would
+have counted 210 EUR. The provider suite checks the exact boundary. There is no
+automatic rollback, and nothing is deployed to the hosted pilot.
+[Guide](knowledge-workspace.md#autopilot-levels-and-the-daily-limit) ·
+[Local record](evidence/autopilot-2026-11-18.md).
+
+## Shop twin readiness
+
+The customer simulator opens with a **Shop twin** panel for the selected private
+sandbox. It reads the number of purchasable items, how many have stock, whether
+simulated payment and shipping are active for the first delivery country, and
+how many customer tests were saved. In local Studio a copy of the demo shop was
+reported as ready, and a copy with all stock set to zero as not ready with the
+open step and its repair link. No catalog import was run for this record, and
+nothing is deployed to the hosted pilot.
+[Guide](shop-twin.md) · [Local record](evidence/shop-twin-2026-11-18.md).
+
+## Attack test in the customer simulator
+
+The customer simulator has a second, model-free test. Nine scripted attackers
+try negative and excessive quantities, a stale cart, an own price, a guessed
+cart key, a forged total, an outdated review and a repeated order against a
+private sandbox. In local Studio all nine were refused and the repeated order
+produced one order with one stock reduction. The registered scenario suite
+checks the same result in an isolated database and that the live shop is
+unchanged. This is not deployed to the hosted pilot, results are not saved with
+the release review, and it is not a security certification.
+[Guide](customer-scenarios.md#attack-test) ·
+[Local record](evidence/attack-test-2026-11-18.md) · [Roadmap](roadmap.md).
+
 ## Product and category layouts in Studio
 
 **Shop design** opens channel layouts for product pages and categories. Move

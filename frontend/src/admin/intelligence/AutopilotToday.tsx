@@ -1,0 +1,177 @@
+/** Read-only autopilot summary: level per area, daily limits and today's native use; settings stay with the guardrail editor. */
+import { useEffect, useState } from "react";
+import type { RequestFn } from "../shell/studio-types";
+import { useLocale } from "../../shared/i18n/i18n";
+import Icon from "../../shared/ui/Icon";
+import { useAutopilotText, type AutopilotWord } from "./autopilot-i18n";
+import "../styles/autopilot.css";
+export type AutopilotStatus = {
+  level: number;
+  currency: string;
+  scale: number;
+  productsPerDay: number;
+  productsUsed: number;
+  maxDailyExposureMinor: number | null;
+  exposureMinor: number;
+  changes: {
+    productId: string;
+    name: string;
+    currency: string;
+    baselineMinor: number;
+    currentMinor: number;
+    stock: number;
+    exposureMinor: number;
+    counted: boolean;
+  }[];
+};
+const fixedAreas: AutopilotWord[] = [
+  "areaStock",
+  "areaContent",
+  "areaDesign",
+  "areaRules",
+];
+export default function AutopilotToday({
+  request,
+  revision,
+}: {
+  request: RequestFn;
+  revision?: number;
+}) {
+  const t = useAutopilotText(),
+    { locale } = useLocale();
+  const [value, setValue] = useState<AutopilotStatus>(),
+    [error, setError] = useState("");
+  useEffect(() => {
+    let active = true;
+    setError("");
+    request("/api/intelligence/autonomy.status", {}, "POST")
+      .then((next) => {
+        const status = next as Partial<AutopilotStatus> | undefined;
+        if (active)
+          setValue(
+            Array.isArray(status?.changes) && status.currency
+              ? (status as AutopilotStatus)
+              : undefined,
+          );
+      })
+      .catch((e) => {
+        if (active) {
+          setValue(undefined);
+          setError((e as Error).message);
+        }
+      });
+    return () => {
+      active = false;
+    };
+  }, [request, revision]);
+  if (error)
+    return (
+      <p className="knowledge-alert" role="alert">
+        {error}
+      </p>
+    );
+  if (!value) return <p role="status">{t("loading")}</p>;
+  const money = (minor: number, currency = value.currency) => {
+    const amount = minor / 10 ** value.scale;
+    try {
+      return new Intl.NumberFormat(locale, {
+        style: "currency",
+        currency,
+      }).format(amount);
+    } catch {
+      return `${amount.toFixed(value.scale)} ${currency}`;
+    }
+  };
+  const share = (used: number, limit: number) =>
+    `${Math.min(100, limit > 0 ? Math.round((used / limit) * 100) : 0)}%`;
+  const active = value.level > 0;
+  return (
+    <section className="autopilot">
+      <header>
+        <span className="autopilot-emblem">
+          <Icon name="gauge" size={20} />
+        </span>
+        <div>
+          <h3>{t("title")}</h3>
+          <p>{t("intro")}</p>
+        </div>
+      </header>
+      <ul className="autopilot-areas">
+        <li data-active={active}>
+          <strong>{t("areaPrices")}</strong>
+          <span>{t(active ? "level1" : "level0")}</span>
+        </li>
+        {fixedAreas.map((area) => (
+          <li key={area}>
+            <strong>{t(area)}</strong>
+            <span>{t("level0")}</span>
+          </li>
+        ))}
+      </ul>
+      <p className="autopilot-note">{t("fixed")}</p>
+      {active && (
+        <div className="autopilot-today">
+          <h4>{t("today")}</h4>
+          <div className="autopilot-meter">
+            <span>
+              {t("products", {
+                used: value.productsUsed,
+                limit: value.productsPerDay,
+              })}
+            </span>
+            <i>
+              <b
+                style={{
+                  width: share(value.productsUsed, value.productsPerDay),
+                }}
+              />
+            </i>
+          </div>
+          <div className="autopilot-meter">
+            <span>
+              {value.maxDailyExposureMinor == null
+                ? t("exposureOpen", { used: money(value.exposureMinor) })
+                : t("exposure", {
+                    used: money(value.exposureMinor),
+                    limit: money(value.maxDailyExposureMinor),
+                  })}
+            </span>
+            {value.maxDailyExposureMinor != null && (
+              <i>
+                <b
+                  style={{
+                    width: share(
+                      value.exposureMinor,
+                      value.maxDailyExposureMinor,
+                    ),
+                  }}
+                />
+              </i>
+            )}
+          </div>
+          <p className="autopilot-note">{t("exposureHint")}</p>
+          {value.changes.length ? (
+            <ul className="autopilot-changes">
+              {value.changes.map((change) => (
+                <li key={change.productId}>
+                  <strong>{change.name}</strong>
+                  <span>
+                    {t("change", {
+                      from: money(change.baselineMinor, change.currency),
+                      to: money(change.currentMinor, change.currency),
+                      stock: change.stock,
+                      amount: money(change.exposureMinor, change.currency),
+                    })}
+                    {!change.counted && ` · ${t("otherCurrency")}`}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="autopilot-note">{t("none")}</p>
+          )}
+        </div>
+      )}
+    </section>
+  );
+}
