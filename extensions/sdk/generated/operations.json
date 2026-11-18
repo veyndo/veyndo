@@ -3792,6 +3792,16 @@
       "readOnly": false
     },
     {
+      "description": "Prefill an experiment preregistration from the shop's live payment figures; saves nothing",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {},
+        "type": "object"
+      },
+      "name": "knowledge.experiment.suggest",
+      "readOnly": true
+    },
+    {
       "description": "Read delayed live-cash outcomes with conservative final-only inference",
       "inputSchema": {
         "additionalProperties": false,

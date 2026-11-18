@@ -3521,8 +3521,8 @@
     },
     "src/capabilities/catalog.rs": {
       "status": "unproved",
-      "sha256": "1b678013f411ec58a8e9de543d179459b913639803c60938bf4224424f538921",
-      "review": "Completion of stages 1-3: attack_store.rs saves applied actor-private report rows and reads the latest with release-digest freshness; commerce/test_stock.rs sets sandbox-only test stock through revision, index sync and product event; cognition/autonomy_revert.rs restores day baselines by request and from the agent worker lane when exposure exceeds the limit, skipping prices changed since; no extracted policy changed; scenario and provider suites cover each path"
+      "sha256": "961654d203da7ca449e449993bf02e8637d13c49f44cca1f104c3f6991b6a873",
+      "review": "Self-running experiments: Design gains an optional immutable automation flag pair; experiments/automation.rs adds a read-only suggestion from live payment figures and worker steps that repeat the manual finish transition, call the existing report owner and record a decision, fixing the treatment layout mode only when the unchanged extracted experiment_result_admissible reports a proved uplift; cognitive_experiments suite covers kept, seeded published and manual cases"
     },
     "src/capabilities/contract.rs": {
       "status": "unproved",
@@ -3541,8 +3541,8 @@
     },
     "src/capabilities/registry.rs": {
       "status": "unproved",
-      "sha256": "a0e20606135d2823b099f26fb9757e51fbfc19ec2d61ecbbaae0bef1cc2227c3",
-      "review": "Completion of stages 1-3: attack_store.rs saves applied actor-private report rows and reads the latest with release-digest freshness; commerce/test_stock.rs sets sandbox-only test stock through revision, index sync and product event; cognition/autonomy_revert.rs restores day baselines by request and from the agent worker lane when exposure exceeds the limit, skipping prices changed since; no extracted policy changed; scenario and provider suites cover each path"
+      "sha256": "ee3591361c51945ed523f4c4f8f6f1943b2489f26180db791717af7b02945b62",
+      "review": "Self-running experiments: Design gains an optional immutable automation flag pair; experiments/automation.rs adds a read-only suggestion from live payment figures and worker steps that repeat the manual finish transition, call the existing report owner and record a decision, fixing the treatment layout mode only when the unchanged extracted experiment_result_admissible reports a proved uplift; cognitive_experiments suite covers kept, seeded published and manual cases"
     },
     "src/capabilities/schema.rs": {
       "status": "unproved",
@@ -3756,23 +3756,28 @@
     },
     "src/cognition/contracts.rs": {
       "status": "reviewed-binding",
-      "sha256": "8f76e424495b81ccb3c924dc18a4eff27cb69f394ae9ab4b936ff6ed0dea5447",
-      "review": "Completion of stages 1-3: attack_store.rs saves applied actor-private report rows and reads the latest with release-digest freshness; commerce/test_stock.rs sets sandbox-only test stock through revision, index sync and product event; cognition/autonomy_revert.rs restores day baselines by request and from the agent worker lane when exposure exceeds the limit, skipping prices changed since; no extracted policy changed; scenario and provider suites cover each path"
+      "sha256": "6ac02c6c365a1272292c6f098525a5eea412e561ae247b6ca63f4a5aa6480d41",
+      "review": "Self-running experiments: Design gains an optional immutable automation flag pair; experiments/automation.rs adds a read-only suggestion from live payment figures and worker steps that repeat the manual finish transition, call the existing report owner and record a decision, fixing the treatment layout mode only when the unchanged extracted experiment_result_admissible reports a proved uplift; cognitive_experiments suite covers kept, seeded published and manual cases"
     },
     "src/cognition/evidence.rs": {
       "status": "unproved",
       "sha256": "ade8a8f68965833a8d78d6045683dece18d7f44ea23fcf234310df6f987f0a92",
       "review": "Tenant roles and current grants independently reviewed; owner/retained-override/acceptance races repaired and PostgreSQL-blocked regressions passed; PII and Flow projection boundaries documented; B2B feature settings delegate shared CAS/history and preserve financial guards. Existing extracted policies unchanged; SQL/async/UI remain reviewed adapters, not full proofs."
     },
+    "src/cognition/experiments/automation.rs": {
+      "status": "unproved",
+      "sha256": "3346f880938562d2cc089a51f05cfcecb4eca3963a8d168199b8f0f729f27bf2",
+      "review": "Self-running experiments: Design gains an optional immutable automation flag pair; experiments/automation.rs adds a read-only suggestion from live payment figures and worker steps that repeat the manual finish transition, call the existing report owner and record a decision, fixing the treatment layout mode only when the unchanged extracted experiment_result_admissible reports a proved uplift; cognitive_experiments suite covers kept, seeded published and manual cases"
+    },
     "src/cognition/experiments/mod.rs": {
       "status": "unproved",
-      "sha256": "dc052b1f2b7385046afe5c89268abb10e90eb3968de468aecb0e3cb335f861a1",
-      "review": "Reviewed bounded tenant-scoped embedding intake/model-generation cursors, revision/lease fencing and fair vector retry drain; pooled geometry-checked Qdrant hydration and admitted reranking; current-right read tools, structured protocols and SSE transport; exact source quotation/review/public compilation/signatures; transactional price corridors and non-compounding daily autonomy; consent-bound assignments/preferences and delayed cached native-payment readout including stop/withdrawal invalidation. New migration RLS/composite links and extracted predicate consumers reviewed. Native HTTP/PG/Qdrant/provider/UI regressions cover contracts; semantic quality, statistical assumptions, SQL, network and surrounding Rust remain unproved."
+      "sha256": "f0fe0bc1895cb4ee2b95849e3f3db9648155f15eedc4e46d5ab5c4b57df3b5d9",
+      "review": "Self-running experiments: Design gains an optional immutable automation flag pair; experiments/automation.rs adds a read-only suggestion from live payment figures and worker steps that repeat the manual finish transition, call the existing report owner and record a decision, fixing the treatment layout mode only when the unchanged extracted experiment_result_admissible reports a proved uplift; cognitive_experiments suite covers kept, seeded published and manual cases"
     },
     "src/cognition/experiments/model.rs": {
       "status": "reviewed-binding",
-      "sha256": "52498b85d648fb4bf43822764e86ebed3df87dc381b32d16c4c81a1f34021e22",
-      "review": "Reviewed bounded tenant-scoped embedding intake/model-generation cursors, revision/lease fencing and fair vector retry drain; pooled geometry-checked Qdrant hydration and admitted reranking; current-right read tools, structured protocols and SSE transport; exact source quotation/review/public compilation/signatures; transactional price corridors and non-compounding daily autonomy; consent-bound assignments/preferences and delayed cached native-payment readout including stop/withdrawal invalidation. New migration RLS/composite links and extracted predicate consumers reviewed. Native HTTP/PG/Qdrant/provider/UI regressions cover contracts; semantic quality, statistical assumptions, SQL, network and surrounding Rust remain unproved."
+      "sha256": "493ec08961b6e40d558af1859f475db0942d872e409601e6bef55c04bbb7946a",
+      "review": "Self-running experiments: Design gains an optional immutable automation flag pair; experiments/automation.rs adds a read-only suggestion from live payment figures and worker steps that repeat the manual finish transition, call the existing report owner and record a decision, fixing the treatment layout mode only when the unchanged extracted experiment_result_admissible reports a proved uplift; cognitive_experiments suite covers kept, seeded published and manual cases"
     },
     "src/cognition/experiments/report.rs": {
       "status": "unproved",
@@ -5531,8 +5536,8 @@
     },
     "src/workers.rs": {
       "status": "unproved",
-      "sha256": "c7ac8b2424804cf6072469431a5d4593fffa3c583299ef967203c00161c9121f",
-      "review": "Completion of stages 1-3: attack_store.rs saves applied actor-private report rows and reads the latest with release-digest freshness; commerce/test_stock.rs sets sandbox-only test stock through revision, index sync and product event; cognition/autonomy_revert.rs restores day baselines by request and from the agent worker lane when exposure exceeds the limit, skipping prices changed since; no extracted policy changed; scenario and provider suites cover each path"
+      "sha256": "8795e718c2831b768719e4a8a302b7c2b56564c3b96f44542a211e1684703925",
+      "review": "Self-running experiments: Design gains an optional immutable automation flag pair; experiments/automation.rs adds a read-only suggestion from live payment figures and worker steps that repeat the manual finish transition, call the existing report owner and record a decision, fixing the treatment layout mode only when the unchanged extracted experiment_result_admissible reports a proved uplift; cognitive_experiments suite covers kept, seeded published and manual cases"
     }
   },
   "inputs": {

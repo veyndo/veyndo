@@ -1737,6 +1737,7 @@ interface inputs {
   knowledge-experiment-start: func(input: knowledge-experiment-start-input) -> result<string, string>;
   knowledge-experiment-stop: func(input: knowledge-experiment-stop-input) -> result<string, string>;
   knowledge-experiment-finish: func(input: knowledge-experiment-finish-input) -> result<string, string>;
+  knowledge-experiment-suggest: func(input: string) -> result<string, string>;
   knowledge-experiment-report: func(input: knowledge-experiment-report-input) -> result<string, string>;
   catalog-facts: func(input: catalog-facts-input) -> result<string, string>;
   knowledge-autonomy-apply: func(input: knowledge-autonomy-apply-input) -> result<string, string>;

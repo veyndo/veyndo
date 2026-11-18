@@ -53,6 +53,17 @@ Studio and the public Lumen storefront responded on their existing origins.
   promotion remain open. [Measured workloads](benchmarks.md) ·
   [Component tasks](commerce-components.md).
 
+## Experiments that run themselves
+
+**Shop knowledge → Experiments** can prefill an experiment from the shop's live
+payments and has two switches: finish and read out by itself, and adopt a proved
+layout by itself. Locally, with the experiment's clock moved past its settlement
+period, the worker completed it and recorded "kept" within about half a minute.
+No real experiment ran: the test shop has no live payments, and the proved-uplift
+path was exercised only with a seeded readout in the test suite.
+[Guide](knowledge-workspace.md#experiments-that-run-themselves) ·
+[Local record](evidence/self-running-experiments-2026-11-18.md).
+
 ## Roadmap stages 1 to 3 completed locally
 
 Attack tests are now saved and shown beside the release review. A real generic

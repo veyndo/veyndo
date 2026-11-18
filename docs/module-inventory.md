@@ -270,6 +270,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/cognition/context.rs](../src/cognition/context.rs) | Bounded localized catalog retrieval before inference; full catalog size never expands the prompt. |
 | [src/cognition/contracts.rs](../src/cognition/contracts.rs) | Evidence APIs and MCP contracts dispatch into one authorized owner; the claim compiler rejects free prose. |
 | [src/cognition/evidence.rs](../src/cognition/evidence.rs) | Source-bound claim lifecycle on the existing knowledge relation ledger; no model text becomes a confirmed fact automatically. |
+| [src/cognition/experiments/automation.rs](../src/cognition/experiments/automation.rs) | Experiment suggestions from native figures, and worker steps that finish, read out and apply an approved experiment without further clicks. |
 | [src/cognition/experiments/mod.rs](../src/cognition/experiments/mod.rs) | Controlled experiments use the existing storefront layout consumer and authoritative payment ledger. |
 | [src/cognition/experiments/model.rs](../src/cognition/experiments/model.rs) | Preregistered fixed-horizon experiment parameters and conservative bounded-outcome inference. |
 | [src/cognition/experiments/report.rs](../src/cognition/experiments/report.rs) | Delayed final experiment readout is derived from the existing live capture/refund ledger, never demo rewards. |
@@ -953,6 +954,7 @@ This lists every checked-in source module in these roots, including files with n
 | [frontend/src/admin/environments/release-tests.css](../frontend/src/admin/environments/release-tests.css) | Existing release workbench typography with bounded, responsive test controls. |
 | [frontend/src/admin/intelligence/AutopilotToday.tsx](../frontend/src/admin/intelligence/AutopilotToday.tsx) | Read-only autopilot summary: level per area, daily limits and today's native use; settings stay with the guardrail editor. |
 | [frontend/src/admin/intelligence/EvidenceReview.tsx](../frontend/src/admin/intelligence/EvidenceReview.tsx) | Review source-bound candidates through shared HTTP/MCP contracts; changed sources block publication. |
+| [frontend/src/admin/intelligence/ExperimentAutomation.tsx](../frontend/src/admin/intelligence/ExperimentAutomation.tsx) | Suggestion card, automation switches and decision note for experiments; the lifecycle and readout stay with the native owner. |
 | [frontend/src/admin/intelligence/ExperimentStudio.tsx](../frontend/src/admin/intelligence/ExperimentStudio.tsx) | Immutable experiment designs and lifecycle controls share the core HTTP/MCP owner and current settings rights. |
 | [frontend/src/admin/intelligence/ExternalKnowledge.tsx](../frontend/src/admin/intelligence/ExternalKnowledge.tsx) | Private connected-app evidence browser shows active-source provenance without exposing it to shoppers. |
 | [frontend/src/admin/intelligence/GuardrailProductCard.tsx](../frontend/src/admin/intelligence/GuardrailProductCard.tsx) | Currency-aware editing of one native product corridor, with honest product/configuration links. |
@@ -973,6 +975,7 @@ This lists every checked-in source module in these roots, including files with n
 | [frontend/src/admin/intelligence/behavior/BehaviorJourney.tsx](../frontend/src/admin/intelligence/behavior/BehaviorJourney.tsx) | Authorized journey timeline links to native product, customer and order views, through permission-bound native CRM references. |
 | [frontend/src/admin/intelligence/behavior/BehaviorView.tsx](../frontend/src/admin/intelligence/behavior/BehaviorView.tsx) | Behavioral workspace makes consent, channel/window, guest journeys and semantic projections inspectable. |
 | [frontend/src/admin/intelligence/behavior/types.ts](../frontend/src/admin/intelligence/behavior/types.ts) | Bounded private read models; aggregate users and customer identities have separate rights. |
+| [frontend/src/admin/intelligence/experiment-automation-i18n.ts](../frontend/src/admin/intelligence/experiment-automation-i18n.ts) | Vocabulary for experiment suggestions and automation in EN/DE/FR/ES; figures are parameters. |
 | [frontend/src/admin/intelligence/guardrail-model.ts](../frontend/src/admin/intelligence/guardrail-model.ts) | Native policy shape and currency conversion only; admission remains in the Rust commerce owner. |
 | [frontend/src/admin/intelligence/knowledge-types.ts](../frontend/src/admin/intelligence/knowledge-types.ts) | Typed knowledge read models preserve source ownership, revisions, sampling and privacy boundaries. |
 | [frontend/src/admin/legal/ConsumerRequests.tsx](../frontend/src/admin/legal/ConsumerRequests.tsx) | Permission-scoped consumer request queue and optimistic, recorded review actions. |

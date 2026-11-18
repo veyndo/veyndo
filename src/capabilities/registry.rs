@@ -45,6 +45,7 @@ pub(crate) static OPERATIONS: LazyLock<Vec<Operation>> = LazyLock::new(|| {
                     | "knowledge.claims"
                     | "knowledge.experiments"
                     | "knowledge.experiment.report"
+                    | "knowledge.experiment.suggest"
                     | "knowledge.search"
                     | "knowledge.external"
                     | "knowledge.workspace"

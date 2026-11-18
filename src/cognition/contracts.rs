@@ -144,7 +144,7 @@ pub(crate) fn router() -> Router<App> {
 
 fn experiments_schema(name: &str) -> Option<Value> {
     let props = match name {
-        "knowledge.experiments" => json!({}),
+        "knowledge.experiments" | "knowledge.experiment.suggest" => json!({}),
         "knowledge.experiment.create" => {
             json!({"design":{"type":"object"},"approve":{"type":"boolean"}})
         }

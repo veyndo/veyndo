@@ -113,6 +113,10 @@ const COGNITIVE: &[(&str, &str)] = &[
         "Close enrollment after the preregistered horizon",
     ),
     (
+        "knowledge.experiment.suggest",
+        "Prefill an experiment preregistration from the shop's live payment figures; saves nothing",
+    ),
+    (
         "knowledge.experiment.report",
         "Read delayed live-cash outcomes with conservative final-only inference",
     ),

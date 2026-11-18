@@ -1,5 +1,13 @@
 # Changelog
 
+## Experiments that run themselves
+
+- Suggest a layout experiment from the shop's live payments of the last 30 days,
+  with its basis and warnings. Nothing is saved until you register it.
+- Let an approved experiment finish at its horizon and save its final readout
+  after the settlement period without further clicks. Optionally adopt a proved
+  layout automatically; without proof the shop stays as it is.
+
 ## Complete the attack test, shop twin and autopilot
 
 - Save every attack test, show the last one again in the simulator and beside

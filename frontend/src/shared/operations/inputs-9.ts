@@ -107,7 +107,7 @@ export interface Inputs9 {
     id?: string;
     revision?: number;
   };
+  "knowledge.experiment.suggest": JsonValue;
   "knowledge.experiment.report": { id?: string };
   "catalog.facts": { productId?: string };
-  "knowledge.autonomy.apply": { taskId?: string };
 }

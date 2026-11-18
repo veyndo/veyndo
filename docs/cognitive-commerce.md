@@ -280,6 +280,8 @@ worker in this slice.
 
 ## Controlled experiments and private preferences
 
+An approved experiment can opt into worker automation (`automation.finish`, `automation.apply` in its immutable design): the agent worker lane completes it at the horizon, saves the final readout after settlement and may fix the proved treatment as the shop layout mode. See [the guide](knowledge-workspace.md#experiments-that-run-themselves).
+
 Studio **Shop knowledge → Experiments** creates immutable preregistrations for two
 native layouts, one channel/currency, horizon, settlement delay, minimum arm size,
 outcome cap and fixed CUPED coefficient. Explicit start/stop/finish operations use

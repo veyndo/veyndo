@@ -2,6 +2,16 @@
 /** Native input DTOs; opaque JSON fields remain explicit. */
 import type { JsonValue } from "./value";
 export interface Inputs11 {
+  "merchant.payment": {
+    amountMinor?: number;
+    approve: boolean;
+    captureId?: string;
+    finalCapture?: boolean;
+    id: string;
+    operation:
+      "capture" | "authorize" | "void" | "refund" | "reconcile" | "cancel";
+    requestKey: string;
+  };
   "merchant.payment.details": { id: string };
   "merchant.payment.providers": JsonValue;
   "merchant.payment.onboarding": {
@@ -80,5 +90,4 @@ export interface Inputs11 {
     to?: string | null;
   };
   "studio.workspace.work.read": JsonValue;
-  "studio.workspace.read": JsonValue;
 }

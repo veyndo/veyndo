@@ -2,6 +2,7 @@
 /** Native input DTOs; opaque JSON fields remain explicit. */
 import type { JsonValue } from "./value";
 export interface Inputs10 {
+  "knowledge.autonomy.apply": { taskId?: string };
   "knowledge.autonomy.revert": { approve?: boolean; productId?: string };
   "knowledge.autonomy.status": JsonValue;
   "knowledge.claims": { productId?: string };
@@ -53,14 +54,4 @@ export interface Inputs10 {
   };
   "checkout.payment.instructions": { id: string };
   "merchant.payment.instructions": { id: string };
-  "merchant.payment": {
-    amountMinor?: number;
-    approve: boolean;
-    captureId?: string;
-    finalCapture?: boolean;
-    id: string;
-    operation:
-      "capture" | "authorize" | "void" | "refund" | "reconcile" | "cancel";
-    requestKey: string;
-  };
 }
