@@ -5562,8 +5562,8 @@
   },
   "inputs": {
     ".github/workflows/verify.yml": {
-      "sha256": "b3f0352f1472afd7e3ad850e89879d481e62d3c949cee64d932b96283ebe0812",
-      "review": "Scenario attack probes: shopper.rs purchase split into review/accept/complete with unchanged order of native calls; new probes.rs is an unproved read-and-attempt adapter over existing cart/checkout capabilities; agentic_scenarios suite passes with nine refusals and unchanged live shop"
+      "sha256": "ee9adc94376b18b317ccdefc6ebbfada49e9f8999c052be1dd92d4662d9265d7",
+      "review": "Proof coverage page: scripts/formal/coverage_page.py renders docs/proof-coverage.md from the manifest and kernel sources and is checked in the quick lane; no Rust, Lean or policy change"
     },
     "Cargo.lock": {
       "sha256": "4c346075447e7340f0cf7d859a0a50c15ffca513a68b5105921fe41caf6adae2",
@@ -6288,6 +6288,10 @@
     "scripts/formal/conformance.py": {
       "sha256": "6041658e9c332c4fd298d578b3abee7f99d9ef1bbbba7ed42e1ea3ad07ac3e79",
       "review": "Reviewed marketplace money guard consumers and exact properties, cap-neighbour comparison cases, native stock binding and local regressions; external protocols and tax law remain tested unproved boundaries"
+    },
+    "scripts/formal/coverage_page.py": {
+      "sha256": "774da34c086414f337c04c1c2eab7566b781b56022f7d68c82f98491caa50c09",
+      "review": "Proof coverage page: scripts/formal/coverage_page.py renders docs/proof-coverage.md from the manifest and kernel sources and is checked in the quick lane; no Rust, Lean or policy change"
     },
     "scripts/formal/extract.py": {
       "sha256": "18ca3e4ba2989fbef9e1413cf0cc0a726ec21ea8a6bee4a7eed5f06818b14583",

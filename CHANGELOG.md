@@ -1,5 +1,12 @@
 # Changelog
 
+## Proof coverage you can read
+
+- Add the generated handbook page "What is proved, what is reviewed and what is
+  neither": every proved rule with its properties and callers, the share of
+  unproved source files and the money path by area.
+- Check the page against the proof manifest in the required quick check.
+
 ## Poppy discovery file
 
 - Publish `/.well-known/poppy.json` (Personal Agent Protocol 1.0) on every

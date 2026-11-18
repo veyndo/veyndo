@@ -1,10 +1,12 @@
 # What the Lean proofs cover
 
-The current source declares **63 extracted policies used in production Rust paths**
-and **150 named properties**. This is **not a certificate that the entire commerce
-core is correct or bug-free**. The reviewed inventory contains **713 Rust modules**:
-eight extracted policy modules (including the facade), 63 reviewed binding modules,
-one comparison driver and 641 unproved modules. Binding review is not proof of the surrounding modules.
+The current numbers are on the generated page
+[What is proved, what is reviewed and what is neither](proof-coverage.md): every
+proved rule with its properties and callers, the share of unproved source files
+and the state of the money path. That page is rebuilt from the manifest and
+checked in CI, so the figures in this guide that carry a date describe that date
+only. This is **not a certificate that the entire commerce core is correct or
+bug-free**. Binding review is not proof of the surrounding modules.
 The [manifest](../proof/manifest.json) and per-revision CI artifact are authoritative.
 The operational-record exclusion remains part of the generic app release policy.
 The original compatibility experiment and its dated evidence are retained on the

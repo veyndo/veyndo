@@ -149,7 +149,7 @@
     },
     {
       "id": "proof-coverage",
-      "status": "planned",
+      "status": "local",
       "title": {
         "en": "Proof coverage you can read",
         "de": "Beweisabdeckung zum Nachlesen",
@@ -157,14 +157,14 @@
         "es": "Cobertura de pruebas legible"
       },
       "summary": {
-        "en": "A public page shows which rules are machine-proved, which are tested and which are neither, starting with the money path.",
-        "de": "Eine öffentliche Seite zeigt, welche Regeln maschinell bewiesen, welche getestet und welche keins von beidem sind, beginnend beim Geldpfad.",
-        "fr": "Une page publique montre quelles règles sont prouvées par machine, lesquelles sont testées et lesquelles ne le sont pas, en commençant par l’argent.",
-        "es": "Una página pública muestra qué reglas están demostradas por máquina, cuáles probadas y cuáles ninguna, empezando por el dinero."
+        "en": "A generated page lists every machine-proved rule with its properties and callers, the share of unproved source files and the state of the money path. It is rebuilt from the proof manifest and checked on every change.",
+        "de": "Eine generierte Seite listet jede maschinell bewiesene Regel mit ihren Eigenschaften und Aufrufern, den Anteil unbewiesener Quelldateien und den Stand des Geldpfads. Sie entsteht aus dem Beweis-Manifest und wird bei jeder Änderung geprüft.",
+        "fr": "Une page générée liste chaque règle prouvée par machine avec ses propriétés et ses appelants, la part de fichiers non prouvés et l’état du chemin de l’argent. Elle est reconstruite à partir du manifeste de preuves et vérifiée à chaque modification.",
+        "es": "Una página generada lista cada regla demostrada por máquina con sus propiedades y llamadores, la proporción de archivos sin demostrar y el estado de la ruta del dinero. Se reconstruye desde el manifiesto de pruebas y se comprueba en cada cambio."
       },
       "buildsOn": "63 extracted Lean policies, proof manifest, differential checks against original PHP",
-      "guide": null,
-      "evidence": null
+      "guide": "docs/proof-coverage.md",
+      "evidence": "docs/evidence/proof-coverage-2026-11-18.md"
     },
     {
       "id": "sovereign-ai",

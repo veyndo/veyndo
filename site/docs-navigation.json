@@ -218,6 +218,7 @@
       "sources": [
         "docs/production-architecture.md",
         "docs/formal-verification.md",
+        "docs/proof-coverage.md",
         "docs/benchmarks.md",
         "docs/testing.md",
         "docs/architecture.md",

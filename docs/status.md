@@ -53,6 +53,16 @@ Studio and the public Lumen storefront responded on their existing origins.
   promotion remain open. [Measured workloads](benchmarks.md) ·
   [Component tasks](commerce-components.md).
 
+## Proof coverage page
+
+The handbook has a generated page that lists the 64 machine-proved rules with
+their 153 properties and callers, and states that 904 of 988 Rust source files
+(91.5 %) are unproved. On the money path, 15 of 81 files call a proved rule and
+8 still contain floating point. The page is rebuilt from the proof manifest and
+checked on every change. It does not show test coverage per file, and nothing
+new was proved for it.
+[Page](proof-coverage.md) · [Record](evidence/proof-coverage-2026-11-18.md).
+
 ## Poppy discovery file
 
 Every shop with its own configured domain publishes `/.well-known/poppy.json`

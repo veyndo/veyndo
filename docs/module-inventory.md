@@ -2189,6 +2189,7 @@ This lists every checked-in source module in these roots, including files with n
 | [scripts/fashion_demo.py](../scripts/fashion_demo.py) | Actual default signup, fashion variants/media/localization, isolated checkout and restart; synthetic data only. |
 | [scripts/formal/axioms.py](../scripts/formal/axioms.py) | Audit owned proof sources and transitive Lean dependencies; no extra axioms are allowed. |
 | [scripts/formal/conformance.py](../scripts/formal/conformance.py) | Compare compiled Rust production policies with Lean's extracted executable, |
+| [scripts/formal/coverage_page.py](../scripts/formal/coverage_page.py) | Render docs/proof-coverage.md from proof/manifest.json and the kernel sources; --check rejects drift and broken totals. |
 | [scripts/formal/extract.py](../scripts/formal/extract.py) | Fail-closed typed Rust-to-Lean extraction. Trusted boundary: this translator, |
 | [scripts/formal/layout.py](../scripts/formal/layout.py) | Keep domain proof imports, theorem inventory and module sizes closed and reviewable. |
 | [scripts/formal/layout_tests.py](../scripts/formal/layout_tests.py) | Negative controls for missing claims and Rust facade escapes without editing the real source tree. |
