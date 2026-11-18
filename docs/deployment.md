@@ -138,6 +138,12 @@ AI workers need the same key; back it up separately. Do not rotate it without
 re-encrypting existing credentials. `INFERENCE_ALLOW_LOOPBACK` stays false in
 public deployments. [Control-plane behavior and boundaries](platform.md).
 
+Set `SOVEREIGN_AI=true` to admit only self-hosted models for every shop; the
+operator console then shows the mode as fixed. `SOVEREIGN_MODEL_HOSTS` lists
+model hosts you operate under a public name. A cluster-internal model address
+such as `http://ollama:11434` comes from `OLLAMA_URL`, because the console
+accepts only HTTPS endpoints. [Sovereign AI mode](sovereign-ai.md).
+
 ## Optional private experience service
 
 The generic trusted broker, one-use Studio handoff and hosted frontend mount are opt-in. Configure the exact private service issuer/origin and matching runtime-only shared keys; see [experience integration](experience-integration.md). The private service and Storyfront never belong in this public build or repository.

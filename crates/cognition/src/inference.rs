@@ -8,6 +8,7 @@ pub use error::{Admission, InferenceError};
 mod protocol;
 mod request;
 pub mod settings;
+pub mod sovereign;
 mod tools;
 
 #[derive(Clone, Debug, Default, Deserialize, Serialize)]
@@ -33,6 +34,8 @@ pub struct Inference {
     settings: std::sync::Arc<tokio::sync::Mutex<Option<(std::time::Instant, Value)>>>,
     default_provider: Provider,
     disabled: Vec<String>,
+    /// Only the self-operated model route is admitted; see sovereign.rs.
+    sovereign: bool,
     ollama_key: Option<String>,
     http: reqwest::Client,
     ollama: String,
@@ -54,7 +57,8 @@ pub struct Output {
 impl Inference {
     pub fn from_env(http: reqwest::Client) -> Self {
         let key = |name| env::var(name).ok().filter(|s| !s.is_empty());
-        Self {
+        let mut inference = Self {
+            sovereign: false,
             db: None,
             budget_db: None,
             settings: Default::default(),
@@ -71,7 +75,9 @@ impl Inference {
                 .unwrap_or("https://api.anthropic.com/v1".into()),
             anthropic_key: key("ANTHROPIC_API_KEY"),
             anthropic_model: env::var("ANTHROPIC_MODEL").unwrap_or("claude-sonnet-5-5".into()),
-        }
+        };
+        inference.apply_sovereign(false);
+        inference
     }
     pub fn providers(&self) -> Value {
         let current = match self.default_provider {
@@ -94,7 +100,7 @@ impl Inference {
             {"id":"ollama","name":"Local / open weights","model":self.local_model,"configured":!self.disabled.iter().any(|v|v=="ollama")},
             {"id":"openai","name":"OpenAI","model":self.openai_model,"configured":self.openai_key.is_some() && !self.disabled.iter().any(|v|v=="openai")},
             {"id":"anthropic","name":"Claude","model":self.anthropic_model,"configured":self.anthropic_key.is_some() && !self.disabled.iter().any(|v|v=="anthropic")}
-        ],"defaultProvider":self.default_provider,"credentials":"platform-inherited-server-only"})
+        ],"defaultProvider":self.default_provider,"credentials":"platform-inherited-server-only","sovereignty":self.sovereignty()})
     }
     pub async fn structured(
         &self,

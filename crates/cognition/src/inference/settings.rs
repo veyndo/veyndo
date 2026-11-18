@@ -126,6 +126,7 @@ impl Inference {
                 runtime.disabled.push(id.to_string());
             }
         }
+        runtime.apply_sovereign(data["sovereign"] == true);
         Ok(runtime)
     }
     pub async fn public_providers(&self) -> Result<Value, String> {
@@ -144,6 +145,12 @@ impl Inference {
         if r.disabled.iter().any(|v| v == id) {
             return Err("Provider is disabled by the platform operator".into());
         }
+        let endpoint = match id {
+            "openai" => &r.openai_url,
+            "anthropic" => &r.anthropic_url,
+            _ => &r.ollama,
+        };
+        r.admit(id, endpoint)?;
         match id {
             "openai" => Ok((r.openai_url, r.openai_key, r.openai_model)),
             "anthropic" => Ok((r.anthropic_url, r.anthropic_key, r.anthropic_model)),

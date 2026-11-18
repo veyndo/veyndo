@@ -19,6 +19,7 @@ import ExternalKnowledge from "./ExternalKnowledge";
 import ExperimentStudio from "./ExperimentStudio";
 import ScenarioStudio from "../scenarios/ScenarioStudio";
 import GuardrailSettings from "./GuardrailSettings";
+import SovereignAI from "./SovereignAI";
 import EvidenceReview from "./EvidenceReview";
 import MemoryView from "./MemoryView";
 import "../styles/knowledge.css";
@@ -216,11 +217,14 @@ export function KnowledgeView({
                 />
               )}
               {tab === "guardrails" && (
-                <GuardrailSettings
-                  request={request}
-                  products={data.products}
-                  onDirtyChange={setDirty}
-                />
+                <>
+                  <SovereignAI request={request} />
+                  <GuardrailSettings
+                    request={request}
+                    products={data.products}
+                    onDirtyChange={setDirty}
+                  />
+                </>
               )}
               {tab === "observations" && (
                 <>

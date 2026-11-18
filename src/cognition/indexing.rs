@@ -16,6 +16,8 @@ pub(crate) async fn query_embedding(a: &App, t: &str, text: &str) -> Option<Vec<
     if endpoint.is_empty() && env::var("EMBEDDING_BASE_URL").is_err() {
         return None;
     }
+    let target = env::var("EMBEDDING_BASE_URL").unwrap_or(endpoint.clone());
+    a.inference.admit_endpoint(&target).await.ok()?;
     knowledge::embedding(&a.http, &endpoint, key.as_deref(), &model(), text)
         .await
         .ok()
@@ -66,6 +68,7 @@ pub(crate) async fn index_once(a: &App) -> Result<bool> {
     }
     let (url, key, _) = a.inference.connection("ollama").await.unwrap_or_default();
     let url = env::var("EMBEDDING_BASE_URL").unwrap_or(url);
+    a.inference.admit_endpoint(&url).await.map_err(bad)?;
     let key = env::var("EMBEDDING_API_KEY").ok().or(key);
     let texts = sources
         .iter()

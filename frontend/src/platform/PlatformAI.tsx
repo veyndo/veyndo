@@ -4,6 +4,7 @@ import { usePlatformText } from "../shared/i18n/platform-i18n";
 import { useControlText } from "../shared/i18n/control-i18n";
 import {
   platformRequest as request,
+  PlatformError,
   type AISettings,
   type AIProvider,
 } from "./platform-api";
@@ -34,7 +35,8 @@ export default function PlatformAI({ token }: { token: string }) {
     c = useControlText();
   const [data, setData] = useState<AISettings>(),
     [providers, setProviders] = useState(defaults),
-    [selected, setSelected] = useState("ollama");
+    [selected, setSelected] = useState("ollama"),
+    [sovereign, setSovereign] = useState(false);
   const [keys, setKeys] = useState<Record<string, string>>({}),
     [clear, setClear] = useState<Record<string, boolean>>({}),
     [busy, setBusy] = useState(false),
@@ -52,6 +54,7 @@ export default function PlatformAI({ token }: { token: string }) {
         ]),
       ),
     );
+    setSovereign(v.settings.sovereign === true);
     setKeys({});
     setClear({});
   };
@@ -79,7 +82,7 @@ export default function PlatformAI({ token }: { token: string }) {
           "/api/platform/ai",
           {
             revision: data.revision,
-            settings: { defaultProvider: selected, providers },
+            settings: { defaultProvider: selected, providers, sovereign },
             keys,
             clearKeys: clear,
           },
@@ -87,8 +90,12 @@ export default function PlatformAI({ token }: { token: string }) {
         ),
       );
       setMessage(c("saved"));
-    } catch {
-      setMessage(t("retry"));
+    } catch (e) {
+      setMessage(
+        e instanceof PlatformError && e.status === 422
+          ? c("sovereignRefused")
+          : t("retry"),
+      );
     } finally {
       setBusy(false);
     }
@@ -106,6 +113,24 @@ export default function PlatformAI({ token }: { token: string }) {
           void save();
         }}
       >
+        <label className="platform-checkbox">
+          <input
+            type="checkbox"
+            checked={
+              sovereign || !!data?.effective?.sovereignty?.lockedByDeployment
+            }
+            disabled={!!data?.effective?.sovereignty?.lockedByDeployment}
+            onChange={(e) => setSovereign(e.target.checked)}
+          />
+          {c("sovereign")}
+        </label>
+        <p className="platform-note">
+          {c(
+            data?.effective?.sovereignty?.lockedByDeployment
+              ? "sovereignLocked"
+              : "sovereignHint",
+          )}
+        </p>
         <label>
           {c("defaultProvider")}
           <select

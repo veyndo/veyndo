@@ -653,6 +653,7 @@ This lists every checked-in source module in these roots, including files with n
 | [crates/cognition/src/inference/request.rs](../crates/cognition/src/inference/request.rs) | One provider request owns native wire translation, bounded model admission and network egress. |
 | [crates/cognition/src/inference/schema.rs](../crates/cognition/src/inference/schema.rs) | Provider wire adaptation for strict fixed-object schemas; dynamic JSON is encoded only on the model wire and restored before domain validation. |
 | [crates/cognition/src/inference/settings.rs](../crates/cognition/src/inference/settings.rs) | Shared operator settings; AES-GCM secrets are never part of merchant/operator read responses. |
+| [crates/cognition/src/inference/sovereign.rs](../crates/cognition/src/inference/sovereign.rs) | Sovereign mode: one switch that admits only the self-operated model route and reports where each model call goes. |
 | [crates/cognition/src/inference/tests.rs](../crates/cognition/src/inference/tests.rs) | Provider response contracts, strict schemas and truncation rejection. |
 | [crates/cognition/src/inference/tools/request.rs](../crates/cognition/src/inference/tools/request.rs) | Provider-native messages and correlated tool results, including opaque reasoning continuation. |
 | [crates/cognition/src/inference/tools/response.rs](../crates/cognition/src/inference/tools/response.rs) | Fail-closed normalization of bounded calls; malformed, truncated or unknown operations never execute. |
@@ -976,6 +977,7 @@ This lists every checked-in source module in these roots, including files with n
 | [frontend/src/admin/intelligence/MemoryView.tsx](../frontend/src/admin/intelligence/MemoryView.tsx) | Durable co-purchase evidence and revision-bound merchant decisions, with simulation labels and explicit confirmation. |
 | [frontend/src/admin/intelligence/MerchantSourceIntake.tsx](../frontend/src/admin/intelligence/MerchantSourceIntake.tsx) | Conversation intake reuses the real private versioned source editor and existing upload API. |
 | [frontend/src/admin/intelligence/SourceEditor.tsx](../frontend/src/admin/intelligence/SourceEditor.tsx) | Single-language source editor with inherited fields, product lookup and private-first API/file ingestion. |
+| [frontend/src/admin/intelligence/SovereignAI.tsx](../frontend/src/admin/intelligence/SovereignAI.tsx) | Read-only sovereign AI report: whether the mode is on and which host every model route uses; the operator owns the switch. |
 | [frontend/src/admin/intelligence/autopilot-i18n.ts](../frontend/src/admin/intelligence/autopilot-i18n.ts) | Autopilot vocabulary: levels per area, daily limits and today's use in EN/DE/FR/ES; amounts are parameters. |
 | [frontend/src/admin/intelligence/behavior/BehaviorGraph.tsx](../frontend/src/admin/intelligence/behavior/BehaviorGraph.tsx) | A derived graph connects coarse browsers to native products and existing semantic product relations. |
 | [frontend/src/admin/intelligence/behavior/BehaviorJourney.tsx](../frontend/src/admin/intelligence/behavior/BehaviorJourney.tsx) | Authorized journey timeline links to native product, customer and order views, through permission-bound native CRM references. |
@@ -984,6 +986,7 @@ This lists every checked-in source module in these roots, including files with n
 | [frontend/src/admin/intelligence/experiment-automation-i18n.ts](../frontend/src/admin/intelligence/experiment-automation-i18n.ts) | Vocabulary for experiment suggestions and automation in EN/DE/FR/ES; figures are parameters. |
 | [frontend/src/admin/intelligence/guardrail-model.ts](../frontend/src/admin/intelligence/guardrail-model.ts) | Native policy shape and currency conversion only; admission remains in the Rust commerce owner. |
 | [frontend/src/admin/intelligence/knowledge-types.ts](../frontend/src/admin/intelligence/knowledge-types.ts) | Typed knowledge read models preserve source ownership, revisions, sampling and privacy boundaries. |
+| [frontend/src/admin/intelligence/sovereign-i18n.ts](../frontend/src/admin/intelligence/sovereign-i18n.ts) | Sovereign AI vocabulary: the switch state, one line per model route and the limits of the statement in EN/DE/FR/ES. |
 | [frontend/src/admin/legal/ConsumerRequests.tsx](../frontend/src/admin/legal/ConsumerRequests.tsx) | Permission-scoped consumer request queue and optimistic, recorded review actions. |
 | [frontend/src/admin/legal/LegalServices.tsx](../frontend/src/admin/legal/LegalServices.tsx) | Purpose inventory and provider disclosures edited in the selected content language. |
 | [frontend/src/admin/legal/LegalSettings.tsx](../frontend/src/admin/legal/LegalSettings.tsx) | Central revisioned legal workspace, inherited channel settings, source-backed sector guidance and request review. |
@@ -1178,6 +1181,7 @@ This lists every checked-in source module in these roots, including files with n
 | [frontend/src/admin/styles/sales-channels.css](../frontend/src/admin/styles/sales-channels.css) | Sales-channel cards, onboarding and scoped settings use the same responsive, accessible Studio design. |
 | [frontend/src/admin/styles/service-integrations.css](../frontend/src/admin/styles/service-integrations.css) | Compact, responsive provider setup and explicit operation feedback. |
 | [frontend/src/admin/styles/settings.css](../frontend/src/admin/styles/settings.css) | Independent settings navigation, grouped native forms and save feedback in Studio theme tokens. |
+| [frontend/src/admin/styles/sovereign.css](../frontend/src/admin/styles/sovereign.css) | Sovereign AI report: mode state and one row per model route. |
 | [frontend/src/admin/styles/studio/01-studio.css](../frontend/src/admin/styles/studio/01-studio.css) | studio: studio styles. Source order is preserved by the entry stylesheet. |
 | [frontend/src/admin/styles/studio/02-workspace-switch.css](../frontend/src/admin/styles/studio/02-workspace-switch.css) | studio: workspace-switch styles. Source order is preserved by the entry stylesheet. |
 | [frontend/src/admin/styles/studio/03-welcome-symbol.css](../frontend/src/admin/styles/studio/03-welcome-symbol.css) | studio: welcome-symbol styles. Source order is preserved by the entry stylesheet. |
