@@ -107,3 +107,14 @@
 .autopilot-changes span {
   color: var(--muted, #63768c);
 }
+.autopilot-changes li {
+  align-items: center;
+}
+.autopilot-changes em {
+  font-style: normal;
+  color: #17693a;
+  font-weight: 600;
+}
+.autopilot-all {
+  justify-self: start;
+}

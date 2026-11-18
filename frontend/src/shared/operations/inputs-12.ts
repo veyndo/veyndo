@@ -2,6 +2,66 @@
 /** Native input DTOs; opaque JSON fields remain explicit. */
 import type { JsonValue } from "./value";
 export interface Inputs12 {
+  "studio.workspace.save": { data: JsonValue; revision: number };
+  "merchant.import.inspect": {
+    details?: boolean;
+    options: {
+      acknowledgedWarnings?: Array<string>;
+      channelId?: string;
+      customerGroup?: string;
+      destinationDigest?: string;
+      locale?: string;
+      sourcePriceBasis?: "gross" | "net";
+      taxRate?: number;
+    };
+    record: {
+      data: JsonValue;
+      kind:
+        | "products"
+        | "categories"
+        | "pages"
+        | "customers"
+        | "orders"
+        | "assets"
+        | "reviews"
+        | "coupons";
+      source: string;
+      sourceId: string;
+      sourceShop: string;
+      version: 1;
+      warnings: Array<string>;
+    };
+  };
+  "merchant.import.record": {
+    approve: boolean;
+    assetChunks?: Array<string>;
+    options: {
+      acknowledgedWarnings?: Array<string>;
+      channelId?: string;
+      customerGroup?: string;
+      destinationDigest?: string;
+      locale?: string;
+      sourcePriceBasis?: "gross" | "net";
+      taxRate?: number;
+    };
+    record: {
+      data: JsonValue;
+      kind:
+        | "products"
+        | "categories"
+        | "pages"
+        | "customers"
+        | "orders"
+        | "assets"
+        | "reviews"
+        | "coupons";
+      source: string;
+      sourceId: string;
+      sourceShop: string;
+      version: 1;
+      warnings: Array<string>;
+    };
+  };
   "merchant.customer.creation": JsonValue;
   "merchant.customer.create": {
     additionalAddresses?: Array<JsonValue>;
@@ -68,17 +128,4 @@ export interface Inputs12 {
     taxRate: number;
   };
   "pos.customers": { barcode?: string; channelId: string; query?: string };
-  "pos.customer": {
-    cartToken: string;
-    channelId: string;
-    customerId: string | null;
-    revision: number;
-  };
-  "pos.discount": {
-    cartToken: string;
-    channelId: string;
-    discount: JsonValue;
-    revision: number;
-  };
-  "pos.receipt": { channelId: string; orderId: string; receiptId: string };
 }

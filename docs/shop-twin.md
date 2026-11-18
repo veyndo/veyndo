@@ -22,23 +22,29 @@ and you do not have to migrate anything first.
    | Already on Veyndo | Nothing to import; the sandbox starts as a copy of your shop | [Sandboxes](workbench.md) |
 
 3. Open **Shop knowledge → Customer simulator** with the sandbox selected. The
-   **Shop twin** panel shows four steps and what is still missing.
+   **Shop twin** panel shows five steps and what is still missing.
 
-## Read the four steps
+![Twin after a CSV import: test stock set, attack test passed](assets/roadmap/shop-twin-import.jpg)
+
+## Read the five steps
 
 | Step | Done when | If it is open |
 | --- | --- | --- |
 | **Catalog** | The copy has purchasable items and the selected sales channel shows them | **Bring catalog** opens the import |
-| **Test stock** | At least one item has stock | **Open products** and set stock; it stays in the copy |
+| **Test stock** | At least one item has stock | **Set test stock to 10** fills every item without stock; **Open products** sets it per product. Both stay in the copy |
 | **Checkout** | A simulated payment method and a shipping method are active for the first delivery country | **Open settings** |
 | **Customer tests** | You saved at least one customer test in this copy | Describe a goal below the panel and start |
+| **Attack test** | The last saved attack test refused every attack and the configuration is unchanged since | Run the attacks below the customer profiles |
 
 ![A copy without stock is reported as not ready](assets/roadmap/shop-twin-open.jpg)
 
 Imported products start with **zero stock**. That is deliberate: Veyndo does not
 invent inventory. The twin therefore says "No item has stock" instead of letting
-every test customer fail at checkout. Stock you set in a sandbox is never
-published to the live shop.
+every test customer fail at checkout. **Set test stock to 10** gives every active
+item without stock ten units through the normal product revision, search index
+and product event, up to 500 items per click. Items that already have stock keep
+it. The action exists only in a private sandbox and needs the right to edit the
+catalog. Stock you set in a sandbox is never published to the live shop.
 
 ## Test the twin
 
@@ -62,4 +68,5 @@ published to the live shop.
 `merchant.scenario.readiness` (`GET /api/agent/scenario-readiness`) returns the
 figures of the panel for the selected private sandbox. It is read-only, needs the
 same rights as the customer simulator and refuses live shops. MCP exposes the
-same operation.
+same operation. `merchant.scenario.stock` (`POST /api/agent/scenario-stock` with
+`{"quantity": 10, "approve": true}`) sets the test stock.

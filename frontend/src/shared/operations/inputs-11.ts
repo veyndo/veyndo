@@ -2,6 +2,17 @@
 /** Native input DTOs; opaque JSON fields remain explicit. */
 import type { JsonValue } from "./value";
 export interface Inputs11 {
+  "merchant.payment.details": { id: string };
+  "merchant.payment.providers": JsonValue;
+  "merchant.payment.onboarding": {
+    approve?: boolean;
+    channel?: string;
+    country?: string;
+    environment?: "sandbox" | "live" | "simulation" | "contract-fixture";
+    id?: string;
+    operation?: "start" | "status" | "disconnect";
+    requestKey?: string;
+  };
   "merchant.app.history": {
     app: string;
     approve?: boolean;
@@ -70,64 +81,4 @@ export interface Inputs11 {
   };
   "studio.workspace.work.read": JsonValue;
   "studio.workspace.read": JsonValue;
-  "studio.workspace.save": { data: JsonValue; revision: number };
-  "merchant.import.inspect": {
-    details?: boolean;
-    options: {
-      acknowledgedWarnings?: Array<string>;
-      channelId?: string;
-      customerGroup?: string;
-      destinationDigest?: string;
-      locale?: string;
-      sourcePriceBasis?: "gross" | "net";
-      taxRate?: number;
-    };
-    record: {
-      data: JsonValue;
-      kind:
-        | "products"
-        | "categories"
-        | "pages"
-        | "customers"
-        | "orders"
-        | "assets"
-        | "reviews"
-        | "coupons";
-      source: string;
-      sourceId: string;
-      sourceShop: string;
-      version: 1;
-      warnings: Array<string>;
-    };
-  };
-  "merchant.import.record": {
-    approve: boolean;
-    assetChunks?: Array<string>;
-    options: {
-      acknowledgedWarnings?: Array<string>;
-      channelId?: string;
-      customerGroup?: string;
-      destinationDigest?: string;
-      locale?: string;
-      sourcePriceBasis?: "gross" | "net";
-      taxRate?: number;
-    };
-    record: {
-      data: JsonValue;
-      kind:
-        | "products"
-        | "categories"
-        | "pages"
-        | "customers"
-        | "orders"
-        | "assets"
-        | "reviews"
-        | "coupons";
-      source: string;
-      sourceId: string;
-      sourceShop: string;
-      version: 1;
-      warnings: Array<string>;
-    };
-  };
 }

@@ -126,6 +126,48 @@ const words = {
   ],
   twinDone: ["Done", "Erledigt", "Fait", "Hecho"],
   twinOpen: ["Open", "Offen", "À faire", "Pendiente"],
+  twinFill: [
+    "Set test stock to 10",
+    "Testbestand auf 10 setzen",
+    "Mettre le stock de test à 10",
+    "Poner stock de prueba en 10",
+  ],
+  twinFilled: [
+    "Test stock set for {count} items. It stays in this copy.",
+    "Testbestand für {count} Artikel gesetzt. Er bleibt in dieser Kopie.",
+    "Stock de test défini pour {count} articles. Il reste dans cette copie.",
+    "Stock de prueba puesto en {count} artículos. Se queda en esta copia.",
+  ],
+  twinAttack: [
+    "Attack test",
+    "Angriffstest",
+    "Test d’attaque",
+    "Prueba de ataque",
+  ],
+  twinAttackOk: [
+    "Attacks refused: {held} of {total}. The configuration is unchanged since then.",
+    "Abgewehrte Angriffe: {held} von {total}. Die Konfiguration ist seitdem unverändert.",
+    "Attaques refusées : {held} sur {total}. La configuration n’a pas changé depuis.",
+    "Ataques rechazados: {held} de {total}. La configuración no ha cambiado desde entonces.",
+  ],
+  twinAttackStale: [
+    "The last attack test is older than your latest changes. Run it again below.",
+    "Der letzte Angriffstest ist älter als deine letzten Änderungen. Starte ihn unten erneut.",
+    "Le dernier test d’attaque est antérieur à vos dernières modifications. Relancez-le ci-dessous.",
+    "La última prueba de ataque es anterior a tus últimos cambios. Lánzala de nuevo abajo.",
+  ],
+  twinAttackBreached: [
+    "The last attack test found attacks that got through or need a check. See the result below.",
+    "Der letzte Angriffstest hat Angriffe gefunden, die durchkamen oder zu prüfen sind. Sieh dir das Ergebnis unten an.",
+    "Le dernier test a trouvé des attaques réussies ou à vérifier. Voir le résultat ci-dessous.",
+    "La última prueba encontró ataques que pasaron o que hay que revisar. Mira el resultado abajo.",
+  ],
+  twinAttackNone: [
+    "No attack test yet. Run the attacks below.",
+    "Noch kein Angriffstest. Starte unten die Angriffe.",
+    "Aucun test d’attaque pour l’instant. Lancez les attaques ci-dessous.",
+    "Aún no hay prueba de ataque. Lanza los ataques abajo.",
+  ],
 } as const;
 export type TwinWord = keyof typeof words;
 export function useTwinText() {

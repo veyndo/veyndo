@@ -1,5 +1,6 @@
 //! Fictional shopper cohorts reuse native task authority, checkpoints and private commerce operations.
 use super::*;
+mod attack_store;
 mod catalogue;
 mod evidence;
 mod journey;
@@ -24,6 +25,14 @@ pub(crate) const CAPABILITIES: &[(&str, &str)] = &[
     (
         "merchant.scenario.readiness",
         "Read whether a private sandbox is ready to be tested as a shop twin",
+    ),
+    (
+        "merchant.scenario.stock",
+        "Give empty products of a private sandbox a test stock quantity",
+    ),
+    (
+        "merchant.scenario.attacks",
+        "Read the latest saved attack test of a private sandbox",
     ),
     (
         "merchant.scenario.probe",
@@ -62,6 +71,9 @@ pub(crate) fn schema(name: &str) -> Option<Value> {
         "merchant.scenario.status" => {
             json!({"type":"object","required":["id"],"additionalProperties":false,"properties":{"id":{"type":"string","minLength":1,"maxLength":40}}})
         }
+        "merchant.scenario.stock" => {
+            json!({"type":"object","required":["quantity","approve"],"additionalProperties":false,"properties":{"quantity":{"type":"integer","minimum":1,"maximum":1000},"approve":{"type":"boolean"}}})
+        }
         _ => json!({"type":"object","properties":{},"additionalProperties":false}),
     })
 }
@@ -73,14 +85,19 @@ pub(crate) fn router() -> Router<App> {
             post(create).get(list),
         )
         .secure_route(
+            "/api/agent/scenario-stock",
+            &[("POST", "catalog.write")],
+            post(stock),
+        )
+        .secure_route(
             "/api/agent/scenario-readiness",
             &[("GET", "assistant.use")],
             get(readiness),
         )
         .secure_route(
             "/api/agent/scenario-probes",
-            &[("POST", "assistant.use")],
-            post(probe),
+            &[("POST", "assistant.use"), ("GET", "assistant.use")],
+            post(probe).get(attacks),
         )
         .secure_route(
             "/api/agent/scenarios/{id}",
@@ -98,6 +115,18 @@ async fn create(
 async fn readiness(State(a): State<App>, h: RequestContext) -> Result<Json<Value>> {
     Ok(Json(
         invoke(&a, &h, "merchant.scenario.readiness", &json!({})).await?,
+    ))
+}
+async fn stock(
+    State(a): State<App>,
+    h: RequestContext,
+    Json(v): Json<Value>,
+) -> Result<Json<Value>> {
+    Ok(Json(invoke(&a, &h, "merchant.scenario.stock", &v).await?))
+}
+async fn attacks(State(a): State<App>, h: RequestContext) -> Result<Json<Value>> {
+    Ok(Json(
+        invoke(&a, &h, "merchant.scenario.attacks", &json!({})).await?,
     ))
 }
 async fn probe(State(a): State<App>, h: RequestContext) -> Result<Json<Value>> {
@@ -148,7 +177,20 @@ pub(crate) async fn invoke(a: &App, h: &RequestContext, name: &str, v: &Value) -
         return readiness::read(a, h, &t).await;
     }
     if name == "merchant.scenario.probe" {
-        return probes::run(a, h, &t).await;
+        let mut report = probes::run(a, h, &t).await?;
+        attack_store::save(a, h, &t, &report).await?;
+        report["configurationReview"] = json!("current");
+        return Ok(report);
+    }
+    if name == "merchant.scenario.stock" {
+        auth::permit(h, "catalog.write")?;
+        if v["approve"] != true {
+            return Err(bad("Explicit approve=true required"));
+        }
+        return commerce::test_stock::fill(a, &t, v["quantity"].as_i64().unwrap_or(0) as i32).await;
+    }
+    if name == "merchant.scenario.attacks" {
+        return Ok(json!({"latest":attack_store::latest(a, h, &t).await?}));
     }
     if name == "merchant.scenario.create" {
         let group = v["requestId"].as_str().unwrap();
@@ -233,8 +275,9 @@ pub(crate) async fn invoke(a: &App, h: &RequestContext, name: &str, v: &Value) -
             currency.scale,
         )
         .await?;
+        let attack = attack_store::latest(a, h, &t).await?;
         return Ok(
-            json!({"scenarios":items,"configuration":{"channel":marketing::channel_id(h),"mainLocale":settings.main_locale,"locales":settings.locales,"countries":settings.countries,"currency":currency.code,"scale":currency.scale,"catalogue":catalogue}}),
+            json!({"scenarios":items,"attack":if attack.is_null() {Value::Null} else {json!({"summary":attack["summary"],"total":attack["probes"].as_array().map_or(0, Vec::len),"savedAt":attack["savedAt"],"configurationReview":attack["configurationReview"]})},"configuration":{"channel":marketing::channel_id(h),"mainLocale":settings.main_locale,"locales":settings.locales,"countries":settings.countries,"currency":currency.code,"scale":currency.scale,"catalogue":catalogue}}),
         );
     }
     if rows.is_empty() {

@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import type { RequestFn } from "../shell/studio-types";
 import Icon from "../../shared/ui/Icon";
+import { useLocale } from "../../shared/i18n/i18n";
 import { useAttackText, type AttackWord } from "./scenario-attack-i18n";
 import type { AttackProbe, AttackReport } from "./scenario-types";
 const titles: Record<string, AttackWord> = {
@@ -35,16 +36,36 @@ const outcomes: Record<AttackProbe["outcome"], AttackWord> = {
   review: "attackReview",
 };
 import "./scenario-labs.css";
-export default function ScenarioAttacks({ request }: { request: RequestFn }) {
-  const t = useAttackText();
+export default function ScenarioAttacks({
+  request,
+  onSaved,
+}: {
+  request: RequestFn;
+  onSaved?: () => void;
+}) {
+  const t = useAttackText(),
+    { locale } = useLocale();
   const [report, setReport] = useState<AttackReport>(),
     [busy, setBusy] = useState(false),
     [error, setError] = useState("");
-  // A result belongs to the shop, sandbox and channel it ran in.
+  // A result belongs to the shop, sandbox and channel it ran in; the last saved one is shown again.
   useEffect(() => {
+    let active = true;
     setReport(undefined);
     setError("");
     setBusy(false);
+    request("/api/agent/scenario-probes")
+      .then((value) => {
+        const latest = (value as { latest?: AttackReport | null } | undefined)
+          ?.latest;
+        if (active && latest && Array.isArray(latest.probes)) setReport(latest);
+      })
+      .catch(() => {
+        /* A missing history must not block a new run. */
+      });
+    return () => {
+      active = false;
+    };
   }, [request]);
   const start = async () => {
     setBusy(true);
@@ -57,6 +78,7 @@ export default function ScenarioAttacks({ request }: { request: RequestFn }) {
           "POST",
         )) as AttackReport,
       );
+      onSaved?.();
     } catch (e) {
       setError((e as Error).message);
     } finally {
@@ -98,6 +120,19 @@ export default function ScenarioAttacks({ request }: { request: RequestFn }) {
                 .replace("{total}", String(report.probes.length))}
             </strong>{" "}
             {t("attackProduct").replace("{product}", report.product.name)}
+          </p>
+          <p className="scenario-attack-detail">
+            {report.savedAt &&
+              !Number.isNaN(Date.parse(report.savedAt)) &&
+              `${t("attackSaved").replace("{time}", new Date(report.savedAt).toLocaleString(locale))} `}
+            {t(
+              report.configurationReview === "current"
+                ? "attackCurrent"
+                : report.configurationReview === "stale" ||
+                    report.configurationReview === "changed_during_run"
+                  ? "attackStale"
+                  : "attackUnverified",
+            )}
           </p>
           <ul className="scenario-attack-list">
             {report.probes.map((probe) => (

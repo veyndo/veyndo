@@ -125,6 +125,10 @@ const COGNITIVE: &[(&str, &str)] = &[
         "Apply a price-only proposal within explicit current merchant policy and daily budget",
     ),
     (
+        "knowledge.autonomy.revert",
+        "Restore today's automatic price changes to the day's baseline",
+    ),
+    (
         "knowledge.autonomy.status",
         "Read the price autopilot level, daily limits and today's use",
     ),

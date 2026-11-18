@@ -105,13 +105,28 @@ the limit is refused and the price stays as it was.
 To set it, choose **Allow limited automatic prices**, enter the **Daily limit for
 price reductions** and save. Leave the field empty for no limit.
 
-Not included: the autopilot does not take a change back by itself when sales
-drop, the limit covers only products priced in the shop's pricing currency, and
-it is a ceiling on given-up revenue, not a forecast of loss or margin.
+**Taking changes back.** Each of today's automatic changes has a **Take back**
+button; it restores the price from the start of the day. A product whose price
+you changed by hand afterwards is left alone.
+
+![Autopilot after a rollback](assets/roadmap/autopilot-rollback.jpg)
+
+The autopilot also takes today's reductions back **by itself** when today's
+total rises above the limit, for example because stock arrives or you lower the
+limit. A background check runs about every 30 seconds, so this happens within
+about a minute. It restores to the price from the start of the day and records
+an `ai.autonomy.reverted` event.
+
+Not included: there is no rollback triggered by falling sales or conversion,
+the limit covers only products priced in the shop's pricing currency, and it is
+a ceiling on given-up revenue, not a forecast of loss or margin.
 
 `knowledge.autonomy.status` (`POST /api/intelligence/autonomy.status`, also an MCP
 tool) returns the level, the limits and today's changes. It needs
 `knowledge.read` and `settings.read` and reserves nothing.
+`knowledge.autonomy.revert` (`POST /api/intelligence/autonomy.revert` with
+`{"approve": true}` and an optional `productId`) takes changes back; it needs
+`catalog.write` and `settings.write`.
 
 ## Connected knowledge and testing views
 

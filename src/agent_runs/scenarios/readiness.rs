@@ -41,6 +41,7 @@ pub(super) async fn read(a: &App, h: &RequestContext, t: &str) -> Result<Value> 
     let actor = header(h, "x-rac-user").ok_or(bad("Scenario actor required"))?;
     let tests: i64 = sqlx::query_scalar("SELECT count(DISTINCT run_request->'scenario'->>'group') FROM tasks WHERE tenant=$1 AND run_actor=$2 AND run_request ? 'scenario' AND (run_request->>'agentId') IS NOT DISTINCT FROM $3")
         .bind(t).bind(actor).bind(&h.principal.agent_key).fetch_one(&a.db).await?;
+    let attack = attack_store::latest(a, h, t).await?;
     let blockers: Vec<&str> = [
         (products == 0, "no_products"),
         (products > 0 && visible == 0, "channel_empty"),
@@ -56,6 +57,6 @@ pub(super) async fn read(a: &App, h: &RequestContext, t: &str) -> Result<Value> 
         json!({"sandbox":{"id":t,"name":name},"channel":channel,"currency":currency.code,
         "catalogue":{"products":products,"withStock":stocked,"withoutStock":row.get::<i64,_>("empty"),"inactive":row.get::<i64,_>("inactive"),"visibleSample":visible},
         "checkout":{"country":country,"simulatedPayment":payment,"shipping":shipping},
-        "tests":{"customerTests":tests},"ready":blockers.is_empty(),"blockers":blockers,"synthetic":true}),
+        "tests":{"customerTests":tests,"attack":if attack.is_null() {Value::Null} else {json!({"summary":attack["summary"],"savedAt":attack["savedAt"],"configurationReview":attack["configurationReview"]})}},"ready":blockers.is_empty(),"blockers":blockers,"synthetic":true}),
     )
 }

@@ -53,6 +53,16 @@ Studio and the public Lumen storefront responded on their existing origins.
   promotion remain open. [Measured workloads](benchmarks.md) ·
   [Component tasks](commerce-components.md).
 
+## Roadmap stages 1 to 3 completed locally
+
+Attack tests are now saved and shown beside the release review. A real generic
+CSV import into a new sandbox, one-click test stock and an attack test on an
+imported product ran locally end to end. Automatic price changes can be taken
+back per product, and a worker guard restores today's reductions when the daily
+limit is exceeded. Not deployed to the hosted pilot; there is no rollback on
+sales or conversion. [Local record](evidence/stages-1-3-completion-2026-11-18.md)
+· [Roadmap](roadmap.md).
+
 ## Autopilot levels and daily limit
 
 **Shop knowledge → AI boundaries** opens with an Autopilot panel: prices can be

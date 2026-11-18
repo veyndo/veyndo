@@ -62,14 +62,14 @@ it("names the zero-stock blocker and opens the product owner only with the right
   const onOpen = vi.fn();
   const view = render(show(async () => empty, ["catalog.read"], onOpen));
   await waitFor(() =>
-    expect(document.querySelectorAll(".is-open")).toHaveLength(2),
+    expect(document.querySelectorAll(".is-open")).toHaveLength(3),
   );
   fireEvent.click(screen.getByRole("button"));
   expect(onOpen).toHaveBeenCalledWith("productData");
   view.unmount();
   render(show(async () => empty, []));
   await waitFor(() =>
-    expect(document.querySelectorAll(".is-open")).toHaveLength(2),
+    expect(document.querySelectorAll(".is-open")).toHaveLength(3),
   );
   expect(screen.queryAllByRole("button")).toHaveLength(0);
 });
@@ -86,4 +86,52 @@ it("shows nothing for a foreign response shape and the native error on failure",
   await waitFor(() =>
     expect(screen.getByRole("alert").textContent).toContain("private sandbox"),
   );
+});
+it("sets sandbox test stock with explicit approval, reloads and shows a current clean attack test as done", async () => {
+  let stocked = false;
+  const request = vi.fn(async (path: string, body?: unknown) => {
+    if (path === "/api/agent/scenario-stock") {
+      stocked = true;
+      expect(body).toEqual({ quantity: 10, approve: true });
+      return { updated: 9 };
+    }
+    return twin(
+      stocked
+        ? {
+            catalogue: {
+              products: 9,
+              withStock: 9,
+              withoutStock: 0,
+              inactive: 0,
+              visibleSample: 9,
+            },
+            tests: {
+              customerTests: 1,
+              attack: {
+                summary: { held: 9, breached: 0, review: 0 },
+                configurationReview: "current",
+              },
+            },
+          }
+        : {
+            ready: false,
+            blockers: ["no_stock"],
+            catalogue: {
+              products: 9,
+              withStock: 0,
+              withoutStock: 9,
+              inactive: 0,
+              visibleSample: 9,
+            },
+          },
+    );
+  });
+  render(show(request, ["catalog.read", "catalog.write"]));
+  await waitFor(() => expect(screen.getAllByRole("button")).toHaveLength(2));
+  fireEvent.click(screen.getAllByRole("button")[0]);
+  await waitFor(() =>
+    expect(document.querySelectorAll(".is-done")).toHaveLength(5),
+  );
+  expect(document.body.textContent).toMatch(/9/);
+  expect(screen.queryAllByRole("button")).toHaveLength(0);
 });

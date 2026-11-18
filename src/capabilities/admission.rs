@@ -65,7 +65,7 @@ pub(super) fn visible(a: &App, h: &RequestContext, name: &str) -> bool {
     if n.starts_with("automation.") {
         return merchant(a, h).is_ok() && marketing::capability_visible(h, n);
     }
-    if *n == "knowledge.autonomy.apply" {
+    if *n == "knowledge.autonomy.apply" || *n == "knowledge.autonomy.revert" {
         return auth::allowed(h, "knowledge.read")
             && auth::allowed(h, "catalog.write")
             && auth::allowed(h, "settings.write");

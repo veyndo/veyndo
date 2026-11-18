@@ -33,14 +33,42 @@ const fixedAreas: AutopilotWord[] = [
 export default function AutopilotToday({
   request,
   revision,
+  canRevert = false,
 }: {
   request: RequestFn;
   revision?: number;
+  canRevert?: boolean;
 }) {
   const t = useAutopilotText(),
     { locale } = useLocale();
   const [value, setValue] = useState<AutopilotStatus>(),
-    [error, setError] = useState("");
+    [error, setError] = useState(""),
+    [local, setLocal] = useState(0),
+    [notice, setNotice] = useState("");
+  const revert = async (productId?: string) => {
+    setNotice("");
+    try {
+      const done = (await request(
+        "/api/intelligence/autonomy.revert",
+        { approve: true, ...(productId ? { productId } : {}) },
+        "POST",
+      )) as { reverted: string[]; skipped: { reason: string }[] };
+      const kept = done.skipped.filter(
+        (item) => item.reason === "changed_since",
+      ).length;
+      setNotice(
+        [
+          t("reverted", { count: done.reverted.length }),
+          kept ? t("revertSkipped", { count: kept }) : "",
+        ]
+          .filter(Boolean)
+          .join(" "),
+      );
+      setLocal((n) => n + 1);
+    } catch (e) {
+      setError((e as Error).message);
+    }
+  };
   useEffect(() => {
     let active = true;
     setError("");
@@ -63,7 +91,7 @@ export default function AutopilotToday({
     return () => {
       active = false;
     };
-  }, [request, revision]);
+  }, [request, revision, local]);
   if (error)
     return (
       <p className="knowledge-alert" role="alert">
@@ -150,6 +178,21 @@ export default function AutopilotToday({
             )}
           </div>
           <p className="autopilot-note">{t("exposureHint")}</p>
+          {value.maxDailyExposureMinor != null && (
+            <p className="autopilot-note">{t("guardHint")}</p>
+          )}
+          {notice && <p role="status">{notice}</p>}
+          {canRevert &&
+            value.changes.filter((c) => c.currentMinor !== c.baselineMinor)
+              .length > 1 && (
+              <button
+                type="button"
+                className="studio-secondary autopilot-all"
+                onClick={() => void revert()}
+              >
+                {t("revertAll")}
+              </button>
+            )}
           {value.changes.length ? (
             <ul className="autopilot-changes">
               {value.changes.map((change) => (
@@ -164,6 +207,19 @@ export default function AutopilotToday({
                     })}
                     {!change.counted && ` · ${t("otherCurrency")}`}
                   </span>
+                  {change.currentMinor === change.baselineMinor ? (
+                    <em>{t("atBaseline")}</em>
+                  ) : (
+                    canRevert && (
+                      <button
+                        type="button"
+                        className="studio-secondary"
+                        onClick={() => void revert(change.productId)}
+                      >
+                        {t("revert")}
+                      </button>
+                    )
+                  )}
                 </li>
               ))}
             </ul>

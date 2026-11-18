@@ -107,6 +107,37 @@ const words = {
     "Lecture de l’utilisation du jour…",
     "Leyendo el uso de hoy…",
   ],
+  revert: ["Take back", "Zurücknehmen", "Annuler", "Revertir"],
+  revertAll: [
+    "Take back all of today’s changes",
+    "Alle heutigen Änderungen zurücknehmen",
+    "Annuler toutes les modifications du jour",
+    "Revertir todos los cambios de hoy",
+  ],
+  reverted: [
+    "Restored to the price at the start of the day: {count}.",
+    "Auf den Preis vom Tagesbeginn zurückgesetzt: {count}.",
+    "Rétablis au prix du début de journée : {count}.",
+    "Restaurados al precio del inicio del día: {count}.",
+  ],
+  revertSkipped: [
+    "Not restored because the price was changed by hand afterwards: {count}.",
+    "Nicht zurückgesetzt, weil der Preis danach von Hand geändert wurde: {count}.",
+    "Non rétablis car le prix a ensuite été modifié à la main : {count}.",
+    "No restaurados porque el precio se cambió a mano después: {count}.",
+  ],
+  atBaseline: [
+    "Back at the price from the start of the day",
+    "Wieder auf dem Preis vom Tagesbeginn",
+    "De nouveau au prix du début de journée",
+    "De nuevo al precio del inicio del día",
+  ],
+  guardHint: [
+    "If today’s total rises above the limit, for example because stock arrives or you lower the limit, the autopilot takes today’s reductions back by itself within about a minute.",
+    "Steigt die heutige Summe über das Limit, zum Beispiel weil Ware eintrifft oder du das Limit senkst, nimmt der Autopilot die heutigen Senkungen innerhalb etwa einer Minute von selbst zurück.",
+    "Si le total du jour dépasse la limite, par exemple à l’arrivée de stock ou si vous baissez la limite, le pilote automatique annule de lui-même les baisses du jour en une minute environ.",
+    "Si el total de hoy supera el límite, por ejemplo al llegar stock o si bajas el límite, el piloto automático revierte por sí mismo las bajadas de hoy en un minuto aproximadamente.",
+  ],
 } as const;
 export type AutopilotWord = keyof typeof words;
 export function useAutopilotText() {

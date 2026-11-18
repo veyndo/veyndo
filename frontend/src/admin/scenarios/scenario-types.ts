@@ -84,6 +84,9 @@ export type AttackReport = {
   product: { id: string; name: string };
   summary: { held: number; breached: number; review: number };
   probes: AttackProbe[];
+  savedAt?: string;
+  configurationReview?:
+    "current" | "stale" | "unverified" | "changed_during_run";
 };
 export type TwinReadiness = {
   sandbox: { id: string; name: string };
@@ -99,7 +102,20 @@ export type TwinReadiness = {
     simulatedPayment: boolean;
     shipping: boolean;
   };
-  tests: { customerTests: number };
+  tests: {
+    customerTests: number;
+    attack?: {
+      summary: AttackReport["summary"];
+      savedAt?: string;
+      configurationReview?: AttackReport["configurationReview"];
+    } | null;
+  };
   ready: boolean;
   blockers: string[];
+};
+export type AttackSummary = {
+  summary: AttackReport["summary"];
+  total: number;
+  savedAt?: string;
+  configurationReview?: AttackReport["configurationReview"];
 };

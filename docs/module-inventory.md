@@ -28,6 +28,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/agent_runs/controls.rs](../src/agent_runs/controls.rs) | Live-only agent stop and existing-key admission; no control becomes a sandbox release or credential snapshot. |
 | [src/agent_runs/flow_proposals.rs](../src/agent_runs/flow_proposals.rs) | Scheduled Flow results become native reviewable tasks; only personal approval supplies execution authority. |
 | [src/agent_runs/navigation.rs](../src/agent_runs/navigation.rs) | Model navigation names native views, never URLs or authority. Admission rechecks current rights and tenant-owned records. |
+| [src/agent_runs/scenarios/attack_store.rs](../src/agent_runs/scenarios/attack_store.rs) | Saved attack test reports are actor-private applied task rows of the sandbox; freshness reuses the release configuration digest. |
 | [src/agent_runs/scenarios/catalogue.rs](../src/agent_runs/scenarios/catalogue.rs) | A bounded native channel sample seeds editable fictional profiles; it never reads customer data or invokes inference. |
 | [src/agent_runs/scenarios/evidence.rs](../src/agent_runs/scenarios/evidence.rs) | Scenario evidence uses the release owner's configuration projection, never orders or inventory. |
 | [src/agent_runs/scenarios/journey.rs](../src/agent_runs/scenarios/journey.rs) | Each fictional customer has an independent durable provider journal and an authoritative native journey. |
@@ -258,6 +259,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/checkout_review.rs](../src/checkout_review.rs) | Bind the reviewed revision and exact total for every checkout transport. |
 | [src/cognition/advisor.rs](../src/cognition/advisor.rs) | Buyer-admitted initial catalog/evidence context and bounded native response revalidation; no extra truth store. |
 | [src/cognition/autonomy.rs](../src/cognition/autonomy.rs) | Price-only optional autonomy, atomic unique-SKU daily quotas, a non-compounding day baseline and a daily exposure ceiling. |
+| [src/cognition/autonomy_revert.rs](../src/cognition/autonomy_revert.rs) | Takes today's automatic price changes back to the day's baseline, by request or when the daily exposure limit is exceeded. |
 | [src/cognition/behavior/capture.rs](../src/cognition/behavior/capture.rs) | Cart-locked writes serialize with withdrawal; customer association is derived from authenticated native identity. |
 | [src/cognition/behavior/geography.rs](../src/cognition/behavior/geography.rs) | Optional trusted ingress geography. Ordinary country headers never establish visitor location. |
 | [src/cognition/behavior/input.rs](../src/cognition/behavior/input.rs) | Minimal behavioral envelope: no URLs, search text, raw user agents, IPs or caller customer identities. |
@@ -334,6 +336,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/commerce/tax.rs](../src/commerce/tax.rs) | Destination tax-class resolution and net-preserving price conversion. |
 | [src/commerce/tax_context.rs](../src/commerce/tax_context.rs) | Tax conditions consume private authoritative pre-tax cart facts without a recursive quote. |
 | [src/commerce/tax_rules.rs](../src/commerce/tax_rules.rs) | Priority-based destination rules; current tax law is merchant configuration, not bundled tax advice. |
+| [src/commerce/test_stock.rs](../src/commerce/test_stock.rs) | Bulk test stock for a private sandbox: empty purchasable products get a quantity through the native revision, index sync and event. |
 | [src/commerce/types.rs](../src/commerce/types.rs) | Checkout selection and configuration data contracts. |
 | [src/concierge.rs](../src/concierge.rs) | Read-only storefront shopping advisor. |
 | [src/context.rs](../src/context.rs) | Bounded behavioral ports of Shopware 6.7.14.2 context and product-cart selection. |
@@ -941,6 +944,7 @@ This lists every checked-in source module in these roots, including files with n
 | [frontend/src/admin/developer/useDesignerKeys.ts](../frontend/src/admin/developer/useDesignerKeys.ts) | Designer keyboard shortcuts leave native input and rich-editor undo behavior intact. |
 | [frontend/src/admin/developer/useDraftStorage.ts](../frontend/src/admin/developer/useDraftStorage.ts) | Actor-private server autosaves serialize writes and preserve optimistic revisions across app switches. |
 | [frontend/src/admin/environments/EnvironmentManager.tsx](../frontend/src/admin/environments/EnvironmentManager.tsx) | Private environment creation and digest-bound selective release. |
+| [frontend/src/admin/environments/ReleaseAttack.tsx](../frontend/src/admin/environments/ReleaseAttack.tsx) | The latest saved attack test of the sandbox beside the release review; evidence only, never an approval gate. |
 | [frontend/src/admin/environments/ReleaseScenarios.tsx](../frontend/src/admin/environments/ReleaseScenarios.tsx) | Actor-private saved scenario evidence sits beside native release diffs without becoming an approval gate. |
 | [frontend/src/admin/environments/ReleaseShopPreview.tsx](../frontend/src/admin/environments/ReleaseShopPreview.tsx) | Explicit native sandbox preview rechecks the saved run; it never attests a historical render. |
 | [frontend/src/admin/environments/release-preview-i18n.ts](../frontend/src/admin/environments/release-preview-i18n.ts) | Native preview controls distinguish current rendering from saved API test evidence. |

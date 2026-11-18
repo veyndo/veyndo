@@ -2554,6 +2554,11 @@
       "sha256": "494f8d7e66e32ef9bac72789bdf03d002fb47ee0d62e2ff8a54584d4479326a1",
       "review": "Reviewed native presentation consistency: linked product/order/customer navigation must match the working-view entity; one discriminator replaces same-shaped union alternatives, exact native grid admission and current rights retained. New native and UI mismatch regressions plus provider HTTP rejection checks."
     },
+    "src/agent_runs/scenarios/attack_store.rs": {
+      "status": "unproved",
+      "sha256": "2e1d7a4e01368cfef835dca383b8fa9fee44d41ef5b61d679bc928974e05cb00",
+      "review": "Completion of stages 1-3: attack_store.rs saves applied actor-private report rows and reads the latest with release-digest freshness; commerce/test_stock.rs sets sandbox-only test stock through revision, index sync and product event; cognition/autonomy_revert.rs restores day baselines by request and from the agent worker lane when exposure exceeds the limit, skipping prices changed since; no extracted policy changed; scenario and provider suites cover each path"
+    },
     "src/agent_runs/scenarios/catalogue.rs": {
       "status": "unproved",
       "sha256": "ff6ee5b7a53894880ed6465882fd45eedd947fa64621435dd88aa6f93dd23764",
@@ -2571,8 +2576,8 @@
     },
     "src/agent_runs/scenarios/mod.rs": {
       "status": "unproved",
-      "sha256": "68a5efadf82010ee87976a4fbcfd90406e880287639c735f2ea4a3cc9a27203b",
-      "review": "Twin readiness: new read-only readiness.rs adapter over existing settings, catalogue sample and task rows; registry classifies merchant.scenario.readiness as a read; agentic_scenarios suite passes with ready, zero-stock and denied-caller cases"
+      "sha256": "ebe78b8dac713b7fda841f969f34dc1d5bfdaebf91b3ff642f995139c4e19988",
+      "review": "Completion of stages 1-3: attack_store.rs saves applied actor-private report rows and reads the latest with release-digest freshness; commerce/test_stock.rs sets sandbox-only test stock through revision, index sync and product event; cognition/autonomy_revert.rs restores day baselines by request and from the agent worker lane when exposure exceeds the limit, skipping prices changed since; no extracted policy changed; scenario and provider suites cover each path"
     },
     "src/agent_runs/scenarios/probes.rs": {
       "status": "unproved",
@@ -2581,8 +2586,8 @@
     },
     "src/agent_runs/scenarios/readiness.rs": {
       "status": "unproved",
-      "sha256": "c9fcc6f6a3a85f00bfdb79186769e703d16044592baf12f5bdecc302718435cb",
-      "review": "Twin readiness: new read-only readiness.rs adapter over existing settings, catalogue sample and task rows; registry classifies merchant.scenario.readiness as a read; agentic_scenarios suite passes with ready, zero-stock and denied-caller cases"
+      "sha256": "3790b9c3a8319d45cf4eb3da0ebf082c3b97af32a5d38382773d0ba73eaaf1f7",
+      "review": "Completion of stages 1-3: attack_store.rs saves applied actor-private report rows and reads the latest with release-digest freshness; commerce/test_stock.rs sets sandbox-only test stock through revision, index sync and product event; cognition/autonomy_revert.rs restores day baselines by request and from the agent worker lane when exposure exceeds the limit, skipping prices changed since; no extracted policy changed; scenario and provider suites cover each path"
     },
     "src/agent_runs/scenarios/shopper.rs": {
       "status": "unproved",
@@ -3511,13 +3516,13 @@
     },
     "src/capabilities/admission.rs": {
       "status": "unproved",
-      "sha256": "8622759b9a7175bda8f4b7eff25d6b0435455e13b8436bedebf9d5d0346aa1b6",
-      "review": "Reviewed native aggregate reports: bound tenant/filter SQL, exact numeric order/refund snapshots, reuse of current consent eligibility, optional rights projections and private workspace CAS layouts; reporting adapters remain unproved."
+      "sha256": "ac03b842a61c68a77137560a0978df25e16bab5a98fecff18f1fafb2e4621ff3",
+      "review": "Completion of stages 1-3: attack_store.rs saves applied actor-private report rows and reads the latest with release-digest freshness; commerce/test_stock.rs sets sandbox-only test stock through revision, index sync and product event; cognition/autonomy_revert.rs restores day baselines by request and from the agent worker lane when exposure exceeds the limit, skipping prices changed since; no extracted policy changed; scenario and provider suites cover each path"
     },
     "src/capabilities/catalog.rs": {
       "status": "unproved",
-      "sha256": "9e1cfcd0c578cec3336b8a10f493cbd9ab4a48967c5bbe638a10d9210de40aa9",
-      "review": "Autopilot daily limit: guardrails.rs gains optional max_daily_exposure_minor with a validated ceiling; autonomy.rs adds an unproved exposure sum and passes its comparison as the daily_budget input of the unchanged extracted ai_autonomy_admissible; read-only knowledge.autonomy.status; providers suite covers the exact boundary"
+      "sha256": "1b678013f411ec58a8e9de543d179459b913639803c60938bf4224424f538921",
+      "review": "Completion of stages 1-3: attack_store.rs saves applied actor-private report rows and reads the latest with release-digest freshness; commerce/test_stock.rs sets sandbox-only test stock through revision, index sync and product event; cognition/autonomy_revert.rs restores day baselines by request and from the agent worker lane when exposure exceeds the limit, skipping prices changed since; no extracted policy changed; scenario and provider suites cover each path"
     },
     "src/capabilities/contract.rs": {
       "status": "unproved",
@@ -3536,8 +3541,8 @@
     },
     "src/capabilities/registry.rs": {
       "status": "unproved",
-      "sha256": "88630c40f57ea25e04386c631446eb484a6ae47cee0959f41b4a5fc3c811c711",
-      "review": "Autopilot daily limit: guardrails.rs gains optional max_daily_exposure_minor with a validated ceiling; autonomy.rs adds an unproved exposure sum and passes its comparison as the daily_budget input of the unchanged extracted ai_autonomy_admissible; read-only knowledge.autonomy.status; providers suite covers the exact boundary"
+      "sha256": "a0e20606135d2823b099f26fb9757e51fbfc19ec2d61ecbbaae0bef1cc2227c3",
+      "review": "Completion of stages 1-3: attack_store.rs saves applied actor-private report rows and reads the latest with release-digest freshness; commerce/test_stock.rs sets sandbox-only test stock through revision, index sync and product event; cognition/autonomy_revert.rs restores day baselines by request and from the agent worker lane when exposure exceeds the limit, skipping prices changed since; no extracted policy changed; scenario and provider suites cover each path"
     },
     "src/capabilities/schema.rs": {
       "status": "unproved",
@@ -3704,6 +3709,11 @@
       "sha256": "6780916904cd642f64a263cbf8417b75e77832e4e3676f74f4ccc24257f18cfb",
       "review": "Autopilot daily limit: guardrails.rs gains optional max_daily_exposure_minor with a validated ceiling; autonomy.rs adds an unproved exposure sum and passes its comparison as the daily_budget input of the unchanged extracted ai_autonomy_admissible; read-only knowledge.autonomy.status; providers suite covers the exact boundary"
     },
+    "src/cognition/autonomy_revert.rs": {
+      "status": "unproved",
+      "sha256": "64d74ca2dbaa8ac1d908b96b46ea735d964fc921332405b4cbc18f3e037c0274",
+      "review": "Completion of stages 1-3: attack_store.rs saves applied actor-private report rows and reads the latest with release-digest freshness; commerce/test_stock.rs sets sandbox-only test stock through revision, index sync and product event; cognition/autonomy_revert.rs restores day baselines by request and from the agent worker lane when exposure exceeds the limit, skipping prices changed since; no extracted policy changed; scenario and provider suites cover each path"
+    },
     "src/cognition/behavior/capture.rs": {
       "status": "unproved",
       "sha256": "48518ff85988adee480e52bdd327fd360707a39bb6f42a68f0a947b7f3a39180",
@@ -3746,8 +3756,8 @@
     },
     "src/cognition/contracts.rs": {
       "status": "reviewed-binding",
-      "sha256": "8ed057557e931f45b52a83314668f5b4401ad42a74ee8189d3d9c4cc374bcbbd",
-      "review": "Autopilot daily limit: guardrails.rs gains optional max_daily_exposure_minor with a validated ceiling; autonomy.rs adds an unproved exposure sum and passes its comparison as the daily_budget input of the unchanged extracted ai_autonomy_admissible; read-only knowledge.autonomy.status; providers suite covers the exact boundary"
+      "sha256": "8f76e424495b81ccb3c924dc18a4eff27cb69f394ae9ab4b936ff6ed0dea5447",
+      "review": "Completion of stages 1-3: attack_store.rs saves applied actor-private report rows and reads the latest with release-digest freshness; commerce/test_stock.rs sets sandbox-only test stock through revision, index sync and product event; cognition/autonomy_revert.rs restores day baselines by request and from the agent worker lane when exposure exceeds the limit, skipping prices changed since; no extracted policy changed; scenario and provider suites cover each path"
     },
     "src/cognition/evidence.rs": {
       "status": "unproved",
@@ -3791,8 +3801,8 @@
     },
     "src/cognition/mod.rs": {
       "status": "unproved",
-      "sha256": "e84b4df73bb11f4b17bf53f7ba9bd897e0c6686f3b2919c03e1645fb5f68f6a5",
-      "review": "Behavior analytics reviewed: existing cart-locked consent predicate reused; purpose-separated withdrawal, tenant/FK scope, typed and bounded observations, private journey permissions and derived reports. New SQL/frontend/proxy adapters remain unproved; no new theorem claim."
+      "sha256": "a8914bb998ac8b79a0b3a3bdbcf887c146912dd570d4234ed3b8bd0ba1d47190",
+      "review": "Completion of stages 1-3: attack_store.rs saves applied actor-private report rows and reads the latest with release-digest freshness; commerce/test_stock.rs sets sandbox-only test stock through revision, index sync and product event; cognition/autonomy_revert.rs restores day baselines by request and from the agent worker lane when exposure exceeds the limit, skipping prices changed since; no extracted policy changed; scenario and provider suites cover each path"
     },
     "src/cognition/preferences.rs": {
       "status": "unproved",
@@ -3946,8 +3956,8 @@
     },
     "src/commerce/mod.rs": {
       "status": "unproved",
-      "sha256": "9c5e1fab1d034528fa2c846af1156cc07b829097e3e192ff32ea363e2f695d1b",
-      "review": "Reviewed opt-in paged catalogue preparation: current catalogue.read and tenant-owned products, enabled-language translation flags and durable image states only; no mutation, provider retry, credential or authority widening. Failed image jobs remain inspectable after reload."
+      "sha256": "85be3f7b507a3e133a1a5899f730100e3e1894194212b32c38e33a7fb38fecce",
+      "review": "Completion of stages 1-3: attack_store.rs saves applied actor-private report rows and reads the latest with release-digest freshness; commerce/test_stock.rs sets sandbox-only test stock through revision, index sync and product event; cognition/autonomy_revert.rs restores day baselines by request and from the agent worker lane when exposure exceeds the limit, skipping prices changed since; no extracted policy changed; scenario and provider suites cover each path"
     },
     "src/commerce/order_fields.rs": {
       "status": "unproved",
@@ -4083,6 +4093,11 @@
       "status": "reviewed-binding",
       "sha256": "7450f7c1120ea79d4302e6f9d451c246a9d9c4142acdd1ddf3e0fcbf93cf687f",
       "review": "Reviewed international configuration, destination tax predicates and native bindings; targeted PostgreSQL international/catalog cases plus Rust tests pass. Translation fixtures verify restart, provider rejection, tenant permissions and revision conflicts. Config/product/apply share row locks. Additive schema 028 and versioned MIT geography reviewed; surrounding SQL/provider behavior remains unproved."
+    },
+    "src/commerce/test_stock.rs": {
+      "status": "unproved",
+      "sha256": "350b8a2afdc7fccddb9acb5c351b7950ff7e405d34fd2e42c5f736042adc2bb9",
+      "review": "Completion of stages 1-3: attack_store.rs saves applied actor-private report rows and reads the latest with release-digest freshness; commerce/test_stock.rs sets sandbox-only test stock through revision, index sync and product event; cognition/autonomy_revert.rs restores day baselines by request and from the agent worker lane when exposure exceeds the limit, skipping prices changed since; no extracted policy changed; scenario and provider suites cover each path"
     },
     "src/commerce/types.rs": {
       "status": "unproved",
@@ -5516,8 +5531,8 @@
     },
     "src/workers.rs": {
       "status": "unproved",
-      "sha256": "ec88cff9bd039d6faf3479bd6d8e2df7afb88a6c45220faa2b31ebd4a5b95a4a",
-      "review": "Reviewed the separation of app worker startup from HTTP and operator initialization. The switch preserves the existing default, role and signed database scope. Shutdown stops future work and bounds the wait for tasks in progress."
+      "sha256": "c7ac8b2424804cf6072469431a5d4593fffa3c583299ef967203c00161c9121f",
+      "review": "Completion of stages 1-3: attack_store.rs saves applied actor-private report rows and reads the latest with release-digest freshness; commerce/test_stock.rs sets sandbox-only test stock through revision, index sync and product event; cognition/autonomy_revert.rs restores day baselines by request and from the agent worker lane when exposure exceeds the limit, skipping prices changed since; no extracted policy changed; scenario and provider suites cover each path"
     }
   },
   "inputs": {

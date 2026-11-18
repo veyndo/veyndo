@@ -21,7 +21,23 @@ export default function ScenarioTwin({
   const t = useTwinText(),
     { locale } = useLocale();
   const [value, setValue] = useState<TwinReadiness>(),
-    [error, setError] = useState("");
+    [error, setError] = useState(""),
+    [local, setLocal] = useState(0),
+    [notice, setNotice] = useState("");
+  const fill = async () => {
+    setError("");
+    try {
+      const done = (await request(
+        "/api/agent/scenario-stock",
+        { quantity: 10, approve: true },
+        "POST",
+      )) as { updated: number };
+      setNotice(t("twinFilled", { count: done.updated }));
+      setLocal((n) => n + 1);
+    } catch (e) {
+      setError((e as Error).message);
+    }
+  };
   useEffect(() => {
     let active = true;
     setError("");
@@ -45,7 +61,7 @@ export default function ScenarioTwin({
     return () => {
       active = false;
     };
-  }, [request, refresh]);
+  }, [request, refresh, local]);
   if (error)
     return (
       <p className="scenario-error" role="alert">
@@ -63,6 +79,7 @@ export default function ScenarioTwin({
   } catch {
     /* Keep the ISO code when the runtime has no display name. */
   }
+  const attack = tests.attack;
   const blocked = (code: string) => blockers.includes(code);
   const steps: {
     id: string;
@@ -70,6 +87,7 @@ export default function ScenarioTwin({
     done: boolean;
     text: string;
     action?: { label: string; tab: Tab; right: string };
+    fill?: boolean;
   }[] = [
     {
       id: "catalogue",
@@ -97,6 +115,7 @@ export default function ScenarioTwin({
               without: catalogue.withoutStock,
             })
           : t("twinStockEmpty"),
+      fill: catalogue.withoutStock > 0,
       action: {
         label: t("twinOpenProducts"),
         tab: "productData",
@@ -130,6 +149,27 @@ export default function ScenarioTwin({
           ? t("twinTestsOk", { count: tests.customerTests })
           : t("twinTestsNone"),
     },
+    {
+      id: "attack",
+      title: t("twinAttack"),
+      done:
+        !!attack &&
+        attack.configurationReview === "current" &&
+        attack.summary.breached + attack.summary.review === 0,
+      text: !attack
+        ? t("twinAttackNone")
+        : attack.summary.breached + attack.summary.review > 0
+          ? t("twinAttackBreached")
+          : attack.configurationReview === "current"
+            ? t("twinAttackOk", {
+                held: attack.summary.held,
+                total:
+                  attack.summary.held +
+                  attack.summary.breached +
+                  attack.summary.review,
+              })
+            : t("twinAttackStale"),
+    },
   ];
   return (
     <section className="scenario-twin">
@@ -150,6 +190,7 @@ export default function ScenarioTwin({
           {t(value.ready ? "twinReady" : "twinNotReady")}
         </span>
       </header>
+      {notice && <p role="status">{notice}</p>}
       <ol className="scenario-twin-steps">
         {steps.map((step) => (
           <li key={step.id} className={step.done ? "is-done" : "is-open"}>
@@ -163,6 +204,11 @@ export default function ScenarioTwin({
               </span>
               <p>{step.text}</p>
             </div>
+            {step.fill && access.includes("catalog.write") && (
+              <button className="studio-primary" onClick={() => void fill()}>
+                {t("twinFill")}
+              </button>
+            )}
             {!step.done &&
               step.action &&
               access.includes(step.action.right) && (

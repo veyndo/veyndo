@@ -120,7 +120,14 @@ function GuardrailEditor({
       )}
       {!state.value && !state.error && <p role="status">{k("loading")}</p>}
       {state.value && studio.access.includes("knowledge.read") && (
-        <AutopilotToday request={request} revision={state.value.revision} />
+        <AutopilotToday
+          request={request}
+          revision={state.value.revision}
+          canRevert={
+            studio.access.includes("catalog.write") &&
+            studio.access.includes("settings.write")
+          }
+        />
       )}
       {state.value && (
         <form
