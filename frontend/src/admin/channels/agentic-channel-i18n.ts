@@ -148,6 +148,40 @@ const words = {
     "Le droit de lecture du catalogue est requis.",
     "Se requiere permiso de lectura del catálogo.",
   ],
+  offerTitle: [
+    "Signed offers",
+    "Signierte Angebote",
+    "Offres signées",
+    "Ofertas firmadas",
+  ],
+  offerHint: [
+    "A buying agent can ask for the cart's quote with a signature. It checks the signature with your shop's public key and no longer has to trust the price it was shown.",
+    "Ein Kaufagent kann das Angebot zum Warenkorb mit Signatur abrufen. Er prüft die Signatur mit dem öffentlichen Schlüssel deines Shops und muss dem angezeigten Preis nicht mehr vertrauen.",
+    "Un agent d’achat peut demander le devis du panier avec une signature. Il la vérifie avec la clé publique de votre boutique et n’a plus à croire le prix affiché.",
+    "Un agente de compra puede pedir la oferta del carrito con firma. La comprueba con la clave pública de tu tienda y ya no tiene que fiarse del precio mostrado.",
+  ],
+  offerActive: ["Active", "Aktiv", "Actif", "Activo"],
+  offerMissing: [
+    "Not set up: the signing key is missing on this installation.",
+    "Nicht eingerichtet: Auf dieser Installation fehlt der Signierschlüssel.",
+    "Non configuré : la clé de signature manque sur cette installation.",
+    "Sin configurar: falta la clave de firma en esta instalación.",
+  ],
+  offerKey: ["Key", "Schlüssel", "Clé", "Clave"],
+  offerValid: ["Valid for", "Gültig für", "Valable", "Válida durante"],
+  offerMinutes: [
+    "{minutes} minutes",
+    "{minutes} Minuten",
+    "{minutes} minutes",
+    "{minutes} minutos",
+  ],
+  offerScope: [
+    "An offer states what the shop calculated for one cart version. Checkout confirms exactly that version and total or refuses. It reserves no stock and does not freeze a price you change afterwards.",
+    "Ein Angebot hält fest, was der Shop für einen Warenkorbstand berechnet hat. Der Checkout bestätigt genau diesen Stand und diese Summe oder lehnt ab. Es reserviert keinen Bestand und friert keinen Preis ein, den du danach änderst.",
+    "Une offre indique ce que la boutique a calculé pour une version du panier. Le paiement confirme exactement cette version et ce total, ou refuse. Elle ne réserve aucun stock et ne fige pas un prix que vous modifiez ensuite.",
+    "Una oferta indica lo que la tienda calculó para una versión del carrito. El pago confirma exactamente esa versión y ese total, o lo rechaza. No reserva stock ni congela un precio que cambies después.",
+  ],
+  offerPaths: ["For agents", "Für Agenten", "Pour les agents", "Para agentes"],
 } as const;
 export function useAgenticChannelText() {
   const { locale } = useLocale();

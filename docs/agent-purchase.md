@@ -86,6 +86,13 @@ The quote is calculated by Commerce Core, not by the agent. It contains the
 line items with unit price, tax and the stock the core sees. On 17 November
 2026 the demo lamp returned 59.90 EUR including 9.56 EUR tax at 19 %.
 
+### Optional: get the quote signed
+
+Call the tool `cart.offer` with the same cart token. The answer carries the
+quote with an Ed25519 signature that the agent can check against the shop's
+public key at `/.well-known/commerce-facts.json`. See
+[signed offers](agentic-commerce.md#signed-offers).
+
 ## 5. Choose delivery and payment
 
 ```sh

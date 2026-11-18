@@ -16,6 +16,7 @@ pub(crate) mod indexing;
 pub(crate) mod preferences;
 mod recommendations;
 pub(crate) mod signed;
+pub(crate) mod signed_offer;
 mod stream;
 pub(crate) mod tools;
 pub(crate) use recommendations::*;

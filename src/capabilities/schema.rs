@@ -220,6 +220,9 @@ pub(crate) fn input(name: &str) -> Value {
             json!({"revision":{"type":"integer"},"items":{"type":"array","items":{"type":"object","properties":{"id":{"type":"string"},"quantity":{"type":"integer","minimum":1}},"required":["id","quantity"]}}})
         }
         "checkout.complete" => json!({"idempotency_key":{"type":"string"}}),
+        "offer.verify" => {
+            json!({"payloadBase64":{"type":"string","maxLength":65536},"signature":{"type":"string","maxLength":256}})
+        }
         "merchant.plan" => json!({"instruction":{"type":"string"}}),
         "merchant.apply" => json!({"task_id":{"type":"string"},"approve":{"type":"boolean"}}),
         _ => json!({}),
@@ -269,6 +272,7 @@ pub(crate) fn input(name: &str) -> Value {
         "developer.stage" => vec!["buildId", "digest", "approve"],
         "developer.task" => vec!["environment", "prompt", "agent"],
         "cart.replace" => vec!["revision", "items"],
+        "offer.verify" => vec!["payloadBase64", "signature"],
         "catalog.detail" => vec!["productId"],
         "checkout.select" => vec!["revision", "checkout"],
         "checkout.complete" => vec!["idempotency_key"],

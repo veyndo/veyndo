@@ -126,6 +126,8 @@ pub(super) async fn invoke_native(
             cart_json(a, &c).await
         }
         "cart.quote" => cart_json(a, &load_cart(a, h).await?).await,
+        "cart.offer" => cognition::signed_offer::issue(a, h).await,
+        "offer.verify" => cognition::signed_offer::verify(a, h, v).await,
         "cart.replace" => {
             let i = serde_json::from_value(v["items"].clone()).map_err(|e| bad(e.to_string()))?;
             let c = set_items(

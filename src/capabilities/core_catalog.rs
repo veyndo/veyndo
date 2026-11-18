@@ -289,6 +289,14 @@ pub(crate) const CORE: &[(&str, &str)] = &[
     ),
     ("cart.quote", "Calculate authoritative cart"),
     (
+        "cart.offer",
+        "Sign the current cart quote so a buying agent can verify it offline",
+    ),
+    (
+        "offer.verify",
+        "Check a signed offer's signature, expiry and whether checkout would still confirm it",
+    ),
+    (
         "checkout.complete",
         "Place order with simulated/manual payment and Idempotency-Key",
     ),

@@ -70,7 +70,14 @@ pub(crate) static OPERATIONS: LazyLock<Vec<Operation>> = LazyLock::new(|| {
                     "checkout.payment.methods",
                 ]
                 .contains(&name)
-                || matches!(name, "catalog.facts" | "checkout.options" | "cart.quote");
+                || matches!(
+                    name,
+                    "catalog.facts"
+                        | "checkout.options"
+                        | "cart.quote"
+                        | "cart.offer"
+                        | "offer.verify"
+                );
             Operation {
                 name,
                 description,

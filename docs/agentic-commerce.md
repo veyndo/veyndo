@@ -100,6 +100,50 @@ this endpoint does not mean Veyndo has been admitted to Google surfaces. See
 the [Google Cart overview](https://developers.google.com/merchant/ucp/guides/overview/cart-overview)
 and [Merchant Center guidance](https://developers.google.com/merchant/ucp/guides/tools/merchant-center/overview).
 
+## Signed offers
+
+A buying agent does not have to trust the price it is shown. It can ask the shop
+for the cart's quote **with a signature** and check that signature with the
+shop's public key, without calling the shop again.
+
+![Signed offers in Studio](assets/roadmap/signed-offers-studio.jpg)
+
+*Local Studio, synthetic shop, 18 November 2026.*
+
+**For merchants.** Open **Sales channels → AI channels & imports**. The **Signed
+offers** card shows whether offers are signed on this installation, the key
+identifier and how long an offer is valid. There is nothing to switch on per
+shop; signing needs the operator's signing key (`FACT_SIGNING_SEED` or the
+platform secret).
+
+**For agents.** With the cart token in `sw-context-token`:
+
+1. `GET /store-api/checkout/cart/offer` (MCP tool `cart.offer`) returns
+   `payload`, `payloadBase64`, `signature`, `algorithm` (`Ed25519`), `keyId` and
+   `verificationKeys`.
+2. Fetch the public key once from `/.well-known/commerce-facts.json` and verify
+   `signature` over the decoded bytes of `payloadBase64`.
+3. Read the signed fields: shop, sales channel, cart revision, currency, exact
+   total in minor units, each line with quantity and prices, the selected
+   country, shipping and payment method, `issuedAt` and `expiresAt` (ten
+   minutes).
+4. Optional: `POST /store-api/checkout/offer/verify` (MCP tool `offer.verify`)
+   with `payloadBase64` and `signature` answers whether the offer is authentic,
+   expired, and whether checkout would still confirm it for the cart you hold.
+
+Try it against a running shop:
+
+```sh
+python3 scripts/demo/signed_offer.py http://127.0.0.1:8787 atelier lamp
+```
+
+**What an offer is and is not.** It states what the shop calculated for one cart
+revision at one moment. Checkout confirms exactly that revision and total, or
+refuses, and the agent asks for a new offer. It does not reserve stock and it
+does not freeze a price the merchant changes afterwards: after such a change the
+old offer is still authentic but no longer honoured. It contains no buyer data
+and never the cart token. AP2 payment mandates are not part of it.
+
 ## Explicit buyer consent
 
 A platform can pass the buyer's consent choices together with the cart. The

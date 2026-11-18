@@ -3531,8 +3531,8 @@
     },
     "src/capabilities/core_catalog.rs": {
       "status": "unproved",
-      "sha256": "da93eca7aecf3853b830e0cc58e9e3d67eefff0a605794380091f471f5fa13d7",
-      "review": "Separate Flow validation HTTP and MCP entry points are read-only, use the same tenant action and revision checks and cannot call save on older hosts. Legacy validation-only clients continue to get a read-only check on the new host. Signed PostgreSQL regression verifies denied access, invalid graphs and no Flow writes."
+      "sha256": "d2ccdc8fdf60d94f8fa476d5cfdfbf2bcdfcf2485127cd15211572024a6a2e34",
+      "review": "Signed offers: cognition/signed_offer.rs signs a closed projection of the native cart quote with the existing Ed25519 owner and verifies signature, shop, expiry and current cart match; signed.rs gains key_id and verify helpers; readiness reports signing status; no extracted policy changed; providers suite verifies independently and covers forged, foreign, malformed, changed-cart and changed-price cases"
     },
     "src/capabilities/dispatch.rs": {
       "status": "unproved",
@@ -3541,18 +3541,18 @@
     },
     "src/capabilities/registry.rs": {
       "status": "unproved",
-      "sha256": "ee3591361c51945ed523f4c4f8f6f1943b2489f26180db791717af7b02945b62",
-      "review": "Self-running experiments: Design gains an optional immutable automation flag pair; experiments/automation.rs adds a read-only suggestion from live payment figures and worker steps that repeat the manual finish transition, call the existing report owner and record a decision, fixing the treatment layout mode only when the unchanged extracted experiment_result_admissible reports a proved uplift; cognitive_experiments suite covers kept, seeded published and manual cases"
+      "sha256": "37b0b0499534ec07d07e7e2a691bc0f25208f8ecd13dbf7621e950fe1fe95b55",
+      "review": "Signed offers: cognition/signed_offer.rs signs a closed projection of the native cart quote with the existing Ed25519 owner and verifies signature, shop, expiry and current cart match; signed.rs gains key_id and verify helpers; readiness reports signing status; no extracted policy changed; providers suite verifies independently and covers forged, foreign, malformed, changed-cart and changed-price cases"
     },
     "src/capabilities/schema.rs": {
       "status": "unproved",
-      "sha256": "7aa20a316772adbce79a322c4b8cd51dcc14366ce8c52ab1c78173ea294a01bd",
-      "review": "Codex source review: the admitted Flow draft tool publishes one closed result schema, validates it at the existing shared dispatch boundary, and preserves all other operation contracts. Native PostgreSQL HTTP and MCP tests cover correct revision, no save or queue, denied authority and stale drafts. The unit test rejects a claimed save and missing or negative revision; generated TypeScript, OpenAPI and WIT were checked. The adapter remains unproved; no policy or theorem changed."
+      "sha256": "4bd5f79a1e80e7dca1034184bba7c8f5b4c195eb3b254d182d7ed244df97c359",
+      "review": "Signed offers: cognition/signed_offer.rs signs a closed projection of the native cart quote with the existing Ed25519 owner and verifies signature, shop, expiry and current cart match; signed.rs gains key_id and verify helpers; readiness reports signing status; no extracted policy changed; providers suite verifies independently and covers forged, foreign, malformed, changed-cart and changed-price cases"
     },
     "src/capabilities.rs": {
       "status": "unproved",
-      "sha256": "6a71cc8f4bd76222de064b3edf7ab5bb253a138650141c97dcbc17c8805a6ddc",
-      "review": "Codex source review: the admitted Flow draft tool publishes one closed result schema, validates it at the existing shared dispatch boundary, and preserves all other operation contracts. Native PostgreSQL HTTP and MCP tests cover correct revision, no save or queue, denied authority and stale drafts. The unit test rejects a claimed save and missing or negative revision; generated TypeScript, OpenAPI and WIT were checked. The adapter remains unproved; no policy or theorem changed."
+      "sha256": "bd4ba9b79e6f1c7ebdafe4fb50bf27f3f71cc143ac374c530644bcb6d120becd",
+      "review": "Signed offers: cognition/signed_offer.rs signs a closed projection of the native cart quote with the existing Ed25519 owner and verifies signature, shop, expiry and current cart match; signed.rs gains key_id and verify helpers; readiness reports signing status; no extracted policy changed; providers suite verifies independently and covers forged, foreign, malformed, changed-cart and changed-price cases"
     },
     "src/cart_model.rs": {
       "status": "unproved",
@@ -3806,8 +3806,8 @@
     },
     "src/cognition/mod.rs": {
       "status": "unproved",
-      "sha256": "a8914bb998ac8b79a0b3a3bdbcf887c146912dd570d4234ed3b8bd0ba1d47190",
-      "review": "Completion of stages 1-3: attack_store.rs saves applied actor-private report rows and reads the latest with release-digest freshness; commerce/test_stock.rs sets sandbox-only test stock through revision, index sync and product event; cognition/autonomy_revert.rs restores day baselines by request and from the agent worker lane when exposure exceeds the limit, skipping prices changed since; no extracted policy changed; scenario and provider suites cover each path"
+      "sha256": "30110a52dfb7d0849f187a7ff642ba8a602324567beb8e6e33d5afc2417cd1ef",
+      "review": "Signed offers: cognition/signed_offer.rs signs a closed projection of the native cart quote with the existing Ed25519 owner and verifies signature, shop, expiry and current cart match; signed.rs gains key_id and verify helpers; readiness reports signing status; no extracted policy changed; providers suite verifies independently and covers forged, foreign, malformed, changed-cart and changed-price cases"
     },
     "src/cognition/preferences.rs": {
       "status": "unproved",
@@ -3826,13 +3826,18 @@
     },
     "src/cognition/routes.rs": {
       "status": "unproved",
-      "sha256": "3eec673b8530d0570448a67ec095733db33a943a9810b32afbeeacbedde9a78c",
-      "review": "Behavior analytics reviewed: existing cart-locked consent predicate reused; purpose-separated withdrawal, tenant/FK scope, typed and bounded observations, private journey permissions and derived reports. New SQL/frontend/proxy adapters remain unproved; no new theorem claim."
+      "sha256": "b68ded78e45e0d9005f2b02bb4d808ad360df2cc34b06c47238502d49060574f",
+      "review": "Signed offers: cognition/signed_offer.rs signs a closed projection of the native cart quote with the existing Ed25519 owner and verifies signature, shop, expiry and current cart match; signed.rs gains key_id and verify helpers; readiness reports signing status; no extracted policy changed; providers suite verifies independently and covers forged, foreign, malformed, changed-cart and changed-price cases"
     },
     "src/cognition/signed.rs": {
       "status": "unproved",
-      "sha256": "8a1be9771ddb16aeb95e9a39f49d4595616e5282a1615b988497faed0df96de6",
-      "review": "Identity-only Veyndo namespace and canonical-domain rename; reviewed migration checksum compatibility for six historical SQL versions, unchanged checkout predicates, 42 library and 169 binary tests pass; native component legacy boundary remains configured and guarded."
+      "sha256": "12ce482dd469e57b5b08a56b53f7c7f86db4ac13e2199d97f9fa4d4ff69f9bc9",
+      "review": "Signed offers: cognition/signed_offer.rs signs a closed projection of the native cart quote with the existing Ed25519 owner and verifies signature, shop, expiry and current cart match; signed.rs gains key_id and verify helpers; readiness reports signing status; no extracted policy changed; providers suite verifies independently and covers forged, foreign, malformed, changed-cart and changed-price cases"
+    },
+    "src/cognition/signed_offer.rs": {
+      "status": "unproved",
+      "sha256": "9c01fa4df1a0e6190f35fef44cbbb82e25a2a51e9ae106f78d16569d6596e47d",
+      "review": "Signed offers: cognition/signed_offer.rs signs a closed projection of the native cart quote with the existing Ed25519 owner and verifies signature, shop, expiry and current cart match; signed.rs gains key_id and verify helpers; readiness reports signing status; no extracted policy changed; providers suite verifies independently and covers forged, foreign, malformed, changed-cart and changed-price cases"
     },
     "src/cognition/stream.rs": {
       "status": "unproved",
@@ -4651,8 +4656,8 @@
     },
     "src/mcp/transport.rs": {
       "status": "unproved",
-      "sha256": "e4fe4e6af90583a2febf6bcd640cedf3ee503300d8df5f1566f6a8124a10f0ef",
-      "review": "Reviewed eighteen core findings: typed trusted identity and explicit route rights; consolidated current grants; durable auth and fenced shared limits; scoped transactions and one-backend PgBouncer including nested borrow fixes; bounded Wasm/PNG work; notified workers, savepoint quarantine and conservative retention; separate runtime roles and startup configuration. Real PostgreSQL/provider regressions preserve current tenant/customer/payment behavior. SQL/network adapters remain unproved."
+      "sha256": "38bf12eb27ac6410ad33fae55d4f275db960d7cd290621c892ace2368ecaa7a7",
+      "review": "Signed offers: cognition/signed_offer.rs signs a closed projection of the native cart quote with the existing Ed25519 owner and verifies signature, shop, expiry and current cart match; signed.rs gains key_id and verify helpers; readiness reports signing status; no extracted policy changed; providers suite verifies independently and covers forged, foreign, malformed, changed-cart and changed-price cases"
     },
     "src/mcp.rs": {
       "status": "unproved",
@@ -5516,8 +5521,8 @@
     },
     "src/ucp/readiness.rs": {
       "status": "unproved",
-      "sha256": "48c67391642123bb928a69305609cd034ae3b2a632a19eb8df71dc7f3bb54a48",
-      "review": "Reviewed inbound UCP/native cart and consent transactions, native finalization contact guard, immutable order snapshots, explicit optional negotiation, public HTTPS app-owned catalogue adapters; independent whole-branch review findings repaired and six isolated HTTP/PG suites pass. No extracted kernel policy changed; SQL/provider behavior remains unproved."
+      "sha256": "a9f72435041f282928ad25c8f3a5f523690f2de5d3f65d4e358168427cf5c9a8",
+      "review": "Signed offers: cognition/signed_offer.rs signs a closed projection of the native cart quote with the existing Ed25519 owner and verifies signature, shop, expiry and current cart match; signed.rs gains key_id and verify helpers; readiness reports signing status; no extracted policy changed; providers suite verifies independently and covers forged, foreign, malformed, changed-cart and changed-price cases"
     },
     "src/work_signal.rs": {
       "status": "unproved",

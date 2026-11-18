@@ -1,5 +1,15 @@
 # Changelog
 
+## Signed offers for buying agents
+
+- Issue the cart quote with an Ed25519 signature (`GET
+  /store-api/checkout/cart/offer`, MCP tool `cart.offer`) that an agent verifies
+  offline with the shop's public key.
+- Answer whether an offer is authentic, expired and still confirmed by checkout
+  (`POST /store-api/checkout/offer/verify`, MCP tool `offer.verify`).
+- Show signing status, key identifier and agent paths in **Sales channels → AI
+  channels & imports**. Add `scripts/demo/signed_offer.py`.
+
 ## Experiments that run themselves
 
 - Suggest a layout experiment from the shop's live payments of the last 30 days,

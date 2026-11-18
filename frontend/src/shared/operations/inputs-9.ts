@@ -2,6 +2,92 @@
 /** Native input DTOs; opaque JSON fields remain explicit. */
 import type { JsonValue } from "./value";
 export interface Inputs9 {
+  "team.roles": {
+    approve?: boolean;
+    data?: {
+      active: boolean;
+      name: JsonValue;
+      permissions: Array<
+        | "overview.read"
+        | "assistant.use"
+        | "automation.read"
+        | "automation.manage"
+        | "channels.read"
+        | "channels.manage"
+        | "developer.read"
+        | "developer.manage"
+        | "environments.read"
+        | "environments.manage"
+        | "knowledge.write"
+        | "ai.manage"
+        | "apps.read"
+        | "pos.use"
+        | "b2b.read"
+        | "b2b.manage"
+        | "catalog.read"
+        | "catalog.write"
+        | "orders.read"
+        | "orders.write"
+        | "customers.read"
+        | "customers.pii"
+        | "customers.write"
+        | "documents.read"
+        | "documents.create"
+        | "payments.read"
+        | "payments.manage"
+        | "team.manage"
+        | "settings.read"
+        | "settings.write"
+        | "apps.manage"
+        | "knowledge.read"
+      >;
+    };
+    id?: string;
+    revision?: number;
+  };
+  "team.role.save": {
+    approve?: boolean;
+    data?: {
+      active: boolean;
+      name: JsonValue;
+      permissions: Array<
+        | "overview.read"
+        | "assistant.use"
+        | "automation.read"
+        | "automation.manage"
+        | "channels.read"
+        | "channels.manage"
+        | "developer.read"
+        | "developer.manage"
+        | "environments.read"
+        | "environments.manage"
+        | "knowledge.write"
+        | "ai.manage"
+        | "apps.read"
+        | "pos.use"
+        | "b2b.read"
+        | "b2b.manage"
+        | "catalog.read"
+        | "catalog.write"
+        | "orders.read"
+        | "orders.write"
+        | "customers.read"
+        | "customers.pii"
+        | "customers.write"
+        | "documents.read"
+        | "documents.create"
+        | "payments.read"
+        | "payments.manage"
+        | "team.manage"
+        | "settings.read"
+        | "settings.write"
+        | "apps.manage"
+        | "knowledge.read"
+      >;
+    };
+    id?: string;
+    revision?: number;
+  };
   "team.role.dependencies": {
     approve?: boolean;
     data?: {
@@ -108,6 +194,4 @@ export interface Inputs9 {
     revision?: number;
   };
   "knowledge.experiment.suggest": JsonValue;
-  "knowledge.experiment.report": { id?: string };
-  "catalog.facts": { productId?: string };
 }

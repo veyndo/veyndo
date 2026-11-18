@@ -413,6 +413,10 @@ interface inputs {
     %items: list<cart-replace-input-items-item>,
     %revision: s64,
   }
+  record offer-verify-input {
+    %payload-base64: string,
+    %signature: string,
+  }
   record checkout-complete-input {
     %idempotency-key: string,
   }
@@ -1704,6 +1708,8 @@ interface inputs {
   cart-create: func(input: cart-create-input) -> result<string, string>;
   cart-replace: func(input: cart-replace-input) -> result<string, string>;
   cart-quote: func(input: string) -> result<string, string>;
+  cart-offer: func(input: string) -> result<string, string>;
+  offer-verify: func(input: offer-verify-input) -> result<string, string>;
   checkout-complete: func(input: checkout-complete-input) -> result<string, string>;
   merchant-plan: func(input: merchant-plan-input) -> result<string, string>;
   merchant-apply: func(input: merchant-apply-input) -> result<string, string>;

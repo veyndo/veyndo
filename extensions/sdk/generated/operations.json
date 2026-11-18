@@ -2345,6 +2345,40 @@
       "readOnly": true
     },
     {
+      "description": "Sign the current cart quote so a buying agent can verify it offline",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {},
+        "required": [],
+        "type": "object"
+      },
+      "name": "cart.offer",
+      "readOnly": true
+    },
+    {
+      "description": "Check a signed offer's signature, expiry and whether checkout would still confirm it",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "payloadBase64": {
+            "maxLength": 65536,
+            "type": "string"
+          },
+          "signature": {
+            "maxLength": 256,
+            "type": "string"
+          }
+        },
+        "required": [
+          "payloadBase64",
+          "signature"
+        ],
+        "type": "object"
+      },
+      "name": "offer.verify",
+      "readOnly": true
+    },
+    {
       "description": "Place order with simulated/manual payment and Idempotency-Key",
       "inputSchema": {
         "additionalProperties": false,

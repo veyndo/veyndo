@@ -224,6 +224,43 @@ try:
     assert facts['payload']['expiresAt']-facts['payload']['issuedAt']==300
     assert call('/ucp/v1/products/lamp/facts',headers={'x-tenant':'workshop'})['payload']['tenant']=='workshop'
     passed('Real public and UCP-extension facts bind native product data and channel identity with independently verified Ed25519 signatures')
+    # Signed cart offer: a buying agent can check the shop's quote offline and ask whether checkout would still confirm it.
+    shop={'x-tenant':'workshop'}
+    cart=call('/store-api/checkout/cart',{'session':'offer-'+uuid.uuid4().hex},shop);ch={**shop,'sw-context-token':cart['token']}
+    call('/store-api/checkout/cart/offer',headers=ch,expected=409)
+    call('/store-api/checkout/cart/offer',headers=shop,expected=401)
+    quote=call('/store-api/checkout/cart/line-item',{'items':[{'referencedId':'lamp','quantity':2}]},ch)
+    offer=call('/store-api/checkout/cart/offer',headers=ch)
+    Ed25519PublicKey.from_public_bytes(decode(keys['keys'][0]['x'])).verify(decode(offer['signature']),decode(offer['payloadBase64']))
+    signed=json.loads(decode(offer['payloadBase64']))
+    assert signed==offer['payload'] and signed['kind']=='offer' and signed['tenant']=='workshop' and signed['currency']=='EUR' and signed['channel']=='default' and signed['totalMinor']==quote['price']['totalMinor'] and signed['cartRevision']==quote['revision'],signed
+    assert signed['expiresAt']-signed['issuedAt']==600 and signed['lineItems']==[{'id':'lamp','label':quote['lineItems'][0]['label'],'quantity':2,'unitPrice':quote['lineItems'][0]['price']['unitPrice'],'totalPrice':quote['lineItems'][0]['price']['totalPrice']}],signed
+    assert cart['token'] not in json.dumps(offer) and 'customerEmail' not in signed and 'stock' not in signed['lineItems'][0]
+    proof={'payloadBase64':offer['payloadBase64'],'signature':offer['signature']}
+    held=call('/store-api/checkout/offer/verify',proof,ch)
+    assert held['valid'] and held['honoured'] and held['matchesCart'] is True and not held['expired'] and held['totalMinor']==signed['totalMinor'],held
+    outside=call('/store-api/checkout/offer/verify',proof,shop)
+    assert outside['valid'] and outside['matchesCart'] is None and not outside['honoured'],outside
+    forged=base64.urlsafe_b64encode(json.dumps({**signed,'totalMinor':'1'}).encode()).decode().rstrip('=')
+    assert call('/store-api/checkout/offer/verify',{**proof,'payloadBase64':forged},ch)=={'valid':False,'reason':'signature'}
+    assert call('/store-api/checkout/offer/verify',proof,{'x-tenant':'atelier'})=={'valid':False,'reason':'other_shop'}
+    assert call('/store-api/checkout/offer/verify',{'payloadBase64':'%%','signature':offer['signature']},ch)=={'valid':False,'reason':'malformed'}
+    call('/store-api/checkout/offer/verify',{'signature':offer['signature']},ch,expected=400)
+    tool=call('/mcp',{'jsonrpc':'2.0','id':11,'method':'tools/call','params':{'name':'offer.verify','arguments':proof}},ch)
+    assert tool['result']['structuredContent']['honoured'] is True,tool
+    tool=call('/mcp',{'jsonrpc':'2.0','id':12,'method':'tools/call','params':{'name':'cart.offer','arguments':{}}},ch)
+    assert tool['result']['structuredContent']['payload']['totalMinor']==signed['totalMinor'],tool
+    # Not a price lock: after the merchant changes the price the old offer is still authentic but no longer honoured.
+    price=subprocess.check_output(psql(os.getenv('DB_CONTAINER','veyndo-postgres-1'),'commerce',os.getenv('TEST_DATABASE','commerce'),'-XqAt','-v','ON_ERROR_STOP=1'),input="BEGIN; SELECT set_config('rac.system','on',true); UPDATE products SET price=price+1,revision=revision+1 WHERE tenant='workshop' AND id='lamp'; COMMIT;",text=True)
+    stale=call('/store-api/checkout/offer/verify',proof,ch)
+    assert stale['valid'] and stale['matchesCart'] is False and not stale['honoured'],stale
+    fresh=call('/store-api/checkout/cart/offer',headers=ch)['payload']
+    assert int(fresh['totalMinor'])==int(signed['totalMinor'])+200 and fresh['cartRevision']==signed['cartRevision'],fresh
+    subprocess.check_output(psql(os.getenv('DB_CONTAINER','veyndo-postgres-1'),'commerce',os.getenv('TEST_DATABASE','commerce'),'-XqAt','-v','ON_ERROR_STOP=1'),input="BEGIN; SELECT set_config('rac.system','on',true); UPDATE products SET price=price-1,revision=revision+1 WHERE tenant='workshop' AND id='lamp'; COMMIT;",text=True)
+    call('/store-api/checkout/cart/line-item',{'items':[{'referencedId':'lamp','quantity':3}]},ch)
+    changed=call('/store-api/checkout/offer/verify',proof,ch)
+    assert changed['valid'] and changed['matchesCart'] is False and not changed['honoured'],changed
+    passed('Signed cart offers verify independently, expose no cart capability or buyer data, and are honoured only for the same shop, cart revision and current total; forged, foreign and outdated offers are refused')
     request=urllib.request.Request(base+'/api/agent/chat/stream',data=json.dumps({'message':'Stream validated response','inference':{'provider':'openai'}}).encode(),headers={'Content-Type':'application/json',**ah})
     with urllib.request.urlopen(request,timeout=30) as response:
         frames=response.read().decode();assert response.headers['content-type'].startswith('text/event-stream') and 'event: accepted' in frames and 'event: complete' in frames
