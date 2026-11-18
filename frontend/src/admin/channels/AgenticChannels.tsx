@@ -11,6 +11,14 @@ import "../styles/agentic-channels.css";
 type Readiness = {
   cartTransfer: boolean;
   buyerConsent: boolean;
+  signedOffers?: {
+    configured: boolean;
+    keyId?: string | null;
+    validSeconds: number;
+    offerPath: string;
+    verifyPath: string;
+    keysPath: string;
+  };
   externalAcceptance: string;
   configuredPayments: { id: string; mode: string }[];
 };
@@ -135,6 +143,45 @@ export default function AgenticChannels({
           {readiness && <p className="soft-tag">{t("approval")}</p>}
         </div>
       </article>
+      {readiness?.signedOffers && (
+        <article className="studio-card agentic-protocol">
+          <div>
+            <Icon name="lock" />
+            <h3>{t("offerTitle")}</h3>
+            <p>{t("offerHint")}</p>
+            <p>{t("offerScope")}</p>
+          </div>
+          <div>
+            {readiness.signedOffers.configured ? (
+              <dl>
+                <dt>{t("offerTitle")}</dt>
+                <dd>{t("offerActive")}</dd>
+                <dt>{t("offerKey")}</dt>
+                <dd>
+                  <code>{readiness.signedOffers.keyId?.slice(0, 16)}</code>
+                </dd>
+                <dt>{t("offerValid")}</dt>
+                <dd>
+                  {t("offerMinutes").replace(
+                    "{minutes}",
+                    String(readiness.signedOffers.validSeconds / 60),
+                  )}
+                </dd>
+                <dt>{t("offerPaths")}</dt>
+                <dd>
+                  <code>{readiness.signedOffers.offerPath}</code>
+                  <br />
+                  <code>{readiness.signedOffers.verifyPath}</code>
+                  <br />
+                  <code>{readiness.signedOffers.keysPath}</code>
+                </dd>
+              </dl>
+            ) : (
+              <p role="status">{t("offerMissing")}</p>
+            )}
+          </div>
+        </article>
+      )}
       <div className="agentic-import-cards">
         {cards.map((c) => (
           <article className="studio-card" key={c.id}>

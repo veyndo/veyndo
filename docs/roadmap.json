@@ -111,7 +111,7 @@
     },
     {
       "id": "signed-offers",
-      "status": "planned",
+      "status": "local",
       "title": {
         "en": "Signed offers for buying agents",
         "de": "Signierte Angebote für Kaufagenten",
@@ -119,14 +119,14 @@
         "es": "Ofertas firmadas para agentes de compra"
       },
       "summary": {
-        "en": "A buying agent receives a binding quote with a signature it can check, instead of a price it has to trust.",
-        "de": "Ein Kaufagent erhält ein verbindliches Angebot mit prüfbarer Signatur statt eines Preises, dem er vertrauen muss.",
-        "fr": "Un agent d’achat reçoit un devis ferme avec une signature vérifiable, au lieu d’un prix à croire sur parole.",
-        "es": "Un agente de compra recibe una oferta vinculante con firma verificable, en lugar de un precio en el que debe confiar."
+        "en": "A buying agent receives the cart's quote with a signature it can check offline with the shop's public key. Checkout confirms exactly that cart version and total, or refuses. It is not a price lock.",
+        "de": "Ein Kaufagent erhält das Angebot zum Warenkorb mit einer Signatur, die er offline mit dem öffentlichen Schlüssel des Shops prüfen kann. Der Checkout bestätigt genau diesen Warenkorbstand und diese Summe oder lehnt ab. Es ist keine Preisbindung.",
+        "fr": "Un agent d’achat reçoit le devis du panier avec une signature vérifiable hors ligne avec la clé publique de la boutique. Le paiement confirme exactement cette version et ce total, ou refuse. Ce n’est pas un blocage de prix.",
+        "es": "Un agente de compra recibe la oferta del carrito con una firma que puede comprobar sin conexión con la clave pública de la tienda. El pago confirma exactamente esa versión y ese total, o lo rechaza. No es un bloqueo de precio."
       },
       "buildsOn": "Binding quotes over HTTP, MCP and UCP; short-lived signed native facts",
-      "guide": null,
-      "evidence": null
+      "guide": "docs/agentic-commerce.md#signed-offers",
+      "evidence": "docs/evidence/signed-offers-2026-11-18.md"
     },
     {
       "id": "trade-network",

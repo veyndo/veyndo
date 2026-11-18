@@ -53,6 +53,17 @@ Studio and the public Lumen storefront responded on their existing origins.
   promotion remain open. [Measured workloads](benchmarks.md) ·
   [Component tasks](commerce-components.md).
 
+## Signed offers for buying agents
+
+A buying agent can fetch the cart quote with an Ed25519 signature and verify it
+offline with the shop's public key. A local agent script verified an offer,
+rejected a forged total offline and saw the shop stop honouring the offer after
+the cart changed. The offer is a verifiable statement of the quote, not a price
+lock or a stock reservation, and it is issued for Store API and MCP carts, not
+for UCP carts. Not deployed to the hosted pilot.
+[Guide](agentic-commerce.md#signed-offers) ·
+[Local record](evidence/signed-offers-2026-11-18.md).
+
 ## Experiments that run themselves
 
 **Shop knowledge → Experiments** can prefill an experiment from the shop's live

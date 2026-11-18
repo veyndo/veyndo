@@ -2,6 +2,8 @@
 /** Native input DTOs; opaque JSON fields remain explicit. */
 import type { JsonValue } from "./value";
 export interface Inputs7 {
+  "cart.offer": JsonValue;
+  "offer.verify": { payloadBase64: string; signature: string };
   "checkout.complete": { idempotency_key: string };
   "merchant.plan": { instruction: string };
   "merchant.apply": { approve: boolean; task_id: string };
@@ -229,6 +231,4 @@ export interface Inputs7 {
     sourceTaskId?: string;
     title: string;
   };
-  "merchant.scenario.status": { id: string };
-  "merchant.scenario.list": JsonValue;
 }

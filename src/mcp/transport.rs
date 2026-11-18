@@ -18,6 +18,8 @@ pub(super) async fn invoke_transport(
         "catalog.detail",
         "checkout.options",
         "cart.quote",
+        "cart.offer",
+        "offer.verify",
     ]
     .contains(&name)
     {

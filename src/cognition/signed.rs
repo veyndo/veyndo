@@ -35,6 +35,22 @@ pub(crate) fn attest(payload: Value) -> Result<Value> {
         json!({"payload":payload,"payloadBase64":URL_SAFE_NO_PAD.encode(&bytes),"signature":URL_SAFE_NO_PAD.encode(key.sign(&bytes).as_ref()),"algorithm":"Ed25519","keyId":hash(&public),"verificationKeys":"/.well-known/commerce-facts.json"}),
     )
 }
+/// Identifier of the public key agents verify against; absent when signing is not configured.
+pub(crate) fn key_id() -> Option<String> {
+    key()
+        .ok()
+        .map(|key| hash(&URL_SAFE_NO_PAD.encode(key.public_key().as_ref())))
+}
+/// Verifies bytes against this installation's own public key.
+pub(crate) fn verify(bytes: &[u8], signature: &[u8]) -> Result<bool> {
+    let key = key()?;
+    Ok(ring::signature::UnparsedPublicKey::new(
+        &ring::signature::ED25519,
+        key.public_key().as_ref(),
+    )
+    .verify(bytes, signature)
+    .is_ok())
+}
 async fn keys() -> Result<Json<Value>> {
     let public = URL_SAFE_NO_PAD.encode(key()?.public_key().as_ref());
     Ok(Json(

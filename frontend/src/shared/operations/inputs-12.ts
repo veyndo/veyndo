@@ -2,6 +2,30 @@
 /** Native input DTOs; opaque JSON fields remain explicit. */
 import type { JsonValue } from "./value";
 export interface Inputs12 {
+  "merchant.reports.read": {
+    channel?: string | null;
+    channelType?: "all" | "storefront" | "headless" | "marketplace" | "pos";
+    compare?: boolean;
+    currency?: string | null;
+    from?: string | null;
+    interval?: "auto" | "day" | "week" | "month" | "year";
+    period?:
+      | "today"
+      | "yesterday"
+      | "week"
+      | "last7"
+      | "last30"
+      | "last90"
+      | "month"
+      | "lastMonth"
+      | "year"
+      | "lastYear"
+      | "all"
+      | "custom";
+    timezone?: string;
+    to?: string | null;
+  };
+  "studio.workspace.work.read": JsonValue;
   "studio.workspace.read": JsonValue;
   "studio.workspace.save": { data: JsonValue; revision: number };
   "merchant.import.inspect": {
@@ -97,35 +121,4 @@ export interface Inputs12 {
     totalMinor: string;
   };
   "merchant.catalog.context": JsonValue;
-  "merchant.catalog.prepare": {
-    count: number;
-    inference?: {
-      model?: string | null;
-      provider?: "platform" | "ollama" | "openai" | "anthropic";
-    } | null;
-    mode: "csv" | "url" | "demo" | "shopify_csv" | "shop_mcp";
-    shopDomain?: string;
-    source: string;
-  };
-  "merchant.catalog.save": {
-    approve: boolean;
-    currency: string;
-    demo: boolean;
-    draft: {
-      description: string;
-      imageUrl?: string;
-      name: string;
-      price: number;
-      productNumber?: string;
-      source?: {
-        externalId: string;
-        provider: "shopify_csv" | "shop_mcp";
-        url?: string;
-      };
-    };
-    id: string;
-    mainLocale: string;
-    settingsRevision: number;
-    taxRate: number;
-  };
 }

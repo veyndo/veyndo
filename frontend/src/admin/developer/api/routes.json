@@ -1525,6 +1525,11 @@
     "source": "src/routes.rs"
   },
   {
+    "path": "/store-api/checkout/cart/offer",
+    "method": "GET",
+    "source": "src/cognition/signed_offer.rs"
+  },
+  {
     "path": "/store-api/checkout/cart/preview",
     "method": "POST",
     "source": "src/routes.rs"
@@ -1568,6 +1573,11 @@
     "path": "/store-api/checkout/independent/create",
     "method": "POST",
     "source": "src/checkout/private_browser.rs"
+  },
+  {
+    "path": "/store-api/checkout/offer/verify",
+    "method": "POST",
+    "source": "src/cognition/signed_offer.rs"
   },
   {
     "path": "/store-api/checkout/options",

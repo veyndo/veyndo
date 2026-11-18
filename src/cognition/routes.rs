@@ -6,6 +6,7 @@ pub(crate) fn cognition_router() -> Router<App> {
         .merge(behavior::router())
         .merge(preferences::router())
         .merge(signed::router())
+        .merge(signed_offer::router())
         .merge(stream::router())
         .route(
             "/store-api/intelligence/recommendations/{id}",
