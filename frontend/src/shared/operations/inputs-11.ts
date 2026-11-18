@@ -2,6 +2,14 @@
 /** Native input DTOs; opaque JSON fields remain explicit. */
 import type { JsonValue } from "./value";
 export interface Inputs11 {
+  "merchant.app.history": {
+    app: string;
+    approve?: boolean;
+    entity: string;
+    id: string;
+    revision?: number;
+    version?: number;
+  };
   "merchant.app.restore": {
     app: string;
     approve: boolean;
@@ -122,5 +130,4 @@ export interface Inputs11 {
       warnings: Array<string>;
     };
   };
-  "merchant.customer.creation": JsonValue;
 }

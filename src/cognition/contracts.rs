@@ -10,6 +10,7 @@ pub(crate) fn schema(name: &str) -> Option<Value> {
     let props = match name {
         "catalog.facts" => json!({"productId":{"type":"string"}}),
         "knowledge.autonomy.apply" => json!({"taskId":{"type":"string"}}),
+        "knowledge.autonomy.status" => json!({}),
         "knowledge.claims" => json!({"productId":{"type":"string"}}),
         "knowledge.claim.propose" => {
             json!({"productId":{"type":"string"},"sourceId":{"type":"string"},"contentHash":{"type":"string"},"text":{"type":"string","maxLength":1200},"quote":{"type":"string","maxLength":2400},"locale":{"type":"string"},"confidence":{"type":"number","minimum":0,"maximum":1},"nodeType":{"type":"string","enum":evidence::NODE_TYPES}})
@@ -53,6 +54,7 @@ pub(crate) async fn invoke_contract(
             )
             .await
         }
+        "knowledge.autonomy.status" => autonomy::status(a, &t, h).await,
         "knowledge.claims" => evidence::claims(a, &t, product()?, false).await,
         "knowledge.claim.propose" => evidence::propose(a, h, v).await,
         "knowledge.claim.review" => evidence::decide(a, h, v).await,

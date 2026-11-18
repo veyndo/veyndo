@@ -1,5 +1,13 @@
 # Changelog
 
+## Autopilot levels and a daily limit for price reductions
+
+- Add an optional daily limit to automatic prices: reduction times current
+  stock, summed over the products the autopilot changed today. A change that
+  would exceed it is refused and the price stays unchanged.
+- Show the level per area, the limits and today's use above the price
+  boundaries in Studio, over HTTP and the MCP tool `knowledge.autonomy.status`.
+
 ## Shop twin readiness in the customer simulator
 
 - Show for the selected private sandbox whether catalog, test stock, simulated

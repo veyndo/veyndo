@@ -2,6 +2,7 @@
 /** Native input DTOs; opaque JSON fields remain explicit. */
 import type { JsonValue } from "./value";
 export interface Inputs12 {
+  "merchant.customer.creation": JsonValue;
   "merchant.customer.create": {
     additionalAddresses?: Array<JsonValue>;
     billingAddress: JsonValue;
@@ -80,5 +81,4 @@ export interface Inputs12 {
     revision: number;
   };
   "pos.receipt": { channelId: string; orderId: string; receiptId: string };
-  "pos.channels": JsonValue;
 }

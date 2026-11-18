@@ -7,6 +7,8 @@ import { useStudio } from "../shell/StudioContext";
 import Icon from "../../shared/ui/Icon";
 import GuardrailProductSearch from "./GuardrailProductSearch";
 import GuardrailProductCard from "./GuardrailProductCard";
+import AutopilotToday from "./AutopilotToday";
+import { useAutopilotText } from "./autopilot-i18n";
 import {
   defaultPolicy,
   validPolicy,
@@ -38,6 +40,7 @@ function GuardrailEditor({
   onDirtyChange?: (dirty: boolean) => void;
 }) {
   const k = useKnowledgeText(),
+    ap = useAutopilotText(),
     studio = useStudio();
   const state = useSettingsDraft<Settings>(request, "/api/merchant/commerce");
   const [added, setAdded] = useState<Product[]>([]);
@@ -83,6 +86,10 @@ function GuardrailEditor({
       ],
     });
   };
+  const pricing = state.value?.data.currencies?.pricingCurrency ?? "";
+  const pricingScale =
+    state.value?.data.currencies?.definitions.find((c) => c.code === pricing)
+      ?.scale ?? 2;
   const navigate = (tab: Parameters<typeof studio.selectTab>[0]) =>
     studio.selectTab(tab);
   const disabledLink = state.dirty || state.busy;
@@ -112,6 +119,9 @@ function GuardrailEditor({
         </p>
       )}
       {!state.value && !state.error && <p role="status">{k("loading")}</p>}
+      {state.value && studio.access.includes("knowledge.read") && (
+        <AutopilotToday request={request} revision={state.value.revision} />
+      )}
       {state.value && (
         <form
           onSubmit={(e) => {
@@ -198,6 +208,35 @@ function GuardrailEditor({
                     }
                   />
                   <small>{k("policyChangeHint")}</small>
+                </label>
+                <label>
+                  {ap("limitLabel", { currency: pricing })}
+                  <input
+                    type="number"
+                    min={0}
+                    step={1 / 10 ** pricingScale}
+                    value={
+                      policy.autonomy.maxDailyExposureMinor == null
+                        ? ""
+                        : policy.autonomy.maxDailyExposureMinor /
+                          10 ** pricingScale
+                    }
+                    onChange={(e) =>
+                      update({
+                        ...policy,
+                        autonomy: {
+                          ...policy.autonomy,
+                          maxDailyExposureMinor:
+                            e.target.value === ""
+                              ? null
+                              : Math.round(
+                                  Number(e.target.value) * 10 ** pricingScale,
+                                ),
+                        },
+                      })
+                    }
+                  />
+                  <small>{ap("limitHint")}</small>
                 </label>
               </div>
             )}

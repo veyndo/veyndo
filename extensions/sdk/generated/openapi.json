@@ -7627,6 +7627,48 @@
                         "additionalProperties": false,
                         "properties": {
                           "name": {
+                            "const": "knowledge.autonomy.status"
+                          },
+                          "arguments": {
+                            "additionalProperties": false,
+                            "properties": {},
+                            "type": "object"
+                          }
+                        }
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "required": [
+                      "jsonrpc",
+                      "id",
+                      "method",
+                      "params"
+                    ],
+                    "additionalProperties": false,
+                    "properties": {
+                      "jsonrpc": {
+                        "const": "2.0"
+                      },
+                      "id": {
+                        "type": [
+                          "string",
+                          "integer"
+                        ]
+                      },
+                      "method": {
+                        "const": "tools/call"
+                      },
+                      "params": {
+                        "type": "object",
+                        "required": [
+                          "name",
+                          "arguments"
+                        ],
+                        "additionalProperties": false,
+                        "properties": {
+                          "name": {
                             "const": "knowledge.claims"
                           },
                           "arguments": {

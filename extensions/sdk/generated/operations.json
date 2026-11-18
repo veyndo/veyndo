@@ -3801,6 +3801,16 @@
       "readOnly": false
     },
     {
+      "description": "Read the price autopilot level, daily limits and today's use",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {},
+        "type": "object"
+      },
+      "name": "knowledge.autonomy.status",
+      "readOnly": true
+    },
+    {
       "description": "Read source-bound product evidence",
       "inputSchema": {
         "additionalProperties": false,

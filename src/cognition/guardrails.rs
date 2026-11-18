@@ -32,6 +32,9 @@ pub(crate) struct Autonomy {
     pub enabled: bool,
     pub max_change_bps: u16,
     pub products_per_day: u16,
+    /// Optional ceiling for today's price reductions times current stock, in minor units of the pricing currency.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub max_daily_exposure_minor: Option<u64>,
 }
 impl Default for Autonomy {
     fn default() -> Self {
@@ -39,6 +42,7 @@ impl Default for Autonomy {
             enabled: false,
             max_change_bps: 500,
             products_per_day: 20,
+            max_daily_exposure_minor: None,
         }
     }
 }
@@ -48,6 +52,10 @@ impl Config {
         if self.corridors.len() > 1000
             || self.autonomy.max_change_bps > 500
             || !(1..=100).contains(&self.autonomy.products_per_day)
+            || self
+                .autonomy
+                .max_daily_exposure_minor
+                .is_some_and(|limit| limit > 1_000_000_000_000)
         {
             return Err(bad("AI guardrail limits exceeded"));
         }

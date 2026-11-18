@@ -1,0 +1,109 @@
+/* Autopilot summary: level per area, daily meters and today's autonomous price changes. */
+.autopilot {
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+  margin-bottom: 20px;
+  border: 1px solid var(--border, #d6e2ef);
+  border-radius: 16px;
+  background: var(--panel, #fff);
+}
+.autopilot > header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.autopilot h3,
+.autopilot h4 {
+  margin: 0 0 4px;
+}
+.autopilot p {
+  margin: 0;
+  color: var(--muted, #63768c);
+  line-height: 1.55;
+}
+.autopilot-emblem {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+  border-radius: 14px;
+  background: #e5f3ff;
+  color: #0877e8;
+}
+.autopilot-areas {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.autopilot-areas li {
+  display: grid;
+  gap: 2px;
+  padding: 10px 12px;
+  border: 1px solid var(--border, #d6e2ef);
+  border-radius: 12px;
+  font-size: 13px;
+}
+.autopilot-areas span {
+  color: var(--muted, #63768c);
+}
+.autopilot-areas li[data-active="true"] {
+  border-color: #0877e8;
+  background: #f1f8ff;
+}
+.autopilot-areas li[data-active="true"] span {
+  color: #0b539b;
+  font-weight: 600;
+}
+.autopilot-note {
+  font-size: 12.5px;
+}
+.autopilot-today {
+  display: grid;
+  gap: 10px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border, #d6e2ef);
+}
+.autopilot-meter {
+  display: grid;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.autopilot-meter i {
+  display: block;
+  height: 8px;
+  border-radius: 999px;
+  background: #e8eef5;
+  overflow: hidden;
+}
+.autopilot-meter b {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #0877e8;
+}
+.autopilot-changes {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 13px;
+}
+.autopilot-changes li {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border: 1px solid var(--border, #d6e2ef);
+  border-radius: 10px;
+}
+.autopilot-changes span {
+  color: var(--muted, #63768c);
+}

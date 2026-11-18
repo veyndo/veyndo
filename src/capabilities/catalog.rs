@@ -124,6 +124,10 @@ const COGNITIVE: &[(&str, &str)] = &[
         "knowledge.autonomy.apply",
         "Apply a price-only proposal within explicit current merchant policy and daily budget",
     ),
+    (
+        "knowledge.autonomy.status",
+        "Read the price autopilot level, daily limits and today's use",
+    ),
     ("knowledge.claims", "Read source-bound product evidence"),
     (
         "knowledge.claim.propose",

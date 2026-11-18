@@ -1730,6 +1730,7 @@ interface inputs {
   knowledge-experiment-report: func(input: knowledge-experiment-report-input) -> result<string, string>;
   catalog-facts: func(input: catalog-facts-input) -> result<string, string>;
   knowledge-autonomy-apply: func(input: knowledge-autonomy-apply-input) -> result<string, string>;
+  knowledge-autonomy-status: func(input: string) -> result<string, string>;
   knowledge-claims: func(input: knowledge-claims-input) -> result<string, string>;
   knowledge-claim-propose: func(input: knowledge-claim-propose-input) -> result<string, string>;
   knowledge-claim-review: func(input: knowledge-claim-review-input) -> result<string, string>;

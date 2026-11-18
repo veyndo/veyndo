@@ -257,7 +257,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/checkout_products.rs](../src/checkout_products.rs) | Localized immutable checkout SKU snapshots read under the purchase transaction's locks. |
 | [src/checkout_review.rs](../src/checkout_review.rs) | Bind the reviewed revision and exact total for every checkout transport. |
 | [src/cognition/advisor.rs](../src/cognition/advisor.rs) | Buyer-admitted initial catalog/evidence context and bounded native response revalidation; no extra truth store. |
-| [src/cognition/autonomy.rs](../src/cognition/autonomy.rs) | Price-only optional autonomy, atomic unique-SKU daily quotas and a non-compounding day baseline. |
+| [src/cognition/autonomy.rs](../src/cognition/autonomy.rs) | Price-only optional autonomy, atomic unique-SKU daily quotas, a non-compounding day baseline and a daily exposure ceiling. |
 | [src/cognition/behavior/capture.rs](../src/cognition/behavior/capture.rs) | Cart-locked writes serialize with withdrawal; customer association is derived from authenticated native identity. |
 | [src/cognition/behavior/geography.rs](../src/cognition/behavior/geography.rs) | Optional trusted ingress geography. Ordinary country headers never establish visitor location. |
 | [src/cognition/behavior/input.rs](../src/cognition/behavior/input.rs) | Minimal behavioral envelope: no URLs, search text, raw user agents, IPs or caller customer identities. |
@@ -947,6 +947,7 @@ This lists every checked-in source module in these roots, including files with n
 | [frontend/src/admin/environments/release-preview.css](../frontend/src/admin/environments/release-preview.css) | Native shop preview stays contained in the release review at both viewport sizes. |
 | [frontend/src/admin/environments/release-tests-i18n.ts](../frontend/src/admin/environments/release-tests-i18n.ts) | Release review vocabulary keeps simulated commerce evidence distinct from publication approval. |
 | [frontend/src/admin/environments/release-tests.css](../frontend/src/admin/environments/release-tests.css) | Existing release workbench typography with bounded, responsive test controls. |
+| [frontend/src/admin/intelligence/AutopilotToday.tsx](../frontend/src/admin/intelligence/AutopilotToday.tsx) | Read-only autopilot summary: level per area, daily limits and today's native use; settings stay with the guardrail editor. |
 | [frontend/src/admin/intelligence/EvidenceReview.tsx](../frontend/src/admin/intelligence/EvidenceReview.tsx) | Review source-bound candidates through shared HTTP/MCP contracts; changed sources block publication. |
 | [frontend/src/admin/intelligence/ExperimentStudio.tsx](../frontend/src/admin/intelligence/ExperimentStudio.tsx) | Immutable experiment designs and lifecycle controls share the core HTTP/MCP owner and current settings rights. |
 | [frontend/src/admin/intelligence/ExternalKnowledge.tsx](../frontend/src/admin/intelligence/ExternalKnowledge.tsx) | Private connected-app evidence browser shows active-source provenance without exposing it to shoppers. |
@@ -963,6 +964,7 @@ This lists every checked-in source module in these roots, including files with n
 | [frontend/src/admin/intelligence/MemoryView.tsx](../frontend/src/admin/intelligence/MemoryView.tsx) | Durable co-purchase evidence and revision-bound merchant decisions, with simulation labels and explicit confirmation. |
 | [frontend/src/admin/intelligence/MerchantSourceIntake.tsx](../frontend/src/admin/intelligence/MerchantSourceIntake.tsx) | Conversation intake reuses the real private versioned source editor and existing upload API. |
 | [frontend/src/admin/intelligence/SourceEditor.tsx](../frontend/src/admin/intelligence/SourceEditor.tsx) | Single-language source editor with inherited fields, product lookup and private-first API/file ingestion. |
+| [frontend/src/admin/intelligence/autopilot-i18n.ts](../frontend/src/admin/intelligence/autopilot-i18n.ts) | Autopilot vocabulary: levels per area, daily limits and today's use in EN/DE/FR/ES; amounts are parameters. |
 | [frontend/src/admin/intelligence/behavior/BehaviorGraph.tsx](../frontend/src/admin/intelligence/behavior/BehaviorGraph.tsx) | A derived graph connects coarse browsers to native products and existing semantic product relations. |
 | [frontend/src/admin/intelligence/behavior/BehaviorJourney.tsx](../frontend/src/admin/intelligence/behavior/BehaviorJourney.tsx) | Authorized journey timeline links to native product, customer and order views, through permission-bound native CRM references. |
 | [frontend/src/admin/intelligence/behavior/BehaviorView.tsx](../frontend/src/admin/intelligence/behavior/BehaviorView.tsx) | Behavioral workspace makes consent, channel/window, guest journeys and semantic projections inspectable. |
@@ -1130,6 +1132,7 @@ This lists every checked-in source module in these roots, including files with n
 | [frontend/src/admin/styles/assistant-layout.css](../frontend/src/admin/styles/assistant-layout.css) | One reading column connects merchant context, conversation and intake in full Studio and the copilot. |
 | [frontend/src/admin/styles/automation-lifecycle.css](../frontend/src/admin/styles/automation-lifecycle.css) | Configuration workspace: readable definitions, clear selection and contextual actions. |
 | [frontend/src/admin/styles/automation.css](../frontend/src/admin/styles/automation.css) | Actual graph nodes and original rule forms use the Studio theme and independent responsive columns. |
+| [frontend/src/admin/styles/autopilot.css](../frontend/src/admin/styles/autopilot.css) | Autopilot summary: level per area, daily meters and today's autonomous price changes. |
 | [frontend/src/admin/styles/b2b-settings.css](../frontend/src/admin/styles/b2b-settings.css) | Revisioned B2B settings cards, accessible switches and responsive spacing. |
 | [frontend/src/admin/styles/behavior.css](../frontend/src/admin/styles/behavior.css) | Consent-bound insights use the existing Studio tokens and a responsive, inspectable visual hierarchy. |
 | [frontend/src/admin/styles/canvas-commerce-editor.css](../frontend/src/admin/styles/canvas-commerce-editor.css) | Shared native commerce handoff spacing loads with its Canvas editor in every workspace. |

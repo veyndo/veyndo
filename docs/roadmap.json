@@ -73,22 +73,22 @@
     },
     {
       "id": "autopilot",
-      "status": "planned",
+      "status": "local",
       "title": {
-        "en": "Autopilot levels with a loss limit",
-        "de": "Autopilot-Stufen mit Verlustgrenze",
-        "fr": "Niveaux de pilote automatique avec limite de perte",
-        "es": "Niveles de piloto automático con límite de pérdida"
+        "en": "Autopilot levels with a daily limit",
+        "de": "Autopilot-Stufen mit Tageslimit",
+        "fr": "Niveaux de pilote automatique avec limite quotidienne",
+        "es": "Niveles de piloto automático con límite diario"
       },
       "summary": {
-        "en": "Choose per area whether an agent suggests, acts within a budget or acts alone. Each level has a daily limit and an automatic rollback.",
-        "de": "Wähle pro Bereich, ob ein Agent vorschlägt, im Budget handelt oder allein handelt. Jede Stufe hat ein Tageslimit und eine automatische Rücknahme.",
-        "fr": "Choisissez par domaine si un agent propose, agit dans un budget ou agit seul. Chaque niveau a une limite quotidienne et un retour arrière automatique.",
-        "es": "Elige por área si un agente propone, actúa dentro de un presupuesto o actúa solo. Cada nivel tiene un límite diario y una reversión automática."
+        "en": "See per area whether an agent suggests or acts. For prices it may act within a budget: price boundaries, a daily movement, a number of products and a daily limit for price reductions. An automatic rollback is not built yet.",
+        "de": "Sieh pro Bereich, ob ein Agent vorschlägt oder handelt. Bei Preisen darf er im Budget handeln: Preisgrenzen, Tagesbewegung, Anzahl Produkte und ein Tageslimit für Preissenkungen. Eine automatische Rücknahme ist noch nicht gebaut.",
+        "fr": "Voyez par domaine si un agent propose ou agit. Pour les prix, il peut agir dans un budget : bornes de prix, variation quotidienne, nombre de produits et limite quotidienne des baisses. Le retour arrière automatique n’existe pas encore.",
+        "es": "Mira por área si un agente propone o actúa. En precios puede actuar dentro de un presupuesto: límites de precio, variación diaria, número de productos y un límite diario de bajadas. La reversión automática aún no existe."
       },
       "buildsOn": "Existing price autonomy with daily product budget, price corridors, agent credentials with allowances",
-      "guide": null,
-      "evidence": null
+      "guide": "docs/knowledge-workspace.md#autopilot-levels-and-the-daily-limit",
+      "evidence": "docs/evidence/autopilot-2026-11-18.md"
     },
     {
       "id": "experiments",

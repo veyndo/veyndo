@@ -53,6 +53,18 @@ Studio and the public Lumen storefront responded on their existing origins.
   promotion remain open. [Measured workloads](benchmarks.md) ·
   [Component tasks](commerce-components.md).
 
+## Autopilot levels and daily limit
+
+**Shop knowledge → AI boundaries** opens with an Autopilot panel: prices can be
+on level 0 (suggests) or level 1 (acts within the budget); every other area
+stays on level 0. Level 1 has a new optional daily limit for price reductions,
+counted as reduction times current stock. Locally the autopilot reduced one
+price inside a 200 EUR limit and was refused a further reduction that would
+have counted 210 EUR. The provider suite checks the exact boundary. There is no
+automatic rollback, and nothing is deployed to the hosted pilot.
+[Guide](knowledge-workspace.md#autopilot-levels-and-the-daily-limit) ·
+[Local record](evidence/autopilot-2026-11-18.md).
+
 ## Shop twin readiness
 
 The customer simulator opens with a **Shop twin** panel for the selected private
