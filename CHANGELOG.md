@@ -1,5 +1,12 @@
 # Changelog
 
+## Poppy discovery file
+
+- Publish `/.well-known/poppy.json` (Personal Agent Protocol 1.0) on every
+  configured shop domain, naming the shop's MCP endpoint for guest shopping.
+- Show the published address in **Sales channels → AI channels & imports**.
+  Sign-in through agents and the UCP entry are not published yet.
+
 ## Reorder from other Veyndo shops
 
 - Save supplier links (product, supplier shop, reorder point, quantity) and a

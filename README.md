@@ -51,9 +51,9 @@ shop context. [Illustrated walkthrough](https://www.veyndo.ai/docs/one-shop-comp
 | **Shape the shop** | Design shop pages and app placements on one zoomable canvas. Drag elements, retain drafts and compare AI proposals. Add multilingual image captions and [3D product models with variant materials](docs/product-3d-models.md). Storyfront powers Experiences. [Visual design](docs/personal-workspace-and-shop-design.md). |
 | **Automate the work** | Repeat reviewed work as a Flow and compare rule drafts with recorded order inputs before saving. [Automation](docs/automation.md), [reusable work](docs/personal-workspace-and-shop-design.md#repeat-completed-work-as-a-flow), [rule comparison](docs/rule-history-comparison.md). |
 | **Shop by intent** | Describe a gift, budget or comparison; edit the visual selection with real product cards, then use native variants, app configuration and checkout. [Shopper workspace](docs/ui-experience.md#standard-storefront-and-customer-account). |
-| **Test before release** | Let fictional customers test private proposals with native baskets and simulated purchases. Review outcomes and preview before publication. [Customer simulator](docs/customer-scenarios.md). |
+| **Test before release** | Fictional customers and scripted attackers try a private copy with native baskets and simulated purchases. [Simulator](docs/customer-scenarios.md), [shop twin](docs/shop-twin.md). |
 | **See what works** | Build sales and conversion reports. [Merchant reports](docs/merchant-reports.md). |
-| **Stay in control** | Current roles, private sandboxes, immutable versions, saved-data upgrade checks and selected publication govern changes. [Security](docs/security.md). |
+| **Stay in control** | Roles, private sandboxes, immutable versions, selected publication and autopilot limits govern changes. [Security](docs/security.md). |
 
 [Watch four product films](docs/video-tours.md) about the storefront, Studio,
 visual editor and Product Advisor app. Download captions as VTT or SRT.
@@ -91,7 +91,7 @@ for verification tooling. Run `./scripts/dev.sh` and open
 | Countries, languages, currency and taxes | [International commerce](docs/international-commerce.md) · [Currencies](docs/currencies.md) |
 | POS, B2B, EDI and marketplaces | [POS](docs/pos.md) · [B2B](docs/b2b-commerce.md) · [EDI](docs/edi.md) · [Marketplaces](docs/marketplaces.md) |
 | Apps, settings, storage and private releases | [App platform](docs/app-platform.md) · [Build five apps](docs/app-tutorials/README.md) · [Storage and runtime](docs/app-data-storage.md) |
-| Agents | [Agentic UI](docs/agentic-component-ui.md) · [Limits](docs/agent-authority-controls.md) · [Product Guide](docs/product-guide-mcp-app.md) · [MCP](docs/agent-workshop.md) · [Hosted API and SDK](docs/hosted-component-api.md) · [UCP B2B](docs/b2b-ucp-negotiation.md) |
+| Agents | [Agentic UI](docs/agentic-component-ui.md) · [Limits](docs/agent-authority-controls.md) · [Product Guide](docs/product-guide-mcp-app.md) · [MCP](docs/agent-workshop.md) · [Hosted API and SDK](docs/hosted-component-api.md) · [UCP B2B](docs/b2b-ucp-negotiation.md) · [Signed offers](docs/agentic-commerce.md#signed-offers) |
 | Operation and verification | [Architecture](docs/production-architecture.md) · [Integrations](docs/service-integrations.md) · [Testing](docs/testing.md) · [Proof boundaries](docs/formal-verification.md) |
 
 <!-- roadmap:start -->

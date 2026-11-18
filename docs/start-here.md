@@ -59,6 +59,7 @@ against it. It is not established production infrastructure.
 | App Studio, Flows and the customer simulator in Studio | Approval on external agent shopping surfaces |
 
 The [status page](status.md) records each of these with its date and evidence.
+The [roadmap](roadmap.md) shows what was added most recently and what comes next.
 
 ## How this handbook is organised
 

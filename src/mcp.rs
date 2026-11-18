@@ -1,5 +1,6 @@
 //! Typed MCP schemas and JSON-RPC transport.
 use crate::*;
+pub(crate) mod poppy;
 mod protocol;
 mod transport;
 use protocol::RpcError;

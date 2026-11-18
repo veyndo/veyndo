@@ -261,6 +261,18 @@ try:
     changed=call('/store-api/checkout/offer/verify',proof,ch)
     assert changed['valid'] and changed['matchesCart'] is False and not changed['honoured'],changed
     passed('Signed cart offers verify independently, expose no cart capability or buyer data, and are honoured only for the same shop, cart revision and current total; forged, foreign and outdated offers are refused')
+    # Poppy discovery: only the configured shop domain publishes the document, and the endpoint it names answers there.
+    shop_host={'Host':'workshop.veyndo.ai'}
+    poppy=call('/.well-known/poppy.json',headers=shop_host)
+    assert set(poppy)=={'protocol_version','organization','apis'} and poppy['protocol_version']=='1.0',poppy
+    assert poppy['organization']['domain']=='workshop.veyndo.ai' and poppy['organization']['name'].strip() and set(poppy['organization'])=={'name','domain'},poppy
+    assert [(api['type'],api['url']) for api in poppy['apis']]==[('mcp','https://workshop.veyndo.ai/mcp')] and poppy['apis'][0]['description'].strip(),poppy
+    for missing in [{}, {'x-tenant':'workshop'}, {'Host':'unknown-shop-for-poppy.veyndo.ai'}, {'Host':'workshop.previous.test'}]:
+        call('/.well-known/poppy.json',headers=missing,expected=404)
+    listed=call('/mcp',{'jsonrpc':'2.0','id':21,'method':'tools/list'},{**shop_host})
+    assert {'catalog.search','cart.create','cart.offer','checkout.complete'}<={tool['name'] for tool in listed['result']['tools']},'The published MCP endpoint must offer guest shopping on the shop domain'
+    assert call('/api/merchant/catalog/intake')['agentic']['poppy']=={'published':True,'url':'https://workshop.veyndo.ai/.well-known/poppy.json','version':'1.0','offers':['mcp']}
+    passed('Poppy discovery is published only on the configured shop domain with matching domain and HTTPS MCP endpoint, and that endpoint lists guest shopping tools')
     # Trade network: a reorder proposal fetches a signed offer from another shop's public checkout; approval hands over, it never orders.
     supplier={'x-tenant':'atelier'}
     item=call('/store-api/product',{},supplier)['elements'][0]['id']

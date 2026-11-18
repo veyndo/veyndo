@@ -449,6 +449,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/marketing/rules.rs](../src/marketing/rules.rs) | Bounded Shopware-style boolean/numeric rule AST. Unknown operators/conditions fail closed. |
 | [src/marketing/work_template.rs](../src/marketing/work_template.rs) | Bounded copies of reviewed native work: event values replace explicit scalar fields, never executable text. |
 | [src/marketing/work_template_source.rs](../src/marketing/work_template_source.rs) | Templates reference actor-private task evidence; configuration/history/release never copy its inputs. |
+| [src/mcp/poppy.rs](../src/mcp/poppy.rs) | Personal Agent Protocol discovery: a configured shop domain publishes poppy.json naming its guest MCP endpoint; no sign-in, session or UCP entry is claimed. |
 | [src/mcp/protocol.rs](../src/mcp/protocol.rs) | JSON-RPC envelope errors differ from actionable domain/tool failures; no transport invents authorization. |
 | [src/mcp/transport.rs](../src/mcp/transport.rs) | MCP visibility and shared read-scope memoization, independent of internal planning tools. |
 | [src/mcp.rs](../src/mcp.rs) | Typed MCP schemas and JSON-RPC transport. |

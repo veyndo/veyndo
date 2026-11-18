@@ -4659,6 +4659,11 @@
       "sha256": "f89b5bf1fc2a4cda6b60d2b8bc67db04f738997faa051f537e71d4e79ee393b7",
       "review": "Reviewed task-reference-only Flow templates, same actor and original scope checks at native save and runtime, scalar event mapping, no copied credentials or source inputs, shared stop/lease and transactional daily limits; actual private event-to-approval write, denial and zero-inference regressions plus UI scope cleanup pass. Async SQL remains outside formal proof."
     },
+    "src/mcp/poppy.rs": {
+      "status": "unproved",
+      "sha256": "1ffb18a7d8675b0b09e2bb3224cd0ee11a66a64570b119bfa55dbcf9d9cea844",
+      "review": "Poppy discovery: mcp/poppy.rs serves a static Personal Agent Protocol 1.0 document only on the exact configured shop host derived from the existing HostShop resolution, naming the existing MCP endpoint; no authority, sign-in or UCP claim; readiness reports the published address; no extracted policy changed; providers suite covers host binding and negative hosts"
+    },
     "src/mcp/protocol.rs": {
       "status": "unproved",
       "sha256": "23668a0d83a1823fa77cb00503e32d6416cd6ca00d6e6af0da254810f6aad57e",
@@ -4671,8 +4676,8 @@
     },
     "src/mcp.rs": {
       "status": "unproved",
-      "sha256": "c52687dc26c7e620d3467a4dc4ca56f3a83eef22330e0c6298197f9da9c179c7",
-      "review": "Review MCP read admission against the same active manifest at dispatch, native app placements with explicit list-action opt-in and tenant revision URI, and existing opaque document CSP. App model, direct HTTP and hosted composition checks cover their corresponding runtime contracts."
+      "sha256": "eae4ac545d125c52e4135e89b16b39c6bf420dc83e79849291c2af82ef66502e",
+      "review": "Poppy discovery: mcp/poppy.rs serves a static Personal Agent Protocol 1.0 document only on the exact configured shop host derived from the existing HostShop resolution, naming the existing MCP endpoint; no authority, sign-in or UCP claim; readiness reports the published address; no extracted policy changed; providers suite covers host binding and negative hosts"
     },
     "src/migrations/identity_checksums.rs": {
       "status": "unproved",
@@ -5306,8 +5311,8 @@
     },
     "src/routes.rs": {
       "status": "unproved",
-      "sha256": "99e1e443f052106932d747957098bcbed49c5acbb1cd236d1c93ba8887adeea8",
-      "review": "Trade network: commerce/supply.rs adds validated supplier links and a ceiling to the settings; commerce/supply_proposal.rs acts as an unauthenticated guest at the supplier shop through existing cart, signed offer and checkout handoff owners, never with merchant authority, and approval re-verifies the offer against link and ceiling without placing an order; no extracted policy changed; providers suite covers forged, unlinked, own-shop and ceiling cases"
+      "sha256": "eaebd5d770f4a7fdedeb1a220f2e2f65e453ef347ee08df9a5ddd3d3954fae97",
+      "review": "Poppy discovery: mcp/poppy.rs serves a static Personal Agent Protocol 1.0 document only on the exact configured shop host derived from the existing HostShop resolution, naming the existing MCP endpoint; no authority, sign-in or UCP claim; readiness reports the published address; no extracted policy changed; providers suite covers host binding and negative hosts"
     },
     "src/runtime_config.rs": {
       "status": "unproved",
@@ -5531,8 +5536,8 @@
     },
     "src/ucp/readiness.rs": {
       "status": "unproved",
-      "sha256": "a9f72435041f282928ad25c8f3a5f523690f2de5d3f65d4e358168427cf5c9a8",
-      "review": "Signed offers: cognition/signed_offer.rs signs a closed projection of the native cart quote with the existing Ed25519 owner and verifies signature, shop, expiry and current cart match; signed.rs gains key_id and verify helpers; readiness reports signing status; no extracted policy changed; providers suite verifies independently and covers forged, foreign, malformed, changed-cart and changed-price cases"
+      "sha256": "c390b5175a8e41b3029975694db20f7d95031da662646b53ad26ab98dbd8f097",
+      "review": "Poppy discovery: mcp/poppy.rs serves a static Personal Agent Protocol 1.0 document only on the exact configured shop host derived from the existing HostShop resolution, naming the existing MCP endpoint; no authority, sign-in or UCP claim; readiness reports the published address; no extracted policy changed; providers suite covers host binding and negative hosts"
     },
     "src/work_signal.rs": {
       "status": "unproved",
