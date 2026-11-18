@@ -17,6 +17,7 @@
       },
       "sources": [
         "docs/start-here.md",
+        "docs/roadmap.md",
         "docs/agent-purchase.md",
         "docs/first-tour.md",
         "docs/hosted-component-api.md",

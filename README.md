@@ -94,6 +94,10 @@ for verification tooling. Run `./scripts/dev.sh` and open
 | Agents | [Agentic UI](docs/agentic-component-ui.md) · [Limits](docs/agent-authority-controls.md) · [Product Guide](docs/product-guide-mcp-app.md) · [MCP](docs/agent-workshop.md) · [Hosted API and SDK](docs/hosted-component-api.md) · [UCP B2B](docs/b2b-ucp-negotiation.md) |
 | Operation and verification | [Architecture](docs/production-architecture.md) · [Integrations](docs/service-integrations.md) · [Testing](docs/testing.md) · [Proof boundaries](docs/formal-verification.md) |
 
+<!-- roadmap:start -->
+**Roadmap:** 0 of 8 stages work today. [See what comes next](docs/roadmap.md).
+<!-- roadmap:end -->
+
 ## Current boundaries
 
 Veyndo is an experiment platform, not established production infrastructure.

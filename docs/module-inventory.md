@@ -2215,6 +2215,7 @@ This lists every checked-in source module in these roots, including files with n
 | [scripts/providers.py](../scripts/providers.py) | Cloud wire-contract tests using local HTTP servers, NOT live cloud inference. |
 | [scripts/read_performance.py](../scripts/read_performance.py) | Two real Rust replicas test coherent read caches; optional matched local HTTP baseline probe. |
 | [scripts/restart.py](../scripts/restart.py) | Persist an API snapshot, restart server+DB externally, verify exact state. |
+| [scripts/roadmap.py](../scripts/roadmap.py) | Render the one roadmap source into the handbook page, the README line and the website data module; --check rejects drift. |
 | [scripts/rule_catalog.py](../scripts/rule_catalog.py) | Inventory original Shopware conditions without claiming unsupported scopes are implemented. |
 | [scripts/rule_differential.py](../scripts/rule_differential.py) | Execute original Shopware numeric comparisons, including epsilon, null and unsupported operator semantics. |
 | [scripts/rust_connectors.py](../scripts/rust_connectors.py) | Actual Rust/PostgreSQL multi-process notification, OAuth/import and adversarial fixtures; no external accounts. |
