@@ -32,6 +32,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/agent_runs/scenarios/evidence.rs](../src/agent_runs/scenarios/evidence.rs) | Scenario evidence uses the release owner's configuration projection, never orders or inventory. |
 | [src/agent_runs/scenarios/journey.rs](../src/agent_runs/scenarios/journey.rs) | Each fictional customer has an independent durable provider journal and an authoritative native journey. |
 | [src/agent_runs/scenarios/mod.rs](../src/agent_runs/scenarios/mod.rs) | Fictional shopper cohorts reuse native task authority, checkpoints and private commerce operations. |
+| [src/agent_runs/scenarios/probes.rs](../src/agent_runs/scenarios/probes.rs) | Scripted hostile shoppers probe native cart and checkout fences in a private sandbox; no model call, no live effect. |
 | [src/agent_runs/scenarios/shopper.rs](../src/agent_runs/scenarios/shopper.rs) | A closed shopper adapter uses native carts and exact reviewed totals; no model-supplied authority or payment mode. |
 | [src/agent_runs/scenarios/source.rs](../src/agent_runs/scenarios/source.rs) | A customer test can reference only its actor's completed, applied native proposal in this sandbox. |
 | [src/agent_runs/translation.rs](../src/agent_runs/translation.rs) | Translation child work reuses native draft storage, original authority and the existing task scheduler. |
@@ -1022,6 +1023,7 @@ This lists every checked-in source module in these roots, including files with n
 | [frontend/src/admin/reports/model.ts](../frontend/src/admin/reports/model.ts) | Saved report definitions contain presentation/filter choices only; the server remains the source of every value. |
 | [frontend/src/admin/reports/report-i18n.ts](../frontend/src/admin/reports/report-i18n.ts) | Studio report vocabulary; amounts, names and dates come from the native report snapshot. |
 | [frontend/src/admin/reports/reports.css](../frontend/src/admin/reports/reports.css) | Report workspace extends Studio tokens with readable charts, restrained controls and explicit reordering. |
+| [frontend/src/admin/scenarios/ScenarioAttacks.tsx](../frontend/src/admin/scenarios/ScenarioAttacks.tsx) | Scripted attack results for the selected private sandbox; outcomes come from native refusals, never from a model. |
 | [frontend/src/admin/scenarios/ScenarioComparison.tsx](../frontend/src/admin/scenarios/ScenarioComparison.tsx) | Matching test inputs and changed observed snapshots are separate evidence. |
 | [frontend/src/admin/scenarios/ScenarioEvidence.tsx](../frontend/src/admin/scenarios/ScenarioEvidence.tsx) | Configuration freshness is independent of whether a fictional purchase succeeded. |
 | [frontend/src/admin/scenarios/ScenarioHistory.tsx](../frontend/src/admin/scenarios/ScenarioHistory.tsx) | Distinguishable saved-run and comparison selection for the customer lab. |
@@ -1032,6 +1034,7 @@ This lists every checked-in source module in these roots, including files with n
 | [frontend/src/admin/scenarios/ScenarioStudio.tsx](../frontend/src/admin/scenarios/ScenarioStudio.tsx) | A compact private customer lab on the existing Studio scope and durable run controls. |
 | [frontend/src/admin/scenarios/ScenarioSuggestions.tsx](../frontend/src/admin/scenarios/ScenarioSuggestions.tsx) | Catalogue-derived drafts are previewed before adoption; native commerce still decides actual prices and purchases. |
 | [frontend/src/admin/scenarios/scenario-access.ts](../frontend/src/admin/scenarios/scenario-access.ts) | Keep every scenario entry aligned with the native compound admission. |
+| [frontend/src/admin/scenarios/scenario-attack-i18n.ts](../frontend/src/admin/scenarios/scenario-attack-i18n.ts) | Attack test vocabulary: closed probe titles and finding texts in EN/DE/FR/ES; native refusal details stay verbatim. |
 | [frontend/src/admin/scenarios/scenario-history.ts](../frontend/src/admin/scenarios/scenario-history.ts) | Saved-test labels and reload links share the existing Studio URL without storing briefs or customer data. |
 | [frontend/src/admin/scenarios/scenario-i18n.ts](../frontend/src/admin/scenarios/scenario-i18n.ts) | Simulator vocabulary distinguishes actual native outcomes from fictional customer reasoning. |
 | [frontend/src/admin/scenarios/scenario-types.ts](../frontend/src/admin/scenarios/scenario-types.ts) | Safe public projections; cart tokens and provider checkpoints are never part of this contract. |

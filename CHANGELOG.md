@@ -1,5 +1,13 @@
 # Changelog
 
+## Attack test in the customer simulator
+
+- Run nine scripted cart and checkout attacks against a private sandbox from
+  **Shop knowledge → Customer simulator**, over HTTP or the MCP tool
+  `merchant.scenario.probe`. No model is used and the live shop is not touched.
+- Add one roadmap source, `docs/roadmap.json`, that renders the handbook roadmap,
+  the README line and the website data. The quick check rejects drift.
+
 ## Make the "Agents buy" chapter task-first
 
 - Open shopping agents, connectors, Storyfront, own frontends, checkout and the payment test record with what the reader wants to do and where to go.

@@ -80,6 +80,11 @@
     "source": "src/agent_runs/contract.rs"
   },
   {
+    "path": "/api/agent/scenario-probes",
+    "method": "POST",
+    "source": "src/agent_runs/scenarios/mod.rs"
+  },
+  {
     "path": "/api/agent/scenarios",
     "method": "GET",
     "source": "src/agent_runs/scenarios/mod.rs"

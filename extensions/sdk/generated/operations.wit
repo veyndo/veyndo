@@ -1708,6 +1708,7 @@ interface inputs {
   merchant-scenario-create: func(input: merchant-scenario-create-input) -> result<string, string>;
   merchant-scenario-status: func(input: merchant-scenario-status-input) -> result<string, string>;
   merchant-scenario-list: func(input: string) -> result<string, string>;
+  merchant-scenario-probe: func(input: string) -> result<string, string>;
   merchant-apps-search: func(input: merchant-apps-search-input) -> result<string, string>;
   merchant-apps-read: func(input: merchant-apps-read-input) -> result<string, string>;
   merchant-agents-status: func(input: string) -> result<string, string>;

@@ -7,15 +7,35 @@
     "es": "La tienda que se cambia a sí misma y demuestra que no rompe nada."
   },
   "statuses": {
-    "planned": {"en": "Planned", "de": "Geplant", "fr": "Prévu", "es": "Planificado"},
-    "building": {"en": "In progress", "de": "In Arbeit", "fr": "En cours", "es": "En curso"},
-    "local": {"en": "Works locally", "de": "Läuft lokal", "fr": "Fonctionne en local", "es": "Funciona en local"},
-    "hosted": {"en": "Live in the hosted pilot", "de": "Live im gehosteten Pilot", "fr": "En ligne dans le pilote hébergé", "es": "En vivo en el piloto alojado"}
+    "planned": {
+      "en": "Planned",
+      "de": "Geplant",
+      "fr": "Prévu",
+      "es": "Planificado"
+    },
+    "building": {
+      "en": "In progress",
+      "de": "In Arbeit",
+      "fr": "En cours",
+      "es": "En curso"
+    },
+    "local": {
+      "en": "Works locally",
+      "de": "Läuft lokal",
+      "fr": "Fonctionne en local",
+      "es": "Funciona en local"
+    },
+    "hosted": {
+      "en": "Live in the hosted pilot",
+      "de": "Live im gehosteten Pilot",
+      "fr": "En ligne dans le pilote hébergé",
+      "es": "En vivo en el piloto alojado"
+    }
   },
   "stages": [
     {
       "id": "stress-test",
-      "status": "building",
+      "status": "local",
       "title": {
         "en": "Test customers that attack",
         "de": "Testkunden, die angreifen",
@@ -29,12 +49,12 @@
         "es": "Antes de publicar un cambio, atacantes guionizados prueban totales falsificados, carritos obsoletos, cantidades imposibles y pedidos repetidos en la copia privada."
       },
       "buildsOn": "Customer simulator, private sandboxes, native cart and checkout operations",
-      "guide": null,
-      "evidence": null
+      "guide": "docs/customer-scenarios.md#attack-test",
+      "evidence": "docs/evidence/attack-test-2026-11-18.md"
     },
     {
       "id": "shop-twin",
-      "status": "planned",
+      "status": "building",
       "title": {
         "en": "A twin of your existing shop",
         "de": "Ein Zwilling deines bestehenden Shops",

@@ -2,6 +2,7 @@
 /** Native input DTOs; opaque JSON fields remain explicit. */
 import type { JsonValue } from "./value";
 export interface Inputs9 {
+  "knowledge.behavior.journey": { session?: string };
   "knowledge.experiments": JsonValue;
   "knowledge.experiment.create": { approve?: boolean; design?: JsonValue };
   "knowledge.experiment.start": {
@@ -52,11 +53,5 @@ export interface Inputs9 {
     id?: string;
     revision?: number;
     state?: "evidenced" | "confirmed" | "rejected";
-  };
-  "knowledge.extract": {
-    inference?: JsonValue;
-    locale?: string;
-    productId?: string;
-    sourceId?: string;
   };
 }

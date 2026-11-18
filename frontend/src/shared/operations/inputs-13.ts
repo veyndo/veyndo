@@ -2,6 +2,7 @@
 /** Native input DTOs; opaque JSON fields remain explicit. */
 import type { JsonValue } from "./value";
 export interface Inputs13 {
+  "pos.reconcile": { cartToken: string; channelId: string; requestKey: string };
   "pos.catalog": {
     after?: string;
     barcode?: string;
@@ -57,5 +58,4 @@ export interface Inputs13 {
     tenderMinor?: string;
     totalMinor: string;
   };
-  "pos.held": { channelId: string };
 }

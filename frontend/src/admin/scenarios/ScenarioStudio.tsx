@@ -12,6 +12,7 @@ import ScenarioSuggestions from "./ScenarioSuggestions";
 import ScenarioReport from "./ScenarioReport";
 import ScenarioComparison from "./ScenarioComparison";
 import ScenarioSource from "./ScenarioSource";
+import ScenarioAttacks from "./ScenarioAttacks";
 import type {
   Profile,
   Configuration,
@@ -312,6 +313,7 @@ export default function ScenarioStudio({
               {t(busy ? "starting" : "start")}
             </button>
           </footer>
+          <ScenarioAttacks request={request} />
           {!!scenarios.length && (
             <ScenarioHistory
               scenarios={scenarios}

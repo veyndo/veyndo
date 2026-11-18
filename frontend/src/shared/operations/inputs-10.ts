@@ -2,6 +2,12 @@
 /** Native input DTOs; opaque JSON fields remain explicit. */
 import type { JsonValue } from "./value";
 export interface Inputs10 {
+  "knowledge.extract": {
+    inference?: JsonValue;
+    locale?: string;
+    productId?: string;
+    sourceId?: string;
+  };
   "knowledge.compile": {
     claims?: Array<{ id: string; text: string }>;
     productId?: string;
@@ -50,12 +56,5 @@ export interface Inputs10 {
     id: string;
     revision: number;
     version: number;
-  };
-  "merchant.site.task": {
-    agent?: "codex" | "claude_code";
-    id: string;
-    instruction: string;
-    revision: number;
-    selected?: string;
   };
 }

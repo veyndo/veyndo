@@ -2571,13 +2571,18 @@
     },
     "src/agent_runs/scenarios/mod.rs": {
       "status": "unproved",
-      "sha256": "9aee02a16740079dbdbb04aac6af4c5df66a3d764b4e102f2d4a2827f12d2743",
-      "review": "Reviewed source attribution and bounded optional release-projection evidence; native current rights and source checks retained around inference. Strict split-login HTTP regressions include changed sources and 1001 app records without losing native purchases or historical reports. Digests are boundary observations, not frozen execution or Lean-certified async code."
+      "sha256": "c41e92d5ce726d5b22ec2125b488b8530344aa53db415715d15ec3ac3380e010",
+      "review": "Scenario attack probes: shopper.rs purchase split into review/accept/complete with unchanged order of native calls; new probes.rs is an unproved read-and-attempt adapter over existing cart/checkout capabilities; agentic_scenarios suite passes with nine refusals and unchanged live shop"
+    },
+    "src/agent_runs/scenarios/probes.rs": {
+      "status": "unproved",
+      "sha256": "c7dd8ce8c49a603f6c9a6f4cb9730a8af2086a6cc7b55aa8a38632eb22917cb4",
+      "review": "Scenario attack probes: shopper.rs purchase split into review/accept/complete with unchanged order of native calls; new probes.rs is an unproved read-and-attempt adapter over existing cart/checkout capabilities; agentic_scenarios suite passes with nine refusals and unchanged live shop"
     },
     "src/agent_runs/scenarios/shopper.rs": {
       "status": "unproved",
-      "sha256": "8dbdb71e7fb49bd89295d32ed1cd38d3522810131200b6067c8b8a5375b2424a",
-      "review": "Customer scenarios: independent scenario_security_review completed; native signed-role, cohort, replay, injection, cancellation and post-lock lease-expiry regressions pass. Shared checkout preflight avoids nested-pool deadlock; authority is rechecked at the fenced transaction commit."
+      "sha256": "37dc4cb7108ebc8264da3bcb08f63cb1dfe6211eb333e17215cde642865f5093",
+      "review": "Scenario attack probes: shopper.rs purchase split into review/accept/complete with unchanged order of native calls; new probes.rs is an unproved read-and-attempt adapter over existing cart/checkout capabilities; agentic_scenarios suite passes with nine refusals and unchanged live shop"
     },
     "src/agent_runs/scenarios/source.rs": {
       "status": "unproved",
@@ -5512,8 +5517,8 @@
   },
   "inputs": {
     ".github/workflows/verify.yml": {
-      "sha256": "2d707ebdaa8cbf5d09b16b929cd9fd45a097278c3362a23ebdd4d0fcf0a5b75a",
-      "review": "Run the same static Rust image input and mutation guard once in admission for all CI lanes. Standalone contexts follow their own manifests and local dependency roots and keep lock and source removal negative controls. Full coverage and native jobs retain their cadence."
+      "sha256": "b3f0352f1472afd7e3ad850e89879d481e62d3c949cee64d932b96283ebe0812",
+      "review": "Scenario attack probes: shopper.rs purchase split into review/accept/complete with unchanged order of native calls; new probes.rs is an unproved read-and-attempt adapter over existing cart/checkout capabilities; agentic_scenarios suite passes with nine refusals and unchanged live shop"
     },
     "Cargo.lock": {
       "sha256": "4c346075447e7340f0cf7d859a0a50c15ffca513a68b5105921fe41caf6adae2",

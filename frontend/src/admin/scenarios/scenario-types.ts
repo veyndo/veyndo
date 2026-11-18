@@ -71,3 +71,17 @@ export type Configuration = {
   currency: string;
   scale: number;
 };
+export type AttackProbe = {
+  id: string;
+  outcome: "held" | "breached" | "review";
+  finding?: string;
+  status?: number;
+  detail?: string;
+  orderId?: string;
+};
+export type AttackReport = {
+  id: string;
+  product: { id: string; name: string };
+  summary: { held: number; breached: number; review: number };
+  probes: AttackProbe[];
+};

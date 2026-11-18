@@ -53,10 +53,20 @@ pub(super) async fn purchase(
             .clone()
             .ok_or(bad("Completed cart has no order"));
     }
-    let (config, _) = commerce::scoped_config(a, &cart.tenant, &cart.data.sales_channel).await?;
     let country = profile["country"]
         .as_str()
         .ok_or(bad("Profile country required"))?;
+    let (revision, minor) = review(a, h, country).await?;
+    if minor > profile["budgetMinor"].as_i64().unwrap_or(0) {
+        return Err(bad("Native checkout total exceeds this customer's budget"));
+    }
+    accept(a, h).await?;
+    complete(a, h, &revision, minor, key).await
+}
+/// Selects simulated payment and shipping for a country; returns the reviewed revision and exact total.
+pub(super) async fn review(a: &App, h: &RequestContext, country: &str) -> Result<(Value, i64)> {
+    let cart = load_cart(a, h).await?;
+    let (config, _) = commerce::scoped_config(a, &cart.tenant, &cart.data.sales_channel).await?;
     let payment = config
         .payments
         .iter()
@@ -82,9 +92,9 @@ pub(super) async fn purchase(
         .as_str()
         .and_then(|s| s.parse::<i64>().ok())
         .ok_or(bad("Native quote has no exact total"))?;
-    if minor > profile["budgetMinor"].as_i64().unwrap_or(0) {
-        return Err(bad("Native checkout total exceeds this customer's budget"));
-    }
+    Ok((quote["revision"].clone(), minor))
+}
+pub(super) async fn accept(a: &App, h: &RequestContext) -> Result<()> {
     let policy = call(a, h, "privacy.policy", &json!({})).await?;
     call(
         a,
@@ -93,10 +103,20 @@ pub(super) async fn purchase(
         &json!({"policyVersion":policy["policyVersion"],"terms":true,"digitalImmediate":true}),
     )
     .await?;
+    Ok(())
+}
+/// Completes with the revision and total the caller claims to have reviewed; the native owner decides.
+pub(super) async fn complete(
+    a: &App,
+    h: &RequestContext,
+    revision: &Value,
+    minor: i64,
+    key: &str,
+) -> Result<Value> {
     let mut reviewed = h.clone();
     reviewed.insert(
         "x-commerce-cart-revision",
-        quote["revision"]
+        revision
             .to_string()
             .parse()
             .map_err(|_| bad("Invalid cart revision"))?,

@@ -11,3 +11,8 @@ without customer records, inference, auto-start or a second executor; `ScenarioR
 `scenario-types` defines safe projections; `scenario-i18n` supplies EN/DE/FR/ES;
 `scenarios.css` owns responsive presentation. Browser coverage and conversion
 predictions must not be inferred from these API journeys.
+
+`ScenarioAttacks` runs the scripted attack test (`POST /api/agent/scenario-probes`)
+for the selected sandbox and lists native refusals; `scenario-attack-i18n` holds
+its closed probe and finding vocabulary. Results are not saved and are not a
+security certification of the shop.

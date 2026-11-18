@@ -53,6 +53,19 @@ Studio and the public Lumen storefront responded on their existing origins.
   promotion remain open. [Measured workloads](benchmarks.md) ·
   [Component tasks](commerce-components.md).
 
+## Attack test in the customer simulator
+
+The customer simulator has a second, model-free test. Nine scripted attackers
+try negative and excessive quantities, a stale cart, an own price, a guessed
+cart key, a forged total, an outdated review and a repeated order against a
+private sandbox. In local Studio all nine were refused and the repeated order
+produced one order with one stock reduction. The registered scenario suite
+checks the same result in an isolated database and that the live shop is
+unchanged. This is not deployed to the hosted pilot, results are not saved with
+the release review, and it is not a security certification.
+[Guide](customer-scenarios.md#attack-test) ·
+[Local record](evidence/attack-test-2026-11-18.md) · [Roadmap](roadmap.md).
+
 ## Product and category layouts in Studio
 
 **Shop design** opens channel layouts for product pages and categories. Move
