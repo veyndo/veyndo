@@ -17,8 +17,8 @@ than the check verifies. **It is not a claim that the shop is free of errors:**
 | Rule files | 8 | 0.8 % | The files that contain the proved rules |
 | Reviewed callers | 67 | 6.8 % | Files that call a proved rule; a person reviewed how the rule is fed, the surrounding code is not proved |
 | Comparison drivers | 9 | 0.9 % | Test programs that compare the compiled Rust rules with the Lean versions |
-| **Unproved files** | 904 | 91.5 % | Everything else: database access, HTTP, providers, the user interface server |
-| All Rust source files | 988 | 100 % | |
+| **Unproved files** | 905 | 91.5 % | Everything else: database access, HTTP, providers, the user interface server |
+| All Rust source files | 989 | 100 % | |
 
 A proved rule looks like this one, which caps a discount at the amount it is
 taken from:

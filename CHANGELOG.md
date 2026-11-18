@@ -1,5 +1,15 @@
 # Changelog
 
+## Sovereign AI mode
+
+- Add one operator switch, and the deployment variable `SOVEREIGN_AI=true`,
+  that admits only self-hosted models: OpenAI, Claude and image generation are
+  refused, and the text, embedding and reranker endpoints must be loopback, a
+  private network, a cluster-internal name or listed in `SOVEREIGN_MODEL_HOSTS`.
+- Refuse saving the switch while a model endpoint is external.
+- Show the mode and the host of every model route in **Shop knowledge → AI
+  guardrails**.
+
 ## Proof coverage you can read
 
 - Add the generated handbook page "What is proved, what is reviewed and what is

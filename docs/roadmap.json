@@ -168,7 +168,7 @@
     },
     {
       "id": "sovereign-ai",
-      "status": "planned",
+      "status": "local",
       "title": {
         "en": "Sovereign AI mode",
         "de": "Souveräner KI-Betrieb",
@@ -176,14 +176,14 @@
         "es": "Modo de IA soberana"
       },
       "summary": {
-        "en": "One switch keeps every model call on models you host yourself. Studio shows that no shop data leaves your servers.",
-        "de": "Ein Schalter hält jeden Modellaufruf auf selbst betriebenen Modellen. Studio zeigt, dass keine Shopdaten deine Server verlassen.",
-        "fr": "Un seul réglage garde chaque appel sur des modèles que vous hébergez. Studio montre qu’aucune donnée ne quitte vos serveurs.",
-        "es": "Un interruptor mantiene cada llamada en modelos que alojas tú. Studio muestra que ningún dato sale de tus servidores."
+        "en": "One switch keeps every model request on models you host yourself. Studio shows the host of each model route.",
+        "de": "Ein Schalter hält jede Modellanfrage auf selbst betriebenen Modellen. Studio zeigt den Host jeder Modellstrecke.",
+        "fr": "Un seul réglage garde chaque requête sur des modèles que vous hébergez. Studio montre l’hôte de chaque route.",
+        "es": "Un interruptor mantiene cada petición en modelos que alojas tú. Studio muestra el host de cada ruta."
       },
       "buildsOn": "Local model route, central provider settings, per-task model routing",
-      "guide": null,
-      "evidence": null
+      "guide": "docs/sovereign-ai.md",
+      "evidence": "docs/evidence/sovereign-ai-2026-11-18.md"
     }
   ]
 }

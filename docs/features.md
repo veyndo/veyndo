@@ -289,6 +289,7 @@ not deployed to the hosted pilot yet. The [roadmap](roadmap.md) tracks them.
 | Give buying agents a quote they can verify | Signed offers | [Signed offers](agentic-commerce.md#signed-offers) |
 | Reorder from another shop on the same installation | Reorder | [Trade network](trade-network.md) |
 | Be found by personal agents | Poppy file | [Poppy discovery](agentic-commerce.md#poppy-discovery) |
+| Keep every model request on models you host yourself | Sovereign AI mode | [Sovereign AI mode](sovereign-ai.md) |
 
 ## Assistant and shop intelligence
 

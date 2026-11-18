@@ -123,6 +123,30 @@ const rows = {
     "Infraestructura",
     "Infrastructure",
   ],
+  sovereign: [
+    "Sovereign AI mode: admit only self-hosted models",
+    "Souveräner KI-Betrieb: nur selbst betriebene Modelle zulassen",
+    "Modo de IA soberana: admitir solo modelos autoalojados",
+    "Mode IA souveraine : n’admettre que des modèles auto-hébergés",
+  ],
+  sovereignHint: [
+    "OpenAI and Claude are refused for every shop, and so is image generation. The Ollama, embedding and reranker endpoints must be loopback, a private network, a cluster-internal name or a host listed in SOVEREIGN_MODEL_HOSTS; otherwise saving is refused.",
+    "OpenAI und Claude werden für jeden Shop abgelehnt, ebenso die Bilderzeugung. Die Endpunkte für Ollama, Embeddings und Reranker müssen Loopback, ein privates Netz, ein clusterinterner Name oder ein Host aus SOVEREIGN_MODEL_HOSTS sein; sonst wird das Speichern abgelehnt.",
+    "OpenAI y Claude se rechazan para todas las tiendas, igual que la generación de imágenes. Los endpoints de Ollama, embeddings y reranker deben ser loopback, una red privada, un nombre interno del clúster o un host de SOVEREIGN_MODEL_HOSTS; si no, se rechaza el guardado.",
+    "OpenAI et Claude sont refusés pour chaque boutique, ainsi que la génération d’images. Les endpoints Ollama, embeddings et reranker doivent être en loopback, sur un réseau privé, un nom interne au cluster ou un hôte de SOVEREIGN_MODEL_HOSTS ; sinon l’enregistrement est refusé.",
+  ],
+  sovereignLocked: [
+    "Fixed by SOVEREIGN_AI=true in the deployment.",
+    "Durch SOVEREIGN_AI=true in der Installation festgelegt.",
+    "Fijado por SOVEREIGN_AI=true en el despliegue.",
+    "Fixé par SOVEREIGN_AI=true dans le déploiement.",
+  ],
+  sovereignRefused: [
+    "Not saved: a model endpoint is not self-hosted.",
+    "Nicht gespeichert: Ein Modell-Endpunkt ist nicht selbst betrieben.",
+    "No guardado: un endpoint de modelo no es autoalojado.",
+    "Non enregistré : un endpoint de modèle n’est pas auto-hébergé.",
+  ],
   inherited: [
     "One configuration, every shop. Applies to chat, product questions, translations and app generation within 5 seconds.",
     "Eine Konfiguration für alle Shops. Gilt für Chat, Produktfragen, Übersetzungen und App-Generierung innerhalb von 5 Sekunden.",

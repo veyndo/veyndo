@@ -4,6 +4,56 @@ from testing.native_tools import response as native_response
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 
+def sovereign_mode(req,save,written,settings,captured,owner,seed,oh,h,check,base):
+    """One operator switch refuses hosted providers on the real HTTP path; a local sink proves no request leaves for them."""
+    hits=[]
+    class Sink(BaseHTTPRequestHandler):
+        def log_message(self,*args): pass
+        def do_POST(self):
+            self.rfile.read(int(self.headers.get('Content-Length',0)));hits.append(self.path)
+            self.send_response(500);self.end_headers()
+    sink=ThreadingHTTPServer(('127.0.0.1',0),Sink)
+    threading.Thread(target=sink.serve_forever,daemon=True).start()
+    def chat(provider):
+        r=urllib.request.Request(base+'/api/agent/chat',data=json.dumps({'message':'Describe the shop without changes','inference':{'provider':provider}}).encode(),headers={'Content-Type':'application/json',**h(owner,seed)})
+        try:
+            with urllib.request.urlopen(r,timeout=90) as response:return response.status,json.load(response)
+        except urllib.error.HTTPError as e:return e.code,json.load(e)
+    try:
+        hosted=json.loads(json.dumps(settings))
+        hosted['providers']['openai']={'endpoint':f'http://127.0.0.1:{sink.server_address[1]}','enabled':True,'model':'hosted-fixture'}
+        open_mode=save({'revision':written['revision'],'settings':hosted,'keys':{'openai':'synthetic-hosted-key-not-a-real-credential'}})
+        assert open_mode['effective']['sovereignty']['enabled'] is False
+        # With the mode off the hosted route is live: the request reaches the sink.
+        chat('openai');assert hits, 'the hosted provider fixture must be reachable before the switch'
+        before,chats=len(hits),len([v for v in captured if v[0]=='/api/chat'])
+        foreign=json.loads(json.dumps(hosted));foreign['sovereign']=True
+        foreign['providers']['ollama']={**hosted['providers']['ollama'],'endpoint':'https://ollama.example.com'}
+        refused=req('/api/platform/ai',{'revision':open_mode['revision'],'settings':foreign},oh,422,method='PUT')
+        assert 'text' in json.dumps(refused)
+        on=save({'revision':open_mode['revision'],'settings':{**hosted,'sovereign':True}})
+        report=on['effective']['sovereignty']
+        assert on['settings']['sovereign'] is True and report['enabled'] and report['holds'] and report['refusedProviders']==['openai','anthropic']
+        merchant=req('/api/agent/providers',headers=h(owner,seed))
+        listed={v['id']:v['configured'] for v in merchant['providers']}
+        assert listed=={'platform':True,'ollama':True,'openai':False,'anthropic':False} and merchant['defaultProvider']=='ollama'
+        routes={v['use']:v for v in merchant['sovereignty']['routes']}
+        assert routes['text']['host']=='127.0.0.1' and routes['text']['selfHosted'] and routes['text']['admitted'] and not routes['images']['admitted']
+        assert 'synthetic' not in json.dumps(merchant) and str(sink.server_address[1]) not in json.dumps(merchant)
+        for provider in ['openai','anthropic']:
+            status,body=chat(provider)
+            assert status!=200 or body['messages'][-1]['data'].get('preview',{}).get('inference')!=provider,(provider,status,body)
+        assert len(hits)==before, 'a hosted provider received a request in sovereign mode'
+        status,body=chat('platform')
+        assert status==200 and body['messages'][-1]['data']['preview']['inference']=='ollama'
+        assert len([v for v in captured if v[0]=='/api/chat'])>chats
+        check('sovereign AI mode: hosted providers receive no request and are listed as unavailable, the self-hosted route still answers, an external endpoint cannot be saved')
+        current=req('/api/platform/ai',headers=oh)
+        save({'revision':current['revision'],'settings':settings,'clearKeys':{'openai':True}})
+    finally:
+        sink.shutdown();sink.server_close()
+
+
 def verify(req, sql, owner, other, seed, empty, oh, h, check, base):
     for path in ['/api/platform/ai','/api/platform/infrastructure','/api/platform/shops/'+seed]:
         req(path, headers=h(other), expected=403)
@@ -72,6 +122,7 @@ def verify(req, sql, owner, other, seed, empty, oh, h, check, base):
         assert len(chats)==6 and all(auth=='Bearer '+key and model==expected_models.get(path) for path,auth,model in captured), [(path,model,auth=='Bearer '+key) for path,auth,model in captured]
         req('/api/platform/ai',{'revision':written['revision'],'settings':settings,'keys':{'ollama':'denied'}},h(other),403,method='PUT')
         check('encrypted write-only keys and central model reach two independent shops; stale revisions and foreign saves rejected')
+        sovereign_mode(req,save,written,settings,captured,owner,seed,oh,h,check,base)
     finally:
         current=req('/api/platform/ai',headers=oh)
         save({'revision':current['revision'],'settings':original['settings'],'clearKeys':{'ollama':True}})

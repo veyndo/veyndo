@@ -701,8 +701,8 @@
     },
     "crates/cognition/src/inference/request.rs": {
       "status": "unproved",
-      "sha256": "9bf8b80dbbdb21d6c352374d78ec8780f62dae646b2bcf26cc72ecab6fc9326b",
-      "review": "Reviewed migration 104 and all changed Rust/build owners: existing-key planning-only scope, trusted distinct agent identity, live-root lock before budget key, checked integer allocation with existing kernel guard, no network transaction, typed nonretryable quota errors, current credentials and lease-fenced late worker results; actual two-replica allocation/restart and in-flight-stop fixtures plus 623 UI tests pass. SQL/auth/provider integration is not formally proved."
+      "sha256": "b06d70d9314c5925587b2459792c11c4c2cc6630888b14ce05b240eff935c270",
+      "review": "Stage 8 adds the sovereign AI gate in the inference crate and its callers; no extracted policy changes."
     },
     "crates/cognition/src/inference/schema.rs": {
       "status": "unproved",
@@ -711,8 +711,13 @@
     },
     "crates/cognition/src/inference/settings.rs": {
       "status": "unproved",
-      "sha256": "071b7c6704a0862d5b954d4967747e9b3e2ccca362d8defeb9a15d96132314fe",
-      "review": "Apps 0.27 shared settings preserve native personal/live administrator and digest/CAS admission; original AES-GCM envelope delegates to vault-only authority; independent settings deny machine/delegated identities and unsupported grants. Actual two-shop HTTP/MCP/SDK, rollback, CAS, binding/restart and shared PostgreSQL contracts pass; native integration follows the unchanged owners."
+      "sha256": "e5180407795d64b38be4ad989f724a3dc62a02b1abe8ca674f6eb51dcfa23218",
+      "review": "Stage 8 adds the sovereign AI gate in the inference crate and its callers; no extracted policy changes."
+    },
+    "crates/cognition/src/inference/sovereign.rs": {
+      "status": "unproved",
+      "sha256": "a2b7c18b968dcdd5e4b30f2f7f3072ff1bc7ff16c705f4a94310dcb0fe278d61",
+      "review": "Stage 8 adds the sovereign AI gate in the inference crate and its callers; no extracted policy changes."
     },
     "crates/cognition/src/inference/tests.rs": {
       "status": "unproved",
@@ -741,8 +746,8 @@
     },
     "crates/cognition/src/inference.rs": {
       "status": "unproved",
-      "sha256": "ab56267d5b489543bd4036eb620d7f3bc701fbcb82d783c983e2b1d224c1b161",
-      "review": "Reviewed migration 104 and all changed Rust/build owners: existing-key planning-only scope, trusted distinct agent identity, live-root lock before budget key, checked integer allocation with existing kernel guard, no network transaction, typed nonretryable quota errors, current credentials and lease-fenced late worker results; actual two-replica allocation/restart and in-flight-stop fixtures plus 623 UI tests pass. SQL/auth/provider integration is not formally proved."
+      "sha256": "4ab2dafa5691259f3358ee64373a3b4d077d5a089c347467146d1e53a666eb2b",
+      "review": "Stage 8 adds the sovereign AI gate in the inference crate and its callers; no extracted policy changes."
     },
     "crates/cognition/src/lib.rs": {
       "status": "unproved",
@@ -2516,8 +2521,8 @@
     },
     "src/agent.rs": {
       "status": "unproved",
-      "sha256": "6485933b3abcaf98827eae1f585074c60033ced0f38ba78307dcb28c6e3b7d1c",
-      "review": "Reviewed contextual private-work contracts and independent findings: app opt-out, locked guidance, preserved manual actions, conversation lease and locale inheritance; native own/foreign, stale approval, narrowed rights, renewed login, killed-worker continuation and actual app-preview regressions passed. SQL, async runtime and providers remain unproved."
+      "sha256": "fd4f3e1824393ab32a4f22d9fc7b35b8ff5abbfeaecb43521bfeec14e2c0178c",
+      "review": "Stage 8 adds the sovereign AI gate in the inference crate and its callers; no extracted policy changes."
     },
     "src/agent_runs/authority.rs": {
       "status": "reviewed-binding",
@@ -3801,8 +3806,8 @@
     },
     "src/cognition/indexing.rs": {
       "status": "unproved",
-      "sha256": "c2e35f34ffd201b1084fb42e5cca15f69e005b63338679d35b0e5d11ca18aa08",
-      "review": "Codex source review: the per-shop model revision only advances; queue claims bind the live shop's active model and revision, and result publication locks that generation before checking the existing source and lease fences. The additive migration preserves revision zero for existing installations. The PostgreSQL and Qdrant test overlapped two Core processes, released an old provider response after takeover, reindexed 150 products and verified current edits and search. SQL and worker code remain unproved; no extracted policy changed."
+      "sha256": "97fff760f56bc5d15e40c6175ea4f10023347baa5737c946570a9762a95d2e2d",
+      "review": "Stage 8 adds the sovereign AI gate in the inference crate and its callers; no extracted policy changes."
     },
     "src/cognition/mod.rs": {
       "status": "unproved",
@@ -5181,8 +5186,8 @@
     },
     "src/platform/ai.rs": {
       "status": "reviewed-binding",
-      "sha256": "de04d181f674e1f734766ecfa067399a4726672964db10e441441f77fb14133a",
-      "review": "Identity-only Veyndo namespace and canonical-domain rename; reviewed migration checksum compatibility for six historical SQL versions, unchanged checkout predicates, 42 library and 169 binary tests pass; native component legacy boundary remains configured and guarded."
+      "sha256": "db43f8f5914f1e42a559ddf468e70eff002be4247b2d7d7459ddbd37562bf78c",
+      "review": "Stage 8 adds the sovereign AI gate in the inference crate and its callers; no extracted policy changes."
     },
     "src/platform/auth.rs": {
       "status": "reviewed-binding",

@@ -104,12 +104,17 @@ export type Traffic = {
 export type AIProvider = { model: string; endpoint: string; enabled: boolean };
 export type AISettings = {
   revision: number;
-  settings: { defaultProvider: string; providers: Record<string, AIProvider> };
+  settings: {
+    defaultProvider: string;
+    providers: Record<string, AIProvider>;
+    sovereign?: boolean;
+  };
   keyStored: Record<string, boolean>;
   encryptedStorageReady: boolean;
   effective: {
     defaultProvider: string;
     providers: { id: string; model: string; configured: boolean }[];
+    sovereignty?: { enabled: boolean; lockedByDeployment: boolean };
   } | null;
 };
 export type Infrastructure = {

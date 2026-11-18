@@ -22,6 +22,7 @@ async fn snapshot(a: &App) -> Result<Value> {
             visible["providers"][id] = provider.clone();
         }
     }
+    visible["sovereign"] = json!(stored["sovereign"] == true);
     Ok(
         json!({"revision":row.get::<i64,_>("revision"),"settings":visible,
         "updatedAt":row.get::<String,_>("updated"),"encryptedStorageReady":settings::encryption_ready(),
@@ -67,6 +68,25 @@ pub(super) async fn save(
         data["providers"][id] =
             json!({"model":model,"endpoint":endpoint.trim_end_matches('/'),"enabled":enabled});
     }
+    let sovereign = v["settings"]["sovereign"].as_bool().unwrap_or(false);
+    data["sovereign"] = json!(sovereign);
+    // Refuse a switch that would only fail closed later: every configured model route must be self-operated.
+    if sovereign || veyndo::inference::sovereign::locked() {
+        let blockers = a.inference.sovereign_blockers(
+            data["providers"]["ollama"]["endpoint"]
+                .as_str()
+                .unwrap_or_default(),
+        );
+        if !blockers.is_empty() {
+            return Err(Error(
+                StatusCode::UNPROCESSABLE_ENTITY,
+                format!(
+                    "Sovereign AI mode needs self-hosted endpoints for: {}",
+                    blockers.join(", ")
+                ),
+            ));
+        }
+    }
     let mut tx = a.db.begin().await?;
     let row = sqlx::query("SELECT revision,secrets FROM platform_ai WHERE id=true FOR UPDATE")
         .fetch_one(&mut *tx)
@@ -95,7 +115,7 @@ pub(super) async fn save(
     sqlx::query("UPDATE platform_ai SET revision=revision+1,data=$1,secrets=$2,updated_by=$3,updated_at=now() WHERE id=true").bind(data).bind(secrets).bind(actor).execute(&mut *tx).await?;
     sqlx::query("INSERT INTO platform_audit(actor,action,data) VALUES($1,'ai.updated',$2)")
         .bind(actor)
-        .bind(json!({"defaultProvider":provider}))
+        .bind(json!({"defaultProvider":provider,"sovereign":sovereign}))
         .execute(&mut *tx)
         .await?;
     tx.commit().await?;

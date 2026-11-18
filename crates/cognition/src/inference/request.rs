@@ -22,6 +22,14 @@ impl Inference {
         {
             return Err("Provider disabled by platform operator".into());
         }
+        self.admit(
+            id.as_str().unwrap_or_default(),
+            match provider {
+                Provider::Openai => &self.openai_url,
+                Provider::Anthropic => &self.anthropic_url,
+                _ => &self.ollama,
+            },
+        )?;
         let default_model = match provider {
             Provider::Ollama => &self.local_model,
             Provider::Openai => &self.openai_model,

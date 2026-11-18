@@ -56,12 +56,23 @@ Studio and the public Lumen storefront responded on their existing origins.
 ## Proof coverage page
 
 The handbook has a generated page that lists the 64 machine-proved rules with
-their 153 properties and callers, and states that 904 of 988 Rust source files
+their 153 properties and callers, and states that 905 of 989 Rust source files
 (91.5 %) are unproved. On the money path, 15 of 81 files call a proved rule and
 8 still contain floating point. The page is rebuilt from the proof manifest and
 checked on every change. It does not show test coverage per file, and nothing
 new was proved for it.
 [Page](proof-coverage.md) · [Record](evidence/proof-coverage-2026-11-18.md).
+
+## Sovereign AI mode
+
+One operator switch (or `SOVEREIGN_AI=true`) limits every model request to the
+self-operated route: OpenAI, Claude and image generation are refused, and the
+text, embedding and reranker endpoints must be loopback, a private network, a
+cluster-internal name or a declared host. Locally a hosted provider received no
+request while the local model kept answering, and Studio showed the host per
+route. Hosts are judged by name and address range, not by DNS; apps are
+outside the mode. Not deployed to the hosted pilot.
+[Guide](sovereign-ai.md) · [Local record](evidence/sovereign-ai-2026-11-18.md).
 
 ## Poppy discovery file
 

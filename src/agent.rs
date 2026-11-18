@@ -87,7 +87,8 @@ pub(super) async fn retrieve(a: &App, t: &str, q: &str) -> Result<Value> {
     };
     let mut result = knowledge::search(&a.db, t, q, vector, &model).await?;
     if !veyndo::inference::budget::is_budgeted()
-        && env::var("RERANKER_URL").is_ok()
+        && let Ok(reranker) = env::var("RERANKER_URL")
+        && a.inference.admit_endpoint(&reranker).await.is_ok()
         && let Ok(_slot) = a.inference_slots.clone().try_acquire_owned()
         && let Ok(_lease) =
             crate::performance::cluster_lease::Lease::acquire(a, t, "reranker", 1).await
