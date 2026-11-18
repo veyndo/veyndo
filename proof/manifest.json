@@ -3966,8 +3966,8 @@
     },
     "src/commerce/mod.rs": {
       "status": "unproved",
-      "sha256": "85be3f7b507a3e133a1a5899f730100e3e1894194212b32c38e33a7fb38fecce",
-      "review": "Completion of stages 1-3: attack_store.rs saves applied actor-private report rows and reads the latest with release-digest freshness; commerce/test_stock.rs sets sandbox-only test stock through revision, index sync and product event; cognition/autonomy_revert.rs restores day baselines by request and from the agent worker lane when exposure exceeds the limit, skipping prices changed since; no extracted policy changed; scenario and provider suites cover each path"
+      "sha256": "ba990c3d0a3bfcd0883d7321547cc6e01d7d3d59e02b06c520f5defafccc5bfa",
+      "review": "Trade network: commerce/supply.rs adds validated supplier links and a ceiling to the settings; commerce/supply_proposal.rs acts as an unauthenticated guest at the supplier shop through existing cart, signed offer and checkout handoff owners, never with merchant authority, and approval re-verifies the offer against link and ceiling without placing an order; no extracted policy changed; providers suite covers forged, unlinked, own-shop and ceiling cases"
     },
     "src/commerce/order_fields.rs": {
       "status": "unproved",
@@ -4086,8 +4086,18 @@
     },
     "src/commerce/settings_validation.rs": {
       "status": "unproved",
-      "sha256": "79c1df3079e10dde6c90a0748fa196c1572f0cf35fce21c4c77bef377c8d3df4",
-      "review": "Native multi-capture admission, immutable receipts and per-capture refund budgets; async adapters remain unproved"
+      "sha256": "18f98b06c491f51f1196e5b71b53c2887a8dba5870b508cab386c5ee818f6537",
+      "review": "Trade network: commerce/supply.rs adds validated supplier links and a ceiling to the settings; commerce/supply_proposal.rs acts as an unauthenticated guest at the supplier shop through existing cart, signed offer and checkout handoff owners, never with merchant authority, and approval re-verifies the offer against link and ceiling without placing an order; no extracted policy changed; providers suite covers forged, unlinked, own-shop and ceiling cases"
+    },
+    "src/commerce/supply.rs": {
+      "status": "unproved",
+      "sha256": "b23ee1d09b87bba209f8081230826cce1a86805be21e93b0c4aa285134843378",
+      "review": "Trade network: commerce/supply.rs adds validated supplier links and a ceiling to the settings; commerce/supply_proposal.rs acts as an unauthenticated guest at the supplier shop through existing cart, signed offer and checkout handoff owners, never with merchant authority, and approval re-verifies the offer against link and ceiling without placing an order; no extracted policy changed; providers suite covers forged, unlinked, own-shop and ceiling cases"
+    },
+    "src/commerce/supply_proposal.rs": {
+      "status": "unproved",
+      "sha256": "132a8915d63586582b649edc9ad1d348aeee0757ee7011f4deb9508e93ee490e",
+      "review": "Trade network: commerce/supply.rs adds validated supplier links and a ceiling to the settings; commerce/supply_proposal.rs acts as an unauthenticated guest at the supplier shop through existing cart, signed offer and checkout handoff owners, never with merchant authority, and approval re-verifies the offer against link and ceiling without placing an order; no extracted policy changed; providers suite covers forged, unlinked, own-shop and ceiling cases"
     },
     "src/commerce/tax.rs": {
       "status": "unproved",
@@ -4111,8 +4121,8 @@
     },
     "src/commerce/types.rs": {
       "status": "unproved",
-      "sha256": "dd1273e173fe92a7eaf88c889aa2f36328b77bd0f01a12f6dd2fb2ee2ca8489f",
-      "review": "Reviewed pure Contact/Address extraction: original strict wire fields, defaults, normalization, byte/calendar checks and safe validation messages retained in Commerce; native PII/account ownership, geography/payment admission and transactions unchanged. Portable crate cases and seven actual HTTP/PostgreSQL suites passed."
+      "sha256": "aa660c5093a816024c0d6e366bff306190d87bd8fa1cf07981cfd6bc4f9799ea",
+      "review": "Trade network: commerce/supply.rs adds validated supplier links and a ceiling to the settings; commerce/supply_proposal.rs acts as an unauthenticated guest at the supplier shop through existing cart, signed offer and checkout handoff owners, never with merchant authority, and approval re-verifies the offer against link and ceiling without placing an order; no extracted policy changed; providers suite covers forged, unlinked, own-shop and ceiling cases"
     },
     "src/concierge.rs": {
       "status": "unproved",
@@ -5296,8 +5306,8 @@
     },
     "src/routes.rs": {
       "status": "unproved",
-      "sha256": "2a396d9b705d6de2d09a9a505d0308141eb9b76d60d211983469e62d78c1d32e",
-      "review": "Reviewed API-only ingress, startup profile validation, and reserved API hostname resolution. Isolated HTTP and PostgreSQL cover presentation rejection, explicit Store and MCP shop context, UCP, existing merchant authorization, and tenant isolation."
+      "sha256": "99e1e443f052106932d747957098bcbed49c5acbb1cd236d1c93ba8887adeea8",
+      "review": "Trade network: commerce/supply.rs adds validated supplier links and a ceiling to the settings; commerce/supply_proposal.rs acts as an unauthenticated guest at the supplier shop through existing cart, signed offer and checkout handoff owners, never with merchant authority, and approval re-verifies the offer against link and ceiling without placing an order; no extracted policy changed; providers suite covers forged, unlinked, own-shop and ceiling cases"
     },
     "src/runtime_config.rs": {
       "status": "unproved",

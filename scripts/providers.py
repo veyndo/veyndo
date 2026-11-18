@@ -261,6 +261,44 @@ try:
     changed=call('/store-api/checkout/offer/verify',proof,ch)
     assert changed['valid'] and changed['matchesCart'] is False and not changed['honoured'],changed
     passed('Signed cart offers verify independently, expose no cart capability or buyer data, and are honoured only for the same shop, cart revision and current total; forged, foreign and outdated offers are refused')
+    # Trade network: a reorder proposal fetches a signed offer from another shop's public checkout; approval hands over, it never orders.
+    supplier={'x-tenant':'atelier'}
+    item=call('/store-api/product',{},supplier)['elements'][0]['id']
+    orders_before=len(call('/api/merchant/orders',headers={**ah,'x-tenant':'atelier'}).get('elements'))
+    def supply(value, expected=200):
+        snapshot=call('/api/merchant/commerce');data=copy.deepcopy(snapshot['data']);data['supply']=value
+        return call('/api/merchant/commerce',{'revision':snapshot['revision'],'data':data},method='PUT',expected=expected)
+    link={'productId':'lamp','supplierShop':'atelier','supplierProductId':item,'reorderPoint':100000,'reorderQuantity':2}
+    supply({'links':[link,link]},400)
+    supply({'links':[{**link,'reorderQuantity':0}]},400)
+    supply({'maxOrderMinor':1,'links':[link]})
+    reorder=call('/api/merchant/supply/proposal',{})
+    line=reorder['lines'][0];found=line['offer']
+    Ed25519PublicKey.from_public_bytes(decode(keys['keys'][0]['x'])).verify(decode(found['signature']),decode(found['payloadBase64']))
+    assert reorder['orders']=='none' and reorder['maxOrderMinor']==1 and line['productId']=='lamp' and line['quantity']==2 and line['withinCeiling'] is False,reorder
+    assert found['payload']['tenant']=='atelier' and found['payload']['lineItems'][0]['id']==item and found['payload']['lineItems'][0]['quantity']==2,found
+    ask={'productId':'lamp','payloadBase64':found['payloadBase64'],'signature':found['signature'],'cartToken':found['cartToken']}
+    call('/api/merchant/supply/approve',ask,expected=400)
+    call('/api/merchant/supply/approve',{**ask,'approve':True},expected=409)
+    supply({'links':[link]})
+    call('/api/merchant/supply/approve',{**ask,'approve':True},expected=409)
+    supply({'maxOrderMinor':int(found['payload']['totalMinor']),'links':[link]})
+    forged=base64.urlsafe_b64encode(json.dumps({**found['payload'],'totalMinor':'1'}).encode()).decode().rstrip('=')
+    call('/api/merchant/supply/approve',{**ask,'payloadBase64':forged,'approve':True},expected=409)
+    call('/api/merchant/supply/approve',{**ask,'productId':'mug','approve':True},expected=400)
+    done=call('/api/merchant/supply/approve',{**ask,'approve':True})
+    assert done['approved'] and done['ordered'] is False and done['checkoutPath'].startswith('/checkout?shop=atelier') and '#checkout/' in done['checkoutPath'] and done['expiresInSeconds']==600,done
+    assert len(call('/api/merchant/orders',headers={**ah,'x-tenant':'atelier'}).get('elements'))==orders_before,'Approval must not place an order at the supplier'
+    assert call('/api/merchant/supply/proposal',{})['lines'][0]['withinCeiling'] is True
+    supply({'maxOrderMinor':100000,'links':[{**link,'supplierShop':'workshop'}]})
+    own=call('/api/merchant/supply/proposal',{})['lines'][0]
+    assert own['error']=='supplier_refused' and 'offer' not in own,own
+    supply({'maxOrderMinor':100000,'links':[{**link,'reorderPoint':0}]})
+    enough=call('/api/merchant/supply/proposal',{})
+    assert enough['lines']==[] and enough['sufficient']==1,enough
+    call('/api/merchant/supply/proposal',{},headers=supplier,expected=401)
+    supply({'links':[]})
+    passed('Reorder proposals carry an independently verifiable offer from another shop, respect the ceiling per reorder, refuse forged or unlinked requests, hand over to the supplier checkout without ordering and never treat a shop as its own supplier')
     request=urllib.request.Request(base+'/api/agent/chat/stream',data=json.dumps({'message':'Stream validated response','inference':{'provider':'openai'}}).encode(),headers={'Content-Type':'application/json',**ah})
     with urllib.request.urlopen(request,timeout=30) as response:
         frames=response.read().decode();assert response.headers['content-type'].startswith('text/event-stream') and 'event: accepted' in frames and 'event: complete' in frames

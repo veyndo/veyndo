@@ -18,6 +18,7 @@ pub(crate) fn router(a: App) -> Router {
         .merge(apps::app_router())
         .merge(apps::site_builder::router())
         .merge(checkout_handoff::router())
+        .merge(commerce::supply_proposal::router())
         .merge(documents::router())
         .merge(staging::router())
         .merge(studio::personal::router())

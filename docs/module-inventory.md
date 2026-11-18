@@ -335,6 +335,8 @@ This lists every checked-in source module in these roots, including files with n
 | [src/commerce/settings_routes.rs](../src/commerce/settings_routes.rs) | Tenant configuration and operational read model. |
 | [src/commerce/settings_scope.rs](../src/commerce/settings_scope.rs) | Scoped checkout configuration: basis row lock orders all override writes and authoritative checkout reads. |
 | [src/commerce/settings_validation.rs](../src/commerce/settings_validation.rs) | Configuration validation and required availability invariants. |
+| [src/commerce/supply.rs](../src/commerce/supply.rs) | Supplier links for reordering inside the Veyndo network: which product is bought from which shop, when and how much, with a ceiling per order. |
+| [src/commerce/supply_proposal.rs](../src/commerce/supply_proposal.rs) | Reorder proposals: a signed offer from the supplier shop's public checkout on this installation, checked against the ceiling; approval hands over to that checkout and orders nothing. |
 | [src/commerce/tax.rs](../src/commerce/tax.rs) | Destination tax-class resolution and net-preserving price conversion. |
 | [src/commerce/tax_context.rs](../src/commerce/tax_context.rs) | Tax conditions consume private authoritative pre-tax cart facts without a recursive quote. |
 | [src/commerce/tax_rules.rs](../src/commerce/tax_rules.rs) | Priority-based destination rules; current tax law is merchant configuration, not bundled tax advice. |
@@ -844,10 +846,12 @@ This lists every checked-in source module in these roots, including files with n
 | [frontend/src/admin/channels/ChannelType.tsx](../frontend/src/admin/channels/ChannelType.tsx) | Channel kind and POS presentation editor use the existing channel/content-language contract. |
 | [frontend/src/admin/channels/ChannelVisibility.tsx](../frontend/src/admin/channels/ChannelVisibility.tsx) | Public/private audience settings only apply to storefront and headless channel entry points. |
 | [frontend/src/admin/channels/SalesChannelsWorkspace.tsx](../frontend/src/admin/channels/SalesChannelsWorkspace.tsx) | Discover and create channels separately from rules; shared settings and independent SaaS shops remain explicit. |
+| [frontend/src/admin/channels/SupplyReorder.tsx](../frontend/src/admin/channels/SupplyReorder.tsx) | Supplier links in the native settings revision and reorder proposals with signed supplier offers; approval hands over to the supplier checkout. |
 | [frontend/src/admin/channels/agentic-channel-i18n.ts](../frontend/src/admin/channels/agentic-channel-i18n.ts) | Inward catalogue intake and protocol readiness use clear four-language merchant copy. |
 | [frontend/src/admin/channels/channel-i18n.ts](../frontend/src/admin/channels/channel-i18n.ts) | Sales-channel onboarding and inherited settings vocabulary in all interface languages. |
 | [frontend/src/admin/channels/channel-model.ts](../frontend/src/admin/channels/channel-model.ts) | Existing sales-channel contract and safe storefront URLs; independent tenants remain a separate concept. |
 | [frontend/src/admin/channels/connection-i18n.ts](../frontend/src/admin/channels/connection-i18n.ts) | Domain lifecycle copy in every supported Studio language. |
+| [frontend/src/admin/channels/supply-i18n.ts](../frontend/src/admin/channels/supply-i18n.ts) | Vocabulary for supplier links and reorder proposals in EN/DE/FR/ES; figures and names are parameters. |
 | [frontend/src/admin/customers/CustomerCreate.tsx](../frontend/src/admin/customers/CustomerCreate.tsx) | Native CRM creation with explicit address defaults, inline validation and unsaved-change recovery. |
 | [frontend/src/admin/customers/CustomerDirectory.tsx](../frontend/src/admin/customers/CustomerDirectory.tsx) | Registered and guest contacts share native directory filters and permission-aware grid controls. |
 | [frontend/src/admin/customers/CustomersManager.tsx](../frontend/src/admin/customers/CustomersManager.tsx) | CRM list and editable customer profile with linked order history. |
@@ -1185,6 +1189,7 @@ This lists every checked-in source module in these roots, including files with n
 | [frontend/src/admin/styles/studio/10-studio-mobile-preview-button.css](../frontend/src/admin/styles/studio/10-studio-mobile-preview-button.css) | studio: studio-mobile-preview-button styles. Source order is preserved by the entry stylesheet. |
 | [frontend/src/admin/styles/studio-sign-in.css](../frontend/src/admin/styles/studio-sign-in.css) | Dedicated access surface: responsive Veyndo login and native modal reauthentication. |
 | [frontend/src/admin/styles/studio.css](../frontend/src/admin/styles/studio.css) | Ordered studio stylesheet entry; domain rules live in the adjacent folder. |
+| [frontend/src/admin/styles/supply.css](../frontend/src/admin/styles/supply.css) | Supplier links and reorder proposals in the sales channel workspace. |
 | [frontend/src/admin/styles/team-roles.css](../frontend/src/admin/styles/team-roles.css) | Native team roles and readable scopes share Studio surfaces and responsive form rhythm. |
 | [frontend/src/admin/styles/team-workspace.css](../frontend/src/admin/styles/team-workspace.css) | Account, shop creation and team access share a clear action and form hierarchy. |
 | [frontend/src/admin/styles/variants.css](../frontend/src/admin/styles/variants.css) | Variant family and review table share the catalog's responsive theme and focus treatment. |

@@ -1,5 +1,13 @@
 # Changelog
 
+## Reorder from other Veyndo shops
+
+- Save supplier links (product, supplier shop, reorder point, quantity) and a
+  ceiling per reorder in the shop settings.
+- Fetch a signed offer from the supplier shop's public checkout for products at
+  their reorder point; approve within the ceiling and open the supplier's
+  checkout through a single-use link. Nothing is ordered automatically.
+
 ## Signed offers for buying agents
 
 - Issue the cart quote with an Ed25519 signature (`GET

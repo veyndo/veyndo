@@ -1020,6 +1020,16 @@
     "source": "extensions/apps/site-builder/design_agent.rs"
   },
   {
+    "path": "/api/merchant/supply/approve",
+    "method": "POST",
+    "source": "src/commerce/supply_proposal.rs"
+  },
+  {
+    "path": "/api/merchant/supply/proposal",
+    "method": "POST",
+    "source": "src/commerce/supply_proposal.rs"
+  },
+  {
     "path": "/api/merchant/translations",
     "method": "GET",
     "source": "src/translations/mod.rs"
