@@ -3141,6 +3141,16 @@
       "readOnly": true
     },
     {
+      "description": "Read whether a private sandbox is ready to be tested as a shop twin",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {},
+        "type": "object"
+      },
+      "name": "merchant.scenario.readiness",
+      "readOnly": true
+    },
+    {
       "description": "Run scripted cart and checkout attacks against a private sandbox",
       "inputSchema": {
         "additionalProperties": false,

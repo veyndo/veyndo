@@ -1,5 +1,13 @@
 # Changelog
 
+## Shop twin readiness in the customer simulator
+
+- Show for the selected private sandbox whether catalog, test stock, simulated
+  checkout and saved customer tests are ready, with a link to the owning
+  workspace for each open step. HTTP and the MCP tool
+  `merchant.scenario.readiness` return the same read-only figures.
+- Add the guide "Test a twin of your existing shop".
+
 ## Attack test in the customer simulator
 
 - Run nine scripted cart and checkout attacks against a private sandbox from

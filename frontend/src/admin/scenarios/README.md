@@ -16,3 +16,8 @@ predictions must not be inferred from these API journeys.
 for the selected sandbox and lists native refusals; `scenario-attack-i18n` holds
 its closed probe and finding vocabulary. Results are not saved and are not a
 security certification of the shop.
+
+`ScenarioTwin` reads `GET /api/agent/scenario-readiness` for the selected
+sandbox and lists catalog, test stock, simulated checkout and saved tests with a
+link to the owning workspace for each open step; `scenario-twin-i18n` holds its
+vocabulary. It writes nothing.

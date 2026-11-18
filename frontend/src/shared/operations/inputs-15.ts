@@ -2,6 +2,21 @@
 /** Native input DTOs; opaque JSON fields remain explicit. */
 import type { JsonValue } from "./value";
 export interface Inputs15 {
+  "b2b.quotes.merchant": {
+    cartRevision?: number;
+    companyId?: string;
+    customerId?: string;
+    data?: JsonValue;
+    id?: string;
+    lines?: Array<{ quantity: number; sku: string }>;
+    message?: string;
+    parentId?: string | null;
+    productIds?: Array<string>;
+    purchaseOrder?: string;
+    revision?: number;
+    state?: "approved" | "rejected";
+    unitId?: string;
+  };
   "b2b.quote.request": {
     cartRevision?: number;
     companyId?: string;
@@ -144,21 +159,6 @@ export interface Inputs15 {
     unitId?: string;
   };
   "b2b.list.apply": {
-    cartRevision?: number;
-    companyId?: string;
-    customerId?: string;
-    data?: JsonValue;
-    id?: string;
-    lines?: Array<{ quantity: number; sku: string }>;
-    message?: string;
-    parentId?: string | null;
-    productIds?: Array<string>;
-    purchaseOrder?: string;
-    revision?: number;
-    state?: "approved" | "rejected";
-    unitId?: string;
-  };
-  "b2b.quick-order": {
     cartRevision?: number;
     companyId?: string;
     customerId?: string;

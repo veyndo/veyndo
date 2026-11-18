@@ -2,6 +2,12 @@
 /** Native input DTOs; opaque JSON fields remain explicit. */
 import type { JsonValue } from "./value";
 export interface Inputs10 {
+  "knowledge.claim.review": {
+    approve?: boolean;
+    id?: string;
+    revision?: number;
+    state?: "evidenced" | "confirmed" | "rejected";
+  };
   "knowledge.extract": {
     inference?: JsonValue;
     locale?: string;
@@ -48,13 +54,5 @@ export interface Inputs10 {
     id: string;
     revision?: number;
     version?: number;
-  };
-  "merchant.app.restore": {
-    app: string;
-    approve: boolean;
-    entity: string;
-    id: string;
-    revision: number;
-    version: number;
   };
 }

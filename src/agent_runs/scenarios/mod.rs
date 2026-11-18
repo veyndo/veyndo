@@ -4,6 +4,7 @@ mod catalogue;
 mod evidence;
 mod journey;
 mod probes;
+mod readiness;
 mod shopper;
 mod source;
 pub(super) use journey::execute;
@@ -19,6 +20,10 @@ pub(crate) const CAPABILITIES: &[(&str, &str)] = &[
     (
         "merchant.scenario.list",
         "List the current actor's sandbox scenarios",
+    ),
+    (
+        "merchant.scenario.readiness",
+        "Read whether a private sandbox is ready to be tested as a shop twin",
     ),
     (
         "merchant.scenario.probe",
@@ -68,6 +73,11 @@ pub(crate) fn router() -> Router<App> {
             post(create).get(list),
         )
         .secure_route(
+            "/api/agent/scenario-readiness",
+            &[("GET", "assistant.use")],
+            get(readiness),
+        )
+        .secure_route(
             "/api/agent/scenario-probes",
             &[("POST", "assistant.use")],
             post(probe),
@@ -84,6 +94,11 @@ async fn create(
     Json(v): Json<Value>,
 ) -> Result<Json<Value>> {
     Ok(Json(invoke(&a, &h, "merchant.scenario.create", &v).await?))
+}
+async fn readiness(State(a): State<App>, h: RequestContext) -> Result<Json<Value>> {
+    Ok(Json(
+        invoke(&a, &h, "merchant.scenario.readiness", &json!({})).await?,
+    ))
 }
 async fn probe(State(a): State<App>, h: RequestContext) -> Result<Json<Value>> {
     Ok(Json(
@@ -129,6 +144,9 @@ pub(crate) async fn admit(a: &App, h: &RequestContext) -> Result<String> {
 pub(crate) async fn invoke(a: &App, h: &RequestContext, name: &str, v: &Value) -> Result<Value> {
     apps::validate_native_input(&schema(name).ok_or(bad("Unknown scenario operation"))?, v)?;
     let t = admit(a, h).await?;
+    if name == "merchant.scenario.readiness" {
+        return readiness::read(a, h, &t).await;
+    }
     if name == "merchant.scenario.probe" {
         return probes::run(a, h, &t).await;
     }

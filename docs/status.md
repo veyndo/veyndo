@@ -53,6 +53,17 @@ Studio and the public Lumen storefront responded on their existing origins.
   promotion remain open. [Measured workloads](benchmarks.md) ·
   [Component tasks](commerce-components.md).
 
+## Shop twin readiness
+
+The customer simulator opens with a **Shop twin** panel for the selected private
+sandbox. It reads the number of purchasable items, how many have stock, whether
+simulated payment and shipping are active for the first delivery country, and
+how many customer tests were saved. In local Studio a copy of the demo shop was
+reported as ready, and a copy with all stock set to zero as not ready with the
+open step and its repair link. No catalog import was run for this record, and
+nothing is deployed to the hosted pilot.
+[Guide](shop-twin.md) · [Local record](evidence/shop-twin-2026-11-18.md).
+
 ## Attack test in the customer simulator
 
 The customer simulator has a second, model-free test. Nine scripted attackers

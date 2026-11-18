@@ -85,6 +85,11 @@
     "source": "src/agent_runs/scenarios/mod.rs"
   },
   {
+    "path": "/api/agent/scenario-readiness",
+    "method": "GET",
+    "source": "src/agent_runs/scenarios/mod.rs"
+  },
+  {
     "path": "/api/agent/scenarios",
     "method": "GET",
     "source": "src/agent_runs/scenarios/mod.rs"

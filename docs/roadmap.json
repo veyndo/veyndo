@@ -54,7 +54,7 @@
     },
     {
       "id": "shop-twin",
-      "status": "building",
+      "status": "local",
       "title": {
         "en": "A twin of your existing shop",
         "de": "Ein Zwilling deines bestehenden Shops",
@@ -62,14 +62,14 @@
         "es": "Un gemelo de tu tienda actual"
       },
       "summary": {
-        "en": "Bring a Shopware, Shopify or WooCommerce catalog into a private copy and let test customers and buying agents try it. Nobody has to migrate first.",
-        "de": "Hol einen Shopware-, Shopify- oder WooCommerce-Katalog in eine private Kopie und lass Testkunden und Kaufagenten ihn ausprobieren. Niemand muss vorher umziehen.",
-        "fr": "Importez un catalogue Shopware, Shopify ou WooCommerce dans une copie privée et laissez clients de test et agents d’achat l’essayer. Aucune migration préalable.",
-        "es": "Trae un catálogo de Shopware, Shopify o WooCommerce a una copia privada y deja que clientes de prueba y agentes de compra lo prueben. Sin migrar antes."
+        "en": "A private copy shows whether catalog, test stock and checkout are ready, then test customers and attackers try it. Bring the catalog from Shopware, Shopify, WooCommerce or CSV. Nobody has to migrate first.",
+        "de": "Eine private Kopie zeigt, ob Katalog, Testbestand und Checkout bereit sind, dann probieren Testkunden und Angreifer sie aus. Hol den Katalog aus Shopware, Shopify, WooCommerce oder CSV. Niemand muss vorher umziehen.",
+        "fr": "Une copie privée indique si catalogue, stock de test et paiement sont prêts, puis clients de test et attaquants l’essaient. Importez le catalogue depuis Shopware, Shopify, WooCommerce ou CSV. Aucune migration préalable.",
+        "es": "Una copia privada muestra si catálogo, stock de prueba y pago están listos; después la prueban clientes de prueba y atacantes. Trae el catálogo desde Shopware, Shopify, WooCommerce o CSV. Sin migrar antes."
       },
       "buildsOn": "Migration Assistant, catalog import, customer simulator",
-      "guide": null,
-      "evidence": null
+      "guide": "docs/shop-twin.md",
+      "evidence": "docs/evidence/shop-twin-2026-11-18.md"
     },
     {
       "id": "autopilot",

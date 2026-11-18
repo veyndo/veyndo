@@ -34,6 +34,7 @@ const outcomes: Record<AttackProbe["outcome"], AttackWord> = {
   breached: "attackBreached",
   review: "attackReview",
 };
+import "./scenario-labs.css";
 export default function ScenarioAttacks({ request }: { request: RequestFn }) {
   const t = useAttackText();
   const [report, setReport] = useState<AttackReport>(),

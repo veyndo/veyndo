@@ -95,7 +95,7 @@ for verification tooling. Run `./scripts/dev.sh` and open
 | Operation and verification | [Architecture](docs/production-architecture.md) · [Integrations](docs/service-integrations.md) · [Testing](docs/testing.md) · [Proof boundaries](docs/formal-verification.md) |
 
 <!-- roadmap:start -->
-**Roadmap:** 1 of 8 stages work today. [See what comes next](docs/roadmap.md).
+**Roadmap:** 2 of 8 stages work today. [See what comes next](docs/roadmap.md).
 <!-- roadmap:end -->
 
 ## Current boundaries

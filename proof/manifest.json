@@ -2571,13 +2571,18 @@
     },
     "src/agent_runs/scenarios/mod.rs": {
       "status": "unproved",
-      "sha256": "c41e92d5ce726d5b22ec2125b488b8530344aa53db415715d15ec3ac3380e010",
-      "review": "Scenario attack probes: shopper.rs purchase split into review/accept/complete with unchanged order of native calls; new probes.rs is an unproved read-and-attempt adapter over existing cart/checkout capabilities; agentic_scenarios suite passes with nine refusals and unchanged live shop"
+      "sha256": "68a5efadf82010ee87976a4fbcfd90406e880287639c735f2ea4a3cc9a27203b",
+      "review": "Twin readiness: new read-only readiness.rs adapter over existing settings, catalogue sample and task rows; registry classifies merchant.scenario.readiness as a read; agentic_scenarios suite passes with ready, zero-stock and denied-caller cases"
     },
     "src/agent_runs/scenarios/probes.rs": {
       "status": "unproved",
       "sha256": "c7dd8ce8c49a603f6c9a6f4cb9730a8af2086a6cc7b55aa8a38632eb22917cb4",
       "review": "Scenario attack probes: shopper.rs purchase split into review/accept/complete with unchanged order of native calls; new probes.rs is an unproved read-and-attempt adapter over existing cart/checkout capabilities; agentic_scenarios suite passes with nine refusals and unchanged live shop"
+    },
+    "src/agent_runs/scenarios/readiness.rs": {
+      "status": "unproved",
+      "sha256": "c9fcc6f6a3a85f00bfdb79186769e703d16044592baf12f5bdecc302718435cb",
+      "review": "Twin readiness: new read-only readiness.rs adapter over existing settings, catalogue sample and task rows; registry classifies merchant.scenario.readiness as a read; agentic_scenarios suite passes with ready, zero-stock and denied-caller cases"
     },
     "src/agent_runs/scenarios/shopper.rs": {
       "status": "unproved",
@@ -3531,8 +3536,8 @@
     },
     "src/capabilities/registry.rs": {
       "status": "unproved",
-      "sha256": "12c293b9822fe60696079284395da6544ef880a1648aab5b3aa61188088398b2",
-      "review": "Codex source review: the admitted Flow draft tool publishes one closed result schema, validates it at the existing shared dispatch boundary, and preserves all other operation contracts. Native PostgreSQL HTTP and MCP tests cover correct revision, no save or queue, denied authority and stale drafts. The unit test rejects a claimed save and missing or negative revision; generated TypeScript, OpenAPI and WIT were checked. The adapter remains unproved; no policy or theorem changed."
+      "sha256": "96bc5d9bc227875d1e87b3d1d05f3ec170e5bfe0844b77f76bab1661292c47da",
+      "review": "Twin readiness: new read-only readiness.rs adapter over existing settings, catalogue sample and task rows; registry classifies merchant.scenario.readiness as a read; agentic_scenarios suite passes with ready, zero-stock and denied-caller cases"
     },
     "src/capabilities/schema.rs": {
       "status": "unproved",

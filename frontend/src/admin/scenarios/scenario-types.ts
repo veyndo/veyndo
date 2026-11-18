@@ -85,3 +85,21 @@ export type AttackReport = {
   summary: { held: number; breached: number; review: number };
   probes: AttackProbe[];
 };
+export type TwinReadiness = {
+  sandbox: { id: string; name: string };
+  catalogue: {
+    products: number;
+    withStock: number;
+    withoutStock: number;
+    inactive: number;
+    visibleSample: number;
+  };
+  checkout: {
+    country: string | null;
+    simulatedPayment: boolean;
+    shipping: boolean;
+  };
+  tests: { customerTests: number };
+  ready: boolean;
+  blockers: string[];
+};
