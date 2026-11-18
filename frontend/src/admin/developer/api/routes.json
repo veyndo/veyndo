@@ -81,12 +81,22 @@
   },
   {
     "path": "/api/agent/scenario-probes",
+    "method": "GET",
+    "source": "src/agent_runs/scenarios/mod.rs"
+  },
+  {
+    "path": "/api/agent/scenario-probes",
     "method": "POST",
     "source": "src/agent_runs/scenarios/mod.rs"
   },
   {
     "path": "/api/agent/scenario-readiness",
     "method": "GET",
+    "source": "src/agent_runs/scenarios/mod.rs"
+  },
+  {
+    "path": "/api/agent/scenario-stock",
+    "method": "POST",
     "source": "src/agent_runs/scenarios/mod.rs"
   },
   {

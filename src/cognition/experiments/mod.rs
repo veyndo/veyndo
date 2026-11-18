@@ -1,7 +1,9 @@
 //! Controlled experiments use the existing storefront layout consumer and authoritative payment ledger.
 use crate::*;
+mod automation;
 mod model;
 mod report;
+pub(crate) use automation::auto_once;
 use model::Design;
 pub(crate) async fn invoke(a: &App, h: &RequestContext, name: &str, v: &Value) -> Result<Value> {
     let t = merchant(a, h)?;
@@ -11,6 +13,9 @@ pub(crate) async fn invoke(a: &App, h: &RequestContext, name: &str, v: &Value) -
         return Ok(
             json!({"experiments":rows.iter().map(|r|json!({"id":r.get::<String,_>("id"),"design":r.get::<Value,_>("data"),"revision":r.get::<i64,_>("revision"),"state":r.get::<String,_>("state"),"startedAt":r.get::<Option<String>,_>("started_at"),"endsAt":r.get::<Option<String>,_>("ends_at")})).collect::<Vec<_>>() }),
         );
+    }
+    if name == "knowledge.experiment.suggest" {
+        return automation::suggest(a, h, &t).await;
     }
     if name == "knowledge.experiment.report" {
         return report::report(a, &t, v["id"].as_str().ok_or(bad("Experiment required"))?).await;

@@ -320,7 +320,10 @@ export default function ScenarioStudio({
               {t(busy ? "starting" : "start")}
             </button>
           </footer>
-          <ScenarioAttacks request={request} />
+          <ScenarioAttacks
+            request={request}
+            onSaved={() => setRefresh((value) => value + 1)}
+          />
           {!!scenarios.length && (
             <ScenarioHistory
               scenarios={scenarios}

@@ -45,6 +45,7 @@ pub(crate) static OPERATIONS: LazyLock<Vec<Operation>> = LazyLock::new(|| {
                     | "knowledge.claims"
                     | "knowledge.experiments"
                     | "knowledge.experiment.report"
+                    | "knowledge.experiment.suggest"
                     | "knowledge.search"
                     | "knowledge.external"
                     | "knowledge.workspace"
@@ -59,6 +60,7 @@ pub(crate) static OPERATIONS: LazyLock<Vec<Operation>> = LazyLock::new(|| {
                 || name == "merchant.scenario.status"
                 || name == "merchant.scenario.list"
                 || name == "merchant.scenario.readiness"
+                || name == "merchant.scenario.attacks"
                 || name == "knowledge.autonomy.status"
                 || name == "merchant.agents.status"
                 || [

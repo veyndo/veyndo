@@ -1,5 +1,23 @@
 # Changelog
 
+## Experiments that run themselves
+
+- Suggest a layout experiment from the shop's live payments of the last 30 days,
+  with its basis and warnings. Nothing is saved until you register it.
+- Let an approved experiment finish at its horizon and save its final readout
+  after the settlement period without further clicks. Optionally adopt a proved
+  layout automatically; without proof the shop stays as it is.
+
+## Complete the attack test, shop twin and autopilot
+
+- Save every attack test, show the last one again in the simulator and beside
+  the release review with whether the configuration changed since.
+- Set test stock for all items without stock in a private sandbox with one
+  action; add the attack test as the fifth twin step.
+- Take automatic price changes back per product or all at once. A worker guard
+  restores today's reductions by itself when the daily limit is exceeded. A
+  price changed by hand afterwards is never overwritten.
+
 ## Autopilot levels and a daily limit for price reductions
 
 - Add an optional daily limit to automatic prices: reduction times current

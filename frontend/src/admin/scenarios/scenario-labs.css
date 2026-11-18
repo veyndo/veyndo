@@ -170,3 +170,12 @@
 .scenario-twin-steps .is-done .scenario-twin-state {
   color: #17693a;
 }
+.release-attack {
+  display: grid;
+  gap: 8px;
+  margin: 12px 0;
+}
+.release-attack h3,
+.release-attack p {
+  margin: 0;
+}

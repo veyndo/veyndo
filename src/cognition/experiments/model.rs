@@ -14,6 +14,22 @@ pub(super) struct Design {
     pub minimum_per_arm: usize,
     pub outcome_cap_minor: i64,
     pub cuped_theta: f64,
+    #[serde(default, skip_serializing_if = "Automation::is_off")]
+    pub automation: Automation,
+}
+/// What the worker may do after the merchant approved the start: finish and read out, and optionally apply a proved result.
+#[derive(Clone, Copy, Default, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub(super) struct Automation {
+    #[serde(default)]
+    pub finish: bool,
+    #[serde(default)]
+    pub apply: bool,
+}
+impl Automation {
+    fn is_off(&self) -> bool {
+        !self.finish && !self.apply
+    }
 }
 impl Design {
     pub fn validate(&self) -> Result<()> {
@@ -29,6 +45,7 @@ impl Design {
             || !(1..=1_000_000_000_000).contains(&self.outcome_cap_minor)
             || !self.cuped_theta.is_finite()
             || !(0.0..=1.0).contains(&self.cuped_theta)
+            || self.automation.apply && !self.automation.finish
         {
             return Err(bad(
                 "Invalid preregistration: distinct layouts, 1–720 hours, 14–90 settlement days, 100–5000 units per arm and bounded outcome required",

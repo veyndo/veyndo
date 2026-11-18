@@ -172,6 +172,42 @@ const words = {
     "La boutique a échoué avec une erreur serveur au lieu de refuser proprement.",
     "La tienda falló con un error de servidor en lugar de rechazar limpiamente.",
   ],
+  attackSaved: [
+    "Saved {time}.",
+    "Gespeichert {time}.",
+    "Enregistré {time}.",
+    "Guardado {time}.",
+  ],
+  attackCurrent: [
+    "The shop configuration has not changed since this test.",
+    "Die Shop-Konfiguration ist seit diesem Test unverändert.",
+    "La configuration de la boutique n’a pas changé depuis ce test.",
+    "La configuración de la tienda no ha cambiado desde esta prueba.",
+  ],
+  attackStale: [
+    "The shop configuration changed after this test. Run the attacks again.",
+    "Die Shop-Konfiguration wurde nach diesem Test geändert. Starte die Angriffe erneut.",
+    "La configuration a changé après ce test. Relancez les attaques.",
+    "La configuración cambió después de esta prueba. Lanza los ataques de nuevo.",
+  ],
+  attackUnverified: [
+    "Whether the configuration changed since this test could not be checked.",
+    "Ob sich die Konfiguration seit diesem Test geändert hat, ließ sich nicht prüfen.",
+    "Impossible de vérifier si la configuration a changé depuis ce test.",
+    "No se pudo comprobar si la configuración cambió desde esta prueba.",
+  ],
+  attackReleaseTitle: [
+    "Attack test",
+    "Angriffstest",
+    "Test d’attaque",
+    "Prueba de ataque",
+  ],
+  attackReleaseNone: [
+    "No attack test was saved in this sandbox yet. Open the customer simulator to run one.",
+    "In dieser Sandbox ist noch kein Angriffstest gespeichert. Öffne den Kundensimulator, um einen zu starten.",
+    "Aucun test d’attaque n’est enregistré dans cette sandbox. Ouvrez le simulateur client pour en lancer un.",
+    "Aún no hay ninguna prueba de ataque guardada en esta sandbox. Abre el simulador de clientes para lanzar una.",
+  ],
 } as const;
 export type AttackWord = keyof typeof words;
 export function useAttackText() {

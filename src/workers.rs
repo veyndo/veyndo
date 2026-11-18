@@ -50,6 +50,13 @@ pub(crate) fn start(a: &App, role: &str, app_enabled: bool) -> Option<AppWorkers
                         Ok(worked) => ticks.worked(worked),
                         Err(e) => eprintln!("agent worker status={}", e.0.as_u16()),
                     }
+                    // The autopilot guard shares this lane; it rate-limits itself per process.
+                    if let Err(e) = cognition::autonomy_revert::guard_once(&worker).await {
+                        eprintln!("autopilot guard status={}", e.0.as_u16());
+                    }
+                    if let Err(e) = cognition::experiments::auto_once(&worker).await {
+                        eprintln!("experiment automation status={}", e.0.as_u16());
+                    }
                 }
             });
         }

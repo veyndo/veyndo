@@ -228,10 +228,19 @@ decide about, for example it sold more than the current stock because
 backorders are allowed. A server error also counts as **Check**, not as a refusal.
 
 The honest replayed order is a real private, simulated order in the sandbox, like
-any other test order. The live shop is not touched. Results are shown once and
-are **not saved** with the release review yet. Nine scripted attacks are a
-regression check for these fences, not a penetration test or a security
-certificate for the shop.
+any other test order. The live shop is not touched.
+
+Each run is **saved** for you in that sandbox (the ten most recent are kept).
+The panel shows the last one again when you return, with whether the shop
+configuration changed since. **Staging & releases** shows the same line beside
+your pending changes, so you see before publishing whether the attacks were run
+against the configuration you are about to release. It is evidence, not a gate:
+publication is not blocked.
+
+![Saved attack test beside the release review](assets/roadmap/attack-test-release.jpg)
+
+Nine scripted attacks are a regression check for these fences, not a
+penetration test or a security certificate for the shop.
 
 ## Shared contract and isolation
 
@@ -240,7 +249,10 @@ certificate for the shop.
 | `merchant.scenario.create` | `POST /api/agent/scenarios` | Idempotently enqueue one to six profiles in a private environment. |
 | `merchant.scenario.list` | `GET /api/agent/scenarios` | Actor-private history and selected channel configuration. |
 | `merchant.scenario.status` | `GET /api/agent/scenarios/{id}` | Current saved observations and customer task states. |
-| `merchant.scenario.probe` | `POST /api/agent/scenario-probes` | Run the nine scripted cart and checkout attacks in a private environment; no model call. |
+| `merchant.scenario.probe` | `POST /api/agent/scenario-probes` | Run the nine scripted cart and checkout attacks in a private environment and save the report; no model call. |
+| `merchant.scenario.attacks` | `GET /api/agent/scenario-probes` | Latest saved attack report of this person, sandbox and channel, with configuration freshness. |
+| `merchant.scenario.readiness` | `GET /api/agent/scenario-readiness` | Twin readiness of the sandbox. [Shop twin](shop-twin.md) |
+| `merchant.scenario.stock` | `POST /api/agent/scenario-stock` | Give items without stock a test quantity; private sandbox only, needs `catalog.write` and explicit approval. |
 
 MCP and HTTP share the capability registry and handlers. Existing
 `merchant.run.cancel` / `merchant.run.resume` operations control the individual

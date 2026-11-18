@@ -105,13 +105,71 @@ the limit is refused and the price stays as it was.
 To set it, choose **Allow limited automatic prices**, enter the **Daily limit for
 price reductions** and save. Leave the field empty for no limit.
 
-Not included: the autopilot does not take a change back by itself when sales
-drop, the limit covers only products priced in the shop's pricing currency, and
-it is a ceiling on given-up revenue, not a forecast of loss or margin.
+**Taking changes back.** Each of today's automatic changes has a **Take back**
+button; it restores the price from the start of the day. A product whose price
+you changed by hand afterwards is left alone.
+
+![Autopilot after a rollback](assets/roadmap/autopilot-rollback.jpg)
+
+The autopilot also takes today's reductions back **by itself** when today's
+total rises above the limit, for example because stock arrives or you lower the
+limit. A background check runs about every 30 seconds, so this happens within
+about a minute. It restores to the price from the start of the day and records
+an `ai.autonomy.reverted` event.
+
+Not included: there is no rollback triggered by falling sales or conversion,
+the limit covers only products priced in the shop's pricing currency, and it is
+a ceiling on given-up revenue, not a forecast of loss or margin.
 
 `knowledge.autonomy.status` (`POST /api/intelligence/autonomy.status`, also an MCP
 tool) returns the level, the limits and today's changes. It needs
 `knowledge.read` and `settings.read` and reserves nothing.
+`knowledge.autonomy.revert` (`POST /api/intelligence/autonomy.revert` with
+`{"approve": true}` and an optional `productId`) takes changes back; it needs
+`catalog.write` and `settings.write`.
+
+## Experiments that run themselves
+
+A layout experiment compares the two storefront layouts on real, consenting
+visitors and reads the result from real payments. You still decide whether it
+starts. After that it can run without further clicks.
+
+![Experiment suggestion, automation switches and a self-decided experiment](assets/roadmap/experiments-studio.jpg)
+
+*Local Studio, synthetic shop without live payments, 18 November 2026.*
+
+1. Open **Shop knowledge → Experiments** and choose **Suggest from shop
+   figures**. The form is prefilled from the live payments of the last 30 days:
+   the layout you show now is the control, the cap is the amount 95 % of
+   payments stay under, and the run is one week with 400 or more payments a
+   month, otherwise two. Nothing is saved yet.
+2. Read the warnings. Without live payments the experiment would run but its
+   result would stay empty, because simulated orders never count. With fewer
+   than 200 payments a month it may stay undecided.
+3. Keep **Finish and read out by itself** on. Turn **Adopt a proved layout by
+   itself** on only if you want the shop to change without asking you again.
+4. Choose **Register experiment**, then **Start random assignment**.
+
+| After you start | Who acts | What happens |
+| --- | --- | --- |
+| The fixed run ends | Worker, within about 30 seconds | Assignment stops, as if you chose **Finish** |
+| The settlement period ends (14 to 90 days) | Worker | The final readout is computed once and saved |
+| The readout proves an uplift and adopting is on | Worker | The tested layout becomes the shop's fixed layout |
+| No proved uplift, or adopting is off | Worker | The shop stays as it is; the decision is recorded |
+
+An experiment without these switches behaves as before and waits for you.
+Stopping early, a withdrawn consent or a foreign currency still invalidate the
+readout, and then nothing is adopted. "Proved" keeps its strict meaning: final
+look only, at least the preregistered minimum in both groups, and a lower bound
+above zero.
+
+Not included: the suggestion is arithmetic on your own payments, not a model
+hypothesis; test customers cannot pre-screen a layout because they use the
+commerce API, not pages; only the two existing layouts can be compared; and the
+adopted layout applies to the whole shop, not one sales channel.
+
+`knowledge.experiment.suggest` (`POST /api/intelligence/experiment.suggest`, also
+an MCP tool) returns the prefilled design, its basis and the warnings.
 
 ## Connected knowledge and testing views
 
@@ -221,7 +279,7 @@ The shop persists sources and order evidence, retrieves them for the actual mode
 prompt and recommends merchant-approved associations. Its existing layout policy
 also records views/rewards; this workspace does not confuse layout learning with
 product-variant learning. Model weights remain fixed. No causal uplift, automatic
-fact truth, full customer-question log, autonomous experiments or full Shopware parity
+fact truth, full customer-question log, agent-designed experiments or full Shopware parity
 is implied. Authoritative price/tax/order decisions continue in the deterministic core.
 
 Customer questions remain read-only and are not silently logged. Gmail/app content

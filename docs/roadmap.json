@@ -43,14 +43,14 @@
         "es": "Clientes de prueba que atacan"
       },
       "summary": {
-        "en": "Before a change goes live, scripted attackers try forged totals, stale carts, impossible quantities and replayed orders against the private copy.",
-        "de": "Bevor eine Änderung live geht, versuchen feste Angreifer gefälschte Summen, veraltete Warenkörbe, unmögliche Mengen und wiederholte Bestellungen an der privaten Kopie.",
-        "fr": "Avant la mise en ligne, des attaquants scriptés essaient totaux falsifiés, paniers périmés, quantités impossibles et commandes rejouées sur la copie privée.",
-        "es": "Antes de publicar un cambio, atacantes guionizados prueban totales falsificados, carritos obsoletos, cantidades imposibles y pedidos repetidos en la copia privada."
+        "en": "Before a change goes live, scripted attackers try forged totals, stale carts, impossible quantities and replayed orders against the private copy. The result is saved and shown beside the release review.",
+        "de": "Bevor eine Änderung live geht, versuchen feste Angreifer gefälschte Summen, veraltete Warenkörbe, unmögliche Mengen und wiederholte Bestellungen an der privaten Kopie. Das Ergebnis wird gespeichert und neben der Freigabeprüfung gezeigt.",
+        "fr": "Avant la mise en ligne, des attaquants scriptés essaient totaux falsifiés, paniers périmés, quantités impossibles et commandes rejouées sur la copie privée. Le résultat est enregistré et affiché à côté de la revue de publication.",
+        "es": "Antes de publicar un cambio, atacantes guionizados prueban totales falsificados, carritos obsoletos, cantidades imposibles y pedidos repetidos en la copia privada. El resultado se guarda y se muestra junto a la revisión de publicación."
       },
       "buildsOn": "Customer simulator, private sandboxes, native cart and checkout operations",
       "guide": "docs/customer-scenarios.md#attack-test",
-      "evidence": "docs/evidence/attack-test-2026-11-18.md"
+      "evidence": "docs/evidence/stages-1-3-completion-2026-11-18.md"
     },
     {
       "id": "shop-twin",
@@ -62,14 +62,14 @@
         "es": "Un gemelo de tu tienda actual"
       },
       "summary": {
-        "en": "A private copy shows whether catalog, test stock and checkout are ready, then test customers and attackers try it. Bring the catalog from Shopware, Shopify, WooCommerce or CSV. Nobody has to migrate first.",
-        "de": "Eine private Kopie zeigt, ob Katalog, Testbestand und Checkout bereit sind, dann probieren Testkunden und Angreifer sie aus. Hol den Katalog aus Shopware, Shopify, WooCommerce oder CSV. Niemand muss vorher umziehen.",
-        "fr": "Une copie privée indique si catalogue, stock de test et paiement sont prêts, puis clients de test et attaquants l’essaient. Importez le catalogue depuis Shopware, Shopify, WooCommerce ou CSV. Aucune migration préalable.",
-        "es": "Una copia privada muestra si catálogo, stock de prueba y pago están listos; después la prueban clientes de prueba y atacantes. Trae el catálogo desde Shopware, Shopify, WooCommerce o CSV. Sin migrar antes."
+        "en": "Bring a catalog from Shopware, Shopify, WooCommerce or CSV into a private copy, set test stock with one click and let test customers and attackers try it. Nobody has to migrate first.",
+        "de": "Hol einen Katalog aus Shopware, Shopify, WooCommerce oder CSV in eine private Kopie, setze Testbestand mit einem Klick und lass Testkunden und Angreifer sie ausprobieren. Niemand muss vorher umziehen.",
+        "fr": "Importez un catalogue Shopware, Shopify, WooCommerce ou CSV dans une copie privée, définissez un stock de test en un clic et laissez clients de test et attaquants l’essayer. Aucune migration préalable.",
+        "es": "Trae un catálogo de Shopware, Shopify, WooCommerce o CSV a una copia privada, pon stock de prueba con un clic y deja que clientes de prueba y atacantes la prueben. Sin migrar antes."
       },
       "buildsOn": "Migration Assistant, catalog import, customer simulator",
       "guide": "docs/shop-twin.md",
-      "evidence": "docs/evidence/shop-twin-2026-11-18.md"
+      "evidence": "docs/evidence/stages-1-3-completion-2026-11-18.md"
     },
     {
       "id": "autopilot",
@@ -81,18 +81,18 @@
         "es": "Niveles de piloto automático con límite diario"
       },
       "summary": {
-        "en": "See per area whether an agent suggests or acts. For prices it may act within a budget: price boundaries, a daily movement, a number of products and a daily limit for price reductions. An automatic rollback is not built yet.",
-        "de": "Sieh pro Bereich, ob ein Agent vorschlägt oder handelt. Bei Preisen darf er im Budget handeln: Preisgrenzen, Tagesbewegung, Anzahl Produkte und ein Tageslimit für Preissenkungen. Eine automatische Rücknahme ist noch nicht gebaut.",
-        "fr": "Voyez par domaine si un agent propose ou agit. Pour les prix, il peut agir dans un budget : bornes de prix, variation quotidienne, nombre de produits et limite quotidienne des baisses. Le retour arrière automatique n’existe pas encore.",
-        "es": "Mira por área si un agente propone o actúa. En precios puede actuar dentro de un presupuesto: límites de precio, variación diaria, número de productos y un límite diario de bajadas. La reversión automática aún no existe."
+        "en": "See per area whether an agent suggests or acts. For prices it may act within a budget with a daily limit for price reductions. You can take changes back, and the autopilot takes them back by itself when the limit is exceeded.",
+        "de": "Sieh pro Bereich, ob ein Agent vorschlägt oder handelt. Bei Preisen darf er im Budget handeln, mit einem Tageslimit für Preissenkungen. Du kannst Änderungen zurücknehmen, und der Autopilot nimmt sie von selbst zurück, wenn das Limit überschritten ist.",
+        "fr": "Voyez par domaine si un agent propose ou agit. Pour les prix, il peut agir dans un budget avec une limite quotidienne des baisses. Vous pouvez annuler des modifications, et le pilote automatique les annule de lui-même si la limite est dépassée.",
+        "es": "Mira por área si un agente propone o actúa. En precios puede actuar dentro de un presupuesto con un límite diario de bajadas. Puedes revertir cambios, y el piloto automático los revierte solo cuando se supera el límite."
       },
       "buildsOn": "Existing price autonomy with daily product budget, price corridors, agent credentials with allowances",
       "guide": "docs/knowledge-workspace.md#autopilot-levels-and-the-daily-limit",
-      "evidence": "docs/evidence/autopilot-2026-11-18.md"
+      "evidence": "docs/evidence/stages-1-3-completion-2026-11-18.md"
     },
     {
       "id": "experiments",
-      "status": "planned",
+      "status": "local",
       "title": {
         "en": "Experiments that run themselves",
         "de": "Experimente, die von selbst laufen",
@@ -100,14 +100,14 @@
         "es": "Experimentos que se ejecutan solos"
       },
       "summary": {
-        "en": "An agent states a hypothesis, test customers screen it, a share of real visitors decides, and the result is published or withdrawn.",
-        "de": "Ein Agent stellt eine Hypothese auf, Testkunden sortieren vor, ein Anteil echter Besucher entscheidet, und das Ergebnis wird veröffentlicht oder zurückgenommen.",
-        "fr": "Un agent formule une hypothèse, des clients de test la filtrent, une part de vrais visiteurs décide, puis le résultat est publié ou retiré.",
-        "es": "Un agente formula una hipótesis, los clientes de prueba la filtran, una parte de visitantes reales decide y el resultado se publica o se retira."
+        "en": "Get an experiment suggested from your shop's own payments, start it once, and it finishes, reads out and decides by itself. A proved layout can be adopted automatically; without proof the shop stays as it is.",
+        "de": "Lass dir ein Experiment aus den Zahlungen deines Shops vorschlagen, starte es einmal, und es schließt ab, wertet aus und entscheidet von selbst. Ein bewiesenes Layout kann automatisch übernommen werden; ohne Beweis bleibt der Shop, wie er ist.",
+        "fr": "Faites proposer une expérience à partir des paiements de votre boutique, lancez-la une fois : elle se clôture, s’analyse et décide seule. Une mise en page prouvée peut être adoptée automatiquement ; sans preuve, rien ne change.",
+        "es": "Recibe una propuesta de experimento a partir de los pagos de tu tienda, inícialo una vez y termina, se evalúa y decide solo. Un diseño demostrado puede adoptarse automáticamente; sin prueba, la tienda queda como está."
       },
-      "buildsOn": "Existing preregistered layout experiments with consent-bound assignment and payment-ledger readout",
-      "guide": null,
-      "evidence": null
+      "buildsOn": "Preregistered layout experiments with consent-bound assignment and payment-ledger readout",
+      "guide": "docs/knowledge-workspace.md#experiments-that-run-themselves",
+      "evidence": "docs/evidence/self-running-experiments-2026-11-18.md"
     },
     {
       "id": "signed-offers",

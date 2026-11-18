@@ -5,6 +5,12 @@ import type { RequestFn } from "../shell/studio-types";
 import { useKnowledgeText } from "../../shared/i18n/knowledge-i18n";
 import { useLocale } from "../../shared/i18n/i18n";
 import { useStudio } from "../shell/StudioContext";
+import {
+  AutomationFields,
+  AutomationNote,
+  ExperimentSuggestion,
+  type Automation,
+} from "./ExperimentAutomation";
 type Design = {
   title: string;
   locale: string;
@@ -17,6 +23,7 @@ type Design = {
   minimumPerArm: number;
   outcomeCapMinor: number;
   cupedTheta: number;
+  automation?: Automation;
 };
 type Experiment = {
   id: string;
@@ -31,6 +38,7 @@ type Readout = {
   netCollectedMinor: string;
   currency: string;
   interval95?: number[] | null;
+  decision?: string;
 };
 export default function ExperimentStudio({ request }: { request: RequestFn }) {
   const k = useKnowledgeText(),
@@ -128,6 +136,11 @@ export default function ExperimentStudio({ request }: { request: RequestFn }) {
       <p>{k("experimentIntro")}</p>
       <p className="muted">{k("experimentBoundary")}</p>
       {error && <p role="alert">{error}</p>}
+      <ExperimentSuggestion
+        request={request}
+        disabled={busy || !canWrite}
+        onUse={(design) => setDraft((d) => ({ ...d, ...design }) as Design)}
+      />
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -209,6 +222,10 @@ export default function ExperimentStudio({ request }: { request: RequestFn }) {
               />
             </label>
           ))}
+          <AutomationFields
+            value={draft.automation}
+            onChange={(automation) => setDraft({ ...draft, automation })}
+          />
           <button
             className="studio-primary"
             disabled={!draft.channel || !draft.currency}
@@ -247,6 +264,10 @@ export default function ExperimentStudio({ request }: { request: RequestFn }) {
               {k("experimentEnds")}: {date(row.endsAt)}
             </p>
           )}
+          <AutomationNote
+            automation={row.design.automation}
+            decision={reports[row.id]?.decision}
+          />
           <div className="studio-actions">
             {row.state === "draft" && (
               <button
@@ -288,6 +309,8 @@ export default function ExperimentStudio({ request }: { request: RequestFn }) {
                     "POST",
                   );
                   setReports((previous) => ({ ...previous, [row.id]: result }));
+                  // A self-running experiment may have changed state since the list was read.
+                  await refresh();
                 })
               }
             >

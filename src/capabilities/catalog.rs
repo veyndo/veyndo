@@ -113,6 +113,10 @@ const COGNITIVE: &[(&str, &str)] = &[
         "Close enrollment after the preregistered horizon",
     ),
     (
+        "knowledge.experiment.suggest",
+        "Prefill an experiment preregistration from the shop's live payment figures; saves nothing",
+    ),
+    (
         "knowledge.experiment.report",
         "Read delayed live-cash outcomes with conservative final-only inference",
     ),
@@ -123,6 +127,10 @@ const COGNITIVE: &[(&str, &str)] = &[
     (
         "knowledge.autonomy.apply",
         "Apply a price-only proposal within explicit current merchant policy and daily budget",
+    ),
+    (
+        "knowledge.autonomy.revert",
+        "Restore today's automatic price changes to the day's baseline",
     ),
     (
         "knowledge.autonomy.status",

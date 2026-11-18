@@ -151,14 +151,29 @@ with (ROOT / 'artifacts/scenarios.log').open('w') as log:
         call('/api/agent/scenario-probes', {}, {'x-tenant': range_}, 401, method='POST')
         tool = call('/mcp', {'jsonrpc':'2.0','id':2,'method':'tools/call','params':{'name':'merchant.scenario.probe','arguments':{}}}, attacker)
         assert tool['result']['structuredContent']['summary']['breached'] == 0, tool
+        saved = call('/api/agent/scenario-probes', headers=attacker)['latest']
+        assert saved['id'] == tool['result']['structuredContent']['id'] and saved['configurationReview'] == 'current' and saved['summary']['breached'] == 0, saved
+        assert call('/api/agent/scenario-readiness', headers=attacker)['tests']['attack']['summary'] == saved['summary']
+        assert call('/api/agent/scenario-probes', headers=headers)['latest'] is None, 'Another sandbox must not see this report'
+        call('/api/agent/scenario-probes', headers=live, expected=409)
+        assert int(sql(f"SELECT count(*) FROM tasks WHERE tenant='{range_}' AND run_request ? 'attack'")) == 2
         print('PASS nine scripted cart/checkout attacks refused in the sandbox; live shop, model and anonymous callers untouched', flush=True)
         # An imported catalogue starts without stock: the twin must say so instead of letting tests fail silently.
         sql(f"UPDATE products SET stock=0 WHERE tenant='{range_}'")
         empty = call('/api/agent/scenario-readiness', headers=attacker)
         assert empty['ready'] is False and empty['blockers'] == ['no_stock'] and empty['catalogue']['withStock'] == 0, empty
         call('/api/agent/scenario-probes', {}, attacker, 409, method='POST')
+        call('/api/agent/scenario-stock', {'quantity': 5}, attacker, 400, method='POST')
+        call('/api/agent/scenario-stock', {'quantity': 5, 'approve': True}, live, 409, method='POST')
+        call('/api/agent/scenario-stock', {'quantity': 1001, 'approve': True}, attacker, 400, method='POST')
+        filled = call('/api/agent/scenario-stock', {'quantity': 5, 'approve': True}, attacker, method='POST')
+        assert filled['updated'] == empty['catalogue']['withoutStock'] > 0 and filled['remaining'] == 0, filled
+        again = call('/api/agent/scenario-readiness', headers=attacker)
+        assert again['ready'] is True and again['catalogue']['withStock'] == filled['updated'], again
+        assert call('/api/agent/scenario-stock', {'quantity': 9, 'approve': True}, attacker, method='POST')['updated'] == 0, 'Products with stock keep it'
+        assert call('/api/agent/scenario-probes', {}, attacker, method='POST')['summary']['breached'] == 0
         assert sql(untouched) == live_before, 'Twin readiness must not change the live shop'
-        print('PASS twin readiness: ready copy, HTTP/MCP parity, zero-stock blocker, live and anonymous callers denied', flush=True)
+        print('PASS twin readiness and saved attack report: ready copy, HTTP/MCP parity, zero-stock blocker, sandbox-only test stock, live and anonymous callers denied', flush=True)
         body = {'requestId': suffix, 'title': 'Lamp purchase', 'instruction': 'Buy one lamp within your budget.', 'inference': {'provider': 'openai'}, 'profiles': [{'id': 'budget', 'name': 'Budget shopper', 'goal': 'Buy a lamp', 'budgetMinor': 100000, 'locale': 'en-GB', 'country': 'DE'}]}
         call('/api/agent/scenarios', body, scoped, 400)
         call('/api/agent/scenarios', body, live, 409)

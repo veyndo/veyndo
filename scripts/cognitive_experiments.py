@@ -81,6 +81,39 @@ assert command('experiment.report',{'id':e2})['withdrawals']==1
 assert sql(f"SELECT count(*) FROM intelligence_assignments WHERE tenant='atelier' AND experiment_id='{e2}'")=='0'
 print('PASS mature final readout persists once to graph/outbox; stop and consent withdrawal invalidate cached inference')
 
+# Self-running experiment: one approval starts it; the worker lane finishes it, reads it out and decides.
+suggestion=command('experiment.suggest',{})
+assert suggestion['saved'] is False and suggestion['design']['automation']=={'finish':True,'apply':False} and suggestion['design']['control']!=suggestion['design']['treatment'],suggestion
+assert suggestion['basis']['livePayments30Days']>=0 and set(suggestion['warnings'])<={'no_live_payments','low_volume','already_running'},suggestion
+call('/api/intelligence/experiment.create',{'design':{**design,'automation':{'apply':True}},'approve':True},merchant,expected=400)
+mode=lambda: sql("SELECT data->>'mode' FROM experiences WHERE tenant='atelier'")
+before_mode=mode()
+def decided(id,seconds=90):
+ for _ in range(seconds*2):
+  value=sql(f"SELECT coalesce(state||':'||coalesce(final_report->>'decision',''),'') FROM intelligence_experiments WHERE tenant='atelier' AND id='{id}'")
+  if value.split(':')[1]: return value
+  time.sleep(.5)
+ raise AssertionError(value)
+e3=command('experiment.create',{'design':{**design,'title':'Self-running fixture','automation':{'finish':True,'apply':True}},'approve':True})['id']
+command('experiment.start',{'id':e3,'revision':1,'approve':True})
+sql(f"UPDATE intelligence_experiments SET started_at=now()-interval '17 days',ends_at=now()-interval '16 days' WHERE tenant='atelier' AND id='{e3}';")
+assert decided(e3)=='completed:kept' and mode()==before_mode,'Without a proved uplift the shop layout must stay as it was'
+assert sql(f"SELECT count(*) FROM outbox WHERE tenant='atelier' AND kind='intelligence.experiment.changed' AND data->>'id'='{e3}' AND data->>'actor'='experiment-autopilot'")=='2'
+assert command('experiment.report',{'id':e3})['decision']=='kept'
+# The decision step itself, with a seeded mature readout: a proved uplift fixes the treatment layout.
+e4=command('experiment.create',{'design':{**design,'title':'Seeded proof fixture','automation':{'finish':True,'apply':True}},'approve':True})['id']
+command('experiment.start',{'id':e4,'revision':1,'approve':True})
+sql(f"UPDATE intelligence_experiments SET state='completed',started_at=now()-interval '17 days',ends_at=now()-interval '16 days',final_report='{{\"finalLook\":true,\"causalUpliftProven\":true}}'::jsonb WHERE tenant='atelier' AND id='{e4}';")
+assert decided(e4)=='completed:published' and mode()=='comparison'
+e5=command('experiment.create',{'design':{**design,'title':'Manual fixture'},'approve':True})['id']
+command('experiment.start',{'id':e5,'revision':1,'approve':True})
+sql(f"UPDATE intelligence_experiments SET started_at=now()-interval '17 days',ends_at=now()-interval '16 days' WHERE tenant='atelier' AND id='{e5}';")
+time.sleep(40)
+assert sql(f"SELECT state FROM intelligence_experiments WHERE tenant='atelier' AND id='{e5}'")=='running','An experiment without automation waits for the merchant'
+command('experiment.stop',{'id':e5,'revision':2,'approve':True})
+sql(f"UPDATE experiences SET data=jsonb_set(data,'{{mode}}',to_jsonb('{before_mode}'::text)),revision=revision+1 WHERE tenant='atelier';")
+print('PASS suggestion saves nothing; an approved self-running experiment is finished, read out and decided by the worker; proof fixes the layout, no proof keeps it; manual experiments wait')
+
 # Actual committed intelligence producers must reach the existing durable flow consumer.
 for event in ['intelligence.experiment.changed','intelligence.experiment.result']:
  flow_id=event.replace('.','_')

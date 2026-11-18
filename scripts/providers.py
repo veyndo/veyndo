@@ -186,8 +186,25 @@ try:
     over=copy.deepcopy(enabled);over['autonomy']['maxDailyExposureMinor']=1_000_000_000_001
     snapshot=call('/api/merchant/commerce');data=copy.deepcopy(snapshot['data']);data['aiPolicy']=over
     call('/api/merchant/commerce',{'revision':snapshot['revision'],'data':data},method='PUT',expected=400)
+    # Rollback: by request, and by the worker guard once today's exposure is above the limit.
+    call('/api/intelligence/autonomy.revert',{},expected=400)
+    back=call('/api/intelligence/autonomy.revert',{'approve':True})
+    assert back['reverted']==['lamp'] and lamp()['price']==baseline/100,(back,lamp())
+    assert call('/api/intelligence/autonomy.status',{})['exposureMinor']==0
+    assert call('/api/intelligence/autonomy.revert',{'approve':True})['skipped'][0]['reason']=='at_baseline'
+    assert reduce(need)['applied'] and lamp()['price']==70
+    limited=copy.deepcopy(enabled);limited['autonomy']['maxDailyExposureMinor']=need-1;policy(limited)
+    for _ in range(120):
+        if lamp()['price']==baseline/100: break
+        time.sleep(.5)
+    assert lamp()['price']==baseline/100,'The worker guard must restore the day baseline once the limit is exceeded'
+    # A price the merchant changed afterwards is never overwritten by a rollback.
+    assert reduce(need)['applied']
+    subprocess.check_output(psql(os.getenv('DB_CONTAINER','veyndo-postgres-1'),'commerce',os.getenv('TEST_DATABASE','commerce'),'-XqAt','-v','ON_ERROR_STOP=1'),input="BEGIN; SELECT set_config('rac.system','on',true); UPDATE products SET price=70.5,revision=revision+1 WHERE tenant='workshop' AND id='lamp'; COMMIT;",text=True)
+    kept=call('/api/intelligence/autonomy.revert',{'approve':True,'productId':'lamp'})
+    assert kept['reverted']==[] and kept['skipped'][0]['reason']=='changed_since' and lamp()['price']==70.5,kept
     policy(enabled)
-    passed('Autonomy refuses price reductions beyond the daily exposure limit, applies at the exact limit and reports today\'s use over HTTP and MCP')
+    passed('Autonomy refuses price reductions beyond the daily exposure limit, applies at the exact limit, reports today\'s use over HTTP and MCP, restores the baseline by request and by the worker guard, and never overwrites a later manual price')
     proposal['changes']=[{'product_id':'lamp','price':73}]
     draft=call('/api/agent/chat',{'message':'Policy revision test','inference':{'provider':'openai'}})['messages'][-1]['data']
     locked=copy.deepcopy(enabled);locked['corridors'][0]['priceLocked']=True;policy(locked)

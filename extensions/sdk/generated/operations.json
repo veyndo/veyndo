@@ -3151,6 +3151,39 @@
       "readOnly": true
     },
     {
+      "description": "Give empty products of a private sandbox a test stock quantity",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "approve": {
+            "type": "boolean"
+          },
+          "quantity": {
+            "maximum": 1000,
+            "minimum": 1,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "quantity",
+          "approve"
+        ],
+        "type": "object"
+      },
+      "name": "merchant.scenario.stock",
+      "readOnly": false
+    },
+    {
+      "description": "Read the latest saved attack test of a private sandbox",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {},
+        "type": "object"
+      },
+      "name": "merchant.scenario.attacks",
+      "readOnly": true
+    },
+    {
       "description": "Run scripted cart and checkout attacks against a private sandbox",
       "inputSchema": {
         "additionalProperties": false,
@@ -3759,6 +3792,16 @@
       "readOnly": false
     },
     {
+      "description": "Prefill an experiment preregistration from the shop's live payment figures; saves nothing",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {},
+        "type": "object"
+      },
+      "name": "knowledge.experiment.suggest",
+      "readOnly": true
+    },
+    {
       "description": "Read delayed live-cash outcomes with conservative final-only inference",
       "inputSchema": {
         "additionalProperties": false,
@@ -3798,6 +3841,24 @@
         "type": "object"
       },
       "name": "knowledge.autonomy.apply",
+      "readOnly": false
+    },
+    {
+      "description": "Restore today's automatic price changes to the day's baseline",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "approve": {
+            "type": "boolean"
+          },
+          "productId": {
+            "maxLength": 160,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "name": "knowledge.autonomy.revert",
       "readOnly": false
     },
     {

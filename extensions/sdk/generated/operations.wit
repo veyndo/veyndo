@@ -552,6 +552,10 @@ interface inputs {
   record merchant-scenario-status-input {
     %id: string,
   }
+  record merchant-scenario-stock-input {
+    %approve: bool,
+    %quantity: s64,
+  }
   record merchant-apps-search-input {
     %after: option<string>,
     %limit: option<s64>,
@@ -655,6 +659,10 @@ interface inputs {
   }
   record knowledge-autonomy-apply-input {
     %task-id: option<string>,
+  }
+  record knowledge-autonomy-revert-input {
+    %approve: option<bool>,
+    %product-id: option<string>,
   }
   record knowledge-claims-input {
     %product-id: option<string>,
@@ -1709,6 +1717,8 @@ interface inputs {
   merchant-scenario-status: func(input: merchant-scenario-status-input) -> result<string, string>;
   merchant-scenario-list: func(input: string) -> result<string, string>;
   merchant-scenario-readiness: func(input: string) -> result<string, string>;
+  merchant-scenario-stock: func(input: merchant-scenario-stock-input) -> result<string, string>;
+  merchant-scenario-attacks: func(input: string) -> result<string, string>;
   merchant-scenario-probe: func(input: string) -> result<string, string>;
   merchant-apps-search: func(input: merchant-apps-search-input) -> result<string, string>;
   merchant-apps-read: func(input: merchant-apps-read-input) -> result<string, string>;
@@ -1727,9 +1737,11 @@ interface inputs {
   knowledge-experiment-start: func(input: knowledge-experiment-start-input) -> result<string, string>;
   knowledge-experiment-stop: func(input: knowledge-experiment-stop-input) -> result<string, string>;
   knowledge-experiment-finish: func(input: knowledge-experiment-finish-input) -> result<string, string>;
+  knowledge-experiment-suggest: func(input: string) -> result<string, string>;
   knowledge-experiment-report: func(input: knowledge-experiment-report-input) -> result<string, string>;
   catalog-facts: func(input: catalog-facts-input) -> result<string, string>;
   knowledge-autonomy-apply: func(input: knowledge-autonomy-apply-input) -> result<string, string>;
+  knowledge-autonomy-revert: func(input: knowledge-autonomy-revert-input) -> result<string, string>;
   knowledge-autonomy-status: func(input: string) -> result<string, string>;
   knowledge-claims: func(input: knowledge-claims-input) -> result<string, string>;
   knowledge-claim-propose: func(input: knowledge-claim-propose-input) -> result<string, string>;

@@ -11,6 +11,9 @@ pub(crate) fn schema(name: &str) -> Option<Value> {
         "catalog.facts" => json!({"productId":{"type":"string"}}),
         "knowledge.autonomy.apply" => json!({"taskId":{"type":"string"}}),
         "knowledge.autonomy.status" => json!({}),
+        "knowledge.autonomy.revert" => {
+            json!({"approve":{"type":"boolean"},"productId":{"type":"string","maxLength":160}})
+        }
         "knowledge.claims" => json!({"productId":{"type":"string"}}),
         "knowledge.claim.propose" => {
             json!({"productId":{"type":"string"},"sourceId":{"type":"string"},"contentHash":{"type":"string"},"text":{"type":"string","maxLength":1200},"quote":{"type":"string","maxLength":2400},"locale":{"type":"string"},"confidence":{"type":"number","minimum":0,"maximum":1},"nodeType":{"type":"string","enum":evidence::NODE_TYPES}})
@@ -55,6 +58,7 @@ pub(crate) async fn invoke_contract(
             .await
         }
         "knowledge.autonomy.status" => autonomy::status(a, &t, h).await,
+        "knowledge.autonomy.revert" => autonomy_revert::request(a, &t, h, v).await,
         "knowledge.claims" => evidence::claims(a, &t, product()?, false).await,
         "knowledge.claim.propose" => evidence::propose(a, h, v).await,
         "knowledge.claim.review" => evidence::decide(a, h, v).await,
@@ -140,7 +144,7 @@ pub(crate) fn router() -> Router<App> {
 
 fn experiments_schema(name: &str) -> Option<Value> {
     let props = match name {
-        "knowledge.experiments" => json!({}),
+        "knowledge.experiments" | "knowledge.experiment.suggest" => json!({}),
         "knowledge.experiment.create" => {
             json!({"design":{"type":"object"},"approve":{"type":"boolean"}})
         }

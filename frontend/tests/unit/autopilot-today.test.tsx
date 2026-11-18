@@ -1,5 +1,5 @@
 /** The autopilot summary shows the level per area and today's native use; it formats money in the shop currency and writes nothing. */
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { expect, it, vi } from "vitest";
 import AutopilotToday, {
   type AutopilotStatus,
@@ -81,4 +81,37 @@ it("shows nothing for a foreign response shape and the native error on failure",
   await waitFor(() =>
     expect(screen.getByRole("alert").textContent).toContain("permission"),
   );
+});
+it("takes one change back with explicit approval, reloads and reports a price kept after a manual edit", async () => {
+  let restored = false;
+  const request = vi.fn(async (path: string, body?: unknown) => {
+    if (path === "/api/intelligence/autonomy.revert") {
+      expect(body).toEqual({ approve: true, productId: "lamp" });
+      restored = true;
+      return {
+        reverted: ["lamp"],
+        skipped: [{ productId: "mug", reason: "changed_since" }],
+      };
+    }
+    const value = status();
+    if (restored) {
+      value.changes[0].currentMinor = 7123;
+      value.changes[0].exposureMinor = 0;
+      value.exposureMinor = 0;
+    }
+    return value;
+  });
+  const view = render(
+    <LocaleProvider>
+      <AutopilotToday request={request as RequestFn} canRevert />
+    </LocaleProvider>,
+  );
+  fireEvent.click(await screen.findByRole("button"));
+  await waitFor(() => expect(screen.queryByRole("button")).toBeNull());
+  expect(screen.getByRole("status").textContent).toMatch(/1.*1/);
+  expect(document.querySelector(".autopilot-changes em")).toBeTruthy();
+  view.unmount();
+  render(show(async () => status()));
+  await waitFor(() => expect(screen.getByText("Desk lamp")).toBeTruthy());
+  expect(screen.queryByRole("button")).toBeNull();
 });

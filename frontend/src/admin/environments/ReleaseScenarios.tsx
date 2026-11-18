@@ -1,9 +1,14 @@
 /** Actor-private saved scenario evidence sits beside native release diffs without becoming an approval gate. */
 import { useEffect, useMemo, useState } from "react";
 import type { RequestFn } from "../shell/studio-types";
-import type { Report, Scenario } from "../scenarios/scenario-types";
+import type {
+  AttackSummary,
+  Report,
+  Scenario,
+} from "../scenarios/scenario-types";
 import { canTestCustomers } from "../scenarios/scenario-access";
 import ReleaseShopPreview from "./ReleaseShopPreview";
+import ReleaseAttack from "./ReleaseAttack";
 import ScenarioReport from "../scenarios/ScenarioReport";
 import { useLocale } from "../../shared/i18n/i18n";
 import { scenarioLabel } from "../scenarios/scenario-history";
@@ -60,6 +65,7 @@ function Review({
   const [list, setList] = useState<{
     request: RequestFn;
     items: Scenario[];
+    attack?: AttackSummary | null;
     error?: boolean;
     refresh: number;
   }>();
@@ -89,7 +95,12 @@ function Review({
     request("/api/agent/scenarios")
       .then((value) => {
         if (!active) return;
-        setList({ request, items: value.scenarios, refresh });
+        setList({
+          request,
+          items: value.scenarios,
+          attack: value.attack,
+          refresh,
+        });
         setSelection((previous) =>
           previous?.request === request &&
           value.scenarios.some((item: Scenario) => item.id === previous.id)
@@ -186,6 +197,9 @@ function Review({
       )}
       {currentList && !currentList.error && !currentList.items.length && (
         <p>{t("empty")}</p>
+      )}
+      {currentList && !currentList.error && (
+        <ReleaseAttack attack={currentList.attack} />
       )}
       {report && (
         <>
