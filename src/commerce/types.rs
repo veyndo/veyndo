@@ -56,6 +56,8 @@ pub(crate) struct Settings {
     #[serde(default)]
     pub ai_policy: crate::cognition::guardrails::Config,
     #[serde(default)]
+    pub supply: super::supply::Config,
+    #[serde(default)]
     pub legal: crate::legal::Config,
     #[serde(default)]
     pub currencies: crate::currencies::Config,

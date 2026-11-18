@@ -275,6 +275,21 @@ Restoring a supported state requires an explicit confirmation and the current re
 
 *Edited UI sequence of actual current controls. See the capture inventory for the individual stills and the action scope.*
 
+## Test, autopilot and agent channels
+
+These parts were added on 18 November 2026 and work in a local build; they are
+not deployed to the hosted pilot yet. The [roadmap](roadmap.md) tracks them.
+
+| You want to | Use | Guide |
+| --- | --- | --- |
+| Try to cheat your own cart and checkout before a release | Attack test | [Customer simulator](customer-scenarios.md#attack-test) |
+| Test a private copy of your shop, also with an imported catalog | Shop twin | [Shop twin](shop-twin.md) |
+| Let an agent change prices inside a daily limit and take changes back | Autopilot | [Autopilot levels](knowledge-workspace.md#autopilot-levels-and-the-daily-limit) |
+| Run a layout experiment that finishes and decides by itself | Experiments | [Self-running experiments](knowledge-workspace.md#experiments-that-run-themselves) |
+| Give buying agents a quote they can verify | Signed offers | [Signed offers](agentic-commerce.md#signed-offers) |
+| Reorder from another shop on the same installation | Reorder | [Trade network](trade-network.md) |
+| Be found by personal agents | Poppy file | [Poppy discovery](agentic-commerce.md#poppy-discovery) |
+
 ## Assistant and shop intelligence
 
 ### Conversations and reviewed changes

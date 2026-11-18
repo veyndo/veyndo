@@ -11,6 +11,7 @@ import "../styles/agentic-channels.css";
 type Readiness = {
   cartTransfer: boolean;
   buyerConsent: boolean;
+  poppy?: { published: boolean; url?: string | null; version: string };
   signedOffers?: {
     configured: boolean;
     keyId?: string | null;
@@ -143,6 +144,32 @@ export default function AgenticChannels({
           {readiness && <p className="soft-tag">{t("approval")}</p>}
         </div>
       </article>
+      {readiness?.poppy && (
+        <article className="studio-card agentic-protocol">
+          <div>
+            <Icon name="agents" />
+            <h3>{t("poppyTitle")}</h3>
+            <p>{t("poppyHint")}</p>
+            <p>{t("poppyScope")}</p>
+          </div>
+          <div>
+            {readiness.poppy.published ? (
+              <dl>
+                <dt>{t("poppyTitle").split(":")[0]}</dt>
+                <dd>{t("poppyPublished")}</dd>
+                <dt>{t("poppyVersion")}</dt>
+                <dd>{readiness.poppy.version}</dd>
+                <dt>{t("poppyFile")}</dt>
+                <dd>
+                  <code>{readiness.poppy.url}</code>
+                </dd>
+              </dl>
+            ) : (
+              <p role="status">{t("poppyMissing")}</p>
+            )}
+          </div>
+        </article>
+      )}
       {readiness?.signedOffers && (
         <article className="studio-card agentic-protocol">
           <div>

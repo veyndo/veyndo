@@ -100,6 +100,55 @@ this endpoint does not mean Veyndo has been admitted to Google surfaces. See
 the [Google Cart overview](https://developers.google.com/merchant/ucp/guides/overview/cart-overview)
 and [Merchant Center guidance](https://developers.google.com/merchant/ucp/guides/tools/merchant-center/overview).
 
+## Poppy discovery
+
+[Poppy](https://personalagentprotocol.org/docs/1.0/spec), the Personal Agent
+Protocol, is how a personal agent finds out what it may do at a business. The
+agent fetches one file from the shop's domain before anything else. Veyndo
+publishes that file for every shop that has its own domain.
+
+![Poppy and signed offers in Studio](assets/roadmap/poppy-studio.jpg)
+
+*Local Studio, synthetic shop, 18 November 2026.*
+
+**For merchants.** Open **Sales channels → AI channels & imports**. The **Poppy**
+card shows whether the file is published and its address. There is nothing to
+switch on. If shops on your installation have no own domain, the card says so:
+Poppy requires the file on the shop's own host.
+
+**What is published.** `https://SHOP.DOMAIN/.well-known/poppy.json`:
+
+```json
+{
+  "protocol_version": "1.0",
+  "organization": { "name": "Roadmap Lab", "domain": "roadmap-lab.example.com" },
+  "apis": [
+    {
+      "type": "mcp",
+      "url": "https://roadmap-lab.example.com/mcp",
+      "description": "Guest shopping over MCP: search the catalog, read product details and signed facts, build a cart, get a signed offer and place an order through the shop's own checkout. No sign-in is offered; merchant tools need a merchant credential."
+    }
+  ]
+}
+```
+
+`organization.domain` is the host that serves the file, as Poppy requires, and
+the MCP endpoint is on the same host. The file is answered only on the exact
+configured shop domain. Other hosts, former domains and a request that merely
+sends a shop header get 404.
+
+**What is deliberately not published yet.**
+
+| Part of Poppy | Why it is missing |
+| --- | --- |
+| Sign-in for customers through an agent (`auth`, sessions) | Veyndo has no OAuth authorization server for agents. Guests only. |
+| The `ucp` entry and extension | Poppy allows it only when the UCP profile offers `dev.ucp.common.ask`, which Veyndo does not implement yet. |
+| Browser sessions and tasks | Not implemented. |
+| Recognizing signed agent requests (Web Bot Auth) | Not implemented. |
+
+A shop with a UCP profile is still reachable over UCP as before; it is just not
+announced through Poppy.
+
 ## Signed offers
 
 A buying agent does not have to trust the price it is shown. It can ask the shop

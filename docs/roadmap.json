@@ -130,22 +130,22 @@
     },
     {
       "id": "trade-network",
-      "status": "planned",
+      "status": "local",
       "title": {
-        "en": "A trade network between shops",
-        "de": "Ein Handelsnetz zwischen Shops",
-        "fr": "Un réseau d’échange entre boutiques",
-        "es": "Una red comercial entre tiendas"
+        "en": "Reorder between shops",
+        "de": "Nachbestellen zwischen Shops",
+        "fr": "Réassort entre boutiques",
+        "es": "Reposición entre tiendas"
       },
       "summary": {
-        "en": "Every shop is seller and buyer. A purchasing agent reorders from suppliers within a budget you set.",
-        "de": "Jeder Shop ist Verkäufer und Einkäufer. Ein Einkaufsagent bestellt innerhalb deines Budgets bei Lieferanten nach.",
-        "fr": "Chaque boutique vend et achète. Un agent d’approvisionnement recommande chez les fournisseurs dans le budget fixé.",
-        "es": "Cada tienda vende y compra. Un agente de compras repone con proveedores dentro del presupuesto que fijes."
+        "en": "Link a product to the shop you buy it from. At the reorder point your shop fetches a signed offer from that shop, checks it against your ceiling and hands over to the supplier's checkout after your approval. Same installation only, nothing is ordered by itself.",
+        "de": "Verknüpfe ein Produkt mit dem Shop, bei dem du es einkaufst. Am Meldebestand holt dein Shop dort ein signiertes Angebot, prüft es gegen deinen Höchstbetrag und übergibt nach deiner Freigabe an den Checkout des Lieferanten. Nur innerhalb einer Installation, von selbst wird nichts bestellt.",
+        "fr": "Associez un produit à la boutique où vous l’achetez. Au seuil de réassort, votre boutique y demande une offre signée, la compare à votre plafond et, après votre validation, passe la main au paiement du fournisseur. Même installation uniquement, rien n’est commandé automatiquement.",
+        "es": "Vincula un producto con la tienda donde lo compras. En el punto de pedido tu tienda pide allí una oferta firmada, la compara con tu tope y, tras tu aprobación, pasa al pago del proveedor. Solo dentro de una instalación; no se pide nada por sí solo."
       },
-      "buildsOn": "Read-only supplier catalog import, B2B quotes and negotiation over UCP",
-      "guide": null,
-      "evidence": null
+      "buildsOn": "Signed offers, checkout handoff, public cart operations of the supplier shop",
+      "guide": "docs/trade-network.md",
+      "evidence": "docs/evidence/trade-network-2026-11-18.md"
     },
     {
       "id": "proof-coverage",

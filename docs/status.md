@@ -53,6 +53,28 @@ Studio and the public Lumen storefront responded on their existing origins.
   promotion remain open. [Measured workloads](benchmarks.md) ·
   [Component tasks](commerce-components.md).
 
+## Poppy discovery file
+
+Every shop with its own configured domain publishes `/.well-known/poppy.json`
+(Personal Agent Protocol 1.0) naming its MCP endpoint for guest shopping. A
+document of this shape validates against the official schema, and locally the
+file was fetched from a shop host and the named endpoint listed the shopping
+tools. Sign-in through agents, the UCP entry (it needs UCP Ask) and Web Bot Auth
+are not implemented. Not deployed to the hosted pilot.
+[Guide](agentic-commerce.md#poppy-discovery) ·
+[Local record](evidence/poppy-discovery-2026-11-18.md).
+
+## Reordering between shops
+
+A shop can link products to a supplier shop on the same installation. For
+products at their reorder point it fetches a signed offer from the supplier's
+public checkout, compares it with a ceiling per reorder and, after approval,
+opens the supplier's checkout through a single-use link. Locally, a 354 EUR
+offer within a 500 EUR ceiling was approved and the supplier checkout opened
+with that basket; an 845 EUR offer could not be approved. No order was placed.
+Other installations, B2B prices and automatic ordering are not supported.
+[Guide](trade-network.md) · [Local record](evidence/trade-network-2026-11-18.md).
+
 ## Signed offers for buying agents
 
 A buying agent can fetch the cart quote with an Ed25519 signature and verify it

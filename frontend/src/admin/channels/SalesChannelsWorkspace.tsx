@@ -8,6 +8,7 @@ import { useChannelText } from "./channel-i18n";
 import Icon from "../../shared/ui/Icon";
 import { freshChannel, type Channel } from "./channel-model";
 import ChannelEditor from "./ChannelEditor";
+import SupplyReorder from "./SupplyReorder";
 import AgenticChannels from "./AgenticChannels";
 import { useAgenticChannelText } from "./agentic-channel-i18n";
 import CatalogIntake from "../catalog/CatalogIntake";
@@ -128,6 +129,7 @@ export default function SalesChannelsWorkspace({
           channels={channels}
           mainLocale={settings?.mainLocale ?? locale}
         />
+        <SupplyReorder request={request} rights={rights} />
         {intake && (
           <CatalogIntake
             initialMode={intake}

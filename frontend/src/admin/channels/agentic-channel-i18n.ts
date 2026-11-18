@@ -182,6 +182,33 @@ const words = {
     "Una oferta indica lo que la tienda calculó para una versión del carrito. El pago confirma exactamente esa versión y ese total, o lo rechaza. No reserva stock ni congela un precio que cambies después.",
   ],
   offerPaths: ["For agents", "Für Agenten", "Pour les agents", "Para agentes"],
+  poppyTitle: [
+    "Poppy: found by personal agents",
+    "Poppy: von persönlichen Agenten gefunden werden",
+    "Poppy : être trouvé par les agents personnels",
+    "Poppy: que te encuentren los agentes personales",
+  ],
+  poppyHint: [
+    "Personal agents look for a file on your shop domain that says how they may work with you. Veyndo publishes it and names your shop's MCP endpoint for guest shopping.",
+    "Persönliche Agenten suchen auf deiner Shop-Domain eine Datei, die sagt, wie sie mit dir arbeiten dürfen. Veyndo veröffentlicht sie und nennt den MCP-Endpunkt deines Shops für den Einkauf als Gast.",
+    "Les agents personnels cherchent sur le domaine de votre boutique un fichier indiquant comment travailler avec vous. Veyndo le publie et indique le point d’accès MCP de votre boutique pour l’achat en invité.",
+    "Los agentes personales buscan en el dominio de tu tienda un archivo que indica cómo pueden trabajar contigo. Veyndo lo publica e indica el punto de acceso MCP de tu tienda para comprar como invitado.",
+  ],
+  poppyScope: [
+    "Not included yet: customers signing in through an agent, and the UCP entry, which needs the UCP question service.",
+    "Noch nicht enthalten: die Anmeldung von Kunden über einen Agenten und der UCP-Eintrag, der den UCP-Fragedienst voraussetzt.",
+    "Pas encore inclus : la connexion des clients via un agent et l’entrée UCP, qui nécessite le service de questions UCP.",
+    "Aún no incluido: el inicio de sesión de clientes mediante un agente y la entrada UCP, que requiere el servicio de preguntas UCP.",
+  ],
+  poppyPublished: ["Published", "Veröffentlicht", "Publié", "Publicado"],
+  poppyVersion: ["Version", "Version", "Version", "Versión"],
+  poppyFile: ["File", "Datei", "Fichier", "Archivo"],
+  poppyMissing: [
+    "Not published: shops on this installation have no own domain. Poppy needs one domain per shop.",
+    "Nicht veröffentlicht: Shops dieser Installation haben keine eigene Domain. Poppy braucht eine Domain pro Shop.",
+    "Non publié : les boutiques de cette installation n’ont pas de domaine propre. Poppy exige un domaine par boutique.",
+    "No publicado: las tiendas de esta instalación no tienen dominio propio. Poppy necesita un dominio por tienda.",
+  ],
 } as const;
 export function useAgenticChannelText() {
   const { locale } = useLocale();

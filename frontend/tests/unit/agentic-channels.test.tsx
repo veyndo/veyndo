@@ -117,3 +117,55 @@ it("shows signed offers as active with key and agent paths, or names the missing
   expect(await screen.findByText(/signing key is missing/)).toBeVisible();
   expect(screen.queryByText("/store-api/checkout/cart/offer")).toBeNull();
 });
+it("shows the published Poppy file or says that shops need their own domain", async () => {
+  const agentic = (poppy: object) => ({
+    agentic: {
+      destination: "veyndo",
+      channel: "default",
+      cartTransfer: true,
+      buyerConsent: true,
+      externalAcceptance: "not_verified",
+      configuredPayments: [],
+      poppy,
+    },
+  });
+  const show = (request: unknown) => (
+    <LocaleProvider>
+      <AgenticChannels
+        request={request as RequestFn}
+        canRead
+        canImport={false}
+        onImport={() => {}}
+        onBack={() => {}}
+        channels={[]}
+        mainLocale="en-GB"
+      />
+    </LocaleProvider>
+  );
+  const view = render(
+    show(
+      vi.fn().mockResolvedValue(
+        agentic({
+          published: true,
+          url: "https://nord.veyndo.ai/.well-known/poppy.json",
+          version: "1.0",
+        }),
+      ),
+    ),
+  );
+  expect(
+    await screen.findByText("https://nord.veyndo.ai/.well-known/poppy.json"),
+  ).toBeVisible();
+  expect(screen.getByText("Published")).toBeVisible();
+  view.unmount();
+  render(
+    show(
+      vi
+        .fn()
+        .mockResolvedValue(
+          agentic({ published: false, url: null, version: "1.0" }),
+        ),
+    ),
+  );
+  expect(await screen.findByText(/have no own domain/)).toBeVisible();
+});
