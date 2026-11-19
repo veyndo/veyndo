@@ -1,5 +1,6 @@
 //! Pure catalogue rules: no database, no HTTP.
 pub mod content;
+pub mod graph_query;
 pub mod media;
 pub mod model_format;
 pub mod rich;

@@ -241,9 +241,9 @@
         "tasks",
         "tenants"
       ],
-      "glob_imports": 43,
+      "glob_imports": 42,
       "untyped_access": 202,
-      "sql_outside_store": 27
+      "sql_outside_store": 26
     },
     "inventory": {
       "title": "Stock, reservations and supply",

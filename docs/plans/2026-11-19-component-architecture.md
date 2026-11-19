@@ -187,12 +187,16 @@ Order follows the dependency report, lowest first. Each line is one move.
     texts, which clock an edit is checked against) and every SQL statement of an
     edit in `store/product_edit`; identity, channel visibility and category
     assignment as a service;
+  - categories: the edit with its checks, the saved fact query rule, the tree
+    read and the serialized cycle-safe write as `types/`, `store/`, `service/`
+    and `http/`; the shop's languages come through the `Shop` port;
   - rich text and the content fallback rules.
   The content language rules (`Languages`: key, allowed, translated names) went
   to `core`, because roles, marketing, legal and POS use them too.
   Open: the edit handler itself still runs in the server, because it also calls
   legal, marketing, knowledge and the shop settings; so do product list and
-  creation, categories, assets, translations jobs, catalogue reads and pages.
+  creation, category navigation and staging, assets, translation jobs, catalogue
+  reads and pages.
 - [ ] inventory
 - [ ] shipping
 - [ ] customers

@@ -1,6 +1,7 @@
 //! What the catalog component needs from other components. The server implements these; tests use their own.
 use sqlx::PgConnection;
 use std::sync::Arc;
+use veyndo_core::localized::Languages;
 use veyndo_core::{PortFuture, RequestContext, State};
 
 /// Who writes a review: the cart of the request and, when signed in, its customer.
@@ -17,8 +18,24 @@ pub trait Shoppers: Send + Sync {
     fn bought<'a>(&'a self, shopper: &'a Shopper, product: &'a str) -> PortFuture<'a, bool>;
 }
 
-/// The shop around the catalogue: its environments and its change history.
+/// The content languages of a shop, owned so they can cross a port.
+pub struct ContentLanguages {
+    pub main: String,
+    pub enabled: Vec<String>,
+}
+
+impl ContentLanguages {
+    pub fn as_ref(&self) -> Languages<'_> {
+        Languages {
+            main: &self.main,
+            enabled: &self.enabled,
+        }
+    }
+}
+
+/// The shop around the catalogue: its languages, its environments and its change history.
 pub trait Shop: Send + Sync {
+    fn languages<'a>(&'a self, tenant: &'a str) -> PortFuture<'a, ContentLanguages>;
     /// Whether the shop is a preview environment of a live shop.
     fn is_preview<'a>(&'a self, tenant: &'a str) -> PortFuture<'a, bool>;
     /// Marks the changes of this transaction in the history as made by the request for `reason`.

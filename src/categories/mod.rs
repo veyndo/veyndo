@@ -1,7 +1,6 @@
 //! Tenant-scoped category tree, localized navigation and product assignment boundaries.
 use crate::*;
 mod admin;
-mod graph_query;
 mod navigation;
 pub(crate) use admin::{
     admit_configuration, create as create_category, import, input_schema, list as list_categories,

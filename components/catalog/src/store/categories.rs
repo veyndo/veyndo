@@ -1,4 +1,5 @@
 //! Which categories a product is assigned to.
+use crate::types::category::{Category, Edit};
 use sqlx::PgConnection;
 use veyndo_core::{Result, State};
 
@@ -41,4 +42,69 @@ pub async fn of_product(a: &State, tenant: &str, product: &str) -> Result<Vec<St
         .bind(product)
         .fetch_all(&a.db)
         .await?)
+}
+
+/// The whole tree of a shop in display order; at most 2001 rows so the caller can refuse larger trees.
+pub async fn tree(a: &State, tenant: &str) -> Result<Vec<Category>> {
+    Ok(sqlx::query_as::<_, Category>("SELECT id,parent_id,position,revision,data FROM categories WHERE tenant=$1 ORDER BY position,id LIMIT 2001")
+        .bind(tenant)
+        .fetch_all(&a.db)
+        .await?)
+}
+
+/// Serializes tree changes of one shop, so two moves cannot build a cycle together.
+pub async fn lock_tree(tx: &mut PgConnection, tenant: &str) -> Result<()> {
+    sqlx::query("SELECT pg_advisory_xact_lock(hashtextextended($1,726))")
+        .bind(tenant)
+        .execute(tx)
+        .await?;
+    Ok(())
+}
+
+/// Whether `parent` exists and is neither the category itself nor one of its descendants.
+pub async fn parent_admissible(
+    tx: &mut PgConnection,
+    tenant: &str,
+    parent: &str,
+    id: &str,
+) -> Result<bool> {
+    Ok(sqlx::query_scalar("WITH RECURSIVE ancestors AS (SELECT id,parent_id FROM categories WHERE tenant=$1 AND id=$2 UNION ALL SELECT c.id,c.parent_id FROM categories c JOIN ancestors x ON c.id=x.parent_id WHERE c.tenant=$1) SELECT EXISTS(SELECT 1 FROM ancestors) AND NOT EXISTS(SELECT 1 FROM ancestors WHERE id=$3)")
+        .bind(tenant)
+        .bind(parent)
+        .bind(id)
+        .fetch_one(tx)
+        .await?)
+}
+
+pub async fn insert(tx: &mut PgConnection, tenant: &str, id: &str, edit: &Edit) -> Result<()> {
+    sqlx::query("INSERT INTO categories(tenant,id,parent_id,position,data) VALUES($1,$2,$3,$4,$5)")
+        .bind(tenant)
+        .bind(id)
+        .bind(&edit.parent_id)
+        .bind(edit.position)
+        .bind(&edit.data)
+        .execute(tx)
+        .await?;
+    Ok(())
+}
+
+/// Stores the edit at `revision`; `false` when the category changed or does not exist.
+pub async fn update(
+    tx: &mut PgConnection,
+    tenant: &str,
+    id: &str,
+    edit: &Edit,
+    revision: i64,
+) -> Result<bool> {
+    Ok(sqlx::query("UPDATE categories SET parent_id=$1,position=$2,data=$3,revision=revision+1 WHERE tenant=$4 AND id=$5 AND revision=$6")
+        .bind(&edit.parent_id)
+        .bind(edit.position)
+        .bind(&edit.data)
+        .bind(tenant)
+        .bind(id)
+        .bind(revision)
+        .execute(tx)
+        .await?
+        .rows_affected()
+        == 1)
 }

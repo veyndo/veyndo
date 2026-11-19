@@ -1,10 +1,14 @@
 //! Saved category predicates select only current confirmed public source claims; no inference at browse time.
-use super::*;
-pub(super) const TYPES: &[&str] = &[
+use serde_json::Value;
+use veyndo_core::localized::Languages;
+use veyndo_core::{Result, bad};
+
+pub const TYPES: &[&str] = &[
     "intent", "problem", "occasion", "audience", "material", "property",
 ];
 
-pub(super) fn validate(data: &Value, settings: &commerce::Settings) -> Result<()> {
+/// A saved fact query belongs to a listing, names a supported node type and has text in the main language.
+pub fn validate(data: &Value, languages: Languages) -> Result<()> {
     let Some(query) = data.get("graphQuery").filter(|v| !v.is_null()) else {
         return Ok(());
     };
@@ -28,14 +32,7 @@ pub(super) fn validate(data: &Value, settings: &commerce::Settings) -> Result<()
         .filter(|m| !m.is_empty() && m.len() <= 100)
         .ok_or(bad("Localized fact query required"))?;
     for (locale, value) in text {
-        let allowed = settings.locales.iter().any(|l| l == locale)
-            || (settings
-                .locales
-                .iter()
-                .filter(|l| l.split('-').next() == Some(locale))
-                .count()
-                == 1);
-        if !allowed
+        if !languages.allowed(locale)
             || (!value.is_null()
                 && !value.as_str().is_some_and(|s| {
                     s.is_empty() || (s.trim() == s && s.chars().count() >= 3 && s.len() <= 120)
@@ -47,10 +44,10 @@ pub(super) fn validate(data: &Value, settings: &commerce::Settings) -> Result<()
         }
     }
     let main = text
-        .get(&settings.main_locale)
+        .get(languages.main)
         .and_then(Value::as_str)
         .or_else(|| {
-            text.get(settings.main_locale.split('-').next().unwrap_or(""))
+            text.get(languages.main.split('-').next().unwrap_or(""))
                 .and_then(Value::as_str)
         })
         .unwrap_or("");
@@ -62,14 +59,21 @@ pub(super) fn validate(data: &Value, settings: &commerce::Settings) -> Result<()
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use super::validate;
+    use serde_json::{Value, json};
+    use veyndo_core::localized::Languages;
     #[test]
     fn saved_query_is_closed_localized_and_bounded() {
-        let settings: commerce::Settings =
-            serde_json::from_value(json!({"countries":[],"taxes":[],"shipping":[],"payments":[]}))
-                .unwrap();
+        let enabled: Vec<String> = ["en-GB", "de-DE", "fr-FR", "es-ES"]
+            .iter()
+            .map(|l| (*l).to_owned())
+            .collect();
+        let languages = Languages {
+            main: "en-GB",
+            enabled: &enabled,
+        };
         let mut data = json!({"type":"page","graphQuery":{"nodeType":"intent","minimumConfidence":0.8,"text":{"en":"cycling","de":null,"es":""}}});
-        assert!(validate(&data, &settings).is_ok());
+        assert!(validate(&data, languages).is_ok());
         for q in [
             json!({"nodeType":"unknown","minimumConfidence":0.8,"text":{"en":"cycling"}}),
             json!({"nodeType":"intent","minimumConfidence":1.1,"text":{"en":"cycling"}}),
@@ -78,9 +82,9 @@ mod tests {
             json!({"nodeType":"intent","minimumConfidence":0.8,"text":{"en":"cycling"},"sql":"arbitrary"}),
         ] {
             data["graphQuery"] = q;
-            assert!(validate(&data, &settings).is_err());
+            assert!(validate(&data, languages).is_err());
         }
         data["graphQuery"] = Value::Null;
-        assert!(validate(&data, &settings).is_ok());
+        assert!(validate(&data, languages).is_ok());
     }
 }

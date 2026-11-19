@@ -1,8 +1,8 @@
 //! The server's implementation of what the catalog component reads from carts, orders, environments and the history.
-use crate::{App, RequestContext, history, load_cart, staging};
+use crate::{App, RequestContext, commerce, history, load_cart, staging};
 use sqlx::PgConnection;
 use std::sync::Arc;
-use veyndo_catalog::ports::{Catalog, Shop, Shopper, Shoppers};
+use veyndo_catalog::ports::{Catalog, ContentLanguages, Shop, Shopper, Shoppers};
 use veyndo_core::PortFuture;
 
 struct Server(App);
@@ -32,6 +32,15 @@ impl Shoppers for Server {
 }
 
 impl Shop for Server {
+    fn languages<'a>(&'a self, tenant: &'a str) -> PortFuture<'a, ContentLanguages> {
+        Box::pin(async move {
+            let (settings, _) = commerce::config(&self.0, tenant).await?;
+            Ok(ContentLanguages {
+                main: settings.main_locale.clone(),
+                enabled: settings.locales.clone(),
+            })
+        })
+    }
     fn is_preview<'a>(&'a self, tenant: &'a str) -> PortFuture<'a, bool> {
         Box::pin(async move { Ok(staging::parent(&self.0, tenant).await?.is_some()) })
     }
