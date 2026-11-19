@@ -1,5 +1,8 @@
-//! SKU loading with parent translation fallback.
+//! SKU loading with parent translation fallback; owned by the catalog component.
 use super::*;
+use axum::extract::FromRef;
+pub(crate) use veyndo_catalog::domain::family::inherited_extra;
+use veyndo_catalog::service::catalog_reads;
 
 pub(crate) async fn cart_products(
     a: &App,
@@ -7,55 +10,8 @@ pub(crate) async fn cart_products(
     chain: &[String],
     items: &[Item],
 ) -> Result<Vec<Product>> {
-    if items.is_empty() {
-        return Ok(vec![]);
-    }
     let ids = items.iter().map(|i| i.id.clone()).collect::<Vec<_>>();
-    // Two explicit indexed lookups avoid the OR/subquery plan that scanned a
-    // million-row tenant even for a small cart. Root-only carts need one lookup.
-    let rows = sqlx::query("SELECT * FROM products WHERE tenant=$1 AND id=ANY($2) ORDER BY id")
-        .bind(t)
-        .bind(&ids)
-        .fetch_all(&a.db)
-        .await?;
-    let mut selected = rows.iter().map(product).collect::<Vec<_>>();
-    let parent_ids = selected
-        .iter()
-        .filter_map(|p| p.parent_id.as_ref())
-        .filter(|id| !ids.contains(id))
-        .cloned()
-        .collect::<Vec<_>>();
-    if !parent_ids.is_empty() {
-        let parents =
-            sqlx::query("SELECT * FROM products WHERE tenant=$1 AND id=ANY($2) ORDER BY id")
-                .bind(t)
-                .bind(parent_ids)
-                .fetch_all(&a.db)
-                .await?;
-        selected.extend(parents.iter().map(product));
-        selected.sort_by(|a, b| a.id.cmp(&b.id));
-    }
-    let roots = localize_products(
-        a,
-        t,
-        chain,
-        selected
-            .iter()
-            .filter(|p| p.parent_id.is_none())
-            .cloned()
-            .collect(),
-    )
-    .await?;
-    let parents: HashMap<_, _> = roots.iter().map(|p| (p.id.as_str(), p)).collect();
-    for p in &mut selected {
-        let parent_id = p.parent_id.as_deref().unwrap_or(&p.id);
-        if let Some(parent) = parents.get(parent_id) {
-            p.name = parent.name.clone();
-            p.description = parent.description.clone();
-            p.extra = inherited_extra(&parent.extra, &p.extra);
-        }
-    }
-    localize_products(a, t, chain, selected).await
+    catalog_reads::for_cart(&FromRef::from_ref(a), t, chain, &ids).await
 }
 
 pub(crate) async fn family_products(
@@ -65,87 +21,5 @@ pub(crate) async fn family_products(
     id: &str,
     criteria: &CatalogCriteria,
 ) -> Result<(Vec<Product>, String, Option<String>)> {
-    let limit = criteria.page_size()?;
-    let selected = sqlx::query("SELECT * FROM products WHERE tenant=$1 AND id=$2")
-        .bind(t)
-        .bind(id)
-        .fetch_optional(&a.db)
-        .await?
-        .ok_or(Error(StatusCode::NOT_FOUND, "Product not found".into()))?;
-    let selected = product(&selected);
-    let family = selected
-        .parent_id
-        .as_deref()
-        .unwrap_or(&selected.id)
-        .to_owned();
-    let roots = sqlx::query("SELECT * FROM products WHERE tenant=$1 AND id=$2")
-        .bind(t)
-        .bind(&family)
-        .fetch_all(&a.db)
-        .await?;
-    let roots = localize_products(a, t, chain, roots.iter().map(product).collect()).await?;
-    let allowed = criteria
-        .product_ids
-        .as_ref()
-        .filter(|ids| !ids.contains(&family));
-    let rows = sqlx::query(
-        "SELECT * FROM products WHERE tenant=$1 AND parent_id=$2 AND active AND NOT EXISTS(SELECT 1 FROM product_channel_visibility v WHERE v.tenant=products.tenant AND v.product_id=products.id AND v.channel_id=$6 AND NOT v.visible) AND id>$3 AND ($5::text[] IS NULL OR id=ANY($5)) AND ($7::text IS NULL OR EXISTS(SELECT 1 FROM b2b_catalog b WHERE b.tenant=products.tenant AND b.unit_id=$7 AND (b.product_id=products.id OR b.product_id=products.parent_id))) ORDER BY id LIMIT $4",
-    )
-    .bind(t)
-    .bind(&family)
-    .bind(criteria.after.as_deref().unwrap_or(""))
-    .bind((limit + 1) as i64)
-    .bind(allowed)
-    .bind(&criteria.channel_id)
-    .bind(&criteria.b2b_unit)
-    .fetch_all(&a.db)
-    .await?;
-    let next_cursor = (rows.len() > limit).then(|| rows[limit - 1].get::<String, _>("id"));
-    let mut result = roots;
-    for row in rows.iter().take(limit) {
-        result.push(product(row));
-    }
-    // A deep-linked SKU remains visible even when it is outside the requested page.
-    if !result.iter().any(|p| p.id == id) {
-        result.push(selected);
-    }
-    let parent = result
-        .iter()
-        .find(|p| p.id == family)
-        .map(|p| (p.name.clone(), p.description.clone(), p.extra.clone()));
-    if let Some((name, description, extra)) = parent {
-        for p in &mut result {
-            if p.parent_id.as_deref() == Some(&family) {
-                p.name = name.clone();
-                p.description = description.clone();
-                p.extra = inherited_extra(&extra, &p.extra);
-            }
-        }
-    }
-    Ok((
-        localize_products(a, t, chain, result).await?,
-        family,
-        next_cursor,
-    ))
-}
-
-/// Absent SKU metadata inherits from the family; explicit values (including false) override.
-pub(crate) fn inherited_extra(parent: &Value, child: &Value) -> Value {
-    let mut merged = parent.as_object().cloned().unwrap_or_default();
-    if let Some(fields) = child.as_object() {
-        merged.extend(fields.clone());
-    }
-    Value::Object(merged)
-}
-#[cfg(test)]
-mod tests {
-    use super::*;
-    #[test]
-    fn sku_metadata_inherits_without_overwriting_explicit_values() {
-        let parent = json!({"shippingFree":true,"specifications":{"fr":{"Matière":"Grès"}},"crossSelling":["notebook"]});
-        assert_eq!(inherited_extra(&parent, &json!({})), parent);
-        let child = inherited_extra(&parent, &json!({"shippingFree":false}));
-        assert_eq!(child["shippingFree"], false);
-        assert_eq!(child["specifications"], parent["specifications"]);
-    }
+    catalog_reads::family(&FromRef::from_ref(a), t, chain, id, criteria).await
 }

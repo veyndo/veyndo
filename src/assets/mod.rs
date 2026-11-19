@@ -56,13 +56,17 @@ pub(crate) fn router() -> Router<App> {
         .secure_route(
             "/api/merchant/assets/{id}",
             &[("GET", "catalog.read"), ("PUT", "catalog.write")],
-            get(download::preview).put(veyndo_catalog::http::assets::publish),
+            get(veyndo_catalog::http::downloads::preview)
+                .put(veyndo_catalog::http::assets::publish),
         )
         .route(
             "/store-api/product/{id}/attachments",
-            get(download::attachments),
+            get(veyndo_catalog::http::downloads::attachments),
         )
-        .route("/store-api/assets/{id}", get(download::attachment))
+        .route(
+            "/store-api/assets/{id}",
+            get(veyndo_catalog::http::downloads::attachment),
+        )
         .route("/store-api/account/downloads", get(download::owned))
         .route(
             "/store-api/orders/{order}/downloads/{asset}",

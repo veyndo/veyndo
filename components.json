@@ -193,9 +193,7 @@
         "src/storefront_pages.rs",
         "src/localization.rs",
         "src/seed.rs",
-        "src/demo_catalog.rs",
-        "src/catalog_channel.sql",
-        "src/catalog_search.sql"
+        "src/demo_catalog.rs"
       ],
       "tables": [
         "categories",
@@ -241,9 +239,9 @@
         "tasks",
         "tenants"
       ],
-      "glob_imports": 41,
+      "glob_imports": 40,
       "untyped_access": 203,
-      "sql_outside_store": 20
+      "sql_outside_store": 18
     },
     "inventory": {
       "title": "Stock, reservations and supply",

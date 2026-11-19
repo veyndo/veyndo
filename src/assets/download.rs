@@ -1,78 +1,12 @@
-//! Public attachments honor sales-channel visibility; downloads require a paid, owned order snapshot.
+//! Downloads require a paid, owned order snapshot; public attachments are served by the catalog component.
 use super::*;
-pub(super) async fn attachments(
-    State(a): State<App>,
-    h: RequestContext,
-    Path(id): Path<String>,
-) -> Result<Json<Value>> {
-    marketing::admit_product(&a, &h, &id).await?;
-    let t = tenant(&h)?;
-    let (settings, _) = commerce::config(&a, &t).await?;
-    let locale = header(&h, "x-commerce-locale").unwrap_or(&settings.main_locale);
-    let rows=sqlx::query("SELECT id,title,filename,mime,octet_length(content) AS bytes FROM product_assets WHERE tenant=$1 AND public AND kind='attachment' AND (product_id=$2 OR product_id=(SELECT parent_id FROM products WHERE tenant=$1 AND id=$2)) ORDER BY created_at LIMIT 50").bind(t).bind(id).fetch_all(&a.db).await?;
-    Ok(Json(
-        json!({"elements":rows.iter().map(|r|json!({"id":r.get::<String,_>("id"),"title":r.get::<Value,_>("title"),"name":commerce::translated_string(&r.get::<Value,_>("title"),locale,&settings.main_locale),"filename":r.get::<String,_>("filename"),"mime":r.get::<String,_>("mime"),"bytes":r.get::<i32,_>("bytes")})).collect::<Vec<_>>()}),
-    ))
-}
 fn response(r: &sqlx::postgres::PgRow) -> Response {
-    let filename: String = r.get("filename");
-    (
-        [
-            (axum::http::header::CONTENT_TYPE, r.get::<String, _>("mime")),
-            (
-                axum::http::header::CONTENT_DISPOSITION,
-                format!("attachment; filename=\"{filename}\""),
-            ),
-            (
-                axum::http::header::CACHE_CONTROL,
-                "private, no-store".into(),
-            ),
-            (axum::http::header::X_CONTENT_TYPE_OPTIONS, "nosniff".into()),
-        ],
-        r.get::<Vec<u8>, _>("content"),
-    )
-        .into_response()
-}
-pub(super) async fn attachment(
-    State(a): State<App>,
-    h: RequestContext,
-    Path(id): Path<String>,
-    axum::extract::Query(context): axum::extract::Query<ModelContext>,
-) -> Result<Response> {
-    let t = tenant(&h)?;
-    let r=sqlx::query("SELECT product_id,mime,filename,content FROM product_assets WHERE tenant=$1 AND id=$2 AND kind='attachment' AND public").bind(t).bind(id).fetch_optional(&a.db).await?.ok_or(Error(StatusCode::NOT_FOUND,"Attachment not found".into()))?;
-    let owner: String = r.get("product_id");
-    let selected = context.product_id.as_deref().unwrap_or(&owner);
-    if selected != owner {
-        let parent: Option<String> =
-            sqlx::query_scalar("SELECT parent_id FROM products WHERE tenant=$1 AND id=$2")
-                .bind(tenant(&h)?)
-                .bind(selected)
-                .fetch_optional(&a.db)
-                .await?
-                .flatten();
-        if r.get::<String, _>("mime") != "model/gltf-binary" || parent.as_deref() != Some(&owner) {
-            return Err(Error(StatusCode::NOT_FOUND, "Attachment not found".into()));
-        }
-    }
-    marketing::admit_product(&a, &h, selected).await?;
-    Ok(response(&r))
-}
-#[derive(Default, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub(super) struct ModelContext {
-    product_id: Option<String>,
-}
-/// Authenticated Studio preview never requires activating or publishing an unfinished product.
-pub(super) async fn preview(
-    State(a): State<App>,
-    h: RequestContext,
-    Path(id): Path<String>,
-) -> Result<Response> {
-    let t = merchant(&a, &h)?;
-    auth::permit(&h, "catalog.read")?;
-    let row = sqlx::query("SELECT mime,filename,content FROM product_assets WHERE tenant=$1 AND id=$2 AND kind='attachment' AND mime='model/gltf-binary'").bind(t).bind(id).fetch_optional(&a.db).await?.ok_or(Error(StatusCode::NOT_FOUND,"Model unavailable".into()))?;
-    Ok(response(&row))
+    veyndo_catalog::http::downloads::response(veyndo_catalog::types::asset::StoredFile {
+        product_id: String::new(),
+        mime: r.get("mime"),
+        filename: r.get("filename"),
+        content: r.get("content"),
+    })
 }
 fn paid(o: &Value) -> bool {
     verified_kernel::download_admissible(

@@ -42,27 +42,13 @@ pub(super) async fn localize_products(
     chain: &[String],
     ps: Vec<Product>,
 ) -> Result<Vec<Product>> {
-    if ps.is_empty() {
-        return Ok(ps);
-    }
-    let ids = ps.iter().map(|p| p.id.clone()).collect::<Vec<_>>();
-    let texts = veyndo_catalog::store::translations::for_products(&a.core, t, chain, &ids).await?;
-    let languages = performance::languages(a).await?;
-    let locale_chain = chain
-        .iter()
-        .filter_map(|id| {
-            languages
-                .iter()
-                .find(|l| l.id == *id)
-                .map(|l| l.locale.clone())
-        })
-        .collect::<Vec<_>>();
-    Ok(veyndo_catalog::domain::hydration::hydrate(
-        ps,
-        &texts,
+    veyndo_catalog::service::catalog_reads::localize(
+        &axum::extract::FromRef::from_ref(a),
+        t,
         chain,
-        &locale_chain,
-    ))
+        ps,
+    )
+    .await
 }
 pub(super) async fn context_info(State(a): State<App>, h: RequestContext) -> Result<Json<Value>> {
     let (locale, chain) = language_context(&a, &h).await?;

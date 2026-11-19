@@ -24,3 +24,24 @@ pub struct Upload {
     pub grant: Option<String>,
     pub product: Option<String>,
 }
+
+/// A published attachment as the storefront lists it.
+#[derive(sqlx::FromRow)]
+pub struct Attachment {
+    pub id: String,
+    pub title: Value,
+    pub filename: String,
+    pub mime: String,
+    pub bytes: i32,
+}
+
+/// A stored file with its content, ready to be delivered.
+#[derive(sqlx::FromRow)]
+pub struct StoredFile {
+    /// The product the file belongs to; empty when the read did not need it.
+    #[sqlx(default)]
+    pub product_id: String,
+    pub mime: String,
+    pub filename: String,
+    pub content: Vec<u8>,
+}

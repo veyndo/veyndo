@@ -135,7 +135,7 @@ Reference: Shopware **6.7.14.2**, commit [`29535190246fcaf0b091d7bdf02dd16358c94
 | Parent/child category tree, position, translations | `categories/admin.rs`; migration 026; `CategoriesWorkspace.tsx` | Four languages, revision checks, same-tenant parent FK, ancestor/cycle validation and shop-local edit lock |
 | Page / folder / external-link category types | Category data and public navigation renderer | `page`, `folder`, HTTPS `link`; legacy `structuring` remains readable |
 | Multiple product-category associations | `product_categories`; `categories::assignments` | Tenant-bound many-to-many links, at most 100 assignments per product |
-| Parent listing includes descendant assignments | `categories/listing.sql` | Active subtree, enabled by default; `displayNestedProducts=false` limits the listing to direct assignments |
+| Parent listing includes descendant assignments | `components/catalog/src/store/category_listing.sql` | Active subtree, enabled by default; `displayNestedProducts=false` limits the listing to direct assignments |
 | Active and visible are different | `categories/navigation.rs` | Inactive branches are inaccessible; invisible branches disappear from navigation but active category listings remain directly addressable |
 | Sales-channel navigation root | `marketing/channels.rs`, `categories/navigation.rs`, channel settings form | Independent `navigationCategoryId` per storefront/headless channel; default root is `catalog-root` |
 | Storefront navigation and category listing | `/store-api/navigation`, `/store-api/product` with `categoryId`; `CatalogNavigation.tsx` | Localized tree and real product filtering before pagination; no hard-coded category names |

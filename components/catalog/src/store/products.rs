@@ -98,3 +98,15 @@ pub async fn exists(tx: &mut PgConnection, tenant: &str, product: &str) -> Resul
             .await?,
     )
 }
+
+/// The parent of a variant; `None` for a main product or an unknown ID.
+pub async fn parent_of(a: &State, tenant: &str, product: &str) -> Result<Option<String>> {
+    Ok(
+        sqlx::query_scalar("SELECT parent_id FROM products WHERE tenant=$1 AND id=$2")
+            .bind(tenant)
+            .bind(product)
+            .fetch_optional(&a.db)
+            .await?
+            .flatten(),
+    )
+}

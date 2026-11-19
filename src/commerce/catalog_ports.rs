@@ -1,6 +1,7 @@
 //! The server's implementation of what the catalog component reads from carts, orders, environments and the history.
 use crate::{
-    App, RequestContext, commerce, history, language_context, load_cart, marketing, staging, tenant,
+    App, RequestContext, commerce, history, language_context, load_cart, marketing, performance,
+    staging, tenant,
 };
 use sqlx::PgConnection;
 use std::sync::Arc;
@@ -43,6 +44,20 @@ impl Shop for Server {
             })
         })
     }
+    fn locales<'a>(&'a self, ids: &'a [String]) -> PortFuture<'a, Vec<String>> {
+        Box::pin(async move {
+            let languages = performance::languages(&self.0).await?;
+            Ok(ids
+                .iter()
+                .filter_map(|id| {
+                    languages
+                        .iter()
+                        .find(|l| l.id == *id)
+                        .map(|l| l.locale.clone())
+                })
+                .collect())
+        })
+    }
     fn visit<'a>(&'a self, request: &'a RequestContext) -> PortFuture<'a, Visit> {
         Box::pin(async move {
             let tenant = tenant(request)?;
@@ -58,6 +73,13 @@ impl Shop for Server {
                     .unwrap_or_else(|| "catalog-root".into()),
             })
         })
+    }
+    fn admit_product<'a>(
+        &'a self,
+        request: &'a RequestContext,
+        product: &'a str,
+    ) -> PortFuture<'a, ()> {
+        Box::pin(marketing::admit_product(&self.0, request, product))
     }
     fn is_preview<'a>(&'a self, tenant: &'a str) -> PortFuture<'a, bool> {
         Box::pin(async move { Ok(staging::parent(&self.0, tenant).await?.is_some()) })

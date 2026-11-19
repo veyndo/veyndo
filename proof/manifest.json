@@ -682,13 +682,18 @@
   "sources": {
     "components/catalog/src/domain/asset_file.rs": {
       "status": "unproved",
-      "sha256": "b6c9b53866b2a4505da3c80b69de79dfe77a74890fb2ddf53809dc55d603977a",
-      "review": "Asset upload, listing and publishing moved into components/catalog; no rule changed"
+      "sha256": "a1e0b807528d23397a4bd21541b842b1c9979a08d4270d7d69e47b81eae9d6c7",
+      "review": "Storefront catalogue reads and public attachments moved into components/catalog; no rule changed"
     },
     "components/catalog/src/domain/content.rs": {
       "status": "unproved",
       "sha256": "ee3e16add3458894ff03fc982bedd07278603ac51c25708575a359574998c251",
       "review": "Catalog component crate created; no rule changed"
+    },
+    "components/catalog/src/domain/family.rs": {
+      "status": "unproved",
+      "sha256": "e6e1da1854c405e6ce45b0880aa9fb607504c9316a1e98b874b4537727bd1c40",
+      "review": "Storefront catalogue reads and public attachments moved into components/catalog; no rule changed"
     },
     "components/catalog/src/domain/graph_query.rs": {
       "status": "unproved",
@@ -732,8 +737,8 @@
     },
     "components/catalog/src/domain.rs": {
       "status": "unproved",
-      "sha256": "e299c5c8dfa90d819136ffc516255be01c521883f3217a87fa323691395f3538",
-      "review": "Asset upload, listing and publishing moved into components/catalog; no rule changed"
+      "sha256": "a948271809edec1febee0c6a24ef4817b467066d2999af0e3f3c6aff411a6c40",
+      "review": "Storefront catalogue reads and public attachments moved into components/catalog; no rule changed"
     },
     "components/catalog/src/http/assets.rs": {
       "status": "unproved",
@@ -744,6 +749,11 @@
       "status": "unproved",
       "sha256": "a73ca4cafd72ba86992a64184fa9458efac3ba2449c68d5e093dc63f884b455c",
       "review": "Category navigation and seeding moved into components/catalog; no rule changed"
+    },
+    "components/catalog/src/http/downloads.rs": {
+      "status": "unproved",
+      "sha256": "f4256a2e39318cdb5dca0e589df214455027972c18eff33d41c697accd3f138d",
+      "review": "Storefront catalogue reads and public attachments moved into components/catalog; no rule changed"
     },
     "components/catalog/src/http/ingestion.rs": {
       "status": "unproved",
@@ -757,8 +767,8 @@
     },
     "components/catalog/src/http.rs": {
       "status": "unproved",
-      "sha256": "ab5179af7ae22a0364c5e1f6f56007214cedecd38d4a1cbe906cb9fc5611904a",
-      "review": "Asset upload, listing and publishing moved into components/catalog; no rule changed"
+      "sha256": "6db7fdb476165bcd8109c83608cb7a83a268395cfb4199e1439d00a6a6bb5438",
+      "review": "Storefront catalogue reads and public attachments moved into components/catalog; no rule changed"
     },
     "components/catalog/src/lib.rs": {
       "status": "unproved",
@@ -767,13 +777,18 @@
     },
     "components/catalog/src/ports.rs": {
       "status": "unproved",
-      "sha256": "4490757bb0c5de3b499ac41449189beebc40c1e410234ce62b6b0ad9bea3d6fa",
-      "review": "Category navigation and seeding moved into components/catalog; no rule changed"
+      "sha256": "02c13dde9af6048d80f8313dede972b340cbd3b77c28ed8a32ced4cdc691d9f0",
+      "review": "Storefront catalogue reads and public attachments moved into components/catalog; no rule changed"
     },
     "components/catalog/src/service/assets.rs": {
       "status": "unproved",
       "sha256": "5cd233db052dde213b710828e6ce32e59badffc1f52d736f7bddc0565afe36d7",
       "review": "Asset upload, listing and publishing moved into components/catalog; no rule changed"
+    },
+    "components/catalog/src/service/catalog_reads.rs": {
+      "status": "unproved",
+      "sha256": "3e5ad44dfc9ca324edc220d8abf53578f8253dd684e364423bdb235b12bbe481",
+      "review": "Storefront catalogue reads and public attachments moved into components/catalog; no rule changed"
     },
     "components/catalog/src/service/categories.rs": {
       "status": "unproved",
@@ -807,13 +822,18 @@
     },
     "components/catalog/src/service.rs": {
       "status": "unproved",
-      "sha256": "b94a33cd20418c90be713e2a4d2321afb88c32645bff295bcb1605673a08370e",
-      "review": "Asset upload, listing and publishing moved into components/catalog; no rule changed"
+      "sha256": "192bf3eddcf7715038fae1f5883923490a49a461d593e191a337d780083a20ba",
+      "review": "Storefront catalogue reads and public attachments moved into components/catalog; no rule changed"
     },
     "components/catalog/src/store/assets.rs": {
       "status": "unproved",
-      "sha256": "58495658ea4f202917de51e587d870c3df24a30ef905e74a9e7c4cb3457e4d77",
-      "review": "Asset upload, listing and publishing moved into components/catalog; no rule changed"
+      "sha256": "d3bf7055c77714fd082dbfb33957c69598fc0cc63869d55e41ec79042f4e007f",
+      "review": "Storefront catalogue reads and public attachments moved into components/catalog; no rule changed"
+    },
+    "components/catalog/src/store/catalog_reads.rs": {
+      "status": "unproved",
+      "sha256": "4afbba4a146fc47e7e8470fd087b4097fdd8cbbfc5d993507f958c9521021418",
+      "review": "Storefront catalogue reads and public attachments moved into components/catalog; no rule changed"
     },
     "components/catalog/src/store/categories.rs": {
       "status": "unproved",
@@ -847,8 +867,8 @@
     },
     "components/catalog/src/store/products.rs": {
       "status": "unproved",
-      "sha256": "fb7f3eb58c09f007d9823f41e38e53501a91ba528d0280e387c8d9adbb3acfcc",
-      "review": "Product edit types, stores and language rules moved into components; no rule changed"
+      "sha256": "35a08955fe883d907d21223e0ab413dd653c55219b5cd37496c7a81c852b86d8",
+      "review": "Storefront catalogue reads and public attachments moved into components/catalog; no rule changed"
     },
     "components/catalog/src/store/reviews.rs": {
       "status": "unproved",
@@ -862,13 +882,18 @@
     },
     "components/catalog/src/store.rs": {
       "status": "unproved",
-      "sha256": "d0afde6a37d674e27e487baff38c649b0f2dc96dd4f1e05a2d344856e233108c",
-      "review": "Product hydration, list query and preparation moved into components/catalog; no rule changed"
+      "sha256": "9dc2c19f74e42e2eda8ccdcdfedb095d44f7d9bdb162b023036c526894d429e0",
+      "review": "Storefront catalogue reads and public attachments moved into components/catalog; no rule changed"
     },
     "components/catalog/src/types/asset.rs": {
       "status": "unproved",
-      "sha256": "26289bebc6b6d412993777b268054298676dee95abe020d3e3910394f322a6e0",
-      "review": "Asset upload, listing and publishing moved into components/catalog; no rule changed"
+      "sha256": "31d838e41de23fff6b709da15fd679cf2d084ec1fdd1afec254be3dd78524d14",
+      "review": "Storefront catalogue reads and public attachments moved into components/catalog; no rule changed"
+    },
+    "components/catalog/src/types/catalog_page.rs": {
+      "status": "unproved",
+      "sha256": "4b98351f7d33eeee2e7a57dab719650129fbab80f1711caa024d1a4964fb6c99",
+      "review": "Storefront catalogue reads and public attachments moved into components/catalog; no rule changed"
     },
     "components/catalog/src/types/category.rs": {
       "status": "unproved",
@@ -902,8 +927,8 @@
     },
     "components/catalog/src/types.rs": {
       "status": "unproved",
-      "sha256": "eb8013a829b4b554f3e8836a7f7eae4f25f1956da530679cc8653448a0cbca8b",
-      "review": "Asset upload, listing and publishing moved into components/catalog; no rule changed"
+      "sha256": "9a2bcea53ca95789b2a268b746f8c40feaf4c5c8f36322252e754b500eef9515",
+      "review": "Storefront catalogue reads and public attachments moved into components/catalog; no rule changed"
     },
     "components/core/src/access.rs": {
       "status": "unproved",
@@ -3697,8 +3722,8 @@
     },
     "src/assets/download.rs": {
       "status": "reviewed-binding",
-      "sha256": "e2dedc2bc5f2a8195c904bacce5fcf5677361d3a83e65462600d59c6a1c6755b",
-      "review": "Review native GLB validation and owned parent assignments, current catalogue CAS and binary preview/channel authorization; no kernel policy changes or full-core proof claim"
+      "sha256": "a9ccd8a99a4318f34066672bc687f2608adf93f0e880abec69c87767027f9d08",
+      "review": "Storefront catalogue reads and public attachments moved into components/catalog; no rule changed"
     },
     "src/assets/image_jobs.rs": {
       "status": "unproved",
@@ -3722,8 +3747,8 @@
     },
     "src/assets/mod.rs": {
       "status": "unproved",
-      "sha256": "a2424d66f41ac3aa6d76ae939bc58d8af410b787e6133167e8efcdd774ad3220",
-      "review": "Asset upload, listing and publishing moved into components/catalog; no rule changed"
+      "sha256": "3ebfc4f1e6b0381606ba611fba824ad06f1b5c49913e6e72af56dd2c1db6b721",
+      "review": "Storefront catalogue reads and public attachments moved into components/catalog; no rule changed"
     },
     "src/assets/model_format.rs": {
       "status": "unproved",
@@ -4132,8 +4157,8 @@
     },
     "src/catalog_page.rs": {
       "status": "unproved",
-      "sha256": "2c88da305c7b9d7198d9ac80a06678769eade94ed915e051fa523a96ab96f093",
-      "review": "Reviewed bounded native catalog IDs intersected with existing channel/B2B admission, selected-product batch hydration and configured locale context; HTTP/MCP selected-ID and foreign-channel denial regression plus Rust/catalog checks passed."
+      "sha256": "2dce07c669a134e746d28436382c7b540b04699f00ec429b2f330a6556578b07",
+      "review": "Storefront catalogue reads and public attachments moved into components/catalog; no rule changed"
     },
     "src/catalog_routes.rs": {
       "status": "unproved",
@@ -4387,8 +4412,8 @@
     },
     "src/commerce/catalog.rs": {
       "status": "unproved",
-      "sha256": "c3db6e8287d38869376f08c80e0ccdf5e5616be0520b36adbb8703b5a27d3428",
-      "review": "Reviewed native B2B authority, unit-first locking, revision-bound approvals and offers, exact budget allocation/release, private variant pagination, current app callbacks and forced tenant FKs/RLS; EDI codecs remain app-owned and bounded. Real PostgreSQL approval/concurrent budget/revocation/PDF/MCP and app/checkout baseline suites passed; schema/build/proof and changed Rust owners reviewed. Two extracted decisions add four Lean properties, not whole-server verification."
+      "sha256": "58b76ce1eda0a9b654fa06ed9de05cc9548482ee74fd6acfbd6dfb3f9ec4cd1f",
+      "review": "Storefront catalogue reads and public attachments moved into components/catalog; no rule changed"
     },
     "src/commerce/catalog_intake/csv.rs": {
       "status": "unproved",
@@ -4417,8 +4442,8 @@
     },
     "src/commerce/catalog_ports.rs": {
       "status": "unproved",
-      "sha256": "5e30019e625f1f1cee06d11315676cf9ff8944b522e1e01314e3e2d4853464a3",
-      "review": "Category navigation and seeding moved into components/catalog; no rule changed"
+      "sha256": "944c95a3fcfd975b3182f3d62824cd2b029fc8c992f7f79700f09120be5b98a5",
+      "review": "Storefront catalogue reads and public attachments moved into components/catalog; no rule changed"
     },
     "src/commerce/configuration.rs": {
       "status": "unproved",
@@ -4957,8 +4982,8 @@
     },
     "src/localization.rs": {
       "status": "unproved",
-      "sha256": "8c42b5e01c6195bf1534a5456ad42207fffc5d5972b0b8378fb90bdd3d91b4de",
-      "review": "Product hydration, list query and preparation moved into components/catalog; no rule changed"
+      "sha256": "6db6ae95a0f75449a2d4299c574af38d98e99370d96f2e7d2abac70e44b93879",
+      "review": "Storefront catalogue reads and public attachments moved into components/catalog; no rule changed"
     },
     "src/main.rs": {
       "status": "unproved",
@@ -6769,18 +6794,6 @@
     "src/auth/identity.sql": {
       "sha256": "18f5242cce96f0e5157e5baf780d04ed7b2b8ec0c91ad795400160c6cf6021d2",
       "review": "Knowledge introspection reuses current scoped native identity, expiring integration keys and app package approval. Real catalog delivery, read-only evidence, foreign-shop and revoked-key checks and Checkout tenant isolation passed locally."
-    },
-    "src/catalog_channel.sql": {
-      "sha256": "2eca0d892fc281f0948daac41f59a67d1fab8443e341eb5e9bf64fded533c1e6",
-      "review": "Reviewed native B2B authority, unit-first locking, revision-bound approvals and offers, exact budget allocation/release, private variant pagination, current app callbacks and forced tenant FKs/RLS; EDI codecs remain app-owned and bounded. Real PostgreSQL approval/concurrent budget/revocation/PDF/MCP and app/checkout baseline suites passed; schema/build/proof and changed Rust owners reviewed. Two extracted decisions add four Lean properties, not whole-server verification."
-    },
-    "src/catalog_search.sql": {
-      "sha256": "8a09466a45168dff5c1eacdd16d61857c018bbf45dc0d568fa2853909ac5a720",
-      "review": "Reviewed native B2B authority, unit-first locking, revision-bound approvals and offers, exact budget allocation/release, private variant pagination, current app callbacks and forced tenant FKs/RLS; EDI codecs remain app-owned and bounded. Real PostgreSQL approval/concurrent budget/revocation/PDF/MCP and app/checkout baseline suites passed; schema/build/proof and changed Rust owners reviewed. Two extracted decisions add four Lean properties, not whole-server verification."
-    },
-    "src/categories/listing.sql": {
-      "sha256": "ca6884b88d8c44f5742380682b02031192fb59fed70f0d432e00ac142148ad81",
-      "review": "Reviewed native B2B authority, unit-first locking, revision-bound approvals and offers, exact budget allocation/release, private variant pagination, current app callbacks and forced tenant FKs/RLS; EDI codecs remain app-owned and bounded. Real PostgreSQL approval/concurrent budget/revocation/PDF/MCP and app/checkout baseline suites passed; schema/build/proof and changed Rust owners reviewed. Two extracted decisions add four Lean properties, not whole-server verification."
     },
     "src/cognition/behavior/eligible.sql": {
       "sha256": "7f34fe7b256243ec7d7e60914c847aea4717446525d89c68ff995ccbe2779c89",

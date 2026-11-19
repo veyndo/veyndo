@@ -1,6 +1,6 @@
 //! Reads of stored product assets.
-use crate::types::asset::Asset;
 use crate::types::asset::Upload;
+use crate::types::asset::{Asset, Attachment, StoredFile};
 use sqlx::PgConnection;
 use veyndo_core::{Result, State};
 
@@ -93,4 +93,30 @@ pub async fn set_public(
             .rows_affected()
             == 1,
     )
+}
+
+/// The published attachments of a product and of its parent, oldest first.
+pub async fn public_attachments(a: &State, tenant: &str, product: &str) -> Result<Vec<Attachment>> {
+    Ok(sqlx::query_as::<_, Attachment>("SELECT id,title,filename,mime,octet_length(content) AS bytes FROM product_assets WHERE tenant=$1 AND public AND kind='attachment' AND (product_id=$2 OR product_id=(SELECT parent_id FROM products WHERE tenant=$1 AND id=$2)) ORDER BY created_at LIMIT 50")
+        .bind(tenant)
+        .bind(product)
+        .fetch_all(&a.db)
+        .await?)
+}
+
+pub async fn public_attachment(a: &State, tenant: &str, id: &str) -> Result<Option<StoredFile>> {
+    Ok(sqlx::query_as::<_, StoredFile>("SELECT product_id,mime,filename,content FROM product_assets WHERE tenant=$1 AND id=$2 AND kind='attachment' AND public")
+        .bind(tenant)
+        .bind(id)
+        .fetch_optional(&a.db)
+        .await?)
+}
+
+/// A 3D model for the merchant preview, published or not.
+pub async fn model(a: &State, tenant: &str, id: &str) -> Result<Option<StoredFile>> {
+    Ok(sqlx::query_as::<_, StoredFile>("SELECT mime,filename,content FROM product_assets WHERE tenant=$1 AND id=$2 AND kind='attachment' AND mime='model/gltf-binary'")
+        .bind(tenant)
+        .bind(id)
+        .fetch_optional(&a.db)
+        .await?)
 }

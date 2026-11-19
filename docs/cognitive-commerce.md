@@ -325,7 +325,7 @@ after validation or an authenticated cross-device memory implementation.
 | `src/cognition/{guardrails,autonomy}.rs`; migration 073 | Native policy, current revisions, daily price budget and transactional consumer |
 | `src/cognition/experiments/`; migration 075 | Native assignment, preregistration and actual payment-ledger readout |
 | `src/cognition/preferences.rs`; existing privacy owner | Private graph, current consent, advice admission and erasure |
-| `src/categories/{admin,graph_query}.rs`, `listing.sql`; migration 077 | Native saved fact-category predicates, source admission and existing catalog consumer |
+| `components/catalog/src/{domain/graph_query,store/categories}.rs`, `store/category_listing.sql`; migration 077 | Native saved fact-category predicates, source admission and existing catalog consumer |
 | `frontend/src/admin/intelligence/`, storefront account and shared i18n/API | Multilingual editors and native request transport |
 
 Registered verification includes `users`, `providers`, `knowledge_workspace`,

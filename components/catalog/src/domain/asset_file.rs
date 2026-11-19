@@ -27,6 +27,17 @@ pub fn validate_bytes(mime: &str, b: &[u8]) -> Result<()> {
     }
 }
 
+/// Whether a file of `owner` may be delivered in the context of `selected`: the product itself,
+/// or one of its variants when the file is a 3D model the variant shows with its own material.
+pub fn deliverable_for(
+    owner: &str,
+    selected: &str,
+    selected_parent: Option<&str>,
+    mime: &str,
+) -> bool {
+    selected == owner || (mime == "model/gltf-binary" && selected_parent == Some(owner))
+}
+
 #[cfg(test)]
 mod tests {
     use super::validate_bytes;
@@ -38,5 +49,35 @@ mod tests {
         assert!(validate_bytes("text/plain", b"Manual").is_ok());
         assert!(validate_bytes("image/png", b"\x89PNG\r\n\x1a\nrest").is_ok());
         assert!(validate_bytes("image/png", b"").is_err());
+    }
+
+    #[test]
+    fn a_variant_may_load_only_the_model_of_its_parent() {
+        use super::deliverable_for;
+        assert!(deliverable_for("chair", "chair", None, "application/pdf"));
+        assert!(deliverable_for(
+            "chair",
+            "chair-oak",
+            Some("chair"),
+            "model/gltf-binary"
+        ));
+        assert!(!deliverable_for(
+            "chair",
+            "chair-oak",
+            Some("chair"),
+            "application/pdf"
+        ));
+        assert!(!deliverable_for(
+            "chair",
+            "table",
+            None,
+            "model/gltf-binary"
+        ));
+        assert!(!deliverable_for(
+            "chair",
+            "lamp-red",
+            Some("lamp"),
+            "model/gltf-binary"
+        ));
     }
 }
