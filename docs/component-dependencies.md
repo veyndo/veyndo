@@ -23,7 +23,7 @@ run SQL without being in a `store` folder. Both numbers only fall.
 | checkout | 2686 | 13 | 148 | 9 | 3 | apps (20), b2b (18), catalog (6), core (239), customers (5), host (7), identity (2), intelligence (2), inventory (3), marketing (15), orders (6), payments (8), pos (11), pricing (36), shipping (7), shop (54), studio (9) | 12 |
 | customers | 2059 | 18 | 85 | 10 | 3 | apps (9), catalog (3), checkout (2), core (172), identity (32), marketing (2), orders (3), pos (1), pricing (2), shipping (4), shop (14), studio (9) | 6 |
 | orders | 5012 | 34 | 452 | 20 | 7 | apps (32), b2b (1), catalog (9), checkout (7), core (287), customers (5), identity (72), inventory (1), marketing (6), payments (5), pos (1), pricing (6), shipping (2), shop (26), studio (8) | 17 |
-| payments | 4008 | 3 | 264 | 21 | 7 | apps (10), core (275), host (5), identity (10), inventory (1), pos (1), shop (7), studio (1) | 14 |
+| payments | 4102 | 2 | 264 | 17 | 7 | apps (10), core (244), host (5), identity (10), inventory (1), pos (1), pricing (7), shop (7), studio (1) | 14 |
 | marketing | 4988 | 29 | 339 | 23 | 8 | apps (23), automation (38), b2b (3), catalog (7), checkout (3), core (219), identity (37), intelligence (13), orders (1), payments (1), pos (4), pricing (17), shop (24), studio (4) | 24 |
 | b2b | 2275 | 19 | 108 | 13 | 8 | apps (18), checkout (17), core (170), customers (3), identity (17), marketing (1), orders (1), pos (1), pricing (5), shop (23), studio (18) | 8 |
 | pos | 1046 | 9 | 68 | 5 | 0 | apps (1), catalog (5), checkout (15), core (56), customers (1), identity (25), marketing (5), orders (2), payments (3), pricing (3), shipping (1), shop (18), studio (1) | 8 |
@@ -114,9 +114,9 @@ reduced to one direction first.
 | intelligence | core | `RequestContext` | 147 |
 | apps | core | `RequestContext` | 137 |
 | intelligence | core | `State` | 136 |
-| payments | core | `Result` | 115 |
 | apps | core | `State` | 113 |
 | catalog | core | `Result` | 89 |
+| payments | core | `Result` | 86 |
 | apps | identity | `auth::` | 84 |
 | identity | core | `State` | 83 |
 | orders | core | `State` | 81 |

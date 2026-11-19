@@ -31,7 +31,7 @@
     "refund_admissible": {
       "bindings": [
         "src/payments/operations.rs",
-        "src/payments/refund_receipts.rs"
+        "components/payments/src/domain/refunds.rs"
       ],
       "theorems": [
         "refund_bounded",
@@ -132,7 +132,7 @@
     },
     "receipt_admissible": {
       "bindings": [
-        "src/payments/receipt_guard.rs"
+        "components/payments/src/domain/receipt_guard.rs"
       ],
       "theorems": [
         "receipt_exact",
@@ -275,7 +275,7 @@
     },
     "payment_transition_admissible": {
       "bindings": [
-        "src/payments/state.rs"
+        "components/payments/src/domain/state.rs"
       ],
       "theorems": [
         "payment_transition_exact",
@@ -609,7 +609,7 @@
     },
     "capture_admissible": {
       "bindings": [
-        "src/payments/capture_admission.rs"
+        "components/payments/src/store/capture_admission.rs"
       ],
       "theorems": [
         "capture_exact",
@@ -1349,6 +1349,111 @@
       "status": "unproved",
       "sha256": "58ba6136e58cd8e21790e9cc2f19a5dd4e470361c35d04c6d102b52235ebd85e",
       "review": "order workflow kernel bindings follow the move into components/orders"
+    },
+    "components/payments/src/domain/amounts.rs": {
+      "status": "unproved",
+      "sha256": "d6e3db757a6dda0349afb727f68c0c39a99825d8d844be6ce875421ac8f4f194",
+      "review": "Payment ledger rules moved into components/payments; kernel call sites unchanged"
+    },
+    "components/payments/src/domain/attempt.rs": {
+      "status": "unproved",
+      "sha256": "8de088fe235163d44b0a63b5e4b503ca66f84c24a964ba2bd618f6dd9efb493f",
+      "review": "Payment ledger rules moved into components/payments; kernel call sites unchanged"
+    },
+    "components/payments/src/domain/catalog.rs": {
+      "status": "unproved",
+      "sha256": "5d93df4c2be4dcf15d17c5314f7bbb2340ffc8a5ef50cd89a5e470b66574a479",
+      "review": "Payment ledger rules moved into components/payments; kernel call sites unchanged"
+    },
+    "components/payments/src/domain/details_model.rs": {
+      "status": "unproved",
+      "sha256": "7fb4ac5f1d1eb32ad2dc78b2a7d8e8bd93637e394040c46b2058b218093f7980",
+      "review": "Payment ledger rules moved into components/payments; kernel call sites unchanged"
+    },
+    "components/payments/src/domain/details_tests.rs": {
+      "status": "unproved",
+      "sha256": "75d2ac7a2863508e2c7375e4970736e4266c530e35daed6b114316e703e171e4",
+      "review": "Payment ledger rules moved into components/payments; kernel call sites unchanged"
+    },
+    "components/payments/src/domain/diagnostics.rs": {
+      "status": "unproved",
+      "sha256": "663111e655bfc43a22c1ef5009356561b0757716b407bcedc3b7b5815c8587aa",
+      "review": "Payment ledger rules moved into components/payments; kernel call sites unchanged"
+    },
+    "components/payments/src/domain/receipt_guard.rs": {
+      "status": "reviewed-binding",
+      "sha256": "fa3740792bad1ab4bf837889e7814f69f44af66f3a8a83198b4853e743e3bda9",
+      "review": "Payment ledger rules moved into components/payments; kernel call sites unchanged"
+    },
+    "components/payments/src/domain/receipt_ref.rs": {
+      "status": "unproved",
+      "sha256": "cc745138e5e61646cd02a7eb821f81a7b16fee129bdf2302daf809d52810aabe",
+      "review": "Payment ledger rules moved into components/payments; kernel call sites unchanged"
+    },
+    "components/payments/src/domain/refunds.rs": {
+      "status": "reviewed-binding",
+      "sha256": "f6d2c67c8d39e8966419c019965b0ca774a18b33ac3f2d4323bf506b02f872a6",
+      "review": "Payment ledger rules moved into components/payments; kernel call sites unchanged"
+    },
+    "components/payments/src/domain/return_urls.rs": {
+      "status": "unproved",
+      "sha256": "a4853709cdeb0fd6d8a42e42e2f89799d16c7210d6a9115b5e68e3c09e7cc1c2",
+      "review": "Payment ledger rules moved into components/payments; kernel call sites unchanged"
+    },
+    "components/payments/src/domain/settlements.rs": {
+      "status": "unproved",
+      "sha256": "a21328ca72d5ecb26b7ef8c7bd263f4adff3a394b8e47baf7f10b57fd46df3ca",
+      "review": "Payment ledger rules moved into components/payments; kernel call sites unchanged"
+    },
+    "components/payments/src/domain/state.rs": {
+      "status": "reviewed-binding",
+      "sha256": "4e229a510931845cd21dfb4cbb1bb986e3ed925292fb8be7b5bdeae770ec4b52",
+      "review": "Payment ledger rules moved into components/payments; kernel call sites unchanged"
+    },
+    "components/payments/src/domain.rs": {
+      "status": "unproved",
+      "sha256": "0ba257329efed3a52bba7ecab430e33e252e1a1999b7a063a243d34ea21afeeb",
+      "review": "Payment ledger rules moved into components/payments; kernel call sites unchanged"
+    },
+    "components/payments/src/lib.rs": {
+      "status": "unproved",
+      "sha256": "e0ffaabbe2fb6d85137b7937b9072fb6dec770047a7977ec03fb25b63dc34df3",
+      "review": "Payment ledger rules moved into components/payments; kernel call sites unchanged"
+    },
+    "components/payments/src/store/attempts.rs": {
+      "status": "unproved",
+      "sha256": "10d9bbe95d21bd062c93e4153dc10ad6f077fe2c6593c48484187b77a08ae8b8",
+      "review": "Payment ledger rules moved into components/payments; kernel call sites unchanged"
+    },
+    "components/payments/src/store/capture_admission.rs": {
+      "status": "reviewed-binding",
+      "sha256": "a2704718c9b3be7854fb2d0ff8720660c068a2f76938eb7d04d4f42dcab0c9a7",
+      "review": "Payment ledger rules moved into components/payments; kernel call sites unchanged"
+    },
+    "components/payments/src/store/receipt_claims.rs": {
+      "status": "unproved",
+      "sha256": "d9f2d72619b32ba0fe931b629d076924f93010cb1f41b90b039fee4bcff6a257",
+      "review": "Payment ledger rules moved into components/payments; kernel call sites unchanged"
+    },
+    "components/payments/src/store/refund_allocation.rs": {
+      "status": "unproved",
+      "sha256": "8466829618926c6c53955a697082645cc2653a5fbce1a43b0a76991d3f9a8da0",
+      "review": "Payment ledger rules moved into components/payments; kernel call sites unchanged"
+    },
+    "components/payments/src/store/refund_receipts.rs": {
+      "status": "unproved",
+      "sha256": "9f649ed63fd9466ffd1ef62c3030d9f0d3cdfdc5be914e103c083a1baaf1a3c4",
+      "review": "Payment ledger rules moved into components/payments; kernel call sites unchanged"
+    },
+    "components/payments/src/store/settlements.rs": {
+      "status": "unproved",
+      "sha256": "3bc83b3412c71dda1d1e26aa253d6609c6c9165bdb6e5c6e4f222c0bf38ce202",
+      "review": "Payment ledger rules moved into components/payments; kernel call sites unchanged"
+    },
+    "components/payments/src/store.rs": {
+      "status": "unproved",
+      "sha256": "eeff459a09498302db6703405d8bd0d63f09dfa23ec49631b7b0e9c7241b520a",
+      "review": "Payment ledger rules moved into components/payments; kernel call sites unchanged"
     },
     "components/pricing/examples/customer_contract.rs": {
       "status": "unproved",
@@ -5816,9 +5921,9 @@
       "review": "Native multi-capture admission, immutable receipts and per-capture refund budgets; async adapters remain unproved"
     },
     "src/payments/capture_admission.rs": {
-      "status": "reviewed-binding",
-      "sha256": "33c89cfc2701ebaebb189a691b46e4b4e30dcd6f6c34aaf984fd819800cc40a2",
-      "review": "Native multi-capture admission, immutable receipts and per-capture refund budgets; async adapters remain unproved"
+      "status": "unproved",
+      "sha256": "05b7bdb28c2e44d37e3c19f2e07235ef5357066bac68b178325e80820d4bcdf1",
+      "review": "Payment ledger rules moved into components/payments; kernel call sites unchanged"
     },
     "src/payments/capture_configuration.rs": {
       "status": "unproved",
@@ -5827,8 +5932,8 @@
     },
     "src/payments/catalog.rs": {
       "status": "unproved",
-      "sha256": "4f34c31d1e9f0667f8856eeff757a43f74df8ec69f1249dadc364bc7d3450fe5",
-      "review": "Reviewed generic saved-payment consent/session and opaque instrument ownership, forced signed-scope RLS and tenant FKs, immutable funding in native payment jobs, non-financial revocation receipt handling and optional metadata savepoint isolation. Actual local Rust/PG save/reuse/revoke, invalid late metadata, restart and distinct restricted-login cases pass. Existing extracted kernel unchanged; asynchronous SQL/provider paths remain unproved."
+      "sha256": "2ed0d4bbaa4de957ca62d2c7627c602dbd8f6a0b1f6e0ee9b2b383158b4880b4",
+      "review": "Payment ledger rules moved into components/payments; kernel call sites unchanged"
     },
     "src/payments/contract.rs": {
       "status": "unproved",
@@ -5842,18 +5947,13 @@
     },
     "src/payments/details_model.rs": {
       "status": "unproved",
-      "sha256": "15fb81a47ed7fd1d8a9a217978ce7e45cf1bbd239e2f8cc083d1b761e2388c7e",
-      "review": "Reviewed payment-only read snapshot, frozen inspect identity without order PII, strict transaction DTO and native HTTP/MCP read admission; local Rust/Core/PG and targeted UI checks pass. SQL and provider I/O remain unproved."
-    },
-    "src/payments/details_tests.rs": {
-      "status": "unproved",
-      "sha256": "68722baf9dd2502e266d64b30ab205ef5f70980a278618aa16d48dddcaf5ba4c",
-      "review": "Reviewed payment-only read snapshot, frozen inspect identity without order PII, strict transaction DTO and native HTTP/MCP read admission; local Rust/Core/PG and targeted UI checks pass. SQL and provider I/O remain unproved."
+      "sha256": "1bb550f2b6414ac7143f6a23f22b0cc4ed16105bbf049db661c44d239a0a5d8d",
+      "review": "Payment ledger rules moved into components/payments; kernel call sites unchanged"
     },
     "src/payments/diagnostics.rs": {
       "status": "unproved",
-      "sha256": "78e5e97975153cb318790f5730e9c8ac783374824f4e0108192df6c16ce1064f",
-      "review": "Reviewed provider-neutral diagnostic allowlist, bounded error transport and current tenant/payment-read projection. No financial admission, identity or settlement policy changed. Unknown provider text remains suppressed; targeted Rust and four-language frontend diagnostics regressions pass."
+      "sha256": "cdd986caec62d2e5421f469c8e8fcf58a66fd3266a29ce441a4b491a586e0c0f",
+      "review": "Payment ledger rules moved into components/payments; kernel call sites unchanged"
     },
     "src/payments/funding.rs": {
       "status": "unproved",
@@ -5862,8 +5962,8 @@
     },
     "src/payments/generic_receipts.rs": {
       "status": "unproved",
-      "sha256": "d272bb34284c49833e11786d1809771b62247cfe4479cd4722c6c0d90c32a47b",
-      "review": "Reviewed generic saved-payment consent/session and opaque instrument ownership, forced signed-scope RLS and tenant FKs, immutable funding in native payment jobs, non-financial revocation receipt handling and optional metadata savepoint isolation. Actual local Rust/PG save/reuse/revoke, invalid late metadata, restart and distinct restricted-login cases pass. Existing extracted kernel unchanged; asynchronous SQL/provider paths remain unproved."
+      "sha256": "4a0dc1364e1e238d73c5eca43896e5f3da56a16a4f8077ef9a2004520bdc2202",
+      "review": "Payment ledger rules moved into components/payments; kernel call sites unchanged"
     },
     "src/payments/instructions.rs": {
       "status": "unproved",
@@ -5897,8 +5997,8 @@
     },
     "src/payments/provider.rs": {
       "status": "unproved",
-      "sha256": "5acd3be105ab58bf2491f1421c1ce54c8628952198f930fd7b6cb932e5215682",
-      "review": "Identity-only Veyndo namespace and canonical-domain rename; reviewed migration checksum compatibility for six historical SQL versions, unchanged checkout predicates, 42 library and 169 binary tests pass; native component legacy boundary remains configured and guarded."
+      "sha256": "70aa6d25fb7d975467e4cd7996b31105600437d98bff4bc4331d96f32d561c88",
+      "review": "Payment ledger rules moved into components/payments; kernel call sites unchanged"
     },
     "src/payments/provider_configuration.rs": {
       "status": "unproved",
@@ -5911,19 +6011,19 @@
       "review": "Reviewed eighteen core findings: typed trusted identity and explicit route rights; consolidated current grants; durable auth and fenced shared limits; scoped transactions and one-backend PgBouncer including nested borrow fixes; bounded Wasm/PNG work; notified workers, savepoint quarantine and conservative retention; separate runtime roles and startup configuration. Real PostgreSQL/provider regressions preserve current tenant/customer/payment behavior. SQL/network adapters remain unproved."
     },
     "src/payments/receipt_guard.rs": {
-      "status": "reviewed-binding",
-      "sha256": "dd3cddcacdb0cb896e9d9221cd909cf89402f942997e1e08a1f96ad6c9632231",
-      "review": "Reviewed eighteen core findings: typed trusted identity and explicit route rights; consolidated current grants; durable auth and fenced shared limits; scoped transactions and one-backend PgBouncer including nested borrow fixes; bounded Wasm/PNG work; notified workers, savepoint quarantine and conservative retention; separate runtime roles and startup configuration. Real PostgreSQL/provider regressions preserve current tenant/customer/payment behavior. SQL/network adapters remain unproved."
+      "status": "unproved",
+      "sha256": "d125d138144e2120c51efe969f17c674ea0ba3caee5e5ec89f422f3515845bd9",
+      "review": "Payment ledger rules moved into components/payments; kernel call sites unchanged"
     },
     "src/payments/refund_allocation.rs": {
       "status": "unproved",
-      "sha256": "5b30accf0af36fe684a8a9cb1d91caed51146a01f4190920e49d16bb9907e8a9",
-      "review": "Native multi-capture admission, immutable receipts and per-capture refund budgets; async adapters remain unproved"
+      "sha256": "94ad7b14350cb9163199a55f1752bab245455b526a2d944f1bfe200e196a14a1",
+      "review": "Payment ledger rules moved into components/payments; kernel call sites unchanged"
     },
     "src/payments/refund_receipts.rs": {
-      "status": "reviewed-binding",
-      "sha256": "1a0e82a82632c35846ee8b3f1bd2d995b0d6ab5ea833ecc05f1f2dbf3eb2a1cd",
-      "review": "Reviewed bounded capture/refund receipts and completion of recovered native jobs; settings validate inherited capture timing; kernel proofs unchanged"
+      "status": "unproved",
+      "sha256": "f888811eb91b0aa71c77991025b395973707e538cfa60d9b4f76239e4351a91c",
+      "review": "Payment ledger rules moved into components/payments; kernel call sites unchanged"
     },
     "src/payments/registry.rs": {
       "status": "unproved",
@@ -5937,8 +6037,8 @@
     },
     "src/payments/return_urls.rs": {
       "status": "unproved",
-      "sha256": "e215a6d144f463baebac6b5ec3a538df8a4c2ee4b0f7b2a20e3ac848409fa554",
-      "review": "Identity-only Veyndo namespace and canonical-domain rename; reviewed migration checksum compatibility for six historical SQL versions, unchanged checkout predicates, 42 library and 169 binary tests pass; native component legacy boundary remains configured and guarded."
+      "sha256": "f381eb70df9e02eaa2bbcec3f11f8fb24ae7a19bca92807bd6e308b2474b0812",
+      "review": "Payment ledger rules moved into components/payments; kernel call sites unchanged"
     },
     "src/payments/routes.rs": {
       "status": "unproved",
@@ -5952,13 +6052,13 @@
     },
     "src/payments/settlements.rs": {
       "status": "unproved",
-      "sha256": "94fc23120eacbae44b207d213723c12e624c851fafca3b9e5d640735cf40d02e",
-      "review": "Reviewed bounded capture/refund receipts and completion of recovered native jobs; settings validate inherited capture timing; kernel proofs unchanged"
+      "sha256": "de0607136bc9601e45bb3847d5352f5531a0f99c75dd9a579cb5464aa0244a12",
+      "review": "Payment ledger rules moved into components/payments; kernel call sites unchanged"
     },
     "src/payments/state.rs": {
-      "status": "reviewed-binding",
-      "sha256": "85f11639662aea7178180ad9a6c52a05604a7ecce2e2b0c13642cf6bff742ffe",
-      "review": "Native multi-capture admission, immutable receipts and per-capture refund budgets; async adapters remain unproved"
+      "status": "unproved",
+      "sha256": "510bb7c08d62d7f9951fe62d24d6cd96413343903822f51aca21e0d54167775c",
+      "review": "Payment ledger rules moved into components/payments; kernel call sites unchanged"
     },
     "src/payments/storage.rs": {
       "status": "reviewed-binding",
@@ -6392,12 +6492,12 @@
       "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
     },
     "Cargo.lock": {
-      "sha256": "ea1ee1df4d7c8b48063b080cf6a941adb2bb5d92617796a97e50872bdeb6bf57",
-      "review": "order workflow kernel bindings follow the move into components/orders"
+      "sha256": "eea21938323b8891bc53f9eb24c62f57e7be5f91fb4a9d17c53c33ed4cdbcd34",
+      "review": "Payment ledger rules moved into components/payments; kernel call sites unchanged"
     },
     "Cargo.toml": {
-      "sha256": "238a32b4ea7b1f079fdaf51f1fc672af07ef89eff889f9f89bada42e2cc88916",
-      "review": "order workflow kernel bindings follow the move into components/orders"
+      "sha256": "7638b41574d1477eae6412db91578e245a516326305914ad7fe934c496efe677",
+      "review": "Payment ledger rules moved into components/payments; kernel call sites unchanged"
     },
     "components.lock.json": {
       "sha256": "7b4a931ad81c6665d5d95e6b42b8ef4d09ebe8971ac24998d8f94bb6a737ff53",

@@ -1,53 +1,9 @@
 //! Provider-neutral receipt admission and atomic allocation; verified evidence owns ledger transitions.
 use super::{Attempt, enqueue_tx, release_stock, remote, state, update_order};
-use crate::{Error, Result, Row, StatusCode, Value, bad, conflict, json};
+use crate::{Error, Result, StatusCode, Value, bad, conflict, json};
 
-pub(super) fn identity(p: &Attempt, v: &Value) -> Result<()> {
-    if v["apiVersion"] != "1"
-        || v["provider"] != p.provider
-        || v["adapterVersion"] != p.adapter_version
-        || v["tenant"] != p.tenant
-        || v["attemptId"] != p.id
-        || v["orderId"] != p.order
-        || v["environment"] != p.environment
-        || v["accountRef"] != p.context["accountRef"]
-        || v["currency"] != p.currency
-        || v["amountMinor"].as_i64() != Some(p.amount)
-        || p.provider_order
-            .as_ref()
-            .is_some_and(|r| v["reference"] != *r)
-    {
-        return Err(bad("Payment receipt identity, account or invoice mismatch"));
-    }
-    Ok(())
-}
-pub(super) fn reference(v: &Value) -> Result<&str> {
-    v.as_str()
-        .filter(|s| {
-            !s.is_empty()
-                && s.len() <= 200
-                && s.bytes()
-                    .all(|b| b.is_ascii_alphanumeric() || b"_-:.".contains(&b))
-        })
-        .ok_or(bad("Invalid provider receipt reference"))
-}
-pub(super) async fn claim(
-    tx: &mut sqlx::Transaction<'_, sqlx::Postgres>,
-    p: &Attempt,
-    kind: &str,
-    id: &str,
-    key: &str,
-) -> Result<()> {
-    sqlx::query("INSERT INTO payment_receipt_claims(provider,environment,account_ref,kind,receipt_ref,tenant,attempt_id,job_key) VALUES($1,$2,$3,$4,$5,$6,$7,$8) ON CONFLICT DO NOTHING").bind(&p.provider).bind(&p.environment).bind(p.context["accountRef"].as_str().unwrap_or("")).bind(kind).bind(id).bind(&p.tenant).bind(&p.id).bind(key).execute(&mut **tx).await?;
-    let row=sqlx::query("SELECT tenant,attempt_id,job_key FROM payment_receipt_claims WHERE provider=$1 AND environment=$2 AND account_ref=$3 AND kind=$4 AND receipt_ref=$5 FOR UPDATE").bind(&p.provider).bind(&p.environment).bind(p.context["accountRef"].as_str().unwrap_or("")).bind(kind).bind(id).fetch_one(&mut **tx).await?;
-    if row.get::<String, _>("tenant") != p.tenant
-        || row.get::<String, _>("attempt_id") != p.id
-        || (["refund", "capture-job"].contains(&kind) && row.get::<String, _>("job_key") != key)
-    {
-        return Err(conflict("Provider receipt already allocated"));
-    }
-    Ok(())
-}
+pub(super) use veyndo_payments::domain::receipt_ref::{identity, reference};
+pub(super) use veyndo_payments::store::receipt_claims::claim;
 pub(crate) async fn persist(
     tx: &mut sqlx::Transaction<'_, sqlx::Postgres>,
     p: &Attempt,

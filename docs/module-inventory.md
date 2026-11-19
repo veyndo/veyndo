@@ -492,7 +492,6 @@ This lists every checked-in source module in these roots, including files with n
 | [src/payments/contract.rs](../src/payments/contract.rs) | Adapt the shared provider declaration grammar; native payment authority and actual effects remain attached. |
 | [src/payments/details.rs](../src/payments/details.rs) | Native payment-only history projection and optional owned provider observation; no financial command is executed. |
 | [src/payments/details_model.rs](../src/payments/details_model.rs) | Typed, PII-free provider transaction details; these observations never mutate native payment state. |
-| [src/payments/details_tests.rs](../src/payments/details_tests.rs) | Transaction observations reject untyped and foreign evidence without touching payment state. |
 | [src/payments/diagnostics.rs](../src/payments/diagnostics.rs) | Safe, provider-neutral operational hints. These never authorize a financial transition. |
 | [src/payments/funding.rs](../src/payments/funding.rs) | Account-authorized funding choice, immutable consent and saved-instrument admission; cart possession is insufficient. |
 | [src/payments/generic_receipts.rs](../src/payments/generic_receipts.rs) | Provider-neutral receipt admission and atomic allocation; verified evidence owns ledger transitions. |
@@ -800,6 +799,27 @@ This lists every checked-in source module in these roots, including files with n
 | [components/orders/src/store/machine.rs](../components/orders/src/store/machine.rs) | The shop's stored order state machine; a shop without one uses the default. |
 | [components/orders/src/store/order_mutation.rs](../components/orders/src/store/order_mutation.rs) | Shared operational order writes: one replay ledger, immutable quote, audit, cart projection and outbox. |
 | [components/orders/src/store.rs](../components/orders/src/store.rs) | SQL of the orders component. |
+| [components/payments/src/domain/amounts.rs](../components/payments/src/domain/amounts.rs) | Provider wire amounts: decimal strings at the ISO precision of their currency, exact in minor units. |
+| [components/payments/src/domain/attempt.rs](../components/payments/src/domain/attempt.rs) | One payment attempt of an order as the ledger stores it. |
+| [components/payments/src/domain/catalog.rs](../components/payments/src/domain/catalog.rs) | Native payment operation descriptions, composed by the canonical operation registry. |
+| [components/payments/src/domain/details_model.rs](../components/payments/src/domain/details_model.rs) | Typed, PII-free provider transaction details; these observations never mutate native payment state. |
+| [components/payments/src/domain/details_tests.rs](../components/payments/src/domain/details_tests.rs) | Transaction observations reject untyped and foreign evidence without touching payment state. |
+| [components/payments/src/domain/diagnostics.rs](../components/payments/src/domain/diagnostics.rs) | Safe, provider-neutral operational hints. These never authorize a financial transition. |
+| [components/payments/src/domain/receipt_guard.rs](../components/payments/src/domain/receipt_guard.rs) | Bind integer provider receipt amounts and status to the formally checked exact-match predicate. |
+| [components/payments/src/domain/receipt_ref.rs](../components/payments/src/domain/receipt_ref.rs) | Receipt identity: a provider answer must name exactly the attempt, account and invoice it was issued for. |
+| [components/payments/src/domain/refunds.rs](../components/payments/src/domain/refunds.rs) | Refund budgets: which capture a refund draws from, what is already used and the exact admissible total. |
+| [components/payments/src/domain/return_urls.rs](../components/payments/src/domain/return_urls.rs) | Provider return/cancel URLs preserve the tenant and sales channel; navigation is never payment evidence. |
+| [components/payments/src/domain/settlements.rs](../components/payments/src/domain/settlements.rs) | Immutable capture receipts and exact cumulative settlement for native partial/multiple captures. |
+| [components/payments/src/domain/state.rs](../components/payments/src/domain/state.rs) | One monotonic provider-neutral ledger state machine; evidence validation and authorization stay in receipt adapters. |
+| [components/payments/src/domain.rs](../components/payments/src/domain.rs) | Rules of the payment ledger, free of I/O. |
+| [components/payments/src/lib.rs](../components/payments/src/lib.rs) | Payments component: the attempt ledger, its state machine, settlements, refunds and receipt admission. |
+| [components/payments/src/store/attempts.rs](../components/payments/src/store/attempts.rs) | Row mapping of the payment attempt ledger. |
+| [components/payments/src/store/capture_admission.rs](../components/payments/src/store/capture_admission.rs) | Serialized native capture budgets; uncertain capture jobs reserve the remaining authorization. |
+| [components/payments/src/store/receipt_claims.rs](../components/payments/src/store/receipt_claims.rs) | Receipt claims: one provider receipt belongs to exactly one attempt, across tenants. |
+| [components/payments/src/store/refund_allocation.rs](../components/payments/src/store/refund_allocation.rs) | Serialized refund budgets: pending native refund jobs reserve their share of a capture. |
+| [components/payments/src/store/refund_receipts.rs](../components/payments/src/store/refund_receipts.rs) | Exactly-once provider refund admission, including refunds initiated outside Studio. |
+| [components/payments/src/store/settlements.rs](../components/payments/src/store/settlements.rs) | Capture settlement admission: receipt claims, native job matching and the captured total in one transaction. |
+| [components/payments/src/store.rs](../components/payments/src/store.rs) | SQL of the payment ledger; admissions run inside the caller's transaction. |
 | [components/pricing/examples/customer_contract.rs](../components/pricing/examples/customer_contract.rs) | Run contact normalization without a Core process, database, credentials or network. |
 | [components/pricing/src/conversions.rs](../components/pricing/src/conversions.rs) | A rejected pricing input becomes a client error of the shared error contract. |
 | [components/pricing/src/domain/cart.rs](../components/pricing/src/domain/cart.rs) | Persisted cart data with explicit typed host contexts and no credential or storage authority. |

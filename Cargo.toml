@@ -80,6 +80,7 @@ veyndo-customers = { path = "components/customers" }
 veyndo-shop = { path = "components/shop" }
 veyndo-marketing = { path = "components/marketing" }
 veyndo-orders = { path = "components/orders" }
+veyndo-payments = { path = "components/payments" }
 veyndo-apps = { path = "crates/apps" }
 veyndo-cognition = { path = "crates/cognition" }
 roxmltree = "0.21"

@@ -518,6 +518,7 @@
     "payments": {
       "title": "Provider-independent payment ledger, captures, refunds and provider workers",
       "sources": [
+        "components/payments",
         "src/payments"
       ],
       "tables": [
@@ -536,6 +537,7 @@
         "identity",
         "inventory",
         "pos",
+        "pricing",
         "shop",
         "studio"
       ],
@@ -555,9 +557,9 @@
         "policy",
         "sales_channels"
       ],
-      "glob_imports": 3,
+      "glob_imports": 2,
       "untyped_access": 264,
-      "sql_outside_store": 21
+      "sql_outside_store": 17
     },
     "marketing": {
       "title": "Rules, coupons, promotions, flows and sales channels",

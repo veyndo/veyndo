@@ -243,7 +243,16 @@ Order follows the dependency report, lowest first. Each line is one move.
   storefront request, attribute the history and read shop settings; login,
   registration, profile and password; merchant customer create and edit; the
   order snapshot; browser sessions.
-- [ ] payments
+- [ ] payments. Started: `components/payments` owns the attempt type, the
+  payment state machine, wire amounts at ISO precision, receipt identity and
+  references, settlement and refund budgets, the details model, the receipt
+  guard, public diagnostics, return URLs and the method catalogue in `domain/`;
+  `store/` holds the row mapping, receipt claims and the capture, settlement
+  and refund admissions that run inside the caller's transaction. The four
+  proved payment rules are bound to the new files. Open: provider dispatch and
+  remote adapter, the job worker, sessions, instruments, accounts, webhooks,
+  merchant routes and the order update after a receipt (ports to orders and
+  inventory).
 - [ ] checkout
 - [ ] orders. Started: `components/orders` owns the order state machine with
   its default and bounds, the stored machine, derived order fields, the
