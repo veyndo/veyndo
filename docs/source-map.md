@@ -23,7 +23,7 @@ remain connected while shared contracts move into crates.
 | Customers, accounts and addresses | `src/accounts/` and `src/operations/{customers,customer_create,customer_lookup,addresses}.rs` serve storefront accounts, merchant lookup, manual orders and agent tools. | Verified account identity, immutable order ownership and current PII permissions. |
 | Cart and checkout | `src/cart_*.rs`, `src/order_checkout.rs` and `src/checkout/` serve Store API, reviewed merchant orders, agents, POS and the separate Checkout host ports. | Cart revision, legal and payment review, idempotency, original receipt recovery and the single commit transaction. |
 | Pricing and taxes | `components/pricing/`, `src/cart_price.rs`, `src/checkout/price.rs`, `src/commerce/tax*.rs` and `src/currencies/` price the same current cart across those consumers. | Currency/rounding behavior, authoritative rule facts, price snapshots and tax context. |
-| Inventory | `src/checkout/lock.rs` and `src/commerce/inventory.rs` allocate and consume stock on the checkout transaction; cancellation releases persisted reservations. | Ordered product locks, aggregate stock revisions, one allocation per purchase and idempotent release. |
+| Inventory | `src/checkout/lock.rs` and `components/inventory/` allocate and consume stock on the checkout transaction; cancellation releases persisted reservations. | Ordered product locks, aggregate stock revisions, one allocation per purchase and idempotent release. |
 | Orders | `src/checkout/commit.rs`, `src/commerce/external_orders.rs` and `src/operations/{orders,order_list,manual_orders}.rs` connect native purchase and imported orders to the same ledger. | Immutable amounts and buyer snapshots, tenant identity, order state guards and atomic order events. |
 | Payments and refunds | `src/payments/` admits commands and signed receipts from the separate Payments adapter; native checkout and merchant actions reuse that owner. | Verified amounts, allocations, receipt uniqueness, current authority and uncertainty after interrupted provider calls. |
 | Fulfillment and documents | `src/commerce/{fulfillment,delivery,delivery_split}.rs` and `src/operations/{order_documents,receipts,delivery_booking}.rs` serve Studio, Flow actions and carrier apps. | Persisted order quantities, split delivery conservation, original receipt identity and provider callback evidence. |
@@ -464,7 +464,7 @@ Native durable jobs, leases, rights, consent, order and stock owners remain unch
 
 ## Inventory write boundary
 
-`veyndo_pricing::inventory::InventoryLines` pairs product IDs and positive
+`veyndo_inventory::InventoryLines` pairs product IDs and positive
 quantities that fit the existing signed database representation. Native checkout
 (including POS) and Marketplace each build the batch once. The same batch drives
 the native allocation ledger and the stock decrement; the storage adapter needs
@@ -939,7 +939,7 @@ reads, historical preservation and display. See [the measurement boundary](platf
 | `src/performance/access_snapshot.{rs,sql}`; `src/auth/identity.{rs,sql}` | One current shop/channel/mount snapshot, joined personal identity/channel lookup; immutable request ownership | `read_performance`, `channel_management`, `identity_broker`, `tenant_isolation` |
 | `src/performance/delivery.rs`; `frontend/scripts/precompress.mjs` | Native-only zero-SQL assets, secret-free compression opt-in, deterministic gzip/Brotli variants with correct `Vary`, MIME and range contracts | `read_performance`; frontend precompression unit tests |
 | `src/performance/{settings,mod}.rs` | Immutable `Arc<Settings>` cache ownership; mutable copies only where necessary | Two-replica version/delete/recreate/revocation and checkout/currency regressions |
-| `src/commerce/{inventory.rs,inventory_release.sql}`; `src/order_checkout.rs` | Batched deduction/allocation/release; persisted quantities and sorted product locks | `production_foundations` with simultaneous opposite-order baskets and cancellation replay |
+| `components/inventory/src/store/{reservations.rs,release.sql}`; `src/order_checkout.rs` | Batched deduction/allocation/release; persisted quantities and sorted product locks | `production_foundations` with simultaneous opposite-order baskets and cancellation replay |
 | `src/studio/{facts.rs,overview.sql,revenue.rs}`; `src/studio.rs` | Consolidated bounded facts and three parallel read branches; unchanged currency-separated API | `studio`, `read_performance` nonempty mixed-currency before/after response checks |
 | `scripts/testing/{hotpath,inventory_batch}.py` | Helpers in existing integration suites, wire/query measurements and real concurrent checkout effects | Existing verification registry; no separate runtime or benchmark engine |
 

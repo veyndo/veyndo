@@ -15,14 +15,14 @@ run SQL without being in a `store` folder. Both numbers only fall.
 | --- | ---: | ---: | ---: | ---: | ---: | --- | ---: |
 | core | 3421 | 0 | 4 | 10 | 10 | none | 10 |
 | identity | 3524 | 8 | 86 | 18 | 13 | apps (9), catalog (16), checkout (1), core (356), customers (1), host (4), intelligence (9), marketing (5), shop (14), studio (4) | 11 |
-| shop | 4134 | 43 | 98 | 24 | 15 | apps (7), b2b (2), catalog (7), checkout (17), core (260), customers (3), host (4), intelligence (8), marketing (8), payments (4), pricing (8), shipping (1), studio (13) | 19 |
+| shop | 4135 | 43 | 98 | 24 | 15 | apps (7), b2b (2), catalog (7), checkout (17), core (260), customers (3), host (4), intelligence (8), marketing (8), payments (4), pricing (8), shipping (1), studio (13) | 19 |
 | catalog | 8518 | 40 | 203 | 15 | 11 | apps (19), b2b (2), checkout (12), core (338), customers (5), identity (23), intelligence (7), marketing (15), pricing (30), protocols (1), shop (17), studio (8) | 14 |
-| inventory | 374 | 3 | 26 | 3 | 2 | catalog (1), checkout (2), core (27), identity (4), intelligence (3), pricing (2), protocols (2), shop (2) | 3 |
-| pricing | 3737 | 9 | 19 | 5 | 2 | apps (2), catalog (1), checkout (8), core (69), identity (4), marketing (3), shop (15), studio (1) | 9 |
+| inventory | 649 | 2 | 26 | 2 | 2 | catalog (1), checkout (2), core (29), identity (4), intelligence (3), pricing (3), protocols (2), shop (2) | 3 |
+| pricing | 3683 | 9 | 19 | 5 | 2 | apps (2), catalog (1), checkout (8), core (69), identity (4), marketing (3), shop (15), studio (1) | 9 |
 | shipping | 970 | 7 | 115 | 4 | 0 | apps (3), catalog (5), checkout (1), core (45), identity (5), orders (5), payments (1), pricing (12), shop (20), studio (4) | 6 |
-| checkout | 2715 | 14 | 148 | 9 | 3 | apps (22), b2b (19), catalog (6), core (240), customers (5), host (7), identity (2), intelligence (2), inventory (2), marketing (15), orders (6), payments (8), pos (12), pricing (36), shipping (10), shop (22), studio (9) | 12 |
+| checkout | 2715 | 14 | 148 | 9 | 3 | apps (22), b2b (19), catalog (6), core (240), customers (5), host (7), identity (2), intelligence (2), inventory (3), marketing (15), orders (6), payments (8), pos (12), pricing (35), shipping (10), shop (22), studio (9) | 12 |
 | customers | 1618 | 18 | 85 | 15 | 3 | apps (9), catalog (3), checkout (5), core (175), identity (32), marketing (2), orders (5), pos (1), pricing (1), shipping (5), shop (13), studio (9) | 6 |
-| orders | 4968 | 39 | 451 | 22 | 7 | apps (36), b2b (1), catalog (9), checkout (15), core (293), customers (5), identity (71), marketing (6), payments (7), pos (1), pricing (6), shipping (2), shop (22), studio (8) | 17 |
+| orders | 4968 | 39 | 451 | 22 | 7 | apps (36), b2b (1), catalog (9), checkout (15), core (293), customers (5), identity (71), inventory (1), marketing (6), payments (7), pos (1), pricing (5), shipping (2), shop (22), studio (8) | 17 |
 | payments | 4021 | 3 | 265 | 21 | 7 | apps (10), checkout (3), core (275), host (5), identity (10), inventory (1), pos (1), shop (13), studio (1) | 14 |
 | marketing | 4954 | 38 | 339 | 26 | 8 | apps (24), automation (31), b2b (3), catalog (8), checkout (19), core (225), identity (37), intelligence (12), orders (1), payments (2), pos (4), pricing (16), shipping (9), shop (18), studio (4) | 24 |
 | b2b | 2367 | 19 | 108 | 13 | 8 | apps (18), checkout (31), core (172), customers (3), identity (17), marketing (1), orders (2), pos (1), pricing (5), shipping (1), shop (12), studio (18) | 8 |
@@ -72,12 +72,12 @@ reduced to one direction first.
 - checkout ↔ customers: 5 and 5 references
 - checkout ↔ identity: 2 and 1 references
 - checkout ↔ intelligence: 2 and 22 references
-- checkout ↔ inventory: 2 and 2 references
+- checkout ↔ inventory: 3 and 2 references
 - checkout ↔ marketing: 15 and 19 references
 - checkout ↔ orders: 6 and 15 references
 - checkout ↔ payments: 8 and 3 references
 - checkout ↔ pos: 12 and 23 references
-- checkout ↔ pricing: 36 and 8 references
+- checkout ↔ pricing: 35 and 8 references
 - checkout ↔ shipping: 10 and 1 references
 - checkout ↔ shop: 22 and 17 references
 - customers ↔ identity: 32 and 1 references

@@ -5,7 +5,6 @@ pub mod context;
 pub mod customer;
 pub mod discount;
 pub mod external_order;
-pub mod inventory;
 pub mod money;
 pub mod pricing;
 pub(crate) mod validation;

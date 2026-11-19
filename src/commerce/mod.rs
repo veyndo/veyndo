@@ -21,6 +21,7 @@ pub(crate) use context_routes::*;
 mod detail;
 pub(crate) use detail::*;
 mod catalog_ports;
+mod inventory_ports;
 mod settings_routes;
 pub(crate) use settings_routes::*;
 mod settings_validation;

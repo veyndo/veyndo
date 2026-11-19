@@ -1,0 +1,14 @@
+[package]
+name = "veyndo-inventory"
+version.workspace = true
+edition.workspace = true
+license-file.workspace = true
+description = "Stock, the allocation ledger of orders, and supplier links for reordering"
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+sqlx.workspace = true
+veyndo-catalog = { path = "../catalog" }
+veyndo-core = { path = "../core" }
+veyndo-pricing = { path = "../pricing" }

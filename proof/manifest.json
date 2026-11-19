@@ -1120,6 +1120,61 @@
       "sha256": "5e7aa39b24a5d51ebd41a9c115adf496790236d0bfe39376e71f1366b708c47c",
       "review": "The route permission registry moved unchanged into components/identity and is generic over the server state"
     },
+    "components/inventory/src/domain/lines.rs": {
+      "status": "unproved",
+      "sha256": "661e3e3cea583c3bdae3a0e567b8f382e5d2c703548af5b4cfd38be5a4c26ece",
+      "review": "inventory component crate created; no kernel binding changed"
+    },
+    "components/inventory/src/domain/reorder.rs": {
+      "status": "unproved",
+      "sha256": "91341d6a6bf6e073479533ffa950d664b9fe76f710efc6180d6d40d1bd962c03",
+      "review": "inventory component crate created; no kernel binding changed"
+    },
+    "components/inventory/src/domain/supply.rs": {
+      "status": "unproved",
+      "sha256": "3d071a614bc55986440f99f3140dfa899098cb4101550dbf42aab62cb83beb1b",
+      "review": "inventory component crate created; no kernel binding changed"
+    },
+    "components/inventory/src/domain.rs": {
+      "status": "unproved",
+      "sha256": "5029fdbd31e4875de9bdc9edfd5aed456632cb1ddc7366c1d6f2e0fd9af11c1d",
+      "review": "inventory component crate created; no kernel binding changed"
+    },
+    "components/inventory/src/lib.rs": {
+      "status": "unproved",
+      "sha256": "6d585f0808eb5ae0e3f7e84da162b593c7f82afe801ffbabd3eacebdaa9749b3",
+      "review": "inventory component crate created; no kernel binding changed"
+    },
+    "components/inventory/src/ports.rs": {
+      "status": "unproved",
+      "sha256": "713350cfdc8735e41e2c4f105970b99c444b0e1cfe2e015329d28d293d84917a",
+      "review": "inventory component crate created; no kernel binding changed"
+    },
+    "components/inventory/src/service/test_stock.rs": {
+      "status": "unproved",
+      "sha256": "c4c8ab48cd118337712f932133c56dd10ad6ff107ba53497cdea3483fc7937c6",
+      "review": "inventory component crate created; no kernel binding changed"
+    },
+    "components/inventory/src/service.rs": {
+      "status": "unproved",
+      "sha256": "12ab0b2dece10dcddd0919857237077b26088a28b6e1b08a5577a4c9e8949dd2",
+      "review": "inventory component crate created; no kernel binding changed"
+    },
+    "components/inventory/src/store/reservations.rs": {
+      "status": "unproved",
+      "sha256": "4dbcb58adc340207a7454a90c3a862467746cc442cdf809ebc653ec957abcbae",
+      "review": "inventory component crate created; no kernel binding changed"
+    },
+    "components/inventory/src/store/test_stock.rs": {
+      "status": "unproved",
+      "sha256": "509d9c7b199998bf7c2751be3904cd74746f34a2bfe53adbff5b46032be51dd4",
+      "review": "inventory component crate created; no kernel binding changed"
+    },
+    "components/inventory/src/store.rs": {
+      "status": "unproved",
+      "sha256": "a54911683c2df1e61ba19a54de4f3b619a9a8ae9126f77805f856f741d438a4b",
+      "review": "inventory component crate created; no kernel binding changed"
+    },
     "components/pricing/examples/customer_contract.rs": {
       "status": "unproved",
       "sha256": "b2d7ff94933d8ad9a9bee2eac2309ec287be5f0c35a54bc855afcfe96de51569",
@@ -1180,11 +1235,6 @@
       "sha256": "28433f6a9c86207623fa4c69625725da33982e33d2dfa5b6e2c8e812891277b1",
       "review": "Moved paid external order DTO and reconciliation without changing original field order, bounds, errors, or verified kernel predicates. Native still owns admission and the legacy display projection. Shared Commerce unit tests and exchange contract guard pass."
     },
-    "components/pricing/src/domain/inventory.rs": {
-      "status": "unproved",
-      "sha256": "3dd4fe71f3df9f29ea1df9134847fa33be81eafc3e23dcf7c7cceccb372d8d7c",
-      "review": "Both native order paths retain their existing ordered locks, availability predicates, SQL and write order. Checked positive i32 conversion preserves the existing allocation ledger range. One aligned batch feeds both writes; unit cases cover signed limits and line pairing. No Lean predicate, schema, cancellation or provider change."
-    },
     "components/pricing/src/domain/money.rs": {
       "status": "reviewed-binding",
       "sha256": "ace64cb04150669420b07d1d212b5e342eac631eeff2d5c5067b99e6ce31a240",
@@ -1202,8 +1252,8 @@
     },
     "components/pricing/src/domain.rs": {
       "status": "unproved",
-      "sha256": "a264f94962d50beb9af3ff00ff75a96c4e5be9d59f110c8d73cb9f0bc8463d6e",
-      "review": "Tax classes, the destination rate and the context selection rules moved unchanged into components/pricing; the destination tax rule is bound there"
+      "sha256": "86592d78c112badeb507dd01c517a1fce43973d7768595e574ed24a501ed603e",
+      "review": "inventory component crate created; no kernel binding changed"
     },
     "components/pricing/src/http/currencies.rs": {
       "status": "unproved",
@@ -1222,8 +1272,8 @@
     },
     "components/pricing/src/lib.rs": {
       "status": "unproved",
-      "sha256": "9db248f0d5ddd1ed0a2a4114701c4f04439bfbf58183a1c4024c068ccf0a043d",
-      "review": "Currency discovery moved into components/pricing behind the shop settings and cart ports; no rule changed"
+      "sha256": "092b78420233c5f698ca4e4e21ee92b76395c37033578310669aebe59902fdf5",
+      "review": "inventory component crate created; no kernel binding changed"
     },
     "components/pricing/src/ports.rs": {
       "status": "unproved",
@@ -4227,8 +4277,8 @@
     },
     "src/checkout/commit.rs": {
       "status": "reviewed-binding",
-      "sha256": "5d6b18fca6e959cb9bffd54ba390512fa37d8be94cdc94469d94278dc08c8eae",
-      "review": "The commerce crate became components/pricing with its rules under domain/; no rule changed"
+      "sha256": "2bffbfe88e8b0bc512835b7d20aa513341a6b386586c9754fc765fa0b58d87df",
+      "review": "inventory component crate created; no kernel binding changed"
     },
     "src/checkout/lock.rs": {
       "status": "reviewed-binding",
@@ -4527,8 +4577,8 @@
     },
     "src/commerce/external_orders.rs": {
       "status": "reviewed-binding",
-      "sha256": "32b24b797f13fd7b5dee497209a07718c6a2083fef44f7dffb93f6dbaad8e6c4",
-      "review": "The commerce crate became components/pricing with its rules under domain/; no rule changed"
+      "sha256": "1ba40f2e918cc91ad8d3a6112cf40fb6958bdb7257b191c3c08e3395012cfc69",
+      "review": "inventory component crate created; no kernel binding changed"
     },
     "src/commerce/fulfillment.rs": {
       "status": "reviewed-binding",
@@ -4552,8 +4602,13 @@
     },
     "src/commerce/inventory.rs": {
       "status": "unproved",
-      "sha256": "4bb1d0206e2badefdc02b3898d915be552397f0f2c8ff39fedd545344bf71e4b",
-      "review": "The commerce crate became components/pricing with its rules under domain/; no rule changed"
+      "sha256": "442a0ad368ae9727b83643b12d466056abdae8e925075d9da5cf84518e2000e9",
+      "review": "inventory component crate created; no kernel binding changed"
+    },
+    "src/commerce/inventory_ports.rs": {
+      "status": "unproved",
+      "sha256": "43d94a027111abb992f3ef3d46357ed1238bef6f9480ab388bca02bd6e6b2f59",
+      "review": "inventory component crate created; no kernel binding changed"
     },
     "src/commerce/method_text.rs": {
       "status": "unproved",
@@ -4567,8 +4622,8 @@
     },
     "src/commerce/mod.rs": {
       "status": "unproved",
-      "sha256": "9ac4154ed1db3c19700ede424a447f0c84a3b753ae42d3aa0bce90080c1c737d",
-      "review": "Product edit types, stores and language rules moved into components; no rule changed"
+      "sha256": "e6ac6765911c7fda1f8cdaa16ae14e7ed23bc2e16f893978f064e97295e3c2ec",
+      "review": "inventory component crate created; no kernel binding changed"
     },
     "src/commerce/order_fields.rs": {
       "status": "unproved",
@@ -4672,13 +4727,13 @@
     },
     "src/commerce/supply.rs": {
       "status": "unproved",
-      "sha256": "b23ee1d09b87bba209f8081230826cce1a86805be21e93b0c4aa285134843378",
-      "review": "Trade network: commerce/supply.rs adds validated supplier links and a ceiling to the settings; commerce/supply_proposal.rs acts as an unauthenticated guest at the supplier shop through existing cart, signed offer and checkout handoff owners, never with merchant authority, and approval re-verifies the offer against link and ceiling without placing an order; no extracted policy changed; providers suite covers forged, unlinked, own-shop and ceiling cases"
+      "sha256": "ebbae6e564045daf1c4909f1a5c17fea1871de7029b26f82586b0388bf4bf7e0",
+      "review": "inventory component crate created; no kernel binding changed"
     },
     "src/commerce/supply_proposal.rs": {
       "status": "unproved",
-      "sha256": "132a8915d63586582b649edc9ad1d348aeee0757ee7011f4deb9508e93ee490e",
-      "review": "Trade network: commerce/supply.rs adds validated supplier links and a ceiling to the settings; commerce/supply_proposal.rs acts as an unauthenticated guest at the supplier shop through existing cart, signed offer and checkout handoff owners, never with merchant authority, and approval re-verifies the offer against link and ceiling without placing an order; no extracted policy changed; providers suite covers forged, unlinked, own-shop and ceiling cases"
+      "sha256": "556d16b69b04ca40e330a72cc8c47c07cb19cb85bf34d9cd2a1dcb9d556b8b9d",
+      "review": "inventory component crate created; no kernel binding changed"
     },
     "src/commerce/tax.rs": {
       "status": "unproved",
@@ -4697,8 +4752,8 @@
     },
     "src/commerce/test_stock.rs": {
       "status": "unproved",
-      "sha256": "350b8a2afdc7fccddb9acb5c351b7950ff7e405d34fd2e42c5f736042adc2bb9",
-      "review": "Completion of stages 1-3: attack_store.rs saves applied actor-private report rows and reads the latest with release-digest freshness; commerce/test_stock.rs sets sandbox-only test stock through revision, index sync and product event; cognition/autonomy_revert.rs restores day baselines by request and from the agent worker lane when exposure exceeds the limit, skipping prices changed since; no extracted policy changed; scenario and provider suites cover each path"
+      "sha256": "d0f4bc82298434858eb0e40e3904a520bf8471188bb59bf1d322598a0d481636",
+      "review": "inventory component crate created; no kernel binding changed"
     },
     "src/commerce/types.rs": {
       "status": "unproved",
@@ -6072,12 +6127,12 @@
       "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
     },
     "Cargo.lock": {
-      "sha256": "f1f530c420bf72eda3a8b683590bb4c02a746d4c7552542e16595ac7b524bb76",
-      "review": "image jobs moved into components/catalog; no kernel binding changed"
+      "sha256": "35d983bc7d7f75a2f0f59fbdc78153b6af743f357bc748006320123a0e06b7bd",
+      "review": "inventory component crate created; no kernel binding changed"
     },
     "Cargo.toml": {
-      "sha256": "2d7ebc432e34c20cf53825be094b58226b72dc3894a6f2804810c2c37211dd38",
-      "review": "Catalog component crate created; no rule changed"
+      "sha256": "164a63a75f29e9c7e52445aad60ed96c99591b2fe7bb003427e2d19b986489ad",
+      "review": "inventory component crate created; no kernel binding changed"
     },
     "components.lock.json": {
       "sha256": "7b4a931ad81c6665d5d95e6b42b8ef4d09ebe8971ac24998d8f94bb6a737ff53",
@@ -6858,10 +6913,6 @@
     "src/commerce/external_order_labels.sql": {
       "sha256": "3f131887429e16594a5d0354e0194d49191ee4bf857d732780da5324c53e6d7a",
       "review": "Batch external-order labels within the existing locked transaction; preserve locale-first variant precedence, tenant predicates, stock guard, package fence and idempotency; native baseline and optimized fixture compare the same frozen results."
-    },
-    "src/commerce/inventory_release.sql": {
-      "sha256": "c78d5349b9e81865d677f7cb6504f09fd6546f9eb1a2022463cd640ddb8a7029",
-      "review": "Reviewed native-only static bypass with hosted denial and Lean exact acceptance; one fresh domain/environment/status/channel/mount SQL snapshot and current membership lookup preserve scoped admission, binding identity and revocation; immutable Arc settings retain locked mutation/checkout reads; secret-free compression opt-in and deterministic precompressed assets preserve streams/ranges; batched inventory uses existing checkout locks and ordered idempotent release; bounded overview SQL preserves currency-separated historical facts. Real two-replica read/channel/tenant/checkout and strict-runtime regressions passed; SQL and build inputs now explicitly locked. These adapters remain unproved."
     },
     "src/documents/search.sql": {
       "sha256": "0f1405cf3bbcb50a7e549de823c326ce4ca7ece23fdb1a31042b1b0da456d378",

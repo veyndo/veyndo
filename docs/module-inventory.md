@@ -303,7 +303,8 @@ This lists every checked-in source module in these roots, including files with n
 | [src/commerce/geography.rs](../src/commerce/geography.rs) | Bundled MIT country catalogue, tenant-owned overrides and typed region admission. |
 | [src/commerce/group_usage.rs](../src/commerce/group_usage.rs) | Removing a customer group rejects live customer, price and native/source-rule dependencies under the settings lock. |
 | [src/commerce/international_capabilities.rs](../src/commerce/international_capabilities.rs) | International configuration and translation MCP tools call the exact same scoped native handlers as HTTP. |
-| [src/commerce/inventory.rs](../src/commerce/inventory.rs) | All-checkout allocation ledger; release is idempotent and always uses persisted quantities, never edited order JSON. |
+| [src/commerce/inventory.rs](../src/commerce/inventory.rs) | Stock allocation, consumption and release are owned by the inventory component. |
+| [src/commerce/inventory_ports.rs](../src/commerce/inventory_ports.rs) | The server's implementation of what the inventory component reads from environments and the product index. |
 | [src/commerce/method_text.rs](../src/commerce/method_text.rs) | Shared translated names and descriptions with field-wise shop-main-language inheritance. |
 | [src/commerce/method_usage.rs](../src/commerce/method_usage.rs) | Tenant-scoped dependency preflight and authoritative deletion guards; order snapshots remain immutable. |
 | [src/commerce/mod.rs](../src/commerce/mod.rs) | Native catalogue and checkout domains; pricing ports remain in the library. |
@@ -327,12 +328,12 @@ This lists every checked-in source module in these roots, including files with n
 | [src/commerce/settings_routes.rs](../src/commerce/settings_routes.rs) | Tenant configuration and operational read model. |
 | [src/commerce/settings_scope.rs](../src/commerce/settings_scope.rs) | Scoped checkout configuration: basis row lock orders all override writes and authoritative checkout reads. |
 | [src/commerce/settings_validation.rs](../src/commerce/settings_validation.rs) | Configuration validation and required availability invariants. |
-| [src/commerce/supply.rs](../src/commerce/supply.rs) | Supplier links for reordering inside the Veyndo network: which product is bought from which shop, when and how much, with a ceiling per order. |
+| [src/commerce/supply.rs](../src/commerce/supply.rs) | Supplier links are owned by the inventory component; the shop settings embed them. |
 | [src/commerce/supply_proposal.rs](../src/commerce/supply_proposal.rs) | Reorder proposals: a signed offer from the supplier shop's public checkout on this installation, checked against the ceiling; approval hands over to that checkout and orders nothing. |
 | [src/commerce/tax.rs](../src/commerce/tax.rs) | Destination tax-class resolution and net-preserving price conversion. |
 | [src/commerce/tax_context.rs](../src/commerce/tax_context.rs) | Tax conditions consume private authoritative pre-tax cart facts without a recursive quote. |
 | [src/commerce/tax_rules.rs](../src/commerce/tax_rules.rs) | Priority-based destination rules; current tax law is merchant configuration, not bundled tax advice. |
-| [src/commerce/test_stock.rs](../src/commerce/test_stock.rs) | Bulk test stock for a private sandbox: empty purchasable products get a quantity through the native revision, index sync and event. |
+| [src/commerce/test_stock.rs](../src/commerce/test_stock.rs) | Entry point for scenarios; test stock is owned by the inventory component. |
 | [src/commerce/types.rs](../src/commerce/types.rs) | Checkout selection and configuration data contracts. |
 | [src/concierge.rs](../src/concierge.rs) | Read-only storefront shopping advisor. |
 | [src/currencies/capabilities.rs](../src/currencies/capabilities.rs) | Currency MCP operations reuse the native HTTP handlers and existing settings/catalog permissions. |
@@ -759,6 +760,18 @@ This lists every checked-in source module in these roots, including files with n
 | [components/identity/src/domain.rs](../components/identity/src/domain.rs) | Pure identity rules: no database, no transport. |
 | [components/identity/src/lib.rs](../components/identity/src/lib.rs) | Identity component: the checks every other component uses to ask who a request acts for and what it may do. |
 | [components/identity/src/route_policy.rs](../components/identity/src/route_policy.rs) | Rights are registered beside each API method. Missing registrations always deny access. |
+| [components/inventory/src/domain/lines.rs](../components/inventory/src/domain/lines.rs) | Checked item quantities for inventory writes. Availability and locks belong to the host. |
+| [components/inventory/src/domain/reorder.rs](../components/inventory/src/domain/reorder.rs) | Whether a supplier's signed offer is the reorder the merchant saved, and within the ceiling. |
+| [components/inventory/src/domain/supply.rs](../components/inventory/src/domain/supply.rs) | Supplier links for reordering inside the Veyndo network: which product is bought from which shop, when and how much, with a ceiling per order. |
+| [components/inventory/src/domain.rs](../components/inventory/src/domain.rs) | Rules of stock quantities and reordering, free of I/O. |
+| [components/inventory/src/lib.rs](../components/inventory/src/lib.rs) | Inventory component: stock writes, the allocation ledger of orders, test stock and supplier links. |
+| [components/inventory/src/ports.rs](../components/inventory/src/ports.rs) | What the inventory component needs from other components. The server implements these; tests use their own. |
+| [components/inventory/src/service/test_stock.rs](../components/inventory/src/service/test_stock.rs) | Bulk test stock for a private sandbox: empty purchasable products get a quantity through the native revision, index sync and event. |
+| [components/inventory/src/service.rs](../components/inventory/src/service.rs) | Operations of the inventory component. |
+| [components/inventory/src/store/release.sql](../components/inventory/src/store/release.sql) | Independent app entry; see extensions/README.md for its public contract. |
+| [components/inventory/src/store/reservations.rs](../components/inventory/src/store/reservations.rs) | All-checkout allocation ledger; release is idempotent and always uses persisted quantities, never edited order JSON. |
+| [components/inventory/src/store/test_stock.rs](../components/inventory/src/store/test_stock.rs) | Stock writes for empty purchasable products, in bounded batches. |
+| [components/inventory/src/store.rs](../components/inventory/src/store.rs) | SQL of the inventory component. |
 | [components/pricing/examples/customer_contract.rs](../components/pricing/examples/customer_contract.rs) | Run contact normalization without a Core process, database, credentials or network. |
 | [components/pricing/src/conversions.rs](../components/pricing/src/conversions.rs) | A rejected pricing input becomes a client error of the shared error contract. |
 | [components/pricing/src/domain/cart.rs](../components/pricing/src/domain/cart.rs) | Persisted cart data with explicit typed host contexts and no credential or storage authority. |
@@ -771,7 +784,6 @@ This lists every checked-in source module in these roots, including files with n
 | [components/pricing/src/domain/discount.rs](../components/pricing/src/domain/discount.rs) | Integer-cent proportional discount allocation; cumulative rounding conserves the exact basket discount. |
 | [components/pricing/src/domain/discount_boundaries.rs](../components/pricing/src/domain/discount_boundaries.rs) | Discount conservation at signed limits and against an independent prefix-rounding oracle. |
 | [components/pricing/src/domain/external_order.rs](../components/pricing/src/domain/external_order.rs) | Portable paid-order input and minor-unit reconciliation; host still verifies source authority and commits stock. |
-| [components/pricing/src/domain/inventory.rs](../components/pricing/src/domain/inventory.rs) | Checked item quantities for inventory writes. Availability and locks belong to the host. |
 | [components/pricing/src/domain/money.rs](../components/pricing/src/domain/money.rs) | Exact signed minor-unit amounts with explicit currency scale; legacy Shopware float pricing stays isolated. |
 | [components/pricing/src/domain/pricing.rs](../components/pricing/src/domain/pricing.rs) | Behavioral port of Shopware 6.7.14.2 quantity calculators. |
 | [components/pricing/src/domain/validation.rs](../components/pricing/src/domain/validation.rs) | Shared static validation errors carry no private values or transport authority. |

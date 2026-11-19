@@ -215,7 +215,15 @@ Order follows the dependency report, lowest first. Each line is one move.
   inference), the translation
   worker and job routes (they drive inference), storefront pages, staging of
   categories, demo data.
-- [ ] inventory
+- [ ] inventory. Started: `components/inventory` owns the checked quantity batch
+  (`InventoryLines`, moved out of pricing), the allocation ledger with the
+  idempotent release, stock consumption, supplier links with their bounds, the
+  rule that admits a signed supplier offer (saved link, pricing currency,
+  ceiling), and test stock as a service behind the ports `Environments`
+  (private sandbox) and `ProductIndex`. Open: the reorder proposal and its
+  approval still run in the server, because they call the supplier shop's
+  cart, signed offers and the checkout handoff; reservations of open carts
+  (`inventory_reservations`); `query_as!`.
 - [ ] shipping
 - [ ] customers
 - [ ] payments

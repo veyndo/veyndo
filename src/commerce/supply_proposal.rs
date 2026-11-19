@@ -1,6 +1,7 @@
 //! Reorder proposals: a signed offer from the supplier shop's public checkout on this installation, checked against the ceiling; approval hands over to that checkout and orders nothing.
 use super::*;
 use base64::{Engine, engine::general_purpose::URL_SAFE_NO_PAD};
+use veyndo_inventory::domain::reorder;
 /// A guest at the supplier shop, exactly as any visitor: no merchant authority crosses the shop boundary.
 fn guest(shop: &str, token: Option<&str>) -> Result<RequestContext> {
     let mut h = RequestContext::new();
@@ -76,10 +77,7 @@ pub(crate) async fn propose(a: &App, h: &RequestContext) -> Result<Value> {
                 let same = found["payload"]["currency"].as_str() == Some(currency.as_str());
                 line["offer"] = found;
                 line["sameCurrency"] = json!(same);
-                line["withinCeiling"] = json!(
-                    same && total.is_some()
-                        && ceiling.is_some_and(|limit| total.unwrap_or(u64::MAX) <= limit)
-                );
+                line["withinCeiling"] = json!(reorder::within_ceiling(same, total, ceiling));
             }
             Err(e) => {
                 line["error"] = json!("supplier_refused");
@@ -139,21 +137,12 @@ pub(crate) async fn approve(a: &App, h: &RequestContext, v: &Value) -> Result<Va
         .ok()
         .and_then(|bytes| serde_json::from_slice(&bytes).ok())
         .ok_or(bad("Invalid offer"))?;
-    let line = &signed["lineItems"];
-    let total = signed["totalMinor"]
-        .as_str()
-        .and_then(|value| value.parse::<u64>().ok())
-        .ok_or(bad("Offer has no exact total"))?;
-    if line.as_array().map_or(0, Vec::len) != 1
-        || line[0]["id"].as_str() != Some(link.supplier_product_id.as_str())
-        || line[0]["quantity"].as_i64() != Some(i64::from(link.reorder_quantity))
-        || signed["currency"].as_str() != Some(settings.currencies.pricing_currency.as_str())
-    {
-        return Err(conflict("The offer does not match the saved supplier link"));
-    }
-    if total > ceiling {
-        return Err(conflict("The offer is above the ceiling per reorder"));
-    }
+    let total = reorder::admit(
+        &signed,
+        link,
+        &settings.currencies.pricing_currency,
+        ceiling,
+    )?;
     let handoff = checkout_handoff::issue(
         State(a.clone()),
         holder,

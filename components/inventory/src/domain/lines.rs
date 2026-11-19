@@ -1,5 +1,5 @@
 //! Checked item quantities for inventory writes. Availability and locks belong to the host.
-use crate::ValidationError;
+use veyndo_core::{Result, bad};
 
 /// One ordered batch for both the allocation ledger and the stock write.
 /// The host still owns distinct product admission and transaction locking.
@@ -9,9 +9,7 @@ pub struct InventoryLines<'a> {
 }
 
 impl<'a> InventoryLines<'a> {
-    pub fn new(
-        lines: impl ExactSizeIterator<Item = (&'a str, u32)>,
-    ) -> Result<Self, ValidationError> {
+    pub fn new(lines: impl ExactSizeIterator<Item = (&'a str, u32)>) -> Result<Self> {
         let mut batch = Self {
             ids: Vec::with_capacity(lines.len()),
             quantities: Vec::with_capacity(lines.len()),
@@ -20,7 +18,7 @@ impl<'a> InventoryLines<'a> {
             let quantity = i32::try_from(quantity)
                 .ok()
                 .filter(|&value| value > 0)
-                .ok_or(ValidationError::new("Invalid inventory quantity"))?;
+                .ok_or(bad("Invalid inventory quantity"))?;
             batch.ids.push(id);
             batch.quantities.push(quantity);
         }
@@ -38,7 +36,7 @@ impl<'a> InventoryLines<'a> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use super::InventoryLines;
 
     #[test]
     fn signed_quantities_preserve_line_alignment_without_wrapping() {

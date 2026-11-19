@@ -74,6 +74,7 @@ veyndo-app-storage = { path = "extensions/services/app-storage" }
 veyndo-runtime = { path = "crates/runtime" }
 veyndo-pricing = { path = "components/pricing" }
 veyndo-catalog = { path = "components/catalog" }
+veyndo-inventory = { path = "components/inventory" }
 veyndo-apps = { path = "crates/apps" }
 veyndo-cognition = { path = "crates/cognition" }
 roxmltree = "0.21"
