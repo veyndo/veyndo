@@ -912,8 +912,8 @@
     },
     "components/pricing/src/http/currencies.rs": {
       "status": "unproved",
-      "sha256": "db7450d9fe8a624f09077fbc3d6e69d113821e5833cfa4087800ca920a57b6e7",
-      "review": "Customer groups and price job creation moved into components/pricing; the customer group rule is bound there"
+      "sha256": "151fcdf27bd5ccd80db925bac4c4e43e7eac606c4716307982b90960b412890e",
+      "review": "Price job worker moved into components/pricing behind a catalogue port"
     },
     "components/pricing/src/http/price_jobs.rs": {
       "status": "unproved",
@@ -932,8 +932,8 @@
     },
     "components/pricing/src/ports.rs": {
       "status": "unproved",
-      "sha256": "f664a82f859a03ae862347f5d872d1e5b196d74b62dffc85f0cd8eb16e43b3fc",
-      "review": "Customer groups and price job creation moved into components/pricing; the customer group rule is bound there"
+      "sha256": "52fadac93edbca3bac7fb3bb0948ab937829a6b53fdd09ae98098db1917e5308",
+      "review": "Price job worker moved into components/pricing behind a catalogue port"
     },
     "components/pricing/src/service/conversion.rs": {
       "status": "unproved",
@@ -944,6 +944,11 @@
       "status": "unproved",
       "sha256": "c5402778c09c145b101dd836e1b80d897c519bf29c8c20a3bdd0f21343e59b02",
       "review": "The currency removal guard moved into components/pricing as store and service; no rule changed"
+    },
+    "components/pricing/src/service/price_job_worker.rs": {
+      "status": "unproved",
+      "sha256": "e7249a8fdf6bfef443f8ddda39257bd33a76868cc55219b598733459342562bd",
+      "review": "Price job worker moved into components/pricing behind a catalogue port"
     },
     "components/pricing/src/service/price_jobs.rs": {
       "status": "unproved",
@@ -967,8 +972,8 @@
     },
     "components/pricing/src/service.rs": {
       "status": "unproved",
-      "sha256": "b75cef487e05f80073ff3d20de98394e7af7daade142bb0d7e5f025fb10f5ae3",
-      "review": "The currency removal guard moved into components/pricing as store and service; no rule changed"
+      "sha256": "05a9595e67ecb757f967bb9a3b66d4633fdf521c34fbffc989850a49378850b2",
+      "review": "Price job worker moved into components/pricing behind a catalogue port"
     },
     "components/pricing/src/store/currency_usage.rs": {
       "status": "unproved",
@@ -977,8 +982,8 @@
     },
     "components/pricing/src/store/price_jobs.rs": {
       "status": "unproved",
-      "sha256": "f4015a3bf884e7f49c7558d3256ecc5108a40ae73e539cb2fb82a585b56c5d35",
-      "review": "Customer groups and price job creation moved into components/pricing; the customer group rule is bound there"
+      "sha256": "e8385f903a9467c4f5a5f584f45e2301b5ba853932be7b68a301744416ee3317",
+      "review": "Price job worker moved into components/pricing behind a catalogue port"
     },
     "components/pricing/src/store.rs": {
       "status": "unproved",
@@ -997,8 +1002,8 @@
     },
     "components/pricing/src/types/price_job.rs": {
       "status": "unproved",
-      "sha256": "889b71493f307b1ae2ac915b7900bd26262819c41d0b0fbf15f348fad2febc09",
-      "review": "Price job reads moved into components/pricing as typed store and HTTP adapters; no rule changed"
+      "sha256": "9afde8e76e1ea81d3b962cbee473600e1e1ea63fe42ede8350d42d82882801b7",
+      "review": "Price job worker moved into components/pricing behind a catalogue port"
     },
     "components/pricing/src/types/tax.rs": {
       "status": "unproved",
@@ -4442,8 +4447,8 @@
     },
     "src/currencies/jobs.rs": {
       "status": "unproved",
-      "sha256": "d16d0476fb69724b8615fa122fb9dcf18b30cf9f80e08e4e7023118589074c38",
-      "review": "Customer groups and price job creation moved into components/pricing; the customer group rule is bound there"
+      "sha256": "99a5b516d472f1aabf0ce78f0fc42f5967bc6db9e48a963bf1ed1bf469dcc7d7",
+      "review": "Price job worker moved into components/pricing behind a catalogue port"
     },
     "src/currencies/mod.rs": {
       "status": "unproved",
@@ -4452,8 +4457,8 @@
     },
     "src/currencies/ports.rs": {
       "status": "unproved",
-      "sha256": "e14c45720486c86b133cf54843b67b5adbbe0699753ac95da1ade4cef8c3aa31",
-      "review": "Customer groups and price job creation moved into components/pricing; the customer group rule is bound there"
+      "sha256": "493eb284a28fc420a398a6c07fe68bdb57c27a0a415da442332b35f2e349b425",
+      "review": "Price job worker moved into components/pricing behind a catalogue port"
     },
     "src/currencies/rates.rs": {
       "status": "unproved",

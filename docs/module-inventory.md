@@ -341,9 +341,9 @@ This lists every checked-in source module in these roots, including files with n
 | [src/commerce/types.rs](../src/commerce/types.rs) | Checkout selection and configuration data contracts. |
 | [src/concierge.rs](../src/concierge.rs) | Read-only storefront shopping advisor. |
 | [src/currencies/capabilities.rs](../src/currencies/capabilities.rs) | Currency MCP operations reuse the native HTTP handlers and existing settings/catalog permissions. |
-| [src/currencies/jobs.rs](../src/currencies/jobs.rs) | Bounded restart-safe fixed-price materialization with frozen FX, product locks and atomic checkpoints across replicas. |
+| [src/currencies/jobs.rs](../src/currencies/jobs.rs) | The background loop that runs queued price jobs and refreshes automatic rates; the batch itself is owned by the pricing component. |
 | [src/currencies/mod.rs](../src/currencies/mod.rs) | Tenant currency configuration, channel contexts and durable price generation; no FX network calls in checkout. |
-| [src/currencies/ports.rs](../src/currencies/ports.rs) | The server's implementation of what the pricing component reads from the shop settings and the cart. |
+| [src/currencies/ports.rs](../src/currencies/ports.rs) | The server's implementation of what the pricing component reads from the shop settings, the cart and the catalogue. |
 | [src/currencies/rates.rs](../src/currencies/rates.rs) | Stores refreshed reference rates in the shop settings; the refresh runs outside checkout. |
 | [src/currencies/request.rs](../src/currencies/request.rs) | The currency a storefront request asks for: the cart's own, else the request header. |
 | [src/currencies/routes.rs](../src/currencies/routes.rs) | Native currency discovery, revision-safe selection and authenticated FX/price job operations. |
@@ -726,6 +726,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/pricing/src/ports.rs](../components/pricing/src/ports.rs) | What the pricing component needs from other components. The server implements these; tests use their own. |
 | [components/pricing/src/service/conversion.rs](../components/pricing/src/service/conversion.rs) | Exact rational minor-unit FX conversion at the isolated legacy calculator boundary; fixed prices are explicit decimal strings. |
 | [components/pricing/src/service/currency_change.rs](../components/pricing/src/service/currency_change.rs) | What a change of the currency configuration must not do: relabel stored amounts or remove a currency still in use. |
+| [components/pricing/src/service/price_job_worker.rs](../components/pricing/src/service/price_job_worker.rs) | Bounded restart-safe fixed-price materialization with frozen FX, product locks and atomic checkpoints across replicas. |
 | [components/pricing/src/service/price_jobs.rs](../components/pricing/src/service/price_jobs.rs) | Queues a run that writes fixed prices of one currency, with the exchange rates frozen at creation. |
 | [components/pricing/src/service/rates.rs](../components/pricing/src/service/rates.rs) | Bounded ECB reference-rate retrieval with exact decimal parsing; a refresh never invents rates. |
 | [components/pricing/src/service/tax.rs](../components/pricing/src/service/tax.rs) | The tax rate of a delivery destination: the most specific active rule, else the country rate, else the class default. |

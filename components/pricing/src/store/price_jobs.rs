@@ -1,5 +1,5 @@
 //! Reads of the price jobs of one shop.
-use crate::types::price_job::PriceJob;
+use crate::types::price_job::{PriceJob, QueuedJob};
 use serde_json::Value;
 use sqlx::PgConnection;
 use veyndo_core::{Result, State};
@@ -50,6 +50,41 @@ pub async fn insert(
         .bind(id)
         .bind(data)
         .bind(ceiling)
+        .execute(tx)
+        .await?;
+    Ok(())
+}
+
+/// Claims the oldest queued job of any shop; another replica skips it while this transaction holds it.
+pub async fn claim(tx: &mut PgConnection) -> Result<Option<QueuedJob>> {
+    Ok(sqlx::query_as::<_, QueuedJob>("SELECT *,created_at::text AS snapshot_started FROM currency_price_jobs WHERE state='queued' ORDER BY created_at FOR UPDATE SKIP LOCKED LIMIT 1")
+        .fetch_optional(tx)
+        .await?)
+}
+
+pub async fn advance(
+    tx: &mut PgConnection,
+    job: &QueuedJob,
+    cursor: &str,
+    processed: i64,
+    state: &str,
+) -> Result<()> {
+    sqlx::query("UPDATE currency_price_jobs SET cursor=$1,processed=processed+$2,state=$3 WHERE tenant=$4 AND id=$5")
+        .bind(cursor)
+        .bind(processed)
+        .bind(state)
+        .bind(&job.tenant)
+        .bind(&job.id)
+        .execute(tx)
+        .await?;
+    Ok(())
+}
+
+pub async fn fail(tx: &mut PgConnection, job: &QueuedJob, error: &str) -> Result<()> {
+    sqlx::query("UPDATE currency_price_jobs SET state='failed',data=jsonb_set(data,'{error}',$1) WHERE tenant=$2 AND id=$3")
+        .bind(serde_json::json!(error))
+        .bind(&job.tenant)
+        .bind(&job.id)
         .execute(tx)
         .await?;
     Ok(())

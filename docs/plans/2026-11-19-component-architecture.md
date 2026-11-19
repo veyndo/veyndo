@@ -140,10 +140,13 @@ Done when the server builds on both crates without glob imports from them.
       of the component, with typed rows and tests against test ports.
 - [x] Price job creation (through a locked-settings port), tax classes with the
       destination rate, customer groups and the context selection rules moved.
-- [ ] Move the price job worker, the rate refresh and the removal guard. The
-      worker writes product prices and history, so it needs a catalogue port;
-      tax and group validation stay with `shop` because they check the whole
-      settings object; currency selection on a cart belongs to checkout.
+- [x] Move the price job worker, the rate refresh and the removal guard. The
+      worker (`service/price_job_worker`) locks products, writes fixed prices and
+      marks the history through the `Catalogue` port; the server keeps only the
+      timer loop. Retrieving rates is pricing, storing them in the shop settings
+      stays with `shop`, as do tax and group validation, because they write or
+      check the whole settings object; currency selection on a cart belongs to
+      checkout.
 - [ ] Money is one type in minor units everywhere; the column "uses floating
       point" on the proof coverage page is zero for this component. Done so far:
       cart totals (goods, tax, payable, net) are added as minor units by proved

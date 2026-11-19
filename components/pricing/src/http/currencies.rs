@@ -24,9 +24,12 @@ pub async fn discover(State(p): State<Pricing>, h: RequestContext) -> Result<Jso
 #[cfg(test)]
 mod tests {
     use super::discover;
-    use crate::ports::{Carts, PortFuture, Pricing, ShopSettings};
+    use crate::catalog::Product;
+    use crate::ports::{Carts, Catalogue, PortFuture, Pricing, ShopSettings};
     use crate::types::currency::{Config, Definition};
     use axum::extract::State;
+    use serde_json::Value;
+    use sqlx::PgConnection;
     use std::sync::Arc;
     use veyndo_core::RequestContext;
 
@@ -61,11 +64,43 @@ mod tests {
             Box::pin(async { Ok("USD".to_owned()) })
         }
     }
+    struct Shelf;
+    impl Catalogue for Shelf {
+        fn attribute<'a>(
+            &'a self,
+            _: &'a mut PgConnection,
+            _: Option<&'a str>,
+            _: &'a str,
+        ) -> PortFuture<'a, ()> {
+            Box::pin(async { Ok(()) })
+        }
+        fn lock_products<'a>(
+            &'a self,
+            _: &'a mut PgConnection,
+            _: &'a str,
+            _: &'a str,
+            _: &'a str,
+            _: &'a str,
+        ) -> PortFuture<'a, Vec<Product>> {
+            Box::pin(async { Ok(Vec::new()) })
+        }
+        fn store_fixed_prices<'a>(
+            &'a self,
+            _: &'a mut PgConnection,
+            _: &'a str,
+            _: &'a str,
+            _: &'a str,
+            _: Value,
+        ) -> PortFuture<'a, ()> {
+            Box::pin(async { Ok(()) })
+        }
+    }
     fn pricing() -> Pricing {
         Pricing {
             core: veyndo_core::State::detached(),
             settings: Arc::new(Shop),
             carts: Arc::new(Cart),
+            catalogue: Arc::new(Shelf),
         }
     }
     fn request(pairs: &[(&'static str, &str)]) -> RequestContext {

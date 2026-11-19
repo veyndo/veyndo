@@ -23,3 +23,27 @@ impl sqlx::FromRow<'_, PgRow> for PriceJob {
         })
     }
 }
+
+/// A queued job as the worker claims it.
+pub struct QueuedJob {
+    pub tenant: String,
+    pub id: String,
+    pub data: Value,
+    pub cursor: String,
+    pub ceiling: String,
+    /// When the job was created; products created later are not touched.
+    pub snapshot: String,
+}
+
+impl sqlx::FromRow<'_, PgRow> for QueuedJob {
+    fn from_row(row: &PgRow) -> sqlx::Result<Self> {
+        Ok(Self {
+            tenant: row.try_get("tenant")?,
+            id: row.try_get("id")?,
+            data: row.try_get("data")?,
+            cursor: row.try_get("cursor")?,
+            ceiling: row.try_get("ceiling")?,
+            snapshot: row.try_get("snapshot_started")?,
+        })
+    }
+}

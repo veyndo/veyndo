@@ -317,8 +317,8 @@
         "products"
       ],
       "glob_imports": 9,
-      "untyped_access": 20,
-      "sql_outside_store": 4
+      "untyped_access": 19,
+      "sql_outside_store": 5
     },
     "shipping": {
       "title": "Delivery methods, destinations, delivery splits and carrier booking",
