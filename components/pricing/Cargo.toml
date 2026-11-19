@@ -1,0 +1,16 @@
+[package]
+name = "veyndo-pricing"
+version.workspace = true
+edition.workspace = true
+license-file.workspace = true
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+veyndo-kernel = { path = "../../crates/kernel" }
+veyndo-core = { path = "../core", optional = true }
+
+[features]
+# Without `service` the crate is the pure domain only, for consumers such as independent apps.
+default = ["service"]
+service = ["dep:veyndo-core"]

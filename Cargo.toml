@@ -71,7 +71,7 @@ veyndo-flow-graph = { path = "crates/flow-graph" }
 veyndo-app-model = { path = "extensions/services/app-storage/model" }
 veyndo-app-storage = { path = "extensions/services/app-storage" }
 veyndo-runtime = { path = "crates/runtime" }
-veyndo-commerce = { path = "crates/commerce" }
+veyndo-pricing = { path = "components/pricing" }
 veyndo-apps = { path = "crates/apps" }
 veyndo-cognition = { path = "crates/cognition" }
 roxmltree = "0.21"

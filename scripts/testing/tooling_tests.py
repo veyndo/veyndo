@@ -237,13 +237,13 @@ class WorkspaceCoverage(unittest.TestCase):
         from coverage_report import rust_gaps
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            for name in ('src/main.rs', 'crates/commerce/src/money.rs', 'extensions/apps/example/src/lib.rs'):
+            for name in ('src/main.rs', 'components/pricing/src/domain/money.rs', 'extensions/apps/example/src/lib.rs'):
                 path = root / name
                 path.parent.mkdir(parents=True, exist_ok=True)
                 path.write_text('// fixture')
             emitted = [{'filename': str(root / 'src/main.rs')}]
             self.assertEqual(rust_gaps(root, emitted), [
-                'crates/commerce/src/money.rs', 'extensions/apps/example/src/lib.rs'])
+                'components/pricing/src/domain/money.rs', 'extensions/apps/example/src/lib.rs'])
 
 
 if __name__ == '__main__':

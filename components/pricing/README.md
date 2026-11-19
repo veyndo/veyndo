@@ -8,7 +8,7 @@ provider or dependency on the product shell.
 An external Rust adapter can parse and validate the same customer-editable input:
 
 ```rust
-use veyndo_commerce::customer::Contact;
+use veyndo_pricing::customer::Contact;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut input: Contact = serde_json::from_str(r#"{"name":"Demo Buyer"}"#)?;
@@ -17,8 +17,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 ```
 
-Run `cargo run -p veyndo-commerce --example customer_contract` for a complete
-synthetic contact and address example. Run `cargo test -p veyndo-commerce` for
+Run `cargo run -p veyndo-pricing --example customer_contract` for a complete
+synthetic contact and address example. Run `cargo test -p veyndo-pricing` for
 wire compatibility, rejected identity fields and calculation regressions.
 
 Contact and address data can be personal. Parsing or validating them grants no
@@ -29,7 +29,7 @@ order-ownership claim. Existing native validators still check the selected
 country, region and payment method against the current shop configuration.
 
 Marketplace adapters can parse the host exchange snapshot as
-`veyndo_commerce::external_order::PaidOrder` and run `validate()` before
+`veyndo_pricing::external_order::PaidOrder` and run `validate()` before
 handing it to Core. The contract checks amounts, explicit tax, line uniqueness
 and that the total reconciles in minor units. It does not prove provider payment
 or authorize writes. The host checks the current app and channel and handles

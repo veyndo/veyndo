@@ -22,7 +22,7 @@ remain connected while shared contracts move into crates.
 | Catalog, categories, variants and media | Store catalog/detail, Studio and native operations use `src/commerce/{catalog,detail,product_admin,product_edit,product_fields}.rs`, `src/categories/` and the shared Product contract below. | Tenant/channel filtering, translation inheritance, content revision, variant identity and internal fact redaction. |
 | Customers, accounts and addresses | `src/accounts/` and `src/operations/{customers,customer_create,customer_lookup,addresses}.rs` serve storefront accounts, merchant lookup, manual orders and agent tools. | Verified account identity, immutable order ownership and current PII permissions. |
 | Cart and checkout | `src/cart_*.rs`, `src/order_checkout.rs` and `src/checkout/` serve Store API, reviewed merchant orders, agents, POS and the separate Checkout host ports. | Cart revision, legal and payment review, idempotency, original receipt recovery and the single commit transaction. |
-| Pricing and taxes | `crates/commerce/`, `src/cart_price.rs`, `src/checkout/price.rs`, `src/commerce/tax*.rs` and `src/currencies/` price the same current cart across those consumers. | Currency/rounding behavior, authoritative rule facts, price snapshots and tax context. |
+| Pricing and taxes | `components/pricing/`, `src/cart_price.rs`, `src/checkout/price.rs`, `src/commerce/tax*.rs` and `src/currencies/` price the same current cart across those consumers. | Currency/rounding behavior, authoritative rule facts, price snapshots and tax context. |
 | Inventory | `src/checkout/lock.rs` and `src/commerce/inventory.rs` allocate and consume stock on the checkout transaction; cancellation releases persisted reservations. | Ordered product locks, aggregate stock revisions, one allocation per purchase and idempotent release. |
 | Orders | `src/checkout/commit.rs`, `src/commerce/external_orders.rs` and `src/operations/{orders,order_list,manual_orders}.rs` connect native purchase and imported orders to the same ledger. | Immutable amounts and buyer snapshots, tenant identity, order state guards and atomic order events. |
 | Payments and refunds | `src/payments/` admits commands and signed receipts from the separate Payments adapter; native checkout and merchant actions reuse that owner. | Verified amounts, allocations, receipt uniqueness, current authority and uncertainty after interrupted provider calls. |
@@ -35,16 +35,16 @@ must not become another price, order or inventory owner.
 
 ## Shared customer input contract
 
-`veyndo-commerce::customer` owns Contact, Address and their original bounded
+`veyndo-pricing::customer` owns Contact, Address and their original bounded
 syntax validation. Native `accounts::Contact` and `commerce::Address` reexport
 those same types. Legacy names, optional-field defaults, the `zipcode` alias,
 name normalization, byte limits and calendar checks remain unchanged. Native
 adapters map the portable validation error to the existing HTTP/MCP error.
 
 The library has no database, network, model, account session or identity store.
-Rust clients can run the [standalone contact example](../crates/commerce/examples/customer_contract.rs)
-without Core: `cargo run -p veyndo-commerce --example customer_contract`.
-[Package guide](../crates/commerce/README.md).
+Rust clients can run the [standalone contact example](../components/pricing/examples/customer_contract.rs)
+without Core: `cargo run -p veyndo-pricing --example customer_contract`.
+[Package guide](../components/pricing/README.md).
 
 Contact fields contain personal data. This input type grants no permission to
 read or publish them. PII projection, login, immutable order ownership and
@@ -72,7 +72,7 @@ through Core's locked stock and commit transaction.
 
 ## Shared cart contract
 
-`veyndo-commerce::cart` owns Item and the persisted Cart data contract.
+`veyndo-pricing::cart` owns Item and the persisted Cart data contract.
 Its four context parameters retain the host's concrete discount, business,
 app configuration and checkout types. Native `src/cart_model.rs` binds
 those parameters to the existing POS, B2B, App and checkout definitions.
@@ -92,10 +92,10 @@ visible in Studio. [Hosted verification](status.md#shared-cart-contract-on-north
 
 ## Shared product contract
 
-`veyndo-commerce::catalog` owns the Product snapshot and Tier DTO used by
+`veyndo-pricing::catalog` owns the Product snapshot and Tier DTO used by
 native catalog, cart, rules and order paths. It depends on Serde and the
 existing Commerce pricing types. It has no database, HTTP or inference
-dependency. Other Rust components can use `veyndo_commerce::catalog::Product`;
+dependency. Other Rust components can use `veyndo_pricing::catalog::Product`;
 the product library also reexports `veyndo::catalog`.
 
 `src/catalog_model.rs` hydrates that same type through Core's existing
@@ -464,7 +464,7 @@ Native durable jobs, leases, rights, consent, order and stock owners remain unch
 
 ## Inventory write boundary
 
-`veyndo_commerce::inventory::InventoryLines` pairs product IDs and positive
+`veyndo_pricing::inventory::InventoryLines` pairs product IDs and positive
 quantities that fit the existing signed database representation. Native checkout
 (including POS) and Marketplace each build the batch once. The same batch drives
 the native allocation ledger and the stock decrement; the storage adapter needs
@@ -486,7 +486,7 @@ provider-neutral `apps/core_exchange.rs`, the native display adapter in
 `commerce/external_order_input.rs` and the intake transaction in
 `commerce/external_orders.rs`, with its bounded
 `commerce/external_order_labels.sql` name lookup. The strict wire model and
-exact minor-unit reconciliation live in `crates/commerce/src/external_order.rs`.
+exact minor-unit reconciliation live in `components/pricing/src/domain/external_order.rs`.
 Validating a snapshot checks its consistency; the authorized adapter and host
 still own source verification and admission. Existing product/channel configuration,
 app consent/jobs/records, currency, stock, customer projection, documents and event
@@ -576,7 +576,7 @@ See [international commerce](international-commerce.md) for the exact contract.
 | [`src/order_routes.rs`](../src/order_routes.rs) | Merchant order read adapter. | `integration.py + commerce.py + protocols.py + users.py + restart.py` |
 | [`src/outbox.rs`](../src/outbox.rs) | Durable outbox and audit projection worker. | `integration.py + protocols.py + studio.py + restart.py` |
 | [`src/planner.rs`](../src/planner.rs), `planner/{admission,repair}.rs` | Grounded model planning, shared native admission and one checkpointed correction of invalid output. | `providers.py + live intelligence.py/studio.py + protocols.py` |
-| [`crates/commerce/src/pricing.rs`](../crates/commerce/src/pricing.rs) | Behavioral port of Shopware 6.7.14.2 quantity calculators. | `differential.py + delivery_differential.py + Rust numeric regressions + commerce.py` |
+| [`components/pricing/src/domain/pricing.rs`](../components/pricing/src/domain/pricing.rs) | Behavioral port of Shopware 6.7.14.2 quantity calculators. | `differential.py + delivery_differential.py + Rust numeric regressions + commerce.py` |
 | [`src/proposal_apply.rs`](../src/proposal_apply.rs) | Transactional application of approved, revision-bound proposals. | `providers.py + live intelligence.py/studio.py + protocols.py` |
 | [`src/proposal_model.rs`](../src/proposal_model.rs) | Typed proposals and validation before persistence or execution. | `providers.py + live intelligence.py/studio.py + protocols.py` |
 | [`src/proposal_routes.rs`](../src/proposal_routes.rs) | HTTP proposal creation, approval and task listing. | `providers.py + live intelligence.py/studio.py + protocols.py` |
@@ -699,7 +699,7 @@ Shopware compatibility claim is made.
 | `src/auth/provision.rs`, `registration.rs` | Shared synthetic template provisioning for first and additional owned shops | `marketing_accounts.py`, `users.py` |
 | `src/marketing/{rules,promotions,flows,channels,routes,mod}.rs` | Bounded AST, authoritative campaigns, durable note/proposal jobs and sales-channel scope | Rust rule tests, `marketing_accounts.py`, `developer_documents.py` |
 | `crates/automation/src/rule_comparison.rs`, `src/bin/rules.rs`, `reference/rules.php` | Original Shopware numeric comparison behavior, independent batch oracle | `rule_differential.py`: 1,280 comparisons |
-| `crates/commerce/src/discount.rs` | Exact-cent proportional basket discount allocation | Rust conservation/bounds tests, concurrent coupon HTTP checkout |
+| `components/pricing/src/domain/discount.rs` | Exact-cent proportional basket discount allocation | Rust conservation/bounds tests, concurrent coupon HTTP checkout |
 | `src/commerce/product_edit.rs` | Revision-bound translations and advanced metadata; own product/reference validation | `marketing_accounts.py` and selected release |
 | `src/experience.rs` | Persisted layout policy plus owned-session signal ranking/clearing | `intelligence.py`, `marketing_accounts.py` |
 | `frontend/src/admin/{developer,environments,storyfronts,automation,catalog}/` | Dedicated merchant workbench forms and review surfaces | Strict frontend build, actual browser review |

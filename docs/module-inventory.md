@@ -647,21 +647,6 @@ This lists every checked-in source module in these roots, including files with n
 | [crates/cognition/src/inference.rs](../crates/cognition/src/inference.rs) | Provider adapters. Credentials stay on the server; domain validation is separate. |
 | [crates/cognition/src/lib.rs](../crates/cognition/src/lib.rs) | Provider protocol adapters and prompt evidence; no commerce write capability. |
 | [crates/cognition/src/prompts.rs](../crates/cognition/src/prompts.rs) | Versioned system-prompt provenance; no prompt text or private context is exposed in evidence. |
-| [crates/commerce/examples/customer_contract.rs](../crates/commerce/examples/customer_contract.rs) | Run contact normalization without a Core process, database, credentials or network. |
-| [crates/commerce/src/cart.rs](../crates/commerce/src/cart.rs) | Persisted cart data with explicit typed host contexts and no credential or storage authority. |
-| [crates/commerce/src/catalog.rs](../crates/commerce/src/catalog.rs) | Shared product snapshot and tier contracts, without database or transport authority. |
-| [crates/commerce/src/customer/address.rs](../crates/commerce/src/customer/address.rs) | Shared address wire contract and original bounded syntax normalization; hosts retain geography admission. |
-| [crates/commerce/src/customer/contact.rs](../crates/commerce/src/customer/contact.rs) | Customer-editable contact contract and bounded syntax checks; no account identity or persistence. |
-| [crates/commerce/src/customer/contract_tests.rs](../crates/commerce/src/customer/contract_tests.rs) | Compatibility and hostile-field cases for portable contact/address inputs; no authorization is inferred. |
-| [crates/commerce/src/customer/mod.rs](../crates/commerce/src/customer/mod.rs) | Portable customer contact and address contracts; credentials, identity and PII authorization belong to hosts. |
-| [crates/commerce/src/discount.rs](../crates/commerce/src/discount.rs) | Integer-cent proportional discount allocation; cumulative rounding conserves the exact basket discount. |
-| [crates/commerce/src/discount_boundaries.rs](../crates/commerce/src/discount_boundaries.rs) | Discount conservation at signed limits and against an independent prefix-rounding oracle. |
-| [crates/commerce/src/external_order.rs](../crates/commerce/src/external_order.rs) | Portable paid-order input and minor-unit reconciliation; host still verifies source authority and commits stock. |
-| [crates/commerce/src/inventory.rs](../crates/commerce/src/inventory.rs) | Checked item quantities for inventory writes. Availability and locks belong to the host. |
-| [crates/commerce/src/lib.rs](../crates/commerce/src/lib.rs) | Cart, product, amount and calculation contracts without transport or inference dependencies. |
-| [crates/commerce/src/money.rs](../crates/commerce/src/money.rs) | Exact signed minor-unit amounts with explicit currency scale; legacy Shopware float pricing stays isolated. |
-| [crates/commerce/src/pricing.rs](../crates/commerce/src/pricing.rs) | Behavioral port of Shopware 6.7.14.2 quantity calculators. |
-| [crates/commerce/src/validation.rs](../crates/commerce/src/validation.rs) | Shared static validation errors carry no private values or transport authority. |
 | [crates/flow-graph/src/catalog.rs](../crates/flow-graph/src/catalog.rs) | Stable built-in Flow identifiers shared by discovery and native admission. |
 | [crates/flow-graph/src/execution.rs](../crates/flow-graph/src/execution.rs) | Typed instructions from a validated graph. The host evaluates facts and performs effects. |
 | [crates/flow-graph/src/lib.rs](../crates/flow-graph/src/lib.rs) | Dependency-free validation and indexed lookup for bounded commerce flow graphs. |
@@ -715,6 +700,23 @@ This lists every checked-in source module in these roots, including files with n
 | [components/core/src/shop_scope.rs](../components/core/src/shop_scope.rs) | Which shop a request addresses: the transport header, or the deployment's default shop. No authentication. |
 | [components/core/src/state.rs](../components/core/src/state.rs) | The state every component may use: the tenant-scoped database pool, the outbound HTTP client and request admission. |
 | [components/core/src/work_signal.rs](../components/core/src/work_signal.rs) | One dedicated LISTEN connection per worker process. Commit notifications are hints; polling repairs lost hints. |
+| [components/pricing/examples/customer_contract.rs](../components/pricing/examples/customer_contract.rs) | Run contact normalization without a Core process, database, credentials or network. |
+| [components/pricing/src/conversions.rs](../components/pricing/src/conversions.rs) | A rejected pricing input becomes a client error of the shared error contract. |
+| [components/pricing/src/domain/cart.rs](../components/pricing/src/domain/cart.rs) | Persisted cart data with explicit typed host contexts and no credential or storage authority. |
+| [components/pricing/src/domain/catalog.rs](../components/pricing/src/domain/catalog.rs) | Shared product snapshot and tier contracts, without database or transport authority. |
+| [components/pricing/src/domain/customer/address.rs](../components/pricing/src/domain/customer/address.rs) | Shared address wire contract and original bounded syntax normalization; hosts retain geography admission. |
+| [components/pricing/src/domain/customer/contact.rs](../components/pricing/src/domain/customer/contact.rs) | Customer-editable contact contract and bounded syntax checks; no account identity or persistence. |
+| [components/pricing/src/domain/customer/contract_tests.rs](../components/pricing/src/domain/customer/contract_tests.rs) | Compatibility and hostile-field cases for portable contact/address inputs; no authorization is inferred. |
+| [components/pricing/src/domain/customer/mod.rs](../components/pricing/src/domain/customer/mod.rs) | Portable customer contact and address contracts; credentials, identity and PII authorization belong to hosts. |
+| [components/pricing/src/domain/discount.rs](../components/pricing/src/domain/discount.rs) | Integer-cent proportional discount allocation; cumulative rounding conserves the exact basket discount. |
+| [components/pricing/src/domain/discount_boundaries.rs](../components/pricing/src/domain/discount_boundaries.rs) | Discount conservation at signed limits and against an independent prefix-rounding oracle. |
+| [components/pricing/src/domain/external_order.rs](../components/pricing/src/domain/external_order.rs) | Portable paid-order input and minor-unit reconciliation; host still verifies source authority and commits stock. |
+| [components/pricing/src/domain/inventory.rs](../components/pricing/src/domain/inventory.rs) | Checked item quantities for inventory writes. Availability and locks belong to the host. |
+| [components/pricing/src/domain/money.rs](../components/pricing/src/domain/money.rs) | Exact signed minor-unit amounts with explicit currency scale; legacy Shopware float pricing stays isolated. |
+| [components/pricing/src/domain/pricing.rs](../components/pricing/src/domain/pricing.rs) | Behavioral port of Shopware 6.7.14.2 quantity calculators. |
+| [components/pricing/src/domain/validation.rs](../components/pricing/src/domain/validation.rs) | Shared static validation errors carry no private values or transport authority. |
+| [components/pricing/src/domain.rs](../components/pricing/src/domain.rs) | Pure rules and data contracts: no database, no transport. This is the part that is proved. |
+| [components/pricing/src/lib.rs](../components/pricing/src/lib.rs) | Pricing component: amounts, price calculation, discounts and the cart, product and customer contracts they work on. |
 
 ## Studio, storefront, platform and shared frontend
 

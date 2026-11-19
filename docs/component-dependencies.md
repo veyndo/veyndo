@@ -13,12 +13,12 @@ run SQL without being in a `store` folder. Both numbers only fall.
 
 | Component | Lines of Rust | Glob imports | Untyped accesses | SQL outside store | Tables | Uses | Foreign tables |
 | --- | ---: | ---: | ---: | ---: | ---: | --- | ---: |
-| core | 3162 | 0 | 4 | 10 | 10 | pricing (2) | 10 |
+| core | 3157 | 0 | 4 | 10 | 10 | none | 10 |
 | identity | 3401 | 8 | 86 | 18 | 13 | apps (9), catalog (7), checkout (1), core (365), customers (1), host (15), intelligence (9), marketing (5), shop (14), studio (4) | 11 |
 | shop | 4123 | 42 | 98 | 23 | 15 | apps (7), b2b (2), catalog (3), checkout (17), core (256), customers (3), host (10), intelligence (8), marketing (8), payments (4), pricing (11), shipping (1), studio (12) | 19 |
 | catalog | 5920 | 53 | 202 | 33 | 11 | apps (19), b2b (2), checkout (12), core (341), customers (5), host (28), identity (30), intelligence (10), marketing (16), pricing (29), protocols (1), shipping (1), shop (42), studio (9) | 15 |
 | inventory | 374 | 3 | 26 | 3 | 2 | catalog (1), checkout (2), core (27), host (2), identity (4), intelligence (3), pricing (3), protocols (2), shop (2) | 3 |
-| pricing | 3004 | 14 | 20 | 4 | 2 | apps (2), catalog (2), checkout (7), core (71), host (5), identity (6), marketing (4), shop (21), studio (2) | 10 |
+| pricing | 3015 | 13 | 20 | 4 | 2 | apps (2), catalog (2), checkout (7), core (73), host (5), identity (6), marketing (4), shop (21), studio (2) | 10 |
 | shipping | 977 | 7 | 115 | 4 | 0 | apps (3), catalog (5), checkout (1), core (43), host (3), identity (5), orders (5), payments (1), pricing (16), shop (20), studio (4) | 6 |
 | checkout | 2706 | 14 | 148 | 10 | 3 | apps (22), b2b (19), catalog (9), core (240), customers (5), host (7), identity (2), intelligence (2), inventory (2), marketing (15), orders (6), payments (8), pos (12), pricing (51), shipping (10), shop (22), studio (9) | 13 |
 | customers | 1618 | 18 | 85 | 15 | 3 | apps (9), catalog (1), checkout (5), core (175), host (10), identity (32), marketing (2), orders (5), pos (1), pricing (1), shipping (5), shop (13), studio (9) | 6 |
@@ -37,7 +37,7 @@ run SQL without being in a `store` folder. Both numbers only fall.
 
 ## Cycles
 
-72 pairs of components depend on each other. A crate boundary needs each pair
+71 pairs of components depend on each other. A crate boundary needs each pair
 reduced to one direction first.
 
 - apps ↔ b2b: 3 and 18 references
@@ -82,7 +82,6 @@ reduced to one direction first.
 - checkout ↔ pricing: 51 and 7 references
 - checkout ↔ shipping: 10 and 1 references
 - checkout ↔ shop: 22 and 17 references
-- core ↔ pricing: 2 and 71 references
 - customers ↔ identity: 32 and 1 references
 - customers ↔ orders: 5 and 5 references
 - customers ↔ pos: 1 and 1 references

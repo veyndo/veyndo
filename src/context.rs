@@ -1,6 +1,6 @@
 //! Bounded behavioral ports of Shopware 6.7.14.2 context and product-cart selection.
 use serde::{Deserialize, Serialize};
-pub use veyndo_commerce::catalog::Tier;
+pub use veyndo_pricing::catalog::Tier;
 
 pub const SYSTEM_LANGUAGE: &str = "2fbb5fe2e29a4d70aa5854ce7ce3e20b";
 #[derive(Clone, Debug, Deserialize, Serialize)]

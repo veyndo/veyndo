@@ -1,7 +1,7 @@
 //! Generic authorized external order intake reuses native stock, customer snapshots, documents, history and outbox.
 use super::external_order_input::{Input, source_price};
 use crate::*;
-use veyndo_commerce::inventory::InventoryLines;
+use veyndo_pricing::inventory::InventoryLines;
 pub(crate) async fn import_external(
     a: &App,
     h: &RequestContext,

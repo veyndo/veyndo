@@ -1,11 +1,6 @@
 //! Conversions from library errors into the shared error contract; the wire messages are part of the public API.
-use crate::{Error, StatusCode, bad, conflict};
+use crate::{Error, StatusCode, conflict};
 
-impl From<veyndo_commerce::ValidationError> for Error {
-    fn from(error: veyndo_commerce::ValidationError) -> Self {
-        bad(error.to_string())
-    }
-}
 impl From<sqlx::Error> for Error {
     fn from(e: sqlx::Error) -> Self {
         if matches!(e, sqlx::Error::PoolTimedOut) {

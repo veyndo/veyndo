@@ -182,7 +182,7 @@ The storefront and Studio use that same shop identity and transaction boundary. 
 
 ## Choose a starting point
 
-For Rust integrations, the [Commerce crate guide](../crates/commerce/README.md)
+For Rust integrations, the [Commerce crate guide](../components/pricing/README.md)
 shows shared product, cart, contact and address contracts. Its contact example
 runs without a server. The host still owns account identity, PII admission and
 the atomic order transaction. Independent HTTP/MCP hosting for the remaining

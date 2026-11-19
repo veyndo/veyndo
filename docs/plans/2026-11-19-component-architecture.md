@@ -115,10 +115,9 @@ Rules that hold from the first component on:
 - [ ] Replace the `App` state object by per-component state plus ports. Done so
       far: `veyndo_core::State` (database, HTTP client, admission) that the server
       state dereferences to; the outbox `Projector` port.
-- [ ] Remove the dependencies `core` has on other components. One is left: the
-      conversion from the pricing validation error, which moves to
-      `components/pricing` in phase 2. Server wiring (`App`, outbox routes) is
-      assigned to the host; crate-to-crate dependencies are read from crate names.
+- [x] Remove the dependencies `core` has on other components (`uses` of core in
+      `components.json` is empty). Server wiring (`App`, outbox routes) is assigned
+      to the host; crate-to-crate dependencies are read from crate names.
 - [ ] `components/identity` with `types/`, `store/`, `service/`, `http/`.
 - [x] Ban new `use super::*` / `use crate::*`: `glob_imports` per component in
       `components.json` only falls (528 files at the start); component crates have none.
@@ -127,8 +126,11 @@ Done when the server builds on both crates without glob imports from them.
 
 ## Phase 2: pilot `pricing`
 
-- [ ] Merge `src/currencies`, taxes, customer groups and `crates/commerce` into
-      `components/pricing` in the target layout.
+- [x] `crates/commerce` is `components/pricing` (`veyndo-pricing`) with its rules
+      under `domain/`. The `service` feature (default) adds what needs `core`;
+      without it the crate is the pure domain, which the migration app uses.
+- [ ] Move `src/currencies`, taxes and customer groups into `components/pricing`
+      as `types/`, `store/`, `service/`, `http/`.
 - [ ] Money is one type in minor units everywhere; the column "uses floating
       point" on the proof coverage page is zero for this component.
 - [ ] Typed DTOs at the interface; `sqlx::query_as!` with offline cache in `store/`.

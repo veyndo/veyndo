@@ -4,7 +4,7 @@
   "policies": {
     "discount_cap": {
       "bindings": [
-        "crates/commerce/src/discount.rs"
+        "components/pricing/src/domain/discount.rs"
       ],
       "theorems": [
         "discount_bounded",
@@ -266,7 +266,7 @@
     },
     "currency_scale_admissible": {
       "bindings": [
-        "crates/commerce/src/money.rs"
+        "components/pricing/src/domain/money.rs"
       ],
       "theorems": [
         "currency_scale_exact",
@@ -475,7 +475,7 @@
     },
     "external_amount_admissible": {
       "bindings": [
-        "crates/commerce/src/external_order.rs"
+        "components/pricing/src/domain/external_order.rs"
       ],
       "theorems": [
         "external_amount_exact",
@@ -484,7 +484,7 @@
     },
     "external_paid_total_admissible": {
       "bindings": [
-        "crates/commerce/src/external_order.rs"
+        "components/pricing/src/domain/external_order.rs"
       ],
       "theorems": [
         "external_paid_total_exact",
@@ -687,8 +687,8 @@
     },
     "components/core/src/conversions.rs": {
       "status": "unproved",
-      "sha256": "13514612fbe1d4061533cd23ebdf746ad3a3512c78e9e742db950b82603693a1",
-      "review": "Component architecture phase 0 and first core crate: the error contract moved unchanged from src/failure.rs and src/foundation.rs to components/core (wire messages, status mapping and retry header identical; the permission scope is resolved by the caller, the inference conversion lives beside its error type). Structure check drops the file length limit and adds the component map; clippy limits function length. Core and cognition unit tests pass. SQL, HTTP and provider behaviour is not formally proved."
+      "sha256": "6a4ad272f91ee9ce23ecded4c69db741c0a0298838c2bbd6df5bb21cf8fa6678",
+      "review": "The commerce crate became components/pricing with its rules under domain/; no rule changed"
     },
     "components/core/src/database/authority.rs": {
       "status": "unproved",
@@ -769,6 +769,91 @@
       "status": "unproved",
       "sha256": "43278481afd65222ac1a7e6c26a5450aa67a5b09072f02b3146def25cb6214f2",
       "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
+    },
+    "components/pricing/examples/customer_contract.rs": {
+      "status": "unproved",
+      "sha256": "b2d7ff94933d8ad9a9bee2eac2309ec287be5f0c35a54bc855afcfe96de51569",
+      "review": "The commerce crate became components/pricing with its rules under domain/; no rule changed"
+    },
+    "components/pricing/src/conversions.rs": {
+      "status": "unproved",
+      "sha256": "65746d1573a582e7a603cbeb613e0b9c8d5bb4c1afd46412081d90c64ed95632",
+      "review": "The commerce crate became components/pricing with its rules under domain/; no rule changed"
+    },
+    "components/pricing/src/domain/cart.rs": {
+      "status": "unproved",
+      "sha256": "967754486c3b3e6c8254581d9f3851e7e42d231b5e8d4dc04d699ba6299c2795",
+      "review": "Moved the unchanged persisted Item/Cart schema into Commerce with typed host context parameters. Native aliases bind the original POS, B2B, App and Checkout types; StoredCart retains tenant/token/status and hydration. Seventeen Commerce tests, native handoff/review, all four App quote hooks, POS, B2B and B2B UCP passed with PostgreSQL. Legacy defaults and malformed context rejection passed. No new mathematical claim."
+    },
+    "components/pricing/src/domain/catalog.rs": {
+      "status": "unproved",
+      "sha256": "13367b7553a93cb82ae5faf9c5b5ffd360c3710c65b44437aa194f5162cb4a0c",
+      "review": "Moved unchanged Product and Tier serialization contracts into the transport-free Commerce crate. Native hydration and context reexports preserve callers. Fourteen Commerce tests, 1446 original PHP context cases, PostgreSQL catalog and automation order/invoice/privacy suites passed; dependency negative controls passed. No new mathematical claim."
+    },
+    "components/pricing/src/domain/customer/address.rs": {
+      "status": "unproved",
+      "sha256": "18b9d48ae007917c61a64cd29e0441ba5a9fa91d53d0eb9d5b0020babd3ae3fd",
+      "review": "Reviewed pure Contact/Address extraction: original strict wire fields, defaults, normalization, byte/calendar checks and safe validation messages retained in Commerce; native PII/account ownership, geography/payment admission and transactions unchanged. Portable crate cases and seven actual HTTP/PostgreSQL suites passed."
+    },
+    "components/pricing/src/domain/customer/contact.rs": {
+      "status": "unproved",
+      "sha256": "3e470e34fcca478004e0c2add480bc2c3cc24def2d52afec98dddfad4d1ca145",
+      "review": "Reviewed pure Contact/Address extraction: original strict wire fields, defaults, normalization, byte/calendar checks and safe validation messages retained in Commerce; native PII/account ownership, geography/payment admission and transactions unchanged. Portable crate cases and seven actual HTTP/PostgreSQL suites passed."
+    },
+    "components/pricing/src/domain/customer/contract_tests.rs": {
+      "status": "unproved",
+      "sha256": "d92c83205144f84a997b4a90060dc16c7a4cf05ece474e3deb34ae8dee0bf331",
+      "review": "The commerce crate became components/pricing with its rules under domain/; no rule changed"
+    },
+    "components/pricing/src/domain/customer/mod.rs": {
+      "status": "unproved",
+      "sha256": "5bb597f831f19640d89cca0a93e427c71efeddd3252b46caa6082c068cdac069",
+      "review": "Moved paid external order DTO and reconciliation without changing original field order, bounds, errors, or verified kernel predicates. Native still owns admission and the legacy display projection. Shared Commerce unit tests and exchange contract guard pass."
+    },
+    "components/pricing/src/domain/discount.rs": {
+      "status": "reviewed-binding",
+      "sha256": "908c8d2c7d2c4200a1ad704abad971c124a205caa5b22807cbe79c1fa8eddcba",
+      "review": "Reviewed shared discount allocator: u128 positive sum and bounded per-line remainder carry preserve cumulative rounding; app price targets reject overflow before quote mutation; independent boundary and native promotion regressions."
+    },
+    "components/pricing/src/domain/discount_boundaries.rs": {
+      "status": "unproved",
+      "sha256": "716482f6adf361b9e445d7b8242c82432df11f98938a013f325e16fcd0bd55e9",
+      "review": "Reviewed shared discount allocator: u128 positive sum and bounded per-line remainder carry preserve cumulative rounding; app price targets reject overflow before quote mutation; independent boundary and native promotion regressions."
+    },
+    "components/pricing/src/domain/external_order.rs": {
+      "status": "reviewed-binding",
+      "sha256": "28433f6a9c86207623fa4c69625725da33982e33d2dfa5b6e2c8e812891277b1",
+      "review": "Moved paid external order DTO and reconciliation without changing original field order, bounds, errors, or verified kernel predicates. Native still owns admission and the legacy display projection. Shared Commerce unit tests and exchange contract guard pass."
+    },
+    "components/pricing/src/domain/inventory.rs": {
+      "status": "unproved",
+      "sha256": "3dd4fe71f3df9f29ea1df9134847fa33be81eafc3e23dcf7c7cceccb372d8d7c",
+      "review": "Both native order paths retain their existing ordered locks, availability predicates, SQL and write order. Checked positive i32 conversion preserves the existing allocation ledger range. One aligned batch feeds both writes; unit cases cover signed limits and line pairing. No Lean predicate, schema, cancellation or provider change."
+    },
+    "components/pricing/src/domain/money.rs": {
+      "status": "reviewed-binding",
+      "sha256": "eccf8be0775f1531a2520c4c8254cccae04b27507c9035bdb46ff25a3d0b14dd",
+      "review": "Review compiler-enforced foundation crates with unchanged native owners; native provider read-tool aliases and current authorization, private checkpoint continuation and versioned prompt evidence; fixed subscriber acknowledgements preserve commit gaps, independent quarantine and explicit replay; traced requests/tasks/outbox without payloads; exact decimal-to-minor-unit rounding retains legacy price boundary; real SQL poison-isolation regression passes and workspace unit/clippy checks pass"
+    },
+    "components/pricing/src/domain/pricing.rs": {
+      "status": "unproved",
+      "sha256": "421ebdf7a78c2b46da9c1ee567d2df7052077db7f7c7919cccb516b1e020baac",
+      "review": "Initial extraction of 13 production policies; surrounding Rust explicitly unproved; existing HTTP regression suites retained"
+    },
+    "components/pricing/src/domain/validation.rs": {
+      "status": "unproved",
+      "sha256": "a99195e93e7d85ee91e1e43cac9987704fda0dfaf59a3153e177994a8400a901",
+      "review": "Moved paid external order DTO and reconciliation without changing original field order, bounds, errors, or verified kernel predicates. Native still owns admission and the legacy display projection. Shared Commerce unit tests and exchange contract guard pass."
+    },
+    "components/pricing/src/domain.rs": {
+      "status": "unproved",
+      "sha256": "786dba0be120bf64a79f4da18dde1539b97942e87c0c450e5e8aac6e0faad728",
+      "review": "The commerce crate became components/pricing with its rules under domain/; no rule changed"
+    },
+    "components/pricing/src/lib.rs": {
+      "status": "unproved",
+      "sha256": "7a402b5646e065cf6d0a9c58b2a520079173f4e78352a7c59fa2f452d4b853a2",
+      "review": "The commerce crate became components/pricing with its rules under domain/; no rule changed"
     },
     "crates/apps/src/component_runtime.rs": {
       "status": "unproved",
@@ -909,81 +994,6 @@
       "status": "unproved",
       "sha256": "59073e8455c0a79b15a7d5968e1fb7bbb65f4202d295ab976c684d6470f152cb",
       "review": "Test-only change: fixed fixtures verify prompt evidence for merchant planner versions 1 and 6 independently of registry order, including embedded prompt markers and private context. All 16 cognition unit tests pass."
-    },
-    "crates/commerce/examples/customer_contract.rs": {
-      "status": "unproved",
-      "sha256": "0244b5b069f268478178980b1e48b8c23789751e444949c05440ba20602d36bc",
-      "review": "Reviewed pure Contact/Address extraction: original strict wire fields, defaults, normalization, byte/calendar checks and safe validation messages retained in Commerce; native PII/account ownership, geography/payment admission and transactions unchanged. Portable crate cases and seven actual HTTP/PostgreSQL suites passed."
-    },
-    "crates/commerce/src/cart.rs": {
-      "status": "unproved",
-      "sha256": "967754486c3b3e6c8254581d9f3851e7e42d231b5e8d4dc04d699ba6299c2795",
-      "review": "Moved the unchanged persisted Item/Cart schema into Commerce with typed host context parameters. Native aliases bind the original POS, B2B, App and Checkout types; StoredCart retains tenant/token/status and hydration. Seventeen Commerce tests, native handoff/review, all four App quote hooks, POS, B2B and B2B UCP passed with PostgreSQL. Legacy defaults and malformed context rejection passed. No new mathematical claim."
-    },
-    "crates/commerce/src/catalog.rs": {
-      "status": "unproved",
-      "sha256": "13367b7553a93cb82ae5faf9c5b5ffd360c3710c65b44437aa194f5162cb4a0c",
-      "review": "Moved unchanged Product and Tier serialization contracts into the transport-free Commerce crate. Native hydration and context reexports preserve callers. Fourteen Commerce tests, 1446 original PHP context cases, PostgreSQL catalog and automation order/invoice/privacy suites passed; dependency negative controls passed. No new mathematical claim."
-    },
-    "crates/commerce/src/customer/address.rs": {
-      "status": "unproved",
-      "sha256": "18b9d48ae007917c61a64cd29e0441ba5a9fa91d53d0eb9d5b0020babd3ae3fd",
-      "review": "Reviewed pure Contact/Address extraction: original strict wire fields, defaults, normalization, byte/calendar checks and safe validation messages retained in Commerce; native PII/account ownership, geography/payment admission and transactions unchanged. Portable crate cases and seven actual HTTP/PostgreSQL suites passed."
-    },
-    "crates/commerce/src/customer/contact.rs": {
-      "status": "unproved",
-      "sha256": "3e470e34fcca478004e0c2add480bc2c3cc24def2d52afec98dddfad4d1ca145",
-      "review": "Reviewed pure Contact/Address extraction: original strict wire fields, defaults, normalization, byte/calendar checks and safe validation messages retained in Commerce; native PII/account ownership, geography/payment admission and transactions unchanged. Portable crate cases and seven actual HTTP/PostgreSQL suites passed."
-    },
-    "crates/commerce/src/customer/contract_tests.rs": {
-      "status": "unproved",
-      "sha256": "2cdfd32d24f16885b7825150df584d8ea307ccaae91df2f4fc22555e2696112c",
-      "review": "Reviewed pure Contact/Address extraction: original strict wire fields, defaults, normalization, byte/calendar checks and safe validation messages retained in Commerce; native PII/account ownership, geography/payment admission and transactions unchanged. Portable crate cases and seven actual HTTP/PostgreSQL suites passed."
-    },
-    "crates/commerce/src/customer/mod.rs": {
-      "status": "unproved",
-      "sha256": "5bb597f831f19640d89cca0a93e427c71efeddd3252b46caa6082c068cdac069",
-      "review": "Moved paid external order DTO and reconciliation without changing original field order, bounds, errors, or verified kernel predicates. Native still owns admission and the legacy display projection. Shared Commerce unit tests and exchange contract guard pass."
-    },
-    "crates/commerce/src/discount.rs": {
-      "status": "reviewed-binding",
-      "sha256": "908c8d2c7d2c4200a1ad704abad971c124a205caa5b22807cbe79c1fa8eddcba",
-      "review": "Reviewed shared discount allocator: u128 positive sum and bounded per-line remainder carry preserve cumulative rounding; app price targets reject overflow before quote mutation; independent boundary and native promotion regressions."
-    },
-    "crates/commerce/src/discount_boundaries.rs": {
-      "status": "unproved",
-      "sha256": "716482f6adf361b9e445d7b8242c82432df11f98938a013f325e16fcd0bd55e9",
-      "review": "Reviewed shared discount allocator: u128 positive sum and bounded per-line remainder carry preserve cumulative rounding; app price targets reject overflow before quote mutation; independent boundary and native promotion regressions."
-    },
-    "crates/commerce/src/external_order.rs": {
-      "status": "reviewed-binding",
-      "sha256": "28433f6a9c86207623fa4c69625725da33982e33d2dfa5b6e2c8e812891277b1",
-      "review": "Moved paid external order DTO and reconciliation without changing original field order, bounds, errors, or verified kernel predicates. Native still owns admission and the legacy display projection. Shared Commerce unit tests and exchange contract guard pass."
-    },
-    "crates/commerce/src/inventory.rs": {
-      "status": "unproved",
-      "sha256": "3dd4fe71f3df9f29ea1df9134847fa33be81eafc3e23dcf7c7cceccb372d8d7c",
-      "review": "Both native order paths retain their existing ordered locks, availability predicates, SQL and write order. Checked positive i32 conversion preserves the existing allocation ledger range. One aligned batch feeds both writes; unit cases cover signed limits and line pairing. No Lean predicate, schema, cancellation or provider change."
-    },
-    "crates/commerce/src/lib.rs": {
-      "status": "unproved",
-      "sha256": "f612f9317405db2129a79f9ca1dc04c78e30a840b928587dc31d5f230396c73c",
-      "review": "Both native order paths retain their existing ordered locks, availability predicates, SQL and write order. Checked positive i32 conversion preserves the existing allocation ledger range. One aligned batch feeds both writes; unit cases cover signed limits and line pairing. No Lean predicate, schema, cancellation or provider change."
-    },
-    "crates/commerce/src/money.rs": {
-      "status": "reviewed-binding",
-      "sha256": "eccf8be0775f1531a2520c4c8254cccae04b27507c9035bdb46ff25a3d0b14dd",
-      "review": "Review compiler-enforced foundation crates with unchanged native owners; native provider read-tool aliases and current authorization, private checkpoint continuation and versioned prompt evidence; fixed subscriber acknowledgements preserve commit gaps, independent quarantine and explicit replay; traced requests/tasks/outbox without payloads; exact decimal-to-minor-unit rounding retains legacy price boundary; real SQL poison-isolation regression passes and workspace unit/clippy checks pass"
-    },
-    "crates/commerce/src/pricing.rs": {
-      "status": "unproved",
-      "sha256": "421ebdf7a78c2b46da9c1ee567d2df7052077db7f7c7919cccb516b1e020baac",
-      "review": "Initial extraction of 13 production policies; surrounding Rust explicitly unproved; existing HTTP regression suites retained"
-    },
-    "crates/commerce/src/validation.rs": {
-      "status": "unproved",
-      "sha256": "a99195e93e7d85ee91e1e43cac9987704fda0dfaf59a3153e177994a8400a901",
-      "review": "Moved paid external order DTO and reconciliation without changing original field order, bounds, errors, or verified kernel predicates. Native still owns admission and the legacy display projection. Shared Commerce unit tests and exchange contract guard pass."
     },
     "crates/flow-graph/src/catalog.rs": {
       "status": "unproved",
@@ -1392,8 +1402,8 @@
     },
     "extensions/apps/migration/contract/money.rs": {
       "status": "unproved",
-      "sha256": "cb699ebe38bc137881c330fc2a3cd7d15bb9a52fa221faaaeda37d59b799bc63",
-      "review": "Reviewed native source-neutral imports, historical no-purchase effects, scoped job leases/creator/package/digest fences and shared managed-record replay. Independent boundary findings fixed with unknown-field rejection and eight concurrent editor/import cases; actual signed-runtime/source-service/native-checkout tests pass. SQL and external source equivalence remain outside extracted proofs."
+      "sha256": "94d725aeb0f63e02ae7671c75520b76e061955a98e97ebe234607ae3fbb9f013",
+      "review": "The commerce crate became components/pricing with its rules under domain/; no rule changed"
     },
     "extensions/apps/migration/service/batch.rs": {
       "status": "unproved",
@@ -1407,8 +1417,8 @@
     },
     "extensions/apps/migration/service/config.rs": {
       "status": "unproved",
-      "sha256": "9c672f4849f9d605a9c49ddc9540052b16014f1215b9465b90d3e2f233ec5e35",
-      "review": "2026-10-19 public export interoperability fix: explicit opt-in omits authorization on manifest and same-origin page reads, private credential mode remains default; HTTPS, DNS pinning, separate credentials, SHA-256/content bounds and native review unchanged. Actual public immutable GitHub HTTPS export now yields exactly three normalized synthetic records; local protected/public transport controls assert no leaked retained token. Core manifest and Rust source reviewed; no new SQL/table/permission or extracted pure commerce policy."
+      "sha256": "b956527316fb310400cc8340cbbe57f22f05ad0ed3f16c4dbdb4578d2fa16ce0",
+      "review": "The commerce crate became components/pricing with its rules under domain/; no rule changed"
     },
     "extensions/apps/migration/service/core.rs": {
       "status": "unproved",
@@ -1427,8 +1437,8 @@
     },
     "extensions/apps/migration/service/export_pack.rs": {
       "status": "unproved",
-      "sha256": "a9eb1f03ec173a65b5bef82fdea48e3458a020c75b05267a28d41661a07c136d",
-      "review": "2026-10-19 public export interoperability fix: explicit opt-in omits authorization on manifest and same-origin page reads, private credential mode remains default; HTTPS, DNS pinning, separate credentials, SHA-256/content bounds and native review unchanged. Actual public immutable GitHub HTTPS export now yields exactly three normalized synthetic records; local protected/public transport controls assert no leaked retained token. Core manifest and Rust source reviewed; no new SQL/table/permission or extracted pure commerce policy."
+      "sha256": "6e3bcb094348b6d71e0d08fc0a8bd11759d9a36b242d9cc75b772e3b3e950382",
+      "review": "The commerce crate became components/pricing with its rules under domain/; no rule changed"
     },
     "extensions/apps/migration/service/export_readiness.rs": {
       "status": "unproved",
@@ -2632,8 +2642,8 @@
     },
     "src/accounts/contacts.rs": {
       "status": "unproved",
-      "sha256": "85e90e63f8a2b8be1811c3f2ce3fac463db2007721de9b18e8e56a397ca10e44",
-      "review": "Reviewed pure Contact/Address extraction: original strict wire fields, defaults, normalization, byte/calendar checks and safe validation messages retained in Commerce; native PII/account ownership, geography/payment admission and transactions unchanged. Portable crate cases and seven actual HTTP/PostgreSQL suites passed."
+      "sha256": "47d221bed8338d2aab07adb5bd6900c9a8c294645b62cef33d70080a3798c789",
+      "review": "The commerce crate became components/pricing with its rules under domain/; no rule changed"
     },
     "src/accounts/demo.rs": {
       "status": "unproved",
@@ -3777,8 +3787,8 @@
     },
     "src/checkout/commit.rs": {
       "status": "reviewed-binding",
-      "sha256": "f1c48babcacf6a5910a5ac00b1b5ba5991093ac3f56b5e25943ff1a57017dc3a",
-      "review": "Both native order paths retain their existing ordered locks, availability predicates, SQL and write order. Checked positive i32 conversion preserves the existing allocation ledger range. One aligned batch feeds both writes; unit cases cover signed limits and line pairing. No Lean predicate, schema, cancellation or provider change."
+      "sha256": "5d6b18fca6e959cb9bffd54ba390512fa37d8be94cdc94469d94278dc08c8eae",
+      "review": "The commerce crate became components/pricing with its rules under domain/; no rule changed"
     },
     "src/checkout/lock.rs": {
       "status": "reviewed-binding",
@@ -4067,13 +4077,13 @@
     },
     "src/commerce/external_order_input.rs": {
       "status": "unproved",
-      "sha256": "7645cb6845c6eb73720867ac2deb52c994c5fa73689bb62076a82cf3c9a5cc02",
-      "review": "Moved paid external order DTO and reconciliation without changing original field order, bounds, errors, or verified kernel predicates. Native still owns admission and the legacy display projection. Shared Commerce unit tests and exchange contract guard pass."
+      "sha256": "e92a62be9814a97c1af9cadfa6e2a67d379b9980f3e5b8ad356550ae3d4a98c8",
+      "review": "The commerce crate became components/pricing with its rules under domain/; no rule changed"
     },
     "src/commerce/external_orders.rs": {
       "status": "reviewed-binding",
-      "sha256": "1b7dfd5e90a873ab06e45adefbb2691fcc4f470a91bf749db8493f837e54c0e0",
-      "review": "Both native order paths retain their existing ordered locks, availability predicates, SQL and write order. Checked positive i32 conversion preserves the existing allocation ledger range. One aligned batch feeds both writes; unit cases cover signed limits and line pairing. No Lean predicate, schema, cancellation or provider change."
+      "sha256": "32b24b797f13fd7b5dee497209a07718c6a2083fef44f7dffb93f6dbaad8e6c4",
+      "review": "The commerce crate became components/pricing with its rules under domain/; no rule changed"
     },
     "src/commerce/fulfillment.rs": {
       "status": "reviewed-binding",
@@ -4097,8 +4107,8 @@
     },
     "src/commerce/inventory.rs": {
       "status": "unproved",
-      "sha256": "1a1e935758ea3c43bb1cb700ae68832540404fe6cb36b254ca17fb00a2459cff",
-      "review": "Both native order paths retain their existing ordered locks, availability predicates, SQL and write order. Checked positive i32 conversion preserves the existing allocation ledger range. One aligned batch feeds both writes; unit cases cover signed limits and line pairing. No Lean predicate, schema, cancellation or provider change."
+      "sha256": "4bb1d0206e2badefdc02b3898d915be552397f0f2c8ff39fedd545344bf71e4b",
+      "review": "The commerce crate became components/pricing with its rules under domain/; no rule changed"
     },
     "src/commerce/method_text.rs": {
       "status": "unproved",
@@ -4267,8 +4277,8 @@
     },
     "src/commerce/types.rs": {
       "status": "unproved",
-      "sha256": "aa660c5093a816024c0d6e366bff306190d87bd8fa1cf07981cfd6bc4f9799ea",
-      "review": "Trade network: commerce/supply.rs adds validated supplier links and a ceiling to the settings; commerce/supply_proposal.rs acts as an unauthenticated guest at the supplier shop through existing cart, signed offer and checkout handoff owners, never with merchant authority, and approval re-verifies the offer against link and ceiling without placing an order; no extracted policy changed; providers suite covers forged, unlinked, own-shop and ceiling cases"
+      "sha256": "bae646704bc24ccdb75da752930fcdc91accc0b126f0eea94c9c32207bfd5644",
+      "review": "The commerce crate became components/pricing with its rules under domain/; no rule changed"
     },
     "src/concierge.rs": {
       "status": "unproved",
@@ -4277,8 +4287,8 @@
     },
     "src/context.rs": {
       "status": "unproved",
-      "sha256": "b45436729a3faa304b88f55f3e308d92448b66c3de8c41ff36af7e567f9fe0d2",
-      "review": "Moved unchanged Product and Tier serialization contracts into the transport-free Commerce crate. Native hydration and context reexports preserve callers. Fourteen Commerce tests, 1446 original PHP context cases, PostgreSQL catalog and automation order/invoice/privacy suites passed; dependency negative controls passed. No new mathematical claim."
+      "sha256": "16d35a993ccf629e6513b77647b3a264b9964a859838609054e4f43ded78cb5e",
+      "review": "The commerce crate became components/pricing with its rules under domain/; no rule changed"
     },
     "src/currencies/capabilities.rs": {
       "status": "unproved",
@@ -4592,8 +4602,8 @@
     },
     "src/lib.rs": {
       "status": "unproved",
-      "sha256": "36ed6b19aa460fd0ede2f16cafaa10690cba9464916857110454d68b47551d61",
-      "review": "Reviewed pure Contact/Address extraction: original strict wire fields, defaults, normalization, byte/calendar checks and safe validation messages retained in Commerce; native PII/account ownership, geography/payment admission and transactions unchanged. Portable crate cases and seven actual HTTP/PostgreSQL suites passed."
+      "sha256": "8d749bb8bda6e1070c20a47efe91a84f6662d97bf141d8b1816969201ad8c8f1",
+      "review": "The commerce crate became components/pricing with its rules under domain/; no rule changed"
     },
     "src/localization.rs": {
       "status": "unproved",
@@ -5647,12 +5657,12 @@
       "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
     },
     "Cargo.lock": {
-      "sha256": "08971594435001207650df05543fe93acab112cffc1a0eee216d87619c15af17",
-      "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
+      "sha256": "fc589f6b31d31fc46bf7fe80846581dc54ce31b31607b964d5dd89880743c180",
+      "review": "The commerce crate became components/pricing with its rules under domain/; no rule changed"
     },
     "Cargo.toml": {
-      "sha256": "19e4fdc90d60f314d67dcf1c1f752635ad0c26d504ecfbdb49ea28d21c7b0acb",
-      "review": "Component architecture phase 0 and first core crate: the error contract moved unchanged from src/failure.rs and src/foundation.rs to components/core (wire messages, status mapping and retry header identical; the permission scope is resolved by the caller, the inference conversion lives beside its error type). Structure check drops the file length limit and adds the component map; clippy limits function length. Core and cognition unit tests pass. SQL, HTTP and provider behaviour is not formally proved."
+      "sha256": "0911199a21787f67520814632a264d203e3879c90e6e27734778d0fa52c55354",
+      "review": "The commerce crate became components/pricing with its rules under domain/; no rule changed"
     },
     "components.lock.json": {
       "sha256": "7b4a931ad81c6665d5d95e6b42b8ef4d09ebe8971ac24998d8f94bb6a737ff53",
@@ -5777,10 +5787,6 @@
     "crates/cognition/prompts/merchant-repair.v1.txt": {
       "sha256": "703a48219790f0746e893117dfeddc88438de3a6eb123af0722900a3b87220ef",
       "review": "Review shared read-only planner admission and one checkpointed correction using original context, current authorized app contracts and unchanged personal approval; managed page fields use app-owned schema; translation and malicious checkout-correction HTTP regressions pass, workspace units and clippy pass"
-    },
-    "crates/commerce/Cargo.toml": {
-      "sha256": "aae017a1931861c398001a481dfc3f17c0954cb89cc1247d2947934ebefb1d26",
-      "review": "Review compiler-enforced foundation crates with unchanged native owners; native provider read-tool aliases and current authorization, private checkpoint continuation and versioned prompt evidence; fixed subscriber acknowledgements preserve commit gaps, independent quarantine and explicit replay; traced requests/tasks/outbox without payloads; exact decimal-to-minor-unit rounding retains legacy price boundary; real SQL poison-isolation regression passes and workspace unit/clippy checks pass"
     },
     "crates/flow-graph/Cargo.toml": {
       "sha256": "8afb55a534c5cb946b952c6d56060b3ec8efe4823c3b494c16c42ef6a5b7689c",
@@ -6371,8 +6377,8 @@
       "review": "Reviewed marketplace money guard consumers and exact properties, cap-neighbour comparison cases, native stock binding and local regressions; external protocols and tax law remain tested unproved boundaries"
     },
     "scripts/formal/coverage_page.py": {
-      "sha256": "774da34c086414f337c04c1c2eab7566b781b56022f7d68c82f98491caa50c09",
-      "review": "Proof coverage page: scripts/formal/coverage_page.py renders docs/proof-coverage.md from the manifest and kernel sources and is checked in the quick lane; no Rust, Lean or policy change"
+      "sha256": "436601ccb36deb2f1d7be2119587c496242558ce5f12415bb6076d6686045b57",
+      "review": "The commerce crate became components/pricing with its rules under domain/; no rule changed"
     },
     "scripts/formal/extract.py": {
       "sha256": "18ca3e4ba2989fbef9e1413cf0cc0a726ec21ea8a6bee4a7eed5f06818b14583",

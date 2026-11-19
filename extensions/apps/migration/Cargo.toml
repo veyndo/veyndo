@@ -22,5 +22,5 @@ base64.workspace = true
 chrono.workspace = true
 chrono-tz.workspace = true
 scraper.workspace = true
-veyndo-commerce = { path = "../../../crates/commerce" }
+veyndo-pricing = { path = "../../../components/pricing", default-features = false }
 veyndo-runtime = { path = "../../../crates/runtime" }

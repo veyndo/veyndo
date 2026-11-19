@@ -1,5 +1,5 @@
 //! Compatibility and hostile-field cases for portable contact/address inputs; no authorization is inferred.
-use super::*;
+use super::{Address, Contact};
 use serde_json::{Value, json};
 
 fn address() -> Value {

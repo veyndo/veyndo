@@ -18,7 +18,7 @@ DOMAINS = {
 }
 # The money path: every file a price, an order total or a payment passes through.
 MONEY = [
-    ('Money primitives and discounts', lambda p: p.startswith('crates/commerce/src/')),
+    ('Money primitives and discounts', lambda p: p.startswith('components/pricing/src/domain/')),
     ('Cart and prices', lambda p: re.match(r'src/cart_\w+\.rs$', p) is not None),
     ('Checkout and orders', lambda p: p.startswith('src/checkout/') or re.match(r'src/(checkout_\w+|order_\w+)\.rs$', p) is not None),
     ('Payments and refunds', lambda p: p.startswith('src/payments/')),

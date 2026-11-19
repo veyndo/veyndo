@@ -1,6 +1,6 @@
 //! Checkout selection and configuration data contracts.
 use super::*;
-pub(crate) use veyndo_commerce::customer::Address;
+pub(crate) use veyndo_pricing::customer::Address;
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -25,7 +25,7 @@ pub(crate) struct CheckoutSelection {
     pub payment_funding: Option<crate::payments::FundingChoice>,
 }
 pub(crate) fn country_default() -> String {
-    veyndo_commerce::customer::country_default()
+    veyndo_pricing::customer::country_default()
 }
 pub(crate) fn shipping_default() -> String {
     "pickup".into()

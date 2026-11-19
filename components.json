@@ -20,9 +20,7 @@
         "tenants",
         "veyndo_authority"
       ],
-      "uses": [
-        "pricing"
-      ],
+      "uses": [],
       "foreign_tables": [
         "app_deliveries",
         "app_schedule_runs",
@@ -285,7 +283,7 @@
     "pricing": {
       "title": "Money, price calculation, discounts, currencies, taxes and customer groups",
       "sources": [
-        "crates/commerce",
+        "components/pricing",
         "src/currencies",
         "src/commerce/tax.rs",
         "src/commerce/tax_context.rs",
@@ -321,7 +319,7 @@
         "outbox",
         "products"
       ],
-      "glob_imports": 14,
+      "glob_imports": 13,
       "untyped_access": 20,
       "sql_outside_store": 4
     },

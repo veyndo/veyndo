@@ -3494,10 +3494,10 @@ dependencies = [
  "veyndo-apps",
  "veyndo-automation",
  "veyndo-cognition",
- "veyndo-commerce",
  "veyndo-core",
  "veyndo-flow-graph",
  "veyndo-kernel",
+ "veyndo-pricing",
  "veyndo-runtime",
  "wasmtime",
  "wat",
@@ -3598,15 +3598,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "veyndo-commerce"
-version = "0.5.0"
-dependencies = [
- "serde",
- "serde_json",
- "veyndo-kernel",
-]
-
-[[package]]
 name = "veyndo-core"
 version = "0.5.0"
 dependencies = [
@@ -3619,7 +3610,6 @@ dependencies = [
  "tokio",
  "tracing",
  "uuid",
- "veyndo-commerce",
  "veyndo-kernel",
  "veyndo-runtime",
 ]
@@ -3663,8 +3653,18 @@ dependencies = [
  "sha2 0.10.9",
  "tokio",
  "uuid",
- "veyndo-commerce",
+ "veyndo-pricing",
  "veyndo-runtime",
+]
+
+[[package]]
+name = "veyndo-pricing"
+version = "0.5.0"
+dependencies = [
+ "serde",
+ "serde_json",
+ "veyndo-core",
+ "veyndo-kernel",
 ]
 
 [[package]]

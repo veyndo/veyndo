@@ -19,7 +19,7 @@ This folder owns the Rust modules listed below. Each source begins with its resp
 - [`concierge.rs`](concierge.rs): Read-only storefront shopping advisor.
 - [`context.rs`](context.rs): Bounded behavioral ports of Shopware 6.7.14.2 context and product-cart selection.
 - [`customer.rs`](customer.rs): Customer credential verification and context rotation.
-- [`discount.rs`](../crates/commerce/src/discount.rs): Integer-cent proportional discount allocation; cumulative rounding conserves the exact basket discount.
+- [`discount.rs`](../components/pricing/src/domain/discount.rs): Integer-cent proportional discount allocation; cumulative rounding conserves the exact basket discount.
 - [`experience.rs`](experience.rs): Persisted storefront layout policy and observed synthetic rewards.
 - [`extensions.rs`](extensions.rs): Merchant catalogue and Wasm extension activation/state.
 - [`foundation.rs`](foundation.rs): Application dependencies, error responses and request context helpers.
@@ -35,7 +35,7 @@ This folder owns the Rust modules listed below. Each source begins with its resp
 - [`order_routes.rs`](order_routes.rs): Merchant order read adapter.
 - [`outbox.rs`](outbox.rs): Durable outbox and audit projection worker.
 - [`planner.rs`](planner.rs): Grounded model planning, recorded inputs and proposed changes.
-- [`pricing.rs`](../crates/commerce/src/pricing.rs): Behavioral port of Shopware 6.7.14.2 quantity calculators.
+- [`pricing.rs`](../components/pricing/src/domain/pricing.rs): Behavioral port of Shopware 6.7.14.2 quantity calculators.
 - [`proposal_apply.rs`](proposal_apply.rs): Transactional application of approved, revision-bound proposals.
 - [`proposal_model.rs`](proposal_model.rs): Typed proposals and validation before persistence or execution.
 - [`proposal_routes.rs`](proposal_routes.rs): HTTP proposal creation, approval and task listing.

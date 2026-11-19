@@ -91,7 +91,7 @@ verified separately by native integration tests rather than proved by Lean.
 
 | Production policy | Lean guarantee | Actual consumer |
 |---|---|---|
-| `discount_cap` | Discount is bounded by both requested amount and goods total; remainder plus discount conserves the total | `crates/commerce/src/discount.rs` |
+| `discount_cap` | Discount is bounded by both requested amount and goods total; remainder plus discount conserves the total | `components/pricing/src/domain/discount.rs` |
 | `stock_admissible` | Admitted quantities are positive, within stock and conserve stock under subtraction | `src/order_checkout.rs`, `src/commerce/external_orders.rs` |
 | `refund_admissible` | Prior/reserved plus requested refund cannot exceed captured amount; zero refunds fail | `src/payments/operations.rs` |
 | `revision_admissible` | Admission requires an exact positive revision | `src/commerce/fulfillment.rs` |
@@ -120,8 +120,8 @@ verified separately by native integration tests rather than proved by Lean.
 | `planning_request_admissible` | Admission is exactly a read classification or an explicitly allowed planning operation | `src/agent_runs/controls.rs` |
 | `agent_preview_admissible` | Private continuation requires an active shop, personal session, matching owner and current preview | `src/agent_runs/authority.rs` |
 | `shop_request_admissible` | Active shops admit requests; paused shops require an admitted read; archived shops deny ordinary operations while settlement callbacks remain available | `src/platform/lifecycle.rs` |
-| `external_amount_admissible` | Gross and tax are bounded, tax cannot exceed gross, rates are bounded and zero rate cannot carry nonzero tax | `crates/commerce/src/external_order.rs` |
-| `external_paid_total_admissible` | A source order is paid with a positive, exactly reconciled total | `crates/commerce/src/external_order.rs` |
+| `external_amount_admissible` | Gross and tax are bounded, tax cannot exceed gross, rates are bounded and zero rate cannot carry nonzero tax | `components/pricing/src/domain/external_order.rs` |
+| `external_paid_total_admissible` | A source order is paid with a positive, exactly reconciled total | `components/pricing/src/domain/external_order.rs` |
 
 These last two properties constrain source snapshots. They do not verify tax law
 or authenticate a marketplace's payment assertion. The import adapter rejects
@@ -299,7 +299,7 @@ The provider extension adds `reservation_release_admissible`: only uncaptured at
 Three further extracted decisions add seven properties: `currency_scale_admissible`
 limits decimal precision, `resource_quota_admissible` admits positive bounded operator
 limits, and `payment_transition_admissible` defines the monotonic ledger graph,
-including late capture. `crates/commerce/src/money.rs`, `src/platform/quotas.rs` and
+including late capture. `components/pricing/src/domain/money.rs`, `src/platform/quotas.rs` and
 `src/payments/state.rs` are their real consumers. This increment brought the then-reviewed
 manifest to 34 policies and 72 named theorems; compiled Rust/Lean comparisons and negative
 mutations remain required. These proofs do not cover signed integer parsing,

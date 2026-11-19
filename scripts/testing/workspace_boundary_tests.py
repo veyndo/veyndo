@@ -10,11 +10,11 @@ def negative_controls(packages):
         package = next(p for p in rows if p['name'] == name)
         cases.append(rows)
         return package
-    for name, dependency in [('veyndo-apps', 'sqlx'), ('veyndo-commerce', 'veyndo-cognition'),
+    for name, dependency in [('veyndo-apps', 'sqlx'), ('veyndo-pricing', 'veyndo-cognition'),
                               ('veyndo-cognition', 'veyndo'), ('veyndo-kernel', 'tokio'), ('veyndo-marketplaces', 'veyndo'),
                               ('veyndo-marketplaces', 'sqlx'), ('veyndo-app-storage', 'veyndo'),
                               ('veyndo-app-storage', 'reqwest'), ('veyndo-apps', 'veyndo-app-storage'),
-                              ('veyndo-commerce', 'veyndo-app-storage'), ('veyndo-app-model', 'sqlx'),
+                              ('veyndo-pricing', 'veyndo-app-storage'), ('veyndo-app-model', 'sqlx'),
                               ('veyndo-app-model', 'veyndo-app-storage'), ('veyndo-app-model', 'veyndo-runtime'),
                               ('veyndo-app-model', 'veyndo'), ('veyndo-app-runtime', 'sqlx'),
                               ('veyndo-flow-graph', 'sqlx'), ('veyndo-flow-graph', 'veyndo'),
@@ -33,18 +33,18 @@ def negative_controls(packages):
         variant('veyndo-apps')['dependencies'].append(
             {'name': 'sqlx', 'rename': 'harmless_helpers', 'kind': kind, 'optional': True,
              'target': 'cfg(target_os = "linux")'})
-    variant('veyndo-commerce')['dependencies'].append({'name': 'business-helper'})
-    variant('veyndo-commerce')['dependencies'].append(
+    variant('veyndo-pricing')['dependencies'].append({'name': 'business-helper'})
+    variant('veyndo-pricing')['dependencies'].append(
         {'name': 'serde', 'path': str(ROOT / 'src')})
     dependency = next(d for d in variant('veyndo-apps')['dependencies'] if d['name'] == 'veyndo-kernel')
     dependency['path'] = str(ROOT / 'src')
     dependency = next(d for d in variant('veyndo-apps')['dependencies'] if d['name'] == 'veyndo-kernel')
     dependency.pop('path', None)
-    variant('veyndo-commerce')['targets'][0]['src_path'] = str(ROOT / 'src/lib.rs')
-    variant('veyndo-apps')['targets'][0]['src_path'] = str(ROOT / 'crates/commerce/src/lib.rs')
+    variant('veyndo-pricing')['targets'][0]['src_path'] = str(ROOT / 'src/lib.rs')
+    variant('veyndo-apps')['targets'][0]['src_path'] = str(ROOT / 'components/pricing/src/domain/lib.rs')
     variant('veyndo-kernel')['targets'].append(
         {'kind': ['custom-build'], 'src_path': str(ROOT / 'crates/kernel/build.rs')})
-    variant('veyndo-commerce')['manifest_path'] = str(ROOT / 'crates/apps/Cargo.toml')
+    variant('veyndo-pricing')['manifest_path'] = str(ROOT / 'crates/apps/Cargo.toml')
     unknown = copy.deepcopy(packages)
     unknown.append({'name': 'business-helper'})
     cases.append(unknown)

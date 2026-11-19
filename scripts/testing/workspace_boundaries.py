@@ -5,10 +5,10 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 OWNERS = {name: ROOT / 'crates' / name.removeprefix('veyndo-') for name in (
-    'veyndo-kernel', 'veyndo-flow-graph', 'veyndo-runtime', 'veyndo-commerce', 'veyndo-apps', 'veyndo-cognition',
+    'veyndo-kernel', 'veyndo-flow-graph', 'veyndo-runtime', 'veyndo-apps', 'veyndo-cognition',
     'veyndo-automation')}
 # Complete components live under components/<name>; the plan in docs/plans moves the root crate there.
-OWNERS.update({'veyndo-core': ROOT / 'components/core'})
+OWNERS.update({'veyndo-core': ROOT / 'components/core', 'veyndo-pricing': ROOT / 'components/pricing'})
 OWNERS.update({'veyndo': ROOT, 'veyndo-migration': ROOT / 'extensions/apps/migration',
                'veyndo-marketplaces': ROOT / 'extensions/apps/marketplaces',
                'veyndo-app-storage': ROOT / 'extensions/services/app-storage',
@@ -25,11 +25,11 @@ ALLOWED = {
     'veyndo-automation': {'veyndo-kernel'},
     'veyndo-runtime': {'veyndo-app-authority'},
     'veyndo-app-authority': set(),
-    'veyndo-commerce': {'veyndo-kernel'},
+    # The optional `service` feature adds the shared error contract; the domain alone needs only the kernel.
+    'veyndo-pricing': {'veyndo-kernel', 'veyndo-core'},
     'veyndo-apps': {'veyndo-kernel', 'veyndo-app-runtime'},
     'veyndo-cognition': {'veyndo-runtime', 'veyndo-kernel', 'veyndo-app-authority', 'veyndo-core'},
-    # Core carries the shared error contract; money validation errors are part of it.
-    'veyndo-core': {'veyndo-commerce', 'veyndo-kernel', 'veyndo-runtime'},
+    'veyndo-core': {'veyndo-kernel', 'veyndo-runtime'},
 }
 # Reviewed direct external capabilities. Cargo reports actual package names even
 # when a manifest renames sqlx as something innocuous. New dependencies need an
@@ -43,7 +43,7 @@ EXTERNAL = {
     'veyndo-kernel': set(),
     'veyndo-flow-graph': set(),
     'veyndo-automation': {'serde_json', 'chrono', 'chrono-tz'},
-    'veyndo-commerce': {'serde', 'serde_json'},
+    'veyndo-pricing': {'serde', 'serde_json'},
     'veyndo-apps': set(),
     'veyndo-core': {'axum', 'serde', 'serde_json', 'sha2', 'sqlx', 'uuid', 'tokio', 'tracing', 'reqwest'},
     'veyndo-runtime': {'hmac', 'sha2', 'zeroize', 'sqlx', 'tokio', 'futures-util',

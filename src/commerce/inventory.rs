@@ -1,6 +1,6 @@
 //! All-checkout allocation ledger; release is idempotent and always uses persisted quantities, never edited order JSON.
 use crate::Result;
-use veyndo_commerce::inventory::InventoryLines;
+use veyndo_pricing::inventory::InventoryLines;
 pub(crate) async fn allocate(
     tx: &mut sqlx::Transaction<'_, sqlx::Postgres>,
     tenant: &str,

@@ -1,7 +1,7 @@
 //! Native legacy price projection from exact imported minor-unit amounts; provider authority remains outside this adapter.
 use crate::{Value, json};
-pub(super) use veyndo_commerce::external_order::PaidOrder as Input;
-use veyndo_commerce::external_order::SourceAmount;
+pub(super) use veyndo_pricing::external_order::PaidOrder as Input;
+use veyndo_pricing::external_order::SourceAmount;
 pub(super) fn source_price(amount: &SourceAmount, scale: u8, quantity: u32) -> Value {
     let factor = 10_i64.pow(scale.into()) as f64;
     let gross = amount.gross_minor as f64 / factor;

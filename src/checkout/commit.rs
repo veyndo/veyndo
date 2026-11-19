@@ -6,7 +6,7 @@ use crate::{
     commerce, conflict, header, json, operations, payments, pos, staging, uid, verified_kernel,
 };
 use sqlx::Row;
-use veyndo_commerce::inventory::InventoryLines;
+use veyndo_pricing::inventory::InventoryLines;
 pub(super) async fn run(
     a: &App,
     h: &RequestContext,

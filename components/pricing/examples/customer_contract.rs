@@ -1,5 +1,5 @@
 //! Run contact normalization without a Core process, database, credentials or network.
-use veyndo_commerce::customer::Contact;
+use veyndo_pricing::customer::Contact;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut contact: Contact = serde_json::from_value(serde_json::json!({
