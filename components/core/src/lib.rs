@@ -7,6 +7,7 @@ mod conversions;
 pub mod database;
 mod failure;
 pub mod http_limits;
+pub mod localized;
 pub mod observability;
 pub mod outbox;
 pub mod request_context;

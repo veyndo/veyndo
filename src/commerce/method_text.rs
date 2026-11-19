@@ -1,13 +1,6 @@
 //! Shared translated names and descriptions with field-wise shop-main-language inheritance.
 use super::*;
-#[derive(Clone, Default, Deserialize, Serialize)]
-#[serde(deny_unknown_fields)]
-pub(crate) struct Text {
-    #[serde(default)]
-    pub name: Option<String>,
-    #[serde(default)]
-    pub description: Option<String>,
-}
+pub(crate) use veyndo_core::localized::Text;
 pub(crate) fn text_field<'a>(
     values: &'a HashMap<String, Text>,
     locale: &str,

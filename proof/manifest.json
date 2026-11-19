@@ -204,7 +204,7 @@
     },
     "destination_tax_admissible": {
       "bindings": [
-        "src/commerce/tax_rules.rs"
+        "components/pricing/src/service/tax.rs"
       ],
       "theorems": [
         "destination_tax_exact"
@@ -732,8 +732,13 @@
     },
     "components/core/src/lib.rs": {
       "status": "reviewed-binding",
-      "sha256": "03c2988cde25a4006f4d595533d2861132071b74df225d82557c657a17563d9b",
-      "review": "Request admission moved into the core crate; no rule changed"
+      "sha256": "0426732e6c38d734b76a94f34ac44a373bb08f8de9858d6a415e4f15c9e87fdb",
+      "review": "Tax classes, the destination rate and the context selection rules moved unchanged into components/pricing; the destination tax rule is bound there"
+    },
+    "components/core/src/localized.rs": {
+      "status": "unproved",
+      "sha256": "1b27518f776f176202b8a868d6ab33463c48bb74b30b38201051f11cee3a0476",
+      "review": "Tax classes, the destination rate and the context selection rules moved unchanged into components/pricing; the destination tax rule is bound there"
     },
     "components/core/src/observability.rs": {
       "status": "unproved",
@@ -810,6 +815,11 @@
       "sha256": "13367b7553a93cb82ae5faf9c5b5ffd360c3710c65b44437aa194f5162cb4a0c",
       "review": "Moved unchanged Product and Tier serialization contracts into the transport-free Commerce crate. Native hydration and context reexports preserve callers. Fourteen Commerce tests, 1446 original PHP context cases, PostgreSQL catalog and automation order/invoice/privacy suites passed; dependency negative controls passed. No new mathematical claim."
     },
+    "components/pricing/src/domain/context.rs": {
+      "status": "unproved",
+      "sha256": "06232ef431491da2c6f17847698f2fad3ad052c4e5a6c3994917136029d00020",
+      "review": "Tax classes, the destination rate and the context selection rules moved unchanged into components/pricing; the destination tax rule is bound there"
+    },
     "components/pricing/src/domain/customer/address.rs": {
       "status": "unproved",
       "sha256": "18b9d48ae007917c61a64cd29e0441ba5a9fa91d53d0eb9d5b0020babd3ae3fd",
@@ -867,8 +877,8 @@
     },
     "components/pricing/src/domain.rs": {
       "status": "unproved",
-      "sha256": "786dba0be120bf64a79f4da18dde1539b97942e87c0c450e5e8aac6e0faad728",
-      "review": "The commerce crate became components/pricing with its rules under domain/; no rule changed"
+      "sha256": "a264f94962d50beb9af3ff00ff75a96c4e5be9d59f110c8d73cb9f0bc8463d6e",
+      "review": "Tax classes, the destination rate and the context selection rules moved unchanged into components/pricing; the destination tax rule is bound there"
     },
     "components/pricing/src/http/currencies.rs": {
       "status": "unproved",
@@ -905,6 +915,11 @@
       "sha256": "7548252599276e0befcbdec1e3d4606e56b8dd1a4a0c721b9637279aa4818005",
       "review": "Currency configuration, conversion and reference-rate retrieval moved unchanged into components/pricing; the currency context rule is bound there"
     },
+    "components/pricing/src/service/tax.rs": {
+      "status": "reviewed-binding",
+      "sha256": "88e720235b03aa7a43533191950fa276b65465fb4f8dca0af6fb44e73da9c89a",
+      "review": "Tax classes, the destination rate and the context selection rules moved unchanged into components/pricing; the destination tax rule is bound there"
+    },
     "components/pricing/src/service/tests.rs": {
       "status": "unproved",
       "sha256": "27e0b8da6ed6de453f70871d1efd590b8f0b6257687e8d91b7b0a2735f7c3b9e",
@@ -912,8 +927,8 @@
     },
     "components/pricing/src/service.rs": {
       "status": "unproved",
-      "sha256": "22bfd5149199a9531f2dc6154769065eab53c9a38458245abb999bb4c5ce93a4",
-      "review": "Currency configuration, conversion and reference-rate retrieval moved unchanged into components/pricing; the currency context rule is bound there"
+      "sha256": "180b70be7d25e9cafbd629eacbe1b151ba1f5ffd62fed105c184ff1541acbe5a",
+      "review": "Tax classes, the destination rate and the context selection rules moved unchanged into components/pricing; the destination tax rule is bound there"
     },
     "components/pricing/src/store/price_jobs.rs": {
       "status": "unproved",
@@ -935,10 +950,15 @@
       "sha256": "889b71493f307b1ae2ac915b7900bd26262819c41d0b0fbf15f348fad2febc09",
       "review": "Price job reads moved into components/pricing as typed store and HTTP adapters; no rule changed"
     },
+    "components/pricing/src/types/tax.rs": {
+      "status": "unproved",
+      "sha256": "8c06762610a845472d16a01cc00dcc97fa44d16af418ae2f34b461f8991b7266",
+      "review": "Tax classes, the destination rate and the context selection rules moved unchanged into components/pricing; the destination tax rule is bound there"
+    },
     "components/pricing/src/types.rs": {
       "status": "unproved",
-      "sha256": "db51ae211013f5b1e92f3f23770b3c201b8ecf11160822d87d5a80d44da02b5e",
-      "review": "Price job reads moved into components/pricing as typed store and HTTP adapters; no rule changed"
+      "sha256": "7677addb72a45ae77e5db2a69b2af52097bfdb9bb26ce86e4805ccc5ac9257d0",
+      "review": "Tax classes, the destination rate and the context selection rules moved unchanged into components/pricing; the destination tax rule is bound there"
     },
     "crates/apps/src/component_runtime.rs": {
       "status": "unproved",
@@ -4192,8 +4212,8 @@
     },
     "src/commerce/method_text.rs": {
       "status": "unproved",
-      "sha256": "7025fd754ed13efe31fde517af1c0821f7a2a60c3797ad009f0afe018a6bbd91",
-      "review": "Reviewed international configuration, destination tax predicates and native bindings; targeted PostgreSQL international/catalog cases plus Rust tests pass. Translation fixtures verify restart, provider rejection, tenant permissions and revision conflicts. Config/product/apply share row locks. Additive schema 028 and versioned MIT geography reviewed; surrounding SQL/provider behavior remains unproved."
+      "sha256": "12544187d281d6bdf4b527208e8b1bfc8f92e66ac2291603ff0968dad59457c8",
+      "review": "Tax classes, the destination rate and the context selection rules moved unchanged into components/pricing; the destination tax rule is bound there"
     },
     "src/commerce/method_usage.rs": {
       "status": "unproved",
@@ -4346,9 +4366,9 @@
       "review": "Reviewed eighteen core findings: typed trusted identity and explicit route rights; consolidated current grants; durable auth and fenced shared limits; scoped transactions and one-backend PgBouncer including nested borrow fixes; bounded Wasm/PNG work; notified workers, savepoint quarantine and conservative retention; separate runtime roles and startup configuration. Real PostgreSQL/provider regressions preserve current tenant/customer/payment behavior. SQL/network adapters remain unproved."
     },
     "src/commerce/tax_rules.rs": {
-      "status": "reviewed-binding",
-      "sha256": "7450f7c1120ea79d4302e6f9d451c246a9d9c4142acdd1ddf3e0fcbf93cf687f",
-      "review": "Reviewed international configuration, destination tax predicates and native bindings; targeted PostgreSQL international/catalog cases plus Rust tests pass. Translation fixtures verify restart, provider rejection, tenant permissions and revision conflicts. Config/product/apply share row locks. Additive schema 028 and versioned MIT geography reviewed; surrounding SQL/provider behavior remains unproved."
+      "status": "unproved",
+      "sha256": "c51735e47db8edcdb927bcb7404c56b1d9c38c98861af6f60741a1cab4aecfd8",
+      "review": "Tax classes, the destination rate and the context selection rules moved unchanged into components/pricing; the destination tax rule is bound there"
     },
     "src/commerce/test_stock.rs": {
       "status": "unproved",
@@ -4357,18 +4377,13 @@
     },
     "src/commerce/types.rs": {
       "status": "unproved",
-      "sha256": "bae646704bc24ccdb75da752930fcdc91accc0b126f0eea94c9c32207bfd5644",
-      "review": "The commerce crate became components/pricing with its rules under domain/; no rule changed"
+      "sha256": "53ab0ecf76668d6015e02ea2865ea87dcf97c01f8bb80bc09cdb06cdd2e8e93b",
+      "review": "Tax classes, the destination rate and the context selection rules moved unchanged into components/pricing; the destination tax rule is bound there"
     },
     "src/concierge.rs": {
       "status": "unproved",
       "sha256": "2158a370c48b517797d3635274facfd073ec489863cb5ccc43e6f86308a05744",
       "review": "Shopper App streaming holds the original AI admission in a bounded scoped producer, emits only completed public tool results and cancels the producer when the client disconnects. Existing native authorization and JSON response are retained."
-    },
-    "src/context.rs": {
-      "status": "unproved",
-      "sha256": "16d35a993ccf629e6513b77647b3a264b9964a859838609054e4f43ded78cb5e",
-      "review": "The commerce crate became components/pricing with its rules under domain/; no rule changed"
     },
     "src/currencies/capabilities.rs": {
       "status": "unproved",
@@ -4677,8 +4692,8 @@
     },
     "src/lib.rs": {
       "status": "unproved",
-      "sha256": "8d749bb8bda6e1070c20a47efe91a84f6662d97bf141d8b1816969201ad8c8f1",
-      "review": "The commerce crate became components/pricing with its rules under domain/; no rule changed"
+      "sha256": "6e25502b227ac8d445b561c1e242ce2cf265f0684a22750c1c6515d4f6a99af2",
+      "review": "Tax classes, the destination rate and the context selection rules moved unchanged into components/pricing; the destination tax rule is bound there"
     },
     "src/localization.rs": {
       "status": "unproved",

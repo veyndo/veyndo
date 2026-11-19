@@ -288,8 +288,7 @@
         "src/commerce/tax_context.rs",
         "src/commerce/tax_rules.rs",
         "src/commerce/customer_groups.rs",
-        "src/commerce/group_usage.rs",
-        "src/context.rs"
+        "src/commerce/group_usage.rs"
       ],
       "tables": [
         "commerce_customer_groups",

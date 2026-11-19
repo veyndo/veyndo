@@ -74,18 +74,7 @@ pub(crate) struct Settings {
     pub shipping: Vec<Shipping>,
     pub payments: Vec<Payment>,
 }
-#[derive(Clone, Deserialize, Serialize)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub(crate) struct TaxConfig {
-    pub id: String,
-    pub rates: HashMap<String, f64>,
-    #[serde(default)]
-    pub translations: HashMap<String, super::method_text::Text>,
-    #[serde(default)]
-    pub default_rate: Option<f64>,
-    #[serde(default)]
-    pub rules: Vec<super::tax_rules::DestinationRule>,
-}
+pub(crate) use veyndo_pricing::types::tax::TaxConfig;
 #[derive(Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub(crate) struct Shipping {

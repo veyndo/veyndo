@@ -340,7 +340,6 @@ This lists every checked-in source module in these roots, including files with n
 | [src/commerce/test_stock.rs](../src/commerce/test_stock.rs) | Bulk test stock for a private sandbox: empty purchasable products get a quantity through the native revision, index sync and event. |
 | [src/commerce/types.rs](../src/commerce/types.rs) | Checkout selection and configuration data contracts. |
 | [src/concierge.rs](../src/concierge.rs) | Read-only storefront shopping advisor. |
-| [src/context.rs](../src/context.rs) | Bounded behavioral ports of Shopware 6.7.14.2 context and product-cart selection. |
 | [src/currencies/capabilities.rs](../src/currencies/capabilities.rs) | Currency MCP operations reuse the native HTTP handlers and existing settings/catalog permissions. |
 | [src/currencies/jobs.rs](../src/currencies/jobs.rs) | Bounded restart-safe fixed-price materialization with frozen FX, product locks and atomic checkpoints across replicas. |
 | [src/currencies/mod.rs](../src/currencies/mod.rs) | Tenant currency configuration, channel contexts and durable price generation; no FX network calls in checkout. |
@@ -689,6 +688,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/core/src/failure.rs](../components/core/src/failure.rs) | Stable safe error details shared by HTTP, MCP and agent streams; legacy constructors retain their wire message. |
 | [components/core/src/http_limits.rs](../components/core/src/http_limits.rs) | Bounded HTTP payloads and streaming responses for native settings and services. |
 | [components/core/src/lib.rs](../components/core/src/lib.rs) | Shared foundation of every component: the error contract, its conversions and basic identifiers. No business rules. |
+| [components/core/src/localized.rs](../components/core/src/localized.rs) | A translated name and description as stored per content language; a missing field inherits from the shop's main language. |
 | [components/core/src/observability.rs](../components/core/src/observability.rs) | Server-generated request correlation and safe structured events, without tokens, query strings or bodies. |
 | [components/core/src/outbox/next_tenant.sql](../components/core/src/outbox/next_tenant.sql) | Independent app entry; see extensions/README.md for its public contract. |
 | [components/core/src/outbox/retention.rs](../components/core/src/outbox/retention.rs) | Bounded retirement of duplicate delivered payloads; provenance IDs and unsettled app/flow work survive. |
@@ -706,6 +706,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/pricing/src/conversions.rs](../components/pricing/src/conversions.rs) | A rejected pricing input becomes a client error of the shared error contract. |
 | [components/pricing/src/domain/cart.rs](../components/pricing/src/domain/cart.rs) | Persisted cart data with explicit typed host contexts and no credential or storage authority. |
 | [components/pricing/src/domain/catalog.rs](../components/pricing/src/domain/catalog.rs) | Shared product snapshot and tier contracts, without database or transport authority. |
+| [components/pricing/src/domain/context.rs](../components/pricing/src/domain/context.rs) | Bounded behavioral ports of Shopware 6.7.14.2 context and product-cart selection. |
 | [components/pricing/src/domain/customer/address.rs](../components/pricing/src/domain/customer/address.rs) | Shared address wire contract and original bounded syntax normalization; hosts retain geography admission. |
 | [components/pricing/src/domain/customer/contact.rs](../components/pricing/src/domain/customer/contact.rs) | Customer-editable contact contract and bounded syntax checks; no account identity or persistence. |
 | [components/pricing/src/domain/customer/contract_tests.rs](../components/pricing/src/domain/customer/contract_tests.rs) | Compatibility and hostile-field cases for portable contact/address inputs; no authorization is inferred. |
@@ -725,12 +726,14 @@ This lists every checked-in source module in these roots, including files with n
 | [components/pricing/src/ports.rs](../components/pricing/src/ports.rs) | What the pricing component needs from other components. The server implements these; tests use their own. |
 | [components/pricing/src/service/conversion.rs](../components/pricing/src/service/conversion.rs) | Exact rational minor-unit FX conversion at the isolated legacy calculator boundary; fixed prices are explicit decimal strings. |
 | [components/pricing/src/service/rates.rs](../components/pricing/src/service/rates.rs) | Bounded ECB reference-rate retrieval with exact decimal parsing; a refresh never invents rates. |
+| [components/pricing/src/service/tax.rs](../components/pricing/src/service/tax.rs) | The tax rate of a delivery destination: the most specific active rule, else the country rate, else the class default. |
 | [components/pricing/src/service/tests.rs](../components/pricing/src/service/tests.rs) | Currency conversion adversaries and immutable source-price semantics, independent of live rate providers. |
 | [components/pricing/src/service.rs](../components/pricing/src/service.rs) | Use cases of the pricing component. |
 | [components/pricing/src/store/price_jobs.rs](../components/pricing/src/store/price_jobs.rs) | Reads of the price jobs of one shop. |
 | [components/pricing/src/store.rs](../components/pricing/src/store.rs) | The only place of the pricing component that contains SQL. |
 | [components/pricing/src/types/currency.rs](../components/pricing/src/types/currency.rs) | Explicit currency scales and rational exchange-rate settings, inherited by sales-channel overrides. |
 | [components/pricing/src/types/price_job.rs](../components/pricing/src/types/price_job.rs) | One run that writes fixed prices of a currency into the catalogue, as the merchant API shows it. |
+| [components/pricing/src/types/tax.rs](../components/pricing/src/types/tax.rs) | Tax classes and their destination rules; current tax law is merchant configuration, not bundled tax advice. |
 | [components/pricing/src/types.rs](../components/pricing/src/types.rs) | The data contracts of the pricing component. |
 
 ## Studio, storefront, platform and shared frontend
