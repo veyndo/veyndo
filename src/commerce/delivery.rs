@@ -202,14 +202,9 @@ pub(crate) async fn dates_conn(conn: &mut sqlx::PgConnection, q: &mut Value) -> 
     if let Some(d) = q["deliveries"].as_array_mut().and_then(|d| d.first_mut()) {
         let min = d["deliveryTime"]["minDays"].as_i64().unwrap() as i32;
         let max = d["deliveryTime"]["maxDays"].as_i64().unwrap() as i32;
-        let r = sqlx::query(
-            "SELECT (current_date+$1::int)::text AS earliest,(current_date+$2::int)::text AS latest",
-        )
-        .bind(min)
-        .bind(max)
-        .fetch_one(conn)
-        .await?;
-        d["deliveryDate"] = json!({"earliest":r.get::<String,_>("earliest"),"latest":r.get::<String,_>("latest"),"basis":"calendar-days"});
+        let (earliest, latest) =
+            veyndo_shipping::store::delivery_dates::window(conn, min, max).await?;
+        d["deliveryDate"] = json!({"earliest":earliest,"latest":latest,"basis":"calendar-days"});
     }
     Ok(())
 }

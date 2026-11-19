@@ -318,6 +318,7 @@
     "shipping": {
       "title": "Delivery methods, destinations, delivery splits and carrier booking",
       "sources": [
+        "components/shipping",
         "src/commerce/delivery.rs",
         "src/commerce/delivery_split.rs",
         "src/commerce/method_text.rs",
@@ -349,7 +350,7 @@
       ],
       "glob_imports": 7,
       "untyped_access": 115,
-      "sql_outside_store": 4
+      "sql_outside_store": 2
     },
     "checkout": {
       "title": "Cart, quote, checkout transaction and order placement",
@@ -853,7 +854,6 @@
         "payments",
         "pricing",
         "protocols",
-        "shipping",
         "shop",
         "studio"
       ],

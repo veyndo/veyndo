@@ -502,7 +502,7 @@
     },
     "delivery_split_admissible": {
       "bindings": [
-        "src/commerce/delivery_split.rs",
+        "components/shipping/src/domain/split.rs",
         "src/commerce/order_workflow.rs"
       ],
       "theorems": [
@@ -513,7 +513,7 @@
     },
     "carrier_booking_admissible": {
       "bindings": [
-        "src/operations/delivery_booking.rs"
+        "components/shipping/src/domain/booking.rs"
       ],
       "theorems": [
         "carrier_booking_exact",
@@ -1062,8 +1062,8 @@
     },
     "components/core/src/localized.rs": {
       "status": "unproved",
-      "sha256": "af42befc0c3226c80e5afb3dafcc6a8e4d1d2be1149646965f6a5091d92d2b93",
-      "review": "Product edit types, stores and language rules moved into components; no rule changed"
+      "sha256": "2e075a23950d948bf48d1355935b0a50a275affa0f1cde8d0755be33306f5ad1",
+      "review": "delivery_split_admissible and carrier_booking_admissible bindings moved into components/shipping"
     },
     "components/core/src/observability.rs": {
       "status": "unproved",
@@ -1359,6 +1359,66 @@
       "status": "unproved",
       "sha256": "df5f670d79a211e312e61b4d3b498a90b94d828b0cbdc3330b0d576722b7f0e9",
       "review": "Customer groups and price job creation moved into components/pricing; the customer group rule is bound there"
+    },
+    "components/shipping/src/domain/booking.rs": {
+      "status": "reviewed-binding",
+      "sha256": "3f609441b5c493c3a1e3d3b68eab9fa37f9655f0305b3b8f219638d1896b90c0",
+      "review": "delivery_split_admissible and carrier_booking_admissible bindings moved into components/shipping"
+    },
+    "components/shipping/src/domain/geography.rs": {
+      "status": "unproved",
+      "sha256": "96af6eda723c78a5d1e760439913f4aef3fc995efb797d47867df7eb56247ef8",
+      "review": "delivery_split_admissible and carrier_booking_admissible bindings moved into components/shipping"
+    },
+    "components/shipping/src/domain/split.rs": {
+      "status": "reviewed-binding",
+      "sha256": "0b1f387f30e64b34c96b848e110d55187b37ab28550cc01129b91663321df154",
+      "review": "delivery_split_admissible and carrier_booking_admissible bindings moved into components/shipping"
+    },
+    "components/shipping/src/domain.rs": {
+      "status": "unproved",
+      "sha256": "c7d13254d5d7d86d67cf89615685b66230817f00106d9b0bc0c89b0ee3876db4",
+      "review": "delivery_split_admissible and carrier_booking_admissible bindings moved into components/shipping"
+    },
+    "components/shipping/src/http/method_usage.rs": {
+      "status": "unproved",
+      "sha256": "4045371aaa0b1c2b0e8c6b789b05a8b6e4f85906496a05d52a000084b8cded17",
+      "review": "delivery_split_admissible and carrier_booking_admissible bindings moved into components/shipping"
+    },
+    "components/shipping/src/http.rs": {
+      "status": "unproved",
+      "sha256": "e639cffec0295d9384237690c89823d1ef6f265bce869201960d393f8215adbb",
+      "review": "delivery_split_admissible and carrier_booking_admissible bindings moved into components/shipping"
+    },
+    "components/shipping/src/lib.rs": {
+      "status": "unproved",
+      "sha256": "dcf3b5c0b308c3dd0bf3e34cd0e6f10ae099eeadf4acc9d491cce9c39a99d93e",
+      "review": "delivery_split_admissible and carrier_booking_admissible bindings moved into components/shipping"
+    },
+    "components/shipping/src/service/method_usage.rs": {
+      "status": "unproved",
+      "sha256": "1d669bc1cbb1167624841d167978598b8fc86c7c5d5951a5ee6f44fdefeac5b9",
+      "review": "delivery_split_admissible and carrier_booking_admissible bindings moved into components/shipping"
+    },
+    "components/shipping/src/service.rs": {
+      "status": "unproved",
+      "sha256": "f495b127d38a6c96e5e97118902c7aa859826fe8bf6cd22aaede6f2277176094",
+      "review": "delivery_split_admissible and carrier_booking_admissible bindings moved into components/shipping"
+    },
+    "components/shipping/src/store/delivery_dates.rs": {
+      "status": "unproved",
+      "sha256": "8cd174d2d13fbb3eadfdf9ff23c7b3f0a56504ac9759e08918acec3a44b6df6e",
+      "review": "delivery_split_admissible and carrier_booking_admissible bindings moved into components/shipping"
+    },
+    "components/shipping/src/store/method_usage.rs": {
+      "status": "unproved",
+      "sha256": "a00076b822c5413ab34208bde273dac6e728438e41c81abf73c7142690fea623",
+      "review": "delivery_split_admissible and carrier_booking_admissible bindings moved into components/shipping"
+    },
+    "components/shipping/src/store.rs": {
+      "status": "unproved",
+      "sha256": "b1c4b41266a639477014245de13eb83a1c14f6f68c68f6b0eaefb5f807bbc2e2",
+      "review": "delivery_split_admissible and carrier_booking_admissible bindings moved into components/shipping"
     },
     "crates/apps/src/component_runtime.rs": {
       "status": "unproved",
@@ -4557,13 +4617,13 @@
     },
     "src/commerce/delivery.rs": {
       "status": "unproved",
-      "sha256": "27723a971e46dbe43ce1228b31e9693fbae299fd7deecbb88f61c6cc146590c9",
-      "review": "Three further proved rules with production bindings: a signed offer is honoured only unexpired and for the unchanged cart, revision and total (signed_offer.rs, result identical to the former expression); sovereign AI mode admits only the self-operated provider on a self-hosted endpoint (sovereign.rs, same decision, endpoint check no longer short-circuited and free of effects); workspace ID length bounds (core). Three SQL statements gained explicit parameter casts matching their bound types. Kernel, core and cognition unit tests pass. SQL, HTTP and provider behaviour is not formally proved."
+      "sha256": "8473e0bddea024bc65e34ec5699e37df78cf764cc0f52315353c8c6d19ba5a0e",
+      "review": "delivery_split_admissible and carrier_booking_admissible bindings moved into components/shipping"
     },
     "src/commerce/delivery_split.rs": {
-      "status": "reviewed-binding",
-      "sha256": "003b619fb77d1c18910c4d4e6836efde52dec1f59e02f825879a10969b7bfc1c",
-      "review": "Native lifecycle review: bounded namespaced app graphs preserve native terminal/payment/stock/buyer admission, per-object immutable accepted definitions, current compound scopes, same HTTP MCP Flow owners and operational history; SQL snapshots and migration 105 are regression-tested adapters, not proved."
+      "status": "unproved",
+      "sha256": "37c8ef45d9d737ea1bd6d156a4d17452bf8d34d4df16457e67f190c8e4997133",
+      "review": "delivery_split_admissible and carrier_booking_admissible bindings moved into components/shipping"
     },
     "src/commerce/detail.rs": {
       "status": "unproved",
@@ -4587,8 +4647,8 @@
     },
     "src/commerce/geography.rs": {
       "status": "unproved",
-      "sha256": "1fe0945d346190dea0dc2f3efd37ef9e8eed3bedfe922b3b7cceff73e225b7a8",
-      "review": "Reviewed eighteen core findings: typed trusted identity and explicit route rights; consolidated current grants; durable auth and fenced shared limits; scoped transactions and one-backend PgBouncer including nested borrow fixes; bounded Wasm/PNG work; notified workers, savepoint quarantine and conservative retention; separate runtime roles and startup configuration. Real PostgreSQL/provider regressions preserve current tenant/customer/payment behavior. SQL/network adapters remain unproved."
+      "sha256": "d23969fcc533d63e32422c737374ef1895ac19fa3f6f07261011ead3d0028739",
+      "review": "delivery_split_admissible and carrier_booking_admissible bindings moved into components/shipping"
     },
     "src/commerce/group_usage.rs": {
       "status": "unproved",
@@ -4612,13 +4672,13 @@
     },
     "src/commerce/method_text.rs": {
       "status": "unproved",
-      "sha256": "12544187d281d6bdf4b527208e8b1bfc8f92e66ac2291603ff0968dad59457c8",
-      "review": "Tax classes, the destination rate and the context selection rules moved unchanged into components/pricing; the destination tax rule is bound there"
+      "sha256": "82b2c1730c1ba84844ee30aa73ee9654d1578d9c0a2bfc05161dccf14a290d5f",
+      "review": "delivery_split_admissible and carrier_booking_admissible bindings moved into components/shipping"
     },
     "src/commerce/method_usage.rs": {
       "status": "unproved",
-      "sha256": "9bd13564da45d80e2af6bf2cde9e80e4f9e31392fded30a3856f7d721e09e703",
-      "review": "Native multi-capture admission, immutable receipts and per-capture refund budgets; async adapters remain unproved"
+      "sha256": "c86782d000915b1158593a629bdebb2d7072d4844e865132dd50a79dcfebc9a7",
+      "review": "delivery_split_admissible and carrier_booking_admissible bindings moved into components/shipping"
     },
     "src/commerce/mod.rs": {
       "status": "unproved",
@@ -5356,9 +5416,9 @@
       "review": "Reviewed native extension identity/private/unique anchors and current read/write/PII scopes; native projections use bounded fixed-store queries, exact indexed filters bind all input and fence the admitted package digest. Real four-object HTTP/MCP, role revocation, foreign reference, immutable upgrade, product/company clone and selected release tests passed. Added extracted configuration-only release predicate and operational false property; SQL and UI remain explicitly unproved. Reviewed canonical schema, preserved AI bindings and versioned grid prompt provenance without changing existing prompt revisions."
     },
     "src/operations/delivery_booking.rs": {
-      "status": "reviewed-binding",
-      "sha256": "3e053bcde7a7e65d60ef66a226a0c7c94daf029f102666371b21e40fa2d3dd65",
-      "review": "Review provider-neutral split quantities, original app-bound PDF acknowledgement, native booking intent, aggregate storage and current Flow/job disclosure; provider effects remain unproved"
+      "status": "unproved",
+      "sha256": "e47e018cd802a6f79985e78b914706b5ec2fa8394d91fa2fba0017fda3ce3b6b",
+      "review": "delivery_split_admissible and carrier_booking_admissible bindings moved into components/shipping"
     },
     "src/operations/grid_plan.rs": {
       "status": "unproved",
@@ -6127,12 +6187,12 @@
       "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
     },
     "Cargo.lock": {
-      "sha256": "35d983bc7d7f75a2f0f59fbdc78153b6af743f357bc748006320123a0e06b7bd",
-      "review": "inventory component crate created; no kernel binding changed"
+      "sha256": "d1910785b0febc580984440ecc8a06ad691126e7d5cea452cac6f4ceaf0f5d49",
+      "review": "delivery_split_admissible and carrier_booking_admissible bindings moved into components/shipping"
     },
     "Cargo.toml": {
-      "sha256": "164a63a75f29e9c7e52445aad60ed96c99591b2fe7bb003427e2d19b986489ad",
-      "review": "inventory component crate created; no kernel binding changed"
+      "sha256": "dbb5938ad9e3024e12e54a6d895ca06b8f2dc6489c4dfef69aec6c15d625e4ea",
+      "review": "delivery_split_admissible and carrier_booking_admissible bindings moved into components/shipping"
     },
     "components.lock.json": {
       "sha256": "7b4a931ad81c6665d5d95e6b42b8ef4d09ebe8971ac24998d8f94bb6a737ff53",

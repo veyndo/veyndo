@@ -1,5 +1,6 @@
 //! Provider-neutral package admission freezes allocation before a paid carrier effect; approved apps reconcile only their own intent.
 use super::*;
+use veyndo_shipping::domain::booking;
 pub(crate) async fn booking_intent(
     a: &App,
     h: &RequestContext,
@@ -53,37 +54,10 @@ pub(crate) async fn booking_intent(
         .as_array_mut()
         .and_then(|ds| ds.get_mut(index))
         .ok_or(bad("Shipment unavailable"))?;
-    if !verified_kernel::carrier_booking_admissible(
-        parcel["state"] == "open",
-        closed,
-        !parcel["label"].is_null(),
-        !parcel["booking"].is_null(),
-        parcel["booking"] == intent,
-    ) {
-        return Err(conflict(
-            "Package is closed, labelled or held by another carrier booking",
-        ));
-    }
-    let event = if operation == "delivery_reserve" {
-        if parcel["booking"] == intent {
-            return Ok(json!({"reserved":true,"reused":true}));
-        }
-        if !parcel["booking"].is_null() {
-            return Err(conflict(
-                "Another unresolved carrier booking occupies this package",
-            ));
-        }
-        parcel["booking"] = intent;
-        "delivery.booking_reserved"
-    } else {
-        if parcel["booking"].is_null() {
-            return Ok(json!({"released":true}));
-        }
-        if parcel["booking"] != intent {
-            return Err(conflict("Only the original carrier intent can be released"));
-        }
-        parcel.as_object_mut().unwrap().remove("booking");
-        "delivery.booking_released"
+    let event = match booking::transition(parcel, operation == "delivery_reserve", closed, &intent)?
+    {
+        booking::Step::Settled(answer) => return Ok(answer),
+        booking::Step::Changed(event) => event,
     };
     order["revision"] = json!(order["revision"].as_u64().unwrap_or(1) + 1);
     commerce::order_mutation::persist(&mut tx,&t,h,&mut order,commerce::order_mutation::Audit{

@@ -300,13 +300,13 @@ This lists every checked-in source module in these roots, including files with n
 | [src/commerce/external_order_input.rs](../src/commerce/external_order_input.rs) | Native legacy price projection from exact imported minor-unit amounts; provider authority remains outside this adapter. |
 | [src/commerce/external_orders.rs](../src/commerce/external_orders.rs) | Generic authorized external order intake reuses native stock, customer snapshots, documents, history and outbox. |
 | [src/commerce/fulfillment.rs](../src/commerce/fulfillment.rs) | Revision-checked payment and delivery state transitions. |
-| [src/commerce/geography.rs](../src/commerce/geography.rs) | Bundled MIT country catalogue, tenant-owned overrides and typed region admission. |
+| [src/commerce/geography.rs](../src/commerce/geography.rs) | Country catalogue of a shop; the bundled world and the admission rules are owned by the shipping component. |
 | [src/commerce/group_usage.rs](../src/commerce/group_usage.rs) | Removing a customer group rejects live customer, price and native/source-rule dependencies under the settings lock. |
 | [src/commerce/international_capabilities.rs](../src/commerce/international_capabilities.rs) | International configuration and translation MCP tools call the exact same scoped native handlers as HTTP. |
 | [src/commerce/inventory.rs](../src/commerce/inventory.rs) | Stock allocation, consumption and release are owned by the inventory component. |
 | [src/commerce/inventory_ports.rs](../src/commerce/inventory_ports.rs) | The server's implementation of what the inventory component reads from environments and the product index. |
 | [src/commerce/method_text.rs](../src/commerce/method_text.rs) | Shared translated names and descriptions with field-wise shop-main-language inheritance. |
-| [src/commerce/method_usage.rs](../src/commerce/method_usage.rs) | Tenant-scoped dependency preflight and authoritative deletion guards; order snapshots remain immutable. |
+| [src/commerce/method_usage.rs](../src/commerce/method_usage.rs) | Authoritative deletion guards for methods; the reference counts are owned by the shipping component. |
 | [src/commerce/mod.rs](../src/commerce/mod.rs) | Native catalogue and checkout domains; pricing ports remain in the library. |
 | [src/commerce/order_fields.rs](../src/commerce/order_fields.rs) | Standard order read fields are projected from the authoritative quote/payment, never maintained twice. |
 | [src/commerce/order_machine.rs](../src/commerce/order_machine.rs) | Declarative order workflow schema. Extensions add states, never executable effects or payment truth. |
@@ -809,6 +809,18 @@ This lists every checked-in source module in these roots, including files with n
 | [components/pricing/src/types/price_job.rs](../components/pricing/src/types/price_job.rs) | One run that writes fixed prices of a currency into the catalogue, as the merchant API shows it. |
 | [components/pricing/src/types/tax.rs](../components/pricing/src/types/tax.rs) | Tax classes and their destination rules; current tax law is merchant configuration, not bundled tax advice. |
 | [components/pricing/src/types.rs](../components/pricing/src/types.rs) | The data contracts of the pricing component. |
+| [components/shipping/src/domain/booking.rs](../components/shipping/src/domain/booking.rs) | A carrier booking occupies one open package; only the intent that reserved it can release it. |
+| [components/shipping/src/domain/geography.rs](../components/shipping/src/domain/geography.rs) | Bundled MIT country catalogue, tenant-owned overrides and typed region admission. |
+| [components/shipping/src/domain/split.rs](../components/shipping/src/domain/split.rs) | Provider-neutral partial-package allocation; quantities and fiscal order snapshots remain conserved. |
+| [components/shipping/src/domain.rs](../components/shipping/src/domain.rs) | Rules of geography and packages, free of I/O. |
+| [components/shipping/src/http/method_usage.rs](../components/shipping/src/http/method_usage.rs) | Where a delivery or payment method is in use. |
+| [components/shipping/src/http.rs](../components/shipping/src/http.rs) | HTTP handlers of the shipping component. |
+| [components/shipping/src/lib.rs](../components/shipping/src/lib.rs) | Shipping component: countries and regions, delivery windows, packages of an order and the use of delivery and payment methods. |
+| [components/shipping/src/service/method_usage.rs](../components/shipping/src/service/method_usage.rs) | Tenant-scoped dependency preflight for delivery and payment methods. |
+| [components/shipping/src/service.rs](../components/shipping/src/service.rs) | Operations of the shipping component. |
+| [components/shipping/src/store/delivery_dates.rs](../components/shipping/src/store/delivery_dates.rs) | Calendar delivery windows by the database's date, so every replica agrees on today. |
+| [components/shipping/src/store/method_usage.rs](../components/shipping/src/store/method_usage.rs) | Where a delivery or payment method is still referenced; order snapshots remain immutable. |
+| [components/shipping/src/store.rs](../components/shipping/src/store.rs) | SQL of the shipping component. |
 
 ## Studio, storefront, platform and shared frontend
 

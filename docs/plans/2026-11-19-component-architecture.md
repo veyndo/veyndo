@@ -224,7 +224,16 @@ Order follows the dependency report, lowest first. Each line is one move.
   approval still run in the server, because they call the supplier shop's
   cart, signed offers and the checkout handoff; reservations of open carts
   (`inventory_reservations`); `query_as!`.
-- [ ] shipping
+- [ ] shipping. Started: `components/shipping` owns the bundled world with the
+  shop's own countries and the address region rule, the split of a package
+  (quantities conserved, no second shipping charge), the carrier booking
+  transition, the reference counts of delivery and payment methods with their
+  preflight handler, and the calendar delivery window. Both kernel bindings
+  (`delivery_split_admissible`, `carrier_booking_admissible`) name the new
+  files. Translated method texts (`pick`, `validate_texts`) went to `core`.
+  Open: shipping cost and tax enrichment of a quote (it reads the shop
+  settings, cart and currency types), the split and booking handlers (they
+  write through the order mutation log), delivery method types.
 - [ ] customers
 - [ ] payments
 - [ ] checkout
