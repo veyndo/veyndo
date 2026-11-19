@@ -236,7 +236,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/catalog_routes.rs](../src/catalog_routes.rs) | Health and localized catalogue HTTP routes. |
 | [src/categories/admin.rs](../src/categories/admin.rs) | Entry points of category writes for capabilities, imports and history; the rules and storage are owned by the catalog component. |
 | [src/categories/mod.rs](../src/categories/mod.rs) | Tenant-scoped category tree, localized navigation and product assignment boundaries. |
-| [src/categories/navigation.rs](../src/categories/navigation.rs) | Public navigation is localized and restricted to the selected channel's active category ancestry. |
+| [src/categories/navigation.rs](../src/categories/navigation.rs) | Admission of a category for the visitor's sales channel; the navigation itself is owned by the catalog component. |
 | [src/checkout/buyer_identity.rs](../src/checkout/buyer_identity.rs) | Exchange a native buyer login for short-lived, Checkout-only authority. |
 | [src/checkout/commit.rs](../src/checkout/commit.rs) | Native final admission and one atomic order, stock, cart, payment-attempt and outbox commit; no external provider call. |
 | [src/checkout/lock.rs](../src/checkout/lock.rs) | Native lock and replay admission use the original ordered transaction, cart capability and current B2B/POS checks. |
@@ -670,16 +670,18 @@ This lists every checked-in source module in these roots, including files with n
 | [components/catalog/src/domain/graph_query.rs](../components/catalog/src/domain/graph_query.rs) | Saved category predicates select only current confirmed public source claims; no inference at browse time. |
 | [components/catalog/src/domain/media.rs](../components/catalog/src/domain/media.rs) | Which media a product may reference: images and at most four uploaded 3D models, with safe URLs and bounded labels. |
 | [components/catalog/src/domain/model_format.rs](../components/catalog/src/domain/model_format.rs) | Bounded self-contained GLB 2 admission; remote resources and runtime decoder downloads are forbidden. |
+| [components/catalog/src/domain/navigation.rs](../components/catalog/src/domain/navigation.rs) | Public navigation: a hidden category hides its whole branch, and every entry is shown in the visitor's language. |
 | [components/catalog/src/domain/rich.rs](../components/catalog/src/domain/rich.rs) | Safe structured rich content, never executable HTML. Same schema for merchant API and frontend. |
 | [components/catalog/src/domain/rich_document.rs](../components/catalog/src/domain/rich_document.rs) | Allow-listed editor JSON with bounded depth and content; HTML/handlers/styles cannot enter the renderer. |
 | [components/catalog/src/domain.rs](../components/catalog/src/domain.rs) | Pure catalogue rules: no database, no HTTP. |
-| [components/catalog/src/http/categories.rs](../components/catalog/src/http/categories.rs) | Merchant category tree: list and save. |
+| [components/catalog/src/http/categories.rs](../components/catalog/src/http/categories.rs) | Merchant category tree (list, save) and the public navigation. |
 | [components/catalog/src/http/reviews.rs](../components/catalog/src/http/reviews.rs) | Storefront review submission and merchant moderation. |
 | [components/catalog/src/http.rs](../components/catalog/src/http.rs) | HTTP handlers of the catalog component. |
 | [components/catalog/src/lib.rs](../components/catalog/src/lib.rs) | Catalog component: products, their translated content and the catalogue reads other components rely on. |
 | [components/catalog/src/ports.rs](../components/catalog/src/ports.rs) | What the catalog component needs from other components. The server implements these; tests use their own. |
 | [components/catalog/src/service/categories.rs](../components/catalog/src/service/categories.rs) | Revision-bound category writes, bounded translations and serialized cycle-safe tree moves. |
 | [components/catalog/src/service/model_media.rs](../components/catalog/src/service/model_media.rs) | Model media references reuse owned immutable product assets, current product CAS and parent variant links. |
+| [components/catalog/src/service/navigation.rs](../components/catalog/src/service/navigation.rs) | Public navigation is localized and restricted to the selected channel's active category ancestry. |
 | [components/catalog/src/service/product_fields.rs](../components/catalog/src/service/product_fields.rs) | Saving the commerce fields of a product after its 3D models were checked against the stored assets. |
 | [components/catalog/src/service/product_identity.rs](../components/catalog/src/service/product_identity.rs) | Saving the identity of a product: a unique number, a unique option combination per parent, channels and categories of this shop. |
 | [components/catalog/src/service/reviews.rs](../components/catalog/src/service/reviews.rs) | Review submission with server-derived purchase verification, and the import of historical reviews with their provenance. |

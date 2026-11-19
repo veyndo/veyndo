@@ -1,5 +1,6 @@
 //! Which categories a product is assigned to.
 use crate::types::category::{Category, Edit};
+use serde_json::json;
 use sqlx::PgConnection;
 use veyndo_core::{Result, State};
 
@@ -107,4 +108,35 @@ pub async fn update(
         .await?
         .rows_affected()
         == 1)
+}
+
+/// Gives a new shop its own root category and one category per legacy product group, with the products assigned.
+pub async fn seed(tx: &mut PgConnection, tenant: &str) -> Result<()> {
+    sqlx::query("UPDATE products SET product_number=id WHERE tenant=$1 AND product_number IS NULL")
+        .bind(tenant)
+        .execute(&mut *tx)
+        .await?;
+    sqlx::query("INSERT INTO categories(tenant,id,data) VALUES($1,'catalog-root',$2) ON CONFLICT DO NOTHING")
+        .bind(tenant)
+        .bind(json!({"active":true,"visible":true,"type":"page","translations":{"en":{"name":"Catalog"},"de":{"name":"Katalog"},"fr":{"name":"Catalogue"},"es":{"name":"Catálogo"}}}))
+        .execute(&mut *tx)
+        .await?;
+    sqlx::query("INSERT INTO categories(tenant,id,parent_id,data) SELECT DISTINCT tenant,'legacy-'||md5(category),'catalog-root',jsonb_build_object('active',true,'visible',true,'type','page','translations',jsonb_build_object('en',jsonb_build_object('name',initcap(category)),'de',jsonb_build_object('name',CASE category WHEN 'furniture' THEN 'Möbel' WHEN 'lighting' THEN 'Leuchten' WHEN 'objects' THEN 'Accessoires' ELSE initcap(category) END),'fr',jsonb_build_object('name',CASE category WHEN 'furniture' THEN 'Meubles' WHEN 'lighting' THEN 'Éclairage' WHEN 'objects' THEN 'Accessoires' ELSE initcap(category) END),'es',jsonb_build_object('name',CASE category WHEN 'furniture' THEN 'Muebles' WHEN 'lighting' THEN 'Iluminación' WHEN 'objects' THEN 'Accesorios' ELSE initcap(category) END))) FROM products WHERE tenant=$1 ON CONFLICT DO NOTHING")
+        .bind(tenant)
+        .execute(&mut *tx)
+        .await?;
+    sqlx::query("INSERT INTO product_categories SELECT tenant,id,'legacy-'||md5(category) FROM products WHERE tenant=$1 ON CONFLICT DO NOTHING")
+        .bind(tenant)
+        .execute(tx)
+        .await?;
+    Ok(())
+}
+
+/// The active categories below and including `root`, in display order; at most 2001 rows.
+pub async fn active_tree(a: &State, tenant: &str, root: &str) -> Result<Vec<Category>> {
+    Ok(sqlx::query_as::<_, Category>("WITH RECURSIVE tree AS (SELECT * FROM categories WHERE tenant=$1 AND id=$2 AND data->>'active'='true' UNION ALL SELECT c.* FROM categories c JOIN tree p ON c.parent_id=p.id WHERE c.tenant=$1 AND c.data->>'active'='true') SELECT id,parent_id,position,revision,data FROM tree ORDER BY position,id LIMIT 2001")
+        .bind(tenant)
+        .bind(root)
+        .fetch_all(&a.db)
+        .await?)
 }

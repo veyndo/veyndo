@@ -16,7 +16,7 @@ run SQL without being in a `store` folder. Both numbers only fall.
 | core | 3412 | 0 | 4 | 10 | 10 | none | 10 |
 | identity | 3524 | 8 | 86 | 18 | 13 | apps (9), catalog (7), checkout (1), core (356), customers (1), host (4), intelligence (9), marketing (5), shop (14), studio (4) | 11 |
 | shop | 4134 | 43 | 98 | 24 | 15 | apps (7), b2b (2), catalog (1), checkout (17), core (260), customers (3), host (4), intelligence (8), marketing (8), payments (4), pricing (8), shipping (1), studio (13) | 19 |
-| catalog | 7017 | 42 | 202 | 26 | 11 | apps (19), b2b (2), checkout (12), core (346), customers (5), identity (29), intelligence (7), marketing (16), pricing (25), protocols (1), shop (18), studio (8) | 15 |
+| catalog | 7136 | 42 | 203 | 24 | 11 | apps (19), b2b (2), checkout (12), core (340), customers (5), identity (29), intelligence (7), marketing (16), pricing (25), protocols (1), shop (18), studio (8) | 15 |
 | inventory | 374 | 3 | 26 | 3 | 2 | catalog (1), checkout (2), core (27), identity (4), intelligence (3), pricing (2), protocols (2), shop (2) | 3 |
 | pricing | 3737 | 9 | 19 | 5 | 2 | apps (2), catalog (1), checkout (8), core (69), identity (4), marketing (3), shop (15), studio (1) | 9 |
 | shipping | 970 | 7 | 115 | 4 | 0 | apps (3), catalog (5), checkout (1), core (45), identity (5), orders (5), payments (1), pricing (12), shop (20), studio (4) | 6 |
@@ -120,14 +120,14 @@ reduced to one direction first.
 | intelligence | core | `State` | 136 |
 | payments | core | `Result` | 115 |
 | apps | core | `State` | 113 |
-| catalog | core | `Result` | 103 |
+| catalog | core | `Result` | 100 |
 | marketing | core | `Result` | 91 |
 | apps | identity | `auth::` | 84 |
 | identity | core | `State` | 83 |
-| catalog | core | `State` | 82 |
 | orders | core | `State` | 81 |
 | identity | core | `Result` | 81 |
 | intelligence | identity | `auth::` | 80 |
+| catalog | core | `State` | 80 |
 | orders | core | `Result` | 79 |
 | shop | core | `State` | 72 |
 | orders | identity | `auth::` | 71 |
@@ -137,8 +137,8 @@ reduced to one direction first.
 | identity | core | `Error` | 66 |
 | shop | core | `Result` | 63 |
 | apps | core | `conflict` | 63 |
-| catalog | core | `RequestContext` | 57 |
 | studio | core | `Result` | 56 |
+| catalog | core | `RequestContext` | 56 |
 | b2b | core | `Result` | 54 |
 | studio | identity | `auth::` | 52 |
 | orders | core | `RequestContext` | 52 |

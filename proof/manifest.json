@@ -700,6 +700,11 @@
       "sha256": "dc81356114cf270a6353705cf0bf21a372aae055cfca26624a629ef5a877a2c4",
       "review": "Product fields, media rules and GLB validation moved into components/catalog; no rule changed"
     },
+    "components/catalog/src/domain/navigation.rs": {
+      "status": "unproved",
+      "sha256": "0f900270d00481457553917688e78c85d1db9cffe2dc3fa76cbcb7fc4e7e8491",
+      "review": "Category navigation and seeding moved into components/catalog; no rule changed"
+    },
     "components/catalog/src/domain/rich.rs": {
       "status": "unproved",
       "sha256": "b5dfa14338a1e119a9d5d1d5527092efe343217d46046a57f7d35e0b25658a9f",
@@ -712,13 +717,13 @@
     },
     "components/catalog/src/domain.rs": {
       "status": "unproved",
-      "sha256": "cd14dacf36b405521a6f9d603680dffa857e1cd3e445751817eff593aff1cf3f",
-      "review": "Categories moved into components/catalog; no rule changed"
+      "sha256": "5fd7785383687a61ecdc3357a46d100dc2746880084f7c552ee99063e0c90622",
+      "review": "Category navigation and seeding moved into components/catalog; no rule changed"
     },
     "components/catalog/src/http/categories.rs": {
       "status": "unproved",
-      "sha256": "6365a224bf3109faf456c7afc873ed79b9fa61acdb43503d4971a0b96c8b21fb",
-      "review": "Categories moved into components/catalog; no rule changed"
+      "sha256": "a73ca4cafd72ba86992a64184fa9458efac3ba2449c68d5e093dc63f884b455c",
+      "review": "Category navigation and seeding moved into components/catalog; no rule changed"
     },
     "components/catalog/src/http/reviews.rs": {
       "status": "unproved",
@@ -737,8 +742,8 @@
     },
     "components/catalog/src/ports.rs": {
       "status": "unproved",
-      "sha256": "5f16e9be958a781c462c24ab81c5f37ab51c7adca7afd670dc339c356a2d586f",
-      "review": "Categories moved into components/catalog; no rule changed"
+      "sha256": "4490757bb0c5de3b499ac41449189beebc40c1e410234ce62b6b0ad9bea3d6fa",
+      "review": "Category navigation and seeding moved into components/catalog; no rule changed"
     },
     "components/catalog/src/service/categories.rs": {
       "status": "unproved",
@@ -749,6 +754,11 @@
       "status": "unproved",
       "sha256": "1a7b6835216fccfcb73973eb2d15ad073c1e6c049ac781bc247807739f6d27d7",
       "review": "Product fields, media rules and GLB validation moved into components/catalog; no rule changed"
+    },
+    "components/catalog/src/service/navigation.rs": {
+      "status": "unproved",
+      "sha256": "10e60f24118956fb7537f14e9bd01fb0c451e12705f337c4b66d907e6164a18d",
+      "review": "Category navigation and seeding moved into components/catalog; no rule changed"
     },
     "components/catalog/src/service/product_fields.rs": {
       "status": "unproved",
@@ -767,8 +777,8 @@
     },
     "components/catalog/src/service.rs": {
       "status": "unproved",
-      "sha256": "74570200247ab64153c5169223386042857662e32f3670bf24167e006f1dddbd",
-      "review": "Categories moved into components/catalog; no rule changed"
+      "sha256": "476a152acf2f1c2422ae1fcc6980900ce27eec904f2e665e242095a18262f046",
+      "review": "Category navigation and seeding moved into components/catalog; no rule changed"
     },
     "components/catalog/src/store/assets.rs": {
       "status": "unproved",
@@ -777,8 +787,8 @@
     },
     "components/catalog/src/store/categories.rs": {
       "status": "unproved",
-      "sha256": "a6690092214f75aa8cb153b139807b88d18a23bb5675895721f2cbe8f8f96e7d",
-      "review": "Categories moved into components/catalog; no rule changed"
+      "sha256": "6bd63b48545917d61bf591c83cd0c682823554b3a3d2773348c74ff6473680de",
+      "review": "Category navigation and seeding moved into components/catalog; no rule changed"
     },
     "components/catalog/src/store/channels.rs": {
       "status": "unproved",
@@ -4077,13 +4087,13 @@
     },
     "src/categories/mod.rs": {
       "status": "unproved",
-      "sha256": "20d195c089d3611890df247886592d3b42c577cc51abf742ca4478833577abd9",
-      "review": "Categories moved into components/catalog; no rule changed"
+      "sha256": "332f68067888723f03e1f29a91d907d68c29359516119a007caeb581d6830040",
+      "review": "Category navigation and seeding moved into components/catalog; no rule changed"
     },
     "src/categories/navigation.rs": {
       "status": "unproved",
-      "sha256": "cdcb3ed7078f637b67afbb8c63f618e7f91f485501562d566e1db60a720971ac",
-      "review": "Reviewed eighteen core findings: typed trusted identity and explicit route rights; consolidated current grants; durable auth and fenced shared limits; scoped transactions and one-backend PgBouncer including nested borrow fixes; bounded Wasm/PNG work; notified workers, savepoint quarantine and conservative retention; separate runtime roles and startup configuration. Real PostgreSQL/provider regressions preserve current tenant/customer/payment behavior. SQL/network adapters remain unproved."
+      "sha256": "25d4da90aa77e60a8c5cf95edcda4943f678b49a0c68058a42aaf12e1b9b449a",
+      "review": "Category navigation and seeding moved into components/catalog; no rule changed"
     },
     "src/checkout/buyer_identity.rs": {
       "status": "unproved",
@@ -4347,8 +4357,8 @@
     },
     "src/commerce/catalog_ports.rs": {
       "status": "unproved",
-      "sha256": "a17e39257c065452e7f66526e5e52e62d5414735448cfc845ed9d0b62fbe0c36",
-      "review": "Categories moved into components/catalog; no rule changed"
+      "sha256": "5e30019e625f1f1cee06d11315676cf9ff8944b522e1e01314e3e2d4853464a3",
+      "review": "Category navigation and seeding moved into components/catalog; no rule changed"
     },
     "src/commerce/configuration.rs": {
       "status": "unproved",
@@ -4357,8 +4367,8 @@
     },
     "src/commerce/content_text.rs": {
       "status": "unproved",
-      "sha256": "6035cfbd53690f09ba7c8bcbcf9f69c32866fae9995eaac259930495a7afa945",
-      "review": "Product edit types, stores and language rules moved into components; no rule changed"
+      "sha256": "4a02a022bcc84c23b8fe8790ffb6d04cb6a0fd498b4290009acf6c7a61dadd75",
+      "review": "Category navigation and seeding moved into components/catalog; no rule changed"
     },
     "src/commerce/context_routes.rs": {
       "status": "unproved",

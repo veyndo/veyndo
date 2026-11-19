@@ -1,6 +1,6 @@
-//! Merchant category tree: list and save.
+//! Merchant category tree (list, save) and the public navigation.
 use crate::ports::Catalog;
-use crate::service::categories;
+use crate::service::{categories, navigation as public};
 use axum::Json;
 use axum::extract::{Path, State};
 use serde_json::{Value, json};
@@ -18,4 +18,9 @@ pub async fn save(
     Json(v): Json<Value>,
 ) -> Result<Json<Value>> {
     Ok(Json(categories::write(&c, &h, &id, v, false).await?))
+}
+
+/// The storefront navigation of the visitor's sales channel and language.
+pub async fn navigation(State(c): State<Catalog>, h: RequestContext) -> Result<Json<Value>> {
+    Ok(Json(public::list(&c, &h).await?))
 }

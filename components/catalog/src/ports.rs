@@ -33,9 +33,18 @@ impl ContentLanguages {
     }
 }
 
+/// A storefront request resolved to its shop, language and the root of its channel's navigation.
+pub struct Visit {
+    pub tenant: String,
+    pub locale: String,
+    pub navigation_root: String,
+}
+
 /// The shop around the catalogue: its languages, its environments and its change history.
 pub trait Shop: Send + Sync {
     fn languages<'a>(&'a self, tenant: &'a str) -> PortFuture<'a, ContentLanguages>;
+    /// Resolves a storefront request; refuses a language the sales channel does not offer.
+    fn visit<'a>(&'a self, request: &'a RequestContext) -> PortFuture<'a, Visit>;
     /// Whether the shop is a preview environment of a live shop.
     fn is_preview<'a>(&'a self, tenant: &'a str) -> PortFuture<'a, bool>;
     /// Marks the changes of this transaction in the history as made by the request for `reason`.

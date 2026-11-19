@@ -12,28 +12,19 @@ pub(crate) fn router() -> Router<App> {
         .secure_route(
             "/api/merchant/categories",
             &[("GET", "catalog.read"), ("POST", "catalog.write")],
-            get(admin::list).post(admin::create),
+            get(veyndo_catalog::http::categories::list).post(admin::create),
         )
         .secure_route(
             "/api/merchant/categories/{id}",
             &[("PUT", "catalog.write")],
-            axum::routing::put(admin::save),
+            axum::routing::put(veyndo_catalog::http::categories::save),
         )
         .route(
             "/store-api/navigation",
-            get(navigation::list).post(navigation::list),
+            get(veyndo_catalog::http::categories::navigation)
+                .post(veyndo_catalog::http::categories::navigation),
         )
 }
 pub(crate) use veyndo_catalog::service::product_identity::assign_categories as assignments;
 
-/// Provision an independent root and legacy assignments for every newly created shop.
-pub(crate) async fn seed(tx: &mut sqlx::PgConnection, t: &str) -> Result<()> {
-    sqlx::query("UPDATE products SET product_number=id WHERE tenant=$1 AND product_number IS NULL")
-        .bind(t)
-        .execute(&mut *tx)
-        .await?;
-    sqlx::query("INSERT INTO categories(tenant,id,data) VALUES($1,'catalog-root',$2) ON CONFLICT DO NOTHING").bind(t).bind(json!({"active":true,"visible":true,"type":"page","translations":{"en":{"name":"Catalog"},"de":{"name":"Katalog"},"fr":{"name":"Catalogue"},"es":{"name":"Catálogo"}}})).execute(&mut *tx).await?;
-    sqlx::query("INSERT INTO categories(tenant,id,parent_id,data) SELECT DISTINCT tenant,'legacy-'||md5(category),'catalog-root',jsonb_build_object('active',true,'visible',true,'type','page','translations',jsonb_build_object('en',jsonb_build_object('name',initcap(category)),'de',jsonb_build_object('name',CASE category WHEN 'furniture' THEN 'Möbel' WHEN 'lighting' THEN 'Leuchten' WHEN 'objects' THEN 'Accessoires' ELSE initcap(category) END),'fr',jsonb_build_object('name',CASE category WHEN 'furniture' THEN 'Meubles' WHEN 'lighting' THEN 'Éclairage' WHEN 'objects' THEN 'Accessoires' ELSE initcap(category) END),'es',jsonb_build_object('name',CASE category WHEN 'furniture' THEN 'Muebles' WHEN 'lighting' THEN 'Iluminación' WHEN 'objects' THEN 'Accesorios' ELSE initcap(category) END))) FROM products WHERE tenant=$1 ON CONFLICT DO NOTHING").bind(t).execute(&mut *tx).await?;
-    sqlx::query("INSERT INTO product_categories SELECT tenant,id,'legacy-'||md5(category) FROM products WHERE tenant=$1 ON CONFLICT DO NOTHING").bind(t).execute(tx).await?;
-    Ok(())
-}
+pub(crate) use veyndo_catalog::store::categories::seed;

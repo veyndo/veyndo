@@ -3,5 +3,6 @@ pub mod content;
 pub mod graph_query;
 pub mod media;
 pub mod model_format;
+pub mod navigation;
 pub mod rich;
 pub mod rich_document;
