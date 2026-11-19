@@ -98,3 +98,19 @@ pub async fn consume(a: &State, subscriber: &str, projector: &dyn Projector) -> 
     tx.commit().await?;
     Ok(worked)
 }
+
+/// Records an event in the same transaction as the change it describes.
+pub async fn publish(
+    tx: &mut sqlx::PgConnection,
+    tenant: &str,
+    kind: &str,
+    data: serde_json::Value,
+) -> Result<()> {
+    sqlx::query("INSERT INTO outbox(tenant,kind,data) VALUES($1,$2,$3)")
+        .bind(tenant)
+        .bind(kind)
+        .bind(data)
+        .execute(tx)
+        .await?;
+    Ok(())
+}

@@ -3,10 +3,10 @@ use crate::catalog::Product;
 use crate::types::currency::Config;
 use serde_json::Value;
 use sqlx::PgConnection;
-use std::{future::Future, pin::Pin, sync::Arc};
-use veyndo_core::{RequestContext, Result, State};
+use std::sync::Arc;
+use veyndo_core::{RequestContext, State};
 
-pub type PortFuture<'a, T> = Pin<Box<dyn Future<Output = Result<T>> + Send + 'a>>;
+pub use veyndo_core::PortFuture;
 
 /// The shop settings as far as pricing reads them.
 pub trait ShopSettings: Send + Sync {

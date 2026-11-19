@@ -6,9 +6,12 @@ license-file.workspace = true
 description = "Products, categories, media, reviews and translated catalogue content"
 
 [dependencies]
+axum.workspace = true
+chrono.workspace = true
 reqwest.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 sqlx.workspace = true
 veyndo-core = { path = "../core" }
+veyndo-identity = { path = "../identity" }
 veyndo-pricing = { path = "../pricing" }

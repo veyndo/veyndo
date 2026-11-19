@@ -3584,11 +3584,14 @@ dependencies = [
 name = "veyndo-catalog"
 version = "0.5.0"
 dependencies = [
+ "axum",
+ "chrono",
  "reqwest",
  "serde",
  "serde_json",
  "sqlx",
  "veyndo-core",
+ "veyndo-identity",
  "veyndo-pricing",
 ]
 

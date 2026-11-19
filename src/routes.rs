@@ -150,7 +150,7 @@ pub(crate) fn router(a: App) -> Router {
         )
         .route(
             "/store-api/product/{id}/reviews",
-            post(commerce::submit_review),
+            post(veyndo_catalog::http::reviews::submit),
         )
         .route("/store-api/checkout/options", get(commerce::options))
         .merge(checkout::router())
@@ -171,7 +171,7 @@ pub(crate) fn router(a: App) -> Router {
         .secure_route(
             "/api/merchant/reviews/{id}",
             &[("PUT", "catalog.write")],
-            axum::routing::put(commerce::moderate),
+            axum::routing::put(veyndo_catalog::http::reviews::moderate),
         )
         .secure_route(
             "/api/merchant/orders/{id}/transition",

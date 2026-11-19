@@ -21,6 +21,10 @@ pub use request_context::RequestContext;
 use sha2::{Digest, Sha256};
 pub use state::State;
 
+/// The future a port method returns: ports are object-safe traits the server implements for a component.
+pub type PortFuture<'a, T> =
+    std::pin::Pin<Box<dyn std::future::Future<Output = Result<T>> + Send + 'a>>;
+
 pub type Result<T> = std::result::Result<T, Error>;
 
 pub fn bad(s: impl Into<String>) -> Error {

@@ -33,7 +33,7 @@ ALLOWED = {
     'veyndo-cognition': {'veyndo-runtime', 'veyndo-kernel', 'veyndo-app-authority', 'veyndo-core'},
     'veyndo-core': {'veyndo-kernel', 'veyndo-runtime'},
     'veyndo-identity': {'veyndo-core', 'veyndo-kernel'},
-    'veyndo-catalog': {'veyndo-core', 'veyndo-pricing'},
+    'veyndo-catalog': {'veyndo-core', 'veyndo-identity', 'veyndo-pricing'},
 }
 # Reviewed direct external capabilities. Cargo reports actual package names even
 # when a manifest renames sqlx as something innocuous. New dependencies need an
@@ -50,7 +50,7 @@ EXTERNAL = {
     'veyndo-pricing': {'serde', 'serde_json', 'chrono', 'regex', 'reqwest', 'tokio', 'axum', 'sqlx'},
     'veyndo-apps': set(),
     'veyndo-identity': {'serde_json', 'axum'},
-    'veyndo-catalog': {'serde', 'serde_json', 'sqlx', 'reqwest'},
+    'veyndo-catalog': {'serde', 'serde_json', 'sqlx', 'reqwest', 'axum', 'chrono'},
     'veyndo-core': {'axum', 'serde', 'serde_json', 'sha2', 'sqlx', 'uuid', 'tokio', 'tracing', 'reqwest'},
     'veyndo-runtime': {'hmac', 'sha2', 'zeroize', 'sqlx', 'tokio', 'futures-util',
                        'serde_json', 'reqwest', 'async-stream', 'uuid'},

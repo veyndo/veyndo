@@ -2,3 +2,4 @@
 pub mod assets;
 pub mod product_fields;
 pub mod products;
+pub mod reviews;

@@ -14,5 +14,13 @@ pub(super) async fn import(a: &App, h: &RequestContext, r: &SourceRecord) -> Res
             .ok_or(bad("Source product required"))?,
     )?;
     let source = json!({"version":r.version,"source":r.source,"sourceShop":r.source_shop,"sourceId":r.source_id,"recordDigest":hash(&json!(r).to_string()),"sourceVerified":r.data["sourceVerified"]});
-    commerce::import_review(a, h, &r.identity(&t), &product, &r.data, &source).await
+    veyndo_catalog::service::reviews::import(
+        &axum::extract::FromRef::from_ref(a),
+        h,
+        &r.identity(&t),
+        &product,
+        &r.data,
+        &source,
+    )
+    .await
 }

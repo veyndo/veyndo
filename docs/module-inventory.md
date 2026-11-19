@@ -290,6 +290,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/commerce/catalog_intake/prepare.rs](../src/commerce/catalog_intake/prepare.rs) | Native CSV parsing and read-only model extraction use existing inference admission and DNS-pinned public egress. |
 | [src/commerce/catalog_intake/save.rs](../src/commerce/catalog_intake/save.rs) | One explicit sandbox-only product creation delegates to native CAS/history/outbox; stable IDs reconcile retries without overwrites. |
 | [src/commerce/catalog_intake/schema.rs](../src/commerce/catalog_intake/schema.rs) | One catalogue-intake contract is shared by HTTP, MCP and explicit UI review; it cannot publish or overwrite products. |
+| [src/commerce/catalog_ports.rs](../src/commerce/catalog_ports.rs) | The server's implementation of what the catalog component reads from carts, orders, environments and the history. |
 | [src/commerce/configuration.rs](../src/commerce/configuration.rs) | Tenant checkout configuration loading. |
 | [src/commerce/content_text.rs](../src/commerce/content_text.rs) | Translated names are checked against the enabled content languages of the shop; the fallback rules are owned by the catalog component. |
 | [src/commerce/context_routes.rs](../src/commerce/context_routes.rs) | Public method discovery and revision-checked checkout context changes. |
@@ -320,9 +321,6 @@ This lists every checked-in source module in these roots, including files with n
 | [src/commerce/product_languages.rs](../src/commerce/product_languages.rs) | Enabled content languages, NULL field inheritance and stable global language registration. |
 | [src/commerce/product_metadata.rs](../src/commerce/product_metadata.rs) | Typed product edit payload and multilingual metadata including exact currency prices. |
 | [src/commerce/product_preparation.rs](../src/commerce/product_preparation.rs) | Opt-in bounded catalogue preparation projection. Existing products, translations and image jobs remain the owners. |
-| [src/commerce/review_import.rs](../src/commerce/review_import.rs) | Native historical review admission preserves source provenance, explicit moderation and unverified customer identity. |
-| [src/commerce/review_moderation.rs](../src/commerce/review_moderation.rs) | Merchant authorization and review publication. |
-| [src/commerce/reviews.rs](../src/commerce/reviews.rs) | Customer review submission with server-derived purchase verification. |
 | [src/commerce/selection.rs](../src/commerce/selection.rs) | Recover a quote after configuration changes without losing items or silently committing new choices. |
 | [src/commerce/settings_defaults.rs](../src/commerce/settings_defaults.rs) | Backward-compatible enrichment of existing configuration with bundled translated method labels. |
 | [src/commerce/settings_mutation.rs](../src/commerce/settings_mutation.rs) | Optimistic settings persistence and audit event. |
@@ -675,15 +673,21 @@ This lists every checked-in source module in these roots, including files with n
 | [components/catalog/src/domain/media.rs](../components/catalog/src/domain/media.rs) | Which media a product may reference: images and at most four uploaded 3D models, with safe URLs and bounded labels. |
 | [components/catalog/src/domain/model_format.rs](../components/catalog/src/domain/model_format.rs) | Bounded self-contained GLB 2 admission; remote resources and runtime decoder downloads are forbidden. |
 | [components/catalog/src/domain.rs](../components/catalog/src/domain.rs) | Pure catalogue rules: no database, no HTTP. |
+| [components/catalog/src/http/reviews.rs](../components/catalog/src/http/reviews.rs) | Storefront review submission and merchant moderation. |
+| [components/catalog/src/http.rs](../components/catalog/src/http.rs) | HTTP handlers of the catalog component. |
 | [components/catalog/src/lib.rs](../components/catalog/src/lib.rs) | Catalog component: products, their translated content and the catalogue reads other components rely on. |
+| [components/catalog/src/ports.rs](../components/catalog/src/ports.rs) | What the catalog component needs from other components. The server implements these; tests use their own. |
 | [components/catalog/src/service/model_media.rs](../components/catalog/src/service/model_media.rs) | Model media references reuse owned immutable product assets, current product CAS and parent variant links. |
 | [components/catalog/src/service/product_fields.rs](../components/catalog/src/service/product_fields.rs) | Saving the commerce fields of a product after its 3D models were checked against the stored assets. |
+| [components/catalog/src/service/reviews.rs](../components/catalog/src/service/reviews.rs) | Review submission with server-derived purchase verification, and the import of historical reviews with their provenance. |
 | [components/catalog/src/service.rs](../components/catalog/src/service.rs) | Catalogue operations that combine rules and stored state. |
 | [components/catalog/src/store/assets.rs](../components/catalog/src/store/assets.rs) | Reads of stored product assets. |
 | [components/catalog/src/store/product_fields.rs](../components/catalog/src/store/product_fields.rs) | Writes and reads of the commerce fields of a product; stock is only written when a quantity is given. |
 | [components/catalog/src/store/products.rs](../components/catalog/src/store/products.rs) | Product rows as the shared product contract, and the bounded locked reads and writes price jobs use. |
+| [components/catalog/src/store/reviews.rs](../components/catalog/src/store/reviews.rs) | Stored product reviews: one per product and reviewer, published only by moderation. |
 | [components/catalog/src/store.rs](../components/catalog/src/store.rs) | The only place of the catalog component that contains SQL. |
 | [components/catalog/src/types/product_fields.rs](../components/catalog/src/types/product_fields.rs) | The commerce fields of a product as the editor sends them; stock is optional so an untouched quantity is never written back. |
+| [components/catalog/src/types/review.rs](../components/catalog/src/types/review.rs) | A review as a shopper submits it and as a migration imports it; both arrive unpublished. |
 | [components/catalog/src/types.rs](../components/catalog/src/types.rs) | Typed payloads and rows of the catalog component. |
 | [components/core/src/access.rs](../components/core/src/access.rs) | Admission facts of one shop and sales channel, read once per request and shared by every later check. |
 | [components/core/src/admission/relay.rs](../components/core/src/admission/relay.rs) | Short, bounded relay admission waiting before contacting the independent Checkout service. |
