@@ -3493,6 +3493,7 @@ dependencies = [
  "veyndo-app-storage",
  "veyndo-apps",
  "veyndo-automation",
+ "veyndo-catalog",
  "veyndo-cognition",
  "veyndo-core",
  "veyndo-flow-graph",
@@ -3577,6 +3578,16 @@ dependencies = [
  "chrono-tz",
  "serde_json",
  "veyndo-kernel",
+]
+
+[[package]]
+name = "veyndo-catalog"
+version = "0.5.0"
+dependencies = [
+ "serde_json",
+ "sqlx",
+ "veyndo-core",
+ "veyndo-pricing",
 ]
 
 [[package]]

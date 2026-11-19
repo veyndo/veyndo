@@ -1,5 +1,5 @@
 //! The server's implementation of what the pricing component reads from the shop settings, the cart and the catalogue.
-use crate::{App, RequestContext, Row, bad, commerce, history, load_cart, product};
+use crate::{App, RequestContext, Row, bad, commerce, history, load_cart};
 use serde_json::Value;
 use sqlx::PgConnection;
 use std::sync::Arc;
@@ -73,14 +73,7 @@ impl Catalogue for Server {
         snapshot: &'a str,
     ) -> PortFuture<'a, Vec<Product>> {
         Box::pin(async move {
-            let rows = sqlx::query("SELECT * FROM products WHERE tenant=$1 AND id>$2 AND id<=$3 AND created_at<=$4::text::timestamptz ORDER BY id LIMIT 100 FOR UPDATE")
-                .bind(tenant)
-                .bind(cursor)
-                .bind(ceiling)
-                .bind(snapshot)
-                .fetch_all(tx)
-                .await?;
-            Ok(rows.iter().map(product).collect())
+            veyndo_catalog::store::products::lock_range(tx, tenant, cursor, ceiling, snapshot).await
         })
     }
     fn store_fixed_prices<'a>(
@@ -92,14 +85,10 @@ impl Catalogue for Server {
         prices: Value,
     ) -> PortFuture<'a, ()> {
         Box::pin(async move {
-            sqlx::query("UPDATE products SET extra=jsonb_set(extra,'{currencyPrices}',coalesce(extra->'currencyPrices','{}') || jsonb_build_object($1::text,$2::jsonb)),revision=revision+1 WHERE tenant=$3 AND id=$4")
-                .bind(currency)
-                .bind(prices)
-                .bind(tenant)
-                .bind(product)
-                .execute(tx)
-                .await?;
-            Ok(())
+            veyndo_catalog::store::products::store_fixed_prices(
+                tx, tenant, product, currency, prices,
+            )
+            .await
         })
     }
 }

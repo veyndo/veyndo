@@ -1,0 +1,12 @@
+[package]
+name = "veyndo-catalog"
+version.workspace = true
+edition.workspace = true
+license-file.workspace = true
+description = "Products, categories, media, reviews and translated catalogue content"
+
+[dependencies]
+serde_json.workspace = true
+sqlx.workspace = true
+veyndo-core = { path = "../core" }
+veyndo-pricing = { path = "../pricing" }

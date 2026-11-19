@@ -169,6 +169,7 @@
     "catalog": {
       "title": "Products, categories, media, reviews, translations and catalogue reads",
       "sources": [
+        "components/catalog",
         "src/commerce/catalog.rs",
         "src/commerce/catalog_intake",
         "src/commerce/detail.rs",
@@ -244,9 +245,9 @@
         "tasks",
         "tenants"
       ],
-      "glob_imports": 53,
+      "glob_imports": 52,
       "untyped_access": 202,
-      "sql_outside_store": 33
+      "sql_outside_store": 32
     },
     "inventory": {
       "title": "Stock, reservations and supply",

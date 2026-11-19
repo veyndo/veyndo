@@ -174,7 +174,12 @@ Done when the server builds on both crates without glob imports from them.
 
 Order follows the dependency report, lowest first. Each line is one move.
 
-- [ ] catalog
+- [ ] catalog. Started: `components/catalog` owns the product row hydration,
+      the locked range read and fixed-price write that price jobs use (the server's
+      `Catalogue` port delegates to it), the template-shop read and the pure
+      content fallback and language key rules. Open: product edit and create,
+      categories, assets, reviews, translations, catalogue reads and pages; these
+      take the server state and need ports to `shop` (settings) and `checkout`.
 - [ ] inventory
 - [ ] shipping
 - [ ] customers

@@ -232,7 +232,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/cart_price.rs](../src/cart_price.rs) | Authoritative quantity pricing and localized checkout quote assembly. |
 | [src/cart_routes.rs](../src/cart_routes.rs) | Store API cart and order route adapters. |
 | [src/cart_storage.rs](../src/cart_storage.rs) | Cart creation, loading and input validation. |
-| [src/catalog_model.rs](../src/catalog_model.rs) | Hydrate the shared Commerce product contract through the native tenant-scoped database. |
+| [src/catalog_model.rs](../src/catalog_model.rs) | The shared Commerce product contract and its row hydration, owned by the catalog component. |
 | [src/catalog_page.rs](../src/catalog_page.rs) | Bounded tenant-scoped catalog reads. A cursor is a product ID, never an offset. |
 | [src/catalog_routes.rs](../src/catalog_routes.rs) | Health and localized catalogue HTTP routes. |
 | [src/categories/admin.rs](../src/categories/admin.rs) | Revision-bound category writes, bounded translations and serialized cycle-safe tree moves. |
@@ -292,7 +292,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/commerce/catalog_intake/save.rs](../src/commerce/catalog_intake/save.rs) | One explicit sandbox-only product creation delegates to native CAS/history/outbox; stable IDs reconcile retries without overwrites. |
 | [src/commerce/catalog_intake/schema.rs](../src/commerce/catalog_intake/schema.rs) | One catalogue-intake contract is shared by HTTP, MCP and explicit UI review; it cannot publish or overwrite products. |
 | [src/commerce/configuration.rs](../src/commerce/configuration.rs) | Tenant checkout configuration loading. |
-| [src/commerce/content_text.rs](../src/commerce/content_text.rs) | Shared field-level content fallback for metadata and configurable object names. |
+| [src/commerce/content_text.rs](../src/commerce/content_text.rs) | Translated names are checked against the enabled content languages of the shop; the fallback rules are owned by the catalog component. |
 | [src/commerce/context_routes.rs](../src/commerce/context_routes.rs) | Public method discovery and revision-checked checkout context changes. |
 | [src/commerce/customer_groups.rs](../src/commerce/customer_groups.rs) | Tenant-owned translated customer groups preserve exact rule IDs and select an explicit existing price/tax presentation basis. |
 | [src/commerce/delivery.rs](../src/commerce/delivery.rs) | Shipping costs, proportional taxes and calendar delivery windows. |
@@ -671,6 +671,12 @@ This lists every checked-in source module in these roots, including files with n
 
 | Module | Responsibility |
 |---|---|
+| [components/catalog/src/domain/content.rs](../components/catalog/src/domain/content.rs) | Field-level content fallback: a missing or `null` translation inherits the main language, an empty one stays empty. |
+| [components/catalog/src/domain/locale.rs](../components/catalog/src/domain/locale.rs) | Which language keys a shop may use for content: canonical language, script, region and variant subtags only. |
+| [components/catalog/src/domain.rs](../components/catalog/src/domain.rs) | Pure catalogue rules: no database, no HTTP. |
+| [components/catalog/src/lib.rs](../components/catalog/src/lib.rs) | Catalog component: products, their translated content and the catalogue reads other components rely on. |
+| [components/catalog/src/store/products.rs](../components/catalog/src/store/products.rs) | Product rows as the shared product contract, and the bounded locked reads and writes price jobs use. |
+| [components/catalog/src/store.rs](../components/catalog/src/store.rs) | The only place of the catalog component that contains SQL. |
 | [components/core/src/access.rs](../components/core/src/access.rs) | Admission facts of one shop and sales channel, read once per request and shared by every later check. |
 | [components/core/src/admission/relay.rs](../components/core/src/admission/relay.rs) | Short, bounded relay admission waiting before contacting the independent Checkout service. |
 | [components/core/src/admission/tests.rs](../components/core/src/admission/tests.rs) | Regression checks for Core admission limits and the Checkout relay retry interval. |

@@ -680,6 +680,36 @@
     }
   },
   "sources": {
+    "components/catalog/src/domain/content.rs": {
+      "status": "unproved",
+      "sha256": "ee3e16add3458894ff03fc982bedd07278603ac51c25708575a359574998c251",
+      "review": "Catalog component crate created; no rule changed"
+    },
+    "components/catalog/src/domain/locale.rs": {
+      "status": "unproved",
+      "sha256": "e48495a91550ef1f854029d20577c01a39ad0a2510019a8e2985157aa86e207b",
+      "review": "Catalog component crate created; no rule changed"
+    },
+    "components/catalog/src/domain.rs": {
+      "status": "unproved",
+      "sha256": "9848eafea1431e01f95ca8adb45bf3e93811326c4f27c47c3ef9426eee3b0c5d",
+      "review": "Catalog component crate created; no rule changed"
+    },
+    "components/catalog/src/lib.rs": {
+      "status": "unproved",
+      "sha256": "173fa840e46ca8c839328456209af1e3b188bfa2363edf204eb2a01a3fb0d1a2",
+      "review": "Catalog component crate created; no rule changed"
+    },
+    "components/catalog/src/store/products.rs": {
+      "status": "unproved",
+      "sha256": "9d923247f673042690e73201e8ed12906a1dbd9398be23670958b1504f8c6366",
+      "review": "Catalog component crate created; no rule changed"
+    },
+    "components/catalog/src/store.rs": {
+      "status": "unproved",
+      "sha256": "2cbb6b03b86da9564464e8b9a2079bc673542e54b22f622f0f5f8654a2f7e353",
+      "review": "Catalog component crate created; no rule changed"
+    },
     "components/core/src/access.rs": {
       "status": "unproved",
       "sha256": "9dbaa399afa585fdc25df2bdc32bd73313fb5324f283470252f428ac7b34423b",
@@ -3902,8 +3932,8 @@
     },
     "src/catalog_model.rs": {
       "status": "unproved",
-      "sha256": "662acd9f8373702988f55b4444c4761c56bc940a6361368afd9c892cd2934376",
-      "review": "Moved unchanged Product and Tier serialization contracts into the transport-free Commerce crate. Native hydration and context reexports preserve callers. Fourteen Commerce tests, 1446 original PHP context cases, PostgreSQL catalog and automation order/invoice/privacy suites passed; dependency negative controls passed. No new mathematical claim."
+      "sha256": "55a707dcd2a87e8109bc644663357d58be28eca3d276a5b2fc79a5efb2746caf",
+      "review": "Catalog component crate created; no rule changed"
     },
     "src/catalog_page.rs": {
       "status": "unproved",
@@ -4202,8 +4232,8 @@
     },
     "src/commerce/content_text.rs": {
       "status": "unproved",
-      "sha256": "9f977e351b9bbf36e6aeff44f59e3fc8357ae854a427a92267f894baa624f85a",
-      "review": "Reviewed shared content-language validation, regional key preservation, shop-main flow fallback and asset labels; existing state/price/permission contracts remain intact."
+      "sha256": "2c0a1597b4df40b873d472715305b0b3e87075fac6f3c4be9b8e8b14f02692f0",
+      "review": "Catalog component crate created; no rule changed"
     },
     "src/commerce/context_routes.rs": {
       "status": "unproved",
@@ -4332,8 +4362,8 @@
     },
     "src/commerce/product_languages.rs": {
       "status": "unproved",
-      "sha256": "a369218680eb572372ee3d790ab5db4623583550cb081be48a10e157398470ab",
-      "review": "Reviewed native source-neutral imports, historical no-purchase effects, scoped job leases/creator/package/digest fences and shared managed-record replay. Independent boundary findings fixed with unknown-field rejection and eight concurrent editor/import cases; actual signed-runtime/source-service/native-checkout tests pass. SQL and external source equivalence remain outside extracted proofs."
+      "sha256": "7fb9d53c797d66d056b5b4e816c5c823279cda386855e582de691de60df62fe8",
+      "review": "Catalog component crate created; no rule changed"
     },
     "src/commerce/product_metadata.rs": {
       "status": "unproved",
@@ -4457,8 +4487,8 @@
     },
     "src/currencies/ports.rs": {
       "status": "unproved",
-      "sha256": "493eb284a28fc420a398a6c07fe68bdb57c27a0a415da442332b35f2e349b425",
-      "review": "Price job worker moved into components/pricing behind a catalogue port"
+      "sha256": "e4e7eaeab6038e27550d201686f7e0e197e38cf389f5dcca42c8e47d5074f683",
+      "review": "Catalog component crate created; no rule changed"
     },
     "src/currencies/rates.rs": {
       "status": "unproved",
@@ -5802,12 +5832,12 @@
       "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
     },
     "Cargo.lock": {
-      "sha256": "979217d8651ea682572233f5e69d4cda42981c17d9c9ab8e88074ae6a64fdaa2",
-      "review": "Price job reads moved into components/pricing as typed store and HTTP adapters; no rule changed"
+      "sha256": "95273f1a25ff41410b3420af00c87b56236b8dacf384d3ad4cb7f96aea28a75a",
+      "review": "Catalog component crate created; no rule changed"
     },
     "Cargo.toml": {
-      "sha256": "e0f8afe8d37f6fc722288433f9a9e09f350979f03026d1a2c5d72c7c7dbd8a53",
-      "review": "Permission rules and the permit and merchant checks moved unchanged into components/identity; the scope rule is bound there"
+      "sha256": "2d7ebc432e34c20cf53825be094b58226b72dc3894a6f2804810c2c37211dd38",
+      "review": "Catalog component crate created; no rule changed"
     },
     "components.lock.json": {
       "sha256": "7b4a931ad81c6665d5d95e6b42b8ef4d09ebe8971ac24998d8f94bb6a737ff53",
