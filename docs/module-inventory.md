@@ -725,11 +725,13 @@ This lists every checked-in source module in these roots, including files with n
 | [components/pricing/src/lib.rs](../components/pricing/src/lib.rs) | Pricing component: amounts, price calculation, discounts and the cart, product and customer contracts they work on. |
 | [components/pricing/src/ports.rs](../components/pricing/src/ports.rs) | What the pricing component needs from other components. The server implements these; tests use their own. |
 | [components/pricing/src/service/conversion.rs](../components/pricing/src/service/conversion.rs) | Exact rational minor-unit FX conversion at the isolated legacy calculator boundary; fixed prices are explicit decimal strings. |
+| [components/pricing/src/service/currency_change.rs](../components/pricing/src/service/currency_change.rs) | What a change of the currency configuration must not do: relabel stored amounts or remove a currency still in use. |
 | [components/pricing/src/service/price_jobs.rs](../components/pricing/src/service/price_jobs.rs) | Queues a run that writes fixed prices of one currency, with the exchange rates frozen at creation. |
 | [components/pricing/src/service/rates.rs](../components/pricing/src/service/rates.rs) | Bounded ECB reference-rate retrieval with exact decimal parsing; a refresh never invents rates. |
 | [components/pricing/src/service/tax.rs](../components/pricing/src/service/tax.rs) | The tax rate of a delivery destination: the most specific active rule, else the country rate, else the class default. |
 | [components/pricing/src/service/tests.rs](../components/pricing/src/service/tests.rs) | Currency conversion adversaries and immutable source-price semantics, independent of live rate providers. |
 | [components/pricing/src/service.rs](../components/pricing/src/service.rs) | Use cases of the pricing component. |
+| [components/pricing/src/store/currency_usage.rs](../components/pricing/src/store/currency_usage.rs) | Where a shop still refers to a currency: product prices, queued price jobs, open carts and purchasing units. |
 | [components/pricing/src/store/price_jobs.rs](../components/pricing/src/store/price_jobs.rs) | Reads of the price jobs of one shop. |
 | [components/pricing/src/store.rs](../components/pricing/src/store.rs) | The only place of the pricing component that contains SQL. |
 | [components/pricing/src/types/currency.rs](../components/pricing/src/types/currency.rs) | Explicit currency scales and rational exchange-rate settings, inherited by sales-channel overrides. |

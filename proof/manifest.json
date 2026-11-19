@@ -940,6 +940,11 @@
       "sha256": "b67ab7cc83e7107090cdede1c7bac168814f5becda7a3c895e62a8eba67eefcb",
       "review": "Currency configuration, conversion and reference-rate retrieval moved unchanged into components/pricing; the currency context rule is bound there"
     },
+    "components/pricing/src/service/currency_change.rs": {
+      "status": "unproved",
+      "sha256": "c5402778c09c145b101dd836e1b80d897c519bf29c8c20a3bdd0f21343e59b02",
+      "review": "The currency removal guard moved into components/pricing as store and service; no rule changed"
+    },
     "components/pricing/src/service/price_jobs.rs": {
       "status": "unproved",
       "sha256": "ab6dfb49661c307bfcf379b1a165c942a765a3313e1c56fd5567b53ae5477a3e",
@@ -962,8 +967,13 @@
     },
     "components/pricing/src/service.rs": {
       "status": "unproved",
-      "sha256": "e04a3a5983f01b9b89fc643aef314c10629d74f767ad2ff81efe6c8037d15e2d",
-      "review": "Customer groups and price job creation moved into components/pricing; the customer group rule is bound there"
+      "sha256": "b75cef487e05f80073ff3d20de98394e7af7daade142bb0d7e5f025fb10f5ae3",
+      "review": "The currency removal guard moved into components/pricing as store and service; no rule changed"
+    },
+    "components/pricing/src/store/currency_usage.rs": {
+      "status": "unproved",
+      "sha256": "980e7e16b2ba1b25dc981f1d67bc0bca054cd360bbc6400773db5a1f3b76b014",
+      "review": "The currency removal guard moved into components/pricing as store and service; no rule changed"
     },
     "components/pricing/src/store/price_jobs.rs": {
       "status": "unproved",
@@ -972,8 +982,8 @@
     },
     "components/pricing/src/store.rs": {
       "status": "unproved",
-      "sha256": "241567fa86bef59ffb4b8c5ea800f11730ae9c6aef7a889df2148a955481a53d",
-      "review": "Price job reads moved into components/pricing as typed store and HTTP adapters; no rule changed"
+      "sha256": "686395c57ceaf9d3f549dec7875c520fd6c599a8a15d2e8b7ec9a6f395fba2aa",
+      "review": "The currency removal guard moved into components/pricing as store and service; no rule changed"
     },
     "components/pricing/src/types/currency.rs": {
       "status": "reviewed-binding",
@@ -4437,8 +4447,8 @@
     },
     "src/currencies/mod.rs": {
       "status": "unproved",
-      "sha256": "58359d487135c172b3ec835864b2945e674b86d97a08c999ef7f2c283f88d5ce",
-      "review": "Currency discovery moved into components/pricing behind the shop settings and cart ports; no rule changed"
+      "sha256": "fcb0ddce3d3d370b95df26c66be1b66ef91358419ada5c6e3e11fcf60b75f68f",
+      "review": "The currency removal guard moved into components/pricing as store and service; no rule changed"
     },
     "src/currencies/ports.rs": {
       "status": "unproved",
@@ -4457,8 +4467,8 @@
     },
     "src/currencies/routes.rs": {
       "status": "unproved",
-      "sha256": "c1d90df90242db25de6566ecf95c704cc592659bd2bf64c9bc485d9b911924d9",
-      "review": "Customer groups and price job creation moved into components/pricing; the customer group rule is bound there"
+      "sha256": "ef8f735c46f4315a3655ac9c1b52a01fabf984d4e1a0a52ff99ab337d3fca475",
+      "review": "The currency removal guard moved into components/pricing as store and service; no rule changed"
     },
     "src/customer.rs": {
       "status": "unproved",

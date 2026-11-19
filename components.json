@@ -102,6 +102,7 @@
         "src/commerce/settings_scope.rs",
         "src/commerce/settings_validation.rs",
         "src/performance",
+        "src/currencies/rates.rs",
         "src/shop_domains.rs",
         "src/shop_domains",
         "src/brand_redirect.rs",
@@ -161,9 +162,9 @@
         "tenant_ai_usage",
         "tenants"
       ],
-      "glob_imports": 42,
+      "glob_imports": 43,
       "untyped_access": 98,
-      "sql_outside_store": 23
+      "sql_outside_store": 24
     },
     "catalog": {
       "title": "Products, categories, media, reviews, translations and catalogue reads",
@@ -313,12 +314,11 @@
         "commerce_rules",
         "commerce_settings",
         "customers",
-        "outbox",
         "products"
       ],
-      "glob_imports": 10,
+      "glob_imports": 9,
       "untyped_access": 20,
-      "sql_outside_store": 5
+      "sql_outside_store": 4
     },
     "shipping": {
       "title": "Delivery methods, destinations, delivery splits and carrier booking",
@@ -541,7 +541,6 @@
         "identity",
         "inventory",
         "pos",
-        "pricing",
         "shop",
         "studio"
       ],

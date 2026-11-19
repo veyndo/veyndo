@@ -66,28 +66,3 @@ pub(super) async fn refresh(
         .await?,
     ))
 }
-pub(crate) async fn guard(
-    tx: &mut sqlx::Transaction<'_, sqlx::Postgres>,
-    t: &str,
-    old: &Config,
-    next: &Config,
-) -> Result<()> {
-    if old.pricing_currency != next.pricing_currency {
-        return Err(conflict(
-            "The original monetary storage currency cannot be relabelled",
-        ));
-    }
-    let removed = old
-        .definitions
-        .iter()
-        .filter(|d| !next.definitions.iter().any(|n| n.code == d.code))
-        .map(|d| d.code.clone())
-        .collect::<Vec<_>>();
-    let used:bool=sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM products WHERE tenant=$1 AND ((extra->'currencyPrices') ?| $2 OR extra->>'priceCurrency'=ANY($2))) OR EXISTS(SELECT 1 FROM currency_price_jobs WHERE tenant=$1 AND state='queued' AND data->>'currency'=ANY($2)) OR EXISTS(SELECT 1 FROM carts WHERE tenant=$1 AND status='open' AND data->>'currency'=ANY($2)) OR EXISTS(SELECT 1 FROM b2b_units WHERE tenant=$1 AND data->>'currency'=ANY($2))").bind(t).bind(removed).fetch_one(&mut **tx).await?;
-    if used {
-        return Err(conflict(
-            "Currency is referenced by product prices, open carts or purchasing units; remove channel availability instead",
-        ));
-    }
-    Ok(())
-}
