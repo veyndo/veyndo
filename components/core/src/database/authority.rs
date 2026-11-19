@@ -1,8 +1,9 @@
 //! Connect separately admitted SQL roles within one process budget; rotate authenticated transaction scopes.
-use crate::*;
-use veyndo::{database_scope::Signer, scoped_pool::ScopedPool};
+use serde_json::Value;
+use std::env;
+use veyndo_runtime::{database_scope::Signer, scoped_pool::ScopedPool};
 
-pub(crate) async fn connect(fallback: &str) -> ScopedPool {
+pub async fn connect(fallback: &str) -> ScopedPool {
     let system_url = env::var("DATABASE_RUNTIME_URL").unwrap_or_else(|_| fallback.to_owned());
     let Some(tenant_url) = env::var("DATABASE_TENANT_URL").ok() else {
         assert!(
@@ -12,13 +13,13 @@ pub(crate) async fn connect(fallback: &str) -> ScopedPool {
         let raw = super::pool::connect(super::pool::pool_options(), &system_url)
             .await
             .expect("commerce connection");
-        return ScopedPool::new(raw, runtime_config::get().transaction_pooling);
+        return ScopedPool::new(raw, super::config::get().transaction_pooling);
     };
     assert!(
-        runtime_config::get().strict,
+        super::config::get().strict,
         "Authenticated SQL scope requires DB_RLS_REQUIRED=true"
     );
-    let budget = runtime_config::get().db_pool_max;
+    let budget = super::config::get().pool_max;
     assert!(
         budget >= 4,
         "Authenticated SQL scope requires DB_POOL_MAX>=4, shared by both pools"

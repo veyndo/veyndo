@@ -7,8 +7,6 @@
         "src/foundation.rs",
         "src/outbox.rs",
         "src/outbox",
-        "src/channel_metrics.rs",
-        "src/channel_metrics",
         "src/performance",
         "crates/kernel",
         "crates/runtime",
@@ -54,9 +52,9 @@
         "tenant_ai_usage",
         "tenant_resource_limits"
       ],
-      "glob_imports": 12,
+      "glob_imports": 9,
       "untyped_access": 5,
-      "sql_outside_store": 14
+      "sql_outside_store": 16
     },
     "identity": {
       "title": "Merchant accounts, memberships, sessions, roles and route policy",

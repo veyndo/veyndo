@@ -1,9 +1,12 @@
 //! Bounded, lossy diagnostic counters. Never use this buffer for business events.
-use crate::*;
+use crate::StatusCode;
+use serde_json::json;
+use std::collections::HashMap;
 use std::sync::Mutex;
+use veyndo_runtime::scoped_pool::ScopedPool;
 
 mod reads;
-pub(crate) use reads::traffic;
+pub use reads::traffic;
 
 const MAX_KEYS: usize = 1024;
 
@@ -17,12 +20,12 @@ struct Counter {
 }
 
 #[derive(Default)]
-pub(crate) struct ChannelMetrics {
+pub struct ChannelMetrics {
     pending: Mutex<HashMap<(String, &'static str), Counter>>,
 }
 
 impl ChannelMetrics {
-    pub(crate) fn record(
+    pub fn record(
         &self,
         tenant: String,
         channel: &'static str,
@@ -47,7 +50,7 @@ impl ChannelMetrics {
         }
     }
 
-    pub(crate) async fn flush(&self, db: &PgPool) {
+    pub async fn flush(&self, db: &ScopedPool) {
         let counters = {
             let mut pending = self.pending.lock().unwrap();
             pending.drain().collect::<Vec<_>>()

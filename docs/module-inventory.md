@@ -240,8 +240,6 @@ This lists every checked-in source module in these roots, including files with n
 | [src/categories/graph_query.rs](../src/categories/graph_query.rs) | Saved category predicates select only current confirmed public source claims; no inference at browse time. |
 | [src/categories/mod.rs](../src/categories/mod.rs) | Tenant-scoped category tree, localized navigation and product assignment boundaries. |
 | [src/categories/navigation.rs](../src/categories/navigation.rs) | Public navigation is localized and restricted to the selected channel's active category ancestry. |
-| [src/channel_metrics/reads.rs](../src/channel_metrics/reads.rs) | One persisted diagnostic read shared by operator overview, shop dossiers and infrastructure. |
-| [src/channel_metrics.rs](../src/channel_metrics.rs) | Bounded, lossy diagnostic counters. Never use this buffer for business events. |
 | [src/checkout/buyer_identity.rs](../src/checkout/buyer_identity.rs) | Exchange a native buyer login for short-lived, Checkout-only authority. |
 | [src/checkout/commit.rs](../src/checkout/commit.rs) | Native final admission and one atomic order, stock, cart, payment-attempt and outbox commit; no external provider call. |
 | [src/checkout/lock.rs](../src/checkout/lock.rs) | Native lock and replay admission use the original ordered transaction, cart capability and current B2B/POS checks. |
@@ -498,7 +496,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/order_checkout.rs](../src/order_checkout.rs) | Native checkout entry used by Store API, Studio, agents and POS. |
 | [src/order_routes.rs](../src/order_routes.rs) | Merchant order read adapter. |
 | [src/outbox/control.rs](../src/outbox/control.rs) | Tenant-authorized quarantine inspection and explicit retry; delivered or retired events cannot be replayed here. |
-| [src/outbox/retention.rs](../src/outbox/retention.rs) | Bounded retirement of duplicate delivered payloads; provenance IDs and unsettled app/flow work survive. |
+| [src/outbox/retention.rs](../src/outbox/retention.rs) | Once a minute: expired sign-in buckets, behaviour evidence and delivered outbox payloads are retired. |
 | [src/outbox.rs](../src/outbox.rs) | Durable outbox and audit projection worker. |
 | [src/payments/accounts.rs](../src/payments/accounts.rs) | Merchant-authorized onboarding bridge; only authenticated provider responses establish account bindings. |
 | [src/payments/app_commands.rs](../src/payments/app_commands.rs) | App/Flow/MCP payment actions enqueue core jobs; provider-bound attempts prevent cross-app command authority. |
@@ -536,16 +534,11 @@ This lists every checked-in source module in these roots, including files with n
 | [src/performance/access_snapshot.rs](../src/performance/access_snapshot.rs) | One fresh, server-owned admission read shared by domain, identity, availability, channel and proxy middleware. |
 | [src/performance/admission.rs](../src/performance/admission.rs) | Bounded instance/tenant concurrency, durable UTC-day AI quotas, and low-cardinality latency telemetry. |
 | [src/performance/admission_tests.rs](../src/performance/admission_tests.rs) | Regression checks for Core admission limits and the Checkout relay retry interval. |
-| [src/performance/authority.rs](../src/performance/authority.rs) | Connect separately admitted SQL roles within one process budget; rotate authenticated transaction scopes. |
-| [src/performance/cache.rs](../src/performance/cache.rs) | Bounded weighted LRU for immutable decoded read models; no network I/O under its mutex. |
-| [src/performance/cluster_lease.rs](../src/performance/cluster_lease.rs) | Cluster-wide tenant resource leases. DB serialization protects admission; cancellation releases the fenced lease. |
 | [src/performance/delivery.rs](../src/performance/delivery.rs) | Native static bypass and bounded HTTP compression; credentials, streams and already encoded bodies stay intact. |
 | [src/performance/invalidation.rs](../src/performance/invalidation.rs) | Commit-only outbox notifications eagerly evict replica caches; authoritative version probes survive missed events. |
 | [src/performance/languages.rs](../src/performance/languages.rs) | Global language registry is versioned in the same transaction as every registry mutation. |
 | [src/performance/mod.rs](../src/performance/mod.rs) | Shared read-context caching with authoritative versions; mutations and checkout locks stay outside memoization. |
-| [src/performance/pool.rs](../src/performance/pool.rs) | Explicit per-process database budgets and bounded queue waits; invalid deployment values fail fast. |
 | [src/performance/relay_admission.rs](../src/performance/relay_admission.rs) | Short, bounded relay admission waiting before contacting the independent Checkout service. |
-| [src/performance/row_security.rs](../src/performance/row_security.rs) | Bind each borrowed PostgreSQL connection to task scope, and reject unsafe strict-runtime roles. |
 | [src/performance/settings.rs](../src/performance/settings.rs) | One MVCC snapshot validates base/override UUIDs; warm reads avoid transmitting or decoding JSON. |
 | [src/planner/admission.rs](../src/planner/admission.rs) | Every initial or repaired model proposal traverses the same native read-only admission. |
 | [src/planner/repair.rs](../src/planner/repair.rs) | One checkpointed correction of rejected output; original evidence, budget and native review remain authoritative. |
@@ -700,13 +693,27 @@ This lists every checked-in source module in these roots, including files with n
 | Module | Responsibility |
 |---|---|
 | [components/core/src/access.rs](../components/core/src/access.rs) | Admission facts of one shop and sales channel, read once per request and shared by every later check. |
+| [components/core/src/cache.rs](../components/core/src/cache.rs) | Bounded weighted LRU for immutable decoded read models; no network I/O under its mutex. |
+| [components/core/src/channel_metrics/reads.rs](../components/core/src/channel_metrics/reads.rs) | One persisted diagnostic read shared by operator overview, shop dossiers and infrastructure. |
+| [components/core/src/channel_metrics.rs](../components/core/src/channel_metrics.rs) | Bounded, lossy diagnostic counters. Never use this buffer for business events. |
 | [components/core/src/conversions.rs](../components/core/src/conversions.rs) | Conversions from library errors into the shared error contract; the wire messages are part of the public API. |
+| [components/core/src/database/authority.rs](../components/core/src/database/authority.rs) | Connect separately admitted SQL roles within one process budget; rotate authenticated transaction scopes. |
+| [components/core/src/database/config.rs](../components/core/src/database/config.rs) | Database deployment values read once per process; an invalid value stops the start. |
+| [components/core/src/database/lease.rs](../components/core/src/database/lease.rs) | Cluster-wide tenant resource leases. DB serialization protects admission; cancellation releases the fenced lease. |
+| [components/core/src/database/pool.rs](../components/core/src/database/pool.rs) | Explicit per-process database budgets and bounded queue waits; invalid deployment values fail fast. |
+| [components/core/src/database/row_security.rs](../components/core/src/database/row_security.rs) | Bind each borrowed PostgreSQL connection to task scope, and reject unsafe strict-runtime roles. |
+| [components/core/src/database.rs](../components/core/src/database.rs) | Database access of the process: deployment values, connection pools, row security and cluster-wide leases. |
 | [components/core/src/failure.rs](../components/core/src/failure.rs) | Stable safe error details shared by HTTP, MCP and agent streams; legacy constructors retain their wire message. |
 | [components/core/src/http_limits.rs](../components/core/src/http_limits.rs) | Bounded HTTP payloads and streaming responses for native settings and services. |
 | [components/core/src/lib.rs](../components/core/src/lib.rs) | Shared foundation of every component: the error contract, its conversions and basic identifiers. No business rules. |
 | [components/core/src/observability.rs](../components/core/src/observability.rs) | Server-generated request correlation and safe structured events, without tokens, query strings or bodies. |
+| [components/core/src/outbox/next_tenant.sql](../components/core/src/outbox/next_tenant.sql) | Independent app entry; see extensions/README.md for its public contract. |
+| [components/core/src/outbox/retention.rs](../components/core/src/outbox/retention.rs) | Bounded retirement of duplicate delivered payloads; provenance IDs and unsettled app/flow work survive. |
+| [components/core/src/outbox/retention.sql](../components/core/src/outbox/retention.sql) | Independent app entry; see extensions/README.md for its public contract. |
+| [components/core/src/outbox.rs](../components/core/src/outbox.rs) | The transactional outbox consumer: each subscriber lane acknowledges an event and commits its effects in one transaction. |
 | [components/core/src/request_context.rs](../components/core/src/request_context.rs) | Trusted request identity lives in extensions; HTTP headers carry transport inputs only. |
 | [components/core/src/shop_scope.rs](../components/core/src/shop_scope.rs) | Which shop a request addresses: the transport header, or the deployment's default shop. No authentication. |
+| [components/core/src/state.rs](../components/core/src/state.rs) | The state every component may use: the tenant-scoped database pool and the outbound HTTP client. |
 | [components/core/src/work_signal.rs](../components/core/src/work_signal.rs) | One dedicated LISTEN connection per worker process. Commit notifications are hints; polling repairs lost hints. |
 
 ## Studio, storefront, platform and shared frontend

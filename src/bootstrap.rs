@@ -54,7 +54,6 @@ pub(crate) async fn bootstrap() -> App {
         .expect("Cluster database connection budget exhausted");
     let a = App {
         _connection_budget: Arc::new(connection_budget),
-        db: db.clone(),
         inference_slots: Arc::new(tokio::sync::Semaphore::new(
             env::var("INFERENCE_CONCURRENCY")
                 .ok()
@@ -64,7 +63,10 @@ pub(crate) async fn bootstrap() -> App {
         )),
         token: Arc::new(auth),
         inference: Inference::from_env(http.clone()).with_database(db.clone()),
-        http,
+        core: veyndo_core::State {
+            db: db.clone(),
+            http,
+        },
         model: Arc::new(env::var("OLLAMA_MODEL").unwrap_or("qwen3.6:35b".into())),
         sandboxes: Arc::new(sandbox_cache::Cache::default()),
         channel_metrics: Arc::new(channel_metrics::ChannelMetrics::default()),

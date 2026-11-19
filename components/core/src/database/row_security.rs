@@ -1,10 +1,10 @@
 //! Bind each borrowed PostgreSQL connection to task scope, and reject unsafe strict-runtime roles.
 use sqlx::PgConnection;
 use std::env;
-use veyndo::scoped_pool::ScopedPool as PgPool;
-use veyndo::tenant_scope::{Scope, current};
+use veyndo_runtime::scoped_pool::ScopedPool as PgPool;
+use veyndo_runtime::tenant_scope::{Scope, current};
 
-pub(super) async fn bind(conn: &mut PgConnection) -> std::result::Result<(), sqlx::Error> {
+pub(crate) async fn bind(conn: &mut PgConnection) -> std::result::Result<(), sqlx::Error> {
     let (tenant, system) = match current() {
         Scope::Tenant(t) => (t, "off"),
         Scope::Personal { tenant, .. } | Scope::Actor { tenant, .. } => (tenant, "off"),
@@ -18,7 +18,7 @@ pub(super) async fn bind(conn: &mut PgConnection) -> std::result::Result<(), sql
         .await?;
     Ok(())
 }
-pub(crate) async fn verify(db: &PgPool) {
+pub async fn verify(db: &PgPool) {
     if env::var("DB_RLS_REQUIRED").as_deref() != Ok("true") {
         return;
     }

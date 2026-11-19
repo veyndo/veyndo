@@ -5,12 +5,7 @@ pub(crate) struct Config {
     pub strict: bool,
     pub http_api_only: bool,
     pub shop_domain_suffix: String,
-    pub transaction_pooling: bool,
     pub listener_url: String,
-    pub db_pool_max: u32,
-    pub db_pool_min: u32,
-    pub db_wait_ms: u32,
-    pub db_connection_budget: u32,
     pub allow_bootstrap: bool,
     pub paypal_accounts: Value,
     pub webhook_keys: Value,
@@ -99,42 +94,11 @@ pub(crate) fn get() -> &'static Config {
                 "Invalid Studio frame origin"
             );
         }
-        let db_pool_max = number("DB_POOL_MAX", 20, 1, 256);
-        let db_pool_min = number("DB_POOL_MIN", 0, 0, db_pool_max);
-        let db_connection_budget = number("DB_CLUSTER_CONNECTION_BUDGET", 80, 4, 100000);
-        let processes = number("DB_MAX_PROCESSES", 1, 1, 1024);
-        assert!(
-            (db_pool_max + 2).saturating_mul(processes) <= db_connection_budget,
-            "Pool + listeners exceeds cluster connection budget"
-        );
-        let pooler_mode = env::var("DB_POOLER_MODE").unwrap_or("session".into());
-        assert!(
-            ["session", "transaction"].contains(&pooler_mode.as_str()),
-            "Invalid DB_POOLER_MODE"
-        );
-        let transaction_pooling = pooler_mode == "transaction";
-        let listener_url = if transaction_pooling {
-            env::var("DATABASE_LISTENER_URL").ok().filter(|s|!s.is_empty()).expect(
-                "Transaction pooling requires a direct/session DATABASE_LISTENER_URL for LISTEN",
-            )
-        } else {
-            env::var("DATABASE_LISTENER_URL")
-                .ok()
-                .filter(|s| !s.is_empty())
-                .ok_or(env::VarError::NotPresent)
-                .or_else(|_| env::var("DATABASE_RUNTIME_URL"))
-                .or_else(|_| env::var("DATABASE_URL"))
-                .unwrap_or_default()
-        };
+        let database = veyndo_core::database::config::get();
         Config {
             http_api_only,
             shop_domain_suffix: env::var("SHOP_DOMAIN_SUFFIX").unwrap_or_default(),
-            transaction_pooling,
-            listener_url,
-            db_pool_max,
-            db_pool_min,
-            db_connection_budget,
-            db_wait_ms: number("DB_POOL_WAIT_MS", 5000, 100, 60000),
+            listener_url: database.listener_url.clone(),
             allow_bootstrap: flag("ALLOW_BOOTSTRAP_AUTH", true),
             paypal_accounts,
             webhook_keys: json_object("APP_WEBHOOK_KEYS", None),
@@ -164,24 +128,8 @@ pub(crate) fn get() -> &'static Config {
         }
     })
 }
-pub(crate) fn number(key: &str, default: u32, min: u32, max: u32) -> u32 {
-    let n = env::var(key)
-        .map(|v| v.parse().unwrap_or_else(|_| panic!("Invalid {key}")))
-        .unwrap_or(default);
-    assert!(
-        (min..=max).contains(&n),
-        "Invalid {key}: expected {min}..{max}"
-    );
-    n
-}
-fn flag(key: &str, default: bool) -> bool {
-    match env::var(key).as_deref() {
-        Ok("true") => true,
-        Ok("false") => false,
-        Err(_) => default,
-        _ => panic!("Invalid boolean {key}"),
-    }
-}
+use veyndo_core::database::config::flag;
+pub(crate) use veyndo_core::database::config::number;
 
 fn json_object(key: &str, fallback: Option<&str>) -> Value {
     let raw = env::var(key)

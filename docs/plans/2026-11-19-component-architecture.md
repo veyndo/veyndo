@@ -107,8 +107,11 @@ Rules that hold from the first component on:
       access snapshot are core-owned data types now.
 - [x] Move shop resolution, header access, request tracing, bounded HTTP bodies
       and the worker wake-up signal into `core`.
-- [ ] Move the outbox, channel metrics and `performance` into `core`; they still
-      take the `App` state object.
+- [x] Move the outbox consumer (subscribers outside core arrive through the
+      `Projector` port), channel metrics, the read cache and the database layer
+      (deployment values, pools, row security, cluster leases) into `core`.
+- [ ] Move request admission and the settings and language read caches out of
+      `src/performance`.
 - [ ] Replace the `App` state object by per-component state plus ports.
 - [ ] Remove the nine dependencies `core` has on other components.
 - [ ] `components/identity` with `types/`, `store/`, `service/`, `http/`.

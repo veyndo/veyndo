@@ -4,7 +4,7 @@ use std::time::Duration;
 
 /// Retry only transient connection admission during a bounded startup window.
 /// Authority/configuration audits still run normally and fail closed afterward.
-pub(super) async fn connect(
+pub(crate) async fn connect(
     options: PgPoolOptions,
     url: &str,
 ) -> Result<sqlx::PgPool, sqlx::Error> {
@@ -33,17 +33,17 @@ fn transient(error: &sqlx::Error) -> bool {
         _ => false,
     }
 }
-pub(crate) fn pool_options() -> PgPoolOptions {
-    let config = crate::runtime_config::get();
-    options(config.db_pool_max, config.db_pool_min)
+pub fn pool_options() -> PgPoolOptions {
+    let config = super::config::get();
+    options(config.pool_max, config.pool_min)
 }
 
-pub(super) fn options(max: u32, min: u32) -> PgPoolOptions {
-    let config = crate::runtime_config::get();
+pub(crate) fn options(max: u32, min: u32) -> PgPoolOptions {
+    let config = super::config::get();
     let options = PgPoolOptions::new()
         .max_connections(max)
         .min_connections(min)
-        .acquire_timeout(Duration::from_millis(config.db_wait_ms.into()))
+        .acquire_timeout(Duration::from_millis(config.wait_ms.into()))
         .idle_timeout(Duration::from_secs(300))
         .max_lifetime(Duration::from_secs(1800));
     if config.transaction_pooling {

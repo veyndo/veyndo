@@ -6,7 +6,7 @@ struct Entry<V> {
     weight: usize,
     used: u64,
 }
-pub(crate) struct Cache<K, V> {
+pub struct Cache<K, V> {
     entries: HashMap<K, Entry<V>>,
     capacity: usize,
     budget: usize,
@@ -14,7 +14,7 @@ pub(crate) struct Cache<K, V> {
     clock: u64,
 }
 impl<K: Eq + Hash + Clone, V> Cache<K, V> {
-    pub(crate) fn new(capacity: usize, budget: usize) -> Self {
+    pub fn new(capacity: usize, budget: usize) -> Self {
         Self {
             entries: HashMap::new(),
             capacity,
@@ -23,13 +23,13 @@ impl<K: Eq + Hash + Clone, V> Cache<K, V> {
             clock: 0,
         }
     }
-    pub(crate) fn get(&mut self, key: &K) -> Option<Arc<V>> {
+    pub fn get(&mut self, key: &K) -> Option<Arc<V>> {
         self.clock = self.clock.saturating_add(1);
         let entry = self.entries.get_mut(key)?;
         entry.used = self.clock;
         Some(entry.value.clone())
     }
-    pub(crate) fn insert(&mut self, key: K, value: Arc<V>, weight: usize) {
+    pub fn insert(&mut self, key: K, value: Arc<V>, weight: usize) {
         if let Some(old) = self.entries.remove(&key) {
             self.weight -= old.weight;
         }
@@ -59,7 +59,7 @@ impl<K: Eq + Hash + Clone, V> Cache<K, V> {
             },
         );
     }
-    pub(crate) fn remove_where(&mut self, predicate: impl Fn(&K) -> bool) {
+    pub fn remove_where(&mut self, predicate: impl Fn(&K) -> bool) {
         self.entries.retain(|key, entry| {
             if predicate(key) {
                 self.weight -= entry.weight;
@@ -69,7 +69,7 @@ impl<K: Eq + Hash + Clone, V> Cache<K, V> {
             }
         });
     }
-    pub(crate) fn usage(&self) -> (usize, usize) {
+    pub fn usage(&self) -> (usize, usize) {
         (self.entries.len(), self.weight)
     }
 }

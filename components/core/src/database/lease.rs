@@ -1,23 +1,23 @@
 //! Cluster-wide tenant resource leases. DB serialization protects admission; cancellation releases the fenced lease.
-use crate::{App, Error, Result, StatusCode, uid};
+use crate::{Error, Result, State, StatusCode, uid};
 use std::time::Duration;
-pub(crate) struct Lease {
-    db: veyndo::scoped_pool::ScopedPool,
+pub struct Lease {
+    db: veyndo_runtime::scoped_pool::ScopedPool,
     id: Option<String>,
     heartbeat: Option<tokio::task::JoinHandle<()>>,
 }
 impl Lease {
-    pub(crate) async fn acquire(a: &App, tenant: &str, class: &str, limit: usize) -> Result<Self> {
+    pub async fn acquire(a: &State, tenant: &str, class: &str, limit: usize) -> Result<Self> {
         Self::weighted(&a.db, tenant, class, limit, 1).await
     }
     async fn weighted(
-        db: &veyndo::scoped_pool::ScopedPool,
+        db: &veyndo_runtime::scoped_pool::ScopedPool,
         tenant: &str,
         class: &str,
         limit: usize,
         slots: i32,
     ) -> Result<Self> {
-        veyndo::tenant_scope::scoped(veyndo::tenant_scope::Scope::System, async {
+        veyndo_runtime::tenant_scope::scoped(veyndo_runtime::tenant_scope::Scope::System, async {
             let id = uid();
             let inserted: bool = sqlx::query_scalar("SELECT claim_resource_lease($1,$2,$3,$4,$5)")
                 .bind(&id)
@@ -42,19 +42,19 @@ impl Lease {
         })
         .await
     }
-    pub(crate) async fn connection_budget(db: &veyndo::scoped_pool::ScopedPool) -> Result<Self> {
-        let config = crate::runtime_config::get();
+    pub async fn connection_budget(db: &veyndo_runtime::scoped_pool::ScopedPool) -> Result<Self> {
+        let config = super::config::get();
         let mut lease = Self::weighted(
             db,
             "__runtime",
             "db-connections",
-            config.db_connection_budget as usize,
-            (config.db_pool_max + 2) as i32,
+            config.connection_budget as usize,
+            (config.pool_max + 2) as i32,
         )
         .await?;
         let pool = db.clone();
         let id = lease.id.clone().expect("new connection lease");
-        lease.heartbeat = Some(veyndo::tenant_scope::spawn(async move {
+        lease.heartbeat = Some(veyndo_runtime::tenant_scope::spawn(async move {
             let mut timer = tokio::time::interval(std::time::Duration::from_secs(60));
             loop {
                 timer.tick().await;
@@ -73,7 +73,7 @@ impl Lease {
 
     /// Free the cluster slot before handing the local relay slot to a queued request.
     /// Drop still schedules cleanup if the request is cancelled or the database stalls.
-    pub(super) async fn finish_relay(mut self) {
+    pub async fn finish_relay(mut self) {
         if tokio::time::timeout(Duration::from_millis(100), self.delete())
             .await
             .is_ok_and(|result| result.is_ok())
@@ -83,7 +83,7 @@ impl Lease {
     }
 
     /// Await release before the Tokio runtime exits; background tasks still hold App clones.
-    pub(crate) async fn release(&self) {
+    pub async fn release(&self) {
         if let Some(heartbeat) = &self.heartbeat {
             heartbeat.abort();
         }
@@ -93,7 +93,7 @@ impl Lease {
     }
 
     async fn delete(&self) -> std::result::Result<(), sqlx::Error> {
-        veyndo::tenant_scope::scoped(veyndo::tenant_scope::Scope::System, async {
+        veyndo_runtime::tenant_scope::scoped(veyndo_runtime::tenant_scope::Scope::System, async {
             sqlx::query("DELETE FROM resource_leases WHERE id=$1")
                 .bind(&self.id)
                 .execute(&self.db)
@@ -114,8 +114,8 @@ impl Drop for Lease {
         };
         let db = self.db.clone();
         // Only this UUID is released. Expiry recovers a killed process; it cannot remove a replacement lease.
-        tokio::spawn(veyndo::tenant_scope::scoped(
-            veyndo::tenant_scope::Scope::System,
+        tokio::spawn(veyndo_runtime::tenant_scope::scoped(
+            veyndo_runtime::tenant_scope::Scope::System,
             async move {
                 let _ = sqlx::query("DELETE FROM resource_leases WHERE id=$1")
                     .bind(id)

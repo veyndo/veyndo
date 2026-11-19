@@ -11,8 +11,8 @@ use std::{
 };
 pub(crate) mod access_snapshot;
 mod admission;
-mod cache;
-pub(crate) mod cluster_lease;
+use veyndo_core::cache;
+pub(crate) use veyndo_core::database::lease as cluster_lease;
 pub(crate) mod delivery;
 pub(crate) use admission::{
     Admission, reserve_ai_attempt, reserve_ai_attempt_tx, run as admit_request,
@@ -20,14 +20,11 @@ pub(crate) use admission::{
 mod invalidation;
 mod languages;
 pub(crate) use invalidation::start as start_invalidations;
-mod authority;
-mod pool;
-pub(crate) use authority::connect as connect_database;
-mod row_security;
+pub(crate) use veyndo_core::database::authority::connect as connect_database;
 mod settings;
 pub(crate) use languages::{LanguageRow, languages};
-pub(crate) use row_security::verify as verify_row_security;
 pub(crate) use settings::settings;
+pub(crate) use veyndo_core::database::row_security::verify as verify_row_security;
 
 // Transfer only AI admission to the bounded producer. Its lifetime is independent
 // of the browser's response buffer; ordinary request slots stay with middleware.

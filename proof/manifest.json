@@ -655,10 +655,55 @@
       "sha256": "9dbaa399afa585fdc25df2bdc32bd73313fb5324f283470252f428ac7b34423b",
       "review": "Request context, principal, POS admission, host shop and the access snapshot data types moved unchanged into components/core; loading the snapshot and matching it to a request stay in the server as free functions with the same queries. Core unit tests (identity headers cannot be forged) pass. SQL, HTTP and provider behaviour is not formally proved."
     },
+    "components/core/src/cache.rs": {
+      "status": "unproved",
+      "sha256": "fb35078b203bcf65b7a161999f0a9b8468649eebf19218c40fef5c6f8aa25406",
+      "review": "Database pools, row security, leases and the read cache moved into the core crate; no rule changed"
+    },
+    "components/core/src/channel_metrics/reads.rs": {
+      "status": "unproved",
+      "sha256": "c04ff334888ed02a8c526cc48797c6f4de4d369636c0d95bf5b6504fac158929",
+      "review": "Channel metrics and the outbox consumer moved into the core crate; no rule changed"
+    },
+    "components/core/src/channel_metrics.rs": {
+      "status": "unproved",
+      "sha256": "06414bd0aa7e74b15ab32167b5d5f3f5628d2a5d84007fec98eedd50460e1994",
+      "review": "Channel metrics and the outbox consumer moved into the core crate; no rule changed"
+    },
     "components/core/src/conversions.rs": {
       "status": "unproved",
       "sha256": "13514612fbe1d4061533cd23ebdf746ad3a3512c78e9e742db950b82603693a1",
       "review": "Component architecture phase 0 and first core crate: the error contract moved unchanged from src/failure.rs and src/foundation.rs to components/core (wire messages, status mapping and retry header identical; the permission scope is resolved by the caller, the inference conversion lives beside its error type). Structure check drops the file length limit and adds the component map; clippy limits function length. Core and cognition unit tests pass. SQL, HTTP and provider behaviour is not formally proved."
+    },
+    "components/core/src/database/authority.rs": {
+      "status": "unproved",
+      "sha256": "ef1daf419b01bd9517db5458fd6d33c5d571765164058fc6a525e4efc78031df",
+      "review": "Database pools, row security, leases and the read cache moved into the core crate; no rule changed"
+    },
+    "components/core/src/database/config.rs": {
+      "status": "unproved",
+      "sha256": "5e2392f511133af3e5ce5574dbf017115d028cc7883f3fba3aa15f07f8380ff7",
+      "review": "Database pools, row security, leases and the read cache moved into the core crate; no rule changed"
+    },
+    "components/core/src/database/lease.rs": {
+      "status": "unproved",
+      "sha256": "d3d30644c58dca0a8b24fc19d002c9f04563cb842c7987ec53cccd766e40e8c7",
+      "review": "Database pools, row security, leases and the read cache moved into the core crate; no rule changed"
+    },
+    "components/core/src/database/pool.rs": {
+      "status": "unproved",
+      "sha256": "8a36abe6f5a23e4fd4edccd84395e49b9582578e32f867ece36181a4c67cac43",
+      "review": "Database pools, row security, leases and the read cache moved into the core crate; no rule changed"
+    },
+    "components/core/src/database/row_security.rs": {
+      "status": "unproved",
+      "sha256": "daf46442c321e5abf293d940342e34a5d85e7be651f96ca2f4e3be25990728b8",
+      "review": "Database pools, row security, leases and the read cache moved into the core crate; no rule changed"
+    },
+    "components/core/src/database.rs": {
+      "status": "unproved",
+      "sha256": "44de91545c4e661928ea53e6f6292a68864edcb86e744f0de176930672bff532",
+      "review": "Database pools, row security, leases and the read cache moved into the core crate; no rule changed"
     },
     "components/core/src/failure.rs": {
       "status": "unproved",
@@ -672,13 +717,23 @@
     },
     "components/core/src/lib.rs": {
       "status": "reviewed-binding",
-      "sha256": "8759d15f1badb89b254afe70ab08d74deb82446f9395891f61c21237383e48cb",
-      "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
+      "sha256": "9ce36da5125b4325ba2870cc9b52dfacd073a7288da35f7ddf5722bb2f78f6fe",
+      "review": "Database pools, row security, leases and the read cache moved into the core crate; no rule changed"
     },
     "components/core/src/observability.rs": {
       "status": "unproved",
       "sha256": "b1324e25f81c0f43d79b8b6a232d3140c4f6e2aadcf16731526cd84896a7886b",
       "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
+    },
+    "components/core/src/outbox/retention.rs": {
+      "status": "unproved",
+      "sha256": "7cbc42e64dabe7a0f825f9036fdaf107b4cc8d15efebf177dd3756c9fde99ef9",
+      "review": "Channel metrics and the outbox consumer moved into the core crate; no rule changed"
+    },
+    "components/core/src/outbox.rs": {
+      "status": "unproved",
+      "sha256": "cab8668c852e96891e15472f03f76f5479d1a85ec63104284161fc0223d80c01",
+      "review": "Channel metrics and the outbox consumer moved into the core crate; no rule changed"
     },
     "components/core/src/request_context.rs": {
       "status": "unproved",
@@ -689,6 +744,11 @@
       "status": "unproved",
       "sha256": "f807294ca87f08d283dcef28501903c2cef9fe5f29ddfd504a1e7e14e31f1369",
       "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
+    },
+    "components/core/src/state.rs": {
+      "status": "unproved",
+      "sha256": "b41b686ebab4d95c13008e8e2c14b09fece5166123810a183b0ee1377f9ef732",
+      "review": "Channel metrics and the outbox consumer moved into the core crate; no rule changed"
     },
     "components/core/src/work_signal.rs": {
       "status": "unproved",
@@ -3587,8 +3647,8 @@
     },
     "src/bootstrap.rs": {
       "status": "unproved",
-      "sha256": "bf3ad69174c6ce33b24587687a5f549285c224830f2aaed9e6db5bf83ff41959",
-      "review": "Reviewed the separation of app worker startup from HTTP and operator initialization. The switch preserves the existing default, role and signed database scope. Shutdown stops future work and bounds the wait for tasks in progress."
+      "sha256": "13187b5ca7c4a25907a2ed41c48efea6329ad559587c7524f2a23fd79d81a773",
+      "review": "Channel metrics and the outbox consumer moved into the core crate; no rule changed"
     },
     "src/brand_redirect.rs": {
       "status": "unproved",
@@ -3694,16 +3754,6 @@
       "status": "unproved",
       "sha256": "cdcb3ed7078f637b67afbb8c63f618e7f91f485501562d566e1db60a720971ac",
       "review": "Reviewed eighteen core findings: typed trusted identity and explicit route rights; consolidated current grants; durable auth and fenced shared limits; scoped transactions and one-backend PgBouncer including nested borrow fixes; bounded Wasm/PNG work; notified workers, savepoint quarantine and conservative retention; separate runtime roles and startup configuration. Real PostgreSQL/provider regressions preserve current tenant/customer/payment behavior. SQL/network adapters remain unproved."
-    },
-    "src/channel_metrics/reads.rs": {
-      "status": "unproved",
-      "sha256": "d02369af78d751367662406dd14dd29e6cdc8e4d8c7ed12b70a651f3862aa19c",
-      "review": "Review HTTP diagnostic histogram: status-only bounded keys, existing buffered flush and tenant RLS unchanged; shared operator reads preserve unclassified legacy totals. Rust unit classification and frontend outcome tests; real platform integration required before merge. No verified commerce policy changed."
-    },
-    "src/channel_metrics.rs": {
-      "status": "unproved",
-      "sha256": "d83b944d836e96d1bf54ec61ca334a23958414ca0db1dcff463791dc20b7fc78",
-      "review": "Identity-only Veyndo namespace and canonical-domain rename; reviewed migration checksum compatibility for six historical SQL versions, unchanged checkout predicates, 42 library and 169 binary tests pass; native component legacy boundary remains configured and guarded."
     },
     "src/checkout/buyer_identity.rs": {
       "status": "unproved",
@@ -4412,8 +4462,8 @@
     },
     "src/foundation.rs": {
       "status": "unproved",
-      "sha256": "0d8fff6b68367faaf98358c19cdbef6ff44437a11fe69a7eaa0b06d00c277b9f",
-      "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
+      "sha256": "25e53946266c4f8a7e7f50ada503daeafd58c99b99272b3db1ccf82e85b56d8a",
+      "review": "Channel metrics and the outbox consumer moved into the core crate; no rule changed"
     },
     "src/history/capability.rs": {
       "status": "unproved",
@@ -4537,8 +4587,8 @@
     },
     "src/main.rs": {
       "status": "unproved",
-      "sha256": "279a6fa4052ee58cbad814473e85f357dce6806d5d756641e0abdc795e85b2f5",
-      "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
+      "sha256": "938eb27a57871c62ee776a2c4fdcd0055590ec086dda7000344be55aba9914ba",
+      "review": "Channel metrics and the outbox consumer moved into the core crate; no rule changed"
     },
     "src/marketing/app_flows.rs": {
       "status": "reviewed-binding",
@@ -4987,13 +5037,13 @@
     },
     "src/outbox/retention.rs": {
       "status": "unproved",
-      "sha256": "e233342ce7e66a8a29579cafd8cc4b4d35e8e50201af537cfbb0935c847c9186",
-      "review": "Behavior analytics reviewed: existing cart-locked consent predicate reused; purpose-separated withdrawal, tenant/FK scope, typed and bounded observations, private journey permissions and derived reports. New SQL/frontend/proxy adapters remain unproved; no new theorem claim."
+      "sha256": "ab2c4030ccc699606f5679ca03b7f915076c68aae7d1e3e3e45b6563e9c6e410",
+      "review": "Channel metrics and the outbox consumer moved into the core crate; no rule changed"
     },
     "src/outbox.rs": {
       "status": "unproved",
-      "sha256": "9e1f262d80d6ad584621f12e777cc73d9d4d0f48a8f202f6cd774b84a8575aa2",
-      "review": "Review combined native business capability and hardening: typed material/dimension guests remain app-owned and bounded; native CAS/FX/current B2B approval and immutable order snapshots; isolated app crate consumer preserves compiler boundary; independent per-event subscriber retry/quarantine preserves healthy events, commit gaps and explicit recovery; signed tenant/system authority, provider-native read tools and real document withdrawal, workspace image closure and source inventory. SQL/async/provider adapters remain tested, not proved."
+      "sha256": "72e3e18edee7da9078855edfd624d4e83bcc9f4c03cf8f692c73bd2d4a0be8f1",
+      "review": "Channel metrics and the outbox consumer moved into the core crate; no rule changed"
     },
     "src/payments/accounts.rs": {
       "status": "unproved",
@@ -5175,21 +5225,6 @@
       "sha256": "935b767c7b94ed6b85ba780ac6bbb1da00bb25b225f1e7cc5355700a8d7cf6fe",
       "review": "Reviewed the same bounded confirmation wait, refusal counters, and release of local slots in the dedicated relay module. Seven Rust admission tests pass. The matched real HTTP/PostgreSQL comparison reproduces the local wait timeouts and validates 48 orders, stock movements, invoices and SMTP receipts per arm. Async admission and leases remain outside the proof."
     },
-    "src/performance/authority.rs": {
-      "status": "unproved",
-      "sha256": "64327daffff6d2e8b7985ec57a085812cc56fb155cf163867f2b0d773baa9281",
-      "review": "Reviewed POS/payment status reads: one statement snapshot for payment, latest job and exact cart-bound native order; existing cashier/customer/channel admission and financial writers unchanged. Reviewed bounded 90-second startup retry for transient connection errors only; strict role/RLS/identity/signing audits remain unchanged. Deterministic pre-fix POS interleaving and actual refused-database startup reproduce original failures; corrected native suites and strict runtime checks are required."
-    },
-    "src/performance/cache.rs": {
-      "status": "unproved",
-      "sha256": "cb3be22453fd387a9ec775862e425bcc661d13c598358d5e434e4dd60ab35227",
-      "review": "Reviewed all changed Rust, append-only schemas, build/extraction and Lean inputs: lease hooks bind new/reused connections and reset on release; strict runtime rejects owner/bypass/TRUNCATE and preserves app-schema ownership; two-replica non-owner PostgreSQL tests deny forged foreign writes, enforce operator quotas and parent-stage daily usage, release persisted allocation quantities once despite corrupted snapshots, and distinguish commit from rollback invalidation. Money retains legacy EUR rounding with explicit scale and original Shopware differential; receipt-backed state admission is monotonic with late capture/refund. Async SQL/provider code remains unproved. Rust 113 tests, staging/app/automation/settings and strict checkout/CRM/tenant regressions passed; 274 frontend tests and production build passed."
-    },
-    "src/performance/cluster_lease.rs": {
-      "status": "unproved",
-      "sha256": "e6ff06b05460b07d5a378c2ac9f14670f34f5c75acb222fbb32728ef382b3ad6",
-      "review": "Reviewed independent Checkout local and cluster admission. Only relay requests wait, for at most 300 ms with separate tenant and process queue caps and no database lease while queued. Relay cleanup uses its original lease ID with Drop fallback. Six Rust admission checks and the local 200,000-product purchase, recovery, worker and provider-fixture paths check the behavior. Asynchronous admission and database leases remain unproved."
-    },
     "src/performance/delivery.rs": {
       "status": "unproved",
       "sha256": "87dbf0a9212f291001b8749400d850e76b8a1aa5b68bf2c8b9d90fc8443bf0bb",
@@ -5207,23 +5242,13 @@
     },
     "src/performance/mod.rs": {
       "status": "unproved",
-      "sha256": "3c186e83fdfeee78b0428c56e4793e3996cf3f079de45a63d89632a23c0e7b37",
-      "review": "Shopper App streaming holds the original AI admission in a bounded scoped producer, emits only completed public tool results and cancels the producer when the client disconnects. Existing native authorization and JSON response are retained."
-    },
-    "src/performance/pool.rs": {
-      "status": "unproved",
-      "sha256": "595972f8993f827b71233d8fffacb2d83254f1ed6d0e9aa0f894a57f0686bd47",
-      "review": "Reviewed POS/payment status reads: one statement snapshot for payment, latest job and exact cart-bound native order; existing cashier/customer/channel admission and financial writers unchanged. Reviewed bounded 90-second startup retry for transient connection errors only; strict role/RLS/identity/signing audits remain unchanged. Deterministic pre-fix POS interleaving and actual refused-database startup reproduce original failures; corrected native suites and strict runtime checks are required."
+      "sha256": "bdbc2a6d698a3e4250ff9c771c49f499fca7c2c17a85f04929b01bc34fa8b5b6",
+      "review": "Database pools, row security, leases and the read cache moved into the core crate; no rule changed"
     },
     "src/performance/relay_admission.rs": {
       "status": "unproved",
       "sha256": "97fa2c0a6e70468191f495687952adb07d432c8fb5f9da93ccc3288f97d9af5f",
       "review": "Reviewed the same bounded confirmation wait, refusal counters, and release of local slots in the dedicated relay module. Seven Rust admission tests pass. The matched real HTTP/PostgreSQL comparison reproduces the local wait timeouts and validates 48 orders, stock movements, invoices and SMTP receipts per arm. Async admission and leases remain outside the proof."
-    },
-    "src/performance/row_security.rs": {
-      "status": "unproved",
-      "sha256": "1b7300a4bfbebda1293084421f505a93dbcccbb12363e139de7cf6533a5a4d7a",
-      "review": "Separate signed role-bound SQL authority preserves old row/domain policies; bound short-lived tickets, personal actor fences, guarded native app DDL, fixed snapshot ordering and narrow language registry. Reviewed additive 099 and runtime pools; actual login attacks, two replicas, restart, app release and real PgBouncer/key rotation pass. SQL/HMAC/transport remain tested adapters outside pure Lean proofs."
     },
     "src/performance/settings.rs": {
       "status": "unproved",
@@ -5377,8 +5402,8 @@
     },
     "src/runtime_config.rs": {
       "status": "unproved",
-      "sha256": "4d5f398c1ee6bdd76bbad7809afa12f25108f4d4a1797e076a4cd5e543958292",
-      "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation and is still read at startup. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
+      "sha256": "23f345a84496b09325fc6e7fb7c4d535abe0b5eb9bcb7d71f81e953717df15d4",
+      "review": "Database pools, row security, leases and the read cache moved into the core crate; no rule changed"
     },
     "src/sandbox_cache.rs": {
       "status": "unproved",
@@ -6452,14 +6477,6 @@
     "src/operations/customer_directory_default.sql": {
       "sha256": "83738c400b888597fce307a480a61dc4b7844a46181f45aca06f011d005ed6ab",
       "review": "Reviewed bounded native directory criteria, constant allowlisted SQL sorts and tenant tuple cursors, localized product-name ordering, read-only central model planning with current domain and PII grants, and HTTP/MCP discovery parity. Isolated PostgreSQL/provider suites cover native checkout-created records, denied foreign tenant/cursor access, stage boundaries and provider failures. Existing pure financial policies remain unchanged; SQL, model semantics and UI remain unproved adapters."
-    },
-    "src/outbox/next_tenant.sql": {
-      "sha256": "b35a3962bd1eca2f90c8bd74d26f0e9860bc5a83c431d7c42cbc6089170595ed",
-      "review": "Review combined native business capability and hardening: typed material/dimension guests remain app-owned and bounded; native CAS/FX/current B2B approval and immutable order snapshots; isolated app crate consumer preserves compiler boundary; independent per-event subscriber retry/quarantine preserves healthy events, commit gaps and explicit recovery; signed tenant/system authority, provider-native read tools and real document withdrawal, workspace image closure and source inventory. SQL/async/provider adapters remain tested, not proved."
-    },
-    "src/outbox/retention.sql": {
-      "sha256": "293cab148e5f9d16df33ac89699b709b82f822bf6be9f55ae1d6beb2ccb03c38",
-      "review": "Reviewed native-only static bypass with hosted denial and Lean exact acceptance; one fresh domain/environment/status/channel/mount SQL snapshot and current membership lookup preserve scoped admission, binding identity and revocation; immutable Arc settings retain locked mutation/checkout reads; secret-free compression opt-in and deterministic precompressed assets preserve streams/ranges; batched inventory uses existing checkout locks and ordered idempotent release; bounded overview SQL preserves currency-separated historical facts. Real two-replica read/channel/tenant/checkout and strict-runtime regressions passed; SQL and build inputs now explicitly locked. These adapters remain unproved."
     },
     "src/performance/access_snapshot.sql": {
       "sha256": "d675ee530b12560085e5335e93fbc60caa9ec45c4b2cb6d6d2950abdd7e50887",

@@ -88,7 +88,7 @@ mod ucp;
 pub(crate) use seed::*;
 mod bootstrap;
 mod brand_redirect;
-mod channel_metrics;
+pub(crate) use veyndo_core::channel_metrics;
 mod migrations;
 mod performance;
 mod platform;

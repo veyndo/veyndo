@@ -1,8 +1,11 @@
 //! One persisted diagnostic read shared by operator overview, shop dossiers and infrastructure.
-use crate::*;
+use crate::Result;
+use serde_json::{Value, json};
+use sqlx::Row;
+use veyndo_runtime::scoped_pool::ScopedPool;
 
-pub(crate) async fn traffic(
-    db: &PgPool,
+pub async fn traffic(
+    db: &ScopedPool,
     tenant: Option<&str>,
     exclude_staging: bool,
 ) -> Result<Vec<Value>> {
