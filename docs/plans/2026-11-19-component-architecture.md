@@ -90,20 +90,25 @@ Rules that hold from the first component on:
 - [x] Dependency and table report: `docs/component-dependencies.md`.
 - [x] `scripts/sql_prepare.py`: every static SQL statement is prepared against the
       migrated schema in the integration suite. First run: 1,604 pass, no mismatch.
+- [x] Budgets in `components.json` that only fall: untyped field accesses (3,594)
+      and files with SQL outside a `store` folder (328).
 - [ ] Lower `too-many-lines-threshold` from 320 to 150 (35 functions to split).
 - [x] Give the three statements whose parameter type comes only from the bound
       value an explicit cast, so they are covered too (1,607 statements covered).
 - [x] Suite runner: `--keep-going` runs the remaining suites after a failure and
       lists every failed suite; the nightly workflow uses it.
-- [ ] Open an issue automatically when the nightly run is red.
+- [x] Open an issue automatically when the nightly run is red (`nightly_report` job;
+      first exercised by the next failing scheduled run).
 
 ## Phase 1: core and identity
 
 - [x] `components/core`: error contract and its conversions as a crate.
 - [x] Move the request context into `core`; its POS admission, host shop and
       access snapshot are core-owned data types now.
-- [ ] Move tenant resolution and header access into `core` (they still read the
-      server's runtime configuration).
+- [x] Move shop resolution, header access, request tracing, bounded HTTP bodies
+      and the worker wake-up signal into `core`.
+- [ ] Move the outbox, channel metrics and `performance` into `core`; they still
+      take the `App` state object.
 - [ ] Replace the `App` state object by per-component state plus ports.
 - [ ] Remove the nine dependencies `core` has on other components.
 - [ ] `components/identity` with `types/`, `store/`, `service/`, `http/`.
@@ -243,9 +248,10 @@ those stay covered by the tests above, and the coverage page keeps saying so.
       honoured (`offer_honoured`, four properties).
 - [x] Sovereign AI mode admits only the self-operated provider on a self-hosted
       endpoint (`sovereign_request_admissible`, four properties).
-- [ ] Extend the extractor to checked addition and multiplication; sums and
-      totals cannot be stated in the current subset (comparisons, `min`,
-      saturating subtraction).
+- [ ] Extend the extractor to saturating addition and multiplication together with
+      the first rule that uses them. The price calculation is still a floating-point
+      port of the original calculators, so "total equals the sum of its parts"
+      becomes provable only after phase 2 moves it to whole minor units.
 - [ ] State-machine proofs as invariants over transitions, not only single steps.
 - [ ] The comparison driver checks the compiled Rust rules against the Lean
       versions on generated inputs for every rule above.

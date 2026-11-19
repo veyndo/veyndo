@@ -2,7 +2,11 @@
 pub mod access;
 mod conversions;
 mod failure;
+pub mod http_limits;
+pub mod observability;
 pub mod request_context;
+pub mod shop_scope;
+pub mod work_signal;
 
 pub use axum::http::StatusCode;
 pub use failure::{Error, Failure};

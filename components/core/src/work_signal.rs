@@ -2,11 +2,11 @@
 use std::sync::{Arc, OnceLock};
 use tokio::sync::broadcast;
 static SIGNAL: OnceLock<broadcast::Sender<()>> = OnceLock::new();
-pub(crate) struct Wakeup {
+pub struct Wakeup {
     rx: broadcast::Receiver<()>,
     fast_until: std::time::Instant,
 }
-pub(crate) fn subscribe() -> Wakeup {
+pub fn subscribe() -> Wakeup {
     let sender = SIGNAL.get_or_init(|| broadcast::channel(64).0);
     Wakeup {
         rx: sender.subscribe(),
@@ -14,12 +14,12 @@ pub(crate) fn subscribe() -> Wakeup {
     }
 }
 impl Wakeup {
-    pub(crate) fn worked(&mut self, worked: bool) {
+    pub fn worked(&mut self, worked: bool) {
         if worked {
             self.fast_until = std::time::Instant::now() + std::time::Duration::from_secs(10);
         }
     }
-    pub(crate) async fn tick(&mut self) {
+    pub async fn tick(&mut self) {
         let delay = if std::time::Instant::now() < self.fast_until {
             250
         } else {
@@ -31,9 +31,9 @@ impl Wakeup {
         }
     }
 }
-pub(crate) fn start(db_url: Arc<String>) {
+pub fn start(db_url: Arc<String>) {
     let sender = SIGNAL.get_or_init(|| broadcast::channel(64).0).clone();
-    veyndo::tenant_scope::spawn(async move {
+    veyndo_runtime::tenant_scope::spawn(async move {
         loop {
             let result = async {
                 let mut listener = sqlx::postgres::PgListener::connect(&db_url).await?;

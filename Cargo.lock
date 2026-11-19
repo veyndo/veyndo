@@ -3611,14 +3611,17 @@ name = "veyndo-core"
 version = "0.5.0"
 dependencies = [
  "axum",
+ "reqwest",
  "serde",
  "serde_json",
  "sha2 0.10.9",
  "sqlx",
  "tokio",
+ "tracing",
  "uuid",
  "veyndo-commerce",
  "veyndo-kernel",
+ "veyndo-runtime",
 ]
 
 [[package]]

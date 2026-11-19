@@ -1,8 +1,10 @@
 //! Bounded HTTP payloads and streaming responses for native settings and services.
-use super::*;
-pub(crate) const SETTINGS_BYTES: usize = 1024 * 1024;
+use crate::{Error, Result, StatusCode, bad};
+use axum::response::IntoResponse;
+use serde_json::Value;
+pub const SETTINGS_BYTES: usize = 1024 * 1024;
 
-pub(crate) async fn settings_errors(
+pub async fn settings_errors(
     request: axum::extract::Request,
     next: axum::middleware::Next,
 ) -> axum::response::Response {
@@ -17,7 +19,7 @@ pub(crate) async fn settings_errors(
     response
 }
 
-pub(crate) async fn json_body(mut r: reqwest::Response) -> Result<Value> {
+pub async fn json_body(mut r: reqwest::Response) -> Result<Value> {
     let mut bytes = Vec::new();
     while let Some(chunk) = r
         .chunk()
@@ -35,6 +37,8 @@ pub(crate) async fn json_body(mut r: reqwest::Response) -> Result<Value> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use axum::{Json, Router, routing::post};
+    use serde_json::json;
 
     #[tokio::test]
     async fn settings_transport_accepts_payment_catalogue_and_keeps_other_limits() {

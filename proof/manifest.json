@@ -665,15 +665,35 @@
       "sha256": "0815662afae602e0085a566eb35ddcb10a8922a651e82af579436b281ba35432",
       "review": "Component architecture phase 0 and first core crate: the error contract moved unchanged from src/failure.rs and src/foundation.rs to components/core (wire messages, status mapping and retry header identical; the permission scope is resolved by the caller, the inference conversion lives beside its error type). Structure check drops the file length limit and adds the component map; clippy limits function length. Core and cognition unit tests pass. SQL, HTTP and provider behaviour is not formally proved."
     },
+    "components/core/src/http_limits.rs": {
+      "status": "unproved",
+      "sha256": "7f1bb88145dfac14d1c6673046bb4a986aa8bf0a4becdc770f47b25622e6d718",
+      "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
+    },
     "components/core/src/lib.rs": {
       "status": "reviewed-binding",
-      "sha256": "1155caff588397deff4a0a38ca39be24911a21054235c6c853dac31ba680bf9b",
-      "review": "Request context, principal, POS admission, host shop and the access snapshot data types moved unchanged into components/core; loading the snapshot and matching it to a request stay in the server as free functions with the same queries. Core unit tests (identity headers cannot be forged) pass. SQL, HTTP and provider behaviour is not formally proved."
+      "sha256": "8759d15f1badb89b254afe70ab08d74deb82446f9395891f61c21237383e48cb",
+      "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
+    },
+    "components/core/src/observability.rs": {
+      "status": "unproved",
+      "sha256": "b1324e25f81c0f43d79b8b6a232d3140c4f6e2aadcf16731526cd84896a7886b",
+      "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
     },
     "components/core/src/request_context.rs": {
       "status": "unproved",
       "sha256": "52eca6e77dc750a5807d31db4c745b97ac0ccbfb1c1af145e9f0f0c7ff2df848",
       "review": "Request context, principal, POS admission, host shop and the access snapshot data types moved unchanged into components/core; loading the snapshot and matching it to a request stay in the server as free functions with the same queries. Core unit tests (identity headers cannot be forged) pass. SQL, HTTP and provider behaviour is not formally proved."
+    },
+    "components/core/src/shop_scope.rs": {
+      "status": "unproved",
+      "sha256": "f807294ca87f08d283dcef28501903c2cef9fe5f29ddfd504a1e7e14e31f1369",
+      "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
+    },
+    "components/core/src/work_signal.rs": {
+      "status": "unproved",
+      "sha256": "43278481afd65222ac1a7e6c26a5450aa67a5b09072f02b3146def25cb6214f2",
+      "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
     },
     "crates/apps/src/component_runtime.rs": {
       "status": "unproved",
@@ -4392,8 +4412,8 @@
     },
     "src/foundation.rs": {
       "status": "unproved",
-      "sha256": "e0db41c4b912897a254bd8c871113214eb9f6dcee648cee061edf8216eeaa244",
-      "review": "Component architecture phase 0 and first core crate: the error contract moved unchanged from src/failure.rs and src/foundation.rs to components/core (wire messages, status mapping and retry header identical; the permission scope is resolved by the caller, the inference conversion lives beside its error type). Structure check drops the file length limit and adds the component map; clippy limits function length. Core and cognition unit tests pass. SQL, HTTP and provider behaviour is not formally proved."
+      "sha256": "0d8fff6b68367faaf98358c19cdbef6ff44437a11fe69a7eaa0b06d00c277b9f",
+      "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
     },
     "src/history/capability.rs": {
       "status": "unproved",
@@ -4419,11 +4439,6 @@
       "status": "unproved",
       "sha256": "e5ecdd27274850e62d9550c1c30e262fb08b255da3f5dc2a62c088c0b7eb1da4",
       "review": "History discovery now uses native entity rights plus current read/write/PII conjunctions; canonical entity set and PII classification are shared with native history. Real narrow-role counterexample reproduced before repair; no financial policy changed."
-    },
-    "src/http_limits.rs": {
-      "status": "unproved",
-      "sha256": "9fce250ef68f3536c47d81930e29b58ca9d4d3ffeb2f48f5f435d7803303ae57",
-      "review": "Reviewed settings-only payload allowance and JSON rejection with real HTTP regression; native authorization, CAS, event and verified commerce kernels unchanged"
     },
     "src/knowledge/embeddings.rs": {
       "status": "unproved",
@@ -4522,8 +4537,8 @@
     },
     "src/main.rs": {
       "status": "unproved",
-      "sha256": "5ddcb30a114fcc0f26299a06b41905f0e08eb6dfd4a4537a4b5265851733668e",
-      "review": "Request context, principal, POS admission, host shop and the access snapshot data types moved unchanged into components/core; loading the snapshot and matching it to a request stay in the server as free functions with the same queries. Core unit tests (identity headers cannot be forged) pass. SQL, HTTP and provider behaviour is not formally proved."
+      "sha256": "279a6fa4052ee58cbad814473e85f357dce6806d5d756641e0abdc795e85b2f5",
+      "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
     },
     "src/marketing/app_flows.rs": {
       "status": "reviewed-binding",
@@ -4754,11 +4769,6 @@
       "status": "unproved",
       "sha256": "755aa7f0e8ddffd0728700b4aa733e47b4a101f7ea195cd8c2285a942bfd7cc1",
       "review": "Reviewed fixed app-record store, tenant/app/model identity, forced signed RLS, trigger-maintained unique/reference/quota projections, scoped schema/preview/staging/checkout consumers and atomic maintenance consolidation; actual PostgreSQL app/checkout/schema/F5 suites and independent security re-review pass. Existing frozen-record WIT conversion remains equivalent; SQL/async adapters remain outside Lean proof boundary."
-    },
-    "src/observability.rs": {
-      "status": "unproved",
-      "sha256": "07a90627751767ce7432015818b46ddd4562441b1fbbe3403efca731a7bcdd08",
-      "review": "Review compiler-enforced foundation crates with unchanged native owners; native provider read-tool aliases and current authorization, private checkpoint continuation and versioned prompt evidence; fixed subscriber acknowledgements preserve commit gaps, independent quarantine and explicit replay; traced requests/tasks/outbox without payloads; exact decimal-to-minor-unit rounding retains legacy price boundary; real SQL poison-isolation regression passes and workspace unit/clippy checks pass"
     },
     "src/operations/addresses.rs": {
       "status": "unproved",
@@ -5367,8 +5377,8 @@
     },
     "src/runtime_config.rs": {
       "status": "unproved",
-      "sha256": "dd44ce8be785f811013a9b64e7ac08443ebbf5dd81666fcb291face3f59f24db",
-      "review": "Reviewed API-only ingress, startup profile validation, and reserved API hostname resolution. Isolated HTTP and PostgreSQL cover presentation rejection, explicit Store and MCP shop context, UCP, existing merchant authorization, and tenant isolation."
+      "sha256": "4d5f398c1ee6bdd76bbad7809afa12f25108f4d4a1797e076a4cd5e543958292",
+      "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation and is still read at startup. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
     },
     "src/sandbox_cache.rs": {
       "status": "unproved",
@@ -5590,11 +5600,6 @@
       "sha256": "c390b5175a8e41b3029975694db20f7d95031da662646b53ad26ab98dbd8f097",
       "review": "Poppy discovery: mcp/poppy.rs serves a static Personal Agent Protocol 1.0 document only on the exact configured shop host derived from the existing HostShop resolution, naming the existing MCP endpoint; no authority, sign-in or UCP claim; readiness reports the published address; no extracted policy changed; providers suite covers host binding and negative hosts"
     },
-    "src/work_signal.rs": {
-      "status": "unproved",
-      "sha256": "640ed67b901e03ae0246705e805324355fb5b67fd40f074739d227d70f748a06",
-      "review": "Identity-only Veyndo namespace and canonical-domain rename; reviewed migration checksum compatibility for six historical SQL versions, unchanged checkout predicates, 42 library and 169 binary tests pass; native component legacy boundary remains configured and guarded."
-    },
     "src/workers/app_lane/queue_health.rs": {
       "status": "unproved",
       "sha256": "8849cecb2bde571c1bff82f7a16e8d776cad8c717ba1bcf14914f9e7b3e043d8",
@@ -5613,12 +5618,12 @@
   },
   "inputs": {
     ".github/workflows/verify.yml": {
-      "sha256": "7be8d169ae6f9da456bb5f74596b6bb0dba309fef337ffe9521bbabbe28cdf17",
-      "review": "Three further proved rules with production bindings: a signed offer is honoured only unexpired and for the unchanged cart, revision and total (signed_offer.rs, result identical to the former expression); sovereign AI mode admits only the self-operated provider on a self-hosted endpoint (sovereign.rs, same decision, endpoint check no longer short-circuited and free of effects); workspace ID length bounds (core). Three SQL statements gained explicit parameter casts matching their bound types. Kernel, core and cognition unit tests pass. SQL, HTTP and provider behaviour is not formally proved."
+      "sha256": "ecc6df2c39033f77c21fa959f8952472691967f67b3cbfb5c0d50b4491f30fec",
+      "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
     },
     "Cargo.lock": {
-      "sha256": "ec16178ee501337dc55e58d9f4bcec984972ee4c447720a89c1b8638f96368bb",
-      "review": "Request context, principal, POS admission, host shop and the access snapshot data types moved unchanged into components/core; loading the snapshot and matching it to a request stay in the server as free functions with the same queries. Core unit tests (identity headers cannot be forged) pass. SQL, HTTP and provider behaviour is not formally proved."
+      "sha256": "08971594435001207650df05543fe93acab112cffc1a0eee216d87619c15af17",
+      "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
     },
     "Cargo.toml": {
       "sha256": "19e4fdc90d60f314d67dcf1c1f752635ad0c26d504ecfbdb49ea28d21c7b0acb",

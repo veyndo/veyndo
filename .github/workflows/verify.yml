@@ -341,3 +341,23 @@ jobs:
             echo 'Complete tests and same-source coverage passed for this workflow source.' >> "$GITHUB_STEP_SUMMARY"
           fi
       # External model/payment/OAuth checks remain opt-in; these reports do not certify live credentials.
+  nightly_report:
+    # A red scheduled run opens one issue, or adds a comment to the open one, so a failure is seen the next morning.
+    needs: verify
+    if: always() && github.event_name == 'schedule' && needs.verify.result != 'success'
+    runs-on: ubuntu-24.04
+    permissions:
+      issues: write
+    steps:
+      - name: Open or update the nightly failure issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          existing=$(gh issue list --repo "$GITHUB_REPOSITORY" --state open --search 'in:title "Nightly verification is red"' --json number --jq '.[0].number // empty')
+          body="The scheduled verification run failed: $RUN_URL (commit $GITHUB_SHA). The integration step lists every failed suite."
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --repo "$GITHUB_REPOSITORY" --body "$body"
+          else
+            gh issue create --repo "$GITHUB_REPOSITORY" --title "Nightly verification is red" --body "$body"
+          fi

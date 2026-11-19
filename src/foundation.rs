@@ -16,19 +16,8 @@ pub(crate) struct App {
     pub(crate) admission: Arc<performance::Admission>,
     pub(crate) reads: Arc<performance::Reads>,
 }
+pub(crate) use veyndo_core::shop_scope::{header, tenant, token};
 pub(crate) use veyndo_core::{Error, Result, bad, conflict, hash, uid, validate_tenant};
-pub(crate) fn header<'a>(h: &'a impl request_context::HeaderReader, k: &str) -> Option<&'a str> {
-    h.value(k)
-}
-pub(crate) fn tenant(h: &impl request_context::HeaderReader) -> Result<String> {
-    let t = header(h, "x-tenant")
-        .or(runtime_config::get().default_tenant.as_deref())
-        .ok_or(bad(
-            "Shop scope required; use its domain or x-tenant header",
-        ))?;
-    validate_tenant(t)?;
-    Ok(t.into())
-}
 pub(crate) fn merchant(_a: &App, h: &RequestContext) -> Result<String> {
     auth::permit(h, "read")?;
     let t = header(h, "x-rac-tenant").ok_or(Error(
@@ -42,10 +31,4 @@ pub(crate) fn merchant(_a: &App, h: &RequestContext) -> Result<String> {
         ));
     }
     Ok(t.into())
-}
-pub(crate) fn token(h: &RequestContext) -> Result<&str> {
-    header(h, "sw-context-token").ok_or(Error(
-        StatusCode::UNAUTHORIZED,
-        "Customer context required".into(),
-    ))
 }

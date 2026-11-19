@@ -5,13 +5,8 @@
       "title": "Shared foundation: errors, request context, database scope, outbox, admission and the verified kernel",
       "sources": [
         "src/foundation.rs",
-        "src/observability.rs",
-        "src/http_limits.rs",
-        "src/security_headers.rs",
-        "src/runtime_config.rs",
         "src/outbox.rs",
         "src/outbox",
-        "src/work_signal.rs",
         "src/channel_metrics.rs",
         "src/channel_metrics",
         "src/performance",
@@ -34,10 +29,10 @@
       "uses": [
         "apps",
         "b2b",
+        "host",
         "identity",
         "intelligence",
         "marketing",
-        "payments",
         "pricing",
         "shop"
       ],
@@ -59,7 +54,9 @@
         "tenant_ai_usage",
         "tenant_resource_limits"
       ],
-      "glob_imports": 14
+      "glob_imports": 12,
+      "untyped_access": 5,
+      "sql_outside_store": 14
     },
     "identity": {
       "title": "Merchant accounts, memberships, sessions, roles and route policy",
@@ -87,6 +84,7 @@
         "checkout",
         "core",
         "customers",
+        "host",
         "intelligence",
         "marketing",
         "shop",
@@ -105,7 +103,9 @@
         "shop_environments",
         "tenants"
       ],
-      "glob_imports": 8
+      "glob_imports": 8,
+      "untyped_access": 86,
+      "sql_outside_store": 18
     },
     "shop": {
       "title": "Shop configuration, domains, legal texts and the operator control plane",
@@ -179,7 +179,9 @@
         "tenant_ai_usage",
         "tenants"
       ],
-      "glob_imports": 37
+      "glob_imports": 37,
+      "untyped_access": 97,
+      "sql_outside_store": 20
     },
     "catalog": {
       "title": "Products, categories, media, reviews, translations and catalogue reads",
@@ -259,7 +261,9 @@
         "tasks",
         "tenants"
       ],
-      "glob_imports": 53
+      "glob_imports": 53,
+      "untyped_access": 202,
+      "sql_outside_store": 33
     },
     "inventory": {
       "title": "Stock, reservations and supply",
@@ -289,7 +293,9 @@
         "products",
         "shop_environments"
       ],
-      "glob_imports": 3
+      "glob_imports": 3,
+      "untyped_access": 26,
+      "sql_outside_store": 3
     },
     "pricing": {
       "title": "Money, price calculation, discounts, currencies, taxes and customer groups",
@@ -330,7 +336,9 @@
         "outbox",
         "products"
       ],
-      "glob_imports": 14
+      "glob_imports": 14,
+      "untyped_access": 20,
+      "sql_outside_store": 4
     },
     "shipping": {
       "title": "Delivery methods, destinations, delivery splits and carrier booking",
@@ -364,7 +372,9 @@
         "commerce_rules",
         "orders"
       ],
-      "glob_imports": 7
+      "glob_imports": 7,
+      "untyped_access": 115,
+      "sql_outside_store": 4
     },
     "checkout": {
       "title": "Cart, quote, checkout transaction and order placement",
@@ -393,6 +403,7 @@
         "catalog",
         "core",
         "customers",
+        "host",
         "identity",
         "intelligence",
         "inventory",
@@ -420,7 +431,9 @@
         "shop_environments",
         "tenants"
       ],
-      "glob_imports": 14
+      "glob_imports": 14,
+      "untyped_access": 148,
+      "sql_outside_store": 10
     },
     "customers": {
       "title": "Customer accounts, sessions, addresses and the merchant customer directory",
@@ -460,7 +473,9 @@
         "outbox",
         "tenants"
       ],
-      "glob_imports": 18
+      "glob_imports": 18,
+      "untyped_access": 85,
+      "sql_outside_store": 15
     },
     "orders": {
       "title": "Order state, fulfilment, receipts, documents and merchant order work",
@@ -520,7 +535,9 @@
         "sales_channels",
         "tenants"
       ],
-      "glob_imports": 39
+      "glob_imports": 39,
+      "untyped_access": 451,
+      "sql_outside_store": 22
     },
     "payments": {
       "title": "Provider-independent payment ledger, captures, refunds and provider workers",
@@ -540,6 +557,7 @@
         "apps",
         "checkout",
         "core",
+        "host",
         "identity",
         "inventory",
         "pos",
@@ -563,7 +581,9 @@
         "policy",
         "sales_channels"
       ],
-      "glob_imports": 3
+      "glob_imports": 3,
+      "untyped_access": 265,
+      "sql_outside_store": 21
     },
     "marketing": {
       "title": "Rules, coupons, promotions, flows and sales channels",
@@ -623,7 +643,9 @@
         "tenants",
         "user_sessions"
       ],
-      "glob_imports": 38
+      "glob_imports": 38,
+      "untyped_access": 339,
+      "sql_outside_store": 26
     },
     "b2b": {
       "title": "Company procurement: organisations, budgets, approvals and quotes",
@@ -664,7 +686,9 @@
         "outbox",
         "products"
       ],
-      "glob_imports": 19
+      "glob_imports": 19,
+      "untyped_access": 108,
+      "sql_outside_store": 13
     },
     "pos": {
       "title": "Point-of-sale register adapters",
@@ -697,7 +721,9 @@
         "products",
         "sales_channels"
       ],
-      "glob_imports": 9
+      "glob_imports": 9,
+      "untyped_access": 68,
+      "sql_outside_store": 5
     },
     "apps": {
       "title": "App packages, managed data, UI surfaces, Wasm extensions and the app builder",
@@ -737,6 +763,7 @@
         "catalog",
         "checkout",
         "core",
+        "host",
         "identity",
         "intelligence",
         "marketing",
@@ -771,7 +798,9 @@
         "tenants",
         "workspace_roles"
       ],
-      "glob_imports": 110
+      "glob_imports": 110,
+      "untyped_access": 427,
+      "sql_outside_store": 42
     },
     "automation": {
       "title": "Deterministic rule evaluation and flow graphs",
@@ -784,7 +813,9 @@
         "core"
       ],
       "foreign_tables": [],
-      "glob_imports": 8
+      "glob_imports": 8,
+      "untyped_access": 97,
+      "sql_outside_store": 0
     },
     "intelligence": {
       "title": "Shop memory, knowledge retrieval, agents, proposals and model inference",
@@ -842,6 +873,7 @@
         "checkout",
         "core",
         "customers",
+        "host",
         "identity",
         "marketing",
         "orders",
@@ -880,7 +912,9 @@
         "translation_jobs",
         "user_sessions"
       ],
-      "glob_imports": 86
+      "glob_imports": 86,
+      "untyped_access": 716,
+      "sql_outside_store": 55
     },
     "studio": {
       "title": "Merchant overview, reports, private staging shops and history",
@@ -947,7 +981,9 @@
         "translation_items",
         "translation_jobs"
       ],
-      "glob_imports": 26
+      "glob_imports": 26,
+      "untyped_access": 167,
+      "sql_outside_store": 18
     },
     "protocols": {
       "title": "MCP, UCP and the shared capability dispatch; adapters without business rules",
@@ -966,6 +1002,7 @@
         "checkout",
         "core",
         "customers",
+        "host",
         "identity",
         "intelligence",
         "marketing",
@@ -981,7 +1018,9 @@
         "carts",
         "tenants"
       ],
-      "glob_imports": 17
+      "glob_imports": 17,
+      "untyped_access": 132,
+      "sql_outside_store": 2
     },
     "host": {
       "title": "Process entry, route registry, worker roles, migrations and command-line tools",
@@ -996,7 +1035,9 @@
         "src/workers",
         "src/migrations.rs",
         "src/migrations",
-        "src/bin"
+        "src/bin",
+        "src/runtime_config.rs",
+        "src/security_headers.rs"
       ],
       "tables": [
         "seed_versions"
@@ -1015,7 +1056,9 @@
         "flow_jobs",
         "products"
       ],
-      "glob_imports": 5
+      "glob_imports": 5,
+      "untyped_access": 40,
+      "sql_outside_store": 3
     },
     "connectors": {
       "title": "Standard provider services and their delivery queue; hosted by the separate connector binary in extensions/services/connectors",
@@ -1030,7 +1073,9 @@
       ],
       "uses": [],
       "foreign_tables": [],
-      "glob_imports": 0
+      "glob_imports": 0,
+      "untyped_access": 0,
+      "sql_outside_store": 0
     }
   }
 }

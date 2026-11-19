@@ -19,7 +19,6 @@ pub(crate) struct Config {
     pub checkout_paypal_sandbox: bool,
     pub payment_services: Value,
     pub frame_ancestors: String,
-    pub default_tenant: Option<String>,
     pub services: Value,
     pub publishers: Value,
     pub private_service_origins: String,
@@ -46,20 +45,8 @@ pub(crate) fn get() -> &'static Config {
             !strict || env::var("DATABASE_RUNTIME_URL").is_ok(),
             "Strict runtime URL required"
         );
-        let default_tenant = env::var("PUBLIC_DEFAULT_TENANT")
-            .ok()
-            .or_else(|| (!strict && flag("SEED_DEMO", true)).then(|| "atelier".into()));
-        if let Some(t) = &default_tenant {
-            assert!(
-                t.len() >= 2
-                    && t.len() <= 48
-                    && !t.starts_with('-')
-                    && !t.ends_with('-')
-                    && t.bytes()
-                        .all(|b| b.is_ascii_lowercase() || b.is_ascii_digit() || b == b'-'),
-                "Invalid PUBLIC_DEFAULT_TENANT"
-            );
-        }
+        // Read once at startup so that an invalid default shop stops the process here, not on a request.
+        veyndo_core::shop_scope::default_tenant();
         let services: Value =
             serde_json::from_str(&env::var("APP_SERVICES").unwrap_or("{}".into()))
                 .expect("Invalid APP_SERVICES JSON");
@@ -157,7 +144,6 @@ pub(crate) fn get() -> &'static Config {
             payment_services,
             frame_ancestors,
             strict,
-            default_tenant,
             services,
             publishers: json_object("APP_PUBLISHERS", None),
             private_service_origins,
