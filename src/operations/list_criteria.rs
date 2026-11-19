@@ -31,14 +31,7 @@ pub(crate) struct Criteria {
     #[serde(default)]
     pub group: String,
 }
-pub(crate) fn direction(value: &str, default: &'static str) -> Result<&'static str> {
-    match value {
-        "" => Ok(default),
-        "asc" => Ok("ASC"),
-        "desc" => Ok("DESC"),
-        _ => Err(bad("Invalid sort direction")),
-    }
-}
+pub(crate) use veyndo_core::sort_direction as direction;
 impl Criteria {
     pub(crate) fn validate(&self) -> Result<i64> {
         if [

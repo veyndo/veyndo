@@ -690,6 +690,11 @@
       "sha256": "c32638931b14cdcdde4aaf0c9ecf56cc5d6ddf2f59f71e3407c9ace9ba11e08f",
       "review": "Categories moved into components/catalog; no rule changed"
     },
+    "components/catalog/src/domain/hydration.rs": {
+      "status": "unproved",
+      "sha256": "aac525b6e5f89c5a44072c9f4451bd7d70ba2a5db1c7016c0c24fcfb3a778a93",
+      "review": "Product hydration, list query and preparation moved into components/catalog; no rule changed"
+    },
     "components/catalog/src/domain/media.rs": {
       "status": "unproved",
       "sha256": "eb9f5aacef9d5c7e52dc5ad2e88c2033632bcb60f406d8a035d7acf5d249f1e3",
@@ -705,6 +710,11 @@
       "sha256": "0f900270d00481457553917688e78c85d1db9cffe2dc3fa76cbcb7fc4e7e8491",
       "review": "Category navigation and seeding moved into components/catalog; no rule changed"
     },
+    "components/catalog/src/domain/preparation.rs": {
+      "status": "unproved",
+      "sha256": "bfd525841470a7fe20898dcc127f35c240aacc3c3d6629deaab052926b915f0a",
+      "review": "Product hydration, list query and preparation moved into components/catalog; no rule changed"
+    },
     "components/catalog/src/domain/rich.rs": {
       "status": "unproved",
       "sha256": "b5dfa14338a1e119a9d5d1d5527092efe343217d46046a57f7d35e0b25658a9f",
@@ -717,8 +727,8 @@
     },
     "components/catalog/src/domain.rs": {
       "status": "unproved",
-      "sha256": "5fd7785383687a61ecdc3357a46d100dc2746880084f7c552ee99063e0c90622",
-      "review": "Category navigation and seeding moved into components/catalog; no rule changed"
+      "sha256": "65f0e70b02dd8c3e3209054a32f23fb61c3f37a515692ab027c533345e1b3aca",
+      "review": "Product hydration, list query and preparation moved into components/catalog; no rule changed"
     },
     "components/catalog/src/http/categories.rs": {
       "status": "unproved",
@@ -795,6 +805,11 @@
       "sha256": "c3f471aaf3d6f2b877c5a0af8b916f68c8ef8f46db2a0503810466ebed44d775",
       "review": "Product edit types, stores and language rules moved into components; no rule changed"
     },
+    "components/catalog/src/store/media_jobs.rs": {
+      "status": "unproved",
+      "sha256": "dcd2df77e10082d049fae65c4b7727f43f85548d83e33cea0e9d9d9ce5805c3a",
+      "review": "Product hydration, list query and preparation moved into components/catalog; no rule changed"
+    },
     "components/catalog/src/store/product_edit.rs": {
       "status": "unproved",
       "sha256": "50cd55cda414b122ed10f5b7a3f2a1887eedf28f03fe06048950af1948aeef99",
@@ -804,6 +819,11 @@
       "status": "unproved",
       "sha256": "1724260f523b75a6a5a5b0697a0704cc1670d1a899c0f212ca2ea88a68ae5ab6",
       "review": "Product fields, media rules and GLB validation moved into components/catalog; no rule changed"
+    },
+    "components/catalog/src/store/product_list.rs": {
+      "status": "unproved",
+      "sha256": "eff322fd0b7d042cb1c5d8c003f11801436d73ec6c6522a08baeea6a3e4d2bab",
+      "review": "Product hydration, list query and preparation moved into components/catalog; no rule changed"
     },
     "components/catalog/src/store/products.rs": {
       "status": "unproved",
@@ -815,10 +835,15 @@
       "sha256": "b1f9e3f74883f0291c539abf5a83f1c1e047b54380407c47457bfcd2b8e437e8",
       "review": "Product edit types, stores and language rules moved into components; no rule changed"
     },
+    "components/catalog/src/store/translations.rs": {
+      "status": "unproved",
+      "sha256": "f32162f0a7a6de1cfc063cc59f46ac297a586898dc47066ed1858fcd37efc6d5",
+      "review": "Product hydration, list query and preparation moved into components/catalog; no rule changed"
+    },
     "components/catalog/src/store.rs": {
       "status": "unproved",
-      "sha256": "4a9ff2481c5811477c3812ef1a54e2246fa10f6a755cf4a9201fc2380a1afb03",
-      "review": "Product edit types, stores and language rules moved into components; no rule changed"
+      "sha256": "d0afde6a37d674e27e487baff38c649b0f2dc96dd4f1e05a2d344856e233108c",
+      "review": "Product hydration, list query and preparation moved into components/catalog; no rule changed"
     },
     "components/catalog/src/types/category.rs": {
       "status": "unproved",
@@ -835,15 +860,25 @@
       "sha256": "a0239be7c34a4fcaba7a164af0da9d3ef71d05d48ac69c18c6819bce7fa58890",
       "review": "Product fields, media rules and GLB validation moved into components/catalog; no rule changed"
     },
+    "components/catalog/src/types/product_list.rs": {
+      "status": "unproved",
+      "sha256": "65e64ccac327fef685ca6efbf1650c05ddc1a4558e91bc7c0e783c54c9d232d5",
+      "review": "Product hydration, list query and preparation moved into components/catalog; no rule changed"
+    },
     "components/catalog/src/types/review.rs": {
       "status": "unproved",
       "sha256": "dc26d44a21920658da6064d7171356b79961ca1e7c05d4cad285c694ab74c707",
       "review": "Reviews moved into components/catalog; no rule changed"
     },
+    "components/catalog/src/types/translation.rs": {
+      "status": "unproved",
+      "sha256": "51ef886cdf2fda5402357272f19d722ba6c66ec71d934a3289366347fde33c16",
+      "review": "Product hydration, list query and preparation moved into components/catalog; no rule changed"
+    },
     "components/catalog/src/types.rs": {
       "status": "unproved",
-      "sha256": "b71ca6b9a1b7eccfd281350e1130f242b0f2e3a04b5f33bbf60f381ebc5a2b34",
-      "review": "Categories moved into components/catalog; no rule changed"
+      "sha256": "907ca566843ab5cb3179e779f2f07a94dba02b8acf0a37a953dd056a67dd3649",
+      "review": "Product hydration, list query and preparation moved into components/catalog; no rule changed"
     },
     "components/core/src/access.rs": {
       "status": "unproved",
@@ -927,8 +962,8 @@
     },
     "components/core/src/lib.rs": {
       "status": "reviewed-binding",
-      "sha256": "de7d1cd64da46a53a2aed85199027211f8c33864025e7868b4e892a8c65e8bef",
-      "review": "Reviews moved into components/catalog; no rule changed"
+      "sha256": "44e16551b0b34907027090bea2161fe8c546774b469f65f1c98db07d7c363e64",
+      "review": "Product hydration, list query and preparation moved into components/catalog; no rule changed"
     },
     "components/core/src/localized/languages.rs": {
       "status": "unproved",
@@ -4162,8 +4197,8 @@
     },
     "src/checkout_products.rs": {
       "status": "unproved",
-      "sha256": "70726a88889b6f04bab452c943bac66d0b80beb020317a780d48d73195c0969c",
-      "review": "Follow-up reviewed: remove redundant references in localized snapshot helper; semantics unchanged from PostgreSQL-verified exact-origin checkout and immutable language snapshot change."
+      "sha256": "757ea6f30c4bc7a3f772a111018c03cff730a1bd10ea010409839c22fd6755a2",
+      "review": "Product hydration, list query and preparation moved into components/catalog; no rule changed"
     },
     "src/checkout_review.rs": {
       "status": "reviewed-binding",
@@ -4367,8 +4402,8 @@
     },
     "src/commerce/content_text.rs": {
       "status": "unproved",
-      "sha256": "4a02a022bcc84c23b8fe8790ffb6d04cb6a0fd498b4290009acf6c7a61dadd75",
-      "review": "Category navigation and seeding moved into components/catalog; no rule changed"
+      "sha256": "831a305a46df952312fc76db4aed8959131a8e2d261e9220b34104f75992690d",
+      "review": "Product hydration, list query and preparation moved into components/catalog; no rule changed"
     },
     "src/commerce/context_routes.rs": {
       "status": "unproved",
@@ -4467,8 +4502,8 @@
     },
     "src/commerce/product_admin.rs": {
       "status": "unproved",
-      "sha256": "601cbfa842cf35c6d7f0c9886f9fd0a06c6cd322a12749e4ca116770507a0dff",
-      "review": "Product edit types, stores and language rules moved into components; no rule changed"
+      "sha256": "37effd3186bb262fdcbf1be1beab739b827ad61b3c73482bb04aa7d0cad03985",
+      "review": "Product hydration, list query and preparation moved into components/catalog; no rule changed"
     },
     "src/commerce/product_channels.rs": {
       "status": "unproved",
@@ -4502,8 +4537,8 @@
     },
     "src/commerce/product_preparation.rs": {
       "status": "unproved",
-      "sha256": "a555a308bafdb93e8087a3ff6c2eeb7eecc03eac6a28f0b45277e1213aae495e",
-      "review": "Reviewed bounded read-only catalogue preparation with native editor main-language fallback for legacy source columns; current tenant/catalogue admission and exact page bound retained. Retain failed image jobs for explicit recovery, with no provider retry or state mutation from reads."
+      "sha256": "44c3739b2082735b64e6f3b88d125497a1e48e253198944b7250fd2d8e47da09",
+      "review": "Product hydration, list query and preparation moved into components/catalog; no rule changed"
     },
     "src/commerce/selection.rs": {
       "status": "unproved",
@@ -4897,8 +4932,8 @@
     },
     "src/localization.rs": {
       "status": "unproved",
-      "sha256": "5db6fdd86b0ad424a4e1ef8e65930a33b2169d22d43216b3aaf3f562fac34fc5",
-      "review": "Reviewed caption proposal admission, owned and DNS-pinned bounded image evidence, product/page locale limits and native registry dispatch; existing HTTP/MCP, tenant denial and sandbox publication regressions passed. No new financial or kernel decision and no expanded Lean claim."
+      "sha256": "8c42b5e01c6195bf1534a5456ad42207fffc5d5972b0b8378fb90bdd3d91b4de",
+      "review": "Product hydration, list query and preparation moved into components/catalog; no rule changed"
     },
     "src/main.rs": {
       "status": "unproved",
@@ -5187,8 +5222,8 @@
     },
     "src/operations/grid_schema.rs": {
       "status": "unproved",
-      "sha256": "a123aa458e1bcf3811891964a49cba1364e634420f97aeb9ca481c7748312994",
-      "review": "Reviewed native extension identity/private/unique anchors and current read/write/PII scopes; native projections use bounded fixed-store queries, exact indexed filters bind all input and fence the admitted package digest. Real four-object HTTP/MCP, role revocation, foreign reference, immutable upgrade, product/company clone and selected release tests passed. Added extracted configuration-only release predicate and operational false property; SQL and UI remain explicitly unproved. Reviewed canonical schema, preserved AI bindings and versioned grid prompt provenance without changing existing prompt revisions."
+      "sha256": "574d687e63b873d0e1ad4ed3a09d134b71f455d0e4feb267ceb921da14e5cd7f",
+      "review": "Product hydration, list query and preparation moved into components/catalog; no rule changed"
     },
     "src/operations/guest_customers.rs": {
       "status": "unproved",
@@ -5262,8 +5297,8 @@
     },
     "src/operations/list_criteria.rs": {
       "status": "unproved",
-      "sha256": "5355f1e250f493387910f03e33109d81958538662f781b71ae44d440e1e26655",
-      "review": "Reviewed native extension identity/private/unique anchors and current read/write/PII scopes; native projections use bounded fixed-store queries, exact indexed filters bind all input and fence the admitted package digest. Real four-object HTTP/MCP, role revocation, foreign reference, immutable upgrade, product/company clone and selected release tests passed. Added extracted configuration-only release predicate and operational false property; SQL and UI remain explicitly unproved. Reviewed canonical schema, preserved AI bindings and versioned grid prompt provenance without changing existing prompt revisions."
+      "sha256": "e62ba0516555123d32104bb1eaeff98065e75e3f8fb9be194dd023de9493be1a",
+      "review": "Product hydration, list query and preparation moved into components/catalog; no rule changed"
     },
     "src/operations/manual_order_admission.rs": {
       "status": "reviewed-binding",
@@ -5282,8 +5317,8 @@
     },
     "src/operations/mod.rs": {
       "status": "unproved",
-      "sha256": "a26828d0d371423b2759fc0809da4298ebf8c7823edb5b6e3fa280056b1a5ddd",
-      "review": "Reviewed invoice recipient caching and immutable native documents; explicit app/PII event consent and current Flow rehydration; existing encrypted email queue and localized templates. Targeted native service and adversarial projection tests; no new formal proof claim."
+      "sha256": "b470487daeee1298d0e9d4aaa7d314e10762640bccee19cb933e83ba24f133d7",
+      "review": "Product hydration, list query and preparation moved into components/catalog; no rule changed"
     },
     "src/operations/order_documents.rs": {
       "status": "unproved",

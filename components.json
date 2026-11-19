@@ -243,7 +243,7 @@
       ],
       "glob_imports": 42,
       "untyped_access": 203,
-      "sql_outside_store": 24
+      "sql_outside_store": 21
     },
     "inventory": {
       "title": "Stock, reservations and supply",
@@ -402,7 +402,6 @@
         "outbox",
         "policy",
         "product_channel_visibility",
-        "product_translations",
         "products",
         "sales_channels",
         "shop_environments",
@@ -410,7 +409,7 @@
       ],
       "glob_imports": 14,
       "untyped_access": 148,
-      "sql_outside_store": 10
+      "sql_outside_store": 9
     },
     "customers": {
       "title": "Customer accounts, sessions, addresses and the merchant customer directory",

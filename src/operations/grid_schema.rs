@@ -94,7 +94,7 @@ pub(crate) fn validate(entity: &str, v: &Value) -> Result<Value> {
     if entity == "products" {
         let c: commerce::ProductCriteria = serde_json::from_value(normalized.clone())
             .map_err(|_| bad("Invalid product filters"))?;
-        c.validate()?;
+        commerce::validate_criteria(&c)?;
     } else {
         let c: super::Criteria =
             serde_json::from_value(normalized.clone()).map_err(|_| bad("Invalid list filters"))?;

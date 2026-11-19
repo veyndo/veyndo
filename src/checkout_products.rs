@@ -12,10 +12,10 @@ pub(crate) async fn snapshot(
         .iter()
         .map(|r| r.get::<String, _>("id"))
         .collect::<Vec<_>>();
-    let translations = sqlx::query("SELECT product_id,language_id,name,description FROM product_translations WHERE tenant=$1 AND product_id=ANY($2) AND language_id=ANY($3) FOR SHARE")
-        .bind(&c.tenant).bind(&ids).bind(chain).fetch_all(&mut **tx).await?;
+    let translations =
+        veyndo_catalog::store::translations::lock_for_products(tx, &c.tenant, chain, &ids).await?;
     let locked = rows.iter().map(product).collect::<Vec<_>>();
-    let roots = localization::hydrate_products(
+    let roots = veyndo_catalog::domain::hydration::hydrate(
         locked
             .iter()
             .filter(|p| p.parent_id.is_none())
@@ -37,7 +37,7 @@ pub(crate) async fn snapshot(
             p
         })
         .collect();
-    Ok(localization::hydrate_products(
+    Ok(veyndo_catalog::domain::hydration::hydrate(
         selected,
         &translations,
         chain,

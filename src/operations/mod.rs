@@ -41,7 +41,7 @@ mod workflow;
 pub(crate) use routes::router;
 
 mod list_criteria;
-pub(crate) use list_criteria::{Criteria, direction as list_direction};
+pub(crate) use list_criteria::Criteria;
 pub(crate) mod grid_schema;
 pub(crate) use grid_schema::fields as grid_fields;
 mod grid_plan;

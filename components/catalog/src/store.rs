@@ -2,7 +2,10 @@
 pub mod assets;
 pub mod categories;
 pub mod channels;
+pub mod media_jobs;
 pub mod product_edit;
 pub mod product_fields;
+pub mod product_list;
 pub mod products;
 pub mod reviews;
+pub mod translations;

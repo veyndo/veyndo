@@ -33,6 +33,15 @@ pub fn bad(s: impl Into<String>) -> Error {
 pub fn conflict(s: &str) -> Error {
     Error(StatusCode::CONFLICT, s.into())
 }
+/// The SQL sort direction of a list request: `asc`, `desc` or empty for the default.
+pub fn sort_direction(value: &str, default: &'static str) -> Result<&'static str> {
+    match value {
+        "" => Ok(default),
+        "asc" => Ok("ASC"),
+        "desc" => Ok("DESC"),
+        _ => Err(bad("Invalid sort direction")),
+    }
+}
 pub fn uid() -> String {
     uuid::Uuid::new_v4().simple().to_string()
 }

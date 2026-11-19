@@ -46,7 +46,7 @@ pub(super) async fn localize_products(
         return Ok(ps);
     }
     let ids = ps.iter().map(|p| p.id.clone()).collect::<Vec<_>>();
-    let rows=sqlx::query("SELECT product_id,language_id,name,description FROM product_translations WHERE tenant=$1 AND language_id=ANY($2) AND product_id=ANY($3)").bind(t).bind(chain).bind(&ids).fetch_all(&a.db).await?;
+    let texts = veyndo_catalog::store::translations::for_products(&a.core, t, chain, &ids).await?;
     let languages = performance::languages(a).await?;
     let locale_chain = chain
         .iter()
@@ -57,80 +57,13 @@ pub(super) async fn localize_products(
                 .map(|l| l.locale.clone())
         })
         .collect::<Vec<_>>();
-    Ok(hydrate_products(ps, &rows, chain, &locale_chain))
+    Ok(veyndo_catalog::domain::hydration::hydrate(
+        ps,
+        &texts,
+        chain,
+        &locale_chain,
+    ))
 }
-/// Hydrate locked rows using the same field-level inheritance as catalog reads.
-pub(crate) fn hydrate_products(
-    mut ps: Vec<Product>,
-    rows: &[sqlx::postgres::PgRow],
-    chain: &[String],
-    locale_chain: &[String],
-) -> Vec<Product> {
-    let mut translations: HashMap<String, ProductTranslations> = HashMap::new();
-    for row in rows {
-        translations
-            .entry(row.get("product_id"))
-            .or_default()
-            .insert(
-                row.get("language_id"),
-                (row.get("name"), row.get("description")),
-            );
-    }
-    for p in &mut ps {
-        super::commerce::localize_extra(&mut p.extra, locale_chain);
-        if let Some(media) = p.media.as_array_mut() {
-            for m in media {
-                if m["caption"].is_object() {
-                    m["caption"] = json!(
-                        locale_chain
-                            .iter()
-                            .flat_map(|l| [l.as_str(), l.split('-').next().unwrap_or(l)])
-                            .find_map(|l| m["caption"][l].as_str())
-                            .unwrap_or("")
-                    );
-                }
-                if m["alt"].is_object() {
-                    let text = locale_chain
-                        .iter()
-                        .flat_map(|l| [l.as_str(), l.split('-').next().unwrap_or(l)])
-                        .find_map(|l| m["alt"][l].as_str())
-                        .map(str::to_owned);
-                    if let Some(text) = text {
-                        m["view"] = json!(text);
-                    }
-                }
-            }
-        }
-        if let Some(values) = translations.get(&p.id) {
-            if let Some(name) = translated_field(values, chain, false) {
-                p.name = name.to_owned();
-            }
-            if let Some(description) = translated_field(values, chain, true) {
-                p.description = description.to_owned();
-            }
-        }
-    }
-    ps
-}
-type ProductTranslations = HashMap<String, (Option<String>, Option<String>)>;
-
-fn translated_field<'a>(
-    values: &'a ProductTranslations,
-    chain: &[String],
-    description: bool,
-) -> Option<&'a str> {
-    // Resolve each field independently: NULL falls back, an empty string does not.
-    chain.iter().find_map(|id| {
-        values.get(id).and_then(|(name, text)| {
-            if description {
-                text.as_deref()
-            } else {
-                name.as_deref()
-            }
-        })
-    })
-}
-
 pub(super) async fn context_info(State(a): State<App>, h: RequestContext) -> Result<Json<Value>> {
     let (locale, chain) = language_context(&a, &h).await?;
     let (settings, _) =
@@ -213,30 +146,4 @@ pub(super) async fn preview_quote(
     Ok(Json(
         json!({"locale":locale,"requestedQuantity":requested,"effectiveQuantity":quantity,"quote":quote(&c,&ps,&settings)?,"sideEffects":false}),
     ))
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn indexed_translations_preserve_field_fallback_and_empty_values() {
-        let values = HashMap::from([
-            ("child".into(), (Some(String::new()), None)),
-            (
-                "parent".into(),
-                (
-                    Some("Parent name".into()),
-                    Some("Parent description".into()),
-                ),
-            ),
-        ]);
-        let chain = vec!["missing".into(), "child".into(), "parent".into()];
-        assert_eq!(translated_field(&values, &chain, false), Some(""));
-        assert_eq!(
-            translated_field(&values, &chain, true),
-            Some("Parent description")
-        );
-        assert_eq!(translated_field(&values, &["absent".into()], false), None);
-    }
 }
