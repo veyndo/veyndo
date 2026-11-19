@@ -1,0 +1,11 @@
+[package]
+name = "veyndo-identity"
+version.workspace = true
+edition.workspace = true
+license-file.workspace = true
+description = "Merchant identity: who a request acts for and which permissions it holds"
+
+[dependencies]
+serde_json.workspace = true
+veyndo-core = { path = "../core" }
+veyndo-kernel = { path = "../../crates/kernel" }

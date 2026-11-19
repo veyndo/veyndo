@@ -67,7 +67,7 @@
     },
     "scope_admissible": {
       "bindings": [
-        "src/auth/permissions.rs"
+        "components/identity/src/domain/permissions.rs"
       ],
       "theorems": [
         "scope_authenticated_known",
@@ -769,6 +769,21 @@
       "status": "unproved",
       "sha256": "43278481afd65222ac1a7e6c26a5450aa67a5b09072f02b3146def25cb6214f2",
       "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
+    },
+    "components/identity/src/domain/permissions.rs": {
+      "status": "reviewed-binding",
+      "sha256": "eee8b856137ddd68ab29983238f67ae7723d8f8bee3e439fdc6e0248d6e27710",
+      "review": "Permission rules and the permit and merchant checks moved unchanged into components/identity; the scope rule is bound there"
+    },
+    "components/identity/src/domain.rs": {
+      "status": "unproved",
+      "sha256": "c2391769fa9060e4da12c1403e56163af363ec6b8613f8036365bb287b589970",
+      "review": "Permission rules and the permit and merchant checks moved unchanged into components/identity; the scope rule is bound there"
+    },
+    "components/identity/src/lib.rs": {
+      "status": "unproved",
+      "sha256": "33538011131c109b7d09cef2c028c6e5bb7a0a6fd855384bff6f14f1daf303fc",
+      "review": "Permission rules and the permit and merchant checks moved unchanged into components/identity; the scope rule is bound there"
     },
     "components/pricing/examples/customer_contract.rs": {
       "status": "unproved",
@@ -3442,8 +3457,8 @@
     },
     "src/auth/middleware.rs": {
       "status": "reviewed-binding",
-      "sha256": "897fb2636ef4b68dda12b3421e8a38066ff223a1e7d7030e762b297776449f81",
-      "review": "Component architecture phase 0 and first core crate: the error contract moved unchanged from src/failure.rs and src/foundation.rs to components/core (wire messages, status mapping and retry header identical; the permission scope is resolved by the caller, the inference conversion lives beside its error type). Structure check drops the file length limit and adds the component map; clippy limits function length. Core and cognition unit tests pass. SQL, HTTP and provider behaviour is not formally proved."
+      "sha256": "62ab6b38095c51872d85d479d2c782f397b7313dec278ba83a4b01757e1de32b",
+      "review": "Permission rules and the permit and merchant checks moved unchanged into components/identity; the scope rule is bound there"
     },
     "src/auth/mod.rs": {
       "status": "unproved",
@@ -3451,9 +3466,9 @@
       "review": "Knowledge introspection reuses current scoped native identity, expiring integration keys and app package approval. Real catalog delivery, read-only evidence, foreign-shop and revoked-key checks and Checkout tenant isolation passed locally."
     },
     "src/auth/permissions.rs": {
-      "status": "reviewed-binding",
-      "sha256": "d28f9ed5173beea61162e91dbaccd763386109022954716e580953f176246870",
-      "review": "App Studio integration review: existing multi-surface native views now include checkout mounts; declared settings reuse encrypted digest/CAS-bound app secrets and private service admission, redact secret reads, deny foreign/nonpersonal/stage writes. Permanent integration keys require the extracted personal/current-admin predicate, retain current membership intersection and revocation; explicit null expiry only at API presentation. Real app_surfaces, merchant_operations, app_studio and tenant_isolation HTTP/PostgreSQL assertions passed before the final inventory check. UI 530 tests passed. Added bounded package/index admission; SQL, crypto, browser and provider adapters remain unproved."
+      "status": "unproved",
+      "sha256": "219a5c454f6dc12545d67c108501c12219fd8c25807117e9fc17675a9a81479e",
+      "review": "Permission rules and the permit and merchant checks moved unchanged into components/identity; the scope rule is bound there"
     },
     "src/auth/provision.rs": {
       "status": "unproved",
@@ -4487,8 +4502,8 @@
     },
     "src/foundation.rs": {
       "status": "unproved",
-      "sha256": "847ed30e6b076a347ac37aea2852dfff06103356db07bb91f5965371ccdc8153",
-      "review": "Request admission moved into the core crate; no rule changed"
+      "sha256": "d26a2fc1f2c4435d43876b4bb86dcad698ea9fbf085685ae14e3724142de7a99",
+      "review": "Permission rules and the permit and merchant checks moved unchanged into components/identity; the scope rule is bound there"
     },
     "src/history/capability.rs": {
       "status": "unproved",
@@ -5657,12 +5672,12 @@
       "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
     },
     "Cargo.lock": {
-      "sha256": "fc589f6b31d31fc46bf7fe80846581dc54ce31b31607b964d5dd89880743c180",
-      "review": "The commerce crate became components/pricing with its rules under domain/; no rule changed"
+      "sha256": "be7160d9ed4c354cb3d73c538f8a43fcc87ae70fcccf51ff627508315697eece",
+      "review": "Permission rules and the permit and merchant checks moved unchanged into components/identity; the scope rule is bound there"
     },
     "Cargo.toml": {
-      "sha256": "0911199a21787f67520814632a264d203e3879c90e6e27734778d0fa52c55354",
-      "review": "The commerce crate became components/pricing with its rules under domain/; no rule changed"
+      "sha256": "e0f8afe8d37f6fc722288433f9a9e09f350979f03026d1a2c5d72c7c7dbd8a53",
+      "review": "Permission rules and the permit and merchant checks moved unchanged into components/identity; the scope rule is bound there"
     },
     "components.lock.json": {
       "sha256": "7b4a931ad81c6665d5d95e6b42b8ef4d09ebe8971ac24998d8f94bb6a737ff53",

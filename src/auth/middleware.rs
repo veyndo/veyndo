@@ -1,25 +1,12 @@
 //! Resolve sessions from PostgreSQL on every request: role changes/revocation work across replicas.
 //! Remove all client-supplied principal headers before adding server-derived identities.
-use crate::{
-    App, Error, RequestContext, Response, Result, State, StatusCode, apps, bad, header, tenant,
-};
+use crate::{App, Error, RequestContext, Response, State, StatusCode, apps, bad, header, tenant};
 use axum::response::IntoResponse;
 use axum::{extract::Request, middleware::Next};
 fn forbidden(s: &str) -> Error {
     Error(StatusCode::FORBIDDEN, s.into())
 }
-pub(crate) fn permit(h: &RequestContext, kind: &str) -> Result<()> {
-    header(h, "x-rac-role").ok_or(Error(
-        StatusCode::UNAUTHORIZED,
-        "Personal login or instance administrator credential required".into(),
-    ))?;
-    let allowed = super::permissions::allowed(h, kind);
-    if allowed {
-        Ok(())
-    } else {
-        Err(Error::permission(crate::auth::scope(kind)))
-    }
-}
+pub(crate) use veyndo_identity::permit;
 pub(crate) async fn authenticate(state: State<App>, request: Request, next: Next) -> Response {
     // Identity lookup is trusted; the admitted business request gets a narrower context below.
     veyndo::tenant_scope::scoped(
@@ -240,24 +227,4 @@ async fn authenticate_scoped(State(a): State<App>, mut request: Request, next: N
             .insert("cache-control", "private, no-store".parse().unwrap());
     }
     response
-}
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn role_matrix() {
-        for role in ["owner", "admin", "editor", "viewer"] {
-            let mut h = RequestContext::new();
-            h.insert("x-rac-role", role.parse().unwrap());
-            assert!(permit(&h, "read").is_ok());
-            assert_eq!(permit(&h, "catalog").is_ok(), role != "viewer");
-            assert_eq!(
-                permit(&h, "users").is_ok(),
-                role == "owner" || role == "admin"
-            );
-            assert!(permit(&h, "unknown").is_err());
-        }
-        assert!(permit(&RequestContext::new(), "read").is_err());
-    }
 }

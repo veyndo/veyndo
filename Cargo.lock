@@ -3496,6 +3496,7 @@ dependencies = [
  "veyndo-cognition",
  "veyndo-core",
  "veyndo-flow-graph",
+ "veyndo-identity",
  "veyndo-kernel",
  "veyndo-pricing",
  "veyndo-runtime",
@@ -3617,6 +3618,15 @@ dependencies = [
 [[package]]
 name = "veyndo-flow-graph"
 version = "0.5.0"
+
+[[package]]
+name = "veyndo-identity"
+version = "0.5.0"
+dependencies = [
+ "serde_json",
+ "veyndo-core",
+ "veyndo-kernel",
+]
 
 [[package]]
 name = "veyndo-kernel"

@@ -16,7 +16,6 @@ tokio.workspace = true
 tracing.workspace = true
 reqwest.workspace = true
 veyndo-runtime = { path = "../../crates/runtime" }
-# Money validation errors are part of the shared error contract; the pricing crate has no I/O dependencies.
 veyndo-kernel = { path = "../../crates/kernel" }
 
 [dev-dependencies]

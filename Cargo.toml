@@ -66,6 +66,7 @@ path = "extensions/apps/edi/service/main.rs"
 tracing.workspace = true
 veyndo-kernel = { path = "crates/kernel" }
 veyndo-core = { path = "components/core" }
+veyndo-identity = { path = "components/identity" }
 veyndo-automation = { path = "crates/automation" }
 veyndo-flow-graph = { path = "crates/flow-graph" }
 veyndo-app-model = { path = "extensions/services/app-storage/model" }

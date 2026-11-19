@@ -118,7 +118,11 @@ Rules that hold from the first component on:
 - [x] Remove the dependencies `core` has on other components (`uses` of core in
       `components.json` is empty). Server wiring (`App`, outbox routes) is assigned
       to the host; crate-to-crate dependencies are read from crate names.
-- [ ] `components/identity` with `types/`, `store/`, `service/`, `http/`.
+- [x] `components/identity` (`veyndo-identity`): permission vocabulary and decision
+      under `domain/`, `permit` and `merchant` as the checks other crates call;
+      the proved scope rule is bound there.
+- [ ] Move the rest of `src/auth` (accounts, sessions, MFA, invitations, route
+      policy) into `components/identity` as `types/`, `store/`, `service/`, `http/`.
 - [x] Ban new `use super::*` / `use crate::*`: `glob_imports` per component in
       `components.json` only falls (528 files at the start); component crates have none.
 
