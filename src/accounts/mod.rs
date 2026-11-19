@@ -47,14 +47,7 @@ pub(crate) fn router() -> Router<App> {
         .route("/store-api/account/password", post(profile::password))
 }
 pub(crate) async fn session(a: &App, t: &str, email: &str) -> Result<String> {
-    let token = uid();
-    sqlx::query("INSERT INTO customer_sessions(digest,tenant,email) VALUES($1,$2,$3)")
-        .bind(hash(&token))
-        .bind(t)
-        .bind(email)
-        .execute(&a.db)
-        .await?;
-    Ok(token)
+    veyndo_customers::service::sessions::open(&a.core, t, email).await
 }
 pub(crate) fn session_digest(h: &RequestContext) -> Result<String> {
     if let Some(buyer) = &h.checkout_buyer {
@@ -70,20 +63,8 @@ pub(crate) fn session_digest(h: &RequestContext) -> Result<String> {
 pub(crate) async fn identity(a: &App, h: &RequestContext) -> Result<(String, String)> {
     let t = tenant(h)?;
     let digest = session_digest(h)?;
-    let email: Option<String> = sqlx::query_scalar(
-        "SELECT s.email FROM customer_sessions s JOIN customers c ON c.tenant=s.tenant AND c.email=s.email WHERE s.tenant=$1 AND s.digest=$2 AND s.expires_at>now() AND c.active",
-    )
-    .bind(&t)
-    .bind(digest)
-    .fetch_optional(&a.db)
-    .await?;
-    Ok((
-        t,
-        email.ok_or(Error(
-            StatusCode::UNAUTHORIZED,
-            "Customer session expired".into(),
-        ))?,
-    ))
+    let email = veyndo_customers::service::sessions::identify(&a.core, &t, &digest).await?;
+    Ok((t, email))
 }
 async fn register(
     State(a): State<App>,
@@ -149,11 +130,12 @@ async fn logout(State(a): State<App>, h: RequestContext) -> Result<Json<Value>> 
     if header(&h, "sw-context-token").is_some() {
         load_cart(&a, &h).await?;
     }
-    sqlx::query("DELETE FROM customer_sessions WHERE tenant=$1 AND digest=$2")
-        .bind(&t)
-        .bind(hash(header(&h, "x-customer-token").unwrap()))
-        .execute(&a.db)
-        .await?;
+    veyndo_customers::service::sessions::close(
+        &a.core,
+        &t,
+        header(&h, "x-customer-token").unwrap(),
+    )
+    .await?;
     if let Some(token) = header(&h, "sw-context-token") {
         sqlx::query("UPDATE carts SET data=jsonb_set(jsonb_set(jsonb_set(jsonb_set(jsonb_set(data,'{email}','null'),'{customer_id}','null'),'{group}','\"consumer\"'),'{company}','null'),'{b2b}','null'),token=$1,revision=revision+1 WHERE tenant=$2 AND token=$3 AND status='open' AND data->>'email'=$4").bind(uid()).bind(&t).bind(token).bind(&email).execute(&a.db).await?;
     }

@@ -1100,6 +1100,66 @@
       "sha256": "43278481afd65222ac1a7e6c26a5450aa67a5b09072f02b3146def25cb6214f2",
       "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
     },
+    "components/customers/src/domain/profile.rs": {
+      "status": "unproved",
+      "sha256": "c115d1bd1a24c4872a2df5e41b8cf4d966f4ee84e0abf888bfeed2db8ae96fc4",
+      "review": "customers component crate created; no kernel binding changed"
+    },
+    "components/customers/src/domain/search.rs": {
+      "status": "unproved",
+      "sha256": "a482d922efddc8f9a4c7a16bb1cf78186bd23d6e664232ce5e6580bd0f8dcadd",
+      "review": "customers component crate created; no kernel binding changed"
+    },
+    "components/customers/src/domain.rs": {
+      "status": "unproved",
+      "sha256": "ce4f5aa3006377227434e5b9cfbdab9b8e12754c07592826ba8c9837deaad513",
+      "review": "customers component crate created; no kernel binding changed"
+    },
+    "components/customers/src/lib.rs": {
+      "status": "unproved",
+      "sha256": "8a60e9b206e64bfd0d66cef9e9b7e3be7332ff697818fa6d5e08532361bd753d",
+      "review": "customers component crate created; no kernel binding changed"
+    },
+    "components/customers/src/service/address_book.rs": {
+      "status": "unproved",
+      "sha256": "79738b95b2c8726c18467a6352011b291223aa932e9769125ca3b0f1b9a2e1a0",
+      "review": "customers component crate created; no kernel binding changed"
+    },
+    "components/customers/src/service/directory.rs": {
+      "status": "unproved",
+      "sha256": "96b3c6033955bc747abc5c55e972a72d828ea74ebbc69b9553ece41d971a7f0c",
+      "review": "customers component crate created; no kernel binding changed"
+    },
+    "components/customers/src/service/sessions.rs": {
+      "status": "unproved",
+      "sha256": "df3f4fc8ba41f7e2ca8f4e127996a2c54269199f4698caf17bd72eb2d35b5e23",
+      "review": "customers component crate created; no kernel binding changed"
+    },
+    "components/customers/src/service.rs": {
+      "status": "unproved",
+      "sha256": "1d35da6c7981b393247006460da1bc3b4f66aa61e1538d4405abe5ef69f339ca",
+      "review": "customers component crate created; no kernel binding changed"
+    },
+    "components/customers/src/store/addresses.rs": {
+      "status": "unproved",
+      "sha256": "41c9192e7b1d85d86a0815c4b315dac4bba15761969d0e53d60123f33eee1eba",
+      "review": "customers component crate created; no kernel binding changed"
+    },
+    "components/customers/src/store/customers.rs": {
+      "status": "unproved",
+      "sha256": "5da5f1a4fd2dae5d5c904729f3d258e799aadf2c4ad8e8c6d755180fb72b0d9e",
+      "review": "customers component crate created; no kernel binding changed"
+    },
+    "components/customers/src/store/sessions.rs": {
+      "status": "unproved",
+      "sha256": "b43918d36f8dfa3916998bceafee5cf460695cd2185335eba9f1bd98167f02b6",
+      "review": "customers component crate created; no kernel binding changed"
+    },
+    "components/customers/src/store.rs": {
+      "status": "unproved",
+      "sha256": "640b85ad8de7ff793c4898be08dd5acace4f376f7e02e09665d6675937a1467a",
+      "review": "customers component crate created; no kernel binding changed"
+    },
     "components/identity/src/domain/permissions.rs": {
       "status": "reviewed-binding",
       "sha256": "eee8b856137ddd68ab29983238f67ae7723d8f8bee3e439fdc6e0248d6e27710",
@@ -3192,8 +3252,8 @@
     },
     "src/accounts/address_store.rs": {
       "status": "unproved",
-      "sha256": "b380eab487802014f9d773103ec5a4217c7d31d004eb34cd0927c938a9410715",
-      "review": "Reviewed original CRM address-book and historical source joins: independent review caught region loss, five-provider US-CA controls now pass; native address import shares tenant-locked storage and suppresses only ordinary address events; all five source transports reach immutable native CRM/history with replay and denial tests. Existing kernel proof boundary unchanged; source JSON, provider reads and SQL/async effects remain unproved."
+      "sha256": "8186489ecffcbdb2b0cebfe351267bf67a1951f6ae925c121dccc5a2068995ff",
+      "review": "customers component crate created; no kernel binding changed"
     },
     "src/accounts/addresses.rs": {
       "status": "unproved",
@@ -3207,8 +3267,8 @@
     },
     "src/accounts/contacts.rs": {
       "status": "unproved",
-      "sha256": "47d221bed8338d2aab07adb5bd6900c9a8c294645b62cef33d70080a3798c789",
-      "review": "The commerce crate became components/pricing with its rules under domain/; no rule changed"
+      "sha256": "036e00b5d3a40e180d943f6729f101ef7e8fa16c43e0165dca836fbbaaa968c2",
+      "review": "customers component crate created; no kernel binding changed"
     },
     "src/accounts/demo.rs": {
       "status": "unproved",
@@ -3217,13 +3277,13 @@
     },
     "src/accounts/metadata.rs": {
       "status": "unproved",
-      "sha256": "1ba551327d9172652e2d6430d094f8ec20ca3ad5959ae446489568f6189ed888",
-      "review": "Initial extraction of 13 production policies; surrounding Rust explicitly unproved; existing HTTP regression suites retained"
+      "sha256": "7b55549fc0381d8c71e12261139c70a3c01f53f9a2bb424a9eb2b4008384d743",
+      "review": "customers component crate created; no kernel binding changed"
     },
     "src/accounts/mod.rs": {
       "status": "unproved",
-      "sha256": "6512217defdf30b32476bf133b86ed458241165b9f6892dcf64a9c351fb6a524",
-      "review": "Checkout grant entry points and tenant-bound session checks reviewed against native buyer login, live-shop admission, wrong buyer and tenant, revocation, replay and isolated two-service PostgreSQL acceptance. No additional formal claims."
+      "sha256": "3d504b40ad41669bf41cc13195cdebb7c6ee9506cb5c011d61f85d6c322ae6c5",
+      "review": "customers component crate created; no kernel binding changed"
     },
     "src/accounts/order_snapshot.rs": {
       "status": "unproved",
@@ -3237,8 +3297,8 @@
     },
     "src/accounts/payment_preference.rs": {
       "status": "unproved",
-      "sha256": "b55712f61d45535d6bab728d590a58300ced25bbe7ddda09f90cc10f7d44a3c1",
-      "review": "Native lifecycle and B2B deadlock repair reviewed: accepted package snapshots, current scopes and private projections preserve existing native invariants. Optional last-payment preference now updates after financial commit and only if changed, removing the proved customer/unit lock inversion without relaxing active-session/budget checks or retrying uncertain effects."
+      "sha256": "4fb192db418fabd61dbd5d3907dfb54f4c4bfc4e3584e1e60639012c27080d5c",
+      "review": "customers component crate created; no kernel binding changed"
     },
     "src/accounts/profile.rs": {
       "status": "unproved",
@@ -5407,8 +5467,8 @@
     },
     "src/operations/customer_lookup.rs": {
       "status": "unproved",
-      "sha256": "ef89ce0432669cd388fab1536d40093942fdb2695e7311c0105d18f179e8fd0c",
-      "review": "Tenant roles and current grants independently reviewed; owner/retained-override/acceptance races repaired and PostgreSQL-blocked regressions passed; PII and Flow projection boundaries documented; B2B feature settings delegate shared CAS/history and preserve financial guards. Existing extracted policies unchanged; SQL/async/UI remain reviewed adapters, not full proofs."
+      "sha256": "a8e4030f37ce1a2a2980b4fbe2215901f99c302a49c9ecc966d84d3cb21b957f",
+      "review": "customers component crate created; no kernel binding changed"
     },
     "src/operations/customers.rs": {
       "status": "unproved",
@@ -5432,8 +5492,8 @@
     },
     "src/operations/guest_customers.rs": {
       "status": "unproved",
-      "sha256": "bd869ddd890c92e4a4be70d44b8451e3d54b3b1c6a7ae455bb438562e5770aca",
-      "review": "Reviewed tenant-scoped guest CRM projection and indexed historical order reads; account enrollment, checkout ownership and authenticated order access are unchanged. Guest snapshots cannot be saved as account profiles; SQL and UI remain unproved adapters."
+      "sha256": "3927f6c8c2eaba4e1433f6ed85492a18d351e94bb2b7b5f9cb41efcdae265553",
+      "review": "customers component crate created; no kernel binding changed"
     },
     "src/operations/imports/assets.rs": {
       "status": "unproved",
@@ -6187,12 +6247,12 @@
       "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
     },
     "Cargo.lock": {
-      "sha256": "d1910785b0febc580984440ecc8a06ad691126e7d5cea452cac6f4ceaf0f5d49",
-      "review": "delivery_split_admissible and carrier_booking_admissible bindings moved into components/shipping"
+      "sha256": "d9c0d263c63f4992d7304c8f225470a149bc4a9e22662aa32c7c50fd1c63620d",
+      "review": "customers component crate created; no kernel binding changed"
     },
     "Cargo.toml": {
-      "sha256": "dbb5938ad9e3024e12e54a6d895ca06b8f2dc6489c4dfef69aec6c15d625e4ea",
-      "review": "delivery_split_admissible and carrier_booking_admissible bindings moved into components/shipping"
+      "sha256": "c7c19bac37694d1cd474342b8dc9698589160081d0ffdc2202ef038457f9fb6d",
+      "review": "customers component crate created; no kernel binding changed"
     },
     "components.lock.json": {
       "sha256": "7b4a931ad81c6665d5d95e6b42b8ef4d09ebe8971ac24998d8f94bb6a737ff53",

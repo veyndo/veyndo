@@ -1,0 +1,13 @@
+[package]
+name = "veyndo-customers"
+version.workspace = true
+edition.workspace = true
+license-file.workspace = true
+description = "Customer accounts, their sessions and address books, and the merchant's view of customers"
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+sqlx.workspace = true
+veyndo-core = { path = "../core" }
+veyndo-pricing = { path = "../pricing" }

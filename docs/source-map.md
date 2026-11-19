@@ -27,7 +27,7 @@ remain connected while shared contracts move into crates.
 | Orders | `src/checkout/commit.rs`, `src/commerce/external_orders.rs` and `src/operations/{orders,order_list,manual_orders}.rs` connect native purchase and imported orders to the same ledger. | Immutable amounts and buyer snapshots, tenant identity, order state guards and atomic order events. |
 | Payments and refunds | `src/payments/` admits commands and signed receipts from the separate Payments adapter; native checkout and merchant actions reuse that owner. | Verified amounts, allocations, receipt uniqueness, current authority and uncertainty after interrupted provider calls. |
 | Fulfillment and documents | `src/commerce/{fulfillment,delivery,delivery_split}.rs` and `src/operations/{order_documents,receipts,delivery_booking}.rs` serve Studio, Flow actions and carrier apps. | Persisted order quantities, split delivery conservation, original receipt identity and provider callback evidence. |
-| Settings and international context | `src/commerce/settings_*.rs`, `src/commerce/geography.rs`, `src/currencies/` and language configuration supply shared native contexts to HTTP, MCP and UCP adapters. | Current grants, basis/channel inheritance, revisions, dependent method usage and selective publication. |
+| Settings and international context | `src/commerce/settings_*.rs`, `components/shipping/src/domain/geography.rs`, `src/currencies/` and language configuration supply shared native contexts to HTTP, MCP and UCP adapters. | Current grants, basis/channel inheritance, revisions, dependent method usage and selective publication. |
 
 An extracted DTO carries data. Its host still admits the caller and
 loads the current shop and channel context. An API adapter or app gateway
@@ -510,7 +510,7 @@ comparison cover their effects; asynchronous SQL and provider code remain unprov
 
 ## International configuration and language boundaries
 
-`commerce/geography.rs` owns catalogue/overlay/address admission; `tax_rules.rs`
+`components/shipping/src/domain/geography.rs` owns catalogue/overlay/address admission; `tax_rules.rs`
 owns guarded destination selection and `tax_context.rs` its private Rule Builder
 facts. `settings_defaults.rs`, `method_text.rs`, `content_text.rs` and
 `product_languages.rs` own compatibility defaults, translations and language

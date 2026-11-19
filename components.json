@@ -413,6 +413,7 @@
     "customers": {
       "title": "Customer accounts, sessions, addresses and the merchant customer directory",
       "sources": [
+        "components/customers",
         "src/accounts",
         "src/customer.rs",
         "src/operations/addresses.rs",
@@ -450,7 +451,7 @@
       ],
       "glob_imports": 18,
       "untyped_access": 85,
-      "sql_outside_store": 15
+      "sql_outside_store": 10
     },
     "orders": {
       "title": "Order state, fulfilment, receipts, documents and merchant order work",

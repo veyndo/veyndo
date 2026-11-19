@@ -9,12 +9,12 @@ This lists every checked-in source module in these roots, including files with n
 | Module | Responsibility |
 |---|---|
 | [src/accounts/address_restore.rs](../src/accounts/address_restore.rs) | Atomic restoration of the owning customer's address aggregate; geography, references and immutable order snapshots remain guarded. |
-| [src/accounts/address_store.rs](../src/accounts/address_store.rs) | Tenant-owned address persistence, optimistic revisions and atomic default assignment. |
+| [src/accounts/address_store.rs](../src/accounts/address_store.rs) | Entry points of the address book: country admission and history attribution here, persistence in the customers component. |
 | [src/accounts/addresses.rs](../src/accounts/addresses.rs) | Store API address book uses independent customer sessions, never merchant credentials. |
 | [src/accounts/browser.rs](../src/accounts/browser.rs) | Host-only customer cookies adapt the existing tenant session ledger without granting merchant authority. |
 | [src/accounts/contacts.rs](../src/accounts/contacts.rs) | Native customer projection; shared contact syntax never grants identity or PII access. |
 | [src/accounts/demo.rs](../src/accounts/demo.rs) | Public synthetic customer fixture for newly provisioned demo shops; never fills real customer addresses. |
-| [src/accounts/metadata.rs](../src/accounts/metadata.rs) | Standard customer read fields and indexed order metrics are derived from authoritative records. |
+| [src/accounts/metadata.rs](../src/accounts/metadata.rs) | Standard customer read fields; the projection and metrics are owned by the customers component. |
 | [src/accounts/mod.rs](../src/accounts/mod.rs) | Independent customer sessions, profile/password management and owning-account order history. |
 | [src/accounts/order_snapshot.rs](../src/accounts/order_snapshot.rs) | Checkout-owned immutable customer and address records; future account edits cannot rewrite an order. |
 | [src/accounts/orders.rs](../src/accounts/orders.rs) | Customer-owned order reads and receipts share one tenant/identity predicate and a public projection. |
@@ -452,7 +452,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/operations/company_public.rs](../src/operations/company_public.rs) | Explicit public legal/brand projection; bank account, domestic tax ID and unlinked uploads remain private. |
 | [src/operations/creation_schema.rs](../src/operations/creation_schema.rs) | Domain-owned MCP schemas for safe CRM creation choices and explicitly reviewed manual orders. |
 | [src/operations/customer_create.rs](../src/operations/customer_create.rs) | Admin CRM creation uses native contacts/address storage, history and outbox; it never issues customer credentials. |
-| [src/operations/customer_lookup.rs](../src/operations/customer_lookup.rs) | Fast customer-only lookup for native identity bindings: tenant-scoped, indexed and bounded; no guest-order union. |
+| [src/operations/customer_lookup.rs](../src/operations/customer_lookup.rs) | Fast customer-only lookup for native identity bindings; the search is owned by the customers component. |
 | [src/operations/customers.rs](../src/operations/customers.rs) | Tenant-scoped paged CRM and revision-checked merchant changes; credentials never leave storage. |
 | [src/operations/delivery_booking.rs](../src/operations/delivery_booking.rs) | Provider-neutral package admission freezes allocation before a paid carrier effect; approved apps reconcile only their own intent. |
 | [src/operations/grid_plan.rs](../src/operations/grid_plan.rs) | Read-only filter planning through the central provider and fleet leases; execution remains native list APIs. |
@@ -756,6 +756,18 @@ This lists every checked-in source module in these roots, including files with n
 | [components/core/src/shop_scope.rs](../components/core/src/shop_scope.rs) | Which shop a request addresses: the transport header, or the deployment's default shop. No authentication. |
 | [components/core/src/state.rs](../components/core/src/state.rs) | The state every component may use: the tenant-scoped database pool, the outbound HTTP client and request admission. |
 | [components/core/src/work_signal.rs](../components/core/src/work_signal.rs) | One dedicated LISTEN connection per worker process. Commit notifications are hints; polling repairs lost hints. |
+| [components/customers/src/domain/profile.rs](../components/customers/src/domain/profile.rs) | Which profile fields are shown as top-level contact fields of a customer. |
+| [components/customers/src/domain/search.rs](../components/customers/src/domain/search.rs) | A merchant's search text as a literal, case-insensitive LIKE fragment. |
+| [components/customers/src/domain.rs](../components/customers/src/domain.rs) | Rules of customer data, free of I/O. |
+| [components/customers/src/lib.rs](../components/customers/src/lib.rs) | Customers component: accounts, sessions, address books and the merchant's view of customers. |
+| [components/customers/src/service/address_book.rs](../components/customers/src/service/address_book.rs) | The address book of a customer: bounded, revision-checked, with defaults that are never left empty. |
+| [components/customers/src/service/directory.rs](../components/customers/src/service/directory.rs) | The merchant's view of customers: standard read fields, the bounded lookup and guest contacts. |
+| [components/customers/src/service/sessions.rs](../components/customers/src/service/sessions.rs) | Independent customer sessions: a random token whose digest alone is stored. |
+| [components/customers/src/service.rs](../components/customers/src/service.rs) | Operations of the customers component. |
+| [components/customers/src/store/addresses.rs](../components/customers/src/store/addresses.rs) | Tenant-owned address persistence, optimistic revisions and atomic default assignment. |
+| [components/customers/src/store/customers.rs](../components/customers/src/store/customers.rs) | Customer rows as the merchant and the account see them, with order metrics from authoritative records. |
+| [components/customers/src/store/sessions.rs](../components/customers/src/store/sessions.rs) | Customer sessions, stored by the digest of their token. |
+| [components/customers/src/store.rs](../components/customers/src/store.rs) | SQL of the customers component. |
 | [components/identity/src/domain/permissions.rs](../components/identity/src/domain/permissions.rs) | The permission vocabulary and the decision whether a request holds one. Owners retain control; delegates cannot grant rights they lack. |
 | [components/identity/src/domain.rs](../components/identity/src/domain.rs) | Pure identity rules: no database, no transport. |
 | [components/identity/src/lib.rs](../components/identity/src/lib.rs) | Identity component: the checks every other component uses to ask who a request acts for and what it may do. |

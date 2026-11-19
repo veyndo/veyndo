@@ -234,7 +234,15 @@ Order follows the dependency report, lowest first. Each line is one move.
   Open: shipping cost and tax enrichment of a quote (it reads the shop
   settings, cart and currency types), the split and booking handlers (they
   write through the order mutation log), delivery method types.
-- [ ] customers
+- [ ] customers. Started: `components/customers` owns the address book (typed
+  statements, the bounded revision-checked save and delete, defaults that are
+  never left empty), customer sessions (only the token digest is stored), the
+  typed customer row, the contact projection, order metrics, the bounded
+  lookup with literal search, the guest contact and the remembered payment
+  method. Open: the handlers still run in the server, because they resolve the
+  storefront request, attribute the history and read shop settings; login,
+  registration, profile and password; merchant customer create and edit; the
+  order snapshot; browser sessions.
 - [ ] payments
 - [ ] checkout
 - [ ] orders

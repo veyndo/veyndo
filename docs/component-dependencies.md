@@ -21,7 +21,7 @@ run SQL without being in a `store` folder. Both numbers only fall.
 | pricing | 3683 | 9 | 19 | 5 | 2 | apps (2), catalog (1), checkout (8), core (69), identity (4), marketing (3), shop (15), studio (1) | 9 |
 | shipping | 1202 | 7 | 115 | 2 | 0 | apps (3), catalog (5), checkout (1), core (46), identity (5), orders (5), payments (1), pricing (14), shop (20), studio (4) | 6 |
 | checkout | 2715 | 14 | 148 | 9 | 3 | apps (22), b2b (19), catalog (6), core (240), customers (5), host (7), identity (2), intelligence (2), inventory (3), marketing (15), orders (6), payments (8), pos (12), pricing (35), shipping (10), shop (22), studio (9) | 12 |
-| customers | 1618 | 18 | 85 | 15 | 3 | apps (9), catalog (3), checkout (5), core (175), identity (32), marketing (2), orders (5), pos (1), pricing (1), shipping (5), shop (13), studio (9) | 6 |
+| customers | 2059 | 18 | 85 | 10 | 3 | apps (9), catalog (3), checkout (5), core (172), identity (32), marketing (2), orders (5), pos (1), pricing (2), shipping (5), shop (13), studio (9) | 6 |
 | orders | 4968 | 39 | 451 | 22 | 7 | apps (36), b2b (1), catalog (9), checkout (15), core (293), customers (5), identity (71), inventory (1), marketing (6), payments (7), pos (1), pricing (5), shipping (2), shop (22), studio (8) | 17 |
 | payments | 4021 | 3 | 265 | 21 | 7 | apps (10), checkout (3), core (275), host (5), identity (10), inventory (1), pos (1), shop (13), studio (1) | 14 |
 | marketing | 4954 | 38 | 339 | 26 | 8 | apps (24), automation (31), b2b (3), catalog (8), checkout (19), core (225), identity (37), intelligence (12), orders (1), payments (2), pos (4), pricing (16), shipping (9), shop (18), studio (4) | 24 |
