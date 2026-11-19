@@ -38,7 +38,15 @@ pub(crate) async fn invoke(a: &App, h: &RequestContext, name: &str, v: &Value) -
         }
         "currency.select" => routes::select(state, h, Json(v.clone())).await?,
         "merchant.currencies.refresh" => routes::refresh(state, h, Json(v.clone())).await?,
-        "merchant.currencies.generate" => jobs::create(state, h, Json(v.clone())).await?,
+        "merchant.currencies.generate" => {
+            use axum::extract::FromRef;
+            veyndo_pricing::http::price_jobs::create(
+                State(FromRef::from_ref(a)),
+                h,
+                Json(v.clone()),
+            )
+            .await?
+        }
         "merchant.currencies.jobs" => {
             veyndo_pricing::http::price_jobs::list(State(a.core.clone()), h).await?
         }

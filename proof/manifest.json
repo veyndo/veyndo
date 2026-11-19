@@ -212,7 +212,7 @@
     },
     "customer_group_net": {
       "bindings": [
-        "src/commerce/customer_groups.rs"
+        "components/pricing/src/types/customer_group.rs"
       ],
       "theorems": [
         "customer_group_unknown_denied",
@@ -882,13 +882,13 @@
     },
     "components/pricing/src/http/currencies.rs": {
       "status": "unproved",
-      "sha256": "0cea47be1f244dd1290b870ee08e8f0a486e9b387bef54bbbdb2d418663b1740",
-      "review": "Currency discovery moved into components/pricing behind the shop settings and cart ports; no rule changed"
+      "sha256": "db7450d9fe8a624f09077fbc3d6e69d113821e5833cfa4087800ca920a57b6e7",
+      "review": "Customer groups and price job creation moved into components/pricing; the customer group rule is bound there"
     },
     "components/pricing/src/http/price_jobs.rs": {
       "status": "unproved",
-      "sha256": "0e5eacaa1068e2d309f44013dc1415b2182b731af6b0b3555e5610e94c6f2564",
-      "review": "Price job reads moved into components/pricing as typed store and HTTP adapters; no rule changed"
+      "sha256": "9aa3e5e570c9bfaa50473b59746f442db9af08cfbb7bf15e332f9d80b37f59c6",
+      "review": "Customer groups and price job creation moved into components/pricing; the customer group rule is bound there"
     },
     "components/pricing/src/http.rs": {
       "status": "unproved",
@@ -902,13 +902,18 @@
     },
     "components/pricing/src/ports.rs": {
       "status": "unproved",
-      "sha256": "27b0b7751b41ea9661f9069e4a59e856266696ff8eba9c008712b8dfeda9bf67",
-      "review": "Currency discovery moved into components/pricing behind the shop settings and cart ports; no rule changed"
+      "sha256": "f664a82f859a03ae862347f5d872d1e5b196d74b62dffc85f0cd8eb16e43b3fc",
+      "review": "Customer groups and price job creation moved into components/pricing; the customer group rule is bound there"
     },
     "components/pricing/src/service/conversion.rs": {
       "status": "unproved",
       "sha256": "b67ab7cc83e7107090cdede1c7bac168814f5becda7a3c895e62a8eba67eefcb",
       "review": "Currency configuration, conversion and reference-rate retrieval moved unchanged into components/pricing; the currency context rule is bound there"
+    },
+    "components/pricing/src/service/price_jobs.rs": {
+      "status": "unproved",
+      "sha256": "ab6dfb49661c307bfcf379b1a165c942a765a3313e1c56fd5567b53ae5477a3e",
+      "review": "Customer groups and price job creation moved into components/pricing; the customer group rule is bound there"
     },
     "components/pricing/src/service/rates.rs": {
       "status": "unproved",
@@ -927,13 +932,13 @@
     },
     "components/pricing/src/service.rs": {
       "status": "unproved",
-      "sha256": "180b70be7d25e9cafbd629eacbe1b151ba1f5ffd62fed105c184ff1541acbe5a",
-      "review": "Tax classes, the destination rate and the context selection rules moved unchanged into components/pricing; the destination tax rule is bound there"
+      "sha256": "e04a3a5983f01b9b89fc643aef314c10629d74f767ad2ff81efe6c8037d15e2d",
+      "review": "Customer groups and price job creation moved into components/pricing; the customer group rule is bound there"
     },
     "components/pricing/src/store/price_jobs.rs": {
       "status": "unproved",
-      "sha256": "59c4dc6b8d4629f743e54c7381d6375ec84af81b7f99a1fe8e88cba7dbd6a99d",
-      "review": "Price job reads moved into components/pricing as typed store and HTTP adapters; no rule changed"
+      "sha256": "f4015a3bf884e7f49c7558d3256ecc5108a40ae73e539cb2fb82a585b56c5d35",
+      "review": "Customer groups and price job creation moved into components/pricing; the customer group rule is bound there"
     },
     "components/pricing/src/store.rs": {
       "status": "unproved",
@@ -944,6 +949,11 @@
       "status": "reviewed-binding",
       "sha256": "e050a57a130f11c3f29816f287843496ded098869c85d568328bb3b680f9a473",
       "review": "Currency configuration, conversion and reference-rate retrieval moved unchanged into components/pricing; the currency context rule is bound there"
+    },
+    "components/pricing/src/types/customer_group.rs": {
+      "status": "reviewed-binding",
+      "sha256": "5b53587e34f062dcc120875cc0717555749009e7622bde07f38206606497e01e",
+      "review": "Customer groups and price job creation moved into components/pricing; the customer group rule is bound there"
     },
     "components/pricing/src/types/price_job.rs": {
       "status": "unproved",
@@ -957,8 +967,8 @@
     },
     "components/pricing/src/types.rs": {
       "status": "unproved",
-      "sha256": "7677addb72a45ae77e5db2a69b2af52097bfdb9bb26ce86e4805ccc5ac9257d0",
-      "review": "Tax classes, the destination rate and the context selection rules moved unchanged into components/pricing; the destination tax rule is bound there"
+      "sha256": "df5f670d79a211e312e61b4d3b498a90b94d828b0cbdc3330b0d576722b7f0e9",
+      "review": "Customer groups and price job creation moved into components/pricing; the customer group rule is bound there"
     },
     "crates/apps/src/component_runtime.rs": {
       "status": "unproved",
@@ -4156,9 +4166,9 @@
       "review": "Customer scenarios: independent scenario_security_review completed; native signed-role, cohort, replay, injection, cancellation and post-lock lease-expiry regressions pass. Shared checkout preflight avoids nested-pool deadlock; authority is rechecked at the fenced transaction commit."
     },
     "src/commerce/customer_groups.rs": {
-      "status": "reviewed-binding",
-      "sha256": "d8b1c3222500c51ece4d4b60212a9ad0c7deb6bf186839711fbf6397d60f2b0a",
-      "review": "Reviewed eighteen core findings: typed trusted identity and explicit route rights; consolidated current grants; durable auth and fenced shared limits; scoped transactions and one-backend PgBouncer including nested borrow fixes; bounded Wasm/PNG work; notified workers, savepoint quarantine and conservative retention; separate runtime roles and startup configuration. Real PostgreSQL/provider regressions preserve current tenant/customer/payment behavior. SQL/network adapters remain unproved."
+      "status": "unproved",
+      "sha256": "ba81b3ad27a72a1cb14dc27dd3a670923d9e702949674457e7983e9a0dea3bb1",
+      "review": "Customer groups and price job creation moved into components/pricing; the customer group rule is bound there"
     },
     "src/commerce/delivery.rs": {
       "status": "unproved",
@@ -4387,13 +4397,13 @@
     },
     "src/currencies/capabilities.rs": {
       "status": "unproved",
-      "sha256": "df155e8451efb275bd78f52daf114bb187491d95d516528767aafb0c01f1ff1e",
-      "review": "Currency discovery moved into components/pricing behind the shop settings and cart ports; no rule changed"
+      "sha256": "b03ebd884ce1e9b9b6cccb2af5006c3cb4659abe6fede269bd46d2958d07d995",
+      "review": "Customer groups and price job creation moved into components/pricing; the customer group rule is bound there"
     },
     "src/currencies/jobs.rs": {
       "status": "unproved",
-      "sha256": "3ecf953f7abaaba7c1bd8be4685c614f29ca901d46f8dbe73c56a121e595bb8d",
-      "review": "Price job reads moved into components/pricing as typed store and HTTP adapters; no rule changed"
+      "sha256": "d16d0476fb69724b8615fa122fb9dcf18b30cf9f80e08e4e7023118589074c38",
+      "review": "Customer groups and price job creation moved into components/pricing; the customer group rule is bound there"
     },
     "src/currencies/mod.rs": {
       "status": "unproved",
@@ -4402,8 +4412,8 @@
     },
     "src/currencies/ports.rs": {
       "status": "unproved",
-      "sha256": "0832ff6b872ed22c726e44d3acf389e20503dbe488606efdbda8aa5b983ffab7",
-      "review": "Currency discovery moved into components/pricing behind the shop settings and cart ports; no rule changed"
+      "sha256": "e14c45720486c86b133cf54843b67b5adbbe0699753ac95da1ade4cef8c3aa31",
+      "review": "Customer groups and price job creation moved into components/pricing; the customer group rule is bound there"
     },
     "src/currencies/rates.rs": {
       "status": "unproved",
@@ -4417,8 +4427,8 @@
     },
     "src/currencies/routes.rs": {
       "status": "unproved",
-      "sha256": "d704be3ab0b5d095e55f188b13d771458094e61754aa3555228102ed8ddc1a28",
-      "review": "Currency discovery moved into components/pricing behind the shop settings and cart ports; no rule changed"
+      "sha256": "c1d90df90242db25de6566ecf95c704cc592659bd2bf64c9bc485d9b911924d9",
+      "review": "Customer groups and price job creation moved into components/pricing; the customer group rule is bound there"
     },
     "src/customer.rs": {
       "status": "unproved",

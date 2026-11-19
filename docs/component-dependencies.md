@@ -18,7 +18,7 @@ run SQL without being in a `store` folder. Both numbers only fall.
 | shop | 4112 | 42 | 98 | 23 | 15 | apps (7), b2b (2), catalog (3), checkout (17), core (256), customers (3), host (4), intelligence (8), marketing (8), payments (4), pricing (12), shipping (1), studio (12) | 19 |
 | catalog | 5920 | 53 | 202 | 33 | 11 | apps (19), b2b (2), checkout (12), core (341), customers (5), identity (30), intelligence (10), marketing (16), pricing (29), protocols (1), shipping (1), shop (42), studio (9) | 15 |
 | inventory | 374 | 3 | 26 | 3 | 2 | catalog (1), checkout (2), core (27), identity (4), intelligence (3), pricing (3), protocols (2), shop (2) | 3 |
-| pricing | 3301 | 10 | 20 | 4 | 2 | apps (2), catalog (2), checkout (8), core (67), identity (5), marketing (3), shop (16), studio (2) | 10 |
+| pricing | 3421 | 10 | 20 | 5 | 2 | apps (2), catalog (2), checkout (8), core (67), identity (4), marketing (3), shop (16), studio (2) | 10 |
 | shipping | 970 | 7 | 115 | 4 | 0 | apps (3), catalog (5), checkout (1), core (45), identity (5), orders (5), payments (1), pricing (16), shop (20), studio (4) | 6 |
 | checkout | 2706 | 14 | 148 | 10 | 3 | apps (22), b2b (19), catalog (9), core (240), customers (5), host (7), identity (2), intelligence (2), inventory (2), marketing (15), orders (6), payments (8), pos (12), pricing (51), shipping (10), shop (22), studio (9) | 13 |
 | customers | 1618 | 18 | 85 | 15 | 3 | apps (9), catalog (1), checkout (5), core (175), identity (32), marketing (2), orders (5), pos (1), pricing (1), shipping (5), shop (13), studio (9) | 6 |

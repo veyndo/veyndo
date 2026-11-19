@@ -47,6 +47,13 @@ mod tests {
                 Ok((config, 7))
             })
         }
+        fn currencies_for_update<'a>(
+            &'a self,
+            _: &'a mut sqlx::PgConnection,
+            tenant: &'a str,
+        ) -> PortFuture<'a, (Config, i64)> {
+            self.currencies(tenant, "default")
+        }
     }
     struct Cart;
     impl Carts for Cart {

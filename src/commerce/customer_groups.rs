@@ -1,12 +1,6 @@
 //! Tenant-owned translated customer groups preserve exact rule IDs and select an explicit existing price/tax presentation basis.
 use super::*;
-#[derive(Clone, Deserialize, Serialize)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub(crate) struct CustomerGroup {
-    pub id: String,
-    pub translations: HashMap<String, super::method_text::Text>,
-    pub price_basis: String,
-}
+pub(crate) use veyndo_pricing::types::customer_group::CustomerGroup;
 pub(super) fn defaults() -> Vec<CustomerGroup> {
     serde_json::from_value(json!([
       {"id":"consumer","priceBasis":"consumer","translations":{"en-GB":{"name":"Consumers"},"de-DE":{"name":"Privatkunden"},"es-ES":{"name":"Clientes particulares"},"fr-FR":{"name":"Particuliers"}}},
@@ -15,11 +9,7 @@ pub(super) fn defaults() -> Vec<CustomerGroup> {
 }
 impl Settings {
     pub(crate) fn is_business(&self, group: &str) -> bool {
-        let entry = self.customer_groups.iter().find(|g| g.id == group);
-        verified_kernel::customer_group_net(
-            entry.is_some(),
-            entry.is_some_and(|g| g.price_basis == "business"),
-        )
+        veyndo_pricing::types::customer_group::priced_net(&self.customer_groups, group)
     }
 }
 pub(super) fn validate_groups(s: &Settings) -> Result<()> {

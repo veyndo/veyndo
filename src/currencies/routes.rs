@@ -15,7 +15,8 @@ pub(crate) fn router() -> Router<App> {
         .secure_route(
             "/api/merchant/currencies/price-jobs",
             &[("GET", "catalog.read"), ("POST", "catalog.write")],
-            get(veyndo_pricing::http::price_jobs::list).post(jobs::create),
+            get(veyndo_pricing::http::price_jobs::list)
+                .post(veyndo_pricing::http::price_jobs::create),
         )
         .secure_route(
             "/api/merchant/currencies/price-jobs/{id}",

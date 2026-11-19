@@ -10,6 +10,12 @@ pub trait ShopSettings: Send + Sync {
     /// Currency configuration and settings revision of a shop as one sales channel sees it.
     fn currencies<'a>(&'a self, tenant: &'a str, channel: &'a str)
     -> PortFuture<'a, (Config, i64)>;
+    /// The shop's own currency configuration and revision, with the settings row locked until the transaction ends.
+    fn currencies_for_update<'a>(
+        &'a self,
+        tx: &'a mut sqlx::PgConnection,
+        tenant: &'a str,
+    ) -> PortFuture<'a, (Config, i64)>;
 }
 
 /// The cart of a storefront request.

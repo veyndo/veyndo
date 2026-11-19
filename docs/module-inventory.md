@@ -725,6 +725,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/pricing/src/lib.rs](../components/pricing/src/lib.rs) | Pricing component: amounts, price calculation, discounts and the cart, product and customer contracts they work on. |
 | [components/pricing/src/ports.rs](../components/pricing/src/ports.rs) | What the pricing component needs from other components. The server implements these; tests use their own. |
 | [components/pricing/src/service/conversion.rs](../components/pricing/src/service/conversion.rs) | Exact rational minor-unit FX conversion at the isolated legacy calculator boundary; fixed prices are explicit decimal strings. |
+| [components/pricing/src/service/price_jobs.rs](../components/pricing/src/service/price_jobs.rs) | Queues a run that writes fixed prices of one currency, with the exchange rates frozen at creation. |
 | [components/pricing/src/service/rates.rs](../components/pricing/src/service/rates.rs) | Bounded ECB reference-rate retrieval with exact decimal parsing; a refresh never invents rates. |
 | [components/pricing/src/service/tax.rs](../components/pricing/src/service/tax.rs) | The tax rate of a delivery destination: the most specific active rule, else the country rate, else the class default. |
 | [components/pricing/src/service/tests.rs](../components/pricing/src/service/tests.rs) | Currency conversion adversaries and immutable source-price semantics, independent of live rate providers. |
@@ -732,6 +733,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/pricing/src/store/price_jobs.rs](../components/pricing/src/store/price_jobs.rs) | Reads of the price jobs of one shop. |
 | [components/pricing/src/store.rs](../components/pricing/src/store.rs) | The only place of the pricing component that contains SQL. |
 | [components/pricing/src/types/currency.rs](../components/pricing/src/types/currency.rs) | Explicit currency scales and rational exchange-rate settings, inherited by sales-channel overrides. |
+| [components/pricing/src/types/customer_group.rs](../components/pricing/src/types/customer_group.rs) | Shop-owned customer groups; each selects whether its prices are shown gross (consumer) or net (business). |
 | [components/pricing/src/types/price_job.rs](../components/pricing/src/types/price_job.rs) | One run that writes fixed prices of a currency into the catalogue, as the merchant API shows it. |
 | [components/pricing/src/types/tax.rs](../components/pricing/src/types/tax.rs) | Tax classes and their destination rules; current tax law is merchant configuration, not bundled tax advice. |
 | [components/pricing/src/types.rs](../components/pricing/src/types.rs) | The data contracts of the pricing component. |

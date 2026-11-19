@@ -1,5 +1,5 @@
 //! The server's implementation of what the pricing component reads from the shop settings and the cart.
-use crate::{App, RequestContext, commerce, load_cart};
+use crate::{App, RequestContext, Row, commerce, load_cart};
 use std::sync::Arc;
 use veyndo_pricing::ports::{Carts, PortFuture, Pricing, ShopSettings};
 use veyndo_pricing::types::currency::Config;
@@ -15,6 +15,24 @@ impl ShopSettings for Server {
         Box::pin(async move {
             let (settings, revision) = commerce::scoped_config(&self.0, tenant, channel).await?;
             Ok((settings.currencies.clone(), revision))
+        })
+    }
+    fn currencies_for_update<'a>(
+        &'a self,
+        tx: &'a mut sqlx::PgConnection,
+        tenant: &'a str,
+    ) -> PortFuture<'a, (Config, i64)> {
+        Box::pin(async move {
+            let row = sqlx::query(
+                "SELECT data,revision FROM commerce_settings WHERE tenant=$1 FOR UPDATE",
+            )
+            .bind(tenant)
+            .fetch_one(tx)
+            .await?;
+            Ok((
+                commerce::decode_config(row.get("data"))?.currencies,
+                row.get("revision"),
+            ))
         })
     }
 }

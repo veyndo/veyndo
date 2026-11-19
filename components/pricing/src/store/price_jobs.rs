@@ -1,5 +1,7 @@
 //! Reads of the price jobs of one shop.
 use crate::types::price_job::PriceJob;
+use serde_json::Value;
+use sqlx::PgConnection;
 use veyndo_core::{Result, State};
 
 pub async fn recent(a: &State, tenant: &str) -> Result<Vec<PriceJob>> {
@@ -15,4 +17,40 @@ pub async fn find(a: &State, tenant: &str, id: &str) -> Result<Option<PriceJob>>
         .bind(id)
         .fetch_optional(&a.db)
         .await?)
+}
+
+pub async fn queued(tx: &mut PgConnection, tenant: &str) -> Result<i64> {
+    Ok(sqlx::query_scalar(
+        "SELECT count(*) FROM currency_price_jobs WHERE tenant=$1 AND state='queued'",
+    )
+    .bind(tenant)
+    .fetch_one(tx)
+    .await?)
+}
+
+/// The highest product ID at creation; the job stops there, so products added later keep their prices.
+pub async fn product_ceiling(tx: &mut PgConnection, tenant: &str) -> Result<String> {
+    Ok(
+        sqlx::query_scalar("SELECT coalesce(max(id),'') FROM products WHERE tenant=$1")
+            .bind(tenant)
+            .fetch_one(tx)
+            .await?,
+    )
+}
+
+pub async fn insert(
+    tx: &mut PgConnection,
+    tenant: &str,
+    id: &str,
+    data: Value,
+    ceiling: &str,
+) -> Result<()> {
+    sqlx::query("INSERT INTO currency_price_jobs(tenant,id,data,ceiling) VALUES($1,$2,$3,$4)")
+        .bind(tenant)
+        .bind(id)
+        .bind(data)
+        .bind(ceiling)
+        .execute(tx)
+        .await?;
+    Ok(())
 }
