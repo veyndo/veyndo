@@ -4,3 +4,4 @@ pub mod categories;
 pub mod downloads;
 pub mod ingestion;
 pub mod reviews;
+pub mod translations;

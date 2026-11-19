@@ -23,6 +23,6 @@ pub(crate) fn router() -> Router<App> {
         .secure_route(
             "/api/merchant/translations/{id}/apply",
             &[("POST", "catalog.write")],
-            post(apply::apply),
+            post(veyndo_catalog::http::translations::apply),
         )
 }

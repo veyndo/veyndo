@@ -7,3 +7,4 @@ pub mod navigation;
 pub mod product_fields;
 pub mod product_identity;
 pub mod reviews;
+pub mod translation_apply;

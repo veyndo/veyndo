@@ -589,11 +589,11 @@ This lists every checked-in source module in these roots, including files with n
 | [src/studio/revenue.rs](../src/studio/revenue.rs) | Merchant turnover remains separated by invoice currency; historical values are never repriced with today's FX. |
 | [src/studio/work.rs](../src/studio/work.rs) | Bounded current-right work items come from native rows; no inferred revenue, customer data or parallel task store. |
 | [src/studio.rs](../src/studio.rs) | Verified merchant overview facts consumed by the chat and activity views. |
-| [src/translations/apply.rs](../src/translations/apply.rs) | Apply at most 50 reviewed drafts per request; stale products become conflicts rather than being overwritten. |
-| [src/translations/fields.rs](../src/translations/fields.rs) | Translate only human-readable text; preserve identifiers, URLs, rich structure and source specification keys. |
+| [src/translations/apply.rs](../src/translations/apply.rs) | Entry point for capabilities; applying reviewed drafts is owned by the catalog component. |
+| [src/translations/fields.rs](../src/translations/fields.rs) | Translation field extraction and admission are owned by the catalog component. |
 | [src/translations/mod.rs](../src/translations/mod.rs) | Tenant-scoped, resumable AI translation drafts; applying is revision checked and emits native product events. |
 | [src/translations/routes.rs](../src/translations/routes.rs) | Authorized translation job creation, progress, paginated drafts and resume/cancel controls. |
-| [src/translations/selection.rs](../src/translations/selection.rs) | Explicit product selection is bounded, unique and tenant-owned before any translation is queued. |
+| [src/translations/selection.rs](../src/translations/selection.rs) | Explicit product selection; the rule and the ownership check are owned by the catalog component. |
 | [src/translations/worker.rs](../src/translations/worker.rs) | One leased product per step: keyset traversal, bounded inference and resumable provider errors. |
 | [src/ucp/cart.rs](../src/ucp/cart.rs) | UCP cart transfer adapts the native cart and single-use browser handoff; supplier totals and return URLs are never trusted. |
 | [src/ucp/consent.rs](../src/ucp/consent.rs) | Explicit UCP consent reuses native cart-bound privacy receipts; source documents never define consent policy or authority. |
@@ -677,12 +677,15 @@ This lists every checked-in source module in these roots, including files with n
 | [components/catalog/src/domain/preparation.rs](../components/catalog/src/domain/preparation.rs) | Which content languages of a product already have a name or a description, as the catalogue preparation view shows it. |
 | [components/catalog/src/domain/rich.rs](../components/catalog/src/domain/rich.rs) | Safe structured rich content, never executable HTML. Same schema for merchant API and frontend. |
 | [components/catalog/src/domain/rich_document.rs](../components/catalog/src/domain/rich_document.rs) | Allow-listed editor JSON with bounded depth and content; HTML/handlers/styles cannot enter the renderer. |
+| [components/catalog/src/domain/selection.rs](../components/catalog/src/domain/selection.rs) | Explicit product selection is bounded and unique before any translation is queued. |
+| [components/catalog/src/domain/translation_fields.rs](../components/catalog/src/domain/translation_fields.rs) | Translate only human-readable text; preserve identifiers, URLs, rich structure and source specification keys. |
 | [components/catalog/src/domain.rs](../components/catalog/src/domain.rs) | Pure catalogue rules: no database, no HTTP. |
 | [components/catalog/src/http/assets.rs](../components/catalog/src/http/assets.rs) | Merchant product files: list, upload and publish. |
 | [components/catalog/src/http/categories.rs](../components/catalog/src/http/categories.rs) | Merchant category tree (list, save) and the public navigation. |
 | [components/catalog/src/http/downloads.rs](../components/catalog/src/http/downloads.rs) | Public attachments honor sales-channel visibility; a file is always delivered as a private download. |
 | [components/catalog/src/http/ingestion.rs](../components/catalog/src/http/ingestion.rs) | Shared bounded multipart parser for product uploads and scoped app uploads; file validation and persistence stay with the asset service. |
 | [components/catalog/src/http/reviews.rs](../components/catalog/src/http/reviews.rs) | Storefront review submission and merchant moderation. |
+| [components/catalog/src/http/translations.rs](../components/catalog/src/http/translations.rs) | Applying reviewed translation drafts. |
 | [components/catalog/src/http.rs](../components/catalog/src/http.rs) | HTTP handlers of the catalog component. |
 | [components/catalog/src/lib.rs](../components/catalog/src/lib.rs) | Catalog component: products, their translated content and the catalogue reads other components rely on. |
 | [components/catalog/src/ports.rs](../components/catalog/src/ports.rs) | What the catalog component needs from other components. The server implements these; tests use their own. |
@@ -694,6 +697,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/catalog/src/service/product_fields.rs](../components/catalog/src/service/product_fields.rs) | Saving the commerce fields of a product after its 3D models were checked against the stored assets. |
 | [components/catalog/src/service/product_identity.rs](../components/catalog/src/service/product_identity.rs) | Saving the identity of a product: a unique number, a unique option combination per parent, channels and categories of this shop. |
 | [components/catalog/src/service/reviews.rs](../components/catalog/src/service/reviews.rs) | Review submission with server-derived purchase verification, and the import of historical reviews with their provenance. |
+| [components/catalog/src/service/translation_apply.rs](../components/catalog/src/service/translation_apply.rs) | Apply at most 50 reviewed drafts per request; stale products become conflicts rather than being overwritten. |
 | [components/catalog/src/service.rs](../components/catalog/src/service.rs) | Catalogue operations that combine rules and stored state. |
 | [components/catalog/src/store/assets.rs](../components/catalog/src/store/assets.rs) | Reads of stored product assets. |
 | [components/catalog/src/store/catalog_channel.sql](../components/catalog/src/store/catalog_channel.sql) | Independent app entry; see extensions/README.md for its public contract. |
@@ -708,6 +712,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/catalog/src/store/product_list.rs](../components/catalog/src/store/product_list.rs) | The keyset-paged merchant product list with its filters; one extra row tells whether more follow. |
 | [components/catalog/src/store/products.rs](../components/catalog/src/store/products.rs) | Product rows as the shared product contract, and the bounded locked reads and writes price jobs use. |
 | [components/catalog/src/store/reviews.rs](../components/catalog/src/store/reviews.rs) | Stored product reviews: one per product and reviewer, published only by moderation. |
+| [components/catalog/src/store/translation_jobs.rs](../components/catalog/src/store/translation_jobs.rs) | Translation jobs and their per-product drafts, as far as applying reviewed drafts needs them. |
 | [components/catalog/src/store/translations.rs](../components/catalog/src/store/translations.rs) | Reads of translated product texts, always bounded to a given set of products. |
 | [components/catalog/src/store.rs](../components/catalog/src/store.rs) | The only place of the catalog component that contains SQL. |
 | [components/catalog/src/types/asset.rs](../components/catalog/src/types/asset.rs) | A stored product file as merchant lists show it; the content itself never enters a list. |

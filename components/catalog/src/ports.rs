@@ -43,6 +43,12 @@ pub struct Visit {
 /// The shop around the catalogue: its languages, its environments and its change history.
 pub trait Shop: Send + Sync {
     fn languages<'a>(&'a self, tenant: &'a str) -> PortFuture<'a, ContentLanguages>;
+    /// The languages inside a transaction, share-locked so they cannot change before it commits.
+    fn languages_shared<'a>(
+        &'a self,
+        tx: &'a mut PgConnection,
+        tenant: &'a str,
+    ) -> PortFuture<'a, ContentLanguages>;
     /// The locales of the given language IDs, in the same order; unknown IDs are left out.
     fn locales<'a>(&'a self, languages: &'a [String]) -> PortFuture<'a, Vec<String>>;
     /// Resolves a storefront request; refuses a language the sales channel does not offer.

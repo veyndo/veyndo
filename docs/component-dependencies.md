@@ -16,7 +16,7 @@ run SQL without being in a `store` folder. Both numbers only fall.
 | core | 3421 | 0 | 4 | 10 | 10 | none | 10 |
 | identity | 3524 | 8 | 86 | 18 | 13 | apps (9), catalog (7), checkout (1), core (356), customers (1), host (4), intelligence (9), marketing (5), shop (14), studio (4) | 11 |
 | shop | 4134 | 43 | 98 | 24 | 15 | apps (7), b2b (2), catalog (1), checkout (17), core (260), customers (3), host (4), intelligence (8), marketing (8), payments (4), pricing (8), shipping (1), studio (13) | 19 |
-| catalog | 7877 | 40 | 203 | 18 | 11 | apps (19), b2b (2), checkout (12), core (334), customers (5), identity (27), intelligence (7), marketing (15), pricing (29), protocols (1), shop (17), studio (8) | 15 |
+| catalog | 8123 | 40 | 203 | 16 | 11 | apps (19), b2b (2), checkout (12), core (336), customers (5), identity (27), intelligence (7), marketing (15), pricing (30), protocols (1), shop (17), studio (8) | 14 |
 | inventory | 374 | 3 | 26 | 3 | 2 | catalog (1), checkout (2), core (27), identity (4), intelligence (3), pricing (2), protocols (2), shop (2) | 3 |
 | pricing | 3737 | 9 | 19 | 5 | 2 | apps (2), catalog (1), checkout (8), core (69), identity (4), marketing (3), shop (15), studio (1) | 9 |
 | shipping | 970 | 7 | 115 | 4 | 0 | apps (3), catalog (5), checkout (1), core (45), identity (5), orders (5), payments (1), pricing (12), shop (20), studio (4) | 6 |
@@ -65,7 +65,7 @@ reduced to one direction first.
 - catalog ↔ identity: 27 and 7 references
 - catalog ↔ intelligence: 7 and 32 references
 - catalog ↔ marketing: 15 and 8 references
-- catalog ↔ pricing: 29 and 1 references
+- catalog ↔ pricing: 30 and 1 references
 - catalog ↔ protocols: 1 and 10 references
 - catalog ↔ shop: 17 and 1 references
 - catalog ↔ studio: 8 and 4 references
@@ -120,15 +120,15 @@ reduced to one direction first.
 | intelligence | core | `State` | 136 |
 | payments | core | `Result` | 115 |
 | apps | core | `State` | 113 |
-| catalog | core | `Result` | 93 |
 | marketing | core | `Result` | 91 |
+| catalog | core | `Result` | 90 |
 | apps | identity | `auth::` | 84 |
 | identity | core | `State` | 83 |
 | orders | core | `State` | 81 |
 | identity | core | `Result` | 81 |
 | intelligence | identity | `auth::` | 80 |
 | orders | core | `Result` | 78 |
-| catalog | core | `State` | 74 |
+| catalog | core | `State` | 75 |
 | shop | core | `State` | 72 |
 | orders | identity | `auth::` | 71 |
 | intelligence | core | `conflict` | 70 |
@@ -137,12 +137,12 @@ reduced to one direction first.
 | identity | core | `Error` | 66 |
 | shop | core | `Result` | 63 |
 | apps | core | `conflict` | 63 |
+| catalog | core | `veyndo_core::` | 57 |
 | studio | core | `Result` | 56 |
 | b2b | core | `Result` | 54 |
 | catalog | core | `RequestContext` | 53 |
 | studio | identity | `auth::` | 52 |
 | orders | core | `RequestContext` | 52 |
-| catalog | core | `veyndo_core::` | 52 |
 | customers | core | `State` | 48 |
 | checkout | core | `RequestContext` | 47 |
 | customers | core | `Result` | 46 |
@@ -195,7 +195,6 @@ reduced to one direction first.
 | catalog | `knowledge_relations` | intelligence | read |
 | catalog | `languages` | shop | read |
 | catalog | `orders` | orders | read |
-| catalog | `outbox` | core | write |
 | catalog | `policy` | intelligence | write |
 | catalog | `sales_channels` | marketing | read |
 | catalog | `shop_environments` | studio | read |

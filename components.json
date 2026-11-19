@@ -232,7 +232,6 @@
         "knowledge_relations",
         "languages",
         "orders",
-        "outbox",
         "policy",
         "sales_channels",
         "shop_environments",
@@ -241,7 +240,7 @@
       ],
       "glob_imports": 40,
       "untyped_access": 203,
-      "sql_outside_store": 18
+      "sql_outside_store": 16
     },
     "inventory": {
       "title": "Stock, reservations and supply",

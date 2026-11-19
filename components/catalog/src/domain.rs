@@ -10,3 +10,5 @@ pub mod navigation;
 pub mod preparation;
 pub mod rich;
 pub mod rich_document;
+pub mod selection;
+pub mod translation_fields;

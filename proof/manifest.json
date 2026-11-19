@@ -44,7 +44,7 @@
     "revision_admissible": {
       "bindings": [
         "src/commerce/fulfillment.rs",
-        "src/translations/apply.rs",
+        "components/catalog/src/service/translation_apply.rs",
         "src/platform/ai.rs",
         "src/platform/lifecycle.rs",
         "src/platform/quotas.rs",
@@ -735,10 +735,20 @@
       "sha256": "142f43c141d589ad1ab68440ad822418f22a19286936fc8544088384ee417f90",
       "review": "Product edit types, stores and language rules moved into components; no rule changed"
     },
+    "components/catalog/src/domain/selection.rs": {
+      "status": "unproved",
+      "sha256": "9d13e2539882072f1c6edb505a2e8e70b6567b43d0ebf77123023fa4210d825b",
+      "review": "revision_admissible binding for applying translation drafts moved into components/catalog"
+    },
+    "components/catalog/src/domain/translation_fields.rs": {
+      "status": "unproved",
+      "sha256": "c1ca95003e0b9b72b3c3ad71dc15f744b35f79895bad9d0ba37c1563319bd1d3",
+      "review": "revision_admissible binding for applying translation drafts moved into components/catalog"
+    },
     "components/catalog/src/domain.rs": {
       "status": "unproved",
-      "sha256": "a948271809edec1febee0c6a24ef4817b467066d2999af0e3f3c6aff411a6c40",
-      "review": "Storefront catalogue reads and public attachments moved into components/catalog; no rule changed"
+      "sha256": "6eabacb7d9ea728735137db4780441ce8511a6d4f38e087c49c10ae499ee7f9b",
+      "review": "revision_admissible binding for applying translation drafts moved into components/catalog"
     },
     "components/catalog/src/http/assets.rs": {
       "status": "unproved",
@@ -765,10 +775,15 @@
       "sha256": "92ece634684bb581d076b505012eb74bf1a7668b33f92f6ab932103a7d0e44d0",
       "review": "Reviews moved into components/catalog; no rule changed"
     },
+    "components/catalog/src/http/translations.rs": {
+      "status": "unproved",
+      "sha256": "f46376794d96d64dfc750a2fbb8d90c83d20d6679489330ba636649775d879d2",
+      "review": "revision_admissible binding for applying translation drafts moved into components/catalog"
+    },
     "components/catalog/src/http.rs": {
       "status": "unproved",
-      "sha256": "6db7fdb476165bcd8109c83608cb7a83a268395cfb4199e1439d00a6a6bb5438",
-      "review": "Storefront catalogue reads and public attachments moved into components/catalog; no rule changed"
+      "sha256": "1c86fb484911f0eeb59448900811619231128b2a34921536b2352017f562cef5",
+      "review": "revision_admissible binding for applying translation drafts moved into components/catalog"
     },
     "components/catalog/src/lib.rs": {
       "status": "unproved",
@@ -777,8 +792,8 @@
     },
     "components/catalog/src/ports.rs": {
       "status": "unproved",
-      "sha256": "02c13dde9af6048d80f8313dede972b340cbd3b77c28ed8a32ced4cdc691d9f0",
-      "review": "Storefront catalogue reads and public attachments moved into components/catalog; no rule changed"
+      "sha256": "63ee0833c0cf9bff101193dacaa5cea00caa5e8f9ec47d984fbe58c7071f095e",
+      "review": "revision_admissible binding for applying translation drafts moved into components/catalog"
     },
     "components/catalog/src/service/assets.rs": {
       "status": "unproved",
@@ -820,10 +835,15 @@
       "sha256": "67c7321fbe19a8a746e713e41d56a505b3430da92ecc3363a1f393515ff0fe63",
       "review": "Product edit types, stores and language rules moved into components; no rule changed"
     },
+    "components/catalog/src/service/translation_apply.rs": {
+      "status": "reviewed-binding",
+      "sha256": "5304b4fbeb513ae21f562cfee1a2baa5b31569480945eaa3efdaa8034a9cc034",
+      "review": "revision_admissible binding for applying translation drafts moved into components/catalog"
+    },
     "components/catalog/src/service.rs": {
       "status": "unproved",
-      "sha256": "192bf3eddcf7715038fae1f5883923490a49a461d593e191a337d780083a20ba",
-      "review": "Storefront catalogue reads and public attachments moved into components/catalog; no rule changed"
+      "sha256": "cb804a7a19d29f173015e7cb58fb1d3a0479a852e6cae1a82f308d3859bdb360",
+      "review": "revision_admissible binding for applying translation drafts moved into components/catalog"
     },
     "components/catalog/src/store/assets.rs": {
       "status": "unproved",
@@ -875,6 +895,11 @@
       "sha256": "b1f9e3f74883f0291c539abf5a83f1c1e047b54380407c47457bfcd2b8e437e8",
       "review": "Product edit types, stores and language rules moved into components; no rule changed"
     },
+    "components/catalog/src/store/translation_jobs.rs": {
+      "status": "unproved",
+      "sha256": "a841a91cf26725e70c68eae1d3ab7a6528f8215ac47bb71530243ba344877eca",
+      "review": "revision_admissible binding for applying translation drafts moved into components/catalog"
+    },
     "components/catalog/src/store/translations.rs": {
       "status": "unproved",
       "sha256": "f32162f0a7a6de1cfc063cc59f46ac297a586898dc47066ed1858fcd37efc6d5",
@@ -882,8 +907,8 @@
     },
     "components/catalog/src/store.rs": {
       "status": "unproved",
-      "sha256": "9dc2c19f74e42e2eda8ccdcdfedb095d44f7d9bdb162b023036c526894d429e0",
-      "review": "Storefront catalogue reads and public attachments moved into components/catalog; no rule changed"
+      "sha256": "21bcf626e0e92112314232961cfd867c787d2d01bfde72eba5666c0fc6d49653",
+      "review": "revision_admissible binding for applying translation drafts moved into components/catalog"
     },
     "components/catalog/src/types/asset.rs": {
       "status": "unproved",
@@ -4442,8 +4467,8 @@
     },
     "src/commerce/catalog_ports.rs": {
       "status": "unproved",
-      "sha256": "944c95a3fcfd975b3182f3d62824cd2b029fc8c992f7f79700f09120be5b98a5",
-      "review": "Storefront catalogue reads and public attachments moved into components/catalog; no rule changed"
+      "sha256": "f34effcf79c05348afcdfab139c5fa661f11af35c37dd6a4f7baabd61a60ac2e",
+      "review": "revision_admissible binding for applying translation drafts moved into components/catalog"
     },
     "src/commerce/configuration.rs": {
       "status": "unproved",
@@ -5941,19 +5966,19 @@
       "review": "Reviewed native aggregate reports: bound tenant/filter SQL, exact numeric order/refund snapshots, reuse of current consent eligibility, optional rights projections and private workspace CAS layouts; reporting adapters remain unproved."
     },
     "src/translations/apply.rs": {
-      "status": "reviewed-binding",
-      "sha256": "f6fa08a7ec5aaf4b77ceb5b71e6b1356d11d9eb1dd7c936ee417415dcce13f86",
-      "review": "Reviewed eighteen core findings: typed trusted identity and explicit route rights; consolidated current grants; durable auth and fenced shared limits; scoped transactions and one-backend PgBouncer including nested borrow fixes; bounded Wasm/PNG work; notified workers, savepoint quarantine and conservative retention; separate runtime roles and startup configuration. Real PostgreSQL/provider regressions preserve current tenant/customer/payment behavior. SQL/network adapters remain unproved."
+      "status": "unproved",
+      "sha256": "6749004d7ffa23088ee115820ee70149cde24e93677749f90969cd724d8f5bcb",
+      "review": "revision_admissible binding for applying translation drafts moved into components/catalog"
     },
     "src/translations/fields.rs": {
       "status": "unproved",
-      "sha256": "ce4506eb38bb90ec8e4812d8b432a7b86b313905283381f06f1dc89c4f575cfe",
-      "review": "Reviewed international configuration, destination tax predicates and native bindings; targeted PostgreSQL international/catalog cases plus Rust tests pass. Translation fixtures verify restart, provider rejection, tenant permissions and revision conflicts. Config/product/apply share row locks. Additive schema 028 and versioned MIT geography reviewed; surrounding SQL/provider behavior remains unproved."
+      "sha256": "56a0b934dcd8458f0a132d94221077d0b8e66bf32752a9b5a837f22be6849a6a",
+      "review": "revision_admissible binding for applying translation drafts moved into components/catalog"
     },
     "src/translations/mod.rs": {
       "status": "unproved",
-      "sha256": "bdb886225812f61ac4723788edd8da0752859af2e39fac9f7b612f8bd1ee8f62",
-      "review": "Reviewed scoped translation selection, original task authority, atomic child linking and completion, cancellation/explicit ambiguous continuation, lease fences, central provider admission outside transactions and bounded prompt evidence; real PostgreSQL/HTTP collection and interruption regressions plus 724 UI tests; skipped products store SQL NULL evidence rather than JSON null. Claude supplied code-only review, findings checked and fixed."
+      "sha256": "704300ee9d1343a3a734ea6a7067a2433e6de9411ff6a9e1caa37c35e1bc647b",
+      "review": "revision_admissible binding for applying translation drafts moved into components/catalog"
     },
     "src/translations/routes.rs": {
       "status": "unproved",
@@ -5962,8 +5987,8 @@
     },
     "src/translations/selection.rs": {
       "status": "unproved",
-      "sha256": "1b2849851a50f96c34b51c10ac840f109c756ca8febdafc6519ee7b88cab1461",
-      "review": "Reviewed scoped translation selection, original task authority, atomic child linking and completion, cancellation/explicit ambiguous continuation, lease fences, central provider admission outside transactions and bounded prompt evidence; real PostgreSQL/HTTP collection and interruption regressions plus 724 UI tests; skipped products store SQL NULL evidence rather than JSON null. Claude supplied code-only review, findings checked and fixed."
+      "sha256": "d43db8797ae544ebe684418091b13dab82ad28376e99f8283667f25ca0411092",
+      "review": "revision_admissible binding for applying translation drafts moved into components/catalog"
     },
     "src/translations/worker.rs": {
       "status": "unproved",

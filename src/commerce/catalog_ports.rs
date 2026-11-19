@@ -44,6 +44,24 @@ impl Shop for Server {
             })
         })
     }
+    fn languages_shared<'a>(
+        &'a self,
+        tx: &'a mut PgConnection,
+        tenant: &'a str,
+    ) -> PortFuture<'a, ContentLanguages> {
+        Box::pin(async move {
+            let data: serde_json::Value =
+                sqlx::query_scalar("SELECT data FROM commerce_settings WHERE tenant=$1 FOR SHARE")
+                    .bind(tenant)
+                    .fetch_one(tx)
+                    .await?;
+            let settings = commerce::decode_config(data)?;
+            Ok(ContentLanguages {
+                main: settings.main_locale,
+                enabled: settings.locales,
+            })
+        })
+    }
     fn locales<'a>(&'a self, ids: &'a [String]) -> PortFuture<'a, Vec<String>> {
         Box::pin(async move {
             let languages = performance::languages(&self.0).await?;
