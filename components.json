@@ -4,10 +4,6 @@
     "core": {
       "title": "Shared foundation: errors, request context, database scope, outbox, admission and the verified kernel",
       "sources": [
-        "src/foundation.rs",
-        "src/outbox.rs",
-        "src/outbox",
-        "src/performance",
         "crates/kernel",
         "crates/runtime",
         "components/core"
@@ -25,36 +21,23 @@
         "veyndo_authority"
       ],
       "uses": [
-        "apps",
-        "b2b",
-        "host",
-        "identity",
-        "intelligence",
-        "marketing",
-        "pricing",
-        "shop"
+        "pricing"
       ],
       "foreign_tables": [
         "app_deliveries",
         "app_schedule_runs",
         "app_webhook_receipts",
-        "auth_attempt_buckets",
-        "commerce_overrides",
-        "commerce_settings",
         "flow_jobs",
-        "hosted_frontends",
         "knowledge_receipts",
-        "languages",
         "observed_pairs",
         "pair_evidence",
-        "sales_channels",
         "shop_environments",
         "tenant_ai_usage",
         "tenant_resource_limits"
       ],
-      "glob_imports": 7,
-      "untyped_access": 5,
-      "sql_outside_store": 16
+      "glob_imports": 0,
+      "untyped_access": 4,
+      "sql_outside_store": 10
     },
     "identity": {
       "title": "Merchant accounts, memberships, sessions, roles and route policy",
@@ -119,6 +102,7 @@
         "src/commerce/settings_routes.rs",
         "src/commerce/settings_scope.rs",
         "src/commerce/settings_validation.rs",
+        "src/performance",
         "src/shop_domains.rs",
         "src/shop_domains",
         "src/brand_redirect.rs",
@@ -169,6 +153,7 @@
         "outbox",
         "product_reviews",
         "products",
+        "read_context_versions",
         "receipt_settings",
         "sales_channels",
         "session_signal_events",
@@ -177,9 +162,9 @@
         "tenant_ai_usage",
         "tenants"
       ],
-      "glob_imports": 37,
-      "untyped_access": 97,
-      "sql_outside_store": 20
+      "glob_imports": 42,
+      "untyped_access": 98,
+      "sql_outside_store": 23
     },
     "catalog": {
       "title": "Products, categories, media, reviews, translations and catalogue reads",
@@ -233,6 +218,7 @@
         "checkout",
         "core",
         "customers",
+        "host",
         "identity",
         "intelligence",
         "marketing",
@@ -280,6 +266,7 @@
         "catalog",
         "checkout",
         "core",
+        "host",
         "identity",
         "intelligence",
         "pricing",
@@ -316,9 +303,9 @@
         "catalog",
         "checkout",
         "core",
+        "host",
         "identity",
         "marketing",
-        "pos",
         "shop",
         "studio"
       ],
@@ -355,6 +342,7 @@
         "catalog",
         "checkout",
         "core",
+        "host",
         "identity",
         "orders",
         "payments",
@@ -454,6 +442,7 @@
         "catalog",
         "checkout",
         "core",
+        "host",
         "identity",
         "marketing",
         "orders",
@@ -505,6 +494,7 @@
         "checkout",
         "core",
         "customers",
+        "host",
         "identity",
         "marketing",
         "payments",
@@ -605,6 +595,7 @@
         "catalog",
         "checkout",
         "core",
+        "host",
         "identity",
         "intelligence",
         "orders",
@@ -665,6 +656,7 @@
         "checkout",
         "core",
         "customers",
+        "host",
         "identity",
         "marketing",
         "orders",
@@ -700,6 +692,7 @@
         "checkout",
         "core",
         "customers",
+        "host",
         "identity",
         "marketing",
         "orders",
@@ -866,7 +859,6 @@
       ],
       "uses": [
         "apps",
-        "automation",
         "catalog",
         "checkout",
         "core",
@@ -935,6 +927,7 @@
         "catalog",
         "core",
         "customers",
+        "host",
         "identity",
         "intelligence",
         "marketing",
@@ -1035,6 +1028,10 @@
         "src/migrations",
         "src/bin",
         "src/runtime_config.rs",
+        "src/foundation.rs",
+        "src/outbox.rs",
+        "src/outbox",
+        "src/performance/delivery.rs",
         "src/security_headers.rs"
       ],
       "tables": [
@@ -1049,14 +1046,18 @@
       ],
       "foreign_tables": [
         "app_deliveries",
+        "auth_attempt_buckets",
         "commerce_settings",
         "extensions",
         "flow_jobs",
-        "products"
+        "outbox",
+        "outbox_subscriber_failures",
+        "products",
+        "projections"
       ],
-      "glob_imports": 5,
+      "glob_imports": 7,
       "untyped_access": 40,
-      "sql_outside_store": 3
+      "sql_outside_store": 6
     },
     "connectors": {
       "title": "Standard provider services and their delivery queue; hosted by the separate connector binary in extensions/services/connectors",

@@ -111,10 +111,23 @@ class Tree:
                 members[module].setdefault(parts[2].removesuffix('.rs'), self.owner[file])
             for name in LOCAL.findall(code):
                 members[module].setdefault(name, self.owner[file])
+        # A file in a crate of its own reaches another component only through that crate's name.
+        packages = {}
+        for manifest in self.root.glob('*/*/Cargo.toml'):
+            name = re.search(r'(?m)^name\s*=\s*"([^"]+)"', manifest.read_text())
+            owner = self.owner_of(str(manifest.parent.relative_to(self.root)) + '/src/lib.rs')
+            if name and owner:
+                packages[name.group(1).replace('-', '_')] = owner
         edges = defaultdict(Counter)
         for file, (code, _) in self.parsed.items():
             here = self.owner[file]
             if here is None:
+                continue
+            if not file.startswith('src/'):
+                for package in re.findall(r'(?<![\w:])(veyndo_\w+)::', code):
+                    target = packages.get(package)
+                    if target and target != here:
+                        edges[here, target][package + '::'] += 1
                 continue
             for module, item in re.findall(r'(?<![\w:])(?:crate::)?([a-z_][a-z0-9_]*)::(\w+)', code):
                 owners = modules.get(module)

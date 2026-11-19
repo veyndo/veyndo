@@ -110,10 +110,15 @@ Rules that hold from the first component on:
 - [x] Move the outbox consumer (subscribers outside core arrive through the
       `Projector` port), channel metrics, the read cache and the database layer
       (deployment values, pools, row security, cluster leases) into `core`.
-- [ ] Move request admission and the settings and language read caches out of
-      `src/performance`.
-- [ ] Replace the `App` state object by per-component state plus ports.
-- [ ] Remove the nine dependencies `core` has on other components.
+- [x] Move request admission into `core`. The settings and language read caches
+      belong to `shop` and move with it in phase 3; `components.json` assigns them so.
+- [ ] Replace the `App` state object by per-component state plus ports. Done so
+      far: `veyndo_core::State` (database, HTTP client, admission) that the server
+      state dereferences to; the outbox `Projector` port.
+- [ ] Remove the dependencies `core` has on other components. One is left: the
+      conversion from the pricing validation error, which moves to
+      `components/pricing` in phase 2. Server wiring (`App`, outbox routes) is
+      assigned to the host; crate-to-crate dependencies are read from crate names.
 - [ ] `components/identity` with `types/`, `store/`, `service/`, `http/`.
 - [x] Ban new `use super::*` / `use crate::*`: `glob_imports` per component in
       `components.json` only falls (528 files at the start); component crates have none.
