@@ -6,18 +6,18 @@ This page answers one question per source file of the commerce core: is its
 rule proved by machine, does it call a proved rule, or neither? It is
 generated from the same manifest the proof check uses, so it cannot say more
 than the check verifies. **It is not a claim that the shop is free of errors:**
-91.4 % of the Rust source files are unproved.
+91.3 % of the Rust source files are unproved.
 
 ## In numbers
 
 | | Count | Share of source files | Meaning |
 | --- | ---: | ---: | --- |
-| **Proved rules** | 69 | | Small pure decisions, translated from the production Rust source to Lean and proved there |
-| **Proved properties** | 169 | | Statements about those rules that hold for every possible input |
+| **Proved rules** | 70 | | Small pure decisions, translated from the production Rust source to Lean and proved there |
+| **Proved properties** | 172 | | Statements about those rules that hold for every possible input |
 | Rule files | 8 | 0.8 % | The files that contain the proved rules |
-| Reviewed callers | 71 | 7.0 % | Files that call a proved rule; a person reviewed how the rule is fed, the surrounding code is not proved |
+| Reviewed callers | 72 | 7.1 % | Files that call a proved rule; a person reviewed how the rule is fed, the surrounding code is not proved |
 | Comparison drivers | 9 | 0.9 % | Test programs that compare the compiled Rust rules with the Lean versions |
-| **Unproved files** | 932 | 91.4 % | Everything else: database access, HTTP, providers, the user interface server |
+| **Unproved files** | 931 | 91.3 % | Everything else: database access, HTTP, providers, the user interface server |
 | All Rust source files | 1020 | 100 % | |
 
 A proved rule looks like this one, which caps a discount at the amount it is
@@ -108,7 +108,7 @@ that call it.
 
 ### Rights, shops and sessions
 
-10 rules, 21 proved properties.
+11 rules, 24 proved properties.
 [Source](https://github.com/veyndo/veyndo/blob/main/crates/kernel/src/verified_kernel/access.rs).
 
 | Rule | What the source says about it | Proved properties | Used in |
@@ -117,6 +117,7 @@ that call it.
 | `channel_access_admissible` | Preview grants admit only simulations; public requests require an active channel and private requests a current merchant. | 4: `channel_private_requires_identity`, `channel_paused_requires_preview`, `channel_preview_no_mutation`, `channel_access_exact` | `src/marketing/channel_access.rs` |
 | `consent_admissible` | Optional processing requires an enabled purpose and a fresh affirmative receipt for this policy. | 1: `consent_exact` | `src/legal/consent.rs` |
 | `legal_checkout_admissible` | Strict checkout binds the current document version and separately requested digital delivery. | 1: `legal_checkout_exact` | `src/legal/checkout.rs` |
+| `merchant_scope_admissible` | A merchant request acts for a shop only with a credential issued for that same shop. | 3: `merchant_scope_exact`, `merchant_scope_other_shop_denied`, `merchant_scope_missing_credential_denied` | `components/identity/src/lib.rs` |
 | `native_asset_bypass` | Only native public assets may skip identity; every hosted alias retains tenant/channel admission. | 2: `native_asset_hosted_denied`, `native_asset_bypass_exact` | `src/auth/middleware.rs` |
 | `persistent_key_admissible` | Permanent credentials and credential settings require a current personal administrator. | 2: `persistent_key_exact`, `persistent_key_nonpersonal_denied` | `src/auth/integrations.rs`, `src/apps/settings.rs` |
 | `platform_admissible` | Global administration requires a personal session and a current independent operator grant. | 2: `platform_exact`, `platform_personal_required` | `src/platform/auth.rs` |

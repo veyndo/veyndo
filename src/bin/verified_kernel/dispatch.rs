@@ -20,6 +20,7 @@ pub(super) fn eval(j: &Value) -> Result<Value, String> {
         | Some("channel_access_admissible")
         | Some("consent_admissible")
         | Some("legal_checkout_admissible")
+        | Some("merchant_scope_admissible")
         | Some("native_asset_bypass")
         | Some("persistent_key_admissible")
         | Some("platform_admissible")

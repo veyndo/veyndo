@@ -15,6 +15,7 @@ def evalRequest (j : Json) : Except String Json := do
   | "native_asset_bypass" => pure (toJson (native_asset_bypass ((← (args.getObjVal? "native_asset") >>= Json.getBool?)) ((← (args.getObjVal? "hosted") >>= Json.getBool?))))
   | "auth_factor_admissible" => pure (toJson (auth_factor_admissible ((← (args.getObjVal? "required") >>= Json.getBool?)) ((← (args.getObjVal? "verified") >>= Json.getBool?))))
   | "persistent_key_admissible" => pure (toJson (persistent_key_admissible ((← (args.getObjVal? "personal") >>= Json.getBool?)) ((← (args.getObjVal? "administrator") >>= Json.getBool?))))
+  | "merchant_scope_admissible" => pure (toJson (merchant_scope_admissible ((← (args.getObjVal? "has_credential") >>= Json.getBool?)) ((← (args.getObjVal? "same_shop") >>= Json.getBool?))))
   | "workspace_length_admissible" => pure (toJson (workspace_length_admissible ((← (args.getObjVal? "length") >>= Json.getNat?))))
   | "planning_request_admissible" => pure (toJson (planning_request_admissible ((← (args.getObjVal? "read_only") >>= Json.getBool?)) ((← (args.getObjVal? "planning_post") >>= Json.getBool?))))
   | "agent_preview_admissible" => pure (toJson (agent_preview_admissible ((← (args.getObjVal? "active") >>= Json.getBool?)) ((← (args.getObjVal? "private_preview") >>= Json.getBool?)) ((← (args.getObjVal? "personal") >>= Json.getBool?)) ((← (args.getObjVal? "same_owner") >>= Json.getBool?)) ((← (args.getObjVal? "current") >>= Json.getBool?))))

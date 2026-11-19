@@ -98,6 +98,9 @@ import Commerce.Claims
 #print axioms CommerceKernel.legal_checkout_exact
 #print axioms CommerceKernel.manual_payment_exact
 #print axioms CommerceKernel.manual_payment_safe
+#print axioms CommerceKernel.merchant_scope_exact
+#print axioms CommerceKernel.merchant_scope_missing_credential_denied
+#print axioms CommerceKernel.merchant_scope_other_shop_denied
 #print axioms CommerceKernel.native_asset_bypass_exact
 #print axioms CommerceKernel.native_asset_hosted_denied
 #print axioms CommerceKernel.native_lifecycle_exact

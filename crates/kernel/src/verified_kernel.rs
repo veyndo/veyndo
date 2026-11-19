@@ -10,6 +10,7 @@ pub use access::auth_factor_admissible;
 pub use access::channel_access_admissible;
 pub use access::consent_admissible;
 pub use access::legal_checkout_admissible;
+pub use access::merchant_scope_admissible;
 pub use access::native_asset_bypass;
 pub use access::persistent_key_admissible;
 pub use access::platform_admissible;

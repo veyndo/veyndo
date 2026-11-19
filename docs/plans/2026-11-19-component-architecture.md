@@ -280,14 +280,19 @@ those stay covered by the tests above, and the coverage page keeps saying so.
       tax for every input; the same input gives the same quote.
 - [ ] Stock: a reservation never takes stock below zero; reserve followed by
       release restores the quantity; an order holds at most what it ordered.
-- [ ] Checkout: an order is placed only for the reviewed cart revision and total;
-      a repeated request places no second order.
-- [ ] Payments: captured never exceeds authorised, refunded never exceeds
-      captured, and every ledger transition is one of the listed ones.
+      Proved: the first two, also for two reservations in sequence
+      (`stock_admissible`, five properties). Open: the per-order bound.
+- [x] Checkout: an order is placed only for the reviewed cart revision and total
+      (`checkout_review_exact`); a repeated request places no second order
+      (`replay_exact`, `replay_same_cart`, `replay_open_fingerprint`).
+- [x] Payments: captured never exceeds authorised (`capture_bounded`), refunded
+      never exceeds captured (`refund_bounded`, also in sequence), and every ledger
+      transition is one of the listed ones (`payment_transition_exact`).
 - [ ] Orders: every reachable state of the order machine is a listed state, and
       completed or cancelled orders accept no further fulfilment.
-- [ ] Access: a request scoped to one shop never satisfies a check for another;
-      a missing permission never admits.
+- [x] Access: a credential of one shop never satisfies a check for another
+      (`merchant_scope_admissible`, three properties, bound in the identity
+      crate); a missing permission never admits (`scope_exact`).
 - [x] Signed offers: an expired offer or a changed cart, revision or total is never
       honoured (`offer_honoured`, four properties).
 - [x] Sovereign AI mode admits only the self-operated provider on a self-hosted

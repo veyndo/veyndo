@@ -30,6 +30,9 @@ def auth_factor_admissible (required : Bool) (verified : Bool) : Bool :=
 def persistent_key_admissible (personal : Bool) (administrator : Bool) : Bool :=
   (personal && administrator)
 
+def merchant_scope_admissible (has_credential : Bool) (same_shop : Bool) : Bool :=
+  (has_credential && same_shop)
+
 def workspace_length_admissible (length : Nat) : Bool :=
   ((decide (length ≥ 2)) && (decide ((length - 48) = 0)))
 

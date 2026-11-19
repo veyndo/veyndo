@@ -4,6 +4,7 @@ pub mod route_policy;
 pub use domain::permissions::{SCOPES, allowed, scope, validate_permissions};
 use veyndo_core::shop_scope::{header, tenant};
 use veyndo_core::{Error, RequestContext, Result, StatusCode};
+use veyndo_kernel::verified_kernel;
 
 /// Refuses a request that has no signed-in identity or lacks the named permission.
 pub fn permit(h: &RequestContext, kind: &str) -> Result<()> {
@@ -21,17 +22,27 @@ pub fn permit(h: &RequestContext, kind: &str) -> Result<()> {
 /// The shop a signed-in merchant request acts for; the credential's shop must match the resolved one.
 pub fn merchant(h: &RequestContext) -> Result<String> {
     permit(h, "read")?;
-    let t = header(h, "x-rac-tenant").ok_or(Error(
-        StatusCode::UNAUTHORIZED,
-        "Merchant credential required".into(),
-    ))?;
-    if t != tenant(h)? {
-        return Err(Error(
-            StatusCode::FORBIDDEN,
-            "Workspace does not match authenticated context".into(),
-        ));
+    let credential = header(h, "x-rac-tenant");
+    let resolved = match credential {
+        Some(_) => Some(tenant(h)?),
+        None => None,
+    };
+    if !verified_kernel::merchant_scope_admissible(
+        credential.is_some(),
+        credential == resolved.as_deref(),
+    ) {
+        return Err(match credential {
+            None => Error(
+                StatusCode::UNAUTHORIZED,
+                "Merchant credential required".into(),
+            ),
+            Some(_) => Error(
+                StatusCode::FORBIDDEN,
+                "Workspace does not match authenticated context".into(),
+            ),
+        });
     }
-    Ok(t.into())
+    Ok(resolved.unwrap_or_default())
 }
 
 #[cfg(test)]
@@ -111,6 +122,16 @@ mod tests {
                 .unwrap()
                 .is_null()
         );
+    }
+
+    #[test]
+    fn a_credential_of_one_shop_does_not_act_for_another() {
+        let mut h = request("admin", None);
+        h.insert("x-rac-tenant", "shop-one".parse().unwrap());
+        h.insert("x-tenant", "shop-two".parse().unwrap());
+        assert_eq!(merchant(&h).unwrap_err().0, StatusCode::FORBIDDEN);
+        h.insert("x-tenant", "shop-one".parse().unwrap());
+        assert_eq!(merchant(&h).unwrap(), "shop-one");
     }
 
     #[test]

@@ -137,6 +137,8 @@ MUTANTS=[
  ('offer_honoured','&& same_revision','&& true'),
  ('sovereign_request_admissible','own_provider && self_hosted','own_provider || self_hosted'),
  ('sovereign_request_admissible','!sovereign ||','sovereign ||'),
+ ('merchant_scope_admissible','&& same_shop','&& true'),
+ ('merchant_scope_admissible','has_credential &&','true &&'),
  ('workspace_length_admissible','length.saturating_sub(48) == 0','true'),
  ('workspace_length_admissible','length >= 2','length >= 1'),
 ]

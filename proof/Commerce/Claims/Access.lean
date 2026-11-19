@@ -106,4 +106,18 @@ theorem workspace_length_short_denied (length : Nat) (h : length < 2) :
   · rfl
   · exact absurd ((workspace_length_exact length).mp value) bound
 
+/-- A merchant request is admitted exactly with a credential for the same shop. -/
+theorem merchant_scope_exact (credential same : Bool) :
+    merchant_scope_admissible credential same = true ↔ credential = true ∧ same = true := by
+  cases credential <;> cases same <;> simp [merchant_scope_admissible]
+
+/-- A credential of one shop never satisfies a check for another shop. -/
+theorem merchant_scope_other_shop_denied (credential : Bool) :
+    merchant_scope_admissible credential false = false := by
+  cases credential <;> simp [merchant_scope_admissible]
+
+/-- Without a shop credential nothing is admitted, whatever shop is addressed. -/
+theorem merchant_scope_missing_credential_denied (same : Bool) :
+    merchant_scope_admissible false same = false := by simp [merchant_scope_admissible]
+
 end CommerceKernel

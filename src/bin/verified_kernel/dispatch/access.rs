@@ -56,6 +56,10 @@ pub(super) fn eval(j: &Value) -> Result<Value, String> {
             b("personal")?,
             b("administrator")?
         ))),
+        Some("merchant_scope_admissible") => Ok(json!(merchant_scope_admissible(
+            b("has_credential")?,
+            b("same_shop")?
+        ))),
         Some("workspace_length_admissible") => Ok(json!(workspace_length_admissible(n("length")?))),
         _ => Err("Unknown policy".into()),
     }

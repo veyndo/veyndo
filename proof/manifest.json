@@ -659,6 +659,16 @@
         "sovereign_off_admits"
       ]
     },
+    "merchant_scope_admissible": {
+      "bindings": [
+        "components/identity/src/lib.rs"
+      ],
+      "theorems": [
+        "merchant_scope_exact",
+        "merchant_scope_other_shop_denied",
+        "merchant_scope_missing_credential_denied"
+      ]
+    },
     "workspace_length_admissible": {
       "bindings": [
         "components/core/src/lib.rs"
@@ -806,9 +816,9 @@
       "review": "Permission rules and the permit and merchant checks moved unchanged into components/identity; the scope rule is bound there"
     },
     "components/identity/src/lib.rs": {
-      "status": "unproved",
-      "sha256": "8ebe27f9fb84b5cddae53d3681a36a413e6d49e17aa7607d7f69adc5f590be0d",
-      "review": "The route permission registry moved unchanged into components/identity and is generic over the server state"
+      "status": "reviewed-binding",
+      "sha256": "5ca07cd40b9e5faa043010679529c2605c0f9ac1d9284c42d6fb181fe7d30d67",
+      "review": "The merchant check is bound to the proved merchant_scope_admissible rule: a credential of one shop never acts for another. Status codes and messages are unchanged."
     },
     "components/identity/src/route_policy.rs": {
       "status": "unproved",
@@ -1162,8 +1172,8 @@
     },
     "crates/kernel/src/verified_kernel/access.rs": {
       "status": "extracted-policy",
-      "sha256": "fb23f9477e40d97e259eecaf662c68f304ca4f10dafd5429e076f0dea6e1ea99",
-      "review": "Workspace length rule written with saturating subtraction so that it stays inside the extracted subset without a range lint; same accepted set, proved as 2 <= length <= 48."
+      "sha256": "fbc3dde65b3a61730524b93d54d6d5dcf089898bd633807b65f6034125863e0a",
+      "review": "The merchant check is bound to the proved merchant_scope_admissible rule: a credential of one shop never acts for another. Status codes and messages are unchanged."
     },
     "crates/kernel/src/verified_kernel/agents.rs": {
       "status": "extracted-policy",
@@ -1197,8 +1207,8 @@
     },
     "crates/kernel/src/verified_kernel.rs": {
       "status": "extracted-policy",
-      "sha256": "713fa5e5df27aca0a5a5d944723d43e864855680f809197875921672a39b0ef0",
-      "review": "Cart totals are added as whole minor units through the proved amount_sum and net_amount rules; the extractor models saturating_add as the sum capped at the largest u64. A test shows the integer totals equal the previous rounded decimal totals."
+      "sha256": "b34509c0f48f19bf8d75182c51f92d9637ed896c2511d7f16b3a50a86d91d6f5",
+      "review": "The merchant check is bound to the proved merchant_scope_admissible rule: a credential of one shop never acts for another. Status codes and messages are unchanged."
     },
     "crates/runtime/src/database_scope/provision.rs": {
       "status": "unproved",
@@ -3757,8 +3767,8 @@
     },
     "src/bin/verified_kernel/dispatch/access.rs": {
       "status": "conformance-driver",
-      "sha256": "c364639c774a94c9003118147a91630beb1297560ba45b901f65e3eb7541f468",
-      "review": "Three further proved rules with production bindings: a signed offer is honoured only unexpired and for the unchanged cart, revision and total (signed_offer.rs, result identical to the former expression); sovereign AI mode admits only the self-operated provider on a self-hosted endpoint (sovereign.rs, same decision, endpoint check no longer short-circuited and free of effects); workspace ID length bounds (core). Three SQL statements gained explicit parameter casts matching their bound types. Kernel, core and cognition unit tests pass. SQL, HTTP and provider behaviour is not formally proved."
+      "sha256": "6dee1cf61c3fec07ef792e104020fd1bfbe07da1dd5eaa63ac431357496879b6",
+      "review": "The merchant check is bound to the proved merchant_scope_admissible rule: a credential of one shop never acts for another. Status codes and messages are unchanged."
     },
     "src/bin/verified_kernel/dispatch/agents.rs": {
       "status": "conformance-driver",
@@ -3792,8 +3802,8 @@
     },
     "src/bin/verified_kernel/dispatch.rs": {
       "status": "conformance-driver",
-      "sha256": "417ffa7a1d76aae2e0c686e1d8b0ad2f1e430459a3bb0dabc5e70c170866703a",
-      "review": "Cart totals are added as whole minor units through the proved amount_sum and net_amount rules; the extractor models saturating_add as the sum capped at the largest u64. A test shows the integer totals equal the previous rounded decimal totals."
+      "sha256": "3aec2b72f6ab964cc0cd48128955674b52dd0bce4bd3f49193b4d5e5f26924c6",
+      "review": "The merchant check is bound to the proved merchant_scope_admissible rule: a credential of one shop never acts for another. Status codes and messages are unchanged."
     },
     "src/bin/verified_kernel.rs": {
       "status": "conformance-driver",
@@ -6441,8 +6451,8 @@
       "review": "Codex source review: the per-shop model revision only advances; queue claims bind the live shop's active model and revision, and result publication locks that generation before checking the existing source and lease fences. The additive migration preserves revision zero for existing installations. The PostgreSQL and Qdrant test overlapped two Core processes, released an old provider response after takeover, reindexed 150 products and verified current edits and search. SQL and worker code remain unproved; no extracted policy changed."
     },
     "proof/Commerce/Claims/Access.lean": {
-      "sha256": "34f17c04a22c1b4ea5d61a5a53b3e17405a7ff25dce0a57a3cf8bc671b854daa",
-      "review": "Workspace length rule written with saturating subtraction so that it stays inside the extracted subset without a range lint; same accepted set, proved as 2 <= length <= 48."
+      "sha256": "937d500230043f3aa810646304adbac693064a869016188b9cc957065b7aa75a",
+      "review": "The merchant check is bound to the proved merchant_scope_admissible rule: a credential of one shop never acts for another. Status codes and messages are unchanged."
     },
     "proof/Commerce/Claims/Agents.lean": {
       "sha256": "c743b6d974b3535c2990f92adb926036f7e5a5993c291191afd6988157bb3ebb",
@@ -6513,12 +6523,12 @@
       "review": "Proof layout controls follow the removed length limit; suite runner can continue after a failing suite; SQL check attributes errors on one ordered stream. No production rule changed in this step."
     },
     "scripts/formal/modules.py": {
-      "sha256": "32714608e66c4297ef00c947edd998ec3a68170c27f1809fe59df4f6975f7008",
-      "review": "Cart totals are added as whole minor units through the proved amount_sum and net_amount rules; the extractor models saturating_add as the sum capped at the largest u64. A test shows the integer totals equal the previous rounded decimal totals."
+      "sha256": "ccb01563cfca5c9ad6a98e3b198636d4c654883aa9862f8b1fd4a07f99a5899a",
+      "review": "The merchant check is bound to the proved merchant_scope_admissible rule: a credential of one shop never acts for another. Status codes and messages are unchanged."
     },
     "scripts/formal/mutations.py": {
-      "sha256": "9bf7ddc6de9908f005589d4677f3b5325ccf336d2de683fc85a2a13377b7f0aa",
-      "review": "Cart totals are added as whole minor units through the proved amount_sum and net_amount rules; the extractor models saturating_add as the sum capped at the largest u64. A test shows the integer totals equal the previous rounded decimal totals."
+      "sha256": "f04cedd47f71f628e29e0116698c49f4a16113df9ee7c76ccf674bfa87b90fdb",
+      "review": "The merchant check is bound to the proved merchant_scope_admissible rule: a credential of one shop never acts for another. Status codes and messages are unchanged."
     },
     "scripts/formal/registry.py": {
       "sha256": "24cd8fe49325e4cd8a972a30249962670088a692204892683408fc2617f05fd0",

@@ -60,6 +60,10 @@ pub fn auth_factor_admissible(required: bool, verified: bool) -> bool {
 pub fn persistent_key_admissible(personal: bool, administrator: bool) -> bool {
     personal && administrator
 }
+/// A merchant request acts for a shop only with a credential issued for that same shop.
+pub fn merchant_scope_admissible(has_credential: bool, same_shop: bool) -> bool {
+    has_credential && same_shop
+}
 /// A workspace ID has between 2 and 48 characters.
 pub fn workspace_length_admissible(length: u64) -> bool {
     length >= 2 && length.saturating_sub(48) == 0
