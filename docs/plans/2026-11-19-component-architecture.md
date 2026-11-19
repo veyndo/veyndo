@@ -245,7 +245,12 @@ Order follows the dependency report, lowest first. Each line is one move.
   order snapshot; browser sessions.
 - [ ] payments
 - [ ] checkout
-- [ ] orders
+- [ ] orders. Started: `components/orders` owns the order state machine with
+  its default and bounds, the stored machine, derived order fields, the
+  transition guards and the workflow view, the audited write log with its
+  replay ledger, and receipt texts. The kernel bindings of the order workflow
+  name the new file. Open: order reads and grids, manual orders, imports,
+  fulfilment handlers, receipts as PDF, returns, company model.
 - [ ] marketing. Started: `components/marketing` owns the rule conditions with
   their bounds and matching, field comparison, the line, customer and order
   facts a rule reads, the snapshot of referenced rules, and the shared

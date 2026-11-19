@@ -102,10 +102,6 @@ pub(crate) async fn current_order(db: &PgPool, t: &str) -> Result<commerce::Orde
     let (base, _) = commerce::machine_conn(&mut conn, t).await?;
     compile(base, &apps, "order")
 }
-/// Only declared display labels cross the customer projection; never app policies or grants.
-pub(crate) fn state_labels(raw: &Value) -> Option<(Value, Value)> {
-    veyndo_app_model::native_lifecycle_snapshot::state_labels(raw)
-}
 pub(crate) fn project_labels(raw: &Value, output: &mut Value) {
     veyndo_app_model::native_lifecycle_snapshot::project_labels(raw, output)
 }

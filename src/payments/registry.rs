@@ -5,12 +5,7 @@ use std::collections::{HashMap, HashSet};
 
 type AvailableMethods = HashMap<(String, String), String>;
 
-pub(crate) fn external(o: &Value) -> bool {
-    !matches!(
-        o["payment"]["provider"].as_str(),
-        Some("manual" | "simulated") | None
-    )
-}
+pub(crate) use veyndo_orders::domain::order_workflow::external;
 pub(crate) async fn install_methods(
     tx: &mut sqlx::Transaction<'_, sqlx::Postgres>,
     t: &str,

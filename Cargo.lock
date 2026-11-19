@@ -3502,6 +3502,7 @@ dependencies = [
  "veyndo-inventory",
  "veyndo-kernel",
  "veyndo-marketing",
+ "veyndo-orders",
  "veyndo-pricing",
  "veyndo-runtime",
  "veyndo-shipping",
@@ -3727,6 +3728,22 @@ dependencies = [
  "uuid",
  "veyndo-pricing",
  "veyndo-runtime",
+]
+
+[[package]]
+name = "veyndo-orders"
+version = "0.5.0"
+dependencies = [
+ "axum",
+ "serde",
+ "serde_json",
+ "sqlx",
+ "veyndo-app-model",
+ "veyndo-core",
+ "veyndo-identity",
+ "veyndo-pricing",
+ "veyndo-runtime",
+ "veyndo-shop",
 ]
 
 [[package]]

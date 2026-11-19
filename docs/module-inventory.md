@@ -307,10 +307,10 @@ This lists every checked-in source module in these roots, including files with n
 | [src/commerce/method_text.rs](../src/commerce/method_text.rs) | Shared translated names and descriptions with field-wise shop-main-language inheritance. |
 | [src/commerce/method_usage.rs](../src/commerce/method_usage.rs) | Authoritative deletion guards for methods; the reference counts are owned by the shipping component. |
 | [src/commerce/mod.rs](../src/commerce/mod.rs) | Native catalogue and checkout domains; pricing ports remain in the library. |
-| [src/commerce/order_fields.rs](../src/commerce/order_fields.rs) | Standard order read fields are projected from the authoritative quote/payment, never maintained twice. |
-| [src/commerce/order_machine.rs](../src/commerce/order_machine.rs) | Declarative order workflow schema. Extensions add states, never executable effects or payment truth. |
-| [src/commerce/order_mutation.rs](../src/commerce/order_mutation.rs) | Shared operational order writes: one replay ledger, immutable quote, audit, cart projection and outbox. |
-| [src/commerce/order_workflow.rs](../src/commerce/order_workflow.rs) | One server-derived action catalogue drives UI, HTTP and MCP; built-in business guards cannot be bypassed. |
+| [src/commerce/order_fields.rs](../src/commerce/order_fields.rs) | Derived order fields are owned by the orders component. |
+| [src/commerce/order_machine.rs](../src/commerce/order_machine.rs) | The order state machine is owned by the orders component. |
+| [src/commerce/order_mutation.rs](../src/commerce/order_mutation.rs) | The audited order write log is owned by the orders component. |
+| [src/commerce/order_workflow.rs](../src/commerce/order_workflow.rs) | Order transition guards and the workflow view are owned by the orders component. |
 | [src/commerce/product_admin.rs](../src/commerce/product_admin.rs) | The merchant product list: catalogue filters from the catalog component, app filters and extensions from the app host. |
 | [src/commerce/product_channels.rs](../src/commerce/product_channels.rs) | Per-product channel visibility for the product editor; storage is owned by the catalog component. |
 | [src/commerce/product_create.rs](../src/commerce/product_create.rs) | Product creation accepts validated stable import IDs; the shared domain save handler retains pricing, ownership and history checks. |
@@ -473,9 +473,8 @@ This lists every checked-in source module in these roots, including files with n
 | [src/operations/order_documents.rs](../src/operations/order_documents.rs) | Immutable private carrier documents belong to the existing order receipt store, never product assets. |
 | [src/operations/order_list.rs](../src/operations/order_list.rs) | Parameter-bound global order filters and stable tuple cursors; query text never becomes SQL. |
 | [src/operations/orders.rs](../src/operations/orders.rs) | Bounded order search, token-redacted detail and append-only operational notes. |
-| [src/operations/receipt_instructions.rs](../src/operations/receipt_instructions.rs) | Four-language invoice recipient footer from the immutable native receipt snapshot; cancellations never request payment. |
 | [src/operations/receipt_pdf.rs](../src/operations/receipt_pdf.rs) | Minimal paginated PDF serializer with WinAnsi Helvetica; snapshot retains complete Unicode originals. |
-| [src/operations/receipt_text.rs](../src/operations/receipt_text.rs) | Four-language document labels and authoritative snapshot-to-print projection. |
+| [src/operations/receipt_text.rs](../src/operations/receipt_text.rs) | Receipt text is owned by the orders component. |
 | [src/operations/receipts.rs](../src/operations/receipts.rs) | Idempotent immutable invoices/delivery notes with transactional per-shop number ranges. |
 | [src/operations/redacted_reads.rs](../src/operations/redacted_reads.rs) | Explicit non-PII domain read views for separately scoped app callbacks; never elevate an identity. |
 | [src/operations/routes.rs](../src/operations/routes.rs) | HTTP/MCP rights for merchant CRM, fulfillment and company settings. |
@@ -791,6 +790,16 @@ This lists every checked-in source module in these roots, including files with n
 | [components/marketing/src/store/facts.rs](../components/marketing/src/store/facts.rs) | Assemble private server-owned rule context once per quote/event; never publish customer facts in cart responses. |
 | [components/marketing/src/store/rule_snapshot.rs](../components/marketing/src/store/rule_snapshot.rs) | Resolve only referenced tenant rule IDs with indexed batched reads; freeze active definitions and revisions into the event snapshot. |
 | [components/marketing/src/store.rs](../components/marketing/src/store.rs) | SQL reads of the marketing component. |
+| [components/orders/src/domain/order_fields.rs](../components/orders/src/domain/order_fields.rs) | Standard order read fields are projected from the authoritative quote/payment, never maintained twice. |
+| [components/orders/src/domain/order_machine.rs](../components/orders/src/domain/order_machine.rs) | Declarative order workflow schema. Extensions add states, never executable effects or payment truth. |
+| [components/orders/src/domain/order_workflow.rs](../components/orders/src/domain/order_workflow.rs) | One server-derived action catalogue drives UI, HTTP and MCP; built-in business guards cannot be bypassed. |
+| [components/orders/src/domain/receipt_instructions.rs](../components/orders/src/domain/receipt_instructions.rs) | Four-language invoice recipient footer from the immutable native receipt snapshot; cancellations never request payment. |
+| [components/orders/src/domain/receipt_text.rs](../components/orders/src/domain/receipt_text.rs) | Four-language document labels and authoritative snapshot-to-print projection. |
+| [components/orders/src/domain.rs](../components/orders/src/domain.rs) | Rules of orders, free of I/O. |
+| [components/orders/src/lib.rs](../components/orders/src/lib.rs) | Orders component: the order state machine, derived fields, audited mutations and receipts. |
+| [components/orders/src/store/machine.rs](../components/orders/src/store/machine.rs) | The shop's stored order state machine; a shop without one uses the default. |
+| [components/orders/src/store/order_mutation.rs](../components/orders/src/store/order_mutation.rs) | Shared operational order writes: one replay ledger, immutable quote, audit, cart projection and outbox. |
+| [components/orders/src/store.rs](../components/orders/src/store.rs) | SQL of the orders component. |
 | [components/pricing/examples/customer_contract.rs](../components/pricing/examples/customer_contract.rs) | Run contact normalization without a Core process, database, credentials or network. |
 | [components/pricing/src/conversions.rs](../components/pricing/src/conversions.rs) | A rejected pricing input becomes a client error of the shared error contract. |
 | [components/pricing/src/domain/cart.rs](../components/pricing/src/domain/cart.rs) | Persisted cart data with explicit typed host contexts and no credential or storage authority. |

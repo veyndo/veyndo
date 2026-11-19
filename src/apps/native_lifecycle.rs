@@ -5,7 +5,7 @@ mod storage;
 pub(crate) use compile::{compile, generation_context, quote_machine};
 pub(crate) use storage::{
     admission, bind_order, capture, current_order, order_machine, project_labels, snapshot,
-    state_labels, validate_active_locale, validate_order_base,
+    validate_active_locale, validate_order_base,
 };
 pub(crate) use veyndo_app_model::native_lifecycle::Snapshot;
 #[cfg(test)]

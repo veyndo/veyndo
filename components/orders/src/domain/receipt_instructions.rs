@@ -1,6 +1,6 @@
 //! Four-language invoice recipient footer from the immutable native receipt snapshot; cancellations never request payment.
-use crate::Value;
-pub(super) fn lines(v: &Value, index: usize) -> Vec<String> {
+use serde_json::Value;
+pub fn lines(v: &Value, index: usize) -> Vec<String> {
     let i = &v["instructions"];
     if i["kind"] != "bank_transfer" {
         return vec![];

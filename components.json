@@ -454,6 +454,7 @@
     "orders": {
       "title": "Order state, fulfilment, receipts, documents and merchant order work",
       "sources": [
+        "components/orders",
         "src/operations",
         "src/order_routes.rs",
         "src/commerce/order_fields.rs",
@@ -510,9 +511,9 @@
         "sales_channels",
         "tenants"
       ],
-      "glob_imports": 39,
-      "untyped_access": 451,
-      "sql_outside_store": 22
+      "glob_imports": 34,
+      "untyped_access": 452,
+      "sql_outside_store": 20
     },
     "payments": {
       "title": "Provider-independent payment ledger, captures, refunds and provider workers",
@@ -555,7 +556,7 @@
         "sales_channels"
       ],
       "glob_imports": 3,
-      "untyped_access": 265,
+      "untyped_access": 264,
       "sql_outside_store": 21
     },
     "marketing": {
@@ -910,7 +911,6 @@
         "identity",
         "intelligence",
         "marketing",
-        "orders",
         "pos",
         "pricing",
         "shop"

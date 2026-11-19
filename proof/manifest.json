@@ -77,7 +77,7 @@
     },
     "order_edit_admissible": {
       "bindings": [
-        "src/commerce/order_workflow.rs"
+        "components/orders/src/domain/order_workflow.rs"
       ],
       "theorems": [
         "terminal_edit_denied",
@@ -86,7 +86,7 @@
     },
     "completion_admissible": {
       "bindings": [
-        "src/commerce/order_workflow.rs"
+        "components/orders/src/domain/order_workflow.rs"
       ],
       "theorems": [
         "completion_safe",
@@ -95,7 +95,7 @@
     },
     "cancellation_admissible": {
       "bindings": [
-        "src/commerce/order_workflow.rs"
+        "components/orders/src/domain/order_workflow.rs"
       ],
       "theorems": [
         "cancellation_safe",
@@ -503,7 +503,7 @@
     "delivery_split_admissible": {
       "bindings": [
         "components/shipping/src/domain/split.rs",
-        "src/commerce/order_workflow.rs"
+        "components/orders/src/domain/order_workflow.rs"
       ],
       "theorems": [
         "delivery_split_exact",
@@ -1299,6 +1299,56 @@
       "status": "unproved",
       "sha256": "e1b0a188165d5b92d09a99d3e32539a785e5c77d5f2b250badb56f9935be04ef",
       "review": "cart types and rule engine moved into components; checking bindings"
+    },
+    "components/orders/src/domain/order_fields.rs": {
+      "status": "unproved",
+      "sha256": "5cae0dc3862a0a52d9e06b7d5391b623575d0bab1414646f828885a41427a682",
+      "review": "order workflow kernel bindings follow the move into components/orders"
+    },
+    "components/orders/src/domain/order_machine.rs": {
+      "status": "unproved",
+      "sha256": "2ebd52f0ab1daee428f10707aebbb6e9470385ebb0976e0cbc7585e2afb03b32",
+      "review": "order workflow kernel bindings follow the move into components/orders"
+    },
+    "components/orders/src/domain/order_workflow.rs": {
+      "status": "reviewed-binding",
+      "sha256": "142aea062c3405ca3966b22772349b4b4a6e8b40d10544b8eed261bed62cc35f",
+      "review": "order workflow kernel bindings follow the move into components/orders"
+    },
+    "components/orders/src/domain/receipt_instructions.rs": {
+      "status": "unproved",
+      "sha256": "e011272d721ecb6bf459cd170ae82f657c1f4cd5cc7672785c6fb1bc822c8ff1",
+      "review": "order workflow kernel bindings follow the move into components/orders"
+    },
+    "components/orders/src/domain/receipt_text.rs": {
+      "status": "unproved",
+      "sha256": "6212e0519b8cba9ce0cbb927c27378c07e93845c7ffe4eeb7c393a483c2aeb72",
+      "review": "order workflow kernel bindings follow the move into components/orders"
+    },
+    "components/orders/src/domain.rs": {
+      "status": "unproved",
+      "sha256": "6d6180a3458a5dcbfadcd78fefbdb19577d49dff7bcdc583bade8423154c5132",
+      "review": "order workflow kernel bindings follow the move into components/orders"
+    },
+    "components/orders/src/lib.rs": {
+      "status": "unproved",
+      "sha256": "6ce297bd017c12a5373906123ab69be5c195bd377d09c850d0003648475067cc",
+      "review": "order workflow kernel bindings follow the move into components/orders"
+    },
+    "components/orders/src/store/machine.rs": {
+      "status": "unproved",
+      "sha256": "e40c6c6cdf2f8e86991c8f8a180ca803bfe428a2c4095b716ed57619396aff39",
+      "review": "order workflow kernel bindings follow the move into components/orders"
+    },
+    "components/orders/src/store/order_mutation.rs": {
+      "status": "unproved",
+      "sha256": "722200ab025714f84aac83ecbdafafe12b7bfa9a380c65444ce97c39c486521b",
+      "review": "order workflow kernel bindings follow the move into components/orders"
+    },
+    "components/orders/src/store.rs": {
+      "status": "unproved",
+      "sha256": "58ba6136e58cd8e21790e9cc2f19a5dd4e470361c35d04c6d102b52235ebd85e",
+      "review": "order workflow kernel bindings follow the move into components/orders"
     },
     "components/pricing/examples/customer_contract.rs": {
       "status": "unproved",
@@ -3822,8 +3872,8 @@
     },
     "src/apps/native_lifecycle/storage.rs": {
       "status": "unproved",
-      "sha256": "09772493e5585cae4d0a346c01ec68508b70011d7ae71cb9412dfa982777a17c",
-      "review": "Reviewed Apps 0.14 model native lifecycle extraction: exact strict graph/snapshot DTOs, original bounded compiler and namespace, complete native canonical digests, mandatory native base/scope/locale policies, current auth callback and unchanged final verified predicate. Original order-domain validation stays native via extension trait; SQL capture/locks/effects unchanged. Independent 104 model and 19 runtime tests, storage PostgreSQL contract, 34 canonical bundle digests, native apps/order units and actual order/RFQ/MCP/release/role/tenant/race fixtures pass; shared compiler and SQL/host remain unproved."
+      "sha256": "61c387a6409f233fa56e1c69beca2bd3e46f9dea84b6b278dd8c89c68022be68",
+      "review": "order workflow kernel bindings follow the move into components/orders"
     },
     "src/apps/native_lifecycle/tests.rs": {
       "status": "unproved",
@@ -3832,8 +3882,8 @@
     },
     "src/apps/native_lifecycle.rs": {
       "status": "reviewed-binding",
-      "sha256": "41996bbabac2c40756a19f08d2c27cff032334bcac71edb08d4389eac3c6f628",
-      "review": "Reviewed complete standard compiler extraction in Apps 0.16/model 0.12. All 19 original before/common/after domain stages now run inside one shared compiler with preserved order, first model kind/pointer or native host error, internal actual view lookup and exhaustive Manifest field coverage. Native manifest_policy delegates value/reference/currency/scope/source/base, current Ed25519 keys, namespace/network/read and clock decisions to original owners; direct verified predicates remain attached. No no-op host domain callbacks or alternative serving compiler. Independent 116 model and 24 runtime tests include all 34 canonical packages, nineteen invalid-domain controls and denied-policy/callback-order cases. Native 74 app and two provider units, seventeen real HTTP/PostgreSQL app/schema/preview/staging/isolation/lifecycle/distribution/surface/assistant/event/generation/marketplace/payment modules, unchanged native digests and Clippy pass. Kernel unchanged; shared compiler, policy adapters and SQL/host effects remain unproved."
+      "sha256": "4b763af57bc177a73bc946d611bbc18b0f36bacfbb510f8ec176f648491e1cd7",
+      "review": "order workflow kernel bindings follow the move into components/orders"
     },
     "src/apps/native_view_tests.rs": {
       "status": "unproved",
@@ -4872,23 +4922,23 @@
     },
     "src/commerce/order_fields.rs": {
       "status": "unproved",
-      "sha256": "141e4e29014e386743691de0880c4589d597270c4e65656e57bf23f0df43e5c6",
-      "review": "Native lifecycle review: bounded namespaced app graphs preserve native terminal/payment/stock/buyer admission, per-object immutable accepted definitions, current compound scopes, same HTTP MCP Flow owners and operational history; SQL snapshots and migration 105 are regression-tested adapters, not proved."
+      "sha256": "d8ec5e20ef36d2913b79a1162fb4ceefafd5b09c27fd0caea9cf0f4303c904ea",
+      "review": "order workflow kernel bindings follow the move into components/orders"
     },
     "src/commerce/order_machine.rs": {
       "status": "unproved",
-      "sha256": "2f72a32dd41392bba108faf469b66a7d76e0ca564c0fa7cdc3c5813d2e435b29",
-      "review": "Reviewed Apps 0.14 model native lifecycle extraction: exact strict graph/snapshot DTOs, original bounded compiler and namespace, complete native canonical digests, mandatory native base/scope/locale policies, current auth callback and unchanged final verified predicate. Original order-domain validation stays native via extension trait; SQL capture/locks/effects unchanged. Independent 104 model and 19 runtime tests, storage PostgreSQL contract, 34 canonical bundle digests, native apps/order units and actual order/RFQ/MCP/release/role/tenant/race fixtures pass; shared compiler and SQL/host remain unproved."
+      "sha256": "0bfeb2e7557e0f136c7eac6d60f926e517b3338be0a0ae98ac4f99b1deaf3e5f",
+      "review": "order workflow kernel bindings follow the move into components/orders"
     },
     "src/commerce/order_mutation.rs": {
       "status": "unproved",
-      "sha256": "84be0215ccf3e73ed3d08073510da89f3779fd71b705931a6419c4d5b977cc65",
-      "review": "Reviewed native source-neutral imports, historical no-purchase effects, scoped job leases/creator/package/digest fences and shared managed-record replay. Independent boundary findings fixed with unknown-field rejection and eight concurrent editor/import cases; actual signed-runtime/source-service/native-checkout tests pass. SQL and external source equivalence remain outside extracted proofs."
+      "sha256": "3e290855b16f59ff6e6ffa7b5900acad79b6a6bf7aaa9186441c120b4533c843",
+      "review": "order workflow kernel bindings follow the move into components/orders"
     },
     "src/commerce/order_workflow.rs": {
-      "status": "reviewed-binding",
-      "sha256": "95aa71664d7ac4702a0919ccd9d2a737b1dd69e45b1981942e3355168704651c",
-      "review": "Native capture budget and receipt review; bounded generated conformance domains; SQL/network adapters remain unproved"
+      "status": "unproved",
+      "sha256": "13a5e06bd2a45f1337233912430c0d4489a7ecd588dc398700a8e88a3dc905b5",
+      "review": "order workflow kernel bindings follow the move into components/orders"
     },
     "src/commerce/product_admin.rs": {
       "status": "unproved",
@@ -5682,8 +5732,8 @@
     },
     "src/operations/mod.rs": {
       "status": "unproved",
-      "sha256": "b470487daeee1298d0e9d4aaa7d314e10762640bccee19cb933e83ba24f133d7",
-      "review": "Product hydration, list query and preparation moved into components/catalog; no rule changed"
+      "sha256": "84b2f30b92758ad6582d7f0ba7e636960cb05cc8afc9215bee5af18b02c1158d",
+      "review": "order workflow kernel bindings follow the move into components/orders"
     },
     "src/operations/order_documents.rs": {
       "status": "unproved",
@@ -5700,11 +5750,6 @@
       "sha256": "fd99de8c9b9e782fcc269171f7e5719ba42d4f156b8ef585b925909eb282d304",
       "review": "Native lifecycle review: bounded namespaced app graphs preserve native terminal/payment/stock/buyer admission, per-object immutable accepted definitions, current compound scopes, same HTTP MCP Flow owners and operational history; SQL snapshots and migration 105 are regression-tested adapters, not proved."
     },
-    "src/operations/receipt_instructions.rs": {
-      "status": "unproved",
-      "sha256": "0f78b089fd8ed9e2b0789eb0d3388193368aebb5a7988a6020bfe5e5255a1136",
-      "review": "Reviewed invoice recipient caching and immutable native documents; explicit app/PII event consent and current Flow rehydration; existing encrypted email queue and localized templates. Targeted native service and adversarial projection tests; no new formal proof claim."
-    },
     "src/operations/receipt_pdf.rs": {
       "status": "unproved",
       "sha256": "3066f24a9a89000c794370fe36d54eef66942565a38b4c0c9fa7471c3c371dcb",
@@ -5712,8 +5757,8 @@
     },
     "src/operations/receipt_text.rs": {
       "status": "unproved",
-      "sha256": "246a7ac618f7fc784efd59c3c73de307cb3bcc64b77e523daf162437cd54b516",
-      "review": "Reviewed invoice recipient caching and immutable native documents; explicit app/PII event consent and current Flow rehydration; existing encrypted email queue and localized templates. Targeted native service and adversarial projection tests; no new formal proof claim."
+      "sha256": "b565341da64aa36be35eb64eac5e61f208e3a5f5d345dc5e2ed827b47b0c9941",
+      "review": "order workflow kernel bindings follow the move into components/orders"
     },
     "src/operations/receipts.rs": {
       "status": "unproved",
@@ -5882,8 +5927,8 @@
     },
     "src/payments/registry.rs": {
       "status": "unproved",
-      "sha256": "6917391e8bf0d119470d6187ab1e5d56a7d382a467aa274793f763bab7ee65c6",
-      "review": "Reviewed Checkout test-only payment profile and existing native payment transaction: final locked provider environment and replay receipt, no queued effect for switched live account, one stock/order and original capture/refund verified through local Core and separate Checkout PostgreSQL/provider fixtures; asynchronous SQL and provider behavior are not mathematical proofs."
+      "sha256": "9189fb755d2bc666cd07c3f25c59a5def63fdc8ec6148bd9d77d1d7070155c7f",
+      "review": "order workflow kernel bindings follow the move into components/orders"
     },
     "src/payments/remote.rs": {
       "status": "unproved",
@@ -6347,12 +6392,12 @@
       "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
     },
     "Cargo.lock": {
-      "sha256": "8d0215e36e38b3387dca080ac030c98f727e7d36c6c7224cf54616030367d457",
-      "review": "cart types and rule engine moved into components; checking bindings"
+      "sha256": "ea1ee1df4d7c8b48063b080cf6a941adb2bb5d92617796a97e50872bdeb6bf57",
+      "review": "order workflow kernel bindings follow the move into components/orders"
     },
     "Cargo.toml": {
-      "sha256": "9a491667d7f7f0f94368055f3eb4d5bdaea2b272c5125413c9585203478598de",
-      "review": "cart types and rule engine moved into components; checking bindings"
+      "sha256": "238a32b4ea7b1f079fdaf51f1fc672af07ef89eff889f9f89bada42e2cc88916",
+      "review": "order workflow kernel bindings follow the move into components/orders"
     },
     "components.lock.json": {
       "sha256": "7b4a931ad81c6665d5d95e6b42b8ef4d09ebe8971ac24998d8f94bb6a737ff53",
