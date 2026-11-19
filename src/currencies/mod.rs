@@ -2,15 +2,12 @@
 use crate::*;
 mod capabilities;
 mod jobs;
-mod model;
-mod pricing;
 mod rates;
+mod request;
 mod routes;
 pub(crate) use capabilities::{invoke, permission, schema};
 pub(crate) use jobs::worker;
-pub(crate) use model::*;
-pub(crate) use pricing::*;
+pub(crate) use request::requested;
 pub(crate) use routes::{guard as routes_guard, router};
-
-#[cfg(test)]
-mod tests;
+pub(crate) use veyndo_pricing::service::conversion::*;
+pub(crate) use veyndo_pricing::types::currency::*;

@@ -5,3 +5,7 @@ pub use domain::validation::ValidationError;
 pub use domain::{cart, catalog, customer, discount, external_order, inventory, money, pricing};
 #[cfg(feature = "service")]
 mod conversions;
+#[cfg(feature = "service")]
+pub mod service;
+#[cfg(feature = "service")]
+pub mod types;

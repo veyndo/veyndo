@@ -1,7 +1,10 @@
 //! Exact rational minor-unit FX conversion at the isolated legacy calculator boundary; fixed prices are explicit decimal strings.
-use super::*;
-use veyndo::money::{Currency, Money};
-pub(crate) fn amount(value: f64, code: &str, precision: u8) -> Result<Money> {
+use crate::catalog::Product;
+use crate::money::{Currency, Money};
+use crate::types::currency::{Config, Definition, rate_units, scale};
+use serde_json::{Value, json};
+use veyndo_core::{Result, bad};
+pub fn amount(value: f64, code: &str, precision: u8) -> Result<Money> {
     if !value.is_finite() || value < 0. {
         return Err(bad("Invalid currency amount"));
     }
@@ -12,10 +15,10 @@ pub(crate) fn amount(value: f64, code: &str, precision: u8) -> Result<Money> {
     .map_err(bad)
 }
 
-pub(crate) fn convert(value: f64, cfg: &Config, d: &Definition) -> Result<f64> {
+pub fn convert(value: f64, cfg: &Config, d: &Definition) -> Result<f64> {
     convert_from(value, &cfg.pricing_currency, cfg, d)
 }
-pub(crate) fn convert_from(value: f64, code: &str, cfg: &Config, d: &Definition) -> Result<f64> {
+pub fn convert_from(value: f64, code: &str, cfg: &Config, d: &Definition) -> Result<f64> {
     if d.code == code {
         return Ok(value);
     }
@@ -39,7 +42,7 @@ pub(crate) fn convert_from(value: f64, code: &str, cfg: &Config, d: &Definition)
         .map_err(|_| bad("FX overflow"))?;
     Ok(minor as f64 / 10_f64.powi(d.scale as i32))
 }
-pub(crate) fn product_price(p: &Product, cfg: &Config, d: &Definition) -> Result<f64> {
+pub fn product_price(p: &Product, cfg: &Config, d: &Definition) -> Result<f64> {
     if d.strategy == "fixed"
         && let Some(s) = p.extra["currencyPrices"][&d.code]["price"].as_str()
     {
@@ -59,7 +62,7 @@ pub(crate) fn product_price(p: &Product, cfg: &Config, d: &Definition) -> Result
         d,
     )
 }
-pub(crate) fn ancillary(
+pub fn ancillary(
     p: &Product,
     field: &str,
     value: Option<f64>,
@@ -89,7 +92,7 @@ pub(crate) fn ancillary(
         })
         .transpose()
 }
-pub(crate) fn validate_prices(v: &Value, cfg: &Config) -> Result<()> {
+pub fn validate_prices(v: &Value, cfg: &Config) -> Result<()> {
     if v.is_null() {
         return Ok(());
     }
@@ -132,10 +135,6 @@ pub(crate) fn validate_prices(v: &Value, cfg: &Config) -> Result<()> {
     }
     Ok(())
 }
-pub(crate) fn context(cfg: &Config, d: &Definition) -> Value {
+pub fn context(cfg: &Config, d: &Definition) -> Value {
     json!({"code":d.code,"scale":d.scale,"factor":d.rate,"baseCurrency":cfg.base_currency,"pricingCurrency":cfg.pricing_currency,"pricingFactor":cfg.definitions.iter().find(|v|v.code==cfg.pricing_currency).map(|v|v.rate.as_str()),"strategy":d.strategy,"rateSource":cfg.rate_source,"rateDate":cfg.rate_date})
-}
-pub(crate) fn requested(h: &RequestContext, cart: Option<&StoredCart>) -> String {
-    cart.map(|c| c.data.currency.clone())
-        .unwrap_or_else(|| header(h, "x-commerce-currency").unwrap_or("").into())
 }

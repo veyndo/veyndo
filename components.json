@@ -317,7 +317,7 @@
         "outbox",
         "products"
       ],
-      "glob_imports": 13,
+      "glob_imports": 10,
       "untyped_access": 20,
       "sql_outside_store": 4
     },

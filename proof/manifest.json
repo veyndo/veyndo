@@ -329,7 +329,7 @@
     },
     "currency_context_admissible": {
       "bindings": [
-        "src/currencies/model.rs"
+        "components/pricing/src/types/currency.rs"
       ],
       "theorems": [
         "currency_context_exact",
@@ -867,8 +867,38 @@
     },
     "components/pricing/src/lib.rs": {
       "status": "unproved",
-      "sha256": "7a402b5646e065cf6d0a9c58b2a520079173f4e78352a7c59fa2f452d4b853a2",
-      "review": "The commerce crate became components/pricing with its rules under domain/; no rule changed"
+      "sha256": "a69be584738f521f5a0df3b4fe554b7cac25064348181bf0aa35bead06e198af",
+      "review": "Currency configuration, conversion and reference-rate retrieval moved unchanged into components/pricing; the currency context rule is bound there"
+    },
+    "components/pricing/src/service/conversion.rs": {
+      "status": "unproved",
+      "sha256": "b67ab7cc83e7107090cdede1c7bac168814f5becda7a3c895e62a8eba67eefcb",
+      "review": "Currency configuration, conversion and reference-rate retrieval moved unchanged into components/pricing; the currency context rule is bound there"
+    },
+    "components/pricing/src/service/rates.rs": {
+      "status": "unproved",
+      "sha256": "7548252599276e0befcbdec1e3d4606e56b8dd1a4a0c721b9637279aa4818005",
+      "review": "Currency configuration, conversion and reference-rate retrieval moved unchanged into components/pricing; the currency context rule is bound there"
+    },
+    "components/pricing/src/service/tests.rs": {
+      "status": "unproved",
+      "sha256": "27e0b8da6ed6de453f70871d1efd590b8f0b6257687e8d91b7b0a2735f7c3b9e",
+      "review": "Currency configuration, conversion and reference-rate retrieval moved unchanged into components/pricing; the currency context rule is bound there"
+    },
+    "components/pricing/src/service.rs": {
+      "status": "unproved",
+      "sha256": "22bfd5149199a9531f2dc6154769065eab53c9a38458245abb999bb4c5ce93a4",
+      "review": "Currency configuration, conversion and reference-rate retrieval moved unchanged into components/pricing; the currency context rule is bound there"
+    },
+    "components/pricing/src/types/currency.rs": {
+      "status": "reviewed-binding",
+      "sha256": "e050a57a130f11c3f29816f287843496ded098869c85d568328bb3b680f9a473",
+      "review": "Currency configuration, conversion and reference-rate retrieval moved unchanged into components/pricing; the currency context rule is bound there"
+    },
+    "components/pricing/src/types.rs": {
+      "status": "unproved",
+      "sha256": "33b591935b884d407c45e43dfc4c7207c5199272acae06f4ff5dd2b5dfc321f5",
+      "review": "Currency configuration, conversion and reference-rate retrieval moved unchanged into components/pricing; the currency context rule is bound there"
     },
     "crates/apps/src/component_runtime.rs": {
       "status": "unproved",
@@ -4317,33 +4347,23 @@
     },
     "src/currencies/mod.rs": {
       "status": "unproved",
-      "sha256": "f1bf8fb0ef46c3d215f6329cbdbb100b7a8f9d52fa524ef5e3ed2068129c820d",
-      "review": "Reviewed multi-currency admission, rational FX boundaries, immutable monetary source, additive ledger scale/RLS migrations, shared API/MCP/UCP paths and local provider/refund evidence. Only bounded policies are proved; FX, DB, network adapters and full commerce remain unproved."
-    },
-    "src/currencies/model.rs": {
-      "status": "reviewed-binding",
-      "sha256": "ca589796d77574ce47cd94c302e344ae7aaf59cadde831bb7c7aba5e89de889d",
-      "review": "Reviewed multi-currency admission, rational FX boundaries, immutable monetary source, additive ledger scale/RLS migrations, shared API/MCP/UCP paths and local provider/refund evidence. Only bounded policies are proved; FX, DB, network adapters and full commerce remain unproved."
-    },
-    "src/currencies/pricing.rs": {
-      "status": "unproved",
-      "sha256": "b0e5bef5d9232abc5d9bb325e934dd7569fd27d8a861d5bc4add5cd4b8bb2bd3",
-      "review": "Review compiler-enforced foundation crates with unchanged native owners; native provider read-tool aliases and current authorization, private checkpoint continuation and versioned prompt evidence; fixed subscriber acknowledgements preserve commit gaps, independent quarantine and explicit replay; traced requests/tasks/outbox without payloads; exact decimal-to-minor-unit rounding retains legacy price boundary; real SQL poison-isolation regression passes and workspace unit/clippy checks pass"
+      "sha256": "849231b01a39f6c9432124b5564aab94de8d12c7f55c7d22b60ebe4858ac90be",
+      "review": "Currency configuration, conversion and reference-rate retrieval moved unchanged into components/pricing; the currency context rule is bound there"
     },
     "src/currencies/rates.rs": {
       "status": "unproved",
-      "sha256": "86b73ab66c9027023f9eda5a6be24db700db8275721ee8397623262ba80421e9",
-      "review": "Reviewed eighteen core findings: typed trusted identity and explicit route rights; consolidated current grants; durable auth and fenced shared limits; scoped transactions and one-backend PgBouncer including nested borrow fixes; bounded Wasm/PNG work; notified workers, savepoint quarantine and conservative retention; separate runtime roles and startup configuration. Real PostgreSQL/provider regressions preserve current tenant/customer/payment behavior. SQL/network adapters remain unproved."
+      "sha256": "d9e68488969bfbb55939bdd121dd8645069b44b7c796809f66778ebacb0f9de9",
+      "review": "Currency configuration, conversion and reference-rate retrieval moved unchanged into components/pricing; the currency context rule is bound there"
+    },
+    "src/currencies/request.rs": {
+      "status": "unproved",
+      "sha256": "844765aac0cde8a7936fb4d5e922f7ea245029d6f3c12e74c7e3a25a6fe00bcf",
+      "review": "Currency configuration, conversion and reference-rate retrieval moved unchanged into components/pricing; the currency context rule is bound there"
     },
     "src/currencies/routes.rs": {
       "status": "unproved",
       "sha256": "8eb494a2fb81eca4071467b41367dcae81157dae7b664583742915c45fdcbdaf",
       "review": "Reviewed selective-publication domain rights, transactional channel and current installed Flow action admission, shared B2B configuration writers with history and staging, method/currency dependency guards, and inherited consent-bound analytics. PostgreSQL and frontend regressions exercise successful effects, denied access, stale revisions and preserved live state. SQL, async adapters and external providers remain unproved."
-    },
-    "src/currencies/tests.rs": {
-      "status": "unproved",
-      "sha256": "87f80e37bbc4c967f7a3c78278ae21f9a65293b766ab4a70f3b4086ddbd4d9e9",
-      "review": "Reviewed multi-currency admission, rational FX boundaries, immutable monetary source, additive ledger scale/RLS migrations, shared API/MCP/UCP paths and local provider/refund evidence. Only bounded policies are proved; FX, DB, network adapters and full commerce remain unproved."
     },
     "src/customer.rs": {
       "status": "unproved",
@@ -5672,8 +5692,8 @@
       "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
     },
     "Cargo.lock": {
-      "sha256": "be7160d9ed4c354cb3d73c538f8a43fcc87ae70fcccf51ff627508315697eece",
-      "review": "Permission rules and the permit and merchant checks moved unchanged into components/identity; the scope rule is bound there"
+      "sha256": "f311956c4d17c12460a423c137c3f19203bc7f5a1c297e14bcb30b130380c1d4",
+      "review": "Currency configuration, conversion and reference-rate retrieval moved unchanged into components/pricing; the currency context rule is bound there"
     },
     "Cargo.toml": {
       "sha256": "e0f8afe8d37f6fc722288433f9a9e09f350979f03026d1a2c5d72c7c7dbd8a53",

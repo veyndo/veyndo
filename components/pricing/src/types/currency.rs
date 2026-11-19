@@ -1,7 +1,9 @@
 //! Explicit currency scales and rational exchange-rate settings, inherited by sales-channel overrides.
-use super::*;
-pub(crate) const CODES: &str = "EUR USD GBP CHF CAD AUD NZD JPY CNY HKD SGD SEK NOK DKK PLN CZK HUF RON BGN ISK TRY BRL MXN INR IDR ILS ZAR KRW THB MYR PHP BHD KWD OMR JOD TND CLP AED SAR";
-pub(crate) fn scale(code: &str) -> Option<u8> {
+use serde::{Deserialize, Serialize};
+use veyndo_core::{Result, bad, conflict};
+use veyndo_kernel::verified_kernel;
+pub const CODES: &str = "EUR USD GBP CHF CAD AUD NZD JPY CNY HKD SGD SEK NOK DKK PLN CZK HUF RON BGN ISK TRY BRL MXN INR IDR ILS ZAR KRW THB MYR PHP BHD KWD OMR JOD TND CLP AED SAR";
+pub fn scale(code: &str) -> Option<u8> {
     CODES.split(' ').find(|c| *c == code).map(|_| match code {
         "JPY" | "KRW" | "CLP" => 0,
         "BHD" | "KWD" | "OMR" | "JOD" | "TND" => 3,
@@ -10,7 +12,7 @@ pub(crate) fn scale(code: &str) -> Option<u8> {
 }
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub(crate) struct Definition {
+pub struct Definition {
     pub code: String,
     pub scale: u8,
     pub rate: String,
@@ -18,7 +20,7 @@ pub(crate) struct Definition {
 }
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub(crate) struct Config {
+pub struct Config {
     pub base_currency: String,
     #[serde(default = "legacy_source")]
     pub pricing_currency: String,
@@ -51,7 +53,7 @@ impl Default for Config {
         }
     }
 }
-pub(crate) fn rate_units(rate: &str) -> Result<i64> {
+pub fn rate_units(rate: &str) -> Result<i64> {
     let (whole, frac) = rate.split_once('.').unwrap_or((rate, ""));
     if whole.is_empty()
         || frac.len() > 8
@@ -83,7 +85,7 @@ pub(crate) fn rate_units(rate: &str) -> Result<i64> {
     Ok(n)
 }
 impl Config {
-    pub(crate) fn validate(&self) -> Result<()> {
+    pub fn validate(&self) -> Result<()> {
         if self.definitions.is_empty()
             || self.definitions.len() > 40
             || self.enabled.is_empty()
@@ -129,7 +131,7 @@ impl Config {
         }
         Ok(())
     }
-    pub(crate) fn selected(&self, code: &str) -> Result<&Definition> {
+    pub fn selected(&self, code: &str) -> Result<&Definition> {
         let code = if code.is_empty() {
             &self.default_currency
         } else {

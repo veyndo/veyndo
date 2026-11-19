@@ -133,12 +133,27 @@ Done when the server builds on both crates without glob imports from them.
 - [x] `crates/commerce` is `components/pricing` (`veyndo-pricing`) with its rules
       under `domain/`. The `service` feature (default) adds what needs `core`;
       without it the crate is the pure domain, which the migration app uses.
-- [ ] Move `src/currencies`, taxes and customer groups into `components/pricing`
-      as `types/`, `store/`, `service/`, `http/`.
+- [x] Currency configuration (`types/currency`), conversion and reference-rate
+      retrieval (`service/`) moved into `components/pricing` with their tests.
+- [ ] Move the currency routes, price jobs, taxes and customer groups into
+      `components/pricing` as `store/`, `service/`, `http/`. They read the shop
+      settings and the cart, so they need the two ports named below first.
 - [ ] Money is one type in minor units everywhere; the column "uses floating
       point" on the proof coverage page is zero for this component.
 - [ ] Typed DTOs at the interface; `sqlx::query_as!` with offline cache in `store/`.
-- [ ] Write down what the pilot cost and what the template needs changed.
+- [x] Write down what the pilot cost and what the template needs changed:
+  - Pure rules and data types move in one step each. Everything that takes the
+    server state does not: 12 of the 13 remaining currency functions call
+    `commerce::scoped_config` (shop settings) or `load_cart`/`cart_json` (checkout).
+  - Template change 1: a component declares what it reads from others in
+    `ports.rs` as a trait; the server implements it. First ports: `ShopSettings`
+    (settings and revision for a shop and channel) and `Carts` (load, quote).
+  - Template change 2: a component router is generic over the server state and
+    takes `veyndo_core::State` by `FromRef`; `secure_route` moves to identity.
+  - Template change 3: a crate feature `service` separates the pure `domain/`
+    from the parts that need `core`, so independent apps keep a small dependency.
+  - Template change 4: test files in a component name their imports; the
+    component check refuses `use super::*` at file level.
 
 ## Phase 3: the remaining components
 

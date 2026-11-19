@@ -345,11 +345,9 @@ This lists every checked-in source module in these roots, including files with n
 | [src/currencies/capabilities.rs](../src/currencies/capabilities.rs) | Currency MCP operations reuse the native HTTP handlers and existing settings/catalog permissions. |
 | [src/currencies/jobs.rs](../src/currencies/jobs.rs) | Bounded restart-safe fixed-price materialization with frozen FX, product locks and atomic checkpoints across replicas. |
 | [src/currencies/mod.rs](../src/currencies/mod.rs) | Tenant currency configuration, channel contexts and durable price generation; no FX network calls in checkout. |
-| [src/currencies/model.rs](../src/currencies/model.rs) | Explicit currency scales and rational exchange-rate settings, inherited by sales-channel overrides. |
-| [src/currencies/pricing.rs](../src/currencies/pricing.rs) | Exact rational minor-unit FX conversion at the isolated legacy calculator boundary; fixed prices are explicit decimal strings. |
-| [src/currencies/rates.rs](../src/currencies/rates.rs) | Bounded ECB reference-rate retrieval with exact decimal parsing; refresh runs outside checkout and never invents rates. |
+| [src/currencies/rates.rs](../src/currencies/rates.rs) | Stores refreshed reference rates in the shop settings; the refresh runs outside checkout. |
+| [src/currencies/request.rs](../src/currencies/request.rs) | The currency a storefront request asks for: the cart's own, else the request header. |
 | [src/currencies/routes.rs](../src/currencies/routes.rs) | Native currency discovery, revision-safe selection and authenticated FX/price job operations. |
-| [src/currencies/tests.rs](../src/currencies/tests.rs) | Currency conversion adversaries and immutable source-price semantics, independent of live rate providers. |
 | [src/customer.rs](../src/customer.rs) | Customer credential verification and context rotation. |
 | [src/demo_catalog.rs](../src/demo_catalog.rs) | Public synthetic fashion template; provisioning copies only this versioned fixture into a new tenant. |
 | [src/developer/agent_connection.rs](../src/developer/agent_connection.rs) | Credential-free local coding-agent connection shared by native editors. |
@@ -720,6 +718,12 @@ This lists every checked-in source module in these roots, including files with n
 | [components/pricing/src/domain/validation.rs](../components/pricing/src/domain/validation.rs) | Shared static validation errors carry no private values or transport authority. |
 | [components/pricing/src/domain.rs](../components/pricing/src/domain.rs) | Pure rules and data contracts: no database, no transport. This is the part that is proved. |
 | [components/pricing/src/lib.rs](../components/pricing/src/lib.rs) | Pricing component: amounts, price calculation, discounts and the cart, product and customer contracts they work on. |
+| [components/pricing/src/service/conversion.rs](../components/pricing/src/service/conversion.rs) | Exact rational minor-unit FX conversion at the isolated legacy calculator boundary; fixed prices are explicit decimal strings. |
+| [components/pricing/src/service/rates.rs](../components/pricing/src/service/rates.rs) | Bounded ECB reference-rate retrieval with exact decimal parsing; a refresh never invents rates. |
+| [components/pricing/src/service/tests.rs](../components/pricing/src/service/tests.rs) | Currency conversion adversaries and immutable source-price semantics, independent of live rate providers. |
+| [components/pricing/src/service.rs](../components/pricing/src/service.rs) | Use cases of the pricing component. |
+| [components/pricing/src/types/currency.rs](../components/pricing/src/types/currency.rs) | Explicit currency scales and rational exchange-rate settings, inherited by sales-channel overrides. |
+| [components/pricing/src/types.rs](../components/pricing/src/types.rs) | The data contracts of the pricing component. |
 
 ## Studio, storefront, platform and shared frontend
 

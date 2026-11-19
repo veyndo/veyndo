@@ -1,5 +1,8 @@
 //! Currency conversion adversaries and immutable source-price semantics, independent of live rate providers.
-use super::*;
+use super::conversion::{amount, convert, convert_from, validate_prices};
+use super::rates;
+use crate::types::currency::{Config, Definition, rate_units, scale};
+use serde_json::json;
 fn config() -> Config {
     let mut c = Config::default();
     for (code, rate, strategy) in [

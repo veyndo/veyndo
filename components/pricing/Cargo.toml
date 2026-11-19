@@ -9,8 +9,12 @@ serde.workspace = true
 serde_json.workspace = true
 veyndo-kernel = { path = "../../crates/kernel" }
 veyndo-core = { path = "../core", optional = true }
+chrono = { workspace = true, optional = true }
+regex = { workspace = true, optional = true }
+reqwest = { workspace = true, optional = true }
+tokio = { workspace = true, optional = true }
 
 [features]
 # Without `service` the crate is the pure domain only, for consumers such as independent apps.
 default = ["service"]
-service = ["dep:veyndo-core"]
+service = ["dep:veyndo-core", "dep:chrono", "dep:regex", "dep:reqwest", "dep:tokio"]
