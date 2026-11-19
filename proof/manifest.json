@@ -655,6 +655,21 @@
       "sha256": "9dbaa399afa585fdc25df2bdc32bd73313fb5324f283470252f428ac7b34423b",
       "review": "Request context, principal, POS admission, host shop and the access snapshot data types moved unchanged into components/core; loading the snapshot and matching it to a request stay in the server as free functions with the same queries. Core unit tests (identity headers cannot be forged) pass. SQL, HTTP and provider behaviour is not formally proved."
     },
+    "components/core/src/admission/relay.rs": {
+      "status": "unproved",
+      "sha256": "97fa2c0a6e70468191f495687952adb07d432c8fb5f9da93ccc3288f97d9af5f",
+      "review": "Request admission moved into the core crate; no rule changed"
+    },
+    "components/core/src/admission/tests.rs": {
+      "status": "unproved",
+      "sha256": "12bb109b2ad27c5be67a07ba4050bd30b4840d5ee9c353fa7498f625f0c1e651",
+      "review": "Request admission moved into the core crate; no rule changed"
+    },
+    "components/core/src/admission.rs": {
+      "status": "unproved",
+      "sha256": "ea20cb431b66a790c4250cdf321e08e26607ed12c68367f8e73c5bfd650218f1",
+      "review": "Request admission moved into the core crate; no rule changed"
+    },
     "components/core/src/cache.rs": {
       "status": "unproved",
       "sha256": "fb35078b203bcf65b7a161999f0a9b8468649eebf19218c40fef5c6f8aa25406",
@@ -717,8 +732,8 @@
     },
     "components/core/src/lib.rs": {
       "status": "reviewed-binding",
-      "sha256": "9ce36da5125b4325ba2870cc9b52dfacd073a7288da35f7ddf5722bb2f78f6fe",
-      "review": "Database pools, row security, leases and the read cache moved into the core crate; no rule changed"
+      "sha256": "03c2988cde25a4006f4d595533d2861132071b74df225d82557c657a17563d9b",
+      "review": "Request admission moved into the core crate; no rule changed"
     },
     "components/core/src/observability.rs": {
       "status": "unproved",
@@ -747,8 +762,8 @@
     },
     "components/core/src/state.rs": {
       "status": "unproved",
-      "sha256": "b41b686ebab4d95c13008e8e2c14b09fece5166123810a183b0ee1377f9ef732",
-      "review": "Channel metrics and the outbox consumer moved into the core crate; no rule changed"
+      "sha256": "0963d5e3829b4e9c343635424384f8edabda0d5ef408a99005c0463b7d88f4bf",
+      "review": "Request admission moved into the core crate; no rule changed"
     },
     "components/core/src/work_signal.rs": {
       "status": "unproved",
@@ -3647,8 +3662,8 @@
     },
     "src/bootstrap.rs": {
       "status": "unproved",
-      "sha256": "13187b5ca7c4a25907a2ed41c48efea6329ad559587c7524f2a23fd79d81a773",
-      "review": "Channel metrics and the outbox consumer moved into the core crate; no rule changed"
+      "sha256": "11a52f70f465bf4a471f8da597f4b1cc42fba205e788610eb3fd344fe1a2d0e6",
+      "review": "Request admission moved into the core crate; no rule changed"
     },
     "src/brand_redirect.rs": {
       "status": "unproved",
@@ -4462,8 +4477,8 @@
     },
     "src/foundation.rs": {
       "status": "unproved",
-      "sha256": "25e53946266c4f8a7e7f50ada503daeafd58c99b99272b3db1ccf82e85b56d8a",
-      "review": "Channel metrics and the outbox consumer moved into the core crate; no rule changed"
+      "sha256": "847ed30e6b076a347ac37aea2852dfff06103356db07bb91f5965371ccdc8153",
+      "review": "Request admission moved into the core crate; no rule changed"
     },
     "src/history/capability.rs": {
       "status": "unproved",
@@ -5215,16 +5230,6 @@
       "sha256": "87d4614160f768dd0adb2603aac94f7a7e3c96608f94c26e424e9bd6044ffd81",
       "review": "Request context, principal, POS admission, host shop and the access snapshot data types moved unchanged into components/core; loading the snapshot and matching it to a request stay in the server as free functions with the same queries. Core unit tests (identity headers cannot be forged) pass. SQL, HTTP and provider behaviour is not formally proved."
     },
-    "src/performance/admission.rs": {
-      "status": "unproved",
-      "sha256": "ce147439c52dd3f0a62713a8d7141e53127d81a99143e72c8b982ae31c28a28a",
-      "review": "Reviewed the same bounded confirmation wait, refusal counters, and release of local slots in the dedicated relay module. Seven Rust admission tests pass. The matched real HTTP/PostgreSQL comparison reproduces the local wait timeouts and validates 48 orders, stock movements, invoices and SMTP receipts per arm. Async admission and leases remain outside the proof."
-    },
-    "src/performance/admission_tests.rs": {
-      "status": "unproved",
-      "sha256": "935b767c7b94ed6b85ba780ac6bbb1da00bb25b225f1e7cc5355700a8d7cf6fe",
-      "review": "Reviewed the same bounded confirmation wait, refusal counters, and release of local slots in the dedicated relay module. Seven Rust admission tests pass. The matched real HTTP/PostgreSQL comparison reproduces the local wait timeouts and validates 48 orders, stock movements, invoices and SMTP receipts per arm. Async admission and leases remain outside the proof."
-    },
     "src/performance/delivery.rs": {
       "status": "unproved",
       "sha256": "87dbf0a9212f291001b8749400d850e76b8a1aa5b68bf2c8b9d90fc8443bf0bb",
@@ -5242,13 +5247,8 @@
     },
     "src/performance/mod.rs": {
       "status": "unproved",
-      "sha256": "bdbc2a6d698a3e4250ff9c771c49f499fca7c2c17a85f04929b01bc34fa8b5b6",
-      "review": "Database pools, row security, leases and the read cache moved into the core crate; no rule changed"
-    },
-    "src/performance/relay_admission.rs": {
-      "status": "unproved",
-      "sha256": "97fa2c0a6e70468191f495687952adb07d432c8fb5f9da93ccc3288f97d9af5f",
-      "review": "Reviewed the same bounded confirmation wait, refusal counters, and release of local slots in the dedicated relay module. Seven Rust admission tests pass. The matched real HTTP/PostgreSQL comparison reproduces the local wait timeouts and validates 48 orders, stock movements, invoices and SMTP receipts per arm. Async admission and leases remain outside the proof."
+      "sha256": "b4968227069d5fb5586e5e78cbe5221e7c824c1dc8a81139b2958c88534054a2",
+      "review": "Request admission moved into the core crate; no rule changed"
     },
     "src/performance/settings.rs": {
       "status": "unproved",

@@ -1,5 +1,6 @@
 //! Shared foundation of every component: the error contract, its conversions and basic identifiers. No business rules.
 pub mod access;
+pub mod admission;
 pub mod cache;
 pub mod channel_metrics;
 mod conversions;

@@ -52,7 +52,7 @@
         "tenant_ai_usage",
         "tenant_resource_limits"
       ],
-      "glob_imports": 9,
+      "glob_imports": 7,
       "untyped_access": 5,
       "sql_outside_store": 16
     },

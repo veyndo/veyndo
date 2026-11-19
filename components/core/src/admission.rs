@@ -1,20 +1,37 @@
 //! Bounded instance/tenant concurrency, durable UTC-day AI quotas, and low-cardinality latency telemetry.
-use crate::*;
+use crate::database::lease::Lease;
+use crate::shop_scope::{header, tenant};
+use crate::{Error, RequestContext, Result, State, StatusCode};
+use axum::response::{IntoResponse, Response};
 use axum::{extract::Request, middleware::Next};
+use serde_json::{Value, json};
 use std::{
+    collections::HashMap,
+    env,
     sync::{
-        Mutex,
+        Arc, Mutex,
         atomic::{AtomicU64, Ordering},
     },
     time::{Duration, Instant},
 };
 use tokio::sync::{OwnedSemaphorePermit, Semaphore};
 
-#[path = "relay_admission.rs"]
-mod relay_admission;
-use relay_admission::{CONFIRM_PATH, RelayRejection, RelayRejections, confirmation_wait};
+mod relay;
+use relay::{CONFIRM_PATH, RelayRejection, RelayRejections, confirmation_wait};
 
 const CHECKOUT_RELAY: &str = "checkout-relay";
+
+/// A streamed AI answer keeps its permit and lease until the stream ends, beyond the lifetime
+/// of the browser's response buffer; ordinary request slots stay with middleware.
+pub type AiStreamPermit = (OwnedSemaphorePermit, Option<Lease>);
+#[derive(Clone)]
+pub struct AiStreamAdmission(Arc<Mutex<Option<AiStreamPermit>>>);
+
+impl AiStreamAdmission {
+    pub fn take(&self) -> Option<AiStreamPermit> {
+        self.0.lock().unwrap().take()
+    }
+}
 
 struct Budget {
     relay: Arc<Semaphore>,
@@ -30,7 +47,7 @@ struct Metric {
     total_ms: u64,
     buckets: [u64; 8],
 }
-pub(crate) struct Admission {
+pub struct Admission {
     general: Arc<Semaphore>,
     checkout: Arc<Semaphore>,
     relay: Arc<Semaphore>,
@@ -123,7 +140,7 @@ impl Admission {
             .unwrap_or(7);
         m.buckets[bucket] += 1;
     }
-    pub(crate) fn snapshot(&self) -> Value {
+    pub fn snapshot(&self) -> Value {
         let metrics = self.metrics.lock().unwrap();
         let [local_capacity, local_timeout, cluster_capacity] = self.relay_rejections.snapshot();
         json!({"scope":"process + database leases","clusterTenantLimits":true,"tenantLimit":self.tenant_limit,"tenantAiLimit":self.ai_limit,
@@ -163,7 +180,7 @@ fn class(path: &str) -> &'static str {
         "api"
     }
 }
-pub(crate) async fn run(a: &App, mut request: Request, next: Next) -> Response {
+pub async fn run(a: &State, mut request: Request, next: Next) -> Response {
     let path = request.uri().path();
     if !(path.starts_with("/api/")
         || path.starts_with("/store-api/")
@@ -205,7 +222,7 @@ pub(crate) async fn run(a: &App, mut request: Request, next: Next) -> Response {
         } else {
             ("requests", a.admission.tenant_limit)
         };
-        match super::cluster_lease::Lease::acquire(a, &tenant, scope, limit).await {
+        match Lease::acquire(a, &tenant, scope, limit).await {
             Ok(lease) => Some(lease),
             Err(e) if class == CHECKOUT_RELAY && e.0 == StatusCode::TOO_MANY_REQUESTS => {
                 a.admission.rejected.fetch_add(1, Ordering::Relaxed);
@@ -220,7 +237,7 @@ pub(crate) async fn run(a: &App, mut request: Request, next: Next) -> Response {
         None
     };
     let ai_lease = if validated && class == "ai" {
-        match super::cluster_lease::Lease::acquire(a, &tenant, "ai", a.admission.ai_limit).await {
+        match Lease::acquire(a, &tenant, "ai", a.admission.ai_limit).await {
             Ok(lease) => Some(lease),
             Err(e) => return e.into_response(),
         }
@@ -242,7 +259,7 @@ pub(crate) async fn run(a: &App, mut request: Request, next: Next) -> Response {
     let _ai_lease = if stream_ai && let Some(permit) = permits.pop() {
         request
             .extensions_mut()
-            .insert(super::AiStreamAdmission(Arc::new(Mutex::new(Some((
+            .insert(AiStreamAdmission(Arc::new(Mutex::new(Some((
                 permit, ai_lease,
             ))))));
         None
@@ -273,7 +290,7 @@ pub(crate) async fn run(a: &App, mut request: Request, next: Next) -> Response {
 }
 /// Shared interactive/background attempt quota; a failed provider call still counts.
 /// This is not token/spend accounting. Staging shares its live tenant's UTC-day budget.
-pub(crate) async fn reserve_ai_attempt(a: &App, tenant: &str) -> Result<()> {
+pub async fn reserve_ai_attempt(a: &State, tenant: &str) -> Result<()> {
     let mut tx = a.db.begin_privileged().await?;
     reserve_ai_attempt_tx(a, tenant, &mut tx).await?;
     tx.commit().await?;
@@ -281,8 +298,8 @@ pub(crate) async fn reserve_ai_attempt(a: &App, tenant: &str) -> Result<()> {
 }
 /// Native admission only: reuse the system transaction that persists the accepted work.
 /// The explicit tenant resolves a sandbox's live budget; callers must admit the actor first.
-pub(crate) async fn reserve_ai_attempt_tx(
-    a: &App,
+pub async fn reserve_ai_attempt_tx(
+    a: &State,
     tenant: &str,
     connection: &mut sqlx::PgConnection,
 ) -> Result<()> {
@@ -315,5 +332,4 @@ fn overloaded(class: &str, message: &str) -> Response {
 }
 
 #[cfg(test)]
-#[path = "admission_tests.rs"]
 mod tests;

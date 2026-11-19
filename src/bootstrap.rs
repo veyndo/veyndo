@@ -66,13 +66,13 @@ pub(crate) async fn bootstrap() -> App {
         core: veyndo_core::State {
             db: db.clone(),
             http,
+            admission: Arc::new(performance::Admission::default()),
         },
         model: Arc::new(env::var("OLLAMA_MODEL").unwrap_or("qwen3.6:35b".into())),
         sandboxes: Arc::new(sandbox_cache::Cache::default()),
         channel_metrics: Arc::new(channel_metrics::ChannelMetrics::default()),
         app_limits: Arc::new(apps::ServiceLimits::default()),
         reads: Arc::new(performance::Reads::default()),
-        admission: Arc::new(performance::Admission::default()),
     };
     if let Some(setup) = setup {
         if env::var("SEED_DEMO").as_deref() != Ok("false") {

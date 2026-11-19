@@ -13,7 +13,7 @@ run SQL without being in a `store` folder. Both numbers only fall.
 
 | Component | Lines of Rust | Glob imports | Untyped accesses | SQL outside store | Tables | Uses | Foreign tables |
 | --- | ---: | ---: | ---: | ---: | ---: | --- | ---: |
-| core | 3803 | 9 | 5 | 16 | 10 | apps (2), b2b (4), host (2), identity (2), intelligence (5), marketing (1), pricing (1), shop (3) | 16 |
+| core | 3807 | 7 | 5 | 16 | 10 | apps (2), b2b (4), host (2), identity (2), intelligence (5), marketing (1), pricing (1), shop (3) | 16 |
 | identity | 3401 | 8 | 86 | 18 | 13 | apps (9), catalog (7), checkout (1), core (385), customers (1), host (3), intelligence (9), marketing (5), shop (9), studio (4) | 11 |
 | shop | 3756 | 37 | 97 | 20 | 15 | apps (7), b2b (2), catalog (3), checkout (17), core (252), customers (3), host (3), intelligence (8), marketing (8), payments (4), pricing (11), shipping (1), studio (12) | 18 |
 | catalog | 5920 | 53 | 202 | 33 | 11 | apps (19), b2b (2), checkout (12), core (379), customers (5), identity (30), intelligence (10), marketing (16), pricing (29), protocols (1), shipping (1), shop (38), studio (9) | 15 |

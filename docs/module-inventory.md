@@ -532,13 +532,10 @@ This lists every checked-in source module in these roots, including files with n
 | [src/payments/storage.rs](../src/payments/storage.rs) | Transactional provider receipts and order state updates; external responses cannot invent amounts or tenants. |
 | [src/payments/worker.rs](../src/payments/worker.rs) | Leased payment jobs; network runs after claim commit, fenced receipts prevent duplicate local effects. |
 | [src/performance/access_snapshot.rs](../src/performance/access_snapshot.rs) | One fresh, server-owned admission read shared by domain, identity, availability, channel and proxy middleware. |
-| [src/performance/admission.rs](../src/performance/admission.rs) | Bounded instance/tenant concurrency, durable UTC-day AI quotas, and low-cardinality latency telemetry. |
-| [src/performance/admission_tests.rs](../src/performance/admission_tests.rs) | Regression checks for Core admission limits and the Checkout relay retry interval. |
 | [src/performance/delivery.rs](../src/performance/delivery.rs) | Native static bypass and bounded HTTP compression; credentials, streams and already encoded bodies stay intact. |
 | [src/performance/invalidation.rs](../src/performance/invalidation.rs) | Commit-only outbox notifications eagerly evict replica caches; authoritative version probes survive missed events. |
 | [src/performance/languages.rs](../src/performance/languages.rs) | Global language registry is versioned in the same transaction as every registry mutation. |
 | [src/performance/mod.rs](../src/performance/mod.rs) | Shared read-context caching with authoritative versions; mutations and checkout locks stay outside memoization. |
-| [src/performance/relay_admission.rs](../src/performance/relay_admission.rs) | Short, bounded relay admission waiting before contacting the independent Checkout service. |
 | [src/performance/settings.rs](../src/performance/settings.rs) | One MVCC snapshot validates base/override UUIDs; warm reads avoid transmitting or decoding JSON. |
 | [src/planner/admission.rs](../src/planner/admission.rs) | Every initial or repaired model proposal traverses the same native read-only admission. |
 | [src/planner/repair.rs](../src/planner/repair.rs) | One checkpointed correction of rejected output; original evidence, budget and native review remain authoritative. |
@@ -693,6 +690,9 @@ This lists every checked-in source module in these roots, including files with n
 | Module | Responsibility |
 |---|---|
 | [components/core/src/access.rs](../components/core/src/access.rs) | Admission facts of one shop and sales channel, read once per request and shared by every later check. |
+| [components/core/src/admission/relay.rs](../components/core/src/admission/relay.rs) | Short, bounded relay admission waiting before contacting the independent Checkout service. |
+| [components/core/src/admission/tests.rs](../components/core/src/admission/tests.rs) | Regression checks for Core admission limits and the Checkout relay retry interval. |
+| [components/core/src/admission.rs](../components/core/src/admission.rs) | Bounded instance/tenant concurrency, durable UTC-day AI quotas, and low-cardinality latency telemetry. |
 | [components/core/src/cache.rs](../components/core/src/cache.rs) | Bounded weighted LRU for immutable decoded read models; no network I/O under its mutex. |
 | [components/core/src/channel_metrics/reads.rs](../components/core/src/channel_metrics/reads.rs) | One persisted diagnostic read shared by operator overview, shop dossiers and infrastructure. |
 | [components/core/src/channel_metrics.rs](../components/core/src/channel_metrics.rs) | Bounded, lossy diagnostic counters. Never use this buffer for business events. |
@@ -713,7 +713,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/core/src/outbox.rs](../components/core/src/outbox.rs) | The transactional outbox consumer: each subscriber lane acknowledges an event and commits its effects in one transaction. |
 | [components/core/src/request_context.rs](../components/core/src/request_context.rs) | Trusted request identity lives in extensions; HTTP headers carry transport inputs only. |
 | [components/core/src/shop_scope.rs](../components/core/src/shop_scope.rs) | Which shop a request addresses: the transport header, or the deployment's default shop. No authentication. |
-| [components/core/src/state.rs](../components/core/src/state.rs) | The state every component may use: the tenant-scoped database pool and the outbound HTTP client. |
+| [components/core/src/state.rs](../components/core/src/state.rs) | The state every component may use: the tenant-scoped database pool, the outbound HTTP client and request admission. |
 | [components/core/src/work_signal.rs](../components/core/src/work_signal.rs) | One dedicated LISTEN connection per worker process. Commit notifications are hints; polling repairs lost hints. |
 
 ## Studio, storefront, platform and shared frontend
