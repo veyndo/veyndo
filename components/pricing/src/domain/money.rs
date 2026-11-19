@@ -178,6 +178,16 @@ impl Money {
     }
 }
 
+/// A calculated amount as whole minor units; `None` when it is negative, not finite or beyond exact integer range.
+pub fn to_minor(value: f64, scale: u8) -> Option<u64> {
+    let minor = (value * 10_f64.powi(i32::from(scale))).round();
+    (value.is_finite() && value >= 0. && minor <= 9_007_199_254_740_992.).then_some(minor as u64)
+}
+/// Minor units as the decimal number the wire format carries.
+pub fn from_minor(minor: u64, scale: u8) -> f64 {
+    minor as f64 / 10_f64.powi(i32::from(scale))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -285,6 +295,53 @@ mod decimal_rounding {
             "-92233720368547758.09",
         ] {
             assert!(Money::rounded(text, Currency::eur()).is_err());
+        }
+    }
+}
+
+#[cfg(test)]
+mod minor_units {
+    use super::{from_minor, to_minor};
+    use crate::pricing::math_round;
+
+    #[test]
+    fn rounded_amounts_convert_exactly_and_back() {
+        for (value, scale, minor) in [
+            (0.0, 2, 0),
+            (19.99, 2, 1999),
+            (0.07, 2, 7),
+            (1584.0, 0, 1584),
+            (7.123, 3, 7123),
+        ] {
+            assert_eq!(to_minor(value, scale), Some(minor));
+            assert_eq!(from_minor(minor, scale), value);
+        }
+        for value in [-0.01, f64::NAN, f64::INFINITY, 1e30] {
+            assert_eq!(to_minor(value, 2), None);
+        }
+    }
+
+    #[test]
+    fn integer_totals_equal_the_rounded_decimal_totals() {
+        // The same lines added as decimals and rounded once, and added as minor units.
+        let mut state = 0x9e37_79b9_7f4a_7c15_u64;
+        for scale in [0_u8, 2, 3] {
+            for _ in 0..2000 {
+                let mut decimal = 0.0;
+                let mut minor = 0_u64;
+                for _ in 0..40 {
+                    state ^= state << 13;
+                    state ^= state >> 7;
+                    state ^= state << 17;
+                    let line = (state % 10_000_000) as f64 / 10_f64.powi(i32::from(scale));
+                    decimal += line;
+                    minor += to_minor(line, scale).unwrap();
+                }
+                assert_eq!(
+                    math_round(decimal, i32::from(scale)),
+                    from_minor(minor, scale)
+                );
+            }
         }
     }
 }

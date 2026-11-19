@@ -138,12 +138,18 @@ Done when the server builds on both crates without glob imports from them.
 - [x] First ports (`ShopSettings`, `Carts` in `ports.rs`), implemented by the
       server; currency discovery and the price job reads are `http/` and `store/`
       of the component, with typed rows and tests against test ports.
-- [ ] Move the remaining currency parts (price job creation and worker, rate
-      refresh, the removal guard), taxes and customer groups. The worker writes
-      product prices and history, so it needs a catalogue port; currency
-      selection on a cart belongs to checkout.
+- [x] Price job creation (through a locked-settings port), tax classes with the
+      destination rate, customer groups and the context selection rules moved.
+- [ ] Move the price job worker, the rate refresh and the removal guard. The
+      worker writes product prices and history, so it needs a catalogue port;
+      tax and group validation stay with `shop` because they check the whole
+      settings object; currency selection on a cart belongs to checkout.
 - [ ] Money is one type in minor units everywhere; the column "uses floating
-      point" on the proof coverage page is zero for this component.
+      point" on the proof coverage page is zero for this component. Done so far:
+      cart totals (goods, tax, payable, net) are added as minor units by proved
+      rules. The calculators themselves stay a bit-exact floating-point port of the
+      original ones; replacing them needs the PHP comparison run, which CI has
+      and the local machine does not.
 - [ ] Typed DTOs at the interface; `sqlx::query_as!` with offline cache in `store/`.
       So far rows are typed with `query_as` and checked by `sql_prepare.py`; the
       macro needs the `macros` feature and a prepared-query cache in CI.
@@ -266,7 +272,10 @@ those stay covered by the tests above, and the coverage page keeps saying so.
       reason. No third state.
 - [ ] Money: addition and scaling never overflow silently; rounding is stated and
       proved; net plus tax equals gross; a discount never exceeds its base; a total
-      is never negative.
+      is never negative. Proved and bound in cart pricing: addition (`amount_sum`,
+      four properties), net plus tax equals gross and net never above gross
+      (`net_amount`), discount within its base (`discount_cap`). Open: scaling
+      and rounding.
 - [ ] Price calculation: the order total equals the sum of its lines, shipping and
       tax for every input; the same input gives the same quote.
 - [ ] Stock: a reservation never takes stock below zero; reserve followed by
@@ -284,7 +293,8 @@ those stay covered by the tests above, and the coverage page keeps saying so.
 - [x] Sovereign AI mode admits only the self-operated provider on a self-hosted
       endpoint (`sovereign_request_admissible`, four properties).
 - [ ] Extend the extractor to saturating addition and multiplication together with
-      the first rule that uses them. The price calculation is still a floating-point
+      the first rule that uses them. Addition is done (`amount_sum`); multiplication
+      follows with line totals. The price calculation is still a floating-point
       port of the original calculators, so "total equals the sum of its parts"
       becomes provable only after phase 2 moves it to whole minor units.
 - [ ] State-machine proofs as invariants over transitions, not only single steps.

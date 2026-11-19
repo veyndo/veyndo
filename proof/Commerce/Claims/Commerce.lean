@@ -274,4 +274,31 @@ theorem offer_changed_revision_denied (expired cart total : Bool) :
     offer_honoured expired cart false total = false := by
   cases expired <;> cases cart <;> cases total <;> simp [offer_honoured]
 
+/-- Below the largest representable amount the sum of two amounts is their exact sum. -/
+theorem amount_sum_exact (a b : Nat) (h : a + b ≤ 18446744073709551615) :
+    amount_sum a b = a + b := by
+  simp only [amount_sum]; exact Nat.min_eq_left h
+
+/-- A sum never wraps around: it stays within the representable range. -/
+theorem amount_sum_bounded (a b : Nat) : amount_sum a b ≤ 18446744073709551615 := by
+  simp only [amount_sum]; exact Nat.min_le_right _ _
+
+/-- Adding an amount never makes a representable total smaller. -/
+theorem amount_sum_not_below (a b : Nat) (h : a ≤ 18446744073709551615) :
+    a ≤ amount_sum a b := by
+  simp only [amount_sum]; exact Nat.le_min.mpr ⟨Nat.le_add_right a b, h⟩
+
+/-- The order in which two amounts are added does not matter. -/
+theorem amount_sum_comm (a b : Nat) : amount_sum a b = amount_sum b a := by
+  simp only [amount_sum, Nat.add_comm]
+
+/-- Net plus tax equals gross whenever the tax is part of the gross amount. -/
+theorem net_plus_tax_is_gross (gross tax : Nat) (h : tax ≤ gross) :
+    net_amount gross tax + tax = gross := by
+  simp only [net_amount]; exact Nat.sub_add_cancel h
+
+/-- A net amount never exceeds its gross amount and is never negative. -/
+theorem net_not_above_gross (gross tax : Nat) : net_amount gross tax ≤ gross := by
+  simp only [net_amount]; exact Nat.sub_le _ _
+
 end CommerceKernel

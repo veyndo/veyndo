@@ -89,6 +89,8 @@ pub(super) fn eval(j: &Value) -> Result<Value, String> {
             b("same_revision")?,
             b("same_total")?
         ))),
+        Some("amount_sum") => Ok(json!(amount_sum(n("left")?, n("right")?))),
+        Some("net_amount") => Ok(json!(net_amount(n("gross")?, n("tax")?))),
         _ => Err("Unknown policy".into()),
     }
 }

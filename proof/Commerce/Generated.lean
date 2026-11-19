@@ -159,6 +159,12 @@ def admin_payment_admissible (is_admin : Bool) (manual : Bool) (simulated : Bool
 def offer_honoured (expired : Bool) (same_cart : Bool) (same_revision : Bool) (same_total : Bool) : Bool :=
   ((((!expired) && same_cart) && same_revision) && same_total)
 
+def amount_sum (left : Nat) (right : Nat) : Nat :=
+  (min (left + right) 18446744073709551615)
+
+def net_amount (gross : Nat) (tax : Nat) : Nat :=
+  (gross - tax)
+
 def order_edit_admissible (terminal : Bool) : Bool :=
   (!terminal)
 

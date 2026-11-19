@@ -1,6 +1,6 @@
 """Fail-closed typed Rust-to-Lean extraction. Trusted boundary: this translator,
 Rust/Lean compilers. Nat matches u64 for literals/min/saturating_sub/comparisons;
-no overflowing arithmetic, calls, casts, branches, macros or effects accepted.
+saturating_add is the sum capped at the largest u64. No overflowing arithmetic, calls, casts, branches, macros or effects accepted.
 """
 from dataclasses import dataclass
 import re
@@ -34,7 +34,9 @@ class Expr:
         if self.kind == 'leaf': return self.value
         if self.kind == 'not': return f'(!{self.children[0].lean()})'
         a, b = (c.lean() for c in self.children)
-        if self.kind == 'method': return f'(min {a} {b})' if self.value == 'min' else f'({a} - {b})'
+        if self.kind == 'method':
+            if self.value == 'saturating_add': return f'(min ({a} + {b}) {MAX_U64})'
+            return f'(min {a} {b})' if self.value == 'min' else f'({a} - {b})'
         if self.value in ('&&', '||'): return f'({a} {self.value} {b})'
         op = {'==': '=', '!=': '≠', '<=': '≤', '>=': '≥'}.get(self.value, self.value)
         return f'(decide ({a} {op} {b}))'
@@ -110,7 +112,7 @@ class Parser:
             else: raise ValueError(f'Unknown variable or unsupported call {t}')
         while self.peek() == '.':
             self.take(); method = self.take(); self.take('('); arg = self.expression(0); self.take(')')
-            if method not in ('min','saturating_sub') or value.typ != 'u64' or arg.typ != 'u64': raise ValueError('Unsupported method or type')
+            if method not in ('min','saturating_sub','saturating_add') or value.typ != 'u64' or arg.typ != 'u64': raise ValueError('Unsupported method or type')
             value = Expr('method','u64',method,(value,arg))
         return value
 

@@ -11,6 +11,10 @@ import Commerce.Claims
 #print axioms CommerceKernel.ai_autonomy_exact
 #print axioms CommerceKernel.ai_price_exact
 #print axioms CommerceKernel.ai_price_locked_denied
+#print axioms CommerceKernel.amount_sum_bounded
+#print axioms CommerceKernel.amount_sum_comm
+#print axioms CommerceKernel.amount_sum_exact
+#print axioms CommerceKernel.amount_sum_not_below
 #print axioms CommerceKernel.app_callback_exact
 #print axioms CommerceKernel.app_callback_without_consent_denied
 #print axioms CommerceKernel.app_configuration_release_exact
@@ -98,6 +102,8 @@ import Commerce.Claims
 #print axioms CommerceKernel.native_asset_hosted_denied
 #print axioms CommerceKernel.native_lifecycle_exact
 #print axioms CommerceKernel.native_lifecycle_safe
+#print axioms CommerceKernel.net_not_above_gross
+#print axioms CommerceKernel.net_plus_tax_is_gross
 #print axioms CommerceKernel.notification_ambiguous_never_retry
 #print axioms CommerceKernel.notification_retry_exact
 #print axioms CommerceKernel.offer_changed_revision_denied

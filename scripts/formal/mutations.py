@@ -130,6 +130,8 @@ MUTANTS=[
  ('download_admissible','!order_blocked','true'),
  ('checkout_contact_admissible','billing_present','true'),
  ('receipt_admissible','expected == received','true'),
+ ('amount_sum','left.saturating_add(right)','left'),
+ ('net_amount','gross.saturating_sub(tax)','gross'),
  ('offer_honoured','!expired &&','true &&'),
  ('offer_honoured','&& same_total','&& true'),
  ('offer_honoured','&& same_revision','&& true'),

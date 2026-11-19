@@ -13,14 +13,14 @@ run SQL without being in a `store` folder. Both numbers only fall.
 
 | Component | Lines of Rust | Glob imports | Untyped accesses | SQL outside store | Tables | Uses | Foreign tables |
 | --- | ---: | ---: | ---: | ---: | ---: | --- | ---: |
-| core | 3187 | 0 | 4 | 10 | 10 | none | 10 |
+| core | 3197 | 0 | 4 | 10 | 10 | none | 10 |
 | identity | 3503 | 8 | 86 | 18 | 13 | apps (9), catalog (7), checkout (1), core (355), customers (1), host (4), intelligence (9), marketing (5), shop (14), studio (4) | 11 |
 | shop | 4112 | 42 | 98 | 23 | 15 | apps (7), b2b (2), catalog (3), checkout (17), core (256), customers (3), host (4), intelligence (8), marketing (8), payments (4), pricing (12), shipping (1), studio (12) | 19 |
 | catalog | 5920 | 53 | 202 | 33 | 11 | apps (19), b2b (2), checkout (12), core (341), customers (5), identity (30), intelligence (10), marketing (16), pricing (29), protocols (1), shipping (1), shop (42), studio (9) | 15 |
 | inventory | 374 | 3 | 26 | 3 | 2 | catalog (1), checkout (2), core (27), identity (4), intelligence (3), pricing (3), protocols (2), shop (2) | 3 |
-| pricing | 3421 | 10 | 20 | 5 | 2 | apps (2), catalog (2), checkout (8), core (67), identity (4), marketing (3), shop (16), studio (2) | 10 |
+| pricing | 3478 | 10 | 20 | 5 | 2 | apps (2), catalog (2), checkout (8), core (67), identity (4), marketing (3), shop (16), studio (2) | 10 |
 | shipping | 970 | 7 | 115 | 4 | 0 | apps (3), catalog (5), checkout (1), core (45), identity (5), orders (5), payments (1), pricing (16), shop (20), studio (4) | 6 |
-| checkout | 2706 | 14 | 148 | 10 | 3 | apps (22), b2b (19), catalog (9), core (240), customers (5), host (7), identity (2), intelligence (2), inventory (2), marketing (15), orders (6), payments (8), pos (12), pricing (51), shipping (10), shop (22), studio (9) | 13 |
+| checkout | 2715 | 14 | 148 | 10 | 3 | apps (22), b2b (19), catalog (9), core (240), customers (5), host (7), identity (2), intelligence (2), inventory (2), marketing (15), orders (6), payments (8), pos (12), pricing (47), shipping (10), shop (22), studio (9) | 13 |
 | customers | 1618 | 18 | 85 | 15 | 3 | apps (9), catalog (1), checkout (5), core (175), identity (32), marketing (2), orders (5), pos (1), pricing (1), shipping (5), shop (13), studio (9) | 6 |
 | orders | 4967 | 39 | 451 | 22 | 7 | apps (36), b2b (1), catalog (11), checkout (15), core (294), customers (5), identity (71), marketing (6), payments (7), pos (1), pricing (7), shipping (2), shop (22), studio (8) | 17 |
 | payments | 4021 | 3 | 265 | 21 | 7 | apps (10), checkout (3), core (275), host (5), identity (10), inventory (1), pos (1), pricing (2), shop (13), studio (1) | 14 |
@@ -32,7 +32,7 @@ run SQL without being in a `store` folder. Both numbers only fall.
 | intelligence | 11367 | 86 | 716 | 55 | 28 | apps (45), catalog (31), checkout (22), core (724), customers (1), host (3), identity (80), marketing (18), orders (1), payments (1), pricing (22), protocols (8), shipping (1), shop (43), studio (11) | 26 |
 | studio | 2787 | 26 | 167 | 18 | 5 | apps (31), b2b (4), catalog (4), core (153), customers (1), identity (52), intelligence (11), marketing (8), orders (2), pos (1), pricing (2), shop (12) | 34 |
 | protocols | 2769 | 17 | 132 | 2 | 0 | apps (23), b2b (9), catalog (10), checkout (25), core (104), customers (1), host (2), identity (32), intelligence (23), marketing (9), orders (8), payments (3), pos (3), pricing (6), shipping (3), shop (17), studio (10) | 2 |
-| host | 2961 | 7 | 40 | 6 | 1 | apps (1), catalog (1), core (116), intelligence (5), pricing (13) | 9 |
+| host | 2965 | 7 | 40 | 6 | 1 | apps (1), catalog (1), core (118), intelligence (5), pricing (13) | 9 |
 | connectors | 0 | 0 | 0 | 0 | 6 | none | 0 |
 
 ## Cycles
@@ -78,7 +78,7 @@ reduced to one direction first.
 - checkout ↔ orders: 6 and 15 references
 - checkout ↔ payments: 8 and 3 references
 - checkout ↔ pos: 12 and 23 references
-- checkout ↔ pricing: 51 and 8 references
+- checkout ↔ pricing: 47 and 8 references
 - checkout ↔ shipping: 10 and 1 references
 - checkout ↔ shop: 22 and 17 references
 - customers ↔ identity: 32 and 1 references

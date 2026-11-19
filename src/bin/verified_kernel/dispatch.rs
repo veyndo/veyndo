@@ -50,6 +50,7 @@ pub(super) fn eval(j: &Value) -> Result<Value, String> {
         | Some("rule_boolean_comparison")
         | Some("rule_xor_count") => automation::eval(j),
         Some("admin_payment_admissible")
+        | Some("amount_sum")
         | Some("b2b_approval_admissible")
         | Some("b2b_budget_admissible")
         | Some("capture_admissible")
@@ -60,6 +61,7 @@ pub(super) fn eval(j: &Value) -> Result<Value, String> {
         | Some("discount_cap")
         | Some("external_amount_admissible")
         | Some("external_paid_total_admissible")
+        | Some("net_amount")
         | Some("offer_honoured")
         | Some("pos_cash_admissible")
         | Some("pos_discount_admissible")

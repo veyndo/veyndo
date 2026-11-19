@@ -90,3 +90,11 @@ pub fn offer_honoured(
 ) -> bool {
     !expired && same_cart && same_revision && same_total
 }
+/// The sum of two amounts in minor units; it never wraps around.
+pub fn amount_sum(left: u64, right: u64) -> u64 {
+    left.saturating_add(right)
+}
+/// The net part of a gross amount in minor units; it is never negative.
+pub fn net_amount(gross: u64, tax: u64) -> u64 {
+    gross.saturating_sub(tax)
+}

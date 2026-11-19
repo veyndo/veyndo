@@ -6,19 +6,19 @@ This page answers one question per source file of the commerce core: is its
 rule proved by machine, does it call a proved rule, or neither? It is
 generated from the same manifest the proof check uses, so it cannot say more
 than the check verifies. **It is not a claim that the shop is free of errors:**
-91.2 % of the Rust source files are unproved.
+91.4 % of the Rust source files are unproved.
 
 ## In numbers
 
 | | Count | Share of source files | Meaning |
 | --- | ---: | ---: | --- |
-| **Proved rules** | 67 | | Small pure decisions, translated from the production Rust source to Lean and proved there |
-| **Proved properties** | 163 | | Statements about those rules that hold for every possible input |
+| **Proved rules** | 69 | | Small pure decisions, translated from the production Rust source to Lean and proved there |
+| **Proved properties** | 169 | | Statements about those rules that hold for every possible input |
 | Rule files | 8 | 0.8 % | The files that contain the proved rules |
-| Reviewed callers | 70 | 7.0 % | Files that call a proved rule; a person reviewed how the rule is fed, the surrounding code is not proved |
+| Reviewed callers | 71 | 7.0 % | Files that call a proved rule; a person reviewed how the rule is fed, the surrounding code is not proved |
 | Comparison drivers | 9 | 0.9 % | Test programs that compare the compiled Rust rules with the Lean versions |
-| **Unproved files** | 906 | 91.2 % | Everything else: database access, HTTP, providers, the user interface server |
-| All Rust source files | 993 | 100 % | |
+| **Unproved files** | 932 | 91.4 % | Everything else: database access, HTTP, providers, the user interface server |
+| All Rust source files | 1020 | 100 % | |
 
 A proved rule looks like this one, which caps a discount at the amount it is
 taken from:
@@ -43,12 +43,12 @@ rounding still has to be argued by tests rather than by the type.
 | Area | Files | Call a proved rule | Unproved | Use floating point |
 | --- | ---: | ---: | ---: | ---: |
 | Money primitives and discounts | 14 | 3 | 11 | 3 |
-| Cart and prices | 5 | 0 | 5 | 1 |
+| Cart and prices | 5 | 1 | 4 | 1 |
 | Checkout and orders | 17 | 4 | 13 | 0 |
 | Payments and refunds | 33 | 6 | 27 | 0 |
-| Currencies and taxes | 11 | 2 | 9 | 4 |
+| Currencies and taxes | 10 | 0 | 10 | 2 |
 | Stock | 1 | 0 | 1 | 0 |
-| **Money path in total** | **81** | **15** | **66** | **8** |
+| **Money path in total** | **80** | **14** | **66** | **6** |
 
 The money path is also checked by tests that are not shown here: the
 differential comparison against the original PHP price calculation and the
@@ -62,22 +62,24 @@ that call it.
 
 ### Prices, stock, payments and refunds
 
-18 rules, 54 proved properties.
+20 rules, 60 proved properties.
 [Source](https://github.com/veyndo/veyndo/blob/main/crates/kernel/src/verified_kernel/commerce.rs).
 
 | Rule | What the source says about it | Proved properties | Used in |
 | --- | --- | --- | --- |
 | `admin_payment_admissible` | No comment in the source | 2: `admin_payment_exact`, `admin_external_payment_denied` | `src/operations/manual_order_admission.rs` |
+| `amount_sum` | The sum of two amounts in minor units; it never wraps around. | 4: `amount_sum_exact`, `amount_sum_bounded`, `amount_sum_not_below`, `amount_sum_comm` | `src/cart_price.rs` |
 | `b2b_approval_admissible` | An approval requires a different employee, current authority, pending state and exact revision. | 2: `b2b_approval_exact`, `b2b_self_approval_denied` | `src/b2b/purchase.rs`, `src/b2b/approval.rs` |
 | `b2b_budget_admissible` | Spending cannot exceed a currency-bound unit budget, including existing allocations. | 6: `b2b_budget_exact`, `b2b_budget_conserves`, `budget_sequence_bounded`, `budget_sequence_conservation`, `budget_lowered_limit_denied`, `budget_zero_at_exhaustion` | `src/b2b/purchase.rs` |
 | `capture_admissible` | Captures and in-flight reservations together cannot exceed the original authorization. | 3: `capture_exact`, `capture_bounded`, `capture_zero_denied` | `src/payments/capture_admission.rs` |
 | `checkout_contact_admissible` | No comment in the source | 2: `financial_contact_required`, `checkout_contact_exact` | `src/checkout/commit.rs` |
 | `checkout_review_admissible` | No comment in the source | 1: `checkout_review_exact` | `src/checkout_review.rs` |
-| `currency_context_admissible` | A quoted currency must be enabled, configured and have an admissible rate. | 2: `currency_context_exact`, `currency_context_stale_denied` | `src/currencies/model.rs` |
-| `currency_scale_admissible` | No comment in the source | 2: `currency_scale_exact`, `currency_scale_overflow_denied` | `crates/commerce/src/money.rs` |
-| `discount_cap` | No comment in the source | 6: `discount_bounded`, `discount_requested`, `discount_conservation`, `discount_exact`, `discount_monotone_requested`, `discount_idempotent` | `crates/commerce/src/discount.rs` |
-| `external_amount_admissible` | Source amounts are bounded; a zero rate cannot carry nonzero tax. No tax-law inference. | 2: `external_amount_exact`, `external_amount_tax_bounded` | `crates/commerce/src/external_order.rs` |
-| `external_paid_total_admissible` | Paid imports require a positive, exactly reconciled source total. | 2: `external_paid_total_exact`, `external_unpaid_denied` | `crates/commerce/src/external_order.rs` |
+| `currency_context_admissible` | A quoted currency must be enabled, configured and have an admissible rate. | 2: `currency_context_exact`, `currency_context_stale_denied` | `components/pricing/src/types/currency.rs` |
+| `currency_scale_admissible` | No comment in the source | 2: `currency_scale_exact`, `currency_scale_overflow_denied` | `components/pricing/src/domain/money.rs` |
+| `discount_cap` | No comment in the source | 6: `discount_bounded`, `discount_requested`, `discount_conservation`, `discount_exact`, `discount_monotone_requested`, `discount_idempotent` | `components/pricing/src/domain/discount.rs` |
+| `external_amount_admissible` | Source amounts are bounded; a zero rate cannot carry nonzero tax. No tax-law inference. | 2: `external_amount_exact`, `external_amount_tax_bounded` | `components/pricing/src/domain/external_order.rs` |
+| `external_paid_total_admissible` | Paid imports require a positive, exactly reconciled source total. | 2: `external_paid_total_exact`, `external_unpaid_denied` | `components/pricing/src/domain/external_order.rs` |
+| `net_amount` | The net part of a gross amount in minor units; it is never negative. | 2: `net_plus_tax_is_gross`, `net_not_above_gross` | `src/cart_price.rs` |
 | `offer_honoured` | A signed offer is honoured only before it expires and only for the same cart, revision and total. | 4: `offer_honoured_exact`, `offer_expired_denied`, `offer_changed_total_denied`, `offer_changed_revision_denied` | `src/cognition/signed_offer.rs` |
 | `pos_cash_admissible` | Cash change is bounded and nonnegative only under cashier authorization and a reviewed total. | 3: `pos_cash_exact`, `pos_cash_conserves`, `pos_cash_unauthorized_denied` | `src/pos/settlement.rs` |
 | `pos_discount_admissible` | No comment in the source | 2: `pos_discount_exact`, `pos_discount_exceeds_denied` | `src/pos/discount.rs` |
@@ -118,7 +120,7 @@ that call it.
 | `native_asset_bypass` | Only native public assets may skip identity; every hosted alias retains tenant/channel admission. | 2: `native_asset_hosted_denied`, `native_asset_bypass_exact` | `src/auth/middleware.rs` |
 | `persistent_key_admissible` | Permanent credentials and credential settings require a current personal administrator. | 2: `persistent_key_exact`, `persistent_key_nonpersonal_denied` | `src/auth/integrations.rs`, `src/apps/settings.rs` |
 | `platform_admissible` | Global administration requires a personal session and a current independent operator grant. | 2: `platform_exact`, `platform_personal_required` | `src/platform/auth.rs` |
-| `scope_admissible` | No comment in the source | 3: `scope_authenticated_known`, `scope_explicit_no_escalation`, `scope_exact` | `src/auth/permissions.rs` |
+| `scope_admissible` | No comment in the source | 3: `scope_authenticated_known`, `scope_explicit_no_escalation`, `scope_exact` | `components/identity/src/domain/permissions.rs` |
 | `shop_request_admissible` | Availability fence: paused merchant reads and existing payment settlement may continue. | 2: `shop_availability_exact`, `shop_archived_denied` | `src/platform/lifecycle.rs` |
 | `workspace_length_admissible` | A workspace ID has between 2 and 48 characters. | 2: `workspace_length_exact`, `workspace_length_short_denied` | `components/core/src/lib.rs` |
 
@@ -152,8 +154,8 @@ that call it.
 
 | Rule | What the source says about it | Proved properties | Used in |
 | --- | --- | --- | --- |
-| `customer_group_net` | Net presentation requires a currently configured group with an explicit business basis. | 2: `customer_group_unknown_denied`, `customer_group_net_exact` | `src/commerce/customer_groups.rs` |
-| `destination_tax_admissible` | Destination tax rules require every configured jurisdiction and validity condition. | 1: `destination_tax_exact` | `src/commerce/tax_rules.rs` |
+| `customer_group_net` | Net presentation requires a currently configured group with an explicit business basis. | 2: `customer_group_unknown_denied`, `customer_group_net_exact` | `components/pricing/src/types/customer_group.rs` |
+| `destination_tax_admissible` | Destination tax rules require every configured jurisdiction and validity condition. | 1: `destination_tax_exact` | `components/pricing/src/service/tax.rs` |
 | `flow_delay_admissible` | A durable flow delay is bounded to thirty days. | 1: `flow_delay_exact` | `src/marketing/pipeline.rs` |
 | `notification_retry_admissible` | A notification may be retried only after an explicit rate-limit rejection and before attempt eight. | 2: `notification_retry_exact`, `notification_ambiguous_never_retry` | `extensions/services/connectors/src/worker.rs` |
 | `resource_quota_admissible` | No comment in the source | 2: `resource_quota_exact`, `resource_quota_zero_denied` | `src/platform/quotas.rs` |

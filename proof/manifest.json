@@ -617,6 +617,26 @@
         "capture_zero_denied"
       ]
     },
+    "amount_sum": {
+      "bindings": [
+        "src/cart_price.rs"
+      ],
+      "theorems": [
+        "amount_sum_exact",
+        "amount_sum_bounded",
+        "amount_sum_not_below",
+        "amount_sum_comm"
+      ]
+    },
+    "net_amount": {
+      "bindings": [
+        "src/cart_price.rs"
+      ],
+      "theorems": [
+        "net_plus_tax_is_gross",
+        "net_not_above_gross"
+      ]
+    },
     "offer_honoured": {
       "bindings": [
         "src/cognition/signed_offer.rs"
@@ -862,8 +882,8 @@
     },
     "components/pricing/src/domain/money.rs": {
       "status": "reviewed-binding",
-      "sha256": "eccf8be0775f1531a2520c4c8254cccae04b27507c9035bdb46ff25a3d0b14dd",
-      "review": "Review compiler-enforced foundation crates with unchanged native owners; native provider read-tool aliases and current authorization, private checkpoint continuation and versioned prompt evidence; fixed subscriber acknowledgements preserve commit gaps, independent quarantine and explicit replay; traced requests/tasks/outbox without payloads; exact decimal-to-minor-unit rounding retains legacy price boundary; real SQL poison-isolation regression passes and workspace unit/clippy checks pass"
+      "sha256": "ace64cb04150669420b07d1d212b5e342eac631eeff2d5c5067b99e6ce31a240",
+      "review": "Cart totals are added as whole minor units through the proved amount_sum and net_amount rules; the extractor models saturating_add as the sum capped at the largest u64. A test shows the integer totals equal the previous rounded decimal totals."
     },
     "components/pricing/src/domain/pricing.rs": {
       "status": "unproved",
@@ -1162,8 +1182,8 @@
     },
     "crates/kernel/src/verified_kernel/commerce.rs": {
       "status": "extracted-policy",
-      "sha256": "1d1637c412f8bb710ad24f185c356f6673aa5bb73e25ece194f59ceed610eace",
-      "review": "Three further proved rules with production bindings: a signed offer is honoured only unexpired and for the unchanged cart, revision and total (signed_offer.rs, result identical to the former expression); sovereign AI mode admits only the self-operated provider on a self-hosted endpoint (sovereign.rs, same decision, endpoint check no longer short-circuited and free of effects); workspace ID length bounds (core). Three SQL statements gained explicit parameter casts matching their bound types. Kernel, core and cognition unit tests pass. SQL, HTTP and provider behaviour is not formally proved."
+      "sha256": "6035f0dac413a10eb9de156cbada8400db772d6308f61a97f360f805b2fd20c5",
+      "review": "Cart totals are added as whole minor units through the proved amount_sum and net_amount rules; the extractor models saturating_add as the sum capped at the largest u64. A test shows the integer totals equal the previous rounded decimal totals."
     },
     "crates/kernel/src/verified_kernel/fulfillment.rs": {
       "status": "extracted-policy",
@@ -1177,8 +1197,8 @@
     },
     "crates/kernel/src/verified_kernel.rs": {
       "status": "extracted-policy",
-      "sha256": "206c40dffbdbb22eea76676d4191459b3d0db0086214e2c98e73286e51389f5c",
-      "review": "Three further proved rules with production bindings: a signed offer is honoured only unexpired and for the unchanged cart, revision and total (signed_offer.rs, result identical to the former expression); sovereign AI mode admits only the self-operated provider on a self-hosted endpoint (sovereign.rs, same decision, endpoint check no longer short-circuited and free of effects); workspace ID length bounds (core). Three SQL statements gained explicit parameter casts matching their bound types. Kernel, core and cognition unit tests pass. SQL, HTTP and provider behaviour is not formally proved."
+      "sha256": "713fa5e5df27aca0a5a5d944723d43e864855680f809197875921672a39b0ef0",
+      "review": "Cart totals are added as whole minor units through the proved amount_sum and net_amount rules; the extractor models saturating_add as the sum capped at the largest u64. A test shows the integer totals equal the previous rounded decimal totals."
     },
     "crates/runtime/src/database_scope/provision.rs": {
       "status": "unproved",
@@ -3757,8 +3777,8 @@
     },
     "src/bin/verified_kernel/dispatch/commerce.rs": {
       "status": "conformance-driver",
-      "sha256": "86d7799e006b568b4dcaecacea158ea4ed25efc5677253fb3e91eb601654b796",
-      "review": "Three further proved rules with production bindings: a signed offer is honoured only unexpired and for the unchanged cart, revision and total (signed_offer.rs, result identical to the former expression); sovereign AI mode admits only the self-operated provider on a self-hosted endpoint (sovereign.rs, same decision, endpoint check no longer short-circuited and free of effects); workspace ID length bounds (core). Three SQL statements gained explicit parameter casts matching their bound types. Kernel, core and cognition unit tests pass. SQL, HTTP and provider behaviour is not formally proved."
+      "sha256": "225e2f2fd43f821fb649b873f7d21fe6c07dc2a418405a3657dfe51e85621071",
+      "review": "Cart totals are added as whole minor units through the proved amount_sum and net_amount rules; the extractor models saturating_add as the sum capped at the largest u64. A test shows the integer totals equal the previous rounded decimal totals."
     },
     "src/bin/verified_kernel/dispatch/fulfillment.rs": {
       "status": "conformance-driver",
@@ -3772,8 +3792,8 @@
     },
     "src/bin/verified_kernel/dispatch.rs": {
       "status": "conformance-driver",
-      "sha256": "b45810f17a93213f6fef5997fbbf31f788f71ffac39815c98c533261e2478cee",
-      "review": "Three further proved rules with production bindings: a signed offer is honoured only unexpired and for the unchanged cart, revision and total (signed_offer.rs, result identical to the former expression); sovereign AI mode admits only the self-operated provider on a self-hosted endpoint (sovereign.rs, same decision, endpoint check no longer short-circuited and free of effects); workspace ID length bounds (core). Three SQL statements gained explicit parameter casts matching their bound types. Kernel, core and cognition unit tests pass. SQL, HTTP and provider behaviour is not formally proved."
+      "sha256": "417ffa7a1d76aae2e0c686e1d8b0ad2f1e430459a3bb0dabc5e70c170866703a",
+      "review": "Cart totals are added as whole minor units through the proved amount_sum and net_amount rules; the extractor models saturating_add as the sum capped at the largest u64. A test shows the integer totals equal the previous rounded decimal totals."
     },
     "src/bin/verified_kernel.rs": {
       "status": "conformance-driver",
@@ -3841,9 +3861,9 @@
       "review": "Reviewed chat cart preview and conditional edit reuse native quote and optimistic mutation, and app metadata derives from an admitted public product reference. Catalogue approval checks original task actor and current scopes before applying. The Rust/PostgreSQL regression covers stale quotes, wrong items, foreign cart scope, and same-shop approval denial."
     },
     "src/cart_price.rs": {
-      "status": "unproved",
-      "sha256": "72490a72cf4569e0026254f908fb2b3fb58c743c739888dd996628b6c1dc8b02",
-      "review": "Checkout private relay: fixed upstream session routes, native buyer admission, bounded responses, and separate request capacity for Core callbacks. No new formal claims."
+      "status": "reviewed-binding",
+      "sha256": "375f96cc570473ec6437fc3610c3d57c182b9510b7380fc4deee2add4f0fbbf3",
+      "review": "Cart totals are added as whole minor units through the proved amount_sum and net_amount rules; the extractor models saturating_add as the sum capped at the largest u64. A test shows the integer totals equal the previous rounded decimal totals."
     },
     "src/cart_routes.rs": {
       "status": "unproved",
@@ -6437,8 +6457,8 @@
       "review": "Split unchanged extracted policies and theorem bodies by domain; bind exact existing planning/private-preview admission; prove sequential integer allocations and denial after limit reduction; add u128 edge regressions and closed module inventory."
     },
     "proof/Commerce/Claims/Commerce.lean": {
-      "sha256": "752697a90b12428136bba4371286b3a56e4f3efa0cde6344df5b61e5fcabfb67",
-      "review": "Three further proved rules with production bindings: a signed offer is honoured only unexpired and for the unchanged cart, revision and total (signed_offer.rs, result identical to the former expression); sovereign AI mode admits only the self-operated provider on a self-hosted endpoint (sovereign.rs, same decision, endpoint check no longer short-circuited and free of effects); workspace ID length bounds (core). Three SQL statements gained explicit parameter casts matching their bound types. Kernel, core and cognition unit tests pass. SQL, HTTP and provider behaviour is not formally proved."
+      "sha256": "cd36e058ea4226349fe1da067136bcaf1b56602006f4539fdd112722c150cc49",
+      "review": "Cart totals are added as whole minor units through the proved amount_sum and net_amount rules; the extractor models saturating_add as the sum capped at the largest u64. A test shows the integer totals equal the previous rounded decimal totals."
     },
     "proof/Commerce/Claims/Fulfillment.lean": {
       "sha256": "fa0f2a3d19f2ac74e00368761fa2a89db5890b6b9f9940c969f932466e8024b1",
@@ -6481,8 +6501,8 @@
       "review": "The commerce crate became components/pricing with its rules under domain/; no rule changed"
     },
     "scripts/formal/extract.py": {
-      "sha256": "18ca3e4ba2989fbef9e1413cf0cc0a726ec21ea8a6bee4a7eed5f06818b14583",
-      "review": "Split unchanged extracted policies and theorem bodies by domain; bind exact existing planning/private-preview admission; prove sequential integer allocations and denial after limit reduction; add u128 edge regressions and closed module inventory."
+      "sha256": "e7be48c7fd1153646a478179744843bd007e36324dcf5549f9a5ad049195f27a",
+      "review": "Cart totals are added as whole minor units through the proved amount_sum and net_amount rules; the extractor models saturating_add as the sum capped at the largest u64. A test shows the integer totals equal the previous rounded decimal totals."
     },
     "scripts/formal/layout.py": {
       "sha256": "9e513ba82dd3dea228c6d8ce17f6e2d3c817817d117ec8fae773de76a1a57fb4",
@@ -6493,12 +6513,12 @@
       "review": "Proof layout controls follow the removed length limit; suite runner can continue after a failing suite; SQL check attributes errors on one ordered stream. No production rule changed in this step."
     },
     "scripts/formal/modules.py": {
-      "sha256": "879f1f3abdac9a12a172c47a43ca24be20a8870f5915af168c4da47f5a0db7cd",
-      "review": "Three further proved rules with production bindings: a signed offer is honoured only unexpired and for the unchanged cart, revision and total (signed_offer.rs, result identical to the former expression); sovereign AI mode admits only the self-operated provider on a self-hosted endpoint (sovereign.rs, same decision, endpoint check no longer short-circuited and free of effects); workspace ID length bounds (core). Three SQL statements gained explicit parameter casts matching their bound types. Kernel, core and cognition unit tests pass. SQL, HTTP and provider behaviour is not formally proved."
+      "sha256": "32714608e66c4297ef00c947edd998ec3a68170c27f1809fe59df4f6975f7008",
+      "review": "Cart totals are added as whole minor units through the proved amount_sum and net_amount rules; the extractor models saturating_add as the sum capped at the largest u64. A test shows the integer totals equal the previous rounded decimal totals."
     },
     "scripts/formal/mutations.py": {
-      "sha256": "ba6396dc45b6366434c4b0881ad815538fbc5f5d5ce228f9e4f85818eda60033",
-      "review": "Workspace length rule written with saturating subtraction so that it stays inside the extracted subset without a range lint; same accepted set, proved as 2 <= length <= 48."
+      "sha256": "9bf7ddc6de9908f005589d4677f3b5325ccf336d2de683fc85a2a13377b7f0aa",
+      "review": "Cart totals are added as whole minor units through the proved amount_sum and net_amount rules; the extractor models saturating_add as the sum capped at the largest u64. A test shows the integer totals equal the previous rounded decimal totals."
     },
     "scripts/formal/registry.py": {
       "sha256": "24cd8fe49325e4cd8a972a30249962670088a692204892683408fc2617f05fd0",

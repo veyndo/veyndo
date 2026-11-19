@@ -12,8 +12,11 @@ pub(crate) fn quote(
     let decimals = currency.scale as i32;
     let interval = 10_f64.powi(-decimals);
     let mut lines = vec![];
-    let mut total = 0.;
-    let mut taxes = 0.;
+    // Totals are added as whole minor units by the proved sum rule; the calculators deliver rounded amounts.
+    let minor =
+        |value: f64| veyndo::money::to_minor(value, currency.scale).ok_or(bad("Invalid total"));
+    let mut total = 0_u64;
+    let mut taxes = 0_u64;
     for i in &c.data.items {
         let p = ps
             .iter()
@@ -85,8 +88,8 @@ pub(crate) fn quote(
             calc.tax = math_round(calc.tax + fee.tax, decimals);
             calc.calculated_taxes.extend(fee.calculated_taxes);
         }
-        total += calc.total_price;
-        taxes += calc.tax;
+        total = verified_kernel::amount_sum(total, minor(calc.total_price)?);
+        taxes = verified_kernel::amount_sum(taxes, minor(calc.tax)?);
         lines.push(json!({"id":p.id,"referencedId":p.id,"productNumber":p.product_number,"parentId":p.parent_id,"media":p.media,"label":format!("{}{}",p.name,p.options.as_object().filter(|o|!o.is_empty()).map(|o|format!(" · {}",o.values().filter_map(|v|v.as_str()).collect::<Vec<_>>().join(" / "))).unwrap_or_default()),"quantity":i.quantity,"stock":p.stock,"price":{"unitPrice":calc.unit_price,"totalPrice":calc.total_price,"calculatedTaxes":calc.calculated_taxes.iter().map(|t|json!({"tax":t.tax,"taxRate":t.tax_rate,"price":t.price})).collect::<Vec<_>>(),"listPrice":calc.list_price,"regulationPrice":calc.regulation_price.map(|price|json!({"price":price})),"referencePrice":calc.reference_price},"discountPercent":math_round((1.-discount)*100.,0),"ruleId":tier.map(|t|&t.rule_id),"minPurchase":p.min_purchase,"purchaseSteps":p.purchase_steps,"maxPurchase":p.max_purchase}));
     }
     for line in &mut lines {
@@ -103,15 +106,21 @@ pub(crate) fn quote(
             line["appConfigurations"] = json!(configs);
         }
     }
-    let total = math_round(total, decimals);
-    let taxes = math_round(taxes, decimals);
-    let payable = if b2b {
-        math_round(total + taxes, decimals)
+    let decimal = |minor: u64| veyndo::money::from_minor(minor, currency.scale);
+    let payable = decimal(if b2b {
+        verified_kernel::amount_sum(total, taxes)
     } else {
         total
-    };
+    });
+    let net = decimal(if b2b {
+        total
+    } else {
+        verified_kernel::net_amount(total, taxes)
+    });
+    let total = decimal(total);
+    let taxes = decimal(taxes);
     Ok(
-        json!({"token":c.token,"id":c.id,"revision":c.revision,"status":c.status,"lineItems":lines,"customerGroup":c.data.group,"customerId":c.data.customer_id,"customerEmail":c.data.email,"company":c.data.company,"price":{"positionPrice":total,"totalPrice":payable,"netPrice":if b2b{total}else{math_round(total-taxes,decimals)},"tax":taxes,"taxStatus":if b2b{"net"}else{"gross"},"currency":currency.code,"currencyScale":currency.scale},"currencyContext":currencies::context(cfg,currency),"availableCurrencies":cfg.enabled,"order":c.data.order}),
+        json!({"token":c.token,"id":c.id,"revision":c.revision,"status":c.status,"lineItems":lines,"customerGroup":c.data.group,"customerId":c.data.customer_id,"customerEmail":c.data.email,"company":c.data.company,"price":{"positionPrice":total,"totalPrice":payable,"netPrice":net,"tax":taxes,"taxStatus":if b2b{"net"}else{"gross"},"currency":currency.code,"currencyScale":currency.scale},"currencyContext":currencies::context(cfg,currency),"availableCurrencies":cfg.enabled,"order":c.data.order}),
     )
 }
 pub(crate) fn configuration_price(
