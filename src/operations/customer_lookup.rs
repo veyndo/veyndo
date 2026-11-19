@@ -8,7 +8,7 @@ pub(super) async fn lookup(
     let t = merchant(&a, &h)?;
     auth::permit(&h, "customers.read")?;
     auth::permit(&h, "customers.pii")?;
-    let limit = c.validate()?;
+    let limit = super::list_criteria::validate(&c)?;
     Ok(Json(
         veyndo_customers::service::directory::lookup(&a.core, &t, &c.after, &c.query, limit)
             .await?,

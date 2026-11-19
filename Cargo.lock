@@ -3738,14 +3738,20 @@ name = "veyndo-orders"
 version = "0.5.0"
 dependencies = [
  "axum",
+ "chrono",
+ "pdf-extract",
+ "reqwest",
  "serde",
  "serde_json",
+ "sha2 0.10.9",
  "sqlx",
+ "uuid",
  "veyndo-app-model",
  "veyndo-core",
  "veyndo-identity",
  "veyndo-pricing",
  "veyndo-runtime",
+ "veyndo-shipping",
  "veyndo-shop",
 ]
 

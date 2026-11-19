@@ -2,3 +2,4 @@
 pub mod domain;
 pub mod types;
 pub use types::settings::Settings;
+pub mod store;

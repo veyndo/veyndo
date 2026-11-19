@@ -10,48 +10,7 @@ pub(crate) use inspect::{inspect, route as inspect_route};
 mod products;
 mod relations;
 mod reviews;
-#[derive(Deserialize, Serialize)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub(crate) struct SourceRecord {
-    pub version: u8,
-    pub source: String,
-    pub source_shop: String,
-    pub kind: String,
-    pub source_id: String,
-    pub data: Value,
-    pub warnings: Vec<String>,
-}
-impl SourceRecord {
-    fn validate(&self) -> Result<()> {
-        if self.version != 1
-            || [&self.source, &self.source_shop, &self.source_id]
-                .iter()
-                .any(|s| s.is_empty() || s.len() > 200 || s.chars().any(char::is_control))
-            || !self.data.is_object()
-            || self.data.to_string().len() > 512 * 1024
-            || self.warnings.len() > 20
-        {
-            return Err(bad("Invalid versioned import identity or record"));
-        }
-        Ok(())
-    }
-    pub(super) fn identity(&self, t: &str) -> String {
-        use sha2::Digest;
-        let bytes = sha2::Sha256::digest(
-            serde_json::to_vec(&(
-                t,
-                &self.source,
-                &self.source_shop,
-                &self.kind,
-                &self.source_id,
-            ))
-            .unwrap(),
-        );
-        let mut id = [0; 16];
-        id.copy_from_slice(&bytes[..16]);
-        Uuid::from_bytes(id).to_string()
-    }
-}
+pub(crate) use veyndo_orders::types::source_record::SourceRecord;
 pub(super) async fn identity_namespace(a: &App, t: &str) -> Result<String> {
     Ok(staging::parent(a, t).await?.unwrap_or_else(|| t.into()))
 }

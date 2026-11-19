@@ -710,6 +710,11 @@
       "sha256": "01fc4b97d4a9faee26c1ffdf13b0464b92d33cd24a66fcc12285648efd0bba74",
       "review": "image jobs moved into components/catalog; no kernel binding changed"
     },
+    "components/catalog/src/domain/intake_schema.rs": {
+      "status": "unproved",
+      "sha256": "302c965bcca94d7823992d1e538bcd621c5f38cf967e63cb2618e23ca2947244",
+      "review": "Order list criteria, company model and receipts moved into components; kernel call sites unchanged"
+    },
     "components/catalog/src/domain/media.rs": {
       "status": "unproved",
       "sha256": "eb9f5aacef9d5c7e52dc5ad2e88c2033632bcb60f406d8a035d7acf5d249f1e3",
@@ -752,8 +757,8 @@
     },
     "components/catalog/src/domain.rs": {
       "status": "unproved",
-      "sha256": "b0daca50382b0372a72bade50b4267e2fb3eea1b824b60f48fdf7ceaadfb2d50",
-      "review": "image jobs moved into components/catalog; no kernel binding changed"
+      "sha256": "930caad0547ec444bb3905f2ee5d63a55ec405e42157f884113a30357a39532e",
+      "review": "Order list criteria, company model and receipts moved into components; kernel call sites unchanged"
     },
     "components/catalog/src/http/assets.rs": {
       "status": "unproved",
@@ -1360,6 +1365,26 @@
       "sha256": "2bb2601298480825aabebf6791d204ef513dffa5c42971fcb702d83ec26f01e7",
       "review": "Flow pipeline and promotion types moved into components/marketing; kernel call sites unchanged"
     },
+    "components/orders/src/domain/company_model.rs": {
+      "status": "unproved",
+      "sha256": "b2fe59eba3d1ffff2dcdb08dc286f48ab3bfe240b34caa59feb68f257e2ad748",
+      "review": "Order list criteria, company model and receipts moved into components; kernel call sites unchanged"
+    },
+    "components/orders/src/domain/creation_schema.rs": {
+      "status": "unproved",
+      "sha256": "487cd0adedfe3b619bc775f45f1eda4818131122f6bfe84f77feec88ea93ba96",
+      "review": "Order list criteria, company model and receipts moved into components; kernel call sites unchanged"
+    },
+    "components/orders/src/domain/import_product.rs": {
+      "status": "unproved",
+      "sha256": "523f620bbf1b58f969a3666c3bea260c8d6fa80662e3eca8b2da9b63eee93342",
+      "review": "Order list criteria, company model and receipts moved into components; kernel call sites unchanged"
+    },
+    "components/orders/src/domain/import_relations.rs": {
+      "status": "unproved",
+      "sha256": "fba89f884f778c84af14bff17e2e5c4deec0494f7e207ac89de9609e30abb514",
+      "review": "Order list criteria, company model and receipts moved into components; kernel call sites unchanged"
+    },
     "components/orders/src/domain/order_fields.rs": {
       "status": "unproved",
       "sha256": "5cae0dc3862a0a52d9e06b7d5391b623575d0bab1414646f828885a41427a682",
@@ -1380,6 +1405,11 @@
       "sha256": "e011272d721ecb6bf459cd170ae82f657c1f4cd5cc7672785c6fb1bc822c8ff1",
       "review": "order workflow kernel bindings follow the move into components/orders"
     },
+    "components/orders/src/domain/receipt_pdf.rs": {
+      "status": "unproved",
+      "sha256": "d2d53775b69447f9941b6f85117dcc745b7f9566d907f28406ce4892379c026a",
+      "review": "Order list criteria, company model and receipts moved into components; kernel call sites unchanged"
+    },
     "components/orders/src/domain/receipt_text.rs": {
       "status": "unproved",
       "sha256": "6212e0519b8cba9ce0cbb927c27378c07e93845c7ffe4eeb7c393a483c2aeb72",
@@ -1387,13 +1417,13 @@
     },
     "components/orders/src/domain.rs": {
       "status": "unproved",
-      "sha256": "6d6180a3458a5dcbfadcd78fefbdb19577d49dff7bcdc583bade8423154c5132",
-      "review": "order workflow kernel bindings follow the move into components/orders"
+      "sha256": "72694d2af42f8a010321df814ff0fb0357ced6702175073516b62d329bcd4045",
+      "review": "Order list criteria, company model and receipts moved into components; kernel call sites unchanged"
     },
     "components/orders/src/lib.rs": {
       "status": "unproved",
-      "sha256": "6ce297bd017c12a5373906123ab69be5c195bd377d09c850d0003648475067cc",
-      "review": "order workflow kernel bindings follow the move into components/orders"
+      "sha256": "e145456a1f13d24b5328fb771149f84569b5c9cc61cf32dbb1498f41a782cd19",
+      "review": "Order list criteria, company model and receipts moved into components; kernel call sites unchanged"
     },
     "components/orders/src/store/machine.rs": {
       "status": "unproved",
@@ -1409,6 +1439,21 @@
       "status": "unproved",
       "sha256": "58ba6136e58cd8e21790e9cc2f19a5dd4e470361c35d04c6d102b52235ebd85e",
       "review": "order workflow kernel bindings follow the move into components/orders"
+    },
+    "components/orders/src/types/list_criteria.rs": {
+      "status": "unproved",
+      "sha256": "8fcad14ce0984b66e24f40f7673ecdbc63ca70f73f7a7b8693856ab95a977dd1",
+      "review": "Order list criteria, company model and receipts moved into components; kernel call sites unchanged"
+    },
+    "components/orders/src/types/source_record.rs": {
+      "status": "unproved",
+      "sha256": "a0bc8f34a353f33a2267c86508a1cc0111f9941a16709cbf7242f79eed639d3d",
+      "review": "Order list criteria, company model and receipts moved into components; kernel call sites unchanged"
+    },
+    "components/orders/src/types.rs": {
+      "status": "unproved",
+      "sha256": "840b603c5883287c9054e74b6355e8c223797e6f9dd7bdb7a8fa624ce6c9351d",
+      "review": "Order list criteria, company model and receipts moved into components; kernel call sites unchanged"
     },
     "components/payments/src/domain/amounts.rs": {
       "status": "unproved",
@@ -1760,6 +1805,11 @@
       "sha256": "b1c4b41266a639477014245de13eb83a1c14f6f68c68f6b0eaefb5f807bbc2e2",
       "review": "delivery_split_admissible and carrier_booking_admissible bindings moved into components/shipping"
     },
+    "components/shop/src/domain/checkout_selection.rs": {
+      "status": "unproved",
+      "sha256": "5fe0fec692b5362bb6d51923f4b3bb771e3c99dabd786c1ffbc2b66951002880",
+      "review": "Order list criteria, company model and receipts moved into components; kernel call sites unchanged"
+    },
     "components/shop/src/domain/customer_groups.rs": {
       "status": "unproved",
       "sha256": "da1caedadeff46975c93d69b70d49078c5cac7d7a9e83bd760373655377c91a5",
@@ -1787,13 +1837,23 @@
     },
     "components/shop/src/domain.rs": {
       "status": "unproved",
-      "sha256": "0342f21df6a6ff8ff8a0c6978de624bbdbb9a705d3a9a177005bb81d0708f866",
-      "review": "shop component crate created; settings types moved; no kernel binding changed"
+      "sha256": "d96d128283258be475c34e958364171fb1c450ec28b427baba8c59cead9bea3d",
+      "review": "Order list criteria, company model and receipts moved into components; kernel call sites unchanged"
     },
     "components/shop/src/lib.rs": {
       "status": "unproved",
-      "sha256": "bf19573b8e75163d72b09b76c240fb8c694012d69bcc20cec79291fb2dc2778c",
-      "review": "shop component crate created; settings types moved; no kernel binding changed"
+      "sha256": "5a08d949996029d82491f30ce0af6feab1224965247bdcaba9b40823e77edc42",
+      "review": "Order list criteria, company model and receipts moved into components; kernel call sites unchanged"
+    },
+    "components/shop/src/store/group_usage.rs": {
+      "status": "unproved",
+      "sha256": "ace9347f4b68a8a840bcc669953725d244555192c350601d9aad1c7a73eb6297",
+      "review": "Order list criteria, company model and receipts moved into components; kernel call sites unchanged"
+    },
+    "components/shop/src/store.rs": {
+      "status": "unproved",
+      "sha256": "30003196af90ff0cf953c898bce266644cc2cd94a42b28b754733e29ffa5a5ca",
+      "review": "Order list criteria, company model and receipts moved into components; kernel call sites unchanged"
     },
     "components/shop/src/types/b2b.rs": {
       "status": "unproved",
@@ -4987,8 +5047,8 @@
     },
     "src/commerce/catalog_intake/schema.rs": {
       "status": "unproved",
-      "sha256": "052c4c2322680e4a5929be5adb80f74bd3e2b866b7e065994b7b89378190d794",
-      "review": "Reviewed inbound UCP/native cart and consent transactions, native finalization contact guard, immutable order snapshots, explicit optional negotiation, public HTTPS app-owned catalogue adapters; independent whole-branch review findings repaired and six isolated HTTP/PG suites pass. No extracted kernel policy changed; SQL/provider behavior remains unproved."
+      "sha256": "0f94f34d70d56d1758b31b5abb385984acc0b1ef365a56a16dcf14687967747b",
+      "review": "Order list criteria, company model and receipts moved into components; kernel call sites unchanged"
     },
     "src/commerce/catalog_ports.rs": {
       "status": "unproved",
@@ -5052,8 +5112,8 @@
     },
     "src/commerce/group_usage.rs": {
       "status": "unproved",
-      "sha256": "b90d4e00f3f9dc096f3aaee1ecf0940a2f56960751e4b78b6aaeb4acc2dcdb33",
-      "review": "Reviewed connected CRM: configured group pricing admission with exact Lean contract, settings lock and dependency rejection; independent revisioned default addresses and ownership-validated book restore; trusted transaction-local actors with deferred one-per-transaction credential-free aggregate history; scoped read/write/MCP restore through domain handlers preserving current stock, identity and financial events. Real crm_history tests cover all twelve editable entity restore types, checkout, stale writes, group dependencies, foreign shops and viewer rejection; Rust unit/lint and affected integration suites verify existing consumers. SQL/async adapters remain unproved."
+      "sha256": "0487591f9661a6ae7520628d1432dd53f7cff5d7ab8d7b48c5a352103b36f512",
+      "review": "Order list criteria, company model and receipts moved into components; kernel call sites unchanged"
     },
     "src/commerce/international_capabilities.rs": {
       "status": "unproved",
@@ -5147,8 +5207,8 @@
     },
     "src/commerce/selection.rs": {
       "status": "unproved",
-      "sha256": "cf9c88d0506861120c57343f081fc1b0d6d57cee71c7e47b9b6cafaa78e20088",
-      "review": "Reviewed connected CRM: configured group pricing admission with exact Lean contract, settings lock and dependency rejection; independent revisioned default addresses and ownership-validated book restore; trusted transaction-local actors with deferred one-per-transaction credential-free aggregate history; scoped read/write/MCP restore through domain handlers preserving current stock, identity and financial events. Real crm_history tests cover all twelve editable entity restore types, checkout, stale writes, group dependencies, foreign shops and viewer rejection; Rust unit/lint and affected integration suites verify existing consumers. SQL/async adapters remain unproved."
+      "sha256": "43d5bd721fc073e9578498fabf567bf02294826e67e4c04fe76954873b829e45",
+      "review": "Order list criteria, company model and receipts moved into components; kernel call sites unchanged"
     },
     "src/commerce/settings_mutation.rs": {
       "status": "unproved",
@@ -5757,8 +5817,8 @@
     },
     "src/operations/company_model.rs": {
       "status": "unproved",
-      "sha256": "d8ba973f47e068ac8e362e34a9fd3d1eca01c5512c7191b0ec4129300558b067",
-      "review": "Reviewed company field whitelist, dynamic locales and structured geography; tenant-only immutable decoded logo storage and public linked projection; serialized base/channel revisions with stale and concurrent HTTP cases; order-channel issuer and immutable cancellation snapshots; private cloning, selective release and digest-rebound live baseline. 80 Rust and 122 UI tests plus company, merchant operations, account and staging PostgreSQL suites passed. JSON, SQL, image and UI adapters remain unproved."
+      "sha256": "f6e973b7c6d2635b5a4fe973a9c84210d9a31a36aa412213398023f184ec2f1b",
+      "review": "Order list criteria, company model and receipts moved into components; kernel call sites unchanged"
     },
     "src/operations/company_public.rs": {
       "status": "unproved",
@@ -5767,8 +5827,8 @@
     },
     "src/operations/creation_schema.rs": {
       "status": "unproved",
-      "sha256": "46f8ec48db3242fb0bb3e10cc4a9ac564e9867443d9d89aee18546f799a98ce5",
-      "review": "2026-10-19 reviewed native read-only import projection against shared product/category/address owners; paired CRM/history PII and private target/package/digest checks; generic completion evidence atomically uses existing job creator/lease/package and record CAS, platform AEAD, native actual-field verification, no new app table or queue. Actual eight-domain migration/archival/restart/tamper and native app callback/jobs/admin creation tests pass; pure cancelled-success policy has exact Lean claim, all boolean cases and a true-return negative mutation. SQL, cryptography, async service correctness and public hosting remain outside formal proof."
+      "sha256": "cf6e9983e9f837bf4dc85df6d9951272570d7852680e5475d87cee24d3de2b51",
+      "review": "Order list criteria, company model and receipts moved into components; kernel call sites unchanged"
     },
     "src/operations/customer_create.rs": {
       "status": "unproved",
@@ -5777,13 +5837,13 @@
     },
     "src/operations/customer_lookup.rs": {
       "status": "unproved",
-      "sha256": "a8e4030f37ce1a2a2980b4fbe2215901f99c302a49c9ecc966d84d3cb21b957f",
-      "review": "customers component crate created; no kernel binding changed"
+      "sha256": "8e00dda9f83a130298856c8f896d5cc7c3cbc57f94c5b4ad79f6587ea50b1565",
+      "review": "Order list criteria, company model and receipts moved into components; kernel call sites unchanged"
     },
     "src/operations/customers.rs": {
       "status": "unproved",
-      "sha256": "a1871f3a75abda9d12cda5334fc89ac7b8f703399c612a8dce0834d1c0237fc3",
-      "review": "Reviewed native extension identity/private/unique anchors and current read/write/PII scopes; native projections use bounded fixed-store queries, exact indexed filters bind all input and fence the admitted package digest. Real four-object HTTP/MCP, role revocation, foreign reference, immutable upgrade, product/company clone and selected release tests passed. Added extracted configuration-only release predicate and operational false property; SQL and UI remain explicitly unproved. Reviewed canonical schema, preserved AI bindings and versioned grid prompt provenance without changing existing prompt revisions."
+      "sha256": "93c071a281bc071e0b4ac8df8a62aeb1b665a5a3d7572868f332533a11d99988",
+      "review": "Order list criteria, company model and receipts moved into components; kernel call sites unchanged"
     },
     "src/operations/delivery_booking.rs": {
       "status": "unproved",
@@ -5797,8 +5857,8 @@
     },
     "src/operations/grid_schema.rs": {
       "status": "unproved",
-      "sha256": "574d687e63b873d0e1ad4ed3a09d134b71f455d0e4feb267ceb921da14e5cd7f",
-      "review": "Product hydration, list query and preparation moved into components/catalog; no rule changed"
+      "sha256": "dc5c462d81b66ac6fe7638eefc8299d4f41117207eb787abe8d5e464998a5507",
+      "review": "Order list criteria, company model and receipts moved into components; kernel call sites unchanged"
     },
     "src/operations/guest_customers.rs": {
       "status": "unproved",
@@ -5847,13 +5907,13 @@
     },
     "src/operations/imports/inspect_product.rs": {
       "status": "unproved",
-      "sha256": "0562fec96f1773681e1ba61fd577a2aa776205755ed4e3da4ccab26a18210043",
-      "review": "Reviewed product inspection diff: explicit catalogue-only bounded projection under existing apps.manage/catalog.read and tenant admission; default comparison stays values-free. Actual migration HTTP tests verify changed price/text, missing targets, foreign and no-catalogue denial; no native write/release is added."
+      "sha256": "7af716db556deffb203779fce2286ad91d6bdf8fdae9caf0032d9a3b3be4b521",
+      "review": "Order list criteria, company model and receipts moved into components; kernel call sites unchanged"
     },
     "src/operations/imports/mod.rs": {
       "status": "unproved",
-      "sha256": "61cafa1652913654a6552a7bb7645caa9c076ae97c149ff4a2b8c88d3d01784f",
-      "review": "Reviewed product inspection diff: explicit catalogue-only bounded projection under existing apps.manage/catalog.read and tenant admission; default comparison stays values-free. Actual migration HTTP tests verify changed price/text, missing targets, foreign and no-catalogue denial; no native write/release is added."
+      "sha256": "5424b49b7c0ca0be1999b32eaf1ceac21f249dd51364288b6889947b278fa5d8",
+      "review": "Order list criteria, company model and receipts moved into components; kernel call sites unchanged"
     },
     "src/operations/imports/products.rs": {
       "status": "unproved",
@@ -5862,8 +5922,8 @@
     },
     "src/operations/imports/relations.rs": {
       "status": "unproved",
-      "sha256": "6b5cd1ee3c76bb7183770542be78c5856eb47a94ad25596cc1cf389d70bf8d65",
-      "review": "Reviewed native source-neutral imports, historical no-purchase effects, scoped job leases/creator/package/digest fences and shared managed-record replay. Independent boundary findings fixed with unknown-field rejection and eight concurrent editor/import cases; actual signed-runtime/source-service/native-checkout tests pass. SQL and external source equivalence remain outside extracted proofs."
+      "sha256": "12360fae981165e92f485ec1479c6f449516f5f6f8a802fddb639aef80ffbfc7",
+      "review": "Order list criteria, company model and receipts moved into components; kernel call sites unchanged"
     },
     "src/operations/imports/reviews.rs": {
       "status": "unproved",
@@ -5872,8 +5932,8 @@
     },
     "src/operations/list_criteria.rs": {
       "status": "unproved",
-      "sha256": "e62ba0516555123d32104bb1eaeff98065e75e3f8fb9be194dd023de9493be1a",
-      "review": "Product hydration, list query and preparation moved into components/catalog; no rule changed"
+      "sha256": "ee37d8d798a2412ff258641c97cb539f267c1911a8e55941c42d0e111ea393b5",
+      "review": "Order list criteria, company model and receipts moved into components; kernel call sites unchanged"
     },
     "src/operations/manual_order_admission.rs": {
       "status": "reviewed-binding",
@@ -5907,13 +5967,13 @@
     },
     "src/operations/orders.rs": {
       "status": "unproved",
-      "sha256": "fd99de8c9b9e782fcc269171f7e5719ba42d4f156b8ef585b925909eb282d304",
-      "review": "Native lifecycle review: bounded namespaced app graphs preserve native terminal/payment/stock/buyer admission, per-object immutable accepted definitions, current compound scopes, same HTTP MCP Flow owners and operational history; SQL snapshots and migration 105 are regression-tested adapters, not proved."
+      "sha256": "94b1325c57b536580c8fa6352a8312e81a3b52d12c40df6bb3f5c9c91c52c8a9",
+      "review": "Order list criteria, company model and receipts moved into components; kernel call sites unchanged"
     },
     "src/operations/receipt_pdf.rs": {
       "status": "unproved",
-      "sha256": "3066f24a9a89000c794370fe36d54eef66942565a38b4c0c9fa7471c3c371dcb",
-      "review": "Reviewed receipt PDF WinAnsi character mapping and real PDF extraction regression; native snapshot, permissions, invoice identity, money and extracted policies unchanged. Typographic regression failed on original serializer and passes with correct CP1252 mapping."
+      "sha256": "76cce5a1410bb5be2b894cd2e847ac414c35e338503567a0315bd7cf391b1274",
+      "review": "Order list criteria, company model and receipts moved into components; kernel call sites unchanged"
     },
     "src/operations/receipt_text.rs": {
       "status": "unproved",
@@ -6547,8 +6607,8 @@
       "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
     },
     "Cargo.lock": {
-      "sha256": "f79d8245525512855f9dd22fdf38f6b0768fecf9422fccd6c97356a4e07da450",
-      "review": "Flow pipeline and promotion types moved into components/marketing; kernel call sites unchanged"
+      "sha256": "800fca029abbf88cf68ff3b7f899f589fcb6a657a1dc466a585d2a0c4b7c5b58",
+      "review": "Order list criteria, company model and receipts moved into components; kernel call sites unchanged"
     },
     "Cargo.toml": {
       "sha256": "7638b41574d1477eae6412db91578e245a516326305914ad7fe934c496efe677",

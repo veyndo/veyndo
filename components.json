@@ -145,6 +145,9 @@
         "app_evidence",
         "app_packages",
         "carts",
+        "commerce_flows",
+        "commerce_promotions",
+        "commerce_rules",
         "customers",
         "exposures",
         "memberships",
@@ -238,7 +241,7 @@
         "tasks",
         "tenants"
       ],
-      "glob_imports": 40,
+      "glob_imports": 38,
       "untyped_access": 203,
       "sql_outside_store": 15
     },
@@ -302,17 +305,12 @@
       "foreign_tables": [
         "b2b_units",
         "carts",
-        "commerce_flows",
-        "commerce_overrides",
-        "commerce_promotions",
-        "commerce_rules",
         "commerce_settings",
-        "customers",
         "products"
       ],
-      "glob_imports": 9,
+      "glob_imports": 8,
       "untyped_access": 19,
-      "sql_outside_store": 5
+      "sql_outside_store": 4
     },
     "shipping": {
       "title": "Delivery methods, destinations, delivery splits and carrier booking",
@@ -511,7 +509,7 @@
         "sales_channels",
         "tenants"
       ],
-      "glob_imports": 34,
+      "glob_imports": 30,
       "untyped_access": 452,
       "sql_outside_store": 20
     },

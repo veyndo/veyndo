@@ -98,7 +98,7 @@ pub(crate) fn validate(entity: &str, v: &Value) -> Result<Value> {
     } else {
         let c: super::Criteria =
             serde_json::from_value(normalized.clone()).map_err(|_| bad("Invalid list filters"))?;
-        c.validate()?;
+        super::list_criteria::validate(&c)?;
         c.sort_for(entity)?;
     }
     Ok(normalized)

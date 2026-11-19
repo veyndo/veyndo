@@ -5,6 +5,7 @@ pub mod family;
 pub mod graph_query;
 pub mod hydration;
 pub mod image_job;
+pub mod intake_schema;
 pub mod media;
 pub mod model_format;
 pub mod navigation;

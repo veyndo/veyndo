@@ -8,7 +8,7 @@ pub(super) async fn list(
     let t = merchant(&a, &h)?;
     auth::permit(&h, "orders.read")?;
     auth::permit(&h, "customers.pii")?;
-    let n = c.validate()?;
+    let n = super::list_criteria::validate(&c)?;
     let filters =
         apps::extension_filter::admit(&a, &h, apps::core_extensions::Object::Order, &c.app_filter)
             .await?;
