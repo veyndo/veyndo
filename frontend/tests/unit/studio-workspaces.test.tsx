@@ -143,6 +143,8 @@ it("navigates every merchant workspace without duplicating registry requests", a
     name: "Veyndo Studio",
   });
   const user = userEvent.setup();
+  // The B2B group is collapsed until opened; its entries are part of the navigation too.
+  await user.click(navigation.querySelector("summary")!);
   const buttons = within(navigation).getAllByRole("button");
   expect(buttons.length).toBe(20);
   for (const button of buttons) {

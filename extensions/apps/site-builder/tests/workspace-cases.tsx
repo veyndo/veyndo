@@ -221,9 +221,11 @@ it("moves and deletes blocks on the actual canvas with native undo and without s
   fireEvent.click(
     await screen.findByRole("button", { name: "Open editor: Home" }),
   );
-  const first = (
-    await screen.findAllByRole("group", { name: "Element controls: Hero" })
-  )[0];
+  const first =
+    // A section is named by its own text; the element kind is only the fallback.
+    (
+      await screen.findAllByRole("group", { name: "Element controls: Shop" })
+    )[0];
   fireEvent.click(first.querySelector('[aria-label="Move down"]')!);
   expect(
     [...document.querySelectorAll("[data-block-id]")].map((e) =>

@@ -330,10 +330,14 @@ try:
         task=planned['messages'][-1]['data']['taskId']
         call('/api/agent/tasks/'+task+'/apply',{'approve':True},personal(reader),403)
         call('/api/agent/tasks/'+task+'/apply',{'approve':True},personal(other),404)
-        assert call('/api/agent/tasks/'+task+'/apply',{'approve':True},personal(editor))['applied']
+        # A proposal is approved by the person who asked for it: an editor cannot execute a reader's plan, only their own.
+        call('/api/agent/tasks/'+task+'/apply',{'approve':True},personal(editor),403)
+        assert next(p for p in call('/api/search/product',{},personal(owner))['elements'] if p['id']=='lamp')['price']==before
+        own=call('/api/agent/chat',{'message':'Create a price proposal; do not apply.','inference':{'provider':'openai','model':'contract-openai-model'}},personal(editor))['messages'][-1]['data']['taskId']
+        assert call('/api/agent/tasks/'+own+'/apply',{'approve':True},personal(editor))['applied']
         assert next(p for p in call('/api/search/product',{},personal(owner))['elements'] if p['id']=='lamp')['price']==71.23
         assert next(p for p in call('/api/search/product',{},personal(other))['elements'] if p['id']=='lamp')['price']==before
-        passed('Personal reader can plan; only authorized editor executes in the owning shop')
+        passed('Personal reader can plan but not execute; an editor executes only their own proposal in the owning shop')
         from testing.workspace_composition import verify_composition_access
         verify_composition_access(call, behavior, owner, personal, passed)
     from testing.copilot_navigation import verify_navigation
