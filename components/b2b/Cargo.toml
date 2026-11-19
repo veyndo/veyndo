@@ -1,0 +1,13 @@
+[package]
+name = "veyndo-b2b"
+version.workspace = true
+edition.workspace = true
+license-file.workspace = true
+description = "Company procurement: units, budgets, approvals and their purchasing contract"
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+veyndo-core = { path = "../core" }
+veyndo-pricing = { path = "../pricing" }
+veyndo-shop = { path = "../shop" }

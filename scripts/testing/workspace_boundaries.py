@@ -17,7 +17,10 @@ OWNERS.update({'veyndo-core': ROOT / 'components/core', 'veyndo-pricing': ROOT /
                'veyndo-shop': ROOT / 'components/shop',
                'veyndo-marketing': ROOT / 'components/marketing',
                'veyndo-orders': ROOT / 'components/orders',
-               'veyndo-payments': ROOT / 'components/payments'})
+               'veyndo-payments': ROOT / 'components/payments',
+               'veyndo-b2b': ROOT / 'components/b2b',
+               'veyndo-pos': ROOT / 'components/pos',
+               'veyndo-checkout': ROOT / 'components/checkout'})
 OWNERS.update({'veyndo': ROOT, 'veyndo-migration': ROOT / 'extensions/apps/migration',
                'veyndo-marketplaces': ROOT / 'extensions/apps/marketplaces',
                'veyndo-app-storage': ROOT / 'extensions/services/app-storage',
@@ -39,7 +42,7 @@ ALLOWED = {
     'veyndo-apps': {'veyndo-kernel', 'veyndo-app-runtime'},
     'veyndo-cognition': {'veyndo-runtime', 'veyndo-kernel', 'veyndo-app-authority', 'veyndo-core'},
     'veyndo-core': {'veyndo-kernel', 'veyndo-runtime'},
-    'veyndo-identity': {'veyndo-core', 'veyndo-kernel'},
+    'veyndo-identity': {'veyndo-core', 'veyndo-kernel', 'veyndo-app-model'},
     'veyndo-catalog': {'veyndo-core', 'veyndo-identity', 'veyndo-pricing'},
     'veyndo-inventory': {'veyndo-core', 'veyndo-catalog', 'veyndo-pricing'},
     'veyndo-shipping': {'veyndo-core', 'veyndo-identity', 'veyndo-pricing'},
@@ -47,7 +50,10 @@ ALLOWED = {
     'veyndo-marketing': {'veyndo-core', 'veyndo-pricing', 'veyndo-catalog', 'veyndo-shop', 'veyndo-app-model', 'veyndo-automation', 'veyndo-cognition', 'veyndo-flow-graph'},
     'veyndo-orders': {'veyndo-core', 'veyndo-identity', 'veyndo-pricing', 'veyndo-shop', 'veyndo-app-model', 'veyndo-runtime', 'veyndo-shipping'},
     'veyndo-payments': {'veyndo-core', 'veyndo-pricing'},
-    'veyndo-shop': {'veyndo-core', 'veyndo-pricing', 'veyndo-inventory', 'veyndo-shipping', 'veyndo-app-model'},
+    'veyndo-b2b': {'veyndo-core', 'veyndo-pricing', 'veyndo-shop'},
+    'veyndo-pos': {'veyndo-core', 'veyndo-pricing', 'veyndo-shop'},
+    'veyndo-checkout': {'veyndo-core', 'veyndo-pricing', 'veyndo-shop'},
+    'veyndo-shop': {'veyndo-core', 'veyndo-pricing', 'veyndo-inventory', 'veyndo-shipping', 'veyndo-app-model', 'veyndo-catalog'},
 }
 # Reviewed direct external capabilities. Cargo reports actual package names even
 # when a manifest renames sqlx as something innocuous. New dependencies need an
@@ -63,7 +69,7 @@ EXTERNAL = {
     'veyndo-automation': {'serde_json', 'chrono', 'chrono-tz'},
     'veyndo-pricing': {'serde', 'serde_json', 'chrono', 'regex', 'reqwest', 'tokio', 'axum', 'sqlx'},
     'veyndo-apps': set(),
-    'veyndo-identity': {'serde_json', 'axum'},
+    'veyndo-identity': {'serde_json', 'axum', 'argon2', 'hmac', 'ring', 'sha2', 'tokio', 'uuid'},
     'veyndo-catalog': {'serde', 'serde_json', 'sqlx', 'reqwest', 'axum', 'chrono', 'sha2', 'base64'},
     'veyndo-inventory': {'serde', 'serde_json', 'sqlx'},
     'veyndo-shipping': {'serde', 'serde_json', 'sqlx', 'axum'},
@@ -71,6 +77,9 @@ EXTERNAL = {
     'veyndo-marketing': {'serde', 'serde_json', 'sqlx'},
     'veyndo-orders': {'serde', 'serde_json', 'sqlx', 'axum', 'chrono', 'reqwest', 'sha2', 'uuid', 'pdf-extract'},
     'veyndo-payments': {'serde', 'serde_json', 'sqlx', 'chrono', 'reqwest'},
+    'veyndo-b2b': {'serde', 'serde_json'},
+    'veyndo-pos': {'serde', 'serde_json'},
+    'veyndo-checkout': {'serde', 'serde_json', 'chrono'},
     'veyndo-shop': {'serde', 'serde_json', 'chrono', 'reqwest', 'sqlx'},
     'veyndo-core': {'axum', 'serde', 'serde_json', 'sha2', 'sqlx', 'uuid', 'tokio', 'tracing', 'reqwest'},
     'veyndo-runtime': {'hmac', 'sha2', 'zeroize', 'sqlx', 'tokio', 'futures-util',

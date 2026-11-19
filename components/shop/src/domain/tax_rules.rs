@@ -63,3 +63,21 @@ pub fn validate(t: &TaxConfig, s: &Settings, conditions: Conditions<'_>) -> Resu
     }
     Ok(())
 }
+
+/// The destination a checkout selection names, resolved against the priority rules of one tax class.
+pub fn destination_rate(
+    t: &TaxConfig,
+    c: &crate::types::settings::CheckoutSelection,
+    today: &str,
+) -> Result<f64> {
+    let address = c.address.as_ref();
+    veyndo_pricing::service::tax::destination_rate(
+        t,
+        &veyndo_pricing::types::tax::Destination {
+            country: &c.country,
+            state: address.map(|a| a.country_state_id.as_str()).unwrap_or(""),
+            postal_code: address.map(|a| a.postal_code.as_str()).unwrap_or(""),
+        },
+        today,
+    )
+}

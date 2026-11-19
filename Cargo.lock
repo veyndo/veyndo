@@ -3493,7 +3493,9 @@ dependencies = [
  "veyndo-app-storage",
  "veyndo-apps",
  "veyndo-automation",
+ "veyndo-b2b",
  "veyndo-catalog",
+ "veyndo-checkout",
  "veyndo-cognition",
  "veyndo-core",
  "veyndo-customers",
@@ -3504,6 +3506,7 @@ dependencies = [
  "veyndo-marketing",
  "veyndo-orders",
  "veyndo-payments",
+ "veyndo-pos",
  "veyndo-pricing",
  "veyndo-runtime",
  "veyndo-shipping",
@@ -3588,6 +3591,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "veyndo-b2b"
+version = "0.5.0"
+dependencies = [
+ "serde",
+ "serde_json",
+ "veyndo-core",
+ "veyndo-pricing",
+ "veyndo-shop",
+]
+
+[[package]]
 name = "veyndo-catalog"
 version = "0.5.0"
 dependencies = [
@@ -3602,6 +3616,18 @@ dependencies = [
  "veyndo-core",
  "veyndo-identity",
  "veyndo-pricing",
+]
+
+[[package]]
+name = "veyndo-checkout"
+version = "0.5.0"
+dependencies = [
+ "chrono",
+ "serde",
+ "serde_json",
+ "veyndo-core",
+ "veyndo-pricing",
+ "veyndo-shop",
 ]
 
 [[package]]
@@ -3659,8 +3685,15 @@ version = "0.5.0"
 name = "veyndo-identity"
 version = "0.5.0"
 dependencies = [
+ "argon2",
  "axum",
+ "hmac 0.12.1",
+ "ring",
  "serde_json",
+ "sha2 0.10.9",
+ "tokio",
+ "uuid",
+ "veyndo-app-model",
  "veyndo-core",
  "veyndo-kernel",
 ]
@@ -3769,6 +3802,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "veyndo-pos"
+version = "0.5.0"
+dependencies = [
+ "serde",
+ "serde_json",
+ "veyndo-core",
+ "veyndo-pricing",
+ "veyndo-shop",
+]
+
+[[package]]
 name = "veyndo-pricing"
 version = "0.5.0"
 dependencies = [
@@ -3825,6 +3869,7 @@ dependencies = [
  "serde_json",
  "sqlx",
  "veyndo-app-model",
+ "veyndo-catalog",
  "veyndo-core",
  "veyndo-inventory",
  "veyndo-pricing",

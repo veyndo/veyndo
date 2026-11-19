@@ -1,0 +1,13 @@
+[package]
+name = "veyndo-pos"
+version.workspace = true
+edition.workspace = true
+license-file.workspace = true
+description = "Point of sale: the cashier contract on top of the ordinary checkout"
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+veyndo-core = { path = "../core" }
+veyndo-shop = { path = "../shop" }
+veyndo-pricing = { path = "../pricing" }

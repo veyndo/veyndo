@@ -165,7 +165,7 @@
         "tenant_ai_usage",
         "tenants"
       ],
-      "glob_imports": 40,
+      "glob_imports": 38,
       "untyped_access": 105,
       "sql_outside_store": 24
     },
@@ -285,7 +285,6 @@
         "src/currencies",
         "src/commerce/tax.rs",
         "src/commerce/tax_context.rs",
-        "src/commerce/tax_rules.rs",
         "src/commerce/customer_groups.rs",
         "src/commerce/group_usage.rs"
       ],
@@ -308,8 +307,8 @@
         "commerce_settings",
         "products"
       ],
-      "glob_imports": 8,
-      "untyped_access": 19,
+      "glob_imports": 6,
+      "untyped_access": 17,
       "sql_outside_store": 4
     },
     "shipping": {
@@ -351,18 +350,19 @@
     "checkout": {
       "title": "Cart, quote, checkout transaction and order placement",
       "sources": [
-        "src/checkout",
+        "components/checkout",
         "src/cart_model.rs",
         "src/cart_mutation.rs",
         "src/cart_price.rs",
         "src/cart_routes.rs",
         "src/cart_storage.rs",
+        "src/checkout",
         "src/checkout_handoff.rs",
         "src/checkout_page.rs",
         "src/checkout_products.rs",
         "src/checkout_review.rs",
-        "src/order_checkout.rs",
-        "src/commerce/app_adjustments.rs"
+        "src/commerce/app_adjustments.rs",
+        "src/order_checkout.rs"
       ],
       "tables": [
         "carts",
@@ -403,7 +403,7 @@
         "tenants"
       ],
       "glob_imports": 13,
-      "untyped_access": 148,
+      "untyped_access": 150,
       "sql_outside_store": 9
     },
     "customers": {
@@ -624,6 +624,7 @@
     "b2b": {
       "title": "Company procurement: organisations, budgets, approvals and quotes",
       "sources": [
+        "components/b2b",
         "src/b2b"
       ],
       "tables": [
@@ -659,13 +660,14 @@
         "outbox",
         "products"
       ],
-      "glob_imports": 19,
+      "glob_imports": 17,
       "untyped_access": 108,
       "sql_outside_store": 13
     },
     "pos": {
       "title": "Point-of-sale register adapters",
       "sources": [
+        "components/pos",
         "src/pos"
       ],
       "tables": [],
@@ -694,7 +696,7 @@
         "products",
         "sales_channels"
       ],
-      "glob_imports": 9,
+      "glob_imports": 7,
       "untyped_access": 68,
       "sql_outside_store": 5
     },

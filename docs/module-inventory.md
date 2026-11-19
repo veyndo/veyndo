@@ -330,7 +330,6 @@ This lists every checked-in source module in these roots, including files with n
 | [src/commerce/supply_proposal.rs](../src/commerce/supply_proposal.rs) | Reorder proposals: a signed offer from the supplier shop's public checkout on this installation, checked against the ceiling; approval hands over to that checkout and orders nothing. |
 | [src/commerce/tax.rs](../src/commerce/tax.rs) | Destination tax-class resolution and net-preserving price conversion. |
 | [src/commerce/tax_context.rs](../src/commerce/tax_context.rs) | Tax conditions consume private authoritative pre-tax cart facts without a recursive quote. |
-| [src/commerce/tax_rules.rs](../src/commerce/tax_rules.rs) | Priority-based destination rules; current tax law is merchant configuration, not bundled tax advice. |
 | [src/commerce/test_stock.rs](../src/commerce/test_stock.rs) | Entry point for scenarios; test stock is owned by the inventory component. |
 | [src/commerce/types.rs](../src/commerce/types.rs) | Checkout selection and configuration data contracts are owned by the shop component. |
 | [src/concierge.rs](../src/concierge.rs) | Read-only storefront shopping advisor. |
@@ -658,6 +657,11 @@ This lists every checked-in source module in these roots, including files with n
 
 | Module | Responsibility |
 |---|---|
+| [components/b2b/src/domain/contract.rs](../components/b2b/src/domain/contract.rs) | Native B2B operation catalogue and bounded request schema shared by HTTP, MCP and UCP adapters. |
+| [components/b2b/src/domain.rs](../components/b2b/src/domain.rs) | domain of this component. |
+| [components/b2b/src/lib.rs](../components/b2b/src/lib.rs) | B2B component: company procurement records, their bounds and the purchasing contract. |
+| [components/b2b/src/types/model.rs](../components/b2b/src/types/model.rs) | Bounded typed native company, purchasing-unit and employee policies. Money is currency-bound minor units. |
+| [components/b2b/src/types.rs](../components/b2b/src/types.rs) | types of this component. |
 | [components/catalog/src/domain/asset_file.rs](../components/catalog/src/domain/asset_file.rs) | File admission by content: a declared type is only accepted when the bytes carry its signature. |
 | [components/catalog/src/domain/content.rs](../components/catalog/src/domain/content.rs) | Field-level content fallback: a missing or `null` translation inherits the main language, an empty one stays empty. |
 | [components/catalog/src/domain/family.rs](../components/catalog/src/domain/family.rs) | A variant shows the texts and metadata of its family unless it sets its own. |
@@ -720,6 +724,9 @@ This lists every checked-in source module in these roots, including files with n
 | [components/catalog/src/types/review.rs](../components/catalog/src/types/review.rs) | A review as a shopper submits it and as a migration imports it; both arrive unpublished. |
 | [components/catalog/src/types/translation.rs](../components/catalog/src/types/translation.rs) | The translated texts of a product in one language; `None` inherits along the language chain. |
 | [components/catalog/src/types.rs](../components/catalog/src/types.rs) | Typed payloads and rows of the catalog component. |
+| [components/checkout/src/domain/tax_lines.rs](../components/checkout/src/domain/tax_lines.rs) | Destination tax-class resolution and net-preserving price conversion. |
+| [components/checkout/src/domain.rs](../components/checkout/src/domain.rs) | Rules of a quote, free of I/O apart from the clock. |
+| [components/checkout/src/lib.rs](../components/checkout/src/lib.rs) | Checkout component: tax lines and payment classification of a quote; the transaction follows. |
 | [components/core/src/access.rs](../components/core/src/access.rs) | Admission facts of one shop and sales channel, read once per request and shared by every later check. |
 | [components/core/src/admission/relay.rs](../components/core/src/admission/relay.rs) | Short, bounded relay admission waiting before contacting the independent Checkout service. |
 | [components/core/src/admission/tests.rs](../components/core/src/admission/tests.rs) | Regression checks for Core admission limits and the Checkout relay retry interval. |
@@ -760,7 +767,9 @@ This lists every checked-in source module in these roots, including files with n
 | [components/customers/src/store/customers.rs](../components/customers/src/store/customers.rs) | Customer rows as the merchant and the account see them, with order metrics from authoritative records. |
 | [components/customers/src/store/sessions.rs](../components/customers/src/store/sessions.rs) | Customer sessions, stored by the digest of their token. |
 | [components/customers/src/store.rs](../components/customers/src/store.rs) | SQL of the customers component. |
+| [components/identity/src/domain/credentials.rs](../components/identity/src/domain/credentials.rs) | Argon2 password operations run off the asynchronous request executor. |
 | [components/identity/src/domain/permissions.rs](../components/identity/src/domain/permissions.rs) | The permission vocabulary and the decision whether a request holds one. Owners retain control; delegates cannot grant rights they lack. |
+| [components/identity/src/domain/totp.rs](../components/identity/src/domain/totp.rs) | RFC 6238 authenticator codes, bounded clock drift and constant-time comparison. |
 | [components/identity/src/domain.rs](../components/identity/src/domain.rs) | Pure identity rules: no database, no transport. |
 | [components/identity/src/lib.rs](../components/identity/src/lib.rs) | Identity component: the checks every other component uses to ask who a request acts for and what it may do. |
 | [components/identity/src/route_policy.rs](../components/identity/src/route_policy.rs) | Rights are registered beside each API method. Missing registrations always deny access. |
@@ -840,6 +849,10 @@ This lists every checked-in source module in these roots, including files with n
 | [components/payments/src/store/refund_receipts.rs](../components/payments/src/store/refund_receipts.rs) | Exactly-once provider refund admission, including refunds initiated outside Studio. |
 | [components/payments/src/store/settlements.rs](../components/payments/src/store/settlements.rs) | Capture settlement admission: receipt claims, native job matching and the captured total in one transaction. |
 | [components/payments/src/store.rs](../components/payments/src/store.rs) | SQL of the payment ledger; admissions run inside the caller's transaction. |
+| [components/pos/src/domain/input.rs](../components/pos/src/domain/input.rs) | Strict input envelope shared by HTTP and MCP cashier commands. |
+| [components/pos/src/domain/schema.rs](../components/pos/src/domain/schema.rs) | Strict protocol schemas for the same POS operations used by HTTP and MCP. |
+| [components/pos/src/domain.rs](../components/pos/src/domain.rs) | domain of this component. |
+| [components/pos/src/lib.rs](../components/pos/src/lib.rs) | POS component: the cashier input contract and its capability schema. |
 | [components/pricing/examples/customer_contract.rs](../components/pricing/examples/customer_contract.rs) | Run contact normalization without a Core process, database, credentials or network. |
 | [components/pricing/src/conversions.rs](../components/pricing/src/conversions.rs) | A rejected pricing input becomes a client error of the shared error contract. |
 | [components/pricing/src/domain/cart.rs](../components/pricing/src/domain/cart.rs) | Persisted cart data with explicit typed host contexts and no credential or storage authority. |
@@ -889,9 +902,11 @@ This lists every checked-in source module in these roots, including files with n
 | [components/shipping/src/store/delivery_dates.rs](../components/shipping/src/store/delivery_dates.rs) | Calendar delivery windows by the database's date, so every replica agrees on today. |
 | [components/shipping/src/store/method_usage.rs](../components/shipping/src/store/method_usage.rs) | Where a delivery or payment method is still referenced; order snapshots remain immutable. |
 | [components/shipping/src/store.rs](../components/shipping/src/store.rs) | SQL of the shipping component. |
+| [components/shop/src/domain/buyer_consent.rs](../components/shop/src/domain/buyer_consent.rs) | Required contact data for explicit registered marketing segments; shared by protocol review and locked native checkout. |
 | [components/shop/src/domain/checkout_selection.rs](../components/shop/src/domain/checkout_selection.rs) | Recover a quote after configuration changes without losing items or silently committing new choices. |
 | [components/shop/src/domain/customer_groups.rs](../components/shop/src/domain/customer_groups.rs) | Tenant-owned translated customer groups preserve exact rule IDs and select an explicit existing price/tax presentation basis. |
 | [components/shop/src/domain/defaults.rs](../components/shop/src/domain/defaults.rs) | Backward-compatible enrichment of existing configuration with bundled translated method labels. |
+| [components/shop/src/domain/legal_product.rs](../components/shop/src/domain/legal_product.rs) | Explicit product safety/sector facts, with market-language fallback; no inference of certifications. |
 | [components/shop/src/domain/patch.rs](../components/shop/src/domain/patch.rs) | Transport-only sparse JSON differences: stable record IDs, explicit nulls, and deletion distinct from inheritance. |
 | [components/shop/src/domain/tax_rules.rs](../components/shop/src/domain/tax_rules.rs) | Priority-based destination rules; current tax law is merchant configuration, not bundled tax advice. |
 | [components/shop/src/domain/validation.rs](../components/shop/src/domain/validation.rs) | Configuration validation and required availability invariants. |

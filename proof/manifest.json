@@ -680,6 +680,31 @@
     }
   },
   "sources": {
+    "components/b2b/src/domain/contract.rs": {
+      "status": "unproved",
+      "sha256": "7212007ffd68ad1ac8ec4359a32dd873fe1f538e7b7a7b5aaafe88eb41200dc6",
+      "review": "Identity credentials, B2B and POS contracts and checkout tax lines moved into components; kernel call sites unchanged"
+    },
+    "components/b2b/src/domain.rs": {
+      "status": "unproved",
+      "sha256": "4d4da23b697436e5b9aa5d39cac588ad98744313aeba4e6bb24a73a7764c3d3a",
+      "review": "Identity credentials, B2B and POS contracts and checkout tax lines moved into components; kernel call sites unchanged"
+    },
+    "components/b2b/src/lib.rs": {
+      "status": "unproved",
+      "sha256": "b0055890cb546f6206b930ebf13d4344c7ba6eace06256992765ec74eedfa545",
+      "review": "Identity credentials, B2B and POS contracts and checkout tax lines moved into components; kernel call sites unchanged"
+    },
+    "components/b2b/src/types/model.rs": {
+      "status": "unproved",
+      "sha256": "e3dfd75fc70d741a3bf187f13588ee892dfef5a44f4e2d5d8e6a2c28b4f76da9",
+      "review": "Identity credentials, B2B and POS contracts and checkout tax lines moved into components; kernel call sites unchanged"
+    },
+    "components/b2b/src/types.rs": {
+      "status": "unproved",
+      "sha256": "755916745f77e07030f03259dfa8110819ac3f1da0790743b4dc3a27ab72c1f0",
+      "review": "Identity credentials, B2B and POS contracts and checkout tax lines moved into components; kernel call sites unchanged"
+    },
     "components/catalog/src/domain/asset_file.rs": {
       "status": "unproved",
       "sha256": "a1e0b807528d23397a4bd21541b842b1c9979a08d4270d7d69e47b81eae9d6c7",
@@ -975,6 +1000,21 @@
       "sha256": "9a2bcea53ca95789b2a268b746f8c40feaf4c5c8f36322252e754b500eef9515",
       "review": "Storefront catalogue reads and public attachments moved into components/catalog; no rule changed"
     },
+    "components/checkout/src/domain/tax_lines.rs": {
+      "status": "unproved",
+      "sha256": "b1669548f1cc6abd74ae4684fa8de4e64947eb8c8e3658565b35d26930787ffb",
+      "review": "Identity credentials, B2B and POS contracts and checkout tax lines moved into components; kernel call sites unchanged"
+    },
+    "components/checkout/src/domain.rs": {
+      "status": "unproved",
+      "sha256": "08c3e7e30817fdafd7e4ac6087a72932d92f72f0ff45d0c6cbc5352c5cfb3b17",
+      "review": "Identity credentials, B2B and POS contracts and checkout tax lines moved into components; kernel call sites unchanged"
+    },
+    "components/checkout/src/lib.rs": {
+      "status": "unproved",
+      "sha256": "8cd49e74d7ed186ed61e0e4d16482e129f34b227658d65271a31cbf9d7f09e47",
+      "review": "Identity credentials, B2B and POS contracts and checkout tax lines moved into components; kernel call sites unchanged"
+    },
     "components/core/src/access.rs": {
       "status": "unproved",
       "sha256": "9dbaa399afa585fdc25df2bdc32bd73313fb5324f283470252f428ac7b34423b",
@@ -1165,15 +1205,25 @@
       "sha256": "640b85ad8de7ff793c4898be08dd5acace4f376f7e02e09665d6675937a1467a",
       "review": "customers component crate created; no kernel binding changed"
     },
+    "components/identity/src/domain/credentials.rs": {
+      "status": "unproved",
+      "sha256": "d6e8ae129f04331723572a06f1dbcb6df1eeeede93fdaa8da622417c41752fb9",
+      "review": "Identity credentials, B2B and POS contracts and checkout tax lines moved into components; kernel call sites unchanged"
+    },
     "components/identity/src/domain/permissions.rs": {
       "status": "reviewed-binding",
       "sha256": "eee8b856137ddd68ab29983238f67ae7723d8f8bee3e439fdc6e0248d6e27710",
       "review": "Permission rules and the permit and merchant checks moved unchanged into components/identity; the scope rule is bound there"
     },
+    "components/identity/src/domain/totp.rs": {
+      "status": "unproved",
+      "sha256": "c14bfa43a0c5df49e1388e0c53a53618c4c5d7a395e10bc2f01bfe080a656242",
+      "review": "Identity credentials, B2B and POS contracts and checkout tax lines moved into components; kernel call sites unchanged"
+    },
     "components/identity/src/domain.rs": {
       "status": "unproved",
-      "sha256": "c2391769fa9060e4da12c1403e56163af363ec6b8613f8036365bb287b589970",
-      "review": "Permission rules and the permit and merchant checks moved unchanged into components/identity; the scope rule is bound there"
+      "sha256": "3f81422c12a8848fd9f56e24819ed5f990c06c21f2dc18e92e57a051ec20ab46",
+      "review": "Identity credentials, B2B and POS contracts and checkout tax lines moved into components; kernel call sites unchanged"
     },
     "components/identity/src/lib.rs": {
       "status": "reviewed-binding",
@@ -1560,6 +1610,26 @@
       "sha256": "eeff459a09498302db6703405d8bd0d63f09dfa23ec49631b7b0e9c7241b520a",
       "review": "Payment ledger rules moved into components/payments; kernel call sites unchanged"
     },
+    "components/pos/src/domain/input.rs": {
+      "status": "unproved",
+      "sha256": "4620eeb6f84fbdb4878168cf98c62df642a0eab0d540bff08718a89a972a9618",
+      "review": "Identity credentials, B2B and POS contracts and checkout tax lines moved into components; kernel call sites unchanged"
+    },
+    "components/pos/src/domain/schema.rs": {
+      "status": "unproved",
+      "sha256": "3235c7041ec05647241a6283440d6c4f79ed18242bf7f9de01bdac68a18a9061",
+      "review": "Identity credentials, B2B and POS contracts and checkout tax lines moved into components; kernel call sites unchanged"
+    },
+    "components/pos/src/domain.rs": {
+      "status": "unproved",
+      "sha256": "2e41492077a75372c4851c6580d26f57da56a7a3326f94d18a74647b8f842361",
+      "review": "Identity credentials, B2B and POS contracts and checkout tax lines moved into components; kernel call sites unchanged"
+    },
+    "components/pos/src/lib.rs": {
+      "status": "unproved",
+      "sha256": "22f5bf4b46e229337254511e3fc7e738cf6a55fe528f3e56eff13f7b55fbd208",
+      "review": "Identity credentials, B2B and POS contracts and checkout tax lines moved into components; kernel call sites unchanged"
+    },
     "components/pricing/examples/customer_contract.rs": {
       "status": "unproved",
       "sha256": "b2d7ff94933d8ad9a9bee2eac2309ec287be5f0c35a54bc855afcfe96de51569",
@@ -1805,6 +1875,11 @@
       "sha256": "b1c4b41266a639477014245de13eb83a1c14f6f68c68f6b0eaefb5f807bbc2e2",
       "review": "delivery_split_admissible and carrier_booking_admissible bindings moved into components/shipping"
     },
+    "components/shop/src/domain/buyer_consent.rs": {
+      "status": "unproved",
+      "sha256": "ca5ba6f59b25cd804e96dddeeb6f510ca740edf42b07ab64be07a0b456de1fcb",
+      "review": "Identity credentials, B2B and POS contracts and checkout tax lines moved into components; kernel call sites unchanged"
+    },
     "components/shop/src/domain/checkout_selection.rs": {
       "status": "unproved",
       "sha256": "5fe0fec692b5362bb6d51923f4b3bb771e3c99dabd786c1ffbc2b66951002880",
@@ -1820,6 +1895,11 @@
       "sha256": "81ae23ccef5e80531d65443604a25dedb2e5f9da93d57f4d0f315ca6596eb105",
       "review": "shop component crate created; settings types moved; no kernel binding changed"
     },
+    "components/shop/src/domain/legal_product.rs": {
+      "status": "unproved",
+      "sha256": "7212fbcc2ee067fabbe457c7276eadc829d7592982af74a97b765b9379abac95",
+      "review": "Identity credentials, B2B and POS contracts and checkout tax lines moved into components; kernel call sites unchanged"
+    },
     "components/shop/src/domain/patch.rs": {
       "status": "unproved",
       "sha256": "386462fb4c31daf2ff3a1e58c11ae4cb3415ff139838ced6588c885f87782056",
@@ -1827,8 +1907,8 @@
     },
     "components/shop/src/domain/tax_rules.rs": {
       "status": "unproved",
-      "sha256": "041f1f64bfca621a881080924e7036ecb95577898cb2d1b6042307adb2a6ee53",
-      "review": "shop component crate created; settings types moved; no kernel binding changed"
+      "sha256": "11dd834efc272f78b94d2d044b0f5bc27e37431d6cf13473a10c066337884bbe",
+      "review": "Identity credentials, B2B and POS contracts and checkout tax lines moved into components; kernel call sites unchanged"
     },
     "components/shop/src/domain/validation.rs": {
       "status": "unproved",
@@ -1837,8 +1917,8 @@
     },
     "components/shop/src/domain.rs": {
       "status": "unproved",
-      "sha256": "d96d128283258be475c34e958364171fb1c450ec28b427baba8c59cead9bea3d",
-      "review": "Order list criteria, company model and receipts moved into components; kernel call sites unchanged"
+      "sha256": "0ee0fcc89be265771469168cbd7032eb16c2f45e73c5d9ba2e38b6602ec30ef3",
+      "review": "Identity credentials, B2B and POS contracts and checkout tax lines moved into components; kernel call sites unchanged"
     },
     "components/shop/src/lib.rs": {
       "status": "unproved",
@@ -4417,8 +4497,8 @@
     },
     "src/auth/credentials.rs": {
       "status": "unproved",
-      "sha256": "36a24c34e95f437e81e79d1057305e9f3e313a05309433d5798010003836d2e8",
-      "review": "Identity-only Veyndo namespace and canonical-domain rename; reviewed migration checksum compatibility for six historical SQL versions, unchanged checkout predicates, 42 library and 169 binary tests pass; native component legacy boundary remains configured and guarded."
+      "sha256": "98a67c1dcc8175bdf207dc8d5a677891d0abae6faba66c9114fb2922a3754038",
+      "review": "Identity credentials, B2B and POS contracts and checkout tax lines moved into components; kernel call sites unchanged"
     },
     "src/auth/dto.rs": {
       "status": "unproved",
@@ -4507,8 +4587,8 @@
     },
     "src/auth/totp.rs": {
       "status": "unproved",
-      "sha256": "b352bc5f42ae55c79ca2334339463eb2e90ed9e229b27b5add8045aa891a7217",
-      "review": "Reviewed native factor gate, RFC6238 vectors, current personal proof, credential CAS, parent-session handoff revocation and system-only operational identity schema; own/foreign/revoked/replay real HTTP PostgreSQL cases pass; cryptography SQL provider and browser code remain unproved"
+      "sha256": "0db3f4fe908680971e6a6a5a73215a6cbf10e1ed4eaba9039d4a8374efafb022",
+      "review": "Identity credentials, B2B and POS contracts and checkout tax lines moved into components; kernel call sites unchanged"
     },
     "src/b2b/access.rs": {
       "status": "unproved",
@@ -4527,8 +4607,8 @@
     },
     "src/b2b/contract.rs": {
       "status": "unproved",
-      "sha256": "9440f5d3354d1c9b7f18931cd15cff845e713939de8a666d96242bfbfe3e0cd7",
-      "review": "Native lifecycle review: bounded namespaced app graphs preserve native terminal/payment/stock/buyer admission, per-object immutable accepted definitions, current compound scopes, same HTTP MCP Flow owners and operational history; SQL snapshots and migration 105 are regression-tested adapters, not proved."
+      "sha256": "43f381449a1ae79ff39fd473d0b4a06343db81a48a1547ec5ac33f7e5bf8feb9",
+      "review": "Identity credentials, B2B and POS contracts and checkout tax lines moved into components; kernel call sites unchanged"
     },
     "src/b2b/gateway.rs": {
       "status": "unproved",
@@ -4547,8 +4627,8 @@
     },
     "src/b2b/model.rs": {
       "status": "unproved",
-      "sha256": "c24dc51318e63ac15e8c1d8052edf96e7a0b051ea441f59427190e0c145a3c05",
-      "review": "cart types and rule engine moved into components; checking bindings"
+      "sha256": "929e06ad30430f915eb4feaa0c129a7df99f7f91bc1d57c4b171ad89c698f5f7",
+      "review": "Identity credentials, B2B and POS contracts and checkout tax lines moved into components; kernel call sites unchanged"
     },
     "src/b2b/onboarding.rs": {
       "status": "unproved",
@@ -5142,8 +5222,8 @@
     },
     "src/commerce/mod.rs": {
       "status": "unproved",
-      "sha256": "a0663f13044d7e3052001798190cf0a9f3f469bc2ee456e85557c531cf3e71a2",
-      "review": "shop component crate created; settings types moved; no kernel binding changed"
+      "sha256": "63d7814f592afd40b76b3a57b293c028833e8e9695ba7701957fb810d21dfa33",
+      "review": "Identity credentials, B2B and POS contracts and checkout tax lines moved into components; kernel call sites unchanged"
     },
     "src/commerce/order_fields.rs": {
       "status": "unproved",
@@ -5252,18 +5332,13 @@
     },
     "src/commerce/tax.rs": {
       "status": "unproved",
-      "sha256": "fc9b00ac4e4f927190cf3694fef40e1675ae7e95682598d9736c195109ffd68a",
-      "review": "Reviewed multi-currency admission, rational FX boundaries, immutable monetary source, additive ledger scale/RLS migrations, shared API/MCP/UCP paths and local provider/refund evidence. Only bounded policies are proved; FX, DB, network adapters and full commerce remain unproved."
+      "sha256": "a76dd2d11ed4aaf8f853cac78bf21d95841f2987bba599937f00ba03d48d85b5",
+      "review": "Identity credentials, B2B and POS contracts and checkout tax lines moved into components; kernel call sites unchanged"
     },
     "src/commerce/tax_context.rs": {
       "status": "unproved",
       "sha256": "bb326512b4e55d498e60c813edad3eb4d847b9b55c4ef72370616379b7c2a6ba",
       "review": "Reviewed eighteen core findings: typed trusted identity and explicit route rights; consolidated current grants; durable auth and fenced shared limits; scoped transactions and one-backend PgBouncer including nested borrow fixes; bounded Wasm/PNG work; notified workers, savepoint quarantine and conservative retention; separate runtime roles and startup configuration. Real PostgreSQL/provider regressions preserve current tenant/customer/payment behavior. SQL/network adapters remain unproved."
-    },
-    "src/commerce/tax_rules.rs": {
-      "status": "unproved",
-      "sha256": "552516027b162a9b3ea0a4af4aada34b384a1be0264af0bc2b79671407a78d9e",
-      "review": "shop component crate created; settings types moved; no kernel binding changed"
     },
     "src/commerce/test_stock.rs": {
       "status": "unproved",
@@ -5272,8 +5347,8 @@
     },
     "src/commerce/types.rs": {
       "status": "unproved",
-      "sha256": "e64713590d9e32b3b2ac8532474c529b59220afc3a091c5fb045347cb229ddb6",
-      "review": "shop component crate created; settings types moved; no kernel binding changed"
+      "sha256": "a39b61f984aadbc95cf14cbc89d03565289d134f0b6274a8cf0901c22e533514",
+      "review": "Identity credentials, B2B and POS contracts and checkout tax lines moved into components; kernel call sites unchanged"
     },
     "src/concierge.rs": {
       "status": "unproved",
@@ -5542,8 +5617,8 @@
     },
     "src/legal/buyer_consent.rs": {
       "status": "unproved",
-      "sha256": "917053f6b542c16d09ea0afb9cf3b530391552b370e493250ad69270f275c926",
-      "review": "Reviewed inbound UCP/native cart and consent transactions, native finalization contact guard, immutable order snapshots, explicit optional negotiation, public HTTPS app-owned catalogue adapters; independent whole-branch review findings repaired and six isolated HTTP/PG suites pass. No extracted kernel policy changed; SQL/provider behavior remains unproved."
+      "sha256": "9ef30d2f4c5209795ee47677b95d80721e65afa7c54a89bfb00d9b46ea77ce5e",
+      "review": "Identity credentials, B2B and POS contracts and checkout tax lines moved into components; kernel call sites unchanged"
     },
     "src/legal/capabilities.rs": {
       "status": "unproved",
@@ -5577,8 +5652,8 @@
     },
     "src/legal/product.rs": {
       "status": "unproved",
-      "sha256": "18b2dc7cf5ddc968b3a5fd6c7291ee9cc43866c6cee59a43bd087a0ab0ee2239",
-      "review": "Reviewed legal configuration/validation, scoped receipt locks and revocation, strict digital/physical checkout snapshots, private idempotent declarations/review audit, composite-FK RLS migration 048, permission-shared MCP adapters and receipt-redacted generic flows. Real PostgreSQL/HTTP consent, foreign-session/tenant, stale acknowledgements, immutable order and completed flow cases plus local SMTP consumer receipt delivery pass; exact consent/checkout Boolean claims and negative mutations preserve the stated unproved SQL/browser/provider boundary."
+      "sha256": "6d6e1bcea8647ddf69cda8f72588b1f95b6673ddbad6be5e9ed6106bd033c999",
+      "review": "Identity credentials, B2B and POS contracts and checkout tax lines moved into components; kernel call sites unchanged"
     },
     "src/legal/requests.rs": {
       "status": "unproved",
@@ -6307,18 +6382,18 @@
     },
     "src/pos/input.rs": {
       "status": "unproved",
-      "sha256": "ad68a7e2f6ad7f99c82741944291e7041d739bdea6235235701580868fd2be7f",
-      "review": "POS cashier guard reviewed: exact currency/reason/actor/goods bound; native customer selection and receipt projection remain SQL adapters covered by isolated POS regressions; bound new domain futures"
+      "sha256": "96ba686a5daf446045f6b9a9b8aca9ea4efaf4c671219a15030ea1e26d878f37",
+      "review": "Identity credentials, B2B and POS contracts and checkout tax lines moved into components; kernel call sites unchanged"
     },
     "src/pos/mod.rs": {
       "status": "unproved",
-      "sha256": "87c30b4f988ee31819ee5f9b481a91bf94d9a3402d99645572bb8986328eff38",
-      "review": "Flow pipeline and promotion types moved into components/marketing; kernel call sites unchanged"
+      "sha256": "49207e974ebab2f13949fe8da464b82f0d9eeee4bfd8e9231ce4f6e7a977c255",
+      "review": "Identity credentials, B2B and POS contracts and checkout tax lines moved into components; kernel call sites unchanged"
     },
     "src/pos/schema.rs": {
       "status": "unproved",
-      "sha256": "c79b6270aefde9e2d03d3c704fd2edf42d6bcf7e7de7e9acc2dd4c7d5db12ed6",
-      "review": "POS cashier guard reviewed: exact currency/reason/actor/goods bound; native customer selection and receipt projection remain SQL adapters covered by isolated POS regressions; bound new domain futures"
+      "sha256": "d5ac145d4790c0c1a975bd7513f59f83fce7d3e68315dccff1a92a0f6ee9301f",
+      "review": "Identity credentials, B2B and POS contracts and checkout tax lines moved into components; kernel call sites unchanged"
     },
     "src/pos/settlement.rs": {
       "status": "reviewed-binding",
@@ -6607,12 +6682,12 @@
       "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
     },
     "Cargo.lock": {
-      "sha256": "800fca029abbf88cf68ff3b7f899f589fcb6a657a1dc466a585d2a0c4b7c5b58",
-      "review": "Order list criteria, company model and receipts moved into components; kernel call sites unchanged"
+      "sha256": "1929ed683ba177840198ade57d51ba03c7b2e0ca3f46644e2d4ab3d87d9d4efc",
+      "review": "Identity credentials, B2B and POS contracts and checkout tax lines moved into components; kernel call sites unchanged"
     },
     "Cargo.toml": {
-      "sha256": "7638b41574d1477eae6412db91578e245a516326305914ad7fe934c496efe677",
-      "review": "Payment ledger rules moved into components/payments; kernel call sites unchanged"
+      "sha256": "2749c5abcd4b64853ef518249e95c83a33bff0ff9eb832437e97726070d728ae",
+      "review": "Identity credentials, B2B and POS contracts and checkout tax lines moved into components; kernel call sites unchanged"
     },
     "components.lock.json": {
       "sha256": "7b4a931ad81c6665d5d95e6b42b8ef4d09ebe8971ac24998d8f94bb6a737ff53",

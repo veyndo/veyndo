@@ -12,85 +12,10 @@ mod settlement;
 mod workspace_gateway;
 pub(crate) use config::configure;
 pub(crate) use gateway::invoke;
+pub(crate) use schema::CAPABILITIES;
 pub(crate) use schema::schema;
 pub(crate) use settlement::{check_locked, payment_captured, settle, validate_settlement};
 pub(crate) use veyndo_core::request_context::PosAdmission as Admission;
-pub(crate) const CAPABILITIES: &[(&str, &str)] = &[
-    (
-        "pos.customers",
-        "Search active tenant customers or resolve a customer-number card",
-    ),
-    (
-        "pos.customer",
-        "Revision-checked cashier attachment of an existing customer",
-    ),
-    (
-        "pos.discount",
-        "Audited exact cashier discount through shared pricing",
-    ),
-    (
-        "pos.receipt",
-        "Read printable lines from an existing immutable issued invoice",
-    ),
-    (
-        "pos.channels",
-        "Discover the tenant POS registers through cashier admission",
-    ),
-    (
-        "pos.payment",
-        "Read the owned sale payment and authoritative order",
-    ),
-    (
-        "pos.reconcile",
-        "Reconcile the owned provider attempt through existing durable jobs",
-    ),
-    (
-        "pos.catalog",
-        "Search channel products or resolve a barcode for an authenticated cashier",
-    ),
-    (
-        "pos.context",
-        "Read POS configuration without creating a cart",
-    ),
-    (
-        "pos.detail",
-        "Read native product families and variant prices",
-    ),
-    (
-        "pos.currency",
-        "Select an enabled channel currency through native pricing",
-    ),
-    (
-        "pos.coupons",
-        "Apply coupon codes through the native promotion owner",
-    ),
-    ("pos.create", "Create an actor-bound native POS cart"),
-    (
-        "pos.cart",
-        "Read an owned POS cart and its authoritative quote",
-    ),
-    ("pos.replace", "Revision-checked native POS cart edit"),
-    (
-        "pos.select",
-        "Select customer/contact and a configured payment through the shared checkout",
-    ),
-    (
-        "pos.accept",
-        "Record explicit current legal acknowledgements through the shared legal owner",
-    ),
-    (
-        "pos.complete",
-        "Idempotent native POS checkout, cash tender in exact currency minor units",
-    ),
-    (
-        "pos.held",
-        "List this cashier's held carts in this sales channel",
-    ),
-    (
-        "pos.sales",
-        "Read recent channel orders and cash tender records",
-    ),
-];
 pub(crate) fn router() -> Router<App> {
     Router::new()
         .secure_route(

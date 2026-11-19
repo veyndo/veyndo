@@ -6,6 +6,13 @@ license-file.workspace = true
 description = "Merchant identity: who a request acts for and which permissions it holds"
 
 [dependencies]
+argon2.workspace = true
+hmac.workspace = true
+ring.workspace = true
+sha2.workspace = true
+tokio.workspace = true
+uuid.workspace = true
+veyndo-app-model = { path = "../../extensions/services/app-storage/model" }
 axum.workspace = true
 serde_json.workspace = true
 veyndo-core = { path = "../core" }

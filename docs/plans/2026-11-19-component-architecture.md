@@ -253,7 +253,10 @@ Order follows the dependency report, lowest first. Each line is one move.
   remote adapter, the job worker, sessions, instruments, accounts, webhooks,
   merchant routes and the order update after a receipt (ports to orders and
   inventory).
-- [ ] checkout
+- [ ] checkout. Started: `components/checkout` owns the destination tax lines
+  of a quote (tax class resolution and net-preserving price conversion). Open:
+  cart storage and mutation, the quote, delivery enrichment, the selection, the
+  checkout transaction and order placement, the handoff and review.
 - [ ] orders. Started: `components/orders` owns the order state machine with
   its default and bounds, the stored machine, derived order fields, the
   transition guards and the workflow view, the audited write log with its
@@ -270,8 +273,12 @@ Order follows the dependency report, lowest first. Each line is one move.
   dependency inspection before a deletion. Open: flow projection and jobs,
   flow execution (needs ports to orders, customers and apps), channel access
   and preview, coupons, rule history, routes.
-- [ ] b2b
-- [ ] pos
+- [ ] b2b. Started: `components/b2b` owns the company, unit and member records
+  with their bounds and the capability contract. Open: organization writes,
+  budgets, approvals, quotes, the staging copy, routes.
+- [ ] pos. Started: `components/pos` owns the cashier input envelope and the
+  capability schema; the POS location of a channel lives with the channel in
+  marketing. Open: the gateway, settlement, discounts, cash handling.
 - [ ] apps (with `developer` and the vendored app storage)
 - [ ] automation
 - [ ] intelligence
