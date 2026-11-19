@@ -6,6 +6,7 @@ license-file.workspace = true
 description = "Merchant identity: who a request acts for and which permissions it holds"
 
 [dependencies]
+axum.workspace = true
 serde_json.workspace = true
 veyndo-core = { path = "../core" }
 veyndo-kernel = { path = "../../crates/kernel" }

@@ -782,8 +782,13 @@
     },
     "components/identity/src/lib.rs": {
       "status": "unproved",
-      "sha256": "33538011131c109b7d09cef2c028c6e5bb7a0a6fd855384bff6f14f1daf303fc",
-      "review": "Permission rules and the permit and merchant checks moved unchanged into components/identity; the scope rule is bound there"
+      "sha256": "8ebe27f9fb84b5cddae53d3681a36a413e6d49e17aa7607d7f69adc5f590be0d",
+      "review": "The route permission registry moved unchanged into components/identity and is generic over the server state"
+    },
+    "components/identity/src/route_policy.rs": {
+      "status": "unproved",
+      "sha256": "5e7aa39b24a5d51ebd41a9c115adf496790236d0bfe39376e71f1366b708c47c",
+      "review": "The route permission registry moved unchanged into components/identity and is generic over the server state"
     },
     "components/pricing/examples/customer_contract.rs": {
       "status": "unproved",
@@ -3492,8 +3497,8 @@
     },
     "src/auth/mod.rs": {
       "status": "unproved",
-      "sha256": "a9fe1bb9823442278e84b04a3ae2e2ed4d5b573ca2baada91baedf949699e1cb",
-      "review": "Knowledge introspection reuses current scoped native identity, expiring integration keys and app package approval. Real catalog delivery, read-only evidence, foreign-shop and revoked-key checks and Checkout tenant isolation passed locally."
+      "sha256": "f1f407797d147d4e2d17cd7f8ad232c0d71d3ed64c4f87b8fd97149bb164660a",
+      "review": "The route permission registry moved unchanged into components/identity and is generic over the server state"
     },
     "src/auth/permissions.rs": {
       "status": "unproved",
@@ -3519,11 +3524,6 @@
       "status": "unproved",
       "sha256": "9dbbdc8a01222c1dfee981cac935a3d659184bc8b3667f37ba7682c334f80bfe",
       "review": "Role-save locale validation reuses the existing scoped_locked commerce owner and current transaction; preserves tenant lifecycle lock, refreshed delegation, role CAS and history while preventing nested pool acquisition and fencing locale edits. Existing workspace_roles and app extension signed one-backend regressions exercise this path."
-    },
-    "src/auth/route_policy.rs": {
-      "status": "unproved",
-      "sha256": "7bc70dd86dc0498f4b69b97b673ac390619ed8e58cb0287068b7f413dfb94a9b",
-      "review": "Reviewed eighteen core findings: typed trusted identity and explicit route rights; consolidated current grants; durable auth and fenced shared limits; scoped transactions and one-backend PgBouncer including nested borrow fixes; bounded Wasm/PNG work; notified workers, savepoint quarantine and conservative retention; separate runtime roles and startup configuration. Real PostgreSQL/provider regressions preserve current tenant/customer/payment behavior. SQL/network adapters remain unproved."
     },
     "src/auth/routes.rs": {
       "status": "unproved",
@@ -4522,8 +4522,8 @@
     },
     "src/foundation.rs": {
       "status": "unproved",
-      "sha256": "d26a2fc1f2c4435d43876b4bb86dcad698ea9fbf085685ae14e3724142de7a99",
-      "review": "Permission rules and the permit and merchant checks moved unchanged into components/identity; the scope rule is bound there"
+      "sha256": "2a3bfede2502ea953a7f70fab552780ae9f45e61dbd6d9ddd053e66c247b31fb",
+      "review": "The route permission registry moved unchanged into components/identity and is generic over the server state"
     },
     "src/history/capability.rs": {
       "status": "unproved",
@@ -5692,8 +5692,8 @@
       "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
     },
     "Cargo.lock": {
-      "sha256": "f311956c4d17c12460a423c137c3f19203bc7f5a1c297e14bcb30b130380c1d4",
-      "review": "Currency configuration, conversion and reference-rate retrieval moved unchanged into components/pricing; the currency context rule is bound there"
+      "sha256": "7db86a6c57c8b037473b2f55d78cfdf1ed9c29b67fa48bbdaa9c365255829dde",
+      "review": "The route permission registry moved unchanged into components/identity and is generic over the server state"
     },
     "Cargo.toml": {
       "sha256": "e0f8afe8d37f6fc722288433f9a9e09f350979f03026d1a2c5d72c7c7dbd8a53",

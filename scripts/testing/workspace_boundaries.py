@@ -47,7 +47,7 @@ EXTERNAL = {
     'veyndo-automation': {'serde_json', 'chrono', 'chrono-tz'},
     'veyndo-pricing': {'serde', 'serde_json', 'chrono', 'regex', 'reqwest', 'tokio'},
     'veyndo-apps': set(),
-    'veyndo-identity': {'serde_json'},
+    'veyndo-identity': {'serde_json', 'axum'},
     'veyndo-core': {'axum', 'serde', 'serde_json', 'sha2', 'sqlx', 'uuid', 'tokio', 'tracing', 'reqwest'},
     'veyndo-runtime': {'hmac', 'sha2', 'zeroize', 'sqlx', 'tokio', 'futures-util',
                        'serde_json', 'reqwest', 'async-stream', 'uuid'},

@@ -3623,6 +3623,7 @@ version = "0.5.0"
 name = "veyndo-identity"
 version = "0.5.0"
 dependencies = [
+ "axum",
  "serde_json",
  "veyndo-core",
  "veyndo-kernel",

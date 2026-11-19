@@ -21,6 +21,12 @@ impl std::ops::Deref for App {
         &self.core
     }
 }
+/// Component routers take only the core part of the server state.
+impl axum::extract::FromRef<App> for veyndo_core::State {
+    fn from_ref(app: &App) -> Self {
+        app.core.clone()
+    }
+}
 pub(crate) use veyndo_core::shop_scope::{header, tenant, token};
 pub(crate) use veyndo_core::{Error, Result, bad, conflict, hash, uid, validate_tenant};
 pub(crate) fn merchant(_a: &App, h: &RequestContext) -> Result<String> {

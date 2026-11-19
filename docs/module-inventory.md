@@ -179,7 +179,6 @@ This lists every checked-in source module in these roots, including files with n
 | [src/auth/recovery_entry.rs](../src/auth/recovery_entry.rs) | Publish only the operator-configured verified identity recovery entry; browsers cannot choose a broker. |
 | [src/auth/registration.rs](../src/auth/registration.rs) | Create an isolated merchant workspace from synthetic template data. |
 | [src/auth/roles.rs](../src/auth/roles.rs) | Tenant-owned roles: current grants, revisioned edits, dependency-checked removal and shared history. |
-| [src/auth/route_policy.rs](../src/auth/route_policy.rs) | Rights are registered beside each API method. Missing registrations always deny access. |
 | [src/auth/routes.rs](../src/auth/routes.rs) | Identity, recovery and personal-security routes share canonical authentication admission. |
 | [src/auth/sessions.rs](../src/auth/sessions.rs) | Login/logout and personal workspace discovery. Only hashed opaque tokens persist. |
 | [src/auth/totp.rs](../src/auth/totp.rs) | RFC 6238 authenticator codes, bounded clock drift and constant-time comparison. |
@@ -701,6 +700,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/identity/src/domain/permissions.rs](../components/identity/src/domain/permissions.rs) | The permission vocabulary and the decision whether a request holds one. Owners retain control; delegates cannot grant rights they lack. |
 | [components/identity/src/domain.rs](../components/identity/src/domain.rs) | Pure identity rules: no database, no transport. |
 | [components/identity/src/lib.rs](../components/identity/src/lib.rs) | Identity component: the checks every other component uses to ask who a request acts for and what it may do. |
+| [components/identity/src/route_policy.rs](../components/identity/src/route_policy.rs) | Rights are registered beside each API method. Missing registrations always deny access. |
 | [components/pricing/examples/customer_contract.rs](../components/pricing/examples/customer_contract.rs) | Run contact normalization without a Core process, database, credentials or network. |
 | [components/pricing/src/conversions.rs](../components/pricing/src/conversions.rs) | A rejected pricing input becomes a client error of the shared error contract. |
 | [components/pricing/src/domain/cart.rs](../components/pricing/src/domain/cart.rs) | Persisted cart data with explicit typed host contexts and no credential or storage authority. |

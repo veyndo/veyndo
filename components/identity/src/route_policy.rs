@@ -1,5 +1,5 @@
 //! Rights are registered beside each API method. Missing registrations always deny access.
-use crate::{App, Router};
+use axum::Router;
 use axum::routing::MethodRouter;
 use std::{
     collections::HashMap,
@@ -10,25 +10,25 @@ fn registry() -> &'static Mutex<Registry> {
     static ROUTES: OnceLock<Mutex<Registry>> = OnceLock::new();
     ROUTES.get_or_init(|| Mutex::new(HashMap::new()))
 }
-pub(crate) trait SecureRoutes {
+pub trait SecureRoutes<S> {
     fn secure_route(
         self,
         path: &'static str,
         rights: &'static [(&'static str, &'static str)],
-        methods: MethodRouter<App>,
+        methods: MethodRouter<S>,
     ) -> Self;
 }
-impl SecureRoutes for Router<App> {
+impl<S: Clone + Send + Sync + 'static> SecureRoutes<S> for Router<S> {
     fn secure_route(
         self,
         path: &'static str,
         rights: &'static [(&'static str, &'static str)],
-        methods: MethodRouter<App>,
+        methods: MethodRouter<S>,
     ) -> Self {
         let mut registry = registry().lock().unwrap();
         for &(method, right) in rights {
             assert!(
-                matches!(right, "public" | "platform" | "read") || super::SCOPES.contains(&right),
+                matches!(right, "public" | "platform" | "read") || crate::SCOPES.contains(&right),
                 "Invalid API permission"
             );
             if let Some(old) = registry.insert((path, method), right) {
@@ -39,7 +39,7 @@ impl SecureRoutes for Router<App> {
         self.route(path, methods)
     }
 }
-pub(crate) fn lookup(path: &str, method: &str) -> Option<&'static str> {
+pub fn lookup(path: &str, method: &str) -> Option<&'static str> {
     let registry = registry().lock().unwrap();
     registry
         .get(&(path, method))
@@ -54,12 +54,13 @@ pub(crate) fn lookup(path: &str, method: &str) -> Option<&'static str> {
 }
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use super::{SecureRoutes, lookup};
+    use axum::Router;
 
     #[test]
     fn unregistered_routes_and_methods_are_denied() {
         let test_path = "/api/test/permissions";
-        let _: Router<App> = Router::new().secure_route(
+        let _: Router<()> = Router::new().secure_route(
             test_path,
             &[("GET", "orders.read")],
             axum::routing::get(|| async { "ok" }),
