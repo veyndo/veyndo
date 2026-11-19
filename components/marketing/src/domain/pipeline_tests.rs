@@ -1,6 +1,8 @@
 //! Flow graph and source action schema regression tests reject unsafe graphs before any event dispatch.
-use super::*;
-fn pipeline(v: Value) -> pipeline::Pipeline {
+use super::Pipeline;
+use crate::domain::flow_actions;
+use serde_json::{Value, json};
+fn pipeline(v: Value) -> Pipeline {
     serde_json::from_value(v).unwrap()
 }
 #[test]
@@ -56,6 +58,4 @@ fn upstream_aliases_and_download_revoke_are_explicit() {
         flow_actions::permission("knowledge.extract"),
         "knowledge.write"
     );
-    assert!(metadata::validate_metadata("products", &json!({"price":0})).is_err());
-    assert!(metadata::validate_metadata("products", &json!({"width":-1})).is_err());
 }

@@ -10,7 +10,7 @@ mod input;
 mod schema;
 mod settlement;
 mod workspace_gateway;
-pub(crate) use config::{Config, configure, validate_channel};
+pub(crate) use config::configure;
 pub(crate) use gateway::invoke;
 pub(crate) use schema::schema;
 pub(crate) use settlement::{check_locked, payment_captured, settle, validate_settlement};

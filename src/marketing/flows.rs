@@ -1,86 +1,9 @@
 //! Durable order-event flows: conditions, shop notes and AI proposals; no unapproved model mutations.
 use super::*;
-use veyndo_flow_graph::catalog::{EVENTS, FLOW_ACTIONS};
-fn knowledge_event(kind: &str) -> bool {
-    EVENTS.contains(&kind)
-        && (kind.starts_with("knowledge.")
-            || kind.starts_with("intelligence.")
-            || kind == "merchant.change.applied"
-            || kind == "app.configuration.changed"
-            || kind.starts_with("consumer.")
-            || kind.starts_with("privacy.")
-            || kind.starts_with("b2b.")
-            || kind.starts_with("pos."))
-}
-
-#[derive(Clone, Deserialize, Serialize)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub(crate) struct Flow {
-    #[serde(default)]
-    pub pipeline: Option<super::pipeline::Pipeline>,
-    pub name: HashMap<String, String>,
-    pub active: bool,
-    pub event: String,
-    pub condition: rules::Condition,
-    pub action: String,
-    pub instruction: HashMap<String, Option<String>>,
-    pub locale: String,
-    #[serde(default)]
-    pub inference: Option<Choice>,
-    #[serde(default)]
-    pub actor: Option<String>,
-    #[serde(default)]
-    pub app_action: Option<AppFlowAction>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub work_template: Option<super::work_template::WorkTemplate>,
-}
-#[derive(Clone, Deserialize, Serialize)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub(crate) struct AppFlowAction {
-    pub app: String,
-    pub action: String,
-    #[serde(default)]
-    pub arguments: Value,
-}
-impl Flow {
-    pub(crate) fn validate(&self) -> Result<()> {
-        self.condition.validate(0)?;
-        if self.action == "work_proposal" {
-            self.work_template
-                .as_ref()
-                .ok_or(bad("Work template required"))?
-                .validate()?;
-        } else if self.work_template.is_some() {
-            return Err(bad("Work template requires its review action"));
-        }
-        if self.action == "pipeline" {
-            self.pipeline
-                .as_ref()
-                .ok_or(bad("Flow pipeline required"))?
-                .validate()?;
-        }
-        if self.action == "app_action"
-            && self.app_action.as_ref().is_none_or(|x| {
-                !apps::identifier(&x.app)
-                    || !apps::identifier(&x.action)
-                    || !x.arguments.is_object()
-                    || x.arguments.to_string().len() > 8000
-            })
-        {
-            return Err(bad("Invalid flow app action"));
-        }
-        if !EVENTS.contains(&self.event.as_str()) && !valid_app_event(&self.event)
-            || !FLOW_ACTIONS.contains(&self.action.as_str())
-            || !commerce::valid_locale_key(&self.locale)
-        {
-            return Err(bad("Unsupported flow action, event or locale"));
-        }
-        if self.action != "pipeline" {
-            super::flow_text::shape(&json!(self.instruction))?;
-        }
-        Ok(())
-    }
-}
+use veyndo_flow_graph::catalog::EVENTS;
+pub(crate) use veyndo_marketing::types::flow::{
+    AppFlowAction, Flow, knowledge_event, valid_app_event,
+};
 pub(crate) async fn project_flows(
     tx: &mut sqlx::PgConnection,
     t: &str,
@@ -241,13 +164,4 @@ pub(crate) async fn flow_once(a: &App) -> Result<bool> {
     }
     tx.commit().await?;
     Ok(true)
-}
-
-/// Only namespaced app events can extend the standard event catalogue.
-pub(crate) fn valid_app_event(name: &str) -> bool {
-    let parts = name.split('.').collect::<Vec<_>>();
-    parts.len() == 3
-        && parts[0] == "app"
-        && apps::identifier(parts[1])
-        && apps::identifier(parts[2])
 }

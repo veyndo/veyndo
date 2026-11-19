@@ -619,9 +619,9 @@
         "tenants",
         "user_sessions"
       ],
-      "glob_imports": 29,
+      "glob_imports": 23,
       "untyped_access": 339,
-      "sql_outside_store": 23
+      "sql_outside_store": 20
     },
     "b2b": {
       "title": "Company procurement: organisations, budgets, approvals and quotes",

@@ -196,7 +196,7 @@
     },
     "flow_delay_admissible": {
       "bindings": [
-        "src/marketing/pipeline.rs"
+        "components/marketing/src/domain/pipeline.rs"
       ],
       "theorems": [
         "flow_delay_exact"
@@ -569,7 +569,7 @@
     },
     "source_activation_admissible": {
       "bindings": [
-        "src/marketing/promotions.rs"
+        "components/marketing/src/types/promotion.rs"
       ],
       "theorems": [
         "source_activation_exact",
@@ -1235,10 +1235,30 @@
       "sha256": "a54911683c2df1e61ba19a54de4f3b619a9a8ae9126f77805f856f741d438a4b",
       "review": "inventory component crate created; no kernel binding changed"
     },
+    "components/marketing/src/domain/flow_actions.rs": {
+      "status": "unproved",
+      "sha256": "94f0513b5b80d7624f68b456f10b4645620658b79b8d55009e5fa99287843506",
+      "review": "Flow pipeline and promotion types moved into components/marketing; kernel call sites unchanged"
+    },
+    "components/marketing/src/domain/flow_text.rs": {
+      "status": "unproved",
+      "sha256": "c46b7ec0ad19be74eaba131bac820eff8fe9cb6a2afacc0d25f066567bdb7f50",
+      "review": "Flow pipeline and promotion types moved into components/marketing; kernel call sites unchanged"
+    },
     "components/marketing/src/domain/line_facts.rs": {
       "status": "unproved",
       "sha256": "99fe85789eb9d4b68f9a3a75f93a28ecfbcd06770afa1c7ec1e74e5ad11e8d93",
       "review": "cart types and rule engine moved into components; checking bindings"
+    },
+    "components/marketing/src/domain/pipeline.rs": {
+      "status": "reviewed-binding",
+      "sha256": "0c47c4043354bb55d2a3cbe6f0a5346d47c1d2eee7ffa0ed51c68653c79c0519",
+      "review": "Flow pipeline and promotion types moved into components/marketing; kernel call sites unchanged"
+    },
+    "components/marketing/src/domain/pipeline_tests.rs": {
+      "status": "unproved",
+      "sha256": "6cc1fc3354fdc1aa37b12e6c45bfcc358e776dbe7116a94dce50c6d18bc3aba8",
+      "review": "Flow pipeline and promotion types moved into components/marketing; kernel call sites unchanged"
     },
     "components/marketing/src/domain/rule_fields.rs": {
       "status": "unproved",
@@ -1262,13 +1282,13 @@
     },
     "components/marketing/src/domain.rs": {
       "status": "unproved",
-      "sha256": "79d36443773564582b12d96a139d29d9683ce76a4e416ea1d2f2f111ff87d385",
-      "review": "cart types and rule engine moved into components; checking bindings"
+      "sha256": "0ce1d050156eaa58ab3a753b6a15ce3a41cf380cafc502357fce520ac0407a1e",
+      "review": "Flow pipeline and promotion types moved into components/marketing; kernel call sites unchanged"
     },
     "components/marketing/src/lib.rs": {
       "status": "unproved",
-      "sha256": "eb4f3f175fb844629b6ecb506faa3bf03949143a3309da2242453a6b366d0210",
-      "review": "cart types and rule engine moved into components; checking bindings"
+      "sha256": "5f13292be3b1c4f157b193e7db96b52123ca4dbbc59afe029381abc2d08aeb9f",
+      "review": "Flow pipeline and promotion types moved into components/marketing; kernel call sites unchanged"
     },
     "components/marketing/src/service/conditions.rs": {
       "status": "unproved",
@@ -1280,15 +1300,30 @@
       "sha256": "c7375dc2df950d777bebb7398b37aedf3d95ed0b512c17fd1575f3eca9148c4e",
       "review": "cart types and rule engine moved into components; checking bindings"
     },
+    "components/marketing/src/store/channel_config.rs": {
+      "status": "unproved",
+      "sha256": "c611f47083fc6b43efc5aa93e5c3af94e13040d875799ab757d90b5fd120014d",
+      "review": "Flow pipeline and promotion types moved into components/marketing; kernel call sites unchanged"
+    },
     "components/marketing/src/store/customer_facts.rs": {
       "status": "unproved",
       "sha256": "4904d741e42b8be7322128b20f326cc3e8e44f5e53430cb2986b027de73c0921",
       "review": "cart types and rule engine moved into components; checking bindings"
     },
+    "components/marketing/src/store/dependencies.rs": {
+      "status": "unproved",
+      "sha256": "ca3293e6a4c28f0b79a34931cfe74a52f27f2f0801272ef8e58b863c2e10de10",
+      "review": "Flow pipeline and promotion types moved into components/marketing; kernel call sites unchanged"
+    },
     "components/marketing/src/store/facts.rs": {
       "status": "unproved",
       "sha256": "b742130c3e216d15c87b619f1da50534fcf809c3af85881fd60abda60ba56347",
       "review": "cart types and rule engine moved into components; checking bindings"
+    },
+    "components/marketing/src/store/promotions.rs": {
+      "status": "unproved",
+      "sha256": "662bfc317b15f492c1384d242983a04e0f3b941c3103c217aa6ef59e26b0e4c7",
+      "review": "Flow pipeline and promotion types moved into components/marketing; kernel call sites unchanged"
     },
     "components/marketing/src/store/rule_snapshot.rs": {
       "status": "unproved",
@@ -1297,8 +1332,33 @@
     },
     "components/marketing/src/store.rs": {
       "status": "unproved",
-      "sha256": "e1b0a188165d5b92d09a99d3e32539a785e5c77d5f2b250badb56f9935be04ef",
-      "review": "cart types and rule engine moved into components; checking bindings"
+      "sha256": "514c2977b986864372b5199920119ed816edb08232e6312f6efb7c95f433dbea",
+      "review": "Flow pipeline and promotion types moved into components/marketing; kernel call sites unchanged"
+    },
+    "components/marketing/src/types/channel.rs": {
+      "status": "unproved",
+      "sha256": "ff0701e860cc1a2bb5ae388d9e1be8450a5e07390be568dd0547bc99c5881092",
+      "review": "Flow pipeline and promotion types moved into components/marketing; kernel call sites unchanged"
+    },
+    "components/marketing/src/types/flow.rs": {
+      "status": "unproved",
+      "sha256": "ddd66b441bacd11c27494bac121be5d82b9efb3fafa4d408daf7124a1f1d3313",
+      "review": "Flow pipeline and promotion types moved into components/marketing; kernel call sites unchanged"
+    },
+    "components/marketing/src/types/promotion.rs": {
+      "status": "reviewed-binding",
+      "sha256": "c6b64a3c9890965959d4caf17030f20ec8a626e9d4d3ed1b53a5bd223db9f2ce",
+      "review": "Flow pipeline and promotion types moved into components/marketing; kernel call sites unchanged"
+    },
+    "components/marketing/src/types/work_template.rs": {
+      "status": "unproved",
+      "sha256": "500b7b5f979af266b78c189eed6c34d76e3d86599c18e7176bed098ff2741ede",
+      "review": "Flow pipeline and promotion types moved into components/marketing; kernel call sites unchanged"
+    },
+    "components/marketing/src/types.rs": {
+      "status": "unproved",
+      "sha256": "2bb2601298480825aabebf6791d204ef513dffa5c42971fcb702d83ec26f01e7",
+      "review": "Flow pipeline and promotion types moved into components/marketing; kernel call sites unchanged"
     },
     "components/orders/src/domain/order_fields.rs": {
       "status": "unproved",
@@ -5497,8 +5557,8 @@
     },
     "src/marketing/channel_config.rs": {
       "status": "unproved",
-      "sha256": "974a47b26f6138ea1e644da2bc18bf305febae58211d29a4ac13dd9010eb77fd",
-      "review": "Reviewed selective-publication domain rights, transactional channel and current installed Flow action admission, shared B2B configuration writers with history and staging, method/currency dependency guards, and inherited consent-bound analytics. PostgreSQL and frontend regressions exercise successful effects, denied access, stale revisions and preserved live state. SQL, async adapters and external providers remain unproved."
+      "sha256": "2a99fb925b57be883cc8814b0e7f061cde57283f560518b13a70f09b340de930",
+      "review": "Flow pipeline and promotion types moved into components/marketing; kernel call sites unchanged"
     },
     "src/marketing/channel_preview.rs": {
       "status": "unproved",
@@ -5507,8 +5567,8 @@
     },
     "src/marketing/channels.rs": {
       "status": "unproved",
-      "sha256": "6dbb5f97b5f8e644b7e0250aec875052706eceda481cf3cf59747816f4e63449",
-      "review": "Currency discovery moved into components/pricing behind the shop settings and cart ports; no rule changed"
+      "sha256": "b9db082837057748f15779e89eb65558096e517fa8fa0170fb597d7d8cb1283f",
+      "review": "Flow pipeline and promotion types moved into components/marketing; kernel call sites unchanged"
     },
     "src/marketing/condition_gateway.rs": {
       "status": "unproved",
@@ -5522,8 +5582,8 @@
     },
     "src/marketing/dependencies.rs": {
       "status": "unproved",
-      "sha256": "4986407229dc15d1ba1adbdf41779f66fb105582ed0b120ba77a891acb5abc10",
-      "review": "Reviewed sales-channel access policy and its actual middleware consumer, removed untrusted preview identity headers, revision/session/member-bound single-use preview tickets, tenant-owned domain bindings and guarded deletion, migrated catalogue/cart/navigation/legal consumers and staging defaults. Core HTTP and UI regressions cover foreign IDs, stale revisions, paused/private channels, order denial and logout revocation. Async adapters remain unproved."
+      "sha256": "ef3021b0ad7384ba76d016d3eb17523c4e585241b3743baaefad0332e5c07b26",
+      "review": "Flow pipeline and promotion types moved into components/marketing; kernel call sites unchanged"
     },
     "src/marketing/facts.rs": {
       "status": "unproved",
@@ -5537,8 +5597,8 @@
     },
     "src/marketing/flow_actions.rs": {
       "status": "unproved",
-      "sha256": "78f2f6d2751f67fbdf5098676908a9fbc64b22fcafd243cb4f4ef6672285b6c5",
-      "review": "Moved the exact built-in Flow identifier arrays to the shared catalog, kept tenant app resolution and native grants in Core, and exposed additive discovery metadata. Unknown stored action now fails rather than falling into inference. Graph and kernel decisions are unchanged."
+      "sha256": "07b6412c856206c71a67bf3284ff8516a3e9c7a2236bbb11dd13171fe96ddb1c",
+      "review": "Flow pipeline and promotion types moved into components/marketing; kernel call sites unchanged"
     },
     "src/marketing/flow_jobs.rs": {
       "status": "unproved",
@@ -5557,13 +5617,13 @@
     },
     "src/marketing/flow_text.rs": {
       "status": "unproved",
-      "sha256": "811a3a44cb929b52fbdfb716ba9ef50afff08b4347ed59af4362084f37070b8e",
-      "review": "Reviewed shared content-language validation, regional key preservation, shop-main flow fallback and asset labels; existing state/price/permission contracts remain intact."
+      "sha256": "f9953c1760df9730949fd4865198d36502c6c22373bed1ee07dc23b218068dcf",
+      "review": "Flow pipeline and promotion types moved into components/marketing; kernel call sites unchanged"
     },
     "src/marketing/flows.rs": {
       "status": "unproved",
-      "sha256": "ecc642c3eabd140c6ee9ccc63bc934a9fdc81ce8e37155eadf3dbf213479f8e7",
-      "review": "Flow job storage isolates the PostgreSQL claim, preserves delayed deadlines and existing step receipts, and scopes checkpoint and completion writes to the current tenant/job/attempt; automation regression checks stale claims and terminal delay."
+      "sha256": "ca6fcff5cf17720489c1b6a1c1ab3696f76d7884d83a56701f4aeca699313548",
+      "review": "Flow pipeline and promotion types moved into components/marketing; kernel call sites unchanged"
     },
     "src/marketing/gateway.rs": {
       "status": "unproved",
@@ -5582,38 +5642,33 @@
     },
     "src/marketing/metadata.rs": {
       "status": "unproved",
-      "sha256": "d1c14657940d92957fe0b8d33a3adba49ba3ae388c1556bdbb554b8bf10fdbb9",
-      "review": "Tenant roles and current grants independently reviewed; owner/retained-override/acceptance races repaired and PostgreSQL-blocked regressions passed; PII and Flow projection boundaries documented; B2B feature settings delegate shared CAS/history and preserve financial guards. Existing extracted policies unchanged; SQL/async/UI remain reviewed adapters, not full proofs."
+      "sha256": "7850644db9e32a7abeee36c0be3ed7ac8a39da6188bfd50c2a4c212e10406199",
+      "review": "Flow pipeline and promotion types moved into components/marketing; kernel call sites unchanged"
     },
     "src/marketing/mod.rs": {
       "status": "unproved",
-      "sha256": "a6c046a8650338f3ccb536942d438434fe5b152cd4bd716862813b351ef0fde2",
-      "review": "cart types and rule engine moved into components; checking bindings"
+      "sha256": "252e8a0770d856a3a50ea67fde9393e26a53477ac20ac87cae127862cf31ee6a",
+      "review": "Flow pipeline and promotion types moved into components/marketing; kernel call sites unchanged"
     },
     "src/marketing/pipeline.rs": {
-      "status": "reviewed-binding",
-      "sha256": "de1a6639684d04779a25f430e193da67bc2a35da5e1466387026e2631af5cde3",
-      "review": "Reviewed the shared borrowed Flow directives and native adapter. The old saved graph, validation ordering, cursor identity, permission checks, delay metadata, receipts and effects are preserved. The native regression covers exact unknown cursor rejection and separately restarted worker continuation."
+      "status": "unproved",
+      "sha256": "8a11dc356e31110aeb27ddf1b1e95b6302f243dc716539c7e341f395467d9f1e",
+      "review": "Flow pipeline and promotion types moved into components/marketing; kernel call sites unchanged"
     },
     "src/marketing/pipeline_runtime.rs": {
       "status": "unproved",
       "sha256": "f984e5a8464cc07679ac8998df51b51c4a59053ec411d44814534aa0b0a244dc",
       "review": "Reviewed the shared borrowed Flow directives and native adapter. The old saved graph, validation ordering, cursor identity, permission checks, delay metadata, receipts and effects are preserved. The native regression covers exact unknown cursor rejection and separately restarted worker continuation."
     },
-    "src/marketing/pipeline_tests.rs": {
-      "status": "unproved",
-      "sha256": "10dfdb6008f17fc188ab2df832735dc79ec6d21e4ae041a45ae3ac8286f846db",
-      "review": "Tenant roles and current grants independently reviewed; owner/retained-override/acceptance races repaired and PostgreSQL-blocked regressions passed; PII and Flow projection boundaries documented; B2B feature settings delegate shared CAS/history and preserve financial guards. Existing extracted policies unchanged; SQL/async/UI remain reviewed adapters, not full proofs."
-    },
     "src/marketing/promotion_import.rs": {
       "status": "unproved",
-      "sha256": "288b34928db320fbacdc86298b74ac65c1629b388cefb6c6287c3d61f5d440e8",
-      "review": "Reviewed native historical review admission, immutable coupon provenance and explicit activation policy; independent review findings on malformed usage limits, imported-review PII projection and source-currency spend bounds reproduced and fixed with actual CLI/HTTP/checkout regressions. Existing package, creator, lease and tenant fences retained; SQL, networking and provider parity remain outside the extracted pure activation proof."
+      "sha256": "5e45962c5505eb0fbc81ef8dda06d2cf17b871a438e1c8dc5d353c1be911b7b6",
+      "review": "Flow pipeline and promotion types moved into components/marketing; kernel call sites unchanged"
     },
     "src/marketing/promotions.rs": {
-      "status": "reviewed-binding",
-      "sha256": "42a7ab865aa102e052039f417ed1822f5f78d5333a851675943b28febdfd4354",
-      "review": "Reviewed native historical review admission, immutable coupon provenance and explicit activation policy; independent review findings on malformed usage limits, imported-review PII projection and source-currency spend bounds reproduced and fixed with actual CLI/HTTP/checkout regressions. Existing package, creator, lease and tenant fences retained; SQL, networking and provider parity remain outside the extracted pure activation proof."
+      "status": "unproved",
+      "sha256": "334cc366301334c4fd655391fc0d653a7b27c2a70614374613b1ecae68a6c2d3",
+      "review": "Flow pipeline and promotion types moved into components/marketing; kernel call sites unchanged"
     },
     "src/marketing/routes.rs": {
       "status": "unproved",
@@ -5642,8 +5697,8 @@
     },
     "src/marketing/work_template.rs": {
       "status": "unproved",
-      "sha256": "48de681daa6073361dd44227ae546d00148f0a92a27c4b201085ebbbbabe107c",
-      "review": "Reviewed task-reference-only Flow templates, same actor and original scope checks at native save and runtime, scalar event mapping, no copied credentials or source inputs, shared stop/lease and transactional daily limits; actual private event-to-approval write, denial and zero-inference regressions plus UI scope cleanup pass. Async SQL remains outside formal proof."
+      "sha256": "2f68ab7eaadfdef9aa9e3e199728c7caa20f07346b6c2ecd69c69a49755500d7",
+      "review": "Flow pipeline and promotion types moved into components/marketing; kernel call sites unchanged"
     },
     "src/marketing/work_template_source.rs": {
       "status": "unproved",
@@ -6172,8 +6227,8 @@
     },
     "src/pos/config.rs": {
       "status": "unproved",
-      "sha256": "1fd77f39ddd245f3aa5c71cf50e2272baa3f9270b09e895c5046538eb1a2bf29",
-      "review": "Native POS admission, exact cash/change and shared revision review; reviewed authorized total<=tender<=1e12 and denied unreviewed tender. Existing checkout review and coupon handler extracted without parallel semantics; actor/channel guards on all direct cart consumers."
+      "sha256": "981a548653efb62d22d5d27c923866f60f748a66946e987be73ba3a97ccfec02",
+      "review": "Flow pipeline and promotion types moved into components/marketing; kernel call sites unchanged"
     },
     "src/pos/customer.rs": {
       "status": "unproved",
@@ -6197,8 +6252,8 @@
     },
     "src/pos/mod.rs": {
       "status": "unproved",
-      "sha256": "02b57ffe8bc5d71a9db7dfd15a70d0d13c24acbb3c46e98199e3a5809b46d12b",
-      "review": "cart types and rule engine moved into components; checking bindings"
+      "sha256": "87c30b4f988ee31819ee5f9b481a91bf94d9a3402d99645572bb8986328eff38",
+      "review": "Flow pipeline and promotion types moved into components/marketing; kernel call sites unchanged"
     },
     "src/pos/schema.rs": {
       "status": "unproved",
@@ -6492,8 +6547,8 @@
       "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
     },
     "Cargo.lock": {
-      "sha256": "eea21938323b8891bc53f9eb24c62f57e7be5f91fb4a9d17c53c33ed4cdbcd34",
-      "review": "Payment ledger rules moved into components/payments; kernel call sites unchanged"
+      "sha256": "f79d8245525512855f9dd22fdf38f6b0768fecf9422fccd6c97356a4e07da450",
+      "review": "Flow pipeline and promotion types moved into components/marketing; kernel call sites unchanged"
     },
     "Cargo.toml": {
       "sha256": "7638b41574d1477eae6412db91578e245a516326305914ad7fe934c496efe677",

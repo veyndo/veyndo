@@ -1,35 +1,6 @@
 //! POS presentation/location configuration lives on the existing channel, not in a second settings store.
 use crate::*;
-#[derive(Clone, Debug, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub(crate) struct Config {
-    pub country: String,
-    #[serde(default = "columns")]
-    pub columns: u8,
-    #[serde(default)]
-    pub compact: bool,
-    #[serde(default)]
-    pub receipt_message: HashMap<String, String>,
-}
-fn columns() -> u8 {
-    4
-}
-pub(crate) fn validate_channel(c: &marketing::Channel, s: &commerce::Settings) -> Result<()> {
-    if c.kind != "pos" {
-        if c.pos.is_some() {
-            return Err(bad("POS configuration requires a POS channel"));
-        }
-        return Ok(());
-    }
-    let cfg = c.pos.as_ref().ok_or(bad("POS location country required"))?;
-    if !s.countries.contains(&cfg.country) || !(2..=6).contains(&cfg.columns) {
-        return Err(bad("Invalid POS country or grid columns"));
-    }
-    if !cfg.receipt_message.is_empty() {
-        commerce::validate_names(&json!(cfg.receipt_message), s, 500)?;
-    }
-    Ok(())
-}
+pub(crate) use veyndo_marketing::types::channel::validate_pos as validate_channel;
 /// Called inside channel save, with settings locked before the channel. Installation is transactional.
 pub(crate) async fn configure(
     tx: &mut sqlx::Transaction<'_, sqlx::Postgres>,

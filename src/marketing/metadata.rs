@@ -139,3 +139,14 @@ async fn save(
     }
     Ok(Json(json!({"saved":true,"revision":rev+1})))
 }
+
+#[cfg(test)]
+mod tests {
+    use super::validate_metadata;
+    use crate::json;
+    #[test]
+    fn metadata_cannot_carry_pricing_authority_or_negative_dimensions() {
+        assert!(validate_metadata("products", &json!({"price":0})).is_err());
+        assert!(validate_metadata("products", &json!({"width":-1})).is_err());
+    }
+}

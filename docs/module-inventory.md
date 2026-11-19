@@ -422,7 +422,6 @@ This lists every checked-in source module in these roots, including files with n
 | [src/marketing/mod.rs](../src/marketing/mod.rs) | Native rule conditions, coupons, durable flows and headless/storefront sales-channel boundaries. |
 | [src/marketing/pipeline.rs](../src/marketing/pipeline.rs) | A bounded acyclic flow graph models source-style true/false branches, ordered actions, delays and stop nodes. |
 | [src/marketing/pipeline_runtime.rs](../src/marketing/pipeline_runtime.rs) | Durable sequence execution records each action before dispatch, persists delay cursors and reports uncertain effects. |
-| [src/marketing/pipeline_tests.rs](../src/marketing/pipeline_tests.rs) | Flow graph and source action schema regression tests reject unsafe graphs before any event dispatch. |
 | [src/marketing/promotion_import.rs](../src/marketing/promotion_import.rs) | Imported promotions use the ordinary revisioned owner and retain immutable provenance until a merchant reviews activation. |
 | [src/marketing/promotions.rs](../src/marketing/promotions.rs) | Server-authoritative coupons and automatic campaigns, with deterministic discounts and atomic usage limits. |
 | [src/marketing/routes.rs](../src/marketing/routes.rs) | Typed configuration CRUD, rule preview and revision-bound coupon edits. |
@@ -776,19 +775,31 @@ This lists every checked-in source module in these roots, including files with n
 | [components/inventory/src/store/reservations.rs](../components/inventory/src/store/reservations.rs) | All-checkout allocation ledger; release is idempotent and always uses persisted quantities, never edited order JSON. |
 | [components/inventory/src/store/test_stock.rs](../components/inventory/src/store/test_stock.rs) | Stock writes for empty purchasable products, in bounded batches. |
 | [components/inventory/src/store.rs](../components/inventory/src/store.rs) | SQL of the inventory component. |
+| [components/marketing/src/domain/flow_actions.rs](../components/marketing/src/domain/flow_actions.rs) | Native action schema and permissions use original Core names; no arbitrary SQL, shell or unguarded payment transitions. |
+| [components/marketing/src/domain/flow_text.rs](../components/marketing/src/domain/flow_text.rs) | Shop-language validation and main-language fallback for both simple flows and graphical action nodes. |
 | [components/marketing/src/domain/line_facts.rs](../components/marketing/src/domain/line_facts.rs) | Rule line facts use immutable priced lines plus current tenant product metadata; protected values override metadata. |
+| [components/marketing/src/domain/pipeline.rs](../components/marketing/src/domain/pipeline.rs) | A bounded acyclic flow graph models source-style true/false branches, ordered actions, delays and stop nodes. |
+| [components/marketing/src/domain/pipeline_tests.rs](../components/marketing/src/domain/pipeline_tests.rs) | Flow graph and source action schema regression tests reject unsafe graphs before any event dispatch. |
 | [components/marketing/src/domain/rule_fields.rs](../components/marketing/src/domain/rule_fields.rs) | Typed rule fields share the original comparison operators and server-derived checkout/event facts. |
 | [components/marketing/src/domain/rule_match.rs](../components/marketing/src/domain/rule_match.rs) | Evaluate typed rule trees against server-owned cart, customer and event facts. |
 | [components/marketing/src/domain/rule_tests.rs](../components/marketing/src/domain/rule_tests.rs) | Regression cases for native rule facts and original container boundaries. |
 | [components/marketing/src/domain/rules.rs](../components/marketing/src/domain/rules.rs) | Bounded Shopware-style boolean/numeric rule AST. Unknown operators/conditions fail closed. |
-| [components/marketing/src/domain.rs](../components/marketing/src/domain.rs) | Rule conditions and their matching, free of I/O. |
+| [components/marketing/src/domain.rs](../components/marketing/src/domain.rs) | Rule conditions, flow actions and the flow graph, free of I/O. |
 | [components/marketing/src/lib.rs](../components/marketing/src/lib.rs) | Marketing component: rule conditions, the facts they are matched against, and promotions. |
 | [components/marketing/src/service/conditions.rs](../components/marketing/src/service/conditions.rs) | Shared rule admission and authoritative context for tax and other native consumers. |
 | [components/marketing/src/service.rs](../components/marketing/src/service.rs) | Operations of the marketing component. |
+| [components/marketing/src/store/channel_config.rs](../components/marketing/src/store/channel_config.rs) | Shared transactional channel validation for merchant edits, history restoration and selective release. |
 | [components/marketing/src/store/customer_facts.rs](../components/marketing/src/store/customer_facts.rs) | Customer rule authority is loaded by tenant and stable customer ID, with aggregate history and calendar age. |
+| [components/marketing/src/store/dependencies.rs](../components/marketing/src/store/dependencies.rs) | Inspect tenant-owned definition references and durable uses before configuration deletion. |
 | [components/marketing/src/store/facts.rs](../components/marketing/src/store/facts.rs) | Assemble private server-owned rule context once per quote/event; never publish customer facts in cart responses. |
+| [components/marketing/src/store/promotions.rs](../components/marketing/src/store/promotions.rs) | Server-authoritative coupons and automatic campaigns, with deterministic discounts and atomic usage limits. |
 | [components/marketing/src/store/rule_snapshot.rs](../components/marketing/src/store/rule_snapshot.rs) | Resolve only referenced tenant rule IDs with indexed batched reads; freeze active definitions and revisions into the event snapshot. |
 | [components/marketing/src/store.rs](../components/marketing/src/store.rs) | SQL reads of the marketing component. |
+| [components/marketing/src/types/channel.rs](../components/marketing/src/types/channel.rs) | The sales channel record and the POS location it may carry; one tenant, independent visibility and languages. |
+| [components/marketing/src/types/flow.rs](../components/marketing/src/types/flow.rs) | The flow record: event, condition, action and its localized instruction, validated before it is stored. |
+| [components/marketing/src/types/promotion.rs](../components/marketing/src/types/promotion.rs) | Coupons and automatic campaigns as stored records, with the provenance an imported promotion keeps. |
+| [components/marketing/src/types/work_template.rs](../components/marketing/src/types/work_template.rs) | Bounded copies of reviewed native work: event values replace explicit scalar fields, never executable text. |
+| [components/marketing/src/types.rs](../components/marketing/src/types.rs) | Stored records of the marketing component. |
 | [components/orders/src/domain/order_fields.rs](../components/orders/src/domain/order_fields.rs) | Standard order read fields are projected from the authoritative quote/payment, never maintained twice. |
 | [components/orders/src/domain/order_machine.rs](../components/orders/src/domain/order_machine.rs) | Declarative order workflow schema. Extensions add states, never executable effects or payment truth. |
 | [components/orders/src/domain/order_workflow.rs](../components/orders/src/domain/order_workflow.rs) | One server-derived action catalogue drives UI, HTTP and MCP; built-in business guards cannot be bypassed. |

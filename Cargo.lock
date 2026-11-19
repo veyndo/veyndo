@@ -3691,7 +3691,9 @@ dependencies = [
  "veyndo-app-model",
  "veyndo-automation",
  "veyndo-catalog",
+ "veyndo-cognition",
  "veyndo-core",
+ "veyndo-flow-graph",
  "veyndo-pricing",
  "veyndo-shop",
 ]

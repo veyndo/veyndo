@@ -1,24 +1,7 @@
 //! Sales channels share a merchant tenant but bind independent catalog visibility, locale and cart identity.
 use super::*;
 use std::collections::HashSet;
-#[derive(Clone, Deserialize, Serialize)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub(crate) struct Channel {
-    pub name: HashMap<String, String>,
-    pub kind: String,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub pos: Option<crate::pos::Config>,
-    pub active: bool,
-    #[serde(default = "public_visibility")]
-    pub visibility: String,
-    pub locales: Vec<String>,
-    pub product_ids: Vec<String>,
-    #[serde(default)]
-    pub navigation_category_id: Option<String>,
-}
-fn public_visibility() -> String {
-    "public".into()
-}
+pub(crate) use veyndo_marketing::types::channel::Channel;
 /// Native channel metadata keeps type and activation admission independent of Studio's interface language.
 pub(crate) async fn channel_configuration(
     a: &App,

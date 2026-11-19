@@ -263,8 +263,13 @@ Order follows the dependency report, lowest first. Each line is one move.
 - [ ] marketing. Started: `components/marketing` owns the rule conditions with
   their bounds and matching, field comparison, the line, customer and order
   facts a rule reads, the snapshot of referenced rules, and the shared
-  condition service. Open: promotions and coupons, flows and their jobs,
-  sales channels, dependencies, routes.
+  condition service. `types/` holds the promotion with its import provenance,
+  the flow, the work template and the sales channel with its POS location;
+  `domain/` the flow action schema, the flow graph and instruction texts;
+  `store/` promotion evaluation with usage limits, channel validation and the
+  dependency inspection before a deletion. Open: flow projection and jobs,
+  flow execution (needs ports to orders, customers and apps), channel access
+  and preview, coupons, rule history, routes.
 - [ ] b2b
 - [ ] pos
 - [ ] apps (with `developer` and the vendored app storage)

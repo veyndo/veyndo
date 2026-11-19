@@ -36,7 +36,7 @@ mod pipeline;
 mod pipeline_runtime;
 mod promotion_import;
 mod promotions;
-pub(crate) use promotion_import::{PromotionImport, import_promotion, preserve_import};
+pub(crate) use promotion_import::{import_promotion, preserve_import};
 mod routes;
 mod rule_fields;
 mod rule_history;
@@ -47,9 +47,6 @@ pub(crate) use channels::*;
 pub(crate) use flows::{flow_once, project_flows};
 pub(crate) use promotions::*;
 pub(crate) use routes::{router, save as restore_config};
-
-#[cfg(test)]
-mod pipeline_tests;
 
 mod condition_gateway;
 pub(crate) use condition_gateway::*;

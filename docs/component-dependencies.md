@@ -24,9 +24,9 @@ run SQL without being in a `store` folder. Both numbers only fall.
 | customers | 2059 | 18 | 85 | 10 | 3 | apps (9), catalog (3), checkout (2), core (172), identity (32), marketing (2), orders (3), pos (1), pricing (2), shipping (4), shop (14), studio (9) | 6 |
 | orders | 5012 | 34 | 452 | 20 | 7 | apps (32), b2b (1), catalog (9), checkout (7), core (287), customers (5), identity (72), inventory (1), marketing (6), payments (5), pos (1), pricing (6), shipping (2), shop (26), studio (8) | 17 |
 | payments | 4102 | 2 | 264 | 17 | 7 | apps (10), core (244), host (5), identity (10), inventory (1), pos (1), pricing (7), shop (7), studio (1) | 14 |
-| marketing | 4988 | 29 | 339 | 23 | 8 | apps (23), automation (38), b2b (3), catalog (7), checkout (3), core (219), identity (37), intelligence (13), orders (1), payments (1), pos (4), pricing (17), shop (24), studio (4) | 24 |
+| marketing | 5124 | 23 | 339 | 20 | 8 | apps (16), automation (18), b2b (3), catalog (5), checkout (3), core (217), identity (37), intelligence (15), orders (1), payments (1), pos (2), pricing (12), shop (28), studio (4) | 24 |
 | b2b | 2275 | 19 | 108 | 13 | 8 | apps (18), checkout (17), core (170), customers (3), identity (17), marketing (1), orders (1), pos (1), pricing (5), shop (23), studio (18) | 8 |
-| pos | 1046 | 9 | 68 | 5 | 0 | apps (1), catalog (5), checkout (15), core (56), customers (1), identity (25), marketing (5), orders (2), payments (3), pricing (3), shipping (1), shop (18), studio (1) | 8 |
+| pos | 1017 | 9 | 68 | 5 | 0 | apps (1), catalog (4), checkout (15), core (55), customers (1), identity (25), marketing (4), orders (2), payments (3), pricing (3), shipping (1), shop (18), studio (1) | 8 |
 | apps | 11983 | 109 | 420 | 42 | 22 | b2b (3), catalog (11), checkout (4), core (628), host (17), identity (84), intelligence (4), marketing (13), orders (9), payments (7), pos (1), pricing (8), protocols (1), shipping (2), shop (33), studio (36) | 20 |
 | automation | 1443 | 8 | 97 | 0 | 0 | core (2) | 0 |
 | intelligence | 11287 | 86 | 716 | 55 | 28 | apps (45), catalog (32), checkout (20), core (723), customers (1), host (3), identity (80), marketing (18), orders (1), payments (1), pricing (13), protocols (8), shop (37), studio (11) | 26 |
@@ -46,7 +46,7 @@ reduced to one direction first.
 - apps ↔ host: 17 and 1 references
 - apps ↔ identity: 84 and 9 references
 - apps ↔ intelligence: 4 and 45 references
-- apps ↔ marketing: 13 and 23 references
+- apps ↔ marketing: 13 and 16 references
 - apps ↔ orders: 9 and 32 references
 - apps ↔ payments: 7 and 10 references
 - apps ↔ pos: 1 and 1 references
@@ -62,7 +62,7 @@ reduced to one direction first.
 - catalog ↔ customers: 5 and 3 references
 - catalog ↔ identity: 23 and 16 references
 - catalog ↔ intelligence: 11 and 32 references
-- catalog ↔ marketing: 15 and 7 references
+- catalog ↔ marketing: 15 and 5 references
 - catalog ↔ pricing: 30 and 1 references
 - catalog ↔ protocols: 1 and 10 references
 - catalog ↔ shop: 19 and 7 references
@@ -85,15 +85,15 @@ reduced to one direction first.
 - identity ↔ intelligence: 9 and 80 references
 - identity ↔ marketing: 5 and 37 references
 - identity ↔ studio: 4 and 52 references
-- intelligence ↔ marketing: 18 and 13 references
+- intelligence ↔ marketing: 18 and 15 references
 - intelligence ↔ protocols: 8 and 23 references
 - intelligence ↔ shop: 37 and 5 references
 - intelligence ↔ studio: 11 and 11 references
 - inventory ↔ shop: 2 and 1 references
 - marketing ↔ orders: 1 and 6 references
-- marketing ↔ pos: 4 and 5 references
-- marketing ↔ pricing: 17 and 2 references
-- marketing ↔ shop: 24 and 10 references
+- marketing ↔ pos: 2 and 4 references
+- marketing ↔ pricing: 12 and 2 references
+- marketing ↔ shop: 28 and 10 references
 - marketing ↔ studio: 4 and 8 references
 - orders ↔ pos: 1 and 2 references
 - orders ↔ shipping: 2 and 4 references
@@ -123,13 +123,13 @@ reduced to one direction first.
 | identity | core | `Result` | 81 |
 | intelligence | identity | `auth::` | 80 |
 | catalog | core | `State` | 80 |
-| marketing | core | `Result` | 78 |
 | shop | core | `State` | 72 |
 | orders | identity | `auth::` | 71 |
 | orders | core | `Result` | 71 |
 | intelligence | core | `conflict` | 70 |
 | intelligence | core | `Error` | 70 |
 | checkout | core | `Result` | 67 |
+| marketing | core | `Result` | 66 |
 | identity | core | `Error` | 66 |
 | apps | core | `conflict` | 63 |
 | shop | core | `Result` | 60 |
