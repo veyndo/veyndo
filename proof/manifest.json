@@ -705,6 +705,11 @@
       "sha256": "aac525b6e5f89c5a44072c9f4451bd7d70ba2a5db1c7016c0c24fcfb3a778a93",
       "review": "Product hydration, list query and preparation moved into components/catalog; no rule changed"
     },
+    "components/catalog/src/domain/image_job.rs": {
+      "status": "unproved",
+      "sha256": "01fc4b97d4a9faee26c1ffdf13b0464b92d33cd24a66fcc12285648efd0bba74",
+      "review": "image jobs moved into components/catalog; no kernel binding changed"
+    },
     "components/catalog/src/domain/media.rs": {
       "status": "unproved",
       "sha256": "eb9f5aacef9d5c7e52dc5ad2e88c2033632bcb60f406d8a035d7acf5d249f1e3",
@@ -747,8 +752,8 @@
     },
     "components/catalog/src/domain.rs": {
       "status": "unproved",
-      "sha256": "6eabacb7d9ea728735137db4780441ce8511a6d4f38e087c49c10ae499ee7f9b",
-      "review": "revision_admissible binding for applying translation drafts moved into components/catalog"
+      "sha256": "b0daca50382b0372a72bade50b4267e2fb3eea1b824b60f48fdf7ceaadfb2d50",
+      "review": "image jobs moved into components/catalog; no kernel binding changed"
     },
     "components/catalog/src/http/assets.rs": {
       "status": "unproved",
@@ -764,6 +769,11 @@
       "status": "unproved",
       "sha256": "f4256a2e39318cdb5dca0e589df214455027972c18eff33d41c697accd3f138d",
       "review": "Storefront catalogue reads and public attachments moved into components/catalog; no rule changed"
+    },
+    "components/catalog/src/http/image_jobs.rs": {
+      "status": "unproved",
+      "sha256": "b0b61095f2571bc60da7efeb79342cae8a6e6d2e36d102672e0396fa5217f2cb",
+      "review": "image jobs moved into components/catalog; no kernel binding changed"
     },
     "components/catalog/src/http/ingestion.rs": {
       "status": "unproved",
@@ -782,8 +792,8 @@
     },
     "components/catalog/src/http.rs": {
       "status": "unproved",
-      "sha256": "1c86fb484911f0eeb59448900811619231128b2a34921536b2352017f562cef5",
-      "review": "revision_admissible binding for applying translation drafts moved into components/catalog"
+      "sha256": "4143134d9074365fecb6e852b19919d3fffd0069595173a316eb5470829a0a98",
+      "review": "image jobs moved into components/catalog; no kernel binding changed"
     },
     "components/catalog/src/lib.rs": {
       "status": "unproved",
@@ -792,8 +802,8 @@
     },
     "components/catalog/src/ports.rs": {
       "status": "unproved",
-      "sha256": "63ee0833c0cf9bff101193dacaa5cea00caa5e8f9ec47d984fbe58c7071f095e",
-      "review": "revision_admissible binding for applying translation drafts moved into components/catalog"
+      "sha256": "1d082dc672c47dd8936a1dc0ee188ac0c949e849977ffd8ea003f7049e2146e5",
+      "review": "image jobs moved into components/catalog; no kernel binding changed"
     },
     "components/catalog/src/service/assets.rs": {
       "status": "unproved",
@@ -809,6 +819,11 @@
       "status": "unproved",
       "sha256": "919277d5e04c4245a0e2e72ec9303c8ce771f79cb444c48b72a3d71eb0864f4e",
       "review": "Categories moved into components/catalog; no rule changed"
+    },
+    "components/catalog/src/service/image_jobs.rs": {
+      "status": "unproved",
+      "sha256": "4c89f2c87c4cf8cd6a17fb491f7f375cdc93e2f4581b03f3f37751e5bdff30c9",
+      "review": "image jobs moved into components/catalog; no kernel binding changed"
     },
     "components/catalog/src/service/model_media.rs": {
       "status": "unproved",
@@ -842,8 +857,8 @@
     },
     "components/catalog/src/service.rs": {
       "status": "unproved",
-      "sha256": "cb804a7a19d29f173015e7cb58fb1d3a0479a852e6cae1a82f308d3859bdb360",
-      "review": "revision_admissible binding for applying translation drafts moved into components/catalog"
+      "sha256": "89dbe876062ee83383303435348f03e7ecb35d54b77d6cdd2edcc10159914679",
+      "review": "image jobs moved into components/catalog; no kernel binding changed"
     },
     "components/catalog/src/store/assets.rs": {
       "status": "unproved",
@@ -867,8 +882,8 @@
     },
     "components/catalog/src/store/media_jobs.rs": {
       "status": "unproved",
-      "sha256": "dcd2df77e10082d049fae65c4b7727f43f85548d83e33cea0e9d9d9ce5805c3a",
-      "review": "Product hydration, list query and preparation moved into components/catalog; no rule changed"
+      "sha256": "87a0926f2f6761be525c239c091cca183dc2a061c1c3508383de0119567f6587",
+      "review": "image jobs moved into components/catalog; no kernel binding changed"
     },
     "components/catalog/src/store/product_edit.rs": {
       "status": "unproved",
@@ -3752,13 +3767,13 @@
     },
     "src/assets/image_jobs.rs": {
       "status": "unproved",
-      "sha256": "124d84279ff48a521ffd41ab8088b2c366d335668f40d0a89881c67425f3488a",
-      "review": "Reviewed opt-in paged catalogue preparation: current catalogue.read and tenant-owned products, enabled-language translation flags and durable image states only; no mutation, provider retry, credential or authority widening. Failed image jobs remain inspectable after reload."
+      "sha256": "409412df571135492577073d91fac8219b4a451cd8cf12b44067af5daaedce12",
+      "review": "image jobs moved into components/catalog; no kernel binding changed"
     },
     "src/assets/image_provider.rs": {
       "status": "unproved",
-      "sha256": "10ae93a5e3d9b9b4a6118f09c477630a58f4c6f3a9212adba9ec4988773e5c49",
-      "review": "Reviewed eighteen core findings: typed trusted identity and explicit route rights; consolidated current grants; durable auth and fenced shared limits; scoped transactions and one-backend PgBouncer including nested borrow fixes; bounded Wasm/PNG work; notified workers, savepoint quarantine and conservative retention; separate runtime roles and startup configuration. Real PostgreSQL/provider regressions preserve current tenant/customer/payment behavior. SQL/network adapters remain unproved."
+      "sha256": "c5556712b7d8e4ed1f60f7481b30f36ce3214a6315b57df3bcf8db1cc9e289a4",
+      "review": "image jobs moved into components/catalog; no kernel binding changed"
     },
     "src/assets/import.rs": {
       "status": "unproved",
@@ -3772,8 +3787,8 @@
     },
     "src/assets/mod.rs": {
       "status": "unproved",
-      "sha256": "3ebfc4f1e6b0381606ba611fba824ad06f1b5c49913e6e72af56dd2c1db6b721",
-      "review": "Storefront catalogue reads and public attachments moved into components/catalog; no rule changed"
+      "sha256": "7129f2d8fd4a23a8752de19daed45bc92054f8b3337fad9b39fe2fb4801a429c",
+      "review": "image jobs moved into components/catalog; no kernel binding changed"
     },
     "src/assets/model_format.rs": {
       "status": "unproved",
@@ -4467,8 +4482,8 @@
     },
     "src/commerce/catalog_ports.rs": {
       "status": "unproved",
-      "sha256": "f34effcf79c05348afcdfab139c5fa661f11af35c37dd6a4f7baabd61a60ac2e",
-      "review": "revision_admissible binding for applying translation drafts moved into components/catalog"
+      "sha256": "348395c2df96d510bb0cf0f0d78321d1be8ea1cb1443687681e1e1383fc86a12",
+      "review": "image jobs moved into components/catalog; no kernel binding changed"
     },
     "src/commerce/configuration.rs": {
       "status": "unproved",
@@ -6057,8 +6072,8 @@
       "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
     },
     "Cargo.lock": {
-      "sha256": "0d4ae51ba9a66ad457e05f82f0ab33323c6e5495b4090a75671807c107316396",
-      "review": "Asset upload, listing and publishing moved into components/catalog; no rule changed"
+      "sha256": "f1f530c420bf72eda3a8b683590bb4c02a746d4c7552542e16595ac7b524bb76",
+      "review": "image jobs moved into components/catalog; no kernel binding changed"
     },
     "Cargo.toml": {
       "sha256": "2d7ebc432e34c20cf53825be094b58226b72dc3894a6f2804810c2c37211dd38",

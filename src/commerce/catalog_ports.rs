@@ -1,11 +1,13 @@
 //! The server's implementation of what the catalog component reads from carts, orders, environments and the history.
 use crate::{
-    App, RequestContext, commerce, history, language_context, load_cart, marketing, performance,
-    staging, tenant,
+    App, RequestContext, assets, commerce, history, language_context, load_cart, marketing,
+    performance, staging, tenant,
 };
 use sqlx::PgConnection;
 use std::sync::Arc;
-use veyndo_catalog::ports::{Catalog, ContentLanguages, Shop, Shopper, Shoppers, Visit};
+use veyndo_catalog::ports::{
+    Catalog, ContentLanguages, ImageProvider, Images, Shop, Shopper, Shoppers, Visit,
+};
 use veyndo_core::PortFuture;
 
 struct Server(App);
@@ -112,13 +114,37 @@ impl Shop for Server {
     }
 }
 
+impl Images for Server {
+    fn provider<'a>(&'a self) -> PortFuture<'a, ImageProvider> {
+        Box::pin(async move {
+            Ok(ImageProvider {
+                configured: assets::image_provider::configured(&self.0).await,
+                model: assets::image_provider::model(),
+            })
+        })
+    }
+    fn create<'a>(
+        &'a self,
+        tenant: &'a str,
+        prompt: &'a str,
+        source: Option<(String, Vec<u8>)>,
+    ) -> PortFuture<'a, Vec<u8>> {
+        Box::pin(async move {
+            let _cluster =
+                performance::cluster_lease::Lease::acquire(&self.0, tenant, "model", 2).await?;
+            assets::image_provider::create(&self.0, prompt, source).await
+        })
+    }
+}
+
 impl axum::extract::FromRef<App> for Catalog {
     fn from_ref(app: &App) -> Self {
         let server = Arc::new(Server(app.clone()));
         Catalog {
             core: app.core.clone(),
             shoppers: server.clone(),
-            shop: server,
+            shop: server.clone(),
+            images: server,
         }
     }
 }

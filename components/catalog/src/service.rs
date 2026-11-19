@@ -2,6 +2,7 @@
 pub mod assets;
 pub mod catalog_reads;
 pub mod categories;
+pub mod image_jobs;
 pub mod model_media;
 pub mod navigation;
 pub mod product_fields;

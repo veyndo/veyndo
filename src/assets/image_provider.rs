@@ -1,17 +1,17 @@
 //! Optional OpenAI Images adapter; bounded responses and decoded PNG output, no remote user URLs or leaked provider errors.
 use crate::*;
 use base64::{Engine, engine::general_purpose::STANDARD};
-pub(super) async fn configured(a: &App) -> bool {
+pub(crate) async fn configured(a: &App) -> bool {
     env::var("IMAGE_GENERATION_ENABLED").as_deref() == Ok("true")
         && a.inference
             .connection("openai")
             .await
             .is_ok_and(|(_, key, _)| key.is_some())
 }
-pub(super) fn model() -> String {
+pub(crate) fn model() -> String {
     env::var("OPENAI_IMAGE_MODEL").unwrap_or("gpt-image-2.5-sunburst".into())
 }
-pub(super) async fn create(
+pub(crate) async fn create(
     a: &App,
     prompt: &str,
     source: Option<(String, Vec<u8>)>,

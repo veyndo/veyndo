@@ -240,7 +240,7 @@
       ],
       "glob_imports": 40,
       "untyped_access": 203,
-      "sql_outside_store": 16
+      "sql_outside_store": 15
     },
     "inventory": {
       "title": "Stock, reservations and supply",

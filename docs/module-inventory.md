@@ -146,7 +146,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/assets/captions.rs](../src/assets/captions.rs) | Caption proposals use central inference and current shop languages; only the owning native editor can save them. |
 | [src/assets/design_references.rs](../src/assets/design_references.rs) | Bounded reference capture uses the shared public-only DNS-pinned egress client; partial failures remain visible. |
 | [src/assets/download.rs](../src/assets/download.rs) | Downloads require a paid, owned order snapshot; public attachments are served by the catalog component. |
-| [src/assets/image_jobs.rs](../src/assets/image_jobs.rs) | Durable image jobs: tenant admission, revision-bound private previews and explicit publication, without automatic paid retries. |
+| [src/assets/image_jobs.rs](../src/assets/image_jobs.rs) | Entry points for routes, capabilities and the worker; image jobs are owned by the catalog component. |
 | [src/assets/image_provider.rs](../src/assets/image_provider.rs) | Optional OpenAI Images adapter; bounded responses and decoded PNG output, no remote user URLs or leaked provider errors. |
 | [src/assets/import.rs](../src/assets/import.rs) | Immutable imported product images reuse the native asset table, product lock, byte validation and publication lifecycle. |
 | [src/assets/ingestion.rs](../src/assets/ingestion.rs) | The bounded multipart parser is owned by the catalog component. |
@@ -671,6 +671,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/catalog/src/domain/family.rs](../components/catalog/src/domain/family.rs) | A variant shows the texts and metadata of its family unless it sets its own. |
 | [components/catalog/src/domain/graph_query.rs](../components/catalog/src/domain/graph_query.rs) | Saved category predicates select only current confirmed public source claims; no inference at browse time. |
 | [components/catalog/src/domain/hydration.rs](../components/catalog/src/domain/hydration.rs) | Translated product hydration: each field is resolved on its own along the language chain. |
+| [components/catalog/src/domain/image_job.rs](../components/catalog/src/domain/image_job.rs) | What a merchant may ask of an image job, and the instruction the image model receives. |
 | [components/catalog/src/domain/media.rs](../components/catalog/src/domain/media.rs) | Which media a product may reference: images and at most four uploaded 3D models, with safe URLs and bounded labels. |
 | [components/catalog/src/domain/model_format.rs](../components/catalog/src/domain/model_format.rs) | Bounded self-contained GLB 2 admission; remote resources and runtime decoder downloads are forbidden. |
 | [components/catalog/src/domain/navigation.rs](../components/catalog/src/domain/navigation.rs) | Public navigation: a hidden category hides its whole branch, and every entry is shown in the visitor's language. |
@@ -683,6 +684,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/catalog/src/http/assets.rs](../components/catalog/src/http/assets.rs) | Merchant product files: list, upload and publish. |
 | [components/catalog/src/http/categories.rs](../components/catalog/src/http/categories.rs) | Merchant category tree (list, save) and the public navigation. |
 | [components/catalog/src/http/downloads.rs](../components/catalog/src/http/downloads.rs) | Public attachments honor sales-channel visibility; a file is always delivered as a private download. |
+| [components/catalog/src/http/image_jobs.rs](../components/catalog/src/http/image_jobs.rs) | Image jobs of a product: provider status, queueing, review and publication. |
 | [components/catalog/src/http/ingestion.rs](../components/catalog/src/http/ingestion.rs) | Shared bounded multipart parser for product uploads and scoped app uploads; file validation and persistence stay with the asset service. |
 | [components/catalog/src/http/reviews.rs](../components/catalog/src/http/reviews.rs) | Storefront review submission and merchant moderation. |
 | [components/catalog/src/http/translations.rs](../components/catalog/src/http/translations.rs) | Applying reviewed translation drafts. |
@@ -692,6 +694,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/catalog/src/service/assets.rs](../components/catalog/src/service/assets.rs) | File admission, immutable bytes and explicit publishing; binary content never enters merchant list responses. |
 | [components/catalog/src/service/catalog_reads.rs](../components/catalog/src/service/catalog_reads.rs) | Translated catalogue reads for the storefront, the cart and product pages; variants show their family's texts. |
 | [components/catalog/src/service/categories.rs](../components/catalog/src/service/categories.rs) | Revision-bound category writes, bounded translations and serialized cycle-safe tree moves. |
+| [components/catalog/src/service/image_jobs.rs](../components/catalog/src/service/image_jobs.rs) | Durable image jobs: tenant admission, revision-bound private previews and explicit publication, without automatic paid retries. |
 | [components/catalog/src/service/model_media.rs](../components/catalog/src/service/model_media.rs) | Model media references reuse owned immutable product assets, current product CAS and parent variant links. |
 | [components/catalog/src/service/navigation.rs](../components/catalog/src/service/navigation.rs) | Public navigation is localized and restricted to the selected channel's active category ancestry. |
 | [components/catalog/src/service/product_fields.rs](../components/catalog/src/service/product_fields.rs) | Saving the commerce fields of a product after its 3D models were checked against the stored assets. |
@@ -706,7 +709,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/catalog/src/store/categories.rs](../components/catalog/src/store/categories.rs) | Which categories a product is assigned to. |
 | [components/catalog/src/store/category_listing.sql](../components/catalog/src/store/category_listing.sql) | Independent app entry; see extensions/README.md for its public contract. |
 | [components/catalog/src/store/channels.rs](../components/catalog/src/store/channels.rs) | Per-product channel visibility overrides remain indexed even when an open catalog contains millions of products. |
-| [components/catalog/src/store/media_jobs.rs](../components/catalog/src/store/media_jobs.rs) | Reads of image jobs. |
+| [components/catalog/src/store/media_jobs.rs](../components/catalog/src/store/media_jobs.rs) | Image jobs: admission counts, the queue, private results and their publication. |
 | [components/catalog/src/store/product_edit.rs](../components/catalog/src/store/product_edit.rs) | Writes of one product edit inside its transaction: allocation lock, creation, clocks, identity, content and translations. |
 | [components/catalog/src/store/product_fields.rs](../components/catalog/src/store/product_fields.rs) | Writes and reads of the commerce fields of a product; stock is only written when a quantity is given. |
 | [components/catalog/src/store/product_list.rs](../components/catalog/src/store/product_list.rs) | The keyset-paged merchant product list with its filters; one extra row tells whether more follow. |

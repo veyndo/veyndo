@@ -70,10 +70,30 @@ pub trait Shop: Send + Sync {
     ) -> PortFuture<'a, ()>;
 }
 
+/// Whether images can be generated right now, and with which model.
+pub struct ImageProvider {
+    pub configured: bool,
+    pub model: String,
+}
+
+/// The image model. A call may cost money, so callers never repeat one on their own.
+pub trait Images: Send + Sync {
+    fn provider<'a>(&'a self) -> PortFuture<'a, ImageProvider>;
+    /// Creates a PNG from the instruction, optionally starting from an image (MIME type, bytes).
+    /// The call counts against the shop's share of concurrent model use.
+    fn create<'a>(
+        &'a self,
+        tenant: &'a str,
+        prompt: &'a str,
+        source: Option<(String, Vec<u8>)>,
+    ) -> PortFuture<'a, Vec<u8>>;
+}
+
 /// The state catalog handlers extract when they need another component.
 #[derive(Clone)]
 pub struct Catalog {
     pub core: State,
     pub shoppers: Arc<dyn Shoppers>,
     pub shop: Arc<dyn Shop>,
+    pub images: Arc<dyn Images>,
 }

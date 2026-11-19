@@ -2,6 +2,7 @@
 pub mod assets;
 pub mod categories;
 pub mod downloads;
+pub mod image_jobs;
 pub mod ingestion;
 pub mod reviews;
 pub mod translations;

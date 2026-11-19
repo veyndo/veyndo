@@ -203,11 +203,16 @@ Order follows the dependency report, lowest first. Each line is one move.
     drafts (at most 50 per request, a stale product becomes a conflict). The
     share-locked shop languages come through the `Shop` port; the
     `revision_admissible` binding now names the catalog service.
+  - image jobs: the request rule and the model instruction, admission (one per
+    product, ten pending per shop), the queue, the private preview and the
+    revision-bound publication. The image model is the port `Images`; the
+    server's implementation holds the shop's model lease around the call.
   The content language rules (`Languages`: key, allowed, translated names) and
   the sort direction went to `core`, because other components use them too.
   Open: the handlers of product edit, list and creation still run in the server,
   because they also call legal, marketing, knowledge, the app host and the shop
-  settings. Also open: paid downloads, image jobs and captions, the translation
+  settings. Also open: paid downloads, caption proposals (they drive
+  inference), the translation
   worker and job routes (they drive inference), storefront pages, staging of
   categories, demo data.
 - [ ] inventory
