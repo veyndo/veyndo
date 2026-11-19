@@ -1,7 +1,8 @@
 //! Revision-bound multilingual product metadata: specifications, SEO, cross-selling and free shipping.
-pub(super) use super::product_metadata::Translation;
-use super::product_metadata::*;
 use super::*;
+use veyndo_catalog::service::{product_fields, product_identity};
+use veyndo_catalog::store::product_edit as store;
+use veyndo_catalog::types::product_edit::Edit;
 pub(crate) async fn edit_product(
     State(a): State<App>,
     h: RequestContext,
@@ -47,104 +48,22 @@ pub(super) async fn save_product(
         return Err(bad("Product price currency is not configured"));
     }
     currencies::validate_prices(&edit.extra.currency_prices, &settings.currencies)?;
-    super::product_languages::validate(&edit.translations, &settings)?;
+    let languages = settings.languages();
+    edit.validate_translations(languages)?;
     crate::legal::validate_product(&edit.extra.compliance, &settings)?;
-    let main_key = super::product_languages::key(&settings.main_locale, &settings);
-    let main = edit
-        .translations
-        .get(&main_key)
-        .ok_or(bad("Main product language required"))?;
-    let main_name = main.name.clone().ok_or(bad("Main product name required"))?;
-    let main_description = main.description.clone().unwrap_or_default();
-    if edit.extra.cross_selling.len() > 20
-        || edit.extra.seo.len() > 100
-        || edit.extra.specifications.len() > 100
-    {
-        return Err(bad("Product metadata exceeds limits"));
-    }
-    if edit
-        .extra
-        .tax_class_id
-        .as_ref()
-        .is_some_and(|id| !settings.taxes.iter().any(|tax| &tax.id == id))
-    {
-        return Err(bad("Unknown product tax class"));
-    }
-    for (lang, seo) in &edit.extra.seo {
-        if !super::product_languages::allowed(lang, &settings)
-            || seo.title.as_ref().is_some_and(|v| v.len() > 200)
-            || seo.description.as_ref().is_some_and(|v| v.len() > 500)
-            || seo
-                .slug
-                .as_ref()
-                .is_some_and(|v| v.len() > 200 || v.contains(['?', '#', '/']))
-        {
-            return Err(bad("Invalid SEO metadata"));
-        }
-    }
-    for (lang, specs) in &edit.extra.specifications {
-        if !super::product_languages::allowed(lang, &settings)
-            || specs.len() > 40
-            || specs
-                .iter()
-                .any(|(k, v)| k.is_empty() || k.len() > 100 || v.len() > 1000)
-        {
-            return Err(bad("Invalid specification metadata"));
-        }
-    }
-    if !edit.extra.rich_description.is_null() {
-        assets::validate_rich(&edit.extra.rich_description)?;
-        if edit
-            .extra
-            .rich_description
-            .as_object()
-            .unwrap()
-            .keys()
-            .any(|lang| !super::product_languages::allowed(lang, &settings))
-        {
-            return Err(bad("Rich description language is not enabled"));
-        }
-    }
+    let (main_name, main_description) = edit.main_text(languages)?;
+    edit.validate_metadata(languages, |id| {
+        settings.taxes.iter().any(|tax| tax.id == id)
+    })?;
     marketing::validate_metadata("products", &edit.extra.automation)?;
-    if let Some(fields) = &edit.commerce {
-        fields.validate()?;
-        for media in fields.media.as_array().unwrap() {
-            for (field, limit) in [("alt", 400), ("caption", 600)] {
-                if let Some(value) = media.get(field) {
-                    let translations = value
-                        .as_object()
-                        .ok_or(bad("Image text must be translations"))?;
-                    if translations.len() > 100
-                        || translations.iter().any(|(l, v)| {
-                            !super::product_languages::allowed(l, &settings)
-                                || !(v.is_null() || v.as_str().is_some_and(|s| s.len() <= limit))
-                        })
-                    {
-                        return Err(bad("Invalid image text translation"));
-                    }
-                }
-            }
-        }
-    }
-    if let Some(c) = &edit.catalog {
-        c.validate()?;
-    }
-    if !edit.extra.identity.is_null()
-        && (!edit.extra.identity.is_object() || edit.extra.identity.to_string().len() > 8000)
-    {
-        return Err(bad("Invalid product identity metadata"));
-    }
+    edit.validate_fields(languages)?;
     if let Some(c) = &edit.catalog {
         if edit.extra.automation.is_null() {
             edit.extra.automation = json!({});
         }
         edit.extra.automation["categoryIds"] = json!(c.category_ids);
     }
-    // Serialize product number allocation for this merchant, not globally.
-    sqlx::query("SELECT pg_advisory_xact_lock(hashtextextended($1,727))")
-        .bind(&t)
-        .execute(&mut *tx)
-        .await?;
+    store::lock_numbers(&mut tx, &t).await?;
     if create {
         let fields = edit
             .catalog
@@ -153,105 +72,89 @@ pub(super) async fn save_product(
         if edit.revision != 0 {
             return Err(bad("New product revision must be zero"));
         }
-        if let Some(parent) = &fields.parent_id {
-            let valid:bool=sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM products WHERE tenant=$1 AND id=$2 AND parent_id IS NULL)").bind(&t).bind(parent).fetch_one(&mut *tx).await?;
-            if !valid || fields.options.is_empty() {
-                return Err(bad("Variant parent and options required"));
-            }
+        if let Some(parent) = &fields.parent_id
+            && (!store::is_main_product(&mut tx, &t, parent).await? || fields.options.is_empty())
+        {
+            return Err(bad("Variant parent and options required"));
         }
-        let inserted=sqlx::query("INSERT INTO products(tenant,id,name,description,category,price,tax_rate,stock,revision,content_revision,parent_id) VALUES($1,$2,$3,$4,'objects',0,19,0,0,0,$5) ON CONFLICT(tenant,id) DO NOTHING").bind(&t).bind(&id).bind(&main_name).bind(&main_description).bind(&fields.parent_id).execute(&mut *tx).await?.rows_affected();
-        if inserted == 0 {
+        if !store::insert(
+            &mut tx,
+            &t,
+            &id,
+            &main_name,
+            &main_description,
+            fields.parent_id.as_deref(),
+        )
+        .await?
+        {
             return Err(conflict("Product already exists"));
         }
     }
     if !create {
-        let row = sqlx::query(
-            "SELECT revision,content_revision,parent_id FROM products WHERE tenant=$1 AND id=$2 FOR UPDATE",
-        )
-        .bind(&t)
-        .bind(&id)
-        .fetch_optional(&mut *tx)
-        .await?
-        .ok_or(Error(StatusCode::NOT_FOUND, "Product not found".into()))?;
+        let clocks = store::lock_clocks(&mut tx, &t, &id)
+            .await?
+            .ok_or(Error(StatusCode::NOT_FOUND, "Product not found".into()))?;
         // Content-only requests cannot carry an absolute stock value. Legacy clients
         // and explicit stock edits retain aggregate CAS, including checkout changes.
-        let content_only = edit.content_revision.is_some()
-            && edit
-                .commerce
-                .as_ref()
-                .is_none_or(|fields| fields.stock.is_none());
-        let (current, expected) = if content_only {
-            (
-                row.get::<i64, _>("content_revision"),
-                edit.content_revision.unwrap(),
-            )
-        } else {
-            (row.get::<i64, _>("revision"), edit.revision)
-        };
-        if current != expected {
+        let check = edit.expected(clocks.revision, clocks.content_revision);
+        if check.current != check.expected {
             return Err(Error::revision_at(
-                current,
-                if content_only {
-                    "/contentRevision"
-                } else {
-                    "/revision"
-                },
+                check.current,
+                check.pointer,
                 "Product changed",
             ));
         }
-        edit.revision = row.get("revision");
+        edit.revision = clocks.revision;
         if edit
             .catalog
             .as_ref()
-            .is_some_and(|c| c.parent_id != row.get::<Option<String>, _>("parent_id"))
+            .is_some_and(|c| c.parent_id != clocks.parent_id)
         {
             return Err(bad("Variant parent cannot be changed"));
         }
     }
     if let Some(c) = &edit.catalog {
-        c.save(&mut tx, &t, &id).await?;
+        product_identity::save(&mut tx, &t, &id, c).await?;
     }
-
     for product in &edit.extra.cross_selling {
-        let exists: bool =
-            sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM products WHERE tenant=$1 AND id=$2)")
-                .bind(&t)
-                .bind(product)
-                .fetch_one(&mut *tx)
-                .await?;
-        if !exists || product == &id {
+        if !veyndo_catalog::store::products::exists(&mut tx, &t, product).await? || product == &id {
             return Err(bad("Invalid cross-selling product"));
         }
     }
-    let n=sqlx::query("UPDATE products SET extra=$1,name=$2,description=$3,revision=revision+1 WHERE tenant=$4 AND id=$5 AND revision=$6").bind(json!(edit.extra)).bind(&main_name).bind(&main_description).bind(&t).bind(&id).bind(edit.revision).execute(&mut *tx).await?.rows_affected();
-    if n != 1 {
+    if !store::update_content(
+        &mut tx,
+        &t,
+        &id,
+        json!(edit.extra),
+        &main_name,
+        &main_description,
+        edit.revision,
+    )
+    .await?
+    {
         return Err(conflict("Product changed"));
     }
     if let Some(fields) = &edit.commerce {
-        veyndo_catalog::service::product_fields::save(&mut tx, &t, &id, fields).await?;
+        product_fields::save(&mut tx, &t, &id, fields).await?;
     }
     for (lang, tr) in edit.translations {
-        let locale =
-            super::product_languages::locale(&lang, &settings).ok_or(bad("Unsupported locale"))?;
-        sqlx::query("INSERT INTO product_translations(tenant,product_id,language_id,name,description) SELECT $1,$2,id,$3,$4 FROM languages WHERE locale=$5 ON CONFLICT(tenant,product_id,language_id) DO UPDATE SET name=EXCLUDED.name,description=EXCLUDED.description").bind(&t).bind(&id).bind(tr.name).bind(tr.description).bind(locale).execute(&mut *tx).await?;
+        let locale = languages.locale(&lang).ok_or(bad("Unsupported locale"))?;
+        store::upsert_translation(&mut tx, &t, &id, locale, tr.name, tr.description).await?;
     }
-    let row = sqlx::query("SELECT * FROM products WHERE tenant=$1 AND id=$2")
-        .bind(&t)
-        .bind(&id)
-        .fetch_one(&mut *tx)
-        .await?;
-    knowledge::sync_product(&mut tx, &t, &json!(product(&row))).await?;
-    sqlx::query("INSERT INTO outbox(tenant,kind,data) VALUES($1,$2,$3)")
-        .bind(&t)
-        .bind(if create {
+    let (saved, content_revision) = store::saved(&mut tx, &t, &id).await?;
+    knowledge::sync_product(&mut tx, &t, &json!(saved)).await?;
+    veyndo_core::outbox::publish(
+        &mut tx,
+        &t,
+        if create {
             "product.created"
         } else {
             "product.updated"
-        })
-        .bind(json!({"productId":id,"revision":edit.revision+1}))
-        .execute(&mut *tx)
-        .await?;
-    let result = json!({"id":id,"saved":true,"revision":row.get::<i64,_>("revision"),"contentRevision":row.get::<i64,_>("content_revision"),"stock":row.get::<i32,_>("stock")});
+        },
+        json!({"productId":id,"revision":edit.revision+1}),
+    )
+    .await?;
+    let result = json!({"id":id,"saved":true,"revision":saved.revision,"contentRevision":content_revision,"stock":saved.stock});
     tx.commit().await?;
     Ok(Json(result))
 }
@@ -293,7 +196,7 @@ pub(crate) async fn product_editor(
         .filter(|c| c["visible"] == true)
         .map(|c| c["id"].clone())
         .collect::<Vec<_>>();
-    let category_ids:Vec<String>=sqlx::query_scalar("SELECT category_id FROM product_categories WHERE tenant=$1 AND product_id=$2 ORDER BY category_id").bind(&t).bind(&id).fetch_all(&a.db).await?;
+    let category_ids = veyndo_catalog::store::categories::of_product(&a.core, &t, &id).await?;
     let mut value = json!({"id":id,"mainLocale":settings.main_locale,"availableLocales":settings.locales,"channels":channels,"catalog":{"salesChannelIds":selected_channels,"active":r.get::<bool,_>("active"),"productNumber":r.get::<Option<String>,_>("product_number").unwrap_or_else(||id.clone()),"categoryIds":category_ids,"parentId":r.get::<Option<String>,_>("parent_id"),"options":r.get::<Value,_>("options")},"revision":r.get::<i64,_>("revision"),"contentRevision":r.get::<i64,_>("content_revision"),"translations":translations,"extra":({let mut extra=r.get::<Value,_>("extra");if extra["priceCurrency"].is_null(){extra["priceCurrency"]=json!(settings.currencies.pricing_currency);}extra}),"commerce":editable_fields(&r)});
     apps::core_extensions::attach(
         &a,

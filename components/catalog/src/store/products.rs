@@ -88,3 +88,13 @@ pub async fn store_fixed_prices(
         .await?;
     Ok(())
 }
+
+pub async fn exists(tx: &mut PgConnection, tenant: &str, product: &str) -> Result<bool> {
+    Ok(
+        sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM products WHERE tenant=$1 AND id=$2)")
+            .bind(tenant)
+            .bind(product)
+            .fetch_one(tx)
+            .await?,
+    )
+}

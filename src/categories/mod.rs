@@ -25,41 +25,7 @@ pub(crate) fn router() -> Router<App> {
             get(navigation::list).post(navigation::list),
         )
 }
-pub(crate) async fn assignments(
-    tx: &mut sqlx::PgConnection,
-    t: &str,
-    id: &str,
-    ids: &[String],
-) -> Result<()> {
-    if ids.len() > 100 {
-        return Err(bad("Maximum 100 product categories"));
-    }
-    for category in ids {
-        let exists: bool =
-            sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM categories WHERE tenant=$1 AND id=$2)")
-                .bind(t)
-                .bind(category)
-                .fetch_one(&mut *tx)
-                .await?;
-        if !exists {
-            return Err(bad("Category unavailable in this shop"));
-        }
-    }
-    sqlx::query("DELETE FROM product_categories WHERE tenant=$1 AND product_id=$2")
-        .bind(t)
-        .bind(id)
-        .execute(&mut *tx)
-        .await?;
-    for category in ids {
-        sqlx::query("INSERT INTO product_categories VALUES($1,$2,$3) ON CONFLICT DO NOTHING")
-            .bind(t)
-            .bind(id)
-            .bind(category)
-            .execute(&mut *tx)
-            .await?;
-    }
-    Ok(())
-}
+pub(crate) use veyndo_catalog::service::product_identity::assign_categories as assignments;
 
 /// Provision an independent root and legacy assignments for every newly created shop.
 pub(crate) async fn seed(tx: &mut sqlx::PgConnection, t: &str) -> Result<()> {

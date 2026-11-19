@@ -181,7 +181,6 @@
         "src/commerce/product_fields.rs",
         "src/commerce/product_input.rs",
         "src/commerce/product_languages.rs",
-        "src/commerce/product_metadata.rs",
         "src/commerce/product_preparation.rs",
         "src/commerce/catalog_ports.rs",
         "src/commerce/selection.rs",
@@ -222,7 +221,6 @@
         "marketing",
         "pricing",
         "protocols",
-        "shipping",
         "shop",
         "studio"
       ],
@@ -243,9 +241,9 @@
         "tasks",
         "tenants"
       ],
-      "glob_imports": 46,
+      "glob_imports": 43,
       "untyped_access": 202,
-      "sql_outside_store": 28
+      "sql_outside_store": 27
     },
     "inventory": {
       "title": "Stock, reservations and supply",

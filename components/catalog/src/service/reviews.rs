@@ -1,6 +1,6 @@
 //! Review submission with server-derived purchase verification, and the import of historical reviews with their provenance.
 use crate::ports::Catalog;
-use crate::store::reviews;
+use crate::store::{products, reviews};
 use crate::types::review::{ImportedReview, NewReview};
 use serde_json::{Value, json};
 use veyndo_core::{RequestContext, Result, bad, conflict, outbox, uid};
@@ -60,7 +60,7 @@ pub async fn import(
         .attribute(&mut tx, h, "historical_review_import")
         .await?;
     reviews::lock_import(&mut tx, &tenant, id).await?;
-    if !reviews::product_exists_in(&mut tx, &tenant, product).await? {
+    if !products::exists(&mut tx, &tenant, product).await? {
         return Err(bad(
             "Publish the referenced product before its historical reviews",
         ));

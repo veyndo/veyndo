@@ -174,14 +174,25 @@ Done when the server builds on both crates without glob imports from them.
 
 Order follows the dependency report, lowest first. Each line is one move.
 
-- [ ] catalog. Started: `components/catalog` owns the product row hydration,
-      the locked range read and fixed-price write that price jobs use (the server's
-      `Catalogue` port delegates to it), the template-shop read and the pure
-      content fallback and language key rules, the commerce fields of a product
-      (typed payload, bounds, save that keeps an untouched stock), the media rules
-      and the GLB admission with the model asset check. Open: product edit and create,
-      categories, assets, reviews, translations, catalogue reads and pages; these
-      take the server state and need ports to `shop` (settings) and `checkout`.
+- [ ] catalog. Started: `components/catalog` owns
+  - product rows: hydration, the locked range read and fixed-price write that
+    price jobs use (the server's `Catalogue` port delegates to it), the
+    template-shop read;
+  - the commerce fields of a product (typed payload, bounds, save that keeps an
+    untouched stock), media rules, GLB admission and the model asset check;
+  - reviews: submission, moderation and import as `http/`, `service/` and
+    `store/`, behind the ports `Shoppers` (cart, purchases) and `Shop` (preview
+    environment, history);
+  - the product edit payload with its pure checks (translations, metadata, image
+    texts, which clock an edit is checked against) and every SQL statement of an
+    edit in `store/product_edit`; identity, channel visibility and category
+    assignment as a service;
+  - rich text and the content fallback rules.
+  The content language rules (`Languages`: key, allowed, translated names) went
+  to `core`, because roles, marketing, legal and POS use them too.
+  Open: the edit handler itself still runs in the server, because it also calls
+  legal, marketing, knowledge and the shop settings; so do product list and
+  creation, categories, assets, translations jobs, catalogue reads and pages.
 - [ ] inventory
 - [ ] shipping
 - [ ] customers

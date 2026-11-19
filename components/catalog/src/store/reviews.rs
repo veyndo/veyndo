@@ -14,16 +14,6 @@ pub async fn product_exists(a: &State, tenant: &str, product: &str) -> Result<bo
     )
 }
 
-pub async fn product_exists_in(tx: &mut PgConnection, tenant: &str, product: &str) -> Result<bool> {
-    Ok(
-        sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM products WHERE tenant=$1 AND id=$2)")
-            .bind(tenant)
-            .bind(product)
-            .fetch_one(tx)
-            .await?,
-    )
-}
-
 /// Stores an unpublished review; `false` when this reviewer already reviewed the product.
 pub async fn insert(
     a: &State,

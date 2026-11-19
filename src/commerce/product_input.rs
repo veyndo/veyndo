@@ -39,7 +39,7 @@ pub(crate) fn admit_product_write(v: &Value, create: bool) -> Result<()> {
         }
         category_edit(v)?;
     } else {
-        let edit: super::product_metadata::Edit = serde_json::from_value(v.clone())
+        let edit: veyndo_catalog::types::product_edit::Edit = serde_json::from_value(v.clone())
             .map_err(|_| bad("Product edit requires revision, translations and extra; category-only edits use revision and categoryIds"))?;
         if let Some(catalog) = edit.catalog {
             catalog.validate()?;

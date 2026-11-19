@@ -685,11 +685,6 @@
       "sha256": "ee3e16add3458894ff03fc982bedd07278603ac51c25708575a359574998c251",
       "review": "Catalog component crate created; no rule changed"
     },
-    "components/catalog/src/domain/locale.rs": {
-      "status": "unproved",
-      "sha256": "e48495a91550ef1f854029d20577c01a39ad0a2510019a8e2985157aa86e207b",
-      "review": "Catalog component crate created; no rule changed"
-    },
     "components/catalog/src/domain/media.rs": {
       "status": "unproved",
       "sha256": "eb9f5aacef9d5c7e52dc5ad2e88c2033632bcb60f406d8a035d7acf5d249f1e3",
@@ -700,10 +695,20 @@
       "sha256": "dc81356114cf270a6353705cf0bf21a372aae055cfca26624a629ef5a877a2c4",
       "review": "Product fields, media rules and GLB validation moved into components/catalog; no rule changed"
     },
+    "components/catalog/src/domain/rich.rs": {
+      "status": "unproved",
+      "sha256": "b5dfa14338a1e119a9d5d1d5527092efe343217d46046a57f7d35e0b25658a9f",
+      "review": "Product edit types, stores and language rules moved into components; no rule changed"
+    },
+    "components/catalog/src/domain/rich_document.rs": {
+      "status": "unproved",
+      "sha256": "142f43c141d589ad1ab68440ad822418f22a19286936fc8544088384ee417f90",
+      "review": "Product edit types, stores and language rules moved into components; no rule changed"
+    },
     "components/catalog/src/domain.rs": {
       "status": "unproved",
-      "sha256": "0f4bd851272d641a6463be6e60a4b0a50f763d2946f9b5efb8d51dd1bc6b4db5",
-      "review": "Product fields, media rules and GLB validation moved into components/catalog; no rule changed"
+      "sha256": "85643c6a135362eba7d07b65807591051a78d094cd5b48c75b33d4e1dcda8dcf",
+      "review": "Product edit types, stores and language rules moved into components; no rule changed"
     },
     "components/catalog/src/http/reviews.rs": {
       "status": "unproved",
@@ -735,20 +740,40 @@
       "sha256": "42769340c81f5f4b2f977d8504f8d605dcea680cae2be92d14e1d69053acde2b",
       "review": "Product fields, media rules and GLB validation moved into components/catalog; no rule changed"
     },
+    "components/catalog/src/service/product_identity.rs": {
+      "status": "unproved",
+      "sha256": "f6a50ed747a105ecce53c2b3abddfacad2add4060a7d1fd196796f80725847e9",
+      "review": "Product edit types, stores and language rules moved into components; no rule changed"
+    },
     "components/catalog/src/service/reviews.rs": {
       "status": "unproved",
-      "sha256": "4a59b0716de50092a1051cd562d7ea9f54f17e22845932a1e73562c0883bd9d6",
-      "review": "Reviews moved into components/catalog; no rule changed"
+      "sha256": "67c7321fbe19a8a746e713e41d56a505b3430da92ecc3363a1f393515ff0fe63",
+      "review": "Product edit types, stores and language rules moved into components; no rule changed"
     },
     "components/catalog/src/service.rs": {
       "status": "unproved",
-      "sha256": "b45b3b2769c43d62bfd14f52cf18d64d527588f3daac72947a13f7a45273c458",
-      "review": "Reviews moved into components/catalog; no rule changed"
+      "sha256": "e431ee95714b164a6e24808b2bcce2e5de596959f709df913ed1653b6599d94a",
+      "review": "Product edit types, stores and language rules moved into components; no rule changed"
     },
     "components/catalog/src/store/assets.rs": {
       "status": "unproved",
       "sha256": "3a94b0d5557ea053a5d13f281bfd22081a02d30c53357dd21a7c97019048452f",
       "review": "Product fields, media rules and GLB validation moved into components/catalog; no rule changed"
+    },
+    "components/catalog/src/store/categories.rs": {
+      "status": "unproved",
+      "sha256": "da3316bd7d81987633f2d723afd128730e61181734ae2e0ccb8c4d075135b41b",
+      "review": "Product edit types, stores and language rules moved into components; no rule changed"
+    },
+    "components/catalog/src/store/channels.rs": {
+      "status": "unproved",
+      "sha256": "c3f471aaf3d6f2b877c5a0af8b916f68c8ef8f46db2a0503810466ebed44d775",
+      "review": "Product edit types, stores and language rules moved into components; no rule changed"
+    },
+    "components/catalog/src/store/product_edit.rs": {
+      "status": "unproved",
+      "sha256": "50cd55cda414b122ed10f5b7a3f2a1887eedf28f03fe06048950af1948aeef99",
+      "review": "Product edit types, stores and language rules moved into components; no rule changed"
     },
     "components/catalog/src/store/product_fields.rs": {
       "status": "unproved",
@@ -757,18 +782,23 @@
     },
     "components/catalog/src/store/products.rs": {
       "status": "unproved",
-      "sha256": "9d923247f673042690e73201e8ed12906a1dbd9398be23670958b1504f8c6366",
-      "review": "Catalog component crate created; no rule changed"
+      "sha256": "fb7f3eb58c09f007d9823f41e38e53501a91ba528d0280e387c8d9adbb3acfcc",
+      "review": "Product edit types, stores and language rules moved into components; no rule changed"
     },
     "components/catalog/src/store/reviews.rs": {
       "status": "unproved",
-      "sha256": "a8525ded3efa481e1bb76e8ed3cb3c92017f91973e34a9bd07c1ea83db7f5708",
-      "review": "Reviews moved into components/catalog; no rule changed"
+      "sha256": "b1f9e3f74883f0291c539abf5a83f1c1e047b54380407c47457bfcd2b8e437e8",
+      "review": "Product edit types, stores and language rules moved into components; no rule changed"
     },
     "components/catalog/src/store.rs": {
       "status": "unproved",
-      "sha256": "aa823a938ce23db77a125f9d6bc4420416922398e2e3550c9a8f98f1ec18e857",
-      "review": "Reviews moved into components/catalog; no rule changed"
+      "sha256": "4a9ff2481c5811477c3812ef1a54e2246fa10f6a755cf4a9201fc2380a1afb03",
+      "review": "Product edit types, stores and language rules moved into components; no rule changed"
+    },
+    "components/catalog/src/types/product_edit.rs": {
+      "status": "unproved",
+      "sha256": "469b8887acef06bcb4acf3353771fa84771c5233244083a60a8dbd1dc6727870",
+      "review": "Product edit types, stores and language rules moved into components; no rule changed"
     },
     "components/catalog/src/types/product_fields.rs": {
       "status": "unproved",
@@ -782,8 +812,8 @@
     },
     "components/catalog/src/types.rs": {
       "status": "unproved",
-      "sha256": "d83c853f3c929083d5d4c570ff300f5cb8887cf2eb5ec249b007031ecbc11e6c",
-      "review": "Reviews moved into components/catalog; no rule changed"
+      "sha256": "7745ea23b3e7eeac48ab5e8ba0f235bb5c45ebee6866b8daec52ce69d28eefce",
+      "review": "Product edit types, stores and language rules moved into components; no rule changed"
     },
     "components/core/src/access.rs": {
       "status": "unproved",
@@ -870,10 +900,15 @@
       "sha256": "de7d1cd64da46a53a2aed85199027211f8c33864025e7868b4e892a8c65e8bef",
       "review": "Reviews moved into components/catalog; no rule changed"
     },
+    "components/core/src/localized/languages.rs": {
+      "status": "unproved",
+      "sha256": "74d072d8913dc1e94224af689db3fe15722dd3857c79fae8d80683f8f21814c7",
+      "review": "Product edit types, stores and language rules moved into components; no rule changed"
+    },
     "components/core/src/localized.rs": {
       "status": "unproved",
-      "sha256": "1b27518f776f176202b8a868d6ab33463c48bb74b30b38201051f11cee3a0476",
-      "review": "Tax classes, the destination rate and the context selection rules moved unchanged into components/pricing; the destination tax rule is bound there"
+      "sha256": "af42befc0c3226c80e5afb3dafcc6a8e4d1d2be1149646965f6a5091d92d2b93",
+      "review": "Product edit types, stores and language rules moved into components; no rule changed"
     },
     "components/core/src/observability.rs": {
       "status": "unproved",
@@ -3607,13 +3642,13 @@
     },
     "src/assets/rich.rs": {
       "status": "unproved",
-      "sha256": "78c5dde03b0eb03f60d4d6ea406d5726df549314769c65b3d6f2843de5620afd",
-      "review": "Reviewed international configuration, destination tax predicates and native bindings; targeted PostgreSQL international/catalog cases plus Rust tests pass. Translation fixtures verify restart, provider rejection, tenant permissions and revision conflicts. Config/product/apply share row locks. Additive schema 028 and versioned MIT geography reviewed; surrounding SQL/provider behavior remains unproved."
+      "sha256": "8bb3f257c8c1f53dc72c33985b13ef504909cfdfb2f1427d1896460b8a87192e",
+      "review": "Product edit types, stores and language rules moved into components; no rule changed"
     },
     "src/assets/rich_document.rs": {
       "status": "unproved",
-      "sha256": "a91f1eba45e24f8e0e3c532853785f7292c4ff71abbcb582f47b169217e5fbcb",
-      "review": "Reviewed customer order ownership reuse and shopper projection, customer receipts bound to tenant/order/receipt through the same immutable PDF renderer, HTTPS tracking validation reusing existing rich URL policy, and MCP tracking schema. Real customer HTTP tests reject anonymous/foreign/mismatched IDs, compare customer and merchant PDF bytes, reject unsafe URLs without revision changes and observe live delivery updates. Async SQL and UI paths remain explicitly unproved."
+      "sha256": "a9b9ce25bcbf4b2d923b6c6a9ba17b7f3f297cb12f63e31c043dfc194607e9c0",
+      "review": "Product edit types, stores and language rules moved into components; no rule changed"
     },
     "src/assets/upload.rs": {
       "status": "unproved",
@@ -4027,8 +4062,8 @@
     },
     "src/categories/mod.rs": {
       "status": "unproved",
-      "sha256": "67ec6b72f61aa30913ada60297c2ff2e33e86b1086bd1b0f45630a26816676f9",
-      "review": "Focused independent review accepted bounded native app proposal repair, canonical category admission and current task progress fences; fail-first generation/category/race regressions passed. These adapters remain outside proved business policies."
+      "sha256": "ab409d38d515d4667ddecb1de58f00a2d88dc458ce8be2c89e089ab2acc8d6a6",
+      "review": "Product edit types, stores and language rules moved into components; no rule changed"
     },
     "src/categories/navigation.rs": {
       "status": "unproved",
@@ -4307,8 +4342,8 @@
     },
     "src/commerce/content_text.rs": {
       "status": "unproved",
-      "sha256": "2c0a1597b4df40b873d472715305b0b3e87075fac6f3c4be9b8e8b14f02692f0",
-      "review": "Catalog component crate created; no rule changed"
+      "sha256": "6035cfbd53690f09ba7c8bcbcf9f69c32866fae9995eaac259930495a7afa945",
+      "review": "Product edit types, stores and language rules moved into components; no rule changed"
     },
     "src/commerce/context_routes.rs": {
       "status": "unproved",
@@ -4382,8 +4417,8 @@
     },
     "src/commerce/mod.rs": {
       "status": "unproved",
-      "sha256": "37da5d4969739a7147f64280a19120bc2bd95b76e53463540f73e4ffc0023a81",
-      "review": "Reviews moved into components/catalog; no rule changed"
+      "sha256": "9ac4154ed1db3c19700ede424a447f0c84a3b753ae42d3aa0bce90080c1c737d",
+      "review": "Product edit types, stores and language rules moved into components; no rule changed"
     },
     "src/commerce/order_fields.rs": {
       "status": "unproved",
@@ -4407,13 +4442,13 @@
     },
     "src/commerce/product_admin.rs": {
       "status": "unproved",
-      "sha256": "b990fe464a13aec0ccc39f4e36e7419acb0acbd084b2d793ae15e2cee0ab35f7",
-      "review": "Reviewed bounded read-only catalogue preparation with native editor main-language fallback for legacy source columns; current tenant/catalogue admission and exact page bound retained. Retain failed image jobs for explicit recovery, with no provider retry or state mutation from reads."
+      "sha256": "601cbfa842cf35c6d7f0c9886f9fd0a06c6cd322a12749e4ca116770507a0dff",
+      "review": "Product edit types, stores and language rules moved into components; no rule changed"
     },
     "src/commerce/product_channels.rs": {
       "status": "unproved",
-      "sha256": "e599f13d73c103420f42e801f9884031ae78bc26fe0ac3b9167db7cfdac687c3",
-      "review": "Reviewed tenant-bound catalog/category CRUD, composite FKs and indexed pre-pagination filters; rich document allowlist; shared HTTP/MCP permissions; active/channel admission under checkout locks; committed product events; category/product staging dependency order and live inventory preservation. Existing Lean policy bodies unchanged. New adapters remain unproved; native catalog/MCP/flow/upload/release and commerce/account/operations/protocol/scalability regressions exercise consumers."
+      "sha256": "47754b03e0310f4e5b2fb3d1279e2335ea9b89b3cfac64b7cdf4ff4b64e38c83",
+      "review": "Product edit types, stores and language rules moved into components; no rule changed"
     },
     "src/commerce/product_create.rs": {
       "status": "unproved",
@@ -4422,28 +4457,23 @@
     },
     "src/commerce/product_edit.rs": {
       "status": "unproved",
-      "sha256": "87c2a25827ad164039345aedf7fe08316ddccd9362febaf80117361f05447b65",
-      "review": "Product fields, media rules and GLB validation moved into components/catalog; no rule changed"
+      "sha256": "0826aad157ef5ea9de446e3dd9cf9cf54976b6eb6b27cb32b353e978a273532e",
+      "review": "Product edit types, stores and language rules moved into components; no rule changed"
     },
     "src/commerce/product_fields.rs": {
       "status": "unproved",
-      "sha256": "6519f6e5f65c69f1543f4ae0b683c2c18dba37eff0d1c8257aec0f5c8e3fd7f9",
-      "review": "Product fields, media rules and GLB validation moved into components/catalog; no rule changed"
+      "sha256": "730783c6105c0e555216fd2e6f192f4d90bff4a1f954a0012d5b2ecbf74487f6",
+      "review": "Product edit types, stores and language rules moved into components; no rule changed"
     },
     "src/commerce/product_input.rs": {
       "status": "unproved",
-      "sha256": "5b4727f0302009f300ea273a4a13db168a45ba41409bf6251d452159e5a4ccb6",
-      "review": "Reviewed native category-only product expansion: explicit bounded shape, original aggregate/content CAS retained through native product lock, no commerce or channel write, tenant-owned category assignment and unchanged native rights; pre-review full-product deserialization. Reproduced public Invalid product metadata through old-binary HTTP, replacement preserves metadata and denies stale/mixed/foreign writes. No extracted business predicate changed."
+      "sha256": "a67ce68a6c207b030aa5404ff3497dd934da48f9e4afeffc80c5ba262684bec2",
+      "review": "Product edit types, stores and language rules moved into components; no rule changed"
     },
     "src/commerce/product_languages.rs": {
       "status": "unproved",
-      "sha256": "7fb9d53c797d66d056b5b4e816c5c823279cda386855e582de691de60df62fe8",
-      "review": "Catalog component crate created; no rule changed"
-    },
-    "src/commerce/product_metadata.rs": {
-      "status": "unproved",
-      "sha256": "71dbafddab190a012c43fc3acfbc2a91018722245f02c7418ceea05b04540824",
-      "review": "Codex source review 2026-10-16: native catalogue intake CSV/HTTPS/model preparation and explicit stage-only creation reuse current permissions, stable IDs, locked settings CAS, product/history/outbox and bounded image jobs; native catalog_management, durable_agents and image_jobs checks recorded for this branch. Connected guardrail UI keeps the extracted pricing/autonomy predicates unchanged; authorized paged commerce policy read and merchant instructions verified by users, knowledge_workspace and providers plus 192 Rust tests. All changed transport/SQL/provider adapters remain unproved; no new formal correctness claim."
+      "sha256": "d4b22c5efac1a288e19c7c7205d7af95dc1793448f11d148834270b73d9aa3e3",
+      "review": "Product edit types, stores and language rules moved into components; no rule changed"
     },
     "src/commerce/product_preparation.rs": {
       "status": "unproved",
