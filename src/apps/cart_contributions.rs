@@ -1,23 +1,6 @@
 //! Generic app contributions: configure a cart, bind package/data revisions and persist audited pricing inputs.
 use super::*;
-#[derive(Clone, Debug, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub(crate) struct Configuration {
-    pub app: String,
-    pub product_id: String,
-    pub fields: Value,
-    pub fee_minor: i64,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub currency: Option<String>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub rule_fields: Option<Value>,
-    pub rule_revision: i64,
-    pub app_version: String,
-    pub entity: String,
-    pub record: String,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub presentation: Option<configuration_summary::Snapshot>,
-}
+pub(crate) use veyndo_shop::types::cart::AppConfiguration as Configuration;
 pub(crate) async fn configure(a: &App, h: &RequestContext, id: &str, v: &Value) -> Result<Value> {
     let initial = load_cart(a, h).await?;
     let product = v["productId"].as_str().ok_or(bad("productId required"))?;

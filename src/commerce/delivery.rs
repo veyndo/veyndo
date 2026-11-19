@@ -1,11 +1,7 @@
 //! Shipping costs, proportional taxes and calendar delivery windows.
 use super::*;
 
-pub(crate) fn selection(c: &Cart) -> CheckoutSelection {
-    c.checkout
-        .clone()
-        .unwrap_or_else(CheckoutSelection::defaults)
-}
+pub(crate) use veyndo_shop::types::cart::selection;
 pub(crate) fn enrich(
     mut q: Value,
     c: &StoredCart,

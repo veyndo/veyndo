@@ -1,42 +1,6 @@
 //! Audited cashier discounts use exact minor units and the existing native tax allocator in both quote and commit.
 use super::*;
-#[derive(Clone, Debug, Deserialize, Serialize)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub(crate) struct Discount {
-    pub kind: String,
-    pub value: u64,
-    pub currency: String,
-    pub reason: String,
-    pub actor: String,
-}
-impl Discount {
-    fn minor(&self, goods: u64, currency: &str, actor: bool) -> Result<i64> {
-        if self.currency != currency || goods > i64::MAX as u64 {
-            return Err(bad("Discount currency changed; remove and apply again"));
-        }
-        let minor = match self.kind.as_str() {
-            "percent" if self.value <= 10000 => {
-                ((u128::from(goods) * u128::from(self.value) + 5000) / 10000) as u64
-            }
-            "fixed" => self.value,
-            _ => {
-                return Err(bad(
-                    "Discount requires basis points from 0 to 10000 or exact minor units",
-                ));
-            }
-        };
-        if !verified_kernel::pos_discount_admissible(
-            actor,
-            self.currency == currency,
-            !self.reason.trim().is_empty(),
-            minor,
-            goods,
-        ) {
-            return Err(bad("Discount exceeds the current goods value"));
-        }
-        Ok(minor as i64)
-    }
-}
+pub(crate) use veyndo_shop::types::cart::Discount;
 pub(super) async fn save(a: &App, h: &RequestContext, v: &Value, revision: i64) -> Result<Value> {
     auth::permit(h, "orders.write")?;
     auth::permit(h, "payments.manage")?;

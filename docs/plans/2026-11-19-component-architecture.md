@@ -246,7 +246,11 @@ Order follows the dependency report, lowest first. Each line is one move.
 - [ ] payments
 - [ ] checkout
 - [ ] orders
-- [ ] marketing
+- [ ] marketing. Started: `components/marketing` owns the rule conditions with
+  their bounds and matching, field comparison, the line, customer and order
+  facts a rule reads, the snapshot of referenced rules, and the shared
+  condition service. Open: promotions and coupons, flows and their jobs,
+  sales channels, dependencies, routes.
 - [ ] b2b
 - [ ] pos
 - [ ] apps (with `developer` and the vendored app storage)
@@ -259,7 +263,9 @@ Order follows the dependency report, lowest first. Each line is one move.
   rules, customer groups), the bundled method labels and the sparse channel
   override. It sits above pricing, inventory and shipping, whose types it
   embeds; rule conditions are checked through a function the rule engine
-  passes in. Open: loading, caching, saving and releasing settings, channel
+  passes in. It also owns the cart as every component reads it (`Cart`,
+  `StoredCart`, the cashier discount, the company context, app
+  configurations). Open: loading, caching, saving and releasing settings, channel
   scopes, domains, legal consent, the platform and performance modules.
 
 Per component: sources moved, tables and migrations assigned, SQL only in

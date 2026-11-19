@@ -3501,6 +3501,7 @@ dependencies = [
  "veyndo-identity",
  "veyndo-inventory",
  "veyndo-kernel",
+ "veyndo-marketing",
  "veyndo-pricing",
  "veyndo-runtime",
  "veyndo-shipping",
@@ -3679,6 +3680,21 @@ name = "veyndo-kernel"
 version = "0.5.0"
 
 [[package]]
+name = "veyndo-marketing"
+version = "0.5.0"
+dependencies = [
+ "serde",
+ "serde_json",
+ "sqlx",
+ "veyndo-app-model",
+ "veyndo-automation",
+ "veyndo-catalog",
+ "veyndo-core",
+ "veyndo-pricing",
+ "veyndo-shop",
+]
+
+[[package]]
 name = "veyndo-marketplaces"
 version = "0.2.0"
 dependencies = [
@@ -3768,6 +3784,7 @@ dependencies = [
  "reqwest",
  "serde",
  "serde_json",
+ "sqlx",
  "veyndo-app-model",
  "veyndo-core",
  "veyndo-inventory",

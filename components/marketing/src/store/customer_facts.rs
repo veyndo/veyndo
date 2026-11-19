@@ -1,6 +1,9 @@
 //! Customer rule authority is loaded by tenant and stable customer ID, with aggregate history and calendar age.
-use super::*;
-pub(super) async fn customer(
+use serde_json::{Value, json};
+use sqlx::Row;
+use veyndo_core::Result;
+use veyndo_shop::types::cart::StoredCart;
+pub async fn customer(
     conn: &mut sqlx::PgConnection,
     c: &StoredCart,
     facts: &Value,

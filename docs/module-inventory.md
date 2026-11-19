@@ -51,7 +51,6 @@ This lists every checked-in source module in these roots, including files with n
 | [src/apps/business_capability/tests.rs](../src/apps/business_capability/tests.rs) | Acceptance examples exercise the same Wasm module as checkout, including changed inputs and failed-contract admission. |
 | [src/apps/cart_contributions.rs](../src/apps/cart_contributions.rs) | Generic app contributions: configure a cart, bind package/data revisions and persist audited pricing inputs. |
 | [src/apps/commerce_hooks.rs](../src/apps/commerce_hooks.rs) | Typed pure commerce hooks share the compiled sandbox cache and receive explicit immutable snapshots, never SQL or credentials. |
-| [src/apps/compatibility.rs](../src/apps/compatibility.rs) | Explicit read adapter for persisted v0.5 engraving carts; completed order snapshots remain unchanged. |
 | [src/apps/configuration_events.rs](../src/apps/configuration_events.rs) | Configuration mutations publish minimized identifiers through the native outbox/Flows; no cart capability or shopper text is disclosed. |
 | [src/apps/configuration_examples.rs](../src/apps/configuration_examples.rs) | Frozen configuration cases use the same field validation and bounded guest as real cart configuration. |
 | [src/apps/configuration_inputs.rs](../src/apps/configuration_inputs.rs) | Native policy adapter for shared configuration grammar, library selection and exact guest arguments. |
@@ -226,7 +225,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/capabilities/registry.rs](../src/capabilities/registry.rs) | One immutable native operation record for dispatch, schemas, MCP discovery and bounded agent reads. |
 | [src/capabilities/schema.rs](../src/capabilities/schema.rs) | Native operation input contracts; transports consume this owner instead of maintaining their own schemas. |
 | [src/capabilities.rs](../src/capabilities.rs) | Shared HTTP/MCP capability dispatch and tool authorization. |
-| [src/cart_model.rs](../src/cart_model.rs) | Bind the shared cart contract to native contexts and hydrate tenant-scoped stored carts. |
+| [src/cart_model.rs](../src/cart_model.rs) | The cart contract bound to native contexts is owned by the shop component. |
 | [src/cart_mutation.rs](../src/cart_mutation.rs) | Optimistic cart mutations and quantity normalization. |
 | [src/cart_price.rs](../src/cart_price.rs) | Authoritative quantity pricing and localized checkout quote assembly. |
 | [src/cart_routes.rs](../src/cart_routes.rs) | Store API cart and order route adapters. |
@@ -405,11 +404,10 @@ This lists every checked-in source module in these roots, including files with n
 | [src/marketing/channel_config.rs](../src/marketing/channel_config.rs) | Shared transactional channel validation for merchant edits, history restoration and selective release. |
 | [src/marketing/channel_preview.rs](../src/marketing/channel_preview.rs) | One-use preview handoff becomes a host-only cookie, bound to current session, membership and channel revision. |
 | [src/marketing/channels.rs](../src/marketing/channels.rs) | Sales channels share a merchant tenant but bind independent catalog visibility, locale and cart identity. |
-| [src/marketing/condition_gateway.rs](../src/marketing/condition_gateway.rs) | Shared rule admission and authoritative context for tax and other native consumers. |
+| [src/marketing/condition_gateway.rs](../src/marketing/condition_gateway.rs) | Rule admission and matching are owned by the marketing component. |
 | [src/marketing/coupons.rs](../src/marketing/coupons.rs) | Revision-safe coupon selection for shared storefront/POS carts; pricing remains in promotions. |
-| [src/marketing/customer_facts.rs](../src/marketing/customer_facts.rs) | Customer rule authority is loaded by tenant and stable customer ID, with aggregate history and calendar age. |
 | [src/marketing/dependencies.rs](../src/marketing/dependencies.rs) | Inspect tenant-owned definition references and durable uses before configuration deletion. |
-| [src/marketing/facts.rs](../src/marketing/facts.rs) | Assemble private server-owned rule context once per quote/event; never publish customer facts in cart responses. |
+| [src/marketing/facts.rs](../src/marketing/facts.rs) | Rule facts are assembled by the marketing component. |
 | [src/marketing/flow_access.rs](../src/marketing/flow_access.rs) | Every queued flow step rehydrates current membership; stored definitions never preserve revoked privileges. |
 | [src/marketing/flow_actions.rs](../src/marketing/flow_actions.rs) | Native action schema and permissions use original Core names; no arbitrary SQL, shell or unguarded payment transitions. |
 | [src/marketing/flow_jobs.rs](../src/marketing/flow_jobs.rs) | PostgreSQL ownership of Flow claims, cursor checkpoints and terminal results. |
@@ -420,7 +418,6 @@ This lists every checked-in source module in these roots, including files with n
 | [src/marketing/gateway.rs](../src/marketing/gateway.rs) | MCP automation tools call the same tenant-bound handlers and validators as HTTP; no separate mutation semantics. |
 | [src/marketing/jobs.rs](../src/marketing/jobs.rs) | Read bounded tenant flow execution summaries without reloading rule/channel configuration on each Studio refresh. |
 | [src/marketing/lifecycle.rs](../src/marketing/lifecycle.rs) | Revision-bound deletion and reference admission share HTTP/MCP authorization and tenant locks. |
-| [src/marketing/line_facts.rs](../src/marketing/line_facts.rs) | Rule line facts use immutable priced lines plus current tenant product metadata; protected values override metadata. |
 | [src/marketing/metadata.rs](../src/marketing/metadata.rs) | Authorized revision-bound source facts for products, customers and orders; secrets and pricing authority are excluded. |
 | [src/marketing/mod.rs](../src/marketing/mod.rs) | Native rule conditions, coupons, durable flows and headless/storefront sales-channel boundaries. |
 | [src/marketing/pipeline.rs](../src/marketing/pipeline.rs) | A bounded acyclic flow graph models source-style true/false branches, ordered actions, delays and stop nodes. |
@@ -429,12 +426,10 @@ This lists every checked-in source module in these roots, including files with n
 | [src/marketing/promotion_import.rs](../src/marketing/promotion_import.rs) | Imported promotions use the ordinary revisioned owner and retain immutable provenance until a merchant reviews activation. |
 | [src/marketing/promotions.rs](../src/marketing/promotions.rs) | Server-authoritative coupons and automatic campaigns, with deterministic discounts and atomic usage limits. |
 | [src/marketing/routes.rs](../src/marketing/routes.rs) | Typed configuration CRUD, rule preview and revision-bound coupon edits. |
-| [src/marketing/rule_fields.rs](../src/marketing/rule_fields.rs) | Typed rule fields share the original comparison operators and server-derived checkout/event facts. |
+| [src/marketing/rule_fields.rs](../src/marketing/rule_fields.rs) | Rule field comparison is owned by the marketing component. |
 | [src/marketing/rule_history.rs](../src/marketing/rule_history.rs) | Side-effect-free rule comparison on bounded, tenant-owned frozen Flow order inputs. |
-| [src/marketing/rule_match.rs](../src/marketing/rule_match.rs) | Evaluate typed rule trees against server-owned cart, customer and event facts. |
-| [src/marketing/rule_snapshot.rs](../src/marketing/rule_snapshot.rs) | Resolve only referenced tenant rule IDs with indexed batched reads; freeze active definitions and revisions into the event snapshot. |
-| [src/marketing/rule_tests.rs](../src/marketing/rule_tests.rs) | Regression cases for native rule facts and original container boundaries. |
-| [src/marketing/rules.rs](../src/marketing/rules.rs) | Bounded Shopware-style boolean/numeric rule AST. Unknown operators/conditions fail closed. |
+| [src/marketing/rule_snapshot.rs](../src/marketing/rule_snapshot.rs) | Referenced rule snapshots are read by the marketing component. |
+| [src/marketing/rules.rs](../src/marketing/rules.rs) | Rule conditions are owned by the marketing component. |
 | [src/marketing/work_template.rs](../src/marketing/work_template.rs) | Bounded copies of reviewed native work: event values replace explicit scalar fields, never executable text. |
 | [src/marketing/work_template_source.rs](../src/marketing/work_template_source.rs) | Templates reference actor-private task evidence; configuration/history/release never copy its inputs. |
 | [src/mcp/poppy.rs](../src/mcp/poppy.rs) | Personal Agent Protocol discovery: a configured shop domain publishes poppy.json naming its guest MCP endpoint; no sign-in, session or UCP entry is claimed. |
@@ -783,6 +778,19 @@ This lists every checked-in source module in these roots, including files with n
 | [components/inventory/src/store/reservations.rs](../components/inventory/src/store/reservations.rs) | All-checkout allocation ledger; release is idempotent and always uses persisted quantities, never edited order JSON. |
 | [components/inventory/src/store/test_stock.rs](../components/inventory/src/store/test_stock.rs) | Stock writes for empty purchasable products, in bounded batches. |
 | [components/inventory/src/store.rs](../components/inventory/src/store.rs) | SQL of the inventory component. |
+| [components/marketing/src/domain/line_facts.rs](../components/marketing/src/domain/line_facts.rs) | Rule line facts use immutable priced lines plus current tenant product metadata; protected values override metadata. |
+| [components/marketing/src/domain/rule_fields.rs](../components/marketing/src/domain/rule_fields.rs) | Typed rule fields share the original comparison operators and server-derived checkout/event facts. |
+| [components/marketing/src/domain/rule_match.rs](../components/marketing/src/domain/rule_match.rs) | Evaluate typed rule trees against server-owned cart, customer and event facts. |
+| [components/marketing/src/domain/rule_tests.rs](../components/marketing/src/domain/rule_tests.rs) | Regression cases for native rule facts and original container boundaries. |
+| [components/marketing/src/domain/rules.rs](../components/marketing/src/domain/rules.rs) | Bounded Shopware-style boolean/numeric rule AST. Unknown operators/conditions fail closed. |
+| [components/marketing/src/domain.rs](../components/marketing/src/domain.rs) | Rule conditions and their matching, free of I/O. |
+| [components/marketing/src/lib.rs](../components/marketing/src/lib.rs) | Marketing component: rule conditions, the facts they are matched against, and promotions. |
+| [components/marketing/src/service/conditions.rs](../components/marketing/src/service/conditions.rs) | Shared rule admission and authoritative context for tax and other native consumers. |
+| [components/marketing/src/service.rs](../components/marketing/src/service.rs) | Operations of the marketing component. |
+| [components/marketing/src/store/customer_facts.rs](../components/marketing/src/store/customer_facts.rs) | Customer rule authority is loaded by tenant and stable customer ID, with aggregate history and calendar age. |
+| [components/marketing/src/store/facts.rs](../components/marketing/src/store/facts.rs) | Assemble private server-owned rule context once per quote/event; never publish customer facts in cart responses. |
+| [components/marketing/src/store/rule_snapshot.rs](../components/marketing/src/store/rule_snapshot.rs) | Resolve only referenced tenant rule IDs with indexed batched reads; freeze active definitions and revisions into the event snapshot. |
+| [components/marketing/src/store.rs](../components/marketing/src/store.rs) | SQL reads of the marketing component. |
 | [components/pricing/examples/customer_contract.rs](../components/pricing/examples/customer_contract.rs) | Run contact normalization without a Core process, database, credentials or network. |
 | [components/pricing/src/conversions.rs](../components/pricing/src/conversions.rs) | A rejected pricing input becomes a client error of the shared error contract. |
 | [components/pricing/src/domain/cart.rs](../components/pricing/src/domain/cart.rs) | Persisted cart data with explicit typed host contexts and no credential or storage authority. |
@@ -840,6 +848,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/shop/src/domain.rs](../components/shop/src/domain.rs) | Rules on shop settings, free of I/O. |
 | [components/shop/src/lib.rs](../components/shop/src/lib.rs) | Shop component: the settings every other commerce component reads, with their bounds and inheritance rules. |
 | [components/shop/src/types/b2b.rs](../components/shop/src/types/b2b.rs) | B2B feature switches live in shared commerce settings; disabling never relaxes existing financial policy. |
+| [components/shop/src/types/cart.rs](../components/shop/src/types/cart.rs) | The cart as every commerce component reads it: the shared cart contract bound to this shop's contexts. |
 | [components/shop/src/types/guardrails.rs](../components/shop/src/types/guardrails.rs) | Merchant-owned guardrails in commerce settings; native currency amounts bind preview and execution. |
 | [components/shop/src/types/legal.rs](../components/shop/src/types/legal.rs) | Bounded multilingual legal configuration; policy changes invalidate optional-purpose consent. |
 | [components/shop/src/types/settings.rs](../components/shop/src/types/settings.rs) | Checkout selection and configuration data contracts. |

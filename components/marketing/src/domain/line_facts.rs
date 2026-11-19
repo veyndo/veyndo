@@ -1,6 +1,7 @@
 //! Rule line facts use immutable priced lines plus current tenant product metadata; protected values override metadata.
-use super::*;
-pub(super) fn line(p: &Product, item: &Value) -> Value {
+use serde_json::{Value, json};
+use veyndo_pricing::catalog::Product;
+pub fn line(p: &Product, item: &Value) -> Value {
     let a = &p.extra["automation"];
     let mut v = if a.is_object() { a.clone() } else { json!({}) };
     for (key, default) in [

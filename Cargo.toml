@@ -78,6 +78,7 @@ veyndo-inventory = { path = "components/inventory" }
 veyndo-shipping = { path = "components/shipping" }
 veyndo-customers = { path = "components/customers" }
 veyndo-shop = { path = "components/shop" }
+veyndo-marketing = { path = "components/marketing" }
 veyndo-apps = { path = "crates/apps" }
 veyndo-cognition = { path = "crates/cognition" }
 roxmltree = "0.21"

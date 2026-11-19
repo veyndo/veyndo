@@ -141,7 +141,7 @@
     },
     "rule_authenticated": {
       "bindings": [
-        "src/marketing/rule_match.rs"
+        "components/marketing/src/domain/rule_match.rs"
       ],
       "theorems": [
         "rule_authenticated_exact",
@@ -151,7 +151,7 @@
     "rule_boolean_comparison": {
       "bindings": [
         "crates/automation/src/rule_comparison.rs",
-        "src/marketing/rule_match.rs"
+        "components/marketing/src/domain/rule_match.rs"
       ],
       "theorems": [
         "rule_comparison_exact"
@@ -466,7 +466,7 @@
     },
     "pos_discount_admissible": {
       "bindings": [
-        "src/pos/discount.rs"
+        "components/shop/src/types/cart.rs"
       ],
       "theorems": [
         "pos_discount_exact",
@@ -1235,6 +1235,71 @@
       "sha256": "a54911683c2df1e61ba19a54de4f3b619a9a8ae9126f77805f856f741d438a4b",
       "review": "inventory component crate created; no kernel binding changed"
     },
+    "components/marketing/src/domain/line_facts.rs": {
+      "status": "unproved",
+      "sha256": "99fe85789eb9d4b68f9a3a75f93a28ecfbcd06770afa1c7ec1e74e5ad11e8d93",
+      "review": "cart types and rule engine moved into components; checking bindings"
+    },
+    "components/marketing/src/domain/rule_fields.rs": {
+      "status": "unproved",
+      "sha256": "68bd56747ea6f1746ccd0f97e0c637c95e62eac7f07c8cf99068725e722a5f6f",
+      "review": "cart types and rule engine moved into components; checking bindings"
+    },
+    "components/marketing/src/domain/rule_match.rs": {
+      "status": "reviewed-binding",
+      "sha256": "cb29cf6db729b6db4feefb30402057ff8beaa4e69524974ab5e6649eb7d25922",
+      "review": "cart types and rule engine moved into components; checking bindings"
+    },
+    "components/marketing/src/domain/rule_tests.rs": {
+      "status": "unproved",
+      "sha256": "4bdfdf108626281b815f9cb2acf952f4129314fcaa99d99cb84fe6e26f27e00e",
+      "review": "cart types and rule engine moved into components; checking bindings"
+    },
+    "components/marketing/src/domain/rules.rs": {
+      "status": "unproved",
+      "sha256": "4b5e72a815d8459f8f9446d7c21c3789acf5db1c40b6c1a62667fd7fed56ec47",
+      "review": "cart types and rule engine moved into components; checking bindings"
+    },
+    "components/marketing/src/domain.rs": {
+      "status": "unproved",
+      "sha256": "79d36443773564582b12d96a139d29d9683ce76a4e416ea1d2f2f111ff87d385",
+      "review": "cart types and rule engine moved into components; checking bindings"
+    },
+    "components/marketing/src/lib.rs": {
+      "status": "unproved",
+      "sha256": "eb4f3f175fb844629b6ecb506faa3bf03949143a3309da2242453a6b366d0210",
+      "review": "cart types and rule engine moved into components; checking bindings"
+    },
+    "components/marketing/src/service/conditions.rs": {
+      "status": "unproved",
+      "sha256": "8bbd97c5e186d2cdd06e32df3aa2380cdb69b272d4a7bda6c97892793b33acaf",
+      "review": "cart types and rule engine moved into components; checking bindings"
+    },
+    "components/marketing/src/service.rs": {
+      "status": "unproved",
+      "sha256": "c7375dc2df950d777bebb7398b37aedf3d95ed0b512c17fd1575f3eca9148c4e",
+      "review": "cart types and rule engine moved into components; checking bindings"
+    },
+    "components/marketing/src/store/customer_facts.rs": {
+      "status": "unproved",
+      "sha256": "4904d741e42b8be7322128b20f326cc3e8e44f5e53430cb2986b027de73c0921",
+      "review": "cart types and rule engine moved into components; checking bindings"
+    },
+    "components/marketing/src/store/facts.rs": {
+      "status": "unproved",
+      "sha256": "b742130c3e216d15c87b619f1da50534fcf809c3af85881fd60abda60ba56347",
+      "review": "cart types and rule engine moved into components; checking bindings"
+    },
+    "components/marketing/src/store/rule_snapshot.rs": {
+      "status": "unproved",
+      "sha256": "821fd91d3cf02344ebcd1bfec744fff8215fab196716f81a0a56c8bf7eb1b2b1",
+      "review": "cart types and rule engine moved into components; checking bindings"
+    },
+    "components/marketing/src/store.rs": {
+      "status": "unproved",
+      "sha256": "e1b0a188165d5b92d09a99d3e32539a785e5c77d5f2b250badb56f9935be04ef",
+      "review": "cart types and rule engine moved into components; checking bindings"
+    },
     "components/pricing/examples/customer_contract.rs": {
       "status": "unproved",
       "sha256": "b2d7ff94933d8ad9a9bee2eac2309ec287be5f0c35a54bc855afcfe96de51569",
@@ -1520,6 +1585,11 @@
       "sha256": "46bda1aa6275aa50a395358d938349ba96185508109b955ff4ee0796e9d55d19",
       "review": "shop component crate created; settings types moved; no kernel binding changed"
     },
+    "components/shop/src/types/cart.rs": {
+      "status": "reviewed-binding",
+      "sha256": "8c69b017c27fd08b0c01e98db36bb5051fe1a799bae46c626e58a84d5ef40342",
+      "review": "cart types and rule engine moved into components; checking bindings"
+    },
     "components/shop/src/types/guardrails.rs": {
       "status": "unproved",
       "sha256": "140e8773af1fc60f67b219083fbdbbee59868df0fb0dae0ae04ecd143931df17",
@@ -1537,8 +1607,8 @@
     },
     "components/shop/src/types.rs": {
       "status": "unproved",
-      "sha256": "a3e1d3fab11a9de4e49853db85540bbe109afc932061afe67a271129af1017f5",
-      "review": "shop component crate created; settings types moved; no kernel binding changed"
+      "sha256": "c8dd3115d7120bce0313a2f6f60e6690a5d41100f025c68bfe79148803d75625",
+      "review": "cart types and rule engine moved into components; checking bindings"
     },
     "crates/apps/src/component_runtime.rs": {
       "status": "unproved",
@@ -3512,18 +3582,13 @@
     },
     "src/apps/cart_contributions.rs": {
       "status": "unproved",
-      "sha256": "e1a8759ec3e8afe176fcaedfa6b896f76c83dedb0b09f8f9b629a0a0262087a5",
-      "review": "Review generic immutable configuration display snapshot: declared public inputs only; shared checkout/receipt/admin display, no business-rule or authorization change. Actual B2B HTTP workflow and original-order immutability pass; two Rust tests and 612 frontend tests pass."
+      "sha256": "6a321ce7ac54f33281a30cc3625971b6847fc2b51126eecc1b0b6d809b58d327",
+      "review": "cart types and rule engine moved into components; checking bindings"
     },
     "src/apps/commerce_hooks.rs": {
       "status": "unproved",
       "sha256": "22cd83fdbc017063f74fdca878af9a6ac8e5a0ff0ed314f1d5a28688496e9593",
       "review": "Reviewed complete standard compiler extraction in Apps 0.16/model 0.12. All 19 original before/common/after domain stages now run inside one shared compiler with preserved order, first model kind/pointer or native host error, internal actual view lookup and exhaustive Manifest field coverage. Native manifest_policy delegates value/reference/currency/scope/source/base, current Ed25519 keys, namespace/network/read and clock decisions to original owners; direct verified predicates remain attached. No no-op host domain callbacks or alternative serving compiler. Independent 116 model and 24 runtime tests include all 34 canonical packages, nineteen invalid-domain controls and denied-policy/callback-order cases. Native 74 app and two provider units, seventeen real HTTP/PostgreSQL app/schema/preview/staging/isolation/lifecycle/distribution/surface/assistant/event/generation/marketplace/payment modules, unchanged native digests and Clippy pass. Kernel unchanged; shared compiler, policy adapters and SQL/host effects remain unproved."
-    },
-    "src/apps/compatibility.rs": {
-      "status": "unproved",
-      "sha256": "21f273002ef16caba98df8afe42ef5acba4211542780c0c0b9c6acaa94b731c4",
-      "review": "Initial extraction of 13 production policies; surrounding Rust explicitly unproved; existing HTTP regression suites retained"
     },
     "src/apps/configuration_events.rs": {
       "status": "unproved",
@@ -3552,8 +3617,8 @@
     },
     "src/apps/configuration_summary.rs": {
       "status": "unproved",
-      "sha256": "9ac64858dc6d7ecbff97f0e64db0a7efaec5294198820328f1746358f47d2e5c",
-      "review": "Review generic immutable configuration display snapshot: declared public inputs only; shared checkout/receipt/admin display, no business-rule or authorization change. Actual B2B HTTP workflow and original-order immutability pass; two Rust tests and 612 frontend tests pass."
+      "sha256": "de28b558ef4649cf250026e1ab096d85b1926b95a94d4b43f266e39a982a26f9",
+      "review": "cart types and rule engine moved into components; checking bindings"
     },
     "src/apps/consent.rs": {
       "status": "unproved",
@@ -3737,8 +3802,8 @@
     },
     "src/apps/mod.rs": {
       "status": "unproved",
-      "sha256": "4c022b31b00e04ef4130b65f36243d67f40d2bdb2428aade2f18bd830813491b",
-      "review": "Knowledge introspection reuses current scoped native identity, expiring integration keys and app package approval. Real catalog delivery, read-only evidence, foreign-shop and revoked-key checks and Checkout tenant isolation passed locally."
+      "sha256": "20b6f38481b1dda1a09d4c59b8eb6cb62047d44cd401a1c136ff93f782877557",
+      "review": "cart types and rule engine moved into components; checking bindings"
     },
     "src/apps/model_contract.rs": {
       "status": "unproved",
@@ -4207,8 +4272,8 @@
     },
     "src/b2b/model.rs": {
       "status": "unproved",
-      "sha256": "a6ae2a51f3e22405784165617648cc7bf037d6d30760761b894681be85bd4884",
-      "review": "Reviewed native B2B authority, unit-first locking, revision-bound approvals and offers, exact budget allocation/release, private variant pagination, current app callbacks and forced tenant FKs/RLS; EDI codecs remain app-owned and bounded. Real PostgreSQL approval/concurrent budget/revocation/PDF/MCP and app/checkout baseline suites passed; schema/build/proof and changed Rust owners reviewed. Two extracted decisions add four Lean properties, not whole-server verification."
+      "sha256": "c24dc51318e63ac15e8c1d8052edf96e7a0b051ea441f59427190e0c145a3c05",
+      "review": "cart types and rule engine moved into components; checking bindings"
     },
     "src/b2b/onboarding.rs": {
       "status": "unproved",
@@ -4397,8 +4462,8 @@
     },
     "src/cart_model.rs": {
       "status": "unproved",
-      "sha256": "beb7a4cb76051fce2ab93a6c7aea5f739873e4944b89218ce1febc2e13f2bad8",
-      "review": "Moved the unchanged persisted Item/Cart schema into Commerce with typed host context parameters. Native aliases bind the original POS, B2B, App and Checkout types; StoredCart retains tenant/token/status and hydration. Seventeen Commerce tests, native handoff/review, all four App quote hooks, POS, B2B and B2B UCP passed with PostgreSQL. Legacy defaults and malformed context rejection passed. No new mathematical claim."
+      "sha256": "135b5ee27c2eb25aa0fc503b6cc8a5a802376832f67fde6c92b99ffb8e0353a0",
+      "review": "cart types and rule engine moved into components; checking bindings"
     },
     "src/cart_mutation.rs": {
       "status": "unproved",
@@ -4737,8 +4802,8 @@
     },
     "src/commerce/delivery.rs": {
       "status": "unproved",
-      "sha256": "8473e0bddea024bc65e34ec5699e37df78cf764cc0f52315353c8c6d19ba5a0e",
-      "review": "delivery_split_admissible and carrier_booking_admissible bindings moved into components/shipping"
+      "sha256": "40108140b5f99596d4ab6fee98f439f21108e331c5e9319487a85ec4c9d11e07",
+      "review": "cart types and rule engine moved into components; checking bindings"
     },
     "src/commerce/delivery_split.rs": {
       "status": "unproved",
@@ -5292,18 +5357,13 @@
     },
     "src/marketing/condition_gateway.rs": {
       "status": "unproved",
-      "sha256": "1ce279b617599594c57814388efe3a114fa2152522ceaa2c675d2d5ac58b2522",
-      "review": "Reviewed international configuration, destination tax predicates and native bindings; targeted PostgreSQL international/catalog cases plus Rust tests pass. Translation fixtures verify restart, provider rejection, tenant permissions and revision conflicts. Config/product/apply share row locks. Additive schema 028 and versioned MIT geography reviewed; surrounding SQL/provider behavior remains unproved."
+      "sha256": "e7520f64460ff889f7886b345fe614bf8b3a3c79989c21fa9487751ef4c566b8",
+      "review": "cart types and rule engine moved into components; checking bindings"
     },
     "src/marketing/coupons.rs": {
       "status": "unproved",
       "sha256": "82708ac59eebde4ff4da887dc0cd93421a81bab79008c5c6ac6d0cfc0986b60f",
       "review": "Reviewed native B2B authority, unit-first locking, revision-bound approvals and offers, exact budget allocation/release, private variant pagination, current app callbacks and forced tenant FKs/RLS; EDI codecs remain app-owned and bounded. Real PostgreSQL approval/concurrent budget/revocation/PDF/MCP and app/checkout baseline suites passed; schema/build/proof and changed Rust owners reviewed. Two extracted decisions add four Lean properties, not whole-server verification."
-    },
-    "src/marketing/customer_facts.rs": {
-      "status": "unproved",
-      "sha256": "f750c3a29aa45eff41d3bfe37da4fd9461a0f4a294f8da42b9fc9bff7124626b",
-      "review": "Native customer identity audit: shared immutable account binding removes legacy email reads from orders/PDF/downloads; original cart capability is preserved. Review purchase and duplicate identity now use actual cart/account IDs; native customer review-count facts use the same canonical namespace. Additive 093 withdraws old email-derived purchase badges without assigning identities or editing text/rating/moderation. Static SQL and bound values remain; SQL/migration adapters are reviewed, not proved; extracted money/fulfillment predicates unchanged."
     },
     "src/marketing/dependencies.rs": {
       "status": "unproved",
@@ -5312,8 +5372,8 @@
     },
     "src/marketing/facts.rs": {
       "status": "unproved",
-      "sha256": "70468213c6f727de9f2d646574f21fd9c2afc56bb95ec9622b10383c81116e0a",
-      "review": "Reviewed multi-currency admission, rational FX boundaries, immutable monetary source, additive ledger scale/RLS migrations, shared API/MCP/UCP paths and local provider/refund evidence. Only bounded policies are proved; FX, DB, network adapters and full commerce remain unproved."
+      "sha256": "17fb18eb81f62c0703c3ef9d0840780f32ec88197417670bda02bacaed5c0f06",
+      "review": "cart types and rule engine moved into components; checking bindings"
     },
     "src/marketing/flow_access.rs": {
       "status": "unproved",
@@ -5365,11 +5425,6 @@
       "sha256": "bb9275d60e58277515d64ac33e51148f02ab5717fec83940f5dfdd2a0c5a80bf",
       "review": "Tenant roles and current grants independently reviewed; owner/retained-override/acceptance races repaired and PostgreSQL-blocked regressions passed; PII and Flow projection boundaries documented; B2B feature settings delegate shared CAS/history and preserve financial guards. Existing extracted policies unchanged; SQL/async/UI remain reviewed adapters, not full proofs."
     },
-    "src/marketing/line_facts.rs": {
-      "status": "unproved",
-      "sha256": "9b9cfca1f0d4c1d9cbad9066c144169e43c0719553d96a5ef706a8bf6a871a51",
-      "review": "Reviewed source-named native scopes and strict missing-fact propagation, tenant-owned private metadata and indexed frozen rule references, bounded acyclic flow graph admission, current actor rechecks, stable local effect receipts and uncertain external step handling, persistent cursors/delays and isolated per-flow projection failures. Additive migration 025 and chrono dependencies reviewed; 432 original PHP class comparisons and real branch/delay/state/tag/custom-field/invoice/replay/revocation regressions pass. Extracted exact XOR and thirty-day delay guards with negative mutations; SQL, async runtime and full rule interpreter remain unproved."
-    },
     "src/marketing/metadata.rs": {
       "status": "unproved",
       "sha256": "d1c14657940d92957fe0b8d33a3adba49ba3ae388c1556bdbb554b8bf10fdbb9",
@@ -5377,8 +5432,8 @@
     },
     "src/marketing/mod.rs": {
       "status": "unproved",
-      "sha256": "9953f92a709fcedd91c36c14a7cb4f1699500f4755467d296cf7ec324cf0ad40",
-      "review": "Separate Flow validation HTTP and MCP entry points are read-only, use the same tenant action and revision checks and cannot call save on older hosts. Legacy validation-only clients continue to get a read-only check on the new host. Signed PostgreSQL regression verifies denied access, invalid graphs and no Flow writes."
+      "sha256": "a6c046a8650338f3ccb536942d438434fe5b152cd4bd716862813b351ef0fde2",
+      "review": "cart types and rule engine moved into components; checking bindings"
     },
     "src/marketing/pipeline.rs": {
       "status": "reviewed-binding",
@@ -5412,33 +5467,23 @@
     },
     "src/marketing/rule_fields.rs": {
       "status": "unproved",
-      "sha256": "cbde49185e1cc471f60665b168d4cde0f57c675c7405a82c626f21b867c1b753",
-      "review": "Identity-only Veyndo namespace and canonical-domain rename; reviewed migration checksum compatibility for six historical SQL versions, unchanged checkout predicates, 42 library and 169 binary tests pass; native component legacy boundary remains configured and guarded."
+      "sha256": "36e67bb5f9f99f742d85b41516a7b4338a15a0efc3ade2c868f3b43e0090225f",
+      "review": "cart types and rule engine moved into components; checking bindings"
     },
     "src/marketing/rule_history.rs": {
       "status": "unproved",
       "sha256": "cc3367df7a81038414c5aa577c7d7c1886e4a6faae633742ca5cf4beac8e0036",
       "review": "Reviewed frozen rule comparison: tenant-filtered bounded existing Flow inputs, current compound PII read grants, native checked_matches without current-data reads or action dispatch, reference fanout cap, shared registry and HTTP/MCP parity; real automation and isolation suites pass."
     },
-    "src/marketing/rule_match.rs": {
-      "status": "reviewed-binding",
-      "sha256": "3f142ee1283d62461cb2e5728f7cc60a9cb9c71f08bb5eb20e9cba39c3389834",
-      "review": "Identity-only Veyndo namespace and canonical-domain rename; reviewed migration checksum compatibility for six historical SQL versions, unchanged checkout predicates, 42 library and 169 binary tests pass; native component legacy boundary remains configured and guarded."
-    },
     "src/marketing/rule_snapshot.rs": {
       "status": "unproved",
-      "sha256": "913a85c8c77ada2083aa1a902e50486fcbe31e4dae84670410eb457fa8273949",
-      "review": "Reviewed source-named native scopes and strict missing-fact propagation, tenant-owned private metadata and indexed frozen rule references, bounded acyclic flow graph admission, current actor rechecks, stable local effect receipts and uncertain external step handling, persistent cursors/delays and isolated per-flow projection failures. Additive migration 025 and chrono dependencies reviewed; 432 original PHP class comparisons and real branch/delay/state/tag/custom-field/invoice/replay/revocation regressions pass. Extracted exact XOR and thirty-day delay guards with negative mutations; SQL, async runtime and full rule interpreter remain unproved."
-    },
-    "src/marketing/rule_tests.rs": {
-      "status": "unproved",
-      "sha256": "d1ca508b8a1d82cb539a7bdd2e1b9955b7a8616a4288d6412e88de2657eb85c4",
-      "review": "Identity-only Veyndo namespace and canonical-domain rename; reviewed migration checksum compatibility for six historical SQL versions, unchanged checkout predicates, 42 library and 169 binary tests pass; native component legacy boundary remains configured and guarded."
+      "sha256": "db45c44c31b5eaa782131e65d7b6da678174170ad1a8035a8ed6b8610da17c64",
+      "review": "cart types and rule engine moved into components; checking bindings"
     },
     "src/marketing/rules.rs": {
       "status": "unproved",
-      "sha256": "80f1e23235bb4140c79fd089867ed566b00ff0a7b1dd942dcc16e55b48b2867e",
-      "review": "Identity-only Veyndo namespace and canonical-domain rename; reviewed migration checksum compatibility for six historical SQL versions, unchanged checkout predicates, 42 library and 169 binary tests pass; native component legacy boundary remains configured and guarded."
+      "sha256": "9076052e9c6c5e9d687ba4327970df1939dd386d5de252cec1c729d8efd6a3dc",
+      "review": "cart types and rule engine moved into components; checking bindings"
     },
     "src/marketing/work_template.rs": {
       "status": "unproved",
@@ -5991,9 +6036,9 @@
       "review": "POS cashier guard reviewed: exact currency/reason/actor/goods bound; native customer selection and receipt projection remain SQL adapters covered by isolated POS regressions; bound new domain futures"
     },
     "src/pos/discount.rs": {
-      "status": "reviewed-binding",
-      "sha256": "48598e59a88cdb37bc207ad1c66b3077feddd939d781196217999c9ac5ccc8ca",
-      "review": "Reviewed cashier discount JSON object validation before trusted-actor injection; malformed primitive/array requests return 400 without cart changes or process failure. POS, payment-provider and account HTTP/SQL regressions pass. No extracted policy semantics changed."
+      "status": "unproved",
+      "sha256": "6971e9fa2257bbc2d22093d752c854da798db5c014586169dd9e88419b48d69e",
+      "review": "cart types and rule engine moved into components; checking bindings"
     },
     "src/pos/gateway.rs": {
       "status": "unproved",
@@ -6007,8 +6052,8 @@
     },
     "src/pos/mod.rs": {
       "status": "unproved",
-      "sha256": "b3479d6c9813d11ef23dc2f080ca1f1e4e79c16a8d60b7793be93f9b80b979ba",
-      "review": "Request context, principal, POS admission, host shop and the access snapshot data types moved unchanged into components/core; loading the snapshot and matching it to a request stay in the server as free functions with the same queries. Core unit tests (identity headers cannot be forged) pass. SQL, HTTP and provider behaviour is not formally proved."
+      "sha256": "02b57ffe8bc5d71a9db7dfd15a70d0d13c24acbb3c46e98199e3a5809b46d12b",
+      "review": "cart types and rule engine moved into components; checking bindings"
     },
     "src/pos/schema.rs": {
       "status": "unproved",
@@ -6302,12 +6347,12 @@
       "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
     },
     "Cargo.lock": {
-      "sha256": "3b727e4d0e9afb7bdffc4f53727345b3e4d8c1bb96e0002acf7be01e996de54c",
-      "review": "shop component crate created; settings types moved; no kernel binding changed"
+      "sha256": "8d0215e36e38b3387dca080ac030c98f727e7d36c6c7224cf54616030367d457",
+      "review": "cart types and rule engine moved into components; checking bindings"
     },
     "Cargo.toml": {
-      "sha256": "f448f472a1a65b4609c30c30c41561df3f0e6ce63cd1a5f408dafdbc45ad6dff",
-      "review": "shop component crate created; settings types moved; no kernel binding changed"
+      "sha256": "9a491667d7f7f0f94368055f3eb4d5bdaea2b272c5125413c9585203478598de",
+      "review": "cart types and rule engine moved into components; checking bindings"
     },
     "components.lock.json": {
       "sha256": "7b4a931ad81c6665d5d95e6b42b8ef4d09ebe8971ac24998d8f94bb6a737ff53",

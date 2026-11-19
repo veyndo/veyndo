@@ -44,16 +44,7 @@ pub(crate) struct Member {
     #[serde(default)]
     pub approval_above_minor: Option<u64>,
 }
-#[derive(Clone, Debug, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub(crate) struct Context {
-    pub unit_id: String,
-    pub customer_id: String,
-    #[serde(default)]
-    pub purchase_order: String,
-    #[serde(default)]
-    pub quote_id: Option<String>,
-}
+pub(crate) use veyndo_shop::types::cart::BusinessContext as Context;
 pub(crate) struct Access {
     pub company_id: String,
     pub company: Company,

@@ -4,7 +4,7 @@ mod config;
 mod customer;
 pub(crate) use customer::check as check_customer;
 mod discount;
-pub(crate) use discount::{Discount, apply as adjust_quote};
+pub(crate) use discount::apply as adjust_quote;
 mod gateway;
 mod input;
 mod schema;

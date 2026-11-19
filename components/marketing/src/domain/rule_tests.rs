@@ -1,7 +1,9 @@
 //! Regression cases for native rule facts and original container boundaries.
-use super::*;
+use super::Condition;
+use serde_json::json;
+use veyndo_shop::types::cart::{StoredCart, selection};
 fn numeric(a: f64, b: f64, op: &str) -> bool {
-    veyndo::rule_comparison::numeric(Some(a), Some(b), op).unwrap_or(false)
+    veyndo_automation::rule_comparison::numeric(Some(a), Some(b), op).unwrap_or(false)
 }
 #[test]
 fn rejects_unknown_and_unbounded_conditions() {
@@ -61,7 +63,7 @@ fn operators_match_boundaries() {
 #[test]
 fn original_country_and_variant_conditions_keep_shopware_scope_semantics() {
     let c=StoredCart{id:"test".into(),tenant:"test".into(),token:"".into(),revision:1,status:"open".into(),data:serde_json::from_value(json!({"items":[{"id":"mug","quantity":1}],"group":"consumer","email":null,"company":null,"session":"test","buyer":null,"order":null})).unwrap()};
-    let country = commerce::selection(&c.data).country;
+    let country = selection(&c.data).country;
     assert!(
         Condition::CustomerShippingCountry {
             values: vec![country],

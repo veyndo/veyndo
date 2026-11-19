@@ -1,0 +1,4 @@
+//! Marketing component: rule conditions, the facts they are matched against, and promotions.
+pub mod domain;
+pub mod service;
+pub mod store;

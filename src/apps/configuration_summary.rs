@@ -1,27 +1,7 @@
 //! Immutable public configuration labels accompany accepted inputs; no current package lookup is needed on a receipt.
 use super::*;
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub(crate) struct Snapshot {
-    pub title: HashMap<String, String>,
-    pub main_locale: String,
-    pub fields: Vec<DisplayField>,
-}
-#[derive(Clone, Debug, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub(crate) struct DisplayField {
-    pub label: HashMap<String, String>,
-    pub value: DisplayValue,
-}
-#[derive(Clone, Debug, Serialize, Deserialize)]
-#[serde(untagged)]
-pub(crate) enum DisplayValue {
-    Text(String),
-    Integer(i64),
-    Boolean(bool),
-    Localized(HashMap<String, String>),
-}
+pub(crate) use veyndo_shop::types::cart::{DisplayField, DisplayValue, Snapshot};
 
 pub(crate) fn snapshot(
     manifest: &Manifest,

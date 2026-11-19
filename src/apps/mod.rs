@@ -10,7 +10,6 @@ mod cart_contributions;
 mod commerce_hooks;
 pub(crate) use commerce_hooks::Prepared as PreparedCheckoutHooks;
 pub(crate) use commerce_hooks::{apply as apply_hooks, prepare as prepare_hooks};
-mod compatibility;
 mod configuration_events;
 mod configuration_orders;
 pub(crate) use configuration_orders::configurations;
@@ -130,7 +129,6 @@ mod schema_upgrade;
 mod storage;
 pub(crate) use cart_contributions::*;
 pub(crate) use commerce_hooks::verify_package;
-pub(crate) use compatibility::upgrade_cart;
 pub(crate) use events::*;
 pub(crate) use gateway::{
     additional_permissions, invoke_app, validate_input, validate_native_input,

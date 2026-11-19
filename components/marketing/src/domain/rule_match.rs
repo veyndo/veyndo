@@ -1,8 +1,10 @@
 //! Evaluate typed rule trees against server-owned cart, customer and event facts.
 use super::rules::Condition;
-use super::*;
+use serde_json::Value;
+use veyndo_core::{Result, bad};
+use veyndo_shop::types::cart::{StoredCart, selection};
 impl Condition {
-    pub(crate) fn checked_matches(&self, c: &StoredCart, q: &Value) -> Result<bool> {
+    pub fn checked_matches(&self, c: &StoredCart, q: &Value) -> Result<bool> {
         self.checked_at(c, q, 0)
     }
     fn checked_at(&self, c: &StoredCart, q: &Value, depth: usize) -> Result<bool> {
@@ -24,7 +26,7 @@ impl Condition {
                 rule.checked_at(c, q, depth + 1)
             }
             Self::Source { name, config } => {
-                veyndo::automation_rules::evaluate(name, config, &q["ruleFacts"]).map_err(bad)
+                veyndo_automation::rules::evaluate(name, config, &q["ruleFacts"]).map_err(bad)
             }
             Self::And { children } | Self::Or { children } => {
                 let values = children
@@ -41,7 +43,7 @@ impl Condition {
             _ => Ok(self.matches(c, q)),
         }
     }
-    pub(crate) fn matches(&self, c: &StoredCart, q: &Value) -> bool {
+    pub fn matches(&self, c: &StoredCart, q: &Value) -> bool {
         match self {
             Self::Reference { .. } | Self::Source { .. } => {
                 self.checked_matches(c, q).unwrap_or(false)
@@ -60,7 +62,7 @@ impl Condition {
                 set_matches(std::slice::from_ref(&c.data.group), values, operator)
             }
             Self::Country { values, operator } => {
-                set_matches(&[commerce::selection(&c.data).country], values, operator)
+                set_matches(&[selection(&c.data).country], values, operator)
             }
             Self::Channel { values, operator } => set_matches(
                 std::slice::from_ref(&c.data.sales_channel),
@@ -119,19 +121,15 @@ impl Condition {
                 values,
                 operator,
             ),
-            Self::ShippingMethod { values, operator } => set_matches(
-                &[commerce::selection(&c.data).shipping_method_id],
-                values,
-                operator,
-            ),
-            Self::PaymentMethod { values, operator } => set_matches(
-                &[commerce::selection(&c.data).payment_method_id],
-                values,
-                operator,
-            ),
+            Self::ShippingMethod { values, operator } => {
+                set_matches(&[selection(&c.data).shipping_method_id], values, operator)
+            }
+            Self::PaymentMethod { values, operator } => {
+                set_matches(&[selection(&c.data).payment_method_id], values, operator)
+            }
             Self::BillingCountry { values, operator } => {
                 let ids = if c.data.customer_id.is_some() {
-                    commerce::selection(&c.data)
+                    selection(&c.data)
                         .billing_address
                         .map(|a| a.country)
                         .into_iter()
@@ -142,7 +140,7 @@ impl Condition {
                 set_matches(&ids, values, operator)
             }
             Self::CustomerShippingCountry { values, operator } => {
-                let country = commerce::selection(&c.data).country;
+                let country = selection(&c.data).country;
                 let ids = if country.is_empty() {
                     vec![]
                 } else {
@@ -155,7 +153,7 @@ impl Condition {
                     return operator == "!=";
                 }
                 let matched = wildcard(c.data.email.as_deref().unwrap_or(""), email);
-                veyndo::verified_kernel::rule_boolean_comparison(
+                veyndo_pricing::verified_kernel::rule_boolean_comparison(
                     matched,
                     false,
                     operator == "=",
@@ -163,7 +161,7 @@ impl Condition {
                     false,
                 )
             }
-            Self::LoggedIn { is_logged_in } => veyndo::verified_kernel::rule_authenticated(
+            Self::LoggedIn { is_logged_in } => veyndo_pricing::verified_kernel::rule_authenticated(
                 c.data.customer_id.is_some(),
                 *is_logged_in,
             ),
@@ -171,7 +169,7 @@ impl Condition {
                 field,
                 operator,
                 value,
-            } => rule_fields::matches(c, q, field, operator, value),
+            } => crate::domain::rule_fields::matches(c, q, field, operator, value),
             Self::EventField {
                 path,
                 operator,
@@ -181,16 +179,16 @@ impl Condition {
                 for key in path.split('.') {
                     item = &item[key];
                 }
-                rule_fields::compare(item, operator, value)
+                crate::domain::rule_fields::compare(item, operator, value)
             }
         }
     }
 }
 fn numeric(a: f64, b: f64, op: &str) -> bool {
-    veyndo::rule_comparison::numeric(Some(a), Some(b), op).unwrap_or(false)
+    veyndo_automation::rule_comparison::numeric(Some(a), Some(b), op).unwrap_or(false)
 }
 fn set_matches(actual: &[String], rule: &[String], operator: &str) -> bool {
-    veyndo::rule_comparison::uuids(
+    veyndo_automation::rule_comparison::uuids(
         Some(&actual.iter().cloned().map(Some).collect::<Vec<_>>()),
         Some(&rule.iter().cloned().map(Some).collect::<Vec<_>>()),
         operator,
