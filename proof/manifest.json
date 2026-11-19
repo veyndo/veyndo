@@ -616,6 +616,37 @@
         "capture_bounded",
         "capture_zero_denied"
       ]
+    },
+    "offer_honoured": {
+      "bindings": [
+        "src/cognition/signed_offer.rs"
+      ],
+      "theorems": [
+        "offer_honoured_exact",
+        "offer_expired_denied",
+        "offer_changed_total_denied",
+        "offer_changed_revision_denied"
+      ]
+    },
+    "sovereign_request_admissible": {
+      "bindings": [
+        "crates/cognition/src/inference/sovereign.rs"
+      ],
+      "theorems": [
+        "sovereign_request_exact",
+        "sovereign_foreign_provider_denied",
+        "sovereign_foreign_endpoint_denied",
+        "sovereign_off_admits"
+      ]
+    },
+    "workspace_length_admissible": {
+      "bindings": [
+        "components/core/src/lib.rs"
+      ],
+      "theorems": [
+        "workspace_length_exact",
+        "workspace_length_short_denied"
+      ]
     }
   },
   "sources": {
@@ -630,9 +661,9 @@
       "review": "Component architecture phase 0 and first core crate: the error contract moved unchanged from src/failure.rs and src/foundation.rs to components/core (wire messages, status mapping and retry header identical; the permission scope is resolved by the caller, the inference conversion lives beside its error type). Structure check drops the file length limit and adds the component map; clippy limits function length. Core and cognition unit tests pass. SQL, HTTP and provider behaviour is not formally proved."
     },
     "components/core/src/lib.rs": {
-      "status": "unproved",
-      "sha256": "e370cd2c5fe5be4807d57f416c73625be0e56ba5a02549bba286e796546de893",
-      "review": "Component architecture phase 0 and first core crate: the error contract moved unchanged from src/failure.rs and src/foundation.rs to components/core (wire messages, status mapping and retry header identical; the permission scope is resolved by the caller, the inference conversion lives beside its error type). Structure check drops the file length limit and adds the component map; clippy limits function length. Core and cognition unit tests pass. SQL, HTTP and provider behaviour is not formally proved."
+      "status": "reviewed-binding",
+      "sha256": "65d096f5f373c3976d475b5a51f6cbf66ad1411b3a4016347176c2af84426c67",
+      "review": "Three further proved rules with production bindings: a signed offer is honoured only unexpired and for the unchanged cart, revision and total (signed_offer.rs, result identical to the former expression); sovereign AI mode admits only the self-operated provider on a self-hosted endpoint (sovereign.rs, same decision, endpoint check no longer short-circuited and free of effects); workspace ID length bounds (core). Three SQL statements gained explicit parameter casts matching their bound types. Kernel, core and cognition unit tests pass. SQL, HTTP and provider behaviour is not formally proved."
     },
     "crates/apps/src/component_runtime.rs": {
       "status": "unproved",
@@ -730,9 +761,9 @@
       "review": "Stage 8 adds the sovereign AI gate in the inference crate and its callers; no extracted policy changes."
     },
     "crates/cognition/src/inference/sovereign.rs": {
-      "status": "unproved",
-      "sha256": "a2b7c18b968dcdd5e4b30f2f7f3072ff1bc7ff16c705f4a94310dcb0fe278d61",
-      "review": "Stage 8 adds the sovereign AI gate in the inference crate and its callers; no extracted policy changes."
+      "status": "reviewed-binding",
+      "sha256": "f83e10ddf87be6f0822bb7dc85aab3a0ae8eefb5f57dc4bc04712e15d1cd8f76",
+      "review": "Three further proved rules with production bindings: a signed offer is honoured only unexpired and for the unchanged cart, revision and total (signed_offer.rs, result identical to the former expression); sovereign AI mode admits only the self-operated provider on a self-hosted endpoint (sovereign.rs, same decision, endpoint check no longer short-circuited and free of effects); workspace ID length bounds (core). Three SQL statements gained explicit parameter casts matching their bound types. Kernel, core and cognition unit tests pass. SQL, HTTP and provider behaviour is not formally proved."
     },
     "crates/cognition/src/inference/tests.rs": {
       "status": "unproved",
@@ -881,8 +912,8 @@
     },
     "crates/kernel/src/verified_kernel/access.rs": {
       "status": "extracted-policy",
-      "sha256": "497b6213f231a9082d57d847a689ef85b8160c65e65e8ce2fdae9f0806d8af1b",
-      "review": "Split unchanged extracted policies and theorem bodies by domain; bind exact existing planning/private-preview admission; prove sequential integer allocations and denial after limit reduction; add u128 edge regressions and closed module inventory."
+      "sha256": "fb23f9477e40d97e259eecaf662c68f304ca4f10dafd5429e076f0dea6e1ea99",
+      "review": "Workspace length rule written with saturating subtraction so that it stays inside the extracted subset without a range lint; same accepted set, proved as 2 <= length <= 48."
     },
     "crates/kernel/src/verified_kernel/agents.rs": {
       "status": "extracted-policy",
@@ -901,8 +932,8 @@
     },
     "crates/kernel/src/verified_kernel/commerce.rs": {
       "status": "extracted-policy",
-      "sha256": "d7f67d19c5770afde2a5b399946b14114d3ae98bd06a8182ad1d695009da6532",
-      "review": "Native multi-capture admission, immutable receipts and per-capture refund budgets; async adapters remain unproved"
+      "sha256": "1d1637c412f8bb710ad24f185c356f6673aa5bb73e25ece194f59ceed610eace",
+      "review": "Three further proved rules with production bindings: a signed offer is honoured only unexpired and for the unchanged cart, revision and total (signed_offer.rs, result identical to the former expression); sovereign AI mode admits only the self-operated provider on a self-hosted endpoint (sovereign.rs, same decision, endpoint check no longer short-circuited and free of effects); workspace ID length bounds (core). Three SQL statements gained explicit parameter casts matching their bound types. Kernel, core and cognition unit tests pass. SQL, HTTP and provider behaviour is not formally proved."
     },
     "crates/kernel/src/verified_kernel/fulfillment.rs": {
       "status": "extracted-policy",
@@ -911,13 +942,13 @@
     },
     "crates/kernel/src/verified_kernel/intelligence.rs": {
       "status": "extracted-policy",
-      "sha256": "03e54752ca619bfd66822bf203e2d11f2dfa6dd3e078256f8dc70195b0be89f6",
-      "review": "Split unchanged extracted policies and theorem bodies by domain; bind exact existing planning/private-preview admission; prove sequential integer allocations and denial after limit reduction; add u128 edge regressions and closed module inventory."
+      "sha256": "481633bfe95d476b053ca4007ad40c52d07835bdd63dd6a1040ea22f42faba1c",
+      "review": "Three further proved rules with production bindings: a signed offer is honoured only unexpired and for the unchanged cart, revision and total (signed_offer.rs, result identical to the former expression); sovereign AI mode admits only the self-operated provider on a self-hosted endpoint (sovereign.rs, same decision, endpoint check no longer short-circuited and free of effects); workspace ID length bounds (core). Three SQL statements gained explicit parameter casts matching their bound types. Kernel, core and cognition unit tests pass. SQL, HTTP and provider behaviour is not formally proved."
     },
     "crates/kernel/src/verified_kernel.rs": {
       "status": "extracted-policy",
-      "sha256": "1866e4b24c2b769f14e2b4442e18f2e6fba406ebcc69f9669a0dc15176555352",
-      "review": "Native multi-capture admission, immutable receipts and per-capture refund budgets; async adapters remain unproved"
+      "sha256": "206c40dffbdbb22eea76676d4191459b3d0db0086214e2c98e73286e51389f5c",
+      "review": "Three further proved rules with production bindings: a signed offer is honoured only unexpired and for the unchanged cart, revision and total (signed_offer.rs, result identical to the former expression); sovereign AI mode admits only the self-operated provider on a self-hosted endpoint (sovereign.rs, same decision, endpoint check no longer short-circuited and free of effects); workspace ID length bounds (core). Three SQL statements gained explicit parameter casts matching their bound types. Kernel, core and cognition unit tests pass. SQL, HTTP and provider behaviour is not formally proved."
     },
     "crates/runtime/src/database_scope/provision.rs": {
       "status": "unproved",
@@ -3481,8 +3512,8 @@
     },
     "src/bin/verified_kernel/dispatch/access.rs": {
       "status": "conformance-driver",
-      "sha256": "7808db62d790e11bc8fc4b5ade0e9a42b69a349d68094be6c46558769ea4f935",
-      "review": "Native capture budget and receipt review; bounded generated conformance domains; SQL/network adapters remain unproved"
+      "sha256": "c364639c774a94c9003118147a91630beb1297560ba45b901f65e3eb7541f468",
+      "review": "Three further proved rules with production bindings: a signed offer is honoured only unexpired and for the unchanged cart, revision and total (signed_offer.rs, result identical to the former expression); sovereign AI mode admits only the self-operated provider on a self-hosted endpoint (sovereign.rs, same decision, endpoint check no longer short-circuited and free of effects); workspace ID length bounds (core). Three SQL statements gained explicit parameter casts matching their bound types. Kernel, core and cognition unit tests pass. SQL, HTTP and provider behaviour is not formally proved."
     },
     "src/bin/verified_kernel/dispatch/agents.rs": {
       "status": "conformance-driver",
@@ -3501,8 +3532,8 @@
     },
     "src/bin/verified_kernel/dispatch/commerce.rs": {
       "status": "conformance-driver",
-      "sha256": "d6ae95c77ef2a8fed5e64f5370eb2050dc18f2e02c658be77d8dfe592545fe2d",
-      "review": "Native capture budget and receipt review; bounded generated conformance domains; SQL/network adapters remain unproved"
+      "sha256": "86d7799e006b568b4dcaecacea158ea4ed25efc5677253fb3e91eb601654b796",
+      "review": "Three further proved rules with production bindings: a signed offer is honoured only unexpired and for the unchanged cart, revision and total (signed_offer.rs, result identical to the former expression); sovereign AI mode admits only the self-operated provider on a self-hosted endpoint (sovereign.rs, same decision, endpoint check no longer short-circuited and free of effects); workspace ID length bounds (core). Three SQL statements gained explicit parameter casts matching their bound types. Kernel, core and cognition unit tests pass. SQL, HTTP and provider behaviour is not formally proved."
     },
     "src/bin/verified_kernel/dispatch/fulfillment.rs": {
       "status": "conformance-driver",
@@ -3511,13 +3542,13 @@
     },
     "src/bin/verified_kernel/dispatch/intelligence.rs": {
       "status": "conformance-driver",
-      "sha256": "c28dc1f97a4c336089c0feecb22795c9c22977bfd8e0a90e4ce09acfe3455645",
-      "review": "Native capture budget and receipt review; bounded generated conformance domains; SQL/network adapters remain unproved"
+      "sha256": "885f225cdb8a3ba179548f83aed5bd93b5d18a196c05ca1a4461d9acfa0fc5ef",
+      "review": "Three further proved rules with production bindings: a signed offer is honoured only unexpired and for the unchanged cart, revision and total (signed_offer.rs, result identical to the former expression); sovereign AI mode admits only the self-operated provider on a self-hosted endpoint (sovereign.rs, same decision, endpoint check no longer short-circuited and free of effects); workspace ID length bounds (core). Three SQL statements gained explicit parameter casts matching their bound types. Kernel, core and cognition unit tests pass. SQL, HTTP and provider behaviour is not formally proved."
     },
     "src/bin/verified_kernel/dispatch.rs": {
       "status": "conformance-driver",
-      "sha256": "2c8580b75a87a906e1592a8973e9b5e3cad1d02f3157c58e9c8601d0c706a913",
-      "review": "Native capture budget and receipt review; bounded generated conformance domains; SQL/network adapters remain unproved"
+      "sha256": "b45810f17a93213f6fef5997fbbf31f788f71ffac39815c98c533261e2478cee",
+      "review": "Three further proved rules with production bindings: a signed offer is honoured only unexpired and for the unchanged cart, revision and total (signed_offer.rs, result identical to the former expression); sovereign AI mode admits only the self-operated provider on a self-hosted endpoint (sovereign.rs, same decision, endpoint check no longer short-circuited and free of effects); workspace ID length bounds (core). Three SQL statements gained explicit parameter casts matching their bound types. Kernel, core and cognition unit tests pass. SQL, HTTP and provider behaviour is not formally proved."
     },
     "src/bin/verified_kernel.rs": {
       "status": "conformance-driver",
@@ -3701,8 +3732,8 @@
     },
     "src/checkout_handoff.rs": {
       "status": "unproved",
-      "sha256": "96917427fda71f7d37d765425fb57077499fb96d0fd12f4ca964a67fe5b73185",
-      "review": "Review hosted checkout recovery reads: bound tenant, cart, digest and parent still use one committed snapshot; only explicit reopen locks and rechecks after waiting. Signed PostgreSQL handoff covers a held cart lock and a concurrent order versus reopen."
+      "sha256": "637847dd86b9dac1e460dcb95bbde6ebb73ecc303319578706bef3fc9baf20a3",
+      "review": "Three further proved rules with production bindings: a signed offer is honoured only unexpired and for the unchanged cart, revision and total (signed_offer.rs, result identical to the former expression); sovereign AI mode admits only the self-operated provider on a self-hosted endpoint (sovereign.rs, same decision, endpoint check no longer short-circuited and free of effects); workspace ID length bounds (core). Three SQL statements gained explicit parameter casts matching their bound types. Kernel, core and cognition unit tests pass. SQL, HTTP and provider behaviour is not formally proved."
     },
     "src/checkout_page.rs": {
       "status": "unproved",
@@ -3855,9 +3886,9 @@
       "review": "Signed offers: cognition/signed_offer.rs signs a closed projection of the native cart quote with the existing Ed25519 owner and verifies signature, shop, expiry and current cart match; signed.rs gains key_id and verify helpers; readiness reports signing status; no extracted policy changed; providers suite verifies independently and covers forged, foreign, malformed, changed-cart and changed-price cases"
     },
     "src/cognition/signed_offer.rs": {
-      "status": "unproved",
-      "sha256": "9c01fa4df1a0e6190f35fef44cbbb82e25a2a51e9ae106f78d16569d6596e47d",
-      "review": "Signed offers: cognition/signed_offer.rs signs a closed projection of the native cart quote with the existing Ed25519 owner and verifies signature, shop, expiry and current cart match; signed.rs gains key_id and verify helpers; readiness reports signing status; no extracted policy changed; providers suite verifies independently and covers forged, foreign, malformed, changed-cart and changed-price cases"
+      "status": "reviewed-binding",
+      "sha256": "fab71030d88c05865a21ba937c868b49a563e6de5c40de7c3e1b98e3d36dee5b",
+      "review": "Three further proved rules with production bindings: a signed offer is honoured only unexpired and for the unchanged cart, revision and total (signed_offer.rs, result identical to the former expression); sovereign AI mode admits only the self-operated provider on a self-hosted endpoint (sovereign.rs, same decision, endpoint check no longer short-circuited and free of effects); workspace ID length bounds (core). Three SQL statements gained explicit parameter casts matching their bound types. Kernel, core and cognition unit tests pass. SQL, HTTP and provider behaviour is not formally proved."
     },
     "src/cognition/stream.rs": {
       "status": "unproved",
@@ -3926,8 +3957,8 @@
     },
     "src/commerce/delivery.rs": {
       "status": "unproved",
-      "sha256": "a549ece084081d51760edddb49f85fb13c4113ba452faecb3720c4e282150e20",
-      "review": "Identity-only Veyndo namespace and canonical-domain rename; reviewed migration checksum compatibility for six historical SQL versions, unchanged checkout predicates, 42 library and 169 binary tests pass; native component legacy boundary remains configured and guarded."
+      "sha256": "27723a971e46dbe43ce1228b31e9693fbae299fd7deecbb88f61c6cc146590c9",
+      "review": "Three further proved rules with production bindings: a signed offer is honoured only unexpired and for the unchanged cart, revision and total (signed_offer.rs, result identical to the former expression); sovereign AI mode admits only the self-operated provider on a self-hosted endpoint (sovereign.rs, same decision, endpoint check no longer short-circuited and free of effects); workspace ID length bounds (core). Three SQL statements gained explicit parameter casts matching their bound types. Kernel, core and cognition unit tests pass. SQL, HTTP and provider behaviour is not formally proved."
     },
     "src/commerce/delivery_split.rs": {
       "status": "reviewed-binding",
@@ -4556,8 +4587,8 @@
     },
     "src/marketing/flow_mutations.rs": {
       "status": "unproved",
-      "sha256": "6e2bfb684705347813594154f9415454727b1d491263e2e0f4e4ae4b464c80a8",
-      "review": "Identity-only Veyndo namespace and canonical-domain rename; reviewed migration checksum compatibility for six historical SQL versions, unchanged checkout predicates, 42 library and 169 binary tests pass; native component legacy boundary remains configured and guarded."
+      "sha256": "06a156d8879da8dcc2b6c15d56a4bf127039bc8554efabefa86e80f09162bc0e",
+      "review": "Three further proved rules with production bindings: a signed offer is honoured only unexpired and for the unchanged cart, revision and total (signed_offer.rs, result identical to the former expression); sovereign AI mode admits only the self-operated provider on a self-hosted endpoint (sovereign.rs, same decision, endpoint check no longer short-circuited and free of effects); workspace ID length bounds (core). Three SQL statements gained explicit parameter casts matching their bound types. Kernel, core and cognition unit tests pass. SQL, HTTP and provider behaviour is not formally proved."
     },
     "src/marketing/flow_policy.rs": {
       "status": "unproved",
@@ -5577,12 +5608,12 @@
   },
   "inputs": {
     ".github/workflows/verify.yml": {
-      "sha256": "ae97b82b7e6b66a162c3e3183a4f43554b3860b7e1905b545115dfccd2a41125",
-      "review": "Component architecture phase 0 and first core crate: the error contract moved unchanged from src/failure.rs and src/foundation.rs to components/core (wire messages, status mapping and retry header identical; the permission scope is resolved by the caller, the inference conversion lives beside its error type). Structure check drops the file length limit and adds the component map; clippy limits function length. Core and cognition unit tests pass. SQL, HTTP and provider behaviour is not formally proved."
+      "sha256": "7be8d169ae6f9da456bb5f74596b6bb0dba309fef337ffe9521bbabbe28cdf17",
+      "review": "Three further proved rules with production bindings: a signed offer is honoured only unexpired and for the unchanged cart, revision and total (signed_offer.rs, result identical to the former expression); sovereign AI mode admits only the self-operated provider on a self-hosted endpoint (sovereign.rs, same decision, endpoint check no longer short-circuited and free of effects); workspace ID length bounds (core). Three SQL statements gained explicit parameter casts matching their bound types. Kernel, core and cognition unit tests pass. SQL, HTTP and provider behaviour is not formally proved."
     },
     "Cargo.lock": {
-      "sha256": "3e99f261a28a0ab3d5303b501259770a408b29780f6d74a174f1141f85747a91",
-      "review": "Component architecture phase 0 and first core crate: the error contract moved unchanged from src/failure.rs and src/foundation.rs to components/core (wire messages, status mapping and retry header identical; the permission scope is resolved by the caller, the inference conversion lives beside its error type). Structure check drops the file length limit and adds the component map; clippy limits function length. Core and cognition unit tests pass. SQL, HTTP and provider behaviour is not formally proved."
+      "sha256": "9ab4c46283175b1c9f9b7d97afc4c26eb2cf4a7f5d18f8b2470a5a8bd1d5b8fd",
+      "review": "Three further proved rules with production bindings: a signed offer is honoured only unexpired and for the unchanged cart, revision and total (signed_offer.rs, result identical to the former expression); sovereign AI mode admits only the self-operated provider on a self-hosted endpoint (sovereign.rs, same decision, endpoint check no longer short-circuited and free of effects); workspace ID length bounds (core). Three SQL statements gained explicit parameter casts matching their bound types. Kernel, core and cognition unit tests pass. SQL, HTTP and provider behaviour is not formally proved."
     },
     "Cargo.toml": {
       "sha256": "19e4fdc90d60f314d67dcf1c1f752635ad0c26d504ecfbdb49ea28d21c7b0acb",
@@ -5729,8 +5760,8 @@
       "review": "Apps reader 0.25.0: current OAuth merchant/action admission, signed read-only fixed-schema host and shared original scope/page/field code; real independent PostgreSQL/HTTP/MCP/SDK and runtime/storage regressions pass. Native task context, privileged provisioning, object resolver and write owners retained. No new mathematical claim for host SQL or network."
     },
     "deploy/Dockerfile": {
-      "sha256": "aa0e1526fde41e34fad193a4a00697efb4878c1954ea4e817efa6d1815b063fb",
-      "review": "Move reviewed rule sources and their registry to the pinned Automation library. Compared every original rule and comparison module with the deployed source after normalizing the two equivalent kernel references. The shared Automation policy module is byte-identical. Rust library tests, PHP catalog verification and the 432 condition and 1976 comparison cases passed. The two existing Lean bindings now point at their actual production consumers."
+      "sha256": "e53df5076a41bce6343d848f0aacd726467e1f975da49d9ddf9d7473f817b69f",
+      "review": "Three further proved rules with production bindings: a signed offer is honoured only unexpired and for the unchanged cart, revision and total (signed_offer.rs, result identical to the former expression); sovereign AI mode admits only the self-operated provider on a self-hosted endpoint (sovereign.rs, same decision, endpoint check no longer short-circuited and free of effects); workspace ID length bounds (core). Three SQL statements gained explicit parameter casts matching their bound types. Kernel, core and cognition unit tests pass. SQL, HTTP and provider behaviour is not formally proved."
     },
     "extensions/apps/marketplaces/Cargo.lock": {
       "sha256": "2b38dfedc96b9acb5ff19003964e3fcb1daa33df27ef594eb29bf4cdd1821e81",
@@ -6249,8 +6280,8 @@
       "review": "Codex source review: the per-shop model revision only advances; queue claims bind the live shop's active model and revision, and result publication locks that generation before checking the existing source and lease fences. The additive migration preserves revision zero for existing installations. The PostgreSQL and Qdrant test overlapped two Core processes, released an old provider response after takeover, reindexed 150 products and verified current edits and search. SQL and worker code remain unproved; no extracted policy changed."
     },
     "proof/Commerce/Claims/Access.lean": {
-      "sha256": "f884142fe393e6ea189473d8e02add783f80cef3e45f08d4d0d8e01a57f0a205",
-      "review": "Split unchanged extracted policies and theorem bodies by domain; bind exact existing planning/private-preview admission; prove sequential integer allocations and denial after limit reduction; add u128 edge regressions and closed module inventory."
+      "sha256": "34f17c04a22c1b4ea5d61a5a53b3e17405a7ff25dce0a57a3cf8bc671b854daa",
+      "review": "Workspace length rule written with saturating subtraction so that it stays inside the extracted subset without a range lint; same accepted set, proved as 2 <= length <= 48."
     },
     "proof/Commerce/Claims/Agents.lean": {
       "sha256": "c743b6d974b3535c2990f92adb926036f7e5a5993c291191afd6988157bb3ebb",
@@ -6265,16 +6296,16 @@
       "review": "Split unchanged extracted policies and theorem bodies by domain; bind exact existing planning/private-preview admission; prove sequential integer allocations and denial after limit reduction; add u128 edge regressions and closed module inventory."
     },
     "proof/Commerce/Claims/Commerce.lean": {
-      "sha256": "cd03989c0b628d21eed8e897d4e6e757c9e0a727c92abd95be1c1a205e8d5450",
-      "review": "Native multi-capture admission, immutable receipts and per-capture refund budgets; async adapters remain unproved"
+      "sha256": "752697a90b12428136bba4371286b3a56e4f3efa0cde6344df5b61e5fcabfb67",
+      "review": "Three further proved rules with production bindings: a signed offer is honoured only unexpired and for the unchanged cart, revision and total (signed_offer.rs, result identical to the former expression); sovereign AI mode admits only the self-operated provider on a self-hosted endpoint (sovereign.rs, same decision, endpoint check no longer short-circuited and free of effects); workspace ID length bounds (core). Three SQL statements gained explicit parameter casts matching their bound types. Kernel, core and cognition unit tests pass. SQL, HTTP and provider behaviour is not formally proved."
     },
     "proof/Commerce/Claims/Fulfillment.lean": {
       "sha256": "fa0f2a3d19f2ac74e00368761fa2a89db5890b6b9f9940c969f932466e8024b1",
       "review": "Native multi-capture admission, immutable receipts and per-capture refund budgets; async adapters remain unproved"
     },
     "proof/Commerce/Claims/Intelligence.lean": {
-      "sha256": "a91c33176e385e8b34c8ae3bdd791f8bdc96fde328d52ca3bb0d79b477d4ed6c",
-      "review": "Split unchanged extracted policies and theorem bodies by domain; bind exact existing planning/private-preview admission; prove sequential integer allocations and denial after limit reduction; add u128 edge regressions and closed module inventory."
+      "sha256": "6536ad2fe189421e4553a561d217c16ba23cdf49ef60d35bb92b835adcb75e5c",
+      "review": "Three further proved rules with production bindings: a signed offer is honoured only unexpired and for the unchanged cart, revision and total (signed_offer.rs, result identical to the former expression); sovereign AI mode admits only the self-operated provider on a self-hosted endpoint (sovereign.rs, same decision, endpoint check no longer short-circuited and free of effects); workspace ID length bounds (core). Three SQL statements gained explicit parameter casts matching their bound types. Kernel, core and cognition unit tests pass. SQL, HTTP and provider behaviour is not formally proved."
     },
     "proof/Commerce/Claims.lean": {
       "sha256": "03786b1afcfc2ebffa88983cff7ddc838450fcc808130686245d016c5954815f",
@@ -6317,16 +6348,16 @@
       "review": "Component architecture phase 0 and first core crate: the error contract moved unchanged from src/failure.rs and src/foundation.rs to components/core (wire messages, status mapping and retry header identical; the permission scope is resolved by the caller, the inference conversion lives beside its error type). Structure check drops the file length limit and adds the component map; clippy limits function length. Core and cognition unit tests pass. SQL, HTTP and provider behaviour is not formally proved."
     },
     "scripts/formal/layout_tests.py": {
-      "sha256": "2ed265d29aa9ec55e9bb4c11d0cf9037a4a322850a821a2aabbf6103d16149d6",
-      "review": "Review domain proof import and size closure, explicit Rust registrations, all 149 theorem bindings, existing adapter truth conditions and unchanged 61 prior policy ASTs; negative controls reject extra imports, missing claims and hidden Cargo authority."
+      "sha256": "964b8b56ecaa8e853b7604e8085989544ddad6d07e71deb034a8448ccaccfaee",
+      "review": "Proof layout controls follow the removed length limit; suite runner can continue after a failing suite; SQL check attributes errors on one ordered stream. No production rule changed in this step."
     },
     "scripts/formal/modules.py": {
-      "sha256": "56c1cbc50d3ecf4dbeb7285a393dba6d004c2228a423cf2405aedf58e21615ff",
-      "review": "Native multi-capture admission, immutable receipts and per-capture refund budgets; async adapters remain unproved"
+      "sha256": "879f1f3abdac9a12a172c47a43ca24be20a8870f5915af168c4da47f5a0db7cd",
+      "review": "Three further proved rules with production bindings: a signed offer is honoured only unexpired and for the unchanged cart, revision and total (signed_offer.rs, result identical to the former expression); sovereign AI mode admits only the self-operated provider on a self-hosted endpoint (sovereign.rs, same decision, endpoint check no longer short-circuited and free of effects); workspace ID length bounds (core). Three SQL statements gained explicit parameter casts matching their bound types. Kernel, core and cognition unit tests pass. SQL, HTTP and provider behaviour is not formally proved."
     },
     "scripts/formal/mutations.py": {
-      "sha256": "dafa33d4c9eb6938c39da1e2e87e123972c5ff8af8d5590c8497b520e6cd655b",
-      "review": "Native multi-capture admission, immutable receipts and per-capture refund budgets; async adapters remain unproved"
+      "sha256": "ba6396dc45b6366434c4b0881ad815538fbc5f5d5ce228f9e4f85818eda60033",
+      "review": "Workspace length rule written with saturating subtraction so that it stays inside the extracted subset without a range lint; same accepted set, proved as 2 <= length <= 48."
     },
     "scripts/formal/registry.py": {
       "sha256": "24cd8fe49325e4cd8a972a30249962670088a692204892683408fc2617f05fd0",

@@ -34,6 +34,11 @@ pub(super) fn eval(j: &Value) -> Result<Value, String> {
             b("enough_units")?,
             b("positive_bound")?
         ))),
+        Some("sovereign_request_admissible") => Ok(json!(sovereign_request_admissible(
+            b("sovereign")?,
+            b("own_provider")?,
+            b("self_hosted")?
+        ))),
         _ => Err("Unknown policy".into()),
     }
 }

@@ -21,7 +21,7 @@ pub fn hash(s: &str) -> String {
     format!("{:x}", Sha256::digest(s.as_bytes()))
 }
 pub fn validate_tenant(t: &str) -> Result<()> {
-    if !(2..=48).contains(&t.len())
+    if !veyndo_kernel::verified_kernel::workspace_length_admissible(t.len() as u64)
         || !t
             .bytes()
             .all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || c == b'-')

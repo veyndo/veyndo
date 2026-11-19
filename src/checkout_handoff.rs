@@ -50,7 +50,7 @@ pub(crate) async fn issue(
         .bind(&t)
         .execute(&mut *tx)
         .await?;
-    sqlx::query("INSERT INTO checkout_handoffs(digest,tenant,cart_id,expires_at,recovery_digest,recovery_origin,recovery_expires_at) VALUES($1,$2,$3,now()+interval '10 minutes',$4,$5,CASE WHEN $4 IS NOT NULL THEN now()+interval '24 hours' END) ON CONFLICT(cart_id) DO UPDATE SET digest=EXCLUDED.digest,expires_at=EXCLUDED.expires_at,recovery_digest=EXCLUDED.recovery_digest,recovery_origin=EXCLUDED.recovery_origin,recovery_expires_at=EXCLUDED.recovery_expires_at,consumed_at=NULL")
+    sqlx::query("INSERT INTO checkout_handoffs(digest,tenant,cart_id,expires_at,recovery_digest,recovery_origin,recovery_expires_at) VALUES($1,$2,$3,now()+interval '10 minutes',$4::text,$5,CASE WHEN $4::text IS NOT NULL THEN now()+interval '24 hours' END) ON CONFLICT(cart_id) DO UPDATE SET digest=EXCLUDED.digest,expires_at=EXCLUDED.expires_at,recovery_digest=EXCLUDED.recovery_digest,recovery_origin=EXCLUDED.recovery_origin,recovery_expires_at=EXCLUDED.recovery_expires_at,consumed_at=NULL")
         .bind(hash(&ticket)).bind(&t).bind(&c.id).bind(recovery.as_deref().map(hash)).bind(parent).execute(&mut *tx).await?;
     tx.commit().await?;
     let mut result =

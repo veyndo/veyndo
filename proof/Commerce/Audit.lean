@@ -100,6 +100,10 @@ import Commerce.Claims
 #print axioms CommerceKernel.native_lifecycle_safe
 #print axioms CommerceKernel.notification_ambiguous_never_retry
 #print axioms CommerceKernel.notification_retry_exact
+#print axioms CommerceKernel.offer_changed_revision_denied
+#print axioms CommerceKernel.offer_changed_total_denied
+#print axioms CommerceKernel.offer_expired_denied
+#print axioms CommerceKernel.offer_honoured_exact
 #print axioms CommerceKernel.order_edit_exact
 #print axioms CommerceKernel.payment_pending_capture
 #print axioms CommerceKernel.payment_refunded_terminal
@@ -144,6 +148,10 @@ import Commerce.Claims
 #print axioms CommerceKernel.shop_availability_exact
 #print axioms CommerceKernel.source_activation_exact
 #print axioms CommerceKernel.source_activation_unreviewed_denied
+#print axioms CommerceKernel.sovereign_foreign_endpoint_denied
+#print axioms CommerceKernel.sovereign_foreign_provider_denied
+#print axioms CommerceKernel.sovereign_off_admits
+#print axioms CommerceKernel.sovereign_request_exact
 #print axioms CommerceKernel.stock_conservation
 #print axioms CommerceKernel.stock_exact
 #print axioms CommerceKernel.stock_positive_bounded
@@ -152,3 +160,5 @@ import Commerce.Claims
 #print axioms CommerceKernel.terminal_edit_denied
 #print axioms CommerceKernel.wasm_resources_exact
 #print axioms CommerceKernel.wasm_tables_bounded
+#print axioms CommerceKernel.workspace_length_exact
+#print axioms CommerceKernel.workspace_length_short_denied

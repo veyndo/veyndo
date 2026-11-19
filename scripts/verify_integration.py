@@ -16,7 +16,7 @@ import time
 import urllib.parse
 import uuid
 
-from testing.runtime import ROOT, artifact_path, run, serve, stop
+from testing.runtime import ROOT, artifact_path, run as run_checked, serve, stop
 from testing.database import psql
 from testing.parallel_check import ParallelCheck
 from testing.integration_partitions import PARTITIONS, partition
@@ -25,6 +25,7 @@ parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument("--container", default="veyndo-postgres-1")
 parser.add_argument("--existing-database", action="store_true")
 parser.add_argument("--only", nargs="+", help="Run selected registered HTTP/provider/browser/tooling suites in an isolated database")
+parser.add_argument("--keep-going", action="store_true", help="Run the remaining suites after one fails and list every failed suite at the end")
 parser.add_argument("--partition", choices=PARTITIONS, help="Complete disjoint CI partition, each with its own services and database")
 parser.add_argument("--parallel-pooler", metavar="QDRANT_URL", help="Run signed_pooler concurrently with its own database, logs and a separate disposable Qdrant instance")
 args = parser.parse_args()
@@ -49,6 +50,20 @@ if not env.get("DATABASE_URL"):
 url = urllib.parse.urlsplit(env["DATABASE_URL"])
 name = url.path[1:] if args.existing_database else "commerce_quality_" + uuid.uuid4().hex
 user = url.username or "commerce"
+
+
+failed = []
+
+
+def run(command, env):
+    """One suite. With --keep-going a failure is recorded and the next suite still runs; a later failure may follow from it."""
+    try:
+        run_checked(command, env)
+    except subprocess.CalledProcessError as error:
+        if not args.keep_going:
+            raise
+        failed.append(str(command[1]))
+        print(f'FAILED exit {error.returncode}: {failed[-1]}', flush=True)
 
 
 def sql(statement):
@@ -142,6 +157,8 @@ try:
         for suite in suites.get("tooling", []):
             run([sys.executable, f"scripts/{suite}.py"], env)
         run([sys.executable, "scripts/structure.py"], env)
+        if failed:
+            raise SystemExit(f'FAILED {len(failed)} suites: ' + ', '.join(failed))
         print("PASS selected HTTP suites plus provider, browser-contract and tooling checks" if args.only else "PASS all registered integration and browser-contract suites")
         print(f'TOTAL integration {time.monotonic()-started:.2f}s', flush=True)
 finally:

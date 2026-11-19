@@ -29,7 +29,7 @@ ALLOWED = {
     'veyndo-apps': {'veyndo-kernel', 'veyndo-app-runtime'},
     'veyndo-cognition': {'veyndo-runtime', 'veyndo-kernel', 'veyndo-app-authority', 'veyndo-core'},
     # Core carries the shared error contract; money validation errors are part of it.
-    'veyndo-core': {'veyndo-commerce'},
+    'veyndo-core': {'veyndo-commerce', 'veyndo-kernel'},
 }
 # Reviewed direct external capabilities. Cargo reports actual package names even
 # when a manifest renames sqlx as something innocuous. New dependencies need an

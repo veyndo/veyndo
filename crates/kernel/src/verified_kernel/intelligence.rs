@@ -39,3 +39,11 @@ pub fn experiment_result_admissible(
 ) -> bool {
     final_look && enough_units && positive_bound
 }
+/// In sovereign mode a model request leaves the process only for the self-operated provider on a self-hosted endpoint.
+pub fn sovereign_request_admissible(
+    sovereign: bool,
+    own_provider: bool,
+    self_hosted: bool,
+) -> bool {
+    !sovereign || own_provider && self_hosted
+}

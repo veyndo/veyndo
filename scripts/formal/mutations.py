@@ -130,6 +130,13 @@ MUTANTS=[
  ('download_admissible','!order_blocked','true'),
  ('checkout_contact_admissible','billing_present','true'),
  ('receipt_admissible','expected == received','true'),
+ ('offer_honoured','!expired &&','true &&'),
+ ('offer_honoured','&& same_total','&& true'),
+ ('offer_honoured','&& same_revision','&& true'),
+ ('sovereign_request_admissible','own_provider && self_hosted','own_provider || self_hosted'),
+ ('sovereign_request_admissible','!sovereign ||','sovereign ||'),
+ ('workspace_length_admissible','length.saturating_sub(48) == 0','true'),
+ ('workspace_length_admissible','length >= 2','length >= 1'),
 ]
 
 def mutated(source,name,old,new):

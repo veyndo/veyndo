@@ -3617,6 +3617,7 @@ dependencies = [
  "sqlx",
  "uuid",
  "veyndo-commerce",
+ "veyndo-kernel",
 ]
 
 [[package]]

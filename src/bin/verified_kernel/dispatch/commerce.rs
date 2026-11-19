@@ -83,6 +83,12 @@ pub(super) fn eval(j: &Value) -> Result<Value, String> {
             b("manual")?,
             b("simulated")?
         ))),
+        Some("offer_honoured") => Ok(json!(offer_honoured(
+            b("expired")?,
+            b("same_cart")?,
+            b("same_revision")?,
+            b("same_total")?
+        ))),
         _ => Err("Unknown policy".into()),
     }
 }

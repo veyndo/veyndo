@@ -3,6 +3,7 @@ use serde_json::{Value, json};
 use veyndo::verified_kernel::*;
 pub(super) fn eval(j: &Value) -> Result<Value, String> {
     let args = &j["args"];
+    let n = |key: &str| args[key].as_u64().ok_or_else(|| format!("Invalid {key}"));
     let b = |key: &str| args[key].as_bool().ok_or_else(|| format!("Invalid {key}"));
     match j["function"].as_str() {
         Some("scope_admissible") => Ok(json!(scope_admissible(
@@ -55,6 +56,7 @@ pub(super) fn eval(j: &Value) -> Result<Value, String> {
             b("personal")?,
             b("administrator")?
         ))),
+        Some("workspace_length_admissible") => Ok(json!(workspace_length_admissible(n("length")?))),
         _ => Err("Unknown policy".into()),
     }
 }

@@ -6,18 +6,18 @@ This page answers one question per source file of the commerce core: is its
 rule proved by machine, does it call a proved rule, or neither? It is
 generated from the same manifest the proof check uses, so it cannot say more
 than the check verifies. **It is not a claim that the shop is free of errors:**
-91.5 % of the Rust source files are unproved.
+91.2 % of the Rust source files are unproved.
 
 ## In numbers
 
 | | Count | Share of source files | Meaning |
 | --- | ---: | ---: | --- |
-| **Proved rules** | 64 | | Small pure decisions, translated from the production Rust source to Lean and proved there |
-| **Proved properties** | 153 | | Statements about those rules that hold for every possible input |
+| **Proved rules** | 67 | | Small pure decisions, translated from the production Rust source to Lean and proved there |
+| **Proved properties** | 163 | | Statements about those rules that hold for every possible input |
 | Rule files | 8 | 0.8 % | The files that contain the proved rules |
-| Reviewed callers | 67 | 6.8 % | Files that call a proved rule; a person reviewed how the rule is fed, the surrounding code is not proved |
+| Reviewed callers | 70 | 7.1 % | Files that call a proved rule; a person reviewed how the rule is fed, the surrounding code is not proved |
 | Comparison drivers | 9 | 0.9 % | Test programs that compare the compiled Rust rules with the Lean versions |
-| **Unproved files** | 907 | 91.5 % | Everything else: database access, HTTP, providers, the user interface server |
+| **Unproved files** | 904 | 91.2 % | Everything else: database access, HTTP, providers, the user interface server |
 | All Rust source files | 991 | 100 % | |
 
 A proved rule looks like this one, which caps a discount at the amount it is
@@ -62,7 +62,7 @@ that call it.
 
 ### Prices, stock, payments and refunds
 
-17 rules, 50 proved properties.
+18 rules, 54 proved properties.
 [Source](https://github.com/veyndo/veyndo/blob/main/crates/kernel/src/verified_kernel/commerce.rs).
 
 | Rule | What the source says about it | Proved properties | Used in |
@@ -78,6 +78,7 @@ that call it.
 | `discount_cap` | No comment in the source | 6: `discount_bounded`, `discount_requested`, `discount_conservation`, `discount_exact`, `discount_monotone_requested`, `discount_idempotent` | `crates/commerce/src/discount.rs` |
 | `external_amount_admissible` | Source amounts are bounded; a zero rate cannot carry nonzero tax. No tax-law inference. | 2: `external_amount_exact`, `external_amount_tax_bounded` | `crates/commerce/src/external_order.rs` |
 | `external_paid_total_admissible` | Paid imports require a positive, exactly reconciled source total. | 2: `external_paid_total_exact`, `external_unpaid_denied` | `crates/commerce/src/external_order.rs` |
+| `offer_honoured` | A signed offer is honoured only before it expires and only for the same cart, revision and total. | 4: `offer_honoured_exact`, `offer_expired_denied`, `offer_changed_total_denied`, `offer_changed_revision_denied` | `src/cognition/signed_offer.rs` |
 | `pos_cash_admissible` | Cash change is bounded and nonnegative only under cashier authorization and a reviewed total. | 3: `pos_cash_exact`, `pos_cash_conserves`, `pos_cash_unauthorized_denied` | `src/pos/settlement.rs` |
 | `pos_discount_admissible` | No comment in the source | 2: `pos_discount_exact`, `pos_discount_exceeds_denied` | `src/pos/discount.rs` |
 | `refund_admissible` | No comment in the source | 5: `refund_bounded`, `refund_zero_denied`, `refund_exact`, `refund_sequence_bounded`, `refund_lowered_capture_denied` | `src/payments/operations.rs`, `src/payments/refund_receipts.rs` |
@@ -105,7 +106,7 @@ that call it.
 
 ### Rights, shops and sessions
 
-9 rules, 19 proved properties.
+10 rules, 21 proved properties.
 [Source](https://github.com/veyndo/veyndo/blob/main/crates/kernel/src/verified_kernel/access.rs).
 
 | Rule | What the source says about it | Proved properties | Used in |
@@ -119,6 +120,7 @@ that call it.
 | `platform_admissible` | Global administration requires a personal session and a current independent operator grant. | 2: `platform_exact`, `platform_personal_required` | `src/platform/auth.rs` |
 | `scope_admissible` | No comment in the source | 3: `scope_authenticated_known`, `scope_explicit_no_escalation`, `scope_exact` | `src/auth/permissions.rs` |
 | `shop_request_admissible` | Availability fence: paused merchant reads and existing payment settlement may continue. | 2: `shop_availability_exact`, `shop_archived_denied` | `src/platform/lifecycle.rs` |
+| `workspace_length_admissible` | A workspace ID has between 2 and 48 characters. | 2: `workspace_length_exact`, `workspace_length_short_denied` | `components/core/src/lib.rs` |
 
 ### Agent budgets
 
@@ -132,7 +134,7 @@ that call it.
 
 ### AI prices, claims and experiments
 
-4 rules, 9 proved properties.
+5 rules, 13 proved properties.
 [Source](https://github.com/veyndo/veyndo/blob/main/crates/kernel/src/verified_kernel/intelligence.rs).
 
 | Rule | What the source says about it | Proved properties | Used in |
@@ -141,6 +143,7 @@ that call it.
 | `ai_price_admissible` | Price admission proves only the explicit corridor and supplied domain guards; no model truth claim. | 2: `ai_price_exact`, `ai_price_locked_denied` | `src/cognition/guardrails.rs` |
 | `claim_render_admissible` | Only current, public, confirmed, unexpired source-bound claims may be rendered. | 2: `claim_render_exact`, `claim_unconfirmed_denied` | `src/cognition/contracts.rs`, `src/cognition/claim_batches.rs` |
 | `experiment_result_admissible` | An experiment may claim uplift only at the admissible final look, with enough units and a positive lower bound. | 3: `experiment_result_exact`, `experiment_immature_denied`, `experiment_undersized_denied` | `src/cognition/experiments/model.rs` |
+| `sovereign_request_admissible` | In sovereign mode a model request leaves the process only for the self-operated provider on a self-hosted endpoint. | 4: `sovereign_request_exact`, `sovereign_foreign_provider_denied`, `sovereign_foreign_endpoint_denied`, `sovereign_off_admits` | `crates/cognition/src/inference/sovereign.rs` |
 
 ### Rules and flows
 

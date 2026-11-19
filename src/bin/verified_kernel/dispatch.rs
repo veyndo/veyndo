@@ -24,7 +24,8 @@ pub(super) fn eval(j: &Value) -> Result<Value, String> {
         | Some("persistent_key_admissible")
         | Some("platform_admissible")
         | Some("scope_admissible")
-        | Some("shop_request_admissible") => access::eval(j),
+        | Some("shop_request_admissible")
+        | Some("workspace_length_admissible") => access::eval(j),
         Some("agent_preview_admissible") | Some("planning_request_admissible") => agents::eval(j),
         Some("app_callback_admissible")
         | Some("app_configuration_release_admissible")
@@ -59,6 +60,7 @@ pub(super) fn eval(j: &Value) -> Result<Value, String> {
         | Some("discount_cap")
         | Some("external_amount_admissible")
         | Some("external_paid_total_admissible")
+        | Some("offer_honoured")
         | Some("pos_cash_admissible")
         | Some("pos_discount_admissible")
         | Some("refund_admissible")
@@ -78,7 +80,8 @@ pub(super) fn eval(j: &Value) -> Result<Value, String> {
         Some("ai_autonomy_admissible")
         | Some("ai_price_admissible")
         | Some("claim_render_admissible")
-        | Some("experiment_result_admissible") => intelligence::eval(j),
+        | Some("experiment_result_admissible")
+        | Some("sovereign_request_admissible") => intelligence::eval(j),
         _ => Err("Unknown policy".into()),
     }
 }

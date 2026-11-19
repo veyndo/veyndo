@@ -254,4 +254,24 @@ theorem capture_zero_denied (authorized captured reserved : Nat) :
     capture_admissible authorized captured reserved 0 = false := by
   simp [capture_admissible]
 
+/-- A signed offer is honoured exactly when it has not expired and cart, revision and total are unchanged. -/
+theorem offer_honoured_exact (expired cart revision total : Bool) :
+    offer_honoured expired cart revision total = true ↔
+    expired = false ∧ cart = true ∧ revision = true ∧ total = true := by
+  cases expired <;> cases cart <;> cases revision <;> cases total <;> simp [offer_honoured]
+
+/-- An expired offer is never honoured, whatever the cart looks like. -/
+theorem offer_expired_denied (cart revision total : Bool) :
+    offer_honoured true cart revision total = false := by simp [offer_honoured]
+
+/-- A changed total is never honoured, even before expiry. -/
+theorem offer_changed_total_denied (expired cart revision : Bool) :
+    offer_honoured expired cart revision false = false := by
+  cases expired <;> cases cart <;> cases revision <;> simp [offer_honoured]
+
+/-- A changed cart revision is never honoured, even before expiry. -/
+theorem offer_changed_revision_denied (expired cart total : Bool) :
+    offer_honoured expired cart false total = false := by
+  cases expired <;> cases cart <;> cases total <;> simp [offer_honoured]
+
 end CommerceKernel

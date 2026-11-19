@@ -30,6 +30,9 @@ def auth_factor_admissible (required : Bool) (verified : Bool) : Bool :=
 def persistent_key_admissible (personal : Bool) (administrator : Bool) : Bool :=
   (personal && administrator)
 
+def workspace_length_admissible (length : Nat) : Bool :=
+  ((decide (length ≥ 2)) && (decide ((length - 48) = 0)))
+
 def planning_request_admissible (read_only : Bool) (planning_post : Bool) : Bool :=
   (read_only || planning_post)
 
@@ -153,6 +156,9 @@ def external_paid_total_admissible (paid : Bool) (calculated : Nat) (declared : 
 def admin_payment_admissible (is_admin : Bool) (manual : Bool) (simulated : Bool) : Bool :=
   (((!is_admin) || manual) || simulated)
 
+def offer_honoured (expired : Bool) (same_cart : Bool) (same_revision : Bool) (same_total : Bool) : Bool :=
+  ((((!expired) && same_cart) && same_revision) && same_total)
+
 def order_edit_admissible (terminal : Bool) : Bool :=
   (!terminal)
 
@@ -194,5 +200,8 @@ def claim_render_admissible (confirmed : Bool) (public_source : Bool) (current_s
 
 def experiment_result_admissible (final_look : Bool) (enough_units : Bool) (positive_bound : Bool) : Bool :=
   ((final_look && enough_units) && positive_bound)
+
+def sovereign_request_admissible (sovereign : Bool) (own_provider : Bool) (self_hosted : Bool) : Bool :=
+  ((!sovereign) || (own_provider && self_hosted))
 
 end CommerceKernel

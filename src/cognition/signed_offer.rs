@@ -68,17 +68,21 @@ pub(crate) async fn verify(a: &App, h: &RequestContext, v: &Value) -> Result<Val
     let current = match load_cart(a, h).await {
         Ok(cart) if cart.status == "open" => {
             let quote = cart_json(a, &cart).await?;
-            Some(
-                quote["id"] == offer["cartId"]
-                    && quote["revision"] == offer["cartRevision"]
-                    && quote["price"]["totalMinor"] == offer["totalMinor"],
-            )
+            Some((
+                quote["id"] == offer["cartId"],
+                quote["revision"] == offer["cartRevision"],
+                quote["price"]["totalMinor"] == offer["totalMinor"],
+            ))
         }
-        Ok(_) => Some(false),
+        Ok(_) => Some((false, false, false)),
         Err(_) => None,
     };
+    let honoured = current.is_some_and(|(cart, revision, total)| {
+        verified_kernel::offer_honoured(expired, cart, revision, total)
+    });
+    let current = current.map(|(cart, revision, total)| cart && revision && total);
     Ok(
-        json!({"valid":true,"expired":expired,"matchesCart":current,"honoured":!expired && current == Some(true),
+        json!({"valid":true,"expired":expired,"matchesCart":current,"honoured":honoured,
         "totalMinor":offer["totalMinor"],"currency":offer["currency"],"cartRevision":offer["cartRevision"],"expiresAt":offer["expiresAt"]}),
     )
 }

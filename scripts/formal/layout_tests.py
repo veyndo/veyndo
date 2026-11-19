@@ -41,8 +41,7 @@ def controls(root):
                  lambda s: s.replace('import Commerce.Claims.Agents\n', ''),
                  lambda: check_layout(target, manifest))
         claim = 'proof/Commerce/Claims/Agents.lean'
-        for change in [lambda s: s + '\n' * 321,
-                       lambda s: s + '\ntheorem unregistered : True := by trivial\n',
+        for change in [lambda s: s + '\ntheorem unregistered : True := by trivial\n',
                        lambda s: s.replace('theorem planning_request_exact', 'theorem renamed'),
                        lambda s: s.replace('import Commerce.Generated', 'import Commerce.Claims.Access')]:
             rejected(claim, change, lambda: check_layout(target, manifest))

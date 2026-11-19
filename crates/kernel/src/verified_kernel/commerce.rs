@@ -81,3 +81,12 @@ pub fn external_paid_total_admissible(paid: bool, calculated: u64, declared: u64
 pub fn admin_payment_admissible(is_admin: bool, manual: bool, simulated: bool) -> bool {
     !is_admin || manual || simulated
 }
+/// A signed offer is honoured only before it expires and only for the same cart, revision and total.
+pub fn offer_honoured(
+    expired: bool,
+    same_cart: bool,
+    same_revision: bool,
+    same_total: bool,
+) -> bool {
+    !expired && same_cart && same_revision && same_total
+}

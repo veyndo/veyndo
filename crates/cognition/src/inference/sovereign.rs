@@ -62,7 +62,11 @@ impl Inference {
     }
     /// Checked immediately before any model request leaves the process.
     pub(super) fn admit(&self, provider: &str, endpoint: &str) -> Result<(), String> {
-        if self.sovereign && (provider != "ollama" || !self_hosted(endpoint)) {
+        if !veyndo_kernel::verified_kernel::sovereign_request_admissible(
+            self.sovereign,
+            provider == "ollama",
+            self_hosted(endpoint),
+        ) {
             return Err(REFUSED.into());
         }
         Ok(())

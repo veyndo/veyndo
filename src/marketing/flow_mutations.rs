@@ -110,7 +110,7 @@ pub(crate) async fn execute(
                 .execute(&mut *tx)
                 .await?;
         } else {
-            sqlx::query("INSERT INTO order_downloads(tenant,order_id,asset_id) SELECT $1,$2,a.id FROM product_assets a WHERE a.tenant=$1 AND a.kind='download' AND EXISTS(SELECT 1 FROM jsonb_array_elements($3->'cart'->'lineItems') l WHERE l->>'referencedId'=a.product_id) ON CONFLICT DO NOTHING").bind(t).bind(id).bind(&order).execute(&mut *tx).await?;
+            sqlx::query("INSERT INTO order_downloads(tenant,order_id,asset_id) SELECT $1,$2,a.id FROM product_assets a WHERE a.tenant=$1 AND a.kind='download' AND EXISTS(SELECT 1 FROM jsonb_array_elements($3::jsonb->'cart'->'lineItems') l WHERE l->>'referencedId'=a.product_id) ON CONFLICT DO NOTHING").bind(t).bind(id).bind(&order).execute(&mut *tx).await?;
         }
     } else if action == "action.change.customer.group" || action == "action.change.customer.status"
     {

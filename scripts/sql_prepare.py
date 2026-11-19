@@ -145,14 +145,14 @@ def classify(sql):
 
 def prepare(rows, command):
     """Run PREPARE for each statement in one session; returns {index: error}."""
+    # Markers go to standard error with \\warn, the stream the database errors use, so their order is exact.
     script = ['\\set ON_ERROR_STOP off', "SELECT set_config('rac.system','on',false);"]
     for index, (_, _, _, sql) in enumerate(rows):
-        script += [f'\\echo @@{index}', 'PREPARE veyndo_check AS ' + sql.strip().rstrip(';') + ';', 'DEALLOCATE ALL;']
-    script.append('\\echo @@end')
+        script += [f'\\warn @@{index}', 'PREPARE veyndo_check AS ' + sql.strip().rstrip(';') + ';', 'DEALLOCATE ALL;']
+    script.append('\\warn @@end')
     failures, current = {}, None
-    # Standard output and errors interleave only when read as one stream.
-    merged = subprocess.run(command, input='\n'.join(script), text=True, stdout=subprocess.PIPE,
-                            stderr=subprocess.STDOUT).stdout
+    merged = subprocess.run(command, input='\n'.join(script), text=True, stdout=subprocess.DEVNULL,
+                            stderr=subprocess.PIPE).stderr
     assert '@@end' in merged, 'The database session ended early: ' + merged[-400:]
     for line in merged.splitlines():
         marker = re.fullmatch(r'@@(\d+|end)', line.strip())

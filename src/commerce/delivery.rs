@@ -203,7 +203,7 @@ pub(crate) async fn dates_conn(conn: &mut sqlx::PgConnection, q: &mut Value) -> 
         let min = d["deliveryTime"]["minDays"].as_i64().unwrap() as i32;
         let max = d["deliveryTime"]["maxDays"].as_i64().unwrap() as i32;
         let r = sqlx::query(
-            "SELECT (current_date+$1)::text AS earliest,(current_date+$2)::text AS latest",
+            "SELECT (current_date+$1::int)::text AS earliest,(current_date+$2::int)::text AS latest",
         )
         .bind(min)
         .bind(max)

@@ -10,7 +10,7 @@ required structure check refuses a new one, and a removed one has to be deleted 
 
 | Component | Lines of Rust | Tables | Uses | Foreign tables |
 | --- | ---: | ---: | --- | ---: |
-| core | 3839 | 10 | apps (2), b2b (4), identity (3), intelligence (4), marketing (1), payments (3), pos (1), pricing (1), shop (4) | 16 |
+| core | 3863 | 10 | apps (2), b2b (4), identity (3), intelligence (4), marketing (1), payments (3), pos (1), pricing (1), shop (4) | 16 |
 | identity | 3406 | 13 | apps (9), catalog (7), checkout (1), core (305), customers (1), intelligence (9), marketing (5), shop (9), studio (4) | 11 |
 | shop | 3761 | 15 | apps (7), b2b (2), catalog (3), checkout (17), core (185), customers (3), host (1), intelligence (8), marketing (8), payments (4), pricing (11), shipping (1), studio (12) | 18 |
 | catalog | 5920 | 11 | apps (19), b2b (2), checkout (12), core (295), customers (5), identity (30), intelligence (10), marketing (16), pricing (29), protocols (1), shipping (1), shop (38), studio (9) | 15 |
@@ -26,10 +26,10 @@ required structure check refuses a new one, and a removed one has to be deleted 
 | pos | 1086 | 0 | apps (1), catalog (5), checkout (23), core (48), customers (1), identity (25), marketing (5), orders (2), payments (3), pricing (4), shipping (4), shop (9), studio (1) | 8 |
 | apps | 12059 | 22 | b2b (3), catalog (15), checkout (10), core (589), identity (84), intelligence (3), marketing (13), orders (17), payments (7), pos (1), pricing (15), protocols (1), shipping (3), shop (18), studio (36) | 20 |
 | automation | 1443 | 0 | core (22) | 0 |
-| intelligence | 11359 | 28 | apps (45), automation (1), catalog (31), checkout (22), core (656), customers (1), identity (80), marketing (18), orders (1), payments (1), pricing (22), protocols (8), shipping (1), shop (43), studio (11) | 26 |
+| intelligence | 11367 | 28 | apps (45), automation (1), catalog (31), checkout (22), core (656), customers (1), identity (80), marketing (18), orders (1), payments (1), pricing (22), protocols (8), shipping (1), shop (43), studio (11) | 26 |
 | studio | 2787 | 5 | apps (31), b2b (4), catalog (6), core (126), customers (1), identity (52), intelligence (11), marketing (8), orders (2), pos (1), pricing (2), shop (12) | 34 |
 | protocols | 2769 | 0 | apps (23), b2b (9), catalog (10), checkout (25), core (109), customers (1), identity (32), intelligence (23), marketing (9), orders (8), payments (3), pos (3), pricing (6), shipping (3), shop (16), studio (10) | 2 |
-| host | 2450 | 1 | apps (1), catalog (1), core (84), intelligence (4), pricing (13) | 5 |
+| host | 2466 | 1 | apps (1), catalog (1), core (87), intelligence (4), pricing (13) | 5 |
 | connectors | 0 | 6 | none | 0 |
 
 ## Cycles

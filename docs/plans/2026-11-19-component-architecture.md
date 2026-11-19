@@ -91,10 +91,11 @@ Rules that hold from the first component on:
 - [x] `scripts/sql_prepare.py`: every static SQL statement is prepared against the
       migrated schema in the integration suite. First run: 1,604 pass, no mismatch.
 - [ ] Lower `too-many-lines-threshold` from 320 to 150 (35 functions to split).
-- [ ] Give the three statements whose parameter type comes only from the bound
-      value an explicit cast, so they are covered too.
-- [ ] Suite runner: continue after a failing suite and open an issue when the
-      nightly run is red.
+- [x] Give the three statements whose parameter type comes only from the bound
+      value an explicit cast, so they are covered too (1,607 statements covered).
+- [x] Suite runner: `--keep-going` runs the remaining suites after a failure and
+      lists every failed suite; the nightly workflow uses it.
+- [ ] Open an issue automatically when the nightly run is red.
 
 ## Phase 1: core and identity
 
@@ -211,7 +212,7 @@ Each component carries its own tests; the suite runner composes them.
 - [ ] Migration tests: fresh, upgrade, and the explicit legacy import.
 - [ ] Mutation testing on `domain/`; a surviving mutant is a missing test.
 - [ ] Coverage floors per component instead of one global floor.
-- [ ] The suite runner reports every failing suite of a run, not only the first.
+- [x] The suite runner reports every failing suite of a run, not only the first.
 
 ## Phase 8: proofs
 
@@ -236,7 +237,13 @@ those stay covered by the tests above, and the coverage page keeps saying so.
       completed or cancelled orders accept no further fulfilment.
 - [ ] Access: a request scoped to one shop never satisfies a check for another;
       a missing permission never admits.
-- [ ] Signed offers: an expired offer or a changed revision is never honoured.
+- [x] Signed offers: an expired offer or a changed cart, revision or total is never
+      honoured (`offer_honoured`, four properties).
+- [x] Sovereign AI mode admits only the self-operated provider on a self-hosted
+      endpoint (`sovereign_request_admissible`, four properties).
+- [ ] Extend the extractor to checked addition and multiplication; sums and
+      totals cannot be stated in the current subset (comparisons, `min`,
+      saturating subtraction).
 - [ ] State-machine proofs as invariants over transitions, not only single steps.
 - [ ] The comparison driver checks the compiled Rust rules against the Lean
       versions on generated inputs for every rule above.
