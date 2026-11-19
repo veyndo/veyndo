@@ -1,0 +1,16 @@
+[package]
+name = "veyndo-core"
+version.workspace = true
+edition.workspace = true
+license-file.workspace = true
+description = "Shared foundation every Veyndo component builds on: the error contract and basic identifiers"
+
+[dependencies]
+axum.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+sqlx.workspace = true
+uuid.workspace = true
+# Money validation errors are part of the shared error contract; the pricing crate has no I/O dependencies.
+veyndo-commerce = { path = "../../crates/commerce" }

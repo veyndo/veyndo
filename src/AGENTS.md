@@ -142,3 +142,20 @@ remain fenced across restarts; recovery retrieves only a known original document
 Native app save callbacks require explicit stable IDs and revisions.
 See `docs/shipping-workflows.md` and `extensions/apps/assistant-examples/shipping.json`.
 
+## Components
+
+Keep the code of one responsibility together instead of splitting it to meet a
+number; a single function stays below the clippy limit in `clippy.toml`.
+
+[`components.json`](../components.json) assigns every Rust source and every table to
+exactly one component and lists, per component, the other components it uses and
+the foreign tables it still touches. `scripts/components.py` (part of the structure
+check) refuses a new dependency or a new foreign table access; when you remove one,
+delete it from the map in the same change. New code goes into a component crate
+under `components/<name>/` with the layout in
+[the architecture plan](../docs/plans/2026-11-19-component-architecture.md): `types/`,
+`domain/` without I/O, `store/` as the only place with SQL, `service/`, and thin
+`http/` and `mcp/` adapters. `python3 scripts/sql_prepare.py` prepares every static
+SQL statement against the migrated schema; a statement that the database refuses
+fails the suite. See [component dependencies](../docs/component-dependencies.md) for
+the current state.

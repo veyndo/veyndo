@@ -36,11 +36,6 @@ const resolve = (from, spec) => {
 };
 for (const file of files) {
   const text = fs.readFileSync(file, "utf8");
-  const limit = relative(file).startsWith("shared/i18n/") ? 700 : 400;
-  if (text.split("\n").length - Number(text.endsWith("\n")) > limit)
-    errors.push(
-      `${relative(file)} exceeds ${limit} lines; split responsibility`,
-    );
   if (!text.startsWith("/**") && !text.startsWith("/*"))
     errors.push(`${relative(file)} needs a leading responsibility comment`);
   if (path.dirname(file) === source && path.basename(file) !== "main.tsx")
@@ -177,5 +172,5 @@ if (errors.length) {
   process.exit(1);
 }
 console.log(
-  `PASS ${files.length} frontend modules: ownership, resolved imports, runtime DAG, responsibility comments, folder contracts and size limits`,
+  `PASS ${files.length} frontend modules: ownership, resolved imports, runtime DAG, responsibility comments and folder contracts`,
 );

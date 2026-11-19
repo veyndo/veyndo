@@ -68,8 +68,7 @@ apps, automation, commerce, fulfillment and intelligence**. The corresponding
 seven Lean modules independently import the extracted model. Each theorem must
 appear in the manifest and the stable `Claims.lean` entry must import every domain.
 The extractor rejects extra code, conditional registrations, path overrides and
-wildcard reexports in the facade. Each handwritten proof module is limited to 320
-lines; the current largest is 240. The 61 policies that preceded this split retain
+wildcard reexports in the facade. Handwritten proof modules have no length limit; there is one per domain. The 61 policies that preceded this split retain
 identical typed expressions, argument types and results.
 
 The 18 added properties cover two kinds of real guarantees:

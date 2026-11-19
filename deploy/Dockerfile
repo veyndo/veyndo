@@ -14,6 +14,7 @@ WORKDIR /build
 COPY Cargo.toml Cargo.lock LICENSE ./
 COPY src/ src/
 COPY crates/ crates/
+COPY components/ components/
 COPY migrations/ migrations/
 COPY extensions/ extensions/
 COPY fixtures/ fixtures/

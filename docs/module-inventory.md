@@ -383,7 +383,6 @@ This lists every checked-in source module in these roots, including files with n
 | [src/documents/workspace.rs](../src/documents/workspace.rs) | Permission-filtered knowledge census, cursor source inventory and activity; totals never masquerade as sampled graph counts. |
 | [src/experience.rs](../src/experience.rs) | Persisted storefront layout policy and observed synthetic rewards. |
 | [src/extensions.rs](../src/extensions.rs) | Merchant catalogue and Wasm extension activation/state. |
-| [src/failure.rs](../src/failure.rs) | Stable safe error details shared by HTTP, MCP and agent streams; legacy constructors retain their wire message. |
 | [src/foundation.rs](../src/foundation.rs) | Application dependencies, error responses and request context helpers. |
 | [src/history/capability.rs](../src/history/capability.rs) | HTTP/MCP parity for history; per-entity read/write scopes are checked again at invocation time. |
 | [src/history/mod.rs](../src/history/mod.rs) | Uniform tenant-scoped history from transactional database snapshots; restoration delegates to existing domain validators. |
@@ -699,6 +698,14 @@ This lists every checked-in source module in these roots, including files with n
 | [crates/runtime/src/scoped_pool.rs](../crates/runtime/src/scoped_pool.rs) | The commerce database executor: transaction-local tenant scope, including direct queries and cancelled streams. |
 | [crates/runtime/src/tenant_scope.rs](../crates/runtime/src/tenant_scope.rs) | Database lease context: unknown tasks fail closed; trusted workers explicitly retain their scope. |
 | [crates/runtime/src/trace.rs](../crates/runtime/src/trace.rs) | Private task-local correlation IDs; tracing never authorizes an operation or records payloads. |
+
+## Complete components
+
+| Module | Responsibility |
+|---|---|
+| [components/core/src/conversions.rs](../components/core/src/conversions.rs) | Conversions from library errors into the shared error contract; the wire messages are part of the public API. |
+| [components/core/src/failure.rs](../components/core/src/failure.rs) | Stable safe error details shared by HTTP, MCP and agent streams; legacy constructors retain their wire message. |
+| [components/core/src/lib.rs](../components/core/src/lib.rs) | Shared foundation of every component: the error contract, its conversions and basic identifiers. No business rules. |
 
 ## Studio, storefront, platform and shared frontend
 
@@ -2171,6 +2178,7 @@ This lists every checked-in source module in these roots, including files with n
 | [scripts/commerce.py](../scripts/commerce.py) | Real HTTP/PG tests for SKUs, moderated reviews, tax/shipping/payment and deliveries. |
 | [scripts/company_settings.py](../scripts/company_settings.py) | Real HTTP company basis/channel inheritance, immutable issuer snapshots, bounded logos and private staging. No external services. |
 | [scripts/component_sources.py](../scripts/component_sources.py) | Verify pinned component source snapshots; explicit imports use clean, reviewed Git commits, never mutable branches. |
+| [scripts/components.py](../scripts/components.py) | ', i): |
 | [scripts/composition_release.py](../scripts/composition_release.py) | Validate the Lumen release lock and optionally compare it with Northflank. |
 | [scripts/connected_apps.py](../scripts/connected_apps.py) | Registered connected-app suite: archived OAuth oracle to real Rust knowledge, MCP and Flow consumers. |
 | [scripts/connector_store_tests.py](../scripts/connector_store_tests.py) | Concurrent private state, settings/import fences and encrypted mailbox persistence. |
@@ -2263,6 +2271,7 @@ This lists every checked-in source module in these roots, including files with n
 | [scripts/signed_runtime.py](../scripts/signed_runtime.py) | Repeat the real two-replica runtime path with separately authenticated tenant/system SQL roles. |
 | [scripts/site_markdown.py](../scripts/site_markdown.py) | Render every tracked Markdown document with repository-aware links and search. |
 | [scripts/site_navigation.py](../scripts/site_navigation.py) | Curated reading paths and shared document navigation; Markdown remains authoritative. |
+| [scripts/sql_prepare.py](../scripts/sql_prepare.py) | Prepare every static SQL statement of the Rust sources against the migrated database; a wrong column, table or parameter type fails here instead of at run time. |
 | [scripts/staging.py](../scripts/staging.py) | Real PG proof: private sandbox, immutable app versions, selective release and conflicts. No paid inference. |
 | [scripts/startup_recovery.py](../scripts/startup_recovery.py) | An actual Core startup survives a briefly unreachable isolated PostgreSQL endpoint. |
 | [scripts/storefront_urls.py](../scripts/storefront_urls.py) | Real HTTP product deep links and host isolation in disposable shops. |

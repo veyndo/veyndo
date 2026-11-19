@@ -3495,6 +3495,7 @@ dependencies = [
  "veyndo-automation",
  "veyndo-cognition",
  "veyndo-commerce",
+ "veyndo-core",
  "veyndo-flow-graph",
  "veyndo-kernel",
  "veyndo-runtime",
@@ -3591,6 +3592,7 @@ dependencies = [
  "tokio",
  "tracing",
  "veyndo-app-authority",
+ "veyndo-core",
  "veyndo-kernel",
  "veyndo-runtime",
 ]
@@ -3602,6 +3604,19 @@ dependencies = [
  "serde",
  "serde_json",
  "veyndo-kernel",
+]
+
+[[package]]
+name = "veyndo-core"
+version = "0.5.0"
+dependencies = [
+ "axum",
+ "serde",
+ "serde_json",
+ "sha2 0.10.9",
+ "sqlx",
+ "uuid",
+ "veyndo-commerce",
 ]
 
 [[package]]

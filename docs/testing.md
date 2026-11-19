@@ -521,8 +521,8 @@ original Storyfront container have separate evidence and no claimed percentage.
 
 ## Source architecture
 
-- Rust: 414 source modules (merged cognitive release, 9 October 2026), each with a responsibility header, at most 320 lines; `main.rs` at most 120. Existing domain folders remain independent of extension app implementations.
-- Frontend: separate `admin/`, `storefront/`, `platform/` and `shared/` ownership. Views/controllers and styles are limited to 400 lines; locale data has a documented 700-line allowance. Runtime cycles, unresolved local imports, crossing application boundaries, missing folder contracts and undocumented source files fail CI.
+- Rust: 414 source modules (merged cognitive release, 9 October 2026), each with a responsibility header; `main.rs` at most 120 lines. File length is not limited; clippy limits function length and `scripts/components.py` limits dependencies between components. Existing domain folders remain independent of extension app implementations.
+- Frontend: separate `admin/`, `storefront/`, `platform/` and `shared/` ownership. Runtime cycles, unresolved local imports, crossing application boundaries, missing folder contracts and undocumented source files fail CI.
 - Bundled Email/GA4/Gmail/Slack implementations are Rust modules under their `extensions/apps/<app>/` package; shared service hosting is in `extensions/services/connectors/src/`; independent app examples and browser SDKs remain under `extensions/`. Python test tooling lives under `scripts/` and the previous connector is an archived comparison oracle in `reference/`. [The generated inventory](module-inventory.md) covers runtime/tooling sources and is checked for drift.
 - Studio workspaces load lazily. Root application routing is isolated in `frontend/src/application/`; error boundaries keep workspace failures inside the current view and provide reload recovery for rejected cached module imports. The removed `CommerceManager` had no call site and duplicated old operational UI. Order state management remains in `admin/orders/OrderWorkflow.tsx`; product review moderation lives in `admin/catalog/ReviewModeration.tsx`.
 

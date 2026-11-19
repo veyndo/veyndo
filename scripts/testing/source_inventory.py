@@ -9,6 +9,7 @@ TARGET = ROOT / 'docs/module-inventory.md'
 GROUPS = {
     'Rust commerce and transport': ('src', {'.rs'}),
     'Compiler-enforced domain crates': ('crates', {'.rs'}),
+    'Complete components': ('components', {'.rs', '.sql', '.ts', '.tsx', '.css'}),
     'Studio, storefront, platform and shared frontend': ('frontend/src', {'.ts', '.tsx', '.css'}),
     'Independent apps, services and SDK': ('extensions', {'.rs', '.ts', '.tsx', '.css', '.py', '.js', '.wat', '.html'}),
     'Verification tools and fixtures': ('scripts', {'.py'}),

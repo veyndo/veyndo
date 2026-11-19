@@ -16,76 +16,9 @@ pub(crate) struct App {
     pub(crate) admission: Arc<performance::Admission>,
     pub(crate) reads: Arc<performance::Reads>,
 }
-#[path = "failure.rs"]
-mod failure;
-pub(crate) use failure::Error;
-impl From<veyndo_commerce::ValidationError> for Error {
-    fn from(error: veyndo_commerce::ValidationError) -> Self {
-        bad(error.to_string())
-    }
-}
-impl From<sqlx::Error> for Error {
-    fn from(e: sqlx::Error) -> Self {
-        if matches!(e, sqlx::Error::PoolTimedOut) {
-            return Error(
-                StatusCode::SERVICE_UNAVAILABLE,
-                "Database capacity busy; retry later".into(),
-            );
-        }
-        if let sqlx::Error::Database(ref d) = e
-            && d.constraint()
-                .is_some_and(|c| c.starts_with("app_storage_usage_") && c.ends_with("_check"))
-        {
-            return Error(StatusCode::PAYLOAD_TOO_LARGE,"App storage quota exceeded (100,000 records or 64 MiB); remove data or contact the operator".into());
-        }
-        if let sqlx::Error::Database(ref d) = e
-            && d.code().as_deref() == Some("23505")
-            && d.constraint()
-                .is_some_and(|c| c.starts_with("idx_") || c == "app_record_unique")
-        {
-            return conflict("App field value must be unique; another record already uses it");
-        }
-        if let sqlx::Error::Database(ref d) = e
-            && d.code().as_deref() == Some("23503")
-            && d.table().is_some_and(|t| t.starts_with("app_"))
-        {
-            return conflict(
-                "App relationship is missing or still used by another record; check the selected records before retrying",
-            );
-        }
-        eprintln!("database: {e}");
-        Error(
-            StatusCode::INTERNAL_SERVER_ERROR,
-            "Database operation failed".into(),
-        )
-    }
-}
-pub(crate) type Result<T> = std::result::Result<T, Error>;
-pub(crate) fn bad(s: impl Into<String>) -> Error {
-    Error(StatusCode::BAD_REQUEST, s.into())
-}
-pub(crate) fn conflict(s: &str) -> Error {
-    Error(StatusCode::CONFLICT, s.into())
-}
-pub(crate) fn uid() -> String {
-    Uuid::new_v4().simple().to_string()
-}
+pub(crate) use veyndo_core::{Error, Result, bad, conflict, hash, uid, validate_tenant};
 pub(crate) fn header<'a>(h: &'a impl request_context::HeaderReader, k: &str) -> Option<&'a str> {
     h.value(k)
-}
-pub(crate) fn validate_tenant(t: &str) -> Result<()> {
-    if !(2..=48).contains(&t.len())
-        || !t
-            .bytes()
-            .all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || c == b'-')
-        || t.starts_with('-')
-        || t.ends_with('-')
-    {
-        return Err(bad(
-            "Workspace ID must be 2..48 lowercase letters, numbers or hyphens",
-        ));
-    }
-    Ok(())
 }
 pub(crate) fn tenant(h: &impl request_context::HeaderReader) -> Result<String> {
     let t = header(h, "x-tenant")
@@ -115,14 +48,4 @@ pub(crate) fn token(h: &RequestContext) -> Result<&str> {
         StatusCode::UNAUTHORIZED,
         "Customer context required".into(),
     ))
-}
-pub(crate) fn hash(s: &str) -> String {
-    format!("{:x}", Sha256::digest(s.as_bytes()))
-}
-
-// Provider transport and deterministic admission retain distinct native problem codes.
-impl From<veyndo::inference::InferenceError> for Error {
-    fn from(error: veyndo::inference::InferenceError) -> Self {
-        Error::inference(error)
-    }
 }

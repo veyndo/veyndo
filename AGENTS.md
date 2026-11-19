@@ -1,8 +1,8 @@
 # Changes to Veyndo
 
-Prefer the codebase-memory MCP graph for structural code discovery. Keep Rust
-modules small and give every source file a responsibility comment; the existing
-structure check is mandatory.
+Prefer the codebase-memory MCP graph for structural code discovery. Give every
+source file a responsibility comment; the structure check is mandatory. Files have
+no length limit. Component rules: [src/AGENTS.md](src/AGENTS.md#components).
 
 ## Understand the existing architecture before extending it
 

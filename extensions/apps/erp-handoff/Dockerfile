@@ -4,6 +4,7 @@ WORKDIR /build
 COPY Cargo.toml Cargo.lock LICENSE ./
 COPY src ./src
 COPY crates/ crates/
+COPY components/ components/
 COPY extensions ./extensions
 COPY migrations ./migrations
 COPY fixtures ./fixtures

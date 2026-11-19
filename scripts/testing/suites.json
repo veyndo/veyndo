@@ -1,5 +1,6 @@
 {
   "http": [
+    "sql_prepare",
     "studio",
     "hosted_api",
     "merchant_reports",

@@ -425,8 +425,10 @@ and dependencies to `bootstrap.rs` and transports to `routes.rs`. HTTP, MCP and
 UCP invoke shared operations, rather than independently reimplementing checkout.
 Small modules use a crate-level shared type/import facade; SQL helpers remain
 internal. `commerce/` and `auth/` group their types, validation and operations.
-`structure.py` prevents Rust modules from exceeding 320 lines and keeps `main.rs`
-under 120. Every Rust source starts with a responsibility comment.
+`structure.py` keeps `main.rs` under 120 lines and requires a responsibility
+comment at the top of every Rust source. File length is not limited; clippy limits
+the length of a single function, and [the component map](component-dependencies.md)
+limits which component may use which code and tables.
 
 The five domain crates (`kernel`, `commerce`, `apps`, `cognition`, `runtime`) have
 explicit dependency boundaries checked against real Cargo metadata. New helper
@@ -708,8 +710,8 @@ Shopware compatibility claim is made.
 Migrations 011, 013–015 add source documents/chunks, environment/release/build
 records, customer sessions/profiles, rules/promotions/flows/channels/product
 metadata and anonymous behavior signals. Migration 012 contains checkout handoff.
-The domain file guard remains enforced: Rust modules at most 320 lines, `main.rs`
-at most 120 lines, each module starts with its responsibility comment.
+The domain file guard remains enforced: `main.rs` at most 120 lines, each module
+starts with its responsibility comment.
 ## Bounded reads and setup
 
 | File | Responsibility | Behavioral verification |
@@ -741,8 +743,8 @@ caches; this is not a machine/database cold-start or failover test.
 | `frontend/src/admin/settings/`, `frontend/src/admin/apps/` | Central configuration and issuer, app categories and individual package workspaces; operational layouts use the full available width. |
 | Migrations `016`–`021` | Operations/documents/assets, fine-key storage, state-machine/idempotency storage, explicit schema repair, customer IDs/addresses/default foreign keys and explicitly synthetic demo-address backfill. Applied entries remain immutable/checksummed. |
 
-The file guard verifies every Rust module's responsibility header and maximum
-320 lines (`main.rs` maximum 120). Tests cover the listed actual behaviors;
+The file guard verifies every Rust module's responsibility header (`main.rs`
+maximum 120 lines). Tests cover the listed actual behaviors;
 this does not claim every source line or every original Shopware operation is covered.
 
 ## Formal policy extraction
@@ -750,7 +752,7 @@ this does not claim every source line or every original Shopware operation is co
 | File | Responsibility | Verification |
 |---|---|---|
 | [`crates/kernel/src/verified_kernel.rs`](../crates/kernel/src/verified_kernel.rs) | Closed facade over seven domains and 63 pure production policies | 149 Lean theorems; compiled Rust/Lean conformance; broken-policy mutations |
-| [`proof/Commerce/Claims.lean`](../proof/Commerce/Claims.lean) | Stable entry to seven independently checked proof domains | Exact registered theorem/import inventory; handwritten domains limited to 320 lines |
+| [`proof/Commerce/Claims.lean`](../proof/Commerce/Claims.lean) | Stable entry to seven independently checked proof domains | Exact registered theorem/import inventory; one handwritten file per domain |
 | [`src/bin/verified_kernel.rs`](../src/bin/verified_kernel.rs) | Generated JSON comparison driver calling the real policy module | 156,741 comparison cases; generated drift guard |
 | [`src/payments/receipt_guard.rs`](../src/payments/receipt_guard.rs) | Checked amount conversion and provider receipt policy binding | `payments.py`; reviewed binding, not a proof of the parser |
 

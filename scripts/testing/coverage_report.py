@@ -42,7 +42,7 @@ def rust_gaps(root, files):
     """Keep extracted libraries and app-owned Rust visible in unmeasured gaps."""
     emitted = {Path(f['filename']).resolve() for f in files}
     return sorted(p.relative_to(root).as_posix()
-                  for directory in ('src', 'crates', 'extensions')
+                  for directory in ('src', 'crates', 'components', 'extensions')
                   for p in (root / directory).rglob('*.rs')
                   if p.resolve() not in emitted)
 

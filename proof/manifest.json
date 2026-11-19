@@ -619,6 +619,21 @@
     }
   },
   "sources": {
+    "components/core/src/conversions.rs": {
+      "status": "unproved",
+      "sha256": "13514612fbe1d4061533cd23ebdf746ad3a3512c78e9e742db950b82603693a1",
+      "review": "Component architecture phase 0 and first core crate: the error contract moved unchanged from src/failure.rs and src/foundation.rs to components/core (wire messages, status mapping and retry header identical; the permission scope is resolved by the caller, the inference conversion lives beside its error type). Structure check drops the file length limit and adds the component map; clippy limits function length. Core and cognition unit tests pass. SQL, HTTP and provider behaviour is not formally proved."
+    },
+    "components/core/src/failure.rs": {
+      "status": "unproved",
+      "sha256": "0815662afae602e0085a566eb35ddcb10a8922a651e82af579436b281ba35432",
+      "review": "Component architecture phase 0 and first core crate: the error contract moved unchanged from src/failure.rs and src/foundation.rs to components/core (wire messages, status mapping and retry header identical; the permission scope is resolved by the caller, the inference conversion lives beside its error type). Structure check drops the file length limit and adds the component map; clippy limits function length. Core and cognition unit tests pass. SQL, HTTP and provider behaviour is not formally proved."
+    },
+    "components/core/src/lib.rs": {
+      "status": "unproved",
+      "sha256": "e370cd2c5fe5be4807d57f416c73625be0e56ba5a02549bba286e796546de893",
+      "review": "Component architecture phase 0 and first core crate: the error contract moved unchanged from src/failure.rs and src/foundation.rs to components/core (wire messages, status mapping and retry header identical; the permission scope is resolved by the caller, the inference conversion lives beside its error type). Structure check drops the file length limit and adds the component map; clippy limits function length. Core and cognition unit tests pass. SQL, HTTP and provider behaviour is not formally proved."
+    },
     "crates/apps/src/component_runtime.rs": {
       "status": "unproved",
       "sha256": "4cc79b79b8e7395ad8d66f8f7bbfe57082da9c100c6c3215c86748c9bcb61aec",
@@ -691,8 +706,8 @@
     },
     "crates/cognition/src/inference/error.rs": {
       "status": "unproved",
-      "sha256": "2bd8c6d072997c336bea0b0002126e549baff4b37a8387dbb79d8ecbc14330f9",
-      "review": "Reviewed migration 104 and all changed Rust/build owners: existing-key planning-only scope, trusted distinct agent identity, live-root lock before budget key, checked integer allocation with existing kernel guard, no network transaction, typed nonretryable quota errors, current credentials and lease-fenced late worker results; actual two-replica allocation/restart and in-flight-stop fixtures plus 623 UI tests pass. SQL/auth/provider integration is not formally proved."
+      "sha256": "7a77bc530ebda8323c0063bd27af25a90be323753aaea075e20a6a72f4e97788",
+      "review": "Component architecture phase 0 and first core crate: the error contract moved unchanged from src/failure.rs and src/foundation.rs to components/core (wire messages, status mapping and retry header identical; the permission scope is resolved by the caller, the inference conversion lives beside its error type). Structure check drops the file length limit and adds the component map; clippy limits function length. Core and cognition unit tests pass. SQL, HTTP and provider behaviour is not formally proved."
     },
     "crates/cognition/src/inference/protocol.rs": {
       "status": "unproved",
@@ -3281,8 +3296,8 @@
     },
     "src/auth/middleware.rs": {
       "status": "reviewed-binding",
-      "sha256": "bddef838febeaaa2e1d38805ae72bcada50eb34762632b9ee6e770e545550127",
-      "review": "Knowledge introspection reuses current scoped native identity, expiring integration keys and app package approval. Real catalog delivery, read-only evidence, foreign-shop and revoked-key checks and Checkout tenant isolation passed locally."
+      "sha256": "897fb2636ef4b68dda12b3421e8a38066ff223a1e7d7030e762b297776449f81",
+      "review": "Component architecture phase 0 and first core crate: the error contract moved unchanged from src/failure.rs and src/foundation.rs to components/core (wire messages, status mapping and retry header identical; the permission scope is resolved by the caller, the inference conversion lives beside its error type). Structure check drops the file length limit and adds the component map; clippy limits function length. Core and cognition unit tests pass. SQL, HTTP and provider behaviour is not formally proved."
     },
     "src/auth/mod.rs": {
       "status": "unproved",
@@ -4334,15 +4349,10 @@
       "sha256": "e23d3a3aab80fe28704010cbdcf9e01bcbdf69718f0f39af04e538d894e6c32f",
       "review": "Reviewed eighteen core findings: typed trusted identity and explicit route rights; consolidated current grants; durable auth and fenced shared limits; scoped transactions and one-backend PgBouncer including nested borrow fixes; bounded Wasm/PNG work; notified workers, savepoint quarantine and conservative retention; separate runtime roles and startup configuration. Real PostgreSQL/provider regressions preserve current tenant/customer/payment behavior. SQL/network adapters remain unproved."
     },
-    "src/failure.rs": {
-      "status": "unproved",
-      "sha256": "7ae57ce3b1258f1d825661c94a4979cbc79d8c172f31129a36fa455ebcc1bf8e",
-      "review": "Reviewed migration 104 and all changed Rust/build owners: existing-key planning-only scope, trusted distinct agent identity, live-root lock before budget key, checked integer allocation with existing kernel guard, no network transaction, typed nonretryable quota errors, current credentials and lease-fenced late worker results; actual two-replica allocation/restart and in-flight-stop fixtures plus 623 UI tests pass. SQL/auth/provider integration is not formally proved."
-    },
     "src/foundation.rs": {
       "status": "unproved",
-      "sha256": "f920d2d1671d493e566571fa0f2f92e4b7971faf05028d26d397a4c3bafbb2dc",
-      "review": "Moved paid external order DTO and reconciliation without changing original field order, bounds, errors, or verified kernel predicates. Native still owns admission and the legacy display projection. Shared Commerce unit tests and exchange contract guard pass."
+      "sha256": "e0db41c4b912897a254bd8c871113214eb9f6dcee648cee061edf8216eeaa244",
+      "review": "Component architecture phase 0 and first core crate: the error contract moved unchanged from src/failure.rs and src/foundation.rs to components/core (wire messages, status mapping and retry header identical; the permission scope is resolved by the caller, the inference conversion lives beside its error type). Structure check drops the file length limit and adds the component map; clippy limits function length. Core and cognition unit tests pass. SQL, HTTP and provider behaviour is not formally proved."
     },
     "src/history/capability.rs": {
       "status": "unproved",
@@ -5567,16 +5577,16 @@
   },
   "inputs": {
     ".github/workflows/verify.yml": {
-      "sha256": "ee9adc94376b18b317ccdefc6ebbfada49e9f8999c052be1dd92d4662d9265d7",
-      "review": "Proof coverage page: scripts/formal/coverage_page.py renders docs/proof-coverage.md from the manifest and kernel sources and is checked in the quick lane; no Rust, Lean or policy change"
+      "sha256": "ae97b82b7e6b66a162c3e3183a4f43554b3860b7e1905b545115dfccd2a41125",
+      "review": "Component architecture phase 0 and first core crate: the error contract moved unchanged from src/failure.rs and src/foundation.rs to components/core (wire messages, status mapping and retry header identical; the permission scope is resolved by the caller, the inference conversion lives beside its error type). Structure check drops the file length limit and adds the component map; clippy limits function length. Core and cognition unit tests pass. SQL, HTTP and provider behaviour is not formally proved."
     },
     "Cargo.lock": {
-      "sha256": "4c346075447e7340f0cf7d859a0a50c15ffca513a68b5105921fe41caf6adae2",
-      "review": "Reviewed App model 0.14.0 exact source import from veyndo/apps and native tool metadata adapter: generic list schemas expose only existing indexed nontranslated scalar fields, labels and choices; explicit app schemas and runtime identity/query admission remain unchanged. Independent model, SQL storage, image/service tests and native HTTP/MCP plus JavaScript SDK audience/filter regressions passed. No new schema, indexes, permission grants or commerce writes."
+      "sha256": "3e99f261a28a0ab3d5303b501259770a408b29780f6d74a174f1141f85747a91",
+      "review": "Component architecture phase 0 and first core crate: the error contract moved unchanged from src/failure.rs and src/foundation.rs to components/core (wire messages, status mapping and retry header identical; the permission scope is resolved by the caller, the inference conversion lives beside its error type). Structure check drops the file length limit and adds the component map; clippy limits function length. Core and cognition unit tests pass. SQL, HTTP and provider behaviour is not formally proved."
     },
     "Cargo.toml": {
-      "sha256": "452dc6881b63278c1c563f8a9b8137f3be1538bc634ffaf6498192b014c550dd",
-      "review": "Move reviewed rule sources and their registry to the pinned Automation library. Compared every original rule and comparison module with the deployed source after normalizing the two equivalent kernel references. The shared Automation policy module is byte-identical. Rust library tests, PHP catalog verification and the 432 condition and 1976 comparison cases passed. The two existing Lean bindings now point at their actual production consumers."
+      "sha256": "19e4fdc90d60f314d67dcf1c1f752635ad0c26d504ecfbdb49ea28d21c7b0acb",
+      "review": "Component architecture phase 0 and first core crate: the error contract moved unchanged from src/failure.rs and src/foundation.rs to components/core (wire messages, status mapping and retry header identical; the permission scope is resolved by the caller, the inference conversion lives beside its error type). Structure check drops the file length limit and adds the component map; clippy limits function length. Core and cognition unit tests pass. SQL, HTTP and provider behaviour is not formally proved."
     },
     "components.lock.json": {
       "sha256": "7b4a931ad81c6665d5d95e6b42b8ef4d09ebe8971ac24998d8f94bb6a737ff53",
@@ -5595,8 +5605,8 @@
       "review": "Move reviewed rule sources and their registry to the pinned Automation library. Compared every original rule and comparison module with the deployed source after normalizing the two equivalent kernel references. The shared Automation policy module is byte-identical. Rust library tests, PHP catalog verification and the 432 condition and 1976 comparison cases passed. The two existing Lean bindings now point at their actual production consumers."
     },
     "crates/cognition/Cargo.toml": {
-      "sha256": "c809dfd4e1d26a84f4adfa5beab3de02e6eb7b51c5c51bcb0dfaacb9b41df97f",
-      "review": "Apps 0.27 shared settings preserve native personal/live administrator and digest/CAS admission; original AES-GCM envelope delegates to vault-only authority; independent settings deny machine/delegated identities and unsupported grants. Actual two-shop HTTP/MCP/SDK, rollback, CAS, binding/restart and shared PostgreSQL contracts pass; native integration follows the unchanged owners."
+      "sha256": "7f385a20a6293a5ecb1ab280a8d1754d8a7e6b45c2ab5d8c66314b019e621830",
+      "review": "Component architecture phase 0 and first core crate: the error contract moved unchanged from src/failure.rs and src/foundation.rs to components/core (wire messages, status mapping and retry header identical; the permission scope is resolved by the caller, the inference conversion lives beside its error type). Structure check drops the file length limit and adds the component map; clippy limits function length. Core and cognition unit tests pass. SQL, HTTP and provider behaviour is not formally proved."
     },
     "crates/cognition/evals/app-native-workflows.v1.json": {
       "sha256": "66dd2c2ddcdaf749fe4aaff4e9e4a23cfeb6dff3e0a1b13445d3415763614f59",
@@ -6303,8 +6313,8 @@
       "review": "Split unchanged extracted policies and theorem bodies by domain; bind exact existing planning/private-preview admission; prove sequential integer allocations and denial after limit reduction; add u128 edge regressions and closed module inventory."
     },
     "scripts/formal/layout.py": {
-      "sha256": "c16dbed2d415f4c8f8bfb75bf0740ecb58d2faf912e61cebc87604696154f85c",
-      "review": "Review domain proof import and size closure, explicit Rust registrations, all 149 theorem bindings, existing adapter truth conditions and unchanged 61 prior policy ASTs; negative controls reject extra imports, missing claims and hidden Cargo authority."
+      "sha256": "9e513ba82dd3dea228c6d8ce17f6e2d3c817817d117ec8fae773de76a1a57fb4",
+      "review": "Component architecture phase 0 and first core crate: the error contract moved unchanged from src/failure.rs and src/foundation.rs to components/core (wire messages, status mapping and retry header identical; the permission scope is resolved by the caller, the inference conversion lives beside its error type). Structure check drops the file length limit and adds the component map; clippy limits function length. Core and cognition unit tests pass. SQL, HTTP and provider behaviour is not formally proved."
     },
     "scripts/formal/layout_tests.py": {
       "sha256": "2ed265d29aa9ec55e9bb4c11d0cf9037a4a322850a821a2aabbf6103d16149d6",
@@ -6319,8 +6329,8 @@
       "review": "Native multi-capture admission, immutable receipts and per-capture refund budgets; async adapters remain unproved"
     },
     "scripts/formal/registry.py": {
-      "sha256": "9ff6a7793e526f752ef2d469af94db66c52d0754631dc84094416de196427c9a",
-      "review": "Move reviewed rule sources and their registry to the pinned Automation library. Compared every original rule and comparison module with the deployed source after normalizing the two equivalent kernel references. The shared Automation policy module is byte-identical. Rust library tests, PHP catalog verification and the 432 condition and 1976 comparison cases passed. The two existing Lean bindings now point at their actual production consumers."
+      "sha256": "24cd8fe49325e4cd8a972a30249962670088a692204892683408fc2617f05fd0",
+      "review": "Component architecture phase 0 and first core crate: the error contract moved unchanged from src/failure.rs and src/foundation.rs to components/core (wire messages, status mapping and retry header identical; the permission scope is resolved by the caller, the inference conversion lives beside its error type). Structure check drops the file length limit and adds the component map; clippy limits function length. Core and cognition unit tests pass. SQL, HTTP and provider behaviour is not formally proved."
     },
     "scripts/formal/runners.py": {
       "sha256": "30249280fde2b234aaa1fc6dfd6eff9c0423e7e8e5cca72cb4221325468dc58f",

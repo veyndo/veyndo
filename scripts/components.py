@@ -1,0 +1,278 @@
+#!/usr/bin/env python3
+"""Check the component map: every Rust source has one owner, every table has one owner, and no component gains an undeclared dependency on another component's code or tables."""
+import argparse
+from collections import Counter, defaultdict
+import json
+from pathlib import Path
+import re
+
+ROOT = Path(__file__).resolve().parents[1]
+MAP = ROOT / 'components.json'
+REPORT = ROOT / 'docs/component-dependencies.md'
+FOLDERS = ('src', 'crates', 'components')
+DEFINITION = re.compile(
+    r'(?m)^pub(?:\(crate\))? (?:async |const |unsafe )*(fn|struct|enum|trait|type|const|static) (\w+)')
+LOCAL = re.compile(r'(?m)^\s*(?:pub(?:\([a-z]+\))? )?(?:async |const |unsafe )*(?:fn|struct|enum|trait|type|const|static|mod) (\w+)')
+TABLE = re.compile(r'(?i)CREATE TABLE (?:IF NOT EXISTS )?(?:public\.)?"?([a-z_][a-z0-9_]*)')
+WRITE = r'(?i)\b(?:INSERT INTO|UPDATE|DELETE FROM|MERGE INTO)\s+(?:ONLY\s+)?(?:public\.)?'
+READ = r'(?i)\b(?:FROM|JOIN)\s+(?:ONLY\s+)?(?:public\.)?'
+
+
+def split_source(text):
+    """Separate Rust code from its string literals and drop comments: returns (code, strings)."""
+    code, strings, i, n = [], [], 0, len(text)
+    while i < n:
+        c = text[i]
+        if text.startswith('//', i):
+            i = text.find('\n', i)
+            i = n if i < 0 else i
+        elif text.startswith('/*', i):
+            end = text.find('*/', i)
+            i = n if end < 0 else end + 2
+        elif c == 'r' and re.compile(r'r#*"').match(text, i) and (i == 0 or not (text[i - 1].isalnum() or text[i - 1] == '_')):
+            opening = re.compile(r'r(#*)"').match(text, i)
+            end = text.find('"' + opening.group(1), opening.end())
+            end = n if end < 0 else end
+            strings.append(text[opening.end():end])
+            i = end + 1 + len(opening.group(1))
+            code.append('""')
+        elif c == '"':
+            j = i + 1
+            while j < n and text[j] != '"':
+                j += 2 if text[j] == '\\' else 1
+            strings.append(text[i + 1:j])
+            i = j + 1
+            code.append('""')
+        elif c == "'":
+            # A character literal closes within four characters; a lifetime does not close at all.
+            char = re.compile(r"'(?:\\.[^']{0,8}|[^'\\])'").match(text, i)
+            i = char.end() if char else i + 1
+            code.append("' '" if char else "'")
+        else:
+            code.append(c)
+            i += 1
+    return ''.join(code), strings
+
+
+class Tree:
+    def __init__(self, root=ROOT, mapping=None):
+        self.root = root
+        self.map = mapping or json.loads((root / 'components.json').read_text())
+        self.prefixes = sorted(((prefix, name) for name, row in self.map['components'].items() for prefix in row['sources']),
+                               key=lambda pair: -len(pair[0]))
+        self.files = {}
+        for folder in FOLDERS:
+            for path in sorted((root / folder).rglob('*')):
+                if path.suffix in ('.rs', '.sql') and 'target' not in path.parts:
+                    self.files[str(path.relative_to(root))] = path
+        self.problems = []
+        duplicates = [prefix for prefix, count in Counter(prefix for prefix, _ in self.prefixes).items() if count > 1]
+        if duplicates:
+            self.problems.append('A source prefix has two owners: ' + ', '.join(duplicates))
+        for prefix, name in self.prefixes:
+            if not any(file == prefix or file.startswith(prefix.rstrip('/') + '/') for file in self.files):
+                self.problems.append(f'{name}: source {prefix} matches no file')
+        self.owner = {file: self.owner_of(file) for file in self.files}
+        for file, owner in self.owner.items():
+            if owner is None:
+                self.problems.append(file + ' belongs to no component')
+        self.parsed = {file: split_source(path.read_text()) if path.suffix == '.rs' else ('', [path.read_text()])
+                       for file, path in self.files.items()}
+
+    def owner_of(self, file):
+        for prefix, name in self.prefixes:
+            if file == prefix or file.startswith(prefix.rstrip('/') + '/'):
+                return name
+        return None
+
+    def code_edges(self):
+        """References from one component to items another component defines: {(from, to): Counter(symbol)}."""
+        defined, local = defaultdict(set), defaultdict(set)
+        for file, (code, _) in self.parsed.items():
+            owner = self.owner[file]
+            for _, name in DEFINITION.findall(code):
+                defined[name].add(owner)
+            local[owner].update(LOCAL.findall(code))
+        unique = {name: next(iter(owners)) for name, owners in defined.items() if len(owners) == 1 and len(name) >= 4}
+        # A top-level module may hold files of several components; then the item after `module::` decides.
+        modules, members = defaultdict(set), defaultdict(dict)
+        for file, (code, _) in self.parsed.items():
+            parts = file.split('/')
+            if parts[0] != 'src' or not file.endswith('.rs'):
+                continue
+            module = parts[1].removesuffix('.rs')
+            modules[module].add(self.owner[file])
+            if len(parts) > 2:
+                members[module].setdefault(parts[2].removesuffix('.rs'), self.owner[file])
+            for name in LOCAL.findall(code):
+                members[module].setdefault(name, self.owner[file])
+        edges = defaultdict(Counter)
+        for file, (code, _) in self.parsed.items():
+            here = self.owner[file]
+            if here is None:
+                continue
+            for module, item in re.findall(r'(?<![\w:])(?:crate::)?([a-z_][a-z0-9_]*)::(\w+)', code):
+                owners = modules.get(module)
+                if not owners or module in local[here]:
+                    continue
+                target = next(iter(owners)) if len(owners) == 1 else members[module].get(item)
+                if target and target != here:
+                    edges[here, target][module + '::'] += 1
+            for match in re.finditer(r'(?<![\w.:])([A-Za-z_]\w{3,})\b(\s*\()?', code):
+                name = match.group(1)
+                target = unique.get(name)
+                if not target or target == here or name in local[here]:
+                    continue
+                # A lower-case name counts only when it is called; a local variable may share the name.
+                if name[0].isupper() or match.group(2):
+                    edges[here, target][name] += 1
+        return edges
+
+    def tables(self):
+        names = set()
+        for path in sorted((self.root / 'migrations').glob('*.sql')):
+            names.update(name.lower() for name in TABLE.findall(path.read_text()))
+        # `public.%I` in a migration is a format placeholder for per-app tables, not a table called "public".
+        return names - {'public'}
+
+    def table_use(self, tables):
+        """{(component, table): 'write' | 'read'} from the SQL text in each component's sources."""
+        use = {}
+        pattern = '(' + '|'.join(sorted(map(re.escape, tables), key=len, reverse=True)) + r')\b'
+        for file, (_, strings) in self.parsed.items():
+            here = self.owner[file]
+            text = '\n'.join(strings)
+            for table in re.findall(WRITE + pattern, text):
+                use[here, table.lower()] = 'write'
+            for table in re.findall(READ + pattern, text):
+                use.setdefault((here, table.lower()), 'read')
+        return use
+
+
+def findings(tree):
+    """Everything that differs from the declared map, plus the measured edges for the report."""
+    problems = list(tree.problems)
+    components = tree.map['components']
+    edges = tree.code_edges()
+    tables = tree.tables()
+    owned = Counter(table for row in components.values() for table in row.get('tables', []))
+    for table in sorted(tables - set(owned)):
+        problems.append('table ' + table + ' has no owning component')
+    for table, count in owned.items():
+        if count > 1:
+            problems.append('table ' + table + ' has ' + str(count) + ' owners')
+        if table not in tables:
+            problems.append('table ' + table + ' is declared but no migration creates it')
+    table_owner = {table: name for name, row in components.items() for table in row.get('tables', [])}
+    use = tree.table_use(tables)
+    for name, row in components.items():
+        actual = sorted({target for (source, target) in edges if source == name})
+        declared = sorted(row.get('uses', []))
+        for target in sorted(set(actual) - set(declared)):
+            sample = ', '.join(symbol for symbol, _ in edges[name, target].most_common(3))
+            problems.append(f'{name} now depends on {target} ({sample}); use its public interface or declare the dependency')
+        for target in sorted(set(declared) - set(actual)):
+            problems.append(f'{name} no longer depends on {target}; remove it from "uses"')
+        foreign = sorted({table for (source, table) in use if source == name and table_owner.get(table) not in (None, name)})
+        shared = sorted(row.get('foreign_tables', []))
+        for table in sorted(set(foreign) - set(shared)):
+            problems.append(f'{name} now accesses table {table} of {table_owner[table]}; go through its owner or declare it')
+        for table in sorted(set(shared) - set(foreign)):
+            problems.append(f'{name} no longer accesses table {table}; remove it from "foreign_tables"')
+    return problems, edges, use, table_owner
+
+
+def bootstrap(tree):
+    """Fill uses, tables and foreign_tables from the sources; table owners default to the component that writes most."""
+    components = tree.map['components']
+    edges = tree.code_edges()
+    tables = tree.tables()
+    declared = {table: name for name, row in components.items() for table in row.get('tables', [])}
+    writes, reads = defaultdict(Counter), defaultdict(Counter)
+    pattern = '(' + '|'.join(sorted(map(re.escape, tables), key=len, reverse=True)) + r')\b'
+    for file, (_, strings) in tree.parsed.items():
+        text = '\n'.join(strings)
+        for table in re.findall(WRITE + pattern, text):
+            writes[table.lower()][tree.owner[file]] += 1
+        for table in re.findall(READ + pattern, text):
+            reads[table.lower()][tree.owner[file]] += 1
+    for table in sorted(tables - set(declared)):
+        ranking = writes[table] or reads[table]
+        declared[table] = ranking.most_common(1)[0][0] if ranking else 'core'
+    use = tree.table_use(tables)
+    for name, row in components.items():
+        row['tables'] = sorted(table for table, owner in declared.items() if owner == name and table in tables)
+        row['uses'] = sorted({target for (source, target) in edges if source == name})
+        row['foreign_tables'] = sorted({table for (source, table) in use if source == name and declared[table] != name})
+    MAP.write_text(json.dumps(tree.map, indent=2) + '\n')
+
+
+def report(tree, edges, use, table_owner):
+    components = tree.map['components']
+    sizes = Counter()
+    for file, path in tree.files.items():
+        if path.suffix == '.rs':
+            sizes[tree.owner[file]] += len(path.read_text().splitlines())
+    lines = ['# Component dependencies', '',
+             '<!-- Generated by scripts/components.py --write from components.json and the Rust sources. Do not edit. -->', '',
+             'Each row is one component of the target architecture. "Uses" counts references to items that',
+             'another component defines; "Foreign tables" lists tables a component reads or writes directly',
+             'although another component owns them. Both lists are the remaining hidden dependencies: the',
+             'required structure check refuses a new one, and a removed one has to be deleted from',
+             '`components.json`. The counts come from a text scan and are an estimate, not a compiler result.', '',
+             '| Component | Lines of Rust | Tables | Uses | Foreign tables |', '| --- | ---: | ---: | --- | ---: |']
+    for name, row in components.items():
+        uses = ', '.join(f'{target} ({sum(edges[name, target].values())})' for target in row.get('uses', [])) or 'none'
+        lines.append(f'| {name} | {sizes[name]} | {len(row.get("tables", []))} | {uses} | {len(row.get("foreign_tables", []))} |')
+    pairs = sorted({tuple(sorted(pair)) for pair in edges if (pair[1], pair[0]) in edges})
+    lines += ['', '## Cycles', '', f'{len(pairs)} pairs of components depend on each other. A crate boundary needs each pair',
+              'reduced to one direction first.', '']
+    lines += [f'- {a} ↔ {b}: {sum(edges[a, b].values())} and {sum(edges[b, a].values())} references' for a, b in pairs]
+    lines += ['', '## Most used items across components', '', '| From | To | Item | References |', '| --- | --- | --- | ---: |']
+    top = sorted(((count, source, target, symbol) for (source, target), counter in edges.items()
+                  for symbol, count in counter.items()), reverse=True)[:40]
+    lines += [f'| {source} | {target} | `{symbol}` | {count} |' for count, source, target, symbol in top]
+    lines += ['', '## Foreign table access', '', '| Component | Table | Owner | Access |', '| --- | --- | --- | --- |']
+    for (source, table), kind in sorted(use.items()):
+        if table_owner.get(table) not in (None, source):
+            lines.append(f'| {source} | `{table}` | {table_owner[table]} | {kind} |')
+    return '\n'.join(lines) + '\n'
+
+
+def main(argv=None):
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--bootstrap', action='store_true', help='rewrite uses, tables and foreign_tables from the sources')
+    parser.add_argument('--write', action='store_true', help='write docs/component-dependencies.md')
+    args = parser.parse_args(argv)
+    tree = Tree()
+    if args.bootstrap:
+        assert not tree.problems, '\n'.join(tree.problems)
+        bootstrap(tree)
+        tree = Tree()
+    problems, edges, use, table_owner = findings(tree)
+    if args.write:
+        REPORT.write_text(report(tree, edges, use, table_owner))
+    if problems:
+        raise SystemExit('\n'.join(problems))
+    # Negative controls: an unowned file, an undeclared dependency and an unowned table must each be refused.
+    broken = json.loads(json.dumps(tree.map))
+    first = next(name for name, row in broken['components'].items() if row.get('uses'))
+    broken['components'][first]['uses'] = broken['components'][first]['uses'][1:]
+    assert any('now depends on' in line for line in findings(Tree(mapping=broken))[0]), 'an undeclared dependency must fail'
+    broken = json.loads(json.dumps(tree.map))
+    owner = next(name for name, row in broken['components'].items() if row.get('tables'))
+    broken['components'][owner]['tables'] = broken['components'][owner]['tables'][1:]
+    assert any('has no owning component' in line for line in findings(Tree(mapping=broken))[0]), 'an unowned table must fail'
+    broken = json.loads(json.dumps(tree.map))
+    del broken['components'][first]
+    assert any('belongs to no component' in line for line in Tree(mapping=broken).problems), 'an unowned source must fail'
+    cycles = len({tuple(sorted(pair)) for pair in edges if (pair[1], pair[0]) in edges})
+    foreign = sum(len(row.get('foreign_tables', [])) for row in tree.map['components'].values())
+    print(f'PASS {len(tree.map["components"])} components own {sum(p.suffix == ".rs" for p in tree.files.values())} Rust sources and '
+          f'{len(table_owner)} tables; {len(edges)} declared dependencies, {cycles} mutual pairs and {foreign} foreign table '
+          'accesses remain; negative controls rejected')
+    return 0
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())
