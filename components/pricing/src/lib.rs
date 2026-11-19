@@ -8,6 +8,8 @@ mod conversions;
 #[cfg(feature = "service")]
 pub mod http;
 #[cfg(feature = "service")]
+pub mod ports;
+#[cfg(feature = "service")]
 pub mod service;
 #[cfg(feature = "service")]
 pub mod store;

@@ -135,12 +135,18 @@ Done when the server builds on both crates without glob imports from them.
       without it the crate is the pure domain, which the migration app uses.
 - [x] Currency configuration (`types/currency`), conversion and reference-rate
       retrieval (`service/`) moved into `components/pricing` with their tests.
-- [ ] Move the currency routes, price jobs, taxes and customer groups into
-      `components/pricing` as `store/`, `service/`, `http/`. They read the shop
-      settings and the cart, so they need the two ports named below first.
+- [x] First ports (`ShopSettings`, `Carts` in `ports.rs`), implemented by the
+      server; currency discovery and the price job reads are `http/` and `store/`
+      of the component, with typed rows and tests against test ports.
+- [ ] Move the remaining currency parts (price job creation and worker, rate
+      refresh, the removal guard), taxes and customer groups. The worker writes
+      product prices and history, so it needs a catalogue port; currency
+      selection on a cart belongs to checkout.
 - [ ] Money is one type in minor units everywhere; the column "uses floating
       point" on the proof coverage page is zero for this component.
 - [ ] Typed DTOs at the interface; `sqlx::query_as!` with offline cache in `store/`.
+      So far rows are typed with `query_as` and checked by `sql_prepare.py`; the
+      macro needs the `macros` feature and a prepared-query cache in CI.
 - [x] Write down what the pilot cost and what the template needs changed:
   - Pure rules and data types move in one step each. Everything that takes the
     server state does not: 12 of the 13 remaining currency functions call

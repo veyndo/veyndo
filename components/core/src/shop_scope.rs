@@ -39,6 +39,10 @@ pub fn tenant(h: &impl HeaderReader) -> Result<String> {
     validate_tenant(t)?;
     Ok(t.into())
 }
+/// The sales channel a storefront request addresses.
+pub fn channel(h: &RequestContext) -> &str {
+    header(h, "sw-sales-channel-id").unwrap_or("default")
+}
 pub fn token(h: &RequestContext) -> Result<&str> {
     header(h, "sw-context-token").ok_or(Error(
         StatusCode::UNAUTHORIZED,

@@ -159,3 +159,18 @@ under `components/<name>/` with the layout in
 SQL statement against the migrated schema; a statement that the database refuses
 fails the suite. See [component dependencies](../docs/component-dependencies.md) for
 the current state.
+
+`components/pricing` is the worked example. Follow it:
+
+- What a component reads from another component is a trait in its `ports.rs`.
+  The server implements the trait next to the owning module (see
+  `src/currencies/ports.rs`); a component never calls another component's
+  functions through the root crate. Tests implement the ports themselves and use
+  `veyndo_core::State::detached()`.
+- Handlers extract `veyndo_core::State` or the component's own state (core state
+  plus ports). `veyndo_identity::{permit, merchant}` answer who the request acts
+  for; routes are registered with `veyndo_identity::route_policy::SecureRoutes`.
+- A row that leaves `store/` is a type in `types/`, not a JSON value.
+- The crate feature `service` (default) holds everything that needs `core`;
+  without it the crate is the pure `domain/`.
+- Test files name their imports.

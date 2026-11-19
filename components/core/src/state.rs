@@ -8,3 +8,17 @@ pub struct State {
     pub http: reqwest::Client,
     pub admission: std::sync::Arc<crate::admission::Admission>,
 }
+
+impl State {
+    /// A state whose database is never reached, for tests of code that works through ports only.
+    pub fn detached() -> Self {
+        let pool = sqlx::postgres::PgPoolOptions::new()
+            .connect_lazy("postgres://detached.invalid/none")
+            .expect("lazy pool");
+        Self {
+            db: ScopedPool::new(pool, false),
+            http: reqwest::Client::new(),
+            admission: std::sync::Arc::new(crate::admission::Admission::default()),
+        }
+    }
+}

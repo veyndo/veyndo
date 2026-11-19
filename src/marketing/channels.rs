@@ -81,9 +81,7 @@ pub(crate) async fn channel(
     }
     Ok(Some(c))
 }
-pub(crate) fn channel_id(h: &RequestContext) -> &str {
-    header(h, "sw-sales-channel-id").unwrap_or("default")
-}
+pub(crate) use veyndo_core::shop_scope::channel as channel_id;
 pub(crate) async fn admit_product(a: &App, h: &RequestContext, id: &str) -> Result<()> {
     admit_products(a, h, &[id.to_owned()]).await
 }

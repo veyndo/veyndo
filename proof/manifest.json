@@ -757,13 +757,13 @@
     },
     "components/core/src/shop_scope.rs": {
       "status": "unproved",
-      "sha256": "f807294ca87f08d283dcef28501903c2cef9fe5f29ddfd504a1e7e14e31f1369",
-      "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
+      "sha256": "a770b3955cab59eb1ac2b3e19be4b4990c65e7ca5c46ef9729eed927768aecfe",
+      "review": "Currency discovery moved into components/pricing behind the shop settings and cart ports; no rule changed"
     },
     "components/core/src/state.rs": {
       "status": "unproved",
-      "sha256": "0963d5e3829b4e9c343635424384f8edabda0d5ef408a99005c0463b7d88f4bf",
-      "review": "Request admission moved into the core crate; no rule changed"
+      "sha256": "fc637540235bd74244db6605f69a3d74f85abf94ddfff9b06f693cbbefa3c45e",
+      "review": "Currency discovery moved into components/pricing behind the shop settings and cart ports; no rule changed"
     },
     "components/core/src/work_signal.rs": {
       "status": "unproved",
@@ -870,6 +870,11 @@
       "sha256": "786dba0be120bf64a79f4da18dde1539b97942e87c0c450e5e8aac6e0faad728",
       "review": "The commerce crate became components/pricing with its rules under domain/; no rule changed"
     },
+    "components/pricing/src/http/currencies.rs": {
+      "status": "unproved",
+      "sha256": "0cea47be1f244dd1290b870ee08e8f0a486e9b387bef54bbbdb2d418663b1740",
+      "review": "Currency discovery moved into components/pricing behind the shop settings and cart ports; no rule changed"
+    },
     "components/pricing/src/http/price_jobs.rs": {
       "status": "unproved",
       "sha256": "0e5eacaa1068e2d309f44013dc1415b2182b731af6b0b3555e5610e94c6f2564",
@@ -877,13 +882,18 @@
     },
     "components/pricing/src/http.rs": {
       "status": "unproved",
-      "sha256": "c605c91c0aca9639e1f885b3dbf66940c2e2b0f9fff6260a5a26ecbca5f6292f",
-      "review": "Price job reads moved into components/pricing as typed store and HTTP adapters; no rule changed"
+      "sha256": "d737601427be89ae76f7462a25085d1315c7c7491c24eaf58c73d3d85b9ddfbc",
+      "review": "Currency discovery moved into components/pricing behind the shop settings and cart ports; no rule changed"
     },
     "components/pricing/src/lib.rs": {
       "status": "unproved",
-      "sha256": "c18b04cdfb8d8591c4219033f106993045e5a9a2070f5af0528c45ac1de16825",
-      "review": "Price job reads moved into components/pricing as typed store and HTTP adapters; no rule changed"
+      "sha256": "9db248f0d5ddd1ed0a2a4114701c4f04439bfbf58183a1c4024c068ccf0a043d",
+      "review": "Currency discovery moved into components/pricing behind the shop settings and cart ports; no rule changed"
+    },
+    "components/pricing/src/ports.rs": {
+      "status": "unproved",
+      "sha256": "27b0b7751b41ea9661f9069e4a59e856266696ff8eba9c008712b8dfeda9bf67",
+      "review": "Currency discovery moved into components/pricing behind the shop settings and cart ports; no rule changed"
     },
     "components/pricing/src/service/conversion.rs": {
       "status": "unproved",
@@ -4362,8 +4372,8 @@
     },
     "src/currencies/capabilities.rs": {
       "status": "unproved",
-      "sha256": "3470e3a1d1f113feb5f32c37152048910fa7eb24e0a2b56a5e59c06ca730864a",
-      "review": "Price job reads moved into components/pricing as typed store and HTTP adapters; no rule changed"
+      "sha256": "df155e8451efb275bd78f52daf114bb187491d95d516528767aafb0c01f1ff1e",
+      "review": "Currency discovery moved into components/pricing behind the shop settings and cart ports; no rule changed"
     },
     "src/currencies/jobs.rs": {
       "status": "unproved",
@@ -4372,8 +4382,13 @@
     },
     "src/currencies/mod.rs": {
       "status": "unproved",
-      "sha256": "849231b01a39f6c9432124b5564aab94de8d12c7f55c7d22b60ebe4858ac90be",
-      "review": "Currency configuration, conversion and reference-rate retrieval moved unchanged into components/pricing; the currency context rule is bound there"
+      "sha256": "58359d487135c172b3ec835864b2945e674b86d97a08c999ef7f2c283f88d5ce",
+      "review": "Currency discovery moved into components/pricing behind the shop settings and cart ports; no rule changed"
+    },
+    "src/currencies/ports.rs": {
+      "status": "unproved",
+      "sha256": "0832ff6b872ed22c726e44d3acf389e20503dbe488606efdbda8aa5b983ffab7",
+      "review": "Currency discovery moved into components/pricing behind the shop settings and cart ports; no rule changed"
     },
     "src/currencies/rates.rs": {
       "status": "unproved",
@@ -4387,8 +4402,8 @@
     },
     "src/currencies/routes.rs": {
       "status": "unproved",
-      "sha256": "4669bd5dd0cc0aeadac1f388d8711e91af23e22d81001eb52c2dfe3723177935",
-      "review": "Price job reads moved into components/pricing as typed store and HTTP adapters; no rule changed"
+      "sha256": "d704be3ab0b5d095e55f188b13d771458094e61754aa3555228102ed8ddc1a28",
+      "review": "Currency discovery moved into components/pricing behind the shop settings and cart ports; no rule changed"
     },
     "src/customer.rs": {
       "status": "unproved",
@@ -4702,8 +4717,8 @@
     },
     "src/marketing/channels.rs": {
       "status": "unproved",
-      "sha256": "09ba865ca68b1b86107d3acc5844a958b92f022e8d708fb4323394d3e7435dcb",
-      "review": "Separate native channel metadata admission from the caller interface language: preserve tenant lookup, activation, type and preview guards; existing shopper channel calls retain their explicit enabled-language check, while scenario metadata uses the actual channel locales. Verify German Studio against French-only native catalogue and purchase without extra grants or inference during preview."
+      "sha256": "6dbb5f97b5f8e644b7e0250aec875052706eceda481cf3cf59747816f4e63449",
+      "review": "Currency discovery moved into components/pricing behind the shop settings and cart ports; no rule changed"
     },
     "src/marketing/condition_gateway.rs": {
       "status": "unproved",

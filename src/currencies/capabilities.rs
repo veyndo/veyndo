@@ -32,7 +32,10 @@ pub(crate) async fn invoke(a: &App, h: &RequestContext, name: &str, v: &Value) -
     let state = State(a.clone());
     let h = h.clone();
     let Json(result) = match name {
-        "currency.list" => routes::discover(state, h).await?,
+        "currency.list" => {
+            use axum::extract::FromRef;
+            veyndo_pricing::http::currencies::discover(State(FromRef::from_ref(a)), h).await?
+        }
         "currency.select" => routes::select(state, h, Json(v.clone())).await?,
         "merchant.currencies.refresh" => routes::refresh(state, h, Json(v.clone())).await?,
         "merchant.currencies.generate" => jobs::create(state, h, Json(v.clone())).await?,

@@ -2,7 +2,10 @@
 use super::*;
 pub(crate) fn router() -> Router<App> {
     Router::new()
-        .route("/store-api/currencies", get(discover))
+        .route(
+            "/store-api/currencies",
+            get(veyndo_pricing::http::currencies::discover),
+        )
         .route("/store-api/checkout/currency", axum::routing::put(select))
         .secure_route(
             "/api/merchant/currencies/rates/refresh",
@@ -19,19 +22,6 @@ pub(crate) fn router() -> Router<App> {
             &[("GET", "catalog.read")],
             get(veyndo_pricing::http::price_jobs::detail),
         )
-}
-pub(super) async fn discover(State(a): State<App>, h: RequestContext) -> Result<Json<Value>> {
-    let (s, revision) =
-        commerce::scoped_config(&a, &tenant(&h)?, marketing::channel_id(&h)).await?;
-    let c = if header(&h, "sw-context-token").is_some() {
-        Some(load_cart(&a, &h).await?)
-    } else {
-        None
-    };
-    let d = s.currencies.selected(&requested(&h, c.as_ref()))?;
-    Ok(Json(
-        json!({"currencyContext":context(&s.currencies,d),"availableCurrencies":s.currencies.definitions.iter().filter(|d|s.currencies.enabled.contains(&d.code)).collect::<Vec<_>>(),"defaultCurrency":s.currencies.default_currency,"baseCurrency":s.currencies.base_currency,"configuredCurrencies":s.currencies.definitions,"revision":revision,"catalogue":CODES.split(' ').map(|c|json!({"code":c,"scale":scale(c)})).collect::<Vec<_>>()}),
-    ))
 }
 pub(super) async fn select(
     State(a): State<App>,
