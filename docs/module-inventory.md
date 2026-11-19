@@ -321,20 +321,19 @@ This lists every checked-in source module in these roots, including files with n
 | [src/commerce/product_languages.rs](../src/commerce/product_languages.rs) | Enabled content languages, NULL field inheritance and stable global language registration. |
 | [src/commerce/product_preparation.rs](../src/commerce/product_preparation.rs) | Opt-in bounded catalogue preparation projection. Existing products, translations and image jobs remain the owners. |
 | [src/commerce/selection.rs](../src/commerce/selection.rs) | Recover a quote after configuration changes without losing items or silently committing new choices. |
-| [src/commerce/settings_defaults.rs](../src/commerce/settings_defaults.rs) | Backward-compatible enrichment of existing configuration with bundled translated method labels. |
 | [src/commerce/settings_mutation.rs](../src/commerce/settings_mutation.rs) | Optimistic settings persistence and audit event. |
-| [src/commerce/settings_patch.rs](../src/commerce/settings_patch.rs) | Transport-only sparse JSON differences: stable record IDs, explicit nulls, and deletion distinct from inheritance. |
+| [src/commerce/settings_patch.rs](../src/commerce/settings_patch.rs) | Sparse settings overrides are owned by the shop component. |
 | [src/commerce/settings_release.rs](../src/commerce/settings_release.rs) | Selective staging units for channel settings; all final aggregates and method dependencies use native validators. |
 | [src/commerce/settings_routes.rs](../src/commerce/settings_routes.rs) | Tenant configuration and operational read model. |
 | [src/commerce/settings_scope.rs](../src/commerce/settings_scope.rs) | Scoped checkout configuration: basis row lock orders all override writes and authoritative checkout reads. |
-| [src/commerce/settings_validation.rs](../src/commerce/settings_validation.rs) | Configuration validation and required availability invariants. |
+| [src/commerce/settings_validation.rs](../src/commerce/settings_validation.rs) | Configuration validation is owned by the shop component; rule conditions are checked by the rule engine. |
 | [src/commerce/supply.rs](../src/commerce/supply.rs) | Supplier links are owned by the inventory component; the shop settings embed them. |
 | [src/commerce/supply_proposal.rs](../src/commerce/supply_proposal.rs) | Reorder proposals: a signed offer from the supplier shop's public checkout on this installation, checked against the ceiling; approval hands over to that checkout and orders nothing. |
 | [src/commerce/tax.rs](../src/commerce/tax.rs) | Destination tax-class resolution and net-preserving price conversion. |
 | [src/commerce/tax_context.rs](../src/commerce/tax_context.rs) | Tax conditions consume private authoritative pre-tax cart facts without a recursive quote. |
 | [src/commerce/tax_rules.rs](../src/commerce/tax_rules.rs) | Priority-based destination rules; current tax law is merchant configuration, not bundled tax advice. |
 | [src/commerce/test_stock.rs](../src/commerce/test_stock.rs) | Entry point for scenarios; test stock is owned by the inventory component. |
-| [src/commerce/types.rs](../src/commerce/types.rs) | Checkout selection and configuration data contracts. |
+| [src/commerce/types.rs](../src/commerce/types.rs) | Checkout selection and configuration data contracts are owned by the shop component. |
 | [src/concierge.rs](../src/concierge.rs) | Read-only storefront shopping advisor. |
 | [src/currencies/capabilities.rs](../src/currencies/capabilities.rs) | Currency MCP operations reuse the native HTTP handlers and existing settings/catalog permissions. |
 | [src/currencies/jobs.rs](../src/currencies/jobs.rs) | The background loop that runs queued price jobs and refreshes automatic rates; the batch itself is owned by the pricing component. |
@@ -394,7 +393,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/legal/consent.rs](../src/legal/consent.rs) | Cart/channel-bound affirmative choices; stale/expired policy receipts never authorize processing. |
 | [src/legal/continuation.rs](../src/legal/continuation.rs) | Capability-bound consent continuation: successive carts share one revocable receipt, never copied grants. |
 | [src/legal/mod.rs](../src/legal/mod.rs) | Connected legal/privacy boundary: configuration, consent, checkout snapshots and durable requests. |
-| [src/legal/model.rs](../src/legal/model.rs) | Bounded multilingual legal configuration; policy changes invalidate optional-purpose consent. |
+| [src/legal/model.rs](../src/legal/model.rs) | Legal configuration is owned by the shop component. |
 | [src/legal/product.rs](../src/legal/product.rs) | Explicit product safety/sector facts, with market-language fallback; no inference of certifications. |
 | [src/legal/requests.rs](../src/legal/requests.rs) | Durable withdrawal/data-rights intake, tenant-scoped operator review and customer-held receipt access. |
 | [src/lib.rs](../src/lib.rs) | Reusable pricing, context, sandbox, graph and inference modules. |
@@ -833,6 +832,18 @@ This lists every checked-in source module in these roots, including files with n
 | [components/shipping/src/store/delivery_dates.rs](../components/shipping/src/store/delivery_dates.rs) | Calendar delivery windows by the database's date, so every replica agrees on today. |
 | [components/shipping/src/store/method_usage.rs](../components/shipping/src/store/method_usage.rs) | Where a delivery or payment method is still referenced; order snapshots remain immutable. |
 | [components/shipping/src/store.rs](../components/shipping/src/store.rs) | SQL of the shipping component. |
+| [components/shop/src/domain/customer_groups.rs](../components/shop/src/domain/customer_groups.rs) | Tenant-owned translated customer groups preserve exact rule IDs and select an explicit existing price/tax presentation basis. |
+| [components/shop/src/domain/defaults.rs](../components/shop/src/domain/defaults.rs) | Backward-compatible enrichment of existing configuration with bundled translated method labels. |
+| [components/shop/src/domain/patch.rs](../components/shop/src/domain/patch.rs) | Transport-only sparse JSON differences: stable record IDs, explicit nulls, and deletion distinct from inheritance. |
+| [components/shop/src/domain/tax_rules.rs](../components/shop/src/domain/tax_rules.rs) | Priority-based destination rules; current tax law is merchant configuration, not bundled tax advice. |
+| [components/shop/src/domain/validation.rs](../components/shop/src/domain/validation.rs) | Configuration validation and required availability invariants. |
+| [components/shop/src/domain.rs](../components/shop/src/domain.rs) | Rules on shop settings, free of I/O. |
+| [components/shop/src/lib.rs](../components/shop/src/lib.rs) | Shop component: the settings every other commerce component reads, with their bounds and inheritance rules. |
+| [components/shop/src/types/b2b.rs](../components/shop/src/types/b2b.rs) | B2B feature switches live in shared commerce settings; disabling never relaxes existing financial policy. |
+| [components/shop/src/types/guardrails.rs](../components/shop/src/types/guardrails.rs) | Merchant-owned guardrails in commerce settings; native currency amounts bind preview and execution. |
+| [components/shop/src/types/legal.rs](../components/shop/src/types/legal.rs) | Bounded multilingual legal configuration; policy changes invalidate optional-purpose consent. |
+| [components/shop/src/types/settings.rs](../components/shop/src/types/settings.rs) | Checkout selection and configuration data contracts. |
+| [components/shop/src/types.rs](../components/shop/src/types.rs) | The configuration a shop stores. |
 
 ## Studio, storefront, platform and shared frontend
 

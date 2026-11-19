@@ -72,8 +72,6 @@ mod tax_context;
 mod tax_rules;
 pub(crate) use tax_context::*;
 
-mod settings_defaults;
-
 mod product_languages;
 pub(crate) use product_languages::allowed as company_locale_allowed;
 pub(crate) use product_languages::key as product_language_key;

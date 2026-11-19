@@ -2,16 +2,6 @@
 use super::*;
 pub(crate) use veyndo_core::localized::valid_locale_key;
 
-impl Settings {
-    /// The enabled content languages; the rules on them are shared by every component.
-    pub(crate) fn languages(&self) -> veyndo_core::localized::Languages<'_> {
-        veyndo_core::localized::Languages {
-            main: &self.main_locale,
-            enabled: &self.locales,
-        }
-    }
-}
-
 pub(crate) fn key(locale: &str, s: &Settings) -> String {
     s.languages().key(locale)
 }

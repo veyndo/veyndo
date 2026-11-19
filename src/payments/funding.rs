@@ -1,13 +1,5 @@
 //! Account-authorized funding choice, immutable consent and saved-instrument admission; cart possession is insufficient.
 use crate::*;
-#[derive(Clone, Debug, serde::Deserialize, serde::Serialize)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub(crate) struct Choice {
-    #[serde(default)]
-    pub save: bool,
-    #[serde(default)]
-    pub id: Option<String>,
-}
 pub(crate) async fn prepare(
     tx: &mut sqlx::Transaction<'_, sqlx::Postgres>,
     h: &RequestContext,

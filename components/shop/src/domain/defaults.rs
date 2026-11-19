@@ -1,9 +1,21 @@
 //! Backward-compatible enrichment of existing configuration with bundled translated method labels.
-use super::*;
-pub(crate) fn enrich_defaults(mut s: Settings) -> Settings {
+use crate::types::settings::Settings;
+use serde_json::{Value, json};
+use std::collections::HashMap;
+use veyndo_core::localized::Text;
+use veyndo_core::{Result, bad};
+
+/// Reads stored settings and fills in bundled method labels where none are stored.
+pub fn decode(v: Value) -> Result<Settings> {
+    serde_json::from_value(v)
+        .map(enrich_defaults)
+        .map_err(|_| bad("Invalid commerce configuration"))
+}
+
+pub fn enrich_defaults(mut s: Settings) -> Settings {
     static DEFAULTS: std::sync::OnceLock<Value> = std::sync::OnceLock::new();
     let defaults = DEFAULTS.get_or_init(|| {
-        serde_json::from_str(include_str!("../../fixtures/demo-settings.json"))
+        serde_json::from_str(include_str!("../../../../fixtures/demo-settings.json"))
             .expect("settings fixture")
     });
     for v in &mut s.shipping {
@@ -38,7 +50,7 @@ fn builtin(
     id: &str,
     name: &str,
     main: &str,
-) -> HashMap<String, super::method_text::Text> {
+) -> HashMap<String, Text> {
     if let Some(v) = defaults[section]
         .as_array()
         .unwrap()
@@ -49,7 +61,7 @@ fn builtin(
     } else {
         HashMap::from([(
             main.into(),
-            super::method_text::Text {
+            Text {
                 name: Some(name.into()),
                 description: None,
             },

@@ -15,29 +15,29 @@ run SQL without being in a `store` folder. Both numbers only fall.
 | --- | ---: | ---: | ---: | ---: | ---: | --- | ---: |
 | core | 3499 | 0 | 4 | 10 | 10 | none | 10 |
 | identity | 3524 | 8 | 86 | 18 | 13 | apps (9), catalog (16), checkout (1), core (356), customers (1), host (4), intelligence (9), marketing (5), shop (14), studio (4) | 11 |
-| shop | 4135 | 43 | 98 | 24 | 15 | apps (7), b2b (2), catalog (7), checkout (17), core (260), customers (3), host (4), intelligence (8), marketing (8), payments (4), pricing (8), shipping (1), studio (13) | 19 |
-| catalog | 8518 | 40 | 203 | 15 | 11 | apps (19), b2b (2), checkout (12), core (338), customers (5), identity (23), intelligence (7), marketing (15), pricing (30), protocols (1), shop (17), studio (8) | 14 |
+| shop | 4507 | 40 | 98 | 24 | 15 | apps (4), catalog (7), checkout (17), core (272), customers (3), host (4), intelligence (5), inventory (1), marketing (10), payments (3), pricing (12), shipping (4), studio (13) | 19 |
+| catalog | 8508 | 40 | 203 | 15 | 11 | apps (19), b2b (2), checkout (12), core (338), customers (5), identity (23), intelligence (11), marketing (15), pricing (30), protocols (1), shop (15), studio (8) | 14 |
 | inventory | 649 | 2 | 26 | 2 | 2 | catalog (1), checkout (2), core (29), identity (4), intelligence (3), pricing (3), protocols (2), shop (2) | 3 |
-| pricing | 3683 | 9 | 19 | 5 | 2 | apps (2), catalog (1), checkout (8), core (69), identity (4), marketing (3), shop (15), studio (1) | 9 |
-| shipping | 1202 | 7 | 115 | 2 | 0 | apps (3), catalog (5), checkout (1), core (46), identity (5), orders (5), payments (1), pricing (14), shop (20), studio (4) | 6 |
-| checkout | 2715 | 14 | 148 | 9 | 3 | apps (22), b2b (19), catalog (6), core (240), customers (5), host (7), identity (2), intelligence (2), inventory (3), marketing (15), orders (6), payments (8), pos (12), pricing (35), shipping (10), shop (22), studio (9) | 12 |
-| customers | 2059 | 18 | 85 | 10 | 3 | apps (9), catalog (3), checkout (5), core (172), identity (32), marketing (2), orders (5), pos (1), pricing (2), shipping (5), shop (13), studio (9) | 6 |
-| orders | 4968 | 39 | 451 | 22 | 7 | apps (36), b2b (1), catalog (9), checkout (15), core (293), customers (5), identity (71), inventory (1), marketing (6), payments (7), pos (1), pricing (5), shipping (2), shop (22), studio (8) | 17 |
-| payments | 4021 | 3 | 265 | 21 | 7 | apps (10), checkout (3), core (275), host (5), identity (10), inventory (1), pos (1), shop (13), studio (1) | 14 |
-| marketing | 4954 | 38 | 339 | 26 | 8 | apps (24), automation (31), b2b (3), catalog (8), checkout (19), core (225), identity (37), intelligence (12), orders (1), payments (2), pos (4), pricing (16), shipping (9), shop (18), studio (4) | 24 |
-| b2b | 2367 | 19 | 108 | 13 | 8 | apps (18), checkout (31), core (172), customers (3), identity (17), marketing (1), orders (2), pos (1), pricing (5), shipping (1), shop (12), studio (18) | 8 |
-| pos | 1082 | 9 | 68 | 5 | 0 | apps (1), catalog (5), checkout (23), core (57), customers (1), identity (25), marketing (5), orders (2), payments (3), pricing (3), shipping (4), shop (9), studio (1) | 8 |
-| apps | 12059 | 110 | 427 | 42 | 22 | b2b (3), catalog (11), checkout (10), core (629), host (17), identity (84), intelligence (3), marketing (13), orders (17), payments (7), pos (1), pricing (8), protocols (1), shipping (2), shop (18), studio (36) | 20 |
+| pricing | 3589 | 9 | 19 | 5 | 2 | catalog (1), checkout (8), core (67), identity (4), marketing (2), shop (11), studio (1) | 9 |
+| shipping | 1194 | 7 | 115 | 2 | 0 | apps (3), catalog (5), checkout (1), core (43), identity (5), orders (5), payments (1), pricing (14), shop (18), studio (4) | 6 |
+| checkout | 2715 | 14 | 148 | 9 | 3 | apps (22), b2b (19), catalog (6), core (240), customers (5), host (7), identity (2), intelligence (2), inventory (3), marketing (15), orders (6), payments (8), pos (12), pricing (35), shipping (10), shop (16), studio (9) | 12 |
+| customers | 2059 | 18 | 85 | 10 | 3 | apps (9), catalog (3), checkout (5), core (172), identity (32), marketing (2), orders (5), pos (1), pricing (2), shipping (5), shop (10), studio (9) | 6 |
+| orders | 4968 | 39 | 451 | 22 | 7 | apps (36), b2b (1), catalog (9), checkout (15), core (293), customers (5), identity (71), inventory (1), marketing (6), payments (7), pos (1), pricing (5), shipping (2), shop (18), studio (8) | 17 |
+| payments | 4013 | 3 | 265 | 21 | 7 | apps (10), checkout (3), core (275), host (5), identity (10), inventory (1), pos (1), shop (4), studio (1) | 14 |
+| marketing | 4954 | 38 | 339 | 26 | 8 | apps (24), automation (31), b2b (3), catalog (8), checkout (19), core (225), identity (37), intelligence (13), orders (1), payments (2), pos (4), pricing (16), shipping (9), shop (12), studio (4) | 24 |
+| b2b | 2284 | 19 | 108 | 13 | 8 | apps (18), checkout (31), core (170), customers (3), identity (17), marketing (1), orders (2), pos (1), pricing (5), shipping (1), shop (8), studio (18) | 8 |
+| pos | 1082 | 9 | 68 | 5 | 0 | apps (1), catalog (5), checkout (23), core (57), customers (1), identity (25), marketing (5), orders (2), payments (3), pricing (3), shipping (4), shop (4), studio (1) | 8 |
+| apps | 12059 | 110 | 427 | 42 | 22 | b2b (3), catalog (11), checkout (10), core (629), host (17), identity (84), intelligence (4), marketing (13), orders (17), payments (7), pos (1), pricing (8), protocols (1), shipping (2), shop (14), studio (36) | 20 |
 | automation | 1443 | 8 | 97 | 0 | 0 | core (2) | 0 |
-| intelligence | 11367 | 86 | 716 | 55 | 28 | apps (45), catalog (32), checkout (22), core (724), customers (1), host (3), identity (80), marketing (18), orders (1), payments (1), pricing (13), protocols (8), shop (43), studio (11) | 26 |
-| studio | 2787 | 26 | 167 | 18 | 5 | apps (31), b2b (4), catalog (5), core (153), customers (1), identity (52), intelligence (11), marketing (8), orders (2), pos (1), pricing (1), shop (12) | 34 |
+| intelligence | 11287 | 86 | 716 | 55 | 28 | apps (45), catalog (32), checkout (22), core (723), customers (1), host (3), identity (80), marketing (18), orders (1), payments (1), pricing (13), protocols (8), shop (35), studio (11) | 26 |
+| studio | 2787 | 26 | 167 | 18 | 5 | apps (31), b2b (4), catalog (5), core (153), customers (1), identity (52), intelligence (11), marketing (8), orders (2), pos (1), pricing (1), shop (9) | 34 |
 | protocols | 2769 | 17 | 132 | 2 | 0 | apps (23), b2b (9), catalog (10), checkout (25), core (104), customers (1), host (2), identity (32), intelligence (23), marketing (9), orders (8), payments (3), pos (3), pricing (6), shipping (3), shop (17), studio (10) | 2 |
-| host | 2970 | 7 | 40 | 6 | 1 | apps (1), catalog (5), core (119), intelligence (5), pricing (13) | 9 |
+| host | 2970 | 7 | 40 | 6 | 1 | apps (1), catalog (5), core (119), intelligence (6), pricing (13) | 9 |
 | connectors | 0 | 0 | 0 | 0 | 6 | none | 0 |
 
 ## Cycles
 
-68 pairs of components depend on each other. A crate boundary needs each pair
+67 pairs of components depend on each other. A crate boundary needs each pair
 reduced to one direction first.
 
 - apps ↔ b2b: 3 and 18 references
@@ -45,29 +45,27 @@ reduced to one direction first.
 - apps ↔ checkout: 10 and 22 references
 - apps ↔ host: 17 and 1 references
 - apps ↔ identity: 84 and 9 references
-- apps ↔ intelligence: 3 and 45 references
+- apps ↔ intelligence: 4 and 45 references
 - apps ↔ marketing: 13 and 24 references
 - apps ↔ orders: 17 and 36 references
 - apps ↔ payments: 7 and 10 references
 - apps ↔ pos: 1 and 1 references
-- apps ↔ pricing: 8 and 2 references
 - apps ↔ protocols: 1 and 23 references
 - apps ↔ shipping: 2 and 3 references
-- apps ↔ shop: 18 and 7 references
+- apps ↔ shop: 14 and 4 references
 - apps ↔ studio: 36 and 31 references
 - b2b ↔ checkout: 31 and 19 references
 - b2b ↔ marketing: 1 and 3 references
 - b2b ↔ orders: 2 and 1 references
-- b2b ↔ shop: 12 and 2 references
 - b2b ↔ studio: 18 and 4 references
 - catalog ↔ checkout: 12 and 6 references
 - catalog ↔ customers: 5 and 3 references
 - catalog ↔ identity: 23 and 16 references
-- catalog ↔ intelligence: 7 and 32 references
+- catalog ↔ intelligence: 11 and 32 references
 - catalog ↔ marketing: 15 and 8 references
 - catalog ↔ pricing: 30 and 1 references
 - catalog ↔ protocols: 1 and 10 references
-- catalog ↔ shop: 17 and 7 references
+- catalog ↔ shop: 15 and 7 references
 - catalog ↔ studio: 8 and 5 references
 - checkout ↔ customers: 5 and 5 references
 - checkout ↔ identity: 2 and 1 references
@@ -79,42 +77,43 @@ reduced to one direction first.
 - checkout ↔ pos: 12 and 23 references
 - checkout ↔ pricing: 35 and 8 references
 - checkout ↔ shipping: 10 and 1 references
-- checkout ↔ shop: 22 and 17 references
+- checkout ↔ shop: 16 and 17 references
 - customers ↔ identity: 32 and 1 references
 - customers ↔ orders: 5 and 5 references
 - customers ↔ pos: 1 and 1 references
-- customers ↔ shop: 13 and 3 references
+- customers ↔ shop: 10 and 3 references
 - customers ↔ studio: 9 and 1 references
-- host ↔ intelligence: 5 and 3 references
+- host ↔ intelligence: 6 and 3 references
 - identity ↔ intelligence: 9 and 80 references
 - identity ↔ marketing: 5 and 37 references
 - identity ↔ studio: 4 and 52 references
-- intelligence ↔ marketing: 18 and 12 references
+- intelligence ↔ marketing: 18 and 13 references
 - intelligence ↔ protocols: 8 and 23 references
-- intelligence ↔ shop: 43 and 8 references
+- intelligence ↔ shop: 35 and 5 references
 - intelligence ↔ studio: 11 and 11 references
+- inventory ↔ shop: 2 and 1 references
 - marketing ↔ orders: 1 and 6 references
 - marketing ↔ pos: 4 and 5 references
-- marketing ↔ pricing: 16 and 3 references
-- marketing ↔ shop: 18 and 8 references
+- marketing ↔ pricing: 16 and 2 references
+- marketing ↔ shop: 12 and 10 references
 - marketing ↔ studio: 4 and 8 references
 - orders ↔ pos: 1 and 2 references
 - orders ↔ shipping: 2 and 5 references
 - orders ↔ studio: 8 and 2 references
 - payments ↔ pos: 1 and 3 references
-- payments ↔ shop: 13 and 4 references
+- payments ↔ shop: 4 and 3 references
 - pos ↔ studio: 1 and 1 references
-- pricing ↔ shop: 15 and 8 references
+- pricing ↔ shop: 11 and 12 references
 - pricing ↔ studio: 1 and 1 references
-- shipping ↔ shop: 20 and 1 references
-- shop ↔ studio: 13 and 12 references
+- shipping ↔ shop: 18 and 4 references
+- shop ↔ studio: 13 and 9 references
 
 ## Most used items across components
 
 | From | To | Item | References |
 | --- | --- | --- | ---: |
 | apps | core | `Result` | 262 |
-| intelligence | core | `Result` | 222 |
+| intelligence | core | `Result` | 221 |
 | intelligence | core | `RequestContext` | 147 |
 | apps | core | `RequestContext` | 137 |
 | intelligence | core | `State` | 136 |
@@ -135,12 +134,12 @@ reduced to one direction first.
 | intelligence | core | `Error` | 70 |
 | checkout | core | `Result` | 68 |
 | identity | core | `Error` | 66 |
-| shop | core | `Result` | 63 |
 | apps | core | `conflict` | 63 |
+| shop | core | `Result` | 60 |
 | catalog | core | `veyndo_core::` | 60 |
 | studio | core | `Result` | 56 |
-| b2b | core | `Result` | 54 |
 | catalog | core | `RequestContext` | 53 |
+| b2b | core | `Result` | 53 |
 | studio | identity | `auth::` | 52 |
 | orders | core | `RequestContext` | 52 |
 | customers | core | `State` | 48 |

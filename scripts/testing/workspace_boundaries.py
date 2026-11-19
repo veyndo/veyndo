@@ -13,7 +13,8 @@ OWNERS.update({'veyndo-core': ROOT / 'components/core', 'veyndo-pricing': ROOT /
                'veyndo-catalog': ROOT / 'components/catalog',
                'veyndo-inventory': ROOT / 'components/inventory',
                'veyndo-shipping': ROOT / 'components/shipping',
-               'veyndo-customers': ROOT / 'components/customers'})
+               'veyndo-customers': ROOT / 'components/customers',
+               'veyndo-shop': ROOT / 'components/shop'})
 OWNERS.update({'veyndo': ROOT, 'veyndo-migration': ROOT / 'extensions/apps/migration',
                'veyndo-marketplaces': ROOT / 'extensions/apps/marketplaces',
                'veyndo-app-storage': ROOT / 'extensions/services/app-storage',
@@ -40,6 +41,7 @@ ALLOWED = {
     'veyndo-inventory': {'veyndo-core', 'veyndo-catalog', 'veyndo-pricing'},
     'veyndo-shipping': {'veyndo-core', 'veyndo-identity', 'veyndo-pricing'},
     'veyndo-customers': {'veyndo-core', 'veyndo-pricing'},
+    'veyndo-shop': {'veyndo-core', 'veyndo-pricing', 'veyndo-inventory', 'veyndo-shipping', 'veyndo-app-model'},
 }
 # Reviewed direct external capabilities. Cargo reports actual package names even
 # when a manifest renames sqlx as something innocuous. New dependencies need an
@@ -60,6 +62,7 @@ EXTERNAL = {
     'veyndo-inventory': {'serde', 'serde_json', 'sqlx'},
     'veyndo-shipping': {'serde', 'serde_json', 'sqlx', 'axum'},
     'veyndo-customers': {'serde', 'serde_json', 'sqlx'},
+    'veyndo-shop': {'serde', 'serde_json', 'chrono', 'reqwest'},
     'veyndo-core': {'axum', 'serde', 'serde_json', 'sha2', 'sqlx', 'uuid', 'tokio', 'tracing', 'reqwest'},
     'veyndo-runtime': {'hmac', 'sha2', 'zeroize', 'sqlx', 'tokio', 'futures-util',
                        'serde_json', 'reqwest', 'async-stream', 'uuid'},

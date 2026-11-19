@@ -15,7 +15,10 @@ order=schemas['order_import']['inputSchema']
 assert set(order['properties'])==fields('PaidOrder')
 assert set(order['properties']['lines']['items']['properties'])==fields('OrderLine')
 assert set(order['properties']['shipping']['properties'])==fields('SourceAmount')
-assert 'pub(crate) use veyndo_pricing::customer::Address;' in (ROOT/'src/commerce/types.rs').read_text()
+# The server takes Address from the shop settings, which take it unchanged from the pricing contract.
+assert 'pub use veyndo_pricing::customer::Address;' in (ROOT/'components/shop/src/types/settings.rs').read_text()
+assert 'struct Address' not in (ROOT/'components/shop/src/types/settings.rs').read_text()
+assert 'struct Address' not in (ROOT/'src/commerce/types.rs').read_text()
 address=(ROOT/'components/pricing/src/domain/customer/address.rs').read_text()
 body=re.search(r'struct Address \{(.*?)\n}',address,re.S)[1]
 expected={re.sub(r'_([a-z])',lambda m:m[1].upper(),f) for f in re.findall(r'pub (\w+):',body)}

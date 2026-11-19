@@ -1480,6 +1480,66 @@
       "sha256": "b1c4b41266a639477014245de13eb83a1c14f6f68c68f6b0eaefb5f807bbc2e2",
       "review": "delivery_split_admissible and carrier_booking_admissible bindings moved into components/shipping"
     },
+    "components/shop/src/domain/customer_groups.rs": {
+      "status": "unproved",
+      "sha256": "da1caedadeff46975c93d69b70d49078c5cac7d7a9e83bd760373655377c91a5",
+      "review": "shop component crate created; settings types moved; no kernel binding changed"
+    },
+    "components/shop/src/domain/defaults.rs": {
+      "status": "unproved",
+      "sha256": "81ae23ccef5e80531d65443604a25dedb2e5f9da93d57f4d0f315ca6596eb105",
+      "review": "shop component crate created; settings types moved; no kernel binding changed"
+    },
+    "components/shop/src/domain/patch.rs": {
+      "status": "unproved",
+      "sha256": "386462fb4c31daf2ff3a1e58c11ae4cb3415ff139838ced6588c885f87782056",
+      "review": "shop component crate created; settings types moved; no kernel binding changed"
+    },
+    "components/shop/src/domain/tax_rules.rs": {
+      "status": "unproved",
+      "sha256": "041f1f64bfca621a881080924e7036ecb95577898cb2d1b6042307adb2a6ee53",
+      "review": "shop component crate created; settings types moved; no kernel binding changed"
+    },
+    "components/shop/src/domain/validation.rs": {
+      "status": "unproved",
+      "sha256": "f28e82a28b8e8baffb9e69dbe96607d10b34db4c5ba77ce3f4c44df58be4bbca",
+      "review": "shop component crate created; settings types moved; no kernel binding changed"
+    },
+    "components/shop/src/domain.rs": {
+      "status": "unproved",
+      "sha256": "0342f21df6a6ff8ff8a0c6978de624bbdbb9a705d3a9a177005bb81d0708f866",
+      "review": "shop component crate created; settings types moved; no kernel binding changed"
+    },
+    "components/shop/src/lib.rs": {
+      "status": "unproved",
+      "sha256": "bf19573b8e75163d72b09b76c240fb8c694012d69bcc20cec79291fb2dc2778c",
+      "review": "shop component crate created; settings types moved; no kernel binding changed"
+    },
+    "components/shop/src/types/b2b.rs": {
+      "status": "unproved",
+      "sha256": "46bda1aa6275aa50a395358d938349ba96185508109b955ff4ee0796e9d55d19",
+      "review": "shop component crate created; settings types moved; no kernel binding changed"
+    },
+    "components/shop/src/types/guardrails.rs": {
+      "status": "unproved",
+      "sha256": "140e8773af1fc60f67b219083fbdbbee59868df0fb0dae0ae04ecd143931df17",
+      "review": "shop component crate created; settings types moved; no kernel binding changed"
+    },
+    "components/shop/src/types/legal.rs": {
+      "status": "unproved",
+      "sha256": "b7ee4866d05273cd501144dafc2c1acc1299f925ec4101d5beee536536dc71c9",
+      "review": "shop component crate created; settings types moved; no kernel binding changed"
+    },
+    "components/shop/src/types/settings.rs": {
+      "status": "unproved",
+      "sha256": "9f8443a74c287d73d6e2125e046d00eb43abf913a29a55f4674146bd70d34a58",
+      "review": "shop component crate created; settings types moved; no kernel binding changed"
+    },
+    "components/shop/src/types.rs": {
+      "status": "unproved",
+      "sha256": "a3e1d3fab11a9de4e49853db85540bbe109afc932061afe67a271129af1017f5",
+      "review": "shop component crate created; settings types moved; no kernel binding changed"
+    },
     "crates/apps/src/component_runtime.rs": {
       "status": "unproved",
       "sha256": "4cc79b79b8e7395ad8d66f8f7bbfe57082da9c100c6c3215c86748c9bcb61aec",
@@ -4142,8 +4202,8 @@
     },
     "src/b2b/mod.rs": {
       "status": "unproved",
-      "sha256": "d374d2521dab24d9fff1fbcc7914a1f88cfc3b834a41d033f9653b7217c34142",
-      "review": "Reviewed checkout stage move and buyer-scoped host contract. Native stock, replay and contact predicates retain their consumers; isolated Commerce and Checkout tests verify legal review, current B2B authority, original receipt recovery and one atomic purchase."
+      "sha256": "8a98ce66b4cc9c817ef6fba1c456c8305dc79bdb13324bb3e1817c62d4bf6c87",
+      "review": "shop component crate created; settings types moved; no kernel binding changed"
     },
     "src/b2b/model.rs": {
       "status": "unproved",
@@ -4197,8 +4257,8 @@
     },
     "src/b2b/settings.rs": {
       "status": "unproved",
-      "sha256": "c04f9b14eaef19d883430c4690af5457236da716019b18974755971bdfdd1a12",
-      "review": "Tenant roles and current grants independently reviewed; owner/retained-override/acceptance races repaired and PostgreSQL-blocked regressions passed; PII and Flow projection boundaries documented; B2B feature settings delegate shared CAS/history and preserve financial guards. Existing extracted policies unchanged; SQL/async/UI remain reviewed adapters, not full proofs."
+      "sha256": "3d857f38a677f7233a5c28f2f266898da2c2e627ef24cc2f25cd6262bc779aa1",
+      "review": "shop component crate created; settings types moved; no kernel binding changed"
     },
     "src/b2b/staging.rs": {
       "status": "unproved",
@@ -4562,8 +4622,8 @@
     },
     "src/cognition/guardrails.rs": {
       "status": "reviewed-binding",
-      "sha256": "741a2983d674f5e6c055b62f8ca7cc931dad6102ba1c7740ea149a96399b5bc5",
-      "review": "Autopilot daily limit: guardrails.rs gains optional max_daily_exposure_minor with a validated ceiling; autonomy.rs adds an unproved exposure sum and passes its comparison as the daily_budget input of the unchanged extracted ai_autonomy_admissible; read-only knowledge.autonomy.status; providers suite covers the exact boundary"
+      "sha256": "e75b3bfdbab41ecfbcb8bcc7e29c35abaa4e284bc199d4f6e0b86764fd131ca4",
+      "review": "shop component crate created; settings types moved; no kernel binding changed"
     },
     "src/cognition/indexing.rs": {
       "status": "unproved",
@@ -4657,8 +4717,8 @@
     },
     "src/commerce/configuration.rs": {
       "status": "unproved",
-      "sha256": "1a93bd0f3267d7553da43c08746bbb5f8811ce2485578d7ee8d4257df3a76b46",
-      "review": "Reviewed native-only static bypass with hosted denial and Lean exact acceptance; one fresh domain/environment/status/channel/mount SQL snapshot and current membership lookup preserve scoped admission, binding identity and revocation; immutable Arc settings retain locked mutation/checkout reads; secret-free compression opt-in and deterministic precompressed assets preserve streams/ranges; batched inventory uses existing checkout locks and ordered idempotent release; bounded overview SQL preserves currency-separated historical facts. Real two-replica read/channel/tenant/checkout and strict-runtime regressions passed; SQL and build inputs now explicitly locked. These adapters remain unproved."
+      "sha256": "2e341f70743d966164bc28c4ca7b610226bbf905009d1d6b1f06e524bcc60acd",
+      "review": "shop component crate created; settings types moved; no kernel binding changed"
     },
     "src/commerce/content_text.rs": {
       "status": "unproved",
@@ -4672,8 +4732,8 @@
     },
     "src/commerce/customer_groups.rs": {
       "status": "unproved",
-      "sha256": "ba81b3ad27a72a1cb14dc27dd3a670923d9e702949674457e7983e9a0dea3bb1",
-      "review": "Customer groups and price job creation moved into components/pricing; the customer group rule is bound there"
+      "sha256": "d8920ed76741516a8dadd55533b1b0c1dd9abe6837d2bfcc762db3126fbcd34a",
+      "review": "shop component crate created; settings types moved; no kernel binding changed"
     },
     "src/commerce/delivery.rs": {
       "status": "unproved",
@@ -4707,8 +4767,8 @@
     },
     "src/commerce/geography.rs": {
       "status": "unproved",
-      "sha256": "d23969fcc533d63e32422c737374ef1895ac19fa3f6f07261011ead3d0028739",
-      "review": "delivery_split_admissible and carrier_booking_admissible bindings moved into components/shipping"
+      "sha256": "23176123198a77331279c430f4da779e1e1eb79c888bacf23321b4512bb1f6a4",
+      "review": "shop component crate created; settings types moved; no kernel binding changed"
     },
     "src/commerce/group_usage.rs": {
       "status": "unproved",
@@ -4732,8 +4792,8 @@
     },
     "src/commerce/method_text.rs": {
       "status": "unproved",
-      "sha256": "82b2c1730c1ba84844ee30aa73ee9654d1578d9c0a2bfc05161dccf14a290d5f",
-      "review": "delivery_split_admissible and carrier_booking_admissible bindings moved into components/shipping"
+      "sha256": "0e67bf926d47e1bdbeb1fb50391854910f894becbb6f851a71f4701c438fc47e",
+      "review": "shop component crate created; settings types moved; no kernel binding changed"
     },
     "src/commerce/method_usage.rs": {
       "status": "unproved",
@@ -4742,8 +4802,8 @@
     },
     "src/commerce/mod.rs": {
       "status": "unproved",
-      "sha256": "e6ac6765911c7fda1f8cdaa16ae14e7ed23bc2e16f893978f064e97295e3c2ec",
-      "review": "inventory component crate created; no kernel binding changed"
+      "sha256": "a0663f13044d7e3052001798190cf0a9f3f469bc2ee456e85557c531cf3e71a2",
+      "review": "shop component crate created; settings types moved; no kernel binding changed"
     },
     "src/commerce/order_fields.rs": {
       "status": "unproved",
@@ -4797,8 +4857,8 @@
     },
     "src/commerce/product_languages.rs": {
       "status": "unproved",
-      "sha256": "d4b22c5efac1a288e19c7c7205d7af95dc1793448f11d148834270b73d9aa3e3",
-      "review": "Product edit types, stores and language rules moved into components; no rule changed"
+      "sha256": "3a4810944e9f854484b020ec760207b59d186183bf3f8dc74b0818f0f2d4896e",
+      "review": "shop component crate created; settings types moved; no kernel binding changed"
     },
     "src/commerce/product_preparation.rs": {
       "status": "unproved",
@@ -4810,11 +4870,6 @@
       "sha256": "cf9c88d0506861120c57343f081fc1b0d6d57cee71c7e47b9b6cafaa78e20088",
       "review": "Reviewed connected CRM: configured group pricing admission with exact Lean contract, settings lock and dependency rejection; independent revisioned default addresses and ownership-validated book restore; trusted transaction-local actors with deferred one-per-transaction credential-free aggregate history; scoped read/write/MCP restore through domain handlers preserving current stock, identity and financial events. Real crm_history tests cover all twelve editable entity restore types, checkout, stale writes, group dependencies, foreign shops and viewer rejection; Rust unit/lint and affected integration suites verify existing consumers. SQL/async adapters remain unproved."
     },
-    "src/commerce/settings_defaults.rs": {
-      "status": "unproved",
-      "sha256": "a77b5453efb0fab1ec3395d598c54be70e3adc32bd92cc5407dc712fb327b9d5",
-      "review": "Reviewed international configuration, destination tax predicates and native bindings; targeted PostgreSQL international/catalog cases plus Rust tests pass. Translation fixtures verify restart, provider rejection, tenant permissions and revision conflicts. Config/product/apply share row locks. Additive schema 028 and versioned MIT geography reviewed; surrounding SQL/provider behavior remains unproved."
-    },
     "src/commerce/settings_mutation.rs": {
       "status": "unproved",
       "sha256": "7b3512b2eb17924fb35a2d23d5d1d04cd7d3a8e8d62aa015cf57ed5f5e0fa8ad",
@@ -4822,8 +4877,8 @@
     },
     "src/commerce/settings_patch.rs": {
       "status": "unproved",
-      "sha256": "bb2e8787a3d76bd0761643ef2a8f89185592b9676611f166fb3b1a8bd000c61f",
-      "review": "Tenant roles and current grants independently reviewed; owner/retained-override/acceptance races repaired and PostgreSQL-blocked regressions passed; PII and Flow projection boundaries documented; B2B feature settings delegate shared CAS/history and preserve financial guards. Existing extracted policies unchanged; SQL/async/UI remain reviewed adapters, not full proofs."
+      "sha256": "e920cb2ba9665a73bc7c56d09fc50f5697f35136033634dfba35ed0e8af2ca1a",
+      "review": "shop component crate created; settings types moved; no kernel binding changed"
     },
     "src/commerce/settings_release.rs": {
       "status": "unproved",
@@ -4842,13 +4897,13 @@
     },
     "src/commerce/settings_validation.rs": {
       "status": "unproved",
-      "sha256": "18f98b06c491f51f1196e5b71b53c2887a8dba5870b508cab386c5ee818f6537",
-      "review": "Trade network: commerce/supply.rs adds validated supplier links and a ceiling to the settings; commerce/supply_proposal.rs acts as an unauthenticated guest at the supplier shop through existing cart, signed offer and checkout handoff owners, never with merchant authority, and approval re-verifies the offer against link and ceiling without placing an order; no extracted policy changed; providers suite covers forged, unlinked, own-shop and ceiling cases"
+      "sha256": "c8aa1fab66be75b58a3a53bafc00d3040064257a0cb9f3c324d15db5055aaac3",
+      "review": "shop component crate created; settings types moved; no kernel binding changed"
     },
     "src/commerce/supply.rs": {
       "status": "unproved",
-      "sha256": "ebbae6e564045daf1c4909f1a5c17fea1871de7029b26f82586b0388bf4bf7e0",
-      "review": "inventory component crate created; no kernel binding changed"
+      "sha256": "aaae589492c778c91c9fc82dcc0646d224a1a3a62ad66442d6961dfbd2838d79",
+      "review": "shop component crate created; settings types moved; no kernel binding changed"
     },
     "src/commerce/supply_proposal.rs": {
       "status": "unproved",
@@ -4867,8 +4922,8 @@
     },
     "src/commerce/tax_rules.rs": {
       "status": "unproved",
-      "sha256": "c51735e47db8edcdb927bcb7404c56b1d9c38c98861af6f60741a1cab4aecfd8",
-      "review": "Tax classes, the destination rate and the context selection rules moved unchanged into components/pricing; the destination tax rule is bound there"
+      "sha256": "552516027b162a9b3ea0a4af4aada34b384a1be0264af0bc2b79671407a78d9e",
+      "review": "shop component crate created; settings types moved; no kernel binding changed"
     },
     "src/commerce/test_stock.rs": {
       "status": "unproved",
@@ -4877,8 +4932,8 @@
     },
     "src/commerce/types.rs": {
       "status": "unproved",
-      "sha256": "53ab0ecf76668d6015e02ea2865ea87dcf97c01f8bb80bc09cdb06cdd2e8e93b",
-      "review": "Tax classes, the destination rate and the context selection rules moved unchanged into components/pricing; the destination tax rule is bound there"
+      "sha256": "e64713590d9e32b3b2ac8532474c529b59220afc3a091c5fb045347cb229ddb6",
+      "review": "shop component crate created; settings types moved; no kernel binding changed"
     },
     "src/concierge.rs": {
       "status": "unproved",
@@ -5172,13 +5227,13 @@
     },
     "src/legal/mod.rs": {
       "status": "unproved",
-      "sha256": "56bff0e7fe758d7ef64164c9cae2147f3c42d3ed83fb9cde8a9ca0cda136b365",
-      "review": "Reviewed completed-cart consent continuation: original cart capability, matching tenant/channel/session/customer, current locked policy and unexpired receipt, unchanged deadline, no purchase acceptance transfer. Real PostgreSQL legal_privacy and tenant_isolation passed. SQL adapter remains unproved."
+      "sha256": "58b951920489845984576b7d6bb0192906a16ffcd910990a8edd78dd59b3656f",
+      "review": "shop component crate created; settings types moved; no kernel binding changed"
     },
     "src/legal/model.rs": {
       "status": "unproved",
-      "sha256": "729e0f26dd59bfca1d02b09cc28bf40011f75795aae8616e0bd2358b269e06ff",
-      "review": "Reviewed selective-publication domain rights, transactional channel and current installed Flow action admission, shared B2B configuration writers with history and staging, method/currency dependency guards, and inherited consent-bound analytics. PostgreSQL and frontend regressions exercise successful effects, denied access, stale revisions and preserved live state. SQL, async adapters and external providers remain unproved."
+      "sha256": "6b7c413c70bc694ce20c269a865b31a548fff57483a09e7105ca12f06092287f",
+      "review": "shop component crate created; settings types moved; no kernel binding changed"
     },
     "src/legal/product.rs": {
       "status": "unproved",
@@ -5712,8 +5767,8 @@
     },
     "src/payments/funding.rs": {
       "status": "unproved",
-      "sha256": "940e0b22c7ddb98c312f59415e0209d459e6d91320e6fabfde39b9de716f13c5",
-      "review": "Reviewed generic saved-payment consent/session and opaque instrument ownership, forced signed-scope RLS and tenant FKs, immutable funding in native payment jobs, non-financial revocation receipt handling and optional metadata savepoint isolation. Actual local Rust/PG save/reuse/revoke, invalid late metadata, restart and distinct restricted-login cases pass. Existing extracted kernel unchanged; asynchronous SQL/provider paths remain unproved."
+      "sha256": "64f9a5eb22047d69be2b19760ad140b44aae823449e4283848d26b9eac7695ea",
+      "review": "shop component crate created; settings types moved; no kernel binding changed"
     },
     "src/payments/generic_receipts.rs": {
       "status": "unproved",
@@ -5742,8 +5797,8 @@
     },
     "src/payments/mod.rs": {
       "status": "unproved",
-      "sha256": "6215a6d0770aef0c7510db106fa5aee7a997eb01eb67dc09a002d8e39214f418",
-      "review": "Reviewed provider-neutral diagnostic allowlist, bounded error transport and current tenant/payment-read projection. No financial admission, identity or settlement policy changed. Unknown provider text remains suppressed; targeted Rust and four-language frontend diagnostics regressions pass."
+      "sha256": "10e5df0f59ffa044b25fa10f331b5a27009f6dd2cca78a68058016d75f94b77e",
+      "review": "shop component crate created; settings types moved; no kernel binding changed"
     },
     "src/payments/operations.rs": {
       "status": "reviewed-binding",
@@ -6247,12 +6302,12 @@
       "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
     },
     "Cargo.lock": {
-      "sha256": "d9c0d263c63f4992d7304c8f225470a149bc4a9e22662aa32c7c50fd1c63620d",
-      "review": "customers component crate created; no kernel binding changed"
+      "sha256": "3b727e4d0e9afb7bdffc4f53727345b3e4d8c1bb96e0002acf7be01e996de54c",
+      "review": "shop component crate created; settings types moved; no kernel binding changed"
     },
     "Cargo.toml": {
-      "sha256": "c7c19bac37694d1cd474342b8dc9698589160081d0ffdc2202ef038457f9fb6d",
-      "review": "customers component crate created; no kernel binding changed"
+      "sha256": "f448f472a1a65b4609c30c30c41561df3f0e6ce63cd1a5f408dafdbc45ad6dff",
+      "review": "shop component crate created; settings types moved; no kernel binding changed"
     },
     "components.lock.json": {
       "sha256": "7b4a931ad81c6665d5d95e6b42b8ef4d09ebe8971ac24998d8f94bb6a737ff53",

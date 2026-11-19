@@ -1,7 +1,7 @@
 //! Connected legal/privacy boundary: configuration, consent, checkout snapshots and durable requests.
 use crate::*;
 mod model;
-pub(crate) use model::{Config, validate};
+pub(crate) use model::Config;
 mod consent;
 pub(crate) use consent::{
     policy, read as consent_receipt, require, require_locked, write_locked as consent_locked,

@@ -253,7 +253,14 @@ Order follows the dependency report, lowest first. Each line is one move.
 - [ ] automation
 - [ ] intelligence
 - [ ] studio
-- [ ] shop
+- [ ] shop. Started: `components/shop` owns the settings types (`Settings`,
+  delivery and payment methods, the checkout selection, B2B switches, AI
+  guardrails, legal configuration), every bound on them (`validation`, tax
+  rules, customer groups), the bundled method labels and the sparse channel
+  override. It sits above pricing, inventory and shipping, whose types it
+  embeds; rule conditions are checked through a function the rule engine
+  passes in. Open: loading, caching, saving and releasing settings, channel
+  scopes, domains, legal consent, the platform and performance modules.
 
 Per component: sources moved, tables and migrations assigned, SQL only in
 `store/`, typed interface, `foreign_tables` empty or each entry justified, tests

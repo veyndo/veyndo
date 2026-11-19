@@ -94,7 +94,7 @@
         "src/commerce/types.rs",
         "src/commerce/configuration.rs",
         "src/commerce/context_routes.rs",
-        "src/commerce/settings_defaults.rs",
+        "components/shop",
         "src/commerce/settings_mutation.rs",
         "src/commerce/settings_patch.rs",
         "src/commerce/settings_release.rs",
@@ -128,13 +128,13 @@
       ],
       "uses": [
         "apps",
-        "b2b",
         "catalog",
         "checkout",
         "core",
         "customers",
         "host",
         "intelligence",
+        "inventory",
         "marketing",
         "payments",
         "pricing",
@@ -162,7 +162,7 @@
         "tenant_ai_usage",
         "tenants"
       ],
-      "glob_imports": 43,
+      "glob_imports": 40,
       "untyped_access": 98,
       "sql_outside_store": 24
     },
@@ -291,7 +291,6 @@
         "currency_price_jobs"
       ],
       "uses": [
-        "apps",
         "catalog",
         "checkout",
         "core",
