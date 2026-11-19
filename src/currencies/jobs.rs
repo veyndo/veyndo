@@ -1,26 +1,5 @@
 //! Bounded restart-safe fixed-price materialization with frozen FX, product locks and atomic checkpoints across replicas.
 use super::*;
-pub(super) async fn list(State(a): State<App>, h: RequestContext) -> Result<Json<Value>> {
-    auth::permit(&h, "catalog.read")?;
-    let t = merchant(&a, &h)?;
-    let rows=sqlx::query("SELECT id,state,processed,data,created_at::text AS created FROM currency_price_jobs WHERE tenant=$1 ORDER BY created_at DESC LIMIT 30").bind(t).fetch_all(&a.db).await?;
-    Ok(Json(
-        json!({"jobs":rows.iter().map(view).collect::<Vec<_>>()}),
-    ))
-}
-fn view(r: &sqlx::postgres::PgRow) -> Value {
-    json!({"id":r.get::<String,_>("id"),"state":r.get::<String,_>("state"),"processed":r.get::<i64,_>("processed"),"data":r.get::<Value,_>("data"),"created":r.get::<String,_>("created")})
-}
-pub(super) async fn detail(
-    State(a): State<App>,
-    h: RequestContext,
-    Path(id): Path<String>,
-) -> Result<Json<Value>> {
-    auth::permit(&h, "catalog.read")?;
-    let t = merchant(&a, &h)?;
-    let r=sqlx::query("SELECT id,state,processed,data,created_at::text AS created FROM currency_price_jobs WHERE tenant=$1 AND id=$2").bind(t).bind(id).fetch_optional(&a.db).await?.ok_or(Error(StatusCode::NOT_FOUND,"Price job not found".into()))?;
-    Ok(Json(view(&r)))
-}
 pub(super) async fn create(
     State(a): State<App>,
     h: RequestContext,

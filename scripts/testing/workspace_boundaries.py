@@ -27,7 +27,7 @@ ALLOWED = {
     'veyndo-runtime': {'veyndo-app-authority'},
     'veyndo-app-authority': set(),
     # The optional `service` feature adds the shared error contract; the domain alone needs only the kernel.
-    'veyndo-pricing': {'veyndo-kernel', 'veyndo-core'},
+    'veyndo-pricing': {'veyndo-kernel', 'veyndo-core', 'veyndo-identity'},
     'veyndo-apps': {'veyndo-kernel', 'veyndo-app-runtime'},
     'veyndo-cognition': {'veyndo-runtime', 'veyndo-kernel', 'veyndo-app-authority', 'veyndo-core'},
     'veyndo-core': {'veyndo-kernel', 'veyndo-runtime'},
@@ -45,7 +45,7 @@ EXTERNAL = {
     'veyndo-kernel': set(),
     'veyndo-flow-graph': set(),
     'veyndo-automation': {'serde_json', 'chrono', 'chrono-tz'},
-    'veyndo-pricing': {'serde', 'serde_json', 'chrono', 'regex', 'reqwest', 'tokio'},
+    'veyndo-pricing': {'serde', 'serde_json', 'chrono', 'regex', 'reqwest', 'tokio', 'axum', 'sqlx'},
     'veyndo-apps': set(),
     'veyndo-identity': {'serde_json', 'axum'},
     'veyndo-core': {'axum', 'serde', 'serde_json', 'sha2', 'sqlx', 'uuid', 'tokio', 'tracing', 'reqwest'},

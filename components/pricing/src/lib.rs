@@ -6,6 +6,10 @@ pub use domain::{cart, catalog, customer, discount, external_order, inventory, m
 #[cfg(feature = "service")]
 mod conversions;
 #[cfg(feature = "service")]
+pub mod http;
+#[cfg(feature = "service")]
 pub mod service;
+#[cfg(feature = "service")]
+pub mod store;
 #[cfg(feature = "service")]
 pub mod types;

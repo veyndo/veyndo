@@ -12,12 +12,12 @@ pub(crate) fn router() -> Router<App> {
         .secure_route(
             "/api/merchant/currencies/price-jobs",
             &[("GET", "catalog.read"), ("POST", "catalog.write")],
-            get(jobs::list).post(jobs::create),
+            get(veyndo_pricing::http::price_jobs::list).post(jobs::create),
         )
         .secure_route(
             "/api/merchant/currencies/price-jobs/{id}",
             &[("GET", "catalog.read")],
-            get(jobs::detail),
+            get(veyndo_pricing::http::price_jobs::detail),
         )
 }
 pub(super) async fn discover(State(a): State<App>, h: RequestContext) -> Result<Json<Value>> {

@@ -36,10 +36,12 @@ pub(crate) async fn invoke(a: &App, h: &RequestContext, name: &str, v: &Value) -
         "currency.select" => routes::select(state, h, Json(v.clone())).await?,
         "merchant.currencies.refresh" => routes::refresh(state, h, Json(v.clone())).await?,
         "merchant.currencies.generate" => jobs::create(state, h, Json(v.clone())).await?,
-        "merchant.currencies.jobs" => jobs::list(state, h).await?,
+        "merchant.currencies.jobs" => {
+            veyndo_pricing::http::price_jobs::list(State(a.core.clone()), h).await?
+        }
         "merchant.currencies.job" => {
-            jobs::detail(
-                state,
+            veyndo_pricing::http::price_jobs::detail(
+                State(a.core.clone()),
                 h,
                 Path(v["id"].as_str().ok_or(bad("Job ID required"))?.into()),
             )

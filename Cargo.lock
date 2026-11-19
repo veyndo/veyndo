@@ -3672,13 +3672,16 @@ dependencies = [
 name = "veyndo-pricing"
 version = "0.5.0"
 dependencies = [
+ "axum",
  "chrono",
  "regex",
  "reqwest",
  "serde",
  "serde_json",
+ "sqlx",
  "tokio",
  "veyndo-core",
+ "veyndo-identity",
  "veyndo-kernel",
 ]
 
