@@ -1,4 +1,5 @@
 //! Catalogue operations that combine rules and stored state.
+pub mod assets;
 pub mod categories;
 pub mod model_media;
 pub mod navigation;

@@ -190,13 +190,20 @@ Order follows the dependency report, lowest first. Each line is one move.
   - categories: the edit with its checks, the saved fact query rule, the tree
     read and the serialized cycle-safe write as `types/`, `store/`, `service/`
     and `http/`; the shop's languages come through the `Shop` port;
+  - the public navigation (visitor resolved through the `Shop` port, hidden
+    branches as a pure rule) and the category seed of a new shop;
+  - translated product hydration as a pure rule over typed rows, with the
+    share-locked read checkout uses; the merchant list query (closed sort,
+    cursor, escaped search, a hook for app filters) and the preparation view;
+  - product files: content admission, the multipart parser, upload, list and
+    publish;
   - rich text and the content fallback rules.
-  The content language rules (`Languages`: key, allowed, translated names) went
-  to `core`, because roles, marketing, legal and POS use them too.
-  Open: the edit handler itself still runs in the server, because it also calls
-  legal, marketing, knowledge and the shop settings; so do product list and
-  creation, category navigation and staging, assets, translation jobs, catalogue
-  reads and pages.
+  The content language rules (`Languages`: key, allowed, translated names) and
+  the sort direction went to `core`, because other components use them too.
+  Open: the handlers of product edit, list and creation still run in the server,
+  because they also call legal, marketing, knowledge, the app host and the shop
+  settings. Also open: downloads, image jobs and captions, translation jobs,
+  storefront catalogue reads and pages, staging of categories, demo data.
 - [ ] inventory
 - [ ] shipping
 - [ ] customers

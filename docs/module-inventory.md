@@ -149,12 +149,12 @@ This lists every checked-in source module in these roots, including files with n
 | [src/assets/image_jobs.rs](../src/assets/image_jobs.rs) | Durable image jobs: tenant admission, revision-bound private previews and explicit publication, without automatic paid retries. |
 | [src/assets/image_provider.rs](../src/assets/image_provider.rs) | Optional OpenAI Images adapter; bounded responses and decoded PNG output, no remote user URLs or leaked provider errors. |
 | [src/assets/import.rs](../src/assets/import.rs) | Immutable imported product images reuse the native asset table, product lock, byte validation and publication lifecycle. |
-| [src/assets/ingestion.rs](../src/assets/ingestion.rs) | Shared bounded multipart parser for product uploads and scoped app uploads; file validation/persistence stays in the asset owner. |
+| [src/assets/ingestion.rs](../src/assets/ingestion.rs) | The bounded multipart parser is owned by the catalog component. |
 | [src/assets/mod.rs](../src/assets/mod.rs) | Product attachments and paid digital downloads: bounded binary persistence and tenant/account ACL. |
 | [src/assets/model_format.rs](../src/assets/model_format.rs) | GLB validation is owned by the catalog component. |
 | [src/assets/rich.rs](../src/assets/rich.rs) | Safe structured rich content is validated by the catalog component. |
 | [src/assets/rich_document.rs](../src/assets/rich_document.rs) | The URL rule of rich documents is owned by the catalog component. |
-| [src/assets/upload.rs](../src/assets/upload.rs) | File admission, immutable bytes and explicit publishing; binary content never enters merchant list responses. |
+| [src/assets/upload.rs](../src/assets/upload.rs) | Entry points of product file operations for capabilities and app upload surfaces; rules and storage are owned by the catalog component. |
 | [src/auth/abuse.rs](../src/auth/abuse.rs) | Database-backed account and trusted peer-prefix throttles shared by replicas; reserve before password hashing. |
 | [src/auth/broker.rs](../src/auth/broker.rs) | Optional trusted identity exchange: signatures bind route, audience, expiry and one-use nonce. |
 | [src/auth/broker_credentials.rs](../src/auth/broker_credentials.rs) | Explicit password setup/recovery or existing-password verification from a trusted, verified-email broker. |
@@ -666,6 +666,7 @@ This lists every checked-in source module in these roots, including files with n
 
 | Module | Responsibility |
 |---|---|
+| [components/catalog/src/domain/asset_file.rs](../components/catalog/src/domain/asset_file.rs) | File admission by content: a declared type is only accepted when the bytes carry its signature. |
 | [components/catalog/src/domain/content.rs](../components/catalog/src/domain/content.rs) | Field-level content fallback: a missing or `null` translation inherits the main language, an empty one stays empty. |
 | [components/catalog/src/domain/graph_query.rs](../components/catalog/src/domain/graph_query.rs) | Saved category predicates select only current confirmed public source claims; no inference at browse time. |
 | [components/catalog/src/domain/hydration.rs](../components/catalog/src/domain/hydration.rs) | Translated product hydration: each field is resolved on its own along the language chain. |
@@ -676,11 +677,14 @@ This lists every checked-in source module in these roots, including files with n
 | [components/catalog/src/domain/rich.rs](../components/catalog/src/domain/rich.rs) | Safe structured rich content, never executable HTML. Same schema for merchant API and frontend. |
 | [components/catalog/src/domain/rich_document.rs](../components/catalog/src/domain/rich_document.rs) | Allow-listed editor JSON with bounded depth and content; HTML/handlers/styles cannot enter the renderer. |
 | [components/catalog/src/domain.rs](../components/catalog/src/domain.rs) | Pure catalogue rules: no database, no HTTP. |
+| [components/catalog/src/http/assets.rs](../components/catalog/src/http/assets.rs) | Merchant product files: list, upload and publish. |
 | [components/catalog/src/http/categories.rs](../components/catalog/src/http/categories.rs) | Merchant category tree (list, save) and the public navigation. |
+| [components/catalog/src/http/ingestion.rs](../components/catalog/src/http/ingestion.rs) | Shared bounded multipart parser for product uploads and scoped app uploads; file validation and persistence stay with the asset service. |
 | [components/catalog/src/http/reviews.rs](../components/catalog/src/http/reviews.rs) | Storefront review submission and merchant moderation. |
 | [components/catalog/src/http.rs](../components/catalog/src/http.rs) | HTTP handlers of the catalog component. |
 | [components/catalog/src/lib.rs](../components/catalog/src/lib.rs) | Catalog component: products, their translated content and the catalogue reads other components rely on. |
 | [components/catalog/src/ports.rs](../components/catalog/src/ports.rs) | What the catalog component needs from other components. The server implements these; tests use their own. |
+| [components/catalog/src/service/assets.rs](../components/catalog/src/service/assets.rs) | File admission, immutable bytes and explicit publishing; binary content never enters merchant list responses. |
 | [components/catalog/src/service/categories.rs](../components/catalog/src/service/categories.rs) | Revision-bound category writes, bounded translations and serialized cycle-safe tree moves. |
 | [components/catalog/src/service/model_media.rs](../components/catalog/src/service/model_media.rs) | Model media references reuse owned immutable product assets, current product CAS and parent variant links. |
 | [components/catalog/src/service/navigation.rs](../components/catalog/src/service/navigation.rs) | Public navigation is localized and restricted to the selected channel's active category ancestry. |
@@ -699,6 +703,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/catalog/src/store/reviews.rs](../components/catalog/src/store/reviews.rs) | Stored product reviews: one per product and reviewer, published only by moderation. |
 | [components/catalog/src/store/translations.rs](../components/catalog/src/store/translations.rs) | Reads of translated product texts, always bounded to a given set of products. |
 | [components/catalog/src/store.rs](../components/catalog/src/store.rs) | The only place of the catalog component that contains SQL. |
+| [components/catalog/src/types/asset.rs](../components/catalog/src/types/asset.rs) | A stored product file as merchant lists show it; the content itself never enters a list. |
 | [components/catalog/src/types/category.rs](../components/catalog/src/types/category.rs) | A category write: its place in the tree and its data with translations per content language. |
 | [components/catalog/src/types/product_edit.rs](../components/catalog/src/types/product_edit.rs) | The product edit payload: translated texts, multilingual metadata and the optional commerce and identity fields. |
 | [components/catalog/src/types/product_fields.rs](../components/catalog/src/types/product_fields.rs) | The commerce fields of a product as the editor sends them; stock is optional so an untouched quantity is never written back. |
