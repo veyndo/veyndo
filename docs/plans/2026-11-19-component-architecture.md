@@ -177,7 +177,9 @@ Order follows the dependency report, lowest first. Each line is one move.
 - [ ] catalog. Started: `components/catalog` owns the product row hydration,
       the locked range read and fixed-price write that price jobs use (the server's
       `Catalogue` port delegates to it), the template-shop read and the pure
-      content fallback and language key rules. Open: product edit and create,
+      content fallback and language key rules, the commerce fields of a product
+      (typed payload, bounds, save that keeps an untouched stock), the media rules
+      and the GLB admission with the model asset check. Open: product edit and create,
       categories, assets, reviews, translations, catalogue reads and pages; these
       take the server state and need ports to `shop` (settings) and `checkout`.
 - [ ] inventory

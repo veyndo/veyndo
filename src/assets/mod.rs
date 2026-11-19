@@ -14,7 +14,6 @@ mod rich_document;
 pub(crate) use rich_document::safe_url;
 pub(crate) mod ingestion;
 mod model_format;
-pub(crate) mod model_media;
 mod upload;
 pub(crate) use upload::persist as persist_app_upload;
 mod app_files;

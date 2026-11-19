@@ -228,7 +228,7 @@ pub(super) async fn save_product(
         return Err(conflict("Product changed"));
     }
     if let Some(fields) = &edit.commerce {
-        fields.save(&mut tx, &t, &id).await?;
+        veyndo_catalog::service::product_fields::save(&mut tx, &t, &id, fields).await?;
     }
     for (lang, tr) in edit.translations {
         let locale =

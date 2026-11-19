@@ -16,7 +16,7 @@ run SQL without being in a `store` folder. Both numbers only fall.
 | core | 3202 | 0 | 4 | 10 | 10 | none | 10 |
 | identity | 3524 | 8 | 86 | 18 | 13 | apps (9), catalog (7), checkout (1), core (356), customers (1), host (4), intelligence (9), marketing (5), shop (14), studio (4) | 11 |
 | shop | 4140 | 43 | 98 | 24 | 15 | apps (7), b2b (2), catalog (1), checkout (17), core (260), customers (3), host (4), intelligence (8), marketing (8), payments (4), pricing (8), shipping (1), studio (13) | 19 |
-| catalog | 5993 | 52 | 202 | 32 | 11 | apps (19), b2b (2), checkout (12), core (343), customers (5), identity (30), intelligence (10), marketing (16), pricing (24), protocols (1), shipping (1), shop (42), studio (9) | 15 |
+| catalog | 6172 | 49 | 202 | 30 | 11 | apps (19), b2b (2), checkout (12), core (342), customers (5), identity (30), intelligence (10), marketing (16), pricing (26), protocols (1), shipping (1), shop (42), studio (9) | 15 |
 | inventory | 374 | 3 | 26 | 3 | 2 | catalog (1), checkout (2), core (27), identity (4), intelligence (3), pricing (2), protocols (2), shop (2) | 3 |
 | pricing | 3737 | 9 | 19 | 5 | 2 | apps (2), catalog (1), checkout (8), core (61), identity (4), marketing (3), shop (15), studio (1) | 9 |
 | shipping | 970 | 7 | 115 | 4 | 0 | apps (3), catalog (5), checkout (1), core (45), identity (5), orders (5), payments (1), pricing (12), shop (20), studio (4) | 6 |
@@ -65,7 +65,7 @@ reduced to one direction first.
 - catalog ↔ identity: 30 and 7 references
 - catalog ↔ intelligence: 10 and 31 references
 - catalog ↔ marketing: 16 and 8 references
-- catalog ↔ pricing: 24 and 1 references
+- catalog ↔ pricing: 26 and 1 references
 - catalog ↔ protocols: 1 and 10 references
 - catalog ↔ shipping: 1 and 5 references
 - catalog ↔ shop: 42 and 1 references
@@ -119,7 +119,7 @@ reduced to one direction first.
 | intelligence | core | `RequestContext` | 147 |
 | apps | core | `RequestContext` | 137 |
 | intelligence | core | `State` | 136 |
-| catalog | core | `Result` | 128 |
+| catalog | core | `Result` | 120 |
 | payments | core | `Result` | 115 |
 | apps | core | `State` | 113 |
 | marketing | core | `Result` | 91 |

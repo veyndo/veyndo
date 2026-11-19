@@ -690,15 +690,50 @@
       "sha256": "e48495a91550ef1f854029d20577c01a39ad0a2510019a8e2985157aa86e207b",
       "review": "Catalog component crate created; no rule changed"
     },
+    "components/catalog/src/domain/media.rs": {
+      "status": "unproved",
+      "sha256": "eb9f5aacef9d5c7e52dc5ad2e88c2033632bcb60f406d8a035d7acf5d249f1e3",
+      "review": "Product fields, media rules and GLB validation moved into components/catalog; no rule changed"
+    },
+    "components/catalog/src/domain/model_format.rs": {
+      "status": "unproved",
+      "sha256": "dc81356114cf270a6353705cf0bf21a372aae055cfca26624a629ef5a877a2c4",
+      "review": "Product fields, media rules and GLB validation moved into components/catalog; no rule changed"
+    },
     "components/catalog/src/domain.rs": {
       "status": "unproved",
-      "sha256": "9848eafea1431e01f95ca8adb45bf3e93811326c4f27c47c3ef9426eee3b0c5d",
-      "review": "Catalog component crate created; no rule changed"
+      "sha256": "0f4bd851272d641a6463be6e60a4b0a50f763d2946f9b5efb8d51dd1bc6b4db5",
+      "review": "Product fields, media rules and GLB validation moved into components/catalog; no rule changed"
     },
     "components/catalog/src/lib.rs": {
       "status": "unproved",
-      "sha256": "173fa840e46ca8c839328456209af1e3b188bfa2363edf204eb2a01a3fb0d1a2",
-      "review": "Catalog component crate created; no rule changed"
+      "sha256": "6739b3b47ae50559f137bf6afdcd1f5d367fb428e88b3bd9f5feb97cc6bf1588",
+      "review": "Product fields, media rules and GLB validation moved into components/catalog; no rule changed"
+    },
+    "components/catalog/src/service/model_media.rs": {
+      "status": "unproved",
+      "sha256": "1a7b6835216fccfcb73973eb2d15ad073c1e6c049ac781bc247807739f6d27d7",
+      "review": "Product fields, media rules and GLB validation moved into components/catalog; no rule changed"
+    },
+    "components/catalog/src/service/product_fields.rs": {
+      "status": "unproved",
+      "sha256": "42769340c81f5f4b2f977d8504f8d605dcea680cae2be92d14e1d69053acde2b",
+      "review": "Product fields, media rules and GLB validation moved into components/catalog; no rule changed"
+    },
+    "components/catalog/src/service.rs": {
+      "status": "unproved",
+      "sha256": "1b5be1c9663b52502e27c4d2990147f3fd74c9731575790f78be13da4475585f",
+      "review": "Product fields, media rules and GLB validation moved into components/catalog; no rule changed"
+    },
+    "components/catalog/src/store/assets.rs": {
+      "status": "unproved",
+      "sha256": "3a94b0d5557ea053a5d13f281bfd22081a02d30c53357dd21a7c97019048452f",
+      "review": "Product fields, media rules and GLB validation moved into components/catalog; no rule changed"
+    },
+    "components/catalog/src/store/product_fields.rs": {
+      "status": "unproved",
+      "sha256": "1724260f523b75a6a5a5b0697a0704cc1670d1a899c0f212ca2ea88a68ae5ab6",
+      "review": "Product fields, media rules and GLB validation moved into components/catalog; no rule changed"
     },
     "components/catalog/src/store/products.rs": {
       "status": "unproved",
@@ -707,8 +742,18 @@
     },
     "components/catalog/src/store.rs": {
       "status": "unproved",
-      "sha256": "2cbb6b03b86da9564464e8b9a2079bc673542e54b22f622f0f5f8654a2f7e353",
-      "review": "Catalog component crate created; no rule changed"
+      "sha256": "0f0fac6ebeec45b815974f175e0c9fdb22694f4049c7c54aa0302899fa9fb589",
+      "review": "Product fields, media rules and GLB validation moved into components/catalog; no rule changed"
+    },
+    "components/catalog/src/types/product_fields.rs": {
+      "status": "unproved",
+      "sha256": "a0239be7c34a4fcaba7a164af0da9d3ef71d05d48ac69c18c6819bce7fa58890",
+      "review": "Product fields, media rules and GLB validation moved into components/catalog; no rule changed"
+    },
+    "components/catalog/src/types.rs": {
+      "status": "unproved",
+      "sha256": "ff4f6268c1d58aac766f193c006e0143cbc6e85de6ce0798d886e0fd7bffba0f",
+      "review": "Product fields, media rules and GLB validation moved into components/catalog; no rule changed"
     },
     "components/core/src/access.rs": {
       "status": "unproved",
@@ -3522,18 +3567,13 @@
     },
     "src/assets/mod.rs": {
       "status": "unproved",
-      "sha256": "fa63b09d4dd5311ee550861898294d7411cd2be6b37149ae0474417895ff3c19",
-      "review": "Review native GLB validation and owned parent assignments, current catalogue CAS and binary preview/channel authorization; no kernel policy changes or full-core proof claim"
+      "sha256": "462a00413bc25183f29394119a188dab21227e6063da87382c6832cc97e2fbe2",
+      "review": "Product fields, media rules and GLB validation moved into components/catalog; no rule changed"
     },
     "src/assets/model_format.rs": {
       "status": "unproved",
-      "sha256": "a16207e26d8a2f1831e593156a769ad0eb2049a50bfdb4d922f6af2acb519f13",
-      "review": "Reviewed generic saved-payment consent/session and opaque instrument ownership, forced signed-scope RLS and tenant FKs, immutable funding in native payment jobs, non-financial revocation receipt handling and optional metadata savepoint isolation. Actual local Rust/PG save/reuse/revoke, invalid late metadata, restart and distinct restricted-login cases pass. Model-format test padding uses the equivalent is_multiple_of predicate for current Clippy. Extracted kernel unchanged; SQL/provider paths remain unproved."
-    },
-    "src/assets/model_media.rs": {
-      "status": "unproved",
-      "sha256": "f662aa570f75f8077c815dc069b116c55ceb0ee24006f6c97f95ab02b3932f78",
-      "review": "Review native GLB validation and owned parent assignments, current catalogue CAS and binary preview/channel authorization; no kernel policy changes or full-core proof claim"
+      "sha256": "148d718e05456b098ba034c136679db6bedaf802806dec50b745631957cbb77f",
+      "review": "Product fields, media rules and GLB validation moved into components/catalog; no rule changed"
     },
     "src/assets/rich.rs": {
       "status": "unproved",
@@ -4347,13 +4387,13 @@
     },
     "src/commerce/product_edit.rs": {
       "status": "unproved",
-      "sha256": "6cabad4adde975aab9e57a45d17ac5ab329b9d524b002def884ce1c78300ec17",
-      "review": "Reviewed caption proposal admission, owned and DNS-pinned bounded image evidence, product/page locale limits and native registry dispatch; existing HTTP/MCP, tenant denial and sandbox publication regressions passed. No new financial or kernel decision and no expanded Lean claim."
+      "sha256": "87c2a25827ad164039345aedf7fe08316ddccd9362febaf80117361f05447b65",
+      "review": "Product fields, media rules and GLB validation moved into components/catalog; no rule changed"
     },
     "src/commerce/product_fields.rs": {
       "status": "unproved",
-      "sha256": "8a9ffdc93f09bd1aede67e486ee957579d5488ed81fe7a99a681b746cdc8f3b7",
-      "review": "Review native GLB validation and owned parent assignments, current catalogue CAS and binary preview/channel authorization; no kernel policy changes or full-core proof claim"
+      "sha256": "6519f6e5f65c69f1543f4ae0b683c2c18dba37eff0d1c8257aec0f5c8e3fd7f9",
+      "review": "Product fields, media rules and GLB validation moved into components/catalog; no rule changed"
     },
     "src/commerce/product_input.rs": {
       "status": "unproved",
@@ -5832,8 +5872,8 @@
       "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
     },
     "Cargo.lock": {
-      "sha256": "95273f1a25ff41410b3420af00c87b56236b8dacf384d3ad4cb7f96aea28a75a",
-      "review": "Catalog component crate created; no rule changed"
+      "sha256": "e141dda7e5fa0a6b848caebe45aceef3fed186327171321e2bb72bee04477bca",
+      "review": "Product fields, media rules and GLB validation moved into components/catalog; no rule changed"
     },
     "Cargo.toml": {
       "sha256": "2d7ebc432e34c20cf53825be094b58226b72dc3894a6f2804810c2c37211dd38",
