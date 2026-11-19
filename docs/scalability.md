@@ -170,7 +170,7 @@ bounded database batches and a versioned publication step. Rebuild only changed
 documents and model versions; avoid redundant embeddings for identical variant
 descriptions within their authorized scope.
 
-[Semantic retrieval](../src/knowledge.rs) now uses private Qdrant with
+[Semantic retrieval](../components/intelligence/src/knowledge.rs) now uses private Qdrant with
 tenant/model filtering and authoritative PostgreSQL hydration. Source vectors
 and durable synchronization remain in PostgreSQL. [Managed hosting](managed-hosting.md)
 describes this delivered boundary and the legacy pgvector conversion. At scale,

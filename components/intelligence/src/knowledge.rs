@@ -1,7 +1,6 @@
 //! Transactional PostgreSQL knowledge relations and separately indexed Qdrant retrieval.
-use crate::scoped_pool::ScopedPool as PgPool;
-use serde_json::{Value, json};
-use sqlx::{PgConnection, Row};
+use serde_json::Value;
+use veyndo_runtime::scoped_pool::ScopedPool as PgPool;
 pub mod embeddings;
 pub use embeddings::embedding;
 mod relations;

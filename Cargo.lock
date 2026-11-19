@@ -3501,6 +3501,7 @@ dependencies = [
  "veyndo-customers",
  "veyndo-flow-graph",
  "veyndo-identity",
+ "veyndo-intelligence",
  "veyndo-inventory",
  "veyndo-kernel",
  "veyndo-marketing",
@@ -3511,6 +3512,7 @@ dependencies = [
  "veyndo-runtime",
  "veyndo-shipping",
  "veyndo-shop",
+ "veyndo-studio",
  "wasmtime",
  "wat",
  "webpki-roots",
@@ -3699,6 +3701,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "veyndo-intelligence"
+version = "0.5.0"
+dependencies = [
+ "reqwest",
+ "serde",
+ "serde_json",
+ "sha2 0.10.9",
+ "sqlx",
+ "tokio",
+ "uuid",
+ "veyndo-core",
+ "veyndo-pricing",
+ "veyndo-runtime",
+]
+
+[[package]]
 name = "veyndo-inventory"
 version = "0.5.0"
 dependencies = [
@@ -3874,6 +3892,18 @@ dependencies = [
  "veyndo-inventory",
  "veyndo-pricing",
  "veyndo-shipping",
+]
+
+[[package]]
+name = "veyndo-studio"
+version = "0.5.0"
+dependencies = [
+ "chrono",
+ "chrono-tz",
+ "serde",
+ "serde_json",
+ "veyndo-app-model",
+ "veyndo-core",
 ]
 
 [[package]]

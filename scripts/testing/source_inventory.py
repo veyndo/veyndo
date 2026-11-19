@@ -21,6 +21,10 @@ def responsibility(path):
     comment = re.search(r'(?m)^//! (.*)', text)
     if comment:
         return comment[1]
+    if path.suffix == '.sql':
+        comment = re.search(r'(?m)^--\s*(.+)', text)
+        if comment:
+            return comment[1]
     comment = re.search(r'/\*\*?\s*([^\n]*?)(?:\*/|\n)', text)
     if comment:
         return comment[1].strip(' *')

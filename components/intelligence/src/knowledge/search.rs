@@ -1,5 +1,7 @@
 //! Hybrid exact/lexical + dense RRF; hydrate current tenant rows and retrieve only connected evidence.
-use super::*;
+use super::PgPool;
+use super::vectors;
+use serde_json::{Value, json};
 pub async fn search(
     db: &PgPool,
     tenant: &str,

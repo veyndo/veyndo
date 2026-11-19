@@ -1,0 +1,14 @@
+[package]
+name = "veyndo-studio"
+version.workspace = true
+edition.workspace = true
+license-file.workspace = true
+description = "Studio: reports, personal views and the copy rules of staging shops"
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+chrono.workspace = true
+chrono-tz.workspace = true
+veyndo-core = { path = "../core" }
+veyndo-app-model = { path = "../../extensions/services/app-storage/model" }

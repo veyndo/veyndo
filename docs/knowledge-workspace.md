@@ -295,7 +295,7 @@ content-review decision, not a mechanism for sharing an entire mailbox.
 - `retrieval.rs`, `preview.rs`, `questions.rs`: shared source/language/archive scope,
   deterministic evidence preview and cited real product answers.
 - `tools.rs`, `capabilities/catalog.rs`, `mcp.rs`: HTTP/MCP parity and permission filtering.
-- `src/knowledge.rs`: transactional SQL document reassignment and public graph filtering.
+- `components/intelligence/src/knowledge.rs`: transactional SQL document reassignment and public graph filtering.
 - `src/marketing/flows.rs`, `catalog.rs`: shared native trigger registry, non-order source event admission and durable execution.
 - `src/planner.rs`: document passages actually feed and persist with merchant proposals.
 - `src/staging/documents.rs`: clone/diff/release metadata and chunks as one unit.

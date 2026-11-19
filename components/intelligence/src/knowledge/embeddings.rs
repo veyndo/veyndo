@@ -1,5 +1,5 @@
 //! Bounded batched embeddings: Ollama and OpenAI-compatible self-hosted endpoints, model-defined dimensions.
-use super::*;
+use serde_json::json;
 /// Reject malformed vectors before SQL/Qdrant; dimensions belong to the embedding model.
 pub fn valid(vector: &[f32]) -> bool {
     (1..=8192).contains(&vector.len())
@@ -56,7 +56,7 @@ pub async fn batch(
             response.status()
         ));
     }
-    let raw = crate::http_json::bounded(response, 8 * 1024 * 1024).await?;
+    let raw = veyndo_runtime::http_json::bounded(response, 8 * 1024 * 1024).await?;
     let value = if openai {
         let mut data = raw["data"]
             .as_array()
@@ -95,7 +95,8 @@ fn validate_batch(vectors: &[Vec<f32>], count: usize) -> Result<(), String> {
 }
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use super::{valid, validate_batch};
+
     #[test]
     fn dimensions_follow_model_and_malformed_batches_fail() {
         assert!(validate_batch(&[vec![1.; 384], vec![2.; 384]], 2).is_ok());

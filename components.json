@@ -795,21 +795,20 @@
     "intelligence": {
       "title": "Shop memory, knowledge retrieval, agents, proposals and model inference",
       "sources": [
-        "src/cognition",
+        "components/intelligence",
         "crates/cognition",
-        "src/agent_runs.rs",
-        "src/agent_runs",
         "src/agent.rs",
+        "src/agent_runs",
+        "src/agent_runs.rs",
+        "src/cognition",
         "src/concierge.rs",
-        "src/planner.rs",
+        "src/documents",
+        "src/experience.rs",
         "src/planner",
+        "src/planner.rs",
         "src/proposal_apply.rs",
         "src/proposal_model.rs",
-        "src/proposal_routes.rs",
-        "src/knowledge.rs",
-        "src/knowledge",
-        "src/documents",
-        "src/experience.rs"
+        "src/proposal_routes.rs"
       ],
       "tables": [
         "ai_price_budget",
@@ -885,17 +884,18 @@
         "translation_jobs",
         "user_sessions"
       ],
-      "glob_imports": 86,
+      "glob_imports": 79,
       "untyped_access": 716,
       "sql_outside_store": 55
     },
     "studio": {
       "title": "Merchant overview, reports, private staging shops and history",
       "sources": [
-        "src/studio.rs",
-        "src/studio",
+        "components/studio",
+        "src/history",
         "src/staging",
-        "src/history"
+        "src/studio",
+        "src/studio.rs"
       ],
       "tables": [
         "entity_history",
@@ -953,7 +953,7 @@
         "translation_items",
         "translation_jobs"
       ],
-      "glob_imports": 26,
+      "glob_imports": 24,
       "untyped_access": 167,
       "sql_outside_store": 18
     },

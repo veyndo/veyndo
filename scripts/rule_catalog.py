@@ -34,7 +34,7 @@ for file in sorted(core.rglob("*Rule.php")):
             "type": name,
             "source": str(file.relative_to(core)),
             "status": "implemented-scope" if name in implemented else "not-ported",
-            "nativeModule": "src/marketing/rules.rs + src/marketing/rule_match.rs"
+            "nativeModule": "components/marketing/src/domain/rules.rs + components/marketing/src/domain/rule_match.rs"
             if name in implemented
             else None,
         }

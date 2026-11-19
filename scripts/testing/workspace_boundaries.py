@@ -20,7 +20,9 @@ OWNERS.update({'veyndo-core': ROOT / 'components/core', 'veyndo-pricing': ROOT /
                'veyndo-payments': ROOT / 'components/payments',
                'veyndo-b2b': ROOT / 'components/b2b',
                'veyndo-pos': ROOT / 'components/pos',
-               'veyndo-checkout': ROOT / 'components/checkout'})
+               'veyndo-checkout': ROOT / 'components/checkout',
+               'veyndo-intelligence': ROOT / 'components/intelligence',
+               'veyndo-studio': ROOT / 'components/studio'})
 OWNERS.update({'veyndo': ROOT, 'veyndo-migration': ROOT / 'extensions/apps/migration',
                'veyndo-marketplaces': ROOT / 'extensions/apps/marketplaces',
                'veyndo-app-storage': ROOT / 'extensions/services/app-storage',
@@ -53,6 +55,8 @@ ALLOWED = {
     'veyndo-b2b': {'veyndo-core', 'veyndo-pricing', 'veyndo-shop'},
     'veyndo-pos': {'veyndo-core', 'veyndo-pricing', 'veyndo-shop'},
     'veyndo-checkout': {'veyndo-core', 'veyndo-pricing', 'veyndo-shop'},
+    'veyndo-intelligence': {'veyndo-core', 'veyndo-pricing', 'veyndo-runtime'},
+    'veyndo-studio': {'veyndo-core', 'veyndo-app-model'},
     'veyndo-shop': {'veyndo-core', 'veyndo-pricing', 'veyndo-inventory', 'veyndo-shipping', 'veyndo-app-model', 'veyndo-catalog'},
 }
 # Reviewed direct external capabilities. Cargo reports actual package names even
@@ -80,6 +84,8 @@ EXTERNAL = {
     'veyndo-b2b': {'serde', 'serde_json'},
     'veyndo-pos': {'serde', 'serde_json'},
     'veyndo-checkout': {'serde', 'serde_json', 'chrono'},
+    'veyndo-intelligence': {'serde', 'serde_json', 'sqlx', 'reqwest', 'sha2', 'tokio', 'uuid'},
+    'veyndo-studio': {'serde', 'serde_json', 'chrono', 'chrono-tz'},
     'veyndo-shop': {'serde', 'serde_json', 'chrono', 'reqwest', 'sqlx'},
     'veyndo-core': {'axum', 'serde', 'serde_json', 'sha2', 'sqlx', 'uuid', 'tokio', 'tracing', 'reqwest'},
     'veyndo-runtime': {'hmac', 'sha2', 'zeroize', 'sqlx', 'tokio', 'futures-util',

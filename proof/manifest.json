@@ -423,7 +423,7 @@
     },
     "experiment_result_admissible": {
       "bindings": [
-        "src/cognition/experiments/model.rs"
+        "components/intelligence/src/domain/experiment_model.rs"
       ],
       "theorems": [
         "experiment_result_exact",
@@ -1235,6 +1235,66 @@
       "sha256": "5e7aa39b24a5d51ebd41a9c115adf496790236d0bfe39376e71f1366b708c47c",
       "review": "The route permission registry moved unchanged into components/identity and is generic over the server state"
     },
+    "components/intelligence/src/domain/behavior_input.rs": {
+      "status": "unproved",
+      "sha256": "d3a0dfdf272053030205336636b413176c6d4974ba8ea8bb4afbe0e1b18a5bdf",
+      "review": "Knowledge module and experiment model moved into components/intelligence; kernel call sites unchanged"
+    },
+    "components/intelligence/src/domain/experiment_model.rs": {
+      "status": "reviewed-binding",
+      "sha256": "2d453986a4321a540e62ff95be4da3b60e9c2f56efd2625dcc76a9cd1175bd7f",
+      "review": "Knowledge module and experiment model moved into components/intelligence; kernel call sites unchanged"
+    },
+    "components/intelligence/src/domain.rs": {
+      "status": "unproved",
+      "sha256": "62e3a2f732388a40f8dbe54d807b51f8fa2555035030393a5f364bec6e6f3df2",
+      "review": "Knowledge module and experiment model moved into components/intelligence; kernel call sites unchanged"
+    },
+    "components/intelligence/src/knowledge/embeddings.rs": {
+      "status": "unproved",
+      "sha256": "3e999ee513739da62b1fdb0a0f28d92bccadb82a08a02bd251773dba513f2fc4",
+      "review": "Knowledge module and experiment model moved into components/intelligence; kernel call sites unchanged"
+    },
+    "components/intelligence/src/knowledge/relations.rs": {
+      "status": "unproved",
+      "sha256": "794273c89b92bec008fa1d49a833bd4f5d1ddfbefaeb45c7b40290abc47867bd",
+      "review": "Knowledge module and experiment model moved into components/intelligence; kernel call sites unchanged"
+    },
+    "components/intelligence/src/knowledge/rerank.rs": {
+      "status": "unproved",
+      "sha256": "1cbe668909d6f3ea404e3133945bc6c3bbfa7015d7425ef5686c15e2477f5fdd",
+      "review": "Knowledge module and experiment model moved into components/intelligence; kernel call sites unchanged"
+    },
+    "components/intelligence/src/knowledge/search.rs": {
+      "status": "unproved",
+      "sha256": "d506827cb8cd1d4aba19d351ef49d66e3f2cfd87454d58f515ceebad6b10a3fe",
+      "review": "Knowledge module and experiment model moved into components/intelligence; kernel call sites unchanged"
+    },
+    "components/intelligence/src/knowledge/vector_cache.rs": {
+      "status": "unproved",
+      "sha256": "c9b79364aa0eab1a7f42e3d0fa0f2392c1615aeff8e46f6007479464dec67022",
+      "review": "Knowledge module and experiment model moved into components/intelligence; kernel call sites unchanged"
+    },
+    "components/intelligence/src/knowledge/vector_namespace.rs": {
+      "status": "unproved",
+      "sha256": "997ef19804448ecf861e414aef97c646c7d4e8129d1d7339bcfcb4903c72a976",
+      "review": "Knowledge module and experiment model moved into components/intelligence; kernel call sites unchanged"
+    },
+    "components/intelligence/src/knowledge/vectors.rs": {
+      "status": "unproved",
+      "sha256": "a5497e22aeb4b44930f0c4220a5ff6538da73221bc5540d2a473d3810e66872b",
+      "review": "Knowledge module and experiment model moved into components/intelligence; kernel call sites unchanged"
+    },
+    "components/intelligence/src/knowledge.rs": {
+      "status": "unproved",
+      "sha256": "93c1fa1df3cce65489d388c43f6a2dd73326521c43cdb5309fed7bbf1c92684c",
+      "review": "Knowledge module and experiment model moved into components/intelligence; kernel call sites unchanged"
+    },
+    "components/intelligence/src/lib.rs": {
+      "status": "unproved",
+      "sha256": "c94b3307ac1fb5fe8fe31ad0829412b9f881782b2292e23a4c6ea54442fcdffb",
+      "review": "Knowledge module and experiment model moved into components/intelligence; kernel call sites unchanged"
+    },
     "components/inventory/src/domain/lines.rs": {
       "status": "unproved",
       "sha256": "661e3e3cea583c3bdae3a0e567b8f382e5d2c703548af5b4cfd38be5a4c26ece",
@@ -1964,6 +2024,26 @@
       "status": "unproved",
       "sha256": "c8dd3115d7120bce0313a2f6f60e6690a5d41100f025c68bfe79148803d75625",
       "review": "cart types and rule engine moved into components; checking bindings"
+    },
+    "components/studio/src/domain/report_config.rs": {
+      "status": "unproved",
+      "sha256": "19d211bc72242ce57aecfdb807f6bf061348eb996fe831e2c9223827b20e0337",
+      "review": "Knowledge module and experiment model moved into components/intelligence; kernel call sites unchanged"
+    },
+    "components/studio/src/domain/report_period.rs": {
+      "status": "unproved",
+      "sha256": "c64b428fee5002bebc66b72447bccbfd7503c3758cd81b846b38ccb5e397942f",
+      "review": "Knowledge module and experiment model moved into components/intelligence; kernel call sites unchanged"
+    },
+    "components/studio/src/domain.rs": {
+      "status": "unproved",
+      "sha256": "9965346f41ea22466e3fb66ada6a4756df856244bbf11913d9566890c2dff95f",
+      "review": "Knowledge module and experiment model moved into components/intelligence; kernel call sites unchanged"
+    },
+    "components/studio/src/lib.rs": {
+      "status": "unproved",
+      "sha256": "31e225c636d0847d2a3d04470a2a1e66f8c899af0be5753d72b1205340f4865b",
+      "review": "Knowledge module and experiment model moved into components/intelligence; kernel call sites unchanged"
     },
     "crates/apps/src/component_runtime.rs": {
       "status": "unproved",
@@ -4972,8 +5052,8 @@
     },
     "src/cognition/behavior/input.rs": {
       "status": "unproved",
-      "sha256": "57360b3cbc05bfcdd727c22a9fc77d3094f73f43cd547a54a8c86afa94465071",
-      "review": "Behavior analytics reviewed: existing cart-locked consent predicate reused; purpose-separated withdrawal, tenant/FK scope, typed and bounded observations, private journey permissions and derived reports. New SQL/frontend/proxy adapters remain unproved; no new theorem claim."
+      "sha256": "c431ea136a65e37b80460c8a676e884e18ba4be20ee8a70c6d5e4be64e73a60a",
+      "review": "Knowledge module and experiment model moved into components/intelligence; kernel call sites unchanged"
     },
     "src/cognition/behavior/journey.rs": {
       "status": "unproved",
@@ -5021,9 +5101,9 @@
       "review": "Self-running experiments: Design gains an optional immutable automation flag pair; experiments/automation.rs adds a read-only suggestion from live payment figures and worker steps that repeat the manual finish transition, call the existing report owner and record a decision, fixing the treatment layout mode only when the unchanged extracted experiment_result_admissible reports a proved uplift; cognitive_experiments suite covers kept, seeded published and manual cases"
     },
     "src/cognition/experiments/model.rs": {
-      "status": "reviewed-binding",
-      "sha256": "493ec08961b6e40d558af1859f475db0942d872e409601e6bef55c04bbb7946a",
-      "review": "Self-running experiments: Design gains an optional immutable automation flag pair; experiments/automation.rs adds a read-only suggestion from live payment figures and worker steps that repeat the manual finish transition, call the existing report owner and record a decision, fixing the treatment layout mode only when the unchanged extracted experiment_result_admissible reports a proved uplift; cognitive_experiments suite covers kept, seeded published and manual cases"
+      "status": "unproved",
+      "sha256": "5e6718494a81b6e56887224a86512bb152b0fb7bb4bce67f6e744889a3818c1a",
+      "review": "Knowledge module and experiment model moved into components/intelligence; kernel call sites unchanged"
     },
     "src/cognition/experiments/report.rs": {
       "status": "unproved",
@@ -5575,46 +5655,6 @@
       "sha256": "e5ecdd27274850e62d9550c1c30e262fb08b255da3f5dc2a62c088c0b7eb1da4",
       "review": "History discovery now uses native entity rights plus current read/write/PII conjunctions; canonical entity set and PII classification are shared with native history. Real narrow-role counterexample reproduced before repair; no financial policy changed."
     },
-    "src/knowledge/embeddings.rs": {
-      "status": "unproved",
-      "sha256": "2ebf5812803de9c7a3eb79304ed59e57a2b0fe72c9f64db733f003be5ea34c8e",
-      "review": "Reviewed bounded tenant-scoped embedding intake/model-generation cursors, revision/lease fencing and fair vector retry drain; pooled geometry-checked Qdrant hydration and admitted reranking; current-right read tools, structured protocols and SSE transport; exact source quotation/review/public compilation/signatures; transactional price corridors and non-compounding daily autonomy; consent-bound assignments/preferences and delayed cached native-payment readout including stop/withdrawal invalidation. New migration RLS/composite links and extracted predicate consumers reviewed. Native HTTP/PG/Qdrant/provider/UI regressions cover contracts; semantic quality, statistical assumptions, SQL, network and surrounding Rust remain unproved."
-    },
-    "src/knowledge/relations.rs": {
-      "status": "unproved",
-      "sha256": "0070745318d1d8cd4a4d95a563a231a75602e8e6c2c1a7ce4d3b667247a3e5c3",
-      "review": "Reviewed tenant-scoped fashion fixture provisioning, opt-in idempotent demo seeding and curated catalog-specific links; Rust lint and units pass, actual signup/locale/variant/image/isolated checkout/fresh-process HTTP regressions pass. No business-policy or proof-boundary changes."
-    },
-    "src/knowledge/rerank.rs": {
-      "status": "unproved",
-      "sha256": "3f386e315a0f18f53c132a47dbdc4995d8a3420bca3e4838761548e6e9216d57",
-      "review": "Reviewed bounded tenant-scoped embedding intake/model-generation cursors, revision/lease fencing and fair vector retry drain; pooled geometry-checked Qdrant hydration and admitted reranking; current-right read tools, structured protocols and SSE transport; exact source quotation/review/public compilation/signatures; transactional price corridors and non-compounding daily autonomy; consent-bound assignments/preferences and delayed cached native-payment readout including stop/withdrawal invalidation. New migration RLS/composite links and extracted predicate consumers reviewed. Native HTTP/PG/Qdrant/provider/UI regressions cover contracts; semantic quality, statistical assumptions, SQL, network and surrounding Rust remain unproved."
-    },
-    "src/knowledge/search.rs": {
-      "status": "unproved",
-      "sha256": "a592a2879e24d39841f9c4ae112f14c503fac1580e27814c078389e12921be44",
-      "review": "Reviewed bounded tenant-scoped embedding intake/model-generation cursors, revision/lease fencing and fair vector retry drain; pooled geometry-checked Qdrant hydration and admitted reranking; current-right read tools, structured protocols and SSE transport; exact source quotation/review/public compilation/signatures; transactional price corridors and non-compounding daily autonomy; consent-bound assignments/preferences and delayed cached native-payment readout including stop/withdrawal invalidation. New migration RLS/composite links and extracted predicate consumers reviewed. Native HTTP/PG/Qdrant/provider/UI regressions cover contracts; semantic quality, statistical assumptions, SQL, network and surrounding Rust remain unproved."
-    },
-    "src/knowledge/vector_cache.rs": {
-      "status": "unproved",
-      "sha256": "c9b79364aa0eab1a7f42e3d0fa0f2392c1615aeff8e46f6007479464dec67022",
-      "review": "Reviewed bounded tenant-scoped embedding intake/model-generation cursors, revision/lease fencing and fair vector retry drain; pooled geometry-checked Qdrant hydration and admitted reranking; current-right read tools, structured protocols and SSE transport; exact source quotation/review/public compilation/signatures; transactional price corridors and non-compounding daily autonomy; consent-bound assignments/preferences and delayed cached native-payment readout including stop/withdrawal invalidation. New migration RLS/composite links and extracted predicate consumers reviewed. Native HTTP/PG/Qdrant/provider/UI regressions cover contracts; semantic quality, statistical assumptions, SQL, network and surrounding Rust remain unproved."
-    },
-    "src/knowledge/vector_namespace.rs": {
-      "status": "unproved",
-      "sha256": "5035941a273c2dfd377e9b1ce066248387e385155dcb728ce943e7964c1eff5d",
-      "review": "Identity-only Veyndo namespace and canonical-domain rename; reviewed migration checksum compatibility for six historical SQL versions, unchanged checkout predicates, 42 library and 169 binary tests pass; native component legacy boundary remains configured and guarded."
-    },
-    "src/knowledge/vectors.rs": {
-      "status": "unproved",
-      "sha256": "830743305547c5408ba87a90fe34f35978d335dc7f4ce18d4c919ea7661c8bed",
-      "review": "Identity-only Veyndo namespace and canonical-domain rename; reviewed migration checksum compatibility for six historical SQL versions, unchanged checkout predicates, 42 library and 169 binary tests pass; native component legacy boundary remains configured and guarded."
-    },
-    "src/knowledge.rs": {
-      "status": "unproved",
-      "sha256": "52805a36bd625ceb62b0459ec7c0fcf632fda4fac6a79d4e46b5f430bdc23c9f",
-      "review": "Veyndo identity review: exact crate/config/schema namespace replacements and six allowlisted historical SQL hashes; explicit Qdrant alias migration validates all names/vector shapes/conflicts before atomic additive aliases, preserves physical points and alias-aware tenant deletion, exercised by registered real managed-search HTTP suite; configured WIT 1.0 compatibility links only existing cart/product/record host calls, preserves snapshot/money/fuel/epoch limits, four real component tests pass; crypto sealing keys and persisted credential formats unchanged."
-    },
     "src/legal/buyer_consent.rs": {
       "status": "unproved",
       "sha256": "9ef30d2f4c5209795ee47677b95d80721e65afa7c54a89bfb00d9b46ea77ce5e",
@@ -5662,8 +5702,8 @@
     },
     "src/lib.rs": {
       "status": "unproved",
-      "sha256": "6e25502b227ac8d445b561c1e242ce2cf265f0684a22750c1c6515d4f6a99af2",
-      "review": "Tax classes, the destination rate and the context selection rules moved unchanged into components/pricing; the destination tax rule is bound there"
+      "sha256": "4a3b8c1eefd9306ef082cd448fef4135e9e7ddd9a93c0fa7858e0e2513be96df",
+      "review": "Knowledge module and experiment model moved into components/intelligence; kernel call sites unchanged"
     },
     "src/localization.rs": {
       "status": "unproved",
@@ -6557,13 +6597,13 @@
     },
     "src/studio/reports/config.rs": {
       "status": "unproved",
-      "sha256": "ff0a83f3850e0089ee961a5544117d678effb0faa7f27327b8d80e13199f9092",
-      "review": "Reviewed native aggregate reports: bound tenant/filter SQL, exact numeric order/refund snapshots, reuse of current consent eligibility, optional rights projections and private workspace CAS layouts; reporting adapters remain unproved."
+      "sha256": "8a115f6e9a01ea8f0deb6f7ef3e3518ac56706f8b9cf4d64b9dd25ec99cd60a0",
+      "review": "Knowledge module and experiment model moved into components/intelligence; kernel call sites unchanged"
     },
     "src/studio/reports/period.rs": {
       "status": "unproved",
-      "sha256": "5c14b6c130c20d69aa630c6f7891dcd174ad0ce42653d4d951c7645341bfb8e4",
-      "review": "Reviewed native aggregate reports: bound tenant/filter SQL, exact numeric order/refund snapshots, reuse of current consent eligibility, optional rights projections and private workspace CAS layouts; reporting adapters remain unproved."
+      "sha256": "2cb75a6ba9cc866df633da6878d80b5890e9ddfeda3002c63a0030a946f0f85e",
+      "review": "Knowledge module and experiment model moved into components/intelligence; kernel call sites unchanged"
     },
     "src/studio/reports/traffic.rs": {
       "status": "unproved",
@@ -6682,12 +6722,12 @@
       "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
     },
     "Cargo.lock": {
-      "sha256": "1929ed683ba177840198ade57d51ba03c7b2e0ca3f46644e2d4ab3d87d9d4efc",
-      "review": "Identity credentials, B2B and POS contracts and checkout tax lines moved into components; kernel call sites unchanged"
+      "sha256": "16a4b49b50b5c59b146ad1d7677784e463193d5f2fce2b6cce82aefb5d071cb2",
+      "review": "Knowledge module and experiment model moved into components/intelligence; kernel call sites unchanged"
     },
     "Cargo.toml": {
-      "sha256": "2749c5abcd4b64853ef518249e95c83a33bff0ff9eb832437e97726070d728ae",
-      "review": "Identity credentials, B2B and POS contracts and checkout tax lines moved into components; kernel call sites unchanged"
+      "sha256": "881e080eb9f1b1f051c23e2848df689853473831b4d3072817387d65c23ddb66",
+      "review": "Knowledge module and experiment model moved into components/intelligence; kernel call sites unchanged"
     },
     "components.lock.json": {
       "sha256": "7b4a931ad81c6665d5d95e6b42b8ef4d09ebe8971ac24998d8f94bb6a737ff53",
@@ -7472,18 +7512,6 @@
     "src/documents/search.sql": {
       "sha256": "0f1405cf3bbcb50a7e549de823c326ce4ca7ece23fdb1a31042b1b0da456d378",
       "review": "Review RLS-safe lexical hydration follow-up: parameterized current source reads only after lexical/semantic candidate selection; preserve native source hash/model/locale/publication/product checks, greedy final-position IDs and existing extracted policies. SQL and transport remain unproved."
-    },
-    "src/knowledge/neighborhood.sql": {
-      "sha256": "4a93225bb65b3a99fbffe34491c78ce4b3dd9bb0c7080cb0a1587fa8fe53e0a6",
-      "review": "Reviewed bounded tenant-scoped embedding intake/model-generation cursors, revision/lease fencing and fair vector retry drain; pooled geometry-checked Qdrant hydration and admitted reranking; current-right read tools, structured protocols and SSE transport; exact source quotation/review/public compilation/signatures; transactional price corridors and non-compounding daily autonomy; consent-bound assignments/preferences and delayed cached native-payment readout including stop/withdrawal invalidation. New migration RLS/composite links and extracted predicate consumers reviewed. Native HTTP/PG/Qdrant/provider/UI regressions cover contracts; semantic quality, statistical assumptions, SQL, network and surrounding Rust remain unproved."
-    },
-    "src/knowledge/search.sql": {
-      "sha256": "23f9a496455de77d82892e16baa6f687ff574230fdac5332a58f39bc4f66a08b",
-      "review": "Reviewed migration 079 composite source keys, FORCE RLS and transaction-bound lexical triggers/backfill; both native query owners recheck current text/publication with indexed tenant word candidates. Actual NOSUPERUSER NOBYPASSRLS product/document plans, missing/foreign context and source edit/withdrawal/delete regressions pass; native strict-runtime suite passes. No extracted decision or theorem changed; SQL/query plans remain unproved."
-    },
-    "src/knowledge/vector_claim.sql": {
-      "sha256": "dde2ab619a983471cdd9957b156c429c9ae2bfc53e90feadf9808803dc79d521",
-      "review": "Reviewed bounded tenant-scoped embedding intake/model-generation cursors, revision/lease fencing and fair vector retry drain; pooled geometry-checked Qdrant hydration and admitted reranking; current-right read tools, structured protocols and SSE transport; exact source quotation/review/public compilation/signatures; transactional price corridors and non-compounding daily autonomy; consent-bound assignments/preferences and delayed cached native-payment readout including stop/withdrawal invalidation. New migration RLS/composite links and extracted predicate consumers reviewed. Native HTTP/PG/Qdrant/provider/UI regressions cover contracts; semantic quality, statistical assumptions, SQL, network and surrounding Rust remain unproved."
     },
     "src/operations/customer_directory.sql": {
       "sha256": "3a50ce695d1fc5be24b470e007994253c6f4e0e3c3e639c3122270b539cdcf15",

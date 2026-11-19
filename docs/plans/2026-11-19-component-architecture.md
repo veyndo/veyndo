@@ -281,8 +281,14 @@ Order follows the dependency report, lowest first. Each line is one move.
   marketing. Open: the gateway, settlement, discounts, cash handling.
 - [ ] apps (with `developer` and the vendored app storage)
 - [ ] automation
-- [ ] intelligence
-- [ ] studio
+- [ ] intelligence. Started: `components/intelligence` owns the knowledge
+  module (relations, hybrid search, vectors with their namespace and cache,
+  embeddings, reranking) and the bounded behaviour event and experiment model.
+  Open: agents and their runs, proposals, documents, inference, cognition
+  routes and workers.
+- [ ] studio. Started: `components/studio` owns report configuration and
+  calendar periods. Open: overview, report queries, personal views, staging
+  shops, history.
 - [ ] shop. Started: `components/shop` owns the settings types (`Settings`,
   delivery and payment methods, the checkout selection, B2B switches, AI
   guardrails, legal configuration), every bound on them (`validation`, tax

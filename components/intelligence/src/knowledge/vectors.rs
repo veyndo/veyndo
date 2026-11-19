@@ -1,6 +1,8 @@
 //! Private Qdrant adapter: tenant/model filters, deterministic identities and durable PostgreSQL index queue.
-use super::*;
+use super::PgPool;
+use serde_json::{Value, json};
 use sha2::{Digest, Sha256};
+use sqlx::Row;
 use std::time::Duration;
 fn collection(kind: &str, model: &str, dimensions: usize) -> String {
     format!(
@@ -40,7 +42,7 @@ pub(super) async fn request(
     if !response.status().is_success() {
         return Err(format!("Qdrant HTTP {}", response.status().as_u16()));
     }
-    crate::http_json::bounded(response, 2 * 1024 * 1024).await
+    veyndo_runtime::http_json::bounded(response, 2 * 1024 * 1024).await
 }
 async fn ensure(kind: &str, model: &str, dimensions: usize) -> Result<String, String> {
     let name = collection(kind, model, dimensions);
@@ -141,7 +143,7 @@ pub fn start(db: PgPool) {
     if std::env::var("QDRANT_URL").is_err() {
         return;
     }
-    crate::tenant_scope::spawn(async move {
+    veyndo_runtime::tenant_scope::spawn(async move {
         loop {
             match drain(&db).await {
                 Ok(0) => {}

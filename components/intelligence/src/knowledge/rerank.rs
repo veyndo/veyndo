@@ -1,5 +1,7 @@
 //! Optional TEI cross-encoder reranking on at most 24 tenant-hydrated texts; malformed or unavailable providers retain fused ordering.
-use super::*;
+use super::PgPool;
+use serde_json::{Value, json};
+use sqlx::Row;
 pub async fn apply(tenant: &str, query: &str, hits: &mut [Value], db: &PgPool) -> bool {
     let Ok(url) = std::env::var("RERANKER_URL") else {
         return false;
@@ -58,7 +60,7 @@ pub async fn apply(tenant: &str, query: &str, hits: &mut [Value], db: &PgPool) -
     if !response.status().is_success() {
         return false;
     }
-    let Ok(value) = crate::http_json::bounded(response, 65536).await else {
+    let Ok(value) = veyndo_runtime::http_json::bounded(response, 65536).await else {
         return false;
     };
     let Ok(scores) = validate(&value, hits.len()) else {
@@ -90,7 +92,10 @@ fn validate(value: &Value, count: usize) -> Result<Vec<f64>, ()> {
 }
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use super::validate;
+
+    use serde_json::json;
+
     #[test]
     fn reranking_rejects_duplicate_missing_or_outside_candidates() {
         assert_eq!(

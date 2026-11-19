@@ -1,0 +1,18 @@
+[package]
+name = "veyndo-intelligence"
+version.workspace = true
+edition.workspace = true
+license-file.workspace = true
+description = "Shop memory: knowledge relations, vectors, embeddings, reranking and document parsing"
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+sqlx.workspace = true
+veyndo-core = { path = "../core" }
+reqwest.workspace = true
+sha2.workspace = true
+tokio.workspace = true
+uuid.workspace = true
+veyndo-runtime = { path = "../../crates/runtime" }
+veyndo-pricing = { path = "../pricing" }

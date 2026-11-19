@@ -48,7 +48,7 @@ and [test coverage](testing.md). Diagram images open at full size.
 | Payments | `src/payments/{state,storage,generic_receipts,worker}.rs` | Verified receipts, immutable provider identity, fenced durable jobs |
 | Rules, flows and app events | `src/marketing/`, `src/apps/`, `src/outbox.rs` | Versioned contracts and current action permissions |
 | Read caching, admission and delivery | `src/performance/` | Immutable Arc handles; current SQL versions/access snapshots; outbox eviction; secret-free compression |
-| Shop memory and retrieval | `src/cognition/`, `src/knowledge/` | Provenance/publication filters and persisted event receipts |
+| Shop memory and retrieval | `src/cognition/`, `components/intelligence/src/knowledge/` | Provenance/publication filters and persisted event receipts |
 | Operator controls | `src/platform/` | Separate personal operator grant, audit and revisions |
 | Migrations / startup | `src/migrations.rs`, `src/migrations/schema.rs`, `src/bootstrap.rs` | Append-only checksums and separate migration credential |
 

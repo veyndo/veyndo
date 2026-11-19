@@ -377,14 +377,6 @@ This lists every checked-in source module in these roots, including files with n
 | [src/history/product.rs](../src/history/product.rs) | Rebuild a product edit from an audited snapshot; stock stays current and all associations/media pass normal admission. |
 | [src/history/restore.rs](../src/history/restore.rs) | Restore snapshots by replaying validated entity edits; financial effects and publication are never copied from historical state. |
 | [src/history/routes.rs](../src/history/routes.rs) | History summaries are bounded and permission-filtered; full snapshots and restore targets stay inside the owning shop. |
-| [src/knowledge/embeddings.rs](../src/knowledge/embeddings.rs) | Bounded batched embeddings: Ollama and OpenAI-compatible self-hosted endpoints, model-defined dimensions. |
-| [src/knowledge/relations.rs](../src/knowledge/relations.rs) | Keep knowledge provenance and relations in the same transaction as canonical commerce data. |
-| [src/knowledge/rerank.rs](../src/knowledge/rerank.rs) | Optional TEI cross-encoder reranking on at most 24 tenant-hydrated texts; malformed or unavailable providers retain fused ordering. |
-| [src/knowledge/search.rs](../src/knowledge/search.rs) | Hybrid exact/lexical + dense RRF; hydrate current tenant rows and retrieve only connected evidence. |
-| [src/knowledge/vector_cache.rs](../src/knowledge/vector_cache.rs) | Bounded, short-lived collection geometry cache; only successful verification is cached. |
-| [src/knowledge/vector_namespace.rs](../src/knowledge/vector_namespace.rs) | Explicit, additive Qdrant namespace migration and alias-aware projection deletion. |
-| [src/knowledge/vectors.rs](../src/knowledge/vectors.rs) | Private Qdrant adapter: tenant/model filters, deterministic identities and durable PostgreSQL index queue. |
-| [src/knowledge.rs](../src/knowledge.rs) | Transactional PostgreSQL knowledge relations and separately indexed Qdrant retrieval. |
 | [src/legal/buyer_consent.rs](../src/legal/buyer_consent.rs) | Required contact data for explicit registered marketing segments; shared by protocol review and locked native checkout. |
 | [src/legal/capabilities.rs](../src/legal/capabilities.rs) | MCP legal tools delegate to the same ownership/permission-checked HTTP domain handlers. |
 | [src/legal/checkout.rs](../src/legal/checkout.rs) | Explicit document/digital acknowledgement and immutable order policy snapshots; transport-neutral checkout guard. |
@@ -700,11 +692,11 @@ This lists every checked-in source module in these roots, including files with n
 | [components/catalog/src/service/translation_apply.rs](../components/catalog/src/service/translation_apply.rs) | Apply at most 50 reviewed drafts per request; stale products become conflicts rather than being overwritten. |
 | [components/catalog/src/service.rs](../components/catalog/src/service.rs) | Catalogue operations that combine rules and stored state. |
 | [components/catalog/src/store/assets.rs](../components/catalog/src/store/assets.rs) | Reads of stored product assets. |
-| [components/catalog/src/store/catalog_channel.sql](../components/catalog/src/store/catalog_channel.sql) | Independent app entry; see extensions/README.md for its public contract. |
+| [components/catalog/src/store/catalog_channel.sql](../components/catalog/src/store/catalog_channel.sql) | Bounded explicit channel IDs, with effective-language search before pagination. |
 | [components/catalog/src/store/catalog_reads.rs](../components/catalog/src/store/catalog_reads.rs) | Storefront catalogue reads: the keyset-paged listing with its specialised queries, and bounded product lookups. |
-| [components/catalog/src/store/catalog_search.sql](../components/catalog/src/store/catalog_search.sql) | Independent app entry; see extensions/README.md for its public contract. |
+| [components/catalog/src/store/catalog_search.sql](../components/catalog/src/store/catalog_search.sql) | Each branch returns its first bounded set of effective-language matches. |
 | [components/catalog/src/store/categories.rs](../components/catalog/src/store/categories.rs) | Which categories a product is assigned to. |
-| [components/catalog/src/store/category_listing.sql](../components/catalog/src/store/category_listing.sql) | Independent app entry; see extensions/README.md for its public contract. |
+| [components/catalog/src/store/category_listing.sql](../components/catalog/src/store/category_listing.sql) | Static assignments and saved current-public-fact queries share category/channel pagination. |
 | [components/catalog/src/store/channels.rs](../components/catalog/src/store/channels.rs) | Per-product channel visibility overrides remain indexed even when an open catalog contains millions of products. |
 | [components/catalog/src/store/media_jobs.rs](../components/catalog/src/store/media_jobs.rs) | Image jobs: admission counts, the queue, private results and their publication. |
 | [components/catalog/src/store/product_edit.rs](../components/catalog/src/store/product_edit.rs) | Writes of one product edit inside its transaction: allocation lock, creation, clocks, identity, content and translations. |
@@ -747,9 +739,9 @@ This lists every checked-in source module in these roots, including files with n
 | [components/core/src/localized/languages.rs](../components/core/src/localized/languages.rs) | The content languages a shop enabled: which keys content may use, and which key a language is stored under. |
 | [components/core/src/localized.rs](../components/core/src/localized.rs) | A translated name and description as stored per content language; a missing field inherits from the shop's main language. |
 | [components/core/src/observability.rs](../components/core/src/observability.rs) | Server-generated request correlation and safe structured events, without tokens, query strings or bodies. |
-| [components/core/src/outbox/next_tenant.sql](../components/core/src/outbox/next_tenant.sql) | Independent app entry; see extensions/README.md for its public contract. |
+| [components/core/src/outbox/next_tenant.sql](../components/core/src/outbox/next_tenant.sql) | Lock only this subscriber schedule. A failed event does not block later work. |
 | [components/core/src/outbox/retention.rs](../components/core/src/outbox/retention.rs) | Bounded retirement of duplicate delivered payloads; provenance IDs and unsettled app/flow work survive. |
-| [components/core/src/outbox/retention.sql](../components/core/src/outbox/retention.sql) | Independent app entry; see extensions/README.md for its public contract. |
+| [components/core/src/outbox/retention.sql](../components/core/src/outbox/retention.sql) | Remove only unreferenced delivered metadata after its separate audit window. |
 | [components/core/src/outbox.rs](../components/core/src/outbox.rs) | The transactional outbox consumer: each subscriber lane acknowledges an event and commits its effects in one transaction. |
 | [components/core/src/request_context.rs](../components/core/src/request_context.rs) | Trusted request identity lives in extensions; HTTP headers carry transport inputs only. |
 | [components/core/src/shop_scope.rs](../components/core/src/shop_scope.rs) | Which shop a request addresses: the transport header, or the deployment's default shop. No authentication. |
@@ -773,6 +765,21 @@ This lists every checked-in source module in these roots, including files with n
 | [components/identity/src/domain.rs](../components/identity/src/domain.rs) | Pure identity rules: no database, no transport. |
 | [components/identity/src/lib.rs](../components/identity/src/lib.rs) | Identity component: the checks every other component uses to ask who a request acts for and what it may do. |
 | [components/identity/src/route_policy.rs](../components/identity/src/route_policy.rs) | Rights are registered beside each API method. Missing registrations always deny access. |
+| [components/intelligence/src/domain/behavior_input.rs](../components/intelligence/src/domain/behavior_input.rs) | Minimal behavioral envelope: no URLs, search text, raw user agents, IPs or caller customer identities. |
+| [components/intelligence/src/domain/experiment_model.rs](../components/intelligence/src/domain/experiment_model.rs) | Preregistered fixed-horizon experiment parameters and conservative bounded-outcome inference. |
+| [components/intelligence/src/domain.rs](../components/intelligence/src/domain.rs) | Bounded inputs of the intelligence component, free of I/O. |
+| [components/intelligence/src/knowledge/embeddings.rs](../components/intelligence/src/knowledge/embeddings.rs) | Bounded batched embeddings: Ollama and OpenAI-compatible self-hosted endpoints, model-defined dimensions. |
+| [components/intelligence/src/knowledge/neighborhood.sql](../components/intelligence/src/knowledge/neighborhood.sql) | Two-hop product neighborhood; only currently confirmed public claims enter a buyer-facing inference context. |
+| [components/intelligence/src/knowledge/relations.rs](../components/intelligence/src/knowledge/relations.rs) | Keep knowledge provenance and relations in the same transaction as canonical commerce data. |
+| [components/intelligence/src/knowledge/rerank.rs](../components/intelligence/src/knowledge/rerank.rs) | Optional TEI cross-encoder reranking on at most 24 tenant-hydrated texts; malformed or unavailable providers retain fused ordering. |
+| [components/intelligence/src/knowledge/search.rs](../components/intelligence/src/knowledge/search.rs) | Hybrid exact/lexical + dense RRF; hydrate current tenant rows and retrieve only connected evidence. |
+| [components/intelligence/src/knowledge/search.sql](../components/intelligence/src/knowledge/search.sql) | Indexable candidate paths are combined before ranking; native tenant hydration still owns every hit. |
+| [components/intelligence/src/knowledge/vector_cache.rs](../components/intelligence/src/knowledge/vector_cache.rs) | Bounded, short-lived collection geometry cache; only successful verification is cached. |
+| [components/intelligence/src/knowledge/vector_claim.sql](../components/intelligence/src/knowledge/vector_claim.sql) | Lease and commit before external Qdrant calls; changed sources retain their newer queue revision. |
+| [components/intelligence/src/knowledge/vector_namespace.rs](../components/intelligence/src/knowledge/vector_namespace.rs) | Explicit, additive Qdrant namespace migration and alias-aware projection deletion. |
+| [components/intelligence/src/knowledge/vectors.rs](../components/intelligence/src/knowledge/vectors.rs) | Private Qdrant adapter: tenant/model filters, deterministic identities and durable PostgreSQL index queue. |
+| [components/intelligence/src/knowledge.rs](../components/intelligence/src/knowledge.rs) | Transactional PostgreSQL knowledge relations and separately indexed Qdrant retrieval. |
+| [components/intelligence/src/lib.rs](../components/intelligence/src/lib.rs) | Intelligence component: shop memory with its vector namespace, retrieval and document parsing. |
 | [components/inventory/src/domain/lines.rs](../components/inventory/src/domain/lines.rs) | Checked item quantities for inventory writes. Availability and locks belong to the host. |
 | [components/inventory/src/domain/reorder.rs](../components/inventory/src/domain/reorder.rs) | Whether a supplier's signed offer is the reorder the merchant saved, and within the ceiling. |
 | [components/inventory/src/domain/supply.rs](../components/inventory/src/domain/supply.rs) | Supplier links for reordering inside the Veyndo network: which product is bought from which shop, when and how much, with a ceiling per order. |
@@ -781,7 +788,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/inventory/src/ports.rs](../components/inventory/src/ports.rs) | What the inventory component needs from other components. The server implements these; tests use their own. |
 | [components/inventory/src/service/test_stock.rs](../components/inventory/src/service/test_stock.rs) | Bulk test stock for a private sandbox: empty purchasable products get a quantity through the native revision, index sync and event. |
 | [components/inventory/src/service.rs](../components/inventory/src/service.rs) | Operations of the inventory component. |
-| [components/inventory/src/store/release.sql](../components/inventory/src/store/release.sql) | Independent app entry; see extensions/README.md for its public contract. |
+| [components/inventory/src/store/release.sql](../components/inventory/src/store/release.sql) | Persisted quantities only; releasing twice yields no changes. Lock affected products in checkout's ID order. |
 | [components/inventory/src/store/reservations.rs](../components/inventory/src/store/reservations.rs) | All-checkout allocation ledger; release is idempotent and always uses persisted quantities, never edited order JSON. |
 | [components/inventory/src/store/test_stock.rs](../components/inventory/src/store/test_stock.rs) | Stock writes for empty purchasable products, in bounded batches. |
 | [components/inventory/src/store.rs](../components/inventory/src/store.rs) | SQL of the inventory component. |
@@ -920,6 +927,10 @@ This lists every checked-in source module in these roots, including files with n
 | [components/shop/src/types/legal.rs](../components/shop/src/types/legal.rs) | Bounded multilingual legal configuration; policy changes invalidate optional-purpose consent. |
 | [components/shop/src/types/settings.rs](../components/shop/src/types/settings.rs) | Checkout selection and configuration data contracts. |
 | [components/shop/src/types.rs](../components/shop/src/types.rs) | The configuration a shop stores. |
+| [components/studio/src/domain/report_config.rs](../components/studio/src/domain/report_config.rs) | One bounded report definition for HTTP, MCP and private workspace presentation preferences. |
+| [components/studio/src/domain/report_period.rs](../components/studio/src/domain/report_period.rs) | Calendar periods are resolved once in the requested IANA timezone, with exclusive ends and bounded buckets. |
+| [components/studio/src/domain.rs](../components/studio/src/domain.rs) | domain of this component. |
+| [components/studio/src/lib.rs](../components/studio/src/lib.rs) | Studio component: report periods and configuration. |
 
 ## Studio, storefront, platform and shared frontend
 

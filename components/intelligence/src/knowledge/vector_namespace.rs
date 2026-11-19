@@ -135,7 +135,8 @@ pub(super) async fn names(kind: &str) -> Result<BTreeSet<String>, String> {
 }
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use super::{mapped, namespace};
+
     #[test]
     fn namespace_mapping_is_versioned_and_cannot_capture_foreign_or_unsafe_names() {
         let valid = "legacy_product_v2_0123456789abcdef_768";

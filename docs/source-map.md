@@ -567,7 +567,7 @@ See [international commerce](international-commerce.md) for the exact contract.
 | [`src/extensions.rs`](../src/extensions.rs) | Merchant catalogue and Wasm extension activation/state. | `integration.py + users.py + extensions.py + restart.py` |
 | [`src/foundation.rs`](../src/foundation.rs) | Application dependencies, error responses and request context helpers. | `protocols.py + integration.py + commerce.py + users.py` |
 | [`crates/cognition/src/inference.rs`](../crates/cognition/src/inference.rs) | Provider adapters. Credentials stay on the server; domain validation is separate. | `Rust parsing/schema tests + providers.py + live intelligence.py/studio.py` |
-| [`src/knowledge.rs`](../src/knowledge.rs) | Transactional PostgreSQL relations and private Qdrant retrieval with authoritative tenant/model/digest hydration. | `intelligence.py + studio.py + users.py + restart.py` |
+| [`components/intelligence/src/knowledge.rs`](../components/intelligence/src/knowledge.rs) | Transactional PostgreSQL relations and private Qdrant retrieval with authoritative tenant/model/digest hydration. | `intelligence.py + studio.py + users.py + restart.py` |
 | [`src/lib.rs`](../src/lib.rs) | Reusable pricing, context, sandbox, graph and inference modules. | `server startup/build + integration.py + structure.py` |
 | [`src/localization.rs`](../src/localization.rs) | Shop locale resolution, translated catalog hydration and non-mutating merchant quote. | `studio.py + context_differential.py + commerce.py` |
 | [`src/main.rs`](../src/main.rs) | Process lifetime only. See docs/source-map.md for domain responsibilities. | `server startup/build + integration.py + structure.py` |
@@ -768,7 +768,7 @@ reviewed bindings, not whole-module proofs. See the
 | `extensions/services/connectors/src/{server,oauth,network,store,providers}.rs` | Independent app runtime, provider OAuth/API, encrypted private state and durable jobs |
 | `extensions/apps/{gmail,google-analytics,slack}/manifest.json` | Versioned app API/MCP capabilities and scopes |
 | `src/apps/evidence.rs`, `src/apps/evidence_routes.rs` | Tenant-private incremental imports, retrieval, polling and purge fences |
-| `src/knowledge.rs` | Private PostgreSQL source and product provenance, separated from public graph |
+| `components/intelligence/src/knowledge.rs` | Private PostgreSQL source and product provenance, separated from public graph |
 | `src/planner.rs` | Actual private-source model context and persisted task evidence |
 | `src/marketing/{rules,rule_match,rule_fields,catalog,app_flows,flows}.rs` | Condition schema, original comparison/facts, upstream import, app-aware durable flow execution |
 | `frontend/src/admin/apps/ConnectorPanel.tsx`, `admin/automation/{RuleBuilder,FlowBuilder}.tsx`, `extensions/apps/google-analytics/storefront/ShopAnalytics.tsx` | Multilingual app details, recursive graphical automation, consent and commerce events |
@@ -967,7 +967,7 @@ behavioral coverage is implied.
 ### Forced-RLS lexical candidates
 
 `migrations/079-knowledge-lexical-indexes.sql` owns transactional word projection
-backfill/triggers and composite source containment. `src/knowledge/search.sql`
+backfill/triggers and composite source containment. `components/intelligence/src/knowledge/search.sql`
 and `src/documents/search.sql` narrow candidates, then hydrate/rank/admit current
 native records. `src/documents/retrieval.rs` remains the public/private retrieval
 adapter. `scripts/lexical_search.py`, registered in the existing integration suite
