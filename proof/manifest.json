@@ -650,6 +650,11 @@
     }
   },
   "sources": {
+    "components/core/src/access.rs": {
+      "status": "unproved",
+      "sha256": "9dbaa399afa585fdc25df2bdc32bd73313fb5324f283470252f428ac7b34423b",
+      "review": "Request context, principal, POS admission, host shop and the access snapshot data types moved unchanged into components/core; loading the snapshot and matching it to a request stay in the server as free functions with the same queries. Core unit tests (identity headers cannot be forged) pass. SQL, HTTP and provider behaviour is not formally proved."
+    },
     "components/core/src/conversions.rs": {
       "status": "unproved",
       "sha256": "13514612fbe1d4061533cd23ebdf746ad3a3512c78e9e742db950b82603693a1",
@@ -662,8 +667,13 @@
     },
     "components/core/src/lib.rs": {
       "status": "reviewed-binding",
-      "sha256": "65d096f5f373c3976d475b5a51f6cbf66ad1411b3a4016347176c2af84426c67",
-      "review": "Three further proved rules with production bindings: a signed offer is honoured only unexpired and for the unchanged cart, revision and total (signed_offer.rs, result identical to the former expression); sovereign AI mode admits only the self-operated provider on a self-hosted endpoint (sovereign.rs, same decision, endpoint check no longer short-circuited and free of effects); workspace ID length bounds (core). Three SQL statements gained explicit parameter casts matching their bound types. Kernel, core and cognition unit tests pass. SQL, HTTP and provider behaviour is not formally proved."
+      "sha256": "1155caff588397deff4a0a38ca39be24911a21054235c6c853dac31ba680bf9b",
+      "review": "Request context, principal, POS admission, host shop and the access snapshot data types moved unchanged into components/core; loading the snapshot and matching it to a request stay in the server as free functions with the same queries. Core unit tests (identity headers cannot be forged) pass. SQL, HTTP and provider behaviour is not formally proved."
+    },
+    "components/core/src/request_context.rs": {
+      "status": "unproved",
+      "sha256": "52eca6e77dc750a5807d31db4c745b97ac0ccbfb1c1af145e9f0f0c7ff2df848",
+      "review": "Request context, principal, POS admission, host shop and the access snapshot data types moved unchanged into components/core; loading the snapshot and matching it to a request stay in the server as free functions with the same queries. Core unit tests (identity headers cannot be forged) pass. SQL, HTTP and provider behaviour is not formally proved."
     },
     "crates/apps/src/component_runtime.rs": {
       "status": "unproved",
@@ -3297,8 +3307,8 @@
     },
     "src/auth/identity.rs": {
       "status": "unproved",
-      "sha256": "856cb7fa5b01fcee93b1bfd4fe51bf3758d5cc978b01692416a9b2e21869c531",
-      "review": "Knowledge introspection reuses current scoped native identity, expiring integration keys and app package approval. Real catalog delivery, read-only evidence, foreign-shop and revoked-key checks and Checkout tenant isolation passed locally."
+      "sha256": "695da362fce9f30f59129d146a6ca5ed7f73ab548085641653e6a438391be26a",
+      "review": "Request context, principal, POS admission, host shop and the access snapshot data types moved unchanged into components/core; loading the snapshot and matching it to a request stay in the server as free functions with the same queries. Core unit tests (identity headers cannot be forged) pass. SQL, HTTP and provider behaviour is not formally proved."
     },
     "src/auth/integrations.rs": {
       "status": "reviewed-binding",
@@ -4512,8 +4522,8 @@
     },
     "src/main.rs": {
       "status": "unproved",
-      "sha256": "17dd5f44552aa4867bd6716ec1c7682a9b7ba4d96915bdbbe75cb9deacc660b5",
-      "review": "Reviewed checkout stage move and buyer-scoped host contract. Native stock, replay and contact predicates retain their consumers; isolated Commerce and Checkout tests verify legal review, current B2B authority, original receipt recovery and one atomic purchase."
+      "sha256": "5ddcb30a114fcc0f26299a06b41905f0e08eb6dfd4a4537a4b5265851733668e",
+      "review": "Request context, principal, POS admission, host shop and the access snapshot data types moved unchanged into components/core; loading the snapshot and matching it to a request stay in the server as free functions with the same queries. Core unit tests (identity headers cannot be forged) pass. SQL, HTTP and provider behaviour is not formally proved."
     },
     "src/marketing/app_flows.rs": {
       "status": "reviewed-binding",
@@ -4527,8 +4537,8 @@
     },
     "src/marketing/channel_access.rs": {
       "status": "reviewed-binding",
-      "sha256": "551588cb7aa5b131f024f59651961367f9b039901a19023bcdfcb36369dc9d42",
-      "review": "Reviewed generic tenant-scoped paid external-order/channel exchange, native exact source amounts, existing stock/customer/document/outbox ownership, app capability/FK/ID lookup boundaries and app-owned bounded seller protocols/jobs; local provider PostgreSQL replay restart isolation and UI regressions. Async provider integration remains unproved."
+      "sha256": "b0cba5158c6f2dce5d9fa21b799a87a829b6c13d24637cca7e38e929bbd34e94",
+      "review": "Request context, principal, POS admission, host shop and the access snapshot data types moved unchanged into components/core; loading the snapshot and matching it to a request stay in the server as free functions with the same queries. Core unit tests (identity headers cannot be forged) pass. SQL, HTTP and provider behaviour is not formally proved."
     },
     "src/marketing/channel_config.rs": {
       "status": "unproved",
@@ -5142,8 +5152,8 @@
     },
     "src/performance/access_snapshot.rs": {
       "status": "unproved",
-      "sha256": "bcd6456a6a99ac8c58abc8693251941ed0e4fb05d41282b28210dc996ee2ebac",
-      "review": "Reviewed native-only static bypass with hosted denial and Lean exact acceptance; one fresh domain/environment/status/channel/mount SQL snapshot and current membership lookup preserve scoped admission, binding identity and revocation; immutable Arc settings retain locked mutation/checkout reads; secret-free compression opt-in and deterministic precompressed assets preserve streams/ranges; batched inventory uses existing checkout locks and ordered idempotent release; bounded overview SQL preserves currency-separated historical facts. Real two-replica read/channel/tenant/checkout and strict-runtime regressions passed; SQL and build inputs now explicitly locked. These adapters remain unproved."
+      "sha256": "87d4614160f768dd0adb2603aac94f7a7e3c96608f94c26e424e9bd6044ffd81",
+      "review": "Request context, principal, POS admission, host shop and the access snapshot data types moved unchanged into components/core; loading the snapshot and matching it to a request stay in the server as free functions with the same queries. Core unit tests (identity headers cannot be forged) pass. SQL, HTTP and provider behaviour is not formally proved."
     },
     "src/performance/admission.rs": {
       "status": "unproved",
@@ -5247,8 +5257,8 @@
     },
     "src/platform/lifecycle.rs": {
       "status": "reviewed-binding",
-      "sha256": "ea4b1e5bf80450c8cccd93d3c02e05faf9fdf0b8beb9cdd606b50e1a95b904a9",
-      "review": "Reviewed native-only static bypass with hosted denial and Lean exact acceptance; one fresh domain/environment/status/channel/mount SQL snapshot and current membership lookup preserve scoped admission, binding identity and revocation; immutable Arc settings retain locked mutation/checkout reads; secret-free compression opt-in and deterministic precompressed assets preserve streams/ranges; batched inventory uses existing checkout locks and ordered idempotent release; bounded overview SQL preserves currency-separated historical facts. Real two-replica read/channel/tenant/checkout and strict-runtime regressions passed; SQL and build inputs now explicitly locked. These adapters remain unproved."
+      "sha256": "ddeb07f876b7bc467cd60196a1204efcab92558350444f083ef8be01f3e13bd5",
+      "review": "Request context, principal, POS admission, host shop and the access snapshot data types moved unchanged into components/core; loading the snapshot and matching it to a request stay in the server as free functions with the same queries. Core unit tests (identity headers cannot be forged) pass. SQL, HTTP and provider behaviour is not formally proved."
     },
     "src/platform/metrics.rs": {
       "status": "unproved",
@@ -5307,8 +5317,8 @@
     },
     "src/pos/mod.rs": {
       "status": "unproved",
-      "sha256": "3bcf7b882017afc4dd336a25240966b54a30c68267bef16ce85dd176eced805d",
-      "review": "Native admin creation uses existing CRM address and cart/checkout owners; independently reviewed tenant/actor tokens, final manual payment guard, channel/customer/cart lock order, replay and explicit customer acknowledgement; new SQL/HTTP adapters remain unproved and have real state regressions."
+      "sha256": "b3479d6c9813d11ef23dc2f080ca1f1e4e79c16a8d60b7793be93f9b80b979ba",
+      "review": "Request context, principal, POS admission, host shop and the access snapshot data types moved unchanged into components/core; loading the snapshot and matching it to a request stay in the server as free functions with the same queries. Core unit tests (identity headers cannot be forged) pass. SQL, HTTP and provider behaviour is not formally proved."
     },
     "src/pos/schema.rs": {
       "status": "unproved",
@@ -5344,11 +5354,6 @@
       "status": "unproved",
       "sha256": "61ecbaf39b49fe98309cf97cb4e25fd8485998a4d5977e74aebd7dde08907667",
       "review": "Reviewed original-actor tenant-scoped task listing: preserve existing current-scope admission while exposing approved queued and interrupted work; execution marker is read-only, no credentials or checkpoint contents. Native PostgreSQL queued/completed/cancelled/killed-worker and other-actor cases pass."
-    },
-    "src/request_context.rs": {
-      "status": "unproved",
-      "sha256": "f36fc44ed8edc3b6b4818ae485e91be093ced48b77670a1647b5ae29245e0bfe",
-      "review": "Checkout grant entry points and tenant-bound session checks reviewed against native buyer login, live-shop admission, wrong buyer and tenant, revocation, replay and isolated two-service PostgreSQL acceptance. No additional formal claims."
     },
     "src/routes/http_profile.rs": {
       "status": "unproved",
@@ -5402,8 +5407,8 @@
     },
     "src/shop_domains.rs": {
       "status": "unproved",
-      "sha256": "aad8d2e8791a69a0ed35a351b1a478e72c061d0397cec58c6f68d4507e36d2fa",
-      "review": "Reviewed API-only ingress, startup profile validation, and reserved API hostname resolution. Isolated HTTP and PostgreSQL cover presentation rejection, explicit Store and MCP shop context, UCP, existing merchant authorization, and tenant isolation."
+      "sha256": "d9d2fd3e7925376ca944465e5a5056041c8c467cf79aa44ce88837d15253cdca",
+      "review": "Request context, principal, POS admission, host shop and the access snapshot data types moved unchanged into components/core; loading the snapshot and matching it to a request stay in the server as free functions with the same queries. Core unit tests (identity headers cannot be forged) pass. SQL, HTTP and provider behaviour is not formally proved."
     },
     "src/staging/access.rs": {
       "status": "unproved",
@@ -5612,8 +5617,8 @@
       "review": "Three further proved rules with production bindings: a signed offer is honoured only unexpired and for the unchanged cart, revision and total (signed_offer.rs, result identical to the former expression); sovereign AI mode admits only the self-operated provider on a self-hosted endpoint (sovereign.rs, same decision, endpoint check no longer short-circuited and free of effects); workspace ID length bounds (core). Three SQL statements gained explicit parameter casts matching their bound types. Kernel, core and cognition unit tests pass. SQL, HTTP and provider behaviour is not formally proved."
     },
     "Cargo.lock": {
-      "sha256": "9ab4c46283175b1c9f9b7d97afc4c26eb2cf4a7f5d18f8b2470a5a8bd1d5b8fd",
-      "review": "Three further proved rules with production bindings: a signed offer is honoured only unexpired and for the unchanged cart, revision and total (signed_offer.rs, result identical to the former expression); sovereign AI mode admits only the self-operated provider on a self-hosted endpoint (sovereign.rs, same decision, endpoint check no longer short-circuited and free of effects); workspace ID length bounds (core). Three SQL statements gained explicit parameter casts matching their bound types. Kernel, core and cognition unit tests pass. SQL, HTTP and provider behaviour is not formally proved."
+      "sha256": "ec16178ee501337dc55e58d9f4bcec984972ee4c447720a89c1b8638f96368bb",
+      "review": "Request context, principal, POS admission, host shop and the access snapshot data types moved unchanged into components/core; loading the snapshot and matching it to a request stay in the server as free functions with the same queries. Core unit tests (identity headers cannot be forged) pass. SQL, HTTP and provider behaviour is not formally proved."
     },
     "Cargo.toml": {
       "sha256": "19e4fdc90d60f314d67dcf1c1f752635ad0c26d504ecfbdb49ea28d21c7b0acb",

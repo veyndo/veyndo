@@ -11,7 +11,7 @@ merged and the named check is green; a plan or a partial move is not checked.
 | Fact | Value |
 | --- | ---: |
 | Rust files in the root crate `src/` | 621 files, about 70,000 lines |
-| Files that import everything with `use super::*` / `use crate::*` | 439 / 129 |
+| Files that import everything with `use super::*` / `use crate::*` | 528 |
 | Untyped `v["key"]` accesses | about 4,600 |
 | SQL statements as run-time strings | 1,719 static, 42 built at run time |
 | Tables | 151 |
@@ -100,13 +100,15 @@ Rules that hold from the first component on:
 ## Phase 1: core and identity
 
 - [x] `components/core`: error contract and its conversions as a crate.
-- [ ] Move request context, tenant resolution and header access into `core`;
-      replace its three fields that name `pos`, `performance` and `shop_domains`
-      types by core-owned types.
+- [x] Move the request context into `core`; its POS admission, host shop and
+      access snapshot are core-owned data types now.
+- [ ] Move tenant resolution and header access into `core` (they still read the
+      server's runtime configuration).
 - [ ] Replace the `App` state object by per-component state plus ports.
 - [ ] Remove the nine dependencies `core` has on other components.
 - [ ] `components/identity` with `types/`, `store/`, `service/`, `http/`.
-- [ ] Ban new `use super::*` / `use crate::*`; existing ones fall per component.
+- [x] Ban new `use super::*` / `use crate::*`: `glob_imports` per component in
+      `components.json` only falls (528 files at the start); component crates have none.
 
 Done when the server builds on both crates without glob imports from them.
 

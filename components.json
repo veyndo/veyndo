@@ -5,7 +5,6 @@
       "title": "Shared foundation: errors, request context, database scope, outbox, admission and the verified kernel",
       "sources": [
         "src/foundation.rs",
-        "src/request_context.rs",
         "src/observability.rs",
         "src/http_limits.rs",
         "src/security_headers.rs",
@@ -39,7 +38,6 @@
         "intelligence",
         "marketing",
         "payments",
-        "pos",
         "pricing",
         "shop"
       ],
@@ -60,7 +58,8 @@
         "shop_environments",
         "tenant_ai_usage",
         "tenant_resource_limits"
-      ]
+      ],
+      "glob_imports": 14
     },
     "identity": {
       "title": "Merchant accounts, memberships, sessions, roles and route policy",
@@ -105,7 +104,8 @@
         "sales_channels",
         "shop_environments",
         "tenants"
-      ]
+      ],
+      "glob_imports": 8
     },
     "shop": {
       "title": "Shop configuration, domains, legal texts and the operator control plane",
@@ -178,7 +178,8 @@
         "shop_environments",
         "tenant_ai_usage",
         "tenants"
-      ]
+      ],
+      "glob_imports": 37
     },
     "catalog": {
       "title": "Products, categories, media, reviews, translations and catalogue reads",
@@ -257,7 +258,8 @@
         "shop_environments",
         "tasks",
         "tenants"
-      ]
+      ],
+      "glob_imports": 53
     },
     "inventory": {
       "title": "Stock, reservations and supply",
@@ -286,7 +288,8 @@
         "outbox",
         "products",
         "shop_environments"
-      ]
+      ],
+      "glob_imports": 3
     },
     "pricing": {
       "title": "Money, price calculation, discounts, currencies, taxes and customer groups",
@@ -326,7 +329,8 @@
         "customers",
         "outbox",
         "products"
-      ]
+      ],
+      "glob_imports": 14
     },
     "shipping": {
       "title": "Delivery methods, destinations, delivery splits and carrier booking",
@@ -359,7 +363,8 @@
         "commerce_overrides",
         "commerce_rules",
         "orders"
-      ]
+      ],
+      "glob_imports": 7
     },
     "checkout": {
       "title": "Cart, quote, checkout transaction and order placement",
@@ -414,7 +419,8 @@
         "sales_channels",
         "shop_environments",
         "tenants"
-      ]
+      ],
+      "glob_imports": 14
     },
     "customers": {
       "title": "Customer accounts, sessions, addresses and the merchant customer directory",
@@ -453,7 +459,8 @@
         "orders",
         "outbox",
         "tenants"
-      ]
+      ],
+      "glob_imports": 18
     },
     "orders": {
       "title": "Order state, fulfilment, receipts, documents and merchant order work",
@@ -512,7 +519,8 @@
         "products",
         "sales_channels",
         "tenants"
-      ]
+      ],
+      "glob_imports": 39
     },
     "payments": {
       "title": "Provider-independent payment ledger, captures, refunds and provider workers",
@@ -554,7 +562,8 @@
         "outbox",
         "policy",
         "sales_channels"
-      ]
+      ],
+      "glob_imports": 3
     },
     "marketing": {
       "title": "Rules, coupons, promotions, flows and sales channels",
@@ -613,7 +622,8 @@
         "tasks",
         "tenants",
         "user_sessions"
-      ]
+      ],
+      "glob_imports": 38
     },
     "b2b": {
       "title": "Company procurement: organisations, budgets, approvals and quotes",
@@ -653,7 +663,8 @@
         "orders",
         "outbox",
         "products"
-      ]
+      ],
+      "glob_imports": 19
     },
     "pos": {
       "title": "Point-of-sale register adapters",
@@ -685,7 +696,8 @@
         "outbox",
         "products",
         "sales_channels"
-      ]
+      ],
+      "glob_imports": 9
     },
     "apps": {
       "title": "App packages, managed data, UI surfaces, Wasm extensions and the app builder",
@@ -758,7 +770,8 @@
         "shop_environments",
         "tenants",
         "workspace_roles"
-      ]
+      ],
+      "glob_imports": 110
     },
     "automation": {
       "title": "Deterministic rule evaluation and flow graphs",
@@ -770,7 +783,8 @@
       "uses": [
         "core"
       ],
-      "foreign_tables": []
+      "foreign_tables": [],
+      "glob_imports": 8
     },
     "intelligence": {
       "title": "Shop memory, knowledge retrieval, agents, proposals and model inference",
@@ -865,7 +879,8 @@
         "tenants",
         "translation_jobs",
         "user_sessions"
-      ]
+      ],
+      "glob_imports": 86
     },
     "studio": {
       "title": "Merchant overview, reports, private staging shops and history",
@@ -931,7 +946,8 @@
         "tenants",
         "translation_items",
         "translation_jobs"
-      ]
+      ],
+      "glob_imports": 26
     },
     "protocols": {
       "title": "MCP, UCP and the shared capability dispatch; adapters without business rules",
@@ -964,7 +980,8 @@
       "foreign_tables": [
         "carts",
         "tenants"
-      ]
+      ],
+      "glob_imports": 17
     },
     "host": {
       "title": "Process entry, route registry, worker roles, migrations and command-line tools",
@@ -997,7 +1014,8 @@
         "extensions",
         "flow_jobs",
         "products"
-      ]
+      ],
+      "glob_imports": 5
     },
     "connectors": {
       "title": "Standard provider services and their delivery queue; hosted by the separate connector binary in extensions/services/connectors",
@@ -1011,7 +1029,8 @@
         "connector_sources"
       ],
       "uses": [],
-      "foreign_tables": []
+      "foreign_tables": [],
+      "glob_imports": 0
     }
   }
 }

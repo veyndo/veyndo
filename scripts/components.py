@@ -15,6 +15,8 @@ DEFINITION = re.compile(
 LOCAL = re.compile(r'(?m)^\s*(?:pub(?:\([a-z]+\))? )?(?:async |const |unsafe )*(?:fn|struct|enum|trait|type|const|static|mod) (\w+)')
 TABLE = re.compile(r'(?i)CREATE TABLE (?:IF NOT EXISTS )?(?:public\.)?"?([a-z_][a-z0-9_]*)')
 WRITE = r'(?i)\b(?:INSERT INTO|UPDATE|DELETE FROM|MERGE INTO)\s+(?:ONLY\s+)?(?:public\.)?'
+# A glob import at file level hides which items a file takes from elsewhere; test modules are indented and not counted.
+GLOB = re.compile(r'(?m)^(?:pub(?:\(crate\))? )?use (?:super|crate)::\*;')
 READ = r'(?i)\b(?:FROM|JOIN)\s+(?:ONLY\s+)?(?:public\.)?'
 
 
@@ -128,6 +130,16 @@ class Tree:
                     edges[here, target][name] += 1
         return edges
 
+    def glob_imports(self):
+        """Files per component that import everything from their parent or the crate root."""
+        counts = Counter()
+        for file, path in self.files.items():
+            if path.suffix == '.rs' and GLOB.search(path.read_text()):
+                counts[self.owner[file]] += 1
+                if file.startswith('components/'):
+                    self.problems.append(file + ' is in a component crate and must name its imports')
+        return counts
+
     def tables(self):
         names = set()
         for path in sorted((self.root / 'migrations').glob('*.sql')):
@@ -165,6 +177,14 @@ def findings(tree):
             problems.append('table ' + table + ' is declared but no migration creates it')
     table_owner = {table: name for name, row in components.items() for table in row.get('tables', [])}
     use = tree.table_use(tables)
+    globs = tree.glob_imports()
+    problems += [line for line in tree.problems if line not in problems]
+    for name, row in components.items():
+        declared_globs = row.get('glob_imports', 0)
+        if globs[name] > declared_globs:
+            problems.append(f'{name} has {globs[name]} files with a glob import, {declared_globs} are recorded; name the imports instead')
+        if globs[name] < declared_globs:
+            problems.append(f'{name} has only {globs[name]} files with a glob import left; lower "glob_imports" from {declared_globs}')
     for name, row in components.items():
         actual = sorted({target for (source, target) in edges if source == name})
         declared = sorted(row.get('uses', []))
@@ -200,7 +220,9 @@ def bootstrap(tree):
         ranking = writes[table] or reads[table]
         declared[table] = ranking.most_common(1)[0][0] if ranking else 'core'
     use = tree.table_use(tables)
+    globs = tree.glob_imports()
     for name, row in components.items():
+        row['glob_imports'] = globs[name]
         row['tables'] = sorted(table for table, owner in declared.items() if owner == name and table in tables)
         row['uses'] = sorted({target for (source, target) in edges if source == name})
         row['foreign_tables'] = sorted({table for (source, table) in use if source == name and declared[table] != name})
@@ -219,11 +241,12 @@ def report(tree, edges, use, table_owner):
              'another component defines; "Foreign tables" lists tables a component reads or writes directly',
              'although another component owns them. Both lists are the remaining hidden dependencies: the',
              'required structure check refuses a new one, and a removed one has to be deleted from',
-             '`components.json`. The counts come from a text scan and are an estimate, not a compiler result.', '',
-             '| Component | Lines of Rust | Tables | Uses | Foreign tables |', '| --- | ---: | ---: | --- | ---: |']
+             '`components.json`. The counts come from a text scan and are an estimate, not a compiler result.',
+             '"Glob imports" counts files that start with `use super::*` or `use crate::*`; the number only falls.', '',
+             '| Component | Lines of Rust | Glob imports | Tables | Uses | Foreign tables |', '| --- | ---: | ---: | ---: | --- | ---: |']
     for name, row in components.items():
         uses = ', '.join(f'{target} ({sum(edges[name, target].values())})' for target in row.get('uses', [])) or 'none'
-        lines.append(f'| {name} | {sizes[name]} | {len(row.get("tables", []))} | {uses} | {len(row.get("foreign_tables", []))} |')
+        lines.append(f'| {name} | {sizes[name]} | {row.get("glob_imports", 0)} | {len(row.get("tables", []))} | {uses} | {len(row.get("foreign_tables", []))} |')
     pairs = sorted({tuple(sorted(pair)) for pair in edges if (pair[1], pair[0]) in edges})
     lines += ['', '## Cycles', '', f'{len(pairs)} pairs of components depend on each other. A crate boundary needs each pair',
               'reduced to one direction first.', '']
@@ -266,11 +289,16 @@ def main(argv=None):
     broken = json.loads(json.dumps(tree.map))
     del broken['components'][first]
     assert any('belongs to no component' in line for line in Tree(mapping=broken).problems), 'an unowned source must fail'
+    broken = json.loads(json.dumps(tree.map))
+    busiest = max(broken['components'], key=lambda name: broken['components'][name].get('glob_imports', 0))
+    broken['components'][busiest]['glob_imports'] -= 1
+    assert any('files with a glob import' in line for line in findings(Tree(mapping=broken))[0]), 'a new glob import must fail'
     cycles = len({tuple(sorted(pair)) for pair in edges if (pair[1], pair[0]) in edges})
     foreign = sum(len(row.get('foreign_tables', [])) for row in tree.map['components'].values())
     print(f'PASS {len(tree.map["components"])} components own {sum(p.suffix == ".rs" for p in tree.files.values())} Rust sources and '
           f'{len(table_owner)} tables; {len(edges)} declared dependencies, {cycles} mutual pairs and {foreign} foreign table '
-          'accesses remain; negative controls rejected')
+          f'accesses and {sum(row.get("glob_imports", 0) for row in tree.map["components"].values())} files with glob imports remain; '
+          'negative controls rejected')
     return 0
 
 

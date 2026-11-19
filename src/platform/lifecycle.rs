@@ -56,7 +56,11 @@ pub(crate) async fn admit(a: &App, h: &RequestContext, path: &str, method: &str)
     let t = tenant(h)?;
     let status = if h.principal.tenant.as_deref() == Some(t.as_str()) && h.tenant_status.is_some() {
         h.tenant_status.clone()
-    } else if let Some(access) = h.access.as_ref().filter(|s| s.matches(h)) {
+    } else if let Some(access) = h
+        .access
+        .as_ref()
+        .filter(|s| crate::performance::access_snapshot::matches(s, h))
+    {
         access.status.clone()
     } else {
         sqlx::query_scalar::<_,String>("SELECT t.status FROM tenants t WHERE t.id=coalesce((SELECT live_tenant FROM shop_environments WHERE tenant=$1),$1)").bind(&t).fetch_optional(&a.db).await?

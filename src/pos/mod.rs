@@ -14,11 +14,7 @@ pub(crate) use config::{Config, configure, validate_channel};
 pub(crate) use gateway::invoke;
 pub(crate) use schema::schema;
 pub(crate) use settlement::{check_locked, payment_captured, settle, validate_settlement};
-#[derive(Clone, Debug)]
-pub(crate) struct Admission {
-    pub actor: String,
-    pub tender_minor: Option<u64>,
-}
+pub(crate) use veyndo_core::request_context::PosAdmission as Admission;
 pub(crate) const CAPABILITIES: &[(&str, &str)] = &[
     (
         "pos.customers",

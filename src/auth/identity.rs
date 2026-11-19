@@ -144,21 +144,16 @@ pub(super) async fn resolve(
 
 // Identity remains uncached. This only reuses the same request's authoritative shop/channel read.
 async fn ensure_access(a: &App, h: &mut RequestContext) -> Result<()> {
-    if h.access
-        .as_ref()
-        .is_some_and(|s| s.matches(h) && s.channel_id == crate::marketing::channel_id(h))
-    {
+    if h.access.as_ref().is_some_and(|s| {
+        crate::performance::access_snapshot::matches(s, h)
+            && s.channel_id == crate::marketing::channel_id(h)
+    }) {
         return Ok(());
     }
     let t = tenant(h)?;
     h.access = Some(
-        crate::performance::access_snapshot::AccessSnapshot::load(
-            a,
-            None,
-            &t,
-            crate::marketing::channel_id(h),
-        )
-        .await?,
+        crate::performance::access_snapshot::load(a, None, &t, crate::marketing::channel_id(h))
+            .await?,
     );
     Ok(())
 }

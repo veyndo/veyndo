@@ -54,7 +54,7 @@ pub(crate) async fn admit(
     let snapshot = if let Some(access) = h
         .access
         .as_ref()
-        .filter(|s| s.matches(h) && s.channel_id == id)
+        .filter(|s| crate::performance::access_snapshot::matches(s, h) && s.channel_id == id)
     {
         access.channel.clone()
     } else {

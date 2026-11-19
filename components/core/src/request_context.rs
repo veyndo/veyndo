@@ -1,4 +1,5 @@
 //! Trusted request identity lives in extensions; HTTP headers carry transport inputs only.
+use crate::access::AccessSnapshot;
 use axum::{
     extract::{FromRequestParts, Request},
     http::{HeaderMap as RawHeaders, HeaderValue, request::Parts},
@@ -9,7 +10,7 @@ use std::{
 };
 
 #[derive(Clone, Debug, Default)]
-pub(crate) struct Principal {
+pub struct Principal {
     pub personal_session: bool,
     pub user: Option<String>,
     pub role: Option<String>,
@@ -21,29 +22,41 @@ pub(crate) struct Principal {
     /// Existing integration-key ID, admitted server-side only for budgeted agents.
     pub agent_key: Option<String>,
 }
+/// Internal POS admission of one request: the cashier and the tendered cash amount.
 #[derive(Clone, Debug)]
-pub(crate) struct CheckoutBuyer {
+pub struct PosAdmission {
+    pub actor: String,
+    pub tender_minor: Option<u64>,
+}
+/// The shop a request's host name resolved to, with the admission facts read for it.
+#[derive(Clone)]
+pub struct HostShop {
+    pub alias: String,
+    pub access: std::sync::Arc<AccessSnapshot>,
+}
+#[derive(Clone, Debug)]
+pub struct CheckoutBuyer {
     pub digest: String,
     pub buyer_hash: String,
 }
 
 #[derive(Clone, Debug, Default)]
-pub(crate) struct RequestContext {
+pub struct RequestContext {
     transport: RawHeaders,
     pub principal: Principal,
     /// Decrypted only by the three native Checkout service adapters.
     pub checkout_buyer: Option<CheckoutBuyer>,
     pub validated_tenant: bool,
     /// Internal POS admission, never reconstructed from transport headers.
-    pub pos: Option<crate::pos::Admission>,
+    pub pos: Option<PosAdmission>,
     /// Trusted manual-order adapter admission; transport cannot forge this marker.
     pub admin_order: Option<String>,
     pub tenant_status: Option<String>,
-    pub access: Option<std::sync::Arc<crate::performance::access_snapshot::AccessSnapshot>>,
+    pub access: Option<std::sync::Arc<AccessSnapshot>>,
     preview: Option<String>,
     reason: Option<String>,
 }
-pub(crate) trait HeaderReader {
+pub trait HeaderReader {
     fn value(&self, key: &str) -> Option<&str>;
 }
 impl HeaderReader for RawHeaders {
@@ -66,7 +79,7 @@ impl HeaderReader for RequestContext {
     }
 }
 impl RequestContext {
-    pub(crate) fn new() -> Self {
+    pub fn new() -> Self {
         Self::default()
     }
     fn from_parts(headers: &RawHeaders, extensions: &axum::http::Extensions) -> Self {
@@ -84,20 +97,18 @@ impl RequestContext {
         }
         Self {
             transport,
-            access: extensions
-                .get::<crate::shop_domains::HostShop>()
-                .map(|h| h.access.clone()),
+            access: extensions.get::<HostShop>().map(|h| h.access.clone()),
             ..Self::default()
         }
     }
-    pub(crate) fn from_request(request: &Request) -> Self {
+    pub fn from_request(request: &Request) -> Self {
         Self::from_parts(request.headers(), request.extensions())
     }
-    pub(crate) fn transport(&self) -> &RawHeaders {
+    pub fn transport(&self) -> &RawHeaders {
         &self.transport
     }
     /// Internal adapters/flows explicitly construct trusted contexts; this is never an HTTP extractor.
-    pub(crate) fn insert(&mut self, key: &'static str, value: HeaderValue) -> Option<HeaderValue> {
+    pub fn insert(&mut self, key: &'static str, value: HeaderValue) -> Option<HeaderValue> {
         let slot = match key {
             "x-rac-user" => Some(&mut self.principal.user),
             "x-rac-role" => Some(&mut self.principal.role),

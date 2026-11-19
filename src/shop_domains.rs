@@ -5,11 +5,7 @@ mod frontend_bindings;
 pub(crate) mod frontend_editor;
 mod frontend_transport;
 pub(crate) mod frontends;
-#[derive(Clone)]
-pub(crate) struct HostShop {
-    pub alias: String,
-    pub access: Arc<crate::performance::access_snapshot::AccessSnapshot>,
-}
+pub(crate) use veyndo_core::request_context::HostShop;
 /// Configured former suffixes resolve through the same tenant/channel owner during cutover.
 pub(crate) fn configured_alias<'a>(
     host: &'a str,
@@ -73,12 +69,7 @@ pub(crate) async fn resolve(State(a): State<App>, mut request: Request, next: Ne
         let channel = header(request.headers(), "sw-sales-channel-id").unwrap_or("default");
         let access = veyndo::tenant_scope::scoped(
             veyndo::tenant_scope::Scope::System,
-            crate::performance::access_snapshot::AccessSnapshot::load(
-                &a,
-                Some(shop),
-                shop,
-                channel,
-            ),
+            crate::performance::access_snapshot::load(&a, Some(shop), shop, channel),
         )
         .await;
         let access = match access {

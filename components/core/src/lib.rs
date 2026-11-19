@@ -1,9 +1,12 @@
 //! Shared foundation of every component: the error contract, its conversions and basic identifiers. No business rules.
+pub mod access;
 mod conversions;
 mod failure;
+pub mod request_context;
 
 pub use axum::http::StatusCode;
 pub use failure::{Error, Failure};
+pub use request_context::RequestContext;
 use sha2::{Digest, Sha256};
 
 pub type Result<T> = std::result::Result<T, Error>;
