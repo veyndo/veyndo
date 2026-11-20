@@ -1,7 +1,8 @@
 //! Generated revisions preserve existing storage and access boundaries; destructive changes require manual schema review.
-use super::*;
+use serde_json::{Value, json};
+use veyndo_core::{Result, bad};
 /// Models may add fields and change presentation but never drop persisted schemas or broaden old exposure.
-pub(super) fn retain(old: &Value, next: &mut Value) -> Result<()> {
+pub fn retain(old: &Value, next: &mut Value) -> Result<()> {
     if old.is_null() {
         return Ok(());
     }
@@ -184,7 +185,8 @@ fn retain_handlers(old: &Value, next: &mut Value) {
 }
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use super::retain;
+    use serde_json::{Value, json};
     #[test]
     fn native_workflow_additions_retain_prior_domains_and_explicit_consent() {
         let order =

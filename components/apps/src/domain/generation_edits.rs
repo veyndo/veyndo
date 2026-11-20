@@ -1,10 +1,13 @@
 //! Bounded RFC 6902 edits modify the canonical Manifest; this is model wire adaptation, not an app runtime.
-use super::*;
+use crate::domain::{app_generation, generation_contract};
+use serde_json::{Value, json};
+use veyndo_core::{Result, bad};
 
-pub(super) fn system(locales: &[String]) -> String {
-    let manifest = generation::schema_for(locales)["properties"]["manifest"].clone();
+/// The system prompt for editing an existing manifest in the languages of the shop.
+pub fn system(locales: &[String]) -> String {
+    let manifest = app_generation::schema_for(locales)["properties"]["manifest"].clone();
     format!(
-        include_str!("../../crates/cognition/prompts/app-edit.v3.txt"),
+        include_str!("../../../../crates/cognition/prompts/app-edit.v3.txt"),
         manifest["properties"]["entities"],
         manifest["properties"]["views"],
         manifest["properties"]["surfaces"],
@@ -12,8 +15,9 @@ pub(super) fn system(locales: &[String]) -> String {
     )
 }
 
-pub(super) fn schema(locales: &[String]) -> Value {
-    let summary = generation::schema_for(locales)["properties"]["summary"].clone();
+/// The answer a model gives for an edit: a summary and a bounded list of patch operations.
+pub fn schema(locales: &[String]) -> Value {
+    let summary = app_generation::schema_for(locales)["properties"]["summary"].clone();
     json!({"type":"object","additionalProperties":false,"required":["summary","patch"],"properties":{
     "summary":summary,"patch":{"type":"array","minItems":1,"maxItems":64,"items":{
         "type":"object","additionalProperties":false,"required":["op","path","valueJson"],"properties":{
@@ -22,7 +26,8 @@ pub(super) fn schema(locales: &[String]) -> Value {
         }}}}})
 }
 
-pub(super) fn apply(old: &Value, output: &Value, versions: &Value) -> Result<Value> {
+/// Applies a bounded patch to the canonical manifest and keeps existing storage and access boundaries.
+pub fn apply(old: &Value, output: &Value, versions: &Value) -> Result<Value> {
     let edits = output["patch"]
         .as_array()
         .filter(|p| !p.is_empty() && p.len() <= 64)
@@ -105,7 +110,31 @@ pub(super) fn apply(old: &Value, output: &Value, versions: &Value) -> Result<Val
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use super::{apply, schema, system};
+    use serde_json::{Value, json};
+    #[test]
+    fn the_edit_contract_is_bounded_and_speaks_the_shop_languages() {
+        let locales = ["it-IT".to_string()];
+        let prompt = system(&locales);
+        assert!(prompt.starts_with("[prompt:app-edit@3]"));
+        assert!(prompt.contains("it-IT"));
+        assert!(prompt.contains("\"entity\""));
+        let answer = schema(&locales);
+        assert_eq!(answer["required"], json!(["summary", "patch"]));
+        assert_eq!(answer["properties"]["patch"]["minItems"], 1);
+        assert_eq!(answer["properties"]["patch"]["maxItems"], 64);
+        let operation = &answer["properties"]["patch"]["items"];
+        assert_eq!(
+            operation["properties"]["op"]["enum"],
+            json!(["add", "replace"])
+        );
+        assert_eq!(operation["additionalProperties"], false);
+        assert!(
+            answer["properties"]["summary"]
+                .to_string()
+                .contains("it-IT")
+        );
+    }
     fn original() -> Value {
         json!({"id":"test_app","version":"1.0.0","entities":[{"name":"notes","publicRead":false,"fields":[{"name":"text","kind":"string"}]}],"views":[{"id":"main","blocks":[]}],"events":["order.placed"]})
     }

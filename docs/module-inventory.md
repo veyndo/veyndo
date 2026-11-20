@@ -306,14 +306,8 @@ This lists every checked-in source module in these roots, including files with n
 | [src/developer/agent_connection.rs](../src/developer/agent_connection.rs) | Credential-free local coding-agent connection shared by native editors. |
 | [src/developer/archive.rs](../src/developer/archive.rs) | Recoverable App Studio project deletion; installed packages and app records retain their independent lifecycle. |
 | [src/developer/builds.rs](../src/developer/builds.rs) | Immutable development versions are validated before storage; installation targets only private environments. |
-| [src/developer/design_context.rs](../src/developer/design_context.rs) | Editor context is validated against the supplied Manifest; references are untrusted evidence, never authority. |
 | [src/developer/drafts.rs](../src/developer/drafts.rs) | Actor-private, optimistic mutable autosaves; these never install or alter a published package. |
 | [src/developer/generation.rs](../src/developer/generation.rs) | Structured provider output becomes a reviewable immutable manifest; it cannot write files or call shell tools. |
-| [src/developer/generation_bindings.rs](../src/developer/generation_bindings.rs) | Complete only deterministic native model/asset bindings; original validation and explicit consent remain authoritative. |
-| [src/developer/generation_brief.rs](../src/developer/generation_brief.rs) | Compile a bounded new-app brief into the existing native Manifest; no model-authored wiring or new executor. |
-| [src/developer/generation_contract.rs](../src/developer/generation_contract.rs) | Generated revisions preserve existing storage and access boundaries; destructive changes require manual schema review. |
-| [src/developer/generation_edits.rs](../src/developer/generation_edits.rs) | Bounded RFC 6902 edits modify the canonical Manifest; this is model wire adaptation, not an app runtime. |
-| [src/developer/generation_fields.rs](../src/developer/generation_fields.rs) | Guided field alternatives express native cross-field rules before inference; native admission remains authoritative. |
 | [src/developer/mod.rs](../src/developer/mod.rs) | Prompt-generated declarative apps and native coding-agent handoff, never unsandboxed model code. |
 | [src/developer/preview.rs](../src/developer/preview.rs) | F5 runs the shared native app runtime in an actor-private expiring staging clone; no build/version/release is created. |
 | [src/developer/routes.rs](../src/developer/routes.rs) | Developer HTTP transport and coding-agent task export; explicit staging precedes live release. |
@@ -603,6 +597,7 @@ This lists every checked-in source module in these roots, including files with n
 |---|---|
 | [components/apps/src/domain/action_admission.rs](../components/apps/src/domain/action_admission.rs) | Native authenticated-current-rights adapter for the shared action and callback grant rules. |
 | [components/apps/src/domain/action_policy.rs](../components/apps/src/domain/action_policy.rs) | Which declared actions only read: the distinction every surface, grant and GET route relies on. |
+| [components/apps/src/domain/app_generation.rs](../components/apps/src/domain/app_generation.rs) | The manifest schema a model answers in, specialised to the shop's languages, and the access a regeneration keeps. |
 | [components/apps/src/domain/approval.rs](../components/apps/src/domain/approval.rs) | Operator service authority is bound to immutable package content, never to a merchant-chosen ID. |
 | [components/apps/src/domain/callback_grant.rs](../components/apps/src/domain/callback_grant.rs) | What an app callback key may do: the capability the merchant approved and the role scope behind it. |
 | [components/apps/src/domain/configuration_budget.rs](../components/apps/src/domain/configuration_budget.rs) | The budget of app configurations one cart may carry. |
@@ -611,6 +606,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/apps/src/domain/configuration_summary.rs](../components/apps/src/domain/configuration_summary.rs) | Immutable public configuration labels accompany accepted inputs; no current package lookup is needed on a receipt. |
 | [components/apps/src/domain/consent.rs](../components/apps/src/domain/consent.rs) | Package approval binds all requested permissions to a reviewed digest; current actor rights apply before every installation path. |
 | [components/apps/src/domain/core_extensions.rs](../components/apps/src/domain/core_extensions.rs) | Namespaced core-object extension contracts; native records, rights and app storage keep their owners. |
+| [components/apps/src/domain/design_context.rs](../components/apps/src/domain/design_context.rs) | Editor context is validated against the supplied Manifest; references are untrusted evidence, never authority. |
 | [components/apps/src/domain/discovery.rs](../components/apps/src/domain/discovery.rs) | Search over installed app capabilities with current rights: operations, their schemas and relevance. |
 | [components/apps/src/domain/distribution.rs](../components/apps/src/domain/distribution.rs) | Signed publisher namespaces and tenant-local dependency/version gates. Operator service access still requires its separate exact digest pin. |
 | [components/apps/src/domain/entity_access.rs](../components/apps/src/domain/entity_access.rs) | Editor access to an app entity: the generic endpoint needs every right its declared actions need. |
@@ -620,6 +616,11 @@ This lists every checked-in source module in these roots, including files with n
 | [components/apps/src/domain/event_signature.rs](../components/apps/src/domain/event_signature.rs) | Outgoing app events carry a stable event id and an HMAC-SHA-256 over the shop, app, time, id and body digest. |
 | [components/apps/src/domain/extension_filter.rs](../components/apps/src/domain/extension_filter.rs) | Exact app-field predicates: a bounded, typed wire form that is bound to the current package before use. |
 | [components/apps/src/domain/field_values.rs](../components/apps/src/domain/field_values.rs) | Native currency/content/asset policy for the shared pure field validator. |
+| [components/apps/src/domain/generation_bindings.rs](../components/apps/src/domain/generation_bindings.rs) | Complete only deterministic native model/asset bindings; original validation and explicit consent remain authoritative. |
+| [components/apps/src/domain/generation_brief.rs](../components/apps/src/domain/generation_brief.rs) | Compile a bounded new-app brief into the existing native Manifest; no model-authored wiring or new executor. |
+| [components/apps/src/domain/generation_contract.rs](../components/apps/src/domain/generation_contract.rs) | Generated revisions preserve existing storage and access boundaries; destructive changes require manual schema review. |
+| [components/apps/src/domain/generation_edits.rs](../components/apps/src/domain/generation_edits.rs) | Bounded RFC 6902 edits modify the canonical Manifest; this is model wire adaptation, not an app runtime. |
+| [components/apps/src/domain/generation_fields.rs](../components/apps/src/domain/generation_fields.rs) | Guided field alternatives express native cross-field rules before inference; native admission remains authoritative. |
 | [components/apps/src/domain/input_schema.rs](../components/apps/src/domain/input_schema.rs) | Native API/MCP error adapter for the independent bounded schema validator. |
 | [components/apps/src/domain/input_schema_tests.rs](../components/apps/src/domain/input_schema_tests.rs) | Adversarial schema cases exercise bounded inputs, nullable unions, escaped JSON pointers and output values. |
 | [components/apps/src/domain/manifest_policy.rs](../components/apps/src/domain/manifest_policy.rs) | Required native policy ports for the complete shared compiler; no package or request fields can select a weaker policy. |

@@ -1,7 +1,8 @@
 //! Editor context is validated against the supplied Manifest; references are untrusted evidence, never authority.
-use super::*;
+use serde_json::{Value, json};
+use veyndo_core::{Result, bad, conflict, hash};
 /// Reject stale element/language scope before contacting a provider or external reference.
-pub(super) fn validate(v: &Value, locales: &[String]) -> Result<Value> {
+pub fn validate(v: &Value, locales: &[String]) -> Result<Value> {
     let Some(context) = v.get("context").filter(|c| !c.is_null()) else {
         return Ok(Value::Null);
     };
@@ -32,7 +33,7 @@ pub(super) fn validate(v: &Value, locales: &[String]) -> Result<Value> {
     )
 }
 /// Persist only context, capture status and content digests, never uploaded pixels or fetched HTML.
-pub(super) fn receipt(context: &Value, evidence: &Value) -> Value {
+pub fn receipt(context: &Value, evidence: &Value) -> Value {
     let sources: Vec<Value> = evidence
         .as_array()
         .into_iter()
@@ -47,13 +48,15 @@ pub(super) fn receipt(context: &Value, evidence: &Value) -> Value {
         .collect();
     json!({"version":1,"context":context,"sources":sources})
 }
-pub(super) fn stored(prompt: &str, evidence: Option<&Value>) -> String {
+/// The stored prompt of a build; design evidence travels with the instruction.
+pub fn stored(prompt: &str, evidence: Option<&Value>) -> String {
     evidence.map_or_else(
         || prompt.into(),
         |e| json!({"designEvidence":e,"instruction":prompt}).to_string(),
     )
 }
-pub(super) fn restored(prompt: &str) -> Value {
+/// The design evidence a stored prompt carries, or null.
+pub fn restored(prompt: &str) -> Value {
     serde_json::from_str::<Value>(prompt)
         .ok()
         .and_then(|v| v.get("designEvidence").cloned())
@@ -61,7 +64,8 @@ pub(super) fn restored(prompt: &str) -> Value {
 }
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use super::{receipt, restored, stored, validate};
+    use serde_json::{Value, json};
     #[test]
     fn selection_is_manifest_and_locale_bound() {
         let mut input = json!({"manifest":{"views":[{"id":"detail","blocks":[{"id":"buy"}]}]},"context":{"view":"detail","selected":"buy","language":"de-DE","channel":"*"}});

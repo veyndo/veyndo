@@ -1,8 +1,10 @@
 //! Complete only deterministic native model/asset bindings; original validation and explicit consent remain authoritative.
-use super::*;
-pub(super) fn complete(value: &mut Value) -> Result<()> {
-    let mut m: apps::Manifest =
-        serde_json::from_value(value.clone()).map_err(|e| bad(e.to_string()))?;
+use serde_json::{Value, json};
+use veyndo_app_model::manifest::Manifest;
+use veyndo_core::{Result, bad};
+/// Completes the native model and asset bindings a generated view leaves implicit.
+pub fn complete(value: &mut Value) -> Result<()> {
+    let mut m: Manifest = serde_json::from_value(value.clone()).map_err(|e| bad(e.to_string()))?;
     for view in &mut m.views {
         for block in &mut view.blocks {
             let Some(entity) = block
@@ -37,9 +39,8 @@ pub(super) fn complete(value: &mut Value) -> Result<()> {
     Ok(())
 }
 // Only the empty-app compiler owns these initial grants. Imports retain explicit restrictions.
-pub(super) fn new_app_assets(value: &mut Value) -> Result<()> {
-    let mut m: apps::Manifest =
-        serde_json::from_value(value.clone()).map_err(|e| bad(e.to_string()))?;
+pub fn new_app_assets(value: &mut Value) -> Result<()> {
+    let mut m: Manifest = serde_json::from_value(value.clone()).map_err(|e| bad(e.to_string()))?;
     let has_assets = m.entities.iter().any(|e| {
         e.fields
             .iter()
@@ -52,7 +53,7 @@ pub(super) fn new_app_assets(value: &mut Value) -> Result<()> {
             }
         }
         let contracts: Vec<Value> = serde_json::from_str(include_str!(
-            "../../extensions/sdk/native-asset-actions.json"
+            "../../../../extensions/sdk/native-asset-actions.json"
         ))
         .expect("native asset action contracts");
         for contract in contracts {
@@ -100,10 +101,18 @@ pub(super) fn new_app_assets(value: &mut Value) -> Result<()> {
 }
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use super::{complete, new_app_assets};
+    use crate::domain::app_generation::default_actions;
+    use crate::domain::manifest_validation::validate;
+    use serde_json::{Value, json};
+    use veyndo_app_model::manifest::Manifest;
+    use veyndo_core::Result;
+    fn validate_package(m: &Manifest) -> Result<()> {
+        validate(m, &json!({}))
+    }
     fn upload_draft() -> Value {
         let mut m: Value = serde_json::from_str(include_str!(
-            "../../extensions/apps/product-advisor/manifest.json"
+            "../../../../extensions/apps/product-advisor/manifest.json"
         ))
         .unwrap();
         m["id"] = json!("consultation_binding");
@@ -125,7 +134,7 @@ mod tests {
             block["writeAction"] = Value::Null;
         }
         m.as_object_mut().unwrap().remove("actions");
-        routes::actions(&mut m).unwrap();
+        default_actions(&mut m, &[]).unwrap();
         m
     }
     #[test]
@@ -133,8 +142,8 @@ mod tests {
         let mut value = upload_draft();
         new_app_assets(&mut value).unwrap();
         complete(&mut value).unwrap();
-        let m: apps::Manifest = serde_json::from_value(value.clone()).unwrap();
-        apps::validate(&m).unwrap();
+        let m: Manifest = serde_json::from_value(value.clone()).unwrap();
+        validate_package(&m).unwrap();
         assert_eq!(value["views"][0]["blocks"][0]["readAction"], "list_entries");
         assert_eq!(
             value["views"][0]["blocks"][1]["writeAction"],
@@ -144,7 +153,7 @@ mod tests {
             assert!(m.permissions.iter().any(|p| p == right));
         }
         let contracts: Vec<Value> = serde_json::from_str(include_str!(
-            "../../extensions/sdk/native-asset-actions.json"
+            "../../../../extensions/sdk/native-asset-actions.json"
         ))
         .unwrap();
         for contract in contracts {
@@ -177,11 +186,11 @@ mod tests {
             wrong["views"][0]["blocks"][0]["readAction"],
             "foreign_action"
         );
-        assert!(apps::validate(&serde_json::from_value(wrong).unwrap()).is_err());
+        assert!(validate_package(&serde_json::from_value(wrong).unwrap()).is_err());
         let mut public = upload_draft();
         public["surfaces"][0]["location"] = json!("product.detail");
         complete(&mut public).unwrap();
-        assert!(apps::validate(&serde_json::from_value(public).unwrap()).is_err());
+        assert!(validate_package(&serde_json::from_value(public).unwrap()).is_err());
     }
     #[test]
     fn unresolved_bindings_report_the_exact_view_block_and_property() {
@@ -193,7 +202,7 @@ mod tests {
         ] {
             let mut invalid = value.clone();
             invalid["views"][0]["blocks"][1][property] = replacement;
-            let error = apps::validate(&serde_json::from_value(invalid).unwrap()).unwrap_err();
+            let error = validate_package(&serde_json::from_value(invalid).unwrap()).unwrap_err();
             assert_eq!(
                 error.problem()["pointer"],
                 format!("/views/0/blocks/1/{property}")
@@ -219,8 +228,8 @@ mod tests {
             .as_array_mut()
             .unwrap()
             .push(json!("invented_action"));
-        let m: apps::Manifest = serde_json::from_value(value).unwrap();
-        let error = apps::validate(&m).unwrap_err();
+        let m: Manifest = serde_json::from_value(value).unwrap();
+        let error = validate_package(&m).unwrap_err();
         assert!(error.1.contains("invented_action"));
         assert!(
             error.problem()["pointer"]
@@ -240,7 +249,7 @@ mod tests {
                 .unwrap()
                 .contains(&json!("save_entries"))
         );
-        assert!(apps::validate(&serde_json::from_value(value).unwrap()).is_err());
+        assert!(validate_package(&serde_json::from_value(value).unwrap()).is_err());
     }
     #[test]
     fn valid_import_with_file_field_does_not_gain_asset_authority() {
@@ -248,7 +257,7 @@ mod tests {
         let declared = value["surfaces"][0]["actions"].clone();
         let permissions = value["permissions"].clone();
         complete(&mut value).unwrap();
-        apps::validate(&serde_json::from_value(value.clone()).unwrap()).unwrap();
+        validate_package(&serde_json::from_value(value.clone()).unwrap()).unwrap();
         assert_eq!(value["surfaces"][0]["actions"], declared);
         assert_eq!(value["permissions"], permissions);
         assert!(value["actions"].as_array().unwrap().iter().all(|a| {
@@ -260,7 +269,7 @@ mod tests {
         let mut value = upload_draft();
         complete(&mut value).unwrap();
         value["surfaces"][0]["uiPath"] = json!("native/missing_view");
-        let error = apps::validate(&serde_json::from_value(value).unwrap()).unwrap_err();
+        let error = validate_package(&serde_json::from_value(value).unwrap()).unwrap_err();
         assert_eq!(error.problem()["pointer"], "/surfaces/0/uiPath");
     }
 }

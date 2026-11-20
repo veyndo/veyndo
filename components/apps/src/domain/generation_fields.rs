@@ -1,6 +1,7 @@
 //! Guided field alternatives express native cross-field rules before inference; native admission remains authoritative.
-use super::*;
-pub(super) fn schema(base: &Value) -> Value {
+use serde_json::{Value, json};
+/// The field schema with one alternative per field family, so cross-field rules hold before inference.
+pub fn schema(base: &Value) -> Value {
     let mut field = base.clone();
     field["properties"]["validation"] = json!({"type":"object","additionalProperties":false,"properties":{
         "minimum":{"type":"number"},"maximum":{"type":"number"},
@@ -40,7 +41,14 @@ pub(super) fn schema(base: &Value) -> Value {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use crate::domain::generation_brief;
+    use crate::domain::manifest_validation::validate;
+    use serde_json::json;
+    use veyndo_app_model::manifest::Manifest;
+    use veyndo_core::Result;
+    fn validate_package(m: &Manifest) -> Result<()> {
+        validate(m, &json!({}))
+    }
     #[test]
     fn every_guided_field_family_compiles_under_actual_native_admission() {
         let schema = generation_brief::schema(&["en-GB".into()]);
@@ -56,8 +64,8 @@ mod tests {
                         field[key] = v.clone();
                     }
                 }
-                let m: apps::Manifest = serde_json::from_value(json!({"id":"guided_fields","version":"0.1.0","coreApi":"1","runtime":"declarative","name":{"en-GB":"Fields"},"permissions":["data.read","data.write"],"entities":[{"name":"entries","label":{"en-GB":"Entries"},"publicRead":false,"fields":[field]}]})).unwrap();
-                apps::validate(&m).unwrap();
+                let m: Manifest = serde_json::from_value(json!({"id":"guided_fields","version":"0.1.0","coreApi":"1","runtime":"declarative","name":{"en-GB":"Fields"},"permissions":["data.read","data.write"],"entities":[{"name":"entries","label":{"en-GB":"Entries"},"publicRead":false,"fields":[field]}]})).unwrap();
+                validate_package(&m).unwrap();
             }
         }
     }

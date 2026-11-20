@@ -696,6 +696,11 @@
       "sha256": "c9ec9428c4494a7990b3635b8a90b8e25f404e6ef7d44d0ea68e9179c320844f",
       "review": "Field, reference, view and manifest policy moved into the apps component without changing rules"
     },
+    "components/apps/src/domain/app_generation.rs": {
+      "status": "unproved",
+      "sha256": "0931a677e06e51e1fa43ae7a9e49ea696a77fd3d75732aeb86440f4de420b914",
+      "review": "App Studio generation rules moved into the apps component; behaviour unchanged"
+    },
     "components/apps/src/domain/approval.rs": {
       "status": "reviewed-binding",
       "sha256": "6bede05e37503886dae0924d404be43a103e8ba68fffbd128af8057bb2cda34e",
@@ -735,6 +740,11 @@
       "status": "reviewed-binding",
       "sha256": "175dca3117af71d20fab7f6675d5d2a9ca229367cc38d5758f99fa974a26a221",
       "review": "Record store, consent and core extension rules moved into the apps component without changing rules"
+    },
+    "components/apps/src/domain/design_context.rs": {
+      "status": "unproved",
+      "sha256": "950488ec00e4baa76a081de1b984965b45f6dfaa4775b5216b8900f7c60e41a9",
+      "review": "App Studio generation rules moved into the apps component; behaviour unchanged"
     },
     "components/apps/src/domain/discovery.rs": {
       "status": "unproved",
@@ -780,6 +790,31 @@
       "status": "reviewed-binding",
       "sha256": "697091a20fa0c812820edae0d491cc8bb0d9ef86f588fcc53583b6a13e4cf519",
       "review": "Field, reference, view and manifest policy moved into the apps component without changing rules"
+    },
+    "components/apps/src/domain/generation_bindings.rs": {
+      "status": "unproved",
+      "sha256": "6b9b37949d073030be483f359f617906d846dbf3959313f10169ad2a16b6de06",
+      "review": "App Studio generation rules moved into the apps component; behaviour unchanged"
+    },
+    "components/apps/src/domain/generation_brief.rs": {
+      "status": "unproved",
+      "sha256": "8d36a65ed2ad7aa13bd573465850d540f61fd2904cd4f6141863599d74702a4c",
+      "review": "App Studio generation rules moved into the apps component; behaviour unchanged"
+    },
+    "components/apps/src/domain/generation_contract.rs": {
+      "status": "unproved",
+      "sha256": "dfab94babb47200601feee89391202a412b8893f88ec7b68f4e577b7fbb1a972",
+      "review": "App Studio generation rules moved into the apps component; behaviour unchanged"
+    },
+    "components/apps/src/domain/generation_edits.rs": {
+      "status": "unproved",
+      "sha256": "eeadca9807567ef2e34ceb13518f1881c0113980c44ad5d9195931affea615a6",
+      "review": "App Studio generation rules moved into the apps component; behaviour unchanged"
+    },
+    "components/apps/src/domain/generation_fields.rs": {
+      "status": "unproved",
+      "sha256": "445beb81d39dfca854f791a6fae7a756adebb3fb3a0f51fb494ee5759a6543ea",
+      "review": "App Studio generation rules moved into the apps component; behaviour unchanged"
     },
     "components/apps/src/domain/input_schema.rs": {
       "status": "unproved",
@@ -908,8 +943,8 @@
     },
     "components/apps/src/domain.rs": {
       "status": "unproved",
-      "sha256": "eeac697805e24eaaaa45d515a03fc956ca81270036db18822f3ebe3c5e206a2b",
-      "review": "Surface grants, declared app routes, UI bundle loading and the action and entity handlers moved into the apps component without behavior change"
+      "sha256": "409983e134b95ec69bb937fbd1236be2a0c1c356c77e0368fc83aac8d767d63b",
+      "review": "App Studio generation rules moved into the apps component; behaviour unchanged"
     },
     "components/apps/src/http/actions.rs": {
       "status": "unproved",
@@ -5508,8 +5543,8 @@
     },
     "src/apps/native_lifecycle.rs": {
       "status": "unproved",
-      "sha256": "12119f2fa5187a475af2fe45be0cfd5b206db515379a70f8cb9afe71b735cd89",
-      "review": "Job callbacks, completion evidence, package verification, installation, activation and upgrade review moved into the apps component behind host ports without behavior change"
+      "sha256": "9eddb6cd2a3eb988f710c49f1b79e947418e756f27b97facc4de0ee233234162",
+      "review": "App Studio generation rules moved into the apps component; behaviour unchanged"
     },
     "src/apps/native_view_tests.rs": {
       "status": "unproved",
@@ -6641,11 +6676,6 @@
       "sha256": "6b75176ba5523c15a64cfe2d9de77a881c27c0388dc54a546da5a6b707ab0d2a",
       "review": "Reviewed Apps 0.19 immutable Studio version/history/archive/private-stage extraction. Shared save preserves original serialized Manifest SHA-256 development digest, immutable tenant/app/version including archives, retained prompt/provider/summary bytes, bounded original active/archive queries and archive/restore behavior. Shared stage keeps scoped archived=false row lock, first digest-error order, mandatory native owned private environment/typed compiler/current actor/actual installer hook, then tenant-scoped state update in original privileged caller transaction. Native live/developer/approve gates, locale/source validation, minimized design-evidence projection, private drafts and selective publication remain authoritative. No no-op production callback or alternate installer. Independent PostgreSQL actual shared install/failure rollback, foreign/digest/archive denial, concurrent immutable saves and stage/archive contention plus runnable denied-without-installer example pass. Native 32 developer units including legacy digest comparison, warning-free Clippy and eleven actual HTTP/PostgreSQL apps/studio/preview/staging/isolation/components/surfaces/assistants/generation/visual-workspace/marketplace modules pass. Exact source/WIT pins, 32 dependency negative controls and image closures pass. UI/Checkout additions are documented designs only. Kernel unchanged; shared SQL and native host adapter remain unproved."
     },
-    "src/developer/design_context.rs": {
-      "status": "unproved",
-      "sha256": "27341ed0843c2b67eaf49e01a7be499f77f7a7f3e811f3bb5a219f7c5d4b54eb",
-      "review": "Canvas reference capture uses bounded public-only egress and native vision; developer context is validated before inference, redacted evidence retained in existing immutable versions, HTTP/MCP task schemas preserve native staging and current rights. Native app-generation HTTP/PostgreSQL and context unit regressions passed."
-    },
     "src/developer/drafts.rs": {
       "status": "unproved",
       "sha256": "23acff2a13611901f2bf947b97365378574a44531fa3a03a4ec7ae66ecd6f719",
@@ -6653,38 +6683,13 @@
     },
     "src/developer/generation.rs": {
       "status": "unproved",
-      "sha256": "3c2dfce8b7f7fca39748543f9cda1a53ab868a2d301fac3b3b3131bf9add4b3f",
-      "review": "Canvas reference capture uses bounded public-only egress and native vision; developer context is validated before inference, redacted evidence retained in existing immutable versions, HTTP/MCP task schemas preserve native staging and current rights. Native app-generation HTTP/PostgreSQL and context unit regressions passed."
-    },
-    "src/developer/generation_bindings.rs": {
-      "status": "unproved",
-      "sha256": "05f4938e6c8cf6878d79e649c7c7e1d73b03ce31b6af8f7a441ae2e1b62a3f3a",
-      "review": "Reviewed guided creation asset grants restricted to new empty app construction; ordinary import keeps explicit surface and package authority. Added real upload denial and bounded translated sandbox regressions. No additional proof claims."
-    },
-    "src/developer/generation_brief.rs": {
-      "status": "unproved",
-      "sha256": "75c0bd6744a3650d69d82a70a680b134ca3db4e9d820f58166898e0ecbc5d232",
-      "review": "Guided native field families encode translated/indexed/core-reference and typed validation constraints before inference; new helper preserves existing Manifest admission and authority; native malformed-constraint and OpenAI/Ollama protocol regressions retained"
-    },
-    "src/developer/generation_contract.rs": {
-      "status": "unproved",
-      "sha256": "abf6dc82d9ceab2b64340dcec8c172caa3306f184227207cea5e69ee55f50a52",
-      "review": "Reviewed contextual private-work contracts and independent findings: app opt-out, locked guidance, preserved manual actions, conversation lease and locale inheritance; native own/foreign, stale approval, narrowed rights, renewed login, killed-worker continuation and actual app-preview regressions passed. SQL, async runtime and providers remain unproved."
-    },
-    "src/developer/generation_edits.rs": {
-      "status": "unproved",
-      "sha256": "34b8564d797682b58ebfa7a48db96f6133a3ae4d1e3c8d908bf5acca12ab44e3",
-      "review": "Reviewed model-refusal repair against native validator and connected app-generation/native-lifecycle fixtures: graph, guards, replacement limits and scope metadata share the existing owners; admission predicates, financial boundaries and quote acceptance are unchanged. app-edit@3 preserves immutable prior revisions and binds prompt provenance. Eight hostile provider outputs remain atomic refusals, modal errors preserve the draft, workspace tests and strict Clippy pass. No new pure policy or whole-adapter proof claim."
-    },
-    "src/developer/generation_fields.rs": {
-      "status": "unproved",
-      "sha256": "48755650a2a7062d250665d29c249782775cb22e99849060167dd62f9ad55bf5",
-      "review": "Guided native field families encode translated/indexed/core-reference and typed validation constraints before inference; new helper preserves existing Manifest admission and authority; native malformed-constraint and OpenAI/Ollama protocol regressions retained"
+      "sha256": "2143e0af52ec1884ffb70a0b5744b459ed4e2de7631790b0ff67c044afb00854",
+      "review": "App Studio generation rules moved into the apps component; behaviour unchanged"
     },
     "src/developer/mod.rs": {
       "status": "unproved",
-      "sha256": "ff75c0f9731cc5113cc8bb487c791efd82d0713270eb465c4c6fd59dacf36d34",
-      "review": "Reviewed Apps 0.19 immutable Studio version/history/archive/private-stage extraction. Shared save preserves original serialized Manifest SHA-256 development digest, immutable tenant/app/version including archives, retained prompt/provider/summary bytes, bounded original active/archive queries and archive/restore behavior. Shared stage keeps scoped archived=false row lock, first digest-error order, mandatory native owned private environment/typed compiler/current actor/actual installer hook, then tenant-scoped state update in original privileged caller transaction. Native live/developer/approve gates, locale/source validation, minimized design-evidence projection, private drafts and selective publication remain authoritative. No no-op production callback or alternate installer. Independent PostgreSQL actual shared install/failure rollback, foreign/digest/archive denial, concurrent immutable saves and stage/archive contention plus runnable denied-without-installer example pass. Native 32 developer units including legacy digest comparison, warning-free Clippy and eleven actual HTTP/PostgreSQL apps/studio/preview/staging/isolation/components/surfaces/assistants/generation/visual-workspace/marketplace modules pass. Exact source/WIT pins, 32 dependency negative controls and image closures pass. UI/Checkout additions are documented designs only. Kernel unchanged; shared SQL and native host adapter remain unproved."
+      "sha256": "76d99b71b1308074ea2af9a35deb696e7f871424b0ee630b47b887304380f1a4",
+      "review": "App Studio generation rules moved into the apps component; behaviour unchanged"
     },
     "src/developer/preview.rs": {
       "status": "unproved",
@@ -6693,8 +6698,8 @@
     },
     "src/developer/routes.rs": {
       "status": "unproved",
-      "sha256": "18c259b8e03d905eb0326a57e99222758f33ee8c1d7610f7a9eafcef4257cfff",
-      "review": "Reviewed Apps 0.19 immutable Studio version/history/archive/private-stage extraction. Shared save preserves original serialized Manifest SHA-256 development digest, immutable tenant/app/version including archives, retained prompt/provider/summary bytes, bounded original active/archive queries and archive/restore behavior. Shared stage keeps scoped archived=false row lock, first digest-error order, mandatory native owned private environment/typed compiler/current actor/actual installer hook, then tenant-scoped state update in original privileged caller transaction. Native live/developer/approve gates, locale/source validation, minimized design-evidence projection, private drafts and selective publication remain authoritative. No no-op production callback or alternate installer. Independent PostgreSQL actual shared install/failure rollback, foreign/digest/archive denial, concurrent immutable saves and stage/archive contention plus runnable denied-without-installer example pass. Native 32 developer units including legacy digest comparison, warning-free Clippy and eleven actual HTTP/PostgreSQL apps/studio/preview/staging/isolation/components/surfaces/assistants/generation/visual-workspace/marketplace modules pass. Exact source/WIT pins, 32 dependency negative controls and image closures pass. UI/Checkout additions are documented designs only. Kernel unchanged; shared SQL and native host adapter remain unproved."
+      "sha256": "9931c9d8a3f86b476fca4372c5388eb8eda759d6cf2d5431556d2c20870a3458",
+      "review": "App Studio generation rules moved into the apps component; behaviour unchanged"
     },
     "src/developer/version_storage.rs": {
       "status": "unproved",
@@ -7823,8 +7828,8 @@
       "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
     },
     "Cargo.lock": {
-      "sha256": "999d8929237d1eceaefc470d8a134ce8553a2b7231f44582092e4bb6b45807ac",
-      "review": "Service calls and event delivery moved into the apps component without changing rules"
+      "sha256": "936ecd5f5f53fbd5d6585eafefaec07f783cccf9b75deb2662f18eaddedd127b",
+      "review": "App Studio generation rules moved into the apps component; behaviour unchanged"
     },
     "Cargo.toml": {
       "sha256": "12d2d79a98f6913d20b8e912afb9ea8de0539b9e83428de8a9d7412c406896f6",

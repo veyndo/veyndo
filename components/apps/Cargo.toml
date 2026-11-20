@@ -31,4 +31,6 @@ tracing.workspace = true
 uuid.workspace = true
 chrono.workspace = true
 cron.workspace = true
+semver.workspace = true
+json-patch.workspace = true
 veyndo-cognition = { path = "../../crates/cognition" }

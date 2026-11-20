@@ -1,16 +1,13 @@
 //! Prompt-generated declarative apps and native coding-agent handoff, never unsandboxed model code.
 use crate::*;
+use veyndo_app_platform::domain::{
+    app_generation, design_context, generation_bindings, generation_brief, generation_edits,
+};
 pub(crate) mod agent_connection;
 mod archive;
 mod builds;
-mod design_context;
 mod drafts;
 mod generation;
-mod generation_bindings;
-mod generation_brief;
-mod generation_contract;
-mod generation_edits;
-mod generation_fields;
 mod preview;
 mod routes;
 mod version_storage;

@@ -1,6 +1,11 @@
 //! Compile a bounded new-app brief into the existing native Manifest; no model-authored wiring or new executor.
-use super::*;
-pub(super) fn empty(m: &Value) -> bool {
+use crate::domain::{app_generation, generation_bindings, generation_fields};
+use serde::Deserialize;
+use serde_json::{Value, json};
+use std::collections::HashMap;
+use veyndo_core::{Result, bad};
+/// Whether a draft is still the empty declarative shell guided creation starts from.
+pub fn empty(m: &Value) -> bool {
     m["runtime"] == "declarative"
         && [
             "entities",
@@ -27,8 +32,9 @@ pub(super) fn empty(m: &Value) -> bool {
         .iter()
         .all(|key| m.get(key).is_none_or(Value::is_null))
 }
-pub(super) fn schema(locales: &[String]) -> Value {
-    let base = generation::schema_for(locales);
+/// The bounded brief a model fills in for a new app, in the languages of the shop.
+pub fn schema(locales: &[String]) -> Value {
+    let base = app_generation::schema_for(locales);
     let props = &base["properties"]["manifest"]["properties"];
     let mut entities = props["entities"].clone();
     entities["minItems"] = json!(1);
@@ -68,7 +74,8 @@ struct Placement {
     label: HashMap<String, String>,
     save_label: HashMap<String, String>,
 }
-pub(super) fn apply(old: &Value, output: &Value, versions: &Value) -> Result<Value> {
+/// Compiles a brief into a complete native manifest; only an empty private draft accepts it.
+pub fn apply(old: &Value, output: &Value, versions: &Value) -> Result<Value> {
     if !empty(old) {
         return Err(bad("Guided creation requires an empty private draft"));
     }
@@ -161,19 +168,27 @@ pub(super) fn apply(old: &Value, output: &Value, versions: &Value) -> Result<Val
         surfaces.push(json!({"id":id,"location":p.location,"label":p.label,"uiPath":format!("native/{id}"),"actions":[read,write]}));
     }
     let mut result = json!({"summary":brief.summary,"manifest":{"id":old["id"],"version":version.to_string(),"coreApi":"1","runtime":"declarative","category":"operations","name":brief.name,"permissions":["data.read","data.write","admin.slot"],"entities":brief.entities,"settings":brief.settings,"views":views,"surfaces":surfaces,"slots":[],"apiRoutes":[],"intelligence":{"description":brief.summary,"tools":[],"entities":[]}}});
-    routes::actions(&mut result["manifest"])?;
+    app_generation::default_actions(&mut result["manifest"], &[])?;
     generation_bindings::new_app_assets(&mut result["manifest"])?;
     Ok(result)
 }
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use super::{apply, empty, schema};
+    use crate::domain::manifest_validation::validate;
+    use crate::domain::{app_generation, generation_bindings};
+    use serde_json::{Value, json};
+    use veyndo_app_model::manifest::Manifest;
+    use veyndo_core::Result;
+    fn validate_package(m: &Manifest) -> Result<()> {
+        validate(m, &json!({}))
+    }
     fn original() -> Value {
         json!({"id":"private_app","version":"0.1.0","coreApi":"1","runtime":"declarative","name":{"en":"Test"},"entities":[],"views":[],"surfaces":[],"actions":[],"settings":[]})
     }
     fn brief() -> Value {
         let m: Value = serde_json::from_str(include_str!(
-            "../../extensions/apps/product-advisor/manifest.json"
+            "../../../../extensions/apps/product-advisor/manifest.json"
         ))
         .unwrap();
         let mut entity = m["entities"][0].clone();
@@ -188,10 +203,10 @@ mod tests {
     fn merchant_brief_produces_connected_private_views_and_real_native_handlers() {
         assert!(empty(&original()));
         let mut out = apply(&original(), &brief(), &json!([])).unwrap();
-        routes::actions(&mut out["manifest"]).unwrap();
+        app_generation::default_actions(&mut out["manifest"], &[]).unwrap();
         generation_bindings::complete(&mut out["manifest"]).unwrap();
-        let m: apps::Manifest = serde_json::from_value(out["manifest"].clone()).unwrap();
-        apps::validate(&m).unwrap();
+        let m: Manifest = serde_json::from_value(out["manifest"].clone()).unwrap();
+        validate_package(&m).unwrap();
         assert_eq!(m.id, "private_app");
         assert_eq!(m.settings.len(), 1);
         assert_eq!(m.views.len(), 2);

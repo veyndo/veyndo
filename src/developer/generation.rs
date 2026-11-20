@@ -48,7 +48,7 @@ pub(super) async fn generate(a: &App, t: &str, h: &RequestContext, v: &Value) ->
     } else if editing {
         generation_edits::schema(&settings.locales)
     } else {
-        schema_for(&settings.locales)
+        app_generation::schema_for(&settings.locales)
     };
     let system = if guided {
         include_str!("../../crates/cognition/prompts/app-brief.v2.txt")
@@ -87,8 +87,11 @@ pub(super) async fn generate(a: &App, t: &str, h: &RequestContext, v: &Value) ->
                 out.value
             };
             routes::actions(&mut result["manifest"])?;
-            preserve_access(&v["manifest"], &mut result["manifest"]);
-            super::generation_contract::retain(&v["manifest"], &mut result["manifest"])?;
+            app_generation::preserve_access(&v["manifest"], &mut result["manifest"]);
+            veyndo_app_platform::domain::generation_contract::retain(
+                &v["manifest"],
+                &mut result["manifest"],
+            )?;
             result["environment"] = json!(stage);
             result["prompt"] = json!(prompt);
             builds::save(
@@ -120,163 +123,4 @@ pub(super) async fn generate(a: &App, t: &str, h: &RequestContext, v: &Value) ->
         }
     }
     unreachable!("bounded generation returns a validated draft or an error")
-}
-/// Restricted model generation does not silently reopen existing actions to agents or weaken team scopes.
-fn preserve_access(old: &Value, next: &mut Value) {
-    if old["id"] != next["id"] {
-        return;
-    }
-    if let Some(actions) = next["actions"].as_array_mut() {
-        for action in actions {
-            if let Some(prior) = old["actions"]
-                .as_array()
-                .and_then(|rows| rows.iter().find(|a| a["name"] == action["name"]))
-            {
-                action["mcp"] = prior.get("mcp").cloned().unwrap_or(Value::Bool(true));
-                for key in [
-                    "mcp",
-                    "permission",
-                    "requiredPermissions",
-                    "public",
-                    "flowAllowed",
-                ] {
-                    if let Some(value) = prior.get(key) {
-                        action[key] = value.clone();
-                    }
-                }
-            }
-        }
-    }
-}
-pub(super) fn schema() -> Value {
-    serde_json::from_str(include_str!("../../fixtures/app-studio-schema.json"))
-        .expect("bundled app studio schema")
-}
-
-/// Shared schema specializations use actual configured languages, including regional locales.
-pub(super) fn schema_for(locales: &[String]) -> Value {
-    fn walk(v: &mut Value, locales: &[String]) {
-        if v["type"] == "object"
-            && v["properties"].get("en").is_some()
-            && v["properties"].get("de").is_some()
-        {
-            let props = locales
-                .iter()
-                .map(|l| (l.clone(), json!({"type":"string"})))
-                .collect::<serde_json::Map<_, _>>();
-            v["properties"] = Value::Object(props);
-            v["required"] = json!(locales);
-        } else {
-            match v {
-                Value::Object(o) => {
-                    for value in o.values_mut() {
-                        walk(value, locales);
-                    }
-                }
-                Value::Array(a) => {
-                    for value in a {
-                        walk(value, locales);
-                    }
-                }
-                _ => {}
-            }
-        }
-    }
-    let mut v = schema();
-    walk(&mut v, locales);
-    let lifecycle = &mut v["properties"]["manifest"]["properties"]["lifecycles"];
-    lifecycle["description"] = json!(apps::native_lifecycle::generation_context().to_string());
-    lifecycle["items"]["properties"]["transitions"]["items"]["properties"]["requiredPermissions"]
-        ["items"]["enum"] = json!(auth::SCOPES);
-    v
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    #[test]
-    fn generated_handler_schema_requires_native_operations_and_record_inputs() {
-        let schema = schema_for(&["it-IT".into()]);
-        let handlers = &schema["properties"]["manifest"]["properties"]["views"]["items"]["properties"]
-            ["blocks"]["items"]["properties"]["handlers"];
-        let branches = handlers["properties"]["click"]["items"]["anyOf"]
-            .as_array()
-            .unwrap();
-        assert_eq!(branches.len(), 5);
-        for branch in branches {
-            assert!(
-                branch["required"]
-                    .as_array()
-                    .unwrap()
-                    .contains(&json!("op"))
-            );
-            assert_eq!(branch["additionalProperties"], false);
-        }
-        assert_eq!(
-            branches[2]["properties"]["input"]["properties"]["kind"]["enum"],
-            json!(["record"])
-        );
-        assert_eq!(
-            branches[4]["properties"]["text"]["required"],
-            json!(["it-IT"])
-        );
-        let base: Value = serde_json::from_str(include_str!(
-            "../../extensions/apps/product-advisor/manifest.json"
-        ))
-        .unwrap();
-        for instruction in [
-            json!({"op":"validate","target":"editor"}),
-            json!({"op":"refresh","target":"records"}),
-            json!({"op":"call","action":"save_entries","input":{"kind":"record","block":"editor"}}),
-            json!({"op":"navigate","view":"workspace"}),
-            json!({"op":"msgBox","text":{"it-IT":"Salvato"}}),
-        ] {
-            let mut m = base.clone();
-            m["views"][0]["blocks"][2]["handlers"]["click"] = json!([instruction]);
-            assert!(serde_json::from_value::<apps::Manifest>(m).is_ok());
-        }
-        let mut malformed = base;
-        malformed["views"][0]["blocks"][2]["handlers"]["click"] =
-            json!([{"action":"save_entries"}]);
-        assert!(serde_json::from_value::<apps::Manifest>(malformed).is_err());
-    }
-    #[test]
-    fn generation_retains_access_of_existing_actions() {
-        let old = json!({"id":"same","actions":[{"name":"save","mcp":false,"permission":"orders.write","requiredPermissions":["payments.manage","customers.pii"],"public":false,"flowAllowed":false}]});
-        let mut next = json!({"id":"same","actions":[{"name":"save","mcp":true,"permission":"catalog.write","public":true,"flowAllowed":true}]});
-        preserve_access(&old, &mut next);
-        assert_eq!(next, old);
-    }
-    #[test]
-    fn schema_uses_dynamic_regional_shop_languages() {
-        let schema = schema_for(&["es-ES".into(), "it-IT".into(), "en-US".into()]);
-        let labels = &schema["properties"]["manifest"]["properties"]["views"]["items"]["properties"]
-            ["blocks"]["items"]["properties"]["title"];
-        assert_eq!(labels["required"], json!(["es-ES", "it-IT", "en-US"]));
-        assert!(labels["properties"].get("en").is_none());
-        assert_eq!(labels["additionalProperties"], false);
-        let description = &schema["properties"]["manifest"]["properties"]["presentation"]["properties"]
-            ["description"];
-        assert_eq!(description["required"], json!(["es-ES", "it-IT", "en-US"]));
-        assert!(description["properties"].get("en").is_none());
-    }
-    #[test]
-    fn workflow_generation_context_comes_from_native_validation_and_scope_owners() {
-        let schema = schema_for(&["it-IT".into()]);
-        let c = &schema["properties"]["manifest"]["properties"]["lifecycles"];
-        let context: Value = serde_json::from_str(c["description"].as_str().unwrap()).unwrap();
-        assert_eq!(context, apps::native_lifecycle::generation_context());
-        assert_eq!(context["quote"]["replaceableActions"], json!([]));
-        assert_eq!(
-            context["quote"]["allowedNativeTo"],
-            json!(["requested", "rejected"])
-        );
-        assert_eq!(context["quote"]["guards"], json!(["quote.message"]));
-        assert_eq!(
-            c["items"]["properties"]["transitions"]["items"]["properties"]["requiredPermissions"]["items"]
-                ["enum"],
-            json!(auth::SCOPES)
-        );
-        assert!(c.to_string().contains("it-IT"));
-    }
 }
