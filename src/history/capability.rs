@@ -1,50 +1,18 @@
 //! HTTP/MCP parity for history; per-entity read/write scopes are checked again at invocation time.
 use super::*;
+use veyndo_studio::domain::history_access;
 pub(crate) fn schema(name: &str) -> Option<Value> {
     if name == "merchant.customer.groups" {
         return Some(json!({"type":"object","properties":{},"additionalProperties":false}));
     }
-    if ![
-        "merchant.history",
-        "merchant.history.version",
-        "merchant.history.restore",
-    ]
-    .contains(&name)
-    {
-        return None;
-    }
-    let mut props = json!({"entity":{"type":"string","enum":ENTITIES},"id":{"type":"string","minLength":1,"maxLength":254}});
-    let mut required = vec!["entity", "id"];
-    if name == "merchant.history" {
-        props["before"] = json!({"type":"integer"});
-    } else {
-        props["version"] = json!({"type":"integer","minimum":1});
-        required.push("version");
-    }
-    if name == "merchant.history.restore" {
-        props["approve"] = json!({"type":"boolean","const":true});
-        props["revision"] = json!({"type":"integer","minimum":0});
-        props["side"] = json!({"type":"string","enum":["before","after"]});
-        required.extend(["approve", "revision", "side"]);
-    }
-    Some(
-        json!({"type":"object","properties":props,"required":required,"additionalProperties":false}),
-    )
+    history_access::schema(name)
 }
 pub(crate) fn visible(h: &RequestContext, name: &str) -> bool {
     if name == "merchant.customer.groups" {
         return auth::permit(h, "customers.read").is_ok()
             || auth::permit(h, "settings.read").is_ok();
     }
-    [
-        "merchant.history",
-        "merchant.history.version",
-        "merchant.history.restore",
-    ]
-    .contains(&name)
-        && ENTITIES
-            .iter()
-            .any(|entity| accessible(h, entity, name == "merchant.history.restore"))
+    history_access::visible(h, name)
 }
 pub(crate) async fn invoke(a: &App, h: &RequestContext, name: &str, v: &Value) -> Result<Value> {
     let Json(value) = if name == "merchant.customer.groups" {
@@ -57,19 +25,19 @@ pub(crate) async fn invoke(a: &App, h: &RequestContext, name: &str, v: &Value) -
         let id = v["id"].as_str().ok_or(bad("id required"))?.to_string();
         match name {
             "merchant.history" => {
-                routes::list(
-                    State(a.clone()),
+                transport::list(
+                    State(a.core.clone()),
                     h.clone(),
                     Path((entity, id)),
-                    axum::extract::Query(routes::Page {
+                    axum::extract::Query(transport::Page {
                         before: v["before"].as_i64(),
                     }),
                 )
                 .await?
             }
             "merchant.history.version" => {
-                routes::detail(
-                    State(a.clone()),
+                transport::detail(
+                    State(a.core.clone()),
                     h.clone(),
                     Path((
                         entity,

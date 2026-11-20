@@ -956,7 +956,7 @@
       ],
       "glob_imports": 15,
       "untyped_access": 160,
-      "sql_outside_store": 8
+      "sql_outside_store": 7
     },
     "protocols": {
       "title": "MCP, UCP and the shared capability dispatch; adapters without business rules",

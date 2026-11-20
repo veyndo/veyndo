@@ -478,9 +478,14 @@ Order follows the dependency report, lowest first. Each line is one move.
   reader's language and the behaviour consent filter) and the release units
   of a staging shop for knowledge sources, assets and categories
   (`store/staging_documents`, `store/staging_assets`,
-  `store/staging_categories`). Open: the rest of staging shops (clone,
-  snapshot, release),
-  history, the channel activity tracker.
+  `store/staging_categories`), and the reading side of history: which
+  entities keep versions, their rights, the operation schemas and the
+  restoration request (`domain/history_access`), the product edit rebuilt
+  from a version (`domain/product_restore`), version reads (`store/history`)
+  and the listing and version handlers (`http/history`). Open: the rest of
+  staging shops (clone, snapshot, release), the history restore dispatch (it
+  replays edits through roles, B2B, catalog, customers, settings, marketing
+  and documents and needs their ports), the channel activity tracker.
 - [ ] shop. Started: `components/shop` owns the settings types (`Settings`,
   delivery and payment methods, the checkout selection, B2B switches, AI
   guardrails, legal configuration), every bound on them (`validation`, tax

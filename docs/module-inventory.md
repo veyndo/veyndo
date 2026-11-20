@@ -324,10 +324,10 @@ This lists every checked-in source module in these roots, including files with n
 | [src/extensions.rs](../src/extensions.rs) | Merchant catalogue and Wasm extension activation/state. |
 | [src/foundation.rs](../src/foundation.rs) | Application dependencies, error responses and request context helpers. |
 | [src/history/capability.rs](../src/history/capability.rs) | HTTP/MCP parity for history; per-entity read/write scopes are checked again at invocation time. |
-| [src/history/mod.rs](../src/history/mod.rs) | Uniform tenant-scoped history from transactional database snapshots; restoration delegates to existing domain validators. |
+| [src/history/mod.rs](../src/history/mod.rs) | Uniform tenant-scoped history from transactional database snapshots; reading lives in the studio component, restoration delegates to the owning domain validators. |
 | [src/history/product.rs](../src/history/product.rs) | Rebuild a product edit from an audited snapshot; stock stays current and all associations/media pass normal admission. |
 | [src/history/restore.rs](../src/history/restore.rs) | Restore snapshots by replaying validated entity edits; financial effects and publication are never copied from historical state. |
-| [src/history/routes.rs](../src/history/routes.rs) | History summaries are bounded and permission-filtered; full snapshots and restore targets stay inside the owning shop. |
+| [src/history/routes.rs](../src/history/routes.rs) | Restoring a version: rights, approval and the recorded state are checked here; the owning domain validates the replayed edit. |
 | [src/legal/buyer_consent.rs](../src/legal/buyer_consent.rs) | Required contact data for explicit registered marketing segments; shared by protocol review and locked native checkout. |
 | [src/legal/capabilities.rs](../src/legal/capabilities.rs) | MCP legal tools delegate to the same ownership/permission-checked HTTP domain handlers. |
 | [src/legal/checkout.rs](../src/legal/checkout.rs) | Explicit document/digital acknowledgement and immutable order policy snapshots; transport-neutral checkout guard. |
@@ -1146,12 +1146,17 @@ This lists every checked-in source module in these roots, including files with n
 | [components/shop/src/types/legal.rs](../components/shop/src/types/legal.rs) | Bounded multilingual legal configuration; policy changes invalidate optional-purpose consent. |
 | [components/shop/src/types/settings.rs](../components/shop/src/types/settings.rs) | Checkout selection and configuration data contracts. |
 | [components/shop/src/types.rs](../components/shop/src/types.rs) | The configuration a shop stores. |
+| [components/studio/src/domain/history_access.rs](../components/studio/src/domain/history_access.rs) | Which entities keep a history, the rights their versions need, and what a restoration request must state. |
+| [components/studio/src/domain/product_restore.rs](../components/studio/src/domain/product_restore.rs) | Rebuilds a product edit from a recorded version; stock stays current and associations pass the normal product admission afterwards. |
 | [components/studio/src/domain/report_config.rs](../components/studio/src/domain/report_config.rs) | One bounded report definition for HTTP, MCP and private workspace presentation preferences. |
 | [components/studio/src/domain/report_period.rs](../components/studio/src/domain/report_period.rs) | Calendar periods are resolved once in the requested IANA timezone, with exclusive ends and bounded buckets. |
 | [components/studio/src/domain/view_components.rs](../components/studio/src/domain/view_components.rs) | The parts a composed record view may show: always the records, at most three, and only what fits the entity. |
 | [components/studio/src/domain/workspace.rs](../components/studio/src/domain/workspace.rs) | Bounded personal layouts contain references, never delegated rights or executable agent instructions. |
 | [components/studio/src/domain.rs](../components/studio/src/domain.rs) | domain of this component. |
+| [components/studio/src/http/history.rs](../components/studio/src/http/history.rs) | History transport: bounded, permission-filtered version listings and single versions of the owning shop. |
+| [components/studio/src/http.rs](../components/studio/src/http.rs) | HTTP handlers of the studio component; the server registers them with their route rights. |
 | [components/studio/src/lib.rs](../components/studio/src/lib.rs) | Studio component: report periods and configuration. |
+| [components/studio/src/store/history.rs](../components/studio/src/store/history.rs) | Reads the recorded versions of one entity of a shop. |
 | [components/studio/src/store/overview.rs](../components/studio/src/store/overview.rs) | Consolidated dashboard facts in one bounded read; turnover stays separated by invoice currency and is never repriced. |
 | [components/studio/src/store/overview.sql](../components/studio/src/store/overview.sql) | One bounded overview snapshot. Arrays retain the original limits and ordering; currencies remain separate. |
 | [components/studio/src/store/reports/sales.sql](../components/studio/src/store/reports/sales.sql) | One bounded aggregate result, no customer projection and no floating-point monetary accumulation. |

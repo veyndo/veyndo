@@ -3381,6 +3381,16 @@
       "sha256": "c8dd3115d7120bce0313a2f6f60e6690a5d41100f025c68bfe79148803d75625",
       "review": "cart types and rule engine moved into components; checking bindings"
     },
+    "components/studio/src/domain/history_access.rs": {
+      "status": "unproved",
+      "sha256": "0c6c9b6370a1747e9d917a00aa46af6353fd563487f20c49a53d04ecc2d476e6",
+      "review": "History access rules, version reads and the product restoration projection moved into the studio component; behaviour unchanged"
+    },
+    "components/studio/src/domain/product_restore.rs": {
+      "status": "unproved",
+      "sha256": "68089b69f100f8767bb5084bc5b66d171d8ecc9e97ab76e43ec6f3b55167d8ab",
+      "review": "History access rules, version reads and the product restoration projection moved into the studio component; behaviour unchanged"
+    },
     "components/studio/src/domain/report_config.rs": {
       "status": "unproved",
       "sha256": "f735aba7727c59fbbca64e7ecc128959185cf7d6e0241c2916e6e883bc2b338b",
@@ -3403,13 +3413,28 @@
     },
     "components/studio/src/domain.rs": {
       "status": "unproved",
-      "sha256": "71e817c3a5924f97c41099f2084273fb79776ede4ad37125c2618abd025789be",
-      "review": "Personal Studio workspace model and store moved into the studio component without behaviour change"
+      "sha256": "0e1098a445e41a6bc65746c0467fcbf0d1040dfc0361eee80300f7ea3373fcbf",
+      "review": "History access rules, version reads and the product restoration projection moved into the studio component; behaviour unchanged"
+    },
+    "components/studio/src/http/history.rs": {
+      "status": "unproved",
+      "sha256": "a7dac2b367024ec07084c7309a00487f74466fb114e533aae122ae1fd0c47e49",
+      "review": "History access rules, version reads and the product restoration projection moved into the studio component; behaviour unchanged"
+    },
+    "components/studio/src/http.rs": {
+      "status": "unproved",
+      "sha256": "fa8c9e5644770440f9336d1346dda9b712b251e228d5e4039336c005ccf5cf38",
+      "review": "History access rules, version reads and the product restoration projection moved into the studio component; behaviour unchanged"
     },
     "components/studio/src/lib.rs": {
       "status": "unproved",
-      "sha256": "afe81630180a6a5ed323d1a69dd77ff630ae6ed7a266b4f99371bc0dea297498",
-      "review": "Personal Studio workspace model and store moved into the studio component without behaviour change"
+      "sha256": "1542bebcddfcf5a3dffdd774cb0a52fe308a00752f65712a5013086267b262ec",
+      "review": "History access rules, version reads and the product restoration projection moved into the studio component; behaviour unchanged"
+    },
+    "components/studio/src/store/history.rs": {
+      "status": "unproved",
+      "sha256": "678359dc9b5a9af3f22260931526ee4af4c41ce93ed83531b5308b11d2ebe70b",
+      "review": "History access rules, version reads and the product restoration projection moved into the studio component; behaviour unchanged"
     },
     "components/studio/src/store/overview.rs": {
       "status": "unproved",
@@ -3448,8 +3473,8 @@
     },
     "components/studio/src/store.rs": {
       "status": "unproved",
-      "sha256": "5a3da500e239a8129afff48ad2bb7876000ae8c69d2dd6cbdf2319e8c746e4c1",
-      "review": "Local flow mutations moved verbatim into the marketing component and staged knowledge sources, assets and categories into the studio component; the flow owner and release selection stay in the server."
+      "sha256": "9686b9068a914a5e6409017ad92a8c4ff841fa93c9670d9ae947a1382f4106b8",
+      "review": "History access rules, version reads and the product restoration projection moved into the studio component; behaviour unchanged"
     },
     "crates/apps/src/component_runtime.rs": {
       "status": "unproved",
@@ -6793,18 +6818,18 @@
     },
     "src/history/capability.rs": {
       "status": "unproved",
-      "sha256": "624350d4ff6abe0915b0af97b15de7765e15c86f8f5637a05dc0ebacf09d692e",
-      "review": "History discovery now uses native entity rights plus current read/write/PII conjunctions; canonical entity set and PII classification are shared with native history. Real narrow-role counterexample reproduced before repair; no financial policy changed."
+      "sha256": "c50fe2b634a01eaaee340786d7eec0844abfc8e7aa8af28e2f6c315f14313b01",
+      "review": "History access rules, version reads and the product restoration projection moved into the studio component; behaviour unchanged"
     },
     "src/history/mod.rs": {
       "status": "unproved",
-      "sha256": "08acb23ac50a9f2db56e4108a57b0c9bdbb70fadf3a8743e5575feda2717e93d",
-      "review": "B2B access, organization and purchasing storage and flow job claims moved into their components"
+      "sha256": "9d1117359beb2577c48287384103be78ceb3da09ed111706ee6cf89ff1226232",
+      "review": "History access rules, version reads and the product restoration projection moved into the studio component; behaviour unchanged"
     },
     "src/history/product.rs": {
       "status": "unproved",
-      "sha256": "dee81017aaee1d89654b8e3edc0f20c7b8eec7a7ad84cb170e2568b879c3b87f",
-      "review": "Review additive product content clock and rolling-writer trigger; preserve aggregate CAS for explicit stock and legacy clients; content-only HTTP/MCP edits omit stock under the locked native owner; preserve live stock in history and release snapshots. Actual two-replica purchase/cancellation and editor regressions exercise stale writes; async SQL and UI remain outside the existing unchanged Lean proof boundary."
+      "sha256": "a5b97847b68bfb3d96c2b059756732fda81da52c5589f64d9128578424f19200",
+      "review": "History access rules, version reads and the product restoration projection moved into the studio component; behaviour unchanged"
     },
     "src/history/restore.rs": {
       "status": "unproved",
@@ -6813,8 +6838,8 @@
     },
     "src/history/routes.rs": {
       "status": "unproved",
-      "sha256": "e5ecdd27274850e62d9550c1c30e262fb08b255da3f5dc2a62c088c0b7eb1da4",
-      "review": "History discovery now uses native entity rights plus current read/write/PII conjunctions; canonical entity set and PII classification are shared with native history. Real narrow-role counterexample reproduced before repair; no financial policy changed."
+      "sha256": "b943b3571947715e562de8c464cfe2232fb6d0dbc76c27402f2d31a5613ffec4",
+      "review": "History access rules, version reads and the product restoration projection moved into the studio component; behaviour unchanged"
     },
     "src/legal/buyer_consent.rs": {
       "status": "unproved",
@@ -7838,8 +7863,8 @@
       "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
     },
     "Cargo.lock": {
-      "sha256": "936ecd5f5f53fbd5d6585eafefaec07f783cccf9b75deb2662f18eaddedd127b",
-      "review": "App Studio generation rules moved into the apps component; behaviour unchanged"
+      "sha256": "9893d6ead092c26b7f636c81c94035904e7eb56e05ff5559bbdaa944a15398f6",
+      "review": "History access rules, version reads and the product restoration projection moved into the studio component; behaviour unchanged"
     },
     "Cargo.toml": {
       "sha256": "12d2d79a98f6913d20b8e912afb9ea8de0539b9e83428de8a9d7412c406896f6",

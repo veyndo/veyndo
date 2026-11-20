@@ -3985,6 +3985,7 @@ dependencies = [
 name = "veyndo-studio"
 version = "0.5.0"
 dependencies = [
+ "axum",
  "chrono",
  "chrono-tz",
  "reqwest",
