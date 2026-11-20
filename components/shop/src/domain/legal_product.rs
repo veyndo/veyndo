@@ -116,7 +116,8 @@ pub fn product_gaps(extra: &Value, config: &Config, locale: &str, main: &str) ->
 }
 #[cfg(test)]
 mod tests {
-    use super::product_gaps;
+    use super::{product_gaps, validate_product};
+    use crate::types::settings::Settings;
 
     use crate::types::legal::Config;
 
@@ -127,5 +128,25 @@ mod tests {
         let gaps = product_gaps(&v, &Config::default(), "de-DE", "en-GB");
         assert!(gaps.contains(&"responsibleContact".into()));
         assert!(!gaps.contains(&"fibres".into()));
+    }
+    #[test]
+    fn compliance_facts_are_known_fields_with_texts_in_shop_languages() {
+        let s: Settings =
+            serde_json::from_str(include_str!("../../../../fixtures/demo-settings.json")).unwrap();
+        assert!(validate_product(&json!(null), &s).is_ok());
+        assert!(validate_product(&json!({"sector":"textiles","nonEuManufacturer":false,"fibres":{"de-DE":"100 % Baumwolle","en-GB":null}}), &s).is_ok());
+        for invalid in [
+            json!("text"),
+            json!({"sector":"unknown-sector"}),
+            json!({"nonEuManufacturer":"yes"}),
+            json!({"certificate":{"de-DE":"CE"}}),
+            json!({"fibres":"cotton"}),
+            json!({"fibres":{"xx-XX":"cotton"}}),
+            json!({"fibres":{"de-DE":7}}),
+            json!({"fibres":{"de-DE":"a\0b"}}),
+            json!({"fibres":{"de-DE":"x".repeat(6001)}}),
+        ] {
+            assert!(validate_product(&invalid, &s).is_err(), "{invalid}");
+        }
     }
 }

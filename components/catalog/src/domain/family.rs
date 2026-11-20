@@ -20,8 +20,39 @@ pub fn inherit(product: &mut Product, root: &Product) {
 
 #[cfg(test)]
 mod tests {
-    use super::inherited_extra;
-    use serde_json::json;
+    use super::{inherit, inherited_extra};
+    use serde_json::{Value, json};
+    use veyndo_pricing::catalog::Product;
+
+    fn product(id: &str, name: &str, extra: Value) -> Product {
+        serde_json::from_value(json!({
+            "extra":extra,"id":id,"name":name,"category":"","description":format!("About {name}"),"price":10.0,
+            "tax_rate":19.0,"stock":1,"revision":1,"list_price":null,"regulation_price":null,
+            "reference_price":null,"advanced_prices":[],"min_purchase":1,"purchase_steps":1,
+            "max_purchase":null,"parent_id":null,"options":{},"media":[],"properties":{},
+            "delivery_days":1
+        }))
+        .unwrap()
+    }
+
+    #[test]
+    fn a_variant_takes_the_family_texts_and_keeps_its_own_facts() {
+        let root = product(
+            "family",
+            "Mug",
+            json!({"shippingFree":true,"seo":{"en":{"title":"Mug"}}}),
+        );
+        let mut variant = product("family-red", "family-red", json!({"shippingFree":false}));
+        variant.price = 12.5;
+        inherit(&mut variant, &root);
+        assert_eq!(variant.name, "Mug");
+        assert_eq!(variant.description, "About Mug");
+        assert_eq!(
+            variant.extra,
+            json!({"shippingFree":false,"seo":{"en":{"title":"Mug"}}})
+        );
+        assert_eq!((variant.id.as_str(), variant.price), ("family-red", 12.5));
+    }
 
     #[test]
     fn sku_metadata_inherits_without_overwriting_explicit_values() {

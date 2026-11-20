@@ -68,3 +68,49 @@ fn builtin(
         )])
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::{decode, enrich_defaults};
+    use crate::types::settings::Settings;
+    use serde_json::{Value, json};
+
+    fn fixture() -> Value {
+        serde_json::from_str(include_str!("../../../../fixtures/demo-settings.json")).unwrap()
+    }
+
+    #[test]
+    fn stored_settings_without_labels_get_the_bundled_ones() {
+        let mut v = fixture();
+        let bundled = v["shipping"][0]["translations"].clone();
+        v["shipping"][0]["translations"] = json!({});
+        v["payments"][0]["translations"] = json!({});
+        v["taxes"][0]["translations"] = json!({});
+        let s = decode(v).unwrap();
+        assert_eq!(json!(s.shipping[0].translations), bundled);
+        assert!(!s.payments[0].translations.is_empty());
+        assert!(!s.taxes[0].translations.is_empty());
+        assert!(decode(json!({"countries":"DE"})).is_err());
+    }
+
+    #[test]
+    fn an_own_method_gets_its_name_in_the_main_language_and_stored_labels_stay() {
+        let mut v = fixture();
+        v["shipping"][0]["name"] = json!("Bike courier");
+        v["shipping"][0]["translations"] = json!({});
+        v["payments"][0]["translations"] =
+            json!({"de-DE":{"name":"Eigene Zahlung","description":null}});
+        let s: Settings = serde_json::from_value(v).unwrap();
+        let s = enrich_defaults(s);
+        assert_eq!(s.shipping[0].translations.len(), 1);
+        assert_eq!(
+            s.shipping[0].translations[&s.main_locale].name.as_deref(),
+            Some("Bike courier")
+        );
+        assert_eq!(s.payments[0].translations.len(), 1);
+        assert_eq!(
+            s.payments[0].translations["de-DE"].name.as_deref(),
+            Some("Eigene Zahlung")
+        );
+    }
+}

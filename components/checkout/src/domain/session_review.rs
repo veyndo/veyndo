@@ -159,3 +159,187 @@ impl Review {
         }
     }
 }
+#[cfg(test)]
+mod tests {
+    use super::{Review, key, receipt};
+    use serde_json::{Value, json};
+    use veyndo_core::StatusCode;
+    use veyndo_shop::types::cart::StoredCart;
+    use veyndo_shop::types::settings::{CheckoutSelection, FundingChoice};
+
+    const SESSION: &str = "3f2b8c1e-5a4d-4e6f-8a9b-0c1d2e3f4a5b";
+
+    fn cart(admin: Option<&str>) -> StoredCart {
+        StoredCart {
+            id: "cart-1".into(),
+            tenant: "shop".into(),
+            token: "token".into(),
+            data: serde_json::from_value(json!({"items":[],"group":"retail","session":"s",
+                "customer_id":"customer-1","locale":"de-DE","admin_actor":admin}))
+            .expect("cart"),
+            revision: 3,
+            status: "open".into(),
+        }
+    }
+
+    fn review(paypal: bool) -> Review {
+        serde_json::from_value(json!({"sessionId":SESSION,"cartId":"cart-1","customerId":"customer-1",
+            "cartRevision":3,"locale":"de-DE","currency":"EUR","country":"DE",
+            "paymentMethod":if paypal {"paypal-sandbox"} else {"simulated"},
+            "legalPolicyVersion":"policy-7","totalMinor":"1000","confirmed":true,"paypalSandbox":paypal}))
+        .expect("review")
+    }
+
+    fn quote(paypal: bool) -> Value {
+        json!({"id":"cart-1","revision":3,"price":{"currency":"EUR","totalMinor":"1000"},
+            "checkout":{"country":"DE"},
+            "paymentMethod":if paypal {json!({"mode":"app","id":"paypal-sandbox"})} else {json!({"mode":"simulated","id":"simulated"})}})
+    }
+
+    fn placed(paypal: bool) -> Value {
+        let payment = if paypal {
+            json!({"method":{"mode":"app","id":"paypal-sandbox"},"provider":"paypal","environment":"sandbox",
+                "realMoneyCharged":false,"attemptId":"attempt-1","state":"pending"})
+        } else {
+            json!({"provider":"simulated","realMoneyCharged":false,"state":"authorized"})
+        };
+        json!({"id":"order-1","orderNumber":"RAC-1","state":"placed","checkoutSessionId":SESSION,
+            "cart":quote(paypal),"orderCustomer":{"customerId":"customer-1"},"payment":payment,
+            "legal":{"policyVersion":"policy-7"}})
+    }
+
+    #[test]
+    fn a_session_key_needs_a_canonical_uuid() {
+        assert_eq!(
+            key(SESSION).ok(),
+            Some(format!("checkout-session-v1:{SESSION}"))
+        );
+        for invalid in [SESSION.to_uppercase().as_str(), "not-a-session", ""] {
+            assert!(key(invalid).is_err(), "{invalid}");
+        }
+    }
+
+    #[test]
+    fn a_receipt_answers_only_its_own_session_cart_and_customer() {
+        let Ok(simulated) = receipt(&placed(false), SESSION, "cart-1", "customer-1", true) else {
+            panic!("receipt")
+        };
+        assert_eq!(simulated["orderId"], "order-1");
+        assert_eq!(simulated["totalMinor"], "1000");
+        assert!(simulated.get("paymentAttemptId").is_none());
+        let Ok(sandbox) = receipt(&placed(true), SESSION, "cart-1", "customer-1", true) else {
+            panic!("receipt")
+        };
+        assert_eq!(sandbox["paymentAttemptId"], "attempt-1");
+        for (session, cart, customer) in [
+            (
+                "3f2b8c1e-5a4d-4e6f-8a9b-000000000000",
+                "cart-1",
+                "customer-1",
+            ),
+            (SESSION, "cart-2", "customer-1"),
+            (SESSION, "cart-1", "customer-2"),
+        ] {
+            let refused = receipt(&placed(false), session, cart, customer, true);
+            assert_eq!(refused.err().map(|e| e.0), Some(StatusCode::NOT_FOUND));
+        }
+        let mut charged = placed(false);
+        charged["payment"]["realMoneyCharged"] = json!(true);
+        assert!(receipt(&charged, SESSION, "cart-1", "customer-1", true).is_err());
+    }
+
+    #[test]
+    fn the_locked_cart_must_still_be_the_reviewed_customer_cart() {
+        let r = review(false);
+        assert_eq!(r.session(), SESSION);
+        assert!(r.admit_cart(&cart(None), "default", "customer-1").is_ok());
+        assert!(r.admit_cart(&cart(None), "other", "customer-1").is_err());
+        assert!(
+            r.admit_cart(&cart(Some("merchant-1")), "default", "customer-1")
+                .is_err()
+        );
+        let mut language = cart(None);
+        language.data.locale = "en-GB".into();
+        assert!(r.admit_cart(&language, "default", "customer-1").is_err());
+        let foreign = r.admit_cart(&cart(None), "default", "customer-2");
+        assert_eq!(foreign.err().map(|e| e.0), Some(StatusCode::FORBIDDEN));
+        let mut saved = cart(None);
+        saved.data.checkout = Some(CheckoutSelection {
+            payment_funding: Some(FundingChoice {
+                save: true,
+                id: None,
+            }),
+            ..CheckoutSelection::defaults()
+        });
+        assert!(r.admit_cart(&saved, "default", "customer-1").is_ok());
+        assert!(
+            review(true)
+                .admit_cart(&saved, "default", "customer-1")
+                .is_err()
+        );
+    }
+
+    #[test]
+    fn the_quote_must_match_every_reviewed_value() {
+        let r = review(false);
+        let policy = json!("policy-7");
+        assert!(r.check_quote(&quote(false), &policy, 1000).is_ok());
+        assert!(r.check_quote(&quote(false), &policy, 1001).is_err());
+        assert!(
+            r.check_quote(&quote(false), &json!("policy-8"), 1000)
+                .is_err()
+        );
+        assert!(r.check_quote(&quote(true), &policy, 1000).is_err());
+        for (pointer, value) in [
+            ("/revision", json!(4)),
+            ("/price/currency", json!("USD")),
+            ("/checkout/country", json!("AT")),
+            ("/selectionNeedsConfirmation", json!(true)),
+        ] {
+            let mut changed = quote(false);
+            if pointer == "/selectionNeedsConfirmation" {
+                changed["selectionNeedsConfirmation"] = value;
+            } else {
+                *changed.pointer_mut(pointer).expect("field") = value;
+            }
+            assert!(r.check_quote(&changed, &policy, 1000).is_err(), "{pointer}");
+        }
+        assert!(
+            review(true)
+                .check_quote(&quote(true), &policy, 1000)
+                .is_ok()
+        );
+        assert!(
+            review(true)
+                .check_quote(&quote(false), &policy, 1000)
+                .is_err()
+        );
+    }
+
+    #[test]
+    fn a_replay_answers_only_the_original_payment_profile() {
+        assert!(review(false).check_replay(&placed(false), true).is_ok());
+        assert!(review(true).check_replay(&placed(true), true).is_ok());
+        assert!(review(true).check_replay(&placed(false), true).is_err());
+        assert!(review(false).check_replay(&placed(true), true).is_err());
+        let mut amount = placed(false);
+        amount["cart"]["price"]["totalMinor"] = json!("1001");
+        assert!(review(false).check_replay(&amount, true).is_err());
+    }
+
+    #[test]
+    fn a_prepared_payment_must_be_the_sandbox_attempt_of_a_sandbox_review() {
+        let payment = placed(true)["payment"].clone();
+        assert!(review(true).check_prepared_payment(&payment, true).is_ok());
+        assert!(
+            review(false)
+                .check_prepared_payment(&payment, true)
+                .is_err()
+        );
+        assert!(
+            review(true)
+                .check_prepared_payment(&placed(false)["payment"], true)
+                .is_err()
+        );
+    }
+}

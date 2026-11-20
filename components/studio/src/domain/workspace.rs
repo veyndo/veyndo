@@ -189,7 +189,7 @@ pub fn schema(n: &str) -> Option<Value> {
 }
 #[cfg(test)]
 mod tests {
-    use super::{empty, safe_pin, validate};
+    use super::{empty, safe_pin, schema, validate};
     use serde_json::json;
     #[test]
     fn setup_progress_is_bounded_optional_and_never_authority() {
@@ -259,5 +259,20 @@ mod tests {
         let mut v = empty();
         v["active"] = json!("missing");
         assert!(validate(&v).is_err());
+    }
+    #[test]
+    fn workspace_tools_have_closed_schemas_and_only_saving_requires_input() {
+        for name in ["studio.workspace.read", "studio.workspace.work.read"] {
+            assert_eq!(
+                schema(name),
+                Some(
+                    json!({"type":"object","additionalProperties":false,"properties":{},"required":[]})
+                )
+            );
+        }
+        let save = schema("studio.workspace.save").unwrap();
+        assert_eq!(save["required"], json!(["revision", "data"]));
+        assert_eq!(save["properties"]["revision"]["minimum"], 0);
+        assert!(schema("studio.workspace.delete").is_none());
     }
 }

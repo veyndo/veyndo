@@ -90,3 +90,90 @@ pub fn compare(item: &Value, operator: &str, rule: &Value) -> bool {
     veyndo_automation::rule_comparison::string(item.as_str(), rule.as_str().unwrap_or(""), operator)
         .unwrap_or(false)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::{compare, matches, validate, validate_value};
+    use serde_json::{Value, json};
+    use veyndo_shop::types::cart::StoredCart;
+
+    fn cart(extra: Value) -> StoredCart {
+        let mut data = json!({"items":[{"id":"p1","quantity":2},{"id":"p2","quantity":3}],"group":"retail","session":"s","email":null,"company":null,"buyer":null,"order":null});
+        for (key, value) in extra.as_object().unwrap() {
+            data[key] = value.clone();
+        }
+        StoredCart {
+            id: "cart-1".into(),
+            tenant: "shop".into(),
+            token: "token".into(),
+            data: serde_json::from_value(data).unwrap(),
+            revision: 1,
+            status: "open".into(),
+        }
+    }
+
+    #[test]
+    fn comparisons_need_a_known_field_and_an_operator_that_fits_the_value() {
+        assert!(validate("customer.group", "=", &json!("retail")).is_ok());
+        assert!(validate("customer.password", "=", &json!("x")).is_err());
+        assert!(validate_value(">=", &json!(3)).is_ok());
+        assert!(validate_value("contains", &json!("a")).is_ok());
+        assert!(validate_value("!=", &json!(true)).is_ok());
+        assert!(validate_value(">", &json!(true)).is_err());
+        assert!(validate_value(">", &json!("a")).is_err());
+        assert!(validate_value("~", &json!("a")).is_err());
+        assert!(validate_value("=", &json!(["a"])).is_err());
+        assert!(validate_value("=", &Value::Null).is_err());
+        assert!(validate_value("=", &json!("x".repeat(500))).is_err());
+    }
+
+    #[test]
+    fn values_compare_by_their_type() {
+        assert!(compare(&json!(5), ">", &json!(3)));
+        assert!(!compare(&json!(5), "<", &json!(3)));
+        assert!(!compare(&json!("5"), ">", &json!(3)));
+        assert!(compare(&json!(true), "=", &json!(true)));
+        assert!(compare(&json!(false), "!=", &json!(true)));
+        assert!(!compare(&Value::Null, "!=", &json!(true)));
+        assert!(!compare(&json!(true), ">", &json!(true)));
+        assert!(compare(&json!("Hello World"), "contains", &json!("WORLD")));
+        assert!(!compare(&Value::Null, "contains", &json!("x")));
+        assert!(compare(&json!("Retail"), "=", &json!("retail")));
+        assert!(compare(&json!("retail"), "!=", &json!("business")));
+        assert!(compare(&Value::Null, "empty", &json!("")));
+        assert!(!compare(&json!("x"), "empty", &json!("")));
+    }
+
+    #[test]
+    fn fields_read_server_owned_cart_and_event_facts() {
+        let c =
+            cart(json!({"email":"buyer@example.test","customer_id":"c1","sales_channel":"outlet"}));
+        let q = json!({"orderState":"open","paymentState":"paid","eventKind":"order.placed","event":{"title":"Big order","sourceKind":"shop"}});
+        for (field, operator, value) in [
+            ("customer.email", "contains", json!("@example.test")),
+            ("customer.company", "empty", json!("")),
+            ("customer.group", "=", json!("retail")),
+            ("customer.loggedIn", "=", json!(true)),
+            ("cart.quantity", "=", json!(5)),
+            ("cart.shippingMethod", "=", json!("pickup")),
+            ("cart.paymentMethod", "=", json!("demo-card")),
+            ("cart.billingCountry", "empty", json!("")),
+            ("cart.salesChannel", "=", json!("outlet")),
+            ("order.state", "=", json!("open")),
+            ("payment.state", "!=", json!("open")),
+            ("event.kind", "=", json!("order.placed")),
+            ("event.title", "contains", json!("big")),
+            ("event.sourceKind", "=", json!("shop")),
+        ] {
+            assert!(matches(&c, &q, field, operator, &value), "{field}");
+        }
+        assert!(!matches(&c, &q, "customer.password", "=", &json!("x")));
+        assert!(!matches(
+            &cart(json!({})),
+            &q,
+            "customer.loggedIn",
+            "=",
+            &json!(true)
+        ));
+    }
+}

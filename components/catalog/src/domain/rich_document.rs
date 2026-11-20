@@ -116,7 +116,7 @@ pub fn validate(node: &Value, depth: usize, count: &mut usize) -> Result<()> {
 }
 #[cfg(test)]
 mod tests {
-    use super::validate;
+    use super::{safe_url, validate};
     use serde_json::json;
     #[test]
     fn preserves_formatting_and_rejects_scripts() {
@@ -128,6 +128,26 @@ mod tests {
             json!({"type":"paragraph","attrs":{"onclick":"bad"}}),
         ] {
             assert!(validate(&v, 0, &mut 0).is_err());
+        }
+    }
+    #[test]
+    fn links_are_uploaded_assets_or_credential_free_https() {
+        for url in ["/store-api/assets/a1", "https://example.com/page?x=1#top"] {
+            assert!(safe_url(url), "{url}");
+        }
+        let long = format!("https://example.com/{}", "x".repeat(2000));
+        for url in [
+            "http://example.com/",
+            "https://user:secret@example.com/",
+            "javascript:alert(1)",
+            "data:text/html,x",
+            "/media/a.jpg",
+            "https://example.com/a\\b",
+            "https://example.com/a\nb",
+            "",
+            long.as_str(),
+        ] {
+            assert!(!safe_url(url), "{url}");
         }
     }
 }

@@ -64,7 +64,9 @@ pub fn checked_total(captured: i64, refunded: i64, delta: i64) -> Result<i64> {
 
 #[cfg(test)]
 mod tests {
-    use super::checked_total;
+    use super::{capture, checked_total, used};
+    use crate::domain::attempt::sample;
+    use serde_json::json;
     #[test]
     fn confirmed_delta_reuses_exact_refund_policy_and_allows_zero_for_replay() {
         assert_eq!(checked_total(1250, 1249, 1).unwrap(), 1250);
@@ -78,5 +80,47 @@ mod tests {
         ] {
             assert!(checked_total(captured, refunded, delta).is_err());
         }
+    }
+    #[test]
+    fn a_refund_draws_from_a_capture_of_this_payment() {
+        let mut p = sample();
+        let receipts =
+            json!({"captureReceipts":{"cap-1":{"amountMinor":400},"cap-2":{"amountMinor":600}}});
+        assert_eq!(
+            capture(&p, &receipts, &json!({"captureId":"cap-2"})).ok(),
+            Some(("cap-2".into(), 600))
+        );
+        assert!(capture(&p, &receipts, &json!({})).is_err());
+        assert!(capture(&p, &receipts, &json!({"captureId":"cap-3"})).is_err());
+        assert!(capture(&p, &receipts, &json!({"captureId":"cap 1"})).is_err());
+        let single = json!({"captureReceipts":{"cap-1":{"amountMinor":400}}});
+        assert_eq!(
+            capture(&p, &single, &json!({})).ok(),
+            Some(("cap-1".into(), 400))
+        );
+        assert!(capture(&p, &json!({}), &json!({})).is_err());
+        p.capture = Some("cap-9".into());
+        assert_eq!(
+            capture(&p, &json!({}), &json!({})).ok(),
+            Some(("cap-9".into(), 1000))
+        );
+        p.context = json!({"capturedAmountMinor":0});
+        assert!(capture(&p, &json!({}), &json!({})).is_err());
+    }
+
+    #[test]
+    fn used_budget_counts_known_refunds_and_the_unattributed_rest_on_the_first_capture() {
+        let mut p = sample();
+        p.refunded = 300;
+        assert_eq!(used(&p, &json!({}), "cap-1"), 300);
+        p.capture = Some("cap-1".into());
+        let context = json!({"providerRefunds":{
+            "r1":{"captureId":"cap-1","amountMinor":100},
+            "r2":{"captureId":"cap-2","amountMinor":50},
+            "r3":{"amountMinor":25}}});
+        assert_eq!(used(&p, &context, "cap-1"), 100 + 25 + (300 - 175));
+        assert_eq!(used(&p, &context, "cap-2"), 50);
+        p.refunded = 100;
+        assert_eq!(used(&p, &context, "cap-1"), 125);
     }
 }

@@ -192,6 +192,11 @@ pub fn from_minor(minor: u64, scale: u8) -> f64 {
 mod tests {
     use super::*;
     #[test]
+    fn a_currency_keeps_its_code_and_scale() {
+        let currency = Currency::new("KWD", 3).unwrap();
+        assert_eq!((currency.code(), currency.scale()), ("KWD", 3));
+    }
+    #[test]
     fn exact_roundtrip_including_signed_extremes_and_explicit_scales() {
         for scale in [0, 2, 3, 6] {
             let currency = Currency::new("XXX", scale).unwrap();

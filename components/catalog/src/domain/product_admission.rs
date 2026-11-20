@@ -86,7 +86,7 @@ pub fn category_assignment(edit: &CategoryEdit, current: &Value) -> Result<Value
 }
 #[cfg(test)]
 mod tests {
-    use super::{admit_product_write, category_assignment, category_edit};
+    use super::{admit_product_write, category_assignment, category_edit, product_write_guidance};
     use serde_json::json;
     #[test]
     fn category_only_edits_are_explicit_and_bounded() {
@@ -118,5 +118,22 @@ mod tests {
         let content =
             category_edit(&json!({"revision":2,"contentRevision":4,"categoryIds":[]})).unwrap();
         assert!(category_assignment(&content, &current).is_err());
+    }
+    #[test]
+    fn the_guidance_example_is_itself_an_admitted_category_edit() {
+        let guidance = product_write_guidance();
+        let edit = category_edit(&guidance["categoryOnly"]["example"]).unwrap();
+        assert_eq!(edit.revision, 1);
+        assert_eq!(edit.category_ids, ["selected_category"]);
+        assert!(
+            guidance["categoryOnly"]["semantics"]
+                .as_str()
+                .is_some_and(|s| s.contains("revision"))
+        );
+        assert!(
+            guidance["fullEdit"]
+                .as_str()
+                .is_some_and(|s| s.contains("merchant.product.content"))
+        );
     }
 }

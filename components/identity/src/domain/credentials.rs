@@ -70,7 +70,9 @@ pub fn bootstrap_matches(candidate: &str, expected: &str) -> bool {
 
 #[cfg(test)]
 mod tests {
-    use super::{email, hash_password, password, role_allowed, verify_password};
+    use super::{
+        bootstrap_matches, email, hash_password, name, password, role_allowed, verify_password,
+    };
 
     use serde_json::json;
     #[test]
@@ -95,5 +97,30 @@ mod tests {
                 .await
                 .unwrap()
         );
+    }
+    #[test]
+    fn names_are_trimmed_and_bounded() {
+        assert_eq!(
+            name(&json!({"name":"  Ada  "})).ok().as_deref(),
+            Some("Ada")
+        );
+        assert!(name(&json!({"name":"   "})).is_err());
+        assert!(name(&json!({})).is_err());
+        assert!(name(&json!({"name":"x".repeat(101)})).is_err());
+        assert!(name(&json!({"name":"x".repeat(100)})).is_ok());
+    }
+    #[test]
+    fn the_bootstrap_secret_matches_only_itself_and_never_when_unset() {
+        assert!(bootstrap_matches(
+            "a-long-bootstrap-secret",
+            "a-long-bootstrap-secret"
+        ));
+        assert!(!bootstrap_matches(
+            "a-long-bootstrap-secreT",
+            "a-long-bootstrap-secret"
+        ));
+        assert!(!bootstrap_matches("a-long", "a-long-bootstrap-secret"));
+        assert!(!bootstrap_matches("", "a-long-bootstrap-secret"));
+        assert!(!bootstrap_matches("", ""));
     }
 }

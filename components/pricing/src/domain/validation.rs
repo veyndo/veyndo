@@ -12,3 +12,16 @@ impl std::fmt::Display for ValidationError {
     }
 }
 impl std::error::Error for ValidationError {}
+
+#[cfg(test)]
+mod tests {
+    use super::ValidationError;
+
+    #[test]
+    fn an_error_shows_its_static_message() {
+        let e = ValidationError::new("Customer name required");
+        assert_eq!(e.to_string(), "Customer name required");
+        assert_eq!(e, ValidationError::new("Customer name required"));
+        assert_ne!(e, ValidationError::new("Invalid VAT IDs"));
+    }
+}

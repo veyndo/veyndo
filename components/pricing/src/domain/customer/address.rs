@@ -74,3 +74,49 @@ impl Address {
         Ok(())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::Address;
+    use serde_json::{Value, json};
+
+    fn address(extra: Value) -> Address {
+        let mut v = json!({"firstName":" Ada ","lastName":"Lovelace","street":"Weg 1","postalCode":"10115","city":"Berlin"});
+        for (key, value) in extra.as_object().unwrap() {
+            v[key] = value.clone();
+        }
+        serde_json::from_value(v).unwrap()
+    }
+
+    #[test]
+    fn a_missing_name_is_built_from_its_parts_and_the_country_defaults() {
+        let mut a = address(json!({}));
+        assert!(a.validate().is_ok());
+        assert_eq!(a.name, "Ada Lovelace");
+        assert_eq!(a.country, "DE");
+        let mut named: Address = serde_json::from_value(
+            json!({"name":"A. Lovelace","street":"Weg 1","zipcode":"80331","city":"Munich"}),
+        )
+        .unwrap();
+        assert!(named.validate().is_ok());
+        assert_eq!(
+            (named.name.as_str(), named.postal_code.as_str()),
+            ("A. Lovelace", "80331")
+        );
+    }
+
+    #[test]
+    fn incomplete_oversized_or_control_text_is_refused() {
+        for extra in [
+            json!({"firstName":"","lastName":""}),
+            json!({"street":" "}),
+            json!({"city":"x".repeat(161)}),
+            json!({"country":"de"}),
+            json!({"country":"DEU"}),
+            json!({"phoneNumber":"1\n2"}),
+            json!({"company":"x".repeat(161)}),
+        ] {
+            assert!(address(extra.clone()).validate().is_err(), "{extra}");
+        }
+    }
+}

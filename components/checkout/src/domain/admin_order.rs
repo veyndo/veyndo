@@ -30,3 +30,53 @@ pub fn order(c: &StoredCart, order: &mut Value) {
         order["createdBy"] = json!({"source":"merchant","actor":actor});
     }
 }
+#[cfg(test)]
+mod tests {
+    use super::{admit_payment, order, purchase};
+    use serde_json::json;
+    use veyndo_shop::types::cart::StoredCart;
+
+    fn cart(admin: Option<&str>) -> StoredCart {
+        StoredCart {
+            id: "cart-1".into(),
+            tenant: "shop".into(),
+            token: "token".into(),
+            data: serde_json::from_value(json!({"items":[],"group":"retail","session":"s",
+                "customer_id":"customer-1","locale":"de-DE","admin_actor":admin}))
+            .expect("cart"),
+            revision: 3,
+            status: "open".into(),
+        }
+    }
+
+    #[test]
+    fn a_merchant_order_never_enters_an_external_provider() {
+        let admin = cart(Some("merchant-1"));
+        for mode in ["manual", "simulated"] {
+            assert!(admit_payment(&admin, &json!({"paymentMethod":{"mode":mode}})).is_ok());
+        }
+        for mode in ["app", "cash", ""] {
+            assert!(admit_payment(&admin, &json!({"paymentMethod":{"mode":mode}})).is_err());
+        }
+        assert!(admit_payment(&cart(None), &json!({"paymentMethod":{"mode":"app"}})).is_ok());
+    }
+
+    #[test]
+    fn only_merchant_orders_carry_their_actor() {
+        let (mut bought, mut placed) = (json!({}), json!({}));
+        purchase(&cart(Some("merchant-1")), &mut bought);
+        order(&cart(Some("merchant-1")), &mut placed);
+        assert_eq!(
+            bought,
+            json!({"adminActor":"merchant-1","adminCustomer":"customer-1"})
+        );
+        assert_eq!(
+            placed["createdBy"],
+            json!({"source":"merchant","actor":"merchant-1"})
+        );
+        let (mut bought, mut placed) = (json!({}), json!({}));
+        purchase(&cart(None), &mut bought);
+        order(&cart(None), &mut placed);
+        assert_eq!((bought, placed), (json!({}), json!({})));
+    }
+}

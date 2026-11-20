@@ -60,7 +60,75 @@ fn approval_transport(url: &reqwest::Url, environment: &str) -> bool {
 }
 #[cfg(test)]
 mod tests {
-    use super::approval_transport;
+    use super::{approval_transport, approval_url, validate_service};
+    use crate::domain::attempt::sample;
+    use crate::ports::Host;
+    use serde_json::{Value, json};
+    use veyndo_core::{PortFuture, Result};
+
+    struct Fixed;
+    impl Host for Fixed {
+        fn service(&self, _: &str, _: &str, _: &str) -> Result<Value> {
+            Ok(json!({"approvalOrigins":["https://pay.example"]}))
+        }
+        fn captured<'a, 'c: 'a>(
+            &'a self,
+            _: &'a mut sqlx::Transaction<'c, sqlx::Postgres>,
+            _: &'a str,
+            _: &'a mut Value,
+            _: &'a str,
+        ) -> PortFuture<'a, ()> {
+            Box::pin(async { Ok(()) })
+        }
+    }
+
+    #[test]
+    fn a_service_needs_its_environment_https_and_a_private_credential() {
+        let token = "t".repeat(24);
+        let c = json!({"url":"https://adapter.example/v1","environment":"live","token":token});
+        assert!(validate_service(&c, "live").is_ok());
+        assert!(validate_service(&c, "sandbox").is_err());
+        assert!(validate_service(&c, "production").is_err());
+        assert!(validate_service(&json!({}), "live").is_err());
+        for (key, value) in [
+            ("url", json!("http://adapter.example/v1")),
+            ("url", json!("https://user:secret@adapter.example/v1")),
+            ("url", json!("https://adapter.example/v1?x=1")),
+            ("url", json!("https://adapter.example/v1#x")),
+            ("url", json!("not a url")),
+            ("token", json!("short")),
+            ("token", Value::Null),
+        ] {
+            let mut changed = c.clone();
+            changed[key] = value;
+            assert!(validate_service(&changed, "live").is_err(), "{key}");
+        }
+        let local =
+            json!({"url":"http://127.0.0.1:9000","environment":"contract-fixture","token":token});
+        assert!(validate_service(&local, "contract-fixture").is_ok());
+        let mut live = local;
+        live["environment"] = json!("live");
+        assert!(validate_service(&live, "live").is_err());
+    }
+
+    #[test]
+    fn approval_urls_stay_on_the_origins_the_service_authorized() {
+        let p = sample();
+        assert_eq!(approval_url(&Fixed, &p, &Value::Null).ok(), Some(None));
+        assert_eq!(
+            approval_url(&Fixed, &p, &json!("https://pay.example/approve?id=1")).ok(),
+            Some(Some("https://pay.example/approve?id=1".into()))
+        );
+        for invalid in [
+            json!(7),
+            json!("not a url"),
+            json!("https://other.example/approve"),
+            json!("http://pay.example/approve"),
+            json!("https://user:secret@pay.example/approve"),
+        ] {
+            assert!(approval_url(&Fixed, &p, &invalid).is_err(), "{invalid}");
+        }
+    }
 
     #[test]
     fn local_provider_frames_require_fixture_environment_and_exact_loopback() {

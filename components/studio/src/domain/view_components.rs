@@ -23,3 +23,38 @@ pub fn validate(entity: &str, components: &[String]) -> Result<()> {
     }
     Ok(())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::validate;
+
+    fn check(entity: &str, components: &[&str]) -> bool {
+        validate(
+            entity,
+            &components
+                .iter()
+                .map(|c| (*c).to_owned())
+                .collect::<Vec<_>>(),
+        )
+        .is_ok()
+    }
+
+    #[test]
+    fn a_view_always_shows_records_and_only_parts_that_fit_its_entity() {
+        assert!(check("products", &["records"]));
+        assert!(check("products", &["records", "details", "intake"]));
+        assert!(check("orders", &["shippingPolicy", "records"]));
+        assert!(check("customers", &["records", "details"]));
+        assert!(!check("payments", &["records"]));
+        assert!(!check("products", &[]));
+        assert!(!check("products", &["details"]));
+        assert!(!check("products", &["records", "records"]));
+        assert!(!check("products", &["records", "chart"]));
+        assert!(!check("orders", &["records", "intake"]));
+        assert!(!check("products", &["records", "shippingPolicy"]));
+        assert!(!check(
+            "orders",
+            &["records", "details", "shippingPolicy", "intake"]
+        ));
+    }
+}

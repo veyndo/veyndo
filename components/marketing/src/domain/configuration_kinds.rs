@@ -21,3 +21,36 @@ pub fn table(kind: &str) -> Result<&'static str> {
         _ => Err(bad("Unknown configuration type")),
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::{configuration_right, table};
+
+    #[test]
+    fn every_kind_has_its_rights_and_its_table() {
+        assert_eq!(
+            configuration_right("channels", false).ok(),
+            Some("channels.read")
+        );
+        assert_eq!(
+            configuration_right("channels", true).ok(),
+            Some("channels.manage")
+        );
+        for kind in ["rules", "flows", "promotions"] {
+            assert_eq!(
+                configuration_right(kind, false).ok(),
+                Some("automation.read")
+            );
+            assert_eq!(
+                configuration_right(kind, true).ok(),
+                Some("automation.manage")
+            );
+        }
+        assert!(configuration_right("orders", false).is_err());
+        assert_eq!(table("rules").ok(), Some("commerce_rules"));
+        assert_eq!(table("promotions").ok(), Some("commerce_promotions"));
+        assert_eq!(table("flows").ok(), Some("commerce_flows"));
+        assert_eq!(table("channels").ok(), Some("sales_channels"));
+        assert!(table("orders; DROP").is_err());
+    }
+}

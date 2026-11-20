@@ -29,3 +29,40 @@ pub fn plan_result(run: Value) -> Result<Value> {
     }
     Ok(run)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::plan_result;
+    use serde_json::json;
+    use veyndo_core::StatusCode;
+
+    #[test]
+    fn a_ready_run_is_a_proposal_that_needs_approval() {
+        let run = json!({"state":"ready","taskId":"t1","preview":{"changes":1}});
+        let v = plan_result(run.clone()).unwrap();
+        assert_eq!(v["taskId"], "t1");
+        assert_eq!(v["preview"], json!({"changes":1}));
+        assert_eq!(v["approvalRequired"], true);
+        assert_eq!(v["run"], run);
+    }
+
+    #[test]
+    fn a_stopped_run_keeps_its_error_status_and_a_running_one_is_returned_as_is() {
+        for state in ["failed", "uncertain", "cancelled"] {
+            let e = plan_result(json!({"state":state,"taskId":"t1","error":{"status":409,"detail":"stale revision"}})).unwrap_err();
+            assert_eq!(e.0, StatusCode::CONFLICT);
+            assert!(
+                e.1.contains("t1") && e.1.contains("stale revision"),
+                "{}",
+                e.1
+            );
+        }
+        for status in [json!(200), json!(99999), json!("409"), json!(null)] {
+            let e = plan_result(json!({"state":"failed","error":{"status":status}})).unwrap_err();
+            assert_eq!(e.0, StatusCode::BAD_GATEWAY);
+            assert!(e.1.contains("explicit review required"));
+        }
+        let running = json!({"state":"running","taskId":"t1"});
+        assert_eq!(plan_result(running.clone()).ok(), Some(running));
+    }
+}

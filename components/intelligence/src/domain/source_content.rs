@@ -101,3 +101,75 @@ pub fn admit_guidance(h: &RequestContext, kind: &Value) -> Result<()> {
     }
     Ok(())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::{admit_guidance, validate};
+    use serde_json::{Value, json};
+    use veyndo_core::{RequestContext, StatusCode};
+
+    fn check(v: Value) -> veyndo_core::Result<Value> {
+        validate(&["en-GB".into(), "de-DE".into()], "en-GB", &v)
+    }
+
+    #[test]
+    fn a_source_is_returned_in_canonical_form_with_a_digest_of_its_content() {
+        let v = check(json!({"title":"Care","content":"Wash cold","productId":""})).unwrap();
+        assert_eq!(v["kind"], "document");
+        assert_eq!(v["locale"], "en-GB");
+        assert_eq!(v["productId"], Value::Null);
+        assert_eq!(v["translations"], json!({}));
+        let same = check(json!({"title":"Other title","content":"Wash cold"})).unwrap();
+        assert_eq!(v["digest"], same["digest"]);
+        let translated = check(
+            json!({"title":"Care","content":"Wash cold","kind":"care","productId":"p1",
+            "translations":{"de-DE":{"title":"Pflege","content":null}}}),
+        )
+        .unwrap();
+        assert_ne!(v["digest"], translated["digest"]);
+        assert_eq!(translated["productId"], "p1");
+        assert_eq!(translated["kind"], "care");
+    }
+
+    #[test]
+    fn unknown_fields_languages_kinds_and_oversized_text_are_refused() {
+        for invalid in [
+            json!("text"),
+            json!({"title":"Care","content":"Wash cold","owner":"x"}),
+            json!({"title":"Care","content":"Wash cold","locale":"fr-FR"}),
+            json!({"title":" ","content":"Wash cold"}),
+            json!({"title":"x".repeat(201),"content":"Wash cold"}),
+            json!({"title":"Care","content":""}),
+            json!({"title":"Care","content":"x".repeat(100_001)}),
+            json!({"title":"Care","content":"Wash cold","kind":"secret"}),
+            json!({"title":"Care","content":"Wash cold","translations":[]}),
+            json!({"title":"Care","content":"Wash cold","translations":{"en-GB":{"title":"Care"}}}),
+            json!({"title":"Care","content":"Wash cold","translations":{"fr-FR":{"title":"Soin"}}}),
+            json!({"title":"Care","content":"Wash cold","translations":{"de-DE":"Pflege"}}),
+            json!({"title":"Care","content":"Wash cold","translations":{"de-DE":{"summary":"x"}}}),
+            json!({"title":"Care","content":"Wash cold","translations":{"de-DE":{"title":" "}}}),
+            json!({"title":"Care","content":"Wash cold","translations":{"de-DE":{"title":7}}}),
+            json!({"title":"Care","content":"Wash cold","productId":7}),
+        ] {
+            assert!(
+                check(invalid.clone()).is_err(),
+                "{}",
+                invalid.to_string().chars().take(120).collect::<String>()
+            );
+        }
+    }
+
+    #[test]
+    fn guidance_is_written_only_by_a_personal_merchant_session() {
+        let mut h = RequestContext::new();
+        assert_eq!(
+            admit_guidance(&h, &json!("guidance")).err().map(|e| e.0),
+            Some(StatusCode::FORBIDDEN)
+        );
+        assert!(admit_guidance(&h, &json!("manual")).is_ok());
+        h.principal.personal_session = true;
+        assert!(admit_guidance(&h, &json!("guidance")).is_ok());
+        h.principal.app = Some("email".into());
+        assert!(admit_guidance(&h, &json!("guidance")).is_err());
+    }
+}

@@ -129,7 +129,7 @@ pub fn translated(source: &Value, response: &Value) -> Result<Value> {
 }
 #[cfg(test)]
 mod tests {
-    use super::{texts, translated};
+    use super::{Source, source, texts, translated};
     use serde_json::json;
     #[test]
     fn preserve_links_and_refuse_model_structure_changes() {
@@ -157,5 +157,27 @@ mod tests {
         assert_eq!(extra["seo"]["es"]["title"], "Escritorio");
         assert_eq!(extra["specifications"]["es"]["Material"], "Madera");
         assert!(extra["richDescription"].is_null());
+    }
+    #[test]
+    fn the_source_document_prefers_stored_translations_and_falls_back_to_main_metadata() {
+        let extra = json!({"seo":{"de":{"title":"Tisch"},"en":{"title":"Desk"}},"specifications":{"en":{"Material":"Oak"}}});
+        let row = |translated: bool| Source {
+            name: "Desk".into(),
+            description: "Wood".into(),
+            translated_name: translated.then(|| "Tisch".into()),
+            translated_description: None,
+            extra: extra.clone(),
+        };
+        let s = source(row(true), "de", "en");
+        assert_eq!(s["name"], "Tisch");
+        assert_eq!(s["description"], "Wood");
+        assert_eq!(s["seo"], json!({"title":"Tisch"}));
+        assert_eq!(s["specifications"], json!({"Material":"Oak"}));
+        assert!(s["richDescription"].is_null());
+        assert_eq!(source(row(false), "fr", "en")["name"], "Desk");
+        assert_eq!(
+            source(row(false), "fr", "en")["seo"],
+            json!({"title":"Desk"})
+        );
     }
 }

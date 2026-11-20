@@ -83,7 +83,7 @@ pub fn model_asset(url: &str, tenant: &str) -> Result<String> {
 
 #[cfg(test)]
 mod tests {
-    use super::{model_asset, validate};
+    use super::{model_asset, validate, validate_shape};
     use serde_json::json;
 
     #[test]
@@ -114,5 +114,43 @@ mod tests {
         assert!(model_asset("/store-api/assets/m1?shop=a#x", "a").is_err());
         assert!(model_asset("/store-api/assets/m1/x?shop=a", "a").is_err());
         assert!(model_asset("/assets/m1", "a").is_err());
+    }
+
+    #[test]
+    fn models_are_uploaded_assets_and_only_they_carry_material_variants() {
+        let model = |extra: serde_json::Value| {
+            let mut m = json!({"type":"model","url":"/store-api/assets/m1"});
+            for (key, value) in extra.as_object().unwrap() {
+                m[key] = value.clone();
+            }
+            m
+        };
+        assert!(validate_shape(&[]).is_ok());
+        assert!(
+            validate_shape(&[
+                json!({"url":"/media/a.jpg"}),
+                json!({"type":"image"}),
+                model(json!({"modelVariant":"oak"})),
+                model(json!({"modelVariant":null}))
+            ])
+            .is_ok()
+        );
+        assert!(validate_shape(&vec![model(json!({})); 4]).is_ok());
+        assert!(validate_shape(&vec![model(json!({})); 5]).is_err());
+        for invalid in [
+            json!({"type":"video"}),
+            json!({"type":"model","url":"https://cdn.example/m.glb"}),
+            json!({"type":"model"}),
+            model(json!({"modelVariant":7})),
+            model(json!({"modelVariant":"x".repeat(101)})),
+            model(json!({"modelVariant":"a\nb"})),
+            json!({"type":"image","modelVariant":"oak"}),
+            json!({"modelVariant":null}),
+        ] {
+            assert!(
+                validate_shape(std::slice::from_ref(&invalid)).is_err(),
+                "{invalid}"
+            );
+        }
     }
 }

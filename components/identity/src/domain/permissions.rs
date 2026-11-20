@@ -116,3 +116,111 @@ pub fn validate_permissions(h: &RequestContext, v: &Value) -> Result<Value> {
 pub fn planning_scope(scope: &str) -> bool {
     scope.ends_with(".read") || ["assistant.use", "customers.pii"].contains(&scope)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::{allowed, planning_scope, scope, validate_permissions};
+    use serde_json::{Value, json};
+    use veyndo_core::{RequestContext, StatusCode};
+
+    fn member(role: &'static str, permissions: Option<&'static str>) -> RequestContext {
+        let mut h = RequestContext::new();
+        h.insert("x-rac-role", role.parse().unwrap());
+        if let Some(permissions) = permissions {
+            h.insert("x-rac-permissions", permissions.parse().unwrap());
+        }
+        h
+    }
+
+    #[test]
+    fn earlier_area_names_map_to_their_scope() {
+        assert_eq!(scope("catalog"), "catalog.write");
+        assert_eq!(scope("users"), "team.manage");
+        assert_eq!(scope("operations"), "orders.write");
+        assert_eq!(scope("settings"), "settings.write");
+        assert_eq!(scope("extension"), "apps.manage");
+        assert_eq!(scope("orders.read"), "orders.read");
+    }
+
+    #[test]
+    fn roles_hold_their_default_rights_and_owners_every_known_one() {
+        let anonymous = RequestContext::new();
+        assert!(!allowed(&anonymous, "read"));
+        assert!(!allowed(&anonymous, "catalog.read"));
+        let viewer = member("viewer", None);
+        assert!(allowed(&viewer, "read"));
+        assert!(allowed(&viewer, "catalog.read"));
+        assert!(!allowed(&viewer, "catalog.write"));
+        assert!(!allowed(&viewer, "customers.pii"));
+        let editor = member("editor", None);
+        assert!(allowed(&editor, "catalog"));
+        assert!(allowed(&editor, "knowledge.write"));
+        assert!(!allowed(&editor, "orders.write"));
+        let admin = member("admin", None);
+        assert!(allowed(&admin, "users"));
+        assert!(allowed(&admin, "customers.pii"));
+        let owner = member("owner", None);
+        assert!(allowed(&owner, "payments.manage"));
+        for h in [&owner, &admin] {
+            assert!(!allowed(h, "orders.delete-everything"));
+        }
+    }
+
+    #[test]
+    fn an_explicit_list_replaces_the_role_defaults_and_keeps_broad_rights_broad() {
+        let delegate = member(
+            "viewer",
+            Some(r#"["orders.write","settings.write","catalog.write"]"#),
+        );
+        assert!(allowed(&delegate, "orders.write"));
+        assert!(allowed(&delegate, "channels.manage"));
+        assert!(allowed(&delegate, "automation.manage"));
+        assert!(allowed(&delegate, "knowledge.write"));
+        assert!(!allowed(&delegate, "team.manage"));
+        assert!(!allowed(&delegate, "catalog.read"));
+        let broken = member("admin", Some("not json"));
+        assert!(!allowed(&broken, "orders.write"));
+    }
+
+    #[test]
+    fn nobody_delegates_a_right_they_do_not_hold() {
+        let admin = member("admin", None);
+        assert_eq!(
+            validate_permissions(&admin, &Value::Null).ok(),
+            Some(Value::Null)
+        );
+        let list = json!(["orders.write", "catalog.read"]);
+        assert_eq!(validate_permissions(&admin, &list).ok(), Some(list));
+        assert!(validate_permissions(&admin, &json!("orders.write")).is_err());
+        assert!(validate_permissions(&admin, &json!([7])).is_err());
+        assert!(validate_permissions(&admin, &json!(["orders.everything"])).is_err());
+        let editor = member("editor", None);
+        assert_eq!(
+            validate_permissions(&editor, &json!(["team.manage"]))
+                .err()
+                .map(|e| e.0),
+            Some(StatusCode::FORBIDDEN)
+        );
+        assert!(validate_permissions(&editor, &json!(["catalog.write"])).is_ok());
+    }
+
+    #[test]
+    fn planning_agents_read_and_never_write() {
+        for scope in [
+            "catalog.read",
+            "orders.read",
+            "assistant.use",
+            "customers.pii",
+        ] {
+            assert!(planning_scope(scope), "{scope}");
+        }
+        for scope in [
+            "catalog.write",
+            "orders.write",
+            "team.manage",
+            "payments.manage",
+        ] {
+            assert!(!planning_scope(scope), "{scope}");
+        }
+    }
+}

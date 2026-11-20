@@ -108,3 +108,51 @@ pub fn schema(name: &str) -> Option<Value> {
     let properties = json!({"id":{"type":"string","maxLength":100},"unitId":{"type":"string","maxLength":100},"companyId":{"type":"string","maxLength":100},"parentId":{"type":["string","null"]},"customerId":{"type":"string","maxLength":100},"purchaseOrder":{"type":"string","maxLength":100},"revision":{"type":"integer","minimum":0},"state":{"type":"string","enum":["approved","rejected"]},"message":{"type":"string","maxLength":4000},"cartRevision":{"type":"integer","minimum":0},"lines":{"type":"array","maxItems":100,"items":{"type":"object","required":["sku","quantity"],"properties":{"sku":{"type":"string"},"quantity":{"type":"integer","minimum":1,"maximum":10000}},"additionalProperties":false}},"productIds":{"type":"array","maxItems":1000,"items":{"type":"string"}},"data":{"type":"object"}});
     Some(json!({"type":"object","properties":properties,"additionalProperties":false}))
 }
+
+#[cfg(test)]
+mod tests {
+    use super::{CAPABILITIES, permission, schema};
+
+    #[test]
+    fn merchant_operations_name_their_right_and_buyer_operations_none() {
+        assert_eq!(permission("b2b.settings.save"), Some("settings.write"));
+        for name in ["b2b.companies", "b2b.company", "b2b.configuration"] {
+            assert_eq!(permission(name), Some("b2b.read"), "{name}");
+        }
+        for name in [
+            "b2b.company.save",
+            "b2b.unit.save",
+            "b2b.member.save",
+            "b2b.quote.offer",
+            "b2b.quotes.merchant",
+            "b2b.catalog.save",
+        ] {
+            assert_eq!(permission(name), Some("b2b.manage"), "{name}");
+        }
+        for name in [
+            "b2b.quote.request",
+            "b2b.lists",
+            "b2b.select",
+            "company.save",
+            "pos.channels",
+        ] {
+            assert_eq!(permission(name), None, "{name}");
+        }
+    }
+
+    #[test]
+    fn every_operation_has_a_closed_schema_and_unknown_ones_none() {
+        for (name, _) in CAPABILITIES {
+            let s = schema(name).unwrap();
+            assert_eq!(s["type"], "object", "{name}");
+            assert_eq!(s["additionalProperties"], false, "{name}");
+        }
+        let transition = schema("b2b.quote.transition").unwrap();
+        assert_eq!(
+            transition["required"],
+            serde_json::json!(["id", "revision", "action"])
+        );
+        assert!(schema("b2b.quote.request").unwrap()["properties"]["lines"].is_object());
+        assert!(schema("b2b.quote.delete").is_none());
+    }
+}

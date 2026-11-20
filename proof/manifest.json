@@ -685,8 +685,8 @@
   "sources": {
     "components/b2b/src/domain/contract.rs": {
       "status": "unproved",
-      "sha256": "7212007ffd68ad1ac8ec4359a32dd873fe1f538e7b7a7b5aaafe88eb41200dc6",
-      "review": "Identity credentials, B2B and POS contracts and checkout tax lines moved into components; kernel call sites unchanged"
+      "sha256": "f95693b87d97414af42c6811d9a7eacc99326d3570d2a1245a8c06be32379bdf",
+      "review": "Unit tests for every public domain function of the components; no production code changed"
     },
     "components/b2b/src/domain.rs": {
       "status": "unproved",
@@ -770,8 +770,8 @@
     },
     "components/catalog/src/domain/content.rs": {
       "status": "unproved",
-      "sha256": "ee3e16add3458894ff03fc982bedd07278603ac51c25708575a359574998c251",
-      "review": "Catalog component crate created; no rule changed"
+      "sha256": "66e1711498d5bfff83b0e35e78b47bc8cb9f6e001a0eb2f5fd40081d1a7b19d8",
+      "review": "Unit tests for every public domain function of the components; no production code changed"
     },
     "components/catalog/src/domain/csv_rows.rs": {
       "status": "unproved",
@@ -780,8 +780,8 @@
     },
     "components/catalog/src/domain/family.rs": {
       "status": "unproved",
-      "sha256": "e6e1da1854c405e6ce45b0880aa9fb607504c9316a1e98b874b4537727bd1c40",
-      "review": "Storefront catalogue reads and public attachments moved into components/catalog; no rule changed"
+      "sha256": "9d4b739f94f9c79734196a031251b9544023b7baf8eba646cff0d1ea1afcd9ae",
+      "review": "Unit tests for every public domain function of the components; no production code changed"
     },
     "components/catalog/src/domain/graph_query.rs": {
       "status": "unproved",
@@ -795,18 +795,18 @@
     },
     "components/catalog/src/domain/image_job.rs": {
       "status": "unproved",
-      "sha256": "01fc4b97d4a9faee26c1ffdf13b0464b92d33cd24a66fcc12285648efd0bba74",
-      "review": "image jobs moved into components/catalog; no kernel binding changed"
+      "sha256": "89a5a3d8bb407d365f674f2e558bd2af0ccd0b6f5810259b56981dcfc57ed990",
+      "review": "Unit tests for every public domain function of the components; no production code changed"
     },
     "components/catalog/src/domain/intake_schema.rs": {
       "status": "unproved",
-      "sha256": "302c965bcca94d7823992d1e538bcd621c5f38cf967e63cb2618e23ca2947244",
-      "review": "Order list criteria, company model and receipts moved into components; kernel call sites unchanged"
+      "sha256": "0e07cd4a2291e79ffdbae6f9ceb5720be9b65460d8048394a5b7d21ff163297b",
+      "review": "Unit tests for every public domain function of the components; no production code changed"
     },
     "components/catalog/src/domain/media.rs": {
       "status": "unproved",
-      "sha256": "eb9f5aacef9d5c7e52dc5ad2e88c2033632bcb60f406d8a035d7acf5d249f1e3",
-      "review": "Product fields, media rules and GLB validation moved into components/catalog; no rule changed"
+      "sha256": "35ed9cbb0fbe268d412c6400492ad0d9355de1dddc5928e499a8e501ee4cf8a8",
+      "review": "Unit tests for every public domain function of the components; no production code changed"
     },
     "components/catalog/src/domain/model_format.rs": {
       "status": "unproved",
@@ -825,8 +825,8 @@
     },
     "components/catalog/src/domain/product_admission.rs": {
       "status": "unproved",
-      "sha256": "d729d2c7ac6b266c80df1f5d5a9f4dbc972376d6fb26e5d4d7b8c1b5c4e94dff",
-      "review": "Operator session and audit handlers moved into shop; product write admission and the CSV reader moved into catalog without behaviour change"
+      "sha256": "d88ace46506426f697f40cb2727773ac19a4a875d3c14bf6678387994b92f832",
+      "review": "Unit tests for every public domain function of the components; no production code changed"
     },
     "components/catalog/src/domain/rich.rs": {
       "status": "unproved",
@@ -835,18 +835,18 @@
     },
     "components/catalog/src/domain/rich_document.rs": {
       "status": "unproved",
-      "sha256": "142f43c141d589ad1ab68440ad822418f22a19286936fc8544088384ee417f90",
-      "review": "Product edit types, stores and language rules moved into components; no rule changed"
+      "sha256": "75c2314e59c414e1d94783f2834630164305223ceb198cfbcf428a60d2676149",
+      "review": "Unit tests for every public domain function of the components; no production code changed"
     },
     "components/catalog/src/domain/selection.rs": {
       "status": "unproved",
-      "sha256": "9d13e2539882072f1c6edb505a2e8e70b6567b43d0ebf77123023fa4210d825b",
-      "review": "revision_admissible binding for applying translation drafts moved into components/catalog"
+      "sha256": "e0e99f044b66b6bbd34301d43051e66b202debce868a63f7cbf9309ebce825c3",
+      "review": "Unit tests for every public domain function of the components; no production code changed"
     },
     "components/catalog/src/domain/translation_fields.rs": {
       "status": "unproved",
-      "sha256": "c1ca95003e0b9b72b3c3ad71dc15f744b35f79895bad9d0ba37c1563319bd1d3",
-      "review": "revision_admissible binding for applying translation drafts moved into components/catalog"
+      "sha256": "f9c96516c724bd9f698ab06ed66af3a217eb3a992c94e5e8200724e148794559",
+      "review": "Unit tests for every public domain function of the components; no production code changed"
     },
     "components/catalog/src/domain.rs": {
       "status": "unproved",
@@ -1070,28 +1070,28 @@
     },
     "components/checkout/src/domain/admin_order.rs": {
       "status": "reviewed-binding",
-      "sha256": "b8fa5fe837ab1e0497ce4a8d881cc56aa2ac18755cc79a53121938253ecb1236",
-      "review": "Merchant customer writes moved into the customers component and admin order admission into checkout without behaviour change"
+      "sha256": "ac2575fa3657d4126f0df2411d2652c15b7748b6c4154fc8360e1d1b84384cbd",
+      "review": "Unit tests for every public domain function of the components; no production code changed"
     },
     "components/checkout/src/domain/review_binding.rs": {
       "status": "reviewed-binding",
-      "sha256": "731f3b20049c3aeb4f4af20d9492c07bbcffe2f5b550def60c9f96a89edce043",
-      "review": "POS guard, customer, discount and settlement and the checkout session review moved into components"
+      "sha256": "c39f0e52b73b555191935df256a04b264fa6f649454af343b2ef31ed33bdbf0d",
+      "review": "Unit tests for every public domain function of the components; no production code changed"
     },
     "components/checkout/src/domain/session_payment.rs": {
       "status": "unproved",
-      "sha256": "684e4939416801317c0753797776e6343823ad3a4174923056a9c61de6dafc5d",
-      "review": "POS guard, customer, discount and settlement and the checkout session review moved into components"
+      "sha256": "cf17ede1d3dd8a064770b178f515d2d2b6b233b5a679504742ff3e12d63f4b38",
+      "review": "Unit tests for every public domain function of the components; no production code changed"
     },
     "components/checkout/src/domain/session_review.rs": {
       "status": "unproved",
-      "sha256": "fa0314d2fc17aeed3742b0f4dd1bdcb0c20a81699c91e98408a6c6c861eb0dee",
-      "review": "POS guard, customer, discount and settlement and the checkout session review moved into components"
+      "sha256": "4de88b390747839d67ff28a978582f1a80c59a8e3907801957f1a40e14ba3366",
+      "review": "Unit tests for every public domain function of the components; no production code changed"
     },
     "components/checkout/src/domain/tax_lines.rs": {
       "status": "unproved",
-      "sha256": "b1669548f1cc6abd74ae4684fa8de4e64947eb8c8e3658565b35d26930787ffb",
-      "review": "Identity credentials, B2B and POS contracts and checkout tax lines moved into components; kernel call sites unchanged"
+      "sha256": "5c93f2825fcf3b7817a38880a46deb487152d34fb3ffade4704a345629dbb541",
+      "review": "Unit tests for every public domain function of the components; no production code changed"
     },
     "components/checkout/src/domain.rs": {
       "status": "unproved",
@@ -1400,18 +1400,18 @@
     },
     "components/identity/src/domain/clock.rs": {
       "status": "unproved",
-      "sha256": "f95bfda2b5793b203218f4a46817b7afa6416b8e0eed322f200ce66fc341373e",
-      "review": "Sessions, invitations, MFA, integration keys and broker assertions moved into the identity component without behaviour change"
+      "sha256": "5230157621d8e503c0830f40d7e95adca2b22ce1619bdb6401fb064d7eaf3346",
+      "review": "Unit tests for every public domain function of the components; no production code changed"
     },
     "components/identity/src/domain/credentials.rs": {
       "status": "unproved",
-      "sha256": "d6e8ae129f04331723572a06f1dbcb6df1eeeede93fdaa8da622417c41752fb9",
-      "review": "Identity credentials, B2B and POS contracts and checkout tax lines moved into components; kernel call sites unchanged"
+      "sha256": "1274327c1ff7ea1008687f0cdddd8b7df7cc05cc6b59317c510211ab9067e3e4",
+      "review": "Unit tests for every public domain function of the components; no production code changed"
     },
     "components/identity/src/domain/permissions.rs": {
       "status": "reviewed-binding",
-      "sha256": "41febf55523730c78400ed9c8c1eb2f32550bf0a5d9edb51164e8a817b483882",
-      "review": "Sessions, invitations, MFA, integration keys and broker assertions moved into the identity component without behaviour change"
+      "sha256": "06f6decafb7242eef5faf7f57ef521e392881223ecdbeaaaee2456297c6b2501",
+      "review": "Unit tests for every public domain function of the components; no production code changed"
     },
     "components/identity/src/domain/totp.rs": {
       "status": "unproved",
@@ -1525,13 +1525,13 @@
     },
     "components/intelligence/src/domain/claim_batch.rs": {
       "status": "reviewed-binding",
-      "sha256": "723f2599d003e15e462bd6b21fc47ad08961f70891bf8d80118f61a7b9de13f8",
-      "review": "Claim evidence, claim batches, order observation projection, embedding jobs, source search, knowledge inventory, product facts and prompt snapshots moved verbatim into the intelligence component; permissions, settings, provider admission and leases stay in the server. Kernel admission calls unchanged."
+      "sha256": "01b5a1bd9518d69b8595d5a87e5a9a368f7bd326f3888729df02d5a097f9463a",
+      "review": "Unit tests for every public domain function of the components; no production code changed"
     },
     "components/intelligence/src/domain/experiment_model.rs": {
       "status": "reviewed-binding",
-      "sha256": "2d453986a4321a540e62ff95be4da3b60e9c2f56efd2625dcc76a9cd1175bd7f",
-      "review": "Knowledge module and experiment model moved into components/intelligence; kernel call sites unchanged"
+      "sha256": "1c429826983e273c1d4e84786a01791bafbfe4b5adf86c552f84b41c70e23679",
+      "review": "Unit tests for every public domain function of the components; no production code changed"
     },
     "components/intelligence/src/domain/offer.rs": {
       "status": "unproved",
@@ -1545,23 +1545,23 @@
     },
     "components/intelligence/src/domain/prompt_context.rs": {
       "status": "unproved",
-      "sha256": "1c17151f822911a834ecca33e7e91cfda7a4d94ff930c88b90ac724125734291",
-      "review": "Claim evidence, claim batches, order observation projection, embedding jobs, source search, knowledge inventory, product facts and prompt snapshots moved verbatim into the intelligence component; permissions, settings, provider admission and leases stay in the server. Kernel admission calls unchanged."
+      "sha256": "a57bfb3635ce82f4ad02d3abf8ad1519a1c0ed5d3b6a0e9d0a84c3d20e54f021",
+      "review": "Unit tests for every public domain function of the components; no production code changed"
     },
     "components/intelligence/src/domain/run_result.rs": {
       "status": "unproved",
-      "sha256": "bd494241d35a7d0c38f2d3f5137d88809d0aecf105e690a3cefdd1184525ff52",
-      "review": "Agent run projection, conversation turn fence, lease-fenced publication and the checkpoint journal moved verbatim into the intelligence component; authority, permissions and budgets stay in the server."
+      "sha256": "7b5256415cb53180dea2186942b0c99a26b667413c420c984752159dd1bd1e7e",
+      "review": "Unit tests for every public domain function of the components; no production code changed"
     },
     "components/intelligence/src/domain/source_content.rs": {
       "status": "unproved",
-      "sha256": "acb83bc1fed77b6be07bc96dcfa710df2d04d3fbdec282c5ea2a0511f9eb0132",
-      "review": "Knowledge sources, PDF text extraction and embedding generations moved into the intelligence component without behaviour change"
+      "sha256": "36dc45534dea62bde4fe81527226ab83c94120b1ff1c0f264c9597198cf692b7",
+      "review": "Unit tests for every public domain function of the components; no production code changed"
     },
     "components/intelligence/src/domain/trusted_geography.rs": {
       "status": "unproved",
-      "sha256": "d4bdb07cfd7723c78db94500092ecc8b6ba0dafac811b4c116cad9a5c7397e4a",
-      "review": "Process configuration moved into core; browser session transports, Checkout buyer grants, the private Checkout relay, trusted geography and provider startup validation moved into their components without behaviour change"
+      "sha256": "65547b117d050b8fe6dab67af60cf596bc0ca41ff15740defda41f1b497177fc",
+      "review": "Unit tests for every public domain function of the components; no production code changed"
     },
     "components/intelligence/src/domain.rs": {
       "status": "unproved",
@@ -1740,13 +1740,13 @@
     },
     "components/marketing/src/domain/configuration_kinds.rs": {
       "status": "unproved",
-      "sha256": "e244e818f913573ed3434e86c67a86b21bbf5b26879762583c5587ff3e879c96",
-      "review": "Marketing configuration lifecycle (tenant lock, revision, revision-bound deletion, dependency read, rule reference admission) moved verbatim into the marketing component; route registration stays in the server."
+      "sha256": "3400c754062c6d22cbfe186c98501390b7ab0d18920071511bd15ddc2f9b7f9f",
+      "review": "Unit tests for every public domain function of the components; no production code changed"
     },
     "components/marketing/src/domain/flow_actions.rs": {
       "status": "unproved",
-      "sha256": "94f0513b5b80d7624f68b456f10b4645620658b79b8d55009e5fa99287843506",
-      "review": "Flow pipeline and promotion types moved into components/marketing; kernel call sites unchanged"
+      "sha256": "0627cb077d498bcfb7636777306f977cc60161773a4bdae39e01330116218bec",
+      "review": "Unit tests for every public domain function of the components; no production code changed"
     },
     "components/marketing/src/domain/flow_text.rs": {
       "status": "unproved",
@@ -1755,8 +1755,8 @@
     },
     "components/marketing/src/domain/line_facts.rs": {
       "status": "unproved",
-      "sha256": "99fe85789eb9d4b68f9a3a75f93a28ecfbcd06770afa1c7ec1e74e5ad11e8d93",
-      "review": "cart types and rule engine moved into components; checking bindings"
+      "sha256": "ff247bca0184408f03d4ab3ab7b27e64fe48a5243c8a27d3ec6b68fc58591b84",
+      "review": "Unit tests for every public domain function of the components; no production code changed"
     },
     "components/marketing/src/domain/metadata.rs": {
       "status": "unproved",
@@ -1775,18 +1775,18 @@
     },
     "components/marketing/src/domain/rule_comparison.rs": {
       "status": "unproved",
-      "sha256": "e7a9561dea7172fd1cca872cdd377be77ebe119cd384f9dc41bdc1b5eee0f2fb",
-      "review": "Consumer requests moved into the shop component and the frozen rule comparison into marketing without behaviour change"
+      "sha256": "6be1cf98805674e4b8369a986187989b36de9f120048e47c400c80bf7f05ffe0",
+      "review": "Unit tests for every public domain function of the components; no production code changed"
     },
     "components/marketing/src/domain/rule_fields.rs": {
       "status": "unproved",
-      "sha256": "68bd56747ea6f1746ccd0f97e0c637c95e62eac7f07c8cf99068725e722a5f6f",
-      "review": "cart types and rule engine moved into components; checking bindings"
+      "sha256": "def4650ed34898ff3bb23ad822a4b357bb2ad7fb532b99b4fa118c60767f57e3",
+      "review": "Unit tests for every public domain function of the components; no production code changed"
     },
     "components/marketing/src/domain/rule_match.rs": {
       "status": "reviewed-binding",
-      "sha256": "cb29cf6db729b6db4feefb30402057ff8beaa4e69524974ab5e6649eb7d25922",
-      "review": "cart types and rule engine moved into components; checking bindings"
+      "sha256": "3bf79723a9e101d2f10e441e75ef9ce6e440114aa4fbf3f1148dc385e7fede24",
+      "review": "Unit tests for every public domain function of the components; no production code changed"
     },
     "components/marketing/src/domain/rule_tests.rs": {
       "status": "unproved",
@@ -1930,23 +1930,23 @@
     },
     "components/orders/src/domain/company_model.rs": {
       "status": "unproved",
-      "sha256": "890580df005fa40b5c8bffd9babcbaf941d9ce02f14a716a99fa23d7291c3439",
-      "review": "POS, checkout session review, company data, receipts and carrier documents moved into components"
+      "sha256": "9d60abb00d683772aa02ae26337c0de7f3acc2d6d9a665f677f81569be54a4b7",
+      "review": "Unit tests for every public domain function of the components; no production code changed"
     },
     "components/orders/src/domain/creation_schema.rs": {
       "status": "unproved",
-      "sha256": "487cd0adedfe3b619bc775f45f1eda4818131122f6bfe84f77feec88ea93ba96",
-      "review": "Order list criteria, company model and receipts moved into components; kernel call sites unchanged"
+      "sha256": "b5216ddba075de15426ff444939b00979b780666bf2e4f038a3724ba1b3a305d",
+      "review": "Unit tests for every public domain function of the components; no production code changed"
     },
     "components/orders/src/domain/import_product.rs": {
       "status": "unproved",
-      "sha256": "523f620bbf1b58f969a3666c3bea260c8d6fa80662e3eca8b2da9b63eee93342",
-      "review": "Order list criteria, company model and receipts moved into components; kernel call sites unchanged"
+      "sha256": "48f1b3a7db016e46f193c0bd410c8dc19445cbbde5d922e66ee7225c6b791ab0",
+      "review": "Unit tests for every public domain function of the components; no production code changed"
     },
     "components/orders/src/domain/import_relations.rs": {
       "status": "unproved",
-      "sha256": "fba89f884f778c84af14bff17e2e5c4deec0494f7e207ac89de9609e30abb514",
-      "review": "Order list criteria, company model and receipts moved into components; kernel call sites unchanged"
+      "sha256": "8e8424dfffe1f9c21b60467eeecc7eeafb0bed9896976af368545e685eb53b72",
+      "review": "Unit tests for every public domain function of the components; no production code changed"
     },
     "components/orders/src/domain/order_fields.rs": {
       "status": "unproved",
@@ -1960,13 +1960,13 @@
     },
     "components/orders/src/domain/order_workflow.rs": {
       "status": "reviewed-binding",
-      "sha256": "142aea062c3405ca3966b22772349b4b4a6e8b40d10544b8eed261bed62cc35f",
-      "review": "order workflow kernel bindings follow the move into components/orders"
+      "sha256": "33b9f9325cfb8157d39a69019091a46831938a5f1726dbbe371af886099826a7",
+      "review": "Unit tests for every public domain function of the components; no production code changed"
     },
     "components/orders/src/domain/receipt_instructions.rs": {
       "status": "unproved",
-      "sha256": "e011272d721ecb6bf459cd170ae82f657c1f4cd5cc7672785c6fb1bc822c8ff1",
-      "review": "order workflow kernel bindings follow the move into components/orders"
+      "sha256": "e5dd49a65c221448ae7883556b749ebc38b1675ccac5d65010b94a0e0189c0bb",
+      "review": "Unit tests for every public domain function of the components; no production code changed"
     },
     "components/orders/src/domain/receipt_pdf.rs": {
       "status": "unproved",
@@ -2070,13 +2070,13 @@
     },
     "components/payments/src/domain/amounts.rs": {
       "status": "unproved",
-      "sha256": "d6e3db757a6dda0349afb727f68c0c39a99825d8d844be6ce875421ac8f4f194",
-      "review": "Payment ledger rules moved into components/payments; kernel call sites unchanged"
+      "sha256": "a139e3a81c433023be0157bc285cd9aaf99f33fddae5a2d84a8141bd4af854a9",
+      "review": "Unit tests for every public domain function of the components; no production code changed"
     },
     "components/payments/src/domain/attempt.rs": {
       "status": "unproved",
-      "sha256": "8de088fe235163d44b0a63b5e4b503ca66f84c24a964ba2bd618f6dd9efb493f",
-      "review": "Payment ledger rules moved into components/payments; kernel call sites unchanged"
+      "sha256": "1ce49e584f49693b83ab958ec9377614bd58107901e075803fb80edbdd8193b3",
+      "review": "Unit tests for every public domain function of the components; no production code changed"
     },
     "components/payments/src/domain/catalog.rs": {
       "status": "unproved",
@@ -2100,38 +2100,38 @@
     },
     "components/payments/src/domain/instructions.rs": {
       "status": "unproved",
-      "sha256": "657c697de63241060f15789b6f413608289a29158774b530d5961971f403c835",
-      "review": "Receipt persistence and order ledger moved behind the payments host port; kernel call sites unchanged"
+      "sha256": "72afdbc282df81b5f92ef8d7db10b59795f8d82467b5e249328df4c231dc4dce",
+      "review": "Unit tests for every public domain function of the components; no production code changed"
     },
     "components/payments/src/domain/receipt_guard.rs": {
       "status": "reviewed-binding",
-      "sha256": "fa3740792bad1ab4bf837889e7814f69f44af66f3a8a83198b4853e743e3bda9",
-      "review": "Payment ledger rules moved into components/payments; kernel call sites unchanged"
+      "sha256": "92aa8e2872a74818a48458c9ba8037d84de0d1dcded8e6eb6d9f21e49d7c9ebc",
+      "review": "Unit tests for every public domain function of the components; no production code changed"
     },
     "components/payments/src/domain/receipt_ref.rs": {
       "status": "unproved",
-      "sha256": "cc745138e5e61646cd02a7eb821f81a7b16fee129bdf2302daf809d52810aabe",
-      "review": "Payment ledger rules moved into components/payments; kernel call sites unchanged"
+      "sha256": "665408e762f5f0d27cc4866ef68c704bcd5b6a4228f2f77d74610ee128f9605e",
+      "review": "Unit tests for every public domain function of the components; no production code changed"
     },
     "components/payments/src/domain/refunds.rs": {
       "status": "reviewed-binding",
-      "sha256": "f6d2c67c8d39e8966419c019965b0ca774a18b33ac3f2d4323bf506b02f872a6",
-      "review": "Payment ledger rules moved into components/payments; kernel call sites unchanged"
+      "sha256": "cf136f65a21bda0c170bdaf76aea48a138d13d5e5bcbcfb4c2587dad7ae27e0c",
+      "review": "Unit tests for every public domain function of the components; no production code changed"
     },
     "components/payments/src/domain/return_urls.rs": {
       "status": "unproved",
-      "sha256": "a4853709cdeb0fd6d8a42e42e2f89799d16c7210d6a9115b5e68e3c09e7cc1c2",
-      "review": "Payment ledger rules moved into components/payments; kernel call sites unchanged"
+      "sha256": "efcaa709ae41985d38ded7b5599f65d756dd413ab69c17c85647e810b817aa10",
+      "review": "Unit tests for every public domain function of the components; no production code changed"
     },
     "components/payments/src/domain/service_config.rs": {
       "status": "unproved",
-      "sha256": "134be662d42adeef35d2c1773a33aefee7298f502baebaed6836562b4b72f42c",
-      "review": "Receipt persistence and order ledger moved behind the payments host port; kernel call sites unchanged"
+      "sha256": "5c9e31d3a8da412bbf1e5d45799f284ad6156c004e355942494480ba5b127c3a",
+      "review": "Unit tests for every public domain function of the components; no production code changed"
     },
     "components/payments/src/domain/settlements.rs": {
       "status": "unproved",
-      "sha256": "a21328ca72d5ecb26b7ef8c7bd263f4adff3a394b8e47baf7f10b57fd46df3ca",
-      "review": "Payment ledger rules moved into components/payments; kernel call sites unchanged"
+      "sha256": "44ac4bfeb4604689eedc1acb9d103cd19b524b87ba40474f65b2514e00324f3f",
+      "review": "Unit tests for every public domain function of the components; no production code changed"
     },
     "components/payments/src/domain/state.rs": {
       "status": "reviewed-binding",
@@ -2280,8 +2280,8 @@
     },
     "components/pos/src/domain/schema.rs": {
       "status": "unproved",
-      "sha256": "3235c7041ec05647241a6283440d6c4f79ed18242bf7f9de01bdac68a18a9061",
-      "review": "Identity credentials, B2B and POS contracts and checkout tax lines moved into components; kernel call sites unchanged"
+      "sha256": "8bacbd3bd5391c2c88a103e04e6cd88b16e4dc7bb5b8890f43ce458d4684c5b0",
+      "review": "Unit tests for every public domain function of the components; no production code changed"
     },
     "components/pos/src/domain.rs": {
       "status": "unproved",
@@ -2355,13 +2355,13 @@
     },
     "components/pricing/src/domain/customer/address.rs": {
       "status": "unproved",
-      "sha256": "18b9d48ae007917c61a64cd29e0441ba5a9fa91d53d0eb9d5b0020babd3ae3fd",
-      "review": "Reviewed pure Contact/Address extraction: original strict wire fields, defaults, normalization, byte/calendar checks and safe validation messages retained in Commerce; native PII/account ownership, geography/payment admission and transactions unchanged. Portable crate cases and seven actual HTTP/PostgreSQL suites passed."
+      "sha256": "8f2f5f39eedbd03ad9096fd811a013691fa8b2671c096eebfea14c7b75ff6207",
+      "review": "Unit tests for every public domain function of the components; no production code changed"
     },
     "components/pricing/src/domain/customer/contact.rs": {
       "status": "unproved",
-      "sha256": "3e470e34fcca478004e0c2add480bc2c3cc24def2d52afec98dddfad4d1ca145",
-      "review": "Reviewed pure Contact/Address extraction: original strict wire fields, defaults, normalization, byte/calendar checks and safe validation messages retained in Commerce; native PII/account ownership, geography/payment admission and transactions unchanged. Portable crate cases and seven actual HTTP/PostgreSQL suites passed."
+      "sha256": "b55bd74a5048a33f7f7eb596b0488f34ea2cae5c0a98bccdb3d63b26d2ad479b",
+      "review": "Unit tests for every public domain function of the components; no production code changed"
     },
     "components/pricing/src/domain/customer/contract_tests.rs": {
       "status": "unproved",
@@ -2370,8 +2370,8 @@
     },
     "components/pricing/src/domain/customer/mod.rs": {
       "status": "unproved",
-      "sha256": "5bb597f831f19640d89cca0a93e427c71efeddd3252b46caa6082c068cdac069",
-      "review": "Moved paid external order DTO and reconciliation without changing original field order, bounds, errors, or verified kernel predicates. Native still owns admission and the legacy display projection. Shared Commerce unit tests and exchange contract guard pass."
+      "sha256": "7b2eaa1a522ea30aba4a7a33c339dea7d2575982d7285d11ac533c0b3cae6fb1",
+      "review": "Unit tests for every public domain function of the components; no production code changed"
     },
     "components/pricing/src/domain/discount.rs": {
       "status": "reviewed-binding",
@@ -2390,18 +2390,18 @@
     },
     "components/pricing/src/domain/money.rs": {
       "status": "reviewed-binding",
-      "sha256": "ace64cb04150669420b07d1d212b5e342eac631eeff2d5c5067b99e6ce31a240",
-      "review": "Cart totals are added as whole minor units through the proved amount_sum and net_amount rules; the extractor models saturating_add as the sum capped at the largest u64. A test shows the integer totals equal the previous rounded decimal totals."
+      "sha256": "431a7dbcdeaebff53db01ae05cd48074634e6055121b43da93071e59ced0e292",
+      "review": "Unit tests for every public domain function of the components; no production code changed"
     },
     "components/pricing/src/domain/pricing.rs": {
       "status": "unproved",
-      "sha256": "421ebdf7a78c2b46da9c1ee567d2df7052077db7f7c7919cccb516b1e020baac",
-      "review": "Initial extraction of 13 production policies; surrounding Rust explicitly unproved; existing HTTP regression suites retained"
+      "sha256": "983c67e4bb69285a82601055f7624797b9b3634199c8d2e31c5ffb18b9cd0b83",
+      "review": "Unit tests for every public domain function of the components; no production code changed"
     },
     "components/pricing/src/domain/validation.rs": {
       "status": "unproved",
-      "sha256": "a99195e93e7d85ee91e1e43cac9987704fda0dfaf59a3153e177994a8400a901",
-      "review": "Moved paid external order DTO and reconciliation without changing original field order, bounds, errors, or verified kernel predicates. Native still owns admission and the legacy display projection. Shared Commerce unit tests and exchange contract guard pass."
+      "sha256": "199e84135d5a4489f8098035737d0cdb4baabd10cd807b069f783b1ed102b28b",
+      "review": "Unit tests for every public domain function of the components; no production code changed"
     },
     "components/pricing/src/domain.rs": {
       "status": "unproved",
@@ -2575,18 +2575,18 @@
     },
     "components/shop/src/domain/buyer_consent.rs": {
       "status": "unproved",
-      "sha256": "ca5ba6f59b25cd804e96dddeeb6f510ca740edf42b07ab64be07a0b456de1fcb",
-      "review": "Identity credentials, B2B and POS contracts and checkout tax lines moved into components; kernel call sites unchanged"
+      "sha256": "f22f9b328f8805407d3be0d26462e38b192811c0eb017ebe1199a5ee43fe38ad",
+      "review": "Unit tests for every public domain function of the components; no production code changed"
     },
     "components/shop/src/domain/cart_admission.rs": {
       "status": "unproved",
-      "sha256": "20694d0c841285fef209eb6bd27f7cb9dffa0dc64cd348775116b93c4cef5c21",
-      "review": "POS guard, customer, discount and settlement and the checkout session review moved into components"
+      "sha256": "2a5b4cebdbe450ce5760dff8421e57aed65b4caf51d3105e82a4a455a55e13d5",
+      "review": "Unit tests for every public domain function of the components; no production code changed"
     },
     "components/shop/src/domain/cart_lines.rs": {
       "status": "unproved",
-      "sha256": "10c52bdbce953b8f54b7cb78467c66e19f0e99ede87bf54c87830e78b1db58ea",
-      "review": "Coupons, flow job summaries, requisition import, customer snapshot, address restore and account orders moved into components"
+      "sha256": "a4efa9f512763834d75765e8906c43869c944a0b6d34aeb5aca6912998b4eff7",
+      "review": "Unit tests for every public domain function of the components; no production code changed"
     },
     "components/shop/src/domain/checkout_selection.rs": {
       "status": "unproved",
@@ -2595,23 +2595,23 @@
     },
     "components/shop/src/domain/customer_groups.rs": {
       "status": "unproved",
-      "sha256": "da1caedadeff46975c93d69b70d49078c5cac7d7a9e83bd760373655377c91a5",
-      "review": "shop component crate created; settings types moved; no kernel binding changed"
+      "sha256": "f9ba9955eaecd2d5b0bd75ac776284438d23832a800af29a044f0582ddec2d17",
+      "review": "Unit tests for every public domain function of the components; no production code changed"
     },
     "components/shop/src/domain/defaults.rs": {
       "status": "unproved",
-      "sha256": "81ae23ccef5e80531d65443604a25dedb2e5f9da93d57f4d0f315ca6596eb105",
-      "review": "shop component crate created; settings types moved; no kernel binding changed"
+      "sha256": "861d67d0760d528813d9e030025e2bde14e7e2368f7b64354b2140594b11faa8",
+      "review": "Unit tests for every public domain function of the components; no production code changed"
     },
     "components/shop/src/domain/legal_product.rs": {
       "status": "unproved",
-      "sha256": "7212fbcc2ee067fabbe457c7276eadc829d7592982af74a97b765b9379abac95",
-      "review": "Identity credentials, B2B and POS contracts and checkout tax lines moved into components; kernel call sites unchanged"
+      "sha256": "7d420e25f0d4a7b44a9a485bfd3441eaa98a652824a0482295161df92d32ba45",
+      "review": "Unit tests for every public domain function of the components; no production code changed"
     },
     "components/shop/src/domain/method_text.rs": {
       "status": "unproved",
-      "sha256": "123bb256733bab4f2a2d6c8bac954e8b9286b03997909e254436703092808f24",
-      "review": "Delivery enrichment, app adjustments and funding moved into components; kernel call sites unchanged"
+      "sha256": "a1f2d702061c60d50c0e7329b5fe8345fa0281e888a8d6019b83c52ca10cb748",
+      "review": "Unit tests for every public domain function of the components; no production code changed"
     },
     "components/shop/src/domain/patch.rs": {
       "status": "unproved",
@@ -2620,8 +2620,8 @@
     },
     "components/shop/src/domain/tax_rules.rs": {
       "status": "unproved",
-      "sha256": "11dd834efc272f78b94d2d044b0f5bc27e37431d6cf13473a10c066337884bbe",
-      "review": "Identity credentials, B2B and POS contracts and checkout tax lines moved into components; kernel call sites unchanged"
+      "sha256": "b81dd605e178c74acb70aa22684d8ce1a6d70ce6d434f48f142954f447b88a8d",
+      "review": "Unit tests for every public domain function of the components; no production code changed"
     },
     "components/shop/src/domain/validation.rs": {
       "status": "unproved",
@@ -2740,8 +2740,8 @@
     },
     "components/studio/src/domain/report_config.rs": {
       "status": "unproved",
-      "sha256": "19d211bc72242ce57aecfdb807f6bf061348eb996fe831e2c9223827b20e0337",
-      "review": "Knowledge module and experiment model moved into components/intelligence; kernel call sites unchanged"
+      "sha256": "f735aba7727c59fbbca64e7ecc128959185cf7d6e0241c2916e6e883bc2b338b",
+      "review": "Unit tests for every public domain function of the components; no production code changed"
     },
     "components/studio/src/domain/report_period.rs": {
       "status": "unproved",
@@ -2750,13 +2750,13 @@
     },
     "components/studio/src/domain/view_components.rs": {
       "status": "unproved",
-      "sha256": "26657b540611598475bfd11312fccc738edd55f5d52eda139b0204e64aa8354d",
-      "review": "Personal Studio workspace model and store moved into the studio component without behaviour change"
+      "sha256": "797b4eb0ba151a7275267f31971f802dc9da1b87889782396e2f52a0f964eab7",
+      "review": "Unit tests for every public domain function of the components; no production code changed"
     },
     "components/studio/src/domain/workspace.rs": {
       "status": "unproved",
-      "sha256": "7f6e8c5a49f35c0ed5ab319cf70ecbe78e84acc0f1896470b48b34680bb124fe",
-      "review": "Personal Studio workspace model and store moved into the studio component without behaviour change"
+      "sha256": "54dabb02e4d9a03b5861ecbf8df694bf00a267e67ec9baf43b4c8942aa6be7b6",
+      "review": "Unit tests for every public domain function of the components; no production code changed"
     },
     "components/studio/src/domain.rs": {
       "status": "unproved",

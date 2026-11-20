@@ -122,3 +122,124 @@ pub fn validate(action: &str, config: &Value) -> Result<()> {
     }
     Ok(())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::{normalize, permission, validate};
+    use serde_json::json;
+
+    #[test]
+    fn each_action_names_the_right_it_needs() {
+        assert_eq!(permission("action.add.customer.tag"), "customers.write");
+        assert_eq!(
+            permission("action.change.customer.group"),
+            "customers.write"
+        );
+        assert_eq!(permission("action.generate.document"), "documents.create");
+        assert_eq!(permission("action.mail.send"), "apps.manage");
+        assert_eq!(permission("app_action"), "apps.manage");
+        assert_eq!(permission("ai_proposal"), "catalog.write");
+        assert_eq!(permission("knowledge.extract"), "knowledge.write");
+        assert_eq!(permission("note"), "automation.manage");
+        assert_eq!(permission("action.stop.flow"), "automation.manage");
+        assert_eq!(permission("action.set.order.state"), "orders.write");
+    }
+
+    #[test]
+    fn source_names_become_native_ones_without_replacing_native_values() {
+        let c = normalize(
+            "action.add.order.tag",
+            &json!({"tagIds":["a"],"customerGroupId":"vip","documentType":"invoice"}),
+        );
+        assert_eq!(c["tags"], json!(["a"]));
+        assert_eq!(c["groupId"], "vip");
+        assert_eq!(c["kind"], "invoice");
+        let kept = normalize(
+            "action.add.order.tag",
+            &json!({"tagIds":["a"],"tags":["b"]}),
+        );
+        assert_eq!(kept["tags"], json!(["b"]));
+        assert_eq!(
+            normalize("action.grant.download.access", &json!({}))["value"],
+            true
+        );
+        assert_eq!(
+            normalize("action.grant.download.access", &json!({"value":false}))["value"],
+            false
+        );
+        assert!(normalize("note", &json!({})).get("value").is_none());
+    }
+
+    #[test]
+    fn actions_accept_only_their_complete_configuration() {
+        for (action, config) in [
+            ("note", json!({"instruction":{"en-GB":"Check the order"}})),
+            ("knowledge.extract", json!({"sourceId":"s1"})),
+            ("action.add.order.tag", json!({"tagIds":["vip"]})),
+            (
+                "action.set.order.custom.field",
+                json!({"field":"priority","value":1}),
+            ),
+            (
+                "action.change.customer.group",
+                json!({"customerGroupId":"business"}),
+            ),
+            ("action.change.customer.status", json!({"active":false})),
+            ("action.grant.download.access", json!({})),
+            (
+                "action.set.order.state",
+                json!({"kind":"payment","state":"paid"}),
+            ),
+            (
+                "action.generate.document",
+                json!({"documentType":"invoice"}),
+            ),
+            (
+                "app_action",
+                json!({"app":"email","action":"send","arguments":{}}),
+            ),
+            (
+                "action.mail.send",
+                json!({"templateId":"order_confirmation"}),
+            ),
+            (
+                "action.add.order.affiliate.and.campaign.code",
+                json!({"affiliateCode":"a","campaignCode":"c"}),
+            ),
+            ("action.stop.flow", json!({})),
+        ] {
+            assert!(validate(action, &config).is_ok(), "{action}");
+        }
+        for (action, config) in [
+            ("action.run.sql", json!({})),
+            ("note", json!([])),
+            ("note", json!({})),
+            ("note", json!({"instruction":{"en-GB":" "}})),
+            ("knowledge.extract", json!({"query":"x"})),
+            ("action.add.order.tag", json!({"tags":[]})),
+            ("action.add.order.tag", json!({"tags":[""]})),
+            (
+                "action.set.order.custom.field",
+                json!({"field":"a.b","value":1}),
+            ),
+            ("action.set.order.custom.field", json!({"field":"priority"})),
+            (
+                "action.change.customer.group",
+                json!({"groupId":"Not valid"}),
+            ),
+            ("action.change.customer.status", json!({"active":"no"})),
+            ("action.grant.download.access", json!({"value":"yes"})),
+            ("action.set.order.state", json!({"kind":"payment"})),
+            ("action.generate.document", json!({"kind":"credit_note"})),
+            ("app_action", json!({"app":"email","action":"send"})),
+            ("action.mail.send", json!({"templateId":"newsletter"})),
+            (
+                "action.add.order.affiliate.and.campaign.code",
+                json!({"affiliateCode":"a"}),
+            ),
+            ("action.stop.flow", json!({"note":"x".repeat(8000)})),
+        ] {
+            assert!(validate(action, &config).is_err(), "{action} {config}");
+        }
+    }
+}

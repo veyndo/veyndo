@@ -49,3 +49,40 @@ pub fn lines(v: &Value, index: usize) -> Vec<String> {
     }
     lines
 }
+
+#[cfg(test)]
+mod tests {
+    use super::lines;
+    use serde_json::json;
+
+    #[test]
+    fn the_footer_names_the_recipient_in_the_document_language() {
+        let v = json!({"simulated":true,"instructions":{"kind":"bank_transfer","accountHolderName":"Shop GmbH","bankName":"Example Bank","iban":"DE89370400440532013000","bic":"DEUTDEFF","paymentReference":"RF-1"}});
+        let de = lines(&v, 1);
+        assert_eq!(de[0], "");
+        assert_eq!(de[1], "Angaben zum Rechnungskauf");
+        assert_eq!(de[2], "Simulierte Bankdaten. Bitte kein Geld überweisen.");
+        assert_eq!(
+            de[3..],
+            [
+                "Empfänger: Shop GmbH",
+                "Bank: Example Bank",
+                "IBAN: DE89370400440532013000",
+                "BIC: DEUTDEFF",
+                "Verwendungszweck: RF-1"
+            ]
+        );
+        let mut live = v.clone();
+        live["simulated"] = json!(false);
+        let en = lines(&live, 0);
+        assert_eq!(en.len(), 7);
+        assert_eq!(en[2], "Recipient: Shop GmbH");
+        assert_eq!(lines(&live, 9)[1], "Datos del pago por factura");
+    }
+
+    #[test]
+    fn other_payment_kinds_print_no_footer() {
+        assert!(lines(&json!({}), 0).is_empty());
+        assert!(lines(&json!({"instructions":{"kind":"payer_account"}}), 0).is_empty());
+    }
+}

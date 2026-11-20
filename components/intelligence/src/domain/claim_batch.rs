@@ -64,3 +64,73 @@ impl Compile {
         Ok(())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::Compile;
+    use serde_json::{Value, json};
+
+    fn batch(claims: Value) -> Compile {
+        serde_json::from_value(
+            json!({"products":[{"productId":"p1","claims":claims},{"productId":"p2","claims":[]}]}),
+        )
+        .unwrap()
+    }
+
+    #[test]
+    fn a_batch_is_bounded_per_product_and_statement() {
+        let ok = batch(json!([{"id":"c1","text":"Waterproof to 50 m"}]));
+        assert!(ok.bounded().is_ok());
+        assert_eq!(ok.ids(), ["p1", "p2"]);
+        assert!(batch(json!([{"id":"c1","text":""}])).bounded().is_err());
+        assert!(
+            batch(json!([{"id":"c1","text":"x".repeat(1201)}]))
+                .bounded()
+                .is_err()
+        );
+        assert!(
+            batch(json!([{"id":"x".repeat(129),"text":"ok"}]))
+                .bounded()
+                .is_err()
+        );
+        assert!(
+            batch(json!(vec![json!({"id":"c","text":"ok"}); 21]))
+                .bounded()
+                .is_err()
+        );
+        assert!(
+            batch(json!(vec![json!({"id":"c","text":"ok"}); 20]))
+                .bounded()
+                .is_ok()
+        );
+    }
+
+    #[test]
+    fn only_exact_current_claims_of_the_same_product_are_certified() {
+        let current = [
+            json!({"productId":"p1","id":"c1","text":"Waterproof to 50 m"}),
+            json!({"productId":"p2","id":"c2","text":"Made of steel"}),
+        ];
+        assert!(
+            batch(json!([{"id":"c1","text":"Waterproof to 50 m"}]))
+                .exact(&current)
+                .is_ok()
+        );
+        assert!(batch(json!([])).exact(&[]).is_ok());
+        assert!(
+            batch(json!([{"id":"c1","text":"Waterproof to 100 m"}]))
+                .exact(&current)
+                .is_err()
+        );
+        assert!(
+            batch(json!([{"id":"c2","text":"Made of steel"}]))
+                .exact(&current)
+                .is_err()
+        );
+        assert!(
+            batch(json!([{"id":"c9","text":"Waterproof to 50 m"}]))
+                .exact(&current)
+                .is_err()
+        );
+    }
+}

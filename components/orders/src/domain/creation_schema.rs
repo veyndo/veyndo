@@ -80,3 +80,33 @@ pub fn schema(name: &str) -> Option<Value> {
         json!({"type":"object","properties":props,"required":required,"additionalProperties":false}),
     )
 }
+
+#[cfg(test)]
+mod tests {
+    use super::schema;
+
+    #[test]
+    fn creation_tools_have_closed_schemas_and_unknown_tools_none() {
+        for (name, required) in [
+            ("merchant.customer.creation", 0),
+            ("merchant.customer.create", 5),
+            ("merchant.order.context", 1),
+            ("merchant.order.review", 6),
+            ("merchant.order.complete", 11),
+        ] {
+            let s = schema(name).unwrap();
+            assert_eq!(s["type"], "object", "{name}");
+            assert_eq!(s["additionalProperties"], false, "{name}");
+            let names = s["required"].as_array().unwrap();
+            assert_eq!(names.len(), required, "{name}");
+            for key in names {
+                assert!(
+                    s["properties"][key.as_str().unwrap()].is_object(),
+                    "{name} {key}"
+                );
+            }
+        }
+        assert!(schema("merchant.import.record").is_none());
+        assert!(schema("merchant.order.delete").is_none());
+    }
+}

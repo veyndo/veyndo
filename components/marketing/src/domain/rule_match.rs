@@ -222,3 +222,156 @@ fn wildcard(value: &str, pattern: &str) -> bool {
     }
     j == p.len()
 }
+
+#[cfg(test)]
+mod tests {
+    use super::{Condition, wildcard};
+    use serde_json::{Value, json};
+    use veyndo_shop::types::cart::StoredCart;
+
+    fn cart(extra: Value) -> StoredCart {
+        let mut data = json!({"items":[{"id":"p1","quantity":2},{"id":"p2","quantity":3}],"group":"retail","session":"s","email":null,"company":null,"buyer":null,"order":null});
+        for (key, value) in extra.as_object().unwrap() {
+            data[key] = value.clone();
+        }
+        StoredCart {
+            id: "cart-1".into(),
+            tenant: "shop".into(),
+            token: "token".into(),
+            data: serde_json::from_value(data).unwrap(),
+            revision: 1,
+            status: "open".into(),
+        }
+    }
+
+    fn condition(v: Value) -> Condition {
+        serde_json::from_value(v).unwrap()
+    }
+
+    #[test]
+    fn leaf_conditions_read_the_cart_and_the_supplied_facts() {
+        let c = cart(json!({"customer_id":"c1","email":"Buyer@Example.test"}));
+        let q = json!({"price":{"totalPrice":120.0},"orderState":"open","paymentState":"paid","deliveryStates":["shipped"],
+            "lineItems":[{"referencedId":"v1","parentId":"p9"}],"event":{"order":{"number":"A-1"}}});
+        for (v, expected) in [
+            (json!({"type":"alwaysValid"}), true),
+            (
+                json!({"type":"cartCartAmount","operator":">=","amount":100.0}),
+                true,
+            ),
+            (
+                json!({"type":"cartCartAmount","operator":"<","amount":100.0}),
+                false,
+            ),
+            (
+                json!({"type":"cartLineItemCount","operator":"=","count":2.0}),
+                true,
+            ),
+            (json!({"type":"customerGroup","values":["retail"]}), true),
+            (
+                json!({"type":"customerGroup","values":["retail"],"operator":"!="}),
+                false,
+            ),
+            (json!({"type":"salesChannel","values":["default"]}), true),
+            (json!({"type":"lineItemId","values":["p2"]}), true),
+            (json!({"type":"lineItemId","values":["p3"]}), false),
+            (json!({"type":"cartLineItem","values":["p9"]}), true),
+            (json!({"type":"cartLineItem","values":["v1"]}), true),
+            (json!({"type":"cartLineItem","values":["p1"]}), false),
+            (json!({"type":"orderState","values":["open"]}), true),
+            (json!({"type":"paymentState","values":["open"]}), false),
+            (json!({"type":"deliveryState","values":["shipped"]}), true),
+            (json!({"type":"shippingMethod","values":["pickup"]}), true),
+            (json!({"type":"paymentMethod","values":["invoice"]}), false),
+            (
+                json!({"type":"customerEmail","email":"*@example.test","operator":"="}),
+                true,
+            ),
+            (
+                json!({"type":"customerEmail","email":"*@other.test","operator":"!="}),
+                true,
+            ),
+            (json!({"type":"customerLoggedIn","isLoggedIn":true}), true),
+            (json!({"type":"customerLoggedIn","isLoggedIn":false}), false),
+            (
+                json!({"type":"contextField","field":"cart.quantity","operator":">","value":4}),
+                true,
+            ),
+            (
+                json!({"type":"eventField","path":"order.number","operator":"=","value":"a-1"}),
+                true,
+            ),
+            (
+                json!({"type":"eventField","path":"order.missing","operator":"=","value":"a-1"}),
+                false,
+            ),
+        ] {
+            assert_eq!(condition(v.clone()).matches(&c, &q), expected, "{v}");
+        }
+        let guest = cart(json!({"email":"buyer@example.test"}));
+        assert!(
+            !condition(json!({"type":"customerEmail","email":"*","operator":"="}))
+                .matches(&guest, &q)
+        );
+        assert!(
+            condition(json!({"type":"customerEmail","email":"*","operator":"!="}))
+                .matches(&guest, &q)
+        );
+    }
+
+    #[test]
+    fn containers_combine_and_references_resolve_only_active_rules_of_the_snapshot() {
+        let c = cart(json!({}));
+        let q = json!({"price":{"totalPrice":50.0},"ruleFacts":{"rules":{
+            "big":{"active":true,"condition":{"type":"cartCartAmount","operator":">=","amount":100.0}},
+            "small":{"active":true,"condition":{"type":"cartCartAmount","operator":"<","amount":100.0}},
+            "off":{"active":false,"condition":{"type":"alwaysValid"}},
+            "loop":{"active":true,"condition":{"type":"ruleReference","ruleId":"loop"}}}}});
+        let reference = |id: &str| json!({"type":"ruleReference","ruleId":id});
+        assert_eq!(
+            condition(reference("small")).checked_matches(&c, &q).ok(),
+            Some(true)
+        );
+        assert_eq!(
+            condition(reference("big")).checked_matches(&c, &q).ok(),
+            Some(false)
+        );
+        for id in ["off", "missing", "loop"] {
+            assert!(
+                condition(reference(id)).checked_matches(&c, &q).is_err(),
+                "{id}"
+            );
+            assert!(!condition(reference(id)).matches(&c, &q), "{id}");
+        }
+        let negated_missing =
+            condition(json!({"type":"notContainer","child":reference("missing")}));
+        assert!(negated_missing.checked_matches(&c, &q).is_err());
+        let and = condition(
+            json!({"type":"andContainer","children":[reference("small"),{"type":"alwaysValid"}]}),
+        );
+        assert_eq!(and.checked_matches(&c, &q).ok(), Some(true));
+        assert!(and.matches(&c, &q));
+        let or = condition(
+            json!({"type":"orContainer","children":[reference("big"),reference("small")]}),
+        );
+        assert_eq!(or.checked_matches(&c, &q).ok(), Some(true));
+        let not = condition(json!({"type":"notContainer","child":reference("small")}));
+        assert_eq!(not.checked_matches(&c, &q).ok(), Some(false));
+        assert!(!not.matches(&c, &q));
+        let failing_or = condition(
+            json!({"type":"orContainer","children":[{"type":"alwaysValid"},reference("missing")]}),
+        );
+        assert!(failing_or.checked_matches(&c, &q).is_err());
+    }
+
+    #[test]
+    fn wildcards_match_case_insensitively() {
+        assert!(wildcard("Buyer@Example.test", "*@example.TEST"));
+        assert!(wildcard("buyer@example.test", "buyer@*"));
+        assert!(wildcard("buyer@example.test", "b*@*.test"));
+        assert!(wildcard("", "*"));
+        assert!(!wildcard("buyer@example.test", "*@other.test"));
+        assert!(!wildcard("buyer@example.test", "buyer"));
+        assert!(!wildcard("", "a"));
+    }
+}

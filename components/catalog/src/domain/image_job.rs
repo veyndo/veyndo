@@ -77,4 +77,13 @@ mod tests {
         ));
         assert!(text.contains("Do not invent logos"));
     }
+    #[test]
+    fn modes_have_their_wire_names() {
+        assert_eq!(Mode::Generate.name(), "generate");
+        assert_eq!(Mode::Optimize.name(), "optimize");
+        for mode in [Mode::Generate, Mode::Optimize] {
+            let value = json!({"prompt":"ok","mode":mode.name()});
+            assert_eq!(parse(&value).unwrap().mode, mode);
+        }
+    }
 }

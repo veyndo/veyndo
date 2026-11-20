@@ -55,8 +55,51 @@ pub fn catalog_snapshot(products: &[Product], pricing_currency: &str) -> Value {
 }
 #[cfg(test)]
 mod tests {
-    use super::snapshot;
-    use serde_json::json;
+    use super::{catalog_snapshot, snapshot};
+    use serde_json::{Value, json};
+    use veyndo_pricing::domain::catalog::Product;
+
+    fn product(id: &str, extra: Value, description: String) -> Product {
+        serde_json::from_value(json!({
+            "extra":extra,"id":id,"name":"Lamp","category":"","description":description,"price":9.5,
+            "tax_rate":19.0,"stock":3,"revision":4,"list_price":null,"regulation_price":null,
+            "reference_price":null,"advanced_prices":[],"min_purchase":1,"purchase_steps":1,
+            "max_purchase":null,"parent_id":null,"options":{"color":"red"},"media":[],
+            "properties":{"material":"steel"},"delivery_days":1
+        }))
+        .unwrap()
+    }
+
+    #[test]
+    fn the_catalogue_names_each_price_currency_and_stays_inside_its_budget() {
+        let ps = [
+            product("p1", json!({}), "Bright".into()),
+            product(
+                "p2",
+                json!({"priceCurrency":"USD","secret":"x"}),
+                "Warm".into(),
+            ),
+        ];
+        let v = catalog_snapshot(&ps, "EUR");
+        assert_eq!(
+            v[0],
+            json!({"id":"p1","name":"Lamp","description":"Bright","price":9.5,"priceCurrency":"EUR",
+            "stock":3,"revision":4,"properties":{"material":"steel"},"options":{"color":"red"}})
+        );
+        assert_eq!(v[1]["priceCurrency"], "USD");
+        assert!(!v.to_string().contains("secret"));
+        let many = (0..40)
+            .map(|i| product(&format!("p{i}"), json!({}), "x".repeat(1000)))
+            .collect::<Vec<_>>();
+        let bounded = catalog_snapshot(&many, "EUR");
+        assert!(bounded.to_string().len() <= 18000);
+        let rows = bounded.as_array().unwrap();
+        assert_eq!(
+            rows.last().unwrap()["omittedRecords"],
+            json!(41 - rows.len())
+        );
+        assert_eq!(rows[0]["description"].as_str().unwrap().len(), 1000);
+    }
     #[test]
     fn prompt_budget_omits_whole_records_and_never_rewrites_source_text() {
         let v = json!([{"id":"source","text":"x".repeat(1000)}, {"id":"second","text":"uncut"}]);

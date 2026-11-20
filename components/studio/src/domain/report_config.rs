@@ -127,3 +127,109 @@ pub fn schema(n: &str) -> Option<Value> {
         "currency":{"type":["string","null"],"maxLength":3},"compare":{"type":"boolean"}}}),
     )
 }
+
+#[cfg(test)]
+mod tests {
+    use super::{Layout, Query, schema};
+    use serde_json::{Value, json};
+
+    fn query(v: Value) -> Query {
+        serde_json::from_value(v).unwrap()
+    }
+
+    #[test]
+    fn report_filters_default_to_thirty_days_and_accept_only_known_values() {
+        let default = query(json!({}));
+        assert_eq!(
+            (
+                default.period.as_str(),
+                default.interval.as_str(),
+                default.compare
+            ),
+            ("last30", "auto", true)
+        );
+        assert!(default.validate().is_ok());
+        assert!(query(json!({"period":"custom","from":"2026-01-01","to":"2026-01-31","interval":"week","timezone":"Europe/Berlin","channel":"web","channelType":"pos","currency":"EUR","compare":false})).validate().is_ok());
+        for invalid in [
+            json!({"period":"decade"}),
+            json!({"interval":"hour"}),
+            json!({"channelType":"social"}),
+            json!({"timezone":"Mars/Olympus"}),
+            json!({"channel":""}),
+            json!({"channel":"x".repeat(161)}),
+            json!({"currency":"eur"}),
+            json!({"currency":"EURO"}),
+            json!({"from":"2026-02-30"}),
+            json!({"to":"01.01.2026"}),
+        ] {
+            assert!(query(invalid.clone()).validate().is_err(), "{invalid}");
+        }
+        assert!(serde_json::from_value::<Query>(json!({"sql":"x"})).is_err());
+    }
+
+    #[test]
+    fn a_layout_has_at_most_twelve_distinct_known_widgets() {
+        let layout = |widgets: Value| {
+            serde_json::from_value::<Layout>(json!({"query":{},"widgets":widgets})).unwrap()
+        };
+        let widget = |id: &str| json!({"id":id,"kind":"revenue","view":"line","width":"half"});
+        assert!(layout(json!([])).validate().is_ok());
+        assert!(
+            layout(json!([widget("a"), {"id":"b","kind":"funnel","view":"table","width":"full"}]))
+                .validate()
+                .is_ok()
+        );
+        assert!(
+            layout(json!(
+                (0..12)
+                    .map(|i| widget(&format!("w{i}")))
+                    .collect::<Vec<_>>()
+            ))
+            .validate()
+            .is_ok()
+        );
+        assert!(
+            layout(json!(
+                (0..13)
+                    .map(|i| widget(&format!("w{i}")))
+                    .collect::<Vec<_>>()
+            ))
+            .validate()
+            .is_err()
+        );
+        assert!(
+            layout(json!([widget("a"), widget("a")]))
+                .validate()
+                .is_err()
+        );
+        for (key, value) in [
+            ("id", "Not valid"),
+            ("kind", "profit"),
+            ("view", "pie"),
+            ("width", "third"),
+        ] {
+            let mut changed = widget("a");
+            changed[key] = json!(value);
+            assert!(layout(json!([changed])).validate().is_err(), "{key}");
+        }
+        let invalid_query: Layout =
+            serde_json::from_value(json!({"query":{"period":"decade"},"widgets":[]})).unwrap();
+        assert!(invalid_query.validate().is_err());
+    }
+
+    #[test]
+    fn the_report_tool_schema_lists_exactly_the_query_fields() {
+        let s = schema("merchant.reports.read").unwrap();
+        assert_eq!(s["additionalProperties"], false);
+        let fields = json!(Query::default());
+        assert_eq!(
+            s["properties"]
+                .as_object()
+                .unwrap()
+                .keys()
+                .collect::<Vec<_>>(),
+            fields.as_object().unwrap().keys().collect::<Vec<_>>()
+        );
+        assert!(schema("merchant.reports.write").is_none());
+    }
+}

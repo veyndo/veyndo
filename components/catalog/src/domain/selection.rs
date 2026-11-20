@@ -23,7 +23,7 @@ pub fn validate(ids: &[String]) -> Result<()> {
 }
 #[cfg(test)]
 mod tests {
-    use super::parse;
+    use super::{parse, validate};
     use serde_json::json;
     #[test]
     fn missing_means_catalogue_but_explicit_empty_never_does() {
@@ -41,5 +41,16 @@ mod tests {
             parse(Some(&json!(["b", "a"]))).unwrap().unwrap(),
             vec!["b", "a"]
         );
+    }
+    #[test]
+    fn a_selection_names_at_most_a_thousand_short_distinct_identifiers() {
+        let ids = |n: usize| (0..n).map(|i| format!("p{i}")).collect::<Vec<_>>();
+        assert!(validate(&ids(1)).is_ok());
+        assert!(validate(&ids(1000)).is_ok());
+        assert!(validate(&ids(1001)).is_err());
+        assert!(validate(&[]).is_err());
+        assert!(validate(&["x".repeat(160)]).is_ok());
+        assert!(validate(&["x".repeat(161)]).is_err());
+        assert!(validate(&["a".into(), "a".into()]).is_err());
     }
 }

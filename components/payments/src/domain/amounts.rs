@@ -35,7 +35,7 @@ fn parse_minor(value: &str) -> Result<i64> {
 
 #[cfg(test)]
 mod tests {
-    use super::{amount_string, format_amount, parse_amount, parse_minor};
+    use super::{amount_string, format_amount, parse_amount, parse_minor, wire_currency};
 
     #[test]
     fn currency_wire_amounts_use_iso_precision() {
@@ -53,5 +53,14 @@ mod tests {
         for s in ["1.2", "-1.00", "NaN", "1e2.00", "999999999999999999999.00"] {
             assert!(parse_minor(s).is_err());
         }
+    }
+    #[test]
+    fn wire_currencies_are_the_supported_iso_codes() {
+        assert!(wire_currency("EUR").is_ok());
+        assert!(wire_currency("JPY").is_ok());
+        for code in ["XXX", "eur", ""] {
+            assert!(wire_currency(code).is_err(), "{code}");
+        }
+        assert!(parse_amount("-0.00", "EUR").is_err());
     }
 }

@@ -248,6 +248,44 @@ pub fn proportional_tax_rules(taxes: &[CalculatedTax], total: f64) -> Vec<TaxRul
 mod tests {
     use super::*;
     #[test]
+    fn cash_rounding_applies_the_interval_up_to_two_decimals() {
+        assert_eq!(cash_round(1.02, 2, 0.05), 1.0);
+        assert_eq!(cash_round(1.03, 2, 0.05), 1.05);
+        assert_eq!(cash_round(-1.03, 2, 0.05), -1.05);
+        assert_eq!(cash_round(1.005, 2, 0.01), 1.01);
+        assert_eq!(cash_round(1.2346, 3, 0.05), 1.235);
+        assert_eq!(cash_round(7.4, 0, 1.0), 7.0);
+    }
+    #[test]
+    fn proportional_rules_split_by_price_or_evenly_for_a_zero_total() {
+        assert!(proportional_tax_rules(&[], 100.).is_empty());
+        let taxes = [
+            CalculatedTax {
+                tax: 14.25,
+                tax_rate: 19.,
+                price: 75.,
+            },
+            CalculatedTax {
+                tax: 1.75,
+                tax_rate: 7.,
+                price: 25.,
+            },
+        ];
+        let rules = proportional_tax_rules(&taxes, 100.);
+        assert_eq!(
+            rules
+                .iter()
+                .map(|r| (r.tax_rate, r.percentage))
+                .collect::<Vec<_>>(),
+            [(19., 75.), (7., 25.)]
+        );
+        let even = proportional_tax_rules(&taxes, 0.);
+        assert_eq!(
+            even.iter().map(|r| r.percentage).collect::<Vec<_>>(),
+            [50., 50.]
+        );
+    }
+    #[test]
     fn decimal_ties() {
         assert_eq!(math_round(1.005, 2), 1.01);
         assert_eq!(math_round(-1.005, 2), -1.01);

@@ -17,3 +17,32 @@ pub fn validate(items: &[Item]) -> Result<()> {
     }
     Ok(())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::validate;
+    use veyndo_pricing::domain::cart::Item;
+
+    fn item(id: &str, quantity: u32) -> Item {
+        Item {
+            id: id.into(),
+            quantity,
+        }
+    }
+
+    #[test]
+    fn lines_are_unique_bounded_and_at_most_a_hundred() {
+        assert!(validate(&[]).is_ok());
+        assert!(validate(&[item("a", 1), item("b", 10000)]).is_ok());
+        assert!(validate(&[item("a", 0)]).is_err());
+        assert!(validate(&[item("a", 10001)]).is_err());
+        assert!(validate(&[item("a", 1), item("a", 2)]).is_err());
+        let many = |n: usize| {
+            (0..n)
+                .map(|i| item(&format!("p{i}"), 1))
+                .collect::<Vec<_>>()
+        };
+        assert!(validate(&many(100)).is_ok());
+        assert!(validate(&many(101)).is_err());
+    }
+}

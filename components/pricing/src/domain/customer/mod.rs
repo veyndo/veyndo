@@ -11,3 +11,13 @@ mod contract_tests;
 pub fn country_default() -> String {
     "DE".into()
 }
+
+#[cfg(test)]
+mod tests {
+    use super::country_default;
+
+    #[test]
+    fn older_addresses_default_to_germany() {
+        assert_eq!(country_default(), "DE");
+    }
+}

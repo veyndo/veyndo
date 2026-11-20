@@ -83,7 +83,48 @@ pub fn interval(values: &[(usize, f64)], mature: bool, minimum: usize, theta: f6
 }
 #[cfg(test)]
 mod tests {
-    use super::interval;
+    use super::{Design, interval};
+    use serde_json::{Value, json};
+
+    fn design() -> Value {
+        json!({"title":"Listing layout","locale":"en-GB","channel":"default","control":"discovery","treatment":"comparison",
+            "currency":"EUR","durationHours":24,"settlementDays":14,"minimumPerArm":100,"outcomeCapMinor":10000,"cupedTheta":0.5})
+    }
+
+    #[test]
+    fn a_preregistration_needs_distinct_layouts_and_bounded_parameters() {
+        let valid = |v: Value| {
+            serde_json::from_value::<Design>(v)
+                .unwrap()
+                .validate()
+                .is_ok()
+        };
+        assert!(valid(design()));
+        let mut automated = design();
+        automated["automation"] = json!({"finish":true,"apply":true});
+        assert!(valid(automated));
+        for (key, value) in [
+            ("title", json!("  ")),
+            ("title", json!("x".repeat(241))),
+            ("control", json!("comparison")),
+            ("treatment", json!("carousel")),
+            ("durationHours", json!(0)),
+            ("durationHours", json!(721)),
+            ("settlementDays", json!(13)),
+            ("settlementDays", json!(91)),
+            ("minimumPerArm", json!(99)),
+            ("minimumPerArm", json!(5001)),
+            ("outcomeCapMinor", json!(0)),
+            ("cupedTheta", json!(1.5)),
+            ("cupedTheta", json!(-0.1)),
+            ("currency", json!("ZZZ")),
+            ("automation", json!({"apply":true})),
+        ] {
+            let mut changed = design();
+            changed[key] = value;
+            assert!(!valid(changed), "{key}");
+        }
+    }
 
     #[test]
     fn cannot_claim_effect_before_settlement_or_with_tiny_sample() {

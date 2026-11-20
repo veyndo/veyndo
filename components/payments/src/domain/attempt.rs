@@ -19,3 +19,25 @@ pub struct Attempt {
     pub environment: String,
     pub bn_code: String,
 }
+
+/// An authorized attempt over ten euros for the tests of this component.
+#[cfg(test)]
+pub(crate) fn sample() -> Attempt {
+    Attempt {
+        id: "attempt-1".into(),
+        provider: "example".into(),
+        context: serde_json::json!({"accountRef":"account-1"}),
+        tenant: "shop".into(),
+        order: "order-1".into(),
+        amount: 1000,
+        currency: "EUR".into(),
+        currency_scale: 2,
+        state: "authorized".into(),
+        provider_order: None,
+        capture: None,
+        refunded: 0,
+        adapter_version: "1.3.0".into(),
+        environment: "simulation".into(),
+        bn_code: String::new(),
+    }
+}

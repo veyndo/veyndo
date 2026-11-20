@@ -40,3 +40,30 @@ pub fn schema(name: &str) -> Option<Value> {
         json!({"type":"object","properties":props,"required":required,"additionalProperties":false}),
     )
 }
+
+#[cfg(test)]
+mod tests {
+    use super::{CAPABILITIES, schema};
+
+    #[test]
+    fn every_intake_tool_has_a_closed_schema_whose_required_fields_exist() {
+        for (name, _) in CAPABILITIES {
+            let s = schema(name).unwrap();
+            assert_eq!(s["type"], "object", "{name}");
+            assert_eq!(s["additionalProperties"], false, "{name}");
+            for key in s["required"].as_array().unwrap() {
+                assert!(
+                    s["properties"][key.as_str().unwrap()].is_object(),
+                    "{name} {key}"
+                );
+            }
+        }
+        let save = schema("merchant.catalog.save").unwrap();
+        assert_eq!(save["properties"]["draft"]["additionalProperties"], false);
+        assert_eq!(
+            schema("merchant.catalog.prepare").unwrap()["properties"]["count"]["maximum"],
+            10
+        );
+        assert!(schema("merchant.catalog.publish").is_none());
+    }
+}

@@ -73,8 +73,8 @@ fn bounded(c: &Condition, q: &Value, depth: usize, remaining: &mut usize) -> boo
 
 #[cfg(test)]
 mod tests {
-    use super::{Condition, bounded};
-    use serde_json::json;
+    use super::{Condition, bounded, digest, evaluate};
+    use serde_json::{Value, json};
     #[test]
     fn shared_reference_fanout_is_bounded_before_interpretation() {
         let mut q = json!({"ruleFacts":{"rules":{}}});
@@ -103,5 +103,82 @@ mod tests {
         };
         assert!(!bounded(&condition, &json!({}), 0, &mut 2048));
         assert!(bounded(&Condition::Always, &json!({}), 0, &mut 2048));
+    }
+    fn amount(at_least: f64) -> Condition {
+        Condition::Amount {
+            operator: ">=".into(),
+            amount: at_least,
+        }
+    }
+
+    fn frozen() -> Value {
+        json!({"event":"order.placed","orderId":"order-1",
+            "cartData":{"items":[{"id":"p1","quantity":1}],"group":"retail","session":"s","email":null,"company":null,"buyer":null,"order":null},
+            "ruleContext":{"ruleFacts":{"currentTime":"2026-01-01T00:00:00Z","rules":{}},"price":{"totalPrice":120.0},"lineItems":[]}})
+    }
+
+    #[test]
+    fn digests_name_exactly_one_value() {
+        assert_eq!(digest(&json!({"a":1})), digest(&json!({"a":1})));
+        assert_ne!(digest(&json!({"a":1})), digest(&json!({"a":2})));
+    }
+
+    #[test]
+    fn both_conditions_are_evaluated_on_the_same_frozen_order() {
+        let d = frozen();
+        let v = evaluate("shop", &d, &amount(100.), &amount(200.));
+        assert_eq!(v["status"], "evaluated");
+        assert_eq!(v["before"], true);
+        assert_eq!(v["after"], false);
+        assert_eq!(v["capturedAt"], "2026-01-01T00:00:00Z");
+        assert_eq!(
+            v["snapshotDigest"],
+            digest(&json!({"cartData":d["cartData"],"ruleContext":d["ruleContext"]}))
+        );
+    }
+
+    #[test]
+    fn incomplete_input_is_unavailable_and_never_guessed() {
+        let unavailable = |d: &Value, after: &Condition| {
+            let v = evaluate("shop", d, &amount(100.), after);
+            assert_eq!(v["status"], "unavailable");
+            v["reason"].as_str().map(String::from)
+        };
+        let mut other = frozen();
+        other["event"] = json!("order.paid");
+        assert_eq!(
+            unavailable(&other, &amount(1.)).as_deref(),
+            Some("not_order_placed")
+        );
+        for key in ["price", "lineItems", "ruleFacts"] {
+            let mut d = frozen();
+            d["ruleContext"].as_object_mut().unwrap().remove(key);
+            assert_eq!(
+                unavailable(&d, &amount(1.)).as_deref(),
+                Some("incomplete_snapshot"),
+                "{key}"
+            );
+        }
+        let mut no_order = frozen();
+        no_order["orderId"] = json!("");
+        assert_eq!(
+            unavailable(&no_order, &amount(1.)).as_deref(),
+            Some("incomplete_snapshot")
+        );
+        let mut no_cart = frozen();
+        no_cart["cartData"] = json!({});
+        assert_eq!(
+            unavailable(&no_cart, &amount(1.)).as_deref(),
+            Some("incomplete_snapshot")
+        );
+        let missing = Condition::Not {
+            child: Box::new(Condition::Reference {
+                rule_id: "gone".into(),
+            }),
+        };
+        assert_eq!(
+            unavailable(&frozen(), &missing).as_deref(),
+            Some("required_facts_unavailable")
+        );
     }
 }

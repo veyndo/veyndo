@@ -54,3 +54,85 @@ pub fn product(r: &SourceRecord, t: &str) -> Result<Value> {
     }
     Ok(json!({"parentId":parent,"categoryIds":categories,"options":options}))
 }
+
+#[cfg(test)]
+mod tests {
+    use super::{identity, product};
+    use crate::types::source_record::SourceRecord;
+    use serde_json::{Value, json};
+
+    fn record(data: Value) -> SourceRecord {
+        SourceRecord {
+            version: 1,
+            source: "shopware".into(),
+            source_shop: "old-shop".into(),
+            kind: "products".into(),
+            source_id: "p1".into(),
+            data,
+            warnings: vec![],
+        }
+    }
+
+    #[test]
+    fn a_relation_identity_is_bound_to_shop_kind_and_source_id() {
+        let r = record(json!({}));
+        let id = identity(&r, "shop", "categories", "c1").unwrap();
+        assert_eq!(
+            identity(&r, "shop", "categories", "c1").ok(),
+            Some(id.clone())
+        );
+        assert_ne!(
+            identity(&r, "shop", "products", "c1").ok(),
+            Some(id.clone())
+        );
+        assert_ne!(
+            identity(&r, "other-shop", "categories", "c1").ok(),
+            Some(id.clone())
+        );
+        assert_ne!(identity(&r, "shop", "categories", "c2").ok(), Some(id));
+        assert_eq!(
+            identity(&r, "shop", "products", "p1").ok(),
+            Some(r.identity("shop"))
+        );
+        for invalid in ["", "a\nb", &"x".repeat(201)] {
+            assert!(identity(&r, "shop", "categories", invalid).is_err());
+        }
+    }
+
+    #[test]
+    fn product_relations_resolve_parent_and_categories_or_the_catalogue_root() {
+        let r = record(
+            json!({"parentSourceId":"parent","categorySourceIds":["c1","c2"],"options":{"size":"M"}}),
+        );
+        let v = product(&r, "shop").unwrap();
+        assert_eq!(
+            v["parentId"],
+            json!(identity(&r, "shop", "products", "parent").unwrap())
+        );
+        assert_eq!(
+            v["categoryIds"],
+            json!([
+                identity(&r, "shop", "categories", "c1").unwrap(),
+                identity(&r, "shop", "categories", "c2").unwrap()
+            ])
+        );
+        assert_eq!(v["options"], json!({"size":"M"}));
+        let plain = product(&record(json!({"parentSourceId":null})), "shop").unwrap();
+        assert_eq!(
+            plain,
+            json!({"parentId":null,"categoryIds":["catalog-root"],"options":{}})
+        );
+        for invalid in [
+            json!({"parentSourceId":7}),
+            json!({"categorySourceIds":"c1"}),
+            json!({"categorySourceIds":[7]}),
+            json!({"categorySourceIds":vec!["c"; 101]}),
+            json!({"options":["M"]}),
+        ] {
+            assert!(
+                product(&record(invalid.clone()), "shop").is_err(),
+                "{invalid}"
+            );
+        }
+    }
+}

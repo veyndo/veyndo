@@ -81,3 +81,97 @@ pub fn destination_rate(
         today,
     )
 }
+
+#[cfg(test)]
+mod tests {
+    use super::{destination_rate, validate};
+    use crate::types::settings::{CheckoutSelection, Settings};
+    use serde_json::{Value, json};
+    use veyndo_core::bad;
+
+    fn settings() -> Settings {
+        serde_json::from_str(include_str!("../../../../fixtures/demo-settings.json")).unwrap()
+    }
+
+    fn rule() -> Value {
+        json!({"id":"berlin","country":"DE","rate":7.0,"postalPrefixes":["10"]})
+    }
+
+    fn check(rule: Value) -> bool {
+        let s = settings();
+        let mut t = s.taxes[0].clone();
+        t.rules = vec![serde_json::from_value(rule).unwrap()];
+        validate(&t, &s, &|_| Ok(())).is_ok()
+    }
+
+    #[test]
+    fn destination_rules_are_bounded_and_name_known_places() {
+        assert!(check(rule()));
+        for (key, value) in [
+            ("country", json!("ZZ")),
+            ("rate", json!(101.0)),
+            ("rate", json!(-1.0)),
+            ("id", json!("Not valid")),
+            ("states", json!(["DE-XX"])),
+            ("postalCodes", json!([""])),
+            ("postalFrom", json!("10000")),
+            ("activeFrom", json!("2026-13-01")),
+            ("activeFrom", json!("1.1.2026")),
+        ] {
+            let mut changed = rule();
+            changed[key] = value;
+            assert!(!check(changed), "{key}");
+        }
+        let mut range = rule();
+        range["postalFrom"] = json!("10000");
+        range["postalTo"] = json!("19999");
+        assert!(check(range.clone()));
+        range["postalTo"] = json!("09999");
+        assert!(!check(range.clone()));
+        range["postalTo"] = json!("199");
+        assert!(!check(range));
+        let mut dates = rule();
+        dates["activeFrom"] = json!("2026-02-01");
+        dates["activeUntil"] = json!("2026-01-01");
+        assert!(!check(dates));
+    }
+
+    #[test]
+    fn rule_counts_default_rates_duplicates_and_conditions_are_checked() {
+        let s = settings();
+        let mut t = s.taxes[0].clone();
+        t.default_rate = Some(120.0);
+        assert!(validate(&t, &s, &|_| Ok(())).is_err());
+        t.default_rate = Some(5.0);
+        assert!(validate(&t, &s, &|_| Ok(())).is_ok());
+        t.rules = vec![
+            serde_json::from_value(rule()).unwrap(),
+            serde_json::from_value(rule()).unwrap(),
+        ];
+        assert!(validate(&t, &s, &|_| Ok(())).is_err());
+        let mut conditional = rule();
+        conditional["condition"] = json!({"field":"x"});
+        t.rules = vec![serde_json::from_value(conditional).unwrap()];
+        assert!(validate(&t, &s, &|_| Ok(())).is_ok());
+        assert!(validate(&t, &s, &|_| Err(bad("refused"))).is_err());
+    }
+
+    #[test]
+    fn the_selection_address_picks_the_destination_rule() {
+        let s = settings();
+        let mut t = s.taxes[0].clone();
+        t.rules = vec![serde_json::from_value(rule()).unwrap()];
+        let mut c = CheckoutSelection::defaults();
+        c.country = "DE".into();
+        assert_eq!(destination_rate(&t, &c, "2026-01-01").ok(), Some(19.0));
+        c.address = Some(
+            serde_json::from_value(
+                json!({"street":"Weg 1","postalCode":"10115","city":"Berlin","country":"DE"}),
+            )
+            .unwrap(),
+        );
+        assert_eq!(destination_rate(&t, &c, "2026-01-01").ok(), Some(7.0));
+        c.country = "IT".into();
+        assert!(destination_rate(&t, &c, "2026-01-01").is_err());
+    }
+}

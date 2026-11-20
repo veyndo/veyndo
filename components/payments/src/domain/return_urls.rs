@@ -43,7 +43,7 @@ pub fn build(
 }
 #[cfg(test)]
 mod tests {
-    use super::build;
+    use super::{build, urls};
 
     #[test]
     fn scoped_return_and_cancel_are_distinct_and_encoded() {
@@ -85,5 +85,22 @@ mod tests {
             .is_err()
         );
         assert!(build("javascript:alert(1)", "a", "default", "x", false).is_err());
+    }
+    #[test]
+    fn configured_urls_carry_the_shop_channel_and_attempt() {
+        let (approved, cancelled) = urls("shop-a", "default", "attempt-a", false).unwrap();
+        for (url, state) in [(approved, "approved"), (cancelled, "cancelled")] {
+            let url = reqwest::Url::parse(&url).unwrap();
+            let pair = |name: &str| {
+                url.query_pairs()
+                    .find(|(k, _)| k == name)
+                    .map(|(_, v)| v.into_owned())
+            };
+            assert_eq!(pair("shop").as_deref(), Some("shop-a"));
+            assert_eq!(pair("channel").as_deref(), Some("default"));
+            assert_eq!(pair("paymentReturn").as_deref(), Some(state));
+            assert_eq!(url.fragment(), Some("payment/attempt-a"));
+            assert_eq!(url.path(), "/");
+        }
     }
 }

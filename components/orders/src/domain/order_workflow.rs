@@ -107,3 +107,205 @@ pub fn external(o: &Value) -> bool {
         Some("manual" | "simulated") | None
     )
 }
+
+#[cfg(test)]
+mod tests {
+    use super::{external, guard, workflow};
+    use crate::domain::order_machine::default_machine;
+    use serde_json::{Value, json};
+    use veyndo_core::RequestContext;
+
+    fn order(state: &str, provider: &str, payment: &str, delivery: &str) -> Value {
+        json!({"state":state,"payment":{"provider":provider,"state":payment},
+            "deliveries":[{"state":delivery,"positions":[{"quantity":2}]}]})
+    }
+
+    #[test]
+    fn only_another_provider_holds_the_money() {
+        assert!(external(&json!({"payment":{"provider":"paypal"}})));
+        for provider in [json!("manual"), json!("simulated"), Value::Null] {
+            assert!(!external(&json!({"payment":{"provider":provider}})));
+        }
+    }
+
+    #[test]
+    fn business_guards_name_what_has_to_happen_first() {
+        let m = default_machine();
+        assert_eq!(
+            guard(
+                &order("completed", "manual", "paid", "delivered"),
+                &m,
+                "order",
+                "cancelled"
+            ),
+            Some("terminalOrder")
+        );
+        assert_eq!(
+            guard(
+                &order("expired", "manual", "pending", "open"),
+                &m,
+                "payment",
+                "paid"
+            ),
+            Some("terminalOrder")
+        );
+        assert_eq!(
+            guard(
+                &order("placed", "manual", "pending", "open"),
+                &m,
+                "order",
+                "cancelled"
+            ),
+            None
+        );
+        assert_eq!(
+            guard(
+                &order("placed", "manual", "paid", "open"),
+                &m,
+                "order",
+                "cancelled"
+            ),
+            Some("refundFirst")
+        );
+        assert_eq!(
+            guard(
+                &order("placed", "paypal", "pending", "open"),
+                &m,
+                "order",
+                "cancelled"
+            ),
+            Some("refundFirst")
+        );
+        assert_eq!(
+            guard(
+                &order("placed", "manual", "pending", "shipped"),
+                &m,
+                "order",
+                "cancelled"
+            ),
+            Some("returnFirst")
+        );
+        assert_eq!(
+            guard(
+                &order("in_progress", "manual", "pending", "delivered"),
+                &m,
+                "order",
+                "completed"
+            ),
+            Some("paymentFirst")
+        );
+        assert_eq!(
+            guard(
+                &order("in_progress", "manual", "paid", "shipped"),
+                &m,
+                "order",
+                "completed"
+            ),
+            Some("deliveryFirst")
+        );
+        assert_eq!(
+            guard(
+                &order("in_progress", "manual", "paid", "delivered"),
+                &m,
+                "order",
+                "completed"
+            ),
+            None
+        );
+        assert_eq!(
+            guard(
+                &order("in_progress", "simulated", "authorized", "delivered"),
+                &m,
+                "order",
+                "completed"
+            ),
+            None
+        );
+        assert_eq!(
+            guard(
+                &order("placed", "paypal", "pending", "open"),
+                &m,
+                "payment",
+                "paid"
+            ),
+            Some("providerConfirmation")
+        );
+        assert_eq!(
+            guard(
+                &order("placed", "manual", "pending", "open"),
+                &m,
+                "payment",
+                "paid"
+            ),
+            None
+        );
+        assert_eq!(
+            guard(
+                &order("placed", "manual", "pending", "open"),
+                &m,
+                "delivery",
+                "shipped"
+            ),
+            None
+        );
+    }
+
+    fn action<'a>(w: &'a Value, id: &str) -> Option<&'a Value> {
+        w["actions"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .find(|a| a["id"] == id)
+    }
+
+    #[test]
+    fn the_catalogue_lists_enabled_and_blocked_actions_of_an_open_order() {
+        let m = default_machine();
+        let h = RequestContext::new();
+        let w = workflow(&order("placed", "manual", "pending", "open"), &m, 7, &h);
+        assert_eq!(w["revision"], 7);
+        assert_eq!(w["states"].as_array().unwrap().len(), m.states.len());
+        assert_eq!(action(&w, "mark_paid").unwrap()["enabled"], true);
+        let ship = action(&w, "delivery_0_shipped").unwrap();
+        assert_eq!(
+            (ship["enabled"].clone(), ship["deliveryIndex"].clone()),
+            (json!(true), json!(0))
+        );
+        assert!(
+            w["actions"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .any(|a| a["kind"] == "order" && a["from"] == "placed")
+        );
+        assert_eq!(
+            w["shipmentSplits"],
+            json!([{"deliveryIndex":0,"enabled":true}])
+        );
+
+        let provider = workflow(&order("placed", "paypal", "pending", "open"), &m, 1, &h);
+        assert!(action(&provider, "mark_paid").is_none());
+        let mut booked = order("placed", "manual", "paid", "shipped");
+        booked["deliveries"][0]["booking"] = json!({"carrier":"dhl"});
+        let w = workflow(&booked, &m, 1, &h);
+        assert!(action(&w, "mark_paid").is_none());
+        let deliver = action(&w, "delivery_0_delivered").unwrap();
+        assert_eq!(
+            (deliver["enabled"].clone(), deliver["reason"].clone()),
+            (json!(false), json!("carrierBooking"))
+        );
+        assert_eq!(w["shipmentSplits"][0]["enabled"], false);
+    }
+
+    #[test]
+    fn a_finished_order_offers_no_actions() {
+        let w = workflow(
+            &order("cancelled", "manual", "pending", "open"),
+            &default_machine(),
+            3,
+            &RequestContext::new(),
+        );
+        assert_eq!(w["actions"], json!([]));
+        assert!(w.get("shipmentSplits").is_none());
+    }
+}

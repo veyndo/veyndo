@@ -94,8 +94,8 @@ pub fn snapshot(p: &Attempt, value: &Value) -> Result<Value> {
 }
 #[cfg(test)]
 mod tests {
-    use super::{Instructions, admit};
-    use crate::domain::attempt::Attempt;
+    use super::{Instructions, admit, snapshot, validated};
+    use crate::domain::attempt::{Attempt, sample};
     use serde_json::json;
     #[test]
     fn instructions_validate_bank_checksum_and_exclude_extra_fields() {
@@ -159,5 +159,25 @@ mod tests {
         assert!(admit(&p, &mut json!({}), &invalid).is_err());
         p.context = json!({});
         assert!(admit(&p, &mut json!({}), &receipt).is_err());
+    }
+    #[test]
+    fn validated_instructions_keep_only_the_typed_fields_and_the_snapshot_adds_the_amount() {
+        let v = json!({"kind":"bank_transfer","paymentReference":"RF-1","iban":"DE89370400440532013000","bic":"DEUTDEFF","bankName":"Example","accountHolderName":"Recipient"});
+        assert_eq!(validated(&v).ok(), Some(v.clone()));
+        let mut extra = v.clone();
+        extra["payer"] = json!("private");
+        assert!(validated(&extra).is_err());
+        assert!(validated(&json!({})).is_err());
+        let p = sample();
+        let s = snapshot(&p, &v).unwrap();
+        assert_eq!(s["instructions"], v);
+        assert_eq!(s["amountMinor"], 1000);
+        assert_eq!(s["currency"], "EUR");
+        assert_eq!(s["currencyScale"], 2);
+        assert_eq!(s["simulated"], true);
+        let mut live = sample();
+        live.environment = "live".into();
+        assert_eq!(snapshot(&live, &v).unwrap()["simulated"], false);
+        assert!(snapshot(&p, &extra).is_err());
     }
 }

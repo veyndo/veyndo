@@ -104,6 +104,33 @@ fn valid_birthday(s: &str) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use serde_json::json;
+    #[test]
+    fn a_contact_needs_a_name_and_bounded_plain_fields() {
+        let contact = |v: serde_json::Value| serde_json::from_value::<Contact>(v).unwrap();
+        let mut built = contact(
+            json!({"name":"","firstName":"Ada","lastName":"Lovelace","birthday":"1990-12-10","vatIds":["DE123456789"]}),
+        );
+        assert!(built.validate().is_ok());
+        assert_eq!(built.name, "Ada Lovelace");
+        for invalid in [
+            json!({"name":" "}),
+            json!({"name":"x".repeat(101)}),
+            json!({"name":"Ada","phoneNumber":"1\t2"}),
+            json!({"name":"Ada","company":"x".repeat(201)}),
+            json!({"name":"Ada","vatIds":[""]}),
+            json!({"name":"Ada","vatIds":vec!["DE1"; 11]}),
+            json!({"name":"Ada","birthday":"1990-02-30"}),
+            json!({"name":"Ada","address":{"street":"","postalCode":"1","city":"B"}}),
+        ] {
+            assert!(contact(invalid.clone()).validate().is_err(), "{invalid}");
+        }
+        let mut with_address = contact(
+            json!({"name":"Ada","address":{"name":"Ada","street":"Weg 1","postalCode":"10115","city":"Berlin"}}),
+        );
+        assert!(with_address.validate().is_ok());
+        assert_eq!(with_address.address.unwrap().country, "DE");
+    }
     #[test]
     fn real_calendar_dates() {
         assert!(valid_birthday("2000-02-29"));

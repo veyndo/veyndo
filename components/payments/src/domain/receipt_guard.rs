@@ -23,3 +23,46 @@ pub fn receipt_matches(
             )
         }))
 }
+
+#[cfg(test)]
+mod tests {
+    use super::receipt_matches;
+    use serde_json::json;
+
+    #[test]
+    fn a_receipt_matches_only_the_exact_confirmed_amount_in_its_currency() {
+        let amount = json!({"value":"12.50","currency_code":"EUR"});
+        assert_eq!(receipt_matches(1250, &amount, "EUR", true).ok(), Some(true));
+        assert_eq!(
+            receipt_matches(1250, &amount, "EUR", false).ok(),
+            Some(false)
+        );
+        assert_eq!(
+            receipt_matches(1249, &amount, "EUR", true).ok(),
+            Some(false)
+        );
+        assert_eq!(
+            receipt_matches(-1250, &amount, "EUR", true).ok(),
+            Some(false)
+        );
+        let foreign = json!({"value":"12.50","currency_code":"USD"});
+        assert_eq!(
+            receipt_matches(1250, &foreign, "EUR", true).ok(),
+            Some(false)
+        );
+    }
+
+    #[test]
+    fn an_unreadable_amount_is_an_error_not_a_mismatch() {
+        for amount in [
+            json!({}),
+            json!({"value":"12.505","currency_code":"EUR"}),
+            json!({"value":"-1.00","currency_code":"EUR"}),
+        ] {
+            assert!(
+                receipt_matches(1250, &amount, "EUR", true).is_err(),
+                "{amount}"
+            );
+        }
+    }
+}

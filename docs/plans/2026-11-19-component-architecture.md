@@ -505,7 +505,9 @@ moved with the code, proof bindings updated.
 
 Each component carries its own tests; the suite runner composes them.
 
-- [ ] Unit tests for every function in `domain/`.
+- [x] Unit tests for every function in `domain/`. Each of the 216 public domain
+      functions of the components is exercised by a test in its own file; private
+      helpers are reached through them.
 - [ ] Property tests for money, stock, discounts and state machines.
 - [ ] Store tests per component against a real, isolated PostgreSQL database,
       including tenant isolation under forced row security.

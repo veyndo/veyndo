@@ -184,3 +184,31 @@ pub fn schema(name: &str) -> Option<Value> {
         json!({"type":"object","properties":props,"required":required,"additionalProperties":false}),
     )
 }
+
+#[cfg(test)]
+mod tests {
+    use super::{CAPABILITIES, schema};
+
+    #[test]
+    fn every_operation_has_a_closed_schema_bound_to_its_channel() {
+        for (name, _) in CAPABILITIES {
+            let s = schema(name).unwrap();
+            assert_eq!(s["type"], "object", "{name}");
+            assert_eq!(s["additionalProperties"], false, "{name}");
+            let required = s["required"].as_array().unwrap();
+            assert_eq!(
+                required.iter().any(|key| key == "channelId"),
+                *name != "pos.channels",
+                "{name}"
+            );
+            for key in required {
+                assert!(
+                    s["properties"][key.as_str().unwrap()].is_object(),
+                    "{name} {key}"
+                );
+            }
+        }
+        assert!(schema("pos.refund.everything").is_none());
+        assert!(schema("channels").is_none());
+    }
+}

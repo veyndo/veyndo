@@ -65,7 +65,7 @@ pub fn localize_extra(extra: &mut Value, chain: &[String]) {
 }
 #[cfg(test)]
 mod tests {
-    use super::{localize_extra, translated_object};
+    use super::{localize_extra, translated_object, translated_string};
     use serde_json::json;
     #[test]
     fn each_field_inherits_main_and_preserves_blank() {
@@ -81,5 +81,22 @@ mod tests {
         localize_extra(&mut extra, &["de-DE".into(), "es-ES".into()]);
         assert_eq!(extra["seo"]["de"]["title"], "ES");
         assert_eq!(extra["richDescription"]["de"][0]["text"], "Hola");
+    }
+    #[test]
+    fn a_text_falls_back_to_its_base_language_then_to_the_main_language() {
+        let map = json!({"de-AT":"Sackerl","de":"Tüte","es-ES":"Bolsa","fr":null});
+        assert_eq!(translated_string(&map, "de-AT", "es-ES"), "Sackerl");
+        assert_eq!(translated_string(&map, "de-DE", "es-ES"), "Tüte");
+        assert_eq!(translated_string(&map, "fr-FR", "es-ES"), "Bolsa");
+        assert_eq!(
+            translated_string(&json!({"es":"Bolsa"}), "it-IT", "es-ES"),
+            "Bolsa"
+        );
+        assert_eq!(
+            translated_string(&json!({"en":"Bag"}), "it-IT", "es-ES"),
+            ""
+        );
+        assert_eq!(translated_string(&json!({"de":""}), "de-DE", "es-ES"), "");
+        assert_eq!(translated_string(&json!(null), "de-DE", "es-ES"), "");
     }
 }
