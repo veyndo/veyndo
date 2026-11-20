@@ -17,62 +17,68 @@ pub(super) fn output(name: &str) -> Option<Value> {
     }))
 }
 
-pub(crate) fn input(name: &str) -> Value {
+/// Schemas that the owning module of an operation publishes itself.
+fn owned(name: &str) -> Option<Value> {
     if let Some(schema) = studio::reports::schema(name) {
-        return schema;
+        return Some(schema);
     }
     if let Some(schema) = assets::caption_schema(name) {
-        return schema;
+        return Some(schema);
     }
     if let Some(schema) = apps::discovery::schema(name) {
-        return schema;
+        return Some(schema);
     }
     if let Some(schema) = operations::imports::schema(name) {
-        return schema;
+        return Some(schema);
     }
     if let Some(schema) = agent_runs::schema(name) {
-        return schema;
+        return Some(schema);
     }
     if let Some(schema) = studio::personal::schema(name) {
-        return schema;
+        return Some(schema);
     }
     if let Some(schema) = apps::site_builder::design_agent::schema(name) {
-        return schema;
+        return Some(schema);
     }
     if let Some(schema) = apps::record_history::schema(name) {
-        return schema;
+        return Some(schema);
     }
     if let Some(schema) = auth::roles::schema(name) {
-        return schema;
+        return Some(schema);
     }
     if let Some(schema) = b2b::schema(name) {
-        return schema;
+        return Some(schema);
     }
     if let Some(schema) = cognition::contracts::schema(name) {
-        return schema;
+        return Some(schema);
     }
     if let Some(schema) = currencies::schema(name) {
-        return schema;
+        return Some(schema);
     }
     if let Some(schema) = legal::schema(name) {
-        return schema;
+        return Some(schema);
     }
     if let Some(schema) = history::schema(name) {
-        return schema;
+        return Some(schema);
     }
     if let Some(schema) = documents::knowledge_schema(name) {
-        return schema;
+        return Some(schema);
     }
     if let Some(schema) = pos::schema(name) {
-        return schema;
+        return Some(schema);
     }
     if let Some(schema) = operations::creation_schema(name) {
-        return schema;
+        return Some(schema);
     }
     if let Some(schema) = commerce::catalog_intake::schema(name) {
-        return schema;
+        return Some(schema);
     }
-    let props = match name {
+    None
+}
+
+/// Input properties of the merchant operations on catalogue, customers, orders and automation.
+fn merchant_properties(name: &str) -> Option<Value> {
+    Some(match name {
         "merchant.grid.plan" => {
             json!({"entity":{"type":"string","enum":["orders","products","customers"]},"instruction":{"type":"string","minLength":1,"maxLength":2000},"locale":{"type":"string","maxLength":35}})
         }
@@ -181,6 +187,13 @@ pub(crate) fn input(name: &str) -> Value {
         "merchant.receipt.create" => {
             json!({"id":{"type":"string"},"revision":{"type":"integer"},"kind":{"type":"string","enum":["invoice","delivery_note","cancellation"]},"locale":{"type":"string","enum":["en","de","fr","es"]},"requestKey":{"type":"string"},"referenceId":{"type":"string"},"deliveryIndex":{"type":"integer","minimum":0}})
         }
+        _ => return None,
+    })
+}
+
+/// Input properties of payment, developer, storefront and agent operations.
+fn other_properties(name: &str) -> Value {
+    match name {
         "merchant.payment.details"
         | "merchant.payment.instructions"
         | "checkout.payment.instructions" => json!({"id":{"type":"string"}}),
@@ -226,8 +239,12 @@ pub(crate) fn input(name: &str) -> Value {
         "merchant.plan" => json!({"instruction":{"type":"string"}}),
         "merchant.apply" => json!({"task_id":{"type":"string"},"approve":{"type":"boolean"}}),
         _ => json!({}),
-    };
-    let required = match name {
+    }
+}
+
+/// The fields an operation cannot run without.
+fn required(name: &str) -> Vec<&'static str> {
+    match name {
         "merchant.delivery.split" => {
             vec!["id", "revision", "deliveryIndex", "positions", "requestKey"]
         }
@@ -280,6 +297,14 @@ pub(crate) fn input(name: &str) -> Value {
         "merchant.plan" => vec!["instruction"],
         "merchant.apply" => vec!["task_id", "approve"],
         _ => vec![],
-    };
+    }
+}
+
+pub(crate) fn input(name: &str) -> Value {
+    if let Some(schema) = owned(name) {
+        return schema;
+    }
+    let props = merchant_properties(name).unwrap_or_else(|| other_properties(name));
+    let required = required(name);
     json!({"type":"object","properties":props,"required":required,"additionalProperties":false})
 }

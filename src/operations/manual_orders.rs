@@ -47,6 +47,84 @@ pub(super) async fn route(
 ) -> Result<Json<Value>> {
     Ok(Json(invoke(&a, &h, &operation, &v).await?))
 }
+/// Builds the draft cart of a manual order for one customer and returns the quote to review.
+async fn review(a: &App, mut h: RequestContext, v: &Value) -> Result<Value> {
+    let draft: Draft = serde_json::from_value(v.clone())
+        .map_err(|_| bad("Customer, items and checkout selection required"))?;
+    validate_items(&draft.items)?;
+    if draft.items.is_empty() {
+        return Err(bad("Add at least one product"));
+    }
+    h.insert(
+        "x-commerce-currency",
+        draft
+            .currency
+            .parse()
+            .map_err(|_| bad("Invalid currency"))?,
+    );
+    let row = sqlx::query(
+        "SELECT id,email,group_name,company FROM customers WHERE tenant=$1 AND id=$2 AND active",
+    )
+    .bind(tenant(&h)?)
+    .bind(&draft.customer_id)
+    .fetch_optional(&a.db)
+    .await?
+    .ok_or(Error(
+        StatusCode::NOT_FOUND,
+        "Active customer unavailable".into(),
+    ))?;
+    let mut c = new_cart_context(a, &h, "", "admin").await?;
+    c.data.admin_actor = h.admin_order.clone();
+    c.data.customer_id = Some(row.get("id"));
+    c.data.email = Some(row.get("email"));
+    c.data.group = row.get("group_name");
+    c.data.company = row.get("company");
+    sqlx::query("UPDATE carts SET data=$1 WHERE tenant=$2 AND id=$3")
+        .bind(json!(c.data))
+        .bind(&c.tenant)
+        .bind(&c.id)
+        .execute(&a.db)
+        .await?;
+    h.insert("sw-context-token", c.token.parse().unwrap());
+    c = set_items(a, &h, draft.items, Some(c.revision)).await?;
+    let mut selection = draft.checkout;
+    if selection.billing_address_id.is_some() || selection.shipping_address_id.is_some() {
+        return Err(bad(
+            "Supply the reviewed address snapshot, not account address IDs",
+        ));
+    }
+    selection.customer_email = c.data.email.clone();
+    let quote = commerce::select_checkout(
+        State(a.clone()),
+        h.clone(),
+        Json(json!({"revision":c.revision,"checkout":selection})),
+    )
+    .await?
+    .0;
+    let c = load_cart(a, &h).await?;
+    let quote = if draft.codes.is_empty() {
+        quote
+    } else {
+        marketing::coupons(
+            State(a.clone()),
+            h.clone(),
+            Json(json!({"revision":c.revision,"codes":draft.codes})),
+        )
+        .await?
+        .0
+    };
+    if !matches!(
+        quote["paymentMethod"]["mode"].as_str(),
+        Some("simulated" | "manual")
+    ) {
+        return Err(bad(
+            "Manual orders require a configured manual or simulated payment; real provider payment must be completed by the buyer",
+        ));
+    }
+    Ok(
+        json!({"cart":quote,"policy":legal::invoke(a,&h,"privacy.policy",&json!({})).await?,"channelId":draft.channel_id,"locale":draft.locale}),
+    )
+}
 pub(crate) async fn invoke(
     a: &App,
     original: &RequestContext,
@@ -88,71 +166,7 @@ pub(crate) async fn invoke(
         );
     }
     if operation == "review" {
-        let draft: Draft = serde_json::from_value(v.clone())
-            .map_err(|_| bad("Customer, items and checkout selection required"))?;
-        validate_items(&draft.items)?;
-        if draft.items.is_empty() {
-            return Err(bad("Add at least one product"));
-        }
-        h.insert(
-            "x-commerce-currency",
-            draft
-                .currency
-                .parse()
-                .map_err(|_| bad("Invalid currency"))?,
-        );
-        let row=sqlx::query("SELECT id,email,group_name,company FROM customers WHERE tenant=$1 AND id=$2 AND active").bind(tenant(&h)?).bind(&draft.customer_id).fetch_optional(&a.db).await?.ok_or(Error(StatusCode::NOT_FOUND,"Active customer unavailable".into()))?;
-        let mut c = new_cart_context(a, &h, "", "admin").await?;
-        c.data.admin_actor = h.admin_order.clone();
-        c.data.customer_id = Some(row.get("id"));
-        c.data.email = Some(row.get("email"));
-        c.data.group = row.get("group_name");
-        c.data.company = row.get("company");
-        sqlx::query("UPDATE carts SET data=$1 WHERE tenant=$2 AND id=$3")
-            .bind(json!(c.data))
-            .bind(&c.tenant)
-            .bind(&c.id)
-            .execute(&a.db)
-            .await?;
-        h.insert("sw-context-token", c.token.parse().unwrap());
-        c = set_items(a, &h, draft.items, Some(c.revision)).await?;
-        let mut selection = draft.checkout;
-        if selection.billing_address_id.is_some() || selection.shipping_address_id.is_some() {
-            return Err(bad(
-                "Supply the reviewed address snapshot, not account address IDs",
-            ));
-        }
-        selection.customer_email = c.data.email.clone();
-        let quote = commerce::select_checkout(
-            State(a.clone()),
-            h.clone(),
-            Json(json!({"revision":c.revision,"checkout":selection})),
-        )
-        .await?
-        .0;
-        let c = load_cart(a, &h).await?;
-        let quote = if draft.codes.is_empty() {
-            quote
-        } else {
-            marketing::coupons(
-                State(a.clone()),
-                h.clone(),
-                Json(json!({"revision":c.revision,"codes":draft.codes})),
-            )
-            .await?
-            .0
-        };
-        if !matches!(
-            quote["paymentMethod"]["mode"].as_str(),
-            Some("simulated" | "manual")
-        ) {
-            return Err(bad(
-                "Manual orders require a configured manual or simulated payment; real provider payment must be completed by the buyer",
-            ));
-        }
-        return Ok(
-            json!({"cart":quote,"policy":legal::invoke(a,&h,"privacy.policy",&json!({})).await?,"channelId":draft.channel_id,"locale":draft.locale}),
-        );
+        return Box::pin(review(a, h, v)).await;
     }
     if operation != "complete" || v["approve"] != true {
         return Err(bad("Explicit reviewed order approval required"));

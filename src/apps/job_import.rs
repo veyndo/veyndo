@@ -3,29 +3,8 @@ use super::*;
 // Retain a connection for the native owner even on the supported two-connection pool.
 // This is process admission, not a claim of fleet-wide throughput isolation.
 static IMPORT_WRITE: tokio::sync::Semaphore = tokio::sync::Semaphore::const_new(1);
-pub(super) async fn execute(
-    a: &App,
-    h: &RequestContext,
-    m: &Manifest,
-    v: &Value,
-    inspect: bool,
-) -> Result<Value> {
-    let mut metadata = v.clone();
-    metadata
-        .as_object_mut()
-        .ok_or(bad("Import object required"))?
-        .remove("assetChunks");
-    input_schema::validate_native(
-        &json!({"type":"object","properties":{"id":{"type":"string","maxLength":100},"lease":{"type":"string","maxLength":100},"record":{"type":"object"}},"required":["id","lease","record"],"additionalProperties":false}),
-        &metadata,
-    )?;
-    let live = merchant(a, h)?;
-    if staging::parent(a, &live).await?.is_some() {
-        return Err(bad("Job callback requires its live workspace"));
-    }
-    let kind = v["record"]["kind"]
-        .as_str()
-        .ok_or(bad("Import kind required"))?;
+/// The write and read capability an import of this kind needs.
+fn capabilities(kind: &str) -> Result<(&'static str, &'static str)> {
     let capability = match kind {
         "products" | "categories" => "products.write",
         "assets" => "assets.write",
@@ -43,8 +22,18 @@ pub(super) async fn execute(
         "customers" => "customers.read",
         "orders" => "orders.read",
         "coupons" => "promotions.write",
-        _ => unreachable!(),
+        _ => return Err(bad("Native job import domain unavailable")),
     };
+    Ok((capability, read_capability))
+}
+/// The package must have been approved for the import and the caller must hold its rights.
+fn admit_app(
+    h: &RequestContext,
+    m: &Manifest,
+    kind: &str,
+    (capability, read_capability): (&str, &str),
+    inspect: bool,
+) -> Result<()> {
     for p in ["jobs.write", capability]
         .into_iter()
         .chain(inspect.then_some(read_capability))
@@ -68,6 +57,68 @@ pub(super) async fn execute(
         credentials::permit(h, "customers.pii")?;
         auth::permit(h, "customers.pii")?;
     }
+    Ok(())
+}
+/// The native import input: the reviewed record with exactly the acknowledged source warnings.
+fn import_input(v: &Value, intent: &Value, inspect: bool) -> Result<Value> {
+    let mut input = json!({"approve":true,"record":v["record"],"options":intent["options"]});
+    if let Some(approved) = intent["options"]["acknowledgedWarnings"].as_array() {
+        let warnings = v["record"]["warnings"]
+            .as_array()
+            .ok_or(bad("Invalid source warnings"))?;
+        if approved.len() > 20
+            || approved
+                .iter()
+                .any(|value| value.as_str().is_none_or(|s| s.len() > 2000))
+            || warnings.iter().any(|warning| !approved.contains(warning))
+        {
+            return Err(bad(
+                "Review every source limitation before importing this record",
+            ));
+        }
+        if warnings.is_empty() {
+            input["options"]
+                .as_object_mut()
+                .unwrap()
+                .remove("acknowledgedWarnings");
+        } else {
+            input["options"]["acknowledgedWarnings"] = json!(warnings);
+        }
+    }
+    if let Some(chunks) = v.get("assetChunks") {
+        input["assetChunks"] = chunks.clone();
+    }
+    if inspect {
+        input.as_object_mut().unwrap().remove("approve");
+        input.as_object_mut().unwrap().remove("assetChunks");
+    }
+    Ok(input)
+}
+pub(super) async fn execute(
+    a: &App,
+    h: &RequestContext,
+    m: &Manifest,
+    v: &Value,
+    inspect: bool,
+) -> Result<Value> {
+    let mut metadata = v.clone();
+    metadata
+        .as_object_mut()
+        .ok_or(bad("Import object required"))?
+        .remove("assetChunks");
+    input_schema::validate_native(
+        &json!({"type":"object","properties":{"id":{"type":"string","maxLength":100},"lease":{"type":"string","maxLength":100},"record":{"type":"object"}},"required":["id","lease","record"],"additionalProperties":false}),
+        &metadata,
+    )?;
+    let live = merchant(a, h)?;
+    if staging::parent(a, &live).await?.is_some() {
+        return Err(bad("Job callback requires its live workspace"));
+    }
+    let kind = v["record"]["kind"]
+        .as_str()
+        .ok_or(bad("Import kind required"))?;
+    let (capability, read_capability) = capabilities(kind)?;
+    admit_app(h, m, kind, (capability, read_capability), inspect)?;
     let _reserve = tokio::time::timeout(std::time::Duration::from_secs(10), IMPORT_WRITE.acquire())
         .await
         .map_err(|_| {
@@ -159,37 +210,7 @@ pub(super) async fn execute(
         target.parse().map_err(|_| bad("Invalid reviewed target"))?,
     );
     identity.principal.tenant = Some(target.into());
-    let mut input = json!({"approve":true,"record":v["record"],"options":intent["options"]});
-    if let Some(approved) = intent["options"]["acknowledgedWarnings"].as_array() {
-        let warnings = v["record"]["warnings"]
-            .as_array()
-            .ok_or(bad("Invalid source warnings"))?;
-        if approved.len() > 20
-            || approved
-                .iter()
-                .any(|value| value.as_str().is_none_or(|s| s.len() > 2000))
-            || warnings.iter().any(|warning| !approved.contains(warning))
-        {
-            return Err(bad(
-                "Review every source limitation before importing this record",
-            ));
-        }
-        if warnings.is_empty() {
-            input["options"]
-                .as_object_mut()
-                .unwrap()
-                .remove("acknowledgedWarnings");
-        } else {
-            input["options"]["acknowledgedWarnings"] = json!(warnings);
-        }
-    }
-    if let Some(chunks) = v.get("assetChunks") {
-        input["assetChunks"] = chunks.clone();
-    }
-    if inspect {
-        input.as_object_mut().unwrap().remove("approve");
-        input.as_object_mut().unwrap().remove("assetChunks");
-    }
+    let input = import_input(v, &intent, inspect)?;
     // Native scope switch is limited to a job-locked target in this same admitted workspace.
     let operation = async {
         if inspect {

@@ -92,7 +92,16 @@ Rules that hold from the first component on:
       migrated schema in the integration suite. First run: 1,604 pass, no mismatch.
 - [x] Budgets in `components.json` that only fall: untyped field accesses (3,594)
       and files with SQL outside a `store` folder (328).
-- [ ] Lower `too-many-lines-threshold` from 320 to 150 (35 functions to split).
+- [x] Lower `too-many-lines-threshold` from 320 to 150. The 25 longer functions
+      of our own code are split into named steps without a change in behaviour
+      (route registry, capability schema, sandbox release and clone, POS
+      gateway, B2B quotes, authentication middleware, external orders, job
+      import, order transition, EDI export, proposal apply, app callbacks,
+      delivery enrichment, merchant operations, promotions, migration source
+      pages, manual orders, mailbox sync, inference request, flow mutations,
+      browser session, checkout commit, scenario journey and probes, receipt
+      text). The hash-locked vendored app storage keeps its former limit through
+      `extensions/services/clippy.toml`, which covers only the crates below it.
 - [x] Give the three statements whose parameter type comes only from the bound
       value an explicit cast, so they are covered too (1,607 statements covered).
 - [x] Suite runner: `--keep-going` runs the remaining suites after a failure and

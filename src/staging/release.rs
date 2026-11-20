@@ -13,6 +13,234 @@ struct Release {
     approve: bool,
     selections: Vec<Selection>,
 }
+/// Takes every lock of a release in the order native writers take them.
+async fn lock_units(tx: &mut Tx<'_>, t: &str, id: &str, keys: &[String]) -> Result<()> {
+    marketing::lock_config(tx, t).await?;
+    operations::lock_company(tx, t).await?;
+    operations::lock_company(tx, id).await?;
+    sqlx::query("SELECT pg_advisory_xact_lock(hashtextextended($1,16))")
+        .bind(t)
+        .execute(&mut **tx)
+        .await?;
+    for lock in [726, 727] {
+        sqlx::query("SELECT pg_advisory_xact_lock(hashtextextended($1,$2))")
+            .bind(t)
+            .bind(lock as i64)
+            .execute(&mut **tx)
+            .await?;
+    }
+    // The package fence precedes record locks, exactly as in native app writes.
+    // Otherwise a concurrent save could hold package SHARE while release holds its record.
+    let mut package_locks = std::collections::BTreeSet::new();
+    for key in keys {
+        let app = if let Some(app) = key.strip_prefix("app:") {
+            Some(app)
+        } else {
+            key.strip_prefix("appdata:")
+                .and_then(|tail| tail.split(':').next())
+        };
+        if let Some(app) = app {
+            package_locks.insert(format!("{t}:{app}"));
+            package_locks.insert(format!("{id}:{app}"));
+        }
+    }
+    for lock in package_locks {
+        sqlx::query("SELECT pg_advisory_xact_lock(hashtextextended($1,7))")
+            .bind(lock)
+            .execute(&mut **tx)
+            .await?;
+    }
+    for key in keys.iter().filter(|k| k.starts_with("appdata:")) {
+        let parts = key.splitn(4, ':').collect::<Vec<_>>();
+        if parts.len() != 4 {
+            return Err(bad("Invalid app data selection"));
+        }
+        sqlx::query("SELECT pg_advisory_xact_lock(hashtextextended($1,8))")
+            .bind(apps::records::lock_key(t, parts[1], parts[2], parts[3]))
+            .execute(&mut **tx)
+            .await?;
+    }
+    Ok(())
+}
+/// A selection must still be the reviewed staged value on an unchanged live baseline.
+fn admit_selections(
+    selections: &[Selection],
+    keys: &[String],
+    current: &Value,
+    actual: &Value,
+    base: &Value,
+) -> Result<()> {
+    for s in selections {
+        let value = current.get(&s.key).ok_or(bad("Unknown change"))?;
+        if hash(&value.to_string()) != s.digest || base["stage"].get(&s.key) == Some(value) {
+            return Err(conflict("Staged change changed or was already published"));
+        }
+        if actual.get(&s.key) != base["live"].get(&s.key) {
+            return Err(conflict("Live content changed; resolve before release"));
+        }
+    }
+    // Validate against the current live operational type before it can be overwritten.
+    // The complete aggregate (including jointly selected categories/settings) is checked below.
+    for key in keys.iter().filter(|k| k.starts_with("channel:")) {
+        let old = actual.get(key).and_then(|v| v["kind"].as_str());
+        let new = current[key]["kind"].as_str();
+        if old.is_some_and(|old| {
+            (old == "pos") != (new == Some("pos"))
+                || (old == "marketplace") != (new == Some("marketplace"))
+        }) {
+            return Err(conflict(
+                "Operational channel type cannot be changed; create a new channel",
+            ));
+        }
+    }
+    Ok(())
+}
+/// Publishes one selected unit through its native writer.
+async fn publish_unit(
+    tx: &mut Tx<'_>,
+    h: &RequestContext,
+    t: &str,
+    id: &str,
+    key: &str,
+    value: &Value,
+    actual: &Value,
+) -> Result<()> {
+    if let Some(channel) = key.strip_prefix("settings-channel:") {
+        auth::permit(h, "settings.write")?;
+        commerce::publish_scope(tx, t, channel, value).await?;
+    } else if key == "company" || key.starts_with("company-channel:") {
+        company::publish(tx, t, id, key, value).await?;
+    } else if key.starts_with("b2b-company:") || key.starts_with("b2b-unit:") {
+        // Policy/catalog units publish below through their shared native writers.
+    } else if key.starts_with("category:") {
+        // Category units were published above in parent-first dependency order.
+    } else if key == "order-workflow" {
+        auth::permit(h, "settings.write")?;
+        let m: commerce::OrderMachine =
+            serde_json::from_value(value.clone()).map_err(|_| bad("Invalid workflow"))?;
+        m.validate()?;
+        let ids = m.states.iter().map(|s| s.id.clone()).collect::<Vec<_>>();
+        let stranded:bool=sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM orders WHERE tenant=$1 AND NOT(data->>'state'=ANY($2)) AND data->>'state' NOT IN ('expired','payment_review'))").bind(t).bind(ids).fetch_one(&mut **tx).await?;
+        if stranded {
+            return Err(conflict("Workflow removes an active order state"));
+        }
+        sqlx::query("INSERT INTO order_state_machines(tenant,data) VALUES($1,$2) ON CONFLICT(tenant) DO UPDATE SET data=EXCLUDED.data,revision=order_state_machines.revision+1").bind(t).bind(value).execute(&mut **tx).await?;
+    } else if let Some(asset) = key.strip_prefix("asset:") {
+        assets::publish_asset(tx, t, id, asset).await?;
+    } else if let Some(document) = key.strip_prefix("document:") {
+        documents::publish(tx, t, id, document, value).await?;
+    } else if key.starts_with("product:") {
+        // Product parents and content were published above, before dependent assets.
+    } else if let Some(app) = key.strip_prefix("app:") {
+        let m: apps::Manifest = serde_json::from_value(value["manifest"].clone())
+            .map_err(|_| bad("Invalid app package"))?;
+        if m.runtime != "declarative" {
+            return Err(bad("External services need a separate deployment"));
+        }
+        apps::actor_permissions(h, &m)?;
+        apps::install_tx(tx, t, m).await?;
+        sqlx::query("UPDATE app_packages SET active=$1 WHERE tenant=$2 AND id=$3")
+            .bind(value["active"].as_bool())
+            .bind(t)
+            .bind(app)
+            .execute(&mut **tx)
+            .await?;
+    } else if key.starts_with("appdata:") {
+        let parts = key.splitn(4, ':').collect::<Vec<_>>();
+        let row = sqlx::query("SELECT manifest FROM app_packages WHERE tenant=$1 AND id=$2")
+            .bind(t)
+            .bind(parts[1])
+            .fetch_optional(&mut **tx)
+            .await?
+            .ok_or(bad("Publish the app package before its data"))?;
+        let m: apps::Manifest =
+            serde_json::from_value(row.get("manifest")).map_err(|_| bad("Invalid app"))?;
+        let e = m
+            .entities
+            .iter()
+            .find(|e| e.name == parts[2])
+            .ok_or(bad("App entity missing"))?;
+        if !apps::core_extensions::configuration(e) {
+            return Err(bad(
+                "Operational customer/order extension records are never release units",
+            ));
+        }
+        let revision = apps::records::get(tx, t, &m.id, &e.name, parts[3], false)
+            .await?
+            .and_then(|r| r["revision"].as_i64())
+            .unwrap_or(0);
+        let mut fields = value.clone();
+        fields.as_object_mut().unwrap().remove("id");
+        apps::record_access(&m, e, h, "save")?;
+        apps::data::save_tx(
+            tx,
+            t,
+            &m,
+            e,
+            &json!({"id":parts[3],"revision":revision,"fields":fields}),
+        )
+        .await?;
+    } else if let Some((kind, unit)) = key.split_once(':') {
+        let table = match kind {
+            "rule" => "commerce_rules",
+            "promotion" => "commerce_promotions",
+            "flow" => "commerce_flows",
+            "channel" => "sales_channels",
+            _ => return Err(bad("Unsupported release unit")),
+        };
+        if kind == "promotion" {
+            marketing::preserve_import(&actual[key], value)?;
+        }
+        if kind == "rule" {
+            sqlx::query("INSERT INTO commerce_rules(tenant,id,name,condition,active) VALUES($1,$2,$3,$4,$5) ON CONFLICT(tenant,id) DO UPDATE SET name=EXCLUDED.name,condition=EXCLUDED.condition,active=EXCLUDED.active,revision=commerce_rules.revision+1").bind(t).bind(unit).bind(&value["name"]).bind(&value["condition"]).bind(value["active"].as_bool()).execute(&mut **tx).await?;
+        } else {
+            let sql = format!(
+                "INSERT INTO {table}(tenant,id,data) VALUES($1,$2,$3) ON CONFLICT(tenant,id) DO UPDATE SET data=EXCLUDED.data,revision={table}.revision+1"
+            );
+            sqlx::query(sqlx::AssertSqlSafe(sql.as_str()))
+                .bind(t)
+                .bind(unit)
+                .bind(if kind == "flow" {
+                    let mut flow = value.clone();
+                    flow["actor"] = json!(header(h, "x-rac-user").unwrap_or("unknown"));
+                    flow
+                } else {
+                    value.clone()
+                })
+                .execute(&mut **tx)
+                .await?;
+        }
+    } else {
+        let table = match key {
+            "settings" => "commerce_settings",
+            "experience" => "experiences",
+            _ => return Err(bad("Unsupported release unit")),
+        };
+        let sql = format!("UPDATE {table} SET data=$1,revision=revision+1 WHERE tenant=$2");
+        sqlx::query(sqlx::AssertSqlSafe(sql.as_str()))
+            .bind(value)
+            .bind(t)
+            .execute(&mut **tx)
+            .await?;
+    }
+    Ok(())
+}
+/// What the live shop holds for a unit after its publication.
+async fn live_value(tx: &mut Tx<'_>, t: &str, key: &str, value: &Value) -> Result<Value> {
+    Ok(if let Some(product) = key.strip_prefix("product:") {
+        super::snapshot::product_snapshot(tx, t, product).await?
+    } else if key == "company" || key.starts_with("company-channel:") {
+        company::live_value(tx, t, key).await?
+    } else if let Some(flow) = key.strip_prefix("flow:") {
+        sqlx::query_scalar("SELECT data FROM commerce_flows WHERE tenant=$1 AND id=$2")
+            .bind(t)
+            .bind(flow)
+            .fetch_one(&mut **tx)
+            .await?
+    } else {
+        value.clone()
+    })
+}
 pub(crate) async fn release(
     State(a): State<App>,
     h: RequestContext,
@@ -39,51 +267,7 @@ pub(crate) async fn release(
     access::permit(&h, &keys)?;
     let mut tx = a.db.begin().await?;
     history::context(&mut tx, &h, "staging.release").await?;
-    marketing::lock_config(&mut tx, &t).await?;
-    operations::lock_company(&mut tx, &t).await?;
-    operations::lock_company(&mut tx, &id).await?;
-    sqlx::query("SELECT pg_advisory_xact_lock(hashtextextended($1,16))")
-        .bind(&t)
-        .execute(&mut *tx)
-        .await?;
-    for lock in [726, 727] {
-        sqlx::query("SELECT pg_advisory_xact_lock(hashtextextended($1,$2))")
-            .bind(&t)
-            .bind(lock as i64)
-            .execute(&mut *tx)
-            .await?;
-    }
-    // The package fence precedes record locks, exactly as in native app writes.
-    // Otherwise a concurrent save could hold package SHARE while release holds its record.
-    let mut package_locks = std::collections::BTreeSet::new();
-    for key in &keys {
-        let app = if let Some(app) = key.strip_prefix("app:") {
-            Some(app)
-        } else {
-            key.strip_prefix("appdata:")
-                .and_then(|tail| tail.split(':').next())
-        };
-        if let Some(app) = app {
-            package_locks.insert(format!("{t}:{app}"));
-            package_locks.insert(format!("{id}:{app}"));
-        }
-    }
-    for lock in package_locks {
-        sqlx::query("SELECT pg_advisory_xact_lock(hashtextextended($1,7))")
-            .bind(lock)
-            .execute(&mut *tx)
-            .await?;
-    }
-    for key in keys.iter().filter(|k| k.starts_with("appdata:")) {
-        let parts = key.splitn(4, ':').collect::<Vec<_>>();
-        if parts.len() != 4 {
-            return Err(bad("Invalid app data selection"));
-        }
-        sqlx::query("SELECT pg_advisory_xact_lock(hashtextextended($1,8))")
-            .bind(apps::records::lock_key(&t, parts[1], parts[2], parts[3]))
-            .execute(&mut *tx)
-            .await?;
-    }
+    lock_units(&mut tx, &t, &id, &keys).await?;
     let mut base: Value = sqlx::query_scalar(
         "SELECT baseline FROM shop_environments WHERE tenant=$1 AND live_tenant=$2 FOR UPDATE",
     )
@@ -98,29 +282,7 @@ pub(crate) async fn release(
             serde_json::from_value(current[key].clone()).map_err(|_| bad("Invalid flow"))?;
         marketing::authorize_flow(&h, &flow)?;
     }
-    for s in &req.selections {
-        let value = current.get(&s.key).ok_or(bad("Unknown change"))?;
-        if hash(&value.to_string()) != s.digest || base["stage"].get(&s.key) == Some(value) {
-            return Err(conflict("Staged change changed or was already published"));
-        }
-        if actual.get(&s.key) != base["live"].get(&s.key) {
-            return Err(conflict("Live content changed; resolve before release"));
-        }
-    }
-    // Validate against the current live operational type before it can be overwritten.
-    // The complete aggregate (including jointly selected categories/settings) is checked below.
-    for key in keys.iter().filter(|k| k.starts_with("channel:")) {
-        let old = actual.get(key).and_then(|v| v["kind"].as_str());
-        let new = current[key]["kind"].as_str();
-        if old.is_some_and(|old| {
-            (old == "pos") != (new == Some("pos"))
-                || (old == "marketplace") != (new == Some("marketplace"))
-        }) {
-            return Err(conflict(
-                "Operational channel type cannot be changed; create a new channel",
-            ));
-        }
-    }
+    admit_selections(&req.selections, &keys, &current, &actual, &base)?;
     categories::publish(&mut tx, &t, &current, &keys).await?;
     products::publish(&mut tx, &t, &current, &keys).await?;
     // App records validate current native references (languages, channels, packages).
@@ -131,138 +293,9 @@ pub(crate) async fn release(
     for key in configuration.chain(records) {
         let s = req.selections.iter().find(|s| s.key == *key).unwrap();
         let value = &current[&s.key];
-        if let Some(channel) = s.key.strip_prefix("settings-channel:") {
-            auth::permit(&h, "settings.write")?;
-            commerce::publish_scope(&mut tx, &t, channel, value).await?;
-        } else if s.key == "company" || s.key.starts_with("company-channel:") {
-            company::publish(&mut tx, &t, &id, &s.key, value).await?;
-        } else if s.key.starts_with("b2b-company:") || s.key.starts_with("b2b-unit:") {
-            // Policy/catalog units publish below through their shared native writers.
-        } else if s.key.starts_with("category:") {
-            // Category units were published above in parent-first dependency order.
-        } else if s.key == "order-workflow" {
-            auth::permit(&h, "settings.write")?;
-            let m: commerce::OrderMachine =
-                serde_json::from_value(value.clone()).map_err(|_| bad("Invalid workflow"))?;
-            m.validate()?;
-            let ids = m.states.iter().map(|s| s.id.clone()).collect::<Vec<_>>();
-            let stranded:bool=sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM orders WHERE tenant=$1 AND NOT(data->>'state'=ANY($2)) AND data->>'state' NOT IN ('expired','payment_review'))").bind(&t).bind(ids).fetch_one(&mut *tx).await?;
-            if stranded {
-                return Err(conflict("Workflow removes an active order state"));
-            }
-            sqlx::query("INSERT INTO order_state_machines(tenant,data) VALUES($1,$2) ON CONFLICT(tenant) DO UPDATE SET data=EXCLUDED.data,revision=order_state_machines.revision+1").bind(&t).bind(value).execute(&mut *tx).await?;
-        } else if s.key.starts_with("asset:") {
-            assets::publish_asset(&mut tx, &t, &id, &s.key[6..]).await?;
-        } else if s.key.starts_with("document:") {
-            documents::publish(&mut tx, &t, &id, &s.key[9..], value).await?;
-        } else if s.key.starts_with("product:") {
-            // Product parents and content were published above, before dependent assets.
-        } else if s.key.starts_with("app:") {
-            let m: apps::Manifest = serde_json::from_value(value["manifest"].clone())
-                .map_err(|_| bad("Invalid app package"))?;
-            if m.runtime != "declarative" {
-                return Err(bad("External services need a separate deployment"));
-            }
-            apps::actor_permissions(&h, &m)?;
-            apps::install_tx(&mut tx, &t, m).await?;
-            sqlx::query("UPDATE app_packages SET active=$1 WHERE tenant=$2 AND id=$3")
-                .bind(value["active"].as_bool())
-                .bind(&t)
-                .bind(&s.key[4..])
-                .execute(&mut *tx)
-                .await?;
-        } else if s.key.starts_with("appdata:") {
-            let parts = s.key.splitn(4, ':').collect::<Vec<_>>();
-            let row = sqlx::query("SELECT manifest FROM app_packages WHERE tenant=$1 AND id=$2")
-                .bind(&t)
-                .bind(parts[1])
-                .fetch_optional(&mut *tx)
-                .await?
-                .ok_or(bad("Publish the app package before its data"))?;
-            let m: apps::Manifest =
-                serde_json::from_value(row.get("manifest")).map_err(|_| bad("Invalid app"))?;
-            let e = m
-                .entities
-                .iter()
-                .find(|e| e.name == parts[2])
-                .ok_or(bad("App entity missing"))?;
-            if !apps::core_extensions::configuration(e) {
-                return Err(bad(
-                    "Operational customer/order extension records are never release units",
-                ));
-            }
-            let revision = apps::records::get(&mut tx, &t, &m.id, &e.name, parts[3], false)
-                .await?
-                .and_then(|r| r["revision"].as_i64())
-                .unwrap_or(0);
-            let mut fields = value.clone();
-            fields.as_object_mut().unwrap().remove("id");
-            apps::record_access(&m, e, &h, "save")?;
-            apps::data::save_tx(
-                &mut tx,
-                &t,
-                &m,
-                e,
-                &json!({"id":parts[3],"revision":revision,"fields":fields}),
-            )
-            .await?;
-        } else if let Some((kind, unit)) = s.key.split_once(':') {
-            let table = match kind {
-                "rule" => "commerce_rules",
-                "promotion" => "commerce_promotions",
-                "flow" => "commerce_flows",
-                "channel" => "sales_channels",
-                _ => return Err(bad("Unsupported release unit")),
-            };
-            if kind == "promotion" {
-                marketing::preserve_import(&actual[&s.key], value)?;
-            }
-            if kind == "rule" {
-                sqlx::query("INSERT INTO commerce_rules(tenant,id,name,condition,active) VALUES($1,$2,$3,$4,$5) ON CONFLICT(tenant,id) DO UPDATE SET name=EXCLUDED.name,condition=EXCLUDED.condition,active=EXCLUDED.active,revision=commerce_rules.revision+1").bind(&t).bind(unit).bind(&value["name"]).bind(&value["condition"]).bind(value["active"].as_bool()).execute(&mut *tx).await?;
-            } else {
-                let sql = format!(
-                    "INSERT INTO {table}(tenant,id,data) VALUES($1,$2,$3) ON CONFLICT(tenant,id) DO UPDATE SET data=EXCLUDED.data,revision={table}.revision+1"
-                );
-                sqlx::query(sqlx::AssertSqlSafe(sql.as_str()))
-                    .bind(&t)
-                    .bind(unit)
-                    .bind(if kind == "flow" {
-                        let mut flow = value.clone();
-                        flow["actor"] = json!(header(&h, "x-rac-user").unwrap_or("unknown"));
-                        flow
-                    } else {
-                        value.clone()
-                    })
-                    .execute(&mut *tx)
-                    .await?;
-            }
-        } else {
-            let table = match s.key.as_str() {
-                "settings" => "commerce_settings",
-                "experience" => "experiences",
-                _ => return Err(bad("Unsupported release unit")),
-            };
-            let sql = format!("UPDATE {table} SET data=$1,revision=revision+1 WHERE tenant=$2");
-            sqlx::query(sqlx::AssertSqlSafe(sql.as_str()))
-                .bind(value)
-                .bind(&t)
-                .execute(&mut *tx)
-                .await?;
-        }
+        publish_unit(&mut tx, &h, &t, &id, &s.key, value, &actual).await?;
         base["stage"][&s.key] = value.clone();
-        base["live"][&s.key] = if s.key.starts_with("product:") {
-            super::snapshot::product_snapshot(&mut tx, &t, &s.key[8..]).await?
-        } else if s.key == "company" || s.key.starts_with("company-channel:") {
-            company::live_value(&mut tx, &t, &s.key).await?
-        } else if s.key.starts_with("flow:") {
-            sqlx::query_scalar("SELECT data FROM commerce_flows WHERE tenant=$1 AND id=$2")
-                .bind(&t)
-                .bind(&s.key[5..])
-                .fetch_one(&mut *tx)
-                .await?
-        } else {
-            value.clone()
-        };
+        base["live"][&s.key] = live_value(&mut tx, &t, &s.key, value).await?;
     }
     assets::validate_product_media(&mut tx, &t, &keys).await?;
     crate::b2b::publish_configuration(&mut tx, &t, &keys, &current).await?;

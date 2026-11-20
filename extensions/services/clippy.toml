@@ -1,0 +1,4 @@
+# The vendored app storage below this folder is hash-locked and keeps the limit it was written under.
+# Clippy reads the nearest configuration above a crate, so this file covers only the crates in
+# extensions/services/; every other crate takes the workspace limit from the root clippy.toml.
+too-many-lines-threshold = 320

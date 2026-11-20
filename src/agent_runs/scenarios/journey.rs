@@ -6,6 +6,51 @@ fn action_schema() -> Value {
         "action":{"type":"string","enum":["search","detail","add","checkout","finish"]},"productId":{"type":"string","maxLength":160},
         "quantity":{"type":"integer","minimum":1,"maximum":10},"query":{"type":"string","maxLength":200},"reason":{"type":"string","maxLength":800}}})
 }
+/// Records what a shopper action led to in the step and the journey; true once the journey is over.
+fn record(
+    state: &mut Value,
+    step: &mut Value,
+    action: &Value,
+    result: Result<Value>,
+) -> Result<bool> {
+    let mut done = false;
+    match result {
+        Ok(value) => {
+            step["observation"] = value.clone();
+            match action["action"].as_str() {
+                Some("search") => {
+                    let known = state["products"]
+                        .as_array_mut()
+                        .ok_or(bad("Invalid observed catalogue"))?;
+                    for product in value.as_array().into_iter().flatten() {
+                        if let Some(old) = known.iter_mut().find(|p| p["id"] == product["id"]) {
+                            *old = product.clone();
+                        } else {
+                            known.push(product.clone());
+                        }
+                    }
+                }
+                Some("checkout") => {
+                    state["outcome"] = json!("purchased");
+                    state["orderId"] = value["orderId"].clone();
+                    state["totalMinor"] = value["totalMinor"].clone();
+                    done = true;
+                }
+                Some("finish") => {
+                    state["outcome"] = json!("stopped_by_customer");
+                    done = true;
+                }
+                _ => {}
+            }
+        }
+        Err(error) => {
+            step["error"] = json!({"status":error.0.as_u16(),"detail":error.1.chars().take(300).collect::<String>()});
+            state["outcome"] = json!("blocked");
+            done = true;
+        }
+    }
+    Ok(done)
+}
 pub(crate) async fn execute(
     a: &App,
     t: &str,
@@ -105,42 +150,7 @@ pub(crate) async fn execute(
         // Do not publish late evidence after cancellation or a permission change.
         checkpoint::authorize(a).await?;
         let mut step = json!({"index":index,"action":action["action"],"reason":action["reason"],"model":output.model,"provider":output.provider});
-        let mut done = false;
-        match result {
-            Ok(value) => {
-                step["observation"] = value.clone();
-                match action["action"].as_str() {
-                    Some("search") => {
-                        let known = state["products"]
-                            .as_array_mut()
-                            .ok_or(bad("Invalid observed catalogue"))?;
-                        for product in value.as_array().into_iter().flatten() {
-                            if let Some(old) = known.iter_mut().find(|p| p["id"] == product["id"]) {
-                                *old = product.clone();
-                            } else {
-                                known.push(product.clone());
-                            }
-                        }
-                    }
-                    Some("checkout") => {
-                        state["outcome"] = json!("purchased");
-                        state["orderId"] = value["orderId"].clone();
-                        state["totalMinor"] = value["totalMinor"].clone();
-                        done = true;
-                    }
-                    Some("finish") => {
-                        state["outcome"] = json!("stopped_by_customer");
-                        done = true;
-                    }
-                    _ => {}
-                }
-            }
-            Err(error) => {
-                step["error"] = json!({"status":error.0.as_u16(),"detail":error.1.chars().take(300).collect::<String>()});
-                state["outcome"] = json!("blocked");
-                done = true;
-            }
-        }
+        let done = record(&mut state, &mut step, action, result)?;
         state["steps"]
             .as_array_mut()
             .ok_or(bad("Invalid scenario journal"))?

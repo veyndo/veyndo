@@ -41,6 +41,87 @@ async fn fresh(
 fn total(v: &Value) -> Option<&str> {
     v["price"]["totalMinor"].as_str()
 }
+/// The product with this ID, or the first one that has stock.
+fn stocked(products: &Value, id: Option<&str>) -> Option<Value> {
+    products
+        .as_array()
+        .into_iter()
+        .flatten()
+        .find(|p| match id {
+            Some(id) => p["id"].as_str() == Some(id),
+            None => p["stock"].as_i64().is_some_and(|s| s > 0),
+        })
+        .cloned()
+}
+/// Forged total, stale review and replayed order against one honestly reviewed basket.
+async fn checkout_probes(
+    a: &App,
+    c: &RequestContext,
+    guest: &RequestContext,
+    country: &str,
+    run: &str,
+    id: &str,
+    stock: i64,
+) -> Result<Vec<Value>> {
+    let mut probes = Vec::new();
+    // The checkout attacks share one honestly reviewed basket; only the claimed review is forged.
+    let reviewed = async {
+        let (revision, minor) = shopper::review(a, c, country).await?;
+        shopper::accept(a, c).await?;
+        Ok::<_, Error>((revision, minor))
+    }
+    .await;
+    match reviewed {
+        Err(e) => {
+            for id in ["forged_total", "stale_review", "replayed_order"] {
+                probes.push(json!({"id":id,"outcome":"review","finding":"checkout_unavailable","status":e.0.as_u16(),"detail":e.1.chars().take(300).collect::<String>()}));
+            }
+        }
+        Ok((revision, minor)) => {
+            let key = format!("probe-{run}");
+            probes.push(verdict(
+                "forged_total",
+                shopper::complete(a, c, &revision, 1, &key).await,
+                |_| ("breached", "accepted"),
+            ));
+            probes.push(verdict(
+                "stale_review",
+                shopper::complete(
+                    a,
+                    c,
+                    &json!(revision.as_i64().unwrap_or(1) - 1),
+                    minor,
+                    &key,
+                )
+                .await,
+                |_| ("breached", "accepted"),
+            ));
+            let first = shopper::complete(a, c, &revision, minor, &key).await;
+            let second = shopper::complete(a, c, &revision, minor, &key).await;
+            let after = stocked(&shopper::products(a, guest, "").await?, Some(id))
+                .and_then(|p| p["stock"].as_i64())
+                .unwrap_or(stock);
+            probes.push(match (first, second) {
+                (Ok(first), Ok(second)) if first["id"] != second["id"] => {
+                    json!({"id":"replayed_order","outcome":"breached","finding":"duplicate_order"})
+                }
+                (Ok(_), Ok(_)) if stock - after > 1 => {
+                    json!({"id":"replayed_order","outcome":"breached","finding":"stock_double"})
+                }
+                (Ok(first), Ok(_)) => {
+                    json!({"id":"replayed_order","outcome":"held","finding":"same_order","orderId":first["id"]})
+                }
+                (Ok(first), Err(_)) => {
+                    json!({"id":"replayed_order","outcome":"held","finding":"replay_refused","orderId":first["id"]})
+                }
+                (Err(e), _) => {
+                    json!({"id":"replayed_order","outcome":"review","finding":"checkout_unavailable","status":e.0.as_u16(),"detail":e.1.chars().take(300).collect::<String>()})
+                }
+            });
+        }
+    }
+    Ok(probes)
+}
 pub(super) async fn run(a: &App, h: &RequestContext, t: &str) -> Result<Value> {
     let settings = catalogue::settings(a, h, t).await?;
     let currency = settings.currencies.selected("")?;
@@ -56,17 +137,6 @@ pub(super) async fn run(a: &App, h: &RequestContext, t: &str) -> Result<Value> {
         .ok_or(bad("Enable a delivery country before running attack tests"))?;
     let request = json!({"channel":marketing::channel_id(h),"locale":locale,"scenario":{"currency":currency.code}});
     let guest = shopper::headers(t, &request, None)?;
-    let stocked = |products: &Value, id: Option<&str>| {
-        products
-            .as_array()
-            .into_iter()
-            .flatten()
-            .find(|p| match id {
-                Some(id) => p["id"].as_str() == Some(id),
-                None => p["stock"].as_i64().is_some_and(|s| s > 0),
-            })
-            .cloned()
-    };
     let target = stocked(&shopper::products(a, &guest, "").await?, None).ok_or(conflict(
         "Add a product with stock to this sandbox before running attack tests",
     ))?;
@@ -173,62 +243,7 @@ pub(super) async fn run(a: &App, h: &RequestContext, t: &str) -> Result<Value> {
         .await,
         |_| ("breached", "accepted"),
     ));
-    // The checkout attacks share one honestly reviewed basket; only the claimed review is forged.
-    let reviewed = async {
-        let (revision, minor) = shopper::review(a, &c, country).await?;
-        shopper::accept(a, &c).await?;
-        Ok::<_, Error>((revision, minor))
-    }
-    .await;
-    match reviewed {
-        Err(e) => {
-            for id in ["forged_total", "stale_review", "replayed_order"] {
-                probes.push(json!({"id":id,"outcome":"review","finding":"checkout_unavailable","status":e.0.as_u16(),"detail":e.1.chars().take(300).collect::<String>()}));
-            }
-        }
-        Ok((revision, minor)) => {
-            let key = format!("probe-{run}");
-            probes.push(verdict(
-                "forged_total",
-                shopper::complete(a, &c, &revision, 1, &key).await,
-                |_| ("breached", "accepted"),
-            ));
-            probes.push(verdict(
-                "stale_review",
-                shopper::complete(
-                    a,
-                    &c,
-                    &json!(revision.as_i64().unwrap_or(1) - 1),
-                    minor,
-                    &key,
-                )
-                .await,
-                |_| ("breached", "accepted"),
-            ));
-            let first = shopper::complete(a, &c, &revision, minor, &key).await;
-            let second = shopper::complete(a, &c, &revision, minor, &key).await;
-            let after = stocked(&shopper::products(a, &guest, "").await?, Some(id))
-                .and_then(|p| p["stock"].as_i64())
-                .unwrap_or(stock);
-            probes.push(match (first, second) {
-                (Ok(first), Ok(second)) if first["id"] != second["id"] => {
-                    json!({"id":"replayed_order","outcome":"breached","finding":"duplicate_order"})
-                }
-                (Ok(_), Ok(_)) if stock - after > 1 => {
-                    json!({"id":"replayed_order","outcome":"breached","finding":"stock_double"})
-                }
-                (Ok(first), Ok(_)) => {
-                    json!({"id":"replayed_order","outcome":"held","finding":"same_order","orderId":first["id"]})
-                }
-                (Ok(first), Err(_)) => {
-                    json!({"id":"replayed_order","outcome":"held","finding":"replay_refused","orderId":first["id"]})
-                }
-                (Err(e), _) => {
-                    json!({"id":"replayed_order","outcome":"review","finding":"checkout_unavailable","status":e.0.as_u16(),"detail":e.1.chars().take(300).collect::<String>()})
-                }
-            });
-        }
-    }
+    probes.extend(checkout_probes(a, &c, &guest, country, &run, id, stock).await?);
     let count = |outcome: &str| probes.iter().filter(|p| p["outcome"] == outcome).count();
     Ok(
         json!({"id":run,"synthetic":true,"execution":"native-commerce-api","channel":marketing::channel_id(h),

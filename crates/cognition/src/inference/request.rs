@@ -1,6 +1,81 @@
 //! One provider request owns native wire translation, bounded model admission and network egress.
 use super::*;
 impl Inference {
+    /// The request body in the provider's own wire format and the URL it goes to.
+    fn wire_request(
+        &self,
+        provider: &Provider,
+        model: &str,
+        (system, user): (&str, &str),
+        schema: &Value,
+        images: &[String],
+    ) -> Result<(Value, String), InferenceError> {
+        let mut visual = vec![json!({"type":"input_text","text":user})];
+        visual.extend(
+            images
+                .iter()
+                .map(|s| json!({"type":"input_image","image_url":s})),
+        );
+        let mut claude = vec![json!({"type":"text","text":user})];
+        for image in images {
+            let (mime, data) = image
+                .strip_prefix("data:")
+                .and_then(|s| s.split_once(";base64,"))
+                .ok_or("Invalid image data")?;
+            claude.push(
+                json!({"type":"image","source":{"type":"base64","media_type":mime,"data":data}}),
+            );
+        }
+        Ok(match provider {
+            Provider::Platform => return Err("Invalid platform provider".into()),
+            Provider::Ollama => (
+                json!({"model":model,"stream":false,"think":false,"format":schema,"options":{"temperature":0,"num_predict":if schema["properties"].get("manifest").is_some() || schema["properties"].get("patch").is_some(){8192}else{2000}},"messages":[{"role":"system","content":system},{"role":"user","content":user,"images":images.iter().filter_map(|s|s.split_once(";base64,").map(|(_,b)|b)).collect::<Vec<_>>()}]}),
+                format!("{}/api/chat", self.ollama.trim_end_matches('/')),
+            ),
+            Provider::Openai if env::var("OPENAI_PROTOCOL").as_deref() == Ok("chat") => (
+                protocol::chat_request(model, system, user, schema, images),
+                format!("{}/chat/completions", self.openai_url.trim_end_matches('/')),
+            ),
+            Provider::Openai => (
+                json!({"model":model,"store":false,"instructions":system,"input":if images.is_empty(){json!(user)}else{json!([{"role":"user","content":visual}])},"max_output_tokens":8192,"text":{"format":{"type":"json_schema","name":"commerce_result","strict":true,"schema":strict_schema(schema.clone())}}}),
+                format!("{}/responses", self.openai_url.trim_end_matches('/')),
+            ),
+            Provider::Anthropic => (
+                json!({"model":model,"max_tokens":8192,"system":system,"messages":[{"role":"user","content":if images.is_empty(){json!(user)}else{json!(claude)}}],"output_config":{"format":{"type":"json_schema","schema":schema}}}),
+                format!("{}/messages", self.anthropic_url.trim_end_matches('/')),
+            ),
+        })
+    }
+    /// Adds the credential the provider expects; a missing key names the setting to configure.
+    fn authorize(
+        &self,
+        provider: &Provider,
+        req: reqwest::RequestBuilder,
+    ) -> Result<reqwest::RequestBuilder, InferenceError> {
+        Ok(match provider {
+            Provider::Platform => return Err("Invalid platform provider".into()),
+            Provider::Ollama => {
+                if let Some(key) = &self.ollama_key {
+                    req.bearer_auth(key)
+                } else {
+                    req
+                }
+            }
+            Provider::Openai => req.bearer_auth(
+                self.openai_key
+                    .as_ref()
+                    .ok_or("OpenAI is not configured: set OPENAI_API_KEY on the server")?,
+            ),
+            Provider::Anthropic => req
+                .header(
+                    "x-api-key",
+                    self.anthropic_key
+                        .as_ref()
+                        .ok_or("Claude is not configured: set ANTHROPIC_API_KEY on the server")?,
+                )
+                .header("anthropic-version", "2023-06-01"),
+        })
+    }
     #[tracing::instrument(skip_all,fields(trace_id=%veyndo_runtime::trace::current()))]
     pub(super) async fn structured_resolved(
         &self,
@@ -47,70 +122,15 @@ impl Inference {
         {
             return Err("Invalid model identifier".into());
         }
-        let mut visual = vec![json!({"type":"input_text","text":user})];
-        visual.extend(
-            images
-                .iter()
-                .map(|s| json!({"type":"input_image","image_url":s})),
-        );
-        let mut claude = vec![json!({"type":"text","text":user})];
-        for image in images {
-            let (mime, data) = image
-                .strip_prefix("data:")
-                .and_then(|s| s.split_once(";base64,"))
-                .ok_or("Invalid image data")?;
-            claude.push(
-                json!({"type":"image","source":{"type":"base64","media_type":mime,"data":data}}),
-            );
-        }
-        let (mut request, path) = match provider {
-            Provider::Platform => return Err("Invalid platform provider".into()),
-            Provider::Ollama => (
-                json!({"model":model,"stream":false,"think":false,"format":schema,"options":{"temperature":0,"num_predict":if schema["properties"].get("manifest").is_some() || schema["properties"].get("patch").is_some(){8192}else{2000}},"messages":[{"role":"system","content":system},{"role":"user","content":user,"images":images.iter().filter_map(|s|s.split_once(";base64,").map(|(_,b)|b)).collect::<Vec<_>>()}]}),
-                format!("{}/api/chat", self.ollama.trim_end_matches('/')),
-            ),
-            Provider::Openai if env::var("OPENAI_PROTOCOL").as_deref() == Ok("chat") => (
-                protocol::chat_request(model, system, user, schema, images),
-                format!("{}/chat/completions", self.openai_url.trim_end_matches('/')),
-            ),
-            Provider::Openai => (
-                json!({"model":model,"store":false,"instructions":system,"input":if images.is_empty(){json!(user)}else{json!([{"role":"user","content":visual}])},"max_output_tokens":8192,"text":{"format":{"type":"json_schema","name":"commerce_result","strict":true,"schema":strict_schema(schema.clone())}}}),
-                format!("{}/responses", self.openai_url.trim_end_matches('/')),
-            ),
-            Provider::Anthropic => (
-                json!({"model":model,"max_tokens":8192,"system":system,"messages":[{"role":"user","content":if images.is_empty(){json!(user)}else{json!(claude)}}],"output_config":{"format":{"type":"json_schema","schema":schema}}}),
-                format!("{}/messages", self.anthropic_url.trim_end_matches('/')),
-            ),
-        };
+        let (mut request, path) =
+            self.wire_request(&provider, model, (system, user), schema, images)?;
         let native_tools = schema.get("x-veyndo-tools").is_some();
         if native_tools {
             tools::request(&provider, schema, &mut request)?;
         }
         protocol::prompt_cache(&provider, &mut request, system);
         let mut req = self.http.post(path).json(&request);
-        req = match provider {
-            Provider::Platform => return Err("Invalid platform provider".into()),
-            Provider::Ollama => {
-                if let Some(key) = &self.ollama_key {
-                    req.bearer_auth(key)
-                } else {
-                    req
-                }
-            }
-            Provider::Openai => req.bearer_auth(
-                self.openai_key
-                    .as_ref()
-                    .ok_or("OpenAI is not configured: set OPENAI_API_KEY on the server")?,
-            ),
-            Provider::Anthropic => req
-                .header(
-                    "x-api-key",
-                    self.anthropic_key
-                        .as_ref()
-                        .ok_or("Claude is not configured: set ANTHROPIC_API_KEY on the server")?,
-                )
-                .header("anthropic-version", "2023-06-01"),
-        };
+        req = self.authorize(&provider, req)?;
         Box::pin(budget::reserve(
             self.budget_db.as_ref(),
             &request,

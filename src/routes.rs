@@ -2,7 +2,8 @@
 use crate::*;
 mod http_profile;
 pub(crate) use http_profile::api_host;
-pub(crate) fn router(a: App) -> Router {
+/// Routers that the owning modules build themselves.
+fn modules() -> Router<App> {
     Router::new()
         .merge(auth::entry_router())
         .route("/products/{id}", get(storefront_pages::product_page))
@@ -38,6 +39,10 @@ pub(crate) fn router(a: App) -> Router {
         .merge(payments::payment_router())
         .merge(cognition::cognition_router())
         .merge(agent_runs::router())
+}
+/// Channel settings, the outbox retry, health, sign-in and the workspace.
+fn workspace_routes() -> Router<App> {
+    Router::new()
         .secure_route(
             "/api/merchant/commerce/channels/{channel}",
             &[("GET", "settings.read"), ("PUT", "settings.write")],
@@ -130,6 +135,10 @@ pub(crate) fn router(a: App) -> Router {
             &[("POST", "team.manage")],
             post(auth::invite_user),
         )
+}
+/// Storefront catalogue, cart and checkout, and the merchant side of commerce.
+fn commerce_routes() -> Router<App> {
+    Router::new()
         .route("/store-api/context", get(context_info))
         .route("/store-api/countries", get(commerce::country_catalogue))
         .secure_route(
@@ -201,6 +210,10 @@ pub(crate) fn router(a: App) -> Router {
             &[("POST", "orders.read")],
             post(orders),
         )
+}
+/// Assistant, knowledge, personalization, extensions and the agent protocols.
+fn assistant_routes() -> Router<App> {
+    Router::new()
         .secure_route(
             "/api/agent/plan",
             &[("POST", "assistant.use")],
@@ -280,6 +293,13 @@ pub(crate) fn router(a: App) -> Router {
             post(mcp).get(|| async { StatusCode::METHOD_NOT_ALLOWED }),
         )
         .merge(ucp::ucp_router())
+}
+pub(crate) fn router(a: App) -> Router {
+    Router::new()
+        .merge(modules())
+        .merge(workspace_routes())
+        .merge(commerce_routes())
+        .merge(assistant_routes())
         .fallback_service(performance::delivery::assets())
         .layer(axum::extract::DefaultBodyLimit::max(64 * 1024))
         .layer(axum::middleware::from_fn(performance::memoize))

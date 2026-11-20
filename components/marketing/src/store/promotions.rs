@@ -7,21 +7,12 @@ use veyndo_core::{Result, bad};
 use veyndo_pricing::pricing::{PriceInput, calculate, math_round};
 use veyndo_shop::types::cart::StoredCart;
 
-pub async fn promote(tx: &mut sqlx::PgConnection, c: &StoredCart, mut q: Value) -> Result<Value> {
-    let b2b = q["price"]["taxStatus"] == "net";
-    let decimals = q["price"]["currencyScale"].as_i64().unwrap_or(2) as i32;
-    let factor = 10_f64.powi(decimals);
-    let pricing_rate = q["currencyContext"]["pricingFactor"]
-        .as_str()
-        .map(veyndo_pricing::types::currency::rate_units)
-        .transpose()?
-        .unwrap_or(100_000_000) as f64;
-    let rate = q["currencyContext"]["factor"]
-        .as_str()
-        .map(veyndo_pricing::types::currency::rate_units)
-        .transpose()?
-        .unwrap_or(100_000_000) as f64
-        / pricing_rate;
+/// The promotions that apply to this cart right now, highest priority first.
+async fn applicable(
+    tx: &mut sqlx::PgConnection,
+    c: &StoredCart,
+    q: &Value,
+) -> Result<Vec<(String, Promotion)>> {
     let rows = sqlx::query(
         "SELECT id,data FROM commerce_promotions WHERE tenant=$1 ORDER BY id FOR UPDATE",
     )
@@ -30,7 +21,7 @@ pub async fn promote(tx: &mut sqlx::PgConnection, c: &StoredCart, mut q: Value) 
     .await?;
     let mut evaluated = q.clone();
     if !rows.is_empty() {
-        evaluated["ruleFacts"] = facts::rule_facts(tx, c, &q).await?;
+        evaluated["ruleFacts"] = facts::rule_facts(tx, c, q).await?;
         rule_snapshot::attach(
             tx,
             &c.tenant,
@@ -71,6 +62,82 @@ pub async fn promote(tx: &mut sqlx::PgConnection, c: &StoredCart, mut q: Value) 
         }
     }
     applicable.sort_by(|a, b| b.1.priority.cmp(&a.1.priority).then(a.0.cmp(&b.0)));
+    Ok(applicable)
+}
+/// Spreads a discount amount over the lines, recalculates their taxes and the totals, and returns the new position total.
+fn discount_lines(q: &mut Value, amount: f64, (decimals, factor, b2b): (i32, f64, bool)) -> f64 {
+    let totals = q["lineItems"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|l| (l["price"]["totalPrice"].as_f64().unwrap() * factor).round() as i64)
+        .collect::<Vec<_>>();
+    let allocated = veyndo_pricing::discount::allocate(&totals, (amount * factor).round() as i64);
+    let mut after = 0.;
+    let mut tax = 0.;
+    for (index, line) in q["lineItems"]
+        .as_array_mut()
+        .unwrap()
+        .iter_mut()
+        .enumerate()
+    {
+        let tax_rate = line["price"]["calculatedTaxes"][0]["taxRate"]
+            .as_f64()
+            .unwrap_or(0.);
+        let discounted = allocated[index] as f64 / factor;
+        let calc = calculate(&PriceInput {
+            price: discounted,
+            decimals,
+            interval: 1. / factor,
+            quantity: 1,
+            tax_rate,
+            gross: !b2b,
+            ..PriceInput::default()
+        });
+        let quantity = line["quantity"].as_u64().unwrap_or(1) as f64;
+        line["price"]["totalPrice"] = json!(calc.total_price);
+        line["price"]["unitPrice"] = json!(math_round(calc.total_price / quantity, decimals));
+        line["price"]["calculatedTaxes"] = json!(
+            calc.calculated_taxes
+                .iter()
+                .map(|t| json!({"tax":t.tax,"taxRate":t.tax_rate,"price":t.price}))
+                .collect::<Vec<_>>()
+        );
+        after += calc.total_price;
+        tax += calc.tax;
+    }
+    after = math_round(after, decimals);
+    tax = math_round(tax, decimals);
+    q["price"]["positionPrice"] = json!(after);
+    q["price"]["tax"] = json!(tax);
+    q["price"]["netPrice"] = json!(if b2b {
+        after
+    } else {
+        math_round(after - tax, decimals)
+    });
+    q["price"]["totalPrice"] = json!(if b2b {
+        math_round(after + tax, decimals)
+    } else {
+        after
+    });
+    after
+}
+pub async fn promote(tx: &mut sqlx::PgConnection, c: &StoredCart, mut q: Value) -> Result<Value> {
+    let b2b = q["price"]["taxStatus"] == "net";
+    let decimals = q["price"]["currencyScale"].as_i64().unwrap_or(2) as i32;
+    let factor = 10_f64.powi(decimals);
+    let pricing_rate = q["currencyContext"]["pricingFactor"]
+        .as_str()
+        .map(veyndo_pricing::types::currency::rate_units)
+        .transpose()?
+        .unwrap_or(100_000_000) as f64;
+    let rate = q["currencyContext"]["factor"]
+        .as_str()
+        .map(veyndo_pricing::types::currency::rate_units)
+        .transpose()?
+        .unwrap_or(100_000_000) as f64
+        / pricing_rate;
+    let applicable = applicable(tx, c, &q).await?;
     let positions = q["lineItems"]
         .as_array()
         .unwrap()
@@ -107,64 +174,7 @@ pub async fn promote(tx: &mut sqlx::PgConnection, c: &StoredCart, mut q: Value) 
             } else {
                 (p.amount * rate / total).min(1.)
             };
-            let totals = q["lineItems"]
-                .as_array()
-                .unwrap()
-                .iter()
-                .map(|l| (l["price"]["totalPrice"].as_f64().unwrap() * factor).round() as i64)
-                .collect::<Vec<_>>();
-            let allocated = veyndo_pricing::discount::allocate(
-                &totals,
-                (total * ratio * factor).round() as i64,
-            );
-            let mut after = 0.;
-            let mut tax = 0.;
-            for (index, line) in q["lineItems"]
-                .as_array_mut()
-                .unwrap()
-                .iter_mut()
-                .enumerate()
-            {
-                let tax_rate = line["price"]["calculatedTaxes"][0]["taxRate"]
-                    .as_f64()
-                    .unwrap_or(0.);
-                let discounted = allocated[index] as f64 / factor;
-                let calc = calculate(&PriceInput {
-                    price: discounted,
-                    decimals,
-                    interval: 1. / factor,
-                    quantity: 1,
-                    tax_rate,
-                    gross: !b2b,
-                    ..PriceInput::default()
-                });
-                let quantity = line["quantity"].as_u64().unwrap_or(1) as f64;
-                line["price"]["totalPrice"] = json!(calc.total_price);
-                line["price"]["unitPrice"] =
-                    json!(math_round(calc.total_price / quantity, decimals));
-                line["price"]["calculatedTaxes"] = json!(
-                    calc.calculated_taxes
-                        .iter()
-                        .map(|t| json!({"tax":t.tax,"taxRate":t.tax_rate,"price":t.price}))
-                        .collect::<Vec<_>>()
-                );
-                after += calc.total_price;
-                tax += calc.tax;
-            }
-            after = math_round(after, decimals);
-            tax = math_round(tax, decimals);
-            q["price"]["positionPrice"] = json!(after);
-            q["price"]["tax"] = json!(tax);
-            q["price"]["netPrice"] = json!(if b2b {
-                after
-            } else {
-                math_round(after - tax, decimals)
-            });
-            q["price"]["totalPrice"] = json!(if b2b {
-                math_round(after + tax, decimals)
-            } else {
-                after
-            });
+            let after = discount_lines(&mut q, total * ratio, (decimals, factor, b2b));
             discounts.push(
                 json!({"id":id,"name":p.name,"kind":p.kind,"amount":math_round(total-after,decimals)}),
             );

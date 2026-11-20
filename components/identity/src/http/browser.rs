@@ -206,6 +206,23 @@ pub async fn apply(
         }
         return response;
     }
+    bind_session(
+        &a,
+        response,
+        &path,
+        (credential, auth),
+        (using_cookie, secure),
+    )
+    .await
+}
+/// Replaces the session token of a successful sign-in answer by the cookie marker and sets the host-only cookies.
+async fn bind_session(
+    a: &veyndo_core::State,
+    response: Response,
+    path: &str,
+    (credential, auth): (Option<String>, Option<String>),
+    (using_cookie, secure): (bool, bool),
+) -> Response {
     let (parts, body) = response.into_parts();
     let Ok(bytes) = to_bytes(body, 1024 * 1024).await else {
         return bad("Browser authentication response exceeds its limit").into_response();

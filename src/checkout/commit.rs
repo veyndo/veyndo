@@ -7,6 +7,39 @@ use crate::{
 };
 use sqlx::Row;
 use veyndo_inventory::InventoryLines;
+/// Prepares the provider payment of an external order and stores the order with it.
+async fn prepare_external(
+    tx: &mut sqlx::Transaction<'_, sqlx::Postgres>,
+    h: &RequestContext,
+    c: &veyndo_shop::types::cart::StoredCart,
+    (q, order): (&serde_json::Value, &mut serde_json::Value),
+    minor: i64,
+    review: Option<&super::session_order::Review>,
+) -> Result<()> {
+    let return_origin = if q["paymentMethod"]["provider"].is_string() {
+        match header(h, "origin") {
+            Some(origin) => Some(
+                payments::sessions::origin_conn(tx, &c.tenant, &c.data.sales_channel, Some(origin))
+                    .await?,
+            ),
+            None => None,
+        }
+    } else {
+        None
+    };
+    payments::prepare(tx, c, order, minor, return_origin.as_deref()).await?;
+    if let Some(review) = review {
+        review.check_prepared_payment(&order["payment"], crate::runtime_config::get().strict)?;
+    }
+    payments::prepare_funding(tx, h, c, order).await?;
+    commerce::order_fields(order);
+    sqlx::query("UPDATE orders SET data=$1 WHERE id=$2")
+        .bind(&*order)
+        .bind(order["id"].as_str())
+        .execute(&mut **tx)
+        .await?;
+    Ok(())
+}
 pub(super) async fn run(
     a: &App,
     h: &RequestContext,
@@ -117,34 +150,7 @@ pub(super) async fn run(
     marketing::record_uses(&mut tx, &c.tenant, &id, &q).await?;
     assets::snapshot(&mut tx, &c, &id).await?;
     if external {
-        let return_origin = if q["paymentMethod"]["provider"].is_string() {
-            match header(h, "origin") {
-                Some(origin) => Some(
-                    payments::sessions::origin_conn(
-                        &mut tx,
-                        &c.tenant,
-                        &c.data.sales_channel,
-                        Some(origin),
-                    )
-                    .await?,
-                ),
-                None => None,
-            }
-        } else {
-            None
-        };
-        payments::prepare(&mut tx, &c, &mut order, minor, return_origin.as_deref()).await?;
-        if let Some(review) = review {
-            review
-                .check_prepared_payment(&order["payment"], crate::runtime_config::get().strict)?;
-        }
-        payments::prepare_funding(&mut tx, h, &c, &order).await?;
-        commerce::order_fields(&mut order);
-        sqlx::query("UPDATE orders SET data=$1 WHERE id=$2")
-            .bind(&order)
-            .bind(&id)
-            .execute(&mut *tx)
-            .await?;
+        prepare_external(&mut tx, h, &c, (&q, &mut order), minor, review).await?;
     }
     commerce::inventory::consume(&mut tx, &c.tenant, &inventory).await?;
     c.data.order = Some(order.clone());

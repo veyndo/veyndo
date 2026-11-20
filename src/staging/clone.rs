@@ -15,6 +15,64 @@ pub(crate) async fn create_preview(
 ) -> Result<Json<Value>> {
     create_inner(a, h, json!({"name":name}), Some(actor.to_owned())).await
 }
+/// Installs the live shop's declarative apps in the sandbox and copies their readable configuration records.
+async fn clone_apps(tx: &mut Tx<'_>, h: &RequestContext, t: &str, id: &str) -> Result<()> {
+    let rows =
+        sqlx::query("SELECT manifest FROM app_packages WHERE tenant=$1 AND active ORDER BY id")
+            .bind(t)
+            .fetch_all(&mut **tx)
+            .await?;
+    for r in rows {
+        let m: apps::Manifest =
+            serde_json::from_value(r.get("manifest")).map_err(|_| bad("Invalid app"))?;
+        if m.runtime == "declarative" {
+            apps::install_tx(tx, id, m.clone()).await?;
+            for entity in m.entities.iter().filter(|e| {
+                apps::core_extensions::configuration(e)
+                    && (e.public_read
+                        || (e.extends.is_some() && apps::record_access(&m, e, h, "list").is_ok()))
+            }) {
+                sqlx::query("SELECT set_config('rac.tenant',$1,true)")
+                    .bind(t)
+                    .execute(&mut **tx)
+                    .await?;
+                let records = apps::records::rows(tx, t, &m.id, entity, 1001).await?;
+                if records.len() > 1000 {
+                    return Err(bad(
+                        "Prototype sandbox supports at most 1000 public records per app entity",
+                    ));
+                }
+                for r in records {
+                    let mut fields = r;
+                    fields.as_object_mut().unwrap().remove("revision");
+                    let record = fields.as_object_mut().unwrap().remove("id").unwrap();
+                    // Installation may have seeded this exact configuration record. Update
+                    // it through its actual CAS instead of colliding with revision zero.
+                    let revision = apps::records::get(
+                        tx,
+                        id,
+                        &m.id,
+                        &entity.name,
+                        record.as_str().ok_or(bad("Invalid app record ID"))?,
+                        false,
+                    )
+                    .await?
+                    .and_then(|value| value["revision"].as_i64())
+                    .unwrap_or(0);
+                    apps::data::save_tx(
+                        tx,
+                        id,
+                        &m,
+                        entity,
+                        &json!({"id":record,"revision":revision,"fields":fields}),
+                    )
+                    .await?;
+                }
+            }
+        }
+    }
+    Ok(())
+}
 async fn create_inner(
     a: App,
     h: RequestContext,
@@ -93,60 +151,7 @@ async fn create_inner(
             .await?;
     }
     crate::b2b::clone_configuration(&mut tx, &t, &id).await?;
-    let rows =
-        sqlx::query("SELECT manifest FROM app_packages WHERE tenant=$1 AND active ORDER BY id")
-            .bind(&t)
-            .fetch_all(&mut *tx)
-            .await?;
-    for r in rows {
-        let m: apps::Manifest =
-            serde_json::from_value(r.get("manifest")).map_err(|_| bad("Invalid app"))?;
-        if m.runtime == "declarative" {
-            apps::install_tx(&mut tx, &id, m.clone()).await?;
-            for entity in m.entities.iter().filter(|e| {
-                apps::core_extensions::configuration(e)
-                    && (e.public_read
-                        || (e.extends.is_some() && apps::record_access(&m, e, &h, "list").is_ok()))
-            }) {
-                sqlx::query("SELECT set_config('rac.tenant',$1,true)")
-                    .bind(&t)
-                    .execute(&mut *tx)
-                    .await?;
-                let records = apps::records::rows(&mut tx, &t, &m.id, entity, 1001).await?;
-                if records.len() > 1000 {
-                    return Err(bad(
-                        "Prototype sandbox supports at most 1000 public records per app entity",
-                    ));
-                }
-                for r in records {
-                    let mut fields = r;
-                    fields.as_object_mut().unwrap().remove("revision");
-                    let record = fields.as_object_mut().unwrap().remove("id").unwrap();
-                    // Installation may have seeded this exact configuration record. Update
-                    // it through its actual CAS instead of colliding with revision zero.
-                    let revision = apps::records::get(
-                        &mut tx,
-                        &id,
-                        &m.id,
-                        &entity.name,
-                        record.as_str().ok_or(bad("Invalid app record ID"))?,
-                        false,
-                    )
-                    .await?
-                    .and_then(|value| value["revision"].as_i64())
-                    .unwrap_or(0);
-                    apps::data::save_tx(
-                        &mut tx,
-                        &id,
-                        &m,
-                        entity,
-                        &json!({"id":record,"revision":revision,"fields":fields}),
-                    )
-                    .await?;
-                }
-            }
-        }
-    }
+    clone_apps(&mut tx, &h, &t, &id).await?;
     sqlx::query("INSERT INTO policy(tenant,variant) VALUES($1,'discovery'),($1,'comparison')")
         .bind(&id)
         .execute(&mut *tx)

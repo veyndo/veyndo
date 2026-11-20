@@ -408,7 +408,7 @@
         "tenants"
       ],
       "glob_imports": 10,
-      "untyped_access": 206,
+      "untyped_access": 207,
       "sql_outside_store": 8
     },
     "customers": {
@@ -511,7 +511,7 @@
         "tenants"
       ],
       "glob_imports": 29,
-      "untyped_access": 451,
+      "untyped_access": 452,
       "sql_outside_store": 11
     },
     "payments": {
@@ -746,7 +746,6 @@
         "payments",
         "pos",
         "pricing",
-        "protocols",
         "shipping",
         "shop",
         "studio"

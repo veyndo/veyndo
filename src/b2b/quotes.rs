@@ -48,68 +48,10 @@ pub(super) async fn invoke(a: &App, h: &RequestContext, op: &str, v: &Value) -> 
         return Ok(json!({"elements":rows.iter().map(|r| wire(r, h, admin)).collect::<Vec<_>>()}));
     }
     if ["quote.get", "quote.current"].contains(&op) {
-        let c = c.as_ref().unwrap();
-        let policy = guard_conn(&mut tx, h, c)
-            .await?
-            .ok_or(bad("Select a purchasing unit first"))?;
-        require(&policy, "quotes")?;
-        let context = c.data.b2b.as_ref().unwrap();
-        let id = if op == "quote.get" {
-            Some(v["id"].as_str().ok_or(bad("Quote required"))?)
-        } else {
-            None
-        };
-        let rows = sqlx::query("SELECT id,unit_id,buyer_id,state,revision,data FROM b2b_quotes WHERE tenant=$1 AND cart_id=$2 AND buyer_id=$3 AND unit_id=$4 AND ($5::text IS NULL OR id=$5) ORDER BY created_at DESC,id DESC LIMIT 20")
-            .bind(&t).bind(&c.id).bind(&context.customer_id).bind(&context.unit_id).bind(id).fetch_all(&mut *tx).await?;
-        if op == "quote.get" {
-            return rows.first().map(|r| wire(r, h, admin)).ok_or(Error(
-                StatusCode::NOT_FOUND,
-                "Quote not found in this cart".into(),
-            ));
-        }
-        return Ok(
-            json!({"elements":rows.iter().map(|r| wire(r, h, admin)).collect::<Vec<_>>(),"limit":20}),
-        );
+        return cart_quotes(&mut tx, h, &t, op, v, c.as_ref().unwrap()).await;
     }
     if let Some(c) = &c {
-        if c.status != "open"
-            || c.data.items.is_empty()
-            || v["revision"].as_i64() != Some(c.revision)
-        {
-            return Err(conflict("Review a current nonempty company cart first"));
-        }
-        let revision: Option<i64> = sqlx::query_scalar(
-            "SELECT revision FROM carts WHERE tenant=$1 AND id=$2 AND status='open' FOR SHARE",
-        )
-        .bind(&t)
-        .bind(&c.id)
-        .fetch_optional(&mut *tx)
-        .await?;
-        if revision != Some(c.revision) {
-            return Err(conflict("Cart changed; request a new quote"));
-        }
-        let policy = guard_conn(&mut tx, h, c)
-            .await?
-            .ok_or(bad("Select a purchasing unit first"))?;
-        require(&policy, "quotes")?;
-        if c.data.b2b.as_ref().is_some_and(|b| b.quote_id.is_some()) {
-            return Err(conflict(
-                "Release the accepted quote before requesting another",
-            ));
-        }
-        let id = uid();
-        let context = c.data.b2b.as_ref().unwrap();
-        let accepted = apps::native_lifecycle::capture(&mut tx, &t, "quote").await?;
-        sqlx::query("INSERT INTO b2b_quotes(tenant,id,unit_id,buyer_id,cart_id,data) VALUES($1,$2,$3,$4,$5,$6)").bind(&t).bind(&id).bind(&context.unit_id).bind(&context.customer_id).bind(&c.id).bind(json!({"quote":q,"currency":c.data.currency,"items":c.data.items,"message":message(v)?,"messages":[],"nativeLifecycle":accepted})).execute(&mut *tx).await?;
-        organization::event(
-            &mut tx,
-            &t,
-            "b2b.quote_requested",
-            json!({"quoteId":id,"unitId":context.unit_id}),
-        )
-        .await?;
-        tx.commit().await?;
-        return Ok(json!({"id":id,"revision":1,"state":"requested"}));
+        return request(tx, h, &t, v, c, q).await;
     }
     let id = v["id"].as_str().ok_or(bad("Quote required"))?;
     if !admin {
@@ -150,48 +92,7 @@ pub(super) async fn invoke(a: &App, h: &RequestContext, op: &str, v: &Value) -> 
             custom_state.as_str()
         }
         "quote.offer" => {
-            if !["requested", "offered"].contains(&state.as_str()) {
-                return Err(conflict("This quote cannot be revised"));
-            }
-            let lines: Vec<OfferLine> = serde_json::from_value(v["data"]["lines"].clone())
-                .map_err(|_| bad("Expected offer lines with grossMinor in the quote currency"))?;
-            let original: Vec<Item> = serde_json::from_value(data["items"].clone())
-                .map_err(|_| bad("Invalid requested items"))?;
-            if lines.len() != original.len()
-                || lines.len() > 100
-                || lines.iter().any(|l| {
-                    l.gross_minor > 1_000_000_000_000
-                        || !original
-                            .iter()
-                            .any(|i| i.id == l.id && i.quantity == l.quantity)
-                })
-                || lines
-                    .iter()
-                    .map(|l| &l.id)
-                    .collect::<std::collections::HashSet<_>>()
-                    .len()
-                    != lines.len()
-            {
-                return Err(bad(
-                    "Offer must cover the exact requested items and quantities",
-                ));
-            }
-            let until = v["data"]["validUntil"]
-                .as_str()
-                .ok_or(bad("Offer expiry required"))?;
-            chrono::DateTime::parse_from_rfc3339(until)
-                .map_err(|_| bad("Offer expiry must be an RFC3339 timestamp"))?;
-            let valid: bool = sqlx::query_scalar(
-                "SELECT $1::timestamptz>now() AND $1::timestamptz<now()+interval '1 year'",
-            )
-            .bind(until)
-            .fetch_one(&mut *tx)
-            .await?;
-            if !valid {
-                return Err(bad("Offer expires within the next year"));
-            }
-            data["lines"] = json!(lines);
-            data["validUntil"] = json!(until);
+            offer(&mut tx, v, &mut data, &state).await?;
             "offered"
         }
         "quote.message" => {
@@ -233,6 +134,127 @@ pub(super) async fn invoke(a: &App, h: &RequestContext, op: &str, v: &Value) -> 
     .await?;
     tx.commit().await?;
     Ok(json!({"id":id,"state":next,"revision":revision+1}))
+}
+type Tx<'a> = sqlx::Transaction<'a, sqlx::Postgres>;
+/// The quotes of the buyer's current cart: one by ID or the latest twenty.
+async fn cart_quotes(
+    tx: &mut Tx<'_>,
+    h: &RequestContext,
+    t: &str,
+    op: &str,
+    v: &Value,
+    c: &StoredCart,
+) -> Result<Value> {
+    let policy = guard_conn(tx, h, c)
+        .await?
+        .ok_or(bad("Select a purchasing unit first"))?;
+    require(&policy, "quotes")?;
+    let context = c.data.b2b.as_ref().unwrap();
+    let id = if op == "quote.get" {
+        Some(v["id"].as_str().ok_or(bad("Quote required"))?)
+    } else {
+        None
+    };
+    let rows = sqlx::query("SELECT id,unit_id,buyer_id,state,revision,data FROM b2b_quotes WHERE tenant=$1 AND cart_id=$2 AND buyer_id=$3 AND unit_id=$4 AND ($5::text IS NULL OR id=$5) ORDER BY created_at DESC,id DESC LIMIT 20")
+        .bind(t).bind(&c.id).bind(&context.customer_id).bind(&context.unit_id).bind(id).fetch_all(&mut **tx).await?;
+    if op == "quote.get" {
+        return rows.first().map(|r| wire(r, h, false)).ok_or(Error(
+            StatusCode::NOT_FOUND,
+            "Quote not found in this cart".into(),
+        ));
+    }
+    Ok(json!({"elements":rows.iter().map(|r| wire(r, h, false)).collect::<Vec<_>>(),"limit":20}))
+}
+/// Records a quote request for the reviewed, unchanged company cart.
+async fn request(
+    mut tx: Tx<'_>,
+    h: &RequestContext,
+    t: &str,
+    v: &Value,
+    c: &StoredCart,
+    q: Option<Value>,
+) -> Result<Value> {
+    if c.status != "open" || c.data.items.is_empty() || v["revision"].as_i64() != Some(c.revision) {
+        return Err(conflict("Review a current nonempty company cart first"));
+    }
+    let revision: Option<i64> = sqlx::query_scalar(
+        "SELECT revision FROM carts WHERE tenant=$1 AND id=$2 AND status='open' FOR SHARE",
+    )
+    .bind(t)
+    .bind(&c.id)
+    .fetch_optional(&mut *tx)
+    .await?;
+    if revision != Some(c.revision) {
+        return Err(conflict("Cart changed; request a new quote"));
+    }
+    let policy = guard_conn(&mut tx, h, c)
+        .await?
+        .ok_or(bad("Select a purchasing unit first"))?;
+    require(&policy, "quotes")?;
+    if c.data.b2b.as_ref().is_some_and(|b| b.quote_id.is_some()) {
+        return Err(conflict(
+            "Release the accepted quote before requesting another",
+        ));
+    }
+    let id = uid();
+    let context = c.data.b2b.as_ref().unwrap();
+    let accepted = apps::native_lifecycle::capture(&mut tx, t, "quote").await?;
+    sqlx::query("INSERT INTO b2b_quotes(tenant,id,unit_id,buyer_id,cart_id,data) VALUES($1,$2,$3,$4,$5,$6)").bind(t).bind(&id).bind(&context.unit_id).bind(&context.customer_id).bind(&c.id).bind(json!({"quote":q,"currency":c.data.currency,"items":c.data.items,"message":message(v)?,"messages":[],"nativeLifecycle":accepted})).execute(&mut *tx).await?;
+    organization::event(
+        &mut tx,
+        t,
+        "b2b.quote_requested",
+        json!({"quoteId":id,"unitId":context.unit_id}),
+    )
+    .await?;
+    tx.commit().await?;
+    Ok(json!({"id":id,"revision":1,"state":"requested"}))
+}
+/// Admits a merchant offer: exact requested items and quantities, bounded prices and an expiry within a year.
+async fn offer(tx: &mut Tx<'_>, v: &Value, data: &mut Value, state: &str) -> Result<()> {
+    if !["requested", "offered"].contains(&state) {
+        return Err(conflict("This quote cannot be revised"));
+    }
+    let lines: Vec<OfferLine> = serde_json::from_value(v["data"]["lines"].clone())
+        .map_err(|_| bad("Expected offer lines with grossMinor in the quote currency"))?;
+    let original: Vec<Item> = serde_json::from_value(data["items"].clone())
+        .map_err(|_| bad("Invalid requested items"))?;
+    if lines.len() != original.len()
+        || lines.len() > 100
+        || lines.iter().any(|l| {
+            l.gross_minor > 1_000_000_000_000
+                || !original
+                    .iter()
+                    .any(|i| i.id == l.id && i.quantity == l.quantity)
+        })
+        || lines
+            .iter()
+            .map(|l| &l.id)
+            .collect::<std::collections::HashSet<_>>()
+            .len()
+            != lines.len()
+    {
+        return Err(bad(
+            "Offer must cover the exact requested items and quantities",
+        ));
+    }
+    let until = v["data"]["validUntil"]
+        .as_str()
+        .ok_or(bad("Offer expiry required"))?;
+    chrono::DateTime::parse_from_rfc3339(until)
+        .map_err(|_| bad("Offer expiry must be an RFC3339 timestamp"))?;
+    let valid: bool = sqlx::query_scalar(
+        "SELECT $1::timestamptz>now() AND $1::timestamptz<now()+interval '1 year'",
+    )
+    .bind(until)
+    .fetch_one(&mut **tx)
+    .await?;
+    if !valid {
+        return Err(bad("Offer expires within the next year"));
+    }
+    data["lines"] = json!(lines);
+    data["validUntil"] = json!(until);
+    Ok(())
 }
 fn message(v: &Value) -> Result<&str> {
     let s = v["message"].as_str().unwrap_or("");

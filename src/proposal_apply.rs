@@ -8,6 +8,93 @@ pub(crate) async fn apply(a: &App, t: &str, id: &str, h: &RequestContext) -> Res
     }
     apply_mode(a, t, id, h, false).await
 }
+/// A merchant approval needs the original actor of the run and every scope it was planned with.
+fn admit_actor(
+    h: &RequestContext,
+    r: &sqlx::postgres::PgRow,
+    v: &Value,
+    autonomous: bool,
+) -> Result<()> {
+    if !autonomous
+        && (r
+            .get::<Option<String>, _>("run_actor")
+            .as_deref()
+            .or(v["actor"].as_str())
+            != header(h, "x-rac-user")
+            || r.get::<Option<Value>, _>("run_scopes")
+                .is_some_and(|scopes| {
+                    scopes.as_array().is_none_or(|scopes| {
+                        scopes
+                            .iter()
+                            .any(|s| s.as_str().is_none_or(|s| !auth::allowed(h, s)))
+                    })
+                }))
+    {
+        return Err(Error(
+            StatusCode::FORBIDDEN,
+            "Proposal requires its original actor and current permissions".into(),
+        ));
+    }
+    Ok(())
+}
+/// The rights a proposal needs for what it changes; operation plans and autonomous translations never pass here.
+fn admit_proposal(h: &RequestContext, p: &Proposal, autonomous: bool) -> Result<()> {
+    if !p.operations.is_empty() {
+        return Err(bad(
+            "Operation plans require their exact private work approval",
+        ));
+    }
+    if !p.changes.is_empty() {
+        auth::permit(h, "catalog.write")?;
+    }
+    if p.experience.is_some() || p.translation.is_some() {
+        auth::permit(h, "catalog.write")?;
+    }
+    if autonomous && p.translation.is_some() {
+        return Err(bad("Translation drafts require explicit merchant approval"));
+    }
+    if autonomous {
+        auth::permit(h, "catalog.write")?;
+        auth::permit(h, "settings.write")?;
+    }
+    Ok(())
+}
+/// Writes the product changes and the experience against the revisions the preview saw.
+async fn write_changes(
+    tx: &mut sqlx::Transaction<'_, sqlx::Postgres>,
+    t: &str,
+    changes: Vec<Change>,
+    (experience, expected): (Option<Value>, Option<i64>),
+) -> Result<()> {
+    for c in changes {
+        let product_id = c.product_id.clone();
+        let n=sqlx::query("UPDATE products SET price=COALESCE($1,price),stock=COALESCE($2,stock),revision=revision+1 WHERE tenant=$3 AND id=$4 AND revision=$5").bind(c.price).bind(c.stock).bind(t).bind(c.product_id).bind(c.expected_revision).execute(&mut **tx).await?.rows_affected();
+        if n != 1 {
+            return Err(conflict("Product changed since preview; create a new plan"));
+        }
+        let row = sqlx::query("SELECT * FROM products WHERE tenant=$1 AND id=$2")
+            .bind(t)
+            .bind(product_id)
+            .fetch_one(&mut **tx)
+            .await?;
+        knowledge::sync_product(tx, t, &serde_json::to_value(product(&row)).unwrap()).await?;
+    }
+    if let Some(e) = experience {
+        let n = sqlx::query(
+            "UPDATE experiences SET data=$1,revision=revision+1 WHERE tenant=$2 AND revision=$3",
+        )
+        .bind(e)
+        .bind(t)
+        .bind(expected)
+        .execute(&mut **tx)
+        .await?
+        .rows_affected();
+        if n != 1 {
+            return Err(conflict("Experience changed since preview"));
+        }
+    }
+    Ok(())
+}
 pub(crate) async fn apply_mode(
     a: &App,
     t: &str,
@@ -52,46 +139,10 @@ pub(crate) async fn apply_mode(
         return Err(conflict("Agent run has no completed proposal to approve"));
     }
     let v: Value = r.get("proposal");
-    if !autonomous
-        && (r
-            .get::<Option<String>, _>("run_actor")
-            .as_deref()
-            .or(v["actor"].as_str())
-            != header(h, "x-rac-user")
-            || r.get::<Option<Value>, _>("run_scopes")
-                .is_some_and(|scopes| {
-                    scopes.as_array().is_none_or(|scopes| {
-                        scopes
-                            .iter()
-                            .any(|s| s.as_str().is_none_or(|s| !auth::allowed(h, s)))
-                    })
-                }))
-    {
-        return Err(Error(
-            StatusCode::FORBIDDEN,
-            "Proposal requires its original actor and current permissions".into(),
-        ));
-    }
+    admit_actor(h, &r, &v, autonomous)?;
     let p: Proposal =
         serde_json::from_value(v["proposal"].clone()).map_err(|e| bad(e.to_string()))?;
-    if !p.operations.is_empty() {
-        return Err(bad(
-            "Operation plans require their exact private work approval",
-        ));
-    }
-    if !p.changes.is_empty() {
-        auth::permit(h, "catalog.write")?;
-    }
-    if p.experience.is_some() || p.translation.is_some() {
-        auth::permit(h, "catalog.write")?;
-    }
-    if autonomous && p.translation.is_some() {
-        return Err(bad("Translation drafts require explicit merchant approval"));
-    }
-    if autonomous {
-        auth::permit(h, "catalog.write")?;
-        auth::permit(h, "settings.write")?;
-    }
+    admit_proposal(h, &p, autonomous)?;
     if r.get::<bool, _>("applied") {
         return Ok(
             json!({"taskId":id,"applied":true,"replayed":true,"translationJobId":p.translation.as_ref().map(|_|id)}),
@@ -156,33 +207,13 @@ pub(crate) async fn apply_mode(
     if let Some(change) = &p.app_action {
         apps::apply_change(&mut tx, t, change, h).await?;
     }
-    for c in p.changes {
-        let product_id = c.product_id.clone();
-        let n=sqlx::query("UPDATE products SET price=COALESCE($1,price),stock=COALESCE($2,stock),revision=revision+1 WHERE tenant=$3 AND id=$4 AND revision=$5").bind(c.price).bind(c.stock).bind(t).bind(c.product_id).bind(c.expected_revision).execute(&mut *tx).await?.rows_affected();
-        if n != 1 {
-            return Err(conflict("Product changed since preview; create a new plan"));
-        }
-        let row = sqlx::query("SELECT * FROM products WHERE tenant=$1 AND id=$2")
-            .bind(t)
-            .bind(product_id)
-            .fetch_one(&mut *tx)
-            .await?;
-        knowledge::sync_product(&mut tx, t, &serde_json::to_value(product(&row)).unwrap()).await?;
-    }
-    if let Some(e) = p.experience {
-        let n = sqlx::query(
-            "UPDATE experiences SET data=$1,revision=revision+1 WHERE tenant=$2 AND revision=$3",
-        )
-        .bind(e)
-        .bind(t)
-        .bind(p.expected_experience_revision)
-        .execute(&mut *tx)
-        .await?
-        .rows_affected();
-        if n != 1 {
-            return Err(conflict("Experience changed since preview"));
-        }
-    }
+    write_changes(
+        &mut tx,
+        t,
+        p.changes,
+        (p.experience, p.expected_experience_revision),
+    )
+    .await?;
     sqlx::query("UPDATE tasks SET applied=true,applied_at=now() WHERE tenant=$2 AND id=$1")
         .bind(id)
         .bind(t)

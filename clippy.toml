@@ -1,3 +1,3 @@
 # A file may be long; a single function may not. This replaces the former 320-line limit per file.
 # The threshold is the current maximum and only goes down.
-too-many-lines-threshold = 320
+too-many-lines-threshold = 150

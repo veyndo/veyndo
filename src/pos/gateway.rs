@@ -146,6 +146,27 @@ pub(crate) async fn invoke(
         )
         .await?
         .0),
+        "create" | "cart" | "replace" | "select" | "accept" | "complete" => {
+            Box::pin(cart_operation(a, h, &t, &data, op, input)).await
+        }
+        "held" | "sales" | "catalog" => {
+            Box::pin(listing(a, h, &t, channel.to_owned(), op, input)).await
+        }
+        _ => Err(bad("Unknown POS operation")),
+    }
+}
+/// The cashier's cart: opening, reading, changing, selecting, accepting and completing a sale.
+async fn cart_operation(
+    a: &App,
+    mut h: RequestContext,
+    t: &str,
+    data: &marketing::Channel,
+    op: &str,
+    input: Input,
+) -> Result<Value> {
+    let admission = h.pos.clone().ok_or(bad("Cashier identity required"))?;
+    let (actor, tender) = (admission.actor, admission.tender_minor);
+    match op {
         "create" => {
             auth::permit(&h, "orders.write")?;
             let mut c = new_cart_context(a, &h, "", "pos").await?;
@@ -161,7 +182,7 @@ pub(crate) async fn invoke(
             selection.payment_method_id = "pos-cash".into();
             sqlx::query("UPDATE carts SET data=$1 WHERE tenant=$2 AND id=$3")
                 .bind(json!(c.data))
-                .bind(&t)
+                .bind(t)
                 .bind(&c.id)
                 .execute(&a.db)
                 .await?;
@@ -243,15 +264,33 @@ pub(crate) async fn invoke(
             ))
             .await
         }
+        _ => Err(bad("Unknown POS operation")),
+    }
+}
+/// Held carts, recent sales and the catalogue page of a register.
+async fn listing(
+    a: &App,
+    h: RequestContext,
+    t: &str,
+    channel: String,
+    op: &str,
+    input: Input,
+) -> Result<Value> {
+    let actor = h
+        .pos
+        .as_ref()
+        .map(|admission| admission.actor.clone())
+        .ok_or(bad("Cashier identity required"))?;
+    match op {
         "held" => {
-            let rows=sqlx::query("SELECT token,revision,data FROM carts WHERE tenant=$1 AND status='open' AND data->>'sales_channel'=$2 AND data->>'pos_actor'=$3 AND jsonb_array_length(data->'items')>0 ORDER BY created_at DESC LIMIT 40").bind(&t).bind(channel).bind(actor).fetch_all(&a.db).await?;
+            let rows=sqlx::query("SELECT token,revision,data FROM carts WHERE tenant=$1 AND status='open' AND data->>'sales_channel'=$2 AND data->>'pos_actor'=$3 AND jsonb_array_length(data->'items')>0 ORDER BY created_at DESC LIMIT 40").bind(t).bind(channel).bind(actor).fetch_all(&a.db).await?;
             Ok(
                 json!({"elements":rows.iter().map(|r|json!({"token":r.get::<String,_>("token"),"revision":r.get::<i64,_>("revision"),"items":r.get::<Value,_>("data")["items"]})).collect::<Vec<_>>() }),
             )
         }
         "sales" => {
             auth::permit(&h, "orders.read")?;
-            let rows=sqlx::query("SELECT id,data->>'orderNumber' AS number,data->'money' AS money,data->'payment'->>'state' AS payment,data->'pos' AS pos,created_at::text AS created FROM orders WHERE tenant=$1 AND data->>'salesChannelId'=$2 ORDER BY created_at DESC LIMIT 30").bind(&t).bind(channel).fetch_all(&a.db).await?;
+            let rows=sqlx::query("SELECT id,data->>'orderNumber' AS number,data->'money' AS money,data->'payment'->>'state' AS payment,data->'pos' AS pos,created_at::text AS created FROM orders WHERE tenant=$1 AND data->>'salesChannelId'=$2 ORDER BY created_at DESC LIMIT 30").bind(t).bind(channel).fetch_all(&a.db).await?;
             Ok(
                 json!({"elements":rows.iter().map(|r|json!({"id":r.get::<String,_>("id"),"number":r.get::<String,_>("number"),"money":r.get::<Value,_>("money"),"paymentState":r.get::<String,_>("payment"),"pos":r.get::<Option<Value>,_>("pos"),"createdAt":r.get::<String,_>("created")})).collect::<Vec<_>>() }),
             )

@@ -3,6 +3,127 @@ use serde_json::Value;
 fn text(v: &Value) -> String {
     v.as_str().unwrap_or("").into()
 }
+/// The seller's legal details that are filled in.
+fn seller_details(v: &Value, index: usize) -> Vec<String> {
+    let word = |w: [&str; 4]| w[index].to_string();
+    let mut lines = vec![];
+    for (key, labels) in [
+        (
+            "vatId",
+            ["VAT ID", "Umsatzsteuer-ID", "Numéro TVA", "Número IVA"],
+        ),
+        (
+            "registrationNumber",
+            [
+                "Register number",
+                "Registernummer",
+                "Numéro registre",
+                "Número registro",
+            ],
+        ),
+        (
+            "registerCourt",
+            [
+                "Register court",
+                "Registergericht",
+                "Tribunal registre",
+                "Tribunal registro",
+            ],
+        ),
+        (
+            "managingDirectors",
+            [
+                "Managing directors",
+                "Geschäftsführer",
+                "Gérants",
+                "Administradores",
+            ],
+        ),
+        (
+            "legalRepresentatives",
+            [
+                "Representatives",
+                "Vertretungsberechtigte",
+                "Représentants",
+                "Representantes",
+            ],
+        ),
+    ] {
+        let value = text(&v["seller"][key]);
+        if !value.is_empty() {
+            lines.push(format!("{}: {value}", word(labels)));
+        }
+    }
+    lines
+}
+/// The positions of the document; a delivery note lists only what its delivery carries.
+fn positions(v: &Value, (sign, decimals, currency): (f64, usize, &str)) -> Vec<String> {
+    let c = &v["order"]["cart"];
+    let mut lines = vec![];
+    if let Some(items) = c["lineItems"].as_array() {
+        for item in items {
+            let quantity = if v["kind"] == "delivery_note" && v.get("delivery").is_some() {
+                let Some(position) = v["delivery"]["positions"].as_array().and_then(|ps| {
+                    ps.iter()
+                        .find(|p| p["id"] == item["referencedId"] || p["id"] == item["id"])
+                }) else {
+                    continue;
+                };
+                position["quantity"].clone()
+            } else {
+                item["quantity"].clone()
+            };
+            lines.push(format!(
+                "{} x {} [{}]",
+                quantity,
+                text(&item["label"]),
+                text(&item["referencedId"])
+            ));
+            if v["kind"] != "delivery_note" {
+                lines.push(format!(
+                    "  {:.decimals$} {currency}",
+                    sign * item["price"]["totalPrice"].as_f64().unwrap_or(0.)
+                ));
+            }
+        }
+    }
+    lines
+}
+/// Net, tax, total, shipping and the tax per rate.
+fn totals(c: &Value, index: usize, (sign, decimals, currency): (f64, usize, &str)) -> Vec<String> {
+    let word = |w: [&str; 4]| w[index].to_string();
+    let mut lines = vec![];
+    for (key, label) in [
+        ("netPrice", word(["Net", "Netto", "Net", "Neto"])),
+        ("tax", word(["Tax", "Steuer", "Taxe", "Impuesto"])),
+        ("totalPrice", word(["Total", "Gesamt", "Total", "Total"])),
+    ] {
+        lines.push(format!(
+            "{label}: {:.decimals$} {currency}",
+            sign * c["price"][key].as_f64().unwrap_or(0.)
+        ));
+    }
+    lines.push(format!(
+        "{}: {:.decimals$} {currency}",
+        word(["Shipping", "Versand", "Livraison", "Envío"]),
+        sign * c["shippingCosts"]["totalPrice"].as_f64().unwrap_or(0.)
+    ));
+    if let Some(items) = c["lineItems"].as_array() {
+        for item in items {
+            if let Some(taxes) = item["price"]["calculatedTaxes"].as_array() {
+                for tax in taxes {
+                    lines.push(format!(
+                        "{} {}%: {:.decimals$} {currency}",
+                        word(["VAT", "MwSt.", "TVA", "IVA"]),
+                        tax["taxRate"],
+                        sign * tax["tax"].as_f64().unwrap_or(0.)
+                    ));
+                }
+            }
+        }
+    }
+    lines
+}
 pub fn lines(v: &Value) -> Vec<String> {
     let lang = v["locale"].as_str().unwrap_or("en");
     let index = match lang {
@@ -53,53 +174,7 @@ pub fn lines(v: &Value) -> Vec<String> {
             text(&o["orderNumber"])
         ),
     ];
-    for (key, labels) in [
-        (
-            "vatId",
-            ["VAT ID", "Umsatzsteuer-ID", "Numéro TVA", "Número IVA"],
-        ),
-        (
-            "registrationNumber",
-            [
-                "Register number",
-                "Registernummer",
-                "Numéro registre",
-                "Número registro",
-            ],
-        ),
-        (
-            "registerCourt",
-            [
-                "Register court",
-                "Registergericht",
-                "Tribunal registre",
-                "Tribunal registro",
-            ],
-        ),
-        (
-            "managingDirectors",
-            [
-                "Managing directors",
-                "Geschäftsführer",
-                "Gérants",
-                "Administradores",
-            ],
-        ),
-        (
-            "legalRepresentatives",
-            [
-                "Representatives",
-                "Vertretungsberechtigte",
-                "Représentants",
-                "Representantes",
-            ],
-        ),
-    ] {
-        let value = text(&v["seller"][key]);
-        if !value.is_empty() {
-            lines.push(format!("{}: {value}", word(labels)));
-        }
-    }
+    lines.extend(seller_details(v, index));
     if let Some(reference) = v["referenceNumber"].as_str() {
         lines.push(format!(
             "{}: {reference}",
@@ -136,63 +211,9 @@ pub fn lines(v: &Value) -> Vec<String> {
     lines.push(String::new());
     let cancellation = v["kind"] == "cancellation";
     let sign = if cancellation { -1. } else { 1. };
-    if let Some(items) = c["lineItems"].as_array() {
-        for item in items {
-            let quantity = if v["kind"] == "delivery_note" && v.get("delivery").is_some() {
-                let Some(position) = v["delivery"]["positions"].as_array().and_then(|ps| {
-                    ps.iter()
-                        .find(|p| p["id"] == item["referencedId"] || p["id"] == item["id"])
-                }) else {
-                    continue;
-                };
-                position["quantity"].clone()
-            } else {
-                item["quantity"].clone()
-            };
-            lines.push(format!(
-                "{} x {} [{}]",
-                quantity,
-                text(&item["label"]),
-                text(&item["referencedId"])
-            ));
-            if v["kind"] != "delivery_note" {
-                lines.push(format!(
-                    "  {:.decimals$} {currency}",
-                    sign * item["price"]["totalPrice"].as_f64().unwrap_or(0.)
-                ));
-            }
-        }
-    }
+    lines.extend(positions(v, (sign, decimals, currency)));
     if v["kind"] != "delivery_note" {
-        for (key, label) in [
-            ("netPrice", word(["Net", "Netto", "Net", "Neto"])),
-            ("tax", word(["Tax", "Steuer", "Taxe", "Impuesto"])),
-            ("totalPrice", word(["Total", "Gesamt", "Total", "Total"])),
-        ] {
-            lines.push(format!(
-                "{label}: {:.decimals$} {currency}",
-                sign * c["price"][key].as_f64().unwrap_or(0.)
-            ));
-        }
-        lines.push(format!(
-            "{}: {:.decimals$} {currency}",
-            word(["Shipping", "Versand", "Livraison", "Envío"]),
-            sign * c["shippingCosts"]["totalPrice"].as_f64().unwrap_or(0.)
-        ));
-        if let Some(items) = c["lineItems"].as_array() {
-            for item in items {
-                if let Some(taxes) = item["price"]["calculatedTaxes"].as_array() {
-                    for tax in taxes {
-                        lines.push(format!(
-                            "{} {}%: {:.decimals$} {currency}",
-                            word(["VAT", "MwSt.", "TVA", "IVA"]),
-                            tax["taxRate"],
-                            sign * tax["tax"].as_f64().unwrap_or(0.)
-                        ));
-                    }
-                }
-            }
-        }
+        lines.extend(totals(c, index, (sign, decimals, currency)));
     }
     if let Some(values) = v["order"]["pos"]["receiptMessage"].as_object() {
         let main = v["order"]["pos"]["mainLocale"].as_str().unwrap_or("en-GB");

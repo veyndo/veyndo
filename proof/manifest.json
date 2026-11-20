@@ -1125,8 +1125,8 @@
     },
     "components/checkout/src/service/delivery.rs": {
       "status": "unproved",
-      "sha256": "6931ab0eafd069d54edc2dbc31eb160fb8eb536ff990c195d20e8efcac006376",
-      "review": "Delivery enrichment, app adjustments and funding moved into components; kernel call sites unchanged"
+      "sha256": "d3a5714f589229d0ce2d7492765e4b0680600f31f19222adb324ce8878e3f934",
+      "review": "Functions above 150 lines split into named steps without behaviour change; function length limit lowered to 150"
     },
     "components/checkout/src/service.rs": {
       "status": "unproved",
@@ -1435,8 +1435,8 @@
     },
     "components/identity/src/http/browser.rs": {
       "status": "unproved",
-      "sha256": "d8c3d125f159d3d5ebc56ed2ae5ff03df2bc6c8dd9f98824e10f3f6599241c41",
-      "review": "Process configuration moved into core; browser session transports, Checkout buyer grants, the private Checkout relay, trusted geography and provider startup validation moved into their components without behaviour change"
+      "sha256": "14478013924c58db2c8ff9e4ccad7241b5a166e18842cd851e08898b5c7b8df3",
+      "review": "Functions above 150 lines split into named steps without behaviour change; function length limit lowered to 150"
     },
     "components/identity/src/http/integrations.rs": {
       "status": "reviewed-binding",
@@ -1875,13 +1875,13 @@
     },
     "components/marketing/src/store/flow_mutations.rs": {
       "status": "unproved",
-      "sha256": "0a0a74cc40c2bfd174d7c8b96d0e76cd1ca4db7d11bbae9ae9e4357d2e1969e9",
-      "review": "Local flow mutations moved verbatim into the marketing component and staged knowledge sources, assets and categories into the studio component; the flow owner and release selection stay in the server."
+      "sha256": "638541f0dc7cba57e0e41eeed04f9c234d599e66ab9bd697a6bb28b2d6bdc646",
+      "review": "Functions above 150 lines split into named steps without behaviour change; function length limit lowered to 150"
     },
     "components/marketing/src/store/promotions.rs": {
       "status": "unproved",
-      "sha256": "662bfc317b15f492c1384d242983a04e0f3b941c3103c217aa6ef59e26b0e4c7",
-      "review": "Flow pipeline and promotion types moved into components/marketing; kernel call sites unchanged"
+      "sha256": "896263af5daf1d00568fd189ebd8b37ced2c3d0dfa59366d9f652697867d372b",
+      "review": "Functions above 150 lines split into named steps without behaviour change; function length limit lowered to 150"
     },
     "components/marketing/src/store/rule_entities.rs": {
       "status": "unproved",
@@ -1975,8 +1975,8 @@
     },
     "components/orders/src/domain/receipt_text.rs": {
       "status": "unproved",
-      "sha256": "6212e0519b8cba9ce0cbb927c27378c07e93845c7ffe4eeb7c393a483c2aeb72",
-      "review": "order workflow kernel bindings follow the move into components/orders"
+      "sha256": "00afdca335e2922d11dc72103e119e270ef922f013cab5ad143d78b1ba91d475",
+      "review": "Functions above 150 lines split into named steps without behaviour change; function length limit lowered to 150"
     },
     "components/orders/src/domain.rs": {
       "status": "unproved",
@@ -2890,8 +2890,8 @@
     },
     "crates/cognition/src/inference/request.rs": {
       "status": "unproved",
-      "sha256": "b06d70d9314c5925587b2459792c11c4c2cc6630888b14ce05b240eff935c270",
-      "review": "Stage 8 adds the sovereign AI gate in the inference crate and its callers; no extracted policy changes."
+      "sha256": "2f6ca130ee35b25009e7fbf9d259d55450ca1fa1c2c0a45b0ca9c6bd8c52f278",
+      "review": "Functions above 150 lines split into named steps without behaviour change; function length limit lowered to 150"
     },
     "crates/cognition/src/inference/schema.rs": {
       "status": "unproved",
@@ -3105,8 +3105,8 @@
     },
     "extensions/apps/edi/service/export.rs": {
       "status": "unproved",
-      "sha256": "ec7d7bea3f89152112cae17d47f788158e93134b0ffbaed83effa080f456846d",
-      "review": "Reviewed app-owned EDI document identity: source hash binds the actual rendered document and explicit native source IDs, excluding mutable order activity/workflow. Deterministic real HTTP/PG counterexample adds an operational note; native receipts, partner authorization, cancellation and amount guards retained. This exporter remains unproved by Lean."
+      "sha256": "35f8fa0048337961537c45aeeddb04a19ac99fe2dad0c6e55381c0b16be0263a",
+      "review": "Functions above 150 lines split into named steps without behaviour change; function length limit lowered to 150"
     },
     "extensions/apps/edi/service/export_tests.rs": {
       "status": "unproved",
@@ -3185,8 +3185,8 @@
     },
     "extensions/apps/gmail/src/provider.rs": {
       "status": "unproved",
-      "sha256": "f738292cc1e4fae6eda0c7e4c7df7040e3def293fcbd42cbd53b51308538220e",
-      "review": "Reviewed Rust-only standard connector service: typed mail settings, tenant-bound AES-GCM, composite PostgreSQL queue/RLS, fenced distributed leases and explicit-only retry; original app/flow/MCP contract and actual SMTP/OAuth/migration regressions. SQL and providers remain unproved."
+      "sha256": "f56e0e15829b387755a614262c38a6e5860654e50af607843c4188da2129d9c3",
+      "review": "Functions above 150 lines split into named steps without behaviour change; function length limit lowered to 150"
     },
     "extensions/apps/google-analytics/src/actions.rs": {
       "status": "unproved",
@@ -3405,8 +3405,8 @@
     },
     "extensions/apps/migration/service/extract.rs": {
       "status": "unproved",
-      "sha256": "318343ba0bac4b04a28ac13da6ee32569e17c574419e00b1df7247ea4ecb7d18",
-      "review": "Reviewed app-owned Vercel/Klaviyo/HubSpot/Contentful/Algolia fixed transports, bounded redacted receipts, native compound action rights and encrypted CAS/lease fences; Shopware 6 read-only OAuth/currency/language projection delegates exact native import/reconciliation; generic tenant/app source reset and bounded source count use existing storage/admission owners. Provider protocols and SQL remain outside the extracted Lean proof scope; native two-worker, private/foreign, signed-login, migration and checkout regressions exercised."
+      "sha256": "87cd8cb5ef9cb55849383ad89ed80e201f73c14c74869d6bfca86f5f0f4e2374",
+      "review": "Functions above 150 lines split into named steps without behaviour change; function length limit lowered to 150"
     },
     "extensions/apps/migration/service/main.rs": {
       "status": "unproved",
@@ -4685,8 +4685,8 @@
     },
     "src/agent_runs/scenarios/journey.rs": {
       "status": "unproved",
-      "sha256": "7658597e1de0db1e066c6b2fdde78b5f3c7a6c8198ebf9b96efa621e7fd55e06",
-      "review": "Reviewed source attribution and bounded optional release-projection evidence; native current rights and source checks retained around inference. Strict split-login HTTP regressions include changed sources and 1001 app records without losing native purchases or historical reports. Digests are boundary observations, not frozen execution or Lean-certified async code."
+      "sha256": "574aa10663eb3d4fc547b24c4d11f7857a8de783250f20f3e14e8cb8c2cae7ec",
+      "review": "Functions above 150 lines split into named steps without behaviour change; function length limit lowered to 150"
     },
     "src/agent_runs/scenarios/mod.rs": {
       "status": "unproved",
@@ -4695,8 +4695,8 @@
     },
     "src/agent_runs/scenarios/probes.rs": {
       "status": "unproved",
-      "sha256": "c7dd8ce8c49a603f6c9a6f4cb9730a8af2086a6cc7b55aa8a38632eb22917cb4",
-      "review": "Scenario attack probes: shopper.rs purchase split into review/accept/complete with unchanged order of native calls; new probes.rs is an unproved read-and-attempt adapter over existing cart/checkout capabilities; agentic_scenarios suite passes with nine refusals and unchanged live shop"
+      "sha256": "fd0724b5d07213906dc26dfbdedc823906d3ddebd2297ef7283e125d3e97c970",
+      "review": "Functions above 150 lines split into named steps without behaviour change; function length limit lowered to 150"
     },
     "src/agent_runs/scenarios/readiness.rs": {
       "status": "unproved",
@@ -4820,8 +4820,8 @@
     },
     "src/apps/core_callbacks.rs": {
       "status": "unproved",
-      "sha256": "4fb7c618ff4c5881dce550b4131c4e33e28f82aa9073a59ee7d94b5bd6265e6e",
-      "review": "Restore the product-only catalog evidence callback under installed app scope and project selected publication through the native outbox transaction. Local Core and isolated Knowledge PostgreSQL composition verifies event retry, private staging, locale, withdrawal, restart, one order, and current source inventory."
+      "sha256": "d7e262fecd7dc7e77bab6d6bbf96065bad6720a345f7973f2ab4ee350a31db93",
+      "review": "Functions above 150 lines split into named steps without behaviour change; function length limit lowered to 150"
     },
     "src/apps/core_catalog_evidence.rs": {
       "status": "unproved",
@@ -4965,8 +4965,8 @@
     },
     "src/apps/job_import.rs": {
       "status": "unproved",
-      "sha256": "2e8ce9faf78181888ec5a896e6b1dd66ef1404d5b4603cacf024141fbc3fba83",
-      "review": "2026-10-19 reviewed native read-only import projection against shared product/category/address owners; paired CRM/history PII and private target/package/digest checks; generic completion evidence atomically uses existing job creator/lease/package and record CAS, platform AEAD, native actual-field verification, no new app table or queue. Actual eight-domain migration/archival/restart/tamper and native app callback/jobs/admin creation tests pass; pure cancelled-success policy has exact Lean claim, all boolean cases and a true-return negative mutation. SQL, cryptography, async service correctness and public hosting remain outside formal proof."
+      "sha256": "b5911aaae2b1b9ffdcefd1f93868cf9f68fe73a643ce22f4bbb345dcadc93c9a",
+      "review": "Functions above 150 lines split into named steps without behaviour change; function length limit lowered to 150"
     },
     "src/apps/jobs.rs": {
       "status": "unproved",
@@ -5380,8 +5380,8 @@
     },
     "src/auth/middleware.rs": {
       "status": "reviewed-binding",
-      "sha256": "62ab6b38095c51872d85d479d2c782f397b7313dec278ba83a4b01757e1de32b",
-      "review": "Permission rules and the permit and merchant checks moved unchanged into components/identity; the scope rule is bound there"
+      "sha256": "28ff1275cba1543093a7d49722fcc30b53ef8af77762a915266458f162549f00",
+      "review": "Functions above 150 lines split into named steps without behaviour change; function length limit lowered to 150"
     },
     "src/auth/mod.rs": {
       "status": "unproved",
@@ -5500,8 +5500,8 @@
     },
     "src/b2b/quotes.rs": {
       "status": "unproved",
-      "sha256": "3273f6e320a520f037cfd1bf8692096ad45d2ad5c7ed0e2442c3342d77c7453d",
-      "review": "B2B approvals, quick order and offer contract moved behind the shop cart port"
+      "sha256": "1b23a25e9a4aa121275588ed59b232669bdff0ec606165b4f23792263180afe7",
+      "review": "Functions above 150 lines split into named steps without behaviour change; function length limit lowered to 150"
     },
     "src/b2b/requisition.rs": {
       "status": "unproved",
@@ -5640,8 +5640,8 @@
     },
     "src/capabilities/schema.rs": {
       "status": "unproved",
-      "sha256": "4bd5f79a1e80e7dca1034184bba7c8f5b4c195eb3b254d182d7ed244df97c359",
-      "review": "Signed offers: cognition/signed_offer.rs signs a closed projection of the native cart quote with the existing Ed25519 owner and verifies signature, shop, expiry and current cart match; signed.rs gains key_id and verify helpers; readiness reports signing status; no extracted policy changed; providers suite verifies independently and covers forged, foreign, malformed, changed-cart and changed-price cases"
+      "sha256": "e9a2d31c79f74b404e92b8cdafe782c8b72f0932472c4c40c87633fbacd27d91",
+      "review": "Functions above 150 lines split into named steps without behaviour change; function length limit lowered to 150"
     },
     "src/capabilities.rs": {
       "status": "unproved",
@@ -5710,8 +5710,8 @@
     },
     "src/checkout/commit.rs": {
       "status": "reviewed-binding",
-      "sha256": "8a9d2f6b2df4c8103b5296d1043726ce3d42d7b16d2978b66dec28522d1ebe8b",
-      "review": "POS guard, customer, discount and settlement and the checkout session review moved into components"
+      "sha256": "efb2be19afbff32c49cb1026f92d08204ac5dd291973514b9611696cc8ace488",
+      "review": "Functions above 150 lines split into named steps without behaviour change; function length limit lowered to 150"
     },
     "src/checkout/lock.rs": {
       "status": "reviewed-binding",
@@ -5995,13 +5995,13 @@
     },
     "src/commerce/external_orders.rs": {
       "status": "reviewed-binding",
-      "sha256": "1ba40f2e918cc91ad8d3a6112cf40fb6958bdb7257b191c3c08e3395012cfc69",
-      "review": "inventory component crate created; no kernel binding changed"
+      "sha256": "55f2ff337199a9364fe29f36f5eedf2ce42b0e75b2ee10556bbf478f0211fb16",
+      "review": "Functions above 150 lines split into named steps without behaviour change; function length limit lowered to 150"
     },
     "src/commerce/fulfillment.rs": {
       "status": "reviewed-binding",
-      "sha256": "3b1b3aef91926dd5ef07fe3399207c4c219b10c775f6faa4ecffc90dfabbd602",
-      "review": "Native capture budget and receipt review; bounded generated conformance domains; SQL/network adapters remain unproved"
+      "sha256": "d61377f453f1c7f345ce971f6866f664e8434d3f22c288ab9508eb8270ef1f9c",
+      "review": "Functions above 150 lines split into named steps without behaviour change; function length limit lowered to 150"
     },
     "src/commerce/geography.rs": {
       "status": "unproved",
@@ -6790,8 +6790,8 @@
     },
     "src/operations/manual_orders.rs": {
       "status": "unproved",
-      "sha256": "21fea0fd3b4817f4f490332b850e91988b9a3bc77ab1632a4812d29bb2338816",
-      "review": "Native admin creation uses existing CRM address and cart/checkout owners; independently reviewed tenant/actor tokens, final manual payment guard, channel/customer/cart lock order, replay and explicit customer acknowledgement; new SQL/HTTP adapters remain unproved and have real state regressions."
+      "sha256": "c5f4538fd3d70022757757f1b4470b00a534e8d91757b2b9946f066e48cb9fc7",
+      "review": "Functions above 150 lines split into named steps without behaviour change; function length limit lowered to 150"
     },
     "src/operations/master_data.rs": {
       "status": "unproved",
@@ -6800,8 +6800,8 @@
     },
     "src/operations/mod.rs": {
       "status": "unproved",
-      "sha256": "79862d68d942a9af2cba91dc1da446230e4867d42897edecdbe3fa7fc66f9ca5",
-      "review": "POS guard, customer, discount and settlement and the checkout session review moved into components"
+      "sha256": "befee0f9ec3b1a7e185a00c7c27627bca38c46b7636f9cd1079e770ba1fa2173",
+      "review": "Functions above 150 lines split into named steps without behaviour change; function length limit lowered to 150"
     },
     "src/operations/order_documents.rs": {
       "status": "unproved",
@@ -7130,8 +7130,8 @@
     },
     "src/pos/gateway.rs": {
       "status": "unproved",
-      "sha256": "f8c9628aed3b1f0b8d2a2e3b0c9906c56efc23cdb1d0cc4bc68a7fa3945d2365",
-      "review": "Reviewed POS/payment status reads: one statement snapshot for payment, latest job and exact cart-bound native order; existing cashier/customer/channel admission and financial writers unchanged. Reviewed bounded 90-second startup retry for transient connection errors only; strict role/RLS/identity/signing audits remain unchanged. Deterministic pre-fix POS interleaving and actual refused-database startup reproduce original failures; corrected native suites and strict runtime checks are required."
+      "sha256": "ea80b3d723bd188c5660337ff6d64dceae1cdd3197785111ca446faea14828b4",
+      "review": "Functions above 150 lines split into named steps without behaviour change; function length limit lowered to 150"
     },
     "src/pos/input.rs": {
       "status": "unproved",
@@ -7165,8 +7165,8 @@
     },
     "src/proposal_apply.rs": {
       "status": "unproved",
-      "sha256": "3e6c40f42a704146d7ca00fc0fe59fe34fac6d4aadcea1616dc5922c991d5f76",
-      "review": "Reviewed chat cart preview and conditional edit reuse native quote and optimistic mutation, and app metadata derives from an admitted public product reference. Catalogue approval checks original task actor and current scopes before applying. The Rust/PostgreSQL regression covers stale quotes, wrong items, foreign cart scope, and same-shop approval denial."
+      "sha256": "767336b47cf85728e60965b8b1f1e089aedcd771bf754fbed8539ac7a2b60ca3",
+      "review": "Functions above 150 lines split into named steps without behaviour change; function length limit lowered to 150"
     },
     "src/proposal_model.rs": {
       "status": "unproved",
@@ -7185,8 +7185,8 @@
     },
     "src/routes.rs": {
       "status": "unproved",
-      "sha256": "f539e7954e01b611e3a478797280d78a75c7d8a30e9ac681e12923424b145d6c",
-      "review": "Process configuration moved into core; browser session transports, Checkout buyer grants, the private Checkout relay, trusted geography and provider startup validation moved into their components without behaviour change"
+      "sha256": "c445546c89bb6f28fe0987f2979700b6f04ec01d807fd13694cee65f81bd5e0c",
+      "review": "Functions above 150 lines split into named steps without behaviour change; function length limit lowered to 150"
     },
     "src/runtime_config.rs": {
       "status": "unproved",
@@ -7250,8 +7250,8 @@
     },
     "src/staging/clone.rs": {
       "status": "unproved",
-      "sha256": "afcb5eca699491c79aedd06806e6439a3fd2cfa5cc172e380eac735589c3e49d",
-      "review": "Reviewed original Shopware app controller, bounded fixed-origin lifecycle jobs and durable uncertain fences; opaque pinned app UI response CSP; operational records excluded by extracted release policy and native clone/publication path. Real container, native permissions/MCP, migration retention and app surface regressions passed; PHP and controller adapters remain unproved."
+      "sha256": "d46200a93813f466e3de99ae8e9c035e37856c44e62bdb755eb61f8c598024af",
+      "review": "Functions above 150 lines split into named steps without behaviour change; function length limit lowered to 150"
     },
     "src/staging/company.rs": {
       "status": "unproved",
@@ -7280,8 +7280,8 @@
     },
     "src/staging/release.rs": {
       "status": "unproved",
-      "sha256": "b260c0a77f067100ca7b594a88ea52fc155f55a1477275f7d361aebb56cedf22",
-      "review": "Reviewed Apps 0.14 model native lifecycle extraction: exact strict graph/snapshot DTOs, original bounded compiler and namespace, complete native canonical digests, mandatory native base/scope/locale policies, current auth callback and unchanged final verified predicate. Original order-domain validation stays native via extension trait; SQL capture/locks/effects unchanged. Independent 104 model and 19 runtime tests, storage PostgreSQL contract, 34 canonical bundle digests, native apps/order units and actual order/RFQ/MCP/release/role/tenant/race fixtures pass; shared compiler and SQL/host remain unproved."
+      "sha256": "4a3613bb315e6741a677c8d2588b5352efecfcde5a8d293bf6147a478d09a995",
+      "review": "Functions above 150 lines split into named steps without behaviour change; function length limit lowered to 150"
     },
     "src/staging/snapshot.rs": {
       "status": "unproved",

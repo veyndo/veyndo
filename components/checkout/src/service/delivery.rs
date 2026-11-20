@@ -6,9 +6,94 @@ use veyndo_pricing::pricing::{PriceInput, TaxRule, calculate, math_round, propor
 use veyndo_pricing::service::conversion as currencies;
 use veyndo_shop::domain::method_text;
 use veyndo_shop::types::cart::StoredCart;
-use veyndo_shop::types::settings::{Settings, Shipping};
+use veyndo_shop::types::settings::{CheckoutSelection, Settings, Shipping};
 
 pub use veyndo_shop::types::cart::selection;
+/// The tax rules of the delivery cost: the highest rate of the basket or its proportional mix.
+fn shipping_tax_rules(q: &Value, shipping: &Shipping, position: f64) -> Vec<TaxRule> {
+    let mut taxes: Vec<veyndo_pricing::pricing::CalculatedTax> = vec![];
+    for line in q["lineItems"].as_array().unwrap() {
+        for v in line["price"]["calculatedTaxes"].as_array().unwrap() {
+            let rate = v["taxRate"].as_f64().unwrap();
+            if let Some(t) = taxes.iter_mut().find(|t| t.tax_rate == rate) {
+                t.price += v["price"].as_f64().unwrap();
+                t.tax += v["tax"].as_f64().unwrap();
+            } else {
+                taxes.push(veyndo_pricing::pricing::CalculatedTax {
+                    tax_rate: rate,
+                    tax: v["tax"].as_f64().unwrap(),
+                    price: v["price"].as_f64().unwrap(),
+                });
+            }
+        }
+    }
+    if shipping.tax_type == "highest" {
+        taxes
+            .iter()
+            .map(|t| t.tax_rate)
+            .max_by(f64::total_cmp)
+            .map(|tax_rate| {
+                vec![TaxRule {
+                    tax_rate,
+                    percentage: 100.,
+                }]
+            })
+            .unwrap_or_default()
+    } else {
+        proportional_tax_rules(&taxes, position)
+    }
+}
+/// The method candidates for every country and the methods available in the selected one.
+fn method_options(
+    q: &mut Value,
+    c: &StoredCart,
+    s: &Settings,
+    selected: &CheckoutSelection,
+    view: &dyn Fn(&Shipping) -> Result<Value>,
+) -> Result<()> {
+    // Candidates support country edits on one page. They are not an admission decision.
+    q["shippingMethodOptions"] = json!(
+        s.shipping
+            .iter()
+            .filter(|v| v.active)
+            .map(view)
+            .collect::<Result<Vec<_>>>()?
+    );
+    q["paymentMethodOptions"] = json!(
+        s.payments
+            .iter()
+            .filter(|v| v.active && (!v.business_only || s.is_business(&c.data.group)))
+            .map(|v| {
+                let mut method = method_text::localized_payment(v, &c.data.locale, s);
+                method["countries"] = json!(
+                    s.countries
+                        .iter()
+                        .filter(|country| v.available_in(country))
+                        .collect::<Vec<_>>()
+                );
+                method["restrictedCountries"] = json!(true);
+                method
+            })
+            .collect::<Vec<_>>()
+    );
+    q["availableShippingMethods"] = json!(
+        s.shipping
+            .iter()
+            .filter(|v| v.active && v.countries.contains(&selected.country))
+            .map(view)
+            .collect::<Result<Vec<_>>>()?
+    );
+    q["availablePaymentMethods"] = json!(
+        s.payments
+            .iter()
+            .filter(|v| v.active
+                && (!v.business_only || s.is_business(&c.data.group))
+                && v.available_in(&selected.country))
+            .map(|v| method_text::localized_payment(v, &c.data.locale, s))
+            .collect::<Vec<_>>()
+    );
+    Ok(())
+}
 pub fn enrich(
     mut q: Value,
     c: &StoredCart,
@@ -77,37 +162,7 @@ pub fn enrich(
             "App shipping adjustment cannot make delivery cost negative",
         ));
     }
-    let mut taxes: Vec<veyndo_pricing::pricing::CalculatedTax> = vec![];
-    for line in q["lineItems"].as_array().unwrap() {
-        for v in line["price"]["calculatedTaxes"].as_array().unwrap() {
-            let rate = v["taxRate"].as_f64().unwrap();
-            if let Some(t) = taxes.iter_mut().find(|t| t.tax_rate == rate) {
-                t.price += v["price"].as_f64().unwrap();
-                t.tax += v["tax"].as_f64().unwrap();
-            } else {
-                taxes.push(veyndo_pricing::pricing::CalculatedTax {
-                    tax_rate: rate,
-                    tax: v["tax"].as_f64().unwrap(),
-                    price: v["price"].as_f64().unwrap(),
-                });
-            }
-        }
-    }
-    let rules = if shipping.tax_type == "highest" {
-        taxes
-            .iter()
-            .map(|t| t.tax_rate)
-            .max_by(f64::total_cmp)
-            .map(|tax_rate| {
-                vec![TaxRule {
-                    tax_rate,
-                    percentage: 100.,
-                }]
-            })
-            .unwrap_or_default()
-    } else {
-        proportional_tax_rules(&taxes, position)
-    };
+    let rules = shipping_tax_rules(&q, shipping, position);
     let gross_calc = calculate(&PriceInput {
         price: gross,
         decimals,
@@ -132,47 +187,7 @@ pub fn enrich(
     q["checkout"] = json!(selected);
     q["configurationRevision"] = json!(revision);
     q["availableCountries"] = json!(s.countries);
-    // Candidates support country edits on one page. They are not an admission decision.
-    q["shippingMethodOptions"] = json!(
-        s.shipping
-            .iter()
-            .filter(|v| v.active)
-            .map(shipping_view)
-            .collect::<Result<Vec<_>>>()?
-    );
-    q["paymentMethodOptions"] = json!(
-        s.payments
-            .iter()
-            .filter(|v| v.active && (!v.business_only || s.is_business(&c.data.group)))
-            .map(|v| {
-                let mut method = method_text::localized_payment(v, &c.data.locale, s);
-                method["countries"] = json!(
-                    s.countries
-                        .iter()
-                        .filter(|country| v.available_in(country))
-                        .collect::<Vec<_>>()
-                );
-                method["restrictedCountries"] = json!(true);
-                method
-            })
-            .collect::<Vec<_>>()
-    );
-    q["availableShippingMethods"] = json!(
-        s.shipping
-            .iter()
-            .filter(|v| v.active && v.countries.contains(&selected.country))
-            .map(shipping_view)
-            .collect::<Result<Vec<_>>>()?
-    );
-    q["availablePaymentMethods"] = json!(
-        s.payments
-            .iter()
-            .filter(|v| v.active
-                && (!v.business_only || s.is_business(&c.data.group))
-                && v.available_in(&selected.country))
-            .map(|v| method_text::localized_payment(v, &c.data.locale, s))
-            .collect::<Vec<_>>()
-    );
+    method_options(&mut q, c, s, &selected, &shipping_view)?;
     let lead = c
         .data
         .items

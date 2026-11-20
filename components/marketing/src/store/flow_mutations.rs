@@ -12,6 +12,50 @@ pub struct Step<'a> {
     pub action: &'a str,
 }
 
+/// The automation data a flow action changes: the customer's group, the customer or the order, locked for the change.
+async fn automation_target(
+    tx: &mut sqlx::Transaction<'_, sqlx::Postgres>,
+    t: &str,
+    customer_id: Option<&str>,
+    order: &Value,
+    (group, customer): (bool, bool),
+) -> Result<Value> {
+    Ok(if group {
+        let row = sqlx::query_scalar::<_, String>(
+            "SELECT group_name FROM customers WHERE tenant=$1 AND id=$2 FOR UPDATE",
+        )
+        .bind(t)
+        .bind(customer_id)
+        .fetch_one(&mut **tx)
+        .await?;
+        sqlx::query(
+            "INSERT INTO commerce_customer_groups(tenant,id) VALUES($1,$2) ON CONFLICT DO NOTHING",
+        )
+        .bind(t)
+        .bind(&row)
+        .execute(&mut **tx)
+        .await?;
+        sqlx::query_scalar::<_, Value>(
+            "SELECT data FROM commerce_customer_groups WHERE tenant=$1 AND id=$2 FOR UPDATE",
+        )
+        .bind(t)
+        .bind(row)
+        .fetch_one(&mut **tx)
+        .await?
+    } else if customer {
+        sqlx::query_scalar::<_, Value>(
+            "SELECT automation FROM customers WHERE tenant=$1 AND id=$2 FOR UPDATE",
+        )
+        .bind(t)
+        .bind(customer_id)
+        .fetch_optional(&mut **tx)
+        .await?
+        .ok_or(bad("Flow customer unavailable"))?
+    } else {
+        order.get("automation").cloned().unwrap_or(json!({}))
+    })
+}
+
 /// Applies one local flow action to its order or customer once per flow key.
 pub async fn execute(
     a: &State,
@@ -59,40 +103,14 @@ pub async fn execute(
         .map(String::from);
     let customer = action.contains("customer");
     let group = action == "action.set.customer.group.custom.field";
-    let mut data = if group {
-        let row = sqlx::query_scalar::<_, String>(
-            "SELECT group_name FROM customers WHERE tenant=$1 AND id=$2 FOR UPDATE",
-        )
-        .bind(t)
-        .bind(&customer_id)
-        .fetch_one(&mut *tx)
-        .await?;
-        sqlx::query(
-            "INSERT INTO commerce_customer_groups(tenant,id) VALUES($1,$2) ON CONFLICT DO NOTHING",
-        )
-        .bind(t)
-        .bind(&row)
-        .execute(&mut *tx)
-        .await?;
-        sqlx::query_scalar::<_, Value>(
-            "SELECT data FROM commerce_customer_groups WHERE tenant=$1 AND id=$2 FOR UPDATE",
-        )
-        .bind(t)
-        .bind(row)
-        .fetch_one(&mut *tx)
-        .await?
-    } else if customer {
-        sqlx::query_scalar::<_, Value>(
-            "SELECT automation FROM customers WHERE tenant=$1 AND id=$2 FOR UPDATE",
-        )
-        .bind(t)
-        .bind(&customer_id)
-        .fetch_optional(&mut *tx)
-        .await?
-        .ok_or(bad("Flow customer unavailable"))?
-    } else {
-        order.get("automation").cloned().unwrap_or(json!({}))
-    };
+    let mut data = automation_target(
+        &mut tx,
+        t,
+        customer_id.as_deref(),
+        &order,
+        (group, customer),
+    )
+    .await?;
     if action.ends_with(".tag") {
         let mut tags = data["tags"].as_array().cloned().unwrap_or_default();
         for tag in config["tags"].as_array().unwrap() {

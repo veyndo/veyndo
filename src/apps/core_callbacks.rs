@@ -31,6 +31,92 @@ async fn invoke(
     .await;
     result.map(Json)
 }
+/// A job claims work or reports progress; a claim by the app itself also carries its settings.
+async fn job_progress(
+    a: &App,
+    h: &RequestContext,
+    t: &str,
+    m: &Manifest,
+    operation: &str,
+    v: &Value,
+) -> Result<Value> {
+    if !m.permissions.iter().any(|p| p == "jobs.write") {
+        return Err(Error(
+            StatusCode::FORBIDDEN,
+            "App job permission required".into(),
+        ));
+    }
+    credentials::permit(h, "jobs.write")?;
+    auth::permit(h, "apps.manage")?;
+    let settings_allowed = operation == "job_claim"
+        && h.principal.app.as_deref() == Some(m.id.as_str())
+        && m.permissions.iter().any(|p| p == "settings.read");
+    if settings_allowed {
+        credentials::permit(h, "settings.read")?;
+        auth::permit(h, "team.manage")?;
+    }
+    let mut result = job_callbacks::execute(a, h, m, operation, v).await?;
+    if settings_allowed {
+        result["_appSettings"] = settings::resolve(a, t, m).await?;
+    }
+    Ok(result)
+}
+/// A receipt export needs explicit document, order and personal data consent.
+async fn receipt(a: &App, h: &RequestContext, m: &Manifest, v: &Value) -> Result<Value> {
+    input_schema::validate(
+        &json!({"type":"object","properties":{"id":{"type":"string","maxLength":100},"receiptId":{"type":"string","maxLength":100}},"required":["id","receiptId"],"additionalProperties":false}),
+        v,
+    )?;
+    for permission in ["documents.read", "orders.read", "customers.pii"] {
+        if !m.permissions.iter().any(|p| p == permission) {
+            return Err(Error(
+                StatusCode::FORBIDDEN,
+                "Receipt export requires explicit document, order and PII consent".into(),
+            ));
+        }
+        credentials::permit(h, permission)?;
+        auth::permit(h, credentials::scope(permission).unwrap())?;
+    }
+    crate::operations::receipt_snapshot(
+        a,
+        h,
+        v["id"].as_str().unwrap(),
+        v["receiptId"].as_str().unwrap(),
+    )
+    .await
+}
+/// Runs a declared native list or save action of the app's own records.
+async fn record_action(
+    a: &App,
+    h: &RequestContext,
+    id: &str,
+    m: &Manifest,
+    v: &Value,
+) -> Result<Value> {
+    input_schema::validate(
+        &json!({"type":"object","properties":{"action":{"type":"string","maxLength":32},"input":{"type":"object"}},"required":["action","input"],"additionalProperties":false}),
+        v,
+    )?;
+    let name = v["action"].as_str().ok_or(bad("Action required"))?;
+    let action = m
+        .actions
+        .iter()
+        .find(|action| action.name == name && ["list", "save"].contains(&action.handler.as_str()))
+        .ok_or(bad("Callback requires a declared native list/save action"))?;
+    let permission = if action.handler == "list" {
+        "data.read"
+    } else {
+        "data.write"
+    };
+    if !m.permissions.iter().any(|p| p == permission) {
+        return Err(Error(
+            StatusCode::FORBIDDEN,
+            "Native record capability not declared".into(),
+        ));
+    }
+    credentials::permit(h, permission)?;
+    invoke_app(a, h, id, name, &v["input"]).await
+}
 async fn execute(
     a: &App,
     h: &RequestContext,
@@ -76,26 +162,7 @@ async fn execute(
         return job_import::execute(a, h, &m, &v, operation == "job_inspect").await;
     }
     if ["job_claim", "job_progress"].contains(&operation) {
-        if !m.permissions.iter().any(|p| p == "jobs.write") {
-            return Err(Error(
-                StatusCode::FORBIDDEN,
-                "App job permission required".into(),
-            ));
-        }
-        credentials::permit(h, "jobs.write")?;
-        auth::permit(h, "apps.manage")?;
-        let settings_allowed = operation == "job_claim"
-            && h.principal.app.as_deref() == Some(m.id.as_str())
-            && m.permissions.iter().any(|p| p == "settings.read");
-        if settings_allowed {
-            credentials::permit(h, "settings.read")?;
-            auth::permit(h, "team.manage")?;
-        }
-        let mut result = job_callbacks::execute(a, h, &m, operation, &v).await?;
-        if settings_allowed {
-            result["_appSettings"] = settings::resolve(a, &t, &m).await?;
-        }
-        return Ok(result);
+        return job_progress(a, h, &t, &m, operation, &v).await;
     }
     if operation == "delivery_snapshot" {
         return core_documents::snapshot(a, h, &m, &v).await;
@@ -104,54 +171,10 @@ async fn execute(
         return core_documents::booking(a, h, &m, operation, &v).await;
     }
     if operation == "receipt_snapshot" {
-        input_schema::validate(
-            &json!({"type":"object","properties":{"id":{"type":"string","maxLength":100},"receiptId":{"type":"string","maxLength":100}},"required":["id","receiptId"],"additionalProperties":false}),
-            &v,
-        )?;
-        for permission in ["documents.read", "orders.read", "customers.pii"] {
-            if !m.permissions.iter().any(|p| p == permission) {
-                return Err(Error(
-                    StatusCode::FORBIDDEN,
-                    "Receipt export requires explicit document, order and PII consent".into(),
-                ));
-            }
-            credentials::permit(h, permission)?;
-            auth::permit(h, credentials::scope(permission).unwrap())?;
-        }
-        return crate::operations::receipt_snapshot(
-            a,
-            h,
-            v["id"].as_str().unwrap(),
-            v["receiptId"].as_str().unwrap(),
-        )
-        .await;
+        return receipt(a, h, &m, &v).await;
     }
     if operation == "record_action" {
-        input_schema::validate(
-            &json!({"type":"object","properties":{"action":{"type":"string","maxLength":32},"input":{"type":"object"}},"required":["action","input"],"additionalProperties":false}),
-            &v,
-        )?;
-        let name = v["action"].as_str().ok_or(bad("Action required"))?;
-        let action = m
-            .actions
-            .iter()
-            .find(|action| {
-                action.name == name && ["list", "save"].contains(&action.handler.as_str())
-            })
-            .ok_or(bad("Callback requires a declared native list/save action"))?;
-        let permission = if action.handler == "list" {
-            "data.read"
-        } else {
-            "data.write"
-        };
-        if !m.permissions.iter().any(|p| p == permission) {
-            return Err(Error(
-                StatusCode::FORBIDDEN,
-                "Native record capability not declared".into(),
-            ));
-        }
-        credentials::permit(h, permission)?;
-        return invoke_app(a, h, id, name, &v["input"]).await;
+        return record_action(a, h, id, &m, &v).await;
     }
     if ["order_import", "channel", "channel_product"].contains(&operation) {
         return core_exchange::execute(a, h, &m, operation, &v).await;

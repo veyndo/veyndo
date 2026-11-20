@@ -1,6 +1,67 @@
 //! Revision-checked payment and delivery state transitions.
 use super::*;
 
+/// A merchant marks a manual payment; external payments change only on a provider receipt.
+fn payment_transition(o: &mut Value, machine: &OrderMachine, target: &str) -> Result<()> {
+    if crate::payments::external(o) {
+        return Err(conflict(
+            "External payments require a confirmed provider receipt",
+        ));
+    }
+    let current = o["payment"]["state"].as_str().unwrap_or("");
+    if !verified_kernel::manual_payment_admissible(
+        machine
+            .states
+            .iter()
+            .any(|s| s.id == o["state"].as_str().unwrap_or("") && s.terminal),
+        crate::payments::external(o),
+        ["pending", "authorized"].contains(&current),
+        target == "paid",
+    ) {
+        return Err(conflict("Invalid payment transition"));
+    }
+    o["payment"]["state"] = json!(target);
+    Ok(())
+}
+/// Ships or delivers one delivery of the order and records safe tracking details.
+fn delivery_transition(o: &mut Value, v: &Value, target: &str) -> Result<()> {
+    let index = v["deliveryIndex"].as_u64().unwrap_or(0) as usize;
+    let d = o["deliveries"]
+        .as_array_mut()
+        .and_then(|v| v.get_mut(index))
+        .ok_or(bad("Order has no delivery"))?;
+    let current = d["state"].as_str().unwrap_or("open");
+    if !d["booking"].is_null() {
+        return Err(conflict("Reconcile the carrier booking before dispatch"));
+    }
+    if !matches!(
+        (current, target),
+        ("open", "shipped") | ("shipped", "delivered")
+    ) {
+        return Err(conflict("Invalid delivery transition"));
+    }
+    if target == "shipped"
+        && let Some(track) = v["trackingCode"].as_str()
+    {
+        if track.len() > 100 {
+            return Err(bad("Tracking code too long"));
+        }
+        d["trackingCode"] = json!(track);
+    }
+    if let Some(url) = v["trackingUrl"].as_str() {
+        if !url.is_empty() && (!url.starts_with("https://") || !crate::assets::safe_url(url)) {
+            return Err(bad("Tracking link must be a safe HTTPS URL"));
+        }
+        d["trackingUrl"] = if url.is_empty() {
+            Value::Null
+        } else {
+            json!(url)
+        };
+    }
+    d["state"] = json!(target);
+    Ok(())
+}
+
 pub(crate) async fn transition_order(
     State(a): State<App>,
     h: RequestContext,
@@ -99,65 +160,13 @@ pub(crate) async fn transition_order(
             if let Some(reason) = guard(&o, &machine, kind, target) {
                 return Err(conflict(reason));
             }
-            if crate::payments::external(&o) {
-                return Err(conflict(
-                    "External payments require a confirmed provider receipt",
-                ));
-            }
-            let current = o["payment"]["state"].as_str().unwrap_or("");
-            if !verified_kernel::manual_payment_admissible(
-                machine
-                    .states
-                    .iter()
-                    .any(|s| s.id == o["state"].as_str().unwrap_or("") && s.terminal),
-                crate::payments::external(&o),
-                ["pending", "authorized"].contains(&current),
-                target == "paid",
-            ) {
-                return Err(conflict("Invalid payment transition"));
-            }
-            o["payment"]["state"] = json!(target);
+            payment_transition(&mut o, &machine, target)?;
         }
         "delivery" => {
             if let Some(reason) = guard(&o, &machine, kind, target) {
                 return Err(conflict(reason));
             }
-            let index = v["deliveryIndex"].as_u64().unwrap_or(0) as usize;
-            let d = o["deliveries"]
-                .as_array_mut()
-                .and_then(|v| v.get_mut(index))
-                .ok_or(bad("Order has no delivery"))?;
-            let current = d["state"].as_str().unwrap_or("open");
-            if !d["booking"].is_null() {
-                return Err(conflict("Reconcile the carrier booking before dispatch"));
-            }
-            if !matches!(
-                (current, target),
-                ("open", "shipped") | ("shipped", "delivered")
-            ) {
-                return Err(conflict("Invalid delivery transition"));
-            }
-            if target == "shipped"
-                && let Some(track) = v["trackingCode"].as_str()
-            {
-                if track.len() > 100 {
-                    return Err(bad("Tracking code too long"));
-                }
-                d["trackingCode"] = json!(track);
-            }
-            if let Some(url) = v["trackingUrl"].as_str() {
-                if !url.is_empty()
-                    && (!url.starts_with("https://") || !crate::assets::safe_url(url))
-                {
-                    return Err(bad("Tracking link must be a safe HTTPS URL"));
-                }
-                d["trackingUrl"] = if url.is_empty() {
-                    Value::Null
-                } else {
-                    json!(url)
-                };
-            }
-            d["state"] = json!(target);
+            delivery_transition(&mut o, &v, target)?;
         }
         _ => return Err(bad("Kind must be payment or delivery")),
     }

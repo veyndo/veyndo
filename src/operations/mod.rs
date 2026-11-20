@@ -121,6 +121,75 @@ pub(crate) fn requires_pii(name: &str) -> bool {
                 | "merchant.receipt.create"
         )
 }
+/// The record a merchant operation names.
+fn record_id(v: &Value) -> Result<String> {
+    v["id"]
+        .as_str()
+        .map(str::to_string)
+        .ok_or(bad("id required"))
+}
+/// Products, categories and product files through their native handlers.
+async fn catalog_operation(a: &App, h: &RequestContext, name: &str, v: &Value) -> Result<Value> {
+    let id = || record_id(v);
+    let Json(result) = match name {
+        "merchant.products" => {
+            commerce::list_products(
+                State(a.clone()),
+                h.clone(),
+                axum::extract::Query(
+                    serde_json::from_value(v.clone())
+                        .map_err(|_| bad("Invalid catalog criteria"))?,
+                ),
+            )
+            .await?
+        }
+        "merchant.categories" => {
+            crate::categories::list_categories(State(a.clone()), h.clone()).await?
+        }
+        "merchant.product.create" => {
+            commerce::create_product(State(a.clone()), h.clone(), Json(v["product"].clone()))
+                .await?
+        }
+        "merchant.category.create" => {
+            crate::categories::create_category(
+                State(a.clone()),
+                h.clone(),
+                Json(v["category"].clone()),
+            )
+            .await?
+        }
+        "merchant.category.save" => {
+            crate::categories::save_category(
+                State(a.clone()),
+                h.clone(),
+                Path(id()?),
+                Json(v["category"].clone()),
+            )
+            .await?
+        }
+        "merchant.product.content" => {
+            commerce::product_editor(State(a.clone()), h.clone(), Path(id()?)).await?
+        }
+        "merchant.product.save" => {
+            commerce::edit_product(
+                State(a.clone()),
+                h.clone(),
+                Path(id()?),
+                Json(v["product"].clone()),
+            )
+            .await?
+        }
+        "merchant.product.assets" => {
+            crate::assets::list(State(a.clone()), h.clone(), Path(id()?)).await?
+        }
+        "merchant.asset.publish" => {
+            crate::assets::publish(State(a.clone()), h.clone(), Path(id()?), Json(v.clone()))
+                .await?
+        }
+        _ => return Err(bad("Unknown operation")),
+    };
+    Ok(result)
+}
 pub(crate) async fn invoke(a: &App, h: &RequestContext, name: &str, v: &Value) -> Result<Value> {
     merchant(a, h)?;
     auth::permit(
@@ -130,12 +199,7 @@ pub(crate) async fn invoke(a: &App, h: &RequestContext, name: &str, v: &Value) -
     if requires_pii(name) {
         auth::permit(h, "customers.pii")?;
     }
-    let id = || {
-        v["id"]
-            .as_str()
-            .map(str::to_string)
-            .ok_or(bad("id required"))
-    };
+    let id = || record_id(v);
     let criteria = || serde_json::from_value(v.clone()).map_err(|_| bad("Invalid search criteria"));
     let Json(result) = match name {
         "merchant.import.record" => Json(imports::invoke(a, h, v).await?),
@@ -192,61 +256,15 @@ pub(crate) async fn invoke(a: &App, h: &RequestContext, name: &str, v: &Value) -
         "merchant.workflow.save" => {
             workflow::save(State(a.clone()), h.clone(), Json(v.clone())).await?
         }
-        "merchant.products" => {
-            commerce::list_products(
-                State(a.clone()),
-                h.clone(),
-                axum::extract::Query(
-                    serde_json::from_value(v.clone())
-                        .map_err(|_| bad("Invalid catalog criteria"))?,
-                ),
-            )
-            .await?
-        }
-        "merchant.categories" => {
-            crate::categories::list_categories(State(a.clone()), h.clone()).await?
-        }
-        "merchant.product.create" => {
-            commerce::create_product(State(a.clone()), h.clone(), Json(v["product"].clone()))
-                .await?
-        }
-        "merchant.category.create" => {
-            crate::categories::create_category(
-                State(a.clone()),
-                h.clone(),
-                Json(v["category"].clone()),
-            )
-            .await?
-        }
-        "merchant.category.save" => {
-            crate::categories::save_category(
-                State(a.clone()),
-                h.clone(),
-                Path(id()?),
-                Json(v["category"].clone()),
-            )
-            .await?
-        }
-        "merchant.product.content" => {
-            commerce::product_editor(State(a.clone()), h.clone(), Path(id()?)).await?
-        }
-        "merchant.product.save" => {
-            commerce::edit_product(
-                State(a.clone()),
-                h.clone(),
-                Path(id()?),
-                Json(v["product"].clone()),
-            )
-            .await?
-        }
-        "merchant.product.assets" => {
-            crate::assets::list(State(a.clone()), h.clone(), Path(id()?)).await?
-        }
-        "merchant.asset.publish" => {
-            crate::assets::publish(State(a.clone()), h.clone(), Path(id()?), Json(v.clone()))
-                .await?
-        }
-
+        "merchant.products"
+        | "merchant.categories"
+        | "merchant.product.create"
+        | "merchant.category.create"
+        | "merchant.category.save"
+        | "merchant.product.content"
+        | "merchant.product.save"
+        | "merchant.product.assets"
+        | "merchant.asset.publish" => Json(Box::pin(catalog_operation(a, h, name, v)).await?),
         "merchant.orders" => {
             orders::list(
                 State(a.clone()),
