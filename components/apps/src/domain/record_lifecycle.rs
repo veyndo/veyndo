@@ -1,18 +1,22 @@
 //! Native transport mapping for shared app-owned workflow contracts and state transitions.
-#[cfg(test)]
-use super::*;
-#[cfg(test)]
-fn contract(e: &Entity) -> Result<()> {
+use crate::domain::model_contract;
+use serde_json::Value;
+use veyndo_app_model::Entity;
+use veyndo_core::Result;
+
+/// Checks the workflow an entity declares.
+pub fn contract(e: &Entity) -> Result<()> {
     veyndo_app_model::lifecycle::contract(e).map_err(model_contract::error)
 }
-#[cfg(test)]
-pub(super) fn change(e: &Entity, old: Option<&Value>, fields: &Value) -> Result<()> {
+/// Checks one record change against the declared workflow.
+pub fn change(e: &Entity, old: Option<&Value>, fields: &Value) -> Result<()> {
     veyndo_app_model::lifecycle::change(e, old, fields).map_err(model_contract::error)
 }
 #[cfg(test)]
 mod tests {
-    #[cfg(test)]
-    use super::*;
+    use super::{change, contract};
+    use serde_json::json;
+    use veyndo_app_model::Entity;
     fn entity() -> Entity {
         serde_json::from_value(json!({"name":"cases","fields":[{"name":"status","kind":"string","required":true,"choices":[{"value":"new","label":{}},{"value":"closed","label":{}}]},{"name":"order_id","kind":"string"}],"workflow":{"field":"status","initial":"new","immutableFields":["order_id"],"transitions":[{"from":"new","to":"closed"}]}})).unwrap()
     }

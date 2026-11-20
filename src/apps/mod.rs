@@ -79,7 +79,6 @@ mod job_import;
 mod jobs;
 pub(crate) mod native_lifecycle;
 pub(crate) mod record_history;
-mod record_lifecycle;
 pub(crate) use approval::print_digest;
 pub(crate) mod hosted;
 pub(crate) mod service_limits;

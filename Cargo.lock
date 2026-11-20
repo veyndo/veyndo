@@ -3559,6 +3559,7 @@ dependencies = [
  "ring",
  "serde_json",
  "sqlx",
+ "tokio",
  "veyndo-app-model",
  "veyndo-app-storage",
  "veyndo-apps",
@@ -3569,6 +3570,7 @@ dependencies = [
  "veyndo-orders",
  "veyndo-pricing",
  "veyndo-runtime",
+ "veyndo-shop",
 ]
 
 [[package]]

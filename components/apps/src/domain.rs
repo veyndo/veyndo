@@ -1,6 +1,9 @@
 //! Pure package rules: no database, no transport.
 pub mod action_policy;
 pub mod approval;
+pub mod configuration_budget;
+pub mod configuration_inputs;
+pub mod configuration_summary;
 pub mod distribution;
 pub mod event_destination;
 pub mod event_projection;
@@ -10,8 +13,10 @@ pub mod manifest_policy;
 pub mod manifest_validation;
 pub mod model_contract;
 pub mod native_views;
+pub mod ontology;
 pub mod persistence;
 pub mod presentation;
+pub mod record_lifecycle;
 pub mod reference_policy;
 pub mod relations;
 pub mod schema_changes;

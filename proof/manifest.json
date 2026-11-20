@@ -694,6 +694,21 @@
       "sha256": "6bede05e37503886dae0924d404be43a103e8ba68fffbd128af8057bb2cda34e",
       "review": "Package approval, distribution, schema adapters, event projection and service transport policy moved into components/apps without a change in behaviour"
     },
+    "components/apps/src/domain/configuration_budget.rs": {
+      "status": "unproved",
+      "sha256": "eed6cd384d24517c231d1b9cad6c0265ecc476d7d71a5842f55333567e9cd5c1",
+      "review": "Configuration, lifecycle, ontology and reference adapters moved into the apps component without changing rules"
+    },
+    "components/apps/src/domain/configuration_inputs.rs": {
+      "status": "unproved",
+      "sha256": "2b09e4ed00f7ee1940679226bfa4bdd6b48b3c7ea4830139141492e5bf71a2ba",
+      "review": "Configuration, lifecycle, ontology and reference adapters moved into the apps component without changing rules"
+    },
+    "components/apps/src/domain/configuration_summary.rs": {
+      "status": "unproved",
+      "sha256": "12b36439fd0d94c4b36a04b305674953bca94fbcea2854e3ca7271d6234f1794",
+      "review": "Configuration, lifecycle, ontology and reference adapters moved into the apps component without changing rules"
+    },
     "components/apps/src/domain/distribution.rs": {
       "status": "unproved",
       "sha256": "ea41256153f8ae695dabf5ec5dc7822d7716c8885e360e7caa1feca3ffb168f2",
@@ -744,6 +759,11 @@
       "sha256": "80d709180488f67c0b3575866fa848d32d4069dc7c7e62a0ca5f13e3898af9e2",
       "review": "Field, reference, view and manifest policy moved into the apps component without changing rules"
     },
+    "components/apps/src/domain/ontology.rs": {
+      "status": "unproved",
+      "sha256": "bd09125153bdb1f205046f3b6287d2574700d15d4417206900363ad02b27f55b",
+      "review": "Configuration, lifecycle, ontology and reference adapters moved into the apps component without changing rules"
+    },
     "components/apps/src/domain/persistence.rs": {
       "status": "unproved",
       "sha256": "976e401c9727b2494ea86f8ba7bfbb29fb238b7eca5b264844e458aecf7ce541",
@@ -753,6 +773,11 @@
       "status": "unproved",
       "sha256": "188a5a9fc0f047a0feb6b1377a9417b98cf0991c3d5ea8c55e5b7b6aeae924a0",
       "review": "Package approval, distribution, schema adapters, event projection and service transport policy moved into components/apps without a change in behaviour"
+    },
+    "components/apps/src/domain/record_lifecycle.rs": {
+      "status": "unproved",
+      "sha256": "27a2acc7839f7f7e6d430bcad3855c480c16371183ef2cf753ec689e7f31e443",
+      "review": "Configuration, lifecycle, ontology and reference adapters moved into the apps component without changing rules"
     },
     "components/apps/src/domain/reference_policy.rs": {
       "status": "reviewed-binding",
@@ -781,18 +806,43 @@
     },
     "components/apps/src/domain.rs": {
       "status": "unproved",
-      "sha256": "2e0452defeb2d19c1ee51360ae5853e45d7fb5e6849237b4c3708d42579e0477",
-      "review": "Field, reference, view and manifest policy moved into the apps component without changing rules"
+      "sha256": "ff2186044547c106b9704aaaf88fcbd173301168dd99c0e90d6301a3ede941e2",
+      "review": "Configuration, lifecycle, ontology and reference adapters moved into the apps component without changing rules"
     },
     "components/apps/src/lib.rs": {
       "status": "unproved",
-      "sha256": "45f5c51a1c341b0ed356ccf2ff69045aa8b4c3bd0bded4cb1cc8376d132425f0",
-      "review": "Package approval, distribution, schema adapters, event projection and service transport policy moved into components/apps without a change in behaviour"
+      "sha256": "3d8c27cc527e5dbeb0f062550884a714b58072ef38a4424a9a2554c8fb834100",
+      "review": "Configuration, lifecycle, ontology and reference adapters moved into the apps component without changing rules"
+    },
+    "components/apps/src/service/egress.rs": {
+      "status": "unproved",
+      "sha256": "aaa2a57dee88405b37de0f05ed229b14f35d3a6a479abdabedf7b751312f3e05",
+      "review": "Configuration, lifecycle, ontology and reference adapters moved into the apps component without changing rules"
+    },
+    "components/apps/src/service/limits.rs": {
+      "status": "unproved",
+      "sha256": "51e81fff0d0bec5c463b6c4a53a4e3468ae26cfcbcbbe4eb7861eab967939702",
+      "review": "Configuration, lifecycle, ontology and reference adapters moved into the apps component without changing rules"
+    },
+    "components/apps/src/service.rs": {
+      "status": "unproved",
+      "sha256": "ff26da8311cdf7064b047bf1863abd007d9210b011e6ad8339abffac494133b3",
+      "review": "Configuration, lifecycle, ontology and reference adapters moved into the apps component without changing rules"
     },
     "components/apps/src/store/asset_references.rs": {
       "status": "unproved",
       "sha256": "ff0ab16afc22e4716b2ea0fc7faa2ccd117c4caebd9399714dd082959e612835",
       "review": "Field, reference, view and manifest policy moved into the apps component without changing rules"
+    },
+    "components/apps/src/store/configuration_events.rs": {
+      "status": "unproved",
+      "sha256": "b6727cf930830bffffa40307d0dea8f3fb3589974a225236e7f120d4522d662a",
+      "review": "Configuration, lifecycle, ontology and reference adapters moved into the apps component without changing rules"
+    },
+    "components/apps/src/store/core_references.rs": {
+      "status": "unproved",
+      "sha256": "d11e9b28f768daedbff6d1631ce722aa33ca1e1641f9ce70386d82e0fc21d062",
+      "review": "Configuration, lifecycle, ontology and reference adapters moved into the apps component without changing rules"
     },
     "components/apps/src/store/dependencies.rs": {
       "status": "unproved",
@@ -801,8 +851,8 @@
     },
     "components/apps/src/store.rs": {
       "status": "unproved",
-      "sha256": "f64c1029a94b4657c836a9ab515a9100603cc755ceb8d9249afd1ba3c5c1c00f",
-      "review": "Field, reference, view and manifest policy moved into the apps component without changing rules"
+      "sha256": "04b1b889e6935082ba6e86a31df4ced0e941f5afea426b55f0ebaea99b1c85b1",
+      "review": "Configuration, lifecycle, ontology and reference adapters moved into the apps component without changing rules"
     },
     "components/b2b/src/domain/contract.rs": {
       "status": "unproved",
@@ -4906,8 +4956,8 @@
     },
     "src/apps/configuration_events.rs": {
       "status": "unproved",
-      "sha256": "e0f8ddc1e21e82750bde07fb7cbd1fa1dad4e569388defe4ce3c1409c6d25e39",
-      "review": "Review combined native business capability and hardening: typed material/dimension guests remain app-owned and bounded; native CAS/FX/current B2B approval and immutable order snapshots; isolated app crate consumer preserves compiler boundary; independent per-event subscriber retry/quarantine preserves healthy events, commit gaps and explicit recovery; signed tenant/system authority, provider-native read tools and real document withdrawal, workspace image closure and source inventory. SQL/async/provider adapters remain tested, not proved."
+      "sha256": "ad6b41885d97a797efb6adb782c1fc1509c540bf8d990b794ee5a772ca859214",
+      "review": "Configuration, lifecycle, ontology and reference adapters moved into the apps component without changing rules"
     },
     "src/apps/configuration_examples.rs": {
       "status": "unproved",
@@ -4916,8 +4966,8 @@
     },
     "src/apps/configuration_inputs.rs": {
       "status": "unproved",
-      "sha256": "d661e278c0dda4163c850c7ec47093f295405962274a78c12e3ff7b5413cd23e",
-      "review": "Field, reference, view and manifest policy moved into the apps component without changing rules"
+      "sha256": "f61d05558845f6986fe253ec3d75fc8bbc1a563bd1cae6a585c68cd475b76169",
+      "review": "Configuration, lifecycle, ontology and reference adapters moved into the apps component without changing rules"
     },
     "src/apps/configuration_orders.rs": {
       "status": "unproved",
@@ -4931,8 +4981,8 @@
     },
     "src/apps/configuration_summary.rs": {
       "status": "unproved",
-      "sha256": "de28b558ef4649cf250026e1ab096d85b1926b95a94d4b43f266e39a982a26f9",
-      "review": "cart types and rule engine moved into components; checking bindings"
+      "sha256": "7678efef3d045121b185d5d9fae79ec55f437a9867412dac9c8485ac4cd8f79c",
+      "review": "Configuration, lifecycle, ontology and reference adapters moved into the apps component without changing rules"
     },
     "src/apps/consent.rs": {
       "status": "unproved",
@@ -4986,8 +5036,8 @@
     },
     "src/apps/editor_contract.rs": {
       "status": "unproved",
-      "sha256": "1e2192bdc76f5fd1ad50e3ef61bea838009099580602cd94d9a09375b616c1ce",
-      "review": "Field, reference, view and manifest policy moved into the apps component without changing rules"
+      "sha256": "f68b9ab67471f8f9d04b9a93460e7617af7354d83232e4c368f9825cff52a2f5",
+      "review": "Configuration, lifecycle, ontology and reference adapters moved into the apps component without changing rules"
     },
     "src/apps/editor_tests.rs": {
       "status": "unproved",
@@ -4996,8 +5046,8 @@
     },
     "src/apps/egress.rs": {
       "status": "unproved",
-      "sha256": "e7d422407527ecf7fc498599e5baf30f46cf5c8f048419de8d5e27f24c6fe0cb",
-      "review": "Identity-only Veyndo namespace and canonical-domain rename; reviewed migration checksum compatibility for six historical SQL versions, unchanged checkout predicates, 42 library and 169 binary tests pass; native component legacy boundary remains configured and guarded."
+      "sha256": "a14ee791ee288dfdff14f5b6639ba470ff0c14f20877ac408b98ad718a358a78",
+      "review": "Configuration, lifecycle, ontology and reference adapters moved into the apps component without changing rules"
     },
     "src/apps/event_contract.rs": {
       "status": "unproved",
@@ -5036,8 +5086,8 @@
     },
     "src/apps/field_values.rs": {
       "status": "unproved",
-      "sha256": "6f97f693de88ee0c08d6621d789312e4228e9d03824d927ff4cf2e0275d21caa",
-      "review": "Field, reference, view and manifest policy moved into the apps component without changing rules"
+      "sha256": "3b612030ab6799aa8adc0c1a51cade98e28fae487111769e7655cc88a7ae43c6",
+      "review": "Configuration, lifecycle, ontology and reference adapters moved into the apps component without changing rules"
     },
     "src/apps/gateway.rs": {
       "status": "unproved",
@@ -5106,8 +5156,8 @@
     },
     "src/apps/mod.rs": {
       "status": "unproved",
-      "sha256": "7e533dbf7ca05d0d1697e49c4ced8129f6afc7a0e5b259121a4b7854ebfcfbd6",
-      "review": "Field, reference, view and manifest policy moved into the apps component without changing rules"
+      "sha256": "80e069a9dc6bf2e6b9dec4f5c7f9d54984d266cf2892054bb580cd8a486eb702",
+      "review": "Configuration, lifecycle, ontology and reference adapters moved into the apps component without changing rules"
     },
     "src/apps/model_contract.rs": {
       "status": "unproved",
@@ -5156,8 +5206,8 @@
     },
     "src/apps/ontology.rs": {
       "status": "unproved",
-      "sha256": "093218b830f914dc767defe75acb86049c275c8a0a161928008af7d9148b39c5",
-      "review": "Reviewed complete standard compiler extraction in Apps 0.16/model 0.12. All 19 original before/common/after domain stages now run inside one shared compiler with preserved order, first model kind/pointer or native host error, internal actual view lookup and exhaustive Manifest field coverage. Native manifest_policy delegates value/reference/currency/scope/source/base, current Ed25519 keys, namespace/network/read and clock decisions to original owners; direct verified predicates remain attached. No no-op host domain callbacks or alternative serving compiler. Independent 116 model and 24 runtime tests include all 34 canonical packages, nineteen invalid-domain controls and denied-policy/callback-order cases. Native 74 app and two provider units, seventeen real HTTP/PostgreSQL app/schema/preview/staging/isolation/lifecycle/distribution/surface/assistant/event/generation/marketplace/payment modules, unchanged native digests and Clippy pass. Kernel unchanged; shared compiler, policy adapters and SQL/host effects remain unproved."
+      "sha256": "03611b237b990bf6961ec1b371f9c991eeffe65f5b8ee997b64133a4684cb9b5",
+      "review": "Configuration, lifecycle, ontology and reference adapters moved into the apps component without changing rules"
     },
     "src/apps/package_fence.rs": {
       "status": "unproved",
@@ -5193,11 +5243,6 @@
       "status": "unproved",
       "sha256": "7fc77192e3f2c2a47dd6212a87cbd87ef7cebbe52fa6a99d09f63b9867b4042b",
       "review": "2026-10-19 reviewed native read-only import projection against shared product/category/address owners; paired CRM/history PII and private target/package/digest checks; generic completion evidence atomically uses existing job creator/lease/package and record CAS, platform AEAD, native actual-field verification, no new app table or queue. Actual eight-domain migration/archival/restart/tamper and native app callback/jobs/admin creation tests pass; pure cancelled-success policy has exact Lean claim, all boolean cases and a true-return negative mutation. SQL, cryptography, async service correctness and public hosting remain outside formal proof."
-    },
-    "src/apps/record_lifecycle.rs": {
-      "status": "unproved",
-      "sha256": "f46665adcd86ecf1d88db7880c96ea3489fea052c64303d1dc3be2427f151b4b",
-      "review": "Apps 0.26.0: original native lifecycle and bounded before/after record history moved into shared managed_hooks on the existing mutation/outbox transaction. Native package/field/reference/language/identity admission remains unchanged. Independent real PostgreSQL/identity/HTTP/MCP/SDK tests and Linux container verify current approval/digest/CAS/state/history scopes/retention and full late-failure rollback. Explicit optional schema-2 write grants and unsupported native policies fail closed; no new proved policy claim for host SQL/network."
     },
     "src/apps/record_write.rs": {
       "status": "unproved",
@@ -5251,8 +5296,8 @@
     },
     "src/apps/service_limits.rs": {
       "status": "unproved",
-      "sha256": "83d3c4268bebc3846218de7b476c01a70edbab285d3afc328a1e073f4d1dabf5",
-      "review": "Reviewed generic transactional app workflow and current-package fence; shared app egress admissions; immutable order callback projection; independent app-only ERP Rust receipts/HMAC/reconciliation and fixture regressions. New async SQL/provider/UI code remains unproved."
+      "sha256": "b9cea924d870b24b6d7bacf97fc4d30707a710a3b07ac27267764f5492d4c9f2",
+      "review": "Configuration, lifecycle, ontology and reference adapters moved into the apps component without changing rules"
     },
     "src/apps/service_policy.rs": {
       "status": "unproved",
@@ -7516,8 +7561,8 @@
       "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
     },
     "Cargo.lock": {
-      "sha256": "da338359ea96a25384b414d65e2f0139d41e6e4514c6f84cf4a20cc07a92d013",
-      "review": "Field, reference, view and manifest policy moved into the apps component without changing rules"
+      "sha256": "ea6b2b77b214a8c4b4f42dfce14218389a91b77758357ac2391a95a224606b3a",
+      "review": "Configuration, lifecycle, ontology and reference adapters moved into the apps component without changing rules"
     },
     "Cargo.toml": {
       "sha256": "12d2d79a98f6913d20b8e912afb9ea8de0539b9e83428de8a9d7412c406896f6",
