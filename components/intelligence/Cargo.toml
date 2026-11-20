@@ -16,3 +16,6 @@ tokio.workspace = true
 uuid.workspace = true
 veyndo-runtime = { path = "../../crates/runtime" }
 veyndo-pricing = { path = "../pricing" }
+veyndo-catalog = { path = "../catalog" }
+libc.workspace = true
+pdf-extract.workspace = true

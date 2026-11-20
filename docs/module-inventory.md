@@ -267,7 +267,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/cognition/experiments/model.rs](../src/cognition/experiments/model.rs) | Preregistered fixed-horizon experiment parameters and conservative bounded-outcome inference. |
 | [src/cognition/experiments/report.rs](../src/cognition/experiments/report.rs) | Delayed final experiment readout is derived from the existing live capture/refund ledger, never demo rewards. |
 | [src/cognition/extraction.rs](../src/cognition/extraction.rs) | API/MCP/flow source extraction shares provider admission and quote checks; candidates require merchant review. |
-| [src/cognition/generations.rs](../src/cognition/generations.rs) | Restart-safe model-change intake: short locked cursor batches reuse the canonical embedding queue. |
+| [src/cognition/generations.rs](../src/cognition/generations.rs) | Model-change intake is owned by the intelligence component. |
 | [src/cognition/guardrails.rs](../src/cognition/guardrails.rs) | Merchant-owned guardrails in commerce settings; native currency amounts bind preview and execution. |
 | [src/cognition/indexing.rs](../src/cognition/indexing.rs) | Durable bounded embedding jobs; short claims and revision fences keep provider latency outside PostgreSQL. |
 | [src/cognition/mod.rs](../src/cognition/mod.rs) | Evidence-based shop memory: event receipts, observed pairs, reviewable hypotheses and bounded context. |
@@ -355,12 +355,12 @@ This lists every checked-in source module in these roots, including files with n
 | [src/developer/preview.rs](../src/developer/preview.rs) | F5 runs the shared native app runtime in an actor-private expiring staging clone; no build/version/release is created. |
 | [src/developer/routes.rs](../src/developer/routes.rs) | Developer HTTP transport and coding-agent task export; explicit staging precedes live release. |
 | [src/developer/version_storage.rs](../src/developer/version_storage.rs) | Native current environment/package/actor admission for shared immutable build staging; original privileged transaction and installer remain authoritative. |
-| [src/documents/content.rs](../src/documents/content.rs) | Validate enabled-language source content and rebuild hash-bound chunks without inherited fabricated translations. |
+| [src/documents/content.rs](../src/documents/content.rs) | Source content is validated by the intelligence component against the shop's enabled languages. |
 | [src/documents/guidance.rs](../src/documents/guidance.rs) | Explicit merchant preferences reuse versioned private sources; quoted guidance never expands native authority. |
 | [src/documents/ingestion.rs](../src/documents/ingestion.rs) | Typed API and bounded upload write source hashes, chunks and graph relations atomically. |
 | [src/documents/lifecycle.rs](../src/documents/lifecycle.rs) | Revision-bound source detail, editing, archive/restore and publication; edits require a new public review. |
 | [src/documents/mod.rs](../src/documents/mod.rs) | Source-bound knowledge ingestion, retrieval and product questions share tenant/product visibility. |
-| [src/documents/parser.rs](../src/documents/parser.rs) | PDF extraction executes in a killable child process without inherited commerce credentials. |
+| [src/documents/parser.rs](../src/documents/parser.rs) | PDF extraction is owned by the intelligence component. |
 | [src/documents/preview.rs](../src/documents/preview.rs) | No-provider retrieval preview shares product-question scope and locale rules; merchant sources never enter customer previews. |
 | [src/documents/product_knowledge.rs](../src/documents/product_knowledge.rs) | Product-centred canonical facts and tenant-filtered graph evidence, independent of the overview's truncated sample. |
 | [src/documents/questions.rs](../src/documents/questions.rs) | Product-specific read-only advice with authoritative price/specification snapshot and validated source citations. |
@@ -806,6 +806,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/identity/src/types.rs](../components/identity/src/types.rs) | Typed request shapes of the identity component. |
 | [components/intelligence/src/domain/behavior_input.rs](../components/intelligence/src/domain/behavior_input.rs) | Minimal behavioral envelope: no URLs, search text, raw user agents, IPs or caller customer identities. |
 | [components/intelligence/src/domain/experiment_model.rs](../components/intelligence/src/domain/experiment_model.rs) | Preregistered fixed-horizon experiment parameters and conservative bounded-outcome inference. |
+| [components/intelligence/src/domain/source_content.rs](../components/intelligence/src/domain/source_content.rs) | Bounds of a knowledge source: enabled languages, kinds, translated fields and the digest that binds its chunks. |
 | [components/intelligence/src/domain.rs](../components/intelligence/src/domain.rs) | Bounded inputs of the intelligence component, free of I/O. |
 | [components/intelligence/src/knowledge/embeddings.rs](../components/intelligence/src/knowledge/embeddings.rs) | Bounded batched embeddings: Ollama and OpenAI-compatible self-hosted endpoints, model-defined dimensions. |
 | [components/intelligence/src/knowledge/neighborhood.sql](../components/intelligence/src/knowledge/neighborhood.sql) | Two-hop product neighborhood; only currently confirmed public claims enter a buyer-facing inference context. |
@@ -819,6 +820,11 @@ This lists every checked-in source module in these roots, including files with n
 | [components/intelligence/src/knowledge/vectors.rs](../components/intelligence/src/knowledge/vectors.rs) | Private Qdrant adapter: tenant/model filters, deterministic identities and durable PostgreSQL index queue. |
 | [components/intelligence/src/knowledge.rs](../components/intelligence/src/knowledge.rs) | Transactional PostgreSQL knowledge relations and separately indexed Qdrant retrieval. |
 | [components/intelligence/src/lib.rs](../components/intelligence/src/lib.rs) | Intelligence component: shop memory with its vector namespace, retrieval and document parsing. |
+| [components/intelligence/src/service/pdf.rs](../components/intelligence/src/service/pdf.rs) | PDF extraction executes in a killable child process without inherited commerce credentials. |
+| [components/intelligence/src/service.rs](../components/intelligence/src/service.rs) | Operations of the intelligence component that call out of process. |
+| [components/intelligence/src/store/documents.rs](../components/intelligence/src/store/documents.rs) | Knowledge sources: hash-bound chunks, revision-checked edits, archive and publication, written atomically with their graph relations. |
+| [components/intelligence/src/store/embedding_generations.rs](../components/intelligence/src/store/embedding_generations.rs) | Restart-safe model-change intake: short locked cursor batches reuse the canonical embedding queue. |
+| [components/intelligence/src/store.rs](../components/intelligence/src/store.rs) | SQL of the intelligence component. |
 | [components/inventory/src/domain/lines.rs](../components/inventory/src/domain/lines.rs) | Checked item quantities for inventory writes. Availability and locks belong to the host. |
 | [components/inventory/src/domain/reorder.rs](../components/inventory/src/domain/reorder.rs) | Whether a supplier's signed offer is the reorder the merchant saved, and within the ceiling. |
 | [components/inventory/src/domain/supply.rs](../components/inventory/src/domain/supply.rs) | Supplier links for reordering inside the Veyndo network: which product is bought from which shop, when and how much, with a ceiling per order. |

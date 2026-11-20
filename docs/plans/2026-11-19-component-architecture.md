@@ -360,9 +360,12 @@ Order follows the dependency report, lowest first. Each line is one move.
 - [ ] automation
 - [ ] intelligence. Started: `components/intelligence` owns the knowledge
   module (relations, hybrid search, vectors with their namespace and cache,
-  embeddings, reranking) and the bounded behaviour event and experiment model.
-  Open: agents and their runs, proposals, documents, inference, cognition
-  routes and workers.
+  embeddings, reranking), the bounded behaviour event and experiment model,
+  knowledge sources and their published documents (`domain/source_content`,
+  `store/documents`), PDF text extraction in a bounded child process
+  (`service/pdf`) and the embedding generations (`store/embedding_generations`).
+  Open: agents and their runs, proposals, the retrieval, question and
+  workspace handlers, inference, cognition routes and workers.
 - [ ] studio. Started: `components/studio` owns report configuration and
   calendar periods, the bounded personal workspace model
   (`domain/workspace`, with the parts of a composed record view in

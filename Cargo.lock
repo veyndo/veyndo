@@ -3721,6 +3721,8 @@ dependencies = [
 name = "veyndo-intelligence"
 version = "0.5.0"
 dependencies = [
+ "libc",
+ "pdf-extract",
  "reqwest",
  "serde",
  "serde_json",
@@ -3728,6 +3730,7 @@ dependencies = [
  "sqlx",
  "tokio",
  "uuid",
+ "veyndo-catalog",
  "veyndo-core",
  "veyndo-pricing",
  "veyndo-runtime",

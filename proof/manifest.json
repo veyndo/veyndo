@@ -1483,10 +1483,15 @@
       "sha256": "2d453986a4321a540e62ff95be4da3b60e9c2f56efd2625dcc76a9cd1175bd7f",
       "review": "Knowledge module and experiment model moved into components/intelligence; kernel call sites unchanged"
     },
+    "components/intelligence/src/domain/source_content.rs": {
+      "status": "unproved",
+      "sha256": "acb83bc1fed77b6be07bc96dcfa710df2d04d3fbdec282c5ea2a0511f9eb0132",
+      "review": "Knowledge sources, PDF text extraction and embedding generations moved into the intelligence component without behaviour change"
+    },
     "components/intelligence/src/domain.rs": {
       "status": "unproved",
-      "sha256": "62e3a2f732388a40f8dbe54d807b51f8fa2555035030393a5f364bec6e6f3df2",
-      "review": "Knowledge module and experiment model moved into components/intelligence; kernel call sites unchanged"
+      "sha256": "c902f1f71a2f5513b697aa52eb5f5ac8040950f60859bb342d0c8c3d2a6074db",
+      "review": "Knowledge sources, PDF text extraction and embedding generations moved into the intelligence component without behaviour change"
     },
     "components/intelligence/src/knowledge/embeddings.rs": {
       "status": "unproved",
@@ -1530,8 +1535,33 @@
     },
     "components/intelligence/src/lib.rs": {
       "status": "unproved",
-      "sha256": "c94b3307ac1fb5fe8fe31ad0829412b9f881782b2292e23a4c6ea54442fcdffb",
-      "review": "Knowledge module and experiment model moved into components/intelligence; kernel call sites unchanged"
+      "sha256": "55116492c9eaf140517471456cf27a57ccc12abb398f61856ddeea509f3fb4e5",
+      "review": "Knowledge sources, PDF text extraction and embedding generations moved into the intelligence component without behaviour change"
+    },
+    "components/intelligence/src/service/pdf.rs": {
+      "status": "unproved",
+      "sha256": "4ed4948f6dcf724d49e5f6284f23aba87fc79b688db16a9dee6a19a2ca9bec13",
+      "review": "Knowledge sources, PDF text extraction and embedding generations moved into the intelligence component without behaviour change"
+    },
+    "components/intelligence/src/service.rs": {
+      "status": "unproved",
+      "sha256": "1680b817fc97a6389ffbc0212b6800164591faecc0d0598a8473819cb25aed6c",
+      "review": "Knowledge sources, PDF text extraction and embedding generations moved into the intelligence component without behaviour change"
+    },
+    "components/intelligence/src/store/documents.rs": {
+      "status": "unproved",
+      "sha256": "d826cea080d824638b9bf6448a9a21a4758795e3f874cac413afab50c7444cd7",
+      "review": "Knowledge sources, PDF text extraction and embedding generations moved into the intelligence component without behaviour change"
+    },
+    "components/intelligence/src/store/embedding_generations.rs": {
+      "status": "unproved",
+      "sha256": "d69f2fb3f71e317ebe0bab83902eeb715eda56ae547b547befe0337e5ebe13b2",
+      "review": "Knowledge sources, PDF text extraction and embedding generations moved into the intelligence component without behaviour change"
+    },
+    "components/intelligence/src/store.rs": {
+      "status": "unproved",
+      "sha256": "364587d0fcf975bdb462848c95a24c07bbd369957b64c08fbab1d62a120c480a",
+      "review": "Knowledge sources, PDF text extraction and embedding generations moved into the intelligence component without behaviour change"
     },
     "components/inventory/src/domain/lines.rs": {
       "status": "unproved",
@@ -5635,8 +5665,8 @@
     },
     "src/cognition/generations.rs": {
       "status": "unproved",
-      "sha256": "cb58e13e1fbaae7637676a91ee2d3551981f5344d8ed21304430419db280a226",
-      "review": "Codex source review: the per-shop model revision only advances; queue claims bind the live shop's active model and revision, and result publication locks that generation before checking the existing source and lease fences. The additive migration preserves revision zero for existing installations. The PostgreSQL and Qdrant test overlapped two Core processes, released an old provider response after takeover, reindexed 150 products and verified current edits and search. SQL and worker code remain unproved; no extracted policy changed."
+      "sha256": "16e7c6e7d342ad5e97b6325a64eec1e6bfe86bad9b4ba0e687fd51b148471a61",
+      "review": "Knowledge sources, PDF text extraction and embedding generations moved into the intelligence component without behaviour change"
     },
     "src/cognition/guardrails.rs": {
       "status": "reviewed-binding",
@@ -6075,23 +6105,23 @@
     },
     "src/documents/content.rs": {
       "status": "unproved",
-      "sha256": "9c7b3435030e1b26c0c5b94e177988f7fb12fc87e03ab581089d33589c29ea84",
-      "review": "Reviewed contextual private-work contracts and independent findings: app opt-out, locked guidance, preserved manual actions, conversation lease and locale inheritance; native own/foreign, stale approval, narrowed rights, renewed login, killed-worker continuation and actual app-preview regressions passed. SQL, async runtime and providers remain unproved."
+      "sha256": "cfe67d6035162bc90ea6b1c4662817fa263aec4edc8d7ccf13bf83e00e07d57c",
+      "review": "Knowledge sources, PDF text extraction and embedding generations moved into the intelligence component without behaviour change"
     },
     "src/documents/guidance.rs": {
       "status": "unproved",
-      "sha256": "32b08915879a4ba13a245a70126b5a2925ee8c82394d10c04cb1b225b8eb18a9",
-      "review": "Reviewed contextual private-work contracts and independent findings: app opt-out, locked guidance, preserved manual actions, conversation lease and locale inheritance; native own/foreign, stale approval, narrowed rights, renewed login, killed-worker continuation and actual app-preview regressions passed. SQL, async runtime and providers remain unproved."
+      "sha256": "4b752d46f491d61a586b5eaed49f6d9f37cebd6b41613422871498d784bc2ef4",
+      "review": "Knowledge sources, PDF text extraction and embedding generations moved into the intelligence component without behaviour change"
     },
     "src/documents/ingestion.rs": {
       "status": "unproved",
-      "sha256": "42f1d45652e42757d422c55b70cdaffbdbfbc21137378c2f679bc0d8e14eb8d2",
-      "review": "Reviewed contextual private-work contracts and independent findings: app opt-out, locked guidance, preserved manual actions, conversation lease and locale inheritance; native own/foreign, stale approval, narrowed rights, renewed login, killed-worker continuation and actual app-preview regressions passed. SQL, async runtime and providers remain unproved."
+      "sha256": "f7fc64e0ae82901150570d9112f6c21d227aa115b3a8585888229672037a9396",
+      "review": "Knowledge sources, PDF text extraction and embedding generations moved into the intelligence component without behaviour change"
     },
     "src/documents/lifecycle.rs": {
       "status": "unproved",
-      "sha256": "1b5aacecab00989bbb46fa00d639533b17c78c862dcd6b4134862c7128e6da64",
-      "review": "Reviewed contextual private-work contracts and independent findings: app opt-out, locked guidance, preserved manual actions, conversation lease and locale inheritance; native own/foreign, stale approval, narrowed rights, renewed login, killed-worker continuation and actual app-preview regressions passed. SQL, async runtime and providers remain unproved."
+      "sha256": "52cb8b89c3da59a26342e3a057b3e56afac8c7d428e9b689dec86dbec55969b5",
+      "review": "Knowledge sources, PDF text extraction and embedding generations moved into the intelligence component without behaviour change"
     },
     "src/documents/mod.rs": {
       "status": "unproved",
@@ -6100,8 +6130,8 @@
     },
     "src/documents/parser.rs": {
       "status": "unproved",
-      "sha256": "468daf9fde14fd59a7782b07bf12d216dacb0ab16f6c9b5a386df21c804865ad",
-      "review": "Initial extraction of 13 production policies; surrounding Rust explicitly unproved; existing HTTP regression suites retained"
+      "sha256": "e46af467b428c7862e6fbc7a90ce15761579f370dec464034965e825c2995810",
+      "review": "Knowledge sources, PDF text extraction and embedding generations moved into the intelligence component without behaviour change"
     },
     "src/documents/preview.rs": {
       "status": "unproved",
@@ -6120,8 +6150,8 @@
     },
     "src/documents/retrieval.rs": {
       "status": "unproved",
-      "sha256": "121eb9567852948cdc3f36522dad020acb3783448ff7568ed044a789d2f3318d",
-      "review": "Review exact frozen document identity re-admission instead of transient retrieval equality; deterministic real-HTTP lease-switch reproducer failed before and passes after, supplied-source archival still conflicts, current scope and other source guards retained; independent security review found no concrete weakening"
+      "sha256": "f95e6b82af6f56e6090187516d7ee464f5ada04ac0a9d36c7a031a7c99d3109d",
+      "review": "Knowledge sources, PDF text extraction and embedding generations moved into the intelligence component without behaviour change"
     },
     "src/documents/tools.rs": {
       "status": "unproved",
@@ -7205,8 +7235,8 @@
       "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
     },
     "Cargo.lock": {
-      "sha256": "153e276733ebace6e2710124ebfbfe34a0a998fb98482e13789d5d350b0ccaaf",
-      "review": "Commerce report query and traffic read moved into the studio component without behaviour change"
+      "sha256": "f9ace94cd9c8951a199e800f5521e6263b1fed15e6fb0138035b6c9e408479c0",
+      "review": "Knowledge sources, PDF text extraction and embedding generations moved into the intelligence component without behaviour change"
     },
     "Cargo.toml": {
       "sha256": "881e080eb9f1b1f051c23e2848df689853473831b4d3072817387d65c23ddb66",

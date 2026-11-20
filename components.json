@@ -885,9 +885,9 @@
         "translation_jobs",
         "user_sessions"
       ],
-      "glob_imports": 79,
+      "glob_imports": 77,
       "untyped_access": 716,
-      "sql_outside_store": 55
+      "sql_outside_store": 51
     },
     "studio": {
       "title": "Merchant overview, reports, private staging shops and history",
