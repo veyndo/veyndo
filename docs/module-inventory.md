@@ -560,8 +560,6 @@ This lists every checked-in source module in these roots, including files with n
 | [src/studio/facts.rs](../src/studio/facts.rs) | Dashboard facts are owned by the studio component. |
 | [src/studio/personal.rs](../src/studio/personal.rs) | Actor-private workspace preferences; HTTP and MCP share CAS, bounds and the current membership. |
 | [src/studio/reports/config.rs](../src/studio/reports/config.rs) | One bounded report definition for HTTP, MCP and private workspace presentation preferences. |
-| [src/studio/reports/period.rs](../src/studio/reports/period.rs) | Calendar periods are resolved once in the requested IANA timezone, with exclusive ends and bounded buckets. |
-| [src/studio/reports/traffic.rs](../src/studio/reports/traffic.rs) | Reporting reuses the behavior owner's exact receipt/expiry predicate and inherited policy resolver; no new tracking store. |
 | [src/studio/reports.rs](../src/studio/reports.rs) | Shared native commerce reports for Studio, workspace, API and agent reads; no second analytics ledger. |
 | [src/studio/work.rs](../src/studio/work.rs) | The work list is owned by the studio component. |
 | [src/studio.rs](../src/studio.rs) | Verified merchant overview facts consumed by the chat and activity views. |
@@ -1027,6 +1025,10 @@ This lists every checked-in source module in these roots, including files with n
 | [components/studio/src/lib.rs](../components/studio/src/lib.rs) | Studio component: report periods and configuration. |
 | [components/studio/src/store/overview.rs](../components/studio/src/store/overview.rs) | Consolidated dashboard facts in one bounded read; turnover stays separated by invoice currency and is never repriced. |
 | [components/studio/src/store/overview.sql](../components/studio/src/store/overview.sql) | One bounded overview snapshot. Arrays retain the original limits and ordering; currencies remain separate. |
+| [components/studio/src/store/reports/sales.sql](../components/studio/src/store/reports/sales.sql) | One bounded aggregate result, no customer projection and no floating-point monetary accumulation. |
+| [components/studio/src/store/reports/source.sql](../components/studio/src/store/reports/source.sql) | Native immutable order money and channel attribution. Every merchant/filter input is bound, not interpolated. |
+| [components/studio/src/store/reports/traffic.sql](../components/studio/src/store/reports/traffic.sql) | Sessions are observed cart contexts with current consent, not people or HTTP request counts. |
+| [components/studio/src/store/reports.rs](../components/studio/src/store/reports.rs) | Shared native commerce reports for Studio, workspace, API and agent reads; no second analytics ledger. |
 | [components/studio/src/store/work_items.rs](../components/studio/src/store/work_items.rs) | Bounded current-right work items come from native rows; no inferred revenue, customer data or parallel task store. |
 | [components/studio/src/store/workspaces.rs](../components/studio/src/store/workspaces.rs) | Actor-private workspace preferences: compare-and-swap on the revision, a bounded version trail and the current membership. |
 | [components/studio/src/store.rs](../components/studio/src/store.rs) | SQL of the studio component. |

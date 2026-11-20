@@ -2553,6 +2553,11 @@
       "sha256": "d3f722c991eef9310a07dd74d18adc83298e0a6735a09ea4d3233c6b329d5c80",
       "review": "Studio overview facts and work list moved into the studio component without behaviour change"
     },
+    "components/studio/src/store/reports.rs": {
+      "status": "unproved",
+      "sha256": "84a6ac7449ca2be841454f3907a51fe8d6db41de20cfe2d4ace981d96a4bc89b",
+      "review": "Commerce report query and traffic read moved into the studio component without behaviour change"
+    },
     "components/studio/src/store/work_items.rs": {
       "status": "unproved",
       "sha256": "2fb03d1ec85ebe5ec38e147d4b383b146e100afac0787f3f27f53abf030aad2f",
@@ -2565,8 +2570,8 @@
     },
     "components/studio/src/store.rs": {
       "status": "unproved",
-      "sha256": "b0cbed6447b109695176477d5941c70b7921f762ee6f0b4ec8d825454ea44cb4",
-      "review": "Studio overview facts and work list moved into the studio component without behaviour change"
+      "sha256": "823712e2a508b9b75e671f56edfe76965644aaa9b74b1119b969f6d65403263a",
+      "review": "Commerce report query and traffic read moved into the studio component without behaviour change"
     },
     "crates/apps/src/component_runtime.rs": {
       "status": "unproved",
@@ -7093,20 +7098,10 @@
       "sha256": "8a115f6e9a01ea8f0deb6f7ef3e3518ac56706f8b9cf4d64b9dd25ec99cd60a0",
       "review": "Knowledge module and experiment model moved into components/intelligence; kernel call sites unchanged"
     },
-    "src/studio/reports/period.rs": {
-      "status": "unproved",
-      "sha256": "2cb75a6ba9cc866df633da6878d80b5890e9ddfeda3002c63a0030a946f0f85e",
-      "review": "Knowledge module and experiment model moved into components/intelligence; kernel call sites unchanged"
-    },
-    "src/studio/reports/traffic.rs": {
-      "status": "unproved",
-      "sha256": "55de174483d2ec8ca4a8b234a34de3a1600796a178cf410308fa362f6f10fe6c",
-      "review": "Reviewed native aggregate reports: bound tenant/filter SQL, exact numeric order/refund snapshots, reuse of current consent eligibility, optional rights projections and private workspace CAS layouts; reporting adapters remain unproved."
-    },
     "src/studio/reports.rs": {
       "status": "unproved",
-      "sha256": "f2723d0f39391740e81d8f5f7d263debeffc650b1b1a530a27aea7e53dfdb7a7",
-      "review": "Reviewed native aggregate reports: bound tenant/filter SQL, exact numeric order/refund snapshots, reuse of current consent eligibility, optional rights projections and private workspace CAS layouts; reporting adapters remain unproved."
+      "sha256": "8802d557e6df4d9f585160415537f49312597e8c2a8280a46decf9c3ec587338",
+      "review": "Commerce report query and traffic read moved into the studio component without behaviour change"
     },
     "src/studio/work.rs": {
       "status": "unproved",
@@ -7210,8 +7205,8 @@
       "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
     },
     "Cargo.lock": {
-      "sha256": "943de557ff7788d1ebb553d82c03951c482e697cf11b4c10129c9e3490a55ad4",
-      "review": "Studio overview facts and work list moved into the studio component without behaviour change"
+      "sha256": "153e276733ebace6e2710124ebfbfe34a0a998fb98482e13789d5d350b0ccaaf",
+      "review": "Commerce report query and traffic read moved into the studio component without behaviour change"
     },
     "Cargo.toml": {
       "sha256": "881e080eb9f1b1f051c23e2848df689853473831b4d3072817387d65c23ddb66",
@@ -8012,18 +8007,6 @@
     "src/performance/settings.sql": {
       "sha256": "6359a5403017cca356a0a04d42492b46ac18a4598df94103d9df2e1379132bd2",
       "review": "Reviewed native-only static bypass with hosted denial and Lean exact acceptance; one fresh domain/environment/status/channel/mount SQL snapshot and current membership lookup preserve scoped admission, binding identity and revocation; immutable Arc settings retain locked mutation/checkout reads; secret-free compression opt-in and deterministic precompressed assets preserve streams/ranges; batched inventory uses existing checkout locks and ordered idempotent release; bounded overview SQL preserves currency-separated historical facts. Real two-replica read/channel/tenant/checkout and strict-runtime regressions passed; SQL and build inputs now explicitly locked. These adapters remain unproved."
-    },
-    "src/studio/reports/sales.sql": {
-      "sha256": "65c67f6c9545dc70f79c4939473341fc654f73c115488678e4736c4cbaeb8137",
-      "review": "Reviewed native aggregate reports: bound tenant/filter SQL, exact numeric order/refund snapshots, reuse of current consent eligibility, optional rights projections and private workspace CAS layouts; reporting adapters remain unproved."
-    },
-    "src/studio/reports/source.sql": {
-      "sha256": "718af452e40c3f93f2b67a929e3378c99dfc803c1761de35cff3abdff25be1de",
-      "review": "Reviewed native aggregate reports: bound tenant/filter SQL, exact numeric order/refund snapshots, reuse of current consent eligibility, optional rights projections and private workspace CAS layouts; reporting adapters remain unproved."
-    },
-    "src/studio/reports/traffic.sql": {
-      "sha256": "bb650388f42a6ed6e094f7e07c02472ac8aea4abacf695d257b9f558c663034d",
-      "review": "Reviewed native aggregate reports: bound tenant/filter SQL, exact numeric order/refund snapshots, reuse of current consent eligibility, optional rights projections and private workspace CAS layouts; reporting adapters remain unproved."
     },
     "src/ucp/b2b-negotiation.json": {
       "sha256": "80049231fb689a5a8a105ff73046ec0a5b97caa480e0a5029e8688ad7dfacba7",

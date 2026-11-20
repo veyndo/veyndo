@@ -14,3 +14,5 @@ veyndo-core = { path = "../core" }
 veyndo-app-model = { path = "../../extensions/services/app-storage/model" }
 sqlx.workspace = true
 veyndo-identity = { path = "../identity" }
+veyndo-pricing = { path = "../pricing" }
+veyndo-shop = { path = "../shop" }

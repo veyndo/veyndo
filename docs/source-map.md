@@ -1109,8 +1109,8 @@ and credential-revision fences. Shopware 6 extraction/normalization stays in
 
 ## Configurable merchant reports
 
-`src/studio/reports.rs` owns HTTP/MCP admission and snapshot composition;
-`src/studio/reports/{config,period,traffic}.rs` owns typed preferences, calendar
+`src/studio/reports.rs` owns HTTP/MCP admission; `components/studio/src/store/reports.rs` the snapshot composition and traffic read;
+`components/studio/src/domain/{report_config,report_period}.rs` owns typed preferences, calendar
 bounds and reuse of native consent eligibility. Bundled SQL aggregates native
 orders/payment attempts without another ledger. `frontend/src/admin/reports/`
 is shared by Shop today and personal workspace areas. Existing private workspace

@@ -368,7 +368,10 @@ Order follows the dependency report, lowest first. Each line is one move.
   (`domain/workspace`, with the parts of a composed record view in
   `domain/view_components`) and its revisioned store (`store/workspaces`),
   the overview facts with their turnover totals (`store/overview`) and the
-  work list (`store/work_items`). Open: report queries, staging shops, history.
+  work list (`store/work_items`) and the report query on a read snapshot
+  with its traffic read (`store/reports`; the server passes settings, the
+  reader's language and the behaviour consent filter). Open: staging shops,
+  history, the channel activity tracker.
 - [ ] shop. Started: `components/shop` owns the settings types (`Settings`,
   delivery and payment methods, the checkout selection, B2B switches, AI
   guardrails, legal configuration), every bound on them (`validation`, tax
