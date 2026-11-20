@@ -1,8 +1,7 @@
-//! Customer rows as the cashier sees them: a bounded search, the account behind a selection and its recheck at settlement.
+//! Customer rows as the cashier sees them: a bounded search and the account behind a selection.
 use serde_json::{Value, json};
 use sqlx::{PgConnection, Row};
-use veyndo_core::{Error, Result, State, StatusCode, conflict};
-use veyndo_shop::types::cart::StoredCart;
+use veyndo_core::{Error, Result, State, StatusCode};
 
 pub async fn search(a: &State, t: &str, query: &str, card: Option<&str>) -> Result<Vec<Value>> {
     let rows=sqlx::query("SELECT id,customer_number,email,profile->>'name' AS name,group_name FROM customers WHERE tenant=$1 AND active AND (($3::text IS NOT NULL AND customer_number=$3) OR ($3 IS NULL AND ($2='' OR strpos(lower(email||' '||customer_number||' '||coalesce(profile->>'name','')),lower($2))>0))) ORDER BY email LIMIT 20")
@@ -25,20 +24,4 @@ pub async fn account(conn: &mut PgConnection, t: &str, id: &str) -> Result<Accou
         company: row.get("company"),
         default_billing_address_id: row.get("default_billing_address_id"),
     })
-}
-
-/// Revalidate the selected account under a shared lock inside checkout; profile edits cannot race settlement.
-pub async fn check(conn: &mut PgConnection, c: &StoredCart) -> Result<()> {
-    if let Some(id) = &c.data.customer_id {
-        let row=sqlx::query("SELECT email,group_name,company FROM customers WHERE tenant=$1 AND id=$2 AND active FOR SHARE").bind(&c.tenant).bind(id).fetch_optional(conn).await?.ok_or(conflict("Selected customer is no longer active; select again"))?;
-        if Some(row.get::<String, _>("email")) != c.data.email
-            || row.get::<String, _>("group_name") != c.data.group
-            || row.get::<Option<String>, _>("company") != c.data.company
-        {
-            return Err(conflict(
-                "Customer changed; select again before completing sale",
-            ));
-        }
-    }
-    Ok(())
 }

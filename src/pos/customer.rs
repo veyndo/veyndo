@@ -1,6 +1,5 @@
 //! Cashier customer lookup and attachment are owned by the POS component; the server supplies the priced cart.
 use super::*;
-pub(crate) use veyndo_pos::store::customers::check;
 pub(super) async fn find(
     a: &App,
     h: &RequestContext,

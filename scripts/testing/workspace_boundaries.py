@@ -48,7 +48,7 @@ ALLOWED = {
     'veyndo-catalog': {'veyndo-core', 'veyndo-identity', 'veyndo-pricing'},
     'veyndo-inventory': {'veyndo-core', 'veyndo-catalog', 'veyndo-pricing'},
     'veyndo-shipping': {'veyndo-core', 'veyndo-identity', 'veyndo-pricing'},
-    'veyndo-customers': {'veyndo-core', 'veyndo-pricing'},
+    'veyndo-customers': {'veyndo-core', 'veyndo-pricing', 'veyndo-identity', 'veyndo-shipping', 'veyndo-shop'},
     'veyndo-marketing': {'veyndo-core', 'veyndo-pricing', 'veyndo-catalog', 'veyndo-shop', 'veyndo-app-model', 'veyndo-automation', 'veyndo-cognition', 'veyndo-flow-graph', 'veyndo-identity'},
     'veyndo-orders': {'veyndo-core', 'veyndo-identity', 'veyndo-pricing', 'veyndo-shop', 'veyndo-app-model', 'veyndo-runtime', 'veyndo-shipping'},
     'veyndo-payments': {'veyndo-core', 'veyndo-pricing', 'veyndo-shop', 'veyndo-inventory', 'veyndo-orders', 'veyndo-kernel'},

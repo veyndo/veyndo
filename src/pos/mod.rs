@@ -2,7 +2,6 @@
 use crate::*;
 mod config;
 mod customer;
-pub(crate) use customer::check as check_customer;
 mod discount;
 pub(crate) use discount::apply as adjust_quote;
 mod gateway;

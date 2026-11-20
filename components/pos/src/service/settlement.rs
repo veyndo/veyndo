@@ -1,7 +1,7 @@
 //! Exact cash admission and order annotation execute in the existing checkout transaction.
 use crate::service::guard;
-use crate::store::customers;
 use serde_json::{Value, json};
+use veyndo_checkout::store::selected_customer;
 use veyndo_core::shop_scope::live_parent;
 use veyndo_core::{Error, RequestContext, Result, StatusCode, bad};
 use veyndo_identity::permit;
@@ -106,7 +106,7 @@ pub async fn check_locked(
             "POS settlement is unavailable in staging".into(),
         ));
     }
-    customers::check(tx, c).await?;
+    selected_customer::check(tx, c).await?;
     if c.data.pos_discount.is_some() {
         permit(h, "payments.manage")?;
     }

@@ -408,7 +408,7 @@
         "tenants"
       ],
       "glob_imports": 11,
-      "untyped_access": 198,
+      "untyped_access": 206,
       "sql_outside_store": 8
     },
     "customers": {
@@ -448,9 +448,9 @@
         "outbox",
         "tenants"
       ],
-      "glob_imports": 17,
-      "untyped_access": 79,
-      "sql_outside_store": 6
+      "glob_imports": 16,
+      "untyped_access": 82,
+      "sql_outside_store": 5
     },
     "orders": {
       "title": "Order state, fulfilment, receipts, documents and merchant order work",
@@ -487,7 +487,6 @@
         "inventory",
         "marketing",
         "payments",
-        "pos",
         "pricing",
         "shipping",
         "shop",
@@ -513,8 +512,8 @@
         "tenants"
       ],
       "glob_imports": 29,
-      "untyped_access": 459,
-      "sql_outside_store": 12
+      "untyped_access": 451,
+      "sql_outside_store": 11
     },
     "payments": {
       "title": "Provider-independent payment ledger, captures, refunds and provider workers",

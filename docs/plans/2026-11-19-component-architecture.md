@@ -256,8 +256,11 @@ Order follows the dependency report, lowest first. Each line is one move.
   typed customer row, the contact projection, order metrics, the bounded
   lookup with literal search, the guest contact and the remembered payment
   method. Open: the handlers still run in the server, because they resolve the
-  storefront request, attribute the history and read shop settings; login,
-  merchant customer create and edit; browser sessions. Registration, the
+  storefront request, attribute the history and read shop settings; login;
+  browser sessions; the merchant customer list and detail (they attach app
+  extensions). `store/crm` owns the merchant creation of a contact with its
+  address plan and the revision-checked merchant change including the
+  restoration of a historical state. Registration, the
   contact profile and the password swap are writes in `store/accounts`; the
   handlers keep credential hashing, geography and channel admission. The restoration of an address aggregate from history
   lives in `store/`; the shop's geography admits each address through a
@@ -295,6 +298,10 @@ Order follows the dependency report, lowest first. Each line is one move.
   mutation, the quote, the selection, the four steps of the checkout
   transaction (they call apps, B2B, payments, marketing and legal and need a
   host port), buyer identity, the handoff.
+  `domain/admin_order` and `store/admin_order` hold the guards of an order a
+  merchant places (manual or simulated payment only, channel policy, the
+  channel's product selection); `store/selected_customer` rechecks the
+  selected customer under a shared lock for checkout and the POS.
 - [ ] orders. Started: `components/orders` owns the order state machine with
   its default and bounds, the stored machine, derived order fields, the
   transition guards and the workflow view, the audited write log with its

@@ -38,16 +38,7 @@ pub(crate) async fn address_save_conn(
     v: &Value,
     address: &commerce::Address,
 ) -> Result<Value> {
-    address_store_conn(conn, t, email, id, v, address, true).await
-}
-pub(crate) async fn address_import_conn(
-    conn: &mut sqlx::PgConnection,
-    t: &str,
-    email: &str,
-    v: &Value,
-    address: &commerce::Address,
-) -> Result<Value> {
-    address_store_conn(conn, t, email, None, v, address, false).await
+    address_store_conn(conn, t, email, id, v, address).await
 }
 async fn address_store_conn(
     conn: &mut sqlx::PgConnection,
@@ -56,7 +47,6 @@ async fn address_store_conn(
     id: Option<&str>,
     v: &Value,
     address: &commerce::Address,
-    emit_event: bool,
 ) -> Result<Value> {
     let address_id = address_book::save(
         conn,
@@ -67,7 +57,7 @@ async fn address_store_conn(
             revision: v["revision"].as_i64(),
             default_billing: v["defaultBilling"].as_bool().unwrap_or(false),
             default_shipping: v["defaultShipping"].as_bool().unwrap_or(false),
-            announce: emit_event,
+            announce: true,
         },
         address,
     )

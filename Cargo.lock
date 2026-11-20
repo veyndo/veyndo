@@ -3684,7 +3684,10 @@ dependencies = [
  "serde_json",
  "sqlx",
  "veyndo-core",
+ "veyndo-identity",
  "veyndo-pricing",
+ "veyndo-shipping",
+ "veyndo-shop",
 ]
 
 [[package]]

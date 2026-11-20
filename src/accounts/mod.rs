@@ -2,11 +2,9 @@
 use crate::*;
 mod payment_preference;
 pub(crate) use payment_preference::remember_payment;
-mod address_restore;
-pub(crate) mod browser;
-pub(crate) use address_restore::restore_book;
 mod address_store;
 mod addresses;
+pub(crate) mod browser;
 mod contacts;
 mod metadata;
 pub(crate) use metadata::decorate;

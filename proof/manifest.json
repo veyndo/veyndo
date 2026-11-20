@@ -525,7 +525,7 @@
     },
     "admin_payment_admissible": {
       "bindings": [
-        "src/operations/manual_order_admission.rs"
+        "components/checkout/src/domain/admin_order.rs"
       ],
       "theorems": [
         "admin_payment_exact",
@@ -1058,6 +1058,11 @@
       "sha256": "9a2bcea53ca95789b2a268b746f8c40feaf4c5c8f36322252e754b500eef9515",
       "review": "Storefront catalogue reads and public attachments moved into components/catalog; no rule changed"
     },
+    "components/checkout/src/domain/admin_order.rs": {
+      "status": "reviewed-binding",
+      "sha256": "b8fa5fe837ab1e0497ce4a8d881cc56aa2ac18755cc79a53121938253ecb1236",
+      "review": "Merchant customer writes moved into the customers component and admin order admission into checkout without behaviour change"
+    },
     "components/checkout/src/domain/review_binding.rs": {
       "status": "reviewed-binding",
       "sha256": "731f3b20049c3aeb4f4af20d9492c07bbcffe2f5b550def60c9f96a89edce043",
@@ -1080,8 +1085,8 @@
     },
     "components/checkout/src/domain.rs": {
       "status": "unproved",
-      "sha256": "66d49e2d161fdacec86b919055e1939df96c54e01365d9551fdc24cb25dc4ce0",
-      "review": "POS guard, customer, discount and settlement and the checkout session review moved into components"
+      "sha256": "798db4447744fa2c28e4c879e4c49a3f6e21b337e923bf066d68667da915e19f",
+      "review": "Merchant customer writes moved into the customers component and admin order admission into checkout without behaviour change"
     },
     "components/checkout/src/lib.rs": {
       "status": "unproved",
@@ -1103,6 +1108,11 @@
       "sha256": "8d8f71730ad60dcf5227ab3fa6a0ba8b32aea63b732ce5abd4e9b69d1ed4f2fb",
       "review": "Delivery enrichment, app adjustments and funding moved into components; kernel call sites unchanged"
     },
+    "components/checkout/src/store/admin_order.rs": {
+      "status": "unproved",
+      "sha256": "a5728a68770696abbfa556f102243a7e9d18eb46c1d00f2cbac6676b92fc5271",
+      "review": "Merchant customer writes moved into the customers component and admin order admission into checkout without behaviour change"
+    },
     "components/checkout/src/store/customer_snapshot.rs": {
       "status": "unproved",
       "sha256": "a4879982eac35a2be2108e00b040726381b347633378adc0a377e083321a9740",
@@ -1118,6 +1128,11 @@
       "sha256": "8b7362fade55bc41b751fdbbc1495026c7776dd1549c991905db602a838950ac",
       "review": "POS guard, customer, discount and settlement and the checkout session review moved into components"
     },
+    "components/checkout/src/store/selected_customer.rs": {
+      "status": "unproved",
+      "sha256": "91b24e6f146a4eb5c6189ad88ea9a3d0141dc6f7274c9706e0dd34ca0171fb06",
+      "review": "Merchant customer writes moved into the customers component and admin order admission into checkout without behaviour change"
+    },
     "components/checkout/src/store/session.rs": {
       "status": "unproved",
       "sha256": "3cd9428edc864a30bc3ce27fdf9cc6eebaa2302d57de929171869749598f3ded",
@@ -1125,8 +1140,8 @@
     },
     "components/checkout/src/store.rs": {
       "status": "unproved",
-      "sha256": "d1828963008229b24316b2a3bcfae79cc11fd325f0cee2d1d24068083affc730",
-      "review": "Customer account writes, the legal snapshot of an order and the locked settings read moved into components"
+      "sha256": "a8cfd27939c0b088a97e177b99a6839dc43d028d1d2c0888e13a0d63f3b799fc",
+      "review": "Merchant customer writes moved into the customers component and admin order admission into checkout without behaviour change"
     },
     "components/core/src/access.rs": {
       "status": "unproved",
@@ -1323,6 +1338,11 @@
       "sha256": "41c9192e7b1d85d86a0815c4b315dac4bba15761969d0e53d60123f33eee1eba",
       "review": "customers component crate created; no kernel binding changed"
     },
+    "components/customers/src/store/crm.rs": {
+      "status": "unproved",
+      "sha256": "6e94e881861fa13d3b00cd74b73c97abb1ed8b19b2a5e590bbb3f31127295f00",
+      "review": "Merchant customer writes moved into the customers component and admin order admission into checkout without behaviour change"
+    },
     "components/customers/src/store/customers.rs": {
       "status": "unproved",
       "sha256": "5da5f1a4fd2dae5d5c904729f3d258e799aadf2c4ad8e8c6d755180fb72b0d9e",
@@ -1335,8 +1355,8 @@
     },
     "components/customers/src/store.rs": {
       "status": "unproved",
-      "sha256": "797ae5709467f0c6ea61502855ade93afed3b8c06ba4881ab2b25f9fbb4a7d01",
-      "review": "Customer account writes, the legal snapshot of an order and the locked settings read moved into components"
+      "sha256": "d1f88b2a4e92c65fd3def33bfced0b62b1d917e9c2e6afa9664ad42f771d713e",
+      "review": "Merchant customer writes moved into the customers component and admin order admission into checkout without behaviour change"
     },
     "components/identity/src/domain/clock.rs": {
       "status": "unproved",
@@ -2105,8 +2125,8 @@
     },
     "components/pos/src/service/settlement.rs": {
       "status": "reviewed-binding",
-      "sha256": "1a7a4ca4a362661b2d48c5d5139c3f9960d4dc9828bb8e59d5d372ee9b25401a",
-      "review": "POS guard, customer, discount and settlement and the checkout session review moved into components"
+      "sha256": "f55ca6885caf2776438ee31fbd7eb9855401459b0c747f6152b1f28eb3ced75e",
+      "review": "Merchant customer writes moved into the customers component and admin order admission into checkout without behaviour change"
     },
     "components/pos/src/service.rs": {
       "status": "unproved",
@@ -2115,8 +2135,8 @@
     },
     "components/pos/src/store/customers.rs": {
       "status": "unproved",
-      "sha256": "d20274a474e1ccd02c252537e365357bacb2796712f68f1b063eb014b548edaa",
-      "review": "POS guard, customer, discount and settlement and the checkout session review moved into components"
+      "sha256": "490fa46252ee00678ef5bc7033cb44eaf40772d6a3efdbfb25c7fb05a0b1de72",
+      "review": "Merchant customer writes moved into the customers component and admin order admission into checkout without behaviour change"
     },
     "components/pos/src/store.rs": {
       "status": "unproved",
@@ -4268,15 +4288,10 @@
       "sha256": "7dd250660934625e9fee8c09c77844b57a0fc18144812b52898d24466998dafb",
       "review": "Reviewed app-owned Vercel/Klaviyo/HubSpot/Contentful/Algolia fixed transports, bounded redacted receipts, native compound action rights and encrypted CAS/lease fences; Shopware 6 read-only OAuth/currency/language projection delegates exact native import/reconciliation; generic tenant/app source reset and bounded source count use existing storage/admission owners. Provider protocols and SQL remain outside the extracted Lean proof scope; native two-worker, private/foreign, signed-login, migration and checkout regressions exercised."
     },
-    "src/accounts/address_restore.rs": {
-      "status": "unproved",
-      "sha256": "1684cc9a56e8e9cfae0935654e88d4742c5ade07d2823b171ccd92590194117e",
-      "review": "Coupons, flow job summaries, requisition import, customer snapshot, address restore and account orders moved into components"
-    },
     "src/accounts/address_store.rs": {
       "status": "unproved",
-      "sha256": "8186489ecffcbdb2b0cebfe351267bf67a1951f6ae925c121dccc5a2068995ff",
-      "review": "customers component crate created; no kernel binding changed"
+      "sha256": "d65f2e1a4321a78794ce944e2f3bd2e3836150c928b1b933b43396187fa96957",
+      "review": "Merchant customer writes moved into the customers component and admin order admission into checkout without behaviour change"
     },
     "src/accounts/addresses.rs": {
       "status": "unproved",
@@ -4305,8 +4320,8 @@
     },
     "src/accounts/mod.rs": {
       "status": "unproved",
-      "sha256": "8dad171ea8de022dfdaf7cccb8ff01f734d568072d2847dc6d337f4819d94c50",
-      "review": "Customer account writes, the legal snapshot of an order and the locked settings read moved into components"
+      "sha256": "0d70a49f29fe8b907351c1631b600ecba4fe70c45f1d39419725220d5ddcd39d",
+      "review": "Merchant customer writes moved into the customers component and admin order admission into checkout without behaviour change"
     },
     "src/accounts/order_snapshot.rs": {
       "status": "unproved",
@@ -6400,8 +6415,8 @@
     },
     "src/operations/customer_create.rs": {
       "status": "unproved",
-      "sha256": "67045ca1e761f375c10a6e81080213ef25e694b443de6ad571bf66274221750a",
-      "review": "2026-10-19 reviewed native read-only import projection against shared product/category/address owners; paired CRM/history PII and private target/package/digest checks; generic completion evidence atomically uses existing job creator/lease/package and record CAS, platform AEAD, native actual-field verification, no new app table or queue. Actual eight-domain migration/archival/restart/tamper and native app callback/jobs/admin creation tests pass; pure cancelled-success policy has exact Lean claim, all boolean cases and a true-return negative mutation. SQL, cryptography, async service correctness and public hosting remain outside formal proof."
+      "sha256": "a86f0953147a316efc380914916a18d52183ee0445857884629c580800a86d30",
+      "review": "Merchant customer writes moved into the customers component and admin order admission into checkout without behaviour change"
     },
     "src/operations/customer_lookup.rs": {
       "status": "unproved",
@@ -6410,8 +6425,8 @@
     },
     "src/operations/customers.rs": {
       "status": "unproved",
-      "sha256": "93c071a281bc071e0b4ac8df8a62aeb1b665a5a3d7572868f332533a11d99988",
-      "review": "Order list criteria, company model and receipts moved into components; kernel call sites unchanged"
+      "sha256": "f7b219550d81f06d10bca375e7fc9fc1516069113ce7c2888594adcd509ab684",
+      "review": "Merchant customer writes moved into the customers component and admin order admission into checkout without behaviour change"
     },
     "src/operations/delivery_booking.rs": {
       "status": "unproved",
@@ -6504,9 +6519,9 @@
       "review": "Order list criteria, company model and receipts moved into components; kernel call sites unchanged"
     },
     "src/operations/manual_order_admission.rs": {
-      "status": "reviewed-binding",
-      "sha256": "352694c0aa870deb1819735019fdb66de67fbea7b6bedc756554bb45bf0923eb",
-      "review": "POS guard, customer, discount and settlement and the checkout session review moved into components"
+      "status": "unproved",
+      "sha256": "44ce2d70167a69eb5347c1f626e91a694382a447340f834547c60d5c181d0534",
+      "review": "Merchant customer writes moved into the customers component and admin order admission into checkout without behaviour change"
     },
     "src/operations/manual_orders.rs": {
       "status": "unproved",
@@ -6845,8 +6860,8 @@
     },
     "src/pos/customer.rs": {
       "status": "unproved",
-      "sha256": "4230f27df5a8c0236aff7b973ae07a240218c4d8155a81ee9d6243cd3185666e",
-      "review": "POS guard, customer, discount and settlement and the checkout session review moved into components"
+      "sha256": "1b83f19779572cfa4e1512a667e4aff74da399ad496bc0525343947928d5fea0",
+      "review": "Merchant customer writes moved into the customers component and admin order admission into checkout without behaviour change"
     },
     "src/pos/discount.rs": {
       "status": "unproved",
@@ -6865,8 +6880,8 @@
     },
     "src/pos/mod.rs": {
       "status": "unproved",
-      "sha256": "a5d889bc54eb8950a6d14e7e634dbaa845aab2ce95b9ed79f64b9c513a1f01cb",
-      "review": "POS guard, customer, discount and settlement and the checkout session review moved into components"
+      "sha256": "df5e6777153de5ec263495a2f65d78d4dc6b6262f87f6c52e1bbdb6345507a2e",
+      "review": "Merchant customer writes moved into the customers component and admin order admission into checkout without behaviour change"
     },
     "src/pos/schema.rs": {
       "status": "unproved",
@@ -7160,8 +7175,8 @@
       "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
     },
     "Cargo.lock": {
-      "sha256": "70336443e880d468386fa94fc58646d959facafd4981269a636225b4f5ed0c61",
-      "review": "Sessions, invitations, MFA, integration keys and broker assertions moved into the identity component without behaviour change"
+      "sha256": "21f2405ecd4e280a4d20c61c7ac987f4f254b3a9fff923ac5c22571f13a6319e",
+      "review": "Merchant customer writes moved into the customers component and admin order admission into checkout without behaviour change"
     },
     "Cargo.toml": {
       "sha256": "881e080eb9f1b1f051c23e2848df689853473831b4d3072817387d65c23ddb66",
