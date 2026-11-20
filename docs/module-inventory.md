@@ -649,6 +649,12 @@ This lists every checked-in source module in these roots, including files with n
 | [components/b2b/src/domain/contract.rs](../components/b2b/src/domain/contract.rs) | Native B2B operation catalogue and bounded request schema shared by HTTP, MCP and UCP adapters. |
 | [components/b2b/src/domain.rs](../components/b2b/src/domain.rs) | domain of this component. |
 | [components/b2b/src/lib.rs](../components/b2b/src/lib.rs) | B2B component: company procurement records, their bounds and the purchasing contract. |
+| [components/b2b/src/store/access.rs](../components/b2b/src/store/access.rs) | Re-resolves active customer sessions, company policy and unit membership at every procurement boundary. |
+| [components/b2b/src/store/catalog.rs](../components/b2b/src/store/catalog.rs) | Private unit catalog scope is derived from the current employee/cart, never caller criteria; indexed before pagination. |
+| [components/b2b/src/store/organization.rs](../components/b2b/src/store/organization.rs) | Merchant-managed firms, unit hierarchies, employee grants and tenant-bound catalogs with optimistic revisions. |
+| [components/b2b/src/store/purchase.rs](../components/b2b/src/store/purchase.rs) | Serializes unit spending and binds an approved purchase to the authoritative native checkout quote. |
+| [components/b2b/src/store/staging.rs](../components/b2b/src/store/staging.rs) | Clone and publish purchasing configuration only; employees, orders, approvals and spending remain live-only. |
+| [components/b2b/src/store.rs](../components/b2b/src/store.rs) | store of this component. |
 | [components/b2b/src/types/model.rs](../components/b2b/src/types/model.rs) | Bounded typed native company, purchasing-unit and employee policies. Money is currency-bound minor units. |
 | [components/b2b/src/types.rs](../components/b2b/src/types.rs) | types of this component. |
 | [components/catalog/src/domain/asset_file.rs](../components/catalog/src/domain/asset_file.rs) | File admission by content: a declared type is only accepted when the bytes carry its signature. |
@@ -734,6 +740,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/core/src/database/row_security.rs](../components/core/src/database/row_security.rs) | Bind each borrowed PostgreSQL connection to task scope, and reject unsafe strict-runtime roles. |
 | [components/core/src/database.rs](../components/core/src/database.rs) | Database access of the process: deployment values, connection pools, row security and cluster-wide leases. |
 | [components/core/src/failure.rs](../components/core/src/failure.rs) | Stable safe error details shared by HTTP, MCP and agent streams; legacy constructors retain their wire message. |
+| [components/core/src/history_context.rs](../components/core/src/history_context.rs) | Transaction-local actor, source and reason that the history triggers record with every change. |
 | [components/core/src/host_names.rs](../components/core/src/host_names.rs) | Public host names: a syntactically valid domain, the shop alias under a configured suffix and origins of one family. |
 | [components/core/src/http_limits.rs](../components/core/src/http_limits.rs) | Bounded HTTP payloads and streaming responses for native settings and services. |
 | [components/core/src/lib.rs](../components/core/src/lib.rs) | Shared foundation of every component: the error contract, its conversions and basic identifiers. No business rules. |
@@ -810,6 +817,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/marketing/src/store/customer_facts.rs](../components/marketing/src/store/customer_facts.rs) | Customer rule authority is loaded by tenant and stable customer ID, with aggregate history and calendar age. |
 | [components/marketing/src/store/dependencies.rs](../components/marketing/src/store/dependencies.rs) | Inspect tenant-owned definition references and durable uses before configuration deletion. |
 | [components/marketing/src/store/facts.rs](../components/marketing/src/store/facts.rs) | Assemble private server-owned rule context once per quote/event; never publish customer facts in cart responses. |
+| [components/marketing/src/store/flow_jobs.rs](../components/marketing/src/store/flow_jobs.rs) | PostgreSQL ownership of Flow claims, cursor checkpoints and terminal results. |
 | [components/marketing/src/store/promotions.rs](../components/marketing/src/store/promotions.rs) | Server-authoritative coupons and automatic campaigns, with deterministic discounts and atomic usage limits. |
 | [components/marketing/src/store/rule_snapshot.rs](../components/marketing/src/store/rule_snapshot.rs) | Resolve only referenced tenant rule IDs with indexed batched reads; freeze active definitions and revisions into the event snapshot. |
 | [components/marketing/src/store.rs](../components/marketing/src/store.rs) | SQL reads of the marketing component. |

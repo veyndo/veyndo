@@ -49,3 +49,14 @@ pub fn token(h: &RequestContext) -> Result<&str> {
         "Customer context required".into(),
     ))
 }
+/// The stored digest of the customer session a request presents; a checkout buyer carries its own.
+pub fn session_digest(h: &RequestContext) -> Result<String> {
+    if let Some(buyer) = &h.checkout_buyer {
+        return Ok(buyer.digest.clone());
+    }
+    let token = header(h, "x-customer-token").ok_or(Error(
+        StatusCode::UNAUTHORIZED,
+        "Customer login required".into(),
+    ))?;
+    Ok(crate::hash(token))
+}

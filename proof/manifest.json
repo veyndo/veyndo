@@ -443,7 +443,8 @@
     },
     "b2b_budget_admissible": {
       "bindings": [
-        "src/b2b/purchase.rs"
+        "components/b2b/src/store/purchase.rs",
+        "crates/cognition/src/inference/budget.rs"
       ],
       "theorems": [
         "b2b_budget_exact",
@@ -456,7 +457,7 @@
     },
     "b2b_approval_admissible": {
       "bindings": [
-        "src/b2b/purchase.rs",
+        "components/b2b/src/store/purchase.rs",
         "src/b2b/approval.rs"
       ],
       "theorems": [
@@ -692,8 +693,38 @@
     },
     "components/b2b/src/lib.rs": {
       "status": "unproved",
-      "sha256": "b0055890cb546f6206b930ebf13d4344c7ba6eace06256992765ec74eedfa545",
-      "review": "Identity credentials, B2B and POS contracts and checkout tax lines moved into components; kernel call sites unchanged"
+      "sha256": "5c54b4685b9e3ccda17f3620e4bbf355f58944f4f7560e95ca23a70128a588f9",
+      "review": "B2B access, organization and purchasing storage and flow job claims moved into their components"
+    },
+    "components/b2b/src/store/access.rs": {
+      "status": "unproved",
+      "sha256": "6b66745af61a163e589587d2a90dcd67450f0211c44ac53f4e8dea6379d96083",
+      "review": "B2B access, organization and purchasing storage and flow job claims moved into their components"
+    },
+    "components/b2b/src/store/catalog.rs": {
+      "status": "unproved",
+      "sha256": "3a2f4cb72b9d4b69ef77fade0a3995e7b6378d2cc8904233c9fd6638bdd9e1b3",
+      "review": "B2B access, organization and purchasing storage and flow job claims moved into their components"
+    },
+    "components/b2b/src/store/organization.rs": {
+      "status": "unproved",
+      "sha256": "60c816f878bcb6ab0a4367f355dc0db937e4bc594530231fb9484991f5590251",
+      "review": "B2B access, organization and purchasing storage and flow job claims moved into their components"
+    },
+    "components/b2b/src/store/purchase.rs": {
+      "status": "reviewed-binding",
+      "sha256": "6aa647c874fec3bfb2b3282c02678b808e21cd0f6f9d19fbb82ae4fec4ace762",
+      "review": "B2B access, organization and purchasing storage and flow job claims moved into their components"
+    },
+    "components/b2b/src/store/staging.rs": {
+      "status": "unproved",
+      "sha256": "e80c61f7b2cc66298ed4ad504c036e7bea4e38edfe23da6cf99b74de8c690452",
+      "review": "B2B access, organization and purchasing storage and flow job claims moved into their components"
+    },
+    "components/b2b/src/store.rs": {
+      "status": "unproved",
+      "sha256": "40e9dc80085d406b5c72f397ac05b41506c3a5a777e389ed71254616057bf945",
+      "review": "B2B access, organization and purchasing storage and flow job claims moved into their components"
     },
     "components/b2b/src/types/model.rs": {
       "status": "unproved",
@@ -1105,6 +1136,11 @@
       "sha256": "0815662afae602e0085a566eb35ddcb10a8922a651e82af579436b281ba35432",
       "review": "Component architecture phase 0 and first core crate: the error contract moved unchanged from src/failure.rs and src/foundation.rs to components/core (wire messages, status mapping and retry header identical; the permission scope is resolved by the caller, the inference conversion lives beside its error type). Structure check drops the file length limit and adds the component map; clippy limits function length. Core and cognition unit tests pass. SQL, HTTP and provider behaviour is not formally proved."
     },
+    "components/core/src/history_context.rs": {
+      "status": "unproved",
+      "sha256": "2055619ed333029231f93eec2961f83199754c81d9dd76ea04241105410727c4",
+      "review": "B2B access, organization and purchasing storage and flow job claims moved into their components"
+    },
     "components/core/src/host_names.rs": {
       "status": "unproved",
       "sha256": "9ed8354104c5da0c828ea301247be72343147fe1252f24288adaaeedc847b9e4",
@@ -1117,8 +1153,8 @@
     },
     "components/core/src/lib.rs": {
       "status": "reviewed-binding",
-      "sha256": "31a0bd408e24558269642d2c9c5723f988d9c993ec20012116cb9c72703f8582",
-      "review": "Payment commands, worker and provider sessions moved behind the payments gateway port"
+      "sha256": "d97bbf2c6cc4ca7008d3aa99a4144037c41fde7783265f7e711043f87d544c8f",
+      "review": "B2B access, organization and purchasing storage and flow job claims moved into their components"
     },
     "components/core/src/localized/languages.rs": {
       "status": "unproved",
@@ -1152,8 +1188,8 @@
     },
     "components/core/src/shop_scope.rs": {
       "status": "unproved",
-      "sha256": "a770b3955cab59eb1ac2b3e19be4b4990c65e7ca5c46ef9729eed927768aecfe",
-      "review": "Currency discovery moved into components/pricing behind the shop settings and cart ports; no rule changed"
+      "sha256": "25e050ca8a154a98a8d95bff40076e519a4829932a05318e06996fbd80b72c20",
+      "review": "B2B access, organization and purchasing storage and flow job claims moved into their components"
     },
     "components/core/src/state.rs": {
       "status": "unproved",
@@ -1455,6 +1491,11 @@
       "sha256": "b742130c3e216d15c87b619f1da50534fcf809c3af85881fd60abda60ba56347",
       "review": "cart types and rule engine moved into components; checking bindings"
     },
+    "components/marketing/src/store/flow_jobs.rs": {
+      "status": "unproved",
+      "sha256": "2f501b10a17cec6632e30f859063724ceb44a8c665b42030fd15d15c805c80f6",
+      "review": "B2B access, organization and purchasing storage and flow job claims moved into their components"
+    },
     "components/marketing/src/store/promotions.rs": {
       "status": "unproved",
       "sha256": "662bfc317b15f492c1384d242983a04e0f3b941c3103c217aa6ef59e26b0e4c7",
@@ -1467,8 +1508,8 @@
     },
     "components/marketing/src/store.rs": {
       "status": "unproved",
-      "sha256": "514c2977b986864372b5199920119ed816edb08232e6312f6efb7c95f433dbea",
-      "review": "Flow pipeline and promotion types moved into components/marketing; kernel call sites unchanged"
+      "sha256": "6b427b00bd7b11fb0bfc2b1b6aae3fb80f8d44f637b46a8b662105ed8b776b31",
+      "review": "B2B access, organization and purchasing storage and flow job claims moved into their components"
     },
     "components/marketing/src/types/channel.rs": {
       "status": "unproved",
@@ -2231,7 +2272,7 @@
       "review": "Move reviewed rule sources and their registry to the pinned Automation library. Compared every original rule and comparison module with the deployed source after normalizing the two equivalent kernel references. The shared Automation policy module is byte-identical. Rust library tests, PHP catalog verification and the 432 condition and 1976 comparison cases passed. The two existing Lean bindings now point at their actual production consumers."
     },
     "crates/cognition/src/inference/budget.rs": {
-      "status": "unproved",
+      "status": "reviewed-binding",
       "sha256": "e4e8afb7108e03974371cd768bf94aef9f27d7b4bfc8f009d665af6b30018719",
       "review": "Reviewed agent scope construction and locking: synchronously box the child before constructing the task-local future; retain authority only while polling and verify no context leak. Live-root NO KEY UPDATE serializes allocation/enqueue/stop while admitting FK KEY SHARE, avoiding tenant/task inversion. Real held-reference HTTP stop fails before and passes after; actual worker stop and signed-role allocation cases pass. Existing kernel proof unchanged; async/SQL/provider code remains unproved and the Linux instrumented POS repeat is still required."
     },
@@ -3967,8 +4008,8 @@
     },
     "src/accounts/mod.rs": {
       "status": "unproved",
-      "sha256": "3d504b40ad41669bf41cc13195cdebb7c6ee9506cb5c011d61f85d6c322ae6c5",
-      "review": "customers component crate created; no kernel binding changed"
+      "sha256": "dd7288b11146d73f40e51fba55d713f8e0bb469231c4fec04ed1c5644f8723ca",
+      "review": "B2B access, organization and purchasing storage and flow job claims moved into their components"
     },
     "src/accounts/order_snapshot.rs": {
       "status": "unproved",
@@ -4792,8 +4833,8 @@
     },
     "src/b2b/access.rs": {
       "status": "unproved",
-      "sha256": "8a7cbc7944f7bb7a1199fac905c26044f0eb035ea16b083f2e8598b82b717378",
-      "review": "Checkout grant entry points and tenant-bound session checks reviewed against native buyer login, live-shop admission, wrong buyer and tenant, revocation, replay and isolated two-service PostgreSQL acceptance. No additional formal claims."
+      "sha256": "bfc048fefc0015fe21d96d4f547163845f1103294e0ce9fc9c49fa5d71ed60cc",
+      "review": "B2B access, organization and purchasing storage and flow job claims moved into their components"
     },
     "src/b2b/approval.rs": {
       "status": "reviewed-binding",
@@ -4802,8 +4843,8 @@
     },
     "src/b2b/catalog.rs": {
       "status": "unproved",
-      "sha256": "4ea5558d61608a0b37644ca4ed0343935397f9e0a6e80f1f37003fb7590d0724",
-      "review": "Reviewed selective-publication domain rights, transactional channel and current installed Flow action admission, shared B2B configuration writers with history and staging, method/currency dependency guards, and inherited consent-bound analytics. PostgreSQL and frontend regressions exercise successful effects, denied access, stale revisions and preserved live state. SQL, async adapters and external providers remain unproved."
+      "sha256": "77b8ee5c5fff4998ce4c854029d10bcd66012496f4cea8d89cc5fb97056f3b22",
+      "review": "B2B access, organization and purchasing storage and flow job claims moved into their components"
     },
     "src/b2b/contract.rs": {
       "status": "unproved",
@@ -4822,8 +4863,8 @@
     },
     "src/b2b/mod.rs": {
       "status": "unproved",
-      "sha256": "8a98ce66b4cc9c817ef6fba1c456c8305dc79bdb13324bb3e1817c62d4bf6c87",
-      "review": "shop component crate created; settings types moved; no kernel binding changed"
+      "sha256": "17924f9ed8f86a8b56096c77b2136e17dfb28f8be656d809a5208262f567f0bd",
+      "review": "B2B access, organization and purchasing storage and flow job claims moved into their components"
     },
     "src/b2b/model.rs": {
       "status": "unproved",
@@ -4842,13 +4883,13 @@
     },
     "src/b2b/organization.rs": {
       "status": "unproved",
-      "sha256": "a552dc1f513ae66d43554087ca0c5f4bfed88d2dae20b45d53f27f7f845e07fe",
-      "review": "Tenant roles and current grants independently reviewed; owner/retained-override/acceptance races repaired and PostgreSQL-blocked regressions passed; PII and Flow projection boundaries documented; B2B feature settings delegate shared CAS/history and preserve financial guards. Existing extracted policies unchanged; SQL/async/UI remain reviewed adapters, not full proofs."
+      "sha256": "af4877c088dcb071a5e2616e87f1a832dee906b0ea065eb340d1b56c51def12f",
+      "review": "B2B access, organization and purchasing storage and flow job claims moved into their components"
     },
     "src/b2b/purchase.rs": {
-      "status": "reviewed-binding",
-      "sha256": "f0c8015c7c0c8ebee1dd9c0cbc2541a81275e5a2748d1b180c314ea3599066ff",
-      "review": "Reviewed native UCP B2B transport: exact public schema only; bounded namespace/version profile selection without authority; current employee and original-cart RFQ reads; unchanged quote CAS, expiry, pricing, budget and separate approval owners; single-use native checkout handoff; shared idempotent order/outbox. New UCP adapters remain unproved."
+      "status": "unproved",
+      "sha256": "098e865b3b59b8148dc70239bdb449f9aa6faccd62d26bd680ec48b6aee720fc",
+      "review": "B2B access, organization and purchasing storage and flow job claims moved into their components"
     },
     "src/b2b/quick_order.rs": {
       "status": "unproved",
@@ -4882,8 +4923,8 @@
     },
     "src/b2b/staging.rs": {
       "status": "unproved",
-      "sha256": "b5a10040244ae90f68695eb71962b2d315c6677550127708447fdbf183b01cfa",
-      "review": "Reviewed selective-publication domain rights, transactional channel and current installed Flow action admission, shared B2B configuration writers with history and staging, method/currency dependency guards, and inherited consent-bound analytics. PostgreSQL and frontend regressions exercise successful effects, denied access, stale revisions and preserved live state. SQL, async adapters and external providers remain unproved."
+      "sha256": "7890097243e4b487ec890d3f6a14494e34d0c29c176acf64e1297733368573d6",
+      "review": "B2B access, organization and purchasing storage and flow job claims moved into their components"
     },
     "src/bin/automation_rules.rs": {
       "status": "unproved",
@@ -5757,8 +5798,8 @@
     },
     "src/history/mod.rs": {
       "status": "unproved",
-      "sha256": "f964414527a6080ded586187c1dbf6aacf38ab8a80d0766b634cbf97f4c7164f",
-      "review": "History discovery now uses native entity rights plus current read/write/PII conjunctions; canonical entity set and PII classification are shared with native history. Real narrow-role counterexample reproduced before repair; no financial policy changed."
+      "sha256": "08acb23ac50a9f2db56e4108a57b0c9bdbb70fadf3a8743e5575feda2717e93d",
+      "review": "B2B access, organization and purchasing storage and flow job claims moved into their components"
     },
     "src/history/product.rs": {
       "status": "unproved",
@@ -5897,8 +5938,8 @@
     },
     "src/marketing/flow_jobs.rs": {
       "status": "unproved",
-      "sha256": "70afd7a25b41e8e8b60c108d1063cf09d9cc17c4ee602dabcef232f730e167a6",
-      "review": "Flow job storage isolates the PostgreSQL claim, preserves delayed deadlines and existing step receipts, and scopes checkpoint and completion writes to the current tenant/job/attempt; automation regression checks stale claims and terminal delay."
+      "sha256": "a2c818fb4029a288c3d7a82a4f273976b6e2e0fad1430c94fc88966e7a04676e",
+      "review": "B2B access, organization and purchasing storage and flow job claims moved into their components"
     },
     "src/marketing/flow_mutations.rs": {
       "status": "unproved",
@@ -6827,8 +6868,8 @@
       "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
     },
     "Cargo.lock": {
-      "sha256": "655158011bd34526e3a5a3d56b71e477638be94085d746e1bf7b6295116ca909",
-      "review": "Payment commands, worker and provider sessions moved behind the payments gateway port"
+      "sha256": "1e2ea49a5162974eaa0d8294100b6e51e3f764d7d8723eb0aab717c0694bd18f",
+      "review": "B2B access, organization and purchasing storage and flow job claims moved into their components"
     },
     "Cargo.toml": {
       "sha256": "881e080eb9f1b1f051c23e2848df689853473831b4d3072817387d65c23ddb66",

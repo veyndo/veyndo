@@ -49,16 +49,7 @@ pub(crate) fn router() -> Router<App> {
 pub(crate) async fn session(a: &App, t: &str, email: &str) -> Result<String> {
     veyndo_customers::service::sessions::open(&a.core, t, email).await
 }
-pub(crate) fn session_digest(h: &RequestContext) -> Result<String> {
-    if let Some(buyer) = &h.checkout_buyer {
-        return Ok(buyer.digest.clone());
-    }
-    let token = header(h, "x-customer-token").ok_or(Error(
-        StatusCode::UNAUTHORIZED,
-        "Customer login required".into(),
-    ))?;
-    Ok(hash(token))
-}
+pub(crate) use veyndo_core::shop_scope::session_digest;
 
 pub(crate) async fn identity(a: &App, h: &RequestContext) -> Result<(String, String)> {
     let t = tenant(h)?;

@@ -55,26 +55,7 @@ pub(crate) fn router() -> Router<App> {
         )
         .layer(axum::extract::DefaultBodyLimit::max(256 * 1024))
 }
-pub(crate) async fn context(
-    conn: &mut sqlx::PgConnection,
-    h: &RequestContext,
-    source: &str,
-) -> Result<()> {
-    sqlx::query("SELECT set_config('veyndo.actor',$1,true),set_config('veyndo.source',$2,true),set_config('veyndo.reason',$3,true)")
- .bind(header(h,"x-rac-user").unwrap_or(""))
- .bind(source).bind(header(h,"x-rac-history-reason").unwrap_or(""))
- .execute(conn).await?;
-    Ok(())
-}
-pub(crate) async fn customer_context(conn: &mut sqlx::PgConnection, email: &str) -> Result<()> {
-    sqlx::query(
-        "SELECT set_config('veyndo.actor',$1,true),set_config('veyndo.source','customer',true)",
-    )
-    .bind(format!("customer:{email}"))
-    .execute(conn)
-    .await?;
-    Ok(())
-}
+pub(crate) use veyndo_core::history_context::{context, customer_context};
 pub(super) fn rights(entity: &str) -> Result<(&'static str, Option<&'static str>)> {
     Ok(match entity {
         "role" => ("team.manage", Some("team.manage")),
