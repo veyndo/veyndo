@@ -179,8 +179,8 @@
     },
     "app_read_admissible": {
       "bindings": [
-        "src/apps/surfaces.rs",
-        "src/apps/native_views.rs"
+        "components/apps/src/domain/field_values.rs",
+        "components/apps/src/domain/action_policy.rs"
       ],
       "theorems": [
         "app_read_safe",
@@ -232,7 +232,8 @@
     },
     "app_core_reference_admissible": {
       "bindings": [
-        "src/apps/editor_contract.rs"
+        "components/apps/src/domain/field_values.rs",
+        "components/apps/src/domain/reference_policy.rs"
       ],
       "theorems": [
         "app_core_reference_private",
@@ -683,6 +684,11 @@
     }
   },
   "sources": {
+    "components/apps/src/domain/action_policy.rs": {
+      "status": "reviewed-binding",
+      "sha256": "c9ec9428c4494a7990b3635b8a90b8e25f404e6ef7d44d0ea68e9179c320844f",
+      "review": "Field, reference, view and manifest policy moved into the apps component without changing rules"
+    },
     "components/apps/src/domain/approval.rs": {
       "status": "reviewed-binding",
       "sha256": "6bede05e37503886dae0924d404be43a103e8ba68fffbd128af8057bb2cda34e",
@@ -693,10 +699,20 @@
       "sha256": "ea41256153f8ae695dabf5ec5dc7822d7716c8885e360e7caa1feca3ffb168f2",
       "review": "Package approval, distribution, schema adapters, event projection and service transport policy moved into components/apps without a change in behaviour"
     },
+    "components/apps/src/domain/event_destination.rs": {
+      "status": "unproved",
+      "sha256": "a2ac0802a9f3975adb36e8ea1357995ff6210fbeccff7bf600bb0d8aa25f6b2c",
+      "review": "Field, reference, view and manifest policy moved into the apps component without changing rules"
+    },
     "components/apps/src/domain/event_projection.rs": {
       "status": "unproved",
       "sha256": "74955487169ec3b874a55594b3ed016ffc922f942eec591b491224f21cc8e768",
       "review": "Package approval, distribution, schema adapters, event projection and service transport policy moved into components/apps without a change in behaviour"
+    },
+    "components/apps/src/domain/field_values.rs": {
+      "status": "reviewed-binding",
+      "sha256": "697091a20fa0c812820edae0d491cc8bb0d9ef86f588fcc53583b6a13e4cf519",
+      "review": "Field, reference, view and manifest policy moved into the apps component without changing rules"
     },
     "components/apps/src/domain/input_schema.rs": {
       "status": "unproved",
@@ -708,10 +724,25 @@
       "sha256": "a5641755ef38b1f955703d2b36cb8cf305acfef2dfc084ae9bfe5b44118cfb1a",
       "review": "Package approval, distribution, schema adapters, event projection and service transport policy moved into components/apps without a change in behaviour"
     },
+    "components/apps/src/domain/manifest_policy.rs": {
+      "status": "unproved",
+      "sha256": "dd7a6796069b00e125f3668e8cd4227e5a71c4d6a876b6a79ad875d235a0ca01",
+      "review": "Field, reference, view and manifest policy moved into the apps component without changing rules"
+    },
+    "components/apps/src/domain/manifest_validation.rs": {
+      "status": "unproved",
+      "sha256": "27f417475f103c0c77b29529ad8475d0060a5633d941b61062270491e20e4d44",
+      "review": "Field, reference, view and manifest policy moved into the apps component without changing rules"
+    },
     "components/apps/src/domain/model_contract.rs": {
       "status": "unproved",
       "sha256": "49852afeda559d96460cb16ec3959459b98a7f259707e41bc8635711b96df653",
       "review": "Package approval, distribution, schema adapters, event projection and service transport policy moved into components/apps without a change in behaviour"
+    },
+    "components/apps/src/domain/native_views.rs": {
+      "status": "unproved",
+      "sha256": "80d709180488f67c0b3575866fa848d32d4069dc7c7e62a0ca5f13e3898af9e2",
+      "review": "Field, reference, view and manifest policy moved into the apps component without changing rules"
     },
     "components/apps/src/domain/persistence.rs": {
       "status": "unproved",
@@ -722,6 +753,11 @@
       "status": "unproved",
       "sha256": "188a5a9fc0f047a0feb6b1377a9417b98cf0991c3d5ea8c55e5b7b6aeae924a0",
       "review": "Package approval, distribution, schema adapters, event projection and service transport policy moved into components/apps without a change in behaviour"
+    },
+    "components/apps/src/domain/reference_policy.rs": {
+      "status": "reviewed-binding",
+      "sha256": "1b90343c441ade6c4ffa39cc3d1321907aff57d410ed40947153c9e3ec7ac8ab",
+      "review": "Field, reference, view and manifest policy moved into the apps component without changing rules"
     },
     "components/apps/src/domain/relations.rs": {
       "status": "unproved",
@@ -745,13 +781,18 @@
     },
     "components/apps/src/domain.rs": {
       "status": "unproved",
-      "sha256": "c8a97e200901469ca312453d3632049ee8bdadd448d7bfb808b842750ae8bc09",
-      "review": "Package approval, distribution, schema adapters, event projection and service transport policy moved into components/apps without a change in behaviour"
+      "sha256": "2e0452defeb2d19c1ee51360ae5853e45d7fb5e6849237b4c3708d42579e0477",
+      "review": "Field, reference, view and manifest policy moved into the apps component without changing rules"
     },
     "components/apps/src/lib.rs": {
       "status": "unproved",
       "sha256": "45f5c51a1c341b0ed356ccf2ff69045aa8b4c3bd0bded4cb1cc8376d132425f0",
       "review": "Package approval, distribution, schema adapters, event projection and service transport policy moved into components/apps without a change in behaviour"
+    },
+    "components/apps/src/store/asset_references.rs": {
+      "status": "unproved",
+      "sha256": "ff0ab16afc22e4716b2ea0fc7faa2ccd117c4caebd9399714dd082959e612835",
+      "review": "Field, reference, view and manifest policy moved into the apps component without changing rules"
     },
     "components/apps/src/store/dependencies.rs": {
       "status": "unproved",
@@ -760,8 +801,8 @@
     },
     "components/apps/src/store.rs": {
       "status": "unproved",
-      "sha256": "516e65c3a7b34f3e70714816751471c559f9ba71ba7524827b1eb4cbe85ffbd1",
-      "review": "Package approval, distribution, schema adapters, event projection and service transport policy moved into components/apps without a change in behaviour"
+      "sha256": "f64c1029a94b4657c836a9ab515a9100603cc755ceb8d9249afd1ba3c5c1c00f",
+      "review": "Field, reference, view and manifest policy moved into the apps component without changing rules"
     },
     "components/b2b/src/domain/contract.rs": {
       "status": "unproved",
@@ -4875,8 +4916,8 @@
     },
     "src/apps/configuration_inputs.rs": {
       "status": "unproved",
-      "sha256": "da6c270fbd8b070dca65fefa2a34210c867bebfc360535d1314c9f701ef89fe3",
-      "review": "Reviewed complete standard compiler extraction in Apps 0.16/model 0.12. All 19 original before/common/after domain stages now run inside one shared compiler with preserved order, first model kind/pointer or native host error, internal actual view lookup and exhaustive Manifest field coverage. Native manifest_policy delegates value/reference/currency/scope/source/base, current Ed25519 keys, namespace/network/read and clock decisions to original owners; direct verified predicates remain attached. No no-op host domain callbacks or alternative serving compiler. Independent 116 model and 24 runtime tests include all 34 canonical packages, nineteen invalid-domain controls and denied-policy/callback-order cases. Native 74 app and two provider units, seventeen real HTTP/PostgreSQL app/schema/preview/staging/isolation/lifecycle/distribution/surface/assistant/event/generation/marketplace/payment modules, unchanged native digests and Clippy pass. Kernel unchanged; shared compiler, policy adapters and SQL/host effects remain unproved."
+      "sha256": "d661e278c0dda4163c850c7ec47093f295405962274a78c12e3ff7b5413cd23e",
+      "review": "Field, reference, view and manifest policy moved into the apps component without changing rules"
     },
     "src/apps/configuration_orders.rs": {
       "status": "unproved",
@@ -4940,13 +4981,13 @@
     },
     "src/apps/distribution.rs": {
       "status": "unproved",
-      "sha256": "3bb4e7cc99c940365a61bb44c3224cea225036b0af399a682dbc675e0a923903",
-      "review": "Package approval, distribution, schema adapters, event projection and service transport policy moved into components/apps without a change in behaviour"
+      "sha256": "bae4fe2ee188bc4d433d07688f2cea199f2f1e3cf7c5d9e5df12e61b045f0a34",
+      "review": "Field, reference, view and manifest policy moved into the apps component without changing rules"
     },
     "src/apps/editor_contract.rs": {
-      "status": "reviewed-binding",
-      "sha256": "5a2babb6bfd40d2240cd1f0743864e417ae8b79af2668abaef0070e36252b115",
-      "review": "Reviewed strict configuration/library/exact-argument and typed-hook/frozen-decision contract extraction into pinned Apps 0.13.0/model 0.9.0/runtime 0.2.0. Canonical native currency/value/reference/source policy, full compiler order, required expected-null wire semantics, exact problem pointers, WIT projection, bounded guest comparison and contribution limits preserved. Native async cache/source/current-package/library fences and checkout/release remain attached. 96 model and 19 runtime tests, independent seven-plus-five preflight examples, native 74 app units, unchanged 34 package digests, isolated PostgreSQL contract and ten real integrated HTTP/MCP/B2B/configuration/preview/release/AI/Marketplace modules pass. Kernel unchanged; model/runtime/host/SQL remains unproved."
+      "status": "unproved",
+      "sha256": "1e2192bdc76f5fd1ad50e3ef61bea838009099580602cd94d9a09375b616c1ce",
+      "review": "Field, reference, view and manifest policy moved into the apps component without changing rules"
     },
     "src/apps/editor_tests.rs": {
       "status": "unproved",
@@ -4960,8 +5001,8 @@
     },
     "src/apps/event_contract.rs": {
       "status": "unproved",
-      "sha256": "067d6478b7ffc5238a86d252726410e2fb883e7fc7c1ad7c2c1f7f5f699561c5",
-      "review": "Reviewed complete standard compiler extraction in Apps 0.16/model 0.12. All 19 original before/common/after domain stages now run inside one shared compiler with preserved order, first model kind/pointer or native host error, internal actual view lookup and exhaustive Manifest field coverage. Native manifest_policy delegates value/reference/currency/scope/source/base, current Ed25519 keys, namespace/network/read and clock decisions to original owners; direct verified predicates remain attached. No no-op host domain callbacks or alternative serving compiler. Independent 116 model and 24 runtime tests include all 34 canonical packages, nineteen invalid-domain controls and denied-policy/callback-order cases. Native 74 app and two provider units, seventeen real HTTP/PostgreSQL app/schema/preview/staging/isolation/lifecycle/distribution/surface/assistant/event/generation/marketplace/payment modules, unchanged native digests and Clippy pass. Kernel unchanged; shared compiler, policy adapters and SQL/host effects remain unproved."
+      "sha256": "b5386d432d0b57dfb0bc11bc11f330f75115f9ed066c366b1300e94b4fda68f6",
+      "review": "Field, reference, view and manifest policy moved into the apps component without changing rules"
     },
     "src/apps/event_projection.rs": {
       "status": "unproved",
@@ -4995,8 +5036,8 @@
     },
     "src/apps/field_values.rs": {
       "status": "unproved",
-      "sha256": "05459b12dd4d8d609d2175cbac639bf905977419456f34fc907367749b0cdf16",
-      "review": "Reviewed strict configuration/library/exact-argument and typed-hook/frozen-decision contract extraction into pinned Apps 0.13.0/model 0.9.0/runtime 0.2.0. Canonical native currency/value/reference/source policy, full compiler order, required expected-null wire semantics, exact problem pointers, WIT projection, bounded guest comparison and contribution limits preserved. Native async cache/source/current-package/library fences and checkout/release remain attached. 96 model and 19 runtime tests, independent seven-plus-five preflight examples, native 74 app units, unchanged 34 package digests, isolated PostgreSQL contract and ten real integrated HTTP/MCP/B2B/configuration/preview/release/AI/Marketplace modules pass. Kernel unchanged; model/runtime/host/SQL remains unproved."
+      "sha256": "6f97f693de88ee0c08d6621d789312e4228e9d03824d927ff4cf2e0275d21caa",
+      "review": "Field, reference, view and manifest policy moved into the apps component without changing rules"
     },
     "src/apps/gateway.rs": {
       "status": "unproved",
@@ -5053,15 +5094,10 @@
       "sha256": "6f9faa71807561751d5a177395ecb905dd1a4242154795e04627e8129fa0624d",
       "review": "Reviewed final Apps 0.23 schema migration extraction and same-transaction native validation; only final import ordering and removal of unused native wrappers follow the passing 74 App units, seven native PostgreSQL/API modules and independent PostgreSQL/Linux tests. Bounded snapshots, rollback and checked revision preserve original authority; kernel unchanged and surrounding SQL/host code remain unproved."
     },
-    "src/apps/manifest_policy.rs": {
-      "status": "unproved",
-      "sha256": "0fa2c5ff58ccbef26bfd002f185e4f19916bdfcf3429a3db45281b1140edf4b1",
-      "review": "Reviewed complete standard compiler extraction in Apps 0.16/model 0.12. All 19 original before/common/after domain stages now run inside one shared compiler with preserved order, first model kind/pointer or native host error, internal actual view lookup and exhaustive Manifest field coverage. Native manifest_policy delegates value/reference/currency/scope/source/base, current Ed25519 keys, namespace/network/read and clock decisions to original owners; direct verified predicates remain attached. No no-op host domain callbacks or alternative serving compiler. Independent 116 model and 24 runtime tests include all 34 canonical packages, nineteen invalid-domain controls and denied-policy/callback-order cases. Native 74 app and two provider units, seventeen real HTTP/PostgreSQL app/schema/preview/staging/isolation/lifecycle/distribution/surface/assistant/event/generation/marketplace/payment modules, unchanged native digests and Clippy pass. Kernel unchanged; shared compiler, policy adapters and SQL/host effects remain unproved."
-    },
     "src/apps/manifest_validation.rs": {
       "status": "unproved",
-      "sha256": "9045d2f7fd89798ad95abcba9cd03bf9084b380b49630f699ce43610d0b012d6",
-      "review": "Reviewed complete standard compiler extraction in Apps 0.16/model 0.12. All 19 original before/common/after domain stages now run inside one shared compiler with preserved order, first model kind/pointer or native host error, internal actual view lookup and exhaustive Manifest field coverage. Native manifest_policy delegates value/reference/currency/scope/source/base, current Ed25519 keys, namespace/network/read and clock decisions to original owners; direct verified predicates remain attached. No no-op host domain callbacks or alternative serving compiler. Independent 116 model and 24 runtime tests include all 34 canonical packages, nineteen invalid-domain controls and denied-policy/callback-order cases. Native 74 app and two provider units, seventeen real HTTP/PostgreSQL app/schema/preview/staging/isolation/lifecycle/distribution/surface/assistant/event/generation/marketplace/payment modules, unchanged native digests and Clippy pass. Kernel unchanged; shared compiler, policy adapters and SQL/host effects remain unproved."
+      "sha256": "e557e461323fe1b00bfddf169494b3d0d8653d1222dd2d21a22b51b76fd559d8",
+      "review": "Field, reference, view and manifest policy moved into the apps component without changing rules"
     },
     "src/apps/mcp_views.rs": {
       "status": "reviewed-binding",
@@ -5070,8 +5106,8 @@
     },
     "src/apps/mod.rs": {
       "status": "unproved",
-      "sha256": "f03b751f3fb1eb10f6bf49fc813a5a444a77429e916d5d03b1bb0cc1eae390cb",
-      "review": "Package approval, distribution, schema adapters, event projection and service transport policy moved into components/apps without a change in behaviour"
+      "sha256": "7e533dbf7ca05d0d1697e49c4ced8129f6afc7a0e5b259121a4b7854ebfcfbd6",
+      "review": "Field, reference, view and manifest policy moved into the apps component without changing rules"
     },
     "src/apps/model_contract.rs": {
       "status": "unproved",
@@ -5109,9 +5145,9 @@
       "review": "Reviewed exact native view/control/geometry/UI AST extraction into pinned Apps model 0.8.0; native compiler order, error pointers, canonical digests, canonical field policy and direct verified public-read predicate preserved. Independent compiler negatives, 74 native app unit tests and twelve real PostgreSQL/HTTP composition modules pass. Shared model, host adapters and SQL remain outside extracted proof scope."
     },
     "src/apps/native_views.rs": {
-      "status": "reviewed-binding",
-      "sha256": "61bcb7b9f3d7ddd5e4bd835e3a8f789645d490b7a76daaeec633768bc4c8e358",
-      "review": "Reviewed complete standard compiler extraction in Apps 0.16/model 0.12. All 19 original before/common/after domain stages now run inside one shared compiler with preserved order, first model kind/pointer or native host error, internal actual view lookup and exhaustive Manifest field coverage. Native manifest_policy delegates value/reference/currency/scope/source/base, current Ed25519 keys, namespace/network/read and clock decisions to original owners; direct verified predicates remain attached. No no-op host domain callbacks or alternative serving compiler. Independent 116 model and 24 runtime tests include all 34 canonical packages, nineteen invalid-domain controls and denied-policy/callback-order cases. Native 74 app and two provider units, seventeen real HTTP/PostgreSQL app/schema/preview/staging/isolation/lifecycle/distribution/surface/assistant/event/generation/marketplace/payment modules, unchanged native digests and Clippy pass. Kernel unchanged; shared compiler, policy adapters and SQL/host effects remain unproved."
+      "status": "unproved",
+      "sha256": "0beb6483625546af5eba1cae372055481c865df95dd73d6289a8632d96cc7e0f",
+      "review": "Field, reference, view and manifest policy moved into the apps component without changing rules"
     },
     "src/apps/observability.rs": {
       "status": "unproved",
@@ -5177,11 +5213,6 @@
       "status": "unproved",
       "sha256": "b20acc49912a38605b819524dd8ef987a107d791347319c40874ebd431d5a605",
       "review": "Review MCP read admission against the same active manifest at dispatch, native app placements with explicit list-action opt-in and tenant revision URI, and existing opaque document CSP. App model, direct HTTP and hosted composition checks cover their corresponding runtime contracts."
-    },
-    "src/apps/relations.rs": {
-      "status": "unproved",
-      "sha256": "89072ebf86ceca74a93b74c3efed7c2881dd249371dad88516c5649b316bf9d4",
-      "review": "Package approval, distribution, schema adapters, event projection and service transport policy moved into components/apps without a change in behaviour"
     },
     "src/apps/routes.rs": {
       "status": "unproved",
@@ -5259,9 +5290,9 @@
       "review": "Reviewed namespaced GET/POST and opaque app UI contracts, typed bounded JSON/indexed keyset reads, exact record revision binding, selected bounded AI context, staging imports and nonqueuing service admission; real PostgreSQL app/surface/service/staging/developer/user regressions and source/nonce SDK checks passed. GET policy excludes managed writes; external read-only behavior and SQL remain unproved."
     },
     "src/apps/surfaces.rs": {
-      "status": "reviewed-binding",
-      "sha256": "8858eefa53aa2f7d9522d29100f94714a697bb5cff48682ffad2824c2cfad775",
-      "review": "MCP read admission is bound to current actor, active installed manifest and the declared view revision. HTTP/PostgreSQL tests check both assistant audiences, cross-tenant denial, deactivation and bound pagination. The opaque browser frame was checked with real navigation. Existing model hosts deny the new placements unless they supply a matching view."
+      "status": "unproved",
+      "sha256": "a216459bac7d8a8245e993c5e589a742099ca2745a35d1c05cac109eb7fd873d",
+      "review": "Field, reference, view and manifest policy moved into the apps component without changing rules"
     },
     "src/apps/tool_contract.rs": {
       "status": "unproved",
@@ -7485,8 +7516,8 @@
       "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
     },
     "Cargo.lock": {
-      "sha256": "3616ce374c7549f602c0b44fb0744b5d3a270d37840a0518f7923127f619d0f3",
-      "review": "Package approval, distribution, schema adapters, event projection and service transport policy moved into components/apps without a change in behaviour"
+      "sha256": "da338359ea96a25384b414d65e2f0139d41e6e4514c6f84cf4a20cc07a92d013",
+      "review": "Field, reference, view and manifest policy moved into the apps component without changing rules"
     },
     "Cargo.toml": {
       "sha256": "12d2d79a98f6913d20b8e912afb9ea8de0539b9e83428de8a9d7412c406896f6",

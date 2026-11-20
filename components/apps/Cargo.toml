@@ -15,3 +15,10 @@ veyndo-core = { path = "../core" }
 veyndo-kernel = { path = "../../crates/kernel" }
 veyndo-app-model = { path = "../../extensions/services/app-storage/model" }
 veyndo-app-storage = { path = "../../extensions/services/app-storage" }
+veyndo-apps = { path = "../../crates/apps" }
+veyndo-runtime = { path = "../../crates/runtime" }
+veyndo-identity = { path = "../identity" }
+veyndo-pricing = { path = "../pricing" }
+veyndo-catalog = { path = "../catalog" }
+veyndo-orders = { path = "../orders" }
+chrono.workspace = true

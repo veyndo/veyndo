@@ -1,8 +1,20 @@
 //! Required native policy ports for the complete shared compiler; no package or request fields can select a weaker policy.
-use super::*;
+use crate::domain::reference_policy::ReferencePolicy;
+use crate::domain::{action_policy, distribution, event_destination, field_values};
+use serde_json::Value;
 use veyndo_app_model as shared;
-pub(super) struct Policy;
-impl shared::fields::ValuePolicy for Policy {
+use veyndo_app_model::Action;
+use veyndo_app_model::manifest::Manifest;
+use veyndo_core::localized::valid_locale_key;
+use veyndo_core::{Error, Result};
+use veyndo_identity::SCOPES;
+use veyndo_pricing::types::currency as currencies;
+
+/// The native policy of the package compiler, with the publisher keys the operator registered.
+pub struct Policy<'a> {
+    pub publishers: &'a Value,
+}
+impl shared::fields::ValuePolicy for Policy<'_> {
     fn locale(&self, key: &str) -> bool {
         shared::fields::ValuePolicy::locale(&field_values::Policy, key)
     }
@@ -16,62 +28,58 @@ impl shared::fields::ValuePolicy for Policy {
         shared::fields::ValuePolicy::relations(&field_values::Policy, value)
     }
 }
-impl shared::declarations::ReferencePolicy for Policy {
+impl shared::declarations::ReferencePolicy for Policy<'_> {
     fn admitted(&self, product: bool, private: bool) -> bool {
-        shared::declarations::ReferencePolicy::admitted(
-            &editor_contract::ReferencePolicy,
-            product,
-            private,
-        )
+        shared::declarations::ReferencePolicy::admitted(&ReferencePolicy, product, private)
     }
 }
-impl shared::configuration::Policy for Policy {
+impl shared::configuration::Policy for Policy<'_> {
     fn known_currency(&self, code: &str) -> bool {
         currencies::scale(code).is_some()
     }
 }
-impl shared::package::Policy for Policy {
+impl shared::package::Policy for Policy<'_> {
     fn known_scope(&self, scope: &str) -> bool {
-        auth::SCOPES.contains(&scope)
+        SCOPES.contains(&scope)
     }
     fn component_source(&self, source: &str) -> bool {
-        Sandbox::component_source(source)
+        veyndo_apps::sandbox::Sandbox::component_source(source)
     }
 }
-impl shared::views::Policy for Policy {
+impl shared::views::Policy for Policy<'_> {
     fn public_read(&self, writes: bool) -> bool {
         shared::views::Policy::public_read(&field_values::Policy, writes)
     }
 }
-impl shared::native_lifecycle::CompilerPolicy for Policy {
+impl shared::native_lifecycle::CompilerPolicy for Policy<'_> {
     fn scopes(&self) -> &[&str] {
-        auth::SCOPES
+        SCOPES
     }
     fn locale(&self, key: &str) -> bool {
-        commerce::valid_locale_key(key)
+        valid_locale_key(key)
     }
     fn order_base(&self) -> shared::native_lifecycle::Machine {
-        commerce::default_machine()
+        veyndo_orders::domain::order_machine::default_machine()
     }
 }
-impl shared::distribution::SignatureVerifier for Policy {
+impl shared::distribution::SignatureVerifier for Policy<'_> {
     type Error = Error;
     fn verify_signature(&self, m: &Manifest) -> Result<()> {
         shared::distribution::SignatureVerifier::verify_signature(
-            &distribution::NativeVerifier(&crate::runtime_config::get().publishers),
+            &distribution::NativeVerifier(self.publishers),
             m,
         )
     }
 }
-impl shared::compiler::Policy for Policy {
+impl shared::compiler::Policy for Policy<'_> {
     fn unsigned_namespace(&self, m: &Manifest) -> Result<()> {
-        distribution::unsigned_namespace(m)
+        distribution::unsigned_namespace(m, self.publishers)
     }
     fn destination(&self, url: &str) -> Result<()> {
-        event_contract::destination(url).map(|_| ())
+        event_destination::destination(url).map(|_| ())
     }
     fn readonly(&self, action: &Action) -> bool {
-        surfaces::readonly(action)
+        action_policy::readonly(action)
     }
     fn now(&self) -> chrono::DateTime<chrono::Utc> {
         chrono::Utc::now()

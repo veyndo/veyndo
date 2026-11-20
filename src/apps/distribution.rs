@@ -1,14 +1,7 @@
 //! Signed publisher namespaces and tenant-local dependency/version gates; the rules live in the apps component, this module supplies the operator's publisher keys.
 use super::*;
 use base64::{Engine as _, engine::general_purpose::STANDARD};
-pub(super) use veyndo_app_platform::domain::distribution::NativeVerifier;
 use veyndo_app_platform::domain::distribution::message;
-pub(super) fn unsigned_namespace(m: &Manifest) -> Result<()> {
-    veyndo_app_platform::domain::distribution::unsigned_namespace(
-        m,
-        &crate::runtime_config::get().publishers,
-    )
-}
 pub(super) async fn dependencies(
     tx: &mut sqlx::Transaction<'_, sqlx::Postgres>,
     t: &str,

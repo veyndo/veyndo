@@ -28,12 +28,7 @@ async fn no_store(request: axum::extract::Request, next: axum::middleware::Next)
     );
     response
 }
-pub(crate) fn readonly(action: &Action) -> bool {
-    verified_kernel::app_read_admissible(
-        action.read_only || ["list", "configurations"].contains(&action.handler.as_str()),
-        ["save", "emit", "submit"].contains(&action.handler.as_str()),
-    )
-}
+pub(crate) use veyndo_app_platform::domain::action_policy::readonly;
 struct SurfacePolicy<'a>(&'a Manifest);
 impl veyndo_app_model::surfaces::Policy for SurfacePolicy<'_> {
     fn native_view(&self, surface: &Surface) -> bool {

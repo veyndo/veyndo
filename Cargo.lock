@@ -3554,14 +3554,21 @@ name = "veyndo-app-platform"
 version = "0.5.0"
 dependencies = [
  "base64 0.22.1",
+ "chrono",
  "reqwest",
  "ring",
  "serde_json",
  "sqlx",
  "veyndo-app-model",
  "veyndo-app-storage",
+ "veyndo-apps",
+ "veyndo-catalog",
  "veyndo-core",
+ "veyndo-identity",
  "veyndo-kernel",
+ "veyndo-orders",
+ "veyndo-pricing",
+ "veyndo-runtime",
 ]
 
 [[package]]

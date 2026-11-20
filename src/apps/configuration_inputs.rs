@@ -1,19 +1,5 @@
 //! Native policy adapter for shared configuration grammar, library selection and exact guest arguments.
 use super::*;
-impl veyndo_app_model::declarations::ReferencePolicy for field_values::Policy {
-    fn admitted(&self, product: bool, private: bool) -> bool {
-        veyndo_app_model::declarations::ReferencePolicy::admitted(
-            &editor_contract::ReferencePolicy,
-            product,
-            private,
-        )
-    }
-}
-impl veyndo_app_model::configuration::Policy for field_values::Policy {
-    fn known_currency(&self, code: &str) -> bool {
-        currencies::scale(code).is_some()
-    }
-}
 #[cfg(test)]
 pub(super) fn validate(m: &Manifest) -> Result<()> {
     veyndo_app_model::configuration::validate(

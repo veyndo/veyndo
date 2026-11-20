@@ -1,11 +1,5 @@
 //! Editor mounts, enumerated fields and tenant-owned core references; no app alters core tables.
 use super::*;
-pub(super) struct ReferencePolicy;
-impl veyndo_app_model::declarations::ReferencePolicy for ReferencePolicy {
-    fn admitted(&self, product: bool, private: bool) -> bool {
-        verified_kernel::app_core_reference_admissible(product, private)
-    }
-}
 /// The generic entity endpoint cannot bypass stricter action permissions.
 pub(crate) fn entity_access(
     m: &Manifest,

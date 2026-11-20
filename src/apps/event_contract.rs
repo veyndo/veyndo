@@ -1,25 +1,6 @@
 //! Explicit event filters, bounded batches and signed public HTTPS delivery extend the existing leased outbox, not a second queue.
 use super::*;
-pub(super) fn destination(url: &str) -> Result<reqwest::Url> {
-    let u = reqwest::Url::parse(url).map_err(|_| bad("Invalid event destination URL"))?;
-    if u.scheme() != "https"
-        || !u.username().is_empty()
-        || u.password().is_some()
-        || u.fragment().is_some()
-        || u.query().is_some()
-        || url.len() > 2048
-    {
-        return Err(bad(
-            "Event destination requires public HTTPS without credentials, query or fragment",
-        ));
-    }
-    if let Ok(ip) = u.host_str().unwrap_or("").parse()
-        && !veyndo::network_policy::public_address(ip)
-    {
-        return Err(bad("Private event destinations are prohibited"));
-    }
-    Ok(u)
-}
+pub(super) use veyndo_app_platform::domain::event_destination::destination;
 pub(super) fn batch_size(m: &Manifest) -> i64 {
     m.event_delivery
         .as_ref()

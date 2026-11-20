@@ -101,7 +101,6 @@ pub(crate) use planning_contracts::contracts as planning_contracts;
 mod runtime;
 pub(crate) use planning::*;
 mod manifest;
-mod manifest_policy;
 mod manifest_validation;
 mod native_data;
 #[cfg(test)]
@@ -120,7 +119,6 @@ mod persistence;
 mod record_write;
 pub(crate) mod records;
 mod registry;
-mod relations;
 mod routes;
 mod schema_changes;
 mod schema_upgrade;
