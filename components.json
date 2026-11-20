@@ -513,7 +513,7 @@
         "tenants"
       ],
       "glob_imports": 29,
-      "untyped_access": 452,
+      "untyped_access": 459,
       "sql_outside_store": 12
     },
     "payments": {
@@ -622,8 +622,8 @@
         "user_sessions"
       ],
       "glob_imports": 21,
-      "untyped_access": 339,
-      "sql_outside_store": 17
+      "untyped_access": 337,
+      "sql_outside_store": 16
     },
     "b2b": {
       "title": "Company procurement: organisations, budgets, approvals and quotes",
@@ -955,9 +955,9 @@
         "translation_items",
         "translation_jobs"
       ],
-      "glob_imports": 24,
-      "untyped_access": 167,
-      "sql_outside_store": 17
+      "glob_imports": 23,
+      "untyped_access": 160,
+      "sql_outside_store": 16
     },
     "protocols": {
       "title": "MCP, UCP and the shared capability dispatch; adapters without business rules",

@@ -551,7 +551,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/staging/assets.rs](../src/staging/assets.rs) | Binary assets are immutable, staged independently through metadata/digest units; paid entitlements never clone. |
 | [src/staging/categories.rs](../src/staging/categories.rs) | Category release units and dependency-ordered tree publication; stock is never part of a catalog release. |
 | [src/staging/clone.rs](../src/staging/clone.rs) | Clone only catalog/configuration into a private tenant; customer/order/payment state is excluded. |
-| [src/staging/company.rs](../src/staging/company.rs) | Selective company identity release copies only linked immutable logo bytes and validates the final company aggregate. |
+| [src/staging/company.rs](../src/staging/company.rs) | The company identity release is owned by the orders component, next to the company basis it publishes. |
 | [src/staging/documents.rs](../src/staging/documents.rs) | Knowledge documents/chunks clone and publish with their source provenance; publication visibility is a reviewed unit. |
 | [src/staging/final_config.rs](../src/staging/final_config.rs) | Validate the final published channel/automation aggregate and initialize native POS defaults. |
 | [src/staging/mod.rs](../src/staging/mod.rs) | Private cloned shops, scope admission and selective atomic release of reviewed changes. |
@@ -786,6 +786,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/identity/src/domain/permissions.rs](../components/identity/src/domain/permissions.rs) | The permission vocabulary and the decision whether a request holds one. Owners retain control; delegates cannot grant rights they lack. |
 | [components/identity/src/domain/totp.rs](../components/identity/src/domain/totp.rs) | RFC 6238 authenticator codes, bounded clock drift and constant-time comparison. |
 | [components/identity/src/domain.rs](../components/identity/src/domain.rs) | Pure identity rules: no database, no transport. |
+| [components/identity/src/http/access.rs](../components/identity/src/http/access.rs) | What a signed-in person may do in this workspace, their own sessions, and revocation of sessions and invitations. |
 | [components/identity/src/http/members.rs](../components/identity/src/http/members.rs) | Workspace member visibility and immediately effective role/revocation changes. |
 | [components/identity/src/http.rs](../components/identity/src/http.rs) | HTTP handlers of the identity component. |
 | [components/identity/src/lib.rs](../components/identity/src/lib.rs) | Identity component: the checks every other component uses to ask who a request acts for and what it may do. |
@@ -823,6 +824,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/marketing/src/domain/flow_actions.rs](../components/marketing/src/domain/flow_actions.rs) | Native action schema and permissions use original Core names; no arbitrary SQL, shell or unguarded payment transitions. |
 | [components/marketing/src/domain/flow_text.rs](../components/marketing/src/domain/flow_text.rs) | Shop-language validation and main-language fallback for both simple flows and graphical action nodes. |
 | [components/marketing/src/domain/line_facts.rs](../components/marketing/src/domain/line_facts.rs) | Rule line facts use immutable priced lines plus current tenant product metadata; protected values override metadata. |
+| [components/marketing/src/domain/metadata.rs](../components/marketing/src/domain/metadata.rs) | Revision-bound source facts a rule may read on products, customers and orders; secrets and pricing authority are excluded. |
 | [components/marketing/src/domain/pipeline.rs](../components/marketing/src/domain/pipeline.rs) | A bounded acyclic flow graph models source-style true/false branches, ordered actions, delays and stop nodes. |
 | [components/marketing/src/domain/pipeline_tests.rs](../components/marketing/src/domain/pipeline_tests.rs) | Flow graph and source action schema regression tests reject unsafe graphs before any event dispatch. |
 | [components/marketing/src/domain/rule_fields.rs](../components/marketing/src/domain/rule_fields.rs) | Typed rule fields share the original comparison operators and server-derived checkout/event facts. |
@@ -842,6 +844,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/marketing/src/store/flow_job_summaries.rs](../components/marketing/src/store/flow_job_summaries.rs) | Bounded flow execution summaries of a shop; a restricted reader never sees action output. |
 | [components/marketing/src/store/flow_jobs.rs](../components/marketing/src/store/flow_jobs.rs) | PostgreSQL ownership of Flow claims, cursor checkpoints and terminal results. |
 | [components/marketing/src/store/promotions.rs](../components/marketing/src/store/promotions.rs) | Server-authoritative coupons and automatic campaigns, with deterministic discounts and atomic usage limits. |
+| [components/marketing/src/store/rule_entities.rs](../components/marketing/src/store/rule_entities.rs) | Writes rule metadata onto the product, customer or order it describes, bound to the revision the merchant read. |
 | [components/marketing/src/store/rule_snapshot.rs](../components/marketing/src/store/rule_snapshot.rs) | Resolve only referenced tenant rule IDs with indexed batched reads; freeze active definitions and revisions into the event snapshot. |
 | [components/marketing/src/store.rs](../components/marketing/src/store.rs) | SQL reads of the marketing component. |
 | [components/marketing/src/types/channel.rs](../components/marketing/src/types/channel.rs) | The sales channel record and the POS location it may carry; one tenant, independent visibility and languages. |
@@ -866,6 +869,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/orders/src/store/carrier_documents.rs](../components/orders/src/store/carrier_documents.rs) | Immutable private carrier documents belong to the existing order receipt store, never product assets. |
 | [components/orders/src/store/company.rs](../components/orders/src/store/company.rs) | Revisioned tenant company basis and sparse channel overrides, serialized with receipt issuance. |
 | [components/orders/src/store/company_logos.rs](../components/orders/src/store/company_logos.rs) | Tenant-owned company logos: deduplicated immutable PNGs, delivered publicly only while a channel links them. |
+| [components/orders/src/store/company_release.rs](../components/orders/src/store/company_release.rs) | Selective company identity release copies only linked immutable logo bytes and validates the final company aggregate. |
 | [components/orders/src/store/machine.rs](../components/orders/src/store/machine.rs) | The shop's stored order state machine; a shop without one uses the default. |
 | [components/orders/src/store/order_list.rs](../components/orders/src/store/order_list.rs) | Parameter-bound global order filters and stable tuple cursors; query text never becomes SQL. |
 | [components/orders/src/store/order_mutation.rs](../components/orders/src/store/order_mutation.rs) | Shared operational order writes: one replay ledger, immutable quote, audit, cart projection and outbox. |

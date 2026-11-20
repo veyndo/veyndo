@@ -1358,6 +1358,11 @@
       "sha256": "3f81422c12a8848fd9f56e24819ed5f990c06c21f2dc18e92e57a051ec20ab46",
       "review": "Identity credentials, B2B and POS contracts and checkout tax lines moved into components; kernel call sites unchanged"
     },
+    "components/identity/src/http/access.rs": {
+      "status": "unproved",
+      "sha256": "b828bebe5d1246d3c7e8384e1c22b4ca70d6b2d71808c6619082e26b3b788903",
+      "review": "Access overview, session revocation, company release and rule metadata moved into components"
+    },
     "components/identity/src/http/members.rs": {
       "status": "unproved",
       "sha256": "dfb778acb704d800782c01e0984c65b7851cb3ba1263cba2c3d3e703722d9c2e",
@@ -1365,8 +1370,8 @@
     },
     "components/identity/src/http.rs": {
       "status": "unproved",
-      "sha256": "77bfced7c198ca0f2c6a91fa1d0be83460467d5ffc1783d804f999a25f9448aa",
-      "review": "Role grants, workspace members and the Studio handoff ticket moved into the identity component"
+      "sha256": "d3f0c01050e12c856bd299099413607311a2c6e66d76954fa1db3ea2e8fd0e4f",
+      "review": "Access overview, session revocation, company release and rule metadata moved into components"
     },
     "components/identity/src/lib.rs": {
       "status": "reviewed-binding",
@@ -1523,6 +1528,11 @@
       "sha256": "99fe85789eb9d4b68f9a3a75f93a28ecfbcd06770afa1c7ec1e74e5ad11e8d93",
       "review": "cart types and rule engine moved into components; checking bindings"
     },
+    "components/marketing/src/domain/metadata.rs": {
+      "status": "unproved",
+      "sha256": "2a9f06449f0c171b58488e9934271a9f23d85714c7c3a90f819088e228a103d3",
+      "review": "Access overview, session revocation, company release and rule metadata moved into components"
+    },
     "components/marketing/src/domain/pipeline.rs": {
       "status": "reviewed-binding",
       "sha256": "0c47c4043354bb55d2a3cbe6f0a5346d47c1d2eee7ffa0ed51c68653c79c0519",
@@ -1555,8 +1565,8 @@
     },
     "components/marketing/src/domain.rs": {
       "status": "unproved",
-      "sha256": "0ce1d050156eaa58ab3a753b6a15ce3a41cf380cafc502357fce520ac0407a1e",
-      "review": "Flow pipeline and promotion types moved into components/marketing; kernel call sites unchanged"
+      "sha256": "0f6dd5f41d0687197acd700c099dd5d53f8dc93534106ec51523ada45511ad45",
+      "review": "Access overview, session revocation, company release and rule metadata moved into components"
     },
     "components/marketing/src/lib.rs": {
       "status": "unproved",
@@ -1618,6 +1628,11 @@
       "sha256": "662bfc317b15f492c1384d242983a04e0f3b941c3103c217aa6ef59e26b0e4c7",
       "review": "Flow pipeline and promotion types moved into components/marketing; kernel call sites unchanged"
     },
+    "components/marketing/src/store/rule_entities.rs": {
+      "status": "unproved",
+      "sha256": "0d597b3242ebb259f91ac1e09bf39e5ce8472016756894a17c8c7496fee07ede",
+      "review": "Access overview, session revocation, company release and rule metadata moved into components"
+    },
     "components/marketing/src/store/rule_snapshot.rs": {
       "status": "unproved",
       "sha256": "821fd91d3cf02344ebcd1bfec744fff8215fab196716f81a0a56c8bf7eb1b2b1",
@@ -1625,8 +1640,8 @@
     },
     "components/marketing/src/store.rs": {
       "status": "unproved",
-      "sha256": "85a49c1ad7d237b5341c3276dbdc1c93955701fcf356a49b4fa5a17a7148bb44",
-      "review": "Coupons, flow job summaries, requisition import, customer snapshot, address restore and account orders moved into components"
+      "sha256": "fce56b48ca835c15dc91bfd03a12f81d4809675a9e3277aa1c4b37c4915406a6",
+      "review": "Access overview, session revocation, company release and rule metadata moved into components"
     },
     "components/marketing/src/types/channel.rs": {
       "status": "unproved",
@@ -1738,6 +1753,11 @@
       "sha256": "42fc2b01cfbef2ea6e203a0cf446000b73ac745683769bcf24d2f62c2b6e6164",
       "review": "POS, checkout session review, company data, receipts and carrier documents moved into components"
     },
+    "components/orders/src/store/company_release.rs": {
+      "status": "unproved",
+      "sha256": "a22bce58c20ab3db418d010f27c2d51270ec03c163c72a4a8637cec22c035329",
+      "review": "Access overview, session revocation, company release and rule metadata moved into components"
+    },
     "components/orders/src/store/machine.rs": {
       "status": "unproved",
       "sha256": "e40c6c6cdf2f8e86991c8f8a180ca803bfe428a2c4095b716ed57619396aff39",
@@ -1770,8 +1790,8 @@
     },
     "components/orders/src/store.rs": {
       "status": "unproved",
-      "sha256": "2f1cce60a804c86ff82debbb61cd01c77a966bdf032ace86a122b7207ca1072f",
-      "review": "Coupons, flow job summaries, requisition import, customer snapshot, address restore and account orders moved into components"
+      "sha256": "265554a65f57efa8bc81a876041b3c0241c13a83c1380dd5c5b81092e1c8f439",
+      "review": "Access overview, session revocation, company release and rule metadata moved into components"
     },
     "components/orders/src/types/list_criteria.rs": {
       "status": "unproved",
@@ -5010,8 +5030,8 @@
     },
     "src/auth/permissions.rs": {
       "status": "unproved",
-      "sha256": "219a5c454f6dc12545d67c108501c12219fd8c25807117e9fc17675a9a81479e",
-      "review": "Permission rules and the permit and merchant checks moved unchanged into components/identity; the scope rule is bound there"
+      "sha256": "61c1d21eeb235703e52172e4c2642c19176955f7c610a6bd98f6a1ad1cfb6670",
+      "review": "Access overview, session revocation, company release and rule metadata moved into components"
     },
     "src/auth/provision.rs": {
       "status": "unproved",
@@ -6195,8 +6215,8 @@
     },
     "src/marketing/metadata.rs": {
       "status": "unproved",
-      "sha256": "7850644db9e32a7abeee36c0be3ed7ac8a39da6188bfd50c2a4c212e10406199",
-      "review": "Flow pipeline and promotion types moved into components/marketing; kernel call sites unchanged"
+      "sha256": "a7b6add3c072cba008ed6b2ac4db54c82f5223d6794f56c346311669579bede6",
+      "review": "Access overview, session revocation, company release and rule metadata moved into components"
     },
     "src/marketing/mod.rs": {
       "status": "unproved",
@@ -6905,8 +6925,8 @@
     },
     "src/staging/company.rs": {
       "status": "unproved",
-      "sha256": "5d69c3a3d02a3cb4d32dd410488288b6e1984e34354cb2e16661858263d52a1a",
-      "review": "Reviewed company field whitelist, dynamic locales and structured geography; tenant-only immutable decoded logo storage and public linked projection; serialized base/channel revisions with stale and concurrent HTTP cases; order-channel issuer and immutable cancellation snapshots; private cloning, selective release and digest-rebound live baseline. 80 Rust and 122 UI tests plus company, merchant operations, account and staging PostgreSQL suites passed. JSON, SQL, image and UI adapters remain unproved."
+      "sha256": "5847a2015383d6894e2d79b8c23c40d1c5cfd1e88c4b3345abfaea1b848e2f09",
+      "review": "Access overview, session revocation, company release and rule metadata moved into components"
     },
     "src/staging/documents.rs": {
       "status": "unproved",

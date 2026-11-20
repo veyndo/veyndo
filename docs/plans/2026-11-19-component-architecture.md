@@ -125,8 +125,9 @@ Rules that hold from the first component on:
       policy) into `components/identity` as `types/`, `store/`, `service/`, `http/`.
       Started: `store/roles` holds the grants of a role, the rehydrated current
       actor and the usage of a role; `http/members` the workspace member list
-      and the role or revocation change; `store/handoffs` the one-time Studio
-      handoff ticket. Open: accounts and sessions, MFA, invitations, the
+      and the role or revocation change, `http/access` the access overview,
+      the personal session list and the revocation of sessions and invitations;
+      `store/handoffs` the one-time Studio handoff ticket. Open: accounts and sessions, MFA, invitations, the
       identity broker, integration keys, browser sessions, the middleware,
       provisioning, the role editor (it validates names against shop settings).
 - [x] Ban new `use super::*` / `use crate::*`: `glob_imports` per component in
@@ -295,7 +296,8 @@ Order follows the dependency report, lowest first. Each line is one move.
   its channel overrides and public projection, company logos, the issuance
   of invoices, delivery notes and cancellations, and carrier documents.
   `ports::Payments` supplies the transfer instructions an invoice prints.
-  The orders and receipts an owning customer account reads live there too.
+  The orders and receipts an owning customer account reads live there too,
+  as does the selective company release of a staging environment.
   Open: the grid plan, manual orders, imports, the workflow save (app
   lifecycle), fulfilment handlers, returns, merchant customer edits.
 - [ ] marketing. Started: `components/marketing` owns the rule conditions with
@@ -307,7 +309,8 @@ Order follows the dependency report, lowest first. Each line is one move.
   `store/` promotion evaluation with usage limits, channel validation and the
   dependency inspection before a deletion, the flow job claims with their
   checkpoints, the membership a queued step runs with and the bounded job
-  summaries; `service/` the coupon selection of a cart, which admits and
+  summaries and the revision-bound write of rule metadata (its bounds are in
+  `domain/metadata`); `service/` the coupon selection of a cart, which admits and
   prices it through `veyndo_shop::ports::Carts`. Open: flow projection, flow
   execution (needs ports to orders, customers and apps), channel access and
   preview, rule history, routes.
