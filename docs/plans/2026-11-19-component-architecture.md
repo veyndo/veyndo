@@ -407,7 +407,11 @@ Order follows the dependency report, lowest first. Each line is one move.
   (`domain/cart_admission`), the bounds of cart lines and the cart port
   (`ports::Carts`: guarded load, priced view, admission of a locked row,
   revision-checked line replacement). `store/settings` reads the settings of
-  a channel under a share lock. Open: cached loading, saving and releasing
+  a channel under a share lock. The operator control plane has started to move: the per-shop AI
+  quota, aggregate metrics, the shop dossier and the audited lifecycle change
+  (`http/operator_*`) and the container readings
+  (`service/container_resources`); operator authentication and availability
+  admission stay in the server. Open: cached loading, saving and releasing
   settings, channel scope handlers, domains, legal consent, the platform and
   performance modules.
 

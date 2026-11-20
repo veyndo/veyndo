@@ -3,4 +3,6 @@ pub mod domain;
 pub mod ports;
 pub mod types;
 pub use types::settings::Settings;
+pub mod http;
+pub mod service;
 pub mod store;

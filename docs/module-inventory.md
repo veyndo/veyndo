@@ -1028,8 +1028,16 @@ This lists every checked-in source module in these roots, including files with n
 | [components/shop/src/domain/tax_rules.rs](../components/shop/src/domain/tax_rules.rs) | Priority-based destination rules; current tax law is merchant configuration, not bundled tax advice. |
 | [components/shop/src/domain/validation.rs](../components/shop/src/domain/validation.rs) | Configuration validation and required availability invariants. |
 | [components/shop/src/domain.rs](../components/shop/src/domain.rs) | Rules on shop settings, free of I/O. |
+| [components/shop/src/http/operator.rs](../components/shop/src/http/operator.rs) | The operator a control-plane request acts as; the server authenticates the personal session and sets this header. |
+| [components/shop/src/http/operator_lifecycle.rs](../components/shop/src/http/operator_lifecycle.rs) | Audited, reversible shop lifecycle; preserved commerce records and the current revision prevent accidental overwrites. |
+| [components/shop/src/http/operator_metrics.rs](../components/shop/src/http/operator_metrics.rs) | Aggregate-only control-plane reads: real tenants, bounded pages, explicit currencies and simulated/confirmed amounts. |
+| [components/shop/src/http/operator_quotas.rs](../components/shop/src/http/operator_quotas.rs) | Operator-only per-shop daily interactive AI limits, optimistic revisions and durable audit. |
+| [components/shop/src/http/operator_shop.rs](../components/shop/src/http/operator_shop.rs) | Operator shop dossier: registration, business identity, access roster, channels and measured HTTP activity. |
+| [components/shop/src/http.rs](../components/shop/src/http.rs) | HTTP handlers of the shop component. |
 | [components/shop/src/lib.rs](../components/shop/src/lib.rs) | Shop component: the settings every other commerce component reads, with their bounds and inheritance rules. |
 | [components/shop/src/ports.rs](../components/shop/src/ports.rs) | What components that work on a buyer's cart need from the server: the guarded cart, its priced view and a revision-checked replacement of its lines. |
+| [components/shop/src/service/container_resources.rs](../components/shop/src/service/container_resources.rs) | Linux container resource readings; unavailable fields stay null on other hosts and the first CPU sample. |
+| [components/shop/src/service.rs](../components/shop/src/service.rs) | Services of the shop component. |
 | [components/shop/src/store/consumer_requests.rs](../components/shop/src/store/consumer_requests.rs) | Durable withdrawal and data-rights intake, tenant-scoped operator review and customer-held receipt access. |
 | [components/shop/src/store/group_usage.rs](../components/shop/src/store/group_usage.rs) | Removing a customer group rejects live customer, price and native/source-rule dependencies under the settings lock. |
 | [components/shop/src/store/settings.rs](../components/shop/src/store/settings.rs) | The settings of a sales channel read under a share lock, so they cannot change before the transaction commits. |

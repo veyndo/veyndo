@@ -18,3 +18,6 @@ veyndo-inventory = { path = "../inventory" }
 veyndo-pricing = { path = "../pricing" }
 veyndo-shipping = { path = "../shipping" }
 veyndo-identity = { path = "../identity" }
+axum.workspace = true
+tokio.workspace = true
+veyndo-kernel = { path = "../../crates/kernel" }

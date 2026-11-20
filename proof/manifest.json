@@ -46,8 +46,8 @@
         "src/commerce/fulfillment.rs",
         "components/catalog/src/service/translation_apply.rs",
         "src/platform/ai.rs",
-        "src/platform/lifecycle.rs",
-        "src/platform/quotas.rs",
+        "components/shop/src/http/operator_quotas.rs",
+        "components/shop/src/http/operator_lifecycle.rs",
         "src/commerce/delivery_split.rs",
         "components/intelligence/src/store/evidence.rs",
         "components/checkout/src/domain/review_binding.rs"
@@ -287,7 +287,7 @@
     },
     "resource_quota_admissible": {
       "bindings": [
-        "src/platform/quotas.rs"
+        "components/shop/src/http/operator_quotas.rs"
       ],
       "theorems": [
         "resource_quota_exact",
@@ -2558,15 +2558,55 @@
       "sha256": "665ebc1979e362e2125ae3aa055b2a9063cd1e249c800d3d1481be6f5af8a568",
       "review": "Coupons, flow job summaries, requisition import, customer snapshot, address restore and account orders moved into components"
     },
+    "components/shop/src/http/operator.rs": {
+      "status": "unproved",
+      "sha256": "043211944199e948ea4cb50115392218b7b7208f754d0153509c34672694d0a1",
+      "review": "Operator control plane (quotas, aggregate metrics, shop dossier, audited lifecycle change, container readings) moved verbatim into the shop component; operator authentication and availability admission stay in the server. Kernel admission calls unchanged."
+    },
+    "components/shop/src/http/operator_lifecycle.rs": {
+      "status": "reviewed-binding",
+      "sha256": "bcf0bad1498dbc55edb1b601f92f7cd37563e2fd2f99ff21ebe25dcb52ff9cb3",
+      "review": "Operator control plane (quotas, aggregate metrics, shop dossier, audited lifecycle change, container readings) moved verbatim into the shop component; operator authentication and availability admission stay in the server. Kernel admission calls unchanged."
+    },
+    "components/shop/src/http/operator_metrics.rs": {
+      "status": "unproved",
+      "sha256": "8fc1a1b972d5058eddf6dd08a9968389023de490f847e7968f568ac17a983aee",
+      "review": "Operator control plane (quotas, aggregate metrics, shop dossier, audited lifecycle change, container readings) moved verbatim into the shop component; operator authentication and availability admission stay in the server. Kernel admission calls unchanged."
+    },
+    "components/shop/src/http/operator_quotas.rs": {
+      "status": "reviewed-binding",
+      "sha256": "e8fc389fa9e551d3673f30e672d51376aaf888b2d6e3caeba227768abdab24fe",
+      "review": "Operator control plane (quotas, aggregate metrics, shop dossier, audited lifecycle change, container readings) moved verbatim into the shop component; operator authentication and availability admission stay in the server. Kernel admission calls unchanged."
+    },
+    "components/shop/src/http/operator_shop.rs": {
+      "status": "unproved",
+      "sha256": "1762966d1259d82b6b53ad138d0b19fffe83093b1a1de3061de2499dba5449ad",
+      "review": "Operator control plane (quotas, aggregate metrics, shop dossier, audited lifecycle change, container readings) moved verbatim into the shop component; operator authentication and availability admission stay in the server. Kernel admission calls unchanged."
+    },
+    "components/shop/src/http.rs": {
+      "status": "unproved",
+      "sha256": "478783bff5d1d4ff02ab13dc6d6517fc518afd569d0aed9fe1b6252065f3cf30",
+      "review": "Operator control plane (quotas, aggregate metrics, shop dossier, audited lifecycle change, container readings) moved verbatim into the shop component; operator authentication and availability admission stay in the server. Kernel admission calls unchanged."
+    },
     "components/shop/src/lib.rs": {
       "status": "unproved",
-      "sha256": "07c31c76026ab1fd6db6b6f9f6c2b6b63f04cf9283b515458e08d0fcabbb01a2",
-      "review": "B2B approvals, quick order and offer contract moved behind the shop cart port"
+      "sha256": "25006d8d7dcbf8f331d74210882a92e436f3cba6ebd10850ccc12947186e777c",
+      "review": "Operator control plane (quotas, aggregate metrics, shop dossier, audited lifecycle change, container readings) moved verbatim into the shop component; operator authentication and availability admission stay in the server. Kernel admission calls unchanged."
     },
     "components/shop/src/ports.rs": {
       "status": "unproved",
       "sha256": "fb6c6fb5bd3243b58f9a625aaa9bd2d470af1f0de3b3bf5e61b4e68f6956b617",
       "review": "Coupons, flow job summaries, requisition import, customer snapshot, address restore and account orders moved into components"
+    },
+    "components/shop/src/service/container_resources.rs": {
+      "status": "unproved",
+      "sha256": "8e8b3e25eed9b774c65248e0a5c9393f1a09f3ef4b22b0c84be129c073f2dd3f",
+      "review": "Operator control plane (quotas, aggregate metrics, shop dossier, audited lifecycle change, container readings) moved verbatim into the shop component; operator authentication and availability admission stay in the server. Kernel admission calls unchanged."
+    },
+    "components/shop/src/service.rs": {
+      "status": "unproved",
+      "sha256": "ec4b6b85a54231c3cdcf7a535417538ed41d8fd32b0af0921bea34230e0de4fc",
+      "review": "Operator control plane (quotas, aggregate metrics, shop dossier, audited lifecycle change, container readings) moved verbatim into the shop component; operator authentication and availability admission stay in the server. Kernel admission calls unchanged."
     },
     "components/shop/src/store/consumer_requests.rs": {
       "status": "unproved",
@@ -6955,8 +6995,8 @@
     },
     "src/platform/auth.rs": {
       "status": "reviewed-binding",
-      "sha256": "31fee764cfa461651d3708177968c5b588afbefcb5a28a2d603f529b702c52da",
-      "review": "Reviewed eighteen core findings: typed trusted identity and explicit route rights; consolidated current grants; durable auth and fenced shared limits; scoped transactions and one-backend PgBouncer including nested borrow fixes; bounded Wasm/PNG work; notified workers, savepoint quarantine and conservative retention; separate runtime roles and startup configuration. Real PostgreSQL/provider regressions preserve current tenant/customer/payment behavior. SQL/network adapters remain unproved."
+      "sha256": "e0b8ffa88e2b0ad19dee630437af55408ac18336235c2209b90b07b1783f6144",
+      "review": "Operator control plane (quotas, aggregate metrics, shop dossier, audited lifecycle change, container readings) moved verbatim into the shop component; operator authentication and availability admission stay in the server. Kernel admission calls unchanged."
     },
     "src/platform/bootstrap.rs": {
       "status": "unproved",
@@ -6970,13 +7010,13 @@
     },
     "src/platform/lifecycle.rs": {
       "status": "reviewed-binding",
-      "sha256": "ddeb07f876b7bc467cd60196a1204efcab92558350444f083ef8be01f3e13bd5",
-      "review": "Request context, principal, POS admission, host shop and the access snapshot data types moved unchanged into components/core; loading the snapshot and matching it to a request stay in the server as free functions with the same queries. Core unit tests (identity headers cannot be forged) pass. SQL, HTTP and provider behaviour is not formally proved."
+      "sha256": "45a6401a223a952787509070db36ae546203e739b864910724b87965ce94f2ab",
+      "review": "Operator control plane (quotas, aggregate metrics, shop dossier, audited lifecycle change, container readings) moved verbatim into the shop component; operator authentication and availability admission stay in the server. Kernel admission calls unchanged."
     },
     "src/platform/metrics.rs": {
       "status": "unproved",
-      "sha256": "7233948f70dfcf6574add82b7bab0b042949056a20afa4ad84e659cbf1f6321e",
-      "review": "Native capture budget and receipt review; bounded generated conformance domains; SQL/network adapters remain unproved"
+      "sha256": "062fabfd09539a0c8a33faef62fb77ef65830e67462a4850a32fc7955eca8eca",
+      "review": "Operator control plane (quotas, aggregate metrics, shop dossier, audited lifecycle change, container readings) moved verbatim into the shop component; operator authentication and availability admission stay in the server. Kernel admission calls unchanged."
     },
     "src/platform/mod.rs": {
       "status": "unproved",
@@ -6989,19 +7029,19 @@
       "review": "Reviewed eighteen core findings: typed trusted identity and explicit route rights; consolidated current grants; durable auth and fenced shared limits; scoped transactions and one-backend PgBouncer including nested borrow fixes; bounded Wasm/PNG work; notified workers, savepoint quarantine and conservative retention; separate runtime roles and startup configuration. Real PostgreSQL/provider regressions preserve current tenant/customer/payment behavior. SQL/network adapters remain unproved."
     },
     "src/platform/quotas.rs": {
-      "status": "reviewed-binding",
-      "sha256": "f32d1d937cd13d58b501c010188011127fd4aa7f5007153d3a0f21572cce28b9",
-      "review": "Reviewed eighteen core findings: typed trusted identity and explicit route rights; consolidated current grants; durable auth and fenced shared limits; scoped transactions and one-backend PgBouncer including nested borrow fixes; bounded Wasm/PNG work; notified workers, savepoint quarantine and conservative retention; separate runtime roles and startup configuration. Real PostgreSQL/provider regressions preserve current tenant/customer/payment behavior. SQL/network adapters remain unproved."
+      "status": "unproved",
+      "sha256": "d8dfe4dfa28043f2e605ab5425b8c482d763d2a890bfe5d07d377cea175277ff",
+      "review": "Operator control plane (quotas, aggregate metrics, shop dossier, audited lifecycle change, container readings) moved verbatim into the shop component; operator authentication and availability admission stay in the server. Kernel admission calls unchanged."
     },
     "src/platform/resources.rs": {
       "status": "unproved",
-      "sha256": "f69c5ac63b3ce7d000badbc17360d8dc4952f3ed1895562675d49023ffe06b65",
-      "review": "Reviewed global AES-GCM write-only inference configuration, personal operator guards, revisioned reversible availability policy and queue admission including stages; local two-shop/fresh-process tests, 100 Rust tests and affected tenant/provider/payment/flow/translation/image regressions passed. Surrounding async adapters remain unproved."
+      "sha256": "e20d0faa17d5cd5dd2a66cda6ca1484fe4f44c7fb48796c750b705a8efa4c3ca",
+      "review": "Operator control plane (quotas, aggregate metrics, shop dossier, audited lifecycle change, container readings) moved verbatim into the shop component; operator authentication and availability admission stay in the server. Kernel admission calls unchanged."
     },
     "src/platform/shop_detail.rs": {
       "status": "unproved",
-      "sha256": "8c5bdd3be5f5985cf1f875a26d7605695b3f44b815d4f1b7514899f88922c66f",
-      "review": "Reviewed eighteen core findings: typed trusted identity and explicit route rights; consolidated current grants; durable auth and fenced shared limits; scoped transactions and one-backend PgBouncer including nested borrow fixes; bounded Wasm/PNG work; notified workers, savepoint quarantine and conservative retention; separate runtime roles and startup configuration. Real PostgreSQL/provider regressions preserve current tenant/customer/payment behavior. SQL/network adapters remain unproved."
+      "sha256": "e06d0ef7164d9c9f41ee208e5915c755a2e18a55fb199bc2d1b6d413e05435dc",
+      "review": "Operator control plane (quotas, aggregate metrics, shop dossier, audited lifecycle change, container readings) moved verbatim into the shop component; operator authentication and availability admission stay in the server. Kernel admission calls unchanged."
     },
     "src/pos/config.rs": {
       "status": "unproved",
@@ -7305,8 +7345,8 @@
       "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
     },
     "Cargo.lock": {
-      "sha256": "33ae8aa0a5ae71f6e737dd7b4d627ff6e09a5e0bb2788ffc467d1f622dd49da7",
-      "review": "Local flow mutations moved verbatim into the marketing component and staged knowledge sources, assets and categories into the studio component; the flow owner and release selection stay in the server."
+      "sha256": "b9b5d7ffa0cbf91e850e47ea56ce2b6d2966028277a192a212e095fa25d66242",
+      "review": "Operator control plane (quotas, aggregate metrics, shop dossier, audited lifecycle change, container readings) moved verbatim into the shop component; operator authentication and availability admission stay in the server. Kernel admission calls unchanged."
     },
     "Cargo.toml": {
       "sha256": "881e080eb9f1b1f051c23e2848df689853473831b4d3072817387d65c23ddb66",

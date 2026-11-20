@@ -25,7 +25,4 @@ pub(crate) async fn authenticate(a: &App, h: &RequestContext) -> Result<String> 
     }
     Ok(user)
 }
-pub(super) fn actor(h: &RequestContext) -> Result<&str> {
-    header(h, "x-rac-platform-user")
-        .ok_or(Error(StatusCode::UNAUTHORIZED, "Operator required".into()))
-}
+pub(super) use veyndo_shop::http::operator::actor;
