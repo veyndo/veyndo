@@ -4,6 +4,7 @@ pub mod configuration_examples;
 pub mod configuration_runtime;
 pub mod egress;
 pub mod event_delivery;
+pub mod gateway;
 pub mod job_callbacks;
 pub mod job_evidence;
 pub mod job_requests;

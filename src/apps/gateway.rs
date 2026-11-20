@@ -1,10 +1,53 @@
 //! One permission-aware action gateway serves HTTP, UI and MCP; service egress is operator configured.
 use super::*;
+use veyndo_app_platform::ports::{ActionFuture, HostActions, HostCall, HostedFuture, RuleFuture};
 pub(crate) fn validate_input(schema: &Value, v: &Value) -> Result<()> {
     input_schema::validate(schema, v)
 }
 pub(crate) fn validate_native_input(schema: &Value, v: &Value) -> Result<()> {
     input_schema::validate_native(schema, v)
+}
+/// The handlers the server owns, reached by the gateway after it admitted the call.
+struct ServerActions<'a>(&'a App);
+impl HostActions for ServerActions<'_> {
+    fn hosted<'a>(&'a self, tenant: &'a str, app: &'a str, action: &'a str) -> HostedFuture<'a> {
+        Box::pin(super::hosted::action(self.0, tenant, app, action))
+    }
+    fn run<'a>(&'a self, call: HostCall<'a>) -> ActionFuture<'a> {
+        Box::pin(async move {
+            let (a, h, v, id) = (self.0, call.actor, call.input, call.manifest.id.as_str());
+            match call.action.handler.as_str() {
+                "assets" | "asset_preview" => {
+                    auth::permit(h, "catalog.read")?;
+                    assets::app_file_callback(a, h, &call.action.handler, v).await
+                }
+                "asset_upload" => Err(bad(
+                    "Asset uploads require the bounded multipart surface endpoint",
+                )),
+                "submit" => {
+                    submissions::submit(
+                        a,
+                        h,
+                        call.manifest,
+                        call.entity.ok_or(bad("Entity required"))?,
+                        v,
+                    )
+                    .await
+                }
+                "configure" => configure(a, h, id, v).await,
+                "configurations" => {
+                    merchant(a, h)?;
+                    configurations(a, call.tenant, id, v).await
+                }
+                "payment_command" => crate::payments::app_command(a, h, id, v).await,
+                "payment_onboarding" => crate::payments::onboarding(a, h, id, v).await,
+                _ => Err(bad("Unsupported app action")),
+            }
+        })
+    }
+    fn purge_sources<'a>(&'a self, tenant: &'a str, app: &'a str, cursor: i64) -> RuleFuture<'a> {
+        Box::pin(purge_sources(self.0, tenant, app, cursor))
+    }
 }
 pub(crate) async fn invoke_app(
     a: &App,
@@ -23,103 +66,16 @@ pub(super) async fn invoke(
     v: &Value,
     mcp: Option<mcp_views::Mode<'_>>,
 ) -> Result<Value> {
-    let start = std::time::Instant::now();
-    let result = execute(a, h, id, name, v, mcp).await;
-    let status = result
-        .as_ref()
-        .map(|_| StatusCode::OK)
-        .unwrap_or_else(|e| e.0);
-    observability::record(a, h, id, name, v, status, start.elapsed().as_millis()).await;
-    result
-}
-async fn execute(
-    a: &App,
-    h: &RequestContext,
-    id: &str,
-    name: &str,
-    v: &Value,
-    mcp: Option<mcp_views::Mode<'_>>,
-) -> Result<Value> {
-    let t = tenant(h)?;
-    let m = package(a, &t, id, true).await?;
-    let action = m
-        .actions
-        .iter()
-        .find(|act| act.name == name)
-        .ok_or(bad("Unknown app action"))?;
-    if let Some(mode) = mcp {
-        mcp_views::admit_tool(h, &m, action, &t, mode)?;
-    }
-    action_admission::check(a, h, action, v)?;
-    if let Some(result) = super::hosted::action(a, &t, id, name).await? {
-        return tool_contract::checked_output(action, result);
-    }
-    let e = action
-        .entity
-        .as_ref()
-        .and_then(|n| m.entities.iter().find(|e| e.name == *n));
-    if let Some(e) = e {
-        core_extensions::access(e, h, action.handler == "save")?;
-    }
-    let result = match action.handler.as_str() {
-        "assets" | "asset_preview" => {
-            auth::permit(h, "catalog.read")?;
-            assets::app_file_callback(a, h, &action.handler, v).await
-        }
-        "asset_upload" => Err(bad(
-            "Asset uploads require the bounded multipart surface endpoint",
-        )),
-        "list" => {
-            data::list_scoped(
-                a,
-                &t,
-                &m,
-                e.ok_or(bad("Entity required"))?,
-                v,
-                action.public.then(|| marketing::channel_id(h)),
-            )
-            .await
-        }
-        "submit" => submissions::submit(a, h, &m, e.ok_or(bad("Entity required"))?, v).await,
-        "save" => data::save(a, &t, &m, e.ok_or(bad("Entity required"))?, v, h).await,
-        "configure" => configure(a, h, id, v).await,
-        "configurations" => {
-            merchant(a, h)?;
-            configurations(a, &t, id, v).await
-        }
-        "payment_command" => crate::payments::app_command(a, h, id, v).await,
-        "payment_onboarding" => crate::payments::onboarding(a, h, id, v).await,
-        "service" => {
-            if !m.permissions.contains(&"service.call".into()) || m.runtime != "service" {
-                return Err(Error(
-                    StatusCode::FORBIDDEN,
-                    "Service permission required".into(),
-                ));
-            }
-            let result = service_call(a, &t, id, &format!("actions/{name}"), v).await?;
-            if result["purgeSources"] == true && m.permissions.contains(&"knowledge.write".into()) {
-                purge_sources(a, &t, id, result["exportCursor"].as_i64().unwrap_or(0)).await?;
-            }
-            Ok(result)
-        }
-        "job" => jobs::enqueue(a, h, &m, action, v).await,
-        "emit" => {
-            if v.to_string().len() > 16384 {
-                return Err(bad("App event exceeds limit"));
-            }
-            let event: i64 = sqlx::query_scalar(
-                "INSERT INTO outbox(tenant,kind,data) VALUES($1,$2,$3) RETURNING id",
-            )
-            .bind(&t)
-            .bind(format!("app.{id}.{name}"))
-            .bind(v)
-            .fetch_one(&a.db)
-            .await?;
-            Ok(json!({"eventId":event,"accepted":true}))
-        }
-        _ => Err(bad("Unsupported app action")),
-    }?;
-    tool_contract::checked_output(action, result)
+    veyndo_app_platform::service::gateway::invoke(
+        &service_limits::platform(a),
+        &ServerActions(a),
+        h,
+        id,
+        name,
+        v,
+        mcp,
+    )
+    .await
 }
 pub(crate) async fn service_call(
     a: &App,

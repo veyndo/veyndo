@@ -42,7 +42,6 @@ This lists every checked-in source module in these roots, including files with n
 | [src/agent_runs/work_plan.rs](../src/agent_runs/work_plan.rs) | Reviewed work binds bounded native configuration commands and managed app saves before any worker effect. |
 | [src/agent_runs/worker.rs](../src/agent_runs/worker.rs) | Database claims resume only completed checkpoints; unknown model outcomes are never automatically charged again. |
 | [src/agent_runs.rs](../src/agent_runs.rs) | Durable continuation extends native tasks; leases fence checkpoints and publication, never approved writes. |
-| [src/apps/action_admission.rs](../src/apps/action_admission.rs) | Action admission lives in the apps component; this module keeps the short path for the gateway. |
 | [src/apps/approval.rs](../src/apps/approval.rs) | Operator service authority is bound to immutable package content, never to a merchant-chosen ID; the rules live in the apps component. |
 | [src/apps/asset_surfaces.rs](../src/apps/asset_surfaces.rs) | App file uploads reuse the product asset parser/store and require the current package plus either callback consent or a surface grant. |
 | [src/apps/business_capability/mod.rs](../src/apps/business_capability/mod.rs) | Native complete-package and bounded-guest adapters for the independent business contracts and executable examples. |
@@ -661,12 +660,13 @@ This lists every checked-in source module in these roots, including files with n
 | [components/apps/src/http/webhooks.rs](../components/apps/src/http/webhooks.rs) | Operator-signed incoming events: tenant-bound HMAC, five-minute freshness and atomic replay receipts. |
 | [components/apps/src/http.rs](../components/apps/src/http.rs) | HTTP handlers of the app platform; the server registers them with their route rights. |
 | [components/apps/src/lib.rs](../components/apps/src/lib.rs) | Apps component: what an app package may be and do before the server installs or calls it. |
-| [components/apps/src/ports.rs](../components/apps/src/ports.rs) | What the app platform needs from the server: the shared state, its own execution limits, the record rules of bundled apps and the commerce side of an installation. |
+| [components/apps/src/ports.rs](../components/apps/src/ports.rs) | What the app platform needs from the server: the shared state, its own execution limits, the record rules of bundled apps, the commerce side of an installation and the action handlers the server owns. |
 | [components/apps/src/service/admission.rs](../components/apps/src/service/admission.rs) | Shared network-app admission: the local bulkheads plus replica-wide fenced leases. |
 | [components/apps/src/service/configuration_examples.rs](../components/apps/src/service/configuration_examples.rs) | Frozen configuration cases use the same field validation and bounded guest as real cart configuration. |
 | [components/apps/src/service/configuration_runtime.rs](../components/apps/src/service/configuration_runtime.rs) | Generic pure-Wasm contribution executor; the installed package supplies all business predicates. |
 | [components/apps/src/service/egress.rs](../components/apps/src/service/egress.rs) | Bounded origin clients pin resolved addresses for each connection and never use ambient HTTP proxies. |
 | [components/apps/src/service/event_delivery.rs](../components/apps/src/service/event_delivery.rs) | Durable at-least-once app events: retry leases, stable idempotency keys and signed public HTTPS delivery on the existing outbox. |
+| [components/apps/src/service/gateway.rs](../components/apps/src/service/gateway.rs) | One permission-aware action gateway serves HTTP, UI and MCP; service egress is operator configured. |
 | [components/apps/src/service/job_callbacks.rs](../components/apps/src/service/job_callbacks.rs) | Long-job service callbacks disclose input only after current actor consent, package and lease checks. Late callbacks cannot commit. |
 | [components/apps/src/service/job_evidence.rs](../components/apps/src/service/job_evidence.rs) | Native job completion and authenticated private record evidence share one transaction and current creator/package fences. |
 | [components/apps/src/service/job_requests.rs](../components/apps/src/service/job_requests.rs) | Service job requests reuse the existing declared action gateway, actor checks, quotas and transactional outbox. |

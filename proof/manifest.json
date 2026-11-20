@@ -952,8 +952,8 @@
     },
     "components/apps/src/ports.rs": {
       "status": "unproved",
-      "sha256": "43f0b680b582adda38994faefd0d0da81dd047bb75adf2ab9777e6e8e31b3b6c",
-      "review": "Job callbacks, completion evidence, package verification, installation, activation and upgrade review moved into the apps component behind host ports without behavior change"
+      "sha256": "627c76004d985d109a6c6b51b5018490fbd8710fceb8e448e87866b2adb50599",
+      "review": "The app action gateway moved into the apps component; server-owned handlers are reached through a host port without behavior change"
     },
     "components/apps/src/service/admission.rs": {
       "status": "unproved",
@@ -979,6 +979,11 @@
       "status": "unproved",
       "sha256": "671d9457e245f77eb9b4ca534197471d6271608548215ef13e2729a54647a388",
       "review": "Service calls and event delivery moved into the apps component without changing rules"
+    },
+    "components/apps/src/service/gateway.rs": {
+      "status": "unproved",
+      "sha256": "47cc1070f2a080a75e03a05643a3a6ae57cdb08bc177ec1b3855acf8816553bf",
+      "review": "The app action gateway moved into the apps component; server-owned handlers are reached through a host port without behavior change"
     },
     "components/apps/src/service/job_callbacks.rs": {
       "status": "reviewed-binding",
@@ -1032,8 +1037,8 @@
     },
     "components/apps/src/service.rs": {
       "status": "unproved",
-      "sha256": "39e2b1c55fef849bf83eeca958abecccebfd1d0ac6a26bfcbc96f844b0dc5fda",
-      "review": "Job callbacks, completion evidence, package verification, installation, activation and upgrade review moved into the apps component behind host ports without behavior change"
+      "sha256": "a7e0d51c6a01e5af8b7b18a8aa0bac07118279c0a1872e1c9e2ed8d035f94791",
+      "review": "The app action gateway moved into the apps component; server-owned handlers are reached through a host port without behavior change"
     },
     "components/apps/src/store/action_log.rs": {
       "status": "unproved",
@@ -5245,11 +5250,6 @@
       "sha256": "bade8f8defb1900da613d2d2f39ddcf693c35e022acb5900b9b21713fc8e7357",
       "review": "Agent run projection, conversation turn fence, lease-fenced publication and the checkpoint journal moved verbatim into the intelligence component; authority, permissions and budgets stay in the server."
     },
-    "src/apps/action_admission.rs": {
-      "status": "unproved",
-      "sha256": "ad18bedc830e9f303097bb4aa994986dc6aff152334f7c29e83ae9edfd661682",
-      "review": "App jobs and private evidence reads moved into the apps component without changing rules"
-    },
     "src/apps/approval.rs": {
       "status": "unproved",
       "sha256": "a7f8c54e7a0b9954f585dd2e406f6846523076293fe69e0ad27b56ff346b1ff5",
@@ -5397,8 +5397,8 @@
     },
     "src/apps/gateway.rs": {
       "status": "unproved",
-      "sha256": "5d727ecacab31b323004c77579dabdf20afe477857e18ec0b78bc92e3e1b757e",
-      "review": "Assistant app views and the surface registry moved into the apps component without behavior change"
+      "sha256": "1d19db85b54851c9b94d32b88bc944eacfbc329430c3c7e68e1519e2fac3ad99",
+      "review": "The app action gateway moved into the apps component; server-owned handlers are reached through a host port without behavior change"
     },
     "src/apps/hosted.rs": {
       "status": "unproved",
@@ -5422,8 +5422,8 @@
     },
     "src/apps/jobs.rs": {
       "status": "unproved",
-      "sha256": "9b0808f3b63dcdbaf04e2985a1f0471815a9970bdc046440e50e6b96a390efde",
-      "review": "App jobs and private evidence reads moved into the apps component without changing rules"
+      "sha256": "542867a32b5f45b67f19facadb0686656c1e5b0f6c2369d1c4881f6a3c00d769",
+      "review": "The app action gateway moved into the apps component; server-owned handlers are reached through a host port without behavior change"
     },
     "src/apps/manifest.rs": {
       "status": "unproved",
@@ -5437,13 +5437,13 @@
     },
     "src/apps/mcp_views.rs": {
       "status": "unproved",
-      "sha256": "ecd5cf7d0d357f85e1c5631ed3e820570a730e74c4a35608491af22c48029aa0",
-      "review": "Assistant app views and the surface registry moved into the apps component without behavior change"
+      "sha256": "65d73e89567f276450b9a77cb129546ccb22dd4d0cf749403ae71f756a359c2e",
+      "review": "The app action gateway moved into the apps component; server-owned handlers are reached through a host port without behavior change"
     },
     "src/apps/mod.rs": {
       "status": "unproved",
-      "sha256": "8a10e4b4f4d425508c5a41a9a2b95edc5df3dc9c5fc7d74501689e76fbebced5",
-      "review": "Job callbacks, completion evidence, package verification, installation, activation and upgrade review moved into the apps component behind host ports without behavior change"
+      "sha256": "5e674c20cb45412f2242503ac478bd4cb25adc41c846aa15cb3f8eb2d5cb2558",
+      "review": "The app action gateway moved into the apps component; server-owned handlers are reached through a host port without behavior change"
     },
     "src/apps/model_contract.rs": {
       "status": "unproved",
@@ -5567,8 +5567,8 @@
     },
     "src/apps/tool_contract.rs": {
       "status": "reviewed-binding",
-      "sha256": "415652d83901fb927940ef2ce6dfbb36c21bdf6ffa1b84635c6467148602d237",
-      "review": "Assistant app views and the surface registry moved into the apps component without behavior change"
+      "sha256": "57a9766699796bac2288b0e368fb5094c6cffca5ceb52158e8e1bc770d2e4e05",
+      "review": "The app action gateway moved into the apps component; server-owned handlers are reached through a host port without behavior change"
     },
     "src/apps/ui_bundles.rs": {
       "status": "unproved",

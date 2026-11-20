@@ -127,7 +127,11 @@ Rules that hold from the first component on:
       process configuration (`core::process_config`), which the server builds
       and installs once at startup and every component reads.
       The app platform has its own state (`veyndo_app_platform::ports::Platform`:
-      the shared state plus its execution limits), built by the server from `App`.
+      the shared state, its execution limits and the host ports), built by the
+      server from `App`. Its ports are `RecordRules` (the record rules of the
+      bundled site builder), `CommerceInstall` (configuration lock, flow
+      replacement check, payment methods) and `HostActions` (the action
+      handlers that touch carts, files, payments or search).
 - [x] Remove the dependencies `core` has on other components (`uses` of core in
       `components.json` is empty). Server wiring (`App`, outbox routes) is assigned
       to the host; crate-to-crate dependencies are read from crate names.
@@ -397,21 +401,32 @@ Order follows the dependency report, lowest first. Each line is one move.
     admission, privacy projection, batch size, destination and signature, the
     webhook signature and shop binding, secret kinds, the schedule grammar, the
     service transport policy and UI address, and the native error mapping;
-  - `store/`: the record store and managed write, package readers and the
-    package write fence, the dependency gate, schema upgrade, language and
+  - `domain/` also holds native lifecycles with their compiler adapter and
+    the assistant view rules (tool admission, view address, attachments and
+    the view document);
+  - `store/`: the record store, managed reads and writes, record restoration,
+    package readers and the package write fence, installation and activation
+    with their hooks, the dependency gate, schema upgrade, language and
     reference checks, secrets and declared settings, schedules, event
-    deliveries, the action log, configuration events and app filters;
+    deliveries, the action log, configuration events, app filters, durable
+    jobs with retry admission, the storage budget, private evidence reads,
+    lifecycle capture, commerce hook admission, the native-object projection,
+    assistant view lookup and the surface registry;
   - `service/`: pinned egress, local limits and network admission, the module
     compilation cache, the configuration executor with its frozen examples,
-    operator service calls and event delivery;
-  - `http/`: secrets, settings, activity and replay, callback keys and incoming
-    webhooks; the server registers them with their route rights;
-  - `ports`: the `Platform` state.
+    operator service calls, event delivery, package verification, the upgrade
+    review, record import, job claim and progress callbacks with sealed
+    completion evidence, service job requests and the action gateway;
+  - `http/`: secrets, settings, activity and replay, callback keys, incoming
+    webhooks, jobs and record history; the server registers them with their
+    route rights;
+  - `ports`: the `Platform` state and the three host ports named in phase 1.
   The operator's services and publisher keys reach pure rules as parameters.
-  Open (about 6,400 lines remain in `src/apps`): the action gateway and managed
-  data (they call the site builder, assets, payments and cart), surfaces and
-  MCP views, jobs and evidence, installation and activation, commerce hooks,
-  planning, the site builder and `developer`.
+  Open (about 4,000 lines remain in `src/apps`): surface grants and UI bundle
+  routes, core callbacks (they call operations, assets and B2B), evidence
+  ingest (knowledge sync), cart contributions and commerce hook evaluation
+  (cart and currencies), planning, hosted frontends, the tool contract, the
+  site builder and `developer`.
 - [ ] automation
 - [ ] intelligence. Started: `components/intelligence` owns the knowledge
   module (relations, hybrid search, vectors with their namespace and cache,

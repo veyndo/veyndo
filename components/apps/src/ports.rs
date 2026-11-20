@@ -1,12 +1,12 @@
-//! What the app platform needs from the server: the shared state, its own execution limits, the record rules of bundled apps and the commerce side of an installation.
+//! What the app platform needs from the server: the shared state, its own execution limits, the record rules of bundled apps, the commerce side of an installation and the action handlers the server owns.
 use crate::service::limits::ServiceLimits;
 use serde_json::Value;
 use std::future::Future;
 use std::pin::Pin;
 use std::sync::Arc;
-use veyndo_app_model::Entity;
 use veyndo_app_model::manifest::Manifest;
-use veyndo_core::{Result, State};
+use veyndo_app_model::{Action, Entity};
+use veyndo_core::{RequestContext, Result, State};
 
 /// The pending check of a record against the rules of its bundled app.
 pub type RuleFuture<'a> = Pin<Box<dyn Future<Output = Result<()>> + Send + 'a>>;
@@ -41,6 +41,31 @@ pub trait CommerceInstall: Send + Sync {
         t: &'a str,
         m: &'a Manifest,
     ) -> RuleFuture<'a>;
+}
+
+/// The pending result of an action the server runs itself.
+pub type ActionFuture<'a> = Pin<Box<dyn Future<Output = Result<Value>> + Send + 'a>>;
+/// The pending local answer of a connected hosted app, if it has one.
+pub type HostedFuture<'a> = Pin<Box<dyn Future<Output = Result<Option<Value>>> + Send + 'a>>;
+
+/// One admitted app action whose handler the server owns.
+pub struct HostCall<'a> {
+    pub actor: &'a RequestContext,
+    pub tenant: &'a str,
+    pub manifest: &'a Manifest,
+    pub action: &'a Action,
+    pub entity: Option<&'a Entity>,
+    pub input: &'a Value,
+}
+
+/// Action handlers that touch carts, files, payments or search stay with the server; the gateway admits the call first.
+pub trait HostActions: Send + Sync {
+    /// The local answer of a connected hosted app; `None` lets the declared handler run.
+    fn hosted<'a>(&'a self, tenant: &'a str, app: &'a str, action: &'a str) -> HostedFuture<'a>;
+    /// Runs a handler the platform does not own.
+    fn run<'a>(&'a self, call: HostCall<'a>) -> ActionFuture<'a>;
+    /// Removes the imported sources of an app after its service asked for it.
+    fn purge_sources<'a>(&'a self, tenant: &'a str, app: &'a str, cursor: i64) -> RuleFuture<'a>;
 }
 
 /// The state of the app platform; it dereferences to the shared database and HTTP state.

@@ -1,10 +1,10 @@
 //! Assistant app views live in the apps component; this module adds the caller's language and the gateway calls.
 use super::*;
 pub(super) use veyndo_app_platform::domain::mcp_views::Mode;
+pub(super) use veyndo_app_platform::domain::mcp_views::document;
 pub(crate) use veyndo_app_platform::domain::mcp_views::{
     EXTENSION, MIME, attachment_references, attachments,
 };
-pub(super) use veyndo_app_platform::domain::mcp_views::{admit_tool, document};
 pub(crate) use veyndo_app_platform::store::mcp_views::list;
 
 /// MCP opt-out applies to discovery and direct invocation, without disabling the UI/HTTP action.
