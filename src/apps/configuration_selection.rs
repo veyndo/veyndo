@@ -1,29 +1,6 @@
 //! Reusable input-only selections resolve current package/library revisions before one native cart mutation.
 use super::*;
-#[derive(Clone, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub(crate) struct Selection {
-    pub app: String,
-    pub product_id: String,
-    pub fields: Value,
-}
-pub(crate) fn selection_shape(items: &[Item], selections: &[Selection]) -> Result<()> {
-    let mut seen = std::collections::HashSet::new();
-    if selections.len() > 100
-        || json!(selections).to_string().len() > 32768
-        || selections.iter().any(|s| {
-            !identifier(&s.app)
-                || !items.iter().any(|item| item.id == s.product_id)
-                || !seen.insert((&s.app, &s.product_id))
-                || !s.fields.is_object()
-        })
-    {
-        return Err(bad(
-            "Invalid, duplicate or oversized saved configuration selection",
-        ));
-    }
-    Ok(())
-}
+pub(crate) use veyndo_app_platform::domain::configuration_selection::{Selection, selection_shape};
 pub(crate) async fn resolve_selection(
     a: &App,
     t: &str,

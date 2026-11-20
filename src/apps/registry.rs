@@ -14,24 +14,7 @@ pub(super) async fn active_manifests(a: &App, h: &RequestContext) -> Result<Vec<
 pub(crate) async fn package(a: &App, t: &str, id: &str, active: bool) -> Result<Manifest> {
     package_on(&a.db, t, id, active).await
 }
-/// Lifecycle transactions use their current backend without recursively taking a pooled connection.
-pub(crate) async fn package_on<'e>(
-    db: impl sqlx::Executor<'e, Database = sqlx::Postgres>,
-    t: &str,
-    id: &str,
-    active: bool,
-) -> Result<Manifest> {
-    let row = sqlx::query("SELECT manifest,active FROM app_packages WHERE tenant=$1 AND id=$2")
-        .bind(t)
-        .bind(id)
-        .fetch_optional(db)
-        .await?
-        .ok_or(Error(StatusCode::NOT_FOUND, "App not installed".into()))?;
-    if active && !row.get::<bool, _>("active") {
-        return Err(conflict("App is inactive"));
-    }
-    serde_json::from_value(row.get("manifest")).map_err(|_| bad("Invalid installed manifest"))
-}
+pub(crate) use veyndo_app_platform::store::packages::package_on;
 pub(crate) async fn install(a: &App, t: &str, m: Manifest) -> Result<Value> {
     let mut tx = a.db.begin_privileged().await?;
     let result = install_tx(&mut tx, t, m).await?;

@@ -10,68 +10,7 @@ pub(super) fn decode(v: &Value) -> Result<Manifest> {
     approval::installation(&m)?;
     Ok(m)
 }
-pub(crate) fn actor_permissions(h: &RequestContext, m: &Manifest) -> Result<()> {
-    if !m.lifecycles.is_empty() {
-        auth::permit(h, "settings.write")?;
-        for c in &m.lifecycles {
-            auth::permit(
-                h,
-                if c.object == "order" {
-                    "orders.write"
-                } else {
-                    "b2b.manage"
-                },
-            )?;
-            for edge in &c.transitions {
-                for permission in &edge.required_permissions {
-                    auth::permit(h, permission)?;
-                }
-            }
-        }
-    }
-    for p in &m.permissions {
-        if let Some(scope) = credentials::scope(p) {
-            auth::permit(h, scope)?;
-        }
-        if p == "knowledge.write" {
-            auth::permit(h, "apps.manage")?;
-        }
-        if p == "payments.instructions.read" {
-            for scope in ["payments.read", "orders.read", "customers.pii"] {
-                auth::permit(h, scope)?;
-            }
-        }
-        if p == "payments.provider" {
-            auth::permit(h, "payments.manage")?;
-        }
-        if p == "commerce.hooks" {
-            auth::permit(h, "catalog.write")?;
-            auth::permit(h, "settings.write")?;
-        }
-    }
-    Ok(())
-}
-pub(super) fn approved(h: &RequestContext, m: &Manifest, v: &Value) -> Result<()> {
-    actor_permissions(h, m)?;
-    let mut expected = m.permissions.clone();
-    expected.sort();
-    expected.dedup();
-    let Some(requested) = v["permissions"].as_array() else {
-        return Err(conflict("Review and approve the package permissions"));
-    };
-    let mut actual = requested
-        .iter()
-        .map(|v| v.as_str().map(str::to_owned))
-        .collect::<Option<Vec<_>>>()
-        .ok_or(bad("Invalid consent permissions"))?;
-    actual.sort();
-    if v["approve"] != true || v["digest"] != approval::canonical_digest(m) || actual != expected {
-        return Err(conflict(
-            "Package approval must match its current digest and complete permission list",
-        ));
-    }
-    Ok(())
-}
+pub(crate) use veyndo_app_platform::domain::consent::{actor_permissions, approved};
 pub(super) fn router() -> Router<App> {
     Router::new().secure_route("/api/apps/review", &[("POST", "apps.manage")], post(review))
 }

@@ -554,7 +554,7 @@
     },
     "app_configuration_release_admissible": {
       "bindings": [
-        "src/apps/core_extensions.rs"
+        "components/apps/src/domain/core_extensions.rs"
       ],
       "theorems": [
         "app_configuration_release_exact",
@@ -704,10 +704,25 @@
       "sha256": "2b09e4ed00f7ee1940679226bfa4bdd6b48b3c7ea4830139141492e5bf71a2ba",
       "review": "Configuration, lifecycle, ontology and reference adapters moved into the apps component without changing rules"
     },
+    "components/apps/src/domain/configuration_selection.rs": {
+      "status": "unproved",
+      "sha256": "77029cbf4487881519b7fe401a7216c4a64c929bca5d7472a31abefb191c47e6",
+      "review": "Record store, consent and core extension rules moved into the apps component without changing rules"
+    },
     "components/apps/src/domain/configuration_summary.rs": {
       "status": "unproved",
       "sha256": "12b36439fd0d94c4b36a04b305674953bca94fbcea2854e3ca7271d6234f1794",
       "review": "Configuration, lifecycle, ontology and reference adapters moved into the apps component without changing rules"
+    },
+    "components/apps/src/domain/consent.rs": {
+      "status": "unproved",
+      "sha256": "e776ec5ae4db9cc3695d0bd20bfd6c9fafb5e5bf89591397794b354f46a16f1e",
+      "review": "Record store, consent and core extension rules moved into the apps component without changing rules"
+    },
+    "components/apps/src/domain/core_extensions.rs": {
+      "status": "reviewed-binding",
+      "sha256": "175dca3117af71d20fab7f6675d5d2a9ca229367cc38d5758f99fa974a26a221",
+      "review": "Record store, consent and core extension rules moved into the apps component without changing rules"
     },
     "components/apps/src/domain/distribution.rs": {
       "status": "unproved",
@@ -723,6 +738,11 @@
       "status": "unproved",
       "sha256": "74955487169ec3b874a55594b3ed016ffc922f942eec591b491224f21cc8e768",
       "review": "Package approval, distribution, schema adapters, event projection and service transport policy moved into components/apps without a change in behaviour"
+    },
+    "components/apps/src/domain/extension_filter.rs": {
+      "status": "unproved",
+      "sha256": "3110ab772bc3a16a428e3a4ca508a5951fe9c2b78bcdd93c1bd4d154bf65e0c1",
+      "review": "Record store, consent and core extension rules moved into the apps component without changing rules"
     },
     "components/apps/src/domain/field_values.rs": {
       "status": "reviewed-binding",
@@ -799,6 +819,11 @@
       "sha256": "8f273875e3f9eb5e234a862c11749dac1d50f8cfd97476090db9f86563eecfc7",
       "review": "Package approval, distribution, schema adapters, event projection and service transport policy moved into components/apps without a change in behaviour"
     },
+    "components/apps/src/domain/tool_output.rs": {
+      "status": "unproved",
+      "sha256": "eb01df5d0da07c17900bb71488469b6f97bcb52681a0dce43e75f11cd7f35d3b",
+      "review": "Record store, consent and core extension rules moved into the apps component without changing rules"
+    },
     "components/apps/src/domain/webhook_scope.rs": {
       "status": "unproved",
       "sha256": "036782c6d6481d9a472f942c7ded6ec8232efe915847091e14ac59d6103f3b2f",
@@ -806,8 +831,8 @@
     },
     "components/apps/src/domain.rs": {
       "status": "unproved",
-      "sha256": "ff2186044547c106b9704aaaf88fcbd173301168dd99c0e90d6301a3ede941e2",
-      "review": "Configuration, lifecycle, ontology and reference adapters moved into the apps component without changing rules"
+      "sha256": "5588e806d8e4cc7705dcbc508103905252d1620e0a1278407597f361cec683dc",
+      "review": "Record store, consent and core extension rules moved into the apps component without changing rules"
     },
     "components/apps/src/lib.rs": {
       "status": "unproved",
@@ -849,10 +874,30 @@
       "sha256": "52f889580ca300c0e41c1336e0cd0dc2c75b15839b9262e6d1a57535ac1210a0",
       "review": "Package approval, distribution, schema adapters, event projection and service transport policy moved into components/apps without a change in behaviour"
     },
+    "components/apps/src/store/extension_filter.rs": {
+      "status": "unproved",
+      "sha256": "f25ab2568a84a6d04493ad2791629d379733dd959d1e5ab59d9e0d8069930705",
+      "review": "Record store, consent and core extension rules moved into the apps component without changing rules"
+    },
+    "components/apps/src/store/packages.rs": {
+      "status": "unproved",
+      "sha256": "793ab0adf407ad4db3e6bc51ed68e87b684f07f2faee415194842005319f2a22",
+      "review": "Record store, consent and core extension rules moved into the apps component without changing rules"
+    },
+    "components/apps/src/store/record_write.rs": {
+      "status": "unproved",
+      "sha256": "ac7ee68808df7bcdaa30ef0764129b3df7fd300a59de1b0522fa039e50ccdaf5",
+      "review": "Record store, consent and core extension rules moved into the apps component without changing rules"
+    },
+    "components/apps/src/store/records.rs": {
+      "status": "unproved",
+      "sha256": "69fcac12d291553a088c099b4e9d7387c35db6b06fb62c09cde08cd850d974ea",
+      "review": "Record store, consent and core extension rules moved into the apps component without changing rules"
+    },
     "components/apps/src/store.rs": {
       "status": "unproved",
-      "sha256": "04b1b889e6935082ba6e86a31df4ced0e941f5afea426b55f0ebaea99b1c85b1",
-      "review": "Configuration, lifecycle, ontology and reference adapters moved into the apps component without changing rules"
+      "sha256": "fa40527639323020700c28e8b0bacd8a91aa6d2309a32e5f67e188f1f3239291",
+      "review": "Record store, consent and core extension rules moved into the apps component without changing rules"
     },
     "components/b2b/src/domain/contract.rs": {
       "status": "unproved",
@@ -4976,8 +5021,8 @@
     },
     "src/apps/configuration_selection.rs": {
       "status": "unproved",
-      "sha256": "a5d3a27e5c5fefe45e0f82368a42ab3516d0955f8718d5d976b053586c7d56ff",
-      "review": "Review generic immutable configuration display snapshot: declared public inputs only; shared checkout/receipt/admin display, no business-rule or authorization change. Actual B2B HTTP workflow and original-order immutability pass; two Rust tests and 612 frontend tests pass."
+      "sha256": "4b9419474a35fe2afd56c269cdfca28abaa0ca6abaa4236ea9769aed02041217",
+      "review": "Record store, consent and core extension rules moved into the apps component without changing rules"
     },
     "src/apps/configuration_summary.rs": {
       "status": "unproved",
@@ -4986,8 +5031,8 @@
     },
     "src/apps/consent.rs": {
       "status": "unproved",
-      "sha256": "e2ba8775f88611c6c230e803a6ccc840bc8eb2f0f6eae41a3faafc0bf5520210",
-      "review": "Reviewed invoice recipient caching and immutable native documents; explicit app/PII event consent and current Flow rehydration; existing encrypted email queue and localized templates. Targeted native service and adversarial projection tests; no new formal proof claim."
+      "sha256": "73ebf2647e8debc8bc91d8bb65d0c2b0213f7a9ae31af1d45e6eea99cf5511d1",
+      "review": "Record store, consent and core extension rules moved into the apps component without changing rules"
     },
     "src/apps/core_callbacks.rs": {
       "status": "unproved",
@@ -5010,9 +5055,9 @@
       "review": "Reviewed generic tenant-scoped paid external-order/channel exchange, native exact source amounts, existing stock/customer/document/outbox ownership, app capability/FK/ID lookup boundaries and app-owned bounded seller protocols/jobs; local provider PostgreSQL replay restart isolation and UI regressions. Async provider integration remains unproved."
     },
     "src/apps/core_extensions.rs": {
-      "status": "reviewed-binding",
-      "sha256": "448a5f29ffd1be16be1adcd3f0527a26812d00d8ffee185a2bdfcea4929aa21d",
-      "review": "Reviewed complete standard compiler extraction in Apps 0.16/model 0.12. All 19 original before/common/after domain stages now run inside one shared compiler with preserved order, first model kind/pointer or native host error, internal actual view lookup and exhaustive Manifest field coverage. Native manifest_policy delegates value/reference/currency/scope/source/base, current Ed25519 keys, namespace/network/read and clock decisions to original owners; direct verified predicates remain attached. No no-op host domain callbacks or alternative serving compiler. Independent 116 model and 24 runtime tests include all 34 canonical packages, nineteen invalid-domain controls and denied-policy/callback-order cases. Native 74 app and two provider units, seventeen real HTTP/PostgreSQL app/schema/preview/staging/isolation/lifecycle/distribution/surface/assistant/event/generation/marketplace/payment modules, unchanged native digests and Clippy pass. Kernel unchanged; shared compiler, policy adapters and SQL/host effects remain unproved."
+      "status": "unproved",
+      "sha256": "b4e47705cd4e28f8c821a21b2b9627da450336748eb872355f400b37600f0a02",
+      "review": "Record store, consent and core extension rules moved into the apps component without changing rules"
     },
     "src/apps/credentials.rs": {
       "status": "reviewed-binding",
@@ -5076,8 +5121,8 @@
     },
     "src/apps/extension_filter.rs": {
       "status": "unproved",
-      "sha256": "2719a26aa77a386fbd6453ded06a689c3fcbee67bd04aa06c6cf068222088972",
-      "review": "Reviewed native extension identity/private/unique anchors and current read/write/PII scopes; native projections use bounded fixed-store queries, exact indexed filters bind all input and fence the admitted package digest. Real four-object HTTP/MCP, role revocation, foreign reference, immutable upgrade, product/company clone and selected release tests passed. Added extracted configuration-only release predicate and operational false property; SQL and UI remain explicitly unproved. Reviewed canonical schema, preserved AI bindings and versioned grid prompt provenance without changing existing prompt revisions."
+      "sha256": "760ca1cd26e0dfefa2c1cbbadd3bd94cd4b091cd416cef4cf6c3dbeff5ce37af",
+      "review": "Record store, consent and core extension rules moved into the apps component without changing rules"
     },
     "src/apps/extension_projection.rs": {
       "status": "unproved",
@@ -5106,8 +5151,8 @@
     },
     "src/apps/input_schema.rs": {
       "status": "unproved",
-      "sha256": "09afb383fecef54f4633f9a759d16bc2d2faf7bcd8d7f3d6e23d479ee0466052",
-      "review": "Package approval, distribution, schema adapters, event projection and service transport policy moved into components/apps without a change in behaviour"
+      "sha256": "8a30686a1ea2d88748ea629a722ff73767f417a737ed9a92bb8c6033a879341f",
+      "review": "Record store, consent and core extension rules moved into the apps component without changing rules"
     },
     "src/apps/job_callbacks.rs": {
       "status": "reviewed-binding",
@@ -5246,18 +5291,18 @@
     },
     "src/apps/record_write.rs": {
       "status": "unproved",
-      "sha256": "abd935cb23803bc280288d8f9e25fe3e34286e1fbf4bc0cf6f5551b1cc466283",
-      "review": "Apps 0.26.0: original native lifecycle and bounded before/after record history moved into shared managed_hooks on the existing mutation/outbox transaction. Native package/field/reference/language/identity admission remains unchanged. Independent real PostgreSQL/identity/HTTP/MCP/SDK tests and Linux container verify current approval/digest/CAS/state/history scopes/retention and full late-failure rollback. Explicit optional schema-2 write grants and unsupported native policies fail closed; no new proved policy claim for host SQL/network."
+      "sha256": "f5126443eecb54836a30e9bd918950b1d0496a72897ad5504c7bb27af8bdd1bf",
+      "review": "Record store, consent and core extension rules moved into the apps component without changing rules"
     },
     "src/apps/records.rs": {
       "status": "unproved",
-      "sha256": "fb9676d5e3f59da34d93d31a4258972fede720be63728406a709e4908ce3059c",
-      "review": "Reviewed Apps 0.28.0 model installer extraction: native core-extension compatibility, required-field guard, fixed-table projection rebuild, original transaction and native errors are retained. Independent installer admission and SQL remain unproved; real PostgreSQL package approval, immutable versions, rollback and quota tests pass."
+      "sha256": "48d038c1dc575a0f5f956f5eda031c5f18daaa6892ecdd77f043e2802ae6974a",
+      "review": "Record store, consent and core extension rules moved into the apps component without changing rules"
     },
     "src/apps/registry.rs": {
       "status": "unproved",
-      "sha256": "b20acc49912a38605b819524dd8ef987a107d791347319c40874ebd431d5a605",
-      "review": "Review MCP read admission against the same active manifest at dispatch, native app placements with explicit list-action opt-in and tenant revision URI, and existing opaque document CSP. App model, direct HTTP and hosted composition checks cover their corresponding runtime contracts."
+      "sha256": "6d17960d9ccbb41c1c91ae9aa8ce1b13f8a90ff6eece330371bdc60c0336b5d5",
+      "review": "Record store, consent and core extension rules moved into the apps component without changing rules"
     },
     "src/apps/routes.rs": {
       "status": "unproved",
@@ -5341,8 +5386,8 @@
     },
     "src/apps/tool_contract.rs": {
       "status": "unproved",
-      "sha256": "f8d1c93950c519d14069dc4a1de306f0fbf20771d846ee512f5746e07558e757",
-      "review": "Reviewed App model 0.14.0 exact source import from veyndo/apps and native tool metadata adapter: generic list schemas expose only existing indexed nontranslated scalar fields, labels and choices; explicit app schemas and runtime identity/query admission remain unchanged. Independent model, SQL storage, image/service tests and native HTTP/MCP plus JavaScript SDK audience/filter regressions passed. No new schema, indexes, permission grants or commerce writes."
+      "sha256": "14331098f9805244a73624d0c4800a071517f261c0e97cbb638b5191f7f13477",
+      "review": "Record store, consent and core extension rules moved into the apps component without changing rules"
     },
     "src/apps/ui_bundles.rs": {
       "status": "unproved",
@@ -7561,8 +7606,8 @@
       "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
     },
     "Cargo.lock": {
-      "sha256": "ea6b2b77b214a8c4b4f42dfce14218389a91b77758357ac2391a95a224606b3a",
-      "review": "Configuration, lifecycle, ontology and reference adapters moved into the apps component without changing rules"
+      "sha256": "0efe6d167fc7ccd314337c676beaa1434dc62d9d248533b6f93bcb6d4ea7f5d2",
+      "review": "Record store, consent and core extension rules moved into the apps component without changing rules"
     },
     "Cargo.toml": {
       "sha256": "12d2d79a98f6913d20b8e912afb9ea8de0539b9e83428de8a9d7412c406896f6",

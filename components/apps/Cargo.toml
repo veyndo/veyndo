@@ -6,6 +6,7 @@ license-file.workspace = true
 description = "Apps: package approval and distribution, schema adapters, event projection and service transport policy"
 
 [dependencies]
+serde.workspace = true
 serde_json.workspace = true
 reqwest.workspace = true
 base64.workspace = true

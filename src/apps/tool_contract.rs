@@ -60,9 +60,4 @@ pub(crate) async fn app_tools_for(
     }
     Ok(tools)
 }
-pub(super) fn checked_output(action: &Action, result: Value) -> Result<Value> {
-    if let Some(schema) = &action.output_schema {
-        input_schema::validate_value(schema, &result).map_err(|_| Error::output_contract())?;
-    }
-    Ok(result)
-}
+pub(super) use veyndo_app_platform::domain::tool_output::checked_output;
