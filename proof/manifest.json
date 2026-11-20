@@ -2528,15 +2528,35 @@
       "sha256": "c64b428fee5002bebc66b72447bccbfd7503c3758cd81b846b38ccb5e397942f",
       "review": "Knowledge module and experiment model moved into components/intelligence; kernel call sites unchanged"
     },
+    "components/studio/src/domain/view_components.rs": {
+      "status": "unproved",
+      "sha256": "26657b540611598475bfd11312fccc738edd55f5d52eda139b0204e64aa8354d",
+      "review": "Personal Studio workspace model and store moved into the studio component without behaviour change"
+    },
+    "components/studio/src/domain/workspace.rs": {
+      "status": "unproved",
+      "sha256": "7f6e8c5a49f35c0ed5ab319cf70ecbe78e84acc0f1896470b48b34680bb124fe",
+      "review": "Personal Studio workspace model and store moved into the studio component without behaviour change"
+    },
     "components/studio/src/domain.rs": {
       "status": "unproved",
-      "sha256": "9965346f41ea22466e3fb66ada6a4756df856244bbf11913d9566890c2dff95f",
-      "review": "Knowledge module and experiment model moved into components/intelligence; kernel call sites unchanged"
+      "sha256": "71e817c3a5924f97c41099f2084273fb79776ede4ad37125c2618abd025789be",
+      "review": "Personal Studio workspace model and store moved into the studio component without behaviour change"
     },
     "components/studio/src/lib.rs": {
       "status": "unproved",
-      "sha256": "31e225c636d0847d2a3d04470a2a1e66f8c899af0be5753d72b1205340f4865b",
-      "review": "Knowledge module and experiment model moved into components/intelligence; kernel call sites unchanged"
+      "sha256": "afe81630180a6a5ed323d1a69dd77ff630ae6ed7a266b4f99371bc0dea297498",
+      "review": "Personal Studio workspace model and store moved into the studio component without behaviour change"
+    },
+    "components/studio/src/store/workspaces.rs": {
+      "status": "unproved",
+      "sha256": "8704551e0e3f11b2bdb565f9cfbcd4d9634a03c0b23019db525f0802d3753fa1",
+      "review": "Personal Studio workspace model and store moved into the studio component without behaviour change"
+    },
+    "components/studio/src/store.rs": {
+      "status": "unproved",
+      "sha256": "ff50c46781391a6c71de12907d37b0c8307a5536fa18d6ca0350824aa22d2ac6",
+      "review": "Personal Studio workspace model and store moved into the studio component without behaviour change"
     },
     "crates/apps/src/component_runtime.rs": {
       "status": "unproved",
@@ -4450,8 +4470,8 @@
     },
     "src/agent_runs/view.rs": {
       "status": "unproved",
-      "sha256": "e5f3c7867b8022df42c5abb8662ac3aa3d1fa5f692f7eb6b9d7907a999560c53",
-      "review": "Reviewed current Orders and PII admission, optional Knowledge read grant and registered panel filtering. Knowledge preview skips app evidence only on explicit opt-out, preserving native locale and tenant rules. Frontend tests cover rights revocation and independent policy retry. Native order, shipping, knowledge and checkout HTTP cases pass. Extracted policies unchanged; async Rust and SQL remain unproved."
+      "sha256": "3d2efe4c613354cd1a10b41b86131c5d3f9d9cc1a900f762715115885e55eb4a",
+      "review": "Personal Studio workspace model and store moved into the studio component without behaviour change"
     },
     "src/agent_runs/work.rs": {
       "status": "unproved",
@@ -7053,15 +7073,10 @@
       "sha256": "ce72f28cb468f027b7a9a851c5cad576ccf524b06b9e965f424363e27270d91f",
       "review": "Reviewed bounded tenant-scoped embedding intake/model-generation cursors, revision/lease fencing and fair vector retry drain; pooled geometry-checked Qdrant hydration and admitted reranking; current-right read tools, structured protocols and SSE transport; exact source quotation/review/public compilation/signatures; transactional price corridors and non-compounding daily autonomy; consent-bound assignments/preferences and delayed cached native-payment readout including stop/withdrawal invalidation. New migration RLS/composite links and extracted predicate consumers reviewed. Native HTTP/PG/Qdrant/provider/UI regressions cover contracts; semantic quality, statistical assumptions, SQL, network and surrounding Rust remain unproved."
     },
-    "src/studio/personal/model.rs": {
-      "status": "unproved",
-      "sha256": "473d5db984c948d7aa9de05222484a87f4f39fadf32d6fd91e65fd7d9ffab5c9",
-      "review": "Reviewed native aggregate reports: bound tenant/filter SQL, exact numeric order/refund snapshots, reuse of current consent eligibility, optional rights projections and private workspace CAS layouts; reporting adapters remain unproved."
-    },
     "src/studio/personal.rs": {
       "status": "unproved",
-      "sha256": "1bbc594cca12f6711bde63a18f1ce4a55a90832f9a0c7d326e6e57ec2ef1ac56",
-      "review": "Reviewed contextual private-work contracts and independent findings: app opt-out, locked guidance, preserved manual actions, conversation lease and locale inheritance; native own/foreign, stale approval, narrowed rights, renewed login, killed-worker continuation and actual app-preview regressions passed. SQL, async runtime and providers remain unproved."
+      "sha256": "fa829a273bd1d157ca5dec7cf79efba2e0e2b5b3f913f36ebf93e3c448d1f865",
+      "review": "Personal Studio workspace model and store moved into the studio component without behaviour change"
     },
     "src/studio/reports/config.rs": {
       "status": "unproved",
@@ -7190,8 +7205,8 @@
       "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
     },
     "Cargo.lock": {
-      "sha256": "21f2405ecd4e280a4d20c61c7ac987f4f254b3a9fff923ac5c22571f13a6319e",
-      "review": "Merchant customer writes moved into the customers component and admin order admission into checkout without behaviour change"
+      "sha256": "cf179b26533ed20d7618d3bcd1739fbc81812946eb0e5dbe458f483f78dd83a1",
+      "review": "Personal Studio workspace model and store moved into the studio component without behaviour change"
     },
     "Cargo.toml": {
       "sha256": "881e080eb9f1b1f051c23e2848df689853473831b4d3072817387d65c23ddb66",

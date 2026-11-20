@@ -912,7 +912,6 @@
         "core",
         "customers",
         "identity",
-        "intelligence",
         "marketing",
         "pos",
         "pricing",
@@ -954,9 +953,9 @@
         "translation_items",
         "translation_jobs"
       ],
-      "glob_imports": 23,
+      "glob_imports": 22,
       "untyped_access": 160,
-      "sql_outside_store": 16
+      "sql_outside_store": 15
     },
     "protocols": {
       "title": "MCP, UCP and the shared capability dispatch; adapters without business rules",

@@ -11,28 +11,7 @@ pub(crate) struct View {
 fn default_components() -> Vec<String> {
     vec!["records".into()]
 }
-pub(crate) fn validate_components(entity: &str, components: &[String]) -> Result<()> {
-    if !["products", "customers", "orders"].contains(&entity)
-        || components.is_empty()
-        || components.len() > 3
-        || !components.iter().any(|c| c == "records")
-        || components
-            .iter()
-            .collect::<std::collections::HashSet<_>>()
-            .len()
-            != components.len()
-        || components.iter().any(|c| {
-            !matches!(
-                c.as_str(),
-                "records" | "details" | "intake" | "shippingPolicy"
-            ) || (c == "intake" && entity != "products")
-                || (c == "shippingPolicy" && entity != "orders")
-        })
-    {
-        return Err(bad("Invalid agent workspace components"));
-    }
-    Ok(())
-}
+pub(crate) use veyndo_studio::domain::view_components::validate as validate_components;
 pub(crate) fn schema(knowledge: bool) -> Value {
     let mut components = vec!["records", "details", "intake"];
     if knowledge {

@@ -1,11 +1,16 @@
 //! Bounded personal layouts contain references, never delegated rights or executable agent instructions.
-use crate::*;
+use super::report_config::Layout;
+use super::view_components;
+use serde::{Deserialize, Serialize};
+use serde_json::{Value, json};
+use veyndo_app_model::declarations::identifier;
+use veyndo_core::{Result, bad};
 #[derive(Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 struct Workspace {
     areas: Vec<Area>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    today_reports: Option<crate::studio::reports::config::Layout>,
+    today_reports: Option<Layout>,
     active: String,
     goals: Vec<Goal>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -28,7 +33,7 @@ struct Area {
     cards: Vec<String>,
     pins: Vec<Pin>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    reports: Option<crate::studio::reports::config::Layout>,
+    reports: Option<Layout>,
 }
 #[derive(Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -47,10 +52,12 @@ struct Goal {
     status: String,
     task_id: Option<String>,
 }
-pub(super) fn empty() -> Value {
+/// The workspace of a person who has not arranged anything yet.
+pub fn empty() -> Value {
     json!({"areas":[],"active":"","goals":[]})
 }
-pub(super) fn validate(v: &Value) -> Result<Value> {
+/// Admits a workspace within its bounds and returns it in canonical form.
+pub fn validate(v: &Value) -> Result<Value> {
     let w: Workspace =
         serde_json::from_value(v.clone()).map_err(|_| bad("Invalid personal workspace"))?;
     if let Some(layout) = &w.today_reports {
@@ -85,12 +92,12 @@ pub(super) fn validate(v: &Value) -> Result<Value> {
         return Err(bad("Workspace exceeds personal storage limits"));
     }
     for a in &w.areas {
-        if !apps::identifier(&a.id)
+        if !identifier(&a.id)
             || !ids.insert(&a.id)
             || !text(&a.name, 100)
             || a.cards.len() > 16
             || a.pins.len() > 20
-            || a.cards.iter().any(|s| !apps::identifier(&s.to_lowercase()))
+            || a.cards.iter().any(|s| !identifier(&s.to_lowercase()))
             || a.cards
                 .iter()
                 .collect::<std::collections::HashSet<_>>()
@@ -98,7 +105,7 @@ pub(super) fn validate(v: &Value) -> Result<Value> {
                 != a.cards.len()
             || a.pins.iter().any(|p| {
                 !text(&p.title, 100)
-                    || !apps::identifier(&p.tab.to_lowercase())
+                    || !identifier(&p.tab.to_lowercase())
                     || !safe_pin(&p.query)
                     || p.components.as_ref().is_some_and(|components| {
                         let entity = match p.tab.as_str() {
@@ -107,7 +114,7 @@ pub(super) fn validate(v: &Value) -> Result<Value> {
                             "customers" => "customers",
                             _ => return true,
                         };
-                        agent_runs::view::validate_components(entity, components).is_err()
+                        view_components::validate(entity, components).is_err()
                     })
             })
         {
@@ -119,7 +126,7 @@ pub(super) fn validate(v: &Value) -> Result<Value> {
     }
     let mut goals = std::collections::HashSet::new();
     if w.goals.iter().any(|g| {
-        !apps::identifier(&g.id)
+        !identifier(&g.id)
             || !goals.insert(&g.id)
             || !text(&g.title, 1000)
             || !["planned", "working", "review", "done", "stopped"].contains(&g.status.as_str())
@@ -167,7 +174,7 @@ fn safe_pin(query: &str) -> bool {
             })
         })
 }
-pub(crate) fn schema(n: &str) -> Option<Value> {
+pub fn schema(n: &str) -> Option<Value> {
     let properties = match n {
         "studio.workspace.read" | "studio.workspace.work.read" => json!({}),
         "studio.workspace.save" => {
@@ -182,7 +189,8 @@ pub(crate) fn schema(n: &str) -> Option<Value> {
 }
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use super::{empty, safe_pin, validate};
+    use serde_json::json;
     #[test]
     fn setup_progress_is_bounded_optional_and_never_authority() {
         let mut v = empty();

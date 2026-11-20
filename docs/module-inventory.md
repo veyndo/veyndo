@@ -558,7 +558,6 @@ This lists every checked-in source module in these roots, including files with n
 | [src/staging/snapshot.rs](../src/staging/snapshot.rs) | Fixed publishable units: product content/translations, settings, experience and app packages. |
 | [src/storefront_pages.rs](../src/storefront_pages.rs) | Deep-link HTML transport for stable SKU URLs with optional localized SEO slugs. |
 | [src/studio/facts.rs](../src/studio/facts.rs) | Consolidate dashboard reads without unbounded pool fan-out; preserve the existing API and currency/learning semantics. |
-| [src/studio/personal/model.rs](../src/studio/personal/model.rs) | Bounded personal layouts contain references, never delegated rights or executable agent instructions. |
 | [src/studio/personal.rs](../src/studio/personal.rs) | Actor-private workspace preferences; HTTP and MCP share CAS, bounds and the current membership. |
 | [src/studio/reports/config.rs](../src/studio/reports/config.rs) | One bounded report definition for HTTP, MCP and private workspace presentation preferences. |
 | [src/studio/reports/period.rs](../src/studio/reports/period.rs) | Calendar periods are resolved once in the requested IANA timezone, with exclusive ends and bounded buckets. |
@@ -1023,8 +1022,12 @@ This lists every checked-in source module in these roots, including files with n
 | [components/shop/src/types.rs](../components/shop/src/types.rs) | The configuration a shop stores. |
 | [components/studio/src/domain/report_config.rs](../components/studio/src/domain/report_config.rs) | One bounded report definition for HTTP, MCP and private workspace presentation preferences. |
 | [components/studio/src/domain/report_period.rs](../components/studio/src/domain/report_period.rs) | Calendar periods are resolved once in the requested IANA timezone, with exclusive ends and bounded buckets. |
+| [components/studio/src/domain/view_components.rs](../components/studio/src/domain/view_components.rs) | The parts a composed record view may show: always the records, at most three, and only what fits the entity. |
+| [components/studio/src/domain/workspace.rs](../components/studio/src/domain/workspace.rs) | Bounded personal layouts contain references, never delegated rights or executable agent instructions. |
 | [components/studio/src/domain.rs](../components/studio/src/domain.rs) | domain of this component. |
 | [components/studio/src/lib.rs](../components/studio/src/lib.rs) | Studio component: report periods and configuration. |
+| [components/studio/src/store/workspaces.rs](../components/studio/src/store/workspaces.rs) | Actor-private workspace preferences: compare-and-swap on the revision, a bounded version trail and the current membership. |
+| [components/studio/src/store.rs](../components/studio/src/store.rs) | SQL of the studio component. |
 
 ## Studio, storefront, platform and shared frontend
 

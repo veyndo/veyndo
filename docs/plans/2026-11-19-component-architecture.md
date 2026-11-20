@@ -364,8 +364,11 @@ Order follows the dependency report, lowest first. Each line is one move.
   Open: agents and their runs, proposals, documents, inference, cognition
   routes and workers.
 - [ ] studio. Started: `components/studio` owns report configuration and
-  calendar periods. Open: overview, report queries, personal views, staging
-  shops, history.
+  calendar periods, the bounded personal workspace model
+  (`domain/workspace`, with the parts of a composed record view in
+  `domain/view_components`) and its revisioned store (`store/workspaces`),
+  the overview facts with their turnover totals (`store/overview`) and the
+  work list (`store/work_items`). Open: report queries, staging shops, history.
 - [ ] shop. Started: `components/shop` owns the settings types (`Settings`,
   delivery and payment methods, the checkout selection, B2B switches, AI
   guardrails, legal configuration), every bound on them (`validation`, tax

@@ -400,7 +400,7 @@ extends the existing planner/approval owner; it is not another agent backend.
 setup changes across tabs while preserving unrelated fresh workspace fields.
 `SetupBasics.tsx`
 reuses the existing settings draft, fields and save bar. Optional progress remains
-in `src/studio/personal/model.rs` with workspace revisions, RLS and history.
+in `components/studio/src/domain/workspace.rs` with workspace revisions, RLS and history.
 `src/agent_runs/context.rs` admits bounded current setup context to the existing
 assistant. Domain tools and publication retain their native owners.
 
