@@ -36,24 +36,8 @@ pub(super) async fn send(a: &App, t: &str, m: &Manifest, payload: &Value) -> Res
         return Err(bad("Event batch exceeds 64 KiB; reduce batchSize"));
     }
     let stamp = chrono::Utc::now().timestamp().to_string();
-    let key = hash(&format!(
-        "{t}:{}:{}",
-        m.id,
-        bytes.iter().map(|b| format!("{b:02x}")).collect::<String>()
-    ));
-    let canonical = format!(
-        "{t}\n{}\n{stamp}\n{key}\n{}",
-        m.id,
-        hash(std::str::from_utf8(&bytes).unwrap())
-    );
-    let mut mac = <hmac::Hmac<sha2::Sha256> as hmac::Mac>::new_from_slice(secret.as_bytes())
-        .map_err(|_| bad("Invalid signing secret"))?;
-    hmac::Mac::update(&mut mac, canonical.as_bytes());
-    let signature = hmac::Mac::finalize(mac)
-        .into_bytes()
-        .iter()
-        .map(|b| format!("{b:02x}"))
-        .collect::<String>();
+    let (key, signature) =
+        veyndo_app_platform::domain::event_signature::sign(&secret, t, &m.id, &bytes, &stamp)?;
     let response = egress::public_client(&destination(url)?)
         .await?
         .post(url)

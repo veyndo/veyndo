@@ -260,41 +260,11 @@ pub(super) async fn service_call_pinned(
 }
 
 pub(crate) fn ui_url(id: &str) -> Option<String> {
-    let configured = &crate::runtime_config::get().services;
-    let url = configured[id]["uiUrl"].as_str()?;
-    let parsed = reqwest::Url::parse(url).ok()?;
-    if parsed.scheme() == "https"
-        || parsed.scheme() == "http"
-            && ["localhost", "127.0.0.1"].contains(&parsed.host_str().unwrap_or(""))
-    {
-        Some(url.into())
-    } else {
-        None
-    }
+    veyndo_app_platform::domain::service_ui::ui_url(id, &crate::runtime_config::get().services)
 }
 
 /// The registry uses the same live permission check as direct actions.
-pub(super) fn action_authorized(a: &App, h: &RequestContext, action: &Action) -> bool {
-    action.public
-        || merchant(a, h).is_ok()
-            && additional_permissions(h, action).is_ok()
-            && (!(["save", "service", "emit", "job"].contains(&action.handler.as_str())
-                || action.permission.is_some())
-                || auth::permit(
-                    h,
-                    action
-                        .permission
-                        .as_deref()
-                        .unwrap_or(if action.handler == "job" {
-                            "apps.manage"
-                        } else {
-                            "catalog"
-                        }),
-                )
-                .is_ok())
+pub(super) fn action_authorized(_a: &App, h: &RequestContext, action: &Action) -> bool {
+    veyndo_app_platform::domain::action_admission::authorized(h, action)
 }
-
-/// Additional current team rights apply equally to UI, HTTP, MCP, Flow and leased workers.
-pub(crate) fn additional_permissions(h: &RequestContext, action: &Action) -> Result<()> {
-    veyndo_app_model::admission::additional(&action_admission::Current(h), action)
-}
+pub(crate) use veyndo_app_platform::domain::action_admission::additional as additional_permissions;

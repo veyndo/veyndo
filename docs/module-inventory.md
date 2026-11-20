@@ -639,9 +639,12 @@ This lists every checked-in source module in these roots, including files with n
 | [components/apps/src/domain/configuration_summary.rs](../components/apps/src/domain/configuration_summary.rs) | Immutable public configuration labels accompany accepted inputs; no current package lookup is needed on a receipt. |
 | [components/apps/src/domain/consent.rs](../components/apps/src/domain/consent.rs) | Package approval binds all requested permissions to a reviewed digest; current actor rights apply before every installation path. |
 | [components/apps/src/domain/core_extensions.rs](../components/apps/src/domain/core_extensions.rs) | Namespaced core-object extension contracts; native records, rights and app storage keep their owners. |
+| [components/apps/src/domain/discovery.rs](../components/apps/src/domain/discovery.rs) | Search over installed app capabilities with current rights: operations, their schemas and relevance. |
 | [components/apps/src/domain/distribution.rs](../components/apps/src/domain/distribution.rs) | Signed publisher namespaces and tenant-local dependency/version gates. Operator service access still requires its separate exact digest pin. |
+| [components/apps/src/domain/entity_access.rs](../components/apps/src/domain/entity_access.rs) | Editor access to an app entity: the generic endpoint needs every right its declared actions need. |
 | [components/apps/src/domain/event_destination.rs](../components/apps/src/domain/event_destination.rs) | Where a package may have its events delivered: public HTTPS only. |
 | [components/apps/src/domain/event_projection.rs](../components/apps/src/domain/event_projection.rs) | Native installed-Manifest adapter for shared event admission and privacy projections; queue and current authority remain native. |
+| [components/apps/src/domain/event_signature.rs](../components/apps/src/domain/event_signature.rs) | Outgoing app events carry a stable event id and an HMAC-SHA-256 over the shop, app, time, id and body digest. |
 | [components/apps/src/domain/extension_filter.rs](../components/apps/src/domain/extension_filter.rs) | Exact app-field predicates: a bounded, typed wire form that is bound to the current package before use. |
 | [components/apps/src/domain/field_values.rs](../components/apps/src/domain/field_values.rs) | Native currency/content/asset policy for the shared pure field validator. |
 | [components/apps/src/domain/input_schema.rs](../components/apps/src/domain/input_schema.rs) | Native API/MCP error adapter for the independent bounded schema validator. |
@@ -660,6 +663,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/apps/src/domain/schema_changes.rs](../components/apps/src/domain/schema_changes.rs) | Native error and Manifest adapters for the shared pure evolution planner; transactional execution uses shared schema_upgrade through required native validation. |
 | [components/apps/src/domain/secret_kinds.rs](../components/apps/src/domain/secret_kinds.rs) | The kinds of per-shop secrets and which package declarations call for them. |
 | [components/apps/src/domain/service_policy.rs](../components/apps/src/domain/service_policy.rs) | Operator-owned private origins permit isolated service networking without relaxing public egress. |
+| [components/apps/src/domain/service_ui.rs](../components/apps/src/domain/service_ui.rs) | Where the UI of a service app is served from; only the operator configures it. |
 | [components/apps/src/domain/tool_output.rs](../components/apps/src/domain/tool_output.rs) | Declared tool results are checked before they leave; a provider payload that does not fit is never disclosed. |
 | [components/apps/src/domain/webhook_scope.rs](../components/apps/src/domain/webhook_scope.rs) | Scope signed app ingress from its route before identity, tenant lifecycle and forced-RLS admission. |
 | [components/apps/src/domain/webhook_signature.rs](../components/apps/src/domain/webhook_signature.rs) | Incoming app webhooks carry an HMAC-SHA-256 over the exact canonical message. |

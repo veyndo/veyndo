@@ -1,31 +1,6 @@
 //! Search all installed app capabilities with current rights; data reads reuse their exact admitted native action.
 use super::*;
-pub(crate) const CAPABILITIES: &[(&str, &str)] = &[
-    (
-        "merchant.apps.search",
-        "Find relevant installed apps and their admitted read tools by query; follow nextAfter",
-    ),
-    (
-        "merchant.apps.read",
-        "Read an explicitly discovered managed app model through its current declared read action",
-    ),
-];
-pub(crate) fn schema(name: &str) -> Option<Value> {
-    let (properties, required) = match name {
-        "merchant.apps.search" => (
-            json!({"query":{"type":"string","maxLength":4000},"after":{"type":"string","maxLength":160},"limit":{"type":"integer","minimum":1,"maximum":20}}),
-            vec![],
-        ),
-        "merchant.apps.read" => (
-            json!({"app":{"type":"string","maxLength":160},"action":{"type":"string","maxLength":160},"arguments":{"type":"object"}}),
-            vec!["app", "action", "arguments"],
-        ),
-        _ => return None,
-    };
-    Some(
-        json!({"type":"object","properties":properties,"required":required,"additionalProperties":false}),
-    )
-}
+pub(crate) use veyndo_app_platform::domain::discovery::{CAPABILITIES, relevant, schema};
 pub(crate) fn router() -> Router<App> {
     Router::new()
         .secure_route(
@@ -48,25 +23,6 @@ async fn read(
     Json(v): Json<Value>,
 ) -> Result<Json<Value>> {
     Ok(Json(invoke(&a, &h, "merchant.apps.read", &v).await?))
-}
-pub(crate) fn relevant(m: &Manifest, query: &str) -> usize {
-    let text = json!([
-        m.id,
-        m.name,
-        m.intelligence.as_ref().map(|i| &i.description),
-        m.actions
-            .iter()
-            .map(|a| (&a.name, &a.description))
-            .collect::<Vec<_>>()
-    ])
-    .to_string()
-    .to_lowercase();
-    query
-        .split(|c: char| !c.is_alphanumeric())
-        .filter(|s| s.chars().count() > 2)
-        .map(str::to_lowercase)
-        .filter(|s| text.contains(s))
-        .count()
 }
 pub(crate) async fn invoke(a: &App, h: &RequestContext, name: &str, v: &Value) -> Result<Value> {
     let t = merchant(a, h)?;
@@ -135,10 +91,6 @@ pub(crate) async fn invoke(a: &App, h: &RequestContext, name: &str, v: &Value) -
         json!({"nextAfter":if has_more {page.last().map(|p|p["app"].clone())}else{None},"hasMore":has_more,"apps":page}),
     )
 }
-fn admitted(a: &App, h: &RequestContext, m: &Manifest, action: &Action) -> bool {
-    action.mcp != Some(false)
-        && gateway::action_authorized(a, h, action)
-        && m.intelligence
-            .as_ref()
-            .is_none_or(|i| i.tools.contains(&action.name))
+fn admitted(_a: &App, h: &RequestContext, m: &Manifest, action: &Action) -> bool {
+    veyndo_app_platform::domain::discovery::admitted(h, m, action)
 }

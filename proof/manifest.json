@@ -686,8 +686,8 @@
   "sources": {
     "components/apps/src/domain/action_admission.rs": {
       "status": "unproved",
-      "sha256": "294325ec6e5389450c8fc6bdede603505ff66534a4893859a37e20dc3e39a55d",
-      "review": "App secret, settings, activity, credential and webhook handlers moved into the apps component without changing rules"
+      "sha256": "923fd4f5ad6051c9f15ee6f757178cef88115c115236cd4dbeed1ed77a4e75da",
+      "review": "Action authorization and discovery rules moved into the apps component without changing rules"
     },
     "components/apps/src/domain/action_policy.rs": {
       "status": "reviewed-binding",
@@ -734,10 +734,20 @@
       "sha256": "175dca3117af71d20fab7f6675d5d2a9ca229367cc38d5758f99fa974a26a221",
       "review": "Record store, consent and core extension rules moved into the apps component without changing rules"
     },
+    "components/apps/src/domain/discovery.rs": {
+      "status": "unproved",
+      "sha256": "ae32c1af1d86b79b81ceae33a3e10134d40866054dad41ba638d98677386d4c5",
+      "review": "Action authorization, entity access and discovery rules moved into the apps component without changing rules"
+    },
     "components/apps/src/domain/distribution.rs": {
       "status": "unproved",
       "sha256": "ea41256153f8ae695dabf5ec5dc7822d7716c8885e360e7caa1feca3ffb168f2",
       "review": "Package approval, distribution, schema adapters, event projection and service transport policy moved into components/apps without a change in behaviour"
+    },
+    "components/apps/src/domain/entity_access.rs": {
+      "status": "unproved",
+      "sha256": "e95d45e8c105effd9f5a77811f9edab0e9ede0252e289cc54178a8ab86737a04",
+      "review": "Action authorization and discovery rules moved into the apps component without changing rules"
     },
     "components/apps/src/domain/event_destination.rs": {
       "status": "unproved",
@@ -748,6 +758,11 @@
       "status": "unproved",
       "sha256": "74955487169ec3b874a55594b3ed016ffc922f942eec591b491224f21cc8e768",
       "review": "Package approval, distribution, schema adapters, event projection and service transport policy moved into components/apps without a change in behaviour"
+    },
+    "components/apps/src/domain/event_signature.rs": {
+      "status": "unproved",
+      "sha256": "806a9fbaad0de78bcf578528e782fa05bb0d954806f141f436ecafa21cc0cdc4",
+      "review": "Action authorization, entity access and discovery rules moved into the apps component without changing rules"
     },
     "components/apps/src/domain/extension_filter.rs": {
       "status": "unproved",
@@ -839,6 +854,11 @@
       "sha256": "8f273875e3f9eb5e234a862c11749dac1d50f8cfd97476090db9f86563eecfc7",
       "review": "Package approval, distribution, schema adapters, event projection and service transport policy moved into components/apps without a change in behaviour"
     },
+    "components/apps/src/domain/service_ui.rs": {
+      "status": "unproved",
+      "sha256": "f64940ff7797560af779e3a73623e70377f5476cef787443d580197c39c924f4",
+      "review": "Action authorization, entity access and discovery rules moved into the apps component without changing rules"
+    },
     "components/apps/src/domain/tool_output.rs": {
       "status": "unproved",
       "sha256": "eb01df5d0da07c17900bb71488469b6f97bcb52681a0dce43e75f11cd7f35d3b",
@@ -856,8 +876,8 @@
     },
     "components/apps/src/domain.rs": {
       "status": "unproved",
-      "sha256": "c6dca782ddd0e0ca0e8bf5487fadcc27e29c09eed9cec6a1cdfa36f4ff090eec",
-      "review": "App secret, settings, activity, credential and webhook handlers moved into the apps component without changing rules"
+      "sha256": "a3d180ba79a4d8c2fc2d1645a3e11691388194a472705f84bdc047a067de7226",
+      "review": "Action authorization, entity access and discovery rules moved into the apps component without changing rules"
     },
     "components/apps/src/http/activity.rs": {
       "status": "unproved",
@@ -5181,8 +5201,8 @@
     },
     "src/apps/discovery.rs": {
       "status": "unproved",
-      "sha256": "8b77d8f1b7809c47574dd1e2ac6cc688c5531a1c030387dc22a7917d2260b941",
-      "review": "Reviewed contextual private-work contracts and independent findings: app opt-out, locked guidance, preserved manual actions, conversation lease and locale inheritance; native own/foreign, stale approval, narrowed rights, renewed login, killed-worker continuation and actual app-preview regressions passed. SQL, async runtime and providers remain unproved."
+      "sha256": "1c2c9910289d144afe62afe82d5549cb80861873718ec3dd71b1f1cdfb8e9ffb",
+      "review": "Action authorization, entity access and discovery rules moved into the apps component without changing rules"
     },
     "src/apps/distribution.rs": {
       "status": "unproved",
@@ -5191,8 +5211,8 @@
     },
     "src/apps/editor_contract.rs": {
       "status": "unproved",
-      "sha256": "f68b9ab67471f8f9d04b9a93460e7617af7354d83232e4c368f9825cff52a2f5",
-      "review": "Configuration, lifecycle, ontology and reference adapters moved into the apps component without changing rules"
+      "sha256": "01666e63ef20b7bcf7775d525c71a100905b89406f0c0d3b34c55e0049194d2e",
+      "review": "Action authorization, entity access and discovery rules moved into the apps component without changing rules"
     },
     "src/apps/editor_tests.rs": {
       "status": "unproved",
@@ -5206,8 +5226,8 @@
     },
     "src/apps/event_contract.rs": {
       "status": "unproved",
-      "sha256": "b5386d432d0b57dfb0bc11bc11f330f75115f9ed066c366b1300e94b4fda68f6",
-      "review": "Field, reference, view and manifest policy moved into the apps component without changing rules"
+      "sha256": "1d08c758550937b37162cf776e3c4b66d1978dbe2c9d4da5276ca55daa870962",
+      "review": "Action authorization, entity access and discovery rules moved into the apps component without changing rules"
     },
     "src/apps/event_projection.rs": {
       "status": "unproved",
@@ -5246,8 +5266,8 @@
     },
     "src/apps/gateway.rs": {
       "status": "unproved",
-      "sha256": "7cd5fcb9ff672c9dba2bd1ddf70cd240c8a88122735ec9d49d67971e235bc960",
-      "review": "Review MCP read admission against the same active manifest at dispatch, native app placements with explicit list-action opt-in and tenant revision URI, and existing opaque document CSP. App model, direct HTTP and hosted composition checks cover their corresponding runtime contracts."
+      "sha256": "b2308ce8d029e1769d86e4042b6f34231d5fa06b002d47371231bd3a5e6f092c",
+      "review": "Action authorization, entity access and discovery rules moved into the apps component without changing rules"
     },
     "src/apps/history_storage.rs": {
       "status": "unproved",
