@@ -12,10 +12,3 @@ pub(crate) async fn install_tx(
 ) -> Result<Value> {
     package_install::install_tx(&data::BUNDLED, &install_host::COMMERCE, tx, t, m).await
 }
-pub(crate) async fn install_preview(
-    tx: &mut sqlx::Transaction<'_, sqlx::Postgres>,
-    t: &str,
-    m: Manifest,
-) -> Result<Value> {
-    package_install::install_preview(&data::BUNDLED, &install_host::COMMERCE, tx, t, m).await
-}

@@ -1,10 +1,6 @@
-//! App Studio builds live in the apps component; this module supplies the shop main language, publisher keys and payment provider actions.
+//! App Studio builds live in the apps component; this module supplies the shop main language and the payment provider actions.
 use super::*;
-use veyndo_app_platform::domain::build_admission;
 use veyndo_app_platform::service::app_builds::{self, Origin};
-pub(super) fn validate(m: &apps::Manifest) -> Result<()> {
-    build_admission::validate(m, &crate::runtime_config::get().publishers)
-}
 pub(super) async fn save(
     a: &App,
     t: &str,

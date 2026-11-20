@@ -6,7 +6,6 @@ use veyndo_app_platform::domain::{
 pub(crate) mod agent_connection;
 mod builds;
 mod generation;
-mod preview;
 mod routes;
 pub(crate) use routes::router;
 

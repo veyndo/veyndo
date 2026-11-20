@@ -482,7 +482,7 @@
   {
     "path": "/api/developer/preview",
     "method": "POST",
-    "source": "src/developer/preview.rs"
+    "source": "src/developer/routes.rs"
   },
   {
     "path": "/api/developer/schema",

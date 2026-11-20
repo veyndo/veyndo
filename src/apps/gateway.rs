@@ -1,6 +1,8 @@
 //! One permission-aware action gateway serves HTTP, UI and MCP; service egress is operator configured.
 use super::*;
-use veyndo_app_platform::ports::{ActionFuture, HostActions, HostCall, HostedFuture, RuleFuture};
+use veyndo_app_platform::ports::{
+    ActionFuture, EnvironmentFuture, HostActions, HostCall, HostedFuture, RuleFuture,
+};
 pub(crate) fn validate_input(schema: &Value, v: &Value) -> Result<()> {
     input_schema::validate(schema, v)
 }
@@ -68,6 +70,20 @@ impl HostActions for ServerActions {
     }
     fn purge_sources<'a>(&'a self, tenant: &'a str, app: &'a str, cursor: i64) -> RuleFuture<'a> {
         Box::pin(purge_sources(&self.0, tenant, app, cursor))
+    }
+    fn create_preview<'a>(
+        &'a self,
+        h: &'a RequestContext,
+        actor: &'a str,
+    ) -> EnvironmentFuture<'a> {
+        Box::pin(async move {
+            let created =
+                staging::create_preview(self.0.clone(), h.clone(), "App Studio", actor).await?;
+            created.0["id"]
+                .as_str()
+                .map(str::to_owned)
+                .ok_or(bad("Preview environment unavailable"))
+        })
     }
 }
 pub(crate) async fn invoke_app(

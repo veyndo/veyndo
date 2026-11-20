@@ -1,6 +1,6 @@
 //! App Studio transport for private autosaves, project archive and staging a reviewed build.
 use crate::ports::Platform;
-use crate::service::app_builds;
+use crate::service::{app_builds, app_preview};
 use axum::Json;
 use axum::extract::{Path, State as Shared};
 use serde_json::{Value, json};
@@ -137,6 +137,15 @@ pub async fn stage(
     Json(v): Json<Value>,
 ) -> Result<Json<Value>> {
     Ok(Json(app_builds::stage(&a, &h, &id, &v).await?))
+}
+
+/// Runs the draft in the personal preview environment of the caller.
+pub async fn preview(
+    Shared(a): Shared<Platform>,
+    h: RequestContext,
+    Json(v): Json<Value>,
+) -> Result<Json<Value>> {
+    Ok(Json(app_preview::run(&a, &h, v).await?))
 }
 
 #[cfg(test)]

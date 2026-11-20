@@ -52,6 +52,9 @@ pub type ActionFuture<'a> = Pin<Box<dyn Future<Output = Result<Value>> + Send + 
 /// The pending local answer of a connected hosted app, if it has one.
 pub type HostedFuture<'a> = Pin<Box<dyn Future<Output = Result<Option<Value>>> + Send + 'a>>;
 
+/// The pending shop id of a newly created environment.
+pub type EnvironmentFuture<'a> = Pin<Box<dyn Future<Output = Result<String>> + Send + 'a>>;
+
 /// One admitted app action whose handler the server owns.
 pub struct HostCall<'a> {
     pub actor: &'a RequestContext,
@@ -77,6 +80,9 @@ pub trait HostActions: Send + Sync {
     ) -> RuleFuture<'a>;
     /// Removes the imported sources of an app after its service asked for it.
     fn purge_sources<'a>(&'a self, tenant: &'a str, app: &'a str, cursor: i64) -> RuleFuture<'a>;
+    /// Clones the live shop into a personal preview environment of the actor and returns its shop id.
+    fn create_preview<'a>(&'a self, h: &'a RequestContext, actor: &'a str)
+    -> EnvironmentFuture<'a>;
 }
 
 /// The state of the app platform; it dereferences to the shared database and HTTP state.

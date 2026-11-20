@@ -14,7 +14,11 @@ pub(crate) fn router() -> Router<App> {
             &[("PUT", "developer.manage"), ("DELETE", "developer.manage")],
             axum::routing::put(app_studio::save_draft).delete(app_studio::remove_draft),
         )
-        .merge(preview::router())
+        .secure_route(
+            "/api/developer/preview",
+            &[("POST", "developer.manage")],
+            post(app_studio::preview),
+        )
         .secure_route("/api/developer", &[("GET", "developer.read")], get(list))
         .secure_route(
             "/api/developer/schema",

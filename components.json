@@ -773,7 +773,7 @@
         "tenants",
         "workspace_roles"
       ],
-      "glob_imports": 57,
+      "glob_imports": 56,
       "untyped_access": 419,
       "sql_outside_store": 26
     },
