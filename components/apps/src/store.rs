@@ -2,14 +2,17 @@
 pub mod action_log;
 pub mod activation;
 pub mod asset_references;
+pub mod cart_configurations;
 pub mod commerce_hooks;
 pub mod configuration_events;
+pub mod configuration_orders;
 pub mod core_references;
 pub mod dependencies;
 pub mod event_deliveries;
 pub mod evidence;
 pub mod extension_filter;
 pub mod extension_projection;
+pub mod hosted_apps;
 pub mod job_control;
 pub mod jobs;
 pub mod languages;

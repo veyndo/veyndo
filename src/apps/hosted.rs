@@ -1,68 +1,19 @@
-//! Persist hosted-app dependencies through the existing package installer; no private renderer or parallel registry.
+//! Hosted-app installation lives in the apps component; this module adds the connected frontends and their local answers.
 use super::*;
 use sqlx::{Postgres, Transaction};
-pub(crate) const STORYFRONT: &str = include_str!("../../extensions/apps/storyfront/manifest.json");
+use veyndo_app_platform::store::hosted_apps;
 
 pub(crate) async fn ensure(
     tx: &mut Transaction<'_, Postgres>,
     tenant: &str,
     id: &str,
 ) -> Result<()> {
-    if id != "storyfront" {
-        return Err(bad("Unknown hosted app"));
-    }
-    sqlx::query("SELECT pg_advisory_xact_lock(hashtextextended($1,7))")
-        .bind(id)
-        .execute(&mut **tx)
-        .await?;
-    let active: Option<bool> =
-        sqlx::query_scalar("SELECT active FROM app_packages WHERE tenant=$1 AND id=$2 FOR UPDATE")
-            .bind(tenant)
-            .bind(id)
-            .fetch_optional(&mut **tx)
-            .await?;
-    match active {
-        None => {
-            install_tx(
-                tx,
-                tenant,
-                serde_json::from_str(STORYFRONT).map_err(|_| bad("Invalid built-in"))?,
-            )
-            .await?;
-        }
-        Some(false) => {
-            sqlx::query(
-                "UPDATE app_packages SET active=true,revision=revision+1 WHERE tenant=$1 AND id=$2",
-            )
-            .bind(tenant)
-            .bind(id)
-            .execute(&mut **tx)
-            .await?;
-            sqlx::query("INSERT INTO outbox(tenant,kind,data) VALUES($1,'app.activated',$2)")
-                .bind(tenant)
-                .bind(json!({"app":id,"reason":"hosted_frontend"}))
-                .execute(&mut **tx)
-                .await?;
-        }
-        Some(true) => {}
-    }
-    Ok(())
+    hosted_apps::ensure(&data::BUNDLED, &install_host::COMMERCE, tx, tenant, id).await
 }
 
 /// Runs after shared-storage consolidation under the migration lock; normal reads never install apps.
 pub(crate) async fn backfill(tx: &mut Transaction<'_, Postgres>) -> Result<()> {
-    let tenants: Vec<String> = sqlx::query_scalar(
-        "SELECT DISTINCT tenant FROM hosted_frontends WHERE app_id='storyfront' ORDER BY tenant",
-    )
-    .fetch_all(&mut **tx)
-    .await?;
-    for tenant in tenants {
-        ensure(tx, &tenant, "storyfront").await?;
-    }
-    sqlx::query("ALTER TABLE hosted_frontends VALIDATE CONSTRAINT hosted_frontends_app_fk")
-        .execute(&mut **tx)
-        .await?;
-    Ok(())
+    hosted_apps::backfill(&data::BUNDLED, &install_host::COMMERCE, tx).await
 }
 
 pub(crate) async fn connections(a: &App, tenant: &str) -> Result<Vec<Value>> {

@@ -1,6 +1,10 @@
 //! Paginated app-specific immutable purchase projections; filtering happens before LIMIT and never exposes buyer PII.
-use super::*;
-pub(crate) async fn configurations(a: &App, t: &str, id: &str, input: &Value) -> Result<Value> {
+use serde_json::{Value, json};
+use sqlx::Row;
+use veyndo_core::{Result, State, bad};
+
+/// One page of the orders that carry a configuration of this app, newest first.
+pub async fn configurations(a: &State, t: &str, id: &str, input: &Value) -> Result<Value> {
     let limit = input["limit"].as_i64().unwrap_or(100);
     let after = input["after"].as_str().unwrap_or("");
     if !(1..=100).contains(&limit) || after.len() > 100 {

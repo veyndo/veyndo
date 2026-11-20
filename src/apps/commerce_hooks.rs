@@ -18,7 +18,10 @@ pub(crate) async fn prepare(a: &App, t: &str) -> Result<Prepared> {
         let m: Manifest =
             serde_json::from_value(row.get("manifest")).map_err(|_| bad("Invalid hook package"))?;
         let c = m.commerce_hooks.unwrap();
-        modules.insert(hash(&c.source), runtime::prepare_source(c.source).await?);
+        modules.insert(
+            hash(&c.source),
+            veyndo_app_platform::service::configuration_runtime::prepare_source(c.source).await?,
+        );
     }
     Ok(Prepared { modules })
 }

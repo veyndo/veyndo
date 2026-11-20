@@ -10,12 +10,9 @@ mod commerce_hooks;
 pub(crate) use commerce_hooks::Prepared as PreparedCheckoutHooks;
 pub(crate) use commerce_hooks::{apply as apply_hooks, prepare as prepare_hooks};
 mod configuration_events;
-mod configuration_orders;
 pub(crate) use configuration_events::{configuration_budget, configuration_events};
-pub(crate) use configuration_orders::configurations;
-mod configuration_inputs;
+pub(crate) use veyndo_app_platform::store::configuration_orders::configurations;
 mod configuration_selection;
-mod configuration_summary;
 pub(crate) use configuration_selection::{
     Selection as ConfigurationSelection, resolve_selection as configuration_selection_for_list,
     resolve_selections, selection_shape,
@@ -81,7 +78,6 @@ pub(crate) use service_limits::ServiceLimits;
 pub(crate) use ui_documents::SandboxedAppDocument;
 mod observability;
 mod planning;
-mod runtime;
 pub(crate) use planning::*;
 mod manifest;
 mod manifest_validation;

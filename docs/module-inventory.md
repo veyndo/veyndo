@@ -49,10 +49,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/apps/cart_contributions.rs](../src/apps/cart_contributions.rs) | Generic app contributions: configure a cart, bind package/data revisions and persist audited pricing inputs. |
 | [src/apps/commerce_hooks.rs](../src/apps/commerce_hooks.rs) | Typed pure commerce hooks share the compiled sandbox cache and receive explicit immutable snapshots, never SQL or credentials. |
 | [src/apps/configuration_events.rs](../src/apps/configuration_events.rs) | Configuration budget and change events live in the apps component; this module keeps the short path for the cart. |
-| [src/apps/configuration_inputs.rs](../src/apps/configuration_inputs.rs) | The configuration input adapter lives in the apps component; this module keeps the short path for cart configuration. |
-| [src/apps/configuration_orders.rs](../src/apps/configuration_orders.rs) | Paginated app-specific immutable purchase projections; filtering happens before LIMIT and never exposes buyer PII. |
-| [src/apps/configuration_selection.rs](../src/apps/configuration_selection.rs) | Reusable input-only selections resolve current package/library revisions before one native cart mutation. |
-| [src/apps/configuration_summary.rs](../src/apps/configuration_summary.rs) | The configuration receipt snapshot lives in the apps component; this module keeps the short path for cart consumers. |
+| [src/apps/configuration_selection.rs](../src/apps/configuration_selection.rs) | Saved selections resolve in the apps component; this module adds the main language of the shop. |
 | [src/apps/consent.rs](../src/apps/consent.rs) | Package approval binds all requested permissions to a reviewed digest; current actor rights apply before every installation path. |
 | [src/apps/core_callbacks.rs](../src/apps/core_callbacks.rs) | Narrow app callbacks delegate to the existing commerce owners and project PII only with separate consent. |
 | [src/apps/core_catalog_evidence.rs](../src/apps/core_catalog_evidence.rs) | Product-only app callback projects current catalog text and enabled translations in one snapshot. |
@@ -72,7 +69,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/apps/extension_filter.rs](../src/apps/extension_filter.rs) | Exact app-field predicates validated against current packages and applied before native pagination. |
 | [src/apps/field_values.rs](../src/apps/field_values.rs) | The field value policy lives in the apps component; this module keeps the short path for the app adapters. |
 | [src/apps/gateway.rs](../src/apps/gateway.rs) | One permission-aware action gateway serves HTTP, UI and MCP; service egress is operator configured. |
-| [src/apps/hosted.rs](../src/apps/hosted.rs) | Persist hosted-app dependencies through the existing package installer; no private renderer or parallel registry. |
+| [src/apps/hosted.rs](../src/apps/hosted.rs) | Hosted-app installation lives in the apps component; this module adds the connected frontends and their local answers. |
 | [src/apps/input_schema.rs](../src/apps/input_schema.rs) | The bounded input schema validator lives in the apps component; this module keeps the short path for the app adapters. |
 | [src/apps/install_host.rs](../src/apps/install_host.rs) | The commerce side of an app installation: the configuration lock, flows that survive a replacement and payment methods. |
 | [src/apps/job_import.rs](../src/apps/job_import.rs) | Reviewed job records use current creator rights and a locked live package; private targets never become app credentials. |
@@ -93,7 +90,6 @@ This lists every checked-in source module in these roots, including files with n
 | [src/apps/records.rs](../src/apps/records.rs) | The app record store lives in the apps component; this module keeps the short path for the app adapters. |
 | [src/apps/registry.rs](../src/apps/registry.rs) | Atomic installation and additive schema upgrades; immutable version digests preserve history. |
 | [src/apps/routes.rs](../src/apps/routes.rs) | Tenant-scoped package lifecycle, generated data endpoints and a shared action adapter. |
-| [src/apps/runtime.rs](../src/apps/runtime.rs) | The configuration executor lives in the apps component; this module keeps the short path for cart and data adapters. |
 | [src/apps/schedules.rs](../src/apps/schedules.rs) | App schedules live in the apps component; this module keeps the short path for installation and the worker. |
 | [src/apps/secrets.rs](../src/apps/secrets.rs) | Digest-bound per-shop app secret rotation is handled in the apps component; this module registers its routes. |
 | [src/apps/service_limits.rs](../src/apps/service_limits.rs) | Shared network-app admission lives in the apps component; this module builds its state from the server state. |
@@ -668,6 +664,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/apps/src/service/admission.rs](../components/apps/src/service/admission.rs) | Shared network-app admission: the local bulkheads plus replica-wide fenced leases. |
 | [components/apps/src/service/configuration_examples.rs](../components/apps/src/service/configuration_examples.rs) | Frozen configuration cases use the same field validation and bounded guest as real cart configuration. |
 | [components/apps/src/service/configuration_runtime.rs](../components/apps/src/service/configuration_runtime.rs) | Generic pure-Wasm contribution executor; the installed package supplies all business predicates. |
+| [components/apps/src/service/configuration_selection.rs](../components/apps/src/service/configuration_selection.rs) | Reusable input-only selections resolve current package/library revisions before one native cart mutation. |
 | [components/apps/src/service/egress.rs](../components/apps/src/service/egress.rs) | Bounded origin clients pin resolved addresses for each connection and never use ambient HTTP proxies. |
 | [components/apps/src/service/event_delivery.rs](../components/apps/src/service/event_delivery.rs) | Durable at-least-once app events: retry leases, stable idempotency keys and signed public HTTPS delivery on the existing outbox. |
 | [components/apps/src/service/gateway.rs](../components/apps/src/service/gateway.rs) | One permission-aware action gateway serves HTTP, UI and MCP; service egress is operator configured. |
@@ -685,14 +682,17 @@ This lists every checked-in source module in these roots, including files with n
 | [components/apps/src/store/action_log.rs](../components/apps/src/store/action_log.rs) | Bounded metadata-only app telemetry: who called which action with what outcome, never a payload. |
 | [components/apps/src/store/activation.rs](../components/apps/src/store/activation.rs) | Native current-actor/trust/connected-frontend/commerce admission for the shared package-state transaction; original configuration lock order retained. |
 | [components/apps/src/store/asset_references.rs](../components/apps/src/store/asset_references.rs) | Assets an app record refers to must belong to the same shop and fit the field. |
+| [components/apps/src/store/cart_configurations.rs](../components/apps/src/store/cart_configurations.rs) | Cart configurations stay bound to the package, rule revision and price they were made with. |
 | [components/apps/src/store/commerce_hooks.rs](../components/apps/src/store/commerce_hooks.rs) | Which commerce hook packages a shop admits and checkout evaluates. |
 | [components/apps/src/store/configuration_events.rs](../components/apps/src/store/configuration_events.rs) | Configuration mutations publish minimized identifiers through the native outbox/Flows; no cart capability or shopper text is disclosed. |
+| [components/apps/src/store/configuration_orders.rs](../components/apps/src/store/configuration_orders.rs) | Paginated app-specific immutable purchase projections; filtering happens before LIMIT and never exposes buyer PII. |
 | [components/apps/src/store/core_references.rs](../components/apps/src/store/core_references.rs) | Core records an app field names must belong to the same shop; no app alters core tables. |
 | [components/apps/src/store/dependencies.rs](../components/apps/src/store/dependencies.rs) | Tenant-local dependency and version gates of a signed package, read under the installing transaction. |
 | [components/apps/src/store/event_deliveries.rs](../components/apps/src/store/event_deliveries.rs) | Outbox events become queued deliveries for every active package that may receive them. |
 | [components/apps/src/store/evidence.rs](../components/apps/src/store/evidence.rs) | Private provenance-bearing app sources for merchant retrieval; never public PDP answers. |
 | [components/apps/src/store/extension_filter.rs](../components/apps/src/store/extension_filter.rs) | Admitted app-field predicates applied before native pagination. |
 | [components/apps/src/store/extension_projection.rs](../components/apps/src/store/extension_projection.rs) | Bounded native-object read projection from existing app models, references and current package permissions. |
+| [components/apps/src/store/hosted_apps.rs](../components/apps/src/store/hosted_apps.rs) | Persist hosted-app dependencies through the existing package installer; no private renderer or parallel registry. |
 | [components/apps/src/store/job_control.rs](../components/apps/src/store/job_control.rs) | Native current-action/right/input admission for the shared job-control transaction; no duplicate transition or outbox engine. |
 | [components/apps/src/store/jobs.rs](../components/apps/src/store/jobs.rs) | Durable long actions piggyback on the existing outbox. Apps claim a fenced lease; unknown side effects are never retried automatically. |
 | [components/apps/src/store/languages.rs](../components/apps/src/store/languages.rs) | App record translations use configured shop languages and field-level main-language inheritance. |

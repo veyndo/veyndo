@@ -1001,6 +1001,11 @@
       "sha256": "19451f7cc6e610871774e7b44fadfa32d0d6a03323fda9ed1dcc95c99f7aaeb0",
       "review": "Sandbox cache, configuration runtime and package fence moved into the apps component without changing rules"
     },
+    "components/apps/src/service/configuration_selection.rs": {
+      "status": "unproved",
+      "sha256": "bd4d435aca1c80045ce4b7a923c51ec89cf5ccc069b4fd025d0f45e0b025ecbf",
+      "review": "Cart configuration checks, saved selections, the purchase projection and hosted app installation moved into the apps component without behavior change"
+    },
     "components/apps/src/service/egress.rs": {
       "status": "unproved",
       "sha256": "aaa2a57dee88405b37de0f05ed229b14f35d3a6a479abdabedf7b751312f3e05",
@@ -1068,8 +1073,8 @@
     },
     "components/apps/src/service.rs": {
       "status": "unproved",
-      "sha256": "a7e0d51c6a01e5af8b7b18a8aa0bac07118279c0a1872e1c9e2ed8d035f94791",
-      "review": "The app action gateway moved into the apps component; server-owned handlers are reached through a host port without behavior change"
+      "sha256": "8d5e67ae66e7b5eb641233df66a852edcfbbe6b704ec6dde2ca09533ecb358b7",
+      "review": "Cart configuration checks, saved selections, the purchase projection and hosted app installation moved into the apps component without behavior change"
     },
     "components/apps/src/store/action_log.rs": {
       "status": "unproved",
@@ -1086,6 +1091,11 @@
       "sha256": "ff0ab16afc22e4716b2ea0fc7faa2ccd117c4caebd9399714dd082959e612835",
       "review": "Field, reference, view and manifest policy moved into the apps component without changing rules"
     },
+    "components/apps/src/store/cart_configurations.rs": {
+      "status": "unproved",
+      "sha256": "25575ec551a891af11b31be8bcac71bb28c5fba9890ea2853a8a10b4891887d4",
+      "review": "Cart configuration checks, saved selections, the purchase projection and hosted app installation moved into the apps component without behavior change"
+    },
     "components/apps/src/store/commerce_hooks.rs": {
       "status": "unproved",
       "sha256": "87c2f5622e245f950f024d62a43b78074991abcc5e6454e31df7fe0260e1418a",
@@ -1095,6 +1105,11 @@
       "status": "unproved",
       "sha256": "b6727cf930830bffffa40307d0dea8f3fb3589974a225236e7f120d4522d662a",
       "review": "Configuration, lifecycle, ontology and reference adapters moved into the apps component without changing rules"
+    },
+    "components/apps/src/store/configuration_orders.rs": {
+      "status": "unproved",
+      "sha256": "c1790835ab05c62829cc465287b2ce8fbe00cc585523181f82f8c36595859865",
+      "review": "Cart configuration checks, saved selections, the purchase projection and hosted app installation moved into the apps component without behavior change"
     },
     "components/apps/src/store/core_references.rs": {
       "status": "unproved",
@@ -1125,6 +1140,11 @@
       "status": "unproved",
       "sha256": "1ff774dde7b119edc6f22850cc39d3d0430860b0a34e825046bc1eb18ec24f43",
       "review": "Managed app records, restoration, import and native-object projection moved into the apps component behind a record rules port without behavior change"
+    },
+    "components/apps/src/store/hosted_apps.rs": {
+      "status": "unproved",
+      "sha256": "8838c41e7f230b07904cf2a0261fb5f9c3059b114ebbcae9bea04c04a1330d67",
+      "review": "Cart configuration checks, saved selections, the purchase projection and hosted app installation moved into the apps component without behavior change"
     },
     "components/apps/src/store/job_control.rs": {
       "status": "unproved",
@@ -1233,8 +1253,8 @@
     },
     "components/apps/src/store.rs": {
       "status": "unproved",
-      "sha256": "f539a56127e965b5132e1ea76de2586c74036e16fea1de52971f3defe7831647",
-      "review": "Surface grants, declared app routes, UI bundle loading and the action and entity handlers moved into the apps component without behavior change"
+      "sha256": "c2642402829a71c23f9aa4834961648edd01f3c00c9017012e42effc5967ba26",
+      "review": "Cart configuration checks, saved selections, the purchase projection and hosted app installation moved into the apps component without behavior change"
     },
     "components/b2b/src/domain/contract.rs": {
       "status": "unproved",
@@ -5323,38 +5343,23 @@
     },
     "src/apps/cart_contributions.rs": {
       "status": "unproved",
-      "sha256": "6a321ce7ac54f33281a30cc3625971b6847fc2b51126eecc1b0b6d809b58d327",
-      "review": "cart types and rule engine moved into components; checking bindings"
+      "sha256": "c8b866fb11af6932a4775dca8cdfee198badbc6162b0be449903706e53cd7f9a",
+      "review": "Cart configuration checks, saved selections, the purchase projection and hosted app installation moved into the apps component without behavior change"
     },
     "src/apps/commerce_hooks.rs": {
       "status": "unproved",
-      "sha256": "d0746f226725131632438db163c50d67015fe48fd136e550233c2630bf0b788a",
-      "review": "Job callbacks, completion evidence, package verification, installation, activation and upgrade review moved into the apps component behind host ports without behavior change"
+      "sha256": "08fe9067c46611fb1ac9830c8b451d03af958753dda99786002550fe30f295ce",
+      "review": "Cart configuration checks, saved selections, the purchase projection and hosted app installation moved into the apps component without behavior change"
     },
     "src/apps/configuration_events.rs": {
       "status": "unproved",
       "sha256": "ad6b41885d97a797efb6adb782c1fc1509c540bf8d990b794ee5a772ca859214",
       "review": "Configuration, lifecycle, ontology and reference adapters moved into the apps component without changing rules"
     },
-    "src/apps/configuration_inputs.rs": {
-      "status": "unproved",
-      "sha256": "f61d05558845f6986fe253ec3d75fc8bbc1a563bd1cae6a585c68cd475b76169",
-      "review": "Configuration, lifecycle, ontology and reference adapters moved into the apps component without changing rules"
-    },
-    "src/apps/configuration_orders.rs": {
-      "status": "unproved",
-      "sha256": "0c52ed4ff9718ab6fe3dc6435c551c6779c7f88f89d2e7458589b638fa64e07b",
-      "review": "Review combined native business capability and hardening: typed material/dimension guests remain app-owned and bounded; native CAS/FX/current B2B approval and immutable order snapshots; isolated app crate consumer preserves compiler boundary; independent per-event subscriber retry/quarantine preserves healthy events, commit gaps and explicit recovery; signed tenant/system authority, provider-native read tools and real document withdrawal, workspace image closure and source inventory. SQL/async/provider adapters remain tested, not proved."
-    },
     "src/apps/configuration_selection.rs": {
       "status": "unproved",
-      "sha256": "4b9419474a35fe2afd56c269cdfca28abaa0ca6abaa4236ea9769aed02041217",
-      "review": "Record store, consent and core extension rules moved into the apps component without changing rules"
-    },
-    "src/apps/configuration_summary.rs": {
-      "status": "unproved",
-      "sha256": "7678efef3d045121b185d5d9fae79ec55f437a9867412dac9c8485ac4cd8f79c",
-      "review": "Configuration, lifecycle, ontology and reference adapters moved into the apps component without changing rules"
+      "sha256": "321a2246a67914e53373943048d6005e9d9150560c4ab351f3473a974380c457",
+      "review": "Cart configuration checks, saved selections, the purchase projection and hosted app installation moved into the apps component without behavior change"
     },
     "src/apps/consent.rs": {
       "status": "unproved",
@@ -5453,8 +5458,8 @@
     },
     "src/apps/hosted.rs": {
       "status": "unproved",
-      "sha256": "f5adce11589835f9bae7a599f8adb200fa7f8daf9c646eea7ec4e4867a7c0a64",
-      "review": "Reviewed hosted migration responsibility comment after moving native backfill behind shared-store consolidation. Actual pre-055 SQL and canonical ledger now upgrade via the unchanged native migrator before HTTP reads; two real serving processes retain managed Storyfront connection, revision and version history. No runtime decision or proof boundary changed."
+      "sha256": "286f9ce778ddf91cf7238a6ff8043ef620c2d80aa3bdca282f14ed4a7b0f3f13",
+      "review": "Cart configuration checks, saved selections, the purchase projection and hosted app installation moved into the apps component without behavior change"
     },
     "src/apps/input_schema.rs": {
       "status": "unproved",
@@ -5493,8 +5498,8 @@
     },
     "src/apps/mod.rs": {
       "status": "unproved",
-      "sha256": "749facdd517b91bf827d08ce8de3c121029785f13a084aa4253fda27105245fd",
-      "review": "App planning, planning contracts and the app tool catalogue moved into the apps component; the tool wire contract moved to core without behavior change"
+      "sha256": "91e526bb7ef03876805b1d04a7d00251dd4e40266646c07aa4ac00dd703b55df",
+      "review": "Cart configuration checks, saved selections, the purchase projection and hosted app installation moved into the apps component without behavior change"
     },
     "src/apps/model_contract.rs": {
       "status": "unproved",
@@ -5543,8 +5548,8 @@
     },
     "src/apps/records.rs": {
       "status": "unproved",
-      "sha256": "27edb238109729f777ed2d0c123e71562de614d1ac7edb254f38a5cfb295faa1",
-      "review": "Job callbacks, completion evidence, package verification, installation, activation and upgrade review moved into the apps component behind host ports without behavior change"
+      "sha256": "7832a9d1c1708734d6d0a23af033ed51930567381f6be6a7e27064c1a26ab89e",
+      "review": "Cart configuration checks, saved selections, the purchase projection and hosted app installation moved into the apps component without behavior change"
     },
     "src/apps/registry.rs": {
       "status": "unproved",
@@ -5555,11 +5560,6 @@
       "status": "unproved",
       "sha256": "ffdb30a637b1f38b10e986be8c7ab3eabc672d65c55db778ce2e357f17e93a64",
       "review": "Surface grants, declared app routes, UI bundle loading and the action and entity handlers moved into the apps component without behavior change"
-    },
-    "src/apps/runtime.rs": {
-      "status": "unproved",
-      "sha256": "eae3bcd9bf3dc0606ae020f2f2008de2fdb0e60af4195822c481d7460b0d11ed",
-      "review": "Job callbacks, completion evidence, package verification, installation, activation and upgrade review moved into the apps component behind host ports without behavior change"
     },
     "src/apps/schedules.rs": {
       "status": "unproved",
