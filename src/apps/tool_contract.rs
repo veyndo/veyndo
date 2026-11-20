@@ -17,7 +17,7 @@ pub(crate) async fn app_tools_for(
         let digest = m
             .surfaces
             .iter()
-            .any(|s| mcp_views::location(&s.location))
+            .any(|s| veyndo_app_platform::domain::mcp_views::location(&s.location))
             .then(|| approval::canonical_digest(&m));
         for action in &m.actions {
             if (!public_only || action.public)
@@ -48,11 +48,11 @@ pub(crate) async fn app_tools_for(
                 );
                 if let Some(digest) = &digest
                     && let Some(s) = m.surfaces.iter().find(|s| {
-                        s.actions.first() == Some(&action.name) && mcp_views::available(a, h, &m, s)
+                        s.actions.first() == Some(&action.name)
+                            && veyndo_app_platform::domain::mcp_views::available(h, &m, s)
                     })
                 {
-                    tool["_meta"] =
-                        json!({"ui":{"resourceUri":mcp_views::uri(&tenant(h)?, &m, s, digest)}});
+                    tool["_meta"] = json!({"ui":{"resourceUri":veyndo_app_platform::domain::mcp_views::uri(&tenant(h)?, &m, s, digest)}});
                 }
                 tools.push(tool);
             }

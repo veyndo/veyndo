@@ -48,7 +48,7 @@ async fn execute(
         .find(|act| act.name == name)
         .ok_or(bad("Unknown app action"))?;
     if let Some(mode) = mcp {
-        mcp_views::admit_tool(a, h, &m, action, &t, mode)?;
+        mcp_views::admit_tool(h, &m, action, &t, mode)?;
     }
     action_admission::check(a, h, action, v)?;
     if let Some(result) = super::hosted::action(a, &t, id, name).await? {

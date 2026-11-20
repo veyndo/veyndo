@@ -21,6 +21,7 @@ pub mod field_values;
 pub mod input_schema;
 pub mod manifest_policy;
 pub mod manifest_validation;
+pub mod mcp_views;
 pub mod model_contract;
 pub mod native_lifecycle;
 pub mod native_views;

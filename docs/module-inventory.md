@@ -80,7 +80,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/apps/jobs.rs](../src/apps/jobs.rs) | Durable long actions piggyback on the existing outbox. Apps claim a fenced lease; unknown side effects are never retried automatically. |
 | [src/apps/manifest.rs](../src/apps/manifest.rs) | Strict package contract; identifiers and limits are checked before logical model registration. |
 | [src/apps/manifest_validation.rs](../src/apps/manifest_validation.rs) | The package compiler adapter lives in the apps component; this module supplies the operator's publisher keys. |
-| [src/apps/mcp_views.rs](../src/apps/mcp_views.rs) | Publish revision-bound native MCP App views and authorize their read-only interactions. |
+| [src/apps/mcp_views.rs](../src/apps/mcp_views.rs) | Assistant app views live in the apps component; this module adds the caller's language and the gateway calls. |
 | [src/apps/mod.rs](../src/apps/mod.rs) | Versioned app packages: managed data, UI slots, agent tools and isolated service calls. |
 | [src/apps/model_contract.rs](../src/apps/model_contract.rs) | Native errors of model errors live in the apps component; this module keeps the short path for the app adapters. |
 | [src/apps/native_lifecycle.rs](../src/apps/native_lifecycle.rs) | Native lifecycles live in the apps component; this module keeps the short path for orders, quotes and settings. |
@@ -103,7 +103,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/apps/settings.rs](../src/apps/settings.rs) | Declared app settings reuse the digest-bound encrypted secret owner; secret values never have a browser read path. |
 | [src/apps/submissions.rs](../src/apps/submissions.rs) | Public append-only intake uses declared schemas, existing cart admission, quotas, records and outbox. |
 | [src/apps/surface_grants.rs](../src/apps/surface_grants.rs) | Short-lived UI grants bind a package, surface, actor and concrete editor object on the server. |
-| [src/apps/surface_registry.rs](../src/apps/surface_registry.rs) | Current-authority app surface projection shared by storefronts and native visual composition. |
+| [src/apps/surface_registry.rs](../src/apps/surface_registry.rs) | The surface projection lives in the apps component; this module adds the languages of the shop. |
 | [src/apps/surface_tests.rs](../src/apps/surface_tests.rs) | Contract counterexamples reject cross-scope UI actions, unsafe URLs and mutating GET routes. |
 | [src/apps/surfaces.rs](../src/apps/surfaces.rs) | App-owned UI surfaces and namespaced HTTP routes reuse the authorized action gateway. |
 | [src/apps/tool_contract.rs](../src/apps/tool_contract.rs) | Installed app tools share native wire metadata and validate declared results without disclosing provider payloads. |
@@ -631,6 +631,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/apps/src/domain/input_schema_tests.rs](../components/apps/src/domain/input_schema_tests.rs) | Adversarial schema cases exercise bounded inputs, nullable unions, escaped JSON pointers and output values. |
 | [components/apps/src/domain/manifest_policy.rs](../components/apps/src/domain/manifest_policy.rs) | Required native policy ports for the complete shared compiler; no package or request fields can select a weaker policy. |
 | [components/apps/src/domain/manifest_validation.rs](../components/apps/src/domain/manifest_validation.rs) | Complete shared package compiler adapter; trusted native policies retain current authority and exact native errors. |
+| [components/apps/src/domain/mcp_views.rs](../components/apps/src/domain/mcp_views.rs) | Revision-bound native MCP App views: which tools and views a caller may reach, and the view document. |
 | [components/apps/src/domain/model_contract.rs](../components/apps/src/domain/model_contract.rs) | Preserve native problem kinds, revision-conflict status and escaped JSON pointers across the pure model boundary. |
 | [components/apps/src/domain/native_lifecycle.rs](../components/apps/src/domain/native_lifecycle.rs) | Versioned declarative native lifecycles; packages narrow native admission and never execute effects. |
 | [components/apps/src/domain/native_views.rs](../components/apps/src/domain/native_views.rs) | Shared view contracts of a package; actual grants, runtime execution and current rights remain with the server. |
@@ -692,6 +693,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/apps/src/store/jobs.rs](../components/apps/src/store/jobs.rs) | Durable long actions piggyback on the existing outbox. Apps claim a fenced lease; unknown side effects are never retried automatically. |
 | [components/apps/src/store/languages.rs](../components/apps/src/store/languages.rs) | App record translations use configured shop languages and field-level main-language inheritance. |
 | [components/apps/src/store/managed_data.rs](../components/apps/src/store/managed_data.rs) | Shared managed app records: typed writes, optimistic revisions, bounded reads and local RLS context. |
+| [components/apps/src/store/mcp_views.rs](../components/apps/src/store/mcp_views.rs) | Which assistant views of the installed packages a caller may list and open. |
 | [components/apps/src/store/native_lifecycle.rs](../components/apps/src/store/native_lifecycle.rs) | Capture accepted definitions in existing operational JSON under native package locks; no app-specific tables. |
 | [components/apps/src/store/package_fence.rs](../components/apps/src/store/package_fence.rs) | Shared package fence prevents native record or document writes racing contract upgrades. |
 | [components/apps/src/store/package_install.rs](../components/apps/src/store/package_install.rs) | Atomic installation and additive schema upgrades; required hooks preserve compiler/trust, commerce, schema, default-record and schedule admission in the shared transaction. |
@@ -704,6 +706,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/apps/src/store/secrets.rs](../components/apps/src/store/secrets.rs) | Digest-bound per-shop app secrets on platform authenticated encryption; platform keys never leave this owner and there is no plaintext read path. |
 | [components/apps/src/store/settings.rs](../components/apps/src/store/settings.rs) | Declared app settings reuse the digest-bound encrypted secret owner; secret values never have a browser read path. |
 | [components/apps/src/store/storage_usage.rs](../components/apps/src/store/storage_usage.rs) | Existing aggregate app row/byte budget; shared record triggers maintain it without per-app DDL or recounts. |
+| [components/apps/src/store/surface_registry.rs](../components/apps/src/store/surface_registry.rs) | Current-authority app surface projection shared by storefronts and native visual composition. |
 | [components/apps/src/store.rs](../components/apps/src/store.rs) | SQL of the apps component. |
 | [components/b2b/src/domain/contract.rs](../components/b2b/src/domain/contract.rs) | Native B2B operation catalogue and bounded request schema shared by HTTP, MCP and UCP adapters. |
 | [components/b2b/src/domain.rs](../components/b2b/src/domain.rs) | domain of this component. |

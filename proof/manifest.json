@@ -223,7 +223,8 @@
     },
     "app_tool_admissible": {
       "bindings": [
-        "src/apps/mcp_views.rs"
+        "src/apps/tool_contract.rs",
+        "components/apps/src/domain/mcp_views.rs"
       ],
       "theorems": [
         "app_tool_exact",
@@ -799,6 +800,11 @@
       "sha256": "27f417475f103c0c77b29529ad8475d0060a5633d941b61062270491e20e4d44",
       "review": "Field, reference, view and manifest policy moved into the apps component without changing rules"
     },
+    "components/apps/src/domain/mcp_views.rs": {
+      "status": "reviewed-binding",
+      "sha256": "1741ae872a08786f5a0c4a2f67b61a453565da909009f6545baa382459de3c90",
+      "review": "Assistant app views and the surface registry moved into the apps component without behavior change"
+    },
     "components/apps/src/domain/model_contract.rs": {
       "status": "unproved",
       "sha256": "49852afeda559d96460cb16ec3959459b98a7f259707e41bc8635711b96df653",
@@ -891,8 +897,8 @@
     },
     "components/apps/src/domain.rs": {
       "status": "unproved",
-      "sha256": "0c73687d697cfea2218b5d545a855dcdcaa00b4b62ba892d96d275933a555a85",
-      "review": "Native lifecycle rules, capture and commerce hook admission moved into the apps component without behavior change"
+      "sha256": "9dd6e54a87e97850b91e151aa4052fe24969fb73afb69896e37f0fe4aef29eae",
+      "review": "Assistant app views and the surface registry moved into the apps component without behavior change"
     },
     "components/apps/src/http/activity.rs": {
       "status": "unproved",
@@ -1104,6 +1110,11 @@
       "sha256": "aa88d8200552228cbff09d8f046a18bac47507d4701f9b6638709c54ef54aa9f",
       "review": "Managed app records, restoration, import and native-object projection moved into the apps component behind a record rules port without behavior change"
     },
+    "components/apps/src/store/mcp_views.rs": {
+      "status": "unproved",
+      "sha256": "4b3c0efeb2bd33386bb1e3038a883b6c10603c2ca0e4c78504aab072050279f0",
+      "review": "Assistant app views and the surface registry moved into the apps component without behavior change"
+    },
     "components/apps/src/store/native_lifecycle.rs": {
       "status": "unproved",
       "sha256": "155d704793fb78e584413082d36a04e18109e6cb9d629e962200f4ec84067e09",
@@ -1164,10 +1175,15 @@
       "sha256": "5619015a45cd6693444bbd622c3db41c5138a3fc0e5469a0e412b8fddbbf16aa",
       "review": "App jobs and private evidence reads moved into the apps component without changing rules"
     },
+    "components/apps/src/store/surface_registry.rs": {
+      "status": "unproved",
+      "sha256": "3de468eafb0861bde5ecf439b35b940cdefa29409c47b27742e958d27ce90c4f",
+      "review": "Assistant app views and the surface registry moved into the apps component without behavior change"
+    },
     "components/apps/src/store.rs": {
       "status": "unproved",
-      "sha256": "be9e2f2c7ae79c74e81c466cd1c2570a4197b3652b0d63cbe7ce618540230d4c",
-      "review": "Job callbacks, completion evidence, package verification, installation, activation and upgrade review moved into the apps component behind host ports without behavior change"
+      "sha256": "fbd4fe889934c3b24f78389292ef7ec0fe35a01705cc2ab3a73afeef73dbfc18",
+      "review": "Assistant app views and the surface registry moved into the apps component without behavior change"
     },
     "components/b2b/src/domain/contract.rs": {
       "status": "unproved",
@@ -5381,8 +5397,8 @@
     },
     "src/apps/gateway.rs": {
       "status": "unproved",
-      "sha256": "d27ba55868ff7f8f2fd73b01a59212bc5a1678530e9cb40aa6a59252a0340790",
-      "review": "Job callbacks, completion evidence, package verification, installation, activation and upgrade review moved into the apps component behind host ports without behavior change"
+      "sha256": "5d727ecacab31b323004c77579dabdf20afe477857e18ec0b78bc92e3e1b757e",
+      "review": "Assistant app views and the surface registry moved into the apps component without behavior change"
     },
     "src/apps/hosted.rs": {
       "status": "unproved",
@@ -5420,9 +5436,9 @@
       "review": "Field, reference, view and manifest policy moved into the apps component without changing rules"
     },
     "src/apps/mcp_views.rs": {
-      "status": "reviewed-binding",
-      "sha256": "41894dbdf535d3f6f8d4cde8c046858c78c75e1ba6fc36a4be64c79688f8e3ab",
-      "review": "A running Studio chat journals only bounded view references after admitted reads. Original actor and scope checks gate run status; current resource revision and tool rights gate browser data. Local PostgreSQL and Chrome confirm isolation, early filtering, unchanged frame identity, and final approval separation."
+      "status": "unproved",
+      "sha256": "ecd5cf7d0d357f85e1c5631ed3e820570a730e74c4a35608491af22c48029aa0",
+      "review": "Assistant app views and the surface registry moved into the apps component without behavior change"
     },
     "src/apps/mod.rs": {
       "status": "unproved",
@@ -5446,8 +5462,8 @@
     },
     "src/apps/native_views.rs": {
       "status": "unproved",
-      "sha256": "0beb6483625546af5eba1cae372055481c865df95dd73d6289a8632d96cc7e0f",
-      "review": "Field, reference, view and manifest policy moved into the apps component without changing rules"
+      "sha256": "ecb7ada435cfa315f3edf69074d74be5ce8da15290ed9d9f9bbbbd7fa8a9842b",
+      "review": "Assistant app views and the surface registry moved into the apps component without behavior change"
     },
     "src/apps/observability.rs": {
       "status": "unproved",
@@ -5536,8 +5552,8 @@
     },
     "src/apps/surface_registry.rs": {
       "status": "unproved",
-      "sha256": "f1d510e4a711af97b3aab34e04bb31a973b20176c7ec023e1df35b41a48207c2",
-      "review": "Review MCP read admission against the same active manifest at dispatch, native app placements with explicit list-action opt-in and tenant revision URI, and existing opaque document CSP. App model, direct HTTP and hosted composition checks cover their corresponding runtime contracts."
+      "sha256": "a07721a7ca8b2aa6ae78921bf293983142adf7208ff62cc98a9800029a461f41",
+      "review": "Assistant app views and the surface registry moved into the apps component without behavior change"
     },
     "src/apps/surface_tests.rs": {
       "status": "unproved",
@@ -5550,9 +5566,9 @@
       "review": "Surface contract and sandboxed documents moved into the apps component without changing rules"
     },
     "src/apps/tool_contract.rs": {
-      "status": "unproved",
-      "sha256": "14331098f9805244a73624d0c4800a071517f261c0e97cbb638b5191f7f13477",
-      "review": "Record store, consent and core extension rules moved into the apps component without changing rules"
+      "status": "reviewed-binding",
+      "sha256": "415652d83901fb927940ef2ce6dfbb36c21bdf6ffa1b84635c6467148602d237",
+      "review": "Assistant app views and the surface registry moved into the apps component without behavior change"
     },
     "src/apps/ui_bundles.rs": {
       "status": "unproved",
