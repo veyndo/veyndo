@@ -968,7 +968,7 @@ behavioral coverage is implied.
 
 `migrations/079-knowledge-lexical-indexes.sql` owns transactional word projection
 backfill/triggers and composite source containment. `components/intelligence/src/knowledge/search.sql`
-and `src/documents/search.sql` narrow candidates, then hydrate/rank/admit current
+and `components/intelligence/src/store/source_search.sql` narrow candidates, then hydrate/rank/admit current
 native records. `src/documents/retrieval.rs` remains the public/private retrieval
 adapter. `scripts/lexical_search.py`, registered in the existing integration suite
 registry, checks real non-owner plans, native edits, withdrawal, source deletion

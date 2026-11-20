@@ -59,10 +59,14 @@ pub(crate) async fn question(
     )
     .await?
     .0;
-    let unchanged: bool = sqlx::query_scalar(
-        "SELECT EXISTS(SELECT 1 FROM products WHERE tenant=$1 AND id=$2 AND revision=$3) AND NOT EXISTS(SELECT 1 FROM jsonb_to_recordset($4) AS s(\"sourceId\" text,\"documentId\" text,\"contentHash\" text,\"productId\" text,revision bigint,locale text,text text) WHERE NOT EXISTS(SELECT 1 FROM knowledge_documents d JOIN knowledge_chunks c ON c.tenant=d.tenant AND c.document_id=d.id WHERE d.tenant=$1 AND d.id=s.\"documentId\" AND d.visibility='public' AND NOT d.archived AND d.revision=s.revision AND d.content_hash=s.\"contentHash\" AND d.product_id IS NOT DISTINCT FROM s.\"productId\" AND d.id||':'||c.position=s.\"sourceId\" AND c.text=s.text AND c.locale=s.locale))"
-    ).bind(&t).bind(&id).bind(detail["product"]["revision"].as_i64())
-        .bind(&sources).fetch_one(&a.db).await?;
+    let unchanged = veyndo_intelligence::store::documents::sources_unchanged(
+        &a,
+        &t,
+        &id,
+        detail["product"]["revision"].as_i64(),
+        &sources,
+    )
+    .await?;
     if !unchanged || current["product"] != detail["product"] {
         return Err(Error(
             StatusCode::CONFLICT,

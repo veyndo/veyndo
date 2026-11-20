@@ -1,6 +1,6 @@
 //! Knowledge sources: hash-bound chunks, revision-checked edits, archive and publication, written atomically with their graph relations.
 use crate::domain::source_content::admit_guidance;
-use crate::knowledge::{sync_document, sync_product};
+use crate::knowledge::{sync_document, sync_product, vectors};
 use serde_json::{Value, json};
 use sqlx::Row;
 use veyndo_catalog::store::products;
@@ -273,4 +273,159 @@ pub async fn sources_current(a: &State, t: &str, sources: &Value) -> Result<bool
     sqlx::query_scalar(
         "SELECT NOT EXISTS(SELECT 1 FROM jsonb_to_recordset($2) AS s(\"sourceId\" text,\"documentId\" text,\"contentHash\" text,\"productId\" text,revision bigint,locale text,text text) WHERE NOT EXISTS(SELECT 1 FROM knowledge_documents d JOIN knowledge_chunks c ON c.tenant=d.tenant AND c.document_id=d.id WHERE d.tenant=$1 AND d.id=s.\"documentId\" AND NOT d.archived AND d.revision=s.revision AND d.content_hash=s.\"contentHash\" AND d.product_id IS NOT DISTINCT FROM s.\"productId\" AND d.id||':'||c.position=s.\"sourceId\" AND c.text=s.text AND c.locale=s.locale))",
     ).bind(t).bind(json!(records)).fetch_one(&a.db).await.map_err(Into::into)
+}
+
+/// Whether any admitted chunk carries a vector of this model, so a semantic query is worth its cost.
+pub async fn indexed(
+    a: &State,
+    t: &str,
+    model: &str,
+    public: bool,
+    product: Option<&str>,
+) -> Result<bool> {
+    let indexed:bool=sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM knowledge_chunks c JOIN knowledge_documents d ON d.tenant=c.tenant AND d.id=c.document_id WHERE c.tenant=$1 AND NOT d.archived AND c.embedding_model=$2 AND (NOT $3 OR d.visibility='public') AND ($4::text IS NULL OR d.product_id IS NULL OR d.product_id=$4 OR d.product_id=(SELECT parent_id FROM products WHERE tenant=$1 AND id=$4)))").bind(t).bind(model).bind(public).bind(product).fetch_one(&a.db).await?;
+    Ok(indexed)
+}
+
+/// What a source search is bound to.
+pub struct Search<'a> {
+    pub product: Option<&'a str>,
+    pub query: &'a str,
+    pub public: bool,
+    pub locale: &'a str,
+    pub main_locale: &'a str,
+    pub model: &'a str,
+}
+
+/// Bounded lexical/vector source retrieval; public questions use only explicitly published documents.
+pub async fn search(a: &State, t: &str, f: Search<'_>, vector: Option<Vec<f32>>) -> Result<Value> {
+    let (product, query, public, locale, main_locale, model) = (
+        f.product,
+        f.query,
+        f.public,
+        f.locale,
+        f.main_locale,
+        f.model,
+    );
+    let semantic = if let Some(vector) = vector {
+        vectors::query("document", t, model, vector)
+            .await
+            .unwrap_or_default()
+    } else {
+        Vec::new()
+    };
+    let ids = semantic
+        .iter()
+        .filter(|v| v["payload"]["tenant"] == t && v["payload"]["model"] == model)
+        .filter_map(|v| v["payload"]["object_id"].as_str().map(str::to_string))
+        .collect::<Vec<_>>();
+    let digests = semantic
+        .iter()
+        .filter(|v| v["payload"]["tenant"] == t && v["payload"]["model"] == model)
+        .map(|v| {
+            v["payload"]["digest"]
+                .as_str()
+                .unwrap_or_default()
+                .to_string()
+        })
+        .collect::<Vec<_>>();
+    let rows = sqlx::query(include_str!("source_search.sql"))
+        .bind(t)
+        .bind(product)
+        .bind(query)
+        .bind(public)
+        .bind(ids)
+        .bind(digests)
+        .bind(model)
+        .bind(locale)
+        .bind(main_locale)
+        .fetch_all(&a.db)
+        .await?;
+    Ok(json!(rows.iter().map(|r|json!({"sourceId":format!("{}:{}",r.get::<String,_>("id"),r.get::<i32,_>("position")),"documentId":r.get::<String,_>("id"),"title":r.get::<String,_>("title"),"locale":r.get::<String,_>("locale"),"productId":r.get::<Option<String>,_>("product_id"),"appliesToProductId":product,"association":if r.get::<Option<String>,_>("product_id").is_none(){"shop"}else if product.is_none() || r.get::<Option<String>,_>("product_id").as_deref()==product{"product"}else{"product-family"},"sourceType":r.get::<String,_>("source_type"),"contentHash":r.get::<String,_>("content_hash"),"revision":r.get::<i64,_>("revision"),"text":r.get::<String,_>("text")})).collect::<Vec<_>>()))
+}
+
+/// Whether the source exists in this shop.
+pub async fn exists(a: &State, t: &str, id: &str) -> Result<bool> {
+    let exists: bool = sqlx::query_scalar(
+        "SELECT EXISTS(SELECT 1 FROM knowledge_documents WHERE tenant=$1 AND id=$2)",
+    )
+    .bind(t)
+    .bind(id)
+    .fetch_one(&a.db)
+    .await?;
+    Ok(exists)
+}
+
+/// Whether the product revision and every supplied source chunk are still the ones that were read.
+pub async fn sources_unchanged(
+    a: &State,
+    t: &str,
+    id: &str,
+    revision: Option<i64>,
+    sources: &Value,
+) -> Result<bool> {
+    let unchanged: bool = sqlx::query_scalar(
+        "SELECT EXISTS(SELECT 1 FROM products WHERE tenant=$1 AND id=$2 AND revision=$3) AND NOT EXISTS(SELECT 1 FROM jsonb_to_recordset($4) AS s(\"sourceId\" text,\"documentId\" text,\"contentHash\" text,\"productId\" text,revision bigint,locale text,text text) WHERE NOT EXISTS(SELECT 1 FROM knowledge_documents d JOIN knowledge_chunks c ON c.tenant=d.tenant AND c.document_id=d.id WHERE d.tenant=$1 AND d.id=s.\"documentId\" AND d.visibility='public' AND NOT d.archived AND d.revision=s.revision AND d.content_hash=s.\"contentHash\" AND d.product_id IS NOT DISTINCT FROM s.\"productId\" AND d.id||':'||c.position=s.\"sourceId\" AND c.text=s.text AND c.locale=s.locale))"
+    ).bind(t).bind(id).bind(revision)
+        .bind(sources).fetch_one(&a.db).await?;
+    Ok(unchanged)
+}
+
+/// The filter of the source inventory.
+pub struct Inventory<'a> {
+    pub after: &'a str,
+    pub query: &'a str,
+    pub archived: bool,
+    pub kind: &'a str,
+    pub locale: &'a str,
+    pub main_locale: &'a str,
+}
+
+/// Knowledge census, one page of sources with its cursor, and recent activity.
+pub async fn inventory(
+    a: &State,
+    t: &str,
+    f: Inventory<'_>,
+) -> Result<(Value, Vec<Value>, Value, Vec<Value>)> {
+    let totals:Value=sqlx::query_scalar("SELECT jsonb_build_object('products',(SELECT count(*) FROM products WHERE tenant=$1),'sources',(SELECT count(*) FROM knowledge_documents WHERE tenant=$1 AND NOT archived),'published',(SELECT count(*) FROM knowledge_documents WHERE tenant=$1 AND visibility='public' AND NOT archived),'archived',(SELECT count(*) FROM knowledge_documents WHERE tenant=$1 AND archived),'chunks',(SELECT count(*) FROM knowledge_chunks c JOIN knowledge_documents d ON d.tenant=c.tenant AND d.id=c.document_id WHERE c.tenant=$1 AND NOT d.archived),'indexedChunks',(SELECT count(*) FROM knowledge_chunks c JOIN knowledge_documents d ON d.tenant=c.tenant AND d.id=c.document_id WHERE c.tenant=$1 AND NOT d.archived AND embedding IS NOT NULL),'external',(SELECT count(*) FROM app_evidence e JOIN app_packages p ON p.tenant=e.tenant AND p.id=e.app WHERE e.tenant=$1 AND p.active),'observedPairs',(SELECT count(*) FROM observed_pairs WHERE tenant=$1),'processedEvents',(SELECT count(*) FROM knowledge_receipts WHERE tenant=$1),'approvedSuggestions',(SELECT count(*) FROM knowledge_hypotheses WHERE tenant=$1 AND state='published'),'productViews',(SELECT coalesce(sum(views),0) FROM session_signals WHERE tenant=$1),'cartAdds',(SELECT coalesce(sum(cart_adds),0) FROM session_signals WHERE tenant=$1),'reviews',(SELECT count(*) FROM product_reviews WHERE tenant=$1 AND approved))").bind(t).fetch_one(&a.db).await?;
+    let rows:Vec<Value>=sqlx::query_scalar("SELECT (to_jsonb(d)-'tenant'-'content'-'translations') || jsonb_build_object('title',COALESCE(d.translations->$6->>'title',d.translations->$7->>'title',d.title),'chunkCount',(SELECT count(*) FROM knowledge_chunks c WHERE c.tenant=d.tenant AND c.document_id=d.id),'indexedChunks',(SELECT count(*) FROM knowledge_chunks c WHERE c.tenant=d.tenant AND c.document_id=d.id AND embedding IS NOT NULL),'translationLocales',(SELECT coalesce(jsonb_agg(key),'[]') FROM jsonb_object_keys(d.translations) AS key)) FROM knowledge_documents d WHERE tenant=$1 AND id>$2 AND archived=$3 AND ($4='' OR title ILIKE '%' || $4 || '%' OR content ILIKE '%' || $4 || '%' OR translations::text ILIKE '%' || $4 || '%') AND ($5='' OR kind=$5) ORDER BY id LIMIT 51").bind(t).bind(f.after).bind(f.archived).bind(f.query).bind(f.kind).bind(f.locale).bind(f.main_locale).fetch_all(&a.db).await?;
+    let next = if rows.len() > 50 {
+        rows[49]["id"].clone()
+    } else {
+        Value::Null
+    };
+    let activity:Vec<Value>=sqlx::query_scalar("SELECT jsonb_build_object('id',id,'kind',kind,'time',created_at,'sourceId',data->'documentId','hypothesisId',data->'hypothesisId') FROM outbox WHERE tenant=$1 AND (kind LIKE 'knowledge.%' OR kind LIKE 'intelligence.%' OR kind='merchant.change.applied') ORDER BY id DESC LIMIT 20").bind(t).fetch_all(&a.db).await?;
+    Ok((totals, rows, next, activity))
+}
+
+/// Graph evidence and sources around one product.
+pub struct ProductFacts {
+    pub needs: Vec<Value>,
+    pub complements: Vec<Value>,
+    pub observed: Vec<Value>,
+    pub sources: Vec<Value>,
+    pub stats: Value,
+}
+
+/// Needs, complements, observed pairs, sources and review figures of one product.
+pub async fn product_facts(
+    a: &State,
+    t: &str,
+    id: &str,
+    parent: Option<String>,
+    locale: &str,
+    main_locale: &str,
+) -> Result<ProductFacts> {
+    let needs:Vec<Value>=sqlx::query_scalar("SELECT jsonb_build_object('need',target_id,'source',data->'source','confidence',data->'confidence') FROM knowledge_relations WHERE tenant=$1 AND kind='SERVES' AND source_id=$2 ORDER BY target_id LIMIT 50").bind(t).bind(id).fetch_all(&a.db).await?;
+    let complements:Vec<Value>=sqlx::query_scalar("SELECT jsonb_build_object('id',p.id,'name',p.name,'source',r.data->'source') FROM knowledge_relations r JOIN products p ON p.tenant=r.tenant AND p.id=CASE WHEN r.source_id=$2 THEN r.target_id ELSE r.source_id END WHERE r.tenant=$1 AND r.kind='PAIRS_WITH' AND (r.source_id=$2 OR r.target_id=$2) ORDER BY p.id LIMIT 50").bind(t).bind(id).fetch_all(&a.db).await?;
+    let observed:Vec<Value>=sqlx::query_scalar("SELECT jsonb_build_object('id',CASE WHEN left_id=$2 THEN right_id ELSE left_id END,'orders',orders,'lastEvent',last_event,'source','order-observation') FROM observed_pairs WHERE tenant=$1 AND (left_id=$2 OR right_id=$2) ORDER BY orders DESC LIMIT 50").bind(t).bind(id).fetch_all(&a.db).await?;
+    let sources:Vec<Value>=sqlx::query_scalar("SELECT jsonb_build_object('id',id,'title',COALESCE(translations->$4->>'title',translations->$5->>'title',title),'kind',kind,'visibility',visibility,'productId',product_id) FROM knowledge_documents WHERE tenant=$1 AND NOT archived AND (product_id=$2 OR product_id IS NULL OR product_id=$3) ORDER BY id LIMIT 50").bind(t).bind(id).bind(parent).bind(locale).bind(main_locale).fetch_all(&a.db).await?;
+    let stats:Value=sqlx::query_scalar("SELECT jsonb_build_object('variants',(SELECT count(*) FROM products WHERE tenant=$1 AND parent_id=$2),'reviews',(SELECT count(*) FROM product_reviews WHERE tenant=$1 AND product_id=$2 AND approved),'averageRating',(SELECT coalesce(avg(rating),0) FROM product_reviews WHERE tenant=$1 AND product_id=$2 AND approved))").bind(t).bind(id).fetch_one(&a.db).await?;
+    Ok(ProductFacts {
+        needs,
+        complements,
+        observed,
+        sources,
+        stats,
+    })
 }

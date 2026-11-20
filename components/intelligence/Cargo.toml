@@ -22,3 +22,4 @@ pdf-extract.workspace = true
 chrono.workspace = true
 ring.workspace = true
 tracing.workspace = true
+veyndo-kernel = { path = "../../crates/kernel" }

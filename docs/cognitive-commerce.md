@@ -319,7 +319,7 @@ after validation or an authenticated cross-device memory implementation.
 | Owner | Responsibility |
 | --- | --- |
 | `src/cognition/indexing.rs`, `generations.rs`; migrations 071/074/076 | Source-trigger intake, model-change cursors, leased embeddings and status counters (including migration 078 diagnostic deltas) |
-| `components/intelligence/src/knowledge/{search,vectors,vector_cache,rerank,embeddings}.rs`, `src/documents/search.sql`; migration 079 | Retrieval, current native hydration, forced-RLS word candidates, index transport/geometry and provider validation |
+| `components/intelligence/src/knowledge/{search,vectors,vector_cache,rerank,embeddings}.rs`, `components/intelligence/src/store/source_search.sql`; migration 079 | Retrieval, current native hydration, forced-RLS word candidates, index transport/geometry and provider validation |
 | `src/cognition/{context,tools,stream}.rs`; `crates/cognition/src/inference/protocol.rs` | Bounded context, authorized read rounds, existing-chat SSE and model protocols |
 | `src/cognition/{evidence,extraction,claim_batches,contracts,signed}.rs`; migration 072 | Source-bound evidence lifecycle and current public statement/signature adapters |
 | `src/cognition/{guardrails,autonomy}.rs`; migration 073 | Native policy, current revisions, daily price budget and transactional consumer |

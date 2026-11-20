@@ -1,9 +1,6 @@
 //! Merchant-approved associations are consumed by the public shop without exposing order counts or identities.
 use super::*;
-pub(crate) async fn public_pairs(a: &App, t: &str) -> Result<Value> {
-    let rows=sqlx::query("SELECT evidence->>'left' AS left_id,evidence->>'right' AS right_id FROM knowledge_hypotheses WHERE tenant=$1 AND state='published' ORDER BY updated_at DESC LIMIT 24").bind(t).fetch_all(&a.db).await?;
-    Ok(json!(rows.iter().map(|r|json!({"left":r.get::<String,_>("left_id"),"right":r.get::<String,_>("right_id"),"source":"merchant-approved-order-association","causalUpliftProven":false})).collect::<Vec<_>>()))
-}
+pub(crate) use veyndo_intelligence::store::observations::public_pairs;
 pub(crate) async fn recommendations(
     State(a): State<App>,
     h: RequestContext,

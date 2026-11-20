@@ -368,8 +368,14 @@ Order follows the dependency report, lowest first. Each line is one move.
   (`store/experiments`), behaviour observations with the channel report and
   the private journey (`store/behavior`), the private preference graph
   (`domain/preference_graph`, `store/preferences`) and the signed offer
-  projection (`domain/offer`). The server keeps consent, settings and channel
-  admission and passes them in.
+  projection (`domain/offer`), the claim ledger with claim batches
+  (`store/evidence`, `domain/claim_batch`), the order observation projection
+  and published pairs (`store/observations`), the embedding job queue
+  (`store/embedding_jobs`), source search, the source inventory and product
+  facts (`store/documents`) and the bounded prompt context
+  (`domain/prompt_context`, `store/context_products`). The server keeps
+  consent, settings, channel admission, provider admission and leases and
+  passes them in.
   Open: agents and their runs, proposals, the retrieval, question and
   workspace handlers, inference, cognition routes and workers.
 - [ ] studio. Started: `components/studio` owns report configuration and

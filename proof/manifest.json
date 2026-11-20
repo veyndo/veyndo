@@ -49,7 +49,7 @@
         "src/platform/lifecycle.rs",
         "src/platform/quotas.rs",
         "src/commerce/delivery_split.rs",
-        "src/cognition/evidence.rs",
+        "components/intelligence/src/store/evidence.rs",
         "components/checkout/src/domain/review_binding.rs"
       ],
       "theorems": [
@@ -416,7 +416,7 @@
     "claim_render_admissible": {
       "bindings": [
         "src/cognition/contracts.rs",
-        "src/cognition/claim_batches.rs"
+        "components/intelligence/src/domain/claim_batch.rs"
       ],
       "theorems": [
         "claim_render_exact",
@@ -1478,6 +1478,11 @@
       "sha256": "d3a0dfdf272053030205336636b413176c6d4974ba8ea8bb4afbe0e1b18a5bdf",
       "review": "Knowledge module and experiment model moved into components/intelligence; kernel call sites unchanged"
     },
+    "components/intelligence/src/domain/claim_batch.rs": {
+      "status": "reviewed-binding",
+      "sha256": "723f2599d003e15e462bd6b21fc47ad08961f70891bf8d80118f61a7b9de13f8",
+      "review": "Claim evidence, claim batches, order observation projection, embedding jobs, source search, knowledge inventory, product facts and prompt snapshots moved verbatim into the intelligence component; permissions, settings, provider admission and leases stay in the server. Kernel admission calls unchanged."
+    },
     "components/intelligence/src/domain/experiment_model.rs": {
       "status": "reviewed-binding",
       "sha256": "2d453986a4321a540e62ff95be4da3b60e9c2f56efd2625dcc76a9cd1175bd7f",
@@ -1493,6 +1498,11 @@
       "sha256": "db69ff6ed70844cc06b8086696bd03a5e8fe2ea7d7b68f1ef2d9e3d84865afbf",
       "review": "Experiment store, readout and automation, behaviour analytics store and the private preference graph moved verbatim into the intelligence component; consent, settings and channel admission stay in the server. No kernel policy changed."
     },
+    "components/intelligence/src/domain/prompt_context.rs": {
+      "status": "unproved",
+      "sha256": "1c17151f822911a834ecca33e7e91cfda7a4d94ff930c88b90ac724125734291",
+      "review": "Claim evidence, claim batches, order observation projection, embedding jobs, source search, knowledge inventory, product facts and prompt snapshots moved verbatim into the intelligence component; permissions, settings, provider admission and leases stay in the server. Kernel admission calls unchanged."
+    },
     "components/intelligence/src/domain/source_content.rs": {
       "status": "unproved",
       "sha256": "acb83bc1fed77b6be07bc96dcfa710df2d04d3fbdec282c5ea2a0511f9eb0132",
@@ -1500,8 +1510,8 @@
     },
     "components/intelligence/src/domain.rs": {
       "status": "unproved",
-      "sha256": "cab2c15a83f8b4c793853334c308462c7f88cacb7340b0c74072b86e211ed20d",
-      "review": "Experiment store, readout and automation, behaviour analytics store and the private preference graph moved verbatim into the intelligence component; consent, settings and channel admission stay in the server. No kernel policy changed."
+      "sha256": "5a82a97c8d2c8d9c6fa9b49565ff930defb750c6a453400c42958b7ea99b10e3",
+      "review": "Claim evidence, claim batches, order observation projection, embedding jobs, source search, knowledge inventory, product facts and prompt snapshots moved verbatim into the intelligence component; permissions, settings, provider admission and leases stay in the server. Kernel admission calls unchanged."
     },
     "components/intelligence/src/knowledge/embeddings.rs": {
       "status": "unproved",
@@ -1563,20 +1573,40 @@
       "sha256": "db51743c8bb50d131db665ca051be9e0fa9ee0f883d4e51eab1d625769bbaf43",
       "review": "Experiment store, readout and automation, behaviour analytics store and the private preference graph moved verbatim into the intelligence component; consent, settings and channel admission stay in the server. No kernel policy changed."
     },
+    "components/intelligence/src/store/context_products.rs": {
+      "status": "unproved",
+      "sha256": "e9a1f7d7274494e9fb6d32fa4fbfb962e5b4da60faecc301be7704e11808d7d0",
+      "review": "Claim evidence, claim batches, order observation projection, embedding jobs, source search, knowledge inventory, product facts and prompt snapshots moved verbatim into the intelligence component; permissions, settings, provider admission and leases stay in the server. Kernel admission calls unchanged."
+    },
     "components/intelligence/src/store/documents.rs": {
       "status": "unproved",
-      "sha256": "d826cea080d824638b9bf6448a9a21a4758795e3f874cac413afab50c7444cd7",
-      "review": "Knowledge sources, PDF text extraction and embedding generations moved into the intelligence component without behaviour change"
+      "sha256": "c1faecd71a447e68f628be5b34c82a63b668c3a9cbfe60bedf59b735a35f70e8",
+      "review": "Claim evidence, claim batches, order observation projection, embedding jobs, source search, knowledge inventory, product facts and prompt snapshots moved verbatim into the intelligence component; permissions, settings, provider admission and leases stay in the server. Kernel admission calls unchanged."
     },
     "components/intelligence/src/store/embedding_generations.rs": {
       "status": "unproved",
       "sha256": "d69f2fb3f71e317ebe0bab83902eeb715eda56ae547b547befe0337e5ebe13b2",
       "review": "Knowledge sources, PDF text extraction and embedding generations moved into the intelligence component without behaviour change"
     },
+    "components/intelligence/src/store/embedding_jobs.rs": {
+      "status": "unproved",
+      "sha256": "84b9f4a25a2ed51241d538401d4f2c479fdd7b62ba29f442a0a33604fb5acfd4",
+      "review": "Claim evidence, claim batches, order observation projection, embedding jobs, source search, knowledge inventory, product facts and prompt snapshots moved verbatim into the intelligence component; permissions, settings, provider admission and leases stay in the server. Kernel admission calls unchanged."
+    },
+    "components/intelligence/src/store/evidence.rs": {
+      "status": "reviewed-binding",
+      "sha256": "ebbbc3b1a6e0b606a3d3ca0eb88fbafbd5de56c2e17dd03f34704cd8824965f2",
+      "review": "Claim evidence, claim batches, order observation projection, embedding jobs, source search, knowledge inventory, product facts and prompt snapshots moved verbatim into the intelligence component; permissions, settings, provider admission and leases stay in the server. Kernel admission calls unchanged."
+    },
     "components/intelligence/src/store/experiments.rs": {
       "status": "unproved",
       "sha256": "ede6adceb19e3f7fa57a28d8258f0357f3e6e9f9a84ebea97b9773b2f81c33a5",
       "review": "Experiment store, readout and automation, behaviour analytics store and the private preference graph moved verbatim into the intelligence component; consent, settings and channel admission stay in the server. No kernel policy changed."
+    },
+    "components/intelligence/src/store/observations.rs": {
+      "status": "unproved",
+      "sha256": "6e55fb10f705b034aa7e2bd947364f1774719a0b2bf6237d9ff8dbbdb7ff7a28",
+      "review": "Claim evidence, claim batches, order observation projection, embedding jobs, source search, knowledge inventory, product facts and prompt snapshots moved verbatim into the intelligence component; permissions, settings, provider admission and leases stay in the server. Kernel admission calls unchanged."
     },
     "components/intelligence/src/store/preferences.rs": {
       "status": "unproved",
@@ -1585,8 +1615,8 @@
     },
     "components/intelligence/src/store.rs": {
       "status": "unproved",
-      "sha256": "31e2c617c196cd6ff1cd69a09ccc05901f8a4009fd0b97c2afa041a8ad919bcc",
-      "review": "Experiment store, readout and automation, behaviour analytics store and the private preference graph moved verbatim into the intelligence component; consent, settings and channel admission stay in the server. No kernel policy changed."
+      "sha256": "c97d30286950a2df57d4f8de604b83faf478299a295f29fb12c020f78b632b32",
+      "review": "Claim evidence, claim batches, order observation projection, embedding jobs, source search, knowledge inventory, product facts and prompt snapshots moved verbatim into the intelligence component; permissions, settings, provider admission and leases stay in the server. Kernel admission calls unchanged."
     },
     "components/inventory/src/domain/lines.rs": {
       "status": "unproved",
@@ -5644,14 +5674,14 @@
       "review": "Experiment store, readout and automation, behaviour analytics store and the private preference graph moved verbatim into the intelligence component; consent, settings and channel admission stay in the server. No kernel policy changed."
     },
     "src/cognition/claim_batches.rs": {
-      "status": "reviewed-binding",
-      "sha256": "9ce3a0dca6793519167e9b5874741a82b4019c23834324f75011613688e8529c",
-      "review": "Reviewed bounded tenant-scoped embedding intake/model-generation cursors, revision/lease fencing and fair vector retry drain; pooled geometry-checked Qdrant hydration and admitted reranking; current-right read tools, structured protocols and SSE transport; exact source quotation/review/public compilation/signatures; transactional price corridors and non-compounding daily autonomy; consent-bound assignments/preferences and delayed cached native-payment readout including stop/withdrawal invalidation. New migration RLS/composite links and extracted predicate consumers reviewed. Native HTTP/PG/Qdrant/provider/UI regressions cover contracts; semantic quality, statistical assumptions, SQL, network and surrounding Rust remain unproved."
+      "status": "unproved",
+      "sha256": "fadeb5a6f719171ed11e1c0767e6ad140c5785ac0da8378bb730023a00fd7ab3",
+      "review": "Claim evidence, claim batches, order observation projection, embedding jobs, source search, knowledge inventory, product facts and prompt snapshots moved verbatim into the intelligence component; permissions, settings, provider admission and leases stay in the server. Kernel admission calls unchanged."
     },
     "src/cognition/context.rs": {
       "status": "unproved",
-      "sha256": "b796fd7a7f4ae8daca98072bc0c165ba8bbc1f0b595ad0cc386d44a4b7864553",
-      "review": "Reviewed single-retrieval catalog hydration and buyer-admitted graph projection; post-inference exact original-ID locale/channel/catalog/evidence response fence. Native predicates unchanged; SQL, graph semantics, source timing and free model prose remain unproved."
+      "sha256": "312b173abe97a8b5d2aac70565130f748ee79b81064a9f17aca4ba18aa7304da",
+      "review": "Claim evidence, claim batches, order observation projection, embedding jobs, source search, knowledge inventory, product facts and prompt snapshots moved verbatim into the intelligence component; permissions, settings, provider admission and leases stay in the server. Kernel admission calls unchanged."
     },
     "src/cognition/contracts.rs": {
       "status": "reviewed-binding",
@@ -5659,9 +5689,9 @@
       "review": "Self-running experiments: Design gains an optional immutable automation flag pair; experiments/automation.rs adds a read-only suggestion from live payment figures and worker steps that repeat the manual finish transition, call the existing report owner and record a decision, fixing the treatment layout mode only when the unchanged extracted experiment_result_admissible reports a proved uplift; cognitive_experiments suite covers kept, seeded published and manual cases"
     },
     "src/cognition/evidence.rs": {
-      "status": "reviewed-binding",
-      "sha256": "ade8a8f68965833a8d78d6045683dece18d7f44ea23fcf234310df6f987f0a92",
-      "review": "Tenant roles and current grants independently reviewed; owner/retained-override/acceptance races repaired and PostgreSQL-blocked regressions passed; PII and Flow projection boundaries documented; B2B feature settings delegate shared CAS/history and preserve financial guards. Existing extracted policies unchanged; SQL/async/UI remain reviewed adapters, not full proofs."
+      "status": "unproved",
+      "sha256": "7fc363a82f7b736e77f1e7f1ee5cdcd9e28af7c78f6e6551c6adad4838f84e3a",
+      "review": "Claim evidence, claim batches, order observation projection, embedding jobs, source search, knowledge inventory, product facts and prompt snapshots moved verbatim into the intelligence component; permissions, settings, provider admission and leases stay in the server. Kernel admission calls unchanged."
     },
     "src/cognition/experiments/mod.rs": {
       "status": "unproved",
@@ -5685,8 +5715,8 @@
     },
     "src/cognition/indexing.rs": {
       "status": "unproved",
-      "sha256": "97fff760f56bc5d15e40c6175ea4f10023347baa5737c946570a9762a95d2e2d",
-      "review": "Stage 8 adds the sovereign AI gate in the inference crate and its callers; no extracted policy changes."
+      "sha256": "0e39a8b516283bae332cb455c2d1d7acd0f57f6b30069791d02965f2525cfa51",
+      "review": "Claim evidence, claim batches, order observation projection, embedding jobs, source search, knowledge inventory, product facts and prompt snapshots moved verbatim into the intelligence component; permissions, settings, provider admission and leases stay in the server. Kernel admission calls unchanged."
     },
     "src/cognition/mod.rs": {
       "status": "unproved",
@@ -5700,13 +5730,13 @@
     },
     "src/cognition/projection.rs": {
       "status": "unproved",
-      "sha256": "3aa8965626afc805c0e46477a0612d2ee7d596a87de89ebb056d8e1f79ec1dac",
-      "review": "Reviewed all changed Rust, append-only schemas, build/extraction and Lean inputs: lease hooks bind new/reused connections and reset on release; strict runtime rejects owner/bypass/TRUNCATE and preserves app-schema ownership; two-replica non-owner PostgreSQL tests deny forged foreign writes, enforce operator quotas and parent-stage daily usage, release persisted allocation quantities once despite corrupted snapshots, and distinguish commit from rollback invalidation. Money retains legacy EUR rounding with explicit scale and original Shopware differential; receipt-backed state admission is monotonic with late capture/refund. Async SQL/provider code remains unproved. Rust 113 tests, staging/app/automation/settings and strict checkout/CRM/tenant regressions passed; 274 frontend tests and production build passed."
+      "sha256": "2757ece715352c013736a120c078069d08dd46c9ca34c99b1a9eb3c469f2f3ae",
+      "review": "Claim evidence, claim batches, order observation projection, embedding jobs, source search, knowledge inventory, product facts and prompt snapshots moved verbatim into the intelligence component; permissions, settings, provider admission and leases stay in the server. Kernel admission calls unchanged."
     },
     "src/cognition/recommendations.rs": {
       "status": "unproved",
-      "sha256": "efd0236da14c30f36d19e3395b2539d0002dfdc98dd6f89c800e9a0b24f5114b",
-      "review": "Reviewed eighteen core findings: typed trusted identity and explicit route rights; consolidated current grants; durable auth and fenced shared limits; scoped transactions and one-backend PgBouncer including nested borrow fixes; bounded Wasm/PNG work; notified workers, savepoint quarantine and conservative retention; separate runtime roles and startup configuration. Real PostgreSQL/provider regressions preserve current tenant/customer/payment behavior. SQL/network adapters remain unproved."
+      "sha256": "8c418fac9ea6ec4c2529bf67f8c58b0216f53a82cf5e07e4dbeb15368de1ddb2",
+      "review": "Claim evidence, claim batches, order observation projection, embedding jobs, source search, knowledge inventory, product facts and prompt snapshots moved verbatim into the intelligence component; permissions, settings, provider admission and leases stay in the server. Kernel admission calls unchanged."
     },
     "src/cognition/routes.rs": {
       "status": "unproved",
@@ -6150,18 +6180,18 @@
     },
     "src/documents/product_knowledge.rs": {
       "status": "unproved",
-      "sha256": "89660b3c6186dfc4f1803fa7ccd38a1860bf8f521acf1ffa0a5c0a676636d9b3",
-      "review": "Reviewed eighteen core findings: typed trusted identity and explicit route rights; consolidated current grants; durable auth and fenced shared limits; scoped transactions and one-backend PgBouncer including nested borrow fixes; bounded Wasm/PNG work; notified workers, savepoint quarantine and conservative retention; separate runtime roles and startup configuration. Real PostgreSQL/provider regressions preserve current tenant/customer/payment behavior. SQL/network adapters remain unproved."
+      "sha256": "03caf019ae4434fd32f6e4e0ebc184a33672af61e6889ae132bcb70127809b79",
+      "review": "Claim evidence, claim batches, order observation projection, embedding jobs, source search, knowledge inventory, product facts and prompt snapshots moved verbatim into the intelligence component; permissions, settings, provider admission and leases stay in the server. Kernel admission calls unchanged."
     },
     "src/documents/questions.rs": {
       "status": "unproved",
-      "sha256": "166f0e9576c3a26296331ed7053d1540d827fd36afdabd867ca2614b105aaf81",
-      "review": "Reviewed migration 104 and all changed Rust/build owners: existing-key planning-only scope, trusted distinct agent identity, live-root lock before budget key, checked integer allocation with existing kernel guard, no network transaction, typed nonretryable quota errors, current credentials and lease-fenced late worker results; actual two-replica allocation/restart and in-flight-stop fixtures plus 623 UI tests pass. SQL/auth/provider integration is not formally proved."
+      "sha256": "c66bdb55031a3541015ceb7dbfc34b53695eedfca6feb8468470d37f6cec3348",
+      "review": "Claim evidence, claim batches, order observation projection, embedding jobs, source search, knowledge inventory, product facts and prompt snapshots moved verbatim into the intelligence component; permissions, settings, provider admission and leases stay in the server. Kernel admission calls unchanged."
     },
     "src/documents/retrieval.rs": {
       "status": "unproved",
-      "sha256": "f95e6b82af6f56e6090187516d7ee464f5ada04ac0a9d36c7a031a7c99d3109d",
-      "review": "Knowledge sources, PDF text extraction and embedding generations moved into the intelligence component without behaviour change"
+      "sha256": "020a11004736baa884c7a7e33ab65694da14b8a67b59eaa6ed489dcc86b3f65c",
+      "review": "Claim evidence, claim batches, order observation projection, embedding jobs, source search, knowledge inventory, product facts and prompt snapshots moved verbatim into the intelligence component; permissions, settings, provider admission and leases stay in the server. Kernel admission calls unchanged."
     },
     "src/documents/tools.rs": {
       "status": "unproved",
@@ -6170,8 +6200,8 @@
     },
     "src/documents/workspace.rs": {
       "status": "unproved",
-      "sha256": "ab7c139b1314bc4a8c954efdb068b7a73b39c518de352768dfed6c725e0a4803",
-      "review": "Tenant roles and current grants independently reviewed; owner/retained-override/acceptance races repaired and PostgreSQL-blocked regressions passed; PII and Flow projection boundaries documented; B2B feature settings delegate shared CAS/history and preserve financial guards. Existing extracted policies unchanged; SQL/async/UI remain reviewed adapters, not full proofs."
+      "sha256": "0e188f2e988df54bcf6cd4f42d016d0a0bea3c6e5ae1863900c87cb5432c2265",
+      "review": "Claim evidence, claim batches, order observation projection, embedding jobs, source search, knowledge inventory, product facts and prompt snapshots moved verbatim into the intelligence component; permissions, settings, provider admission and leases stay in the server. Kernel admission calls unchanged."
     },
     "src/experience.rs": {
       "status": "unproved",
@@ -7245,8 +7275,8 @@
       "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
     },
     "Cargo.lock": {
-      "sha256": "bf5c13ba74bc222e0b0cf483439b0667a90a1a9c154919877a6af3d189ee90b9",
-      "review": "Experiment store, readout and automation, behaviour analytics store and the private preference graph moved verbatim into the intelligence component; consent, settings and channel admission stay in the server. No kernel policy changed."
+      "sha256": "5a6e53703144f6ee299f9f4d5ccbeca96939e391f2cfd87b0f22b11a8d5380bb",
+      "review": "Claim evidence, claim batches, order observation projection, embedding jobs, source search, knowledge inventory, product facts and prompt snapshots moved verbatim into the intelligence component; permissions, settings, provider admission and leases stay in the server. Kernel admission calls unchanged."
     },
     "Cargo.toml": {
       "sha256": "881e080eb9f1b1f051c23e2848df689853473831b4d3072817387d65c23ddb66",
@@ -8004,25 +8034,9 @@
       "sha256": "a9ece67d4975e6c5e44cf26f4d6e397a3780449d8e3f8fbb3860627211b9fda5",
       "review": "Designer acceptance: app-owned versioned style prompt, bounded style-only schema preserving native page content/structure, shared proposal validation unchanged for content edits. Registered visual_workspace RED to GREEN and real Qwen screenshot returns three review-only alternatives. Prompt registry/governance extends app-owned version files. SQL/inference/rendering remain unproved."
     },
-    "src/cognition/claim_batch.sql": {
-      "sha256": "4198f7532aae65c9defbd6ad60f26b4128060305a69e40d755ff1449f7144cf2",
-      "review": "Reviewed bounded tenant-scoped embedding intake/model-generation cursors, revision/lease fencing and fair vector retry drain; pooled geometry-checked Qdrant hydration and admitted reranking; current-right read tools, structured protocols and SSE transport; exact source quotation/review/public compilation/signatures; transactional price corridors and non-compounding daily autonomy; consent-bound assignments/preferences and delayed cached native-payment readout including stop/withdrawal invalidation. New migration RLS/composite links and extracted predicate consumers reviewed. Native HTTP/PG/Qdrant/provider/UI regressions cover contracts; semantic quality, statistical assumptions, SQL, network and surrounding Rust remain unproved."
-    },
-    "src/cognition/evidence_read.sql": {
-      "sha256": "8ef86442948464ab2fa6d1f845441af64e4dd677125e4ebc1319ae8daa42ff31",
-      "review": "Reviewed bounded tenant-scoped embedding intake/model-generation cursors, revision/lease fencing and fair vector retry drain; pooled geometry-checked Qdrant hydration and admitted reranking; current-right read tools, structured protocols and SSE transport; exact source quotation/review/public compilation/signatures; transactional price corridors and non-compounding daily autonomy; consent-bound assignments/preferences and delayed cached native-payment readout including stop/withdrawal invalidation. New migration RLS/composite links and extracted predicate consumers reviewed. Native HTTP/PG/Qdrant/provider/UI regressions cover contracts; semantic quality, statistical assumptions, SQL, network and surrounding Rust remain unproved."
-    },
-    "src/cognition/index_claim.sql": {
-      "sha256": "e15887aeaec732b29e7407c480b0461661cc867242fad4ba7c53f0ba369acfb0",
-      "review": "Codex source review: the per-shop model revision only advances; queue claims bind the live shop's active model and revision, and result publication locks that generation before checking the existing source and lease fences. The additive migration preserves revision zero for existing installations. The PostgreSQL and Qdrant test overlapped two Core processes, released an old provider response after takeover, reindexed 150 products and verified current edits and search. SQL and worker code remain unproved; no extracted policy changed."
-    },
     "src/commerce/external_order_labels.sql": {
       "sha256": "3f131887429e16594a5d0354e0194d49191ee4bf857d732780da5324c53e6d7a",
       "review": "Batch external-order labels within the existing locked transaction; preserve locale-first variant precedence, tenant predicates, stock guard, package fence and idempotency; native baseline and optimized fixture compare the same frozen results."
-    },
-    "src/documents/search.sql": {
-      "sha256": "0f1405cf3bbcb50a7e549de823c326ce4ca7ece23fdb1a31042b1b0da456d378",
-      "review": "Review RLS-safe lexical hydration follow-up: parameterized current source reads only after lexical/semantic candidate selection; preserve native source hash/model/locale/publication/product checks, greedy final-position IDs and existing extracted policies. SQL and transport remain unproved."
     },
     "src/operations/customer_directory.sql": {
       "sha256": "3a50ce695d1fc5be24b470e007994253c6f4e0e3c3e639c3122270b539cdcf15",
