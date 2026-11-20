@@ -839,6 +839,16 @@
       "sha256": "3d8c27cc527e5dbeb0f062550884a714b58072ef38a4424a9a2554c8fb834100",
       "review": "Configuration, lifecycle, ontology and reference adapters moved into the apps component without changing rules"
     },
+    "components/apps/src/service/configuration_examples.rs": {
+      "status": "unproved",
+      "sha256": "d8f5c5a4f9ab3ac341f43166b10233b9c47d3af76e27cfe6e9ac90b372aebfd8",
+      "review": "Sandbox cache, configuration runtime and package fence moved into the apps component without changing rules"
+    },
+    "components/apps/src/service/configuration_runtime.rs": {
+      "status": "unproved",
+      "sha256": "19451f7cc6e610871774e7b44fadfa32d0d6a03323fda9ed1dcc95c99f7aaeb0",
+      "review": "Sandbox cache, configuration runtime and package fence moved into the apps component without changing rules"
+    },
     "components/apps/src/service/egress.rs": {
       "status": "unproved",
       "sha256": "aaa2a57dee88405b37de0f05ed229b14f35d3a6a479abdabedf7b751312f3e05",
@@ -849,10 +859,15 @@
       "sha256": "51e81fff0d0bec5c463b6c4a53a4e3468ae26cfcbcbbe4eb7861eab967939702",
       "review": "Configuration, lifecycle, ontology and reference adapters moved into the apps component without changing rules"
     },
+    "components/apps/src/service/sandbox_cache.rs": {
+      "status": "unproved",
+      "sha256": "592fa48bca4482b403e468793ccb51b381d6a1bf6a73cd883fc16363b395a42d",
+      "review": "Sandbox cache, configuration runtime and package fence moved into the apps component without changing rules"
+    },
     "components/apps/src/service.rs": {
       "status": "unproved",
-      "sha256": "ff26da8311cdf7064b047bf1863abd007d9210b011e6ad8339abffac494133b3",
-      "review": "Configuration, lifecycle, ontology and reference adapters moved into the apps component without changing rules"
+      "sha256": "5429a2c445ad99ece05a886eeb5df852dfa1a70dffb21aaa508bcb78caa83e59",
+      "review": "Sandbox cache, configuration runtime and package fence moved into the apps component without changing rules"
     },
     "components/apps/src/store/asset_references.rs": {
       "status": "unproved",
@@ -879,10 +894,20 @@
       "sha256": "f25ab2568a84a6d04493ad2791629d379733dd959d1e5ab59d9e0d8069930705",
       "review": "Record store, consent and core extension rules moved into the apps component without changing rules"
     },
+    "components/apps/src/store/languages.rs": {
+      "status": "unproved",
+      "sha256": "ee60f4e0e976ce96869df0b7a02169899ed648abb4990eb1d3debfe7dc67410b",
+      "review": "Sandbox cache, configuration runtime and package fence moved into the apps component without changing rules"
+    },
+    "components/apps/src/store/package_fence.rs": {
+      "status": "unproved",
+      "sha256": "cc13545b262bec525e226a541a9038530bc420ee1393abecd7e666fdbd194f1b",
+      "review": "Sandbox cache, configuration runtime and package fence moved into the apps component without changing rules"
+    },
     "components/apps/src/store/packages.rs": {
       "status": "unproved",
-      "sha256": "793ab0adf407ad4db3e6bc51ed68e87b684f07f2faee415194842005319f2a22",
-      "review": "Record store, consent and core extension rules moved into the apps component without changing rules"
+      "sha256": "535ceaa06a1a716bd5bdd6208b846dcec58ca292a4d2427f9a3bd2bef966aa76",
+      "review": "Sandbox cache, configuration runtime and package fence moved into the apps component without changing rules"
     },
     "components/apps/src/store/record_write.rs": {
       "status": "unproved",
@@ -894,10 +919,15 @@
       "sha256": "69fcac12d291553a088c099b4e9d7387c35db6b06fb62c09cde08cd850d974ea",
       "review": "Record store, consent and core extension rules moved into the apps component without changing rules"
     },
+    "components/apps/src/store/schema_upgrade.rs": {
+      "status": "unproved",
+      "sha256": "2cd288774dcf356de2cd1c74ac89356898471e1f2966d33c55a3ca805704e7de",
+      "review": "Sandbox cache, configuration runtime and package fence moved into the apps component without changing rules"
+    },
     "components/apps/src/store.rs": {
       "status": "unproved",
-      "sha256": "fa40527639323020700c28e8b0bacd8a91aa6d2309a32e5f67e188f1f3239291",
-      "review": "Record store, consent and core extension rules moved into the apps component without changing rules"
+      "sha256": "d298c033efbe1feffb45606e513de1410fdd104be0257b5aa3a7e9da93009838",
+      "review": "Sandbox cache, configuration runtime and package fence moved into the apps component without changing rules"
     },
     "components/b2b/src/domain/contract.rs": {
       "status": "unproved",
@@ -5006,8 +5036,8 @@
     },
     "src/apps/configuration_examples.rs": {
       "status": "unproved",
-      "sha256": "a55be95c67959e67aa2c84333f99b46c38832f04ac95b5bf109c67dec20f6532",
-      "review": "Review combined native business capability and hardening: typed material/dimension guests remain app-owned and bounded; native CAS/FX/current B2B approval and immutable order snapshots; isolated app crate consumer preserves compiler boundary; independent per-event subscriber retry/quarantine preserves healthy events, commit gaps and explicit recovery; signed tenant/system authority, provider-native read tools and real document withdrawal, workspace image closure and source inventory. SQL/async/provider adapters remain tested, not proved."
+      "sha256": "f46cfe3b7b295ded946f49b63d5e98d63e8f1cbe90e9d1b1da0996f6669f3cf5",
+      "review": "Sandbox cache, configuration runtime and package fence moved into the apps component without changing rules"
     },
     "src/apps/configuration_inputs.rs": {
       "status": "unproved",
@@ -5186,8 +5216,8 @@
     },
     "src/apps/manifest.rs": {
       "status": "unproved",
-      "sha256": "6f9faa71807561751d5a177395ecb905dd1a4242154795e04627e8129fa0624d",
-      "review": "Reviewed final Apps 0.23 schema migration extraction and same-transaction native validation; only final import ordering and removal of unused native wrappers follow the passing 74 App units, seven native PostgreSQL/API modules and independent PostgreSQL/Linux tests. Bounded snapshots, rollback and checked revision preserve original authority; kernel unchanged and surrounding SQL/host code remain unproved."
+      "sha256": "613dff79b857d6230f1ebd4f6e2f25060285c43aa8cdb7648b14168ab48bac0d",
+      "review": "Sandbox cache, configuration runtime and package fence moved into the apps component without changing rules"
     },
     "src/apps/manifest_validation.rs": {
       "status": "unproved",
@@ -5211,8 +5241,8 @@
     },
     "src/apps/native_data.rs": {
       "status": "unproved",
-      "sha256": "712bb49642ca25cb51e983e3750388802d6b7807c1c6120faa79a908c517a6d7",
-      "review": "Reviewed pure app model extraction: exact entity serde defaults, declarations, bounded schema/value/language/workflow/publication rules now shared through pinned veyndo-app-model. Native money/rich/relation policy owners and verified core-reference guard retain authority. Fourteen independent model cases, 74 native app units, 34 unchanged canonical package digests, affected PostgreSQL/API/MCP/visual/state/isolation and marketplace fixtures pass. Async SQL/native adapters and model compiler remain unproved."
+      "sha256": "36764c934e1c28a4727567dcef2d8d7fb65fb7a5de7f4638b34f8ca28f24939e",
+      "review": "Sandbox cache, configuration runtime and package fence moved into the apps component without changing rules"
     },
     "src/apps/native_lifecycle/compile.rs": {
       "status": "unproved",
@@ -5256,8 +5286,8 @@
     },
     "src/apps/package_fence.rs": {
       "status": "unproved",
-      "sha256": "f40890333f9ad9f9b7b35cb88448a065048dd169b3c3afe69063b3c161d9143c",
-      "review": "Reviewed extraction of original Action wire and current-authority/callback scope rules into pinned apps model 0.2; native RequestContext, verified consent/current-role predicate, personal/live key checks and credential persistence retained. Original package shared lock/active scoped row read and digest moved to storage 0.4 with typed native digest comparison retained. 22 model tests, actual PG package lock/isolation tests, 74 native app units, callbacks/consent/surfaces/jobs/schema/core extensions/lifecycle/isolation/visual workspace and composed Marketplace fixtures pass; all 34 bundled package fingerprints unchanged. New adapters and SQL remain unproved; extracted kernel unchanged."
+      "sha256": "7c5c5443f4b3375ee7cce0794e45b870193de2db7cfaf17c24d5e7127c616a83",
+      "review": "Sandbox cache, configuration runtime and package fence moved into the apps component without changing rules"
     },
     "src/apps/package_install.rs": {
       "status": "unproved",
@@ -5301,8 +5331,8 @@
     },
     "src/apps/registry.rs": {
       "status": "unproved",
-      "sha256": "6d17960d9ccbb41c1c91ae9aa8ce1b13f8a90ff6eece330371bdc60c0336b5d5",
-      "review": "Record store, consent and core extension rules moved into the apps component without changing rules"
+      "sha256": "5551615b54e2a3bafe6ca59d555938b6b7903059bd25a47d6b4ac39beb934435",
+      "review": "Sandbox cache, configuration runtime and package fence moved into the apps component without changing rules"
     },
     "src/apps/routes.rs": {
       "status": "unproved",
@@ -5311,8 +5341,8 @@
     },
     "src/apps/runtime.rs": {
       "status": "unproved",
-      "sha256": "9c00640413ec50da40af370ebc74f7d15ef0362d2711a4f001c0b453c5c66e56",
-      "review": "Reviewed strict configuration/library/exact-argument and typed-hook/frozen-decision contract extraction into pinned Apps 0.13.0/model 0.9.0/runtime 0.2.0. Canonical native currency/value/reference/source policy, full compiler order, required expected-null wire semantics, exact problem pointers, WIT projection, bounded guest comparison and contribution limits preserved. Native async cache/source/current-package/library fences and checkout/release remain attached. 96 model and 19 runtime tests, independent seven-plus-five preflight examples, native 74 app units, unchanged 34 package digests, isolated PostgreSQL contract and ten real integrated HTTP/MCP/B2B/configuration/preview/release/AI/Marketplace modules pass. Kernel unchanged; model/runtime/host/SQL remains unproved."
+      "sha256": "012e69d5c3bff7d154c618eaf8dd60f655f752b9e30734f2739ce288644cd154",
+      "review": "Sandbox cache, configuration runtime and package fence moved into the apps component without changing rules"
     },
     "src/apps/schedules.rs": {
       "status": "unproved",
@@ -5326,8 +5356,8 @@
     },
     "src/apps/schema_upgrade.rs": {
       "status": "unproved",
-      "sha256": "c7a6759c8e22f95bcfe5884a0cce94e7414784490577136866c81e529ae6eafd",
-      "review": "Reviewed Apps 0.23 exact schema conversion/recovery extraction and native required same-transaction field/language adapter. Actual independent PostgreSQL installer rollback, scoped snapshots, row/byte/quota/collision/overflow and both Linux runs pass; native 74 App units plus seven HTTP/PostgreSQL modules pass, including exhausted revision and disabled-language regressions. Kernel unchanged; SQL, host authority and full migration remain unproved."
+      "sha256": "e682020af9b4f17aea09a279ba5a9135fb4a37dc4b0bf95358fb41123c7583fa",
+      "review": "Sandbox cache, configuration runtime and package fence moved into the apps component without changing rules"
     },
     "src/apps/secret_storage.rs": {
       "status": "unproved",
@@ -7386,8 +7416,8 @@
     },
     "src/sandbox_cache.rs": {
       "status": "unproved",
-      "sha256": "acece2e42ed522416627359bc852070f16a10d01f4a5946090990df6ef55f5a9",
-      "review": "Reviewed app authority and current creator rights, isolated schemas/RLS and atomic migration rollback, fenced job/event leases, minimized payloads, signature/digest pins, opaque UI grants, pinned DNS egress and bounded Wasm/WIT quote adapters. Actual isolated PostgreSQL own/foreign callback, schema, jobs, events, assets, export, distribution and production-foundation regressions passed. Added extracted package, surface, resource and exact callback-consent policies with negative Lean claims; async/network/UI and general Rust modules remain explicitly unproved."
+      "sha256": "6fb4a9754e0dc80e84fd51a391023f43bbe79e1724eb735d45ff1a7355d4a02b",
+      "review": "Sandbox cache, configuration runtime and package fence moved into the apps component without changing rules"
     },
     "src/security_headers.rs": {
       "status": "unproved",
