@@ -68,6 +68,13 @@ pub trait HostActions: Send + Sync {
     fn hosted<'a>(&'a self, tenant: &'a str, app: &'a str, action: &'a str) -> HostedFuture<'a>;
     /// Runs a handler the platform does not own.
     fn run<'a>(&'a self, call: HostCall<'a>) -> ActionFuture<'a>;
+    /// Admits an object a storefront visitor names in a surface context: their own customer or unit, a visible product or the current sales channel.
+    fn visitor_object<'a>(
+        &'a self,
+        h: &'a RequestContext,
+        key: &'a str,
+        id: &'a str,
+    ) -> RuleFuture<'a>;
     /// Removes the imported sources of an app after its service asked for it.
     fn purge_sources<'a>(&'a self, tenant: &'a str, app: &'a str, cursor: i64) -> RuleFuture<'a>;
 }
@@ -79,6 +86,7 @@ pub struct Platform {
     pub limits: Arc<ServiceLimits>,
     pub rules: &'static dyn RecordRules,
     pub commerce: &'static dyn CommerceInstall,
+    pub actions: Arc<dyn HostActions>,
 }
 impl std::ops::Deref for Platform {
     type Target = State;

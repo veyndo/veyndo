@@ -44,16 +44,6 @@ impl RecordRules for BundledRules {
 pub(crate) fn fields(e: &Entity, v: &Value) -> Result<()> {
     field_values::validate(e, v)
 }
-pub(crate) async fn save(
-    a: &App,
-    t: &str,
-    m: &Manifest,
-    e: &Entity,
-    v: &Value,
-    h: &RequestContext,
-) -> Result<Value> {
-    managed_data::save(&service_limits::platform(a), t, m, e, v, h).await
-}
 pub(crate) async fn save_tx(
     tx: &mut sqlx::Transaction<'_, sqlx::Postgres>,
     t: &str,

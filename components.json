@@ -775,7 +775,7 @@
       ],
       "glob_imports": 67,
       "untyped_access": 421,
-      "sql_outside_store": 26
+      "sql_outside_store": 27
     },
     "automation": {
       "title": "Deterministic rule evaluation and flow graphs",

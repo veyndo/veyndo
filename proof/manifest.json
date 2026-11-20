@@ -380,7 +380,8 @@
     },
     "app_surface_admissible": {
       "bindings": [
-        "src/apps/surface_grants.rs"
+        "components/apps/src/http/surface_grants.rs",
+        "components/apps/src/store/surface_grants.rs"
       ],
       "theorems": [
         "app_surface_exact",
@@ -832,8 +833,8 @@
     },
     "components/apps/src/domain/planning.rs": {
       "status": "unproved",
-      "sha256": "0fb8bceb5c8ab719973cad0a6a0e3508029a97f53347b2b2353a7d8707022b2a",
-      "review": "App planning, planning contracts and the app tool catalogue moved into the apps component; the tool wire contract moved to core without behavior change"
+      "sha256": "573072cb39e0cd89a8dbc32fe50ebbaddcc157620bafa215650f6814d9c8fd3e",
+      "review": "Surface grants, declared app routes, UI bundle loading and the action and entity handlers moved into the apps component without behavior change"
     },
     "components/apps/src/domain/presentation.rs": {
       "status": "unproved",
@@ -880,6 +881,11 @@
       "sha256": "f64940ff7797560af779e3a73623e70377f5476cef787443d580197c39c924f4",
       "review": "Action authorization, entity access and discovery rules moved into the apps component without changing rules"
     },
+    "components/apps/src/domain/surface_grant.rs": {
+      "status": "unproved",
+      "sha256": "6ec80d407b2bb913020303fe7b7417ce7075ba207a7688f671f668d91a81f10b",
+      "review": "Surface grants, declared app routes, UI bundle loading and the action and entity handlers moved into the apps component without behavior change"
+    },
     "components/apps/src/domain/surfaces.rs": {
       "status": "unproved",
       "sha256": "9e34c9228d654b56ef9c7e3e12095813c7665eeb324106f7fdd1761952c077c0",
@@ -902,13 +908,23 @@
     },
     "components/apps/src/domain.rs": {
       "status": "unproved",
-      "sha256": "8a073d20aff6d582db0d74ebd8f052cd98844b1a4a1aaa3d2b475e7c0b068aae",
-      "review": "App planning, planning contracts and the app tool catalogue moved into the apps component; the tool wire contract moved to core without behavior change"
+      "sha256": "eeac697805e24eaaaa45d515a03fc956ca81270036db18822f3ebe3c5e206a2b",
+      "review": "Surface grants, declared app routes, UI bundle loading and the action and entity handlers moved into the apps component without behavior change"
+    },
+    "components/apps/src/http/actions.rs": {
+      "status": "unproved",
+      "sha256": "0160d8f72a790f5a006da7f2e736f1773f1cd900808bdfddf71081f5523948e0",
+      "review": "Surface grants, declared app routes, UI bundle loading and the action and entity handlers moved into the apps component without behavior change"
     },
     "components/apps/src/http/activity.rs": {
       "status": "unproved",
       "sha256": "83b1021af5a2eaf004ef53fdd4c451c25d735d444b6797ea6013bfa44f0b063e",
       "review": "App secret, settings, activity, credential and webhook handlers moved into the apps component without changing rules"
+    },
+    "components/apps/src/http/app_routes.rs": {
+      "status": "unproved",
+      "sha256": "00004a25bb057f33e66db2a94850e9e612d478c6dab6abc06e22a4196e04538f",
+      "review": "Surface grants, declared app routes, UI bundle loading and the action and entity handlers moved into the apps component without behavior change"
     },
     "components/apps/src/http/credentials.rs": {
       "status": "unproved",
@@ -935,6 +951,16 @@
       "sha256": "8adadfd03750d4172af796c971d7614f04fe1bf47feac34568da1a464ba70573",
       "review": "App secret, settings, activity, credential and webhook handlers moved into the apps component without changing rules"
     },
+    "components/apps/src/http/surface_grants.rs": {
+      "status": "reviewed-binding",
+      "sha256": "bda602bad7dbc02c0bb19bc0aa6ebdc1bfade6c548dfc6ae37e74ed21dc0e5bb",
+      "review": "Surface grants, declared app routes, UI bundle loading and the action and entity handlers moved into the apps component without behavior change"
+    },
+    "components/apps/src/http/ui_bundles.rs": {
+      "status": "unproved",
+      "sha256": "e9f1d6396e29385738a00c5c65652b927cb9db20a358af8567519ea6e7ce748a",
+      "review": "Surface grants, declared app routes, UI bundle loading and the action and entity handlers moved into the apps component without behavior change"
+    },
     "components/apps/src/http/ui_documents.rs": {
       "status": "unproved",
       "sha256": "acaa80a16132c8cc6f7bfb4badbf342dbc9a7b0464991db726039257b0eeb45f",
@@ -947,8 +973,8 @@
     },
     "components/apps/src/http.rs": {
       "status": "unproved",
-      "sha256": "5ac3ee916f9ef806f5047761ac3d1ffb101a3c8559b757bf48c7d25700efc755",
-      "review": "Managed app records, restoration, import and native-object projection moved into the apps component behind a record rules port without behavior change"
+      "sha256": "edb5fc6aa22a37609ea953e462d702227c753c88d5f713097383829be7b8308e",
+      "review": "Surface grants, declared app routes, UI bundle loading and the action and entity handlers moved into the apps component without behavior change"
     },
     "components/apps/src/lib.rs": {
       "status": "unproved",
@@ -957,8 +983,8 @@
     },
     "components/apps/src/ports.rs": {
       "status": "unproved",
-      "sha256": "b793806758b59cc8d8824f8179a1db583474011066b311455cc061685a41322d",
-      "review": "App planning, planning contracts and the app tool catalogue moved into the apps component; the tool wire contract moved to core without behavior change"
+      "sha256": "d92bc792032fd92eea580037d2f9fd48111b73bbeaff08b11eb369a333c574fd",
+      "review": "Surface grants, declared app routes, UI bundle loading and the action and entity handlers moved into the apps component without behavior change"
     },
     "components/apps/src/service/admission.rs": {
       "status": "unproved",
@@ -987,8 +1013,8 @@
     },
     "components/apps/src/service/gateway.rs": {
       "status": "unproved",
-      "sha256": "47cc1070f2a080a75e03a05643a3a6ae57cdb08bc177ec1b3855acf8816553bf",
-      "review": "The app action gateway moved into the apps component; server-owned handlers are reached through a host port without behavior change"
+      "sha256": "60f4102374725df6854935a8040a05bbec162d57302f5f1bed1aed0850b01954",
+      "review": "Surface grants, declared app routes, UI bundle loading and the action and entity handlers moved into the apps component without behavior change"
     },
     "components/apps/src/service/job_callbacks.rs": {
       "status": "reviewed-binding",
@@ -1190,6 +1216,11 @@
       "sha256": "5619015a45cd6693444bbd622c3db41c5138a3fc0e5469a0e412b8fddbbf16aa",
       "review": "App jobs and private evidence reads moved into the apps component without changing rules"
     },
+    "components/apps/src/store/surface_grants.rs": {
+      "status": "reviewed-binding",
+      "sha256": "1eed1119953cf07f9ece03fd6fa1b7f59bb67d98d748b9c12f9d0d436123ae22",
+      "review": "Surface grants, declared app routes, UI bundle loading and the action and entity handlers moved into the apps component without behavior change"
+    },
     "components/apps/src/store/surface_registry.rs": {
       "status": "unproved",
       "sha256": "3de468eafb0861bde5ecf439b35b940cdefa29409c47b27742e958d27ce90c4f",
@@ -1202,8 +1233,8 @@
     },
     "components/apps/src/store.rs": {
       "status": "unproved",
-      "sha256": "594b51e2511bdb6cc90336a837f718406f04c4defe871d62835a4c79a5c7ad33",
-      "review": "App planning, planning contracts and the app tool catalogue moved into the apps component; the tool wire contract moved to core without behavior change"
+      "sha256": "f539a56127e965b5132e1ea76de2586c74036e16fea1de52971f3defe7831647",
+      "review": "Surface grants, declared app routes, UI bundle loading and the action and entity handlers moved into the apps component without behavior change"
     },
     "components/b2b/src/domain/contract.rs": {
       "status": "unproved",
@@ -5362,8 +5393,8 @@
     },
     "src/apps/data.rs": {
       "status": "unproved",
-      "sha256": "7e8ea7dbac1e6093f90aa65294c3ba14500d89a9e12b52a6eb1652bbfd708618",
-      "review": "App planning, planning contracts and the app tool catalogue moved into the apps component; the tool wire contract moved to core without behavior change"
+      "sha256": "1fdb336a677d288c39ca970ebcd0de11fbe474bb9b913d62943ed8b2bbce46c8",
+      "review": "Surface grants, declared app routes, UI bundle loading and the action and entity handlers moved into the apps component without behavior change"
     },
     "src/apps/discovery.rs": {
       "status": "unproved",
@@ -5417,8 +5448,8 @@
     },
     "src/apps/gateway.rs": {
       "status": "unproved",
-      "sha256": "1d19db85b54851c9b94d32b88bc944eacfbc329430c3c7e68e1519e2fac3ad99",
-      "review": "The app action gateway moved into the apps component; server-owned handlers are reached through a host port without behavior change"
+      "sha256": "fb8f6bfcf93decce3f32d93483bd68b200859bfbae539541adab2f58e51a6f6b",
+      "review": "Surface grants, declared app routes, UI bundle loading and the action and entity handlers moved into the apps component without behavior change"
     },
     "src/apps/hosted.rs": {
       "status": "unproved",
@@ -5482,8 +5513,8 @@
     },
     "src/apps/native_views.rs": {
       "status": "unproved",
-      "sha256": "ecb7ada435cfa315f3edf69074d74be5ce8da15290ed9d9f9bbbbd7fa8a9842b",
-      "review": "Assistant app views and the surface registry moved into the apps component without behavior change"
+      "sha256": "bae46fa0d8bd2460468e0b150590fb7db35701a4689ae208071f3832426213e4",
+      "review": "Surface grants, declared app routes, UI bundle loading and the action and entity handlers moved into the apps component without behavior change"
     },
     "src/apps/observability.rs": {
       "status": "unproved",
@@ -5522,8 +5553,8 @@
     },
     "src/apps/routes.rs": {
       "status": "unproved",
-      "sha256": "56cde943440425ceaea5ba317ad3339b7acbd8a559961d1bb6997543af11966a",
-      "review": "Job callbacks, completion evidence, package verification, installation, activation and upgrade review moved into the apps component behind host ports without behavior change"
+      "sha256": "ffdb30a637b1f38b10e986be8c7ab3eabc672d65c55db778ce2e357f17e93a64",
+      "review": "Surface grants, declared app routes, UI bundle loading and the action and entity handlers moved into the apps component without behavior change"
     },
     "src/apps/runtime.rs": {
       "status": "unproved",
@@ -5542,8 +5573,8 @@
     },
     "src/apps/service_limits.rs": {
       "status": "unproved",
-      "sha256": "bf1b46668362dc054e8ec42dedeadfc1a193b568ce93e1860c5e8707cccbe77c",
-      "review": "Job callbacks, completion evidence, package verification, installation, activation and upgrade review moved into the apps component behind host ports without behavior change"
+      "sha256": "bcd36ca852cc2727fc759ba62571fb46ce2e981d1301655790138599bda37297",
+      "review": "Surface grants, declared app routes, UI bundle loading and the action and entity handlers moved into the apps component without behavior change"
     },
     "src/apps/service_policy.rs": {
       "status": "unproved",
@@ -5561,9 +5592,9 @@
       "review": "Personal workspace and app-owned site design review: trusted personal sessions and actor RLS; public status/time/channel projection; original read-scope and current-field history; append-only cart-bound inbox/outbox with PII rights; package-before-record release fences. Independent security review and actual PostgreSQL own/foreign/CAS/history/form/model fixtures plus existing app/commerce/checkout/role/strict-runtime suites. New pure intake conjunction has exact Lean claims/conformance/negative mutations. SQL, UI, inference and providers remain unproved."
     },
     "src/apps/surface_grants.rs": {
-      "status": "reviewed-binding",
-      "sha256": "661ed2d3acc22c4f42c449a8d7daaaddaed9502eb3210dd6a8ad0b97ae7235e5",
-      "review": "Reviewed native designer task handoff through existing sandbox, membership, revision and proposal owners; app elements admit only active same-tenant public native surfaces; read-only preview grants narrow server action allowlists. HTTP/PostgreSQL regressions cover own/foreign/private/inactive elements, CAS/release and explicit approval. No verified decision or proof boundary changed."
+      "status": "unproved",
+      "sha256": "37e2606a4050b603b64eb7523b24e9a9baaf059a62ff233d65b5f8423c85f9fd",
+      "review": "Surface grants, declared app routes, UI bundle loading and the action and entity handlers moved into the apps component without behavior change"
     },
     "src/apps/surface_registry.rs": {
       "status": "unproved",
@@ -5577,8 +5608,8 @@
     },
     "src/apps/surfaces.rs": {
       "status": "unproved",
-      "sha256": "17e502415d1703e4ceee7d56b9bcae0a4ca0f41a8da42f0148f7c00929a674e6",
-      "review": "Surface contract and sandboxed documents moved into the apps component without changing rules"
+      "sha256": "9eedd548be4dc6637cbce18a29117caefbc47ee642b801ef2d5564d80b9224c4",
+      "review": "Surface grants, declared app routes, UI bundle loading and the action and entity handlers moved into the apps component without behavior change"
     },
     "src/apps/tool_contract.rs": {
       "status": "unproved",
@@ -5587,8 +5618,8 @@
     },
     "src/apps/ui_bundles.rs": {
       "status": "unproved",
-      "sha256": "6a838b10fcc3e4af6114f0f19bd0d809bcf77cb223045cd2e8f116858e880da4",
-      "review": "Surface contract and sandboxed documents moved into the apps component without changing rules"
+      "sha256": "c2b58ee2f648224fbf4cddf5c029119d923c0eb4d84099dec733d211a0fba506",
+      "review": "Surface grants, declared app routes, UI bundle loading and the action and entity handlers moved into the apps component without behavior change"
     },
     "src/apps/ui_documents.rs": {
       "status": "unproved",

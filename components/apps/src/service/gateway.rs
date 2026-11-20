@@ -2,7 +2,7 @@
 use crate::domain::mcp_views::{Mode, admit_tool};
 use crate::domain::tool_output::checked_output;
 use crate::domain::{action_admission, core_extensions};
-use crate::ports::{HostActions, HostCall, Platform};
+use crate::ports::{HostCall, Platform};
 use crate::service::service_call::service_call;
 use crate::store::packages::package;
 use crate::store::{action_log, jobs, managed_data};
@@ -13,7 +13,6 @@ use veyndo_core::{Error, RequestContext, Result, StatusCode, bad};
 /// Runs one app action for a caller and records its outcome without its payload.
 pub async fn invoke(
     a: &Platform,
-    host: &dyn HostActions,
     h: &RequestContext,
     id: &str,
     name: &str,
@@ -21,7 +20,7 @@ pub async fn invoke(
     mcp: Option<Mode<'_>>,
 ) -> Result<Value> {
     let start = std::time::Instant::now();
-    let result = execute(a, host, h, id, name, v, mcp).await;
+    let result = execute(a, h, id, name, v, mcp).await;
     let status = result
         .as_ref()
         .map(|_| StatusCode::OK)
@@ -31,13 +30,13 @@ pub async fn invoke(
 }
 async fn execute(
     a: &Platform,
-    host: &dyn HostActions,
     h: &RequestContext,
     id: &str,
     name: &str,
     v: &Value,
     mcp: Option<Mode<'_>>,
 ) -> Result<Value> {
+    let host = a.actions.as_ref();
     let t = tenant(h)?;
     let m = package(a, &t, id, true).await?;
     let action = m

@@ -8,14 +8,14 @@ pub(crate) fn validate_native_input(schema: &Value, v: &Value) -> Result<()> {
     input_schema::validate_native(schema, v)
 }
 /// The handlers the server owns, reached by the gateway after it admitted the call.
-struct ServerActions<'a>(&'a App);
-impl HostActions for ServerActions<'_> {
+pub(super) struct ServerActions(pub(super) App);
+impl HostActions for ServerActions {
     fn hosted<'a>(&'a self, tenant: &'a str, app: &'a str, action: &'a str) -> HostedFuture<'a> {
-        Box::pin(super::hosted::action(self.0, tenant, app, action))
+        Box::pin(super::hosted::action(&self.0, tenant, app, action))
     }
     fn run<'a>(&'a self, call: HostCall<'a>) -> ActionFuture<'a> {
         Box::pin(async move {
-            let (a, h, v, id) = (self.0, call.actor, call.input, call.manifest.id.as_str());
+            let (a, h, v, id) = (&self.0, call.actor, call.input, call.manifest.id.as_str());
             match call.action.handler.as_str() {
                 "assets" | "asset_preview" => {
                     auth::permit(h, "catalog.read")?;
@@ -45,8 +45,29 @@ impl HostActions for ServerActions<'_> {
             }
         })
     }
+    fn visitor_object<'a>(
+        &'a self,
+        h: &'a RequestContext,
+        key: &'a str,
+        id: &'a str,
+    ) -> RuleFuture<'a> {
+        Box::pin(async move {
+            let a = &self.0;
+            match key {
+                "customerId" | "unitId" => crate::b2b::surface_context(a, h, key, id).await?,
+                "productId" => marketing::admit_product(a, h, id).await?,
+                _ => {
+                    if id != marketing::channel_id(h) {
+                        return Err(bad("Surface channel differs from the current shop context"));
+                    }
+                    marketing::channel(a, h, id, &language_context(a, h).await?.0).await?;
+                }
+            }
+            Ok(())
+        })
+    }
     fn purge_sources<'a>(&'a self, tenant: &'a str, app: &'a str, cursor: i64) -> RuleFuture<'a> {
-        Box::pin(purge_sources(self.0, tenant, app, cursor))
+        Box::pin(purge_sources(&self.0, tenant, app, cursor))
     }
 }
 pub(crate) async fn invoke_app(
@@ -66,16 +87,8 @@ pub(super) async fn invoke(
     v: &Value,
     mcp: Option<mcp_views::Mode<'_>>,
 ) -> Result<Value> {
-    veyndo_app_platform::service::gateway::invoke(
-        &service_limits::platform(a),
-        &ServerActions(a),
-        h,
-        id,
-        name,
-        v,
-        mcp,
-    )
-    .await
+    veyndo_app_platform::service::gateway::invoke(&service_limits::platform(a), h, id, name, v, mcp)
+        .await
 }
 pub(crate) async fn service_call(
     a: &App,
@@ -98,8 +111,4 @@ pub(crate) fn ui_url(id: &str) -> Option<String> {
     veyndo_app_platform::domain::service_ui::ui_url(id, &crate::runtime_config::get().services)
 }
 
-/// The registry uses the same live permission check as direct actions.
-pub(super) fn action_authorized(_a: &App, h: &RequestContext, action: &Action) -> bool {
-    veyndo_app_platform::domain::action_admission::authorized(h, action)
-}
 pub(crate) use veyndo_app_platform::domain::action_admission::additional as additional_permissions;

@@ -28,5 +28,6 @@ pub mod schema_upgrade;
 pub mod secrets;
 pub mod settings;
 pub mod storage_usage;
+pub mod surface_grants;
 pub mod surface_registry;
 pub mod tool_catalogue;

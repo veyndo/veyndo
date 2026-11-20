@@ -10,6 +10,7 @@ pub(crate) fn platform(a: &App) -> Platform {
         limits: a.app_limits.clone(),
         rules: &data::BUNDLED,
         commerce: &install_host::COMMERCE,
+        actions: std::sync::Arc::new(gateway::ServerActions(a.clone())),
     }
 }
 impl axum::extract::FromRef<App> for Platform {

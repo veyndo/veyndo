@@ -84,7 +84,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/apps/model_contract.rs](../src/apps/model_contract.rs) | Native errors of model errors live in the apps component; this module keeps the short path for the app adapters. |
 | [src/apps/native_lifecycle.rs](../src/apps/native_lifecycle.rs) | Native lifecycles live in the apps component; this module keeps the short path for orders, quotes and settings. |
 | [src/apps/native_view_tests.rs](../src/apps/native_view_tests.rs) | Native schema security regressions: bindings, public writes, allowlists, bounded blocks and legacy digests. |
-| [src/apps/native_views.rs](../src/apps/native_views.rs) | Native view contracts live in the apps component; this module keeps the short path for the surface adapters. |
+| [src/apps/native_views.rs](../src/apps/native_views.rs) | Native view contracts live in the apps component; this module keeps the short path for the surface tests. |
 | [src/apps/observability.rs](../src/apps/observability.rs) | Bounded metadata-only app telemetry, storage usage and explicitly approved cursor-based event replay. |
 | [src/apps/package_fence.rs](../src/apps/package_fence.rs) | The package write fence lives in the apps component; this module keeps the short path for native writers. |
 | [src/apps/planning.rs](../src/apps/planning.rs) | App planning lives in the apps component; this module keeps the short path for the planner and proposals. |
@@ -100,12 +100,12 @@ This lists every checked-in source module in these roots, including files with n
 | [src/apps/service_policy.rs](../src/apps/service_policy.rs) | The service transport policy lives in the apps component; this module keeps the short path for the app adapters. |
 | [src/apps/settings.rs](../src/apps/settings.rs) | Declared app settings reuse the digest-bound encrypted secret owner; secret values never have a browser read path. |
 | [src/apps/submissions.rs](../src/apps/submissions.rs) | Public append-only intake uses declared schemas, existing cart admission, quotas, records and outbox. |
-| [src/apps/surface_grants.rs](../src/apps/surface_grants.rs) | Short-lived UI grants bind a package, surface, actor and concrete editor object on the server. |
+| [src/apps/surface_grants.rs](../src/apps/surface_grants.rs) | Surface grants live in the apps component; this module registers their routes and keeps the short path for uploads. |
 | [src/apps/surface_registry.rs](../src/apps/surface_registry.rs) | The surface projection lives in the apps component; this module adds the languages of the shop. |
 | [src/apps/surface_tests.rs](../src/apps/surface_tests.rs) | Contract counterexamples reject cross-scope UI actions, unsafe URLs and mutating GET routes. |
 | [src/apps/surfaces.rs](../src/apps/surfaces.rs) | App-owned UI surfaces and namespaced HTTP routes reuse the authorized action gateway. |
 | [src/apps/tool_contract.rs](../src/apps/tool_contract.rs) | The app tool catalogue lives in the apps component; this module keeps the short path for MCP and the assistant. |
-| [src/apps/ui_bundles.rs](../src/apps/ui_bundles.rs) | Operator-pinned, bounded self-contained UI bundles use the same actor/context grant as app actions. |
+| [src/apps/ui_bundles.rs](../src/apps/ui_bundles.rs) | UI bundle loading lives in the apps component; this module registers its routes. |
 | [src/apps/ui_documents.rs](../src/apps/ui_documents.rs) | Sandboxed app documents are served by the apps component; this module registers their routes. |
 | [src/apps/ui_logic_tests.rs](../src/apps/ui_logic_tests.rs) | UI programs must keep static types, same-model saves, surface allowlists and acyclic ownership before install or preview. |
 | [src/apps/webhook_scope.rs](../src/apps/webhook_scope.rs) | The webhook shop binding lives in the apps component; this module keeps the short path for the request middleware. |
@@ -644,17 +644,22 @@ This lists every checked-in source module in these roots, including files with n
 | [components/apps/src/domain/secret_kinds.rs](../components/apps/src/domain/secret_kinds.rs) | The kinds of per-shop secrets and which package declarations call for them. |
 | [components/apps/src/domain/service_policy.rs](../components/apps/src/domain/service_policy.rs) | Operator-owned private origins permit isolated service networking without relaxing public egress. |
 | [components/apps/src/domain/service_ui.rs](../components/apps/src/domain/service_ui.rs) | Where the UI of a service app is served from; only the operator configures it. |
+| [components/apps/src/domain/surface_grant.rs](../components/apps/src/domain/surface_grant.rs) | Short-lived UI grants bind a package, surface, actor and concrete editor object; these are the rules without storage. |
 | [components/apps/src/domain/surfaces.rs](../components/apps/src/domain/surfaces.rs) | App-owned UI surfaces and namespaced routes: their contract and where an operator-configured UI is served from. |
 | [components/apps/src/domain/tool_output.rs](../components/apps/src/domain/tool_output.rs) | Declared tool results are checked before they leave; a provider payload that does not fit is never disclosed. |
 | [components/apps/src/domain/webhook_scope.rs](../components/apps/src/domain/webhook_scope.rs) | Scope signed app ingress from its route before identity, tenant lifecycle and forced-RLS admission. |
 | [components/apps/src/domain/webhook_signature.rs](../components/apps/src/domain/webhook_signature.rs) | Incoming app webhooks carry an HMAC-SHA-256 over the exact canonical message. |
 | [components/apps/src/domain.rs](../components/apps/src/domain.rs) | Pure package rules: no database, no transport. |
+| [components/apps/src/http/actions.rs](../components/apps/src/http/actions.rs) | The shared action adapter, generated data endpoints and storefront slots of installed apps. |
 | [components/apps/src/http/activity.rs](../components/apps/src/http/activity.rs) | Bounded metadata-only app telemetry, storage usage and explicitly approved cursor-based event replay. |
+| [components/apps/src/http/app_routes.rs](../components/apps/src/http/app_routes.rs) | Namespaced HTTP routes an app declares reuse the authorized action gateway. |
 | [components/apps/src/http/credentials.rs](../components/apps/src/http/credentials.rs) | App keys reuse the core integration-key store, current creator rights, expiry and immutable package digest. |
 | [components/apps/src/http/jobs.rs](../components/apps/src/http/jobs.rs) | The job list, detail and control of an app. |
 | [components/apps/src/http/record_history.rs](../components/apps/src/http/record_history.rs) | Bounded app-record history, current entity rights and restoration through the normal managed save path. |
 | [components/apps/src/http/secrets.rs](../components/apps/src/http/secrets.rs) | Digest-bound per-shop app secret rotation; there is no plaintext read endpoint. |
 | [components/apps/src/http/settings.rs](../components/apps/src/http/settings.rs) | Declared app settings reuse the digest-bound encrypted secret owner; secret values never have a browser read path. |
+| [components/apps/src/http/surface_grants.rs](../components/apps/src/http/surface_grants.rs) | Short-lived UI grants bind a package, surface, actor and concrete editor object on the server. |
+| [components/apps/src/http/ui_bundles.rs](../components/apps/src/http/ui_bundles.rs) | Operator-pinned, bounded self-contained UI bundles use the same actor/context grant as app actions. |
 | [components/apps/src/http/ui_documents.rs](../components/apps/src/http/ui_documents.rs) | Secret-free, operator-pinned guest code in a response-enforced opaque sandbox, never srcdoc. |
 | [components/apps/src/http/webhooks.rs](../components/apps/src/http/webhooks.rs) | Operator-signed incoming events: tenant-bound HMAC, five-minute freshness and atomic replay receipts. |
 | [components/apps/src/http.rs](../components/apps/src/http.rs) | HTTP handlers of the app platform; the server registers them with their route rights. |
@@ -706,6 +711,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/apps/src/store/secrets.rs](../components/apps/src/store/secrets.rs) | Digest-bound per-shop app secrets on platform authenticated encryption; platform keys never leave this owner and there is no plaintext read path. |
 | [components/apps/src/store/settings.rs](../components/apps/src/store/settings.rs) | Declared app settings reuse the digest-bound encrypted secret owner; secret values never have a browser read path. |
 | [components/apps/src/store/storage_usage.rs](../components/apps/src/store/storage_usage.rs) | Existing aggregate app row/byte budget; shared record triggers maintain it without per-app DDL or recounts. |
+| [components/apps/src/store/surface_grants.rs](../components/apps/src/store/surface_grants.rs) | Stored surface grants: the objects a context may name and the recheck of a presented grant. |
 | [components/apps/src/store/surface_registry.rs](../components/apps/src/store/surface_registry.rs) | Current-authority app surface projection shared by storefronts and native visual composition. |
 | [components/apps/src/store/tool_catalogue.rs](../components/apps/src/store/tool_catalogue.rs) | Installed app tools share native wire metadata and validate declared results without disclosing provider payloads. |
 | [components/apps/src/store.rs](../components/apps/src/store.rs) | SQL of the apps component. |

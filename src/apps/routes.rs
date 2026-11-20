@@ -1,5 +1,6 @@
 //! Tenant-scoped package lifecycle, generated data endpoints and a shared action adapter.
 use super::*;
+use veyndo_app_platform::http::actions::{app_action, entity_list, entity_save, slots};
 pub(crate) fn app_router() -> Router<App> {
     Router::new()
         .merge(discovery::router())
@@ -148,69 +149,6 @@ async fn app_state(
     .map_err(veyndo_app_platform::store::activation::error)?;
     tx.commit().await?;
     Ok(Json(result))
-}
-async fn app_action(
-    State(a): State<App>,
-    h: RequestContext,
-    Path((id, action)): Path<(String, String)>,
-    Json(v): Json<Value>,
-) -> Result<Json<Value>> {
-    Ok(Json(invoke_app(&a, &h, &id, &action, &v).await?))
-}
-async fn entity_list(
-    State(a): State<App>,
-    h: RequestContext,
-    Path((id, name)): Path<(String, String)>,
-    axum::extract::Query(q): axum::extract::Query<HashMap<String, String>>,
-) -> Result<Json<Value>> {
-    let t = merchant(&a, &h)?;
-    let m = package(&a, &t, &id, true).await?;
-    let e = m
-        .entities
-        .iter()
-        .find(|e| e.name == name)
-        .ok_or(bad("Unknown entity"))?;
-    super::editor_contract::entity_access(&m, e, &h, "list")?;
-    let input = json!({"limit":q.get("limit").map(|s| s.parse::<i64>()).transpose().map_err(|_| bad("Invalid app limit"))?,"after":q.get("after"),"filter":q.get("filter").map(|s| serde_json::from_str::<Value>(s)).transpose().map_err(|_| bad("Invalid app filter"))?});
-    let mut input = input;
-    if input["filter"].is_null() {
-        input.as_object_mut().unwrap().remove("filter");
-    }
-    Ok(Json(data::list_page(&a, &t, &m, e, &input).await?))
-}
-async fn entity_save(
-    State(a): State<App>,
-    h: RequestContext,
-    Path((id, name)): Path<(String, String)>,
-    Json(v): Json<Value>,
-) -> Result<Json<Value>> {
-    auth::permit(&h, "catalog")?;
-    let t = merchant(&a, &h)?;
-    let m = package(&a, &t, &id, true).await?;
-    let e = m
-        .entities
-        .iter()
-        .find(|e| e.name == name)
-        .ok_or(bad("Unknown entity"))?;
-    super::editor_contract::entity_access(&m, e, &h, "save")?;
-    Ok(Json(data::save(&a, &t, &m, e, &v, &h).await?))
-}
-async fn slots(State(a): State<App>, h: RequestContext) -> Result<Json<Value>> {
-    let rows = sqlx::query("SELECT manifest FROM app_packages WHERE tenant=$1 AND active")
-        .bind(tenant(&h)?)
-        .fetch_all(&a.db)
-        .await?;
-    let mut slots = vec![];
-    for r in rows {
-        let m: Manifest =
-            serde_json::from_value(r.get("manifest")).map_err(|_| bad("Invalid package"))?;
-        if m.permissions.contains(&"storefront.slot".into()) {
-            for s in m.slots.iter().filter(|s| s.location == "product.detail") {
-                slots.push(json!({"app":m.id,"version":m.version,"slot":s,"entities":m.entities.iter().filter(|e|e.public_read).map(|e|json!({"name":e.name,"label":e.label,"fields":e.fields,"action":m.actions.iter().find(|a|a.public && a.handler=="list" && a.entity.as_deref()==Some(e.name.as_str())).map(|a|&a.name)})).collect::<Vec<_>>(),"configuration":m.configuration.as_ref().map(|c|json!({"inputField":c.input_field,"label":c.label,"hint":c.hint,"inputs":c.inputs.as_ref().map(|i|json!({"fields":i.fields,"arguments":i.arguments,"recordField":i.record_field})),"entity":c.entity,"currency":c.currency}))}));
-            }
-        }
-    }
-    Ok(Json(json!({"slots":slots})))
 }
 async fn configure_action(
     State(a): State<App>,
