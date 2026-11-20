@@ -3934,6 +3934,7 @@ dependencies = [
  "sqlx",
  "veyndo-app-model",
  "veyndo-core",
+ "veyndo-identity",
 ]
 
 [[package]]

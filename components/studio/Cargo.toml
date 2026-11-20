@@ -13,3 +13,4 @@ chrono-tz.workspace = true
 veyndo-core = { path = "../core" }
 veyndo-app-model = { path = "../../extensions/services/app-storage/model" }
 sqlx.workspace = true
+veyndo-identity = { path = "../identity" }

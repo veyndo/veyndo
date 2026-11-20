@@ -940,7 +940,7 @@ reads, historical preservation and display. See [the measurement boundary](platf
 | `src/performance/delivery.rs`; `frontend/scripts/precompress.mjs` | Native-only zero-SQL assets, secret-free compression opt-in, deterministic gzip/Brotli variants with correct `Vary`, MIME and range contracts | `read_performance`; frontend precompression unit tests |
 | `src/performance/{settings,mod}.rs` | Immutable `Arc<Settings>` cache ownership; mutable copies only where necessary | Two-replica version/delete/recreate/revocation and checkout/currency regressions |
 | `components/inventory/src/store/{reservations.rs,release.sql}`; `src/order_checkout.rs` | Batched deduction/allocation/release; persisted quantities and sorted product locks | `production_foundations` with simultaneous opposite-order baskets and cancellation replay |
-| `src/studio/{facts.rs,overview.sql,revenue.rs}`; `src/studio.rs` | Consolidated bounded facts and three parallel read branches; unchanged currency-separated API | `studio`, `read_performance` nonempty mixed-currency before/after response checks |
+| `components/studio/src/store/{overview.rs,overview.sql}`; `src/studio.rs` | Consolidated bounded facts and three parallel read branches; unchanged currency-separated API | `studio`, `read_performance` nonempty mixed-currency before/after response checks |
 | `scripts/testing/{hotpath,inventory_batch}.py` | Helpers in existing integration suites, wire/query measurements and real concurrent checkout effects | Existing verification registry; no separate runtime or benchmark engine |
 
 [Raw measurements and exact limits](read-performance.md); SQL/async adapters remain

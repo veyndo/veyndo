@@ -2548,6 +2548,16 @@
       "sha256": "afe81630180a6a5ed323d1a69dd77ff630ae6ed7a266b4f99371bc0dea297498",
       "review": "Personal Studio workspace model and store moved into the studio component without behaviour change"
     },
+    "components/studio/src/store/overview.rs": {
+      "status": "unproved",
+      "sha256": "d3f722c991eef9310a07dd74d18adc83298e0a6735a09ea4d3233c6b329d5c80",
+      "review": "Studio overview facts and work list moved into the studio component without behaviour change"
+    },
+    "components/studio/src/store/work_items.rs": {
+      "status": "unproved",
+      "sha256": "2fb03d1ec85ebe5ec38e147d4b383b146e100afac0787f3f27f53abf030aad2f",
+      "review": "Studio overview facts and work list moved into the studio component without behaviour change"
+    },
     "components/studio/src/store/workspaces.rs": {
       "status": "unproved",
       "sha256": "8704551e0e3f11b2bdb565f9cfbcd4d9634a03c0b23019db525f0802d3753fa1",
@@ -2555,8 +2565,8 @@
     },
     "components/studio/src/store.rs": {
       "status": "unproved",
-      "sha256": "ff50c46781391a6c71de12907d37b0c8307a5536fa18d6ca0350824aa22d2ac6",
-      "review": "Personal Studio workspace model and store moved into the studio component without behaviour change"
+      "sha256": "b0cbed6447b109695176477d5941c70b7921f762ee6f0b4ec8d825454ea44cb4",
+      "review": "Studio overview facts and work list moved into the studio component without behaviour change"
     },
     "crates/apps/src/component_runtime.rs": {
       "status": "unproved",
@@ -7070,8 +7080,8 @@
     },
     "src/studio/facts.rs": {
       "status": "unproved",
-      "sha256": "ce72f28cb468f027b7a9a851c5cad576ccf524b06b9e965f424363e27270d91f",
-      "review": "Reviewed bounded tenant-scoped embedding intake/model-generation cursors, revision/lease fencing and fair vector retry drain; pooled geometry-checked Qdrant hydration and admitted reranking; current-right read tools, structured protocols and SSE transport; exact source quotation/review/public compilation/signatures; transactional price corridors and non-compounding daily autonomy; consent-bound assignments/preferences and delayed cached native-payment readout including stop/withdrawal invalidation. New migration RLS/composite links and extracted predicate consumers reviewed. Native HTTP/PG/Qdrant/provider/UI regressions cover contracts; semantic quality, statistical assumptions, SQL, network and surrounding Rust remain unproved."
+      "sha256": "cbf69b2953cbc7b09f21a58cb628138ad2b11daff0e0d821f33ca7b4e951082b",
+      "review": "Studio overview facts and work list moved into the studio component without behaviour change"
     },
     "src/studio/personal.rs": {
       "status": "unproved",
@@ -7098,20 +7108,15 @@
       "sha256": "f2723d0f39391740e81d8f5f7d263debeffc650b1b1a530a27aea7e53dfdb7a7",
       "review": "Reviewed native aggregate reports: bound tenant/filter SQL, exact numeric order/refund snapshots, reuse of current consent eligibility, optional rights projections and private workspace CAS layouts; reporting adapters remain unproved."
     },
-    "src/studio/revenue.rs": {
-      "status": "unproved",
-      "sha256": "62194db8088c5f27cdd1ade1046098326d0289b6d1a9f10bd98016b004db2734",
-      "review": "Reviewed native-only static bypass with hosted denial and Lean exact acceptance; one fresh domain/environment/status/channel/mount SQL snapshot and current membership lookup preserve scoped admission, binding identity and revocation; immutable Arc settings retain locked mutation/checkout reads; secret-free compression opt-in and deterministic precompressed assets preserve streams/ranges; batched inventory uses existing checkout locks and ordered idempotent release; bounded overview SQL preserves currency-separated historical facts. Real two-replica read/channel/tenant/checkout and strict-runtime regressions passed; SQL and build inputs now explicitly locked. These adapters remain unproved."
-    },
     "src/studio/work.rs": {
       "status": "unproved",
-      "sha256": "d68651b2a3e01955c78a5fdd74cb98165b97432c03023b9e148d71481fc832a6",
-      "review": "Reviewed contextual private-work contracts and independent findings: app opt-out, locked guidance, preserved manual actions, conversation lease and locale inheritance; native own/foreign, stale approval, narrowed rights, renewed login, killed-worker continuation and actual app-preview regressions passed. SQL, async runtime and providers remain unproved."
+      "sha256": "b876e8b7e10d9b7b2dc84d6114a211145994c2816d059a6a75a69897fbbdc2ea",
+      "review": "Studio overview facts and work list moved into the studio component without behaviour change"
     },
     "src/studio.rs": {
       "status": "unproved",
-      "sha256": "4cbd5568c97626d4c43140c609103148e70a89c58fcfb43f30b2f60fff9749af",
-      "review": "Reviewed native aggregate reports: bound tenant/filter SQL, exact numeric order/refund snapshots, reuse of current consent eligibility, optional rights projections and private workspace CAS layouts; reporting adapters remain unproved."
+      "sha256": "a60d38c7e201b0e155132fc57fea104d6300533046bb9a5dce8c06b68982491c",
+      "review": "Studio overview facts and work list moved into the studio component without behaviour change"
     },
     "src/translations/apply.rs": {
       "status": "unproved",
@@ -7205,8 +7210,8 @@
       "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
     },
     "Cargo.lock": {
-      "sha256": "cf179b26533ed20d7618d3bcd1739fbc81812946eb0e5dbe458f483f78dd83a1",
-      "review": "Personal Studio workspace model and store moved into the studio component without behaviour change"
+      "sha256": "943de557ff7788d1ebb553d82c03951c482e697cf11b4c10129c9e3490a55ad4",
+      "review": "Studio overview facts and work list moved into the studio component without behaviour change"
     },
     "Cargo.toml": {
       "sha256": "881e080eb9f1b1f051c23e2848df689853473831b4d3072817387d65c23ddb66",
@@ -8006,10 +8011,6 @@
     },
     "src/performance/settings.sql": {
       "sha256": "6359a5403017cca356a0a04d42492b46ac18a4598df94103d9df2e1379132bd2",
-      "review": "Reviewed native-only static bypass with hosted denial and Lean exact acceptance; one fresh domain/environment/status/channel/mount SQL snapshot and current membership lookup preserve scoped admission, binding identity and revocation; immutable Arc settings retain locked mutation/checkout reads; secret-free compression opt-in and deterministic precompressed assets preserve streams/ranges; batched inventory uses existing checkout locks and ordered idempotent release; bounded overview SQL preserves currency-separated historical facts. Real two-replica read/channel/tenant/checkout and strict-runtime regressions passed; SQL and build inputs now explicitly locked. These adapters remain unproved."
-    },
-    "src/studio/overview.sql": {
-      "sha256": "08ab1c71d526596a2f283bb46c5778e03a9d3d1a03b8cc7dc325300f19f097af",
       "review": "Reviewed native-only static bypass with hosted denial and Lean exact acceptance; one fresh domain/environment/status/channel/mount SQL snapshot and current membership lookup preserve scoped admission, binding identity and revocation; immutable Arc settings retain locked mutation/checkout reads; secret-free compression opt-in and deterministic precompressed assets preserve streams/ranges; batched inventory uses existing checkout locks and ordered idempotent release; bounded overview SQL preserves currency-separated historical facts. Real two-replica read/channel/tenant/checkout and strict-runtime regressions passed; SQL and build inputs now explicitly locked. These adapters remain unproved."
     },
     "src/studio/reports/sales.sql": {

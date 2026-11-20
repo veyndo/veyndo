@@ -557,14 +557,13 @@ This lists every checked-in source module in these roots, including files with n
 | [src/staging/release.rs](../src/staging/release.rs) | Selected units publish in one transaction with staged digests and live baseline conflict checks. |
 | [src/staging/snapshot.rs](../src/staging/snapshot.rs) | Fixed publishable units: product content/translations, settings, experience and app packages. |
 | [src/storefront_pages.rs](../src/storefront_pages.rs) | Deep-link HTML transport for stable SKU URLs with optional localized SEO slugs. |
-| [src/studio/facts.rs](../src/studio/facts.rs) | Consolidate dashboard reads without unbounded pool fan-out; preserve the existing API and currency/learning semantics. |
+| [src/studio/facts.rs](../src/studio/facts.rs) | Dashboard facts are owned by the studio component. |
 | [src/studio/personal.rs](../src/studio/personal.rs) | Actor-private workspace preferences; HTTP and MCP share CAS, bounds and the current membership. |
 | [src/studio/reports/config.rs](../src/studio/reports/config.rs) | One bounded report definition for HTTP, MCP and private workspace presentation preferences. |
 | [src/studio/reports/period.rs](../src/studio/reports/period.rs) | Calendar periods are resolved once in the requested IANA timezone, with exclusive ends and bounded buckets. |
 | [src/studio/reports/traffic.rs](../src/studio/reports/traffic.rs) | Reporting reuses the behavior owner's exact receipt/expiry predicate and inherited policy resolver; no new tracking store. |
 | [src/studio/reports.rs](../src/studio/reports.rs) | Shared native commerce reports for Studio, workspace, API and agent reads; no second analytics ledger. |
-| [src/studio/revenue.rs](../src/studio/revenue.rs) | Merchant turnover remains separated by invoice currency; historical values are never repriced with today's FX. |
-| [src/studio/work.rs](../src/studio/work.rs) | Bounded current-right work items come from native rows; no inferred revenue, customer data or parallel task store. |
+| [src/studio/work.rs](../src/studio/work.rs) | The work list is owned by the studio component. |
 | [src/studio.rs](../src/studio.rs) | Verified merchant overview facts consumed by the chat and activity views. |
 | [src/translations/apply.rs](../src/translations/apply.rs) | Entry point for capabilities; applying reviewed drafts is owned by the catalog component. |
 | [src/translations/fields.rs](../src/translations/fields.rs) | Translation field extraction and admission are owned by the catalog component. |
@@ -1026,6 +1025,9 @@ This lists every checked-in source module in these roots, including files with n
 | [components/studio/src/domain/workspace.rs](../components/studio/src/domain/workspace.rs) | Bounded personal layouts contain references, never delegated rights or executable agent instructions. |
 | [components/studio/src/domain.rs](../components/studio/src/domain.rs) | domain of this component. |
 | [components/studio/src/lib.rs](../components/studio/src/lib.rs) | Studio component: report periods and configuration. |
+| [components/studio/src/store/overview.rs](../components/studio/src/store/overview.rs) | Consolidated dashboard facts in one bounded read; turnover stays separated by invoice currency and is never repriced. |
+| [components/studio/src/store/overview.sql](../components/studio/src/store/overview.sql) | One bounded overview snapshot. Arrays retain the original limits and ordering; currencies remain separate. |
+| [components/studio/src/store/work_items.rs](../components/studio/src/store/work_items.rs) | Bounded current-right work items come from native rows; no inferred revenue, customer data or parallel task store. |
 | [components/studio/src/store/workspaces.rs](../components/studio/src/store/workspaces.rs) | Actor-private workspace preferences: compare-and-swap on the revision, a bounded version trail and the current membership. |
 | [components/studio/src/store.rs](../components/studio/src/store.rs) | SQL of the studio component. |
 
