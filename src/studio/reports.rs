@@ -34,7 +34,7 @@ pub(crate) async fn invoke(a: &App, h: &RequestContext, v: &Value) -> Result<Val
             settings: &settings,
             locale: &locale,
             chain: &chain,
-            eligible: include_str!("../cognition/behavior/eligible.sql"),
+            eligible: veyndo_intelligence::store::behavior::ELIGIBLE,
             conditions: &marketing::validate_condition,
         },
     )

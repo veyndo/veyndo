@@ -66,7 +66,4 @@ pub(crate) async fn invoke(a: &App, h: &RequestContext, name: &str, v: &Value) -
         _ => Err(bad("Unknown behavioral capability")),
     }
 }
-pub(crate) async fn retire(a: &App) -> Result<()> {
-    sqlx::query("DELETE FROM session_signal_events WHERE (tenant,id) IN (SELECT tenant,id FROM session_signal_events WHERE purpose='analytics' AND expires_at<=now() ORDER BY expires_at LIMIT 1000 FOR UPDATE SKIP LOCKED)").execute(&a.db).await?;
-    Ok(())
-}
+pub(crate) use veyndo_intelligence::store::behavior::retire;

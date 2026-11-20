@@ -1483,6 +1483,16 @@
       "sha256": "2d453986a4321a540e62ff95be4da3b60e9c2f56efd2625dcc76a9cd1175bd7f",
       "review": "Knowledge module and experiment model moved into components/intelligence; kernel call sites unchanged"
     },
+    "components/intelligence/src/domain/offer.rs": {
+      "status": "unproved",
+      "sha256": "a6d22181e047b36a715776e29ee8a9cdef60946bab27a24587074b03e16a3b20",
+      "review": "Experiment store, readout and automation, behaviour analytics store and the private preference graph moved verbatim into the intelligence component; consent, settings and channel admission stay in the server. No kernel policy changed."
+    },
+    "components/intelligence/src/domain/preference_graph.rs": {
+      "status": "unproved",
+      "sha256": "db69ff6ed70844cc06b8086696bd03a5e8fe2ea7d7b68f1ef2d9e3d84865afbf",
+      "review": "Experiment store, readout and automation, behaviour analytics store and the private preference graph moved verbatim into the intelligence component; consent, settings and channel admission stay in the server. No kernel policy changed."
+    },
     "components/intelligence/src/domain/source_content.rs": {
       "status": "unproved",
       "sha256": "acb83bc1fed77b6be07bc96dcfa710df2d04d3fbdec282c5ea2a0511f9eb0132",
@@ -1490,8 +1500,8 @@
     },
     "components/intelligence/src/domain.rs": {
       "status": "unproved",
-      "sha256": "c902f1f71a2f5513b697aa52eb5f5ac8040950f60859bb342d0c8c3d2a6074db",
-      "review": "Knowledge sources, PDF text extraction and embedding generations moved into the intelligence component without behaviour change"
+      "sha256": "cab2c15a83f8b4c793853334c308462c7f88cacb7340b0c74072b86e211ed20d",
+      "review": "Experiment store, readout and automation, behaviour analytics store and the private preference graph moved verbatim into the intelligence component; consent, settings and channel admission stay in the server. No kernel policy changed."
     },
     "components/intelligence/src/knowledge/embeddings.rs": {
       "status": "unproved",
@@ -1548,6 +1558,11 @@
       "sha256": "1680b817fc97a6389ffbc0212b6800164591faecc0d0598a8473819cb25aed6c",
       "review": "Knowledge sources, PDF text extraction and embedding generations moved into the intelligence component without behaviour change"
     },
+    "components/intelligence/src/store/behavior.rs": {
+      "status": "unproved",
+      "sha256": "db51743c8bb50d131db665ca051be9e0fa9ee0f883d4e51eab1d625769bbaf43",
+      "review": "Experiment store, readout and automation, behaviour analytics store and the private preference graph moved verbatim into the intelligence component; consent, settings and channel admission stay in the server. No kernel policy changed."
+    },
     "components/intelligence/src/store/documents.rs": {
       "status": "unproved",
       "sha256": "d826cea080d824638b9bf6448a9a21a4758795e3f874cac413afab50c7444cd7",
@@ -1558,10 +1573,20 @@
       "sha256": "d69f2fb3f71e317ebe0bab83902eeb715eda56ae547b547befe0337e5ebe13b2",
       "review": "Knowledge sources, PDF text extraction and embedding generations moved into the intelligence component without behaviour change"
     },
+    "components/intelligence/src/store/experiments.rs": {
+      "status": "unproved",
+      "sha256": "ede6adceb19e3f7fa57a28d8258f0357f3e6e9f9a84ebea97b9773b2f81c33a5",
+      "review": "Experiment store, readout and automation, behaviour analytics store and the private preference graph moved verbatim into the intelligence component; consent, settings and channel admission stay in the server. No kernel policy changed."
+    },
+    "components/intelligence/src/store/preferences.rs": {
+      "status": "unproved",
+      "sha256": "db658c1ed09ba78fc691452a26d6128f27c8a52a1741688128d6cfee915e9850",
+      "review": "Experiment store, readout and automation, behaviour analytics store and the private preference graph moved verbatim into the intelligence component; consent, settings and channel admission stay in the server. No kernel policy changed."
+    },
     "components/intelligence/src/store.rs": {
       "status": "unproved",
-      "sha256": "364587d0fcf975bdb462848c95a24c07bbd369957b64c08fbab1d62a120c480a",
-      "review": "Knowledge sources, PDF text extraction and embedding generations moved into the intelligence component without behaviour change"
+      "sha256": "31e2c617c196cd6ff1cd69a09ccc05901f8a4009fd0b97c2afa041a8ad919bcc",
+      "review": "Experiment store, readout and automation, behaviour analytics store and the private preference graph moved verbatim into the intelligence component; consent, settings and channel admission stay in the server. No kernel policy changed."
     },
     "components/inventory/src/domain/lines.rs": {
       "status": "unproved",
@@ -5590,8 +5615,8 @@
     },
     "src/cognition/behavior/capture.rs": {
       "status": "unproved",
-      "sha256": "48518ff85988adee480e52bdd327fd360707a39bb6f42a68f0a947b7f3a39180",
-      "review": "Reviewed selective-publication domain rights, transactional channel and current installed Flow action admission, shared B2B configuration writers with history and staging, method/currency dependency guards, and inherited consent-bound analytics. PostgreSQL and frontend regressions exercise successful effects, denied access, stale revisions and preserved live state. SQL, async adapters and external providers remain unproved."
+      "sha256": "9a61c2a72337b8ac345de4f9492b19ac58737a713f4b2460bfc37018f52a6023",
+      "review": "Experiment store, readout and automation, behaviour analytics store and the private preference graph moved verbatim into the intelligence component; consent, settings and channel admission stay in the server. No kernel policy changed."
     },
     "src/cognition/behavior/geography.rs": {
       "status": "unproved",
@@ -5605,18 +5630,18 @@
     },
     "src/cognition/behavior/journey.rs": {
       "status": "unproved",
-      "sha256": "d5b7889ad1b346e858525cf348bcce13c8a6f8308f84fd56cc81639efe4c6894",
-      "review": "Reviewed selective-publication domain rights, transactional channel and current installed Flow action admission, shared B2B configuration writers with history and staging, method/currency dependency guards, and inherited consent-bound analytics. PostgreSQL and frontend regressions exercise successful effects, denied access, stale revisions and preserved live state. SQL, async adapters and external providers remain unproved."
+      "sha256": "762f9b555fa103b8d764ff51851a943e978e91947a6820094c770a7d3502a267",
+      "review": "Experiment store, readout and automation, behaviour analytics store and the private preference graph moved verbatim into the intelligence component; consent, settings and channel admission stay in the server. No kernel policy changed."
     },
     "src/cognition/behavior/mod.rs": {
       "status": "unproved",
-      "sha256": "a22799bb618b37995421a38604e0da8d3d0ae9e26758237ec3cb2e9e89a77258",
-      "review": "Behavior analytics reviewed: existing cart-locked consent predicate reused; purpose-separated withdrawal, tenant/FK scope, typed and bounded observations, private journey permissions and derived reports. New SQL/frontend/proxy adapters remain unproved; no new theorem claim."
+      "sha256": "caca697c7483d55c2d9b477ea3118c94cd638864de025c981b250b9ff240435f",
+      "review": "Experiment store, readout and automation, behaviour analytics store and the private preference graph moved verbatim into the intelligence component; consent, settings and channel admission stay in the server. No kernel policy changed."
     },
     "src/cognition/behavior/report.rs": {
       "status": "unproved",
-      "sha256": "2a5e1d219da2991a2b924f8ba5e7f66b886eb43260612505c0b505688245e137",
-      "review": "Separate signed role-bound SQL authority preserves old row/domain policies; bound short-lived tickets, personal actor fences, guarded native app DDL, fixed snapshot ordering and narrow language registry. Reviewed additive 099 and runtime pools; actual login attacks, two replicas, restart, app release and real PgBouncer/key rotation pass. SQL/HMAC/transport remain tested adapters outside pure Lean proofs."
+      "sha256": "c444dad3ab44ca2a32137886eb1cd16127b10334affd9787e0424a6bd4e22f1d",
+      "review": "Experiment store, readout and automation, behaviour analytics store and the private preference graph moved verbatim into the intelligence component; consent, settings and channel admission stay in the server. No kernel policy changed."
     },
     "src/cognition/claim_batches.rs": {
       "status": "reviewed-binding",
@@ -5638,25 +5663,10 @@
       "sha256": "ade8a8f68965833a8d78d6045683dece18d7f44ea23fcf234310df6f987f0a92",
       "review": "Tenant roles and current grants independently reviewed; owner/retained-override/acceptance races repaired and PostgreSQL-blocked regressions passed; PII and Flow projection boundaries documented; B2B feature settings delegate shared CAS/history and preserve financial guards. Existing extracted policies unchanged; SQL/async/UI remain reviewed adapters, not full proofs."
     },
-    "src/cognition/experiments/automation.rs": {
-      "status": "unproved",
-      "sha256": "3346f880938562d2cc089a51f05cfcecb4eca3963a8d168199b8f0f729f27bf2",
-      "review": "Self-running experiments: Design gains an optional immutable automation flag pair; experiments/automation.rs adds a read-only suggestion from live payment figures and worker steps that repeat the manual finish transition, call the existing report owner and record a decision, fixing the treatment layout mode only when the unchanged extracted experiment_result_admissible reports a proved uplift; cognitive_experiments suite covers kept, seeded published and manual cases"
-    },
     "src/cognition/experiments/mod.rs": {
       "status": "unproved",
-      "sha256": "f0fe0bc1895cb4ee2b95849e3f3db9648155f15eedc4e46d5ab5c4b57df3b5d9",
-      "review": "Self-running experiments: Design gains an optional immutable automation flag pair; experiments/automation.rs adds a read-only suggestion from live payment figures and worker steps that repeat the manual finish transition, call the existing report owner and record a decision, fixing the treatment layout mode only when the unchanged extracted experiment_result_admissible reports a proved uplift; cognitive_experiments suite covers kept, seeded published and manual cases"
-    },
-    "src/cognition/experiments/model.rs": {
-      "status": "unproved",
-      "sha256": "5e6718494a81b6e56887224a86512bb152b0fb7bb4bce67f6e744889a3818c1a",
-      "review": "Knowledge module and experiment model moved into components/intelligence; kernel call sites unchanged"
-    },
-    "src/cognition/experiments/report.rs": {
-      "status": "unproved",
-      "sha256": "93cd6f4097e7fcbaa9f5af094d9849ada61cbf21b5efcce11550689c9d4b29b7",
-      "review": "Reviewed bounded tenant-scoped embedding intake/model-generation cursors, revision/lease fencing and fair vector retry drain; pooled geometry-checked Qdrant hydration and admitted reranking; current-right read tools, structured protocols and SSE transport; exact source quotation/review/public compilation/signatures; transactional price corridors and non-compounding daily autonomy; consent-bound assignments/preferences and delayed cached native-payment readout including stop/withdrawal invalidation. New migration RLS/composite links and extracted predicate consumers reviewed. Native HTTP/PG/Qdrant/provider/UI regressions cover contracts; semantic quality, statistical assumptions, SQL, network and surrounding Rust remain unproved."
+      "sha256": "99c38dc0161aa585512cde1503b373598c6bea352a16664e83ad9b62b92864e8",
+      "review": "Experiment store, readout and automation, behaviour analytics store and the private preference graph moved verbatim into the intelligence component; consent, settings and channel admission stay in the server. No kernel policy changed."
     },
     "src/cognition/extraction.rs": {
       "status": "unproved",
@@ -5685,8 +5695,8 @@
     },
     "src/cognition/preferences.rs": {
       "status": "unproved",
-      "sha256": "65779efa343211fd99dd53b1689d960ce29abb1a81d20fe673b80c930b5b8630",
-      "review": "Reviewed capability-authenticated consent aliases and tenant/channel composite FK. Readers, processing and checkout resolve one canonical receipt; withdrawal erases related preferences in batch. PostgreSQL legal_privacy exercises original expiry, no copied checkout acceptance, second purchase and seven concurrent continuation/withdrawal requests; behavior_intelligence and tenant_isolation passed. SQL adapter remains unproved. Staging diff only adds authorized main-language metadata for product labels."
+      "sha256": "612d28e3b0ce72a9ee5e33ea8300284a90096d6e6b4b13c856a0fdceb50bece4",
+      "review": "Experiment store, readout and automation, behaviour analytics store and the private preference graph moved verbatim into the intelligence component; consent, settings and channel admission stay in the server. No kernel policy changed."
     },
     "src/cognition/projection.rs": {
       "status": "unproved",
@@ -5710,8 +5720,8 @@
     },
     "src/cognition/signed_offer.rs": {
       "status": "reviewed-binding",
-      "sha256": "fab71030d88c05865a21ba937c868b49a563e6de5c40de7c3e1b98e3d36dee5b",
-      "review": "Three further proved rules with production bindings: a signed offer is honoured only unexpired and for the unchanged cart, revision and total (signed_offer.rs, result identical to the former expression); sovereign AI mode admits only the self-operated provider on a self-hosted endpoint (sovereign.rs, same decision, endpoint check no longer short-circuited and free of effects); workspace ID length bounds (core). Three SQL statements gained explicit parameter casts matching their bound types. Kernel, core and cognition unit tests pass. SQL, HTTP and provider behaviour is not formally proved."
+      "sha256": "45ff6fcfb98bd33df40d0bae945e394e935cadc84b7dd7bfab100bd4a15db5c5",
+      "review": "Experiment store, readout and automation, behaviour analytics store and the private preference graph moved verbatim into the intelligence component; consent, settings and channel admission stay in the server. No kernel policy changed."
     },
     "src/cognition/stream.rs": {
       "status": "unproved",
@@ -7130,8 +7140,8 @@
     },
     "src/studio/reports.rs": {
       "status": "unproved",
-      "sha256": "8802d557e6df4d9f585160415537f49312597e8c2a8280a46decf9c3ec587338",
-      "review": "Commerce report query and traffic read moved into the studio component without behaviour change"
+      "sha256": "0983c5a5e5979130337cea958913aa5abbe92da584cb4ccc2d4b7f186363459a",
+      "review": "Experiment store, readout and automation, behaviour analytics store and the private preference graph moved verbatim into the intelligence component; consent, settings and channel admission stay in the server. No kernel policy changed."
     },
     "src/studio/work.rs": {
       "status": "unproved",
@@ -7235,8 +7245,8 @@
       "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
     },
     "Cargo.lock": {
-      "sha256": "f9ace94cd9c8951a199e800f5521e6263b1fed15e6fb0138035b6c9e408479c0",
-      "review": "Knowledge sources, PDF text extraction and embedding generations moved into the intelligence component without behaviour change"
+      "sha256": "bf5c13ba74bc222e0b0cf483439b0667a90a1a9c154919877a6af3d189ee90b9",
+      "review": "Experiment store, readout and automation, behaviour analytics store and the private preference graph moved verbatim into the intelligence component; consent, settings and channel admission stay in the server. No kernel policy changed."
     },
     "Cargo.toml": {
       "sha256": "881e080eb9f1b1f051c23e2848df689853473831b4d3072817387d65c23ddb66",
@@ -7994,20 +8004,12 @@
       "sha256": "a9ece67d4975e6c5e44cf26f4d6e397a3780449d8e3f8fbb3860627211b9fda5",
       "review": "Designer acceptance: app-owned versioned style prompt, bounded style-only schema preserving native page content/structure, shared proposal validation unchanged for content edits. Registered visual_workspace RED to GREEN and real Qwen screenshot returns three review-only alternatives. Prompt registry/governance extends app-owned version files. SQL/inference/rendering remain unproved."
     },
-    "src/cognition/behavior/eligible.sql": {
-      "sha256": "7f34fe7b256243ec7d7e60914c847aea4717446525d89c68ff995ccbe2779c89",
-      "review": "Behavior analytics reviewed: existing cart-locked consent predicate reused; purpose-separated withdrawal, tenant/FK scope, typed and bounded observations, private journey permissions and derived reports. New SQL/frontend/proxy adapters remain unproved; no new theorem claim."
-    },
     "src/cognition/claim_batch.sql": {
       "sha256": "4198f7532aae65c9defbd6ad60f26b4128060305a69e40d755ff1449f7144cf2",
       "review": "Reviewed bounded tenant-scoped embedding intake/model-generation cursors, revision/lease fencing and fair vector retry drain; pooled geometry-checked Qdrant hydration and admitted reranking; current-right read tools, structured protocols and SSE transport; exact source quotation/review/public compilation/signatures; transactional price corridors and non-compounding daily autonomy; consent-bound assignments/preferences and delayed cached native-payment readout including stop/withdrawal invalidation. New migration RLS/composite links and extracted predicate consumers reviewed. Native HTTP/PG/Qdrant/provider/UI regressions cover contracts; semantic quality, statistical assumptions, SQL, network and surrounding Rust remain unproved."
     },
     "src/cognition/evidence_read.sql": {
       "sha256": "8ef86442948464ab2fa6d1f845441af64e4dd677125e4ebc1319ae8daa42ff31",
-      "review": "Reviewed bounded tenant-scoped embedding intake/model-generation cursors, revision/lease fencing and fair vector retry drain; pooled geometry-checked Qdrant hydration and admitted reranking; current-right read tools, structured protocols and SSE transport; exact source quotation/review/public compilation/signatures; transactional price corridors and non-compounding daily autonomy; consent-bound assignments/preferences and delayed cached native-payment readout including stop/withdrawal invalidation. New migration RLS/composite links and extracted predicate consumers reviewed. Native HTTP/PG/Qdrant/provider/UI regressions cover contracts; semantic quality, statistical assumptions, SQL, network and surrounding Rust remain unproved."
-    },
-    "src/cognition/experiments/report.sql": {
-      "sha256": "f6c3f2bbb3fd6f5e2eea78b65bccdb7d9f4aec69f753ada1dac5aa02e7c7cfac",
       "review": "Reviewed bounded tenant-scoped embedding intake/model-generation cursors, revision/lease fencing and fair vector retry drain; pooled geometry-checked Qdrant hydration and admitted reranking; current-right read tools, structured protocols and SSE transport; exact source quotation/review/public compilation/signatures; transactional price corridors and non-compounding daily autonomy; consent-bound assignments/preferences and delayed cached native-payment readout including stop/withdrawal invalidation. New migration RLS/composite links and extracted predicate consumers reviewed. Native HTTP/PG/Qdrant/provider/UI regressions cover contracts; semantic quality, statistical assumptions, SQL, network and surrounding Rust remain unproved."
     },
     "src/cognition/index_claim.sql": {

@@ -3721,14 +3721,17 @@ dependencies = [
 name = "veyndo-intelligence"
 version = "0.5.0"
 dependencies = [
+ "chrono",
  "libc",
  "pdf-extract",
  "reqwest",
+ "ring",
  "serde",
  "serde_json",
  "sha2 0.10.9",
  "sqlx",
  "tokio",
+ "tracing",
  "uuid",
  "veyndo-catalog",
  "veyndo-core",

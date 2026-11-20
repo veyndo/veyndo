@@ -1,5 +1,6 @@
 //! Cart-locked writes serialize with withdrawal; customer association is derived from authenticated native identity.
 use super::{input::Event, *};
+use veyndo_intelligence::store::behavior as store;
 pub(super) async fn capture(
     State(a): State<App>,
     h: RequestContext,
@@ -57,48 +58,31 @@ pub(super) async fn capture(
         return Err(bad("Cart-add observation requires an actual cart item"));
     }
     let dimensions = json!({"browser":input::browser(header(&h,"user-agent").unwrap_or("")),"viewport":v.viewport,"surface":v.surface,"referrerHost":v.referrer_host,"locale":locale,"country":current.checkout.as_ref().map(|s|s.country.clone()).unwrap_or("unknown".into()),"geoCountry":geography::country(&h),"countrySource":"cart-destination"});
-    let session = hash(&c.id);
-    if let Some(old)=sqlx::query("SELECT session,purpose,kind,product_id,dimensions FROM session_signal_events WHERE tenant=$1 AND id=$2").bind(&c.tenant).bind(&v.event_id).fetch_optional(&mut *tx).await? {
-  if old.get::<String,_>("session")!=session || old.get::<String,_>("purpose")!="analytics" || old.get::<String,_>("kind")!=v.kind || old.get::<Option<String>,_>("product_id")!=v.product_id || old.get::<Value,_>("dimensions")!=dimensions {return Err(conflict("Behavioral event ID already belongs to a different observation"));}
-  return Ok(Json(json!({"stored":false,"duplicate":true})));
- }
-    let count:i64=sqlx::query_scalar("SELECT count(*) FROM session_signal_events WHERE tenant=$1 AND session=$2 AND purpose='analytics' AND created_at>now()-interval '1 hour'").bind(&c.tenant).bind(&session).fetch_one(&mut *tx).await?;
-    if count >= i64::from(policy.events_per_hour) {
-        return Err(Error(
-            StatusCode::TOO_MANY_REQUESTS,
-            "Behavioral limit reached; retry after the hourly window".into(),
-        ));
-    }
-    sqlx::query("INSERT INTO session_signal_events(tenant,id,session,purpose,kind,cart_id,channel_id,product_id,customer_id,dimensions,expires_at) VALUES($1,$2,$3,'analytics',$4,$5,$6,$7,$8,$9,now()+make_interval(days=>$10))")
- .bind(&c.tenant).bind(v.event_id).bind(session).bind(v.kind).bind(&c.id).bind(&c.data.sales_channel).bind(v.product_id).bind(customer).bind(dimensions).bind(policy.retention_days as i32).execute(&mut *tx).await?;
+    let stored = store::record(
+        &mut tx,
+        store::Observation {
+            tenant: &c.tenant,
+            cart: &c.id,
+            channel: &c.data.sales_channel,
+            id: &v.event_id,
+            kind: &v.kind,
+            product: v.product_id.as_deref(),
+            customer,
+            dimensions,
+            events_per_hour: i64::from(policy.events_per_hour),
+            retention_days: policy.retention_days as i32,
+        },
+    )
+    .await?;
     tx.commit().await?;
-    Ok(Json(
-        json!({"stored":true,"retentionDays":policy.retention_days,"purpose":"analytics"}),
-    ))
+    Ok(Json(stored))
 }
 pub(super) async fn forget(State(a): State<App>, h: RequestContext) -> Result<Json<Value>> {
     let c = load_cart(&a, &h).await?;
-    let mut tx = a.db.begin().await?;
-    sqlx::query("SELECT id FROM carts WHERE tenant=$1 AND id=$2 FOR UPDATE")
-        .bind(&c.tenant)
-        .bind(&c.id)
-        .fetch_one(&mut *tx)
-        .await?;
-    let n = sqlx::query(
-        "DELETE FROM session_signal_events WHERE tenant=$1 AND session=$2 AND purpose='analytics'",
-    )
-    .bind(&c.tenant)
-    .bind(hash(&c.id))
-    .execute(&mut *tx)
-    .await?
-    .rows_affected();
-    tx.commit().await?;
+    let n = store::forget(&a, &c.tenant, &c.id).await?;
     Ok(Json(json!({"deleted":n})))
 }
 pub(super) async fn export(State(a): State<App>, h: RequestContext) -> Result<Json<Value>> {
     let c = load_cart(&a, &h).await?;
-    let rows=sqlx::query("SELECT id,kind,product_id,dimensions,created_at::text AS time FROM session_signal_events WHERE tenant=$1 AND session=$2 AND purpose='analytics' AND expires_at>now() ORDER BY created_at DESC,id LIMIT 101").bind(&c.tenant).bind(hash(&c.id)).fetch_all(&a.db).await?;
-    Ok(Json(
-        json!({"events":rows.iter().take(100).map(|r|json!({"id":r.get::<String,_>("id"),"kind":r.get::<String,_>("kind"),"productId":r.get::<Option<String>,_>("product_id"),"dimensions":r.get::<Value,_>("dimensions"),"time":r.get::<String,_>("time")})).collect::<Vec<_>>(),"truncated":rows.len()>100}),
-    ))
+    Ok(Json(store::export(&a, &c.tenant, &c.id).await?))
 }

@@ -363,7 +363,13 @@ Order follows the dependency report, lowest first. Each line is one move.
   embeddings, reranking), the bounded behaviour event and experiment model,
   knowledge sources and their published documents (`domain/source_content`,
   `store/documents`), PDF text extraction in a bounded child process
-  (`service/pdf`) and the embedding generations (`store/embedding_generations`).
+  (`service/pdf`), the embedding generations (`store/embedding_generations`),
+  controlled experiments with their readout and worker steps
+  (`store/experiments`), behaviour observations with the channel report and
+  the private journey (`store/behavior`), the private preference graph
+  (`domain/preference_graph`, `store/preferences`) and the signed offer
+  projection (`domain/offer`). The server keeps consent, settings and channel
+  admission and passes them in.
   Open: agents and their runs, proposals, the retrieval, question and
   workspace handlers, inference, cognition routes and workers.
 - [ ] studio. Started: `components/studio` owns report configuration and

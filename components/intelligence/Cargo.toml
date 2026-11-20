@@ -19,3 +19,6 @@ veyndo-pricing = { path = "../pricing" }
 veyndo-catalog = { path = "../catalog" }
 libc.workspace = true
 pdf-extract.workspace = true
+chrono.workspace = true
+ring.workspace = true
+tracing.workspace = true

@@ -262,16 +262,13 @@ This lists every checked-in source module in these roots, including files with n
 | [src/cognition/context.rs](../src/cognition/context.rs) | Bounded localized catalog retrieval before inference; full catalog size never expands the prompt. |
 | [src/cognition/contracts.rs](../src/cognition/contracts.rs) | Evidence APIs and MCP contracts dispatch into one authorized owner; the claim compiler rejects free prose. |
 | [src/cognition/evidence.rs](../src/cognition/evidence.rs) | Source-bound claim lifecycle on the existing knowledge relation ledger; no model text becomes a confirmed fact automatically. |
-| [src/cognition/experiments/automation.rs](../src/cognition/experiments/automation.rs) | Experiment suggestions from native figures, and worker steps that finish, read out and apply an approved experiment without further clicks. |
-| [src/cognition/experiments/mod.rs](../src/cognition/experiments/mod.rs) | Controlled experiments use the existing storefront layout consumer and authoritative payment ledger. |
-| [src/cognition/experiments/model.rs](../src/cognition/experiments/model.rs) | Preregistered fixed-horizon experiment parameters and conservative bounded-outcome inference. |
-| [src/cognition/experiments/report.rs](../src/cognition/experiments/report.rs) | Delayed final experiment readout is derived from the existing live capture/refund ledger, never demo rewards. |
+| [src/cognition/experiments/mod.rs](../src/cognition/experiments/mod.rs) | Controlled experiments use the existing storefront layout consumer and authoritative payment ledger; the intelligence component owns their store. |
 | [src/cognition/extraction.rs](../src/cognition/extraction.rs) | API/MCP/flow source extraction shares provider admission and quote checks; candidates require merchant review. |
 | [src/cognition/generations.rs](../src/cognition/generations.rs) | Model-change intake is owned by the intelligence component. |
 | [src/cognition/guardrails.rs](../src/cognition/guardrails.rs) | Merchant-owned guardrails in commerce settings; native currency amounts bind preview and execution. |
 | [src/cognition/indexing.rs](../src/cognition/indexing.rs) | Durable bounded embedding jobs; short claims and revision fences keep provider latency outside PostgreSQL. |
 | [src/cognition/mod.rs](../src/cognition/mod.rs) | Evidence-based shop memory: event receipts, observed pairs, reviewable hypotheses and bounded context. |
-| [src/cognition/preferences.rs](../src/cognition/preferences.rs) | Consent-bound private cart preference graph: typed bounded input, export, erasure and native advisor context. |
+| [src/cognition/preferences.rs](../src/cognition/preferences.rs) | Consent-bound private cart preference graph: entry points, consent and channel admission; model and store live in the intelligence component. |
 | [src/cognition/projection.rs](../src/cognition/projection.rs) | Exactly-once local observation projection; associations retain order/event evidence and simulation labels. |
 | [src/cognition/recommendations.rs](../src/cognition/recommendations.rs) | Merchant-approved associations are consumed by the public shop without exposing order counts or identities. |
 | [src/cognition/routes.rs](../src/cognition/routes.rs) | Merchant memory endpoints and revision-bound experiment/dismissal decisions. |
@@ -806,6 +803,8 @@ This lists every checked-in source module in these roots, including files with n
 | [components/identity/src/types.rs](../components/identity/src/types.rs) | Typed request shapes of the identity component. |
 | [components/intelligence/src/domain/behavior_input.rs](../components/intelligence/src/domain/behavior_input.rs) | Minimal behavioral envelope: no URLs, search text, raw user agents, IPs or caller customer identities. |
 | [components/intelligence/src/domain/experiment_model.rs](../components/intelligence/src/domain/experiment_model.rs) | Preregistered fixed-horizon experiment parameters and conservative bounded-outcome inference. |
+| [components/intelligence/src/domain/offer.rs](../components/intelligence/src/domain/offer.rs) | The positive projection of a native quote that the shop signs as an offer: a statement, not a price lock. |
+| [components/intelligence/src/domain/preference_graph.rs](../components/intelligence/src/domain/preference_graph.rs) | Typed, bounded private preference graph: no dangling relations and no free-form kinds. |
 | [components/intelligence/src/domain/source_content.rs](../components/intelligence/src/domain/source_content.rs) | Bounds of a knowledge source: enabled languages, kinds, translated fields and the digest that binds its chunks. |
 | [components/intelligence/src/domain.rs](../components/intelligence/src/domain.rs) | Bounded inputs of the intelligence component, free of I/O. |
 | [components/intelligence/src/knowledge/embeddings.rs](../components/intelligence/src/knowledge/embeddings.rs) | Bounded batched embeddings: Ollama and OpenAI-compatible self-hosted endpoints, model-defined dimensions. |
@@ -822,8 +821,13 @@ This lists every checked-in source module in these roots, including files with n
 | [components/intelligence/src/lib.rs](../components/intelligence/src/lib.rs) | Intelligence component: shop memory with its vector namespace, retrieval and document parsing. |
 | [components/intelligence/src/service/pdf.rs](../components/intelligence/src/service/pdf.rs) | PDF extraction executes in a killable child process without inherited commerce credentials. |
 | [components/intelligence/src/service.rs](../components/intelligence/src/service.rs) | Operations of the intelligence component that call out of process. |
+| [components/intelligence/src/store/behavior.rs](../components/intelligence/src/store/behavior.rs) | Consent-bound behaviour observations: the bounded write, a shopper's export and erasure, the channel report with its derived graph and the private journey. |
+| [components/intelligence/src/store/behavior_eligible.sql](../components/intelligence/src/store/behavior_eligible.sql) | One native owner, one channel and a current affirmative receipt; expired observations never contribute. |
 | [components/intelligence/src/store/documents.rs](../components/intelligence/src/store/documents.rs) | Knowledge sources: hash-bound chunks, revision-checked edits, archive and publication, written atomically with their graph relations. |
 | [components/intelligence/src/store/embedding_generations.rs](../components/intelligence/src/store/embedding_generations.rs) | Restart-safe model-change intake: short locked cursor batches reuse the canonical embedding queue. |
+| [components/intelligence/src/store/experiments.rs](../components/intelligence/src/store/experiments.rs) | Controlled experiments on the storefront layout: preregistration, transitions, assignment, the delayed readout from the payment ledger and the worker steps. |
+| [components/intelligence/src/store/experiments_report.sql](../components/intelligence/src/store/experiments_report.sql) | Independent app entry; see extensions/README.md for its public contract. |
+| [components/intelligence/src/store/preferences.rs](../components/intelligence/src/store/preferences.rs) | Consent-bound private cart preferences: revision-checked write, erasure and the request-only advice context. |
 | [components/intelligence/src/store.rs](../components/intelligence/src/store.rs) | SQL of the intelligence component. |
 | [components/inventory/src/domain/lines.rs](../components/inventory/src/domain/lines.rs) | Checked item quantities for inventory writes. Availability and locks belong to the host. |
 | [components/inventory/src/domain/reorder.rs](../components/inventory/src/domain/reorder.rs) | Whether a supplier's signed offer is the reorder the merchant saved, and within the ceiling. |
