@@ -18,10 +18,7 @@ pub(crate) use address_store::*;
 pub(crate) use contacts::*;
 pub(crate) use demo::seed_address as seed_demo_address;
 pub(crate) use order_snapshot::snapshot as order_snapshot;
-/// One immutable account binding for order history, receipts and purchased files.
-/// `$2` is the authenticated account email; it resolves its tenant-owned stable ID.
-/// Matching a legacy guest's contact email alone never establishes ownership.
-pub(crate) const ORDER_ACCOUNT_SCOPE: &str = "(o.data->'orderCustomer'->>'customerId')=(SELECT id FROM customers WHERE tenant=o.tenant AND email=$2)";
+pub(crate) use veyndo_orders::store::account_orders::ACCOUNT_SCOPE as ORDER_ACCOUNT_SCOPE;
 pub(crate) fn router() -> Router<App> {
     Router::new()
         .route("/store-api/account/register", post(register))

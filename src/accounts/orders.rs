@@ -1,5 +1,6 @@
 //! Customer-owned order reads and receipts share one tenant/identity predicate and a public projection.
 use super::*;
+use veyndo_orders::store::account_orders;
 
 // An account ID snapshot owns modern orders; matching guest email never grants access.
 async fn owned(
@@ -9,21 +10,10 @@ async fn owned(
     id: Option<&str>,
     after: Option<&str>,
 ) -> Result<Vec<Value>> {
-    let mut query = sqlx::QueryBuilder::<sqlx::Postgres>::new(
-        "SELECT o.data, o.created_at::text AS time FROM orders o JOIN carts c ON c.id=o.cart_id AND c.tenant=o.tenant WHERE o.tenant=$1 AND ($3::text IS NULL OR o.id=$3) AND ",
-    );
-    query.push(ORDER_ACCOUNT_SCOPE).push(" AND ($4::text IS NULL OR (o.created_at,o.id)<(SELECT created_at,id FROM orders WHERE tenant=$1 AND id=$4)) ORDER BY o.created_at DESC,o.id DESC LIMIT 101");
-    let rows = query
-        .build()
-        .bind(t)
-        .bind(email)
-        .bind(id)
-        .bind(after)
-        .fetch_all(&a.db)
-        .await?;
-    Ok(rows
+    Ok(account_orders::owned(a, t, email, id, after)
+        .await?
         .iter()
-        .map(|r| project(&r.get("data"), &r.get::<String, _>("time")))
+        .map(|(data, time)| project(data, time))
         .collect())
 }
 pub(crate) fn project(raw: &Value, created: &str) -> Value {
@@ -98,9 +88,7 @@ pub(super) async fn detail(
         .await?
         .pop()
         .ok_or(Error(StatusCode::NOT_FOUND, "Order not found".into()))?;
-    let rows = sqlx::query("SELECT id,kind,number,locale,created_at::text AS created FROM order_receipts WHERE tenant=$1 AND order_id=$2 AND customer_visible ORDER BY created_at DESC LIMIT 100")
-        .bind(&t).bind(&id).fetch_all(&a.db).await?;
-    v["receipts"] = json!(rows.iter().map(|r| json!({"id":r.get::<String,_>("id"), "kind":r.get::<String,_>("kind"), "number":r.get::<String,_>("number"), "locale":r.get::<String,_>("locale"), "createdAt":r.get::<String,_>("created"), "pdfPath":format!("/store-api/account/orders/{id}/receipts/{}/pdf", r.get::<String,_>("id"))})).collect::<Vec<_>>());
+    v["receipts"] = json!(account_orders::receipts(&a, &t, &id).await?);
     let (machine, _) = commerce::machine(&a.db, &t).await?;
     if !v["stateLabels"].is_object() {
         v["stateLabels"] = json!(
@@ -122,13 +110,8 @@ pub(super) async fn receipt(
     if owned(&a, &t, &email, Some(&order), None).await?.is_empty() {
         return Err(Error(StatusCode::NOT_FOUND, "Order not found".into()));
     }
-    let r=sqlx::query("SELECT snapshot,content FROM order_receipts WHERE tenant=$1 AND order_id=$2 AND id=$3 AND customer_visible")
-        .bind(t).bind(order).bind(id).fetch_optional(&a.db).await?
-        .ok_or(Error(StatusCode::NOT_FOUND,"Receipt not found".into()))?;
-    Ok(crate::operations::document_response(
-        &r.get("snapshot"),
-        r.get("content"),
-    ))
+    let (snapshot, content) = account_orders::receipt(&a, &t, &order, &id).await?;
+    Ok(crate::operations::document_response(&snapshot, content))
 }
 #[cfg(test)]
 mod tests {

@@ -241,8 +241,10 @@ Order follows the dependency report, lowest first. Each line is one move.
   lookup with literal search, the guest contact and the remembered payment
   method. Open: the handlers still run in the server, because they resolve the
   storefront request, attribute the history and read shop settings; login,
-  registration, profile and password; merchant customer create and edit; the
-  order snapshot; browser sessions.
+  registration, profile and password; merchant customer create and edit;
+  browser sessions. The restoration of an address aggregate from history
+  lives in `store/`; the shop's geography admits each address through a
+  closure.
 - [ ] payments. Started: `components/payments` owns the attempt type, the
   payment state machine, wire amounts at ISO precision, receipt identity and
   references, settlement and refund budgets, recipient instructions, adapter
@@ -268,7 +270,8 @@ Order follows the dependency report, lowest first. Each line is one move.
   order to the reviewed cart revision and total, the reviewed session
   purchase with its replay and receipt checks, and the classification of the
   checkout test payment; `store/` the localized SKU snapshot read under the
-  purchase locks, the channel admission of a session and its placed order.
+  purchase locks, the channel admission of a session and its placed order,
+  and the immutable customer and address record of an order.
   The kernel bindings of the review name the new file. Open: cart storage and
   mutation, the quote, the selection, the four steps of the checkout
   transaction (they call apps, B2B, payments, marketing and legal and need a
@@ -283,6 +286,7 @@ Order follows the dependency report, lowest first. Each line is one move.
   its channel overrides and public projection, company logos, the issuance
   of invoices, delivery notes and cancellations, and carrier documents.
   `ports::Payments` supplies the transfer instructions an invoice prints.
+  The orders and receipts an owning customer account reads live there too.
   Open: the grid plan, manual orders, imports, the workflow save (app
   lifecycle), fulfilment handlers, returns, merchant customer edits.
 - [ ] marketing. Started: `components/marketing` owns the rule conditions with
@@ -293,9 +297,11 @@ Order follows the dependency report, lowest first. Each line is one move.
   `domain/` the flow action schema, the flow graph and instruction texts;
   `store/` promotion evaluation with usage limits, channel validation and the
   dependency inspection before a deletion, the flow job claims with their
-  checkpoints and the membership a queued step runs with. Open: flow
-  projection, flow execution (needs ports to orders, customers and apps),
-  channel access and preview, coupons, rule history, routes.
+  checkpoints, the membership a queued step runs with and the bounded job
+  summaries; `service/` the coupon selection of a cart, which admits and
+  prices it through `veyndo_shop::ports::Carts`. Open: flow projection, flow
+  execution (needs ports to orders, customers and apps), channel access and
+  preview, rule history, routes.
 - [ ] b2b. Started: `components/b2b` owns the company, unit and member records
   with their bounds and the capability contract; `store/` holds unit access
   and the cart guard, organization reads and writes, budgets and approval
@@ -303,9 +309,12 @@ Order follows the dependency report, lowest first. Each line is one move.
   `service/` the approval inbox, quick order and the accepted offer contract.
   They reach the buyer cart through `veyndo_shop::ports::Carts`, which the
   server implements with its guarded cart load, priced view and
-  revision-checked line replacement. Open: lists and requisitions (app
-  configuration selections), quotes and their lifecycle (app lifecycle),
-  the gateway and routes.
+  revision-checked line replacement, and `admit` runs the cashier, channel
+  and company guards on a cart row the caller locked itself. The requisition
+  import lives in `service/`; the bounds of cart lines moved to
+  `veyndo_shop::domain::cart_lines`. Open: lists (app configuration
+  selections), quotes and their lifecycle (app lifecycle), the gateway and
+  routes.
 - [ ] pos. Started: `components/pos` owns the cashier input envelope and the
   capability schema; the POS location of a channel lives with the channel in
   marketing. `service/` holds the cashier customer search and attachment,

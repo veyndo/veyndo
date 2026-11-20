@@ -8,7 +8,7 @@ This lists every checked-in source module in these roots, including files with n
 
 | Module | Responsibility |
 |---|---|
-| [src/accounts/address_restore.rs](../src/accounts/address_restore.rs) | Atomic restoration of the owning customer's address aggregate; geography, references and immutable order snapshots remain guarded. |
+| [src/accounts/address_restore.rs](../src/accounts/address_restore.rs) | The address aggregate is restored by the customers component; the shop's geography admits each address here. |
 | [src/accounts/address_store.rs](../src/accounts/address_store.rs) | Entry points of the address book: country admission and history attribution here, persistence in the customers component. |
 | [src/accounts/addresses.rs](../src/accounts/addresses.rs) | Store API address book uses independent customer sessions, never merchant credentials. |
 | [src/accounts/browser.rs](../src/accounts/browser.rs) | Host-only customer cookies adapt the existing tenant session ledger without granting merchant authority. |
@@ -16,7 +16,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/accounts/demo.rs](../src/accounts/demo.rs) | Public synthetic customer fixture for newly provisioned demo shops; never fills real customer addresses. |
 | [src/accounts/metadata.rs](../src/accounts/metadata.rs) | Standard customer read fields; the projection and metrics are owned by the customers component. |
 | [src/accounts/mod.rs](../src/accounts/mod.rs) | Independent customer sessions, profile/password management and owning-account order history. |
-| [src/accounts/order_snapshot.rs](../src/accounts/order_snapshot.rs) | Checkout-owned immutable customer and address records; future account edits cannot rewrite an order. |
+| [src/accounts/order_snapshot.rs](../src/accounts/order_snapshot.rs) | The immutable customer and address record of an order is owned by the checkout component. |
 | [src/accounts/orders.rs](../src/accounts/orders.rs) | Customer-owned order reads and receipts share one tenant/identity predicate and a public projection. |
 | [src/accounts/payment_preference.rs](../src/accounts/payment_preference.rs) | Optional last-used payment preference is written after purchase commit, without holding cart/unit/product locks. |
 | [src/accounts/profile.rs](../src/accounts/profile.rs) | Typed customer-owned profile updates; price groups, email and merchant roles cannot be self-assigned. |
@@ -196,7 +196,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/b2b/quote_contract.rs](../src/b2b/quote_contract.rs) | Accepted offer prices feed the existing currency/tax calculator; checkout consumes the offer atomically. |
 | [src/b2b/quote_lifecycle.rs](../src/b2b/quote_lifecycle.rs) | App-owned RFQ preparation states reuse native quote CAS, ownership, history and outbox; only native offer/accept moves money. |
 | [src/b2b/quotes.rs](../src/b2b/quotes.rs) | RFQ lifecycle binds merchant offers to a specific company buyer, cart, currency, expiry and revision. |
-| [src/b2b/requisition.rs](../src/b2b/requisition.rs) | Explicit integration permission imports requisitions into native lists; it never impersonates checkout buyers. |
+| [src/b2b/requisition.rs](../src/b2b/requisition.rs) | Requisition import is owned by the B2B component; merchant admission and shop settings are resolved here. |
 | [src/b2b/settings.rs](../src/b2b/settings.rs) | B2B feature switches live in shared commerce settings; disabling never relaxes existing financial policy. |
 | [src/b2b/staging.rs](../src/b2b/staging.rs) | Clone and publish purchasing configuration only; employees, orders, approvals and spending remain live-only. |
 | [src/bin/automation_rules.rs](../src/bin/automation_rules.rs) | JSON batch transport for comparisons with original Shopware rule classes; not a production authority endpoint. |
@@ -396,7 +396,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/marketing/channel_preview.rs](../src/marketing/channel_preview.rs) | One-use preview handoff becomes a host-only cookie, bound to current session, membership and channel revision. |
 | [src/marketing/channels.rs](../src/marketing/channels.rs) | Sales channels share a merchant tenant but bind independent catalog visibility, locale and cart identity. |
 | [src/marketing/condition_gateway.rs](../src/marketing/condition_gateway.rs) | Rule admission and matching are owned by the marketing component. |
-| [src/marketing/coupons.rs](../src/marketing/coupons.rs) | Revision-safe coupon selection for shared storefront/POS carts; pricing remains in promotions. |
+| [src/marketing/coupons.rs](../src/marketing/coupons.rs) | Coupon selection is owned by the marketing component; the server supplies the guarded, priced cart. |
 | [src/marketing/dependencies.rs](../src/marketing/dependencies.rs) | Inspect tenant-owned definition references and durable uses before configuration deletion. |
 | [src/marketing/facts.rs](../src/marketing/facts.rs) | Rule facts are assembled by the marketing component. |
 | [src/marketing/flow_access.rs](../src/marketing/flow_access.rs) | Every queued flow step rehydrates current membership; stored definitions never preserve revoked privileges. |
@@ -407,7 +407,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/marketing/flow_text.rs](../src/marketing/flow_text.rs) | Shop-language validation and main-language fallback for both simple flows and graphical action nodes. |
 | [src/marketing/flows.rs](../src/marketing/flows.rs) | Durable order-event flows: conditions, shop notes and AI proposals; no unapproved model mutations. |
 | [src/marketing/gateway.rs](../src/marketing/gateway.rs) | MCP automation tools call the same tenant-bound handlers and validators as HTTP; no separate mutation semantics. |
-| [src/marketing/jobs.rs](../src/marketing/jobs.rs) | Read bounded tenant flow execution summaries without reloading rule/channel configuration on each Studio refresh. |
+| [src/marketing/jobs.rs](../src/marketing/jobs.rs) | Flow execution summaries are owned by the marketing component; the reader's scopes decide how much it sees. |
 | [src/marketing/lifecycle.rs](../src/marketing/lifecycle.rs) | Revision-bound deletion and reference admission share HTTP/MCP authorization and tenant locks. |
 | [src/marketing/metadata.rs](../src/marketing/metadata.rs) | Authorized revision-bound source facts for products, customers and orders; secrets and pricing authority are excluded. |
 | [src/marketing/mod.rs](../src/marketing/mod.rs) | Native rule conditions, coupons, durable flows and headless/storefront sales-channel boundaries. |
@@ -652,6 +652,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/b2b/src/service/approval.rs](../components/b2b/src/service/approval.rs) | Revision-bound purchasing approval inbox; approvers must be active peers and cannot approve themselves. |
 | [components/b2b/src/service/quick_order.rs](../components/b2b/src/service/quick_order.rs) | Bounded SKU bulk entry resolves native products then uses the ordinary cart's permissions, quantities and prices. |
 | [components/b2b/src/service/quote_contract.rs](../components/b2b/src/service/quote_contract.rs) | Accepted offer prices feed the existing currency/tax calculator; checkout consumes the offer atomically. |
+| [components/b2b/src/service/requisition.rs](../components/b2b/src/service/requisition.rs) | Explicit integration permission imports requisitions into native lists; it never impersonates checkout buyers. |
 | [components/b2b/src/service.rs](../components/b2b/src/service.rs) | Procurement operations on the buyer cart; the server supplies the cart through the shop port. |
 | [components/b2b/src/store/access.rs](../components/b2b/src/store/access.rs) | Re-resolves active customer sessions, company policy and unit membership at every procurement boundary. |
 | [components/b2b/src/store/catalog.rs](../components/b2b/src/store/catalog.rs) | Private unit catalog scope is derived from the current employee/cart, never caller criteria; indexed before pagination. |
@@ -732,6 +733,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/checkout/src/service/app_adjustments.rs](../components/checkout/src/service/app_adjustments.rs) | Apply admitted integer app adjustments through native pricing/tax calculation; extensions cannot replace quote JSON. |
 | [components/checkout/src/service/delivery.rs](../components/checkout/src/service/delivery.rs) | Shipping costs, proportional taxes and calendar delivery windows. |
 | [components/checkout/src/service.rs](../components/checkout/src/service.rs) | service of this component. |
+| [components/checkout/src/store/customer_snapshot.rs](../components/checkout/src/store/customer_snapshot.rs) | Checkout-owned immutable customer and address records; future account edits cannot rewrite an order. |
 | [components/checkout/src/store/product_snapshot.rs](../components/checkout/src/store/product_snapshot.rs) | Localized immutable checkout SKU snapshots read under the purchase transaction's locks. |
 | [components/checkout/src/store/session.rs](../components/checkout/src/store/session.rs) | What a checkout session reads under the checkout transaction: the channel it may sell on and the order it already placed. |
 | [components/checkout/src/store.rs](../components/checkout/src/store.rs) | Reads of the checkout transaction. |
@@ -773,6 +775,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/customers/src/service/directory.rs](../components/customers/src/service/directory.rs) | The merchant's view of customers: standard read fields, the bounded lookup and guest contacts. |
 | [components/customers/src/service/sessions.rs](../components/customers/src/service/sessions.rs) | Independent customer sessions: a random token whose digest alone is stored. |
 | [components/customers/src/service.rs](../components/customers/src/service.rs) | Operations of the customers component. |
+| [components/customers/src/store/address_restore.rs](../components/customers/src/store/address_restore.rs) | Atomic restoration of the owning customer's address aggregate; geography, references and immutable order snapshots remain guarded. |
 | [components/customers/src/store/addresses.rs](../components/customers/src/store/addresses.rs) | Tenant-owned address persistence, optimistic revisions and atomic default assignment. |
 | [components/customers/src/store/customers.rs](../components/customers/src/store/customers.rs) | Customer rows as the merchant and the account see them, with order metrics from authoritative records. |
 | [components/customers/src/store/sessions.rs](../components/customers/src/store/sessions.rs) | Customer sessions, stored by the digest of their token. |
@@ -822,12 +825,14 @@ This lists every checked-in source module in these roots, including files with n
 | [components/marketing/src/domain.rs](../components/marketing/src/domain.rs) | Rule conditions, flow actions and the flow graph, free of I/O. |
 | [components/marketing/src/lib.rs](../components/marketing/src/lib.rs) | Marketing component: rule conditions, the facts they are matched against, and promotions. |
 | [components/marketing/src/service/conditions.rs](../components/marketing/src/service/conditions.rs) | Shared rule admission and authoritative context for tax and other native consumers. |
+| [components/marketing/src/service/coupons.rs](../components/marketing/src/service/coupons.rs) | Revision-safe coupon selection for shared storefront/POS carts; pricing remains in promotions. |
 | [components/marketing/src/service.rs](../components/marketing/src/service.rs) | Operations of the marketing component. |
 | [components/marketing/src/store/channel_config.rs](../components/marketing/src/store/channel_config.rs) | Shared transactional channel validation for merchant edits, history restoration and selective release. |
 | [components/marketing/src/store/customer_facts.rs](../components/marketing/src/store/customer_facts.rs) | Customer rule authority is loaded by tenant and stable customer ID, with aggregate history and calendar age. |
 | [components/marketing/src/store/dependencies.rs](../components/marketing/src/store/dependencies.rs) | Inspect tenant-owned definition references and durable uses before configuration deletion. |
 | [components/marketing/src/store/facts.rs](../components/marketing/src/store/facts.rs) | Assemble private server-owned rule context once per quote/event; never publish customer facts in cart responses. |
 | [components/marketing/src/store/flow_access.rs](../components/marketing/src/store/flow_access.rs) | Every queued flow step rehydrates current membership; stored definitions never preserve revoked privileges. |
+| [components/marketing/src/store/flow_job_summaries.rs](../components/marketing/src/store/flow_job_summaries.rs) | Bounded flow execution summaries of a shop; a restricted reader never sees action output. |
 | [components/marketing/src/store/flow_jobs.rs](../components/marketing/src/store/flow_jobs.rs) | PostgreSQL ownership of Flow claims, cursor checkpoints and terminal results. |
 | [components/marketing/src/store/promotions.rs](../components/marketing/src/store/promotions.rs) | Server-authoritative coupons and automatic campaigns, with deterministic discounts and atomic usage limits. |
 | [components/marketing/src/store/rule_snapshot.rs](../components/marketing/src/store/rule_snapshot.rs) | Resolve only referenced tenant rule IDs with indexed batched reads; freeze active definitions and revisions into the event snapshot. |
@@ -850,6 +855,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/orders/src/domain.rs](../components/orders/src/domain.rs) | Rules of orders, free of I/O. |
 | [components/orders/src/lib.rs](../components/orders/src/lib.rs) | Orders component: the order state machine, derived fields, audited mutations and receipts. |
 | [components/orders/src/ports.rs](../components/orders/src/ports.rs) | What the orders component needs from the server. |
+| [components/orders/src/store/account_orders.rs](../components/orders/src/store/account_orders.rs) | Orders and receipts as their owning customer account reads them; matching a guest's email never grants access. |
 | [components/orders/src/store/carrier_documents.rs](../components/orders/src/store/carrier_documents.rs) | Immutable private carrier documents belong to the existing order receipt store, never product assets. |
 | [components/orders/src/store/company.rs](../components/orders/src/store/company.rs) | Revisioned tenant company basis and sparse channel overrides, serialized with receipt issuance. |
 | [components/orders/src/store/company_logos.rs](../components/orders/src/store/company_logos.rs) | Tenant-owned company logos: deduplicated immutable PNGs, delivered publicly only while a channel links them. |
@@ -965,6 +971,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/shipping/src/store.rs](../components/shipping/src/store.rs) | SQL of the shipping component. |
 | [components/shop/src/domain/buyer_consent.rs](../components/shop/src/domain/buyer_consent.rs) | Required contact data for explicit registered marketing segments; shared by protocol review and locked native checkout. |
 | [components/shop/src/domain/cart_admission.rs](../components/shop/src/domain/cart_admission.rs) | Who may touch a cart: a merchant-created cart only its creating merchant, a POS cart only its admitted cashier, and every cart only its own sales channel. |
+| [components/shop/src/domain/cart_lines.rs](../components/shop/src/domain/cart_lines.rs) | Bounds every set of cart lines keeps: at most 100 distinct products, each once, in a sane quantity. |
 | [components/shop/src/domain/checkout_selection.rs](../components/shop/src/domain/checkout_selection.rs) | Recover a quote after configuration changes without losing items or silently committing new choices. |
 | [components/shop/src/domain/customer_groups.rs](../components/shop/src/domain/customer_groups.rs) | Tenant-owned translated customer groups preserve exact rule IDs and select an explicit existing price/tax presentation basis. |
 | [components/shop/src/domain/defaults.rs](../components/shop/src/domain/defaults.rs) | Backward-compatible enrichment of existing configuration with bundled translated method labels. |

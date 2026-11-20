@@ -391,6 +391,7 @@
         "studio"
       ],
       "foreign_tables": [
+        "commerce_settings",
         "customer_sessions",
         "customers",
         "extensions",
@@ -405,7 +406,7 @@
         "tenants"
       ],
       "glob_imports": 11,
-      "untyped_access": 188,
+      "untyped_access": 194,
       "sql_outside_store": 8
     },
     "customers": {
@@ -441,15 +442,13 @@
       ],
       "foreign_tables": [
         "carts",
-        "commerce_settings",
-        "order_receipts",
         "orders",
         "outbox",
         "tenants"
       ],
-      "glob_imports": 18,
-      "untyped_access": 85,
-      "sql_outside_store": 10
+      "glob_imports": 17,
+      "untyped_access": 79,
+      "sql_outside_store": 7
     },
     "orders": {
       "title": "Order state, fulfilment, receipts, documents and merchant order work",
@@ -622,7 +621,7 @@
       ],
       "glob_imports": 21,
       "untyped_access": 339,
-      "sql_outside_store": 18
+      "sql_outside_store": 17
     },
     "b2b": {
       "title": "Company procurement: organisations, budgets, approvals and quotes",

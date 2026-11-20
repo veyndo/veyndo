@@ -713,10 +713,15 @@
       "sha256": "84272e35216d2c94b26846f4e22a83bdda96e1954bc886d4bca33d9a3b2793cb",
       "review": "B2B approvals, quick order and offer contract moved behind the shop cart port"
     },
+    "components/b2b/src/service/requisition.rs": {
+      "status": "unproved",
+      "sha256": "351faa9841a47a67441a06398b11a804ca1c563731913304512a7d9ccac04a44",
+      "review": "Coupons, flow job summaries, requisition import, customer snapshot, address restore and account orders moved into components"
+    },
     "components/b2b/src/service.rs": {
       "status": "unproved",
-      "sha256": "7a78702a0deccfbc0149c7ac013beb330f2c9de1d17c62d83aadb68377528305",
-      "review": "B2B approvals, quick order and offer contract moved behind the shop cart port"
+      "sha256": "d83901101b468d5f7fbc752522632bfec99389487982bb3763e0dc49f5f21a2c",
+      "review": "Coupons, flow job summaries, requisition import, customer snapshot, address restore and account orders moved into components"
     },
     "components/b2b/src/store/access.rs": {
       "status": "unproved",
@@ -1098,6 +1103,11 @@
       "sha256": "8d8f71730ad60dcf5227ab3fa6a0ba8b32aea63b732ce5abd4e9b69d1ed4f2fb",
       "review": "Delivery enrichment, app adjustments and funding moved into components; kernel call sites unchanged"
     },
+    "components/checkout/src/store/customer_snapshot.rs": {
+      "status": "unproved",
+      "sha256": "a4879982eac35a2be2108e00b040726381b347633378adc0a377e083321a9740",
+      "review": "Coupons, flow job summaries, requisition import, customer snapshot, address restore and account orders moved into components"
+    },
     "components/checkout/src/store/product_snapshot.rs": {
       "status": "unproved",
       "sha256": "8b7362fade55bc41b751fdbbc1495026c7776dd1549c991905db602a838950ac",
@@ -1110,8 +1120,8 @@
     },
     "components/checkout/src/store.rs": {
       "status": "unproved",
-      "sha256": "bef0f095a078072b902da8bd9566ec8c0b6bbc817a8f8082f179c9354cc046b6",
-      "review": "POS guard, customer, discount and settlement and the checkout session review moved into components"
+      "sha256": "688ff6df7999e3b7762f90e8d132af6c828be55a7377e1d349b608d10d720cbf",
+      "review": "Coupons, flow job summaries, requisition import, customer snapshot, address restore and account orders moved into components"
     },
     "components/core/src/access.rs": {
       "status": "unproved",
@@ -1293,6 +1303,11 @@
       "sha256": "1d35da6c7981b393247006460da1bc3b4f66aa61e1538d4405abe5ef69f339ca",
       "review": "customers component crate created; no kernel binding changed"
     },
+    "components/customers/src/store/address_restore.rs": {
+      "status": "unproved",
+      "sha256": "83082b27904fdde97af710f408423c033ec0afe400f62660aacdb55c4a8887da",
+      "review": "Coupons, flow job summaries, requisition import, customer snapshot, address restore and account orders moved into components"
+    },
     "components/customers/src/store/addresses.rs": {
       "status": "unproved",
       "sha256": "41c9192e7b1d85d86a0815c4b315dac4bba15761969d0e53d60123f33eee1eba",
@@ -1310,8 +1325,8 @@
     },
     "components/customers/src/store.rs": {
       "status": "unproved",
-      "sha256": "640b85ad8de7ff793c4898be08dd5acace4f376f7e02e09665d6675937a1467a",
-      "review": "customers component crate created; no kernel binding changed"
+      "sha256": "b167d455f73694348e99bee17eb3208abbbc719cfbf022422b27672466a35681",
+      "review": "Coupons, flow job summaries, requisition import, customer snapshot, address restore and account orders moved into components"
     },
     "components/identity/src/domain/credentials.rs": {
       "status": "unproved",
@@ -1518,10 +1533,15 @@
       "sha256": "8bbd97c5e186d2cdd06e32df3aa2380cdb69b272d4a7bda6c97892793b33acaf",
       "review": "cart types and rule engine moved into components; checking bindings"
     },
+    "components/marketing/src/service/coupons.rs": {
+      "status": "unproved",
+      "sha256": "94e8b9c70f4ec7eeed4497f63078f9bfdc155011ae6804c0830e2858e400bd63",
+      "review": "Coupons, flow job summaries, requisition import, customer snapshot, address restore and account orders moved into components"
+    },
     "components/marketing/src/service.rs": {
       "status": "unproved",
-      "sha256": "c7375dc2df950d777bebb7398b37aedf3d95ed0b512c17fd1575f3eca9148c4e",
-      "review": "cart types and rule engine moved into components; checking bindings"
+      "sha256": "490a5a736c07042d1d8c804c14ea99a51968be743607037406b4e897bf45b5c3",
+      "review": "Coupons, flow job summaries, requisition import, customer snapshot, address restore and account orders moved into components"
     },
     "components/marketing/src/store/channel_config.rs": {
       "status": "unproved",
@@ -1548,6 +1568,11 @@
       "sha256": "bac22808f428b59353c4f1fbda325b97c5384e0c5ab1dee24c045f29eda2e286",
       "review": "Flow membership and redacted order reads moved into components"
     },
+    "components/marketing/src/store/flow_job_summaries.rs": {
+      "status": "unproved",
+      "sha256": "5a23b6fab4548d073d0ae243cd3b65d01fd27b5e0ffda172b0edbcc933b6c908",
+      "review": "Coupons, flow job summaries, requisition import, customer snapshot, address restore and account orders moved into components"
+    },
     "components/marketing/src/store/flow_jobs.rs": {
       "status": "unproved",
       "sha256": "2f501b10a17cec6632e30f859063724ceb44a8c665b42030fd15d15c805c80f6",
@@ -1565,8 +1590,8 @@
     },
     "components/marketing/src/store.rs": {
       "status": "unproved",
-      "sha256": "7f5768c44a9e23561c1adeee69bc0795eac8b9098674494600a5ed30df3ae5ca",
-      "review": "Flow membership and redacted order reads moved into components"
+      "sha256": "85a49c1ad7d237b5341c3276dbdc1c93955701fcf356a49b4fa5a17a7148bb44",
+      "review": "Coupons, flow job summaries, requisition import, customer snapshot, address restore and account orders moved into components"
     },
     "components/marketing/src/types/channel.rs": {
       "status": "unproved",
@@ -1658,6 +1683,11 @@
       "sha256": "c345f2c0be21212752cebd236ae2399474e2b22b0449f407dfb8d1e13b47e863",
       "review": "POS, checkout session review, company data, receipts and carrier documents moved into components"
     },
+    "components/orders/src/store/account_orders.rs": {
+      "status": "unproved",
+      "sha256": "945b9d4648fcedae897ac2a546db8542ae0467749d1899eb07dfe833627c97f2",
+      "review": "Coupons, flow job summaries, requisition import, customer snapshot, address restore and account orders moved into components"
+    },
     "components/orders/src/store/carrier_documents.rs": {
       "status": "unproved",
       "sha256": "f3c184da140f7e553336e203ee92a336dff637a4c9c1684ea0565a3f5637e1ef",
@@ -1705,8 +1735,8 @@
     },
     "components/orders/src/store.rs": {
       "status": "unproved",
-      "sha256": "a75166ca079c2ade1a10e9b33840170dc9d05b5a91c213a547667942ba3b22d6",
-      "review": "POS, checkout session review, company data, receipts and carrier documents moved into components"
+      "sha256": "2f1cce60a804c86ff82debbb61cd01c77a966bdf032ace86a122b7207ca1072f",
+      "review": "Coupons, flow job summaries, requisition import, customer snapshot, address restore and account orders moved into components"
     },
     "components/orders/src/types/list_criteria.rs": {
       "status": "unproved",
@@ -2233,6 +2263,11 @@
       "sha256": "20694d0c841285fef209eb6bd27f7cb9dffa0dc64cd348775116b93c4cef5c21",
       "review": "POS guard, customer, discount and settlement and the checkout session review moved into components"
     },
+    "components/shop/src/domain/cart_lines.rs": {
+      "status": "unproved",
+      "sha256": "10c52bdbce953b8f54b7cb78467c66e19f0e99ede87bf54c87830e78b1db58ea",
+      "review": "Coupons, flow job summaries, requisition import, customer snapshot, address restore and account orders moved into components"
+    },
     "components/shop/src/domain/checkout_selection.rs": {
       "status": "unproved",
       "sha256": "5fe0fec692b5362bb6d51923f4b3bb771e3c99dabd786c1ffbc2b66951002880",
@@ -2275,8 +2310,8 @@
     },
     "components/shop/src/domain.rs": {
       "status": "unproved",
-      "sha256": "cd08c020639720872ff9209ab95a07310824651068a48d01869c0578545375c4",
-      "review": "POS guard, customer, discount and settlement and the checkout session review moved into components"
+      "sha256": "665ebc1979e362e2125ae3aa055b2a9063cd1e249c800d3d1481be6f5af8a568",
+      "review": "Coupons, flow job summaries, requisition import, customer snapshot, address restore and account orders moved into components"
     },
     "components/shop/src/lib.rs": {
       "status": "unproved",
@@ -2285,8 +2320,8 @@
     },
     "components/shop/src/ports.rs": {
       "status": "unproved",
-      "sha256": "3aebe14f9c3b22e4177ce68ad3b2c6d0cc9e3a517217ce9105a3898218921a6b",
-      "review": "B2B approvals, quick order and offer contract moved behind the shop cart port"
+      "sha256": "fb6c6fb5bd3243b58f9a625aaa9bd2d470af1f0de3b3bf5e61b4e68f6956b617",
+      "review": "Coupons, flow job summaries, requisition import, customer snapshot, address restore and account orders moved into components"
     },
     "components/shop/src/store/group_usage.rs": {
       "status": "unproved",
@@ -4115,8 +4150,8 @@
     },
     "src/accounts/address_restore.rs": {
       "status": "unproved",
-      "sha256": "712936ff628c4e4d36457cebddfbe7027621ed4cfadbd3bce9054af4cac8018f",
-      "review": "Reviewed connected CRM: configured group pricing admission with exact Lean contract, settings lock and dependency rejection; independent revisioned default addresses and ownership-validated book restore; trusted transaction-local actors with deferred one-per-transaction credential-free aggregate history; scoped read/write/MCP restore through domain handlers preserving current stock, identity and financial events. Real crm_history tests cover all twelve editable entity restore types, checkout, stale writes, group dependencies, foreign shops and viewer rejection; Rust unit/lint and affected integration suites verify existing consumers. SQL/async adapters remain unproved."
+      "sha256": "1684cc9a56e8e9cfae0935654e88d4742c5ade07d2823b171ccd92590194117e",
+      "review": "Coupons, flow job summaries, requisition import, customer snapshot, address restore and account orders moved into components"
     },
     "src/accounts/address_store.rs": {
       "status": "unproved",
@@ -4150,18 +4185,18 @@
     },
     "src/accounts/mod.rs": {
       "status": "unproved",
-      "sha256": "dd7288b11146d73f40e51fba55d713f8e0bb469231c4fec04ed1c5644f8723ca",
-      "review": "B2B access, organization and purchasing storage and flow job claims moved into their components"
+      "sha256": "a327cd598e951513db0f10627b37d108dbac1644819e6e2b1c10dfaf139629fa",
+      "review": "Coupons, flow job summaries, requisition import, customer snapshot, address restore and account orders moved into components"
     },
     "src/accounts/order_snapshot.rs": {
       "status": "unproved",
-      "sha256": "80217419109b1e8684b7a5cf913660f766ad422917c2c9c5c82f1f25d87b5e8a",
-      "review": "Reviewed connected CRM: configured group pricing admission with exact Lean contract, settings lock and dependency rejection; independent revisioned default addresses and ownership-validated book restore; trusted transaction-local actors with deferred one-per-transaction credential-free aggregate history; scoped read/write/MCP restore through domain handlers preserving current stock, identity and financial events. Real crm_history tests cover all twelve editable entity restore types, checkout, stale writes, group dependencies, foreign shops and viewer rejection; Rust unit/lint and affected integration suites verify existing consumers. SQL/async adapters remain unproved."
+      "sha256": "bf7718304df2f763062d88f8afad4c0cc9b49b057fa07ce805399e416db38a65",
+      "review": "Coupons, flow job summaries, requisition import, customer snapshot, address restore and account orders moved into components"
     },
     "src/accounts/orders.rs": {
       "status": "unproved",
-      "sha256": "7d855fecbc101eafa1404e5d2d6ff8fcf3ff1c5330b3ca3aaa0aca8f2889590f",
-      "review": "Native lifecycle review: bounded namespaced app graphs preserve native terminal/payment/stock/buyer admission, per-object immutable accepted definitions, current compound scopes, same HTTP MCP Flow owners and operational history; SQL snapshots and migration 105 are regression-tested adapters, not proved."
+      "sha256": "1e627e54ad9733f0e7f7eb08f696827314871e68232e8015a34d72ebddacd4c5",
+      "review": "Coupons, flow job summaries, requisition import, customer snapshot, address restore and account orders moved into components"
     },
     "src/accounts/payment_preference.rs": {
       "status": "unproved",
@@ -5035,8 +5070,8 @@
     },
     "src/b2b/quick_order.rs": {
       "status": "unproved",
-      "sha256": "caf1901c0925c9612fae0e6191b7af67dbf810576912a7df495db2fdeef19c26",
-      "review": "B2B approvals, quick order and offer contract moved behind the shop cart port"
+      "sha256": "362ba68b36592b66305b5b71f9d80fc92b42b9a624e4aceae77a143541895816",
+      "review": "Coupons, flow job summaries, requisition import, customer snapshot, address restore and account orders moved into components"
     },
     "src/b2b/quote_contract.rs": {
       "status": "unproved",
@@ -5055,8 +5090,8 @@
     },
     "src/b2b/requisition.rs": {
       "status": "unproved",
-      "sha256": "1067fcd7ae3fd2773faf66802da47e26a8446f05c7948ecee5939c9aa37a9db7",
-      "review": "Reviewed native B2B authority, unit-first locking, revision-bound approvals and offers, exact budget allocation/release, private variant pagination, current app callbacks and forced tenant FKs/RLS; EDI codecs remain app-owned and bounded. Real PostgreSQL approval/concurrent budget/revocation/PDF/MCP and app/checkout baseline suites passed; schema/build/proof and changed Rust owners reviewed. Two extracted decisions add four Lean properties, not whole-server verification."
+      "sha256": "08c6172260fb000951c7cd16e5526612409f029f64fddee4988a3e3f888a8957",
+      "review": "Coupons, flow job summaries, requisition import, customer snapshot, address restore and account orders moved into components"
     },
     "src/b2b/settings.rs": {
       "status": "unproved",
@@ -5220,8 +5255,8 @@
     },
     "src/cart_storage.rs": {
       "status": "unproved",
-      "sha256": "de951e1a60a2f6eb1df128b98a6ce57aa6e393705e2a45375c5ebc661e1cf549",
-      "review": "B2B approvals, quick order and offer contract moved behind the shop cart port"
+      "sha256": "83b15a81bb8cfa13b6f27f86df4534e22d35f10cb493d61307f25a6b7760455f",
+      "review": "Coupons, flow job summaries, requisition import, customer snapshot, address restore and account orders moved into components"
     },
     "src/catalog_model.rs": {
       "status": "unproved",
@@ -6055,8 +6090,8 @@
     },
     "src/marketing/coupons.rs": {
       "status": "unproved",
-      "sha256": "82708ac59eebde4ff4da887dc0cd93421a81bab79008c5c6ac6d0cfc0986b60f",
-      "review": "Reviewed native B2B authority, unit-first locking, revision-bound approvals and offers, exact budget allocation/release, private variant pagination, current app callbacks and forced tenant FKs/RLS; EDI codecs remain app-owned and bounded. Real PostgreSQL approval/concurrent budget/revocation/PDF/MCP and app/checkout baseline suites passed; schema/build/proof and changed Rust owners reviewed. Two extracted decisions add four Lean properties, not whole-server verification."
+      "sha256": "3f024c573680218a4ec63d203bf33c2f01840852c640651c4d63fbce623e74c7",
+      "review": "Coupons, flow job summaries, requisition import, customer snapshot, address restore and account orders moved into components"
     },
     "src/marketing/dependencies.rs": {
       "status": "unproved",
@@ -6110,8 +6145,8 @@
     },
     "src/marketing/jobs.rs": {
       "status": "unproved",
-      "sha256": "2602e171f2706e7d2320a698ebc478e580e666853fe30c541103eaf2a145f378",
-      "review": "Flow history adds a tenant-bound join to the original task for applied/execution-started metadata only; existing source-permission projection is unchanged. The shared frontend observes original native runs and preserves approval, actor, revision and domain authority. Native Flow fixture verifies pending/completed history plus parent isolation."
+      "sha256": "7fadd0e8e8dad67b40d98e8e383a20a4a420569323addd935e2183c0246432e1",
+      "review": "Coupons, flow job summaries, requisition import, customer snapshot, address restore and account orders moved into components"
     },
     "src/marketing/lifecycle.rs": {
       "status": "unproved",

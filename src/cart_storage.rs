@@ -92,20 +92,7 @@ pub(crate) async fn new_cart(
         .await?;
     Ok(c)
 }
-pub(crate) fn validate_items(items: &[Item]) -> Result<()> {
-    if items.len() > 100 {
-        return Err(bad("Maximum 100 distinct items"));
-    }
-    let mut seen = std::collections::HashSet::new();
-    for i in items {
-        if i.quantity == 0 || i.quantity > 10000 || !seen.insert(&i.id) {
-            return Err(bad(
-                "Items must have unique IDs and quantities from 1 to 10000",
-            ));
-        }
-    }
-    Ok(())
-}
+pub(crate) use veyndo_shop::domain::cart_lines::validate as validate_items;
 
 pub(crate) async fn new_cart_context(
     a: &App,
@@ -187,6 +174,18 @@ impl veyndo_shop::ports::Carts for Carts<'_> {
     }
     fn view<'a>(&'a self, cart: &'a StoredCart) -> veyndo_core::PortFuture<'a, Value> {
         Box::pin(cart_json(self.0, cart))
+    }
+    fn admit<'a>(
+        &'a self,
+        conn: &'a mut sqlx::PgConnection,
+        h: &'a RequestContext,
+        cart: &'a StoredCart,
+    ) -> veyndo_core::PortFuture<'a, ()> {
+        Box::pin(async move {
+            pos::guard_cart(h, cart)?;
+            b2b::guard_conn(conn, h, cart).await?;
+            Ok(())
+        })
     }
     fn replace<'a>(
         &'a self,
