@@ -45,6 +45,19 @@ pub fn merchant(h: &RequestContext) -> Result<String> {
     Ok(resolved.unwrap_or_default())
 }
 
+/// The rights every assistant conversation needs together.
+pub fn assistant_access(h: &RequestContext) -> Result<()> {
+    for right in [
+        "assistant.use",
+        "catalog.read",
+        "orders.read",
+        "knowledge.read",
+    ] {
+        permit(h, right)?;
+    }
+    Ok(())
+}
+
 #[cfg(test)]
 mod tests {
     use super::{RequestContext, StatusCode, allowed, merchant, permit, validate_permissions};

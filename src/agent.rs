@@ -1,16 +1,6 @@
 //! Persistent grounded conversations and tenant-scoped semantic knowledge HTTP adapters.
 use super::*;
-pub(crate) fn assistant_access(h: &RequestContext) -> Result<()> {
-    for right in [
-        "assistant.use",
-        "catalog.read",
-        "orders.read",
-        "knowledge.read",
-    ] {
-        auth::permit(h, right)?;
-    }
-    Ok(())
-}
+pub(crate) use veyndo_identity::assistant_access;
 
 pub(super) fn choice(v: &Value) -> Result<Option<Choice>> {
     v.get("inference")

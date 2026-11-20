@@ -251,10 +251,17 @@ Order follows the dependency report, lowest first. Each line is one move.
   mapping, receipt claims, job admission, saved instruments, the order ledger
   (order update, events, stock release) and the capture, settlement and refund
   admissions; `service/` the provider-neutral receipt persistence and funding
-  admission. `ports::Host` is what the server supplies: adapter configuration
-  and the POS sale completion. The proved payment rules are bound to the new
-  files. Open: provider dispatch and the remote adapter call, the job worker,
-  sessions, accounts, webhooks, merchant routes, the PayPal adapter include.
+  admission, the adapter request, the leased job worker, signed provider
+  notifications, embedded provider sessions with their parent origin check,
+  transaction details, recipient instructions and app payment commands; the
+  command queue with refund admission and the customer binding sit in
+  `store/`. `ports::Host` is what the server supplies to the ledger: adapter
+  configuration and the POS sale completion. `ports::Gateway` is the provider
+  side: the admitted adapter transport, provider dispatch, receipt
+  persistence per provider, the worker scope and the built-in provider's
+  cancellation evidence. The proved payment rules are bound to the new files.
+  Open: provider accounts and onboarding, the registry of methods from app
+  manifests, routes, the PayPal adapter include.
 - [ ] checkout. Started: `components/checkout` owns the destination tax lines
   of a quote, the shipping and payment method enrichment with delivery dates,
   and exact app price adjustments. Open: cart storage and mutation, the quote,
@@ -265,7 +272,8 @@ Order follows the dependency report, lowest first. Each line is one move.
   transition guards and the workflow view, the audited write log with its
   replay ledger, and receipt texts. The kernel bindings of the order workflow
   name the new file. Open: order reads and grids, manual orders, imports,
-  fulfilment handlers, receipts as PDF, returns, company model.
+  fulfilment handlers, returns. The redacted read views for app callbacks
+  live in `store/`.
 - [ ] marketing. Started: `components/marketing` owns the rule conditions with
   their bounds and matching, field comparison, the line, customer and order
   facts a rule reads, the snapshot of referenced rules, and the shared
@@ -273,12 +281,16 @@ Order follows the dependency report, lowest first. Each line is one move.
   the flow, the work template and the sales channel with its POS location;
   `domain/` the flow action schema, the flow graph and instruction texts;
   `store/` promotion evaluation with usage limits, channel validation and the
-  dependency inspection before a deletion. Open: flow projection and jobs,
-  flow execution (needs ports to orders, customers and apps), channel access
-  and preview, coupons, rule history, routes.
+  dependency inspection before a deletion, the flow job claims with their
+  checkpoints and the membership a queued step runs with. Open: flow
+  projection, flow execution (needs ports to orders, customers and apps),
+  channel access and preview, coupons, rule history, routes.
 - [ ] b2b. Started: `components/b2b` owns the company, unit and member records
-  with their bounds and the capability contract. Open: organization writes,
-  budgets, approvals, quotes, the staging copy, routes.
+  with their bounds and the capability contract; `store/` holds unit access
+  and the cart guard, organization reads and writes, budgets and approval
+  thresholds of a purchase, the private unit catalog and the staging copy.
+  Open: lists, quotes and their lifecycle, approvals, quick order,
+  requisitions (they need the cart port), routes.
 - [ ] pos. Started: `components/pos` owns the cashier input envelope and the
   capability schema; the POS location of a channel lives with the channel in
   marketing. Open: the gateway, settlement, discounts, cash handling.

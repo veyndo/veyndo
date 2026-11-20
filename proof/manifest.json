@@ -1283,8 +1283,8 @@
     },
     "components/identity/src/lib.rs": {
       "status": "reviewed-binding",
-      "sha256": "5ca07cd40b9e5faa043010679529c2605c0f9ac1d9284c42d6fb181fe7d30d67",
-      "review": "The merchant check is bound to the proved merchant_scope_admissible rule: a credential of one shop never acts for another. Status codes and messages are unchanged."
+      "sha256": "b057578a21e0e387a7415d490a7acb940730bc07baa17359634aefd030403254",
+      "review": "Flow membership and redacted order reads moved into components"
     },
     "components/identity/src/route_policy.rs": {
       "status": "unproved",
@@ -1491,6 +1491,11 @@
       "sha256": "b742130c3e216d15c87b619f1da50534fcf809c3af85881fd60abda60ba56347",
       "review": "cart types and rule engine moved into components; checking bindings"
     },
+    "components/marketing/src/store/flow_access.rs": {
+      "status": "unproved",
+      "sha256": "bac22808f428b59353c4f1fbda325b97c5384e0c5ab1dee24c045f29eda2e286",
+      "review": "Flow membership and redacted order reads moved into components"
+    },
     "components/marketing/src/store/flow_jobs.rs": {
       "status": "unproved",
       "sha256": "2f501b10a17cec6632e30f859063724ceb44a8c665b42030fd15d15c805c80f6",
@@ -1508,8 +1513,8 @@
     },
     "components/marketing/src/store.rs": {
       "status": "unproved",
-      "sha256": "6b427b00bd7b11fb0bfc2b1b6aae3fb80f8d44f637b46a8b662105ed8b776b31",
-      "review": "B2B access, organization and purchasing storage and flow job claims moved into their components"
+      "sha256": "7f5768c44a9e23561c1adeee69bc0795eac8b9098674494600a5ed30df3ae5ca",
+      "review": "Flow membership and redacted order reads moved into components"
     },
     "components/marketing/src/types/channel.rs": {
       "status": "unproved",
@@ -1606,10 +1611,15 @@
       "sha256": "722200ab025714f84aac83ecbdafafe12b7bfa9a380c65444ce97c39c486521b",
       "review": "order workflow kernel bindings follow the move into components/orders"
     },
+    "components/orders/src/store/redacted_reads.rs": {
+      "status": "unproved",
+      "sha256": "3fa20c09df3850c733023539cb0f76a84cb3287883c4836ed8553f552b03e8b0",
+      "review": "Flow membership and redacted order reads moved into components"
+    },
     "components/orders/src/store.rs": {
       "status": "unproved",
-      "sha256": "58ba6136e58cd8e21790e9cc2f19a5dd4e470361c35d04c6d102b52235ebd85e",
-      "review": "order workflow kernel bindings follow the move into components/orders"
+      "sha256": "ce4feb412a4755484ab06ec038550151b26f1f73f486993c8c30c6ea03da321f",
+      "review": "Flow membership and redacted order reads moved into components"
     },
     "components/orders/src/types/list_criteria.rs": {
       "status": "unproved",
@@ -4033,8 +4043,8 @@
     },
     "src/agent.rs": {
       "status": "unproved",
-      "sha256": "fd4f3e1824393ab32a4f22d9fc7b35b8ff5abbfeaecb43521bfeec14e2c0178c",
-      "review": "Stage 8 adds the sovereign AI gate in the inference crate and its callers; no extracted policy changes."
+      "sha256": "1ea56212d4a5e9e5a6db16ceda15683e8a791fb60b933724487dc402bdec7c0c",
+      "review": "Flow membership and redacted order reads moved into components"
     },
     "src/agent_runs/authority.rs": {
       "status": "reviewed-binding",
@@ -5928,8 +5938,8 @@
     },
     "src/marketing/flow_access.rs": {
       "status": "unproved",
-      "sha256": "8480c18449a5fa0395141dbe86855d41c9bfca944134f87aa58a3969751f2dee",
-      "review": "App upgrade final review: current saved Flow membership and shared additional/core rights on the existing locked connection; explicit validation-rule schema migration reuses bounded native field checks; payment registry preserves active basis/channel method coverage. Real PostgreSQL negative fixtures reproduced old admission and pass after fixes. SQL/async admission remains unproved."
+      "sha256": "3dae3c4bde7a6c2db41138461ab390a24d82cedf3b09f1c5ea2ae754d71eccf8",
+      "review": "Flow membership and redacted order reads moved into components"
     },
     "src/marketing/flow_actions.rs": {
       "status": "unproved",
@@ -6263,8 +6273,8 @@
     },
     "src/operations/redacted_reads.rs": {
       "status": "unproved",
-      "sha256": "e95b1e3a4ab7b47dd55afc2986e03ca05a483905b2ffde14abfb21139a090a6e",
-      "review": "Reviewed tenant role, PII and B2B admission changes with independent reviewer; fixed stale owner/invitation races tested against PostgreSQL. App callbacks preserve existing safe projections without elevating identities; separate PII consent required for full reads, foreign IDs rejected and retained guest/group fields regression tested. SQL/async/UI remain outside proof boundary; verified commerce kernel unchanged."
+      "sha256": "218180de9082c10e26f658415dc1f0d6a7fae167e22b3e1baebe47e0d09cdf3b",
+      "review": "Flow membership and redacted order reads moved into components"
     },
     "src/operations/routes.rs": {
       "status": "unproved",
@@ -6868,8 +6878,8 @@
       "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
     },
     "Cargo.lock": {
-      "sha256": "1e2ea49a5162974eaa0d8294100b6e51e3f764d7d8723eb0aab717c0694bd18f",
-      "review": "B2B access, organization and purchasing storage and flow job claims moved into their components"
+      "sha256": "911a0d9433735f23ef2f8fe53ad762843a564ffd5ffc5a10a2c3d1e3f49210cf",
+      "review": "Flow membership and redacted order reads moved into components"
     },
     "Cargo.toml": {
       "sha256": "881e080eb9f1b1f051c23e2848df689853473831b4d3072817387d65c23ddb66",

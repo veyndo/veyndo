@@ -14,6 +14,7 @@ veyndo-automation = { path = "../../crates/automation" }
 veyndo-catalog = { path = "../catalog" }
 veyndo-cognition = { path = "../../crates/cognition" }
 veyndo-core = { path = "../core" }
+veyndo-identity = { path = "../identity" }
 veyndo-flow-graph = { path = "../../crates/flow-graph" }
 veyndo-pricing = { path = "../pricing" }
 veyndo-shop = { path = "../shop" }

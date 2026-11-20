@@ -817,6 +817,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/marketing/src/store/customer_facts.rs](../components/marketing/src/store/customer_facts.rs) | Customer rule authority is loaded by tenant and stable customer ID, with aggregate history and calendar age. |
 | [components/marketing/src/store/dependencies.rs](../components/marketing/src/store/dependencies.rs) | Inspect tenant-owned definition references and durable uses before configuration deletion. |
 | [components/marketing/src/store/facts.rs](../components/marketing/src/store/facts.rs) | Assemble private server-owned rule context once per quote/event; never publish customer facts in cart responses. |
+| [components/marketing/src/store/flow_access.rs](../components/marketing/src/store/flow_access.rs) | Every queued flow step rehydrates current membership; stored definitions never preserve revoked privileges. |
 | [components/marketing/src/store/flow_jobs.rs](../components/marketing/src/store/flow_jobs.rs) | PostgreSQL ownership of Flow claims, cursor checkpoints and terminal results. |
 | [components/marketing/src/store/promotions.rs](../components/marketing/src/store/promotions.rs) | Server-authoritative coupons and automatic campaigns, with deterministic discounts and atomic usage limits. |
 | [components/marketing/src/store/rule_snapshot.rs](../components/marketing/src/store/rule_snapshot.rs) | Resolve only referenced tenant rule IDs with indexed batched reads; freeze active definitions and revisions into the event snapshot. |
@@ -840,6 +841,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/orders/src/lib.rs](../components/orders/src/lib.rs) | Orders component: the order state machine, derived fields, audited mutations and receipts. |
 | [components/orders/src/store/machine.rs](../components/orders/src/store/machine.rs) | The shop's stored order state machine; a shop without one uses the default. |
 | [components/orders/src/store/order_mutation.rs](../components/orders/src/store/order_mutation.rs) | Shared operational order writes: one replay ledger, immutable quote, audit, cart projection and outbox. |
+| [components/orders/src/store/redacted_reads.rs](../components/orders/src/store/redacted_reads.rs) | Explicit non-PII domain read views for separately scoped app callbacks; never elevate an identity. |
 | [components/orders/src/store.rs](../components/orders/src/store.rs) | SQL of the orders component. |
 | [components/orders/src/types/list_criteria.rs](../components/orders/src/types/list_criteria.rs) | Bounded order and customer list filters and sorts, reused by HTTP, MCP and reviewed grid plans; the app host admits the app filter. |
 | [components/orders/src/types/source_record.rs](../components/orders/src/types/source_record.rs) | One versioned record of a source system as an adapter hands it over; its identity is stable per tenant. |

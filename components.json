@@ -510,9 +510,9 @@
         "sales_channels",
         "tenants"
       ],
-      "glob_imports": 30,
+      "glob_imports": 29,
       "untyped_access": 452,
-      "sql_outside_store": 20
+      "sql_outside_store": 19
     },
     "payments": {
       "title": "Provider-independent payment ledger, captures, refunds and provider workers",
@@ -619,9 +619,9 @@
         "tenants",
         "user_sessions"
       ],
-      "glob_imports": 22,
+      "glob_imports": 21,
       "untyped_access": 339,
-      "sql_outside_store": 19
+      "sql_outside_store": 18
     },
     "b2b": {
       "title": "Company procurement: organisations, budgets, approvals and quotes",
