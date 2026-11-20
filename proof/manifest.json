@@ -809,10 +809,20 @@
       "sha256": "8166099030ee95b32a27b18deac8cff3ff953bfd1f47e5c6407a3fc59b0b3d54",
       "review": "Package approval, distribution, schema adapters, event projection and service transport policy moved into components/apps without a change in behaviour"
     },
+    "components/apps/src/domain/schedule.rs": {
+      "status": "unproved",
+      "sha256": "a6a0692e28cb2bd8bbe2cbb778d9922954e9bf071e9dfade4fbeb57dcd987078",
+      "review": "Secret persistence, schedules and event projection moved into the apps component without changing rules"
+    },
     "components/apps/src/domain/schema_changes.rs": {
       "status": "unproved",
       "sha256": "241aafe0ea9ddd7058195ee5f6c634bb7ce7f8d001ba369fa3292ea37e52c164",
       "review": "Package approval, distribution, schema adapters, event projection and service transport policy moved into components/apps without a change in behaviour"
+    },
+    "components/apps/src/domain/secret_kinds.rs": {
+      "status": "unproved",
+      "sha256": "ce7772e93f3c0deb1f86727fd53cc5e316a07a254205dfc285fdcd13398dcf8a",
+      "review": "Secret persistence, schedules and event projection moved into the apps component without changing rules"
     },
     "components/apps/src/domain/service_policy.rs": {
       "status": "reviewed-binding",
@@ -831,8 +841,8 @@
     },
     "components/apps/src/domain.rs": {
       "status": "unproved",
-      "sha256": "5588e806d8e4cc7705dcbc508103905252d1620e0a1278407597f361cec683dc",
-      "review": "Record store, consent and core extension rules moved into the apps component without changing rules"
+      "sha256": "5c1e584922f253330d854067523341e17c5a9a44cb9acd748b42a9756058a8d4",
+      "review": "Secret persistence, schedules and event projection moved into the apps component without changing rules"
     },
     "components/apps/src/lib.rs": {
       "status": "unproved",
@@ -869,6 +879,11 @@
       "sha256": "5429a2c445ad99ece05a886eeb5df852dfa1a70dffb21aaa508bcb78caa83e59",
       "review": "Sandbox cache, configuration runtime and package fence moved into the apps component without changing rules"
     },
+    "components/apps/src/store/action_log.rs": {
+      "status": "unproved",
+      "sha256": "6dc22255dc7b12c3b80ea4875ace2b4c23396292283ca6dc6cb541884d364645",
+      "review": "Secret persistence, schedules and event projection moved into the apps component without changing rules"
+    },
     "components/apps/src/store/asset_references.rs": {
       "status": "unproved",
       "sha256": "ff0ab16afc22e4716b2ea0fc7faa2ccd117c4caebd9399714dd082959e612835",
@@ -888,6 +903,11 @@
       "status": "unproved",
       "sha256": "52f889580ca300c0e41c1336e0cd0dc2c75b15839b9262e6d1a57535ac1210a0",
       "review": "Package approval, distribution, schema adapters, event projection and service transport policy moved into components/apps without a change in behaviour"
+    },
+    "components/apps/src/store/event_deliveries.rs": {
+      "status": "unproved",
+      "sha256": "978751f3872d990ce36ba4cc763be243a3598cb9547c0deb9188c1da4757febf",
+      "review": "Secret persistence, schedules and event projection moved into the apps component without changing rules"
     },
     "components/apps/src/store/extension_filter.rs": {
       "status": "unproved",
@@ -919,15 +939,30 @@
       "sha256": "69fcac12d291553a088c099b4e9d7387c35db6b06fb62c09cde08cd850d974ea",
       "review": "Record store, consent and core extension rules moved into the apps component without changing rules"
     },
+    "components/apps/src/store/schedules.rs": {
+      "status": "unproved",
+      "sha256": "0f4b83a186577d3b242c1a3689be6835422ff5bd6bc4950ac238adb8d0d60f4f",
+      "review": "Secret persistence, schedules and event projection moved into the apps component without changing rules"
+    },
     "components/apps/src/store/schema_upgrade.rs": {
       "status": "unproved",
       "sha256": "2cd288774dcf356de2cd1c74ac89356898471e1f2966d33c55a3ca805704e7de",
       "review": "Sandbox cache, configuration runtime and package fence moved into the apps component without changing rules"
     },
+    "components/apps/src/store/secrets.rs": {
+      "status": "unproved",
+      "sha256": "51a88b5a5f782a07d90c550fae19be610097655aaf061627fe5c6fe31e781ce4",
+      "review": "Secret persistence, schedules and event projection moved into the apps component without changing rules"
+    },
+    "components/apps/src/store/settings.rs": {
+      "status": "unproved",
+      "sha256": "f2f832ca6f9b976884b0513e0a7048a2461958fdd4f0dc61998a9151ecebbe3c",
+      "review": "Secret persistence, schedules and event projection moved into the apps component without changing rules"
+    },
     "components/apps/src/store.rs": {
       "status": "unproved",
-      "sha256": "d298c033efbe1feffb45606e513de1410fdd104be0257b5aa3a7e9da93009838",
-      "review": "Sandbox cache, configuration runtime and package fence moved into the apps component without changing rules"
+      "sha256": "2591dce012085448fcbd0624175e74935cfecaa6e6707cf3ce243128962c18d8",
+      "review": "Secret persistence, schedules and event projection moved into the apps component without changing rules"
     },
     "components/b2b/src/domain/contract.rs": {
       "status": "unproved",
@@ -5136,8 +5171,8 @@
     },
     "src/apps/events.rs": {
       "status": "unproved",
-      "sha256": "cc7eb579cc668edaebf7db208faf8189b31ff0566559ecdfb1409d556ea4eec5",
-      "review": "Review compiler-enforced foundation crates with unchanged native owners; native provider read-tool aliases and current authorization, private checkpoint continuation and versioned prompt evidence; fixed subscriber acknowledgements preserve commit gaps, independent quarantine and explicit replay; traced requests/tasks/outbox without payloads; exact decimal-to-minor-unit rounding retains legacy price boundary; real SQL poison-isolation regression passes and workspace unit/clippy checks pass"
+      "sha256": "2ddcab9201b9753353115e8bd86b97de15763ebddcccc8f810a0323ecdd873e7",
+      "review": "Secret persistence, schedules and event projection moved into the apps component without changing rules"
     },
     "src/apps/evidence.rs": {
       "status": "unproved",
@@ -5276,8 +5311,8 @@
     },
     "src/apps/observability.rs": {
       "status": "unproved",
-      "sha256": "8d057a8d01fce04ac95ac75e46a12c8f850fd89efe9e48464516d2d260880264",
-      "review": "Reviewed app authority and current creator rights, isolated schemas/RLS and atomic migration rollback, fenced job/event leases, minimized payloads, signature/digest pins, opaque UI grants, pinned DNS egress and bounded Wasm/WIT quote adapters. Actual isolated PostgreSQL own/foreign callback, schema, jobs, events, assets, export, distribution and production-foundation regressions passed. Added extracted package, surface, resource and exact callback-consent policies with negative Lean claims; async/network/UI and general Rust modules remain explicitly unproved."
+      "sha256": "0a340b75545c132d82b17efb5078e43766ef0227654ef436fbf83156d7831470",
+      "review": "Secret persistence, schedules and event projection moved into the apps component without changing rules"
     },
     "src/apps/ontology.rs": {
       "status": "unproved",
@@ -5346,8 +5381,8 @@
     },
     "src/apps/schedules.rs": {
       "status": "unproved",
-      "sha256": "8c13827d8338c1736830c39d395a761454d658b8aead04d9b530aec809898399",
-      "review": "Reviewed complete standard compiler extraction in Apps 0.16/model 0.12. All 19 original before/common/after domain stages now run inside one shared compiler with preserved order, first model kind/pointer or native host error, internal actual view lookup and exhaustive Manifest field coverage. Native manifest_policy delegates value/reference/currency/scope/source/base, current Ed25519 keys, namespace/network/read and clock decisions to original owners; direct verified predicates remain attached. No no-op host domain callbacks or alternative serving compiler. Independent 116 model and 24 runtime tests include all 34 canonical packages, nineteen invalid-domain controls and denied-policy/callback-order cases. Native 74 app and two provider units, seventeen real HTTP/PostgreSQL app/schema/preview/staging/isolation/lifecycle/distribution/surface/assistant/event/generation/marketplace/payment modules, unchanged native digests and Clippy pass. Kernel unchanged; shared compiler, policy adapters and SQL/host effects remain unproved."
+      "sha256": "a26a132348833882175372ecf2558cbd773b782fe1e5962d20a6457dd3c4b6e4",
+      "review": "Secret persistence, schedules and event projection moved into the apps component without changing rules"
     },
     "src/apps/schema_changes.rs": {
       "status": "unproved",
@@ -5361,13 +5396,13 @@
     },
     "src/apps/secret_storage.rs": {
       "status": "unproved",
-      "sha256": "d872fc0f01e797c99d721d7f8bc8d6378499f14c70a10b903d9a58f43462c811",
-      "review": "Apps 0.27 shared settings preserve native personal/live administrator and digest/CAS admission; original AES-GCM envelope delegates to vault-only authority; independent settings deny machine/delegated identities and unsupported grants. Actual two-shop HTTP/MCP/SDK, rollback, CAS, binding/restart and shared PostgreSQL contracts pass; native integration follows the unchanged owners."
+      "sha256": "bcc5d6cbc6e496d9ca04e6c2397109b3978a635d13fec8d48c3be8336895fd2d",
+      "review": "Secret persistence, schedules and event projection moved into the apps component without changing rules"
     },
     "src/apps/secrets.rs": {
       "status": "unproved",
-      "sha256": "15c6fc3fece34eb55f298b26e1402e284cf3dce028222b9261310784e695b667",
-      "review": "Reviewed Apps 0.18 encrypted configuration extraction from original native secrets/settings storage. Required host Crypto delegates actual seal/open to unchanged native platform key owner. Shared metadata, resolution and rotation retain exact tenant/app/kind/digest/revision binding, secret advisory/row locks, current active package row check, CAS, ciphertext write and metadata-only atomic outbox order; locked resolution retains original webhook receipt transaction. Native current personal/live administrator and direct verified persistent-key predicate, consent, declared kinds/settings, payload validation, sandbox exclusion, browser projection and no-fallback-on-stale semantics remain attached. Checked revision increment rejects exhausted/negative values before encryption instead of overflow. Independent actual-AEAD PostgreSQL tests include wrong key and tenant/app/kind/revision replay denial, missing/stale/current metadata, unavailable key, CAS/package mismatch, overflow, outbox rollback, concurrent CAS and rotation blocked by shared read. Ephemeral-key example rolls back and prints no key/value/ciphertext. Linux component CI, 74 native app units, warning-free Clippy and nine HTTP/PostgreSQL modules apps/app_jobs/staging/tenant_isolation/app_secrets/app_surfaces/app_events/app_assistants/marketplaces pass, including strict non-owner RLS service/webhook delivery, secret-safe settings/custom actions, revoked/paused authority and overflow regression. Source/WIT pins, 32 Cargo boundary controls and image closures pass. Kernel unchanged; shared SQL/crypto/host code remains unproved."
+      "sha256": "24fcf6ab455b8f7b4413269e0fff702fd1ad264731dfc631d0c7f256f9ac8718",
+      "review": "Secret persistence, schedules and event projection moved into the apps component without changing rules"
     },
     "src/apps/service_limits.rs": {
       "status": "unproved",
@@ -5381,8 +5416,8 @@
     },
     "src/apps/settings.rs": {
       "status": "reviewed-binding",
-      "sha256": "2f58262009a7f8fab23e62dd9bc35f464c462d195c5e068b60da638acd7cc70e",
-      "review": "Apps 0.27 shared settings preserve native personal/live administrator and digest/CAS admission; original AES-GCM envelope delegates to vault-only authority; independent settings deny machine/delegated identities and unsupported grants. Actual two-shop HTTP/MCP/SDK, rollback, CAS, binding/restart and shared PostgreSQL contracts pass; native integration follows the unchanged owners."
+      "sha256": "53fb51b8b32fb8abaae67b060178dee9a0833a16b6480c40b29db7db13be846a",
+      "review": "Secret persistence, schedules and event projection moved into the apps component without changing rules"
     },
     "src/apps/storage.rs": {
       "status": "unproved",
@@ -7636,8 +7671,8 @@
       "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
     },
     "Cargo.lock": {
-      "sha256": "0efe6d167fc7ccd314337c676beaa1434dc62d9d248533b6f93bcb6d4ea7f5d2",
-      "review": "Record store, consent and core extension rules moved into the apps component without changing rules"
+      "sha256": "c9a6e73190dac4c4350d3d1ceda75af83eea09e2d8febe8fe33a76d495e0c061",
+      "review": "Secret persistence, schedules and event projection moved into the apps component without changing rules"
     },
     "Cargo.toml": {
       "sha256": "12d2d79a98f6913d20b8e912afb9ea8de0539b9e83428de8a9d7412c406896f6",

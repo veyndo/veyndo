@@ -25,3 +25,5 @@ veyndo-orders = { path = "../orders" }
 veyndo-shop = { path = "../shop" }
 tokio.workspace = true
 chrono.workspace = true
+cron.workspace = true
+veyndo-cognition = { path = "../../crates/cognition" }

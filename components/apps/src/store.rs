@@ -1,12 +1,17 @@
 //! SQL of the apps component.
+pub mod action_log;
 pub mod asset_references;
 pub mod configuration_events;
 pub mod core_references;
 pub mod dependencies;
+pub mod event_deliveries;
 pub mod extension_filter;
 pub mod languages;
 pub mod package_fence;
 pub mod packages;
 pub mod record_write;
 pub mod records;
+pub mod schedules;
 pub mod schema_upgrade;
+pub mod secrets;
+pub mod settings;

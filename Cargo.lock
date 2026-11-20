@@ -3555,6 +3555,7 @@ version = "0.5.0"
 dependencies = [
  "base64 0.22.1",
  "chrono",
+ "cron",
  "reqwest",
  "ring",
  "serde",
@@ -3565,6 +3566,7 @@ dependencies = [
  "veyndo-app-storage",
  "veyndo-apps",
  "veyndo-catalog",
+ "veyndo-cognition",
  "veyndo-core",
  "veyndo-identity",
  "veyndo-kernel",
