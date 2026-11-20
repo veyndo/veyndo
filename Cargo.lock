@@ -3553,13 +3553,16 @@ dependencies = [
 name = "veyndo-app-platform"
 version = "0.5.0"
 dependencies = [
+ "axum",
  "base64 0.22.1",
  "chrono",
  "cron",
+ "hmac 0.12.1",
  "reqwest",
  "ring",
  "serde",
  "serde_json",
+ "sha2 0.10.9",
  "sqlx",
  "tokio",
  "veyndo-app-model",

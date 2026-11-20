@@ -388,7 +388,7 @@
     },
     "app_callback_admissible": {
       "bindings": [
-        "src/apps/credentials.rs"
+        "components/apps/src/domain/callback_grant.rs"
       ],
       "theorems": [
         "app_callback_exact",
@@ -545,7 +545,7 @@
     "persistent_key_admissible": {
       "bindings": [
         "components/identity/src/http/integrations.rs",
-        "src/apps/settings.rs"
+        "components/apps/src/http/settings.rs"
       ],
       "theorems": [
         "persistent_key_exact",
@@ -684,6 +684,11 @@
     }
   },
   "sources": {
+    "components/apps/src/domain/action_admission.rs": {
+      "status": "unproved",
+      "sha256": "294325ec6e5389450c8fc6bdede603505ff66534a4893859a37e20dc3e39a55d",
+      "review": "App secret, settings, activity, credential and webhook handlers moved into the apps component without changing rules"
+    },
     "components/apps/src/domain/action_policy.rs": {
       "status": "reviewed-binding",
       "sha256": "c9ec9428c4494a7990b3635b8a90b8e25f404e6ef7d44d0ea68e9179c320844f",
@@ -693,6 +698,11 @@
       "status": "reviewed-binding",
       "sha256": "6bede05e37503886dae0924d404be43a103e8ba68fffbd128af8057bb2cda34e",
       "review": "Package approval, distribution, schema adapters, event projection and service transport policy moved into components/apps without a change in behaviour"
+    },
+    "components/apps/src/domain/callback_grant.rs": {
+      "status": "reviewed-binding",
+      "sha256": "375df33e6577bd33bc72720068ae1724b1479ca246faac9d79669a969597d58a",
+      "review": "App secret, settings, activity, credential and webhook handlers moved into the apps component without changing rules"
     },
     "components/apps/src/domain/configuration_budget.rs": {
       "status": "unproved",
@@ -839,15 +849,50 @@
       "sha256": "036782c6d6481d9a472f942c7ded6ec8232efe915847091e14ac59d6103f3b2f",
       "review": "Package approval, distribution, schema adapters, event projection and service transport policy moved into components/apps without a change in behaviour"
     },
+    "components/apps/src/domain/webhook_signature.rs": {
+      "status": "unproved",
+      "sha256": "dee2d52db7a420ace39807107bee30c83c6b9b86c8b3d537cd820ea0affcb047",
+      "review": "App secret, settings, activity, credential and webhook handlers moved into the apps component without changing rules"
+    },
     "components/apps/src/domain.rs": {
       "status": "unproved",
-      "sha256": "5c1e584922f253330d854067523341e17c5a9a44cb9acd748b42a9756058a8d4",
-      "review": "Secret persistence, schedules and event projection moved into the apps component without changing rules"
+      "sha256": "c6dca782ddd0e0ca0e8bf5487fadcc27e29c09eed9cec6a1cdfa36f4ff090eec",
+      "review": "App secret, settings, activity, credential and webhook handlers moved into the apps component without changing rules"
+    },
+    "components/apps/src/http/activity.rs": {
+      "status": "unproved",
+      "sha256": "83b1021af5a2eaf004ef53fdd4c451c25d735d444b6797ea6013bfa44f0b063e",
+      "review": "App secret, settings, activity, credential and webhook handlers moved into the apps component without changing rules"
+    },
+    "components/apps/src/http/credentials.rs": {
+      "status": "unproved",
+      "sha256": "e1eec3e776baaaa071a9191c36e4901533d7d94caa32575ab60f54179b28d4be",
+      "review": "App secret, settings, activity, credential and webhook handlers moved into the apps component without changing rules"
+    },
+    "components/apps/src/http/secrets.rs": {
+      "status": "unproved",
+      "sha256": "beffdfdb79ac41904cf743349bdca60d7223a6b7408f5db26b11a13102207568",
+      "review": "App secret, settings, activity, credential and webhook handlers moved into the apps component without changing rules"
+    },
+    "components/apps/src/http/settings.rs": {
+      "status": "reviewed-binding",
+      "sha256": "8adadfd03750d4172af796c971d7614f04fe1bf47feac34568da1a464ba70573",
+      "review": "App secret, settings, activity, credential and webhook handlers moved into the apps component without changing rules"
+    },
+    "components/apps/src/http/webhooks.rs": {
+      "status": "unproved",
+      "sha256": "c92279c7a009616dfa38b10028bb55cba47dfaf7a2c340a13045b693c4a4a025",
+      "review": "App secret, settings, activity, credential and webhook handlers moved into the apps component without changing rules"
+    },
+    "components/apps/src/http.rs": {
+      "status": "unproved",
+      "sha256": "f9f91829e9f4d4624fa3ce0432e473fb2e54d3abcb19a1fd386e9b70828741c5",
+      "review": "App secret, settings, activity, credential and webhook handlers moved into the apps component without changing rules"
     },
     "components/apps/src/lib.rs": {
       "status": "unproved",
-      "sha256": "3d8c27cc527e5dbeb0f062550884a714b58072ef38a4424a9a2554c8fb834100",
-      "review": "Configuration, lifecycle, ontology and reference adapters moved into the apps component without changing rules"
+      "sha256": "e5e3e1e488c7ca26364c94126c2beb7e9e8c3457b5cdf869be60a346646c548e",
+      "review": "App secret, settings, activity, credential and webhook handlers moved into the apps component without changing rules"
     },
     "components/apps/src/service/configuration_examples.rs": {
       "status": "unproved",
@@ -1581,8 +1626,8 @@
     },
     "components/core/src/shop_scope.rs": {
       "status": "unproved",
-      "sha256": "fd055a44c716c169095c35a775cf57e9becbf242c8f3d4438eeeec0a5fb6497f",
-      "review": "POS guard, customer, discount and settlement and the checkout session review moved into components"
+      "sha256": "afcdc9804824ab20ead50fcb17b7c2b4d7923d02930a31cab831d3ab3edfa2fc",
+      "review": "App secret, settings, activity, credential and webhook handlers moved into the apps component without changing rules"
     },
     "components/core/src/state.rs": {
       "status": "unproved",
@@ -5026,8 +5071,8 @@
     },
     "src/apps/action_admission.rs": {
       "status": "unproved",
-      "sha256": "00b20601e6ba48a5adb0d33ee719c31acd9cd37fcc5f071dfad0aead01a2d487",
-      "review": "Reviewed extraction of original Action wire and current-authority/callback scope rules into pinned apps model 0.2; native RequestContext, verified consent/current-role predicate, personal/live key checks and credential persistence retained. Original package shared lock/active scoped row read and digest moved to storage 0.4 with typed native digest comparison retained. 22 model tests, actual PG package lock/isolation tests, 74 native app units, callbacks/consent/surfaces/jobs/schema/core extensions/lifecycle/isolation/visual workspace and composed Marketplace fixtures pass; all 34 bundled package fingerprints unchanged. New adapters and SQL remain unproved; extracted kernel unchanged."
+      "sha256": "4d2a2888a04b77be32fd4326ca683858912084ec14a3906bb6087ac1fe7ced29",
+      "review": "App secret, settings, activity, credential and webhook handlers moved into the apps component without changing rules"
     },
     "src/apps/activation.rs": {
       "status": "unproved",
@@ -5125,9 +5170,9 @@
       "review": "Record store, consent and core extension rules moved into the apps component without changing rules"
     },
     "src/apps/credentials.rs": {
-      "status": "reviewed-binding",
-      "sha256": "a187a98221344c9434f1a22fc29d4377bacd0df92fad77f100482301a57fa499",
-      "review": "Knowledge introspection reuses current scoped native identity, expiring integration keys and app package approval. Real catalog delivery, read-only evidence, foreign-shop and revoked-key checks and Checkout tenant isolation passed locally."
+      "status": "unproved",
+      "sha256": "e520a63ce913b27e9c58a025bf6c5c72ea6717a85f6617d1207f2f4fa7d8aeb0",
+      "review": "App secret, settings, activity, credential and webhook handlers moved into the apps component without changing rules"
     },
     "src/apps/data.rs": {
       "status": "unproved",
@@ -5266,8 +5311,8 @@
     },
     "src/apps/mod.rs": {
       "status": "unproved",
-      "sha256": "80e069a9dc6bf2e6b9dec4f5c7f9d54984d266cf2892054bb580cd8a486eb702",
-      "review": "Configuration, lifecycle, ontology and reference adapters moved into the apps component without changing rules"
+      "sha256": "99aed8432b9703271110c6ba81017b1664ff591c18dea1884dbfe0fda882c70d",
+      "review": "App secret, settings, activity, credential and webhook handlers moved into the apps component without changing rules"
     },
     "src/apps/model_contract.rs": {
       "status": "unproved",
@@ -5311,8 +5356,8 @@
     },
     "src/apps/observability.rs": {
       "status": "unproved",
-      "sha256": "0a340b75545c132d82b17efb5078e43766ef0227654ef436fbf83156d7831470",
-      "review": "Secret persistence, schedules and event projection moved into the apps component without changing rules"
+      "sha256": "297e834b57f54579d21e325c6be3fd97996e960ef4a95dec8ce77f6aaf023d7b",
+      "review": "App secret, settings, activity, credential and webhook handlers moved into the apps component without changing rules"
     },
     "src/apps/ontology.rs": {
       "status": "unproved",
@@ -5394,15 +5439,10 @@
       "sha256": "e682020af9b4f17aea09a279ba5a9135fb4a37dc4b0bf95358fb41123c7583fa",
       "review": "Sandbox cache, configuration runtime and package fence moved into the apps component without changing rules"
     },
-    "src/apps/secret_storage.rs": {
-      "status": "unproved",
-      "sha256": "bcc5d6cbc6e496d9ca04e6c2397109b3978a635d13fec8d48c3be8336895fd2d",
-      "review": "Secret persistence, schedules and event projection moved into the apps component without changing rules"
-    },
     "src/apps/secrets.rs": {
       "status": "unproved",
-      "sha256": "24fcf6ab455b8f7b4413269e0fff702fd1ad264731dfc631d0c7f256f9ac8718",
-      "review": "Secret persistence, schedules and event projection moved into the apps component without changing rules"
+      "sha256": "8ef15bf01a454e9f31038ca32e3f07172c4979ce425c8b8c3279287edbeb4a65",
+      "review": "App secret, settings, activity, credential and webhook handlers moved into the apps component without changing rules"
     },
     "src/apps/service_limits.rs": {
       "status": "unproved",
@@ -5415,9 +5455,9 @@
       "review": "Package approval, distribution, schema adapters, event projection and service transport policy moved into components/apps without a change in behaviour"
     },
     "src/apps/settings.rs": {
-      "status": "reviewed-binding",
-      "sha256": "53fb51b8b32fb8abaae67b060178dee9a0833a16b6480c40b29db7db13be846a",
-      "review": "Secret persistence, schedules and event projection moved into the apps component without changing rules"
+      "status": "unproved",
+      "sha256": "6e6bb92c24a510520587ce828ee029b5c76a807ca55718d38353c1eae8450956",
+      "review": "App secret, settings, activity, credential and webhook handlers moved into the apps component without changing rules"
     },
     "src/apps/storage.rs": {
       "status": "unproved",
@@ -5481,8 +5521,8 @@
     },
     "src/apps/webhooks.rs": {
       "status": "unproved",
-      "sha256": "d9dd8cda2a39febd29b91ff12faba751d81e5c207013bb421215b839fd500f34",
-      "review": "Reviewed complete standard compiler extraction in Apps 0.16/model 0.12. All 19 original before/common/after domain stages now run inside one shared compiler with preserved order, first model kind/pointer or native host error, internal actual view lookup and exhaustive Manifest field coverage. Native manifest_policy delegates value/reference/currency/scope/source/base, current Ed25519 keys, namespace/network/read and clock decisions to original owners; direct verified predicates remain attached. No no-op host domain callbacks or alternative serving compiler. Independent 116 model and 24 runtime tests include all 34 canonical packages, nineteen invalid-domain controls and denied-policy/callback-order cases. Native 74 app and two provider units, seventeen real HTTP/PostgreSQL app/schema/preview/staging/isolation/lifecycle/distribution/surface/assistant/event/generation/marketplace/payment modules, unchanged native digests and Clippy pass. Kernel unchanged; shared compiler, policy adapters and SQL/host effects remain unproved."
+      "sha256": "3633c643db3c6d42b79d40288323c27c80f4acd061ed499fe77bce15d035c25f",
+      "review": "App secret, settings, activity, credential and webhook handlers moved into the apps component without changing rules"
     },
     "src/assets/app_files.rs": {
       "status": "unproved",
@@ -7526,8 +7566,8 @@
     },
     "src/staging/mod.rs": {
       "status": "unproved",
-      "sha256": "3fce060994f4a04af6719ab504b0817ead001d2d7b1f546e1dd6a3807ec7302a",
-      "review": "POS guard, customer, discount and settlement and the checkout session review moved into components"
+      "sha256": "1a22d9715a668207872a49d88d8aec6f385a78194285ba4ef02ff50ee255b44e",
+      "review": "App secret, settings, activity, credential and webhook handlers moved into the apps component without changing rules"
     },
     "src/staging/products.rs": {
       "status": "unproved",
@@ -7671,8 +7711,8 @@
       "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
     },
     "Cargo.lock": {
-      "sha256": "c9a6e73190dac4c4350d3d1ceda75af83eea09e2d8febe8fe33a76d495e0c061",
-      "review": "Secret persistence, schedules and event projection moved into the apps component without changing rules"
+      "sha256": "33b57cec4bf569808a5b947a25a400cc4de21bd1e163de0e07d9467299b99419",
+      "review": "App secret, settings, activity, credential and webhook handlers moved into the apps component without changing rules"
     },
     "Cargo.toml": {
       "sha256": "12d2d79a98f6913d20b8e912afb9ea8de0539b9e83428de8a9d7412c406896f6",

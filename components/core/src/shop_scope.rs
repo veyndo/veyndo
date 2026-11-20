@@ -69,3 +69,12 @@ pub async fn live_parent(conn: &mut sqlx::PgConnection, t: &str) -> Result<Optio
             .await?,
     )
 }
+/// The live shop a staging environment belongs to, read on the pooled connection; `None` for a live shop.
+pub async fn parent(a: &crate::State, t: &str) -> Result<Option<String>> {
+    Ok(
+        sqlx::query_scalar("SELECT live_tenant FROM shop_environments WHERE tenant=$1")
+            .bind(t)
+            .fetch_optional(&a.db)
+            .await?,
+    )
+}

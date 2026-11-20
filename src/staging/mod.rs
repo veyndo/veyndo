@@ -34,15 +34,8 @@ pub(crate) fn router() -> Router<App> {
             post(release),
         )
 }
-pub(crate) async fn parent(a: &App, t: &str) -> Result<Option<String>> {
-    Ok(
-        sqlx::query_scalar("SELECT live_tenant FROM shop_environments WHERE tenant=$1")
-            .bind(t)
-            .fetch_optional(&a.db)
-            .await?,
-    )
-}
 pub(crate) use veyndo_core::shop_scope::live_parent as parent_conn;
+pub(crate) use veyndo_core::shop_scope::parent;
 pub(crate) async fn live(a: &App, h: &RequestContext) -> Result<String> {
     let t = merchant(a, h)?;
     if parent(a, &t).await?.is_some() {

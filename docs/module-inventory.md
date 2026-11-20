@@ -42,7 +42,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/agent_runs/work_plan.rs](../src/agent_runs/work_plan.rs) | Reviewed work binds bounded native configuration commands and managed app saves before any worker effect. |
 | [src/agent_runs/worker.rs](../src/agent_runs/worker.rs) | Database claims resume only completed checkpoints; unknown model outcomes are never automatically charged again. |
 | [src/agent_runs.rs](../src/agent_runs.rs) | Durable continuation extends native tasks; leases fence checkpoints and publication, never approved writes. |
-| [src/apps/action_admission.rs](../src/apps/action_admission.rs) | Native authenticated-current-rights adapter for the shared action and callback grant rules. |
+| [src/apps/action_admission.rs](../src/apps/action_admission.rs) | Action admission lives in the apps component; this module keeps the short path for the gateway. |
 | [src/apps/activation.rs](../src/apps/activation.rs) | Native current-actor/trust/connected-frontend/commerce admission for the shared package-state transaction; original configuration lock order retained. |
 | [src/apps/approval.rs](../src/apps/approval.rs) | Operator service authority is bound to immutable package content, never to a merchant-chosen ID; the rules live in the apps component. |
 | [src/apps/asset_surfaces.rs](../src/apps/asset_surfaces.rs) | App file uploads reuse the product asset parser/store and require the current package plus either callback consent or a surface grant. |
@@ -116,8 +116,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/apps/schedules.rs](../src/apps/schedules.rs) | App schedules live in the apps component; this module keeps the short path for installation and the worker. |
 | [src/apps/schema_changes.rs](../src/apps/schema_changes.rs) | The schema evolution adapter lives in the apps component; this module keeps the short path for the upgrade review. |
 | [src/apps/schema_upgrade.rs](../src/apps/schema_upgrade.rs) | The schema upgrade host lives in the apps component; this module keeps the short path for installation. |
-| [src/apps/secret_storage.rs](../src/apps/secret_storage.rs) | Secret encryption lives in the apps component; this module keeps the short path for the settings routes. |
-| [src/apps/secrets.rs](../src/apps/secrets.rs) | Digest-bound per-shop app secret rotation reuses platform authenticated encryption; no plaintext read endpoint. |
+| [src/apps/secrets.rs](../src/apps/secrets.rs) | Digest-bound per-shop app secret rotation is handled in the apps component; this module registers its routes. |
 | [src/apps/service_limits.rs](../src/apps/service_limits.rs) | Shared network-app admission: the local bulkheads of the apps component plus replica-wide fenced leases. |
 | [src/apps/service_policy.rs](../src/apps/service_policy.rs) | The service transport policy lives in the apps component; this module keeps the short path for the app adapters. |
 | [src/apps/settings.rs](../src/apps/settings.rs) | Declared app settings reuse the digest-bound encrypted secret owner; secret values never have a browser read path. |
@@ -133,7 +132,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/apps/ui_logic_tests.rs](../src/apps/ui_logic_tests.rs) | UI programs must keep static types, same-model saves, surface allowlists and acyclic ownership before install or preview. |
 | [src/apps/upgrade_review.rs](../src/apps/upgrade_review.rs) | Probe the actual transactional installer and roll it back; return admission metadata, never app record contents. |
 | [src/apps/webhook_scope.rs](../src/apps/webhook_scope.rs) | The webhook shop binding lives in the apps component; this module keeps the short path for the request middleware. |
-| [src/apps/webhooks.rs](../src/apps/webhooks.rs) | Operator-signed incoming events: tenant-bound HMAC, five-minute freshness and atomic replay receipts. |
+| [src/apps/webhooks.rs](../src/apps/webhooks.rs) | Incoming app webhooks are handled in the apps component; this module registers their public route. |
 | [src/assets/app_files.rs](../src/assets/app_files.rs) | Scoped app access to the existing asset store. Binary callbacks are explicit and private; publishing still uses the native asset lifecycle. |
 | [src/assets/caption_source.rs](../src/assets/caption_source.rs) | Image evidence uses owned assets or DNS-pinned public HTTPS; decoded thumbnails strip metadata before inference. |
 | [src/assets/captions.rs](../src/assets/captions.rs) | Caption proposals use central inference and current shop languages; only the owning native editor can save them. |
@@ -630,8 +629,10 @@ This lists every checked-in source module in these roots, including files with n
 
 | Module | Responsibility |
 |---|---|
+| [components/apps/src/domain/action_admission.rs](../components/apps/src/domain/action_admission.rs) | Native authenticated-current-rights adapter for the shared action and callback grant rules. |
 | [components/apps/src/domain/action_policy.rs](../components/apps/src/domain/action_policy.rs) | Which declared actions only read: the distinction every surface, grant and GET route relies on. |
 | [components/apps/src/domain/approval.rs](../components/apps/src/domain/approval.rs) | Operator service authority is bound to immutable package content, never to a merchant-chosen ID. |
+| [components/apps/src/domain/callback_grant.rs](../components/apps/src/domain/callback_grant.rs) | What an app callback key may do: the capability the merchant approved and the role scope behind it. |
 | [components/apps/src/domain/configuration_budget.rs](../components/apps/src/domain/configuration_budget.rs) | The budget of app configurations one cart may carry. |
 | [components/apps/src/domain/configuration_inputs.rs](../components/apps/src/domain/configuration_inputs.rs) | Native policy adapter for shared configuration grammar, library selection and exact guest arguments. |
 | [components/apps/src/domain/configuration_selection.rs](../components/apps/src/domain/configuration_selection.rs) | Reusable input-only selections: their wire form and bounds before current packages resolve them. |
@@ -661,7 +662,14 @@ This lists every checked-in source module in these roots, including files with n
 | [components/apps/src/domain/service_policy.rs](../components/apps/src/domain/service_policy.rs) | Operator-owned private origins permit isolated service networking without relaxing public egress. |
 | [components/apps/src/domain/tool_output.rs](../components/apps/src/domain/tool_output.rs) | Declared tool results are checked before they leave; a provider payload that does not fit is never disclosed. |
 | [components/apps/src/domain/webhook_scope.rs](../components/apps/src/domain/webhook_scope.rs) | Scope signed app ingress from its route before identity, tenant lifecycle and forced-RLS admission. |
+| [components/apps/src/domain/webhook_signature.rs](../components/apps/src/domain/webhook_signature.rs) | Incoming app webhooks carry an HMAC-SHA-256 over the exact canonical message. |
 | [components/apps/src/domain.rs](../components/apps/src/domain.rs) | Pure package rules: no database, no transport. |
+| [components/apps/src/http/activity.rs](../components/apps/src/http/activity.rs) | Bounded metadata-only app telemetry, storage usage and explicitly approved cursor-based event replay. |
+| [components/apps/src/http/credentials.rs](../components/apps/src/http/credentials.rs) | App keys reuse the core integration-key store, current creator rights, expiry and immutable package digest. |
+| [components/apps/src/http/secrets.rs](../components/apps/src/http/secrets.rs) | Digest-bound per-shop app secret rotation; there is no plaintext read endpoint. |
+| [components/apps/src/http/settings.rs](../components/apps/src/http/settings.rs) | Declared app settings reuse the digest-bound encrypted secret owner; secret values never have a browser read path. |
+| [components/apps/src/http/webhooks.rs](../components/apps/src/http/webhooks.rs) | Operator-signed incoming events: tenant-bound HMAC, five-minute freshness and atomic replay receipts. |
+| [components/apps/src/http.rs](../components/apps/src/http.rs) | HTTP handlers of the app platform; the server registers them with their route rights. |
 | [components/apps/src/lib.rs](../components/apps/src/lib.rs) | Apps component: what an app package may be and do before the server installs or calls it. |
 | [components/apps/src/service/configuration_examples.rs](../components/apps/src/service/configuration_examples.rs) | Frozen configuration cases use the same field validation and bounded guest as real cart configuration. |
 | [components/apps/src/service/configuration_runtime.rs](../components/apps/src/service/configuration_runtime.rs) | Generic pure-Wasm contribution executor; the installed package supplies all business predicates. |

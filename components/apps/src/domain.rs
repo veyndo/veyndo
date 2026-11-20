@@ -1,6 +1,8 @@
 //! Pure package rules: no database, no transport.
+pub mod action_admission;
 pub mod action_policy;
 pub mod approval;
+pub mod callback_grant;
 pub mod configuration_budget;
 pub mod configuration_inputs;
 pub mod configuration_selection;
@@ -29,3 +31,4 @@ pub mod secret_kinds;
 pub mod service_policy;
 pub mod tool_output;
 pub mod webhook_scope;
+pub mod webhook_signature;

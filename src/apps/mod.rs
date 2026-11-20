@@ -46,7 +46,6 @@ mod event_contract;
 mod event_projection;
 mod events;
 mod schedules;
-mod secret_storage;
 mod secrets;
 mod settings;
 mod webhook_scope;
