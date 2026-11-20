@@ -476,12 +476,10 @@ This lists every checked-in source module in these roots, including files with n
 | [src/outbox.rs](../src/outbox.rs) | Durable outbox and audit projection worker. |
 | [src/payments/accounts.rs](../src/payments/accounts.rs) | Merchant-authorized onboarding bridge; only authenticated provider responses establish account bindings. |
 | [src/payments/app_commands.rs](../src/payments/app_commands.rs) | App/Flow/MCP payment actions enqueue core jobs; provider-bound attempts prevent cross-app command authority. |
-| [src/payments/capture_admission.rs](../src/payments/capture_admission.rs) | Serialized native capture budgets; uncertain capture jobs reserve the remaining authorization. |
 | [src/payments/capture_configuration.rs](../src/payments/capture_configuration.rs) | Capture timing is versioned shop/channel configuration; every attempt freezes its admitted provider intent. |
 | [src/payments/catalog.rs](../src/payments/catalog.rs) | Native payment operation descriptions, composed by the canonical operation registry. |
 | [src/payments/contract.rs](../src/payments/contract.rs) | Adapt the shared provider declaration grammar; native payment authority and actual effects remain attached. |
 | [src/payments/details.rs](../src/payments/details.rs) | Native payment-only history projection and optional owned provider observation; no financial command is executed. |
-| [src/payments/details_model.rs](../src/payments/details_model.rs) | Typed, PII-free provider transaction details; these observations never mutate native payment state. |
 | [src/payments/diagnostics.rs](../src/payments/diagnostics.rs) | Safe, provider-neutral operational hints. These never authorize a financial transition. |
 | [src/payments/funding.rs](../src/payments/funding.rs) | Account-authorized funding choice, immutable consent and saved-instrument admission; cart possession is insufficient. |
 | [src/payments/generic_receipts.rs](../src/payments/generic_receipts.rs) | Provider-neutral receipt admission and atomic allocation; verified evidence owns ledger transitions. |
@@ -496,7 +494,6 @@ This lists every checked-in source module in these roots, including files with n
 | [src/payments/provider_configuration.rs](../src/payments/provider_configuration.rs) | Pure startup validation of the native provider origin; no live credentials or provider calls. |
 | [src/payments/provider_webhooks.rs](../src/payments/provider_webhooks.rs) | Version-pinned HMAC notifications enqueue reconciliation; external event payloads never write monetary state. |
 | [src/payments/receipt_guard.rs](../src/payments/receipt_guard.rs) | Bind integer provider receipt amounts and status to the formally checked exact-match predicate. |
-| [src/payments/refund_allocation.rs](../src/payments/refund_allocation.rs) | Refunds select an owned capture and reserve its remaining amount before a provider call. |
 | [src/payments/registry.rs](../src/payments/registry.rs) | Installed payment registry and immutable account/version snapshots; no remote calls inside checkout SQL. |
 | [src/payments/remote.rs](../src/payments/remote.rs) | Dedicated payment RPC, pinned service version and operator-owned egress; never ordinary app-action receipts. |
 | [src/payments/return_urls.rs](../src/payments/return_urls.rs) | Provider return/cancel URLs preserve the tenant and sales channel; navigation is never payment evidence. |
@@ -505,7 +502,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/payments/settlements.rs](../src/payments/settlements.rs) | Immutable capture receipts and exact cumulative settlement for native partial/multiple captures. |
 | [src/payments/state.rs](../src/payments/state.rs) | One monotonic provider-neutral ledger state machine; evidence validation and authorization stay in receipt adapters. |
 | [src/payments/storage.rs](../src/payments/storage.rs) | Transactional provider receipts and order state updates; external responses cannot invent amounts or tenants. |
-| [src/payments/worker.rs](../src/payments/worker.rs) | Leased payment jobs; network runs after claim commit, fenced receipts prevent duplicate local effects. |
+| [src/payments/worker.rs](../src/payments/worker.rs) | Leased payment jobs; the component owns the claim, the fence and the receipt, this file binds the server ports. |
 | [src/performance/access_snapshot.rs](../src/performance/access_snapshot.rs) | One fresh, server-owned admission read shared by domain, identity, availability, channel and proxy middleware. |
 | [src/performance/delivery.rs](../src/performance/delivery.rs) | Native static bypass and bounded HTTP compression; credentials, streams and already encoded bodies stay intact. |
 | [src/performance/invalidation.rs](../src/performance/invalidation.rs) | Commit-only outbox notifications eagerly evict replica caches; authoritative version probes survive missed events. |
@@ -737,6 +734,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/core/src/database/row_security.rs](../components/core/src/database/row_security.rs) | Bind each borrowed PostgreSQL connection to task scope, and reject unsafe strict-runtime roles. |
 | [components/core/src/database.rs](../components/core/src/database.rs) | Database access of the process: deployment values, connection pools, row security and cluster-wide leases. |
 | [components/core/src/failure.rs](../components/core/src/failure.rs) | Stable safe error details shared by HTTP, MCP and agent streams; legacy constructors retain their wire message. |
+| [components/core/src/host_names.rs](../components/core/src/host_names.rs) | Public host names: a syntactically valid domain, the shop alias under a configured suffix and origins of one family. |
 | [components/core/src/http_limits.rs](../components/core/src/http_limits.rs) | Bounded HTTP payloads and streaming responses for native settings and services. |
 | [components/core/src/lib.rs](../components/core/src/lib.rs) | Shared foundation of every component: the error contract, its conversions and basic identifiers. No business rules. |
 | [components/core/src/localized/languages.rs](../components/core/src/localized/languages.rs) | The content languages a shop enabled: which keys content may use, and which key a language is stored under. |
@@ -855,11 +853,19 @@ This lists every checked-in source module in these roots, including files with n
 | [components/payments/src/domain.rs](../components/payments/src/domain.rs) | Rules of the payment ledger, free of I/O. |
 | [components/payments/src/lib.rs](../components/payments/src/lib.rs) | Payments component: the attempt ledger, its state machine, settlements, refunds and receipt admission. |
 | [components/payments/src/ports.rs](../components/payments/src/ports.rs) | What the payment ledger needs from the server: adapter service configuration and the effects other components attach to a captured order. |
+| [components/payments/src/service/commands.rs](../components/payments/src/service/commands.rs) | App/Flow/MCP payment actions enqueue core jobs; provider-bound attempts prevent cross-app command authority. |
+| [components/payments/src/service/details.rs](../components/payments/src/service/details.rs) | Native payment-only history projection and optional owned provider observation; no financial command is executed. |
 | [components/payments/src/service/funding.rs](../components/payments/src/service/funding.rs) | Account-authorized funding choice, immutable consent and saved-instrument admission; cart possession is insufficient. |
+| [components/payments/src/service/instructions.rs](../components/payments/src/service/instructions.rs) | Typed recipient instructions of an attempt: the stored snapshot or the provider's current answer; reads never settle an invoice. |
+| [components/payments/src/service/notifications.rs](../components/payments/src/service/notifications.rs) | Version-pinned HMAC notifications enqueue reconciliation; external event payloads never write monetary state. |
 | [components/payments/src/service/receipts.rs](../components/payments/src/service/receipts.rs) | Provider-neutral receipt admission and atomic allocation; verified evidence owns ledger transitions. |
+| [components/payments/src/service/remote.rs](../components/payments/src/service/remote.rs) | Builds the pinned adapter request of one payment operation; the gateway owns transport and admission. |
+| [components/payments/src/service/sessions.rs](../components/payments/src/service/sessions.rs) | Customer-bound, short-lived provider UI sessions; iframe messages are never ledger receipts. |
+| [components/payments/src/service/worker.rs](../components/payments/src/service/worker.rs) | Leased payment jobs; network runs after claim commit, fenced receipts prevent duplicate local effects. |
 | [components/payments/src/service.rs](../components/payments/src/service.rs) | service of this component. |
 | [components/payments/src/store/attempts.rs](../components/payments/src/store/attempts.rs) | Row mapping of the payment attempt ledger. |
 | [components/payments/src/store/capture_admission.rs](../components/payments/src/store/capture_admission.rs) | Serialized native capture budgets; uncertain capture jobs reserve the remaining authorization. |
+| [components/payments/src/store/commands.rs](../components/payments/src/store/commands.rs) | Durable idempotent payment commands, customer context binding and serial refund admission. |
 | [components/payments/src/store/instructions.rs](../components/payments/src/store/instructions.rs) | The outbox event that makes accepted recipient instructions available, with a native invoice snapshot. |
 | [components/payments/src/store/instruments.rs](../components/payments/src/store/instruments.rs) | Saved instruments a verified receipt may add: only for the original account's consent, only redacted metadata. |
 | [components/payments/src/store/jobs.rs](../components/payments/src/store/jobs.rs) | Idempotent admission of a payment job: one key, one fingerprint, inside the caller's transaction. |
@@ -867,6 +873,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/payments/src/store/receipt_claims.rs](../components/payments/src/store/receipt_claims.rs) | Receipt claims: one provider receipt belongs to exactly one attempt, across tenants. |
 | [components/payments/src/store/refund_allocation.rs](../components/payments/src/store/refund_allocation.rs) | Serialized refund budgets: pending native refund jobs reserve their share of a capture. |
 | [components/payments/src/store/refund_receipts.rs](../components/payments/src/store/refund_receipts.rs) | Exactly-once provider refund admission, including refunds initiated outside Studio. |
+| [components/payments/src/store/saved_instruments.rs](../components/payments/src/store/saved_instruments.rs) | Customer-owned saved instruments expose only redacted metadata; immediate revocation and provider cleanup share payment jobs. |
 | [components/payments/src/store/settlements.rs](../components/payments/src/store/settlements.rs) | Capture settlement admission: receipt claims, native job matching and the captured total in one transaction. |
 | [components/payments/src/store.rs](../components/payments/src/store.rs) | SQL of the payment ledger; admissions run inside the caller's transaction. |
 | [components/pos/src/domain/input.rs](../components/pos/src/domain/input.rs) | Strict input envelope shared by HTTP and MCP cashier commands. |

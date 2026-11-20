@@ -1,0 +1,180 @@
+//! Leased payment jobs; network runs after claim commit, fenced receipts prevent duplicate local effects.
+use crate::domain::amounts::parse_amount;
+use crate::domain::receipt_ref::identity;
+use crate::ports::{Gateway, Host};
+use crate::store::attempts::attempt;
+use crate::store::jobs::enqueue_tx;
+use crate::store::order_ledger::release_stock;
+use serde_json::{Value, json};
+use sqlx::Row;
+use veyndo_core::{Result, State, StatusCode, bad, conflict};
+
+pub async fn payment_once(host: &dyn Host, gateway: &dyn Gateway, a: &State) -> Result<bool> {
+    let (tenants, providers) = gateway.scope();
+    if tenants.is_empty() && providers.is_empty() {
+        return Ok(false);
+    }
+    let mut tx = a.db.begin().await?;
+    // Take the attempt first everywhere. Reconciliation may finish a different capture job.
+    let candidate: Option<String> = sqlx::query_scalar("SELECT p.id FROM payment_attempts p WHERE ((p.provider='paypal' AND p.tenant=ANY($1)) OR p.provider=ANY($2)) AND EXISTS(SELECT 1 FROM payment_jobs j WHERE j.tenant=p.tenant AND j.attempt_id=p.id AND j.available_at<=now() AND (j.state='queued' OR j.state='running' AND j.lease_until<now())) AND NOT EXISTS(SELECT 1 FROM payment_jobs j WHERE j.tenant=p.tenant AND j.attempt_id=p.id AND j.state='running' AND j.lease_until>now()) ORDER BY p.created_at LIMIT 1 FOR UPDATE OF p SKIP LOCKED")
+        .bind(&tenants).bind(&providers).fetch_optional(&mut *tx).await?;
+    let row = if let Some(candidate) = candidate {
+        sqlx::query("SELECT * FROM payment_jobs WHERE attempt_id=$1 AND available_at<=now() AND (state='queued' OR state='running' AND lease_until<now()) ORDER BY created_at LIMIT 1 FOR UPDATE SKIP LOCKED")
+            .bind(candidate).fetch_optional(&mut *tx).await?
+    } else {
+        None
+    };
+    let Some(job) = row else {
+        tx.commit().await?;
+        return expire_one(a, &tenants, &providers).await;
+    };
+    let id = job.get::<String, _>("id");
+    let op = job.get::<String, _>("operation");
+    let mut input = job.get::<Value, _>("request");
+    input["ledgerJobKey"] = json!(id);
+    let generation = job.get::<i32, _>("attempts") + 1;
+    sqlx::query("UPDATE payment_jobs SET state='running',attempts=$1,lease_until=now()+interval '60 seconds' WHERE id=$2").bind(generation).bind(&id).execute(&mut *tx).await?;
+    let row = sqlx::query("SELECT * FROM payment_attempts WHERE id=$1")
+        .bind(job.get::<String, _>("attempt_id"))
+        .fetch_one(&mut *tx)
+        .await?;
+    let p = attempt(&row);
+    tx.commit().await?;
+    let outcome = if ["capture", "authorize"].contains(&op.as_str())
+        && ![
+            "ready",
+            "approved",
+            "authorized",
+            "captured",
+            "partially_captured",
+            "partially_refunded",
+        ]
+        .contains(&p.state.as_str())
+    {
+        Err(conflict("Payment cannot be captured in this state"))
+    } else if op == "cancel" && p.provider == "paypal" {
+        if p.provider_order.is_some() {
+            gateway.dispatch(&p, "reconcile", &id, &input).await
+        } else {
+            Ok(json!({"notCreated":true}))
+        }
+    } else {
+        gateway.dispatch(&p, &op, &id, &input).await
+    };
+    let mut tx = a.db.begin().await?;
+    // Admission and receipt allocation lock attempt before jobs, including recovered capture jobs.
+    let row = sqlx::query("SELECT * FROM payment_attempts WHERE id=$1 FOR UPDATE")
+        .bind(&p.id)
+        .fetch_one(&mut *tx)
+        .await?;
+    let current = attempt(&row);
+    let fence = sqlx::query("SELECT state,attempts FROM payment_jobs WHERE id=$1 FOR UPDATE")
+        .bind(&id)
+        .fetch_one(&mut *tx)
+        .await?;
+    if fence.get::<String, _>("state") != "running" || fence.get::<i32, _>("attempts") != generation
+    {
+        return Ok(false);
+    }
+    match outcome {
+        Ok(v) => {
+            if op == "refund" && p.provider == "paypal" && v["status"] == "PENDING" {
+                let remote = v["id"]
+                    .as_str()
+                    .filter(|s| s.bytes().all(|c| c.is_ascii_alphanumeric() || c == b'-'))
+                    .ok_or(bad("Refund ID missing"))?;
+                let amount = input["amountMinor"]
+                    .as_i64()
+                    .ok_or(bad("Refund amount missing"))?;
+                if v["amount"]["currency_code"] != current.currency
+                    || parse_amount(v["amount"]["value"].as_str().unwrap_or(""), &p.currency)?
+                        != amount
+                {
+                    return Err(bad("Pending refund amount mismatch"));
+                }
+                sqlx::query("INSERT INTO payment_refunds(tenant,job_id,attempt_id,provider_id,status,amount_minor) VALUES($1,$2,$3,$4,'pending',$5) ON CONFLICT DO NOTHING").bind(&p.tenant).bind(&id).bind(&p.id).bind(remote).bind(amount).execute(&mut *tx).await?;
+                sqlx::query("UPDATE payment_jobs SET state='queued',available_at=now()+interval '10 seconds',lease_until=NULL WHERE id=$1").bind(&id).execute(&mut *tx).await?;
+                tx.commit().await?;
+                return Ok(false);
+            }
+            // SAVEPOINT keeps a rejected/malformed remote receipt from partially mutating local state.
+            sqlx::query("SAVEPOINT receipt").execute(&mut *tx).await?;
+            let result =
+                if op == "cancel" && current.provider == "paypal" && v["status"] != "COMPLETED" {
+                    let validation = if v["notCreated"] == true {
+                        Ok(())
+                    } else {
+                        gateway.cancellable(&current, &v)
+                    };
+                    if let Err(e) = validation {
+                        Err(e)
+                    } else {
+                        release_stock(
+                            host,
+                            &mut tx,
+                            &current,
+                            if input["expiry"] == true {
+                                "expired"
+                            } else {
+                                "cancelled"
+                            },
+                            false,
+                        )
+                        .await
+                    }
+                } else if op == "vault_revoke" {
+                    identity(&current, &v).and_then(|_| {
+                        if v["vaultRevoked"] == true && v["vaultReference"] == input["reference"] {
+                            Ok(())
+                        } else {
+                            Err(bad("Provider did not confirm instrument revocation"))
+                        }
+                    })
+                } else {
+                    gateway.persist(&mut tx, &current, &op, &input, &v).await
+                };
+            if let Err(e) = result {
+                if e.0 == StatusCode::ACCEPTED && generation < 8 {
+                    sqlx::query("ROLLBACK TO SAVEPOINT receipt")
+                        .execute(&mut *tx)
+                        .await?;
+                    sqlx::query("UPDATE payment_jobs SET state='queued',available_at=now()+interval '10 seconds',lease_until=NULL WHERE id=$1").bind(&id).execute(&mut *tx).await?;
+                    tx.commit().await?;
+                    return Ok(false);
+                }
+                sqlx::query("ROLLBACK TO SAVEPOINT receipt")
+                    .execute(&mut *tx)
+                    .await?;
+                sqlx::query("UPDATE payment_jobs SET state='uncertain',error=$1,lease_until=NULL WHERE id=$2").bind(e.1).bind(&id).execute(&mut *tx).await?;
+            } else {
+                sqlx::query("UPDATE payment_jobs SET state='succeeded',response=$1,error=NULL,lease_until=NULL WHERE id=$2").bind(v).bind(&id).execute(&mut *tx).await?;
+            }
+        }
+        Err(e) => {
+            let terminal = generation >= 8 || e.0 == StatusCode::CONFLICT;
+            sqlx::query("UPDATE payment_jobs SET state=$1,error=$2,lease_until=NULL,available_at=now()+interval '2 seconds' WHERE id=$3").bind(if terminal{if e.0==StatusCode::CONFLICT{"failed"}else{"uncertain"}}else{"queued"}).bind(e.1).bind(&id).execute(&mut *tx).await?;
+        }
+    }
+    tx.commit().await?;
+    Ok(true)
+}
+async fn expire_one(a: &State, tenants: &[String], providers: &[String]) -> Result<bool> {
+    // An uncertain provider operation requires reconciliation, never automatic inventory release.
+    let mut tx = a.db.begin().await?;
+    let row=sqlx::query("SELECT * FROM payment_attempts p WHERE (provider='paypal' AND tenant=ANY($1) OR provider=ANY($2)) AND expires_at<now() AND state IN ('pending','ready','approved') AND NOT EXISTS(SELECT 1 FROM payment_jobs j WHERE j.attempt_id=p.id AND j.state IN ('queued','running','uncertain')) ORDER BY expires_at LIMIT 1 FOR UPDATE SKIP LOCKED").bind(tenants).bind(providers).fetch_optional(&mut *tx).await?;
+    let worked = row.is_some();
+    if let Some(r) = row {
+        let p = attempt(&r);
+        enqueue_tx(
+            &mut tx,
+            &p.tenant,
+            &p.id,
+            "cancel",
+            &format!("{}:expiry", p.id),
+            &json!({"expiry":true}),
+        )
+        .await?;
+    }
+    tx.commit().await?;
+    Ok(worked)
+}

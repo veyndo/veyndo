@@ -26,18 +26,3 @@ pub(crate) async fn update_order(
     veyndo_payments::store::order_ledger::update_order(&super::host::PaymentHost, tx, p, state)
         .await
 }
-pub(crate) async fn release_stock(
-    tx: &mut sqlx::Transaction<'_, sqlx::Postgres>,
-    p: &Attempt,
-    state: &str,
-    void_confirmed: bool,
-) -> Result<()> {
-    veyndo_payments::store::order_ledger::release_stock(
-        &super::host::PaymentHost,
-        tx,
-        p,
-        state,
-        void_confirmed,
-    )
-    .await
-}

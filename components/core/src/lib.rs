@@ -6,6 +6,7 @@ pub mod channel_metrics;
 mod conversions;
 pub mod database;
 mod failure;
+pub mod host_names;
 pub mod http_limits;
 pub mod localized;
 pub mod observability;

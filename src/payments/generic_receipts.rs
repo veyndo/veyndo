@@ -2,7 +2,6 @@
 use super::Attempt;
 use crate::{Result, Value};
 
-pub(super) use veyndo_payments::domain::receipt_ref::identity;
 pub(crate) async fn persist(
     tx: &mut sqlx::Transaction<'_, sqlx::Postgres>,
     p: &Attempt,

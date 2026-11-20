@@ -7,11 +7,14 @@ description = "Payments: the attempt ledger, its state machine, settlements, ref
 
 [dependencies]
 chrono.workspace = true
+hmac.workspace = true
+sha2.workspace = true
 reqwest.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 sqlx.workspace = true
 veyndo-core = { path = "../core" }
+veyndo-kernel = { path = "../../crates/kernel" }
 veyndo-pricing = { path = "../pricing" }
 veyndo-shop = { path = "../shop" }
 veyndo-inventory = { path = "../inventory" }

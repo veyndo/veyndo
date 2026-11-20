@@ -3813,12 +3813,15 @@ name = "veyndo-payments"
 version = "0.5.0"
 dependencies = [
  "chrono",
+ "hmac 0.12.1",
  "reqwest",
  "serde",
  "serde_json",
+ "sha2 0.10.9",
  "sqlx",
  "veyndo-core",
  "veyndo-inventory",
+ "veyndo-kernel",
  "veyndo-orders",
  "veyndo-pricing",
  "veyndo-shop",

@@ -2,19 +2,7 @@
 use crate::*;
 use axum::{extract::Request, http::Method, middleware::Next};
 
-pub(crate) fn domain(value: &str) -> bool {
-    value.len() <= 253
-        && value.contains('.')
-        && value.split('.').all(|part| {
-            !part.is_empty()
-                && part.len() <= 63
-                && !part.starts_with('-')
-                && !part.ends_with('-')
-                && part
-                    .bytes()
-                    .all(|b| b.is_ascii_lowercase() || b.is_ascii_digit() || b == b'-')
-        })
-}
+pub(crate) use veyndo_core::host_names::domain;
 fn destination(host: &str, path: &str, canonical: &str, legacy: &str) -> Option<String> {
     if !domain(canonical) || host.contains('@') || host.contains('/') {
         return None;
