@@ -90,10 +90,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/apps/mod.rs](../src/apps/mod.rs) | Versioned app packages: managed data, UI slots, agent tools and isolated service calls. |
 | [src/apps/model_contract.rs](../src/apps/model_contract.rs) | Native errors of model errors live in the apps component; this module keeps the short path for the app adapters. |
 | [src/apps/native_data.rs](../src/apps/native_data.rs) | The record language check lives in the apps component; this module keeps the short path for the data adapter. |
-| [src/apps/native_lifecycle/compile.rs](../src/apps/native_lifecycle/compile.rs) | Adapt shared graph compilation to the complete native package digest, current scope catalogue and native order base. |
-| [src/apps/native_lifecycle/storage.rs](../src/apps/native_lifecycle/storage.rs) | Capture accepted definitions in existing operational JSON under native package locks; no app-specific tables. |
-| [src/apps/native_lifecycle/tests.rs](../src/apps/native_lifecycle/tests.rs) | Contract and native-boundary negative controls; operational tests exercise the actual owners separately. |
-| [src/apps/native_lifecycle.rs](../src/apps/native_lifecycle.rs) | Versioned declarative native lifecycles; packages narrow native admission and never execute effects. |
+| [src/apps/native_lifecycle.rs](../src/apps/native_lifecycle.rs) | Native lifecycles live in the apps component; this module keeps the short path for orders, quotes and settings. |
 | [src/apps/native_view_tests.rs](../src/apps/native_view_tests.rs) | Native schema security regressions: bindings, public writes, allowlists, bounded blocks and legacy digests. |
 | [src/apps/native_views.rs](../src/apps/native_views.rs) | Native view contracts live in the apps component; this module keeps the short path for the surface adapters. |
 | [src/apps/observability.rs](../src/apps/observability.rs) | Bounded metadata-only app telemetry, storage usage and explicitly approved cursor-based event replay. |
@@ -650,6 +647,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/apps/src/domain/manifest_policy.rs](../components/apps/src/domain/manifest_policy.rs) | Required native policy ports for the complete shared compiler; no package or request fields can select a weaker policy. |
 | [components/apps/src/domain/manifest_validation.rs](../components/apps/src/domain/manifest_validation.rs) | Complete shared package compiler adapter; trusted native policies retain current authority and exact native errors. |
 | [components/apps/src/domain/model_contract.rs](../components/apps/src/domain/model_contract.rs) | Preserve native problem kinds, revision-conflict status and escaped JSON pointers across the pure model boundary. |
+| [components/apps/src/domain/native_lifecycle.rs](../components/apps/src/domain/native_lifecycle.rs) | Versioned declarative native lifecycles; packages narrow native admission and never execute effects. |
 | [components/apps/src/domain/native_views.rs](../components/apps/src/domain/native_views.rs) | Shared view contracts of a package; actual grants, runtime execution and current rights remain with the server. |
 | [components/apps/src/domain/ontology.rs](../components/apps/src/domain/ontology.rs) | Native complete-package adapter for graph mapping; the existing authorized list supplies every projected row. |
 | [components/apps/src/domain/persistence.rs](../components/apps/src/domain/persistence.rs) | Translate storage-port failures into the existing native HTTP/MCP domain errors. |
@@ -689,6 +687,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/apps/src/service.rs](../components/apps/src/service.rs) | Process-side helpers of the app platform: pinned egress clients and local execution limits. |
 | [components/apps/src/store/action_log.rs](../components/apps/src/store/action_log.rs) | Bounded metadata-only app telemetry: who called which action with what outcome, never a payload. |
 | [components/apps/src/store/asset_references.rs](../components/apps/src/store/asset_references.rs) | Assets an app record refers to must belong to the same shop and fit the field. |
+| [components/apps/src/store/commerce_hooks.rs](../components/apps/src/store/commerce_hooks.rs) | Which commerce hook packages a shop admits and checkout evaluates. |
 | [components/apps/src/store/configuration_events.rs](../components/apps/src/store/configuration_events.rs) | Configuration mutations publish minimized identifiers through the native outbox/Flows; no cart capability or shopper text is disclosed. |
 | [components/apps/src/store/core_references.rs](../components/apps/src/store/core_references.rs) | Core records an app field names must belong to the same shop; no app alters core tables. |
 | [components/apps/src/store/dependencies.rs](../components/apps/src/store/dependencies.rs) | Tenant-local dependency and version gates of a signed package, read under the installing transaction. |
@@ -698,6 +697,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/apps/src/store/job_control.rs](../components/apps/src/store/job_control.rs) | Native current-action/right/input admission for the shared job-control transaction; no duplicate transition or outbox engine. |
 | [components/apps/src/store/jobs.rs](../components/apps/src/store/jobs.rs) | Durable long actions piggyback on the existing outbox. Apps claim a fenced lease; unknown side effects are never retried automatically. |
 | [components/apps/src/store/languages.rs](../components/apps/src/store/languages.rs) | App record translations use configured shop languages and field-level main-language inheritance. |
+| [components/apps/src/store/native_lifecycle.rs](../components/apps/src/store/native_lifecycle.rs) | Capture accepted definitions in existing operational JSON under native package locks; no app-specific tables. |
 | [components/apps/src/store/package_fence.rs](../components/apps/src/store/package_fence.rs) | Shared package fence prevents native record or document writes racing contract upgrades. |
 | [components/apps/src/store/packages.rs](../components/apps/src/store/packages.rs) | The installed package of a shop, read on the backend the caller already holds. |
 | [components/apps/src/store/record_write.rs](../components/apps/src/store/record_write.rs) | Native lifecycle/history hooks around the shared record mutation engine; package and typed field validation stay with the caller. |

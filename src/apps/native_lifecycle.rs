@@ -1,39 +1,7 @@
-//! Versioned declarative native lifecycles; packages narrow native admission and never execute effects.
-use super::*;
-mod compile;
-mod storage;
-pub(crate) use compile::{compile, generation_context, quote_machine};
-pub(crate) use storage::{
-    admission, bind_order, capture, current_order, order_machine, project_labels, snapshot,
-    validate_active_locale, validate_order_base,
+//! Native lifecycles live in the apps component; this module keeps the short path for orders, quotes and settings.
+pub(crate) use veyndo_app_platform::domain::native_lifecycle::{
+    allowed, generation_context, order_machine, project_labels, reason, snapshot, validate_locale,
 };
-pub(crate) use veyndo_app_model::native_lifecycle::Snapshot;
-#[cfg(test)]
-use veyndo_app_model::native_lifecycle::fact_value;
-#[cfg(test)]
-pub(super) fn validate(m: &Manifest) -> Result<()> {
-    let digest = approval::canonical_digest(m);
-    veyndo_app_model::native_lifecycle::validate(
-        &compile::package(m, &digest),
-        &compile::HostPolicy,
-    )
-    .map_err(model_contract::error)
-}
-pub(crate) fn validate_locale(m: &Manifest, main: &str) -> Result<()> {
-    let digest = approval::canonical_digest(m);
-    veyndo_app_model::native_lifecycle::validate_locale(&compile::package(m, &digest), main)
-        .map_err(model_contract::error)
-}
-pub(crate) fn reason(
-    h: &RequestContext,
-    edge: &commerce::MachineEdge,
-    data: &Value,
-) -> Option<&'static str> {
-    veyndo_app_model::native_lifecycle::reason(edge, data, |p| auth::permit(h, p).is_ok())
-}
-pub(crate) fn allowed(native: bool, rights: bool, guards: bool) -> bool {
-    verified_kernel::native_lifecycle_admissible(native, rights, guards)
-}
-
-#[cfg(test)]
-mod tests;
+pub(crate) use veyndo_app_platform::store::native_lifecycle::{
+    admission, bind_order, capture, current_order, validate_active_locale, validate_order_base,
+};

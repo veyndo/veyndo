@@ -1,6 +1,7 @@
 //! SQL of the apps component.
 pub mod action_log;
 pub mod asset_references;
+pub mod commerce_hooks;
 pub mod configuration_events;
 pub mod core_references;
 pub mod dependencies;
@@ -10,6 +11,7 @@ pub mod extension_filter;
 pub mod job_control;
 pub mod jobs;
 pub mod languages;
+pub mod native_lifecycle;
 pub mod package_fence;
 pub mod packages;
 pub mod record_write;

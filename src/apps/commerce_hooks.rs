@@ -36,23 +36,7 @@ pub(crate) async fn verify_package(m: &Manifest) -> Result<()> {
 pub(crate) struct Prepared {
     pub modules: HashMap<String, Arc<Sandbox>>,
 }
-async fn rows(conn: &mut sqlx::PgConnection, t: &str) -> Result<Vec<sqlx::postgres::PgRow>> {
-    // Row locks fence upgrades/deactivation during checkout. Nine detects the eight-app admission cap.
-    let rows=sqlx::query("SELECT manifest FROM app_packages WHERE tenant=$1 AND active AND manifest ? 'commerceHooks' ORDER BY id LIMIT 9 FOR SHARE").bind(t).fetch_all(conn).await?;
-    if rows.len() > 8 {
-        return Err(bad("At most eight active commerce-hook apps are admitted"));
-    }
-    Ok(rows)
-}
-pub(super) async fn admission(conn: &mut sqlx::PgConnection, t: &str, m: &Manifest) -> Result<()> {
-    if m.commerce_hooks.is_some() {
-        let count:i64=sqlx::query_scalar("SELECT count(*) FROM app_packages WHERE tenant=$1 AND active AND id<>$2 AND manifest ? 'commerceHooks'").bind(t).bind(&m.id).fetch_one(conn).await?;
-        if count >= 8 {
-            return Err(bad("At most eight active commerce-hook apps are admitted"));
-        }
-    }
-    Ok(())
-}
+pub(super) use veyndo_app_platform::store::commerce_hooks::{admission, rows};
 pub(crate) async fn prepare(a: &App, t: &str) -> Result<Prepared> {
     let mut conn = a.db.begin().await?;
     let ms = rows(&mut conn, t).await?;

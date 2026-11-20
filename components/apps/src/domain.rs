@@ -22,6 +22,7 @@ pub mod input_schema;
 pub mod manifest_policy;
 pub mod manifest_validation;
 pub mod model_contract;
+pub mod native_lifecycle;
 pub mod native_views;
 pub mod ontology;
 pub mod persistence;

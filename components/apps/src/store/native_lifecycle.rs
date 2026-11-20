@@ -1,5 +1,12 @@
 //! Capture accepted definitions in existing operational JSON under native package locks; no app-specific tables.
-use super::*;
+use crate::domain::native_lifecycle::{Snapshot, compile, quote_machine, validate_locale};
+use serde_json::{Value, json};
+use veyndo_app_model::manifest::Manifest;
+use veyndo_core::{Result, bad};
+use veyndo_orders::domain::order_machine::OrderMachine;
+use veyndo_orders::store::machine::machine_conn;
+use veyndo_runtime::scoped_pool::ScopedPool;
+
 async fn packages(conn: &mut sqlx::PgConnection, t: &str) -> Result<Vec<Manifest>> {
     let rows: Vec<Value> = sqlx::query_scalar("SELECT manifest FROM app_packages WHERE tenant=$1 AND active AND jsonb_array_length(coalesce(manifest->'lifecycles','[]'))>0 ORDER BY id LIMIT 9 FOR SHARE")
         .bind(t).fetch_all(conn).await?;
@@ -11,7 +18,8 @@ async fn packages(conn: &mut sqlx::PgConnection, t: &str) -> Result<Vec<Manifest
         .collect()
 }
 /// Called under the existing aggregate configuration lock, including selected publication.
-pub(crate) async fn validate_active_locale(
+/// Requires every active lifecycle package to carry labels in a new main language.
+pub async fn validate_active_locale(
     conn: &mut sqlx::PgConnection,
     t: &str,
     main: &str,
@@ -21,7 +29,8 @@ pub(crate) async fn validate_active_locale(
     }
     Ok(())
 }
-pub(crate) async fn admission(conn: &mut sqlx::PgConnection, t: &str, m: &Manifest) -> Result<()> {
+/// Admits a lifecycle package only if all active ones still compile together.
+pub async fn admission(conn: &mut sqlx::PgConnection, t: &str, m: &Manifest) -> Result<()> {
     if m.lifecycles.is_empty() {
         return Ok(());
     }
@@ -38,12 +47,13 @@ pub(crate) async fn admission(conn: &mut sqlx::PgConnection, t: &str, m: &Manife
     if apps.len() > 8 {
         return Err(bad("At most eight native lifecycle apps per shop"));
     }
-    let (base, _) = commerce::machine_conn(conn, t).await?;
+    let (base, _) = machine_conn(conn, t).await?;
     compile(base, &apps, "order")?;
     compile(quote_machine(), &apps, "quote")?;
     Ok(())
 }
-pub(crate) async fn capture(conn: &mut sqlx::PgConnection, t: &str, object: &str) -> Result<Value> {
+/// The compiled lifecycle of an object, captured for the object that is being accepted.
+pub async fn capture(conn: &mut sqlx::PgConnection, t: &str, object: &str) -> Result<Value> {
     // This single ordered package snapshot is held until the native object commits.
     let apps = packages(conn, t).await?;
     if !apps
@@ -53,7 +63,7 @@ pub(crate) async fn capture(conn: &mut sqlx::PgConnection, t: &str, object: &str
         return Ok(Value::Null);
     }
     let (base, revision) = if object == "order" {
-        commerce::machine_conn(conn, t).await?
+        machine_conn(conn, t).await?
     } else {
         (quote_machine(), 0)
     };
@@ -73,44 +83,26 @@ pub(crate) async fn capture(conn: &mut sqlx::PgConnection, t: &str, object: &str
         machine
     }))
 }
-pub(crate) fn snapshot(data: &Value, object: &str) -> Result<Option<Snapshot>> {
-    veyndo_app_model::native_lifecycle_snapshot::snapshot(data, object)
-        .map_err(model_contract::error)
-}
-pub(crate) fn order_machine(
-    data: &Value,
-    fallback: commerce::OrderMachine,
-    revision: i64,
-) -> Result<(commerce::OrderMachine, i64)> {
-    veyndo_app_model::native_lifecycle_snapshot::order_machine(data, fallback, revision)
-        .map_err(model_contract::error)
-}
-
-pub(crate) async fn validate_order_base(
+/// Requires the active lifecycle packages to compile on a new order base machine.
+pub async fn validate_order_base(
     conn: &mut sqlx::PgConnection,
     t: &str,
-    base: commerce::OrderMachine,
+    base: OrderMachine,
 ) -> Result<()> {
     let apps = packages(conn, t).await?;
     compile(base, &apps, "order")?;
     Ok(())
 }
 
-pub(crate) async fn current_order(db: &PgPool, t: &str) -> Result<commerce::OrderMachine> {
+/// The order machine currently in force for a shop.
+pub async fn current_order(db: &ScopedPool, t: &str) -> Result<OrderMachine> {
     let mut conn = db.begin().await?;
     let apps = packages(&mut conn, t).await?;
-    let (base, _) = commerce::machine_conn(&mut conn, t).await?;
+    let (base, _) = machine_conn(&mut conn, t).await?;
     compile(base, &apps, "order")
 }
-pub(crate) fn project_labels(raw: &Value, output: &mut Value) {
-    veyndo_app_model::native_lifecycle_snapshot::project_labels(raw, output)
-}
-
-pub(crate) async fn bind_order(
-    conn: &mut sqlx::PgConnection,
-    t: &str,
-    order: &mut Value,
-) -> Result<()> {
+/// Stores the captured lifecycle on an order that is being placed.
+pub async fn bind_order(conn: &mut sqlx::PgConnection, t: &str, order: &mut Value) -> Result<()> {
     let lifecycle = capture(conn, t, "order").await?;
     if !lifecycle.is_null() {
         order["nativeLifecycle"] = lifecycle;
