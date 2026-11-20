@@ -166,7 +166,7 @@
         "tenants"
       ],
       "glob_imports": 38,
-      "untyped_access": 105,
+      "untyped_access": 109,
       "sql_outside_store": 24
     },
     "catalog": {
@@ -327,6 +327,7 @@
       "uses": [
         "apps",
         "catalog",
+        "checkout",
         "core",
         "identity",
         "orders",
@@ -343,8 +344,8 @@
         "commerce_rules",
         "orders"
       ],
-      "glob_imports": 7,
-      "untyped_access": 115,
+      "glob_imports": 6,
+      "untyped_access": 73,
       "sql_outside_store": 2
     },
     "checkout": {
@@ -402,8 +403,8 @@
         "shop_environments",
         "tenants"
       ],
-      "glob_imports": 13,
-      "untyped_access": 150,
+      "glob_imports": 12,
+      "untyped_access": 188,
       "sql_outside_store": 9
     },
     "customers": {
@@ -555,7 +556,7 @@
         "policy",
         "sales_channels"
       ],
-      "glob_imports": 2,
+      "glob_imports": 1,
       "untyped_access": 264,
       "sql_outside_store": 17
     },
@@ -682,7 +683,6 @@
         "orders",
         "payments",
         "pricing",
-        "shipping",
         "shop",
         "studio"
       ],

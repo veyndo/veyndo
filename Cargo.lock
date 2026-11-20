@@ -3627,8 +3627,10 @@ dependencies = [
  "chrono",
  "serde",
  "serde_json",
+ "sqlx",
  "veyndo-core",
  "veyndo-pricing",
+ "veyndo-shipping",
  "veyndo-shop",
 ]
 
@@ -3817,6 +3819,7 @@ dependencies = [
  "sqlx",
  "veyndo-core",
  "veyndo-pricing",
+ "veyndo-shop",
 ]
 
 [[package]]

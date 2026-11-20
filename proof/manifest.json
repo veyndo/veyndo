@@ -1012,8 +1012,23 @@
     },
     "components/checkout/src/lib.rs": {
       "status": "unproved",
-      "sha256": "8cd49e74d7ed186ed61e0e4d16482e129f34b227658d65271a31cbf9d7f09e47",
-      "review": "Identity credentials, B2B and POS contracts and checkout tax lines moved into components; kernel call sites unchanged"
+      "sha256": "c03d8b05d29a607169939eb06744c143c4736928080969d088271a7ee02d4f2e",
+      "review": "Delivery enrichment, app adjustments and funding moved into components; kernel call sites unchanged"
+    },
+    "components/checkout/src/service/app_adjustments.rs": {
+      "status": "unproved",
+      "sha256": "5def5e0eab01f7dfcb65a74c4f1580d2fb39facab32e81ba57ace2d15e2fa5df",
+      "review": "Delivery enrichment, app adjustments and funding moved into components; kernel call sites unchanged"
+    },
+    "components/checkout/src/service/delivery.rs": {
+      "status": "unproved",
+      "sha256": "6931ab0eafd069d54edc2dbc31eb160fb8eb536ff990c195d20e8efcac006376",
+      "review": "Delivery enrichment, app adjustments and funding moved into components; kernel call sites unchanged"
+    },
+    "components/checkout/src/service.rs": {
+      "status": "unproved",
+      "sha256": "8d8f71730ad60dcf5227ab3fa6a0ba8b32aea63b732ce5abd4e9b69d1ed4f2fb",
+      "review": "Delivery enrichment, app adjustments and funding moved into components; kernel call sites unchanged"
     },
     "components/core/src/access.rs": {
       "status": "unproved",
@@ -1632,8 +1647,18 @@
     },
     "components/payments/src/lib.rs": {
       "status": "unproved",
-      "sha256": "e0ffaabbe2fb6d85137b7937b9072fb6dec770047a7977ec03fb25b63dc34df3",
-      "review": "Payment ledger rules moved into components/payments; kernel call sites unchanged"
+      "sha256": "c150c64daa2b8080780af43351f24b44d63ba699ee42407898b8965c3c15f98d",
+      "review": "Delivery enrichment, app adjustments and funding moved into components; kernel call sites unchanged"
+    },
+    "components/payments/src/service/funding.rs": {
+      "status": "unproved",
+      "sha256": "f469197ec03c09080948343525a26f88de3bb3e810b9615a24fd9cd54e5d269c",
+      "review": "Delivery enrichment, app adjustments and funding moved into components; kernel call sites unchanged"
+    },
+    "components/payments/src/service.rs": {
+      "status": "unproved",
+      "sha256": "86245ef04c1e548c81998167fd8b136fca84ec2a3924cf550b3e105c16203d00",
+      "review": "Delivery enrichment, app adjustments and funding moved into components; kernel call sites unchanged"
     },
     "components/payments/src/store/attempts.rs": {
       "status": "unproved",
@@ -1960,6 +1985,11 @@
       "sha256": "7212fbcc2ee067fabbe457c7276eadc829d7592982af74a97b765b9379abac95",
       "review": "Identity credentials, B2B and POS contracts and checkout tax lines moved into components; kernel call sites unchanged"
     },
+    "components/shop/src/domain/method_text.rs": {
+      "status": "unproved",
+      "sha256": "123bb256733bab4f2a2d6c8bac954e8b9286b03997909e254436703092808f24",
+      "review": "Delivery enrichment, app adjustments and funding moved into components; kernel call sites unchanged"
+    },
     "components/shop/src/domain/patch.rs": {
       "status": "unproved",
       "sha256": "386462fb4c31daf2ff3a1e58c11ae4cb3415ff139838ced6588c885f87782056",
@@ -1977,8 +2007,8 @@
     },
     "components/shop/src/domain.rs": {
       "status": "unproved",
-      "sha256": "0ee0fcc89be265771469168cbd7032eb16c2f45e73c5d9ba2e38b6602ec30ef3",
-      "review": "Identity credentials, B2B and POS contracts and checkout tax lines moved into components; kernel call sites unchanged"
+      "sha256": "21b43949e51bcf31f6d44a7a39eacf390848e55f8e08f1261d93613df4f9a791",
+      "review": "Delivery enrichment, app adjustments and funding moved into components; kernel call sites unchanged"
     },
     "components/shop/src/lib.rs": {
       "status": "unproved",
@@ -5177,8 +5207,8 @@
     },
     "src/commerce/app_adjustments.rs": {
       "status": "unproved",
-      "sha256": "4bc033f53ba9994bf0e58915b303ad6276a76cc7eb535ed4b76b905bfe1c5a42",
-      "review": "Reviewed shared discount allocator: u128 positive sum and bounded per-line remainder carry preserve cumulative rounding; app price targets reject overflow before quote mutation; independent boundary and native promotion regressions."
+      "sha256": "307f311fc41396f970799bf599a968cf3a72dc4ec59cfa4a1a0dd87f97737635",
+      "review": "Delivery enrichment, app adjustments and funding moved into components; kernel call sites unchanged"
     },
     "src/commerce/catalog.rs": {
       "status": "unproved",
@@ -5237,8 +5267,8 @@
     },
     "src/commerce/delivery.rs": {
       "status": "unproved",
-      "sha256": "40108140b5f99596d4ab6fee98f439f21108e331c5e9319487a85ec4c9d11e07",
-      "review": "cart types and rule engine moved into components; checking bindings"
+      "sha256": "010a812376e78f10838cd3919c7c808198de0a8d0ae53239ffbbe1e2f3fe6bad",
+      "review": "Delivery enrichment, app adjustments and funding moved into components; kernel call sites unchanged"
     },
     "src/commerce/delivery_split.rs": {
       "status": "unproved",
@@ -5292,8 +5322,8 @@
     },
     "src/commerce/method_text.rs": {
       "status": "unproved",
-      "sha256": "0e67bf926d47e1bdbeb1fb50391854910f894becbb6f851a71f4701c438fc47e",
-      "review": "shop component crate created; settings types moved; no kernel binding changed"
+      "sha256": "6c20658d803047c3d22060ef040770747b526031a8eb93d19819c071b38edf45",
+      "review": "Delivery enrichment, app adjustments and funding moved into components; kernel call sites unchanged"
     },
     "src/commerce/method_usage.rs": {
       "status": "unproved",
@@ -5302,8 +5332,8 @@
     },
     "src/commerce/mod.rs": {
       "status": "unproved",
-      "sha256": "63d7814f592afd40b76b3a57b293c028833e8e9695ba7701957fb810d21dfa33",
-      "review": "Identity credentials, B2B and POS contracts and checkout tax lines moved into components; kernel call sites unchanged"
+      "sha256": "36fd30db1cef1ea62bf9580eb7e5e221f95af78674399e9fd9842ded029fbe60",
+      "review": "Delivery enrichment, app adjustments and funding moved into components; kernel call sites unchanged"
     },
     "src/commerce/order_fields.rs": {
       "status": "unproved",
@@ -5427,8 +5457,8 @@
     },
     "src/commerce/types.rs": {
       "status": "unproved",
-      "sha256": "a39b61f984aadbc95cf14cbc89d03565289d134f0b6274a8cf0901c22e533514",
-      "review": "Identity credentials, B2B and POS contracts and checkout tax lines moved into components; kernel call sites unchanged"
+      "sha256": "aaf6fc85b1b02d28c775067bb6e46c6b8b677685a2f1e37d59fee5be40d369b3",
+      "review": "Delivery enrichment, app adjustments and funding moved into components; kernel call sites unchanged"
     },
     "src/concierge.rs": {
       "status": "unproved",
@@ -6187,8 +6217,8 @@
     },
     "src/payments/funding.rs": {
       "status": "unproved",
-      "sha256": "64f9a5eb22047d69be2b19760ad140b44aae823449e4283848d26b9eac7695ea",
-      "review": "shop component crate created; settings types moved; no kernel binding changed"
+      "sha256": "b318d349cfb62f0d5ee63a65e5ccf3c5d040302b695578d29755def48217d3e1",
+      "review": "Delivery enrichment, app adjustments and funding moved into components; kernel call sites unchanged"
     },
     "src/payments/generic_receipts.rs": {
       "status": "unproved",
@@ -6722,8 +6752,8 @@
       "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
     },
     "Cargo.lock": {
-      "sha256": "16a4b49b50b5c59b146ad1d7677784e463193d5f2fce2b6cce82aefb5d071cb2",
-      "review": "Knowledge module and experiment model moved into components/intelligence; kernel call sites unchanged"
+      "sha256": "04a8aae4d72155e6df848065412146725ae35973f0bdfe8d5302b6725d8a8992",
+      "review": "Delivery enrichment, app adjustments and funding moved into components; kernel call sites unchanged"
     },
     "Cargo.toml": {
       "sha256": "881e080eb9f1b1f051c23e2848df689853473831b4d3072817387d65c23ddb66",

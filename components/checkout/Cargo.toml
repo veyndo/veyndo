@@ -6,9 +6,11 @@ license-file.workspace = true
 description = "Checkout: cart quote, tax lines, selection and the order placement transaction"
 
 [dependencies]
+sqlx.workspace = true
 chrono.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 veyndo-core = { path = "../core" }
 veyndo-pricing = { path = "../pricing" }
 veyndo-shop = { path = "../shop" }
+veyndo-shipping = { path = "../shipping" }

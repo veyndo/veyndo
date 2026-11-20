@@ -1,6 +1,5 @@
 //! Native catalogue and checkout domains; pricing ports remain in the library.
 use crate::*;
-use veyndo::pricing::{TaxRule, proportional_tax_rules};
 mod types;
 pub(crate) use types::*;
 mod customer_groups;

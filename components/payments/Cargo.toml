@@ -13,3 +13,4 @@ serde_json.workspace = true
 sqlx.workspace = true
 veyndo-core = { path = "../core" }
 veyndo-pricing = { path = "../pricing" }
+veyndo-shop = { path = "../shop" }

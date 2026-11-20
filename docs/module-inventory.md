@@ -719,6 +719,9 @@ This lists every checked-in source module in these roots, including files with n
 | [components/checkout/src/domain/tax_lines.rs](../components/checkout/src/domain/tax_lines.rs) | Destination tax-class resolution and net-preserving price conversion. |
 | [components/checkout/src/domain.rs](../components/checkout/src/domain.rs) | Rules of a quote, free of I/O apart from the clock. |
 | [components/checkout/src/lib.rs](../components/checkout/src/lib.rs) | Checkout component: tax lines and payment classification of a quote; the transaction follows. |
+| [components/checkout/src/service/app_adjustments.rs](../components/checkout/src/service/app_adjustments.rs) | Apply admitted integer app adjustments through native pricing/tax calculation; extensions cannot replace quote JSON. |
+| [components/checkout/src/service/delivery.rs](../components/checkout/src/service/delivery.rs) | Shipping costs, proportional taxes and calendar delivery windows. |
+| [components/checkout/src/service.rs](../components/checkout/src/service.rs) | service of this component. |
 | [components/core/src/access.rs](../components/core/src/access.rs) | Admission facts of one shop and sales channel, read once per request and shared by every later check. |
 | [components/core/src/admission/relay.rs](../components/core/src/admission/relay.rs) | Short, bounded relay admission waiting before contacting the independent Checkout service. |
 | [components/core/src/admission/tests.rs](../components/core/src/admission/tests.rs) | Regression checks for Core admission limits and the Checkout relay retry interval. |
@@ -849,6 +852,8 @@ This lists every checked-in source module in these roots, including files with n
 | [components/payments/src/domain/state.rs](../components/payments/src/domain/state.rs) | One monotonic provider-neutral ledger state machine; evidence validation and authorization stay in receipt adapters. |
 | [components/payments/src/domain.rs](../components/payments/src/domain.rs) | Rules of the payment ledger, free of I/O. |
 | [components/payments/src/lib.rs](../components/payments/src/lib.rs) | Payments component: the attempt ledger, its state machine, settlements, refunds and receipt admission. |
+| [components/payments/src/service/funding.rs](../components/payments/src/service/funding.rs) | Account-authorized funding choice, immutable consent and saved-instrument admission; cart possession is insufficient. |
+| [components/payments/src/service.rs](../components/payments/src/service.rs) | service of this component. |
 | [components/payments/src/store/attempts.rs](../components/payments/src/store/attempts.rs) | Row mapping of the payment attempt ledger. |
 | [components/payments/src/store/capture_admission.rs](../components/payments/src/store/capture_admission.rs) | Serialized native capture budgets; uncertain capture jobs reserve the remaining authorization. |
 | [components/payments/src/store/receipt_claims.rs](../components/payments/src/store/receipt_claims.rs) | Receipt claims: one provider receipt belongs to exactly one attempt, across tenants. |
@@ -914,6 +919,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/shop/src/domain/customer_groups.rs](../components/shop/src/domain/customer_groups.rs) | Tenant-owned translated customer groups preserve exact rule IDs and select an explicit existing price/tax presentation basis. |
 | [components/shop/src/domain/defaults.rs](../components/shop/src/domain/defaults.rs) | Backward-compatible enrichment of existing configuration with bundled translated method labels. |
 | [components/shop/src/domain/legal_product.rs](../components/shop/src/domain/legal_product.rs) | Explicit product safety/sector facts, with market-language fallback; no inference of certifications. |
+| [components/shop/src/domain/method_text.rs](../components/shop/src/domain/method_text.rs) | Shared translated names and descriptions with field-wise shop-main-language inheritance. |
 | [components/shop/src/domain/patch.rs](../components/shop/src/domain/patch.rs) | Transport-only sparse JSON differences: stable record IDs, explicit nulls, and deletion distinct from inheritance. |
 | [components/shop/src/domain/tax_rules.rs](../components/shop/src/domain/tax_rules.rs) | Priority-based destination rules; current tax law is merchant configuration, not bundled tax advice. |
 | [components/shop/src/domain/validation.rs](../components/shop/src/domain/validation.rs) | Configuration validation and required availability invariants. |
