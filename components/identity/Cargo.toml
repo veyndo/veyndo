@@ -18,3 +18,8 @@ serde_json.workspace = true
 veyndo-core = { path = "../core" }
 veyndo-kernel = { path = "../../crates/kernel" }
 sqlx.workspace = true
+serde.workspace = true
+reqwest.workspace = true
+veyndo-cognition = { path = "../../crates/cognition" }
+veyndo-runtime = { path = "../../crates/runtime" }
+base64.workspace = true

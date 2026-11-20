@@ -112,3 +112,7 @@ pub fn validate_permissions(h: &RequestContext, v: &Value) -> Result<Value> {
     }
     Ok(v.clone())
 }
+/// A right a budgeted planning agent may hold: reading, the assistant and personal data, never a business write.
+pub fn planning_scope(scope: &str) -> bool {
+    scope.ends_with(".read") || ["assistant.use", "customers.pii"].contains(&scope)
+}

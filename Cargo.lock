@@ -3697,16 +3697,21 @@ version = "0.5.0"
 dependencies = [
  "argon2",
  "axum",
+ "base64 0.22.1",
  "hmac 0.12.1",
+ "reqwest",
  "ring",
+ "serde",
  "serde_json",
  "sha2 0.10.9",
  "sqlx",
  "tokio",
  "uuid",
  "veyndo-app-model",
+ "veyndo-cognition",
  "veyndo-core",
  "veyndo-kernel",
+ "veyndo-runtime",
 ]
 
 [[package]]

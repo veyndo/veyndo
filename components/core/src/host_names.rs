@@ -50,6 +50,18 @@ pub fn same_origin_family(
     configured_alias(expected_host, canonical, "")
         .is_some_and(|prefix| configured_alias(actual_host, "", legacy) == Some(prefix))
 }
+/// Canonical links are server-owned; independent admin login always uses the configured Studio origin.
+pub fn links(shop: &str) -> serde_json::Value {
+    let origin =
+        std::env::var("COMMERCE_PUBLIC_ORIGIN").unwrap_or_else(|_| "http://127.0.0.1:8787".into());
+    let storefront = std::env::var("SHOP_DOMAIN_SUFFIX")
+        .ok()
+        .filter(|s| !s.is_empty())
+        .map(|suffix| format!("https://{shop}.{suffix}/"))
+        .unwrap_or_else(|| format!("{}/?shop={shop}", origin.trim_end_matches('/')));
+    serde_json::json!({"storefrontUrl":storefront,"studioUrl":format!("{}/?shop={shop}#merchant",origin.trim_end_matches('/'))})
+}
+
 #[cfg(test)]
 mod tests {
     use super::{configured_alias, same_origin_family};

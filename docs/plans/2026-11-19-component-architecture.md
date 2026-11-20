@@ -127,9 +127,18 @@ Rules that hold from the first component on:
       actor and the usage of a role; `http/members` the workspace member list
       and the role or revocation change, `http/access` the access overview,
       the personal session list and the revocation of sessions and invitations;
-      `store/handoffs` the one-time Studio handoff ticket. Open: accounts and sessions, MFA, invitations, the
-      identity broker, integration keys, browser sessions, the middleware,
-      provisioning, the role editor (it validates names against shop settings).
+      `store/handoffs` the one-time Studio handoff ticket. `store/sessions`
+      issues personal sessions and MFA challenges, `http/sessions` owns login,
+      logout and workspace discovery, `http/invitations` the invitations,
+      `http/mfa` enrollment, confirmation, disabling and verification,
+      `store/credentials` the one credential lookup (`identity.sql`),
+      `http/integrations` the integration keys, `store/broker` the signed
+      broker assertion with its nonce and `http/broker` password setup,
+      recovery discovery and the broker session; `types/envelopes` the typed
+      request shapes. Open: the broker exchange and inference (they provision
+      a shop and call the model), registration and provisioning, browser
+      sessions, the middleware with login throttling, the Knowledge
+      introspection, the role editor (it validates names against shop settings).
 - [x] Ban new `use super::*` / `use crate::*`: `glob_imports` per component in
       `components.json` only falls (528 files at the start); component crates have none.
 
@@ -310,7 +319,7 @@ Order follows the dependency report, lowest first. Each line is one move.
   dependency inspection before a deletion, the flow job claims with their
   checkpoints, the membership a queued step runs with and the bounded job
   summaries and the revision-bound write of rule metadata (its bounds are in
-  `domain/metadata`); `service/` the coupon selection of a cart, which admits and
+  `domain/metadata`; `domain/condition_import` translates source conditions); `service/` the coupon selection of a cart, which admits and
   prices it through `veyndo_shop::ports::Carts`. Open: flow projection, flow
   execution (needs ports to orders, customers and apps), channel access and
   preview, rule history, routes.

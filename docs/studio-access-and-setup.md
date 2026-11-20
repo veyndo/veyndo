@@ -134,7 +134,7 @@ app slots retain their own granted capabilities; they do not inherit catalog wri
 | Responsibility | Source |
 | --- | --- |
 | Persisted roles, current grants, history/FKs/RLS | `migrations/082-workspace-roles.sql`, `src/auth/roles.rs` |
-| Session/key identity and delegation | `src/auth/identity.sql`, `members.rs`, `invitations.rs`, `permissions.rs` |
+| Session/key identity and delegation | `components/identity/src/store/identity.sql`, `http/members.rs`, `http/invitations.rs`, `http/access.rs` |
 | UI navigation and refreshed grants | `frontend/src/admin/shell/permissions.ts`, `useStudioPermissions.ts` |
 | Shared permission labels and role editor | `frontend/src/admin/team/` |
 | Channel wizard field validation | `frontend/src/admin/channels/ChannelEditor.tsx` |

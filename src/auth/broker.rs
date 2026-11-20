@@ -1,109 +1,11 @@
 //! Optional trusted identity exchange: signatures bind route, audience, expiry and one-use nonce.
 use super::{email, hash_password, provision_shop};
 use crate::{
-    App, Arc, Error, Json, Result, Row, Sha256, State, StatusCode, Value, bad, conflict, env, hash,
-    json, knowledge, prototype_products, uid, validate_tenant,
+    App, Arc, Json, Result, State, Value, bad, conflict, json, knowledge, prototype_products, uid,
+    validate_tenant,
 };
 
-use base64::{Engine, engine::general_purpose::URL_SAFE_NO_PAD};
-use hmac::{Hmac, Mac};
-
-pub(crate) async fn assertion(a: &App, route: &str, v: &Value) -> Result<Value> {
-    let key = env::var("IDENTITY_BROKER_KEY")
-        .ok()
-        .filter(|k| k.len() >= 64)
-        .ok_or(Error(
-            StatusCode::SERVICE_UNAVAILABLE,
-            "Identity broker is not configured".into(),
-        ))?;
-    let issuer =
-        env::var("IDENTITY_BROKER_ISSUER").map_err(|_| bad("Identity issuer is not configured"))?;
-    let limit = if route == "/api/identity/inference" {
-        8_100_000
-    } else {
-        32000
-    };
-    let encoded = v["payload"]
-        .as_str()
-        .filter(|s| s.len() <= limit)
-        .ok_or(bad("Invalid identity assertion"))?;
-    let signature = URL_SAFE_NO_PAD
-        .decode(v["signature"].as_str().unwrap_or(""))
-        .map_err(|_| bad("Invalid assertion signature"))?;
-    let mut mac = Hmac::<Sha256>::new_from_slice(key.as_bytes())
-        .map_err(|_| bad("Invalid broker configuration"))?;
-    mac.update(format!("{route}\n{encoded}").as_bytes());
-    mac.verify_slice(&signature).map_err(|_| {
-        Error(
-            StatusCode::UNAUTHORIZED,
-            "Invalid identity assertion".into(),
-        )
-    })?;
-    let claims: Value = serde_json::from_slice(
-        &URL_SAFE_NO_PAD
-            .decode(encoded)
-            .map_err(|_| bad("Invalid assertion encoding"))?,
-    )
-    .map_err(|_| bad("Invalid identity payload"))?;
-    let now = chrono::Utc::now().timestamp();
-    if claims["iss"] != issuer
-        || claims["aud"] != "veyndo-identity"
-        || claims["verified"] != true
-        || !claims["exp"]
-            .as_i64()
-            .is_some_and(|e| e > now && e <= now + 60)
-        || !claims["iat"]
-            .as_i64()
-            .is_some_and(|i| i <= now + 5 && i >= now - 60)
-        || !claims["nonce"]
-            .as_str()
-            .is_some_and(|n| n.len() == 64 && n.bytes().all(|c| c.is_ascii_hexdigit()))
-    {
-        return Err(Error(
-            StatusCode::UNAUTHORIZED,
-            "Expired or invalid identity assertion".into(),
-        ));
-    }
-    email(&claims)?;
-    if route == "/api/identity/inference" {
-        let row=sqlx::query("SELECT u.id,coalesce(m.enabled,false) AS required FROM merchant_users u LEFT JOIN merchant_mfa m ON m.user_id=u.id WHERE u.email=$1").bind(email(&claims)?).fetch_optional(&a.db).await?;
-        if let Some(row) = row
-            && row.get::<bool, _>("required")
-        {
-            let mut tx = a.db.begin().await?;
-            if !super::mfa::trusted_session_tx(
-                &mut tx,
-                &row.get::<String, _>("id"),
-                claims["sessionToken"].as_str(),
-            )
-            .await?
-            {
-                return Err(Error(
-                    StatusCode::UNAUTHORIZED,
-                    "Second factor required".into(),
-                ));
-            }
-        }
-    }
-    if !claims["sub"]
-        .as_str()
-        .is_some_and(|s| !s.is_empty() && s.len() <= 200)
-    {
-        return Err(bad("Identity subject required"));
-    }
-    sqlx::query("DELETE FROM identity_nonces WHERE expires_at<now()")
-        .execute(&a.db)
-        .await?;
-    let used=sqlx::query("INSERT INTO identity_nonces(digest,expires_at) VALUES($1,now()+interval '2 minutes') ON CONFLICT DO NOTHING")
-        .bind(hash(&format!("{}:{}",issuer,claims["nonce"].as_str().unwrap()))).execute(&a.db).await?.rows_affected();
-    if used == 0 {
-        return Err(Error(
-            StatusCode::UNAUTHORIZED,
-            "Identity assertion already consumed".into(),
-        ));
-    }
-    Ok(claims)
-}
+pub(crate) use veyndo_identity::store::broker::assertion;
 
 pub(crate) async fn exchange(State(a): State<App>, Json(v): Json<Value>) -> Result<Json<Value>> {
     let c = assertion(&a, "/api/identity/exchange", &v).await?;

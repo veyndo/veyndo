@@ -54,9 +54,6 @@ pub(crate) async fn model_authority(
                 && header(h, "authorization").is_some()),
     }
 }
-pub(crate) fn planning_scope(scope: &str) -> bool {
-    scope.ends_with(".read") || ["assistant.use", "customers.pii"].contains(&scope)
-}
 pub(crate) async fn admit_key(a: &App, h: &RequestContext, path: &str, method: &str) -> Result<()> {
     if let Some(id) = &h.principal.agent_key {
         let run_control = path

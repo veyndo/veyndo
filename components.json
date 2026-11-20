@@ -83,9 +83,9 @@
         "shop_environments",
         "tenants"
       ],
-      "glob_imports": 8,
+      "glob_imports": 6,
       "untyped_access": 86,
-      "sql_outside_store": 18
+      "sql_outside_store": 16
     },
     "shop": {
       "title": "Shop configuration, domains, legal texts and the operator control plane",

@@ -52,7 +52,6 @@ pub(crate) async fn redeem(State(a): State<App>, Json(v): Json<Value>) -> Result
         return Err(Error(StatusCode::FORBIDDEN, "Shop access revoked".into()));
     }
     let session = super::sessions::issue_verified_tx(
-        &a,
         &mut tx,
         &user,
         &tenant,

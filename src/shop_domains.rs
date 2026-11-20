@@ -69,14 +69,4 @@ pub(crate) async fn resolve(State(a): State<App>, mut request: Request, next: Ne
     next.run(request).await
 }
 
-/// Canonical links are server-owned; independent admin login always uses the configured Studio origin.
-pub(crate) fn links(shop: &str) -> Value {
-    let origin =
-        env::var("COMMERCE_PUBLIC_ORIGIN").unwrap_or_else(|_| "http://127.0.0.1:8787".into());
-    let storefront = env::var("SHOP_DOMAIN_SUFFIX")
-        .ok()
-        .filter(|s| !s.is_empty())
-        .map(|suffix| format!("https://{shop}.{suffix}/"))
-        .unwrap_or_else(|| format!("{}/?shop={shop}", origin.trim_end_matches('/')));
-    json!({"storefrontUrl":storefront,"studioUrl":format!("{}/?shop={shop}#merchant",origin.trim_end_matches('/'))})
-}
+pub(crate) use veyndo_core::host_names::links;

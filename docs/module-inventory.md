@@ -156,17 +156,17 @@ This lists every checked-in source module in these roots, including files with n
 | [src/assets/upload.rs](../src/assets/upload.rs) | Entry points of product file operations for capabilities and app upload surfaces; rules and storage are owned by the catalog component. |
 | [src/auth/abuse.rs](../src/auth/abuse.rs) | Database-backed account and trusted peer-prefix throttles shared by replicas; reserve before password hashing. |
 | [src/auth/broker.rs](../src/auth/broker.rs) | Optional trusted identity exchange: signatures bind route, audience, expiry and one-use nonce. |
-| [src/auth/broker_credentials.rs](../src/auth/broker_credentials.rs) | Explicit password setup/recovery or existing-password verification from a trusted, verified-email broker. |
+| [src/auth/broker_credentials.rs](../src/auth/broker_credentials.rs) | Broker password setup and verification are owned by the identity component. |
 | [src/auth/broker_inference.rs](../src/auth/broker_inference.rs) | Trusted server-to-server inference inherits operator settings without disclosing any provider credentials. |
-| [src/auth/broker_recovery.rs](../src/auth/broker_recovery.rs) | Verified-mail recovery discovers only the canonical account's active memberships; it never provisions a shop. |
-| [src/auth/broker_session.rs](../src/auth/broker_session.rs) | A freshly verified external identity may request its existing personal session; MFA remains mandatory. |
+| [src/auth/broker_recovery.rs](../src/auth/broker_recovery.rs) | Broker recovery discovery is owned by the identity component. |
+| [src/auth/broker_session.rs](../src/auth/broker_session.rs) | Broker session requests are owned by the identity component. |
 | [src/auth/browser.rs](../src/auth/browser.rs) | Browser transport for the existing personal-session ledger: host-only HttpOnly cookies, exact origins and CSRF. |
 | [src/auth/credentials.rs](../src/auth/credentials.rs) | Argon2 password operations run off the asynchronous request executor. |
-| [src/auth/dto.rs](../src/auth/dto.rs) | Stable typed authentication envelopes; field validation remains in the shared credential owner. |
+| [src/auth/dto.rs](../src/auth/dto.rs) | Stable typed authentication envelopes are owned by the identity component. |
 | [src/auth/handoff.rs](../src/auth/handoff.rs) | One-time personal-session handoff to the Studio; no passwords or bearer tokens in links. |
 | [src/auth/identity.rs](../src/auth/identity.rs) | Resolve the current credential and membership once; bootstrap and sandbox checks share the same boundary. |
-| [src/auth/integrations.rs](../src/auth/integrations.rs) | Explicit-lifetime API/MCP keys are bounded to one workspace and intersect their creator's current membership. |
-| [src/auth/invitations.rs](../src/auth/invitations.rs) | Single-use, expiring invitations. Acceptance verifies an existing account password. |
+| [src/auth/integrations.rs](../src/auth/integrations.rs) | Credential resolution and integration keys are owned by the identity component. |
+| [src/auth/invitations.rs](../src/auth/invitations.rs) | Workspace invitations are owned by the identity component. |
 | [src/auth/knowledge_identity.rs](../src/auth/knowledge_identity.rs) | Inspect current, expiring native credentials for the one configured Knowledge catalog pilot. |
 | [src/auth/members.rs](../src/auth/members.rs) | Workspace member handlers are owned by the identity component. |
 | [src/auth/mfa.rs](../src/auth/mfa.rs) | Personal MFA enrollment and one-use sign-in challenges share the native session and encryption owners. |
@@ -178,8 +178,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/auth/registration.rs](../src/auth/registration.rs) | Create an isolated merchant workspace from synthetic template data. |
 | [src/auth/roles.rs](../src/auth/roles.rs) | Tenant-owned roles: current grants, revisioned edits, dependency-checked removal and shared history. |
 | [src/auth/routes.rs](../src/auth/routes.rs) | Identity, recovery and personal-security routes share canonical authentication admission. |
-| [src/auth/sessions.rs](../src/auth/sessions.rs) | Login/logout and personal workspace discovery. Only hashed opaque tokens persist. |
-| [src/auth/totp.rs](../src/auth/totp.rs) | RFC 6238 authenticator codes, bounded clock drift and constant-time comparison. |
+| [src/auth/sessions.rs](../src/auth/sessions.rs) | Login/logout and personal workspace discovery are owned by the identity component. |
 | [src/b2b/access.rs](../src/b2b/access.rs) | Re-resolves active customer sessions, company policy and unit membership at every procurement boundary. |
 | [src/b2b/approval.rs](../src/b2b/approval.rs) | Revision-bound purchasing approval inbox; approvers must be active peers and cannot approve themselves. |
 | [src/b2b/catalog.rs](../src/b2b/catalog.rs) | Private unit catalog scope is derived from the current employee/cart, never caller criteria; indexed before pagination. |
@@ -782,18 +781,30 @@ This lists every checked-in source module in these roots, including files with n
 | [components/customers/src/store/customers.rs](../components/customers/src/store/customers.rs) | Customer rows as the merchant and the account see them, with order metrics from authoritative records. |
 | [components/customers/src/store/sessions.rs](../components/customers/src/store/sessions.rs) | Customer sessions, stored by the digest of their token. |
 | [components/customers/src/store.rs](../components/customers/src/store.rs) | SQL of the customers component. |
+| [components/identity/src/domain/clock.rs](../components/identity/src/domain/clock.rs) | The wall clock in whole seconds, as signed assertions and authenticator codes count it. |
 | [components/identity/src/domain/credentials.rs](../components/identity/src/domain/credentials.rs) | Argon2 password operations run off the asynchronous request executor. |
 | [components/identity/src/domain/permissions.rs](../components/identity/src/domain/permissions.rs) | The permission vocabulary and the decision whether a request holds one. Owners retain control; delegates cannot grant rights they lack. |
 | [components/identity/src/domain/totp.rs](../components/identity/src/domain/totp.rs) | RFC 6238 authenticator codes, bounded clock drift and constant-time comparison. |
 | [components/identity/src/domain.rs](../components/identity/src/domain.rs) | Pure identity rules: no database, no transport. |
 | [components/identity/src/http/access.rs](../components/identity/src/http/access.rs) | What a signed-in person may do in this workspace, their own sessions, and revocation of sessions and invitations. |
+| [components/identity/src/http/broker.rs](../components/identity/src/http/broker.rs) | Password setup, recovery discovery and session requests from the trusted, verified-email identity broker. |
+| [components/identity/src/http/integrations.rs](../components/identity/src/http/integrations.rs) | Explicit-lifetime API/MCP keys are bounded to one workspace and intersect their creator's current membership. |
+| [components/identity/src/http/invitations.rs](../components/identity/src/http/invitations.rs) | Single-use, expiring invitations. Acceptance verifies an existing account password. |
 | [components/identity/src/http/members.rs](../components/identity/src/http/members.rs) | Workspace member visibility and immediately effective role/revocation changes. |
+| [components/identity/src/http/mfa.rs](../components/identity/src/http/mfa.rs) | Personal MFA enrollment and one-use sign-in challenges share the native session and encryption owners. |
+| [components/identity/src/http/sessions.rs](../components/identity/src/http/sessions.rs) | Login, logout and personal workspace discovery. |
 | [components/identity/src/http.rs](../components/identity/src/http.rs) | HTTP handlers of the identity component. |
 | [components/identity/src/lib.rs](../components/identity/src/lib.rs) | Identity component: the checks every other component uses to ask who a request acts for and what it may do. |
 | [components/identity/src/route_policy.rs](../components/identity/src/route_policy.rs) | Rights are registered beside each API method. Missing registrations always deny access. |
+| [components/identity/src/store/broker.rs](../components/identity/src/store/broker.rs) | Trusted identity broker assertions: the signature binds route, audience, expiry and a one-use nonce. |
+| [components/identity/src/store/credentials.rs](../components/identity/src/store/credentials.rs) | Resolves a bearer credential once: the person or app behind it, its workspace memberships and the selected shop. |
 | [components/identity/src/store/handoffs.rs](../components/identity/src/store/handoffs.rs) | One-time personal-session handoff to the Studio; no passwords or bearer tokens in links. |
+| [components/identity/src/store/identity.sql](../components/identity/src/store/identity.sql) | One authoritative snapshot: credential, all active grants, selected environment and current shop status. |
 | [components/identity/src/store/roles.rs](../components/identity/src/store/roles.rs) | Tenant-owned roles as access decisions read them: the grants of a role, the current actor and what still uses a role. |
+| [components/identity/src/store/sessions.rs](../components/identity/src/store/sessions.rs) | Personal merchant sessions: only hashed opaque tokens persist, and a second factor is honoured before one is issued. |
 | [components/identity/src/store.rs](../components/identity/src/store.rs) | SQL of the identity component. |
+| [components/identity/src/types/envelopes.rs](../components/identity/src/types/envelopes.rs) | Stable typed authentication envelopes; field validation remains in the shared credential owner. |
+| [components/identity/src/types.rs](../components/identity/src/types.rs) | Typed request shapes of the identity component. |
 | [components/intelligence/src/domain/behavior_input.rs](../components/intelligence/src/domain/behavior_input.rs) | Minimal behavioral envelope: no URLs, search text, raw user agents, IPs or caller customer identities. |
 | [components/intelligence/src/domain/experiment_model.rs](../components/intelligence/src/domain/experiment_model.rs) | Preregistered fixed-horizon experiment parameters and conservative bounded-outcome inference. |
 | [components/intelligence/src/domain.rs](../components/intelligence/src/domain.rs) | Bounded inputs of the intelligence component, free of I/O. |
@@ -821,6 +832,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/inventory/src/store/reservations.rs](../components/inventory/src/store/reservations.rs) | All-checkout allocation ledger; release is idempotent and always uses persisted quantities, never edited order JSON. |
 | [components/inventory/src/store/test_stock.rs](../components/inventory/src/store/test_stock.rs) | Stock writes for empty purchasable products, in bounded batches. |
 | [components/inventory/src/store.rs](../components/inventory/src/store.rs) | SQL of the inventory component. |
+| [components/marketing/src/domain/condition_import.rs](../components/marketing/src/domain/condition_import.rs) | Source-compatible condition import: converts original payloads without guessing identifiers or dropping configuration. |
 | [components/marketing/src/domain/flow_actions.rs](../components/marketing/src/domain/flow_actions.rs) | Native action schema and permissions use original Core names; no arbitrary SQL, shell or unguarded payment transitions. |
 | [components/marketing/src/domain/flow_text.rs](../components/marketing/src/domain/flow_text.rs) | Shop-language validation and main-language fallback for both simple flows and graphical action nodes. |
 | [components/marketing/src/domain/line_facts.rs](../components/marketing/src/domain/line_facts.rs) | Rule line facts use immutable priced lines plus current tenant product metadata; protected values override metadata. |

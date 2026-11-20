@@ -3,6 +3,7 @@ pub mod domain;
 pub mod http;
 pub mod route_policy;
 pub mod store;
+pub mod types;
 pub use domain::permissions::{SCOPES, allowed, scope, validate_permissions};
 use veyndo_core::shop_scope::{header, tenant};
 use veyndo_core::{Error, RequestContext, Result, StatusCode};

@@ -496,7 +496,7 @@
     },
     "auth_factor_admissible": {
       "bindings": [
-        "src/auth/sessions.rs"
+        "components/identity/src/store/sessions.rs"
       ],
       "theorems": [
         "auth_factor_exact",
@@ -543,7 +543,7 @@
     },
     "persistent_key_admissible": {
       "bindings": [
-        "src/auth/integrations.rs",
+        "components/identity/src/http/integrations.rs",
         "src/apps/settings.rs"
       ],
       "theorems": [
@@ -1210,8 +1210,8 @@
     },
     "components/core/src/host_names.rs": {
       "status": "unproved",
-      "sha256": "9ed8354104c5da0c828ea301247be72343147fe1252f24288adaaeedc847b9e4",
-      "review": "Payment commands, worker and provider sessions moved behind the payments gateway port"
+      "sha256": "38fa975c5405d8553c354857224da81c2aff5e8445d3df889e58b66a5c95c2be",
+      "review": "Sessions, invitations, MFA, integration keys and broker assertions moved into the identity component without behaviour change"
     },
     "components/core/src/http_limits.rs": {
       "status": "unproved",
@@ -1338,6 +1338,11 @@
       "sha256": "797ae5709467f0c6ea61502855ade93afed3b8c06ba4881ab2b25f9fbb4a7d01",
       "review": "Customer account writes, the legal snapshot of an order and the locked settings read moved into components"
     },
+    "components/identity/src/domain/clock.rs": {
+      "status": "unproved",
+      "sha256": "f95bfda2b5793b203218f4a46817b7afa6416b8e0eed322f200ce66fc341373e",
+      "review": "Sessions, invitations, MFA, integration keys and broker assertions moved into the identity component without behaviour change"
+    },
     "components/identity/src/domain/credentials.rs": {
       "status": "unproved",
       "sha256": "d6e8ae129f04331723572a06f1dbcb6df1eeeede93fdaa8da622417c41752fb9",
@@ -1345,8 +1350,8 @@
     },
     "components/identity/src/domain/permissions.rs": {
       "status": "reviewed-binding",
-      "sha256": "eee8b856137ddd68ab29983238f67ae7723d8f8bee3e439fdc6e0248d6e27710",
-      "review": "Permission rules and the permit and merchant checks moved unchanged into components/identity; the scope rule is bound there"
+      "sha256": "41febf55523730c78400ed9c8c1eb2f32550bf0a5d9edb51164e8a817b483882",
+      "review": "Sessions, invitations, MFA, integration keys and broker assertions moved into the identity component without behaviour change"
     },
     "components/identity/src/domain/totp.rs": {
       "status": "unproved",
@@ -1355,33 +1360,68 @@
     },
     "components/identity/src/domain.rs": {
       "status": "unproved",
-      "sha256": "3f81422c12a8848fd9f56e24819ed5f990c06c21f2dc18e92e57a051ec20ab46",
-      "review": "Identity credentials, B2B and POS contracts and checkout tax lines moved into components; kernel call sites unchanged"
+      "sha256": "73b053220d894f29887eaf67a7da6f77f4f27d0f2945c9761087c4f2dc344fed",
+      "review": "Sessions, invitations, MFA, integration keys and broker assertions moved into the identity component without behaviour change"
     },
     "components/identity/src/http/access.rs": {
       "status": "unproved",
       "sha256": "b828bebe5d1246d3c7e8384e1c22b4ca70d6b2d71808c6619082e26b3b788903",
       "review": "Access overview, session revocation, company release and rule metadata moved into components"
     },
+    "components/identity/src/http/broker.rs": {
+      "status": "unproved",
+      "sha256": "f5433e62325fa9a346244f7d626126b7a14247823fb027c81e34b304e37ca666",
+      "review": "Sessions, invitations, MFA, integration keys and broker assertions moved into the identity component without behaviour change"
+    },
+    "components/identity/src/http/integrations.rs": {
+      "status": "reviewed-binding",
+      "sha256": "891f4413e799ffc0f5435cb83360992ffceecaf9a23079f177c1d6fbb00ed448",
+      "review": "Sessions, invitations, MFA, integration keys and broker assertions moved into the identity component without behaviour change"
+    },
+    "components/identity/src/http/invitations.rs": {
+      "status": "unproved",
+      "sha256": "94799dae9b13d51960ddabf9cad442e3ec627783620f7abbc16483da7ae73d4e",
+      "review": "Sessions, invitations, MFA, integration keys and broker assertions moved into the identity component without behaviour change"
+    },
     "components/identity/src/http/members.rs": {
       "status": "unproved",
       "sha256": "dfb778acb704d800782c01e0984c65b7851cb3ba1263cba2c3d3e703722d9c2e",
       "review": "Role grants, workspace members and the Studio handoff ticket moved into the identity component"
     },
+    "components/identity/src/http/mfa.rs": {
+      "status": "unproved",
+      "sha256": "c7e4d929c43ffd8e6455ac16e2eaeacbd55d4dfe7055ee8a5545295086d0f2da",
+      "review": "Sessions, invitations, MFA, integration keys and broker assertions moved into the identity component without behaviour change"
+    },
+    "components/identity/src/http/sessions.rs": {
+      "status": "unproved",
+      "sha256": "32f0d3e1673fab10f1c0d8162992e395a1f240b0c13521aa7a47cae1a2665f4a",
+      "review": "Sessions, invitations, MFA, integration keys and broker assertions moved into the identity component without behaviour change"
+    },
     "components/identity/src/http.rs": {
       "status": "unproved",
-      "sha256": "d3f0c01050e12c856bd299099413607311a2c6e66d76954fa1db3ea2e8fd0e4f",
-      "review": "Access overview, session revocation, company release and rule metadata moved into components"
+      "sha256": "4077e988633ba662babd5b508a9ae44914130e63cf64fa51ec5ecf02c2221694",
+      "review": "Sessions, invitations, MFA, integration keys and broker assertions moved into the identity component without behaviour change"
     },
     "components/identity/src/lib.rs": {
       "status": "reviewed-binding",
-      "sha256": "34a611abcfa0a5fd6ade3a7d7b303c6cfb6173c9d7ffa9acd07aa151f3558ca1",
-      "review": "Role grants, workspace members and the Studio handoff ticket moved into the identity component"
+      "sha256": "d44953dcce8c3b644c9a73a49f3ff3a6915a153f506e88281f406a3f73721c09",
+      "review": "Sessions, invitations, MFA, integration keys and broker assertions moved into the identity component without behaviour change"
     },
     "components/identity/src/route_policy.rs": {
       "status": "unproved",
       "sha256": "5e7aa39b24a5d51ebd41a9c115adf496790236d0bfe39376e71f1366b708c47c",
       "review": "The route permission registry moved unchanged into components/identity and is generic over the server state"
+    },
+    "components/identity/src/store/broker.rs": {
+      "status": "unproved",
+      "sha256": "ca6b0c3d09dafc7c64d3d589ba08b7e4bc1557b40c5d040f7e6d0210e63148ae",
+      "review": "Sessions, invitations, MFA, integration keys and broker assertions moved into the identity component without behaviour change"
+    },
+    "components/identity/src/store/credentials.rs": {
+      "status": "unproved",
+      "sha256": "c7197b5d5254b07904e4e7a8505d03ccca79bf44aa8e5c3f137672f9ce542f2c",
+      "review": "Sessions, invitations, MFA, integration keys and broker assertions moved into the identity component without behaviour change"
     },
     "components/identity/src/store/handoffs.rs": {
       "status": "unproved",
@@ -1393,10 +1433,25 @@
       "sha256": "77b1a530c7779668b89cf152a693b5f472988c902ad8bdd373414a39035b17bc",
       "review": "Role grants, workspace members and the Studio handoff ticket moved into the identity component"
     },
+    "components/identity/src/store/sessions.rs": {
+      "status": "reviewed-binding",
+      "sha256": "76a2ad3a60f548d95030cd0462eab2622496ca3f7a2ccb68e4afc1b622e21c79",
+      "review": "Sessions, invitations, MFA, integration keys and broker assertions moved into the identity component without behaviour change"
+    },
     "components/identity/src/store.rs": {
       "status": "unproved",
-      "sha256": "8e78da5e8708127c3d6dc79c5689ec62cd3fff7d8ec2f0472d2f2b01ea9a9ac1",
-      "review": "Role grants, workspace members and the Studio handoff ticket moved into the identity component"
+      "sha256": "75f3ba258d69512213ca8eaf492806e082aa482d91e3b9ecae16caf9d6061932",
+      "review": "Sessions, invitations, MFA, integration keys and broker assertions moved into the identity component without behaviour change"
+    },
+    "components/identity/src/types/envelopes.rs": {
+      "status": "unproved",
+      "sha256": "4deaaca4a8e15dc82abf7ed7f723cafc2cab9dbe6315b74dbe4cab73a11c371b",
+      "review": "Sessions, invitations, MFA, integration keys and broker assertions moved into the identity component without behaviour change"
+    },
+    "components/identity/src/types.rs": {
+      "status": "unproved",
+      "sha256": "df7f994bb9f395889bbd848d3bf95efd5791c866c873f614ceecc79d34d3d161",
+      "review": "Sessions, invitations, MFA, integration keys and broker assertions moved into the identity component without behaviour change"
     },
     "components/intelligence/src/domain/behavior_input.rs": {
       "status": "unproved",
@@ -1513,6 +1568,11 @@
       "sha256": "a54911683c2df1e61ba19a54de4f3b619a9a8ae9126f77805f856f741d438a4b",
       "review": "inventory component crate created; no kernel binding changed"
     },
+    "components/marketing/src/domain/condition_import.rs": {
+      "status": "unproved",
+      "sha256": "eed30031fb501837963dda02e307925d80724c2bd4481e1af6cad1fc17d959ba",
+      "review": "Sessions, invitations, MFA, integration keys and broker assertions moved into the identity component without behaviour change"
+    },
     "components/marketing/src/domain/flow_actions.rs": {
       "status": "unproved",
       "sha256": "94f0513b5b80d7624f68b456f10b4645620658b79b8d55009e5fa99287843506",
@@ -1565,8 +1625,8 @@
     },
     "components/marketing/src/domain.rs": {
       "status": "unproved",
-      "sha256": "0f6dd5f41d0687197acd700c099dd5d53f8dc93534106ec51523ada45511ad45",
-      "review": "Access overview, session revocation, company release and rule metadata moved into components"
+      "sha256": "b709b42ec353756a5a1000d26d0329afb3c2dad08cbfedb919e42fde20fed09c",
+      "review": "Sessions, invitations, MFA, integration keys and broker assertions moved into the identity component without behaviour change"
     },
     "components/marketing/src/lib.rs": {
       "status": "unproved",
@@ -4295,8 +4355,8 @@
     },
     "src/agent_runs/controls.rs": {
       "status": "reviewed-binding",
-      "sha256": "bf1e3d719ed9efcf31c575c85757857e7980985ae5379f5a20d851994ed7b77f",
-      "review": "Split unchanged extracted policies and theorem bodies by domain; bind exact existing planning/private-preview admission; prove sequential integer allocations and denial after limit reduction; add u128 edge regressions and closed module inventory."
+      "sha256": "41e9a1d7725a03856fc5f7c8d5e4d1d8d4c4689b65fe8c33295b6e82db9051a6",
+      "review": "Sessions, invitations, MFA, integration keys and broker assertions moved into the identity component without behaviour change"
     },
     "src/agent_runs/flow_proposals.rs": {
       "status": "unproved",
@@ -4945,13 +5005,13 @@
     },
     "src/auth/broker.rs": {
       "status": "unproved",
-      "sha256": "6257a8c7bbaed24fbda361b4227dc022ba6946a9772b6dc318cdfd081bc233f9",
-      "review": "Reviewed both shop creation routes and removed only the per-account count check and its Studio-only lock. Real HTTP and PostgreSQL regressions cover both routes above the old limit, current personal proof, existing foreign ownership and tenant isolation."
+      "sha256": "8cd3618aa61858b11e1610a607f04653ea5136540cca2298ca6c378a1551f99b",
+      "review": "Sessions, invitations, MFA, integration keys and broker assertions moved into the identity component without behaviour change"
     },
     "src/auth/broker_credentials.rs": {
       "status": "unproved",
-      "sha256": "882e4eb560d73942dc65e337d2af7d5955dbde28f01c18e3854e46684189e395",
-      "review": "Reviewed native factor gate, RFC6238 vectors, current personal proof, credential CAS, parent-session handoff revocation and system-only operational identity schema; own/foreign/revoked/replay real HTTP PostgreSQL cases pass; cryptography SQL provider and browser code remain unproved"
+      "sha256": "b7bff0d88546880b1dc80f5c10a64ce7319905d8f0b378a59a13ba90a1af0b6a",
+      "review": "Sessions, invitations, MFA, integration keys and broker assertions moved into the identity component without behaviour change"
     },
     "src/auth/broker_inference.rs": {
       "status": "unproved",
@@ -4960,13 +5020,13 @@
     },
     "src/auth/broker_recovery.rs": {
       "status": "unproved",
-      "sha256": "08e4c62dc8ea124929c20468d2f33153b9d6af4448b198ab236cf2a04bfc65f1",
-      "review": "Reviewed native factor gate, RFC6238 vectors, current personal proof, credential CAS, parent-session handoff revocation and system-only operational identity schema; own/foreign/revoked/replay real HTTP PostgreSQL cases pass; cryptography SQL provider and browser code remain unproved"
+      "sha256": "c3a75d1eeb7b78b7d084142b3b6cdc504df51248fc136377f0119f3a7cb38571",
+      "review": "Sessions, invitations, MFA, integration keys and broker assertions moved into the identity component without behaviour change"
     },
     "src/auth/broker_session.rs": {
       "status": "unproved",
-      "sha256": "2f131c6901f66c6a5f801c3d2aab64c47dc2e293a8f66684b4e917e3191e837c",
-      "review": "Reviewed native factor gate, RFC6238 vectors, current personal proof, credential CAS, parent-session handoff revocation and system-only operational identity schema; own/foreign/revoked/replay real HTTP PostgreSQL cases pass; cryptography SQL provider and browser code remain unproved"
+      "sha256": "da49e3691a259a1239082227687b04635d238bf1d3ca971ade45a83f42a1e66b",
+      "review": "Sessions, invitations, MFA, integration keys and broker assertions moved into the identity component without behaviour change"
     },
     "src/auth/browser.rs": {
       "status": "unproved",
@@ -4980,13 +5040,13 @@
     },
     "src/auth/dto.rs": {
       "status": "unproved",
-      "sha256": "fa5dd4feba74f588f4189c3d65412bf1035c40ab3ac2f0814f887b88ad55a4f1",
-      "review": "Reviewed migration 104 and all changed Rust/build owners: existing-key planning-only scope, trusted distinct agent identity, live-root lock before budget key, checked integer allocation with existing kernel guard, no network transaction, typed nonretryable quota errors, current credentials and lease-fenced late worker results; actual two-replica allocation/restart and in-flight-stop fixtures plus 623 UI tests pass. SQL/auth/provider integration is not formally proved."
+      "sha256": "23b570ed3be2224f16dd440f18e3b898e72c8fd5de354689ca6c72a2049ca499",
+      "review": "Sessions, invitations, MFA, integration keys and broker assertions moved into the identity component without behaviour change"
     },
     "src/auth/handoff.rs": {
       "status": "unproved",
-      "sha256": "2ff520dcf80b3ee456dfe34208cab6745fa68d4e877bce205afe4219df19ec0f",
-      "review": "Role grants, workspace members and the Studio handoff ticket moved into the identity component"
+      "sha256": "5bbeb3c423aecb663a896696a1259bbcda073e7cb68aa715681325bc1702a8e0",
+      "review": "Sessions, invitations, MFA, integration keys and broker assertions moved into the identity component without behaviour change"
     },
     "src/auth/identity.rs": {
       "status": "unproved",
@@ -4994,14 +5054,14 @@
       "review": "Request context, principal, POS admission, host shop and the access snapshot data types moved unchanged into components/core; loading the snapshot and matching it to a request stay in the server as free functions with the same queries. Core unit tests (identity headers cannot be forged) pass. SQL, HTTP and provider behaviour is not formally proved."
     },
     "src/auth/integrations.rs": {
-      "status": "reviewed-binding",
-      "sha256": "f244c6df69f8a56430322c7c0ca6f46b217803e7fa6f5d117fc18b4c6d6f79d1",
-      "review": "Knowledge introspection reuses current scoped native identity, expiring integration keys and app package approval. Real catalog delivery, read-only evidence, foreign-shop and revoked-key checks and Checkout tenant isolation passed locally."
+      "status": "unproved",
+      "sha256": "b8b921aeb5ea25db4749b708b9a984fd0099831803e33f7f382e2d80a2a02e12",
+      "review": "Sessions, invitations, MFA, integration keys and broker assertions moved into the identity component without behaviour change"
     },
     "src/auth/invitations.rs": {
       "status": "unproved",
-      "sha256": "bb92c9500a3efee431d5da7772d5506894c6283825cb8794d48102492a12fc42",
-      "review": "Tenant roles and current grants independently reviewed; owner/retained-override/acceptance races repaired and PostgreSQL-blocked regressions passed; PII and Flow projection boundaries documented; B2B feature settings delegate shared CAS/history and preserve financial guards. Existing extracted policies unchanged; SQL/async/UI remain reviewed adapters, not full proofs."
+      "sha256": "e51c8860ef33e2cafbce510ebe8e6c71e41ec0bdc5e022003b6abf1b2df051ea",
+      "review": "Sessions, invitations, MFA, integration keys and broker assertions moved into the identity component without behaviour change"
     },
     "src/auth/knowledge_identity.rs": {
       "status": "unproved",
@@ -5015,8 +5075,8 @@
     },
     "src/auth/mfa.rs": {
       "status": "unproved",
-      "sha256": "ca48077a09acec7a1f4243370ad55d79633ef0321a38e1efa199f5ef9d473f26",
-      "review": "Separate signed role-bound SQL authority preserves old row/domain policies; bound short-lived tickets, personal actor fences, guarded native app DDL, fixed snapshot ordering and narrow language registry. Reviewed additive 099 and runtime pools; actual login attacks, two replicas, restart, app release and real PgBouncer/key rotation pass. SQL/HMAC/transport remain tested adapters outside pure Lean proofs."
+      "sha256": "9171bdf803ae9f03f0076a66dda901e1e9fb0eaa90aa13b819f31c35bf14ade2",
+      "review": "Sessions, invitations, MFA, integration keys and broker assertions moved into the identity component without behaviour change"
     },
     "src/auth/middleware.rs": {
       "status": "reviewed-binding",
@@ -5025,8 +5085,8 @@
     },
     "src/auth/mod.rs": {
       "status": "unproved",
-      "sha256": "f1f407797d147d4e2d17cd7f8ad232c0d71d3ed64c4f87b8fd97149bb164660a",
-      "review": "The route permission registry moved unchanged into components/identity and is generic over the server state"
+      "sha256": "a759040f9f1e669e5c77f064196442817a6245f695d12990e6d5aaee25b497e8",
+      "review": "Sessions, invitations, MFA, integration keys and broker assertions moved into the identity component without behaviour change"
     },
     "src/auth/permissions.rs": {
       "status": "unproved",
@@ -5050,8 +5110,8 @@
     },
     "src/auth/roles.rs": {
       "status": "unproved",
-      "sha256": "1c0b1e6e52c94302ce982682ea4e79fd00325829a4196b9a3a1a2f395349e023",
-      "review": "Role grants, workspace members and the Studio handoff ticket moved into the identity component"
+      "sha256": "892715387abb01fe8d60b93444f4cb6fa1f49bd8c5e937220fd21bb39dd04e9f",
+      "review": "Sessions, invitations, MFA, integration keys and broker assertions moved into the identity component without behaviour change"
     },
     "src/auth/routes.rs": {
       "status": "unproved",
@@ -5059,14 +5119,9 @@
       "review": "Knowledge introspection reuses current scoped native identity, expiring integration keys and app package approval. Real catalog delivery, read-only evidence, foreign-shop and revoked-key checks and Checkout tenant isolation passed locally."
     },
     "src/auth/sessions.rs": {
-      "status": "reviewed-binding",
-      "sha256": "3ea56de717b7b60305443c76aaf400952944e7acd9816f51791930c50abeefcd",
-      "review": "Reviewed canonical personal MFA proof and system-only migration 091, code/recovery replay fences, stale credential CAS and parent-session revocation; user-data projection now reuses its scoped transaction connection to avoid nested pool borrows; native PostgreSQL isolation, broker restart and UI/private continuation regression suites pass; surrounding adapters remain unproved"
-    },
-    "src/auth/totp.rs": {
       "status": "unproved",
-      "sha256": "0db3f4fe908680971e6a6a5a73215a6cbf10e1ed4eaba9039d4a8374efafb022",
-      "review": "Identity credentials, B2B and POS contracts and checkout tax lines moved into components; kernel call sites unchanged"
+      "sha256": "b158e449269187e2753653244a8cbe728f5ab12fe80976a92a568d03514095e4",
+      "review": "Sessions, invitations, MFA, integration keys and broker assertions moved into the identity component without behaviour change"
     },
     "src/b2b/access.rs": {
       "status": "unproved",
@@ -6120,8 +6175,8 @@
     },
     "src/marketing/catalog.rs": {
       "status": "unproved",
-      "sha256": "e056d449b93e18c349822bf26f8715aa850141675906065f66731a59bb6c05bb",
-      "review": "Moved the exact built-in Flow identifier arrays to the shared catalog, kept tenant app resolution and native grants in Core, and exposed additive discovery metadata. Unknown stored action now fails rather than falling into inference. Graph and kernel decisions are unchanged."
+      "sha256": "ad73d5e7f95fdc36c55df4c59c184a484c2834c21d7cf709b0ccfa159e840235",
+      "review": "Sessions, invitations, MFA, integration keys and broker assertions moved into the identity component without behaviour change"
     },
     "src/marketing/channel_access.rs": {
       "status": "reviewed-binding",
@@ -6900,8 +6955,8 @@
     },
     "src/shop_domains.rs": {
       "status": "unproved",
-      "sha256": "c50f1e3ebc1370a89ac82fa422cf50e2d2983ae572bd5233c247a167c2f73100",
-      "review": "Payment commands, worker and provider sessions moved behind the payments gateway port"
+      "sha256": "def03d70c0dbdc80278effa89279c1c10ae71b4f463257801ce715b636d2bd6d",
+      "review": "Sessions, invitations, MFA, integration keys and broker assertions moved into the identity component without behaviour change"
     },
     "src/staging/access.rs": {
       "status": "unproved",
@@ -7105,8 +7160,8 @@
       "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
     },
     "Cargo.lock": {
-      "sha256": "ca361855fc2ed93bc5e13781c11450fbdfe0595cf9c5afe5638257c4fe7c273f",
-      "review": "Role grants, workspace members and the Studio handoff ticket moved into the identity component"
+      "sha256": "70336443e880d468386fa94fc58646d959facafd4981269a636225b4f5ed0c61",
+      "review": "Sessions, invitations, MFA, integration keys and broker assertions moved into the identity component without behaviour change"
     },
     "Cargo.toml": {
       "sha256": "881e080eb9f1b1f051c23e2848df689853473831b4d3072817387d65c23ddb66",
@@ -7863,10 +7918,6 @@
     "scripts/testing/prompt_governance.py": {
       "sha256": "a9ece67d4975e6c5e44cf26f4d6e397a3780449d8e3f8fbb3860627211b9fda5",
       "review": "Designer acceptance: app-owned versioned style prompt, bounded style-only schema preserving native page content/structure, shared proposal validation unchanged for content edits. Registered visual_workspace RED to GREEN and real Qwen screenshot returns three review-only alternatives. Prompt registry/governance extends app-owned version files. SQL/inference/rendering remain unproved."
-    },
-    "src/auth/identity.sql": {
-      "sha256": "18f5242cce96f0e5157e5baf780d04ed7b2b8ec0c91ad795400160c6cf6021d2",
-      "review": "Knowledge introspection reuses current scoped native identity, expiring integration keys and app package approval. Real catalog delivery, read-only evidence, foreign-shop and revoked-key checks and Checkout tenant isolation passed locally."
     },
     "src/cognition/behavior/eligible.sql": {
       "sha256": "7f34fe7b256243ec7d7e60914c847aea4717446525d89c68ff995ccbe2779c89",

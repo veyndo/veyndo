@@ -28,7 +28,6 @@ mod registration;
 pub(crate) use provision::{create_workspace, provision_shop};
 pub(crate) mod mfa;
 mod sessions;
-mod totp;
 pub(crate) use credentials::*;
 pub(crate) use invitations::*;
 pub(crate) use members::*;
