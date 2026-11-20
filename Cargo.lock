@@ -3490,6 +3490,7 @@ dependencies = [
  "tracing-subscriber",
  "uuid",
  "veyndo-app-model",
+ "veyndo-app-platform",
  "veyndo-app-storage",
  "veyndo-apps",
  "veyndo-automation",
@@ -3546,6 +3547,21 @@ dependencies = [
  "serde_json",
  "sha2 0.10.9",
  "url",
+]
+
+[[package]]
+name = "veyndo-app-platform"
+version = "0.5.0"
+dependencies = [
+ "base64 0.22.1",
+ "reqwest",
+ "ring",
+ "serde_json",
+ "sqlx",
+ "veyndo-app-model",
+ "veyndo-app-storage",
+ "veyndo-core",
+ "veyndo-kernel",
 ]
 
 [[package]]

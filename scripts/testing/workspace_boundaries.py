@@ -22,7 +22,8 @@ OWNERS.update({'veyndo-core': ROOT / 'components/core', 'veyndo-pricing': ROOT /
                'veyndo-pos': ROOT / 'components/pos',
                'veyndo-checkout': ROOT / 'components/checkout',
                'veyndo-intelligence': ROOT / 'components/intelligence',
-               'veyndo-studio': ROOT / 'components/studio'})
+               'veyndo-studio': ROOT / 'components/studio',
+               'veyndo-app-platform': ROOT / 'components/apps'})
 OWNERS.update({'veyndo': ROOT, 'veyndo-migration': ROOT / 'extensions/apps/migration',
                'veyndo-marketplaces': ROOT / 'extensions/apps/marketplaces',
                'veyndo-app-storage': ROOT / 'extensions/services/app-storage',
@@ -42,6 +43,7 @@ ALLOWED = {
     # The optional `service` feature adds the shared error contract; the domain alone needs only the kernel.
     'veyndo-pricing': {'veyndo-kernel', 'veyndo-core', 'veyndo-identity'},
     'veyndo-apps': {'veyndo-kernel', 'veyndo-app-runtime'},
+    'veyndo-app-platform': {'veyndo-core', 'veyndo-kernel', 'veyndo-app-model', 'veyndo-app-storage'},
     'veyndo-cognition': {'veyndo-runtime', 'veyndo-kernel', 'veyndo-app-authority', 'veyndo-core'},
     'veyndo-core': {'veyndo-kernel', 'veyndo-runtime'},
     'veyndo-identity': {'veyndo-core', 'veyndo-kernel', 'veyndo-app-model', 'veyndo-cognition', 'veyndo-runtime'},
@@ -73,6 +75,7 @@ EXTERNAL = {
     'veyndo-automation': {'serde_json', 'chrono', 'chrono-tz'},
     'veyndo-pricing': {'serde', 'serde_json', 'chrono', 'regex', 'reqwest', 'tokio', 'axum', 'sqlx'},
     'veyndo-apps': set(),
+    'veyndo-app-platform': {'serde_json', 'reqwest', 'base64', 'ring', 'sqlx'},
     'veyndo-identity': {'serde', 'serde_json', 'axum', 'argon2', 'hmac', 'ring', 'sha2', 'tokio', 'uuid', 'sqlx', 'reqwest', 'base64'},
     'veyndo-catalog': {'serde', 'serde_json', 'sqlx', 'reqwest', 'axum', 'chrono', 'sha2', 'base64'},
     'veyndo-inventory': {'serde', 'serde_json', 'sqlx'},

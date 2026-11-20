@@ -321,7 +321,7 @@
     },
     "app_service_transport_admissible": {
       "bindings": [
-        "src/apps/service_policy.rs"
+        "components/apps/src/domain/service_policy.rs"
       ],
       "theorems": [
         "app_service_transport_exact",
@@ -369,7 +369,7 @@
     },
     "app_package_authorized": {
       "bindings": [
-        "src/apps/approval.rs"
+        "components/apps/src/domain/approval.rs"
       ],
       "theorems": [
         "app_package_authority_exact",
@@ -683,6 +683,86 @@
     }
   },
   "sources": {
+    "components/apps/src/domain/approval.rs": {
+      "status": "reviewed-binding",
+      "sha256": "6bede05e37503886dae0924d404be43a103e8ba68fffbd128af8057bb2cda34e",
+      "review": "Package approval, distribution, schema adapters, event projection and service transport policy moved into components/apps without a change in behaviour"
+    },
+    "components/apps/src/domain/distribution.rs": {
+      "status": "unproved",
+      "sha256": "ea41256153f8ae695dabf5ec5dc7822d7716c8885e360e7caa1feca3ffb168f2",
+      "review": "Package approval, distribution, schema adapters, event projection and service transport policy moved into components/apps without a change in behaviour"
+    },
+    "components/apps/src/domain/event_projection.rs": {
+      "status": "unproved",
+      "sha256": "74955487169ec3b874a55594b3ed016ffc922f942eec591b491224f21cc8e768",
+      "review": "Package approval, distribution, schema adapters, event projection and service transport policy moved into components/apps without a change in behaviour"
+    },
+    "components/apps/src/domain/input_schema.rs": {
+      "status": "unproved",
+      "sha256": "8fd5f0558d2a55bb114a3a5ad5c2279234bfcbe12b37d5e78fbd4dad4f65c860",
+      "review": "Package approval, distribution, schema adapters, event projection and service transport policy moved into components/apps without a change in behaviour"
+    },
+    "components/apps/src/domain/input_schema_tests.rs": {
+      "status": "unproved",
+      "sha256": "a5641755ef38b1f955703d2b36cb8cf305acfef2dfc084ae9bfe5b44118cfb1a",
+      "review": "Package approval, distribution, schema adapters, event projection and service transport policy moved into components/apps without a change in behaviour"
+    },
+    "components/apps/src/domain/model_contract.rs": {
+      "status": "unproved",
+      "sha256": "49852afeda559d96460cb16ec3959459b98a7f259707e41bc8635711b96df653",
+      "review": "Package approval, distribution, schema adapters, event projection and service transport policy moved into components/apps without a change in behaviour"
+    },
+    "components/apps/src/domain/persistence.rs": {
+      "status": "unproved",
+      "sha256": "976e401c9727b2494ea86f8ba7bfbb29fb238b7eca5b264844e458aecf7ce541",
+      "review": "Package approval, distribution, schema adapters, event projection and service transport policy moved into components/apps without a change in behaviour"
+    },
+    "components/apps/src/domain/presentation.rs": {
+      "status": "unproved",
+      "sha256": "188a5a9fc0f047a0feb6b1377a9417b98cf0991c3d5ea8c55e5b7b6aeae924a0",
+      "review": "Package approval, distribution, schema adapters, event projection and service transport policy moved into components/apps without a change in behaviour"
+    },
+    "components/apps/src/domain/relations.rs": {
+      "status": "unproved",
+      "sha256": "8166099030ee95b32a27b18deac8cff3ff953bfd1f47e5c6407a3fc59b0b3d54",
+      "review": "Package approval, distribution, schema adapters, event projection and service transport policy moved into components/apps without a change in behaviour"
+    },
+    "components/apps/src/domain/schema_changes.rs": {
+      "status": "unproved",
+      "sha256": "241aafe0ea9ddd7058195ee5f6c634bb7ce7f8d001ba369fa3292ea37e52c164",
+      "review": "Package approval, distribution, schema adapters, event projection and service transport policy moved into components/apps without a change in behaviour"
+    },
+    "components/apps/src/domain/service_policy.rs": {
+      "status": "reviewed-binding",
+      "sha256": "8f273875e3f9eb5e234a862c11749dac1d50f8cfd97476090db9f86563eecfc7",
+      "review": "Package approval, distribution, schema adapters, event projection and service transport policy moved into components/apps without a change in behaviour"
+    },
+    "components/apps/src/domain/webhook_scope.rs": {
+      "status": "unproved",
+      "sha256": "036782c6d6481d9a472f942c7ded6ec8232efe915847091e14ac59d6103f3b2f",
+      "review": "Package approval, distribution, schema adapters, event projection and service transport policy moved into components/apps without a change in behaviour"
+    },
+    "components/apps/src/domain.rs": {
+      "status": "unproved",
+      "sha256": "c8a97e200901469ca312453d3632049ee8bdadd448d7bfb808b842750ae8bc09",
+      "review": "Package approval, distribution, schema adapters, event projection and service transport policy moved into components/apps without a change in behaviour"
+    },
+    "components/apps/src/lib.rs": {
+      "status": "unproved",
+      "sha256": "45f5c51a1c341b0ed356ccf2ff69045aa8b4c3bd0bded4cb1cc8376d132425f0",
+      "review": "Package approval, distribution, schema adapters, event projection and service transport policy moved into components/apps without a change in behaviour"
+    },
+    "components/apps/src/store/dependencies.rs": {
+      "status": "unproved",
+      "sha256": "52f889580ca300c0e41c1336e0cd0dc2c75b15839b9262e6d1a57535ac1210a0",
+      "review": "Package approval, distribution, schema adapters, event projection and service transport policy moved into components/apps without a change in behaviour"
+    },
+    "components/apps/src/store.rs": {
+      "status": "unproved",
+      "sha256": "516e65c3a7b34f3e70714816751471c559f9ba71ba7524827b1eb4cbe85ffbd1",
+      "review": "Package approval, distribution, schema adapters, event projection and service transport policy moved into components/apps without a change in behaviour"
+    },
     "components/b2b/src/domain/contract.rs": {
       "status": "unproved",
       "sha256": "f95693b87d97414af42c6811d9a7eacc99326d3570d2a1245a8c06be32379bdf",
@@ -4754,9 +4834,9 @@
       "review": "Reviewed Apps 0.22 activation extraction against Core 52eb64e4 original routes::app_state and distribution::deactivate. Shared transaction preserves mandatory native config-before-lifecycle hook, original tenant fence 543 then package fence 7 shared with actual installation/writers, current activation or connected-frontend branch hook, active-dependant SQL, late revision CAS/error order and same-state revision increment. Native current management/merchant/signed scope, typed input, actual installed package/actor rights/consent/operator trust/signed dependencies/commerce/native lifecycle and connected-frontend query remain authoritative; original caller commit/rollback. No default approving production hook, shadow principal, new endpoint/permission/event, implicit installation, deletion or schema change. Independent PostgreSQL durable synthetic host facts and actual shared install/writer fences test both dependency race orders, concurrent CAS, retained records/versions, hook rollback/reconnect, original missing/error order and exhausted revision non-overwrite. Denied-without-host example and two Linux component runs pass. Native 74 App units, warning-free workspace Clippy and seven HTTP/PostgreSQL apps/studio/isolation/channelManagement/signedDistribution/surfaces/visualWorkspace modules pass; expanded role/stale/missing-revision and inactive-dependency reactivation denials, connected frontend guard and subsequent normal operation pass. Exact source/WIT, 892-module structure and source inventory pass. Kernel unchanged; SQL/async/native host code remains reviewed and unproved."
     },
     "src/apps/approval.rs": {
-      "status": "reviewed-binding",
-      "sha256": "76c00e8ff83ad3d93805818e98d4da2b6299b58725b7c7d6e8a9fb8c48031791",
-      "review": "Reviewed Apps 0.15/model 0.11 complete strict Manifest and remaining domain contract extraction. Core aliases the same wire, common projection, canonical fingerprints and signature message; recursive key ordering preserves original 34 package digests under default and preserve_order JSON builds. Native Ed25519 current operator keys, original metadata/signature/dependency order and native 400/403 kinds, unsigned namespace/service pins, tenant-scoped locks and financial effects stay attached. Shared dependency version/cycle/active-dependant checks retain behavior, malformed ranges fail closed. Independent 116 model plus eight ordered-JSON cases, actual synthetic Ed25519 example, 19 runtime and PostgreSQL contract pass; 74 native app and two provider contract units, current native fingerprints and actual install/schema/preview/release/tenant/signed-dependency fixtures pass. Kernel unchanged; shared model, crypto adapters and SQL/host effects remain unproved."
+      "status": "unproved",
+      "sha256": "a7f8c54e7a0b9954f585dd2e406f6846523076293fe69e0ad27b56ff346b1ff5",
+      "review": "Package approval, distribution, schema adapters, event projection and service transport policy moved into components/apps without a change in behaviour"
     },
     "src/apps/asset_surfaces.rs": {
       "status": "unproved",
@@ -4860,8 +4940,8 @@
     },
     "src/apps/distribution.rs": {
       "status": "unproved",
-      "sha256": "0a2706117324416c109101ebdc1687cec7f2dd501f7cd90bf975a55d3171b9d8",
-      "review": "Reviewed Apps 0.22 activation extraction against Core 52eb64e4 original routes::app_state and distribution::deactivate. Shared transaction preserves mandatory native config-before-lifecycle hook, original tenant fence 543 then package fence 7 shared with actual installation/writers, current activation or connected-frontend branch hook, active-dependant SQL, late revision CAS/error order and same-state revision increment. Native current management/merchant/signed scope, typed input, actual installed package/actor rights/consent/operator trust/signed dependencies/commerce/native lifecycle and connected-frontend query remain authoritative; original caller commit/rollback. No default approving production hook, shadow principal, new endpoint/permission/event, implicit installation, deletion or schema change. Independent PostgreSQL durable synthetic host facts and actual shared install/writer fences test both dependency race orders, concurrent CAS, retained records/versions, hook rollback/reconnect, original missing/error order and exhausted revision non-overwrite. Denied-without-host example and two Linux component runs pass. Native 74 App units, warning-free workspace Clippy and seven HTTP/PostgreSQL apps/studio/isolation/channelManagement/signedDistribution/surfaces/visualWorkspace modules pass; expanded role/stale/missing-revision and inactive-dependency reactivation denials, connected frontend guard and subsequent normal operation pass. Exact source/WIT, 892-module structure and source inventory pass. Kernel unchanged; SQL/async/native host code remains reviewed and unproved."
+      "sha256": "3bb4e7cc99c940365a61bb44c3224cea225036b0af399a682dbc675e0a923903",
+      "review": "Package approval, distribution, schema adapters, event projection and service transport policy moved into components/apps without a change in behaviour"
     },
     "src/apps/editor_contract.rs": {
       "status": "reviewed-binding",
@@ -4885,8 +4965,8 @@
     },
     "src/apps/event_projection.rs": {
       "status": "unproved",
-      "sha256": "b30ba1b74b9f77316e260a4ca9956b6958951d77e78178feef858e095c6e552e",
-      "review": "Reviewed complete standard compiler extraction in Apps 0.16/model 0.12. All 19 original before/common/after domain stages now run inside one shared compiler with preserved order, first model kind/pointer or native host error, internal actual view lookup and exhaustive Manifest field coverage. Native manifest_policy delegates value/reference/currency/scope/source/base, current Ed25519 keys, namespace/network/read and clock decisions to original owners; direct verified predicates remain attached. No no-op host domain callbacks or alternative serving compiler. Independent 116 model and 24 runtime tests include all 34 canonical packages, nineteen invalid-domain controls and denied-policy/callback-order cases. Native 74 app and two provider units, seventeen real HTTP/PostgreSQL app/schema/preview/staging/isolation/lifecycle/distribution/surface/assistant/event/generation/marketplace/payment modules, unchanged native digests and Clippy pass. Kernel unchanged; shared compiler, policy adapters and SQL/host effects remain unproved."
+      "sha256": "4455047c5d6ef56b97511f6092a7cfcb64afce7d599143f82ed47a8cd238ad43",
+      "review": "Package approval, distribution, schema adapters, event projection and service transport policy moved into components/apps without a change in behaviour"
     },
     "src/apps/events.rs": {
       "status": "unproved",
@@ -4935,13 +5015,8 @@
     },
     "src/apps/input_schema.rs": {
       "status": "unproved",
-      "sha256": "7b2af1a2bd51b6ad0931396f1fec020f3f6e3f709fa40b37fe69fa732a9153eb",
-      "review": "Reviewed extraction of original common Manifest grammar, model/index/configuration checks, action schema/privacy/Flow/job/payment/asset restrictions, strict legacy Slot type and event name rules into pinned model 0.3. Native required before/after validators retain original ordering, strict full decoder, complete domain/provider/UI/hook/lifecycle/distribution checks; host policy uses exact native auth scope registry, Sandbox component discriminator and verified reference guard. Independent 34 model tests, actual storage PG contract, native build/clippy/74 app units and app/consent/callback/assets/storage/schema/jobs/Studio/F5/lifecycle/staging/distribution/tenant/surface/visual/Marketplace fixtures pass; 34 canonical package digests unchanged. Removed redundant contract-only native schema wrapper; same pure validator runs directly in schema tests. New generic compiler and adapters remain unproved; kernel policies unchanged."
-    },
-    "src/apps/input_schema_tests.rs": {
-      "status": "unproved",
-      "sha256": "3252a930cafa16366ceab801d26c89ce3ad6bee85c2178322f8f2bf38316272e",
-      "review": "Reviewed extraction of original common Manifest grammar, model/index/configuration checks, action schema/privacy/Flow/job/payment/asset restrictions, strict legacy Slot type and event name rules into pinned model 0.3. Native required before/after validators retain original ordering, strict full decoder, complete domain/provider/UI/hook/lifecycle/distribution checks; host policy uses exact native auth scope registry, Sandbox component discriminator and verified reference guard. Independent 34 model tests, actual storage PG contract, native build/clippy/74 app units and app/consent/callback/assets/storage/schema/jobs/Studio/F5/lifecycle/staging/distribution/tenant/surface/visual/Marketplace fixtures pass; 34 canonical package digests unchanged. Removed redundant contract-only native schema wrapper; same pure validator runs directly in schema tests. New generic compiler and adapters remain unproved; kernel policies unchanged."
+      "sha256": "09afb383fecef54f4633f9a759d16bc2d2faf7bcd8d7f3d6e23d479ee0466052",
+      "review": "Package approval, distribution, schema adapters, event projection and service transport policy moved into components/apps without a change in behaviour"
     },
     "src/apps/job_callbacks.rs": {
       "status": "reviewed-binding",
@@ -4995,13 +5070,13 @@
     },
     "src/apps/mod.rs": {
       "status": "unproved",
-      "sha256": "20b6f38481b1dda1a09d4c59b8eb6cb62047d44cd401a1c136ff93f782877557",
-      "review": "cart types and rule engine moved into components; checking bindings"
+      "sha256": "f03b751f3fb1eb10f6bf49fc813a5a444a77429e916d5d03b1bb0cc1eae390cb",
+      "review": "Package approval, distribution, schema adapters, event projection and service transport policy moved into components/apps without a change in behaviour"
     },
     "src/apps/model_contract.rs": {
       "status": "unproved",
-      "sha256": "1c83e7f489984761ba075c39885b8b40d24f7f237e986afe773f62832255d12a",
-      "review": "Reviewed Apps 0.15/model 0.11 complete strict Manifest and remaining domain contract extraction. Core aliases the same wire, common projection, canonical fingerprints and signature message; recursive key ordering preserves original 34 package digests under default and preserve_order JSON builds. Native Ed25519 current operator keys, original metadata/signature/dependency order and native 400/403 kinds, unsigned namespace/service pins, tenant-scoped locks and financial effects stay attached. Shared dependency version/cycle/active-dependant checks retain behavior, malformed ranges fail closed. Independent 116 model plus eight ordered-JSON cases, actual synthetic Ed25519 example, 19 runtime and PostgreSQL contract pass; 74 native app and two provider contract units, current native fingerprints and actual install/schema/preview/release/tenant/signed-dependency fixtures pass. Kernel unchanged; shared model, crypto adapters and SQL/host effects remain unproved."
+      "sha256": "f82caa3c1040abc5236712a77f30dd3a5a75efb314fd319c0f613590e9c0ce96",
+      "review": "Package approval, distribution, schema adapters, event projection and service transport policy moved into components/apps without a change in behaviour"
     },
     "src/apps/native_data.rs": {
       "status": "unproved",
@@ -5060,8 +5135,8 @@
     },
     "src/apps/persistence.rs": {
       "status": "unproved",
-      "sha256": "ce59d54d23503cc8fa38035b323e4e18eea97b29a8c64636cb7ac4828e14ec02",
-      "review": "Reviewed shared record mutation and query extraction into pinned Apps 0.2.0. Native package/model/reference/language checks, workflow and bounded-history hooks remain on the original transaction. Independent PostgreSQL CAS/replay/hook-outbox rollback/typed-publication tests, native apps/storage/jobs/schema/extensions/visual workspace, 43 tenant checks and marketplace order-stock-Flow-invoice fixture pass. SQL and async adapters remain unproved."
+      "sha256": "3f27cb7f27e146ac490f6326ba7674d0e35c3732512daeb30e9b854a99426692",
+      "review": "Package approval, distribution, schema adapters, event projection and service transport policy moved into components/apps without a change in behaviour"
     },
     "src/apps/planning.rs": {
       "status": "unproved",
@@ -5072,11 +5147,6 @@
       "status": "unproved",
       "sha256": "82c03b76a89038f2a81df98fdc25f8420e5c2c2010c7173b5b09f267417182d6",
       "review": "Review shared read-only planner admission and one checkpointed correction using original context, current authorized app contracts and unchanged personal approval; managed page fields use app-owned schema; translation and malicious checkout-correction HTTP regressions pass, workspace units and clippy pass"
-    },
-    "src/apps/presentation.rs": {
-      "status": "unproved",
-      "sha256": "0d7b324afdc1530ecc2e4b34b562bcd0917f774d959856d5689569a4220a146a",
-      "review": "Reviewed Apps 0.15/model 0.11 complete strict Manifest and remaining domain contract extraction. Core aliases the same wire, common projection, canonical fingerprints and signature message; recursive key ordering preserves original 34 package digests under default and preserve_order JSON builds. Native Ed25519 current operator keys, original metadata/signature/dependency order and native 400/403 kinds, unsigned namespace/service pins, tenant-scoped locks and financial effects stay attached. Shared dependency version/cycle/active-dependant checks retain behavior, malformed ranges fail closed. Independent 116 model plus eight ordered-JSON cases, actual synthetic Ed25519 example, 19 runtime and PostgreSQL contract pass; 74 native app and two provider contract units, current native fingerprints and actual install/schema/preview/release/tenant/signed-dependency fixtures pass. Kernel unchanged; shared model, crypto adapters and SQL/host effects remain unproved."
     },
     "src/apps/record_history.rs": {
       "status": "unproved",
@@ -5110,8 +5180,8 @@
     },
     "src/apps/relations.rs": {
       "status": "unproved",
-      "sha256": "c6304c2d88230713f274cd457f484d7389fed6c2141d7e02748fc03df0c49fe5",
-      "review": "Reviewed fixed app-record store, tenant/app/model identity, forced signed RLS, trigger-maintained unique/reference/quota projections, scoped schema/preview/staging/checkout consumers and atomic maintenance consolidation; actual PostgreSQL app/checkout/schema/F5 suites and independent security re-review pass. Existing frozen-record WIT conversion remains equivalent; SQL/async adapters remain outside Lean proof boundary."
+      "sha256": "89072ebf86ceca74a93b74c3efed7c2881dd249371dad88516c5649b316bf9d4",
+      "review": "Package approval, distribution, schema adapters, event projection and service transport policy moved into components/apps without a change in behaviour"
     },
     "src/apps/routes.rs": {
       "status": "unproved",
@@ -5130,8 +5200,8 @@
     },
     "src/apps/schema_changes.rs": {
       "status": "unproved",
-      "sha256": "b15ec332e47aaad7896677117fda5b187d964de0dace9e0e217dec1d841603c7",
-      "review": "Reviewed Apps 0.23 exact schema conversion/recovery extraction and native required same-transaction field/language adapter. Actual independent PostgreSQL installer rollback, scoped snapshots, row/byte/quota/collision/overflow and both Linux runs pass; native 74 App units plus seven HTTP/PostgreSQL modules pass, including exhausted revision and disabled-language regressions. Kernel unchanged; SQL, host authority and full migration remain unproved."
+      "sha256": "5f95902ac4ee357524ebff4a49802ce39757ff263592e41470c52799c1831b4b",
+      "review": "Package approval, distribution, schema adapters, event projection and service transport policy moved into components/apps without a change in behaviour"
     },
     "src/apps/schema_upgrade.rs": {
       "status": "unproved",
@@ -5154,9 +5224,9 @@
       "review": "Reviewed generic transactional app workflow and current-package fence; shared app egress admissions; immutable order callback projection; independent app-only ERP Rust receipts/HMAC/reconciliation and fixture regressions. New async SQL/provider/UI code remains unproved."
     },
     "src/apps/service_policy.rs": {
-      "status": "reviewed-binding",
-      "sha256": "daf47ae008a478ecef5cbc69e3518722aef84e73f3736b20a635b7e42bf0b0f7",
-      "review": "Identity-only Veyndo namespace and canonical-domain rename; reviewed migration checksum compatibility for six historical SQL versions, unchanged checkout predicates, 42 library and 169 binary tests pass; native component legacy boundary remains configured and guarded."
+      "status": "unproved",
+      "sha256": "b69ce7971bce19cefa926adf69f7355215d2451eaff15ddbc8c6110c1bf2cf6d",
+      "review": "Package approval, distribution, schema adapters, event projection and service transport policy moved into components/apps without a change in behaviour"
     },
     "src/apps/settings.rs": {
       "status": "reviewed-binding",
@@ -5220,8 +5290,8 @@
     },
     "src/apps/webhook_scope.rs": {
       "status": "unproved",
-      "sha256": "703c81902a3d35d387dd072a58d962403e95d46e61e50c0ab122910550515047",
-      "review": "Reviewed app authority and current creator rights, isolated schemas/RLS and atomic migration rollback, fenced job/event leases, minimized payloads, signature/digest pins, opaque UI grants, pinned DNS egress and bounded Wasm/WIT quote adapters. Actual isolated PostgreSQL own/foreign callback, schema, jobs, events, assets, export, distribution and production-foundation regressions passed. Added extracted package, surface, resource and exact callback-consent policies with negative Lean claims; async/network/UI and general Rust modules remain explicitly unproved."
+      "sha256": "034823b15911336ae4feb41eaffcb1ae72fcd2a1eb23c89d840a794f4a365c57",
+      "review": "Package approval, distribution, schema adapters, event projection and service transport policy moved into components/apps without a change in behaviour"
     },
     "src/apps/webhooks.rs": {
       "status": "unproved",
@@ -7415,12 +7485,12 @@
       "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
     },
     "Cargo.lock": {
-      "sha256": "905dda61ed05cb88eb9a2dea39eb3e834157be40c362621c40ca774facb4bd0b",
-      "review": "Process configuration moved into core; browser session transports, Checkout buyer grants, the private Checkout relay, trusted geography and provider startup validation moved into their components without behaviour change"
+      "sha256": "3616ce374c7549f602c0b44fb0744b5d3a270d37840a0518f7923127f619d0f3",
+      "review": "Package approval, distribution, schema adapters, event projection and service transport policy moved into components/apps without a change in behaviour"
     },
     "Cargo.toml": {
-      "sha256": "881e080eb9f1b1f051c23e2848df689853473831b4d3072817387d65c23ddb66",
-      "review": "Knowledge module and experiment model moved into components/intelligence; kernel call sites unchanged"
+      "sha256": "12d2d79a98f6913d20b8e912afb9ea8de0539b9e83428de8a9d7412c406896f6",
+      "review": "Package approval, distribution, schema adapters, event projection and service transport policy moved into components/apps without a change in behaviour"
     },
     "components.lock.json": {
       "sha256": "7b4a931ad81c6665d5d95e6b42b8ef4d09ebe8971ac24998d8f94bb6a737ff53",

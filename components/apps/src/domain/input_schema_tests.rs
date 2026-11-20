@@ -1,5 +1,6 @@
 //! Adversarial schema cases exercise bounded inputs, nullable unions, escaped JSON pointers and output values.
-use super::*;
+use super::{validate, validate_native, validate_value};
+use serde_json::json;
 use veyndo_app_model::schema::validate_contract;
 #[test]
 fn nullable_types_and_json_pointers_are_enforced() {

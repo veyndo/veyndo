@@ -383,7 +383,19 @@ Order follows the dependency report, lowest first. Each line is one move.
   admission names the new file. Open: the gateway (it dispatches into
   catalog, currencies, coupons, legal and the checkout) and the channel
   installation (it validates settings through the rule engine).
-- [ ] apps (with `developer` and the vendored app storage)
+- [ ] apps (with `developer` and the vendored app storage). Started:
+  `components/apps` (crate `veyndo-app-platform`; `crates/apps` stays the
+  sandbox without SQL or network authority) owns package approval against
+  bundled and operator-pinned digests (`domain/approval`), publisher
+  signatures and namespaces (`domain/distribution`) with the tenant-local
+  dependency gate (`store/dependencies`), the event admission and privacy
+  projection (`domain/event_projection`), the input schema, presentation and
+  schema evolution adapters, the native error mapping of model and storage
+  errors, relation value bounds, the service transport policy and the
+  webhook shop binding. The operator's services and publisher keys are passed
+  in by the server. Open: field and manifest policy (they need locale keys,
+  rich content, scopes and the order machine), managed data, surfaces, jobs,
+  the gateway and the app builder.
 - [ ] automation
 - [ ] intelligence. Started: `components/intelligence` owns the knowledge
   module (relations, hybrid search, vectors with their namespace and cache,

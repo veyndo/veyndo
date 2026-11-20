@@ -703,6 +703,7 @@
     "apps": {
       "title": "App packages, managed data, UI surfaces, Wasm extensions and the app builder",
       "sources": [
+        "components/apps",
         "src/apps",
         "src/developer",
         "src/extensions.rs",
@@ -772,9 +773,9 @@
         "tenants",
         "workspace_roles"
       ],
-      "glob_imports": 109,
+      "glob_imports": 100,
       "untyped_access": 420,
-      "sql_outside_store": 42
+      "sql_outside_store": 41
     },
     "automation": {
       "title": "Deterministic rule evaluation and flow graphs",

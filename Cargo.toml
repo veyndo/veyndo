@@ -87,6 +87,7 @@ veyndo-checkout = { path = "components/checkout" }
 veyndo-intelligence = { path = "components/intelligence" }
 veyndo-studio = { path = "components/studio" }
 veyndo-apps = { path = "crates/apps" }
+veyndo-app-platform = { path = "components/apps" }
 veyndo-cognition = { path = "crates/cognition" }
 roxmltree = "0.21"
 aes-gcm = "0.10.3"

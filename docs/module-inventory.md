@@ -44,7 +44,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/agent_runs.rs](../src/agent_runs.rs) | Durable continuation extends native tasks; leases fence checkpoints and publication, never approved writes. |
 | [src/apps/action_admission.rs](../src/apps/action_admission.rs) | Native authenticated-current-rights adapter for the shared action and callback grant rules. |
 | [src/apps/activation.rs](../src/apps/activation.rs) | Native current-actor/trust/connected-frontend/commerce admission for the shared package-state transaction; original configuration lock order retained. |
-| [src/apps/approval.rs](../src/apps/approval.rs) | Operator service authority is bound to immutable package content, never to a merchant-chosen ID. |
+| [src/apps/approval.rs](../src/apps/approval.rs) | Operator service authority is bound to immutable package content, never to a merchant-chosen ID; the rules live in the apps component. |
 | [src/apps/asset_surfaces.rs](../src/apps/asset_surfaces.rs) | App file uploads reuse the product asset parser/store and require the current package plus either callback consent or a surface grant. |
 | [src/apps/business_capability/mod.rs](../src/apps/business_capability/mod.rs) | Native complete-package and bounded-guest adapters for the independent business contracts and executable examples. |
 | [src/apps/business_capability/tests.rs](../src/apps/business_capability/tests.rs) | Acceptance examples exercise the same Wasm module as checkout, including changed inputs and failed-contract admission. |
@@ -65,12 +65,12 @@ This lists every checked-in source module in these roots, including files with n
 | [src/apps/credentials.rs](../src/apps/credentials.rs) | App keys reuse the core integration-key store, current creator rights, expiry and immutable package digest. |
 | [src/apps/data.rs](../src/apps/data.rs) | Shared managed app records: typed writes, optimistic revisions, bounded reads and local RLS context. |
 | [src/apps/discovery.rs](../src/apps/discovery.rs) | Search all installed app capabilities with current rights; data reads reuse their exact admitted native action. |
-| [src/apps/distribution.rs](../src/apps/distribution.rs) | Signed publisher namespaces and tenant-local dependency/version gates. Operator service access still requires its separate exact digest pin. |
+| [src/apps/distribution.rs](../src/apps/distribution.rs) | Signed publisher namespaces and tenant-local dependency/version gates; the rules live in the apps component, this module supplies the operator's publisher keys. |
 | [src/apps/editor_contract.rs](../src/apps/editor_contract.rs) | Editor mounts, enumerated fields and tenant-owned core references; no app alters core tables. |
 | [src/apps/editor_tests.rs](../src/apps/editor_tests.rs) | Assistant fixture contracts exercise real validation, not only the client-side builder. |
 | [src/apps/egress.rs](../src/apps/egress.rs) | Bounded origin clients pin resolved addresses for each connection and never use ambient HTTP proxies. |
 | [src/apps/event_contract.rs](../src/apps/event_contract.rs) | Explicit event filters, bounded batches and signed public HTTPS delivery extend the existing leased outbox, not a second queue. |
-| [src/apps/event_projection.rs](../src/apps/event_projection.rs) | Native installed-Manifest adapter for shared event admission and privacy projections; queue and current authority remain native. |
+| [src/apps/event_projection.rs](../src/apps/event_projection.rs) | Event admission and privacy projection live in the apps component; this module keeps the short path for the event queue. |
 | [src/apps/events.rs](../src/apps/events.rs) | Durable at-least-once app events, retry leases and stable event idempotency keys. |
 | [src/apps/evidence.rs](../src/apps/evidence.rs) | Private provenance-bearing app exports feed merchant retrieval and durable app events; never public PDP answers. |
 | [src/apps/evidence_routes.rs](../src/apps/evidence_routes.rs) | Scoped merchant-only evidence retrieval; sources never enter public product answers. |
@@ -80,8 +80,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/apps/gateway.rs](../src/apps/gateway.rs) | One permission-aware action gateway serves HTTP, UI and MCP; service egress is operator configured. |
 | [src/apps/history_storage.rs](../src/apps/history_storage.rs) | Required current historical-read authority and actual native managed save for shared record restoration; no bypass of package/field/reference/CAS/history owners. |
 | [src/apps/hosted.rs](../src/apps/hosted.rs) | Persist hosted-app dependencies through the existing package installer; no private renderer or parallel registry. |
-| [src/apps/input_schema.rs](../src/apps/input_schema.rs) | Native API/MCP error adapter for the independent bounded schema validator. |
-| [src/apps/input_schema_tests.rs](../src/apps/input_schema_tests.rs) | Adversarial schema cases exercise bounded inputs, nullable unions, escaped JSON pointers and output values. |
+| [src/apps/input_schema.rs](../src/apps/input_schema.rs) | The bounded input schema validator lives in the apps component; this module keeps the short path for the app adapters. |
 | [src/apps/job_callbacks.rs](../src/apps/job_callbacks.rs) | Long-job service callbacks disclose input only after current actor consent, package and lease checks. Late callbacks cannot commit. |
 | [src/apps/job_control.rs](../src/apps/job_control.rs) | Native current-action/right/input admission for the shared job-control transaction; no duplicate transition or outbox engine. |
 | [src/apps/job_enqueue.rs](../src/apps/job_enqueue.rs) | Service job requests reuse the existing declared action gateway, actor checks, quotas and transactional outbox. |
@@ -93,7 +92,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/apps/manifest_validation.rs](../src/apps/manifest_validation.rs) | Complete shared package compiler adapter; trusted native policies retain current authority and exact native errors. |
 | [src/apps/mcp_views.rs](../src/apps/mcp_views.rs) | Publish revision-bound native MCP App views and authorize their read-only interactions. |
 | [src/apps/mod.rs](../src/apps/mod.rs) | Versioned app packages: managed data, UI slots, agent tools and isolated service calls. |
-| [src/apps/model_contract.rs](../src/apps/model_contract.rs) | Preserve native problem kinds, revision-conflict status and escaped JSON pointers across the pure model boundary. |
+| [src/apps/model_contract.rs](../src/apps/model_contract.rs) | Native errors of model errors live in the apps component; this module keeps the short path for the app adapters. |
 | [src/apps/native_data.rs](../src/apps/native_data.rs) | App record translations use configured shop languages and field-level main-language inheritance. |
 | [src/apps/native_lifecycle/compile.rs](../src/apps/native_lifecycle/compile.rs) | Adapt shared graph compilation to the complete native package digest, current scope catalogue and native order base. |
 | [src/apps/native_lifecycle/storage.rs](../src/apps/native_lifecycle/storage.rs) | Capture accepted definitions in existing operational JSON under native package locks; no app-specific tables. |
@@ -105,26 +104,25 @@ This lists every checked-in source module in these roots, including files with n
 | [src/apps/ontology.rs](../src/apps/ontology.rs) | Native complete-package adapter for graph mapping; the existing authorized list supplies every projected row. |
 | [src/apps/package_fence.rs](../src/apps/package_fence.rs) | Shared package fence prevents native record or document writes racing contract upgrades. |
 | [src/apps/package_install.rs](../src/apps/package_install.rs) | Required native installation hooks preserve compiler/trust, commerce, schema, default-record and schedule admission in the shared transaction. |
-| [src/apps/persistence.rs](../src/apps/persistence.rs) | Translate storage-port failures into the existing native HTTP/MCP domain errors. |
+| [src/apps/persistence.rs](../src/apps/persistence.rs) | Storage failures become native errors in the apps component; this module keeps the short path for the app adapters. |
 | [src/apps/planning.rs](../src/apps/planning.rs) | Registered managed app actions join the same preview/approve transaction as core changes. |
 | [src/apps/planning_contracts.rs](../src/apps/planning_contracts.rs) | Current authorized managed-save models accompany proposals; no records, secrets or new authority. |
-| [src/apps/presentation.rs](../src/apps/presentation.rs) | Adapt shared passive artwork validation; installation and trusted service UI remain native owners. |
 | [src/apps/record_history.rs](../src/apps/record_history.rs) | Bounded app-record history, current entity rights and restoration through the normal managed save path. |
 | [src/apps/record_import.rs](../src/apps/record_import.rs) | Private source-record intake reuses an installed app's declared native save action, schema, rights and package fence. |
 | [src/apps/record_lifecycle.rs](../src/apps/record_lifecycle.rs) | Native transport mapping for shared app-owned workflow contracts and state transitions. |
 | [src/apps/record_write.rs](../src/apps/record_write.rs) | Native lifecycle/history hooks around the shared record mutation engine; package and typed field validation stay in data.rs. |
 | [src/apps/records.rs](../src/apps/records.rs) | One fixed PostgreSQL record store; every operation retains tenant/app/model identity and original wire values. |
 | [src/apps/registry.rs](../src/apps/registry.rs) | Atomic installation and additive schema upgrades; immutable version digests preserve history. |
-| [src/apps/relations.rs](../src/apps/relations.rs) | Shared relation projections are maintained transactionally by app_record_project; wire values remain bounded ordered arrays. |
+| [src/apps/relations.rs](../src/apps/relations.rs) | Relation value bounds live in the apps component; this module keeps the short path for the field policy. |
 | [src/apps/routes.rs](../src/apps/routes.rs) | Tenant-scoped package lifecycle, generated data endpoints and a shared action adapter. |
 | [src/apps/runtime.rs](../src/apps/runtime.rs) | Generic pure-Wasm contribution executor; the installed package supplies all business predicates. |
 | [src/apps/schedules.rs](../src/apps/schedules.rs) | Durable UTC cron ticks emit namespaced outbox events; replicas lock due rows and staging never runs them. |
-| [src/apps/schema_changes.rs](../src/apps/schema_changes.rs) | Native error and Manifest adapters for the shared pure evolution planner; transactional execution uses shared schema_upgrade through required native validation. |
+| [src/apps/schema_changes.rs](../src/apps/schema_changes.rs) | The schema evolution adapter lives in the apps component; this module keeps the short path for the upgrade review. |
 | [src/apps/schema_upgrade.rs](../src/apps/schema_upgrade.rs) | Native field/content-language authority for shared bounded schema migration on the original installation transaction. |
 | [src/apps/secret_storage.rs](../src/apps/secret_storage.rs) | Required native authenticated encryption and exact errors for shared app secret persistence; platform keys never leave this owner. |
 | [src/apps/secrets.rs](../src/apps/secrets.rs) | Digest-bound per-shop app secret rotation reuses platform authenticated encryption; no plaintext read endpoint. |
 | [src/apps/service_limits.rs](../src/apps/service_limits.rs) | Shared network-app admission: per-app and aggregate tenant bulkheads plus replica-wide fenced leases. |
-| [src/apps/service_policy.rs](../src/apps/service_policy.rs) | Operator-owned private origins permit isolated service networking without relaxing public egress. |
+| [src/apps/service_policy.rs](../src/apps/service_policy.rs) | The service transport policy lives in the apps component; this module keeps the short path for the app adapters. |
 | [src/apps/settings.rs](../src/apps/settings.rs) | Declared app settings reuse the digest-bound encrypted secret owner; secret values never have a browser read path. |
 | [src/apps/storage.rs](../src/apps/storage.rs) | Existing aggregate app row/byte budget; shared record triggers maintain it without per-app DDL or recounts. |
 | [src/apps/submissions.rs](../src/apps/submissions.rs) | Public append-only intake uses declared schemas, existing cart admission, quotas, records and outbox. |
@@ -137,7 +135,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/apps/ui_documents.rs](../src/apps/ui_documents.rs) | Secret-free, operator-pinned guest code in a response-enforced opaque sandbox, never srcdoc. |
 | [src/apps/ui_logic_tests.rs](../src/apps/ui_logic_tests.rs) | UI programs must keep static types, same-model saves, surface allowlists and acyclic ownership before install or preview. |
 | [src/apps/upgrade_review.rs](../src/apps/upgrade_review.rs) | Probe the actual transactional installer and roll it back; return admission metadata, never app record contents. |
-| [src/apps/webhook_scope.rs](../src/apps/webhook_scope.rs) | Scope signed app ingress from its route before identity, tenant lifecycle and forced-RLS admission. |
+| [src/apps/webhook_scope.rs](../src/apps/webhook_scope.rs) | The webhook shop binding lives in the apps component; this module keeps the short path for the request middleware. |
 | [src/apps/webhooks.rs](../src/apps/webhooks.rs) | Operator-signed incoming events: tenant-bound HMAC, five-minute freshness and atomic replay receipts. |
 | [src/assets/app_files.rs](../src/assets/app_files.rs) | Scoped app access to the existing asset store. Binary callbacks are explicit and private; publishing still uses the native asset lifecycle. |
 | [src/assets/caption_source.rs](../src/assets/caption_source.rs) | Image evidence uses owned assets or DNS-pinned public HTTPS; decoded thumbnails strip metadata before inference. |
@@ -635,6 +633,22 @@ This lists every checked-in source module in these roots, including files with n
 
 | Module | Responsibility |
 |---|---|
+| [components/apps/src/domain/approval.rs](../components/apps/src/domain/approval.rs) | Operator service authority is bound to immutable package content, never to a merchant-chosen ID. |
+| [components/apps/src/domain/distribution.rs](../components/apps/src/domain/distribution.rs) | Signed publisher namespaces and tenant-local dependency/version gates. Operator service access still requires its separate exact digest pin. |
+| [components/apps/src/domain/event_projection.rs](../components/apps/src/domain/event_projection.rs) | Native installed-Manifest adapter for shared event admission and privacy projections; queue and current authority remain native. |
+| [components/apps/src/domain/input_schema.rs](../components/apps/src/domain/input_schema.rs) | Native API/MCP error adapter for the independent bounded schema validator. |
+| [components/apps/src/domain/input_schema_tests.rs](../components/apps/src/domain/input_schema_tests.rs) | Adversarial schema cases exercise bounded inputs, nullable unions, escaped JSON pointers and output values. |
+| [components/apps/src/domain/model_contract.rs](../components/apps/src/domain/model_contract.rs) | Preserve native problem kinds, revision-conflict status and escaped JSON pointers across the pure model boundary. |
+| [components/apps/src/domain/persistence.rs](../components/apps/src/domain/persistence.rs) | Translate storage-port failures into the existing native HTTP/MCP domain errors. |
+| [components/apps/src/domain/presentation.rs](../components/apps/src/domain/presentation.rs) | Adapt shared passive artwork validation; installation and trusted service UI remain native owners. |
+| [components/apps/src/domain/relations.rs](../components/apps/src/domain/relations.rs) | Shared relation projections are maintained transactionally by app_record_project; wire values remain bounded ordered arrays. |
+| [components/apps/src/domain/schema_changes.rs](../components/apps/src/domain/schema_changes.rs) | Native error and Manifest adapters for the shared pure evolution planner; transactional execution uses shared schema_upgrade through required native validation. |
+| [components/apps/src/domain/service_policy.rs](../components/apps/src/domain/service_policy.rs) | Operator-owned private origins permit isolated service networking without relaxing public egress. |
+| [components/apps/src/domain/webhook_scope.rs](../components/apps/src/domain/webhook_scope.rs) | Scope signed app ingress from its route before identity, tenant lifecycle and forced-RLS admission. |
+| [components/apps/src/domain.rs](../components/apps/src/domain.rs) | Pure package rules: no database, no transport. |
+| [components/apps/src/lib.rs](../components/apps/src/lib.rs) | Apps component: what an app package may be and do before the server installs or calls it. |
+| [components/apps/src/store/dependencies.rs](../components/apps/src/store/dependencies.rs) | Tenant-local dependency and version gates of a signed package, read under the installing transaction. |
+| [components/apps/src/store.rs](../components/apps/src/store.rs) | SQL of the apps component. |
 | [components/b2b/src/domain/contract.rs](../components/b2b/src/domain/contract.rs) | Native B2B operation catalogue and bounded request schema shared by HTTP, MCP and UCP adapters. |
 | [components/b2b/src/domain.rs](../components/b2b/src/domain.rs) | domain of this component. |
 | [components/b2b/src/lib.rs](../components/b2b/src/lib.rs) | B2B component: company procurement records, their bounds and the purchasing contract. |
