@@ -23,3 +23,4 @@ chrono.workspace = true
 ring.workspace = true
 tracing.workspace = true
 veyndo-kernel = { path = "../../crates/kernel" }
+veyndo-shipping = { path = "../shipping" }

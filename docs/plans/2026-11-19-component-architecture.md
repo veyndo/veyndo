@@ -114,7 +114,9 @@ Rules that hold from the first component on:
       belong to `shop` and move with it in phase 3; `components.json` assigns them so.
 - [ ] Replace the `App` state object by per-component state plus ports. Done so
       far: `veyndo_core::State` (database, HTTP client, admission) that the server
-      state dereferences to; the outbox `Projector` port.
+      state dereferences to; the outbox `Projector` port; the validated
+      process configuration (`core::process_config`), which the server builds
+      and installs once at startup and every component reads.
 - [x] Remove the dependencies `core` has on other components (`uses` of core in
       `components.json` is empty). Server wiring (`App`, outbox routes) is assigned
       to the host; crate-to-crate dependencies are read from crate names.
@@ -127,7 +129,9 @@ Rules that hold from the first component on:
       actor and the usage of a role; `http/members` the workspace member list
       and the role or revocation change, `http/access` the access overview,
       the personal session list and the revocation of sessions and invitations;
-      `store/handoffs` the one-time Studio handoff ticket. `store/sessions`
+      `store/handoffs` the one-time Studio handoff ticket; `http/browser` the
+      cookie transport of the personal session (host-only cookies, exact
+      origin, CSRF) as request middleware. `store/sessions`
       issues personal sessions and MFA challenges, `http/sessions` owns login,
       logout and workspace discovery, `http/invitations` the invitations,
       `http/mfa` enrollment, confirmation, disabling and verification,
@@ -257,14 +261,15 @@ Order follows the dependency report, lowest first. Each line is one move.
   lookup with literal search, the guest contact and the remembered payment
   method. Open: the handlers still run in the server, because they resolve the
   storefront request, attribute the history and read shop settings; login;
-  browser sessions; the merchant customer list and detail (they attach app
+  the merchant customer list and detail (they attach app
   extensions). `store/crm` owns the merchant creation of a contact with its
   address plan and the revision-checked merchant change including the
   restoration of a historical state. Registration, the
   contact profile and the password swap are writes in `store/accounts`; the
   handlers keep credential hashing, geography and channel admission. The restoration of an address aggregate from history
   lives in `store/`; the shop's geography admits each address through a
-  closure.
+  closure. `http/browser` is the customer cookie transport in front of the
+  tenant session ledger.
 - [ ] payments. Started: `components/payments` owns the attempt type, the
   payment state machine, wire amounts at ISO precision, receipt identity and
   references, settlement and refund budgets, recipient instructions, adapter
@@ -282,6 +287,8 @@ Order follows the dependency report, lowest first. Each line is one move.
   side: the admitted adapter transport, provider dispatch, receipt
   persistence per provider, the worker scope and the built-in provider's
   cancellation evidence. The proved payment rules are bound to the new files.
+  `service/provider_configuration` validates the provider origin, accounts
+  and adapter services once at startup.
   Open: provider accounts and onboarding, the registry of methods from app
   manifests, routes, the PayPal adapter include.
 - [ ] checkout. Started: `components/checkout` owns the destination tax lines
@@ -297,7 +304,10 @@ Order follows the dependency report, lowest first. Each line is one move.
   The kernel bindings of the review name the new file. Open: cart storage and
   mutation, the quote, the selection, the four steps of the checkout
   transaction (they call apps, B2B, payments, marketing and legal and need a
-  host port), buyer identity, the handoff.
+  host port), the handoff. `http/buyer_identity` seals and inspects the
+  short-lived Checkout grant of a live customer session and
+  `http/private_browser` relays the two browser commands to the private
+  Checkout service; the server only registers their routes.
   `domain/admin_order` and `store/admin_order` hold the guards of an order a
   merchant places (manual or simulated payment only, channel policy, the
   channel's product selection); `store/selected_customer` rechecks the
@@ -381,7 +391,8 @@ Order follows the dependency report, lowest first. Each line is one move.
   (`domain/prompt_context`, `store/context_products`) and durable agent
   runs in storage: the caller projection, the conversation turn fence,
   lease-fenced publication and the checkpoint journal (`store/agent_runs`,
-  `domain/run_result`). The server keeps
+  `domain/run_result`); `domain/trusted_geography` accepts a visitor
+  country only from the trusted ingress. The server keeps
   consent, settings, channel admission, provider admission and leases and
   passes them in.
   Open: agents and their runs, proposals, the retrieval, question and

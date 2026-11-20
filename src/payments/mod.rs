@@ -31,7 +31,6 @@ mod operations;
 #[path = "../../extensions/apps/paypal/src/compatibility.rs"]
 mod paypal;
 mod provider;
-pub(crate) mod provider_configuration;
 mod provider_webhooks;
 pub(crate) mod remote;
 mod return_urls;

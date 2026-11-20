@@ -485,7 +485,6 @@ This lists every checked-in source module in these roots, including files with n
 | [src/payments/mod.rs](../src/payments/mod.rs) | Provider-independent payment ledger and durable workers; the PayPal adapter supports explicit Sandbox/Live environments. |
 | [src/payments/operations.rs](../src/payments/operations.rs) | Durable idempotent payment commands, customer context binding and serial refund admission. |
 | [src/payments/provider.rs](../src/payments/provider.rs) | Payment provider identity, tenant account configuration and immutable wire context. |
-| [src/payments/provider_configuration.rs](../src/payments/provider_configuration.rs) | Pure startup validation of the native provider origin; no live credentials or provider calls. |
 | [src/payments/provider_webhooks.rs](../src/payments/provider_webhooks.rs) | Version-pinned HMAC notifications enqueue reconciliation; external event payloads never write monetary state. |
 | [src/payments/receipt_guard.rs](../src/payments/receipt_guard.rs) | Bind integer provider receipt amounts and status to the formally checked exact-match predicate. |
 | [src/payments/registry.rs](../src/payments/registry.rs) | Installed payment registry and immutable account/version snapshots; no remote calls inside checkout SQL. |
@@ -720,6 +719,9 @@ This lists every checked-in source module in these roots, including files with n
 | [components/checkout/src/domain/session_review.rs](../components/checkout/src/domain/session_review.rs) | The purchase a buyer explicitly reviewed in a checkout session, and the checks that bind the order to exactly that review. |
 | [components/checkout/src/domain/tax_lines.rs](../components/checkout/src/domain/tax_lines.rs) | Destination tax-class resolution and net-preserving price conversion. |
 | [components/checkout/src/domain.rs](../components/checkout/src/domain.rs) | Rules of a quote, free of I/O apart from the clock. |
+| [components/checkout/src/http/buyer_identity.rs](../components/checkout/src/http/buyer_identity.rs) | Exchange a native buyer login for short-lived, Checkout-only authority. |
+| [components/checkout/src/http/private_browser.rs](../components/checkout/src/http/private_browser.rs) | Relay only the browser's two Checkout session commands to a private service. |
+| [components/checkout/src/http.rs](../components/checkout/src/http.rs) | Checkout transports: sealed buyer grants and the relay to the private Checkout service. |
 | [components/checkout/src/lib.rs](../components/checkout/src/lib.rs) | Checkout component: tax lines and payment classification of a quote; the transaction follows. |
 | [components/checkout/src/service/app_adjustments.rs](../components/checkout/src/service/app_adjustments.rs) | Apply admitted integer app adjustments through native pricing/tax calculation; extensions cannot replace quote JSON. |
 | [components/checkout/src/service/delivery.rs](../components/checkout/src/service/delivery.rs) | Shipping costs, proportional taxes and calendar delivery windows. |
@@ -757,6 +759,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/core/src/outbox/retention.rs](../components/core/src/outbox/retention.rs) | Bounded retirement of duplicate delivered payloads; provenance IDs and unsettled app/flow work survive. |
 | [components/core/src/outbox/retention.sql](../components/core/src/outbox/retention.sql) | Remove only unreferenced delivered metadata after its separate audit window. |
 | [components/core/src/outbox.rs](../components/core/src/outbox.rs) | The transactional outbox consumer: each subscriber lane acknowledges an event and commits its effects in one transaction. |
+| [components/core/src/process_config.rs](../components/core/src/process_config.rs) | Immutable process configuration: the server validates it once at startup, every component reads the same value. |
 | [components/core/src/request_context.rs](../components/core/src/request_context.rs) | Trusted request identity lives in extensions; HTTP headers carry transport inputs only. |
 | [components/core/src/shop_scope.rs](../components/core/src/shop_scope.rs) | Which shop a request addresses: the transport header, or the deployment's default shop. No authentication. |
 | [components/core/src/state.rs](../components/core/src/state.rs) | The state every component may use: the tenant-scoped database pool, the outbound HTTP client and request admission. |
@@ -764,6 +767,8 @@ This lists every checked-in source module in these roots, including files with n
 | [components/customers/src/domain/profile.rs](../components/customers/src/domain/profile.rs) | Which profile fields are shown as top-level contact fields of a customer. |
 | [components/customers/src/domain/search.rs](../components/customers/src/domain/search.rs) | A merchant's search text as a literal, case-insensitive LIKE fragment. |
 | [components/customers/src/domain.rs](../components/customers/src/domain.rs) | Rules of customer data, free of I/O. |
+| [components/customers/src/http/browser.rs](../components/customers/src/http/browser.rs) | Host-only customer cookies adapt the existing tenant session ledger without granting merchant authority. |
+| [components/customers/src/http.rs](../components/customers/src/http.rs) | Customer transports: the browser cookie adapter in front of the tenant session ledger. |
 | [components/customers/src/lib.rs](../components/customers/src/lib.rs) | Customers component: accounts, sessions, address books and the merchant's view of customers. |
 | [components/customers/src/service/address_book.rs](../components/customers/src/service/address_book.rs) | The address book of a customer: bounded, revision-checked, with defaults that are never left empty. |
 | [components/customers/src/service/directory.rs](../components/customers/src/service/directory.rs) | The merchant's view of customers: standard read fields, the bounded lookup and guest contacts. |
@@ -783,6 +788,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/identity/src/domain.rs](../components/identity/src/domain.rs) | Pure identity rules: no database, no transport. |
 | [components/identity/src/http/access.rs](../components/identity/src/http/access.rs) | What a signed-in person may do in this workspace, their own sessions, and revocation of sessions and invitations. |
 | [components/identity/src/http/broker.rs](../components/identity/src/http/broker.rs) | Password setup, recovery discovery and session requests from the trusted, verified-email identity broker. |
+| [components/identity/src/http/browser.rs](../components/identity/src/http/browser.rs) | Browser transport for the existing personal-session ledger: host-only HttpOnly cookies, exact origins and CSRF. |
 | [components/identity/src/http/integrations.rs](../components/identity/src/http/integrations.rs) | Explicit-lifetime API/MCP keys are bounded to one workspace and intersect their creator's current membership. |
 | [components/identity/src/http/invitations.rs](../components/identity/src/http/invitations.rs) | Single-use, expiring invitations. Acceptance verifies an existing account password. |
 | [components/identity/src/http/members.rs](../components/identity/src/http/members.rs) | Workspace member visibility and immediately effective role/revocation changes. |
@@ -808,6 +814,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/intelligence/src/domain/prompt_context.rs](../components/intelligence/src/domain/prompt_context.rs) | What a model is given to read: the shared source policy and byte-bounded snapshots that never cut text mid-string. |
 | [components/intelligence/src/domain/run_result.rs](../components/intelligence/src/domain/run_result.rs) | The synchronous planning result of a saved run: a ready proposal, or the error the run stopped with. |
 | [components/intelligence/src/domain/source_content.rs](../components/intelligence/src/domain/source_content.rs) | Bounds of a knowledge source: enabled languages, kinds, translated fields and the digest that binds its chunks. |
+| [components/intelligence/src/domain/trusted_geography.rs](../components/intelligence/src/domain/trusted_geography.rs) | Optional trusted ingress geography. Ordinary country headers never establish visitor location. |
 | [components/intelligence/src/domain.rs](../components/intelligence/src/domain.rs) | Bounded inputs of the intelligence component, free of I/O. |
 | [components/intelligence/src/knowledge/embeddings.rs](../components/intelligence/src/knowledge/embeddings.rs) | Bounded batched embeddings: Ollama and OpenAI-compatible self-hosted endpoints, model-defined dimensions. |
 | [components/intelligence/src/knowledge/neighborhood.sql](../components/intelligence/src/knowledge/neighborhood.sql) | Two-hop product neighborhood; only currently confirmed public claims enter a buyer-facing inference context. |
@@ -941,6 +948,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/payments/src/service/funding.rs](../components/payments/src/service/funding.rs) | Account-authorized funding choice, immutable consent and saved-instrument admission; cart possession is insufficient. |
 | [components/payments/src/service/instructions.rs](../components/payments/src/service/instructions.rs) | Typed recipient instructions of an attempt: the stored snapshot or the provider's current answer; reads never settle an invoice. |
 | [components/payments/src/service/notifications.rs](../components/payments/src/service/notifications.rs) | Version-pinned HMAC notifications enqueue reconciliation; external event payloads never write monetary state. |
+| [components/payments/src/service/provider_configuration.rs](../components/payments/src/service/provider_configuration.rs) | Pure startup validation of the native provider origin; no live credentials or provider calls. |
 | [components/payments/src/service/receipts.rs](../components/payments/src/service/receipts.rs) | Provider-neutral receipt admission and atomic allocation; verified evidence owns ledger transitions. |
 | [components/payments/src/service/remote.rs](../components/payments/src/service/remote.rs) | Builds the pinned adapter request of one payment operation; the gateway owns transport and admission. |
 | [components/payments/src/service/sessions.rs](../components/payments/src/service/sessions.rs) | Customer-bound, short-lived provider UI sessions; iframe messages are never ledger receipts. |

@@ -14,3 +14,6 @@ veyndo-pricing = { path = "../pricing" }
 veyndo-identity = { path = "../identity" }
 veyndo-shipping = { path = "../shipping" }
 veyndo-shop = { path = "../shop" }
+axum.workspace = true
+veyndo-runtime = { path = "../../crates/runtime" }
+reqwest.workspace = true

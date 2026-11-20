@@ -83,7 +83,7 @@
         "shop_environments",
         "tenants"
       ],
-      "glob_imports": 6,
+      "glob_imports": 5,
       "untyped_access": 86,
       "sql_outside_store": 16
     },
@@ -407,7 +407,7 @@
         "shop_environments",
         "tenants"
       ],
-      "glob_imports": 11,
+      "glob_imports": 10,
       "untyped_access": 206,
       "sql_outside_store": 8
     },
@@ -430,7 +430,6 @@
       ],
       "uses": [
         "apps",
-        "catalog",
         "checkout",
         "core",
         "identity",
@@ -448,7 +447,7 @@
         "outbox",
         "tenants"
       ],
-      "glob_imports": 16,
+      "glob_imports": 15,
       "untyped_access": 82,
       "sql_outside_store": 5
     },
@@ -854,6 +853,7 @@
         "payments",
         "pricing",
         "protocols",
+        "shipping",
         "shop",
         "studio"
       ],
@@ -885,7 +885,7 @@
         "translation_jobs",
         "user_sessions"
       ],
-      "glob_imports": 75,
+      "glob_imports": 74,
       "untyped_access": 716,
       "sql_outside_store": 35
     },

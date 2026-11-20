@@ -1088,10 +1088,25 @@
       "sha256": "798db4447744fa2c28e4c879e4c49a3f6e21b337e923bf066d68667da915e19f",
       "review": "Merchant customer writes moved into the customers component and admin order admission into checkout without behaviour change"
     },
+    "components/checkout/src/http/buyer_identity.rs": {
+      "status": "unproved",
+      "sha256": "10c3d9ef48dda6957b32da5a2efba403b432cab2ced82cb5843467a4f6ed5396",
+      "review": "Process configuration moved into core; browser session transports, Checkout buyer grants, the private Checkout relay, trusted geography and provider startup validation moved into their components without behaviour change"
+    },
+    "components/checkout/src/http/private_browser.rs": {
+      "status": "unproved",
+      "sha256": "022df4202b5378baf0e2fab8be091b91723453a7426f944ce8da32845e5fd080",
+      "review": "Process configuration moved into core; browser session transports, Checkout buyer grants, the private Checkout relay, trusted geography and provider startup validation moved into their components without behaviour change"
+    },
+    "components/checkout/src/http.rs": {
+      "status": "unproved",
+      "sha256": "f1393700ec58e7af87c49746a85c43eb41ff4fe1382a82b85fc40729beafaf62",
+      "review": "Process configuration moved into core; browser session transports, Checkout buyer grants, the private Checkout relay, trusted geography and provider startup validation moved into their components without behaviour change"
+    },
     "components/checkout/src/lib.rs": {
       "status": "unproved",
-      "sha256": "1a152f24459cf60b7a327a4eac66a57c2167bf02b7dde0e1fd7ea499e4476153",
-      "review": "POS guard, customer, discount and settlement and the checkout session review moved into components"
+      "sha256": "32cc75782e5b1f9410975828ff795466375e305874110758a5752501b56fc4b9",
+      "review": "Process configuration moved into core; browser session transports, Checkout buyer grants, the private Checkout relay, trusted geography and provider startup validation moved into their components without behaviour change"
     },
     "components/checkout/src/service/app_adjustments.rs": {
       "status": "unproved",
@@ -1235,8 +1250,8 @@
     },
     "components/core/src/lib.rs": {
       "status": "reviewed-binding",
-      "sha256": "d97bbf2c6cc4ca7008d3aa99a4144037c41fde7783265f7e711043f87d544c8f",
-      "review": "B2B access, organization and purchasing storage and flow job claims moved into their components"
+      "sha256": "f14fa809a44c578da8b144674d8a9c140452ee0d0043fe00a50aa6da5d150cb5",
+      "review": "Process configuration moved into core; browser session transports, Checkout buyer grants, the private Checkout relay, trusted geography and provider startup validation moved into their components without behaviour change"
     },
     "components/core/src/localized/languages.rs": {
       "status": "unproved",
@@ -1262,6 +1277,11 @@
       "status": "unproved",
       "sha256": "0d050ca2a43af1bed34dc45de5288c9ae42b1c151e94b8b8e808cb1f88bdb47b",
       "review": "Reviews moved into components/catalog; no rule changed"
+    },
+    "components/core/src/process_config.rs": {
+      "status": "unproved",
+      "sha256": "eb0a82feacd8e7deb625b33c5b45cd45e199feb9be7d9ecafa6afc0dc61b00a6",
+      "review": "Process configuration moved into core; browser session transports, Checkout buyer grants, the private Checkout relay, trusted geography and provider startup validation moved into their components without behaviour change"
     },
     "components/core/src/request_context.rs": {
       "status": "unproved",
@@ -1298,10 +1318,20 @@
       "sha256": "ce4f5aa3006377227434e5b9cfbdab9b8e12754c07592826ba8c9837deaad513",
       "review": "customers component crate created; no kernel binding changed"
     },
+    "components/customers/src/http/browser.rs": {
+      "status": "unproved",
+      "sha256": "52083863d8ec801e04487b14f5e32b41f2fb2935b459bac7933174154cda3284",
+      "review": "Process configuration moved into core; browser session transports, Checkout buyer grants, the private Checkout relay, trusted geography and provider startup validation moved into their components without behaviour change"
+    },
+    "components/customers/src/http.rs": {
+      "status": "unproved",
+      "sha256": "6f97e54e90ae9c022323865d6ebfb5595c86fb1e881aeeaca906bc01b54a9750",
+      "review": "Process configuration moved into core; browser session transports, Checkout buyer grants, the private Checkout relay, trusted geography and provider startup validation moved into their components without behaviour change"
+    },
     "components/customers/src/lib.rs": {
       "status": "unproved",
-      "sha256": "8a60e9b206e64bfd0d66cef9e9b7e3be7332ff697818fa6d5e08532361bd753d",
-      "review": "customers component crate created; no kernel binding changed"
+      "sha256": "67d6bb06aeacc470f682b0bb996288b11af2f47e9a4ce26272ea01ed5361578c",
+      "review": "Process configuration moved into core; browser session transports, Checkout buyer grants, the private Checkout relay, trusted geography and provider startup validation moved into their components without behaviour change"
     },
     "components/customers/src/service/address_book.rs": {
       "status": "unproved",
@@ -1393,6 +1423,11 @@
       "sha256": "f5433e62325fa9a346244f7d626126b7a14247823fb027c81e34b304e37ca666",
       "review": "Sessions, invitations, MFA, integration keys and broker assertions moved into the identity component without behaviour change"
     },
+    "components/identity/src/http/browser.rs": {
+      "status": "unproved",
+      "sha256": "d8c3d125f159d3d5ebc56ed2ae5ff03df2bc6c8dd9f98824e10f3f6599241c41",
+      "review": "Process configuration moved into core; browser session transports, Checkout buyer grants, the private Checkout relay, trusted geography and provider startup validation moved into their components without behaviour change"
+    },
     "components/identity/src/http/integrations.rs": {
       "status": "reviewed-binding",
       "sha256": "891f4413e799ffc0f5435cb83360992ffceecaf9a23079f177c1d6fbb00ed448",
@@ -1420,8 +1455,8 @@
     },
     "components/identity/src/http.rs": {
       "status": "unproved",
-      "sha256": "4077e988633ba662babd5b508a9ae44914130e63cf64fa51ec5ecf02c2221694",
-      "review": "Sessions, invitations, MFA, integration keys and broker assertions moved into the identity component without behaviour change"
+      "sha256": "4476738cae726af2a5d83644ddc1b47e34ca82a8a094ad46e38f8236060d9f0d",
+      "review": "Process configuration moved into core; browser session transports, Checkout buyer grants, the private Checkout relay, trusted geography and provider startup validation moved into their components without behaviour change"
     },
     "components/identity/src/lib.rs": {
       "status": "reviewed-binding",
@@ -1513,10 +1548,15 @@
       "sha256": "acb83bc1fed77b6be07bc96dcfa710df2d04d3fbdec282c5ea2a0511f9eb0132",
       "review": "Knowledge sources, PDF text extraction and embedding generations moved into the intelligence component without behaviour change"
     },
+    "components/intelligence/src/domain/trusted_geography.rs": {
+      "status": "unproved",
+      "sha256": "d4bdb07cfd7723c78db94500092ecc8b6ba0dafac811b4c116cad9a5c7397e4a",
+      "review": "Process configuration moved into core; browser session transports, Checkout buyer grants, the private Checkout relay, trusted geography and provider startup validation moved into their components without behaviour change"
+    },
     "components/intelligence/src/domain.rs": {
       "status": "unproved",
-      "sha256": "25132a1fb9e9a1fced48bad8090ba1c716c7f297b26644819f065029e32ddf35",
-      "review": "Agent run projection, conversation turn fence, lease-fenced publication and the checkpoint journal moved verbatim into the intelligence component; authority, permissions and budgets stay in the server."
+      "sha256": "72548f2a3db6639873d1a7576e42a77348f5e1841d74f0d03ea71ce949acaafa",
+      "review": "Process configuration moved into core; browser session transports, Checkout buyer grants, the private Checkout relay, trusted geography and provider startup validation moved into their components without behaviour change"
     },
     "components/intelligence/src/knowledge/embeddings.rs": {
       "status": "unproved",
@@ -2128,6 +2168,11 @@
       "sha256": "ce9273df8fd33063634aa13e4d53f8f2a34f68cad678676ae5a0c65fe121bc18",
       "review": "Payment commands, worker and provider sessions moved behind the payments gateway port"
     },
+    "components/payments/src/service/provider_configuration.rs": {
+      "status": "unproved",
+      "sha256": "ee899455b638edc1f143b2b05522b33bd09f42ed56280979f9638cbece5f45e8",
+      "review": "Process configuration moved into core; browser session transports, Checkout buyer grants, the private Checkout relay, trusted geography and provider startup validation moved into their components without behaviour change"
+    },
     "components/payments/src/service/receipts.rs": {
       "status": "unproved",
       "sha256": "ee9db556202da6e72daa169aeda57b7772db64460b7c3b5f055f461f4123a9f3",
@@ -2150,8 +2195,8 @@
     },
     "components/payments/src/service.rs": {
       "status": "unproved",
-      "sha256": "68ad545b764ef0778d38fe776f22d8881e31eadf85fb3dccabcc4d61a09b81d8",
-      "review": "Payment commands, worker and provider sessions moved behind the payments gateway port"
+      "sha256": "d57d24ac47ce0526499542d9ddb8780e451d367e8aab8f850c8b45c0088bf917",
+      "review": "Process configuration moved into core; browser session transports, Checkout buyer grants, the private Checkout relay, trusted geography and provider startup validation moved into their components without behaviour change"
     },
     "components/payments/src/store/attempts.rs": {
       "status": "unproved",
@@ -4525,8 +4570,8 @@
     },
     "src/accounts/browser.rs": {
       "status": "unproved",
-      "sha256": "1a70d58708bc7df92f6e0f6638b8d1abd008d8cb4a420f17cf88cb4a4f51c944",
-      "review": "Reviewed browser adapters against existing personal/customer ledgers, exact host/origin/CSRF admission, passive-response races, current database scopes, explicit MCP compatibility and intersecting build-owned credential-origin CSP; no pure money or authorization policy changed"
+      "sha256": "911a2ffde8d63fc0306969122961929d1e2184c373bc30e78e7b4f4489de5934",
+      "review": "Process configuration moved into core; browser session transports, Checkout buyer grants, the private Checkout relay, trusted geography and provider startup validation moved into their components without behaviour change"
     },
     "src/accounts/contacts.rs": {
       "status": "unproved",
@@ -5270,8 +5315,8 @@
     },
     "src/auth/browser.rs": {
       "status": "unproved",
-      "sha256": "92b83f41d2570b1184281aefee46a970afd4c09f5f0712c712f0c7a61e81bc7a",
-      "review": "Reviewed browser adapters against existing personal/customer ledgers, exact host/origin/CSRF admission, passive-response races, current database scopes, explicit MCP compatibility and intersecting build-owned credential-origin CSP; no pure money or authorization policy changed"
+      "sha256": "b6eb6317d5d6892e8be7cb88f253ebaaae280f2d5a61dc901c5a3d57c874348a",
+      "review": "Process configuration moved into core; browser session transports, Checkout buyer grants, the private Checkout relay, trusted geography and provider startup validation moved into their components without behaviour change"
     },
     "src/auth/credentials.rs": {
       "status": "unproved",
@@ -5645,8 +5690,8 @@
     },
     "src/checkout/buyer_identity.rs": {
       "status": "unproved",
-      "sha256": "5a07cf9e31ece9cb79c0e6b6a6eedfd3c73479ff19fa9ccf1dd26a13acb411d2",
-      "review": "Checkout private relay: fixed upstream session routes, native buyer admission, bounded responses, and separate request capacity for Core callbacks. No new formal claims."
+      "sha256": "ee2a97f93f14a066861cb373426e03ca111c197938c27691d95e4bfe7b3b0988",
+      "review": "Process configuration moved into core; browser session transports, Checkout buyer grants, the private Checkout relay, trusted geography and provider startup validation moved into their components without behaviour change"
     },
     "src/checkout/commit.rs": {
       "status": "reviewed-binding",
@@ -5675,8 +5720,8 @@
     },
     "src/checkout/private_browser.rs": {
       "status": "unproved",
-      "sha256": "003f35b63b89b56aea52166f2b8a731d8d0e3cd407baa5298f135b162fe26c7b",
-      "review": "Checkout private relay: fixed upstream session routes, native buyer admission, bounded responses, and separate request capacity for Core callbacks. No new formal claims."
+      "sha256": "318bde5cb992e67f60b0ca4d735680fb93660f53d65eba84d4183ba065370f0f",
+      "review": "Process configuration moved into core; browser session transports, Checkout buyer grants, the private Checkout relay, trusted geography and provider startup validation moved into their components without behaviour change"
     },
     "src/checkout/session_order.rs": {
       "status": "unproved",
@@ -5740,8 +5785,8 @@
     },
     "src/cognition/behavior/geography.rs": {
       "status": "unproved",
-      "sha256": "e9fca2feda1d631840993be52ad43d8ebb55b5cda9174ba003a186c8521ffbb1",
-      "review": "Identity-only Veyndo namespace and canonical-domain rename; reviewed migration checksum compatibility for six historical SQL versions, unchanged checkout predicates, 42 library and 169 binary tests pass; native component legacy boundary remains configured and guarded."
+      "sha256": "7a9b668561e78efbf28169187e1e93633ab9c1b47c853d46484ea7bafd13afcf",
+      "review": "Process configuration moved into core; browser session transports, Checkout buyer grants, the private Checkout relay, trusted geography and provider startup validation moved into their components without behaviour change"
     },
     "src/cognition/behavior/input.rs": {
       "status": "unproved",
@@ -5980,8 +6025,8 @@
     },
     "src/commerce/mod.rs": {
       "status": "unproved",
-      "sha256": "36fd30db1cef1ea62bf9580eb7e5e221f95af78674399e9fd9842ded029fbe60",
-      "review": "Delivery enrichment, app adjustments and funding moved into components; kernel call sites unchanged"
+      "sha256": "3ed3653f54ce51aee2db13fa2cee68d01b3167efcedfd54f9b9d9424b417b638",
+      "review": "Process configuration moved into core; browser session transports, Checkout buyer grants, the private Checkout relay, trusted geography and provider startup validation moved into their components without behaviour change"
     },
     "src/commerce/order_fields.rs": {
       "status": "unproved",
@@ -6885,8 +6930,8 @@
     },
     "src/payments/mod.rs": {
       "status": "unproved",
-      "sha256": "c5a415aff1911e6d3313344cca460cc14b62b99b0e5cc7b9bef3c6d18ca807bf",
-      "review": "Payment commands, worker and provider sessions moved behind the payments gateway port"
+      "sha256": "1f4592ea6b58a08d74c7a4067f7261b892197842b773915ab0501ebd2d0acff8",
+      "review": "Process configuration moved into core; browser session transports, Checkout buyer grants, the private Checkout relay, trusted geography and provider startup validation moved into their components without behaviour change"
     },
     "src/payments/operations.rs": {
       "status": "unproved",
@@ -6897,11 +6942,6 @@
       "status": "unproved",
       "sha256": "70aa6d25fb7d975467e4cd7996b31105600437d98bff4bc4331d96f32d561c88",
       "review": "Payment ledger rules moved into components/payments; kernel call sites unchanged"
-    },
-    "src/payments/provider_configuration.rs": {
-      "status": "unproved",
-      "sha256": "2fa7a508a2ea7a3c6cf064f9257b144b863f503998d693dfef13996bda3523c3",
-      "review": "Review shared payment-service simulation admission, configured environment discovery and additive native account constraint; financial kernel unchanged."
     },
     "src/payments/provider_webhooks.rs": {
       "status": "unproved",
@@ -7130,13 +7170,13 @@
     },
     "src/routes.rs": {
       "status": "unproved",
-      "sha256": "6cb61a0ca9d1c9fb11491e4f10039a7bc27833d36afa3eec52d1f3060e9d5bb8",
-      "review": "Reviews moved into components/catalog; no rule changed"
+      "sha256": "f539e7954e01b611e3a478797280d78a75c7d8a30e9ac681e12923424b145d6c",
+      "review": "Process configuration moved into core; browser session transports, Checkout buyer grants, the private Checkout relay, trusted geography and provider startup validation moved into their components without behaviour change"
     },
     "src/runtime_config.rs": {
       "status": "unproved",
-      "sha256": "23f345a84496b09325fc6e7fb7c4d535abe0b5eb9bcb7d71f81e953717df15d4",
-      "review": "Database pools, row security, leases and the read cache moved into the core crate; no rule changed"
+      "sha256": "c907d01016cfdac827ac090bfb81b8c3232287451b412e9555130e5afb5d20aa",
+      "review": "Process configuration moved into core; browser session transports, Checkout buyer grants, the private Checkout relay, trusted geography and provider startup validation moved into their components without behaviour change"
     },
     "src/sandbox_cache.rs": {
       "status": "unproved",
@@ -7360,8 +7400,8 @@
       "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
     },
     "Cargo.lock": {
-      "sha256": "a8f7aa3250a16eb8f9ea1255e08747b7bbd2b817b06726b450b37fcb4970a8de",
-      "review": "Marketing configuration lifecycle (tenant lock, revision, revision-bound deletion, dependency read, rule reference admission) moved verbatim into the marketing component; route registration stays in the server."
+      "sha256": "905dda61ed05cb88eb9a2dea39eb3e834157be40c362621c40ca774facb4bd0b",
+      "review": "Process configuration moved into core; browser session transports, Checkout buyer grants, the private Checkout relay, trusted geography and provider startup validation moved into their components without behaviour change"
     },
     "Cargo.toml": {
       "sha256": "881e080eb9f1b1f051c23e2848df689853473831b4d3072817387d65c23ddb66",

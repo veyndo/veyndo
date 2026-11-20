@@ -16,3 +16,11 @@ veyndo-shop = { path = "../shop" }
 veyndo-shipping = { path = "../shipping" }
 uuid.workspace = true
 veyndo-catalog = { path = "../catalog" }
+axum.workspace = true
+base64.workspace = true
+reqwest.workspace = true
+ring.workspace = true
+sha2.workspace = true
+veyndo-b2b = { path = "../b2b" }
+veyndo-identity = { path = "../identity" }
+veyndo-runtime = { path = "../../crates/runtime" }

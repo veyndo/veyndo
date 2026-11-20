@@ -296,11 +296,11 @@ pub(crate) fn router(a: App) -> Router {
             auth::authenticate,
         ))
         .layer(axum::middleware::from_fn_with_state(
-            a.clone(),
+            a.core.clone(),
             auth::browser::apply,
         ))
         .layer(axum::middleware::from_fn_with_state(
-            a.clone(),
+            a.core.clone(),
             accounts::browser::apply,
         ))
         .layer(axum::middleware::from_fn(performance::delivery::classify))

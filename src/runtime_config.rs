@@ -1,30 +1,9 @@
 //! Immutable process configuration, validated once at startup. Mutable shop/provider settings remain in PostgreSQL.
 use serde_json::Value;
-use std::{env, sync::OnceLock};
-pub(crate) struct Config {
-    pub strict: bool,
-    pub http_api_only: bool,
-    pub shop_domain_suffix: String,
-    pub listener_url: String,
-    pub allow_bootstrap: bool,
-    pub paypal_accounts: Value,
-    pub webhook_keys: Value,
-    pub paypal_base: String,
-    pub paypal_environment: &'static str,
-    pub checkout_paypal_sandbox: bool,
-    pub payment_services: Value,
-    pub frame_ancestors: String,
-    pub services: Value,
-    pub publishers: Value,
-    pub private_service_origins: String,
-    pub outbox_retention_days: u32,
-    pub outbox_metadata_days: u32,
-    pub behavior_geo_secret: Option<String>,
-    pub trusted_proxies: Vec<std::net::IpAddr>,
-}
+use std::env;
+pub(crate) use veyndo_core::process_config::Config;
 pub(crate) fn get() -> &'static Config {
-    static CONFIG: OnceLock<Config> = OnceLock::new();
-    CONFIG.get_or_init(|| {
+    veyndo_core::process_config::init(|| {
         let strict = flag("DB_RLS_REQUIRED", false);
         let http_api_only = match env::var("HTTP_PROFILE").as_deref() {
             Ok("api-only") => true,
@@ -76,7 +55,7 @@ pub(crate) fn get() -> &'static Config {
             .collect();
         let paypal_accounts = json_object("PAYPAL_ACCOUNTS", Some("PAYPAL_SANDBOX_ACCOUNTS"));
         let payment_services = json_object("PAYMENT_SERVICES", None);
-        crate::payments::provider_configuration::validate_accounts(
+        veyndo_payments::service::provider_configuration::validate_accounts(
             &paypal_accounts,
             &payment_services,
         );
@@ -102,8 +81,9 @@ pub(crate) fn get() -> &'static Config {
             allow_bootstrap: flag("ALLOW_BOOTSTRAP_AUTH", true),
             paypal_accounts,
             webhook_keys: json_object("APP_WEBHOOK_KEYS", None),
-            paypal_base: crate::payments::provider_configuration::paypal_base(),
-            paypal_environment: crate::payments::provider_configuration::paypal_environment(),
+            paypal_base: veyndo_payments::service::provider_configuration::paypal_base(),
+            paypal_environment:
+                veyndo_payments::service::provider_configuration::paypal_environment(),
             checkout_paypal_sandbox: flag("CHECKOUT_ENABLE_PAYPAL_SANDBOX_PURCHASE", false),
             payment_services,
             frame_ancestors,

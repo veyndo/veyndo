@@ -1,6 +1,8 @@
 //! Pure startup validation of the native provider origin; no live credentials or provider calls.
+use crate::domain::service_config::validate_service;
 use std::env;
-pub(crate) fn paypal_base() -> String {
+/// The provider origin for the configured environment; anything else stops the start.
+pub fn paypal_base() -> String {
     let live = env::var("PAYPAL_ENVIRONMENT").unwrap_or("sandbox".into());
     if !["live", "sandbox"].contains(&live.as_str()) {
         panic!("PAYPAL_ENVIRONMENT must be live or sandbox");
@@ -25,7 +27,8 @@ pub(crate) fn paypal_base() -> String {
     }
     base.trim_end_matches('/').into()
 }
-pub(crate) fn paypal_environment() -> &'static str {
+/// Which provider environment this process talks to.
+pub fn paypal_environment() -> &'static str {
     if env::var("PAYPAL_SANDBOX_BASE_URL").is_ok_and(|s| s.starts_with("http://")) {
         "contract-fixture"
     } else if env::var("PAYPAL_ENVIRONMENT").is_ok_and(|s| s == "live") {
@@ -36,7 +39,7 @@ pub(crate) fn paypal_environment() -> &'static str {
 }
 
 /// Validate every declared provider at startup, without embedding credential values in diagnostics.
-pub(crate) fn validate_accounts(accounts: &serde_json::Value, services: &serde_json::Value) {
+pub fn validate_accounts(accounts: &serde_json::Value, services: &serde_json::Value) {
     for account in accounts
         .as_object()
         .expect("PayPal accounts object")
@@ -68,7 +71,7 @@ pub(crate) fn validate_accounts(accounts: &serde_json::Value, services: &serde_j
             .values()
         {
             if version["url"].is_string() {
-                super::remote::validate_service(
+                validate_service(
                     version,
                     version["environment"]
                         .as_str()
@@ -101,7 +104,7 @@ pub(crate) fn validate_accounts(accounts: &serde_json::Value, services: &serde_j
                 }
                 for environment in ["sandbox", "live", "simulation", "contract-fixture"] {
                     if let Some(config) = version.get(environment) {
-                        super::remote::validate_service(config, environment)
+                        validate_service(config, environment)
                             .expect("Invalid payment service environment configuration");
                     }
                 }
@@ -112,7 +115,7 @@ pub(crate) fn validate_accounts(accounts: &serde_json::Value, services: &serde_j
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use super::{validate_accounts, validate_service};
     use serde_json::json;
     #[test]
     fn hosted_simulation_requires_https_and_a_configured_default() {
@@ -130,6 +133,6 @@ mod tests {
         );
         let mut insecure = service;
         insecure["url"] = json!("http://127.0.0.1:8888");
-        assert!(super::super::remote::validate_service(&insecure, "simulation").is_err());
+        assert!(validate_service(&insecure, "simulation").is_err());
     }
 }

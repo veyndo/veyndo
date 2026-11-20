@@ -12,6 +12,7 @@ pub mod http_limits;
 pub mod localized;
 pub mod observability;
 pub mod outbox;
+pub mod process_config;
 pub mod request_context;
 pub mod shop_scope;
 mod state;
