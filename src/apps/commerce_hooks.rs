@@ -4,7 +4,6 @@ use std::sync::Arc;
 use veyndo::component_runtime::{
     self as wit, AppRecord, CartItem, CartSnapshot, Money, ProductSnapshot, Snapshot,
 };
-pub(crate) use veyndo_app_platform::service::package_verification::verify_package;
 pub(crate) struct Prepared {
     pub modules: HashMap<String, Arc<Sandbox>>,
 }

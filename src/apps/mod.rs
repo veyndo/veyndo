@@ -97,7 +97,6 @@ pub(crate) mod records;
 mod registry;
 mod routes;
 pub(crate) use cart_contributions::*;
-pub(crate) use commerce_hooks::verify_package;
 pub(crate) use events::*;
 pub(crate) use gateway::{
     additional_permissions, invoke_app, validate_input, validate_native_input,

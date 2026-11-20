@@ -2,6 +2,7 @@
 pub mod actions;
 pub mod activity;
 pub mod app_routes;
+pub mod app_studio;
 pub mod credentials;
 pub mod jobs;
 pub mod record_history;

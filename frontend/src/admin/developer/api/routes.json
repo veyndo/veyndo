@@ -457,17 +457,17 @@
   {
     "path": "/api/developer/drafts",
     "method": "GET",
-    "source": "src/developer/drafts.rs"
+    "source": "src/developer/routes.rs"
   },
   {
     "path": "/api/developer/drafts/{id}",
     "method": "DELETE",
-    "source": "src/developer/drafts.rs"
+    "source": "src/developer/routes.rs"
   },
   {
     "path": "/api/developer/drafts/{id}",
     "method": "PUT",
-    "source": "src/developer/drafts.rs"
+    "source": "src/developer/routes.rs"
   },
   {
     "path": "/api/developer/generate",

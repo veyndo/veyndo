@@ -1,8 +1,19 @@
 //! Developer HTTP transport and coding-agent task export; explicit staging precedes live release.
 use super::*;
+use veyndo_app_platform::http::app_studio;
+use veyndo_app_platform::service::app_builds;
 pub(crate) fn router() -> Router<App> {
     Router::new()
-        .merge(drafts::router())
+        .secure_route(
+            "/api/developer/drafts",
+            &[("GET", "developer.manage")],
+            get(app_studio::drafts),
+        )
+        .secure_route(
+            "/api/developer/drafts/{id}",
+            &[("PUT", "developer.manage"), ("DELETE", "developer.manage")],
+            axum::routing::put(app_studio::save_draft).delete(app_studio::remove_draft),
+        )
         .merge(preview::router())
         .secure_route("/api/developer", &[("GET", "developer.read")], get(list))
         .secure_route(
@@ -23,7 +34,7 @@ pub(crate) fn router() -> Router<App> {
         .secure_route(
             "/api/developer/builds/{id}/stage",
             &[("POST", "developer.manage")],
-            post(stage),
+            post(app_studio::stage),
         )
         .secure_route(
             "/api/developer/task",
@@ -33,12 +44,12 @@ pub(crate) fn router() -> Router<App> {
         .secure_route(
             "/api/developer/apps/{id}",
             &[("DELETE", "developer.manage")],
-            axum::routing::delete(archive::remove),
+            axum::routing::delete(app_studio::remove),
         )
         .secure_route(
             "/api/developer/apps/{id}/restore",
             &[("POST", "developer.manage")],
-            post(archive::restore),
+            post(app_studio::restore),
         )
 }
 async fn schema(State(a): State<App>, h: RequestContext) -> Result<Json<Value>> {
@@ -51,12 +62,9 @@ pub(crate) async fn list(State(a): State<App>, h: RequestContext) -> Result<Json
     auth::permit(&h, "developer.read")?;
     let t = staging::live(&a, &h).await?;
     let (settings, _) = commerce::config(&a, &t).await?;
-    let mut tx = a.db.begin().await?;
-    let rows = veyndo_app_storage::build_versions::list(&mut tx, &t, false).await?;
-    let trash = veyndo_app_storage::build_versions::list(&mut tx, &t, true).await?;
-    tx.commit().await?;
+    let (builds, archived) = app_builds::list(&a.core, &t).await?;
     Ok(Json(
-        json!({"builds":rows.iter().map(|r|json!({"id":r.get::<String,_>("id"),"environment":r.get::<String,_>("environment"),"app":r.get::<String,_>("app"),"version":r.get::<String,_>("version"),"digest":r.get::<String,_>("digest"),"manifest":r.get::<Value,_>("manifest"),"summary":r.get::<Value,_>("summary"),"state":r.get::<String,_>("state"),"provider":r.get::<String,_>("provider"),"model":r.get::<Option<String>,_>("model"),"designEvidence":design_context::restored(&r.get::<String,_>("prompt"))})).collect::<Vec<_>>(),"archivedBuilds":trash.iter().map(|r|json!({"id":r.get::<String,_>("id"),"environment":r.get::<String,_>("environment"),"app":r.get::<String,_>("app"),"version":r.get::<String,_>("version"),"digest":r.get::<String,_>("digest"),"manifest":r.get::<Value,_>("manifest"),"summary":r.get::<Value,_>("summary"),"state":r.get::<String,_>("state"),"provider":r.get::<String,_>("provider"),"model":r.get::<Option<String>,_>("model"),"designEvidence":design_context::restored(&r.get::<String,_>("prompt"))})).collect::<Vec<_>>(),"mainLocale":settings.main_locale,"locales":settings.locales,"providers":a.inference.public_providers().await.map_err(bad)?,"codingAgents":[{"id":"codex","transport":"mcp + task export"},{"id":"claude_code","transport":"mcp + task export"}],"runtime":"declarative native data/API/UI; arbitrary service code requires an external build"}),
+        json!({"builds":builds,"archivedBuilds":archived,"mainLocale":settings.main_locale,"locales":settings.locales,"providers":a.inference.public_providers().await.map_err(bad)?,"codingAgents":[{"id":"codex","transport":"mcp + task export"},{"id":"claude_code","transport":"mcp + task export"}],"runtime":"declarative native data/API/UI; arbitrary service code requires an external build"}),
     ))
 }
 async fn generate(
@@ -69,14 +77,15 @@ async fn generate(
     Ok(Json(generation::generate(&a, &t, &h, &v).await?))
 }
 
+/// The actions a payment provider package gets when it declares none.
+pub(super) fn payment_actions() -> [Value; 2] {
+    [
+        crate::payments::onboarding_action(),
+        crate::payments::command_action(),
+    ]
+}
 pub(super) fn actions(m: &mut Value) -> Result<()> {
-    app_generation::default_actions(
-        m,
-        &[
-            crate::payments::onboarding_action(),
-            crate::payments::command_action(),
-        ],
-    )
+    app_generation::default_actions(m, &payment_actions())
 }
 
 pub(crate) async fn import(
@@ -90,33 +99,6 @@ pub(crate) async fn import(
     Ok(Json(
         builds::save(&a, &t, &v, "external-agent", None, None).await?,
     ))
-}
-pub(crate) async fn stage(
-    State(a): State<App>,
-    h: RequestContext,
-    Path(id): Path<String>,
-    Json(v): Json<Value>,
-) -> Result<Json<Value>> {
-    auth::permit(&h, "developer.manage")?;
-    let t = staging::live(&a, &h).await?;
-    if v["approve"] != true {
-        return Err(bad("Approve the reviewed build first"));
-    }
-    let mut tx = a.db.begin_privileged().await?;
-    let result = veyndo_app_storage::build_versions::stage(
-        &mut tx,
-        &t,
-        &id,
-        &v["digest"],
-        &version_storage::Admission {
-            live: &t,
-            actor: &h,
-        },
-    )
-    .await
-    .map_err(version_storage::stage_error)?;
-    tx.commit().await?;
-    Ok(Json(result))
 }
 pub(crate) async fn task(
     State(a): State<App>,

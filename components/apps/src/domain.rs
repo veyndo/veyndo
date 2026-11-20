@@ -3,6 +3,7 @@ pub mod action_admission;
 pub mod action_policy;
 pub mod app_generation;
 pub mod approval;
+pub mod build_admission;
 pub mod callback_grant;
 pub mod configuration_budget;
 pub mod configuration_inputs;
