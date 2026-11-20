@@ -3818,6 +3818,8 @@ dependencies = [
  "serde_json",
  "sqlx",
  "veyndo-core",
+ "veyndo-inventory",
+ "veyndo-orders",
  "veyndo-pricing",
  "veyndo-shop",
 ]

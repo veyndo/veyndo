@@ -535,6 +535,7 @@
         "host",
         "identity",
         "inventory",
+        "orders",
         "pos",
         "pricing",
         "shop",
@@ -558,7 +559,7 @@
       ],
       "glob_imports": 1,
       "untyped_access": 264,
-      "sql_outside_store": 17
+      "sql_outside_store": 16
     },
     "marketing": {
       "title": "Rules, coupons, promotions, flows and sales channels",

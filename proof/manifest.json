@@ -256,7 +256,7 @@
     },
     "reservation_release_admissible": {
       "bindings": [
-        "src/payments/storage.rs"
+        "components/payments/src/store/order_ledger.rs"
       ],
       "theorems": [
         "reservation_release_exact",
@@ -1610,6 +1610,11 @@
       "sha256": "663111e655bfc43a22c1ef5009356561b0757716b407bcedc3b7b5815c8587aa",
       "review": "Payment ledger rules moved into components/payments; kernel call sites unchanged"
     },
+    "components/payments/src/domain/instructions.rs": {
+      "status": "unproved",
+      "sha256": "657c697de63241060f15789b6f413608289a29158774b530d5961971f403c835",
+      "review": "Receipt persistence and order ledger moved behind the payments host port; kernel call sites unchanged"
+    },
     "components/payments/src/domain/receipt_guard.rs": {
       "status": "reviewed-binding",
       "sha256": "fa3740792bad1ab4bf837889e7814f69f44af66f3a8a83198b4853e743e3bda9",
@@ -1630,6 +1635,11 @@
       "sha256": "a4853709cdeb0fd6d8a42e42e2f89799d16c7210d6a9115b5e68e3c09e7cc1c2",
       "review": "Payment ledger rules moved into components/payments; kernel call sites unchanged"
     },
+    "components/payments/src/domain/service_config.rs": {
+      "status": "unproved",
+      "sha256": "134be662d42adeef35d2c1773a33aefee7298f502baebaed6836562b4b72f42c",
+      "review": "Receipt persistence and order ledger moved behind the payments host port; kernel call sites unchanged"
+    },
     "components/payments/src/domain/settlements.rs": {
       "status": "unproved",
       "sha256": "a21328ca72d5ecb26b7ef8c7bd263f4adff3a394b8e47baf7f10b57fd46df3ca",
@@ -1642,23 +1652,33 @@
     },
     "components/payments/src/domain.rs": {
       "status": "unproved",
-      "sha256": "0ba257329efed3a52bba7ecab430e33e252e1a1999b7a063a243d34ea21afeeb",
-      "review": "Payment ledger rules moved into components/payments; kernel call sites unchanged"
+      "sha256": "d61e98c52bcf430b229d922e2a19a8da36afc49fc4a02209de4aa01703358f99",
+      "review": "Receipt persistence and order ledger moved behind the payments host port; kernel call sites unchanged"
     },
     "components/payments/src/lib.rs": {
       "status": "unproved",
-      "sha256": "c150c64daa2b8080780af43351f24b44d63ba699ee42407898b8965c3c15f98d",
-      "review": "Delivery enrichment, app adjustments and funding moved into components; kernel call sites unchanged"
+      "sha256": "6dd4bebc0ef4a8ec0675c22fb6c60d721fe82873a7037f4a23ae4d81dbeb5122",
+      "review": "Receipt persistence and order ledger moved behind the payments host port; kernel call sites unchanged"
+    },
+    "components/payments/src/ports.rs": {
+      "status": "unproved",
+      "sha256": "dae3e50b7b9adff107a8f4c11adc7b333963dbb97bdbe8c6464f442921056db3",
+      "review": "Receipt persistence and order ledger moved behind the payments host port; kernel call sites unchanged"
     },
     "components/payments/src/service/funding.rs": {
       "status": "unproved",
       "sha256": "f469197ec03c09080948343525a26f88de3bb3e810b9615a24fd9cd54e5d269c",
       "review": "Delivery enrichment, app adjustments and funding moved into components; kernel call sites unchanged"
     },
+    "components/payments/src/service/receipts.rs": {
+      "status": "unproved",
+      "sha256": "ee9db556202da6e72daa169aeda57b7772db64460b7c3b5f055f461f4123a9f3",
+      "review": "Receipt persistence and order ledger moved behind the payments host port; kernel call sites unchanged"
+    },
     "components/payments/src/service.rs": {
       "status": "unproved",
-      "sha256": "86245ef04c1e548c81998167fd8b136fca84ec2a3924cf550b3e105c16203d00",
-      "review": "Delivery enrichment, app adjustments and funding moved into components; kernel call sites unchanged"
+      "sha256": "2f78059b5b11af0033ea03c4e6916ad064e887da00c00786c825f3cfba936877",
+      "review": "Receipt persistence and order ledger moved behind the payments host port; kernel call sites unchanged"
     },
     "components/payments/src/store/attempts.rs": {
       "status": "unproved",
@@ -1669,6 +1689,26 @@
       "status": "reviewed-binding",
       "sha256": "a2704718c9b3be7854fb2d0ff8720660c068a2f76938eb7d04d4f42dcab0c9a7",
       "review": "Payment ledger rules moved into components/payments; kernel call sites unchanged"
+    },
+    "components/payments/src/store/instructions.rs": {
+      "status": "unproved",
+      "sha256": "044109fbd0d5171bda29aee4896b4c17f99015fddc8b2983d5606810507f1737",
+      "review": "Receipt persistence and order ledger moved behind the payments host port; kernel call sites unchanged"
+    },
+    "components/payments/src/store/instruments.rs": {
+      "status": "unproved",
+      "sha256": "7753b368e6032ffb29085f1513c78e3478b71d963a8b97ef2b544ead57d310c5",
+      "review": "Receipt persistence and order ledger moved behind the payments host port; kernel call sites unchanged"
+    },
+    "components/payments/src/store/jobs.rs": {
+      "status": "unproved",
+      "sha256": "0be3f94644790954160e6ef9a8bcf162c1e745129031f805cf8ee97de941cb0b",
+      "review": "Receipt persistence and order ledger moved behind the payments host port; kernel call sites unchanged"
+    },
+    "components/payments/src/store/order_ledger.rs": {
+      "status": "reviewed-binding",
+      "sha256": "5426cc725aac7d513ef49c6cb285b442be434b05e4d8e1ab731164e1af0f9af8",
+      "review": "Receipt persistence and order ledger moved behind the payments host port; kernel call sites unchanged"
     },
     "components/payments/src/store/receipt_claims.rs": {
       "status": "unproved",
@@ -1692,8 +1732,8 @@
     },
     "components/payments/src/store.rs": {
       "status": "unproved",
-      "sha256": "eeff459a09498302db6703405d8bd0d63f09dfa23ec49631b7b0e9c7241b520a",
-      "review": "Payment ledger rules moved into components/payments; kernel call sites unchanged"
+      "sha256": "cb25391b24360c17cac13bca6bf71873689f6608d1de614870afa0a8c359d679",
+      "review": "Receipt persistence and order ledger moved behind the payments host port; kernel call sites unchanged"
     },
     "components/pos/src/domain/input.rs": {
       "status": "unproved",
@@ -6222,23 +6262,28 @@
     },
     "src/payments/generic_receipts.rs": {
       "status": "unproved",
-      "sha256": "4a0dc1364e1e238d73c5eca43896e5f3da56a16a4f8077ef9a2004520bdc2202",
-      "review": "Payment ledger rules moved into components/payments; kernel call sites unchanged"
+      "sha256": "23e2868fb34f4c707eccf9f97f9d9a9a7e2fb6127e7f0e08da90c1e62b91f181",
+      "review": "Receipt persistence and order ledger moved behind the payments host port; kernel call sites unchanged"
+    },
+    "src/payments/host.rs": {
+      "status": "unproved",
+      "sha256": "c58a6cd80dca1926f0ad139e3dad57397c0bc170a02cbc468011912bf275d99d",
+      "review": "Receipt persistence and order ledger moved behind the payments host port; kernel call sites unchanged"
     },
     "src/payments/instructions.rs": {
       "status": "unproved",
-      "sha256": "f5224df2cd8304a8e85559930e5d182a7a8aa36c79cc70142ac673bc3459f5af",
-      "review": "Reviewed invoice recipient caching and immutable native documents; explicit app/PII event consent and current Flow rehydration; existing encrypted email queue and localized templates. Targeted native service and adversarial projection tests; no new formal proof claim."
+      "sha256": "41a7349b1145e6b3e94054febc6f47bf7399707bd23b1c3fc1f69c4ed643cda4",
+      "review": "Receipt persistence and order ledger moved behind the payments host port; kernel call sites unchanged"
     },
     "src/payments/instructions_state.rs": {
       "status": "unproved",
-      "sha256": "e4f6eced06f7961b35fe195d88a93927fc2047dbe36a9998b2ed70ed4046db62",
-      "review": "Reviewed invoice recipient caching and immutable native documents; explicit app/PII event consent and current Flow rehydration; existing encrypted email queue and localized templates. Targeted native service and adversarial projection tests; no new formal proof claim."
+      "sha256": "f788e8124bc22ae5bbb439255ee8f73a0d687514fe49a4e3a0c5c876dad754a2",
+      "review": "Receipt persistence and order ledger moved behind the payments host port; kernel call sites unchanged"
     },
     "src/payments/instruments.rs": {
       "status": "unproved",
-      "sha256": "e7c4d416398e3845cd84a5c9fc97b8867e2dfaefb38a5d44d50f503b90f58bb2",
-      "review": "Reviewed generic saved-payment consent/session and opaque instrument ownership, forced signed-scope RLS and tenant FKs, immutable funding in native payment jobs, non-financial revocation receipt handling and optional metadata savepoint isolation. Actual local Rust/PG save/reuse/revoke, invalid late metadata, restart and distinct restricted-login cases pass. Existing extracted kernel unchanged; asynchronous SQL/provider paths remain unproved."
+      "sha256": "8d2ccac5638605d6dbe0e25be795bb946188a52e76b1e026b0d2cd5f0b31aafd",
+      "review": "Receipt persistence and order ledger moved behind the payments host port; kernel call sites unchanged"
     },
     "src/payments/merchant.rs": {
       "status": "unproved",
@@ -6247,13 +6292,13 @@
     },
     "src/payments/mod.rs": {
       "status": "unproved",
-      "sha256": "10e5df0f59ffa044b25fa10f331b5a27009f6dd2cca78a68058016d75f94b77e",
-      "review": "shop component crate created; settings types moved; no kernel binding changed"
+      "sha256": "8d7fb968efa66656d7b3dc42301d93744efa011036d1ebfad9db71500ac4ce3b",
+      "review": "Receipt persistence and order ledger moved behind the payments host port; kernel call sites unchanged"
     },
     "src/payments/operations.rs": {
       "status": "reviewed-binding",
-      "sha256": "85ff44a67b359759ce280a541476f01f6e46f4f73e383c4929b50781c45055af",
-      "review": "Native multi-capture admission, immutable receipts and per-capture refund budgets; async adapters remain unproved"
+      "sha256": "08c1f017e6171aa27735edd40a4ba2b887edb4efbe3b211411c49ec64ddff075",
+      "review": "Receipt persistence and order ledger moved behind the payments host port; kernel call sites unchanged"
     },
     "src/payments/provider.rs": {
       "status": "unproved",
@@ -6280,11 +6325,6 @@
       "sha256": "94ad7b14350cb9163199a55f1752bab245455b526a2d944f1bfe200e196a14a1",
       "review": "Payment ledger rules moved into components/payments; kernel call sites unchanged"
     },
-    "src/payments/refund_receipts.rs": {
-      "status": "unproved",
-      "sha256": "f888811eb91b0aa71c77991025b395973707e538cfa60d9b4f76239e4351a91c",
-      "review": "Payment ledger rules moved into components/payments; kernel call sites unchanged"
-    },
     "src/payments/registry.rs": {
       "status": "unproved",
       "sha256": "9189fb755d2bc666cd07c3f25c59a5def63fdc8ec6148bd9d77d1d7070155c7f",
@@ -6292,8 +6332,8 @@
     },
     "src/payments/remote.rs": {
       "status": "unproved",
-      "sha256": "000d1ee8e797ccd7ed0313875b93f27391f8e53292316f708ac8c97504a22904",
-      "review": "Reviewed provider-neutral diagnostic allowlist, bounded error transport and current tenant/payment-read projection. No financial admission, identity or settlement policy changed. Unknown provider text remains suppressed; targeted Rust and four-language frontend diagnostics regressions pass."
+      "sha256": "d7651bd8d201ce989f91e2bcfdffa3013df0e5bc0dbc916916ba23fb718a264a",
+      "review": "Receipt persistence and order ledger moved behind the payments host port; kernel call sites unchanged"
     },
     "src/payments/return_urls.rs": {
       "status": "unproved",
@@ -6312,8 +6352,8 @@
     },
     "src/payments/settlements.rs": {
       "status": "unproved",
-      "sha256": "de0607136bc9601e45bb3847d5352f5531a0f99c75dd9a579cb5464aa0244a12",
-      "review": "Payment ledger rules moved into components/payments; kernel call sites unchanged"
+      "sha256": "bd68ce889d0d72250926adc70932c4fa9a8c94ac902292b64c04e7b2e7926e21",
+      "review": "Receipt persistence and order ledger moved behind the payments host port; kernel call sites unchanged"
     },
     "src/payments/state.rs": {
       "status": "unproved",
@@ -6321,9 +6361,9 @@
       "review": "Payment ledger rules moved into components/payments; kernel call sites unchanged"
     },
     "src/payments/storage.rs": {
-      "status": "reviewed-binding",
-      "sha256": "c43dcc3a02f4ebba1d8ad126a3bc90757e76b845f5e68c358cace484898ad318",
-      "review": "Native multi-capture admission, immutable receipts and per-capture refund budgets; async adapters remain unproved"
+      "status": "unproved",
+      "sha256": "14455fa79d416573cb157bcae7e6cb18f05aaf5a0255c89986d257081db4ed52",
+      "review": "Receipt persistence and order ledger moved behind the payments host port; kernel call sites unchanged"
     },
     "src/payments/worker.rs": {
       "status": "unproved",
@@ -6752,8 +6792,8 @@
       "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
     },
     "Cargo.lock": {
-      "sha256": "04a8aae4d72155e6df848065412146725ae35973f0bdfe8d5302b6725d8a8992",
-      "review": "Delivery enrichment, app adjustments and funding moved into components; kernel call sites unchanged"
+      "sha256": "1cebcea52ecd0cb630f065ab5ab4a637e8bce5275e56a44e4b9bfcca6dbaf5da",
+      "review": "Receipt persistence and order ledger moved behind the payments host port; kernel call sites unchanged"
     },
     "Cargo.toml": {
       "sha256": "881e080eb9f1b1f051c23e2848df689853473831b4d3072817387d65c23ddb66",

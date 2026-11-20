@@ -14,3 +14,5 @@ sqlx.workspace = true
 veyndo-core = { path = "../core" }
 veyndo-pricing = { path = "../pricing" }
 veyndo-shop = { path = "../shop" }
+veyndo-inventory = { path = "../inventory" }
+veyndo-orders = { path = "../orders" }

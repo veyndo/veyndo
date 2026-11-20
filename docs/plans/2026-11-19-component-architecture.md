@@ -245,18 +245,21 @@ Order follows the dependency report, lowest first. Each line is one move.
   order snapshot; browser sessions.
 - [ ] payments. Started: `components/payments` owns the attempt type, the
   payment state machine, wire amounts at ISO precision, receipt identity and
-  references, settlement and refund budgets, the details model, the receipt
-  guard, public diagnostics, return URLs and the method catalogue in `domain/`;
-  `store/` holds the row mapping, receipt claims and the capture, settlement
-  and refund admissions that run inside the caller's transaction. The four
-  proved payment rules are bound to the new files. Open: provider dispatch and
-  remote adapter, the job worker, sessions, instruments, accounts, webhooks,
-  merchant routes and the order update after a receipt (ports to orders and
-  inventory).
+  references, settlement and refund budgets, recipient instructions, adapter
+  service admission, the details model, the receipt guard, public diagnostics,
+  return URLs and the method catalogue in `domain/`. `store/` holds the row
+  mapping, receipt claims, job admission, saved instruments, the order ledger
+  (order update, events, stock release) and the capture, settlement and refund
+  admissions; `service/` the provider-neutral receipt persistence and funding
+  admission. `ports::Host` is what the server supplies: adapter configuration
+  and the POS sale completion. The proved payment rules are bound to the new
+  files. Open: provider dispatch and the remote adapter call, the job worker,
+  sessions, accounts, webhooks, merchant routes, the PayPal adapter include.
 - [ ] checkout. Started: `components/checkout` owns the destination tax lines
-  of a quote (tax class resolution and net-preserving price conversion). Open:
-  cart storage and mutation, the quote, delivery enrichment, the selection, the
-  checkout transaction and order placement, the handoff and review.
+  of a quote, the shipping and payment method enrichment with delivery dates,
+  and exact app price adjustments. Open: cart storage and mutation, the quote,
+  the selection, the checkout transaction and order placement, the handoff
+  and review.
 - [ ] orders. Started: `components/orders` owns the order state machine with
   its default and bounds, the stored machine, derived order fields, the
   transition guards and the workflow view, the audited write log with its
