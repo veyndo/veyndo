@@ -329,7 +329,11 @@ Order follows the dependency report, lowest first. Each line is one move.
   `domain/metadata`; `domain/condition_import` translates source conditions;
   `domain/rule_comparison` and `store/rule_history` compare a saved rule with a
   draft on frozen Flow inputs; `store/flow_mutations` applies a local flow
-  action to its order or customer once per flow key); `service/` the coupon selection of a cart, which admits and
+  action to its order or customer once per flow key;
+  `domain/configuration_kinds`, `store/configuration_lifecycle` and
+  `http/configuration` hold the right and table of each configuration kind,
+  the tenant lock, the revision-bound deletion with its dependency read and
+  the admission of rule references); `service/` the coupon selection of a cart, which admits and
   prices it through `veyndo_shop::ports::Carts`. Open: flow projection, flow
   execution (needs ports to orders, customers and apps), channel access and
   preview, rule history, routes.

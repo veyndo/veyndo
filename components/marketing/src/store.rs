@@ -1,5 +1,6 @@
 //! SQL reads of the marketing component.
 pub mod channel_config;
+pub mod configuration_lifecycle;
 pub mod customer_facts;
 pub mod dependencies;
 pub mod facts;

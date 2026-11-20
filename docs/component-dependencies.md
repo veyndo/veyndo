@@ -24,7 +24,7 @@ run SQL without being in a `store` folder. Both numbers only fall.
 | customers | 2174 | 16 | 82 | 5 | 3 | apps (9), catalog (2), checkout (2), core (153), identity (32), marketing (4), orders (1), pos (1), pricing (5), shipping (3), shop (11), studio (4) | 4 |
 | orders | 5326 | 29 | 451 | 11 | 7 | apps (32), b2b (1), catalog (9), checkout (6), core (256), customers (5), identity (72), inventory (1), marketing (7), payments (5), pricing (8), shipping (3), shop (17), studio (8) | 17 |
 | payments | 4462 | 1 | 264 | 15 | 7 | apps (10), core (213), host (4), identity (10), inventory (1), orders (1), pos (1), pricing (8), shop (4), studio (1) | 14 |
-| marketing | 5248 | 21 | 337 | 14 | 8 | apps (14), automation (20), b2b (2), catalog (5), checkout (3), core (201), identity (38), intelligence (14), orders (1), payments (1), pos (1), pricing (12), shop (28), studio (3) | 24 |
+| marketing | 5279 | 20 | 337 | 14 | 8 | apps (14), automation (20), b2b (2), catalog (5), checkout (3), core (189), identity (37), intelligence (14), orders (1), payments (1), pos (1), pricing (12), shop (28), studio (2) | 24 |
 | b2b | 2382 | 9 | 108 | 8 | 8 | apps (16), checkout (10), core (103), customers (2), identity (20), marketing (1), orders (1), pos (1), pricing (8), shop (23), studio (8) | 8 |
 | pos | 1077 | 6 | 68 | 5 | 0 | apps (1), catalog (4), checkout (17), core (36), customers (1), identity (15), marketing (3), orders (1), payments (3), pricing (5), shop (14) | 8 |
 | apps | 11983 | 109 | 420 | 42 | 22 | b2b (3), catalog (10), checkout (4), core (628), host (17), identity (84), intelligence (1), marketing (13), orders (8), payments (7), pos (1), pricing (8), protocols (1), shipping (1), shop (33), studio (36) | 20 |
@@ -84,7 +84,7 @@ reduced to one direction first.
 - customers ↔ studio: 4 and 1 references
 - host ↔ intelligence: 6 and 3 references
 - identity ↔ intelligence: 4 and 81 references
-- identity ↔ marketing: 5 and 38 references
+- identity ↔ marketing: 5 and 37 references
 - identity ↔ shop: 12 and 2 references
 - identity ↔ studio: 1 and 44 references
 - intelligence ↔ marketing: 18 and 14 references
@@ -96,7 +96,7 @@ reduced to one direction first.
 - marketing ↔ pos: 1 and 3 references
 - marketing ↔ pricing: 12 and 2 references
 - marketing ↔ shop: 28 and 11 references
-- marketing ↔ studio: 3 and 9 references
+- marketing ↔ studio: 2 and 9 references
 - orders ↔ payments: 5 and 1 references
 - orders ↔ shipping: 3 and 4 references
 - payments ↔ pos: 1 and 3 references
@@ -130,7 +130,6 @@ reduced to one direction first.
 | orders | core | `Result` | 56 |
 | checkout | core | `Result` | 55 |
 | catalog | core | `RequestContext` | 53 |
-| marketing | core | `Result` | 51 |
 | intelligence | core | `conflict` | 51 |
 | identity | core | `veyndo_core::` | 49 |
 | checkout | core | `RequestContext` | 49 |
@@ -139,17 +138,18 @@ reduced to one direction first.
 | customers | core | `State` | 48 |
 | shop | core | `veyndo_core::` | 45 |
 | intelligence | apps | `apps::` | 45 |
+| marketing | core | `Result` | 44 |
 | studio | identity | `auth::` | 42 |
 | customers | core | `Result` | 39 |
 | studio | core | `State` | 37 |
 | payments | core | `State` | 37 |
 | payments | core | `RequestContext` | 37 |
 | payments | core | `veyndo_core::` | 36 |
-| marketing | core | `State` | 35 |
-| marketing | core | `RequestContext` | 35 |
+| marketing | core | `veyndo_core::` | 35 |
 | checkout | core | `State` | 35 |
 | studio | core | `Result` | 34 |
-| marketing | identity | `auth::` | 34 |
+| marketing | core | `RequestContext` | 33 |
+| identity | core | `State` | 33 |
 
 ## Foreign table access
 

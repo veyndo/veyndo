@@ -3760,6 +3760,7 @@ version = "0.5.0"
 name = "veyndo-marketing"
 version = "0.5.0"
 dependencies = [
+ "axum",
  "serde",
  "serde_json",
  "sqlx",

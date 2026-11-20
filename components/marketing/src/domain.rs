@@ -1,5 +1,6 @@
 //! Rule conditions, flow actions and the flow graph, free of I/O.
 pub mod condition_import;
+pub mod configuration_kinds;
 pub mod flow_actions;
 pub mod flow_text;
 pub mod line_facts;

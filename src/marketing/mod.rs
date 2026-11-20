@@ -16,7 +16,6 @@ mod jobs;
 pub(crate) use gateway::{capability_visible, invoke};
 mod metadata;
 pub(crate) use metadata::validate_metadata;
-mod dependencies;
 mod facts;
 mod flow_access;
 pub(crate) use flow_access::proposal_headers as flow_proposal_headers;

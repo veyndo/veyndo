@@ -38,24 +38,8 @@ pub(crate) fn router() -> Router<App> {
             post(rule_history::compare),
         )
 }
-pub(crate) fn configuration_right(kind: &str, write: bool) -> Result<&'static str> {
-    match (kind, write) {
-        ("channels", false) => Ok("channels.read"),
-        ("channels", true) => Ok("channels.manage"),
-        ("rules" | "flows" | "promotions", false) => Ok("automation.read"),
-        ("rules" | "flows" | "promotions", true) => Ok("automation.manage"),
-        _ => Err(bad("Unknown configuration type")),
-    }
-}
-pub(super) fn table(kind: &str) -> Result<&'static str> {
-    match kind {
-        "rules" => Ok("commerce_rules"),
-        "promotions" => Ok("commerce_promotions"),
-        "flows" => Ok("commerce_flows"),
-        "channels" => Ok("sales_channels"),
-        _ => Err(bad("Unknown configuration type")),
-    }
-}
+pub(crate) use veyndo_marketing::domain::configuration_kinds::configuration_right;
+pub(super) use veyndo_marketing::domain::configuration_kinds::table;
 pub(super) async fn list(State(a): State<App>, h: RequestContext) -> Result<Json<Value>> {
     let t = merchant(&a, &h)?;
     if !["automation.read", "channels.read"]

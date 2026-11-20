@@ -43,7 +43,7 @@ pub(crate) async fn invoke(a: &App, h: &RequestContext, name: &str, v: &Value) -
         }
         "automation.dependencies" => {
             lifecycle::dependencies(
-                State(a.clone()),
+                State(a.core.clone()),
                 h.clone(),
                 Path((
                     v["kind"].as_str().ok_or(bad("Kind required"))?.into(),
@@ -54,7 +54,7 @@ pub(crate) async fn invoke(a: &App, h: &RequestContext, name: &str, v: &Value) -
         }
         "automation.delete" => {
             lifecycle::delete(
-                State(a.clone()),
+                State(a.core.clone()),
                 h.clone(),
                 Path((
                     v["kind"].as_str().ok_or(bad("Kind required"))?.into(),

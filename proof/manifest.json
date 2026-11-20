@@ -1688,6 +1688,11 @@
       "sha256": "eed30031fb501837963dda02e307925d80724c2bd4481e1af6cad1fc17d959ba",
       "review": "Sessions, invitations, MFA, integration keys and broker assertions moved into the identity component without behaviour change"
     },
+    "components/marketing/src/domain/configuration_kinds.rs": {
+      "status": "unproved",
+      "sha256": "e244e818f913573ed3434e86c67a86b21bbf5b26879762583c5587ff3e879c96",
+      "review": "Marketing configuration lifecycle (tenant lock, revision, revision-bound deletion, dependency read, rule reference admission) moved verbatim into the marketing component; route registration stays in the server."
+    },
     "components/marketing/src/domain/flow_actions.rs": {
       "status": "unproved",
       "sha256": "94f0513b5b80d7624f68b456f10b4645620658b79b8d55009e5fa99287843506",
@@ -1745,13 +1750,23 @@
     },
     "components/marketing/src/domain.rs": {
       "status": "unproved",
-      "sha256": "84d0a6c21b81e4cdd758a8d852c6d02971ec053a3b8208c56c30b243f5956b9e",
-      "review": "Consumer requests moved into the shop component and the frozen rule comparison into marketing without behaviour change"
+      "sha256": "ac614dd3605726edcca3b280c6c27197c9eddcbf8694eb632e0dbf53de73ae81",
+      "review": "Marketing configuration lifecycle (tenant lock, revision, revision-bound deletion, dependency read, rule reference admission) moved verbatim into the marketing component; route registration stays in the server."
+    },
+    "components/marketing/src/http/configuration.rs": {
+      "status": "unproved",
+      "sha256": "999bfd91813db5e52bc51b0b854d3f20fb42626865db140a39525705f8db4cd6",
+      "review": "Marketing configuration lifecycle (tenant lock, revision, revision-bound deletion, dependency read, rule reference admission) moved verbatim into the marketing component; route registration stays in the server."
+    },
+    "components/marketing/src/http.rs": {
+      "status": "unproved",
+      "sha256": "765981796a587e180f683b6cbfd3ce99cf63b106768f0be9c74ed1b61469ff3b",
+      "review": "Marketing configuration lifecycle (tenant lock, revision, revision-bound deletion, dependency read, rule reference admission) moved verbatim into the marketing component; route registration stays in the server."
     },
     "components/marketing/src/lib.rs": {
       "status": "unproved",
-      "sha256": "5f13292be3b1c4f157b193e7db96b52123ca4dbbc59afe029381abc2d08aeb9f",
-      "review": "Flow pipeline and promotion types moved into components/marketing; kernel call sites unchanged"
+      "sha256": "1d24fa80910146060ac56d142fc0c25577ef8a6132cc47bc75fc266787396ff9",
+      "review": "Marketing configuration lifecycle (tenant lock, revision, revision-bound deletion, dependency read, rule reference admission) moved verbatim into the marketing component; route registration stays in the server."
     },
     "components/marketing/src/service/conditions.rs": {
       "status": "unproved",
@@ -1772,6 +1787,11 @@
       "status": "unproved",
       "sha256": "c611f47083fc6b43efc5aa93e5c3af94e13040d875799ab757d90b5fd120014d",
       "review": "Flow pipeline and promotion types moved into components/marketing; kernel call sites unchanged"
+    },
+    "components/marketing/src/store/configuration_lifecycle.rs": {
+      "status": "unproved",
+      "sha256": "46700df007101dbab506e9711ac3308fe8bef26d4e6f6e1cf28305bd92f09666",
+      "review": "Marketing configuration lifecycle (tenant lock, revision, revision-bound deletion, dependency read, rule reference admission) moved verbatim into the marketing component; route registration stays in the server."
     },
     "components/marketing/src/store/customer_facts.rs": {
       "status": "unproved",
@@ -1830,8 +1850,8 @@
     },
     "components/marketing/src/store.rs": {
       "status": "unproved",
-      "sha256": "9c272c6a4221588847660ad30b90954713913ae855b92f03b5737840fe7a870d",
-      "review": "Local flow mutations moved verbatim into the marketing component and staged knowledge sources, assets and categories into the studio component; the flow owner and release selection stay in the server."
+      "sha256": "30fdf7c888b9490b84b669160aa0b503348af52c4db0f43a8b3c2c72f089369a",
+      "review": "Marketing configuration lifecycle (tenant lock, revision, revision-bound deletion, dependency read, rule reference admission) moved verbatim into the marketing component; route registration stays in the server."
     },
     "components/marketing/src/types/channel.rs": {
       "status": "unproved",
@@ -6413,11 +6433,6 @@
       "sha256": "3f024c573680218a4ec63d203bf33c2f01840852c640651c4d63fbce623e74c7",
       "review": "Coupons, flow job summaries, requisition import, customer snapshot, address restore and account orders moved into components"
     },
-    "src/marketing/dependencies.rs": {
-      "status": "unproved",
-      "sha256": "ef3021b0ad7384ba76d016d3eb17523c4e585241b3743baaefad0332e5c07b26",
-      "review": "Flow pipeline and promotion types moved into components/marketing; kernel call sites unchanged"
-    },
     "src/marketing/facts.rs": {
       "status": "unproved",
       "sha256": "17fb18eb81f62c0703c3ef9d0840780f32ec88197417670bda02bacaed5c0f06",
@@ -6460,8 +6475,8 @@
     },
     "src/marketing/gateway.rs": {
       "status": "unproved",
-      "sha256": "5960520a51cbb198eaf2fceaf4bd6b9f65a90d9a92417fa58222ee23ba406dd7",
-      "review": "Separate Flow validation HTTP and MCP entry points are read-only, use the same tenant action and revision checks and cannot call save on older hosts. Legacy validation-only clients continue to get a read-only check on the new host. Signed PostgreSQL regression verifies denied access, invalid graphs and no Flow writes."
+      "sha256": "8638d1636351218e7ce3c9e3b71581c50910441f9669233735061364e829b113",
+      "review": "Marketing configuration lifecycle (tenant lock, revision, revision-bound deletion, dependency read, rule reference admission) moved verbatim into the marketing component; route registration stays in the server."
     },
     "src/marketing/jobs.rs": {
       "status": "unproved",
@@ -6470,8 +6485,8 @@
     },
     "src/marketing/lifecycle.rs": {
       "status": "unproved",
-      "sha256": "bb9275d60e58277515d64ac33e51148f02ab5717fec83940f5dfdd2a0c5a80bf",
-      "review": "Tenant roles and current grants independently reviewed; owner/retained-override/acceptance races repaired and PostgreSQL-blocked regressions passed; PII and Flow projection boundaries documented; B2B feature settings delegate shared CAS/history and preserve financial guards. Existing extracted policies unchanged; SQL/async/UI remain reviewed adapters, not full proofs."
+      "sha256": "8f29576366799c1b2affd4ac1370b5842df41bbb1c7195ae015edb922879dfa2",
+      "review": "Marketing configuration lifecycle (tenant lock, revision, revision-bound deletion, dependency read, rule reference admission) moved verbatim into the marketing component; route registration stays in the server."
     },
     "src/marketing/metadata.rs": {
       "status": "unproved",
@@ -6480,8 +6495,8 @@
     },
     "src/marketing/mod.rs": {
       "status": "unproved",
-      "sha256": "252e8a0770d856a3a50ea67fde9393e26a53477ac20ac87cae127862cf31ee6a",
-      "review": "Flow pipeline and promotion types moved into components/marketing; kernel call sites unchanged"
+      "sha256": "33230e42fb10e38185e0ec9121c021e605d5e660684f81faf98d4a31c773eb7c",
+      "review": "Marketing configuration lifecycle (tenant lock, revision, revision-bound deletion, dependency read, rule reference admission) moved verbatim into the marketing component; route registration stays in the server."
     },
     "src/marketing/pipeline.rs": {
       "status": "unproved",
@@ -6505,8 +6520,8 @@
     },
     "src/marketing/routes.rs": {
       "status": "unproved",
-      "sha256": "5153168e37f87769bb86711cfd9d7cfcc8e105ed9f68dc80613fd694386b6b36",
-      "review": "Separate Flow validation HTTP and MCP entry points are read-only, use the same tenant action and revision checks and cannot call save on older hosts. Legacy validation-only clients continue to get a read-only check on the new host. Signed PostgreSQL regression verifies denied access, invalid graphs and no Flow writes."
+      "sha256": "a1c189303d932d79cc8bffe73ff244be6357375c914da4b4f4713bb5aa4087ad",
+      "review": "Marketing configuration lifecycle (tenant lock, revision, revision-bound deletion, dependency read, rule reference admission) moved verbatim into the marketing component; route registration stays in the server."
     },
     "src/marketing/rule_fields.rs": {
       "status": "unproved",
@@ -7345,8 +7360,8 @@
       "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
     },
     "Cargo.lock": {
-      "sha256": "b9b5d7ffa0cbf91e850e47ea56ce2b6d2966028277a192a212e095fa25d66242",
-      "review": "Operator control plane (quotas, aggregate metrics, shop dossier, audited lifecycle change, container readings) moved verbatim into the shop component; operator authentication and availability admission stay in the server. Kernel admission calls unchanged."
+      "sha256": "a8f7aa3250a16eb8f9ea1255e08747b7bbd2b817b06726b450b37fcb4970a8de",
+      "review": "Marketing configuration lifecycle (tenant lock, revision, revision-bound deletion, dependency read, rule reference admission) moved verbatim into the marketing component; route registration stays in the server."
     },
     "Cargo.toml": {
       "sha256": "881e080eb9f1b1f051c23e2848df689853473831b4d3072817387d65c23ddb66",
