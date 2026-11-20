@@ -2,15 +2,26 @@
 use super::*;
 use veyndo_app_platform::ports::{RecordRules, RuleFuture};
 use veyndo_app_platform::store::managed_data;
-pub(crate) use veyndo_app_platform::store::managed_data::{
-    list_page, list_scoped, record_revision,
-};
+pub(crate) use veyndo_app_platform::store::managed_data::{list_page, record_revision};
 /// The bundled site builder normalizes and checks its own pages; every other app has no extra rules.
 pub(crate) struct BundledRules;
 pub(crate) static BUNDLED: BundledRules = BundledRules;
 impl RecordRules for BundledRules {
     fn normalize(&self, m: &Manifest, v: &Value) -> Result<Value> {
         normalize_input(m, v)
+    }
+    fn check(&self, m: &Manifest, e: &Entity, fields: &Value) -> Result<()> {
+        if m.id == "site_builder" {
+            site_builder::validate(&e.name, fields)?;
+        }
+        Ok(())
+    }
+    fn planning_format(&self, m: &Manifest) -> Value {
+        if m.id == "site_builder" {
+            site_builder::planning_contract()
+        } else {
+            Value::Null
+        }
     }
     fn validate<'a, 'c: 'a>(
         &'a self,

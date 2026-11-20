@@ -81,8 +81,6 @@ pub(crate) use service_limits::ServiceLimits;
 pub(crate) use ui_documents::SandboxedAppDocument;
 mod observability;
 mod planning;
-mod planning_contracts;
-pub(crate) use planning_contracts::contracts as planning_contracts;
 mod runtime;
 pub(crate) use planning::*;
 mod manifest;

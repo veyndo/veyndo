@@ -223,7 +223,7 @@
     },
     "app_tool_admissible": {
       "bindings": [
-        "src/apps/tool_contract.rs",
+        "components/apps/src/store/tool_catalogue.rs",
         "components/apps/src/domain/mcp_views.rs"
       ],
       "theorems": [
@@ -830,6 +830,11 @@
       "sha256": "976e401c9727b2494ea86f8ba7bfbb29fb238b7eca5b264844e458aecf7ce541",
       "review": "Package approval, distribution, schema adapters, event projection and service transport policy moved into components/apps without a change in behaviour"
     },
+    "components/apps/src/domain/planning.rs": {
+      "status": "unproved",
+      "sha256": "0fb8bceb5c8ab719973cad0a6a0e3508029a97f53347b2b2353a7d8707022b2a",
+      "review": "App planning, planning contracts and the app tool catalogue moved into the apps component; the tool wire contract moved to core without behavior change"
+    },
     "components/apps/src/domain/presentation.rs": {
       "status": "unproved",
       "sha256": "188a5a9fc0f047a0feb6b1377a9417b98cf0991c3d5ea8c55e5b7b6aeae924a0",
@@ -897,8 +902,8 @@
     },
     "components/apps/src/domain.rs": {
       "status": "unproved",
-      "sha256": "9dd6e54a87e97850b91e151aa4052fe24969fb73afb69896e37f0fe4aef29eae",
-      "review": "Assistant app views and the surface registry moved into the apps component without behavior change"
+      "sha256": "8a073d20aff6d582db0d74ebd8f052cd98844b1a4a1aaa3d2b475e7c0b068aae",
+      "review": "App planning, planning contracts and the app tool catalogue moved into the apps component; the tool wire contract moved to core without behavior change"
     },
     "components/apps/src/http/activity.rs": {
       "status": "unproved",
@@ -952,8 +957,8 @@
     },
     "components/apps/src/ports.rs": {
       "status": "unproved",
-      "sha256": "627c76004d985d109a6c6b51b5018490fbd8710fceb8e448e87866b2adb50599",
-      "review": "The app action gateway moved into the apps component; server-owned handlers are reached through a host port without behavior change"
+      "sha256": "b793806758b59cc8d8824f8179a1db583474011066b311455cc061685a41322d",
+      "review": "App planning, planning contracts and the app tool catalogue moved into the apps component; the tool wire contract moved to core without behavior change"
     },
     "components/apps/src/service/admission.rs": {
       "status": "unproved",
@@ -1140,6 +1145,11 @@
       "sha256": "535ceaa06a1a716bd5bdd6208b846dcec58ca292a4d2427f9a3bd2bef966aa76",
       "review": "Sandbox cache, configuration runtime and package fence moved into the apps component without changing rules"
     },
+    "components/apps/src/store/planning.rs": {
+      "status": "unproved",
+      "sha256": "f6f7d06dba3d8d916d5ff25ba775f3c547d52b539c2530ed657f2ab248330a57",
+      "review": "App planning, planning contracts and the app tool catalogue moved into the apps component; the tool wire contract moved to core without behavior change"
+    },
     "components/apps/src/store/record_restore.rs": {
       "status": "unproved",
       "sha256": "fc40e9231ce1d38bd93e32d0e4300c34a819f17e789588c7aca3348d6d2ff61a",
@@ -1185,10 +1195,15 @@
       "sha256": "3de468eafb0861bde5ecf439b35b940cdefa29409c47b27742e958d27ce90c4f",
       "review": "Assistant app views and the surface registry moved into the apps component without behavior change"
     },
+    "components/apps/src/store/tool_catalogue.rs": {
+      "status": "reviewed-binding",
+      "sha256": "9514660b77c6d0a3d51bb18935da8cf5da645a927a32321ddeda2a57c166ea3d",
+      "review": "App planning, planning contracts and the app tool catalogue moved into the apps component; the tool wire contract moved to core without behavior change"
+    },
     "components/apps/src/store.rs": {
       "status": "unproved",
-      "sha256": "fbd4fe889934c3b24f78389292ef7ec0fe35a01705cc2ab3a73afeef73dbfc18",
-      "review": "Assistant app views and the surface registry moved into the apps component without behavior change"
+      "sha256": "594b51e2511bdb6cc90336a837f718406f04c4defe871d62835a4c79a5c7ad33",
+      "review": "App planning, planning contracts and the app tool catalogue moved into the apps component; the tool wire contract moved to core without behavior change"
     },
     "components/b2b/src/domain/contract.rs": {
       "status": "unproved",
@@ -1767,8 +1782,8 @@
     },
     "components/core/src/lib.rs": {
       "status": "reviewed-binding",
-      "sha256": "f14fa809a44c578da8b144674d8a9c140452ee0d0043fe00a50aa6da5d150cb5",
-      "review": "Process configuration moved into core; browser session transports, Checkout buyer grants, the private Checkout relay, trusted geography and provider startup validation moved into their components without behaviour change"
+      "sha256": "f28bdfceff3b8f61429ace13af1c376f658587d237e3c52556bcfb18920e459f",
+      "review": "App planning, planning contracts and the app tool catalogue moved into the apps component; the tool wire contract moved to core without behavior change"
     },
     "components/core/src/localized/languages.rs": {
       "status": "unproved",
@@ -1814,6 +1829,11 @@
       "status": "unproved",
       "sha256": "fc637540235bd74244db6605f69a3d74f85abf94ddfff9b06f693cbbefa3c45e",
       "review": "Currency discovery moved into components/pricing behind the shop settings and cart ports; no rule changed"
+    },
+    "components/core/src/tool_contract.rs": {
+      "status": "unproved",
+      "sha256": "866fca6c96cb6877f8358d1d809faf15e39ea16b45e973020b5f8553abb55c63",
+      "review": "App planning, planning contracts and the app tool catalogue moved into the apps component; the tool wire contract moved to core without behavior change"
     },
     "components/core/src/work_signal.rs": {
       "status": "unproved",
@@ -5342,8 +5362,8 @@
     },
     "src/apps/data.rs": {
       "status": "unproved",
-      "sha256": "c8a86c3d460fea935f6ff415f2cfa28e1e38fd4e71cad5d8d3716b0d9f24462a",
-      "review": "Managed app records, restoration, import and native-object projection moved into the apps component behind a record rules port without behavior change"
+      "sha256": "7e8ea7dbac1e6093f90aa65294c3ba14500d89a9e12b52a6eb1652bbfd708618",
+      "review": "App planning, planning contracts and the app tool catalogue moved into the apps component; the tool wire contract moved to core without behavior change"
     },
     "src/apps/discovery.rs": {
       "status": "unproved",
@@ -5442,8 +5462,8 @@
     },
     "src/apps/mod.rs": {
       "status": "unproved",
-      "sha256": "5e674c20cb45412f2242503ac478bd4cb25adc41c846aa15cb3f8eb2d5cb2558",
-      "review": "The app action gateway moved into the apps component; server-owned handlers are reached through a host port without behavior change"
+      "sha256": "749facdd517b91bf827d08ce8de3c121029785f13a084aa4253fda27105245fd",
+      "review": "App planning, planning contracts and the app tool catalogue moved into the apps component; the tool wire contract moved to core without behavior change"
     },
     "src/apps/model_contract.rs": {
       "status": "unproved",
@@ -5477,13 +5497,8 @@
     },
     "src/apps/planning.rs": {
       "status": "unproved",
-      "sha256": "3a0e19c4cdeb0c30269a0c2233695c11604bb7bd3b822992a3a5aef530705afe",
-      "review": "Review shared read-only planner admission and one checkpointed correction using original context, current authorized app contracts and unchanged personal approval; managed page fields use app-owned schema; translation and malicious checkout-correction HTTP regressions pass, workspace units and clippy pass"
-    },
-    "src/apps/planning_contracts.rs": {
-      "status": "unproved",
-      "sha256": "82c03b76a89038f2a81df98fdc25f8420e5c2c2010c7173b5b09f267417182d6",
-      "review": "Review shared read-only planner admission and one checkpointed correction using original context, current authorized app contracts and unchanged personal approval; managed page fields use app-owned schema; translation and malicious checkout-correction HTTP regressions pass, workspace units and clippy pass"
+      "sha256": "622d925e31de46d9fee3090327d2edae5c3c4b96a125f61d8db7af8fec6937bf",
+      "review": "App planning, planning contracts and the app tool catalogue moved into the apps component; the tool wire contract moved to core without behavior change"
     },
     "src/apps/record_history.rs": {
       "status": "unproved",
@@ -5502,8 +5517,8 @@
     },
     "src/apps/registry.rs": {
       "status": "unproved",
-      "sha256": "68ab7374e5e36b99b55840e66ebce0437151075e0d41e93c0b665346d1ab3e30",
-      "review": "Job callbacks, completion evidence, package verification, installation, activation and upgrade review moved into the apps component behind host ports without behavior change"
+      "sha256": "5350a7ce6a487992ab39894c2d38f2c2888175b1cb0440f23364f0b3f0ee8e45",
+      "review": "App planning, planning contracts and the app tool catalogue moved into the apps component; the tool wire contract moved to core without behavior change"
     },
     "src/apps/routes.rs": {
       "status": "unproved",
@@ -5566,9 +5581,9 @@
       "review": "Surface contract and sandboxed documents moved into the apps component without changing rules"
     },
     "src/apps/tool_contract.rs": {
-      "status": "reviewed-binding",
-      "sha256": "57a9766699796bac2288b0e368fb5094c6cffca5ceb52158e8e1bc770d2e4e05",
-      "review": "The app action gateway moved into the apps component; server-owned handlers are reached through a host port without behavior change"
+      "status": "unproved",
+      "sha256": "be24064d2b1a439206639cab941a7a3f13c6c98ab0389aa37645175dbb05bab3",
+      "review": "App planning, planning contracts and the app tool catalogue moved into the apps component; the tool wire contract moved to core without behavior change"
     },
     "src/apps/ui_bundles.rs": {
       "status": "unproved",
@@ -5985,11 +6000,6 @@
       "sha256": "961654d203da7ca449e449993bf02e8637d13c49f44cca1f104c3f6991b6a873",
       "review": "Self-running experiments: Design gains an optional immutable automation flag pair; experiments/automation.rs adds a read-only suggestion from live payment figures and worker steps that repeat the manual finish transition, call the existing report owner and record a decision, fixing the treatment layout mode only when the unchanged extracted experiment_result_admissible reports a proved uplift; cognitive_experiments suite covers kept, seeded published and manual cases"
     },
-    "src/capabilities/contract.rs": {
-      "status": "unproved",
-      "sha256": "d8a982b673d95dd2f2ab6cfda6e0e2cfcdbc53cf9239d15bfde79f521b68cdcc",
-      "review": "Reviewed restored native operation/schema/boxed dispatch ownership, non-retryable output-contract failures, escaped identifiers and scheduling-row fair outbox migration; existing pure policies unchanged, SQL and transport adapters remain unproved"
-    },
     "src/capabilities/core_catalog.rs": {
       "status": "unproved",
       "sha256": "d2ccdc8fdf60d94f8fa476d5cfdfbf2bcdfcf2485127cd15211572024a6a2e34",
@@ -6012,8 +6022,8 @@
     },
     "src/capabilities.rs": {
       "status": "unproved",
-      "sha256": "bd4ba9b79e6f1c7ebdafe4fb50bf27f3f71cc143ac374c530644bcb6d120becd",
-      "review": "Signed offers: cognition/signed_offer.rs signs a closed projection of the native cart quote with the existing Ed25519 owner and verifies signature, shop, expiry and current cart match; signed.rs gains key_id and verify helpers; readiness reports signing status; no extracted policy changed; providers suite verifies independently and covers forged, foreign, malformed, changed-cart and changed-price cases"
+      "sha256": "5f4aa9e27606000dd541ef1500ea26c5312f5922cb0a8f4a4a58dab29f76a470",
+      "review": "App planning, planning contracts and the app tool catalogue moved into the apps component; the tool wire contract moved to core without behavior change"
     },
     "src/cart_model.rs": {
       "status": "unproved",

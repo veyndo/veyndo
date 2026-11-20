@@ -87,8 +87,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/apps/native_views.rs](../src/apps/native_views.rs) | Native view contracts live in the apps component; this module keeps the short path for the surface adapters. |
 | [src/apps/observability.rs](../src/apps/observability.rs) | Bounded metadata-only app telemetry, storage usage and explicitly approved cursor-based event replay. |
 | [src/apps/package_fence.rs](../src/apps/package_fence.rs) | The package write fence lives in the apps component; this module keeps the short path for native writers. |
-| [src/apps/planning.rs](../src/apps/planning.rs) | Registered managed app actions join the same preview/approve transaction as core changes. |
-| [src/apps/planning_contracts.rs](../src/apps/planning_contracts.rs) | Current authorized managed-save models accompany proposals; no records, secrets or new authority. |
+| [src/apps/planning.rs](../src/apps/planning.rs) | App planning lives in the apps component; this module keeps the short path for the planner and proposals. |
 | [src/apps/record_history.rs](../src/apps/record_history.rs) | App record history lives in the apps component; this module registers its routes and keeps the capability path. |
 | [src/apps/record_import.rs](../src/apps/record_import.rs) | Managed record import lives in the apps component; this module keeps the short path for the import operations. |
 | [src/apps/records.rs](../src/apps/records.rs) | The app record store lives in the apps component; this module keeps the short path for the app adapters. |
@@ -105,7 +104,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/apps/surface_registry.rs](../src/apps/surface_registry.rs) | The surface projection lives in the apps component; this module adds the languages of the shop. |
 | [src/apps/surface_tests.rs](../src/apps/surface_tests.rs) | Contract counterexamples reject cross-scope UI actions, unsafe URLs and mutating GET routes. |
 | [src/apps/surfaces.rs](../src/apps/surfaces.rs) | App-owned UI surfaces and namespaced HTTP routes reuse the authorized action gateway. |
-| [src/apps/tool_contract.rs](../src/apps/tool_contract.rs) | Installed app tools share native wire metadata and validate declared results without disclosing provider payloads. |
+| [src/apps/tool_contract.rs](../src/apps/tool_contract.rs) | The app tool catalogue lives in the apps component; this module keeps the short path for MCP and the assistant. |
 | [src/apps/ui_bundles.rs](../src/apps/ui_bundles.rs) | Operator-pinned, bounded self-contained UI bundles use the same actor/context grant as app actions. |
 | [src/apps/ui_documents.rs](../src/apps/ui_documents.rs) | Sandboxed app documents are served by the apps component; this module registers their routes. |
 | [src/apps/ui_logic_tests.rs](../src/apps/ui_logic_tests.rs) | UI programs must keep static types, same-model saves, surface allowlists and acyclic ownership before install or preview. |
@@ -189,7 +188,6 @@ This lists every checked-in source module in these roots, including files with n
 | [src/brand_redirect.rs](../src/brand_redirect.rs) | Move browser pages to the configured domain while retaining integration and checkout endpoints. |
 | [src/capabilities/admission.rs](../src/capabilities/admission.rs) | MCP discovery applies current merchant permissions through the same capability owners as invocation. |
 | [src/capabilities/catalog.rs](../src/capabilities/catalog.rs) | Shared catalogue composes native capabilities and cognitive contracts without duplicating authorization. |
-| [src/capabilities/contract.rs](../src/capabilities/contract.rs) | Shared wire description for native operations and installed app actions; hints never grant execution rights. |
 | [src/capabilities/core_catalog.rs](../src/capabilities/core_catalog.rs) | Public HTTP/MCP capability catalogue, separate from authorization and dispatch. |
 | [src/capabilities/dispatch.rs](../src/capabilities/dispatch.rs) | Closed native domain routing selected once by the operation registry; inactive futures stay boxed. |
 | [src/capabilities/registry.rs](../src/capabilities/registry.rs) | One immutable native operation record for dispatch, schemas, MCP discovery and bounded agent reads. |
@@ -636,6 +634,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/apps/src/domain/native_views.rs](../components/apps/src/domain/native_views.rs) | Shared view contracts of a package; actual grants, runtime execution and current rights remain with the server. |
 | [components/apps/src/domain/ontology.rs](../components/apps/src/domain/ontology.rs) | Native complete-package adapter for graph mapping; the existing authorized list supplies every projected row. |
 | [components/apps/src/domain/persistence.rs](../components/apps/src/domain/persistence.rs) | Translate storage-port failures into the existing native HTTP/MCP domain errors. |
+| [components/apps/src/domain/planning.rs](../components/apps/src/domain/planning.rs) | Merchant planning over app records: what a proposal may bind and how much untrusted context a model sees. |
 | [components/apps/src/domain/presentation.rs](../components/apps/src/domain/presentation.rs) | Adapt shared passive artwork validation; installation and trusted service UI remain native owners. |
 | [components/apps/src/domain/record_lifecycle.rs](../components/apps/src/domain/record_lifecycle.rs) | Native transport mapping for shared app-owned workflow contracts and state transitions. |
 | [components/apps/src/domain/reference_policy.rs](../components/apps/src/domain/reference_policy.rs) | Which core records an app field may refer to; no app alters core tables. |
@@ -698,6 +697,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/apps/src/store/package_fence.rs](../components/apps/src/store/package_fence.rs) | Shared package fence prevents native record or document writes racing contract upgrades. |
 | [components/apps/src/store/package_install.rs](../components/apps/src/store/package_install.rs) | Atomic installation and additive schema upgrades; required hooks preserve compiler/trust, commerce, schema, default-record and schedule admission in the shared transaction. |
 | [components/apps/src/store/packages.rs](../components/apps/src/store/packages.rs) | The installed package of a shop, read on the backend the caller already holds. |
+| [components/apps/src/store/planning.rs](../components/apps/src/store/planning.rs) | Registered managed app actions join the same preview/approve transaction as core changes; planners see current authorized models only. |
 | [components/apps/src/store/record_restore.rs](../components/apps/src/store/record_restore.rs) | Required current historical-read authority and actual native managed save for shared record restoration; no bypass of package/field/reference/CAS/history owners. |
 | [components/apps/src/store/record_write.rs](../components/apps/src/store/record_write.rs) | Native lifecycle/history hooks around the shared record mutation engine; package and typed field validation stay with the caller. |
 | [components/apps/src/store/records.rs](../components/apps/src/store/records.rs) | One fixed PostgreSQL record store; every operation retains tenant/app/model identity and original wire values. |
@@ -707,6 +707,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/apps/src/store/settings.rs](../components/apps/src/store/settings.rs) | Declared app settings reuse the digest-bound encrypted secret owner; secret values never have a browser read path. |
 | [components/apps/src/store/storage_usage.rs](../components/apps/src/store/storage_usage.rs) | Existing aggregate app row/byte budget; shared record triggers maintain it without per-app DDL or recounts. |
 | [components/apps/src/store/surface_registry.rs](../components/apps/src/store/surface_registry.rs) | Current-authority app surface projection shared by storefronts and native visual composition. |
+| [components/apps/src/store/tool_catalogue.rs](../components/apps/src/store/tool_catalogue.rs) | Installed app tools share native wire metadata and validate declared results without disclosing provider payloads. |
 | [components/apps/src/store.rs](../components/apps/src/store.rs) | SQL of the apps component. |
 | [components/b2b/src/domain/contract.rs](../components/b2b/src/domain/contract.rs) | Native B2B operation catalogue and bounded request schema shared by HTTP, MCP and UCP adapters. |
 | [components/b2b/src/domain.rs](../components/b2b/src/domain.rs) | domain of this component. |
@@ -838,6 +839,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/core/src/request_context.rs](../components/core/src/request_context.rs) | Trusted request identity lives in extensions; HTTP headers carry transport inputs only. |
 | [components/core/src/shop_scope.rs](../components/core/src/shop_scope.rs) | Which shop a request addresses: the transport header, or the deployment's default shop. No authentication. |
 | [components/core/src/state.rs](../components/core/src/state.rs) | The state every component may use: the tenant-scoped database pool, the outbound HTTP client and request admission. |
+| [components/core/src/tool_contract.rs](../components/core/src/tool_contract.rs) | Shared wire description for native operations and installed app actions; hints never grant execution rights. |
 | [components/core/src/work_signal.rs](../components/core/src/work_signal.rs) | One dedicated LISTEN connection per worker process. Commit notifications are hints; polling repairs lost hints. |
 | [components/customers/src/domain/profile.rs](../components/customers/src/domain/profile.rs) | Which profile fields are shown as top-level contact fields of a customer. |
 | [components/customers/src/domain/search.rs](../components/customers/src/domain/search.rs) | A merchant's search text as a literal, case-insensitive LIKE fragment. |

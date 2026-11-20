@@ -27,6 +27,7 @@ pub mod native_lifecycle;
 pub mod native_views;
 pub mod ontology;
 pub mod persistence;
+pub mod planning;
 pub mod presentation;
 pub mod record_lifecycle;
 pub mod reference_policy;

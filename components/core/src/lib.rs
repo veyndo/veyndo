@@ -16,6 +16,7 @@ pub mod process_config;
 pub mod request_context;
 pub mod shop_scope;
 mod state;
+pub mod tool_contract;
 pub mod work_signal;
 
 pub use axum::http::StatusCode;

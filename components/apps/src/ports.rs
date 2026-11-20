@@ -15,6 +15,10 @@ pub type RuleFuture<'a> = Pin<Box<dyn Future<Output = Result<()>> + Send + 'a>>;
 pub trait RecordRules: Send + Sync {
     /// The stored form of a record input; apps without their own form return it unchanged.
     fn normalize(&self, m: &Manifest, v: &Value) -> Result<Value>;
+    /// Checks record fields against the app's own shape before a proposal is bound; it reads nothing.
+    fn check(&self, m: &Manifest, e: &Entity, fields: &Value) -> Result<()>;
+    /// The nested format a planner must follow for the records of this app; null without one.
+    fn planning_format(&self, m: &Manifest) -> Value;
     /// Checks a normalized record input before it is written.
     fn validate<'a, 'c: 'a>(
         &'a self,

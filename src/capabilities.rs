@@ -4,8 +4,7 @@ use tracing::Instrument;
 
 mod admission;
 mod catalog;
-mod contract;
-pub(crate) use contract::ToolContract;
+pub(crate) use veyndo_core::tool_contract::ToolContract;
 mod dispatch;
 mod registry;
 mod schema;
