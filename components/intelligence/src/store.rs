@@ -1,4 +1,5 @@
 //! SQL of the intelligence component.
+pub mod agent_runs;
 pub mod behavior;
 pub mod context_products;
 pub mod documents;

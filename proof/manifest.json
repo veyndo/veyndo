@@ -1503,6 +1503,11 @@
       "sha256": "1c17151f822911a834ecca33e7e91cfda7a4d94ff930c88b90ac724125734291",
       "review": "Claim evidence, claim batches, order observation projection, embedding jobs, source search, knowledge inventory, product facts and prompt snapshots moved verbatim into the intelligence component; permissions, settings, provider admission and leases stay in the server. Kernel admission calls unchanged."
     },
+    "components/intelligence/src/domain/run_result.rs": {
+      "status": "unproved",
+      "sha256": "bd494241d35a7d0c38f2d3f5137d88809d0aecf105e690a3cefdd1184525ff52",
+      "review": "Agent run projection, conversation turn fence, lease-fenced publication and the checkpoint journal moved verbatim into the intelligence component; authority, permissions and budgets stay in the server."
+    },
     "components/intelligence/src/domain/source_content.rs": {
       "status": "unproved",
       "sha256": "acb83bc1fed77b6be07bc96dcfa710df2d04d3fbdec282c5ea2a0511f9eb0132",
@@ -1510,8 +1515,8 @@
     },
     "components/intelligence/src/domain.rs": {
       "status": "unproved",
-      "sha256": "5a82a97c8d2c8d9c6fa9b49565ff930defb750c6a453400c42958b7ea99b10e3",
-      "review": "Claim evidence, claim batches, order observation projection, embedding jobs, source search, knowledge inventory, product facts and prompt snapshots moved verbatim into the intelligence component; permissions, settings, provider admission and leases stay in the server. Kernel admission calls unchanged."
+      "sha256": "25132a1fb9e9a1fced48bad8090ba1c716c7f297b26644819f065029e32ddf35",
+      "review": "Agent run projection, conversation turn fence, lease-fenced publication and the checkpoint journal moved verbatim into the intelligence component; authority, permissions and budgets stay in the server."
     },
     "components/intelligence/src/knowledge/embeddings.rs": {
       "status": "unproved",
@@ -1568,6 +1573,11 @@
       "sha256": "1680b817fc97a6389ffbc0212b6800164591faecc0d0598a8473819cb25aed6c",
       "review": "Knowledge sources, PDF text extraction and embedding generations moved into the intelligence component without behaviour change"
     },
+    "components/intelligence/src/store/agent_runs.rs": {
+      "status": "unproved",
+      "sha256": "6c3b45ca8c01cc4b200dea573cbc117926a83a1de33d59fb22242b100774e2ad",
+      "review": "Agent run projection, conversation turn fence, lease-fenced publication and the checkpoint journal moved verbatim into the intelligence component; authority, permissions and budgets stay in the server."
+    },
     "components/intelligence/src/store/behavior.rs": {
       "status": "unproved",
       "sha256": "db51743c8bb50d131db665ca051be9e0fa9ee0f883d4e51eab1d625769bbaf43",
@@ -1615,8 +1625,8 @@
     },
     "components/intelligence/src/store.rs": {
       "status": "unproved",
-      "sha256": "c97d30286950a2df57d4f8de604b83faf478299a295f29fb12c020f78b632b32",
-      "review": "Claim evidence, claim batches, order observation projection, embedding jobs, source search, knowledge inventory, product facts and prompt snapshots moved verbatim into the intelligence component; permissions, settings, provider admission and leases stay in the server. Kernel admission calls unchanged."
+      "sha256": "89ca750eba8e05b0549dc8716b0ce706ff18a8be9c2d02699d169e47973d9f40",
+      "review": "Agent run projection, conversation turn fence, lease-fenced publication and the checkpoint journal moved verbatim into the intelligence component; authority, permissions and budgets stay in the server."
     },
     "components/inventory/src/domain/lines.rs": {
       "status": "unproved",
@@ -4490,8 +4500,8 @@
     },
     "src/agent_runs/checkpoint.rs": {
       "status": "unproved",
-      "sha256": "0789c599a0f587857629f761e16be6de4af89fca07061804557a3aa2fb019557",
-      "review": "A running Studio chat journals only bounded view references after admitted reads. Original actor and scope checks gate run status; current resource revision and tool rights gate browser data. Local PostgreSQL and Chrome confirm isolation, early filtering, unchanged frame identity, and final approval separation."
+      "sha256": "9f225db96ff11ad72881fa3ec7ea61d98dc0d4c5322a4f0365dab6cedef3a3f2",
+      "review": "Agent run projection, conversation turn fence, lease-fenced publication and the checkpoint journal moved verbatim into the intelligence component; authority, permissions and budgets stay in the server."
     },
     "src/agent_runs/context.rs": {
       "status": "unproved",
@@ -4500,8 +4510,8 @@
     },
     "src/agent_runs/contract.rs": {
       "status": "unproved",
-      "sha256": "24ad87d08e69ff480c7d35ec474d44f533b39ff8bc0326124583bf3005c99b7a",
-      "review": "A running Studio chat journals only bounded view references after admitted reads. Original actor and scope checks gate run status; current resource revision and tool rights gate browser data. Local PostgreSQL and Chrome confirm isolation, early filtering, unchanged frame identity, and final approval separation."
+      "sha256": "62c28ccd3112b9d010b7ec72968a79471e1126f995f399c2a569b08e093a2f3c",
+      "review": "Agent run projection, conversation turn fence, lease-fenced publication and the checkpoint journal moved verbatim into the intelligence component; authority, permissions and budgets stay in the server."
     },
     "src/agent_runs/controls.rs": {
       "status": "reviewed-binding",
@@ -4590,8 +4600,8 @@
     },
     "src/agent_runs.rs": {
       "status": "unproved",
-      "sha256": "56abc34ae0025ac60c98b9e52f513f2cf17a02483b2a2c43e7b60315268f602e",
-      "review": "A running Studio chat journals only bounded view references after admitted reads. Original actor and scope checks gate run status; current resource revision and tool rights gate browser data. Local PostgreSQL and Chrome confirm isolation, early filtering, unchanged frame identity, and final approval separation."
+      "sha256": "bade8f8defb1900da613d2d2f39ddcf693c35e022acb5900b9b21713fc8e7357",
+      "review": "Agent run projection, conversation turn fence, lease-fenced publication and the checkpoint journal moved verbatim into the intelligence component; authority, permissions and budgets stay in the server."
     },
     "src/apps/action_admission.rs": {
       "status": "unproved",

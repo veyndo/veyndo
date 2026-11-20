@@ -29,7 +29,7 @@ run SQL without being in a `store` folder. Both numbers only fall.
 | pos | 1077 | 6 | 68 | 5 | 0 | apps (1), catalog (4), checkout (17), core (36), customers (1), identity (15), marketing (3), orders (1), payments (3), pricing (5), shop (14) | 8 |
 | apps | 11983 | 109 | 420 | 42 | 22 | b2b (3), catalog (10), checkout (4), core (628), host (17), identity (84), intelligence (1), marketing (13), orders (8), payments (7), pos (1), pricing (8), protocols (1), shipping (1), shop (33), studio (36) | 20 |
 | automation | 1443 | 8 | 97 | 0 | 0 | core (2) | 0 |
-| intelligence | 11939 | 75 | 716 | 35 | 28 | apps (45), catalog (29), checkout (20), core (663), customers (1), host (3), identity (81), marketing (18), orders (1), payments (1), pricing (15), protocols (8), shop (37), studio (7) | 26 |
+| intelligence | 12011 | 75 | 716 | 35 | 28 | apps (45), catalog (29), checkout (20), core (657), customers (1), host (3), identity (81), marketing (18), orders (1), payments (1), pricing (15), protocols (8), shop (37), studio (7) | 26 |
 | studio | 2802 | 18 | 160 | 11 | 5 | apps (26), b2b (4), catalog (5), core (139), customers (1), identity (44), marketing (9), pos (1), pricing (2), shop (12) | 34 |
 | protocols | 2769 | 17 | 132 | 2 | 0 | apps (23), b2b (9), catalog (10), checkout (20), core (104), customers (1), host (2), identity (32), intelligence (23), marketing (9), orders (8), payments (3), pos (3), pricing (6), shipping (3), shop (21), studio (10) | 2 |
 | host | 2970 | 7 | 40 | 6 | 1 | apps (1), catalog (4), core (119), intelligence (6), pricing (13) | 9 |
@@ -110,7 +110,7 @@ reduced to one direction first.
 | From | To | Item | References |
 | --- | --- | --- | ---: |
 | apps | core | `Result` | 262 |
-| intelligence | core | `Result` | 176 |
+| intelligence | core | `Result` | 174 |
 | intelligence | core | `RequestContext` | 144 |
 | apps | core | `RequestContext` | 137 |
 | intelligence | core | `State` | 136 |
@@ -125,13 +125,13 @@ reduced to one direction first.
 | orders | identity | `auth::` | 68 |
 | apps | core | `conflict` | 63 |
 | catalog | core | `veyndo_core::` | 60 |
-| intelligence | core | `Error` | 59 |
+| intelligence | core | `Error` | 58 |
 | shop | core | `Result` | 57 |
 | orders | core | `Result` | 56 |
-| intelligence | core | `conflict` | 56 |
 | checkout | core | `Result` | 55 |
 | catalog | core | `RequestContext` | 53 |
 | marketing | core | `Result` | 51 |
+| intelligence | core | `conflict` | 51 |
 | identity | core | `veyndo_core::` | 49 |
 | checkout | core | `RequestContext` | 49 |
 | orders | core | `RequestContext` | 48 |

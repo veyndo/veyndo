@@ -373,7 +373,10 @@ Order follows the dependency report, lowest first. Each line is one move.
   and published pairs (`store/observations`), the embedding job queue
   (`store/embedding_jobs`), source search, the source inventory and product
   facts (`store/documents`) and the bounded prompt context
-  (`domain/prompt_context`, `store/context_products`). The server keeps
+  (`domain/prompt_context`, `store/context_products`) and durable agent
+  runs in storage: the caller projection, the conversation turn fence,
+  lease-fenced publication and the checkpoint journal (`store/agent_runs`,
+  `domain/run_result`). The server keeps
   consent, settings, channel admission, provider admission and leases and
   passes them in.
   Open: agents and their runs, proposals, the retrieval, question and

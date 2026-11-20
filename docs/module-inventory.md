@@ -807,6 +807,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/intelligence/src/domain/offer.rs](../components/intelligence/src/domain/offer.rs) | The positive projection of a native quote that the shop signs as an offer: a statement, not a price lock. |
 | [components/intelligence/src/domain/preference_graph.rs](../components/intelligence/src/domain/preference_graph.rs) | Typed, bounded private preference graph: no dangling relations and no free-form kinds. |
 | [components/intelligence/src/domain/prompt_context.rs](../components/intelligence/src/domain/prompt_context.rs) | What a model is given to read: the shared source policy and byte-bounded snapshots that never cut text mid-string. |
+| [components/intelligence/src/domain/run_result.rs](../components/intelligence/src/domain/run_result.rs) | The synchronous planning result of a saved run: a ready proposal, or the error the run stopped with. |
 | [components/intelligence/src/domain/source_content.rs](../components/intelligence/src/domain/source_content.rs) | Bounds of a knowledge source: enabled languages, kinds, translated fields and the digest that binds its chunks. |
 | [components/intelligence/src/domain.rs](../components/intelligence/src/domain.rs) | Bounded inputs of the intelligence component, free of I/O. |
 | [components/intelligence/src/knowledge/embeddings.rs](../components/intelligence/src/knowledge/embeddings.rs) | Bounded batched embeddings: Ollama and OpenAI-compatible self-hosted endpoints, model-defined dimensions. |
@@ -823,6 +824,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/intelligence/src/lib.rs](../components/intelligence/src/lib.rs) | Intelligence component: shop memory with its vector namespace, retrieval and document parsing. |
 | [components/intelligence/src/service/pdf.rs](../components/intelligence/src/service/pdf.rs) | PDF extraction executes in a killable child process without inherited commerce credentials. |
 | [components/intelligence/src/service.rs](../components/intelligence/src/service.rs) | Operations of the intelligence component that call out of process. |
+| [components/intelligence/src/store/agent_runs.rs](../components/intelligence/src/store/agent_runs.rs) | Durable agent runs in storage: the caller projection, the conversation turn fence, publication under the run lease and the checkpoint journal. |
 | [components/intelligence/src/store/behavior.rs](../components/intelligence/src/store/behavior.rs) | Consent-bound behaviour observations: the bounded write, a shopper's export and erasure, the channel report with its derived graph and the private journey. |
 | [components/intelligence/src/store/behavior_eligible.sql](../components/intelligence/src/store/behavior_eligible.sql) | One native owner, one channel and a current affirmative receipt; expired observations never contribute. |
 | [components/intelligence/src/store/claim_batch.sql](../components/intelligence/src/store/claim_batch.sql) | One bounded read retains the evidence ledger's current/public/valid-time admission; no historical claim cache. |

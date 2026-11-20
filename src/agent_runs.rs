@@ -175,16 +175,7 @@ pub(crate) async fn persist(
         return flow_proposals::persist(a, t, id, evidence, h).await;
     };
     checkpoint::authorize(a).await?;
-    let mut tx = a.db.begin().await?;
-    let row=sqlx::query("UPDATE tasks SET proposal=$1,run_state='ready',run_pending=NULL,run_lease=NULL,run_until=NULL,run_revision=run_revision+1,run_updated=now() WHERE tenant=$2 AND id=$3 AND run_state='running' AND run_lease=$4 AND run_until>now() RETURNING conversation_id")
-        .bind(evidence).bind(t).bind(id).bind(&run.lease).fetch_optional(&mut *tx).await?.ok_or(conflict("Agent run cancelled or lease lost"))?;
-    if let Some(c) = row.get::<Option<String>, _>("conversation_id") {
-        sqlx::query("UPDATE conversations SET turn_owner=NULL,turn_until=NULL WHERE tenant=$1 AND id=$2 AND turn_owner=$3").bind(t).bind(&c).bind(id).execute(&mut *tx).await?;
-        let data = json!({"taskId":id,"preview":evidence,"approvalRequired":true});
-        sqlx::query("INSERT INTO chat_messages(tenant,conversation_id,role,content,data) VALUES($1,$2,'assistant',$3,$4)").bind(t).bind(c).bind(evidence["proposal"]["summary"].as_str().unwrap_or("")).bind(data).execute(&mut *tx).await?;
-    }
-    tx.commit().await?;
-    Ok(())
+    veyndo_intelligence::store::agent_runs::publish(a, t, id, evidence, &run.lease).await
 }
 
 /// Compatibility wait is only a transport: dropping it never deletes the persisted run.
@@ -200,33 +191,7 @@ pub(crate) async fn wait(a: &App, h: &RequestContext, id: &str) -> Result<Value>
         tokio::time::sleep(std::time::Duration::from_millis(250)).await;
     }
 }
-/// Preserve the synchronous planning error contract while the saved run remains inspectable.
-pub(crate) fn plan_result(run: Value) -> Result<Value> {
-    if run["state"] == "ready" {
-        return Ok(
-            json!({"taskId":run["taskId"],"preview":run["preview"],"approvalRequired":true,"run":run}),
-        );
-    }
-    if [Some("failed"), Some("uncertain"), Some("cancelled")].contains(&run["state"].as_str()) {
-        let status = run["error"]["status"]
-            .as_u64()
-            .and_then(|v| u16::try_from(v).ok())
-            .and_then(|v| StatusCode::from_u16(v).ok())
-            .filter(|v| v.is_client_error() || v.is_server_error())
-            .unwrap_or(StatusCode::BAD_GATEWAY);
-        return Err(Error(
-            status,
-            format!(
-                "Saved agent run {} stopped: {}. Inspect its status before continuing.",
-                run["taskId"].as_str().unwrap_or(""),
-                run["error"]["detail"]
-                    .as_str()
-                    .unwrap_or("explicit review required")
-            ),
-        ));
-    }
-    Ok(run)
-}
+pub(crate) use veyndo_intelligence::domain::run_result::plan_result;
 pub(crate) async fn conversation_run(
     a: &App,
     h: &RequestContext,

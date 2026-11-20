@@ -226,43 +226,4 @@ pub(crate) async fn invoke(a: &App, h: &RequestContext, name: &str, v: &Value) -
         json!({"taskId":row.get::<String,_>("id"),"state":next,"revision":revision+1,"approvalRequired":true}),
     )
 }
-/// Share one conversation turn fence between explicit continuation and approved work.
-pub(super) async fn claim_conversation(
-    tx: &mut sqlx::Transaction<'_, sqlx::Postgres>,
-    t: &str,
-    conversation: &str,
-    task: &str,
-) -> Result<()> {
-    let row=sqlx::query("SELECT turn_owner,(turn_until IS NULL OR turn_until<now()) AS available FROM conversations WHERE tenant=$1 AND id=$2 FOR UPDATE").bind(t).bind(conversation).fetch_optional(&mut **tx).await?.ok_or(conflict("Conversation unavailable"))?;
-    let busy:bool=sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM tasks WHERE tenant=$1 AND conversation_id=$2 AND id<>$3 AND run_state IN ('queued','running','uncertain'))").bind(t).bind(conversation).bind(task).fetch_one(&mut **tx).await?;
-    if busy
-        || (row.get::<Option<String>, _>("turn_owner").as_deref() != Some(task)
-            && !row.get::<bool, _>("available"))
-    {
-        return Err(conflict("A newer conversation turn is active"));
-    }
-    sqlx::query(
-        "UPDATE conversations SET turn_owner=$3,turn_until='infinity' WHERE tenant=$1 AND id=$2",
-    )
-    .bind(t)
-    .bind(conversation)
-    .bind(task)
-    .execute(&mut **tx)
-    .await?;
-    Ok(())
-}
-pub(super) fn project(row: &sqlx::postgres::PgRow) -> Value {
-    let state: String = row.get("run_state");
-    let cp: Value = row.get("run_checkpoint");
-    let request: Value = row.get("run_request");
-    let execution=request["execution"].as_array().map(|plan|json!({"total":plan.len(),"completed":cp.as_object().map_or(0,|o|o.keys().filter(|k|k.starts_with("operation-")).count()),"steps":plan.iter().enumerate().map(|(n,s)|json!({"name":s["name"],"label":s["label"],"completed":cp.get(format!("operation-{n}")).is_some(),"translationJobId":cp.get(format!("translation-{n}"))})).collect::<Vec<_>>()}));
-    let steps = cp
-        .as_object()
-        .map_or(0, |o| o.keys().filter(|k| k.starts_with("model-")).count());
-    let scenario = request.get("scenario").map(|s| {
-        let mut result = s.clone();
-        result["steps"] = cp["scenario-state"]["steps"].clone();
-        result
-    });
-    json!({"taskId":row.get::<String,_>("id"),"agentId":row.get::<Value,_>("run_request")["agentId"],"channel":request["channel"],"state":state,"revision":row.get::<i64,_>("run_revision"),"completedModelSteps":steps,"scenario":scenario,"execution":execution,"error":row.get::<Option<Value>,_>("run_error"),"conversationId":row.get::<Option<String>,_>("conversation_id"),"approvalRequired":!row.get::<bool,_>("applied"),"preview":if state=="ready" {row.get::<Value,_>("proposal")}else{Value::Null},"updatedAt":row.get::<String,_>("updated_text")})
-}
+pub(super) use veyndo_intelligence::store::agent_runs::{claim_conversation, project};

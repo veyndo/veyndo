@@ -72,8 +72,16 @@ pub(crate) async fn load(a: &App, key: &str) -> Result<Option<Value>> {
         return Ok(None);
     };
     authorize(a).await?;
-    Ok(sqlx::query_scalar("SELECT run_checkpoint->$4 FROM tasks WHERE tenant=$1 AND id=$2 AND run_lease=$3 AND run_state='running' AND run_until>now()")
-        .bind(&run.tenant).bind(&run.id).bind(&run.lease).bind(key).fetch_optional(&a.db).await?.flatten())
+    veyndo_intelligence::store::agent_runs::load(
+        a,
+        veyndo_intelligence::store::agent_runs::Lease {
+            tenant: &run.tenant,
+            id: &run.id,
+            lease: &run.lease,
+        },
+        key,
+    )
+    .await
 }
 pub(crate) async fn app_views(a: &App, trace: &[Value]) -> Result<()> {
     if CURRENT.try_with(|run| run.conversation).unwrap_or(false) {
@@ -90,12 +98,17 @@ pub(crate) async fn save(a: &App, key: &str, value: &Value) -> Result<()> {
         return Err(bad("Agent checkpoint exceeds its bounded budget"));
     }
     authorize(a).await?;
-    let changed=sqlx::query("UPDATE tasks SET run_checkpoint=jsonb_set(run_checkpoint,ARRAY[$4],$5,true),run_pending=NULL,run_revision=run_revision+1,run_updated=now(),run_until=now()+interval '240 seconds' WHERE tenant=$1 AND id=$2 AND run_lease=$3 AND run_state='running' AND run_until>now()")
-        .bind(&run.tenant).bind(&run.id).bind(&run.lease).bind(key).bind(value).execute(&a.db).await?.rows_affected();
-    if changed != 1 {
-        return Err(conflict("Agent run cancelled or lease lost"));
-    }
-    Ok(())
+    veyndo_intelligence::store::agent_runs::save(
+        a,
+        veyndo_intelligence::store::agent_runs::Lease {
+            tenant: &run.tenant,
+            id: &run.id,
+            lease: &run.lease,
+        },
+        key,
+        value,
+    )
+    .await
 }
 #[tracing::instrument(skip_all,fields(trace_id=%veyndo::trace::current()))]
 pub(crate) async fn model(
@@ -116,11 +129,16 @@ pub(crate) async fn model(
     }
     if let Ok(run) = CURRENT.try_with(Clone::clone) {
         authorize(a).await?;
-        let changed=sqlx::query("UPDATE tasks SET run_pending=$4,run_updated=now(),run_until=now()+interval '240 seconds' WHERE tenant=$1 AND id=$2 AND run_lease=$3 AND run_state='running' AND run_until>now()")
-            .bind(&run.tenant).bind(&run.id).bind(&run.lease).bind(&key).execute(&a.db).await?.rows_affected();
-        if changed != 1 {
-            return Err(conflict("Agent lease lost before inference"));
-        }
+        veyndo_intelligence::store::agent_runs::pending(
+            a,
+            veyndo_intelligence::store::agent_runs::Lease {
+                tenant: &run.tenant,
+                id: &run.id,
+                lease: &run.lease,
+            },
+            &key,
+        )
+        .await?;
     }
     agent::assistant_access(h).or_else(|e| if public { Ok(()) } else { Err(e) })?;
     let authority = super::controls::model_authority(a, h).await;
