@@ -411,15 +411,15 @@ Order follows the dependency report, lowest first. Each line is one move.
   quota, aggregate metrics, the shop dossier and the audited lifecycle change
   (`http/operator_*`) and the container readings
   (`service/container_resources`); operator authentication and availability
-  admission stay in the server. Open: cached loading, saving and releasing
-  settings, channel scope handlers, domains, legal consent, the platform and
-  performance modules.
+  admission stay in the server. `store/consumer_requests` owns the withdrawal
+  and data-rights intake, the receipt of its holder and the operator review.
+  Open: cached loading, saving and releasing settings, channel scope handlers,
+  domains, legal consent, the rest of the platform (AI settings,
+  infrastructure, provisioning) and the performance modules.
 
 Per component: sources moved, tables and migrations assigned, SQL only in
 `store/`, typed interface, `foreign_tables` empty or each entry justified, tests
 moved with the code, proof bindings updated.
-  `store/consumer_requests` owns the withdrawal and data-rights intake, the
-  receipt of its holder and the operator review.
 
 ## Phase 4: frontends
 
