@@ -899,6 +899,11 @@
       "sha256": "e1eec3e776baaaa071a9191c36e4901533d7d94caa32575ab60f54179b28d4be",
       "review": "App secret, settings, activity, credential and webhook handlers moved into the apps component without changing rules"
     },
+    "components/apps/src/http/jobs.rs": {
+      "status": "unproved",
+      "sha256": "e45ca4142474e72487b3505020403c7b8724cf3162ccc8dc1e107541c00d9f1f",
+      "review": "App jobs and private evidence reads moved into the apps component without changing rules"
+    },
     "components/apps/src/http/secrets.rs": {
       "status": "unproved",
       "sha256": "beffdfdb79ac41904cf743349bdca60d7223a6b7408f5db26b11a13102207568",
@@ -921,8 +926,8 @@
     },
     "components/apps/src/http.rs": {
       "status": "unproved",
-      "sha256": "1f1bc3dd2c6c98c0dfb55d3f174f19474e4266d27572f57b4b903e1b120389a8",
-      "review": "Surface contract and sandboxed documents moved into the apps component without changing rules"
+      "sha256": "6dbec9a8f473d584d216281245eb624ed5472aa31ae4d89dc2bf6e557b89bb45",
+      "review": "App jobs and private evidence reads moved into the apps component without changing rules"
     },
     "components/apps/src/lib.rs": {
       "status": "unproved",
@@ -1014,10 +1019,25 @@
       "sha256": "978751f3872d990ce36ba4cc763be243a3598cb9547c0deb9188c1da4757febf",
       "review": "Secret persistence, schedules and event projection moved into the apps component without changing rules"
     },
+    "components/apps/src/store/evidence.rs": {
+      "status": "unproved",
+      "sha256": "0c73580b47f9df39bc878a2d1738a32fa8837659a13c86be8a5c8772215975a1",
+      "review": "App jobs and private evidence reads moved into the apps component without changing rules"
+    },
     "components/apps/src/store/extension_filter.rs": {
       "status": "unproved",
       "sha256": "f25ab2568a84a6d04493ad2791629d379733dd959d1e5ab59d9e0d8069930705",
       "review": "Record store, consent and core extension rules moved into the apps component without changing rules"
+    },
+    "components/apps/src/store/job_control.rs": {
+      "status": "unproved",
+      "sha256": "874bbcf240f0eaf71c32ca0fe3415c132b0a88ff8df4e0011afec2743a53032f",
+      "review": "App jobs and private evidence reads moved into the apps component without changing rules"
+    },
+    "components/apps/src/store/jobs.rs": {
+      "status": "unproved",
+      "sha256": "06cc28a088aa93ae73638971f883993655247534b497d7ac06cea7c072978d10",
+      "review": "App jobs and private evidence reads moved into the apps component without changing rules"
     },
     "components/apps/src/store/languages.rs": {
       "status": "unproved",
@@ -1064,10 +1084,15 @@
       "sha256": "f2f832ca6f9b976884b0513e0a7048a2461958fdd4f0dc61998a9151ecebbe3c",
       "review": "Secret persistence, schedules and event projection moved into the apps component without changing rules"
     },
+    "components/apps/src/store/storage_usage.rs": {
+      "status": "unproved",
+      "sha256": "5619015a45cd6693444bbd622c3db41c5138a3fc0e5469a0e412b8fddbbf16aa",
+      "review": "App jobs and private evidence reads moved into the apps component without changing rules"
+    },
     "components/apps/src/store.rs": {
       "status": "unproved",
-      "sha256": "2591dce012085448fcbd0624175e74935cfecaa6e6707cf3ce243128962c18d8",
-      "review": "Secret persistence, schedules and event projection moved into the apps component without changing rules"
+      "sha256": "f067c282d938e23009ffc7924d863afbe266a5536b052d0e464d77b63f893033",
+      "review": "App jobs and private evidence reads moved into the apps component without changing rules"
     },
     "components/b2b/src/domain/contract.rs": {
       "status": "unproved",
@@ -5131,8 +5156,8 @@
     },
     "src/apps/action_admission.rs": {
       "status": "unproved",
-      "sha256": "4d2a2888a04b77be32fd4326ca683858912084ec14a3906bb6087ac1fe7ced29",
-      "review": "App secret, settings, activity, credential and webhook handlers moved into the apps component without changing rules"
+      "sha256": "ad18bedc830e9f303097bb4aa994986dc6aff152334f7c29e83ae9edfd661682",
+      "review": "App jobs and private evidence reads moved into the apps component without changing rules"
     },
     "src/apps/activation.rs": {
       "status": "unproved",
@@ -5271,8 +5296,8 @@
     },
     "src/apps/evidence.rs": {
       "status": "unproved",
-      "sha256": "34378db3544058b447d1d6880b7d2cfe10c68429d614988f2fe871de897231cb",
-      "review": "Reviewed app-owned Vercel/Klaviyo/HubSpot/Contentful/Algolia fixed transports, bounded redacted receipts, native compound action rights and encrypted CAS/lease fences; Shopware 6 read-only OAuth/currency/language projection delegates exact native import/reconciliation; generic tenant/app source reset and bounded source count use existing storage/admission owners. Provider protocols and SQL remain outside the extracted Lean proof scope; native two-worker, private/foreign, signed-login, migration and checkout regressions exercised."
+      "sha256": "7351c3560cb06af0a31169dfd7eb63e7113cb60077d73800accb485b4b079c86",
+      "review": "App jobs and private evidence reads moved into the apps component without changing rules"
     },
     "src/apps/evidence_routes.rs": {
       "status": "unproved",
@@ -5319,11 +5344,6 @@
       "sha256": "1f914880fa77540539b1ea6dc7976ad0809c58fbe3f60d20b0aeb07017500422",
       "review": "Reviewed app-storage extraction: original record/job SQL now runs in pinned veyndo/apps through existing scoped transactions; native identity/package/CAS/evidence validation retained. Independent PostgreSQL rollback/replay/lease/quota test, native app_shared_storage/app_jobs, 43 tenant checks and marketplace HTTP/MCP order-stock-Flow-invoice fixture pass. SQL and host adapters remain unproved."
     },
-    "src/apps/job_control.rs": {
-      "status": "unproved",
-      "sha256": "09631d28f1e954fcdc71b9b05ae6a621ecdaa96b26d4a174bbe3298cb53cbf3d",
-      "review": "Reviewed Apps 0.17 job history/control extraction from original native jobs.rs. Shared bounded queries preserve tenant/app bindings, stable created-at/id cursor anchors, group-as-label, uncertainty/success-only-result projections; native actor/package/action admission and result/message/fingerprint redaction remain attached. Shared merchant control preserves original row lock, CAS/error order, archive/cancel/retry/resolve transitions, explicit unknown-outcome approval, retry actor/package reset, retained cancellation lease, event order and caller atomic rollback. Required native retry hook uses original current action, primary/additional rights and stored-input validation. Callback identity/creator-role locks, signed SQL scope, evidence and direct verified completion predicate unchanged. Independent PostgreSQL concurrency, scope/hostile/cursor and hook/outbox/missing-actor rollback plus actual standalone rollback example pass; Linux component CI and warning-free Clippy pass. Native 74 app units and seven HTTP/PostgreSQL suites apps, app_jobs, app_components, staging, tenant_isolation, shipping_contract and marketplaces pass, including new foreign/cursor/projection regression and real shipping restart. Source/WIT pins, 32 dependency controls and image closures pass. Kernel unchanged; shared SQL, control orchestration and host adapters remain unproved."
-    },
     "src/apps/job_enqueue.rs": {
       "status": "unproved",
       "sha256": "61b75fc3a11fd0f9cd4d2372a56225f3dec3f4bac7c2fae52edbc88490cd482e",
@@ -5341,8 +5361,8 @@
     },
     "src/apps/jobs.rs": {
       "status": "unproved",
-      "sha256": "a60bf9b750ffc15cb5c527df01f4cfa7f25eb79ec72aefa078f46752848f1e08",
-      "review": "Reviewed Apps 0.29 job supervision: original native current-rights/current-package result redaction and queued-event selection share job_projection via the actual native authority adapter. Native detail/actor/retry/execution checks and the original job-control CAS/leases/outbox remain unchanged. Independent schema-5 supervisor uses fresh authority, explicit boolean/digest/revision/outcome approval and exact control-only grants; actual two-shop HTTP/MCP/SDK, rollback, SQL role and restart tests pass. Host/network/SQL remain unproved; kernel unchanged."
+      "sha256": "9b0808f3b63dcdbaf04e2985a1f0471815a9970bdc046440e50e6b96a390efde",
+      "review": "App jobs and private evidence reads moved into the apps component without changing rules"
     },
     "src/apps/manifest.rs": {
       "status": "unproved",
@@ -5361,8 +5381,8 @@
     },
     "src/apps/mod.rs": {
       "status": "unproved",
-      "sha256": "f862ae9b794078a5e1dd02dcff9f2ef69a9d8eed21e862dce929b91e3caf45bd",
-      "review": "Service calls and event delivery moved into the apps component without changing rules"
+      "sha256": "0623db095a6eb3e8ceceb22392ed228381c77c7d54c5126da25fcc6c574fab50",
+      "review": "App jobs and private evidence reads moved into the apps component without changing rules"
     },
     "src/apps/model_contract.rs": {
       "status": "unproved",
@@ -5511,8 +5531,8 @@
     },
     "src/apps/storage.rs": {
       "status": "unproved",
-      "sha256": "5ce918e37d39d83f935ae7f337c9a4b31df34292478f55705deb9cfa7f18c9e6",
-      "review": "Reviewed fixed app-record store, tenant/app/model identity, forced signed RLS, trigger-maintained unique/reference/quota projections, scoped schema/preview/staging/checkout consumers and atomic maintenance consolidation; actual PostgreSQL app/checkout/schema/F5 suites and independent security re-review pass. Existing frozen-record WIT conversion remains equivalent; SQL/async adapters remain outside Lean proof boundary."
+      "sha256": "06bfb809a6a58857b90d444e6c22782114f1460dc3f633f6b90e57bfe6fc3d09",
+      "review": "App jobs and private evidence reads moved into the apps component without changing rules"
     },
     "src/apps/submissions.rs": {
       "status": "reviewed-binding",

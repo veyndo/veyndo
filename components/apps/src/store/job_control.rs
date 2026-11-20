@@ -1,7 +1,15 @@
 //! Native current-action/right/input admission for the shared job-control transaction; no duplicate transition or outbox engine.
-use super::*;
+use crate::domain::{action_admission, input_schema};
+use crate::store::jobs;
+use serde_json::Value;
+use sqlx::Row;
+use veyndo_app_model::manifest::Manifest;
 use veyndo_app_storage::job_control as shared;
-pub(super) struct Admission<'a> {
+use veyndo_core::{Error, RequestContext, StatusCode, bad, conflict};
+use veyndo_identity::permit;
+
+/// Readmits a retried job under the current action, rights and input schema.
+pub struct Admission<'a> {
     pub context: &'a RequestContext,
     pub manifest: &'a Manifest,
 }
@@ -22,17 +30,18 @@ impl<'db> shared::RetryAdmission<'db> for Admission<'_> {
                 .iter()
                 .find(|a| a.name == row.get::<String, _>("action") && a.handler == "job")
                 .ok_or(conflict("Job action is no longer installed"))?;
-            auth::permit(
+            permit(
                 self.context,
                 action.permission.as_deref().unwrap_or("apps.manage"),
             )?;
-            gateway::additional_permissions(self.context, action)?;
-            validate_input(&action.input_schema, &row.get::<Value, _>("input"))?;
+            action_admission::additional(self.context, action)?;
+            input_schema::validate(&action.input_schema, &row.get::<Value, _>("input"))?;
             Ok(jobs::event_kind(self.manifest, &action.name))
         })
     }
 }
-pub(super) fn error(e: shared::ControlError<Error>) -> Error {
+/// The native error of a shared job control failure.
+pub fn error(e: shared::ControlError<Error>) -> Error {
     match e {
         shared::ControlError::Database(e) => e.into(),
         shared::ControlError::Invalid(s) => bad(s),

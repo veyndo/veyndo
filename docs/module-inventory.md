@@ -80,7 +80,6 @@ This lists every checked-in source module in these roots, including files with n
 | [src/apps/hosted.rs](../src/apps/hosted.rs) | Persist hosted-app dependencies through the existing package installer; no private renderer or parallel registry. |
 | [src/apps/input_schema.rs](../src/apps/input_schema.rs) | The bounded input schema validator lives in the apps component; this module keeps the short path for the app adapters. |
 | [src/apps/job_callbacks.rs](../src/apps/job_callbacks.rs) | Long-job service callbacks disclose input only after current actor consent, package and lease checks. Late callbacks cannot commit. |
-| [src/apps/job_control.rs](../src/apps/job_control.rs) | Native current-action/right/input admission for the shared job-control transaction; no duplicate transition or outbox engine. |
 | [src/apps/job_enqueue.rs](../src/apps/job_enqueue.rs) | Service job requests reuse the existing declared action gateway, actor checks, quotas and transactional outbox. |
 | [src/apps/job_evidence.rs](../src/apps/job_evidence.rs) | Native job completion and authenticated private record evidence share one transaction and current creator/package fences. |
 | [src/apps/job_import.rs](../src/apps/job_import.rs) | Reviewed job records use current creator rights and a locked live package; private targets never become app credentials. |
@@ -118,7 +117,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/apps/service_limits.rs](../src/apps/service_limits.rs) | Shared network-app admission lives in the apps component; this module builds its state from the server state. |
 | [src/apps/service_policy.rs](../src/apps/service_policy.rs) | The service transport policy lives in the apps component; this module keeps the short path for the app adapters. |
 | [src/apps/settings.rs](../src/apps/settings.rs) | Declared app settings reuse the digest-bound encrypted secret owner; secret values never have a browser read path. |
-| [src/apps/storage.rs](../src/apps/storage.rs) | Existing aggregate app row/byte budget; shared record triggers maintain it without per-app DDL or recounts. |
+| [src/apps/storage.rs](../src/apps/storage.rs) | The app storage budget lives in the apps component; this module keeps the short path for installation. |
 | [src/apps/submissions.rs](../src/apps/submissions.rs) | Public append-only intake uses declared schemas, existing cart admission, quotas, records and outbox. |
 | [src/apps/surface_grants.rs](../src/apps/surface_grants.rs) | Short-lived UI grants bind a package, surface, actor and concrete editor object on the server. |
 | [src/apps/surface_registry.rs](../src/apps/surface_registry.rs) | Current-authority app surface projection shared by storefronts and native visual composition. |
@@ -670,6 +669,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/apps/src/domain.rs](../components/apps/src/domain.rs) | Pure package rules: no database, no transport. |
 | [components/apps/src/http/activity.rs](../components/apps/src/http/activity.rs) | Bounded metadata-only app telemetry, storage usage and explicitly approved cursor-based event replay. |
 | [components/apps/src/http/credentials.rs](../components/apps/src/http/credentials.rs) | App keys reuse the core integration-key store, current creator rights, expiry and immutable package digest. |
+| [components/apps/src/http/jobs.rs](../components/apps/src/http/jobs.rs) | The job list, detail and control of an app. |
 | [components/apps/src/http/secrets.rs](../components/apps/src/http/secrets.rs) | Digest-bound per-shop app secret rotation; there is no plaintext read endpoint. |
 | [components/apps/src/http/settings.rs](../components/apps/src/http/settings.rs) | Declared app settings reuse the digest-bound encrypted secret owner; secret values never have a browser read path. |
 | [components/apps/src/http/ui_documents.rs](../components/apps/src/http/ui_documents.rs) | Secret-free, operator-pinned guest code in a response-enforced opaque sandbox, never srcdoc. |
@@ -693,7 +693,10 @@ This lists every checked-in source module in these roots, including files with n
 | [components/apps/src/store/core_references.rs](../components/apps/src/store/core_references.rs) | Core records an app field names must belong to the same shop; no app alters core tables. |
 | [components/apps/src/store/dependencies.rs](../components/apps/src/store/dependencies.rs) | Tenant-local dependency and version gates of a signed package, read under the installing transaction. |
 | [components/apps/src/store/event_deliveries.rs](../components/apps/src/store/event_deliveries.rs) | Outbox events become queued deliveries for every active package that may receive them. |
+| [components/apps/src/store/evidence.rs](../components/apps/src/store/evidence.rs) | Private provenance-bearing app sources for merchant retrieval; never public PDP answers. |
 | [components/apps/src/store/extension_filter.rs](../components/apps/src/store/extension_filter.rs) | Admitted app-field predicates applied before native pagination. |
+| [components/apps/src/store/job_control.rs](../components/apps/src/store/job_control.rs) | Native current-action/right/input admission for the shared job-control transaction; no duplicate transition or outbox engine. |
+| [components/apps/src/store/jobs.rs](../components/apps/src/store/jobs.rs) | Durable long actions piggyback on the existing outbox. Apps claim a fenced lease; unknown side effects are never retried automatically. |
 | [components/apps/src/store/languages.rs](../components/apps/src/store/languages.rs) | App record translations use configured shop languages and field-level main-language inheritance. |
 | [components/apps/src/store/package_fence.rs](../components/apps/src/store/package_fence.rs) | Shared package fence prevents native record or document writes racing contract upgrades. |
 | [components/apps/src/store/packages.rs](../components/apps/src/store/packages.rs) | The installed package of a shop, read on the backend the caller already holds. |
@@ -703,6 +706,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/apps/src/store/schema_upgrade.rs](../components/apps/src/store/schema_upgrade.rs) | Native field/content-language authority for shared bounded schema migration on the original installation transaction. |
 | [components/apps/src/store/secrets.rs](../components/apps/src/store/secrets.rs) | Digest-bound per-shop app secrets on platform authenticated encryption; platform keys never leave this owner and there is no plaintext read path. |
 | [components/apps/src/store/settings.rs](../components/apps/src/store/settings.rs) | Declared app settings reuse the digest-bound encrypted secret owner; secret values never have a browser read path. |
+| [components/apps/src/store/storage_usage.rs](../components/apps/src/store/storage_usage.rs) | Existing aggregate app row/byte budget; shared record triggers maintain it without per-app DDL or recounts. |
 | [components/apps/src/store.rs](../components/apps/src/store.rs) | SQL of the apps component. |
 | [components/b2b/src/domain/contract.rs](../components/b2b/src/domain/contract.rs) | Native B2B operation catalogue and bounded request schema shared by HTTP, MCP and UCP adapters. |
 | [components/b2b/src/domain.rs](../components/b2b/src/domain.rs) | domain of this component. |

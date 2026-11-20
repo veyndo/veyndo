@@ -69,7 +69,6 @@ pub(crate) use tool_contract::{app_tools, app_tools_for};
 mod history_storage;
 mod input_schema;
 mod job_callbacks;
-mod job_control;
 mod job_enqueue;
 mod job_evidence;
 mod job_import;
