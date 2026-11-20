@@ -1,0 +1,134 @@
+//! Searches the installed app capabilities a caller may use; data reads run through the same admitted action gateway.
+use crate::domain::discovery::{admitted, relevant, schema};
+use crate::domain::input_schema::validate_native;
+use crate::ports::Platform;
+use crate::service::gateway;
+use crate::store::packages::package;
+use serde_json::{Value, json};
+use sqlx::Row;
+use veyndo_app_model::manifest::Manifest;
+use veyndo_core::{RequestContext, Result, bad, conflict};
+use veyndo_identity::{merchant, permit};
+
+/// The handlers a discovery read may reach: managed lists and saved configurations.
+const READS: [&str; 2] = ["list", "configurations"];
+
+/// One page of ranked apps after the app named by `after`; a vanished cursor asks the caller to search again.
+pub fn page(
+    mut apps: Vec<(usize, String, Value)>,
+    after: Option<&str>,
+    limit: usize,
+) -> Result<Value> {
+    apps.sort_by(|x, y| y.0.cmp(&x.0).then(x.1.cmp(&y.1)));
+    let offset = match after {
+        Some(id) => apps
+            .iter()
+            .position(|x| x.1 == id)
+            .map(|n| n + 1)
+            .ok_or(conflict("App discovery changed; search again"))?,
+        None => 0,
+    };
+    let has_more = offset + limit < apps.len();
+    let page = apps
+        .into_iter()
+        .skip(offset)
+        .take(limit)
+        .map(|x| x.2)
+        .collect::<Vec<_>>();
+    Ok(
+        json!({"nextAfter":if has_more {page.last().map(|p|p["app"].clone())}else{None},"hasMore":has_more,"apps":page}),
+    )
+}
+
+/// Runs `merchant.apps.search` or `merchant.apps.read` with the rights of the caller.
+pub async fn invoke(a: &Platform, h: &RequestContext, name: &str, v: &Value) -> Result<Value> {
+    let t = merchant(h)?;
+    permit(h, "apps.read")?;
+    validate_native(
+        &schema(name).ok_or(bad("Unknown app discovery operation"))?,
+        v,
+    )?;
+    if name == "merchant.apps.read" {
+        let app = v["app"].as_str().ok_or(bad("App required"))?;
+        let m = package(a, &t, app, true).await?;
+        let action = m
+            .actions
+            .iter()
+            .find(|act| {
+                act.name == v["action"]
+                    && admitted(h, &m, act)
+                    && READS.contains(&act.handler.as_str())
+            })
+            .ok_or(bad("App action is not an admitted managed read"))?;
+        return Box::pin(gateway::invoke(
+            a,
+            h,
+            &m.id,
+            &action.name,
+            &v["arguments"],
+            None,
+        ))
+        .await;
+    }
+    let rows =
+        sqlx::query("SELECT manifest FROM app_packages WHERE tenant=$1 AND active ORDER BY id")
+            .bind(&t)
+            .fetch_all(&a.db)
+            .await?;
+    let query = v["query"].as_str().unwrap_or("");
+    let mut apps = vec![];
+    for row in rows {
+        let m: Manifest = serde_json::from_value(row.get("manifest"))
+            .map_err(|_| bad("Invalid installed app"))?;
+        let actions=m.actions.iter().filter(|act|admitted(h,&m,act) && READS.contains(&act.handler.as_str()))
+            .map(|act|json!({"action":act.name,"description":act.description,"inputSchema":act.input_schema})).take(12).collect::<Vec<_>>();
+        let proposals=m.actions.iter().filter(|act|admitted(h,&m,act) && act.handler=="save").map(|act|json!({"name":format!("app.{}.{}",m.id,act.name),"description":act.description,"inputSchema":act.input_schema,"reviewRequired":true})).take(12).collect::<Vec<_>>();
+        if actions.is_empty() && proposals.is_empty() {
+            continue;
+        }
+        let score = relevant(&m, query);
+        if !query.trim().is_empty() && score == 0 {
+            continue;
+        }
+        apps.push((
+            score,
+            m.id.clone(),
+            json!({"app":m.id,"version":m.version,"name":m.name,"tools":actions,"proposals":proposals}),
+        ));
+    }
+    page(
+        apps,
+        v["after"].as_str(),
+        v["limit"].as_u64().unwrap_or(8) as usize,
+    )
+}
+
+#[cfg(test)]
+mod tests {
+    use super::page;
+    use serde_json::json;
+    use veyndo_core::StatusCode;
+
+    #[test]
+    fn pages_rank_by_relevance_then_id_and_continue_after_a_known_app() {
+        let apps = || {
+            vec![
+                (1, "notes".to_string(), json!({"app":"notes"})),
+                (3, "reviews".to_string(), json!({"app":"reviews"})),
+                (1, "advisor".to_string(), json!({"app":"advisor"})),
+            ]
+        };
+        let first = page(apps(), None, 2).unwrap();
+        assert_eq!(first["apps"], json!([{"app":"reviews"},{"app":"advisor"}]));
+        assert_eq!(first["hasMore"], true);
+        assert_eq!(first["nextAfter"], "advisor");
+        let rest = page(apps(), Some("advisor"), 2).unwrap();
+        assert_eq!(rest["apps"], json!([{"app":"notes"}]));
+        assert_eq!(rest["hasMore"], false);
+        assert!(rest["nextAfter"].is_null());
+        assert_eq!(
+            page(apps(), Some("removed"), 2).err().map(|e| e.0),
+            Some(StatusCode::CONFLICT)
+        );
+    }
+}

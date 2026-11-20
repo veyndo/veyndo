@@ -58,7 +58,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/apps/core_extensions.rs](../src/apps/core_extensions.rs) | Namespaced core-object extension contracts live in the apps component; this module adds the native projections. |
 | [src/apps/credentials.rs](../src/apps/credentials.rs) | App keys reuse the core integration-key store, current creator rights, expiry and immutable package digest. |
 | [src/apps/data.rs](../src/apps/data.rs) | Managed app records live in the apps component; this module supplies the record rules of the bundled site builder. |
-| [src/apps/discovery.rs](../src/apps/discovery.rs) | Search all installed app capabilities with current rights; data reads reuse their exact admitted native action. |
+| [src/apps/discovery.rs](../src/apps/discovery.rs) | App capability discovery lives in the apps component; this module keeps the server-side entry for MCP and capabilities. |
 | [src/apps/distribution.rs](../src/apps/distribution.rs) | Signed publisher namespaces and tenant-local dependency/version gates; the rules live in the apps component, this module supplies the operator's publisher keys. |
 | [src/apps/editor_contract.rs](../src/apps/editor_contract.rs) | Editor mounts, enumerated fields and tenant-owned core references; no app alters core tables. |
 | [src/apps/editor_tests.rs](../src/apps/editor_tests.rs) | Assistant fixture contracts exercise real validation, not only the client-side builder. |
@@ -650,6 +650,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/apps/src/http/app_studio.rs](../components/apps/src/http/app_studio.rs) | App Studio transport for private autosaves, project archive and staging a reviewed build. |
 | [components/apps/src/http/credentials.rs](../components/apps/src/http/credentials.rs) | App keys reuse the core integration-key store, current creator rights, expiry and immutable package digest. |
 | [components/apps/src/http/jobs.rs](../components/apps/src/http/jobs.rs) | The job list, detail and control of an app. |
+| [components/apps/src/http/packages.rs](../components/apps/src/http/packages.rs) | Package transport: capability discovery for agents, switching an installed package on or off, and the public consent adapter. |
 | [components/apps/src/http/record_history.rs](../components/apps/src/http/record_history.rs) | Bounded app-record history, current entity rights and restoration through the normal managed save path. |
 | [components/apps/src/http/secrets.rs](../components/apps/src/http/secrets.rs) | Digest-bound per-shop app secret rotation; there is no plaintext read endpoint. |
 | [components/apps/src/http/settings.rs](../components/apps/src/http/settings.rs) | Declared app settings reuse the digest-bound encrypted secret owner; secret values never have a browser read path. |
@@ -666,6 +667,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/apps/src/service/configuration_examples.rs](../components/apps/src/service/configuration_examples.rs) | Frozen configuration cases use the same field validation and bounded guest as real cart configuration. |
 | [components/apps/src/service/configuration_runtime.rs](../components/apps/src/service/configuration_runtime.rs) | Generic pure-Wasm contribution executor; the installed package supplies all business predicates. |
 | [components/apps/src/service/configuration_selection.rs](../components/apps/src/service/configuration_selection.rs) | Reusable input-only selections resolve current package/library revisions before one native cart mutation. |
+| [components/apps/src/service/discovery.rs](../components/apps/src/service/discovery.rs) | Searches the installed app capabilities a caller may use; data reads run through the same admitted action gateway. |
 | [components/apps/src/service/egress.rs](../components/apps/src/service/egress.rs) | Bounded origin clients pin resolved addresses for each connection and never use ambient HTTP proxies. |
 | [components/apps/src/service/event_delivery.rs](../components/apps/src/service/event_delivery.rs) | Durable at-least-once app events: retry leases, stable idempotency keys and signed public HTTPS delivery on the existing outbox. |
 | [components/apps/src/service/gateway.rs](../components/apps/src/service/gateway.rs) | One permission-aware action gateway serves HTTP, UI and MCP; service egress is operator configured. |

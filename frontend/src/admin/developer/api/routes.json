@@ -12,12 +12,12 @@
   {
     "path": "/api/agent/apps/read",
     "method": "POST",
-    "source": "src/apps/discovery.rs"
+    "source": "src/apps/routes.rs"
   },
   {
     "path": "/api/agent/apps/search",
     "method": "POST",
-    "source": "src/apps/discovery.rs"
+    "source": "src/apps/routes.rs"
   },
   {
     "path": "/api/agent/chat",

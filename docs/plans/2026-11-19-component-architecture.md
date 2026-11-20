@@ -417,16 +417,32 @@ Order follows the dependency report, lowest first. Each line is one move.
     operator service calls, event delivery, package verification, the upgrade
     review, record import, job claim and progress callbacks with sealed
     completion evidence, service job requests and the action gateway;
+  - `domain/` further holds the surface grant rules, app planning, the App
+    Studio generation rules (schema, guided brief, bounded edits, retained
+    contract, deterministic bindings, design context, default actions) and
+    the build admission;
+  - `store/` further holds surface grants, planning, the tool catalogue, cart
+    configuration checks, the purchase projection and hosted app
+    installation;
+  - `service/` further holds saved selections, App Studio builds (save, list,
+    archive, staging), the immediate preview and capability discovery;
   - `http/`: secrets, settings, activity and replay, callback keys, incoming
-    webhooks, jobs and record history; the server registers them with their
-    route rights;
+    webhooks, jobs, record history, surface grants, UI bundles, declared app
+    routes, the action and entity handlers, App Studio autosaves, archive,
+    staging and preview, capability discovery, package activation and the
+    consent adapter; the server registers them with their route rights;
   - `ports`: the `Platform` state and the three host ports named in phase 1.
+    `HostActions` also creates the personal preview environment.
   The operator's services and publisher keys reach pure rules as parameters.
-  Open (about 4,000 lines remain in `src/apps`): surface grants and UI bundle
-  routes, core callbacks (they call operations, assets and B2B), evidence
-  ingest (knowledge sync), cart contributions and commerce hook evaluation
-  (cart and currencies), planning, hosted frontends, the tool contract, the
-  site builder and `developer`.
+  The tool wire contract lives in `veyndo_core::tool_contract`.
+  Open (about 3,000 lines remain in `src/apps`, 360 in `src/developer`): core
+  callbacks, documents and exchange (they call operations, assets and B2B),
+  job import, evidence ingest (knowledge sync), cart contributions and
+  commerce hook evaluation (cart and currencies), submissions (cart and site
+  forms), asset surfaces, the package list and installation route (shop
+  settings, hosted frontends), the site builder, and in `developer` the
+  generation orchestrator and coding-agent task export (inference and design
+  references stay with the server).
 - [ ] automation
 - [ ] intelligence. Started: `components/intelligence` owns the knowledge
   module (relations, hybrid search, vectors with their namespace and cache,

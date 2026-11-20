@@ -1,9 +1,19 @@
 //! Tenant-scoped package lifecycle, generated data endpoints and a shared action adapter.
 use super::*;
 use veyndo_app_platform::http::actions::{app_action, entity_list, entity_save, slots};
+use veyndo_app_platform::http::packages;
 pub(crate) fn app_router() -> Router<App> {
     Router::new()
-        .merge(discovery::router())
+        .secure_route(
+            "/api/agent/apps/search",
+            &[("POST", "apps.read")],
+            post(packages::search),
+        )
+        .secure_route(
+            "/api/agent/apps/read",
+            &[("POST", "apps.read")],
+            post(packages::read),
+        )
         .merge(super::webhooks::router())
         .merge(evidence_routes::router())
         .merge(record_history::router())
@@ -20,7 +30,7 @@ pub(crate) fn app_router() -> Router<App> {
         .merge(core_documents::router())
         .merge(asset_surfaces::router())
         .merge(jobs::router())
-        .route("/store-api/apps/analytics.js", get(analytics_sdk))
+        .route("/store-api/apps/analytics.js", get(packages::analytics_sdk))
         .secure_route(
             "/api/apps",
             &[("GET", "apps.read"), ("POST", "apps.manage")],
@@ -29,7 +39,7 @@ pub(crate) fn app_router() -> Router<App> {
         .secure_route(
             "/api/apps/{id}",
             &[("PUT", "apps.manage")],
-            axum::routing::put(app_state),
+            axum::routing::put(packages::state),
         )
         .secure_route(
             "/api/apps/{id}/actions/{action}",
@@ -118,38 +128,6 @@ async fn app_install(
     }
     Ok(Json(result))
 }
-async fn app_state(
-    State(a): State<App>,
-    h: RequestContext,
-    Path(id): Path<String>,
-    Json(v): Json<Value>,
-) -> Result<Json<Value>> {
-    auth::permit(&h, "users")?;
-    let t = merchant(&a, &h)?;
-    let active = v["active"].as_bool().ok_or(bad("active required"))?;
-    let mut tx = a.db.begin().await?;
-    let result = veyndo_app_storage::activation::set(
-        &mut tx,
-        &veyndo_app_storage::activation::Change {
-            scope: veyndo_app_storage::Scope {
-                tenant: &t,
-                app: &id,
-            },
-            active,
-            revision: v["revision"].as_i64(),
-        },
-        &veyndo_app_platform::store::activation::Host {
-            tenant: &t,
-            app: &id,
-            actor: &h,
-            commerce: &install_host::COMMERCE,
-        },
-    )
-    .await
-    .map_err(veyndo_app_platform::store::activation::error)?;
-    tx.commit().await?;
-    Ok(Json(result))
-}
 async fn configure_action(
     State(a): State<App>,
     h: RequestContext,
@@ -157,16 +135,4 @@ async fn configure_action(
     Json(v): Json<Value>,
 ) -> Result<Json<Value>> {
     Ok(Json(configure(&a, &h, &id, &v).await?))
-}
-
-/// The shared public consent adapter contains no tenant configuration or provider credentials.
-async fn analytics_sdk() -> impl axum::response::IntoResponse {
-    (
-        [
-            ("content-type", "text/javascript; charset=utf-8"),
-            ("cache-control", "public, max-age=3600"),
-            ("x-content-type-options", "nosniff"),
-        ],
-        include_str!("../../extensions/sdk/analytics.js"),
-    )
 }

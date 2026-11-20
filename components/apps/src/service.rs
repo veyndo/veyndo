@@ -5,6 +5,7 @@ pub mod app_preview;
 pub mod configuration_examples;
 pub mod configuration_runtime;
 pub mod configuration_selection;
+pub mod discovery;
 pub mod egress;
 pub mod event_delivery;
 pub mod gateway;

@@ -5,6 +5,7 @@ pub mod app_routes;
 pub mod app_studio;
 pub mod credentials;
 pub mod jobs;
+pub mod packages;
 pub mod record_history;
 pub mod secrets;
 pub mod settings;

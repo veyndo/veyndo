@@ -981,6 +981,11 @@
       "sha256": "e45ca4142474e72487b3505020403c7b8724cf3162ccc8dc1e107541c00d9f1f",
       "review": "App jobs and private evidence reads moved into the apps component without changing rules"
     },
+    "components/apps/src/http/packages.rs": {
+      "status": "unproved",
+      "sha256": "c08f3540cbaf9e0bea9426300137a7cb6f3fac788bcd566abfbc47fc2a03817e",
+      "review": "App discovery, package activation and consent adapter moved into the apps component; behaviour unchanged"
+    },
     "components/apps/src/http/record_history.rs": {
       "status": "unproved",
       "sha256": "d60cec3ac6237ddfc68dbb3a99845dbad460290010266aa6de82622483e19f1b",
@@ -1018,8 +1023,8 @@
     },
     "components/apps/src/http.rs": {
       "status": "unproved",
-      "sha256": "aff225d36da3adac31e96096a3f3001fc5c38858f3f4483d0a21b69f90f43e24",
-      "review": "App Studio builds, autosaves, archive and staging moved into the apps component; behaviour unchanged"
+      "sha256": "95ee1cf154fac8ebebdfcafea281372cec68e6a5c9a5caca382a48ddd9e5d5a2",
+      "review": "App discovery, package activation and consent adapter moved into the apps component; behaviour unchanged"
     },
     "components/apps/src/lib.rs": {
       "status": "unproved",
@@ -1060,6 +1065,11 @@
       "status": "unproved",
       "sha256": "bd4d435aca1c80045ce4b7a923c51ec89cf5ccc069b4fd025d0f45e0b025ecbf",
       "review": "Cart configuration checks, saved selections, the purchase projection and hosted app installation moved into the apps component without behavior change"
+    },
+    "components/apps/src/service/discovery.rs": {
+      "status": "unproved",
+      "sha256": "1330f04ef3d3ec37535e61c44c794f999734cf1e83a213f0174c1597938878dd",
+      "review": "App discovery, package activation and consent adapter moved into the apps component; behaviour unchanged"
     },
     "components/apps/src/service/egress.rs": {
       "status": "unproved",
@@ -1128,8 +1138,8 @@
     },
     "components/apps/src/service.rs": {
       "status": "unproved",
-      "sha256": "9b6c7839333ce002648e2e71ebe545e86bf00b0457c433569688b85d2e55cdff",
-      "review": "App Studio immediate preview moved into the apps component behind the host port; behaviour unchanged"
+      "sha256": "3158656ac903b0915c7f07266530da843f2f438b9935bdb0f71682da1041fbd3",
+      "review": "App discovery, package activation and consent adapter moved into the apps component; behaviour unchanged"
     },
     "components/apps/src/store/action_log.rs": {
       "status": "unproved",
@@ -5458,8 +5468,8 @@
     },
     "src/apps/discovery.rs": {
       "status": "unproved",
-      "sha256": "1c2c9910289d144afe62afe82d5549cb80861873718ec3dd71b1f1cdfb8e9ffb",
-      "review": "Action authorization, entity access and discovery rules moved into the apps component without changing rules"
+      "sha256": "4cfb1fc8b7ed99c71b501c1698438a906e86f46da7faa4c5330efd9a56c81b8b",
+      "review": "App discovery, package activation and consent adapter moved into the apps component; behaviour unchanged"
     },
     "src/apps/distribution.rs": {
       "status": "unproved",
@@ -5613,8 +5623,8 @@
     },
     "src/apps/routes.rs": {
       "status": "unproved",
-      "sha256": "ffdb30a637b1f38b10e986be8c7ab3eabc672d65c55db778ce2e357f17e93a64",
-      "review": "Surface grants, declared app routes, UI bundle loading and the action and entity handlers moved into the apps component without behavior change"
+      "sha256": "c8db125f7d852622fa696cbf076e0ab5d825c6e471607957b200d79dc6647b9f",
+      "review": "App discovery, package activation and consent adapter moved into the apps component; behaviour unchanged"
     },
     "src/apps/schedules.rs": {
       "status": "unproved",
