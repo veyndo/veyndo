@@ -649,6 +649,10 @@ This lists every checked-in source module in these roots, including files with n
 | [components/b2b/src/domain/contract.rs](../components/b2b/src/domain/contract.rs) | Native B2B operation catalogue and bounded request schema shared by HTTP, MCP and UCP adapters. |
 | [components/b2b/src/domain.rs](../components/b2b/src/domain.rs) | domain of this component. |
 | [components/b2b/src/lib.rs](../components/b2b/src/lib.rs) | B2B component: company procurement records, their bounds and the purchasing contract. |
+| [components/b2b/src/service/approval.rs](../components/b2b/src/service/approval.rs) | Revision-bound purchasing approval inbox; approvers must be active peers and cannot approve themselves. |
+| [components/b2b/src/service/quick_order.rs](../components/b2b/src/service/quick_order.rs) | Bounded SKU bulk entry resolves native products then uses the ordinary cart's permissions, quantities and prices. |
+| [components/b2b/src/service/quote_contract.rs](../components/b2b/src/service/quote_contract.rs) | Accepted offer prices feed the existing currency/tax calculator; checkout consumes the offer atomically. |
+| [components/b2b/src/service.rs](../components/b2b/src/service.rs) | Procurement operations on the buyer cart; the server supplies the cart through the shop port. |
 | [components/b2b/src/store/access.rs](../components/b2b/src/store/access.rs) | Re-resolves active customer sessions, company policy and unit membership at every procurement boundary. |
 | [components/b2b/src/store/catalog.rs](../components/b2b/src/store/catalog.rs) | Private unit catalog scope is derived from the current employee/cart, never caller criteria; indexed before pagination. |
 | [components/b2b/src/store/organization.rs](../components/b2b/src/store/organization.rs) | Merchant-managed firms, unit hierarchies, employee grants and tenant-bound catalogs with optimistic revisions. |
@@ -950,6 +954,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/shop/src/domain/validation.rs](../components/shop/src/domain/validation.rs) | Configuration validation and required availability invariants. |
 | [components/shop/src/domain.rs](../components/shop/src/domain.rs) | Rules on shop settings, free of I/O. |
 | [components/shop/src/lib.rs](../components/shop/src/lib.rs) | Shop component: the settings every other commerce component reads, with their bounds and inheritance rules. |
+| [components/shop/src/ports.rs](../components/shop/src/ports.rs) | What components that work on a buyer's cart need from the server: the guarded cart, its priced view and a revision-checked replacement of its lines. |
 | [components/shop/src/store/group_usage.rs](../components/shop/src/store/group_usage.rs) | Removing a customer group rejects live customer, price and native/source-rule dependencies under the settings lock. |
 | [components/shop/src/store.rs](../components/shop/src/store.rs) | SQL of the shop component. |
 | [components/shop/src/types/b2b.rs](../components/shop/src/types/b2b.rs) | B2B feature switches live in shared commerce settings; disabling never relaxes existing financial policy. |

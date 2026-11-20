@@ -1,12 +1,6 @@
 //! RFQ lifecycle binds merchant offers to a specific company buyer, cart, currency, expiry and revision.
 use super::*;
-#[derive(Clone, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub(super) struct OfferLine {
-    pub id: String,
-    pub quantity: u32,
-    pub gross_minor: u64,
-}
+pub(super) use veyndo_b2b::types::model::OfferLine;
 pub(super) async fn invoke(a: &App, h: &RequestContext, op: &str, v: &Value) -> Result<Value> {
     let t = tenant(h)?;
     let admin = ["quotes.merchant", "quote.offer", "quote.transition"].contains(&op);

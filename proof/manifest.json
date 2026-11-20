@@ -458,7 +458,7 @@
     "b2b_approval_admissible": {
       "bindings": [
         "components/b2b/src/store/purchase.rs",
-        "src/b2b/approval.rs"
+        "components/b2b/src/service/approval.rs"
       ],
       "theorems": [
         "b2b_approval_exact",
@@ -693,8 +693,28 @@
     },
     "components/b2b/src/lib.rs": {
       "status": "unproved",
-      "sha256": "5c54b4685b9e3ccda17f3620e4bbf355f58944f4f7560e95ca23a70128a588f9",
-      "review": "B2B access, organization and purchasing storage and flow job claims moved into their components"
+      "sha256": "089fb1135183fa4f2df9cb8f6ecd0b58a4fe61f4037a62e3b30544fc6ad2bfe5",
+      "review": "B2B approvals, quick order and offer contract moved behind the shop cart port"
+    },
+    "components/b2b/src/service/approval.rs": {
+      "status": "reviewed-binding",
+      "sha256": "6d9a709d6ec4d241b5d51a79aaf790b2dc3a2c2fb09dcfd5fbdfb8b847ef8e4f",
+      "review": "B2B approvals, quick order and offer contract moved behind the shop cart port"
+    },
+    "components/b2b/src/service/quick_order.rs": {
+      "status": "unproved",
+      "sha256": "a54724fce58f1d9712699a6803fdad9905d87fb9868a3fc4a8b19408cef54b47",
+      "review": "B2B approvals, quick order and offer contract moved behind the shop cart port"
+    },
+    "components/b2b/src/service/quote_contract.rs": {
+      "status": "unproved",
+      "sha256": "84272e35216d2c94b26846f4e22a83bdda96e1954bc886d4bca33d9a3b2793cb",
+      "review": "B2B approvals, quick order and offer contract moved behind the shop cart port"
+    },
+    "components/b2b/src/service.rs": {
+      "status": "unproved",
+      "sha256": "7a78702a0deccfbc0149c7ac013beb330f2c9de1d17c62d83aadb68377528305",
+      "review": "B2B approvals, quick order and offer contract moved behind the shop cart port"
     },
     "components/b2b/src/store/access.rs": {
       "status": "unproved",
@@ -728,8 +748,8 @@
     },
     "components/b2b/src/types/model.rs": {
       "status": "unproved",
-      "sha256": "e3dfd75fc70d741a3bf187f13588ee892dfef5a44f4e2d5d8e6a2c28b4f76da9",
-      "review": "Identity credentials, B2B and POS contracts and checkout tax lines moved into components; kernel call sites unchanged"
+      "sha256": "986ab0f3d72b038a707c362e63cf2e6ceac69f58a791495f5fec5f19f6c33e64",
+      "review": "B2B approvals, quick order and offer contract moved behind the shop cart port"
     },
     "components/b2b/src/types.rs": {
       "status": "unproved",
@@ -2153,8 +2173,13 @@
     },
     "components/shop/src/lib.rs": {
       "status": "unproved",
-      "sha256": "5a08d949996029d82491f30ce0af6feab1224965247bdcaba9b40823e77edc42",
-      "review": "Order list criteria, company model and receipts moved into components; kernel call sites unchanged"
+      "sha256": "07c31c76026ab1fd6db6b6f9f6c2b6b63f04cf9283b515458e08d0fcabbb01a2",
+      "review": "B2B approvals, quick order and offer contract moved behind the shop cart port"
+    },
+    "components/shop/src/ports.rs": {
+      "status": "unproved",
+      "sha256": "3aebe14f9c3b22e4177ce68ad3b2c6d0cc9e3a517217ce9105a3898218921a6b",
+      "review": "B2B approvals, quick order and offer contract moved behind the shop cart port"
     },
     "components/shop/src/store/group_usage.rs": {
       "status": "unproved",
@@ -4847,9 +4872,9 @@
       "review": "B2B access, organization and purchasing storage and flow job claims moved into their components"
     },
     "src/b2b/approval.rs": {
-      "status": "reviewed-binding",
-      "sha256": "08f4585d276de48153c5425465786c0cf2a51eed000a90271b0a3ab64c28f41f",
-      "review": "Reviewed native B2B authority, unit-first locking, revision-bound approvals and offers, exact budget allocation/release, private variant pagination, current app callbacks and forced tenant FKs/RLS; EDI codecs remain app-owned and bounded. Real PostgreSQL approval/concurrent budget/revocation/PDF/MCP and app/checkout baseline suites passed; schema/build/proof and changed Rust owners reviewed. Two extracted decisions add four Lean properties, not whole-server verification."
+      "status": "unproved",
+      "sha256": "98c54181ec4336ee1511a8133439e21a9d4e634bb423f3f9cc5330ba3e7efc13",
+      "review": "B2B approvals, quick order and offer contract moved behind the shop cart port"
     },
     "src/b2b/catalog.rs": {
       "status": "unproved",
@@ -4903,13 +4928,13 @@
     },
     "src/b2b/quick_order.rs": {
       "status": "unproved",
-      "sha256": "8e777895d9b7bb8f896bd87cb82a6b144fba0d533a9e5ea0dac1921dda55789a",
-      "review": "Reviewed native B2B authority, unit-first locking, revision-bound approvals and offers, exact budget allocation/release, private variant pagination, current app callbacks and forced tenant FKs/RLS; EDI codecs remain app-owned and bounded. Real PostgreSQL approval/concurrent budget/revocation/PDF/MCP and app/checkout baseline suites passed; schema/build/proof and changed Rust owners reviewed. Two extracted decisions add four Lean properties, not whole-server verification."
+      "sha256": "caf1901c0925c9612fae0e6191b7af67dbf810576912a7df495db2fdeef19c26",
+      "review": "B2B approvals, quick order and offer contract moved behind the shop cart port"
     },
     "src/b2b/quote_contract.rs": {
       "status": "unproved",
-      "sha256": "23b36df91b07e375f8b801b24535d2b4b6f46ecf7f4550637f4c64253b725c97",
-      "review": "Reviewed native B2B authority, unit-first locking, revision-bound approvals and offers, exact budget allocation/release, private variant pagination, current app callbacks and forced tenant FKs/RLS; EDI codecs remain app-owned and bounded. Real PostgreSQL approval/concurrent budget/revocation/PDF/MCP and app/checkout baseline suites passed; schema/build/proof and changed Rust owners reviewed. Two extracted decisions add four Lean properties, not whole-server verification."
+      "sha256": "5f8bb7d1f1af821d2b4d330a18ee0a0a8a71f6eb1dab625ec4f4632d810bac08",
+      "review": "B2B approvals, quick order and offer contract moved behind the shop cart port"
     },
     "src/b2b/quote_lifecycle.rs": {
       "status": "unproved",
@@ -4918,8 +4943,8 @@
     },
     "src/b2b/quotes.rs": {
       "status": "unproved",
-      "sha256": "be2f1385b9e8868b8a0daab208f431dff6bd99af7f7b48151064eb1c1b018a26",
-      "review": "Review app-only accepted lifecycle snapshots and private RFQ projection, with native rights/payment/stock/buyer guards; move the extracted lifecycle conjunction into the existing app_intake pure owner and explicitly update its closed extraction registration. No expanded proof boundary."
+      "sha256": "3273f6e320a520f037cfd1bf8692096ad45d2ad5c7ed0e2442c3342d77c7453d",
+      "review": "B2B approvals, quick order and offer contract moved behind the shop cart port"
     },
     "src/b2b/requisition.rs": {
       "status": "unproved",
@@ -5088,8 +5113,8 @@
     },
     "src/cart_storage.rs": {
       "status": "unproved",
-      "sha256": "88eed442d16e61c474c9f6aabfc07996a0837e3645f3399dc4a60497308c8072",
-      "review": "Native admin creation uses existing CRM address and cart/checkout owners; independently reviewed tenant/actor tokens, final manual payment guard, channel/customer/cart lock order, replay and explicit customer acknowledgement; new SQL/HTTP adapters remain unproved and have real state regressions."
+      "sha256": "de951e1a60a2f6eb1df128b98a6ce57aa6e393705e2a45375c5ebc661e1cf549",
+      "review": "B2B approvals, quick order and offer contract moved behind the shop cart port"
     },
     "src/catalog_model.rs": {
       "status": "unproved",

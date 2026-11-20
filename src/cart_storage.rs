@@ -178,3 +178,22 @@ pub(crate) async fn new_cart_context(
         .await?;
     Ok(c)
 }
+
+/// The server side of the cart port components use.
+pub(crate) struct Carts<'s>(pub(crate) &'s App);
+impl veyndo_shop::ports::Carts for Carts<'_> {
+    fn load<'a>(&'a self, h: &'a RequestContext) -> veyndo_core::PortFuture<'a, StoredCart> {
+        Box::pin(load_cart(self.0, h))
+    }
+    fn view<'a>(&'a self, cart: &'a StoredCart) -> veyndo_core::PortFuture<'a, Value> {
+        Box::pin(cart_json(self.0, cart))
+    }
+    fn replace<'a>(
+        &'a self,
+        h: &'a RequestContext,
+        items: Vec<Item>,
+        expected: Option<i64>,
+    ) -> veyndo_core::PortFuture<'a, StoredCart> {
+        Box::pin(set_cart(self.0, h, items, expected, None))
+    }
+}

@@ -288,9 +288,13 @@ Order follows the dependency report, lowest first. Each line is one move.
 - [ ] b2b. Started: `components/b2b` owns the company, unit and member records
   with their bounds and the capability contract; `store/` holds unit access
   and the cart guard, organization reads and writes, budgets and approval
-  thresholds of a purchase, the private unit catalog and the staging copy.
-  Open: lists, quotes and their lifecycle, approvals, quick order,
-  requisitions (they need the cart port), routes.
+  thresholds of a purchase, the private unit catalog and the staging copy;
+  `service/` the approval inbox, quick order and the accepted offer contract.
+  They reach the buyer cart through `veyndo_shop::ports::Carts`, which the
+  server implements with its guarded cart load, priced view and
+  revision-checked line replacement. Open: lists and requisitions (app
+  configuration selections), quotes and their lifecycle (app lifecycle),
+  the gateway and routes.
 - [ ] pos. Started: `components/pos` owns the cashier input envelope and the
   capability schema; the POS location of a channel lives with the channel in
   marketing. Open: the gateway, settlement, discounts, cash handling.

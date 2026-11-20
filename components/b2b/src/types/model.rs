@@ -95,3 +95,11 @@ impl Member {
         self.active && self.permissions.iter().any(|p| p == permission)
     }
 }
+/// One line of a merchant offer: the gross price of a requested quantity in the quote currency.
+#[derive(Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct OfferLine {
+    pub id: String,
+    pub quantity: u32,
+    pub gross_minor: u64,
+}
