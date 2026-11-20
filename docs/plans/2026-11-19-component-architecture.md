@@ -123,6 +123,12 @@ Rules that hold from the first component on:
       the proved scope rule is bound there.
 - [ ] Move the rest of `src/auth` (accounts, sessions, MFA, invitations, route
       policy) into `components/identity` as `types/`, `store/`, `service/`, `http/`.
+      Started: `store/roles` holds the grants of a role, the rehydrated current
+      actor and the usage of a role; `http/members` the workspace member list
+      and the role or revocation change; `store/handoffs` the one-time Studio
+      handoff ticket. Open: accounts and sessions, MFA, invitations, the
+      identity broker, integration keys, browser sessions, the middleware,
+      provisioning, the role editor (it validates names against shop settings).
 - [x] Ban new `use super::*` / `use crate::*`: `glob_imports` per component in
       `components.json` only falls (528 files at the start); component crates have none.
 

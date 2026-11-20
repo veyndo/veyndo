@@ -1,6 +1,8 @@
 //! Identity component: the checks every other component uses to ask who a request acts for and what it may do.
 pub mod domain;
+pub mod http;
 pub mod route_policy;
+pub mod store;
 pub use domain::permissions::{SCOPES, allowed, scope, validate_permissions};
 use veyndo_core::shop_scope::{header, tenant};
 use veyndo_core::{Error, RequestContext, Result, StatusCode};

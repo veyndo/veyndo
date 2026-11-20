@@ -17,3 +17,4 @@ axum.workspace = true
 serde_json.workspace = true
 veyndo-core = { path = "../core" }
 veyndo-kernel = { path = "../../crates/kernel" }
+sqlx.workspace = true

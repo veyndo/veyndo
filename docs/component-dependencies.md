@@ -14,7 +14,7 @@ run SQL without being in a `store` folder. Both numbers only fall.
 | Component | Lines of Rust | Glob imports | Untyped accesses | SQL outside store | Tables | Uses | Foreign tables |
 | --- | ---: | ---: | ---: | ---: | ---: | --- | ---: |
 | core | 3648 | 0 | 4 | 12 | 10 | none | 10 |
-| identity | 3545 | 8 | 86 | 18 | 13 | apps (8), catalog (16), checkout (1), core (350), customers (1), host (4), intelligence (3), marketing (5), shop (14), studio (4) | 11 |
+| identity | 3576 | 8 | 86 | 18 | 13 | apps (8), catalog (16), checkout (1), core (326), customers (1), host (4), intelligence (3), marketing (5), shop (14), studio (4) | 11 |
 | shop | 4839 | 38 | 105 | 24 | 15 | apps (4), catalog (8), checkout (13), core (279), customers (3), host (4), identity (1), intelligence (3), inventory (1), marketing (11), payments (3), pricing (17), shipping (4), studio (13) | 22 |
 | catalog | 8459 | 38 | 203 | 15 | 11 | apps (19), b2b (2), checkout (9), core (338), customers (5), identity (23), intelligence (8), marketing (15), pricing (29), protocols (1), shop (14), studio (8) | 14 |
 | inventory | 649 | 2 | 26 | 2 | 2 | catalog (1), checkout (2), core (29), identity (4), intelligence (2), pricing (3), protocols (2), shop (2) | 3 |
@@ -119,20 +119,20 @@ reduced to one direction first.
 | apps | core | `State` | 113 |
 | catalog | core | `Result` | 89 |
 | apps | identity | `auth::` | 84 |
-| identity | core | `State` | 83 |
 | orders | core | `State` | 81 |
 | catalog | core | `State` | 80 |
 | intelligence | identity | `auth::` | 79 |
-| identity | core | `Result` | 74 |
+| identity | core | `State` | 78 |
 | payments | core | `Result` | 73 |
 | shop | core | `State` | 72 |
 | intelligence | core | `conflict` | 70 |
 | intelligence | core | `Error` | 70 |
 | orders | identity | `auth::` | 68 |
-| identity | core | `Error` | 66 |
+| identity | core | `Result` | 68 |
 | apps | core | `conflict` | 63 |
 | catalog | core | `veyndo_core::` | 60 |
 | orders | core | `Result` | 59 |
+| identity | core | `Error` | 59 |
 | shop | core | `Result` | 57 |
 | marketing | core | `Result` | 56 |
 | checkout | core | `Result` | 55 |
@@ -144,12 +144,12 @@ reduced to one direction first.
 | customers | core | `State` | 48 |
 | intelligence | apps | `apps::` | 45 |
 | customers | core | `Result` | 44 |
-| identity | core | `RequestContext` | 41 |
 | studio | core | `State` | 37 |
 | payments | core | `State` | 37 |
 | payments | core | `RequestContext` | 37 |
 | shop | core | `RequestContext` | 36 |
 | payments | core | `veyndo_core::` | 36 |
+| identity | core | `RequestContext` | 36 |
 | marketing | core | `State` | 35 |
 
 ## Foreign table access

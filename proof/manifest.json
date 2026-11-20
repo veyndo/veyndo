@@ -1358,15 +1358,40 @@
       "sha256": "3f81422c12a8848fd9f56e24819ed5f990c06c21f2dc18e92e57a051ec20ab46",
       "review": "Identity credentials, B2B and POS contracts and checkout tax lines moved into components; kernel call sites unchanged"
     },
+    "components/identity/src/http/members.rs": {
+      "status": "unproved",
+      "sha256": "dfb778acb704d800782c01e0984c65b7851cb3ba1263cba2c3d3e703722d9c2e",
+      "review": "Role grants, workspace members and the Studio handoff ticket moved into the identity component"
+    },
+    "components/identity/src/http.rs": {
+      "status": "unproved",
+      "sha256": "77bfced7c198ca0f2c6a91fa1d0be83460467d5ffc1783d804f999a25f9448aa",
+      "review": "Role grants, workspace members and the Studio handoff ticket moved into the identity component"
+    },
     "components/identity/src/lib.rs": {
       "status": "reviewed-binding",
-      "sha256": "b057578a21e0e387a7415d490a7acb940730bc07baa17359634aefd030403254",
-      "review": "Flow membership and redacted order reads moved into components"
+      "sha256": "34a611abcfa0a5fd6ade3a7d7b303c6cfb6173c9d7ffa9acd07aa151f3558ca1",
+      "review": "Role grants, workspace members and the Studio handoff ticket moved into the identity component"
     },
     "components/identity/src/route_policy.rs": {
       "status": "unproved",
       "sha256": "5e7aa39b24a5d51ebd41a9c115adf496790236d0bfe39376e71f1366b708c47c",
       "review": "The route permission registry moved unchanged into components/identity and is generic over the server state"
+    },
+    "components/identity/src/store/handoffs.rs": {
+      "status": "unproved",
+      "sha256": "0b2a6bd9abf4dc167d68fe7a419649c1a857f9c81bdeb661f9cf0d72913ae8f7",
+      "review": "Role grants, workspace members and the Studio handoff ticket moved into the identity component"
+    },
+    "components/identity/src/store/roles.rs": {
+      "status": "unproved",
+      "sha256": "77b1a530c7779668b89cf152a693b5f472988c902ad8bdd373414a39035b17bc",
+      "review": "Role grants, workspace members and the Studio handoff ticket moved into the identity component"
+    },
+    "components/identity/src/store.rs": {
+      "status": "unproved",
+      "sha256": "8e78da5e8708127c3d6dc79c5689ec62cd3fff7d8ec2f0472d2f2b01ea9a9ac1",
+      "review": "Role grants, workspace members and the Studio handoff ticket moved into the identity component"
     },
     "components/intelligence/src/domain/behavior_input.rs": {
       "status": "unproved",
@@ -4940,8 +4965,8 @@
     },
     "src/auth/handoff.rs": {
       "status": "unproved",
-      "sha256": "09676e04d6a6bcde60613f919b5c3837a16c6053a631eaaa39f7e5dc7f68fb48",
-      "review": "Reviewed native factor gate, RFC6238 vectors, current personal proof, credential CAS, parent-session handoff revocation and system-only operational identity schema; own/foreign/revoked/replay real HTTP PostgreSQL cases pass; cryptography SQL provider and browser code remain unproved"
+      "sha256": "2ff520dcf80b3ee456dfe34208cab6745fa68d4e877bce205afe4219df19ec0f",
+      "review": "Role grants, workspace members and the Studio handoff ticket moved into the identity component"
     },
     "src/auth/identity.rs": {
       "status": "unproved",
@@ -4965,8 +4990,8 @@
     },
     "src/auth/members.rs": {
       "status": "unproved",
-      "sha256": "2c1749000a3aca822427e8f427d4304fbf161a5772568ba3e9d31a1e32ae1aa6",
-      "review": "Tenant roles and current grants independently reviewed; owner/retained-override/acceptance races repaired and PostgreSQL-blocked regressions passed; PII and Flow projection boundaries documented; B2B feature settings delegate shared CAS/history and preserve financial guards. Existing extracted policies unchanged; SQL/async/UI remain reviewed adapters, not full proofs."
+      "sha256": "7c4dd2e92fd43ca7050d422949eb2faede6d7469f1c680c1a2fa39edc2b124c4",
+      "review": "Role grants, workspace members and the Studio handoff ticket moved into the identity component"
     },
     "src/auth/mfa.rs": {
       "status": "unproved",
@@ -5005,8 +5030,8 @@
     },
     "src/auth/roles.rs": {
       "status": "unproved",
-      "sha256": "9dbbdc8a01222c1dfee981cac935a3d659184bc8b3667f37ba7682c334f80bfe",
-      "review": "Role-save locale validation reuses the existing scoped_locked commerce owner and current transaction; preserves tenant lifecycle lock, refreshed delegation, role CAS and history while preventing nested pool acquisition and fencing locale edits. Existing workspace_roles and app extension signed one-backend regressions exercise this path."
+      "sha256": "1c0b1e6e52c94302ce982682ea4e79fd00325829a4196b9a3a1a2f395349e023",
+      "review": "Role grants, workspace members and the Studio handoff ticket moved into the identity component"
     },
     "src/auth/routes.rs": {
       "status": "unproved",
@@ -7060,8 +7085,8 @@
       "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
     },
     "Cargo.lock": {
-      "sha256": "281b27b68b2b5e87453eb3bfd08ed1ab8b329046467f6c0e950c517fabbd93fc",
-      "review": "POS guard, customer, discount and settlement and the checkout session review moved into components"
+      "sha256": "ca361855fc2ed93bc5e13781c11450fbdfe0595cf9c5afe5638257c4fe7c273f",
+      "review": "Role grants, workspace members and the Studio handoff ticket moved into the identity component"
     },
     "Cargo.toml": {
       "sha256": "881e080eb9f1b1f051c23e2848df689853473831b4d3072817387d65c23ddb66",

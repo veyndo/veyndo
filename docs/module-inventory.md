@@ -168,7 +168,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/auth/integrations.rs](../src/auth/integrations.rs) | Explicit-lifetime API/MCP keys are bounded to one workspace and intersect their creator's current membership. |
 | [src/auth/invitations.rs](../src/auth/invitations.rs) | Single-use, expiring invitations. Acceptance verifies an existing account password. |
 | [src/auth/knowledge_identity.rs](../src/auth/knowledge_identity.rs) | Inspect current, expiring native credentials for the one configured Knowledge catalog pilot. |
-| [src/auth/members.rs](../src/auth/members.rs) | Workspace member visibility and immediately effective role/revocation changes. |
+| [src/auth/members.rs](../src/auth/members.rs) | Workspace member handlers are owned by the identity component. |
 | [src/auth/mfa.rs](../src/auth/mfa.rs) | Personal MFA enrollment and one-use sign-in challenges share the native session and encryption owners. |
 | [src/auth/middleware.rs](../src/auth/middleware.rs) | Resolve sessions from PostgreSQL on every request: role changes/revocation work across replicas. |
 | [src/auth/mod.rs](../src/auth/mod.rs) | Personal merchant accounts, tenant memberships, scoped sessions and role enforcement. |
@@ -786,8 +786,13 @@ This lists every checked-in source module in these roots, including files with n
 | [components/identity/src/domain/permissions.rs](../components/identity/src/domain/permissions.rs) | The permission vocabulary and the decision whether a request holds one. Owners retain control; delegates cannot grant rights they lack. |
 | [components/identity/src/domain/totp.rs](../components/identity/src/domain/totp.rs) | RFC 6238 authenticator codes, bounded clock drift and constant-time comparison. |
 | [components/identity/src/domain.rs](../components/identity/src/domain.rs) | Pure identity rules: no database, no transport. |
+| [components/identity/src/http/members.rs](../components/identity/src/http/members.rs) | Workspace member visibility and immediately effective role/revocation changes. |
+| [components/identity/src/http.rs](../components/identity/src/http.rs) | HTTP handlers of the identity component. |
 | [components/identity/src/lib.rs](../components/identity/src/lib.rs) | Identity component: the checks every other component uses to ask who a request acts for and what it may do. |
 | [components/identity/src/route_policy.rs](../components/identity/src/route_policy.rs) | Rights are registered beside each API method. Missing registrations always deny access. |
+| [components/identity/src/store/handoffs.rs](../components/identity/src/store/handoffs.rs) | One-time personal-session handoff to the Studio; no passwords or bearer tokens in links. |
+| [components/identity/src/store/roles.rs](../components/identity/src/store/roles.rs) | Tenant-owned roles as access decisions read them: the grants of a role, the current actor and what still uses a role. |
+| [components/identity/src/store.rs](../components/identity/src/store.rs) | SQL of the identity component. |
 | [components/intelligence/src/domain/behavior_input.rs](../components/intelligence/src/domain/behavior_input.rs) | Minimal behavioral envelope: no URLs, search text, raw user agents, IPs or caller customer identities. |
 | [components/intelligence/src/domain/experiment_model.rs](../components/intelligence/src/domain/experiment_model.rs) | Preregistered fixed-horizon experiment parameters and conservative bounded-outcome inference. |
 | [components/intelligence/src/domain.rs](../components/intelligence/src/domain.rs) | Bounded inputs of the intelligence component, free of I/O. |
