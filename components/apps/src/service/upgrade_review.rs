@@ -1,7 +1,16 @@
 //! Probe the actual transactional installer and roll it back; return admission metadata, never app record contents.
-use super::*;
-pub(super) async fn inspect(
-    a: &App,
+use crate::domain::schema_changes;
+use crate::ports::Platform;
+use crate::store::package_install::install_tx;
+use serde_json::{Value, json};
+use sqlx::Row;
+use veyndo_app_model::manifest::Manifest;
+use veyndo_core::shop_scope::owned_stage;
+use veyndo_core::{Result, bad};
+
+/// What installing a package would change, probed with the real installer and rolled back.
+pub async fn inspect(
+    a: &Platform,
     live: &str,
     environment: Option<&str>,
     m: &Manifest,
@@ -14,12 +23,12 @@ pub(super) async fn inspect(
     .await?;
     // Child ownership is system metadata: retain the exact parent/private-stage guard in this bounded transaction.
     let t = if let Some(environment) = environment {
-        staging::owned_on(&mut *tx, live, environment).await?;
+        owned_stage(&mut *tx, live, environment).await?;
         environment
     } else {
         live
     };
-    crate::marketing::lock_config(&mut tx, t).await?;
+    a.commerce.lock(&mut tx, t).await?;
     let previous: Option<Value> =
         sqlx::query_scalar("SELECT manifest FROM app_packages WHERE tenant=$1 AND id=$2")
             .bind(t)
@@ -58,7 +67,7 @@ pub(super) async fn inspect(
         .collect::<Vec<_>>();
     // This owner only writes through this transaction. It does not send events or execute services.
     let result: Result<()> = async {
-        registry::install_tx(&mut tx, t, m.clone()).await?;
+        install_tx(a.rules, a.commerce, &mut tx, t, m.clone()).await?;
         // The real commit also checks deferred relational constraints; rollback alone would miss them.
         sqlx::query("SET CONSTRAINTS ALL IMMEDIATE")
             .execute(&mut *tx)

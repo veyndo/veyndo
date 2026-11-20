@@ -26,7 +26,13 @@ async fn review(
     }
     let m = decode(&v)?;
     actor_permissions(&h, &m)?;
-    let (previous, upgrade) = upgrade_review::inspect(&a, &t, environment, &m).await?;
+    let (previous, upgrade) = veyndo_app_platform::service::upgrade_review::inspect(
+        &service_limits::platform(&a),
+        &t,
+        environment,
+        &m,
+    )
+    .await?;
     let old = previous.as_ref().map(|v| &v.permissions);
     let added = m
         .permissions

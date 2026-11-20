@@ -4,39 +4,11 @@ use std::sync::Arc;
 use veyndo::component_runtime::{
     self as wit, AppRecord, CartItem, CartSnapshot, Money, ProductSnapshot, Snapshot,
 };
-pub(crate) async fn verify_package(m: &Manifest) -> Result<()> {
-    if let Some(c) = &m.configuration {
-        let entity = m
-            .entities
-            .iter()
-            .find(|e| e.name == c.entity)
-            .ok_or(bad("Configuration model missing"))?;
-        data::fields(entity, &c.default_fields)?;
-        runtime::validate_fee(
-            c,
-            c.default_fields[&c.price_field]
-                .as_i64()
-                .ok_or(bad("Default price required"))?,
-        )
-        .await?;
-        configuration_examples::verify(c).await?;
-    }
-    let Some(c) = &m.commerce_hooks else {
-        return Ok(());
-    };
-    let guest = runtime::prepare_source(c.source.clone()).await?;
-    let manifest = m.clone();
-    tokio::task::spawn_blocking(move || {
-        guest.validate_component_abi().map_err(bad)?;
-        business_capability::verify(&manifest, &guest)
-    })
-    .await
-    .map_err(|_| bad("Component verification worker failed"))?
-}
+pub(crate) use veyndo_app_platform::service::package_verification::verify_package;
 pub(crate) struct Prepared {
     pub modules: HashMap<String, Arc<Sandbox>>,
 }
-pub(super) use veyndo_app_platform::store::commerce_hooks::{admission, rows};
+pub(super) use veyndo_app_platform::store::commerce_hooks::rows;
 pub(crate) async fn prepare(a: &App, t: &str) -> Result<Prepared> {
     let mut conn = a.db.begin().await?;
     let ms = rows(&mut conn, t).await?;

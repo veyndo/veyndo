@@ -47,21 +47,7 @@ pub(crate) async fn owned(a: &App, live: &str, stage: &str) -> Result<Value> {
     owned_on(&a.db, live, stage).await
 }
 /// Transactional callers retain their current backend and the same live/stage ownership guard.
-pub(crate) async fn owned_on<'e>(
-    db: impl sqlx::Executor<'e, Database = sqlx::Postgres>,
-    live: &str,
-    stage: &str,
-) -> Result<Value> {
-    sqlx::query_scalar("SELECT baseline FROM shop_environments WHERE tenant=$1 AND live_tenant=$2 AND preview_owner IS NULL")
-        .bind(stage)
-        .bind(live)
-        .fetch_optional(db)
-        .await?
-        .ok_or(Error(
-            StatusCode::NOT_FOUND,
-            "Environment unavailable".into(),
-        ))
-}
+pub(crate) use veyndo_core::shop_scope::owned_stage as owned_on;
 async fn list(State(a): State<App>, h: RequestContext) -> Result<Json<Value>> {
     let t = live(&a, &h).await?;
     let rows=sqlx::query("SELECT tenant,name,created_at::text AS created_at FROM shop_environments WHERE live_tenant=$1 AND preview_owner IS NULL ORDER BY created_at DESC").bind(&t).fetch_all(&a.db).await?;

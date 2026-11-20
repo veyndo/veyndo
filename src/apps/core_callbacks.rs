@@ -55,7 +55,14 @@ async fn job_progress(
         credentials::permit(h, "settings.read")?;
         auth::permit(h, "team.manage")?;
     }
-    let mut result = job_callbacks::execute(a, h, m, operation, v).await?;
+    let mut result = veyndo_app_platform::service::job_callbacks::execute(
+        &service_limits::platform(a),
+        h,
+        m,
+        operation,
+        v,
+    )
+    .await?;
     if settings_allowed {
         result["_appSettings"] = settings::resolve(a, t, m).await?;
     }
@@ -153,10 +160,10 @@ async fn execute(
         return assets::app_file_callback(a, h, operation, &v).await;
     }
     if operation == "job_enqueue" {
-        return job_enqueue::execute(a, h, &m, &v).await;
+        return veyndo_app_platform::service::job_requests::execute(a, h, &m, &v).await;
     }
     if operation == "job_evidence" {
-        return job_evidence::verify(a, h, &m, &v).await;
+        return veyndo_app_platform::service::job_evidence::verify(a, h, &m, &v).await;
     }
     if ["job_import", "job_inspect"].contains(&operation) {
         return job_import::execute(a, h, &m, &v, operation == "job_inspect").await;

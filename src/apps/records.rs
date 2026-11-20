@@ -1,4 +1,2 @@
 //! The app record store lives in the apps component; this module keeps the short path for the app adapters.
-pub(crate) use veyndo_app_platform::store::records::{
-    get, install, lock_key, project, reset_preview, rows,
-};
+pub(crate) use veyndo_app_platform::store::records::{get, lock_key, project, reset_preview, rows};

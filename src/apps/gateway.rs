@@ -32,23 +32,6 @@ pub(super) async fn invoke(
     observability::record(a, h, id, name, v, status, start.elapsed().as_millis()).await;
     result
 }
-// A job callback holds its admitted manifest/action through enqueue. Re-reading
-// the package must never turn a formerly declared job into a service invocation.
-pub(super) async fn invoke_job(
-    a: &App,
-    h: &RequestContext,
-    m: &Manifest,
-    name: &str,
-    v: &Value,
-) -> Result<Value> {
-    let action = m
-        .actions
-        .iter()
-        .find(|action| action.name == name && action.handler == "job")
-        .ok_or(bad("Callback requires a declared job action"))?;
-    action_admission::check(a, h, action, v)?;
-    tool_contract::checked_output(action, jobs::enqueue(a, h, m, action, v).await?)
-}
 async fn execute(
     a: &App,
     h: &RequestContext,

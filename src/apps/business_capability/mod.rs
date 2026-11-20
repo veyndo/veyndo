@@ -1,4 +1,5 @@
 //! Native complete-package and bounded-guest adapters for the independent business contracts and executable examples.
+#[cfg(test)]
 use super::*;
 #[cfg(test)]
 use veyndo_app_model::business_snapshot as snapshot;
@@ -16,6 +17,7 @@ pub(super) fn validate(m: &Manifest) -> Result<()> {
     )
     .map_err(model_contract::error)
 }
+#[cfg(test)]
 pub(super) fn verify(m: &Manifest, guest: &Sandbox) -> Result<()> {
     veyndo_apps::business_examples::verify(m.capability.as_ref(), guest)
         .map_err(model_contract::error)

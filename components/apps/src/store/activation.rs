@@ -1,10 +1,17 @@
 //! Native current-actor/trust/connected-frontend/commerce admission for the shared package-state transaction; original configuration lock order retained.
-use super::*;
+use crate::domain::{approval, consent};
+use crate::ports::CommerceInstall;
+use crate::store::packages::package_on;
+use crate::store::{commerce_hooks, dependencies, native_lifecycle};
 use veyndo_app_storage::{activation as shared, installation::HookFuture};
-pub(super) struct Host<'a> {
+use veyndo_core::{Error, RequestContext, bad, conflict, process_config};
+
+/// The admission of one activation or deactivation, run by the shared package-state change.
+pub struct Host<'a> {
     pub tenant: &'a str,
     pub app: &'a str,
     pub actor: &'a RequestContext,
+    pub commerce: &'a dyn CommerceInstall,
 }
 impl<'db> shared::StateHooks<'db> for Host<'_> {
     type Error = Error;
@@ -15,7 +22,7 @@ impl<'db> shared::StateHooks<'db> for Host<'_> {
     where
         'db: 'a,
     {
-        Box::pin(async move { crate::marketing::lock_config(tx, self.tenant).await })
+        Box::pin(async move { self.commerce.lock(tx, self.tenant).await })
     }
     fn activating<'a>(
         &'a self,
@@ -27,8 +34,9 @@ impl<'db> shared::StateHooks<'db> for Host<'_> {
         Box::pin(async move {
             let m = package_on(&mut **tx, self.tenant, self.app, false).await?;
             consent::actor_permissions(self.actor, &m)?;
-            approval::installation(&m)?;
-            distribution::dependencies(tx, self.tenant, &m).await?;
+            let config = process_config::get();
+            approval::installation(&m, &config.services)?;
+            dependencies::check(tx, self.tenant, &m, &config.publishers).await?;
             commerce_hooks::admission(tx, self.tenant, &m).await?;
             native_lifecycle::admission(tx, self.tenant, &m).await
         })
@@ -57,7 +65,8 @@ impl<'db> shared::StateHooks<'db> for Host<'_> {
         })
     }
 }
-pub(super) fn error(e: shared::ChangeError<Error>) -> Error {
+/// The response for a refused or failed state change.
+pub fn error(e: shared::ChangeError<Error>) -> Error {
     match e {
         shared::ChangeError::Database(e) => e.into(),
         shared::ChangeError::Invalid(s) => bad(s),

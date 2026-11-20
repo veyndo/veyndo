@@ -2,19 +2,6 @@
 use super::*;
 use base64::{Engine as _, engine::general_purpose::STANDARD};
 use veyndo_app_platform::domain::distribution::message;
-pub(super) async fn dependencies(
-    tx: &mut sqlx::Transaction<'_, sqlx::Postgres>,
-    t: &str,
-    m: &Manifest,
-) -> Result<()> {
-    veyndo_app_platform::store::dependencies::check(
-        tx,
-        t,
-        m,
-        &crate::runtime_config::get().publishers,
-    )
-    .await
-}
 /// Offline signing shares the server canonical representation. The 32-byte seed is supplied on stdin, never logged.
 pub(crate) fn sign_package() {
     use ring::signature::KeyPair;

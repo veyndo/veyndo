@@ -137,14 +137,15 @@ async fn app_state(
             active,
             revision: v["revision"].as_i64(),
         },
-        &activation::Host {
+        &veyndo_app_platform::store::activation::Host {
             tenant: &t,
             app: &id,
             actor: &h,
+            commerce: &install_host::COMMERCE,
         },
     )
     .await
-    .map_err(activation::error)?;
+    .map_err(veyndo_app_platform::store::activation::error)?;
     tx.commit().await?;
     Ok(Json(result))
 }

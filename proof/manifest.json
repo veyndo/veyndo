@@ -582,7 +582,7 @@
     },
     "job_completion_admissible": {
       "bindings": [
-        "src/apps/job_callbacks.rs"
+        "components/apps/src/service/job_callbacks.rs"
       ],
       "theorems": [
         "job_completion_exact",
@@ -946,8 +946,8 @@
     },
     "components/apps/src/ports.rs": {
       "status": "unproved",
-      "sha256": "8f834d481ca62a1d61ab446d759df1e31662db531e6967bce1f060c61ea647b4",
-      "review": "Managed app records, restoration, import and native-object projection moved into the apps component behind a record rules port without behavior change"
+      "sha256": "43f0b680b582adda38994faefd0d0da81dd047bb75adf2ab9777e6e8e31b3b6c",
+      "review": "Job callbacks, completion evidence, package verification, installation, activation and upgrade review moved into the apps component behind host ports without behavior change"
     },
     "components/apps/src/service/admission.rs": {
       "status": "unproved",
@@ -974,10 +974,30 @@
       "sha256": "671d9457e245f77eb9b4ca534197471d6271608548215ef13e2729a54647a388",
       "review": "Service calls and event delivery moved into the apps component without changing rules"
     },
+    "components/apps/src/service/job_callbacks.rs": {
+      "status": "reviewed-binding",
+      "sha256": "2a9d9f9b0d38b3d7ee17b95c61e00c27bb849460f4bbb42c66b605ba620627e8",
+      "review": "Job callbacks, completion evidence, package verification, installation, activation and upgrade review moved into the apps component behind host ports without behavior change"
+    },
+    "components/apps/src/service/job_evidence.rs": {
+      "status": "unproved",
+      "sha256": "dc93eac97cca7e6044525b961860c46de873ec2b5e81c15c9079e9d35d2d9c8e",
+      "review": "Job callbacks, completion evidence, package verification, installation, activation and upgrade review moved into the apps component behind host ports without behavior change"
+    },
+    "components/apps/src/service/job_requests.rs": {
+      "status": "unproved",
+      "sha256": "3e60a8911117952420beae5e2d04f23a19e33157eee0bb1f939aaca9c3570644",
+      "review": "Job callbacks, completion evidence, package verification, installation, activation and upgrade review moved into the apps component behind host ports without behavior change"
+    },
     "components/apps/src/service/limits.rs": {
       "status": "unproved",
       "sha256": "51e81fff0d0bec5c463b6c4a53a4e3468ae26cfcbcbbe4eb7861eab967939702",
       "review": "Configuration, lifecycle, ontology and reference adapters moved into the apps component without changing rules"
+    },
+    "components/apps/src/service/package_verification.rs": {
+      "status": "unproved",
+      "sha256": "8a874ad38bb416d196d0b606a41ccdd554a86d166861690a7700f4f18241ea18",
+      "review": "Job callbacks, completion evidence, package verification, installation, activation and upgrade review moved into the apps component behind host ports without behavior change"
     },
     "components/apps/src/service/record_import.rs": {
       "status": "unproved",
@@ -999,15 +1019,25 @@
       "sha256": "8fce37e2ec4489c5789884fa41c6fe141947c5a65fd8b4f8c3d8056f48f198b1",
       "review": "Surface contract and sandboxed documents moved into the apps component without changing rules"
     },
+    "components/apps/src/service/upgrade_review.rs": {
+      "status": "unproved",
+      "sha256": "4ccf6a311b242409f9b4cdb42a64b879b5ddd51eac3fe33b56155ac63bc0f500",
+      "review": "Job callbacks, completion evidence, package verification, installation, activation and upgrade review moved into the apps component behind host ports without behavior change"
+    },
     "components/apps/src/service.rs": {
       "status": "unproved",
-      "sha256": "1af8db0b5c6458e3defcde9572bede704c321ee20cd3090b38137ccf61ae7895",
-      "review": "Managed app records, restoration, import and native-object projection moved into the apps component behind a record rules port without behavior change"
+      "sha256": "39e2b1c55fef849bf83eeca958abecccebfd1d0ac6a26bfcbc96f844b0dc5fda",
+      "review": "Job callbacks, completion evidence, package verification, installation, activation and upgrade review moved into the apps component behind host ports without behavior change"
     },
     "components/apps/src/store/action_log.rs": {
       "status": "unproved",
       "sha256": "6dc22255dc7b12c3b80ea4875ace2b4c23396292283ca6dc6cb541884d364645",
       "review": "Secret persistence, schedules and event projection moved into the apps component without changing rules"
+    },
+    "components/apps/src/store/activation.rs": {
+      "status": "unproved",
+      "sha256": "f90abcb798f53a86137fcb256f98dd1807ee0f3445a97df5ad7f4106f9639db1",
+      "review": "Job callbacks, completion evidence, package verification, installation, activation and upgrade review moved into the apps component behind host ports without behavior change"
     },
     "components/apps/src/store/asset_references.rs": {
       "status": "unproved",
@@ -1084,6 +1114,11 @@
       "sha256": "cc13545b262bec525e226a541a9038530bc420ee1393abecd7e666fdbd194f1b",
       "review": "Sandbox cache, configuration runtime and package fence moved into the apps component without changing rules"
     },
+    "components/apps/src/store/package_install.rs": {
+      "status": "unproved",
+      "sha256": "0969d0d08d8a4d467a60593825e4cd02ea33f6f6a3cd8a5aca6d13ce94b32600",
+      "review": "Job callbacks, completion evidence, package verification, installation, activation and upgrade review moved into the apps component behind host ports without behavior change"
+    },
     "components/apps/src/store/packages.rs": {
       "status": "unproved",
       "sha256": "535ceaa06a1a716bd5bdd6208b846dcec58ca292a4d2427f9a3bd2bef966aa76",
@@ -1131,8 +1166,8 @@
     },
     "components/apps/src/store.rs": {
       "status": "unproved",
-      "sha256": "f6e9b9df47821f3b247cd563f9083a17d51de5b26efde6e18c5b2147953c09d9",
-      "review": "Managed app records, restoration, import and native-object projection moved into the apps component behind a record rules port without behavior change"
+      "sha256": "be9e2f2c7ae79c74e81c466cd1c2570a4197b3652b0d63cbe7ce618540230d4c",
+      "review": "Job callbacks, completion evidence, package verification, installation, activation and upgrade review moved into the apps component behind host ports without behavior change"
     },
     "components/b2b/src/domain/contract.rs": {
       "status": "unproved",
@@ -1751,8 +1786,8 @@
     },
     "components/core/src/shop_scope.rs": {
       "status": "unproved",
-      "sha256": "afcdc9804824ab20ead50fcb17b7c2b4d7923d02930a31cab831d3ab3edfa2fc",
-      "review": "App secret, settings, activity, credential and webhook handlers moved into the apps component without changing rules"
+      "sha256": "5829ae1f3d12f237d11ad8626320ac8c9238de5803423206a16b8e641c5e50f5",
+      "review": "Job callbacks, completion evidence, package verification, installation, activation and upgrade review moved into the apps component behind host ports without behavior change"
     },
     "components/core/src/state.rs": {
       "status": "unproved",
@@ -5199,11 +5234,6 @@
       "sha256": "ad18bedc830e9f303097bb4aa994986dc6aff152334f7c29e83ae9edfd661682",
       "review": "App jobs and private evidence reads moved into the apps component without changing rules"
     },
-    "src/apps/activation.rs": {
-      "status": "unproved",
-      "sha256": "317a4174295faeda387f6c5b32125d749dd3eeaf67bc15cae3bcc9c96fb15abf",
-      "review": "Reviewed Apps 0.22 activation extraction against Core 52eb64e4 original routes::app_state and distribution::deactivate. Shared transaction preserves mandatory native config-before-lifecycle hook, original tenant fence 543 then package fence 7 shared with actual installation/writers, current activation or connected-frontend branch hook, active-dependant SQL, late revision CAS/error order and same-state revision increment. Native current management/merchant/signed scope, typed input, actual installed package/actor rights/consent/operator trust/signed dependencies/commerce/native lifecycle and connected-frontend query remain authoritative; original caller commit/rollback. No default approving production hook, shadow principal, new endpoint/permission/event, implicit installation, deletion or schema change. Independent PostgreSQL durable synthetic host facts and actual shared install/writer fences test both dependency race orders, concurrent CAS, retained records/versions, hook rollback/reconnect, original missing/error order and exhausted revision non-overwrite. Denied-without-host example and two Linux component runs pass. Native 74 App units, warning-free workspace Clippy and seven HTTP/PostgreSQL apps/studio/isolation/channelManagement/signedDistribution/surfaces/visualWorkspace modules pass; expanded role/stale/missing-revision and inactive-dependency reactivation denials, connected frontend guard and subsequent normal operation pass. Exact source/WIT, 892-module structure and source inventory pass. Kernel unchanged; SQL/async/native host code remains reviewed and unproved."
-    },
     "src/apps/approval.rs": {
       "status": "unproved",
       "sha256": "a7f8c54e7a0b9954f585dd2e406f6846523076293fe69e0ad27b56ff346b1ff5",
@@ -5216,8 +5246,8 @@
     },
     "src/apps/business_capability/mod.rs": {
       "status": "unproved",
-      "sha256": "033da29aa12c935c113e1043c113ef5819523b12b357e5564283220784126597",
-      "review": "Reviewed complete standard compiler extraction in Apps 0.16/model 0.12. All 19 original before/common/after domain stages now run inside one shared compiler with preserved order, first model kind/pointer or native host error, internal actual view lookup and exhaustive Manifest field coverage. Native manifest_policy delegates value/reference/currency/scope/source/base, current Ed25519 keys, namespace/network/read and clock decisions to original owners; direct verified predicates remain attached. No no-op host domain callbacks or alternative serving compiler. Independent 116 model and 24 runtime tests include all 34 canonical packages, nineteen invalid-domain controls and denied-policy/callback-order cases. Native 74 app and two provider units, seventeen real HTTP/PostgreSQL app/schema/preview/staging/isolation/lifecycle/distribution/surface/assistant/event/generation/marketplace/payment modules, unchanged native digests and Clippy pass. Kernel unchanged; shared compiler, policy adapters and SQL/host effects remain unproved."
+      "sha256": "042558bcb14ee885d2bd20f5d7429bcd01f14ec5dcb9c580d68bc1fc35307f13",
+      "review": "Job callbacks, completion evidence, package verification, installation, activation and upgrade review moved into the apps component behind host ports without behavior change"
     },
     "src/apps/business_capability/tests.rs": {
       "status": "unproved",
@@ -5231,18 +5261,13 @@
     },
     "src/apps/commerce_hooks.rs": {
       "status": "unproved",
-      "sha256": "da45aab266d5d8f170c86f0a5d0e965faecb9a30d0692f94f933d44b959bc49e",
-      "review": "Native lifecycle rules, capture and commerce hook admission moved into the apps component without behavior change"
+      "sha256": "d0746f226725131632438db163c50d67015fe48fd136e550233c2630bf0b788a",
+      "review": "Job callbacks, completion evidence, package verification, installation, activation and upgrade review moved into the apps component behind host ports without behavior change"
     },
     "src/apps/configuration_events.rs": {
       "status": "unproved",
       "sha256": "ad6b41885d97a797efb6adb782c1fc1509c540bf8d990b794ee5a772ca859214",
       "review": "Configuration, lifecycle, ontology and reference adapters moved into the apps component without changing rules"
-    },
-    "src/apps/configuration_examples.rs": {
-      "status": "unproved",
-      "sha256": "f46cfe3b7b295ded946f49b63d5e98d63e8f1cbe90e9d1b1da0996f6669f3cf5",
-      "review": "Sandbox cache, configuration runtime and package fence moved into the apps component without changing rules"
     },
     "src/apps/configuration_inputs.rs": {
       "status": "unproved",
@@ -5266,13 +5291,13 @@
     },
     "src/apps/consent.rs": {
       "status": "unproved",
-      "sha256": "73ebf2647e8debc8bc91d8bb65d0c2b0213f7a9ae31af1d45e6eea99cf5511d1",
-      "review": "Record store, consent and core extension rules moved into the apps component without changing rules"
+      "sha256": "9102507025f7a9d08e590b823a8954d7e4a73456d5f13473c5596ec634e6e176",
+      "review": "Job callbacks, completion evidence, package verification, installation, activation and upgrade review moved into the apps component behind host ports without behavior change"
     },
     "src/apps/core_callbacks.rs": {
       "status": "unproved",
-      "sha256": "d7e262fecd7dc7e77bab6d6bbf96065bad6720a345f7973f2ab4ee350a31db93",
-      "review": "Functions above 150 lines split into named steps without behaviour change; function length limit lowered to 150"
+      "sha256": "027c67b0fa5dd163758329aa77f577d1180f82d57d2016a8acad413b1514cf1a",
+      "review": "Job callbacks, completion evidence, package verification, installation, activation and upgrade review moved into the apps component behind host ports without behavior change"
     },
     "src/apps/core_catalog_evidence.rs": {
       "status": "unproved",
@@ -5311,8 +5336,8 @@
     },
     "src/apps/distribution.rs": {
       "status": "unproved",
-      "sha256": "bae4fe2ee188bc4d433d07688f2cea199f2f1e3cf7c5d9e5df12e61b045f0a34",
-      "review": "Field, reference, view and manifest policy moved into the apps component without changing rules"
+      "sha256": "066f7933b2efb344bc6b7c248efcacb1bb83166c2ca6a363d472ce96a21a94c7",
+      "review": "Job callbacks, completion evidence, package verification, installation, activation and upgrade review moved into the apps component behind host ports without behavior change"
     },
     "src/apps/editor_contract.rs": {
       "status": "unproved",
@@ -5356,8 +5381,8 @@
     },
     "src/apps/gateway.rs": {
       "status": "unproved",
-      "sha256": "008c8dbe93bc4056f1d77132632856b707dc422fdc7955ef93a201ead4a405cc",
-      "review": "Service calls and event delivery moved into the apps component without changing rules"
+      "sha256": "d27ba55868ff7f8f2fd73b01a59212bc5a1678530e9cb40aa6a59252a0340790",
+      "review": "Job callbacks, completion evidence, package verification, installation, activation and upgrade review moved into the apps component behind host ports without behavior change"
     },
     "src/apps/hosted.rs": {
       "status": "unproved",
@@ -5369,20 +5394,10 @@
       "sha256": "8a30686a1ea2d88748ea629a722ff73767f417a737ed9a92bb8c6033a879341f",
       "review": "Record store, consent and core extension rules moved into the apps component without changing rules"
     },
-    "src/apps/job_callbacks.rs": {
-      "status": "reviewed-binding",
-      "sha256": "1f914880fa77540539b1ea6dc7976ad0809c58fbe3f60d20b0aeb07017500422",
-      "review": "Reviewed app-storage extraction: original record/job SQL now runs in pinned veyndo/apps through existing scoped transactions; native identity/package/CAS/evidence validation retained. Independent PostgreSQL rollback/replay/lease/quota test, native app_shared_storage/app_jobs, 43 tenant checks and marketplace HTTP/MCP order-stock-Flow-invoice fixture pass. SQL and host adapters remain unproved."
-    },
-    "src/apps/job_enqueue.rs": {
+    "src/apps/install_host.rs": {
       "status": "unproved",
-      "sha256": "61b75fc3a11fd0f9cd4d2372a56225f3dec3f4bac7c2fae52edbc88490cd482e",
-      "review": "Reviewed extraction of unchanged action permission/schema admission into action_admission.rs and a pinned gateway invoke_job lane. The callback cannot re-read a replacement package into a non-job/service dispatch; it holds the admitted manifest/action and reuses original jobs::enqueue. Fresh native PostgreSQL marketplace fixture and all 43 tenant isolation checks passed again after this change, including compound rights, revoked keys, foreign scope, CAS/replay, paid order, stock, invoice/Flow and restart. Rust build and clippy pass. Existing pure Lean policies are unchanged; surrounding async code remains unproved."
-    },
-    "src/apps/job_evidence.rs": {
-      "status": "unproved",
-      "sha256": "e3ae172e1ada5e60071840d88f02ddd975f9a7c4d27c9516652d10f22f21abc6",
-      "review": "2026-10-19 reviewed native read-only import projection against shared product/category/address owners; paired CRM/history PII and private target/package/digest checks; generic completion evidence atomically uses existing job creator/lease/package and record CAS, platform AEAD, native actual-field verification, no new app table or queue. Actual eight-domain migration/archival/restart/tamper and native app callback/jobs/admin creation tests pass; pure cancelled-success policy has exact Lean claim, all boolean cases and a true-return negative mutation. SQL, cryptography, async service correctness and public hosting remain outside formal proof."
+      "sha256": "3e3380cd613505e47498973b032f512f3c58ba984ac57d61530388618527c735",
+      "review": "Job callbacks, completion evidence, package verification, installation, activation and upgrade review moved into the apps component behind host ports without behavior change"
     },
     "src/apps/job_import.rs": {
       "status": "unproved",
@@ -5411,18 +5426,18 @@
     },
     "src/apps/mod.rs": {
       "status": "unproved",
-      "sha256": "fe9277910dc8eb1afa81585ab34c8a40049d1687013f5b3226da0d62c6e576b1",
-      "review": "Managed app records, restoration, import and native-object projection moved into the apps component behind a record rules port without behavior change"
+      "sha256": "8a10e4b4f4d425508c5a41a9a2b95edc5df3dc9c5fc7d74501689e76fbebced5",
+      "review": "Job callbacks, completion evidence, package verification, installation, activation and upgrade review moved into the apps component behind host ports without behavior change"
     },
     "src/apps/model_contract.rs": {
       "status": "unproved",
-      "sha256": "f82caa3c1040abc5236712a77f30dd3a5a75efb314fd319c0f613590e9c0ce96",
-      "review": "Package approval, distribution, schema adapters, event projection and service transport policy moved into components/apps without a change in behaviour"
+      "sha256": "7192aed79a7a5572bd85bb989bb9014edcd41363594ee7e8915a8dd1f1a147a7",
+      "review": "Job callbacks, completion evidence, package verification, installation, activation and upgrade review moved into the apps component behind host ports without behavior change"
     },
     "src/apps/native_lifecycle.rs": {
       "status": "unproved",
-      "sha256": "9f6038f826167f2faf56fc268424fecdaa0e060992fe5732f29399ed85dabbff",
-      "review": "Native lifecycle rules, capture and commerce hook admission moved into the apps component without behavior change"
+      "sha256": "12119f2fa5187a475af2fe45be0cfd5b206db515379a70f8cb9afe71b735cd89",
+      "review": "Job callbacks, completion evidence, package verification, installation, activation and upgrade review moved into the apps component behind host ports without behavior change"
     },
     "src/apps/native_view_tests.rs": {
       "status": "unproved",
@@ -5443,11 +5458,6 @@
       "status": "unproved",
       "sha256": "7c5c5443f4b3375ee7cce0794e45b870193de2db7cfaf17c24d5e7127c616a83",
       "review": "Sandbox cache, configuration runtime and package fence moved into the apps component without changing rules"
-    },
-    "src/apps/package_install.rs": {
-      "status": "unproved",
-      "sha256": "7be085004b45f1fc02cb311aa9046415c8e43dd2d324fe60ad6450f31e5c36fb",
-      "review": "Reviewed extraction of original registry installation sequencing to pinned Apps 0.5: caller transaction, native compiler/provider trust and marketing-before-tenant/package lock order retained; mandatory dependencies/commerce/lifecycle, typed downgrade/schema migration, model/default/schedule hooks; same locks 543/7, quota 128, immutable digest, revision/activation, version and app.installed writes. Independent PG hook rollback at all five stages, quota contention, own/foreign versions, preview history and writer fence pass; native installation/Studio/F5/schema/staging/release/distribution/tenant and Marketplace composition pass. New SQL/hooks remain explicitly unproved; kernel policies unchanged."
     },
     "src/apps/planning.rs": {
       "status": "unproved",
@@ -5471,38 +5481,28 @@
     },
     "src/apps/records.rs": {
       "status": "unproved",
-      "sha256": "e7318f2cbf98c79d2e2aaf3edda4d7dcdda6ed3303d7bcba0a8fa1e229343164",
-      "review": "Managed app records, restoration, import and native-object projection moved into the apps component behind a record rules port without behavior change"
+      "sha256": "27edb238109729f777ed2d0c123e71562de614d1ac7edb254f38a5cfb295faa1",
+      "review": "Job callbacks, completion evidence, package verification, installation, activation and upgrade review moved into the apps component behind host ports without behavior change"
     },
     "src/apps/registry.rs": {
       "status": "unproved",
-      "sha256": "5551615b54e2a3bafe6ca59d555938b6b7903059bd25a47d6b4ac39beb934435",
-      "review": "Sandbox cache, configuration runtime and package fence moved into the apps component without changing rules"
+      "sha256": "68ab7374e5e36b99b55840e66ebce0437151075e0d41e93c0b665346d1ab3e30",
+      "review": "Job callbacks, completion evidence, package verification, installation, activation and upgrade review moved into the apps component behind host ports without behavior change"
     },
     "src/apps/routes.rs": {
       "status": "unproved",
-      "sha256": "b15c67e609d58c0aa2c7a01b742ad7bfce3a5bd096c10830dd05fbf28d8d1b4e",
-      "review": "Reviewed Apps 0.22 activation extraction against Core 52eb64e4 original routes::app_state and distribution::deactivate. Shared transaction preserves mandatory native config-before-lifecycle hook, original tenant fence 543 then package fence 7 shared with actual installation/writers, current activation or connected-frontend branch hook, active-dependant SQL, late revision CAS/error order and same-state revision increment. Native current management/merchant/signed scope, typed input, actual installed package/actor rights/consent/operator trust/signed dependencies/commerce/native lifecycle and connected-frontend query remain authoritative; original caller commit/rollback. No default approving production hook, shadow principal, new endpoint/permission/event, implicit installation, deletion or schema change. Independent PostgreSQL durable synthetic host facts and actual shared install/writer fences test both dependency race orders, concurrent CAS, retained records/versions, hook rollback/reconnect, original missing/error order and exhausted revision non-overwrite. Denied-without-host example and two Linux component runs pass. Native 74 App units, warning-free workspace Clippy and seven HTTP/PostgreSQL apps/studio/isolation/channelManagement/signedDistribution/surfaces/visualWorkspace modules pass; expanded role/stale/missing-revision and inactive-dependency reactivation denials, connected frontend guard and subsequent normal operation pass. Exact source/WIT, 892-module structure and source inventory pass. Kernel unchanged; SQL/async/native host code remains reviewed and unproved."
+      "sha256": "56cde943440425ceaea5ba317ad3339b7acbd8a559961d1bb6997543af11966a",
+      "review": "Job callbacks, completion evidence, package verification, installation, activation and upgrade review moved into the apps component behind host ports without behavior change"
     },
     "src/apps/runtime.rs": {
       "status": "unproved",
-      "sha256": "012e69d5c3bff7d154c618eaf8dd60f655f752b9e30734f2739ce288644cd154",
-      "review": "Sandbox cache, configuration runtime and package fence moved into the apps component without changing rules"
+      "sha256": "eae3bcd9bf3dc0606ae020f2f2008de2fdb0e60af4195822c481d7460b0d11ed",
+      "review": "Job callbacks, completion evidence, package verification, installation, activation and upgrade review moved into the apps component behind host ports without behavior change"
     },
     "src/apps/schedules.rs": {
       "status": "unproved",
-      "sha256": "a26a132348833882175372ecf2558cbd773b782fe1e5962d20a6457dd3c4b6e4",
-      "review": "Secret persistence, schedules and event projection moved into the apps component without changing rules"
-    },
-    "src/apps/schema_changes.rs": {
-      "status": "unproved",
-      "sha256": "5f95902ac4ee357524ebff4a49802ce39757ff263592e41470c52799c1831b4b",
-      "review": "Package approval, distribution, schema adapters, event projection and service transport policy moved into components/apps without a change in behaviour"
-    },
-    "src/apps/schema_upgrade.rs": {
-      "status": "unproved",
-      "sha256": "e682020af9b4f17aea09a279ba5a9135fb4a37dc4b0bf95358fb41123c7583fa",
-      "review": "Sandbox cache, configuration runtime and package fence moved into the apps component without changing rules"
+      "sha256": "d8af0ca5ecb15671ce4e141ae5c5b2377c875acef44a39ee0fed6b32a713b1e6",
+      "review": "Job callbacks, completion evidence, package verification, installation, activation and upgrade review moved into the apps component behind host ports without behavior change"
     },
     "src/apps/secrets.rs": {
       "status": "unproved",
@@ -5511,8 +5511,8 @@
     },
     "src/apps/service_limits.rs": {
       "status": "unproved",
-      "sha256": "5d49beb6da5a7a1cb32369c5c34fe7ff96858c6e5988136e830d4acc8ec79628",
-      "review": "Managed app records, restoration, import and native-object projection moved into the apps component behind a record rules port without behavior change"
+      "sha256": "bf1b46668362dc054e8ec42dedeadfc1a193b568ce93e1860c5e8707cccbe77c",
+      "review": "Job callbacks, completion evidence, package verification, installation, activation and upgrade review moved into the apps component behind host ports without behavior change"
     },
     "src/apps/service_policy.rs": {
       "status": "unproved",
@@ -5523,11 +5523,6 @@
       "status": "unproved",
       "sha256": "6e6bb92c24a510520587ce828ee029b5c76a807ca55718d38353c1eae8450956",
       "review": "App secret, settings, activity, credential and webhook handlers moved into the apps component without changing rules"
-    },
-    "src/apps/storage.rs": {
-      "status": "unproved",
-      "sha256": "06bfb809a6a58857b90d444e6c22782114f1460dc3f633f6b90e57bfe6fc3d09",
-      "review": "App jobs and private evidence reads moved into the apps component without changing rules"
     },
     "src/apps/submissions.rs": {
       "status": "reviewed-binding",
@@ -5573,11 +5568,6 @@
       "status": "unproved",
       "sha256": "7d70fd0061d4d618c679bc55e56a3e9961a73889d765a549f749206a97a4defb",
       "review": "Reviewed exact native view/control/geometry/UI AST extraction into pinned Apps model 0.8.0; native compiler order, error pointers, canonical digests, canonical field policy and direct verified public-read predicate preserved. Independent compiler negatives, 74 native app unit tests and twelve real PostgreSQL/HTTP composition modules pass. Shared model, host adapters and SQL remain outside extracted proof scope."
-    },
-    "src/apps/upgrade_review.rs": {
-      "status": "unproved",
-      "sha256": "b3852399d6465f308bcd2d89b5d2e6b53d6aa4c29e55397c221fc7c0df4b2e4d",
-      "review": "Selected-stage app review checks exact owned-stage metadata inside its existing privileged rollback transaction; current compound rights and private-preview exclusion remain unchanged, actual restricted-role regression reproduced and repaired"
     },
     "src/apps/webhook_scope.rs": {
       "status": "unproved",
@@ -7631,8 +7621,8 @@
     },
     "src/staging/mod.rs": {
       "status": "unproved",
-      "sha256": "1a22d9715a668207872a49d88d8aec6f385a78194285ba4ef02ff50ee255b44e",
-      "review": "App secret, settings, activity, credential and webhook handlers moved into the apps component without changing rules"
+      "sha256": "ddcc032f7be26287582685d182696f44cc6a4e2490cb49f7c06fba2bc684abef",
+      "review": "Job callbacks, completion evidence, package verification, installation, activation and upgrade review moved into the apps component behind host ports without behavior change"
     },
     "src/staging/products.rs": {
       "status": "unproved",
