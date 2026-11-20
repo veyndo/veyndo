@@ -749,6 +749,11 @@
       "sha256": "e95d45e8c105effd9f5a77811f9edab0e9ede0252e289cc54178a8ab86737a04",
       "review": "Action authorization and discovery rules moved into the apps component without changing rules"
     },
+    "components/apps/src/domain/event_batch.rs": {
+      "status": "unproved",
+      "sha256": "602066e5f2e45bcc6fdf629b152edeaa2c66579af5a693ab79eb94c8970fc491",
+      "review": "Service calls and event delivery moved into the apps component without changing rules"
+    },
     "components/apps/src/domain/event_destination.rs": {
       "status": "unproved",
       "sha256": "a2ac0802a9f3975adb36e8ea1357995ff6210fbeccff7bf600bb0d8aa25f6b2c",
@@ -876,8 +881,8 @@
     },
     "components/apps/src/domain.rs": {
       "status": "unproved",
-      "sha256": "a3d180ba79a4d8c2fc2d1645a3e11691388194a472705f84bdc047a067de7226",
-      "review": "Action authorization, entity access and discovery rules moved into the apps component without changing rules"
+      "sha256": "d5c599aac01d818cd1f9648bcc4c3c7e3dc03154c92312a38f4cb952039e0f62",
+      "review": "Service calls and event delivery moved into the apps component without changing rules"
     },
     "components/apps/src/http/activity.rs": {
       "status": "unproved",
@@ -911,8 +916,18 @@
     },
     "components/apps/src/lib.rs": {
       "status": "unproved",
-      "sha256": "e5e3e1e488c7ca26364c94126c2beb7e9e8c3457b5cdf869be60a346646c548e",
-      "review": "App secret, settings, activity, credential and webhook handlers moved into the apps component without changing rules"
+      "sha256": "7188118ab336e0f0f8ca522b1932af1c09c1caf977766b90d46c232bbd966d27",
+      "review": "Service calls and event delivery moved into the apps component without changing rules"
+    },
+    "components/apps/src/ports.rs": {
+      "status": "unproved",
+      "sha256": "cdfe0c34b2cf568092ffa45eb9e709a279256bfd9488e125204c829622cf4b59",
+      "review": "Service calls and event delivery moved into the apps component without changing rules"
+    },
+    "components/apps/src/service/admission.rs": {
+      "status": "unproved",
+      "sha256": "848e6f162d2bd33a1025a69ab6a2b81ab51c9a99c37f27b882ee8bb3294d2393",
+      "review": "Service calls and event delivery moved into the apps component without changing rules"
     },
     "components/apps/src/service/configuration_examples.rs": {
       "status": "unproved",
@@ -929,6 +944,11 @@
       "sha256": "aaa2a57dee88405b37de0f05ed229b14f35d3a6a479abdabedf7b751312f3e05",
       "review": "Configuration, lifecycle, ontology and reference adapters moved into the apps component without changing rules"
     },
+    "components/apps/src/service/event_delivery.rs": {
+      "status": "unproved",
+      "sha256": "671d9457e245f77eb9b4ca534197471d6271608548215ef13e2729a54647a388",
+      "review": "Service calls and event delivery moved into the apps component without changing rules"
+    },
     "components/apps/src/service/limits.rs": {
       "status": "unproved",
       "sha256": "51e81fff0d0bec5c463b6c4a53a4e3468ae26cfcbcbbe4eb7861eab967939702",
@@ -939,10 +959,15 @@
       "sha256": "592fa48bca4482b403e468793ccb51b381d6a1bf6a73cd883fc16363b395a42d",
       "review": "Sandbox cache, configuration runtime and package fence moved into the apps component without changing rules"
     },
+    "components/apps/src/service/service_call.rs": {
+      "status": "unproved",
+      "sha256": "ef7980e047cc341586d8137b393fe9452a7ded74318b7ea82845d935aa0640e6",
+      "review": "Service calls and event delivery moved into the apps component without changing rules"
+    },
     "components/apps/src/service.rs": {
       "status": "unproved",
-      "sha256": "5429a2c445ad99ece05a886eeb5df852dfa1a70dffb21aaa508bcb78caa83e59",
-      "review": "Sandbox cache, configuration runtime and package fence moved into the apps component without changing rules"
+      "sha256": "c751f89b9cf4994616a3be63d7719507015a5ceaf29363b7c5023af0c92b198f",
+      "review": "Service calls and event delivery moved into the apps component without changing rules"
     },
     "components/apps/src/store/action_log.rs": {
       "status": "unproved",
@@ -5224,20 +5249,10 @@
       "sha256": "a14ee791ee288dfdff14f5b6639ba470ff0c14f20877ac408b98ad718a358a78",
       "review": "Configuration, lifecycle, ontology and reference adapters moved into the apps component without changing rules"
     },
-    "src/apps/event_contract.rs": {
-      "status": "unproved",
-      "sha256": "1d08c758550937b37162cf776e3c4b66d1978dbe2c9d4da5276ca55daa870962",
-      "review": "Action authorization, entity access and discovery rules moved into the apps component without changing rules"
-    },
-    "src/apps/event_projection.rs": {
-      "status": "unproved",
-      "sha256": "4455047c5d6ef56b97511f6092a7cfcb64afce7d599143f82ed47a8cd238ad43",
-      "review": "Package approval, distribution, schema adapters, event projection and service transport policy moved into components/apps without a change in behaviour"
-    },
     "src/apps/events.rs": {
       "status": "unproved",
-      "sha256": "2ddcab9201b9753353115e8bd86b97de15763ebddcccc8f810a0323ecdd873e7",
-      "review": "Secret persistence, schedules and event projection moved into the apps component without changing rules"
+      "sha256": "ac834760b8daf835e45deb2044c477d4637649d518dda85e0aeabb9db5f630d4",
+      "review": "Service calls and event delivery moved into the apps component without changing rules"
     },
     "src/apps/evidence.rs": {
       "status": "unproved",
@@ -5266,8 +5281,8 @@
     },
     "src/apps/gateway.rs": {
       "status": "unproved",
-      "sha256": "b2308ce8d029e1769d86e4042b6f34231d5fa06b002d47371231bd3a5e6f092c",
-      "review": "Action authorization, entity access and discovery rules moved into the apps component without changing rules"
+      "sha256": "008c8dbe93bc4056f1d77132632856b707dc422fdc7955ef93a201ead4a405cc",
+      "review": "Service calls and event delivery moved into the apps component without changing rules"
     },
     "src/apps/history_storage.rs": {
       "status": "unproved",
@@ -5331,8 +5346,8 @@
     },
     "src/apps/mod.rs": {
       "status": "unproved",
-      "sha256": "99aed8432b9703271110c6ba81017b1664ff591c18dea1884dbfe0fda882c70d",
-      "review": "App secret, settings, activity, credential and webhook handlers moved into the apps component without changing rules"
+      "sha256": "f862ae9b794078a5e1dd02dcff9f2ef69a9d8eed21e862dce929b91e3caf45bd",
+      "review": "Service calls and event delivery moved into the apps component without changing rules"
     },
     "src/apps/model_contract.rs": {
       "status": "unproved",
@@ -5461,13 +5476,13 @@
     },
     "src/apps/secrets.rs": {
       "status": "unproved",
-      "sha256": "8ef15bf01a454e9f31038ca32e3f07172c4979ce425c8b8c3279287edbeb4a65",
-      "review": "App secret, settings, activity, credential and webhook handlers moved into the apps component without changing rules"
+      "sha256": "fbddf7a18385c3826e0cf5d2c469fe8c2c0aa23d921b7ce773771cd92fd536e9",
+      "review": "Service calls and event delivery moved into the apps component without changing rules"
     },
     "src/apps/service_limits.rs": {
       "status": "unproved",
-      "sha256": "b9cea924d870b24b6d7bacf97fc4d30707a710a3b07ac27267764f5492d4c9f2",
-      "review": "Configuration, lifecycle, ontology and reference adapters moved into the apps component without changing rules"
+      "sha256": "f25799758ff53d40bed1e3e5436530f015f30cf466e8655d3799eecdafa20a3a",
+      "review": "Service calls and event delivery moved into the apps component without changing rules"
     },
     "src/apps/service_policy.rs": {
       "status": "unproved",
@@ -7731,8 +7746,8 @@
       "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
     },
     "Cargo.lock": {
-      "sha256": "33b57cec4bf569808a5b947a25a400cc4de21bd1e163de0e07d9467299b99419",
-      "review": "App secret, settings, activity, credential and webhook handlers moved into the apps component without changing rules"
+      "sha256": "999d8929237d1eceaefc470d8a134ce8553a2b7231f44582092e4bb6b45807ac",
+      "review": "Service calls and event delivery moved into the apps component without changing rules"
     },
     "Cargo.toml": {
       "sha256": "12d2d79a98f6913d20b8e912afb9ea8de0539b9e83428de8a9d7412c406896f6",

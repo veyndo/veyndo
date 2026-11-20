@@ -12,6 +12,7 @@ pub mod core_extensions;
 pub mod discovery;
 pub mod distribution;
 pub mod entity_access;
+pub mod event_batch;
 pub mod event_destination;
 pub mod event_projection;
 pub mod event_signature;

@@ -13,4 +13,3 @@ pub(super) fn router() -> Router<App> {
             axum::routing::put(veyndo_app_platform::http::secrets::rotate),
         )
 }
-pub(super) use veyndo_app_platform::store::secrets::resolve;

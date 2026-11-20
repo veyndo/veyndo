@@ -27,6 +27,8 @@ veyndo-catalog = { path = "../catalog" }
 veyndo-orders = { path = "../orders" }
 veyndo-shop = { path = "../shop" }
 tokio.workspace = true
+tracing.workspace = true
+uuid.workspace = true
 chrono.workspace = true
 cron.workspace = true
 veyndo-cognition = { path = "../../crates/cognition" }

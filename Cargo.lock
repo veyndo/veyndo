@@ -3565,6 +3565,8 @@ dependencies = [
  "sha2 0.10.9",
  "sqlx",
  "tokio",
+ "tracing",
+ "uuid",
  "veyndo-app-model",
  "veyndo-app-storage",
  "veyndo-apps",

@@ -42,8 +42,6 @@ mod distribution;
 pub(crate) use consent::actor_permissions;
 pub(crate) use distribution::sign_package;
 pub(crate) mod data;
-mod event_contract;
-mod event_projection;
 mod events;
 mod schedules;
 mod secrets;
