@@ -167,7 +167,7 @@
         "tenants"
       ],
       "glob_imports": 38,
-      "untyped_access": 109,
+      "untyped_access": 105,
       "sql_outside_store": 24
     },
     "catalog": {
@@ -396,9 +396,11 @@
         "customers",
         "extensions",
         "hosted_frontends",
+        "legal_acceptances",
         "orders",
         "outbox",
         "policy",
+        "privacy_consents",
         "product_channel_visibility",
         "products",
         "sales_channels",
@@ -406,7 +408,7 @@
         "tenants"
       ],
       "glob_imports": 11,
-      "untyped_access": 194,
+      "untyped_access": 198,
       "sql_outside_store": 8
     },
     "customers": {
@@ -448,7 +450,7 @@
       ],
       "glob_imports": 17,
       "untyped_access": 79,
-      "sql_outside_store": 7
+      "sql_outside_store": 6
     },
     "orders": {
       "title": "Order state, fulfilment, receipts, documents and merchant order work",

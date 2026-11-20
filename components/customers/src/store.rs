@@ -1,4 +1,5 @@
 //! SQL of the customers component.
+pub mod accounts;
 pub mod address_restore;
 pub mod addresses;
 pub mod customers;

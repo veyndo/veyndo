@@ -8,37 +8,8 @@ pub(crate) async fn scoped_locked(
     t: &str,
     channel: &str,
 ) -> Result<(Settings, i64)> {
-    let row = sqlx::query("SELECT data,revision FROM commerce_settings WHERE tenant=$1 FOR SHARE")
-        .bind(t)
-        .fetch_one(&mut **tx)
-        .await?;
-    let base = decode_config(row.get("data"))?;
-    let revision: i64 = row.get("revision");
-    if channel == "default" {
-        return Ok((base, revision));
-    }
-    let exists: bool =
-        sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM sales_channels WHERE tenant=$1 AND id=$2)")
-            .bind(t)
-            .bind(channel)
-            .fetch_one(&mut **tx)
-            .await?;
-    if !exists {
-        return Err(Error(
-            StatusCode::NOT_FOUND,
-            "Sales channel not found".into(),
-        ));
-    }
-    let patch: Option<Value> =
-        sqlx::query_scalar("SELECT data FROM commerce_overrides WHERE tenant=$1 AND channel_id=$2")
-            .bind(t)
-            .bind(channel)
-            .fetch_optional(&mut **tx)
-            .await?;
-    Ok((
-        super::settings_patch::resolve(&base, patch.unwrap_or(json!([])))?,
-        revision,
-    ))
+    veyndo_shop::store::settings::scoped_locked(tx, t, channel, &marketing::validate_condition)
+        .await
 }
 pub(crate) async fn get_scope(
     State(a): State<App>,

@@ -734,6 +734,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/checkout/src/service/delivery.rs](../components/checkout/src/service/delivery.rs) | Shipping costs, proportional taxes and calendar delivery windows. |
 | [components/checkout/src/service.rs](../components/checkout/src/service.rs) | service of this component. |
 | [components/checkout/src/store/customer_snapshot.rs](../components/checkout/src/store/customer_snapshot.rs) | Checkout-owned immutable customer and address records; future account edits cannot rewrite an order. |
+| [components/checkout/src/store/legal_snapshot.rs](../components/checkout/src/store/legal_snapshot.rs) | Explicit document and digital acknowledgement, checked under the purchase locks and frozen into the order. |
 | [components/checkout/src/store/product_snapshot.rs](../components/checkout/src/store/product_snapshot.rs) | Localized immutable checkout SKU snapshots read under the purchase transaction's locks. |
 | [components/checkout/src/store/session.rs](../components/checkout/src/store/session.rs) | What a checkout session reads under the checkout transaction: the channel it may sell on and the order it already placed. |
 | [components/checkout/src/store.rs](../components/checkout/src/store.rs) | Reads of the checkout transaction. |
@@ -775,6 +776,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/customers/src/service/directory.rs](../components/customers/src/service/directory.rs) | The merchant's view of customers: standard read fields, the bounded lookup and guest contacts. |
 | [components/customers/src/service/sessions.rs](../components/customers/src/service/sessions.rs) | Independent customer sessions: a random token whose digest alone is stored. |
 | [components/customers/src/service.rs](../components/customers/src/service.rs) | Operations of the customers component. |
+| [components/customers/src/store/accounts.rs](../components/customers/src/store/accounts.rs) | Writes a customer makes to the own account: registration, the contact profile and the password. |
 | [components/customers/src/store/address_restore.rs](../components/customers/src/store/address_restore.rs) | Atomic restoration of the owning customer's address aggregate; geography, references and immutable order snapshots remain guarded. |
 | [components/customers/src/store/addresses.rs](../components/customers/src/store/addresses.rs) | Tenant-owned address persistence, optimistic revisions and atomic default assignment. |
 | [components/customers/src/store/customers.rs](../components/customers/src/store/customers.rs) | Customer rows as the merchant and the account see them, with order metrics from authoritative records. |
@@ -984,6 +986,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/shop/src/lib.rs](../components/shop/src/lib.rs) | Shop component: the settings every other commerce component reads, with their bounds and inheritance rules. |
 | [components/shop/src/ports.rs](../components/shop/src/ports.rs) | What components that work on a buyer's cart need from the server: the guarded cart, its priced view and a revision-checked replacement of its lines. |
 | [components/shop/src/store/group_usage.rs](../components/shop/src/store/group_usage.rs) | Removing a customer group rejects live customer, price and native/source-rule dependencies under the settings lock. |
+| [components/shop/src/store/settings.rs](../components/shop/src/store/settings.rs) | The settings of a sales channel read under a share lock, so they cannot change before the transaction commits. |
 | [components/shop/src/store.rs](../components/shop/src/store.rs) | SQL of the shop component. |
 | [components/shop/src/types/b2b.rs](../components/shop/src/types/b2b.rs) | B2B feature switches live in shared commerce settings; disabling never relaxes existing financial policy. |
 | [components/shop/src/types/cart.rs](../components/shop/src/types/cart.rs) | The cart as every commerce component reads it: the shared cart contract bound to this shop's contexts. |

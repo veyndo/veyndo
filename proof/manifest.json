@@ -304,7 +304,7 @@
     },
     "legal_checkout_admissible": {
       "bindings": [
-        "src/legal/checkout.rs"
+        "components/checkout/src/store/legal_snapshot.rs"
       ],
       "theorems": [
         "legal_checkout_exact"
@@ -1108,6 +1108,11 @@
       "sha256": "a4879982eac35a2be2108e00b040726381b347633378adc0a377e083321a9740",
       "review": "Coupons, flow job summaries, requisition import, customer snapshot, address restore and account orders moved into components"
     },
+    "components/checkout/src/store/legal_snapshot.rs": {
+      "status": "reviewed-binding",
+      "sha256": "0ba788b01db8b19504f0bb54feb8a2b3fa8d377d20e00ce8740748fae2c73abf",
+      "review": "Customer account writes, the legal snapshot of an order and the locked settings read moved into components"
+    },
     "components/checkout/src/store/product_snapshot.rs": {
       "status": "unproved",
       "sha256": "8b7362fade55bc41b751fdbbc1495026c7776dd1549c991905db602a838950ac",
@@ -1120,8 +1125,8 @@
     },
     "components/checkout/src/store.rs": {
       "status": "unproved",
-      "sha256": "688ff6df7999e3b7762f90e8d132af6c828be55a7377e1d349b608d10d720cbf",
-      "review": "Coupons, flow job summaries, requisition import, customer snapshot, address restore and account orders moved into components"
+      "sha256": "d1828963008229b24316b2a3bcfae79cc11fd325f0cee2d1d24068083affc730",
+      "review": "Customer account writes, the legal snapshot of an order and the locked settings read moved into components"
     },
     "components/core/src/access.rs": {
       "status": "unproved",
@@ -1303,6 +1308,11 @@
       "sha256": "1d35da6c7981b393247006460da1bc3b4f66aa61e1538d4405abe5ef69f339ca",
       "review": "customers component crate created; no kernel binding changed"
     },
+    "components/customers/src/store/accounts.rs": {
+      "status": "unproved",
+      "sha256": "7e6ef6312c83efb522eac1ac49e035499833f4d0a043c0d0517c7ab0e728d292",
+      "review": "Customer account writes, the legal snapshot of an order and the locked settings read moved into components"
+    },
     "components/customers/src/store/address_restore.rs": {
       "status": "unproved",
       "sha256": "83082b27904fdde97af710f408423c033ec0afe400f62660aacdb55c4a8887da",
@@ -1325,8 +1335,8 @@
     },
     "components/customers/src/store.rs": {
       "status": "unproved",
-      "sha256": "b167d455f73694348e99bee17eb3208abbbc719cfbf022422b27672466a35681",
-      "review": "Coupons, flow job summaries, requisition import, customer snapshot, address restore and account orders moved into components"
+      "sha256": "797ae5709467f0c6ea61502855ade93afed3b8c06ba4881ab2b25f9fbb4a7d01",
+      "review": "Customer account writes, the legal snapshot of an order and the locked settings read moved into components"
     },
     "components/identity/src/domain/credentials.rs": {
       "status": "unproved",
@@ -2328,10 +2338,15 @@
       "sha256": "ace9347f4b68a8a840bcc669953725d244555192c350601d9aad1c7a73eb6297",
       "review": "Order list criteria, company model and receipts moved into components; kernel call sites unchanged"
     },
+    "components/shop/src/store/settings.rs": {
+      "status": "unproved",
+      "sha256": "d7eeaf590b1f0856748b86dcd4ec09909e172bd712dbd4c5934b73fe9fa2ed1c",
+      "review": "Customer account writes, the legal snapshot of an order and the locked settings read moved into components"
+    },
     "components/shop/src/store.rs": {
       "status": "unproved",
-      "sha256": "30003196af90ff0cf953c898bce266644cc2cd94a42b28b754733e29ffa5a5ca",
-      "review": "Order list criteria, company model and receipts moved into components; kernel call sites unchanged"
+      "sha256": "e13574826eda527ee8e39d6d8dec8706fe31971892462a53b3be0f20a183e648",
+      "review": "Customer account writes, the legal snapshot of an order and the locked settings read moved into components"
     },
     "components/shop/src/types/b2b.rs": {
       "status": "unproved",
@@ -4185,8 +4200,8 @@
     },
     "src/accounts/mod.rs": {
       "status": "unproved",
-      "sha256": "a327cd598e951513db0f10627b37d108dbac1644819e6e2b1c10dfaf139629fa",
-      "review": "Coupons, flow job summaries, requisition import, customer snapshot, address restore and account orders moved into components"
+      "sha256": "8dad171ea8de022dfdaf7cccb8ff01f734d568072d2847dc6d337f4819d94c50",
+      "review": "Customer account writes, the legal snapshot of an order and the locked settings read moved into components"
     },
     "src/accounts/order_snapshot.rs": {
       "status": "unproved",
@@ -4205,8 +4220,8 @@
     },
     "src/accounts/profile.rs": {
       "status": "unproved",
-      "sha256": "ec0998efa83df4d1eed02f38d1af61410b60340e247c48fc8c969f135f5be440",
-      "review": "Reviewed eighteen core findings: typed trusted identity and explicit route rights; consolidated current grants; durable auth and fenced shared limits; scoped transactions and one-backend PgBouncer including nested borrow fixes; bounded Wasm/PNG work; notified workers, savepoint quarantine and conservative retention; separate runtime roles and startup configuration. Real PostgreSQL/provider regressions preserve current tenant/customer/payment behavior. SQL/network adapters remain unproved."
+      "sha256": "97d90b90f4b3b7b2675ad6f24296d68f641bd4dbe07e53e554e79ea1a58ac6f3",
+      "review": "Customer account writes, the legal snapshot of an order and the locked settings read moved into components"
     },
     "src/agent.rs": {
       "status": "unproved",
@@ -5730,8 +5745,8 @@
     },
     "src/commerce/settings_scope.rs": {
       "status": "unproved",
-      "sha256": "eca21b6606dbbb479082339c822c8cefb12e1af127554642c00b9c473e557037",
-      "review": "Reviewed native-only static bypass with hosted denial and Lean exact acceptance; one fresh domain/environment/status/channel/mount SQL snapshot and current membership lookup preserve scoped admission, binding identity and revocation; immutable Arc settings retain locked mutation/checkout reads; secret-free compression opt-in and deterministic precompressed assets preserve streams/ranges; batched inventory uses existing checkout locks and ordered idempotent release; bounded overview SQL preserves currency-separated historical facts. Real two-replica read/channel/tenant/checkout and strict-runtime regressions passed; SQL and build inputs now explicitly locked. These adapters remain unproved."
+      "sha256": "8ba3bb90d6c23cea588c3c27661eed7f7fc575a18ff8f7f354179064703e5649",
+      "review": "Customer account writes, the legal snapshot of an order and the locked settings read moved into components"
     },
     "src/commerce/settings_validation.rs": {
       "status": "unproved",
@@ -6004,9 +6019,9 @@
       "review": "Reviewed eighteen core findings: typed trusted identity and explicit route rights; consolidated current grants; durable auth and fenced shared limits; scoped transactions and one-backend PgBouncer including nested borrow fixes; bounded Wasm/PNG work; notified workers, savepoint quarantine and conservative retention; separate runtime roles and startup configuration. Real PostgreSQL/provider regressions preserve current tenant/customer/payment behavior. SQL/network adapters remain unproved."
     },
     "src/legal/checkout.rs": {
-      "status": "reviewed-binding",
-      "sha256": "278a2203a1694848cd40c674dbb377c564d0b15c5f6820ca3f59cee226ab5923",
-      "review": "Customer scenarios: independent scenario_security_review completed; native signed-role, cohort, replay, injection, cancellation and post-lock lease-expiry regressions pass. Shared checkout preflight avoids nested-pool deadlock; authority is rechecked at the fenced transaction commit."
+      "status": "unproved",
+      "sha256": "0d801b36e667dd91b55a68d95961d940982d2b031253dc3196ef565f06f2e67f",
+      "review": "Customer account writes, the legal snapshot of an order and the locked settings read moved into components"
     },
     "src/legal/consent.rs": {
       "status": "reviewed-binding",
@@ -6015,13 +6030,13 @@
     },
     "src/legal/continuation.rs": {
       "status": "unproved",
-      "sha256": "2fa47a90fc99b24a14bdf19e0ac257b672d36436d133f1be6b90cdf422a5e07d",
-      "review": "Reviewed migration 108 scoped receipt references, authenticated original-cart and same-customer continuation including current B2B guard, shared root locking/revocation and preference erasure; native legal/UCP purchases, expiry, denial and concurrency regressions pass. Existing pure policies unchanged; SQL and browser behavior remain outside the formal proof."
+      "sha256": "7e528f126777fe5b60690a926ec6529d5614ad3dc141e64b38a84a157de32b17",
+      "review": "Customer account writes, the legal snapshot of an order and the locked settings read moved into components"
     },
     "src/legal/mod.rs": {
       "status": "unproved",
-      "sha256": "58b951920489845984576b7d6bb0192906a16ffcd910990a8edd78dd59b3656f",
-      "review": "shop component crate created; settings types moved; no kernel binding changed"
+      "sha256": "400e6ebd502e5c02aeea8a68d4fe17e490a775e8ea9e221c7e01724127cdb33c",
+      "review": "Customer account writes, the legal snapshot of an order and the locked settings read moved into components"
     },
     "src/legal/model.rs": {
       "status": "unproved",

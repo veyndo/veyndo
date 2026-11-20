@@ -14,7 +14,7 @@ mod checkout;
 pub(crate) use checkout::snapshot;
 mod product;
 mod requests;
-pub(crate) use product::{product_gaps, validate_product};
+pub(crate) use product::validate_product;
 mod capabilities;
 pub(crate) use capabilities::{invoke, permission, schema};
 pub(crate) fn router() -> Router<App> {

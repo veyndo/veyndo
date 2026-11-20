@@ -83,32 +83,20 @@ async fn register(
             if !settings.countries.contains(&ad.country) {
                 return Err(bad("Address country unavailable"));
             }
-            initial.push((field, ad));
+            initial.push(veyndo_customers::store::accounts::Initial {
+                address: ad,
+                default_billing: field == "billingAddress",
+                default_shipping: field == "shippingAddress",
+            });
         }
     }
     let locale = language_context(&a, &h).await?.0;
     let channel = marketing::channel_id(&h);
     marketing::channel(&a, &h, channel, &locale).await?;
-    let mut tx = a.db.begin().await?;
-    history::customer_context(&mut tx, &email).await?;
-    let n=sqlx::query("INSERT INTO customers(tenant,email,password_hash,profile) VALUES($1,$2,$3,$4) ON CONFLICT DO NOTHING").bind(&t).bind(&email).bind(password).bind(json!(contact)).execute(&mut *tx).await?.rows_affected();
-    if n != 1 {
-        return Err(conflict("Account already exists"));
-    }
-    for (field, ad) in initial {
-        address_save_conn(&mut tx,&t,&email,None,&json!({"defaultBilling":field=="billingAddress","defaultShipping":field=="shippingAddress"}),&ad).await?;
-    }
-    sqlx::query(
-        "UPDATE customers SET language_id=$1,sales_channel_id=$2,company=NULLIF($5,'') WHERE tenant=$3 AND email=$4",
+    veyndo_customers::store::accounts::register(
+        &a, &t, &email, password, &contact, initial, &locale, channel,
     )
-    .bind(locale)
-    .bind(channel)
-    .bind(&t)
-    .bind(&email)
-    .bind(&contact.company)
-    .execute(&mut *tx)
     .await?;
-    tx.commit().await?;
     Ok(Json(
         json!({"customerToken":session(&a,&t,&email).await?,"email":email}),
     ))

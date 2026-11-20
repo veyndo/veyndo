@@ -1,8 +1,7 @@
 //! Capability-bound consent continuation: successive carts share one revocable receipt, never copied grants.
 use super::*;
 
-// Aliases are server-created, one hop and immutable; both sides are tenant/channel scoped.
-pub(super) const RECEIPT_SQL: &str = "SELECT root.cart_id,root.policy_version,root.data,root.expires_at>now() AS fresh FROM privacy_consents own JOIN privacy_consents root ON root.tenant=own.tenant AND root.channel_id=own.channel_id AND root.cart_id=coalesce(own.source_cart_id,own.cart_id) AND root.source_cart_id IS NULL WHERE own.tenant=$1 AND own.cart_id=$2 AND own.channel_id=$3 FOR SHARE OF root";
+pub(super) use veyndo_checkout::store::legal_snapshot::RECEIPT_SQL;
 
 pub(super) async fn receipt_owner(
     tx: &mut sqlx::Transaction<'_, sqlx::Postgres>,

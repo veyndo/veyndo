@@ -241,8 +241,9 @@ Order follows the dependency report, lowest first. Each line is one move.
   lookup with literal search, the guest contact and the remembered payment
   method. Open: the handlers still run in the server, because they resolve the
   storefront request, attribute the history and read shop settings; login,
-  registration, profile and password; merchant customer create and edit;
-  browser sessions. The restoration of an address aggregate from history
+  merchant customer create and edit; browser sessions. Registration, the
+  contact profile and the password swap are writes in `store/accounts`; the
+  handlers keep credential hashing, geography and channel admission. The restoration of an address aggregate from history
   lives in `store/`; the shop's geography admits each address through a
   closure.
 - [ ] payments. Started: `components/payments` owns the attempt type, the
@@ -271,7 +272,9 @@ Order follows the dependency report, lowest first. Each line is one move.
   purchase with its replay and receipt checks, and the classification of the
   checkout test payment; `store/` the localized SKU snapshot read under the
   purchase locks, the channel admission of a session and its placed order,
-  and the immutable customer and address record of an order.
+  the immutable customer and address record of an order, and the legal
+  acknowledgement and consent checked under the purchase locks and frozen
+  into the order (`legal_checkout_admissible` names the new file).
   The kernel bindings of the review name the new file. Open: cart storage and
   mutation, the quote, the selection, the four steps of the checkout
   transaction (they call apps, B2B, payments, marketing and legal and need a
@@ -344,8 +347,13 @@ Order follows the dependency report, lowest first. Each line is one move.
   embeds; rule conditions are checked through a function the rule engine
   passes in. It also owns the cart as every component reads it (`Cart`,
   `StoredCart`, the cashier discount, the company context, app
-  configurations). Open: loading, caching, saving and releasing settings, channel
-  scopes, domains, legal consent, the platform and performance modules.
+  configurations), the admission of a request to a cart
+  (`domain/cart_admission`), the bounds of cart lines and the cart port
+  (`ports::Carts`: guarded load, priced view, admission of a locked row,
+  revision-checked line replacement). `store/settings` reads the settings of
+  a channel under a share lock. Open: cached loading, saving and releasing
+  settings, channel scope handlers, domains, legal consent, the platform and
+  performance modules.
 
 Per component: sources moved, tables and migrations assigned, SQL only in
 `store/`, typed interface, `foreign_tables` empty or each entry justified, tests
