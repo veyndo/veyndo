@@ -3936,12 +3936,15 @@ version = "0.5.0"
 dependencies = [
  "chrono",
  "chrono-tz",
+ "reqwest",
  "serde",
  "serde_json",
  "sqlx",
  "veyndo-app-model",
+ "veyndo-catalog",
  "veyndo-core",
  "veyndo-identity",
+ "veyndo-intelligence",
  "veyndo-pricing",
  "veyndo-shop",
 ]

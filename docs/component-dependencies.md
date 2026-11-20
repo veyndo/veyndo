@@ -24,20 +24,20 @@ run SQL without being in a `store` folder. Both numbers only fall.
 | customers | 2174 | 16 | 82 | 5 | 3 | apps (9), catalog (2), checkout (2), core (153), identity (32), marketing (4), orders (3), pos (1), pricing (5), shipping (3), shop (11), studio (4) | 4 |
 | orders | 5326 | 29 | 451 | 11 | 7 | apps (32), b2b (1), catalog (9), checkout (6), core (256), customers (5), identity (72), inventory (1), marketing (7), payments (5), pricing (8), shipping (3), shop (17), studio (8) | 17 |
 | payments | 4462 | 1 | 264 | 15 | 7 | apps (10), core (213), host (4), identity (10), inventory (1), orders (1), pos (1), pricing (8), shop (4), studio (1) | 14 |
-| marketing | 5208 | 21 | 337 | 15 | 8 | apps (14), automation (20), b2b (2), catalog (5), checkout (3), core (200), identity (38), intelligence (14), orders (1), payments (1), pos (1), pricing (12), shop (28), studio (3) | 24 |
+| marketing | 5248 | 21 | 337 | 14 | 8 | apps (14), automation (20), b2b (2), catalog (5), checkout (3), core (201), identity (38), intelligence (14), orders (1), payments (1), pos (1), pricing (12), shop (28), studio (3) | 24 |
 | b2b | 2382 | 9 | 108 | 8 | 8 | apps (16), checkout (10), core (103), customers (2), identity (20), marketing (1), orders (1), pos (1), pricing (8), shop (23), studio (8) | 8 |
 | pos | 1077 | 6 | 68 | 5 | 0 | apps (1), catalog (4), checkout (17), core (36), customers (1), identity (15), marketing (3), orders (1), payments (3), pricing (5), shop (14) | 8 |
 | apps | 11983 | 109 | 420 | 42 | 22 | b2b (3), catalog (10), checkout (4), core (628), host (17), identity (84), intelligence (1), marketing (13), orders (8), payments (7), pos (1), pricing (8), protocols (1), shipping (1), shop (33), studio (36) | 20 |
 | automation | 1443 | 8 | 97 | 0 | 0 | core (2) | 0 |
 | intelligence | 12011 | 75 | 716 | 35 | 28 | apps (45), catalog (29), checkout (20), core (657), customers (1), host (3), identity (81), marketing (18), orders (1), payments (1), pricing (15), protocols (8), shop (37), studio (7) | 26 |
-| studio | 2802 | 18 | 160 | 11 | 5 | apps (26), b2b (4), catalog (5), core (139), customers (1), identity (44), marketing (9), pos (1), pricing (2), shop (12) | 34 |
+| studio | 2811 | 15 | 160 | 8 | 5 | apps (26), b2b (4), catalog (6), core (132), customers (1), identity (44), intelligence (1), marketing (9), pos (1), pricing (2), shop (12) | 34 |
 | protocols | 2769 | 17 | 132 | 2 | 0 | apps (23), b2b (9), catalog (10), checkout (20), core (104), customers (1), host (2), identity (32), intelligence (23), marketing (9), orders (8), payments (3), pos (3), pricing (6), shipping (3), shop (21), studio (10) | 2 |
 | host | 2970 | 7 | 40 | 6 | 1 | apps (1), catalog (4), core (119), intelligence (6), pricing (13) | 9 |
 | connectors | 0 | 0 | 0 | 0 | 6 | none | 0 |
 
 ## Cycles
 
-64 pairs of components depend on each other. A crate boundary needs each pair
+65 pairs of components depend on each other. A crate boundary needs each pair
 reduced to one direction first.
 
 - apps ↔ b2b: 3 and 16 references
@@ -66,7 +66,7 @@ reduced to one direction first.
 - catalog ↔ pricing: 29 and 1 references
 - catalog ↔ protocols: 1 and 10 references
 - catalog ↔ shop: 14 and 8 references
-- catalog ↔ studio: 8 and 5 references
+- catalog ↔ studio: 8 and 6 references
 - checkout ↔ customers: 5 and 2 references
 - checkout ↔ identity: 2 and 1 references
 - checkout ↔ intelligence: 2 and 20 references
@@ -90,6 +90,7 @@ reduced to one direction first.
 - intelligence ↔ marketing: 18 and 14 references
 - intelligence ↔ protocols: 8 and 23 references
 - intelligence ↔ shop: 37 and 3 references
+- intelligence ↔ studio: 7 and 1 references
 - inventory ↔ shop: 2 and 1 references
 - marketing ↔ orders: 1 and 7 references
 - marketing ↔ pos: 1 and 3 references
@@ -138,7 +139,6 @@ reduced to one direction first.
 | customers | core | `State` | 48 |
 | intelligence | apps | `apps::` | 45 |
 | studio | identity | `auth::` | 42 |
-| studio | core | `Result` | 42 |
 | customers | core | `Result` | 39 |
 | studio | core | `State` | 37 |
 | payments | core | `State` | 37 |
@@ -148,6 +148,7 @@ reduced to one direction first.
 | marketing | core | `State` | 35 |
 | marketing | core | `RequestContext` | 35 |
 | checkout | core | `State` | 35 |
+| studio | core | `Result` | 34 |
 | marketing | identity | `auth::` | 34 |
 
 ## Foreign table access

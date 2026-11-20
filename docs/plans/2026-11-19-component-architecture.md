@@ -328,7 +328,8 @@ Order follows the dependency report, lowest first. Each line is one move.
   summaries and the revision-bound write of rule metadata (its bounds are in
   `domain/metadata`; `domain/condition_import` translates source conditions;
   `domain/rule_comparison` and `store/rule_history` compare a saved rule with a
-  draft on frozen Flow inputs); `service/` the coupon selection of a cart, which admits and
+  draft on frozen Flow inputs; `store/flow_mutations` applies a local flow
+  action to its order or customer once per flow key); `service/` the coupon selection of a cart, which admits and
   prices it through `veyndo_shop::ports::Carts`. Open: flow projection, flow
   execution (needs ports to orders, customers and apps), channel access and
   preview, rule history, routes.
@@ -388,7 +389,11 @@ Order follows the dependency report, lowest first. Each line is one move.
   the overview facts with their turnover totals (`store/overview`) and the
   work list (`store/work_items`) and the report query on a read snapshot
   with its traffic read (`store/reports`; the server passes settings, the
-  reader's language and the behaviour consent filter). Open: staging shops,
+  reader's language and the behaviour consent filter) and the release units
+  of a staging shop for knowledge sources, assets and categories
+  (`store/staging_documents`, `store/staging_assets`,
+  `store/staging_categories`). Open: the rest of staging shops (clone,
+  snapshot, release),
   history, the channel activity tracker.
 - [ ] shop. Started: `components/shop` owns the settings types (`Settings`,
   delivery and payment methods, the checkout selection, B2B switches, AI

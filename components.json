@@ -622,7 +622,7 @@
       ],
       "glob_imports": 21,
       "untyped_access": 337,
-      "sql_outside_store": 15
+      "sql_outside_store": 14
     },
     "b2b": {
       "title": "Company procurement: organisations, budgets, approvals and quotes",
@@ -912,6 +912,7 @@
         "core",
         "customers",
         "identity",
+        "intelligence",
         "marketing",
         "pos",
         "pricing",
@@ -953,9 +954,9 @@
         "translation_items",
         "translation_jobs"
       ],
-      "glob_imports": 18,
+      "glob_imports": 15,
       "untyped_access": 160,
-      "sql_outside_store": 11
+      "sql_outside_store": 8
     },
     "protocols": {
       "title": "MCP, UCP and the shared capability dispatch; adapters without business rules",

@@ -877,6 +877,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/marketing/src/store/flow_access.rs](../components/marketing/src/store/flow_access.rs) | Every queued flow step rehydrates current membership; stored definitions never preserve revoked privileges. |
 | [components/marketing/src/store/flow_job_summaries.rs](../components/marketing/src/store/flow_job_summaries.rs) | Bounded flow execution summaries of a shop; a restricted reader never sees action output. |
 | [components/marketing/src/store/flow_jobs.rs](../components/marketing/src/store/flow_jobs.rs) | PostgreSQL ownership of Flow claims, cursor checkpoints and terminal results. |
+| [components/marketing/src/store/flow_mutations.rs](../components/marketing/src/store/flow_mutations.rs) | Local flow mutations journal the effect in the same transaction; customer authority changes revoke existing sessions. |
 | [components/marketing/src/store/promotions.rs](../components/marketing/src/store/promotions.rs) | Server-authoritative coupons and automatic campaigns, with deterministic discounts and atomic usage limits. |
 | [components/marketing/src/store/rule_entities.rs](../components/marketing/src/store/rule_entities.rs) | Writes rule metadata onto the product, customer or order it describes, bound to the revision the merchant read. |
 | [components/marketing/src/store/rule_history.rs](../components/marketing/src/store/rule_history.rs) | Rule comparison on bounded, tenant-owned frozen Flow order inputs; it never reads current commerce data. |
@@ -1051,6 +1052,9 @@ This lists every checked-in source module in these roots, including files with n
 | [components/studio/src/store/reports/source.sql](../components/studio/src/store/reports/source.sql) | Native immutable order money and channel attribution. Every merchant/filter input is bound, not interpolated. |
 | [components/studio/src/store/reports/traffic.sql](../components/studio/src/store/reports/traffic.sql) | Sessions are observed cart contexts with current consent, not people or HTTP request counts. |
 | [components/studio/src/store/reports.rs](../components/studio/src/store/reports.rs) | Shared native commerce reports for Studio, workspace, API and agent reads; no second analytics ledger. |
+| [components/studio/src/store/staging_assets.rs](../components/studio/src/store/staging_assets.rs) | Binary assets are immutable, staged independently through metadata/digest units; paid entitlements never clone. |
+| [components/studio/src/store/staging_categories.rs](../components/studio/src/store/staging_categories.rs) | Category release units and dependency-ordered tree publication; stock is never part of a catalog release. |
+| [components/studio/src/store/staging_documents.rs](../components/studio/src/store/staging_documents.rs) | Knowledge documents/chunks clone and publish with their source provenance; publication visibility is a reviewed unit. |
 | [components/studio/src/store/work_items.rs](../components/studio/src/store/work_items.rs) | Bounded current-right work items come from native rows; no inferred revenue, customer data or parallel task store. |
 | [components/studio/src/store/workspaces.rs](../components/studio/src/store/workspaces.rs) | Actor-private workspace preferences: compare-and-swap on the revision, a bounded version trail and the current membership. |
 | [components/studio/src/store.rs](../components/studio/src/store.rs) | SQL of the studio component. |

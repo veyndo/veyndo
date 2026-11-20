@@ -1803,6 +1803,11 @@
       "sha256": "2f501b10a17cec6632e30f859063724ceb44a8c665b42030fd15d15c805c80f6",
       "review": "B2B access, organization and purchasing storage and flow job claims moved into their components"
     },
+    "components/marketing/src/store/flow_mutations.rs": {
+      "status": "unproved",
+      "sha256": "0a0a74cc40c2bfd174d7c8b96d0e76cd1ca4db7d11bbae9ae9e4357d2e1969e9",
+      "review": "Local flow mutations moved verbatim into the marketing component and staged knowledge sources, assets and categories into the studio component; the flow owner and release selection stay in the server."
+    },
     "components/marketing/src/store/promotions.rs": {
       "status": "unproved",
       "sha256": "662bfc317b15f492c1384d242983a04e0f3b941c3103c217aa6ef59e26b0e4c7",
@@ -1825,8 +1830,8 @@
     },
     "components/marketing/src/store.rs": {
       "status": "unproved",
-      "sha256": "06c83d52ee228cb8f81ed8ee5838b863b9d908d9b87c701bc25da23099bbf7a4",
-      "review": "Consumer requests moved into the shop component and the frozen rule comparison into marketing without behaviour change"
+      "sha256": "9c272c6a4221588847660ad30b90954713913ae855b92f03b5737840fe7a870d",
+      "review": "Local flow mutations moved verbatim into the marketing component and staged knowledge sources, assets and categories into the studio component; the flow owner and release selection stay in the server."
     },
     "components/marketing/src/types/channel.rs": {
       "status": "unproved",
@@ -2653,6 +2658,21 @@
       "sha256": "84a6ac7449ca2be841454f3907a51fe8d6db41de20cfe2d4ace981d96a4bc89b",
       "review": "Commerce report query and traffic read moved into the studio component without behaviour change"
     },
+    "components/studio/src/store/staging_assets.rs": {
+      "status": "unproved",
+      "sha256": "15c4e038ddde172b645c26c3205b3cbc6bd7917977386254aadeebcb9b2118e1",
+      "review": "Local flow mutations moved verbatim into the marketing component and staged knowledge sources, assets and categories into the studio component; the flow owner and release selection stay in the server."
+    },
+    "components/studio/src/store/staging_categories.rs": {
+      "status": "unproved",
+      "sha256": "fe6668ab631e2245be2740d16b416e376244d776c53cc9fbacf4a3cb1779e1cc",
+      "review": "Local flow mutations moved verbatim into the marketing component and staged knowledge sources, assets and categories into the studio component; the flow owner and release selection stay in the server."
+    },
+    "components/studio/src/store/staging_documents.rs": {
+      "status": "unproved",
+      "sha256": "6edeb7c328284acbbd04aea890fab165770d9cd6e38da8f9b46a0d35fec11ea3",
+      "review": "Local flow mutations moved verbatim into the marketing component and staged knowledge sources, assets and categories into the studio component; the flow owner and release selection stay in the server."
+    },
     "components/studio/src/store/work_items.rs": {
       "status": "unproved",
       "sha256": "2fb03d1ec85ebe5ec38e147d4b383b146e100afac0787f3f27f53abf030aad2f",
@@ -2665,8 +2685,8 @@
     },
     "components/studio/src/store.rs": {
       "status": "unproved",
-      "sha256": "823712e2a508b9b75e671f56edfe76965644aaa9b74b1119b969f6d65403263a",
-      "review": "Commerce report query and traffic read moved into the studio component without behaviour change"
+      "sha256": "5a3da500e239a8129afff48ad2bb7876000ae8c69d2dd6cbdf2319e8c746e4c1",
+      "review": "Local flow mutations moved verbatim into the marketing component and staged knowledge sources, assets and categories into the studio component; the flow owner and release selection stay in the server."
     },
     "crates/apps/src/component_runtime.rs": {
       "status": "unproved",
@@ -6380,8 +6400,8 @@
     },
     "src/marketing/flow_mutations.rs": {
       "status": "unproved",
-      "sha256": "06a156d8879da8dcc2b6c15d56a4bf127039bc8554efabefa86e80f09162bc0e",
-      "review": "Three further proved rules with production bindings: a signed offer is honoured only unexpired and for the unchanged cart, revision and total (signed_offer.rs, result identical to the former expression); sovereign AI mode admits only the self-operated provider on a self-hosted endpoint (sovereign.rs, same decision, endpoint check no longer short-circuited and free of effects); workspace ID length bounds (core). Three SQL statements gained explicit parameter casts matching their bound types. Kernel, core and cognition unit tests pass. SQL, HTTP and provider behaviour is not formally proved."
+      "sha256": "42a9727712c8ecd5e7c13d080f270c386dfee093eb917c70d8ed9f5affc429fa",
+      "review": "Local flow mutations moved verbatim into the marketing component and staged knowledge sources, assets and categories into the studio component; the flow owner and release selection stay in the server."
     },
     "src/marketing/flow_policy.rs": {
       "status": "unproved",
@@ -7110,13 +7130,13 @@
     },
     "src/staging/assets.rs": {
       "status": "unproved",
-      "sha256": "56ad0e92f2170555ff42ee6c8ee7a363b3e8d8991add31d21f4b0e6c5b8a764e",
-      "review": "Independent review of native imported immutable image boundaries and selected parent/product-before-asset publication; exact persisted product baseline, attachment-only guard, source-position ordering and recoverable two-step association verified through real HTTP/PostgreSQL regressions. Pure extracted policies unchanged."
+      "sha256": "530ccc1ab809d7488bec27a5d9a9ee1193405b35b1a94ee359992521db5b6794",
+      "review": "Local flow mutations moved verbatim into the marketing component and staged knowledge sources, assets and categories into the studio component; the flow owner and release selection stay in the server."
     },
     "src/staging/categories.rs": {
       "status": "unproved",
-      "sha256": "0cf6f22d3fe16f58e00373dfa111f530ee2b17bb2e47f39b371cfeaf49934e37",
-      "review": "Reviewed tenant-bound catalog/category CRUD, composite FKs and indexed pre-pagination filters; rich document allowlist; shared HTTP/MCP permissions; active/channel admission under checkout locks; committed product events; category/product staging dependency order and live inventory preservation. Existing Lean policy bodies unchanged. New adapters remain unproved; native catalog/MCP/flow/upload/release and commerce/account/operations/protocol/scalability regressions exercise consumers."
+      "sha256": "b3442424e0a533a4e52e5dbd1e99c1758bf7b5c46133cab2ad2cdb29b85f4caf",
+      "review": "Local flow mutations moved verbatim into the marketing component and staged knowledge sources, assets and categories into the studio component; the flow owner and release selection stay in the server."
     },
     "src/staging/clone.rs": {
       "status": "unproved",
@@ -7130,8 +7150,8 @@
     },
     "src/staging/documents.rs": {
       "status": "unproved",
-      "sha256": "d34534083d6ef59cf11e2791b58582a56728fa632b4f51a8021d92990896eabb",
-      "review": "Reviewed merged managed PostgreSQL/Qdrant knowledge retrieval with authoritative tenant, archived, visibility, enabled-language and digest hydration checks; preserved source reassignment and vector text revision fence; no extracted policy changed."
+      "sha256": "1abf0bbb5befc5041852ce9abd1025964855f7b79a44dc1d3fed90784f95304c",
+      "review": "Local flow mutations moved verbatim into the marketing component and staged knowledge sources, assets and categories into the studio component; the flow owner and release selection stay in the server."
     },
     "src/staging/final_config.rs": {
       "status": "unproved",
@@ -7285,8 +7305,8 @@
       "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
     },
     "Cargo.lock": {
-      "sha256": "5a6e53703144f6ee299f9f4d5ccbeca96939e391f2cfd87b0f22b11a8d5380bb",
-      "review": "Claim evidence, claim batches, order observation projection, embedding jobs, source search, knowledge inventory, product facts and prompt snapshots moved verbatim into the intelligence component; permissions, settings, provider admission and leases stay in the server. Kernel admission calls unchanged."
+      "sha256": "33ae8aa0a5ae71f6e737dd7b4d627ff6e09a5e0bb2788ffc467d1f622dd49da7",
+      "review": "Local flow mutations moved verbatim into the marketing component and staged knowledge sources, assets and categories into the studio component; the flow owner and release selection stay in the server."
     },
     "Cargo.toml": {
       "sha256": "881e080eb9f1b1f051c23e2848df689853473831b4d3072817387d65c23ddb66",
