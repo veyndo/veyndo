@@ -1623,6 +1623,11 @@
       "sha256": "6cc1fc3354fdc1aa37b12e6c45bfcc358e776dbe7116a94dce50c6d18bc3aba8",
       "review": "Flow pipeline and promotion types moved into components/marketing; kernel call sites unchanged"
     },
+    "components/marketing/src/domain/rule_comparison.rs": {
+      "status": "unproved",
+      "sha256": "e7a9561dea7172fd1cca872cdd377be77ebe119cd384f9dc41bdc1b5eee0f2fb",
+      "review": "Consumer requests moved into the shop component and the frozen rule comparison into marketing without behaviour change"
+    },
     "components/marketing/src/domain/rule_fields.rs": {
       "status": "unproved",
       "sha256": "68bd56747ea6f1746ccd0f97e0c637c95e62eac7f07c8cf99068725e722a5f6f",
@@ -1645,8 +1650,8 @@
     },
     "components/marketing/src/domain.rs": {
       "status": "unproved",
-      "sha256": "b709b42ec353756a5a1000d26d0329afb3c2dad08cbfedb919e42fde20fed09c",
-      "review": "Sessions, invitations, MFA, integration keys and broker assertions moved into the identity component without behaviour change"
+      "sha256": "84d0a6c21b81e4cdd758a8d852c6d02971ec053a3b8208c56c30b243f5956b9e",
+      "review": "Consumer requests moved into the shop component and the frozen rule comparison into marketing without behaviour change"
     },
     "components/marketing/src/lib.rs": {
       "status": "unproved",
@@ -1713,6 +1718,11 @@
       "sha256": "0d597b3242ebb259f91ac1e09bf39e5ce8472016756894a17c8c7496fee07ede",
       "review": "Access overview, session revocation, company release and rule metadata moved into components"
     },
+    "components/marketing/src/store/rule_history.rs": {
+      "status": "unproved",
+      "sha256": "9e2c25a59bc4c0db5382ec249362bf2f996af89e563cd09a00fbfc9226a47802",
+      "review": "Consumer requests moved into the shop component and the frozen rule comparison into marketing without behaviour change"
+    },
     "components/marketing/src/store/rule_snapshot.rs": {
       "status": "unproved",
       "sha256": "821fd91d3cf02344ebcd1bfec744fff8215fab196716f81a0a56c8bf7eb1b2b1",
@@ -1720,8 +1730,8 @@
     },
     "components/marketing/src/store.rs": {
       "status": "unproved",
-      "sha256": "fce56b48ca835c15dc91bfd03a12f81d4809675a9e3277aa1c4b37c4915406a6",
-      "review": "Access overview, session revocation, company release and rule metadata moved into components"
+      "sha256": "06c83d52ee228cb8f81ed8ee5838b863b9d908d9b87c701bc25da23099bbf7a4",
+      "review": "Consumer requests moved into the shop component and the frozen rule comparison into marketing without behaviour change"
     },
     "components/marketing/src/types/channel.rs": {
       "status": "unproved",
@@ -2458,6 +2468,11 @@
       "sha256": "fb6c6fb5bd3243b58f9a625aaa9bd2d470af1f0de3b3bf5e61b4e68f6956b617",
       "review": "Coupons, flow job summaries, requisition import, customer snapshot, address restore and account orders moved into components"
     },
+    "components/shop/src/store/consumer_requests.rs": {
+      "status": "unproved",
+      "sha256": "c4cc84f4a0629244cf875a93d2259ad9b58e23fc5c0c2f9288c1d8e7cb2a4cc6",
+      "review": "Consumer requests moved into the shop component and the frozen rule comparison into marketing without behaviour change"
+    },
     "components/shop/src/store/group_usage.rs": {
       "status": "unproved",
       "sha256": "ace9347f4b68a8a840bcc669953725d244555192c350601d9aad1c7a73eb6297",
@@ -2470,8 +2485,8 @@
     },
     "components/shop/src/store.rs": {
       "status": "unproved",
-      "sha256": "e13574826eda527ee8e39d6d8dec8706fe31971892462a53b3be0f20a183e648",
-      "review": "Customer account writes, the legal snapshot of an order and the locked settings read moved into components"
+      "sha256": "23c8d0f23703b4a690a810c789dcd187875a7bd1ac802392bbfc33a187dff1eb",
+      "review": "Consumer requests moved into the shop component and the frozen rule comparison into marketing without behaviour change"
     },
     "components/shop/src/types/b2b.rs": {
       "status": "unproved",
@@ -6165,8 +6180,8 @@
     },
     "src/legal/requests.rs": {
       "status": "unproved",
-      "sha256": "38dbcc2427b46a3bcf185c296a936324eb805607261edc2697783d04372c7e41",
-      "review": "Reviewed eighteen core findings: typed trusted identity and explicit route rights; consolidated current grants; durable auth and fenced shared limits; scoped transactions and one-backend PgBouncer including nested borrow fixes; bounded Wasm/PNG work; notified workers, savepoint quarantine and conservative retention; separate runtime roles and startup configuration. Real PostgreSQL/provider regressions preserve current tenant/customer/payment behavior. SQL/network adapters remain unproved."
+      "sha256": "8a69968be342d22399572b93dea3f9722b025c07c9b302cd3e54532575b410fe",
+      "review": "Consumer requests moved into the shop component and the frozen rule comparison into marketing without behaviour change"
     },
     "src/lib.rs": {
       "status": "unproved",
@@ -6325,8 +6340,8 @@
     },
     "src/marketing/rule_history.rs": {
       "status": "unproved",
-      "sha256": "cc3367df7a81038414c5aa577c7d7c1886e4a6faae633742ca5cf4beac8e0036",
-      "review": "Reviewed frozen rule comparison: tenant-filtered bounded existing Flow inputs, current compound PII read grants, native checked_matches without current-data reads or action dispatch, reference fanout cap, shared registry and HTTP/MCP parity; real automation and isolation suites pass."
+      "sha256": "0036c27e3bd72b554880c3561db55221c532d3071188874c1244007d73852788",
+      "review": "Consumer requests moved into the shop component and the frozen rule comparison into marketing without behaviour change"
     },
     "src/marketing/rule_snapshot.rs": {
       "status": "unproved",

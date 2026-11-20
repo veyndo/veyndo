@@ -168,7 +168,7 @@
       ],
       "glob_imports": 38,
       "untyped_access": 105,
-      "sql_outside_store": 24
+      "sql_outside_store": 23
     },
     "catalog": {
       "title": "Products, categories, media, reviews, translations and catalogue reads",
@@ -622,7 +622,7 @@
       ],
       "glob_imports": 21,
       "untyped_access": 337,
-      "sql_outside_store": 16
+      "sql_outside_store": 15
     },
     "b2b": {
       "title": "Company procurement: organisations, budgets, approvals and quotes",

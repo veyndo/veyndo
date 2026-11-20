@@ -842,6 +842,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/marketing/src/domain/metadata.rs](../components/marketing/src/domain/metadata.rs) | Revision-bound source facts a rule may read on products, customers and orders; secrets and pricing authority are excluded. |
 | [components/marketing/src/domain/pipeline.rs](../components/marketing/src/domain/pipeline.rs) | A bounded acyclic flow graph models source-style true/false branches, ordered actions, delays and stop nodes. |
 | [components/marketing/src/domain/pipeline_tests.rs](../components/marketing/src/domain/pipeline_tests.rs) | Flow graph and source action schema regression tests reject unsafe graphs before any event dispatch. |
+| [components/marketing/src/domain/rule_comparison.rs](../components/marketing/src/domain/rule_comparison.rs) | Side-effect-free comparison of two rule conditions on a frozen Flow order input. |
 | [components/marketing/src/domain/rule_fields.rs](../components/marketing/src/domain/rule_fields.rs) | Typed rule fields share the original comparison operators and server-derived checkout/event facts. |
 | [components/marketing/src/domain/rule_match.rs](../components/marketing/src/domain/rule_match.rs) | Evaluate typed rule trees against server-owned cart, customer and event facts. |
 | [components/marketing/src/domain/rule_tests.rs](../components/marketing/src/domain/rule_tests.rs) | Regression cases for native rule facts and original container boundaries. |
@@ -860,6 +861,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/marketing/src/store/flow_jobs.rs](../components/marketing/src/store/flow_jobs.rs) | PostgreSQL ownership of Flow claims, cursor checkpoints and terminal results. |
 | [components/marketing/src/store/promotions.rs](../components/marketing/src/store/promotions.rs) | Server-authoritative coupons and automatic campaigns, with deterministic discounts and atomic usage limits. |
 | [components/marketing/src/store/rule_entities.rs](../components/marketing/src/store/rule_entities.rs) | Writes rule metadata onto the product, customer or order it describes, bound to the revision the merchant read. |
+| [components/marketing/src/store/rule_history.rs](../components/marketing/src/store/rule_history.rs) | Rule comparison on bounded, tenant-owned frozen Flow order inputs; it never reads current commerce data. |
 | [components/marketing/src/store/rule_snapshot.rs](../components/marketing/src/store/rule_snapshot.rs) | Resolve only referenced tenant rule IDs with indexed batched reads; freeze active definitions and revisions into the event snapshot. |
 | [components/marketing/src/store.rs](../components/marketing/src/store.rs) | SQL reads of the marketing component. |
 | [components/marketing/src/types/channel.rs](../components/marketing/src/types/channel.rs) | The sales channel record and the POS location it may carry; one tenant, independent visibility and languages. |
@@ -1009,6 +1011,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/shop/src/domain.rs](../components/shop/src/domain.rs) | Rules on shop settings, free of I/O. |
 | [components/shop/src/lib.rs](../components/shop/src/lib.rs) | Shop component: the settings every other commerce component reads, with their bounds and inheritance rules. |
 | [components/shop/src/ports.rs](../components/shop/src/ports.rs) | What components that work on a buyer's cart need from the server: the guarded cart, its priced view and a revision-checked replacement of its lines. |
+| [components/shop/src/store/consumer_requests.rs](../components/shop/src/store/consumer_requests.rs) | Durable withdrawal and data-rights intake, tenant-scoped operator review and customer-held receipt access. |
 | [components/shop/src/store/group_usage.rs](../components/shop/src/store/group_usage.rs) | Removing a customer group rejects live customer, price and native/source-rule dependencies under the settings lock. |
 | [components/shop/src/store/settings.rs](../components/shop/src/store/settings.rs) | The settings of a sales channel read under a share lock, so they cannot change before the transaction commits. |
 | [components/shop/src/store.rs](../components/shop/src/store.rs) | SQL of the shop component. |

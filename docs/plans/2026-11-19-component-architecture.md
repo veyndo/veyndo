@@ -326,7 +326,9 @@ Order follows the dependency report, lowest first. Each line is one move.
   dependency inspection before a deletion, the flow job claims with their
   checkpoints, the membership a queued step runs with and the bounded job
   summaries and the revision-bound write of rule metadata (its bounds are in
-  `domain/metadata`; `domain/condition_import` translates source conditions); `service/` the coupon selection of a cart, which admits and
+  `domain/metadata`; `domain/condition_import` translates source conditions;
+  `domain/rule_comparison` and `store/rule_history` compare a saved rule with a
+  draft on frozen Flow inputs); `service/` the coupon selection of a cart, which admits and
   prices it through `veyndo_shop::ports::Carts`. Open: flow projection, flow
   execution (needs ports to orders, customers and apps), channel access and
   preview, rule history, routes.
@@ -383,6 +385,8 @@ Order follows the dependency report, lowest first. Each line is one move.
 Per component: sources moved, tables and migrations assigned, SQL only in
 `store/`, typed interface, `foreign_tables` empty or each entry justified, tests
 moved with the code, proof bindings updated.
+  `store/consumer_requests` owns the withdrawal and data-rights intake, the
+  receipt of its holder and the operator review.
 
 ## Phase 4: frontends
 

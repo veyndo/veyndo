@@ -8,4 +8,5 @@ pub mod flow_job_summaries;
 pub mod flow_jobs;
 pub mod promotions;
 pub mod rule_entities;
+pub mod rule_history;
 pub mod rule_snapshot;
