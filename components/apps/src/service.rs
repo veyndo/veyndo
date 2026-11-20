@@ -7,3 +7,4 @@ pub mod event_delivery;
 pub mod limits;
 pub mod sandbox_cache;
 pub mod service_call;
+pub mod ui_bundles;

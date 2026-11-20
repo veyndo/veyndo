@@ -3,4 +3,5 @@ pub mod activity;
 pub mod credentials;
 pub mod secrets;
 pub mod settings;
+pub mod ui_documents;
 pub mod webhooks;

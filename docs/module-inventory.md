@@ -126,7 +126,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/apps/surfaces.rs](../src/apps/surfaces.rs) | App-owned UI surfaces and namespaced HTTP routes reuse the authorized action gateway. |
 | [src/apps/tool_contract.rs](../src/apps/tool_contract.rs) | Installed app tools share native wire metadata and validate declared results without disclosing provider payloads. |
 | [src/apps/ui_bundles.rs](../src/apps/ui_bundles.rs) | Operator-pinned, bounded self-contained UI bundles use the same actor/context grant as app actions. |
-| [src/apps/ui_documents.rs](../src/apps/ui_documents.rs) | Secret-free, operator-pinned guest code in a response-enforced opaque sandbox, never srcdoc. |
+| [src/apps/ui_documents.rs](../src/apps/ui_documents.rs) | Sandboxed app documents are served by the apps component; this module registers their routes. |
 | [src/apps/ui_logic_tests.rs](../src/apps/ui_logic_tests.rs) | UI programs must keep static types, same-model saves, surface allowlists and acyclic ownership before install or preview. |
 | [src/apps/upgrade_review.rs](../src/apps/upgrade_review.rs) | Probe the actual transactional installer and roll it back; return admission metadata, never app record contents. |
 | [src/apps/webhook_scope.rs](../src/apps/webhook_scope.rs) | The webhook shop binding lives in the apps component; this module keeps the short path for the request middleware. |
@@ -663,6 +663,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/apps/src/domain/secret_kinds.rs](../components/apps/src/domain/secret_kinds.rs) | The kinds of per-shop secrets and which package declarations call for them. |
 | [components/apps/src/domain/service_policy.rs](../components/apps/src/domain/service_policy.rs) | Operator-owned private origins permit isolated service networking without relaxing public egress. |
 | [components/apps/src/domain/service_ui.rs](../components/apps/src/domain/service_ui.rs) | Where the UI of a service app is served from; only the operator configures it. |
+| [components/apps/src/domain/surfaces.rs](../components/apps/src/domain/surfaces.rs) | App-owned UI surfaces and namespaced routes: their contract and where an operator-configured UI is served from. |
 | [components/apps/src/domain/tool_output.rs](../components/apps/src/domain/tool_output.rs) | Declared tool results are checked before they leave; a provider payload that does not fit is never disclosed. |
 | [components/apps/src/domain/webhook_scope.rs](../components/apps/src/domain/webhook_scope.rs) | Scope signed app ingress from its route before identity, tenant lifecycle and forced-RLS admission. |
 | [components/apps/src/domain/webhook_signature.rs](../components/apps/src/domain/webhook_signature.rs) | Incoming app webhooks carry an HMAC-SHA-256 over the exact canonical message. |
@@ -671,6 +672,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/apps/src/http/credentials.rs](../components/apps/src/http/credentials.rs) | App keys reuse the core integration-key store, current creator rights, expiry and immutable package digest. |
 | [components/apps/src/http/secrets.rs](../components/apps/src/http/secrets.rs) | Digest-bound per-shop app secret rotation; there is no plaintext read endpoint. |
 | [components/apps/src/http/settings.rs](../components/apps/src/http/settings.rs) | Declared app settings reuse the digest-bound encrypted secret owner; secret values never have a browser read path. |
+| [components/apps/src/http/ui_documents.rs](../components/apps/src/http/ui_documents.rs) | Secret-free, operator-pinned guest code in a response-enforced opaque sandbox, never srcdoc. |
 | [components/apps/src/http/webhooks.rs](../components/apps/src/http/webhooks.rs) | Operator-signed incoming events: tenant-bound HMAC, five-minute freshness and atomic replay receipts. |
 | [components/apps/src/http.rs](../components/apps/src/http.rs) | HTTP handlers of the app platform; the server registers them with their route rights. |
 | [components/apps/src/lib.rs](../components/apps/src/lib.rs) | Apps component: what an app package may be and do before the server installs or calls it. |
@@ -683,6 +685,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/apps/src/service/limits.rs](../components/apps/src/service/limits.rs) | Local network-app admission: per-app and aggregate tenant bulkheads inside one process. |
 | [components/apps/src/service/sandbox_cache.rs](../components/apps/src/service/sandbox_cache.rs) | Bounded module compilation cache. Prepare outside commerce locks; verify the digest under the lock. |
 | [components/apps/src/service/service_call.rs](../components/apps/src/service/service_call.rs) | Operator-configured service egress: no URL or credential comes from a package, merchant, model or event. |
+| [components/apps/src/service/ui_bundles.rs](../components/apps/src/service/ui_bundles.rs) | Operator-pinned, bounded self-contained UI bundles. |
 | [components/apps/src/service.rs](../components/apps/src/service.rs) | Process-side helpers of the app platform: pinned egress clients and local execution limits. |
 | [components/apps/src/store/action_log.rs](../components/apps/src/store/action_log.rs) | Bounded metadata-only app telemetry: who called which action with what outcome, never a payload. |
 | [components/apps/src/store/asset_references.rs](../components/apps/src/store/asset_references.rs) | Assets an app record refers to must belong to the same shop and fit the field. |

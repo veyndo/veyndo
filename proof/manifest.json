@@ -864,6 +864,11 @@
       "sha256": "f64940ff7797560af779e3a73623e70377f5476cef787443d580197c39c924f4",
       "review": "Action authorization, entity access and discovery rules moved into the apps component without changing rules"
     },
+    "components/apps/src/domain/surfaces.rs": {
+      "status": "unproved",
+      "sha256": "9e34c9228d654b56ef9c7e3e12095813c7665eeb324106f7fdd1761952c077c0",
+      "review": "Surface contract and sandboxed documents moved into the apps component without changing rules"
+    },
     "components/apps/src/domain/tool_output.rs": {
       "status": "unproved",
       "sha256": "eb01df5d0da07c17900bb71488469b6f97bcb52681a0dce43e75f11cd7f35d3b",
@@ -881,8 +886,8 @@
     },
     "components/apps/src/domain.rs": {
       "status": "unproved",
-      "sha256": "d5c599aac01d818cd1f9648bcc4c3c7e3dc03154c92312a38f4cb952039e0f62",
-      "review": "Service calls and event delivery moved into the apps component without changing rules"
+      "sha256": "7cf1756db1cd7c866f7da392c500b32566ede6d54d64392b69f55b407f9684bf",
+      "review": "Surface contract and sandboxed documents moved into the apps component without changing rules"
     },
     "components/apps/src/http/activity.rs": {
       "status": "unproved",
@@ -904,6 +909,11 @@
       "sha256": "8adadfd03750d4172af796c971d7614f04fe1bf47feac34568da1a464ba70573",
       "review": "App secret, settings, activity, credential and webhook handlers moved into the apps component without changing rules"
     },
+    "components/apps/src/http/ui_documents.rs": {
+      "status": "unproved",
+      "sha256": "acaa80a16132c8cc6f7bfb4badbf342dbc9a7b0464991db726039257b0eeb45f",
+      "review": "Surface contract and sandboxed documents moved into the apps component without changing rules"
+    },
     "components/apps/src/http/webhooks.rs": {
       "status": "unproved",
       "sha256": "c92279c7a009616dfa38b10028bb55cba47dfaf7a2c340a13045b693c4a4a025",
@@ -911,8 +921,8 @@
     },
     "components/apps/src/http.rs": {
       "status": "unproved",
-      "sha256": "f9f91829e9f4d4624fa3ce0432e473fb2e54d3abcb19a1fd386e9b70828741c5",
-      "review": "App secret, settings, activity, credential and webhook handlers moved into the apps component without changing rules"
+      "sha256": "1f1bc3dd2c6c98c0dfb55d3f174f19474e4266d27572f57b4b903e1b120389a8",
+      "review": "Surface contract and sandboxed documents moved into the apps component without changing rules"
     },
     "components/apps/src/lib.rs": {
       "status": "unproved",
@@ -964,10 +974,15 @@
       "sha256": "ef7980e047cc341586d8137b393fe9452a7ded74318b7ea82845d935aa0640e6",
       "review": "Service calls and event delivery moved into the apps component without changing rules"
     },
+    "components/apps/src/service/ui_bundles.rs": {
+      "status": "unproved",
+      "sha256": "8fce37e2ec4489c5789884fa41c6fe141947c5a65fd8b4f8c3d8056f48f198b1",
+      "review": "Surface contract and sandboxed documents moved into the apps component without changing rules"
+    },
     "components/apps/src/service.rs": {
       "status": "unproved",
-      "sha256": "c751f89b9cf4994616a3be63d7719507015a5ceaf29363b7c5023af0c92b198f",
-      "review": "Service calls and event delivery moved into the apps component without changing rules"
+      "sha256": "d6908e1e4e4a8c38f5165d821234becb149e0e39f12a0d0817f4ef6173afb6ee",
+      "review": "Surface contract and sandboxed documents moved into the apps component without changing rules"
     },
     "components/apps/src/store/action_log.rs": {
       "status": "unproved",
@@ -5246,8 +5261,8 @@
     },
     "src/apps/egress.rs": {
       "status": "unproved",
-      "sha256": "a14ee791ee288dfdff14f5b6639ba470ff0c14f20877ac408b98ad718a358a78",
-      "review": "Configuration, lifecycle, ontology and reference adapters moved into the apps component without changing rules"
+      "sha256": "12292c3aa4d37b14b7263ac303cf81313c38e4cc93237ed0fca01ee509b4e192",
+      "review": "Surface contract and sandboxed documents moved into the apps component without changing rules"
     },
     "src/apps/events.rs": {
       "status": "unproved",
@@ -5521,8 +5536,8 @@
     },
     "src/apps/surfaces.rs": {
       "status": "unproved",
-      "sha256": "a216459bac7d8a8245e993c5e589a742099ca2745a35d1c05cac109eb7fd873d",
-      "review": "Field, reference, view and manifest policy moved into the apps component without changing rules"
+      "sha256": "17e502415d1703e4ceee7d56b9bcae0a4ca0f41a8da42f0148f7c00929a674e6",
+      "review": "Surface contract and sandboxed documents moved into the apps component without changing rules"
     },
     "src/apps/tool_contract.rs": {
       "status": "unproved",
@@ -5531,13 +5546,13 @@
     },
     "src/apps/ui_bundles.rs": {
       "status": "unproved",
-      "sha256": "3c3e19fe70730bafa93e35ac1eb1a034427cdfb9363332a5ca573817c14a5c76",
-      "review": "Reviewed original Shopware app controller, bounded fixed-origin lifecycle jobs and durable uncertain fences; opaque pinned app UI response CSP; operational records excluded by extracted release policy and native clone/publication path. Real container, native permissions/MCP, migration retention and app surface regressions passed; PHP and controller adapters remain unproved."
+      "sha256": "6a838b10fcc3e4af6114f0f19bd0d809bcf77cb223045cd2e8f116858e880da4",
+      "review": "Surface contract and sandboxed documents moved into the apps component without changing rules"
     },
     "src/apps/ui_documents.rs": {
       "status": "unproved",
-      "sha256": "0b6a8aaf5107a221eee822e941d4da0610a2c3ec38a47c9c6d3375265feb1ff6",
-      "review": "Review MCP read admission against the same active manifest at dispatch, native app placements with explicit list-action opt-in and tenant revision URI, and existing opaque document CSP. App model, direct HTTP and hosted composition checks cover their corresponding runtime contracts."
+      "sha256": "f477bdb0a3a6bf89cb15f5af6eb534fe88eb913e80e4d7929f78f3d910acc234",
+      "review": "Surface contract and sandboxed documents moved into the apps component without changing rules"
     },
     "src/apps/ui_logic_tests.rs": {
       "status": "unproved",

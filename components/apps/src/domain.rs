@@ -34,6 +34,7 @@ pub mod schema_changes;
 pub mod secret_kinds;
 pub mod service_policy;
 pub mod service_ui;
+pub mod surfaces;
 pub mod tool_output;
 pub mod webhook_scope;
 pub mod webhook_signature;

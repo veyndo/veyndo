@@ -29,46 +29,13 @@ async fn no_store(request: axum::extract::Request, next: axum::middleware::Next)
     response
 }
 pub(crate) use veyndo_app_platform::domain::action_policy::readonly;
-struct SurfacePolicy<'a>(&'a Manifest);
-impl veyndo_app_model::surfaces::Policy for SurfacePolicy<'_> {
-    fn native_view(&self, surface: &Surface) -> bool {
-        native_views::is_native(self.0, surface)
-    }
-    fn assistant_view(&self, surface: &Surface) -> Option<&veyndo_app_model::views::NativeView> {
-        self.0
-            .views
-            .iter()
-            .find(|view| surface.ui_path == format!("native/{}", view.id))
-    }
-    fn known_scope(&self, scope: &str) -> bool {
-        auth::SCOPES.contains(&scope)
-    }
-    fn readonly(&self, action: &Action) -> bool {
-        readonly(action)
-    }
-}
-pub(crate) fn validate_contract(m: &Manifest) -> Result<()> {
-    let contract = veyndo_app_model::surfaces::Contract {
-        runtime: &m.runtime,
-        permissions: &m.permissions,
-        actions: &m.actions,
-        surfaces: &m.surfaces,
-        api_routes: &m.api_routes,
-    };
-    veyndo_app_model::surfaces::validate(&contract, &SurfacePolicy(m))
-        .map_err(model_contract::error)?;
-    veyndo_app_model::intelligence::validate(m.intelligence.as_ref(), &m.actions, &m.entities)
-        .map_err(model_contract::error)?;
-    Ok(())
-}
+pub(crate) use veyndo_app_platform::domain::surfaces::validate_contract;
 pub(super) fn surface_url(id: &str, path: &str) -> Option<String> {
-    let mut url = reqwest::Url::parse(&gateway::ui_url(id)?).ok()?;
-    let base = url.path().trim_end_matches('/');
-    let next = format!("{base}/{path}");
-    url.set_path(&next);
-    url.set_query(None);
-    url.set_fragment(None);
-    Some(url.to_string())
+    veyndo_app_platform::domain::surfaces::surface_url(
+        id,
+        path,
+        &crate::runtime_config::get().services,
+    )
 }
 pub(crate) use super::surface_registry::registry;
 async fn admin_surfaces(State(a): State<App>, h: RequestContext) -> Result<Json<Value>> {
@@ -173,31 +140,4 @@ async fn write_route(
         )
         .await?,
     ))
-}
-
-#[cfg(test)]
-mod policy_tests {
-    use super::*;
-    #[test]
-    fn native_surface_policy_retains_verified_effect_guards() {
-        let m: Manifest = serde_json::from_str(include_str!(
-            "../../extensions/apps/care-studio/manifest.json"
-        ))
-        .unwrap();
-        let mut action: Action = serde_json::from_value(json!({"name":"effect","description":"Effect","handler":"save","readOnly":true,"inputSchema":{"type":"object"}})).unwrap();
-        let policy = SurfacePolicy(&m);
-        for handler in ["save", "emit", "submit"] {
-            action.handler = handler.into();
-            assert!(!veyndo_app_model::surfaces::Policy::readonly(
-                &policy, &action
-            ));
-        }
-        action.read_only = false;
-        for handler in ["list", "configurations"] {
-            action.handler = handler.into();
-            assert!(veyndo_app_model::surfaces::Policy::readonly(
-                &policy, &action
-            ));
-        }
-    }
 }
