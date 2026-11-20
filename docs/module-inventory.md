@@ -653,6 +653,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/b2b/src/types.rs](../components/b2b/src/types.rs) | types of this component. |
 | [components/catalog/src/domain/asset_file.rs](../components/catalog/src/domain/asset_file.rs) | File admission by content: a declared type is only accepted when the bytes carry its signature. |
 | [components/catalog/src/domain/content.rs](../components/catalog/src/domain/content.rs) | Field-level content fallback: a missing or `null` translation inherits the main language, an empty one stays empty. |
+| [components/catalog/src/domain/csv_rows.rs](../components/catalog/src/domain/csv_rows.rs) | Bounded UTF-8 CSV reader: quoted delimiters, escaped quotes and multiline fields; no formula evaluation or silent row loss. |
 | [components/catalog/src/domain/family.rs](../components/catalog/src/domain/family.rs) | A variant shows the texts and metadata of its family unless it sets its own. |
 | [components/catalog/src/domain/graph_query.rs](../components/catalog/src/domain/graph_query.rs) | Saved category predicates select only current confirmed public source claims; no inference at browse time. |
 | [components/catalog/src/domain/hydration.rs](../components/catalog/src/domain/hydration.rs) | Translated product hydration: each field is resolved on its own along the language chain. |
@@ -662,6 +663,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/catalog/src/domain/model_format.rs](../components/catalog/src/domain/model_format.rs) | Bounded self-contained GLB 2 admission; remote resources and runtime decoder downloads are forbidden. |
 | [components/catalog/src/domain/navigation.rs](../components/catalog/src/domain/navigation.rs) | Public navigation: a hidden category hides its whole branch, and every entry is shown in the visitor's language. |
 | [components/catalog/src/domain/preparation.rs](../components/catalog/src/domain/preparation.rs) | Which content languages of a product already have a name or a description, as the catalogue preparation view shows it. |
+| [components/catalog/src/domain/product_admission.rs](../components/catalog/src/domain/product_admission.rs) | Admit native product edits and expand explicit category-only changes through the same revisioned editor. |
 | [components/catalog/src/domain/rich.rs](../components/catalog/src/domain/rich.rs) | Safe structured rich content, never executable HTML. Same schema for merchant API and frontend. |
 | [components/catalog/src/domain/rich_document.rs](../components/catalog/src/domain/rich_document.rs) | Allow-listed editor JSON with bounded depth and content; HTML/handlers/styles cannot enter the renderer. |
 | [components/catalog/src/domain/selection.rs](../components/catalog/src/domain/selection.rs) | Explicit product selection is bounded and unique before any translation is queued. |
@@ -1043,6 +1045,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/shop/src/http/operator_lifecycle.rs](../components/shop/src/http/operator_lifecycle.rs) | Audited, reversible shop lifecycle; preserved commerce records and the current revision prevent accidental overwrites. |
 | [components/shop/src/http/operator_metrics.rs](../components/shop/src/http/operator_metrics.rs) | Aggregate-only control-plane reads: real tenants, bounded pages, explicit currencies and simulated/confirmed amounts. |
 | [components/shop/src/http/operator_quotas.rs](../components/shop/src/http/operator_quotas.rs) | Operator-only per-shop daily interactive AI limits, optimistic revisions and durable audit. |
+| [components/shop/src/http/operator_session.rs](../components/shop/src/http/operator_session.rs) | The operator's own session and the control-plane audit trail. |
 | [components/shop/src/http/operator_shop.rs](../components/shop/src/http/operator_shop.rs) | Operator shop dossier: registration, business identity, access roster, channels and measured HTTP activity. |
 | [components/shop/src/http.rs](../components/shop/src/http.rs) | HTTP handlers of the shop component. |
 | [components/shop/src/lib.rs](../components/shop/src/lib.rs) | Shop component: the settings every other commerce component reads, with their bounds and inheritance rules. |

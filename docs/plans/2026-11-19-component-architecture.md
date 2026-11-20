@@ -234,7 +234,10 @@ Order follows the dependency report, lowest first. Each line is one move.
   settings. Also open: paid downloads, caption proposals (they drive
   inference), the translation
   worker and job routes (they drive inference), storefront pages, staging of
-  categories, demo data.
+  categories, demo data. `domain/product_admission` admits a product write as
+  a full or an explicit category-only edit and builds the assignment-only
+  edit against the clock the merchant read; `domain/csv_rows` is the bounded
+  CSV reader of the catalogue intake.
 - [ ] inventory. Started: `components/inventory` owns the checked quantity batch
   (`InventoryLines`, moved out of pricing), the allocation ledger with the
   idempotent release, stock consumption, supplier links with their bounds, the
@@ -428,6 +431,8 @@ Order follows the dependency report, lowest first. Each line is one move.
   (`service/container_resources`); operator authentication and availability
   admission stay in the server. `store/consumer_requests` owns the withdrawal
   and data-rights intake, the receipt of its holder and the operator review.
+  `http/operator_session` answers the operator's own session and the
+  control-plane audit trail.
   Open: cached loading, saving and releasing settings, channel scope handlers,
   domains, legal consent, the rest of the platform (AI settings,
   infrastructure, provisioning) and the performance modules.

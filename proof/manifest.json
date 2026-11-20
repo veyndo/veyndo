@@ -773,6 +773,11 @@
       "sha256": "ee3e16add3458894ff03fc982bedd07278603ac51c25708575a359574998c251",
       "review": "Catalog component crate created; no rule changed"
     },
+    "components/catalog/src/domain/csv_rows.rs": {
+      "status": "unproved",
+      "sha256": "2d12511fc4c995397f794a512cac0970b9705058a9a6a397ed73b58b591b0016",
+      "review": "Operator session and audit handlers moved into shop; product write admission and the CSV reader moved into catalog without behaviour change"
+    },
     "components/catalog/src/domain/family.rs": {
       "status": "unproved",
       "sha256": "e6e1da1854c405e6ce45b0880aa9fb607504c9316a1e98b874b4537727bd1c40",
@@ -818,6 +823,11 @@
       "sha256": "bfd525841470a7fe20898dcc127f35c240aacc3c3d6629deaab052926b915f0a",
       "review": "Product hydration, list query and preparation moved into components/catalog; no rule changed"
     },
+    "components/catalog/src/domain/product_admission.rs": {
+      "status": "unproved",
+      "sha256": "d729d2c7ac6b266c80df1f5d5a9f4dbc972376d6fb26e5d4d7b8c1b5c4e94dff",
+      "review": "Operator session and audit handlers moved into shop; product write admission and the CSV reader moved into catalog without behaviour change"
+    },
     "components/catalog/src/domain/rich.rs": {
       "status": "unproved",
       "sha256": "b5dfa14338a1e119a9d5d1d5527092efe343217d46046a57f7d35e0b25658a9f",
@@ -840,8 +850,8 @@
     },
     "components/catalog/src/domain.rs": {
       "status": "unproved",
-      "sha256": "930caad0547ec444bb3905f2ee5d63a55ec405e42157f884113a30357a39532e",
-      "review": "Order list criteria, company model and receipts moved into components; kernel call sites unchanged"
+      "sha256": "ec5fe2b5ba18637dead097c9a1237b3cdd2fca0776b9aaa261cd8467bebc7d83",
+      "review": "Operator session and audit handlers moved into shop; product write admission and the CSV reader moved into catalog without behaviour change"
     },
     "components/catalog/src/http/assets.rs": {
       "status": "unproved",
@@ -2643,6 +2653,11 @@
       "sha256": "e8fc389fa9e551d3673f30e672d51376aaf888b2d6e3caeba227768abdab24fe",
       "review": "Operator control plane (quotas, aggregate metrics, shop dossier, audited lifecycle change, container readings) moved verbatim into the shop component; operator authentication and availability admission stay in the server. Kernel admission calls unchanged."
     },
+    "components/shop/src/http/operator_session.rs": {
+      "status": "unproved",
+      "sha256": "85cfc5782423d738d2093ff3214662dce671641ab0b442bd35da1679d0b388d6",
+      "review": "Operator session and audit handlers moved into shop; product write admission and the CSV reader moved into catalog without behaviour change"
+    },
     "components/shop/src/http/operator_shop.rs": {
       "status": "unproved",
       "sha256": "1762966d1259d82b6b53ad138d0b19fffe83093b1a1de3061de2499dba5449ad",
@@ -2650,8 +2665,8 @@
     },
     "components/shop/src/http.rs": {
       "status": "unproved",
-      "sha256": "478783bff5d1d4ff02ab13dc6d6517fc518afd569d0aed9fe1b6252065f3cf30",
-      "review": "Operator control plane (quotas, aggregate metrics, shop dossier, audited lifecycle change, container readings) moved verbatim into the shop component; operator authentication and availability admission stay in the server. Kernel admission calls unchanged."
+      "sha256": "4b16597fb3aef0aaa3a8e8efed32409edee22eda997cfbe11f08f746ea8562e8",
+      "review": "Operator session and audit handlers moved into shop; product write admission and the CSV reader moved into catalog without behaviour change"
     },
     "components/shop/src/lib.rs": {
       "status": "unproved",
@@ -5910,8 +5925,8 @@
     },
     "src/commerce/catalog_intake/csv.rs": {
       "status": "unproved",
-      "sha256": "87d6d9437f849754efb7940543b4c18efb58f8b29f29eba4b95293cc3bf8f584",
-      "review": "Reviewed inbound UCP/native cart and consent transactions, native finalization contact guard, immutable order snapshots, explicit optional negotiation, public HTTPS app-owned catalogue adapters; independent whole-branch review findings repaired and six isolated HTTP/PG suites pass. No extracted kernel policy changed; SQL/provider behavior remains unproved."
+      "sha256": "cd8b2cec102f40e90fb3553d953ee1d8fb321d00551a5b165e8ad643fffd95b7",
+      "review": "Operator session and audit handlers moved into shop; product write admission and the CSV reader moved into catalog without behaviour change"
     },
     "src/commerce/catalog_intake/mod.rs": {
       "status": "unproved",
@@ -6075,8 +6090,8 @@
     },
     "src/commerce/product_input.rs": {
       "status": "unproved",
-      "sha256": "a67ce68a6c207b030aa5404ff3497dd934da48f9e4afeffc80c5ba262684bec2",
-      "review": "Product edit types, stores and language rules moved into components; no rule changed"
+      "sha256": "7c5e6f40c5b8219b36aee646a418ba731ab43b35e40d27329579605aea92c8d0",
+      "review": "Operator session and audit handlers moved into shop; product write admission and the CSV reader moved into catalog without behaviour change"
     },
     "src/commerce/product_languages.rs": {
       "status": "unproved",
@@ -7075,8 +7090,8 @@
     },
     "src/platform/mod.rs": {
       "status": "unproved",
-      "sha256": "c8acf3f78a4dba959282dc6695afd266c80375fcbb3ceeb9273b6241259b8ffa",
-      "review": "Reviewed eighteen core findings: typed trusted identity and explicit route rights; consolidated current grants; durable auth and fenced shared limits; scoped transactions and one-backend PgBouncer including nested borrow fixes; bounded Wasm/PNG work; notified workers, savepoint quarantine and conservative retention; separate runtime roles and startup configuration. Real PostgreSQL/provider regressions preserve current tenant/customer/payment behavior. SQL/network adapters remain unproved."
+      "sha256": "ac012832ffd200cd49a69adf44b764413500dbc414f8c2ec57b698c449a58315",
+      "review": "Operator session and audit handlers moved into shop; product write admission and the CSV reader moved into catalog without behaviour change"
     },
     "src/platform/provision.rs": {
       "status": "unproved",

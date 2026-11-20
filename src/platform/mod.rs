@@ -13,6 +13,7 @@ mod shop_detail;
 pub(crate) use lifecycle::admit;
 mod provision;
 pub(crate) use auth::authenticate;
+use veyndo_shop::http::operator_session::{audit, session};
 pub(crate) fn router() -> Router<App> {
     Router::new()
         .secure_route(
@@ -56,21 +57,4 @@ pub(crate) fn router() -> Router<App> {
             get(infrastructure::snapshot),
         )
         .secure_route("/api/platform/audit", &[("GET", "platform")], get(audit))
-}
-async fn session(State(a): State<App>, h: RequestContext) -> Result<Json<Value>> {
-    let actor = auth::actor(&h)?;
-    let row = sqlx::query("SELECT id,name,email FROM merchant_users WHERE id=$1")
-        .bind(actor)
-        .fetch_one(&a.db)
-        .await?;
-    Ok(Json(
-        json!({"user":{"id":row.get::<String,_>("id"),"name":row.get::<String,_>("name"),"email":row.get::<String,_>("email")},"scope":"platform","canCreateShops":true}),
-    ))
-}
-async fn audit(State(a): State<App>, h: RequestContext) -> Result<Json<Value>> {
-    auth::actor(&h)?;
-    let rows = sqlx::query("SELECT id,actor,action,tenant,created_at::text AS time FROM platform_audit ORDER BY id DESC LIMIT 100").fetch_all(&a.db).await?;
-    Ok(Json(
-        json!({"elements":rows.iter().map(|r| json!({"id":r.get::<i64,_>("id"),"actor":r.get::<Option<String>,_>("actor"),"action":r.get::<String,_>("action"),"shop":r.get::<Option<String>,_>("tenant"),"time":r.get::<String,_>("time")})).collect::<Vec<_>>()}),
-    ))
 }
