@@ -1,11 +1,18 @@
 //! Bounded native-object read projection from existing app models, references and current package permissions.
-use super::{Manifest, core_extensions::Object, editor_contract, gateway, records};
-use crate::{App, RequestContext, Result, bad, merchant};
+use crate::domain::action_admission::authorized;
+use crate::domain::entity_access::entity_access;
+use crate::domain::ontology;
+use crate::store::records;
 use serde_json::{Value, json};
 use sqlx::Row;
+use veyndo_app_model::manifest::Manifest;
+use veyndo_app_model::{Entity, Object};
+use veyndo_core::{RequestContext, Result, State, bad};
+use veyndo_identity::merchant;
 
-pub(super) async fn attach(
-    a: &App,
+/// Attaches the readable app extensions of up to 100 native objects in one indexed lookup.
+pub async fn attach(
+    a: &State,
     h: &RequestContext,
     object: Object,
     rows: &mut [Value],
@@ -18,7 +25,7 @@ pub(super) async fn attach(
             "Extension projection supports at most 100 native objects",
         ));
     }
-    let t = merchant(a, h)?;
+    let t = merchant(h)?;
     let ids: Vec<String> = rows
         .iter()
         .filter_map(|r| r["id"].as_str().map(str::to_owned))
@@ -28,7 +35,7 @@ pub(super) async fn attach(
         return Ok(());
     }
     let mut tx = a.db.begin().await?;
-    let mut models = models(&mut tx, a, h, &t, object).await?;
+    let mut models = models(&mut tx, h, &t, object).await?;
     let omitted = models.len().saturating_sub(24);
     models.truncate(24);
     if models.is_empty() {
@@ -85,7 +92,7 @@ pub(super) async fn attach(
                 .map(|v| records::project(e, v));
             let ontology = record
                 .as_ref()
-                .and_then(|record| super::ontology::project(&t, manifest, e, &json!([record])));
+                .and_then(|record| ontology::project(&t, manifest, e, &json!([record])));
             let out = json!({"app":app,"version":version,"entity":e.name,"label":e.label,"model":e,"readAction":read,"writeAction":write,"record":record,"language":language,"native":native,"ontology":ontology});
             let size = out.to_string().len();
             if bytes + size > 65536 {
@@ -101,10 +108,11 @@ pub(super) async fn attach(
     Ok(())
 }
 
-pub(super) type Model = (
+/// One readable extension model: app, version, entity, read and write action, native bindings and its package.
+pub type Model = (
     String,
     String,
-    super::Entity,
+    Entity,
     String,
     Option<String>,
     Value,
@@ -112,7 +120,6 @@ pub(super) type Model = (
 );
 async fn models(
     tx: &mut sqlx::PgConnection,
-    a: &App,
     h: &RequestContext,
     t: &str,
     object: Object,
@@ -126,28 +133,26 @@ async fn models(
         let m = std::sync::Arc::new(m);
         for e in &m.entities {
             if !e.extends.as_ref().is_some_and(|x| x.object == object)
-                || editor_contract::entity_access(&m, e, h, "list").is_err()
+                || entity_access(&m, e, h, "list").is_err()
             {
                 continue;
             }
             let Some(read) = m.actions.iter().find(|action| {
                 action.entity.as_deref() == Some(e.name.as_str())
                     && action.handler == "list"
-                    && gateway::action_authorized(a, h, action)
+                    && authorized(h, action)
             }) else {
                 continue;
             };
             let write = m.actions.iter().find(|action| {
                 action.entity.as_deref() == Some(e.name.as_str())
                     && action.handler == "save"
-                    && gateway::action_authorized(a, h, action)
+                    && authorized(h, action)
             });
             let lookups: serde_json::Map<String, Value> = m
                 .actions
                 .iter()
-                .filter(|action| {
-                    action.handler == "list" && gateway::action_authorized(a, h, action)
-                })
+                .filter(|action| action.handler == "list" && authorized(h, action))
                 .filter_map(|action| {
                     action
                         .entity
@@ -162,7 +167,7 @@ async fn models(
                     matches!(
                         action.handler.as_str(),
                         "assets" | "asset_preview" | "asset_upload"
-                    ) && gateway::action_authorized(a, h, action)
+                    ) && authorized(h, action)
                 })
                 .map(|action| (action.handler.clone(), json!(action.name)))
                 .collect();
@@ -181,10 +186,10 @@ async fn models(
 }
 
 /// Planning receives only current readable field definitions, never records, secrets or native identities.
-pub(super) async fn descriptions(a: &App, h: &RequestContext, object: Object) -> Result<Value> {
-    let t = merchant(a, h)?;
+pub async fn descriptions(a: &State, h: &RequestContext, object: Object) -> Result<Value> {
+    let t = merchant(h)?;
     let mut tx = a.db.begin().await?;
-    let models = models(&mut tx, a, h, &t, object).await?;
+    let models = models(&mut tx, h, &t, object).await?;
     let fields=bounded_fields(models.iter().flat_map(|(app,_,e,_,_,_,_)|e.fields.iter().filter(|f|f.indexed && !f.translatable && matches!(f.kind.as_str(),"string"|"integer"|"boolean") && Some(f.name.as_str())!=e.extends.as_ref().map(|x|x.field.as_str())).map(move |f|serde_json::json!({"app":app,"entity":e.name,"field":f.name,"kind":f.kind,"label":f.label}))));
     tx.commit().await?;
     Ok(serde_json::json!(fields))
@@ -209,7 +214,8 @@ fn bounded_fields(fields: impl IntoIterator<Item = Value>) -> Vec<Value> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use super::bounded_fields;
+    use serde_json::json;
     #[test]
     fn planning_metadata_is_bounded_without_rewriting_labels_or_starving_small_definitions() {
         let small =

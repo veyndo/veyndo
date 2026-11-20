@@ -806,8 +806,8 @@
     },
     "components/apps/src/domain/native_lifecycle.rs": {
       "status": "reviewed-binding",
-      "sha256": "ef6d0d6fe4dc1be8117971091057089ca9baa1574fc5c4e0211fba533fd96d92",
-      "review": "Native lifecycle rules, capture and commerce hook admission moved into the apps component without behavior change"
+      "sha256": "6cf0bd8e41b1c100d5a5890e028de4877022c6c0d44c821f2c699b8f62e4f91a",
+      "review": "Managed app records, restoration, import and native-object projection moved into the apps component behind a record rules port without behavior change"
     },
     "components/apps/src/domain/native_views.rs": {
       "status": "unproved",
@@ -909,6 +909,11 @@
       "sha256": "e45ca4142474e72487b3505020403c7b8724cf3162ccc8dc1e107541c00d9f1f",
       "review": "App jobs and private evidence reads moved into the apps component without changing rules"
     },
+    "components/apps/src/http/record_history.rs": {
+      "status": "unproved",
+      "sha256": "d60cec3ac6237ddfc68dbb3a99845dbad460290010266aa6de82622483e19f1b",
+      "review": "Managed app records, restoration, import and native-object projection moved into the apps component behind a record rules port without behavior change"
+    },
     "components/apps/src/http/secrets.rs": {
       "status": "unproved",
       "sha256": "beffdfdb79ac41904cf743349bdca60d7223a6b7408f5db26b11a13102207568",
@@ -931,8 +936,8 @@
     },
     "components/apps/src/http.rs": {
       "status": "unproved",
-      "sha256": "6dbec9a8f473d584d216281245eb624ed5472aa31ae4d89dc2bf6e557b89bb45",
-      "review": "App jobs and private evidence reads moved into the apps component without changing rules"
+      "sha256": "5ac3ee916f9ef806f5047761ac3d1ffb101a3c8559b757bf48c7d25700efc755",
+      "review": "Managed app records, restoration, import and native-object projection moved into the apps component behind a record rules port without behavior change"
     },
     "components/apps/src/lib.rs": {
       "status": "unproved",
@@ -941,8 +946,8 @@
     },
     "components/apps/src/ports.rs": {
       "status": "unproved",
-      "sha256": "cdfe0c34b2cf568092ffa45eb9e709a279256bfd9488e125204c829622cf4b59",
-      "review": "Service calls and event delivery moved into the apps component without changing rules"
+      "sha256": "8f834d481ca62a1d61ab446d759df1e31662db531e6967bce1f060c61ea647b4",
+      "review": "Managed app records, restoration, import and native-object projection moved into the apps component behind a record rules port without behavior change"
     },
     "components/apps/src/service/admission.rs": {
       "status": "unproved",
@@ -974,6 +979,11 @@
       "sha256": "51e81fff0d0bec5c463b6c4a53a4e3468ae26cfcbcbbe4eb7861eab967939702",
       "review": "Configuration, lifecycle, ontology and reference adapters moved into the apps component without changing rules"
     },
+    "components/apps/src/service/record_import.rs": {
+      "status": "unproved",
+      "sha256": "c6332aeb38c38e11f1a11f1f1bbf43ddcfcd1f1c75ff902a41621e31cc5aeb53",
+      "review": "Managed app records, restoration, import and native-object projection moved into the apps component behind a record rules port without behavior change"
+    },
     "components/apps/src/service/sandbox_cache.rs": {
       "status": "unproved",
       "sha256": "592fa48bca4482b403e468793ccb51b381d6a1bf6a73cd883fc16363b395a42d",
@@ -991,8 +1001,8 @@
     },
     "components/apps/src/service.rs": {
       "status": "unproved",
-      "sha256": "d6908e1e4e4a8c38f5165d821234becb149e0e39f12a0d0817f4ef6173afb6ee",
-      "review": "Surface contract and sandboxed documents moved into the apps component without changing rules"
+      "sha256": "1af8db0b5c6458e3defcde9572bede704c321ee20cd3090b38137ccf61ae7895",
+      "review": "Managed app records, restoration, import and native-object projection moved into the apps component behind a record rules port without behavior change"
     },
     "components/apps/src/store/action_log.rs": {
       "status": "unproved",
@@ -1039,6 +1049,11 @@
       "sha256": "f25ab2568a84a6d04493ad2791629d379733dd959d1e5ab59d9e0d8069930705",
       "review": "Record store, consent and core extension rules moved into the apps component without changing rules"
     },
+    "components/apps/src/store/extension_projection.rs": {
+      "status": "unproved",
+      "sha256": "1ff774dde7b119edc6f22850cc39d3d0430860b0a34e825046bc1eb18ec24f43",
+      "review": "Managed app records, restoration, import and native-object projection moved into the apps component behind a record rules port without behavior change"
+    },
     "components/apps/src/store/job_control.rs": {
       "status": "unproved",
       "sha256": "874bbcf240f0eaf71c32ca0fe3415c132b0a88ff8df4e0011afec2743a53032f",
@@ -1054,6 +1069,11 @@
       "sha256": "ee60f4e0e976ce96869df0b7a02169899ed648abb4990eb1d3debfe7dc67410b",
       "review": "Sandbox cache, configuration runtime and package fence moved into the apps component without changing rules"
     },
+    "components/apps/src/store/managed_data.rs": {
+      "status": "unproved",
+      "sha256": "aa88d8200552228cbff09d8f046a18bac47507d4701f9b6638709c54ef54aa9f",
+      "review": "Managed app records, restoration, import and native-object projection moved into the apps component behind a record rules port without behavior change"
+    },
     "components/apps/src/store/native_lifecycle.rs": {
       "status": "unproved",
       "sha256": "155d704793fb78e584413082d36a04e18109e6cb9d629e962200f4ec84067e09",
@@ -1068,6 +1088,11 @@
       "status": "unproved",
       "sha256": "535ceaa06a1a716bd5bdd6208b846dcec58ca292a4d2427f9a3bd2bef966aa76",
       "review": "Sandbox cache, configuration runtime and package fence moved into the apps component without changing rules"
+    },
+    "components/apps/src/store/record_restore.rs": {
+      "status": "unproved",
+      "sha256": "fc40e9231ce1d38bd93e32d0e4300c34a819f17e789588c7aca3348d6d2ff61a",
+      "review": "Managed app records, restoration, import and native-object projection moved into the apps component behind a record rules port without behavior change"
     },
     "components/apps/src/store/record_write.rs": {
       "status": "unproved",
@@ -1106,8 +1131,8 @@
     },
     "components/apps/src/store.rs": {
       "status": "unproved",
-      "sha256": "685edf5ea3ec13a10304552bb41d024915fab3cb5db2a6fa27ddb8be87442a94",
-      "review": "Native lifecycle rules, capture and commerce hook admission moved into the apps component without behavior change"
+      "sha256": "f6e9b9df47821f3b247cd563f9083a17d51de5b26efde6e18c5b2147953c09d9",
+      "review": "Managed app records, restoration, import and native-object projection moved into the apps component behind a record rules port without behavior change"
     },
     "components/b2b/src/domain/contract.rs": {
       "status": "unproved",
@@ -5266,8 +5291,8 @@
     },
     "src/apps/core_extensions.rs": {
       "status": "unproved",
-      "sha256": "b4e47705cd4e28f8c821a21b2b9627da450336748eb872355f400b37600f0a02",
-      "review": "Record store, consent and core extension rules moved into the apps component without changing rules"
+      "sha256": "dbcdec175c04563ddb6f85ae2be48cce4782092162a80c9a4f955645d729886a",
+      "review": "Managed app records, restoration, import and native-object projection moved into the apps component behind a record rules port without behavior change"
     },
     "src/apps/credentials.rs": {
       "status": "unproved",
@@ -5276,8 +5301,8 @@
     },
     "src/apps/data.rs": {
       "status": "unproved",
-      "sha256": "13f58051efcbcd31301dab98da85006bf3ddaf08019ff7c6d96c55ed4e611045",
-      "review": "Apps reader 0.25.0: current OAuth merchant/action admission, signed read-only fixed-schema host and shared original scope/page/field code; real independent PostgreSQL/HTTP/MCP/SDK and runtime/storage regressions pass. Native task context, privileged provisioning, object resolver and write owners retained. No new mathematical claim for host SQL or network."
+      "sha256": "c8a86c3d460fea935f6ff415f2cfa28e1e38fd4e71cad5d8d3716b0d9f24462a",
+      "review": "Managed app records, restoration, import and native-object projection moved into the apps component behind a record rules port without behavior change"
     },
     "src/apps/discovery.rs": {
       "status": "unproved",
@@ -5291,8 +5316,8 @@
     },
     "src/apps/editor_contract.rs": {
       "status": "unproved",
-      "sha256": "01666e63ef20b7bcf7775d525c71a100905b89406f0c0d3b34c55e0049194d2e",
-      "review": "Action authorization, entity access and discovery rules moved into the apps component without changing rules"
+      "sha256": "1611592a7f6512b09e78f54c81a1f4634d60f300b856c1e8299ca6c0ce1d9800",
+      "review": "Managed app records, restoration, import and native-object projection moved into the apps component behind a record rules port without behavior change"
     },
     "src/apps/editor_tests.rs": {
       "status": "unproved",
@@ -5324,25 +5349,15 @@
       "sha256": "760ca1cd26e0dfefa2c1cbbadd3bd94cd4b091cd416cef4cf6c3dbeff5ce37af",
       "review": "Record store, consent and core extension rules moved into the apps component without changing rules"
     },
-    "src/apps/extension_projection.rs": {
-      "status": "unproved",
-      "sha256": "11e61ed1fa070d74b9d94f9d1156ad394d3e6fb5b7470fa1749bed7564339699",
-      "review": "Reviewed native extension metadata byte bound: retain complete current-scope indexed field definitions, skip oversized labels, cap at 128 definitions and 16 KiB; no change to admissibility policy, tenant authorization or unproved adapter boundary. Unit test covers oversize skip and count limit."
-    },
     "src/apps/field_values.rs": {
       "status": "unproved",
-      "sha256": "3b612030ab6799aa8adc0c1a51cade98e28fae487111769e7655cc88a7ae43c6",
-      "review": "Configuration, lifecycle, ontology and reference adapters moved into the apps component without changing rules"
+      "sha256": "9824d8e561fb77c35aacd7e9f319c597db819bbb7872a3060f7cea7e562987ae",
+      "review": "Managed app records, restoration, import and native-object projection moved into the apps component behind a record rules port without behavior change"
     },
     "src/apps/gateway.rs": {
       "status": "unproved",
       "sha256": "008c8dbe93bc4056f1d77132632856b707dc422fdc7955ef93a201ead4a405cc",
       "review": "Service calls and event delivery moved into the apps component without changing rules"
-    },
-    "src/apps/history_storage.rs": {
-      "status": "unproved",
-      "sha256": "848c3aff13047c073aa37cd4ee37b048925137b68be76428a8d77ca9d10dc290",
-      "review": "Reviewed Apps 0.21 record history extraction against Core 5b75a656 original record_history.rs and record_write hooks. Shared immutable capture retains original list-action scopes and duplicate immutability, SQL actor/source attribution, app advisory fence namespace 948, fixed table and original 20-revision/16 MiB pruning/order. Nonpositive revisions reject before subtraction. Bounded scoped list keeps original limit/order then requires current historical read authority; native current entity and declared-field projection remain. Restore preserves original lookup/error order and historical read admission, then requires actual native data::save_tx on the original transaction with current expected revision, typed fields/references/lifecycle/CAS/history/outbox/package fence. Native HTTP/MCP explicit review/current rights/signed scope/context/commit remain; no direct record rewind, new endpoints/permissions, DDL or approving default host. Independent real PostgreSQL original attribution/rights, malformed denial, actual byte retention, concurrent restores and failed audit/capture rollback pass; example denies missing authority/writer. Native 74 App units, warning-free workspace Clippy and seven actual HTTP/PostgreSQL apps/studio/isolation/schema/sharedStorage/coreExtensions/visualWorkspace modules pass, including successful HTTP and MCP restore plus stale/review/foreign denial. Exact source/WIT, 886-module structure and source inventory pass. Kernel unchanged; SQL/async/native host code remains reviewed and unproved."
     },
     "src/apps/hosted.rs": {
       "status": "unproved",
@@ -5396,18 +5411,13 @@
     },
     "src/apps/mod.rs": {
       "status": "unproved",
-      "sha256": "0623db095a6eb3e8ceceb22392ed228381c77c7d54c5126da25fcc6c574fab50",
-      "review": "App jobs and private evidence reads moved into the apps component without changing rules"
+      "sha256": "fe9277910dc8eb1afa81585ab34c8a40049d1687013f5b3226da0d62c6e576b1",
+      "review": "Managed app records, restoration, import and native-object projection moved into the apps component behind a record rules port without behavior change"
     },
     "src/apps/model_contract.rs": {
       "status": "unproved",
       "sha256": "f82caa3c1040abc5236712a77f30dd3a5a75efb314fd319c0f613590e9c0ce96",
       "review": "Package approval, distribution, schema adapters, event projection and service transport policy moved into components/apps without a change in behaviour"
-    },
-    "src/apps/native_data.rs": {
-      "status": "unproved",
-      "sha256": "36764c934e1c28a4727567dcef2d8d7fb65fb7a5de7f4638b34f8ca28f24939e",
-      "review": "Sandbox cache, configuration runtime and package fence moved into the apps component without changing rules"
     },
     "src/apps/native_lifecycle.rs": {
       "status": "unproved",
@@ -5429,11 +5439,6 @@
       "sha256": "297e834b57f54579d21e325c6be3fd97996e960ef4a95dec8ce77f6aaf023d7b",
       "review": "App secret, settings, activity, credential and webhook handlers moved into the apps component without changing rules"
     },
-    "src/apps/ontology.rs": {
-      "status": "unproved",
-      "sha256": "03611b237b990bf6961ec1b371f9c991eeffe65f5b8ee997b64133a4684cb9b5",
-      "review": "Configuration, lifecycle, ontology and reference adapters moved into the apps component without changing rules"
-    },
     "src/apps/package_fence.rs": {
       "status": "unproved",
       "sha256": "7c5c5443f4b3375ee7cce0794e45b870193de2db7cfaf17c24d5e7127c616a83",
@@ -5443,11 +5448,6 @@
       "status": "unproved",
       "sha256": "7be085004b45f1fc02cb311aa9046415c8e43dd2d324fe60ad6450f31e5c36fb",
       "review": "Reviewed extraction of original registry installation sequencing to pinned Apps 0.5: caller transaction, native compiler/provider trust and marketing-before-tenant/package lock order retained; mandatory dependencies/commerce/lifecycle, typed downgrade/schema migration, model/default/schedule hooks; same locks 543/7, quota 128, immutable digest, revision/activation, version and app.installed writes. Independent PG hook rollback at all five stages, quota contention, own/foreign versions, preview history and writer fence pass; native installation/Studio/F5/schema/staging/release/distribution/tenant and Marketplace composition pass. New SQL/hooks remain explicitly unproved; kernel policies unchanged."
-    },
-    "src/apps/persistence.rs": {
-      "status": "unproved",
-      "sha256": "3f27cb7f27e146ac490f6326ba7674d0e35c3732512daeb30e9b854a99426692",
-      "review": "Package approval, distribution, schema adapters, event projection and service transport policy moved into components/apps without a change in behaviour"
     },
     "src/apps/planning.rs": {
       "status": "unproved",
@@ -5461,23 +5461,18 @@
     },
     "src/apps/record_history.rs": {
       "status": "unproved",
-      "sha256": "19e11e46b949458d890789afd55ae0f5228d019c9fb3925a88d27b707a42259b",
-      "review": "Apps 0.26.0: original native lifecycle and bounded before/after record history moved into shared managed_hooks on the existing mutation/outbox transaction. Native package/field/reference/language/identity admission remains unchanged. Independent real PostgreSQL/identity/HTTP/MCP/SDK tests and Linux container verify current approval/digest/CAS/state/history scopes/retention and full late-failure rollback. Explicit optional schema-2 write grants and unsupported native policies fail closed; no new proved policy claim for host SQL/network."
+      "sha256": "edf57abcf3639858144e82a926cd028592b01106807b6c2a2bb8f2b59839d7f1",
+      "review": "Managed app records, restoration, import and native-object projection moved into the apps component behind a record rules port without behavior change"
     },
     "src/apps/record_import.rs": {
       "status": "unproved",
-      "sha256": "7fc77192e3f2c2a47dd6212a87cbd87ef7cebbe52fa6a99d09f63b9867b4042b",
-      "review": "2026-10-19 reviewed native read-only import projection against shared product/category/address owners; paired CRM/history PII and private target/package/digest checks; generic completion evidence atomically uses existing job creator/lease/package and record CAS, platform AEAD, native actual-field verification, no new app table or queue. Actual eight-domain migration/archival/restart/tamper and native app callback/jobs/admin creation tests pass; pure cancelled-success policy has exact Lean claim, all boolean cases and a true-return negative mutation. SQL, cryptography, async service correctness and public hosting remain outside formal proof."
-    },
-    "src/apps/record_write.rs": {
-      "status": "unproved",
-      "sha256": "f5126443eecb54836a30e9bd918950b1d0496a72897ad5504c7bb27af8bdd1bf",
-      "review": "Record store, consent and core extension rules moved into the apps component without changing rules"
+      "sha256": "e838fed75c8145962515aa12db15cf49895d80e88a1e7dc76fa89252fc830882",
+      "review": "Managed app records, restoration, import and native-object projection moved into the apps component behind a record rules port without behavior change"
     },
     "src/apps/records.rs": {
       "status": "unproved",
-      "sha256": "48d038c1dc575a0f5f956f5eda031c5f18daaa6892ecdd77f043e2802ae6974a",
-      "review": "Record store, consent and core extension rules moved into the apps component without changing rules"
+      "sha256": "e7318f2cbf98c79d2e2aaf3edda4d7dcdda6ed3303d7bcba0a8fa1e229343164",
+      "review": "Managed app records, restoration, import and native-object projection moved into the apps component behind a record rules port without behavior change"
     },
     "src/apps/registry.rs": {
       "status": "unproved",
@@ -5516,8 +5511,8 @@
     },
     "src/apps/service_limits.rs": {
       "status": "unproved",
-      "sha256": "f25799758ff53d40bed1e3e5436530f015f30cf466e8655d3799eecdafa20a3a",
-      "review": "Service calls and event delivery moved into the apps component without changing rules"
+      "sha256": "5d49beb6da5a7a1cb32369c5c34fe7ff96858c6e5988136e830d4acc8ec79628",
+      "review": "Managed app records, restoration, import and native-object projection moved into the apps component behind a record rules port without behavior change"
     },
     "src/apps/service_policy.rs": {
       "status": "unproved",

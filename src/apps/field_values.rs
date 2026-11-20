@@ -2,4 +2,3 @@
 #[cfg(test)]
 pub(super) use veyndo_app_platform::domain::field_values::Policy;
 pub(super) use veyndo_app_platform::domain::field_values::validate;
-pub(super) use veyndo_app_platform::store::asset_references::references;

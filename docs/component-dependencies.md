@@ -27,7 +27,7 @@ run SQL without being in a `store` folder. Both numbers only fall.
 | marketing | 5848 | 20 | 337 | 14 | 8 | apps (14), automation (20), b2b (2), catalog (5), checkout (3), core (189), identity (37), intelligence (14), orders (1), payments (1), pos (1), pricing (13), shop (30), studio (2) | 24 |
 | b2b | 2452 | 9 | 108 | 8 | 8 | apps (16), checkout (10), core (108), customers (2), identity (20), marketing (1), orders (1), pos (1), pricing (8), shop (25), studio (8) | 8 |
 | pos | 1144 | 6 | 68 | 5 | 0 | apps (1), catalog (4), checkout (17), core (40), customers (1), identity (15), marketing (4), orders (1), payments (3), pricing (5), shop (14) | 8 |
-| apps | 13623 | 75 | 421 | 33 | 22 | b2b (3), catalog (10), checkout (4), core (551), host (11), identity (69), intelligence (4), marketing (13), orders (13), payments (7), pos (1), pricing (12), shipping (1), shop (27), studio (25) | 20 |
+| apps | 13816 | 74 | 421 | 31 | 22 | b2b (3), catalog (10), checkout (4), core (531), host (11), identity (67), intelligence (4), marketing (13), orders (13), payments (7), pos (1), pricing (11), shipping (1), shop (27), studio (21) | 20 |
 | automation | 1443 | 8 | 97 | 0 | 0 | core (2) | 0 |
 | intelligence | 12405 | 74 | 716 | 35 | 28 | apps (45), catalog (27), checkout (20), core (669), customers (1), host (1), identity (81), marketing (18), orders (1), payments (1), pricing (16), protocols (8), shipping (1), shop (37), studio (7) | 26 |
 | studio | 2998 | 15 | 160 | 8 | 5 | apps (26), b2b (4), catalog (6), core (139), customers (1), identity (44), intelligence (1), marketing (9), pos (1), pricing (2), shop (12) | 34 |
@@ -44,7 +44,7 @@ reduced to one direction first.
 - apps ↔ catalog: 10 and 19 references
 - apps ↔ checkout: 4 and 20 references
 - apps ↔ host: 11 and 1 references
-- apps ↔ identity: 69 and 8 references
+- apps ↔ identity: 67 and 8 references
 - apps ↔ intelligence: 4 and 45 references
 - apps ↔ marketing: 13 and 14 references
 - apps ↔ orders: 13 and 32 references
@@ -52,7 +52,7 @@ reduced to one direction first.
 - apps ↔ pos: 1 and 1 references
 - apps ↔ shipping: 1 and 3 references
 - apps ↔ shop: 27 and 4 references
-- apps ↔ studio: 25 and 26 references
+- apps ↔ studio: 21 and 26 references
 - b2b ↔ checkout: 10 and 19 references
 - b2b ↔ marketing: 1 and 2 references
 - b2b ↔ orders: 1 and 1 references
@@ -109,14 +109,14 @@ reduced to one direction first.
 | From | To | Item | References |
 | --- | --- | --- | ---: |
 | intelligence | core | `Result` | 180 |
-| apps | core | `Result` | 162 |
+| apps | core | `Result` | 150 |
 | intelligence | core | `RequestContext` | 147 |
 | intelligence | core | `State` | 136 |
-| apps | core | `RequestContext` | 113 |
-| apps | core | `veyndo_core::` | 98 |
-| apps | core | `State` | 87 |
+| apps | core | `veyndo_core::` | 107 |
+| apps | core | `RequestContext` | 103 |
 | catalog | core | `Result` | 86 |
 | orders | core | `State` | 81 |
+| apps | core | `State` | 81 |
 | catalog | core | `State` | 80 |
 | intelligence | identity | `auth::` | 78 |
 | payments | core | `Result` | 73 |
@@ -124,7 +124,6 @@ reduced to one direction first.
 | orders | core | `Result` | 63 |
 | catalog | core | `veyndo_core::` | 62 |
 | intelligence | core | `Error` | 58 |
-| apps | identity | `auth::` | 54 |
 | identity | core | `veyndo_core::` | 53 |
 | catalog | core | `RequestContext` | 53 |
 | shop | core | `State` | 52 |
@@ -132,14 +131,15 @@ reduced to one direction first.
 | intelligence | core | `conflict` | 51 |
 | orders | core | `RequestContext` | 50 |
 | checkout | core | `Result` | 48 |
+| apps | identity | `auth::` | 48 |
 | shop | core | `Result` | 46 |
 | customers | core | `State` | 46 |
 | intelligence | apps | `apps::` | 45 |
 | marketing | core | `Result` | 44 |
 | checkout | core | `RequestContext` | 44 |
 | studio | identity | `auth::` | 42 |
-| apps | core | `conflict` | 40 |
 | customers | core | `Result` | 39 |
+| apps | core | `conflict` | 39 |
 | studio | core | `Result` | 38 |
 | studio | core | `State` | 37 |
 | payments | core | `veyndo_core::` | 37 |

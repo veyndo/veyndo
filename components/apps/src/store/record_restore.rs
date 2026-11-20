@@ -1,13 +1,23 @@
 //! Required current historical-read authority and actual native managed save for shared record restoration; no bypass of package/field/reference/CAS/history owners.
-use super::*;
+use crate::ports::RecordRules;
+use crate::store::managed_data;
+use serde_json::{Value, json};
+use veyndo_app_model::Entity;
+use veyndo_app_model::manifest::Manifest;
 use veyndo_app_storage::{RecordKey, record_history as shared};
-pub(super) struct Current<'a>(pub(super) &'a RequestContext);
+use veyndo_core::{Error, RequestContext, StatusCode};
+use veyndo_identity::domain::permissions::allowed;
+
+/// The reader whose current rights decide which historical fields are shown.
+pub struct Current<'a>(pub &'a RequestContext);
 impl shared::ReadAuthority for Current<'_> {
     fn allowed(&self, scope: &str) -> bool {
-        auth::allowed(self.0, scope)
+        allowed(self.0, scope)
     }
 }
-pub(super) struct Restore<'a> {
+/// A restoration that writes through the ordinary managed save of the entity.
+pub struct Restore<'a> {
+    pub rules: &'a dyn RecordRules,
     pub actor: &'a RequestContext,
     pub manifest: &'a Manifest,
     pub entity: &'a Entity,
@@ -15,7 +25,7 @@ pub(super) struct Restore<'a> {
 }
 impl shared::ReadAuthority for Restore<'_> {
     fn allowed(&self, scope: &str) -> bool {
-        auth::allowed(self.actor, scope)
+        allowed(self.actor, scope)
     }
 }
 impl<'db> shared::RestoreHost<'db> for Restore<'_> {
@@ -30,7 +40,8 @@ impl<'db> shared::RestoreHost<'db> for Restore<'_> {
         'db: 'a,
     {
         Box::pin(async move {
-            data::save_tx(
+            managed_data::save_tx(
+                self.rules,
                 tx,
                 key.scope.tenant,
                 self.manifest,
@@ -41,7 +52,8 @@ impl<'db> shared::RestoreHost<'db> for Restore<'_> {
         })
     }
 }
-pub(super) fn error(e: shared::RestoreError<Error>) -> Error {
+/// The response for a refused or failed restoration.
+pub fn error(e: shared::RestoreError<Error>) -> Error {
     match e {
         shared::RestoreError::Database(e) => e.into(),
         shared::RestoreError::Unavailable => {

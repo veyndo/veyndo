@@ -2,6 +2,7 @@
 pub mod activity;
 pub mod credentials;
 pub mod jobs;
+pub mod record_history;
 pub mod secrets;
 pub mod settings;
 pub mod ui_documents;

@@ -5,6 +5,7 @@ pub mod configuration_runtime;
 pub mod egress;
 pub mod event_delivery;
 pub mod limits;
+pub mod record_import;
 pub mod sandbox_cache;
 pub mod service_call;
 pub mod ui_bundles;

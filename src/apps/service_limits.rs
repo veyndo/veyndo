@@ -8,6 +8,12 @@ pub(crate) fn platform(a: &App) -> Platform {
     Platform {
         core: a.core.clone(),
         limits: a.app_limits.clone(),
+        rules: &data::BUNDLED,
+    }
+}
+impl axum::extract::FromRef<App> for Platform {
+    fn from_ref(app: &App) -> Self {
+        platform(app)
     }
 }
 /// All app-network entry points share these ceilings, including signed delivery and pinned UI fetches.

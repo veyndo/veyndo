@@ -9,7 +9,7 @@ pub(crate) async fn descriptions(
     h: &RequestContext,
     object: Object,
 ) -> Result<serde_json::Value> {
-    super::extension_projection::descriptions(a, h, object).await
+    veyndo_app_platform::store::extension_projection::descriptions(a, h, object).await
 }
 
 /// Native lists and details share one bounded, permission-filtered app projection.
@@ -19,5 +19,5 @@ pub(crate) async fn attach(
     object: Object,
     rows: &mut [serde_json::Value],
 ) -> Result<()> {
-    super::extension_projection::attach(a, h, object, rows).await
+    veyndo_app_platform::store::extension_projection::attach(a, h, object, rows).await
 }
