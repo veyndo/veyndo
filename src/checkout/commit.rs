@@ -36,7 +36,7 @@ pub(super) async fn run(
     } = priced;
     checkout_review::validate(h, &c, &q, minor)?;
     if let Some(review) = review {
-        review.admit_channel(&mut tx, &c).await?;
+        veyndo_checkout::store::session::admit_channel(&mut tx, &c).await?;
         review.check_quote(&q, &legal_snapshot["policyVersion"], minor)?;
     }
     if config.is_business(&c.data.group) {
@@ -135,7 +135,8 @@ pub(super) async fn run(
         };
         payments::prepare(&mut tx, &c, &mut order, minor, return_origin.as_deref()).await?;
         if let Some(review) = review {
-            review.check_prepared_payment(&order["payment"])?;
+            review
+                .check_prepared_payment(&order["payment"], crate::runtime_config::get().strict)?;
         }
         payments::prepare_funding(&mut tx, h, &c, &order).await?;
         commerce::order_fields(&mut order);

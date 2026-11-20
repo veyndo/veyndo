@@ -3,7 +3,7 @@ use crate::domain::order_fields::order_fields;
 use serde_json::{Value, json};
 use sqlx::Row;
 use veyndo_core::{RequestContext, Result, bad, conflict};
-type Tx<'a> = sqlx::Transaction<'a, sqlx::Postgres>;
+pub type Tx<'a> = sqlx::Transaction<'a, sqlx::Postgres>;
 
 pub async fn replay(
     tx: &mut Tx<'_>,

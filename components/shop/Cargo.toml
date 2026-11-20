@@ -17,3 +17,4 @@ veyndo-core = { path = "../core" }
 veyndo-inventory = { path = "../inventory" }
 veyndo-pricing = { path = "../pricing" }
 veyndo-shipping = { path = "../shipping" }
+veyndo-identity = { path = "../identity" }

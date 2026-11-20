@@ -4,7 +4,7 @@ use crate::{App, RequestContext, Result, Value, auth, bad, conflict, merchant};
 use veyndo_payments::domain::instructions::snapshot;
 /// The issuer already holds the order lock and document/PII authority. This immutable read takes no reverse payment lock and performs no provider I/O.
 pub(crate) async fn for_document(
-    tx: &mut sqlx::Transaction<'_, sqlx::Postgres>,
+    tx: &mut sqlx::PgConnection,
     t: &str,
     order: &Value,
 ) -> Result<Option<Value>> {
@@ -16,7 +16,7 @@ pub(crate) async fn for_document(
             .bind(t)
             .bind(id)
             .bind(order["id"].as_str().unwrap_or(""))
-            .fetch_optional(&mut **tx)
+            .fetch_optional(tx)
             .await?
             .ok_or(bad("Document payment is not bound to this order"))?;
     let p = attempt(&row);

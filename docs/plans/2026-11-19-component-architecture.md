@@ -264,16 +264,27 @@ Order follows the dependency report, lowest first. Each line is one move.
   manifests, routes, the PayPal adapter include.
 - [ ] checkout. Started: `components/checkout` owns the destination tax lines
   of a quote, the shipping and payment method enrichment with delivery dates,
-  and exact app price adjustments. Open: cart storage and mutation, the quote,
-  the selection, the checkout transaction and order placement, the handoff
-  and review.
+  and exact app price adjustments. `domain/` also holds the binding of an
+  order to the reviewed cart revision and total, the reviewed session
+  purchase with its replay and receipt checks, and the classification of the
+  checkout test payment; `store/` the localized SKU snapshot read under the
+  purchase locks, the channel admission of a session and its placed order.
+  The kernel bindings of the review name the new file. Open: cart storage and
+  mutation, the quote, the selection, the four steps of the checkout
+  transaction (they call apps, B2B, payments, marketing and legal and need a
+  host port), buyer identity, the handoff.
 - [ ] orders. Started: `components/orders` owns the order state machine with
   its default and bounds, the stored machine, derived order fields, the
   transition guards and the workflow view, the audited write log with its
   replay ledger, and receipt texts. The kernel bindings of the order workflow
-  name the new file. Open: order reads and grids, manual orders, imports,
-  fulfilment handlers, returns. The redacted read views for app callbacks
-  live in `store/`.
+  name the new file. `store/` also holds the redacted read views for app
+  callbacks, the merchant order list (admitted app filters join through a
+  closure), the order detail with its activity, notes, the company basis with
+  its channel overrides and public projection, company logos, the issuance
+  of invoices, delivery notes and cancellations, and carrier documents.
+  `ports::Payments` supplies the transfer instructions an invoice prints.
+  Open: the grid plan, manual orders, imports, the workflow save (app
+  lifecycle), fulfilment handlers, returns, merchant customer edits.
 - [ ] marketing. Started: `components/marketing` owns the rule conditions with
   their bounds and matching, field comparison, the line, customer and order
   facts a rule reads, the snapshot of referenced rules, and the shared
@@ -297,7 +308,15 @@ Order follows the dependency report, lowest first. Each line is one move.
   the gateway and routes.
 - [ ] pos. Started: `components/pos` owns the cashier input envelope and the
   capability schema; the POS location of a channel lives with the channel in
-  marketing. Open: the gateway, settlement, discounts, cash handling.
+  marketing. `service/` holds the cashier customer search and attachment,
+  the audited cashier discount in quote and commit, cash admission, the order
+  annotation and the sale completion; `store/` the customer rows a cashier
+  sees. They price through `veyndo_shop::ports::Carts`. The cart admission
+  every adapter runs (merchant-created cart, cashier, sales channel) moved to
+  `veyndo_shop::domain::cart_admission`. The kernel binding of cash
+  admission names the new file. Open: the gateway (it dispatches into
+  catalog, currencies, coupons, legal and the checkout) and the channel
+  installation (it validates settings through the rule engine).
 - [ ] apps (with `developer` and the vendored app storage)
 - [ ] automation
 - [ ] intelligence. Started: `components/intelligence` owns the knowledge

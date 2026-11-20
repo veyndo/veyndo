@@ -60,3 +60,12 @@ pub fn session_digest(h: &RequestContext) -> Result<String> {
     ))?;
     Ok(crate::hash(token))
 }
+/// The live shop a staging environment belongs to; `None` for a live shop.
+pub async fn live_parent(conn: &mut sqlx::PgConnection, t: &str) -> Result<Option<String>> {
+    Ok(
+        sqlx::query_scalar("SELECT live_tenant FROM shop_environments WHERE tenant=$1")
+            .bind(t)
+            .fetch_optional(conn)
+            .await?,
+    )
+}

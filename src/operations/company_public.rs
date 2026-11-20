@@ -7,83 +7,15 @@ pub(super) async fn get(State(a): State<App>, h: RequestContext) -> Result<Json<
     let locale = header(&h, "x-commerce-locale").unwrap_or(&settings.main_locale);
     marketing::channel(&a, &h, channel, locale).await?;
     let mut tx = a.db.begin().await?;
-    master_data::lock(&mut tx, &t).await?;
-    let base = master_data::records(&mut tx, &t, None).await?;
-    let patch: Option<Value> =
-        sqlx::query_scalar("SELECT data FROM company_overrides WHERE tenant=$1 AND channel_id=$2")
-            .bind(&t)
-            .bind(channel)
-            .fetch_optional(&mut *tx)
-            .await?;
-    let data = company_model::resolve(&base["data"], &patch.unwrap_or(json!({})));
-    // Unconfigured shop presentation uses its chosen name, never a fabricated legal issuer.
-    let default_brand: Option<String> = if data.get("brandName").is_none_or(Value::is_null)
-        && data["name"]
-            .as_str()
-            .is_none_or(|name| name.trim().is_empty())
-    {
-        sqlx::query_scalar("SELECT name FROM tenants WHERE id=$1")
-            .bind(&t)
-            .fetch_optional(&mut *tx)
-            .await?
-    } else {
-        None
-    };
+    let (data, default_brand) = master_data::public_source(&mut tx, &t, channel).await?;
     tx.commit().await?;
-    let mut public = json!({});
-    for key in [
-        "name",
-        "address",
-        "street",
-        "houseNumber",
-        "additionalAddressLine1",
-        "additionalAddressLine2",
-        "postalCode",
-        "city",
-        "country",
-        "countryStateId",
-        "legalForm",
-        "registrationNumber",
-        "registerType",
-        "registerCourt",
-        "managingDirectors",
-        "legalRepresentatives",
-        "contentResponsible",
-        "contentResponsibleAddress",
-        "vatId",
-        "economicId",
-        "email",
-        "phoneNumber",
-        "website",
-        "supervisoryAuthority",
-        "professionalChamber",
-        "professionalTitle",
-        "professionalCountry",
-        "professionalRulesUrl",
-        "shareCapital",
-        "outstandingCapital",
-        "liquidationNotice",
-    ] {
-        if let Some(value) = data.get(key) {
-            public[key] = value.clone();
-        }
-    }
-    for key in company_model::LOCALIZED {
-        public[*key] = json!(commerce::translated_string(
-            &data[*key],
-            locale,
-            &settings.main_locale
-        ));
-    }
-    if let Some(name) = default_brand {
-        public["brandName"] = json!(name);
-    }
-    if let Some(logo) = data["logoId"].as_str().filter(|s| !s.is_empty()) {
-        public["logoId"] = json!(logo);
-        public["logoUrl"] = json!(format!(
-            "/store-api/company-logo/{logo}?shop={t}&channel={channel}"
-        ));
-    }
+    let public = company_model::public(
+        &data,
+        &|value| commerce::translated_string(value, locale, &settings.main_locale).to_owned(),
+        default_brand,
+        &t,
+        channel,
+    );
     Ok(Json(
         json!({"data":public,"salesChannelId":channel,"mainLocale":settings.main_locale}),
     ))

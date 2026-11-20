@@ -34,7 +34,7 @@ pub(super) async fn run(
     b2b::lock_unit(&mut tx, &c).await?;
     b2b::guard_conn(&mut tx, h, &c).await?;
     if let Some(review) = review {
-        review.admit_locked(&mut tx, h, &c).await?;
+        super::session_order::admit_locked(review, &mut tx, h, &c).await?;
     }
     if c.data.locale != admitted.data.locale {
         return Err(conflict("Checkout language changed; review again"));
@@ -76,8 +76,8 @@ pub(super) async fn run(
         }
         let order = r.get("data");
         if let Some(review) = review {
-            review.admit_channel(&mut tx, &c).await?;
-            review.check_replay(&order)?;
+            veyndo_checkout::store::session::admit_channel(&mut tx, &c).await?;
+            review.check_replay(&order, crate::runtime_config::get().strict)?;
         }
         return Ok(Admission::Replay(order));
     }

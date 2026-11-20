@@ -3,6 +3,7 @@ use super::*;
 use base64::Engine;
 use image::ImageFormat;
 use std::io::Cursor;
+use veyndo_orders::store::company_logos;
 fn normalize(bytes: &[u8]) -> Result<(Vec<u8>, u32, u32)> {
     if bytes.is_empty() || bytes.len() > 2 * 1024 * 1024 {
         return Err(bad("Logo must contain 1 byte..2 MiB"));
@@ -57,44 +58,13 @@ pub(super) async fn upload(
         .await
         .map_err(|_| bad("Cannot decode logo"))??;
     let digest = format!("{:x}", Sha256::digest(&content));
-    let mut tx = a.db.begin().await?;
-    master_data::lock(&mut tx, &t).await?;
-    let count: i64 = sqlx::query_scalar("SELECT count(*) FROM company_logos WHERE tenant=$1")
-        .bind(&t)
-        .fetch_one(&mut *tx)
-        .await?;
-    let exists: Option<String> =
-        sqlx::query_scalar("SELECT id FROM company_logos WHERE tenant=$1 AND digest=$2")
-            .bind(&t)
-            .bind(&digest)
-            .fetch_optional(&mut *tx)
-            .await?;
-    let id = if let Some(id) = exists {
-        id
-    } else {
-        if count >= 50 {
-            return Err(bad("Maximum 50 company logos per shop"));
-        }
-        let id = uid();
-        sqlx::query("INSERT INTO company_logos(tenant,id,content,digest,mime,width,height) VALUES($1,$2,$3,$4,'image/png',$5,$6)").bind(&t).bind(&id).bind(content).bind(&digest).bind(w as i32).bind(h as i32).execute(&mut *tx).await?;
-        id
-    };
-    tx.commit().await?;
+    let id = company_logos::save(&a, &t, content, &digest, w, h).await?;
     Ok(Json(
         json!({"id":id,"digest":digest,"width":w,"height":h,"published":false}),
     ))
 }
 async fn bytes(a: &App, t: &str, id: &str) -> Result<Response> {
-    let data: Vec<u8> =
-        sqlx::query_scalar("SELECT content FROM company_logos WHERE tenant=$1 AND id=$2")
-            .bind(t)
-            .bind(id)
-            .fetch_optional(&a.db)
-            .await?
-            .ok_or(Error(
-                StatusCode::NOT_FOUND,
-                "Company logo not found".into(),
-            ))?;
+    let data = company_logos::content(a, t, id).await?;
     Ok((
         [
             ("content-type", "image/png"),
@@ -112,16 +82,7 @@ pub(super) async fn preview(
 ) -> Result<Json<Value>> {
     let t = merchant(&a, &h)?;
     auth::permit(&h, "settings.read")?;
-    let content: Vec<u8> =
-        sqlx::query_scalar("SELECT content FROM company_logos WHERE tenant=$1 AND id=$2")
-            .bind(&t)
-            .bind(&id)
-            .fetch_optional(&a.db)
-            .await?
-            .ok_or(Error(
-                StatusCode::NOT_FOUND,
-                "Company logo not found".into(),
-            ))?;
+    let content = company_logos::content(&a, &t, &id).await?;
     Ok(Json(
         json!({"id":id,"dataUrl":format!("data:image/png;base64,{}",base64::engine::general_purpose::STANDARD.encode(content))}),
     ))
@@ -148,25 +109,7 @@ pub(super) async fn public(
     }
     h.insert("x-tenant", q.shop.parse().map_err(|_| bad("Invalid shop"))?);
     let t = tenant(&h)?;
-
-    if q.channel != "default" {
-        let active:bool=sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM sales_channels WHERE tenant=$1 AND id=$2 AND data->>'active'='true')").bind(&t).bind(&q.channel).fetch_one(&a.db).await?;
-        if !active {
-            return Err(Error(
-                StatusCode::NOT_FOUND,
-                "Sales channel not found".into(),
-            ));
-        }
-    }
-    let mut tx = a.db.begin().await?;
-    let effective = master_data::seller(&mut tx, &t, &q.channel).await?;
-    tx.commit().await?;
-    if effective["logoId"] != id {
-        return Err(Error(
-            StatusCode::NOT_FOUND,
-            "Company logo is not linked to this channel".into(),
-        ));
-    }
+    company_logos::admit_public(&a, &t, &q.channel, &id).await?;
     bytes(&a, &t, &id).await
 }
 #[cfg(test)]

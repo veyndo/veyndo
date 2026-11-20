@@ -15,7 +15,7 @@ mod manual_order_admission;
 mod manual_orders;
 pub(crate) use manual_order_admission::{
     admin_order, admin_purchase, admit_admin_payment, admit_admin_products, check_admin_customer,
-    guard_admin_cart, lock_admin_checkout,
+    lock_admin_checkout,
 };
 mod guest_customers;
 pub(crate) use customers::restore_customer;

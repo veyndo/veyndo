@@ -48,7 +48,9 @@
         "src/platform/ai.rs",
         "src/platform/lifecycle.rs",
         "src/platform/quotas.rs",
-        "src/checkout_review.rs"
+        "src/commerce/delivery_split.rs",
+        "src/cognition/evidence.rs",
+        "components/checkout/src/domain/review_binding.rs"
       ],
       "theorems": [
         "revision_exact",
@@ -239,7 +241,7 @@
     },
     "checkout_review_admissible": {
       "bindings": [
-        "src/checkout_review.rs"
+        "components/checkout/src/domain/review_binding.rs"
       ],
       "theorems": [
         "checkout_review_exact"
@@ -433,7 +435,7 @@
     },
     "pos_cash_admissible": {
       "bindings": [
-        "src/pos/settlement.rs"
+        "components/pos/src/service/settlement.rs"
       ],
       "theorems": [
         "pos_cash_exact",
@@ -1051,6 +1053,21 @@
       "sha256": "9a2bcea53ca95789b2a268b746f8c40feaf4c5c8f36322252e754b500eef9515",
       "review": "Storefront catalogue reads and public attachments moved into components/catalog; no rule changed"
     },
+    "components/checkout/src/domain/review_binding.rs": {
+      "status": "reviewed-binding",
+      "sha256": "731f3b20049c3aeb4f4af20d9492c07bbcffe2f5b550def60c9f96a89edce043",
+      "review": "POS guard, customer, discount and settlement and the checkout session review moved into components"
+    },
+    "components/checkout/src/domain/session_payment.rs": {
+      "status": "unproved",
+      "sha256": "684e4939416801317c0753797776e6343823ad3a4174923056a9c61de6dafc5d",
+      "review": "POS guard, customer, discount and settlement and the checkout session review moved into components"
+    },
+    "components/checkout/src/domain/session_review.rs": {
+      "status": "unproved",
+      "sha256": "fa0314d2fc17aeed3742b0f4dd1bdcb0c20a81699c91e98408a6c6c861eb0dee",
+      "review": "POS guard, customer, discount and settlement and the checkout session review moved into components"
+    },
     "components/checkout/src/domain/tax_lines.rs": {
       "status": "unproved",
       "sha256": "b1669548f1cc6abd74ae4684fa8de4e64947eb8c8e3658565b35d26930787ffb",
@@ -1058,13 +1075,13 @@
     },
     "components/checkout/src/domain.rs": {
       "status": "unproved",
-      "sha256": "08c3e7e30817fdafd7e4ac6087a72932d92f72f0ff45d0c6cbc5352c5cfb3b17",
-      "review": "Identity credentials, B2B and POS contracts and checkout tax lines moved into components; kernel call sites unchanged"
+      "sha256": "66d49e2d161fdacec86b919055e1939df96c54e01365d9551fdc24cb25dc4ce0",
+      "review": "POS guard, customer, discount and settlement and the checkout session review moved into components"
     },
     "components/checkout/src/lib.rs": {
       "status": "unproved",
-      "sha256": "c03d8b05d29a607169939eb06744c143c4736928080969d088271a7ee02d4f2e",
-      "review": "Delivery enrichment, app adjustments and funding moved into components; kernel call sites unchanged"
+      "sha256": "1a152f24459cf60b7a327a4eac66a57c2167bf02b7dde0e1fd7ea499e4476153",
+      "review": "POS guard, customer, discount and settlement and the checkout session review moved into components"
     },
     "components/checkout/src/service/app_adjustments.rs": {
       "status": "unproved",
@@ -1080,6 +1097,21 @@
       "status": "unproved",
       "sha256": "8d8f71730ad60dcf5227ab3fa6a0ba8b32aea63b732ce5abd4e9b69d1ed4f2fb",
       "review": "Delivery enrichment, app adjustments and funding moved into components; kernel call sites unchanged"
+    },
+    "components/checkout/src/store/product_snapshot.rs": {
+      "status": "unproved",
+      "sha256": "8b7362fade55bc41b751fdbbc1495026c7776dd1549c991905db602a838950ac",
+      "review": "POS guard, customer, discount and settlement and the checkout session review moved into components"
+    },
+    "components/checkout/src/store/session.rs": {
+      "status": "unproved",
+      "sha256": "3cd9428edc864a30bc3ce27fdf9cc6eebaa2302d57de929171869749598f3ded",
+      "review": "POS guard, customer, discount and settlement and the checkout session review moved into components"
+    },
+    "components/checkout/src/store.rs": {
+      "status": "unproved",
+      "sha256": "bef0f095a078072b902da8bd9566ec8c0b6bbc817a8f8082f179c9354cc046b6",
+      "review": "POS guard, customer, discount and settlement and the checkout session review moved into components"
     },
     "components/core/src/access.rs": {
       "status": "unproved",
@@ -1208,8 +1240,8 @@
     },
     "components/core/src/shop_scope.rs": {
       "status": "unproved",
-      "sha256": "25e050ca8a154a98a8d95bff40076e519a4829932a05318e06996fbd80b72c20",
-      "review": "B2B access, organization and purchasing storage and flow job claims moved into their components"
+      "sha256": "fd055a44c716c169095c35a775cf57e9becbf242c8f3d4438eeeec0a5fb6497f",
+      "review": "POS guard, customer, discount and settlement and the checkout session review moved into components"
     },
     "components/core/src/state.rs": {
       "status": "unproved",
@@ -1563,8 +1595,8 @@
     },
     "components/orders/src/domain/company_model.rs": {
       "status": "unproved",
-      "sha256": "b2fe59eba3d1ffff2dcdb08dc286f48ab3bfe240b34caa59feb68f257e2ad748",
-      "review": "Order list criteria, company model and receipts moved into components; kernel call sites unchanged"
+      "sha256": "890580df005fa40b5c8bffd9babcbaf941d9ce02f14a716a99fa23d7291c3439",
+      "review": "POS, checkout session review, company data, receipts and carrier documents moved into components"
     },
     "components/orders/src/domain/creation_schema.rs": {
       "status": "unproved",
@@ -1618,18 +1650,53 @@
     },
     "components/orders/src/lib.rs": {
       "status": "unproved",
-      "sha256": "e145456a1f13d24b5328fb771149f84569b5c9cc61cf32dbb1498f41a782cd19",
-      "review": "Order list criteria, company model and receipts moved into components; kernel call sites unchanged"
+      "sha256": "6a96b778a1cab09f6772c19777ec555cd0183bdf0a51dacc0f8cec75f0c3ba3d",
+      "review": "POS, checkout session review, company data, receipts and carrier documents moved into components"
+    },
+    "components/orders/src/ports.rs": {
+      "status": "unproved",
+      "sha256": "c345f2c0be21212752cebd236ae2399474e2b22b0449f407dfb8d1e13b47e863",
+      "review": "POS, checkout session review, company data, receipts and carrier documents moved into components"
+    },
+    "components/orders/src/store/carrier_documents.rs": {
+      "status": "unproved",
+      "sha256": "f3c184da140f7e553336e203ee92a336dff637a4c9c1684ea0565a3f5637e1ef",
+      "review": "POS, checkout session review, company data, receipts and carrier documents moved into components"
+    },
+    "components/orders/src/store/company.rs": {
+      "status": "unproved",
+      "sha256": "e5cbaa0ec2fddfb59a62210e9a9c9fda6c60be70d7ff927d9b7da7cb2c0d4992",
+      "review": "POS, checkout session review, company data, receipts and carrier documents moved into components"
+    },
+    "components/orders/src/store/company_logos.rs": {
+      "status": "unproved",
+      "sha256": "42fc2b01cfbef2ea6e203a0cf446000b73ac745683769bcf24d2f62c2b6e6164",
+      "review": "POS, checkout session review, company data, receipts and carrier documents moved into components"
     },
     "components/orders/src/store/machine.rs": {
       "status": "unproved",
       "sha256": "e40c6c6cdf2f8e86991c8f8a180ca803bfe428a2c4095b716ed57619396aff39",
       "review": "order workflow kernel bindings follow the move into components/orders"
     },
+    "components/orders/src/store/order_list.rs": {
+      "status": "unproved",
+      "sha256": "9283b62975d558c85dbf4ca990fd9bd83c8405a7514a67f1b8f39a46560724a8",
+      "review": "POS, checkout session review, company data, receipts and carrier documents moved into components"
+    },
     "components/orders/src/store/order_mutation.rs": {
       "status": "unproved",
-      "sha256": "722200ab025714f84aac83ecbdafafe12b7bfa9a380c65444ce97c39c486521b",
-      "review": "order workflow kernel bindings follow the move into components/orders"
+      "sha256": "c1d6879e48447ba9ebd8840b97d27af2270e3561413ffabbb6e46ab6af14800c",
+      "review": "POS, checkout session review, company data, receipts and carrier documents moved into components"
+    },
+    "components/orders/src/store/order_reads.rs": {
+      "status": "unproved",
+      "sha256": "76e6fe2f2ef5495daafe4da4f5a0c795a9532e835e7070297a6a3766e672e2a6",
+      "review": "POS, checkout session review, company data, receipts and carrier documents moved into components"
+    },
+    "components/orders/src/store/receipts.rs": {
+      "status": "unproved",
+      "sha256": "e759fa38deb9d661d6cc24c6fb2bc2f6560dd1cc82fe79c28a1b150bf5f25967",
+      "review": "POS, checkout session review, company data, receipts and carrier documents moved into components"
     },
     "components/orders/src/store/redacted_reads.rs": {
       "status": "unproved",
@@ -1638,8 +1705,8 @@
     },
     "components/orders/src/store.rs": {
       "status": "unproved",
-      "sha256": "ce4feb412a4755484ab06ec038550151b26f1f73f486993c8c30c6ea03da321f",
-      "review": "Flow membership and redacted order reads moved into components"
+      "sha256": "a75166ca079c2ade1a10e9b33840170dc9d05b5a91c213a547667942ba3b22d6",
+      "review": "POS, checkout session review, company data, receipts and carrier documents moved into components"
     },
     "components/orders/src/types/list_criteria.rs": {
       "status": "unproved",
@@ -1873,8 +1940,43 @@
     },
     "components/pos/src/lib.rs": {
       "status": "unproved",
-      "sha256": "22f5bf4b46e229337254511e3fc7e738cf6a55fe528f3e56eff13f7b55fbd208",
-      "review": "Identity credentials, B2B and POS contracts and checkout tax lines moved into components; kernel call sites unchanged"
+      "sha256": "d107d2d2fa9836464c6a3fb7e4e9d1bf07fb79fe8ff03c37f4ac3290bf7cb916",
+      "review": "POS guard, customer, discount and settlement and the checkout session review moved into components"
+    },
+    "components/pos/src/service/customer.rs": {
+      "status": "unproved",
+      "sha256": "71addd90c13461234cd1bf5f0dc4d736ee5b52bc56648d8811d9f01acc0c3b5f",
+      "review": "POS guard, customer, discount and settlement and the checkout session review moved into components"
+    },
+    "components/pos/src/service/discount.rs": {
+      "status": "unproved",
+      "sha256": "7bb005be5fe87d5ceff7055f0cc706bdcab11fba0f780d4eece5c79b0d8bf382",
+      "review": "POS guard, customer, discount and settlement and the checkout session review moved into components"
+    },
+    "components/pos/src/service/guard.rs": {
+      "status": "unproved",
+      "sha256": "7190001030eb7d9a85665494d7587a509fa0ed431f47e64c9ef0766683aa10bf",
+      "review": "POS guard, customer, discount and settlement and the checkout session review moved into components"
+    },
+    "components/pos/src/service/settlement.rs": {
+      "status": "reviewed-binding",
+      "sha256": "1a7a4ca4a362661b2d48c5d5139c3f9960d4dc9828bb8e59d5d372ee9b25401a",
+      "review": "POS guard, customer, discount and settlement and the checkout session review moved into components"
+    },
+    "components/pos/src/service.rs": {
+      "status": "unproved",
+      "sha256": "331c07deef28d2c8ef8784f6c8380d3c5c8cbca3287e8fba06a60543b5cacfff",
+      "review": "POS guard, customer, discount and settlement and the checkout session review moved into components"
+    },
+    "components/pos/src/store/customers.rs": {
+      "status": "unproved",
+      "sha256": "d20274a474e1ccd02c252537e365357bacb2796712f68f1b063eb014b548edaa",
+      "review": "POS guard, customer, discount and settlement and the checkout session review moved into components"
+    },
+    "components/pos/src/store.rs": {
+      "status": "unproved",
+      "sha256": "fe8d03eec3ea8e16ed39493802d35cd2a58c74dabfce0ffa14c79c6e9a1823ad",
+      "review": "POS guard, customer, discount and settlement and the checkout session review moved into components"
     },
     "components/pricing/examples/customer_contract.rs": {
       "status": "unproved",
@@ -2126,6 +2228,11 @@
       "sha256": "ca5ba6f59b25cd804e96dddeeb6f510ca740edf42b07ab64be07a0b456de1fcb",
       "review": "Identity credentials, B2B and POS contracts and checkout tax lines moved into components; kernel call sites unchanged"
     },
+    "components/shop/src/domain/cart_admission.rs": {
+      "status": "unproved",
+      "sha256": "20694d0c841285fef209eb6bd27f7cb9dffa0dc64cd348775116b93c4cef5c21",
+      "review": "POS guard, customer, discount and settlement and the checkout session review moved into components"
+    },
     "components/shop/src/domain/checkout_selection.rs": {
       "status": "unproved",
       "sha256": "5fe0fec692b5362bb6d51923f4b3bb771e3c99dabd786c1ffbc2b66951002880",
@@ -2168,8 +2275,8 @@
     },
     "components/shop/src/domain.rs": {
       "status": "unproved",
-      "sha256": "21b43949e51bcf31f6d44a7a39eacf390848e55f8e08f1261d93613df4f9a791",
-      "review": "Delivery enrichment, app adjustments and funding moved into components; kernel call sites unchanged"
+      "sha256": "cd08c020639720872ff9209ab95a07310824651068a48d01869c0578545375c4",
+      "review": "POS guard, customer, discount and settlement and the checkout session review moved into components"
     },
     "components/shop/src/lib.rs": {
       "status": "unproved",
@@ -5153,13 +5260,13 @@
     },
     "src/checkout/commit.rs": {
       "status": "reviewed-binding",
-      "sha256": "2bffbfe88e8b0bc512835b7d20aa513341a6b386586c9754fc765fa0b58d87df",
-      "review": "inventory component crate created; no kernel binding changed"
+      "sha256": "8a9d2f6b2df4c8103b5296d1043726ce3d42d7b16d2978b66dec28522d1ebe8b",
+      "review": "POS guard, customer, discount and settlement and the checkout session review moved into components"
     },
     "src/checkout/lock.rs": {
       "status": "reviewed-binding",
-      "sha256": "7f5b89ad7a8e079d5688b21d7d1ce296c7902772d4ef0c2d4b4bf8290f352107",
-      "review": "Reviewed checkout stage move and buyer-scoped host contract. Native stock, replay and contact predicates retain their consumers; isolated Commerce and Checkout tests verify legal review, current B2B authority, original receipt recovery and one atomic purchase."
+      "sha256": "040fe03b2a61dfd57dda806ee14646631a2278905fe931041d38fd1208655cfa",
+      "review": "POS guard, customer, discount and settlement and the checkout session review moved into components"
     },
     "src/checkout/mod.rs": {
       "status": "unproved",
@@ -5183,13 +5290,13 @@
     },
     "src/checkout/session_order.rs": {
       "status": "unproved",
-      "sha256": "b23b219b4431bd75981a63eab65c8015d520a75d2c7edbb4e7205baf3dce821e",
-      "review": "Reviewed Checkout test-only payment profile and existing native payment transaction: final locked provider environment and replay receipt, no queued effect for switched live account, one stock/order and original capture/refund verified through local Core and separate Checkout PostgreSQL/provider fixtures; asynchronous SQL and provider behavior are not mathematical proofs."
+      "sha256": "72bc335701b8edfc806796d2c7fa71d1d70dac262b85fc22eed173b810fc8c1b",
+      "review": "POS guard, customer, discount and settlement and the checkout session review moved into components"
     },
     "src/checkout/session_payment.rs": {
       "status": "unproved",
-      "sha256": "68dd61bea5c592d329b6a9b6ffac3befa44f14508990924cb24b85d03e532e2f",
-      "review": "Reviewed Checkout test-only payment profile and existing native payment transaction: final locked provider environment and replay receipt, no queued effect for switched live account, one stock/order and original capture/refund verified through local Core and separate Checkout PostgreSQL/provider fixtures; asynchronous SQL and provider behavior are not mathematical proofs."
+      "sha256": "cfde356f48d519a14dc40900cfc063385c016f06cf53525f6ea58553c77e3ba0",
+      "review": "POS guard, customer, discount and settlement and the checkout session review moved into components"
     },
     "src/checkout/session_quote.rs": {
       "status": "unproved",
@@ -5213,13 +5320,13 @@
     },
     "src/checkout_products.rs": {
       "status": "unproved",
-      "sha256": "757ea6f30c4bc7a3f772a111018c03cff730a1bd10ea010409839c22fd6755a2",
-      "review": "Product hydration, list query and preparation moved into components/catalog; no rule changed"
+      "sha256": "9b7f542577ebcfb54282ebd8b92ffad32dda6c9577a9786f2989a1c65267c7d0",
+      "review": "POS guard, customer, discount and settlement and the checkout session review moved into components"
     },
     "src/checkout_review.rs": {
-      "status": "reviewed-binding",
-      "sha256": "eb81975bfb74b2b541749a273e8f8943a002106fac7c5402b5868e16a12f250c",
-      "review": "Native POS admission, exact cash/change and shared revision review; reviewed authorized total<=tender<=1e12 and denied unreviewed tender. Existing checkout review and coupon handler extracted without parallel semantics; actor/channel guards on all direct cart consumers."
+      "status": "unproved",
+      "sha256": "82670f1abac80938434670433c3da2435c8f38ce61863ed4f22ee092d4ef855f",
+      "review": "POS guard, customer, discount and settlement and the checkout session review moved into components"
     },
     "src/cognition/advisor.rs": {
       "status": "unproved",
@@ -5282,7 +5389,7 @@
       "review": "Self-running experiments: Design gains an optional immutable automation flag pair; experiments/automation.rs adds a read-only suggestion from live payment figures and worker steps that repeat the manual finish transition, call the existing report owner and record a decision, fixing the treatment layout mode only when the unchanged extracted experiment_result_admissible reports a proved uplift; cognitive_experiments suite covers kept, seeded published and manual cases"
     },
     "src/cognition/evidence.rs": {
-      "status": "unproved",
+      "status": "reviewed-binding",
       "sha256": "ade8a8f68965833a8d78d6045683dece18d7f44ea23fcf234310df6f987f0a92",
       "review": "Tenant roles and current grants independently reviewed; owner/retained-override/acceptance races repaired and PostgreSQL-blocked regressions passed; PII and Flow projection boundaries documented; B2B feature settings delegate shared CAS/history and preserve financial guards. Existing extracted policies unchanged; SQL/async/UI remain reviewed adapters, not full proofs."
     },
@@ -5378,8 +5485,8 @@
     },
     "src/commerce/catalog.rs": {
       "status": "unproved",
-      "sha256": "58b76ce1eda0a9b654fa06ed9de05cc9548482ee74fd6acfbd6dfb3f9ec4cd1f",
-      "review": "Storefront catalogue reads and public attachments moved into components/catalog; no rule changed"
+      "sha256": "60e0442315c15ab7faaef34be68072e7d5d8c487b48d38270a4c94ba4f1bed55",
+      "review": "POS guard, customer, discount and settlement and the checkout session review moved into components"
     },
     "src/commerce/catalog_intake/csv.rs": {
       "status": "unproved",
@@ -5437,7 +5544,7 @@
       "review": "Delivery enrichment, app adjustments and funding moved into components; kernel call sites unchanged"
     },
     "src/commerce/delivery_split.rs": {
-      "status": "unproved",
+      "status": "reviewed-binding",
       "sha256": "37c8ef45d9d737ea1bd6d156a4d17452bf8d34d4df16457e67f190c8e4997133",
       "review": "delivery_split_admissible and carrier_booking_admissible bindings moved into components/shipping"
     },
@@ -6123,8 +6230,8 @@
     },
     "src/operations/company_logo.rs": {
       "status": "unproved",
-      "sha256": "5f973439466c09a4cafef1e13c72083599272d639b9fb5b3bcb6b21ceb38b25e",
-      "review": "Reviewed eighteen core findings: typed trusted identity and explicit route rights; consolidated current grants; durable auth and fenced shared limits; scoped transactions and one-backend PgBouncer including nested borrow fixes; bounded Wasm/PNG work; notified workers, savepoint quarantine and conservative retention; separate runtime roles and startup configuration. Real PostgreSQL/provider regressions preserve current tenant/customer/payment behavior. SQL/network adapters remain unproved."
+      "sha256": "8f14e1a09afce6d338828f8be4a3e04f79fd201276a00324d44d3f002e9d6131",
+      "review": "POS, checkout session review, company data, receipts and carrier documents moved into components"
     },
     "src/operations/company_model.rs": {
       "status": "unproved",
@@ -6133,8 +6240,8 @@
     },
     "src/operations/company_public.rs": {
       "status": "unproved",
-      "sha256": "6f2df42dd5e9cfb1eb59923f697d48b97ee10fed851402c3332a13757b525095",
-      "review": "Reviewed tenant-scoped company presentation fallback: only absent brand and legal seller use the existing chosen tenant name; explicit localized brands and immutable issuer/config revisions stay unchanged. Actual identity-broker HTTP regression failed before and passed after; company settings and signed runtime/pooler isolation suites passed."
+      "sha256": "1904bfe5c8764d64c238d932136cafbd134fb42991bb3b6b3fa2b2cc88b7da90",
+      "review": "POS, checkout session review, company data, receipts and carrier documents moved into components"
     },
     "src/operations/creation_schema.rs": {
       "status": "unproved",
@@ -6248,8 +6355,8 @@
     },
     "src/operations/manual_order_admission.rs": {
       "status": "reviewed-binding",
-      "sha256": "084e82dc28ef02a992cbd48592fdfa70793c21580280f9030cf7208e9e12bc7d",
-      "review": "Native admin creation shares CRM addresses/history and checkout. Independent review repaired actor-token routes, final provider admission and settings-channel-customer-cart locks. Regression tests exercise state, permissions, replay and concurrent orders; SQL/HTTP adapters remain unproved."
+      "sha256": "352694c0aa870deb1819735019fdb66de67fbea7b6bedc756554bb45bf0923eb",
+      "review": "POS guard, customer, discount and settlement and the checkout session review moved into components"
     },
     "src/operations/manual_orders.rs": {
       "status": "unproved",
@@ -6258,28 +6365,28 @@
     },
     "src/operations/master_data.rs": {
       "status": "unproved",
-      "sha256": "988373c6046ac094de641a3fb10109b74fc4b67017b26c96be60568d0ac3e37b",
-      "review": "Reviewed eighteen core findings: typed trusted identity and explicit route rights; consolidated current grants; durable auth and fenced shared limits; scoped transactions and one-backend PgBouncer including nested borrow fixes; bounded Wasm/PNG work; notified workers, savepoint quarantine and conservative retention; separate runtime roles and startup configuration. Real PostgreSQL/provider regressions preserve current tenant/customer/payment behavior. SQL/network adapters remain unproved."
+      "sha256": "73d86552633f7f41d0d85e4e8db0a40feffaa78bea0f90e5d137bca57ff747f6",
+      "review": "POS, checkout session review, company data, receipts and carrier documents moved into components"
     },
     "src/operations/mod.rs": {
       "status": "unproved",
-      "sha256": "84b2f30b92758ad6582d7f0ba7e636960cb05cc8afc9215bee5af18b02c1158d",
-      "review": "order workflow kernel bindings follow the move into components/orders"
+      "sha256": "79862d68d942a9af2cba91dc1da446230e4867d42897edecdbe3fa7fc66f9ca5",
+      "review": "POS guard, customer, discount and settlement and the checkout session review moved into components"
     },
     "src/operations/order_documents.rs": {
       "status": "unproved",
-      "sha256": "f720a09f7e1d6ac4f9be13108fbbe0f47f35dfe849c5e83b73f28a44e416b5db",
-      "review": "Review provider-neutral split quantities, original app-bound PDF acknowledgement, native booking intent, aggregate storage and current Flow/job disclosure; provider effects remain unproved"
+      "sha256": "c8a2089f75caac74701f80c29a7c712735c34834e3d0511b316851c4e1059c10",
+      "review": "POS, checkout session review, company data, receipts and carrier documents moved into components"
     },
     "src/operations/order_list.rs": {
       "status": "unproved",
-      "sha256": "d7467f2bffb17e0db52373a28109f7464e05a1b0179366c231e1e42471d9c73b",
-      "review": "Reviewed native extension identity/private/unique anchors and current read/write/PII scopes; native projections use bounded fixed-store queries, exact indexed filters bind all input and fence the admitted package digest. Real four-object HTTP/MCP, role revocation, foreign reference, immutable upgrade, product/company clone and selected release tests passed. Added extracted configuration-only release predicate and operational false property; SQL and UI remain explicitly unproved. Reviewed canonical schema, preserved AI bindings and versioned grid prompt provenance without changing existing prompt revisions."
+      "sha256": "d9dd4ed71f9e496041aa260523d25264ebbf5d05f32af88873ae61d2a6bdffa5",
+      "review": "POS, checkout session review, company data, receipts and carrier documents moved into components"
     },
     "src/operations/orders.rs": {
       "status": "unproved",
-      "sha256": "94b1325c57b536580c8fa6352a8312e81a3b52d12c40df6bb3f5c9c91c52c8a9",
-      "review": "Order list criteria, company model and receipts moved into components; kernel call sites unchanged"
+      "sha256": "3d41d0e8fa7ad65d5a7806583f37d7629f60693e450b299585cc6279650c6558",
+      "review": "POS, checkout session review, company data, receipts and carrier documents moved into components"
     },
     "src/operations/receipt_pdf.rs": {
       "status": "unproved",
@@ -6293,8 +6400,8 @@
     },
     "src/operations/receipts.rs": {
       "status": "unproved",
-      "sha256": "888cdf9c91d74716dd06e9b125c3a3b2edf9efa33f81ce5ae85f90ad1433d1aa",
-      "review": "Reviewed invoice recipient caching and immutable native documents; explicit app/PII event consent and current Flow rehydration; existing encrypted email queue and localized templates. Targeted native service and adversarial projection tests; no new formal proof claim."
+      "sha256": "34f160ee1c9eb736079b4fb25f4ac8b045cb880ab0d4a22d193a1d094b54731b",
+      "review": "POS, checkout session review, company data, receipts and carrier documents moved into components"
     },
     "src/operations/redacted_reads.rs": {
       "status": "unproved",
@@ -6393,8 +6500,8 @@
     },
     "src/payments/instructions_state.rs": {
       "status": "unproved",
-      "sha256": "f788e8124bc22ae5bbb439255ee8f73a0d687514fe49a4e3a0c5c876dad754a2",
-      "review": "Receipt persistence and order ledger moved behind the payments host port; kernel call sites unchanged"
+      "sha256": "276a48ae750f9ebf65e396b838e84925f403542342e6dbcdc21df76f1f1ebaed",
+      "review": "POS, checkout session review, company data, receipts and carrier documents moved into components"
     },
     "src/payments/instruments.rs": {
       "status": "unproved",
@@ -6588,13 +6695,13 @@
     },
     "src/pos/customer.rs": {
       "status": "unproved",
-      "sha256": "1fcfc2db996a581339303d2aca5441ede2387922b12fb37f98bf28fc9f6ad041",
-      "review": "POS cashier guard reviewed: exact currency/reason/actor/goods bound; native customer selection and receipt projection remain SQL adapters covered by isolated POS regressions; bound new domain futures"
+      "sha256": "4230f27df5a8c0236aff7b973ae07a240218c4d8155a81ee9d6243cd3185666e",
+      "review": "POS guard, customer, discount and settlement and the checkout session review moved into components"
     },
     "src/pos/discount.rs": {
       "status": "unproved",
-      "sha256": "6971e9fa2257bbc2d22093d752c854da798db5c014586169dd9e88419b48d69e",
-      "review": "cart types and rule engine moved into components; checking bindings"
+      "sha256": "d5b1ad11e809680a13f78ba272455e9e140c1f64b999e227b0f2fd86fbab64d0",
+      "review": "POS guard, customer, discount and settlement and the checkout session review moved into components"
     },
     "src/pos/gateway.rs": {
       "status": "unproved",
@@ -6608,8 +6715,8 @@
     },
     "src/pos/mod.rs": {
       "status": "unproved",
-      "sha256": "49207e974ebab2f13949fe8da464b82f0d9eeee4bfd8e9231ce4f6e7a977c255",
-      "review": "Identity credentials, B2B and POS contracts and checkout tax lines moved into components; kernel call sites unchanged"
+      "sha256": "a5d889bc54eb8950a6d14e7e634dbaa845aab2ce95b9ed79f64b9c513a1f01cb",
+      "review": "POS guard, customer, discount and settlement and the checkout session review moved into components"
     },
     "src/pos/schema.rs": {
       "status": "unproved",
@@ -6617,9 +6724,9 @@
       "review": "Identity credentials, B2B and POS contracts and checkout tax lines moved into components; kernel call sites unchanged"
     },
     "src/pos/settlement.rs": {
-      "status": "reviewed-binding",
-      "sha256": "40eb19b42e9527e2ce5d1d7a0e58273800bd0cca021f1ca52cf4f826a5e44439",
-      "review": "POS cashier guard reviewed: exact currency/reason/actor/goods bound; native customer selection and receipt projection remain SQL adapters covered by isolated POS regressions; bound new domain futures"
+      "status": "unproved",
+      "sha256": "bdeae03cfb21a7fd36e7dab262b646af1949682d4d544eb2efa021b8f84743df",
+      "review": "POS guard, customer, discount and settlement and the checkout session review moved into components"
     },
     "src/pos/workspace_gateway.rs": {
       "status": "unproved",
@@ -6738,8 +6845,8 @@
     },
     "src/staging/mod.rs": {
       "status": "unproved",
-      "sha256": "987237ba1a2a78dcc7dcd1a16d978e5620ee2c2d1d8cad9787de961f8f671fb8",
-      "review": "Reviewed capability-authenticated consent aliases and tenant/channel composite FK. Readers, processing and checkout resolve one canonical receipt; withdrawal erases related preferences in batch. PostgreSQL legal_privacy exercises original expiry, no copied checkout acceptance, second purchase and seven concurrent continuation/withdrawal requests; behavior_intelligence and tenant_isolation passed. SQL adapter remains unproved. Staging diff only adds authorized main-language metadata for product labels."
+      "sha256": "3fce060994f4a04af6719ab504b0817ead001d2d7b1f546e1dd6a3807ec7302a",
+      "review": "POS guard, customer, discount and settlement and the checkout session review moved into components"
     },
     "src/staging/products.rs": {
       "status": "unproved",
@@ -6903,8 +7010,8 @@
       "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
     },
     "Cargo.lock": {
-      "sha256": "911a0d9433735f23ef2f8fe53ad762843a564ffd5ffc5a10a2c3d1e3f49210cf",
-      "review": "Flow membership and redacted order reads moved into components"
+      "sha256": "281b27b68b2b5e87453eb3bfd08ed1ab8b329046467f6c0e950c517fabbd93fc",
+      "review": "POS guard, customer, discount and settlement and the checkout session review moved into components"
     },
     "Cargo.toml": {
       "sha256": "881e080eb9f1b1f051c23e2848df689853473831b4d3072817387d65c23ddb66",

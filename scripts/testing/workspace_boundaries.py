@@ -53,11 +53,11 @@ ALLOWED = {
     'veyndo-orders': {'veyndo-core', 'veyndo-identity', 'veyndo-pricing', 'veyndo-shop', 'veyndo-app-model', 'veyndo-runtime', 'veyndo-shipping'},
     'veyndo-payments': {'veyndo-core', 'veyndo-pricing', 'veyndo-shop', 'veyndo-inventory', 'veyndo-orders', 'veyndo-kernel'},
     'veyndo-b2b': {'veyndo-core', 'veyndo-pricing', 'veyndo-shop', 'veyndo-identity', 'veyndo-kernel', 'veyndo-app-model'},
-    'veyndo-pos': {'veyndo-core', 'veyndo-pricing', 'veyndo-shop'},
-    'veyndo-checkout': {'veyndo-core', 'veyndo-pricing', 'veyndo-shop', 'veyndo-shipping'},
+    'veyndo-pos': {'veyndo-core', 'veyndo-pricing', 'veyndo-shop', 'veyndo-checkout', 'veyndo-customers', 'veyndo-identity'},
+    'veyndo-checkout': {'veyndo-core', 'veyndo-pricing', 'veyndo-shop', 'veyndo-shipping', 'veyndo-catalog'},
     'veyndo-intelligence': {'veyndo-core', 'veyndo-pricing', 'veyndo-runtime'},
     'veyndo-studio': {'veyndo-core', 'veyndo-app-model'},
-    'veyndo-shop': {'veyndo-core', 'veyndo-pricing', 'veyndo-inventory', 'veyndo-shipping', 'veyndo-app-model', 'veyndo-catalog'},
+    'veyndo-shop': {'veyndo-core', 'veyndo-pricing', 'veyndo-inventory', 'veyndo-shipping', 'veyndo-app-model', 'veyndo-catalog', 'veyndo-identity'},
 }
 # Reviewed direct external capabilities. Cargo reports actual package names even
 # when a manifest renames sqlx as something innocuous. New dependencies need an
@@ -82,8 +82,8 @@ EXTERNAL = {
     'veyndo-orders': {'serde', 'serde_json', 'sqlx', 'axum', 'chrono', 'reqwest', 'sha2', 'uuid', 'pdf-extract'},
     'veyndo-payments': {'serde', 'serde_json', 'sqlx', 'chrono', 'reqwest', 'hmac', 'sha2'},
     'veyndo-b2b': {'serde', 'serde_json', 'sqlx'},
-    'veyndo-pos': {'serde', 'serde_json'},
-    'veyndo-checkout': {'serde', 'serde_json', 'chrono', 'sqlx'},
+    'veyndo-pos': {'serde', 'serde_json', 'sqlx'},
+    'veyndo-checkout': {'serde', 'serde_json', 'chrono', 'sqlx', 'uuid'},
     'veyndo-intelligence': {'serde', 'serde_json', 'sqlx', 'reqwest', 'sha2', 'tokio', 'uuid'},
     'veyndo-studio': {'serde', 'serde_json', 'chrono', 'chrono-tz'},
     'veyndo-shop': {'serde', 'serde_json', 'chrono', 'reqwest', 'sqlx'},

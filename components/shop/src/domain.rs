@@ -1,5 +1,6 @@
 //! Rules on shop settings, free of I/O.
 pub mod buyer_consent;
+pub mod cart_admission;
 pub mod checkout_selection;
 pub mod customer_groups;
 pub mod defaults;

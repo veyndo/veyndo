@@ -35,7 +35,7 @@
       ],
       "glob_imports": 0,
       "untyped_access": 4,
-      "sql_outside_store": 11
+      "sql_outside_store": 12
     },
     "identity": {
       "title": "Merchant accounts, memberships, sessions, roles and route policy",
@@ -133,6 +133,7 @@
         "core",
         "customers",
         "host",
+        "identity",
         "intelligence",
         "inventory",
         "marketing",
@@ -403,9 +404,9 @@
         "shop_environments",
         "tenants"
       ],
-      "glob_imports": 12,
+      "glob_imports": 11,
       "untyped_access": 188,
-      "sql_outside_store": 9
+      "sql_outside_store": 8
     },
     "customers": {
       "title": "Customer accounts, sessions, addresses and the merchant customer directory",
@@ -512,7 +513,7 @@
       ],
       "glob_imports": 29,
       "untyped_access": 452,
-      "sql_outside_store": 19
+      "sql_outside_store": 12
     },
     "payments": {
       "title": "Provider-independent payment ledger, captures, refunds and provider workers",
@@ -684,8 +685,7 @@
         "orders",
         "payments",
         "pricing",
-        "shop",
-        "studio"
+        "shop"
       ],
       "foreign_tables": [
         "carts",
@@ -697,7 +697,7 @@
         "products",
         "sales_channels"
       ],
-      "glob_imports": 7,
+      "glob_imports": 6,
       "untyped_access": 68,
       "sql_outside_store": 5
     },

@@ -1,7 +1,6 @@
 //! SKU loading with parent translation fallback; owned by the catalog component.
 use super::*;
 use axum::extract::FromRef;
-pub(crate) use veyndo_catalog::domain::family::inherited_extra;
 use veyndo_catalog::service::catalog_reads;
 
 pub(crate) async fn cart_products(

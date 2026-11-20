@@ -170,6 +170,67 @@ pub fn validate(data: &Value, settings: &Settings, partial: bool) -> Result<()> 
     }
     Ok(())
 }
+/// What a storefront may show of the company: legal and brand details, never the bank account, the domestic tax ID or unlinked uploads.
+pub fn public(
+    data: &Value,
+    text: &dyn Fn(&Value) -> String,
+    default_brand: Option<String>,
+    t: &str,
+    channel: &str,
+) -> Value {
+    let mut public = json!({});
+    for key in [
+        "name",
+        "address",
+        "street",
+        "houseNumber",
+        "additionalAddressLine1",
+        "additionalAddressLine2",
+        "postalCode",
+        "city",
+        "country",
+        "countryStateId",
+        "legalForm",
+        "registrationNumber",
+        "registerType",
+        "registerCourt",
+        "managingDirectors",
+        "legalRepresentatives",
+        "contentResponsible",
+        "contentResponsibleAddress",
+        "vatId",
+        "economicId",
+        "email",
+        "phoneNumber",
+        "website",
+        "supervisoryAuthority",
+        "professionalChamber",
+        "professionalTitle",
+        "professionalCountry",
+        "professionalRulesUrl",
+        "shareCapital",
+        "outstandingCapital",
+        "liquidationNotice",
+    ] {
+        if let Some(value) = data.get(key) {
+            public[key] = value.clone();
+        }
+    }
+    for key in LOCALIZED {
+        public[*key] = json!(text(&data[*key]));
+    }
+    if let Some(name) = default_brand {
+        public["brandName"] = json!(name);
+    }
+    if let Some(logo) = data["logoId"].as_str().filter(|s| !s.is_empty()) {
+        public["logoId"] = json!(logo);
+        public["logoUrl"] = json!(format!(
+            "/store-api/company-logo/{logo}?shop={t}&channel={channel}"
+        ));
+    }
+    public
+}
+
 #[cfg(test)]
 mod tests {
     use super::{address, resolve};

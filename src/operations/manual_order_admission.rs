@@ -1,25 +1,5 @@
 //! Private admin-cart admission and locked final checkout guards; shared pricing and order effects stay native.
 use super::*;
-pub(crate) fn guard_admin_cart(h: &RequestContext, c: &StoredCart) -> Result<()> {
-    if let Some(actor) = &c.data.admin_actor {
-        if h.admin_order.as_ref() != Some(actor) || header(h, "x-rac-user") != Some(actor.as_str())
-        {
-            return Err(Error(
-                StatusCode::FORBIDDEN,
-                "Manual order requires its creating merchant".into(),
-            ));
-        }
-        for right in [
-            "orders.write",
-            "customers.read",
-            "customers.pii",
-            "catalog.read",
-        ] {
-            auth::permit(h, right)?;
-        }
-    }
-    Ok(())
-}
 pub(crate) async fn check_admin_customer(
     conn: &mut sqlx::PgConnection,
     c: &StoredCart,

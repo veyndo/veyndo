@@ -244,13 +244,13 @@ This lists every checked-in source module in these roots, including files with n
 | [src/checkout/price.rs](../src/checkout/price.rs) | Authoritative native quote uses locked products/settings, original taxes, promotions, App hooks, POS and stock checks. |
 | [src/checkout/private_browser.rs](../src/checkout/private_browser.rs) | Relay only the browser's two Checkout session commands to a private service. |
 | [src/checkout/session_order.rs](../src/checkout/session_order.rs) | Bind an explicitly reviewed session purchase to the native transaction and its original order. |
-| [src/checkout/session_payment.rs](../src/checkout/session_payment.rs) | Classify the opt-in Checkout test payment without introducing a second payment ledger. |
+| [src/checkout/session_payment.rs](../src/checkout/session_payment.rs) | The Checkout test payment classification is owned by the checkout component; the deployment says whether fixtures count. |
 | [src/checkout/session_quote.rs](../src/checkout/session_quote.rs) | Project the current native cart quote for the independent checkout session service. |
 | [src/checkout/state.rs](../src/checkout/state.rs) | Opaque native checkout states retain the original transaction and prepared package/language inputs. |
 | [src/checkout_handoff.rs](../src/checkout_handoff.rs) | Single-use checkout transfer for independent storefronts; no app-specific catalog or checkout rules. |
 | [src/checkout_page.rs](../src/checkout_page.rs) | The existing checkout may be framed only by its registered tenant/channel storefront. |
-| [src/checkout_products.rs](../src/checkout_products.rs) | Localized immutable checkout SKU snapshots read under the purchase transaction's locks. |
-| [src/checkout_review.rs](../src/checkout_review.rs) | Bind the reviewed revision and exact total for every checkout transport. |
+| [src/checkout_products.rs](../src/checkout_products.rs) | The locked SKU snapshot is owned by the checkout component; the language chain is prepared here before the transaction. |
+| [src/checkout_review.rs](../src/checkout_review.rs) | The reviewed revision and total binding is owned by the checkout component. |
 | [src/cognition/advisor.rs](../src/cognition/advisor.rs) | Buyer-admitted initial catalog/evidence context and bounded native response revalidation; no extra truth store. |
 | [src/cognition/autonomy.rs](../src/cognition/autonomy.rs) | Price-only optional autonomy, atomic unique-SKU daily quotas, a non-compounding day baseline and a daily exposure ceiling. |
 | [src/cognition/autonomy_revert.rs](../src/cognition/autonomy_revert.rs) | Takes today's automatic price changes back to the day's baseline, by request or when the daily exposure limit is exceeded. |
@@ -458,10 +458,10 @@ This lists every checked-in source module in these roots, including files with n
 | [src/operations/list_criteria.rs](../src/operations/list_criteria.rs) | Bounded native order/customer filter and sort contracts, reused by HTTP, MCP and reviewed grid plans. |
 | [src/operations/manual_order_admission.rs](../src/operations/manual_order_admission.rs) | Private admin-cart admission and locked final checkout guards; shared pricing and order effects stay native. |
 | [src/operations/manual_orders.rs](../src/operations/manual_orders.rs) | Actor-private manual-order quotes reuse native cart, legal, pricing, inventory and checkout; no second order ledger. |
-| [src/operations/master_data.rs](../src/operations/master_data.rs) | Revisioned tenant company basis and sparse channel overrides, serialized with receipt issuance. |
+| [src/operations/master_data.rs](../src/operations/master_data.rs) | HTTP entry points of the company basis; storage and validation are owned by the orders component. |
 | [src/operations/mod.rs](../src/operations/mod.rs) | Merchant CRM and fulfillment APIs, shared verbatim with MCP operations capabilities. |
 | [src/operations/order_documents.rs](../src/operations/order_documents.rs) | Immutable private carrier documents belong to the existing order receipt store, never product assets. |
-| [src/operations/order_list.rs](../src/operations/order_list.rs) | Parameter-bound global order filters and stable tuple cursors; query text never becomes SQL. |
+| [src/operations/order_list.rs](../src/operations/order_list.rs) | The order list query is owned by the orders component; admitted app filters join it here. |
 | [src/operations/orders.rs](../src/operations/orders.rs) | Bounded order search, token-redacted detail and append-only operational notes. |
 | [src/operations/receipt_pdf.rs](../src/operations/receipt_pdf.rs) | Minimal paginated PDF serializer with WinAnsi Helvetica; snapshot retains complete Unicode originals. |
 | [src/operations/receipt_text.rs](../src/operations/receipt_text.rs) | Receipt text is owned by the orders component. |
@@ -524,13 +524,13 @@ This lists every checked-in source module in these roots, including files with n
 | [src/platform/resources.rs](../src/platform/resources.rs) | Linux container resource readings; unavailable fields stay null on other hosts and the first CPU sample. |
 | [src/platform/shop_detail.rs](../src/platform/shop_detail.rs) | Operator shop dossier: registration, business identity, access roster, channels and measured HTTP activity. |
 | [src/pos/config.rs](../src/pos/config.rs) | POS presentation/location configuration lives on the existing channel, not in a second settings store. |
-| [src/pos/customer.rs](../src/pos/customer.rs) | Cashier-only customer lookup/card resolution and revision-checked account attachment; never issues customer credentials. |
-| [src/pos/discount.rs](../src/pos/discount.rs) | Audited cashier discounts use exact minor units and the existing native tax allocator in both quote and commit. |
+| [src/pos/customer.rs](../src/pos/customer.rs) | Cashier customer lookup and attachment are owned by the POS component; the server supplies the priced cart. |
+| [src/pos/discount.rs](../src/pos/discount.rs) | Cashier discounts are owned by the POS component; the server supplies the priced cart. |
 | [src/pos/gateway.rs](../src/pos/gateway.rs) | HTTP/MCP POS operations construct a trusted cashier context, then call existing commerce owners. |
 | [src/pos/input.rs](../src/pos/input.rs) | Strict input envelope shared by HTTP and MCP cashier commands. |
 | [src/pos/mod.rs](../src/pos/mod.rs) | Authenticated POS adapters reuse the native catalog/cart/checkout/receipt and durable event owners. |
 | [src/pos/schema.rs](../src/pos/schema.rs) | Strict protocol schemas for the same POS operations used by HTTP and MCP. |
-| [src/pos/settlement.rs](../src/pos/settlement.rs) | Exact cash admission and order annotation execute in the existing checkout transaction. |
+| [src/pos/settlement.rs](../src/pos/settlement.rs) | Cash admission and the POS order annotation are owned by the POS component. |
 | [src/pos/workspace_gateway.rs](../src/pos/workspace_gateway.rs) | Cashier workspace commands delegate to CRM, native discounts and immutable receipt projection. |
 | [src/prelude.rs](../src/prelude.rs) | Shared dependency names for native domain modules; no process setup or business rules. |
 | [src/proposal_apply.rs](../src/proposal_apply.rs) | Transactional application of approved, revision-bound proposals. |
@@ -723,12 +723,18 @@ This lists every checked-in source module in these roots, including files with n
 | [components/catalog/src/types/review.rs](../components/catalog/src/types/review.rs) | A review as a shopper submits it and as a migration imports it; both arrive unpublished. |
 | [components/catalog/src/types/translation.rs](../components/catalog/src/types/translation.rs) | The translated texts of a product in one language; `None` inherits along the language chain. |
 | [components/catalog/src/types.rs](../components/catalog/src/types.rs) | Typed payloads and rows of the catalog component. |
+| [components/checkout/src/domain/review_binding.rs](../components/checkout/src/domain/review_binding.rs) | Bind the reviewed revision and exact total for every checkout transport. |
+| [components/checkout/src/domain/session_payment.rs](../components/checkout/src/domain/session_payment.rs) | Classify the opt-in Checkout test payment without introducing a second payment ledger. |
+| [components/checkout/src/domain/session_review.rs](../components/checkout/src/domain/session_review.rs) | The purchase a buyer explicitly reviewed in a checkout session, and the checks that bind the order to exactly that review. |
 | [components/checkout/src/domain/tax_lines.rs](../components/checkout/src/domain/tax_lines.rs) | Destination tax-class resolution and net-preserving price conversion. |
 | [components/checkout/src/domain.rs](../components/checkout/src/domain.rs) | Rules of a quote, free of I/O apart from the clock. |
 | [components/checkout/src/lib.rs](../components/checkout/src/lib.rs) | Checkout component: tax lines and payment classification of a quote; the transaction follows. |
 | [components/checkout/src/service/app_adjustments.rs](../components/checkout/src/service/app_adjustments.rs) | Apply admitted integer app adjustments through native pricing/tax calculation; extensions cannot replace quote JSON. |
 | [components/checkout/src/service/delivery.rs](../components/checkout/src/service/delivery.rs) | Shipping costs, proportional taxes and calendar delivery windows. |
 | [components/checkout/src/service.rs](../components/checkout/src/service.rs) | service of this component. |
+| [components/checkout/src/store/product_snapshot.rs](../components/checkout/src/store/product_snapshot.rs) | Localized immutable checkout SKU snapshots read under the purchase transaction's locks. |
+| [components/checkout/src/store/session.rs](../components/checkout/src/store/session.rs) | What a checkout session reads under the checkout transaction: the channel it may sell on and the order it already placed. |
+| [components/checkout/src/store.rs](../components/checkout/src/store.rs) | Reads of the checkout transaction. |
 | [components/core/src/access.rs](../components/core/src/access.rs) | Admission facts of one shop and sales channel, read once per request and shared by every later check. |
 | [components/core/src/admission/relay.rs](../components/core/src/admission/relay.rs) | Short, bounded relay admission waiting before contacting the independent Checkout service. |
 | [components/core/src/admission/tests.rs](../components/core/src/admission/tests.rs) | Regression checks for Core admission limits and the Checkout relay retry interval. |
@@ -843,8 +849,15 @@ This lists every checked-in source module in these roots, including files with n
 | [components/orders/src/domain/receipt_text.rs](../components/orders/src/domain/receipt_text.rs) | Four-language document labels and authoritative snapshot-to-print projection. |
 | [components/orders/src/domain.rs](../components/orders/src/domain.rs) | Rules of orders, free of I/O. |
 | [components/orders/src/lib.rs](../components/orders/src/lib.rs) | Orders component: the order state machine, derived fields, audited mutations and receipts. |
+| [components/orders/src/ports.rs](../components/orders/src/ports.rs) | What the orders component needs from the server. |
+| [components/orders/src/store/carrier_documents.rs](../components/orders/src/store/carrier_documents.rs) | Immutable private carrier documents belong to the existing order receipt store, never product assets. |
+| [components/orders/src/store/company.rs](../components/orders/src/store/company.rs) | Revisioned tenant company basis and sparse channel overrides, serialized with receipt issuance. |
+| [components/orders/src/store/company_logos.rs](../components/orders/src/store/company_logos.rs) | Tenant-owned company logos: deduplicated immutable PNGs, delivered publicly only while a channel links them. |
 | [components/orders/src/store/machine.rs](../components/orders/src/store/machine.rs) | The shop's stored order state machine; a shop without one uses the default. |
+| [components/orders/src/store/order_list.rs](../components/orders/src/store/order_list.rs) | Parameter-bound global order filters and stable tuple cursors; query text never becomes SQL. |
 | [components/orders/src/store/order_mutation.rs](../components/orders/src/store/order_mutation.rs) | Shared operational order writes: one replay ledger, immutable quote, audit, cart projection and outbox. |
+| [components/orders/src/store/order_reads.rs](../components/orders/src/store/order_reads.rs) | Token-redacted merchant order detail with its activity, and append-only operational notes. |
+| [components/orders/src/store/receipts.rs](../components/orders/src/store/receipts.rs) | Idempotent immutable invoices/delivery notes with transactional per-shop number ranges. |
 | [components/orders/src/store/redacted_reads.rs](../components/orders/src/store/redacted_reads.rs) | Explicit non-PII domain read views for separately scoped app callbacks; never elevate an identity. |
 | [components/orders/src/store.rs](../components/orders/src/store.rs) | SQL of the orders component. |
 | [components/orders/src/types/list_criteria.rs](../components/orders/src/types/list_criteria.rs) | Bounded order and customer list filters and sorts, reused by HTTP, MCP and reviewed grid plans; the app host admits the app filter. |
@@ -894,6 +907,13 @@ This lists every checked-in source module in these roots, including files with n
 | [components/pos/src/domain/schema.rs](../components/pos/src/domain/schema.rs) | Strict protocol schemas for the same POS operations used by HTTP and MCP. |
 | [components/pos/src/domain.rs](../components/pos/src/domain.rs) | domain of this component. |
 | [components/pos/src/lib.rs](../components/pos/src/lib.rs) | POS component: the cashier input contract and its capability schema. |
+| [components/pos/src/service/customer.rs](../components/pos/src/service/customer.rs) | Cashier-only customer lookup/card resolution and revision-checked account attachment; never issues customer credentials. |
+| [components/pos/src/service/discount.rs](../components/pos/src/service/discount.rs) | Audited cashier discounts use exact minor units and the existing native tax allocator in both quote and commit. |
+| [components/pos/src/service/guard.rs](../components/pos/src/service/guard.rs) | The cart admission cashier operations share with every other cart adapter is owned by the shop component. |
+| [components/pos/src/service/settlement.rs](../components/pos/src/service/settlement.rs) | Exact cash admission and order annotation execute in the existing checkout transaction. |
+| [components/pos/src/service.rs](../components/pos/src/service.rs) | Cashier operations on top of the ordinary cart and checkout. |
+| [components/pos/src/store/customers.rs](../components/pos/src/store/customers.rs) | Customer rows as the cashier sees them: a bounded search, the account behind a selection and its recheck at settlement. |
+| [components/pos/src/store.rs](../components/pos/src/store.rs) | Reads the cashier workspace needs from the shop's own tables. |
 | [components/pricing/examples/customer_contract.rs](../components/pricing/examples/customer_contract.rs) | Run contact normalization without a Core process, database, credentials or network. |
 | [components/pricing/src/conversions.rs](../components/pricing/src/conversions.rs) | A rejected pricing input becomes a client error of the shared error contract. |
 | [components/pricing/src/domain/cart.rs](../components/pricing/src/domain/cart.rs) | Persisted cart data with explicit typed host contexts and no credential or storage authority. |
@@ -944,6 +964,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/shipping/src/store/method_usage.rs](../components/shipping/src/store/method_usage.rs) | Where a delivery or payment method is still referenced; order snapshots remain immutable. |
 | [components/shipping/src/store.rs](../components/shipping/src/store.rs) | SQL of the shipping component. |
 | [components/shop/src/domain/buyer_consent.rs](../components/shop/src/domain/buyer_consent.rs) | Required contact data for explicit registered marketing segments; shared by protocol review and locked native checkout. |
+| [components/shop/src/domain/cart_admission.rs](../components/shop/src/domain/cart_admission.rs) | Who may touch a cart: a merchant-created cart only its creating merchant, a POS cart only its admitted cashier, and every cart only its own sales channel. |
 | [components/shop/src/domain/checkout_selection.rs](../components/shop/src/domain/checkout_selection.rs) | Recover a quote after configuration changes without losing items or silently committing new choices. |
 | [components/shop/src/domain/customer_groups.rs](../components/shop/src/domain/customer_groups.rs) | Tenant-owned translated customer groups preserve exact rule IDs and select an explicit existing price/tax presentation basis. |
 | [components/shop/src/domain/defaults.rs](../components/shop/src/domain/defaults.rs) | Backward-compatible enrichment of existing configuration with bundled translated method labels. |

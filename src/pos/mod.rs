@@ -29,29 +29,4 @@ pub(crate) fn router() -> Router<App> {
             post(gateway::route),
         )
 }
-/// Also invoked by ordinary cart adapters. A stolen POS token is not merchant or channel admission.
-pub(crate) fn guard_cart(h: &RequestContext, c: &StoredCart) -> Result<()> {
-    operations::guard_admin_cart(h, c)?;
-    if c.data.pos_actor.is_some()
-        && !h
-            .pos
-            .as_ref()
-            .is_some_and(|p| c.data.pos_actor.as_deref() == Some(&p.actor))
-    {
-        return Err(Error(
-            StatusCode::FORBIDDEN,
-            "POS cart belongs to another cashier or requires POS admission".into(),
-        ));
-    }
-    if c.data.sales_channel != marketing::channel_id(h) {
-        return Err(Error(
-            StatusCode::FORBIDDEN,
-            "Cart belongs to another sales channel".into(),
-        ));
-    }
-    if c.data.pos_actor.is_some() && c.data.customer_id.is_some() {
-        auth::permit(h, "customers.read")?;
-        auth::permit(h, "customers.pii")?;
-    }
-    Ok(())
-}
+pub(crate) use veyndo_pos::service::guard::cart as guard_cart;
