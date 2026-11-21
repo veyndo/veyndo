@@ -8,6 +8,7 @@ pub mod flow_access;
 pub mod flow_job_summaries;
 pub mod flow_jobs;
 pub mod flow_mutations;
+pub mod flow_projection;
 pub mod promotions;
 pub mod rule_entities;
 pub mod rule_history;

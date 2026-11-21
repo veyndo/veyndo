@@ -24,7 +24,7 @@ run SQL without being in a `store` folder. Both numbers only fall.
 | customers | 2187 | 15 | 82 | 5 | 3 | apps (9), checkout (2), core (148), identity (31), marketing (4), orders (1), pos (1), pricing (5), shipping (3), shop (10), studio (4) | 4 |
 | orders | 5920 | 29 | 452 | 11 | 7 | apps (32), b2b (1), catalog (9), checkout (6), core (266), customers (5), identity (72), inventory (1), marketing (7), payments (5), pricing (8), shipping (3), shop (18), studio (8) | 17 |
 | payments | 4798 | 1 | 264 | 15 | 7 | apps (10), core (214), host (4), identity (10), inventory (1), orders (1), pos (1), pricing (8), shop (4), studio (1) | 14 |
-| marketing | 5848 | 20 | 337 | 14 | 8 | apps (14), automation (20), b2b (2), catalog (5), checkout (3), core (189), identity (37), intelligence (14), orders (1), payments (1), pos (1), pricing (13), shop (30), studio (2) | 24 |
+| marketing | 5992 | 20 | 337 | 14 | 8 | apps (14), automation (20), b2b (2), catalog (5), checkout (3), core (189), identity (37), intelligence (14), orders (1), payments (1), pos (1), pricing (13), shop (30), studio (2) | 24 |
 | b2b | 2452 | 9 | 108 | 8 | 8 | apps (16), checkout (10), core (108), customers (2), identity (20), marketing (1), orders (1), pos (1), pricing (8), shop (25), studio (8) | 8 |
 | pos | 1144 | 6 | 68 | 5 | 0 | apps (1), catalog (4), checkout (17), core (40), customers (1), identity (15), marketing (4), orders (1), payments (3), pricing (5), shop (14) | 8 |
 | apps | 15153 | 56 | 419 | 26 | 22 | b2b (3), catalog (10), checkout (4), core (412), host (7), identity (63), intelligence (5), marketing (8), orders (13), payments (7), pos (1), pricing (11), shipping (1), shop (26), studio (11) | 20 |
@@ -133,14 +133,14 @@ reduced to one direction first.
 | shop | core | `Result` | 46 |
 | customers | core | `State` | 46 |
 | intelligence | apps | `apps::` | 45 |
-| marketing | core | `Result` | 44 |
 | checkout | core | `RequestContext` | 44 |
+| marketing | core | `Result` | 43 |
 | apps | core | `State` | 42 |
 | customers | core | `Result` | 39 |
 | payments | core | `veyndo_core::` | 37 |
 | payments | core | `State` | 37 |
 | payments | core | `RequestContext` | 37 |
-| marketing | core | `veyndo_core::` | 35 |
+| marketing | core | `veyndo_core::` | 36 |
 | apps | identity | `veyndo_identity::` | 35 |
 | studio | identity | `auth::` | 34 |
 | studio | core | `State` | 33 |

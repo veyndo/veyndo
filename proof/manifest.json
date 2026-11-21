@@ -2391,6 +2391,11 @@
       "sha256": "0627cb077d498bcfb7636777306f977cc60161773a4bdae39e01330116218bec",
       "review": "Unit tests for every public domain function of the components; no production code changed"
     },
+    "components/marketing/src/domain/flow_projection.rs": {
+      "status": "unproved",
+      "sha256": "efbc1603f0ac178f880f2b4be37fc3115ca8b98b9147301d1e09c4c3f2e0ab9a",
+      "review": "Outbox flow projection moved into the marketing component; behaviour unchanged"
+    },
     "components/marketing/src/domain/flow_text.rs": {
       "status": "unproved",
       "sha256": "c46b7ec0ad19be74eaba131bac820eff8fe9cb6a2afacc0d25f066567bdb7f50",
@@ -2443,8 +2448,8 @@
     },
     "components/marketing/src/domain.rs": {
       "status": "unproved",
-      "sha256": "ac614dd3605726edcca3b280c6c27197c9eddcbf8694eb632e0dbf53de73ae81",
-      "review": "Marketing configuration lifecycle (tenant lock, revision, revision-bound deletion, dependency read, rule reference admission) moved verbatim into the marketing component; route registration stays in the server."
+      "sha256": "a5c5b7c85a90991aebf190cecf6062b90e81b953d800b8b1a6820c395b4d6a92",
+      "review": "Outbox flow projection moved into the marketing component; behaviour unchanged"
     },
     "components/marketing/src/http/configuration.rs": {
       "status": "unproved",
@@ -2521,6 +2526,11 @@
       "sha256": "638541f0dc7cba57e0e41eeed04f9c234d599e66ab9bd697a6bb28b2d6bdc646",
       "review": "Functions above 150 lines split into named steps without behaviour change; function length limit lowered to 150"
     },
+    "components/marketing/src/store/flow_projection.rs": {
+      "status": "unproved",
+      "sha256": "6ea944eea930379ddd9a0b31e4f780b62eca7ed7a57f4c0299fd21df837f1446",
+      "review": "Outbox flow projection moved into the marketing component; behaviour unchanged"
+    },
     "components/marketing/src/store/promotions.rs": {
       "status": "unproved",
       "sha256": "896263af5daf1d00568fd189ebd8b37ced2c3d0dfa59366d9f652697867d372b",
@@ -2543,8 +2553,8 @@
     },
     "components/marketing/src/store.rs": {
       "status": "unproved",
-      "sha256": "30fdf7c888b9490b84b669160aa0b503348af52c4db0f43a8b3c2c72f089369a",
-      "review": "Marketing configuration lifecycle (tenant lock, revision, revision-bound deletion, dependency read, rule reference admission) moved verbatim into the marketing component; route registration stays in the server."
+      "sha256": "29f024ffe5fe7e32a515074deeae47bf2b91ab869fd927709312cabd9d0deae8",
+      "review": "Outbox flow projection moved into the marketing component; behaviour unchanged"
     },
     "components/marketing/src/types/channel.rs": {
       "status": "unproved",
@@ -6978,8 +6988,8 @@
     },
     "src/marketing/flows.rs": {
       "status": "unproved",
-      "sha256": "ca6fcff5cf17720489c1b6a1c1ab3696f76d7884d83a56701f4aeca699313548",
-      "review": "Flow pipeline and promotion types moved into components/marketing; kernel call sites unchanged"
+      "sha256": "47e2f01041ec1d206813795fca9ee39e265d3ed699b7c56d2917bed61debfa06",
+      "review": "Outbox flow projection moved into the marketing component; behaviour unchanged"
     },
     "src/marketing/gateway.rs": {
       "status": "unproved",
