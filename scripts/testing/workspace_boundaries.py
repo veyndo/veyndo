@@ -58,7 +58,7 @@ ALLOWED = {
     'veyndo-pos': {'veyndo-core', 'veyndo-pricing', 'veyndo-shop', 'veyndo-checkout', 'veyndo-customers', 'veyndo-identity'},
     'veyndo-checkout': {'veyndo-core', 'veyndo-pricing', 'veyndo-shop', 'veyndo-shipping', 'veyndo-catalog', 'veyndo-b2b', 'veyndo-identity', 'veyndo-runtime'},
     'veyndo-intelligence': {'veyndo-core', 'veyndo-pricing', 'veyndo-runtime', 'veyndo-catalog', 'veyndo-kernel', 'veyndo-shipping'},
-    'veyndo-studio': {'veyndo-core', 'veyndo-app-model', 'veyndo-identity', 'veyndo-pricing', 'veyndo-shop', 'veyndo-catalog', 'veyndo-intelligence'},
+    'veyndo-studio': {'veyndo-core', 'veyndo-app-model', 'veyndo-identity', 'veyndo-pricing', 'veyndo-shop', 'veyndo-catalog', 'veyndo-intelligence', 'veyndo-marketing'},
     'veyndo-shop': {'veyndo-core', 'veyndo-pricing', 'veyndo-inventory', 'veyndo-shipping', 'veyndo-app-model', 'veyndo-catalog', 'veyndo-identity', 'veyndo-kernel'},
 }
 # Reviewed direct external capabilities. Cargo reports actual package names even

@@ -1,42 +1,15 @@
-//! Shared native commerce reports for Studio, workspace, API and agent reads; no second analytics ledger.
+//! Shared commerce reports live in the studio component; this module keeps the server registration and capability entries.
 use crate::*;
 pub(crate) mod config;
 pub(crate) use config::schema;
-pub(crate) fn visible(h: &RequestContext) -> bool {
-    auth::allowed(h, "overview.read") || auth::allowed(h, "orders.read")
-}
+pub(crate) use veyndo_studio::service::reports::visible;
 pub(crate) fn router() -> Router<App> {
-    Router::new().secure_route("/api/merchant/reports", &[("POST", "read")], post(http))
-}
-async fn http(
-    State(a): State<App>,
-    h: RequestContext,
-    Json(v): Json<Value>,
-) -> Result<Json<Value>> {
-    Ok(Json(invoke(&a, &h, &v).await?))
+    Router::new().secure_route(
+        "/api/merchant/reports",
+        &[("POST", "read")],
+        post(veyndo_studio::http::reports::report),
+    )
 }
 pub(crate) async fn invoke(a: &App, h: &RequestContext, v: &Value) -> Result<Value> {
-    let t = merchant(a, h)?;
-    if !visible(h) {
-        return Err(Error(
-            StatusCode::FORBIDDEN,
-            "Shop reporting permission required".into(),
-        ));
-    }
-    let (settings, _) = commerce::config(a, &t).await?;
-    let (locale, chain) = language_context(a, h).await?;
-    veyndo_studio::store::reports::run(
-        a,
-        h,
-        &t,
-        v,
-        veyndo_studio::store::reports::Context {
-            settings: &settings,
-            locale: &locale,
-            chain: &chain,
-            eligible: veyndo_intelligence::store::behavior::ELIGIBLE,
-            conditions: &marketing::validate_condition,
-        },
-    )
-    .await
+    veyndo_studio::service::reports::invoke(&a.core, h, v).await
 }

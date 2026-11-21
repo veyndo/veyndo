@@ -509,7 +509,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/studio/facts.rs](../src/studio/facts.rs) | Dashboard facts are owned by the studio component. |
 | [src/studio/personal.rs](../src/studio/personal.rs) | Actor-private workspace preferences; HTTP and MCP share CAS, bounds and the current membership. |
 | [src/studio/reports/config.rs](../src/studio/reports/config.rs) | One bounded report definition for HTTP, MCP and private workspace presentation preferences. |
-| [src/studio/reports.rs](../src/studio/reports.rs) | Shared native commerce reports for Studio, workspace, API and agent reads; no second analytics ledger. |
+| [src/studio/reports.rs](../src/studio/reports.rs) | Shared commerce reports live in the studio component; this module keeps the server registration and capability entries. |
 | [src/studio/work.rs](../src/studio/work.rs) | The work list is owned by the studio component. |
 | [src/studio.rs](../src/studio.rs) | Verified merchant overview facts consumed by the chat and activity views. |
 | [src/translations/apply.rs](../src/translations/apply.rs) | Entry point for capabilities; applying reviewed drafts is owned by the catalog component. |
@@ -808,6 +808,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/checkout/src/lib.rs](../components/checkout/src/lib.rs) | Checkout component: tax lines and payment classification of a quote; the transaction follows. |
 | [components/checkout/src/service/app_adjustments.rs](../components/checkout/src/service/app_adjustments.rs) | Apply admitted integer app adjustments through native pricing/tax calculation; extensions cannot replace quote JSON. |
 | [components/checkout/src/service/delivery.rs](../components/checkout/src/service/delivery.rs) | Shipping costs, proportional taxes and calendar delivery windows. |
+| [components/checkout/src/service/language.rs](../components/checkout/src/service/language.rs) | The language chain of a stored cart, prepared before the checkout transaction holds a pool connection. |
 | [components/checkout/src/service.rs](../components/checkout/src/service.rs) | service of this component. |
 | [components/checkout/src/store/admin_order.rs](../components/checkout/src/store/admin_order.rs) | Locked checkout guards of an order a merchant places: channel policy, the selected customer and the channel's product selection. |
 | [components/checkout/src/store/customer_snapshot.rs](../components/checkout/src/store/customer_snapshot.rs) | Checkout-owned immutable customer and address records; future account edits cannot rewrite an order. |
@@ -1160,8 +1161,11 @@ This lists every checked-in source module in these roots, including files with n
 | [components/studio/src/domain/workspace.rs](../components/studio/src/domain/workspace.rs) | Bounded personal layouts contain references, never delegated rights or executable agent instructions. |
 | [components/studio/src/domain.rs](../components/studio/src/domain.rs) | domain of this component. |
 | [components/studio/src/http/history.rs](../components/studio/src/http/history.rs) | History transport: bounded, permission-filtered version listings and single versions of the owning shop. |
+| [components/studio/src/http/reports.rs](../components/studio/src/http/reports.rs) | Report transport: one bounded report query per request. |
 | [components/studio/src/http.rs](../components/studio/src/http.rs) | HTTP handlers of the studio component; the server registers them with their route rights. |
 | [components/studio/src/lib.rs](../components/studio/src/lib.rs) | Studio component: report periods and configuration. |
+| [components/studio/src/service/reports.rs](../components/studio/src/service/reports.rs) | Shared commerce reports for Studio, the workspace, the API and agent reads; there is no second analytics ledger. |
+| [components/studio/src/service.rs](../components/studio/src/service.rs) | Operations of the studio component. |
 | [components/studio/src/store/history.rs](../components/studio/src/store/history.rs) | Reads the recorded versions of one entity of a shop. |
 | [components/studio/src/store/overview.rs](../components/studio/src/store/overview.rs) | Consolidated dashboard facts in one bounded read; turnover stays separated by invoice currency and is never repriced. |
 | [components/studio/src/store/overview.sql](../components/studio/src/store/overview.sql) | One bounded overview snapshot. Arrays retain the original limits and ordering; currencies remain separate. |

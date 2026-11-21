@@ -1766,10 +1766,15 @@
       "sha256": "d3a5714f589229d0ce2d7492765e4b0680600f31f19222adb324ce8878e3f934",
       "review": "Functions above 150 lines split into named steps without behaviour change; function length limit lowered to 150"
     },
+    "components/checkout/src/service/language.rs": {
+      "status": "unproved",
+      "sha256": "662c602ce49ff5d630ae877299aabee1e27aabdb6321416518156f9528610ced",
+      "review": "Report service moved into the studio component and the cart language chain into the checkout component; behaviour unchanged"
+    },
     "components/checkout/src/service.rs": {
       "status": "unproved",
-      "sha256": "8d8f71730ad60dcf5227ab3fa6a0ba8b32aea63b732ce5abd4e9b69d1ed4f2fb",
-      "review": "Delivery enrichment, app adjustments and funding moved into components; kernel call sites unchanged"
+      "sha256": "cb036212be79f4b64e42b74d6d585b9b5b0a8deb3f1f12e78a3c73fcdf034407",
+      "review": "Report service moved into the studio component and the cart language chain into the checkout component; behaviour unchanged"
     },
     "components/checkout/src/store/admin_order.rs": {
       "status": "unproved",
@@ -3456,15 +3461,30 @@
       "sha256": "a7dac2b367024ec07084c7309a00487f74466fb114e533aae122ae1fd0c47e49",
       "review": "History access rules, version reads and the product restoration projection moved into the studio component; behaviour unchanged"
     },
+    "components/studio/src/http/reports.rs": {
+      "status": "unproved",
+      "sha256": "4bb88b3cf7ec3940eee777e123df27d03eed43479bea034fabbd20fa79a0d614",
+      "review": "Report service moved into the studio component and the cart language chain into the checkout component; behaviour unchanged"
+    },
     "components/studio/src/http.rs": {
       "status": "unproved",
-      "sha256": "fa8c9e5644770440f9336d1346dda9b712b251e228d5e4039336c005ccf5cf38",
-      "review": "History access rules, version reads and the product restoration projection moved into the studio component; behaviour unchanged"
+      "sha256": "b6869d9272ba8d20072f9dfcd1c8155feb2dc0b0f120585c6738412e9ff71e59",
+      "review": "Report service moved into the studio component and the cart language chain into the checkout component; behaviour unchanged"
     },
     "components/studio/src/lib.rs": {
       "status": "unproved",
-      "sha256": "1542bebcddfcf5a3dffdd774cb0a52fe308a00752f65712a5013086267b262ec",
-      "review": "History access rules, version reads and the product restoration projection moved into the studio component; behaviour unchanged"
+      "sha256": "39b9c760915b4f92ecc1654d28f8542c3c76911362d18d5cbee5bb092434a3dd",
+      "review": "Report service moved into the studio component and the cart language chain into the checkout component; behaviour unchanged"
+    },
+    "components/studio/src/service/reports.rs": {
+      "status": "unproved",
+      "sha256": "da5119df249ac3978c65f61c4f66c6578f0599d33855bc5b6ced8ece89e0b17a",
+      "review": "Report service moved into the studio component and the cart language chain into the checkout component; behaviour unchanged"
+    },
+    "components/studio/src/service.rs": {
+      "status": "unproved",
+      "sha256": "65a44c3a273dc66dec1fa77788f2744357ce3a231dd4d86d593db809d2ef66d8",
+      "review": "Report service moved into the studio component and the cart language chain into the checkout component; behaviour unchanged"
     },
     "components/studio/src/store/history.rs": {
       "status": "unproved",
@@ -6303,8 +6323,8 @@
     },
     "src/checkout_products.rs": {
       "status": "unproved",
-      "sha256": "9b7f542577ebcfb54282ebd8b92ffad32dda6c9577a9786f2989a1c65267c7d0",
-      "review": "POS guard, customer, discount and settlement and the checkout session review moved into components"
+      "sha256": "ab34554960f4e3b2a1a4547b9bc2a810f834db82204a5610b322bc01b1a15de6",
+      "review": "Report service moved into the studio component and the cart language chain into the checkout component; behaviour unchanged"
     },
     "src/checkout_review.rs": {
       "status": "unproved",
@@ -7783,8 +7803,8 @@
     },
     "src/studio/reports.rs": {
       "status": "unproved",
-      "sha256": "0983c5a5e5979130337cea958913aa5abbe92da584cb4ccc2d4b7f186363459a",
-      "review": "Experiment store, readout and automation, behaviour analytics store and the private preference graph moved verbatim into the intelligence component; consent, settings and channel admission stay in the server. No kernel policy changed."
+      "sha256": "3f9ef182f365761bded4b659a04cb749ecd34dd822f4e92febb0ddcd02c85fbd",
+      "review": "Report service moved into the studio component and the cart language chain into the checkout component; behaviour unchanged"
     },
     "src/studio/work.rs": {
       "status": "unproved",
@@ -7888,8 +7908,8 @@
       "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
     },
     "Cargo.lock": {
-      "sha256": "8f0c258f092b306a663031e4e69d987a239aa8113e8d37e7417d2cd283910fcf",
-      "review": "Request language selection moved into the shop component and sales channel admission into the marketing component; behaviour unchanged"
+      "sha256": "99b480b7c9b5638ba2d311a5d72771c3199fd371058977b53ed830593190323f",
+      "review": "Report service moved into the studio component and the cart language chain into the checkout component; behaviour unchanged"
     },
     "Cargo.toml": {
       "sha256": "12d2d79a98f6913d20b8e912afb9ea8de0539b9e83428de8a9d7412c406896f6",
