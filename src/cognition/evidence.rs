@@ -1,14 +1,9 @@
-//! Source-bound claim lifecycle: permissions and the shop languages here, the ledger in the intelligence component.
+//! The source-bound claim lifecycle lives in the intelligence component; these entries keep the server-side signatures.
 use super::*;
-use veyndo_intelligence::store::evidence as store;
+use veyndo_intelligence::service::claims as lifecycle;
 pub(crate) use veyndo_intelligence::store::evidence::{NODE_TYPES, claims};
 pub(crate) async fn propose(a: &App, h: &RequestContext, v: &Value) -> Result<Value> {
-    let t = merchant(a, h)?;
-    auth::permit(h, "knowledge.write")?;
-    let mut tx = a.db.begin().await?;
-    let result = propose_in(a, &mut tx, &t, h, v).await?;
-    tx.commit().await?;
-    Ok(result)
+    lifecycle::propose(&a.core, h, v).await
 }
 pub(crate) async fn propose_in(
     a: &App,
@@ -17,19 +12,8 @@ pub(crate) async fn propose_in(
     h: &RequestContext,
     v: &Value,
 ) -> Result<Value> {
-    let (settings, _) = commerce::config(a, t).await?;
-    store::propose_in(
-        tx,
-        t,
-        header(h, "x-rac-user").unwrap_or("integration"),
-        v,
-        &settings.main_locale,
-        &settings.locales,
-    )
-    .await
+    lifecycle::propose_in(&a.core, tx, t, h, v).await
 }
 pub(crate) async fn decide(a: &App, h: &RequestContext, v: &Value) -> Result<Value> {
-    let t = merchant(a, h)?;
-    auth::permit(h, "knowledge.write")?;
-    store::decide(a, &t, header(h, "x-rac-user"), v).await
+    lifecycle::decide(&a.core, h, v).await
 }

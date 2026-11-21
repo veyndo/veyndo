@@ -224,10 +224,10 @@ This lists every checked-in source module in these roots, including files with n
 | [src/cognition/behavior/journey.rs](../src/cognition/behavior/journey.rs) | Private journey drilldown uses the same current receipt, tenant predicates and bounded event projection. |
 | [src/cognition/behavior/mod.rs](../src/cognition/behavior/mod.rs) | Native behavior analytics projects the existing event ledger into private shop knowledge. |
 | [src/cognition/behavior/report.rs](../src/cognition/behavior/report.rs) | Indexed channel report and a derived semantic graph; observations never imply causation or model learning. |
-| [src/cognition/claim_batches.rs](../src/cognition/claim_batches.rs) | Bounded public claim intake/compilation shares current channel admission and source-bound evidence, without per-SKU HTTP round trips. |
+| [src/cognition/claim_batches.rs](../src/cognition/claim_batches.rs) | Public claim batches live in the intelligence component; this module registers their storefront routes. |
 | [src/cognition/context.rs](../src/cognition/context.rs) | Bounded localized catalog retrieval before inference; full catalog size never expands the prompt. |
 | [src/cognition/contracts.rs](../src/cognition/contracts.rs) | Evidence APIs and MCP contracts dispatch into one authorized owner; the claim compiler rejects free prose. |
-| [src/cognition/evidence.rs](../src/cognition/evidence.rs) | Source-bound claim lifecycle: permissions and the shop languages here, the ledger in the intelligence component. |
+| [src/cognition/evidence.rs](../src/cognition/evidence.rs) | The source-bound claim lifecycle lives in the intelligence component; these entries keep the server-side signatures. |
 | [src/cognition/experiments/mod.rs](../src/cognition/experiments/mod.rs) | Controlled experiments use the existing storefront layout consumer and authoritative payment ledger; the intelligence component owns their store. |
 | [src/cognition/extraction.rs](../src/cognition/extraction.rs) | API/MCP/flow source extraction shares provider admission and quote checks; candidates require merchant review. |
 | [src/cognition/generations.rs](../src/cognition/generations.rs) | Model-change intake is owned by the intelligence component. |
@@ -319,7 +319,6 @@ This lists every checked-in source module in these roots, including files with n
 | [src/documents/questions.rs](../src/documents/questions.rs) | Product-specific read-only advice with authoritative price/specification snapshot and validated source citations. |
 | [src/documents/retrieval.rs](../src/documents/retrieval.rs) | Bounded lexical/vector source retrieval; public questions use only explicitly published documents. |
 | [src/documents/tools.rs](../src/documents/tools.rs) | Knowledge workspace/source MCP tools delegate to the same authorized HTTP operations and schemas. |
-| [src/documents/workspace.rs](../src/documents/workspace.rs) | Permission-filtered knowledge census, cursor source inventory and activity; totals never masquerade as sampled graph counts. |
 | [src/experience.rs](../src/experience.rs) | Persisted storefront layout policy and observed synthetic rewards. |
 | [src/extensions.rs](../src/extensions.rs) | Merchant catalogue and Wasm extension activation/state. |
 | [src/foundation.rs](../src/foundation.rs) | Application dependencies, error responses and request context helpers. |
@@ -901,6 +900,9 @@ This lists every checked-in source module in these roots, including files with n
 | [components/intelligence/src/domain/source_content.rs](../components/intelligence/src/domain/source_content.rs) | Bounds of a knowledge source: enabled languages, kinds, translated fields and the digest that binds its chunks. |
 | [components/intelligence/src/domain/trusted_geography.rs](../components/intelligence/src/domain/trusted_geography.rs) | Optional trusted ingress geography. Ordinary country headers never establish visitor location. |
 | [components/intelligence/src/domain.rs](../components/intelligence/src/domain.rs) | Bounded inputs of the intelligence component, free of I/O. |
+| [components/intelligence/src/http/claims.rs](../components/intelligence/src/http/claims.rs) | Public claim intake and compilation: bounded batches under the current channel admission, without one request per product. |
+| [components/intelligence/src/http/workspace.rs](../components/intelligence/src/http/workspace.rs) | The knowledge workspace: a permission-filtered census, the source inventory by cursor and recent activity. Totals never pose as sampled graph counts. |
+| [components/intelligence/src/http.rs](../components/intelligence/src/http.rs) | HTTP handlers of the intelligence component; the server registers them with their route rights. |
 | [components/intelligence/src/knowledge/embeddings.rs](../components/intelligence/src/knowledge/embeddings.rs) | Bounded batched embeddings: Ollama and OpenAI-compatible self-hosted endpoints, model-defined dimensions. |
 | [components/intelligence/src/knowledge/neighborhood.sql](../components/intelligence/src/knowledge/neighborhood.sql) | Two-hop product neighborhood; only currently confirmed public claims enter a buyer-facing inference context. |
 | [components/intelligence/src/knowledge/relations.rs](../components/intelligence/src/knowledge/relations.rs) | Keep knowledge provenance and relations in the same transaction as canonical commerce data. |
@@ -913,6 +915,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/intelligence/src/knowledge/vectors.rs](../components/intelligence/src/knowledge/vectors.rs) | Private Qdrant adapter: tenant/model filters, deterministic identities and durable PostgreSQL index queue. |
 | [components/intelligence/src/knowledge.rs](../components/intelligence/src/knowledge.rs) | Transactional PostgreSQL knowledge relations and separately indexed Qdrant retrieval. |
 | [components/intelligence/src/lib.rs](../components/intelligence/src/lib.rs) | Intelligence component: shop memory with its vector namespace, retrieval and document parsing. |
+| [components/intelligence/src/service/claims.rs](../components/intelligence/src/service/claims.rs) | The source-bound claim lifecycle and public claim batches: rights and shop languages here, the ledger in `store::evidence`. |
 | [components/intelligence/src/service/pdf.rs](../components/intelligence/src/service/pdf.rs) | PDF extraction executes in a killable child process without inherited commerce credentials. |
 | [components/intelligence/src/service.rs](../components/intelligence/src/service.rs) | Operations of the intelligence component that call out of process. |
 | [components/intelligence/src/store/agent_runs.rs](../components/intelligence/src/store/agent_runs.rs) | Durable agent runs in storage: the caller projection, the conversation turn fence, publication under the run lease and the checkpoint journal. |

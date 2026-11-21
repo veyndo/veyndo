@@ -57,7 +57,7 @@ ALLOWED = {
     'veyndo-b2b': {'veyndo-core', 'veyndo-pricing', 'veyndo-shop', 'veyndo-identity', 'veyndo-kernel', 'veyndo-app-model'},
     'veyndo-pos': {'veyndo-core', 'veyndo-pricing', 'veyndo-shop', 'veyndo-checkout', 'veyndo-customers', 'veyndo-identity'},
     'veyndo-checkout': {'veyndo-core', 'veyndo-pricing', 'veyndo-shop', 'veyndo-shipping', 'veyndo-catalog', 'veyndo-b2b', 'veyndo-identity', 'veyndo-runtime'},
-    'veyndo-intelligence': {'veyndo-core', 'veyndo-pricing', 'veyndo-runtime', 'veyndo-catalog', 'veyndo-kernel', 'veyndo-shipping'},
+    'veyndo-intelligence': {'veyndo-core', 'veyndo-pricing', 'veyndo-runtime', 'veyndo-catalog', 'veyndo-kernel', 'veyndo-shipping', 'veyndo-identity', 'veyndo-shop', 'veyndo-marketing'},
     'veyndo-studio': {'veyndo-core', 'veyndo-app-model', 'veyndo-identity', 'veyndo-pricing', 'veyndo-shop', 'veyndo-catalog', 'veyndo-intelligence', 'veyndo-marketing'},
     'veyndo-shop': {'veyndo-core', 'veyndo-pricing', 'veyndo-inventory', 'veyndo-shipping', 'veyndo-app-model', 'veyndo-catalog', 'veyndo-identity', 'veyndo-kernel'},
 }
@@ -87,7 +87,7 @@ EXTERNAL = {
     'veyndo-b2b': {'serde', 'serde_json', 'sqlx'},
     'veyndo-pos': {'serde', 'serde_json', 'sqlx'},
     'veyndo-checkout': {'serde', 'serde_json', 'chrono', 'sqlx', 'uuid', 'axum', 'base64', 'reqwest', 'ring', 'sha2'},
-    'veyndo-intelligence': {'serde', 'serde_json', 'sqlx', 'reqwest', 'sha2', 'tokio', 'uuid', 'libc', 'pdf-extract', 'chrono', 'ring', 'tracing'},
+    'veyndo-intelligence': {'serde', 'serde_json', 'sqlx', 'reqwest', 'sha2', 'tokio', 'uuid', 'libc', 'pdf-extract', 'chrono', 'ring', 'tracing', 'axum'},
     'veyndo-studio': {'axum', 'serde', 'serde_json', 'chrono', 'chrono-tz', 'sqlx', 'reqwest'},
     'veyndo-shop': {'serde', 'serde_json', 'chrono', 'reqwest', 'sqlx', 'axum', 'tokio'},
     'veyndo-core': {'axum', 'serde', 'serde_json', 'sha2', 'sqlx', 'uuid', 'tokio', 'tracing', 'reqwest'},

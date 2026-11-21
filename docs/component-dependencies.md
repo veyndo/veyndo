@@ -29,7 +29,7 @@ run SQL without being in a `store` folder. Both numbers only fall.
 | pos | 1144 | 6 | 68 | 5 | 0 | apps (1), catalog (4), checkout (17), core (40), customers (1), identity (15), marketing (4), orders (1), payments (3), pricing (5), shop (15) | 8 |
 | apps | 15153 | 56 | 419 | 26 | 22 | b2b (3), catalog (10), checkout (4), core (412), host (7), identity (63), intelligence (5), marketing (8), orders (13), payments (7), pos (1), pricing (11), shipping (1), shop (29), studio (11) | 20 |
 | automation | 1443 | 8 | 97 | 0 | 0 | core (2) | 0 |
-| intelligence | 12405 | 74 | 716 | 35 | 28 | apps (45), catalog (27), checkout (20), core (669), customers (1), host (1), identity (81), marketing (18), orders (1), payments (1), pricing (16), protocols (8), shipping (1), shop (49), studio (7) | 26 |
+| intelligence | 12494 | 73 | 716 | 35 | 28 | apps (45), catalog (27), checkout (20), core (656), customers (1), host (1), identity (81), marketing (18), orders (1), payments (1), pricing (16), protocols (8), shipping (1), shop (49), studio (7) | 26 |
 | studio | 3279 | 15 | 160 | 7 | 5 | apps (26), b2b (4), catalog (6), core (126), customers (1), identity (38), intelligence (2), marketing (9), pos (1), pricing (2), shop (14) | 34 |
 | protocols | 2749 | 16 | 132 | 2 | 0 | apps (23), b2b (9), catalog (10), checkout (20), core (104), customers (1), host (2), identity (32), intelligence (23), marketing (9), orders (8), payments (3), pos (3), pricing (6), shipping (3), shop (21), studio (10) | 2 |
 | host | 2969 | 7 | 40 | 6 | 1 | apps (1), catalog (4), core (119), intelligence (5), pricing (13) | 9 |
@@ -108,15 +108,15 @@ reduced to one direction first.
 
 | From | To | Item | References |
 | --- | --- | --- | ---: |
-| intelligence | core | `Result` | 180 |
+| intelligence | core | `Result` | 176 |
 | apps | core | `veyndo_core::` | 171 |
-| intelligence | core | `RequestContext` | 147 |
-| intelligence | core | `State` | 136 |
+| intelligence | core | `RequestContext` | 143 |
+| intelligence | core | `State` | 130 |
 | apps | core | `Result` | 96 |
 | catalog | core | `Result` | 86 |
 | orders | core | `State` | 81 |
 | catalog | core | `State` | 80 |
-| intelligence | identity | `auth::` | 78 |
+| intelligence | identity | `auth::` | 75 |
 | payments | core | `Result` | 73 |
 | orders | identity | `auth::` | 68 |
 | orders | core | `Result` | 63 |
@@ -141,13 +141,13 @@ reduced to one direction first.
 | payments | core | `veyndo_core::` | 37 |
 | payments | core | `State` | 37 |
 | payments | core | `RequestContext` | 37 |
+| intelligence | core | `veyndo_core::` | 36 |
 | apps | identity | `veyndo_identity::` | 35 |
 | marketing | core | `RequestContext` | 33 |
 | checkout | shop | `veyndo_shop::` | 33 |
 | studio | identity | `auth::` | 32 |
 | studio | core | `Result` | 32 |
 | protocols | identity | `auth::` | 32 |
-| orders | apps | `apps::` | 32 |
 
 ## Foreign table access
 

@@ -7,7 +7,6 @@ mod lifecycle;
 mod preview;
 mod product_knowledge;
 mod tools;
-mod workspace;
 pub(crate) use tools::{knowledge_invoke, knowledge_schema};
 mod parser;
 mod questions;
@@ -33,7 +32,7 @@ pub(crate) fn router() -> Router<App> {
         .secure_route(
             "/api/knowledge/workspace",
             &[("GET", "knowledge.read")],
-            get(workspace::workspace),
+            get(veyndo_intelligence::http::workspace::workspace),
         )
         .secure_route(
             "/api/knowledge/product/{id}",

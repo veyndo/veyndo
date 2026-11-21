@@ -10,6 +10,10 @@ serde.workspace = true
 serde_json.workspace = true
 sqlx.workspace = true
 veyndo-core = { path = "../core" }
+veyndo-identity = { path = "../identity" }
+veyndo-shop = { path = "../shop" }
+veyndo-marketing = { path = "../marketing" }
+axum.workspace = true
 reqwest.workspace = true
 sha2.workspace = true
 tokio.workspace = true

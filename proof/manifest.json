@@ -2216,6 +2216,21 @@
       "sha256": "72548f2a3db6639873d1a7576e42a77348f5e1841d74f0d03ea71ce949acaafa",
       "review": "Process configuration moved into core; browser session transports, Checkout buyer grants, the private Checkout relay, trusted geography and provider startup validation moved into their components without behaviour change"
     },
+    "components/intelligence/src/http/claims.rs": {
+      "status": "unproved",
+      "sha256": "6e5c7d6938a049bf7bc1c06864aa13d77b2401da19b38fcf571baf8823309158",
+      "review": "Claim lifecycle, public claim batches and the knowledge workspace moved into the intelligence component; behaviour unchanged"
+    },
+    "components/intelligence/src/http/workspace.rs": {
+      "status": "unproved",
+      "sha256": "5aec05fc05e6e2ec4b1d0deab7dea38c1794ae4dd8d3491c6136d75551c09360",
+      "review": "Claim lifecycle, public claim batches and the knowledge workspace moved into the intelligence component; behaviour unchanged"
+    },
+    "components/intelligence/src/http.rs": {
+      "status": "unproved",
+      "sha256": "d2ee9f537b6713981b1670794690758806cd0766749660c6a29c2edc588f5711",
+      "review": "Claim lifecycle, public claim batches and the knowledge workspace moved into the intelligence component; behaviour unchanged"
+    },
     "components/intelligence/src/knowledge/embeddings.rs": {
       "status": "unproved",
       "sha256": "3e999ee513739da62b1fdb0a0f28d92bccadb82a08a02bd251773dba513f2fc4",
@@ -2258,8 +2273,13 @@
     },
     "components/intelligence/src/lib.rs": {
       "status": "unproved",
-      "sha256": "55116492c9eaf140517471456cf27a57ccc12abb398f61856ddeea509f3fb4e5",
-      "review": "Knowledge sources, PDF text extraction and embedding generations moved into the intelligence component without behaviour change"
+      "sha256": "c2066f1b4317d660643a1c612ab80f575fadabf5c3b5ee4048872579b9d3bbb6",
+      "review": "Claim lifecycle, public claim batches and the knowledge workspace moved into the intelligence component; behaviour unchanged"
+    },
+    "components/intelligence/src/service/claims.rs": {
+      "status": "unproved",
+      "sha256": "3e8430117d495ad9148aa54ecb02cd8479c95e70f6dc551baa54d1bc6705424d",
+      "review": "Claim lifecycle, public claim batches and the knowledge workspace moved into the intelligence component; behaviour unchanged"
     },
     "components/intelligence/src/service/pdf.rs": {
       "status": "unproved",
@@ -2268,8 +2288,8 @@
     },
     "components/intelligence/src/service.rs": {
       "status": "unproved",
-      "sha256": "1680b817fc97a6389ffbc0212b6800164591faecc0d0598a8473819cb25aed6c",
-      "review": "Knowledge sources, PDF text extraction and embedding generations moved into the intelligence component without behaviour change"
+      "sha256": "e35a842a0c68255c298c463ed3279a44f7f6383e4ef5ae5e3d963267f388e7b9",
+      "review": "Claim lifecycle, public claim batches and the knowledge workspace moved into the intelligence component; behaviour unchanged"
     },
     "components/intelligence/src/store/agent_runs.rs": {
       "status": "unproved",
@@ -6378,8 +6398,8 @@
     },
     "src/cognition/claim_batches.rs": {
       "status": "unproved",
-      "sha256": "fadeb5a6f719171ed11e1c0767e6ad140c5785ac0da8378bb730023a00fd7ab3",
-      "review": "Claim evidence, claim batches, order observation projection, embedding jobs, source search, knowledge inventory, product facts and prompt snapshots moved verbatim into the intelligence component; permissions, settings, provider admission and leases stay in the server. Kernel admission calls unchanged."
+      "sha256": "234fe4b5950c6b8417ac4d54be4aa5588ab76cae407f382692110c95ffa879ed",
+      "review": "Claim lifecycle, public claim batches and the knowledge workspace moved into the intelligence component; behaviour unchanged"
     },
     "src/cognition/context.rs": {
       "status": "unproved",
@@ -6393,8 +6413,8 @@
     },
     "src/cognition/evidence.rs": {
       "status": "unproved",
-      "sha256": "7fc363a82f7b736e77f1e7f1ee5cdcd9e28af7c78f6e6551c6adad4838f84e3a",
-      "review": "Claim evidence, claim batches, order observation projection, embedding jobs, source search, knowledge inventory, product facts and prompt snapshots moved verbatim into the intelligence component; permissions, settings, provider admission and leases stay in the server. Kernel admission calls unchanged."
+      "sha256": "e7d3f9a32ea8fe37f0341b9a4f0141b89e5468ab0b2ce6d70c01e5a0346e3de1",
+      "review": "Claim lifecycle, public claim batches and the knowledge workspace moved into the intelligence component; behaviour unchanged"
     },
     "src/cognition/experiments/mod.rs": {
       "status": "unproved",
@@ -6818,8 +6838,8 @@
     },
     "src/documents/mod.rs": {
       "status": "unproved",
-      "sha256": "a3133e9b6d3eae9f9e753c64d5ef7be8f5bd58413f25a550b73ab4535b984184",
-      "review": "Reviewed contextual private-work contracts and independent findings: app opt-out, locked guidance, preserved manual actions, conversation lease and locale inheritance; native own/foreign, stale approval, narrowed rights, renewed login, killed-worker continuation and actual app-preview regressions passed. SQL, async runtime and providers remain unproved."
+      "sha256": "b891cc6fc94667c3077831acbb14d70351148543a2e7b87f48aab20f8d6f38f6",
+      "review": "Claim lifecycle, public claim batches and the knowledge workspace moved into the intelligence component; behaviour unchanged"
     },
     "src/documents/parser.rs": {
       "status": "unproved",
@@ -6848,13 +6868,8 @@
     },
     "src/documents/tools.rs": {
       "status": "unproved",
-      "sha256": "2d13409918f32363f921ea16f0b8899d4968ec8395ce7a320a07705d36e68f97",
-      "review": "Reviewed contextual private-work contracts and independent findings: app opt-out, locked guidance, preserved manual actions, conversation lease and locale inheritance; native own/foreign, stale approval, narrowed rights, renewed login, killed-worker continuation and actual app-preview regressions passed. SQL, async runtime and providers remain unproved."
-    },
-    "src/documents/workspace.rs": {
-      "status": "unproved",
-      "sha256": "0e188f2e988df54bcf6cd4f42d016d0a0bea3c6e5ae1863900c87cb5432c2265",
-      "review": "Claim evidence, claim batches, order observation projection, embedding jobs, source search, knowledge inventory, product facts and prompt snapshots moved verbatim into the intelligence component; permissions, settings, provider admission and leases stay in the server. Kernel admission calls unchanged."
+      "sha256": "c8477385884cef9108720b038822ce1d5c011e15c6a258891d5f6bcefb70f0ad",
+      "review": "Claim lifecycle, public claim batches and the knowledge workspace moved into the intelligence component; behaviour unchanged"
     },
     "src/experience.rs": {
       "status": "unproved",
@@ -7908,8 +7923,8 @@
       "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
     },
     "Cargo.lock": {
-      "sha256": "99b480b7c9b5638ba2d311a5d72771c3199fd371058977b53ed830593190323f",
-      "review": "Report service moved into the studio component and the cart language chain into the checkout component; behaviour unchanged"
+      "sha256": "a8c6d4479b1ced3bc6811629fc4a4f5414d779592d1118c241fd7b4c103e2f59",
+      "review": "Claim lifecycle, public claim batches and the knowledge workspace moved into the intelligence component; behaviour unchanged"
     },
     "Cargo.toml": {
       "sha256": "12d2d79a98f6913d20b8e912afb9ea8de0539b9e83428de8a9d7412c406896f6",

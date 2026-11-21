@@ -36,8 +36,8 @@ pub(crate) async fn knowledge_invoke(
     };
     let Json(result) = match name {
         "knowledge.workspace" => {
-            workspace::workspace(
-                State(a.clone()),
+            veyndo_intelligence::http::workspace::workspace(
+                State(a.core.clone()),
                 h.clone(),
                 axum::extract::Query(
                     serde_json::from_value(v.clone())
