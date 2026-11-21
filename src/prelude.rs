@@ -17,7 +17,7 @@ pub(crate) use veyndo::scoped_pool::ScopedPool as PgPool;
 pub(crate) use veyndo::{
     inference::{Choice, Inference},
     knowledge,
-    pricing::{PriceInput, calculate, math_round},
+    pricing::{PriceInput, calculate},
     sandbox::Sandbox,
     verified_kernel,
 };

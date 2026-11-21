@@ -287,7 +287,8 @@ Order follows the dependency report, lowest first. Each line is one move.
   handlers keep credential hashing, geography and channel admission. The restoration of an address aggregate from history
   lives in `store/`; the shop's geography admits each address through a
   closure. `http/browser` is the customer cookie transport in front of the
-  tenant session ledger.
+  tenant session ledger; `http/crm_context` gives CRM writers their creation
+  choices.
 - [ ] payments. Started: `components/payments` owns the attempt type, the
   payment state machine, wire amounts at ISO precision, receipt identity and
   references, settlement and refund budgets, recipient instructions, adapter
@@ -319,8 +320,10 @@ Order follows the dependency report, lowest first. Each line is one move.
   the immutable customer and address record of an order, and the legal
   acknowledgement and consent checked under the purchase locks and frozen
   into the order (`legal_checkout_admissible` names the new file).
-  The kernel bindings of the review name the new file. Open: cart storage and
-  mutation, the quote, the selection, the four steps of the checkout
+  The kernel bindings of the review name the new file. The cart quote with
+  quantity pricing, configuration fees and minor-unit totals is
+  `domain/cart_quote`; the language chain of a stored cart is
+  `service/language`. Open: cart storage and mutation, the selection, the four steps of the checkout
   transaction (they call apps, B2B, payments, marketing and legal and need a
   host port), the handoff. `http/buyer_identity` seals and inspects the
   short-lived Checkout grant of a live customer session and
@@ -362,9 +365,12 @@ Order follows the dependency report, lowest first. Each line is one move.
   `http/configuration` hold the right and table of each configuration kind,
   the tenant lock, the revision-bound deletion with its dependency read and
   the admission of rule references); `service/` the coupon selection of a cart, which admits and
-  prices it through `veyndo_shop::ports::Carts`. Open: flow projection, flow
-  execution (needs ports to orders, customers and apps), channel access and
-  preview, rule history, routes.
+  prices it through `veyndo_shop::ports::Carts`. The outbox flow projection
+  is `domain/flow_projection` and `store/flow_projection`; sales channel
+  admission (marketplace, cashier and preview rules, served locales, product
+  selection, company catalog) is `domain/channel_admission` and
+  `service/channels`. Open: flow execution (needs ports to orders, customers
+  and apps), channel preview and access tokens, rule history, routes.
 - [ ] b2b. Started: `components/b2b` owns the company, unit and member records
   with their bounds and the capability contract; `store/` holds unit access
   and the cart guard, organization reads and writes, budgets and approval
@@ -466,8 +472,12 @@ Order follows the dependency report, lowest first. Each line is one move.
   country only from the trusted ingress. The server keeps
   consent, settings, channel admission, provider admission and leases and
   passes them in.
-  Open: agents and their runs, proposals, the retrieval, question and
-  workspace handlers, inference, cognition routes and workers.
+  The claim lifecycle and public claim batches (`service/claims`,
+  `http/claims`), the knowledge workspace (`http/workspace`), experiment
+  operations (`service/experiments`) and source content checks
+  (`service/sources`) read settings through the shop read cache.
+  Open: agents and their runs, proposals, the retrieval and question
+  handlers, inference, cognition routes and workers.
 - [ ] studio. Started: `components/studio` owns report configuration and
   calendar periods, the bounded personal workspace model
   (`domain/workspace`, with the parts of a composed record view in
@@ -482,7 +492,8 @@ Order follows the dependency report, lowest first. Each line is one move.
   entities keep versions, their rights, the operation schemas and the
   restoration request (`domain/history_access`), the product edit rebuilt
   from a version (`domain/product_restore`), version reads (`store/history`)
-  and the listing and version handlers (`http/history`). Open: the rest of
+  and the listing and version handlers (`http/history`), and the report
+  service with its handler (`service/reports`, `http/reports`). Open: the rest of
   staging shops (clone, snapshot, release), the history restore dispatch (it
   replays edits through roles, B2B, catalog, customers, settings, marketing
   and documents and needs their ports), the channel activity tracker.
@@ -506,7 +517,11 @@ Order follows the dependency report, lowest first. Each line is one move.
   and data-rights intake, the receipt of its holder and the operator review.
   `http/operator_session` answers the operator's own session and the
   control-plane audit trail.
-  Open: cached loading, saving and releasing settings, channel scope handlers,
+  The process-wide read cache of settings and the language registry, with
+  its per-request memo and the startup registration of the condition check,
+  is `service/read_cache`; the request language and its translation chain
+  are `domain/language_selection` and `service/language`.
+  Open: saving and releasing settings, channel scope handlers,
   domains, legal consent, the rest of the platform (AI settings,
   infrastructure, provisioning) and the performance modules.
 

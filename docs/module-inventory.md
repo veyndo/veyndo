@@ -796,6 +796,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/catalog/src/types/translation.rs](../components/catalog/src/types/translation.rs) | The translated texts of a product in one language; `None` inherits along the language chain. |
 | [components/catalog/src/types.rs](../components/catalog/src/types.rs) | Typed payloads and rows of the catalog component. |
 | [components/checkout/src/domain/admin_order.rs](../components/checkout/src/domain/admin_order.rs) | Orders a merchant places for a customer: only manual or simulated payment, and the actor is kept on the record. |
+| [components/checkout/src/domain/cart_quote.rs](../components/checkout/src/domain/cart_quote.rs) | The authoritative cart quote: quantity pricing, app configuration fees and localized totals. Totals are added as whole minor units. |
 | [components/checkout/src/domain/review_binding.rs](../components/checkout/src/domain/review_binding.rs) | Bind the reviewed revision and exact total for every checkout transport. |
 | [components/checkout/src/domain/session_payment.rs](../components/checkout/src/domain/session_payment.rs) | Classify the opt-in Checkout test payment without introducing a second payment ledger. |
 | [components/checkout/src/domain/session_review.rs](../components/checkout/src/domain/session_review.rs) | The purchase a buyer explicitly reviewed in a checkout session, and the checks that bind the order to exactly that review. |

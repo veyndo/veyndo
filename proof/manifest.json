@@ -625,7 +625,7 @@
     },
     "amount_sum": {
       "bindings": [
-        "src/cart_price.rs"
+        "components/checkout/src/domain/cart_quote.rs"
       ],
       "theorems": [
         "amount_sum_exact",
@@ -636,7 +636,7 @@
     },
     "net_amount": {
       "bindings": [
-        "src/cart_price.rs"
+        "components/checkout/src/domain/cart_quote.rs"
       ],
       "theorems": [
         "net_plus_tax_is_gross",
@@ -1711,6 +1711,11 @@
       "sha256": "ac2575fa3657d4126f0df2411d2652c15b7748b6c4154fc8360e1d1b84384cbd",
       "review": "Unit tests for every public domain function of the components; no production code changed"
     },
+    "components/checkout/src/domain/cart_quote.rs": {
+      "status": "reviewed-binding",
+      "sha256": "6760c7c79519d9b4e34533c2ffd42fc35f009f6753bc1f48772773e0055586b9",
+      "review": "Cart quote, configuration fee and quantity normalisation moved into the checkout component; behaviour unchanged"
+    },
     "components/checkout/src/domain/review_binding.rs": {
       "status": "reviewed-binding",
       "sha256": "c39f0e52b73b555191935df256a04b264fa6f649454af343b2ef31ed33bdbf0d",
@@ -1733,8 +1738,8 @@
     },
     "components/checkout/src/domain.rs": {
       "status": "unproved",
-      "sha256": "798db4447744fa2c28e4c879e4c49a3f6e21b337e923bf066d68667da915e19f",
-      "review": "Merchant customer writes moved into the customers component and admin order admission into checkout without behaviour change"
+      "sha256": "b1b37750e86b826e0714a7bb8655c3a32e796d2d5bae8005b91964856bb5885c",
+      "review": "Cart quote, configuration fee and quantity normalisation moved into the checkout component; behaviour unchanged"
     },
     "components/checkout/src/http/buyer_identity.rs": {
       "status": "unproved",
@@ -6247,9 +6252,9 @@
       "review": "Reviewed chat cart preview and conditional edit reuse native quote and optimistic mutation, and app metadata derives from an admitted public product reference. Catalogue approval checks original task actor and current scopes before applying. The Rust/PostgreSQL regression covers stale quotes, wrong items, foreign cart scope, and same-shop approval denial."
     },
     "src/cart_price.rs": {
-      "status": "reviewed-binding",
-      "sha256": "375f96cc570473ec6437fc3610c3d57c182b9510b7380fc4deee2add4f0fbbf3",
-      "review": "Cart totals are added as whole minor units through the proved amount_sum and net_amount rules; the extractor models saturating_add as the sum capped at the largest u64. A test shows the integer totals equal the previous rounded decimal totals."
+      "status": "unproved",
+      "sha256": "be053d27effdbbcb366856d255e118b97801d205853e3ab343b9aa742a7ac123",
+      "review": "Cart quote, configuration fee and quantity normalisation moved into the checkout component; behaviour unchanged"
     },
     "src/cart_routes.rs": {
       "status": "unproved",
@@ -7683,8 +7688,8 @@
     },
     "src/prelude.rs": {
       "status": "unproved",
-      "sha256": "50c1c63729b2a9467d5fa5a0bb94d732020d42576061df8c2378e78fcb6dd3dd",
-      "review": "Identity-only Veyndo namespace and canonical-domain rename; reviewed migration checksum compatibility for six historical SQL versions, unchanged checkout predicates, 42 library and 169 binary tests pass; native component legacy boundary remains configured and guarded."
+      "sha256": "70a05f4a8e194ff628bb39cba5e59b9e876b463d1e94250cba1b0ba1914c9f27",
+      "review": "Cart quote, configuration fee and quantity normalisation moved into the checkout component; behaviour unchanged"
     },
     "src/proposal_apply.rs": {
       "status": "unproved",
