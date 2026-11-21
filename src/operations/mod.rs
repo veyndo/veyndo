@@ -205,7 +205,7 @@ pub(crate) async fn invoke(a: &App, h: &RequestContext, name: &str, v: &Value) -
         "merchant.import.record" => Json(imports::invoke(a, h, v).await?),
         "merchant.import.inspect" => Json(imports::inspect(a, h, v).await?),
         "merchant.customer.creation" => {
-            customer_create::context(State(a.clone()), h.clone()).await?
+            customer_create::context(State(a.core.clone()), h.clone()).await?
         }
         "merchant.customer.create" => {
             customer_create::create(State(a.clone()), h.clone(), Json(v.clone())).await?

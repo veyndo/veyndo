@@ -1981,10 +1981,15 @@
       "sha256": "52083863d8ec801e04487b14f5e32b41f2fb2935b459bac7933174154cda3284",
       "review": "Process configuration moved into core; browser session transports, Checkout buyer grants, the private Checkout relay, trusted geography and provider startup validation moved into their components without behaviour change"
     },
+    "components/customers/src/http/crm_context.rs": {
+      "status": "unproved",
+      "sha256": "6d6b171723dfcaa86a34930d6e905fa91f00f1d76fd3711608baa0f3d0e1ec8a",
+      "review": "Experiment operations and source content checks moved into the intelligence component, CRM creation context into customers; behaviour unchanged"
+    },
     "components/customers/src/http.rs": {
       "status": "unproved",
-      "sha256": "6f97e54e90ae9c022323865d6ebfb5595c86fb1e881aeeaca906bc01b54a9750",
-      "review": "Process configuration moved into core; browser session transports, Checkout buyer grants, the private Checkout relay, trusted geography and provider startup validation moved into their components without behaviour change"
+      "sha256": "8cc900e9b69af787f3485a7ef11da14aba8967764963b6d44f7496107aa1b96a",
+      "review": "Experiment operations and source content checks moved into the intelligence component, CRM creation context into customers; behaviour unchanged"
     },
     "components/customers/src/lib.rs": {
       "status": "unproved",
@@ -2281,15 +2286,25 @@
       "sha256": "3e8430117d495ad9148aa54ecb02cd8479c95e70f6dc551baa54d1bc6705424d",
       "review": "Claim lifecycle, public claim batches and the knowledge workspace moved into the intelligence component; behaviour unchanged"
     },
+    "components/intelligence/src/service/experiments.rs": {
+      "status": "unproved",
+      "sha256": "e93ec09c402c8c5ec2e520e4f4a9fe48ea1dca3d4663cf3e8e20c7aca69b1cf2",
+      "review": "Experiment operations and source content checks moved into the intelligence component, CRM creation context into customers; behaviour unchanged"
+    },
     "components/intelligence/src/service/pdf.rs": {
       "status": "unproved",
       "sha256": "4ed4948f6dcf724d49e5f6284f23aba87fc79b688db16a9dee6a19a2ca9bec13",
       "review": "Knowledge sources, PDF text extraction and embedding generations moved into the intelligence component without behaviour change"
     },
+    "components/intelligence/src/service/sources.rs": {
+      "status": "unproved",
+      "sha256": "09875b35aa87235607feeb4fb306aa01c694e407ff52aba2cbe7bf0396a84bb1",
+      "review": "Experiment operations and source content checks moved into the intelligence component, CRM creation context into customers; behaviour unchanged"
+    },
     "components/intelligence/src/service.rs": {
       "status": "unproved",
-      "sha256": "e35a842a0c68255c298c463ed3279a44f7f6383e4ef5ae5e3d963267f388e7b9",
-      "review": "Claim lifecycle, public claim batches and the knowledge workspace moved into the intelligence component; behaviour unchanged"
+      "sha256": "4f81aa6525e6abbea09ec0fc4938034be1a3e1742adbf85f449ff53e3b94707d",
+      "review": "Experiment operations and source content checks moved into the intelligence component, CRM creation context into customers; behaviour unchanged"
     },
     "components/intelligence/src/store/agent_runs.rs": {
       "status": "unproved",
@@ -6418,8 +6433,8 @@
     },
     "src/cognition/experiments/mod.rs": {
       "status": "unproved",
-      "sha256": "99c38dc0161aa585512cde1503b373598c6bea352a16664e83ad9b62b92864e8",
-      "review": "Experiment store, readout and automation, behaviour analytics store and the private preference graph moved verbatim into the intelligence component; consent, settings and channel admission stay in the server. No kernel policy changed."
+      "sha256": "e34c21f6e3b77f1780a1b6b28ce9c06d9ef3f97f452b96fc215b3d562ae2a4f1",
+      "review": "Experiment operations and source content checks moved into the intelligence component, CRM creation context into customers; behaviour unchanged"
     },
     "src/cognition/extraction.rs": {
       "status": "unproved",
@@ -6818,8 +6833,8 @@
     },
     "src/documents/content.rs": {
       "status": "unproved",
-      "sha256": "cfe67d6035162bc90ea6b1c4662817fa263aec4edc8d7ccf13bf83e00e07d57c",
-      "review": "Knowledge sources, PDF text extraction and embedding generations moved into the intelligence component without behaviour change"
+      "sha256": "b99bdc1a93a8b4f01410c364ece1390a26c026a264a718d55bbd3850c1cc0ed7",
+      "review": "Experiment operations and source content checks moved into the intelligence component, CRM creation context into customers; behaviour unchanged"
     },
     "src/documents/guidance.rs": {
       "status": "unproved",
@@ -7198,8 +7213,8 @@
     },
     "src/operations/customer_create.rs": {
       "status": "unproved",
-      "sha256": "a86f0953147a316efc380914916a18d52183ee0445857884629c580800a86d30",
-      "review": "Merchant customer writes moved into the customers component and admin order admission into checkout without behaviour change"
+      "sha256": "4f2b4131be2f654beee1031cf3696376abfdbc34e60855e4cabef0fd7e73bd0d",
+      "review": "Experiment operations and source content checks moved into the intelligence component, CRM creation context into customers; behaviour unchanged"
     },
     "src/operations/customer_lookup.rs": {
       "status": "unproved",
@@ -7318,8 +7333,8 @@
     },
     "src/operations/mod.rs": {
       "status": "unproved",
-      "sha256": "befee0f9ec3b1a7e185a00c7c27627bca38c46b7636f9cd1079e770ba1fa2173",
-      "review": "Functions above 150 lines split into named steps without behaviour change; function length limit lowered to 150"
+      "sha256": "2d99c17a2dde9907668f3fdd8360b33276f99029cada8cd072118662b2c56e41",
+      "review": "Experiment operations and source content checks moved into the intelligence component, CRM creation context into customers; behaviour unchanged"
     },
     "src/operations/order_documents.rs": {
       "status": "unproved",

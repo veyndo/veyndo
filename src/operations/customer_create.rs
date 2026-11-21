@@ -40,15 +40,5 @@ async fn create_inner(
     ))
 }
 
-/// Safe creation choices are available to CRM writers without granting settings access.
-pub(super) async fn context(State(a): State<App>, h: RequestContext) -> Result<Json<Value>> {
-    let t = merchant(&a, &h)?;
-    auth::permit(&h, "customers.write")?;
-    auth::permit(&h, "customers.pii")?;
-    let (s, _) = commerce::config(&a, &t).await?;
-    Ok(Json(
-        json!({"elements":s.customer_groups,"countries":s.countries,"mainLocale":s.main_locale}),
-    ))
-}
-
+pub(super) use veyndo_customers::http::crm_context::context;
 pub(super) use veyndo_customers::store::crm::address_plan;
