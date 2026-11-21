@@ -1,4 +1,5 @@
 //! Rule conditions, flow actions and the flow graph, free of I/O.
+pub mod channel_admission;
 pub mod condition_import;
 pub mod configuration_kinds;
 pub mod flow_actions;

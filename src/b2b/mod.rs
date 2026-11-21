@@ -22,7 +22,7 @@ mod requisition;
 mod staging;
 use access::{access, catalog_guard, require};
 pub(crate) use access::{guard, guard_conn, identity, surface_context};
-pub(crate) use catalog::{admit as admit_catalog, scope as catalog_scope};
+pub(crate) use catalog::scope as catalog_scope;
 pub(crate) use gateway::invoke;
 pub(crate) use model::Context;
 pub(crate) use purchase::{check_locked, lock_unit, preview, record, release_budget};

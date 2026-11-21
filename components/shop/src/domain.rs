@@ -5,6 +5,7 @@ pub mod cart_lines;
 pub mod checkout_selection;
 pub mod customer_groups;
 pub mod defaults;
+pub mod language_selection;
 pub mod legal_product;
 pub mod method_text;
 pub mod patch;

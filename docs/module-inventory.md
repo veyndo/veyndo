@@ -345,7 +345,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/marketing/channel_access.rs](../src/marketing/channel_access.rs) | Single admission boundary for Store API, UCP/MCP and hosted storefronts; previews cannot purchase. |
 | [src/marketing/channel_config.rs](../src/marketing/channel_config.rs) | Shared transactional channel validation for merchant edits, history restoration and selective release. |
 | [src/marketing/channel_preview.rs](../src/marketing/channel_preview.rs) | One-use preview handoff becomes a host-only cookie, bound to current session, membership and channel revision. |
-| [src/marketing/channels.rs](../src/marketing/channels.rs) | Sales channels share a merchant tenant but bind independent catalog visibility, locale and cart identity. |
+| [src/marketing/channels.rs](../src/marketing/channels.rs) | Sales channel admission lives in the marketing component; these entries keep the server-side signatures. |
 | [src/marketing/condition_gateway.rs](../src/marketing/condition_gateway.rs) | Rule admission and matching are owned by the marketing component. |
 | [src/marketing/coupons.rs](../src/marketing/coupons.rs) | Coupon selection is owned by the marketing component; the server supplies the guarded, priced cart. |
 | [src/marketing/facts.rs](../src/marketing/facts.rs) | Rule facts are assembled by the marketing component. |
@@ -943,6 +943,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/inventory/src/store/reservations.rs](../components/inventory/src/store/reservations.rs) | All-checkout allocation ledger; release is idempotent and always uses persisted quantities, never edited order JSON. |
 | [components/inventory/src/store/test_stock.rs](../components/inventory/src/store/test_stock.rs) | Stock writes for empty purchasable products, in bounded batches. |
 | [components/inventory/src/store.rs](../components/inventory/src/store.rs) | SQL of the inventory component. |
+| [components/marketing/src/domain/channel_admission.rs](../components/marketing/src/domain/channel_admission.rs) | Who may open a sales channel, which locales it serves and which products its selection holds. |
 | [components/marketing/src/domain/condition_import.rs](../components/marketing/src/domain/condition_import.rs) | Source-compatible condition import: converts original payloads without guessing identifiers or dropping configuration. |
 | [components/marketing/src/domain/configuration_kinds.rs](../components/marketing/src/domain/configuration_kinds.rs) | The kinds of marketing configuration: the right each needs and the table each lives in. |
 | [components/marketing/src/domain/flow_actions.rs](../components/marketing/src/domain/flow_actions.rs) | Native action schema and permissions use original Core names; no arbitrary SQL, shell or unguarded payment transitions. |
@@ -961,6 +962,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/marketing/src/http/configuration.rs](../components/marketing/src/http/configuration.rs) | Revision-bound deletion and the dependency read of marketing configuration share HTTP/MCP authorization and tenant locks. |
 | [components/marketing/src/http.rs](../components/marketing/src/http.rs) | HTTP handlers of the marketing component. |
 | [components/marketing/src/lib.rs](../components/marketing/src/lib.rs) | Marketing component: rule conditions, the facts they are matched against, and promotions. |
+| [components/marketing/src/service/channels.rs](../components/marketing/src/service/channels.rs) | Sales channels share a shop but bind their own catalog visibility, languages and cart identity; storefront reads pass through them. |
 | [components/marketing/src/service/conditions.rs](../components/marketing/src/service/conditions.rs) | Shared rule admission and authoritative context for tax and other native consumers. |
 | [components/marketing/src/service/coupons.rs](../components/marketing/src/service/coupons.rs) | Revision-safe coupon selection for shared storefront/POS carts; pricing remains in promotions. |
 | [components/marketing/src/service.rs](../components/marketing/src/service.rs) | Operations of the marketing component. |
@@ -1119,6 +1121,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/shop/src/domain/checkout_selection.rs](../components/shop/src/domain/checkout_selection.rs) | Recover a quote after configuration changes without losing items or silently committing new choices. |
 | [components/shop/src/domain/customer_groups.rs](../components/shop/src/domain/customer_groups.rs) | Tenant-owned translated customer groups preserve exact rule IDs and select an explicit existing price/tax presentation basis. |
 | [components/shop/src/domain/defaults.rs](../components/shop/src/domain/defaults.rs) | Backward-compatible enrichment of existing configuration with bundled translated method labels. |
+| [components/shop/src/domain/language_selection.rs](../components/shop/src/domain/language_selection.rs) | Which language a request reads in and the fallback chain of its translations; the shop main language always closes the chain. |
 | [components/shop/src/domain/legal_product.rs](../components/shop/src/domain/legal_product.rs) | Explicit product safety/sector facts, with market-language fallback; no inference of certifications. |
 | [components/shop/src/domain/method_text.rs](../components/shop/src/domain/method_text.rs) | Shared translated names and descriptions with field-wise shop-main-language inheritance. |
 | [components/shop/src/domain/patch.rs](../components/shop/src/domain/patch.rs) | Transport-only sparse JSON differences: stable record IDs, explicit nulls, and deletion distinct from inheritance. |
@@ -1135,6 +1138,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/shop/src/lib.rs](../components/shop/src/lib.rs) | Shop component: the settings every other commerce component reads, with their bounds and inheritance rules. |
 | [components/shop/src/ports.rs](../components/shop/src/ports.rs) | What components that work on a buyer's cart need from the server: the guarded cart, its priced view and a revision-checked replacement of its lines. |
 | [components/shop/src/service/container_resources.rs](../components/shop/src/service/container_resources.rs) | Linux container resource readings; unavailable fields stay null on other hosts and the first CPU sample. |
+| [components/shop/src/service/language.rs](../components/shop/src/service/language.rs) | The language of a request from its shop, its locale header and an explicit language id. |
 | [components/shop/src/service/read_cache.rs](../components/shop/src/service/read_cache.rs) | The process-wide read cache of shop settings and the language registry. Every hit still probes the authoritative SQL version; mutations and checkout locks never read through it. |
 | [components/shop/src/service/read_cache_settings.sql](../components/shop/src/service/read_cache_settings.sql) | Atomic read snapshot: deletion/recreation and unchanged revision numbers cannot reuse an old UUID. |
 | [components/shop/src/service.rs](../components/shop/src/service.rs) | Services of the shop component. |

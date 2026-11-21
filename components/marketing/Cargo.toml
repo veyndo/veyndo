@@ -11,6 +11,7 @@ serde_json.workspace = true
 sqlx.workspace = true
 veyndo-app-model = { path = "../../extensions/services/app-storage/model" }
 veyndo-automation = { path = "../../crates/automation" }
+veyndo-b2b = { path = "../b2b" }
 veyndo-catalog = { path = "../catalog" }
 veyndo-cognition = { path = "../../crates/cognition" }
 veyndo-core = { path = "../core" }

@@ -2376,6 +2376,11 @@
       "sha256": "a54911683c2df1e61ba19a54de4f3b619a9a8ae9126f77805f856f741d438a4b",
       "review": "inventory component crate created; no kernel binding changed"
     },
+    "components/marketing/src/domain/channel_admission.rs": {
+      "status": "unproved",
+      "sha256": "fc58be5a871e2fab5e49f08b639edf8dc313990e4c7afc7869df96368c52e52e",
+      "review": "Request language selection moved into the shop component and sales channel admission into the marketing component; behaviour unchanged"
+    },
     "components/marketing/src/domain/condition_import.rs": {
       "status": "unproved",
       "sha256": "eed30031fb501837963dda02e307925d80724c2bd4481e1af6cad1fc17d959ba",
@@ -2448,8 +2453,8 @@
     },
     "components/marketing/src/domain.rs": {
       "status": "unproved",
-      "sha256": "a5c5b7c85a90991aebf190cecf6062b90e81b953d800b8b1a6820c395b4d6a92",
-      "review": "Outbox flow projection moved into the marketing component; behaviour unchanged"
+      "sha256": "6c5f023dfed4ff192d1307308d4527b9252856539233c34f4ce597138fc78820",
+      "review": "Request language selection moved into the shop component and sales channel admission into the marketing component; behaviour unchanged"
     },
     "components/marketing/src/http/configuration.rs": {
       "status": "unproved",
@@ -2466,6 +2471,11 @@
       "sha256": "1d24fa80910146060ac56d142fc0c25577ef8a6132cc47bc75fc266787396ff9",
       "review": "Marketing configuration lifecycle (tenant lock, revision, revision-bound deletion, dependency read, rule reference admission) moved verbatim into the marketing component; route registration stays in the server."
     },
+    "components/marketing/src/service/channels.rs": {
+      "status": "unproved",
+      "sha256": "851a145adf6c2d645ad7c5e856b1d5f4e10e7d2374c99bb24ce0d389a0e7f063",
+      "review": "Request language selection moved into the shop component and sales channel admission into the marketing component; behaviour unchanged"
+    },
     "components/marketing/src/service/conditions.rs": {
       "status": "unproved",
       "sha256": "8bbd97c5e186d2cdd06e32df3aa2380cdb69b272d4a7bda6c97892793b33acaf",
@@ -2478,8 +2488,8 @@
     },
     "components/marketing/src/service.rs": {
       "status": "unproved",
-      "sha256": "490a5a736c07042d1d8c804c14ea99a51968be743607037406b4e897bf45b5c3",
-      "review": "Coupons, flow job summaries, requisition import, customer snapshot, address restore and account orders moved into components"
+      "sha256": "ba904d96c4285a8648b35d1b7fe7c5d4f658dbc8d7e190d1a1d3f3155f76d3bb",
+      "review": "Request language selection moved into the shop component and sales channel admission into the marketing component; behaviour unchanged"
     },
     "components/marketing/src/store/channel_config.rs": {
       "status": "unproved",
@@ -3256,6 +3266,11 @@
       "sha256": "861d67d0760d528813d9e030025e2bde14e7e2368f7b64354b2140594b11faa8",
       "review": "Unit tests for every public domain function of the components; no production code changed"
     },
+    "components/shop/src/domain/language_selection.rs": {
+      "status": "unproved",
+      "sha256": "657af9245123b7ae9ba372abfb72f79068ebf6e5b9954a8168ea6b3dc9b22236",
+      "review": "Request language selection moved into the shop component and sales channel admission into the marketing component; behaviour unchanged"
+    },
     "components/shop/src/domain/legal_product.rs": {
       "status": "unproved",
       "sha256": "7d420e25f0d4a7b44a9a485bfd3441eaa98a652824a0482295161df92d32ba45",
@@ -3283,8 +3298,8 @@
     },
     "components/shop/src/domain.rs": {
       "status": "unproved",
-      "sha256": "665ebc1979e362e2125ae3aa055b2a9063cd1e249c800d3d1481be6f5af8a568",
-      "review": "Coupons, flow job summaries, requisition import, customer snapshot, address restore and account orders moved into components"
+      "sha256": "fcd9ef82831b4a54f3a473a145b97a3fcd403e489fa8d4514831b295b5477351",
+      "review": "Request language selection moved into the shop component and sales channel admission into the marketing component; behaviour unchanged"
     },
     "components/shop/src/http/operator.rs": {
       "status": "unproved",
@@ -3336,6 +3351,11 @@
       "sha256": "8e8b3e25eed9b774c65248e0a5c9393f1a09f3ef4b22b0c84be129c073f2dd3f",
       "review": "Operator control plane (quotas, aggregate metrics, shop dossier, audited lifecycle change, container readings) moved verbatim into the shop component; operator authentication and availability admission stay in the server. Kernel admission calls unchanged."
     },
+    "components/shop/src/service/language.rs": {
+      "status": "unproved",
+      "sha256": "ad250009a2f4c98cd4698730df2f972fc6612bad3748acbf0fcfe6e80165e1ae",
+      "review": "Request language selection moved into the shop component and sales channel admission into the marketing component; behaviour unchanged"
+    },
     "components/shop/src/service/read_cache.rs": {
       "status": "unproved",
       "sha256": "0fd48f196db236af2568b6a303d73239340b8ea83963b10b3b54e471c8d9643a",
@@ -3343,8 +3363,8 @@
     },
     "components/shop/src/service.rs": {
       "status": "unproved",
-      "sha256": "b26d3a812a8161aa9a306b881de7c0f225867d85919fff51b94710a359e27ee4",
-      "review": "Settings and language read cache moved into the shop component; condition check registered at startup; behaviour unchanged"
+      "sha256": "0688b429f13adf400b3654347b8b8c4081b502e6a86402718e8d7ece9b2d2072",
+      "review": "Request language selection moved into the shop component and sales channel admission into the marketing component; behaviour unchanged"
     },
     "components/shop/src/store/consumer_requests.rs": {
       "status": "unproved",
@@ -5973,8 +5993,8 @@
     },
     "src/b2b/mod.rs": {
       "status": "unproved",
-      "sha256": "17924f9ed8f86a8b56096c77b2136e17dfb28f8be656d809a5208262f567f0bd",
-      "review": "B2B access, organization and purchasing storage and flow job claims moved into their components"
+      "sha256": "3a83cd2f8feaaaf07b83083e2f2293203cfe557918c947acd17640598e59a868",
+      "review": "Request language selection moved into the shop component and sales channel admission into the marketing component; behaviour unchanged"
     },
     "src/b2b/model.rs": {
       "status": "unproved",
@@ -6908,8 +6928,8 @@
     },
     "src/localization.rs": {
       "status": "unproved",
-      "sha256": "6db6ae95a0f75449a2d4299c574af38d98e99370d96f2e7d2abac70e44b93879",
-      "review": "Storefront catalogue reads and public attachments moved into components/catalog; no rule changed"
+      "sha256": "416491f5482f4835f6dd5e865c1896cfca1145f51140ca232a9a067781741ab6",
+      "review": "Request language selection moved into the shop component and sales channel admission into the marketing component; behaviour unchanged"
     },
     "src/main.rs": {
       "status": "unproved",
@@ -6943,8 +6963,8 @@
     },
     "src/marketing/channels.rs": {
       "status": "unproved",
-      "sha256": "b9db082837057748f15779e89eb65558096e517fa8fa0170fb597d7d8cb1283f",
-      "review": "Flow pipeline and promotion types moved into components/marketing; kernel call sites unchanged"
+      "sha256": "a719c6d4d3b32c9a00763758dbf4fc7b0bbe9ba890892efa70853c5979175ece",
+      "review": "Request language selection moved into the shop component and sales channel admission into the marketing component; behaviour unchanged"
     },
     "src/marketing/condition_gateway.rs": {
       "status": "unproved",
@@ -7868,8 +7888,8 @@
       "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
     },
     "Cargo.lock": {
-      "sha256": "9893d6ead092c26b7f636c81c94035904e7eb56e05ff5559bbdaa944a15398f6",
-      "review": "History access rules, version reads and the product restoration projection moved into the studio component; behaviour unchanged"
+      "sha256": "8f0c258f092b306a663031e4e69d987a239aa8113e8d37e7417d2cd283910fcf",
+      "review": "Request language selection moved into the shop component and sales channel admission into the marketing component; behaviour unchanged"
     },
     "Cargo.toml": {
       "sha256": "12d2d79a98f6913d20b8e912afb9ea8de0539b9e83428de8a9d7412c406896f6",

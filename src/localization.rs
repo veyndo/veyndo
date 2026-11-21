@@ -1,40 +1,8 @@
 //! Shop locale resolution, translated catalog hydration and non-mutating merchant quote.
 use super::*;
-use veyndo::context::{Language, language_chain};
 
 pub(super) async fn language_context(a: &App, h: &RequestContext) -> Result<(String, Vec<String>)> {
-    let (settings, _) = commerce::config(a, &tenant(h)?).await?;
-    let locale = header(h, "x-commerce-locale").unwrap_or(&settings.main_locale);
-    let rows = performance::languages(a).await?;
-    let selected = if let Some(id) = header(h, "sw-language-id") {
-        rows.iter().find(|r| r.id == id)
-    } else {
-        rows.iter().find(|r| r.locale == locale)
-    }
-    .ok_or(bad("Language unavailable"))?;
-    let available = rows.iter().map(|r| r.id.clone()).collect::<Vec<_>>();
-    let languages = rows
-        .iter()
-        .map(|r| Language {
-            id: r.id.clone(),
-            parent_id: r.parent_id.clone(),
-        })
-        .collect::<Vec<_>>();
-    let mut chain = language_chain(&selected.id, &available, &languages).map_err(bad)?;
-    if settings.main_locale != "en-GB" {
-        let main = rows
-            .iter()
-            .find(|r| r.locale == settings.main_locale)
-            .ok_or(bad("Main language unavailable"))?
-            .id
-            .clone();
-        let current = selected.id.clone();
-        chain.retain(|id| id != veyndo::context::SYSTEM_LANGUAGE || id == &current);
-        if !chain.contains(&main) {
-            chain.push(main);
-        }
-    }
-    Ok((selected.locale.clone(), chain))
+    veyndo_shop::service::language::language_context(&a.core, h).await
 }
 pub(super) async fn localize_products(
     a: &App,

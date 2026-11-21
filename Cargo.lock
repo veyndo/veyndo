@@ -3813,6 +3813,7 @@ dependencies = [
  "sqlx",
  "veyndo-app-model",
  "veyndo-automation",
+ "veyndo-b2b",
  "veyndo-catalog",
  "veyndo-cognition",
  "veyndo-core",
