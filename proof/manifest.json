@@ -3336,10 +3336,15 @@
       "sha256": "8e8b3e25eed9b774c65248e0a5c9393f1a09f3ef4b22b0c84be129c073f2dd3f",
       "review": "Operator control plane (quotas, aggregate metrics, shop dossier, audited lifecycle change, container readings) moved verbatim into the shop component; operator authentication and availability admission stay in the server. Kernel admission calls unchanged."
     },
+    "components/shop/src/service/read_cache.rs": {
+      "status": "unproved",
+      "sha256": "0fd48f196db236af2568b6a303d73239340b8ea83963b10b3b54e471c8d9643a",
+      "review": "Settings and language read cache moved into the shop component; condition check registered at startup; behaviour unchanged"
+    },
     "components/shop/src/service.rs": {
       "status": "unproved",
-      "sha256": "ec4b6b85a54231c3cdcf7a535417538ed41d8fd32b0af0921bea34230e0de4fc",
-      "review": "Operator control plane (quotas, aggregate metrics, shop dossier, audited lifecycle change, container readings) moved verbatim into the shop component; operator authentication and availability admission stay in the server. Kernel admission calls unchanged."
+      "sha256": "b26d3a812a8161aa9a306b881de7c0f225867d85919fff51b94710a359e27ee4",
+      "review": "Settings and language read cache moved into the shop component; condition check registered at startup; behaviour unchanged"
     },
     "components/shop/src/store/consumer_requests.rs": {
       "status": "unproved",
@@ -6113,8 +6118,8 @@
     },
     "src/bootstrap.rs": {
       "status": "unproved",
-      "sha256": "11a52f70f465bf4a471f8da597f4b1cc42fba205e788610eb3fd344fe1a2d0e6",
-      "review": "Request admission moved into the core crate; no rule changed"
+      "sha256": "5156a35623a0041d5c07c85d9503ea0e41e49cd7ece6bb6ee47cdd404707d22a",
+      "review": "Settings and language read cache moved into the shop component; condition check registered at startup; behaviour unchanged"
     },
     "src/brand_redirect.rs": {
       "status": "unproved",
@@ -6823,8 +6828,8 @@
     },
     "src/foundation.rs": {
       "status": "unproved",
-      "sha256": "2a3bfede2502ea953a7f70fab552780ae9f45e61dbd6d9ddd053e66c247b31fb",
-      "review": "The route permission registry moved unchanged into components/identity and is generic over the server state"
+      "sha256": "76fb67159ef1acfb2fb8a626d897af8ebeafaf7f969ef2cc9c35eb8b839d5d83",
+      "review": "Settings and language read cache moved into the shop component; condition check registered at startup; behaviour unchanged"
     },
     "src/history/capability.rs": {
       "status": "unproved",
@@ -7328,8 +7333,8 @@
     },
     "src/outbox.rs": {
       "status": "unproved",
-      "sha256": "72e3e18edee7da9078855edfd624d4e83bcc9f4c03cf8f692c73bd2d4a0be8f1",
-      "review": "Channel metrics and the outbox consumer moved into the core crate; no rule changed"
+      "sha256": "cb413510365428c19f97329597fe43f61da990abadde1474dc59b3542d076996",
+      "review": "Settings and language read cache moved into the shop component; condition check registered at startup; behaviour unchanged"
     },
     "src/payments/accounts.rs": {
       "status": "unproved",
@@ -7483,23 +7488,13 @@
     },
     "src/performance/invalidation.rs": {
       "status": "unproved",
-      "sha256": "98eae1609057be698b6608ffd1a5c19183aad77b133ccabe42e6af6349894af2",
-      "review": "Identity-only Veyndo namespace and canonical-domain rename; reviewed migration checksum compatibility for six historical SQL versions, unchanged checkout predicates, 42 library and 169 binary tests pass; native component legacy boundary remains configured and guarded."
-    },
-    "src/performance/languages.rs": {
-      "status": "unproved",
-      "sha256": "01714c5db1d133c5f9fa45b5969f582a618f2bae7fa3cf629ad0c611a4a49b0c",
-      "review": "Reviewed version-checked settings and language reads: atomic UUID stamps and payload/version snapshot, tenant-channel keys, read-only task memoization and unchanged locked checkout resolution; two warmed Rust replicas cover immediate edits, overrides/delete/recreate, no-revision direct SQL, transaction rollback, registry changes, revocation, cold restart and disabled fallback. Weighted eviction, HTTP cache policies and bounded pool overload/recovery are tested; async SQL/cache behavior remains outside Lean proofs."
+      "sha256": "d00bbe6bbdd42d57c674adba2fd932d15afbe46e75f0dbecda3e327ca9304fbf",
+      "review": "Settings and language read cache moved into the shop component; condition check registered at startup; behaviour unchanged"
     },
     "src/performance/mod.rs": {
       "status": "unproved",
-      "sha256": "b4968227069d5fb5586e5e78cbe5221e7c824c1dc8a81139b2958c88534054a2",
-      "review": "Request admission moved into the core crate; no rule changed"
-    },
-    "src/performance/settings.rs": {
-      "status": "unproved",
-      "sha256": "28bd482d3f35217c6c87545fa347172d038d97c25cf0a065784f22aff64534e6",
-      "review": "Reviewed native-only static bypass with hosted denial and Lean exact acceptance; one fresh domain/environment/status/channel/mount SQL snapshot and current membership lookup preserve scoped admission, binding identity and revocation; immutable Arc settings retain locked mutation/checkout reads; secret-free compression opt-in and deterministic precompressed assets preserve streams/ranges; batched inventory uses existing checkout locks and ordered idempotent release; bounded overview SQL preserves currency-separated historical facts. Real two-replica read/channel/tenant/checkout and strict-runtime regressions passed; SQL and build inputs now explicitly locked. These adapters remain unproved."
+      "sha256": "8e27c619c94e767e56253df1b3aeca9787e2f0c5c8d93f10c98a9cef2fecad37",
+      "review": "Settings and language read cache moved into the shop component; condition check registered at startup; behaviour unchanged"
     },
     "src/planner/admission.rs": {
       "status": "unproved",
@@ -7533,8 +7528,8 @@
     },
     "src/platform/infrastructure.rs": {
       "status": "unproved",
-      "sha256": "fdde1c7f2812332bce56138a637d821d23b76a1a9d52b82175f97ea57de2d44e",
-      "review": "Reviewed eighteen core findings: typed trusted identity and explicit route rights; consolidated current grants; durable auth and fenced shared limits; scoped transactions and one-backend PgBouncer including nested borrow fixes; bounded Wasm/PNG work; notified workers, savepoint quarantine and conservative retention; separate runtime roles and startup configuration. Real PostgreSQL/provider regressions preserve current tenant/customer/payment behavior. SQL/network adapters remain unproved."
+      "sha256": "e84ce3faf98a7618b0abfa531844e004b119f5779d0f9f930913cb04294d99b2",
+      "review": "Settings and language read cache moved into the shop component; condition check registered at startup; behaviour unchanged"
     },
     "src/platform/lifecycle.rs": {
       "status": "reviewed-binding",
@@ -8646,10 +8641,6 @@
     },
     "src/performance/access_snapshot.sql": {
       "sha256": "d675ee530b12560085e5335e93fbc60caa9ec45c4b2cb6d6d2950abdd7e50887",
-      "review": "Reviewed native-only static bypass with hosted denial and Lean exact acceptance; one fresh domain/environment/status/channel/mount SQL snapshot and current membership lookup preserve scoped admission, binding identity and revocation; immutable Arc settings retain locked mutation/checkout reads; secret-free compression opt-in and deterministic precompressed assets preserve streams/ranges; batched inventory uses existing checkout locks and ordered idempotent release; bounded overview SQL preserves currency-separated historical facts. Real two-replica read/channel/tenant/checkout and strict-runtime regressions passed; SQL and build inputs now explicitly locked. These adapters remain unproved."
-    },
-    "src/performance/settings.sql": {
-      "sha256": "6359a5403017cca356a0a04d42492b46ac18a4598df94103d9df2e1379132bd2",
       "review": "Reviewed native-only static bypass with hosted denial and Lean exact acceptance; one fresh domain/environment/status/channel/mount SQL snapshot and current membership lookup preserve scoped admission, binding identity and revocation; immutable Arc settings retain locked mutation/checkout reads; secret-free compression opt-in and deterministic precompressed assets preserve streams/ranges; batched inventory uses existing checkout locks and ordered idempotent release; bounded overview SQL preserves currency-separated historical facts. Real two-replica read/channel/tenant/checkout and strict-runtime regressions passed; SQL and build inputs now explicitly locked. These adapters remain unproved."
     },
     "src/ucp/b2b-negotiation.json": {

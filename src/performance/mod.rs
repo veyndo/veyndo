@@ -1,97 +1,29 @@
 //! Shared read-context caching with authoritative versions; mutations and checkout locks stay outside memoization.
 use crate::*;
 use axum::{extract::Request, middleware::Next};
-use commerce::Settings;
-use std::{
-    cell::RefCell,
-    sync::{
-        Mutex,
-        atomic::{AtomicU64, Ordering},
-    },
-};
 pub(crate) mod access_snapshot;
-use veyndo_core::cache;
 pub(crate) use veyndo_core::database::lease as cluster_lease;
 pub(crate) mod delivery;
 pub(crate) use veyndo_core::admission::{
     Admission, AiStreamAdmission, reserve_ai_attempt, reserve_ai_attempt_tx, run as admit_request,
 };
 mod invalidation;
-mod languages;
 pub(crate) use invalidation::start as start_invalidations;
 pub(crate) use veyndo_core::database::authority::connect as connect_database;
-mod settings;
-pub(crate) use languages::{LanguageRow, languages};
-pub(crate) use settings::settings;
 pub(crate) use veyndo_core::database::row_security::verify as verify_row_security;
 
-type Scope = (String, String);
-pub(crate) struct SettingsEntry {
-    version: String,
-    value: Arc<Settings>,
-    revision: i64,
+pub(crate) use veyndo_shop::service::read_cache::{LanguageRow, read_scope, reads};
+/// The settings of a sales channel through the shop read cache.
+pub(crate) async fn settings(
+    a: &App,
+    tenant: &str,
+    channel: &str,
+) -> Result<(Arc<commerce::Settings>, i64)> {
+    veyndo_shop::service::read_cache::settings(&a.core, tenant, channel).await
 }
-pub(crate) struct LanguageEntry {
-    version: String,
-    rows: Arc<Vec<LanguageRow>>,
-}
-pub(crate) struct Reads {
-    settings: Mutex<cache::Cache<Scope, SettingsEntry>>,
-    languages: Mutex<cache::Cache<(), LanguageEntry>>,
-    invalidations: AtomicU64,
-    probes: AtomicU64,
-    hits: AtomicU64,
-    loads: AtomicU64,
-    memo_hits: AtomicU64,
-    enabled: bool,
-}
-impl Default for Reads {
-    fn default() -> Self {
-        Self {
-            settings: Mutex::new(cache::Cache::new(256, 32 * 1024 * 1024)),
-            languages: Mutex::new(cache::Cache::new(1, 1024 * 1024)),
-            invalidations: AtomicU64::new(0),
-            probes: AtomicU64::new(0),
-            hits: AtomicU64::new(0),
-            loads: AtomicU64::new(0),
-            memo_hits: AtomicU64::new(0),
-            enabled: env::var("READ_CONTEXT_CACHE").as_deref() != Ok("false"),
-        }
-    }
-}
-impl Reads {
-    pub(crate) fn invalidate(&self, tenant: &str) {
-        self.settings
-            .lock()
-            .unwrap()
-            .remove_where(|(t, _)| t == tenant);
-        self.invalidations.fetch_add(1, Ordering::Relaxed);
-    }
-    pub(crate) fn clear(&self) {
-        self.settings.lock().unwrap().remove_where(|_| true);
-        self.languages.lock().unwrap().remove_where(|_| true);
-    }
-
-    pub(crate) fn snapshot(&self) -> Value {
-        let (entries, bytes) = self.settings.lock().unwrap().usage();
-        json!({"eventInvalidations":self.invalidations.load(Ordering::Relaxed),"enabled":self.enabled,"versionProbes":self.probes.load(Ordering::Relaxed),
-            "decodedHits":self.hits.load(Ordering::Relaxed),"payloadLoads":self.loads.load(Ordering::Relaxed),
-            "requestMemoHits":self.memo_hits.load(Ordering::Relaxed),"settingsEntries":entries,
-            "estimatedSettingsBytes":bytes,"maxSettingsEntries":256,"settingsBudgetBytes":32*1024*1024})
-    }
-}
-#[derive(Default)]
-struct Memo {
-    settings: HashMap<Scope, Arc<SettingsEntry>>,
-    languages: Option<Arc<LanguageEntry>>,
-}
-tokio::task_local! { static MEMO: RefCell<Memo>; }
-pub(crate) async fn read_scope<F: std::future::Future>(future: F) -> F::Output {
-    if MEMO.try_with(|_| ()).is_ok() {
-        future.await
-    } else {
-        MEMO.scope(RefCell::new(Memo::default()), future).await
-    }
+/// The global language registry through the shop read cache.
+pub(crate) async fn languages(a: &App) -> Result<Arc<Vec<LanguageRow>>> {
+    veyndo_shop::service::read_cache::languages(&a.core).await
 }
 pub(crate) async fn memoize(request: Request, next: Next) -> Response {
     let path = request.uri().path().to_owned();

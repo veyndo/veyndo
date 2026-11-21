@@ -72,8 +72,8 @@ pub(crate) async fn bootstrap() -> App {
         sandboxes: Arc::new(sandbox_cache::Cache::default()),
         channel_metrics: Arc::new(channel_metrics::ChannelMetrics::default()),
         app_limits: Arc::new(apps::ServiceLimits::default()),
-        reads: Arc::new(performance::Reads::default()),
     };
+    veyndo_shop::service::read_cache::register_conditions(marketing::validate_condition);
     if let Some(setup) = setup {
         if env::var("SEED_DEMO").as_deref() != Ok("false") {
             migrations::seed_demo(&a, &setup).await;
@@ -135,7 +135,7 @@ pub(crate) async fn run() {
     let a = bootstrap().await;
     let app_workers = workers::start(&a, &role, app_enabled);
     currencies::worker(&a);
-    performance::start_invalidations(&a);
+    performance::start_invalidations();
     if matches!(role.as_str(), "all" | "memory-worker") {
         knowledge::vectors::start(a.db.clone());
     }

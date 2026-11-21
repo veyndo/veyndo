@@ -13,7 +13,6 @@ pub(crate) struct App {
     pub(crate) sandboxes: Arc<sandbox_cache::Cache>,
     pub(crate) channel_metrics: Arc<channel_metrics::ChannelMetrics>,
     pub(crate) app_limits: Arc<apps::ServiceLimits>,
-    pub(crate) reads: Arc<performance::Reads>,
 }
 impl std::ops::Deref for App {
     type Target = veyndo_core::State;

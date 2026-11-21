@@ -166,9 +166,9 @@
         "tenant_ai_usage",
         "tenants"
       ],
-      "glob_imports": 34,
+      "glob_imports": 32,
       "untyped_access": 105,
-      "sql_outside_store": 24
+      "sql_outside_store": 23
     },
     "catalog": {
       "title": "Products, categories, media, reviews, translations and catalogue reads",

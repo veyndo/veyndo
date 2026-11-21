@@ -10,7 +10,7 @@ pub(crate) async fn runtime(State(a): State<App>, h: RequestContext) -> Result<J
     Ok(Json(
         json!({"outboxPending":r.get::<i64,_>("pending"),"outboxQuarantined":r.get::<i64,_>("quarantined"),"outboxRetrying":r.get::<i64,_>("retrying"),"eventsConsumed":r.get::<i64,_>("consumed"),"consumer":"independent cognition/apps/flows/audit cursors; no external messages in projection",
             // Instance-wide diagnostic counters are visible only to the existing instance credential.
-            "performance":if header(&h,"x-rac-user")==Some("bootstrap") {Some(json!({"reads":a.reads.snapshot(),"admission":a.admission.snapshot(),"pool":{"size":a.db.size(),"idle":a.db.num_idle()}}))}else{None}}),
+            "performance":if header(&h,"x-rac-user")==Some("bootstrap") {Some(json!({"reads":performance::reads().snapshot(),"admission":a.admission.snapshot(),"pool":{"size":a.db.size(),"idle":a.db.num_idle()}}))}else{None}}),
     ))
 }
 pub(crate) use veyndo_core::outbox::SUBSCRIBERS;

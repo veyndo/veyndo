@@ -1,12 +1,11 @@
 //! Commit-only outbox notifications eagerly evict replica caches; authoritative version probes survive missed events.
 use crate::*;
 use sqlx::postgres::PgListener;
-pub(crate) fn start(a: &App) {
-    let a = a.clone();
+pub(crate) fn start() {
     veyndo::tenant_scope::spawn(async move {
         let url = &runtime_config::get().listener_url;
         loop {
-            a.reads.clear();
+            super::reads().clear();
             let connected = PgListener::connect(url).await;
             if let Ok(mut listener) = connected
                 && listener.listen("veyndo_read_invalidation").await.is_ok()
@@ -15,9 +14,9 @@ pub(crate) fn start(a: &App) {
                     if let Ok(v) = serde_json::from_str::<Value>(event.payload())
                         && let Some(t) = v["tenant"].as_str()
                     {
-                        a.reads.invalidate(t);
+                        super::reads().invalidate(t);
                     } else {
-                        a.reads.clear();
+                        super::reads().clear();
                     }
                 }
             }

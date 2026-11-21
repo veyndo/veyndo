@@ -455,9 +455,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/performance/access_snapshot.rs](../src/performance/access_snapshot.rs) | One fresh, server-owned admission read shared by domain, identity, availability, channel and proxy middleware. |
 | [src/performance/delivery.rs](../src/performance/delivery.rs) | Native static bypass and bounded HTTP compression; credentials, streams and already encoded bodies stay intact. |
 | [src/performance/invalidation.rs](../src/performance/invalidation.rs) | Commit-only outbox notifications eagerly evict replica caches; authoritative version probes survive missed events. |
-| [src/performance/languages.rs](../src/performance/languages.rs) | Global language registry is versioned in the same transaction as every registry mutation. |
 | [src/performance/mod.rs](../src/performance/mod.rs) | Shared read-context caching with authoritative versions; mutations and checkout locks stay outside memoization. |
-| [src/performance/settings.rs](../src/performance/settings.rs) | One MVCC snapshot validates base/override UUIDs; warm reads avoid transmitting or decoding JSON. |
 | [src/planner/admission.rs](../src/planner/admission.rs) | Every initial or repaired model proposal traverses the same native read-only admission. |
 | [src/planner/repair.rs](../src/planner/repair.rs) | One checkpointed correction of rejected output; original evidence, budget and native review remain authoritative. |
 | [src/planner.rs](../src/planner.rs) | Grounded model planning: durable input snapshots share native proposal validation and explicit apply. |
@@ -1137,6 +1135,8 @@ This lists every checked-in source module in these roots, including files with n
 | [components/shop/src/lib.rs](../components/shop/src/lib.rs) | Shop component: the settings every other commerce component reads, with their bounds and inheritance rules. |
 | [components/shop/src/ports.rs](../components/shop/src/ports.rs) | What components that work on a buyer's cart need from the server: the guarded cart, its priced view and a revision-checked replacement of its lines. |
 | [components/shop/src/service/container_resources.rs](../components/shop/src/service/container_resources.rs) | Linux container resource readings; unavailable fields stay null on other hosts and the first CPU sample. |
+| [components/shop/src/service/read_cache.rs](../components/shop/src/service/read_cache.rs) | The process-wide read cache of shop settings and the language registry. Every hit still probes the authoritative SQL version; mutations and checkout locks never read through it. |
+| [components/shop/src/service/read_cache_settings.sql](../components/shop/src/service/read_cache_settings.sql) | Atomic read snapshot: deletion/recreation and unchanged revision numbers cannot reuse an old UUID. |
 | [components/shop/src/service.rs](../components/shop/src/service.rs) | Services of the shop component. |
 | [components/shop/src/store/consumer_requests.rs](../components/shop/src/store/consumer_requests.rs) | Durable withdrawal and data-rights intake, tenant-scoped operator review and customer-held receipt access. |
 | [components/shop/src/store/group_usage.rs](../components/shop/src/store/group_usage.rs) | Removing a customer group rejects live customer, price and native/source-rule dependencies under the settings lock. |
