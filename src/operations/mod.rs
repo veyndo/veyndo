@@ -274,8 +274,13 @@ pub(crate) async fn invoke(a: &App, h: &RequestContext, name: &str, v: &Value) -
         }
         "merchant.order" => orders::detail(State(a.clone()), h.clone(), Path(id()?)).await?,
         "merchant.delivery.split" => {
-            commerce::split_delivery(State(a.clone()), h.clone(), Path(id()?), Json(v.clone()))
-                .await?
+            commerce::split_delivery(
+                State(a.core.clone()),
+                h.clone(),
+                Path(id()?),
+                Json(v.clone()),
+            )
+            .await?
         }
         "merchant.customers" => {
             customers::list(

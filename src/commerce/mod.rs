@@ -30,7 +30,6 @@ pub(crate) use settings_mutation::*;
 mod fulfillment;
 pub(crate) use fulfillment::*;
 mod delivery_split;
-pub(crate) mod order_mutation;
 pub(crate) use delivery_split::split_delivery;
 
 mod selection;

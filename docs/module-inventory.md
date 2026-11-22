@@ -255,7 +255,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/commerce/context_routes.rs](../src/commerce/context_routes.rs) | Public method discovery and revision-checked checkout context changes. |
 | [src/commerce/customer_groups.rs](../src/commerce/customer_groups.rs) | Tenant-owned translated customer groups preserve exact rule IDs and select an explicit existing price/tax presentation basis. |
 | [src/commerce/delivery.rs](../src/commerce/delivery.rs) | Shipping costs, proportional taxes and calendar delivery windows. |
-| [src/commerce/delivery_split.rs](../src/commerce/delivery_split.rs) | Provider-neutral partial-package allocation; quantities and fiscal order snapshots remain conserved. |
+| [src/commerce/delivery_split.rs](../src/commerce/delivery_split.rs) | Partial-package allocation is owned by the orders component. |
 | [src/commerce/detail.rs](../src/commerce/detail.rs) | Product family, context prices, gallery, properties and review aggregates. |
 | [src/commerce/external_orders.rs](../src/commerce/external_orders.rs) | External order intake is owned by the apps component; the core exchange of an admitted app calls it. |
 | [src/commerce/fulfillment.rs](../src/commerce/fulfillment.rs) | Revision-checked order, payment and delivery transitions are owned by the orders component. |
@@ -269,7 +269,6 @@ This lists every checked-in source module in these roots, including files with n
 | [src/commerce/mod.rs](../src/commerce/mod.rs) | Native catalogue and checkout domains; pricing ports remain in the library. |
 | [src/commerce/order_fields.rs](../src/commerce/order_fields.rs) | Derived order fields are owned by the orders component. |
 | [src/commerce/order_machine.rs](../src/commerce/order_machine.rs) | The order state machine is owned by the orders component. |
-| [src/commerce/order_mutation.rs](../src/commerce/order_mutation.rs) | The audited order write log is owned by the orders component. |
 | [src/commerce/order_workflow.rs](../src/commerce/order_workflow.rs) | Order transition guards and the workflow view are owned by the orders component. |
 | [src/commerce/product_admin.rs](../src/commerce/product_admin.rs) | The merchant product list: catalogue filters from the catalog component, app filters and extensions from the app host. |
 | [src/commerce/product_channels.rs](../src/commerce/product_channels.rs) | Per-product channel visibility for the product editor; storage is owned by the catalog component. |
@@ -385,7 +384,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/operations/customer_create.rs](../src/operations/customer_create.rs) | Admin CRM creation uses native contacts/address storage, history and outbox; it never issues customer credentials. |
 | [src/operations/customer_lookup.rs](../src/operations/customer_lookup.rs) | Fast customer-only lookup for native identity bindings; the search is owned by the customers component. |
 | [src/operations/customers.rs](../src/operations/customers.rs) | Tenant-scoped paged CRM and revision-checked merchant changes; credentials never leave storage. |
-| [src/operations/delivery_booking.rs](../src/operations/delivery_booking.rs) | Provider-neutral package admission freezes allocation before a paid carrier effect; approved apps reconcile only their own intent. |
+| [src/operations/delivery_booking.rs](../src/operations/delivery_booking.rs) | Carrier booking intents of approved apps are owned by the apps component. |
 | [src/operations/grid_plan.rs](../src/operations/grid_plan.rs) | Read-only filter planning through the central provider and fleet leases; execution remains native list APIs. |
 | [src/operations/grid_schema.rs](../src/operations/grid_schema.rs) | The allowlisted list-filter schema now lives in the studio component; model plans, MCP and saved views share it. |
 | [src/operations/guest_customers.rs](../src/operations/guest_customers.rs) | Merchant-only guest contact projection; order snapshots never create account authority. |
@@ -658,6 +657,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/apps/src/service/admission.rs](../components/apps/src/service/admission.rs) | Shared network-app admission: the local bulkheads plus replica-wide fenced leases. |
 | [components/apps/src/service/app_builds.rs](../components/apps/src/service/app_builds.rs) | App Studio builds: immutable development versions saved after admission, listed, archived, and staged into an environment the shop owns. |
 | [components/apps/src/service/app_preview.rs](../components/apps/src/service/app_preview.rs) | Immediate App Studio preview: the native runtime in an expiring personal environment. No build, version or release is created. |
+| [components/apps/src/service/carrier_booking.rs](../components/apps/src/service/carrier_booking.rs) | Provider-neutral package admission freezes allocation before a paid carrier effect; approved apps reconcile only their own intent. |
 | [components/apps/src/service/configuration_examples.rs](../components/apps/src/service/configuration_examples.rs) | Frozen configuration cases use the same field validation and bounded guest as real cart configuration. |
 | [components/apps/src/service/configuration_runtime.rs](../components/apps/src/service/configuration_runtime.rs) | Generic pure-Wasm contribution executor; the installed package supplies all business predicates. |
 | [components/apps/src/service/configuration_selection.rs](../components/apps/src/service/configuration_selection.rs) | Reusable input-only selections resolve current package/library revisions before one native cart mutation. |
@@ -1015,6 +1015,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/orders/src/domain.rs](../components/orders/src/domain.rs) | Rules of orders, free of I/O. |
 | [components/orders/src/http/company.rs](../components/orders/src/http/company.rs) | Company basis transport: reading and saving the shop-wide or channel-specific company data under the settings rights. |
 | [components/orders/src/http/company_logo.rs](../components/orders/src/http/company_logo.rs) | Company logo transport: one multipart upload, a merchant preview and the public delivery of linked logos. |
+| [components/orders/src/http/delivery_split.rs](../components/orders/src/http/delivery_split.rs) | Provider-neutral partial-package allocation; quantities and fiscal order snapshots remain conserved. |
 | [components/orders/src/http/transitions.rs](../components/orders/src/http/transitions.rs) | Order transition transport: revision-checked order, payment and delivery state changes with idempotent replay. |
 | [components/orders/src/http.rs](../components/orders/src/http.rs) | HTTP handlers of the orders component; the server registers them with their route rights. |
 | [components/orders/src/lib.rs](../components/orders/src/lib.rs) | Orders component: the order state machine, derived fields, audited mutations and receipts. |

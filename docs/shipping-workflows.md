@@ -157,15 +157,15 @@ jobs, allocations and receipts cannot be staged or selectively released.
 
 ## Ownership and checks
 
-- `commerce/delivery_split.rs`: bounded allocation, native revision and tenant checks.
-- `commerce/order_mutation.rs`: the shared transition/split replay ledger, cart
+- `components/orders/src/http/delivery_split.rs`: bounded allocation, native revision and tenant checks.
+- `components/orders/src/store/order_mutation.rs`: the shared transition/split replay ledger, cart
   projection, activity and outbox transaction.
-- `commerce/order_workflow.rs`: server admission consumed by Studio and MCP.
+- `components/orders/src/domain/order_workflow.rs`: server admission consumed by Studio and MCP.
 - `admin/orders/ShipmentSplit.tsx`: one translated quantity editor, using the parent
   operation fence and preserving failed commands for correction.
 - `extensions/apps/assistant-examples/shipping.json`: versioned carrier-neutral job,
   consent and API declaration consumed by the App Studio assistant.
-- `operations/delivery_booking.rs`: package-scoped current app admission and
+- `components/apps/src/service/carrier_booking.rs`: package-scoped current app admission and
   reserve/release audit; unknown effects block allocation, dispatch and other carriers.
 - `operations/order_documents.rs`, migration 092 and `apps/core_documents.rs`: generic
   immutable receipt/PDF admission; `apps/package_fence.rs` shares the existing package

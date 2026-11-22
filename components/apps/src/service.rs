@@ -2,6 +2,7 @@
 pub mod admission;
 pub mod app_builds;
 pub mod app_preview;
+pub mod carrier_booking;
 pub mod configuration_examples;
 pub mod configuration_runtime;
 pub mod configuration_selection;

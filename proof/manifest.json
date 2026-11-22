@@ -48,7 +48,7 @@
         "src/platform/ai.rs",
         "components/shop/src/http/operator_quotas.rs",
         "components/shop/src/http/operator_lifecycle.rs",
-        "src/commerce/delivery_split.rs",
+        "components/orders/src/http/delivery_split.rs",
         "components/intelligence/src/store/evidence.rs",
         "components/checkout/src/domain/review_binding.rs"
       ],
@@ -1051,6 +1051,11 @@
       "sha256": "30c655df456b79bdf998a1fea7f1d94eb6cbde5aa52d03fdaa07bc40b9d83c9c",
       "review": "App Studio immediate preview moved into the apps component behind the host port; behaviour unchanged"
     },
+    "components/apps/src/service/carrier_booking.rs": {
+      "status": "unproved",
+      "sha256": "dbf3a7dadea4bd7a01498aa490d66a574b3bd5ad3d4577d65968e0a0518e470e",
+      "review": "Delivery split and carrier booking intents moved into the orders and apps components"
+    },
     "components/apps/src/service/configuration_examples.rs": {
       "status": "unproved",
       "sha256": "d8f5c5a4f9ab3ac341f43166b10233b9c47d3af76e27cfe6e9ac90b372aebfd8",
@@ -1143,8 +1148,8 @@
     },
     "components/apps/src/service.rs": {
       "status": "unproved",
-      "sha256": "6bb3148e3f0f1386a7476232cf83e33a3dc3702bfc322fa7a11250a0ae60e001",
-      "review": "Order transitions, external order intake and saved agent authority moved into the orders, apps and identity components"
+      "sha256": "7130718d28556e86e302ad06f62503fd9c45ea39110f797a4449ddb496d034d0",
+      "review": "Delivery split and carrier booking intents moved into the orders and apps components"
     },
     "components/apps/src/store/action_log.rs": {
       "status": "unproved",
@@ -2751,15 +2756,20 @@
       "sha256": "9b27db1c1956deb67816cd72b0b4a63709e8f7ba29e6512c83d6b72729041f61",
       "review": "Company basis and logo transport moved into the orders component, tax rule conditions into checkout; behaviour unchanged"
     },
+    "components/orders/src/http/delivery_split.rs": {
+      "status": "reviewed-binding",
+      "sha256": "36b59a2b14d231d9b6143974d863cb7a049638fa749c213f600b3cca1ae59b64",
+      "review": "Delivery split and carrier booking intents moved into the orders and apps components"
+    },
     "components/orders/src/http/transitions.rs": {
       "status": "reviewed-binding",
-      "sha256": "13fc7c6b279fe23114651cc273152ee1b0f72b8442d1209a55fa90586bc0dfab",
-      "review": "Order transitions, external order intake and saved agent authority moved into the orders, apps and identity components"
+      "sha256": "93403d0769d42d24404a7b0ef233268d78e94cf5640e1c70ae5337538622b277",
+      "review": "Delivery split and carrier booking intents moved into the orders and apps components"
     },
     "components/orders/src/http.rs": {
       "status": "unproved",
-      "sha256": "abfaaaa502f28916195f9747da2140fcd60fbe8b1ec178e992caafed7848db68",
-      "review": "Order transitions, external order intake and saved agent authority moved into the orders, apps and identity components"
+      "sha256": "c6017f582730d5d076d3faf72c409b0a4ac9fcff916ae67d418f172a89baebd1",
+      "review": "Delivery split and carrier booking intents moved into the orders and apps components"
     },
     "components/orders/src/lib.rs": {
       "status": "unproved",
@@ -6677,9 +6687,9 @@
       "review": "Delivery enrichment, app adjustments and funding moved into components; kernel call sites unchanged"
     },
     "src/commerce/delivery_split.rs": {
-      "status": "reviewed-binding",
-      "sha256": "37c8ef45d9d737ea1bd6d156a4d17452bf8d34d4df16457e67f190c8e4997133",
-      "review": "delivery_split_admissible and carrier_booking_admissible bindings moved into components/shipping"
+      "status": "unproved",
+      "sha256": "701ffd72909bdba4869a9e066b2d584b216a4900cc50b6712a7d5ffe31471ede",
+      "review": "Delivery split and carrier booking intents moved into the orders and apps components"
     },
     "src/commerce/detail.rs": {
       "status": "unproved",
@@ -6733,8 +6743,8 @@
     },
     "src/commerce/mod.rs": {
       "status": "unproved",
-      "sha256": "034116c02bfff409efaedf410cd40415f0cbe145811339b6876bb428cf7d90ef",
-      "review": "Order transitions, external order intake and saved agent authority moved into the orders, apps and identity components"
+      "sha256": "55d8e25a25986b1c1f7255469d7855af0bdd7908bd809206f07e4681501a6dda",
+      "review": "Delivery split and carrier booking intents moved into the orders and apps components"
     },
     "src/commerce/order_fields.rs": {
       "status": "unproved",
@@ -6744,11 +6754,6 @@
     "src/commerce/order_machine.rs": {
       "status": "unproved",
       "sha256": "0bfeb2e7557e0f136c7eac6d60f926e517b3338be0a0ae98ac4f99b1deaf3e5f",
-      "review": "order workflow kernel bindings follow the move into components/orders"
-    },
-    "src/commerce/order_mutation.rs": {
-      "status": "unproved",
-      "sha256": "3e290855b16f59ff6e6ffa7b5900acad79b6a6bf7aaa9186441c120b4533c843",
       "review": "order workflow kernel bindings follow the move into components/orders"
     },
     "src/commerce/order_workflow.rs": {
@@ -7328,8 +7333,8 @@
     },
     "src/operations/delivery_booking.rs": {
       "status": "unproved",
-      "sha256": "e47e018cd802a6f79985e78b914706b5ec2fa8394d91fa2fba0017fda3ce3b6b",
-      "review": "delivery_split_admissible and carrier_booking_admissible bindings moved into components/shipping"
+      "sha256": "50485cb69a043d45349928701a5ae1f24ce9248c835a1826e76707e1825afc62",
+      "review": "Delivery split and carrier booking intents moved into the orders and apps components"
     },
     "src/operations/grid_plan.rs": {
       "status": "unproved",
@@ -7433,8 +7438,8 @@
     },
     "src/operations/mod.rs": {
       "status": "unproved",
-      "sha256": "c2d6ab2ac9c776af1634c30b7144659c0e0ec5ba2003139b96507544cd8fec68",
-      "review": "Order transitions, external order intake and saved agent authority moved into the orders, apps and identity components"
+      "sha256": "3cae1aeb9a2c1bc13d92b66d0fde582f8a2116a6c0edd79601278088d8d6b0fd",
+      "review": "Delivery split and carrier booking intents moved into the orders and apps components"
     },
     "src/operations/order_documents.rs": {
       "status": "unproved",

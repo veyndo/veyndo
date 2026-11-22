@@ -26,7 +26,7 @@ fn contract(error: veyndo_app_model::Error) -> Error {
     }
 }
 /// The machine the order was accepted under, or the shop's current one.
-fn accepted_machine(
+pub(crate) fn accepted_machine(
     o: &Value,
     fallback: OrderMachine,
     revision: i64,

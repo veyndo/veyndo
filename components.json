@@ -325,16 +325,13 @@
       ],
       "tables": [],
       "uses": [
-        "apps",
         "catalog",
         "checkout",
         "core",
         "identity",
-        "orders",
         "payments",
         "pricing",
-        "shop",
-        "studio"
+        "shop"
       ],
       "foreign_tables": [
         "b2b_units",
@@ -344,9 +341,9 @@
         "commerce_rules",
         "orders"
       ],
-      "glob_imports": 6,
-      "untyped_access": 73,
-      "sql_outside_store": 2
+      "glob_imports": 4,
+      "untyped_access": 52,
+      "sql_outside_store": 0
     },
     "checkout": {
       "title": "Cart, quote, checkout transaction and order placement",
@@ -458,7 +455,6 @@
         "src/order_routes.rs",
         "src/commerce/order_fields.rs",
         "src/commerce/order_machine.rs",
-        "src/commerce/order_mutation.rs",
         "src/commerce/order_workflow.rs",
         "src/commerce/external_orders.rs",
         "src/commerce/fulfillment.rs"
@@ -505,8 +501,8 @@
         "tenants"
       ],
       "glob_imports": 25,
-      "untyped_access": 437,
-      "sql_outside_store": 10
+      "untyped_access": 450,
+      "sql_outside_store": 11
     },
     "payments": {
       "title": "Provider-independent payment ledger, captures, refunds and provider workers",
@@ -769,8 +765,8 @@
         "workspace_roles"
       ],
       "glob_imports": 56,
-      "untyped_access": 426,
-      "sql_outside_store": 27
+      "untyped_access": 434,
+      "sql_outside_store": 28
     },
     "automation": {
       "title": "Deterministic rule evaluation and flow graphs",
