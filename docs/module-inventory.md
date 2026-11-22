@@ -153,7 +153,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/b2b/lists.rs](../src/b2b/lists.rs) | Reusable private/shared procurement lists; applying them reuses native cart admission and pricing. |
 | [src/b2b/mod.rs](../src/b2b/mod.rs) | Native modular company procurement; protocol-specific EDI adapters remain in their app packages. |
 | [src/b2b/model.rs](../src/b2b/model.rs) | Bounded typed native company, purchasing-unit and employee policies. Money is currency-bound minor units. |
-| [src/b2b/onboarding.rs](../src/b2b/onboarding.rs) | Atomic company setup delegates to the same company/unit/member writers; foreign customers roll back the whole setup. |
+| [src/b2b/onboarding.rs](../src/b2b/onboarding.rs) | Atomic company setup lives in the B2B component; this entry keeps the server-side signature. |
 | [src/b2b/orders.rs](../src/b2b/orders.rs) | Explicit unit-wide order permission reuses the customer-safe order projection; no email-based ownership. |
 | [src/b2b/organization.rs](../src/b2b/organization.rs) | Merchant-managed firms, unit hierarchies, employee grants and tenant-bound catalogs with optimistic revisions. |
 | [src/b2b/purchase.rs](../src/b2b/purchase.rs) | Serializes unit spending and binds an approved purchase to the authoritative native checkout quote. |
@@ -298,7 +298,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/currencies/jobs.rs](../src/currencies/jobs.rs) | The background loop that runs queued price jobs and refreshes automatic rates; the batch itself is owned by the pricing component. |
 | [src/currencies/mod.rs](../src/currencies/mod.rs) | Tenant currency configuration, channel contexts and durable price generation; no FX network calls in checkout. |
 | [src/currencies/ports.rs](../src/currencies/ports.rs) | The server's implementation of what the pricing component reads from the shop settings, the cart and the catalogue. |
-| [src/currencies/rates.rs](../src/currencies/rates.rs) | Stores refreshed reference rates in the shop settings; the refresh runs outside checkout. |
+| [src/currencies/rates.rs](../src/currencies/rates.rs) | Reference rate refresh lives in the shop component; this entry keeps the server-side signature. |
 | [src/currencies/request.rs](../src/currencies/request.rs) | The currency a storefront request asks for: the cart's own, else the request header. |
 | [src/currencies/routes.rs](../src/currencies/routes.rs) | Native currency discovery, revision-safe selection and authenticated FX/price job operations. |
 | [src/customer.rs](../src/customer.rs) | Customer credential verification and context rotation. |
@@ -311,7 +311,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/documents/content.rs](../src/documents/content.rs) | Source content is validated by the intelligence component against the shop's enabled languages. |
 | [src/documents/guidance.rs](../src/documents/guidance.rs) | Explicit merchant preferences reuse versioned private sources; quoted guidance never expands native authority. |
 | [src/documents/ingestion.rs](../src/documents/ingestion.rs) | Typed API and bounded upload write source hashes, chunks and graph relations atomically. |
-| [src/documents/lifecycle.rs](../src/documents/lifecycle.rs) | Revision-bound source detail, editing, archive/restore and publication; edits require a new public review. |
+| [src/documents/lifecycle.rs](../src/documents/lifecycle.rs) | Source detail, editing and publication live in the intelligence component; these entries keep the server-side signatures. |
 | [src/documents/mod.rs](../src/documents/mod.rs) | Source-bound knowledge ingestion, retrieval and product questions share tenant/product visibility. |
 | [src/documents/parser.rs](../src/documents/parser.rs) | PDF extraction is owned by the intelligence component. |
 | [src/documents/preview.rs](../src/documents/preview.rs) | No-provider retrieval preview shares product-question scope and locale rules; merchant sources never enter customer previews. |
@@ -358,7 +358,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/marketing/gateway.rs](../src/marketing/gateway.rs) | MCP automation tools call the same tenant-bound handlers and validators as HTTP; no separate mutation semantics. |
 | [src/marketing/jobs.rs](../src/marketing/jobs.rs) | Flow execution summaries are owned by the marketing component; the reader's scopes decide how much it sees. |
 | [src/marketing/lifecycle.rs](../src/marketing/lifecycle.rs) | Revision-bound deletion and reference admission share HTTP/MCP authorization and tenant locks. |
-| [src/marketing/metadata.rs](../src/marketing/metadata.rs) | Authorized revision-bound source facts for products, customers and orders; secrets and pricing authority are excluded. |
+| [src/marketing/metadata.rs](../src/marketing/metadata.rs) | Rule facts of products, customers and orders are saved by the marketing component; this module registers the route. |
 | [src/marketing/mod.rs](../src/marketing/mod.rs) | Native rule conditions, coupons, durable flows and headless/storefront sales-channel boundaries. |
 | [src/marketing/pipeline.rs](../src/marketing/pipeline.rs) | A bounded acyclic flow graph models source-style true/false branches, ordered actions, delays and stop nodes. |
 | [src/marketing/pipeline_runtime.rs](../src/marketing/pipeline_runtime.rs) | Durable sequence execution records each action before dispatch, persists delay cursors and reports uncertain effects. |
@@ -366,7 +366,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/marketing/promotions.rs](../src/marketing/promotions.rs) | Server-authoritative coupons and automatic campaigns, with deterministic discounts and atomic usage limits. |
 | [src/marketing/routes.rs](../src/marketing/routes.rs) | Typed configuration CRUD, rule preview and revision-bound coupon edits. |
 | [src/marketing/rule_fields.rs](../src/marketing/rule_fields.rs) | Rule field comparison is owned by the marketing component. |
-| [src/marketing/rule_history.rs](../src/marketing/rule_history.rs) | Side-effect-free rule comparison on bounded, tenant-owned frozen Flow order inputs. |
+| [src/marketing/rule_history.rs](../src/marketing/rule_history.rs) | Rule comparison lives in the marketing component; these entries keep the server-side signatures. |
 | [src/marketing/rule_snapshot.rs](../src/marketing/rule_snapshot.rs) | Referenced rule snapshots are read by the marketing component. |
 | [src/marketing/rules.rs](../src/marketing/rules.rs) | Rule conditions are owned by the marketing component. |
 | [src/marketing/work_template.rs](../src/marketing/work_template.rs) | Bounded copies of reviewed native work: event values replace explicit scalar fields, never executable text. |
@@ -469,7 +469,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/platform/quotas.rs](../src/platform/quotas.rs) | Operator-only per-shop daily interactive AI limits, optimistic revisions and durable audit. |
 | [src/platform/resources.rs](../src/platform/resources.rs) | Linux container resource readings; unavailable fields stay null on other hosts and the first CPU sample. |
 | [src/platform/shop_detail.rs](../src/platform/shop_detail.rs) | Operator shop dossier: registration, business identity, access roster, channels and measured HTTP activity. |
-| [src/pos/config.rs](../src/pos/config.rs) | POS presentation/location configuration lives on the existing channel, not in a second settings store. |
+| [src/pos/config.rs](../src/pos/config.rs) | POS channel setup lives in the POS component. |
 | [src/pos/customer.rs](../src/pos/customer.rs) | Cashier customer lookup and attachment are owned by the POS component; the server supplies the priced cart. |
 | [src/pos/discount.rs](../src/pos/discount.rs) | Cashier discounts are owned by the POS component; the server supplies the priced cart. |
 | [src/pos/gateway.rs](../src/pos/gateway.rs) | HTTP/MCP POS operations construct a trusted cashier context, then call existing commerce owners. |
@@ -719,6 +719,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/b2b/src/domain.rs](../components/b2b/src/domain.rs) | domain of this component. |
 | [components/b2b/src/lib.rs](../components/b2b/src/lib.rs) | B2B component: company procurement records, their bounds and the purchasing contract. |
 | [components/b2b/src/service/approval.rs](../components/b2b/src/service/approval.rs) | Revision-bound purchasing approval inbox; approvers must be active peers and cannot approve themselves. |
+| [components/b2b/src/service/onboarding.rs](../components/b2b/src/service/onboarding.rs) | Atomic company setup through the same company, unit and member writers; a foreign customer rolls back the whole setup. |
 | [components/b2b/src/service/quick_order.rs](../components/b2b/src/service/quick_order.rs) | Bounded SKU bulk entry resolves native products then uses the ordinary cart's permissions, quantities and prices. |
 | [components/b2b/src/service/quote_contract.rs](../components/b2b/src/service/quote_contract.rs) | Accepted offer prices feed the existing currency/tax calculator; checkout consumes the offer atomically. |
 | [components/b2b/src/service/requisition.rs](../components/b2b/src/service/requisition.rs) | Explicit integration permission imports requisitions into native lists; it never impersonates checkout buyers. |
@@ -903,6 +904,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/intelligence/src/domain/trusted_geography.rs](../components/intelligence/src/domain/trusted_geography.rs) | Optional trusted ingress geography. Ordinary country headers never establish visitor location. |
 | [components/intelligence/src/domain.rs](../components/intelligence/src/domain.rs) | Bounded inputs of the intelligence component, free of I/O. |
 | [components/intelligence/src/http/claims.rs](../components/intelligence/src/http/claims.rs) | Public claim intake and compilation: bounded batches under the current channel admission, without one request per product. |
+| [components/intelligence/src/http/sources.rs](../components/intelligence/src/http/sources.rs) | Revision-bound source detail, editing, archive and publication; an edit needs a new public review. |
 | [components/intelligence/src/http/workspace.rs](../components/intelligence/src/http/workspace.rs) | The knowledge workspace: a permission-filtered census, the source inventory by cursor and recent activity. Totals never pose as sampled graph counts. |
 | [components/intelligence/src/http.rs](../components/intelligence/src/http.rs) | HTTP handlers of the intelligence component; the server registers them with their route rights. |
 | [components/intelligence/src/knowledge/embeddings.rs](../components/intelligence/src/knowledge/embeddings.rs) | Bounded batched embeddings: Ollama and OpenAI-compatible self-hosted endpoints, model-defined dimensions. |
@@ -968,6 +970,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/marketing/src/domain/rules.rs](../components/marketing/src/domain/rules.rs) | Bounded Shopware-style boolean/numeric rule AST. Unknown operators/conditions fail closed. |
 | [components/marketing/src/domain.rs](../components/marketing/src/domain.rs) | Rule conditions, flow actions and the flow graph, free of I/O. |
 | [components/marketing/src/http/configuration.rs](../components/marketing/src/http/configuration.rs) | Revision-bound deletion and the dependency read of marketing configuration share HTTP/MCP authorization and tenant locks. |
+| [components/marketing/src/http/rules.rs](../components/marketing/src/http/rules.rs) | Rule comparison on frozen flow inputs and the revisioned rule facts of products, customers and orders. |
 | [components/marketing/src/http.rs](../components/marketing/src/http.rs) | HTTP handlers of the marketing component. |
 | [components/marketing/src/lib.rs](../components/marketing/src/lib.rs) | Marketing component: rule conditions, the facts they are matched against, and promotions. |
 | [components/marketing/src/service/channels.rs](../components/marketing/src/service/channels.rs) | Sales channels share a shop but bind their own catalog visibility, languages and cart identity; storefront reads pass through them. |
@@ -1072,6 +1075,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/pos/src/service/guard.rs](../components/pos/src/service/guard.rs) | The cart admission cashier operations share with every other cart adapter is owned by the shop component. |
 | [components/pos/src/service/settlement.rs](../components/pos/src/service/settlement.rs) | Exact cash admission and order annotation execute in the existing checkout transaction. |
 | [components/pos/src/service.rs](../components/pos/src/service.rs) | Cashier operations on top of the ordinary cart and checkout. |
+| [components/pos/src/store/channel_setup.rs](../components/pos/src/store/channel_setup.rs) | A new POS channel brings its cash payment and collection delivery as channel overrides; there is no second settings store. |
 | [components/pos/src/store/customers.rs](../components/pos/src/store/customers.rs) | Customer rows as the cashier sees them: a bounded search and the account behind a selection. |
 | [components/pos/src/store.rs](../components/pos/src/store.rs) | Reads the cashier workspace needs from the shop's own tables. |
 | [components/pricing/examples/customer_contract.rs](../components/pricing/examples/customer_contract.rs) | Run contact normalization without a Core process, database, credentials or network. |
@@ -1146,6 +1150,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/shop/src/lib.rs](../components/shop/src/lib.rs) | Shop component: the settings every other commerce component reads, with their bounds and inheritance rules. |
 | [components/shop/src/ports.rs](../components/shop/src/ports.rs) | What components that work on a buyer's cart need from the server: the guarded cart, its priced view and a revision-checked replacement of its lines. |
 | [components/shop/src/service/container_resources.rs](../components/shop/src/service/container_resources.rs) | Linux container resource readings; unavailable fields stay null on other hosts and the first CPU sample. |
+| [components/shop/src/service/currency_rates.rs](../components/shop/src/service/currency_rates.rs) | Stores refreshed reference rates in the shop settings under the expected revision; the refresh never runs inside a checkout. |
 | [components/shop/src/service/language.rs](../components/shop/src/service/language.rs) | The language of a request from its shop, its locale header and an explicit language id. |
 | [components/shop/src/service/read_cache.rs](../components/shop/src/service/read_cache.rs) | The process-wide read cache of shop settings and the language registry. Every hit still probes the authoritative SQL version; mutations and checkout locks never read through it. |
 | [components/shop/src/service/read_cache_settings.sql](../components/shop/src/service/read_cache_settings.sql) | Atomic read snapshot: deletion/recreation and unchanged revision numbers cannot reuse an old UUID. |

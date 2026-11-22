@@ -94,7 +94,8 @@ pub fn register_conditions(check: Conditions) {
     let _ = CONDITIONS.set(check);
 }
 
-fn conditions(v: &Value) -> Result<()> {
+/// The registered rule-condition check; before registration every override is refused.
+pub fn conditions(v: &Value) -> Result<()> {
     match CONDITIONS.get() {
         Some(check) => check(v),
         None => Err(bad("Rule conditions are unavailable")),

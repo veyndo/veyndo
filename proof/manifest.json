@@ -1341,6 +1341,11 @@
       "sha256": "6d9a709d6ec4d241b5d51a79aaf790b2dc3a2c2fb09dcfd5fbdfb8b847ef8e4f",
       "review": "B2B approvals, quick order and offer contract moved behind the shop cart port"
     },
+    "components/b2b/src/service/onboarding.rs": {
+      "status": "unproved",
+      "sha256": "ff04037b5e8cd01b7941019ec6d27a86fe68c8174e62319bf73e2c97ae4a8172",
+      "review": "Rate refresh, company onboarding, POS channel setup, rule comparison and facts and source lifecycle handlers moved into their components; behaviour unchanged"
+    },
     "components/b2b/src/service/quick_order.rs": {
       "status": "unproved",
       "sha256": "a54724fce58f1d9712699a6803fdad9905d87fb9868a3fc4a8b19408cef54b47",
@@ -1358,8 +1363,8 @@
     },
     "components/b2b/src/service.rs": {
       "status": "unproved",
-      "sha256": "d83901101b468d5f7fbc752522632bfec99389487982bb3763e0dc49f5f21a2c",
-      "review": "Coupons, flow job summaries, requisition import, customer snapshot, address restore and account orders moved into components"
+      "sha256": "eb4396669294dcae2f55c72a706ed5ade01cb45531fb9c149d6f846b95e6f27b",
+      "review": "Rate refresh, company onboarding, POS channel setup, rule comparison and facts and source lifecycle handlers moved into their components; behaviour unchanged"
     },
     "components/b2b/src/store/access.rs": {
       "status": "unproved",
@@ -2231,6 +2236,11 @@
       "sha256": "6e5c7d6938a049bf7bc1c06864aa13d77b2401da19b38fcf571baf8823309158",
       "review": "Claim lifecycle, public claim batches and the knowledge workspace moved into the intelligence component; behaviour unchanged"
     },
+    "components/intelligence/src/http/sources.rs": {
+      "status": "unproved",
+      "sha256": "4e6ff590c69aa70a84699fb43b086df422896ed4511873fb15435c57222764f0",
+      "review": "Rate refresh, company onboarding, POS channel setup, rule comparison and facts and source lifecycle handlers moved into their components; behaviour unchanged"
+    },
     "components/intelligence/src/http/workspace.rs": {
       "status": "unproved",
       "sha256": "5aec05fc05e6e2ec4b1d0deab7dea38c1794ae4dd8d3491c6136d75551c09360",
@@ -2238,8 +2248,8 @@
     },
     "components/intelligence/src/http.rs": {
       "status": "unproved",
-      "sha256": "d2ee9f537b6713981b1670794690758806cd0766749660c6a29c2edc588f5711",
-      "review": "Claim lifecycle, public claim batches and the knowledge workspace moved into the intelligence component; behaviour unchanged"
+      "sha256": "8d6897143c939d7e93ec35fcea3405706a8e6a73fad567b743ab572e96c1eca5",
+      "review": "Rate refresh, company onboarding, POS channel setup, rule comparison and facts and source lifecycle handlers moved into their components; behaviour unchanged"
     },
     "components/intelligence/src/knowledge/embeddings.rs": {
       "status": "unproved",
@@ -2506,10 +2516,15 @@
       "sha256": "999bfd91813db5e52bc51b0b854d3f20fb42626865db140a39525705f8db4cd6",
       "review": "Marketing configuration lifecycle (tenant lock, revision, revision-bound deletion, dependency read, rule reference admission) moved verbatim into the marketing component; route registration stays in the server."
     },
+    "components/marketing/src/http/rules.rs": {
+      "status": "unproved",
+      "sha256": "89bc3cbfc658131e742382d9bf7080c56c9d5b78cd03f8111ecf4bf6a300eb34",
+      "review": "Rate refresh, company onboarding, POS channel setup, rule comparison and facts and source lifecycle handlers moved into their components; behaviour unchanged"
+    },
     "components/marketing/src/http.rs": {
       "status": "unproved",
-      "sha256": "765981796a587e180f683b6cbfd3ce99cf63b106768f0be9c74ed1b61469ff3b",
-      "review": "Marketing configuration lifecycle (tenant lock, revision, revision-bound deletion, dependency read, rule reference admission) moved verbatim into the marketing component; route registration stays in the server."
+      "sha256": "1240d9a89276cf83709aa61b72b1d3ccbc9c60100e9fc71317bbe07cdddf95c4",
+      "review": "Rate refresh, company onboarding, POS channel setup, rule comparison and facts and source lifecycle handlers moved into their components; behaviour unchanged"
     },
     "components/marketing/src/lib.rs": {
       "status": "unproved",
@@ -3026,6 +3041,11 @@
       "sha256": "331c07deef28d2c8ef8784f6c8380d3c5c8cbca3287e8fba06a60543b5cacfff",
       "review": "POS guard, customer, discount and settlement and the checkout session review moved into components"
     },
+    "components/pos/src/store/channel_setup.rs": {
+      "status": "unproved",
+      "sha256": "3bfe0598a1b5ba72c34b98a8f5b905443b0a2c2b7dc78bb8720cf2d5ba01ee3d",
+      "review": "Rate refresh, company onboarding, POS channel setup, rule comparison and facts and source lifecycle handlers moved into their components; behaviour unchanged"
+    },
     "components/pos/src/store/customers.rs": {
       "status": "unproved",
       "sha256": "490fa46252ee00678ef5bc7033cb44eaf40772d6a3efdbfb25c7fb05a0b1de72",
@@ -3033,8 +3053,8 @@
     },
     "components/pos/src/store.rs": {
       "status": "unproved",
-      "sha256": "fe8d03eec3ea8e16ed39493802d35cd2a58c74dabfce0ffa14c79c6e9a1823ad",
-      "review": "POS guard, customer, discount and settlement and the checkout session review moved into components"
+      "sha256": "85f906886670efaab983e460fb2272701b5d58c3ff2cafeb706f77d1e29f025b",
+      "review": "Rate refresh, company onboarding, POS channel setup, rule comparison and facts and source lifecycle handlers moved into their components; behaviour unchanged"
     },
     "components/pricing/examples/customer_contract.rs": {
       "status": "unproved",
@@ -3396,6 +3416,11 @@
       "sha256": "8e8b3e25eed9b774c65248e0a5c9393f1a09f3ef4b22b0c84be129c073f2dd3f",
       "review": "Operator control plane (quotas, aggregate metrics, shop dossier, audited lifecycle change, container readings) moved verbatim into the shop component; operator authentication and availability admission stay in the server. Kernel admission calls unchanged."
     },
+    "components/shop/src/service/currency_rates.rs": {
+      "status": "unproved",
+      "sha256": "550f20d45ae728f53277a1f4f3bf43527b7189d48adb12bc10ec0bfab52b85c5",
+      "review": "Rate refresh, company onboarding, POS channel setup, rule comparison and facts and source lifecycle handlers moved into their components; behaviour unchanged"
+    },
     "components/shop/src/service/language.rs": {
       "status": "unproved",
       "sha256": "ad250009a2f4c98cd4698730df2f972fc6612bad3748acbf0fcfe6e80165e1ae",
@@ -3403,13 +3428,13 @@
     },
     "components/shop/src/service/read_cache.rs": {
       "status": "unproved",
-      "sha256": "0fd48f196db236af2568b6a303d73239340b8ea83963b10b3b54e471c8d9643a",
-      "review": "Settings and language read cache moved into the shop component; condition check registered at startup; behaviour unchanged"
+      "sha256": "44e0ab1a33fb30dcb73648c88a254506a4761d5aa4fbcfa214e3635cfda6ca23",
+      "review": "Rate refresh, company onboarding, POS channel setup, rule comparison and facts and source lifecycle handlers moved into their components; behaviour unchanged"
     },
     "components/shop/src/service.rs": {
       "status": "unproved",
-      "sha256": "0688b429f13adf400b3654347b8b8c4081b502e6a86402718e8d7ece9b2d2072",
-      "review": "Request language selection moved into the shop component and sales channel admission into the marketing component; behaviour unchanged"
+      "sha256": "9b0f3b8f2c1d6a62cb3deb0728f8b86eb810f6aaf28b60fc850ce56fb0698655",
+      "review": "Rate refresh, company onboarding, POS channel setup, rule comparison and facts and source lifecycle handlers moved into their components; behaviour unchanged"
     },
     "components/shop/src/store/consumer_requests.rs": {
       "status": "unproved",
@@ -6063,8 +6088,8 @@
     },
     "src/b2b/onboarding.rs": {
       "status": "unproved",
-      "sha256": "dc1d2531fa43016831456437144e16d0854532d076a3b0909f0bc3311eacf338",
-      "review": "Tenant roles and current grants independently reviewed; owner/retained-override/acceptance races repaired and PostgreSQL-blocked regressions passed; PII and Flow projection boundaries documented; B2B feature settings delegate shared CAS/history and preserve financial guards. Existing extracted policies unchanged; SQL/async/UI remain reviewed adapters, not full proofs."
+      "sha256": "09e59441db6f5beb5787071a550cf8083b9304bedb67770481fe7bbcf9bb6615",
+      "review": "Rate refresh, company onboarding, POS channel setup, rule comparison and facts and source lifecycle handlers moved into their components; behaviour unchanged"
     },
     "src/b2b/orders.rs": {
       "status": "unproved",
@@ -6633,8 +6658,8 @@
     },
     "src/commerce/mod.rs": {
       "status": "unproved",
-      "sha256": "3ed3653f54ce51aee2db13fa2cee68d01b3167efcedfd54f9b9d9424b417b638",
-      "review": "Process configuration moved into core; browser session transports, Checkout buyer grants, the private Checkout relay, trusted geography and provider startup validation moved into their components without behaviour change"
+      "sha256": "88b44db2d0cc5667d4da3e9b1beaf7569f86516a0a7ceb6f265d6d71423d8a58",
+      "review": "Rate refresh, company onboarding, POS channel setup, rule comparison and facts and source lifecycle handlers moved into their components; behaviour unchanged"
     },
     "src/commerce/order_fields.rs": {
       "status": "unproved",
@@ -6788,8 +6813,8 @@
     },
     "src/currencies/rates.rs": {
       "status": "unproved",
-      "sha256": "d9e68488969bfbb55939bdd121dd8645069b44b7c796809f66778ebacb0f9de9",
-      "review": "Currency configuration, conversion and reference-rate retrieval moved unchanged into components/pricing; the currency context rule is bound there"
+      "sha256": "d9706c67e90f6d81b03d45bad39d8f8d76cedd68f1b69a7f044f8c81c577519b",
+      "review": "Rate refresh, company onboarding, POS channel setup, rule comparison and facts and source lifecycle handlers moved into their components; behaviour unchanged"
     },
     "src/currencies/request.rs": {
       "status": "unproved",
@@ -6853,8 +6878,8 @@
     },
     "src/documents/lifecycle.rs": {
       "status": "unproved",
-      "sha256": "52cb8b89c3da59a26342e3a057b3e56afac8c7d428e9b689dec86dbec55969b5",
-      "review": "Knowledge sources, PDF text extraction and embedding generations moved into the intelligence component without behaviour change"
+      "sha256": "ec7d1b8c6c0520821633bfb65a89c84f5b8e0142bb97a30440ebae1b3f3febb9",
+      "review": "Rate refresh, company onboarding, POS channel setup, rule comparison and facts and source lifecycle handlers moved into their components; behaviour unchanged"
     },
     "src/documents/mod.rs": {
       "status": "unproved",
@@ -7088,8 +7113,8 @@
     },
     "src/marketing/metadata.rs": {
       "status": "unproved",
-      "sha256": "a7b6add3c072cba008ed6b2ac4db54c82f5223d6794f56c346311669579bede6",
-      "review": "Access overview, session revocation, company release and rule metadata moved into components"
+      "sha256": "2d63b94ffc72f6acdde5660ef445996ea31d89bf75eb456305bda6ccd2e6993a",
+      "review": "Rate refresh, company onboarding, POS channel setup, rule comparison and facts and source lifecycle handlers moved into their components; behaviour unchanged"
     },
     "src/marketing/mod.rs": {
       "status": "unproved",
@@ -7128,8 +7153,8 @@
     },
     "src/marketing/rule_history.rs": {
       "status": "unproved",
-      "sha256": "0036c27e3bd72b554880c3561db55221c532d3071188874c1244007d73852788",
-      "review": "Consumer requests moved into the shop component and the frozen rule comparison into marketing without behaviour change"
+      "sha256": "d690292cbe373dc9a61fd65f38496c25e11a8103bb24acda58dfd1b07d5e2fbe",
+      "review": "Rate refresh, company onboarding, POS channel setup, rule comparison and facts and source lifecycle handlers moved into their components; behaviour unchanged"
     },
     "src/marketing/rule_snapshot.rs": {
       "status": "unproved",
@@ -7643,8 +7668,8 @@
     },
     "src/pos/config.rs": {
       "status": "unproved",
-      "sha256": "981a548653efb62d22d5d27c923866f60f748a66946e987be73ba3a97ccfec02",
-      "review": "Flow pipeline and promotion types moved into components/marketing; kernel call sites unchanged"
+      "sha256": "3dad660c66335e9b7a6929ceefa3550be07ccfdde265dca4b5c50c0ecc7cb0a3",
+      "review": "Rate refresh, company onboarding, POS channel setup, rule comparison and facts and source lifecycle handlers moved into their components; behaviour unchanged"
     },
     "src/pos/customer.rs": {
       "status": "unproved",
@@ -7943,8 +7968,8 @@
       "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
     },
     "Cargo.lock": {
-      "sha256": "a8c6d4479b1ced3bc6811629fc4a4f5414d779592d1118c241fd7b4c103e2f59",
-      "review": "Claim lifecycle, public claim batches and the knowledge workspace moved into the intelligence component; behaviour unchanged"
+      "sha256": "2eb3d5572706ba8730b6fb07771f380ad5577dbbd3a44a275e2812f7e99ba9d4",
+      "review": "Rate refresh, company onboarding, POS channel setup, rule comparison and facts and source lifecycle handlers moved into their components; behaviour unchanged"
     },
     "Cargo.toml": {
       "sha256": "12d2d79a98f6913d20b8e912afb9ea8de0539b9e83428de8a9d7412c406896f6",

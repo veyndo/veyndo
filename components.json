@@ -696,9 +696,9 @@
         "products",
         "sales_channels"
       ],
-      "glob_imports": 6,
+      "glob_imports": 5,
       "untyped_access": 68,
-      "sql_outside_store": 5
+      "sql_outside_store": 4
     },
     "apps": {
       "title": "App packages, managed data, UI surfaces, Wasm extensions and the app builder",

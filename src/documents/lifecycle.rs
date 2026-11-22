@@ -1,14 +1,12 @@
-//! Revision-bound source detail, editing, archive/restore and publication; edits require a new public review.
+//! Source detail, editing and publication live in the intelligence component; these entries keep the server-side signatures.
 use super::*;
-use veyndo_intelligence::store::documents as store;
+use veyndo_intelligence::http::sources;
 pub(crate) async fn detail(
     State(a): State<App>,
     h: RequestContext,
     Path(id): Path<String>,
 ) -> Result<Json<Value>> {
-    let t = merchant(&a, &h)?;
-    auth::permit(&h, "knowledge.read")?;
-    Ok(Json(store::detail(&a, &t, &id).await?))
+    sources::detail(State(a.core.clone()), h, Path(id)).await
 }
 pub(crate) async fn edit(
     State(a): State<App>,
@@ -16,11 +14,7 @@ pub(crate) async fn edit(
     Path(id): Path<String>,
     Json(v): Json<Value>,
 ) -> Result<Json<Value>> {
-    let t = merchant(&a, &h)?;
-    auth::permit(&h, "knowledge.write")?;
-    guidance::admit(&h, &v["kind"])?;
-    let data = content::validate(&a, &t, &v).await?;
-    Ok(Json(store::edit(&a, &h, &t, &id, &v, &data).await?))
+    sources::edit(State(a.core.clone()), h, Path(id), Json(v)).await
 }
 pub(crate) async fn lifecycle(
     State(a): State<App>,
@@ -28,7 +22,5 @@ pub(crate) async fn lifecycle(
     Path(id): Path<String>,
     Json(v): Json<Value>,
 ) -> Result<Json<Value>> {
-    let t = merchant(&a, &h)?;
-    auth::permit(&h, "knowledge.write")?;
-    Ok(Json(store::lifecycle(&a, &h, &t, &id, &v).await?))
+    sources::lifecycle(State(a.core.clone()), h, Path(id), Json(v)).await
 }
