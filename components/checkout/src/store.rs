@@ -5,3 +5,4 @@ pub mod legal_snapshot;
 pub mod product_snapshot;
 pub mod selected_customer;
 pub mod session;
+pub mod tax_conditions;

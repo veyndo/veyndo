@@ -3,6 +3,7 @@ pub mod company_model;
 pub mod creation_schema;
 pub mod import_product;
 pub mod import_relations;
+pub mod logo_image;
 pub mod order_fields;
 pub mod order_machine;
 pub mod order_workflow;

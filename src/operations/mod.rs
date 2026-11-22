@@ -1,7 +1,6 @@
 //! Merchant CRM and fulfillment APIs, shared verbatim with MCP operations capabilities.
 use crate::*;
 mod addresses;
-mod company_logo;
 mod company_model;
 mod company_public;
 mod creation_schema;

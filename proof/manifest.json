@@ -1816,10 +1816,15 @@
       "sha256": "3cd9428edc864a30bc3ce27fdf9cc6eebaa2302d57de929171869749598f3ded",
       "review": "POS guard, customer, discount and settlement and the checkout session review moved into components"
     },
+    "components/checkout/src/store/tax_conditions.rs": {
+      "status": "unproved",
+      "sha256": "00f57c2ced88108a94d05ddee52fd46f99433b20a0621bf0212e87767023ad94",
+      "review": "Company basis and logo transport moved into the orders component, tax rule conditions into checkout; behaviour unchanged"
+    },
     "components/checkout/src/store.rs": {
       "status": "unproved",
-      "sha256": "a8cfd27939c0b088a97e177b99a6839dc43d028d1d2c0888e13a0d63f3b799fc",
-      "review": "Merchant customer writes moved into the customers component and admin order admission into checkout without behaviour change"
+      "sha256": "7bc08132562756bafecfcac224d5bea3430a4a0ca7b47bc8ca3fc180133f5a42",
+      "review": "Company basis and logo transport moved into the orders component, tax rule conditions into checkout; behaviour unchanged"
     },
     "components/core/src/access.rs": {
       "status": "unproved",
@@ -2671,6 +2676,11 @@
       "sha256": "8e8424dfffe1f9c21b60467eeecc7eeafb0bed9896976af368545e685eb53b72",
       "review": "Unit tests for every public domain function of the components; no production code changed"
     },
+    "components/orders/src/domain/logo_image.rs": {
+      "status": "unproved",
+      "sha256": "0d0afcbce62206c2ce556861fbee0356fc63b06a26818e11ac95532796c9c7fc",
+      "review": "Company basis and logo transport moved into the orders component, tax rule conditions into checkout; behaviour unchanged"
+    },
     "components/orders/src/domain/order_fields.rs": {
       "status": "unproved",
       "sha256": "5cae0dc3862a0a52d9e06b7d5391b623575d0bab1414646f828885a41427a682",
@@ -2703,13 +2713,28 @@
     },
     "components/orders/src/domain.rs": {
       "status": "unproved",
-      "sha256": "72694d2af42f8a010321df814ff0fb0357ced6702175073516b62d329bcd4045",
-      "review": "Order list criteria, company model and receipts moved into components; kernel call sites unchanged"
+      "sha256": "1f0ad5d6b9727d049bba133a5c5b78194988114087e9182801f72970df3c5563",
+      "review": "Company basis and logo transport moved into the orders component, tax rule conditions into checkout; behaviour unchanged"
+    },
+    "components/orders/src/http/company.rs": {
+      "status": "unproved",
+      "sha256": "a087d67f34a49b9667031e12a8b7a09191addafacc8e8193bd31c3dd0b463a11",
+      "review": "Company basis and logo transport moved into the orders component, tax rule conditions into checkout; behaviour unchanged"
+    },
+    "components/orders/src/http/company_logo.rs": {
+      "status": "unproved",
+      "sha256": "9b27db1c1956deb67816cd72b0b4a63709e8f7ba29e6512c83d6b72729041f61",
+      "review": "Company basis and logo transport moved into the orders component, tax rule conditions into checkout; behaviour unchanged"
+    },
+    "components/orders/src/http.rs": {
+      "status": "unproved",
+      "sha256": "e09a21213fd11696722320cfb5d96823ad7ce8b98afcde1f5e18fc8e95e24371",
+      "review": "Company basis and logo transport moved into the orders component, tax rule conditions into checkout; behaviour unchanged"
     },
     "components/orders/src/lib.rs": {
       "status": "unproved",
-      "sha256": "6a96b778a1cab09f6772c19777ec555cd0183bdf0a51dacc0f8cec75f0c3ba3d",
-      "review": "POS, checkout session review, company data, receipts and carrier documents moved into components"
+      "sha256": "08df39eb43fd3d5af07faacf5068a667edbc99d0452754532feb76cc6ddf3cb6",
+      "review": "Company basis and logo transport moved into the orders component, tax rule conditions into checkout; behaviour unchanged"
     },
     "components/orders/src/ports.rs": {
       "status": "unproved",
@@ -6773,8 +6798,8 @@
     },
     "src/commerce/tax_context.rs": {
       "status": "unproved",
-      "sha256": "bb326512b4e55d498e60c813edad3eb4d847b9b55c4ef72370616379b7c2a6ba",
-      "review": "Reviewed eighteen core findings: typed trusted identity and explicit route rights; consolidated current grants; durable auth and fenced shared limits; scoped transactions and one-backend PgBouncer including nested borrow fixes; bounded Wasm/PNG work; notified workers, savepoint quarantine and conservative retention; separate runtime roles and startup configuration. Real PostgreSQL/provider regressions preserve current tenant/customer/payment behavior. SQL/network adapters remain unproved."
+      "sha256": "01c4220c642e7335cfbdecee03501e092066769d96081f3f12db77386408db41",
+      "review": "Company basis and logo transport moved into the orders component, tax rule conditions into checkout; behaviour unchanged"
     },
     "src/commerce/test_stock.rs": {
       "status": "unproved",
@@ -7221,11 +7246,6 @@
       "sha256": "dc879a218586eee0318914955760395a1fe2ab936d4d5f989fadfc2d4949d35f",
       "review": "Tenant roles and current grants independently reviewed; owner/retained-override/acceptance races repaired and PostgreSQL-blocked regressions passed; PII and Flow projection boundaries documented; B2B feature settings delegate shared CAS/history and preserve financial guards. Existing extracted policies unchanged; SQL/async/UI remain reviewed adapters, not full proofs."
     },
-    "src/operations/company_logo.rs": {
-      "status": "unproved",
-      "sha256": "8f14e1a09afce6d338828f8be4a3e04f79fd201276a00324d44d3f002e9d6131",
-      "review": "POS, checkout session review, company data, receipts and carrier documents moved into components"
-    },
     "src/operations/company_model.rs": {
       "status": "unproved",
       "sha256": "f6e973b7c6d2635b5a4fe973a9c84210d9a31a36aa412213398023f184ec2f1b",
@@ -7358,13 +7378,13 @@
     },
     "src/operations/master_data.rs": {
       "status": "unproved",
-      "sha256": "73d86552633f7f41d0d85e4e8db0a40feffaa78bea0f90e5d137bca57ff747f6",
-      "review": "POS, checkout session review, company data, receipts and carrier documents moved into components"
+      "sha256": "76b286520761078a7969883a3baa18566abdf2e30da01488ddf106a1171f78e0",
+      "review": "Company basis and logo transport moved into the orders component, tax rule conditions into checkout; behaviour unchanged"
     },
     "src/operations/mod.rs": {
       "status": "unproved",
-      "sha256": "2d99c17a2dde9907668f3fdd8360b33276f99029cada8cd072118662b2c56e41",
-      "review": "Experiment operations and source content checks moved into the intelligence component, CRM creation context into customers; behaviour unchanged"
+      "sha256": "d0224d3d59023c77af224ac87122d3ca6dfb9c7ebd79ae91a34047c9cd5616d4",
+      "review": "Company basis and logo transport moved into the orders component, tax rule conditions into checkout; behaviour unchanged"
     },
     "src/operations/order_documents.rs": {
       "status": "unproved",
@@ -7403,8 +7423,8 @@
     },
     "src/operations/routes.rs": {
       "status": "unproved",
-      "sha256": "1f08be8c7631228b22fb0c955c0f796ec124f8bf56944f192d0fa9e21000c87d",
-      "review": "2026-10-19 reviewed native read-only import projection against shared product/category/address owners; paired CRM/history PII and private target/package/digest checks; generic completion evidence atomically uses existing job creator/lease/package and record CAS, platform AEAD, native actual-field verification, no new app table or queue. Actual eight-domain migration/archival/restart/tamper and native app callback/jobs/admin creation tests pass; pure cancelled-success policy has exact Lean claim, all boolean cases and a true-return negative mutation. SQL, cryptography, async service correctness and public hosting remain outside formal proof."
+      "sha256": "7b3893462653bf3553d8132e427a3d36c74f8102ef5c516df0017742303642de",
+      "review": "Company basis and logo transport moved into the orders component, tax rule conditions into checkout; behaviour unchanged"
     },
     "src/operations/workflow.rs": {
       "status": "unproved",
@@ -7968,8 +7988,8 @@
       "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
     },
     "Cargo.lock": {
-      "sha256": "2eb3d5572706ba8730b6fb07771f380ad5577dbbd3a44a275e2812f7e99ba9d4",
-      "review": "Rate refresh, company onboarding, POS channel setup, rule comparison and facts and source lifecycle handlers moved into their components; behaviour unchanged"
+      "sha256": "1f0cedc8934e9842de03323d21137cc1707096fe53a2f73f73ff6fd77abcb0cb",
+      "review": "Company basis and logo transport moved into the orders component, tax rule conditions into checkout; behaviour unchanged"
     },
     "Cargo.toml": {
       "sha256": "12d2d79a98f6913d20b8e912afb9ea8de0539b9e83428de8a9d7412c406896f6",

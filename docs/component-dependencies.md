@@ -18,11 +18,11 @@ run SQL without being in a `store` folder. Both numbers only fall.
 | shop | 5597 | 32 | 105 | 23 | 15 | apps (4), catalog (8), checkout (13), core (249), customers (3), host (4), identity (2), intelligence (3), inventory (1), marketing (11), payments (3), pricing (20), shipping (4), studio (3) | 22 |
 | catalog | 8668 | 38 | 203 | 15 | 11 | apps (19), b2b (2), checkout (9), core (333), customers (5), identity (23), intelligence (8), marketing (15), pricing (27), protocols (1), shop (13), studio (8) | 14 |
 | inventory | 649 | 2 | 26 | 2 | 2 | catalog (1), checkout (2), core (29), identity (4), intelligence (2), pricing (3), protocols (2), shop (2) | 3 |
-| pricing | 3548 | 6 | 17 | 4 | 2 | catalog (1), checkout (4), core (64), identity (4), marketing (2), shop (10), studio (1) | 4 |
+| pricing | 3516 | 6 | 17 | 4 | 2 | catalog (1), checkout (4), core (63), identity (4), shop (7), studio (1) | 4 |
 | shipping | 973 | 6 | 73 | 2 | 0 | apps (3), catalog (5), checkout (1), core (38), identity (5), orders (4), payments (1), pricing (3), shop (10), studio (4) | 6 |
-| checkout | 3961 | 10 | 207 | 8 | 3 | apps (19), b2b (19), catalog (9), core (206), customers (5), host (9), identity (2), intelligence (2), inventory (3), marketing (15), orders (1), payments (8), pos (12), pricing (40), shipping (3), shop (86), studio (7) | 15 |
+| checkout | 4008 | 10 | 207 | 8 | 3 | apps (19), b2b (19), catalog (9), core (207), customers (5), host (9), identity (2), intelligence (2), inventory (3), marketing (16), orders (1), payments (8), pos (12), pricing (39), shipping (3), shop (88), studio (7) | 15 |
 | customers | 2196 | 15 | 82 | 5 | 3 | apps (9), checkout (2), core (145), identity (30), marketing (4), orders (1), pos (1), pricing (5), shipping (3), shop (11), studio (4) | 4 |
-| orders | 5920 | 29 | 452 | 11 | 7 | apps (32), b2b (1), catalog (9), checkout (6), core (266), customers (5), identity (72), inventory (1), marketing (7), payments (5), pricing (8), shipping (3), shop (18), studio (8) | 17 |
+| orders | 5976 | 28 | 452 | 11 | 7 | apps (32), b2b (1), catalog (9), checkout (6), core (238), customers (5), identity (68), inventory (1), marketing (7), payments (5), pricing (8), shipping (3), shop (18), studio (8) | 17 |
 | payments | 4798 | 1 | 264 | 15 | 7 | apps (10), core (214), host (4), identity (10), inventory (1), orders (1), pos (1), pricing (8), shop (4), studio (1) | 14 |
 | marketing | 6154 | 20 | 337 | 14 | 8 | apps (14), automation (20), b2b (2), catalog (5), checkout (3), core (180), identity (36), intelligence (14), orders (1), payments (1), pos (1), pricing (14), shop (31), studio (2) | 24 |
 | b2b | 2494 | 9 | 108 | 8 | 8 | apps (16), checkout (10), core (110), customers (2), identity (17), marketing (1), orders (1), pos (1), pricing (8), shop (26), studio (7) | 8 |
@@ -37,7 +37,7 @@ run SQL without being in a `store` folder. Both numbers only fall.
 
 ## Cycles
 
-63 pairs of components depend on each other. A crate boundary needs each pair
+62 pairs of components depend on each other. A crate boundary needs each pair
 reduced to one direction first.
 
 - apps ↔ b2b: 3 and 16 references
@@ -69,12 +69,12 @@ reduced to one direction first.
 - checkout ↔ identity: 2 and 1 references
 - checkout ↔ intelligence: 2 and 20 references
 - checkout ↔ inventory: 3 and 2 references
-- checkout ↔ marketing: 15 and 3 references
+- checkout ↔ marketing: 16 and 3 references
 - checkout ↔ orders: 1 and 6 references
 - checkout ↔ pos: 12 and 17 references
-- checkout ↔ pricing: 40 and 4 references
+- checkout ↔ pricing: 39 and 4 references
 - checkout ↔ shipping: 3 and 1 references
-- checkout ↔ shop: 86 and 13 references
+- checkout ↔ shop: 88 and 13 references
 - customers ↔ identity: 30 and 1 references
 - customers ↔ orders: 1 and 5 references
 - customers ↔ pos: 1 and 1 references
@@ -92,14 +92,13 @@ reduced to one direction first.
 - inventory ↔ shop: 2 and 1 references
 - marketing ↔ orders: 1 and 7 references
 - marketing ↔ pos: 1 and 5 references
-- marketing ↔ pricing: 14 and 2 references
 - marketing ↔ shop: 31 and 11 references
 - marketing ↔ studio: 2 and 9 references
 - orders ↔ payments: 5 and 1 references
 - orders ↔ shipping: 3 and 4 references
 - payments ↔ pos: 1 and 3 references
 - payments ↔ shop: 4 and 3 references
-- pricing ↔ shop: 10 and 20 references
+- pricing ↔ shop: 7 and 20 references
 - pricing ↔ studio: 1 and 2 references
 - shipping ↔ shop: 10 and 4 references
 - shop ↔ studio: 3 and 14 references
@@ -114,35 +113,35 @@ reduced to one direction first.
 | intelligence | core | `State` | 133 |
 | apps | core | `Result` | 96 |
 | catalog | core | `Result` | 86 |
-| orders | core | `State` | 81 |
 | catalog | core | `State` | 80 |
 | payments | core | `Result` | 73 |
 | intelligence | identity | `auth::` | 70 |
-| orders | identity | `auth::` | 68 |
-| orders | core | `Result` | 63 |
+| orders | core | `State` | 67 |
+| orders | identity | `auth::` | 62 |
 | catalog | core | `veyndo_core::` | 62 |
 | apps | core | `RequestContext` | 59 |
 | shop | core | `veyndo_core::` | 58 |
 | intelligence | core | `Error` | 58 |
+| orders | core | `Result` | 54 |
 | identity | core | `veyndo_core::` | 53 |
 | catalog | core | `RequestContext` | 53 |
 | shop | core | `State` | 52 |
 | intelligence | core | `conflict` | 51 |
-| orders | core | `RequestContext` | 50 |
 | shop | core | `Result` | 46 |
 | intelligence | apps | `apps::` | 45 |
 | checkout | core | `Result` | 45 |
 | customers | core | `State` | 44 |
+| orders | core | `RequestContext` | 43 |
 | checkout | core | `RequestContext` | 43 |
 | marketing | core | `veyndo_core::` | 42 |
 | marketing | core | `Result` | 42 |
 | apps | core | `State` | 42 |
 | intelligence | core | `veyndo_core::` | 40 |
+| checkout | shop | `veyndo_shop::` | 39 |
 | customers | core | `Result` | 38 |
 | payments | core | `veyndo_core::` | 37 |
 | payments | core | `State` | 37 |
 | payments | core | `RequestContext` | 37 |
-| checkout | shop | `veyndo_shop::` | 37 |
 | apps | identity | `veyndo_identity::` | 35 |
 | studio | identity | `auth::` | 32 |
 | studio | core | `Result` | 32 |

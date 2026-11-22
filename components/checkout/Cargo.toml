@@ -22,5 +22,6 @@ reqwest.workspace = true
 ring.workspace = true
 sha2.workspace = true
 veyndo-b2b = { path = "../b2b" }
+veyndo-marketing = { path = "../marketing" }
 veyndo-identity = { path = "../identity" }
 veyndo-runtime = { path = "../../crates/runtime" }

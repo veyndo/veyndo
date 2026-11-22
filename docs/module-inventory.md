@@ -380,7 +380,6 @@ This lists every checked-in source module in these roots, including files with n
 | [src/migrations/schema.rs](../src/migrations/schema.rs) | Append-only ordered migration source catalogue; deployed checksums are never rewritten. |
 | [src/migrations.rs](../src/migrations.rs) | Versioned setup is separate from serving; no catalog-wide startup repair. |
 | [src/operations/addresses.rs](../src/operations/addresses.rs) | Merchant/MCP address operations use identical customer ownership and revision checks to the Store API. |
-| [src/operations/company_logo.rs](../src/operations/company_logo.rs) | Tenant-owned logo uploads: bounded decoding, metadata stripping, immutable PNG storage and linked public delivery. |
 | [src/operations/company_model.rs](../src/operations/company_model.rs) | Company profile admission, sparse channel inheritance and structured-address print projection. |
 | [src/operations/company_public.rs](../src/operations/company_public.rs) | Explicit public legal/brand projection; bank account, domestic tax ID and unlinked uploads remain private. |
 | [src/operations/creation_schema.rs](../src/operations/creation_schema.rs) | Domain-owned MCP schemas for safe CRM creation choices and explicitly reviewed manual orders. |
@@ -407,7 +406,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/operations/list_criteria.rs](../src/operations/list_criteria.rs) | Bounded native order/customer filter and sort contracts, reused by HTTP, MCP and reviewed grid plans. |
 | [src/operations/manual_order_admission.rs](../src/operations/manual_order_admission.rs) | Private admin-cart admission and locked final checkout guards are owned by the checkout component. |
 | [src/operations/manual_orders.rs](../src/operations/manual_orders.rs) | Actor-private manual-order quotes reuse native cart, legal, pricing, inventory and checkout; no second order ledger. |
-| [src/operations/master_data.rs](../src/operations/master_data.rs) | HTTP entry points of the company basis; storage and validation are owned by the orders component. |
+| [src/operations/master_data.rs](../src/operations/master_data.rs) | The company basis lives in the orders component; these entries keep the server-side signatures. |
 | [src/operations/mod.rs](../src/operations/mod.rs) | Merchant CRM and fulfillment APIs, shared verbatim with MCP operations capabilities. |
 | [src/operations/order_documents.rs](../src/operations/order_documents.rs) | Immutable private carrier documents belong to the existing order receipt store, never product assets. |
 | [src/operations/order_list.rs](../src/operations/order_list.rs) | The order list query is owned by the orders component; admitted app filters join it here. |
@@ -817,6 +816,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/checkout/src/store/product_snapshot.rs](../components/checkout/src/store/product_snapshot.rs) | Localized immutable checkout SKU snapshots read under the purchase transaction's locks. |
 | [components/checkout/src/store/selected_customer.rs](../components/checkout/src/store/selected_customer.rs) | The customer a merchant selected for a cart, revalidated under a shared lock so profile edits cannot race the purchase. |
 | [components/checkout/src/store/session.rs](../components/checkout/src/store/session.rs) | What a checkout session reads under the checkout transaction: the channel it may sell on and the order it already placed. |
+| [components/checkout/src/store/tax_conditions.rs](../components/checkout/src/store/tax_conditions.rs) | Tax rules with conditions read private pre-tax cart facts; the quote they are measured on carries no taxes of its own conditions. |
 | [components/checkout/src/store.rs](../components/checkout/src/store.rs) | Reads of the checkout transaction. |
 | [components/core/src/access.rs](../components/core/src/access.rs) | Admission facts of one shop and sales channel, read once per request and shared by every later check. |
 | [components/core/src/admission/relay.rs](../components/core/src/admission/relay.rs) | Short, bounded relay admission waiting before contacting the independent Checkout service. |
@@ -1001,6 +1001,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/orders/src/domain/creation_schema.rs](../components/orders/src/domain/creation_schema.rs) | Domain-owned MCP schemas for safe CRM creation choices and explicitly reviewed manual orders. |
 | [components/orders/src/domain/import_product.rs](../components/orders/src/domain/import_product.rs) | Explicit catalogue-only preview: whitelist current mapped/native fields, bound text/media, reuse native money formatting. |
 | [components/orders/src/domain/import_relations.rs](../components/orders/src/domain/import_relations.rs) | Canonical import references resolve to tenant-bound native IDs; the existing product owner validates every relation. |
+| [components/orders/src/domain/logo_image.rs](../components/orders/src/domain/logo_image.rs) | Bounded logo decoding: only raster formats, limited size and memory, re-encoded as PNG so no metadata or active content survives. |
 | [components/orders/src/domain/order_fields.rs](../components/orders/src/domain/order_fields.rs) | Standard order read fields are projected from the authoritative quote/payment, never maintained twice. |
 | [components/orders/src/domain/order_machine.rs](../components/orders/src/domain/order_machine.rs) | Declarative order workflow schema. Extensions add states, never executable effects or payment truth. |
 | [components/orders/src/domain/order_workflow.rs](../components/orders/src/domain/order_workflow.rs) | One server-derived action catalogue drives UI, HTTP and MCP; built-in business guards cannot be bypassed. |
@@ -1008,6 +1009,9 @@ This lists every checked-in source module in these roots, including files with n
 | [components/orders/src/domain/receipt_pdf.rs](../components/orders/src/domain/receipt_pdf.rs) | Minimal paginated PDF serializer with WinAnsi Helvetica; snapshot retains complete Unicode originals. |
 | [components/orders/src/domain/receipt_text.rs](../components/orders/src/domain/receipt_text.rs) | Four-language document labels and authoritative snapshot-to-print projection. |
 | [components/orders/src/domain.rs](../components/orders/src/domain.rs) | Rules of orders, free of I/O. |
+| [components/orders/src/http/company.rs](../components/orders/src/http/company.rs) | Company basis transport: reading and saving the shop-wide or channel-specific company data under the settings rights. |
+| [components/orders/src/http/company_logo.rs](../components/orders/src/http/company_logo.rs) | Company logo transport: one multipart upload, a merchant preview and the public delivery of linked logos. |
+| [components/orders/src/http.rs](../components/orders/src/http.rs) | HTTP handlers of the orders component; the server registers them with their route rights. |
 | [components/orders/src/lib.rs](../components/orders/src/lib.rs) | Orders component: the order state machine, derived fields, audited mutations and receipts. |
 | [components/orders/src/ports.rs](../components/orders/src/ports.rs) | What the orders component needs from the server. |
 | [components/orders/src/store/account_orders.rs](../components/orders/src/store/account_orders.rs) | Orders and receipts as their owning customer account reads them; matching a guest's email never grants access. |

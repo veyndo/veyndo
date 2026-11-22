@@ -298,7 +298,6 @@
         "checkout",
         "core",
         "identity",
-        "marketing",
         "shop",
         "studio"
       ],
@@ -510,7 +509,7 @@
         "sales_channels",
         "tenants"
       ],
-      "glob_imports": 29,
+      "glob_imports": 28,
       "untyped_access": 452,
       "sql_outside_store": 11
     },
