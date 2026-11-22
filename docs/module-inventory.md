@@ -231,7 +231,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/cognition/experiments/mod.rs](../src/cognition/experiments/mod.rs) | Controlled experiments use the existing storefront layout consumer and authoritative payment ledger; the intelligence component owns their store. |
 | [src/cognition/extraction.rs](../src/cognition/extraction.rs) | API/MCP/flow source extraction shares provider admission and quote checks; candidates require merchant review. |
 | [src/cognition/generations.rs](../src/cognition/generations.rs) | Model-change intake is owned by the intelligence component. |
-| [src/cognition/guardrails.rs](../src/cognition/guardrails.rs) | Merchant-owned guardrails in commerce settings; native currency amounts bind preview and execution. |
+| [src/cognition/guardrails.rs](../src/cognition/guardrails.rs) | The guardrail rules live in the intelligence component; plan validation reads the current settings here. |
 | [src/cognition/indexing.rs](../src/cognition/indexing.rs) | Durable bounded embedding jobs; short claims and revision fences keep provider latency outside PostgreSQL. |
 | [src/cognition/mod.rs](../src/cognition/mod.rs) | Evidence-based shop memory: event receipts, observed pairs, reviewable hypotheses and bounded context. |
 | [src/cognition/preferences.rs](../src/cognition/preferences.rs) | Consent-bound private cart preference graph: entry points, consent and channel admission; model and store live in the intelligence component. |
@@ -424,7 +424,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/outbox.rs](../src/outbox.rs) | Durable outbox and audit projection worker. |
 | [src/payments/accounts.rs](../src/payments/accounts.rs) | Merchant-authorized onboarding bridge; only authenticated provider responses establish account bindings. |
 | [src/payments/app_commands.rs](../src/payments/app_commands.rs) | App/Flow/MCP payment actions enqueue core jobs; provider-bound attempts prevent cross-app command authority. |
-| [src/payments/capture_configuration.rs](../src/payments/capture_configuration.rs) | Capture timing is versioned shop/channel configuration; every attempt freezes its admitted provider intent. |
+| [src/payments/capture_configuration.rs](../src/payments/capture_configuration.rs) | Capture timing lives in the payments component; the server keeps this path for its callers. |
 | [src/payments/catalog.rs](../src/payments/catalog.rs) | Native payment operation descriptions, composed by the canonical operation registry. |
 | [src/payments/contract.rs](../src/payments/contract.rs) | Adapt the shared provider declaration grammar; native payment authority and actual effects remain attached. |
 | [src/payments/details.rs](../src/payments/details.rs) | Native payment-only history projection and optional owned provider observation; no financial command is executed. |
@@ -898,6 +898,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/intelligence/src/domain/experiment_model.rs](../components/intelligence/src/domain/experiment_model.rs) | Preregistered fixed-horizon experiment parameters and conservative bounded-outcome inference. |
 | [components/intelligence/src/domain/offer.rs](../components/intelligence/src/domain/offer.rs) | The positive projection of a native quote that the shop signs as an offer: a statement, not a price lock. |
 | [components/intelligence/src/domain/preference_graph.rs](../components/intelligence/src/domain/preference_graph.rs) | Typed, bounded private preference graph: no dangling relations and no free-form kinds. |
+| [components/intelligence/src/domain/price_guardrails.rs](../components/intelligence/src/domain/price_guardrails.rs) | Merchant-owned AI price guardrails: corridors, margins, discounts and the autonomy limit, measured in native currency amounts. |
 | [components/intelligence/src/domain/prompt_context.rs](../components/intelligence/src/domain/prompt_context.rs) | What a model is given to read: the shared source policy and byte-bounded snapshots that never cut text mid-string. |
 | [components/intelligence/src/domain/run_result.rs](../components/intelligence/src/domain/run_result.rs) | The synchronous planning result of a saved run: a ready proposal, or the error the run stopped with. |
 | [components/intelligence/src/domain/source_content.rs](../components/intelligence/src/domain/source_content.rs) | Bounds of a knowledge source: enabled languages, kinds, translated fields and the digest that binds its chunks. |
@@ -1031,6 +1032,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/orders/src/types.rs](../components/orders/src/types.rs) | Stored and exchanged records of the orders component. |
 | [components/payments/src/domain/amounts.rs](../components/payments/src/domain/amounts.rs) | Provider wire amounts: decimal strings at the ISO precision of their currency, exact in minor units. |
 | [components/payments/src/domain/attempt.rs](../components/payments/src/domain/attempt.rs) | One payment attempt of an order as the ledger stores it. |
+| [components/payments/src/domain/capture_intent.rs](../components/payments/src/domain/capture_intent.rs) | Capture timing of a payment method: capture at once or authorize first, as configured and as the provider method supports. |
 | [components/payments/src/domain/catalog.rs](../components/payments/src/domain/catalog.rs) | Native payment operation descriptions, composed by the canonical operation registry. |
 | [components/payments/src/domain/details_model.rs](../components/payments/src/domain/details_model.rs) | Typed, PII-free provider transaction details; these observations never mutate native payment state. |
 | [components/payments/src/domain/details_tests.rs](../components/payments/src/domain/details_tests.rs) | Transaction observations reject untyped and foreign evidence without touching payment state. |
@@ -1059,6 +1061,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/payments/src/service.rs](../components/payments/src/service.rs) | service of this component. |
 | [components/payments/src/store/attempts.rs](../components/payments/src/store/attempts.rs) | Row mapping of the payment attempt ledger. |
 | [components/payments/src/store/capture_admission.rs](../components/payments/src/store/capture_admission.rs) | Serialized native capture budgets; uncertain capture jobs reserve the remaining authorization. |
+| [components/payments/src/store/capture_configuration.rs](../components/payments/src/store/capture_configuration.rs) | Capture timing is versioned shop and channel configuration; every attempt freezes the provider intent admitted here. |
 | [components/payments/src/store/commands.rs](../components/payments/src/store/commands.rs) | Durable idempotent payment commands, customer context binding and serial refund admission. |
 | [components/payments/src/store/instructions.rs](../components/payments/src/store/instructions.rs) | The outbox event that makes accepted recipient instructions available, with a native invoice snapshot. |
 | [components/payments/src/store/instruments.rs](../components/payments/src/store/instruments.rs) | Saved instruments a verified receipt may add: only for the original account's consent, only redacted metadata. |

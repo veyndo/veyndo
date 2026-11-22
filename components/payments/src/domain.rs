@@ -1,6 +1,7 @@
 //! Rules of the payment ledger, free of I/O.
 pub mod amounts;
 pub mod attempt;
+pub mod capture_intent;
 pub mod catalog;
 pub mod details_model;
 pub mod diagnostics;

@@ -2,16 +2,7 @@
 use crate::*;
 
 // One constrained capability model drives agent plans, MCP and merchant writes.
-#[derive(Clone, Debug, Deserialize, Serialize)]
-pub(crate) struct Change {
-    pub(crate) product_id: String,
-    #[serde(default)]
-    pub(crate) expected_revision: i64,
-    #[serde(default)]
-    pub(crate) price: Option<f64>,
-    #[serde(default)]
-    pub(crate) stock: Option<i32>,
-}
+pub(crate) use veyndo_intelligence::domain::price_guardrails::Change;
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub(crate) struct Proposal {
     #[serde(default, skip_serializing_if = "Option::is_none")]

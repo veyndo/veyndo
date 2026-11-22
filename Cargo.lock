@@ -3899,6 +3899,7 @@ dependencies = [
  "serde_json",
  "sha2 0.10.9",
  "sqlx",
+ "veyndo-app-model",
  "veyndo-core",
  "veyndo-inventory",
  "veyndo-kernel",

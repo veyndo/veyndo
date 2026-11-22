@@ -1,6 +1,7 @@
 //! SQL of the payment ledger; admissions run inside the caller's transaction.
 pub mod attempts;
 pub mod capture_admission;
+pub mod capture_configuration;
 pub mod commands;
 pub mod instructions;
 pub mod instruments;

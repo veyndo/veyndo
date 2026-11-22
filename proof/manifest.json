@@ -399,7 +399,7 @@
     },
     "ai_price_admissible": {
       "bindings": [
-        "src/cognition/guardrails.rs"
+        "components/intelligence/src/domain/price_guardrails.rs"
       ],
       "theorems": [
         "ai_price_exact",
@@ -409,7 +409,7 @@
     "ai_autonomy_admissible": {
       "bindings": [
         "src/cognition/autonomy.rs",
-        "src/cognition/guardrails.rs"
+        "components/intelligence/src/domain/price_guardrails.rs"
       ],
       "theorems": [
         "ai_autonomy_exact",
@@ -2211,6 +2211,11 @@
       "sha256": "db69ff6ed70844cc06b8086696bd03a5e8fe2ea7d7b68f1ef2d9e3d84865afbf",
       "review": "Experiment store, readout and automation, behaviour analytics store and the private preference graph moved verbatim into the intelligence component; consent, settings and channel admission stay in the server. No kernel policy changed."
     },
+    "components/intelligence/src/domain/price_guardrails.rs": {
+      "status": "reviewed-binding",
+      "sha256": "90b7c2c7894ce854c9dd1618a4c0b1ebb5d9618a960af2c0224f1288451c905c",
+      "review": "AI price guardrails moved into the intelligence component and capture configuration into payments; behaviour unchanged"
+    },
     "components/intelligence/src/domain/prompt_context.rs": {
       "status": "unproved",
       "sha256": "a57bfb3635ce82f4ad02d3abf8ad1519a1c0ed5d3b6a0e9d0a84c3d20e54f021",
@@ -2233,8 +2238,8 @@
     },
     "components/intelligence/src/domain.rs": {
       "status": "unproved",
-      "sha256": "72548f2a3db6639873d1a7576e42a77348f5e1841d74f0d03ea71ce949acaafa",
-      "review": "Process configuration moved into core; browser session transports, Checkout buyer grants, the private Checkout relay, trusted geography and provider startup validation moved into their components without behaviour change"
+      "sha256": "692b7d046cc42e03e4e0529a4d8b095fa52901aace65fded6d3063af5727994b",
+      "review": "AI price guardrails moved into the intelligence component and capture configuration into payments; behaviour unchanged"
     },
     "components/intelligence/src/http/claims.rs": {
       "status": "unproved",
@@ -2826,6 +2831,11 @@
       "sha256": "1ce49e584f49693b83ab958ec9377614bd58107901e075803fb80edbdd8193b3",
       "review": "Unit tests for every public domain function of the components; no production code changed"
     },
+    "components/payments/src/domain/capture_intent.rs": {
+      "status": "unproved",
+      "sha256": "891e7de70965037167631b2f19af62a59701148d706328ae189405f9b3303997",
+      "review": "AI price guardrails moved into the intelligence component and capture configuration into payments; behaviour unchanged"
+    },
     "components/payments/src/domain/catalog.rs": {
       "status": "unproved",
       "sha256": "5d93df4c2be4dcf15d17c5314f7bbb2340ffc8a5ef50cd89a5e470b66574a479",
@@ -2888,8 +2898,8 @@
     },
     "components/payments/src/domain.rs": {
       "status": "unproved",
-      "sha256": "d61e98c52bcf430b229d922e2a19a8da36afc49fc4a02209de4aa01703358f99",
-      "review": "Receipt persistence and order ledger moved behind the payments host port; kernel call sites unchanged"
+      "sha256": "e8c13cc5c8c4e59103b0c8453630f3e000029e3ceee3499682871bef9091593b",
+      "review": "AI price guardrails moved into the intelligence component and capture configuration into payments; behaviour unchanged"
     },
     "components/payments/src/lib.rs": {
       "status": "unproved",
@@ -2966,6 +2976,11 @@
       "sha256": "a2704718c9b3be7854fb2d0ff8720660c068a2f76938eb7d04d4f42dcab0c9a7",
       "review": "Payment ledger rules moved into components/payments; kernel call sites unchanged"
     },
+    "components/payments/src/store/capture_configuration.rs": {
+      "status": "unproved",
+      "sha256": "b418e01b014a7a13eea3edb056392c45b5dbb96da30f689688ea05cfc1a4f945",
+      "review": "AI price guardrails moved into the intelligence component and capture configuration into payments; behaviour unchanged"
+    },
     "components/payments/src/store/commands.rs": {
       "status": "reviewed-binding",
       "sha256": "5fede8ecca8cab8aefa817d4e15447c6d3a917ba71a5185d48c2594280c50101",
@@ -3018,8 +3033,8 @@
     },
     "components/payments/src/store.rs": {
       "status": "unproved",
-      "sha256": "dd8b724f3ce79289afb110c3808579f3614957da060ad4a61d23201061b6fcc1",
-      "review": "Payment commands, worker and provider sessions moved behind the payments gateway port"
+      "sha256": "1680d2a8393219887d70d250007c574146ca9a072121e88e1dd0a8aa736d4830",
+      "review": "AI price guardrails moved into the intelligence component and capture configuration into payments; behaviour unchanged"
     },
     "components/pos/src/domain/input.rs": {
       "status": "unproved",
@@ -6502,9 +6517,9 @@
       "review": "Knowledge sources, PDF text extraction and embedding generations moved into the intelligence component without behaviour change"
     },
     "src/cognition/guardrails.rs": {
-      "status": "reviewed-binding",
-      "sha256": "e75b3bfdbab41ecfbcb8bcc7e29c35abaa4e284bc199d4f6e0b86764fd131ca4",
-      "review": "shop component crate created; settings types moved; no kernel binding changed"
+      "status": "unproved",
+      "sha256": "33e305ab126a7faa6a1bb9ae5ca16326637c380d032cc98f1251b7c4a9c442f4",
+      "review": "AI price guardrails moved into the intelligence component and capture configuration into payments; behaviour unchanged"
     },
     "src/cognition/indexing.rs": {
       "status": "unproved",
@@ -7468,8 +7483,8 @@
     },
     "src/payments/capture_configuration.rs": {
       "status": "unproved",
-      "sha256": "cdb986d3b03805fb73771623cbc63f3cf6f4be72cb5779bdc9fe70645e815e97",
-      "review": "Reviewed partial capture, per-capture refunds, settings admission and attempt-before-job locking; generated dispatcher follows policy domains; no SQL/provider proof claim"
+      "sha256": "5958a5195f1343fa732e8e0eda22822cf6b5f3c53cff20b4d6e537e5aa2e4a1e",
+      "review": "AI price guardrails moved into the intelligence component and capture configuration into payments; behaviour unchanged"
     },
     "src/payments/catalog.rs": {
       "status": "unproved",
@@ -7478,8 +7493,8 @@
     },
     "src/payments/contract.rs": {
       "status": "unproved",
-      "sha256": "9d599247b8d67c3aa3ad0996f352ac5ecff4ab0dae2ca722a875ae188f50d02b",
-      "review": "Reviewed complete standard compiler extraction in Apps 0.16/model 0.12. All 19 original before/common/after domain stages now run inside one shared compiler with preserved order, first model kind/pointer or native host error, internal actual view lookup and exhaustive Manifest field coverage. Native manifest_policy delegates value/reference/currency/scope/source/base, current Ed25519 keys, namespace/network/read and clock decisions to original owners; direct verified predicates remain attached. No no-op host domain callbacks or alternative serving compiler. Independent 116 model and 24 runtime tests include all 34 canonical packages, nineteen invalid-domain controls and denied-policy/callback-order cases. Native 74 app and two provider units, seventeen real HTTP/PostgreSQL app/schema/preview/staging/isolation/lifecycle/distribution/surface/assistant/event/generation/marketplace/payment modules, unchanged native digests and Clippy pass. Kernel unchanged; shared compiler, policy adapters and SQL/host effects remain unproved."
+      "sha256": "c397b139c024c9e36c3e95ab5d048c9db25913ac9abef370173dd821152934b0",
+      "review": "AI price guardrails moved into the intelligence component and capture configuration into payments; behaviour unchanged"
     },
     "src/payments/details.rs": {
       "status": "unproved",
@@ -7528,8 +7543,8 @@
     },
     "src/payments/mod.rs": {
       "status": "unproved",
-      "sha256": "1f4592ea6b58a08d74c7a4067f7261b892197842b773915ab0501ebd2d0acff8",
-      "review": "Process configuration moved into core; browser session transports, Checkout buyer grants, the private Checkout relay, trusted geography and provider startup validation moved into their components without behaviour change"
+      "sha256": "9d75dee21910b847c8f5da01e24d95a27f708465723fb34923c3d3f24e04c068",
+      "review": "AI price guardrails moved into the intelligence component and capture configuration into payments; behaviour unchanged"
     },
     "src/payments/operations.rs": {
       "status": "unproved",
@@ -7743,8 +7758,8 @@
     },
     "src/proposal_model.rs": {
       "status": "unproved",
-      "sha256": "92208ddf13c4d704ac009df3adb85428a52ab25e8adb4176d5d0f13a7b45dfd8",
-      "review": "Reviewed persistent copilot navigation as unproved adapter: registered views, current domain and PII rights, tenant-scoped record existence, no URLs or mutations; prompt v5 and isolated HTTP invalid-target regressions."
+      "sha256": "b7c89bb7bb63ccdb0170dde12d74379f090031fd51598d4012334d0ed8c90e47",
+      "review": "AI price guardrails moved into the intelligence component and capture configuration into payments; behaviour unchanged"
     },
     "src/proposal_routes.rs": {
       "status": "unproved",
@@ -7988,8 +8003,8 @@
       "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
     },
     "Cargo.lock": {
-      "sha256": "1f0cedc8934e9842de03323d21137cc1707096fe53a2f73f73ff6fd77abcb0cb",
-      "review": "Company basis and logo transport moved into the orders component, tax rule conditions into checkout; behaviour unchanged"
+      "sha256": "26139fd4a7a8d8ab568027b9471304ae21908ed8ec7d4a6beb341d3ee8931af8",
+      "review": "AI price guardrails moved into the intelligence component and capture configuration into payments; behaviour unchanged"
     },
     "Cargo.toml": {
       "sha256": "12d2d79a98f6913d20b8e912afb9ea8de0539b9e83428de8a9d7412c406896f6",

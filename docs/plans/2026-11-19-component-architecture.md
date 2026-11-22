@@ -308,6 +308,9 @@ Order follows the dependency report, lowest first. Each line is one move.
   cancellation evidence. The proved payment rules are bound to the new files.
   `service/provider_configuration` validates the provider origin, accounts
   and adapter services once at startup.
+  The capture intent of a method (`domain/capture_intent`) and the check of
+  configured capture modes against installed providers
+  (`store/capture_configuration`) live here too.
   Open: provider accounts and onboarding, the registry of methods from app
   manifests, routes, the PayPal adapter include.
 - [ ] checkout. Started: `components/checkout` owns the destination tax lines
@@ -344,7 +347,10 @@ Order follows the dependency report, lowest first. Each line is one move.
   of invoices, delivery notes and cancellations, and carrier documents.
   `ports::Payments` supplies the transfer instructions an invoice prints.
   The orders and receipts an owning customer account reads live there too,
-  as does the selective company release of a staging environment.
+  as does the selective company release of a staging environment. The
+  company basis handlers (`http/company`) and logo upload, preview and
+  public delivery with bounded decoding (`http/company_logo`,
+  `domain/logo_image`) moved here.
   Open: the grid plan, manual orders, imports, the workflow save (app
   lifecycle), fulfilment handlers, returns, merchant customer edits.
 - [ ] marketing. Started: `components/marketing` owns the rule conditions with
@@ -381,7 +387,8 @@ Order follows the dependency report, lowest first. Each line is one move.
   revision-checked line replacement, and `admit` runs the cashier, channel
   and company guards on a cart row the caller locked itself. The requisition
   import lives in `service/`; the bounds of cart lines moved to
-  `veyndo_shop::domain::cart_lines`. Open: lists (app configuration
+  `veyndo_shop::domain::cart_lines`. Company onboarding with its first
+  unit is `service/onboarding`. Open: lists (app configuration
   selections), quotes and their lifecycle (app lifecycle), the gateway and
   routes.
 - [ ] pos. Started: `components/pos` owns the cashier input envelope and the
@@ -392,9 +399,10 @@ Order follows the dependency report, lowest first. Each line is one move.
   sees. They price through `veyndo_shop::ports::Carts`. The cart admission
   every adapter runs (merchant-created cart, cashier, sales channel) moved to
   `veyndo_shop::domain::cart_admission`. The kernel binding of cash
-  admission names the new file. Open: the gateway (it dispatches into
-  catalog, currencies, coupons, legal and the checkout) and the channel
-  installation (it validates settings through the rule engine).
+  admission names the new file. The setup of a new POS channel (cash
+  payment and collection as channel overrides) is `store/channel_setup`.
+  Open: the gateway (it dispatches into catalog, currencies, coupons, legal
+  and the checkout).
 - [ ] apps (with `developer` and the vendored app storage). Started:
   `components/apps` (crate `veyndo-app-platform`; `crates/apps` stays the
   sandbox without SQL or network authority). It owns
@@ -475,7 +483,9 @@ Order follows the dependency report, lowest first. Each line is one move.
   The claim lifecycle and public claim batches (`service/claims`,
   `http/claims`), the knowledge workspace (`http/workspace`), experiment
   operations (`service/experiments`) and source content checks
-  (`service/sources`) read settings through the shop read cache.
+  (`service/sources`) read settings through the shop read cache. The AI price
+  guardrails with the proposed change type are `domain/price_guardrails`;
+  source detail, edit and lifecycle handlers are `http/sources`.
   Open: agents and their runs, proposals, the retrieval and question
   handlers, inference, cognition routes and workers.
 - [ ] studio. Started: `components/studio` owns report configuration and
