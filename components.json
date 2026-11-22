@@ -84,7 +84,7 @@
         "tenants"
       ],
       "glob_imports": 5,
-      "untyped_access": 86,
+      "untyped_access": 88,
       "sql_outside_store": 16
     },
     "shop": {
@@ -244,7 +244,7 @@
       ],
       "glob_imports": 38,
       "untyped_access": 203,
-      "sql_outside_store": 15
+      "sql_outside_store": 14
     },
     "inventory": {
       "title": "Stock, reservations and supply",
@@ -460,10 +460,8 @@
         "src/commerce/order_machine.rs",
         "src/commerce/order_mutation.rs",
         "src/commerce/order_workflow.rs",
-        "src/commerce/external_order_input.rs",
         "src/commerce/external_orders.rs",
-        "src/commerce/fulfillment.rs",
-        "src/commerce/external_order_labels.sql"
+        "src/commerce/fulfillment.rs"
       ],
       "tables": [
         "order_activity",
@@ -499,19 +497,16 @@
         "company_logos",
         "company_overrides",
         "customers",
-        "languages",
         "outbox",
         "product_assets",
-        "product_channel_visibility",
         "product_reviews",
-        "product_translations",
         "products",
         "sales_channels",
         "tenants"
       ],
-      "glob_imports": 28,
-      "untyped_access": 452,
-      "sql_outside_store": 11
+      "glob_imports": 25,
+      "untyped_access": 437,
+      "sql_outside_store": 10
     },
     "payments": {
       "title": "Provider-independent payment ledger, captures, refunds and provider workers",
@@ -741,6 +736,7 @@
         "host",
         "identity",
         "intelligence",
+        "inventory",
         "marketing",
         "orders",
         "payments",
@@ -773,8 +769,8 @@
         "workspace_roles"
       ],
       "glob_imports": 56,
-      "untyped_access": 419,
-      "sql_outside_store": 26
+      "untyped_access": 426,
+      "sql_outside_store": 27
     },
     "automation": {
       "title": "Deterministic rule evaluation and flow graphs",
@@ -845,7 +841,6 @@
         "checkout",
         "core",
         "customers",
-        "host",
         "identity",
         "marketing",
         "orders",
@@ -881,12 +876,11 @@
         "sales_channels",
         "shop_environments",
         "tenants",
-        "translation_jobs",
-        "user_sessions"
+        "translation_jobs"
       ],
-      "glob_imports": 73,
-      "untyped_access": 716,
-      "sql_outside_store": 35
+      "glob_imports": 72,
+      "untyped_access": 714,
+      "sql_outside_store": 34
     },
     "studio": {
       "title": "Merchant overview, reports, private staging shops and history",
@@ -913,6 +907,7 @@
         "identity",
         "intelligence",
         "marketing",
+        "orders",
         "pos",
         "pricing",
         "shop"
@@ -937,6 +932,7 @@
         "order_state_machines",
         "orders",
         "outbox",
+        "outbox_subscriber_failures",
         "payment_attempts",
         "policy",
         "product_assets",
@@ -944,6 +940,7 @@
         "product_channel_visibility",
         "product_translations",
         "products",
+        "projections",
         "receipt_settings",
         "sales_channels",
         "semantic_products",
@@ -954,7 +951,7 @@
         "translation_jobs"
       ],
       "glob_imports": 15,
-      "untyped_access": 160,
+      "untyped_access": 168,
       "sql_outside_store": 7
     },
     "protocols": {
@@ -1031,14 +1028,11 @@
         "commerce_settings",
         "extensions",
         "flow_jobs",
-        "outbox",
-        "outbox_subscriber_failures",
-        "products",
-        "projections"
+        "products"
       ],
       "glob_imports": 7,
       "untyped_access": 40,
-      "sql_outside_store": 6
+      "sql_outside_store": 4
     },
     "connectors": {
       "title": "Standard provider services and their delivery queue; hosted by the separate connector binary in extensions/services/connectors",

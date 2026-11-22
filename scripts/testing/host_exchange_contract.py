@@ -6,7 +6,7 @@ contract=json.loads((ROOT/'extensions/sdk/host-exchange-v1.json').read_text())
 assert contract['version']==1
 schemas=contract['operations']
 assert set(schemas)=={'record_action','channel','channel_product','order_import','job_enqueue','job_claim','job_progress'}
-assert 'pub(super) use veyndo_pricing::external_order::PaidOrder as Input;' in (ROOT/'src/commerce/external_order_input.rs').read_text()
+assert 'use veyndo_pricing::external_order::{PaidOrder as Input, SourceAmount};' in (ROOT/'components/apps/src/service/external_orders.rs').read_text()
 text=(ROOT/'components/pricing/src/domain/external_order.rs').read_text()
 def fields(name):
     body=re.search(r'struct '+name+r' \{(.*?)\n}',text,re.S)[1]

@@ -1,5 +1,6 @@
 //! SQL of the studio component.
 pub mod history;
+pub mod outbox_control;
 pub mod overview;
 pub mod reports;
 pub mod staging_assets;

@@ -61,7 +61,7 @@ fn workspace_routes() -> Router<App> {
         .secure_route(
             "/api/runtime/outbox/{id}/retry",
             &[("POST", "settings.write")],
-            post(retry_outbox),
+            post(veyndo_studio::http::outbox::retry),
         )
         .route("/health", get(health))
         .secure_route(
@@ -277,7 +277,11 @@ fn assistant_routes() -> Router<App> {
             axum::routing::delete(forget_personalization),
         )
         .secure_route("/api/concierge", &[("POST", "public")], post(concierge))
-        .secure_route("/api/runtime", &[("GET", "settings.read")], get(runtime))
+        .secure_route(
+            "/api/runtime",
+            &[("GET", "settings.read")],
+            get(veyndo_studio::http::outbox::runtime),
+        )
         .secure_route(
             "/api/extensions/activate",
             &[("POST", "apps.manage")],

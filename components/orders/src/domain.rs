@@ -6,6 +6,7 @@ pub mod import_relations;
 pub mod logo_image;
 pub mod order_fields;
 pub mod order_machine;
+pub mod order_transitions;
 pub mod order_workflow;
 pub mod receipt_instructions;
 pub mod receipt_pdf;

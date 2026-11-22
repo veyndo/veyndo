@@ -296,8 +296,13 @@ pub(crate) async fn invoke(a: &App, h: &RequestContext, name: &str, v: &Value) -
             .await?
         }
         "merchant.order.transition" => {
-            commerce::transition_order(State(a.clone()), h.clone(), Path(id()?), Json(v.clone()))
-                .await?
+            commerce::transition_order(
+                State(a.core.clone()),
+                h.clone(),
+                Path(id()?),
+                Json(v.clone()),
+            )
+            .await?
         }
         "merchant.order.note" => {
             orders::note(State(a.clone()), h.clone(), Path(id()?), Json(v.clone())).await?

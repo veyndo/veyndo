@@ -96,6 +96,5 @@ pub(crate) mod supply;
 pub(crate) mod supply_proposal;
 pub(crate) mod test_stock;
 
-mod external_order_input;
 mod external_orders;
 pub(crate) use external_orders::import_external;

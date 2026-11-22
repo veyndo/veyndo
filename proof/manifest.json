@@ -18,7 +18,7 @@
     "stock_admissible": {
       "bindings": [
         "src/checkout/price.rs",
-        "src/commerce/external_orders.rs"
+        "components/apps/src/service/external_orders.rs"
       ],
       "theorems": [
         "stock_positive_bounded",
@@ -43,7 +43,7 @@
     },
     "revision_admissible": {
       "bindings": [
-        "src/commerce/fulfillment.rs",
+        "components/orders/src/http/transitions.rs",
         "components/catalog/src/service/translation_apply.rs",
         "src/platform/ai.rs",
         "components/shop/src/http/operator_quotas.rs",
@@ -106,7 +106,7 @@
     },
     "manual_payment_admissible": {
       "bindings": [
-        "src/commerce/fulfillment.rs"
+        "components/orders/src/domain/order_transitions.rs"
       ],
       "theorems": [
         "manual_payment_safe",
@@ -602,7 +602,7 @@
     },
     "agent_preview_admissible": {
       "bindings": [
-        "src/agent_runs/authority.rs"
+        "components/identity/src/store/agent_authority.rs"
       ],
       "theorems": [
         "agent_preview_exact",
@@ -1081,6 +1081,11 @@
       "sha256": "671d9457e245f77eb9b4ca534197471d6271608548215ef13e2729a54647a388",
       "review": "Service calls and event delivery moved into the apps component without changing rules"
     },
+    "components/apps/src/service/external_orders.rs": {
+      "status": "reviewed-binding",
+      "sha256": "ca1a3e7c37313d8090f7d77279ba07d7a0255480da38bc5a6fe1861318ef5854",
+      "review": "Order transitions, external order intake and saved agent authority moved into the orders, apps and identity components"
+    },
     "components/apps/src/service/gateway.rs": {
       "status": "unproved",
       "sha256": "60f4102374725df6854935a8040a05bbec162d57302f5f1bed1aed0850b01954",
@@ -1138,8 +1143,8 @@
     },
     "components/apps/src/service.rs": {
       "status": "unproved",
-      "sha256": "3158656ac903b0915c7f07266530da843f2f438b9935bdb0f71682da1041fbd3",
-      "review": "App discovery, package activation and consent adapter moved into the apps component; behaviour unchanged"
+      "sha256": "6bb3148e3f0f1386a7476232cf83e33a3dc3702bfc322fa7a11250a0ae60e001",
+      "review": "Order transitions, external order intake and saved agent authority moved into the orders, apps and identity components"
     },
     "components/apps/src/store/action_log.rs": {
       "status": "unproved",
@@ -1626,6 +1631,11 @@
       "sha256": "87a0926f2f6761be525c239c091cca183dc2a061c1c3508383de0119567f6587",
       "review": "image jobs moved into components/catalog; no kernel binding changed"
     },
+    "components/catalog/src/store/order_downloads.rs": {
+      "status": "unproved",
+      "sha256": "9eecaca5b7126c5b956bc022438a28067cf6fe1ff129132666f1202acdb7c2a2",
+      "review": "Order transitions, external order intake and saved agent authority moved into the orders, apps and identity components"
+    },
     "components/catalog/src/store/product_edit.rs": {
       "status": "unproved",
       "sha256": "50cd55cda414b122ed10f5b7a3f2a1887eedf28f03fe06048950af1948aeef99",
@@ -1663,8 +1673,8 @@
     },
     "components/catalog/src/store.rs": {
       "status": "unproved",
-      "sha256": "21bcf626e0e92112314232961cfd867c787d2d01bfde72eba5666c0fc6d49653",
-      "review": "revision_admissible binding for applying translation drafts moved into components/catalog"
+      "sha256": "0a2249077ab954c82407c30e19e34825d024c55715ed54f0b553b90f4da4a4dd",
+      "review": "Order transitions, external order intake and saved agent authority moved into the orders, apps and identity components"
     },
     "components/catalog/src/types/asset.rs": {
       "status": "unproved",
@@ -2146,6 +2156,11 @@
       "sha256": "5e7aa39b24a5d51ebd41a9c115adf496790236d0bfe39376e71f1366b708c47c",
       "review": "The route permission registry moved unchanged into components/identity and is generic over the server state"
     },
+    "components/identity/src/store/agent_authority.rs": {
+      "status": "reviewed-binding",
+      "sha256": "86c1770d3fc6c2a68bb4a3659ba4ccf06be05342850e0531db1d4fdf14931434",
+      "review": "Order transitions, external order intake and saved agent authority moved into the orders, apps and identity components"
+    },
     "components/identity/src/store/broker.rs": {
       "status": "unproved",
       "sha256": "ca6b0c3d09dafc7c64d3d589ba08b7e4bc1557b40c5d040f7e6d0210e63148ae",
@@ -2173,8 +2188,8 @@
     },
     "components/identity/src/store.rs": {
       "status": "unproved",
-      "sha256": "75f3ba258d69512213ca8eaf492806e082aa482d91e3b9ecae16caf9d6061932",
-      "review": "Sessions, invitations, MFA, integration keys and broker assertions moved into the identity component without behaviour change"
+      "sha256": "c6f082c067dac12a36f0c503dbb2bc75336aecff87eb7436fd6dc176d9131a29",
+      "review": "Order transitions, external order intake and saved agent authority moved into the orders, apps and identity components"
     },
     "components/identity/src/types/envelopes.rs": {
       "status": "unproved",
@@ -2696,6 +2711,11 @@
       "sha256": "2ebd52f0ab1daee428f10707aebbb6e9470385ebb0976e0cbc7585e2afb03b32",
       "review": "order workflow kernel bindings follow the move into components/orders"
     },
+    "components/orders/src/domain/order_transitions.rs": {
+      "status": "reviewed-binding",
+      "sha256": "d7a7d9f3a7aa502f534c414ce3dd48fe40e7cd0feeecbef382680717114ab927",
+      "review": "Order transitions, external order intake and saved agent authority moved into the orders, apps and identity components"
+    },
     "components/orders/src/domain/order_workflow.rs": {
       "status": "reviewed-binding",
       "sha256": "33b9f9325cfb8157d39a69019091a46831938a5f1726dbbe371af886099826a7",
@@ -2718,8 +2738,8 @@
     },
     "components/orders/src/domain.rs": {
       "status": "unproved",
-      "sha256": "1f0ad5d6b9727d049bba133a5c5b78194988114087e9182801f72970df3c5563",
-      "review": "Company basis and logo transport moved into the orders component, tax rule conditions into checkout; behaviour unchanged"
+      "sha256": "127add8bf21e2ebd3574a7f8a225052b59c87bc6ea99b97a914bbaab3aa9d126",
+      "review": "Order transitions, external order intake and saved agent authority moved into the orders, apps and identity components"
     },
     "components/orders/src/http/company.rs": {
       "status": "unproved",
@@ -2731,10 +2751,15 @@
       "sha256": "9b27db1c1956deb67816cd72b0b4a63709e8f7ba29e6512c83d6b72729041f61",
       "review": "Company basis and logo transport moved into the orders component, tax rule conditions into checkout; behaviour unchanged"
     },
+    "components/orders/src/http/transitions.rs": {
+      "status": "reviewed-binding",
+      "sha256": "13fc7c6b279fe23114651cc273152ee1b0f72b8442d1209a55fa90586bc0dfab",
+      "review": "Order transitions, external order intake and saved agent authority moved into the orders, apps and identity components"
+    },
     "components/orders/src/http.rs": {
       "status": "unproved",
-      "sha256": "e09a21213fd11696722320cfb5d96823ad7ce8b98afcde1f5e18fc8e95e24371",
-      "review": "Company basis and logo transport moved into the orders component, tax rule conditions into checkout; behaviour unchanged"
+      "sha256": "abfaaaa502f28916195f9747da2140fcd60fbe8b1ec178e992caafed7848db68",
+      "review": "Order transitions, external order intake and saved agent authority moved into the orders, apps and identity components"
     },
     "components/orders/src/lib.rs": {
       "status": "unproved",
@@ -3526,6 +3551,11 @@
       "sha256": "c8dd3115d7120bce0313a2f6f60e6690a5d41100f025c68bfe79148803d75625",
       "review": "cart types and rule engine moved into components; checking bindings"
     },
+    "components/studio/src/domain/grid_criteria.rs": {
+      "status": "unproved",
+      "sha256": "5f012475ede5f9b0e78e2200a7dbd8ce0e69afb547e67ed991f69f5396098498",
+      "review": "Order transitions, external order intake and saved agent authority moved into the orders, apps and identity components"
+    },
     "components/studio/src/domain/history_access.rs": {
       "status": "unproved",
       "sha256": "0c6c9b6370a1747e9d917a00aa46af6353fd563487f20c49a53d04ecc2d476e6",
@@ -3558,13 +3588,18 @@
     },
     "components/studio/src/domain.rs": {
       "status": "unproved",
-      "sha256": "0e1098a445e41a6bc65746c0467fcbf0d1040dfc0361eee80300f7ea3373fcbf",
-      "review": "History access rules, version reads and the product restoration projection moved into the studio component; behaviour unchanged"
+      "sha256": "0e23e9f337961ab6905799cbcb01409d5fab8c12448b3b02af43f2ead592b5c0",
+      "review": "Order transitions, external order intake and saved agent authority moved into the orders, apps and identity components"
     },
     "components/studio/src/http/history.rs": {
       "status": "unproved",
       "sha256": "a7dac2b367024ec07084c7309a00487f74466fb114e533aae122ae1fd0c47e49",
       "review": "History access rules, version reads and the product restoration projection moved into the studio component; behaviour unchanged"
+    },
+    "components/studio/src/http/outbox.rs": {
+      "status": "unproved",
+      "sha256": "697d67ee2ac0c02267007123cbe823292b30b1676c0b7f8039d507819792a321",
+      "review": "Order transitions, external order intake and saved agent authority moved into the orders, apps and identity components"
     },
     "components/studio/src/http/reports.rs": {
       "status": "unproved",
@@ -3573,8 +3608,8 @@
     },
     "components/studio/src/http.rs": {
       "status": "unproved",
-      "sha256": "b6869d9272ba8d20072f9dfcd1c8155feb2dc0b0f120585c6738412e9ff71e59",
-      "review": "Report service moved into the studio component and the cart language chain into the checkout component; behaviour unchanged"
+      "sha256": "2ea7f9354aa09ca98d65b2095d21857bbadee38666cee4a420b97274d9f2b05e",
+      "review": "Order transitions, external order intake and saved agent authority moved into the orders, apps and identity components"
     },
     "components/studio/src/lib.rs": {
       "status": "unproved",
@@ -3595,6 +3630,11 @@
       "status": "unproved",
       "sha256": "678359dc9b5a9af3f22260931526ee4af4c41ce93ed83531b5308b11d2ebe70b",
       "review": "History access rules, version reads and the product restoration projection moved into the studio component; behaviour unchanged"
+    },
+    "components/studio/src/store/outbox_control.rs": {
+      "status": "unproved",
+      "sha256": "43546ef79aac238f3569e5a423579a22aa6c1eedde16f2d2301c52f596e2497f",
+      "review": "Order transitions, external order intake and saved agent authority moved into the orders, apps and identity components"
     },
     "components/studio/src/store/overview.rs": {
       "status": "unproved",
@@ -3633,8 +3673,8 @@
     },
     "components/studio/src/store.rs": {
       "status": "unproved",
-      "sha256": "9686b9068a914a5e6409017ad92a8c4ff841fa93c9670d9ae947a1382f4106b8",
-      "review": "History access rules, version reads and the product restoration projection moved into the studio component; behaviour unchanged"
+      "sha256": "c6e189471c679d3ac2ee596706958df56d64536bd7d9c6d47e530a82afabbf3b",
+      "review": "Order transitions, external order intake and saved agent authority moved into the orders, apps and identity components"
     },
     "crates/apps/src/component_runtime.rs": {
       "status": "unproved",
@@ -5462,9 +5502,9 @@
       "review": "Flow membership and redacted order reads moved into components"
     },
     "src/agent_runs/authority.rs": {
-      "status": "reviewed-binding",
-      "sha256": "64c4213ecfdcc1f2d24daffcc4ddf302fc6afa3dd8878cb0600abc2d85bbd53c",
-      "review": "Split unchanged extracted policies and theorem bodies by domain; bind exact existing planning/private-preview admission; prove sequential integer allocations and denial after limit reduction; add u128 edge regressions and closed module inventory."
+      "status": "unproved",
+      "sha256": "234b4f4f4d8294556cb69b0f25816b78ea63bbd1d782be408494de1253020217",
+      "review": "Order transitions, external order intake and saved agent authority moved into the orders, apps and identity components"
     },
     "src/agent_runs/checkpoint.rs": {
       "status": "unproved",
@@ -5938,8 +5978,8 @@
     },
     "src/assets/mod.rs": {
       "status": "unproved",
-      "sha256": "7129f2d8fd4a23a8752de19daed45bc92054f8b3337fad9b39fe2fb4801a429c",
-      "review": "image jobs moved into components/catalog; no kernel binding changed"
+      "sha256": "0ee1b7547d578cde5c35c4e5b604e95d24058a04ccbd475de0b5b72084b08d4f",
+      "review": "Order transitions, external order intake and saved agent authority moved into the orders, apps and identity components"
     },
     "src/assets/model_format.rs": {
       "status": "unproved",
@@ -6118,8 +6158,8 @@
     },
     "src/b2b/mod.rs": {
       "status": "unproved",
-      "sha256": "3a83cd2f8feaaaf07b83083e2f2293203cfe557918c947acd17640598e59a868",
-      "review": "Request language selection moved into the shop component and sales channel admission into the marketing component; behaviour unchanged"
+      "sha256": "d551a1d9a960d90e95c4a81224a00bdc5e36730c6ed7faedfe24f83995bb85d0",
+      "review": "Order transitions, external order intake and saved agent authority moved into the orders, apps and identity components"
     },
     "src/b2b/model.rs": {
       "status": "unproved",
@@ -6646,20 +6686,15 @@
       "sha256": "9c8404f38e6fd01127ed8c2e7a84da3fdcb835b2a1de321f86ed59718ec59654",
       "review": "Reviewed native historical review admission, immutable coupon provenance and explicit activation policy; independent review findings on malformed usage limits, imported-review PII projection and source-currency spend bounds reproduced and fixed with actual CLI/HTTP/checkout regressions. Existing package, creator, lease and tenant fences retained; SQL, networking and provider parity remain outside the extracted pure activation proof."
     },
-    "src/commerce/external_order_input.rs": {
-      "status": "unproved",
-      "sha256": "e92a62be9814a97c1af9cadfa6e2a67d379b9980f3e5b8ad356550ae3d4a98c8",
-      "review": "The commerce crate became components/pricing with its rules under domain/; no rule changed"
-    },
     "src/commerce/external_orders.rs": {
-      "status": "reviewed-binding",
-      "sha256": "55f2ff337199a9364fe29f36f5eedf2ce42b0e75b2ee10556bbf478f0211fb16",
-      "review": "Functions above 150 lines split into named steps without behaviour change; function length limit lowered to 150"
+      "status": "unproved",
+      "sha256": "457950e3b5c6e12d92be01bbe60a58426b4765125bd7a711d0fde1429c919d70",
+      "review": "Order transitions, external order intake and saved agent authority moved into the orders, apps and identity components"
     },
     "src/commerce/fulfillment.rs": {
-      "status": "reviewed-binding",
-      "sha256": "d61377f453f1c7f345ce971f6866f664e8434d3f22c288ab9508eb8270ef1f9c",
-      "review": "Functions above 150 lines split into named steps without behaviour change; function length limit lowered to 150"
+      "status": "unproved",
+      "sha256": "265a27cba3993761e5a009bb9b1ecd0166f7fb9914f5b800debc029919d075fb",
+      "review": "Order transitions, external order intake and saved agent authority moved into the orders, apps and identity components"
     },
     "src/commerce/geography.rs": {
       "status": "unproved",
@@ -6678,8 +6713,8 @@
     },
     "src/commerce/inventory.rs": {
       "status": "unproved",
-      "sha256": "442a0ad368ae9727b83643b12d466056abdae8e925075d9da5cf84518e2000e9",
-      "review": "inventory component crate created; no kernel binding changed"
+      "sha256": "05c56b2ce5f7dfad60b4212ea2a4af2bbee44913226cf40a9ed8aeb42df1ffa9",
+      "review": "Order transitions, external order intake and saved agent authority moved into the orders, apps and identity components"
     },
     "src/commerce/inventory_ports.rs": {
       "status": "unproved",
@@ -6698,8 +6733,8 @@
     },
     "src/commerce/mod.rs": {
       "status": "unproved",
-      "sha256": "88b44db2d0cc5667d4da3e9b1beaf7569f86516a0a7ceb6f265d6d71423d8a58",
-      "review": "Rate refresh, company onboarding, POS channel setup, rule comparison and facts and source lifecycle handlers moved into their components; behaviour unchanged"
+      "sha256": "034116c02bfff409efaedf410cd40415f0cbe145811339b6876bb428cf7d90ef",
+      "review": "Order transitions, external order intake and saved agent authority moved into the orders, apps and identity components"
     },
     "src/commerce/order_fields.rs": {
       "status": "unproved",
@@ -7053,8 +7088,8 @@
     },
     "src/main.rs": {
       "status": "unproved",
-      "sha256": "938eb27a57871c62ee776a2c4fdcd0055590ec086dda7000344be55aba9914ba",
-      "review": "Channel metrics and the outbox consumer moved into the core crate; no rule changed"
+      "sha256": "ba7a27df868da3e859b17689a7c110e32ac076ec08ceec6cc7b3a45d666e3f2a",
+      "review": "Order transitions, external order intake and saved agent authority moved into the orders, apps and identity components"
     },
     "src/marketing/app_flows.rs": {
       "status": "reviewed-binding",
@@ -7303,8 +7338,8 @@
     },
     "src/operations/grid_schema.rs": {
       "status": "unproved",
-      "sha256": "dc5c462d81b66ac6fe7638eefc8299d4f41117207eb787abe8d5e464998a5507",
-      "review": "Order list criteria, company model and receipts moved into components; kernel call sites unchanged"
+      "sha256": "d2bb4c5945df942bd9def3ba524adc6934c5ac40ed9cb7d1618255a18ad48d24",
+      "review": "Order transitions, external order intake and saved agent authority moved into the orders, apps and identity components"
     },
     "src/operations/guest_customers.rs": {
       "status": "unproved",
@@ -7398,8 +7433,8 @@
     },
     "src/operations/mod.rs": {
       "status": "unproved",
-      "sha256": "d0224d3d59023c77af224ac87122d3ca6dfb9c7ebd79ae91a34047c9cd5616d4",
-      "review": "Company basis and logo transport moved into the orders component, tax rule conditions into checkout; behaviour unchanged"
+      "sha256": "c2d6ab2ac9c776af1634c30b7144659c0e0ec5ba2003139b96507544cd8fec68",
+      "review": "Order transitions, external order intake and saved agent authority moved into the orders, apps and identity components"
     },
     "src/operations/order_documents.rs": {
       "status": "unproved",
@@ -7456,11 +7491,6 @@
       "sha256": "ef47050aa7d513062744f421a39de09ff59faa6025bac29ff8af84b1bdb8d16b",
       "review": "Tenant roles and current grants independently reviewed; owner/retained-override/acceptance races repaired and PostgreSQL-blocked regressions passed; PII and Flow projection boundaries documented; B2B feature settings delegate shared CAS/history and preserve financial guards. Existing extracted policies unchanged; SQL/async/UI remain reviewed adapters, not full proofs."
     },
-    "src/outbox/control.rs": {
-      "status": "unproved",
-      "sha256": "b156e93f9aeebdca8cc69403059f4c2aec88081e204fda7af4c5bd92721dda24",
-      "review": "Review combined native business capability and hardening: typed material/dimension guests remain app-owned and bounded; native CAS/FX/current B2B approval and immutable order snapshots; isolated app crate consumer preserves compiler boundary; independent per-event subscriber retry/quarantine preserves healthy events, commit gaps and explicit recovery; signed tenant/system authority, provider-native read tools and real document withdrawal, workspace image closure and source inventory. SQL/async/provider adapters remain tested, not proved."
-    },
     "src/outbox/retention.rs": {
       "status": "unproved",
       "sha256": "ab2c4030ccc699606f5679ca03b7f915076c68aae7d1e3e3e45b6563e9c6e410",
@@ -7468,8 +7498,8 @@
     },
     "src/outbox.rs": {
       "status": "unproved",
-      "sha256": "cb413510365428c19f97329597fe43f61da990abadde1474dc59b3542d076996",
-      "review": "Settings and language read cache moved into the shop component; condition check registered at startup; behaviour unchanged"
+      "sha256": "51e30c44d413e075cc52e100bb342a300524a15326004a6203251c041fe727c4",
+      "review": "Order transitions, external order intake and saved agent authority moved into the orders, apps and identity components"
     },
     "src/payments/accounts.rs": {
       "status": "unproved",
@@ -7773,8 +7803,8 @@
     },
     "src/routes.rs": {
       "status": "unproved",
-      "sha256": "c445546c89bb6f28fe0987f2979700b6f04ec01d807fd13694cee65f81bd5e0c",
-      "review": "Functions above 150 lines split into named steps without behaviour change; function length limit lowered to 150"
+      "sha256": "db5b116f43b244e1da6eafad15f319f59e824f36b0c4a5d3031149f6d30dfea6",
+      "review": "Order transitions, external order intake and saved agent authority moved into the orders, apps and identity components"
     },
     "src/runtime_config.rs": {
       "status": "unproved",
@@ -8003,8 +8033,8 @@
       "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
     },
     "Cargo.lock": {
-      "sha256": "26139fd4a7a8d8ab568027b9471304ae21908ed8ec7d4a6beb341d3ee8931af8",
-      "review": "AI price guardrails moved into the intelligence component and capture configuration into payments; behaviour unchanged"
+      "sha256": "e84bb8eea80e01a01518240851b48ca7d0192f497c81d38c0c8701d8ef70855a",
+      "review": "Order transitions, external order intake and saved agent authority moved into the orders, apps and identity components"
     },
     "Cargo.toml": {
       "sha256": "12d2d79a98f6913d20b8e912afb9ea8de0539b9e83428de8a9d7412c406896f6",
@@ -8761,10 +8791,6 @@
     "scripts/testing/prompt_governance.py": {
       "sha256": "a9ece67d4975e6c5e44cf26f4d6e397a3780449d8e3f8fbb3860627211b9fda5",
       "review": "Designer acceptance: app-owned versioned style prompt, bounded style-only schema preserving native page content/structure, shared proposal validation unchanged for content edits. Registered visual_workspace RED to GREEN and real Qwen screenshot returns three review-only alternatives. Prompt registry/governance extends app-owned version files. SQL/inference/rendering remain unproved."
-    },
-    "src/commerce/external_order_labels.sql": {
-      "sha256": "3f131887429e16594a5d0354e0194d49191ee4bf857d732780da5324c53e6d7a",
-      "review": "Batch external-order labels within the existing locked transaction; preserve locale-first variant precedence, tenant predicates, stock guard, package fence and idempotency; native baseline and optimized fixture compare the same frozen results."
     },
     "src/operations/customer_directory.sql": {
       "sha256": "3a50ce695d1fc5be24b470e007994253c6f4e0e3c3e639c3122270b539cdcf15",

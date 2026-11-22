@@ -1,4 +1,5 @@
 //! domain of this component.
+pub mod grid_criteria;
 pub mod history_access;
 pub mod product_restore;
 pub mod report_config;

@@ -4,6 +4,7 @@ pub mod catalog_reads;
 pub mod categories;
 pub mod channels;
 pub mod media_jobs;
+pub mod order_downloads;
 pub mod product_edit;
 pub mod product_fields;
 pub mod product_list;

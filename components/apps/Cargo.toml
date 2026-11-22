@@ -25,6 +25,9 @@ veyndo-identity = { path = "../identity" }
 veyndo-pricing = { path = "../pricing" }
 veyndo-catalog = { path = "../catalog" }
 veyndo-orders = { path = "../orders" }
+veyndo-checkout = { path = "../checkout" }
+veyndo-inventory = { path = "../inventory" }
+veyndo-shipping = { path = "../shipping" }
 veyndo-shop = { path = "../shop" }
 tokio.workspace = true
 tracing.workspace = true
