@@ -20,7 +20,7 @@ run SQL without being in a `store` folder. Both numbers only fall.
 | inventory | 649 | 2 | 26 | 2 | 2 | catalog (1), checkout (2), core (29), identity (4), intelligence (2), pricing (3), protocols (2), shop (2) | 3 |
 | pricing | 3516 | 6 | 17 | 4 | 2 | catalog (1), checkout (4), core (63), identity (4), shop (7), studio (1) | 4 |
 | shipping | 818 | 4 | 52 | 0 | 0 | catalog (5), checkout (1), core (25), identity (2), payments (1), pricing (3), shop (8) | 6 |
-| checkout | 4008 | 10 | 207 | 8 | 3 | apps (19), b2b (19), catalog (9), core (207), customers (5), host (9), identity (2), intelligence (2), inventory (3), marketing (16), orders (1), payments (8), pos (12), pricing (39), shipping (3), shop (88), studio (7) | 15 |
+| checkout | 4019 | 10 | 207 | 8 | 3 | apps (19), b2b (19), catalog (9), core (205), customers (5), host (9), identity (2), intelligence (2), inventory (3), marketing (15), orders (1), payments (8), pos (11), pricing (39), shipping (3), shop (90), studio (7) | 15 |
 | customers | 2196 | 15 | 82 | 5 | 3 | apps (9), checkout (2), core (145), identity (30), marketing (4), orders (1), pos (1), pricing (5), shipping (3), shop (11), studio (4) | 4 |
 | orders | 5797 | 25 | 450 | 11 | 7 | apps (27), b2b (1), catalog (9), checkout (6), core (211), customers (4), identity (65), inventory (1), marketing (7), payments (2), pricing (7), shipping (2), shop (17), studio (7) | 14 |
 | payments | 4829 | 1 | 264 | 14 | 7 | apps (9), core (213), host (4), identity (10), inventory (1), orders (1), pos (1), pricing (8), shop (5), studio (1) | 14 |
@@ -29,7 +29,7 @@ run SQL without being in a `store` folder. Both numbers only fall.
 | pos | 1178 | 5 | 68 | 4 | 0 | apps (1), catalog (4), checkout (17), core (40), customers (1), identity (15), marketing (5), orders (1), payments (3), pricing (5), shop (20) | 8 |
 | apps | 15526 | 56 | 434 | 28 | 22 | b2b (3), catalog (11), checkout (5), core (415), host (7), identity (65), intelligence (5), inventory (2), marketing (8), orders (17), payments (7), pos (1), pricing (12), shipping (2), shop (33), studio (11) | 20 |
 | automation | 1443 | 8 | 97 | 0 | 0 | core (2) | 0 |
-| intelligence | 12542 | 72 | 714 | 34 | 28 | apps (45), catalog (27), checkout (20), core (647), customers (1), identity (76), marketing (17), orders (1), payments (1), pricing (18), protocols (8), shipping (1), shop (50), studio (7) | 25 |
+| intelligence | 12570 | 72 | 714 | 34 | 28 | apps (45), catalog (27), checkout (17), core (642), customers (1), identity (76), marketing (17), orders (1), payments (1), pricing (18), protocols (8), shipping (1), shop (51), studio (7) | 25 |
 | studio | 3516 | 15 | 168 | 7 | 5 | apps (27), b2b (4), catalog (7), core (129), customers (1), identity (39), intelligence (2), marketing (9), orders (1), pos (1), pricing (2), shop (14) | 36 |
 | protocols | 2749 | 16 | 132 | 2 | 0 | apps (23), b2b (9), catalog (10), checkout (20), core (104), customers (1), host (2), identity (32), intelligence (23), marketing (9), orders (8), payments (3), pos (3), pricing (6), shipping (3), shop (21), studio (10) | 2 |
 | host | 2930 | 7 | 40 | 4 | 1 | apps (1), catalog (4), core (105), intelligence (5), pricing (13) | 6 |
@@ -66,14 +66,14 @@ reduced to one direction first.
 - catalog ↔ studio: 8 and 7 references
 - checkout ↔ customers: 5 and 2 references
 - checkout ↔ identity: 2 and 1 references
-- checkout ↔ intelligence: 2 and 20 references
+- checkout ↔ intelligence: 2 and 17 references
 - checkout ↔ inventory: 3 and 2 references
-- checkout ↔ marketing: 16 and 3 references
+- checkout ↔ marketing: 15 and 3 references
 - checkout ↔ orders: 1 and 6 references
-- checkout ↔ pos: 12 and 17 references
+- checkout ↔ pos: 11 and 17 references
 - checkout ↔ pricing: 39 and 4 references
 - checkout ↔ shipping: 3 and 1 references
-- checkout ↔ shop: 88 and 13 references
+- checkout ↔ shop: 90 and 13 references
 - customers ↔ identity: 30 and 1 references
 - customers ↔ orders: 1 and 4 references
 - customers ↔ pos: 1 and 1 references
@@ -85,7 +85,7 @@ reduced to one direction first.
 - identity ↔ studio: 1 and 39 references
 - intelligence ↔ marketing: 17 and 14 references
 - intelligence ↔ protocols: 8 and 23 references
-- intelligence ↔ shop: 50 and 3 references
+- intelligence ↔ shop: 51 and 3 references
 - intelligence ↔ studio: 7 and 2 references
 - inventory ↔ shop: 2 and 1 references
 - marketing ↔ orders: 1 and 7 references
@@ -105,8 +105,8 @@ reduced to one direction first.
 
 | From | To | Item | References |
 | --- | --- | --- | ---: |
-| intelligence | core | `Result` | 173 |
 | apps | core | `veyndo_core::` | 173 |
+| intelligence | core | `Result` | 169 |
 | intelligence | core | `RequestContext` | 140 |
 | intelligence | core | `State` | 133 |
 | apps | core | `Result` | 96 |
@@ -122,29 +122,29 @@ reduced to one direction first.
 | identity | core | `veyndo_core::` | 55 |
 | catalog | core | `RequestContext` | 53 |
 | shop | core | `State` | 52 |
-| intelligence | core | `Error` | 50 |
-| intelligence | core | `conflict` | 48 |
+| intelligence | core | `Error` | 49 |
+| intelligence | core | `conflict` | 47 |
 | shop | core | `Result` | 46 |
 | orders | core | `Result` | 45 |
 | intelligence | apps | `apps::` | 45 |
 | checkout | core | `Result` | 45 |
 | customers | core | `State` | 44 |
+| intelligence | core | `veyndo_core::` | 43 |
 | checkout | core | `RequestContext` | 43 |
 | marketing | core | `veyndo_core::` | 42 |
 | marketing | core | `Result` | 42 |
 | apps | core | `State` | 42 |
 | orders | core | `RequestContext` | 41 |
-| intelligence | core | `veyndo_core::` | 41 |
+| checkout | shop | `veyndo_shop::` | 41 |
 | payments | core | `veyndo_core::` | 39 |
-| checkout | shop | `veyndo_shop::` | 39 |
 | customers | core | `Result` | 38 |
 | payments | core | `State` | 37 |
 | payments | core | `RequestContext` | 37 |
 | apps | identity | `veyndo_identity::` | 37 |
+| checkout | core | `veyndo_core::` | 33 |
 | studio | identity | `auth::` | 32 |
 | studio | core | `Result` | 32 |
 | protocols | identity | `auth::` | 32 |
-| studio | core | `State` | 31 |
 
 ## Foreign table access
 

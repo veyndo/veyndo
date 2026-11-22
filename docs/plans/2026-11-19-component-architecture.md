@@ -156,7 +156,8 @@ Rules that hold from the first component on:
       recovery discovery and the broker session; `types/envelopes` the typed
       request shapes. Open: the broker exchange and inference (they provision
       a shop and call the model), registration and provisioning, browser
-      sessions, the middleware with login throttling, the Knowledge
+      sessions. Saved agent runs rebuild and recheck their authority in
+      `store/agent_authority`. Still open: the middleware with login throttling, the Knowledge
       introspection, the role editor (it validates names against shop settings).
 - [x] Ban new `use super::*` / `use crate::*`: `glob_imports` per component in
       `components.json` only falls (528 files at the start); component crates have none.
@@ -326,7 +327,8 @@ Order follows the dependency report, lowest first. Each line is one move.
   The kernel bindings of the review name the new file. The cart quote with
   quantity pricing, configuration fees and minor-unit totals is
   `domain/cart_quote`; the language chain of a stored cart is
-  `service/language`. Open: cart storage and mutation, the selection, the four steps of the checkout
+  `service/language`. The guarded cart of a request is loaded by
+  `store/cart_load`. Open: cart creation and mutation, the selection, the four steps of the checkout
   transaction (they call apps, B2B, payments, marketing and legal and need a
   host port), the handoff. `http/buyer_identity` seals and inspects the
   short-lived Checkout grant of a live customer session and
@@ -350,9 +352,12 @@ Order follows the dependency report, lowest first. Each line is one move.
   as does the selective company release of a staging environment. The
   company basis handlers (`http/company`) and logo upload, preview and
   public delivery with bounded decoding (`http/company_logo`,
-  `domain/logo_image`) moved here.
+  `domain/logo_image`) moved here, as did the order, payment and delivery
+  transitions (`domain/order_transitions` with the cancellation rule,
+  `http/transitions`; the accepted app lifecycle is read through the shared
+  app model) and the delivery split (`http/delivery_split`).
   Open: the grid plan, manual orders, imports, the workflow save (app
-  lifecycle), fulfilment handlers, returns, merchant customer edits.
+  lifecycle), returns, merchant customer edits.
 - [ ] marketing. Started: `components/marketing` owns the rule conditions with
   their bounds and matching, field comparison, the line, customer and order
   facts a rule reads, the snapshot of referenced rules, and the shared
@@ -449,6 +454,10 @@ Order follows the dependency report, lowest first. Each line is one move.
     `HostActions` also creates the personal preview environment.
   The operator's services and publisher keys reach pure rules as parameters.
   The tool wire contract lives in `veyndo_core::tool_contract`.
+  The import of paid orders an admitted app reports
+  (`service/external_orders`) and carrier booking intents of approved
+  apps (`service/carrier_booking`) live here; order downloads are granted
+  by the catalog store (`store/order_downloads`).
   Open (about 3,000 lines remain in `src/apps`, 360 in `src/developer`): core
   callbacks, documents and exchange (they call operations, assets and B2B),
   job import, evidence ingest (knowledge sync), cart contributions and
@@ -486,6 +495,9 @@ Order follows the dependency report, lowest first. Each line is one move.
   (`service/sources`) read settings through the shop read cache. The AI price
   guardrails with the proposed change type are `domain/price_guardrails`;
   source detail, edit and lifecycle handlers are `http/sources`.
+  The Ed25519 fact signing key with its public key set
+  (`service/fact_signing`) and signed cart offers, issued and checked
+  through the shop's cart port (`service/signed_offer`), live here.
   Open: agents and their runs, proposals, the retrieval and question
   handlers, inference, cognition routes and workers.
 - [ ] studio. Started: `components/studio` owns report configuration and
@@ -503,7 +515,10 @@ Order follows the dependency report, lowest first. Each line is one move.
   restoration request (`domain/history_access`), the product edit rebuilt
   from a version (`domain/product_restore`), version reads (`store/history`)
   and the listing and version handlers (`http/history`), and the report
-  service with its handler (`service/reports`, `http/reports`). Open: the rest of
+  service with its handler (`service/reports`, `http/reports`), the outbox
+  runtime counters and quarantine retry (`store/outbox_control`,
+  `http/outbox`) and the allowlisted grid filter schema
+  (`domain/grid_criteria`). Open: the rest of
   staging shops (clone, snapshot, release), the history restore dispatch (it
   replays edits through roles, B2B, catalog, customers, settings, marketing
   and documents and needs their ports), the channel activity tracker.

@@ -3772,6 +3772,7 @@ name = "veyndo-intelligence"
 version = "0.5.0"
 dependencies = [
  "axum",
+ "base64 0.22.1",
  "chrono",
  "libc",
  "pdf-extract",

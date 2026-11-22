@@ -645,7 +645,7 @@
     },
     "offer_honoured": {
       "bindings": [
-        "src/cognition/signed_offer.rs"
+        "components/intelligence/src/service/signed_offer.rs"
       ],
       "theorems": [
         "offer_honoured_exact",
@@ -2336,10 +2336,20 @@
       "sha256": "e93ec09c402c8c5ec2e520e4f4a9fe48ea1dca3d4663cf3e8e20c7aca69b1cf2",
       "review": "Experiment operations and source content checks moved into the intelligence component, CRM creation context into customers; behaviour unchanged"
     },
+    "components/intelligence/src/service/fact_signing.rs": {
+      "status": "unproved",
+      "sha256": "bb612d34b6f1a3874161325fef79fe1fd4a839e255a2b68dbc6013f0f5f9f0a8",
+      "review": "Signed offers and fact signing moved into the intelligence component behind the cart port"
+    },
     "components/intelligence/src/service/pdf.rs": {
       "status": "unproved",
       "sha256": "4ed4948f6dcf724d49e5f6284f23aba87fc79b688db16a9dee6a19a2ca9bec13",
       "review": "Knowledge sources, PDF text extraction and embedding generations moved into the intelligence component without behaviour change"
+    },
+    "components/intelligence/src/service/signed_offer.rs": {
+      "status": "reviewed-binding",
+      "sha256": "827b8485ab54d513138b5ff1334294a6e2699ca26696715f4deff69b26969255",
+      "review": "Signed offers and fact signing moved into the intelligence component behind the cart port"
     },
     "components/intelligence/src/service/sources.rs": {
       "status": "unproved",
@@ -2348,8 +2358,8 @@
     },
     "components/intelligence/src/service.rs": {
       "status": "unproved",
-      "sha256": "4f81aa6525e6abbea09ec0fc4938034be1a3e1742adbf85f449ff53e3b94707d",
-      "review": "Experiment operations and source content checks moved into the intelligence component, CRM creation context into customers; behaviour unchanged"
+      "sha256": "86ed46d9964f9283344bf42555edc735bbb2759f15ffc2d8018fae81c649dbf1",
+      "review": "Signed offers and fact signing moved into the intelligence component behind the cart port"
     },
     "components/intelligence/src/store/agent_runs.rs": {
       "status": "unproved",
@@ -6353,8 +6363,8 @@
     },
     "src/capabilities.rs": {
       "status": "unproved",
-      "sha256": "5f4aa9e27606000dd541ef1500ea26c5312f5922cb0a8f4a4a58dab29f76a470",
-      "review": "App planning, planning contracts and the app tool catalogue moved into the apps component; the tool wire contract moved to core without behavior change"
+      "sha256": "fda033ad335f60aaebb1da98eb8a246823f1428da6b6076e252bb2560696dc2f",
+      "review": "Signed offers and fact signing moved into the intelligence component behind the cart port"
     },
     "src/cart_model.rs": {
       "status": "unproved",
@@ -6603,13 +6613,13 @@
     },
     "src/cognition/signed.rs": {
       "status": "unproved",
-      "sha256": "12ce482dd469e57b5b08a56b53f7c7f86db4ac13e2199d97f9fa4d4ff69f9bc9",
-      "review": "Signed offers: cognition/signed_offer.rs signs a closed projection of the native cart quote with the existing Ed25519 owner and verifies signature, shop, expiry and current cart match; signed.rs gains key_id and verify helpers; readiness reports signing status; no extracted policy changed; providers suite verifies independently and covers forged, foreign, malformed, changed-cart and changed-price cases"
+      "sha256": "b524587f81204891fb01773576246583bd0687e07ee3f5c2d21bd9ae22136498",
+      "review": "Signed offers and fact signing moved into the intelligence component behind the cart port"
     },
     "src/cognition/signed_offer.rs": {
-      "status": "reviewed-binding",
-      "sha256": "45ff6fcfb98bd33df40d0bae945e394e935cadc84b7dd7bfab100bd4a15db5c5",
-      "review": "Experiment store, readout and automation, behaviour analytics store and the private preference graph moved verbatim into the intelligence component; consent, settings and channel admission stay in the server. No kernel policy changed."
+      "status": "unproved",
+      "sha256": "c9f589bd5db455f466b1bfa87f6050ecfaf8f3b960c6d786fc9aa5f31d12d7e1",
+      "review": "Signed offers and fact signing moved into the intelligence component behind the cart port"
     },
     "src/cognition/stream.rs": {
       "status": "unproved",
@@ -6843,8 +6853,8 @@
     },
     "src/commerce/supply_proposal.rs": {
       "status": "unproved",
-      "sha256": "556d16b69b04ca40e330a72cc8c47c07cb19cb85bf34d9cd2a1dcb9d556b8b9d",
-      "review": "inventory component crate created; no kernel binding changed"
+      "sha256": "79b1382887de2a073c43104a31ce74a74197c1b3a129a1527b5cbd4cbcb0da42",
+      "review": "Signed offers and fact signing moved into the intelligence component behind the cart port"
     },
     "src/commerce/tax.rs": {
       "status": "unproved",
@@ -8038,8 +8048,8 @@
       "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
     },
     "Cargo.lock": {
-      "sha256": "e84bb8eea80e01a01518240851b48ca7d0192f497c81d38c0c8701d8ef70855a",
-      "review": "Order transitions, external order intake and saved agent authority moved into the orders, apps and identity components"
+      "sha256": "a04b893159e074da9b0cffbaff71b059e880c02b3d9392afd13353720ee073b6",
+      "review": "Signed offers and fact signing moved into the intelligence component behind the cart port"
     },
     "Cargo.toml": {
       "sha256": "12d2d79a98f6913d20b8e912afb9ea8de0539b9e83428de8a9d7412c406896f6",

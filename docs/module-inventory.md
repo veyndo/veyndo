@@ -239,7 +239,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/cognition/recommendations.rs](../src/cognition/recommendations.rs) | Merchant-approved associations are consumed by the public shop without exposing order counts or identities. |
 | [src/cognition/routes.rs](../src/cognition/routes.rs) | Merchant memory endpoints and revision-bound experiment/dismissal decisions. |
 | [src/cognition/signed.rs](../src/cognition/signed.rs) | Public Ed25519 attestations bind exact native facts and channel context for five minutes; signatures do not guarantee source truth. |
-| [src/cognition/signed_offer.rs](../src/cognition/signed_offer.rs) | Signed cart offers: an Ed25519 attestation of the native quote that a buying agent can check offline; a statement, not a price lock. |
+| [src/cognition/signed_offer.rs](../src/cognition/signed_offer.rs) | Signed cart offer transport; the intelligence component signs and checks offers through the cart port. |
 | [src/cognition/stream.rs](../src/cognition/stream.rs) | Compatible SSE transport waits on the same persisted run; detached request handling retains native tenant scope. |
 | [src/cognition/tools.rs](../src/cognition/tools.rs) | Bounded agent read rounds use the same capability dispatcher and current actor rights; never execute writes. |
 | [src/commerce/app_adjustments.rs](../src/commerce/app_adjustments.rs) | Apply admitted integer app adjustments through native pricing/tax calculation; extensions cannot replace quote JSON. |
@@ -812,6 +812,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/checkout/src/service/language.rs](../components/checkout/src/service/language.rs) | The language chain of a stored cart, prepared before the checkout transaction holds a pool connection. |
 | [components/checkout/src/service.rs](../components/checkout/src/service.rs) | service of this component. |
 | [components/checkout/src/store/admin_order.rs](../components/checkout/src/store/admin_order.rs) | Locked checkout guards of an order a merchant places: channel policy, the selected customer and the channel's product selection. |
+| [components/checkout/src/store/cart_load.rs](../components/checkout/src/store/cart_load.rs) | The buyer's cart of a request: loaded by tenant and context token, then guarded by cashier, company and sales channel rules. |
 | [components/checkout/src/store/customer_snapshot.rs](../components/checkout/src/store/customer_snapshot.rs) | Checkout-owned immutable customer and address records; future account edits cannot rewrite an order. |
 | [components/checkout/src/store/legal_snapshot.rs](../components/checkout/src/store/legal_snapshot.rs) | Explicit document and digital acknowledgement, checked under the purchase locks and frozen into the order. |
 | [components/checkout/src/store/product_snapshot.rs](../components/checkout/src/store/product_snapshot.rs) | Localized immutable checkout SKU snapshots read under the purchase transaction's locks. |
@@ -924,7 +925,9 @@ This lists every checked-in source module in these roots, including files with n
 | [components/intelligence/src/lib.rs](../components/intelligence/src/lib.rs) | Intelligence component: shop memory with its vector namespace, retrieval and document parsing. |
 | [components/intelligence/src/service/claims.rs](../components/intelligence/src/service/claims.rs) | The source-bound claim lifecycle and public claim batches: rights and shop languages here, the ledger in `store::evidence`. |
 | [components/intelligence/src/service/experiments.rs](../components/intelligence/src/service/experiments.rs) | Experiment operations for HTTP and MCP: reading needs the knowledge right, changes need settings rights and explicit approval. |
+| [components/intelligence/src/service/fact_signing.rs](../components/intelligence/src/service/fact_signing.rs) | Public Ed25519 attestations bind exact native facts and channel context for a short time; signatures do not guarantee source truth. |
 | [components/intelligence/src/service/pdf.rs](../components/intelligence/src/service/pdf.rs) | PDF extraction executes in a killable child process without inherited commerce credentials. |
+| [components/intelligence/src/service/signed_offer.rs](../components/intelligence/src/service/signed_offer.rs) | Signed cart offers: an Ed25519 attestation of the native quote that a buying agent can check offline; a statement, not a price lock. |
 | [components/intelligence/src/service/sources.rs](../components/intelligence/src/service/sources.rs) | Knowledge source content checked against the languages the shop has enabled. |
 | [components/intelligence/src/service.rs](../components/intelligence/src/service.rs) | Operations of the intelligence component that call out of process. |
 | [components/intelligence/src/store/agent_runs.rs](../components/intelligence/src/store/agent_runs.rs) | Durable agent runs in storage: the caller projection, the conversation turn fence, publication under the run lease and the checkpoint journal. |

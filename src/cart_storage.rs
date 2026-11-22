@@ -2,23 +2,7 @@
 use crate::*;
 
 pub(crate) async fn load_cart(a: &App, h: &RequestContext) -> Result<StoredCart> {
-    let r = sqlx::query("SELECT * FROM carts WHERE tenant=$1 AND token=$2")
-        .bind(tenant(h)?)
-        .bind(token(h)?)
-        .fetch_optional(&a.db)
-        .await?
-        .ok_or(Error(StatusCode::NOT_FOUND, "Cart not found".into()))?;
-    let c = stored(&r)?;
-    pos::guard_cart(h, &c)?;
-    b2b::guard(a, h, &c).await?;
-    if c.data.sales_channel != marketing::channel_id(h) {
-        return Err(Error(
-            StatusCode::FORBIDDEN,
-            "Cart belongs to another sales channel".into(),
-        ));
-    }
-    marketing::channel(a, h, &c.data.sales_channel, &c.data.locale).await?;
-    Ok(c)
+    veyndo_checkout::store::cart_load::load(a, h).await
 }
 pub(crate) async fn new_cart(
     a: &App,

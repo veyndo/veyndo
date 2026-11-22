@@ -36,7 +36,7 @@ async fn offer(a: &App, buyer: &str, link: &supply::Link) -> Result<Value> {
     let holder = guest(&link.supplier_shop, Some(&token))?;
     let revision = load_cart(a, &holder).await?.revision;
     let quote = Box::pin(capabilities::invoke(a, &holder, "cart.replace", &json!({"revision":revision,"items":[{"id":link.supplier_product_id,"quantity":link.reorder_quantity}]}))).await?;
-    let signed = cognition::signed_offer::issue(a, &holder).await?;
+    let signed = cognition::signed_offer::issue_offer(a, &holder).await?;
     let stock = quote["lineItems"][0]["stock"].as_i64().unwrap_or(0);
     Ok(
         json!({"cartToken":token,"payload":signed["payload"],"payloadBase64":signed["payloadBase64"],"signature":signed["signature"],"keyId":signed["keyId"],
@@ -121,7 +121,7 @@ pub(crate) async fn approve(a: &App, h: &RequestContext, v: &Value) -> Result<Va
         .max_order_minor
         .ok_or(conflict("Set a ceiling per reorder before approving one"))?;
     let holder = guest(&link.supplier_shop, Some(token))?;
-    let checked = cognition::signed_offer::verify(
+    let checked = cognition::signed_offer::verify_offer(
         a,
         &holder,
         &json!({"payloadBase64":encoded,"signature":signature}),
