@@ -126,7 +126,9 @@ pub(super) async fn project(
     let receipt = if let Some(snapshot) = snapshot {
         snapshot["consent"].clone()
     } else {
-        legal::consent_receipt(State(a.clone()), h.clone()).await?.0
+        legal::consent_receipt(State(a.core.clone()), h.clone())
+            .await?
+            .0
     };
     let saved_buyer = json!({"consent":snapshot.map(|s|s["buyerConsent"].clone())});
     let original = if snapshot.is_some() {

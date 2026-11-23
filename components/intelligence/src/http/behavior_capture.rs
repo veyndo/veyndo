@@ -1,8 +1,25 @@
-//! Cart-locked writes serialize with withdrawal; customer association is derived from authenticated native identity.
-use super::{input::Event, *};
-use veyndo_intelligence::store::behavior as store;
-pub(super) async fn capture(
-    State(a): State<App>,
+//! Cart-locked behavioral capture serializes with consent withdrawal; the customer association comes from the authenticated native session.
+use crate::domain::behavior_input::{Event, browser};
+use crate::domain::trusted_geography::country;
+use crate::service::consent::require_locked;
+use crate::store::behavior as store;
+use axum::Json;
+use axum::extract::State as Shared;
+use serde_json::{Value, json};
+use sqlx::Row;
+use veyndo_checkout::store::cart_load::load as load_cart;
+use veyndo_core::shop_scope::{header, session_digest, tenant};
+use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad, conflict};
+use veyndo_customers::service::sessions::identify;
+use veyndo_marketing::service::channels::admit_product;
+use veyndo_marketing::service::conditions::validate_condition;
+use veyndo_shop::service::language::language_context;
+use veyndo_shop::store::settings::scoped_locked;
+use veyndo_shop::types::cart::Cart;
+
+/// Records one consent-bound behavioral observation of the open cart.
+pub async fn capture(
+    Shared(a): Shared<State>,
     h: RequestContext,
     Json(v): Json<Event>,
 ) -> Result<Json<Value>> {
@@ -19,7 +36,7 @@ pub(super) async fn capture(
         ));
     }
     let customer = if header(&h, "x-customer-token").is_some() {
-        let (_, email) = accounts::identity(&a, &h).await?;
+        let email = identify(&a, &tenant(&h)?, &session_digest(&h)?).await?;
         sqlx::query_scalar::<_, String>("SELECT id FROM customers WHERE tenant=$1 AND email=$2")
             .bind(&c.tenant)
             .bind(email)
@@ -30,7 +47,7 @@ pub(super) async fn capture(
     };
     let locale = language_context(&a, &h).await?.0;
     if let Some(product) = &v.product_id {
-        marketing::admit_product(&a, &h, product).await?;
+        admit_product(&a, &h, product).await?;
     }
     let mut tx = a.db.begin().await?;
     // Same lock order as consent withdrawal: cart -> settings -> receipt.
@@ -42,10 +59,15 @@ pub(super) async fn capture(
     if row.get::<String, _>("status") != "open" {
         return Err(conflict("Behavioral events require an open cart context"));
     }
-    let current: cart_model::Cart =
-        serde_json::from_value(row.get("data")).map_err(|e| bad(e.to_string()))?;
-    legal::require_locked(&mut tx, &c, "analytics").await?;
-    let (settings, _) = commerce::scoped_locked(&mut tx, &c.tenant, &c.data.sales_channel).await?;
+    let current: Cart = serde_json::from_value(row.get("data")).map_err(|e| bad(e.to_string()))?;
+    require_locked(&mut tx, &c, "analytics").await?;
+    let (settings, _) = scoped_locked(
+        &mut tx,
+        &c.tenant,
+        &c.data.sales_channel,
+        &validate_condition,
+    )
+    .await?;
     let policy = &settings.legal.behavior_analytics;
     if !policy.enabled {
         return Err(Error(
@@ -59,7 +81,7 @@ pub(super) async fn capture(
     {
         return Err(bad("Cart-add observation requires an actual cart item"));
     }
-    let dimensions = json!({"browser":input::browser(header(&h,"user-agent").unwrap_or("")),"viewport":v.viewport,"surface":v.surface,"referrerHost":v.referrer_host,"locale":locale,"country":current.checkout.as_ref().map(|s|s.country.clone()).unwrap_or("unknown".into()),"geoCountry":geography::country(&h),"countrySource":"cart-destination"});
+    let dimensions = json!({"browser":browser(header(&h,"user-agent").unwrap_or("")),"viewport":v.viewport,"surface":v.surface,"referrerHost":v.referrer_host,"locale":locale,"country":current.checkout.as_ref().map(|s|s.country.clone()).unwrap_or("unknown".into()),"geoCountry":country(&h),"countrySource":"cart-destination"});
     let stored = store::record(
         &mut tx,
         store::Observation {
@@ -79,12 +101,14 @@ pub(super) async fn capture(
     tx.commit().await?;
     Ok(Json(stored))
 }
-pub(super) async fn forget(State(a): State<App>, h: RequestContext) -> Result<Json<Value>> {
+/// Deletes the cart's observations.
+pub async fn forget(Shared(a): Shared<State>, h: RequestContext) -> Result<Json<Value>> {
     let c = load_cart(&a, &h).await?;
     let n = store::forget(&a, &c.tenant, &c.id).await?;
     Ok(Json(json!({"deleted":n})))
 }
-pub(super) async fn export(State(a): State<App>, h: RequestContext) -> Result<Json<Value>> {
+/// The cart's observations for the visitor.
+pub async fn export(Shared(a): Shared<State>, h: RequestContext) -> Result<Json<Value>> {
     let c = load_cart(&a, &h).await?;
     Ok(Json(store::export(&a, &c.tenant, &c.id).await?))
 }

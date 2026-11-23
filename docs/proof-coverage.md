@@ -17,8 +17,8 @@ than the check verifies. **It is not a claim that the shop is free of errors:**
 | Rule files | 8 | 0.5 % | The files that contain the proved rules |
 | Reviewed callers | 79 | 5.3 % | Files that call a proved rule; a person reviewed how the rule is fed, the surrounding code is not proved |
 | Comparison drivers | 9 | 0.6 % | Test programs that compare the compiled Rust rules with the Lean versions |
-| **Unproved files** | 1386 | 93.5 % | Everything else: database access, HTTP, providers, the user interface server |
-| All Rust source files | 1482 | 100 % | |
+| **Unproved files** | 1383 | 93.5 % | Everything else: database access, HTTP, providers, the user interface server |
+| All Rust source files | 1479 | 100 % | |
 
 A proved rule looks like this one, which caps a discount at the amount it is
 taken from:
@@ -115,7 +115,7 @@ that call it.
 | --- | --- | --- | --- |
 | `auth_factor_admissible` | Factor evidence is supplied only by the native verified-code or live personal-session handoff owners. | 2: `auth_factor_exact`, `auth_factor_required_denied` | `components/identity/src/store/sessions.rs` |
 | `channel_access_admissible` | Preview grants admit only simulations; public requests require an active channel and private requests a current merchant. | 4: `channel_private_requires_identity`, `channel_paused_requires_preview`, `channel_preview_no_mutation`, `channel_access_exact` | `src/marketing/channel_access.rs` |
-| `consent_admissible` | Optional processing requires an enabled purpose and a fresh affirmative receipt for this policy. | 1: `consent_exact` | `src/legal/consent.rs` |
+| `consent_admissible` | Optional processing requires an enabled purpose and a fresh affirmative receipt for this policy. | 1: `consent_exact` | `components/intelligence/src/service/consent.rs` |
 | `legal_checkout_admissible` | Strict checkout binds the current document version and separately requested digital delivery. | 1: `legal_checkout_exact` | `components/checkout/src/store/legal_snapshot.rs` |
 | `merchant_scope_admissible` | A merchant request acts for a shop only with a credential issued for that same shop. | 3: `merchant_scope_exact`, `merchant_scope_other_shop_denied`, `merchant_scope_missing_credential_denied` | `components/identity/src/lib.rs` |
 | `native_asset_bypass` | Only native public assets may skip identity; every hosted alias retains tenant/channel admission. | 2: `native_asset_hosted_denied`, `native_asset_bypass_exact` | `src/auth/middleware.rs` |

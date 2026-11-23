@@ -1,8 +1,6 @@
 //! Native behavior analytics projects the existing event ledger into private shop knowledge.
 use crate::*;
-mod capture;
-mod geography;
-mod input;
+use veyndo_intelligence::http::behavior_capture as capture;
 pub(crate) fn router() -> Router<App> {
     Router::new()
         .route(

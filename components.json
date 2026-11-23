@@ -130,7 +130,6 @@
         "core",
         "host",
         "identity",
-        "intelligence",
         "inventory",
         "marketing",
         "payments",
@@ -145,7 +144,6 @@
         "commerce_promotions",
         "commerce_rules",
         "customers",
-        "exposures",
         "memberships",
         "merchant_users",
         "orders",
@@ -155,15 +153,13 @@
         "read_context_versions",
         "receipt_settings",
         "sales_channels",
-        "session_signal_events",
-        "session_signals",
         "shop_environments",
         "tenant_ai_usage",
         "tenants"
       ],
-      "glob_imports": 28,
-      "untyped_access": 98,
-      "sql_outside_store": 19
+      "glob_imports": 23,
+      "untyped_access": 93,
+      "sql_outside_store": 16
     },
     "catalog": {
       "title": "Products, categories, media, reviews, translations and catalogue reads",
@@ -208,7 +204,6 @@
         "core",
         "customers",
         "identity",
-        "inference",
         "intelligence",
         "marketing",
         "pricing",
@@ -844,9 +839,11 @@
         "exposures",
         "flow_jobs",
         "integration_keys",
+        "legal_acceptances",
         "orders",
         "outbox",
         "payment_attempts",
+        "privacy_consent_log",
         "privacy_consents",
         "product_reviews",
         "product_translations",
@@ -857,8 +854,8 @@
         "translation_jobs"
       ],
       "glob_imports": 36,
-      "untyped_access": 587,
-      "sql_outside_store": 25
+      "untyped_access": 592,
+      "sql_outside_store": 27
     },
     "studio": {
       "title": "Merchant overview, reports, private staging shops and history",

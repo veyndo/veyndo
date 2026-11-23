@@ -7,6 +7,7 @@ pub mod autonomy_revert;
 pub mod behavior;
 pub mod claims;
 pub mod concierge;
+pub mod consent;
 pub mod conversations;
 pub mod experiments;
 pub mod extraction;

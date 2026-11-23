@@ -298,7 +298,7 @@
     },
     "consent_admissible": {
       "bindings": [
-        "src/legal/consent.rs"
+        "components/intelligence/src/service/consent.rs"
       ],
       "theorems": [
         "consent_exact"
@@ -2436,20 +2436,40 @@
       "sha256": "2e0b524ab3507594b3d64c5f6dab213436e571598f798f8eea676bc8f2d3f3f0",
       "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
     },
+    "components/intelligence/src/http/behavior_capture.rs": {
+      "status": "unproved",
+      "sha256": "3842e542ff5c71e20af2f1a7dc6331d321b2aa34d43b12798c34d549b79e74eb",
+      "review": "Batch F6: consent, legal acknowledgement and requests, behavior capture, preferences and the storefront experience moved into intelligence"
+    },
     "components/intelligence/src/http/claims.rs": {
       "status": "unproved",
       "sha256": "6e5c7d6938a049bf7bc1c06864aa13d77b2401da19b38fcf571baf8823309158",
       "review": "Claim lifecycle, public claim batches and the knowledge workspace moved into the intelligence component; behaviour unchanged"
+    },
+    "components/intelligence/src/http/experience.rs": {
+      "status": "unproved",
+      "sha256": "687f8988da910bd1d565f28a429127a6e97e3de7472d87f3f7b700ce5ba31a92",
+      "review": "Batch F6: consent, legal acknowledgement and requests, behavior capture, preferences and the storefront experience moved into intelligence"
     },
     "components/intelligence/src/http/ingestion.rs": {
       "status": "unproved",
       "sha256": "1a9dcc2b688ef554c4955157b949a0c46a786d8f6673a74e0888553627e751fa",
       "review": "Knowledge source ingestion and guidance reads move into intelligence"
     },
+    "components/intelligence/src/http/legal.rs": {
+      "status": "unproved",
+      "sha256": "9029e31564f8f37a00dad3d1fa0d3340586792657782093f4e571a334fe7d06d",
+      "review": "Batch F6: consent, legal acknowledgement and requests, behavior capture, preferences and the storefront experience moved into intelligence"
+    },
     "components/intelligence/src/http/memory.rs": {
       "status": "unproved",
       "sha256": "50e91fbe5dfb2b5553f219411f42dbf8976dd4849373d24e1c6035697da093f8",
       "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
+    },
+    "components/intelligence/src/http/preferences.rs": {
+      "status": "unproved",
+      "sha256": "524f92a6a681a0d0604de7e66ddb542763e92737de2d81d226b42770319ab363",
+      "review": "Batch F6: consent, legal acknowledgement and requests, behavior capture, preferences and the storefront experience moved into intelligence"
     },
     "components/intelligence/src/http/sources.rs": {
       "status": "unproved",
@@ -2463,8 +2483,8 @@
     },
     "components/intelligence/src/http.rs": {
       "status": "unproved",
-      "sha256": "27e536f1afe31d3bf7bc1ffbb3447c7ce8149489f1091771e79c0ad84345f05f",
-      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
+      "sha256": "324c014e5c0b0ca933b7e44882738ff5ac832bb59f1cf3dd11d7f66937ae81a0",
+      "review": "Batch F6: consent, legal acknowledgement and requests, behavior capture, preferences and the storefront experience moved into intelligence"
     },
     "components/intelligence/src/knowledge/embeddings.rs": {
       "status": "unproved",
@@ -2555,6 +2575,11 @@
       "status": "unproved",
       "sha256": "a0ee4468451b894c4e0bd12a29a0b298c939558af7bdff1cee83af52ae4d201a",
       "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
+    },
+    "components/intelligence/src/service/consent.rs": {
+      "status": "reviewed-binding",
+      "sha256": "ab8b6af53afa02d7f90a38d87c8f84120018749a34dfdee3f81ce19f834e8125",
+      "review": "Batch F6: consent, legal acknowledgement and requests, behavior capture, preferences and the storefront experience moved into intelligence"
     },
     "components/intelligence/src/service/conversations.rs": {
       "status": "unproved",
@@ -2688,8 +2713,8 @@
     },
     "components/intelligence/src/service.rs": {
       "status": "unproved",
-      "sha256": "6a35ca7b9bcab4e082a41511e6737fabbee024f15baeef8f3f0ba086d8e5870e",
-      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
+      "sha256": "7ecb17634c5b7f40f91a604684440fae214fa3714964be0b1e064f22b295736f",
+      "review": "Batch F6: consent, legal acknowledgement and requests, behavior capture, preferences and the storefront experience moved into intelligence"
     },
     "components/intelligence/src/store/agent_runs.rs": {
       "status": "unproved",
@@ -6861,25 +6886,10 @@
       "sha256": "3f16b5aed3fc91c8335814cd9f47fd8de200f12c879b059ce3c8f9f8127d5d6e",
       "review": "Cart projection, product detail, checkout handoff, cart creation and supply proposals move into components"
     },
-    "src/cognition/behavior/capture.rs": {
-      "status": "unproved",
-      "sha256": "9ac7c9f5d0d8ad315f41e82038af6d9aabe8031e722932563b00331c116758ed",
-      "review": "Batch F5: inference component for crates/cognition, crate-cycle gate, core paths for history attribution and environment parent"
-    },
-    "src/cognition/behavior/geography.rs": {
-      "status": "unproved",
-      "sha256": "55732b278c4e0e34ce1f8c4ab69fa47a2a46d244b96ad81f0917e08276bc9a7d",
-      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
-    },
-    "src/cognition/behavior/input.rs": {
-      "status": "unproved",
-      "sha256": "c431ea136a65e37b80460c8a676e884e18ba4be20ee8a70c6d5e4be64e73a60a",
-      "review": "Knowledge module and experiment model moved into components/intelligence; kernel call sites unchanged"
-    },
     "src/cognition/behavior/mod.rs": {
       "status": "unproved",
-      "sha256": "a11015c65b2df940fb0c5383ab53d8f0f5e50001dd0df2d9dff3cf74018d2597",
-      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
+      "sha256": "a0b6b9074c2db647cdc68fa34b35f6eb811ccf6ef16f2371305a0ca8c9a6b994",
+      "review": "Batch F6: consent, legal acknowledgement and requests, behavior capture, preferences and the storefront experience moved into intelligence"
     },
     "src/cognition/claim_batches.rs": {
       "status": "unproved",
@@ -6903,8 +6913,8 @@
     },
     "src/cognition/experiments/mod.rs": {
       "status": "unproved",
-      "sha256": "e34c21f6e3b77f1780a1b6b28ce9c06d9ef3f97f452b96fc215b3d562ae2a4f1",
-      "review": "Experiment operations and source content checks moved into the intelligence component, CRM creation context into customers; behaviour unchanged"
+      "sha256": "7ff637c92099ceeb3fd22e3bd4df5263ab80a2af87a9b93e533f3cf91957a8f9",
+      "review": "Batch F6: consent, legal acknowledgement and requests, behavior capture, preferences and the storefront experience moved into intelligence"
     },
     "src/cognition/extraction.rs": {
       "status": "unproved",
@@ -6923,8 +6933,8 @@
     },
     "src/cognition/preferences.rs": {
       "status": "unproved",
-      "sha256": "2c22165b44db40e14be297b288fc207bd72d57dcfedafbe1b2a708000b51e8bf",
-      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
+      "sha256": "0ca4b283d06b0c0c5caeb78f3df1528bea6f8c9f7bfd6738db2ed592d26df771",
+      "review": "Batch F6: consent, legal acknowledgement and requests, behavior capture, preferences and the storefront experience moved into intelligence"
     },
     "src/cognition/projection.rs": {
       "status": "unproved",
@@ -7248,8 +7258,8 @@
     },
     "src/experience.rs": {
       "status": "unproved",
-      "sha256": "5303ddd342ad990aef28744d9f3b97edf674e73e1a051f1c14bdf4313bab0e4c",
-      "review": "Behavior analytics reviewed: existing cart-locked consent predicate reused; purpose-separated withdrawal, tenant/FK scope, typed and bounded observations, private journey permissions and derived reports. New SQL/frontend/proxy adapters remain unproved; no new theorem claim."
+      "sha256": "804cefc273048080d231f10a084d5ccc379796955495bf9b4e993a3a1443f8e8",
+      "review": "Batch F6: consent, legal acknowledgement and requests, behavior capture, preferences and the storefront experience moved into intelligence"
     },
     "src/extensions.rs": {
       "status": "unproved",
@@ -7291,40 +7301,15 @@
       "sha256": "9ef30d2f4c5209795ee47677b95d80721e65afa7c54a89bfb00d9b46ea77ce5e",
       "review": "Identity credentials, B2B and POS contracts and checkout tax lines moved into components; kernel call sites unchanged"
     },
-    "src/legal/capabilities.rs": {
-      "status": "unproved",
-      "sha256": "b7bd403901ade7ee0f7a14dcd2a5b00a3c1e1cbd61656b5408613b546d3d0a8a",
-      "review": "Reviewed eighteen core findings: typed trusted identity and explicit route rights; consolidated current grants; durable auth and fenced shared limits; scoped transactions and one-backend PgBouncer including nested borrow fixes; bounded Wasm/PNG work; notified workers, savepoint quarantine and conservative retention; separate runtime roles and startup configuration. Real PostgreSQL/provider regressions preserve current tenant/customer/payment behavior. SQL/network adapters remain unproved."
-    },
-    "src/legal/checkout.rs": {
-      "status": "unproved",
-      "sha256": "f9578328aa0282287f99a1da7ea0468b7d72ccbddcc573812bca77cbd08d9e3a",
-      "review": "The purchase transaction moves into checkout behind the purchase port"
-    },
-    "src/legal/consent.rs": {
-      "status": "reviewed-binding",
-      "sha256": "76ba5eab144279d94783c5993be52444ee77e7d67bcce128f6dba6912cd96a7f",
-      "review": "Reviewed capability-authenticated consent aliases and tenant/channel composite FK. Readers, processing and checkout resolve one canonical receipt; withdrawal erases related preferences in batch. PostgreSQL legal_privacy exercises original expiry, no copied checkout acceptance, second purchase and seven concurrent continuation/withdrawal requests; behavior_intelligence and tenant_isolation passed. SQL adapter remains unproved. Staging diff only adds authorized main-language metadata for product labels."
-    },
-    "src/legal/continuation.rs": {
-      "status": "unproved",
-      "sha256": "7e528f126777fe5b60690a926ec6529d5614ad3dc141e64b38a84a157de32b17",
-      "review": "Customer account writes, the legal snapshot of an order and the locked settings read moved into components"
-    },
     "src/legal/mod.rs": {
       "status": "unproved",
-      "sha256": "04347c703852081120fa03b3d18afd0c246b3423a1ed89a8300e75b22ac53a25",
-      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
+      "sha256": "68f6dab90bf0d04f327b4a2743ae811c2f9b86675e35e8bd66ed93d407f9d3a4",
+      "review": "Batch F6: consent, legal acknowledgement and requests, behavior capture, preferences and the storefront experience moved into intelligence"
     },
     "src/legal/model.rs": {
       "status": "unproved",
       "sha256": "6b7c413c70bc694ce20c269a865b31a548fff57483a09e7105ca12f06092287f",
       "review": "shop component crate created; settings types moved; no kernel binding changed"
-    },
-    "src/legal/requests.rs": {
-      "status": "unproved",
-      "sha256": "8a69968be342d22399572b93dea3f9722b025c07c9b302cd3e54532575b410fe",
-      "review": "Consumer requests moved into the shop component and the frozen rule comparison into marketing without behaviour change"
     },
     "src/lib.rs": {
       "status": "unproved",
@@ -8048,8 +8033,8 @@
     },
     "src/ucp/consent.rs": {
       "status": "unproved",
-      "sha256": "c560cdc5b732931e9e25d2fd7c6ddc2d7828d6e138de17ee230095eb1a7cb660",
-      "review": "Reviewed UCP PUT compatibility: replace omitted buyer contact fields, preserve only explicit prior consent, and retain native required-contact completion guard; protocols and agentic real HTTP regressions."
+      "sha256": "30f1cc62a979de5485098d66e4acbfaf8e4c90bbd694d7434bf27268841a146b",
+      "review": "Batch F6: consent, legal acknowledgement and requests, behavior capture, preferences and the storefront experience moved into intelligence"
     },
     "src/ucp/document.rs": {
       "status": "unproved",
@@ -8103,8 +8088,8 @@
       "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
     },
     "Cargo.lock": {
-      "sha256": "3b6c7067015b8849ce942e32e6a9f8a8e90ed8047964cf7afe8177b7a355368c",
-      "review": "Batch F4: source-record imports moved into studio behind the ImportHost port"
+      "sha256": "963da74d91ce32494088079e97a4dc049ab61de56c25bbc03489b8543b2256cb",
+      "review": "Batch F6: consent, legal acknowledgement and requests, behavior capture, preferences and the storefront experience moved into intelligence"
     },
     "Cargo.toml": {
       "sha256": "12d2d79a98f6913d20b8e912afb9ea8de0539b9e83428de8a9d7412c406896f6",

@@ -19,7 +19,8 @@ intelligence. It records exact implemented paths and the still-open audit scope.
 `components/intelligence` owns source review, read-agent rounds
 (`service/read_rounds`), price guardrails and autonomy, controlled experiments,
 consent-bound preferences, retrieval and the rebuildable Qdrant projection
-(`knowledge`); `src/cognition/` keeps the storefront routes that need carts and consent. Extend the existing settings, capability, outbox,
+(`knowledge`) and the consent receipts that gate personalization and analytics;
+`src/cognition/` only registers routes. Extend the existing settings, capability, outbox,
 chat, proposal and native checkout owners. Do not create another knowledge truth
 store, pricing engine, approval queue or chat backend. Stored evidence is not
 model-weight learning; exact source admission is not proof of surrounding prose.
@@ -28,8 +29,9 @@ cursors, source-trigger jobs and fenced publication share the existing index que
 
 ## Behavioral intelligence ownership
 
-`src/cognition/behavior/` owns consent-bound native visitor capture; the report and
-journey reads are `components/intelligence/src/service/behavior.rs`. Reuse `session_signal_events`, native carts/accounts,
+Consent-bound native visitor capture (`components/intelligence/src/http/behavior_capture.rs`),
+the consent receipts (`service/consent.rs`) and the report and journey reads
+(`service/behavior.rs`) live in the intelligence component. Reuse `session_signal_events`, native carts/accounts,
 current legal receipts, product knowledge, forced tenant RLS and composite foreign
 keys. Never introduce another analytics identity, cookie, event ledger, pricing or
 order truth. Do not record raw IP/UA, search/question text or visitor-supplied customer

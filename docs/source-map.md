@@ -563,7 +563,7 @@ See [international commerce](international-commerce.md) for the exact contract.
 | [`src/concierge.rs`](../src/concierge.rs) | Read-only storefront shopping advisor. | `providers.py + live intelligence.py/studio.py + protocols.py` |
 | [`src/context.rs`](../src/context.rs) | Bounded behavioral ports of Shopware 6.7.14.2 context and product-cart selection. | `context_differential.py + Rust selectors + studio.py` |
 | [`src/customer.rs`](../src/customer.rs) | Customer credential verification and context rotation. | `server startup/build + integration.py + structure.py` |
-| [`src/experience.rs`](../src/experience.rs) | Persisted storefront layout policy and observed synthetic rewards. | `integration.py + protocols.py + studio.py + restart.py` |
+| [`components/intelligence/src/http/experience.rs`](../components/intelligence/src/http/experience.rs) | Persisted storefront layout policy and observed synthetic rewards. | `integration.py + protocols.py + studio.py + restart.py` |
 | [`src/extensions.rs`](../src/extensions.rs) | Merchant catalogue and Wasm extension activation/state. | `integration.py + users.py + extensions.py + restart.py` |
 | [`src/foundation.rs`](../src/foundation.rs) | Application dependencies, error responses and request context helpers. | `protocols.py + integration.py + commerce.py + users.py` |
 | [`crates/cognition/src/inference.rs`](../crates/cognition/src/inference.rs) | Provider adapters. Credentials stay on the server; domain validation is separate. | `Rust parsing/schema tests + providers.py + live intelligence.py/studio.py` |
@@ -701,7 +701,7 @@ Shopware compatibility claim is made.
 | `crates/automation/src/rule_comparison.rs`, `src/bin/rules.rs`, `reference/rules.php` | Original Shopware numeric comparison behavior, independent batch oracle | `rule_differential.py`: 1,280 comparisons |
 | `components/pricing/src/domain/discount.rs` | Exact-cent proportional basket discount allocation | Rust conservation/bounds tests, concurrent coupon HTTP checkout |
 | `components/studio/src/http/product_editor.rs` | Revision-bound translations and advanced metadata; own product/reference validation | `marketing_accounts.py` and selected release |
-| `src/experience.rs` | Persisted layout policy plus owned-session signal ranking/clearing | `intelligence.py`, `marketing_accounts.py` |
+| `components/intelligence/src/http/experience.rs` | Persisted layout policy plus owned-session signal ranking/clearing | `intelligence.py`, `marketing_accounts.py` |
 | `frontend/src/admin/{developer,environments,storyfronts,automation,catalog}/` | Dedicated merchant workbench forms and review surfaces | Strict frontend build, actual browser review |
 | `frontend/src/storefront/account/CustomerAccount.tsx`, `admin/intelligence/KnowledgeSources.tsx`, `admin/intelligence/SourceEditor.tsx`, `storefront/catalog/ProductQuestion.tsx` | Customer account editing/history and private upload/cited shopper questions | Native HTTP suites and browser forms |
 | `frontend/src/shared/i18n/{workbench-i18n,errors-i18n}.ts`, `frontend/tests/locales.mjs` | Four-language typed vocabulary and exact/fallback errors | Locale parity/nonempty/error tests |

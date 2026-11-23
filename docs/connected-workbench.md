@@ -143,7 +143,7 @@ reported.
 | `src/developer/generation_edits.rs` | Bounded JSON Patch model wire, atomic Manifest edits and host-assigned versions; no app runtime |
 | `src/developer/generation_contract.rs` | Existing schema/access/integration preservation; rejected removal/type-change unit cases |
 | `src/planner.rs`, `proposal_apply.rs`, `translations/routes.rs` | One approved translation job owner; actual Rust/PostgreSQL planner/approval/restart/isolation suite |
-| `src/experience.rs`, `usePersonalization.ts` | Explainable category ordering and scope/consent boundaries; existing controlled experiment suite and late-response UI regression |
+| `components/intelligence/src/http/experience.rs`, `usePersonalization.ts` | Explainable category ordering and scope/consent boundaries; existing controlled experiment suite and late-response UI regression |
 | Private Experience `onboarding-catalog.ts`, `job-lease.ts` | Actual worker import loop checkpoint/retry and real leased PostgreSQL progress tests |
 | Private Payments `onboarding_referral.rs`, `webhooks.rs` | Durable referral identity and disconnected-account guard; real private/public Rust/PostgreSQL local PSP contract |
 

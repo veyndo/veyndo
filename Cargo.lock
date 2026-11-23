@@ -3801,6 +3801,7 @@ dependencies = [
  "veyndo-checkout",
  "veyndo-cognition",
  "veyndo-core",
+ "veyndo-customers",
  "veyndo-identity",
  "veyndo-inventory",
  "veyndo-kernel",
