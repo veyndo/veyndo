@@ -15,7 +15,7 @@ pub(crate) use veyndo_app_platform::store::configuration_orders::configurations;
 mod configuration_selection;
 pub(crate) use configuration_selection::{
     Selection as ConfigurationSelection, resolve_selection as configuration_selection_for_list,
-    resolve_selections, selection_shape,
+    resolve_selections,
 };
 mod consent;
 mod core_callbacks;

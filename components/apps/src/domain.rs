@@ -7,7 +7,7 @@ pub mod build_admission;
 pub mod callback_grant;
 pub mod configuration_budget;
 pub mod configuration_inputs;
-pub mod configuration_selection;
+pub use veyndo_shop::domain::configuration_selection;
 pub mod configuration_summary;
 pub mod consent;
 pub mod core_extensions;

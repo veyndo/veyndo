@@ -726,11 +726,6 @@
       "sha256": "2b09e4ed00f7ee1940679226bfa4bdd6b48b3c7ea4830139141492e5bf71a2ba",
       "review": "Configuration, lifecycle, ontology and reference adapters moved into the apps component without changing rules"
     },
-    "components/apps/src/domain/configuration_selection.rs": {
-      "status": "unproved",
-      "sha256": "77029cbf4487881519b7fe401a7216c4a64c929bca5d7472a31abefb191c47e6",
-      "review": "Record store, consent and core extension rules moved into the apps component without changing rules"
-    },
     "components/apps/src/domain/configuration_summary.rs": {
       "status": "unproved",
       "sha256": "12b36439fd0d94c4b36a04b305674953bca94fbcea2854e3ca7271d6234f1794",
@@ -948,8 +943,8 @@
     },
     "components/apps/src/domain.rs": {
       "status": "unproved",
-      "sha256": "8ecbf315c1b7c83937e2fc785ac7bdd259fc40f1db386cd34013b3d9ceaac090",
-      "review": "App Studio builds, autosaves, archive and staging moved into the apps component; behaviour unchanged"
+      "sha256": "4dd092349b45af9a443360baf3b39f61d74a4c2eb094ce35ebb3c916be453a17",
+      "review": "Procurement lists move into b2b; configuration selection rules into shop"
     },
     "components/apps/src/http/actions.rs": {
       "status": "unproved",
@@ -1353,13 +1348,18 @@
     },
     "components/b2b/src/ports.rs": {
       "status": "unproved",
-      "sha256": "898e7c35a56990cb6e57f7c23421f25caf1199bce89d41d29ab9a8b1e8cd1969",
-      "review": "Company quotes and their lifecycle rules move into b2b"
+      "sha256": "f107dcb7815dcd8250759c1814069782d2f2ed5e6dec7793bdfa74bac07b3309",
+      "review": "Procurement lists move into b2b; configuration selection rules into shop"
     },
     "components/b2b/src/service/approval.rs": {
       "status": "reviewed-binding",
       "sha256": "6d9a709d6ec4d241b5d51a79aaf790b2dc3a2c2fb09dcfd5fbdfb8b847ef8e4f",
       "review": "B2B approvals, quick order and offer contract moved behind the shop cart port"
+    },
+    "components/b2b/src/service/lists.rs": {
+      "status": "unproved",
+      "sha256": "9a11d44dc579ed88fdc16193ecc62996b13793b87a620091858a1af5f9f9bd89",
+      "review": "Procurement lists move into b2b; configuration selection rules into shop"
     },
     "components/b2b/src/service/onboarding.rs": {
       "status": "unproved",
@@ -1388,8 +1388,8 @@
     },
     "components/b2b/src/service.rs": {
       "status": "unproved",
-      "sha256": "ac2ad9f416eabcb1b8ebaeec13eb75731c5602fcd65073b1160a6428c0389c90",
-      "review": "Company quotes and their lifecycle rules move into b2b"
+      "sha256": "27fd97a068bd8cfb1cd7392a74021b9ada2ec1e1b9bbf1639e8b048ae9f38d53",
+      "review": "Procurement lists move into b2b; configuration selection rules into shop"
     },
     "components/b2b/src/store/access.rs": {
       "status": "unproved",
@@ -3541,6 +3541,11 @@
       "sha256": "5fe0fec692b5362bb6d51923f4b3bb771e3c99dabd786c1ffbc2b66951002880",
       "review": "Order list criteria, company model and receipts moved into components; kernel call sites unchanged"
     },
+    "components/shop/src/domain/configuration_selection.rs": {
+      "status": "unproved",
+      "sha256": "77029cbf4487881519b7fe401a7216c4a64c929bca5d7472a31abefb191c47e6",
+      "review": "Procurement lists move into b2b; configuration selection rules into shop"
+    },
     "components/shop/src/domain/customer_groups.rs": {
       "status": "unproved",
       "sha256": "f9ba9955eaecd2d5b0bd75ac776284438d23832a800af29a044f0582ddec2d17",
@@ -3583,8 +3588,8 @@
     },
     "components/shop/src/domain.rs": {
       "status": "unproved",
-      "sha256": "fcd9ef82831b4a54f3a473a145b97a3fcd403e489fa8d4514831b295b5477351",
-      "review": "Request language selection moved into the shop component and sales channel admission into the marketing component; behaviour unchanged"
+      "sha256": "1ee144f7cc7e86cb59a03221f5b91f469829ef61ca0080fc8d38f1c00251a6c7",
+      "review": "Procurement lists move into b2b; configuration selection rules into shop"
     },
     "components/shop/src/http/frontend_transport.rs": {
       "status": "unproved",
@@ -5943,8 +5948,8 @@
     },
     "src/apps/mod.rs": {
       "status": "unproved",
-      "sha256": "71313e58535322d00dbdbba1c8d650d1d48a293f69610fd743db00649ea92e0b",
-      "review": "App Studio builds, autosaves, archive and staging moved into the apps component; behaviour unchanged"
+      "sha256": "08202b15f146c8dbfbbc8a5045dd5b9abdd7d75cecc6ed1ae7d925d8868d4484",
+      "review": "Procurement lists move into b2b; configuration selection rules into shop"
     },
     "src/apps/model_contract.rs": {
       "status": "unproved",
@@ -6298,18 +6303,13 @@
     },
     "src/b2b/gateway.rs": {
       "status": "unproved",
-      "sha256": "78d05854cbff49e6cc7f41c39969bde8bbe7823f2c21f54f70353eb21ec0d7a6",
-      "review": "Company quotes and their lifecycle rules move into b2b"
-    },
-    "src/b2b/lists.rs": {
-      "status": "unproved",
-      "sha256": "0640f572c47f2e235b5039185ac7b4d975361c460e3688e23e7547d58af8d96e",
-      "review": "Review combined native business capability and hardening: typed material/dimension guests remain app-owned and bounded; native CAS/FX/current B2B approval and immutable order snapshots; isolated app crate consumer preserves compiler boundary; independent per-event subscriber retry/quarantine preserves healthy events, commit gaps and explicit recovery; signed tenant/system authority, provider-native read tools and real document withdrawal, workspace image closure and source inventory. SQL/async/provider adapters remain tested, not proved."
+      "sha256": "b84931457d89114a90326535250916cad15fb0bddd19180c17c332a2ad35969b",
+      "review": "Procurement lists move into b2b; configuration selection rules into shop"
     },
     "src/b2b/mod.rs": {
       "status": "unproved",
-      "sha256": "160a8dd2ee217e31cca34329e91c1455d1dd3fcad54c64f1bf820a66066a49aa",
-      "review": "Company quotes and their lifecycle rules move into b2b"
+      "sha256": "1de51834d2ba954e3acef0ce4b4ee36750f0444cc2bde20edcdcbacd059c50f4",
+      "review": "Procurement lists move into b2b; configuration selection rules into shop"
     },
     "src/b2b/model.rs": {
       "status": "unproved",

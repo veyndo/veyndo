@@ -148,7 +148,6 @@ This lists every checked-in source module in these roots, including files with n
 | [src/b2b/catalog.rs](../src/b2b/catalog.rs) | Private unit catalog scope is derived from the current employee/cart, never caller criteria; indexed before pagination. |
 | [src/b2b/contract.rs](../src/b2b/contract.rs) | Native B2B operation catalogue and bounded request schema shared by HTTP, MCP and UCP adapters. |
 | [src/b2b/gateway.rs](../src/b2b/gateway.rs) | One native command contract for Store API, merchant API and MCP; actor identity never comes from arguments. |
-| [src/b2b/lists.rs](../src/b2b/lists.rs) | Reusable private/shared procurement lists; applying them reuses native cart admission and pricing. |
 | [src/b2b/mod.rs](../src/b2b/mod.rs) | Native modular company procurement; protocol-specific EDI adapters remain in their app packages. |
 | [src/b2b/model.rs](../src/b2b/model.rs) | Bounded typed native company, purchasing-unit and employee policies. Money is currency-bound minor units. |
 | [src/b2b/onboarding.rs](../src/b2b/onboarding.rs) | Atomic company setup lives in the B2B component; this entry keeps the server-side signature. |
@@ -571,7 +570,6 @@ This lists every checked-in source module in these roots, including files with n
 | [components/apps/src/domain/callback_grant.rs](../components/apps/src/domain/callback_grant.rs) | What an app callback key may do: the capability the merchant approved and the role scope behind it. |
 | [components/apps/src/domain/configuration_budget.rs](../components/apps/src/domain/configuration_budget.rs) | The budget of app configurations one cart may carry. |
 | [components/apps/src/domain/configuration_inputs.rs](../components/apps/src/domain/configuration_inputs.rs) | Native policy adapter for shared configuration grammar, library selection and exact guest arguments. |
-| [components/apps/src/domain/configuration_selection.rs](../components/apps/src/domain/configuration_selection.rs) | Reusable input-only selections: their wire form and bounds before current packages resolve them. |
 | [components/apps/src/domain/configuration_summary.rs](../components/apps/src/domain/configuration_summary.rs) | Immutable public configuration labels accompany accepted inputs; no current package lookup is needed on a receipt. |
 | [components/apps/src/domain/consent.rs](../components/apps/src/domain/consent.rs) | Package approval binds all requested permissions to a reviewed digest; current actor rights apply before every installation path. |
 | [components/apps/src/domain/core_extensions.rs](../components/apps/src/domain/core_extensions.rs) | Namespaced core-object extension contracts; native records, rights and app storage keep their owners. |
@@ -697,8 +695,9 @@ This lists every checked-in source module in these roots, including files with n
 | [components/b2b/src/domain/quote_lifecycle.rs](../components/b2b/src/domain/quote_lifecycle.rs) | App-owned RFQ preparation states reuse native quote CAS, ownership, history and outbox; only native offer/accept moves money. |
 | [components/b2b/src/domain.rs](../components/b2b/src/domain.rs) | domain of this component. |
 | [components/b2b/src/lib.rs](../components/b2b/src/lib.rs) | B2B component: company procurement records, their bounds and the purchasing contract. |
-| [components/b2b/src/ports.rs](../components/b2b/src/ports.rs) | What quote requests need from the server: the compiled app lifecycle a new quote is accepted under. |
+| [components/b2b/src/ports.rs](../components/b2b/src/ports.rs) | What quotes and procurement lists need from the server: the compiled app lifecycle of a new quote, app configuration admission and the configured cart edit. |
 | [components/b2b/src/service/approval.rs](../components/b2b/src/service/approval.rs) | Revision-bound purchasing approval inbox; approvers must be active peers and cannot approve themselves. |
+| [components/b2b/src/service/lists.rs](../components/b2b/src/service/lists.rs) | Reusable private/shared procurement lists; applying them reuses native cart admission and pricing. |
 | [components/b2b/src/service/onboarding.rs](../components/b2b/src/service/onboarding.rs) | Atomic company setup through the same company, unit and member writers; a foreign customer rolls back the whole setup. |
 | [components/b2b/src/service/quick_order.rs](../components/b2b/src/service/quick_order.rs) | Bounded SKU bulk entry resolves native products then uses the ordinary cart's permissions, quantities and prices. |
 | [components/b2b/src/service/quote_contract.rs](../components/b2b/src/service/quote_contract.rs) | Accepted offer prices feed the existing currency/tax calculator; checkout consumes the offer atomically. |
@@ -1151,6 +1150,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/shop/src/domain/cart_admission.rs](../components/shop/src/domain/cart_admission.rs) | Who may touch a cart: a merchant-created cart only its creating merchant, a POS cart only its admitted cashier, and every cart only its own sales channel. |
 | [components/shop/src/domain/cart_lines.rs](../components/shop/src/domain/cart_lines.rs) | Bounds every set of cart lines keeps: at most 100 distinct products, each once, in a sane quantity. |
 | [components/shop/src/domain/checkout_selection.rs](../components/shop/src/domain/checkout_selection.rs) | Recover a quote after configuration changes without losing items or silently committing new choices. |
+| [components/shop/src/domain/configuration_selection.rs](../components/shop/src/domain/configuration_selection.rs) | Reusable input-only selections: their wire form and bounds before current packages resolve them. |
 | [components/shop/src/domain/customer_groups.rs](../components/shop/src/domain/customer_groups.rs) | Tenant-owned translated customer groups preserve exact rule IDs and select an explicit existing price/tax presentation basis. |
 | [components/shop/src/domain/defaults.rs](../components/shop/src/domain/defaults.rs) | Backward-compatible enrichment of existing configuration with bundled translated method labels. |
 | [components/shop/src/domain/language_selection.rs](../components/shop/src/domain/language_selection.rs) | Which language a request reads in and the fallback chain of its translations; the shop main language always closes the chain. |

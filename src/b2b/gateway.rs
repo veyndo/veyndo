@@ -109,7 +109,14 @@ pub(crate) async fn invoke(a: &App, h: &RequestContext, name: &str, v: &Value) -
         "member.save" => organization::member(a, h, v).await,
         "catalog.save" => catalog::save(a, h, v).await,
         op @ ("lists" | "list.save" | "list.delete" | "list.apply") => {
-            lists::invoke(a, h, op, v).await
+            veyndo_b2b::service::lists::invoke(
+                a,
+                (&crate::cart_storage::Carts(a), &ListCarts(a)),
+                h,
+                op,
+                v,
+            )
+            .await
         }
         op @ ("quotes" | "quotes.merchant" | "quote.request" | "quote.offer" | "quote.message"
         | "quote.reject" | "quote.get" | "quote.current" | "quote.transition") => {
@@ -234,5 +241,40 @@ impl veyndo_b2b::ports::QuoteLifecycle for QuoteLifecycle {
         tenant: &'a str,
     ) -> veyndo_core::PortFuture<'a, Value> {
         Box::pin(apps::native_lifecycle::capture(conn, tenant, "quote"))
+    }
+}
+
+/// App configuration admission and the configured cart edit of procurement lists.
+struct ListCarts<'a>(&'a App);
+impl veyndo_b2b::ports::ListCarts for ListCarts<'_> {
+    fn check<'a>(
+        &'a self,
+        tenant: &'a str,
+        selection: &'a apps::ConfigurationSelection,
+    ) -> veyndo_core::PortFuture<'a, ()> {
+        Box::pin(async move {
+            apps::configuration_selection_for_list(self.0, tenant, selection).await?;
+            Ok(())
+        })
+    }
+    fn apply<'a>(
+        &'a self,
+        h: &'a RequestContext,
+        items: Vec<Item>,
+        expected: i64,
+        selections: &'a [apps::ConfigurationSelection],
+    ) -> veyndo_core::PortFuture<'a, Value> {
+        Box::pin(async move {
+            let c = crate::cart_mutation::set_configured_cart(
+                self.0,
+                h,
+                items,
+                Some(expected),
+                None,
+                Some(selections),
+            )
+            .await?;
+            cart_json(self.0, &c).await
+        })
     }
 }

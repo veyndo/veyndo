@@ -437,7 +437,11 @@ Order follows the dependency report, lowest first. Each line is one move.
   the accepted snapshot through the shared lifecycle model, and the snapshot
   a new quote captures comes through `ports::QuoteLifecycle`, because the app
   platform compiles it and already depends on b2b through orders.
-  Open: lists (app configuration selections), the gateway and routes.
+  Procurement lists (save, share, delete, apply) are `service/lists`; the
+  wire form and bounds of saved app configuration selections moved to
+  `veyndo_shop::domain::configuration_selection`, and resolving a selection
+  and the configured cart edit come through `ports::ListCarts`.
+  Open: the gateway and routes.
 - [ ] pos. Started: `components/pos` owns the cashier input envelope and the
   capability schema; the POS location of a channel lives with the channel in
   marketing. `service/` holds the cashier customer search and attachment,

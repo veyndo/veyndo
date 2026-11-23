@@ -3,6 +3,7 @@ pub mod buyer_consent;
 pub mod cart_admission;
 pub mod cart_lines;
 pub mod checkout_selection;
+pub mod configuration_selection;
 pub mod customer_groups;
 pub mod defaults;
 pub mod language_selection;

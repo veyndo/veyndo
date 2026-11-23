@@ -624,7 +624,6 @@
         "core",
         "customers",
         "identity",
-        "marketing",
         "orders",
         "pos",
         "pricing",
@@ -641,7 +640,7 @@
         "outbox",
         "products"
       ],
-      "glob_imports": 7,
+      "glob_imports": 6,
       "untyped_access": 108,
       "sql_outside_store": 8
     },

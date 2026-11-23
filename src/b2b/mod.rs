@@ -7,7 +7,6 @@ mod contract;
 mod gateway;
 mod settings;
 pub(crate) use contract::{CAPABILITIES, permission, schema};
-mod lists;
 mod model;
 mod onboarding;
 mod orders;

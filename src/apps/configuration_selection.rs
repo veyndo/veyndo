@@ -1,6 +1,6 @@
 //! Saved selections resolve in the apps component; this module adds the main language of the shop.
 use super::*;
-pub(crate) use veyndo_app_platform::domain::configuration_selection::{Selection, selection_shape};
+pub(crate) use veyndo_app_platform::domain::configuration_selection::Selection;
 use veyndo_app_platform::service::configuration_selection as resolver;
 pub(crate) async fn resolve_selection(
     a: &App,
