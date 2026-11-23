@@ -27,7 +27,7 @@ or infer historical order ownership from email. Manual-order review/complete bel
 to `operations/manual_orders.rs`; it uses actor-private native carts, current
 compound rights/PII, selected channel/language/currency and original checkout.
 Keep settings → channel → customer FOR UPDATE → cart lock ordering for this path.
-`manual_order_admission.rs` rechecks final native payment mode and channel/catalog
+`components/checkout/src/store/admin_order.rs` rechecks final native payment mode and channel/catalog
 admission under those locks; no real provider is called by manual orders. The small
 admin-payment decision is an extracted Lean policy; async SQL remains unproved.
 Direct token SQL paths (especially account logout and purchased downloads) must

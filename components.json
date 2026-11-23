@@ -249,7 +249,6 @@
       "title": "Stock, reservations and supply",
       "sources": [
         "components/inventory",
-        "src/commerce/inventory.rs",
         "src/commerce/inventory_ports.rs",
         "src/commerce/supply_proposal.rs",
         "src/commerce/test_stock.rs"
@@ -348,8 +347,6 @@
         "src/checkout",
         "src/checkout_handoff.rs",
         "src/checkout_page.rs",
-        "src/checkout_products.rs",
-        "src/checkout_review.rs",
         "src/commerce/app_adjustments.rs",
         "src/order_checkout.rs"
       ],
@@ -395,7 +392,7 @@
         "shop_environments",
         "tenants"
       ],
-      "glob_imports": 10,
+      "glob_imports": 9,
       "untyped_access": 219,
       "sql_outside_store": 6
     },
@@ -492,7 +489,7 @@
         "sales_channels",
         "tenants"
       ],
-      "glob_imports": 25,
+      "glob_imports": 24,
       "untyped_access": 450,
       "sql_outside_store": 11
     },

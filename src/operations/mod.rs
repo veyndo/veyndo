@@ -10,13 +10,8 @@ pub(crate) mod imports;
 pub(crate) use creation_schema::schema as creation_schema;
 mod customer_lookup;
 mod customers;
-mod manual_order_admission;
-mod manual_orders;
-pub(crate) use manual_order_admission::{
-    admin_order, admin_purchase, admit_admin_payment, admit_admin_products, check_admin_customer,
-    lock_admin_checkout,
-};
 mod guest_customers;
+mod manual_orders;
 pub(crate) use customers::restore_customer;
 pub(crate) use master_data::save as restore_company;
 mod master_data;

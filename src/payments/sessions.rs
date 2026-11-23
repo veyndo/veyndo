@@ -19,4 +19,3 @@ pub(crate) async fn session(
         .await?,
     ))
 }
-pub(crate) use veyndo_payments::service::sessions::origin_conn;

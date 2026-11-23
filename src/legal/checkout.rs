@@ -30,4 +30,3 @@ pub(super) async fn accept(
     tx.commit().await?;
     Ok(Json(data))
 }
-pub(crate) use veyndo_checkout::store::legal_snapshot::snapshot;

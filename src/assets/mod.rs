@@ -76,15 +76,6 @@ pub(crate) fn router() -> Router<App> {
             model_format::MODEL_LIMIT + 65536,
         ))
 }
-pub(crate) async fn snapshot(
-    tx: &mut sqlx::Transaction<'_, sqlx::Postgres>,
-    c: &StoredCart,
-    order: &str,
-) -> Result<()> {
-    let products: Vec<String> = c.data.items.iter().map(|i| i.id.clone()).collect();
-    veyndo_catalog::store::order_downloads::grant(tx, &c.tenant, &products, order).await
-}
-
 pub(crate) fn media_permission(name: &str) -> Option<&'static str> {
     match name {
         "merchant.media.caption" => Some("assistant.use"),

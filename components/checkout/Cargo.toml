@@ -25,4 +25,7 @@ veyndo-b2b = { path = "../b2b" }
 veyndo-marketing = { path = "../marketing" }
 veyndo-identity = { path = "../identity" }
 veyndo-customers = { path = "../customers" }
+veyndo-inventory = { path = "../inventory" }
+veyndo-orders = { path = "../orders" }
+veyndo-payments = { path = "../payments" }
 veyndo-runtime = { path = "../../crates/runtime" }

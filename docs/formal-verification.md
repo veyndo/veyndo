@@ -103,7 +103,7 @@ verified separately by native integration tests rather than proved by Lean.
 | `manual_payment_admissible` | Manual payment cannot confirm an external provider; it requires a pending payment and nonterminal order | `src/commerce/fulfillment.rs` |
 | `download_admissible` | Blocked orders grant no download; admitted downloads require payment or explicit simulated authorization | `src/assets/download.rs` |
 | `checkout_review_admissible` | Exact revision and amount equality plus confirmed methods are required when a client supplies the review headers | `src/order_checkout.rs` |
-| `admin_payment_admissible` | Admin orders admit only manual or simulated payment; ordinary buyer checkout retains its provider path | `src/operations/manual_order_admission.rs`, `src/order_checkout.rs` |
+| `admin_payment_admissible` | Admin orders admit only manual or simulated payment; ordinary buyer checkout retains its provider path | `components/checkout/src/domain/admin_order.rs`, `src/order_checkout.rs` |
 | `checkout_contact_admissible` | Financial checkout requires email and billing data; simulated checkout has an explicit exception | `src/order_checkout.rs` |
 | `receipt_admissible` | Accepted provider receipts match amount and currency and confirm the outcome | `src/payments/receipt_guard.rs` |
 | `platform_admissible` | Operator access requires a personal identity, active grant and account | `src/platform/auth.rs` |

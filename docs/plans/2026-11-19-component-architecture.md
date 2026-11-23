@@ -346,9 +346,15 @@ Order follows the dependency report, lowest first. Each line is one move.
   addresses, refused when the quote cannot honour it) is
   `store/cart_selection`; the public method discovery is
   `service/checkout_options`, with the provider pairs from `Quotes::available`.
-  Open: the four steps of the checkout
-  transaction (they call apps, B2B, payments, marketing and legal and need a
-  host port). `http/buyer_identity` seals and inspects the
+  The purchase transaction is `service/purchase` with its steps `lock`
+  (idempotency lock, merchant channel policy, cart, company unit, reviewed
+  session, fingerprint and replay), `price` (product locks, contract prices,
+  locked settings, taxes, promotions, stock) and `commit` (review binding,
+  company budget, payment admission, one atomic order, stock, downloads and
+  outbox commit). App sandboxes and hooks, the cashier, the built-in PayPal
+  adapter and the agent run fence reach it through the generic port
+  `ports::Purchase`, implemented by `checkout::purchase::Server`; the server
+  keeps only the remembered payment preference after the commit. `http/buyer_identity` seals and inspects the
   short-lived Checkout grant of a live customer session and
   `http/private_browser` relays the two browser commands to the private
   Checkout service; the server only registers their routes.

@@ -5,17 +5,6 @@ use axum::http::header::CACHE_CONTROL;
 pub(crate) use veyndo_checkout::domain::session_review::{Recovery, Review, key, receipt};
 use veyndo_checkout::store::session;
 
-/// The locked cart still belongs to the reviewed session and its current buyer.
-pub(super) async fn admit_locked(
-    review: &Review,
-    tx: &mut sqlx::PgConnection,
-    h: &RequestContext,
-    c: &StoredCart,
-) -> Result<()> {
-    let buyer = b2b::identity(tx, h).await?;
-    review.admit_cart(c, marketing::channel_id(h), &buyer)
-}
-
 pub(crate) async fn confirm_session(
     State(a): State<App>,
     mut h: RequestContext,

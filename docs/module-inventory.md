@@ -15,7 +15,6 @@ This lists every checked-in source module in these roots, including files with n
 | [src/accounts/demo.rs](../src/accounts/demo.rs) | Public synthetic customer fixture for newly provisioned demo shops; never fills real customer addresses. |
 | [src/accounts/metadata.rs](../src/accounts/metadata.rs) | Standard customer read fields; the projection and metrics are owned by the customers component. |
 | [src/accounts/mod.rs](../src/accounts/mod.rs) | Independent customer sessions, profile/password management and owning-account order history. |
-| [src/accounts/order_snapshot.rs](../src/accounts/order_snapshot.rs) | The immutable customer and address record of an order is owned by the checkout component. |
 | [src/accounts/orders.rs](../src/accounts/orders.rs) | Customer-owned order reads and receipts share one tenant/identity predicate and a public projection. |
 | [src/accounts/payment_preference.rs](../src/accounts/payment_preference.rs) | Optional last-used payment preference is written after purchase commit, without holding cart/unit/product locks. |
 | [src/accounts/profile.rs](../src/accounts/profile.rs) | Typed customer-owned profile updates; price groups, email and merchant roles cannot be self-assigned. |
@@ -201,19 +200,13 @@ This lists every checked-in source module in these roots, including files with n
 | [src/categories/mod.rs](../src/categories/mod.rs) | Tenant-scoped category tree, localized navigation and product assignment boundaries. |
 | [src/categories/navigation.rs](../src/categories/navigation.rs) | Admission of a category for the visitor's sales channel; the navigation itself is owned by the catalog component. |
 | [src/checkout/buyer_identity.rs](../src/checkout/buyer_identity.rs) | Exchange a native buyer login for short-lived, Checkout-only authority. |
-| [src/checkout/commit.rs](../src/checkout/commit.rs) | Native final admission and one atomic order, stock, cart, payment-attempt and outbox commit; no external provider call. |
-| [src/checkout/lock.rs](../src/checkout/lock.rs) | Native lock and replay admission use the original ordered transaction, cart capability and current B2B/POS checks. |
 | [src/checkout/mod.rs](../src/checkout/mod.rs) | Expose the commerce host contract through the existing native checkout transaction. |
-| [src/checkout/prepare.rs](../src/checkout/prepare.rs) | Native preparation performs original cart/channel/package admission before taking commerce locks. |
-| [src/checkout/price.rs](../src/checkout/price.rs) | Authoritative native quote uses locked products/settings, original taxes, promotions, App hooks, POS and stock checks. |
 | [src/checkout/private_browser.rs](../src/checkout/private_browser.rs) | Relay only the browser's two Checkout session commands to a private service. |
+| [src/checkout/purchase.rs](../src/checkout/purchase.rs) | The server side of the purchase transaction: app sandboxes and hooks, the cashier, the built-in payment provider and the agent run fence. |
 | [src/checkout/session_order.rs](../src/checkout/session_order.rs) | Bind an explicitly reviewed session purchase to the native transaction and its original order. |
 | [src/checkout/session_quote.rs](../src/checkout/session_quote.rs) | Project the current native cart quote for the independent checkout session service. |
-| [src/checkout/state.rs](../src/checkout/state.rs) | Opaque native checkout states retain the original transaction and prepared package/language inputs. |
 | [src/checkout_handoff.rs](../src/checkout_handoff.rs) | Single-use checkout transfer is owned by the checkout component; the server projects the redeemed cart. |
 | [src/checkout_page.rs](../src/checkout_page.rs) | The existing checkout may be framed only by its registered tenant/channel storefront. |
-| [src/checkout_products.rs](../src/checkout_products.rs) | The locked SKU snapshot is owned by the checkout component; the language chain is prepared here before the transaction. |
-| [src/checkout_review.rs](../src/checkout_review.rs) | The reviewed revision and total binding is owned by the checkout component. |
 | [src/cognition/advisor.rs](../src/cognition/advisor.rs) | Buyer-admitted initial catalog/evidence context and bounded native response revalidation; no extra truth store. |
 | [src/cognition/autonomy.rs](../src/cognition/autonomy.rs) | Price-only optional autonomy, atomic unique-SKU daily quotas, a non-compounding day baseline and a daily exposure ceiling. |
 | [src/cognition/autonomy_revert.rs](../src/cognition/autonomy_revert.rs) | Takes today's automatic price changes back to the day's baseline, by request or when the daily exposure limit is exceeded. |
@@ -261,7 +254,6 @@ This lists every checked-in source module in these roots, including files with n
 | [src/commerce/geography.rs](../src/commerce/geography.rs) | Country catalogue of a shop; the bundled world and the admission rules are owned by the shipping component. |
 | [src/commerce/group_usage.rs](../src/commerce/group_usage.rs) | Removing a customer group rejects live customer, price and native/source-rule dependencies under the settings lock. |
 | [src/commerce/international_capabilities.rs](../src/commerce/international_capabilities.rs) | International configuration and translation MCP tools call the exact same scoped native handlers as HTTP. |
-| [src/commerce/inventory.rs](../src/commerce/inventory.rs) | Stock allocation, consumption and release are owned by the inventory component. |
 | [src/commerce/inventory_ports.rs](../src/commerce/inventory_ports.rs) | The server's implementation of what the inventory component reads from environments and the product index. |
 | [src/commerce/method_usage.rs](../src/commerce/method_usage.rs) | Authoritative deletion guards for methods; the reference counts are owned by the shipping component. |
 | [src/commerce/mod.rs](../src/commerce/mod.rs) | Native catalogue and checkout domains; pricing ports remain in the library. |
@@ -399,7 +391,6 @@ This lists every checked-in source module in these roots, including files with n
 | [src/operations/imports/relations.rs](../src/operations/imports/relations.rs) | Canonical import references resolve to tenant-bound native IDs; the existing product owner validates every relation. |
 | [src/operations/imports/reviews.rs](../src/operations/imports/reviews.rs) | Versioned generic review records resolve native product identity and preserve source claims outside native purchase authority. |
 | [src/operations/list_criteria.rs](../src/operations/list_criteria.rs) | Bounded native order/customer filter and sort contracts, reused by HTTP, MCP and reviewed grid plans. |
-| [src/operations/manual_order_admission.rs](../src/operations/manual_order_admission.rs) | Private admin-cart admission and locked final checkout guards are owned by the checkout component. |
 | [src/operations/manual_orders.rs](../src/operations/manual_orders.rs) | Actor-private manual-order quotes reuse native cart, legal, pricing, inventory and checkout; no second order ledger. |
 | [src/operations/master_data.rs](../src/operations/master_data.rs) | The company basis lives in the orders component; these entries keep the server-side signatures. |
 | [src/operations/mod.rs](../src/operations/mod.rs) | Merchant CRM and fulfillment APIs, shared verbatim with MCP operations capabilities. |
@@ -423,7 +414,6 @@ This lists every checked-in source module in these roots, including files with n
 | [src/payments/contract.rs](../src/payments/contract.rs) | Adapt the shared provider declaration grammar; native payment authority and actual effects remain attached. |
 | [src/payments/details.rs](../src/payments/details.rs) | Native payment-only history projection and optional owned provider observation; no financial command is executed. |
 | [src/payments/diagnostics.rs](../src/payments/diagnostics.rs) | Safe, provider-neutral operational hints. These never authorize a financial transition. |
-| [src/payments/funding.rs](../src/payments/funding.rs) | Account-authorized funding choice, immutable consent and saved-instrument admission; cart possession is insufficient. |
 | [src/payments/generic_receipts.rs](../src/payments/generic_receipts.rs) | Provider-neutral receipt admission and atomic allocation; verified evidence owns ledger transitions. |
 | [src/payments/host.rs](../src/payments/host.rs) | The server side of the payment ledger port: adapter configuration and the POS sale completion. |
 | [src/payments/instructions.rs](../src/payments/instructions.rs) | Customer-capability and compound merchant access to typed recipient instructions; reads never settle an invoice. |
@@ -806,12 +796,16 @@ This lists every checked-in source module in these roots, including files with n
 | [components/checkout/src/http/product_detail.rs](../components/checkout/src/http/product_detail.rs) | Storefront product detail: family, context prices per quantity tier, gallery, properties, delivery window and review aggregates. |
 | [components/checkout/src/http.rs](../components/checkout/src/http.rs) | Checkout transports: sealed buyer grants and the relay to the private Checkout service. |
 | [components/checkout/src/lib.rs](../components/checkout/src/lib.rs) | Checkout component: tax lines and payment classification of a quote; the transaction follows. |
-| [components/checkout/src/ports.rs](../components/checkout/src/ports.rs) | What the cart projection needs from the server: localized cart products, the payment methods providers admit, and the app hooks and cashier discount that run after native pricing. |
+| [components/checkout/src/ports.rs](../components/checkout/src/ports.rs) | What checkout needs from the server: cart products, provider payment methods, app hooks and configurations, the cashier, the built-in payment provider and the agent run fence. |
 | [components/checkout/src/service/app_adjustments.rs](../components/checkout/src/service/app_adjustments.rs) | Apply admitted integer app adjustments through native pricing/tax calculation; extensions cannot replace quote JSON. |
 | [components/checkout/src/service/cart_projection.rs](../components/checkout/src/service/cart_projection.rs) | The priced cart as storefront, Studio and agents receive it: native quote, promotions, app hooks, taxes, legal flags, delivery dates and exact minor totals. |
 | [components/checkout/src/service/checkout_options.rs](../components/checkout/src/service/checkout_options.rs) | Public method discovery: the active shipping methods with converted prices and the payment methods this visitor may choose. |
 | [components/checkout/src/service/delivery.rs](../components/checkout/src/service/delivery.rs) | Shipping costs, proportional taxes and calendar delivery windows. |
 | [components/checkout/src/service/language.rs](../components/checkout/src/service/language.rs) | The language chain of a stored cart, prepared before the checkout transaction holds a pool connection. |
+| [components/checkout/src/service/purchase/commit.rs](../components/checkout/src/service/purchase/commit.rs) | Final admission and one atomic order, stock, cart, payment-attempt and outbox commit; no external provider call. |
+| [components/checkout/src/service/purchase/lock.rs](../components/checkout/src/service/purchase/lock.rs) | Ordered lock and replay admission: idempotency key, merchant channel policy, cart, company unit, reviewed session and the purchase fingerprint. |
+| [components/checkout/src/service/purchase/price.rs](../components/checkout/src/service/purchase/price.rs) | The authoritative locked quote: product locks and channel admission, contract prices, locked settings, taxes, promotions, app hooks, the cashier discount and stock. |
+| [components/checkout/src/service/purchase.rs](../components/checkout/src/service/purchase.rs) | The purchase transaction: native preparation, ordered locks with replay admission, the authoritative locked quote, and one atomic order commit; no external provider call. |
 | [components/checkout/src/service.rs](../components/checkout/src/service.rs) | service of this component. |
 | [components/checkout/src/store/admin_order.rs](../components/checkout/src/store/admin_order.rs) | Locked checkout guards of an order a merchant places: channel policy, the selected customer and the channel's product selection. |
 | [components/checkout/src/store/cart_create.rs](../components/checkout/src/store/cart_create.rs) | A new buyer cart: inserted with the shop defaults, then bound to the request's language, channel, currency and signed-in customer. |

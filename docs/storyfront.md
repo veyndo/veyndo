@@ -288,7 +288,7 @@ sequenceDiagram
     Bag->>Bag: Subtract purchased quantities once
 ```
 
-`checkout_products.rs` reuses catalog translation inheritance inside the purchase
+`components/checkout/src/store/product_snapshot.rs` reuses catalog translation inheritance inside the purchase
 transaction. The saved cart locale selects the order labels, including variant parent
 inheritance; later product translations do not rewrite an existing order.
 `checkout_page.rs` owns frame admission; `embedded-checkout.ts` owns receipt transport.

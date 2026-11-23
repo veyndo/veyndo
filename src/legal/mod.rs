@@ -11,7 +11,6 @@ mod continuation;
 pub(crate) use buyer_consent::missing_contact;
 pub(crate) use continuation::continue_consent;
 mod checkout;
-pub(crate) use checkout::snapshot;
 mod product;
 mod requests;
 pub(crate) use product::validate_product;

@@ -9,13 +9,11 @@ mod contacts;
 mod metadata;
 pub(crate) use metadata::decorate;
 mod demo;
-mod order_snapshot;
 mod orders;
 mod profile;
 pub(crate) use address_store::*;
 pub(crate) use contacts::*;
 pub(crate) use demo::seed_address as seed_demo_address;
-pub(crate) use order_snapshot::snapshot as order_snapshot;
 pub(crate) use veyndo_orders::store::account_orders::ACCOUNT_SCOPE as ORDER_ACCOUNT_SCOPE;
 pub(crate) fn router() -> Router<App> {
     Router::new()

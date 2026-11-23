@@ -17,7 +17,7 @@
     },
     "stock_admissible": {
       "bindings": [
-        "src/checkout/price.rs",
+        "components/checkout/src/service/purchase/price.rs",
         "components/apps/src/service/external_orders.rs"
       ],
       "theorems": [
@@ -59,7 +59,7 @@
     },
     "replay_admissible": {
       "bindings": [
-        "src/checkout/lock.rs"
+        "components/checkout/src/service/purchase/lock.rs"
       ],
       "theorems": [
         "replay_same_cart",
@@ -125,7 +125,7 @@
     },
     "checkout_contact_admissible": {
       "bindings": [
-        "src/checkout/commit.rs"
+        "components/checkout/src/service/purchase/commit.rs"
       ],
       "theorems": [
         "financial_contact_required",
@@ -1793,8 +1793,8 @@
     },
     "components/checkout/src/ports.rs": {
       "status": "unproved",
-      "sha256": "f578aa7e60a984768e3ee55bb48e1f4bf50a7a77876999ea870b78f5ed83816b",
-      "review": "Checkout selection and method discovery move into checkout"
+      "sha256": "b596a26f45529eeac84295910ac85e519ccd4e695ffe50f11b8b065e8c5dc020",
+      "review": "The purchase transaction moves into checkout behind the purchase port"
     },
     "components/checkout/src/service/app_adjustments.rs": {
       "status": "unproved",
@@ -1821,10 +1821,30 @@
       "sha256": "662c602ce49ff5d630ae877299aabee1e27aabdb6321416518156f9528610ced",
       "review": "Report service moved into the studio component and the cart language chain into the checkout component; behaviour unchanged"
     },
+    "components/checkout/src/service/purchase/commit.rs": {
+      "status": "reviewed-binding",
+      "sha256": "dc735f31eeaaf5db707329942963ed9ad8274693e37f7ee107d0764b047a6de3",
+      "review": "The purchase transaction moves into checkout behind the purchase port"
+    },
+    "components/checkout/src/service/purchase/lock.rs": {
+      "status": "reviewed-binding",
+      "sha256": "cbbe06f8d8e7ff523e5ae43e0417a03c0a07449b41f1a89200744a1d73589934",
+      "review": "The purchase transaction moves into checkout behind the purchase port"
+    },
+    "components/checkout/src/service/purchase/price.rs": {
+      "status": "reviewed-binding",
+      "sha256": "a1ce19f6cae063917b8dd318614b55543302f99de661fc07cd399204a29f5e14",
+      "review": "The purchase transaction moves into checkout behind the purchase port"
+    },
+    "components/checkout/src/service/purchase.rs": {
+      "status": "unproved",
+      "sha256": "c95c1f01f6ed1813d2516b5a05d43b004bcbc7c9d47dbb0514e82cecc420b893",
+      "review": "The purchase transaction moves into checkout behind the purchase port"
+    },
     "components/checkout/src/service.rs": {
       "status": "unproved",
-      "sha256": "e392dc267a69de16c0668add7be08567aac1917bcdd2a5b1e4bd1a7fa1116ae0",
-      "review": "Checkout selection and method discovery move into checkout"
+      "sha256": "ad93c6f4de7bb91dcb1413c16f94cdde3f6a463d33b3a62c6f74e2b167ac0a3f",
+      "review": "The purchase transaction moves into checkout behind the purchase port"
     },
     "components/checkout/src/store/admin_order.rs": {
       "status": "unproved",
@@ -5548,13 +5568,8 @@
     },
     "src/accounts/mod.rs": {
       "status": "unproved",
-      "sha256": "0d70a49f29fe8b907351c1631b600ecba4fe70c45f1d39419725220d5ddcd39d",
-      "review": "Merchant customer writes moved into the customers component and admin order admission into checkout without behaviour change"
-    },
-    "src/accounts/order_snapshot.rs": {
-      "status": "unproved",
-      "sha256": "bf7718304df2f763062d88f8afad4c0cc9b49b057fa07ce805399e416db38a65",
-      "review": "Coupons, flow job summaries, requisition import, customer snapshot, address restore and account orders moved into components"
+      "sha256": "c51194170ea54d436fc4a2781dec83cd816d44981b012080c3574d497bb9810c",
+      "review": "The purchase transaction moves into checkout behind the purchase port"
     },
     "src/accounts/orders.rs": {
       "status": "unproved",
@@ -6053,8 +6068,8 @@
     },
     "src/assets/mod.rs": {
       "status": "unproved",
-      "sha256": "0ee1b7547d578cde5c35c4e5b604e95d24058a04ccbd475de0b5b72084b08d4f",
-      "review": "Order transitions, external order intake and saved agent authority moved into the orders, apps and identity components"
+      "sha256": "8f03e70b9be950cc7113e6f42d9b2c23cfe5f01f451295759df36f908a443810",
+      "review": "The purchase transaction moves into checkout behind the purchase port"
     },
     "src/assets/model_format.rs": {
       "status": "unproved",
@@ -6233,8 +6248,8 @@
     },
     "src/b2b/mod.rs": {
       "status": "unproved",
-      "sha256": "d551a1d9a960d90e95c4a81224a00bdc5e36730c6ed7faedfe24f83995bb85d0",
-      "review": "Order transitions, external order intake and saved agent authority moved into the orders, apps and identity components"
+      "sha256": "de223a576dbb46ea88180125dee12d961b6fd54f14335cd1d159d1809d56879d",
+      "review": "The purchase transaction moves into checkout behind the purchase port"
     },
     "src/b2b/model.rs": {
       "status": "unproved",
@@ -6268,8 +6283,8 @@
     },
     "src/b2b/quote_contract.rs": {
       "status": "unproved",
-      "sha256": "5f8bb7d1f1af821d2b4d330a18ee0a0a8a71f6eb1dab625ec4f4632d810bac08",
-      "review": "B2B approvals, quick order and offer contract moved behind the shop cart port"
+      "sha256": "b64b06d79644eecc5d74f8e097b480572eec0e2b71117896213c042a994d9f6f",
+      "review": "The purchase transaction moves into checkout behind the purchase port"
     },
     "src/b2b/quote_lifecycle.rs": {
       "status": "unproved",
@@ -6481,50 +6496,30 @@
       "sha256": "b7739396fb2b3ba08c951f852f21801cc59e39c0b84aca49987f4e922eb15db9",
       "review": "Cart projection and product detail move into checkout behind a quote port"
     },
-    "src/checkout/commit.rs": {
-      "status": "reviewed-binding",
-      "sha256": "efb2be19afbff32c49cb1026f92d08204ac5dd291973514b9611696cc8ace488",
-      "review": "Functions above 150 lines split into named steps without behaviour change; function length limit lowered to 150"
-    },
-    "src/checkout/lock.rs": {
-      "status": "reviewed-binding",
-      "sha256": "040fe03b2a61dfd57dda806ee14646631a2278905fe931041d38fd1208655cfa",
-      "review": "POS guard, customer, discount and settlement and the checkout session review moved into components"
-    },
     "src/checkout/mod.rs": {
       "status": "unproved",
-      "sha256": "0cc56f43e0e55e7dc2facdb595456cd926e09a15abc5600b4f180da2aae4025b",
-      "review": "Cart projection and product detail move into checkout behind a quote port"
-    },
-    "src/checkout/prepare.rs": {
-      "status": "unproved",
-      "sha256": "37ff8c83f43b0a8463afcb5c428c2b925977a8610a7b838db599aa83216b49d2",
-      "review": "Reviewed checkout stage move and buyer-scoped host contract. Native stock, replay and contact predicates retain their consumers; isolated Commerce and Checkout tests verify legal review, current B2B authority, original receipt recovery and one atomic purchase."
-    },
-    "src/checkout/price.rs": {
-      "status": "reviewed-binding",
-      "sha256": "a46f9e33c6fbbd6937db808698dfc26f9e8623424f2c022802f6fc6afe8ffb91",
-      "review": "Reviewed checkout stage move and buyer-scoped host contract. Native stock, replay and contact predicates retain their consumers; isolated Commerce and Checkout tests verify legal review, current B2B authority, original receipt recovery and one atomic purchase."
+      "sha256": "6841e754cfbf13aa091da60e35cf0813b42a1974397251992e53475d7d340004",
+      "review": "The purchase transaction moves into checkout behind the purchase port"
     },
     "src/checkout/private_browser.rs": {
       "status": "unproved",
       "sha256": "318bde5cb992e67f60b0ca4d735680fb93660f53d65eba84d4183ba065370f0f",
       "review": "Process configuration moved into core; browser session transports, Checkout buyer grants, the private Checkout relay, trusted geography and provider startup validation moved into their components without behaviour change"
     },
+    "src/checkout/purchase.rs": {
+      "status": "unproved",
+      "sha256": "0a78912b5d038bf7303c935b488586722ba69e7c0f6b434fbb0737101d6ef289",
+      "review": "The purchase transaction moves into checkout behind the purchase port"
+    },
     "src/checkout/session_order.rs": {
       "status": "unproved",
-      "sha256": "72bc335701b8edfc806796d2c7fa71d1d70dac262b85fc22eed173b810fc8c1b",
-      "review": "POS guard, customer, discount and settlement and the checkout session review moved into components"
+      "sha256": "37820cb158ca759addffa0f813b57ac0abe376402c0bbc3e1e2eb2406b1a5647",
+      "review": "The purchase transaction moves into checkout behind the purchase port"
     },
     "src/checkout/session_quote.rs": {
       "status": "unproved",
       "sha256": "93bcb9d0436b565d91ff63166b222ce385a938862c34dbb10feb068ad35b0292",
       "review": "Checkout grant entry points and tenant-bound session checks reviewed against native buyer login, live-shop admission, wrong buyer and tenant, revocation, replay and isolated two-service PostgreSQL acceptance. No additional formal claims."
-    },
-    "src/checkout/state.rs": {
-      "status": "unproved",
-      "sha256": "fddc697650c0a40f64a2c8595a47079e5049bc5593aa49deefb85d1180cb05d0",
-      "review": "Reviewed checkout stage move and buyer-scoped host contract. Native stock, replay and contact predicates retain their consumers; isolated Commerce and Checkout tests verify legal review, current B2B authority, original receipt recovery and one atomic purchase."
     },
     "src/checkout_handoff.rs": {
       "status": "unproved",
@@ -6535,16 +6530,6 @@
       "status": "unproved",
       "sha256": "3f16b5aed3fc91c8335814cd9f47fd8de200f12c879b059ce3c8f9f8127d5d6e",
       "review": "Cart projection, product detail, checkout handoff, cart creation and supply proposals move into components"
-    },
-    "src/checkout_products.rs": {
-      "status": "unproved",
-      "sha256": "ab34554960f4e3b2a1a4547b9bc2a810f834db82204a5610b322bc01b1a15de6",
-      "review": "Report service moved into the studio component and the cart language chain into the checkout component; behaviour unchanged"
-    },
-    "src/checkout_review.rs": {
-      "status": "unproved",
-      "sha256": "82670f1abac80938434670433c3da2435c8f38ce61863ed4f22ee092d4ef855f",
-      "review": "POS guard, customer, discount and settlement and the checkout session review moved into components"
     },
     "src/cognition/advisor.rs": {
       "status": "unproved",
@@ -6781,11 +6766,6 @@
       "sha256": "5a13200d9a6c1e76050cd01e2c2d49a9b55f048af735a60e278758ccb266fdd6",
       "review": "Codex source review 2026-10-16: native catalogue intake CSV/HTTPS/model preparation and explicit stage-only creation reuse current permissions, stable IDs, locked settings CAS, product/history/outbox and bounded image jobs; native catalog_management, durable_agents and image_jobs checks recorded for this branch. Connected guardrail UI keeps the extracted pricing/autonomy predicates unchanged; authorized paged commerce policy read and merchant instructions verified by users, knowledge_workspace and providers plus 192 Rust tests. All changed transport/SQL/provider adapters remain unproved; no new formal correctness claim."
     },
-    "src/commerce/inventory.rs": {
-      "status": "unproved",
-      "sha256": "05c56b2ce5f7dfad60b4212ea2a4af2bbee44913226cf40a9ed8aeb42df1ffa9",
-      "review": "Order transitions, external order intake and saved agent authority moved into the orders, apps and identity components"
-    },
     "src/commerce/inventory_ports.rs": {
       "status": "unproved",
       "sha256": "43d94a027111abb992f3ef3d46357ed1238bef6f9480ab388bca02bd6e6b2f59",
@@ -6798,8 +6778,8 @@
     },
     "src/commerce/mod.rs": {
       "status": "unproved",
-      "sha256": "f314f4ab613693a40d86c51941deb598000cb0d9760c37c69b587e3cc6566112",
-      "review": "Checkout selection and method discovery move into checkout"
+      "sha256": "ae251c4035607a25b1393e8da81d8bb962f8a992b3a8405dc2c30ea4b51e0652",
+      "review": "The purchase transaction moves into checkout behind the purchase port"
     },
     "src/commerce/order_fields.rs": {
       "status": "unproved",
@@ -7098,8 +7078,8 @@
     },
     "src/legal/checkout.rs": {
       "status": "unproved",
-      "sha256": "0d801b36e667dd91b55a68d95961d940982d2b031253dc3196ef565f06f2e67f",
-      "review": "Customer account writes, the legal snapshot of an order and the locked settings read moved into components"
+      "sha256": "f9578328aa0282287f99a1da7ea0468b7d72ccbddcc573812bca77cbd08d9e3a",
+      "review": "The purchase transaction moves into checkout behind the purchase port"
     },
     "src/legal/consent.rs": {
       "status": "reviewed-binding",
@@ -7113,8 +7093,8 @@
     },
     "src/legal/mod.rs": {
       "status": "unproved",
-      "sha256": "400e6ebd502e5c02aeea8a68d4fe17e490a775e8ea9e221c7e01724127cdb33c",
-      "review": "Customer account writes, the legal snapshot of an order and the locked settings read moved into components"
+      "sha256": "118bfa3421c316c509b30590368bc78451c97a051dc7e8f8b9c67ee25dffbde9",
+      "review": "The purchase transaction moves into checkout behind the purchase port"
     },
     "src/legal/model.rs": {
       "status": "unproved",
@@ -7143,8 +7123,8 @@
     },
     "src/main.rs": {
       "status": "unproved",
-      "sha256": "ba7a27df868da3e859b17689a7c110e32ac076ec08ceec6cc7b3a45d666e3f2a",
-      "review": "Order transitions, external order intake and saved agent authority moved into the orders, apps and identity components"
+      "sha256": "1c9aba4c29f3e4cdc20e2bb8e97ced89e251db7c0bc5b63d986397e4da66f83c",
+      "review": "The purchase transaction moves into checkout behind the purchase port"
     },
     "src/marketing/app_flows.rs": {
       "status": "reviewed-binding",
@@ -7268,8 +7248,8 @@
     },
     "src/marketing/promotions.rs": {
       "status": "unproved",
-      "sha256": "334cc366301334c4fd655391fc0d653a7b27c2a70614374613b1ecae68a6c2d3",
-      "review": "Flow pipeline and promotion types moved into components/marketing; kernel call sites unchanged"
+      "sha256": "281f9f493ca53da1ac23aae2c55f25093c9def09ad6f8c12adb6735ae4f64e3a",
+      "review": "The purchase transaction moves into checkout behind the purchase port"
     },
     "src/marketing/routes.rs": {
       "status": "unproved",
@@ -7471,11 +7451,6 @@
       "sha256": "ee37d8d798a2412ff258641c97cb539f267c1911a8e55941c42d0e111ea393b5",
       "review": "Order list criteria, company model and receipts moved into components; kernel call sites unchanged"
     },
-    "src/operations/manual_order_admission.rs": {
-      "status": "unproved",
-      "sha256": "44ce2d70167a69eb5347c1f626e91a694382a447340f834547c60d5c181d0534",
-      "review": "Merchant customer writes moved into the customers component and admin order admission into checkout without behaviour change"
-    },
     "src/operations/manual_orders.rs": {
       "status": "unproved",
       "sha256": "c5f4538fd3d70022757757f1b4470b00a534e8d91757b2b9946f066e48cb9fc7",
@@ -7488,8 +7463,8 @@
     },
     "src/operations/mod.rs": {
       "status": "unproved",
-      "sha256": "3cae1aeb9a2c1bc13d92b66d0fde582f8a2116a6c0edd79601278088d8d6b0fd",
-      "review": "Delivery split and carrier booking intents moved into the orders and apps components"
+      "sha256": "2bf14ec60685edbb3a1f1cda74b036bf597d11abc6083c667041344f1baa947f",
+      "review": "The purchase transaction moves into checkout behind the purchase port"
     },
     "src/operations/order_documents.rs": {
       "status": "unproved",
@@ -7591,11 +7566,6 @@
       "sha256": "cdd986caec62d2e5421f469c8e8fcf58a66fd3266a29ce441a4b491a586e0c0f",
       "review": "Payment ledger rules moved into components/payments; kernel call sites unchanged"
     },
-    "src/payments/funding.rs": {
-      "status": "unproved",
-      "sha256": "b318d349cfb62f0d5ee63a65e5ccf3c5d040302b695578d29755def48217d3e1",
-      "review": "Delivery enrichment, app adjustments and funding moved into components; kernel call sites unchanged"
-    },
     "src/payments/generic_receipts.rs": {
       "status": "unproved",
       "sha256": "41336daefd9472414637e09987e85056f46e5283ff86fc8e9c850da61f189808",
@@ -7628,8 +7598,8 @@
     },
     "src/payments/mod.rs": {
       "status": "unproved",
-      "sha256": "9d75dee21910b847c8f5da01e24d95a27f708465723fb34923c3d3f24e04c068",
-      "review": "AI price guardrails moved into the intelligence component and capture configuration into payments; behaviour unchanged"
+      "sha256": "08b97dc5f4ca63c287e82c3a9cfa3a3b8e13e8a7b420671191e0e5d93544aa05",
+      "review": "The purchase transaction moves into checkout behind the purchase port"
     },
     "src/payments/operations.rs": {
       "status": "unproved",
@@ -7673,8 +7643,8 @@
     },
     "src/payments/sessions.rs": {
       "status": "unproved",
-      "sha256": "73c79a20ddc394f4ba2c29ba778e6d3bc268b6e91e4f6db32c820e46ef43c0e2",
-      "review": "Payment commands, worker and provider sessions moved behind the payments gateway port"
+      "sha256": "0974bbd94f244912a10eb090942e116b834630c547d2e0ae4dd24ac7a93f7d2e",
+      "review": "The purchase transaction moves into checkout behind the purchase port"
     },
     "src/payments/settlements.rs": {
       "status": "unproved",
@@ -8088,8 +8058,8 @@
       "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
     },
     "Cargo.lock": {
-      "sha256": "0290a247bf362066165b13a8b4a720870e8d6c68a44f1f41da2d890358d17eb3",
-      "review": "Cart projection, product detail, checkout handoff, cart creation and supply proposals move into components"
+      "sha256": "b52b5f29eee5623153071e4139f53068272d3da5b9db1f0ec2d866b40a094ab2",
+      "review": "The purchase transaction moves into checkout behind the purchase port"
     },
     "Cargo.toml": {
       "sha256": "12d2d79a98f6913d20b8e912afb9ea8de0539b9e83428de8a9d7412c406896f6",

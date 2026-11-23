@@ -89,7 +89,6 @@ mod settings_release;
 pub(crate) use settings_release::*;
 
 pub(crate) use settings_patch::resolve as restore_checkout_data;
-pub(crate) mod inventory;
 pub(crate) mod supply_proposal;
 pub(crate) mod test_stock;
 

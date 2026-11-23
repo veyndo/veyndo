@@ -4,3 +4,4 @@ pub mod cart_projection;
 pub mod checkout_options;
 pub mod delivery;
 pub mod language;
+pub mod purchase;
