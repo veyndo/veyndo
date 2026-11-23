@@ -32,9 +32,14 @@ pub(crate) async fn international_invoke(
     let Json(result) = match name {
         "merchant.commerce.read" => {
             if let Some(channel) = v["channelId"].as_str() {
-                get_scope(state, headers, Path(channel.into())).await?
+                get_scope(
+                    State(axum::extract::FromRef::from_ref(a)),
+                    headers,
+                    Path(channel.into()),
+                )
+                .await?
             } else {
-                merchant_config(state, headers).await?
+                merchant_config(State(axum::extract::FromRef::from_ref(a)), headers).await?
             }
         }
         "merchant.commerce.dependencies" => {
@@ -56,9 +61,20 @@ pub(crate) async fn international_invoke(
         }
         "merchant.commerce.save" => {
             if let Some(channel) = v["channelId"].as_str() {
-                save_scope(state, headers, Path(channel.into()), Json(v.clone())).await?
+                save_scope(
+                    State(axum::extract::FromRef::from_ref(a)),
+                    headers,
+                    Path(channel.into()),
+                    Json(v.clone()),
+                )
+                .await?
             } else {
-                save_config(state, headers, Json(v.clone())).await?
+                save_config(
+                    State(axum::extract::FromRef::from_ref(a)),
+                    headers,
+                    Json(v.clone()),
+                )
+                .await?
             }
         }
         "merchant.translations.list" => translations::list(State(a.core.clone()), headers).await?,

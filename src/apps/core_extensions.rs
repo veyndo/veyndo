@@ -4,14 +4,6 @@ use crate::{RequestContext, Result};
 pub(crate) use veyndo_app_model::Object;
 pub(crate) use veyndo_app_platform::domain::core_extensions::{access, configuration};
 
-pub(crate) async fn descriptions(
-    a: &crate::App,
-    h: &RequestContext,
-    object: Object,
-) -> Result<serde_json::Value> {
-    veyndo_app_platform::store::extension_projection::descriptions(a, h, object).await
-}
-
 /// Native lists and details share one bounded, permission-filtered app projection.
 pub(crate) async fn attach(
     a: &crate::App,

@@ -1208,8 +1208,8 @@
     },
     "components/apps/src/store/extension_filter.rs": {
       "status": "unproved",
-      "sha256": "f25ab2568a84a6d04493ad2791629d379733dd959d1e5ab59d9e0d8069930705",
-      "review": "Record store, consent and core extension rules moved into the apps component without changing rules"
+      "sha256": "3014ae17fe5bef1a668d0c37457516429d108c3555ea2df22dc065246e0c6797",
+      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
     },
     "components/apps/src/store/extension_projection.rs": {
       "status": "unproved",
@@ -2131,10 +2131,15 @@
       "sha256": "6d6b171723dfcaa86a34930d6e905fa91f00f1d76fd3711608baa0f3d0e1ec8a",
       "review": "Experiment operations and source content checks moved into the intelligence component, CRM creation context into customers; behaviour unchanged"
     },
+    "components/customers/src/http/merchant_crm.rs": {
+      "status": "unproved",
+      "sha256": "e52c8630ea17340538bda6d0ca1ae96bdb3ab9319760ac6a7b1d23df55e95a68",
+      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
+    },
     "components/customers/src/http.rs": {
       "status": "unproved",
-      "sha256": "4b240247c826fdb5a7faff33c5ed6912846c8dda497f31d595b2fa399639f5db",
-      "review": "Batch A: customer accounts, account orders, sign-in throttle, handoff and roles move into customers, orders and identity"
+      "sha256": "bec8d3c72c73d785795ae605dbd363b3090b6f91c7fd3aa7839e4f20d3eee082",
+      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
     },
     "components/customers/src/lib.rs": {
       "status": "unproved",
@@ -2366,11 +2371,6 @@
       "sha256": "1c429826983e273c1d4e84786a01791bafbfe4b5adf86c552f84b41c70e23679",
       "review": "Unit tests for every public domain function of the components; no production code changed"
     },
-    "components/intelligence/src/domain/navigation.rs": {
-      "status": "unproved",
-      "sha256": "c363bfb841dc468db039ee4fb643190e23d02820d6c9d5b9531ebbdfa61c57bd",
-      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
-    },
     "components/intelligence/src/domain/offer.rs": {
       "status": "unproved",
       "sha256": "a6d22181e047b36a715776e29ee8a9cdef60946bab27a24587074b03e16a3b20",
@@ -2413,8 +2413,8 @@
     },
     "components/intelligence/src/domain.rs": {
       "status": "unproved",
-      "sha256": "b05063fa69fb47237959ba1bb8c9e8eecbc5d7dbebc1599fb1fda7087943fdfd",
-      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
+      "sha256": "13b26df12563c69afd742d863e43b149a894d7e3ad700c1e73035aa5969879b3",
+      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
     },
     "components/intelligence/src/http/agents.rs": {
       "status": "unproved",
@@ -2581,6 +2581,11 @@
       "sha256": "47966e65794779fd191243c7d01cfd91cf4b9face2167bd9f2acef2f13df6474",
       "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
     },
+    "components/intelligence/src/service/navigation.rs": {
+      "status": "unproved",
+      "sha256": "c363bfb841dc468db039ee4fb643190e23d02820d6c9d5b9531ebbdfa61c57bd",
+      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
+    },
     "components/intelligence/src/service/pdf.rs": {
       "status": "unproved",
       "sha256": "4ed4948f6dcf724d49e5f6284f23aba87fc79b688db16a9dee6a19a2ca9bec13",
@@ -2668,8 +2673,8 @@
     },
     "components/intelligence/src/service.rs": {
       "status": "unproved",
-      "sha256": "72dfe98a68136b6f064adf05cea92d18b6c6d64da73c5ffa921ed3f103b85cff",
-      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
+      "sha256": "6a35ca7b9bcab4e082a41511e6737fabbee024f15baeef8f3f0ba086d8e5870e",
+      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
     },
     "components/intelligence/src/store/agent_runs.rs": {
       "status": "unproved",
@@ -3853,8 +3858,8 @@
     },
     "components/shop/src/ports.rs": {
       "status": "unproved",
-      "sha256": "fb6c6fb5bd3243b58f9a625aaa9bd2d470af1f0de3b3bf5e61b4e68f6956b617",
-      "review": "Coupons, flow job summaries, requisition import, customer snapshot, address restore and account orders moved into components"
+      "sha256": "f210e2265a9331358dc353f49a5234a82e91430f03d7ce8cd09199f946a920de",
+      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
     },
     "components/shop/src/service/container_resources.rs": {
       "status": "unproved",
@@ -3876,10 +3881,15 @@
       "sha256": "44e0ab1a33fb30dcb73648c88a254506a4761d5aa4fbcfa214e3635cfda6ca23",
       "review": "Rate refresh, company onboarding, POS channel setup, rule comparison and facts and source lifecycle handlers moved into their components; behaviour unchanged"
     },
+    "components/shop/src/service/settings_writes.rs": {
+      "status": "unproved",
+      "sha256": "5e5abe0ed95563eb2e37e3ec6e135b7bf147ebfe66fde007f89c436b8468712d",
+      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
+    },
     "components/shop/src/service.rs": {
       "status": "unproved",
-      "sha256": "9b0f3b8f2c1d6a62cb3deb0728f8b86eb810f6aaf28b60fc850ce56fb0698655",
-      "review": "Rate refresh, company onboarding, POS channel setup, rule comparison and facts and source lifecycle handlers moved into their components; behaviour unchanged"
+      "sha256": "a0aea2822ee907c2fff46c09072f32ac043e428e967ee08fef5ef0c7991a7b4f",
+      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
     },
     "components/shop/src/store/consumer_requests.rs": {
       "status": "unproved",
@@ -3956,6 +3966,11 @@
       "sha256": "c64b428fee5002bebc66b72447bccbfd7503c3758cd81b846b38ccb5e397942f",
       "review": "Knowledge module and experiment model moved into components/intelligence; kernel call sites unchanged"
     },
+    "components/studio/src/domain/staging_access.rs": {
+      "status": "unproved",
+      "sha256": "5611a7a29ad5db2a0960cbf8e24b3344cbbe54f00cc00e185becbaecdf1f88ad",
+      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
+    },
     "components/studio/src/domain/view_components.rs": {
       "status": "unproved",
       "sha256": "797b4eb0ba151a7275267f31971f802dc9da1b87889782396e2f52a0f964eab7",
@@ -3968,33 +3983,68 @@
     },
     "components/studio/src/domain.rs": {
       "status": "unproved",
-      "sha256": "0e23e9f337961ab6905799cbcb01409d5fab8c12448b3b02af43f2ead592b5c0",
-      "review": "Order transitions, external order intake and saved agent authority moved into the orders, apps and identity components"
+      "sha256": "e7ab5728c7e90b7d7dda497106533d609357a3f4ca4b37517c54b23390dd8495",
+      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
+    },
+    "components/studio/src/http/customers.rs": {
+      "status": "unproved",
+      "sha256": "b6f3a6caa37ff26ca94dbad8711b9fcddf3400997abbca7320369a590461f8d2",
+      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
     },
     "components/studio/src/http/history.rs": {
       "status": "unproved",
       "sha256": "a7dac2b367024ec07084c7309a00487f74466fb114e533aae122ae1fd0c47e49",
       "review": "History access rules, version reads and the product restoration projection moved into the studio component; behaviour unchanged"
     },
+    "components/studio/src/http/orders.rs": {
+      "status": "unproved",
+      "sha256": "d4f2cd2742f5288b1a934a2477bca341d972d57323f53e91f4b0fe07780300d4",
+      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
+    },
     "components/studio/src/http/outbox.rs": {
       "status": "unproved",
       "sha256": "697d67ee2ac0c02267007123cbe823292b30b1676c0b7f8039d507819792a321",
       "review": "Order transitions, external order intake and saved agent authority moved into the orders, apps and identity components"
+    },
+    "components/studio/src/http/product_editor.rs": {
+      "status": "unproved",
+      "sha256": "54b43d6472211eec9e83d7a1cf60f28c8624f6de3c5b3c39e85e29ec5adb78ca",
+      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
+    },
+    "components/studio/src/http/products.rs": {
+      "status": "unproved",
+      "sha256": "d7220a4814af741e8133ed889e087dc113e2239c32ce45878b8bb14ff57c33a4",
+      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
     },
     "components/studio/src/http/reports.rs": {
       "status": "unproved",
       "sha256": "4bb88b3cf7ec3940eee777e123df27d03eed43479bea034fabbd20fa79a0d614",
       "review": "Report service moved into the studio component and the cart language chain into the checkout component; behaviour unchanged"
     },
+    "components/studio/src/http/workflow.rs": {
+      "status": "unproved",
+      "sha256": "83a906cbb025858bce9b435e246b79ab46513fd321546994b71463e5345adf26",
+      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
+    },
+    "components/studio/src/http/workspace.rs": {
+      "status": "unproved",
+      "sha256": "c74cf242e042c622a97262a825fbedd10255ab9de2b28fe6c29237260734c880",
+      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
+    },
     "components/studio/src/http.rs": {
       "status": "unproved",
-      "sha256": "2ea7f9354aa09ca98d65b2095d21857bbadee38666cee4a420b97274d9f2b05e",
-      "review": "Order transitions, external order intake and saved agent authority moved into the orders, apps and identity components"
+      "sha256": "84768b183ffb8e6ba033b973c51ead708f5deb9bc4a9e238d5018d23bd360ae4",
+      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
     },
     "components/studio/src/lib.rs": {
       "status": "unproved",
       "sha256": "39b9c760915b4f92ecc1654d28f8542c3c76911362d18d5cbee5bb092434a3dd",
       "review": "Report service moved into the studio component and the cart language chain into the checkout component; behaviour unchanged"
+    },
+    "components/studio/src/service/grid_plan.rs": {
+      "status": "unproved",
+      "sha256": "b15865176f6ee4aa5922e3b8037a20a9341af2dfa639a8ac0a2d6a830d8078c5",
+      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
     },
     "components/studio/src/service/reports.rs": {
       "status": "unproved",
@@ -4003,8 +4053,8 @@
     },
     "components/studio/src/service.rs": {
       "status": "unproved",
-      "sha256": "65a44c3a273dc66dec1fa77788f2744357ce3a231dd4d86d593db809d2ef66d8",
-      "review": "Report service moved into the studio component and the cart language chain into the checkout component; behaviour unchanged"
+      "sha256": "8c40cdd42ce19fa325347d4fd7f2789ce07bae9018ad5b9ac318ca1186636fe4",
+      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
     },
     "components/studio/src/store/history.rs": {
       "status": "unproved",
@@ -5831,25 +5881,15 @@
       "sha256": "911a2ffde8d63fc0306969122961929d1e2184c373bc30e78e7b4f4489de5934",
       "review": "Process configuration moved into core; browser session transports, Checkout buyer grants, the private Checkout relay, trusted geography and provider startup validation moved into their components without behaviour change"
     },
-    "src/accounts/contacts.rs": {
-      "status": "unproved",
-      "sha256": "3121f2d24cde43850634ccbe4f29f24f811a38f8b9ee6665666089d7006ebd18",
-      "review": "Batch A: customer accounts, account orders, sign-in throttle, handoff and roles move into customers, orders and identity"
-    },
     "src/accounts/demo.rs": {
       "status": "unproved",
       "sha256": "6afac85cdfe1abf40d35346ccd695eff4ff8fdcb3ce245d230e2472da8c4c5f6",
       "review": "Initial extraction of 13 production policies; surrounding Rust explicitly unproved; existing HTTP regression suites retained"
     },
-    "src/accounts/metadata.rs": {
-      "status": "unproved",
-      "sha256": "7b55549fc0381d8c71e12261139c70a3c01f53f9a2bb424a9eb2b4008384d743",
-      "review": "customers component crate created; no kernel binding changed"
-    },
     "src/accounts/mod.rs": {
       "status": "unproved",
-      "sha256": "c2158feb0ab9cf371d0729bf02b3b387007705f723c6ea73156096595e23eba2",
-      "review": "Batch A: customer accounts, account orders, sign-in throttle, handoff and roles move into customers, orders and identity"
+      "sha256": "08817a5223b5948cbec4392ed36c713f1d1c535ba6f67ce73dfbc4a06ddd2a2f",
+      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
     },
     "src/accounts/orders.rs": {
       "status": "unproved",
@@ -5893,8 +5933,8 @@
     },
     "src/agent_runs/navigation.rs": {
       "status": "unproved",
-      "sha256": "2f50c6959bf6827c8ab62a3eb1d294a93cb1690b3835fd00cc126c0ebc668e90",
-      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
+      "sha256": "43766936d85d3cbbaed14c049968734c426f5c57bf061a57cf28be75a95f07dd",
+      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
     },
     "src/agent_runs/scenarios.rs": {
       "status": "unproved",
@@ -5993,8 +6033,8 @@
     },
     "src/apps/core_extensions.rs": {
       "status": "unproved",
-      "sha256": "dbcdec175c04563ddb6f85ae2be48cce4782092162a80c9a4f955645d729886a",
-      "review": "Managed app records, restoration, import and native-object projection moved into the apps component behind a record rules port without behavior change"
+      "sha256": "05e5d943ba9a717b9d91bbd5c9bb4b51c447535ca524df93ee66689403af8319",
+      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
     },
     "src/apps/credentials.rs": {
       "status": "unproved",
@@ -6048,8 +6088,8 @@
     },
     "src/apps/extension_filter.rs": {
       "status": "unproved",
-      "sha256": "760ca1cd26e0dfefa2c1cbbadd3bd94cd4b091cd416cef4cf6c3dbeff5ce37af",
-      "review": "Record store, consent and core extension rules moved into the apps component without changing rules"
+      "sha256": "cef5fef2ffdd986817d5a06d685de78a19f98f9bf3746a3f69eb263eeb2d2ce4",
+      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
     },
     "src/apps/field_values.rs": {
       "status": "unproved",
@@ -6113,8 +6153,8 @@
     },
     "src/apps/native_lifecycle.rs": {
       "status": "unproved",
-      "sha256": "5d93e872f5cc96eed5c1abfb67d8a6f952d3a4c6c3c0d3231bfba49a8e86f84e",
-      "review": "Batch A: customer accounts, account orders, sign-in throttle, handoff and roles move into customers, orders and identity"
+      "sha256": "32975b0cf41e9c596fa1ad950adbf25cb60e3e14f1988c9625fc3ca18571df37",
+      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
     },
     "src/apps/native_view_tests.rs": {
       "status": "unproved",
@@ -6503,8 +6543,8 @@
     },
     "src/b2b/settings.rs": {
       "status": "unproved",
-      "sha256": "3d857f38a677f7233a5c28f2f266898da2c2e627ef24cc2f25cd6262bc779aa1",
-      "review": "shop component crate created; settings types moved; no kernel binding changed"
+      "sha256": "eabef82b62f5006f17d4018b0434f751f67be8ffd4b7a800535aabec0a906d9a",
+      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
     },
     "src/b2b/staging.rs": {
       "status": "unproved",
@@ -6853,8 +6893,8 @@
     },
     "src/commerce/catalog_intake/save.rs": {
       "status": "unproved",
-      "sha256": "9d8a6b85054bcd7fac021f5380f365d1f35b6d372b25c64034638bd05c4759d2",
-      "review": "Reviewed inbound UCP/native cart and consent transactions, native finalization contact guard, immutable order snapshots, explicit optional negotiation, public HTTPS app-owned catalogue adapters; independent whole-branch review findings repaired and six isolated HTTP/PG suites pass. No extracted kernel policy changed; SQL/provider behavior remains unproved."
+      "sha256": "db56624eed3430cdb78aea75155ad2d8ae3fd1ad3259a96778d7aa6ff6d7cc55",
+      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
     },
     "src/commerce/catalog_intake/schema.rs": {
       "status": "unproved",
@@ -6916,15 +6956,10 @@
       "sha256": "177fc17cb0a6da5e1a375a1055d0b745fe8167bede6c18b89776a1ad51812bde",
       "review": "Batch A: customer accounts, account orders, sign-in throttle, handoff and roles move into customers, orders and identity"
     },
-    "src/commerce/group_usage.rs": {
-      "status": "unproved",
-      "sha256": "0487591f9661a6ae7520628d1432dd53f7cff5d7ab8d7b48c5a352103b36f512",
-      "review": "Order list criteria, company model and receipts moved into components; kernel call sites unchanged"
-    },
     "src/commerce/international_capabilities.rs": {
       "status": "unproved",
-      "sha256": "c23dc3103a0f87bb5640af6b0d39968985835c6fd6c700ba843979701d3a8ecb",
-      "review": "Translation jobs move into catalog"
+      "sha256": "f7eacfebfbebad412efa34f02d7a1e43e55dfd7b7daf2d8f349e8c2b5e60380b",
+      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
     },
     "src/commerce/inventory_ports.rs": {
       "status": "unproved",
@@ -6933,13 +6968,13 @@
     },
     "src/commerce/method_usage.rs": {
       "status": "unproved",
-      "sha256": "c86782d000915b1158593a629bdebb2d7072d4844e865132dd50a79dcfebc9a7",
-      "review": "delivery_split_admissible and carrier_booking_admissible bindings moved into components/shipping"
+      "sha256": "83231e5b1f43b8c5705c2863d73681186fe9e6096b34b334df10149668c99f72",
+      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
     },
     "src/commerce/mod.rs": {
       "status": "unproved",
-      "sha256": "6c577f1e188bfc666a32d31d403522778815976d78ed1aaf2a9a4171ecbee47a",
-      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
+      "sha256": "b25f4be0c1cc5db13e5f4a8139b61b299a3fb8e91d4bc70ae13a3046540cc8a3",
+      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
     },
     "src/commerce/order_fields.rs": {
       "status": "unproved",
@@ -6951,85 +6986,40 @@
       "sha256": "0bfeb2e7557e0f136c7eac6d60f926e517b3338be0a0ae98ac4f99b1deaf3e5f",
       "review": "order workflow kernel bindings follow the move into components/orders"
     },
-    "src/commerce/order_workflow.rs": {
-      "status": "unproved",
-      "sha256": "13a5e06bd2a45f1337233912430c0d4489a7ecd588dc398700a8e88a3dc905b5",
-      "review": "order workflow kernel bindings follow the move into components/orders"
-    },
     "src/commerce/product_admin.rs": {
       "status": "unproved",
-      "sha256": "37effd3186bb262fdcbf1be1beab739b827ad61b3c73482bb04aa7d0cad03985",
-      "review": "Product hydration, list query and preparation moved into components/catalog; no rule changed"
-    },
-    "src/commerce/product_channels.rs": {
-      "status": "unproved",
-      "sha256": "47754b03e0310f4e5b2fb3d1279e2335ea9b89b3cfac64b7cdf4ff4b64e38c83",
-      "review": "Product edit types, stores and language rules moved into components; no rule changed"
-    },
-    "src/commerce/product_create.rs": {
-      "status": "unproved",
-      "sha256": "2dd7159051b0e93f4cc9cd947e1c73ae9b9b3210bdcaf9e59ce23146d47ab0ec",
-      "review": "Reviewed eighteen core findings: typed trusted identity and explicit route rights; consolidated current grants; durable auth and fenced shared limits; scoped transactions and one-backend PgBouncer including nested borrow fixes; bounded Wasm/PNG work; notified workers, savepoint quarantine and conservative retention; separate runtime roles and startup configuration. Real PostgreSQL/provider regressions preserve current tenant/customer/payment behavior. SQL/network adapters remain unproved."
-    },
-    "src/commerce/product_edit.rs": {
-      "status": "unproved",
-      "sha256": "0826aad157ef5ea9de446e3dd9cf9cf54976b6eb6b27cb32b353e978a273532e",
-      "review": "Product edit types, stores and language rules moved into components; no rule changed"
-    },
-    "src/commerce/product_fields.rs": {
-      "status": "unproved",
-      "sha256": "730783c6105c0e555216fd2e6f192f4d90bff4a1f954a0012d5b2ecbf74487f6",
-      "review": "Product edit types, stores and language rules moved into components; no rule changed"
+      "sha256": "8dccd65d3bb08fa26fc7ed213b4db44ca987ff3a8ff1a9f810a13505a2175734",
+      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
     },
     "src/commerce/product_input.rs": {
       "status": "unproved",
-      "sha256": "7c5e6f40c5b8219b36aee646a418ba731ab43b35e40d27329579605aea92c8d0",
-      "review": "Operator session and audit handlers moved into shop; product write admission and the CSV reader moved into catalog without behaviour change"
+      "sha256": "12397a741d614e4e497e73ead2f62537d4453fa7c36434d6a82079dd4223b74c",
+      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
     },
     "src/commerce/product_languages.rs": {
       "status": "unproved",
-      "sha256": "3a4810944e9f854484b020ec760207b59d186183bf3f8dc74b0818f0f2d4896e",
-      "review": "shop component crate created; settings types moved; no kernel binding changed"
-    },
-    "src/commerce/product_preparation.rs": {
-      "status": "unproved",
-      "sha256": "44c3739b2082735b64e6f3b88d125497a1e48e253198944b7250fd2d8e47da09",
-      "review": "Product hydration, list query and preparation moved into components/catalog; no rule changed"
+      "sha256": "852c77bd8776a176a0d39608a2cfaf71e10e71b59fc52e7d36e83bcd26970ba6",
+      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
     },
     "src/commerce/selection.rs": {
       "status": "unproved",
       "sha256": "43d5bd721fc073e9578498fabf567bf02294826e67e4c04fe76954873b829e45",
       "review": "Order list criteria, company model and receipts moved into components; kernel call sites unchanged"
     },
-    "src/commerce/settings_mutation.rs": {
+    "src/commerce/settings_guards.rs": {
       "status": "unproved",
-      "sha256": "7b3512b2eb17924fb35a2d23d5d1d04cd7d3a8e8d62aa015cf57ed5f5e0fa8ad",
-      "review": "Settings basis and release also validate inherited capture timing in every affected channel; tested monetary kernel unchanged"
+      "sha256": "66e888e51e206be9d53be8cb029a9577283711b69596f233e5e898b1c9dbc4f9",
+      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
     },
     "src/commerce/settings_patch.rs": {
       "status": "unproved",
-      "sha256": "e920cb2ba9665a73bc7c56d09fc50f5697f35136033634dfba35ed0e8af2ca1a",
-      "review": "shop component crate created; settings types moved; no kernel binding changed"
-    },
-    "src/commerce/settings_release.rs": {
-      "status": "unproved",
-      "sha256": "f28bfb36e81c78f177615a7246bf0be0d105e79e99e00f8304a1ce43f5daafc8",
-      "review": "Settings basis and release also validate inherited capture timing in every affected channel; tested monetary kernel unchanged"
-    },
-    "src/commerce/settings_routes.rs": {
-      "status": "unproved",
-      "sha256": "a9957496c5319e8bb612735674d5590bf9d9176d0146a1f85871b7cde6085944",
-      "review": "2026-10-19 reviewed native read-only import projection against shared product/category/address owners; paired CRM/history PII and private target/package/digest checks; generic completion evidence atomically uses existing job creator/lease/package and record CAS, platform AEAD, native actual-field verification, no new app table or queue. Actual eight-domain migration/archival/restart/tamper and native app callback/jobs/admin creation tests pass; pure cancelled-success policy has exact Lean claim, all boolean cases and a true-return negative mutation. SQL, cryptography, async service correctness and public hosting remain outside formal proof."
+      "sha256": "51256008d86636c66795b905f1c95e90b71092caad1bcd6150eb96cac450fbb3",
+      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
     },
     "src/commerce/settings_scope.rs": {
       "status": "unproved",
-      "sha256": "8ba3bb90d6c23cea588c3c27661eed7f7fc575a18ff8f7f354179064703e5649",
-      "review": "Customer account writes, the legal snapshot of an order and the locked settings read moved into components"
-    },
-    "src/commerce/settings_validation.rs": {
-      "status": "unproved",
-      "sha256": "c8aa1fab66be75b58a3a53bafc00d3040064257a0cb9f3c324d15db5055aaac3",
-      "review": "shop component crate created; settings types moved; no kernel binding changed"
+      "sha256": "c9e6eeb985bbea6160b4695fda6c7352540b6b02369a39b1209090a0707595d8",
+      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
     },
     "src/commerce/supply_proposal.rs": {
       "status": "unproved",
@@ -7073,8 +7063,8 @@
     },
     "src/currencies/mod.rs": {
       "status": "unproved",
-      "sha256": "fcb0ddce3d3d370b95df26c66be1b66ef91358419ada5c6e3e11fcf60b75f68f",
-      "review": "The currency removal guard moved into components/pricing as store and service; no rule changed"
+      "sha256": "cde044ace056339049dff9a73f5599efc491b33c9aa0b4650a76344e86dfac4a",
+      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
     },
     "src/currencies/ports.rs": {
       "status": "unproved",
@@ -7203,13 +7193,13 @@
     },
     "src/history/product.rs": {
       "status": "unproved",
-      "sha256": "a5b97847b68bfb3d96c2b059756732fda81da52c5589f64d9128578424f19200",
-      "review": "History access rules, version reads and the product restoration projection moved into the studio component; behaviour unchanged"
+      "sha256": "7fa94a80cd390f2e0d80f8a2e0d1911b7ea4fa959bf5a2c96f520444346ec1cd",
+      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
     },
     "src/history/restore.rs": {
       "status": "unproved",
-      "sha256": "a62209361844d8f00c216e48b01f5a2a16e32f8992053f018f2ddd7061fe92b7",
-      "review": "Tenant roles and current grants independently reviewed; owner/retained-override/acceptance races repaired and PostgreSQL-blocked regressions passed; PII and Flow projection boundaries documented; B2B feature settings delegate shared CAS/history and preserve financial guards. Existing extracted policies unchanged; SQL/async/UI remain reviewed adapters, not full proofs."
+      "sha256": "47a0d68ad383b3ffdcc066853d1559e7ef1da74cdc592e705d4ab9beee315a50",
+      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
     },
     "src/history/routes.rs": {
       "status": "unproved",
@@ -7243,18 +7233,13 @@
     },
     "src/legal/mod.rs": {
       "status": "unproved",
-      "sha256": "118bfa3421c316c509b30590368bc78451c97a051dc7e8f8b9c67ee25dffbde9",
-      "review": "The purchase transaction moves into checkout behind the purchase port"
+      "sha256": "04347c703852081120fa03b3d18afd0c246b3423a1ed89a8300e75b22ac53a25",
+      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
     },
     "src/legal/model.rs": {
       "status": "unproved",
       "sha256": "6b7c413c70bc694ce20c269a865b31a548fff57483a09e7105ca12f06092287f",
       "review": "shop component crate created; settings types moved; no kernel binding changed"
-    },
-    "src/legal/product.rs": {
-      "status": "unproved",
-      "sha256": "6d6e1bcea8647ddf69cda8f72588b1f95b6673ddbad6be5e9ed6106bd033c999",
-      "review": "Identity credentials, B2B and POS contracts and checkout tax lines moved into components; kernel call sites unchanged"
     },
     "src/legal/requests.rs": {
       "status": "unproved",
@@ -7368,13 +7353,13 @@
     },
     "src/marketing/metadata.rs": {
       "status": "unproved",
-      "sha256": "2d63b94ffc72f6acdde5660ef445996ea31d89bf75eb456305bda6ccd2e6993a",
-      "review": "Rate refresh, company onboarding, POS channel setup, rule comparison and facts and source lifecycle handlers moved into their components; behaviour unchanged"
+      "sha256": "b0592c5337809ad58624f21dbc8d798e4c33e8d9399ee4774b05ead5a58928f6",
+      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
     },
     "src/marketing/mod.rs": {
       "status": "unproved",
-      "sha256": "39d88445571f55c054b4fe23b975dd5c73f053537e4cdbed809f32ce03da3ddf",
-      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
+      "sha256": "cfb8c5ee096e5ce59f125732de1c10c38cfbd2848c1e1da8802d51911a1855a8",
+      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
     },
     "src/marketing/pipeline.rs": {
       "status": "unproved",
@@ -7463,8 +7448,8 @@
     },
     "src/operations/addresses.rs": {
       "status": "unproved",
-      "sha256": "dc879a218586eee0318914955760395a1fe2ab936d4d5f989fadfc2d4949d35f",
-      "review": "Tenant roles and current grants independently reviewed; owner/retained-override/acceptance races repaired and PostgreSQL-blocked regressions passed; PII and Flow projection boundaries documented; B2B feature settings delegate shared CAS/history and preserve financial guards. Existing extracted policies unchanged; SQL/async/UI remain reviewed adapters, not full proofs."
+      "sha256": "16e6d83d59320287bd1915809d5945ef486def19fc56173bd74e45a7620255ef",
+      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
     },
     "src/operations/company_model.rs": {
       "status": "unproved",
@@ -7483,18 +7468,13 @@
     },
     "src/operations/customer_create.rs": {
       "status": "unproved",
-      "sha256": "4f2b4131be2f654beee1031cf3696376abfdbc34e60855e4cabef0fd7e73bd0d",
-      "review": "Experiment operations and source content checks moved into the intelligence component, CRM creation context into customers; behaviour unchanged"
+      "sha256": "3f73d0ab53a41db2875ae18910da72239fcb9d8d84928deee84964d9616066e5",
+      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
     },
     "src/operations/customer_lookup.rs": {
       "status": "unproved",
-      "sha256": "8e00dda9f83a130298856c8f896d5cc7c3cbc57f94c5b4ad79f6587ea50b1565",
-      "review": "Order list criteria, company model and receipts moved into components; kernel call sites unchanged"
-    },
-    "src/operations/customers.rs": {
-      "status": "unproved",
-      "sha256": "f7b219550d81f06d10bca375e7fc9fc1516069113ce7c2888594adcd509ab684",
-      "review": "Merchant customer writes moved into the customers component and admin order admission into checkout without behaviour change"
+      "sha256": "ba1175ba4b2e26f8f6e7ff6ac56a8d1aa4b1ef9470bfe76e1d382c1c3ed099f6",
+      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
     },
     "src/operations/delivery_booking.rs": {
       "status": "unproved",
@@ -7503,23 +7483,18 @@
     },
     "src/operations/grid_plan.rs": {
       "status": "unproved",
-      "sha256": "7d2f6bccd27e1e89bf31ad8f05d9cbad4e368278646282c17c03944b3a2e389e",
-      "review": "Reviewed native extension identity/private/unique anchors and current read/write/PII scopes; native projections use bounded fixed-store queries, exact indexed filters bind all input and fence the admitted package digest. Real four-object HTTP/MCP, role revocation, foreign reference, immutable upgrade, product/company clone and selected release tests passed. Added extracted configuration-only release predicate and operational false property; SQL and UI remain explicitly unproved. Reviewed canonical schema, preserved AI bindings and versioned grid prompt provenance without changing existing prompt revisions."
+      "sha256": "b9ad9c8e523462399a30653b985c6f8e23bbc70385ebab0ad49406cd875c82a2",
+      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
     },
     "src/operations/grid_schema.rs": {
       "status": "unproved",
-      "sha256": "d2bb4c5945df942bd9def3ba524adc6934c5ac40ed9cb7d1618255a18ad48d24",
-      "review": "Order transitions, external order intake and saved agent authority moved into the orders, apps and identity components"
-    },
-    "src/operations/guest_customers.rs": {
-      "status": "unproved",
-      "sha256": "3927f6c8c2eaba4e1433f6ed85492a18d351e94bb2b7b5f9cb41efcdae265553",
-      "review": "customers component crate created; no kernel binding changed"
+      "sha256": "a775398230ff14931a702c84871c937d259c29c365e50dec572d53cfda70e866",
+      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
     },
     "src/operations/imports/assets.rs": {
       "status": "unproved",
-      "sha256": "3fe9b57d16713d6c54cdf1bc3613cd1bfe53752b10f701674679a1cc990a79f1",
-      "review": "Independent review of native imported immutable image boundaries and selected parent/product-before-asset publication; exact persisted product baseline, attachment-only guard, source-position ordering and recoverable two-step association verified through real HTTP/PostgreSQL regressions. Pure extracted policies unchanged."
+      "sha256": "e7a6aa10a9765c48cb808941a3c50911d7e1872c259105f875e9b404c11f7db5",
+      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
     },
     "src/operations/imports/categories.rs": {
       "status": "unproved",
@@ -7543,8 +7518,8 @@
     },
     "src/operations/imports/inspect.rs": {
       "status": "unproved",
-      "sha256": "5dd8f6c12fad287932224be3d5e3e7c00e98f8308d365e3f49df00c01397fd11",
-      "review": "App-owned bounded HTML normalizer and generic native rich-description mapping/comparison; actual WooCommerce browser exposed raw HTML. SQL/native write adapters remain unproved."
+      "sha256": "559f4fb7898bc7a2fa468095011d664b176ad4ccb4436a6c7ce14c892d12ab68",
+      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
     },
     "src/operations/imports/inspect_history.rs": {
       "status": "unproved",
@@ -7568,8 +7543,8 @@
     },
     "src/operations/imports/products.rs": {
       "status": "unproved",
-      "sha256": "1aea40a04fe1a12c340dad4bef3772fee0d818a5c44cfd9512fc4c7074168156",
-      "review": "App-owned bounded HTML normalizer and generic native rich-description mapping/comparison; actual WooCommerce browser exposed raw HTML. SQL/native write adapters remain unproved."
+      "sha256": "f7671556d22a18f27856e7acd1bafea5dbe98cf6d550c8a6ca663cd4ba535865",
+      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
     },
     "src/operations/imports/relations.rs": {
       "status": "unproved",
@@ -7580,11 +7555,6 @@
       "status": "unproved",
       "sha256": "f8921c073c18c3fa709a47afb1c19269b88077d3d49649ba312a152f2417edda",
       "review": "Reviews moved into components/catalog; no rule changed"
-    },
-    "src/operations/list_criteria.rs": {
-      "status": "unproved",
-      "sha256": "ee37d8d798a2412ff258641c97cb539f267c1911a8e55941c42d0e111ea393b5",
-      "review": "Order list criteria, company model and receipts moved into components; kernel call sites unchanged"
     },
     "src/operations/manual_orders.rs": {
       "status": "unproved",
@@ -7598,22 +7568,12 @@
     },
     "src/operations/mod.rs": {
       "status": "unproved",
-      "sha256": "2bf14ec60685edbb3a1f1cda74b036bf597d11abc6083c667041344f1baa947f",
-      "review": "The purchase transaction moves into checkout behind the purchase port"
+      "sha256": "d4f3ceb5bae0826b6a67be387eb2308c363de3c2108091711a5202567f4cfa91",
+      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
     },
     "src/operations/order_documents.rs": {
       "status": "unproved",
       "sha256": "c8a2089f75caac74701f80c29a7c712735c34834e3d0511b316851c4e1059c10",
-      "review": "POS, checkout session review, company data, receipts and carrier documents moved into components"
-    },
-    "src/operations/order_list.rs": {
-      "status": "unproved",
-      "sha256": "d9dd4ed71f9e496041aa260523d25264ebbf5d05f32af88873ae61d2a6bdffa5",
-      "review": "POS, checkout session review, company data, receipts and carrier documents moved into components"
-    },
-    "src/operations/orders.rs": {
-      "status": "unproved",
-      "sha256": "3d41d0e8fa7ad65d5a7806583f37d7629f60693e450b299585cc6279650c6558",
       "review": "POS, checkout session review, company data, receipts and carrier documents moved into components"
     },
     "src/operations/receipt_pdf.rs": {
@@ -7640,11 +7600,6 @@
       "status": "unproved",
       "sha256": "7b3893462653bf3553d8132e427a3d36c74f8102ef5c516df0017742303642de",
       "review": "Company basis and logo transport moved into the orders component, tax rule conditions into checkout; behaviour unchanged"
-    },
-    "src/operations/workflow.rs": {
-      "status": "unproved",
-      "sha256": "945c8e0fca0fa73dfc14a137048cc7754a68bd13dd91b54b2a1db38d30cc522f",
-      "review": "Reviewed Apps 0.14 model native lifecycle extraction: exact strict graph/snapshot DTOs, original bounded compiler and namespace, complete native canonical digests, mandatory native base/scope/locale policies, current auth callback and unchanged final verified predicate. Original order-domain validation stays native via extension trait; SQL capture/locks/effects unchanged. Independent 104 model and 19 runtime tests, storage PostgreSQL contract, 34 canonical bundle digests, native apps/order units and actual order/RFQ/MCP/release/role/tenant/race fixtures pass; shared compiler and SQL/host remain unproved."
     },
     "src/order_checkout.rs": {
       "status": "unproved",
@@ -8003,8 +7958,8 @@
     },
     "src/staging/access.rs": {
       "status": "unproved",
-      "sha256": "028fdee783c1926d366c1c4fad0a03192e9240b3200a6a354ed2533a3623374e",
-      "review": "Reviewed staging diff: model/action and private-data admission use the same locked package snapshot; no nested pool checkout under the snapshot transaction. Regression rejects missing additional rights, PII rights and missing models; real one-backend PgBouncer collection reproduction retained."
+      "sha256": "db5563196d5dc98e91dad91d1a63d3f2909188509ea070f93b389a20df1cb5c4",
+      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
     },
     "src/staging/assets.rs": {
       "status": "unproved",
@@ -8068,8 +8023,8 @@
     },
     "src/studio/personal.rs": {
       "status": "unproved",
-      "sha256": "fa829a273bd1d157ca5dec7cf79efba2e0e2b5b3f913f36ebf93e3c448d1f865",
-      "review": "Personal Studio workspace model and store moved into the studio component without behaviour change"
+      "sha256": "667aba631ae1979dfeecca1fd792132abb3446606c061d07501e00d7e0066ae9",
+      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
     },
     "src/studio/reports/config.rs": {
       "status": "unproved",
@@ -8081,15 +8036,10 @@
       "sha256": "3f9ef182f365761bded4b659a04cb749ecd34dd822f4e92febb0ddcd02c85fbd",
       "review": "Report service moved into the studio component and the cart language chain into the checkout component; behaviour unchanged"
     },
-    "src/studio/work.rs": {
-      "status": "unproved",
-      "sha256": "b876e8b7e10d9b7b2dc84d6114a211145994c2816d059a6a75a69897fbbdc2ea",
-      "review": "Studio overview facts and work list moved into the studio component without behaviour change"
-    },
     "src/studio.rs": {
       "status": "unproved",
-      "sha256": "a60d38c7e201b0e155132fc57fea104d6300533046bb9a5dce8c06b68982491c",
-      "review": "Studio overview facts and work list moved into the studio component without behaviour change"
+      "sha256": "37c97c81c0068a0d7b60c2cf8480bc83d4ec911c4a6e0fc0e18da13d629f4c93",
+      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
     },
     "src/translations/apply.rs": {
       "status": "unproved",
@@ -8183,8 +8133,8 @@
       "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
     },
     "Cargo.lock": {
-      "sha256": "799251d922a69750ffe3d77f91eec7cdd36a5a6535fa8fea7bc42085b900c10c",
-      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
+      "sha256": "74c11518e3fe1bce9ee4c0678cf945993e94d02129f3ff55cfb7240136615594",
+      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
     },
     "Cargo.toml": {
       "sha256": "12d2d79a98f6913d20b8e912afb9ea8de0539b9e83428de8a9d7412c406896f6",
@@ -8941,14 +8891,6 @@
     "scripts/testing/prompt_governance.py": {
       "sha256": "a9ece67d4975e6c5e44cf26f4d6e397a3780449d8e3f8fbb3860627211b9fda5",
       "review": "Designer acceptance: app-owned versioned style prompt, bounded style-only schema preserving native page content/structure, shared proposal validation unchanged for content edits. Registered visual_workspace RED to GREEN and real Qwen screenshot returns three review-only alternatives. Prompt registry/governance extends app-owned version files. SQL/inference/rendering remain unproved."
-    },
-    "src/operations/customer_directory.sql": {
-      "sha256": "3a50ce695d1fc5be24b470e007994253c6f4e0e3c3e639c3122270b539cdcf15",
-      "review": "Reviewed bounded native directory criteria, constant allowlisted SQL sorts and tenant tuple cursors, localized product-name ordering, read-only central model planning with current domain and PII grants, and HTTP/MCP discovery parity. Isolated PostgreSQL/provider suites cover native checkout-created records, denied foreign tenant/cursor access, stage boundaries and provider failures. Existing pure financial policies remain unchanged; SQL, model semantics and UI remain unproved adapters."
-    },
-    "src/operations/customer_directory_default.sql": {
-      "sha256": "83738c400b888597fce307a480a61dc4b7844a46181f45aca06f011d005ed6ab",
-      "review": "Reviewed bounded native directory criteria, constant allowlisted SQL sorts and tenant tuple cursors, localized product-name ordering, read-only central model planning with current domain and PII grants, and HTTP/MCP discovery parity. Isolated PostgreSQL/provider suites cover native checkout-created records, denied foreign tenant/cursor access, stage boundaries and provider failures. Existing pure financial policies remain unchanged; SQL, model semantics and UI remain unproved adapters."
     },
     "src/performance/access_snapshot.sql": {
       "sha256": "d675ee530b12560085e5335e93fbc60caa9ec45c4b2cb6d6d2950abdd7e50887",

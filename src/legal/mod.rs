@@ -10,11 +10,9 @@ mod buyer_consent;
 mod continuation;
 pub(crate) use buyer_consent::missing_contact;
 pub(crate) use continuation::continue_consent;
-mod checkout;
-mod product;
-mod requests;
-pub(crate) use product::validate_product;
 mod capabilities;
+mod checkout;
+mod requests;
 pub(crate) use capabilities::{invoke, permission, schema};
 pub(crate) fn router() -> Router<App> {
     Router::new()

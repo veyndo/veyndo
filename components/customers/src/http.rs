@@ -3,3 +3,4 @@ pub mod account;
 pub mod addresses;
 pub mod browser;
 pub mod crm_context;
+pub mod merchant_crm;

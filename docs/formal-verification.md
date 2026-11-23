@@ -97,9 +97,9 @@ verified separately by native integration tests rather than proved by Lean.
 | `revision_admissible` | Admission requires an exact positive revision | `src/commerce/fulfillment.rs` |
 | `replay_admissible` | A replay belongs to the same cart; an open cart requires the same fingerprint | `src/order_checkout.rs` |
 | `scope_admissible` | Admission requires authentication and a known scope; explicit denial cannot inherit role defaults | `src/auth/permissions.rs` |
-| `order_edit_admissible` | Terminal orders cannot admit operational edits | `src/commerce/order_workflow.rs` |
-| `completion_admissible` | Completion requires payment ready, deliveries complete and a nonterminal order | `src/commerce/order_workflow.rs` |
-| `cancellation_admissible` | Cancellation requires open deliveries and no external payment/refund constraint | `src/commerce/order_workflow.rs` |
+| `order_edit_admissible` | Terminal orders cannot admit operational edits | `components/orders/src/domain/order_workflow.rs` |
+| `completion_admissible` | Completion requires payment ready, deliveries complete and a nonterminal order | `components/orders/src/domain/order_workflow.rs` |
+| `cancellation_admissible` | Cancellation requires open deliveries and no external payment/refund constraint | `components/orders/src/domain/order_workflow.rs` |
 | `manual_payment_admissible` | Manual payment cannot confirm an external provider; it requires a pending payment and nonterminal order | `src/commerce/fulfillment.rs` |
 | `download_admissible` | Blocked orders grant no download; admitted downloads require payment or explicit simulated authorization | `components/orders/src/http/downloads.rs` |
 | `checkout_review_admissible` | Exact revision and amount equality plus confirmed methods are required when a client supplies the review headers | `src/order_checkout.rs` |

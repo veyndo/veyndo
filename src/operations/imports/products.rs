@@ -31,7 +31,8 @@ pub(super) async fn import(
         ));
     }
     let payload = mapped(a, &t, r, options).await?;
-    let Json(result) = commerce::create_product(State(a.clone()), h.clone(), Json(payload)).await?;
+    let Json(result) =
+        commerce::create_product(State(a.core.clone()), h.clone(), Json(payload)).await?;
     Ok(json!({"id":result["id"],"replayed":false,"stockActivated":false}))
 }
 

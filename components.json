@@ -94,19 +94,16 @@
         "src/commerce/configuration.rs",
         "src/commerce/context_routes.rs",
         "components/shop",
-        "src/commerce/settings_mutation.rs",
         "src/commerce/settings_patch.rs",
-        "src/commerce/settings_release.rs",
-        "src/commerce/settings_routes.rs",
         "src/commerce/settings_scope.rs",
-        "src/commerce/settings_validation.rs",
         "src/performance",
         "src/currencies/rates.rs",
         "src/shop_domains.rs",
         "src/shop_domains",
         "src/brand_redirect.rs",
         "src/legal",
-        "src/platform"
+        "src/platform",
+        "src/commerce/settings_guards.rs"
       ],
       "tables": [
         "commerce_overrides",
@@ -137,8 +134,7 @@
         "marketing",
         "payments",
         "pricing",
-        "shipping",
-        "studio"
+        "shipping"
       ],
       "foreign_tables": [
         "app_evidence",
@@ -164,9 +160,9 @@
         "tenant_ai_usage",
         "tenants"
       ],
-      "glob_imports": 31,
+      "glob_imports": 28,
       "untyped_access": 98,
-      "sql_outside_store": 22
+      "sql_outside_store": 19
     },
     "catalog": {
       "title": "Products, categories, media, reviews, translations and catalogue reads",
@@ -177,13 +173,8 @@
         "src/commerce/detail.rs",
         "src/commerce/content_text.rs",
         "src/commerce/product_admin.rs",
-        "src/commerce/product_channels.rs",
-        "src/commerce/product_create.rs",
-        "src/commerce/product_edit.rs",
-        "src/commerce/product_fields.rs",
         "src/commerce/product_input.rs",
         "src/commerce/product_languages.rs",
-        "src/commerce/product_preparation.rs",
         "src/commerce/catalog_ports.rs",
         "src/commerce/selection.rs",
         "src/categories",
@@ -239,9 +230,9 @@
         "tasks",
         "tenants"
       ],
-      "glob_imports": 36,
-      "untyped_access": 192,
-      "sql_outside_store": 12
+      "glob_imports": 31,
+      "untyped_access": 180,
+      "sql_outside_store": 10
     },
     "inventory": {
       "title": "Stock, reservations and supply",
@@ -276,8 +267,7 @@
         "src/currencies",
         "src/commerce/tax.rs",
         "src/commerce/tax_context.rs",
-        "src/commerce/customer_groups.rs",
-        "src/commerce/group_usage.rs"
+        "src/commerce/customer_groups.rs"
       ],
       "tables": [
         "commerce_customer_groups",
@@ -317,7 +307,6 @@
         "catalog",
         "core",
         "identity",
-        "payments",
         "pricing",
         "shop"
       ],
@@ -401,9 +390,7 @@
         "src/customer.rs",
         "src/operations/addresses.rs",
         "src/operations/customer_create.rs",
-        "src/operations/customer_lookup.rs",
-        "src/operations/customers.rs",
-        "src/operations/guest_customers.rs"
+        "src/operations/customer_lookup.rs"
       ],
       "tables": [
         "customer_addresses",
@@ -411,7 +398,6 @@
         "customers"
       ],
       "uses": [
-        "apps",
         "checkout",
         "core",
         "identity",
@@ -428,9 +414,9 @@
         "outbox",
         "tenants"
       ],
-      "glob_imports": 12,
-      "untyped_access": 66,
-      "sql_outside_store": 6
+      "glob_imports": 6,
+      "untyped_access": 58,
+      "sql_outside_store": 5
     },
     "orders": {
       "title": "Order state, fulfilment, receipts, documents and merchant order work",
@@ -440,7 +426,6 @@
         "src/order_routes.rs",
         "src/commerce/order_fields.rs",
         "src/commerce/order_machine.rs",
-        "src/commerce/order_workflow.rs",
         "src/commerce/external_orders.rs",
         "src/commerce/fulfillment.rs"
       ],
@@ -470,7 +455,6 @@
         "studio"
       ],
       "foreign_tables": [
-        "app_packages",
         "carts",
         "categories",
         "commerce_promotions",
@@ -486,9 +470,9 @@
         "sales_channels",
         "tenants"
       ],
-      "glob_imports": 24,
-      "untyped_access": 470,
-      "sql_outside_store": 12
+      "glob_imports": 20,
+      "untyped_access": 461,
+      "sql_outside_store": 11
     },
     "payments": {
       "title": "Provider-independent payment ledger, captures, refunds and provider workers",
@@ -906,10 +890,12 @@
         "commerce_settings",
         "company_logos",
         "company_overrides",
+        "customers",
         "exposures",
         "extensions",
         "knowledge_chunks",
         "knowledge_documents",
+        "languages",
         "merchant_users",
         "order_state_machines",
         "orders",
@@ -932,9 +918,9 @@
         "translation_items",
         "translation_jobs"
       ],
-      "glob_imports": 15,
-      "untyped_access": 168,
-      "sql_outside_store": 7
+      "glob_imports": 14,
+      "untyped_access": 197,
+      "sql_outside_store": 10
     },
     "protocols": {
       "title": "MCP, UCP and the shared capability dispatch; adapters without business rules",

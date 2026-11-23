@@ -8,7 +8,7 @@ pub(super) async fn restore(
     revision: i64,
 ) -> Result<Json<Value>> {
     let Json(mut current) =
-        commerce::product_editor(State(a.clone()), h.clone(), Path(id.clone())).await?;
+        commerce::product_editor(State(a.core.clone()), h.clone(), Path(id.clone())).await?;
     if current["revision"] != revision {
         return Err(conflict("Product changed; reload before restoring"));
     }
@@ -21,5 +21,5 @@ pub(super) async fn restore(
         &settings.locales,
         &settings.main_locale,
     );
-    commerce::edit_product(State(a), h, Path(id), Json(current)).await
+    commerce::edit_product(State(a.core.clone()), h, Path(id), Json(current)).await
 }

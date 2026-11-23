@@ -1,29 +1,54 @@
-//! Revision-bound multilingual product metadata: specifications, SEO, cross-selling and free shipping.
-use super::*;
+//! The merchant product editor: revision-bound multilingual content, identity, commerce fields, channels and categories, checked against the shop settings, compliance rules, automation metadata and app extensions.
+use axum::Json;
+use axum::extract::{Path, State as Shared};
+use serde_json::{Value, json};
+use sqlx::Row;
+use veyndo_app_model::Object;
+use veyndo_app_model::declarations::identifier;
+use veyndo_app_platform::store::extension_projection::attach;
+use veyndo_catalog::domain::product_admission::{category_assignment, category_edit};
 use veyndo_catalog::service::{product_fields, product_identity};
 use veyndo_catalog::store::product_edit as store;
+use veyndo_catalog::store::product_fields::editable;
+use veyndo_catalog::store::{categories, channels, products};
 use veyndo_catalog::types::product_edit::Edit;
-pub(crate) async fn edit_product(
-    State(a): State<App>,
+use veyndo_core::history_context::context;
+use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad, conflict};
+use veyndo_identity::{merchant, permit};
+use veyndo_intelligence::knowledge::sync_product;
+use veyndo_marketing::domain::metadata::validate as validate_metadata;
+use veyndo_pricing::service::conversion::validate_prices;
+use veyndo_shop::domain::defaults::decode;
+use veyndo_shop::domain::legal_product::validate_product;
+use veyndo_shop::service::read_cache::config;
+
+/// The language key of a locale in the shop's settings.
+fn language_key(locale: &str, s: &veyndo_shop::Settings) -> String {
+    s.languages().key(locale)
+}
+/// Saves an existing product at its revision.
+pub async fn edit_product(
+    Shared(a): Shared<State>,
     h: RequestContext,
     Path(id): Path<String>,
     Json(v): Json<Value>,
 ) -> Result<Json<Value>> {
-    let v = super::product_input::expand_category_edit(&a, &h, &id, v).await?;
+    let v = expand_category_edit(&a, &h, &id, v).await?;
     save_product(a, h, id, v, false).await
 }
-pub(super) async fn save_product(
-    a: App,
+/// The shared revision-checked save of product content, identity, fields and translations.
+pub async fn save_product(
+    a: State,
     h: RequestContext,
     id: String,
     v: Value,
     create: bool,
 ) -> Result<Json<Value>> {
-    auth::permit(&h, "catalog")?;
-    let t = merchant(&a, &h)?;
+    permit(&h, "catalog")?;
+    let t = merchant(&h)?;
     let mut edit: Edit = serde_json::from_value(v).map_err(|_| bad("Invalid product metadata"))?;
     let mut tx = a.db.begin().await?;
-    history::context(&mut tx, &h, "merchant").await?;
+    context(&mut tx, &h, "merchant").await?;
     let settings_row =
         sqlx::query("SELECT data, revision FROM commerce_settings WHERE tenant=$1 FOR SHARE")
             .bind(&t)
@@ -35,7 +60,7 @@ pub(super) async fn save_product(
     {
         return Err(conflict("Catalogue settings changed; prepare fresh drafts"));
     }
-    let settings = decode_config(settings_row.get("data"))?;
+    let settings = decode(settings_row.get("data"))?;
     if create && edit.extra.price_currency.is_none() {
         edit.extra.price_currency = Some(settings.currencies.base_currency.clone());
     }
@@ -47,15 +72,15 @@ pub(super) async fn save_product(
     {
         return Err(bad("Product price currency is not configured"));
     }
-    currencies::validate_prices(&edit.extra.currency_prices, &settings.currencies)?;
+    validate_prices(&edit.extra.currency_prices, &settings.currencies)?;
     let languages = settings.languages();
     edit.validate_translations(languages)?;
-    crate::legal::validate_product(&edit.extra.compliance, &settings)?;
+    validate_product(&edit.extra.compliance, &settings)?;
     let (main_name, main_description) = edit.main_text(languages)?;
     edit.validate_metadata(languages, |id| {
         settings.taxes.iter().any(|tax| tax.id == id)
     })?;
-    marketing::validate_metadata("products", &edit.extra.automation)?;
+    validate_metadata("products", &edit.extra.automation)?;
     edit.validate_fields(languages)?;
     if let Some(c) = &edit.catalog {
         if edit.extra.automation.is_null() {
@@ -117,7 +142,7 @@ pub(super) async fn save_product(
         product_identity::save(&mut tx, &t, &id, c).await?;
     }
     for product in &edit.extra.cross_selling {
-        if !veyndo_catalog::store::products::exists(&mut tx, &t, product).await? || product == &id {
+        if !products::exists(&mut tx, &t, product).await? || product == &id {
             return Err(bad("Invalid cross-selling product"));
         }
     }
@@ -142,7 +167,7 @@ pub(super) async fn save_product(
         store::upsert_translation(&mut tx, &t, &id, locale, tr.name, tr.description).await?;
     }
     let (saved, content_revision) = store::saved(&mut tx, &t, &id).await?;
-    knowledge::sync_product(&mut tx, &t, &json!(saved)).await?;
+    sync_product(&mut tx, &t, &json!(saved)).await?;
     veyndo_core::outbox::publish(
         &mut tx,
         &t,
@@ -158,13 +183,14 @@ pub(super) async fn save_product(
     tx.commit().await?;
     Ok(Json(result))
 }
-pub(crate) async fn product_editor(
-    State(a): State<App>,
+/// The product as the merchant editor shows it, with languages, channels, categories and app extensions.
+pub async fn product_editor(
+    Shared(a): Shared<State>,
     h: RequestContext,
     Path(id): Path<String>,
 ) -> Result<Json<Value>> {
-    auth::permit(&h, "catalog.read")?;
-    let t = merchant(&a, &h)?;
+    permit(&h, "catalog.read")?;
+    let t = merchant(&h)?;
     let r = sqlx::query("SELECT * FROM products WHERE tenant=$1 AND id=$2")
         .bind(&t)
         .bind(&id)
@@ -176,12 +202,12 @@ pub(crate) async fn product_editor(
     let mut translations = json!({});
     for tr in rows {
         let locale: String = tr.get("locale");
-        let key = super::product_languages::key(&locale, &settings);
+        let key = language_key(&locale, &settings);
         translations[&key] = json!({"name":tr.get::<Option<String>,_>("name"),"description":tr.get::<Option<String>,_>("description")});
     }
     // Old catalogs may have only the canonical source columns. Seed only the main
     // field in the editable response; other languages remain NULL (inherit).
-    let main = super::product_languages::key(&settings.main_locale, &settings);
+    let main = language_key(&settings.main_locale, &settings);
     if translations[&main]["name"].is_null() {
         translations[&main]["name"] = json!(r.get::<String, _>("name"));
     }
@@ -196,14 +222,45 @@ pub(crate) async fn product_editor(
         .filter(|c| c["visible"] == true)
         .map(|c| c["id"].clone())
         .collect::<Vec<_>>();
-    let category_ids = veyndo_catalog::store::categories::of_product(&a.core, &t, &id).await?;
-    let mut value = json!({"id":id,"mainLocale":settings.main_locale,"availableLocales":settings.locales,"channels":channels,"catalog":{"salesChannelIds":selected_channels,"active":r.get::<bool,_>("active"),"productNumber":r.get::<Option<String>,_>("product_number").unwrap_or_else(||id.clone()),"categoryIds":category_ids,"parentId":r.get::<Option<String>,_>("parent_id"),"options":r.get::<Value,_>("options")},"revision":r.get::<i64,_>("revision"),"contentRevision":r.get::<i64,_>("content_revision"),"translations":translations,"extra":({let mut extra=r.get::<Value,_>("extra");if extra["priceCurrency"].is_null(){extra["priceCurrency"]=json!(settings.currencies.pricing_currency);}extra}),"commerce":editable_fields(&r)});
-    apps::core_extensions::attach(
-        &a,
-        &h,
-        apps::core_extensions::Object::Product,
-        std::slice::from_mut(&mut value),
-    )
-    .await?;
+    let category_ids = categories::of_product(&a, &t, &id).await?;
+    let mut value = json!({"id":id,"mainLocale":settings.main_locale,"availableLocales":settings.locales,"channels":channels,"catalog":{"salesChannelIds":selected_channels,"active":r.get::<bool,_>("active"),"productNumber":r.get::<Option<String>,_>("product_number").unwrap_or_else(||id.clone()),"categoryIds":category_ids,"parentId":r.get::<Option<String>,_>("parent_id"),"options":r.get::<Value,_>("options")},"revision":r.get::<i64,_>("revision"),"contentRevision":r.get::<i64,_>("content_revision"),"translations":translations,"extra":({let mut extra=r.get::<Value,_>("extra");if extra["priceCurrency"].is_null(){extra["priceCurrency"]=json!(settings.currencies.pricing_currency);}extra}),"commerce":editable(&r)});
+    attach(&a, &h, Object::Product, std::slice::from_mut(&mut value)).await?;
     Ok(Json(value))
+}
+/// The channel visibility of a product for the editor, at most 100 channels.
+async fn product_channels(a: &State, t: &str, id: &str) -> Result<Value> {
+    let channels = channels::visibility(a, t, id).await?;
+    if channels.len() > 100 {
+        return Err(bad(
+            "Interactive product editor supports at most 100 channels",
+        ));
+    }
+    Ok(json!(channels))
+}
+/// Expands an explicit category-only change through the same revisioned editor.
+async fn expand_category_edit(a: &State, h: &RequestContext, id: &str, v: Value) -> Result<Value> {
+    if v.get("categoryIds").is_none() {
+        return Ok(v);
+    }
+    permit(h, "catalog")?;
+    let edit = category_edit(&v)?;
+    let current = product_editor(Shared(a.clone()), h.clone(), Path(id.to_owned()))
+        .await?
+        .0;
+    category_assignment(&edit, &current)
+}
+/// Creates a product with a generated or validated stable ID.
+pub async fn create_product(
+    Shared(a): Shared<State>,
+    h: RequestContext,
+    Json(v): Json<Value>,
+) -> Result<Json<Value>> {
+    let id = match v.get("id") {
+        None | Some(Value::Null) => uuid::Uuid::new_v4().to_string(),
+        Some(Value::String(id)) if identifier(id) || uuid::Uuid::parse_str(id).is_ok() => {
+            id.clone()
+        }
+        _ => return Err(bad("Invalid product ID")),
+    };
+    save_product(a, h, id, v, true).await
 }

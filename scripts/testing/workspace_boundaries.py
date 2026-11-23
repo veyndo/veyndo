@@ -58,7 +58,7 @@ ALLOWED = {
     'veyndo-pos': {'veyndo-core', 'veyndo-pricing', 'veyndo-shop', 'veyndo-checkout', 'veyndo-customers', 'veyndo-identity', 'veyndo-marketing'},
     'veyndo-checkout': {'veyndo-core', 'veyndo-pricing', 'veyndo-shop', 'veyndo-shipping', 'veyndo-catalog', 'veyndo-b2b', 'veyndo-identity', 'veyndo-runtime', 'veyndo-marketing', 'veyndo-customers', 'veyndo-inventory', 'veyndo-orders', 'veyndo-payments'},
     'veyndo-intelligence': {'veyndo-core', 'veyndo-pricing', 'veyndo-runtime', 'veyndo-catalog', 'veyndo-kernel', 'veyndo-shipping', 'veyndo-identity', 'veyndo-shop', 'veyndo-marketing', 'veyndo-checkout', 'veyndo-inventory', 'veyndo-cognition', 'veyndo-app-model'},
-    'veyndo-studio': {'veyndo-core', 'veyndo-app-model', 'veyndo-identity', 'veyndo-app-platform', 'veyndo-orders', 'veyndo-pricing', 'veyndo-shop', 'veyndo-catalog', 'veyndo-intelligence', 'veyndo-marketing'},
+    'veyndo-studio': {'veyndo-core', 'veyndo-customers', 'veyndo-cognition', 'veyndo-app-model', 'veyndo-identity', 'veyndo-app-platform', 'veyndo-orders', 'veyndo-pricing', 'veyndo-shop', 'veyndo-catalog', 'veyndo-intelligence', 'veyndo-marketing'},
     'veyndo-shop': {'veyndo-core', 'veyndo-pricing', 'veyndo-inventory', 'veyndo-shipping', 'veyndo-app-model', 'veyndo-catalog', 'veyndo-identity', 'veyndo-kernel'},
 }
 # Reviewed direct external capabilities. Cargo reports actual package names even
@@ -88,7 +88,7 @@ EXTERNAL = {
     'veyndo-pos': {'serde', 'serde_json', 'sqlx'},
     'veyndo-checkout': {'serde', 'serde_json', 'chrono', 'sqlx', 'uuid', 'axum', 'base64', 'reqwest', 'ring', 'sha2'},
     'veyndo-intelligence': {'serde', 'serde_json', 'sqlx', 'reqwest', 'sha2', 'tokio', 'uuid', 'libc', 'pdf-extract', 'chrono', 'ring', 'base64', 'tracing', 'axum'},
-    'veyndo-studio': {'axum', 'serde', 'serde_json', 'chrono', 'chrono-tz', 'sqlx', 'reqwest'},
+    'veyndo-studio': {'axum', 'serde', 'serde_json', 'chrono', 'chrono-tz', 'sqlx', 'reqwest', 'uuid', 'tokio'},
     'veyndo-shop': {'serde', 'serde_json', 'chrono', 'reqwest', 'sqlx', 'axum', 'tokio', 'futures-util'},
     'veyndo-core': {'axum', 'serde', 'serde_json', 'sha2', 'sqlx', 'uuid', 'tokio', 'tracing', 'reqwest'},
     'veyndo-runtime': {'hmac', 'sha2', 'zeroize', 'sqlx', 'tokio', 'futures-util',

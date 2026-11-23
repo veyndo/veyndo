@@ -11,5 +11,4 @@ pub(crate) use jobs::worker;
 pub(crate) use request::requested;
 pub(crate) use routes::router;
 pub(crate) use veyndo_pricing::service::conversion::*;
-pub(crate) use veyndo_pricing::service::currency_change::guard as routes_guard;
 pub(crate) use veyndo_pricing::types::currency::*;

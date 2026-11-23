@@ -4,13 +4,9 @@ mod payment_preference;
 pub(crate) use payment_preference::remember_payment;
 mod address_store;
 pub(crate) mod browser;
-mod contacts;
-mod metadata;
-pub(crate) use metadata::decorate;
 mod demo;
 mod orders;
 pub(crate) use address_store::*;
-pub(crate) use contacts::*;
 pub(crate) use demo::seed_address as seed_demo_address;
 pub(crate) fn router() -> Router<App> {
     Router::new()

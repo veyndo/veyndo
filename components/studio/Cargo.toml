@@ -23,3 +23,6 @@ veyndo-marketing = { path = "../marketing" }
 veyndo-catalog = { path = "../catalog" }
 veyndo-intelligence = { path = "../intelligence" }
 reqwest.workspace = true
+veyndo-customers = { path = "../customers" }
+veyndo-cognition = { path = "../../crates/cognition" }
+uuid.workspace = true

@@ -1,24 +1,35 @@
-//! Revision-bound workflow configuration used by installed apps and selective sandbox releases.
-use super::*;
-use crate::commerce::OrderMachineValidation;
-pub(super) async fn get(State(a): State<App>, h: RequestContext) -> Result<Json<Value>> {
-    let t = merchant(&a, &h)?;
-    auth::permit(&h, "orders.read")?;
-    let (m, r) = commerce::machine(&a.db, &t).await?;
-    let (settings, _) = commerce::config(&a, &t).await?;
-    let effective = apps::native_lifecycle::current_order(&a.db, &t).await?;
+//! Revision-bound order workflow configuration used by installed apps and selective sandbox releases.
+use axum::Json;
+use axum::extract::State as Shared;
+use serde_json::{Value, json};
+use veyndo_app_platform::store::native_lifecycle::{current_order, validate_order_base};
+use veyndo_core::shop_scope::header;
+use veyndo_core::{RequestContext, Result, State, bad, conflict};
+use veyndo_identity::{merchant, permit};
+use veyndo_marketing::store::configuration_lifecycle::lock as lock_config;
+use veyndo_orders::domain::order_machine::{OrderMachine, OrderMachineValidation};
+use veyndo_orders::store::machine::machine;
+use veyndo_shop::service::read_cache::config;
+/// The shop's order workflow with its effective states.
+pub async fn get(Shared(a): Shared<State>, h: RequestContext) -> Result<Json<Value>> {
+    let t = merchant(&h)?;
+    permit(&h, "orders.read")?;
+    let (m, r) = machine(&a.db, &t).await?;
+    let (settings, _) = config(&a, &t).await?;
+    let effective = current_order(&a.db, &t).await?;
     Ok(Json(
         json!({"data":m,"revision":r,"mainLocale":settings.main_locale,"effectiveStates":effective.states}),
     ))
 }
-pub(super) async fn save(
-    State(a): State<App>,
+/// Saves the workflow at its revision; it never strands an active order state.
+pub async fn save(
+    Shared(a): Shared<State>,
     h: RequestContext,
     Json(v): Json<Value>,
 ) -> Result<Json<Value>> {
-    let t = merchant(&a, &h)?;
-    auth::permit(&h, "settings.write")?;
-    let m: commerce::OrderMachine =
+    let t = merchant(&h)?;
+    permit(&h, "settings.write")?;
+    let m: OrderMachine =
         serde_json::from_value(v["data"].clone()).map_err(|_| bad("Invalid workflow schema"))?;
     m.validate()?;
     if m.transitions.iter().any(|edge| edge.policy.is_some()) {
@@ -28,13 +39,13 @@ pub(super) async fn save(
     }
     let revision = v["revision"].as_i64().ok_or(bad("revision required"))?;
     let mut tx = a.db.begin().await?;
-    marketing::lock_config(&mut tx, &t).await?;
+    lock_config(&mut tx, &t).await?;
     sqlx::query("SELECT pg_advisory_xact_lock(hashtextextended($1,27))")
         .bind(&t)
         .execute(&mut *tx)
         .await?;
     if let Some(app) = &m.source_app {
-        auth::permit(&h, "apps.manage")?;
+        permit(&h, "apps.manage")?;
         let active: bool = sqlx::query_scalar(
             "SELECT EXISTS(SELECT 1 FROM app_packages WHERE tenant=$1 AND id=$2 AND active)",
         )
@@ -46,7 +57,7 @@ pub(super) async fn save(
             return Err(bad("Workflow source app is not installed"));
         }
     }
-    apps::native_lifecycle::validate_order_base(&mut tx, &t, m.clone()).await?;
+    validate_order_base(&mut tx, &t, m.clone()).await?;
     let old: Option<i64> =
         sqlx::query_scalar("SELECT revision FROM order_state_machines WHERE tenant=$1 FOR UPDATE")
             .bind(&t)

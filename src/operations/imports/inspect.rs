@@ -27,7 +27,8 @@ pub(crate) async fn inspect(a: &App, h: &RequestContext, v: &Value) -> Result<Va
             auth::permit(h, "catalog.read")?;
             let mapped = products::mapped(a, &t, &r, &v["options"]).await?;
             let actual =
-                match commerce::product_editor(State(a.clone()), h.clone(), Path(id.clone())).await
+                match commerce::product_editor(State(a.core.clone()), h.clone(), Path(id.clone()))
+                    .await
                 {
                     Ok(Json(value)) => Some(value),
                     Err(e) if e.0 == StatusCode::NOT_FOUND => None,

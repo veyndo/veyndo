@@ -3,7 +3,6 @@ use crate::*;
 mod types;
 pub(crate) use types::*;
 mod customer_groups;
-mod group_usage;
 pub(crate) use customer_groups::*;
 mod configuration;
 pub(crate) use configuration::*;
@@ -19,12 +18,8 @@ mod detail;
 pub(crate) use detail::*;
 mod catalog_ports;
 mod inventory_ports;
-mod settings_routes;
-pub(crate) use settings_routes::*;
-mod settings_validation;
-pub(crate) use settings_validation::*;
-mod settings_mutation;
-pub(crate) use settings_mutation::*;
+mod settings_guards;
+pub(crate) use settings_guards::*;
 mod fulfillment;
 pub(crate) use fulfillment::*;
 mod delivery_split;
@@ -34,30 +29,17 @@ mod selection;
 pub(crate) use selection::*;
 
 pub(crate) mod catalog_intake;
-mod product_create;
-mod product_edit;
 mod product_input;
-pub(crate) use product_create::create_product;
-pub(crate) use product_edit::*;
 pub(crate) use product_input::{admit_product_write, product_write_guidance};
 
 mod order_machine;
 pub(crate) use order_machine::*;
-mod order_workflow;
-pub(crate) use order_workflow::*;
-
-mod product_fields;
-pub(crate) use product_fields::*;
 
 mod order_fields;
 pub(crate) use order_fields::*;
 
 mod product_admin;
-mod product_preparation;
 pub(crate) use product_admin::*;
-
-mod product_channels;
-pub(crate) use product_channels::*;
 
 mod geography;
 pub(crate) use geography::country_catalogue;
@@ -82,12 +64,12 @@ pub(crate) use settings_scope::*;
 mod method_usage;
 pub(crate) use method_usage::method_dependencies;
 
-mod settings_release;
-pub(crate) use settings_release::*;
-
 pub(crate) use settings_patch::resolve as restore_checkout_data;
 pub(crate) mod supply_proposal;
 pub(crate) mod test_stock;
 
 mod external_orders;
 pub(crate) use external_orders::import_external;
+pub(crate) use veyndo_studio::http::product_editor::{
+    create_product, edit_product, product_editor,
+};

@@ -11,7 +11,7 @@ pub(crate) async fn save(a: &App, h: &RequestContext, v: &Value) -> Result<Value
         .map_err(|_| bad("Invalid B2B feature configuration"))?;
     data["b2b"] = json!(config);
     Ok(commerce::save_config(
-        State(a.clone()),
+        State(axum::extract::FromRef::from_ref(a)),
         h.clone(),
         Json(json!({"revision":v["revision"],"data":data})),
     )

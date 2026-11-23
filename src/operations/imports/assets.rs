@@ -57,7 +57,7 @@ pub(super) async fn import(
     media["importGroup"] = json!(group);
     media["importPosition"] = json!(position);
     let Json(mut editor) =
-        commerce::product_editor(State(a.clone()), h.clone(), Path(product.clone())).await?;
+        commerce::product_editor(State(a.core.clone()), h.clone(), Path(product.clone())).await?;
     let items = editor["commerce"]["media"]
         .as_array_mut()
         .ok_or(bad("Native media unavailable"))?;
@@ -84,8 +84,13 @@ pub(super) async fn import(
     // Omit stock so adding an image never restores a quantity observed before a concurrent native writer.
     editor["commerce"].as_object_mut().unwrap().remove("stock");
     let payload = json!({"revision":editor["revision"],"contentRevision":editor["contentRevision"],"translations":editor["translations"],"extra":editor["extra"],"catalog":editor["catalog"],"commerce":editor["commerce"]});
-    let _ =
-        commerce::edit_product(State(a.clone()), h.clone(), Path(product), Json(payload)).await?;
+    let _ = commerce::edit_product(
+        State(a.core.clone()),
+        h.clone(),
+        Path(product),
+        Json(payload),
+    )
+    .await?;
     Ok(json!({"id":id,"replayed":false}))
 }
 fn hash_bytes(bytes: &[u8]) -> String {

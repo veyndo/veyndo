@@ -10,9 +10,7 @@ This lists every checked-in source module in these roots, including files with n
 |---|---|
 | [src/accounts/address_store.rs](../src/accounts/address_store.rs) | Entries of the address book are owned by the customers component. |
 | [src/accounts/browser.rs](../src/accounts/browser.rs) | Host-only customer cookies adapt the existing tenant session ledger without granting merchant authority. |
-| [src/accounts/contacts.rs](../src/accounts/contacts.rs) | Native customer projection; shared contact syntax never grants identity or PII access. |
 | [src/accounts/demo.rs](../src/accounts/demo.rs) | Public synthetic customer fixture for newly provisioned demo shops; never fills real customer addresses. |
-| [src/accounts/metadata.rs](../src/accounts/metadata.rs) | Standard customer read fields; the projection and metrics are owned by the customers component. |
 | [src/accounts/mod.rs](../src/accounts/mod.rs) | Independent customer sessions, profile/password management and owning-account order history. |
 | [src/accounts/orders.rs](../src/accounts/orders.rs) | Customer receipt PDFs render in the server; the order reads and projection are owned by the orders component. |
 | [src/accounts/payment_preference.rs](../src/accounts/payment_preference.rs) | Optional last-used payment preference is written after purchase commit, without holding cart/unit/product locks. |
@@ -53,7 +51,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/apps/events.rs](../src/apps/events.rs) | App event delivery lives in the apps component; this module supplies its state to the worker and the outbox. |
 | [src/apps/evidence.rs](../src/apps/evidence.rs) | Private provenance-bearing app exports feed merchant retrieval and durable app events; never public PDP answers. |
 | [src/apps/evidence_routes.rs](../src/apps/evidence_routes.rs) | Scoped merchant-only evidence retrieval; sources never enter public product answers. |
-| [src/apps/extension_filter.rs](../src/apps/extension_filter.rs) | Exact app-field predicates validated against current packages and applied before native pagination. |
+| [src/apps/extension_filter.rs](../src/apps/extension_filter.rs) | Exact app-field predicates live in the apps component; this module keeps the short path. |
 | [src/apps/field_values.rs](../src/apps/field_values.rs) | The field value policy lives in the apps component; this module keeps the short path for the app adapters. |
 | [src/apps/gateway.rs](../src/apps/gateway.rs) | One permission-aware action gateway serves HTTP, UI and MCP; service egress is operator configured. |
 | [src/apps/hosted.rs](../src/apps/hosted.rs) | Hosted-app installation lives in the apps component; this module adds the connected frontends and their local answers. |
@@ -227,29 +225,19 @@ This lists every checked-in source module in these roots, including files with n
 | [src/commerce/external_orders.rs](../src/commerce/external_orders.rs) | External order intake is owned by the apps component; the core exchange of an admitted app calls it. |
 | [src/commerce/fulfillment.rs](../src/commerce/fulfillment.rs) | Revision-checked order, payment and delivery transitions are owned by the orders component. |
 | [src/commerce/geography.rs](../src/commerce/geography.rs) | Country catalogue of a shop; the bundled world and the admission rules are owned by the shipping component. |
-| [src/commerce/group_usage.rs](../src/commerce/group_usage.rs) | Removing a customer group rejects live customer, price and native/source-rule dependencies under the settings lock. |
 | [src/commerce/international_capabilities.rs](../src/commerce/international_capabilities.rs) | International configuration and translation MCP tools call the exact same scoped native handlers as HTTP. |
 | [src/commerce/inventory_ports.rs](../src/commerce/inventory_ports.rs) | The server's implementation of what the inventory component reads from environments and the product index. |
 | [src/commerce/method_usage.rs](../src/commerce/method_usage.rs) | Authoritative deletion guards for methods; the reference counts are owned by the shipping component. |
 | [src/commerce/mod.rs](../src/commerce/mod.rs) | Native catalogue and checkout domains; pricing ports remain in the library. |
 | [src/commerce/order_fields.rs](../src/commerce/order_fields.rs) | Derived order fields are owned by the orders component. |
 | [src/commerce/order_machine.rs](../src/commerce/order_machine.rs) | The order state machine is owned by the orders component. |
-| [src/commerce/order_workflow.rs](../src/commerce/order_workflow.rs) | Order transition guards and the workflow view are owned by the orders component. |
-| [src/commerce/product_admin.rs](../src/commerce/product_admin.rs) | The merchant product list: catalogue filters from the catalog component, app filters and extensions from the app host. |
-| [src/commerce/product_channels.rs](../src/commerce/product_channels.rs) | Per-product channel visibility for the product editor; storage is owned by the catalog component. |
-| [src/commerce/product_create.rs](../src/commerce/product_create.rs) | Product creation accepts validated stable import IDs; the shared domain save handler retains pricing, ownership and history checks. |
-| [src/commerce/product_edit.rs](../src/commerce/product_edit.rs) | Revision-bound multilingual product metadata: specifications, SEO, cross-selling and free shipping. |
-| [src/commerce/product_fields.rs](../src/commerce/product_fields.rs) | Native product fields preserve stock unless an explicit absolute quantity passes aggregate CAS; owned by the catalog component. |
-| [src/commerce/product_input.rs](../src/commerce/product_input.rs) | Admit native product edits and expand explicit category-only changes through the same revisioned editor. |
+| [src/commerce/product_admin.rs](../src/commerce/product_admin.rs) | The merchant product list lives in the studio component; the server registers it with product creation. |
+| [src/commerce/product_input.rs](../src/commerce/product_input.rs) | Native product write admission lives in the catalog component. |
 | [src/commerce/product_languages.rs](../src/commerce/product_languages.rs) | Enabled content languages, NULL field inheritance and stable global language registration. |
-| [src/commerce/product_preparation.rs](../src/commerce/product_preparation.rs) | Opt-in bounded catalogue preparation projection. Existing products, translations and image jobs remain the owners. |
 | [src/commerce/selection.rs](../src/commerce/selection.rs) | Recover a quote after configuration changes without losing items or silently committing new choices. |
-| [src/commerce/settings_mutation.rs](../src/commerce/settings_mutation.rs) | Optimistic settings persistence and audit event. |
+| [src/commerce/settings_guards.rs](../src/commerce/settings_guards.rs) | The server side of the settings port: rule conditions, payment capture configuration, the marketing configuration lock and app lifecycle locales. |
 | [src/commerce/settings_patch.rs](../src/commerce/settings_patch.rs) | Sparse settings overrides are owned by the shop component. |
-| [src/commerce/settings_release.rs](../src/commerce/settings_release.rs) | Selective staging units for channel settings; all final aggregates and method dependencies use native validators. |
-| [src/commerce/settings_routes.rs](../src/commerce/settings_routes.rs) | Tenant configuration and operational read model. |
 | [src/commerce/settings_scope.rs](../src/commerce/settings_scope.rs) | Scoped checkout configuration: basis row lock orders all override writes and authoritative checkout reads. |
-| [src/commerce/settings_validation.rs](../src/commerce/settings_validation.rs) | Configuration validation is owned by the shop component; rule conditions are checked by the rule engine. |
 | [src/commerce/supply_proposal.rs](../src/commerce/supply_proposal.rs) | Reorder proposal routes; the intelligence component owns the supplier offers, the ceiling check and the checkout handover. |
 | [src/commerce/tax.rs](../src/commerce/tax.rs) | Destination tax-class resolution and net-preserving price conversion. |
 | [src/commerce/tax_context.rs](../src/commerce/tax_context.rs) | Tax conditions consume private authoritative pre-tax cart facts without a recursive quote. |
@@ -294,7 +282,6 @@ This lists every checked-in source module in these roots, including files with n
 | [src/legal/continuation.rs](../src/legal/continuation.rs) | Capability-bound consent continuation: successive carts share one revocable receipt, never copied grants. |
 | [src/legal/mod.rs](../src/legal/mod.rs) | Connected legal/privacy boundary: configuration, consent, checkout snapshots and durable requests. |
 | [src/legal/model.rs](../src/legal/model.rs) | Legal configuration is owned by the shop component. |
-| [src/legal/product.rs](../src/legal/product.rs) | Explicit product safety/sector facts, with market-language fallback; no inference of certifications. |
 | [src/legal/requests.rs](../src/legal/requests.rs) | Durable withdrawal/data-rights intake, tenant-scoped operator review and customer-held receipt access. |
 | [src/lib.rs](../src/lib.rs) | Reusable pricing, context, sandbox, graph and inference modules. |
 | [src/localization.rs](../src/localization.rs) | Shop locale resolution, translated catalog hydration and non-mutating merchant quote. |
@@ -336,17 +323,15 @@ This lists every checked-in source module in these roots, including files with n
 | [src/migrations/recent_schema.rs](../src/migrations/recent_schema.rs) | Later additive migrations retain the same ordered ledger and checksum contract. |
 | [src/migrations/schema.rs](../src/migrations/schema.rs) | Append-only ordered migration source catalogue; deployed checksums are never rewritten. |
 | [src/migrations.rs](../src/migrations.rs) | Versioned setup is separate from serving; no catalog-wide startup repair. |
-| [src/operations/addresses.rs](../src/operations/addresses.rs) | Merchant/MCP address operations use identical customer ownership and revision checks to the Store API. |
+| [src/operations/addresses.rs](../src/operations/addresses.rs) | Merchant address operations live in the customers component. |
 | [src/operations/company_model.rs](../src/operations/company_model.rs) | Company profile admission, sparse channel inheritance and structured-address print projection. |
 | [src/operations/company_public.rs](../src/operations/company_public.rs) | Explicit public legal/brand projection; bank account, domestic tax ID and unlinked uploads remain private. |
 | [src/operations/creation_schema.rs](../src/operations/creation_schema.rs) | Domain-owned MCP schemas for safe CRM creation choices and explicitly reviewed manual orders. |
-| [src/operations/customer_create.rs](../src/operations/customer_create.rs) | Admin CRM creation uses native contacts/address storage, history and outbox; it never issues customer credentials. |
+| [src/operations/customer_create.rs](../src/operations/customer_create.rs) | Merchant customer creation lives in the customers component. |
 | [src/operations/customer_lookup.rs](../src/operations/customer_lookup.rs) | Fast customer-only lookup for native identity bindings; the search is owned by the customers component. |
-| [src/operations/customers.rs](../src/operations/customers.rs) | Tenant-scoped paged CRM and revision-checked merchant changes; credentials never leave storage. |
 | [src/operations/delivery_booking.rs](../src/operations/delivery_booking.rs) | Carrier booking intents of approved apps are owned by the apps component. |
-| [src/operations/grid_plan.rs](../src/operations/grid_plan.rs) | Read-only filter planning through the central provider and fleet leases; execution remains native list APIs. |
+| [src/operations/grid_plan.rs](../src/operations/grid_plan.rs) | Grid filter planning lives in the studio component; this handler lends it the server's model context. |
 | [src/operations/grid_schema.rs](../src/operations/grid_schema.rs) | The allowlisted list-filter schema now lives in the studio component; model plans, MCP and saved views share it. |
-| [src/operations/guest_customers.rs](../src/operations/guest_customers.rs) | Merchant-only guest contact projection; order snapshots never create account authority. |
 | [src/operations/imports/assets.rs](../src/operations/imports/assets.rs) | Reviewed source image intake resolves its native product and delegates immutable binary storage and media edits to their existing owners. |
 | [src/operations/imports/categories.rs](../src/operations/imports/categories.rs) | Source-neutral category intake preserves stable hierarchy and uses the revisioned native category owner privately. |
 | [src/operations/imports/coupons.rs](../src/operations/imports/coupons.rs) | Generic coupon import delegates a reviewed native promotion definition, without pretending original usage is a new purchase. |
@@ -360,19 +345,15 @@ This lists every checked-in source module in these roots, including files with n
 | [src/operations/imports/products.rs](../src/operations/imports/products.rs) | Private native product intake delegates all catalogue validation, history and selected release to the existing owner. |
 | [src/operations/imports/relations.rs](../src/operations/imports/relations.rs) | Canonical import references resolve to tenant-bound native IDs; the existing product owner validates every relation. |
 | [src/operations/imports/reviews.rs](../src/operations/imports/reviews.rs) | Versioned generic review records resolve native product identity and preserve source claims outside native purchase authority. |
-| [src/operations/list_criteria.rs](../src/operations/list_criteria.rs) | Bounded native order/customer filter and sort contracts, reused by HTTP, MCP and reviewed grid plans. |
 | [src/operations/manual_orders.rs](../src/operations/manual_orders.rs) | Actor-private manual-order quotes reuse native cart, legal, pricing, inventory and checkout; no second order ledger. |
 | [src/operations/master_data.rs](../src/operations/master_data.rs) | The company basis lives in the orders component; these entries keep the server-side signatures. |
 | [src/operations/mod.rs](../src/operations/mod.rs) | Merchant CRM and fulfillment APIs, shared verbatim with MCP operations capabilities. |
 | [src/operations/order_documents.rs](../src/operations/order_documents.rs) | Immutable private carrier documents belong to the existing order receipt store, never product assets. |
-| [src/operations/order_list.rs](../src/operations/order_list.rs) | The order list query is owned by the orders component; admitted app filters join it here. |
-| [src/operations/orders.rs](../src/operations/orders.rs) | Bounded order search, token-redacted detail and append-only operational notes. |
 | [src/operations/receipt_pdf.rs](../src/operations/receipt_pdf.rs) | Minimal paginated PDF serializer with WinAnsi Helvetica; snapshot retains complete Unicode originals. |
 | [src/operations/receipt_text.rs](../src/operations/receipt_text.rs) | Receipt text is owned by the orders component. |
 | [src/operations/receipts.rs](../src/operations/receipts.rs) | Idempotent immutable invoices/delivery notes with transactional per-shop number ranges. |
 | [src/operations/redacted_reads.rs](../src/operations/redacted_reads.rs) | Explicit non-PII domain read views for separately scoped app callbacks; never elevate an identity. |
 | [src/operations/routes.rs](../src/operations/routes.rs) | HTTP/MCP rights for merchant CRM, fulfillment and company settings. |
-| [src/operations/workflow.rs](../src/operations/workflow.rs) | Revision-bound workflow configuration used by installed apps and selective sandbox releases. |
 | [src/order_checkout.rs](../src/order_checkout.rs) | Native checkout entry used by Store API, Studio, agents and POS. |
 | [src/order_routes.rs](../src/order_routes.rs) | Merchant order read adapter. |
 | [src/outbox/retention.rs](../src/outbox/retention.rs) | Once a minute: expired sign-in buckets, behaviour evidence and delivered outbox payloads are retired. |
@@ -444,7 +425,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/shop_domains/frontend_editor.rs](../src/shop_domains/frontend_editor.rs) | Operator-owned editor navigation for hosted frontends; no private editor or identity implementation. |
 | [src/shop_domains/frontends.rs](../src/shop_domains/frontends.rs) | Generic operator-allowlisted frontend mounts. Host scope is derived from storage, never client headers. |
 | [src/shop_domains.rs](../src/shop_domains.rs) | Resolve configured shop subdomains before authentication; reject unknown hosts and conflicting scopes. |
-| [src/staging/access.rs](../src/staging/access.rs) | Selective publication checks every selected domain's current rights before writing any live row. |
+| [src/staging/access.rs](../src/staging/access.rs) | Release-unit rights live in the studio component. |
 | [src/staging/assets.rs](../src/staging/assets.rs) | Binary assets are immutable, staged independently through metadata/digest units; paid entitlements never clone. |
 | [src/staging/categories.rs](../src/staging/categories.rs) | Category release units and dependency-ordered tree publication; stock is never part of a catalog release. |
 | [src/staging/clone.rs](../src/staging/clone.rs) | Clone only catalog/configuration into a private tenant; customer/order/payment state is excluded. |
@@ -457,10 +438,9 @@ This lists every checked-in source module in these roots, including files with n
 | [src/staging/snapshot.rs](../src/staging/snapshot.rs) | Fixed publishable units: product content/translations, settings, experience and app packages. |
 | [src/storefront_pages.rs](../src/storefront_pages.rs) | Deep-link HTML transport for stable SKU URLs with optional localized SEO slugs. |
 | [src/studio/facts.rs](../src/studio/facts.rs) | Dashboard facts are owned by the studio component. |
-| [src/studio/personal.rs](../src/studio/personal.rs) | Actor-private workspace preferences; HTTP and MCP share CAS, bounds and the current membership. |
+| [src/studio/personal.rs](../src/studio/personal.rs) | The personal workspace lives in the studio component; the server registers its routes. |
 | [src/studio/reports/config.rs](../src/studio/reports/config.rs) | One bounded report definition for HTTP, MCP and private workspace presentation preferences. |
 | [src/studio/reports.rs](../src/studio/reports.rs) | Shared commerce reports live in the studio component; this module keeps the server registration and capability entries. |
-| [src/studio/work.rs](../src/studio/work.rs) | The work list is owned by the studio component. |
 | [src/studio.rs](../src/studio.rs) | Verified merchant overview facts consumed by the chat and activity views. |
 | [src/translations/apply.rs](../src/translations/apply.rs) | Entry point for capabilities; applying reviewed drafts is owned by the catalog component. |
 | [src/translations/fields.rs](../src/translations/fields.rs) | Translation field extraction and admission are owned by the catalog component. |
@@ -834,6 +814,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/customers/src/http/addresses.rs](../components/customers/src/http/addresses.rs) | Store API address book: independent customer sessions, never merchant credentials. |
 | [components/customers/src/http/browser.rs](../components/customers/src/http/browser.rs) | Host-only customer cookies adapt the existing tenant session ledger without granting merchant authority. |
 | [components/customers/src/http/crm_context.rs](../components/customers/src/http/crm_context.rs) | The choices a CRM writer needs to create a customer, without granting settings access. |
+| [components/customers/src/http/merchant_crm.rs](../components/customers/src/http/merchant_crm.rs) | Merchant CRM writes: customer creation and the address book, with the same ownership and revision checks as the Store API. |
 | [components/customers/src/http.rs](../components/customers/src/http.rs) | Customer transports: the browser cookie adapter in front of the tenant session ledger. |
 | [components/customers/src/lib.rs](../components/customers/src/lib.rs) | Customers component: accounts, sessions, address books and the merchant's view of customers. |
 | [components/customers/src/service/address_book.rs](../components/customers/src/service/address_book.rs) | The address book of a customer: bounded, revision-checked, with defaults that are never left empty. |
@@ -1195,6 +1176,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/shop/src/service/language.rs](../components/shop/src/service/language.rs) | The language of a request from its shop, its locale header and an explicit language id. |
 | [components/shop/src/service/read_cache.rs](../components/shop/src/service/read_cache.rs) | The process-wide read cache of shop settings and the language registry. Every hit still probes the authoritative SQL version; mutations and checkout locks never read through it. |
 | [components/shop/src/service/read_cache_settings.sql](../components/shop/src/service/read_cache_settings.sql) | Atomic read snapshot: deletion/recreation and unchanged revision numbers cannot reuse an old UUID. |
+| [components/shop/src/service/settings_writes.rs](../components/shop/src/service/settings_writes.rs) | Settings writes: the shared basis, channel overrides and their selective release, guarded against stranding methods, groups, currencies, tax classes and languages. Cross-component checks come through the settings port. |
 | [components/shop/src/service.rs](../components/shop/src/service.rs) | Services of the shop component. |
 | [components/shop/src/store/consumer_requests.rs](../components/shop/src/store/consumer_requests.rs) | Durable withdrawal and data-rights intake, tenant-scoped operator review and customer-held receipt access. |
 | [components/shop/src/store/group_usage.rs](../components/shop/src/store/group_usage.rs) | Removing a customer group rejects live customer, price and native/source-rule dependencies under the settings lock. |
@@ -1211,16 +1193,26 @@ This lists every checked-in source module in these roots, including files with n
 | [components/studio/src/domain/product_restore.rs](../components/studio/src/domain/product_restore.rs) | Rebuilds a product edit from a recorded version; stock stays current and associations pass the normal product admission afterwards. |
 | [components/studio/src/domain/report_config.rs](../components/studio/src/domain/report_config.rs) | One bounded report definition for HTTP, MCP and private workspace presentation preferences. |
 | [components/studio/src/domain/report_period.rs](../components/studio/src/domain/report_period.rs) | Calendar periods are resolved once in the requested IANA timezone, with exclusive ends and bounded buckets. |
+| [components/studio/src/domain/staging_access.rs](../components/studio/src/domain/staging_access.rs) | Selective publication checks every selected domain's current rights before writing any live row; diffs show only what the caller may read. |
 | [components/studio/src/domain/view_components.rs](../components/studio/src/domain/view_components.rs) | The parts a composed record view may show: always the records, at most three, and only what fits the entity. |
 | [components/studio/src/domain/workspace.rs](../components/studio/src/domain/workspace.rs) | Bounded personal layouts contain references, never delegated rights or executable agent instructions. |
 | [components/studio/src/domain.rs](../components/studio/src/domain.rs) | domain of this component. |
+| [components/studio/src/http/customers.rs](../components/studio/src/http/customers.rs) | Tenant-scoped paged CRM with admitted app filters and revision-checked merchant changes; credentials never leave storage. |
 | [components/studio/src/http/history.rs](../components/studio/src/http/history.rs) | History transport: bounded, permission-filtered version listings and single versions of the owning shop. |
+| [components/studio/src/http/orders.rs](../components/studio/src/http/orders.rs) | Merchant order search with admitted app filters, token-redacted detail with the effective workflow, and append-only operational notes. |
 | [components/studio/src/http/outbox.rs](../components/studio/src/http/outbox.rs) | Outbox runtime transport: the merchant's delivery counters and the explicit retry of a quarantined event. |
+| [components/studio/src/http/product_editor.rs](../components/studio/src/http/product_editor.rs) | The merchant product editor: revision-bound multilingual content, identity, commerce fields, channels and categories, checked against the shop settings, compliance rules, automation metadata and app extensions. |
+| [components/studio/src/http/products.rs](../components/studio/src/http/products.rs) | The merchant product list: catalogue filters from the catalog component, app filters and extensions from the app host, and the opt-in preparation projection. |
 | [components/studio/src/http/reports.rs](../components/studio/src/http/reports.rs) | Report transport: one bounded report query per request. |
+| [components/studio/src/http/workflow.rs](../components/studio/src/http/workflow.rs) | Revision-bound order workflow configuration used by installed apps and selective sandbox releases. |
+| [components/studio/src/http/workspace.rs](../components/studio/src/http/workspace.rs) | Actor-private workspace preferences; HTTP and MCP share CAS, bounds and the current membership. |
 | [components/studio/src/http.rs](../components/studio/src/http.rs) | HTTP handlers of the studio component; the server registers them with their route rights. |
 | [components/studio/src/lib.rs](../components/studio/src/lib.rs) | Studio component: report periods and configuration. |
+| [components/studio/src/service/grid_plan.rs](../components/studio/src/service/grid_plan.rs) | Read-only filter planning through the central provider and fleet leases; execution remains native list APIs. |
 | [components/studio/src/service/reports.rs](../components/studio/src/service/reports.rs) | Shared commerce reports for Studio, the workspace, the API and agent reads; there is no second analytics ledger. |
 | [components/studio/src/service.rs](../components/studio/src/service.rs) | Operations of the studio component. |
+| [components/studio/src/store/customer_directory.sql](../components/studio/src/store/customer_directory.sql) | One tenant-scoped CRM entry per email, including historical guest checkouts. |
+| [components/studio/src/store/customer_directory_default.sql](../components/studio/src/store/customer_directory_default.sql) | One tenant-scoped CRM entry per email, including historical guest checkouts. |
 | [components/studio/src/store/history.rs](../components/studio/src/store/history.rs) | Reads the recorded versions of one entity of a shop. |
 | [components/studio/src/store/outbox_control.rs](../components/studio/src/store/outbox_control.rs) | Outbox runtime SQL: tenant counters and the explicit release of one quarantined event that was neither delivered nor retired. |
 | [components/studio/src/store/overview.rs](../components/studio/src/store/overview.rs) | Consolidated dashboard facts in one bounded read; turnover stays separated by invoice currency and is never repriced. |

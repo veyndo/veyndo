@@ -8,15 +8,3 @@ pub(crate) fn key(locale: &str, s: &Settings) -> String {
 pub(crate) fn allowed(key: &str, s: &Settings) -> bool {
     s.languages().allowed(key)
 }
-pub(super) async fn register(
-    tx: &mut sqlx::Transaction<'_, sqlx::Postgres>,
-    s: &Settings,
-) -> Result<()> {
-    for locale in &s.locales {
-        sqlx::query("SELECT public.veyndo_register_language($1)")
-            .bind(locale)
-            .execute(&mut **tx)
-            .await?;
-    }
-    Ok(())
-}
