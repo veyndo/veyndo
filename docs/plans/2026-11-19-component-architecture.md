@@ -338,7 +338,11 @@ Order follows the dependency report, lowest first. Each line is one move.
   product detail with its tier prices and reviews is `http/product_detail`
   (on the catalog state); the single-use checkout handoff and its recovery
   are `http/handoff`, with the framing parent check in `store/hosted_parent`.
-  Open: cart mutation, the selection, the four steps of the checkout
+  A cart edit (normalized quantities, expected revision, the review
+  fingerprint, the locked write) is `store/cart_edit`; app configuration
+  selections, protocol consent and the agent run fence reach it through the
+  port `ports::CartEdits`, implemented per edit by `cart_mutation::Edits`.
+  Open: the selection, the four steps of the checkout
   transaction (they call apps, B2B, payments, marketing and legal and need a
   host port). `http/buyer_identity` seals and inspects the
   short-lived Checkout grant of a live customer session and

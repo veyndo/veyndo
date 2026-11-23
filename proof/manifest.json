@@ -1793,8 +1793,8 @@
     },
     "components/checkout/src/ports.rs": {
       "status": "unproved",
-      "sha256": "f1eb1478d2b20ebed9fb4ae3232f6030659e555dfa31c88dd060653276082e4f",
-      "review": "Cart projection and product detail move into checkout behind a quote port"
+      "sha256": "eb65cfd94cf78cc7743f7da03aa88f4a9a85f74af77197aebfc7dbc1f053b815",
+      "review": "Cart edits move into checkout behind the cart edit port"
     },
     "components/checkout/src/service/app_adjustments.rs": {
       "status": "unproved",
@@ -1830,6 +1830,11 @@
       "status": "unproved",
       "sha256": "dafe50e01f9054ee048c8c22531822e2b4db5e649427eb122152a5617248adec",
       "review": "Cart projection, product detail, checkout handoff, cart creation and supply proposals move into components"
+    },
+    "components/checkout/src/store/cart_edit.rs": {
+      "status": "unproved",
+      "sha256": "e8fc4dcda5dfd957b1b0daa4327bc274abceadd4f01c6d845b99c3e8ef6e45bd",
+      "review": "Cart edits move into checkout behind the cart edit port"
     },
     "components/checkout/src/store/cart_load.rs": {
       "status": "unproved",
@@ -1873,8 +1878,8 @@
     },
     "components/checkout/src/store.rs": {
       "status": "unproved",
-      "sha256": "333c1adeb2feb7ec81881b946c1dce4bddcb8a77c50c6aa0a33b5d5f84dfa2ac",
-      "review": "Cart projection, product detail, checkout handoff, cart creation and supply proposals move into components"
+      "sha256": "02de517b7060920f3c066d455529d754bac20fa4ee042f38753b5f078e3ce417",
+      "review": "Cart edits move into checkout behind the cart edit port"
     },
     "components/core/src/access.rs": {
       "status": "unproved",
@@ -6413,8 +6418,8 @@
     },
     "src/cart_mutation.rs": {
       "status": "unproved",
-      "sha256": "b4c23289edadaad522e03a4bea2592e7edf6aa1ded4e079a91eb6490b0a3e581",
-      "review": "Reviewed chat cart preview and conditional edit reuse native quote and optimistic mutation, and app metadata derives from an admitted public product reference. Catalogue approval checks original task actor and current scopes before applying. The Rust/PostgreSQL regression covers stale quotes, wrong items, foreign cart scope, and same-shop approval denial."
+      "sha256": "981eb1254f093dfb099e6e83f7bb2e1998f723dada3b53c91cdfac1d73729344",
+      "review": "Cart edits move into checkout behind the cart edit port"
     },
     "src/cart_price.rs": {
       "status": "unproved",

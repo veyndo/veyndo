@@ -399,7 +399,7 @@
       ],
       "glob_imports": 10,
       "untyped_access": 212,
-      "sql_outside_store": 7
+      "sql_outside_store": 6
     },
     "customers": {
       "title": "Customer accounts, sessions, addresses and the merchant customer directory",

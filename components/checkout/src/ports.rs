@@ -34,3 +34,23 @@ pub trait Quotes: Send + Sync {
         revision: i64,
     ) -> PortFuture<'a, Value>;
 }
+
+/// What a cart edit needs from the server around the native revision check: app configurations, protocol consent and the agent run fence.
+pub trait CartEdits: Send + Sync {
+    /// The priced cart as the storefront receives it.
+    fn view<'a>(&'a self, cart: &'a StoredCart) -> PortFuture<'a, Value>;
+    /// Applies the edit's app configuration selections to the candidate before it is priced.
+    fn configure<'a>(&'a self, cart: &'a mut StoredCart) -> PortFuture<'a, ()>;
+    /// Checks the configurations under the cart lock, before the new revision is written.
+    fn locked<'a, 'c: 'a>(
+        &'a self,
+        tx: &'a mut sqlx::Transaction<'c, sqlx::Postgres>,
+        cart: &'a StoredCart,
+    ) -> PortFuture<'a, ()>;
+    /// Configuration events, consent and the agent run fence, in the transaction that wrote the revision.
+    fn committed<'a, 'c: 'a>(
+        &'a self,
+        tx: &'a mut sqlx::Transaction<'c, sqlx::Postgres>,
+        cart: &'a StoredCart,
+    ) -> PortFuture<'a, ()>;
+}

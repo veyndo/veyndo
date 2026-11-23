@@ -815,6 +815,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/checkout/src/service.rs](../components/checkout/src/service.rs) | service of this component. |
 | [components/checkout/src/store/admin_order.rs](../components/checkout/src/store/admin_order.rs) | Locked checkout guards of an order a merchant places: channel policy, the selected customer and the channel's product selection. |
 | [components/checkout/src/store/cart_create.rs](../components/checkout/src/store/cart_create.rs) | A new buyer cart: inserted with the shop defaults, then bound to the request's language, channel, currency and signed-in customer. |
+| [components/checkout/src/store/cart_edit.rs](../components/checkout/src/store/cart_edit.rs) | Optimistic cart edits: normalized quantities, the expected revision, an optional review fingerprint and the locked write. |
 | [components/checkout/src/store/cart_load.rs](../components/checkout/src/store/cart_load.rs) | The buyer's cart of a request: loaded by tenant and context token, then guarded by cashier, company and sales channel rules. |
 | [components/checkout/src/store/customer_snapshot.rs](../components/checkout/src/store/customer_snapshot.rs) | Checkout-owned immutable customer and address records; future account edits cannot rewrite an order. |
 | [components/checkout/src/store/hosted_parent.rs](../components/checkout/src/store/hosted_parent.rs) | The storefront origin that may frame the hosted checkout: exactly the mounted shop and sales channel, over plain HTTPS. |
