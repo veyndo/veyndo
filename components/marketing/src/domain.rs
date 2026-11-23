@@ -4,6 +4,7 @@ pub mod condition_import;
 pub mod configuration_kinds;
 pub mod flow_actions;
 pub mod flow_projection;
+pub mod flow_steps;
 pub mod flow_text;
 pub mod line_facts;
 pub mod metadata;

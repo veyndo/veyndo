@@ -17,7 +17,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/agent.rs](../src/agent.rs) | Model provider listing and product retrieval over the server's model context; conversations and knowledge handlers live in the intelligence component. |
 | [src/agent_host.rs](../src/agent_host.rs) | The server side of the agent port: native capabilities, installed app tools, consent-bound preferences, studio order facts, the native work vocabulary and proposal admission. |
 | [src/agent_runs/authority.rs](../src/agent_runs/authority.rs) | Saved runs retain an upper authority bound; the identity component rechecks credential, membership and private stage admission. |
-| [src/agent_runs/checkpoint.rs](../src/agent_runs/checkpoint.rs) | The run journal lives in the intelligence component; these entries lend it the server's agent port. |
+| [src/agent_runs/checkpoint.rs](../src/agent_runs/checkpoint.rs) | The run journal lives in the intelligence component; the server reuses its commit fence. |
 | [src/agent_runs/contract.rs](../src/agent_runs/contract.rs) | HTTP/MCP share revision-bound run controls and safe progress; scenarios, agent controls and run operations are dispatched by name. |
 | [src/agent_runs/controls.rs](../src/agent_runs/controls.rs) | Live-only agent stop and existing-key admission live in the intelligence component; the server registers the routes. |
 | [src/agent_runs/navigation.rs](../src/agent_runs/navigation.rs) | Navigation targets live in the intelligence component. |
@@ -262,19 +262,19 @@ This lists every checked-in source module in these roots, including files with n
 | [src/lib.rs](../src/lib.rs) | Reusable pricing, context, sandbox, graph and inference modules. |
 | [src/localization.rs](../src/localization.rs) | Shop locale resolution, translated catalog hydration and non-mutating merchant quote. |
 | [src/main.rs](../src/main.rs) | Process lifetime only. See docs/source-map.md for domain responsibilities. |
-| [src/marketing/app_flows.rs](../src/marketing/app_flows.rs) | App flow dispatch uses the same permission/schema gateway as HTTP/MCP, with a stable job key. |
+| [src/marketing/app_flows.rs](../src/marketing/app_flows.rs) | App flow dispatch uses the same permission/schema gateway as HTTP/MCP, with a stable job key; admission lives in the app platform. |
 | [src/marketing/catalog.rs](../src/marketing/catalog.rs) | The automation catalogue is owned by the marketing component; the server registers its routes. |
-| [src/marketing/channel_access.rs](../src/marketing/channel_access.rs) | Single admission boundary for Store API, UCP/MCP and hosted storefronts; previews cannot purchase. |
-| [src/marketing/channel_config.rs](../src/marketing/channel_config.rs) | Shared transactional channel validation for merchant edits, history restoration and selective release. |
-| [src/marketing/channel_preview.rs](../src/marketing/channel_preview.rs) | One-use preview handoff becomes a host-only cookie, bound to current session, membership and channel revision. |
+| [src/marketing/channel_access.rs](../src/marketing/channel_access.rs) | The sales channel admission boundary is owned by the marketing component. |
+| [src/marketing/channel_preview.rs](../src/marketing/channel_preview.rs) | Merchant channel previews are owned by the marketing component; the server registers their routes. |
 | [src/marketing/channels.rs](../src/marketing/channels.rs) | Sales channel admission lives in the marketing component; these entries keep the server-side signatures. |
 | [src/marketing/condition_gateway.rs](../src/marketing/condition_gateway.rs) | Rule admission and matching are owned by the marketing component. |
+| [src/marketing/configuration_host.rs](../src/marketing/configuration_host.rs) | The server side of saving marketing configuration: actor-private work templates, installed app actions and POS channel setup. |
 | [src/marketing/coupons.rs](../src/marketing/coupons.rs) | Coupon selection is owned by the marketing component; the server supplies the guarded, priced cart. |
 | [src/marketing/flow_access.rs](../src/marketing/flow_access.rs) | Every queued flow step rehydrates current membership; stored definitions never preserve revoked privileges. |
 | [src/marketing/flow_actions.rs](../src/marketing/flow_actions.rs) | Native action schema and permissions use original Core names; no arbitrary SQL, shell or unguarded payment transitions. |
 | [src/marketing/flow_jobs.rs](../src/marketing/flow_jobs.rs) | PostgreSQL ownership of Flow claims, cursor checkpoints and terminal results. |
 | [src/marketing/flow_mutations.rs](../src/marketing/flow_mutations.rs) | Local flow mutations journal the effect in the same transaction; customer authority changes revoke existing sessions. |
-| [src/marketing/flow_policy.rs](../src/marketing/flow_policy.rs) | All configuration entry points require the publishing actor's native action rights; queued work rechecks them. |
+| [src/marketing/flow_policy.rs](../src/marketing/flow_policy.rs) | Flow configuration policy lives in the marketing component; the server lends it templates, apps and channel setup. |
 | [src/marketing/flow_text.rs](../src/marketing/flow_text.rs) | Shop-language validation and main-language fallback for both simple flows and graphical action nodes. |
 | [src/marketing/flows.rs](../src/marketing/flows.rs) | Durable order-event flows: conditions, shop notes and AI proposals; no unapproved model mutations. |
 | [src/marketing/gateway.rs](../src/marketing/gateway.rs) | MCP automation tools call the same tenant-bound handlers and validators as HTTP; no separate mutation semantics. |
@@ -282,15 +282,10 @@ This lists every checked-in source module in these roots, including files with n
 | [src/marketing/lifecycle.rs](../src/marketing/lifecycle.rs) | Revision-bound deletion and reference admission share HTTP/MCP authorization and tenant locks. |
 | [src/marketing/metadata.rs](../src/marketing/metadata.rs) | Rule facts of products, customers and orders are saved by the marketing component; this module registers the route. |
 | [src/marketing/mod.rs](../src/marketing/mod.rs) | Native rule conditions, coupons, durable flows and headless/storefront sales-channel boundaries. |
-| [src/marketing/pipeline.rs](../src/marketing/pipeline.rs) | A bounded acyclic flow graph models source-style true/false branches, ordered actions, delays and stop nodes. |
 | [src/marketing/pipeline_runtime.rs](../src/marketing/pipeline_runtime.rs) | The pipeline runner is owned by the marketing component; the server supplies the action effects. |
-| [src/marketing/promotion_import.rs](../src/marketing/promotion_import.rs) | Imported promotions use the ordinary revisioned owner and retain immutable provenance until a merchant reviews activation. |
-| [src/marketing/promotions.rs](../src/marketing/promotions.rs) | Server-authoritative coupons and automatic campaigns, with deterministic discounts and atomic usage limits. |
-| [src/marketing/routes.rs](../src/marketing/routes.rs) | Typed configuration CRUD, rule preview and revision-bound coupon edits. |
+| [src/marketing/promotion_import.rs](../src/marketing/promotion_import.rs) | Imported promotions are saved by the marketing component's configuration owner. |
+| [src/marketing/routes.rs](../src/marketing/routes.rs) | Routes of typed configuration CRUD, rule preview and coupon edits; the marketing component owns their rules. |
 | [src/marketing/rule_history.rs](../src/marketing/rule_history.rs) | Rule comparison lives in the marketing component; these entries keep the server-side signatures. |
-| [src/marketing/rules.rs](../src/marketing/rules.rs) | Rule conditions are owned by the marketing component. |
-| [src/marketing/work_template.rs](../src/marketing/work_template.rs) | Bounded copies of reviewed native work: event values replace explicit scalar fields, never executable text. |
-| [src/marketing/work_template_source.rs](../src/marketing/work_template_source.rs) | Templates reference actor-private task evidence; configuration/history/release never copy its inputs. |
 | [src/mcp/poppy.rs](../src/mcp/poppy.rs) | Personal Agent Protocol discovery: a configured shop domain publishes poppy.json naming its guest MCP endpoint; no sign-in, session or UCP entry is claimed. |
 | [src/mcp/protocol.rs](../src/mcp/protocol.rs) | JSON-RPC envelope errors differ from actionable domain/tool failures; no transport invents authorization. |
 | [src/mcp/transport.rs](../src/mcp/transport.rs) | MCP visibility and shared read-scope memoization, independent of internal planning tools. |
@@ -558,6 +553,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/apps/src/service/event_delivery.rs](../components/apps/src/service/event_delivery.rs) | Durable at-least-once app events: retry leases, stable idempotency keys and signed public HTTPS delivery on the existing outbox. |
 | [components/apps/src/service/external_orders/labels.sql](../components/apps/src/service/external_orders/labels.sql) | Bounded imported-order names: locale first, then child before parent. |
 | [components/apps/src/service/external_orders.rs](../components/apps/src/service/external_orders.rs) | Generic authorized external order intake reuses native stock, customer snapshots, documents, history and outbox. |
+| [components/apps/src/service/flow_apps.rs](../components/apps/src/service/flow_apps.rs) | App steps of flows use the same permission and schema gateway as HTTP and MCP: admission, installed-package checks, upgrade safety and argument binding. |
 | [components/apps/src/service/gateway.rs](../components/apps/src/service/gateway.rs) | One permission-aware action gateway serves HTTP, UI and MCP; service egress is operator configured. |
 | [components/apps/src/service/job_callbacks.rs](../components/apps/src/service/job_callbacks.rs) | Long-job service callbacks disclose input only after current actor consent, package and lease checks. Late callbacks cannot commit. |
 | [components/apps/src/service/job_evidence.rs](../components/apps/src/service/job_evidence.rs) | Native job completion and authenticated private record evidence share one transaction and current creator/package fences. |
@@ -924,6 +920,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/marketing/src/domain/configuration_kinds.rs](../components/marketing/src/domain/configuration_kinds.rs) | The kinds of marketing configuration: the right each needs and the table each lives in. |
 | [components/marketing/src/domain/flow_actions.rs](../components/marketing/src/domain/flow_actions.rs) | Native action schema and permissions use original Core names; no arbitrary SQL, shell or unguarded payment transitions. |
 | [components/marketing/src/domain/flow_projection.rs](../components/marketing/src/domain/flow_projection.rs) | What a flow sees of an outbox event: personal receipts and payment instructions removed, the order states and the event folded into one rule context. |
+| [components/marketing/src/domain/flow_steps.rs](../components/marketing/src/domain/flow_steps.rs) | The app steps of a flow: a simple app action and every app or mail node of its pipeline, seen as one app flow each. |
 | [components/marketing/src/domain/flow_text.rs](../components/marketing/src/domain/flow_text.rs) | Shop-language validation and main-language fallback for both simple flows and graphical action nodes. |
 | [components/marketing/src/domain/line_facts.rs](../components/marketing/src/domain/line_facts.rs) | Rule line facts use immutable priced lines plus current tenant product metadata; protected values override metadata. |
 | [components/marketing/src/domain/metadata.rs](../components/marketing/src/domain/metadata.rs) | Revision-bound source facts a rule may read on products, customers and orders; secrets and pricing authority are excluded. |
@@ -936,14 +933,18 @@ This lists every checked-in source module in these roots, including files with n
 | [components/marketing/src/domain/rules.rs](../components/marketing/src/domain/rules.rs) | Bounded Shopware-style boolean/numeric rule AST. Unknown operators/conditions fail closed. |
 | [components/marketing/src/domain.rs](../components/marketing/src/domain.rs) | Rule conditions, flow actions and the flow graph, free of I/O. |
 | [components/marketing/src/http/catalog.rs](../components/marketing/src/http/catalog.rs) | Native condition metadata, app action/event discovery and source-compatible condition import. |
+| [components/marketing/src/http/channel_preview.rs](../components/marketing/src/http/channel_preview.rs) | One-use preview handoff becomes a host-only cookie, bound to current session, membership and channel revision. |
 | [components/marketing/src/http/configuration.rs](../components/marketing/src/http/configuration.rs) | Revision-bound deletion and the dependency read of marketing configuration share HTTP/MCP authorization and tenant locks. |
 | [components/marketing/src/http/flow_jobs.rs](../components/marketing/src/http/flow_jobs.rs) | Flow execution summaries; the reader's scopes decide how much of each job it sees. |
 | [components/marketing/src/http/rules.rs](../components/marketing/src/http/rules.rs) | Rule comparison on frozen flow inputs and the revisioned rule facts of products, customers and orders. |
 | [components/marketing/src/http.rs](../components/marketing/src/http.rs) | HTTP handlers of the marketing component. |
 | [components/marketing/src/lib.rs](../components/marketing/src/lib.rs) | Marketing component: rule conditions, the facts they are matched against, and promotions. |
 | [components/marketing/src/ports.rs](../components/marketing/src/ports.rs) | What the flow runner needs from the server: the effect of one pipeline action node. |
+| [components/marketing/src/service/channel_access.rs](../components/marketing/src/service/channel_access.rs) | Single admission boundary for Store API, UCP/MCP and hosted storefronts; previews cannot purchase. |
+| [components/marketing/src/service/channel_preview.rs](../components/marketing/src/service/channel_preview.rs) | Merchant preview grants of paused or private channels: bound to the current session, membership, channel revision and host. |
 | [components/marketing/src/service/channels.rs](../components/marketing/src/service/channels.rs) | Sales channels share a shop but bind their own catalog visibility, languages and cart identity; storefront reads pass through them. |
 | [components/marketing/src/service/conditions.rs](../components/marketing/src/service/conditions.rs) | Shared rule admission and authoritative context for tax and other native consumers. |
+| [components/marketing/src/service/configuration_writes.rs](../components/marketing/src/service/configuration_writes.rs) | Typed configuration reads and revision-bound saves of rules, promotions, flows and channels; flow drafts validate without saving. |
 | [components/marketing/src/service/coupons.rs](../components/marketing/src/service/coupons.rs) | Revision-safe coupon selection for shared storefront/POS carts; pricing remains in promotions. |
 | [components/marketing/src/service/pipeline_runtime.rs](../components/marketing/src/service/pipeline_runtime.rs) | Durable sequence execution records each action before dispatch, persists delay cursors and reports uncertain effects. |
 | [components/marketing/src/service/rule_preview.rs](../components/marketing/src/service/rule_preview.rs) | Rule preview: a condition evaluated against the merchant's own priced cart with its rule facts; it changes nothing. |
@@ -1176,6 +1177,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/studio/src/http.rs](../components/studio/src/http.rs) | HTTP handlers of the studio component; the server registers them with their route rights. |
 | [components/studio/src/lib.rs](../components/studio/src/lib.rs) | Studio component: report periods and configuration. |
 | [components/studio/src/ports.rs](../components/studio/src/ports.rs) | What reviewed work and proposal approval need from the server: the native operation registry, the app gateway's managed saves and the catalogue state. |
+| [components/studio/src/service/flow_templates.rs](../components/studio/src/service/flow_templates.rs) | Flow work templates: bounded copies of reviewed native work whose event values replace explicit scalar fields, never executable text. |
 | [components/studio/src/service/grid_plan.rs](../components/studio/src/service/grid_plan.rs) | Read-only filter planning through the central provider and fleet leases; execution remains native list APIs. |
 | [components/studio/src/service/imports/assets.rs](../components/studio/src/service/imports/assets.rs) | Reviewed source image intake resolves its native product and delegates immutable binary storage and media edits to their existing owners. |
 | [components/studio/src/service/imports/categories.rs](../components/studio/src/service/imports/categories.rs) | Source-neutral category intake preserves stable hierarchy and uses the revisioned native category owner privately. |

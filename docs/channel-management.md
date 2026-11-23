@@ -48,9 +48,9 @@ Previews permit bounded cart simulations and catalog reads. They **cannot place 
 
 | Operation | Existing owner / new responsibility |
 |---|---|
-| Channel list/save/delete/dependencies | `src/marketing/routes.rs`, `lifecycle.rs`, `dependencies.rs` |
-| Shared request admission | `src/marketing/channel_access.rs`, called by `src/auth/middleware.rs` |
-| Session-bound handoff and revocation | `src/marketing/channel_preview.rs`; migration 053 and forced tenant RLS |
+| Channel list/save/delete/dependencies | `components/marketing/src/service/configuration_writes.rs`, `http/configuration.rs`, `store/dependencies.rs`; POS setup through the `ConfigurationHost` port |
+| Shared request admission | `components/marketing/src/service/channel_access.rs`, called by `src/auth/middleware.rs` |
+| Session-bound handoff and revocation | `components/marketing/src/http/channel_preview.rs` and `service/channel_preview.rs`; migration 053 and forced tenant RLS |
 | Catalog/cart/navigation/legal reads | Existing consumers use only the server-derived preview marker |
 | Frontend alias CRUD and revision checks | `src/shop_domains/frontend_bindings.rs`; existing `hosted_frontends` table |
 | Actual proxy and streamed responses | `src/shop_domains/frontends.rs`, `frontend_transport.rs` |

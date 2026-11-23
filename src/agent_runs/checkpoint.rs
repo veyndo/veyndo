@@ -1,14 +1,2 @@
-//! The run journal lives in the intelligence component; these entries lend it the server's agent port.
-use crate::agent_host::Host;
-use crate::*;
-use veyndo_intelligence::service::run_journal as journal;
+//! The run journal lives in the intelligence component; the server reuses its commit fence.
 pub(crate) use veyndo_intelligence::service::run_journal::fence_commit;
-pub(crate) async fn persist(
-    a: &App,
-    t: &str,
-    id: &str,
-    evidence: &Value,
-    h: &RequestContext,
-) -> Result<()> {
-    journal::persist(&Host(a), t, id, evidence, h).await
-}

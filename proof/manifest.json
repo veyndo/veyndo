@@ -161,7 +161,7 @@
     },
     "app_flow_admissible": {
       "bindings": [
-        "src/marketing/app_flows.rs"
+        "components/apps/src/service/flow_apps.rs"
       ],
       "theorems": [
         "app_flow_exact",
@@ -342,7 +342,7 @@
     },
     "channel_access_admissible": {
       "bindings": [
-        "src/marketing/channel_access.rs"
+        "components/marketing/src/service/channel_access.rs"
       ],
       "theorems": [
         "channel_private_requires_identity",
@@ -1101,6 +1101,11 @@
       "sha256": "ca1a3e7c37313d8090f7d77279ba07d7a0255480da38bc5a6fe1861318ef5854",
       "review": "Order transitions, external order intake and saved agent authority moved into the orders, apps and identity components"
     },
+    "components/apps/src/service/flow_apps.rs": {
+      "status": "reviewed-binding",
+      "sha256": "17e29d1fbd7e638463a11feeec64b58962fe21ca9c1a605a9fe6ddd060cb4e57",
+      "review": "F7: marketing configuration, channel admission and flow templates move into components"
+    },
     "components/apps/src/service/gateway.rs": {
       "status": "unproved",
       "sha256": "60f4102374725df6854935a8040a05bbec162d57302f5f1bed1aed0850b01954",
@@ -1158,8 +1163,8 @@
     },
     "components/apps/src/service.rs": {
       "status": "unproved",
-      "sha256": "7f487b8b2175f83c05cec2a6a13abc2c02eb6ff10315bbd439f50266b48c13eb",
-      "review": "Batch B: commerce hooks, cart contributions and app source ingestion move into apps"
+      "sha256": "7fdbdbf7187fb0c42ea9268f113ee1de296c97c4e9e7e0180ae95947e4eb2015",
+      "review": "F7: marketing configuration, channel admission and flow templates move into components"
     },
     "components/apps/src/store/action_log.rs": {
       "status": "unproved",
@@ -2033,8 +2038,8 @@
     },
     "components/core/src/host_names.rs": {
       "status": "unproved",
-      "sha256": "38fa975c5405d8553c354857224da81c2aff5e8445d3df889e58b66a5c95c2be",
-      "review": "Sessions, invitations, MFA, integration keys and broker assertions moved into the identity component without behaviour change"
+      "sha256": "9eaee3c98dfabb7b41b9fb2be601b0141ea83ac65592242d4307bc821c80a71b",
+      "review": "F7: marketing configuration, channel admission and flow templates move into components"
     },
     "components/core/src/http_limits.rs": {
       "status": "unproved",
@@ -2851,6 +2856,11 @@
       "sha256": "efbc1603f0ac178f880f2b4be37fc3115ca8b98b9147301d1e09c4c3f2e0ab9a",
       "review": "Outbox flow projection moved into the marketing component; behaviour unchanged"
     },
+    "components/marketing/src/domain/flow_steps.rs": {
+      "status": "unproved",
+      "sha256": "fb14da32b6097deff2a1a71423d124af37bc1280305538efbabddd62f4ceee82",
+      "review": "F7: marketing configuration, channel admission and flow templates move into components"
+    },
     "components/marketing/src/domain/flow_text.rs": {
       "status": "unproved",
       "sha256": "c46b7ec0ad19be74eaba131bac820eff8fe9cb6a2afacc0d25f066567bdb7f50",
@@ -2903,13 +2913,18 @@
     },
     "components/marketing/src/domain.rs": {
       "status": "unproved",
-      "sha256": "6c5f023dfed4ff192d1307308d4527b9252856539233c34f4ce597138fc78820",
-      "review": "Request language selection moved into the shop component and sales channel admission into the marketing component; behaviour unchanged"
+      "sha256": "5cf4253f03ddb480a28546415caa91394b3c6795c28a88ec305b5f2bee294b68",
+      "review": "F7: marketing configuration, channel admission and flow templates move into components"
     },
     "components/marketing/src/http/catalog.rs": {
       "status": "unproved",
       "sha256": "3fe737cf2481ced5cdf552a7c949ed950c29bd597e231e345bd03166db2063e4",
       "review": "Automation catalogue, rule preview, flow job list and the pipeline runner move into marketing"
+    },
+    "components/marketing/src/http/channel_preview.rs": {
+      "status": "unproved",
+      "sha256": "6919cd9271776f53f86fb3f9b3d602bdf64bc00669515d34f718f00b6ca312c6",
+      "review": "F7: marketing configuration, channel admission and flow templates move into components"
     },
     "components/marketing/src/http/configuration.rs": {
       "status": "unproved",
@@ -2928,8 +2943,8 @@
     },
     "components/marketing/src/http.rs": {
       "status": "unproved",
-      "sha256": "aface124d671048b883308ffbde76d95b21e1b7212e3fb2a0788623c4559625b",
-      "review": "Automation catalogue, rule preview, flow job list and the pipeline runner move into marketing"
+      "sha256": "4100fd6488a410decaa7fd1c89128664a09436ac790ef0a518094bbfada607bf",
+      "review": "F7: marketing configuration, channel admission and flow templates move into components"
     },
     "components/marketing/src/lib.rs": {
       "status": "unproved",
@@ -2938,8 +2953,18 @@
     },
     "components/marketing/src/ports.rs": {
       "status": "unproved",
-      "sha256": "84a3885d0fa500598730e12ecde2aa745b9f3038f4da1318e6d6eef9a8fb5a79",
-      "review": "Automation catalogue, rule preview, flow job list and the pipeline runner move into marketing"
+      "sha256": "876a39d0de4b431844502968d3f388b2782ee83d66e2307ee2a4e53c5681d90d",
+      "review": "F7: marketing configuration, channel admission and flow templates move into components"
+    },
+    "components/marketing/src/service/channel_access.rs": {
+      "status": "reviewed-binding",
+      "sha256": "32557898f6ce9fdf8bb1f35959f7d650e843e93c339350a12387dea03f81f805",
+      "review": "F7: marketing configuration, channel admission and flow templates move into components"
+    },
+    "components/marketing/src/service/channel_preview.rs": {
+      "status": "unproved",
+      "sha256": "159dde8de722fad2e9634215a760c02504752bf7971d9c8f091005a458dc5ac4",
+      "review": "F7: marketing configuration, channel admission and flow templates move into components"
     },
     "components/marketing/src/service/channels.rs": {
       "status": "unproved",
@@ -2950,6 +2975,11 @@
       "status": "unproved",
       "sha256": "8bbd97c5e186d2cdd06e32df3aa2380cdb69b272d4a7bda6c97892793b33acaf",
       "review": "cart types and rule engine moved into components; checking bindings"
+    },
+    "components/marketing/src/service/configuration_writes.rs": {
+      "status": "unproved",
+      "sha256": "0182e95548575c67d3860610736dac2b09a602cf93ace10466d8ab4721ce2513",
+      "review": "F7: marketing configuration, channel admission and flow templates move into components"
     },
     "components/marketing/src/service/coupons.rs": {
       "status": "unproved",
@@ -2968,8 +2998,8 @@
     },
     "components/marketing/src/service.rs": {
       "status": "unproved",
-      "sha256": "a6f568f8d5fdce2847afc5620f9ca3a021f7fc3772c1a7dab2c51fd555ebd97e",
-      "review": "Automation catalogue, rule preview, flow job list and the pipeline runner move into marketing"
+      "sha256": "e213bbc42e5c20b729231b7fabbfe0870996198c581758f315d91b77a9de5df7",
+      "review": "F7: marketing configuration, channel admission and flow templates move into components"
     },
     "components/marketing/src/store/channel_config.rs": {
       "status": "unproved",
@@ -4106,6 +4136,11 @@
       "sha256": "e199205ad5068d21e5daba641548b4fbe7c1662ed7cd624381994b44f0140372",
       "review": "Batch F4: source-record imports moved into studio behind the ImportHost port"
     },
+    "components/studio/src/service/flow_templates.rs": {
+      "status": "unproved",
+      "sha256": "b6e5ad255eb63aa29153fb284f270ede7a51d8adecca0214ec933e55e3e34c7f",
+      "review": "F7: marketing configuration, channel admission and flow templates move into components"
+    },
     "components/studio/src/service/grid_plan.rs": {
       "status": "unproved",
       "sha256": "b15865176f6ee4aa5922e3b8037a20a9341af2dfa639a8ac0a2d6a830d8078c5",
@@ -4233,8 +4268,8 @@
     },
     "components/studio/src/service.rs": {
       "status": "unproved",
-      "sha256": "e97c52abc03514e4bf0d2eb361156402a09bd1d6d03ae6c8dd612513a790304b",
-      "review": "Batch F4: source-record imports moved into studio behind the ImportHost port"
+      "sha256": "cc7704ee0ea4496e5ff90b2411deaee4b31368d10022e464e054492f2f43798a",
+      "review": "F7: marketing configuration, channel admission and flow templates move into components"
     },
     "components/studio/src/store/history.rs": {
       "status": "unproved",
@@ -6103,8 +6138,8 @@
     },
     "src/agent_runs/checkpoint.rs": {
       "status": "unproved",
-      "sha256": "205137fcb04ded6a404ac267a95d3b18790b40c5c1f42b6440b87a46a5a9898b",
-      "review": "Batch F1: proposals, list views, reviewed work, its execution and proposal application moved into studio behind the WorkHost port"
+      "sha256": "c49c615e7237e24131e19eea8b0cd940254b1c17ea9fba17e1c5fc876bbdf2b8",
+      "review": "F7: marketing configuration, channel admission and flow templates move into components"
     },
     "src/agent_runs/contract.rs": {
       "status": "unproved",
@@ -6138,8 +6173,8 @@
     },
     "src/agent_runs/work_plan.rs": {
       "status": "unproved",
-      "sha256": "9f84915b6e946615d906677a7ad968f2cc4f6c0b5a31e292de56821f2160b556",
-      "review": "Batch F1: proposals, list views, reviewed work, its execution and proposal application moved into studio behind the WorkHost port"
+      "sha256": "99c051d53ef7b6aa160adf2cf9958f11342dc4253f8fe824dd25ead8bfc420cf",
+      "review": "F7: marketing configuration, channel admission and flow templates move into components"
     },
     "src/agent_runs/worker.rs": {
       "status": "unproved",
@@ -6198,8 +6233,8 @@
     },
     "src/apps/core_extensions.rs": {
       "status": "unproved",
-      "sha256": "e4f2e62c6fa80144985d7f63d01364421016cb2a33d97117d4b51ab2f9708fa9",
-      "review": "Batch F2: sandbox clone, snapshot, diff and release moved into studio behind the ReleaseHost port"
+      "sha256": "742bd7c707e994524d8c6dca99d5e47917841d99655f873d5d8cd1bc6297428b",
+      "review": "F7: marketing configuration, channel admission and flow templates move into components"
     },
     "src/apps/credentials.rs": {
       "status": "unproved",
@@ -6248,8 +6283,8 @@
     },
     "src/apps/gateway.rs": {
       "status": "unproved",
-      "sha256": "0ddd3f1aabb6201635e00391398c99a11da360700c54f72b75d72464418ceed4",
-      "review": "Batch F2: sandbox clone, snapshot, diff and release moved into studio behind the ReleaseHost port"
+      "sha256": "1d168a23a5d09e0fe57751c95e09929062d9000dc87e823af29ab08a280591aa",
+      "review": "F7: marketing configuration, channel admission and flow templates move into components"
     },
     "src/apps/hosted.rs": {
       "status": "unproved",
@@ -6278,8 +6313,8 @@
     },
     "src/apps/manifest.rs": {
       "status": "unproved",
-      "sha256": "d4721fc23e232b7158e6304ce02e79746279aacd4a12a6a98d45dc9350744c0e",
-      "review": "Batch F3: bundled app contract tests, the app view read and the catalogue evidence callback moved into the apps component"
+      "sha256": "5427878ae763cf75b52b5055bca7793150b2443347867896473db209a2420f02",
+      "review": "F7: marketing configuration, channel admission and flow templates move into components"
     },
     "src/apps/manifest_validation.rs": {
       "status": "unproved",
@@ -6293,8 +6328,8 @@
     },
     "src/apps/mod.rs": {
       "status": "unproved",
-      "sha256": "5488b8071bfe6526a96c4abaca977849347b4419106cc6016f29f49bc34d2f26",
-      "review": "Batch F3: bundled app contract tests, the app view read and the catalogue evidence callback moved into the apps component"
+      "sha256": "48e42ddcca300ab46aa02afd62c459a9c3bdb8a8e4ed6f35b1024d037816cef2",
+      "review": "F7: marketing configuration, channel admission and flow templates move into components"
     },
     "src/apps/model_contract.rs": {
       "status": "unproved",
@@ -7323,13 +7358,13 @@
     },
     "src/main.rs": {
       "status": "unproved",
-      "sha256": "b4b634a65c9a05545934ae2b500c33affbc03ea395958ffff3f3cf65b655bfba",
-      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
+      "sha256": "ad6f66f3fb653cbc13f2d9f38e95a8dce8601c509499e2eeda1e327492f0ade6",
+      "review": "F7: marketing configuration, channel admission and flow templates move into components"
     },
     "src/marketing/app_flows.rs": {
-      "status": "reviewed-binding",
-      "sha256": "96220ea857f88420e133670ebf74430e82b9c81326f29b0b934c24d01637dcb7",
-      "review": "Reviewed invoice recipient caching and immutable native documents; explicit app/PII event consent and current Flow rehydration; existing encrypted email queue and localized templates. Targeted native service and adversarial projection tests; no new formal proof claim."
+      "status": "unproved",
+      "sha256": "57570f98a41c20f958bc2c9106e8a4c52c15a42ea19ff0fb286aaf14340c8dae",
+      "review": "F7: marketing configuration, channel admission and flow templates move into components"
     },
     "src/marketing/catalog.rs": {
       "status": "unproved",
@@ -7337,19 +7372,14 @@
       "review": "Automation catalogue, rule preview, flow job list and the pipeline runner move into marketing"
     },
     "src/marketing/channel_access.rs": {
-      "status": "reviewed-binding",
-      "sha256": "b0cba5158c6f2dce5d9fa21b799a87a829b6c13d24637cca7e38e929bbd34e94",
-      "review": "Request context, principal, POS admission, host shop and the access snapshot data types moved unchanged into components/core; loading the snapshot and matching it to a request stay in the server as free functions with the same queries. Core unit tests (identity headers cannot be forged) pass. SQL, HTTP and provider behaviour is not formally proved."
-    },
-    "src/marketing/channel_config.rs": {
       "status": "unproved",
-      "sha256": "2a99fb925b57be883cc8814b0e7f061cde57283f560518b13a70f09b340de930",
-      "review": "Flow pipeline and promotion types moved into components/marketing; kernel call sites unchanged"
+      "sha256": "6231bbe73df5a5001f46e0346fc46e680a8c8444b30c9b2b3243571d8f7c5028",
+      "review": "F7: marketing configuration, channel admission and flow templates move into components"
     },
     "src/marketing/channel_preview.rs": {
       "status": "unproved",
-      "sha256": "72f56d3010781f3a589218a9219e31757f453f3d74b4108d94bbce2878eae8de",
-      "review": "Separate signed role-bound SQL authority preserves old row/domain policies; bound short-lived tickets, personal actor fences, guarded native app DDL, fixed snapshot ordering and narrow language registry. Reviewed additive 099 and runtime pools; actual login attacks, two replicas, restart, app release and real PgBouncer/key rotation pass. SQL/HMAC/transport remain tested adapters outside pure Lean proofs."
+      "sha256": "e4dc5f2cda341e6d0c8cec6daef24df6ad1be224d131056f35d12bcaad748323",
+      "review": "F7: marketing configuration, channel admission and flow templates move into components"
     },
     "src/marketing/channels.rs": {
       "status": "unproved",
@@ -7360,6 +7390,11 @@
       "status": "unproved",
       "sha256": "e7520f64460ff889f7886b345fe614bf8b3a3c79989c21fa9487751ef4c566b8",
       "review": "cart types and rule engine moved into components; checking bindings"
+    },
+    "src/marketing/configuration_host.rs": {
+      "status": "unproved",
+      "sha256": "ce92c51805a8bbbf33166caa946b6d3efed97bb29f113c1c25d9f71653b5b6e3",
+      "review": "F7: marketing configuration, channel admission and flow templates move into components"
     },
     "src/marketing/coupons.rs": {
       "status": "unproved",
@@ -7388,8 +7423,8 @@
     },
     "src/marketing/flow_policy.rs": {
       "status": "unproved",
-      "sha256": "58cdd5c6263b2f0e7ebaf4a81d66ab6a7f37e6dc30d65bd5d9c76b397df95f1c",
-      "review": "Separate Flow validation HTTP and MCP entry points are read-only, use the same tenant action and revision checks and cannot call save on older hosts. Legacy validation-only clients continue to get a read-only check on the new host. Signed PostgreSQL regression verifies denied access, invalid graphs and no Flow writes."
+      "sha256": "e868c3a7360de846ca4cbc75df490fe244d9ee786ed92714d4ee35f4133c3af2",
+      "review": "F7: marketing configuration, channel admission and flow templates move into components"
     },
     "src/marketing/flow_text.rs": {
       "status": "unproved",
@@ -7398,8 +7433,8 @@
     },
     "src/marketing/flows.rs": {
       "status": "unproved",
-      "sha256": "47e2f01041ec1d206813795fca9ee39e265d3ed699b7c56d2917bed61debfa06",
-      "review": "Outbox flow projection moved into the marketing component; behaviour unchanged"
+      "sha256": "7efd934cf7b73f19a9e7ea7a61fc6a98ea77fc07f546ecf521708918185e7b4b",
+      "review": "F7: marketing configuration, channel admission and flow templates move into components"
     },
     "src/marketing/gateway.rs": {
       "status": "unproved",
@@ -7408,13 +7443,13 @@
     },
     "src/marketing/jobs.rs": {
       "status": "unproved",
-      "sha256": "613c2dc3c0dbc920a2a33aab9dc9b419fd98006f75b47c641efb9887b95cd819",
-      "review": "Automation catalogue, rule preview, flow job list and the pipeline runner move into marketing"
+      "sha256": "1bb1258e2d737d161e1c6091ae39ae42fc9e1f9cd739417e6dd7bd00e94870d4",
+      "review": "F7: marketing configuration, channel admission and flow templates move into components"
     },
     "src/marketing/lifecycle.rs": {
       "status": "unproved",
-      "sha256": "8f29576366799c1b2affd4ac1370b5842df41bbb1c7195ae015edb922879dfa2",
-      "review": "Marketing configuration lifecycle (tenant lock, revision, revision-bound deletion, dependency read, rule reference admission) moved verbatim into the marketing component; route registration stays in the server."
+      "sha256": "92ea1e270e3e69ebc0429fa0a2c9f4fde8802953756bfd0b567824105cbb35c8",
+      "review": "F7: marketing configuration, channel admission and flow templates move into components"
     },
     "src/marketing/metadata.rs": {
       "status": "unproved",
@@ -7423,13 +7458,8 @@
     },
     "src/marketing/mod.rs": {
       "status": "unproved",
-      "sha256": "2da014d6bd7cf97c5a87f3bdc1c29623cfafbd3881345df307381a50da93f1f7",
-      "review": "Batch F2: sandbox clone, snapshot, diff and release moved into studio behind the ReleaseHost port"
-    },
-    "src/marketing/pipeline.rs": {
-      "status": "unproved",
-      "sha256": "8a11dc356e31110aeb27ddf1b1e95b6302f243dc716539c7e341f395467d9f1e",
-      "review": "Flow pipeline and promotion types moved into components/marketing; kernel call sites unchanged"
+      "sha256": "61df6057c6cfb164c2fedac31aac4ff663c7d1e93613ee4c3033dc327119cd9c",
+      "review": "F7: marketing configuration, channel admission and flow templates move into components"
     },
     "src/marketing/pipeline_runtime.rs": {
       "status": "unproved",
@@ -7438,38 +7468,18 @@
     },
     "src/marketing/promotion_import.rs": {
       "status": "unproved",
-      "sha256": "8f873ca66b8fbb6e52305d3dd577f2191b0b61843d9fb10fb3ff1dadf72e463d",
-      "review": "Batch F5: inference component for crates/cognition, crate-cycle gate, core paths for history attribution and environment parent"
-    },
-    "src/marketing/promotions.rs": {
-      "status": "unproved",
-      "sha256": "281f9f493ca53da1ac23aae2c55f25093c9def09ad6f8c12adb6735ae4f64e3a",
-      "review": "The purchase transaction moves into checkout behind the purchase port"
+      "sha256": "ec35544d472fc044c40f38886d32821584810bf04619878b201d1f27c42e08c2",
+      "review": "F7: marketing configuration, channel admission and flow templates move into components"
     },
     "src/marketing/routes.rs": {
       "status": "unproved",
-      "sha256": "832bc57bc3e71cc42a0811fe4a3b1b680c72b6ce4ad56188379b5ac5b07a7a0d",
-      "review": "Batch F5: inference component for crates/cognition, crate-cycle gate, core paths for history attribution and environment parent"
+      "sha256": "23d4fd212b86b7bdcd50dcf6bbb32cdb71cc17e1cc0bb9e9dcb57b1b6de0aa51",
+      "review": "F7: marketing configuration, channel admission and flow templates move into components"
     },
     "src/marketing/rule_history.rs": {
       "status": "unproved",
       "sha256": "d690292cbe373dc9a61fd65f38496c25e11a8103bb24acda58dfd1b07d5e2fbe",
       "review": "Rate refresh, company onboarding, POS channel setup, rule comparison and facts and source lifecycle handlers moved into their components; behaviour unchanged"
-    },
-    "src/marketing/rules.rs": {
-      "status": "unproved",
-      "sha256": "9076052e9c6c5e9d687ba4327970df1939dd386d5de252cec1c729d8efd6a3dc",
-      "review": "cart types and rule engine moved into components; checking bindings"
-    },
-    "src/marketing/work_template.rs": {
-      "status": "unproved",
-      "sha256": "e83757234e78a8467945c941793ae778f476cba6a505ed1acf71e4a6c1e4ca17",
-      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
-    },
-    "src/marketing/work_template_source.rs": {
-      "status": "unproved",
-      "sha256": "f89b5bf1fc2a4cda6b60d2b8bc67db04f738997faa051f537e71d4e79ee393b7",
-      "review": "Reviewed task-reference-only Flow templates, same actor and original scope checks at native save and runtime, scalar event mapping, no copied credentials or source inputs, shared stop/lease and transactional daily limits; actual private event-to-approval write, denial and zero-inference regressions plus UI scope cleanup pass. Async SQL remains outside formal proof."
     },
     "src/mcp/poppy.rs": {
       "status": "unproved",
@@ -7948,8 +7958,8 @@
     },
     "src/shop_domains/frontends.rs": {
       "status": "unproved",
-      "sha256": "eefc198a675d9b3a78f916cb394bd62ec830cc6c1b294c40f0dc0c9f925309cb",
-      "review": "Hosted frontend transport moves into shop"
+      "sha256": "5832fcf2b483168533fe4cc4a2cc3aa0b42cac65263af12dcd51119d00bd9615",
+      "review": "F7: marketing configuration, channel admission and flow templates move into components"
     },
     "src/shop_domains.rs": {
       "status": "unproved",
@@ -7963,8 +7973,8 @@
     },
     "src/staging/release_host.rs": {
       "status": "unproved",
-      "sha256": "0d50a8af0c90b406e4e73ac254409d88fed4480d31a637e53fdaf8ca00bf4a5e",
-      "review": "Batch F2: sandbox clone, snapshot, diff and release moved into studio behind the ReleaseHost port"
+      "sha256": "15a1e7575b267f67a417f1d7b849214ec13be9ec6a746f1def1dd50c28472b18",
+      "review": "F7: marketing configuration, channel admission and flow templates move into components"
     },
     "src/storefront_pages.rs": {
       "status": "unproved",
@@ -8088,8 +8098,8 @@
       "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
     },
     "Cargo.lock": {
-      "sha256": "963da74d91ce32494088079e97a4dc049ab61de56c25bbc03489b8543b2256cb",
-      "review": "Batch F6: consent, legal acknowledgement and requests, behavior capture, preferences and the storefront experience moved into intelligence"
+      "sha256": "0b0552e60a0e43d598fb8ce5860c80c9be32bfc3e8e085e7bd02a1cb929ec9ee",
+      "review": "F7: marketing configuration, channel admission and flow templates move into components"
     },
     "Cargo.toml": {
       "sha256": "12d2d79a98f6913d20b8e912afb9ea8de0539b9e83428de8a9d7412c406896f6",

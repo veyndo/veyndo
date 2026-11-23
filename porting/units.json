@@ -305,7 +305,7 @@
       ],
       "implementation": [
         "crates/automation/src/rule_comparison.rs",
-        "src/marketing/rules.rs"
+        "components/marketing/src/domain/rules.rs"
       ],
       "gates": [
         [

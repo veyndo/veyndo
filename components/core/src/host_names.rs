@@ -62,9 +62,40 @@ pub fn links(shop: &str) -> serde_json::Value {
     serde_json::json!({"storefrontUrl":storefront,"studioUrl":format!("{}/?shop={shop}#merchant",origin.trim_end_matches('/'))})
 }
 
+/// Paths a hosted frontend may serve: never Core APIs, Store API, UCP, MCP, health or internal services.
+pub fn public_path(path: &str) -> bool {
+    if path.starts_with("/channel-preview/")
+        || path.starts_with("/api/") && !public_api_path(path)
+        || path.starts_with("/store-api/")
+        || path.starts_with("/ucp/")
+        || path == "/mcp"
+        || path == "/health"
+        || path.starts_with("/.well-known/")
+    {
+        return false;
+    }
+    if path.starts_with("/experience-api/") {
+        return path == "/experience-api/context" || path.starts_with("/experience-api/shops/");
+    }
+    !path.starts_with("/experience-internal/")
+}
+/// Reserved public frontend API namespace; never admits encoded or ambiguous paths.
+pub fn public_api_path(path: &str) -> bool {
+    path.strip_prefix("/api/v1/").is_some_and(|suffix| {
+        !suffix.is_empty()
+            && suffix.split('/').all(|part| {
+                !part.is_empty()
+                    && part != "."
+                    && part != ".."
+                    && part
+                        .bytes()
+                        .all(|b| b.is_ascii_alphanumeric() || b"-_.".contains(&b))
+            })
+    })
+}
 #[cfg(test)]
 mod tests {
-    use super::{configured_alias, same_origin_family};
+    use super::{configured_alias, public_path, same_origin_family};
     #[test]
     fn aliases_keep_exact_suffix_boundaries_and_existing_prefix_validation() {
         for host in ["shop.veyndo.ai", "shop.previous.test"] {
@@ -110,6 +141,21 @@ mod tests {
                 allowed,
                 "{value}"
             );
+        }
+    }
+    #[test]
+    fn hosted_frontends_never_serve_core_paths() {
+        for p in [
+            "/store-api/product",
+            "/ucp/v1",
+            "/mcp",
+            "/api/v1/../x",
+            "/experience-internal/a",
+        ] {
+            assert!(!public_path(p), "{p}");
+        }
+        for p in ["/", "/api/v1/products/p-1", "/experience-api/shops/demo"] {
+            assert!(public_path(p), "{p}");
         }
     }
 }

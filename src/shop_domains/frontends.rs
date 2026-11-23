@@ -25,36 +25,7 @@ pub(super) fn valid_origin(s: &str) -> bool {
                 || u.scheme() == "http" && matches!(u.host_str(), Some("127.0.0.1" | "localhost")))
     })
 }
-pub(crate) fn public_path(path: &str) -> bool {
-    if path.starts_with("/channel-preview/")
-        || path.starts_with("/api/") && !public_api_path(path)
-        || path.starts_with("/store-api/")
-        || path.starts_with("/ucp/")
-        || path == "/mcp"
-        || path == "/health"
-        || path.starts_with("/.well-known/")
-    {
-        return false;
-    }
-    if path.starts_with("/experience-api/") {
-        return path == "/experience-api/context" || path.starts_with("/experience-api/shops/");
-    }
-    !path.starts_with("/experience-internal/")
-}
-/// Reserved public frontend API namespace; never admits encoded or ambiguous paths.
-pub(crate) fn public_api_path(path: &str) -> bool {
-    path.strip_prefix("/api/v1/").is_some_and(|suffix| {
-        !suffix.is_empty()
-            && suffix.split('/').all(|part| {
-                !part.is_empty()
-                    && part != "."
-                    && part != ".."
-                    && part
-                        .bytes()
-                        .all(|b| b.is_ascii_alphanumeric() || b"-_.".contains(&b))
-            })
-    })
-}
+pub(crate) use veyndo_core::host_names::{public_api_path, public_path};
 /// Only an operator-bound hostname may delegate an otherwise unregistered route.
 /// Registered Core routes always keep their own permission and handler.
 pub(crate) fn delegated_api(request: &Request) -> bool {

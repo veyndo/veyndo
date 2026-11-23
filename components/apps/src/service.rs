@@ -12,6 +12,7 @@ pub mod discovery;
 pub mod egress;
 pub mod event_delivery;
 pub mod external_orders;
+pub mod flow_apps;
 pub mod gateway;
 pub mod job_callbacks;
 pub mod job_evidence;

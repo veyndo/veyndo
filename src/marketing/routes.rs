@@ -1,4 +1,4 @@
-//! Typed configuration CRUD, rule preview and revision-bound coupon edits.
+//! Routes of typed configuration CRUD, rule preview and coupon edits; the marketing component owns their rules.
 use super::*;
 pub(crate) fn router() -> Router<App> {
     Router::new()
@@ -38,48 +38,10 @@ pub(crate) fn router() -> Router<App> {
             post(rule_history::compare),
         )
 }
-pub(crate) use veyndo_marketing::domain::configuration_kinds::configuration_right;
-pub(super) use veyndo_marketing::domain::configuration_kinds::table;
 pub(super) async fn list(State(a): State<App>, h: RequestContext) -> Result<Json<Value>> {
-    let t = merchant(&a, &h)?;
-    if !["automation.read", "channels.read"]
-        .iter()
-        .any(|s| auth::allowed(&h, s))
-    {
-        auth::permit(&h, "automation.read")?;
-    }
-    let mut result = json!({});
-    for kind in ["rules", "promotions", "flows", "channels"] {
-        if !auth::allowed(&h, configuration_right(kind, false)?) {
-            result[kind] = json!([]);
-            continue;
-        }
-        let table = table(kind)?;
-        let sql = if kind == "rules" {
-            format!(
-                "SELECT id,jsonb_build_object('name',name,'condition',condition,'active',active) AS data,revision FROM {table} WHERE tenant=$1 ORDER BY id LIMIT 100"
-            )
-        } else {
-            format!("SELECT id,data,revision FROM {table} WHERE tenant=$1 ORDER BY id LIMIT 100")
-        };
-        let rows = sqlx::query(sqlx::AssertSqlSafe(sql.as_str()))
-            .bind(&t)
-            .fetch_all(&a.db)
-            .await?;
-        result[kind]=json!(rows.iter().map(|r|json!({"id":r.get::<String,_>("id"),"data":r.get::<Value,_>("data"),"revision":r.get::<i64,_>("revision")})).collect::<Vec<_>>());
-    }
-    let settings = commerce::config(&a, &t).await?.0;
-    if let Some(channels) = result["channels"].as_array_mut() {
-        for channel in channels.iter_mut().filter(|c| c["id"] == "default") {
-            channel["data"]["locales"] = json!(settings.locales);
-        }
-    }
-    result["jobs"] = if auth::allowed(&h, "automation.read") {
-        jobs::values(&a, &t, &h).await?
-    } else {
-        json!([])
-    };
-    Ok(Json(result))
+    veyndo_marketing::service::configuration_writes::list(&a.core, &h)
+        .await
+        .map(Json)
 }
 pub(crate) async fn save(
     State(a): State<App>,
@@ -87,142 +49,14 @@ pub(crate) async fn save(
     Path((kind, id)): Path<(String, String)>,
     Json(v): Json<Value>,
 ) -> Result<Json<Value>> {
-    auth::permit(&h, configuration_right(&kind, true)?)?;
-    let t = merchant(&a, &h)?;
-    if !apps::identifier(&id) {
-        return Err(bad("Invalid configuration ID"));
-    }
-    let table = table(&kind)?;
-    let mut data = v["data"].clone();
-    let expected = v["revision"].as_i64().ok_or(bad("Revision required"))?;
-    let validate_only = v
-        .get("validateOnly")
-        .map(|flag| flag.as_bool().ok_or(bad("validateOnly must be a boolean")))
-        .transpose()?
-        .unwrap_or(false);
-    if kind == "flows" {
-        flow_policy::bind_actor(&h, &mut data)?;
-        if validate_only {
-            return flow_policy::preflight(&a, &t, &h, &id, expected, &data)
-                .await
-                .map(Json);
-        }
-    } else if validate_only {
-        return Err(bad("Draft validation is available for flows"));
-    }
-    let (settings, _) = commerce::config(&a, &t).await?;
-    match kind.as_str() {
-        "rules" => {
-            let c: rules::Condition = serde_json::from_value(data["condition"].clone())
-                .map_err(|_| bad("Unsupported rule condition"))?;
-            c.validate(0)?;
-            if !data["active"].is_boolean() {
-                return Err(bad("Rule active flag required"));
-            }
-        }
-        "promotions" => {
-            let p: Promotion = serde_json::from_value(data.clone())
-                .map_err(|_| bad("Invalid promotion schema"))?;
-            validate_promotion(&p)?;
-            for date in [&p.start, &p.end] {
-                if let Some(date) = date
-                    && !sqlx::query_scalar::<_, bool>("SELECT $1::timestamptz IS NOT NULL")
-                        .bind(date)
-                        .fetch_one(&a.db)
-                        .await
-                        .unwrap_or(false)
-                {
-                    return Err(bad("Invalid campaign timestamp"));
-                }
-            }
-            if p.start.is_some()
-                && p.end.is_some()
-                && !sqlx::query_scalar::<_, bool>("SELECT $1::timestamptz <= $2::timestamptz")
-                    .bind(&p.start)
-                    .bind(&p.end)
-                    .fetch_one(&a.db)
-                    .await?
-            {
-                return Err(bad("Campaign end precedes start"));
-            }
-        }
-        "flows" => {}
-        "channels" => {
-            normalize_channel(&mut data, &id, &settings);
-        }
-        _ => unreachable!(),
-    }
-    let name = &data["name"];
-    commerce::validate_names(name, &settings, 100)?;
-    let mut tx = a.db.begin().await?;
-    // Match selective release: automation admission precedes settings and app locks.
-    lifecycle::lock(&mut tx, &t).await?;
-    if kind == "channels" {
-        sqlx::query("SELECT revision FROM commerce_settings WHERE tenant=$1 FOR UPDATE")
-            .bind(&t)
-            .fetch_one(&mut *tx)
-            .await?;
-        let settings = commerce::decode_config(
-            sqlx::query_scalar("SELECT data FROM commerce_settings WHERE tenant=$1")
-                .bind(&t)
-                .fetch_one(&mut *tx)
-                .await?,
-        )?;
-        validate_channel_config(&mut tx, &t, &id, &data, &settings).await?;
-    }
-    if kind == "flows" {
-        validate_flow_config(&mut tx, &t, &h, &data).await?;
-    }
-    veyndo_core::history_context::context(&mut tx, &h, "merchant").await?;
-    lifecycle::validate_references(&mut tx, &t, &kind, &id, &data).await?;
-    let sql = format!("SELECT revision FROM {table} WHERE tenant=$1 AND id=$2 FOR UPDATE");
-    sqlx::query("SELECT pg_advisory_xact_lock(hashtextextended($1,17))")
-        .bind(format!("{t}:{table}:{id}"))
-        .execute(&mut *tx)
-        .await?;
-    let rev: Option<i64> = sqlx::query_scalar(sqlx::AssertSqlSafe(sql.as_str()))
-        .bind(&t)
-        .bind(&id)
-        .fetch_optional(&mut *tx)
-        .await?;
-    if rev.unwrap_or(0) != expected {
-        return Err(conflict("Configuration revision changed"));
-    }
-    if kind == "promotions" {
-        let old: Option<Value> =
-            sqlx::query_scalar("SELECT data FROM commerce_promotions WHERE tenant=$1 AND id=$2")
-                .bind(&t)
-                .bind(&id)
-                .fetch_optional(&mut *tx)
-                .await?;
-        preserve_import(&old.unwrap_or(Value::Null), &data)?;
-        if !data["sourceImport"].is_null() {
-            let duplicate:bool=sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM commerce_promotions WHERE tenant=$1 AND id<>$2 AND data->>'code'=$3)").bind(&t).bind(&id).bind(data["code"].as_str()).fetch_one(&mut *tx).await?;
-            if duplicate {
-                return Err(conflict(
-                    "Coupon code already belongs to another native promotion; review the mapping",
-                ));
-            }
-        }
-    }
-    if kind == "rules" {
-        sqlx::query("INSERT INTO commerce_rules(tenant,id,name,condition,active) VALUES($1,$2,$3,$4,$5) ON CONFLICT(tenant,id) DO UPDATE SET name=EXCLUDED.name,condition=EXCLUDED.condition,active=EXCLUDED.active,revision=commerce_rules.revision+1").bind(&t).bind(&id).bind(name).bind(&data["condition"]).bind(data["active"].as_bool()).execute(&mut *tx).await?;
-    } else {
-        let sql = format!(
-            "INSERT INTO {table}(tenant,id,data) VALUES($1,$2,$3) ON CONFLICT(tenant,id) DO UPDATE SET data=EXCLUDED.data,revision={table}.revision+1"
-        );
-        sqlx::query(sqlx::AssertSqlSafe(sql.as_str()))
-            .bind(&t)
-            .bind(&id)
-            .bind(&data)
-            .execute(&mut *tx)
-            .await?;
-    }
-    if kind == "channels" {
-        crate::pos::configure(&mut tx, &t, &id, &data, rev.is_none()).await?;
-    }
-    tx.commit().await?;
-    Ok(Json(json!({"saved":true,"revision":expected+1})))
+    veyndo_marketing::service::configuration_writes::save(
+        &super::configuration_host::Configuration(&a),
+        &h,
+        (&kind, &id),
+        &v,
+    )
+    .await
+    .map(Json)
 }
 pub(super) async fn preview(
     State(a): State<App>,

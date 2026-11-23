@@ -17,7 +17,7 @@
       "type": "alwaysValid",
       "source": "Checkout/Cart/Rule/AlwaysValidRule.php",
       "status": "implemented-scope",
-      "nativeModule": "src/marketing/rules.rs + src/marketing/rule_match.rs"
+      "nativeModule": "components/marketing/src/domain/rules.rs + components/marketing/src/domain/rule_match.rs"
     },
     {
       "type": "orderCampaignCode",
@@ -29,7 +29,7 @@
       "type": "cartCartAmount",
       "source": "Checkout/Cart/Rule/CartAmountRule.php",
       "status": "implemented-scope",
-      "nativeModule": "src/marketing/rules.rs + src/marketing/rule_match.rs"
+      "nativeModule": "components/marketing/src/domain/rules.rs + components/marketing/src/domain/rule_match.rs"
     },
     {
       "type": "cartHasDeliveryFreeItem",
@@ -245,7 +245,7 @@
       "type": "cartLineItem",
       "source": "Checkout/Cart/Rule/LineItemRule.php",
       "status": "implemented-scope",
-      "nativeModule": "src/marketing/rules.rs + src/marketing/rule_match.rs"
+      "nativeModule": "components/marketing/src/domain/rules.rs + components/marketing/src/domain/rule_match.rs"
     },
     {
       "type": "cartLineItemStock",
@@ -299,19 +299,19 @@
       "type": "cartLineItemsInCartCount",
       "source": "Checkout/Cart/Rule/LineItemsInCartCountRule.php",
       "status": "implemented-scope",
-      "nativeModule": "src/marketing/rules.rs + src/marketing/rule_match.rs"
+      "nativeModule": "components/marketing/src/domain/rules.rs + components/marketing/src/domain/rule_match.rs"
     },
     {
       "type": "paymentMethod",
       "source": "Checkout/Cart/Rule/PaymentMethodRule.php",
       "status": "implemented-scope",
-      "nativeModule": "src/marketing/rules.rs + src/marketing/rule_match.rs"
+      "nativeModule": "components/marketing/src/domain/rules.rs + components/marketing/src/domain/rule_match.rs"
     },
     {
       "type": "shippingMethod",
       "source": "Checkout/Cart/Rule/ShippingMethodRule.php",
       "status": "implemented-scope",
-      "nativeModule": "src/marketing/rules.rs + src/marketing/rule_match.rs"
+      "nativeModule": "components/marketing/src/domain/rules.rs + components/marketing/src/domain/rule_match.rs"
     },
     {
       "type": "cart_tax_rule",
@@ -335,7 +335,7 @@
       "type": "customerBillingCountry",
       "source": "Checkout/Customer/Rule/BillingCountryRule.php",
       "status": "implemented-scope",
-      "nativeModule": "src/marketing/rules.rs + src/marketing/rule_match.rs"
+      "nativeModule": "components/marketing/src/domain/rules.rs + components/marketing/src/domain/rule_match.rs"
     },
     {
       "type": "customerBillingState",
@@ -389,13 +389,13 @@
       "type": "customerCustomerGroup",
       "source": "Checkout/Customer/Rule/CustomerGroupRule.php",
       "status": "implemented-scope",
-      "nativeModule": "src/marketing/rules.rs + src/marketing/rule_match.rs"
+      "nativeModule": "components/marketing/src/domain/rules.rs + components/marketing/src/domain/rule_match.rs"
     },
     {
       "type": "customerLoggedIn",
       "source": "Checkout/Customer/Rule/CustomerLoggedInRule.php",
       "status": "implemented-scope",
-      "nativeModule": "src/marketing/rules.rs + src/marketing/rule_match.rs"
+      "nativeModule": "components/marketing/src/domain/rules.rs + components/marketing/src/domain/rule_match.rs"
     },
     {
       "type": "customerCustomerNumber",
@@ -449,7 +449,7 @@
       "type": "customerEmail",
       "source": "Checkout/Customer/Rule/EmailRule.php",
       "status": "implemented-scope",
-      "nativeModule": "src/marketing/rules.rs + src/marketing/rule_match.rs"
+      "nativeModule": "components/marketing/src/domain/rules.rs + components/marketing/src/domain/rule_match.rs"
     },
     {
       "type": "customerIsActive",
@@ -509,7 +509,7 @@
       "type": "customerShippingCountry",
       "source": "Checkout/Customer/Rule/ShippingCountryRule.php",
       "status": "implemented-scope",
-      "nativeModule": "src/marketing/rules.rs + src/marketing/rule_match.rs"
+      "nativeModule": "components/marketing/src/domain/rules.rs + components/marketing/src/domain/rule_match.rs"
     },
     {
       "type": "customerShippingState",
@@ -617,7 +617,7 @@
       "type": "andContainer",
       "source": "Framework/Rule/Container/AndRule.php",
       "status": "implemented-scope",
-      "nativeModule": "src/marketing/rules.rs + src/marketing/rule_match.rs"
+      "nativeModule": "components/marketing/src/domain/rules.rs + components/marketing/src/domain/rule_match.rs"
     },
     {
       "type": "allLineItemsContainer",
@@ -629,13 +629,13 @@
       "type": "notContainer",
       "source": "Framework/Rule/Container/NotRule.php",
       "status": "implemented-scope",
-      "nativeModule": "src/marketing/rules.rs + src/marketing/rule_match.rs"
+      "nativeModule": "components/marketing/src/domain/rules.rs + components/marketing/src/domain/rule_match.rs"
     },
     {
       "type": "orContainer",
       "source": "Framework/Rule/Container/OrRule.php",
       "status": "implemented-scope",
-      "nativeModule": "src/marketing/rules.rs + src/marketing/rule_match.rs"
+      "nativeModule": "components/marketing/src/domain/rules.rs + components/marketing/src/domain/rule_match.rs"
     },
     {
       "type": "xorContainer",
@@ -659,7 +659,7 @@
       "type": "salesChannel",
       "source": "Framework/Rule/SalesChannelRule.php",
       "status": "implemented-scope",
-      "nativeModule": "src/marketing/rules.rs + src/marketing/rule_match.rs"
+      "nativeModule": "components/marketing/src/domain/rules.rs + components/marketing/src/domain/rule_match.rs"
     },
     {
       "type": "scriptRule",

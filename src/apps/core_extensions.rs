@@ -2,7 +2,6 @@
 use crate::{RequestContext, Result};
 
 pub(crate) use veyndo_app_model::Object;
-pub(crate) use veyndo_app_platform::domain::core_extensions::access;
 
 /// Native lists and details share one bounded, permission-filtered app projection.
 pub(crate) async fn attach(

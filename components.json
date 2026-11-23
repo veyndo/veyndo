@@ -569,9 +569,9 @@
         "tenants",
         "user_sessions"
       ],
-      "glob_imports": 19,
-      "untyped_access": 338,
-      "sql_outside_store": 14
+      "glob_imports": 17,
+      "untyped_access": 327,
+      "sql_outside_store": 11
     },
     "b2b": {
       "title": "Company procurement: organisations, budgets, approvals and quotes",
@@ -705,6 +705,7 @@
         "b2b_companies",
         "b2b_units",
         "carts",
+        "commerce_flows",
         "commerce_settings",
         "customers",
         "hosted_frontends",
@@ -724,8 +725,8 @@
         "workspace_roles"
       ],
       "glob_imports": 47,
-      "untyped_access": 430,
-      "sql_outside_store": 27
+      "untyped_access": 440,
+      "sql_outside_store": 28
     },
     "automation": {
       "title": "Deterministic rule evaluation and flow graphs",
@@ -853,7 +854,7 @@
         "tenants",
         "translation_jobs"
       ],
-      "glob_imports": 36,
+      "glob_imports": 35,
       "untyped_access": 592,
       "sql_outside_store": 27
     },
@@ -934,8 +935,8 @@
         "translation_jobs"
       ],
       "glob_imports": 10,
-      "untyped_access": 385,
-      "sql_outside_store": 21
+      "untyped_access": 387,
+      "sql_outside_store": 22
     },
     "protocols": {
       "title": "MCP, UCP and the shared capability dispatch; adapters without business rules",

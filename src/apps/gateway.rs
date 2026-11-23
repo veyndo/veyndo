@@ -3,9 +3,6 @@ use super::*;
 use veyndo_app_platform::ports::{
     ActionFuture, EnvironmentFuture, HostActions, HostCall, HostedFuture, RuleFuture,
 };
-pub(crate) fn validate_input(schema: &Value, v: &Value) -> Result<()> {
-    input_schema::validate(schema, v)
-}
 pub(crate) fn validate_native_input(schema: &Value, v: &Value) -> Result<()> {
     input_schema::validate_native(schema, v)
 }

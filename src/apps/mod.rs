@@ -83,9 +83,7 @@ mod registry;
 mod routes;
 pub(crate) use cart_contributions::*;
 pub(crate) use events::*;
-pub(crate) use gateway::{
-    additional_permissions, invoke_app, validate_input, validate_native_input,
-};
+pub(crate) use gateway::{invoke_app, validate_native_input};
 pub(crate) use manifest::*;
 pub(crate) use registry::*;
 pub(crate) use routes::*;

@@ -34,7 +34,14 @@ pub(crate) async fn flow_once(a: &App) -> Result<bool> {
     } else if f.action == "work_proposal" {
         match f.work_template.as_ref() {
             Some(template) => {
-                super::work_template::prepare(a, t, &f, id, template, definition).await
+                veyndo_studio::service::flow_templates::prepare(
+                    &crate::agent_host::Host(a),
+                    (t, id),
+                    &f,
+                    template,
+                    definition,
+                )
+                .await
             }
             None => Err(bad("Work template required")),
         }

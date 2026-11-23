@@ -17,8 +17,8 @@ than the check verifies. **It is not a claim that the shop is free of errors:**
 | Rule files | 8 | 0.5 % | The files that contain the proved rules |
 | Reviewed callers | 79 | 5.3 % | Files that call a proved rule; a person reviewed how the rule is fed, the surrounding code is not proved |
 | Comparison drivers | 9 | 0.6 % | Test programs that compare the compiled Rust rules with the Lean versions |
-| **Unproved files** | 1383 | 93.5 % | Everything else: database access, HTTP, providers, the user interface server |
-| All Rust source files | 1479 | 100 % | |
+| **Unproved files** | 1385 | 93.5 % | Everything else: database access, HTTP, providers, the user interface server |
+| All Rust source files | 1481 | 100 % | |
 
 A proved rule looks like this one, which caps a discount at the amount it is
 taken from:
@@ -114,7 +114,7 @@ that call it.
 | Rule | What the source says about it | Proved properties | Used in |
 | --- | --- | --- | --- |
 | `auth_factor_admissible` | Factor evidence is supplied only by the native verified-code or live personal-session handoff owners. | 2: `auth_factor_exact`, `auth_factor_required_denied` | `components/identity/src/store/sessions.rs` |
-| `channel_access_admissible` | Preview grants admit only simulations; public requests require an active channel and private requests a current merchant. | 4: `channel_private_requires_identity`, `channel_paused_requires_preview`, `channel_preview_no_mutation`, `channel_access_exact` | `src/marketing/channel_access.rs` |
+| `channel_access_admissible` | Preview grants admit only simulations; public requests require an active channel and private requests a current merchant. | 4: `channel_private_requires_identity`, `channel_paused_requires_preview`, `channel_preview_no_mutation`, `channel_access_exact` | `components/marketing/src/service/channel_access.rs` |
 | `consent_admissible` | Optional processing requires an enabled purpose and a fresh affirmative receipt for this policy. | 1: `consent_exact` | `components/intelligence/src/service/consent.rs` |
 | `legal_checkout_admissible` | Strict checkout binds the current document version and separately requested digital delivery. | 1: `legal_checkout_exact` | `components/checkout/src/store/legal_snapshot.rs` |
 | `merchant_scope_admissible` | A merchant request acts for a shop only with a credential issued for that same shop. | 3: `merchant_scope_exact`, `merchant_scope_other_shop_denied`, `merchant_scope_missing_credential_denied` | `components/identity/src/lib.rs` |
@@ -174,7 +174,7 @@ that call it.
 | `app_callback_admissible` | Original app consent and the creator's current core role must both permit a callback. | 2: `app_callback_exact`, `app_callback_without_consent_denied` | `components/apps/src/domain/callback_grant.rs` |
 | `app_configuration_release_admissible` | Operational receipts and customer/order extensions cannot become configuration release units. | 3: `app_configuration_release_exact`, `app_configuration_release_operational`, `app_configuration_release_receipts` | `components/apps/src/domain/core_extensions.rs` |
 | `app_core_reference_admissible` | Personal core references are private; only product references may be declared public. | 2: `app_core_reference_private`, `app_core_reference_exact` | `components/apps/src/domain/field_values.rs`, `components/apps/src/domain/reference_policy.rs` |
-| `app_flow_admissible` | Only an explicitly eligible private mutation action may be bound to a durable flow. | 2: `app_flow_exact`, `app_flow_readonly_denied` | `src/marketing/app_flows.rs` |
+| `app_flow_admissible` | Only an explicitly eligible private mutation action may be bound to a durable flow. | 2: `app_flow_exact`, `app_flow_readonly_denied` | `components/apps/src/service/flow_apps.rs` |
 | `app_package_authorized` | A package may use operator credentials only if its exact content is pinned or bundled. | 2: `app_package_authority_exact`, `app_package_unapproved_denied` | `components/apps/src/domain/approval.rs` |
 | `app_read_admissible` | GET app routes require declared read-only behavior and exclude managed mutations. | 2: `app_read_safe`, `app_read_exact` | `components/apps/src/domain/field_values.rs`, `components/apps/src/domain/action_policy.rs` |
 | `app_service_transport_admissible` | Private HTTP requires an exact operator-approved origin; unsafe URL parts are always denied. | 3: `app_service_transport_exact`, `app_service_transport_unapproved_denied`, `app_service_transport_unsafe_denied` | `components/apps/src/domain/service_policy.rs` |

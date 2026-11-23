@@ -1,12 +1,9 @@
 //! Reviewed work lives in the studio component; these entries lend it the server's ports.
 use super::*;
 use crate::agent_host::Host;
-pub(crate) use veyndo_studio::domain::proposal::{Step, work_schema as schema};
+pub(crate) use veyndo_studio::domain::proposal::work_schema as schema;
 pub(crate) fn catalogue(a: &App, h: &RequestContext) -> Vec<Value> {
     veyndo_studio::service::work_plan::catalogue(&Host(a), h)
-}
-pub(crate) async fn bind(a: &App, t: &str, h: &RequestContext, steps: &mut [Step]) -> Result<()> {
-    veyndo_studio::service::work_plan::bind(&Host(a), t, h, steps).await
 }
 pub(crate) async fn execute(
     a: &App,

@@ -697,7 +697,7 @@ Shopware compatibility claim is made.
 | `src/documents/{ingestion,parser,retrieval,questions,mod}.rs` | Bounded PDF/text ingestion, private/public sources, actual graph/chunks/vector retrieval and cited PDP answers | `developer_documents.py` including real PDF child process |
 | `src/accounts/{mod,profile}.rs`, `customer.rs`, `cart_storage.rs` | Separate customer sessions, profile/password/history and trusted identity reuse | `marketing_accounts.py`, `commerce.py` |
 | `src/auth/provision.rs`, `registration.rs` | Shared synthetic template provisioning for first and additional owned shops | `marketing_accounts.py`, `users.py` |
-| `src/marketing/{rules,promotions,flows,channels,routes,mod}.rs` | Bounded AST, authoritative campaigns, durable note/proposal jobs and sales-channel scope | Rust rule tests, `marketing_accounts.py`, `developer_documents.py` |
+| `components/marketing/src/{domain/rules,types/promotion,service/configuration_writes,service/channels}.rs`, `src/marketing/{flows,routes,mod}.rs` | Bounded AST, authoritative campaigns, revision-bound configuration saves, durable note/proposal jobs and sales-channel scope | Rust rule tests, `marketing_accounts.py`, `developer_documents.py` |
 | `crates/automation/src/rule_comparison.rs`, `src/bin/rules.rs`, `reference/rules.php` | Original Shopware numeric comparison behavior, independent batch oracle | `rule_differential.py`: 1,280 comparisons |
 | `components/pricing/src/domain/discount.rs` | Exact-cent proportional basket discount allocation | Rust conservation/bounds tests, concurrent coupon HTTP checkout |
 | `components/studio/src/http/product_editor.rs` | Revision-bound translations and advanced metadata; own product/reference validation | `marketing_accounts.py` and selected release |
@@ -770,7 +770,7 @@ reviewed bindings, not whole-module proofs. See the
 | `src/apps/evidence.rs`, `src/apps/evidence_routes.rs` | Tenant-private incremental imports, retrieval, polling and purge fences |
 | `components/intelligence/src/knowledge.rs` | Private PostgreSQL source and product provenance, separated from public graph |
 | `components/intelligence/src/service/planner.rs` | Actual private-source model context and persisted task evidence |
-| `src/marketing/{rules,rule_match,rule_fields,catalog,app_flows,flows}.rs` | Condition schema, original comparison/facts, upstream import, app-aware durable flow execution |
+| `components/marketing/src/domain/{rules,rule_match,rule_fields,flow_steps}.rs`, `components/apps/src/service/flow_apps.rs`, `src/marketing/{app_flows,flows}.rs` | Condition schema, original comparison/facts, upstream import, app-aware durable flow execution |
 | `frontend/src/admin/apps/ConnectorPanel.tsx`, `admin/automation/{RuleBuilder,FlowBuilder}.tsx`, `extensions/apps/google-analytics/storefront/ShopAnalytics.tsx` | Multilingual app details, recursive graphical automation, consent and commerce events |
 | `extensions/sdk/analytics.js` | Reusable consent-bound GA4 adapter for headless frontends |
 | `scripts/{connected_apps,connector_store_tests,rule_differential}.py` | Actual provider/model wire path, state fences and original PHP comparison regressions |
@@ -907,7 +907,7 @@ See [merchant password enrollment](experience-integration.md#merchant-password-e
 
 ### Channel access and frontend bindings
 
-`marketing/channel_access.rs` is the shared Store API/UCP/MCP/hosted admission boundary; `channel_preview.rs` owns personal, one-use browser previews. `auth/middleware.rs` strips forged preview principals and adds the validated request marker consumed by catalog, cart, navigation and legal paths. `shop_domains/frontend_bindings.rs` owns revisioned tenant/Experience alias CRUD; it reuses `hosted_frontends`, not another domain registry. The private renderer remains in the private integration repository. See [channel management](channel-management.md) for behavior and limits.
+`components/marketing/src/service/channel_access.rs` is the shared Store API/UCP/MCP/hosted admission boundary; `service/channel_preview.rs` and `http/channel_preview.rs` own personal, one-use browser previews. The hosted path rules live in `veyndo_core::host_names`. `auth/middleware.rs` strips forged preview principals and adds the validated request marker consumed by catalog, cart, navigation and legal paths. `shop_domains/frontend_bindings.rs` owns revisioned tenant/Experience alias CRUD; it reuses `hosted_frontends`, not another domain registry. The private renderer remains in the private integration repository. See [channel management](channel-management.md) for behavior and limits.
 
 ## HTTP failure diagnostics
 
@@ -1018,8 +1018,11 @@ and network/certification limits](edi.md).
 
 ## Shared publication and observation owners
 
-`marketing/channel_config.rs` owns transactional channel admission for native
-writes and releases; `marketing/flow_policy.rs` checks current action rights.
+`components/marketing/src/store/channel_config.rs` owns transactional channel admission for native
+writes and releases; `components/marketing/src/service/configuration_writes.rs` checks current action rights.
+The server lends it work templates (`components/studio/src/service/flow_templates.rs`),
+installed app actions (`components/apps/src/service/flow_apps.rs`) and POS channel setup through
+`veyndo_marketing::ports::ConfigurationHost` (`src/marketing/configuration_host.rs`).
 `staging/access.rs` checks each selected domain and `final_config.rs` validates the
 final aggregate/POS defaults. `b2b/staging.rs` clones only configuration/catalogs
 and delegates publication to the same organization/catalog transactional writers.
@@ -1045,7 +1048,7 @@ Experience owner implements email recovery/forms and rechecks current native pro
 | --- | --- |
 | `src/commerce/{delivery_split,order_mutation}.rs` | Native quantity-conserving package split, current grants/CAS/replay and one shared order/cart/audit/outbox transaction; `shipment_workflows.py` exercises real HTTP/MCP and concurrent requests. |
 | `src/operations/{delivery_booking,order_documents}.rs`, `src/apps/{core_documents,package_fence}.rs`, migration 092 | Native package intent and immutable private PDF admission with the existing receipt/RLS/quota owner; original app/key acknowledgement, unknown-effect fences and customer-only return documents. |
-| `src/apps/jobs.rs`, `src/marketing/app_flows.rs` | Current actor/action/digest admission for job results, minimized list projections and stable Flow-to-job identity; `shipping_contract.py` drives a real local service, restart and rights revocation. |
+| `src/apps/jobs.rs`, `components/apps/src/service/flow_apps.rs`, `src/marketing/app_flows.rs` | Current actor/action/digest admission for job results, minimized list projections and stable Flow-to-job identity; `shipping_contract.py` drives a real local service, restart and rights revocation. |
 | `extensions/apps/assistant-examples/shipping.json`, `admin/developer/assistant-model.ts` | One carrier-neutral job/callback declaration for coding and visual assistants. No carrier protocol or deployable provider is shipped. |
 | `crates/kernel/src/verified_kernel/fulfillment.rs` | Extracted strict-subset and carrier-intent decisions, Lean statements, compiled conformance and negative mutations; surrounding SQL/network effects remain tested rather than proved. |
 

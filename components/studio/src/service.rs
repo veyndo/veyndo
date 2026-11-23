@@ -1,4 +1,5 @@
 //! Operations of the studio component.
+pub mod flow_templates;
 pub mod grid_plan;
 pub mod imports;
 pub mod proposal_admission;

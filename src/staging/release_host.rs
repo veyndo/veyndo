@@ -39,7 +39,7 @@ impl ReleaseHost for Releases<'_> {
         h: &'a RequestContext,
         value: &'a Value,
     ) -> PortFuture<'a, ()> {
-        Box::pin(marketing::validate_flow_config(tx, t, h, value))
+        Box::pin(marketing::validate_flow_config(self.0, tx, t, h, value))
     }
     fn authorize_flow(&self, h: &RequestContext, flow: &Value) -> Result<()> {
         let flow: marketing::Flow =
