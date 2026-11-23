@@ -598,8 +598,8 @@
         "tenants",
         "user_sessions"
       ],
-      "glob_imports": 20,
-      "untyped_access": 337,
+      "glob_imports": 19,
+      "untyped_access": 338,
       "sql_outside_store": 14
     },
     "b2b": {

@@ -2626,10 +2626,20 @@
       "sha256": "6c5f023dfed4ff192d1307308d4527b9252856539233c34f4ce597138fc78820",
       "review": "Request language selection moved into the shop component and sales channel admission into the marketing component; behaviour unchanged"
     },
+    "components/marketing/src/http/catalog.rs": {
+      "status": "unproved",
+      "sha256": "3fe737cf2481ced5cdf552a7c949ed950c29bd597e231e345bd03166db2063e4",
+      "review": "Automation catalogue, rule preview, flow job list and the pipeline runner move into marketing"
+    },
     "components/marketing/src/http/configuration.rs": {
       "status": "unproved",
       "sha256": "999bfd91813db5e52bc51b0b854d3f20fb42626865db140a39525705f8db4cd6",
       "review": "Marketing configuration lifecycle (tenant lock, revision, revision-bound deletion, dependency read, rule reference admission) moved verbatim into the marketing component; route registration stays in the server."
+    },
+    "components/marketing/src/http/flow_jobs.rs": {
+      "status": "unproved",
+      "sha256": "9379ce1e9bdbd30a183466bba0c2b47f57acf42b3d25873f7be9cf18b25be1a1",
+      "review": "Automation catalogue, rule preview, flow job list and the pipeline runner move into marketing"
     },
     "components/marketing/src/http/rules.rs": {
       "status": "unproved",
@@ -2638,13 +2648,18 @@
     },
     "components/marketing/src/http.rs": {
       "status": "unproved",
-      "sha256": "1240d9a89276cf83709aa61b72b1d3ccbc9c60100e9fc71317bbe07cdddf95c4",
-      "review": "Rate refresh, company onboarding, POS channel setup, rule comparison and facts and source lifecycle handlers moved into their components; behaviour unchanged"
+      "sha256": "aface124d671048b883308ffbde76d95b21e1b7212e3fb2a0788623c4559625b",
+      "review": "Automation catalogue, rule preview, flow job list and the pipeline runner move into marketing"
     },
     "components/marketing/src/lib.rs": {
       "status": "unproved",
-      "sha256": "1d24fa80910146060ac56d142fc0c25577ef8a6132cc47bc75fc266787396ff9",
-      "review": "Marketing configuration lifecycle (tenant lock, revision, revision-bound deletion, dependency read, rule reference admission) moved verbatim into the marketing component; route registration stays in the server."
+      "sha256": "cef92f2d441e3e2a43683ef76157feebb87902f25aba85d6fc8c4220d25d18a2",
+      "review": "Automation catalogue, rule preview, flow job list and the pipeline runner move into marketing"
+    },
+    "components/marketing/src/ports.rs": {
+      "status": "unproved",
+      "sha256": "84a3885d0fa500598730e12ecde2aa745b9f3038f4da1318e6d6eef9a8fb5a79",
+      "review": "Automation catalogue, rule preview, flow job list and the pipeline runner move into marketing"
     },
     "components/marketing/src/service/channels.rs": {
       "status": "unproved",
@@ -2661,10 +2676,20 @@
       "sha256": "94e8b9c70f4ec7eeed4497f63078f9bfdc155011ae6804c0830e2858e400bd63",
       "review": "Coupons, flow job summaries, requisition import, customer snapshot, address restore and account orders moved into components"
     },
+    "components/marketing/src/service/pipeline_runtime.rs": {
+      "status": "unproved",
+      "sha256": "78e4e77228b4eab5a279bf6a5b6cad54d55f953a500ee17393ff4e757151e562",
+      "review": "Automation catalogue, rule preview, flow job list and the pipeline runner move into marketing"
+    },
+    "components/marketing/src/service/rule_preview.rs": {
+      "status": "unproved",
+      "sha256": "84bde31d473093697a17f6c704e78f7821a7a381c5a526b7031ee2404dd22390",
+      "review": "Automation catalogue, rule preview, flow job list and the pipeline runner move into marketing"
+    },
     "components/marketing/src/service.rs": {
       "status": "unproved",
-      "sha256": "ba904d96c4285a8648b35d1b7fe7c5d4f658dbc8d7e190d1a1d3f3155f76d3bb",
-      "review": "Request language selection moved into the shop component and sales channel admission into the marketing component; behaviour unchanged"
+      "sha256": "a6f568f8d5fdce2847afc5620f9ca3a021f7fc3772c1a7dab2c51fd555ebd97e",
+      "review": "Automation catalogue, rule preview, flow job list and the pipeline runner move into marketing"
     },
     "components/marketing/src/store/channel_config.rs": {
       "status": "unproved",
@@ -7138,8 +7163,8 @@
     },
     "src/marketing/catalog.rs": {
       "status": "unproved",
-      "sha256": "ad73d5e7f95fdc36c55df4c59c184a484c2834c21d7cf709b0ccfa159e840235",
-      "review": "Sessions, invitations, MFA, integration keys and broker assertions moved into the identity component without behaviour change"
+      "sha256": "c31732117bd605c16614e44cb38c2a8a0daec3aff70817754744c4541845f178",
+      "review": "Automation catalogue, rule preview, flow job list and the pipeline runner move into marketing"
     },
     "src/marketing/channel_access.rs": {
       "status": "reviewed-binding",
@@ -7170,11 +7195,6 @@
       "status": "unproved",
       "sha256": "3f024c573680218a4ec63d203bf33c2f01840852c640651c4d63fbce623e74c7",
       "review": "Coupons, flow job summaries, requisition import, customer snapshot, address restore and account orders moved into components"
-    },
-    "src/marketing/facts.rs": {
-      "status": "unproved",
-      "sha256": "17fb18eb81f62c0703c3ef9d0840780f32ec88197417670bda02bacaed5c0f06",
-      "review": "cart types and rule engine moved into components; checking bindings"
     },
     "src/marketing/flow_access.rs": {
       "status": "unproved",
@@ -7213,13 +7233,13 @@
     },
     "src/marketing/gateway.rs": {
       "status": "unproved",
-      "sha256": "8638d1636351218e7ce3c9e3b71581c50910441f9669233735061364e829b113",
-      "review": "Marketing configuration lifecycle (tenant lock, revision, revision-bound deletion, dependency read, rule reference admission) moved verbatim into the marketing component; route registration stays in the server."
+      "sha256": "0a9ef4bc03fe41e82ae764349c845fb4c0839db75db0eccf15592a9e5277b06b",
+      "review": "Automation catalogue, rule preview, flow job list and the pipeline runner move into marketing"
     },
     "src/marketing/jobs.rs": {
       "status": "unproved",
-      "sha256": "7fadd0e8e8dad67b40d98e8e383a20a4a420569323addd935e2183c0246432e1",
-      "review": "Coupons, flow job summaries, requisition import, customer snapshot, address restore and account orders moved into components"
+      "sha256": "613c2dc3c0dbc920a2a33aab9dc9b419fd98006f75b47c641efb9887b95cd819",
+      "review": "Automation catalogue, rule preview, flow job list and the pipeline runner move into marketing"
     },
     "src/marketing/lifecycle.rs": {
       "status": "unproved",
@@ -7233,8 +7253,8 @@
     },
     "src/marketing/mod.rs": {
       "status": "unproved",
-      "sha256": "33230e42fb10e38185e0ec9121c021e605d5e660684f81faf98d4a31c773eb7c",
-      "review": "Marketing configuration lifecycle (tenant lock, revision, revision-bound deletion, dependency read, rule reference admission) moved verbatim into the marketing component; route registration stays in the server."
+      "sha256": "28ff89949f7510ae92ec55fcab5fb7b5ac35dea439568124f4698eec6049cfdd",
+      "review": "Automation catalogue, rule preview, flow job list and the pipeline runner move into marketing"
     },
     "src/marketing/pipeline.rs": {
       "status": "unproved",
@@ -7243,8 +7263,8 @@
     },
     "src/marketing/pipeline_runtime.rs": {
       "status": "unproved",
-      "sha256": "f984e5a8464cc07679ac8998df51b51c4a59053ec411d44814534aa0b0a244dc",
-      "review": "Reviewed the shared borrowed Flow directives and native adapter. The old saved graph, validation ordering, cursor identity, permission checks, delay metadata, receipts and effects are preserved. The native regression covers exact unknown cursor rejection and separately restarted worker continuation."
+      "sha256": "3e45cd43efa91f527a64d37939dd126271a2b189f498e913f145c9f8f51d142c",
+      "review": "Automation catalogue, rule preview, flow job list and the pipeline runner move into marketing"
     },
     "src/marketing/promotion_import.rs": {
       "status": "unproved",
@@ -7258,23 +7278,13 @@
     },
     "src/marketing/routes.rs": {
       "status": "unproved",
-      "sha256": "a1c189303d932d79cc8bffe73ff244be6357375c914da4b4f4713bb5aa4087ad",
-      "review": "Marketing configuration lifecycle (tenant lock, revision, revision-bound deletion, dependency read, rule reference admission) moved verbatim into the marketing component; route registration stays in the server."
-    },
-    "src/marketing/rule_fields.rs": {
-      "status": "unproved",
-      "sha256": "36e67bb5f9f99f742d85b41516a7b4338a15a0efc3ade2c868f3b43e0090225f",
-      "review": "cart types and rule engine moved into components; checking bindings"
+      "sha256": "c86c2fdaba76ed3830a93194edc8e7b3543e9ce0bfc740cf0ab77ac5cf6e3839",
+      "review": "Automation catalogue, rule preview, flow job list and the pipeline runner move into marketing"
     },
     "src/marketing/rule_history.rs": {
       "status": "unproved",
       "sha256": "d690292cbe373dc9a61fd65f38496c25e11a8103bb24acda58dfd1b07d5e2fbe",
       "review": "Rate refresh, company onboarding, POS channel setup, rule comparison and facts and source lifecycle handlers moved into their components; behaviour unchanged"
-    },
-    "src/marketing/rule_snapshot.rs": {
-      "status": "unproved",
-      "sha256": "db45c44c31b5eaa782131e65d7b6da678174170ad1a8035a8ed6b8610da17c64",
-      "review": "cart types and rule engine moved into components; checking bindings"
     },
     "src/marketing/rules.rs": {
       "status": "unproved",

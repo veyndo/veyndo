@@ -18,7 +18,7 @@ pub(crate) async fn invoke(a: &App, h: &RequestContext, name: &str, v: &Value) -
         "automation.compare_history" => {
             rule_history::compare(State(a.clone()), h.clone(), Json(v.clone())).await?
         }
-        "automation.catalog" => catalog::catalog(State(a.clone()), h.clone()).await?,
+        "automation.catalog" => catalog::catalog(State(a.core.clone()), h.clone()).await?,
         "automation.list" => routes::list(State(a.clone()), h.clone()).await?,
         "automation.validate_flow" => {
             flow_policy::validate_draft(

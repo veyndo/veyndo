@@ -229,25 +229,13 @@ pub(super) async fn preview(
     h: RequestContext,
     Json(v): Json<Value>,
 ) -> Result<Json<Value>> {
-    let t = merchant(&a, &h)?;
-    auth::permit(&h, "automation.read")?;
-    let c: rules::Condition =
-        serde_json::from_value(v["condition"].clone()).map_err(|_| bad("Unsupported condition"))?;
-    c.validate(0)?;
-    let cart = load_cart(&a, &h).await?;
-    if cart.tenant != t {
-        return Err(bad("Wrong cart"));
-    }
-    let mut q = cart_json(&a, &cart).await?;
-    q["ruleFacts"] = facts::rule_facts(&mut *a.db.begin().await?, &cart, &q).await?;
-    super::rule_snapshot::attach(
-        &mut *a.db.begin().await?,
-        &t,
-        &v["condition"],
-        &mut q["ruleFacts"],
-    )
-    .await?;
     Ok(Json(
-        json!({"matched":c.checked_matches(&cart,&q)?,"sideEffects":false}),
+        veyndo_marketing::service::rule_preview::preview(
+            &a,
+            &crate::cart_storage::Carts(&a),
+            &h,
+            &v,
+        )
+        .await?,
     ))
 }

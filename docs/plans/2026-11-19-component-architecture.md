@@ -408,7 +408,12 @@ Order follows the dependency report, lowest first. Each line is one move.
   is `domain/flow_projection` and `store/flow_projection`; sales channel
   admission (marketplace, cashier and preview rules, served locales, product
   selection, company catalog) is `domain/channel_admission` and
-  `service/channels`. Open: flow execution (needs ports to orders, customers
+  `service/channels`. The automation catalogue and the condition import are
+  `http/catalog`, the flow job list `http/flow_jobs`, the rule preview on the
+  cart port `service/rule_preview`, and the pipeline runner (recorded steps,
+  delay cursors, uncertain effects) `service/pipeline_runtime`, whose action
+  effects come through `ports::FlowEffects`.
+  Open: the flow worker and its actions (needs ports to orders, customers
   and apps), channel preview and access tokens, rule history, routes.
 - [ ] b2b. Started: `components/b2b` owns the company, unit and member records
   with their bounds and the capability contract; `store/` holds unit access
