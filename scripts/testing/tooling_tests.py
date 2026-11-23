@@ -17,6 +17,23 @@ from source_inventory import responsibility
 
 
 class OwnedRuntime(unittest.TestCase):
+    def test_suites_refuse_a_server_binary_older_than_its_sources(self):
+        import os
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            (root / 'src').mkdir()
+            source = root / 'src' / 'main.rs'
+            source.write_text('fn main() {}')
+            binary = root / 'veyndo'
+            binary.write_text('built')
+            with patch.object(runtime, 'ROOT', root):
+                os.utime(source, (100, 100))
+                os.utime(binary, (200, 200))
+                self.assertIsNone(runtime.stale_binary(binary, ('src',)))
+                os.utime(source, (300, 300))
+                self.assertEqual(runtime.stale_binary(binary, ('src',)), source)
+                self.assertEqual(runtime.stale_binary(root / 'missing', ('src',)), root / 'missing')
+
     def test_outbox_rehearsal_refuses_named_databases_before_sql(self):
         sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
         from testing.outbox_cases import migration_states

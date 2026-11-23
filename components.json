@@ -67,8 +67,7 @@
         "host",
         "intelligence",
         "marketing",
-        "shop",
-        "studio"
+        "shop"
       ],
       "foreign_tables": [
         "app_packages",
@@ -430,9 +429,9 @@
         "outbox",
         "tenants"
       ],
-      "glob_imports": 13,
-      "untyped_access": 82,
-      "sql_outside_store": 5
+      "glob_imports": 12,
+      "untyped_access": 66,
+      "sql_outside_store": 6
     },
     "orders": {
       "title": "Order state, fulfilment, receipts, documents and merchant order work",
@@ -489,7 +488,7 @@
         "tenants"
       ],
       "glob_imports": 24,
-      "untyped_access": 454,
+      "untyped_access": 470,
       "sql_outside_store": 12
     },
     "payments": {

@@ -144,7 +144,11 @@ Rules that hold from the first component on:
       actor and the usage of a role; `http/members` the workspace member list
       and the role or revocation change, `http/access` the access overview,
       the personal session list and the revocation of sessions and invitations;
-      `store/handoffs` the one-time Studio handoff ticket; `http/browser` the
+      `store/handoffs` the one-time Studio handoff ticket with its create and
+      redeem handlers in `http/handoff`; `http/abuse` the database-backed
+      sign-in throttle by peer prefix and account; `service/roles` the role
+      edits, whose names are checked in the shop languages through
+      `ports::RoleLanguages`; `http/browser` the
       cookie transport of the personal session (host-only cookies, exact
       origin, CSRF) as request middleware. `store/sessions`
       issues personal sessions and MFA challenges, `http/sessions` owns login,
@@ -284,8 +288,10 @@ Order follows the dependency report, lowest first. Each line is one move.
   lookup with literal search, the guest contact and the remembered payment
   method. The address book entries (country admission against the shop
   settings, history attribution) are `service/address_entries`, the
-  storefront address routes `http/addresses`. Open: the other account
-  handlers (profile, registration, orders); login;
+  storefront address routes `http/addresses`, registration and the profile
+  with the password swap `http/account`; the customer's own orders are
+  `orders/http/account_orders`. Open: logout (it loads the guarded cart),
+  receipt PDFs; login;
   the merchant customer list and detail (they attach app
   extensions). `store/crm` owns the merchant creation of a contact with its
   address plan and the revision-checked merchant change including the
@@ -737,12 +743,22 @@ Phase 5 and 6 come last and end the work.
 
 The server crate holds about 31,150 lines (from about 70,000). Each batch is one
 working block with one verification run (clippy, unit tests, generators,
-structure and boundary checks, the proof coverage page and the integration
-suites of every touched area) and one or a few local commits.
+structure and boundary checks, the proof coverage page, `cargo build` and the
+integration suites of every touched area) and one or a few local commits.
+
+The suites start the prebuilt `target/debug/veyndo`; they do not compile it.
+Between 22 and 23 November the binary was not rebuilt, so the suite runs of 17
+commits checked an old server. A complete run on a fresh build on 23 November
+passed 143 of 145 suites: `money_boundary_differential` needs the Shopware
+reference (`composer install`) and did not run; `signed_runtime` revealed that
+the migration-only job never installed the process configuration that app
+package installation now reads, which is fixed. `verify_integration.py` now
+refuses to start when the binary is older than any Rust, SQL or manifest
+source.
 
 | Batch | Scope | Server lines today | Target owner |
 | --- | --- | ---: | --- |
-| A | Accounts and login: profile, registration, account orders, the rest of `src/auth` (sessions, MFA, invitations, route rights), `src/platform` | about 2,300 | identity, customers |
+| A (done 23 Nov) | Accounts and login: profile, registration, account orders, sign-in throttle, Studio handoff, roles. Shop provisioning, identity resolution in the middleware and the operator platform compose many components and move to F | about 2,300 | identity, customers, orders |
 | B | App platform: the rest of `src/apps` (packages, hooks, surfaces, callbacks, jobs), `src/developer`, app-backed asset and document helpers | about 3,800 | apps |
 | C | Agents and planning: `src/agent_runs`, `src/cognition`, `src/planner*`, `agent.rs`, `concierge.rs`, `proposal_apply.rs` | about 5,400 | intelligence |
 | D | Merchant operations: `src/operations`, the rest of `src/commerce`, `src/staging`, `src/studio*`, settings release | about 5,600 | orders, catalog, shop, studio |

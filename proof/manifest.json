@@ -2096,6 +2096,11 @@
       "sha256": "ce4f5aa3006377227434e5b9cfbdab9b8e12754c07592826ba8c9837deaad513",
       "review": "customers component crate created; no kernel binding changed"
     },
+    "components/customers/src/http/account.rs": {
+      "status": "unproved",
+      "sha256": "0d33fb252f5275cf9899f9d67b9bbdf5e5aa851d0076ffd2727ad46ad56937ad",
+      "review": "Batch A: customer accounts, account orders, sign-in throttle, handoff and roles move into customers, orders and identity"
+    },
     "components/customers/src/http/addresses.rs": {
       "status": "unproved",
       "sha256": "12b96ac0905e82e06da3b91c895b612e159e6d91ef955701b8ca884836c8640c",
@@ -2113,8 +2118,8 @@
     },
     "components/customers/src/http.rs": {
       "status": "unproved",
-      "sha256": "5cf1ee5f7501c12a55885c93e9ac176fc8ca1b3df4fcda4fdb563e7ba2307a8b",
-      "review": "Address book entries and storefront routes move into customers"
+      "sha256": "4b240247c826fdb5a7faff33c5ed6912846c8dda497f31d595b2fa399639f5db",
+      "review": "Batch A: customer accounts, account orders, sign-in throttle, handoff and roles move into customers, orders and identity"
     },
     "components/customers/src/lib.rs": {
       "status": "unproved",
@@ -2206,6 +2211,11 @@
       "sha256": "73b053220d894f29887eaf67a7da6f77f4f27d0f2945c9761087c4f2dc344fed",
       "review": "Sessions, invitations, MFA, integration keys and broker assertions moved into the identity component without behaviour change"
     },
+    "components/identity/src/http/abuse.rs": {
+      "status": "unproved",
+      "sha256": "4f23a276d9567dced3eeaf1b00e6e86b0688c81958d7790cb918154ee8823586",
+      "review": "Batch A: customer accounts, account orders, sign-in throttle, handoff and roles move into customers, orders and identity"
+    },
     "components/identity/src/http/access.rs": {
       "status": "unproved",
       "sha256": "b828bebe5d1246d3c7e8384e1c22b4ca70d6b2d71808c6619082e26b3b788903",
@@ -2220,6 +2230,11 @@
       "status": "unproved",
       "sha256": "14478013924c58db2c8ff9e4ccad7241b5a166e18842cd851e08898b5c7b8df3",
       "review": "Functions above 150 lines split into named steps without behaviour change; function length limit lowered to 150"
+    },
+    "components/identity/src/http/handoff.rs": {
+      "status": "unproved",
+      "sha256": "c0d605e267bab07290d40e84818fa8396f5d1309e048b1b717e97f3c7ea8cbfd",
+      "review": "Batch A: customer accounts, account orders, sign-in throttle, handoff and roles move into customers, orders and identity"
     },
     "components/identity/src/http/integrations.rs": {
       "status": "reviewed-binding",
@@ -2248,18 +2263,33 @@
     },
     "components/identity/src/http.rs": {
       "status": "unproved",
-      "sha256": "4476738cae726af2a5d83644ddc1b47e34ca82a8a094ad46e38f8236060d9f0d",
-      "review": "Process configuration moved into core; browser session transports, Checkout buyer grants, the private Checkout relay, trusted geography and provider startup validation moved into their components without behaviour change"
+      "sha256": "bbca8119fa834c2af72f472a51da90032afb4b7ef87ae34c9d4fc97266c8d35d",
+      "review": "Batch A: customer accounts, account orders, sign-in throttle, handoff and roles move into customers, orders and identity"
     },
     "components/identity/src/lib.rs": {
       "status": "reviewed-binding",
-      "sha256": "d44953dcce8c3b644c9a73a49f3ff3a6915a153f506e88281f406a3f73721c09",
-      "review": "Sessions, invitations, MFA, integration keys and broker assertions moved into the identity component without behaviour change"
+      "sha256": "32325400be432a1a07b2892ae25c58e838553179b095e6767d674af985970104",
+      "review": "Batch A: customer accounts, account orders, sign-in throttle, handoff and roles move into customers, orders and identity"
+    },
+    "components/identity/src/ports.rs": {
+      "status": "unproved",
+      "sha256": "dd6ef0407b64b5ef70cc0e9fcb669846703117c716a6b531b67826a4b6071f41",
+      "review": "Batch A: customer accounts, account orders, sign-in throttle, handoff and roles move into customers, orders and identity"
     },
     "components/identity/src/route_policy.rs": {
       "status": "unproved",
       "sha256": "5e7aa39b24a5d51ebd41a9c115adf496790236d0bfe39376e71f1366b708c47c",
       "review": "The route permission registry moved unchanged into components/identity and is generic over the server state"
+    },
+    "components/identity/src/service/roles.rs": {
+      "status": "unproved",
+      "sha256": "be182d9d23bab4832e02fcdf72a42e6625331b73da474d896a6ec57b2cd88e69",
+      "review": "Batch A: customer accounts, account orders, sign-in throttle, handoff and roles move into customers, orders and identity"
+    },
+    "components/identity/src/service.rs": {
+      "status": "unproved",
+      "sha256": "d7610c08767f5c8303058a600db6411610a18d9e107339674facc8281ff40390",
+      "review": "Batch A: customer accounts, account orders, sign-in throttle, handoff and roles move into customers, orders and identity"
     },
     "components/identity/src/store/agent_authority.rs": {
       "status": "reviewed-binding",
@@ -2891,6 +2921,11 @@
       "sha256": "127add8bf21e2ebd3574a7f8a225052b59c87bc6ea99b97a914bbaab3aa9d126",
       "review": "Order transitions, external order intake and saved agent authority moved into the orders, apps and identity components"
     },
+    "components/orders/src/http/account_orders.rs": {
+      "status": "unproved",
+      "sha256": "f2a457d53ca18c92e47a3ef0ecd9d6b066f80d9214db28f83f4786c3d250715c",
+      "review": "Batch A: customer accounts, account orders, sign-in throttle, handoff and roles move into customers, orders and identity"
+    },
     "components/orders/src/http/company.rs": {
       "status": "unproved",
       "sha256": "a087d67f34a49b9667031e12a8b7a09191addafacc8e8193bd31c3dd0b463a11",
@@ -2918,8 +2953,8 @@
     },
     "components/orders/src/http.rs": {
       "status": "unproved",
-      "sha256": "988ef669ac6835cf8fd0e8524612acb7a0c1cdd642564e30ed6a115debf9561c",
-      "review": "Paid order downloads move into orders"
+      "sha256": "2f589fccdce189668f5fdb0840db852574803992fc635dbdaffbd25d49ef1922",
+      "review": "Batch A: customer accounts, account orders, sign-in throttle, handoff and roles move into customers, orders and identity"
     },
     "components/orders/src/lib.rs": {
       "status": "unproved",
@@ -5628,8 +5663,8 @@
     },
     "src/accounts/contacts.rs": {
       "status": "unproved",
-      "sha256": "036e00b5d3a40e180d943f6729f101ef7e8fa16c43e0165dca836fbbaaa968c2",
-      "review": "customers component crate created; no kernel binding changed"
+      "sha256": "3121f2d24cde43850634ccbe4f29f24f811a38f8b9ee6665666089d7006ebd18",
+      "review": "Batch A: customer accounts, account orders, sign-in throttle, handoff and roles move into customers, orders and identity"
     },
     "src/accounts/demo.rs": {
       "status": "unproved",
@@ -5643,23 +5678,18 @@
     },
     "src/accounts/mod.rs": {
       "status": "unproved",
-      "sha256": "d2f254294237ae6e784e8c498bf23c9ff02ea79dede63e69c0b1d77b85cc0c15",
-      "review": "Address book entries and storefront routes move into customers"
+      "sha256": "c2158feb0ab9cf371d0729bf02b3b387007705f723c6ea73156096595e23eba2",
+      "review": "Batch A: customer accounts, account orders, sign-in throttle, handoff and roles move into customers, orders and identity"
     },
     "src/accounts/orders.rs": {
       "status": "unproved",
-      "sha256": "1e627e54ad9733f0e7f7eb08f696827314871e68232e8015a34d72ebddacd4c5",
-      "review": "Coupons, flow job summaries, requisition import, customer snapshot, address restore and account orders moved into components"
+      "sha256": "22da24dd4bdbf8ab411acba7034a72a570f607e6a135d804d2ddffe85fa0d86f",
+      "review": "Batch A: customer accounts, account orders, sign-in throttle, handoff and roles move into customers, orders and identity"
     },
     "src/accounts/payment_preference.rs": {
       "status": "unproved",
       "sha256": "4fb192db418fabd61dbd5d3907dfb54f4c4bfc4e3584e1e60639012c27080d5c",
       "review": "customers component crate created; no kernel binding changed"
-    },
-    "src/accounts/profile.rs": {
-      "status": "unproved",
-      "sha256": "97d90b90f4b3b7b2675ad6f24296d68f641bd4dbe07e53e554e79ea1a58ac6f3",
-      "review": "Customer account writes, the legal snapshot of an order and the locked settings read moved into components"
     },
     "src/agent.rs": {
       "status": "unproved",
@@ -5963,8 +5993,8 @@
     },
     "src/apps/native_lifecycle.rs": {
       "status": "unproved",
-      "sha256": "082bba1614028804cce38e2e416dd85f59c8ba2f147ef5604d213ad1ef915b2d",
-      "review": "Company quotes and their lifecycle rules move into b2b"
+      "sha256": "5d93e872f5cc96eed5c1abfb67d8a6f952d3a4c6c3c0d3231bfba49a8e86f84e",
+      "review": "Batch A: customer accounts, account orders, sign-in throttle, handoff and roles move into customers, orders and identity"
     },
     "src/apps/native_view_tests.rs": {
       "status": "unproved",
@@ -6161,11 +6191,6 @@
       "sha256": "30e60d8bfa8618222d6620a570ca36fe1f5a60b65e7095d919befbbf8f2ab245",
       "review": "Asset upload, listing and publishing moved into components/catalog; no rule changed"
     },
-    "src/auth/abuse.rs": {
-      "status": "unproved",
-      "sha256": "f884aaa3da82fc004b25a0fbc2c500c6a20e5e01425c42d7cc7327bd13e57dac",
-      "review": "Reviewed native factor gate, RFC6238 vectors, current personal proof, credential CAS, parent-session handoff revocation and system-only operational identity schema; own/foreign/revoked/replay real HTTP PostgreSQL cases pass; cryptography SQL provider and browser code remain unproved"
-    },
     "src/auth/broker.rs": {
       "status": "unproved",
       "sha256": "8cd3618aa61858b11e1610a607f04653ea5136540cca2298ca6c378a1551f99b",
@@ -6208,8 +6233,8 @@
     },
     "src/auth/handoff.rs": {
       "status": "unproved",
-      "sha256": "5bbeb3c423aecb663a896696a1259bbcda073e7cb68aa715681325bc1702a8e0",
-      "review": "Sessions, invitations, MFA, integration keys and broker assertions moved into the identity component without behaviour change"
+      "sha256": "f209cb05f7a64d1326b0b73c541beb2c06692de6599339fd847b5008e731874f",
+      "review": "Batch A: customer accounts, account orders, sign-in throttle, handoff and roles move into customers, orders and identity"
     },
     "src/auth/identity.rs": {
       "status": "unproved",
@@ -6243,18 +6268,18 @@
     },
     "src/auth/middleware.rs": {
       "status": "reviewed-binding",
-      "sha256": "28ff1275cba1543093a7d49722fcc30b53ef8af77762a915266458f162549f00",
-      "review": "Functions above 150 lines split into named steps without behaviour change; function length limit lowered to 150"
+      "sha256": "9585aa84225b4d78e5557e0b86c7233afa53e3cc6953333acad5ba52dc8d1795",
+      "review": "Batch A: customer accounts, account orders, sign-in throttle, handoff and roles move into customers, orders and identity"
     },
     "src/auth/mod.rs": {
       "status": "unproved",
-      "sha256": "a759040f9f1e669e5c77f064196442817a6245f695d12990e6d5aaee25b497e8",
-      "review": "Sessions, invitations, MFA, integration keys and broker assertions moved into the identity component without behaviour change"
+      "sha256": "5ea0e58aa95dfe7667544aef8115f037d4b4f885e98045a1860283e100922454",
+      "review": "Batch A: customer accounts, account orders, sign-in throttle, handoff and roles move into customers, orders and identity"
     },
     "src/auth/permissions.rs": {
       "status": "unproved",
-      "sha256": "61c1d21eeb235703e52172e4c2642c19176955f7c610a6bd98f6a1ad1cfb6670",
-      "review": "Access overview, session revocation, company release and rule metadata moved into components"
+      "sha256": "6d10be0ff632cbc2590515c47acbbff7552a9226a5ad4b3b078c8a17accdf760",
+      "review": "Batch A: customer accounts, account orders, sign-in throttle, handoff and roles move into customers, orders and identity"
     },
     "src/auth/provision.rs": {
       "status": "unproved",
@@ -6273,8 +6298,8 @@
     },
     "src/auth/roles.rs": {
       "status": "unproved",
-      "sha256": "892715387abb01fe8d60b93444f4cb6fa1f49bd8c5e937220fd21bb39dd04e9f",
-      "review": "Sessions, invitations, MFA, integration keys and broker assertions moved into the identity component without behaviour change"
+      "sha256": "fdf716672447554edc18c43dd5b4376e35b907d98237581628b01776f7907e3c",
+      "review": "Batch A: customer accounts, account orders, sign-in throttle, handoff and roles move into customers, orders and identity"
     },
     "src/auth/routes.rs": {
       "status": "unproved",
@@ -6283,8 +6308,8 @@
     },
     "src/auth/sessions.rs": {
       "status": "unproved",
-      "sha256": "b158e449269187e2753653244a8cbe728f5ab12fe80976a92a568d03514095e4",
-      "review": "Sessions, invitations, MFA, integration keys and broker assertions moved into the identity component without behaviour change"
+      "sha256": "987ff1c77e683a68190e1b3ba34dec25206337eeedcfe5d70a3f1ffb2b2f8ed1",
+      "review": "Batch A: customer accounts, account orders, sign-in throttle, handoff and roles move into customers, orders and identity"
     },
     "src/b2b/access.rs": {
       "status": "unproved",
@@ -6448,8 +6473,8 @@
     },
     "src/bootstrap.rs": {
       "status": "unproved",
-      "sha256": "5156a35623a0041d5c07c85d9503ea0e41e49cd7ece6bb6ee47cdd404707d22a",
-      "review": "Settings and language read cache moved into the shop component; condition check registered at startup; behaviour unchanged"
+      "sha256": "d487e84d87295e95cfb5b1ce77ecb61c268338a42b2732c50a3ac05883d203b3",
+      "review": "Batch A with the migration-mode configuration fix"
     },
     "src/brand_redirect.rs": {
       "status": "unproved",
@@ -6808,8 +6833,8 @@
     },
     "src/commerce/geography.rs": {
       "status": "unproved",
-      "sha256": "23176123198a77331279c430f4da779e1e1eb79c888bacf23321b4512bb1f6a4",
-      "review": "shop component crate created; settings types moved; no kernel binding changed"
+      "sha256": "177fc17cb0a6da5e1a375a1055d0b745fe8167bede6c18b89776a1ad51812bde",
+      "review": "Batch A: customer accounts, account orders, sign-in throttle, handoff and roles move into customers, orders and identity"
     },
     "src/commerce/group_usage.rs": {
       "status": "unproved",
@@ -6833,8 +6858,8 @@
     },
     "src/commerce/mod.rs": {
       "status": "unproved",
-      "sha256": "ae251c4035607a25b1393e8da81d8bb962f8a992b3a8405dc2c30ea4b51e0652",
-      "review": "The purchase transaction moves into checkout behind the purchase port"
+      "sha256": "46a9866f7583529ed770b5d50bdf725b01b8c44cdc06a37fd44d51e2ff833caa",
+      "review": "Batch A: customer accounts, account orders, sign-in throttle, handoff and roles move into customers, orders and identity"
     },
     "src/commerce/order_fields.rs": {
       "status": "unproved",
@@ -7718,8 +7743,8 @@
     },
     "src/performance/mod.rs": {
       "status": "unproved",
-      "sha256": "8e27c619c94e767e56253df1b3aeca9787e2f0c5c8d93f10c98a9cef2fecad37",
-      "review": "Settings and language read cache moved into the shop component; condition check registered at startup; behaviour unchanged"
+      "sha256": "1e67537b21b81121e93c5d25e8af505b0d5e325268a4e0d13138866b2db80436",
+      "review": "Batch A: customer accounts, account orders, sign-in throttle, handoff and roles move into customers, orders and identity"
     },
     "src/planner/admission.rs": {
       "status": "unproved",
@@ -7868,8 +7893,8 @@
     },
     "src/runtime_config.rs": {
       "status": "unproved",
-      "sha256": "c907d01016cfdac827ac090bfb81b8c3232287451b412e9555130e5afb5d20aa",
-      "review": "Process configuration moved into core; browser session transports, Checkout buyer grants, the private Checkout relay, trusted geography and provider startup validation moved into their components without behaviour change"
+      "sha256": "995e82f1f7926048610991ef0d9497eeb8fe55c12fde9c17db3d6dd30fbcc2e7",
+      "review": "Batch A with the migration-mode configuration fix"
     },
     "src/sandbox_cache.rs": {
       "status": "unproved",
@@ -8088,8 +8113,8 @@
       "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
     },
     "Cargo.lock": {
-      "sha256": "a69355ec436d57e71cd88d309d857822e69cfdc9ea5cd70ecdd9f360f705ba05",
-      "review": "Company quotes and their lifecycle rules move into b2b"
+      "sha256": "9c5c6f11317cb8cb90fc3b3cf863c7d8985c5aa9f59ec65906607b5fe2d66fa9",
+      "review": "Batch A: customer accounts, account orders, sign-in throttle, handoff and roles move into customers, orders and identity"
     },
     "Cargo.toml": {
       "sha256": "12d2d79a98f6913d20b8e912afb9ea8de0539b9e83428de8a9d7412c406896f6",

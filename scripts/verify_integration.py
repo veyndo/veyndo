@@ -16,7 +16,7 @@ import time
 import urllib.parse
 import uuid
 
-from testing.runtime import ROOT, artifact_path, run as run_checked, serve, stop
+from testing.runtime import ROOT, artifact_path, require_fresh_binary, run as run_checked, serve, stop
 from testing.database import psql
 from testing.parallel_check import ParallelCheck
 from testing.integration_partitions import PARTITIONS, partition
@@ -29,6 +29,7 @@ parser.add_argument("--keep-going", action="store_true", help="Run the remaining
 parser.add_argument("--partition", choices=PARTITIONS, help="Complete disjoint CI partition, each with its own services and database")
 parser.add_argument("--parallel-pooler", metavar="QDRANT_URL", help="Run signed_pooler concurrently with its own database, logs and a separate disposable Qdrant instance")
 args = parser.parse_args()
+require_fresh_binary()
 started = time.monotonic()
 env = dict(os.environ)
 if args.partition and (args.only or args.existing_database or args.parallel_pooler):

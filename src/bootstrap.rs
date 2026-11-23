@@ -114,6 +114,9 @@ pub(crate) async fn bootstrap() -> App {
 
 pub(crate) async fn run() {
     if env::var("BOOTSTRAP_MODE").is_ok_and(|s| s == "migrate") {
+        // Migrations install hosted app packages through component code that reads the
+        // validated process configuration, so it is installed before the first migration.
+        let _configuration = runtime_config::get();
         let database_url = env::var("DATABASE_URL").expect("DATABASE_URL required");
         let db = PgPoolOptions::new()
             .max_connections(1)

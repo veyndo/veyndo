@@ -11,12 +11,14 @@ pub(crate) fn get() -> &'static Config {
             _ => panic!("HTTP_PROFILE must be combined or api-only"),
         };
         let mode = env::var("BOOTSTRAP_MODE").unwrap_or("auto".into());
+        // The migration-only job is that separate owner job: the serving rules do not apply to it.
+        let serving = mode != "migrate";
         assert!(
-            !strict || mode == "serve",
+            !serving || !strict || mode == "serve",
             "Strict runtime must use BOOTSTRAP_MODE=serve; migrate in a separate owner job"
         );
         assert!(
-            !strict || env::var("DATABASE_RUNTIME_URL").is_ok(),
+            !serving || !strict || env::var("DATABASE_RUNTIME_URL").is_ok(),
             "Strict runtime URL required"
         );
         // Read once at startup so that an invalid default shop stops the process here, not on a request.

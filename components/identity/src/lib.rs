@@ -1,7 +1,9 @@
 //! Identity component: the checks every other component uses to ask who a request acts for and what it may do.
 pub mod domain;
 pub mod http;
+pub mod ports;
 pub mod route_policy;
+pub mod service;
 pub mod store;
 pub mod types;
 pub use domain::permissions::{SCOPES, allowed, scope, validate_permissions};

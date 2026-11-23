@@ -14,9 +14,8 @@ This lists every checked-in source module in these roots, including files with n
 | [src/accounts/demo.rs](../src/accounts/demo.rs) | Public synthetic customer fixture for newly provisioned demo shops; never fills real customer addresses. |
 | [src/accounts/metadata.rs](../src/accounts/metadata.rs) | Standard customer read fields; the projection and metrics are owned by the customers component. |
 | [src/accounts/mod.rs](../src/accounts/mod.rs) | Independent customer sessions, profile/password management and owning-account order history. |
-| [src/accounts/orders.rs](../src/accounts/orders.rs) | Customer-owned order reads and receipts share one tenant/identity predicate and a public projection. |
+| [src/accounts/orders.rs](../src/accounts/orders.rs) | Customer receipt PDFs render in the server; the order reads and projection are owned by the orders component. |
 | [src/accounts/payment_preference.rs](../src/accounts/payment_preference.rs) | Optional last-used payment preference is written after purchase commit, without holding cart/unit/product locks. |
-| [src/accounts/profile.rs](../src/accounts/profile.rs) | Typed customer-owned profile updates; price groups, email and merchant roles cannot be self-assigned. |
 | [src/agent.rs](../src/agent.rs) | Persistent grounded conversations and tenant-scoped semantic knowledge HTTP adapters. |
 | [src/agent_runs/authority.rs](../src/agent_runs/authority.rs) | Saved runs retain an upper authority bound; the identity component rechecks credential, membership and private stage admission. |
 | [src/agent_runs/checkpoint.rs](../src/agent_runs/checkpoint.rs) | Bounded journal of prepared context and completed inference calls; ambiguous calls require explicit continuation. |
@@ -117,7 +116,6 @@ This lists every checked-in source module in these roots, including files with n
 | [src/assets/rich.rs](../src/assets/rich.rs) | Safe structured rich content is validated by the catalog component. |
 | [src/assets/rich_document.rs](../src/assets/rich_document.rs) | The URL rule of rich documents is owned by the catalog component. |
 | [src/assets/upload.rs](../src/assets/upload.rs) | Entry points of product file operations for capabilities and app upload surfaces; rules and storage are owned by the catalog component. |
-| [src/auth/abuse.rs](../src/auth/abuse.rs) | Database-backed account and trusted peer-prefix throttles shared by replicas; reserve before password hashing. |
 | [src/auth/broker.rs](../src/auth/broker.rs) | Optional trusted identity exchange: signatures bind route, audience, expiry and one-use nonce. |
 | [src/auth/broker_credentials.rs](../src/auth/broker_credentials.rs) | Broker password setup and verification are owned by the identity component. |
 | [src/auth/broker_inference.rs](../src/auth/broker_inference.rs) | Trusted server-to-server inference inherits operator settings without disclosing any provider credentials. |
@@ -126,7 +124,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/auth/browser.rs](../src/auth/browser.rs) | Browser transport for the existing personal-session ledger: host-only HttpOnly cookies, exact origins and CSRF. |
 | [src/auth/credentials.rs](../src/auth/credentials.rs) | Argon2 password operations run off the asynchronous request executor. |
 | [src/auth/dto.rs](../src/auth/dto.rs) | Stable typed authentication envelopes are owned by the identity component. |
-| [src/auth/handoff.rs](../src/auth/handoff.rs) | One-time personal-session handoff to the Studio; no passwords or bearer tokens in links. |
+| [src/auth/handoff.rs](../src/auth/handoff.rs) | The Studio handoff is owned by the identity component. |
 | [src/auth/identity.rs](../src/auth/identity.rs) | Resolve the current credential and membership once; bootstrap and sandbox checks share the same boundary. |
 | [src/auth/integrations.rs](../src/auth/integrations.rs) | Credential resolution and integration keys are owned by the identity component. |
 | [src/auth/invitations.rs](../src/auth/invitations.rs) | Workspace invitations are owned by the identity component. |
@@ -849,6 +847,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/customers/src/domain/profile.rs](../components/customers/src/domain/profile.rs) | Which profile fields are shown as top-level contact fields of a customer. |
 | [components/customers/src/domain/search.rs](../components/customers/src/domain/search.rs) | A merchant's search text as a literal, case-insensitive LIKE fragment. |
 | [components/customers/src/domain.rs](../components/customers/src/domain.rs) | Rules of customer data, free of I/O. |
+| [components/customers/src/http/account.rs](../components/customers/src/http/account.rs) | Customer accounts on the storefront: registration, the typed profile and the password swap; price groups, email and merchant roles cannot be self-assigned. |
 | [components/customers/src/http/addresses.rs](../components/customers/src/http/addresses.rs) | Store API address book: independent customer sessions, never merchant credentials. |
 | [components/customers/src/http/browser.rs](../components/customers/src/http/browser.rs) | Host-only customer cookies adapt the existing tenant session ledger without granting merchant authority. |
 | [components/customers/src/http/crm_context.rs](../components/customers/src/http/crm_context.rs) | The choices a CRM writer needs to create a customer, without granting settings access. |
@@ -871,9 +870,11 @@ This lists every checked-in source module in these roots, including files with n
 | [components/identity/src/domain/permissions.rs](../components/identity/src/domain/permissions.rs) | The permission vocabulary and the decision whether a request holds one. Owners retain control; delegates cannot grant rights they lack. |
 | [components/identity/src/domain/totp.rs](../components/identity/src/domain/totp.rs) | RFC 6238 authenticator codes, bounded clock drift and constant-time comparison. |
 | [components/identity/src/domain.rs](../components/identity/src/domain.rs) | Pure identity rules: no database, no transport. |
+| [components/identity/src/http/abuse.rs](../components/identity/src/http/abuse.rs) | Database-backed account and trusted peer-prefix throttles shared by replicas; reserve before password hashing. |
 | [components/identity/src/http/access.rs](../components/identity/src/http/access.rs) | What a signed-in person may do in this workspace, their own sessions, and revocation of sessions and invitations. |
 | [components/identity/src/http/broker.rs](../components/identity/src/http/broker.rs) | Password setup, recovery discovery and session requests from the trusted, verified-email identity broker. |
 | [components/identity/src/http/browser.rs](../components/identity/src/http/browser.rs) | Browser transport for the existing personal-session ledger: host-only HttpOnly cookies, exact origins and CSRF. |
+| [components/identity/src/http/handoff.rs](../components/identity/src/http/handoff.rs) | One-time personal-session handoff to the Studio; no passwords or bearer tokens in links. |
 | [components/identity/src/http/integrations.rs](../components/identity/src/http/integrations.rs) | Explicit-lifetime API/MCP keys are bounded to one workspace and intersect their creator's current membership. |
 | [components/identity/src/http/invitations.rs](../components/identity/src/http/invitations.rs) | Single-use, expiring invitations. Acceptance verifies an existing account password. |
 | [components/identity/src/http/members.rs](../components/identity/src/http/members.rs) | Workspace member visibility and immediately effective role/revocation changes. |
@@ -881,7 +882,10 @@ This lists every checked-in source module in these roots, including files with n
 | [components/identity/src/http/sessions.rs](../components/identity/src/http/sessions.rs) | Login, logout and personal workspace discovery. |
 | [components/identity/src/http.rs](../components/identity/src/http.rs) | HTTP handlers of the identity component. |
 | [components/identity/src/lib.rs](../components/identity/src/lib.rs) | Identity component: the checks every other component uses to ask who a request acts for and what it may do. |
+| [components/identity/src/ports.rs](../components/identity/src/ports.rs) | What role management needs from the server: the shop languages role names are written in. |
 | [components/identity/src/route_policy.rs](../components/identity/src/route_policy.rs) | Rights are registered beside each API method. Missing registrations always deny access. |
+| [components/identity/src/service/roles.rs](../components/identity/src/service/roles.rs) | Tenant-owned roles: current grants, revisioned edits, dependency-checked removal and shared history. |
+| [components/identity/src/service.rs](../components/identity/src/service.rs) | service of this component. |
 | [components/identity/src/store/agent_authority.rs](../components/identity/src/store/agent_authority.rs) | Saved agent runs retain an upper authority bound; every continuation rechecks credential, membership and private stage admission. |
 | [components/identity/src/store/broker.rs](../components/identity/src/store/broker.rs) | Trusted identity broker assertions: the signature binds route, audience, expiry and a one-use nonce. |
 | [components/identity/src/store/credentials.rs](../components/identity/src/store/credentials.rs) | Resolves a bearer credential once: the person or app behind it, its workspace memberships and the selected shop. |
@@ -1019,6 +1023,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/orders/src/domain/receipt_pdf.rs](../components/orders/src/domain/receipt_pdf.rs) | Minimal paginated PDF serializer with WinAnsi Helvetica; snapshot retains complete Unicode originals. |
 | [components/orders/src/domain/receipt_text.rs](../components/orders/src/domain/receipt_text.rs) | Four-language document labels and authoritative snapshot-to-print projection. |
 | [components/orders/src/domain.rs](../components/orders/src/domain.rs) | Rules of orders, free of I/O. |
+| [components/orders/src/http/account_orders.rs](../components/orders/src/http/account_orders.rs) | Customer-owned order reads share one tenant/identity predicate and a public projection. |
 | [components/orders/src/http/company.rs](../components/orders/src/http/company.rs) | Company basis transport: reading and saving the shop-wide or channel-specific company data under the settings rights. |
 | [components/orders/src/http/company_logo.rs](../components/orders/src/http/company_logo.rs) | Company logo transport: one multipart upload, a merchant preview and the public delivery of linked logos. |
 | [components/orders/src/http/delivery_split.rs](../components/orders/src/http/delivery_split.rs) | Provider-neutral partial-package allocation; quantities and fiscal order snapshots remain conserved. |

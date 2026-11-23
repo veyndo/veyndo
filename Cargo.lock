@@ -3739,6 +3739,7 @@ dependencies = [
  "sqlx",
  "veyndo-core",
  "veyndo-identity",
+ "veyndo-marketing",
  "veyndo-pricing",
  "veyndo-runtime",
  "veyndo-shipping",

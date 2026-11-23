@@ -245,7 +245,7 @@ async fn authenticate_scoped(State(a): State<App>, mut request: Request, next: N
     request.extensions_mut().insert(h);
     let mut response = veyndo::inference::budget::scoped(
         agent_authority,
-        veyndo::tenant_scope::scoped(scope, super::abuse::run(&a, request, next)),
+        veyndo::tenant_scope::scoped(scope, veyndo_identity::http::abuse::run(&a, request, next)),
     )
     .await;
     if private_response {

@@ -14,11 +14,3 @@ pub(crate) async fn country_catalogue(
         json!({"countries":catalogue(&s),"enabled":s.countries,"mainLocale":s.main_locale,"locales":s.locales,"revision":revision}),
     ))
 }
-/// All address entry points share tenant-defined country/subdivision validation.
-pub(crate) fn validate_address_geography(address: &Address, settings: &Settings) -> Result<()> {
-    geography::validate_address(
-        &address.country,
-        &address.country_state_id,
-        &settings.country_definitions,
-    )
-}

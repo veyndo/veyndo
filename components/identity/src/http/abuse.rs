@@ -1,5 +1,4 @@
 //! Database-backed account and trusted peer-prefix throttles shared by replicas; reserve before password hashing.
-use crate::{App, Error, Result, StatusCode, hash, request_context::HeaderReader};
 use axum::{
     body::Body,
     extract::{ConnectInfo, Request},
@@ -7,6 +6,11 @@ use axum::{
     response::{IntoResponse, Response},
 };
 use std::net::{IpAddr, SocketAddr};
+use veyndo_core::admission::run as admit_request;
+use veyndo_core::request_context::HeaderReader;
+use veyndo_core::{Error, Result, State, StatusCode, bad, hash, process_config};
+use veyndo_runtime::tenant_scope::{Scope, scoped};
+/// The network prefix of an address: /24 for IPv4, /56 for IPv6, never the address itself.
 fn prefix(ip: IpAddr) -> String {
     match ip {
         IpAddr::V4(ip) => {
@@ -19,13 +23,13 @@ fn prefix(ip: IpAddr) -> String {
         }
     }
 }
+/// The peer prefix of a request; a forwarded address counts only behind a trusted proxy.
 fn peer(request: &Request) -> String {
     let actual = request
         .extensions()
         .get::<ConnectInfo<SocketAddr>>()
         .map(|p| p.0.ip());
-    let trusted =
-        actual.is_some_and(|ip| crate::runtime_config::get().trusted_proxies.contains(&ip));
+    let trusted = actual.is_some_and(|ip| process_config::get().trusted_proxies.contains(&ip));
     // Only the last proxy-added address is trusted; user-supplied leading forwarded values are ignored.
     let forwarded = if trusted {
         request
@@ -41,7 +45,8 @@ fn peer(request: &Request) -> String {
         .map(prefix)
         .unwrap_or_else(|| "unknown-peer".into())
 }
-async fn reserve(a: &App, key: &str, limit: i32) -> Result<()> {
+/// Counts one attempt in the bucket; a full or blocked bucket refuses it.
+async fn reserve(a: &State, key: &str, limit: i32) -> Result<()> {
     let allowed:Option<i32>=sqlx::query_scalar("INSERT INTO auth_attempt_buckets(key,attempts) VALUES($1,1) ON CONFLICT(key) DO UPDATE SET attempts=CASE WHEN auth_attempt_buckets.window_at < now()-interval '1 minute' THEN 1 ELSE auth_attempt_buckets.attempts+1 END,window_at=CASE WHEN auth_attempt_buckets.window_at < now()-interval '1 minute' THEN now() ELSE auth_attempt_buckets.window_at END,updated_at=now() WHERE auth_attempt_buckets.blocked_until<=now() AND (auth_attempt_buckets.window_at<now()-interval '1 minute' OR auth_attempt_buckets.attempts<$2) RETURNING attempts")
         .bind(key).bind(limit).fetch_optional(&a.db).await?;
     if allowed.is_none() {
@@ -52,7 +57,8 @@ async fn reserve(a: &App, key: &str, limit: i32) -> Result<()> {
     }
     Ok(())
 }
-pub(super) async fn run(a: &App, request: Request, next: Next) -> Response {
+/// Throttles sign-in, registration and redemption by peer prefix and account before the request is admitted.
+pub async fn run(a: &State, request: Request, next: Next) -> Response {
     let path = request.uri().path().to_owned();
     let guarded = matches!(
         path.as_str(),
@@ -68,19 +74,17 @@ pub(super) async fn run(a: &App, request: Request, next: Next) -> Response {
             | "/store-api/account/register"
     );
     if !guarded {
-        return crate::performance::admit_request(a, request, next).await;
+        return admit_request(a, request, next).await;
     }
     let peer = hash(&format!("auth-ip:{}", peer(&request)));
-    let checked =
-        veyndo::tenant_scope::scoped(veyndo::tenant_scope::Scope::System, reserve(a, &peer, 120))
-            .await;
+    let checked = scoped(Scope::System, reserve(a, &peer, 120)).await;
     if let Err(e) = checked {
         return throttled(e);
     }
     let (parts, body) = request.into_parts();
     let body = match axum::body::to_bytes(body, 65536).await {
         Ok(b) => b,
-        Err(_) => return crate::bad("Authentication payload exceeds 64 KiB").into_response(),
+        Err(_) => return bad("Authentication payload exceeds 64 KiB").into_response(),
     };
     let value: serde_json::Value = serde_json::from_slice(&body).unwrap_or_default();
     let account = value["email"]
@@ -99,22 +103,19 @@ pub(super) async fn run(a: &App, request: Request, next: Next) -> Response {
     };
     let key = account.map(|account| hash(&format!("auth-account:{path}:{tenant}:{account}")));
     if let Some(key) = &key
-        && let Err(e) =
-            veyndo::tenant_scope::scoped(veyndo::tenant_scope::Scope::System, reserve(a, key, 12))
-                .await
+        && let Err(e) = scoped(Scope::System, reserve(a, key, 12)).await
     {
         return throttled(e);
     }
-    let response =
-        crate::performance::admit_request(a, Request::from_parts(parts, Body::from(body)), next)
-            .await;
+    let response = admit_request(a, Request::from_parts(parts, Body::from(body)), next).await;
     if response.status() == StatusCode::UNAUTHORIZED
         && let Some(key) = key
     {
-        let _=veyndo::tenant_scope::scoped(veyndo::tenant_scope::Scope::System,sqlx::query("UPDATE auth_attempt_buckets SET blocked_until=now()+least(60,power(2,least(attempts,6))::int)*interval '1 second' WHERE key=$1 AND attempts>=5").bind(key).execute(&a.db)).await;
+        let _=scoped(Scope::System,sqlx::query("UPDATE auth_attempt_buckets SET blocked_until=now()+least(60,power(2,least(attempts,6))::int)*interval '1 second' WHERE key=$1 AND attempts>=5").bind(key).execute(&a.db)).await;
     }
     response
 }
+/// A refused attempt, with a retry hint when it was throttled.
 fn throttled(e: Error) -> Response {
     let mut r = e.into_response();
     if r.status() == StatusCode::TOO_MANY_REQUESTS {

@@ -5,7 +5,7 @@ pub(crate) mod access_snapshot;
 pub(crate) use veyndo_core::database::lease as cluster_lease;
 pub(crate) mod delivery;
 pub(crate) use veyndo_core::admission::{
-    Admission, AiStreamAdmission, reserve_ai_attempt, reserve_ai_attempt_tx, run as admit_request,
+    Admission, AiStreamAdmission, reserve_ai_attempt, reserve_ai_attempt_tx,
 };
 mod invalidation;
 pub(crate) use invalidation::start as start_invalidations;
