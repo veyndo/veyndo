@@ -1,22 +1,29 @@
 //! Operational history comparison reads actual CRM/address/order/review values with paired current PII rights.
-use super::*;
-pub(super) async fn inspect(
-    a: &App,
+use super::{SourceRecord, relations};
+use serde_json::{Value, json};
+use sqlx::Row;
+use veyndo_core::{RequestContext, Result, State, bad, hash};
+use veyndo_customers::service::address_entries::address_list;
+use veyndo_customers::store::crm::address_plan;
+use veyndo_identity::domain::credentials::email;
+use veyndo_identity::{merchant, permit};
+pub async fn inspect(
+    a: &State,
     h: &RequestContext,
     r: &SourceRecord,
     options: &Value,
     id: &str,
 ) -> Result<(Value, Option<Value>)> {
-    auth::permit(h, "customers.pii")?;
-    let t = merchant(a, h)?;
+    permit(h, "customers.pii")?;
+    let t = merchant(h)?;
     match r.kind.as_str() {
         "customers" => {
-            auth::permit(h, "customers.read")?;
+            permit(h, "customers.read")?;
             let row=sqlx::query("SELECT email,profile,group_name,automation FROM customers WHERE tenant=$1 AND id=$2").bind(&t).bind(id).fetch_optional(&a.db).await?;
             let mut actual = None;
             if let Some(row) = row {
                 let email: String = row.get("email");
-                let book = accounts::address_list(a, &t, &email).await?;
+                let book = address_list(a, &t, &email).await?;
                 let elements = book["elements"]
                     .as_array()
                     .ok_or(bad("Native address book unavailable"))?;
@@ -38,7 +45,7 @@ pub(super) async fn inspect(
             }
             let first = r.data["firstName"].as_str().unwrap_or("");
             let last = r.data["lastName"].as_str().unwrap_or("");
-            let plan = crate::operations::customer_create::address_plan(&r.data)?;
+            let plan = address_plan(&r.data)?;
             let mut billing = Value::Null;
             let mut shipping = Value::Null;
             let mut addresses = vec![];
@@ -54,12 +61,12 @@ pub(super) async fn inspect(
             }
             addresses.sort_by_key(Value::to_string);
             Ok((
-                json!({"email":auth::email(&r.data)?,"profile":{"name":format!("{first} {last}"),"firstName":first,"lastName":last},"customerGroup":options["customerGroup"],"sourceDigest":hash(&json!(r).to_string()),"billingAddress":billing,"shippingAddress":shipping,"addresses":addresses}),
+                json!({"email":email(&r.data)?,"profile":{"name":format!("{first} {last}"),"firstName":first,"lastName":last},"customerGroup":options["customerGroup"],"sourceDigest":hash(&json!(r).to_string()),"billingAddress":billing,"shippingAddress":shipping,"addresses":addresses}),
                 actual,
             ))
         }
         "orders" => {
-            auth::permit(h, "orders.read")?;
+            permit(h, "orders.read")?;
             let actual=sqlx::query_scalar::<_,Value>("SELECT data||jsonb_build_object('sourceCreatedAt',to_char(created_at AT TIME ZONE 'UTC','YYYY-MM-DD\"T\"HH24:MI:SS.US\"Z\"')) FROM orders WHERE tenant=$1 AND id=$2").bind(&t).bind(id).fetch_optional(&a.db).await?;
             let created = chrono::DateTime::parse_from_rfc3339(
                 r.data["createdAt"]
@@ -76,7 +83,7 @@ pub(super) async fn inspect(
             ))
         }
         "reviews" => {
-            auth::permit(h, "catalog.read")?;
+            permit(h, "catalog.read")?;
             let actual=sqlx::query_scalar::<_,Value>("SELECT jsonb_build_object('productId',product_id,'sourceAuthor',author,'rating',rating,'title',title,'text',content,'verifiedPurchase',verified,'sourceDigest',source_import->>'recordDigest','createdAt',to_char(created_at AT TIME ZONE 'UTC','YYYY-MM-DD\"T\"HH24:MI:SS.US\"Z\"')) FROM product_reviews WHERE tenant=$1 AND id=$2").bind(&t).bind(id).fetch_optional(&a.db).await?;
             let created = chrono::DateTime::parse_from_rfc3339(
                 r.data["createdAt"]

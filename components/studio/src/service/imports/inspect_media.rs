@@ -1,14 +1,17 @@
 //! Current immutable image bytes and the independently editable native media association are both inspected.
-use super::*;
-pub(super) async fn inspect(
-    a: &App,
+use super::{SourceRecord, relations};
+use serde_json::{Value, json};
+use veyndo_core::{RequestContext, Result, State, bad, hash};
+use veyndo_identity::{merchant, permit};
+pub async fn inspect(
+    a: &State,
     h: &RequestContext,
     r: &SourceRecord,
     namespace: &str,
     id: &str,
 ) -> Result<(Value, Option<Value>)> {
-    auth::permit(h, "catalog.read")?;
-    let t = merchant(a, h)?;
+    permit(h, "catalog.read")?;
+    let t = merchant(h)?;
     let product = relations::identity(
         r,
         namespace,

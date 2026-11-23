@@ -1,14 +1,23 @@
 //! Source-neutral category intake preserves stable hierarchy and uses the revisioned native category owner privately.
-use super::*;
-pub(super) async fn import(
-    a: &App,
+use super::SourceRecord;
+use crate::ports::ImportHost;
+use axum::Json;
+use serde_json::{Value, json};
+use veyndo_catalog::service::categories::write as write_category;
+use veyndo_core::shop_scope::parent;
+use veyndo_core::{RequestContext, Result, State, bad, conflict, hash};
+use veyndo_identity::{merchant, permit};
+use veyndo_shop::service::read_cache::config;
+pub async fn import<H: ImportHost>(
+    host: &H,
     h: &RequestContext,
     r: &SourceRecord,
     options: &Value,
 ) -> Result<Value> {
-    auth::permit(h, "catalog.write")?;
-    let t = merchant(a, h)?;
-    if staging::parent(a, &t).await?.is_none() {
+    let a = host.core();
+    permit(h, "catalog.write")?;
+    let t = merchant(h)?;
+    if parent(a, &t).await?.is_none() {
         return Err(bad("Category migration requires a private preview"));
     }
     let namespace = super::identity_namespace(a, &t).await?;
@@ -29,19 +38,19 @@ pub(super) async fn import(
         ));
     }
     let payload = mapped(a, &t, r, options).await?;
-    let Json(value) = crate::categories::import(a.clone(), h.clone(), id, payload).await?;
+    let Json(value) = Json(write_category(&host.catalog(), h, &id, payload, true).await?);
     Ok(json!({"id":value["id"],"replayed":false}))
 }
 
 /// Read-only inspection and creation share this native hierarchy/translation mapping.
-pub(super) async fn mapped(a: &App, t: &str, r: &SourceRecord, options: &Value) -> Result<Value> {
+pub async fn mapped(a: &State, t: &str, r: &SourceRecord, options: &Value) -> Result<Value> {
     let namespace = super::identity_namespace(a, t).await?;
     let digest = hash(&json!({"record":r,"options":options}).to_string());
-    let (settings, _) = commerce::config(a, t).await?;
+    let (settings, _) = config(a, t).await?;
     let names = r.data["title"]
         .as_object()
         .ok_or(bad("Translated category names required"))?;
-    let translations:serde_json::Map<String,Value>=names.iter().map(|(locale,name)|(commerce::product_language_key(locale,&settings),json!({"name":name,"description":r.data["body"][locale],"slug":r.data["slug"][locale]}))).collect();
+    let translations:serde_json::Map<String,Value>=names.iter().map(|(locale,name)|(settings.languages().key(locale),json!({"name":name,"description":r.data["body"][locale],"slug":r.data["slug"][locale]}))).collect();
     let parent = r
         .data
         .get("parentSourceId")

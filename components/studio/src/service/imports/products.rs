@@ -1,14 +1,22 @@
 //! Private native product intake delegates all catalogue validation, history and selected release to the existing owner.
-use super::*;
-pub(super) async fn import(
-    a: &App,
+use super::SourceRecord;
+use crate::http::product_editor::create_product;
+use axum::Json;
+use axum::extract::State as Shared;
+use serde_json::{Value, json};
+use veyndo_core::shop_scope::parent;
+use veyndo_core::{RequestContext, Result, State, bad, conflict, hash};
+use veyndo_identity::{merchant, permit};
+use veyndo_shop::service::read_cache::config;
+pub async fn import(
+    a: &State,
     h: &RequestContext,
     r: &SourceRecord,
     options: &Value,
 ) -> Result<Value> {
-    auth::permit(h, "catalog.write")?;
-    let t = merchant(a, h)?;
-    if staging::parent(a, &t).await?.is_none() {
+    permit(h, "catalog.write")?;
+    let t = merchant(h)?;
+    if parent(a, &t).await?.is_none() {
         return Err(bad(
             "Product migration requires a private preview; live inventory was not changed",
         ));
@@ -31,13 +39,12 @@ pub(super) async fn import(
         ));
     }
     let payload = mapped(a, &t, r, options).await?;
-    let Json(result) =
-        commerce::create_product(State(a.core.clone()), h.clone(), Json(payload)).await?;
+    let Json(result) = create_product(Shared(a.clone()), h.clone(), Json(payload)).await?;
     Ok(json!({"id":result["id"],"replayed":false,"stockActivated":false}))
 }
 
 /// Shared native mapping for writes and read-only reconciliation; no second price/translation calculator.
-pub(super) async fn mapped(a: &App, t: &str, r: &SourceRecord, options: &Value) -> Result<Value> {
+pub async fn mapped(a: &State, t: &str, r: &SourceRecord, options: &Value) -> Result<Value> {
     let active = match r.data.get("catalogActive") {
         None | Some(Value::Null) => true,
         Some(value) => value
@@ -47,7 +54,7 @@ pub(super) async fn mapped(a: &App, t: &str, r: &SourceRecord, options: &Value) 
     let namespace = super::identity_namespace(a, t).await?;
     let id = r.identity(&namespace);
     let digest = hash(&json!({"record":r,"options":options}).to_string());
-    let (settings, revision) = commerce::config(a, t).await?;
+    let (settings, revision) = config(a, t).await?;
     let tax = options["taxRate"]
         .as_f64()
         .filter(|n| n.is_finite() && (0.0..=50.0).contains(n))
@@ -68,9 +75,10 @@ pub(super) async fn mapped(a: &App, t: &str, r: &SourceRecord, options: &Value) 
     if currency.scale != scale {
         return Err(bad("Source currency scale differs from native currency"));
     }
-    let mut price = veyndo::money::Money::new(
+    let mut price = veyndo_pricing::money::Money::new(
         minor,
-        veyndo::money::Currency::new(code, scale).map_err(|_| bad("Invalid source currency"))?,
+        veyndo_pricing::money::Currency::new(code, scale)
+            .map_err(|_| bad("Invalid source currency"))?,
     )
     .decimal()
     .parse::<f64>()
@@ -88,7 +96,7 @@ pub(super) async fn mapped(a: &App, t: &str, r: &SourceRecord, options: &Value) 
         return Err(bad("Explicitly confirm the declared source price basis"));
     }
     if basis == "net" {
-        price = calculate(&PriceInput {
+        price = veyndo_pricing::pricing::calculate(&veyndo_pricing::pricing::PriceInput {
             price,
             tax_rate: tax,
             gross: true,
@@ -111,7 +119,7 @@ pub(super) async fn mapped(a: &App, t: &str, r: &SourceRecord, options: &Value) 
         .iter()
         .map(|(locale, name)| {
             (
-                commerce::product_language_key(locale, &settings),
+                settings.languages().key(locale),
                 json!({"name":name,"description":r.data["description"][locale]}),
             )
         })
@@ -122,10 +130,7 @@ pub(super) async fn mapped(a: &App, t: &str, r: &SourceRecord, options: &Value) 
             .as_object()
             .ok_or(bad("Translated native rich descriptions required"))?;
         for (locale, blocks) in values {
-            rich.insert(
-                commerce::product_language_key(locale, &settings),
-                blocks.clone(),
-            );
+            rich.insert(settings.languages().key(locale), blocks.clone());
         }
     }
     let sku = r.data["sku"]

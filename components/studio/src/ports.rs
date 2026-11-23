@@ -62,3 +62,43 @@ pub trait ReleaseHost: Send + Sync {
     /// Compiles and caches the sandbox policy of a new environment.
     fn register_sandbox(&self, id: &str, wat: &str) -> veyndo_core::Result<()>;
 }
+
+/// What source-record imports need from the server: managed app record imports, product image intake, coupon configuration and the catalogue state.
+pub trait ImportHost: Send + Sync {
+    /// The shared state.
+    fn core(&self) -> &veyndo_core::State;
+    /// The catalogue state with its ports.
+    fn catalog(&self) -> veyndo_catalog::ports::Catalog;
+    /// Imports one managed app record into a reviewed destination package.
+    fn import_record<'a>(
+        &'a self,
+        h: &'a RequestContext,
+        id: &'a str,
+        destination: &'a Value,
+        digest: &'a str,
+    ) -> PortFuture<'a, Value>;
+    /// Compares one managed app record with its destination without writing.
+    fn inspect_record<'a>(
+        &'a self,
+        h: &'a RequestContext,
+        id: &'a str,
+        destination: &'a Value,
+        digest: &'a str,
+    ) -> PortFuture<'a, (Value, Option<Value>)>;
+    /// Stores an imported product image through the native asset owner.
+    fn import_image<'a>(
+        &'a self,
+        h: &'a RequestContext,
+        product: &'a str,
+        id: &'a str,
+        metadata: &'a Value,
+        bytes: Vec<u8>,
+    ) -> PortFuture<'a, Value>;
+    /// Saves an imported coupon inactive and unreviewed through the native promotion owner.
+    fn import_promotion<'a>(
+        &'a self,
+        h: &'a RequestContext,
+        id: &'a str,
+        data: &'a Value,
+    ) -> PortFuture<'a, Value>;
+}

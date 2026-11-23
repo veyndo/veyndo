@@ -455,8 +455,6 @@
       ],
       "foreign_tables": [
         "carts",
-        "categories",
-        "commerce_promotions",
         "commerce_settings",
         "company_logos",
         "company_overrides",
@@ -464,14 +462,12 @@
         "order_downloads",
         "outbox",
         "product_assets",
-        "product_reviews",
-        "products",
         "sales_channels",
         "tenants"
       ],
-      "glob_imports": 20,
-      "untyped_access": 461,
-      "sql_outside_store": 11
+      "glob_imports": 10,
+      "untyped_access": 306,
+      "sql_outside_store": 5
     },
     "payments": {
       "title": "Provider-independent payment ledger, captures, refunds and provider workers",
@@ -882,6 +878,7 @@
         "channel_metrics",
         "commerce_flows",
         "commerce_overrides",
+        "commerce_promotions",
         "commerce_rules",
         "commerce_settings",
         "company_logos",
@@ -895,6 +892,7 @@
         "knowledge_documents",
         "languages",
         "merchant_users",
+        "order_activity",
         "order_state_machines",
         "orders",
         "outbox",
@@ -904,6 +902,7 @@
         "product_assets",
         "product_categories",
         "product_channel_visibility",
+        "product_reviews",
         "product_translations",
         "products",
         "projections",
@@ -917,8 +916,8 @@
         "translation_jobs"
       ],
       "glob_imports": 10,
-      "untyped_access": 230,
-      "sql_outside_store": 15
+      "untyped_access": 385,
+      "sql_outside_store": 21
     },
     "protocols": {
       "title": "MCP, UCP and the shared capability dispatch; adapters without business rules",

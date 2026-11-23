@@ -28,3 +28,5 @@ veyndo-cognition = { path = "../../crates/cognition" }
 uuid.workspace = true
 veyndo-b2b = { path = "../b2b" }
 veyndo-pos = { path = "../pos" }
+base64.workspace = true
+sha2.workspace = true

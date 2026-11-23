@@ -4078,13 +4078,78 @@
     },
     "components/studio/src/ports.rs": {
       "status": "unproved",
-      "sha256": "302aa9b0a69b9a35220034362634b3603970585452b7fd2b0dcbacf60d6a2811",
-      "review": "Batch F2: sandbox clone, snapshot, diff and release moved into studio behind the ReleaseHost port"
+      "sha256": "e199205ad5068d21e5daba641548b4fbe7c1662ed7cd624381994b44f0140372",
+      "review": "Batch F4: source-record imports moved into studio behind the ImportHost port"
     },
     "components/studio/src/service/grid_plan.rs": {
       "status": "unproved",
       "sha256": "b15865176f6ee4aa5922e3b8037a20a9341af2dfa639a8ac0a2d6a830d8078c5",
       "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
+    },
+    "components/studio/src/service/imports/assets.rs": {
+      "status": "unproved",
+      "sha256": "ea6d56657e91d69643efd65c968f79a3937c3a77b1cb11930fe24a16c88f393a",
+      "review": "Batch F4: source-record imports moved into studio behind the ImportHost port"
+    },
+    "components/studio/src/service/imports/categories.rs": {
+      "status": "unproved",
+      "sha256": "6e6d4b6f948271cf27bca5ff54ca504d02bb0a8fd5955cb763ddd03afdcad199",
+      "review": "Batch F4: source-record imports moved into studio behind the ImportHost port"
+    },
+    "components/studio/src/service/imports/coupons.rs": {
+      "status": "unproved",
+      "sha256": "8c793d03e8dceed2500d7d2a6f6835cabdacd78d12bf4f97eb721b1eb7b36d94",
+      "review": "Batch F4: source-record imports moved into studio behind the ImportHost port"
+    },
+    "components/studio/src/service/imports/customers.rs": {
+      "status": "unproved",
+      "sha256": "0224146af9d7b1324d35f39781da399adffcee5258d09894fb5f333e108a5d1f",
+      "review": "Batch F4: source-record imports moved into studio behind the ImportHost port"
+    },
+    "components/studio/src/service/imports/historical_orders.rs": {
+      "status": "unproved",
+      "sha256": "9588154134ab3f30cba4fe0397048d8fa8f7cb5a625b97fdb5a3b7743340f466",
+      "review": "Batch F4: source-record imports moved into studio behind the ImportHost port"
+    },
+    "components/studio/src/service/imports/inspect.rs": {
+      "status": "unproved",
+      "sha256": "1be91e25fb0497cb952e4f6ea5d5a6b751ee93a44e89f2c005bfda3e251fc44a",
+      "review": "Batch F4: source-record imports moved into studio behind the ImportHost port"
+    },
+    "components/studio/src/service/imports/inspect_history.rs": {
+      "status": "unproved",
+      "sha256": "2cb7fcf00c509a4be4c0bb1a00ee87dd6703fff381dcea891db11b8ced5a5dc8",
+      "review": "Batch F4: source-record imports moved into studio behind the ImportHost port"
+    },
+    "components/studio/src/service/imports/inspect_media.rs": {
+      "status": "unproved",
+      "sha256": "e5ab94ee8c779b49b98647b836a1a12d406f5829e194269528cc212ee9ca98cd",
+      "review": "Batch F4: source-record imports moved into studio behind the ImportHost port"
+    },
+    "components/studio/src/service/imports/inspect_product.rs": {
+      "status": "unproved",
+      "sha256": "4b0878a933c02ac64e1adb70b2dc2dfebfb847b5fa681b238f477705998fa71c",
+      "review": "Batch F4: source-record imports moved into studio behind the ImportHost port"
+    },
+    "components/studio/src/service/imports/products.rs": {
+      "status": "unproved",
+      "sha256": "1098fb96ce6cb13ef1c64392d02cfade9511f5b595c729553906108766ef0ae9",
+      "review": "Batch F4: source-record imports moved into studio behind the ImportHost port"
+    },
+    "components/studio/src/service/imports/relations.rs": {
+      "status": "unproved",
+      "sha256": "35b8180145f9a502d93491585c986ffcfeb7192c66b1cefbe40c49893d035ac4",
+      "review": "Batch F4: source-record imports moved into studio behind the ImportHost port"
+    },
+    "components/studio/src/service/imports/reviews.rs": {
+      "status": "unproved",
+      "sha256": "b6e7f60430fd5bbcccda74aaf3efc4cf28aa4bffc208f52cb253b9c82187dfb0",
+      "review": "Batch F4: source-record imports moved into studio behind the ImportHost port"
+    },
+    "components/studio/src/service/imports.rs": {
+      "status": "unproved",
+      "sha256": "cd799d962d0d819bd8d099eaea585fc9a1b842b90ce7cd1100685da8377d5933",
+      "review": "Batch F4: source-record imports moved into studio behind the ImportHost port"
     },
     "components/studio/src/service/proposal_admission.rs": {
       "status": "unproved",
@@ -4143,8 +4208,8 @@
     },
     "components/studio/src/service.rs": {
       "status": "unproved",
-      "sha256": "452fc05a05dfbe4fef97fafcf33696c915e46e55cbde432e63fe69c21e272ae0",
-      "review": "Batch F2: sandbox clone, snapshot, diff and release moved into studio behind the ReleaseHost port"
+      "sha256": "e97c52abc03514e4bf0d2eb361156402a09bd1d6d03ae6c8dd612513a790304b",
+      "review": "Batch F4: source-record imports moved into studio behind the ImportHost port"
     },
     "components/studio/src/store/history.rs": {
       "status": "unproved",
@@ -5968,8 +6033,8 @@
     },
     "src/accounts/address_store.rs": {
       "status": "unproved",
-      "sha256": "d1066f06b1d078d1712baad47a14be40801023f7ce2a5e8f64af5b5f6fde792e",
-      "review": "Address book entries and storefront routes move into customers"
+      "sha256": "5c19a225980af6ea294fcedbccb745f06a4a4abd7f07f46fdbadc55896670ae5",
+      "review": "Batch F4: source-record imports moved into studio behind the ImportHost port"
     },
     "src/accounts/browser.rs": {
       "status": "unproved",
@@ -6748,8 +6813,8 @@
     },
     "src/categories/mod.rs": {
       "status": "unproved",
-      "sha256": "afd50321799b0e8f15c503e531a5448ef30a259762ea558f1b646a7ea7b98148",
-      "review": "Batch F2: sandbox clone, snapshot, diff and release moved into studio behind the ReleaseHost port"
+      "sha256": "e79a0afb08a967e68d0803fa6895788f6aa441ab726b88aa80abd5258b11776b",
+      "review": "Batch F4: source-record imports moved into studio behind the ImportHost port"
     },
     "src/categories/navigation.rs": {
       "status": "unproved",
@@ -6993,8 +7058,8 @@
     },
     "src/commerce/mod.rs": {
       "status": "unproved",
-      "sha256": "d458bddff52b5c5bc1ead2606be48fafe7d5545de374b4d7b8e56954c0983245",
-      "review": "Batch F1: proposals, list views, reviewed work, its execution and proposal application moved into studio behind the WorkHost port"
+      "sha256": "67fc13b3b52b89eafd9f442eb3989c1b198b8a16c5580eb759334485c0d3f84c",
+      "review": "Batch F4: source-record imports moved into studio behind the ImportHost port"
     },
     "src/commerce/order_fields.rs": {
       "status": "unproved",
@@ -7483,8 +7548,8 @@
     },
     "src/operations/customer_create.rs": {
       "status": "unproved",
-      "sha256": "3f73d0ab53a41db2875ae18910da72239fcb9d8d84928deee84964d9616066e5",
-      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
+      "sha256": "95a3ff5fbaed68c363aea103be0c30db7965152652b564d2c731c5826c343aa0",
+      "review": "Batch F4: source-record imports moved into studio behind the ImportHost port"
     },
     "src/operations/customer_lookup.rs": {
       "status": "unproved",
@@ -7506,70 +7571,10 @@
       "sha256": "484e79c41e751ea9f6fe8da5378363680b0ce42de3c3f7583fad2e6c84d86505",
       "review": "Batch F1: proposals, list views, reviewed work, its execution and proposal application moved into studio behind the WorkHost port"
     },
-    "src/operations/imports/assets.rs": {
+    "src/operations/imports.rs": {
       "status": "unproved",
-      "sha256": "e7a6aa10a9765c48cb808941a3c50911d7e1872c259105f875e9b404c11f7db5",
-      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
-    },
-    "src/operations/imports/categories.rs": {
-      "status": "unproved",
-      "sha256": "7336ce50ac50fe12029498285f4267858d2ff8f1d929ce584b3acee74020ccfb",
-      "review": "2026-10-19 reviewed native read-only import projection against shared product/category/address owners; paired CRM/history PII and private target/package/digest checks; generic completion evidence atomically uses existing job creator/lease/package and record CAS, platform AEAD, native actual-field verification, no new app table or queue. Actual eight-domain migration/archival/restart/tamper and native app callback/jobs/admin creation tests pass; pure cancelled-success policy has exact Lean claim, all boolean cases and a true-return negative mutation. SQL, cryptography, async service correctness and public hosting remain outside formal proof."
-    },
-    "src/operations/imports/coupons.rs": {
-      "status": "unproved",
-      "sha256": "e64911a16e1fa74a7e950217d9317645c427bf7429d8603c97b90b9950e1276e",
-      "review": "2026-10-19 reviewed native read-only import projection against shared product/category/address owners; paired CRM/history PII and private target/package/digest checks; generic completion evidence atomically uses existing job creator/lease/package and record CAS, platform AEAD, native actual-field verification, no new app table or queue. Actual eight-domain migration/archival/restart/tamper and native app callback/jobs/admin creation tests pass; pure cancelled-success policy has exact Lean claim, all boolean cases and a true-return negative mutation. SQL, cryptography, async service correctness and public hosting remain outside formal proof."
-    },
-    "src/operations/imports/customers.rs": {
-      "status": "unproved",
-      "sha256": "09e3199eee67c45313b761dcd08579f93b0df4f364f7266557ac8e9d1dcf90d6",
-      "review": "Reviewed original CRM address-book and historical source joins: independent review caught region loss, five-provider US-CA controls now pass; native address import shares tenant-locked storage and suppresses only ordinary address events; all five source transports reach immutable native CRM/history with replay and denial tests. Existing kernel proof boundary unchanged; source JSON, provider reads and SQL/async effects remain unproved."
-    },
-    "src/operations/imports/historical_orders.rs": {
-      "status": "unproved",
-      "sha256": "fc111801c987d4cbd19ec2442d65e6151ee3e3c2c5067a394a117db96f551de0",
-      "review": "Reviewed native source-neutral imports, historical no-purchase effects, scoped job leases/creator/package/digest fences and shared managed-record replay. Independent boundary findings fixed with unknown-field rejection and eight concurrent editor/import cases; actual signed-runtime/source-service/native-checkout tests pass. SQL and external source equivalence remain outside extracted proofs."
-    },
-    "src/operations/imports/inspect.rs": {
-      "status": "unproved",
-      "sha256": "559f4fb7898bc7a2fa468095011d664b176ad4ccb4436a6c7ce14c892d12ab68",
-      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
-    },
-    "src/operations/imports/inspect_history.rs": {
-      "status": "unproved",
-      "sha256": "640b10c45082ae2e30f6253dc3c85a3c10ce7e26ec114d1b75607e1ba5a15c67",
-      "review": "2026-10-19 reviewed native read-only import projection against shared product/category/address owners; paired CRM/history PII and private target/package/digest checks; generic completion evidence atomically uses existing job creator/lease/package and record CAS, platform AEAD, native actual-field verification, no new app table or queue. Actual eight-domain migration/archival/restart/tamper and native app callback/jobs/admin creation tests pass; pure cancelled-success policy has exact Lean claim, all boolean cases and a true-return negative mutation. SQL, cryptography, async service correctness and public hosting remain outside formal proof."
-    },
-    "src/operations/imports/inspect_media.rs": {
-      "status": "unproved",
-      "sha256": "7dd40d7df112e85bc867962922d01e1bc139c5411bae6892ced7ac9e6fca52bc",
-      "review": "2026-10-19 reviewed native read-only import projection against shared product/category/address owners; paired CRM/history PII and private target/package/digest checks; generic completion evidence atomically uses existing job creator/lease/package and record CAS, platform AEAD, native actual-field verification, no new app table or queue. Actual eight-domain migration/archival/restart/tamper and native app callback/jobs/admin creation tests pass; pure cancelled-success policy has exact Lean claim, all boolean cases and a true-return negative mutation. SQL, cryptography, async service correctness and public hosting remain outside formal proof."
-    },
-    "src/operations/imports/inspect_product.rs": {
-      "status": "unproved",
-      "sha256": "7af716db556deffb203779fce2286ad91d6bdf8fdae9caf0032d9a3b3be4b521",
-      "review": "Order list criteria, company model and receipts moved into components; kernel call sites unchanged"
-    },
-    "src/operations/imports/mod.rs": {
-      "status": "unproved",
-      "sha256": "5424b49b7c0ca0be1999b32eaf1ceac21f249dd51364288b6889947b278fa5d8",
-      "review": "Order list criteria, company model and receipts moved into components; kernel call sites unchanged"
-    },
-    "src/operations/imports/products.rs": {
-      "status": "unproved",
-      "sha256": "f7671556d22a18f27856e7acd1bafea5dbe98cf6d550c8a6ca663cd4ba535865",
-      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
-    },
-    "src/operations/imports/relations.rs": {
-      "status": "unproved",
-      "sha256": "12360fae981165e92f485ec1479c6f449516f5f6f8a802fddb639aef80ffbfc7",
-      "review": "Order list criteria, company model and receipts moved into components; kernel call sites unchanged"
-    },
-    "src/operations/imports/reviews.rs": {
-      "status": "unproved",
-      "sha256": "f8921c073c18c3fa709a47afb1c19269b88077d3d49649ba312a152f2417edda",
-      "review": "Reviews moved into components/catalog; no rule changed"
+      "sha256": "efbcae8c918a87ba2ac24b30d7c6bbaaa1b356d6570d4a6b5183ff38095cf7e2",
+      "review": "Batch F4: source-record imports moved into studio behind the ImportHost port"
     },
     "src/operations/manual_orders.rs": {
       "status": "unproved",
@@ -7898,8 +7903,8 @@
     },
     "src/prelude.rs": {
       "status": "unproved",
-      "sha256": "70a05f4a8e194ff628bb39cba5e59b9e876b463d1e94250cba1b0ba1914c9f27",
-      "review": "Cart quote, configuration fee and quantity normalisation moved into the checkout component; behaviour unchanged"
+      "sha256": "a792fd1a4261b2a97d6a08f0dcf97516b77214dbbf5162f30a06c337687fd606",
+      "review": "Batch F4: source-record imports moved into studio behind the ImportHost port"
     },
     "src/proposal_apply.rs": {
       "status": "unproved",
@@ -8098,8 +8103,8 @@
       "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
     },
     "Cargo.lock": {
-      "sha256": "651248de44166eca9759b21cd8b4f31a33cb2ceee598563c2c8cfb3b96539a20",
-      "review": "Batch F2: sandbox clone, snapshot, diff and release moved into studio behind the ReleaseHost port"
+      "sha256": "3b6c7067015b8849ce942e32e6a9f8a8e90ed8047964cf7afe8177b7a355368c",
+      "review": "Batch F4: source-record imports moved into studio behind the ImportHost port"
     },
     "Cargo.toml": {
       "sha256": "12d2d79a98f6913d20b8e912afb9ea8de0539b9e83428de8a9d7412c406896f6",

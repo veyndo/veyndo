@@ -1,15 +1,24 @@
 //! Immutable native historical orders preserve exact amounts and provenance without purchase, stock, account or payment effects.
-use super::*;
-pub(super) async fn import(
-    a: &App,
+use super::SourceRecord;
+use serde_json::{Value, json};
+use sqlx::Row;
+use veyndo_app_platform::store::package_fence::lock_package_write;
+use veyndo_app_platform::store::packages::package;
+use veyndo_core::history_context::context;
+use veyndo_core::shop_scope::parent;
+use veyndo_core::{RequestContext, Result, State, bad, conflict, hash};
+use veyndo_identity::{merchant, permit};
+use veyndo_orders::domain::order_fields::order_fields;
+pub async fn import(
+    a: &State,
     h: &RequestContext,
     r: &SourceRecord,
     options: &Value,
 ) -> Result<Value> {
-    auth::permit(h, "orders.write")?;
-    auth::permit(h, "customers.pii")?;
-    let t = merchant(a, h)?;
-    if staging::parent(a, &t).await?.is_some() {
+    permit(h, "orders.write")?;
+    permit(h, "customers.pii")?;
+    let t = merchant(h)?;
+    if parent(a, &t).await?.is_some() {
         return Err(bad(
             "Historical orders require a live migration target; they are never configuration release units",
         ));
@@ -26,9 +35,9 @@ pub(super) async fn import(
         .as_u64()
         .and_then(|n| u8::try_from(n).ok())
         .ok_or(bad("Historical currency scale required"))?;
-    let currency = veyndo::money::Currency::new(code, scale)
+    let currency = veyndo_pricing::money::Currency::new(code, scale)
         .map_err(|_| bad("Invalid historical currency"))?;
-    let exact = veyndo::money::Money::new(minor, currency);
+    let exact = veyndo_pricing::money::Money::new(minor, currency);
     let created = r.data["createdAt"]
         .as_str()
         .and_then(|s| chrono::DateTime::parse_from_rfc3339(s).ok())
@@ -61,7 +70,7 @@ pub(super) async fn import(
     let fingerprint = hash(&json!({"record":r,"options":options}).to_string());
     let key = format!("historical:{id}");
     let mut tx = a.db.begin().await?;
-    history::context(&mut tx, h, "historical_import").await?;
+    context(&mut tx, h, "historical_import").await?;
     sqlx::query("SELECT pg_advisory_xact_lock(hashtextextended($1,28))")
         .bind(format!("{t}:{key}"))
         .execute(&mut *tx)
@@ -87,8 +96,8 @@ pub(super) async fn import(
         .await?
         .ok_or(bad("Target sales channel unavailable"))?;
     if let Some(app) = h.principal.app.as_deref() {
-        let m = apps::package(a, &t, app, true).await?;
-        apps::lock_package_write(&mut tx, &t, &m).await?;
+        let m = package(a, &t, app, true).await?;
+        lock_package_write(&mut tx, &t, &m).await?;
     }
     // Existing UI compatibility amounts are derived from the immutable exact historical amount, not repriced.
     let display = exact
@@ -99,9 +108,9 @@ pub(super) async fn import(
     let mut order = json!({"id":id,"orderNumber":number,"revision":1,"state":"historical","salesChannelId":channel,"channel":"historical_import","cart":quote,"deliveries":[],"payment":{"state":"historical","provider":"historical_import","realMoneyCharged":false},"money":{"minor":minor,"currency":{"code":code,"scale":scale}},"historicalImport":{"source":r.source,"sourceShop":r.source_shop,"sourceId":r.source_id,"snapshot":r.data,"fingerprint":fingerprint,"importedAt":chrono::Utc::now().to_rfc3339(),"sourceAmount":exact.decimal()}});
     order["billingAddress"] = r.data["billingAddress"].clone();
     order["shippingAddress"] = r.data["shippingAddress"].clone();
-    commerce::order_fields(&mut order);
+    order_fields(&mut order);
     let cart_id = format!("history-{id}");
-    let token = format!("history-private-{}", uid());
+    let token = format!("history-private-{}", veyndo_core::uid());
     sqlx::query("INSERT INTO carts(id,tenant,token,data,status) VALUES($1,$2,$3,$4,'completed')")
         .bind(&cart_id)
         .bind(&t)

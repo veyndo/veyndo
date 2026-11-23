@@ -1,22 +1,22 @@
 //! Read-only native import reconciliation compares mapped current values, never a successful replay flag.
-use super::*;
-#[path = "inspect_history.rs"]
-mod history;
-#[path = "inspect_media.rs"]
-mod media;
-#[path = "inspect_product.rs"]
-mod product;
-pub(crate) async fn route(
-    State(a): State<App>,
-    h: RequestContext,
-    Json(v): Json<Value>,
-) -> Result<Json<Value>> {
-    inspect(&a, &h, &v).await.map(Json)
-}
-pub(crate) async fn inspect(a: &App, h: &RequestContext, v: &Value) -> Result<Value> {
-    let t = merchant(a, h)?;
-    auth::permit(h, "apps.manage")?;
-    apps::validate_native_input(&schema("merchant.import.inspect").unwrap(), v)?;
+use super::inspect_history as history;
+use super::inspect_media as media;
+use super::inspect_product as product;
+use super::{SourceRecord, categories, coupons, identity_namespace, products, schema};
+use crate::http::product_editor::product_editor;
+use crate::ports::ImportHost;
+use axum::Json;
+use axum::extract::{Path, State as Shared};
+use serde_json::{Value, json};
+use veyndo_core::model_contract::validate_native;
+use veyndo_core::{RequestContext, Result, StatusCode, bad, hash};
+use veyndo_identity::{merchant, permit};
+use veyndo_shop::service::read_cache::config;
+pub async fn inspect<H: ImportHost>(host: &H, h: &RequestContext, v: &Value) -> Result<Value> {
+    let a = host.core();
+    let t = merchant(h)?;
+    permit(h, "apps.manage")?;
+    validate_native(&schema("merchant.import.inspect").unwrap(), v)?;
     let r: SourceRecord =
         serde_json::from_value(v["record"].clone()).map_err(|_| bad("Invalid source record"))?;
     r.validate()?;
@@ -24,16 +24,14 @@ pub(crate) async fn inspect(a: &App, h: &RequestContext, v: &Value) -> Result<Va
     let mut id = r.identity(&namespace);
     let (expected, actual) = match r.kind.as_str() {
         "products" => {
-            auth::permit(h, "catalog.read")?;
+            permit(h, "catalog.read")?;
             let mapped = products::mapped(a, &t, &r, &v["options"]).await?;
-            let actual =
-                match commerce::product_editor(State(a.core.clone()), h.clone(), Path(id.clone()))
-                    .await
-                {
-                    Ok(Json(value)) => Some(value),
-                    Err(e) if e.0 == StatusCode::NOT_FOUND => None,
-                    Err(e) => return Err(e),
-                };
+            let actual = match product_editor(Shared(a.clone()), h.clone(), Path(id.clone())).await
+            {
+                Ok(Json(value)) => Some(value),
+                Err(e) if e.0 == StatusCode::NOT_FOUND => None,
+                Err(e) => return Err(e),
+            };
             // Inventory, new merchant metadata and later media have independent native owners.
             // Only source-owned fields are asserted by this product record; assets get their own comparison.
             let mut catalog = mapped["catalog"].clone();
@@ -41,8 +39,8 @@ pub(crate) async fn inspect(a: &App, h: &RequestContext, v: &Value) -> Result<Va
                 categories.sort_by_key(Value::to_string);
             }
             let mut translations = mapped["translations"].clone();
-            let settings = commerce::config(a, &t).await?.0;
-            let main = commerce::product_language_key(&settings.main_locale, &settings);
+            let settings = config(a, &t).await?.0;
+            let main = settings.languages().key(&settings.main_locale);
             if translations[&main].is_object() && translations[&main]["description"].is_null() {
                 translations[&main]["description"] = json!("");
             }
@@ -53,7 +51,7 @@ pub(crate) async fn inspect(a: &App, h: &RequestContext, v: &Value) -> Result<Va
             (expected, actual)
         }
         "categories" => {
-            auth::permit(h, "catalog.read")?;
+            permit(h, "catalog.read")?;
             let mapped = categories::mapped(a, &t, &r, &v["options"]).await?;
             let actual = sqlx::query_scalar::<_,Value>("SELECT jsonb_build_object('parentId',parent_id,'data',data) FROM categories WHERE tenant=$1 AND id=$2").bind(&t).bind(&id).fetch_optional(&a.db).await?;
             (
@@ -63,8 +61,7 @@ pub(crate) async fn inspect(a: &App, h: &RequestContext, v: &Value) -> Result<Va
         }
         "assets" => media::inspect(a, h, &r, &namespace, &id).await?,
         "pages" => {
-            apps::inspect_import_record(
-                a,
+            host.inspect_record(
                 h,
                 &id,
                 &r.data["destination"],
@@ -75,7 +72,7 @@ pub(crate) async fn inspect(a: &App, h: &RequestContext, v: &Value) -> Result<Va
             .await?
         }
         "coupons" => {
-            auth::permit(h, "automation.read")?;
+            permit(h, "automation.read")?;
             id = coupons::configuration_id(&r.identity(&t));
             let actual = sqlx::query_scalar::<_, Value>(
                 "SELECT data FROM commerce_promotions WHERE tenant=$1 AND id=$2",
@@ -102,7 +99,7 @@ pub(crate) async fn inspect(a: &App, h: &RequestContext, v: &Value) -> Result<Va
     }
     let mut result = json!({"id":id,"kind":r.kind,"status":if actual.is_none(){"missing"}else if differences.is_empty(){"matching"}else{"changed"},"differences":differences,"checkedAt":chrono::Utc::now().to_rfc3339(),"comparison":"mapped-current-fields-v1","readOnly":true});
     if r.kind == "products" && v["details"] == true {
-        let (settings, _) = commerce::config(a, &t).await?;
+        let (settings, _) = config(a, &t).await?;
         let scale = settings
             .currencies
             .selected(

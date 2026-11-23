@@ -1,15 +1,20 @@
 //! Historical CRM import reuses native validation and addresses, without credentials or ordinary new-customer events.
-use super::*;
-pub(super) async fn import(
-    a: &App,
+use super::SourceRecord;
+use axum::Json;
+use serde_json::{Value, json};
+use veyndo_core::shop_scope::parent;
+use veyndo_core::{RequestContext, Result, State, bad, hash};
+use veyndo_identity::{merchant, permit};
+pub async fn import(
+    a: &State,
     h: &RequestContext,
     r: &SourceRecord,
     options: &Value,
 ) -> Result<Value> {
-    auth::permit(h, "customers.write")?;
-    auth::permit(h, "customers.pii")?;
-    let t = merchant(a, h)?;
-    if staging::parent(a, &t).await?.is_some() {
+    permit(h, "customers.write")?;
+    permit(h, "customers.pii")?;
+    let t = merchant(h)?;
+    if parent(a, &t).await?.is_some() {
         return Err(bad(
             "Historical customer data is not a configuration release unit",
         ));
@@ -28,6 +33,6 @@ pub(super) async fn import(
     }
     let provenance = json!({"source":r.source,"sourceShop":r.source_shop,"sourceId":r.source_id,"fingerprint":hash(&json!(r).to_string())});
     let Json(result) =
-        super::super::customer_create::import(a, h, &id, payload, &provenance).await?;
+        veyndo_customers::http::merchant_crm::import(a, h, &id, payload, &provenance).await?;
     Ok(json!({"id":result["id"],"created":true,"credentialMigrated":false}))
 }

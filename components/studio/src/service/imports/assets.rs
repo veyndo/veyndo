@@ -1,16 +1,25 @@
 //! Reviewed source image intake resolves its native product and delegates immutable binary storage and media edits to their existing owners.
-use super::*;
+use super::SourceRecord;
+use crate::http::product_editor::{edit_product, product_editor};
+use crate::ports::ImportHost;
+use axum::Json;
+use axum::extract::{Path, State as Shared};
 use base64::{Engine as _, engine::general_purpose::STANDARD};
-pub(super) async fn import(
-    a: &App,
+use serde_json::{Value, json};
+use veyndo_core::shop_scope::parent;
+use veyndo_core::{RequestContext, Result, bad, conflict, hash};
+use veyndo_identity::{merchant, permit};
+pub async fn import<H: ImportHost>(
+    host: &H,
     h: &RequestContext,
     r: &SourceRecord,
     chunks: &Value,
 ) -> Result<Value> {
-    auth::permit(h, "catalog.write")?;
-    auth::permit(h, "catalog.read")?;
-    let t = merchant(a, h)?;
-    if staging::parent(a, &t).await?.is_none() {
+    let a = host.core();
+    permit(h, "catalog.write")?;
+    permit(h, "catalog.read")?;
+    let t = merchant(h)?;
+    if parent(a, &t).await?.is_none() {
         return Err(bad("Image migration requires a private preview"));
     }
     let chunks = chunks
@@ -53,11 +62,11 @@ pub(super) async fn import(
         .filter(|p| *p < 20)
         .ok_or(bad("Reviewed source image position must be 0..19"))?;
     let group = hash(&json!([r.source, r.source_shop, r.data["productSourceId"]]).to_string());
-    let mut media = crate::assets::import_image(a, h, &product, &id, &r.data, bytes).await?;
+    let mut media = host.import_image(h, &product, &id, &r.data, bytes).await?;
     media["importGroup"] = json!(group);
     media["importPosition"] = json!(position);
     let Json(mut editor) =
-        commerce::product_editor(State(a.core.clone()), h.clone(), Path(product.clone())).await?;
+        product_editor(Shared(a.clone()), h.clone(), Path(product.clone())).await?;
     let items = editor["commerce"]["media"]
         .as_array_mut()
         .ok_or(bad("Native media unavailable"))?;
@@ -84,13 +93,7 @@ pub(super) async fn import(
     // Omit stock so adding an image never restores a quantity observed before a concurrent native writer.
     editor["commerce"].as_object_mut().unwrap().remove("stock");
     let payload = json!({"revision":editor["revision"],"contentRevision":editor["contentRevision"],"translations":editor["translations"],"extra":editor["extra"],"catalog":editor["catalog"],"commerce":editor["commerce"]});
-    let _ = commerce::edit_product(
-        State(a.core.clone()),
-        h.clone(),
-        Path(product),
-        Json(payload),
-    )
-    .await?;
+    let _ = edit_product(Shared(a.clone()), h.clone(), Path(product), Json(payload)).await?;
     Ok(json!({"id":id,"replayed":false}))
 }
 fn hash_bytes(bytes: &[u8]) -> String {
