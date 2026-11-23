@@ -45,7 +45,7 @@ pub(crate) async fn once(a: &App) -> Result<bool> {
                             return Box::pin(scenarios::execute(a, &t, &id, &h, &request)).await;
                         }
                         if request["execution"].is_array() {
-                            return Box::pin(work::execute(a, &t, &id, &h, &request)).await;
+                            return Box::pin(work_plan::execute(a, &t, &id, &h, &request)).await;
                         }
                         let choice = veyndo_intelligence::service::models::choice(&request)?;
                         let turn = veyndo_intelligence::service::planner::Turn {

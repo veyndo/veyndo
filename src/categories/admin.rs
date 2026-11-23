@@ -5,15 +5,6 @@ use veyndo_catalog::ports::Catalog;
 use veyndo_catalog::service::categories as service;
 pub(crate) use veyndo_catalog::types::category::input_schema;
 
-/// Review uses the exact native DTO/data/language checks before creating executable work.
-pub(crate) async fn admit_configuration(
-    a: &App,
-    t: &str,
-    value: &Value,
-    create: bool,
-) -> Result<()> {
-    service::admit(&Catalog::from_ref(a), t, value, create).await
-}
 pub(crate) async fn list(State(a): State<App>, h: RequestContext) -> Result<Json<Value>> {
     veyndo_catalog::http::categories::list(State(Catalog::from_ref(&a)), h).await
 }

@@ -22,7 +22,6 @@ mod consent;
 mod core_callbacks;
 mod core_catalog_evidence;
 pub(crate) mod core_extensions;
-pub(crate) mod extension_filter;
 mod install_host;
 mod package_fence;
 pub(crate) use package_fence::lock_package_write;

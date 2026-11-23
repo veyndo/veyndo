@@ -29,8 +29,6 @@ mod selection;
 pub(crate) use selection::*;
 
 pub(crate) mod catalog_intake;
-mod product_input;
-pub(crate) use product_input::{admit_product_write, product_write_guidance};
 
 mod order_machine;
 pub(crate) use order_machine::*;

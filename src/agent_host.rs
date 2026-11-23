@@ -81,8 +81,8 @@ impl AgentHost for Host<'_> {
         locale: &'a str,
         candidate: &'a Value,
     ) -> PortFuture<'a, (Proposal, Vec<Product>, i64)> {
-        Box::pin(planner::admission::admit(
-            self.0, t, h, prepared, locale, candidate,
+        Box::pin(veyndo_studio::service::proposal_admission::admit(
+            self, t, h, prepared, locale, candidate,
         ))
     }
     fn configuration_digest<'a>(&'a self, t: &'a str) -> PortFuture<'a, String> {
@@ -101,5 +101,34 @@ impl AgentHost for Host<'_> {
     }
     fn fill_test_stock<'a>(&'a self, t: &'a str, quantity: i32) -> PortFuture<'a, Value> {
         Box::pin(commerce::test_stock::fill(self.0, t, quantity))
+    }
+}
+impl veyndo_studio::ports::WorkHost for Host<'_> {
+    fn work_operations(&self, h: &RequestContext) -> Vec<(&'static str, Value)> {
+        capabilities::OPERATIONS
+            .iter()
+            .filter(|o| o.admitted(self.0, h))
+            .map(|o| (o.name, o.input_schema()))
+            .collect()
+    }
+    fn bind_change<'a>(
+        &'a self,
+        t: &'a str,
+        change: &'a mut apps::AppChange,
+        h: &'a RequestContext,
+    ) -> PortFuture<'a, ()> {
+        Box::pin(apps::bind_change(self.0, t, change, h))
+    }
+    fn apply_change<'a, 'c: 'a>(
+        &'a self,
+        tx: &'a mut sqlx::Transaction<'c, sqlx::Postgres>,
+        t: &'a str,
+        change: &'a apps::AppChange,
+        h: &'a RequestContext,
+    ) -> PortFuture<'a, ()> {
+        Box::pin(apps::apply_change(tx, t, change, h))
+    }
+    fn catalog(&self) -> veyndo_catalog::ports::Catalog {
+        axum::extract::FromRef::from_ref(self.0)
     }
 }

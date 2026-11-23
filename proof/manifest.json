@@ -3966,6 +3966,11 @@
       "sha256": "68089b69f100f8767bb5084bc5b66d171d8ecc9e97ab76e43ec6f3b55167d8ab",
       "review": "History access rules, version reads and the product restoration projection moved into the studio component; behaviour unchanged"
     },
+    "components/studio/src/domain/proposal.rs": {
+      "status": "unproved",
+      "sha256": "1734aa1062cc1287e92c78827407382744c275314a83061a207e08fb088f8993",
+      "review": "Batch F1: proposals, list views, reviewed work, its execution and proposal application moved into studio behind the WorkHost port"
+    },
     "components/studio/src/domain/report_config.rs": {
       "status": "unproved",
       "sha256": "f735aba7727c59fbbca64e7ecc128959185cf7d6e0241c2916e6e883bc2b338b",
@@ -3993,8 +3998,8 @@
     },
     "components/studio/src/domain.rs": {
       "status": "unproved",
-      "sha256": "e7ab5728c7e90b7d7dda497106533d609357a3f4ca4b37517c54b23390dd8495",
-      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
+      "sha256": "f75e05ee10b176911ba73bc86b314001efb5ea276857dcf06ab9139c73c8e55f",
+      "review": "Batch F1: proposals, list views, reviewed work, its execution and proposal application moved into studio behind the WorkHost port"
     },
     "components/studio/src/http/customers.rs": {
       "status": "unproved",
@@ -4026,6 +4031,11 @@
       "sha256": "d7220a4814af741e8133ed889e087dc113e2239c32ce45878b8bb14ff57c33a4",
       "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
     },
+    "components/studio/src/http/proposals.rs": {
+      "status": "unproved",
+      "sha256": "30ac16c7f6655c3475e29b2e1eef33939c2690d863d24b95c22895fb580aff17",
+      "review": "Batch F1: proposals, list views, reviewed work, its execution and proposal application moved into studio behind the WorkHost port"
+    },
     "components/studio/src/http/reports.rs": {
       "status": "unproved",
       "sha256": "4bb88b3cf7ec3940eee777e123df27d03eed43479bea034fabbd20fa79a0d614",
@@ -4043,28 +4053,53 @@
     },
     "components/studio/src/http.rs": {
       "status": "unproved",
-      "sha256": "84768b183ffb8e6ba033b973c51ead708f5deb9bc4a9e238d5018d23bd360ae4",
-      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
+      "sha256": "66309c88535b1d4bc87729cffbb9fe0b0931c42a177a59337c1a2eb10c1b123d",
+      "review": "Batch F1: proposals, list views, reviewed work, its execution and proposal application moved into studio behind the WorkHost port"
     },
     "components/studio/src/lib.rs": {
       "status": "unproved",
-      "sha256": "39b9c760915b4f92ecc1654d28f8542c3c76911362d18d5cbee5bb092434a3dd",
-      "review": "Report service moved into the studio component and the cart language chain into the checkout component; behaviour unchanged"
+      "sha256": "a44a0d67833af5f7660af17151ac72cd82dfaa1b1afa3e683779a5a28bb2760b",
+      "review": "Batch F1: proposals, list views, reviewed work, its execution and proposal application moved into studio behind the WorkHost port"
+    },
+    "components/studio/src/ports.rs": {
+      "status": "unproved",
+      "sha256": "d9b616ec105e07c26275885365a2659f642654f6f510b2929d00906be3a008ee",
+      "review": "Batch F1: proposals, list views, reviewed work, its execution and proposal application moved into studio behind the WorkHost port"
     },
     "components/studio/src/service/grid_plan.rs": {
       "status": "unproved",
       "sha256": "b15865176f6ee4aa5922e3b8037a20a9341af2dfa639a8ac0a2d6a830d8078c5",
       "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
     },
+    "components/studio/src/service/proposal_admission.rs": {
+      "status": "unproved",
+      "sha256": "e368e88de91c8317f234080db1273898c8fc208aa536cba00c4aafdad483e634",
+      "review": "Batch F1: proposals, list views, reviewed work, its execution and proposal application moved into studio behind the WorkHost port"
+    },
+    "components/studio/src/service/proposal_apply.rs": {
+      "status": "unproved",
+      "sha256": "83b1773a2742a01408a34a6ce2ce7df78799d198822deb3b0096f2c92fab59a6",
+      "review": "Batch F1: proposals, list views, reviewed work, its execution and proposal application moved into studio behind the WorkHost port"
+    },
     "components/studio/src/service/reports.rs": {
       "status": "unproved",
       "sha256": "da5119df249ac3978c65f61c4f66c6578f0599d33855bc5b6ced8ece89e0b17a",
       "review": "Report service moved into the studio component and the cart language chain into the checkout component; behaviour unchanged"
     },
+    "components/studio/src/service/work_execution.rs": {
+      "status": "unproved",
+      "sha256": "6ce18b7f91e2c0ed14bda5b3a02a3f207f1815146bbd5070c849b48271d77551",
+      "review": "Batch F1: proposals, list views, reviewed work, its execution and proposal application moved into studio behind the WorkHost port"
+    },
+    "components/studio/src/service/work_plan.rs": {
+      "status": "unproved",
+      "sha256": "864e0665d2f884852befc12f89e1b1b11ebbb41c1672e48510397b8edbd6e9b8",
+      "review": "Batch F1: proposals, list views, reviewed work, its execution and proposal application moved into studio behind the WorkHost port"
+    },
     "components/studio/src/service.rs": {
       "status": "unproved",
-      "sha256": "8c40cdd42ce19fa325347d4fd7f2789ce07bae9018ad5b9ac318ca1186636fe4",
-      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
+      "sha256": "dc783ea34da29c54648a7526e3e085f3f69ab76042cb6e866d257d501a0b3a5c",
+      "review": "Batch F1: proposals, list views, reviewed work, its execution and proposal application moved into studio behind the WorkHost port"
     },
     "components/studio/src/store/history.rs": {
       "status": "unproved",
@@ -5923,8 +5958,8 @@
     },
     "src/agent_host.rs": {
       "status": "unproved",
-      "sha256": "fd5472030aa2e0cb9a50f72c515085d4805177b80c1fed9038e7b3638543bc8c",
-      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
+      "sha256": "5dde457744db73817f74f4370a173951fcc89e1d4c8831c7138a4251455ef639",
+      "review": "Batch F1: proposals, list views, reviewed work, its execution and proposal application moved into studio behind the WorkHost port"
     },
     "src/agent_runs/authority.rs": {
       "status": "unproved",
@@ -5933,13 +5968,13 @@
     },
     "src/agent_runs/checkpoint.rs": {
       "status": "unproved",
-      "sha256": "2237c72ad9acda40091305d5c128a240c3b0cb85886bbc0214704b7224401d67",
-      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
+      "sha256": "205137fcb04ded6a404ac267a95d3b18790b40c5c1f42b6440b87a46a5a9898b",
+      "review": "Batch F1: proposals, list views, reviewed work, its execution and proposal application moved into studio behind the WorkHost port"
     },
     "src/agent_runs/contract.rs": {
       "status": "unproved",
-      "sha256": "e267cb6ea0b92413598d3d82775ca3d3db0e460a01a1c44aaca417066eaf41b4",
-      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
+      "sha256": "503bce16dd591b9b252ba5880c43d6902475f6f0e1ab81901ef11d1c04150700",
+      "review": "Batch F1: proposals, list views, reviewed work, its execution and proposal application moved into studio behind the WorkHost port"
     },
     "src/agent_runs/controls.rs": {
       "status": "unproved",
@@ -5948,8 +5983,8 @@
     },
     "src/agent_runs/navigation.rs": {
       "status": "unproved",
-      "sha256": "43766936d85d3cbbaed14c049968734c426f5c57bf061a57cf28be75a95f07dd",
-      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
+      "sha256": "6dfa809914296cfaee90d094b14499cfd0ac4ad86523b6ba3b1e92cad5a76bbf",
+      "review": "Batch F1: proposals, list views, reviewed work, its execution and proposal application moved into studio behind the WorkHost port"
     },
     "src/agent_runs/scenarios.rs": {
       "status": "unproved",
@@ -5958,33 +5993,28 @@
     },
     "src/agent_runs/translation.rs": {
       "status": "unproved",
-      "sha256": "360762ea22e072bd6c9463c92c51c3d40aa01bb6183f599f35f157d903f68619",
-      "review": "Reviewed scoped translation selection, original task authority, atomic child linking and completion, cancellation/explicit ambiguous continuation, lease fences, central provider admission outside transactions and bounded prompt evidence; real PostgreSQL/HTTP collection and interruption regressions plus 724 UI tests; skipped products store SQL NULL evidence rather than JSON null. Claude supplied code-only review, findings checked and fixed."
+      "sha256": "058c135c40600a756e04395399bf2743ea8342445e0abb11d1fc9ac24939bd21",
+      "review": "Batch F1: proposals, list views, reviewed work, its execution and proposal application moved into studio behind the WorkHost port"
     },
     "src/agent_runs/view.rs": {
       "status": "unproved",
-      "sha256": "3d2efe4c613354cd1a10b41b86131c5d3f9d9cc1a900f762715115885e55eb4a",
-      "review": "Personal Studio workspace model and store moved into the studio component without behaviour change"
-    },
-    "src/agent_runs/work.rs": {
-      "status": "unproved",
-      "sha256": "abac923a54d5c703fb15f558d959b9fee79e1df6263be2261ec7f709e540c8eb",
-      "review": "Reviewed scoped translation selection, original task authority, atomic child linking and completion, cancellation/explicit ambiguous continuation, lease fences, central provider admission outside transactions and bounded prompt evidence; real PostgreSQL/HTTP collection and interruption regressions plus 724 UI tests; skipped products store SQL NULL evidence rather than JSON null. Claude supplied code-only review, findings checked and fixed."
+      "sha256": "dc2b296baa17309189f07b1d6e73e1f60fbbba67ed4a1a0c907730b0ac281351",
+      "review": "Batch F1: proposals, list views, reviewed work, its execution and proposal application moved into studio behind the WorkHost port"
     },
     "src/agent_runs/work_plan.rs": {
       "status": "unproved",
-      "sha256": "7e6f7f868e181b13056f3ab60b6fc87cdd2efac2c0906cebb201ea69b9965b98",
-      "review": "Reviewed native category-only product expansion: explicit bounded shape, original aggregate/content CAS retained through native product lock, no commerce or channel write, tenant-owned category assignment and unchanged native rights; pre-review full-product deserialization. Reproduced public Invalid product metadata through old-binary HTTP, replacement preserves metadata and denies stale/mixed/foreign writes. No extracted business predicate changed."
+      "sha256": "9f84915b6e946615d906677a7ad968f2cc4f6c0b5a31e292de56821f2160b556",
+      "review": "Batch F1: proposals, list views, reviewed work, its execution and proposal application moved into studio behind the WorkHost port"
     },
     "src/agent_runs/worker.rs": {
       "status": "unproved",
-      "sha256": "c2db85bab122e4e3ebe226a0cf90fb99e8f34a96fdeb9a85f3357eac60117b5c",
-      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
+      "sha256": "d382a76872a29e78faf93cc8ca297a625c9b4a8c953bc05896abfeb0cc55dd59",
+      "review": "Batch F1: proposals, list views, reviewed work, its execution and proposal application moved into studio behind the WorkHost port"
     },
     "src/agent_runs.rs": {
       "status": "unproved",
-      "sha256": "dec24a08c0644cc68efb055e2eaab611a146c5d000b2ab1df8516233138a86fc",
-      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
+      "sha256": "1a75744442c41e109d8b7fd080aeb55d5951845061ceebc337e3b3424bb58de8",
+      "review": "Batch F1: proposals, list views, reviewed work, its execution and proposal application moved into studio behind the WorkHost port"
     },
     "src/apps/approval.rs": {
       "status": "unproved",
@@ -6101,11 +6131,6 @@
       "sha256": "708d782ca729b2befffc559d895b6b6d2344883d3e86eaddc5f4d50159f64f76",
       "review": "Reviewed eighteen core findings: typed trusted identity and explicit route rights; consolidated current grants; durable auth and fenced shared limits; scoped transactions and one-backend PgBouncer including nested borrow fixes; bounded Wasm/PNG work; notified workers, savepoint quarantine and conservative retention; separate runtime roles and startup configuration. Real PostgreSQL/provider regressions preserve current tenant/customer/payment behavior. SQL/network adapters remain unproved."
     },
-    "src/apps/extension_filter.rs": {
-      "status": "unproved",
-      "sha256": "cef5fef2ffdd986817d5a06d685de78a19f98f9bf3746a3f69eb263eeb2d2ce4",
-      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
-    },
     "src/apps/field_values.rs": {
       "status": "unproved",
       "sha256": "9824d8e561fb77c35aacd7e9f319c597db819bbb7872a3060f7cea7e562987ae",
@@ -6158,8 +6183,8 @@
     },
     "src/apps/mod.rs": {
       "status": "unproved",
-      "sha256": "ac48c51f7c3d2cf32dac7465502734a5f9a6135b8dca397abbee8f724145fdff",
-      "review": "Batch B: commerce hooks, cart contributions and app source ingestion move into apps"
+      "sha256": "723ceb0ce93c20aa07c9566038254521232d36e1dcc07ceba69df2239fadaddb",
+      "review": "Batch F1: proposals, list views, reviewed work, its execution and proposal application moved into studio behind the WorkHost port"
     },
     "src/apps/model_contract.rs": {
       "status": "unproved",
@@ -6448,8 +6473,8 @@
     },
     "src/auth/permissions.rs": {
       "status": "unproved",
-      "sha256": "6d10be0ff632cbc2590515c47acbbff7552a9226a5ad4b3b078c8a17accdf760",
-      "review": "Batch A: customer accounts, account orders, sign-in throttle, handoff and roles move into customers, orders and identity"
+      "sha256": "5c2afa4d634b5e72885e1b10f7fd4a7e386eb065a2eb012104de3fd937b7ea6c",
+      "review": "Batch F1: proposals, list views, reviewed work, its execution and proposal application moved into studio behind the WorkHost port"
     },
     "src/auth/provision.rs": {
       "status": "unproved",
@@ -6728,13 +6753,13 @@
     },
     "src/categories/admin.rs": {
       "status": "unproved",
-      "sha256": "65f23c4e56b6aa5b87ed5df38f72ac435b9bb405cacff525a234d1d68435a8b7",
-      "review": "Categories moved into components/catalog; no rule changed"
+      "sha256": "d6f31382aa4822faea6f3155a4c7fe5b943797745e4b0e74b2c897b6f6d283ba",
+      "review": "Batch F1: proposals, list views, reviewed work, its execution and proposal application moved into studio behind the WorkHost port"
     },
     "src/categories/mod.rs": {
       "status": "unproved",
-      "sha256": "332f68067888723f03e1f29a91d907d68c29359516119a007caeb581d6830040",
-      "review": "Category navigation and seeding moved into components/catalog; no rule changed"
+      "sha256": "fd7826328a2034ddfbe551c2d8f6dadfc7c374498bac85fc184bd1e05fd568bb",
+      "review": "Batch F1: proposals, list views, reviewed work, its execution and proposal application moved into studio behind the WorkHost port"
     },
     "src/categories/navigation.rs": {
       "status": "unproved",
@@ -6831,11 +6856,6 @@
       "sha256": "2e385d5a13ee9ef5fc0b7c5fd276662fe99291ddb28ddd7d8d529fe3deef1779",
       "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
     },
-    "src/cognition/guardrails.rs": {
-      "status": "unproved",
-      "sha256": "33e305ab126a7faa6a1bb9ae5ca16326637c380d032cc98f1251b7c4a9c442f4",
-      "review": "AI price guardrails moved into the intelligence component and capture configuration into payments; behaviour unchanged"
-    },
     "src/cognition/indexing.rs": {
       "status": "unproved",
       "sha256": "9d47424f93bd18d5694423f3f05abe5d1eb70c503d6852379ab2203afe6edde0",
@@ -6843,8 +6863,8 @@
     },
     "src/cognition/mod.rs": {
       "status": "unproved",
-      "sha256": "e633f6eab7370305e1a630607d0ea9988da815a17690b6f376d2dc6110c51d40",
-      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
+      "sha256": "6b7cab844a31fbdf3c76f1a8f6af5902f1e7c086636edb00940bd2377365f1e0",
+      "review": "Batch F1: proposals, list views, reviewed work, its execution and proposal application moved into studio behind the WorkHost port"
     },
     "src/cognition/preferences.rs": {
       "status": "unproved",
@@ -6983,8 +7003,8 @@
     },
     "src/commerce/mod.rs": {
       "status": "unproved",
-      "sha256": "b25f4be0c1cc5db13e5f4a8139b61b299a3fb8e91d4bc70ae13a3046540cc8a3",
-      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
+      "sha256": "d458bddff52b5c5bc1ead2606be48fafe7d5545de374b4d7b8e56954c0983245",
+      "review": "Batch F1: proposals, list views, reviewed work, its execution and proposal application moved into studio behind the WorkHost port"
     },
     "src/commerce/order_fields.rs": {
       "status": "unproved",
@@ -6999,11 +7019,6 @@
     "src/commerce/product_admin.rs": {
       "status": "unproved",
       "sha256": "8dccd65d3bb08fa26fc7ed213b4db44ca987ff3a8ff1a9f810a13505a2175734",
-      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
-    },
-    "src/commerce/product_input.rs": {
-      "status": "unproved",
-      "sha256": "12397a741d614e4e497e73ead2f62537d4453fa7c36434d6a82079dd4223b74c",
       "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
     },
     "src/commerce/product_languages.rs": {
@@ -7498,8 +7513,8 @@
     },
     "src/operations/grid_schema.rs": {
       "status": "unproved",
-      "sha256": "a775398230ff14931a702c84871c937d259c29c365e50dec572d53cfda70e866",
-      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
+      "sha256": "484e79c41e751ea9f6fe8da5378363680b0ce42de3c3f7583fad2e6c84d86505",
+      "review": "Batch F1: proposals, list views, reviewed work, its execution and proposal application moved into studio behind the WorkHost port"
     },
     "src/operations/imports/assets.rs": {
       "status": "unproved",
@@ -7786,15 +7801,10 @@
       "sha256": "6b966ee27981eca13ad3eed849349877e0ea2b4e65db8cfa719f675308100370",
       "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
     },
-    "src/planner/admission.rs": {
-      "status": "unproved",
-      "sha256": "84da489e6050f6eaf000c71993a5c14605ba17059717237f1a5cd85d7386596c",
-      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
-    },
     "src/planner.rs": {
       "status": "unproved",
-      "sha256": "c861e57029b5b56e7567f946ff15be39436a24edb6310204a23ca3693203bf7e",
-      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
+      "sha256": "2d0ff5787ddde966eade4abb5c4311a7af405b239a1081615c3cb2a5a1037973",
+      "review": "Batch F1: proposals, list views, reviewed work, its execution and proposal application moved into studio behind the WorkHost port"
     },
     "src/platform/ai.rs": {
       "status": "reviewed-binding",
@@ -7903,18 +7913,18 @@
     },
     "src/proposal_apply.rs": {
       "status": "unproved",
-      "sha256": "8f13014738c6cc0633f01a2706433f23ecfbfabdc0b7248fe72a7255704cf674",
-      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
+      "sha256": "9c9993dd10ce0eec0bc9dee3f2062c2ffe3b9be80159ec3e0cfd043b4de9912f",
+      "review": "Batch F1: proposals, list views, reviewed work, its execution and proposal application moved into studio behind the WorkHost port"
     },
     "src/proposal_model.rs": {
       "status": "unproved",
-      "sha256": "b7c89bb7bb63ccdb0170dde12d74379f090031fd51598d4012334d0ed8c90e47",
-      "review": "AI price guardrails moved into the intelligence component and capture configuration into payments; behaviour unchanged"
+      "sha256": "0f21da99b5b288e1b87217ef186e7b8043fe1ec32f03eed691bc48ed5327947e",
+      "review": "Batch F1: proposals, list views, reviewed work, its execution and proposal application moved into studio behind the WorkHost port"
     },
     "src/proposal_routes.rs": {
       "status": "unproved",
-      "sha256": "61ecbaf39b49fe98309cf97cb4e25fd8485998a4d5977e74aebd7dde08907667",
-      "review": "Reviewed original-actor tenant-scoped task listing: preserve existing current-scope admission while exposing approved queued and interrupted work; execution marker is read-only, no credentials or checkpoint contents. Native PostgreSQL queued/completed/cancelled/killed-worker and other-actor cases pass."
+      "sha256": "3dacb55ad84dceda907db1376bc021ca80552a5771d28d8d0000f38b38bf854f",
+      "review": "Batch F1: proposals, list views, reviewed work, its execution and proposal application moved into studio behind the WorkHost port"
     },
     "src/routes/http_profile.rs": {
       "status": "unproved",
@@ -8063,18 +8073,18 @@
     },
     "src/translations/mod.rs": {
       "status": "unproved",
-      "sha256": "704300ee9d1343a3a734ea6a7067a2433e6de9411ff6a9e1caa37c35e1bc647b",
-      "review": "revision_admissible binding for applying translation drafts moved into components/catalog"
+      "sha256": "b44da9863a1859883caae6eece9a6e1395beb842b1a3b0c2735f3a868757cedc",
+      "review": "Batch F1: proposals, list views, reviewed work, its execution and proposal application moved into studio behind the WorkHost port"
     },
     "src/translations/routes.rs": {
       "status": "unproved",
-      "sha256": "e7ceb4990cafe0b98ca5ce3fb774fe6955f81991268f0844a1050fced15b51df",
-      "review": "Translation jobs move into catalog"
+      "sha256": "557e06b66d042e7cdae431ce7ffda5949440476161c22bf6ccf733417e80662e",
+      "review": "Batch F1: proposals, list views, reviewed work, its execution and proposal application moved into studio behind the WorkHost port"
     },
     "src/translations/selection.rs": {
       "status": "unproved",
-      "sha256": "d43db8797ae544ebe684418091b13dab82ad28376e99f8283667f25ca0411092",
-      "review": "revision_admissible binding for applying translation drafts moved into components/catalog"
+      "sha256": "d6abeed5ca5c5574fd2f969827dbaf6427fcc0401a8d26b4d4e31c7377ec1f79",
+      "review": "Batch F1: proposals, list views, reviewed work, its execution and proposal application moved into studio behind the WorkHost port"
     },
     "src/translations/worker.rs": {
       "status": "unproved",

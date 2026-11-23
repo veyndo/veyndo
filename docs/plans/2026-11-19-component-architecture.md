@@ -583,12 +583,11 @@ Order follows the dependency report, lowest first. Each line is one move.
   input schema validator and the model error contract moved to
   `veyndo_core::model_contract`; apps, B2B and orders use it instead of their
   own copies.
-  Open (composition, batch F): proposal approval and application
-  (`src/proposal_apply.rs`), native admission of a plan
-  (`src/planner/admission.rs`), the native work plan, its execution, list
-  views and translation steps (`src/agent_runs/{work_plan,work,view,translation}.rs`).
-  They work on the server's typed proposal, which carries app-platform types,
-  and the app platform already depends on this component. Also open: the SSE
+  Since batch F1 the typed proposal with its list views and work steps
+  (`studio/domain/proposal`), proposal admission, the native work plan with
+  approval, its execution with translation steps, and proposal application
+  live in the studio component behind `studio::ports::WorkHost` (native
+  operation registry, app change binding and application, catalogue state). Also open: the SSE
   transports of chat and shopping advice, storefront preferences and behavior
   capture (they need the cart and consent receipts of batch E), signed facts
   and recommendations (they render storefront catalog pages).
@@ -798,7 +797,7 @@ source.
 | C (done 23 Nov) | Agents and planning: runs, controls, conversations, run journal, read rounds, planning, shopping advice, scenarios, autonomy, behavior reads, extraction, indexing and retrieval. Proposal approval, plan admission, native work plans and list views work on the server's typed proposal (app-platform types) and move to F | about 5,400 | intelligence |
 | D (done 23 Nov) | Merchant operations: order, customer and product lists with app filters, the product editor, the order workflow, the personal workspace, grid filter planning and release-unit rights (studio); settings writes, channel overrides and release checks behind the settings port (shop); merchant customer creation and addresses (customers); app filter admission (apps). Imports, manual orders, receipts, sandbox clone/snapshot/release, catalogue intake and the overview compose many components and move to F | about 5,600 | orders, catalog, shop, studio |
 | E (done 23 Nov, small) | Payment status reads and the job view moved to payments (`http/status`), the image provider adapter to `crates/cognition` (`images`). The rest is composition: consent writes delete intelligence data and need the cart; the POS gateway, app flows, work templates, currency selection on the cart, channel preview/access, translations and the document handlers combine carts, app gateway, shop domains or app evidence with their owner. They move to F with the ports for carts and the app gateway | about 5,000 | payments, cognition |
-| F | Composition: the server is router, worker set and protocol adapters only (5.1); `App` replaced by component state plus ports (phase 1); mutual pairs to zero, foreign tables, glob imports, typed DTOs | everything left except protocols | all |
+| F (F1 done 23 Nov: proposals, views, reviewed work and application in studio) | Composition: the server is router, worker set and protocol adapters only (5.1); `App` replaced by component state plus ports (phase 1); mutual pairs to zero, foreign tables, glob imports, typed DTOs | everything left except protocols | all |
 | G | Frontends F1 to F6 (phase 4) | frontend | frontend |
 | H | Removal (phase 6), test suite (phase 7), proofs (phase 8), acceptance and images (5.2 to 5.6) | | all |
 

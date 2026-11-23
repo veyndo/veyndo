@@ -3,8 +3,7 @@ use crate::*;
 mod admin;
 mod navigation;
 pub(crate) use admin::{
-    admit_configuration, create as create_category, import, input_schema, list as list_categories,
-    save as save_category,
+    create as create_category, import, input_schema, list as list_categories, save as save_category,
 };
 pub(crate) use navigation::admit;
 pub(crate) fn router() -> Router<App> {

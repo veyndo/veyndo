@@ -8,7 +8,6 @@ pub(crate) mod navigation;
 pub(crate) mod scenarios;
 pub(crate) mod translation;
 pub(crate) mod view;
-pub(crate) mod work;
 pub(crate) mod work_plan;
 mod worker;
 pub(crate) use contract::{CAPABILITIES, invoke, router, schema};

@@ -20,12 +20,11 @@ This lists every checked-in source module in these roots, including files with n
 | [src/agent_runs/checkpoint.rs](../src/agent_runs/checkpoint.rs) | The run journal lives in the intelligence component; these entries lend it the server's agent port. |
 | [src/agent_runs/contract.rs](../src/agent_runs/contract.rs) | HTTP/MCP share revision-bound run controls and safe progress; scenarios, agent controls and run operations are dispatched by name. |
 | [src/agent_runs/controls.rs](../src/agent_runs/controls.rs) | Live-only agent stop and existing-key admission live in the intelligence component; the server registers the routes. |
-| [src/agent_runs/navigation.rs](../src/agent_runs/navigation.rs) | Model navigation lives in the intelligence component; the native working view supplies its entity. |
+| [src/agent_runs/navigation.rs](../src/agent_runs/navigation.rs) | Navigation targets live in the intelligence component. |
 | [src/agent_runs/scenarios.rs](../src/agent_runs/scenarios.rs) | Fictional shopper cohorts live in the intelligence component; the server registers their routes and lends the agent port. |
-| [src/agent_runs/translation.rs](../src/agent_runs/translation.rs) | Translation child work reuses native draft storage, original authority and the existing task scheduler. |
-| [src/agent_runs/view.rs](../src/agent_runs/view.rs) | A reviewed grid view contains only native filter criteria; current domain and PII rights are checked before persistence. |
-| [src/agent_runs/work.rs](../src/agent_runs/work.rs) | Approved work uses the existing task lease; each native write is fenced against cancellation and recorded before advancing. |
-| [src/agent_runs/work_plan.rs](../src/agent_runs/work_plan.rs) | Reviewed work binds bounded native configuration commands and managed app saves before any worker effect. |
+| [src/agent_runs/translation.rs](../src/agent_runs/translation.rs) | Translation work steps live in the studio component. |
+| [src/agent_runs/view.rs](../src/agent_runs/view.rs) | Reviewed list views live in the studio component. |
+| [src/agent_runs/work_plan.rs](../src/agent_runs/work_plan.rs) | Reviewed work lives in the studio component; these entries lend it the server's ports. |
 | [src/agent_runs/worker.rs](../src/agent_runs/worker.rs) | The run worker executes claimed runs over the server's tools; claims, recovery and failure records live in the intelligence component. |
 | [src/agent_runs.rs](../src/agent_runs.rs) | Durable continuation extends native tasks; the intelligence component owns admission, controls and run storage, the server executes runs over its tools. |
 | [src/apps/approval.rs](../src/apps/approval.rs) | Operator service authority is bound to immutable package content, never to a merchant-chosen ID; the rules live in the apps component. |
@@ -51,7 +50,6 @@ This lists every checked-in source module in these roots, including files with n
 | [src/apps/events.rs](../src/apps/events.rs) | App event delivery lives in the apps component; this module supplies its state to the worker and the outbox. |
 | [src/apps/evidence.rs](../src/apps/evidence.rs) | Private provenance-bearing app exports feed merchant retrieval and durable app events; never public PDP answers. |
 | [src/apps/evidence_routes.rs](../src/apps/evidence_routes.rs) | Scoped merchant-only evidence retrieval; sources never enter public product answers. |
-| [src/apps/extension_filter.rs](../src/apps/extension_filter.rs) | Exact app-field predicates live in the apps component; this module keeps the short path. |
 | [src/apps/field_values.rs](../src/apps/field_values.rs) | The field value policy lives in the apps component; this module keeps the short path for the app adapters. |
 | [src/apps/gateway.rs](../src/apps/gateway.rs) | One permission-aware action gateway serves HTTP, UI and MCP; service egress is operator configured. |
 | [src/apps/hosted.rs](../src/apps/hosted.rs) | Hosted-app installation lives in the apps component; this module adds the connected frontends and their local answers. |
@@ -197,7 +195,6 @@ This lists every checked-in source module in these roots, including files with n
 | [src/cognition/evidence.rs](../src/cognition/evidence.rs) | The source-bound claim lifecycle lives in the intelligence component; these entries keep the server-side signatures. |
 | [src/cognition/experiments/mod.rs](../src/cognition/experiments/mod.rs) | Controlled experiments use the existing storefront layout consumer and authoritative payment ledger; the intelligence component owns their store. |
 | [src/cognition/extraction.rs](../src/cognition/extraction.rs) | API, MCP and flow source extraction lives in the intelligence component; this entry lends it the server's model context. |
-| [src/cognition/guardrails.rs](../src/cognition/guardrails.rs) | The guardrail rules live in the intelligence component; plan validation reads the current settings here. |
 | [src/cognition/indexing.rs](../src/cognition/indexing.rs) | Durable bounded embedding jobs live in the intelligence component; these entries lend it the server's model context. |
 | [src/cognition/mod.rs](../src/cognition/mod.rs) | Evidence-based shop memory: event receipts, observed pairs, reviewable hypotheses and bounded context. |
 | [src/cognition/preferences.rs](../src/cognition/preferences.rs) | Consent-bound private cart preference graph: entry points, consent and channel admission; model and store live in the intelligence component. |
@@ -231,7 +228,6 @@ This lists every checked-in source module in these roots, including files with n
 | [src/commerce/order_fields.rs](../src/commerce/order_fields.rs) | Derived order fields are owned by the orders component. |
 | [src/commerce/order_machine.rs](../src/commerce/order_machine.rs) | The order state machine is owned by the orders component. |
 | [src/commerce/product_admin.rs](../src/commerce/product_admin.rs) | The merchant product list lives in the studio component; the server registers it with product creation. |
-| [src/commerce/product_input.rs](../src/commerce/product_input.rs) | Native product write admission lives in the catalog component. |
 | [src/commerce/product_languages.rs](../src/commerce/product_languages.rs) | Enabled content languages, NULL field inheritance and stable global language registration. |
 | [src/commerce/selection.rs](../src/commerce/selection.rs) | Recover a quote after configuration changes without losing items or silently committing new choices. |
 | [src/commerce/settings_guards.rs](../src/commerce/settings_guards.rs) | The server side of the settings port: rule conditions, payment capture configuration, the marketing configuration lock and app lifecycle locales. |
@@ -388,7 +384,6 @@ This lists every checked-in source module in these roots, including files with n
 | [src/performance/delivery.rs](../src/performance/delivery.rs) | Native static bypass and bounded HTTP compression; credentials, streams and already encoded bodies stay intact. |
 | [src/performance/invalidation.rs](../src/performance/invalidation.rs) | Commit-only outbox notifications eagerly evict replica caches; authoritative version probes survive missed events. |
 | [src/performance/mod.rs](../src/performance/mod.rs) | Shared read-context caching with authoritative versions; mutations and checkout locks stay outside memoization. |
-| [src/planner/admission.rs](../src/planner/admission.rs) | Every initial or repaired model proposal traverses the same native read-only admission. |
 | [src/planner.rs](../src/planner.rs) | Grounded model planning lives in the intelligence component; the server keeps the native proposal admission it calls through the agent port. |
 | [src/platform/ai.rs](../src/platform/ai.rs) | Operator-only inference administration: optimistic revision, encrypted write-only keys and audit without secrets. |
 | [src/platform/auth.rs](../src/platform/auth.rs) | Independent platform authorization: live personal sessions, current grants, no integration/bootstrap escalation. |
@@ -411,8 +406,8 @@ This lists every checked-in source module in these roots, including files with n
 | [src/pos/settlement.rs](../src/pos/settlement.rs) | Cash admission and the POS order annotation are owned by the POS component. |
 | [src/pos/workspace_gateway.rs](../src/pos/workspace_gateway.rs) | Cashier workspace commands delegate to CRM, native discounts and immutable receipt projection. |
 | [src/prelude.rs](../src/prelude.rs) | Shared dependency names for native domain modules; no process setup or business rules. |
-| [src/proposal_apply.rs](../src/proposal_apply.rs) | Transactional application of approved, revision-bound proposals. |
-| [src/proposal_model.rs](../src/proposal_model.rs) | Typed proposals and validation before persistence or execution. |
+| [src/proposal_apply.rs](../src/proposal_apply.rs) | Proposal application lives in the studio component; these entries lend it the server's ports. |
+| [src/proposal_model.rs](../src/proposal_model.rs) | Typed proposals live in the studio component. |
 | [src/proposal_routes.rs](../src/proposal_routes.rs) | HTTP proposal creation, approval and task listing. |
 | [src/routes/http_profile.rs](../src/routes/http_profile.rs) | Serve the same commerce operations without the native storefront or Studio shell. |
 | [src/routes.rs](../src/routes.rs) | HTTP transport registry; domain behavior lives in dedicated modules. |
@@ -1193,6 +1188,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/studio/src/domain/grid_criteria.rs](../components/studio/src/domain/grid_criteria.rs) | One allowlisted list-filter schema for model plans and MCP; no model-supplied SQL or tenant identity. |
 | [components/studio/src/domain/history_access.rs](../components/studio/src/domain/history_access.rs) | Which entities keep a history, the rights their versions need, and what a restoration request must state. |
 | [components/studio/src/domain/product_restore.rs](../components/studio/src/domain/product_restore.rs) | Rebuilds a product edit from a recorded version; stock stays current and associations pass the normal product admission afterwards. |
+| [components/studio/src/domain/proposal.rs](../components/studio/src/domain/proposal.rs) | Typed proposals, list views and reviewed work steps, with their checks before persistence or execution. |
 | [components/studio/src/domain/report_config.rs](../components/studio/src/domain/report_config.rs) | One bounded report definition for HTTP, MCP and private workspace presentation preferences. |
 | [components/studio/src/domain/report_period.rs](../components/studio/src/domain/report_period.rs) | Calendar periods are resolved once in the requested IANA timezone, with exclusive ends and bounded buckets. |
 | [components/studio/src/domain/staging_access.rs](../components/studio/src/domain/staging_access.rs) | Selective publication checks every selected domain's current rights before writing any live row; diffs show only what the caller may read. |
@@ -1205,13 +1201,19 @@ This lists every checked-in source module in these roots, including files with n
 | [components/studio/src/http/outbox.rs](../components/studio/src/http/outbox.rs) | Outbox runtime transport: the merchant's delivery counters and the explicit retry of a quarantined event. |
 | [components/studio/src/http/product_editor.rs](../components/studio/src/http/product_editor.rs) | The merchant product editor: revision-bound multilingual content, identity, commerce fields, channels and categories, checked against the shop settings, compliance rules, automation metadata and app extensions. |
 | [components/studio/src/http/products.rs](../components/studio/src/http/products.rs) | The merchant product list: catalogue filters from the catalog component, app filters and extensions from the app host, and the opt-in preparation projection. |
+| [components/studio/src/http/proposals.rs](../components/studio/src/http/proposals.rs) | HTTP proposal planning and the caller's reviewable task list. |
 | [components/studio/src/http/reports.rs](../components/studio/src/http/reports.rs) | Report transport: one bounded report query per request. |
 | [components/studio/src/http/workflow.rs](../components/studio/src/http/workflow.rs) | Revision-bound order workflow configuration used by installed apps and selective sandbox releases. |
 | [components/studio/src/http/workspace.rs](../components/studio/src/http/workspace.rs) | Actor-private workspace preferences; HTTP and MCP share CAS, bounds and the current membership. |
 | [components/studio/src/http.rs](../components/studio/src/http.rs) | HTTP handlers of the studio component; the server registers them with their route rights. |
 | [components/studio/src/lib.rs](../components/studio/src/lib.rs) | Studio component: report periods and configuration. |
+| [components/studio/src/ports.rs](../components/studio/src/ports.rs) | What reviewed work and proposal approval need from the server: the native operation registry, the app gateway's managed saves and the catalogue state. |
 | [components/studio/src/service/grid_plan.rs](../components/studio/src/service/grid_plan.rs) | Read-only filter planning through the central provider and fleet leases; execution remains native list APIs. |
+| [components/studio/src/service/proposal_admission.rs](../components/studio/src/service/proposal_admission.rs) | Native admission of model proposals and list views; every initial or repaired proposal traverses the same read-only checks. |
+| [components/studio/src/service/proposal_apply.rs](../components/studio/src/service/proposal_apply.rs) | Transactional application of approved, revision-bound proposals: product changes, experience, app saves, translation drafts and bounded price autonomy. |
 | [components/studio/src/service/reports.rs](../components/studio/src/service/reports.rs) | Shared commerce reports for Studio, the workspace, the API and agent reads; there is no second analytics ledger. |
+| [components/studio/src/service/work_execution.rs](../components/studio/src/service/work_execution.rs) | Approved work runs under the existing task lease; each native write is fenced against cancellation and recorded before advancing. Translation steps reuse native draft storage and yield the worker while drafts are prepared. |
+| [components/studio/src/service/work_plan.rs](../components/studio/src/service/work_plan.rs) | Reviewed work binds bounded native configuration commands and managed app saves before any worker effect; approval re-binds and queues it. |
 | [components/studio/src/service.rs](../components/studio/src/service.rs) | Operations of the studio component. |
 | [components/studio/src/store/customer_directory.sql](../components/studio/src/store/customer_directory.sql) | One tenant-scoped CRM entry per email, including historical guest checkouts. |
 | [components/studio/src/store/customer_directory_default.sql](../components/studio/src/store/customer_directory_default.sql) | One tenant-scoped CRM entry per email, including historical guest checkouts. |

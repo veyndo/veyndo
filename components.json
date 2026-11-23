@@ -173,7 +173,6 @@
         "src/commerce/detail.rs",
         "src/commerce/content_text.rs",
         "src/commerce/product_admin.rs",
-        "src/commerce/product_input.rs",
         "src/commerce/product_languages.rs",
         "src/commerce/catalog_ports.rs",
         "src/commerce/selection.rs",
@@ -230,8 +229,8 @@
         "tasks",
         "tenants"
       ],
-      "glob_imports": 30,
-      "untyped_access": 179,
+      "glob_imports": 29,
+      "untyped_access": 176,
       "sql_outside_store": 10
     },
     "inventory": {
@@ -764,7 +763,6 @@
         "src/concierge.rs",
         "src/documents",
         "src/experience.rs",
-        "src/planner",
         "src/planner.rs",
         "src/proposal_apply.rs",
         "src/proposal_model.rs",
@@ -809,7 +807,6 @@
         "identity",
         "inventory",
         "marketing",
-        "orders",
         "payments",
         "pricing",
         "protocols",
@@ -821,7 +818,6 @@
         "app_evidence",
         "app_packages",
         "carts",
-        "categories",
         "channel_metrics",
         "commerce_flows",
         "commerce_promotions",
@@ -844,9 +840,9 @@
         "tenants",
         "translation_jobs"
       ],
-      "glob_imports": 51,
-      "untyped_access": 741,
-      "sql_outside_store": 33
+      "glob_imports": 45,
+      "untyped_access": 711,
+      "sql_outside_store": 27
     },
     "studio": {
       "title": "Merchant overview, reports, private staging shops and history",
@@ -890,7 +886,9 @@
         "commerce_settings",
         "company_logos",
         "company_overrides",
+        "conversations",
         "customers",
+        "experiences",
         "exposures",
         "extensions",
         "knowledge_chunks",
@@ -919,8 +917,8 @@
         "translation_jobs"
       ],
       "glob_imports": 14,
-      "untyped_access": 197,
-      "sql_outside_store": 10
+      "untyped_access": 230,
+      "sql_outside_store": 15
     },
     "protocols": {
       "title": "MCP, UCP and the shared capability dispatch; adapters without business rules",
