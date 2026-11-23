@@ -208,10 +208,9 @@ This lists every checked-in source module in these roots, including files with n
 | [src/checkout/price.rs](../src/checkout/price.rs) | Authoritative native quote uses locked products/settings, original taxes, promotions, App hooks, POS and stock checks. |
 | [src/checkout/private_browser.rs](../src/checkout/private_browser.rs) | Relay only the browser's two Checkout session commands to a private service. |
 | [src/checkout/session_order.rs](../src/checkout/session_order.rs) | Bind an explicitly reviewed session purchase to the native transaction and its original order. |
-| [src/checkout/session_payment.rs](../src/checkout/session_payment.rs) | The Checkout test payment classification is owned by the checkout component; the deployment says whether fixtures count. |
 | [src/checkout/session_quote.rs](../src/checkout/session_quote.rs) | Project the current native cart quote for the independent checkout session service. |
 | [src/checkout/state.rs](../src/checkout/state.rs) | Opaque native checkout states retain the original transaction and prepared package/language inputs. |
-| [src/checkout_handoff.rs](../src/checkout_handoff.rs) | Single-use checkout transfer for independent storefronts; no app-specific catalog or checkout rules. |
+| [src/checkout_handoff.rs](../src/checkout_handoff.rs) | Single-use checkout transfer is owned by the checkout component; the server projects the redeemed cart. |
 | [src/checkout_page.rs](../src/checkout_page.rs) | The existing checkout may be framed only by its registered tenant/channel storefront. |
 | [src/checkout_products.rs](../src/checkout_products.rs) | The locked SKU snapshot is owned by the checkout component; the language chain is prepared here before the transaction. |
 | [src/checkout_review.rs](../src/checkout_review.rs) | The reviewed revision and total binding is owned by the checkout component. |
@@ -256,7 +255,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/commerce/customer_groups.rs](../src/commerce/customer_groups.rs) | Tenant-owned translated customer groups preserve exact rule IDs and select an explicit existing price/tax presentation basis. |
 | [src/commerce/delivery.rs](../src/commerce/delivery.rs) | Shipping costs, proportional taxes and calendar delivery windows. |
 | [src/commerce/delivery_split.rs](../src/commerce/delivery_split.rs) | Partial-package allocation is owned by the orders component. |
-| [src/commerce/detail.rs](../src/commerce/detail.rs) | Product family, context prices, gallery, properties and review aggregates. |
+| [src/commerce/detail.rs](../src/commerce/detail.rs) | Product detail is owned by the checkout component, which prices the tiers with the native quote. |
 | [src/commerce/external_orders.rs](../src/commerce/external_orders.rs) | External order intake is owned by the apps component; the core exchange of an admitted app calls it. |
 | [src/commerce/fulfillment.rs](../src/commerce/fulfillment.rs) | Revision-checked order, payment and delivery transitions are owned by the orders component. |
 | [src/commerce/geography.rs](../src/commerce/geography.rs) | Country catalogue of a shop; the bundled world and the admission rules are owned by the shipping component. |
@@ -285,8 +284,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/commerce/settings_routes.rs](../src/commerce/settings_routes.rs) | Tenant configuration and operational read model. |
 | [src/commerce/settings_scope.rs](../src/commerce/settings_scope.rs) | Scoped checkout configuration: basis row lock orders all override writes and authoritative checkout reads. |
 | [src/commerce/settings_validation.rs](../src/commerce/settings_validation.rs) | Configuration validation is owned by the shop component; rule conditions are checked by the rule engine. |
-| [src/commerce/supply.rs](../src/commerce/supply.rs) | Supplier links are owned by the inventory component; the shop settings embed them. |
-| [src/commerce/supply_proposal.rs](../src/commerce/supply_proposal.rs) | Reorder proposals: a signed offer from the supplier shop's public checkout on this installation, checked against the ceiling; approval hands over to that checkout and orders nothing. |
+| [src/commerce/supply_proposal.rs](../src/commerce/supply_proposal.rs) | Reorder proposal routes; the intelligence component owns the supplier offers, the ceiling check and the checkout handover. |
 | [src/commerce/tax.rs](../src/commerce/tax.rs) | Destination tax-class resolution and net-preserving price conversion. |
 | [src/commerce/tax_context.rs](../src/commerce/tax_context.rs) | Tax conditions consume private authoritative pre-tax cart facts without a recursive quote. |
 | [src/commerce/test_stock.rs](../src/commerce/test_stock.rs) | Entry point for scenarios; test stock is owned by the inventory component. |
@@ -804,16 +802,22 @@ This lists every checked-in source module in these roots, including files with n
 | [components/checkout/src/domain/tax_lines.rs](../components/checkout/src/domain/tax_lines.rs) | Destination tax-class resolution and net-preserving price conversion. |
 | [components/checkout/src/domain.rs](../components/checkout/src/domain.rs) | Rules of a quote, free of I/O apart from the clock. |
 | [components/checkout/src/http/buyer_identity.rs](../components/checkout/src/http/buyer_identity.rs) | Exchange a native buyer login for short-lived, Checkout-only authority. |
+| [components/checkout/src/http/handoff.rs](../components/checkout/src/http/handoff.rs) | Single-use checkout transfer for independent storefronts; no app-specific catalog or checkout rules. |
 | [components/checkout/src/http/private_browser.rs](../components/checkout/src/http/private_browser.rs) | Relay only the browser's two Checkout session commands to a private service. |
+| [components/checkout/src/http/product_detail.rs](../components/checkout/src/http/product_detail.rs) | Storefront product detail: family, context prices per quantity tier, gallery, properties, delivery window and review aggregates. |
 | [components/checkout/src/http.rs](../components/checkout/src/http.rs) | Checkout transports: sealed buyer grants and the relay to the private Checkout service. |
 | [components/checkout/src/lib.rs](../components/checkout/src/lib.rs) | Checkout component: tax lines and payment classification of a quote; the transaction follows. |
+| [components/checkout/src/ports.rs](../components/checkout/src/ports.rs) | What the cart projection needs from the server: localized cart products, the payment methods providers admit, and the app hooks and cashier discount that run after native pricing. |
 | [components/checkout/src/service/app_adjustments.rs](../components/checkout/src/service/app_adjustments.rs) | Apply admitted integer app adjustments through native pricing/tax calculation; extensions cannot replace quote JSON. |
+| [components/checkout/src/service/cart_projection.rs](../components/checkout/src/service/cart_projection.rs) | The priced cart as storefront, Studio and agents receive it: native quote, promotions, app hooks, taxes, legal flags, delivery dates and exact minor totals. |
 | [components/checkout/src/service/delivery.rs](../components/checkout/src/service/delivery.rs) | Shipping costs, proportional taxes and calendar delivery windows. |
 | [components/checkout/src/service/language.rs](../components/checkout/src/service/language.rs) | The language chain of a stored cart, prepared before the checkout transaction holds a pool connection. |
 | [components/checkout/src/service.rs](../components/checkout/src/service.rs) | service of this component. |
 | [components/checkout/src/store/admin_order.rs](../components/checkout/src/store/admin_order.rs) | Locked checkout guards of an order a merchant places: channel policy, the selected customer and the channel's product selection. |
+| [components/checkout/src/store/cart_create.rs](../components/checkout/src/store/cart_create.rs) | A new buyer cart: inserted with the shop defaults, then bound to the request's language, channel, currency and signed-in customer. |
 | [components/checkout/src/store/cart_load.rs](../components/checkout/src/store/cart_load.rs) | The buyer's cart of a request: loaded by tenant and context token, then guarded by cashier, company and sales channel rules. |
 | [components/checkout/src/store/customer_snapshot.rs](../components/checkout/src/store/customer_snapshot.rs) | Checkout-owned immutable customer and address records; future account edits cannot rewrite an order. |
+| [components/checkout/src/store/hosted_parent.rs](../components/checkout/src/store/hosted_parent.rs) | The storefront origin that may frame the hosted checkout: exactly the mounted shop and sales channel, over plain HTTPS. |
 | [components/checkout/src/store/legal_snapshot.rs](../components/checkout/src/store/legal_snapshot.rs) | Explicit document and digital acknowledgement, checked under the purchase locks and frozen into the order. |
 | [components/checkout/src/store/product_snapshot.rs](../components/checkout/src/store/product_snapshot.rs) | Localized immutable checkout SKU snapshots read under the purchase transaction's locks. |
 | [components/checkout/src/store/selected_customer.rs](../components/checkout/src/store/selected_customer.rs) | The customer a merchant selected for a cart, revalidated under a shared lock so profile edits cannot race the purchase. |
@@ -929,6 +933,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/intelligence/src/service/pdf.rs](../components/intelligence/src/service/pdf.rs) | PDF extraction executes in a killable child process without inherited commerce credentials. |
 | [components/intelligence/src/service/signed_offer.rs](../components/intelligence/src/service/signed_offer.rs) | Signed cart offers: an Ed25519 attestation of the native quote that a buying agent can check offline; a statement, not a price lock. |
 | [components/intelligence/src/service/sources.rs](../components/intelligence/src/service/sources.rs) | Knowledge source content checked against the languages the shop has enabled. |
+| [components/intelligence/src/service/supply_proposal.rs](../components/intelligence/src/service/supply_proposal.rs) | Reorder proposals: a signed offer from the supplier shop's public checkout on this installation, checked against the ceiling; approval hands over to that checkout and orders nothing. |
 | [components/intelligence/src/service.rs](../components/intelligence/src/service.rs) | Operations of the intelligence component that call out of process. |
 | [components/intelligence/src/store/agent_runs.rs](../components/intelligence/src/store/agent_runs.rs) | Durable agent runs in storage: the caller projection, the conversation turn fence, publication under the run lease and the checkpoint journal. |
 | [components/intelligence/src/store/behavior.rs](../components/intelligence/src/store/behavior.rs) | Consent-bound behaviour observations: the bounded write, a shopper's export and erasure, the channel report with its derived graph and the private journey. |

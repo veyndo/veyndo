@@ -13,9 +13,13 @@ pub(super) async fn create(
         doc["context_token"].as_str().unwrap().parse().unwrap(),
     );
     let c = load_cart(&a, &scoped).await?;
-    let transfer = checkout_handoff::issue(State(a), scoped, Json(json!({"revision":c.revision})))
-        .await?
-        .0;
+    let transfer = checkout_handoff::issue(
+        State(a.core.clone()),
+        scoped,
+        Json(json!({"revision":c.revision})),
+    )
+    .await?
+    .0;
     let origin = shop_domains::links(&c.tenant)["studioUrl"]
         .as_str()
         .unwrap()

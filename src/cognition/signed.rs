@@ -5,7 +5,7 @@ pub(crate) use veyndo_intelligence::service::fact_signing::{attest, key_id};
 pub(crate) async fn facts(a: &App, h: &RequestContext, id: &str) -> Result<Value> {
     let t = tenant(h)?;
     let detail = commerce::product_detail(
-        State(a.clone()),
+        State(axum::extract::FromRef::from_ref(a)),
         h.clone(),
         Path(id.into()),
         axum::extract::Query(CatalogCriteria::default()),

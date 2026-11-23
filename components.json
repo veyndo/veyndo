@@ -242,9 +242,9 @@
         "tasks",
         "tenants"
       ],
-      "glob_imports": 38,
-      "untyped_access": 203,
-      "sql_outside_store": 14
+      "glob_imports": 37,
+      "untyped_access": 196,
+      "sql_outside_store": 13
     },
     "inventory": {
       "title": "Stock, reservations and supply",
@@ -252,7 +252,6 @@
         "components/inventory",
         "src/commerce/inventory.rs",
         "src/commerce/inventory_ports.rs",
-        "src/commerce/supply.rs",
         "src/commerce/supply_proposal.rs",
         "src/commerce/test_stock.rs"
       ],
@@ -264,20 +263,15 @@
         "catalog",
         "checkout",
         "core",
-        "identity",
-        "intelligence",
-        "pricing",
-        "protocols",
-        "shop"
+        "pricing"
       ],
       "foreign_tables": [
-        "outbox",
         "products",
         "shop_environments"
       ],
       "glob_imports": 2,
-      "untyped_access": 26,
-      "sql_outside_store": 2
+      "untyped_access": 3,
+      "sql_outside_store": 1
     },
     "pricing": {
       "title": "Money, price calculation, discounts, currencies, taxes and customer groups",
@@ -326,7 +320,6 @@
       "tables": [],
       "uses": [
         "catalog",
-        "checkout",
         "core",
         "identity",
         "payments",
@@ -341,7 +334,7 @@
         "commerce_rules",
         "orders"
       ],
-      "glob_imports": 4,
+      "glob_imports": 3,
       "untyped_access": 52,
       "sql_outside_store": 0
     },
@@ -398,14 +391,15 @@
         "policy",
         "privacy_consents",
         "product_channel_visibility",
+        "product_reviews",
         "products",
         "sales_channels",
         "shop_environments",
         "tenants"
       ],
       "glob_imports": 10,
-      "untyped_access": 207,
-      "sql_outside_store": 8
+      "untyped_access": 212,
+      "sql_outside_store": 7
     },
     "customers": {
       "title": "Customer accounts, sessions, addresses and the merchant customer directory",
@@ -838,6 +832,7 @@
         "core",
         "customers",
         "identity",
+        "inventory",
         "marketing",
         "orders",
         "payments",
@@ -875,8 +870,8 @@
         "translation_jobs"
       ],
       "glob_imports": 72,
-      "untyped_access": 714,
-      "sql_outside_store": 34
+      "untyped_access": 736,
+      "sql_outside_store": 35
     },
     "studio": {
       "title": "Merchant overview, reports, private staging shops and history",

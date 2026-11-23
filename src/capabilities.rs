@@ -93,7 +93,7 @@ pub(super) async fn invoke_native(
             let criteria =
                 serde_json::from_value(v.clone()).map_err(|_| bad("Invalid variant criteria"))?;
             let Json(v) = commerce::product_detail(
-                State(a.clone()),
+                State(axum::extract::FromRef::from_ref(a)),
                 h.clone(),
                 Path(
                     v["productId"]

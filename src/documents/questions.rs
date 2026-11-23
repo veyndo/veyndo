@@ -12,7 +12,7 @@ pub(crate) async fn question(
         .filter(|s| !s.trim().is_empty() && s.len() <= 2000)
         .ok_or(bad("Question must contain 1..2000 bytes"))?;
     let detail = commerce::product_detail(
-        State(a.clone()),
+        State(axum::extract::FromRef::from_ref(&a)),
         h.clone(),
         Path(id.clone()),
         axum::extract::Query(CatalogCriteria::default()),
@@ -52,7 +52,7 @@ pub(crate) async fn question(
     // Provider work holds no commerce lock. Re-admit the current native snapshot
     // and every supplied source, including uncited text that could influence prose.
     let current = commerce::product_detail(
-        State(a.clone()),
+        State(axum::extract::FromRef::from_ref(&a)),
         h.clone(),
         Path(id.clone()),
         axum::extract::Query(CatalogCriteria::default()),

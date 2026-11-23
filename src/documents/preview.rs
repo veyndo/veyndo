@@ -23,7 +23,7 @@ pub(crate) async fn preview(
     let snapshot = if let Some(id) = product {
         Some(
             commerce::product_detail(
-                State(a.clone()),
+                State(axum::extract::FromRef::from_ref(&a)),
                 h.clone(),
                 Path(id.into()),
                 axum::extract::Query(CatalogCriteria::default()),

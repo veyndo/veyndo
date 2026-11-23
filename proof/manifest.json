@@ -1766,25 +1766,45 @@
       "sha256": "10c3d9ef48dda6957b32da5a2efba403b432cab2ced82cb5843467a4f6ed5396",
       "review": "Process configuration moved into core; browser session transports, Checkout buyer grants, the private Checkout relay, trusted geography and provider startup validation moved into their components without behaviour change"
     },
+    "components/checkout/src/http/handoff.rs": {
+      "status": "unproved",
+      "sha256": "e8948354b36d4baff9c5378dd70004a0ea4959f22348c9f88fc7603c0b75a1e1",
+      "review": "Cart projection, product detail, checkout handoff, cart creation and supply proposals move into components"
+    },
     "components/checkout/src/http/private_browser.rs": {
       "status": "unproved",
       "sha256": "022df4202b5378baf0e2fab8be091b91723453a7426f944ce8da32845e5fd080",
       "review": "Process configuration moved into core; browser session transports, Checkout buyer grants, the private Checkout relay, trusted geography and provider startup validation moved into their components without behaviour change"
     },
+    "components/checkout/src/http/product_detail.rs": {
+      "status": "unproved",
+      "sha256": "404bc276b12a2adafc0978d4a3214c25c5531b35d3109fe3db8d2c9770596325",
+      "review": "Cart projection and product detail move into checkout behind a quote port"
+    },
     "components/checkout/src/http.rs": {
       "status": "unproved",
-      "sha256": "f1393700ec58e7af87c49746a85c43eb41ff4fe1382a82b85fc40729beafaf62",
-      "review": "Process configuration moved into core; browser session transports, Checkout buyer grants, the private Checkout relay, trusted geography and provider startup validation moved into their components without behaviour change"
+      "sha256": "038d2da29228b05cb05d73aac7f6d5759e73c640b9ed61abdf71f055c4b2ff43",
+      "review": "Cart projection, product detail, checkout handoff, cart creation and supply proposals move into components"
     },
     "components/checkout/src/lib.rs": {
       "status": "unproved",
-      "sha256": "32cc75782e5b1f9410975828ff795466375e305874110758a5752501b56fc4b9",
-      "review": "Process configuration moved into core; browser session transports, Checkout buyer grants, the private Checkout relay, trusted geography and provider startup validation moved into their components without behaviour change"
+      "sha256": "074d0109766011989092ec25a4fa9a9ede4cda676f8572a78db74370d9e19e22",
+      "review": "Cart projection and product detail move into checkout behind a quote port"
+    },
+    "components/checkout/src/ports.rs": {
+      "status": "unproved",
+      "sha256": "f1eb1478d2b20ebed9fb4ae3232f6030659e555dfa31c88dd060653276082e4f",
+      "review": "Cart projection and product detail move into checkout behind a quote port"
     },
     "components/checkout/src/service/app_adjustments.rs": {
       "status": "unproved",
       "sha256": "5def5e0eab01f7dfcb65a74c4f1580d2fb39facab32e81ba57ace2d15e2fa5df",
       "review": "Delivery enrichment, app adjustments and funding moved into components; kernel call sites unchanged"
+    },
+    "components/checkout/src/service/cart_projection.rs": {
+      "status": "unproved",
+      "sha256": "df4a21eaa29c6c4b94ea23224820e93058a1958ae2e5c05ae680015183fd1d4d",
+      "review": "Cart projection and product detail move into checkout behind a quote port"
     },
     "components/checkout/src/service/delivery.rs": {
       "status": "unproved",
@@ -1798,18 +1818,33 @@
     },
     "components/checkout/src/service.rs": {
       "status": "unproved",
-      "sha256": "cb036212be79f4b64e42b74d6d585b9b5b0a8deb3f1f12e78a3c73fcdf034407",
-      "review": "Report service moved into the studio component and the cart language chain into the checkout component; behaviour unchanged"
+      "sha256": "567c6bb91f3da77cafb56f3c562fdae649f6907a3eed504049a7e3455b50b072",
+      "review": "Cart projection and product detail move into checkout behind a quote port"
     },
     "components/checkout/src/store/admin_order.rs": {
       "status": "unproved",
       "sha256": "a5728a68770696abbfa556f102243a7e9d18eb46c1d00f2cbac6676b92fc5271",
       "review": "Merchant customer writes moved into the customers component and admin order admission into checkout without behaviour change"
     },
+    "components/checkout/src/store/cart_create.rs": {
+      "status": "unproved",
+      "sha256": "dafe50e01f9054ee048c8c22531822e2b4db5e649427eb122152a5617248adec",
+      "review": "Cart projection, product detail, checkout handoff, cart creation and supply proposals move into components"
+    },
+    "components/checkout/src/store/cart_load.rs": {
+      "status": "unproved",
+      "sha256": "0230a61925d0f2a022705dca89d911dcbfb8c7922f481de623edb6b01ac8ab72",
+      "review": "Cart projection and product detail move into checkout behind a quote port"
+    },
     "components/checkout/src/store/customer_snapshot.rs": {
       "status": "unproved",
       "sha256": "a4879982eac35a2be2108e00b040726381b347633378adc0a377e083321a9740",
       "review": "Coupons, flow job summaries, requisition import, customer snapshot, address restore and account orders moved into components"
+    },
+    "components/checkout/src/store/hosted_parent.rs": {
+      "status": "unproved",
+      "sha256": "2eb1679ef071480ddb1ef942831243117eec94c86b10b0d7286587f3902dce90",
+      "review": "Cart projection, product detail, checkout handoff, cart creation and supply proposals move into components"
     },
     "components/checkout/src/store/legal_snapshot.rs": {
       "status": "reviewed-binding",
@@ -1838,8 +1873,8 @@
     },
     "components/checkout/src/store.rs": {
       "status": "unproved",
-      "sha256": "7bc08132562756bafecfcac224d5bea3430a4a0ca7b47bc8ca3fc180133f5a42",
-      "review": "Company basis and logo transport moved into the orders component, tax rule conditions into checkout; behaviour unchanged"
+      "sha256": "333c1adeb2feb7ec81881b946c1dce4bddcb8a77c50c6aa0a33b5d5f84dfa2ac",
+      "review": "Cart projection, product detail, checkout handoff, cart creation and supply proposals move into components"
     },
     "components/core/src/access.rs": {
       "status": "unproved",
@@ -2356,10 +2391,15 @@
       "sha256": "09875b35aa87235607feeb4fb306aa01c694e407ff52aba2cbe7bf0396a84bb1",
       "review": "Experiment operations and source content checks moved into the intelligence component, CRM creation context into customers; behaviour unchanged"
     },
+    "components/intelligence/src/service/supply_proposal.rs": {
+      "status": "unproved",
+      "sha256": "532d7545faf69942dccccb24618c1426558862f949df8afe1630fc3a498e38eb",
+      "review": "Cart projection, product detail, checkout handoff, cart creation and supply proposals move into components"
+    },
     "components/intelligence/src/service.rs": {
       "status": "unproved",
-      "sha256": "86ed46d9964f9283344bf42555edc735bbb2759f15ffc2d8018fae81c649dbf1",
-      "review": "Signed offers and fact signing moved into the intelligence component behind the cart port"
+      "sha256": "6ca53bd3685d4deef7f112f47c7ed22e9b98a59cdd98bed7e35817e8049fbf27",
+      "review": "Cart projection, product detail, checkout handoff, cart creation and supply proposals move into components"
     },
     "components/intelligence/src/store/agent_runs.rs": {
       "status": "unproved",
@@ -6363,8 +6403,8 @@
     },
     "src/capabilities.rs": {
       "status": "unproved",
-      "sha256": "fda033ad335f60aaebb1da98eb8a246823f1428da6b6076e252bb2560696dc2f",
-      "review": "Signed offers and fact signing moved into the intelligence component behind the cart port"
+      "sha256": "751b7645342a359de370bf87b7db24a02ddacfd7c6c133ab1971c6f052d2c788",
+      "review": "Cart projection and product detail move into checkout behind a quote port"
     },
     "src/cart_model.rs": {
       "status": "unproved",
@@ -6378,8 +6418,8 @@
     },
     "src/cart_price.rs": {
       "status": "unproved",
-      "sha256": "be053d27effdbbcb366856d255e118b97801d205853e3ab343b9aa742a7ac123",
-      "review": "Cart quote, configuration fee and quantity normalisation moved into the checkout component; behaviour unchanged"
+      "sha256": "32b9f63ecd956c1dc9cb7db997ea0f84f6d491a5d4e90cea954c2f22a610738b",
+      "review": "Cart projection and product detail move into checkout behind a quote port"
     },
     "src/cart_routes.rs": {
       "status": "unproved",
@@ -6388,8 +6428,8 @@
     },
     "src/cart_storage.rs": {
       "status": "unproved",
-      "sha256": "83b15a81bb8cfa13b6f27f86df4534e22d35f10cb493d61307f25a6b7760455f",
-      "review": "Coupons, flow job summaries, requisition import, customer snapshot, address restore and account orders moved into components"
+      "sha256": "c532e4ed543bd146c0beb20c6f0da61131e7443d21cb2443af46c4868889132b",
+      "review": "Cart projection, product detail, checkout handoff, cart creation and supply proposals move into components"
     },
     "src/catalog_model.rs": {
       "status": "unproved",
@@ -6423,8 +6463,8 @@
     },
     "src/checkout/buyer_identity.rs": {
       "status": "unproved",
-      "sha256": "ee2a97f93f14a066861cb373426e03ca111c197938c27691d95e4bfe7b3b0988",
-      "review": "Process configuration moved into core; browser session transports, Checkout buyer grants, the private Checkout relay, trusted geography and provider startup validation moved into their components without behaviour change"
+      "sha256": "b7739396fb2b3ba08c951f852f21801cc59e39c0b84aca49987f4e922eb15db9",
+      "review": "Cart projection and product detail move into checkout behind a quote port"
     },
     "src/checkout/commit.rs": {
       "status": "reviewed-binding",
@@ -6438,8 +6478,8 @@
     },
     "src/checkout/mod.rs": {
       "status": "unproved",
-      "sha256": "675b56244e9a689647bd8ecda2712bb54f009885522112e2d049004c0248e386",
-      "review": "Checkout private relay: fixed upstream session routes, native buyer admission, bounded responses, and separate request capacity for Core callbacks. No new formal claims."
+      "sha256": "0cc56f43e0e55e7dc2facdb595456cd926e09a15abc5600b4f180da2aae4025b",
+      "review": "Cart projection and product detail move into checkout behind a quote port"
     },
     "src/checkout/prepare.rs": {
       "status": "unproved",
@@ -6461,11 +6501,6 @@
       "sha256": "72bc335701b8edfc806796d2c7fa71d1d70dac262b85fc22eed173b810fc8c1b",
       "review": "POS guard, customer, discount and settlement and the checkout session review moved into components"
     },
-    "src/checkout/session_payment.rs": {
-      "status": "unproved",
-      "sha256": "cfde356f48d519a14dc40900cfc063385c016f06cf53525f6ea58553c77e3ba0",
-      "review": "POS guard, customer, discount and settlement and the checkout session review moved into components"
-    },
     "src/checkout/session_quote.rs": {
       "status": "unproved",
       "sha256": "93bcb9d0436b565d91ff63166b222ce385a938862c34dbb10feb068ad35b0292",
@@ -6478,13 +6513,13 @@
     },
     "src/checkout_handoff.rs": {
       "status": "unproved",
-      "sha256": "637847dd86b9dac1e460dcb95bbde6ebb73ecc303319578706bef3fc9baf20a3",
-      "review": "Three further proved rules with production bindings: a signed offer is honoured only unexpired and for the unchanged cart, revision and total (signed_offer.rs, result identical to the former expression); sovereign AI mode admits only the self-operated provider on a self-hosted endpoint (sovereign.rs, same decision, endpoint check no longer short-circuited and free of effects); workspace ID length bounds (core). Three SQL statements gained explicit parameter casts matching their bound types. Kernel, core and cognition unit tests pass. SQL, HTTP and provider behaviour is not formally proved."
+      "sha256": "9cd025e1488dd5edc0f682d7864eb4f98640392be44bdf1cf137c829e9073e74",
+      "review": "Cart projection, product detail, checkout handoff, cart creation and supply proposals move into components"
     },
     "src/checkout_page.rs": {
       "status": "unproved",
-      "sha256": "dc00e6f6e98bf290418940ef0159504ce51cb023317c572519e56d050fac1e8e",
-      "review": "Reviewed the hosted checkout recovery binding and additive migration. Signed PostgreSQL HTTP tests reject foreign tenant, unregistered origin, forged key and expired recovery, enforce one-time cart transfer and show concurrent purchase and reopen preserve the original order or invalidate the old token. Existing extracted policy proofs are unchanged; SQL and hosted provider behavior are outside Lean."
+      "sha256": "3f16b5aed3fc91c8335814cd9f47fd8de200f12c879b059ce3c8f9f8127d5d6e",
+      "review": "Cart projection, product detail, checkout handoff, cart creation and supply proposals move into components"
     },
     "src/checkout_products.rs": {
       "status": "unproved",
@@ -6613,8 +6648,8 @@
     },
     "src/cognition/signed.rs": {
       "status": "unproved",
-      "sha256": "b524587f81204891fb01773576246583bd0687e07ee3f5c2d21bd9ae22136498",
-      "review": "Signed offers and fact signing moved into the intelligence component behind the cart port"
+      "sha256": "a6df267f492808243400554b407ccab111834e7529a21af398bb350f927c1fb8",
+      "review": "Cart projection and product detail move into checkout behind a quote port"
     },
     "src/cognition/signed_offer.rs": {
       "status": "unproved",
@@ -6638,8 +6673,8 @@
     },
     "src/commerce/catalog.rs": {
       "status": "unproved",
-      "sha256": "60e0442315c15ab7faaef34be68072e7d5d8c487b48d38270a4c94ba4f1bed55",
-      "review": "POS guard, customer, discount and settlement and the checkout session review moved into components"
+      "sha256": "257b1335971c4b7c81d371e6ee92ac3965a3799938b001bacd2cc1ae692ec9a9",
+      "review": "Cart projection and product detail move into checkout behind a quote port"
     },
     "src/commerce/catalog_intake/csv.rs": {
       "status": "unproved",
@@ -6693,8 +6728,8 @@
     },
     "src/commerce/delivery.rs": {
       "status": "unproved",
-      "sha256": "010a812376e78f10838cd3919c7c808198de0a8d0ae53239ffbbe1e2f3fe6bad",
-      "review": "Delivery enrichment, app adjustments and funding moved into components; kernel call sites unchanged"
+      "sha256": "493dd388cadd80dd6145d97699d7fef656993d4bc871065a595a73017d855118",
+      "review": "Cart projection and product detail move into checkout behind a quote port"
     },
     "src/commerce/delivery_split.rs": {
       "status": "unproved",
@@ -6703,8 +6738,8 @@
     },
     "src/commerce/detail.rs": {
       "status": "unproved",
-      "sha256": "9c8404f38e6fd01127ed8c2e7a84da3fdcb835b2a1de321f86ed59718ec59654",
-      "review": "Reviewed native historical review admission, immutable coupon provenance and explicit activation policy; independent review findings on malformed usage limits, imported-review PII projection and source-currency spend bounds reproduced and fixed with actual CLI/HTTP/checkout regressions. Existing package, creator, lease and tenant fences retained; SQL, networking and provider parity remain outside the extracted pure activation proof."
+      "sha256": "d5cd6aa99d06874ce3894dff1da33fdef5122ae8ceb466b436c9f27d9c38bdce",
+      "review": "Cart projection and product detail move into checkout behind a quote port"
     },
     "src/commerce/external_orders.rs": {
       "status": "unproved",
@@ -6753,8 +6788,8 @@
     },
     "src/commerce/mod.rs": {
       "status": "unproved",
-      "sha256": "55d8e25a25986b1c1f7255469d7855af0bdd7908bd809206f07e4681501a6dda",
-      "review": "Delivery split and carrier booking intents moved into the orders and apps components"
+      "sha256": "dc320e3ec8670b4ce8ecb35c18701d92dfd0a3a34acdd030427d388d98074d9a",
+      "review": "Cart projection, product detail, checkout handoff, cart creation and supply proposals move into components"
     },
     "src/commerce/order_fields.rs": {
       "status": "unproved",
@@ -6846,15 +6881,10 @@
       "sha256": "c8aa1fab66be75b58a3a53bafc00d3040064257a0cb9f3c324d15db5055aaac3",
       "review": "shop component crate created; settings types moved; no kernel binding changed"
     },
-    "src/commerce/supply.rs": {
-      "status": "unproved",
-      "sha256": "aaae589492c778c91c9fc82dcc0646d224a1a3a62ad66442d6961dfbd2838d79",
-      "review": "shop component crate created; settings types moved; no kernel binding changed"
-    },
     "src/commerce/supply_proposal.rs": {
       "status": "unproved",
-      "sha256": "79b1382887de2a073c43104a31ce74a74197c1b3a129a1527b5cbd4cbcb0da42",
-      "review": "Signed offers and fact signing moved into the intelligence component behind the cart port"
+      "sha256": "2b9d66d90b24a2f9fa43e5180e3f093485bf07349b7d9c8bc430b60d3631b2dd",
+      "review": "Cart projection, product detail, checkout handoff, cart creation and supply proposals move into components"
     },
     "src/commerce/tax.rs": {
       "status": "unproved",
@@ -6983,8 +7013,8 @@
     },
     "src/documents/preview.rs": {
       "status": "unproved",
-      "sha256": "c5514cc0fbafc4ff25379f8f34ec6397c7eff51c2235a62f50349761154f35f9",
-      "review": "Reviewed current Orders and PII admission, optional Knowledge read grant and registered panel filtering. Knowledge preview skips app evidence only on explicit opt-out, preserving native locale and tenant rules. Frontend tests cover rights revocation and independent policy retry. Native order, shipping, knowledge and checkout HTTP cases pass. Extracted policies unchanged; async Rust and SQL remain unproved."
+      "sha256": "270b989a3c029daf691120f5aac989cb855d500a4d03fbb6b53becfc709dd86c",
+      "review": "Cart projection and product detail move into checkout behind a quote port"
     },
     "src/documents/product_knowledge.rs": {
       "status": "unproved",
@@ -6993,8 +7023,8 @@
     },
     "src/documents/questions.rs": {
       "status": "unproved",
-      "sha256": "c66bdb55031a3541015ceb7dbfc34b53695eedfca6feb8468470d37f6cec3348",
-      "review": "Claim evidence, claim batches, order observation projection, embedding jobs, source search, knowledge inventory, product facts and prompt snapshots moved verbatim into the intelligence component; permissions, settings, provider admission and leases stay in the server. Kernel admission calls unchanged."
+      "sha256": "7d8b2636d8d819a2c0dea57be69ac918039d4ba6c3b5633ca4fb02f9150273f1",
+      "review": "Cart projection and product detail move into checkout behind a quote port"
     },
     "src/documents/retrieval.rs": {
       "status": "unproved",
@@ -7763,8 +7793,8 @@
     },
     "src/pos/gateway.rs": {
       "status": "unproved",
-      "sha256": "ea80b3d723bd188c5660337ff6d64dceae1cdd3197785111ca446faea14828b4",
-      "review": "Functions above 150 lines split into named steps without behaviour change; function length limit lowered to 150"
+      "sha256": "1ba2427164b3f93d5009b683eddacc4cbdd91fa2d3ba792a44a3fcfe8b8e93e3",
+      "review": "Cart projection and product detail move into checkout behind a quote port"
     },
     "src/pos/input.rs": {
       "status": "unproved",
@@ -7988,8 +8018,8 @@
     },
     "src/ucp/cart.rs": {
       "status": "unproved",
-      "sha256": "f2a3f492f7552493857633ed842bb814a5f3ebd1b9f8bb1f53a4b090ceb56903",
-      "review": "Reviewed inbound UCP/native cart and consent transactions, native finalization contact guard, immutable order snapshots, explicit optional negotiation, public HTTPS app-owned catalogue adapters; independent whole-branch review findings repaired and six isolated HTTP/PG suites pass. No extracted kernel policy changed; SQL/provider behavior remains unproved."
+      "sha256": "468da10f988ae9051ded22d9c872f37b86092634c29336c2bc81cd9f8f4b6179",
+      "review": "Cart projection, product detail, checkout handoff, cart creation and supply proposals move into components"
     },
     "src/ucp/consent.rs": {
       "status": "unproved",
@@ -8013,8 +8043,8 @@
     },
     "src/ucp/negotiation.rs": {
       "status": "unproved",
-      "sha256": "03e1fe3dc8fbf92bb5754cead4cb22e5befb8f36751a41140f7eceedd563b3f8",
-      "review": "Reviewed UCP PUT compatibility and optional projection: omitted contact fields are replaced, only explicit prior consent persists, missing contacts still block completion, and unnegotiated absent buyer is not inserted as null. Existing protocols and agentic HTTP regressions cover both contracts."
+      "sha256": "9bda7a57b27217aeeb45e855a1cd917fd8842407594bf06fabbb2d8153411ef3",
+      "review": "Cart projection, product detail, checkout handoff, cart creation and supply proposals move into components"
     },
     "src/ucp/profile.rs": {
       "status": "unproved",
@@ -8048,8 +8078,8 @@
       "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
     },
     "Cargo.lock": {
-      "sha256": "a04b893159e074da9b0cffbaff71b059e880c02b3d9392afd13353720ee073b6",
-      "review": "Signed offers and fact signing moved into the intelligence component behind the cart port"
+      "sha256": "0290a247bf362066165b13a8b4a720870e8d6c68a44f1f41da2d890358d17eb3",
+      "review": "Cart projection, product detail, checkout handoff, cart creation and supply proposals move into components"
     },
     "Cargo.toml": {
       "sha256": "12d2d79a98f6913d20b8e912afb9ea8de0539b9e83428de8a9d7412c406896f6",

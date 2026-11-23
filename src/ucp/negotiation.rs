@@ -52,7 +52,7 @@ pub(crate) async fn command(
                 "Checkout handoff requires only the current cart revision",
             ));
         }
-        checkout_handoff::issue(State(a.clone()), h.clone(), Json(v))
+        checkout_handoff::issue(State(a.core.clone()), h.clone(), Json(v))
             .await?
             .0
     } else {

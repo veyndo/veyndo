@@ -135,7 +135,7 @@ pub(crate) async fn invoke(
             json!({"channel":data,"options":commerce::options(State(a.clone()),h.clone()).await?.0,"policy":legal::invoke(a,&h,"privacy.policy",&json!({})).await?,"currencies":currencies::invoke(a,&h,"currency.list",&json!({})).await?}),
         ),
         "detail" => Ok(commerce::product_detail(
-            State(a.clone()),
+            State(axum::extract::FromRef::from_ref(a)),
             h,
             Path(input.product_id.ok_or(bad("Product required"))?),
             axum::extract::Query(CatalogCriteria {

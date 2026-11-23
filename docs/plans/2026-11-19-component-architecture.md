@@ -259,9 +259,10 @@ Order follows the dependency report, lowest first. Each line is one move.
   idempotent release, stock consumption, supplier links with their bounds, the
   rule that admits a signed supplier offer (saved link, pricing currency,
   ceiling), and test stock as a service behind the ports `Environments`
-  (private sandbox) and `ProductIndex`. Open: the reorder proposal and its
-  approval still run in the server, because they call the supplier shop's
-  cart, signed offers and the checkout handoff; reservations of open carts
+  (private sandbox) and `ProductIndex`. The reorder proposal and its approval
+  live in `intelligence/service/supply_proposal`: the shop component already
+  depends on inventory, so inventory cannot read the supply settings or call
+  the supplier's checkout. Open: reservations of open carts
   (`inventory_reservations`); `query_as!`.
 - [ ] shipping. Started: `components/shipping` owns the bundled world with the
   shop's own countries and the address region rule, the split of a package
@@ -328,9 +329,18 @@ Order follows the dependency report, lowest first. Each line is one move.
   quantity pricing, configuration fees and minor-unit totals is
   `domain/cart_quote`; the language chain of a stored cart is
   `service/language`. The guarded cart of a request is loaded by
-  `store/cart_load`. Open: cart creation and mutation, the selection, the four steps of the checkout
+  `store/cart_load`; a new cart with the shop defaults and the signed-in
+  customer is `store/cart_create`. The priced cart (native quote, promotions,
+  taxes, legal flags, delivery dates, minor totals, company preview) is
+  `service/cart_projection`; what it needs from the server is the port
+  `ports::Quotes` (cart products, provider payment methods, app hooks and the
+  cashier discount), implemented by `cart_price::Quotes`. The storefront
+  product detail with its tier prices and reviews is `http/product_detail`
+  (on the catalog state); the single-use checkout handoff and its recovery
+  are `http/handoff`, with the framing parent check in `store/hosted_parent`.
+  Open: cart mutation, the selection, the four steps of the checkout
   transaction (they call apps, B2B, payments, marketing and legal and need a
-  host port), the handoff. `http/buyer_identity` seals and inspects the
+  host port). `http/buyer_identity` seals and inspects the
   short-lived Checkout grant of a live customer session and
   `http/private_browser` relays the two browser commands to the private
   Checkout service; the server only registers their routes.
@@ -485,7 +495,9 @@ Order follows the dependency report, lowest first. Each line is one move.
   (`domain/prompt_context`, `store/context_products`) and durable agent
   runs in storage: the caller projection, the conversation turn fence,
   lease-fenced publication and the checkpoint journal (`store/agent_runs`,
-  `domain/run_result`); `domain/trusted_geography` accepts a visitor
+  `domain/run_result`); the reorder proposal from a supplier shop on this
+  installation with its approval (`service/supply_proposal`, over the cart
+  port and the checkout handoff); `domain/trusted_geography` accepts a visitor
   country only from the trusted ingress. The server keeps
   consent, settings, channel admission, provider admission and leases and
   passes them in.
