@@ -6,7 +6,6 @@ mod caption_source;
 mod captions;
 pub(crate) mod design_references;
 mod image_jobs;
-pub(crate) mod image_provider;
 pub(crate) use captions::schema as caption_schema;
 mod rich;
 mod rich_document;

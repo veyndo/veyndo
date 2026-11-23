@@ -3701,6 +3701,7 @@ version = "0.5.0"
 dependencies = [
  "aes-gcm",
  "base64 0.22.1",
+ "image",
  "reqwest",
  "serde",
  "serde_json",
@@ -3915,6 +3916,7 @@ dependencies = [
 name = "veyndo-payments"
 version = "0.5.0"
 dependencies = [
+ "axum",
  "chrono",
  "hmac 0.12.1",
  "reqwest",
@@ -3924,6 +3926,7 @@ dependencies = [
  "sqlx",
  "veyndo-app-model",
  "veyndo-core",
+ "veyndo-identity",
  "veyndo-inventory",
  "veyndo-kernel",
  "veyndo-orders",

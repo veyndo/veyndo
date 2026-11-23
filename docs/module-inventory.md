@@ -96,7 +96,6 @@ This lists every checked-in source module in these roots, including files with n
 | [src/assets/captions.rs](../src/assets/captions.rs) | Caption proposals use central inference and current shop languages; only the owning native editor can save them. |
 | [src/assets/design_references.rs](../src/assets/design_references.rs) | Bounded reference capture uses the shared public-only DNS-pinned egress client; partial failures remain visible. |
 | [src/assets/image_jobs.rs](../src/assets/image_jobs.rs) | Entry points for routes, capabilities and the worker; image jobs are owned by the catalog component. |
-| [src/assets/image_provider.rs](../src/assets/image_provider.rs) | Optional OpenAI Images adapter; bounded responses and decoded PNG output, no remote user URLs or leaked provider errors. |
 | [src/assets/import.rs](../src/assets/import.rs) | Immutable imported product images reuse the native asset table, product lock, byte validation and publication lifecycle. |
 | [src/assets/ingestion.rs](../src/assets/ingestion.rs) | The bounded multipart parser is owned by the catalog component. |
 | [src/assets/mod.rs](../src/assets/mod.rs) | Product attachments and paid digital downloads: bounded binary persistence and tenant/account ACL. |
@@ -477,6 +476,7 @@ This lists every checked-in source module in these roots, including files with n
 | [crates/automation/src/rules/tests.rs](../crates/automation/src/rules/tests.rs) | Regression cases cover missing authority under NOT, original quantifiers, dates, metadata types and registry bounds. |
 | [crates/automation/src/rules/time.rs](../crates/automation/src/rules/time.rs) | Calendar comparisons use an explicit server clock, IANA zones and the original exclusive date-range end. |
 | [crates/automation/src/rules/validation.rs](../crates/automation/src/rules/validation.rs) | Bounded source payload validation against exported field/operator metadata and nested condition scopes. |
+| [crates/cognition/src/images.rs](../crates/cognition/src/images.rs) | Optional OpenAI Images adapter; bounded responses and decoded PNG output, no remote user URLs or leaked provider errors. |
 | [crates/cognition/src/inference/budget.rs](../crates/cognition/src/inference/budget.rs) | Durable conservative model allocations use existing agent keys and the live shop stop switch. |
 | [crates/cognition/src/inference/error.rs](../crates/cognition/src/inference/error.rs) | Typed admission failures survive provider adapters; HTTP status never depends on parsing message text. |
 | [crates/cognition/src/inference/protocol.rs](../crates/cognition/src/inference/protocol.rs) | Self-hosted chat-completions adapter and opt-in provider prompt caching; neither caches private commerce responses. |
@@ -1058,6 +1058,8 @@ This lists every checked-in source module in these roots, including files with n
 | [components/payments/src/domain/settlements.rs](../components/payments/src/domain/settlements.rs) | Immutable capture receipts and exact cumulative settlement for native partial/multiple captures. |
 | [components/payments/src/domain/state.rs](../components/payments/src/domain/state.rs) | One monotonic provider-neutral ledger state machine; evidence validation and authorization stay in receipt adapters. |
 | [components/payments/src/domain.rs](../components/payments/src/domain.rs) | Rules of the payment ledger, free of I/O. |
+| [components/payments/src/http/status.rs](../components/payments/src/http/status.rs) | Payment status reads from one statement snapshot, and the merchant's view of a durable payment job. |
+| [components/payments/src/http.rs](../components/payments/src/http.rs) | HTTP handlers of the payments component; the server registers them with their route rights. |
 | [components/payments/src/lib.rs](../components/payments/src/lib.rs) | Payments component: the attempt ledger, its state machine, settlements, refunds and receipt admission. |
 | [components/payments/src/ports.rs](../components/payments/src/ports.rs) | What the payment ledger needs from the server: adapter service configuration and the effects other components attach to a captured order. |
 | [components/payments/src/service/commands.rs](../components/payments/src/service/commands.rs) | App/Flow/MCP payment actions enqueue core jobs; provider-bound attempts prevent cross-app command authority. |

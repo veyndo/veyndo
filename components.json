@@ -230,8 +230,8 @@
         "tasks",
         "tenants"
       ],
-      "glob_imports": 31,
-      "untyped_access": 180,
+      "glob_imports": 30,
+      "untyped_access": 179,
       "sql_outside_store": 10
     },
     "inventory": {
@@ -519,7 +519,7 @@
       ],
       "glob_imports": 1,
       "untyped_access": 264,
-      "sql_outside_store": 13
+      "sql_outside_store": 14
     },
     "marketing": {
       "title": "Rules, coupons, promotions, flows and sales channels",
@@ -845,7 +845,7 @@
         "translation_jobs"
       ],
       "glob_imports": 51,
-      "untyped_access": 740,
+      "untyped_access": 741,
       "sql_outside_store": 33
     },
     "studio": {

@@ -53,7 +53,7 @@ ALLOWED = {
     'veyndo-customers': {'veyndo-core', 'veyndo-pricing', 'veyndo-identity', 'veyndo-shipping', 'veyndo-shop', 'veyndo-runtime', 'veyndo-marketing'},
     'veyndo-marketing': {'veyndo-core', 'veyndo-pricing', 'veyndo-catalog', 'veyndo-shop', 'veyndo-app-model', 'veyndo-automation', 'veyndo-cognition', 'veyndo-flow-graph', 'veyndo-identity', 'veyndo-b2b'},
     'veyndo-orders': {'veyndo-core', 'veyndo-kernel', 'veyndo-b2b', 'veyndo-inventory', 'veyndo-catalog', 'veyndo-identity', 'veyndo-pricing', 'veyndo-shop', 'veyndo-app-model', 'veyndo-runtime', 'veyndo-shipping', 'veyndo-customers'},
-    'veyndo-payments': {'veyndo-core', 'veyndo-pricing', 'veyndo-shop', 'veyndo-inventory', 'veyndo-orders', 'veyndo-kernel', 'veyndo-app-model'},
+    'veyndo-payments': {'veyndo-core', 'veyndo-pricing', 'veyndo-shop', 'veyndo-inventory', 'veyndo-orders', 'veyndo-kernel', 'veyndo-app-model', 'veyndo-identity'},
     'veyndo-b2b': {'veyndo-core', 'veyndo-pricing', 'veyndo-shop', 'veyndo-identity', 'veyndo-kernel', 'veyndo-app-model'},
     'veyndo-pos': {'veyndo-core', 'veyndo-pricing', 'veyndo-shop', 'veyndo-checkout', 'veyndo-customers', 'veyndo-identity', 'veyndo-marketing'},
     'veyndo-checkout': {'veyndo-core', 'veyndo-pricing', 'veyndo-shop', 'veyndo-shipping', 'veyndo-catalog', 'veyndo-b2b', 'veyndo-identity', 'veyndo-runtime', 'veyndo-marketing', 'veyndo-customers', 'veyndo-inventory', 'veyndo-orders', 'veyndo-payments'},
@@ -83,7 +83,7 @@ EXTERNAL = {
     'veyndo-customers': {'serde', 'serde_json', 'sqlx', 'axum', 'reqwest'},
     'veyndo-marketing': {'serde', 'serde_json', 'sqlx', 'axum'},
     'veyndo-orders': {'serde', 'serde_json', 'sqlx', 'axum', 'chrono', 'reqwest', 'sha2', 'uuid', 'pdf-extract', 'image', 'base64', 'tokio'},
-    'veyndo-payments': {'serde', 'serde_json', 'sqlx', 'chrono', 'reqwest', 'hmac', 'sha2'},
+    'veyndo-payments': {'serde', 'serde_json', 'sqlx', 'chrono', 'reqwest', 'hmac', 'sha2', 'axum'},
     'veyndo-b2b': {'serde', 'serde_json', 'sqlx', 'chrono'},
     'veyndo-pos': {'serde', 'serde_json', 'sqlx'},
     'veyndo-checkout': {'serde', 'serde_json', 'chrono', 'sqlx', 'uuid', 'axum', 'base64', 'reqwest', 'ring', 'sha2'},
@@ -94,7 +94,7 @@ EXTERNAL = {
     'veyndo-runtime': {'hmac', 'sha2', 'zeroize', 'sqlx', 'tokio', 'futures-util',
                        'serde_json', 'reqwest', 'async-stream', 'uuid'},
     'veyndo-cognition': {'serde', 'serde_json', 'tokio', 'reqwest', 'aes-gcm',
-                         'base64', 'sha2', 'sqlx', 'tracing'},
+                         'base64', 'sha2', 'sqlx', 'tracing', 'image'},
 }
 
 

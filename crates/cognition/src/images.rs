@@ -1,22 +1,27 @@
 //! Optional OpenAI Images adapter; bounded responses and decoded PNG output, no remote user URLs or leaked provider errors.
-use crate::*;
+use crate::inference::Inference;
 use base64::{Engine, engine::general_purpose::STANDARD};
-pub(crate) async fn configured(a: &App) -> bool {
+use serde_json::{Value, json};
+use std::env;
+use veyndo_core::{Result, bad};
+/// Whether image generation is enabled and an OpenAI key is configured.
+pub async fn configured(a: &Inference) -> bool {
     env::var("IMAGE_GENERATION_ENABLED").as_deref() == Ok("true")
-        && a.inference
-            .connection("openai")
+        && a.connection("openai")
             .await
             .is_ok_and(|(_, key, _)| key.is_some())
 }
-pub(crate) fn model() -> String {
+/// The configured image model.
+pub fn model() -> String {
     env::var("OPENAI_IMAGE_MODEL").unwrap_or("gpt-image-2.5-sunburst".into())
 }
-pub(crate) async fn create(
-    a: &App,
+/// Creates a PNG from an instruction, optionally from a source image.
+pub async fn create(
+    a: &Inference,
     prompt: &str,
     source: Option<(String, Vec<u8>)>,
 ) -> Result<Vec<u8>> {
-    let (base, key, _) = a.inference.connection("openai").await.map_err(bad)?;
+    let (base, key, _) = a.connection("openai").await.map_err(bad)?;
     let key = key.ok_or(bad("Image provider not configured"))?;
     let http = reqwest::Client::builder()
         .redirect(reqwest::redirect::Policy::none())

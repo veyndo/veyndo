@@ -1,7 +1,7 @@
 //! The server's implementation of what the catalog component reads from carts, orders, environments and the history.
 use crate::{
-    App, RequestContext, assets, commerce, history, language_context, load_cart, marketing,
-    performance, staging, tenant,
+    App, RequestContext, commerce, history, language_context, load_cart, marketing, performance,
+    staging, tenant,
 };
 use sqlx::PgConnection;
 use std::sync::Arc;
@@ -118,8 +118,8 @@ impl Images for Server {
     fn provider<'a>(&'a self) -> PortFuture<'a, ImageProvider> {
         Box::pin(async move {
             Ok(ImageProvider {
-                configured: assets::image_provider::configured(&self.0).await,
-                model: assets::image_provider::model(),
+                configured: veyndo_cognition::images::configured(&self.0.inference).await,
+                model: veyndo_cognition::images::model(),
             })
         })
     }
@@ -132,7 +132,7 @@ impl Images for Server {
         Box::pin(async move {
             let _cluster =
                 performance::cluster_lease::Lease::acquire(&self.0, tenant, "model", 2).await?;
-            assets::image_provider::create(&self.0, prompt, source).await
+            veyndo_cognition::images::create(&self.0.inference, prompt, source).await
         })
     }
 }

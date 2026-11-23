@@ -16,20 +16,20 @@ run SQL without being in a `store` folder. Both numbers only fall.
 | core | 3934 | 0 | 4 | 12 | 10 | none | 10 |
 | identity | 4071 | 5 | 88 | 16 | 13 | apps (7), catalog (11), checkout (1), core (183), customers (1), host (2), intelligence (4), marketing (5), shop (12) | 11 |
 | shop | 5673 | 28 | 98 | 19 | 15 | apps (4), catalog (8), checkout (12), core (231), host (4), identity (3), intelligence (2), inventory (1), marketing (9), payments (1), pricing (22), shipping (4) | 22 |
-| catalog | 8076 | 31 | 180 | 10 | 11 | apps (9), b2b (1), checkout (5), core (266), customers (1), identity (17), intelligence (8), marketing (9), pricing (23), protocols (1), shop (6), studio (7) | 13 |
+| catalog | 7960 | 30 | 179 | 10 | 11 | apps (9), b2b (1), checkout (5), core (264), customers (1), identity (17), intelligence (8), marketing (9), pricing (23), protocols (1), shop (6), studio (7) | 13 |
 | inventory | 504 | 2 | 3 | 1 | 2 | catalog (1), checkout (2), core (22), pricing (3) | 2 |
 | pricing | 3513 | 6 | 17 | 4 | 2 | catalog (1), checkout (4), core (63), identity (4), shop (7), studio (1) | 4 |
 | shipping | 779 | 3 | 52 | 0 | 0 | catalog (5), core (28), identity (2), pricing (2), shop (5) | 6 |
 | checkout | 5122 | 9 | 219 | 6 | 3 | apps (21), b2b (16), catalog (11), core (170), customers (3), host (5), identity (3), intelligence (2), inventory (2), marketing (13), orders (1), payments (9), pos (6), pricing (53), shipping (3), shop (111), studio (4) | 16 |
 | customers | 1959 | 6 | 58 | 5 | 3 | checkout (2), core (56), identity (8), marketing (2), orders (1), pos (1), pricing (6), shipping (3), shop (8) | 4 |
 | orders | 5786 | 20 | 461 | 11 | 7 | apps (9), b2b (1), catalog (4), checkout (6), core (188), customers (6), identity (48), inventory (1), marketing (5), payments (2), pricing (7), shipping (2), shop (15), studio (7) | 14 |
-| payments | 4838 | 1 | 264 | 13 | 7 | apps (5), core (198), host (3), identity (10), inventory (1), orders (1), pos (1), pricing (8), shop (7), studio (1) | 14 |
+| payments | 4855 | 1 | 264 | 14 | 7 | apps (5), core (189), host (3), identity (10), inventory (1), orders (1), pos (1), pricing (8), shop (7), studio (1) | 14 |
 | marketing | 6257 | 19 | 338 | 14 | 8 | apps (14), automation (19), b2b (2), catalog (5), checkout (2), core (169), identity (34), intelligence (14), orders (1), payments (1), pos (1), pricing (12), shop (32), studio (2) | 24 |
 | b2b | 2693 | 6 | 108 | 8 | 8 | apps (8), checkout (9), core (86), customers (2), identity (16), orders (1), pos (1), pricing (7), shop (32), studio (3) | 8 |
 | pos | 1178 | 5 | 68 | 4 | 0 | apps (1), catalog (3), checkout (17), core (40), customers (1), identity (15), marketing (5), orders (1), payments (3), pricing (5), shop (20) | 8 |
 | apps | 15325 | 55 | 430 | 28 | 22 | b2b (3), catalog (11), checkout (7), core (397), host (7), identity (66), intelligence (13), inventory (2), marketing (8), orders (17), payments (7), pricing (6), shipping (2), shop (37), studio (11) | 20 |
 | automation | 1443 | 8 | 97 | 0 | 0 | core (2) | 0 |
-| intelligence | 13749 | 51 | 740 | 33 | 28 | apps (20), catalog (23), checkout (17), core (464), customers (1), identity (44), inventory (1), marketing (11), orders (1), payments (1), pricing (25), protocols (6), shipping (3), shop (56), studio (4) | 25 |
+| intelligence | 13870 | 51 | 741 | 33 | 28 | apps (20), catalog (23), checkout (17), core (465), customers (1), identity (44), inventory (1), marketing (11), orders (1), payments (1), pricing (25), protocols (6), shipping (3), shop (56), studio (4) | 25 |
 | studio | 4385 | 14 | 197 | 10 | 5 | apps (36), b2b (4), catalog (16), core (115), customers (4), identity (38), intelligence (5), marketing (12), orders (9), pos (1), pricing (3), shop (18) | 38 |
 | protocols | 2753 | 16 | 132 | 2 | 0 | apps (23), b2b (9), catalog (9), checkout (20), core (104), customers (1), host (2), identity (32), intelligence (24), marketing (9), orders (8), payments (3), pos (3), pricing (6), shipping (3), shop (21), studio (10) | 2 |
 | host | 2944 | 7 | 40 | 4 | 1 | apps (1), catalog (4), core (105), intelligence (5), pricing (13) | 6 |
@@ -98,34 +98,34 @@ reduced to one direction first.
 | From | To | Item | References |
 | --- | --- | --- | ---: |
 | apps | core | `veyndo_core::` | 174 |
-| intelligence | core | `veyndo_core::` | 131 |
+| intelligence | core | `veyndo_core::` | 132 |
 | intelligence | core | `State` | 92 |
 | apps | core | `Result` | 87 |
 | intelligence | core | `Result` | 80 |
 | checkout | shop | `veyndo_shop::` | 80 |
 | intelligence | core | `RequestContext` | 76 |
 | shop | core | `veyndo_core::` | 66 |
-| catalog | core | `Result` | 66 |
 | identity | core | `veyndo_core::` | 64 |
 | catalog | core | `veyndo_core::` | 64 |
-| payments | core | `Result` | 61 |
+| catalog | core | `Result` | 64 |
 | catalog | core | `State` | 59 |
+| payments | core | `Result` | 57 |
 | checkout | core | `veyndo_core::` | 56 |
 | apps | core | `RequestContext` | 56 |
 | orders | core | `State` | 55 |
 | marketing | core | `veyndo_core::` | 47 |
 | shop | core | `State` | 44 |
 | apps | core | `State` | 42 |
+| payments | core | `veyndo_core::` | 41 |
 | catalog | core | `RequestContext` | 41 |
 | shop | core | `Result` | 40 |
-| payments | core | `veyndo_core::` | 40 |
 | orders | identity | `auth::` | 40 |
 | checkout | pricing | `veyndo_pricing::` | 39 |
 | apps | identity | `veyndo_identity::` | 38 |
-| payments | core | `State` | 37 |
-| payments | core | `RequestContext` | 37 |
 | orders | core | `Result` | 37 |
+| payments | core | `RequestContext` | 36 |
 | marketing | core | `Result` | 36 |
+| payments | core | `State` | 35 |
 | orders | core | `veyndo_core::` | 35 |
 | orders | core | `RequestContext` | 35 |
 | studio | core | `veyndo_core::` | 33 |

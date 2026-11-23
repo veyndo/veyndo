@@ -3296,10 +3296,20 @@
       "sha256": "e8c13cc5c8c4e59103b0c8453630f3e000029e3ceee3499682871bef9091593b",
       "review": "AI price guardrails moved into the intelligence component and capture configuration into payments; behaviour unchanged"
     },
+    "components/payments/src/http/status.rs": {
+      "status": "unproved",
+      "sha256": "1a120e2a2fa76f01bfeeedff4da5762a79aae72082f6163ab6643ceac0735034",
+      "review": "Batch E: payment status reads into payments, the image provider adapter into cognition"
+    },
+    "components/payments/src/http.rs": {
+      "status": "unproved",
+      "sha256": "2a57ab8eef4883ca06c5896d64ea9083b9d57d257b94756614a74f7f244bbeea",
+      "review": "Batch E: payment status reads into payments, the image provider adapter into cognition"
+    },
     "components/payments/src/lib.rs": {
       "status": "unproved",
-      "sha256": "6dd4bebc0ef4a8ec0675c22fb6c60d721fe82873a7037f4a23ae4d81dbeb5122",
-      "review": "Receipt persistence and order ledger moved behind the payments host port; kernel call sites unchanged"
+      "sha256": "0ddc82d88bd1e6fbd0d28c2ad18b6de0f18124f6c50830bc08f876c570b1da7f",
+      "review": "Batch E: payment status reads into payments, the image provider adapter into cognition"
     },
     "components/payments/src/ports.rs": {
       "status": "unproved",
@@ -4171,6 +4181,11 @@
       "sha256": "97531aa986bded1655213c57e29d4e655b818f4b6df4110949255308f53e3bd8",
       "review": "Move reviewed rule sources and their registry to the pinned Automation library. Compared every original rule and comparison module with the deployed source after normalizing the two equivalent kernel references. The shared Automation policy module is byte-identical. Rust library tests, PHP catalog verification and the 432 condition and 1976 comparison cases passed. The two existing Lean bindings now point at their actual production consumers."
     },
+    "crates/cognition/src/images.rs": {
+      "status": "unproved",
+      "sha256": "527a1289ae2313ff93666ff38b2415f94c4d3fc9a5b8d0f86db263c5471df643",
+      "review": "Batch E: payment status reads into payments, the image provider adapter into cognition"
+    },
     "crates/cognition/src/inference/budget.rs": {
       "status": "reviewed-binding",
       "sha256": "e4e8afb7108e03974371cd768bf94aef9f27d7b4bfc8f009d665af6b30018719",
@@ -4238,8 +4253,8 @@
     },
     "crates/cognition/src/lib.rs": {
       "status": "unproved",
-      "sha256": "9bb6aa6ab93f5376b655487982299da23a166b4157f3195c10767eee6700849e",
-      "review": "Review compiler-enforced foundation crates with unchanged native owners; native provider read-tool aliases and current authorization, private checkpoint continuation and versioned prompt evidence; fixed subscriber acknowledgements preserve commit gaps, independent quarantine and explicit replay; traced requests/tasks/outbox without payloads; exact decimal-to-minor-unit rounding retains legacy price boundary; real SQL poison-isolation regression passes and workspace unit/clippy checks pass"
+      "sha256": "2f18f0c48e79dfba0c1d02071768eaeb9422360468ac97b3457580d3af33d719",
+      "review": "Batch E: payment status reads into payments, the image provider adapter into cognition"
     },
     "crates/cognition/src/prompts.rs": {
       "status": "unproved",
@@ -6311,11 +6326,6 @@
       "sha256": "409412df571135492577073d91fac8219b4a451cd8cf12b44067af5daaedce12",
       "review": "image jobs moved into components/catalog; no kernel binding changed"
     },
-    "src/assets/image_provider.rs": {
-      "status": "unproved",
-      "sha256": "c5556712b7d8e4ed1f60f7481b30f36ce3214a6315b57df3bcf8db1cc9e289a4",
-      "review": "image jobs moved into components/catalog; no kernel binding changed"
-    },
     "src/assets/import.rs": {
       "status": "unproved",
       "sha256": "63ec0a49bb425e28e7c23da52339b4cfbf22cac6587c7a105370ce4ea55cbb10",
@@ -6328,8 +6338,8 @@
     },
     "src/assets/mod.rs": {
       "status": "unproved",
-      "sha256": "39ea7cde08ae7958fc0f1eeaa6c64dc4a082c7903719b4b421ea61d9e8d880a6",
-      "review": "Paid order downloads move into orders"
+      "sha256": "4d6685981730bab9152aa475a856acac691131da8ba41070484023978b9bf25f",
+      "review": "Batch E: payment status reads into payments, the image provider adapter into cognition"
     },
     "src/assets/model_format.rs": {
       "status": "unproved",
@@ -6903,8 +6913,8 @@
     },
     "src/commerce/catalog_ports.rs": {
       "status": "unproved",
-      "sha256": "348395c2df96d510bb0cf0f0d78321d1be8ea1cb1443687681e1e1383fc86a12",
-      "review": "image jobs moved into components/catalog; no kernel binding changed"
+      "sha256": "cb9951f8f2746aaaa7476a12ae22e40d45014ba996c9b2c8d679fde119d7ba83",
+      "review": "Batch E: payment status reads into payments, the image provider adapter into cognition"
     },
     "src/commerce/configuration.rs": {
       "status": "unproved",
@@ -7728,8 +7738,8 @@
     },
     "src/payments/routes.rs": {
       "status": "unproved",
-      "sha256": "ad43ccd85343c4886694de89659bce18890f0db1faa14ab9cde8cfd4be4743b0",
-      "review": "Reviewed generic saved-payment consent/session and opaque instrument ownership, forced signed-scope RLS and tenant FKs, immutable funding in native payment jobs, non-financial revocation receipt handling and optional metadata savepoint isolation. Actual local Rust/PG save/reuse/revoke, invalid late metadata, restart and distinct restricted-login cases pass. Existing extracted kernel unchanged; asynchronous SQL/provider paths remain unproved."
+      "sha256": "b889e359ba3638abe2e0f2a99f01f3f49d41b2dc27ca43c613127c92c8dff99a",
+      "review": "Batch E: payment status reads into payments, the image provider adapter into cognition"
     },
     "src/payments/sessions.rs": {
       "status": "unproved",
@@ -8133,8 +8143,8 @@
       "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
     },
     "Cargo.lock": {
-      "sha256": "74c11518e3fe1bce9ee4c0678cf945993e94d02129f3ff55cfb7240136615594",
-      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
+      "sha256": "4709e466b0f5267c8a36a0df19a2906ed56660e1e1a1875802a872debcd43f4e",
+      "review": "Batch E: payment status reads into payments, the image provider adapter into cognition"
     },
     "Cargo.toml": {
       "sha256": "12d2d79a98f6913d20b8e912afb9ea8de0539b9e83428de8a9d7412c406896f6",
@@ -8157,8 +8167,8 @@
       "review": "Move reviewed rule sources and their registry to the pinned Automation library. Compared every original rule and comparison module with the deployed source after normalizing the two equivalent kernel references. The shared Automation policy module is byte-identical. Rust library tests, PHP catalog verification and the 432 condition and 1976 comparison cases passed. The two existing Lean bindings now point at their actual production consumers."
     },
     "crates/cognition/Cargo.toml": {
-      "sha256": "7f385a20a6293a5ecb1ab280a8d1754d8a7e6b45c2ab5d8c66314b019e621830",
-      "review": "Component architecture phase 0 and first core crate: the error contract moved unchanged from src/failure.rs and src/foundation.rs to components/core (wire messages, status mapping and retry header identical; the permission scope is resolved by the caller, the inference conversion lives beside its error type). Structure check drops the file length limit and adds the component map; clippy limits function length. Core and cognition unit tests pass. SQL, HTTP and provider behaviour is not formally proved."
+      "sha256": "ccb1464099b59f0915702b545a517cddeb36456d8dd4a7e5edf09a85c6e7c758",
+      "review": "Batch E: payment status reads into payments, the image provider adapter into cognition"
     },
     "crates/cognition/evals/app-native-workflows.v1.json": {
       "sha256": "66dd2c2ddcdaf749fe4aaff4e9e4a23cfeb6dff3e0a1b13445d3415763614f59",
