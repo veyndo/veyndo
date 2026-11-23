@@ -732,3 +732,24 @@ Phases 0 to 3 run in sequence. Phase 4 runs in parallel from F1; F2 needs the
 typed interfaces of the component it covers. Phase 7 and 8 tasks are done with the
 component they belong to; their phases close when every component is through.
 Phase 5 and 6 come last and end the work.
+
+## Remaining batches (from 23 November 2026)
+
+The server crate holds about 31,150 lines (from about 70,000). Each batch is one
+working block with one verification run (clippy, unit tests, generators,
+structure and boundary checks, the proof coverage page and the integration
+suites of every touched area) and one or a few local commits.
+
+| Batch | Scope | Server lines today | Target owner |
+| --- | --- | ---: | --- |
+| A | Accounts and login: profile, registration, account orders, the rest of `src/auth` (sessions, MFA, invitations, route rights), `src/platform` | about 2,300 | identity, customers |
+| B | App platform: the rest of `src/apps` (packages, hooks, surfaces, callbacks, jobs), `src/developer`, app-backed asset and document helpers | about 3,800 | apps |
+| C | Agents and planning: `src/agent_runs`, `src/cognition`, `src/planner*`, `agent.rs`, `concierge.rs`, `proposal_apply.rs` | about 5,400 | intelligence |
+| D | Merchant operations: `src/operations`, the rest of `src/commerce`, `src/staging`, `src/studio*`, settings release | about 5,600 | orders, catalog, shop, studio |
+| E | Remaining storefront and money paths: rest of `src/marketing`, `src/payments`, `src/pos`, `src/legal`, `src/currencies`, `src/assets`, `src/documents`, `src/translations`, storefront routes | about 5,000 | marketing, payments, pos, shop, catalog, intelligence |
+| F | Composition: the server is router, worker set and protocol adapters only (5.1); `App` replaced by component state plus ports (phase 1); mutual pairs to zero, foreign tables, glob imports, typed DTOs | everything left except protocols | all |
+| G | Frontends F1 to F6 (phase 4) | frontend | frontend |
+| H | Removal (phase 6), test suite (phase 7), proofs (phase 8), acceptance and images (5.2 to 5.6) | | all |
+
+MCP, UCP and capability dispatch (`src/capabilities*`, `src/mcp*`, `src/ucp`,
+about 2,500 lines) stay in the server as protocol adapters.
