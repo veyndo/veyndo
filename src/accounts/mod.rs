@@ -3,7 +3,6 @@ use crate::*;
 mod payment_preference;
 pub(crate) use payment_preference::remember_payment;
 mod address_store;
-mod addresses;
 pub(crate) mod browser;
 mod contacts;
 mod metadata;
@@ -19,11 +18,13 @@ pub(crate) fn router() -> Router<App> {
         .route("/store-api/account/register", post(register))
         .route(
             "/store-api/account/addresses",
-            get(addresses::list).post(addresses::create),
+            get(veyndo_customers::http::addresses::list)
+                .post(veyndo_customers::http::addresses::create),
         )
         .route(
             "/store-api/account/addresses/{id}",
-            axum::routing::put(addresses::save).delete(addresses::remove),
+            axum::routing::put(veyndo_customers::http::addresses::save)
+                .delete(veyndo_customers::http::addresses::remove),
         )
         .route(
             "/store-api/account/profile",

@@ -282,8 +282,10 @@ Order follows the dependency report, lowest first. Each line is one move.
   never left empty), customer sessions (only the token digest is stored), the
   typed customer row, the contact projection, order metrics, the bounded
   lookup with literal search, the guest contact and the remembered payment
-  method. Open: the handlers still run in the server, because they resolve the
-  storefront request, attribute the history and read shop settings; login;
+  method. The address book entries (country admission against the shop
+  settings, history attribution) are `service/address_entries`, the
+  storefront address routes `http/addresses`. Open: the other account
+  handlers (profile, registration, orders); login;
   the merchant customer list and detail (they attach app
   extensions). `store/crm` owns the merchant creation of a contact with its
   address plan and the revision-checked merchant change including the

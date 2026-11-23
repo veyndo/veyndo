@@ -422,8 +422,7 @@
         "pos",
         "pricing",
         "shipping",
-        "shop",
-        "studio"
+        "shop"
       ],
       "foreign_tables": [
         "carts",
@@ -431,7 +430,7 @@
         "outbox",
         "tenants"
       ],
-      "glob_imports": 15,
+      "glob_imports": 13,
       "untyped_access": 82,
       "sql_outside_store": 5
     },

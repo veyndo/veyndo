@@ -8,8 +8,7 @@ This lists every checked-in source module in these roots, including files with n
 
 | Module | Responsibility |
 |---|---|
-| [src/accounts/address_store.rs](../src/accounts/address_store.rs) | Entry points of the address book: country admission and history attribution here, persistence in the customers component. |
-| [src/accounts/addresses.rs](../src/accounts/addresses.rs) | Store API address book uses independent customer sessions, never merchant credentials. |
+| [src/accounts/address_store.rs](../src/accounts/address_store.rs) | Entries of the address book are owned by the customers component. |
 | [src/accounts/browser.rs](../src/accounts/browser.rs) | Host-only customer cookies adapt the existing tenant session ledger without granting merchant authority. |
 | [src/accounts/contacts.rs](../src/accounts/contacts.rs) | Native customer projection; shared contact syntax never grants identity or PII access. |
 | [src/accounts/demo.rs](../src/accounts/demo.rs) | Public synthetic customer fixture for newly provisioned demo shops; never fills real customer addresses. |
@@ -850,11 +849,13 @@ This lists every checked-in source module in these roots, including files with n
 | [components/customers/src/domain/profile.rs](../components/customers/src/domain/profile.rs) | Which profile fields are shown as top-level contact fields of a customer. |
 | [components/customers/src/domain/search.rs](../components/customers/src/domain/search.rs) | A merchant's search text as a literal, case-insensitive LIKE fragment. |
 | [components/customers/src/domain.rs](../components/customers/src/domain.rs) | Rules of customer data, free of I/O. |
+| [components/customers/src/http/addresses.rs](../components/customers/src/http/addresses.rs) | Store API address book: independent customer sessions, never merchant credentials. |
 | [components/customers/src/http/browser.rs](../components/customers/src/http/browser.rs) | Host-only customer cookies adapt the existing tenant session ledger without granting merchant authority. |
 | [components/customers/src/http/crm_context.rs](../components/customers/src/http/crm_context.rs) | The choices a CRM writer needs to create a customer, without granting settings access. |
 | [components/customers/src/http.rs](../components/customers/src/http.rs) | Customer transports: the browser cookie adapter in front of the tenant session ledger. |
 | [components/customers/src/lib.rs](../components/customers/src/lib.rs) | Customers component: accounts, sessions, address books and the merchant's view of customers. |
 | [components/customers/src/service/address_book.rs](../components/customers/src/service/address_book.rs) | The address book of a customer: bounded, revision-checked, with defaults that are never left empty. |
+| [components/customers/src/service/address_entries.rs](../components/customers/src/service/address_entries.rs) | Entries of the address book: country admission against the shop settings and history attribution, around the address book persistence. |
 | [components/customers/src/service/directory.rs](../components/customers/src/service/directory.rs) | The merchant's view of customers: standard read fields, the bounded lookup and guest contacts. |
 | [components/customers/src/service/sessions.rs](../components/customers/src/service/sessions.rs) | Independent customer sessions: a random token whose digest alone is stored. |
 | [components/customers/src/service.rs](../components/customers/src/service.rs) | Operations of the customers component. |

@@ -2096,6 +2096,11 @@
       "sha256": "ce4f5aa3006377227434e5b9cfbdab9b8e12754c07592826ba8c9837deaad513",
       "review": "customers component crate created; no kernel binding changed"
     },
+    "components/customers/src/http/addresses.rs": {
+      "status": "unproved",
+      "sha256": "12b96ac0905e82e06da3b91c895b612e159e6d91ef955701b8ca884836c8640c",
+      "review": "Address book entries and storefront routes move into customers"
+    },
     "components/customers/src/http/browser.rs": {
       "status": "unproved",
       "sha256": "52083863d8ec801e04487b14f5e32b41f2fb2935b459bac7933174154cda3284",
@@ -2108,8 +2113,8 @@
     },
     "components/customers/src/http.rs": {
       "status": "unproved",
-      "sha256": "8cc900e9b69af787f3485a7ef11da14aba8967764963b6d44f7496107aa1b96a",
-      "review": "Experiment operations and source content checks moved into the intelligence component, CRM creation context into customers; behaviour unchanged"
+      "sha256": "5cf1ee5f7501c12a55885c93e9ac176fc8ca1b3df4fcda4fdb563e7ba2307a8b",
+      "review": "Address book entries and storefront routes move into customers"
     },
     "components/customers/src/lib.rs": {
       "status": "unproved",
@@ -2120,6 +2125,11 @@
       "status": "unproved",
       "sha256": "79738b95b2c8726c18467a6352011b291223aa932e9769125ca3b0f1b9a2e1a0",
       "review": "customers component crate created; no kernel binding changed"
+    },
+    "components/customers/src/service/address_entries.rs": {
+      "status": "unproved",
+      "sha256": "17e0904654a26546848b57b084faade519142ece58add668bd37e6a79de34f28",
+      "review": "Address book entries and storefront routes move into customers"
     },
     "components/customers/src/service/directory.rs": {
       "status": "unproved",
@@ -2133,8 +2143,8 @@
     },
     "components/customers/src/service.rs": {
       "status": "unproved",
-      "sha256": "1d35da6c7981b393247006460da1bc3b4f66aa61e1538d4405abe5ef69f339ca",
-      "review": "customers component crate created; no kernel binding changed"
+      "sha256": "98bf664956ae582a84454326668c5127c06f0b1acdf2ed6e06096558346c6225",
+      "review": "Address book entries and storefront routes move into customers"
     },
     "components/customers/src/store/accounts.rs": {
       "status": "unproved",
@@ -5608,13 +5618,8 @@
     },
     "src/accounts/address_store.rs": {
       "status": "unproved",
-      "sha256": "d65f2e1a4321a78794ce944e2f3bd2e3836150c928b1b933b43396187fa96957",
-      "review": "Merchant customer writes moved into the customers component and admin order admission into checkout without behaviour change"
-    },
-    "src/accounts/addresses.rs": {
-      "status": "unproved",
-      "sha256": "70bf9c0d12611d3f3b78469a87748ce1e2b745463d82e41355ffa58c66ad96db",
-      "review": "Reviewed eighteen core findings: typed trusted identity and explicit route rights; consolidated current grants; durable auth and fenced shared limits; scoped transactions and one-backend PgBouncer including nested borrow fixes; bounded Wasm/PNG work; notified workers, savepoint quarantine and conservative retention; separate runtime roles and startup configuration. Real PostgreSQL/provider regressions preserve current tenant/customer/payment behavior. SQL/network adapters remain unproved."
+      "sha256": "d1066f06b1d078d1712baad47a14be40801023f7ce2a5e8f64af5b5f6fde792e",
+      "review": "Address book entries and storefront routes move into customers"
     },
     "src/accounts/browser.rs": {
       "status": "unproved",
@@ -5638,8 +5643,8 @@
     },
     "src/accounts/mod.rs": {
       "status": "unproved",
-      "sha256": "e85564191c0c40a04edf56e97c4e163096928f3d7cca1b485d856fcecaea6216",
-      "review": "Paid order downloads move into orders"
+      "sha256": "d2f254294237ae6e784e8c498bf23c9ff02ea79dede63e69c0b1d77b85cc0c15",
+      "review": "Address book entries and storefront routes move into customers"
     },
     "src/accounts/orders.rs": {
       "status": "unproved",
@@ -5808,8 +5813,8 @@
     },
     "src/apps/configuration_selection.rs": {
       "status": "unproved",
-      "sha256": "321a2246a67914e53373943048d6005e9d9150560c4ab351f3473a974380c457",
-      "review": "Cart configuration checks, saved selections, the purchase projection and hosted app installation moved into the apps component without behavior change"
+      "sha256": "3beb5a7c1aef44ffb8b222319845984d0043404df57b097846f21441906adc6a",
+      "review": "Address book entries and storefront routes move into customers"
     },
     "src/apps/consent.rs": {
       "status": "unproved",
