@@ -1,4 +1,5 @@
 //! HTTP handlers of the shop component.
+pub mod frontend_transport;
 pub mod operator;
 pub mod operator_lifecycle;
 pub mod operator_metrics;

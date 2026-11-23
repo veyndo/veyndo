@@ -15,7 +15,7 @@ run SQL without being in a `store` folder. Both numbers only fall.
 | --- | ---: | ---: | ---: | ---: | ---: | --- | ---: |
 | core | 3798 | 0 | 4 | 12 | 10 | none | 10 |
 | identity | 4002 | 5 | 88 | 16 | 13 | apps (8), catalog (15), checkout (1), core (202), customers (1), host (3), intelligence (4), marketing (5), shop (12), studio (1) | 11 |
-| shop | 5468 | 32 | 98 | 22 | 15 | apps (4), catalog (8), checkout (12), core (240), host (4), identity (2), intelligence (2), inventory (1), marketing (9), payments (2), pricing (19), shipping (3), studio (3) | 22 |
+| shop | 5475 | 31 | 98 | 22 | 15 | apps (4), catalog (8), checkout (12), core (243), host (4), identity (2), intelligence (2), inventory (1), marketing (9), payments (2), pricing (19), shipping (3), studio (3) | 22 |
 | catalog | 8472 | 36 | 192 | 12 | 11 | apps (19), b2b (1), checkout (5), core (297), customers (1), identity (21), intelligence (8), marketing (10), pricing (23), protocols (1), shop (9), studio (8) | 13 |
 | inventory | 504 | 2 | 3 | 1 | 2 | catalog (1), checkout (2), core (22), pricing (3) | 2 |
 | pricing | 3516 | 6 | 17 | 4 | 2 | catalog (1), checkout (4), core (63), identity (4), shop (7), studio (1) | 4 |
@@ -113,9 +113,9 @@ reduced to one direction first.
 | orders | core | `State` | 65 |
 | intelligence | identity | `auth::` | 64 |
 | catalog | core | `veyndo_core::` | 64 |
+| shop | core | `veyndo_core::` | 61 |
 | payments | core | `Result` | 61 |
 | apps | core | `RequestContext` | 59 |
-| shop | core | `veyndo_core::` | 58 |
 | orders | identity | `auth::` | 57 |
 | checkout | core | `veyndo_core::` | 56 |
 | identity | core | `veyndo_core::` | 55 |

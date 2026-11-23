@@ -1,7 +1,11 @@
 //! Stream generic hosted frontend responses and admit only explicitly allowlisted opaque shopper cookies.
-use crate::*;
 use axum::body::Body;
+use axum::response::{IntoResponse, Response};
 use futures_util::stream::unfold;
+use std::env;
+use veyndo_core::StatusCode;
+use veyndo_core::request_context::HeaderReader;
+use veyndo_core::shop_scope::header;
 const RESPONSE_LIMIT: usize = 8_000_000;
 fn cookie_names() -> Vec<String> {
     env::var("HOSTED_FRONTEND_COOKIE_NAMES")
@@ -30,11 +34,10 @@ fn opaque_pair(pair: &str, names: &[String]) -> bool {
             .bytes()
             .all(|c| c.is_ascii_alphanumeric() || b"_.~-".contains(&c))
 }
-pub(super) fn request_cookie(
-    headers: &impl crate::request_context::HeaderReader,
-) -> Option<String> {
+/// The shopper cookies of the request that the operator allowlisted for hosted frontends.
+pub fn request_cookie(headers: &impl HeaderReader) -> Option<String> {
     let names = cookie_names();
-    let cookie = crate::header(headers, "cookie")?;
+    let cookie = header(headers, "cookie")?;
     let admitted = cookie
         .split(';')
         .map(str::trim)
@@ -69,7 +72,8 @@ fn allowed_response_cookie(cookie: &str, names: &[String]) -> bool {
             .iter()
             .any(|(name, value)| name == "samesite" && value == "lax")
 }
-pub(super) fn response(upstream: reqwest::Response) -> Response {
+/// Streams the upstream response with its safe headers, a default frame policy and only allowlisted cookies.
+pub fn response(upstream: reqwest::Response, frame_ancestors: &str) -> Response {
     let status =
         StatusCode::from_u16(upstream.status().as_u16()).unwrap_or(StatusCode::BAD_GATEWAY);
     let headers = upstream.headers().clone();
@@ -113,7 +117,7 @@ pub(super) fn response(upstream: reqwest::Response) -> Response {
             "content-security-policy",
             format!(
                 "object-src 'none'; base-uri 'self'; frame-ancestors 'self' {}",
-                crate::runtime_config::get().frame_ancestors
+                frame_ancestors
             )
             .parse()
             .unwrap(),
@@ -179,7 +183,7 @@ mod tests {
             socket.write_all(b"0\r\n\r\n").await.unwrap();
         });
         let upstream = reqwest::get(format!("http://{address}")).await.unwrap();
-        let mut stream = response(upstream).into_body().into_data_stream();
+        let mut stream = response(upstream, "").into_body().into_data_stream();
         let first = tokio::time::timeout(std::time::Duration::from_secs(2), stream.next())
             .await
             .unwrap()

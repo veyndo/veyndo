@@ -154,7 +154,7 @@ async fn proxy(
     {
         req = req.header("x-channel-preview", preview);
     }
-    if let Some(cookie) = super::frontend_transport::request_cookie(&parts.headers) {
+    if let Some(cookie) = veyndo_shop::http::frontend_transport::request_cookie(&parts.headers) {
         req = req.header("cookie", cookie);
     }
     let r = req.send().await.map_err(|_| {
@@ -163,7 +163,10 @@ async fn proxy(
             "Frontend service unavailable".into(),
         )
     })?;
-    Ok(super::frontend_transport::response(r))
+    Ok(veyndo_shop::http::frontend_transport::response(
+        r,
+        &crate::runtime_config::get().frame_ancestors,
+    ))
 }
 #[cfg(test)]
 mod tests {

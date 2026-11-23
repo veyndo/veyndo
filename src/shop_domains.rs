@@ -3,7 +3,6 @@ use crate::*;
 use axum::{extract::Request, middleware::Next};
 mod frontend_bindings;
 pub(crate) mod frontend_editor;
-mod frontend_transport;
 pub(crate) mod frontends;
 pub(crate) use veyndo_core::host_names::configured_alias;
 pub(crate) use veyndo_core::request_context::HostShop;

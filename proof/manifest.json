@@ -3571,6 +3571,11 @@
       "sha256": "fcd9ef82831b4a54f3a473a145b97a3fcd403e489fa8d4514831b295b5477351",
       "review": "Request language selection moved into the shop component and sales channel admission into the marketing component; behaviour unchanged"
     },
+    "components/shop/src/http/frontend_transport.rs": {
+      "status": "unproved",
+      "sha256": "b49661db436246bd6aa9a1dc1e51e89ff0f3a152e1549f76fb34219a3becf88c",
+      "review": "Hosted frontend transport moves into shop"
+    },
     "components/shop/src/http/operator.rs": {
       "status": "unproved",
       "sha256": "043211944199e948ea4cb50115392218b7b7208f754d0153509c34672694d0a1",
@@ -3603,8 +3608,8 @@
     },
     "components/shop/src/http.rs": {
       "status": "unproved",
-      "sha256": "4b16597fb3aef0aaa3a8e8efed32409edee22eda997cfbe11f08f746ea8562e8",
-      "review": "Operator session and audit handlers moved into shop; product write admission and the CSV reader moved into catalog without behaviour change"
+      "sha256": "a21ec4fd6cb769f6371b31d504fd3294e5c1f216c39aa2cb6f4aeb760a745d59",
+      "review": "Hosted frontend transport moves into shop"
     },
     "components/shop/src/lib.rs": {
       "status": "unproved",
@@ -7881,20 +7886,15 @@
       "sha256": "afdd882637b16ccb2a916f4a48927f37411c1ab56888f1af9d739fb390976ac4",
       "review": "Reviewed tenant-scoped hosted app association, transactional immutable Storyfront installation and one-time validated migration 055; dependency deactivation shares config/app locks; private renderer excluded. PostgreSQL regressions cover foreign references and cold restart. SQL/network adapters remain unproved."
     },
-    "src/shop_domains/frontend_transport.rs": {
-      "status": "unproved",
-      "sha256": "ff6b95f4fb578a57833d2e047255b419a9625c0e63919198befa98b16294fb8a",
-      "review": "Identity-only Veyndo namespace and canonical-domain rename; reviewed migration checksum compatibility for six historical SQL versions, unchanged checkout predicates, 42 library and 169 binary tests pass; native component legacy boundary remains configured and guarded."
-    },
     "src/shop_domains/frontends.rs": {
       "status": "unproved",
-      "sha256": "6284b6b8cd1648554756d50dac9747e03aa927db95fc6c47bdb3abbca2e51a26",
-      "review": "Reviewed mounted public frontend API delegation: registered Core handlers retain permissions; hostname mount derives tenant/channel; no early admission bypass, no merchant credentials forwarded. Real identity_broker and channel_management HTTP/PostgreSQL regressions pass GET/POST, unmounted/foreign/paused/private/stale-preview controls. Async transport remains unproved."
+      "sha256": "eefc198a675d9b3a78f916cb394bd62ec830cc6c1b294c40f0dc0c9f925309cb",
+      "review": "Hosted frontend transport moves into shop"
     },
     "src/shop_domains.rs": {
       "status": "unproved",
-      "sha256": "def03d70c0dbdc80278effa89279c1c10ae71b4f463257801ce715b636d2bd6d",
-      "review": "Sessions, invitations, MFA, integration keys and broker assertions moved into the identity component without behaviour change"
+      "sha256": "322675823e0e7b346faa68e88b5e30fbabd82a61871d7eb450b46ba07ae382d0",
+      "review": "Hosted frontend transport moves into shop"
     },
     "src/staging/access.rs": {
       "status": "unproved",
@@ -8078,8 +8078,8 @@
       "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
     },
     "Cargo.lock": {
-      "sha256": "f9fb239d6689f4358622cb9eff21a7c16bc42fb0c995d0b5422cd4ad39652617",
-      "review": "Paid order downloads move into orders"
+      "sha256": "109e867428eabf2476b27689350eded98b28f54c84511f0ed0686c2338205e6d",
+      "review": "Hosted frontend transport moves into shop"
     },
     "Cargo.toml": {
       "sha256": "12d2d79a98f6913d20b8e912afb9ea8de0539b9e83428de8a9d7412c406896f6",

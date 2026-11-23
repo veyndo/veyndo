@@ -468,7 +468,6 @@ This lists every checked-in source module in these roots, including files with n
 | [src/seed.rs](../src/seed.rs) | Idempotent synthetic template catalogue initialization. |
 | [src/shop_domains/frontend_bindings.rs](../src/shop_domains/frontend_bindings.rs) | Revisioned aliases point to an existing tenant-owned Experience; origin selection remains operator-only. |
 | [src/shop_domains/frontend_editor.rs](../src/shop_domains/frontend_editor.rs) | Operator-owned editor navigation for hosted frontends; no private editor or identity implementation. |
-| [src/shop_domains/frontend_transport.rs](../src/shop_domains/frontend_transport.rs) | Stream generic hosted frontend responses and admit only explicitly allowlisted opaque shopper cookies. |
 | [src/shop_domains/frontends.rs](../src/shop_domains/frontends.rs) | Generic operator-allowlisted frontend mounts. Host scope is derived from storage, never client headers. |
 | [src/shop_domains.rs](../src/shop_domains.rs) | Resolve configured shop subdomains before authentication; reject unknown hosts and conflicting scopes. |
 | [src/staging/access.rs](../src/staging/access.rs) | Selective publication checks every selected domain's current rights before writing any live row. |
@@ -1160,6 +1159,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/shop/src/domain/tax_rules.rs](../components/shop/src/domain/tax_rules.rs) | Priority-based destination rules; current tax law is merchant configuration, not bundled tax advice. |
 | [components/shop/src/domain/validation.rs](../components/shop/src/domain/validation.rs) | Configuration validation and required availability invariants. |
 | [components/shop/src/domain.rs](../components/shop/src/domain.rs) | Rules on shop settings, free of I/O. |
+| [components/shop/src/http/frontend_transport.rs](../components/shop/src/http/frontend_transport.rs) | Stream generic hosted frontend responses and admit only explicitly allowlisted opaque shopper cookies. |
 | [components/shop/src/http/operator.rs](../components/shop/src/http/operator.rs) | The operator a control-plane request acts as; the server authenticates the personal session and sets this header. |
 | [components/shop/src/http/operator_lifecycle.rs](../components/shop/src/http/operator_lifecycle.rs) | Audited, reversible shop lifecycle; preserved commerce records and the current revision prevent accidental overwrites. |
 | [components/shop/src/http/operator_metrics.rs](../components/shop/src/http/operator_metrics.rs) | Aggregate-only control-plane reads: real tenants, bounded pages, explicit currencies and simulated/confirmed amounts. |

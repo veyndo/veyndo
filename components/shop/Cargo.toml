@@ -20,4 +20,5 @@ veyndo-shipping = { path = "../shipping" }
 veyndo-identity = { path = "../identity" }
 axum.workspace = true
 tokio.workspace = true
+futures-util.workspace = true
 veyndo-kernel = { path = "../../crates/kernel" }

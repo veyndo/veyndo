@@ -587,6 +587,9 @@ Order follows the dependency report, lowest first. Each line is one move.
   its per-request memo and the startup registration of the condition check,
   is `service/read_cache`; the request language and its translation chain
   are `domain/language_selection` and `service/language`.
+  Streaming a hosted frontend's response with its safe headers, the default
+  frame policy and only the operator's allowlisted shopper cookies is
+  `http/frontend_transport`.
   Open: saving and releasing settings, channel scope handlers,
   domains, legal consent, the rest of the platform (AI settings,
   infrastructure, provisioning) and the performance modules.

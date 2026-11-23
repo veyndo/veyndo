@@ -165,7 +165,7 @@
         "tenant_ai_usage",
         "tenants"
       ],
-      "glob_imports": 32,
+      "glob_imports": 31,
       "untyped_access": 98,
       "sql_outside_store": 22
     },
