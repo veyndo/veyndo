@@ -238,7 +238,10 @@ Order follows the dependency report, lowest first. Each line is one move.
     model response, the explicit product selection, and applying reviewed
     drafts (at most 50 per request, a stale product becomes a conflict). The
     share-locked shop languages come through the `Shop` port; the
-    `revision_admissible` binding now names the catalog service.
+    `revision_admissible` binding now names the catalog service. Enqueueing a
+    job for an enabled target language, the job list, its paginated drafts
+    and resume/cancel are `http/translation_jobs`; the server keeps the
+    provider admission, because it reads the inference settings.
   - image jobs: the request rule and the model instruction, admission (one per
     product, ten pending per shop), the queue, the private preview and the
     revision-bound publication. The image model is the port `Images`; the
@@ -247,9 +250,9 @@ Order follows the dependency report, lowest first. Each line is one move.
   the sort direction went to `core`, because other components use them too.
   Open: the handlers of product edit, list and creation still run in the server,
   because they also call legal, marketing, knowledge, the app host and the shop
-  settings. Also open: paid downloads, caption proposals (they drive
-  inference), the translation
-  worker and job routes (they drive inference), storefront pages, staging of
+  settings. Paid downloads went to orders (`orders/http/downloads`). Also
+  open: caption proposals (they drive inference), the translation worker
+  (it drives inference), storefront pages, staging of
   categories, demo data. `domain/product_admission` admits a product write as
   a full or an explicit category-only edit and builds the assignment-only
   edit against the clock the merchant read; `domain/csv_rows` is the bounded

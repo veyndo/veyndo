@@ -737,6 +737,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/catalog/src/http/image_jobs.rs](../components/catalog/src/http/image_jobs.rs) | Image jobs of a product: provider status, queueing, review and publication. |
 | [components/catalog/src/http/ingestion.rs](../components/catalog/src/http/ingestion.rs) | Shared bounded multipart parser for product uploads and scoped app uploads; file validation and persistence stay with the asset service. |
 | [components/catalog/src/http/reviews.rs](../components/catalog/src/http/reviews.rs) | Storefront review submission and merchant moderation. |
+| [components/catalog/src/http/translation_jobs.rs](../components/catalog/src/http/translation_jobs.rs) | Resumable translation jobs: enqueueing a job for an enabled target language, the job list, its paginated drafts and resume/cancel controls. |
 | [components/catalog/src/http/translations.rs](../components/catalog/src/http/translations.rs) | Applying reviewed translation drafts. |
 | [components/catalog/src/http.rs](../components/catalog/src/http.rs) | HTTP handlers of the catalog component. |
 | [components/catalog/src/lib.rs](../components/catalog/src/lib.rs) | Catalog component: products, their translated content and the catalogue reads other components rely on. |

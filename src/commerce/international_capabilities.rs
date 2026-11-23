@@ -61,13 +61,13 @@ pub(crate) async fn international_invoke(
                 save_config(state, headers, Json(v.clone())).await?
             }
         }
-        "merchant.translations.list" => translations::list(state, headers).await?,
+        "merchant.translations.list" => translations::list(State(a.core.clone()), headers).await?,
         "merchant.translations.create" => {
             translations::create(state, headers, Json(v.clone())).await?
         }
         "merchant.translations.detail" => {
             translations::detail(
-                state,
+                State(a.core.clone()),
                 headers,
                 Path(id()?),
                 axum::extract::Query(HashMap::from([(
@@ -79,7 +79,7 @@ pub(crate) async fn international_invoke(
         }
         "merchant.translations.control" => {
             translations::control(
-                state,
+                State(a.core.clone()),
                 headers,
                 Path(id()?),
                 Json(json!({"action":v["action"]})),

@@ -1536,6 +1536,11 @@
       "sha256": "92ece634684bb581d076b505012eb74bf1a7668b33f92f6ab932103a7d0e44d0",
       "review": "Reviews moved into components/catalog; no rule changed"
     },
+    "components/catalog/src/http/translation_jobs.rs": {
+      "status": "unproved",
+      "sha256": "41f76425e99ee9215c819e2ee1af476dd07c47da666319de8a4e571e127559f1",
+      "review": "Translation jobs move into catalog"
+    },
     "components/catalog/src/http/translations.rs": {
       "status": "unproved",
       "sha256": "f46376794d96d64dfc750a2fbb8d90c83d20d6679489330ba636649775d879d2",
@@ -1543,8 +1548,8 @@
     },
     "components/catalog/src/http.rs": {
       "status": "unproved",
-      "sha256": "4143134d9074365fecb6e852b19919d3fffd0069595173a316eb5470829a0a98",
-      "review": "image jobs moved into components/catalog; no kernel binding changed"
+      "sha256": "90c9ed4aa21fd6a8cab0ce3c7714b72619310bbbfbf9cdb81f30692b189d7f7b",
+      "review": "Translation jobs move into catalog"
     },
     "components/catalog/src/lib.rs": {
       "status": "unproved",
@@ -6798,8 +6803,8 @@
     },
     "src/commerce/international_capabilities.rs": {
       "status": "unproved",
-      "sha256": "5a13200d9a6c1e76050cd01e2c2d49a9b55f048af735a60e278758ccb266fdd6",
-      "review": "Codex source review 2026-10-16: native catalogue intake CSV/HTTPS/model preparation and explicit stage-only creation reuse current permissions, stable IDs, locked settings CAS, product/history/outbox and bounded image jobs; native catalog_management, durable_agents and image_jobs checks recorded for this branch. Connected guardrail UI keeps the extracted pricing/autonomy predicates unchanged; authorized paged commerce policy read and merchant instructions verified by users, knowledge_workspace and providers plus 192 Rust tests. All changed transport/SQL/provider adapters remain unproved; no new formal correctness claim."
+      "sha256": "c23dc3103a0f87bb5640af6b0d39968985835c6fd6c700ba843979701d3a8ecb",
+      "review": "Translation jobs move into catalog"
     },
     "src/commerce/inventory_ports.rs": {
       "status": "unproved",
@@ -7998,8 +8003,8 @@
     },
     "src/translations/routes.rs": {
       "status": "unproved",
-      "sha256": "dbb37fe43ae741dbb9c97265542b163f9ee497389ca4e12ead0e27893d4daf3a",
-      "review": "Reviewed scoped translation selection, original task authority, atomic child linking and completion, cancellation/explicit ambiguous continuation, lease fences, central provider admission outside transactions and bounded prompt evidence; real PostgreSQL/HTTP collection and interruption regressions plus 724 UI tests; skipped products store SQL NULL evidence rather than JSON null. Claude supplied code-only review, findings checked and fixed."
+      "sha256": "e7ceb4990cafe0b98ca5ce3fb774fe6955f81991268f0844a1050fced15b51df",
+      "review": "Translation jobs move into catalog"
     },
     "src/translations/selection.rs": {
       "status": "unproved",
