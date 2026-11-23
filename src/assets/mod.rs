@@ -1,6 +1,5 @@
 //! Product attachments and paid digital downloads: bounded binary persistence and tenant/account ACL.
 use crate::*;
-mod download;
 mod import;
 pub(crate) use import::image as import_image;
 mod caption_source;
@@ -67,10 +66,13 @@ pub(crate) fn router() -> Router<App> {
             "/store-api/assets/{id}",
             get(veyndo_catalog::http::downloads::attachment),
         )
-        .route("/store-api/account/downloads", get(download::owned))
+        .route(
+            "/store-api/account/downloads",
+            get(veyndo_orders::http::downloads::owned),
+        )
         .route(
             "/store-api/orders/{order}/downloads/{asset}",
-            get(download::file),
+            get(veyndo_orders::http::downloads::file),
         )
         .layer(axum::extract::DefaultBodyLimit::max(
             model_format::MODEL_LIMIT + 65536,

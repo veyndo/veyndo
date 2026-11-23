@@ -2,4 +2,5 @@
 pub mod company;
 pub mod company_logo;
 pub mod delivery_split;
+pub mod downloads;
 pub mod transitions;

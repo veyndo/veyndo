@@ -227,7 +227,6 @@
       ],
       "foreign_tables": [
         "b2b_catalog",
-        "carts",
         "commerce_settings",
         "customers",
         "experiences",
@@ -241,9 +240,9 @@
         "tasks",
         "tenants"
       ],
-      "glob_imports": 37,
-      "untyped_access": 196,
-      "sql_outside_store": 13
+      "glob_imports": 36,
+      "untyped_access": 192,
+      "sql_outside_store": 12
     },
     "inventory": {
       "title": "Stock, reservations and supply",
@@ -482,6 +481,7 @@
         "company_logos",
         "company_overrides",
         "customers",
+        "order_downloads",
         "outbox",
         "product_assets",
         "product_reviews",
@@ -490,8 +490,8 @@
         "tenants"
       ],
       "glob_imports": 24,
-      "untyped_access": 450,
-      "sql_outside_store": 11
+      "untyped_access": 454,
+      "sql_outside_store": 12
     },
     "payments": {
       "title": "Provider-independent payment ledger, captures, refunds and provider workers",

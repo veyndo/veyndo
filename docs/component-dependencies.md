@@ -16,13 +16,13 @@ run SQL without being in a `store` folder. Both numbers only fall.
 | core | 3798 | 0 | 4 | 12 | 10 | none | 10 |
 | identity | 4002 | 5 | 88 | 16 | 13 | apps (8), catalog (15), checkout (1), core (202), customers (1), host (3), intelligence (4), marketing (5), shop (12), studio (1) | 11 |
 | shop | 5468 | 32 | 98 | 22 | 15 | apps (4), catalog (8), checkout (12), core (240), host (4), identity (2), intelligence (2), inventory (1), marketing (9), payments (2), pricing (19), shipping (3), studio (3) | 22 |
-| catalog | 8522 | 37 | 196 | 13 | 11 | apps (19), b2b (1), checkout (5), core (323), customers (5), identity (23), intelligence (8), marketing (10), pricing (23), protocols (1), shop (9), studio (8) | 14 |
+| catalog | 8439 | 36 | 192 | 12 | 11 | apps (19), b2b (1), checkout (5), core (309), customers (1), identity (23), intelligence (8), marketing (10), pricing (23), protocols (1), shop (9), studio (8) | 13 |
 | inventory | 504 | 2 | 3 | 1 | 2 | catalog (1), checkout (2), core (22), pricing (3) | 2 |
 | pricing | 3516 | 6 | 17 | 4 | 2 | catalog (1), checkout (4), core (63), identity (4), shop (7), studio (1) | 4 |
 | shipping | 812 | 3 | 52 | 0 | 0 | catalog (5), core (24), identity (2), payments (1), pricing (3), shop (8) | 6 |
 | checkout | 5126 | 9 | 219 | 6 | 3 | apps (21), b2b (16), catalog (11), core (170), customers (3), host (5), identity (3), intelligence (2), inventory (2), marketing (13), orders (1), payments (9), pos (6), pricing (53), shipping (3), shop (111), studio (4) | 16 |
-| customers | 2192 | 15 | 82 | 5 | 3 | apps (9), checkout (2), core (145), identity (30), marketing (4), orders (1), pos (1), pricing (5), shipping (3), shop (11), studio (4) | 4 |
-| orders | 5777 | 24 | 450 | 11 | 7 | apps (27), b2b (1), catalog (9), checkout (6), core (210), customers (4), identity (65), inventory (1), marketing (6), payments (2), pricing (7), shipping (2), shop (16), studio (7) | 14 |
+| customers | 2191 | 15 | 82 | 5 | 3 | apps (9), checkout (2), core (145), identity (30), marketing (4), orders (1), pos (1), pricing (5), shipping (3), shop (11), studio (4) | 4 |
+| orders | 5885 | 24 | 454 | 12 | 7 | apps (27), b2b (1), catalog (12), checkout (6), core (213), customers (5), identity (65), inventory (1), marketing (6), payments (2), pricing (7), shipping (2), shop (17), studio (7) | 15 |
 | payments | 4838 | 1 | 264 | 13 | 7 | apps (5), core (198), host (3), identity (10), inventory (1), orders (1), pos (1), pricing (8), shop (7), studio (1) | 14 |
 | marketing | 6275 | 19 | 338 | 14 | 8 | apps (14), automation (19), b2b (2), catalog (5), checkout (2), core (173), identity (34), intelligence (14), orders (1), payments (1), pos (1), pricing (14), shop (32), studio (2) | 24 |
 | b2b | 2492 | 9 | 108 | 8 | 8 | apps (16), checkout (10), core (110), customers (2), identity (17), marketing (1), orders (1), pos (1), pricing (8), shop (26), studio (7) | 8 |
@@ -74,7 +74,7 @@ reduced to one direction first.
 - checkout ↔ pricing: 53 and 4 references
 - checkout ↔ shop: 111 and 12 references
 - customers ↔ identity: 30 and 1 references
-- customers ↔ orders: 1 and 4 references
+- customers ↔ orders: 1 and 5 references
 - customers ↔ pos: 1 and 1 references
 - customers ↔ studio: 4 and 1 references
 - identity ↔ intelligence: 4 and 74 references
@@ -107,9 +107,9 @@ reduced to one direction first.
 | intelligence | core | `RequestContext` | 135 |
 | intelligence | core | `State` | 125 |
 | apps | core | `Result` | 96 |
-| catalog | core | `Result` | 81 |
 | checkout | shop | `veyndo_shop::` | 80 |
-| catalog | core | `State` | 78 |
+| catalog | core | `Result` | 79 |
+| catalog | core | `State` | 74 |
 | orders | core | `State` | 65 |
 | intelligence | identity | `auth::` | 64 |
 | catalog | core | `veyndo_core::` | 63 |
@@ -120,7 +120,7 @@ reduced to one direction first.
 | checkout | core | `veyndo_core::` | 56 |
 | identity | core | `veyndo_core::` | 55 |
 | shop | core | `State` | 52 |
-| catalog | core | `RequestContext` | 52 |
+| catalog | core | `RequestContext` | 50 |
 | intelligence | core | `Error` | 49 |
 | marketing | core | `veyndo_core::` | 47 |
 | intelligence | core | `veyndo_core::` | 47 |
@@ -141,7 +141,7 @@ reduced to one direction first.
 | studio | identity | `auth::` | 32 |
 | studio | core | `Result` | 32 |
 | protocols | identity | `auth::` | 32 |
-| checkout | core | `RequestContext` | 32 |
+| orders | core | `veyndo_core::` | 32 |
 
 ## Foreign table access
 
@@ -176,7 +176,6 @@ reduced to one direction first.
 | b2b | `outbox` | core | write |
 | b2b | `products` | catalog | read |
 | catalog | `b2b_catalog` | b2b | read |
-| catalog | `carts` | checkout | read |
 | catalog | `commerce_settings` | shop | write |
 | catalog | `customers` | customers | write |
 | catalog | `experiences` | intelligence | write |
@@ -295,6 +294,7 @@ reduced to one direction first.
 | orders | `company_logos` | shop | write |
 | orders | `company_overrides` | shop | write |
 | orders | `customers` | customers | read |
+| orders | `order_downloads` | catalog | read |
 | orders | `outbox` | core | write |
 | orders | `product_assets` | catalog | read |
 | orders | `product_reviews` | catalog | read |

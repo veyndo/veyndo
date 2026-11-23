@@ -101,7 +101,7 @@ verified separately by native integration tests rather than proved by Lean.
 | `completion_admissible` | Completion requires payment ready, deliveries complete and a nonterminal order | `src/commerce/order_workflow.rs` |
 | `cancellation_admissible` | Cancellation requires open deliveries and no external payment/refund constraint | `src/commerce/order_workflow.rs` |
 | `manual_payment_admissible` | Manual payment cannot confirm an external provider; it requires a pending payment and nonterminal order | `src/commerce/fulfillment.rs` |
-| `download_admissible` | Blocked orders grant no download; admitted downloads require payment or explicit simulated authorization | `src/assets/download.rs` |
+| `download_admissible` | Blocked orders grant no download; admitted downloads require payment or explicit simulated authorization | `components/orders/src/http/downloads.rs` |
 | `checkout_review_admissible` | Exact revision and amount equality plus confirmed methods are required when a client supplies the review headers | `src/order_checkout.rs` |
 | `admin_payment_admissible` | Admin orders admit only manual or simulated payment; ordinary buyer checkout retains its provider path | `components/checkout/src/domain/admin_order.rs`, `src/order_checkout.rs` |
 | `checkout_contact_admissible` | Financial checkout requires email and billing data; simulated checkout has an explicit exception | `src/order_checkout.rs` |

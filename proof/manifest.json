@@ -115,7 +115,7 @@
     },
     "download_admissible": {
       "bindings": [
-        "src/assets/download.rs"
+        "components/orders/src/http/downloads.rs"
       ],
       "theorems": [
         "download_blocked_denied",
@@ -2876,6 +2876,11 @@
       "sha256": "36b59a2b14d231d9b6143974d863cb7a049638fa749c213f600b3cca1ae59b64",
       "review": "Delivery split and carrier booking intents moved into the orders and apps components"
     },
+    "components/orders/src/http/downloads.rs": {
+      "status": "reviewed-binding",
+      "sha256": "a1c92c972a6839e4b6e05f2ae8dcb61f2bd03aee39bacba8629dd7162d508b5f",
+      "review": "Paid order downloads move into orders"
+    },
     "components/orders/src/http/transitions.rs": {
       "status": "reviewed-binding",
       "sha256": "93403d0769d42d24404a7b0ef233268d78e94cf5640e1c70ae5337538622b277",
@@ -2883,8 +2888,8 @@
     },
     "components/orders/src/http.rs": {
       "status": "unproved",
-      "sha256": "c6017f582730d5d076d3faf72c409b0a4ac9fcff916ae67d418f172a89baebd1",
-      "review": "Delivery split and carrier booking intents moved into the orders and apps components"
+      "sha256": "988ef669ac6835cf8fd0e8524612acb7a0c1cdd642564e30ed6a115debf9561c",
+      "review": "Paid order downloads move into orders"
     },
     "components/orders/src/lib.rs": {
       "status": "unproved",
@@ -5603,8 +5608,8 @@
     },
     "src/accounts/mod.rs": {
       "status": "unproved",
-      "sha256": "c51194170ea54d436fc4a2781dec83cd816d44981b012080c3574d497bb9810c",
-      "review": "The purchase transaction moves into checkout behind the purchase port"
+      "sha256": "e85564191c0c40a04edf56e97c4e163096928f3d7cca1b485d856fcecaea6216",
+      "review": "Paid order downloads move into orders"
     },
     "src/accounts/orders.rs": {
       "status": "unproved",
@@ -6076,11 +6081,6 @@
       "sha256": "eda440b4084ec8df20d54abf2450e20228f108ef012ffbfd8f5e631361e8157b",
       "review": "Reviewed final canvas adapters: bounded shared reference capture rejects credential URLs and private destinations; context validated before provider calls; immutable version provenance excludes raw pixels/HTML; existing staging, authorization and generated MCP contracts retained. Native screenshot HTTP/MCP, denied-access and app-generation lifecycle regressions passed."
     },
-    "src/assets/download.rs": {
-      "status": "reviewed-binding",
-      "sha256": "a9ccd8a99a4318f34066672bc687f2608adf93f0e880abec69c87767027f9d08",
-      "review": "Storefront catalogue reads and public attachments moved into components/catalog; no rule changed"
-    },
     "src/assets/image_jobs.rs": {
       "status": "unproved",
       "sha256": "409412df571135492577073d91fac8219b4a451cd8cf12b44067af5daaedce12",
@@ -6103,8 +6103,8 @@
     },
     "src/assets/mod.rs": {
       "status": "unproved",
-      "sha256": "8f03e70b9be950cc7113e6f42d9b2c23cfe5f01f451295759df36f908a443810",
-      "review": "The purchase transaction moves into checkout behind the purchase port"
+      "sha256": "39ea7cde08ae7958fc0f1eeaa6c64dc4a082c7903719b4b421ea61d9e8d880a6",
+      "review": "Paid order downloads move into orders"
     },
     "src/assets/model_format.rs": {
       "status": "unproved",
@@ -8073,8 +8073,8 @@
       "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
     },
     "Cargo.lock": {
-      "sha256": "b52b5f29eee5623153071e4139f53068272d3da5b9db1f0ec2d866b40a094ab2",
-      "review": "The purchase transaction moves into checkout behind the purchase port"
+      "sha256": "f9fb239d6689f4358622cb9eff21a7c16bc42fb0c995d0b5422cd4ad39652617",
+      "review": "Paid order downloads move into orders"
     },
     "Cargo.toml": {
       "sha256": "12d2d79a98f6913d20b8e912afb9ea8de0539b9e83428de8a9d7412c406896f6",

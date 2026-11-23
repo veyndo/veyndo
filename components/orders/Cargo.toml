@@ -27,6 +27,7 @@ veyndo-identity = { path = "../identity" }
 veyndo-shipping = { path = "../shipping" }
 veyndo-pricing = { path = "../pricing" }
 veyndo-shop = { path = "../shop" }
+veyndo-customers = { path = "../customers" }
 veyndo-runtime = { path = "../../crates/runtime" }
 
 [dev-dependencies]

@@ -14,7 +14,6 @@ mod profile;
 pub(crate) use address_store::*;
 pub(crate) use contacts::*;
 pub(crate) use demo::seed_address as seed_demo_address;
-pub(crate) use veyndo_orders::store::account_orders::ACCOUNT_SCOPE as ORDER_ACCOUNT_SCOPE;
 pub(crate) fn router() -> Router<App> {
     Router::new()
         .route("/store-api/account/register", post(register))

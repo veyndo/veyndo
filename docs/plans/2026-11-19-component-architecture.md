@@ -384,6 +384,8 @@ Order follows the dependency report, lowest first. Each line is one move.
   transitions (`domain/order_transitions` with the cancellation rule,
   `http/transitions`; the accepted app lifecycle is read through the shared
   app model) and the delivery split (`http/delivery_split`).
+  The paid downloads of a customer's orders and of a guest cart, gated by the
+  proved download rule, are `http/downloads`.
   Open: the grid plan, manual orders, imports, the workflow save (app
   lifecycle), returns, merchant customer edits.
 - [ ] marketing. Started: `components/marketing` owns the rule conditions with

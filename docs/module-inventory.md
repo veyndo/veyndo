@@ -109,7 +109,6 @@ This lists every checked-in source module in these roots, including files with n
 | [src/assets/caption_source.rs](../src/assets/caption_source.rs) | Image evidence uses owned assets or DNS-pinned public HTTPS; decoded thumbnails strip metadata before inference. |
 | [src/assets/captions.rs](../src/assets/captions.rs) | Caption proposals use central inference and current shop languages; only the owning native editor can save them. |
 | [src/assets/design_references.rs](../src/assets/design_references.rs) | Bounded reference capture uses the shared public-only DNS-pinned egress client; partial failures remain visible. |
-| [src/assets/download.rs](../src/assets/download.rs) | Downloads require a paid, owned order snapshot; public attachments are served by the catalog component. |
 | [src/assets/image_jobs.rs](../src/assets/image_jobs.rs) | Entry points for routes, capabilities and the worker; image jobs are owned by the catalog component. |
 | [src/assets/image_provider.rs](../src/assets/image_provider.rs) | Optional OpenAI Images adapter; bounded responses and decoded PNG output, no remote user URLs or leaked provider errors. |
 | [src/assets/import.rs](../src/assets/import.rs) | Immutable imported product images reuse the native asset table, product lock, byte validation and publication lifecycle. |
@@ -1022,6 +1021,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/orders/src/http/company.rs](../components/orders/src/http/company.rs) | Company basis transport: reading and saving the shop-wide or channel-specific company data under the settings rights. |
 | [components/orders/src/http/company_logo.rs](../components/orders/src/http/company_logo.rs) | Company logo transport: one multipart upload, a merchant preview and the public delivery of linked logos. |
 | [components/orders/src/http/delivery_split.rs](../components/orders/src/http/delivery_split.rs) | Provider-neutral partial-package allocation; quantities and fiscal order snapshots remain conserved. |
+| [components/orders/src/http/downloads.rs](../components/orders/src/http/downloads.rs) | Downloads require a paid, owned order snapshot; public attachments are served by the catalog component. |
 | [components/orders/src/http/transitions.rs](../components/orders/src/http/transitions.rs) | Order transition transport: revision-checked order, payment and delivery state changes with idempotent replay. |
 | [components/orders/src/http.rs](../components/orders/src/http.rs) | HTTP handlers of the orders component; the server registers them with their route rights. |
 | [components/orders/src/lib.rs](../components/orders/src/lib.rs) | Orders component: the order state machine, derived fields, audited mutations and receipts. |

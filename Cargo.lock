@@ -3893,6 +3893,7 @@ dependencies = [
  "veyndo-b2b",
  "veyndo-catalog",
  "veyndo-core",
+ "veyndo-customers",
  "veyndo-identity",
  "veyndo-inventory",
  "veyndo-kernel",

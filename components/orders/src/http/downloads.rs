@@ -1,5 +1,24 @@
 //! Downloads require a paid, owned order snapshot; public attachments are served by the catalog component.
-use super::*;
+use crate::store::account_orders::ACCOUNT_SCOPE;
+use axum::Json;
+use axum::extract::{Path, State as Shared};
+use axum::response::Response;
+use serde_json::{Value, json};
+use sqlx::Row;
+use veyndo_catalog::domain::content::translated_string;
+use veyndo_core::shop_scope::{header, session_digest, tenant};
+use veyndo_core::{Error, RequestContext, Result, State, StatusCode};
+use veyndo_customers::service::sessions::identify;
+use veyndo_kernel::verified_kernel;
+use veyndo_shop::service::read_cache::settings;
+
+/// The signed-in customer of the request and their shop.
+async fn customer(a: &State, h: &RequestContext) -> Result<(String, String)> {
+    let t = tenant(h)?;
+    let email = identify(a, &t, &session_digest(h)?).await?;
+    Ok((t, email))
+}
+/// The file as an attachment response.
 fn response(r: &sqlx::postgres::PgRow) -> Response {
     veyndo_catalog::http::downloads::response(veyndo_catalog::types::asset::StoredFile {
         product_id: String::new(),
@@ -8,6 +27,7 @@ fn response(r: &sqlx::postgres::PgRow) -> Response {
         content: r.get("content"),
     })
 }
+/// Whether the order's payment unlocks its downloads.
 fn paid(o: &Value) -> bool {
     verified_kernel::download_admissible(
         ["cancelled", "expired", "payment_review"].contains(&o["state"].as_str().unwrap_or("")),
@@ -16,29 +36,31 @@ fn paid(o: &Value) -> bool {
         o["payment"]["provider"] == "simulated" && o["payment"]["state"] == "authorized",
     )
 }
-pub(super) async fn owned(State(a): State<App>, h: RequestContext) -> Result<Json<Value>> {
-    let (t, email) = accounts::identity(&a, &h).await?;
-    let (settings, _) = commerce::config(&a, &t).await?;
+/// `GET /store-api/account/downloads`: the downloads of the customer's paid orders.
+pub async fn owned(Shared(a): Shared<State>, h: RequestContext) -> Result<Json<Value>> {
+    let (t, email) = customer(&a, &h).await?;
+    let (settings, _) = settings(&a, &t, "default").await?;
     let locale = header(&h, "x-commerce-locale").unwrap_or(&settings.main_locale);
     let mut query = sqlx::QueryBuilder::<sqlx::Postgres>::new(
         "SELECT a.id,a.title,a.filename,o.id AS order_id,o.data FROM order_downloads d JOIN product_assets a ON a.tenant=d.tenant AND a.id=d.asset_id JOIN orders o ON o.tenant=d.tenant AND o.id=d.order_id WHERE d.tenant=$1 AND ",
     );
     query
-        .push(accounts::ORDER_ACCOUNT_SCOPE)
+        .push(ACCOUNT_SCOPE)
         .push(" ORDER BY o.created_at DESC LIMIT 200");
     let rows = query.build().bind(t).bind(email).fetch_all(&a.db).await?;
     Ok(Json(
-        json!({"elements":rows.iter().filter(|r|paid(&r.get::<Value,_>("data"))).map(|r|json!({"id":r.get::<String,_>("id"),"title":r.get::<Value,_>("title"),"name":commerce::translated_string(&r.get::<Value,_>("title"),locale,&settings.main_locale),"filename":r.get::<String,_>("filename"),"orderId":r.get::<String,_>("order_id")})).collect::<Vec<_>>()}),
+        json!({"elements":rows.iter().filter(|r|paid(&r.get::<Value,_>("data"))).map(|r|json!({"id":r.get::<String,_>("id"),"title":r.get::<Value,_>("title"),"name":translated_string(&r.get::<Value,_>("title"),locale,&settings.main_locale),"filename":r.get::<String,_>("filename"),"orderId":r.get::<String,_>("order_id")})).collect::<Vec<_>>()}),
     ))
 }
-pub(super) async fn file(
-    State(a): State<App>,
+/// `GET /store-api/orders/{order}/downloads/{asset}`: one file of a paid order, for its customer or its guest cart.
+pub async fn file(
+    Shared(a): Shared<State>,
     h: RequestContext,
     Path((order, asset)): Path<(String, String)>,
 ) -> Result<Response> {
     let t = tenant(&h)?;
     let email = if header(&h, "x-customer-token").is_some() {
-        Some(accounts::identity(&a, &h).await?.1)
+        Some(customer(&a, &h).await?.1)
     } else {
         None
     };
@@ -47,7 +69,7 @@ pub(super) async fn file(
         "SELECT a.mime,a.filename,a.content,o.data FROM order_downloads d JOIN product_assets a ON a.tenant=d.tenant AND a.id=d.asset_id JOIN orders o ON o.tenant=d.tenant AND o.id=d.order_id JOIN carts c ON c.id=o.cart_id AND c.tenant=o.tenant WHERE d.tenant=$1 AND d.order_id=$3 AND d.asset_id=$4 AND (($2::text IS NOT NULL AND ",
     );
     query
-        .push(accounts::ORDER_ACCOUNT_SCOPE)
+        .push(ACCOUNT_SCOPE)
         .push(") OR (length($5)>0 AND c.token=$5 AND c.data->>'admin_actor' IS NULL AND c.data->>'pos_actor' IS NULL))");
     let r = query
         .build()
