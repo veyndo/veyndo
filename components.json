@@ -864,9 +864,9 @@
         "tenants",
         "translation_jobs"
       ],
-      "glob_imports": 72,
+      "glob_imports": 70,
       "untyped_access": 736,
-      "sql_outside_store": 35
+      "sql_outside_store": 34
     },
     "studio": {
       "title": "Merchant overview, reports, private staging shops and history",

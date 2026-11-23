@@ -2336,6 +2336,11 @@
       "sha256": "6e5c7d6938a049bf7bc1c06864aa13d77b2401da19b38fcf571baf8823309158",
       "review": "Claim lifecycle, public claim batches and the knowledge workspace moved into the intelligence component; behaviour unchanged"
     },
+    "components/intelligence/src/http/ingestion.rs": {
+      "status": "unproved",
+      "sha256": "1a9dcc2b688ef554c4955157b949a0c46a786d8f6673a74e0888553627e751fa",
+      "review": "Knowledge source ingestion and guidance reads move into intelligence"
+    },
     "components/intelligence/src/http/sources.rs": {
       "status": "unproved",
       "sha256": "4e6ff590c69aa70a84699fb43b086df422896ed4511873fb15435c57222764f0",
@@ -2348,8 +2353,8 @@
     },
     "components/intelligence/src/http.rs": {
       "status": "unproved",
-      "sha256": "8d6897143c939d7e93ec35fcea3405706a8e6a73fad567b743ab572e96c1eca5",
-      "review": "Rate refresh, company onboarding, POS channel setup, rule comparison and facts and source lifecycle handlers moved into their components; behaviour unchanged"
+      "sha256": "db68e888e3c1effcc9e5961a2696c859fa1f9131a394a5e907d40dec9daa3ae5",
+      "review": "Knowledge source ingestion and guidance reads move into intelligence"
     },
     "components/intelligence/src/knowledge/embeddings.rs": {
       "status": "unproved",
@@ -2453,8 +2458,8 @@
     },
     "components/intelligence/src/store/documents.rs": {
       "status": "unproved",
-      "sha256": "c1faecd71a447e68f628be5b34c82a63b668c3a9cbfe60bedf59b735a35f70e8",
-      "review": "Claim evidence, claim batches, order observation projection, embedding jobs, source search, knowledge inventory, product facts and prompt snapshots moved verbatim into the intelligence component; permissions, settings, provider admission and leases stay in the server. Kernel admission calls unchanged."
+      "sha256": "d26c603099c4fe2db3359f1618138ecb0d1fea6069d6b5b202fcabe844b02ac3",
+      "review": "Knowledge source ingestion and guidance reads move into intelligence"
     },
     "components/intelligence/src/store/embedding_generations.rs": {
       "status": "unproved",
@@ -7001,20 +7006,15 @@
       "sha256": "c1f7f10b5990373b508b03e384aea33fb39b8b78f945a2e4a6d949cc18fc77dd",
       "review": "App Studio immediate preview moved into the apps component behind the host port; behaviour unchanged"
     },
-    "src/documents/content.rs": {
-      "status": "unproved",
-      "sha256": "b99bdc1a93a8b4f01410c364ece1390a26c026a264a718d55bbd3850c1cc0ed7",
-      "review": "Experiment operations and source content checks moved into the intelligence component, CRM creation context into customers; behaviour unchanged"
-    },
     "src/documents/guidance.rs": {
       "status": "unproved",
-      "sha256": "4b752d46f491d61a586b5eaed49f6d9f37cebd6b41613422871498d784bc2ef4",
-      "review": "Knowledge sources, PDF text extraction and embedding generations moved into the intelligence component without behaviour change"
+      "sha256": "4ec86eaa11f67bbcf9736c74bf608610b8c6bda908e75c354c72a6fc92c87054",
+      "review": "Knowledge source ingestion and guidance reads move into intelligence"
     },
     "src/documents/ingestion.rs": {
       "status": "unproved",
-      "sha256": "f7fc64e0ae82901150570d9112f6c21d227aa115b3a8585888229672037a9396",
-      "review": "Knowledge sources, PDF text extraction and embedding generations moved into the intelligence component without behaviour change"
+      "sha256": "dbc2a37f16258164fd483f9e1eb0cd981ad9508a39e474d6c36c6dda5d131ca1",
+      "review": "Knowledge source ingestion and guidance reads move into intelligence"
     },
     "src/documents/lifecycle.rs": {
       "status": "unproved",
@@ -7023,13 +7023,13 @@
     },
     "src/documents/mod.rs": {
       "status": "unproved",
-      "sha256": "b891cc6fc94667c3077831acbb14d70351148543a2e7b87f48aab20f8d6f38f6",
-      "review": "Claim lifecycle, public claim batches and the knowledge workspace moved into the intelligence component; behaviour unchanged"
+      "sha256": "61ab917f9eee3b7736d74bcf70cd0020b47f45b237fc31f0ee1b206620ce4eb9",
+      "review": "Knowledge source ingestion and guidance reads move into intelligence"
     },
     "src/documents/parser.rs": {
       "status": "unproved",
-      "sha256": "e46af467b428c7862e6fbc7a90ce15761579f370dec464034965e825c2995810",
-      "review": "Knowledge sources, PDF text extraction and embedding generations moved into the intelligence component without behaviour change"
+      "sha256": "7f3d848826ee99d8525ce81216c906e337261eae3fba4c82b6112c1b73cc7c44",
+      "review": "Knowledge source ingestion and guidance reads move into intelligence"
     },
     "src/documents/preview.rs": {
       "status": "unproved",
@@ -7053,8 +7053,8 @@
     },
     "src/documents/tools.rs": {
       "status": "unproved",
-      "sha256": "c8477385884cef9108720b038822ce1d5c011e15c6a258891d5f6bcefb70f0ad",
-      "review": "Claim lifecycle, public claim batches and the knowledge workspace moved into the intelligence component; behaviour unchanged"
+      "sha256": "772e11c098685a405fa51695dab799921a3221deb60ee543a4f9f12a6b145ee0",
+      "review": "Knowledge source ingestion and guidance reads move into intelligence"
     },
     "src/experience.rs": {
       "status": "unproved",

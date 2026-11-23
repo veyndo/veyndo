@@ -504,7 +504,8 @@ Order follows the dependency report, lowest first. Each line is one move.
   module (relations, hybrid search, vectors with their namespace and cache,
   embeddings, reranking), the bounded behaviour event and experiment model,
   knowledge sources and their published documents (`domain/source_content`,
-  `store/documents`), PDF text extraction in a bounded child process
+  `store/documents`, with the JSON and bounded PDF/text ingestion and the
+  publication decision in `http/ingestion` and the private guidance read), PDF text extraction in a bounded child process
   (`service/pdf`), the embedding generations (`store/embedding_generations`),
   controlled experiments with their readout and worker steps
   (`store/experiments`), behaviour observations with the channel report and

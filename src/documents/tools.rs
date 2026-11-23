@@ -61,13 +61,19 @@ pub(crate) async fn knowledge_invoke(
                 o.remove("id");
             }
             if name.ends_with("create") {
-                ingest(State(a.clone()), h.clone(), Json(data)).await?
+                ingest(State(a.core.clone()), h.clone(), Json(data)).await?
             } else {
                 lifecycle::edit(State(a.clone()), h.clone(), Path(id()?), Json(data)).await?
             }
         }
         "knowledge.source.visibility" => {
-            publish(State(a.clone()), h.clone(), Path(id()?), Json(v.clone())).await?
+            publish(
+                State(a.core.clone()),
+                h.clone(),
+                Path(id()?),
+                Json(v.clone()),
+            )
+            .await?
         }
         "knowledge.source.archive" => {
             lifecycle::lifecycle(State(a.clone()), h.clone(), Path(id()?), Json(v.clone())).await?

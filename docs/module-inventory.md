@@ -295,9 +295,8 @@ This lists every checked-in source module in these roots, including files with n
 | [src/developer/generation.rs](../src/developer/generation.rs) | Structured provider output becomes a reviewable immutable manifest; it cannot write files or call shell tools. |
 | [src/developer/mod.rs](../src/developer/mod.rs) | Prompt-generated declarative apps and native coding-agent handoff, never unsandboxed model code. |
 | [src/developer/routes.rs](../src/developer/routes.rs) | Developer HTTP transport and coding-agent task export; explicit staging precedes live release. |
-| [src/documents/content.rs](../src/documents/content.rs) | Source content is validated by the intelligence component against the shop's enabled languages. |
-| [src/documents/guidance.rs](../src/documents/guidance.rs) | Explicit merchant preferences reuse versioned private sources; quoted guidance never expands native authority. |
-| [src/documents/ingestion.rs](../src/documents/ingestion.rs) | Typed API and bounded upload write source hashes, chunks and graph relations atomically. |
+| [src/documents/guidance.rs](../src/documents/guidance.rs) | Explicit merchant preferences reuse versioned private sources, read by the intelligence component; quoted guidance never expands native authority. |
+| [src/documents/ingestion.rs](../src/documents/ingestion.rs) | Source ingestion is owned by the intelligence component. |
 | [src/documents/lifecycle.rs](../src/documents/lifecycle.rs) | Source detail, editing and publication live in the intelligence component; these entries keep the server-side signatures. |
 | [src/documents/mod.rs](../src/documents/mod.rs) | Source-bound knowledge ingestion, retrieval and product questions share tenant/product visibility. |
 | [src/documents/parser.rs](../src/documents/parser.rs) | PDF extraction is owned by the intelligence component. |
@@ -905,6 +904,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/intelligence/src/domain/trusted_geography.rs](../components/intelligence/src/domain/trusted_geography.rs) | Optional trusted ingress geography. Ordinary country headers never establish visitor location. |
 | [components/intelligence/src/domain.rs](../components/intelligence/src/domain.rs) | Bounded inputs of the intelligence component, free of I/O. |
 | [components/intelligence/src/http/claims.rs](../components/intelligence/src/http/claims.rs) | Public claim intake and compilation: bounded batches under the current channel admission, without one request per product. |
+| [components/intelligence/src/http/ingestion.rs](../components/intelligence/src/http/ingestion.rs) | Typed API and bounded upload write source hashes, chunks and graph relations atomically. |
 | [components/intelligence/src/http/sources.rs](../components/intelligence/src/http/sources.rs) | Revision-bound source detail, editing, archive and publication; an edit needs a new public review. |
 | [components/intelligence/src/http/workspace.rs](../components/intelligence/src/http/workspace.rs) | The knowledge workspace: a permission-filtered census, the source inventory by cursor and recent activity. Totals never pose as sampled graph counts. |
 | [components/intelligence/src/http.rs](../components/intelligence/src/http.rs) | HTTP handlers of the intelligence component; the server registers them with their route rights. |
