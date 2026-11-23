@@ -7,7 +7,7 @@ pub(super) async fn save(
     s: &commerce::Settings,
     v: &Value,
 ) -> Result<Value> {
-    if staging::parent(a, t).await?.is_none() {
+    if veyndo_core::shop_scope::parent(a, t).await?.is_none() {
         return Err(bad(
             "Catalogue intake saves require a private sandbox; live products were not changed",
         ));

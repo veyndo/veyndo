@@ -26,4 +26,4 @@ pub(crate) fn router() -> Router<App> {
         )
         .layer(axum::extract::DefaultBodyLimit::max(256 * 1024))
 }
-pub(crate) use veyndo_core::history_context::{context, customer_context};
+pub(crate) use veyndo_core::history_context::customer_context;

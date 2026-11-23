@@ -173,7 +173,7 @@ pub(crate) async fn save(
     if kind == "flows" {
         validate_flow_config(&mut tx, &t, &h, &data).await?;
     }
-    history::context(&mut tx, &h, "merchant").await?;
+    veyndo_core::history_context::context(&mut tx, &h, "merchant").await?;
     lifecycle::validate_references(&mut tx, &t, &kind, &id, &data).await?;
     let sql = format!("SELECT revision FROM {table} WHERE tenant=$1 AND id=$2 FOR UPDATE");
     sqlx::query("SELECT pg_advisory_xact_lock(hashtextextended($1,17))")

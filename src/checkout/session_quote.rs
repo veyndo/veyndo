@@ -23,7 +23,9 @@ async fn owned_cart(
     b2b::surface_context(a, h, "customerId", customer_id).await?;
     if c.data.admin_actor.is_some()
         || c.data.pos_actor.is_some()
-        || staging::parent(a, &c.tenant).await?.is_some()
+        || veyndo_core::shop_scope::parent(a, &c.tenant)
+            .await?
+            .is_some()
     {
         return Err(Error(
             StatusCode::FORBIDDEN,

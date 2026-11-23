@@ -65,6 +65,7 @@
         "core",
         "customers",
         "host",
+        "inference",
         "intelligence",
         "marketing",
         "shop"
@@ -207,6 +208,7 @@
         "core",
         "customers",
         "identity",
+        "inference",
         "intelligence",
         "marketing",
         "pricing",
@@ -277,8 +279,7 @@
         "checkout",
         "core",
         "identity",
-        "shop",
-        "studio"
+        "shop"
       ],
       "foreign_tables": [
         "b2b_units",
@@ -493,8 +494,7 @@
         "orders",
         "pos",
         "pricing",
-        "shop",
-        "studio"
+        "shop"
       ],
       "foreign_tables": [
         "app_packages",
@@ -540,13 +540,13 @@
         "checkout",
         "core",
         "identity",
+        "inference",
         "intelligence",
         "orders",
         "payments",
         "pos",
         "pricing",
-        "shop",
-        "studio"
+        "shop"
       ],
       "foreign_tables": [
         "app_packages",
@@ -695,6 +695,7 @@
         "core",
         "host",
         "identity",
+        "inference",
         "intelligence",
         "inventory",
         "marketing",
@@ -746,11 +747,30 @@
       "untyped_access": 97,
       "sql_outside_store": 0
     },
+    "inference": {
+      "title": "Model provider adapters, inference budgets, prompt provenance and image generation; no commerce write capability",
+      "sources": [
+        "crates/cognition"
+      ],
+      "uses": [
+        "core"
+      ],
+      "tables": [],
+      "foreign_tables": [
+        "integration_keys",
+        "outbox",
+        "platform_ai",
+        "shop_environments",
+        "tenants"
+      ],
+      "glob_imports": 9,
+      "untyped_access": 124,
+      "sql_outside_store": 2
+    },
     "intelligence": {
       "title": "Shop memory, knowledge retrieval, agents, proposals and model inference",
       "sources": [
         "components/intelligence",
-        "crates/cognition",
         "src/agent.rs",
         "src/agent_host.rs",
         "src/agent_runs",
@@ -801,6 +821,7 @@
         "core",
         "customers",
         "identity",
+        "inference",
         "inventory",
         "marketing",
         "payments",
@@ -826,7 +847,6 @@
         "orders",
         "outbox",
         "payment_attempts",
-        "platform_ai",
         "privacy_consents",
         "product_reviews",
         "product_translations",
@@ -836,9 +856,9 @@
         "tenants",
         "translation_jobs"
       ],
-      "glob_imports": 45,
-      "untyped_access": 711,
-      "sql_outside_store": 27
+      "glob_imports": 36,
+      "untyped_access": 587,
+      "sql_outside_store": 25
     },
     "studio": {
       "title": "Merchant overview, reports, private staging shops and history",
@@ -863,6 +883,7 @@
         "core",
         "customers",
         "identity",
+        "inference",
         "intelligence",
         "marketing",
         "orders",
@@ -938,6 +959,7 @@
         "customers",
         "host",
         "identity",
+        "inference",
         "intelligence",
         "marketing",
         "orders",
@@ -984,7 +1006,7 @@
         "apps",
         "catalog",
         "core",
-        "intelligence",
+        "inference",
         "pricing"
       ],
       "foreign_tables": [

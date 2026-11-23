@@ -1,5 +1,5 @@
 //! The server's implementation of what the pricing component reads from the shop settings, the cart and the catalogue.
-use crate::{App, RequestContext, Row, bad, commerce, history, load_cart};
+use crate::{App, RequestContext, Row, bad, commerce, load_cart};
 use serde_json::Value;
 use sqlx::PgConnection;
 use std::sync::Arc;
@@ -61,7 +61,7 @@ impl Catalogue for Server {
                     actor.parse().map_err(|_| bad("Invalid saved actor"))?,
                 );
             }
-            history::context(tx, &request, reason).await
+            veyndo_core::history_context::context(tx, &request, reason).await
         })
     }
     fn lock_products<'a>(

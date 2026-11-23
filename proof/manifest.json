@@ -6208,8 +6208,8 @@
     },
     "src/apps/evidence.rs": {
       "status": "unproved",
-      "sha256": "2eeaa1158a500e2c22d24ff76e90290bb79f1187f6d3a7c0e5d6070d75d50f96",
-      "review": "Batch B: commerce hooks, cart contributions and app source ingestion move into apps"
+      "sha256": "d27fa939181aa72e1d6439493787c66f8aa01d07f60d2a1d1cadcb44b23aa499",
+      "review": "Batch F5: inference component for crates/cognition, crate-cycle gate, core paths for history attribution and environment parent"
     },
     "src/apps/evidence_routes.rs": {
       "status": "unproved",
@@ -6243,8 +6243,8 @@
     },
     "src/apps/job_import.rs": {
       "status": "unproved",
-      "sha256": "b5911aaae2b1b9ffdcefd1f93868cf9f68fe73a643ce22f4bbb345dcadc93c9a",
-      "review": "Functions above 150 lines split into named steps without behaviour change; function length limit lowered to 150"
+      "sha256": "ea1d8e6aa750b7cd0a6b9e384613aba3b9959827b6c77745fc86a684ec4547a1",
+      "review": "Batch F5: inference component for crates/cognition, crate-cycle gate, core paths for history attribution and environment parent"
     },
     "src/apps/jobs.rs": {
       "status": "unproved",
@@ -6343,8 +6343,8 @@
     },
     "src/apps/submissions.rs": {
       "status": "reviewed-binding",
-      "sha256": "5d47ae12ce3791f3df253a1937c9e71379da4fa8da9ae76d846cba32ae5a498f",
-      "review": "Personal workspace and app-owned site design review: trusted personal sessions and actor RLS; public status/time/channel projection; original read-scope and current-field history; append-only cart-bound inbox/outbox with PII rights; package-before-record release fences. Independent security review and actual PostgreSQL own/foreign/CAS/history/form/model fixtures plus existing app/commerce/checkout/role/strict-runtime suites. New pure intake conjunction has exact Lean claims/conformance/negative mutations. SQL, UI, inference and providers remain unproved."
+      "sha256": "4dbe3006a352cddccea244270e0fc99c54d2441d6dc80b0f518303fa68425719",
+      "review": "Batch F5: inference component for crates/cognition, crate-cycle gate, core paths for history attribution and environment parent"
     },
     "src/apps/surface_grants.rs": {
       "status": "unproved",
@@ -6848,8 +6848,8 @@
     },
     "src/checkout/session_quote.rs": {
       "status": "unproved",
-      "sha256": "93bcb9d0436b565d91ff63166b222ce385a938862c34dbb10feb068ad35b0292",
-      "review": "Checkout grant entry points and tenant-bound session checks reviewed against native buyer login, live-shop admission, wrong buyer and tenant, revocation, replay and isolated two-service PostgreSQL acceptance. No additional formal claims."
+      "sha256": "c182961b99cc86a5e2295aa0d6de175feac05dbad441398e479a357346932c16",
+      "review": "Batch F5: inference component for crates/cognition, crate-cycle gate, core paths for history attribution and environment parent"
     },
     "src/checkout_handoff.rs": {
       "status": "unproved",
@@ -6863,8 +6863,8 @@
     },
     "src/cognition/behavior/capture.rs": {
       "status": "unproved",
-      "sha256": "9a61c2a72337b8ac345de4f9492b19ac58737a713f4b2460bfc37018f52a6023",
-      "review": "Experiment store, readout and automation, behaviour analytics store and the private preference graph moved verbatim into the intelligence component; consent, settings and channel admission stay in the server. No kernel policy changed."
+      "sha256": "9ac7c9f5d0d8ad315f41e82038af6d9aabe8031e722932563b00331c116758ed",
+      "review": "Batch F5: inference component for crates/cognition, crate-cycle gate, core paths for history attribution and environment parent"
     },
     "src/cognition/behavior/geography.rs": {
       "status": "unproved",
@@ -6968,8 +6968,8 @@
     },
     "src/commerce/catalog_intake/mod.rs": {
       "status": "unproved",
-      "sha256": "c78203a60d06c6f2419043b85128d39ef695c1d33c048903eb952744a1865b6c",
-      "review": "Reviewed inbound UCP/native cart and consent transactions, native finalization contact guard, immutable order snapshots, explicit optional negotiation, public HTTPS app-owned catalogue adapters; independent whole-branch review findings repaired and six isolated HTTP/PG suites pass. No extracted kernel policy changed; SQL/provider behavior remains unproved."
+      "sha256": "ba01c1fe9e70bfac731e5c0a3317b71eb24369b20c3a82468fa7c459d25af303",
+      "review": "Batch F5: inference component for crates/cognition, crate-cycle gate, core paths for history attribution and environment parent"
     },
     "src/commerce/catalog_intake/prepare.rs": {
       "status": "unproved",
@@ -6978,8 +6978,8 @@
     },
     "src/commerce/catalog_intake/save.rs": {
       "status": "unproved",
-      "sha256": "db56624eed3430cdb78aea75155ad2d8ae3fd1ad3259a96778d7aa6ff6d7cc55",
-      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
+      "sha256": "e3582d91169b0d3e63ecaba2e38492aa3cd8682a0f8f5553164dd5d76bbda416",
+      "review": "Batch F5: inference component for crates/cognition, crate-cycle gate, core paths for history attribution and environment parent"
     },
     "src/commerce/catalog_intake/schema.rs": {
       "status": "unproved",
@@ -6988,8 +6988,8 @@
     },
     "src/commerce/catalog_ports.rs": {
       "status": "unproved",
-      "sha256": "cb9951f8f2746aaaa7476a12ae22e40d45014ba996c9b2c8d679fde119d7ba83",
-      "review": "Batch E: payment status reads into payments, the image provider adapter into cognition"
+      "sha256": "105e8c6e6e20d7d53d4c2bd8a7fb199cc89d1e8cf1d2011edc007aa39c0ac8bb",
+      "review": "Batch F5: inference component for crates/cognition, crate-cycle gate, core paths for history attribution and environment parent"
     },
     "src/commerce/configuration.rs": {
       "status": "unproved",
@@ -7148,8 +7148,8 @@
     },
     "src/currencies/ports.rs": {
       "status": "unproved",
-      "sha256": "e4e7eaeab6038e27550d201686f7e0e197e38cf389f5dcca42c8e47d5074f683",
-      "review": "Catalog component crate created; no rule changed"
+      "sha256": "721491b3232dca376bc162fb44348bcf502fab170759302d0fab318df0c1fa8f",
+      "review": "Batch F5: inference component for crates/cognition, crate-cycle gate, core paths for history attribution and environment parent"
     },
     "src/currencies/rates.rs": {
       "status": "unproved",
@@ -7268,8 +7268,8 @@
     },
     "src/history/mod.rs": {
       "status": "unproved",
-      "sha256": "9d1117359beb2577c48287384103be78ceb3da09ed111706ee6cf89ff1226232",
-      "review": "History access rules, version reads and the product restoration projection moved into the studio component; behaviour unchanged"
+      "sha256": "23e7f60007fc2db468006a2856364c72855e3dd18c74c9ce5b77789e6eea6da0",
+      "review": "Batch F5: inference component for crates/cognition, crate-cycle gate, core paths for history attribution and environment parent"
     },
     "src/history/product.rs": {
       "status": "unproved",
@@ -7453,8 +7453,8 @@
     },
     "src/marketing/promotion_import.rs": {
       "status": "unproved",
-      "sha256": "5e45962c5505eb0fbc81ef8dda06d2cf17b871a438e1c8dc5d353c1be911b7b6",
-      "review": "Flow pipeline and promotion types moved into components/marketing; kernel call sites unchanged"
+      "sha256": "8f873ca66b8fbb6e52305d3dd577f2191b0b61843d9fb10fb3ff1dadf72e463d",
+      "review": "Batch F5: inference component for crates/cognition, crate-cycle gate, core paths for history attribution and environment parent"
     },
     "src/marketing/promotions.rs": {
       "status": "unproved",
@@ -7463,8 +7463,8 @@
     },
     "src/marketing/routes.rs": {
       "status": "unproved",
-      "sha256": "c86c2fdaba76ed3830a93194edc8e7b3543e9ce0bfc740cf0ab77ac5cf6e3839",
-      "review": "Automation catalogue, rule preview, flow job list and the pipeline runner move into marketing"
+      "sha256": "832bc57bc3e71cc42a0811fe4a3b1b680c72b6ce4ad56188379b5ac5b07a7a0d",
+      "review": "Batch F5: inference component for crates/cognition, crate-cycle gate, core paths for history attribution and environment parent"
     },
     "src/marketing/rule_history.rs": {
       "status": "unproved",
@@ -7593,8 +7593,8 @@
     },
     "src/operations/order_documents.rs": {
       "status": "unproved",
-      "sha256": "c8a2089f75caac74701f80c29a7c712735c34834e3d0511b316851c4e1059c10",
-      "review": "POS, checkout session review, company data, receipts and carrier documents moved into components"
+      "sha256": "ca4f9f515d7bf36eded4523a6b02980fc1297f3ce8bac7edcb88aec72b5d0827",
+      "review": "Batch F5: inference component for crates/cognition, crate-cycle gate, core paths for history attribution and environment parent"
     },
     "src/operations/receipt_pdf.rs": {
       "status": "unproved",
@@ -7738,8 +7738,8 @@
     },
     "src/payments/remote.rs": {
       "status": "unproved",
-      "sha256": "a14a492bc51c41ebe198cdcd43e227fda2b14cc22fa6eb5948ac3da7345a4e94",
-      "review": "The payment provider registry moves into payments"
+      "sha256": "b7a669cb51e56985fdcc2084d3b132722a7893fd61cf3343deafff5b2249bd23",
+      "review": "Batch F5: inference component for crates/cognition, crate-cycle gate, core paths for history attribution and environment parent"
     },
     "src/payments/return_urls.rs": {
       "status": "unproved",
@@ -8078,8 +8078,8 @@
     },
     "src/ucp/readiness.rs": {
       "status": "unproved",
-      "sha256": "c390b5175a8e41b3029975694db20f7d95031da662646b53ad26ab98dbd8f097",
-      "review": "Poppy discovery: mcp/poppy.rs serves a static Personal Agent Protocol 1.0 document only on the exact configured shop host derived from the existing HostShop resolution, naming the existing MCP endpoint; no authority, sign-in or UCP claim; readiness reports the published address; no extracted policy changed; providers suite covers host binding and negative hosts"
+      "sha256": "d98669994dfbdfaec13d3320a9288512e794ce06ffc65c8bd16d2841d4aee601",
+      "review": "Batch F5: inference component for crates/cognition, crate-cycle gate, core paths for history attribution and environment parent"
     },
     "src/workers/app_lane/queue_health.rs": {
       "status": "unproved",

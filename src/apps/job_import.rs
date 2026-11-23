@@ -111,7 +111,7 @@ pub(super) async fn execute(
         &metadata,
     )?;
     let live = merchant(a, h)?;
-    if staging::parent(a, &live).await?.is_some() {
+    if veyndo_core::shop_scope::parent(a, &live).await?.is_some() {
         return Err(bad("Job callback requires its live workspace"));
     }
     let kind = v["record"]["kind"]

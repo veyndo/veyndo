@@ -1,7 +1,6 @@
 //! The server's implementation of what the catalog component reads from carts, orders, environments and the history.
 use crate::{
-    App, RequestContext, commerce, history, language_context, load_cart, marketing, performance,
-    staging, tenant,
+    App, RequestContext, commerce, language_context, load_cart, marketing, performance, tenant,
 };
 use sqlx::PgConnection;
 use std::sync::Arc;
@@ -102,7 +101,11 @@ impl Shop for Server {
         Box::pin(marketing::admit_product(&self.0, request, product))
     }
     fn is_preview<'a>(&'a self, tenant: &'a str) -> PortFuture<'a, bool> {
-        Box::pin(async move { Ok(staging::parent(&self.0, tenant).await?.is_some()) })
+        Box::pin(async move {
+            Ok(veyndo_core::shop_scope::parent(&self.0, tenant)
+                .await?
+                .is_some())
+        })
     }
     fn attribute<'a>(
         &'a self,
@@ -110,7 +113,7 @@ impl Shop for Server {
         request: &'a RequestContext,
         reason: &'a str,
     ) -> PortFuture<'a, ()> {
-        Box::pin(history::context(tx, request, reason))
+        Box::pin(veyndo_core::history_context::context(tx, request, reason))
     }
 }
 

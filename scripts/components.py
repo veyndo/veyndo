@@ -90,7 +90,7 @@ class Tree:
                 return name
         return None
 
-    def code_edges(self):
+    def code_edges(self, include_server=True):
         """References from one component to items another component defines: {(from, to): Counter(symbol)}."""
         defined, local = defaultdict(set), defaultdict(set)
         for file, (code, _) in self.parsed.items():
@@ -121,7 +121,7 @@ class Tree:
         edges = defaultdict(Counter)
         for file, (code, _) in self.parsed.items():
             here = self.owner[file]
-            if here is None:
+            if here is None or (not include_server and file.startswith('src/')):
                 continue
             if not file.startswith('src/'):
                 for package in re.findall(r'(?<![\w:])(veyndo_\w+)::', code):
@@ -190,6 +190,12 @@ class Tree:
         return use
 
 
+def crate_cycles(tree):
+    """Pairs of component crates that reference each other, counting only sources outside the server crate."""
+    edges = tree.code_edges(include_server=False)
+    return {tuple(sorted(pair)) for pair in edges if (pair[1], pair[0]) in edges}
+
+
 def findings(tree):
     """Everything that differs from the declared map, plus the measured edges for the report."""
     problems = list(tree.problems)
@@ -237,6 +243,8 @@ def findings(tree):
             problems.append(f'{name} now accesses table {table} of {table_owner[table]}; go through its owner or declare it')
         for table in sorted(set(shared) - set(foreign)):
             problems.append(f'{name} no longer accesses table {table}; remove it from "foreign_tables"')
+    for a, b in sorted(crate_cycles(tree)):
+        problems.append(f'component crates {a} and {b} depend on each other; reduce the pair to one direction')
     return problems, edges, use, table_owner
 
 
@@ -292,8 +300,10 @@ def report(tree, edges, use, table_owner):
         uses = ', '.join(f'{target} ({sum(edges[name, target].values())})' for target in row.get('uses', [])) or 'none'
         lines.append(f'| {name} | {sizes[name]} | {row.get("glob_imports", 0)} | {row.get("untyped_access", 0)} | {row.get("sql_outside_store", 0)} | {len(row.get("tables", []))} | {uses} | {len(row.get("foreign_tables", []))} |')
     pairs = sorted({tuple(sorted(pair)) for pair in edges if (pair[1], pair[0]) in edges})
-    lines += ['', '## Cycles', '', f'{len(pairs)} pairs of components depend on each other. A crate boundary needs each pair',
-              'reduced to one direction first.', '']
+    crate_pairs = sorted(crate_cycles(tree))
+    lines += ['', '## Cycles', '', f'{len(crate_pairs)} pairs of component crates depend on each other (the required check keeps this at zero).',
+              f'{len(pairs)} pairs of components depend on each other once the server files are counted for the component that will own them;',
+              'those pairs close when the server files that still hold their logic move into the components.', '']
     lines += [f'- {a} ↔ {b}: {sum(edges[a, b].values())} and {sum(edges[b, a].values())} references' for a, b in pairs]
     lines += ['', '## Most used items across components', '', '| From | To | Item | References |', '| --- | --- | --- | ---: |']
     top = sorted(((count, source, target, symbol) for (source, target), counter in edges.items()
@@ -340,10 +350,15 @@ def main(argv=None):
     broken = json.loads(json.dumps(tree.map))
     broken['components'][busiest]['untyped_access'] = max(0, broken['components'][busiest].get('untyped_access', 0) - 1)
     assert any('untyped field accesses' in line for line in findings(Tree(mapping=broken))[0]), 'a new untyped access must fail'
+    broken = json.loads(json.dumps(tree.map))
+    # The inference crate used to be counted for intelligence, which made identity and intelligence a crate cycle.
+    broken['components']['inference']['sources'].remove('crates/cognition')
+    broken['components']['intelligence']['sources'].append('crates/cognition')
+    assert any('depend on each other' in line for line in findings(Tree(mapping=broken))[0]), 'a crate cycle must fail'
     cycles = len({tuple(sorted(pair)) for pair in edges if (pair[1], pair[0]) in edges})
     foreign = sum(len(row.get('foreign_tables', [])) for row in tree.map['components'].values())
     print(f'PASS {len(tree.map["components"])} components own {sum(p.suffix == ".rs" for p in tree.files.values())} Rust sources and '
-          f'{len(table_owner)} tables; {len(edges)} declared dependencies, {cycles} mutual pairs and {foreign} foreign table '
+          f'{len(table_owner)} tables; {len(edges)} declared dependencies, {len(crate_cycles(tree))} mutual crate pairs, {cycles} mutual pairs through server files and {foreign} foreign table '
           f'accesses and {sum(row.get("glob_imports", 0) for row in tree.map["components"].values())} files with glob imports remain; '
           'negative controls rejected')
     return 0

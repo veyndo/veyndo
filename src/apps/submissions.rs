@@ -8,7 +8,7 @@ pub(super) async fn submit(
     v: &Value,
 ) -> Result<Value> {
     let t = tenant(h)?;
-    let live = crate::staging::parent(a, &t).await?.is_none();
+    let live = veyndo_core::shop_scope::parent(a, &t).await?.is_none();
     let cart = load_cart(a, h).await?;
     if !verified_kernel::app_submission_admissible(
         !e.public_read,

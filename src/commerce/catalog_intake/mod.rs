@@ -59,7 +59,7 @@ pub(crate) async fn invoke(a: &App, h: &RequestContext, name: &str, v: &Value) -
     let (settings, settings_revision) = commerce::config(a, &t).await?;
     match name {
         "merchant.catalog.context" => Ok(
-            json!({"mainLocale":settings.main_locale,"locales":settings.locales,"currency":settings.currencies.base_currency,"taxes":settings.taxes,"sandbox":staging::parent(a,&t).await?.is_some(),"settingsRevision":settings_revision,"agentic":crate::ucp::readiness(a,h).await?}),
+            json!({"mainLocale":settings.main_locale,"locales":settings.locales,"currency":settings.currencies.base_currency,"taxes":settings.taxes,"sandbox":veyndo_core::shop_scope::parent(a,&t).await?.is_some(),"settingsRevision":settings_revision,"agentic":crate::ucp::readiness(a,h).await?}),
         ),
         "merchant.catalog.prepare" => {
             prepare::prepare(a, h, &t, &settings, settings_revision, v).await

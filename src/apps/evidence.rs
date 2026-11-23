@@ -27,7 +27,7 @@ async fn collect_one(a: &App, r: sqlx::postgres::PgRow) -> Result<()> {
     let t: String = r.get("tenant");
     let id: String = r.get("id");
     let cursor: i64 = r.get("cursor");
-    if staging::parent(a, &t).await?.is_some() {
+    if veyndo_core::shop_scope::parent(a, &t).await?.is_some() {
         return Ok(());
     }
     sqlx::query("INSERT INTO app_export_cursors(tenant,app,last_poll) VALUES($1,$2,now()) ON CONFLICT(tenant,app) DO UPDATE SET last_poll=now()").bind(&t).bind(&id).execute(&a.db).await?;

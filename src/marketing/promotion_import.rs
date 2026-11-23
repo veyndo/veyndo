@@ -9,7 +9,7 @@ pub(crate) async fn import_promotion(
 ) -> Result<Value> {
     let t = merchant(a, h)?;
     auth::permit(h, "automation.manage")?;
-    if staging::parent(a, &t).await?.is_some() {
+    if veyndo_core::shop_scope::parent(a, &t).await?.is_some() {
         return Err(bad(
             "Coupon migration needs its live workspace; activation remains separate",
         ));
