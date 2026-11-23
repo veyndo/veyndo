@@ -1793,8 +1793,8 @@
     },
     "components/checkout/src/ports.rs": {
       "status": "unproved",
-      "sha256": "b596a26f45529eeac84295910ac85e519ccd4e695ffe50f11b8b065e8c5dc020",
-      "review": "The purchase transaction moves into checkout behind the purchase port"
+      "sha256": "62a5d6c08ddc740878e8ac4fd3573734b71f684168c89c355debf2d229017f2d",
+      "review": "The payment provider registry moves into payments"
     },
     "components/checkout/src/service/app_adjustments.rs": {
       "status": "unproved",
@@ -3126,6 +3126,11 @@
       "sha256": "5426cc725aac7d513ef49c6cb285b442be434b05e4d8e1ab731164e1af0f9af8",
       "review": "Receipt persistence and order ledger moved behind the payments host port; kernel call sites unchanged"
     },
+    "components/payments/src/store/provider_registry.rs": {
+      "status": "unproved",
+      "sha256": "1dd9cdfd1c9b6ba3ecf4b32c3517c690dbcfb60d9e21e8c811f9608a8a296dca",
+      "review": "The payment provider registry moves into payments"
+    },
     "components/payments/src/store/receipt_claims.rs": {
       "status": "unproved",
       "sha256": "d9f2d72619b32ba0fe931b629d076924f93010cb1f41b90b039fee4bcff6a257",
@@ -3153,8 +3158,8 @@
     },
     "components/payments/src/store.rs": {
       "status": "unproved",
-      "sha256": "1680d2a8393219887d70d250007c574146ca9a072121e88e1dd0a8aa736d4830",
-      "review": "AI price guardrails moved into the intelligence component and capture configuration into payments; behaviour unchanged"
+      "sha256": "c05b8e712df8cf53987a3af48dc9e740e10cca0906fba98832bcdb8bd5bdbeff",
+      "review": "The payment provider registry moves into payments"
     },
     "components/pos/src/domain/input.rs": {
       "status": "unproved",
@@ -7543,8 +7548,8 @@
     },
     "src/payments/capture_configuration.rs": {
       "status": "unproved",
-      "sha256": "5958a5195f1343fa732e8e0eda22822cf6b5f3c53cff20b4d6e537e5aa2e4a1e",
-      "review": "AI price guardrails moved into the intelligence component and capture configuration into payments; behaviour unchanged"
+      "sha256": "4ed12f2c632808c8de38b05bf21a21d4d2066d4aef40490027479ea44237d4bb",
+      "review": "The payment provider registry moves into payments"
     },
     "src/payments/catalog.rs": {
       "status": "unproved",
@@ -7623,13 +7628,13 @@
     },
     "src/payments/registry.rs": {
       "status": "unproved",
-      "sha256": "9189fb755d2bc666cd07c3f25c59a5def63fdc8ec6148bd9d77d1d7070155c7f",
-      "review": "order workflow kernel bindings follow the move into components/orders"
+      "sha256": "d127d1182ee8019998a9fbc5f96ee3f0abec9a35bf7d7d047b3ee26f1a939c74",
+      "review": "The payment provider registry moves into payments"
     },
     "src/payments/remote.rs": {
       "status": "unproved",
-      "sha256": "8b398fff07c0a64754a94e49ec8180a979430135244b1447ceb3b43edf4b365e",
-      "review": "Payment commands, worker and provider sessions moved behind the payments gateway port"
+      "sha256": "a14a492bc51c41ebe198cdcd43e227fda2b14cc22fa6eb5948ac3da7345a4e94",
+      "review": "The payment provider registry moves into payments"
     },
     "src/payments/return_urls.rs": {
       "status": "unproved",

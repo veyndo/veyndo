@@ -313,8 +313,12 @@ Order follows the dependency report, lowest first. Each line is one move.
   The capture intent of a method (`domain/capture_intent`) and the check of
   configured capture modes against installed providers
   (`store/capture_configuration`) live here too.
-  Open: provider accounts and onboarding, the registry of methods from app
-  manifests, routes, the PayPal adapter include.
+  The registry of methods from app manifests, the provider method
+  availability per currency, the adapter service configuration and the
+  pending provider attempt of an order are `store/provider_registry`.
+  Open: provider accounts and onboarding (they call the app package and the
+  admitted adapter transport, and app-platform already depends on payments
+  through checkout), routes, the PayPal adapter include.
 - [ ] checkout. Started: `components/checkout` owns the destination tax lines
   of a quote, the shipping and payment method enrichment with delivery dates,
   and exact app price adjustments. `domain/` also holds the binding of an

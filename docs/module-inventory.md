@@ -425,7 +425,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/payments/provider.rs](../src/payments/provider.rs) | Payment provider identity, tenant account configuration and immutable wire context. |
 | [src/payments/provider_webhooks.rs](../src/payments/provider_webhooks.rs) | Version-pinned HMAC notifications enqueue reconciliation; external event payloads never write monetary state. |
 | [src/payments/receipt_guard.rs](../src/payments/receipt_guard.rs) | Bind integer provider receipt amounts and status to the formally checked exact-match predicate. |
-| [src/payments/registry.rs](../src/payments/registry.rs) | Installed payment registry and immutable account/version snapshots; no remote calls inside checkout SQL. |
+| [src/payments/registry.rs](../src/payments/registry.rs) | The installed payment registry is owned by the payments component; the server keeps these paths for its callers. |
 | [src/payments/remote.rs](../src/payments/remote.rs) | Dedicated payment RPC, pinned service version and operator-owned egress; never ordinary app-action receipts. |
 | [src/payments/return_urls.rs](../src/payments/return_urls.rs) | Provider return/cancel URLs preserve the tenant and sales channel; navigation is never payment evidence. |
 | [src/payments/routes.rs](../src/payments/routes.rs) | Customer payment status/capture and merchant refund operations share the durable command API. |
@@ -1076,6 +1076,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/payments/src/store/instruments.rs](../components/payments/src/store/instruments.rs) | Saved instruments a verified receipt may add: only for the original account's consent, only redacted metadata. |
 | [components/payments/src/store/jobs.rs](../components/payments/src/store/jobs.rs) | Idempotent admission of a payment job: one key, one fingerprint, inside the caller's transaction. |
 | [components/payments/src/store/order_ledger.rs](../components/payments/src/store/order_ledger.rs) | The order follows its payment: state, settlement summary, events and the release of reserved stock in one transaction. |
+| [components/payments/src/store/provider_registry.rs](../components/payments/src/store/provider_registry.rs) | Installed payment providers: method registration from app manifests, provider account snapshots, method availability and the pending payment attempt of an order; no remote calls inside checkout SQL. |
 | [components/payments/src/store/receipt_claims.rs](../components/payments/src/store/receipt_claims.rs) | Receipt claims: one provider receipt belongs to exactly one attempt, across tenants. |
 | [components/payments/src/store/refund_allocation.rs](../components/payments/src/store/refund_allocation.rs) | Serialized refund budgets: pending native refund jobs reserve their share of a capture. |
 | [components/payments/src/store/refund_receipts.rs](../components/payments/src/store/refund_receipts.rs) | Exactly-once provider refund admission, including refunds initiated outside Studio. |

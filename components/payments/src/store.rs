@@ -7,6 +7,7 @@ pub mod instructions;
 pub mod instruments;
 pub mod jobs;
 pub mod order_ledger;
+pub mod provider_registry;
 pub mod receipt_claims;
 pub mod refund_allocation;
 pub mod refund_receipts;

@@ -2,19 +2,7 @@
 use super::Attempt;
 use crate::{App, Error, Result, StatusCode, Value, bad, http_limits};
 
-pub(crate) fn config(provider: &str, version: &str, environment: &str) -> Result<Value> {
-    let all = &crate::runtime_config::get().payment_services;
-    // Keep environments side by side so switching a channel to live does not strand sandbox receipts.
-    let version = &all[provider][version];
-    let c = if version[environment].is_object() {
-        version[environment].clone()
-    } else {
-        version.clone()
-    };
-    validate_service(&c, environment)?;
-    Ok(c)
-}
-pub(crate) use veyndo_payments::domain::service_config::validate_service;
+pub(crate) use veyndo_payments::store::provider_registry::config;
 pub(crate) async fn call(
     a: &App,
     t: &str,

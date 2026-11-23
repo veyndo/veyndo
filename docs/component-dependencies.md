@@ -23,7 +23,7 @@ run SQL without being in a `store` folder. Both numbers only fall.
 | checkout | 5126 | 9 | 219 | 6 | 3 | apps (21), b2b (16), catalog (11), core (170), customers (3), host (5), identity (3), intelligence (2), inventory (2), marketing (13), orders (1), payments (9), pos (6), pricing (53), shipping (3), shop (111), studio (4) | 16 |
 | customers | 2192 | 15 | 82 | 5 | 3 | apps (9), checkout (2), core (145), identity (30), marketing (4), orders (1), pos (1), pricing (5), shipping (3), shop (11), studio (4) | 4 |
 | orders | 5777 | 24 | 450 | 11 | 7 | apps (27), b2b (1), catalog (9), checkout (6), core (210), customers (4), identity (65), inventory (1), marketing (6), payments (2), pricing (7), shipping (2), shop (16), studio (7) | 14 |
-| payments | 4824 | 1 | 264 | 14 | 7 | apps (9), core (213), host (4), identity (10), inventory (1), orders (1), pos (1), pricing (8), shop (5), studio (1) | 14 |
+| payments | 4838 | 1 | 264 | 13 | 7 | apps (5), core (198), host (3), identity (10), inventory (1), orders (1), pos (1), pricing (8), shop (7), studio (1) | 14 |
 | marketing | 6153 | 20 | 337 | 14 | 8 | apps (14), automation (20), b2b (2), catalog (5), checkout (3), core (180), identity (36), intelligence (14), orders (1), payments (1), pos (1), pricing (14), shop (31), studio (2) | 24 |
 | b2b | 2492 | 9 | 108 | 8 | 8 | apps (16), checkout (10), core (110), customers (2), identity (17), marketing (1), orders (1), pos (1), pricing (8), shop (26), studio (7) | 8 |
 | pos | 1178 | 5 | 68 | 4 | 0 | apps (1), catalog (3), checkout (17), core (40), customers (1), identity (15), marketing (5), orders (1), payments (3), pricing (5), shop (20) | 8 |
@@ -48,7 +48,7 @@ reduced to one direction first.
 - apps ↔ intelligence: 5 and 45 references
 - apps ↔ marketing: 8 and 14 references
 - apps ↔ orders: 17 and 27 references
-- apps ↔ payments: 7 and 9 references
+- apps ↔ payments: 7 and 5 references
 - apps ↔ pos: 1 and 1 references
 - apps ↔ shop: 33 and 4 references
 - apps ↔ studio: 11 and 27 references
@@ -92,7 +92,7 @@ reduced to one direction first.
 - orders ↔ payments: 2 and 1 references
 - orders ↔ studio: 7 and 1 references
 - payments ↔ pos: 1 and 3 references
-- payments ↔ shop: 5 and 2 references
+- payments ↔ shop: 7 and 2 references
 - pricing ↔ shop: 7 and 19 references
 - pricing ↔ studio: 1 and 2 references
 - shipping ↔ shop: 8 and 3 references
@@ -110,10 +110,10 @@ reduced to one direction first.
 | catalog | core | `Result` | 81 |
 | checkout | shop | `veyndo_shop::` | 80 |
 | catalog | core | `State` | 78 |
-| payments | core | `Result` | 70 |
 | intelligence | identity | `auth::` | 68 |
 | orders | core | `State` | 65 |
 | catalog | core | `veyndo_core::` | 63 |
+| payments | core | `Result` | 61 |
 | apps | core | `RequestContext` | 59 |
 | shop | core | `veyndo_core::` | 58 |
 | orders | identity | `auth::` | 57 |
@@ -132,7 +132,7 @@ reduced to one direction first.
 | marketing | core | `Result` | 42 |
 | apps | core | `State` | 42 |
 | orders | core | `RequestContext` | 41 |
-| payments | core | `veyndo_core::` | 39 |
+| payments | core | `veyndo_core::` | 40 |
 | checkout | pricing | `veyndo_pricing::` | 39 |
 | customers | core | `Result` | 38 |
 | payments | core | `State` | 37 |
