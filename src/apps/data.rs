@@ -63,35 +63,3 @@ pub(crate) fn normalize_input(m: &Manifest, v: &Value) -> Result<Value> {
         Ok(v.clone())
     }
 }
-#[cfg(test)]
-mod tests {
-    use super::*;
-    #[test]
-    fn fields_reject_type_and_unknown_properties() {
-        let e = Entity {
-            operational: None,
-            extends: None,
-            name: "config".into(),
-            label: HashMap::new(),
-            public_read: false,
-            publication: None,
-            workflow: None,
-            fields: vec![Field {
-                name: "fee".into(),
-                translatable: false,
-                label: HashMap::new(),
-                kind: "integer".into(),
-                required: true,
-                indexed: false,
-                references: None,
-                core_reference: None,
-                choices: vec![],
-                unique: false,
-                validation: None,
-            }],
-        };
-        assert!(fields(&e, &json!({"fee":200})).is_ok());
-        assert!(fields(&e, &json!({"fee":"200"})).is_err());
-        assert!(fields(&e, &json!({"fee":200,"tenant":"other"})).is_err());
-    }
-}

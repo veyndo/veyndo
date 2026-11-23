@@ -711,6 +711,16 @@
       "sha256": "fcc935478c0b1c49bb331629d622b3cf8a2df5bc51efe2682313773ebb378a6e",
       "review": "App Studio builds, autosaves, archive and staging moved into the apps component; behaviour unchanged"
     },
+    "components/apps/src/domain/bundled_contract_tests.rs": {
+      "status": "unproved",
+      "sha256": "fc8f57818054b8ffb978e305c0cd916cbc183887f53de8aedfe214d033afaa89",
+      "review": "Batch F3: bundled app contract tests, the app view read and the catalogue evidence callback moved into the apps component"
+    },
+    "components/apps/src/domain/business_capability_tests.rs": {
+      "status": "unproved",
+      "sha256": "0ea0d62c04f5a0dee866b254bdfea570675a9b8971fd0b63a1c4495d0cd056be",
+      "review": "Batch F3: bundled app contract tests, the app view read and the catalogue evidence callback moved into the apps component"
+    },
     "components/apps/src/domain/callback_grant.rs": {
       "status": "reviewed-binding",
       "sha256": "375df33e6577bd33bc72720068ae1724b1479ca246faac9d79669a969597d58a",
@@ -938,8 +948,8 @@
     },
     "components/apps/src/domain.rs": {
       "status": "unproved",
-      "sha256": "4dd092349b45af9a443360baf3b39f61d74a4c2eb094ce35ebb3c916be453a17",
-      "review": "Procurement lists move into b2b; configuration selection rules into shop"
+      "sha256": "c01cfb050151bef6bcff3608624b13b7629b7413ea5773059d9a3d072f014a11",
+      "review": "Batch F3: bundled app contract tests, the app view read and the catalogue evidence callback moved into the apps component"
     },
     "components/apps/src/http/actions.rs": {
       "status": "unproved",
@@ -1171,6 +1181,11 @@
       "sha256": "25575ec551a891af11b31be8bcac71bb28c5fba9890ea2853a8a10b4891887d4",
       "review": "Cart configuration checks, saved selections, the purchase projection and hosted app installation moved into the apps component without behavior change"
     },
+    "components/apps/src/store/catalog_evidence.rs": {
+      "status": "unproved",
+      "sha256": "a152a32780416f6ba0cd08ffd0127148d45fa3e91e8629ed36e9ec28e6f997a8",
+      "review": "Batch F3: bundled app contract tests, the app view read and the catalogue evidence callback moved into the apps component"
+    },
     "components/apps/src/store/commerce_hooks.rs": {
       "status": "unproved",
       "sha256": "87c2f5622e245f950f024d62a43b78074991abcc5e6454e31df7fe0260e1418a",
@@ -1243,8 +1258,8 @@
     },
     "components/apps/src/store/mcp_views.rs": {
       "status": "unproved",
-      "sha256": "4b3c0efeb2bd33386bb1e3038a883b6c10603c2ca0e4c78504aab072050279f0",
-      "review": "Assistant app views and the surface registry moved into the apps component without behavior change"
+      "sha256": "7edd77cf5d0ecc108dc2b18fa2924bb5fbccef3e8734cebf686357bd776a69a1",
+      "review": "Batch F3: bundled app contract tests, the app view read and the catalogue evidence callback moved into the apps component"
     },
     "components/apps/src/store/native_lifecycle.rs": {
       "status": "unproved",
@@ -1328,8 +1343,8 @@
     },
     "components/apps/src/store.rs": {
       "status": "unproved",
-      "sha256": "c2642402829a71c23f9aa4834961648edd01f3c00c9017012e42effc5967ba26",
-      "review": "Cart configuration checks, saved selections, the purchase projection and hosted app installation moved into the apps component without behavior change"
+      "sha256": "5ff6fe8fc6e761c76a17c79bba6fc0b20c08aa2b7ad6e3820d9e29f9cbc8495f",
+      "review": "Batch F3: bundled app contract tests, the app view read and the catalogue evidence callback moved into the apps component"
     },
     "components/b2b/src/domain/contract.rs": {
       "status": "unproved",
@@ -6056,16 +6071,6 @@
       "sha256": "7a5949201defdcbbed750f23cabfab8dc46a1314b485367dae5a279e615cc4ef",
       "review": "Reviewed app authority and current creator rights, isolated schemas/RLS and atomic migration rollback, fenced job/event leases, minimized payloads, signature/digest pins, opaque UI grants, pinned DNS egress and bounded Wasm/WIT quote adapters. Actual isolated PostgreSQL own/foreign callback, schema, jobs, events, assets, export, distribution and production-foundation regressions passed. Added extracted package, surface, resource and exact callback-consent policies with negative Lean claims; async/network/UI and general Rust modules remain explicitly unproved."
     },
-    "src/apps/business_capability/mod.rs": {
-      "status": "unproved",
-      "sha256": "042558bcb14ee885d2bd20f5d7429bcd01f14ec5dcb9c580d68bc1fc35307f13",
-      "review": "Job callbacks, completion evidence, package verification, installation, activation and upgrade review moved into the apps component behind host ports without behavior change"
-    },
-    "src/apps/business_capability/tests.rs": {
-      "status": "unproved",
-      "sha256": "edfbdf773713ac1ac8d0c79f5385c5badeae986cf89fbc491f48d7725e30fce0",
-      "review": "Reviewed canonical business intent and frozen decision examples: bounded typed synthetic snapshots, real isolated WIT evaluation before save/install and native staged release, immutable legacy serialization, AI retention of expected cases, main-language labels and tenant failure regressions. No extracted business policy changed."
-    },
     "src/apps/cart_contributions.rs": {
       "status": "unproved",
       "sha256": "b3f54070342416bb8657977d9ed2d4173cfa8f461bd48baa835002e15e452713",
@@ -6088,13 +6093,8 @@
     },
     "src/apps/core_callbacks.rs": {
       "status": "unproved",
-      "sha256": "027c67b0fa5dd163758329aa77f577d1180f82d57d2016a8acad413b1514cf1a",
-      "review": "Job callbacks, completion evidence, package verification, installation, activation and upgrade review moved into the apps component behind host ports without behavior change"
-    },
-    "src/apps/core_catalog_evidence.rs": {
-      "status": "unproved",
-      "sha256": "281d8cf5cc2f13a8145688d8c662030275f002d26deac6128c2e32d00172204b",
-      "review": "Restore the product-only catalog evidence callback under installed app scope and project selected publication through the native outbox transaction. Local Core and isolated Knowledge PostgreSQL composition verifies event retry, private staging, locale, withdrawal, restart, one order, and current source inventory."
+      "sha256": "9a866991178e43fa199b458749093f33a9205fa3d8115766aa0ad4a52d711a95",
+      "review": "Batch F3: bundled app contract tests, the app view read and the catalogue evidence callback moved into the apps component"
     },
     "src/apps/core_documents.rs": {
       "status": "unproved",
@@ -6118,8 +6118,8 @@
     },
     "src/apps/data.rs": {
       "status": "unproved",
-      "sha256": "1fdb336a677d288c39ca970ebcd0de11fbe474bb9b913d62943ed8b2bbce46c8",
-      "review": "Surface grants, declared app routes, UI bundle loading and the action and entity handlers moved into the apps component without behavior change"
+      "sha256": "2b8ccde3700fd5504520dc64a2e33bc0690005111c63b6f5fbf2e43905f5391e",
+      "review": "Batch F3: bundled app contract tests, the app view read and the catalogue evidence callback moved into the apps component"
     },
     "src/apps/discovery.rs": {
       "status": "unproved",
@@ -6130,11 +6130,6 @@
       "status": "unproved",
       "sha256": "066f7933b2efb344bc6b7c248efcacb1bb83166c2ca6a363d472ce96a21a94c7",
       "review": "Job callbacks, completion evidence, package verification, installation, activation and upgrade review moved into the apps component behind host ports without behavior change"
-    },
-    "src/apps/editor_tests.rs": {
-      "status": "unproved",
-      "sha256": "b39c499a802b9b59b4035711064a57350edc106453076a20262716c05d35a968",
-      "review": "Reviewed app MCP ingress, private ownership and bounded durable ingress/clock adapters; added rejection of optional editor reference fields. Local PostgreSQL/HTTP provider and restart tests validate async effects, which remain unproved."
     },
     "src/apps/egress.rs": {
       "status": "unproved",
@@ -6158,8 +6153,8 @@
     },
     "src/apps/field_values.rs": {
       "status": "unproved",
-      "sha256": "9824d8e561fb77c35aacd7e9f319c597db819bbb7872a3060f7cea7e562987ae",
-      "review": "Managed app records, restoration, import and native-object projection moved into the apps component behind a record rules port without behavior change"
+      "sha256": "9e6ddf615c0691a1b3a6db466693dbf4fcdb0f45becc91a4a19176471a0d4e82",
+      "review": "Batch F3: bundled app contract tests, the app view read and the catalogue evidence callback moved into the apps component"
     },
     "src/apps/gateway.rs": {
       "status": "unproved",
@@ -6193,8 +6188,8 @@
     },
     "src/apps/manifest.rs": {
       "status": "unproved",
-      "sha256": "613dff79b857d6230f1ebd4f6e2f25060285c43aa8cdb7648b14168ab48bac0d",
-      "review": "Sandbox cache, configuration runtime and package fence moved into the apps component without changing rules"
+      "sha256": "d4721fc23e232b7158e6304ce02e79746279aacd4a12a6a98d45dc9350744c0e",
+      "review": "Batch F3: bundled app contract tests, the app view read and the catalogue evidence callback moved into the apps component"
     },
     "src/apps/manifest_validation.rs": {
       "status": "unproved",
@@ -6203,13 +6198,13 @@
     },
     "src/apps/mcp_views.rs": {
       "status": "unproved",
-      "sha256": "7f3b84a6881cd649c10b30d84408ced5ab4cb56f4bd1b23d507660abed644336",
-      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
+      "sha256": "f22c0e9cd33b26c441c72bda330f26572bc4390000df69c1ec5ae6d0a50da9f6",
+      "review": "Batch F3: bundled app contract tests, the app view read and the catalogue evidence callback moved into the apps component"
     },
     "src/apps/mod.rs": {
       "status": "unproved",
-      "sha256": "8c949ed6f365789b70f88bfe250ae038df4d5c757e74519249d5889c236fec1d",
-      "review": "Batch F2: sandbox clone, snapshot, diff and release moved into studio behind the ReleaseHost port"
+      "sha256": "5488b8071bfe6526a96c4abaca977849347b4419106cc6016f29f49bc34d2f26",
+      "review": "Batch F3: bundled app contract tests, the app view read and the catalogue evidence callback moved into the apps component"
     },
     "src/apps/model_contract.rs": {
       "status": "unproved",
@@ -6220,16 +6215,6 @@
       "status": "unproved",
       "sha256": "32975b0cf41e9c596fa1ad950adbf25cb60e3e14f1988c9625fc3ca18571df37",
       "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
-    },
-    "src/apps/native_view_tests.rs": {
-      "status": "unproved",
-      "sha256": "e7d5e1c7cecbaa97dd8571b13186ef4f9cfe6cdd70089b49ec07211928d1790a",
-      "review": "Reviewed exact native view/control/geometry/UI AST extraction into pinned Apps model 0.8.0; native compiler order, error pointers, canonical digests, canonical field policy and direct verified public-read predicate preserved. Independent compiler negatives, 74 native app unit tests and twelve real PostgreSQL/HTTP composition modules pass. Shared model, host adapters and SQL remain outside extracted proof scope."
-    },
-    "src/apps/native_views.rs": {
-      "status": "unproved",
-      "sha256": "bae46fa0d8bd2460468e0b150590fb7db35701a4689ae208071f3832426213e4",
-      "review": "Surface grants, declared app routes, UI bundle loading and the action and entity handlers moved into the apps component without behavior change"
     },
     "src/apps/observability.rs": {
       "status": "unproved",
@@ -6306,11 +6291,6 @@
       "sha256": "a07721a7ca8b2aa6ae78921bf293983142adf7208ff62cc98a9800029a461f41",
       "review": "Assistant app views and the surface registry moved into the apps component without behavior change"
     },
-    "src/apps/surface_tests.rs": {
-      "status": "unproved",
-      "sha256": "854cf8a47361e7f48bce454e0a1f68dac67a4f1f42bfbf4cab51d23bd0b9f12f",
-      "review": "Reviewed namespaced GET/POST and opaque app UI contracts, typed bounded JSON/indexed keyset reads, exact record revision binding, selected bounded AI context, staging imports and nonqueuing service admission; real PostgreSQL app/surface/service/staging/developer/user regressions and source/nonce SDK checks passed. GET policy excludes managed writes; external read-only behavior and SQL remain unproved."
-    },
     "src/apps/surfaces.rs": {
       "status": "unproved",
       "sha256": "9eedd548be4dc6637cbce18a29117caefbc47ee642b801ef2d5564d80b9224c4",
@@ -6330,11 +6310,6 @@
       "status": "unproved",
       "sha256": "f477bdb0a3a6bf89cb15f5af6eb534fe88eb913e80e4d7929f78f3d910acc234",
       "review": "Surface contract and sandboxed documents moved into the apps component without changing rules"
-    },
-    "src/apps/ui_logic_tests.rs": {
-      "status": "unproved",
-      "sha256": "7d70fd0061d4d618c679bc55e56a3e9961a73889d765a549f749206a97a4defb",
-      "review": "Reviewed exact native view/control/geometry/UI AST extraction into pinned Apps model 0.8.0; native compiler order, error pointers, canonical digests, canonical field policy and direct verified public-read predicate preserved. Independent compiler negatives, 74 native app unit tests and twelve real PostgreSQL/HTTP composition modules pass. Shared model, host adapters and SQL remain outside extracted proof scope."
     },
     "src/apps/webhook_scope.rs": {
       "status": "unproved",

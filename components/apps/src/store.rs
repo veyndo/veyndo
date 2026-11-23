@@ -3,6 +3,7 @@ pub mod action_log;
 pub mod activation;
 pub mod asset_references;
 pub mod cart_configurations;
+pub mod catalog_evidence;
 pub mod commerce_hooks;
 pub mod configuration_events;
 pub mod configuration_orders;

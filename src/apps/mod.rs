@@ -4,7 +4,6 @@ mod approval;
 mod record_import;
 pub(crate) use record_import::{import_record, inspect_import_record};
 mod asset_surfaces;
-mod business_capability;
 mod cart_contributions;
 pub(crate) use veyndo_app_platform::service::commerce_hooks::Prepared as PreparedCheckoutHooks;
 pub(crate) use veyndo_app_platform::service::commerce_hooks::{
@@ -20,7 +19,6 @@ pub(crate) use configuration_selection::{
 };
 mod consent;
 mod core_callbacks;
-mod core_catalog_evidence;
 pub(crate) mod core_extensions;
 mod install_host;
 mod package_fence;
@@ -41,8 +39,6 @@ mod webhook_scope;
 mod webhooks;
 pub(crate) use schedules::schedule_once;
 pub(crate) use webhook_scope::bind as bind_webhook_scope;
-#[cfg(test)]
-mod editor_tests;
 mod evidence;
 mod evidence_routes;
 pub(crate) use evidence::*;
@@ -66,8 +62,6 @@ pub(crate) mod service_limits;
 mod service_policy;
 mod surface_grants;
 mod surface_registry;
-#[cfg(test)]
-mod surface_tests;
 pub(crate) mod surfaces;
 mod ui_bundles;
 mod ui_documents;
@@ -78,16 +72,11 @@ mod planning;
 pub(crate) use planning::*;
 mod manifest;
 mod manifest_validation;
-#[cfg(test)]
-mod native_view_tests;
-mod native_views;
 #[path = "../../extensions/apps/site-builder/server.rs"]
 pub(crate) mod site_builder;
 #[path = "../../extensions/apps/site-forms/server.rs"]
 mod site_forms;
 mod submissions;
-#[cfg(test)]
-mod ui_logic_tests;
 pub(crate) use manifest_validation::validate;
 pub(crate) mod model_contract;
 mod registry;

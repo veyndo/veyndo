@@ -797,7 +797,7 @@ The production-mode Docker smoke test checks the packaged server and frontend.
 
 | Files | Responsibility | Verification |
 |---|---|---|
-| `src/apps/{surfaces,surface_tests}.rs` | UI contract registry, namespaced route/action adapter, scope and mutating GET rejection | `app_surfaces.py`, Rust contract tests, extracted read admission proof |
+| `src/apps/surfaces.rs`, `components/apps/src/domain/bundled_contract_tests.rs` | UI contract registry, namespaced route/action adapter, scope and mutating GET rejection | `app_surfaces.py`, Rust contract tests, extracted read admission proof |
 | `src/apps/service_limits.rs`, `foundation.rs`, `bootstrap.rs` | Shared non-queuing per-process/per-tenant-app service limits | Slow-service real-cart/second-tenant test and Rust drop/reuse test |
 | `src/apps/{data,registry,planning,gateway}.rs`, `components/intelligence/src/service/planner.rs` | JSONB, indexed bounded pages, direct revision binding, selected bounded AI context and unified actions | Deep-page approved local-model wire fixture; existing app/service/staging regressions |
 | `frontend/src/shared/apps/{AppSurfaces,AppFrame}.tsx`, `extensions/sdk/browser.js` | New Studio/shop navigation and context-aware opaque UI bridge | Actual multilingual browser question/module/page and `frontend/tests/app-sdk.mjs` |

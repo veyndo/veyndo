@@ -73,3 +73,13 @@ pub async fn find(
     }
     Ok(Some((m, s)))
 }
+
+/// One app view document in the caller's language, if the caller may reach it.
+pub async fn read(a: &State, h: &RequestContext, requested: &str) -> Result<Option<Value>> {
+    let Some((m, s)) = find(a, h, requested).await? else {
+        return Ok(None);
+    };
+    let (locale, _) = veyndo_shop::service::language::language_context(a, h).await?;
+    let (settings, _) = veyndo_shop::service::read_cache::config(a, &tenant(h)?).await?;
+    crate::domain::mcp_views::resource(requested, &m, &s, &locale, &settings.main_locale).map(Some)
+}

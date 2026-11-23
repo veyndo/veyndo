@@ -8,6 +8,10 @@ pub mod callback_grant;
 pub mod configuration_budget;
 pub mod configuration_inputs;
 pub use veyndo_shop::domain::configuration_selection;
+#[cfg(test)]
+mod bundled_contract_tests;
+#[cfg(test)]
+mod business_capability_tests;
 pub mod configuration_summary;
 pub mod consent;
 pub mod core_extensions;

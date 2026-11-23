@@ -216,7 +216,12 @@ async fn execute(
             &json!({"type":"object","properties":{"id":{"type":"string","minLength":1,"maxLength":100}},"required":["id"],"additionalProperties":false}),
             &v,
         )?;
-        return super::core_catalog_evidence::read(a, &t, v["id"].as_str().unwrap()).await;
+        return veyndo_app_platform::store::catalog_evidence::catalog_evidence(
+            a,
+            &t,
+            v["id"].as_str().unwrap(),
+        )
+        .await;
     }
     input_schema::validate(
         &json!({"type":"object","properties":{"id":{"type":"string","maxLength":100},"product":{"type":"object"}},"required":["id"],"additionalProperties":false}),

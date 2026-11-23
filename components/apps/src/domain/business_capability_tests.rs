@@ -1,15 +1,38 @@
 //! Acceptance examples exercise the same Wasm module as checkout, including changed inputs and failed-contract admission.
-use super::*;
+use crate::domain::{field_values, manifest_validation, model_contract};
+use serde_json::json;
+use veyndo_app_model::business_snapshot as snapshot;
+use veyndo_app_model::manifest::Manifest;
+use veyndo_apps::sandbox::Sandbox;
+use veyndo_core::Result;
+
+/// The business capability contract of a package.
+fn validate(m: &Manifest) -> Result<()> {
+    veyndo_app_model::business_capability::validate(
+        &veyndo_app_model::business_capability::Context {
+            entities: &m.entities,
+            commerce_hooks: m.commerce_hooks.as_ref(),
+            capability: m.capability.as_ref(),
+        },
+        &field_values::Policy,
+    )
+    .map_err(model_contract::error)
+}
+/// Runs the bundled examples of a capability against the guest module.
+fn verify(m: &Manifest, guest: &Sandbox) -> Result<()> {
+    veyndo_apps::business_examples::verify(m.capability.as_ref(), guest)
+        .map_err(model_contract::error)
+}
 fn package() -> Manifest {
     serde_json::from_str(include_str!(
-        "../../../extensions/apps/snapshot-pricing/manifest.json"
+        "../../../../extensions/apps/snapshot-pricing/manifest.json"
     ))
     .unwrap()
 }
 #[test]
 fn frozen_decisions_execute_real_component_for_multiple_amounts_and_currency_scales() {
     let m = package();
-    super::super::validate(&m).unwrap();
+    manifest_validation::validate(&m, &json!({})).unwrap();
     let guest = Sandbox::new(&m.commerce_hooks.as_ref().unwrap().source).unwrap();
     guest.validate_component_abi().unwrap();
     verify(&m, &guest).unwrap();

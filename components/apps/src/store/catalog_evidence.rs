@@ -1,8 +1,11 @@
 //! Product-only app callback projects current catalog text and enabled translations in one snapshot.
-use super::*;
+use serde_json::{Value, json};
+use veyndo_core::{Result, State};
+use veyndo_shop::service::read_cache::config;
 
-pub(super) async fn read(a: &App, tenant: &str, id: &str) -> Result<Value> {
-    let (settings, _) = crate::commerce::config(a, tenant).await?;
+/// The current catalogue text of a product with its enabled translations, in one snapshot.
+pub async fn catalog_evidence(a: &State, tenant: &str, id: &str) -> Result<Value> {
+    let (settings, _) = config(a, tenant).await?;
     let product = sqlx::query_scalar(
         "SELECT jsonb_build_object(
           'id',p.id,'active',p.active,'locale',$3::text,

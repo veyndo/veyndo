@@ -731,9 +731,9 @@
         "tenants",
         "workspace_roles"
       ],
-      "glob_imports": 55,
+      "glob_imports": 47,
       "untyped_access": 430,
-      "sql_outside_store": 28
+      "sql_outside_store": 27
     },
     "automation": {
       "title": "Deterministic rule evaluation and flow graphs",

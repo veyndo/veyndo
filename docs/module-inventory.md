@@ -29,14 +29,11 @@ This lists every checked-in source module in these roots, including files with n
 | [src/agent_runs.rs](../src/agent_runs.rs) | Durable continuation extends native tasks; the intelligence component owns admission, controls and run storage, the server executes runs over its tools. |
 | [src/apps/approval.rs](../src/apps/approval.rs) | Operator service authority is bound to immutable package content, never to a merchant-chosen ID; the rules live in the apps component. |
 | [src/apps/asset_surfaces.rs](../src/apps/asset_surfaces.rs) | App file uploads reuse the product asset parser/store and require the current package plus either callback consent or a surface grant. |
-| [src/apps/business_capability/mod.rs](../src/apps/business_capability/mod.rs) | Native complete-package and bounded-guest adapters for the independent business contracts and executable examples. |
-| [src/apps/business_capability/tests.rs](../src/apps/business_capability/tests.rs) | Acceptance examples exercise the same Wasm module as checkout, including changed inputs and failed-contract admission. |
 | [src/apps/cart_contributions.rs](../src/apps/cart_contributions.rs) | App cart contributions are owned by the apps component; the server projects the configured cart. |
 | [src/apps/configuration_events.rs](../src/apps/configuration_events.rs) | Configuration budget and change events live in the apps component; this module keeps the short path for the cart. |
 | [src/apps/configuration_selection.rs](../src/apps/configuration_selection.rs) | Saved selections resolve in the apps component; this module adds the main language of the shop. |
 | [src/apps/consent.rs](../src/apps/consent.rs) | Package approval binds all requested permissions to a reviewed digest; current actor rights apply before every installation path. |
 | [src/apps/core_callbacks.rs](../src/apps/core_callbacks.rs) | Narrow app callbacks delegate to the existing commerce owners and project PII only with separate consent. |
-| [src/apps/core_catalog_evidence.rs](../src/apps/core_catalog_evidence.rs) | Product-only app callback projects current catalog text and enabled translations in one snapshot. |
 | [src/apps/core_documents.rs](../src/apps/core_documents.rs) | Dedicated bounded order-document upload requires exact app capabilities, current actor rights and native receipt ownership. |
 | [src/apps/core_exchange.rs](../src/apps/core_exchange.rs) | Generic channel/product projections and imported sales delegate to native owners with explicit app capabilities. |
 | [src/apps/core_extensions.rs](../src/apps/core_extensions.rs) | Namespaced core-object extension contracts live in the apps component; this module adds the native projections. |
@@ -44,7 +41,6 @@ This lists every checked-in source module in these roots, including files with n
 | [src/apps/data.rs](../src/apps/data.rs) | Managed app records live in the apps component; this module supplies the record rules of the bundled site builder. |
 | [src/apps/discovery.rs](../src/apps/discovery.rs) | App capability discovery lives in the apps component; this module keeps the server-side entry for MCP and capabilities. |
 | [src/apps/distribution.rs](../src/apps/distribution.rs) | Signed publisher namespaces and tenant-local dependency/version gates; the rules live in the apps component, this module supplies the operator's publisher keys. |
-| [src/apps/editor_tests.rs](../src/apps/editor_tests.rs) | Assistant fixture contracts exercise real validation, not only the client-side builder. |
 | [src/apps/egress.rs](../src/apps/egress.rs) | Pinned egress clients live in the apps component; this module supplies the operator's private service origins. |
 | [src/apps/events.rs](../src/apps/events.rs) | App event delivery lives in the apps component; this module supplies its state to the worker and the outbox. |
 | [src/apps/evidence.rs](../src/apps/evidence.rs) | Private provenance-bearing app exports feed merchant retrieval and durable app events; never public PDP answers. |
@@ -62,8 +58,6 @@ This lists every checked-in source module in these roots, including files with n
 | [src/apps/mod.rs](../src/apps/mod.rs) | Versioned app packages: managed data, UI slots, agent tools and isolated service calls. |
 | [src/apps/model_contract.rs](../src/apps/model_contract.rs) | Native errors of model errors live in the apps component; this module keeps the short path for the app adapters. |
 | [src/apps/native_lifecycle.rs](../src/apps/native_lifecycle.rs) | Native lifecycles live in the apps component; this module keeps the short path for orders, quotes and settings. |
-| [src/apps/native_view_tests.rs](../src/apps/native_view_tests.rs) | Native schema security regressions: bindings, public writes, allowlists, bounded blocks and legacy digests. |
-| [src/apps/native_views.rs](../src/apps/native_views.rs) | Native view contracts live in the apps component; this module keeps the short path for the surface tests. |
 | [src/apps/observability.rs](../src/apps/observability.rs) | Bounded metadata-only app telemetry, storage usage and explicitly approved cursor-based event replay. |
 | [src/apps/package_fence.rs](../src/apps/package_fence.rs) | The package write fence lives in the apps component; this module keeps the short path for native writers. |
 | [src/apps/planning.rs](../src/apps/planning.rs) | App planning lives in the apps component; this module keeps the short path for the planner and proposals. |
@@ -79,12 +73,10 @@ This lists every checked-in source module in these roots, including files with n
 | [src/apps/submissions.rs](../src/apps/submissions.rs) | Public append-only intake uses declared schemas, existing cart admission, quotas, records and outbox. |
 | [src/apps/surface_grants.rs](../src/apps/surface_grants.rs) | Surface grants live in the apps component; this module registers their routes and keeps the short path for uploads. |
 | [src/apps/surface_registry.rs](../src/apps/surface_registry.rs) | The surface projection lives in the apps component; this module adds the languages of the shop. |
-| [src/apps/surface_tests.rs](../src/apps/surface_tests.rs) | Contract counterexamples reject cross-scope UI actions, unsafe URLs and mutating GET routes. |
 | [src/apps/surfaces.rs](../src/apps/surfaces.rs) | App-owned UI surfaces and namespaced HTTP routes reuse the authorized action gateway. |
 | [src/apps/tool_contract.rs](../src/apps/tool_contract.rs) | The app tool catalogue lives in the apps component; this module keeps the short path for MCP and the assistant. |
 | [src/apps/ui_bundles.rs](../src/apps/ui_bundles.rs) | UI bundle loading lives in the apps component; this module registers its routes. |
 | [src/apps/ui_documents.rs](../src/apps/ui_documents.rs) | Sandboxed app documents are served by the apps component; this module registers their routes. |
-| [src/apps/ui_logic_tests.rs](../src/apps/ui_logic_tests.rs) | UI programs must keep static types, same-model saves, surface allowlists and acyclic ownership before install or preview. |
 | [src/apps/webhook_scope.rs](../src/apps/webhook_scope.rs) | The webhook shop binding lives in the apps component; this module keeps the short path for the request middleware. |
 | [src/apps/webhooks.rs](../src/apps/webhooks.rs) | Incoming app webhooks are handled in the apps component; this module registers their public route. |
 | [src/assets/app_files.rs](../src/assets/app_files.rs) | Scoped app access to the existing asset store. Binary callbacks are explicit and private; publishing still uses the native asset lifecycle. |
@@ -507,6 +499,8 @@ This lists every checked-in source module in these roots, including files with n
 | [components/apps/src/domain/app_generation.rs](../components/apps/src/domain/app_generation.rs) | The manifest schema a model answers in, specialised to the shop's languages, and the access a regeneration keeps. |
 | [components/apps/src/domain/approval.rs](../components/apps/src/domain/approval.rs) | Operator service authority is bound to immutable package content, never to a merchant-chosen ID. |
 | [components/apps/src/domain/build_admission.rs](../components/apps/src/domain/build_admission.rs) | What an App Studio build must satisfy before it is stored: no reserved or reviewed-only package, bounded labels, the shop main language. |
+| [components/apps/src/domain/bundled_contract_tests.rs](../components/apps/src/domain/bundled_contract_tests.rs) | Bundled app contracts run through the real package compiler: UI programs, native views, assistant fixtures, surfaces and routes reject cross-scope actions, unsafe URLs, smuggled authority and unbound writes. |
+| [components/apps/src/domain/business_capability_tests.rs](../components/apps/src/domain/business_capability_tests.rs) | Acceptance examples exercise the same Wasm module as checkout, including changed inputs and failed-contract admission. |
 | [components/apps/src/domain/callback_grant.rs](../components/apps/src/domain/callback_grant.rs) | What an app callback key may do: the capability the merchant approved and the role scope behind it. |
 | [components/apps/src/domain/configuration_budget.rs](../components/apps/src/domain/configuration_budget.rs) | The budget of app configurations one cart may carry. |
 | [components/apps/src/domain/configuration_inputs.rs](../components/apps/src/domain/configuration_inputs.rs) | Native policy adapter for shared configuration grammar, library selection and exact guest arguments. |
@@ -600,6 +594,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/apps/src/store/activation.rs](../components/apps/src/store/activation.rs) | Native current-actor/trust/connected-frontend/commerce admission for the shared package-state transaction; original configuration lock order retained. |
 | [components/apps/src/store/asset_references.rs](../components/apps/src/store/asset_references.rs) | Assets an app record refers to must belong to the same shop and fit the field. |
 | [components/apps/src/store/cart_configurations.rs](../components/apps/src/store/cart_configurations.rs) | Cart configurations stay bound to the package, rule revision and price they were made with. |
+| [components/apps/src/store/catalog_evidence.rs](../components/apps/src/store/catalog_evidence.rs) | Product-only app callback projects current catalog text and enabled translations in one snapshot. |
 | [components/apps/src/store/commerce_hooks.rs](../components/apps/src/store/commerce_hooks.rs) | Which commerce hook packages a shop admits and checkout evaluates. |
 | [components/apps/src/store/configuration_events.rs](../components/apps/src/store/configuration_events.rs) | Configuration mutations publish minimized identifiers through the native outbox/Flows; no cart capability or shopper text is disclosed. |
 | [components/apps/src/store/configuration_orders.rs](../components/apps/src/store/configuration_orders.rs) | Paginated app-specific immutable purchase projections; filtering happens before LIMIT and never exposes buyer PII. |
