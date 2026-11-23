@@ -267,7 +267,7 @@ checkout and finish. Merchant mutations, arbitrary URLs and credentials are abse
 The existing stage restrictions prohibit real payment/provider egress. Reports and
 prompts never contain cart capabilities or provider credentials.
 
-`src/agent_runs/scenarios/` owns only the cohort and shopper adapter. Native commerce
+`components/intelligence/src/service/scenarios/` owns only the cohort and shopper adapter; the server lends it the agent port (`src/agent_host.rs`). Native commerce
 owns calculations, inventory, legal acknowledgement, idempotent orders and app
 hooks. PostgreSQL `tasks`, the existing checkpoints, quotas and worker leases own
 execution; there is no new queue, table per app, payment implementation or Python

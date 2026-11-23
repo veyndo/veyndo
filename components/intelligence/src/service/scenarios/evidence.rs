@@ -1,10 +1,12 @@
 //! Scenario evidence uses the release owner's configuration projection, never orders or inventory.
-use super::*;
+use crate::ports::AgentHost;
+use serde_json::Value;
+use veyndo_core::Result;
 
-pub(super) async fn capture(a: &App, t: &str) -> Option<String> {
+pub async fn capture<H: AgentHost>(host: &H, t: &str) -> Option<String> {
     // Evidence is diagnostic: lock contention or the release projection's size
     // limits must not hide a completed purchase or stop an admitted shopper.
-    match tokio::time::timeout(std::time::Duration::from_secs(3), snapshot(a, t)).await {
+    match tokio::time::timeout(std::time::Duration::from_secs(3), snapshot(host, t)).await {
         Ok(Ok(digest)) => Some(digest),
         _ => {
             tracing::warn!(
@@ -16,21 +18,11 @@ pub(super) async fn capture(a: &App, t: &str) -> Option<String> {
     }
 }
 
-async fn snapshot(a: &App, t: &str) -> Result<String> {
-    let mut tx = a.db.begin().await?;
-    sqlx::query("SET LOCAL lock_timeout='250ms'")
-        .execute(&mut *tx)
-        .await?;
-    operations::lock_company(&mut tx, t).await?;
-    let configuration = staging::snapshot(&mut tx, t).await?;
-    // Release projections exclude credentials, stock and operational records.
-    // Keep only the digest in the actor-private task, not a second configuration store.
-    let digest = hash(&configuration.to_string());
-    tx.rollback().await?;
-    Ok(digest)
+/// The digest of the sandbox's release configuration projection.
+async fn snapshot<H: AgentHost>(host: &H, t: &str) -> Result<String> {
+    host.configuration_digest(t).await
 }
-
-pub(super) fn review(evidence: &Value, current: Option<&str>) -> &'static str {
+pub fn review(evidence: &Value, current: Option<&str>) -> &'static str {
     let Some(started) = evidence["startedDigest"].as_str().filter(|s| !s.is_empty()) else {
         return "unverified";
     };
@@ -54,6 +46,7 @@ pub(super) fn review(evidence: &Value, current: Option<&str>) -> &'static str {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use serde_json::json;
     #[test]
     fn historical_or_partial_evidence_cannot_be_current() {
         for value in [

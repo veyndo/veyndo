@@ -6,7 +6,7 @@ This page answers one question per source file of the commerce core: is its
 rule proved by machine, does it call a proved rule, or neither? It is
 generated from the same manifest the proof check uses, so it cannot say more
 than the check verifies. **It is not a claim that the shop is free of errors:**
-93.5 % of the Rust source files are unproved.
+93.6 % of the Rust source files are unproved.
 
 ## In numbers
 
@@ -17,8 +17,8 @@ than the check verifies. **It is not a claim that the shop is free of errors:**
 | Rule files | 8 | 0.5 % | The files that contain the proved rules |
 | Reviewed callers | 79 | 5.3 % | Files that call a proved rule; a person reviewed how the rule is fed, the surrounding code is not proved |
 | Comparison drivers | 9 | 0.6 % | Test programs that compare the compiled Rust rules with the Lean versions |
-| **Unproved files** | 1388 | 93.5 % | Everything else: database access, HTTP, providers, the user interface server |
-| All Rust source files | 1484 | 100 % | |
+| **Unproved files** | 1402 | 93.6 % | Everything else: database access, HTTP, providers, the user interface server |
+| All Rust source files | 1498 | 100 % | |
 
 A proved rule looks like this one, which caps a discount at the amount it is
 taken from:
@@ -133,7 +133,7 @@ that call it.
 | Rule | What the source says about it | Proved properties | Used in |
 | --- | --- | --- | --- |
 | `agent_preview_admissible` | No comment in the source | 6: `agent_preview_exact`, `agent_inactive_denied`, `agent_private_requires_personal`, `agent_private_requires_owner`, `agent_expired_preview_denied`, `agent_live_independent_of_preview` | `components/identity/src/store/agent_authority.rs` |
-| `planning_request_admissible` | No comment in the source | 2: `planning_request_exact`, `planning_mutation_denied` | `src/agent_runs/controls.rs` |
+| `planning_request_admissible` | No comment in the source | 2: `planning_request_exact`, `planning_mutation_denied` | `components/intelligence/src/service/agent_controls.rs` |
 
 ### AI prices, claims and experiments
 
@@ -142,9 +142,9 @@ that call it.
 
 | Rule | What the source says about it | Proved properties | Used in |
 | --- | --- | --- | --- |
-| `ai_autonomy_admissible` | Budgeted autonomy requires explicit policy, current authority, price-only scope and all budgets. | 2: `ai_autonomy_exact`, `ai_autonomy_disabled_denied` | `src/cognition/autonomy.rs`, `components/intelligence/src/domain/price_guardrails.rs` |
+| `ai_autonomy_admissible` | Budgeted autonomy requires explicit policy, current authority, price-only scope and all budgets. | 2: `ai_autonomy_exact`, `ai_autonomy_disabled_denied` | `components/intelligence/src/service/autonomy.rs`, `components/intelligence/src/domain/price_guardrails.rs` |
 | `ai_price_admissible` | Price admission proves only the explicit corridor and supplied domain guards; no model truth claim. | 2: `ai_price_exact`, `ai_price_locked_denied` | `components/intelligence/src/domain/price_guardrails.rs` |
-| `claim_render_admissible` | Only current, public, confirmed, unexpired source-bound claims may be rendered. | 2: `claim_render_exact`, `claim_unconfirmed_denied` | `src/cognition/contracts.rs`, `components/intelligence/src/domain/claim_batch.rs` |
+| `claim_render_admissible` | Only current, public, confirmed, unexpired source-bound claims may be rendered. | 2: `claim_render_exact`, `claim_unconfirmed_denied` | `components/intelligence/src/service/fact_compiler.rs`, `components/intelligence/src/domain/claim_batch.rs` |
 | `experiment_result_admissible` | An experiment may claim uplift only at the admissible final look, with enough units and a positive lower bound. | 3: `experiment_result_exact`, `experiment_immature_denied`, `experiment_undersized_denied` | `components/intelligence/src/domain/experiment_model.rs` |
 | `sovereign_request_admissible` | In sovereign mode a model request leaves the process only for the self-operated provider on a self-hosted endpoint. | 4: `sovereign_request_exact`, `sovereign_foreign_provider_denied`, `sovereign_foreign_endpoint_denied`, `sovereign_off_admits` | `crates/cognition/src/inference/sovereign.rs` |
 

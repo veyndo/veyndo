@@ -749,7 +749,7 @@
         "workspace_roles"
       ],
       "glob_imports": 55,
-      "untyped_access": 434,
+      "untyped_access": 430,
       "sql_outside_store": 28
     },
     "automation": {
@@ -773,6 +773,7 @@
         "components/intelligence",
         "crates/cognition",
         "src/agent.rs",
+        "src/agent_host.rs",
         "src/agent_runs",
         "src/agent_runs.rs",
         "src/cognition",
@@ -859,9 +860,9 @@
         "tenants",
         "translation_jobs"
       ],
-      "glob_imports": 70,
-      "untyped_access": 736,
-      "sql_outside_store": 34
+      "glob_imports": 51,
+      "untyped_access": 740,
+      "sql_outside_store": 33
     },
     "studio": {
       "title": "Merchant overview, reports, private staging shops and history",

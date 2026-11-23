@@ -2,7 +2,7 @@
 use serde_json::{Value, json};
 use sqlx::postgres::PgRow;
 use sqlx::{Postgres, Row, Transaction};
-use veyndo_core::{Result, State, conflict};
+use veyndo_core::{Error, Result, State, StatusCode, conflict};
 
 /// The lease a worker holds on one running task.
 #[derive(Clone, Copy)]
@@ -91,5 +91,66 @@ pub async fn pending(a: &State, r: Lease<'_>, key: &str) -> Result<()> {
     if changed != 1 {
         return Err(conflict("Agent lease lost before inference"));
     }
+    Ok(())
+}
+
+/// Requeues expired runs; a run with a pending provider call becomes uncertain instead, since its outcome is unknown.
+pub async fn recover(a: &State) -> Result<()> {
+    sqlx::query("UPDATE tasks SET run_state=CASE WHEN run_pending IS NULL THEN 'queued' ELSE 'uncertain' END,run_error=CASE WHEN run_pending IS NULL THEN NULL ELSE jsonb_build_object('code',CASE WHEN run_request ? 'execution' THEN 'agent_work_interrupted' ELSE 'agent_model_interrupted' END,'retryable',false) END,run_lease=NULL,run_until=NULL,run_revision=run_revision+1,run_updated=now() WHERE (tenant,id) IN (SELECT tenant,id FROM tasks WHERE run_state='running' AND run_until<now() ORDER BY run_updated LIMIT 20 FOR UPDATE SKIP LOCKED)").execute(&a.db).await?;
+    Ok(())
+}
+/// Claims the next queued run under a new lease: one ordinary run or two scenario runs per shop at a time.
+pub async fn claim(a: &State, lease: &str) -> Result<Option<PgRow>> {
+    let mut tx = a.db.begin().await?;
+    let row=sqlx::query("SELECT * FROM tasks r WHERE run_state='queued' AND run_after<=now() AND NOT EXISTS(SELECT 1 FROM tasks active WHERE active.tenant=r.tenant AND active.run_state='running' AND active.run_until>now() AND NOT(active.run_request ? 'scenario')) AND (SELECT count(*) FROM tasks active WHERE active.tenant=r.tenant AND active.run_state='running' AND active.run_until>now()) < CASE WHEN r.run_request ? 'scenario' THEN 2 ELSE 1 END ORDER BY run_updated,tenant,id FOR UPDATE SKIP LOCKED LIMIT 1").fetch_optional(&mut *tx).await?;
+    let Some(row) = row else { return Ok(None) };
+    let t: String = row.get("tenant");
+    let id: String = row.get("id");
+    // Serialize tenant admission across replicas, then recheck the running count.
+    let admitted: bool =
+        sqlx::query_scalar("SELECT pg_try_advisory_xact_lock(hashtextextended($1,2))")
+            .bind(&t)
+            .fetch_one(&mut *tx)
+            .await?;
+    if !admitted {
+        return Ok(None);
+    };
+    let is_scenario = row.get::<Value, _>("run_request")["scenario"].is_object();
+    let busy:bool=sqlx::query_scalar("SELECT count(*) >= $2 OR coalesce(bool_or(NOT(run_request ? 'scenario')),false) FROM tasks WHERE tenant=$1 AND run_state='running' AND run_until>now()")
+        .bind(&t).bind(if is_scenario {2_i64}else{1_i64}).fetch_one(&mut *tx).await?;
+    if busy {
+        return Ok(None);
+    };
+    sqlx::query("UPDATE tasks SET run_state='running',run_checkpoint=run_checkpoint-'app-views',run_lease=$3,run_until=now()+interval '240 seconds',run_revision=run_revision+1,run_updated=now() WHERE tenant=$1 AND id=$2")
+        .bind(&t).bind(&id).bind(lease).execute(&mut *tx).await?;
+    tx.commit().await?;
+    Ok(Some(row))
+}
+/// The actor-private problem a failed run records; outbox projections carry IDs and states only.
+pub fn problem(error: &Error) -> Value {
+    let code = match error.0 {
+        StatusCode::FORBIDDEN => "agent_authority_changed",
+        StatusCode::TOO_MANY_REQUESTS => "agent_capacity_busy",
+        _ => "agent_step_failed",
+    };
+    json!({"code":code,"status":error.0.as_u16(),"detail":error.1.chars().take(500).collect::<String>()})
+}
+/// Stops a failed run under its lease, tells its conversation and releases a finished turn.
+pub async fn fail(a: &State, r: Lease<'_>, error: &Error) -> Result<()> {
+    let problem = problem(error);
+    let mut tx = a.db.begin().await?;
+    let stopped=sqlx::query("UPDATE tasks SET run_state=CASE WHEN run_pending IS NOT NULL THEN 'uncertain' ELSE 'failed' END,run_error=$4,run_lease=NULL,run_until=NULL,run_revision=run_revision+1,run_updated=now() WHERE tenant=$1 AND id=$2 AND run_lease=$3 AND run_state='running' AND run_until>now() RETURNING conversation_id,run_state")
+        .bind(r.tenant).bind(r.id).bind(r.lease).bind(&problem).fetch_optional(&mut *tx).await?;
+    if let Some(stopped) = stopped
+        && let Some(c) = stopped.get::<Option<String>, _>("conversation_id")
+    {
+        let state: String = stopped.get("run_state");
+        let data = json!({"error":true,"runId":r.id,"runState":state,"code":problem["code"],"providerUnavailable":error.0==StatusCode::BAD_GATEWAY});
+        sqlx::query("INSERT INTO chat_messages(tenant,conversation_id,role,content,data) VALUES($1,$2,'assistant',$3,$4)").bind(r.tenant).bind(&c).bind(error.1.chars().take(500).collect::<String>()).bind(data).execute(&mut *tx).await?;
+        if state == "failed" {
+            sqlx::query("UPDATE conversations SET turn_owner=NULL,turn_until=NULL WHERE tenant=$1 AND id=$2 AND turn_owner=$3").bind(r.tenant).bind(&c).bind(r.id).execute(&mut *tx).await?;
+        }
+    }
+    tx.commit().await?;
     Ok(())
 }

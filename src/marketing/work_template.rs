@@ -91,7 +91,7 @@ pub(crate) async fn prepare(
             .to_owned();
     let id = uid();
     let evidence = json!({"instruction":instruction,"locale":f.locale,"actor":f.actor,"model":null,"inference":null,"catalogBefore":[],"applied":false,"flowTemplateLimit":template.daily_limit,"proposal":{"summary":instruction,"changes":[],"operations":steps},"templateSource":{"taskId":template.task_id,"flowJob":job,"bindings":template.bindings}});
-    agent_runs::persist(a, t, &id, &evidence, &h).await?;
+    agent_runs::checkpoint::persist(a, t, &id, &evidence, &h).await?;
     Ok(json!({"taskId":id,"preview":evidence,"approvalRequired":true}))
 }
 

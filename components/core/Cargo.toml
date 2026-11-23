@@ -17,6 +17,7 @@ tracing.workspace = true
 reqwest.workspace = true
 veyndo-runtime = { path = "../../crates/runtime" }
 veyndo-kernel = { path = "../../crates/kernel" }
+veyndo-app-model = { path = "../../extensions/services/app-storage/model" }
 
 [dev-dependencies]
 tokio.workspace = true

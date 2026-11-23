@@ -67,38 +67,10 @@ pub(crate) async fn invoke_contract(
         _ => Err(bad("Unknown intelligence contract")),
     }
 }
-pub(crate) async fn compile(a: &App, t: &str, product: &str, v: &Value) -> Result<Value> {
-    let facts = evidence::claims(a, t, product, true).await?;
-    let statements = v["claims"]
-        .as_array()
-        .filter(|a| a.len() <= 20)
-        .ok_or(bad("At most 20 fact statements required"))?;
-    let facts = facts["claims"].as_array().unwrap();
-    let mut rendered = Vec::new();
-    for s in statements {
-        let matched = facts
-            .iter()
-            .find(|f| f["id"] == s["id"] && f["data"]["text"] == s["text"]);
-        if let Some(f) = matched.filter(|f| {
-            verified_kernel::claim_render_admissible(
-                f["state"] == "confirmed",
-                f["sourcePublic"] == true,
-                f["sourceCurrent"] == true,
-                f["validTime"] == true,
-                f["data"]["text"] == s["text"],
-            )
-        }) {
-            rendered.push(json!({"id":f["id"],"text":f["data"]["text"],"locale":f["data"]["locale"],"sourceId":f["data"]["sourceId"],"contentHash":f["data"]["contentHash"]}));
-        } else {
-            return Err(conflict(
-                "Statement is not an exact current confirmed public claim",
-            ));
-        }
-    }
-    Ok(
-        json!({"productId":product,"statements":rendered,"compiled":true,"scope":"Only these exact statements are checked; free prose is not certified"}),
-    )
-}
+pub(crate) use veyndo_intelligence::service::fact_compiler::compile;
+use veyndo_intelligence::service::fact_compiler::{
+    experiments_schema, public_compile, public_facts,
+};
 async fn api(
     State(a): State<App>,
     h: RequestContext,
@@ -108,24 +80,6 @@ async fn api(
     Ok(Json(
         invoke_contract(&a, &h, &format!("knowledge.{name}"), &v).await?,
     ))
-}
-async fn public_facts(
-    State(a): State<App>,
-    h: RequestContext,
-    Path(id): Path<String>,
-) -> Result<Json<Value>> {
-    // Reuse the Store API admission/visibility consumer, including channel restrictions.
-    marketing::admit_product(&a, &h, &id).await?;
-    Ok(Json(evidence::claims(&a, &tenant(&h)?, &id, true).await?))
-}
-async fn public_compile(
-    State(a): State<App>,
-    h: RequestContext,
-    Path(id): Path<String>,
-    Json(v): Json<Value>,
-) -> Result<Json<Value>> {
-    marketing::admit_product(&a, &h, &id).await?;
-    Ok(Json(compile(&a, &tenant(&h)?, &id, &v).await?))
 }
 pub(crate) fn router() -> Router<App> {
     Router::new()
@@ -140,21 +94,4 @@ pub(crate) fn router() -> Router<App> {
             "/store-api/product/{id}/facts/compile",
             post(public_compile),
         )
-}
-
-fn experiments_schema(name: &str) -> Option<Value> {
-    let props = match name {
-        "knowledge.experiments" | "knowledge.experiment.suggest" => json!({}),
-        "knowledge.experiment.create" => {
-            json!({"design":{"type":"object"},"approve":{"type":"boolean"}})
-        }
-        "knowledge.experiment.report" => json!({"id":{"type":"string"}}),
-        "knowledge.experiment.start"
-        | "knowledge.experiment.stop"
-        | "knowledge.experiment.finish" => {
-            json!({"id":{"type":"string"},"revision":{"type":"integer"},"approve":{"type":"boolean"}})
-        }
-        _ => return None,
-    };
-    Some(json!({"type":"object","properties":props,"additionalProperties":false}))
 }

@@ -63,14 +63,6 @@ pub(crate) async fn capture(a: &App, h: &RequestContext) -> Result<AdviceContext
     }
     store::advice(a, &c.tenant, &c.id).await
 }
-pub(crate) async fn revalidate(a: &App, h: &RequestContext, prior: &AdviceContext) -> Result<()> {
-    if !capture(a, h).await?.unchanged(prior) {
-        return Err(conflict(
-            "Private advice context changed during inference; ask again",
-        ));
-    }
-    Ok(())
-}
 pub(crate) fn router() -> Router<App> {
     Router::new().route(
         "/store-api/intelligence/preferences",

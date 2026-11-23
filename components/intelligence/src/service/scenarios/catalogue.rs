@@ -1,21 +1,28 @@
 //! A bounded native channel sample seeds editable fictional profiles; it never reads customer data or invokes inference.
-use super::*;
-pub(super) async fn settings(
-    a: &App,
-    h: &RequestContext,
-    tenant: &str,
-) -> Result<commerce::Settings> {
-    let channel = marketing::channel_id(h);
-    let (settings, _) = commerce::scoped_config(a, tenant, channel).await?;
+use super::shopper;
+use crate::ports::AgentHost;
+use serde_json::Value;
+use serde_json::json;
+use veyndo_core::RequestContext;
+use veyndo_core::Result;
+use veyndo_core::State;
+use veyndo_core::shop_scope::channel as channel_id;
+use veyndo_marketing::service::channels::channel_configuration;
+use veyndo_pricing::service::conversion::amount;
+use veyndo_shop::Settings;
+use veyndo_shop::service::read_cache::settings as scoped_config;
+pub async fn settings(a: &State, h: &RequestContext, tenant: &str) -> Result<Settings> {
+    let channel = channel_id(h);
+    let (settings, _) = scoped_config(a, tenant, channel).await?;
     let mut settings = (*settings).clone();
-    let channel = marketing::channel_configuration(a, h, channel).await?;
+    let channel = channel_configuration(a, h, channel).await?;
     settings
         .locales
         .retain(|locale| channel.locales.contains(locale));
     Ok(settings)
 }
-pub(super) async fn sample(
-    a: &App,
+pub async fn sample<H: AgentHost>(
+    host: &H,
     tenant: &str,
     channel: &str,
     locale: &str,
@@ -27,12 +34,12 @@ pub(super) async fn sample(
         &json!({"channel":channel,"locale":locale,"scenario":{"currency":currency}}),
         None,
     )?;
-    let result = shopper::call(a, &guest, "catalog.search", &json!({"limit":12})).await?;
+    let result = shopper::call(host, &guest, "catalog.search", &json!({"limit":12})).await?;
     Ok(project(&result["elements"], currency, scale))
 }
 fn project(elements: &Value, currency: &str, scale: u8) -> Value {
     json!(elements.as_array().into_iter().flatten().take(12).filter_map(|p| {
-        let price = currencies::amount(p["price"].as_f64()?, currency, scale).ok()?.minor();
+        let price = amount(p["price"].as_f64()?, currency, scale).ok()?.minor();
         if p["currency"].as_str()? != currency || !(1..=100_000_000).contains(&price) {
             return None;
         }

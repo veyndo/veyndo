@@ -78,7 +78,7 @@ Existing workspace row security, revisions and history apply.
 | Welcome, guide, progress and return banner | `frontend/src/admin/setup/` |
 | Inline company form | `SetupBasics.tsx`, reusing `settings/useSettingsDraft`, `CompanyField` and `SettingsSaveBar` |
 | Saved progress validation | `components/studio/src/domain/workspace.rs` |
-| Bounded current setup context for AI | `src/agent_runs/context.rs` |
+| Bounded current setup context for AI | `components/intelligence/src/service/agent_runs.rs` |
 | Layout, goals and personal identity | Existing personal workspace owner; setup saves preserve these fields |
 | Company, products, design, orders and publication | Existing native owners reached from the guide |
 

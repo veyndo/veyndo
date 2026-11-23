@@ -24,13 +24,14 @@ async fn chat(
     // Commit acceptance (or return its HTTP error) before opening SSE. Waiting never enqueues another turn.
     let background = v["background"] == true;
     v["background"] = json!(true);
-    let Json(accepted) = agent::merchant_chat(State(a.clone()), h.clone(), Json(v)).await?;
+    let accepted = veyndo_intelligence::service::conversations::chat(&a, &h, &v).await?;
     let progress = json!({"conversationId":accepted["conversationId"],"run":accepted["run"]});
     let mut job = veyndo::tenant_scope::spawn(async move {
         if background {
-            Ok(Json(accepted))
+            Ok(accepted)
         } else {
-            agent::complete_chat(&a, &h, accepted["run"].clone()).await
+            veyndo_intelligence::service::conversations::complete(&a, &h, accepted["run"].clone())
+                .await
         }
     });
     let stream = async_stream::stream! {
@@ -40,7 +41,7 @@ async fn chat(
             tokio::select! {
                 result=&mut job => {
                     let event=match result {
-                        Ok(Ok(Json(value)))=>Event::default().event("complete").json_data(value),
+                        Ok(Ok(value))=>Event::default().event("complete").json_data(value),
                         Ok(Err(e))=>Event::default().event("error").json_data(json!({"errors":[e.problem()]})),
                         Err(_)=>Event::default().event("error").json_data(json!({"errors":[{"status":500,"detail":"Chat execution interrupted; reload its conversation before retrying"}]})),
                     };

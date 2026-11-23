@@ -31,3 +31,5 @@ veyndo-kernel = { path = "../../crates/kernel" }
 veyndo-shipping = { path = "../shipping" }
 veyndo-checkout = { path = "../checkout" }
 veyndo-inventory = { path = "../inventory" }
+veyndo-cognition = { path = "../../crates/cognition" }
+veyndo-app-model = { path = "../../extensions/services/app-storage/model" }

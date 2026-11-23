@@ -2,19 +2,13 @@
 use serde_json::{Value, json};
 use veyndo_app_model::native_lifecycle::{MachineEdge, Snapshot, reason as edge_reason};
 use veyndo_app_model::native_lifecycle_snapshot::snapshot as accepted;
-use veyndo_core::{Error, RequestContext, Result, StatusCode, bad, conflict};
+use veyndo_core::{Error, RequestContext, Result, StatusCode, conflict};
 use veyndo_identity::permit;
 use veyndo_kernel::verified_kernel;
 
 /// The lifecycle a quote was accepted under, if it carries one.
 fn snapshot(data: &Value) -> Result<Option<Snapshot>> {
-    accepted(data, "quote").map_err(|e| match e.kind {
-        veyndo_app_model::Kind::Bad => bad(e.message),
-        veyndo_app_model::Kind::Conflict => conflict(&e.message),
-        veyndo_app_model::Kind::Validation => {
-            Error::validation(e.pointer.as_deref().unwrap_or(""), e.message)
-        }
-    })
+    accepted(data, "quote").map_err(veyndo_core::model_contract::error)
 }
 
 /// Why a transition is refused for the current actor and facts, if it is.

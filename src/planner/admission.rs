@@ -1,6 +1,6 @@
 //! Every initial or repaired model proposal traverses the same native read-only admission.
-use super::*;
-pub(super) async fn admit(
+use crate::*;
+pub(crate) async fn admit(
     a: &App,
     t: &str,
     authority: &RequestContext,

@@ -1,6 +1,5 @@
 //! Source-bound knowledge ingestion, retrieval and product questions share tenant/product visibility.
 use crate::*;
-pub(crate) mod guidance;
 mod ingestion;
 mod lifecycle;
 mod preview;

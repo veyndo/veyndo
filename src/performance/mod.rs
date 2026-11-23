@@ -4,9 +4,7 @@ use axum::{extract::Request, middleware::Next};
 pub(crate) mod access_snapshot;
 pub(crate) use veyndo_core::database::lease as cluster_lease;
 pub(crate) mod delivery;
-pub(crate) use veyndo_core::admission::{
-    Admission, AiStreamAdmission, reserve_ai_attempt, reserve_ai_attempt_tx,
-};
+pub(crate) use veyndo_core::admission::{Admission, AiStreamAdmission, reserve_ai_attempt};
 mod invalidation;
 pub(crate) use invalidation::start as start_invalidations;
 pub(crate) use veyndo_core::database::authority::connect as connect_database;

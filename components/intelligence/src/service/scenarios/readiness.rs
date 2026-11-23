@@ -1,9 +1,19 @@
 //! Read-only readiness of a private sandbox as a shop twin: catalogue, stock, simulated checkout and saved customer tests.
-use super::*;
-pub(super) async fn read(a: &App, h: &RequestContext, t: &str) -> Result<Value> {
+use super::{attack_store, catalogue};
+use crate::ports::AgentHost;
+use serde_json::Value;
+use serde_json::json;
+use sqlx::Row;
+use veyndo_core::RequestContext;
+use veyndo_core::Result;
+use veyndo_core::bad;
+use veyndo_core::shop_scope::channel as channel_id;
+use veyndo_core::shop_scope::header;
+pub async fn read<H: AgentHost>(host: &H, h: &RequestContext, t: &str) -> Result<Value> {
+    let a = host.models().core;
     let settings = catalogue::settings(a, h, t).await?;
     let currency = settings.currencies.selected("")?;
-    let channel = marketing::channel_id(h);
+    let channel = channel_id(h);
     // Purchasable units are products without variants and the variants themselves.
     let row = sqlx::query("SELECT count(*) AS products, count(*) FILTER (WHERE active AND stock>0) AS stocked, count(*) FILTER (WHERE active AND stock<=0) AS empty, count(*) FILTER (WHERE NOT active) AS inactive FROM products p WHERE tenant=$1 AND NOT EXISTS(SELECT 1 FROM products c WHERE c.tenant=p.tenant AND c.parent_id=p.id)")
         .bind(t).fetch_one(&a.db).await?;
@@ -20,7 +30,7 @@ pub(super) async fn read(a: &App, h: &RequestContext, t: &str) -> Result<Value> 
         .find(|l| *l == &settings.main_locale)
         .or_else(|| settings.locales.first())
     {
-        Some(locale) => catalogue::sample(a, t, channel, locale, &currency.code, currency.scale)
+        Some(locale) => catalogue::sample(host, t, channel, locale, &currency.code, currency.scale)
             .await?
             .as_array()
             .map_or(0, Vec::len),
@@ -41,7 +51,7 @@ pub(super) async fn read(a: &App, h: &RequestContext, t: &str) -> Result<Value> 
     let actor = header(h, "x-rac-user").ok_or(bad("Scenario actor required"))?;
     let tests: i64 = sqlx::query_scalar("SELECT count(DISTINCT run_request->'scenario'->>'group') FROM tasks WHERE tenant=$1 AND run_actor=$2 AND run_request ? 'scenario' AND (run_request->>'agentId') IS NOT DISTINCT FROM $3")
         .bind(t).bind(actor).bind(&h.principal.agent_key).fetch_one(&a.db).await?;
-    let attack = attack_store::latest(a, h, t).await?;
+    let attack = attack_store::latest(host, h, t).await?;
     let blockers: Vec<&str> = [
         (products == 0, "no_products"),
         (products > 0 && visible == 0, "channel_empty"),

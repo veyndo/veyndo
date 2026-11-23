@@ -14,6 +14,16 @@ pub(crate) struct App {
     pub(crate) channel_metrics: Arc<channel_metrics::ChannelMetrics>,
     pub(crate) app_limits: Arc<apps::ServiceLimits>,
 }
+impl App {
+    /// The model context intelligence operations borrow: state, providers and inference slots.
+    pub(crate) fn models(&self) -> veyndo_intelligence::service::models::Models<'_> {
+        veyndo_intelligence::service::models::Models {
+            core: &self.core,
+            inference: &self.inference,
+            slots: &self.inference_slots,
+        }
+    }
+}
 impl std::ops::Deref for App {
     type Target = veyndo_core::State;
     fn deref(&self) -> &Self::Target {

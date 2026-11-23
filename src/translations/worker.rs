@@ -36,7 +36,7 @@ async fn authorized_step(a: &App, job: &sqlx::postgres::PgRow, lease: &str) -> R
                 actor: h.principal.user.clone().unwrap_or_default(),
             }
         };
-        let authority = agent_runs::controls::model_authority(a, &h).await;
+        let authority = agent_runs::controls::model_authority(&h);
         return veyndo::trace::scoped(
             trace,
             veyndo::tenant_scope::scoped(

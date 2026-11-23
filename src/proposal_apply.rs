@@ -189,7 +189,12 @@ pub(crate) async fn apply_mode(
         )?;
     }
     if autonomous {
-        cognition::autonomy::reserve(&mut tx, t, id, h, &settings, &p, &products).await?;
+        let request = cognition::autonomy::Autonomous {
+            task: id,
+            changes: &p.changes,
+            other_work: p.app_action.is_some() || p.experience.is_some(),
+        };
+        cognition::autonomy::reserve(&mut tx, t, h, &settings, request, &products).await?;
     }
     if let Some(target) = &p.translation {
         let choice: Choice = serde_json::from_value(v["translationInference"].clone())

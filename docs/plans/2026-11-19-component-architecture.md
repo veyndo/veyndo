@@ -559,8 +559,39 @@ Order follows the dependency report, lowest first. Each line is one move.
   The Ed25519 fact signing key with its public key set
   (`service/fact_signing`) and signed cart offers, issued and checked
   through the shop's cart port (`service/signed_offer`), live here.
-  Open: agents and their runs, proposals, the retrieval and question
-  handlers, inference, cognition routes and workers.
+  Since batch C (23 November) the component also owns agent work behind
+  the agent port (`ports::AgentHost`, implemented by the server in
+  `src/agent_host.rs`): run admission, status, cancel and resume
+  (`service/agent_runs`), the agent stop control and key admission
+  (`service/agent_controls`), merchant conversations (`service/conversations`,
+  `http/agents`), the run journal with lease fences and journaled model calls
+  (`service/run_journal`), bounded read rounds (`service/read_rounds`),
+  grounded planning with one repair (`service/planner`), shopping advice
+  (`service/concierge`), customer scenarios with their shopper adapter and
+  attack probes (`service/scenarios`), the run worker's claim, recovery and
+  failure records (`store/agent_runs`), flow proposals
+  (`service/flow_proposals`), navigation targets (`service/navigation`), price
+  autonomy and its revert guard (`service/autonomy`, `service/autonomy_revert`),
+  behavior reports and journeys (`service/behavior`), the claim compiler and
+  public facts (`service/fact_compiler`), the advisor context
+  (`service/advisor`), source extraction (`service/extraction`), embedding
+  indexing (`service/indexing`), product and source retrieval with the index
+  status (`service/retrieval`), merchant memory and hypothesis decisions
+  (`http/memory`) and conversation attachments from the executed tool trace
+  (`domain/tool_trace`, re-exported by apps). The server lends its model
+  providers and inference slots through `service/models::Models`. The bounded
+  input schema validator and the model error contract moved to
+  `veyndo_core::model_contract`; apps, B2B and orders use it instead of their
+  own copies.
+  Open (composition, batch F): proposal approval and application
+  (`src/proposal_apply.rs`), native admission of a plan
+  (`src/planner/admission.rs`), the native work plan, its execution, list
+  views and translation steps (`src/agent_runs/{work_plan,work,view,translation}.rs`).
+  They work on the server's typed proposal, which carries app-platform types,
+  and the app platform already depends on this component. Also open: the SSE
+  transports of chat and shopping advice, storefront preferences and behavior
+  capture (they need the cart and consent receipts of batch E), signed facts
+  and recommendations (they render storefront catalog pages).
 - [ ] studio. Started: `components/studio` owns report configuration and
   calendar periods, the bounded personal workspace model
   (`domain/workspace`, with the parts of a composed record view in
@@ -764,7 +795,7 @@ source.
 | --- | --- | ---: | --- |
 | A (done 23 Nov) | Accounts and login: profile, registration, account orders, sign-in throttle, Studio handoff, roles. Shop provisioning, identity resolution in the middleware and the operator platform compose many components and move to F | about 2,300 | identity, customers, orders |
 | B (done 23 Nov) | App platform: commerce hooks, cart contributions, app source ingestion. The rest of `src/apps` and `src/developer` implements host ports over operations, assets, B2B, inference and the gateway and moves to F | about 3,800 | apps |
-| C | Agents and planning: `src/agent_runs`, `src/cognition`, `src/planner*`, `agent.rs`, `concierge.rs`, `proposal_apply.rs` | about 5,400 | intelligence |
+| C (done 23 Nov) | Agents and planning: runs, controls, conversations, run journal, read rounds, planning, shopping advice, scenarios, autonomy, behavior reads, extraction, indexing and retrieval. Proposal approval, plan admission, native work plans and list views work on the server's typed proposal (app-platform types) and move to F | about 5,400 | intelligence |
 | D | Merchant operations: `src/operations`, the rest of `src/commerce`, `src/staging`, `src/studio*`, settings release | about 5,600 | orders, catalog, shop, studio |
 | E | Remaining storefront and money paths: rest of `src/marketing`, `src/payments`, `src/pos`, `src/legal`, `src/currencies`, `src/assets`, `src/documents`, `src/translations`, storefront routes | about 5,000 | marketing, payments, pos, shop, catalog, intelligence |
 | F | Composition: the server is router, worker set and protocol adapters only (5.1); `App` replaced by component state plus ports (phase 1); mutual pairs to zero, foreign tables, glob imports, typed DTOs | everything left except protocols | all |

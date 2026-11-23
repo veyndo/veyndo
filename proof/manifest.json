@@ -408,7 +408,7 @@
     },
     "ai_autonomy_admissible": {
       "bindings": [
-        "src/cognition/autonomy.rs",
+        "components/intelligence/src/service/autonomy.rs",
         "components/intelligence/src/domain/price_guardrails.rs"
       ],
       "theorems": [
@@ -418,7 +418,7 @@
     },
     "claim_render_admissible": {
       "bindings": [
-        "src/cognition/contracts.rs",
+        "components/intelligence/src/service/fact_compiler.rs",
         "components/intelligence/src/domain/claim_batch.rs"
       ],
       "theorems": [
@@ -593,7 +593,7 @@
     },
     "planning_request_admissible": {
       "bindings": [
-        "src/agent_runs/controls.rs"
+        "components/intelligence/src/service/agent_controls.rs"
       ],
       "theorems": [
         "planning_request_exact",
@@ -818,13 +818,8 @@
     },
     "components/apps/src/domain/input_schema.rs": {
       "status": "unproved",
-      "sha256": "8fd5f0558d2a55bb114a3a5ad5c2279234bfcbe12b37d5e78fbd4dad4f65c860",
-      "review": "Package approval, distribution, schema adapters, event projection and service transport policy moved into components/apps without a change in behaviour"
-    },
-    "components/apps/src/domain/input_schema_tests.rs": {
-      "status": "unproved",
-      "sha256": "a5641755ef38b1f955703d2b36cb8cf305acfef2dfc084ae9bfe5b44118cfb1a",
-      "review": "Package approval, distribution, schema adapters, event projection and service transport policy moved into components/apps without a change in behaviour"
+      "sha256": "063478b180787973b3ea91f29deed00cd1db3314171c1e5ccc6c4ca82f968b56",
+      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
     },
     "components/apps/src/domain/manifest_policy.rs": {
       "status": "unproved",
@@ -838,13 +833,13 @@
     },
     "components/apps/src/domain/mcp_views.rs": {
       "status": "reviewed-binding",
-      "sha256": "1741ae872a08786f5a0c4a2f67b61a453565da909009f6545baa382459de3c90",
-      "review": "Assistant app views and the surface registry moved into the apps component without behavior change"
+      "sha256": "f83027a6cd82eba87033e7e83046f60c23eb75c396779b5170056c8a8f378900",
+      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
     },
     "components/apps/src/domain/model_contract.rs": {
       "status": "unproved",
-      "sha256": "49852afeda559d96460cb16ec3959459b98a7f259707e41bc8635711b96df653",
-      "review": "Package approval, distribution, schema adapters, event projection and service transport policy moved into components/apps without a change in behaviour"
+      "sha256": "1f7d6f69fe4aad63109858b632c4706a225a189bc062d437b760bc295d73e7a1",
+      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
     },
     "components/apps/src/domain/native_lifecycle.rs": {
       "status": "reviewed-binding",
@@ -1343,8 +1338,8 @@
     },
     "components/b2b/src/domain/quote_lifecycle.rs": {
       "status": "unproved",
-      "sha256": "7e1c271ed526983417830e9a2ffa2b43fd16ac15a4e0371d742954d114d2dd71",
-      "review": "Company quotes and their lifecycle rules move into b2b"
+      "sha256": "4f962c68d46390b6f6fcf623c920906e87f4abb4592ae7390eda2bdf9f91bf25",
+      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
     },
     "components/b2b/src/domain.rs": {
       "status": "unproved",
@@ -2033,8 +2028,8 @@
     },
     "components/core/src/lib.rs": {
       "status": "reviewed-binding",
-      "sha256": "f28bdfceff3b8f61429ace13af1c376f658587d237e3c52556bcfb18920e459f",
-      "review": "App planning, planning contracts and the app tool catalogue moved into the apps component; the tool wire contract moved to core without behavior change"
+      "sha256": "ed1dbed995eeb24d9593517382b1e3339e424f440fbc17a0cd534b72bb709217",
+      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
     },
     "components/core/src/localized/languages.rs": {
       "status": "unproved",
@@ -2045,6 +2040,16 @@
       "status": "unproved",
       "sha256": "2e075a23950d948bf48d1355935b0a50a275affa0f1cde8d0755be33306f5ad1",
       "review": "delivery_split_admissible and carrier_booking_admissible bindings moved into components/shipping"
+    },
+    "components/core/src/model_contract/schema_tests.rs": {
+      "status": "unproved",
+      "sha256": "a5641755ef38b1f955703d2b36cb8cf305acfef2dfc084ae9bfe5b44118cfb1a",
+      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
+    },
+    "components/core/src/model_contract.rs": {
+      "status": "unproved",
+      "sha256": "43ea76abfe29ce51f43c4462efd01a1365268e6341ebbd8ca62966bde8c922fc",
+      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
     },
     "components/core/src/observability.rs": {
       "status": "unproved",
@@ -2361,6 +2366,11 @@
       "sha256": "1c429826983e273c1d4e84786a01791bafbfe4b5adf86c552f84b41c70e23679",
       "review": "Unit tests for every public domain function of the components; no production code changed"
     },
+    "components/intelligence/src/domain/navigation.rs": {
+      "status": "unproved",
+      "sha256": "c363bfb841dc468db039ee4fb643190e23d02820d6c9d5b9531ebbdfa61c57bd",
+      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
+    },
     "components/intelligence/src/domain/offer.rs": {
       "status": "unproved",
       "sha256": "a6d22181e047b36a715776e29ee8a9cdef60946bab27a24587074b03e16a3b20",
@@ -2391,6 +2401,11 @@
       "sha256": "36dc45534dea62bde4fe81527226ab83c94120b1ff1c0f264c9597198cf692b7",
       "review": "Unit tests for every public domain function of the components; no production code changed"
     },
+    "components/intelligence/src/domain/tool_trace.rs": {
+      "status": "unproved",
+      "sha256": "7b974496f86017a293c2df3d010b953d8f31a1aa8efd8cdce94c3853dfde3341",
+      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
+    },
     "components/intelligence/src/domain/trusted_geography.rs": {
       "status": "unproved",
       "sha256": "65547b117d050b8fe6dab67af60cf596bc0ca41ff15740defda41f1b497177fc",
@@ -2398,8 +2413,13 @@
     },
     "components/intelligence/src/domain.rs": {
       "status": "unproved",
-      "sha256": "692b7d046cc42e03e4e0529a4d8b095fa52901aace65fded6d3063af5727994b",
-      "review": "AI price guardrails moved into the intelligence component and capture configuration into payments; behaviour unchanged"
+      "sha256": "b05063fa69fb47237959ba1bb8c9e8eecbc5d7dbebc1599fb1fda7087943fdfd",
+      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
+    },
+    "components/intelligence/src/http/agents.rs": {
+      "status": "unproved",
+      "sha256": "2e0b524ab3507594b3d64c5f6dab213436e571598f798f8eea676bc8f2d3f3f0",
+      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
     },
     "components/intelligence/src/http/claims.rs": {
       "status": "unproved",
@@ -2410,6 +2430,11 @@
       "status": "unproved",
       "sha256": "1a9dcc2b688ef554c4955157b949a0c46a786d8f6673a74e0888553627e751fa",
       "review": "Knowledge source ingestion and guidance reads move into intelligence"
+    },
+    "components/intelligence/src/http/memory.rs": {
+      "status": "unproved",
+      "sha256": "50e91fbe5dfb2b5553f219411f42dbf8976dd4849373d24e1c6035697da093f8",
+      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
     },
     "components/intelligence/src/http/sources.rs": {
       "status": "unproved",
@@ -2423,8 +2448,8 @@
     },
     "components/intelligence/src/http.rs": {
       "status": "unproved",
-      "sha256": "db68e888e3c1effcc9e5961a2696c859fa1f9131a394a5e907d40dec9daa3ae5",
-      "review": "Knowledge source ingestion and guidance reads move into intelligence"
+      "sha256": "27e536f1afe31d3bf7bc1ffbb3447c7ce8149489f1091771e79c0ad84345f05f",
+      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
     },
     "components/intelligence/src/knowledge/embeddings.rs": {
       "status": "unproved",
@@ -2468,28 +2493,163 @@
     },
     "components/intelligence/src/lib.rs": {
       "status": "unproved",
-      "sha256": "c2066f1b4317d660643a1c612ab80f575fadabf5c3b5ee4048872579b9d3bbb6",
-      "review": "Claim lifecycle, public claim batches and the knowledge workspace moved into the intelligence component; behaviour unchanged"
+      "sha256": "2eb250fb5a52dd9a2e253aa288377ef83101016ec4a8464ad598f38599949ca3",
+      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
+    },
+    "components/intelligence/src/ports.rs": {
+      "status": "unproved",
+      "sha256": "e8b93d17081e16b43e1434f54432b6a8077f18475c27229b4e93fb11a7154ee4",
+      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
+    },
+    "components/intelligence/src/service/advisor.rs": {
+      "status": "unproved",
+      "sha256": "bc1d83fc1b270063a790b8076dd76a0c26f1351a915a471449396f77b42da41a",
+      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
+    },
+    "components/intelligence/src/service/agent_controls.rs": {
+      "status": "reviewed-binding",
+      "sha256": "9032a47f046192a2c12f9d43f0446254ab5fb904011cfb737f9feb78eb4d09ed",
+      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
+    },
+    "components/intelligence/src/service/agent_runs.rs": {
+      "status": "unproved",
+      "sha256": "9893740ce373b236803ca7d7f8ab5ae89c3fb250df5dd7ffcc602c980de6f5e1",
+      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
+    },
+    "components/intelligence/src/service/autonomy.rs": {
+      "status": "reviewed-binding",
+      "sha256": "e7c77314cf85d8af802be0630cc04a7775120f551914b526138066c939373eb9",
+      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
+    },
+    "components/intelligence/src/service/autonomy_revert.rs": {
+      "status": "unproved",
+      "sha256": "318d4c7c655684918f310c8c7e1f743c607ffcf42384eb7284d6b35463a2bb43",
+      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
+    },
+    "components/intelligence/src/service/behavior.rs": {
+      "status": "unproved",
+      "sha256": "1c42932a623e21959e179368e146ee2b8ea8e388896fad2660ca6e2df0c6bde5",
+      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
     },
     "components/intelligence/src/service/claims.rs": {
       "status": "unproved",
       "sha256": "3e8430117d495ad9148aa54ecb02cd8479c95e70f6dc551baa54d1bc6705424d",
       "review": "Claim lifecycle, public claim batches and the knowledge workspace moved into the intelligence component; behaviour unchanged"
     },
+    "components/intelligence/src/service/concierge.rs": {
+      "status": "unproved",
+      "sha256": "a0ee4468451b894c4e0bd12a29a0b298c939558af7bdff1cee83af52ae4d201a",
+      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
+    },
+    "components/intelligence/src/service/conversations.rs": {
+      "status": "unproved",
+      "sha256": "54d9f0d31d3b879ae824a57cf5145e919d32c48f71ff409868ecb0bf298f9bad",
+      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
+    },
     "components/intelligence/src/service/experiments.rs": {
       "status": "unproved",
       "sha256": "e93ec09c402c8c5ec2e520e4f4a9fe48ea1dca3d4663cf3e8e20c7aca69b1cf2",
       "review": "Experiment operations and source content checks moved into the intelligence component, CRM creation context into customers; behaviour unchanged"
+    },
+    "components/intelligence/src/service/extraction.rs": {
+      "status": "unproved",
+      "sha256": "69edef79f21a4a4834b46a8ccbe859d2377ccc4e55e5f82c450028f2745f6f10",
+      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
+    },
+    "components/intelligence/src/service/fact_compiler.rs": {
+      "status": "reviewed-binding",
+      "sha256": "dcebcf3555b322227e9e37e38d7ab65322d40eeb37d8a1d026c2a020d684b948",
+      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
     },
     "components/intelligence/src/service/fact_signing.rs": {
       "status": "unproved",
       "sha256": "bb612d34b6f1a3874161325fef79fe1fd4a839e255a2b68dbc6013f0f5f9f0a8",
       "review": "Signed offers and fact signing moved into the intelligence component behind the cart port"
     },
+    "components/intelligence/src/service/flow_proposals.rs": {
+      "status": "unproved",
+      "sha256": "bc40c4b97e8c61214e13e77173d6b9bdca34883e35c03c63db573fcde22094d4",
+      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
+    },
+    "components/intelligence/src/service/indexing.rs": {
+      "status": "unproved",
+      "sha256": "b5c3be41cb59dd30201d776db0c9f8fd0a193a9b825c8a61fa3b5f3dc24c09cb",
+      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
+    },
+    "components/intelligence/src/service/models.rs": {
+      "status": "unproved",
+      "sha256": "47966e65794779fd191243c7d01cfd91cf4b9face2167bd9f2acef2f13df6474",
+      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
+    },
     "components/intelligence/src/service/pdf.rs": {
       "status": "unproved",
       "sha256": "4ed4948f6dcf724d49e5f6284f23aba87fc79b688db16a9dee6a19a2ca9bec13",
       "review": "Knowledge sources, PDF text extraction and embedding generations moved into the intelligence component without behaviour change"
+    },
+    "components/intelligence/src/service/planner.rs": {
+      "status": "unproved",
+      "sha256": "157db3784b8f940b51fbffb6106c8891456ae027fdbbb5ff2e8710fb11aeaf03",
+      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
+    },
+    "components/intelligence/src/service/read_rounds.rs": {
+      "status": "unproved",
+      "sha256": "5adb9491df3cfa54d81c79dbba589df421018587eef187e17a95735bf7303ccc",
+      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
+    },
+    "components/intelligence/src/service/retrieval.rs": {
+      "status": "unproved",
+      "sha256": "f6c08caedbb80b4e19f784884e1c006e953691c50e9bd821019380c7dc3bcf71",
+      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
+    },
+    "components/intelligence/src/service/run_journal.rs": {
+      "status": "unproved",
+      "sha256": "9c188c20120043dc790e27232383d9105df7b138ebb34a162c25054c48aa1ac1",
+      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
+    },
+    "components/intelligence/src/service/scenarios/attack_store.rs": {
+      "status": "unproved",
+      "sha256": "e2528f6825ca05f4cacf823d9a47d2bb45dfa7a8e74bd6c3cc99b561a6658d50",
+      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
+    },
+    "components/intelligence/src/service/scenarios/catalogue.rs": {
+      "status": "unproved",
+      "sha256": "c73cb5eb17e4a7f2f383b6a5aaacfd6d610bfe4eddeedab9ec859df3fbcdf9dd",
+      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
+    },
+    "components/intelligence/src/service/scenarios/evidence.rs": {
+      "status": "unproved",
+      "sha256": "9c7394b85a8963d5f31bff48b0c0257095c404af7d4e39ca455f95e7de5f5877",
+      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
+    },
+    "components/intelligence/src/service/scenarios/journey.rs": {
+      "status": "unproved",
+      "sha256": "ca58d0e5e637d0af9c6646b814e0d64bc54098d21fd337cebf3bd774deb75f09",
+      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
+    },
+    "components/intelligence/src/service/scenarios/probes.rs": {
+      "status": "unproved",
+      "sha256": "e24d05ed9f51add517283886f158509209e55943c3cc0a9515089c5b49373a3c",
+      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
+    },
+    "components/intelligence/src/service/scenarios/readiness.rs": {
+      "status": "unproved",
+      "sha256": "dd2570e589c5685ce431ab8d1e1cc31223fdd248d40d1270670afeb106b8cef7",
+      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
+    },
+    "components/intelligence/src/service/scenarios/shopper.rs": {
+      "status": "unproved",
+      "sha256": "8dcd751fe0a74779209ba721a16556d832dfe1770f2688a5d95ef38f8ebb7d0e",
+      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
+    },
+    "components/intelligence/src/service/scenarios/source.rs": {
+      "status": "unproved",
+      "sha256": "f3e5ae8639c3f089c6eba5056268fe869b725519432f2dfad9e3ce0f210167ee",
+      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
+    },
+    "components/intelligence/src/service/scenarios.rs": {
+      "status": "unproved",
+      "sha256": "64fd279aee8892bb3fe513fa8ae26c057a5719a1389f185c5203bb2adc2768bf",
+      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
     },
     "components/intelligence/src/service/signed_offer.rs": {
       "status": "reviewed-binding",
@@ -2508,13 +2668,13 @@
     },
     "components/intelligence/src/service.rs": {
       "status": "unproved",
-      "sha256": "6ca53bd3685d4deef7f112f47c7ed22e9b98a59cdd98bed7e35817e8049fbf27",
-      "review": "Cart projection, product detail, checkout handoff, cart creation and supply proposals move into components"
+      "sha256": "72dfe98a68136b6f064adf05cea92d18b6c6d64da73c5ffa921ed3f103b85cff",
+      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
     },
     "components/intelligence/src/store/agent_runs.rs": {
       "status": "unproved",
-      "sha256": "6c3b45ca8c01cc4b200dea573cbc117926a83a1de33d59fb22242b100774e2ad",
-      "review": "Agent run projection, conversation turn fence, lease-fenced publication and the checkpoint journal moved verbatim into the intelligence component; authority, permissions and budgets stay in the server."
+      "sha256": "84bc01f82cd414aa98e06b8be87d0d69da712cd97673dedf2167e65b5c98f482",
+      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
     },
     "components/intelligence/src/store/behavior.rs": {
       "status": "unproved",
@@ -2958,8 +3118,8 @@
     },
     "components/orders/src/http/transitions.rs": {
       "status": "reviewed-binding",
-      "sha256": "93403d0769d42d24404a7b0ef233268d78e94cf5640e1c70ae5337538622b277",
-      "review": "Delivery split and carrier booking intents moved into the orders and apps components"
+      "sha256": "b2518f4a1f97bed5b6cb72ed275fe61364b6f3629f537d30bf488f0581b83f7c",
+      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
     },
     "components/orders/src/http.rs": {
       "status": "unproved",
@@ -5703,88 +5863,43 @@
     },
     "src/agent.rs": {
       "status": "unproved",
-      "sha256": "1ea56212d4a5e9e5a6db16ceda15683e8a791fb60b933724487dc402bdec7c0c",
-      "review": "Flow membership and redacted order reads moved into components"
+      "sha256": "18469e6d856a1d8d5c4cb084b0a8d4313526a9b68943942787c1395052c6b63c",
+      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
+    },
+    "src/agent_host.rs": {
+      "status": "unproved",
+      "sha256": "fd5472030aa2e0cb9a50f72c515085d4805177b80c1fed9038e7b3638543bc8c",
+      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
     },
     "src/agent_runs/authority.rs": {
       "status": "unproved",
-      "sha256": "234b4f4f4d8294556cb69b0f25816b78ea63bbd1d782be408494de1253020217",
-      "review": "Order transitions, external order intake and saved agent authority moved into the orders, apps and identity components"
+      "sha256": "05f41947cdd7c2628d05ddb9a0795aea209ebb38b11168408a50698750972140",
+      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
     },
     "src/agent_runs/checkpoint.rs": {
       "status": "unproved",
-      "sha256": "9f225db96ff11ad72881fa3ec7ea61d98dc0d4c5322a4f0365dab6cedef3a3f2",
-      "review": "Agent run projection, conversation turn fence, lease-fenced publication and the checkpoint journal moved verbatim into the intelligence component; authority, permissions and budgets stay in the server."
-    },
-    "src/agent_runs/context.rs": {
-      "status": "unproved",
-      "sha256": "87c7ceecabaadd5538214902c53482a6189a62f197110fa391d2792a4c590fd1",
-      "review": "Shop setup remains optional bounded actor-private workspace presentation with native CAS/history; agent context adds setup view only and rejects authority fields. Covered by 3 model tests, context negative test and native HTTP/PostgreSQL save/conflict/history/MCP/foreign-shop rejection."
+      "sha256": "2237c72ad9acda40091305d5c128a240c3b0cb85886bbc0214704b7224401d67",
+      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
     },
     "src/agent_runs/contract.rs": {
       "status": "unproved",
-      "sha256": "62c28ccd3112b9d010b7ec72968a79471e1126f995f399c2a569b08e093a2f3c",
-      "review": "Agent run projection, conversation turn fence, lease-fenced publication and the checkpoint journal moved verbatim into the intelligence component; authority, permissions and budgets stay in the server."
+      "sha256": "e267cb6ea0b92413598d3d82775ca3d3db0e460a01a1c44aaca417066eaf41b4",
+      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
     },
     "src/agent_runs/controls.rs": {
-      "status": "reviewed-binding",
-      "sha256": "41e9a1d7725a03856fc5f7c8d5e4d1d8d4c4689b65fe8c33295b6e82db9051a6",
-      "review": "Sessions, invitations, MFA, integration keys and broker assertions moved into the identity component without behaviour change"
-    },
-    "src/agent_runs/flow_proposals.rs": {
       "status": "unproved",
-      "sha256": "5ddd3031d46fe91aa89bd9dc3781332e93c51a6887034df29837b7eb7e6b3056",
-      "review": "Reviewed task-reference-only Flow templates, same actor and original scope checks at native save and runtime, scalar event mapping, no copied credentials or source inputs, shared stop/lease and transactional daily limits; actual private event-to-approval write, denial and zero-inference regressions plus UI scope cleanup pass. Async SQL remains outside formal proof."
+      "sha256": "0253ed5b2b8a375450d138421c0ac592ed1d2cc408adbb773e2d9f7394cc4ea3",
+      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
     },
     "src/agent_runs/navigation.rs": {
       "status": "unproved",
-      "sha256": "494f8d7e66e32ef9bac72789bdf03d002fb47ee0d62e2ff8a54584d4479326a1",
-      "review": "Reviewed native presentation consistency: linked product/order/customer navigation must match the working-view entity; one discriminator replaces same-shaped union alternatives, exact native grid admission and current rights retained. New native and UI mismatch regressions plus provider HTTP rejection checks."
+      "sha256": "2f50c6959bf6827c8ab62a3eb1d294a93cb1690b3835fd00cc126c0ebc668e90",
+      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
     },
-    "src/agent_runs/scenarios/attack_store.rs": {
+    "src/agent_runs/scenarios.rs": {
       "status": "unproved",
-      "sha256": "2e1d7a4e01368cfef835dca383b8fa9fee44d41ef5b61d679bc928974e05cb00",
-      "review": "Completion of stages 1-3: attack_store.rs saves applied actor-private report rows and reads the latest with release-digest freshness; commerce/test_stock.rs sets sandbox-only test stock through revision, index sync and product event; cognition/autonomy_revert.rs restores day baselines by request and from the agent worker lane when exposure exceeds the limit, skipping prices changed since; no extracted policy changed; scenario and provider suites cover each path"
-    },
-    "src/agent_runs/scenarios/catalogue.rs": {
-      "status": "unproved",
-      "sha256": "ff6ee5b7a53894880ed6465882fd45eedd947fa64621435dd88aa6f93dd23764",
-      "review": "Separate native channel metadata admission from the caller interface language: preserve tenant lookup, activation, type and preview guards; existing shopper channel calls retain their explicit enabled-language check, while scenario metadata uses the actual channel locales. Verify German Studio against French-only native catalogue and purchase without extra grants or inference during preview."
-    },
-    "src/agent_runs/scenarios/evidence.rs": {
-      "status": "unproved",
-      "sha256": "0bafda3fd6a5a5aae80742799dd089214c01e61f4d310540b5fd963a6f508e32",
-      "review": "Reviewed source attribution and bounded optional release-projection evidence; native current rights and source checks retained around inference. Strict split-login HTTP regressions include changed sources and 1001 app records without losing native purchases or historical reports. Digests are boundary observations, not frozen execution or Lean-certified async code."
-    },
-    "src/agent_runs/scenarios/journey.rs": {
-      "status": "unproved",
-      "sha256": "574aa10663eb3d4fc547b24c4d11f7857a8de783250f20f3e14e8cb8c2cae7ec",
-      "review": "Functions above 150 lines split into named steps without behaviour change; function length limit lowered to 150"
-    },
-    "src/agent_runs/scenarios/mod.rs": {
-      "status": "unproved",
-      "sha256": "ebe78b8dac713b7fda841f969f34dc1d5bfdaebf91b3ff642f995139c4e19988",
-      "review": "Completion of stages 1-3: attack_store.rs saves applied actor-private report rows and reads the latest with release-digest freshness; commerce/test_stock.rs sets sandbox-only test stock through revision, index sync and product event; cognition/autonomy_revert.rs restores day baselines by request and from the agent worker lane when exposure exceeds the limit, skipping prices changed since; no extracted policy changed; scenario and provider suites cover each path"
-    },
-    "src/agent_runs/scenarios/probes.rs": {
-      "status": "unproved",
-      "sha256": "fd0724b5d07213906dc26dfbdedc823906d3ddebd2297ef7283e125d3e97c970",
-      "review": "Functions above 150 lines split into named steps without behaviour change; function length limit lowered to 150"
-    },
-    "src/agent_runs/scenarios/readiness.rs": {
-      "status": "unproved",
-      "sha256": "3790b9c3a8319d45cf4eb3da0ebf082c3b97af32a5d38382773d0ba73eaaf1f7",
-      "review": "Completion of stages 1-3: attack_store.rs saves applied actor-private report rows and reads the latest with release-digest freshness; commerce/test_stock.rs sets sandbox-only test stock through revision, index sync and product event; cognition/autonomy_revert.rs restores day baselines by request and from the agent worker lane when exposure exceeds the limit, skipping prices changed since; no extracted policy changed; scenario and provider suites cover each path"
-    },
-    "src/agent_runs/scenarios/shopper.rs": {
-      "status": "unproved",
-      "sha256": "37dc4cb7108ebc8264da3bcb08f63cb1dfe6211eb333e17215cde642865f5093",
-      "review": "Scenario attack probes: shopper.rs purchase split into review/accept/complete with unchanged order of native calls; new probes.rs is an unproved read-and-attempt adapter over existing cart/checkout capabilities; agentic_scenarios suite passes with nine refusals and unchanged live shop"
-    },
-    "src/agent_runs/scenarios/source.rs": {
-      "status": "unproved",
-      "sha256": "1b76fb2ae71337ff35887dded94b20e2334c8d02c358fc9832ea470174896cf7",
-      "review": "Reviewed scenario proposal admission and optional bounded release-snapshot evidence; native source apply/purchase, revoked source and 1001-record regressions passed; SQL and async paths remain outside the extracted proof scope"
+      "sha256": "9b67fb6c92b9c7e791c6fbaeb51ac210fdc574429d48a35f504334fb4d4f6e12",
+      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
     },
     "src/agent_runs/translation.rs": {
       "status": "unproved",
@@ -5808,13 +5923,13 @@
     },
     "src/agent_runs/worker.rs": {
       "status": "unproved",
-      "sha256": "fd9f07d338cc078ea27026102ffb56e7f82423d6568cc235121f3d4aabe1f9b9",
-      "review": "A running Studio chat journals only bounded view references after admitted reads. Original actor and scope checks gate run status; current resource revision and tool rights gate browser data. Local PostgreSQL and Chrome confirm isolation, early filtering, unchanged frame identity, and final approval separation."
+      "sha256": "c2db85bab122e4e3ebe226a0cf90fb99e8f34a96fdeb9a85f3357eac60117b5c",
+      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
     },
     "src/agent_runs.rs": {
       "status": "unproved",
-      "sha256": "bade8f8defb1900da613d2d2f39ddcf693c35e022acb5900b9b21713fc8e7357",
-      "review": "Agent run projection, conversation turn fence, lease-fenced publication and the checkpoint journal moved verbatim into the intelligence component; authority, permissions and budgets stay in the server."
+      "sha256": "dec24a08c0644cc68efb055e2eaab611a146c5d000b2ab1df8516233138a86fc",
+      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
     },
     "src/apps/approval.rs": {
       "status": "unproved",
@@ -5983,8 +6098,8 @@
     },
     "src/apps/mcp_views.rs": {
       "status": "unproved",
-      "sha256": "65d73e89567f276450b9a77cb129546ccb22dd4d0cf749403ae71f756a359c2e",
-      "review": "The app action gateway moved into the apps component; server-owned handlers are reached through a host port without behavior change"
+      "sha256": "7f3b84a6881cd649c10b30d84408ced5ab4cb56f4bd1b23d507660abed644336",
+      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
     },
     "src/apps/mod.rs": {
       "status": "unproved",
@@ -6273,8 +6388,8 @@
     },
     "src/auth/middleware.rs": {
       "status": "reviewed-binding",
-      "sha256": "9585aa84225b4d78e5557e0b86c7233afa53e3cc6953333acad5ba52dc8d1795",
-      "review": "Batch A: customer accounts, account orders, sign-in throttle, handoff and roles move into customers, orders and identity"
+      "sha256": "c0486b2869f756db4aeb1f69c98614cb1e761c156e081a428fb10dfbee4f3876",
+      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
     },
     "src/auth/mod.rs": {
       "status": "unproved",
@@ -6488,8 +6603,8 @@
     },
     "src/capabilities/admission.rs": {
       "status": "unproved",
-      "sha256": "ac03b842a61c68a77137560a0978df25e16bab5a98fecff18f1fafb2e4621ff3",
-      "review": "Completion of stages 1-3: attack_store.rs saves applied actor-private report rows and reads the latest with release-digest freshness; commerce/test_stock.rs sets sandbox-only test stock through revision, index sync and product event; cognition/autonomy_revert.rs restores day baselines by request and from the agent worker lane when exposure exceeds the limit, skipping prices changed since; no extracted policy changed; scenario and provider suites cover each path"
+      "sha256": "b25b5161ab326757fc5e2223bd90719a8040aeb0ff2ab6c7565b2db751865058",
+      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
     },
     "src/capabilities/catalog.rs": {
       "status": "unproved",
@@ -6616,21 +6731,6 @@
       "sha256": "3f16b5aed3fc91c8335814cd9f47fd8de200f12c879b059ce3c8f9f8127d5d6e",
       "review": "Cart projection, product detail, checkout handoff, cart creation and supply proposals move into components"
     },
-    "src/cognition/advisor.rs": {
-      "status": "unproved",
-      "sha256": "6eb89178d42e821be2c1d057bfe8b47824019c612aabcaa8ab33b005b71d5a6e",
-      "review": "Reviewed single-retrieval catalog hydration and buyer-admitted graph projection; post-inference exact original-ID locale/channel/catalog/evidence response fence. Native predicates unchanged; SQL, graph semantics, source timing and free model prose remain unproved."
-    },
-    "src/cognition/autonomy.rs": {
-      "status": "reviewed-binding",
-      "sha256": "6780916904cd642f64a263cbf8417b75e77832e4e3676f74f4ccc24257f18cfb",
-      "review": "Autopilot daily limit: guardrails.rs gains optional max_daily_exposure_minor with a validated ceiling; autonomy.rs adds an unproved exposure sum and passes its comparison as the daily_budget input of the unchanged extracted ai_autonomy_admissible; read-only knowledge.autonomy.status; providers suite covers the exact boundary"
-    },
-    "src/cognition/autonomy_revert.rs": {
-      "status": "unproved",
-      "sha256": "64d74ca2dbaa8ac1d908b96b46ea735d964fc921332405b4cbc18f3e037c0274",
-      "review": "Completion of stages 1-3: attack_store.rs saves applied actor-private report rows and reads the latest with release-digest freshness; commerce/test_stock.rs sets sandbox-only test stock through revision, index sync and product event; cognition/autonomy_revert.rs restores day baselines by request and from the agent worker lane when exposure exceeds the limit, skipping prices changed since; no extracted policy changed; scenario and provider suites cover each path"
-    },
     "src/cognition/behavior/capture.rs": {
       "status": "unproved",
       "sha256": "9a61c2a72337b8ac345de4f9492b19ac58737a713f4b2460bfc37018f52a6023",
@@ -6638,28 +6738,18 @@
     },
     "src/cognition/behavior/geography.rs": {
       "status": "unproved",
-      "sha256": "7a9b668561e78efbf28169187e1e93633ab9c1b47c853d46484ea7bafd13afcf",
-      "review": "Process configuration moved into core; browser session transports, Checkout buyer grants, the private Checkout relay, trusted geography and provider startup validation moved into their components without behaviour change"
+      "sha256": "55732b278c4e0e34ce1f8c4ab69fa47a2a46d244b96ad81f0917e08276bc9a7d",
+      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
     },
     "src/cognition/behavior/input.rs": {
       "status": "unproved",
       "sha256": "c431ea136a65e37b80460c8a676e884e18ba4be20ee8a70c6d5e4be64e73a60a",
       "review": "Knowledge module and experiment model moved into components/intelligence; kernel call sites unchanged"
     },
-    "src/cognition/behavior/journey.rs": {
-      "status": "unproved",
-      "sha256": "762f9b555fa103b8d764ff51851a943e978e91947a6820094c770a7d3502a267",
-      "review": "Experiment store, readout and automation, behaviour analytics store and the private preference graph moved verbatim into the intelligence component; consent, settings and channel admission stay in the server. No kernel policy changed."
-    },
     "src/cognition/behavior/mod.rs": {
       "status": "unproved",
-      "sha256": "caca697c7483d55c2d9b477ea3118c94cd638864de025c981b250b9ff240435f",
-      "review": "Experiment store, readout and automation, behaviour analytics store and the private preference graph moved verbatim into the intelligence component; consent, settings and channel admission stay in the server. No kernel policy changed."
-    },
-    "src/cognition/behavior/report.rs": {
-      "status": "unproved",
-      "sha256": "c444dad3ab44ca2a32137886eb1cd16127b10334affd9787e0424a6bd4e22f1d",
-      "review": "Experiment store, readout and automation, behaviour analytics store and the private preference graph moved verbatim into the intelligence component; consent, settings and channel admission stay in the server. No kernel policy changed."
+      "sha256": "a11015c65b2df940fb0c5383ab53d8f0f5e50001dd0df2d9dff3cf74018d2597",
+      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
     },
     "src/cognition/claim_batches.rs": {
       "status": "unproved",
@@ -6668,18 +6758,18 @@
     },
     "src/cognition/context.rs": {
       "status": "unproved",
-      "sha256": "312b173abe97a8b5d2aac70565130f748ee79b81064a9f17aca4ba18aa7304da",
-      "review": "Claim evidence, claim batches, order observation projection, embedding jobs, source search, knowledge inventory, product facts and prompt snapshots moved verbatim into the intelligence component; permissions, settings, provider admission and leases stay in the server. Kernel admission calls unchanged."
+      "sha256": "ab4ecefcddf528675f9e064f384d5ca080f896db5fee30aa5a5f1e8f2029e447",
+      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
     },
     "src/cognition/contracts.rs": {
-      "status": "reviewed-binding",
-      "sha256": "6ac02c6c365a1272292c6f098525a5eea412e561ae247b6ca63f4a5aa6480d41",
-      "review": "Self-running experiments: Design gains an optional immutable automation flag pair; experiments/automation.rs adds a read-only suggestion from live payment figures and worker steps that repeat the manual finish transition, call the existing report owner and record a decision, fixing the treatment layout mode only when the unchanged extracted experiment_result_admissible reports a proved uplift; cognitive_experiments suite covers kept, seeded published and manual cases"
+      "status": "unproved",
+      "sha256": "2d969ca9d434b92aab5e4148eee6f3c96587e6654443d68583d17ac542efe43c",
+      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
     },
     "src/cognition/evidence.rs": {
       "status": "unproved",
-      "sha256": "e7d3f9a32ea8fe37f0341b9a4f0141b89e5468ab0b2ce6d70c01e5a0346e3de1",
-      "review": "Claim lifecycle, public claim batches and the knowledge workspace moved into the intelligence component; behaviour unchanged"
+      "sha256": "19a01654f30142018513dc274c1a577de669ef996641c5b70ba46d7f11901d3d",
+      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
     },
     "src/cognition/experiments/mod.rs": {
       "status": "unproved",
@@ -6688,13 +6778,8 @@
     },
     "src/cognition/extraction.rs": {
       "status": "unproved",
-      "sha256": "771552e2397996b7de57abe4a716769776185b926bb81c47eafb14541a7c0c61",
-      "review": "Reviewed migration 104 and all changed Rust/build owners: existing-key planning-only scope, trusted distinct agent identity, live-root lock before budget key, checked integer allocation with existing kernel guard, no network transaction, typed nonretryable quota errors, current credentials and lease-fenced late worker results; actual two-replica allocation/restart and in-flight-stop fixtures plus 623 UI tests pass. SQL/auth/provider integration is not formally proved."
-    },
-    "src/cognition/generations.rs": {
-      "status": "unproved",
-      "sha256": "16e7c6e7d342ad5e97b6325a64eec1e6bfe86bad9b4ba0e687fd51b148471a61",
-      "review": "Knowledge sources, PDF text extraction and embedding generations moved into the intelligence component without behaviour change"
+      "sha256": "2e385d5a13ee9ef5fc0b7c5fd276662fe99291ddb28ddd7d8d529fe3deef1779",
+      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
     },
     "src/cognition/guardrails.rs": {
       "status": "unproved",
@@ -6703,23 +6788,23 @@
     },
     "src/cognition/indexing.rs": {
       "status": "unproved",
-      "sha256": "0e39a8b516283bae332cb455c2d1d7acd0f57f6b30069791d02965f2525cfa51",
-      "review": "Claim evidence, claim batches, order observation projection, embedding jobs, source search, knowledge inventory, product facts and prompt snapshots moved verbatim into the intelligence component; permissions, settings, provider admission and leases stay in the server. Kernel admission calls unchanged."
+      "sha256": "9d47424f93bd18d5694423f3f05abe5d1eb70c503d6852379ab2203afe6edde0",
+      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
     },
     "src/cognition/mod.rs": {
       "status": "unproved",
-      "sha256": "30110a52dfb7d0849f187a7ff642ba8a602324567beb8e6e33d5afc2417cd1ef",
-      "review": "Signed offers: cognition/signed_offer.rs signs a closed projection of the native cart quote with the existing Ed25519 owner and verifies signature, shop, expiry and current cart match; signed.rs gains key_id and verify helpers; readiness reports signing status; no extracted policy changed; providers suite verifies independently and covers forged, foreign, malformed, changed-cart and changed-price cases"
+      "sha256": "e633f6eab7370305e1a630607d0ea9988da815a17690b6f376d2dc6110c51d40",
+      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
     },
     "src/cognition/preferences.rs": {
       "status": "unproved",
-      "sha256": "612d28e3b0ce72a9ee5e33ea8300284a90096d6e6b4b13c856a0fdceb50bece4",
-      "review": "Experiment store, readout and automation, behaviour analytics store and the private preference graph moved verbatim into the intelligence component; consent, settings and channel admission stay in the server. No kernel policy changed."
+      "sha256": "2c22165b44db40e14be297b288fc207bd72d57dcfedafbe1b2a708000b51e8bf",
+      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
     },
     "src/cognition/projection.rs": {
       "status": "unproved",
-      "sha256": "2757ece715352c013736a120c078069d08dd46c9ca34c99b1a9eb3c469f2f3ae",
-      "review": "Claim evidence, claim batches, order observation projection, embedding jobs, source search, knowledge inventory, product facts and prompt snapshots moved verbatim into the intelligence component; permissions, settings, provider admission and leases stay in the server. Kernel admission calls unchanged."
+      "sha256": "5cde32d76ba6495cf9ae13812528b157557574dac4776e5dd09d875b97cceda5",
+      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
     },
     "src/cognition/recommendations.rs": {
       "status": "unproved",
@@ -6728,8 +6813,8 @@
     },
     "src/cognition/routes.rs": {
       "status": "unproved",
-      "sha256": "b68ded78e45e0d9005f2b02bb4d808ad360df2cc34b06c47238502d49060574f",
-      "review": "Signed offers: cognition/signed_offer.rs signs a closed projection of the native cart quote with the existing Ed25519 owner and verifies signature, shop, expiry and current cart match; signed.rs gains key_id and verify helpers; readiness reports signing status; no extracted policy changed; providers suite verifies independently and covers forged, foreign, malformed, changed-cart and changed-price cases"
+      "sha256": "d73707681bfb8c6fdfa40708d8c82b83a8837e7925e812d07ba568d8462f6c8c",
+      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
     },
     "src/cognition/signed.rs": {
       "status": "unproved",
@@ -6743,13 +6828,8 @@
     },
     "src/cognition/stream.rs": {
       "status": "unproved",
-      "sha256": "b0741012c82196f6e1224758fd4da757f2abf06551fa00d2ba951f19a6ee25de",
-      "review": "Reviewed SSE durable admission before streaming: stored IDs, replay before quota, retained HTTP failures and one native queued run; worker restart and quota regression suite passed."
-    },
-    "src/cognition/tools.rs": {
-      "status": "unproved",
-      "sha256": "f27a0de2d451a1d070135e2679baf0c52698340daf2f69f5c1a92c8d8345eac6",
-      "review": "Reviewed final response presentation metadata: only executed server App view references are attached, record claims cannot forge them, no rights, browser receipt or commerce fact is inferred. Unit and actual HTTP audience regressions cover the shared path."
+      "sha256": "a3bed65586894714559432d8798b6223b72e5fbe4ef46fea40e95e0bebc9a3c5",
+      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
     },
     "src/commerce/catalog.rs": {
       "status": "unproved",
@@ -6858,8 +6938,8 @@
     },
     "src/commerce/mod.rs": {
       "status": "unproved",
-      "sha256": "3a860b9ef471d2aa7e4bca5226830541957b9364db94533da80c2012f4f4ac4c",
-      "review": "Batch B: commerce hooks, cart contributions and app source ingestion move into apps"
+      "sha256": "6c577f1e188bfc666a32d31d403522778815976d78ed1aaf2a9a4171ecbee47a",
+      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
     },
     "src/commerce/order_fields.rs": {
       "status": "unproved",
@@ -6978,8 +7058,8 @@
     },
     "src/concierge.rs": {
       "status": "unproved",
-      "sha256": "2158a370c48b517797d3635274facfd073ec489863cb5ccc43e6f86308a05744",
-      "review": "Shopper App streaming holds the original AI admission in a bounded scoped producer, emits only completed public tool results and cancels the producer when the client disconnects. Existing native authorization and JSON response are retained."
+      "sha256": "49a57ecb7594c3e8cc2dc57e6ab75a068220ef86a9bb20f7721796f68578646e",
+      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
     },
     "src/currencies/capabilities.rs": {
       "status": "unproved",
@@ -7051,11 +7131,6 @@
       "sha256": "c1f7f10b5990373b508b03e384aea33fb39b8b78f945a2e4a6d949cc18fc77dd",
       "review": "App Studio immediate preview moved into the apps component behind the host port; behaviour unchanged"
     },
-    "src/documents/guidance.rs": {
-      "status": "unproved",
-      "sha256": "4ec86eaa11f67bbcf9736c74bf608610b8c6bda908e75c354c72a6fc92c87054",
-      "review": "Knowledge source ingestion and guidance reads move into intelligence"
-    },
     "src/documents/ingestion.rs": {
       "status": "unproved",
       "sha256": "dbc2a37f16258164fd483f9e1eb0cd981ad9508a39e474d6c36c6dda5d131ca1",
@@ -7068,8 +7143,8 @@
     },
     "src/documents/mod.rs": {
       "status": "unproved",
-      "sha256": "61ab917f9eee3b7736d74bcf70cd0020b47f45b237fc31f0ee1b206620ce4eb9",
-      "review": "Knowledge source ingestion and guidance reads move into intelligence"
+      "sha256": "de151c6331e89e9b861b3615e4f9665b81a6829e92d35ceb32e25eaf774f5d59",
+      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
     },
     "src/documents/parser.rs": {
       "status": "unproved",
@@ -7093,8 +7168,8 @@
     },
     "src/documents/retrieval.rs": {
       "status": "unproved",
-      "sha256": "020a11004736baa884c7a7e33ab65694da14b8a67b59eaa6ed489dcc86b3f65c",
-      "review": "Claim evidence, claim batches, order observation projection, embedding jobs, source search, knowledge inventory, product facts and prompt snapshots moved verbatim into the intelligence component; permissions, settings, provider admission and leases stay in the server. Kernel admission calls unchanged."
+      "sha256": "38aab437c1e27b63b0bb1a853684cb7b605eddc133da1cdb64151a67ebc37075",
+      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
     },
     "src/documents/tools.rs": {
       "status": "unproved",
@@ -7113,8 +7188,8 @@
     },
     "src/foundation.rs": {
       "status": "unproved",
-      "sha256": "76fb67159ef1acfb2fb8a626d897af8ebeafaf7f969ef2cc9c35eb8b839d5d83",
-      "review": "Settings and language read cache moved into the shop component; condition check registered at startup; behaviour unchanged"
+      "sha256": "9058faaaa1447236ad21adc406495582b494b99019c32f6ddd1e4fa005336b7f",
+      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
     },
     "src/history/capability.rs": {
       "status": "unproved",
@@ -7198,8 +7273,8 @@
     },
     "src/main.rs": {
       "status": "unproved",
-      "sha256": "1c9aba4c29f3e4cdc20e2bb8e97ced89e251db7c0bc5b63d986397e4da66f83c",
-      "review": "The purchase transaction moves into checkout behind the purchase port"
+      "sha256": "b4b634a65c9a05545934ae2b500c33affbc03ea395958ffff3f3cf65b655bfba",
+      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
     },
     "src/marketing/app_flows.rs": {
       "status": "reviewed-binding",
@@ -7228,8 +7303,8 @@
     },
     "src/marketing/channels.rs": {
       "status": "unproved",
-      "sha256": "a719c6d4d3b32c9a00763758dbf4fc7b0bbe9ba890892efa70853c5979175ece",
-      "review": "Request language selection moved into the shop component and sales channel admission into the marketing component; behaviour unchanged"
+      "sha256": "05930e6584dabe4f02fbb0e9e7c13aa2d21db0620e812b6974fdc84a0aef32a3",
+      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
     },
     "src/marketing/condition_gateway.rs": {
       "status": "unproved",
@@ -7298,8 +7373,8 @@
     },
     "src/marketing/mod.rs": {
       "status": "unproved",
-      "sha256": "28ff89949f7510ae92ec55fcab5fb7b5ac35dea439568124f4698eec6049cfdd",
-      "review": "Automation catalogue, rule preview, flow job list and the pipeline runner move into marketing"
+      "sha256": "39d88445571f55c054b4fe23b975dd5c73f053537e4cdbed809f32ce03da3ddf",
+      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
     },
     "src/marketing/pipeline.rs": {
       "status": "unproved",
@@ -7338,8 +7413,8 @@
     },
     "src/marketing/work_template.rs": {
       "status": "unproved",
-      "sha256": "2f68ab7eaadfdef9aa9e3e199728c7caa20f07346b6c2ecd69c69a49755500d7",
-      "review": "Flow pipeline and promotion types moved into components/marketing; kernel call sites unchanged"
+      "sha256": "e83757234e78a8467945c941793ae778f476cba6a505ed1acf71e4a6c1e4ca17",
+      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
     },
     "src/marketing/work_template_source.rs": {
       "status": "unproved",
@@ -7743,23 +7818,18 @@
     },
     "src/performance/mod.rs": {
       "status": "unproved",
-      "sha256": "1e67537b21b81121e93c5d25e8af505b0d5e325268a4e0d13138866b2db80436",
-      "review": "Batch A: customer accounts, account orders, sign-in throttle, handoff and roles move into customers, orders and identity"
+      "sha256": "6b966ee27981eca13ad3eed849349877e0ea2b4e65db8cfa719f675308100370",
+      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
     },
     "src/planner/admission.rs": {
       "status": "unproved",
-      "sha256": "3aad9e25ca9538eb601868513e2d566518baf9b95ab2bba6843e9c3bc55f7d02",
-      "review": "Reviewed native presentation consistency: linked product/order/customer navigation must match the working-view entity; one discriminator replaces same-shaped union alternatives, exact native grid admission and current rights retained. New native and UI mismatch regressions plus provider HTTP rejection checks."
-    },
-    "src/planner/repair.rs": {
-      "status": "unproved",
-      "sha256": "9ddf9b6f9b224e4650c687d032a3e8f2e66b8865779629d6e8115cef3cb4a002",
-      "review": "Review shared read-only planner admission and one checkpointed correction using original context, current authorized app contracts and unchanged personal approval; managed page fields use app-owned schema; translation and malicious checkout-correction HTTP regressions pass, workspace units and clippy pass"
+      "sha256": "84da489e6050f6eaf000c71993a5c14605ba17059717237f1a5cd85d7386596c",
+      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
     },
     "src/planner.rs": {
       "status": "unproved",
-      "sha256": "dc430742d07e50ecc9b91fb4e8dc5d91be5f532ec33d479649e721649cdc3879",
-      "review": "Review MCP read admission against the same active manifest at dispatch, native app placements with explicit list-action opt-in and tenant revision URI, and existing opaque document CSP. App model, direct HTTP and hosted composition checks cover their corresponding runtime contracts."
+      "sha256": "c861e57029b5b56e7567f946ff15be39436a24edb6310204a23ca3693203bf7e",
+      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
     },
     "src/platform/ai.rs": {
       "status": "reviewed-binding",
@@ -7868,8 +7938,8 @@
     },
     "src/proposal_apply.rs": {
       "status": "unproved",
-      "sha256": "767336b47cf85728e60965b8b1f1e089aedcd771bf754fbed8539ac7a2b60ca3",
-      "review": "Functions above 150 lines split into named steps without behaviour change; function length limit lowered to 150"
+      "sha256": "8f13014738c6cc0633f01a2706433f23ecfbfabdc0b7248fe72a7255704cf674",
+      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
     },
     "src/proposal_model.rs": {
       "status": "unproved",
@@ -8048,8 +8118,8 @@
     },
     "src/translations/worker.rs": {
       "status": "unproved",
-      "sha256": "776531d4749b239df2f07705ba0a5e7f268344879214d9494bd5a1c99d5555df",
-      "review": "Reviewed scoped translation selection, original task authority, atomic child linking and completion, cancellation/explicit ambiguous continuation, lease fences, central provider admission outside transactions and bounded prompt evidence; real PostgreSQL/HTTP collection and interruption regressions plus 724 UI tests; skipped products store SQL NULL evidence rather than JSON null. Claude supplied code-only review, findings checked and fixed."
+      "sha256": "f8d34df835cf8b9c63d14222924a6ba4e3548ada6625f7a45eb34716b4d39f52",
+      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
     },
     "src/ucp/cart.rs": {
       "status": "unproved",
@@ -8113,8 +8183,8 @@
       "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
     },
     "Cargo.lock": {
-      "sha256": "3f0ad818b57927310dbb1b167df1a299cbee0c42c2b4fcc84c499a087e714476",
-      "review": "Batch B: commerce hooks, cart contributions and app source ingestion move into apps"
+      "sha256": "799251d922a69750ffe3d77f91eec7cdd36a5a6535fa8fea7bc42085b900c10c",
+      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
     },
     "Cargo.toml": {
       "sha256": "12d2d79a98f6913d20b8e912afb9ea8de0539b9e83428de8a9d7412c406896f6",

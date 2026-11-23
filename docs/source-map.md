@@ -401,7 +401,7 @@ setup changes across tabs while preserving unrelated fresh workspace fields.
 `SetupBasics.tsx`
 reuses the existing settings draft, fields and save bar. Optional progress remains
 in `components/studio/src/domain/workspace.rs` with workspace revisions, RLS and history.
-`src/agent_runs/context.rs` admits bounded current setup context to the existing
+`components/intelligence/src/service/agent_runs.rs` admits bounded current setup context to the existing
 assistant. Domain tools and publication retain their native owners.
 
 **Studio setup and access:** [Channel wizard fixes, reusable roles, current grants, central B2B configuration and guided company creation](studio-access-and-setup.md).
@@ -575,7 +575,7 @@ See [international commerce](international-commerce.md) for the exact contract.
 | [`src/order_checkout.rs`](../src/order_checkout.rs) and [`src/checkout/`](../src/checkout/README.md) | Shared native checkout entry and typed Commerce host stages for locks, pricing, commit and receipt recovery. | `checkout_review.py + checkout_handoff.py + payments.py` |
 | [`src/order_routes.rs`](../src/order_routes.rs) | Merchant order read adapter. | `integration.py + commerce.py + protocols.py + users.py + restart.py` |
 | [`src/outbox.rs`](../src/outbox.rs) | Durable outbox and audit projection worker. | `integration.py + protocols.py + studio.py + restart.py` |
-| [`src/planner.rs`](../src/planner.rs), `planner/{admission,repair}.rs` | Grounded model planning, shared native admission and one checkpointed correction of invalid output. | `providers.py + live intelligence.py/studio.py + protocols.py` |
+| [`components/intelligence/src/service/planner.rs`](../components/intelligence/src/service/planner.rs), `src/planner/admission.rs` | Grounded model planning and one checkpointed correction of invalid output in the intelligence component; the server keeps the shared native admission behind the agent port. | `providers.py + live intelligence.py/studio.py + protocols.py` |
 | [`components/pricing/src/domain/pricing.rs`](../components/pricing/src/domain/pricing.rs) | Behavioral port of Shopware 6.7.14.2 quantity calculators. | `differential.py + delivery_differential.py + Rust numeric regressions + commerce.py` |
 | [`src/proposal_apply.rs`](../src/proposal_apply.rs) | Transactional application of approved, revision-bound proposals. | `providers.py + live intelligence.py/studio.py + protocols.py` |
 | [`src/proposal_model.rs`](../src/proposal_model.rs) | Typed proposals and validation before persistence or execution. | `providers.py + live intelligence.py/studio.py + protocols.py` |
@@ -599,11 +599,11 @@ See [international commerce](international-commerce.md) for the exact contract.
 | [`src/apps/planning.rs`](../src/apps/planning.rs), `apps/planning_contracts.rs` | Current authorized field contracts and registered managed app actions join the same preview/approve transaction as core changes. | `apps.py + services.py + providers.py + app_inference.py` |
 | [`src/apps/registry.rs`](../src/apps/registry.rs) | Atomic consent-bound installation, explicit tenant schema migrations and immutable version digests. | `apps.py + services.py + providers.py + app_inference.py` |
 | [`src/apps/routes.rs`](../src/apps/routes.rs) | Tenant-scoped package lifecycle, generated data endpoints and a shared action adapter. | `apps.py + services.py + providers.py + app_inference.py` |
-| [`src/cognition/context.rs`](../src/cognition/context.rs) | Bounded localized catalog retrieval before inference; full catalog size never expands the prompt. | `apps.py + live intelligence.py/studio.py + restart.py` |
+| [`components/intelligence/src/service/retrieval.rs`](../components/intelligence/src/service/retrieval.rs) | Bounded localized catalog retrieval before inference; full catalog size never expands the prompt. | `apps.py + live intelligence.py/studio.py + restart.py` |
 | [`src/cognition/mod.rs`](../src/cognition/mod.rs) | Evidence-based shop memory: event receipts, observed pairs, reviewable hypotheses and bounded context. | `apps.py + live intelligence.py/studio.py + restart.py` |
 | [`src/cognition/projection.rs`](../src/cognition/projection.rs) | Exactly-once local observation projection; associations retain order/event evidence and simulation labels. | `apps.py + live intelligence.py/studio.py + restart.py` |
 | [`src/cognition/recommendations.rs`](../src/cognition/recommendations.rs) | Merchant-approved associations are consumed by the public shop without exposing order counts or identities. | `apps.py + live intelligence.py/studio.py + restart.py` |
-| [`src/cognition/routes.rs`](../src/cognition/routes.rs) | Merchant memory endpoints and revision-bound experiment/dismissal decisions. | `apps.py + live intelligence.py/studio.py + restart.py` |
+| [`src/cognition/routes.rs`](../src/cognition/routes.rs), [`components/intelligence/src/http/memory.rs`](../components/intelligence/src/http/memory.rs) | Merchant memory endpoints and revision-bound experiment/dismissal decisions. | `apps.py + live intelligence.py/studio.py + restart.py` |
 | [`src/payments/mod.rs`](../src/payments/mod.rs) | Provider-independent payment ledger and durable workers; the first adapter is explicitly PayPal Sandbox. | `payments.py (local wire fixture) + Rust integer-money tests` |
 | [`src/payments/operations.rs`](../src/payments/operations.rs) | Durable idempotent payment commands, customer context binding and serial refund admission. | `payments.py (local wire fixture) + Rust integer-money tests` |
 | [`extensions/apps/paypal/src/compatibility.rs`](../extensions/apps/paypal/src/compatibility.rs) | Native PayPal Orders v2 sandbox wire adapter; credentials never enter prompts or browser responses. | `payments.py (local wire fixture) + Rust integer-money tests` |
@@ -612,8 +612,8 @@ See [international commerce](international-commerce.md) for the exact contract.
 | [`src/payments/storage.rs`](../src/payments/storage.rs) | Transactional provider receipts and order state updates; external responses cannot invent amounts or tenants. | `payments.py (local wire fixture) + Rust integer-money tests` |
 | [`extensions/apps/paypal/src/webhooks.rs`](../extensions/apps/paypal/src/webhooks.rs) | PayPal verifies webhook signatures before inbox insertion; provider reconciliation confirms monetary state. | `payments.py (local wire fixture) + Rust integer-money tests` |
 | [`src/payments/worker.rs`](../src/payments/worker.rs) | Leased payment jobs; network runs after claim commit, fenced receipts prevent duplicate local effects. | `payments.py (local wire fixture) + Rust integer-money tests` |
-| [`src/agent_runs.rs`](../src/agent_runs.rs) | Existing-task continuation, private checkpoints, lease-fenced completion and original approval. | `durable_agents.py + providers.py` |
-| `src/agent_runs/flow_proposals.rs`, `src/marketing/flow_access.rs` | Scheduled proposals join native ready tasks with current Flow authority, original scope ceiling and live-shop stop; personal approval supplies execution authority. | `testing/agent_flow_work.py` through registered `durable_agents` |
+| [`components/intelligence/src/service/agent_runs.rs`](../components/intelligence/src/service/agent_runs.rs), `service/{agent_controls,run_journal,conversations}.rs`, [`src/agent_runs.rs`](../src/agent_runs.rs) | Existing-task continuation, private checkpoints, lease-fenced completion and original approval; the server executes claimed runs over the agent port. | `durable_agents.py + providers.py` |
+| `components/intelligence/src/service/flow_proposals.rs`, `components/marketing/src/store/flow_access.rs` | Scheduled proposals join native ready tasks with current Flow authority, original scope ceiling and live-shop stop; personal approval supplies execution authority. | `testing/agent_flow_work.py` through registered `durable_agents` |
 | [`src/workers.rs`](../src/workers.rs) | Process role selection and the combined Core app worker switch. | `services.py + payments.py` |
 | [`src/workers/app_lane.rs`](../src/workers/app_lane.rs) | Flow, app scheduler and delivery tasks with bounded shutdown. | `services.py + worker unit tests` |
 | [`src/workers/app_lane/queue_health.rs`](../src/workers/app_lane/queue_health.rs) | Bounded worker-only queue age read and private aggregate logging. | `services.py` |
@@ -769,7 +769,7 @@ reviewed bindings, not whole-module proofs. See the
 | `extensions/apps/{gmail,google-analytics,slack}/manifest.json` | Versioned app API/MCP capabilities and scopes |
 | `src/apps/evidence.rs`, `src/apps/evidence_routes.rs` | Tenant-private incremental imports, retrieval, polling and purge fences |
 | `components/intelligence/src/knowledge.rs` | Private PostgreSQL source and product provenance, separated from public graph |
-| `src/planner.rs` | Actual private-source model context and persisted task evidence |
+| `components/intelligence/src/service/planner.rs` | Actual private-source model context and persisted task evidence |
 | `src/marketing/{rules,rule_match,rule_fields,catalog,app_flows,flows}.rs` | Condition schema, original comparison/facts, upstream import, app-aware durable flow execution |
 | `frontend/src/admin/apps/ConnectorPanel.tsx`, `admin/automation/{RuleBuilder,FlowBuilder}.tsx`, `extensions/apps/google-analytics/storefront/ShopAnalytics.tsx` | Multilingual app details, recursive graphical automation, consent and commerce events |
 | `extensions/sdk/analytics.js` | Reusable consent-bound GA4 adapter for headless frontends |
@@ -799,7 +799,7 @@ The production-mode Docker smoke test checks the packaged server and frontend.
 |---|---|---|
 | `src/apps/{surfaces,surface_tests}.rs` | UI contract registry, namespaced route/action adapter, scope and mutating GET rejection | `app_surfaces.py`, Rust contract tests, extracted read admission proof |
 | `src/apps/service_limits.rs`, `foundation.rs`, `bootstrap.rs` | Shared non-queuing per-process/per-tenant-app service limits | Slow-service real-cart/second-tenant test and Rust drop/reuse test |
-| `src/apps/{data,registry,planning,gateway}.rs`, `src/planner.rs` | JSONB, indexed bounded pages, direct revision binding, selected bounded AI context and unified actions | Deep-page approved local-model wire fixture; existing app/service/staging regressions |
+| `src/apps/{data,registry,planning,gateway}.rs`, `components/intelligence/src/service/planner.rs` | JSONB, indexed bounded pages, direct revision binding, selected bounded AI context and unified actions | Deep-page approved local-model wire fixture; existing app/service/staging regressions |
 | `frontend/src/shared/apps/{AppSurfaces,AppFrame}.tsx`, `extensions/sdk/browser.js` | New Studio/shop navigation and context-aware opaque UI bridge | Actual multilingual browser question/module/page and `frontend/tests/app-sdk.mjs` |
 | `extensions/apps/product-lab/*`, `scripts/product_lab.py` | Independent app code/storage/UI/container and private optional launcher | `app_surfaces.py`, actual non-root resource-limited container smoke |
 | `frontend/src/application/ApplicationRouter.tsx` + `main.tsx` | Separate lazy Studio/storefront/platform loading and root error recovery | Strict production frontend build |

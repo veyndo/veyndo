@@ -16,29 +16,20 @@ This lists every checked-in source module in these roots, including files with n
 | [src/accounts/mod.rs](../src/accounts/mod.rs) | Independent customer sessions, profile/password management and owning-account order history. |
 | [src/accounts/orders.rs](../src/accounts/orders.rs) | Customer receipt PDFs render in the server; the order reads and projection are owned by the orders component. |
 | [src/accounts/payment_preference.rs](../src/accounts/payment_preference.rs) | Optional last-used payment preference is written after purchase commit, without holding cart/unit/product locks. |
-| [src/agent.rs](../src/agent.rs) | Persistent grounded conversations and tenant-scoped semantic knowledge HTTP adapters. |
+| [src/agent.rs](../src/agent.rs) | Model provider listing and product retrieval over the server's model context; conversations and knowledge handlers live in the intelligence component. |
+| [src/agent_host.rs](../src/agent_host.rs) | The server side of the agent port: native capabilities, installed app tools, consent-bound preferences, studio order facts, the native work vocabulary and proposal admission. |
 | [src/agent_runs/authority.rs](../src/agent_runs/authority.rs) | Saved runs retain an upper authority bound; the identity component rechecks credential, membership and private stage admission. |
-| [src/agent_runs/checkpoint.rs](../src/agent_runs/checkpoint.rs) | Bounded journal of prepared context and completed inference calls; ambiguous calls require explicit continuation. |
-| [src/agent_runs/context.rs](../src/agent_runs/context.rs) | Bounded presentation context is saved with the task; it never supplies identity, rights or trusted object facts. |
-| [src/agent_runs/contract.rs](../src/agent_runs/contract.rs) | HTTP/MCP share revision-bound run controls and safe progress; checkpoints and credentials are never exported. |
-| [src/agent_runs/controls.rs](../src/agent_runs/controls.rs) | Live-only agent stop and existing-key admission; no control becomes a sandbox release or credential snapshot. |
-| [src/agent_runs/flow_proposals.rs](../src/agent_runs/flow_proposals.rs) | Scheduled Flow results become native reviewable tasks; only personal approval supplies execution authority. |
-| [src/agent_runs/navigation.rs](../src/agent_runs/navigation.rs) | Model navigation names native views, never URLs or authority. Admission rechecks current rights and tenant-owned records. |
-| [src/agent_runs/scenarios/attack_store.rs](../src/agent_runs/scenarios/attack_store.rs) | Saved attack test reports are actor-private applied task rows of the sandbox; freshness reuses the release configuration digest. |
-| [src/agent_runs/scenarios/catalogue.rs](../src/agent_runs/scenarios/catalogue.rs) | A bounded native channel sample seeds editable fictional profiles; it never reads customer data or invokes inference. |
-| [src/agent_runs/scenarios/evidence.rs](../src/agent_runs/scenarios/evidence.rs) | Scenario evidence uses the release owner's configuration projection, never orders or inventory. |
-| [src/agent_runs/scenarios/journey.rs](../src/agent_runs/scenarios/journey.rs) | Each fictional customer has an independent durable provider journal and an authoritative native journey. |
-| [src/agent_runs/scenarios/mod.rs](../src/agent_runs/scenarios/mod.rs) | Fictional shopper cohorts reuse native task authority, checkpoints and private commerce operations. |
-| [src/agent_runs/scenarios/probes.rs](../src/agent_runs/scenarios/probes.rs) | Scripted hostile shoppers probe native cart and checkout fences in a private sandbox; no model call, no live effect. |
-| [src/agent_runs/scenarios/readiness.rs](../src/agent_runs/scenarios/readiness.rs) | Read-only readiness of a private sandbox as a shop twin: catalogue, stock, simulated checkout and saved customer tests. |
-| [src/agent_runs/scenarios/shopper.rs](../src/agent_runs/scenarios/shopper.rs) | A closed shopper adapter uses native carts and exact reviewed totals; no model-supplied authority or payment mode. |
-| [src/agent_runs/scenarios/source.rs](../src/agent_runs/scenarios/source.rs) | A customer test can reference only its actor's completed, applied native proposal in this sandbox. |
+| [src/agent_runs/checkpoint.rs](../src/agent_runs/checkpoint.rs) | The run journal lives in the intelligence component; these entries lend it the server's agent port. |
+| [src/agent_runs/contract.rs](../src/agent_runs/contract.rs) | HTTP/MCP share revision-bound run controls and safe progress; scenarios, agent controls and run operations are dispatched by name. |
+| [src/agent_runs/controls.rs](../src/agent_runs/controls.rs) | Live-only agent stop and existing-key admission live in the intelligence component; the server registers the routes. |
+| [src/agent_runs/navigation.rs](../src/agent_runs/navigation.rs) | Model navigation lives in the intelligence component; the native working view supplies its entity. |
+| [src/agent_runs/scenarios.rs](../src/agent_runs/scenarios.rs) | Fictional shopper cohorts live in the intelligence component; the server registers their routes and lends the agent port. |
 | [src/agent_runs/translation.rs](../src/agent_runs/translation.rs) | Translation child work reuses native draft storage, original authority and the existing task scheduler. |
 | [src/agent_runs/view.rs](../src/agent_runs/view.rs) | A reviewed grid view contains only native filter criteria; current domain and PII rights are checked before persistence. |
 | [src/agent_runs/work.rs](../src/agent_runs/work.rs) | Approved work uses the existing task lease; each native write is fenced against cancellation and recorded before advancing. |
 | [src/agent_runs/work_plan.rs](../src/agent_runs/work_plan.rs) | Reviewed work binds bounded native configuration commands and managed app saves before any worker effect. |
-| [src/agent_runs/worker.rs](../src/agent_runs/worker.rs) | Database claims resume only completed checkpoints; unknown model outcomes are never automatically charged again. |
-| [src/agent_runs.rs](../src/agent_runs.rs) | Durable continuation extends native tasks; leases fence checkpoints and publication, never approved writes. |
+| [src/agent_runs/worker.rs](../src/agent_runs/worker.rs) | The run worker executes claimed runs over the server's tools; claims, recovery and failure records live in the intelligence component. |
+| [src/agent_runs.rs](../src/agent_runs.rs) | Durable continuation extends native tasks; the intelligence component owns admission, controls and run storage, the server executes runs over its tools. |
 | [src/apps/approval.rs](../src/apps/approval.rs) | Operator service authority is bound to immutable package content, never to a merchant-chosen ID; the rules live in the apps component. |
 | [src/apps/asset_surfaces.rs](../src/apps/asset_surfaces.rs) | App file uploads reuse the product asset parser/store and require the current package plus either callback consent or a surface grant. |
 | [src/apps/business_capability/mod.rs](../src/apps/business_capability/mod.rs) | Native complete-package and bounded-guest adapters for the independent business contracts and executable examples. |
@@ -199,24 +190,18 @@ This lists every checked-in source module in these roots, including files with n
 | [src/checkout/session_quote.rs](../src/checkout/session_quote.rs) | Project the current native cart quote for the independent checkout session service. |
 | [src/checkout_handoff.rs](../src/checkout_handoff.rs) | Single-use checkout transfer is owned by the checkout component; the server projects the redeemed cart. |
 | [src/checkout_page.rs](../src/checkout_page.rs) | The existing checkout may be framed only by its registered tenant/channel storefront. |
-| [src/cognition/advisor.rs](../src/cognition/advisor.rs) | Buyer-admitted initial catalog/evidence context and bounded native response revalidation; no extra truth store. |
-| [src/cognition/autonomy.rs](../src/cognition/autonomy.rs) | Price-only optional autonomy, atomic unique-SKU daily quotas, a non-compounding day baseline and a daily exposure ceiling. |
-| [src/cognition/autonomy_revert.rs](../src/cognition/autonomy_revert.rs) | Takes today's automatic price changes back to the day's baseline, by request or when the daily exposure limit is exceeded. |
 | [src/cognition/behavior/capture.rs](../src/cognition/behavior/capture.rs) | Cart-locked writes serialize with withdrawal; customer association is derived from authenticated native identity. |
 | [src/cognition/behavior/geography.rs](../src/cognition/behavior/geography.rs) | Optional trusted ingress geography. Ordinary country headers never establish visitor location. |
 | [src/cognition/behavior/input.rs](../src/cognition/behavior/input.rs) | Minimal behavioral envelope: no URLs, search text, raw user agents, IPs or caller customer identities. |
-| [src/cognition/behavior/journey.rs](../src/cognition/behavior/journey.rs) | Private journey drilldown uses the same current receipt, tenant predicates and bounded event projection. |
 | [src/cognition/behavior/mod.rs](../src/cognition/behavior/mod.rs) | Native behavior analytics projects the existing event ledger into private shop knowledge. |
-| [src/cognition/behavior/report.rs](../src/cognition/behavior/report.rs) | Indexed channel report and a derived semantic graph; observations never imply causation or model learning. |
 | [src/cognition/claim_batches.rs](../src/cognition/claim_batches.rs) | Public claim batches live in the intelligence component; this module registers their storefront routes. |
-| [src/cognition/context.rs](../src/cognition/context.rs) | Bounded localized catalog retrieval before inference; full catalog size never expands the prompt. |
+| [src/cognition/context.rs](../src/cognition/context.rs) | The source policy that bounds every prompt lives in the intelligence component. |
 | [src/cognition/contracts.rs](../src/cognition/contracts.rs) | Evidence APIs and MCP contracts dispatch into one authorized owner; the claim compiler rejects free prose. |
 | [src/cognition/evidence.rs](../src/cognition/evidence.rs) | The source-bound claim lifecycle lives in the intelligence component; these entries keep the server-side signatures. |
 | [src/cognition/experiments/mod.rs](../src/cognition/experiments/mod.rs) | Controlled experiments use the existing storefront layout consumer and authoritative payment ledger; the intelligence component owns their store. |
-| [src/cognition/extraction.rs](../src/cognition/extraction.rs) | API/MCP/flow source extraction shares provider admission and quote checks; candidates require merchant review. |
-| [src/cognition/generations.rs](../src/cognition/generations.rs) | Model-change intake is owned by the intelligence component. |
+| [src/cognition/extraction.rs](../src/cognition/extraction.rs) | API, MCP and flow source extraction lives in the intelligence component; this entry lends it the server's model context. |
 | [src/cognition/guardrails.rs](../src/cognition/guardrails.rs) | The guardrail rules live in the intelligence component; plan validation reads the current settings here. |
-| [src/cognition/indexing.rs](../src/cognition/indexing.rs) | Durable bounded embedding jobs; short claims and revision fences keep provider latency outside PostgreSQL. |
+| [src/cognition/indexing.rs](../src/cognition/indexing.rs) | Durable bounded embedding jobs live in the intelligence component; these entries lend it the server's model context. |
 | [src/cognition/mod.rs](../src/cognition/mod.rs) | Evidence-based shop memory: event receipts, observed pairs, reviewable hypotheses and bounded context. |
 | [src/cognition/preferences.rs](../src/cognition/preferences.rs) | Consent-bound private cart preference graph: entry points, consent and channel admission; model and store live in the intelligence component. |
 | [src/cognition/projection.rs](../src/cognition/projection.rs) | Exactly-once local observation projection is owned by the intelligence component; the payment kind of an order is read here. |
@@ -225,7 +210,6 @@ This lists every checked-in source module in these roots, including files with n
 | [src/cognition/signed.rs](../src/cognition/signed.rs) | Public Ed25519 attestations bind exact native facts and channel context for five minutes; signatures do not guarantee source truth. |
 | [src/cognition/signed_offer.rs](../src/cognition/signed_offer.rs) | Signed cart offer transport; the intelligence component signs and checks offers through the cart port. |
 | [src/cognition/stream.rs](../src/cognition/stream.rs) | Compatible SSE transport waits on the same persisted run; detached request handling retains native tenant scope. |
-| [src/cognition/tools.rs](../src/cognition/tools.rs) | Bounded agent read rounds use the same capability dispatcher and current actor rights; never execute writes. |
 | [src/commerce/catalog.rs](../src/commerce/catalog.rs) | SKU loading with parent translation fallback; owned by the catalog component. |
 | [src/commerce/catalog_intake/csv.rs](../src/commerce/catalog_intake/csv.rs) | Bounded UTF-8 CSV parser accepts quoted delimiters, escaped quotes and multiline fields; no formula evaluation or silent row loss. |
 | [src/commerce/catalog_intake/mod.rs](../src/commerce/catalog_intake/mod.rs) | Merchant catalogue intake prepares bounded drafts; approved saves reuse native products, history and outbox in a private stage. |
@@ -286,7 +270,6 @@ This lists every checked-in source module in these roots, including files with n
 | [src/developer/generation.rs](../src/developer/generation.rs) | Structured provider output becomes a reviewable immutable manifest; it cannot write files or call shell tools. |
 | [src/developer/mod.rs](../src/developer/mod.rs) | Prompt-generated declarative apps and native coding-agent handoff, never unsandboxed model code. |
 | [src/developer/routes.rs](../src/developer/routes.rs) | Developer HTTP transport and coding-agent task export; explicit staging precedes live release. |
-| [src/documents/guidance.rs](../src/documents/guidance.rs) | Explicit merchant preferences reuse versioned private sources, read by the intelligence component; quoted guidance never expands native authority. |
 | [src/documents/ingestion.rs](../src/documents/ingestion.rs) | Source ingestion is owned by the intelligence component. |
 | [src/documents/lifecycle.rs](../src/documents/lifecycle.rs) | Source detail, editing and publication live in the intelligence component; these entries keep the server-side signatures. |
 | [src/documents/mod.rs](../src/documents/mod.rs) | Source-bound knowledge ingestion, retrieval and product questions share tenant/product visibility. |
@@ -426,8 +409,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/performance/invalidation.rs](../src/performance/invalidation.rs) | Commit-only outbox notifications eagerly evict replica caches; authoritative version probes survive missed events. |
 | [src/performance/mod.rs](../src/performance/mod.rs) | Shared read-context caching with authoritative versions; mutations and checkout locks stay outside memoization. |
 | [src/planner/admission.rs](../src/planner/admission.rs) | Every initial or repaired model proposal traverses the same native read-only admission. |
-| [src/planner/repair.rs](../src/planner/repair.rs) | One checkpointed correction of rejected output; original evidence, budget and native review remain authoritative. |
-| [src/planner.rs](../src/planner.rs) | Grounded model planning: durable input snapshots share native proposal validation and explicit apply. |
+| [src/planner.rs](../src/planner.rs) | Grounded model planning lives in the intelligence component; the server keeps the native proposal admission it calls through the agent port. |
 | [src/platform/ai.rs](../src/platform/ai.rs) | Operator-only inference administration: optimistic revision, encrypted write-only keys and audit without secrets. |
 | [src/platform/auth.rs](../src/platform/auth.rs) | Independent platform authorization: live personal sessions, current grants, no integration/bootstrap escalation. |
 | [src/platform/bootstrap.rs](../src/platform/bootstrap.rs) | Offline first-operator setup: migration-only process, supplied strong credentials, password proof for existing accounts. |
@@ -583,12 +565,11 @@ This lists every checked-in source module in these roots, including files with n
 | [components/apps/src/domain/generation_contract.rs](../components/apps/src/domain/generation_contract.rs) | Generated revisions preserve existing storage and access boundaries; destructive changes require manual schema review. |
 | [components/apps/src/domain/generation_edits.rs](../components/apps/src/domain/generation_edits.rs) | Bounded RFC 6902 edits modify the canonical Manifest; this is model wire adaptation, not an app runtime. |
 | [components/apps/src/domain/generation_fields.rs](../components/apps/src/domain/generation_fields.rs) | Guided field alternatives express native cross-field rules before inference; native admission remains authoritative. |
-| [components/apps/src/domain/input_schema.rs](../components/apps/src/domain/input_schema.rs) | Native API/MCP error adapter for the independent bounded schema validator. |
-| [components/apps/src/domain/input_schema_tests.rs](../components/apps/src/domain/input_schema_tests.rs) | Adversarial schema cases exercise bounded inputs, nullable unions, escaped JSON pointers and output values. |
+| [components/apps/src/domain/input_schema.rs](../components/apps/src/domain/input_schema.rs) | The bounded input schema validator lives in the core component; apps keep the short path. |
 | [components/apps/src/domain/manifest_policy.rs](../components/apps/src/domain/manifest_policy.rs) | Required native policy ports for the complete shared compiler; no package or request fields can select a weaker policy. |
 | [components/apps/src/domain/manifest_validation.rs](../components/apps/src/domain/manifest_validation.rs) | Complete shared package compiler adapter; trusted native policies retain current authority and exact native errors. |
 | [components/apps/src/domain/mcp_views.rs](../components/apps/src/domain/mcp_views.rs) | Revision-bound native MCP App views: which tools and views a caller may reach, and the view document. |
-| [components/apps/src/domain/model_contract.rs](../components/apps/src/domain/model_contract.rs) | Preserve native problem kinds, revision-conflict status and escaped JSON pointers across the pure model boundary. |
+| [components/apps/src/domain/model_contract.rs](../components/apps/src/domain/model_contract.rs) | The model error contract lives in the core component; apps keep the short path. |
 | [components/apps/src/domain/native_lifecycle.rs](../components/apps/src/domain/native_lifecycle.rs) | Versioned declarative native lifecycles; packages narrow native admission and never execute effects. |
 | [components/apps/src/domain/native_views.rs](../components/apps/src/domain/native_views.rs) | Shared view contracts of a package; actual grants, runtime execution and current rights remain with the server. |
 | [components/apps/src/domain/ontology.rs](../components/apps/src/domain/ontology.rs) | Native complete-package adapter for graph mapping; the existing authorized list supplies every projected row. |
@@ -833,6 +814,8 @@ This lists every checked-in source module in these roots, including files with n
 | [components/core/src/lib.rs](../components/core/src/lib.rs) | Shared foundation of every component: the error contract, its conversions and basic identifiers. No business rules. |
 | [components/core/src/localized/languages.rs](../components/core/src/localized/languages.rs) | The content languages a shop enabled: which keys content may use, and which key a language is stored under. |
 | [components/core/src/localized.rs](../components/core/src/localized.rs) | A translated name and description as stored per content language; a missing field inherits from the shop's main language. |
+| [components/core/src/model_contract/schema_tests.rs](../components/core/src/model_contract/schema_tests.rs) | Adversarial schema cases exercise bounded inputs, nullable unions, escaped JSON pointers and output values. |
+| [components/core/src/model_contract.rs](../components/core/src/model_contract.rs) | The native error contract of the pure app model: problem kinds, revision conflicts, escaped JSON pointers and the bounded input schema validator. |
 | [components/core/src/observability.rs](../components/core/src/observability.rs) | Server-generated request correlation and safe structured events, without tokens, query strings or bodies. |
 | [components/core/src/outbox/next_tenant.sql](../components/core/src/outbox/next_tenant.sql) | Lock only this subscriber schedule. A failed event does not block later work. |
 | [components/core/src/outbox/retention.rs](../components/core/src/outbox/retention.rs) | Bounded retirement of duplicate delivered payloads; provenance IDs and unsettled app/flow work survive. |
@@ -905,10 +888,13 @@ This lists every checked-in source module in these roots, including files with n
 | [components/intelligence/src/domain/prompt_context.rs](../components/intelligence/src/domain/prompt_context.rs) | What a model is given to read: the shared source policy and byte-bounded snapshots that never cut text mid-string. |
 | [components/intelligence/src/domain/run_result.rs](../components/intelligence/src/domain/run_result.rs) | The synchronous planning result of a saved run: a ready proposal, or the error the run stopped with. |
 | [components/intelligence/src/domain/source_content.rs](../components/intelligence/src/domain/source_content.rs) | Bounds of a knowledge source: enabled languages, kinds, translated fields and the digest that binds its chunks. |
+| [components/intelligence/src/domain/tool_trace.rs](../components/intelligence/src/domain/tool_trace.rs) | Conversation attachments come only from the server's executed tool trace, never from model prose or record claims. |
 | [components/intelligence/src/domain/trusted_geography.rs](../components/intelligence/src/domain/trusted_geography.rs) | Optional trusted ingress geography. Ordinary country headers never establish visitor location. |
 | [components/intelligence/src/domain.rs](../components/intelligence/src/domain.rs) | Bounded inputs of the intelligence component, free of I/O. |
+| [components/intelligence/src/http/agents.rs](../components/intelligence/src/http/agents.rs) | HTTP handlers of durable agent runs, agent controls and merchant conversations; the server registers them with their route rights. |
 | [components/intelligence/src/http/claims.rs](../components/intelligence/src/http/claims.rs) | Public claim intake and compilation: bounded batches under the current channel admission, without one request per product. |
 | [components/intelligence/src/http/ingestion.rs](../components/intelligence/src/http/ingestion.rs) | Typed API and bounded upload write source hashes, chunks and graph relations atomically. |
+| [components/intelligence/src/http/memory.rs](../components/intelligence/src/http/memory.rs) | Merchant memory reads and revision-bound hypothesis decisions. |
 | [components/intelligence/src/http/sources.rs](../components/intelligence/src/http/sources.rs) | Revision-bound source detail, editing, archive and publication; an edit needs a new public review. |
 | [components/intelligence/src/http/workspace.rs](../components/intelligence/src/http/workspace.rs) | The knowledge workspace: a permission-filtered census, the source inventory by cursor and recent activity. Totals never pose as sampled graph counts. |
 | [components/intelligence/src/http.rs](../components/intelligence/src/http.rs) | HTTP handlers of the intelligence component; the server registers them with their route rights. |
@@ -924,10 +910,38 @@ This lists every checked-in source module in these roots, including files with n
 | [components/intelligence/src/knowledge/vectors.rs](../components/intelligence/src/knowledge/vectors.rs) | Private Qdrant adapter: tenant/model filters, deterministic identities and durable PostgreSQL index queue. |
 | [components/intelligence/src/knowledge.rs](../components/intelligence/src/knowledge.rs) | Transactional PostgreSQL knowledge relations and separately indexed Qdrant retrieval. |
 | [components/intelligence/src/lib.rs](../components/intelligence/src/lib.rs) | Intelligence component: shop memory with its vector namespace, retrieval and document parsing. |
+| [components/intelligence/src/ports.rs](../components/intelligence/src/ports.rs) | What agent runs, planning and shopping advice need from the server: native read operations, installed app tools and contracts, private app evidence, order facts, the native work vocabulary, proposal admission and publication. |
+| [components/intelligence/src/service/advisor.rs](../components/intelligence/src/service/advisor.rs) | Buyer-admitted initial catalog/evidence context and bounded native response revalidation; no extra truth store. |
+| [components/intelligence/src/service/agent_controls.rs](../components/intelligence/src/service/agent_controls.rs) | Live-only agent stop and existing-key admission; no control becomes a sandbox release or credential snapshot. |
+| [components/intelligence/src/service/agent_runs.rs](../components/intelligence/src/service/agent_runs.rs) | Durable agent runs extend native tasks: admission with quota and replay detection, revision-bound status, cancel and explicit resume. Leases fence checkpoints and publication, never approved writes. |
+| [components/intelligence/src/service/autonomy.rs](../components/intelligence/src/service/autonomy.rs) | Price-only optional autonomy, atomic unique-SKU daily quotas, a non-compounding day baseline and a daily exposure ceiling. |
+| [components/intelligence/src/service/autonomy_revert.rs](../components/intelligence/src/service/autonomy_revert.rs) | Takes today's automatic price changes back to the day's baseline, by request or when the daily exposure limit is exceeded. |
+| [components/intelligence/src/service/behavior.rs](../components/intelligence/src/service/behavior.rs) | Merchant reads of native behavior analytics: the indexed channel report and the private journey, under the current receipt policy and tenant predicates. Observations never imply causation or model learning. |
 | [components/intelligence/src/service/claims.rs](../components/intelligence/src/service/claims.rs) | The source-bound claim lifecycle and public claim batches: rights and shop languages here, the ledger in `store::evidence`. |
+| [components/intelligence/src/service/concierge.rs](../components/intelligence/src/service/concierge.rs) | Read-only storefront shopping advisor over admitted catalog evidence; it cannot change a cart or place an order. |
+| [components/intelligence/src/service/conversations.rs](../components/intelligence/src/service/conversations.rs) | Persistent grounded merchant conversations: each turn is a durable run, and history is read only with the rights its runs were admitted under. |
 | [components/intelligence/src/service/experiments.rs](../components/intelligence/src/service/experiments.rs) | Experiment operations for HTTP and MCP: reading needs the knowledge right, changes need settings rights and explicit approval. |
+| [components/intelligence/src/service/extraction.rs](../components/intelligence/src/service/extraction.rs) | API, MCP and flow source extraction share provider admission and quote checks; candidates require merchant review. |
+| [components/intelligence/src/service/fact_compiler.rs](../components/intelligence/src/service/fact_compiler.rs) | The claim compiler renders only exact, current, confirmed and public claims; free prose is never certified. |
 | [components/intelligence/src/service/fact_signing.rs](../components/intelligence/src/service/fact_signing.rs) | Public Ed25519 attestations bind exact native facts and channel context for a short time; signatures do not guarantee source truth. |
+| [components/intelligence/src/service/flow_proposals.rs](../components/intelligence/src/service/flow_proposals.rs) | Scheduled Flow results become native reviewable tasks; only personal approval supplies execution authority. |
+| [components/intelligence/src/service/indexing.rs](../components/intelligence/src/service/indexing.rs) | Durable bounded embedding jobs; short claims and revision fences keep provider latency outside PostgreSQL. |
+| [components/intelligence/src/service/models.rs](../components/intelligence/src/service/models.rs) | The model context of intelligence operations: shared state, the configured inference providers and this process's inference slots. |
+| [components/intelligence/src/service/navigation.rs](../components/intelligence/src/service/navigation.rs) | Model navigation names native views, never URLs or authority. Admission rechecks current rights and tenant-owned records. |
 | [components/intelligence/src/service/pdf.rs](../components/intelligence/src/service/pdf.rs) | PDF extraction executes in a killable child process without inherited commerce credentials. |
+| [components/intelligence/src/service/planner.rs](../components/intelligence/src/service/planner.rs) | Grounded model planning: durable input snapshots share native proposal validation and explicit apply. |
+| [components/intelligence/src/service/read_rounds.rs](../components/intelligence/src/service/read_rounds.rs) | Bounded agent read rounds use the same capability dispatcher and current actor rights; never execute writes. |
+| [components/intelligence/src/service/retrieval.rs](../components/intelligence/src/service/retrieval.rs) | Bounded retrieval before inference: product search with optional reranking, source search and the index status. |
+| [components/intelligence/src/service/run_journal.rs](../components/intelligence/src/service/run_journal.rs) | Bounded journal of prepared context and completed inference calls; ambiguous calls require explicit continuation. |
+| [components/intelligence/src/service/scenarios/attack_store.rs](../components/intelligence/src/service/scenarios/attack_store.rs) | Saved attack test reports are actor-private applied task rows of the sandbox; freshness reuses the release configuration digest. |
+| [components/intelligence/src/service/scenarios/catalogue.rs](../components/intelligence/src/service/scenarios/catalogue.rs) | A bounded native channel sample seeds editable fictional profiles; it never reads customer data or invokes inference. |
+| [components/intelligence/src/service/scenarios/evidence.rs](../components/intelligence/src/service/scenarios/evidence.rs) | Scenario evidence uses the release owner's configuration projection, never orders or inventory. |
+| [components/intelligence/src/service/scenarios/journey.rs](../components/intelligence/src/service/scenarios/journey.rs) | Each fictional customer has an independent durable provider journal and an authoritative native journey. |
+| [components/intelligence/src/service/scenarios/probes.rs](../components/intelligence/src/service/scenarios/probes.rs) | Scripted hostile shoppers probe native cart and checkout fences in a private sandbox; no model call, no live effect. |
+| [components/intelligence/src/service/scenarios/readiness.rs](../components/intelligence/src/service/scenarios/readiness.rs) | Read-only readiness of a private sandbox as a shop twin: catalogue, stock, simulated checkout and saved customer tests. |
+| [components/intelligence/src/service/scenarios/shopper.rs](../components/intelligence/src/service/scenarios/shopper.rs) | A closed shopper adapter uses native carts and exact reviewed totals; no model-supplied authority or payment mode. |
+| [components/intelligence/src/service/scenarios/source.rs](../components/intelligence/src/service/scenarios/source.rs) | A customer test can reference only its actor's completed, applied native proposal in this sandbox. |
+| [components/intelligence/src/service/scenarios.rs](../components/intelligence/src/service/scenarios.rs) | Fictional shopper cohorts reuse native task authority, checkpoints and private commerce operations. |
 | [components/intelligence/src/service/signed_offer.rs](../components/intelligence/src/service/signed_offer.rs) | Signed cart offers: an Ed25519 attestation of the native quote that a buying agent can check offline; a statement, not a price lock. |
 | [components/intelligence/src/service/sources.rs](../components/intelligence/src/service/sources.rs) | Knowledge source content checked against the languages the shop has enabled. |
 | [components/intelligence/src/service/supply_proposal.rs](../components/intelligence/src/service/supply_proposal.rs) | Reorder proposals: a signed offer from the supplier shop's public checkout on this installation, checked against the ceiling; approval hands over to that checkout and orders nothing. |

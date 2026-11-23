@@ -1,5 +1,16 @@
 //! Scripted hostile shoppers probe native cart and checkout fences in a private sandbox; no model call, no live effect.
-use super::*;
+use super::{catalogue, evidence, shopper};
+use crate::ports::AgentHost;
+use serde_json::Value;
+use serde_json::json;
+use veyndo_checkout::store::cart_load::load as load_cart;
+use veyndo_core::Error;
+use veyndo_core::RequestContext;
+use veyndo_core::Result;
+use veyndo_core::bad;
+use veyndo_core::conflict;
+use veyndo_core::shop_scope::channel as channel_id;
+use veyndo_core::uid;
 /// A refusal by the native owner is the expected result; an accepted attack is reported with a closed finding code.
 fn verdict(
     id: &str,
@@ -19,16 +30,17 @@ fn verdict(
         }
     }
 }
-async fn fresh(
-    a: &App,
+async fn fresh<H: AgentHost>(
+    host: &H,
     t: &str,
     request: &Value,
     run: &str,
     n: u8,
 ) -> Result<(RequestContext, i64)> {
+    let a = host.models().core;
     let guest = shopper::headers(t, request, None)?;
     let cart = shopper::call(
-        a,
+        host,
         &guest,
         "cart.create",
         &json!({"session":format!("probe-{run}-{n}")}),
@@ -54,8 +66,8 @@ fn stocked(products: &Value, id: Option<&str>) -> Option<Value> {
         .cloned()
 }
 /// Forged total, stale review and replayed order against one honestly reviewed basket.
-async fn checkout_probes(
-    a: &App,
+async fn checkout_probes<H: AgentHost>(
+    host: &H,
     c: &RequestContext,
     guest: &RequestContext,
     country: &str,
@@ -66,8 +78,8 @@ async fn checkout_probes(
     let mut probes = Vec::new();
     // The checkout attacks share one honestly reviewed basket; only the claimed review is forged.
     let reviewed = async {
-        let (revision, minor) = shopper::review(a, c, country).await?;
-        shopper::accept(a, c).await?;
+        let (revision, minor) = shopper::review(host, c, country).await?;
+        shopper::accept(host, c).await?;
         Ok::<_, Error>((revision, minor))
     }
     .await;
@@ -81,13 +93,13 @@ async fn checkout_probes(
             let key = format!("probe-{run}");
             probes.push(verdict(
                 "forged_total",
-                shopper::complete(a, c, &revision, 1, &key).await,
+                shopper::complete(host, c, &revision, 1, &key).await,
                 |_| ("breached", "accepted"),
             ));
             probes.push(verdict(
                 "stale_review",
                 shopper::complete(
-                    a,
+                    host,
                     c,
                     &json!(revision.as_i64().unwrap_or(1) - 1),
                     minor,
@@ -96,9 +108,9 @@ async fn checkout_probes(
                 .await,
                 |_| ("breached", "accepted"),
             ));
-            let first = shopper::complete(a, c, &revision, minor, &key).await;
-            let second = shopper::complete(a, c, &revision, minor, &key).await;
-            let after = stocked(&shopper::products(a, guest, "").await?, Some(id))
+            let first = shopper::complete(host, c, &revision, minor, &key).await;
+            let second = shopper::complete(host, c, &revision, minor, &key).await;
+            let after = stocked(&shopper::products(host, guest, "").await?, Some(id))
                 .and_then(|p| p["stock"].as_i64())
                 .unwrap_or(stock);
             probes.push(match (first, second) {
@@ -122,7 +134,8 @@ async fn checkout_probes(
     }
     Ok(probes)
 }
-pub(super) async fn run(a: &App, h: &RequestContext, t: &str) -> Result<Value> {
+pub async fn run<H: AgentHost>(host: &H, h: &RequestContext, t: &str) -> Result<Value> {
+    let a = host.models().core;
     let settings = catalogue::settings(a, h, t).await?;
     let currency = settings.currencies.selected("")?;
     let locale = settings
@@ -135,9 +148,10 @@ pub(super) async fn run(a: &App, h: &RequestContext, t: &str) -> Result<Value> {
         .countries
         .first()
         .ok_or(bad("Enable a delivery country before running attack tests"))?;
-    let request = json!({"channel":marketing::channel_id(h),"locale":locale,"scenario":{"currency":currency.code}});
+    let request =
+        json!({"channel":channel_id(h),"locale":locale,"scenario":{"currency":currency.code}});
     let guest = shopper::headers(t, &request, None)?;
-    let target = stocked(&shopper::products(a, &guest, "").await?, None).ok_or(conflict(
+    let target = stocked(&shopper::products(host, &guest, "").await?, None).ok_or(conflict(
         "Add a product with stock to this sandbox before running attack tests",
     ))?;
     let id = target["id"].as_str().ok_or(bad("Product unavailable"))?;
@@ -151,11 +165,11 @@ pub(super) async fn run(a: &App, h: &RequestContext, t: &str) -> Result<Value> {
         json!([item])
     };
     let mut probes = Vec::new();
-    let (c, rev) = fresh(a, t, &request, &run, 1).await?;
+    let (c, rev) = fresh(host, t, &request, &run, 1).await?;
     probes.push(verdict(
         "negative_quantity",
         shopper::call(
-            a,
+            host,
             &c,
             "cart.replace",
             &json!({"revision":rev,"items":[{"id":id,"quantity":-1}]}),
@@ -166,7 +180,7 @@ pub(super) async fn run(a: &App, h: &RequestContext, t: &str) -> Result<Value> {
     probes.push(verdict(
         "unknown_product",
         shopper::call(
-            a,
+            host,
             &c,
             "cart.replace",
             &json!({"revision":rev,"items":[{"id":format!("probe-missing-{run}"),"quantity":1}]}),
@@ -176,7 +190,7 @@ pub(super) async fn run(a: &App, h: &RequestContext, t: &str) -> Result<Value> {
     ));
     // A cart may hold more than the stock; what matters is whether that basket can be bought.
     let excess = shopper::call(
-        a,
+        host,
         &c,
         "cart.replace",
         &json!({"revision":rev,"items":[{"id":id,"quantity":stock + 1}]}),
@@ -189,9 +203,9 @@ pub(super) async fn run(a: &App, h: &RequestContext, t: &str) -> Result<Value> {
     });
     probes.push(if over {
         let bought = async {
-            let (revision, minor) = shopper::review(a, &c, country).await?;
-            shopper::accept(a, &c).await?;
-            shopper::complete(a, &c, &revision, minor, &format!("probe-{run}-excess")).await
+            let (revision, minor) = shopper::review(host, &c, country).await?;
+            shopper::accept(host, &c).await?;
+            shopper::complete(host, &c, &revision, minor, &format!("probe-{run}-excess")).await
         }
         .await;
         verdict("excess_quantity", bought, |_| ("review", "over_stock"))
@@ -207,9 +221,9 @@ pub(super) async fn run(a: &App, h: &RequestContext, t: &str) -> Result<Value> {
         verdict("excess_quantity", excess, |_| ("held", "limited"))
     });
     // A clean one-item basket is the reference total for the injected-price basket.
-    let (c, rev) = fresh(a, t, &request, &run, 2).await?;
+    let (c, rev) = fresh(host, t, &request, &run, 2).await?;
     let clean = shopper::call(
-        a,
+        host,
         &c,
         "cart.replace",
         &json!({"revision":rev,"items":one(json!({}))}),
@@ -218,7 +232,7 @@ pub(super) async fn run(a: &App, h: &RequestContext, t: &str) -> Result<Value> {
     probes.push(verdict(
         "stale_cart",
         shopper::call(
-            a,
+            host,
             &c,
             "cart.replace",
             &json!({"revision":rev,"items":[{"id":id,"quantity":2}]}),
@@ -226,16 +240,16 @@ pub(super) async fn run(a: &App, h: &RequestContext, t: &str) -> Result<Value> {
         .await,
         |_| ("breached", "accepted"),
     ));
-    let (injected, rev) = fresh(a, t, &request, &run, 3).await?;
+    let (injected, rev) = fresh(host, t, &request, &run, 3).await?;
     probes.push(verdict(
         "price_injection",
-        shopper::call(a, &injected, "cart.replace", &json!({"revision":rev,"items":one(json!({"price":0.01,"unitPrice":0.01,"priceMinor":1}))})).await,
+        shopper::call(host, &injected, "cart.replace", &json!({"revision":rev,"items":one(json!({"price":0.01,"unitPrice":0.01,"priceMinor":1}))})).await,
         |v| if total(v).is_some() && total(v) == total(&clean) { ("held", "ignored") } else { ("breached", "total_changed") },
     ));
     probes.push(verdict(
         "guessed_cart",
         shopper::call(
-            a,
+            host,
             &shopper::headers(t, &request, Some(&format!("probe-guess-{run}")))?,
             "cart.quote",
             &json!({}),
@@ -243,11 +257,11 @@ pub(super) async fn run(a: &App, h: &RequestContext, t: &str) -> Result<Value> {
         .await,
         |_| ("breached", "accepted"),
     ));
-    probes.extend(checkout_probes(a, &c, &guest, country, &run, id, stock).await?);
+    probes.extend(checkout_probes(host, &c, &guest, country, &run, id, stock).await?);
     let count = |outcome: &str| probes.iter().filter(|p| p["outcome"] == outcome).count();
     Ok(
-        json!({"id":run,"synthetic":true,"execution":"native-commerce-api","channel":marketing::channel_id(h),
-        "product":{"id":id,"name":target["name"]},"configurationDigest":evidence::capture(a, t).await,
+        json!({"id":run,"synthetic":true,"execution":"native-commerce-api","channel":channel_id(h),
+        "product":{"id":id,"name":target["name"]},"configurationDigest":evidence::capture(host, t).await,
         "summary":{"held":count("held"),"breached":count("breached"),"review":count("review")},"probes":probes}),
     )
 }

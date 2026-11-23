@@ -1,8 +1,13 @@
 //! Scheduled Flow results become native reviewable tasks; only personal approval supplies execution authority.
-use super::*;
+use serde_json::{Value, json};
+use veyndo_core::shop_scope::{channel as channel_id, header};
+use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad, conflict};
+use veyndo_identity::{SCOPES, allowed};
+use veyndo_marketing::store::flow_access::proposal_headers;
 
-pub(super) async fn persist(
-    a: &App,
+/// Publishes a scheduled flow's planning result as a reviewable task under the flow job's lease.
+pub async fn persist(
+    a: &State,
     t: &str,
     id: &str,
     evidence: &Value,
@@ -12,19 +17,19 @@ pub(super) async fn persist(
     let job = header(original, "x-rac-flow-job").ok_or(bad("Flow job required"))?;
     // Inference may outlive a membership/permission change. Never publish evidence
     // with the old grant or widen it to permissions gained during that call.
-    let current = marketing::flow_proposal_headers(a, t, Some(actor), job).await?;
-    let scopes = auth::SCOPES
+    let current = proposal_headers(a, t, Some(actor), job).await?;
+    let scopes = SCOPES
         .iter()
-        .filter(|s| auth::allowed(original, s))
+        .filter(|s| allowed(original, s))
         .copied()
         .collect::<Vec<_>>();
-    if scopes.iter().any(|scope| !auth::allowed(&current, scope)) {
+    if scopes.iter().any(|scope| !allowed(&current, scope)) {
         return Err(Error(
             StatusCode::FORBIDDEN,
             "Flow owner permissions changed during planning".into(),
         ));
     }
-    let request = json!({"instruction":evidence["instruction"],"locale":evidence["locale"],"channel":marketing::channel_id(original),"source":"flow","sourceJobId":job});
+    let request = json!({"instruction":evidence["instruction"],"locale":evidence["locale"],"channel":channel_id(original),"source":"flow","sourceJobId":job});
     let mut tx = a.db.begin_privileged().await?;
     // The same live-shop lock as enqueue/approval fences completion against stop.
     let stopped:bool=sqlx::query_scalar("SELECT agents_stopped FROM tenants WHERE id=coalesce((SELECT live_tenant FROM shop_environments WHERE tenant=$1),$1) FOR NO KEY UPDATE")

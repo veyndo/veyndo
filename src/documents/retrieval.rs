@@ -10,30 +10,15 @@ pub(crate) async fn search_in(
     locale: &str,
     semantic: bool,
 ) -> Result<Value> {
-    let (settings, _) = commerce::config(a, t).await?;
-    let model = env::var("EMBEDDING_MODEL").unwrap_or("qwen3-embedding:0.6b".into());
-    let indexed = store::indexed(a, t, &model, public, product).await?;
-    let vector = if indexed && semantic {
-        cognition::indexing::query_embedding(a, t, query).await
-    } else {
-        None
+    let q = veyndo_intelligence::service::retrieval::SourceQuery {
+        product,
+        query,
+        public,
+        locale,
+        semantic,
     };
-    store::search(
-        a,
-        t,
-        store::Search {
-            product,
-            query,
-            public,
-            locale,
-            main_locale: &settings.main_locale,
-            model: &model,
-        },
-        vector,
-    )
-    .await
+    veyndo_intelligence::service::retrieval::search_in(a.models(), t, q).await
 }
-pub(crate) use veyndo_intelligence::store::documents::sources_current;
 pub(crate) async fn index(
     State(a): State<App>,
     h: RequestContext,

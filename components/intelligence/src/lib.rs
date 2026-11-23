@@ -2,5 +2,6 @@
 pub mod domain;
 pub mod http;
 pub mod knowledge;
+pub mod ports;
 pub mod service;
 pub mod store;

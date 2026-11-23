@@ -26,7 +26,7 @@ mean verification: progress counts the user's explicit reviews, not readiness
 for production. A completed guide does not certify legal compliance, providers
 or a checkout. The AI action uses the existing context-aware merchant assistant.
 The native
-`src/agent_runs/context.rs` owner admits bounded current setup view context and
+`components/intelligence/src/service/agent_runs.rs` owner admits bounded current setup view context and
 rejects a supplied tenant field; generated operation schemas share that contract.
 No provider configuration, automatic publication or parallel onboarding executor.
 

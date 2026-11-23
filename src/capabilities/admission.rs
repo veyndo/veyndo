@@ -12,7 +12,7 @@ pub(super) fn visible(a: &App, h: &RequestContext, name: &str) -> bool {
         return merchant(a, h).is_ok() && auth::allowed(h, "apps.read");
     }
     if name.starts_with("merchant.agents.") {
-        return agent_runs::controls::visible(a, h);
+        return agent_runs::controls::visible(h);
     }
     if name.starts_with("merchant.catalog.") {
         return merchant(a, h).is_ok() && commerce::catalog_intake::visible(h, name);

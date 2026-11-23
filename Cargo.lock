@@ -3727,6 +3727,7 @@ dependencies = [
  "tokio",
  "tracing",
  "uuid",
+ "veyndo-app-model",
  "veyndo-kernel",
  "veyndo-runtime",
 ]
@@ -3794,8 +3795,10 @@ dependencies = [
  "tokio",
  "tracing",
  "uuid",
+ "veyndo-app-model",
  "veyndo-catalog",
  "veyndo-checkout",
+ "veyndo-cognition",
  "veyndo-core",
  "veyndo-identity",
  "veyndo-inventory",

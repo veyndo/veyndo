@@ -3,8 +3,6 @@ use crate::*;
 mod capture;
 mod geography;
 mod input;
-mod journey;
-mod report;
 pub(crate) fn router() -> Router<App> {
     Router::new()
         .route(
@@ -40,30 +38,5 @@ async fn journey_api(
         invoke(&a, &h, "knowledge.behavior.journey", &v).await?,
     ))
 }
-pub(crate) fn schema(name: &str) -> Option<Value> {
-    let props = match name {
-        "knowledge.behavior" => {
-            json!({"days":{"type":"integer","minimum":1,"maximum":30},"salesChannelId":{"type":"string"}})
-        }
-        "knowledge.behavior.journey" => {
-            json!({"session":{"type":"string","minLength":64,"maxLength":64}})
-        }
-        _ => return None,
-    };
-    Some(json!({"type":"object","properties":props,"additionalProperties":false}))
-}
-pub(crate) async fn invoke(a: &App, h: &RequestContext, name: &str, v: &Value) -> Result<Value> {
-    let t = merchant(a, h)?;
-    match name {
-        "knowledge.behavior" => {
-            auth::permit(h, "knowledge.read")?;
-            report::read(a, h, &t, v).await
-        }
-        "knowledge.behavior.journey" => {
-            auth::permit(h, "customers.pii")?;
-            journey::read(a, h, &t, v).await
-        }
-        _ => Err(bad("Unknown behavioral capability")),
-    }
-}
+pub(crate) use veyndo_intelligence::service::behavior::{invoke, schema};
 pub(crate) use veyndo_intelligence::store::behavior::retire;

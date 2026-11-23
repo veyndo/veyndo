@@ -1,8 +1,27 @@
 //! Operations of the intelligence component that call out of process.
+pub mod advisor;
+pub mod agent_controls;
+pub mod agent_runs;
+pub mod autonomy;
+pub mod autonomy_revert;
+pub mod behavior;
 pub mod claims;
+pub mod concierge;
+pub mod conversations;
 pub mod experiments;
+pub mod extraction;
+pub mod fact_compiler;
 pub mod fact_signing;
+pub mod flow_proposals;
+pub mod indexing;
+pub mod models;
 pub mod pdf;
+pub mod planner;
+pub mod read_rounds;
+pub mod retrieval;
+pub mod run_journal;
+pub mod scenarios;
 pub mod signed_offer;
 pub mod sources;
 pub mod supply_proposal;
+pub mod navigation;

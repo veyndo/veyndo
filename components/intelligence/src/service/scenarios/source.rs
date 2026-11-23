@@ -1,20 +1,22 @@
 //! A customer test can reference only its actor's completed, applied native proposal in this sandbox.
-use super::*;
+use super::super::agent_runs::operate;
+use serde_json::Value;
+use serde_json::json;
+use veyndo_core::RequestContext;
+use veyndo_core::Result;
+use veyndo_core::State;
+use veyndo_core::conflict;
+use veyndo_core::hash;
+use veyndo_core::shop_scope::channel as channel_id;
 
-pub(super) async fn resolve(a: &App, h: &RequestContext, id: &str) -> Result<Value> {
-    let run = Box::pin(contract::invoke(
-        a,
-        h,
-        "merchant.run.status",
-        &json!({"id":id}),
-    ))
-    .await?;
+pub async fn resolve(a: &State, h: &RequestContext, id: &str) -> Result<Value> {
+    let run = Box::pin(operate(a, h, "merchant.run.status", &json!({"id":id}))).await?;
     if run["state"] != "ready" || run["approvalRequired"] != false || !run["scenario"].is_null() {
         return Err(conflict(
             "Apply the completed agent proposal in this sandbox before testing it",
         ));
     }
-    if run["channel"].as_str().unwrap_or("default") != marketing::channel_id(h) {
+    if run["channel"].as_str().unwrap_or("default") != channel_id(h) {
         return Err(conflict(
             "Open the source proposal's sales channel before testing it",
         ));
@@ -24,7 +26,7 @@ pub(super) async fn resolve(a: &App, h: &RequestContext, id: &str) -> Result<Val
     )
 }
 
-pub(super) async fn recheck(a: &App, h: &RequestContext, source: &Value) -> Result<()> {
+pub async fn recheck(a: &State, h: &RequestContext, source: &Value) -> Result<()> {
     if let Some(id) = source["taskId"].as_str()
         && resolve(a, h, id).await? != *source
     {

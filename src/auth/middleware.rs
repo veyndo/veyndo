@@ -241,7 +241,7 @@ async fn authenticate_scoped(State(a): State<App>, mut request: Request, next: N
         Err(e) => return e.into_response(),
     };
     *request.headers_mut() = h.transport().clone();
-    let agent_authority = crate::agent_runs::controls::model_authority(&a, &h).await;
+    let agent_authority = crate::agent_runs::controls::model_authority(&h);
     request.extensions_mut().insert(h);
     let mut response = veyndo::inference::budget::scoped(
         agent_authority,

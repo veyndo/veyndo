@@ -10,6 +10,7 @@ pub mod history_context;
 pub mod host_names;
 pub mod http_limits;
 pub mod localized;
+pub mod model_contract;
 pub mod observability;
 pub mod outbox;
 pub mod process_config;

@@ -8,4 +8,5 @@ pub mod price_guardrails;
 pub mod prompt_context;
 pub mod run_result;
 pub mod source_content;
+pub mod tool_trace;
 pub mod trusted_geography;

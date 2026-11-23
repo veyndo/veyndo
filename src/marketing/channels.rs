@@ -2,14 +2,6 @@
 use super::*;
 use veyndo_marketing::service::channels as owner;
 pub(crate) use veyndo_marketing::types::channel::Channel;
-/// Native channel metadata keeps type and activation admission independent of Studio's interface language.
-pub(crate) async fn channel_configuration(
-    a: &App,
-    h: &RequestContext,
-    id: &str,
-) -> Result<Channel> {
-    owner::channel_configuration(&a.core, h, id).await
-}
 pub(crate) async fn channel(
     a: &App,
     h: &RequestContext,
@@ -24,13 +16,6 @@ pub(crate) async fn admit_product(a: &App, h: &RequestContext, id: &str) -> Resu
 }
 pub(crate) async fn admit_products(a: &App, h: &RequestContext, ids: &[String]) -> Result<()> {
     owner::admit_products(&a.core, h, ids).await
-}
-pub(crate) async fn filter_channel(
-    a: &App,
-    h: &RequestContext,
-    ps: Vec<Product>,
-) -> Result<Vec<Product>> {
-    owner::filter_channel(&a.core, h, ps).await
 }
 pub(crate) async fn catalog_scope(a: &App, h: &RequestContext) -> Result<Option<Vec<String>>> {
     owner::catalog_scope(&a.core, h).await

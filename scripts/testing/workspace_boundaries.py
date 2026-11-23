@@ -45,7 +45,7 @@ ALLOWED = {
     'veyndo-apps': {'veyndo-kernel', 'veyndo-app-runtime'},
     'veyndo-app-platform': {'veyndo-core', 'veyndo-kernel', 'veyndo-app-model', 'veyndo-app-storage', 'veyndo-apps', 'veyndo-runtime', 'veyndo-identity', 'veyndo-pricing', 'veyndo-catalog', 'veyndo-orders', 'veyndo-checkout', 'veyndo-inventory', 'veyndo-shipping', 'veyndo-shop', 'veyndo-cognition', 'veyndo-b2b', 'veyndo-marketing', 'veyndo-intelligence'},
     'veyndo-cognition': {'veyndo-runtime', 'veyndo-kernel', 'veyndo-app-authority', 'veyndo-core'},
-    'veyndo-core': {'veyndo-kernel', 'veyndo-runtime'},
+    'veyndo-core': {'veyndo-kernel', 'veyndo-runtime', 'veyndo-app-model'},
     'veyndo-identity': {'veyndo-core', 'veyndo-kernel', 'veyndo-app-model', 'veyndo-cognition', 'veyndo-runtime'},
     'veyndo-catalog': {'veyndo-core', 'veyndo-identity', 'veyndo-pricing'},
     'veyndo-inventory': {'veyndo-core', 'veyndo-catalog', 'veyndo-pricing'},
@@ -57,7 +57,7 @@ ALLOWED = {
     'veyndo-b2b': {'veyndo-core', 'veyndo-pricing', 'veyndo-shop', 'veyndo-identity', 'veyndo-kernel', 'veyndo-app-model'},
     'veyndo-pos': {'veyndo-core', 'veyndo-pricing', 'veyndo-shop', 'veyndo-checkout', 'veyndo-customers', 'veyndo-identity', 'veyndo-marketing'},
     'veyndo-checkout': {'veyndo-core', 'veyndo-pricing', 'veyndo-shop', 'veyndo-shipping', 'veyndo-catalog', 'veyndo-b2b', 'veyndo-identity', 'veyndo-runtime', 'veyndo-marketing', 'veyndo-customers', 'veyndo-inventory', 'veyndo-orders', 'veyndo-payments'},
-    'veyndo-intelligence': {'veyndo-core', 'veyndo-pricing', 'veyndo-runtime', 'veyndo-catalog', 'veyndo-kernel', 'veyndo-shipping', 'veyndo-identity', 'veyndo-shop', 'veyndo-marketing', 'veyndo-checkout', 'veyndo-inventory'},
+    'veyndo-intelligence': {'veyndo-core', 'veyndo-pricing', 'veyndo-runtime', 'veyndo-catalog', 'veyndo-kernel', 'veyndo-shipping', 'veyndo-identity', 'veyndo-shop', 'veyndo-marketing', 'veyndo-checkout', 'veyndo-inventory', 'veyndo-cognition', 'veyndo-app-model'},
     'veyndo-studio': {'veyndo-core', 'veyndo-app-model', 'veyndo-identity', 'veyndo-app-platform', 'veyndo-orders', 'veyndo-pricing', 'veyndo-shop', 'veyndo-catalog', 'veyndo-intelligence', 'veyndo-marketing'},
     'veyndo-shop': {'veyndo-core', 'veyndo-pricing', 'veyndo-inventory', 'veyndo-shipping', 'veyndo-app-model', 'veyndo-catalog', 'veyndo-identity', 'veyndo-kernel'},
 }

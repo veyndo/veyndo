@@ -16,15 +16,7 @@ use veyndo_core::{
 use veyndo_identity::{merchant, permit};
 use veyndo_kernel::verified_kernel;
 
-fn contract(error: veyndo_app_model::Error) -> Error {
-    match error.kind {
-        veyndo_app_model::Kind::Bad => bad(error.message),
-        veyndo_app_model::Kind::Conflict => conflict(&error.message),
-        veyndo_app_model::Kind::Validation => {
-            Error::validation(error.pointer.as_deref().unwrap_or(""), error.message)
-        }
-    }
-}
+use veyndo_core::model_contract::error as contract;
 /// The machine the order was accepted under, or the shop's current one.
 pub(crate) fn accepted_machine(
     o: &Value,

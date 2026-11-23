@@ -1,8 +1,20 @@
 //! Takes today's automatic price changes back to the day's baseline, by request or when the daily exposure limit is exceeded.
-use super::*;
+use super::autonomy::today;
+use crate::knowledge;
+use serde_json::{Value, json};
+use sqlx::Row;
 use std::sync::atomic::{AtomicU64, Ordering};
+use veyndo_catalog::store::products::product;
+use veyndo_core::shop_scope::header;
+use veyndo_core::{Error, RequestContext, Result, State, bad};
+use veyndo_identity::permit;
+use veyndo_pricing::money::{Currency, Money};
+use veyndo_pricing::service::conversion::amount;
+use veyndo_shop::Settings;
+use veyndo_shop::service::read_cache::config;
 static LAST_GUARD: AtomicU64 = AtomicU64::new(0);
-fn minor(s: &commerce::Settings, code: &str, price: f64) -> Result<(i64, u8)> {
+/// A price in minor units with its scale.
+fn minor(s: &Settings, code: &str, price: f64) -> Result<(i64, u8)> {
     let scale = s
         .currencies
         .definitions
@@ -10,17 +22,17 @@ fn minor(s: &commerce::Settings, code: &str, price: f64) -> Result<(i64, u8)> {
         .find(|d| d.code == code)
         .ok_or(bad("Currency missing"))?
         .scale;
-    Ok((currencies::amount(price, code, scale)?.minor(), scale))
+    Ok((amount(price, code, scale)?.minor(), scale))
 }
 /// A product is only restored while it still carries the price the autopilot set; a later manual edit wins.
-pub(crate) async fn revert(
-    a: &App,
+pub async fn revert(
+    a: &State,
     t: &str,
     actor: &str,
     only: Option<&str>,
     automatic: bool,
 ) -> Result<Value> {
-    let (s, _) = commerce::config(a, t).await?;
+    let (s, _) = config(a, t).await?;
     let mut tx = a.db.begin().await?;
     let rows = sqlx::query("SELECT b.product_id,b.baseline_minor,b.currency,p.price,p.revision,k.proposal->'proposal'->'changes' AS changes FROM ai_price_budget b JOIN products p ON p.tenant=b.tenant AND p.id=b.product_id JOIN tasks k ON k.tenant=b.tenant AND k.id=b.task_id WHERE b.tenant=$1 AND b.day=(now() AT TIME ZONE 'UTC')::date AND ($2::text IS NULL OR b.product_id=$2) ORDER BY b.product_id FOR UPDATE OF p")
         .bind(t).bind(only).fetch_all(&mut *tx).await?;
@@ -48,13 +60,10 @@ pub(crate) async fn revert(
             skipped.push(json!({"productId":id,"reason":"changed_since"}));
             continue;
         }
-        let price = veyndo::money::Money::new(
-            baseline,
-            veyndo::money::Currency::new(&code, scale).map_err(bad)?,
-        )
-        .decimal()
-        .parse::<f64>()
-        .map_err(|_| bad("Invalid baseline price"))?;
+        let price = Money::new(baseline, Currency::new(&code, scale).map_err(bad)?)
+            .decimal()
+            .parse::<f64>()
+            .map_err(|_| bad("Invalid baseline price"))?;
         let changed = sqlx::query("UPDATE products SET price=$1,revision=revision+1 WHERE tenant=$2 AND id=$3 AND revision=$4 RETURNING *")
             .bind(price).bind(t).bind(&id).bind(row.get::<i64,_>("revision")).fetch_optional(&mut *tx).await?;
         let Some(changed) = changed else {
@@ -79,9 +88,10 @@ pub(crate) async fn revert(
     tx.commit().await?;
     Ok(json!({"reverted":reverted,"skipped":skipped,"automatic":automatic}))
 }
-pub(crate) async fn request(a: &App, t: &str, h: &RequestContext, v: &Value) -> Result<Value> {
-    auth::permit(h, "catalog.write")?;
-    auth::permit(h, "settings.write")?;
+/// Takes back today's automatic changes on explicit request.
+pub async fn request(a: &State, t: &str, h: &RequestContext, v: &Value) -> Result<Value> {
+    permit(h, "catalog.write")?;
+    permit(h, "settings.write")?;
     if v["approve"] != true {
         return Err(bad("Explicit approve=true required"));
     }
@@ -95,7 +105,7 @@ pub(crate) async fn request(a: &App, t: &str, h: &RequestContext, v: &Value) -> 
     .await
 }
 /// Worker guard: at most every 30 seconds per process, restore shops whose exposure today is above their limit.
-pub(crate) async fn guard_once(a: &App) -> Result<bool> {
+pub async fn guard_once(a: &State) -> Result<bool> {
     let now = std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)
         .map_or(0, |d| d.as_secs());
@@ -113,11 +123,11 @@ pub(crate) async fn guard_once(a: &App) -> Result<bool> {
     for t in tenants {
         // One shop's failure must not stop the guard for the others.
         let result = async {
-            let (s, _) = commerce::config(a, &t).await?;
+            let (s, _) = config(a, &t).await?;
             let Some(limit) = s.ai_policy.autonomy.max_daily_exposure_minor else {
                 return Ok(false);
             };
-            let (total, _) = autonomy::today(&a.db, &t, &s, &[]).await?;
+            let (total, _) = today(&a.db, &t, &s, &[]).await?;
             if total <= u128::from(limit) {
                 return Ok(false);
             }
