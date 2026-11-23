@@ -16,8 +16,6 @@ pub(crate) use organization::save as restore_configuration;
 mod purchase;
 mod quick_order;
 mod quote_contract;
-mod quote_lifecycle;
-mod quotes;
 mod requisition;
 mod staging;
 use access::{access, catalog_guard, require};

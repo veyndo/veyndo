@@ -157,8 +157,6 @@ This lists every checked-in source module in these roots, including files with n
 | [src/b2b/purchase.rs](../src/b2b/purchase.rs) | Serializes unit spending and binds an approved purchase to the authoritative native checkout quote. |
 | [src/b2b/quick_order.rs](../src/b2b/quick_order.rs) | Bounded SKU bulk entry resolves native products then uses the ordinary cart's permissions, quantities and prices. |
 | [src/b2b/quote_contract.rs](../src/b2b/quote_contract.rs) | Accepted offer prices feed the existing currency/tax calculator; checkout consumes the offer atomically. |
-| [src/b2b/quote_lifecycle.rs](../src/b2b/quote_lifecycle.rs) | App-owned RFQ preparation states reuse native quote CAS, ownership, history and outbox; only native offer/accept moves money. |
-| [src/b2b/quotes.rs](../src/b2b/quotes.rs) | RFQ lifecycle binds merchant offers to a specific company buyer, cart, currency, expiry and revision. |
 | [src/b2b/requisition.rs](../src/b2b/requisition.rs) | Requisition import is owned by the B2B component; merchant admission and shop settings are resolved here. |
 | [src/b2b/settings.rs](../src/b2b/settings.rs) | B2B feature switches live in shared commerce settings; disabling never relaxes existing financial policy. |
 | [src/b2b/staging.rs](../src/b2b/staging.rs) | Clone and publish purchasing configuration only; employees, orders, approvals and spending remain live-only. |
@@ -696,12 +694,15 @@ This lists every checked-in source module in these roots, including files with n
 | [components/apps/src/store/tool_catalogue.rs](../components/apps/src/store/tool_catalogue.rs) | Installed app tools share native wire metadata and validate declared results without disclosing provider payloads. |
 | [components/apps/src/store.rs](../components/apps/src/store.rs) | SQL of the apps component. |
 | [components/b2b/src/domain/contract.rs](../components/b2b/src/domain/contract.rs) | Native B2B operation catalogue and bounded request schema shared by HTTP, MCP and UCP adapters. |
+| [components/b2b/src/domain/quote_lifecycle.rs](../components/b2b/src/domain/quote_lifecycle.rs) | App-owned RFQ preparation states reuse native quote CAS, ownership, history and outbox; only native offer/accept moves money. |
 | [components/b2b/src/domain.rs](../components/b2b/src/domain.rs) | domain of this component. |
 | [components/b2b/src/lib.rs](../components/b2b/src/lib.rs) | B2B component: company procurement records, their bounds and the purchasing contract. |
+| [components/b2b/src/ports.rs](../components/b2b/src/ports.rs) | What quote requests need from the server: the compiled app lifecycle a new quote is accepted under. |
 | [components/b2b/src/service/approval.rs](../components/b2b/src/service/approval.rs) | Revision-bound purchasing approval inbox; approvers must be active peers and cannot approve themselves. |
 | [components/b2b/src/service/onboarding.rs](../components/b2b/src/service/onboarding.rs) | Atomic company setup through the same company, unit and member writers; a foreign customer rolls back the whole setup. |
 | [components/b2b/src/service/quick_order.rs](../components/b2b/src/service/quick_order.rs) | Bounded SKU bulk entry resolves native products then uses the ordinary cart's permissions, quantities and prices. |
 | [components/b2b/src/service/quote_contract.rs](../components/b2b/src/service/quote_contract.rs) | Accepted offer prices feed the existing currency/tax calculator; checkout consumes the offer atomically. |
+| [components/b2b/src/service/quotes.rs](../components/b2b/src/service/quotes.rs) | RFQ lifecycle: company quote requests for the reviewed cart, merchant offers bound to a buyer, cart, currency, expiry and revision, app lifecycle transitions and acceptance. |
 | [components/b2b/src/service/requisition.rs](../components/b2b/src/service/requisition.rs) | Explicit integration permission imports requisitions into native lists; it never impersonates checkout buyers. |
 | [components/b2b/src/service.rs](../components/b2b/src/service.rs) | Procurement operations on the buyer cart; the server supplies the cart through the shop port. |
 | [components/b2b/src/store/access.rs](../components/b2b/src/store/access.rs) | Re-resolves active customer sessions, company policy and unit membership at every procurement boundary. |

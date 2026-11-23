@@ -1336,15 +1336,25 @@
       "sha256": "f95693b87d97414af42c6811d9a7eacc99326d3570d2a1245a8c06be32379bdf",
       "review": "Unit tests for every public domain function of the components; no production code changed"
     },
+    "components/b2b/src/domain/quote_lifecycle.rs": {
+      "status": "unproved",
+      "sha256": "7e1c271ed526983417830e9a2ffa2b43fd16ac15a4e0371d742954d114d2dd71",
+      "review": "Company quotes and their lifecycle rules move into b2b"
+    },
     "components/b2b/src/domain.rs": {
       "status": "unproved",
-      "sha256": "4d4da23b697436e5b9aa5d39cac588ad98744313aeba4e6bb24a73a7764c3d3a",
-      "review": "Identity credentials, B2B and POS contracts and checkout tax lines moved into components; kernel call sites unchanged"
+      "sha256": "b6fb0fc8cf348a6d2ea3044a676fb5081fed11fea97f4334f25c80c0dfa155d9",
+      "review": "Company quotes and their lifecycle rules move into b2b"
     },
     "components/b2b/src/lib.rs": {
       "status": "unproved",
-      "sha256": "089fb1135183fa4f2df9cb8f6ecd0b58a4fe61f4037a62e3b30544fc6ad2bfe5",
-      "review": "B2B approvals, quick order and offer contract moved behind the shop cart port"
+      "sha256": "07e50656e7d26e33e463fd8d1cf7905a1a1eb2fd794860019ad8ef874e9d4e93",
+      "review": "Company quotes and their lifecycle rules move into b2b"
+    },
+    "components/b2b/src/ports.rs": {
+      "status": "unproved",
+      "sha256": "898e7c35a56990cb6e57f7c23421f25caf1199bce89d41d29ab9a8b1e8cd1969",
+      "review": "Company quotes and their lifecycle rules move into b2b"
     },
     "components/b2b/src/service/approval.rs": {
       "status": "reviewed-binding",
@@ -1366,6 +1376,11 @@
       "sha256": "84272e35216d2c94b26846f4e22a83bdda96e1954bc886d4bca33d9a3b2793cb",
       "review": "B2B approvals, quick order and offer contract moved behind the shop cart port"
     },
+    "components/b2b/src/service/quotes.rs": {
+      "status": "unproved",
+      "sha256": "9c7cffba003d1eea4b77b83f1764b2c1b0f94625a91744bbc4f3764f4ff31f47",
+      "review": "Company quotes and their lifecycle rules move into b2b"
+    },
     "components/b2b/src/service/requisition.rs": {
       "status": "unproved",
       "sha256": "351faa9841a47a67441a06398b11a804ca1c563731913304512a7d9ccac04a44",
@@ -1373,8 +1388,8 @@
     },
     "components/b2b/src/service.rs": {
       "status": "unproved",
-      "sha256": "eb4396669294dcae2f55c72a706ed5ade01cb45531fb9c149d6f846b95e6f27b",
-      "review": "Rate refresh, company onboarding, POS channel setup, rule comparison and facts and source lifecycle handlers moved into their components; behaviour unchanged"
+      "sha256": "ac2ad9f416eabcb1b8ebaeec13eb75731c5602fcd65073b1160a6428c0389c90",
+      "review": "Company quotes and their lifecycle rules move into b2b"
     },
     "components/b2b/src/store/access.rs": {
       "status": "unproved",
@@ -5938,8 +5953,8 @@
     },
     "src/apps/native_lifecycle.rs": {
       "status": "unproved",
-      "sha256": "f465350ee5b4ec0dac516c301f76849cad5bee0e252d63f76efa4b2b64c05f90",
-      "review": "App Studio builds, autosaves, archive and staging moved into the apps component; behaviour unchanged"
+      "sha256": "082bba1614028804cce38e2e416dd85f59c8ba2f147ef5604d213ad1ef915b2d",
+      "review": "Company quotes and their lifecycle rules move into b2b"
     },
     "src/apps/native_view_tests.rs": {
       "status": "unproved",
@@ -6283,8 +6298,8 @@
     },
     "src/b2b/gateway.rs": {
       "status": "unproved",
-      "sha256": "0c4830c4355800723cab4bc2c851a08226c8a9b5f2eb53dda3099ea8673d1ab4",
-      "review": "Native lifecycle review: bounded namespaced app graphs preserve native terminal/payment/stock/buyer admission, per-object immutable accepted definitions, current compound scopes, same HTTP MCP Flow owners and operational history; SQL snapshots and migration 105 are regression-tested adapters, not proved."
+      "sha256": "78d05854cbff49e6cc7f41c39969bde8bbe7823f2c21f54f70353eb21ec0d7a6",
+      "review": "Company quotes and their lifecycle rules move into b2b"
     },
     "src/b2b/lists.rs": {
       "status": "unproved",
@@ -6293,8 +6308,8 @@
     },
     "src/b2b/mod.rs": {
       "status": "unproved",
-      "sha256": "de223a576dbb46ea88180125dee12d961b6fd54f14335cd1d159d1809d56879d",
-      "review": "The purchase transaction moves into checkout behind the purchase port"
+      "sha256": "160a8dd2ee217e31cca34329e91c1455d1dd3fcad54c64f1bf820a66066a49aa",
+      "review": "Company quotes and their lifecycle rules move into b2b"
     },
     "src/b2b/model.rs": {
       "status": "unproved",
@@ -6330,16 +6345,6 @@
       "status": "unproved",
       "sha256": "b64b06d79644eecc5d74f8e097b480572eec0e2b71117896213c042a994d9f6f",
       "review": "The purchase transaction moves into checkout behind the purchase port"
-    },
-    "src/b2b/quote_lifecycle.rs": {
-      "status": "unproved",
-      "sha256": "5539882fe70056e390591f4bd3ab2af9d520ea334d29f60a19d5c98577a7d45d",
-      "review": "Native lifecycle review: bounded namespaced app graphs preserve native terminal/payment/stock/buyer admission, per-object immutable accepted definitions, current compound scopes, same HTTP MCP Flow owners and operational history; SQL snapshots and migration 105 are regression-tested adapters, not proved."
-    },
-    "src/b2b/quotes.rs": {
-      "status": "unproved",
-      "sha256": "1b23a25e9a4aa121275588ed59b232669bdff0ec606165b4f23792263180afe7",
-      "review": "Functions above 150 lines split into named steps without behaviour change; function length limit lowered to 150"
     },
     "src/b2b/requisition.rs": {
       "status": "unproved",
@@ -8078,8 +8083,8 @@
       "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
     },
     "Cargo.lock": {
-      "sha256": "109e867428eabf2476b27689350eded98b28f54c84511f0ed0686c2338205e6d",
-      "review": "Hosted frontend transport moves into shop"
+      "sha256": "a69355ec436d57e71cd88d309d857822e69cfdc9ea5cd70ecdd9f360f705ba05",
+      "review": "Company quotes and their lifecycle rules move into b2b"
     },
     "Cargo.toml": {
       "sha256": "12d2d79a98f6913d20b8e912afb9ea8de0539b9e83428de8a9d7412c406896f6",

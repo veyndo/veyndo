@@ -1,22 +1,41 @@
-//! RFQ lifecycle binds merchant offers to a specific company buyer, cart, currency, expiry and revision.
-use super::*;
-pub(super) use veyndo_b2b::types::model::OfferLine;
-pub(super) async fn invoke(a: &App, h: &RequestContext, op: &str, v: &Value) -> Result<Value> {
+//! RFQ lifecycle: company quote requests for the reviewed cart, merchant offers bound to a buyer, cart, currency, expiry and revision, app lifecycle transitions and acceptance.
+use crate::domain::quote_lifecycle;
+use crate::ports::QuoteLifecycle;
+use crate::store::access::{access, guard_conn, identity, require};
+use crate::store::organization;
+use crate::types::model::OfferLine;
+use serde_json::{Value, json};
+use sqlx::Row;
+use veyndo_core::history_context::{context, customer_context};
+use veyndo_core::shop_scope::{header, tenant};
+use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad, conflict, uid};
+use veyndo_identity::{merchant, permit};
+use veyndo_shop::ports::Carts;
+use veyndo_shop::types::cart::{Item, StoredCart};
+/// The quote operations of buyers (request, list, read, accept) and merchants (list, offer, transition).
+pub async fn invoke(
+    a: &State,
+    ports: (&dyn Carts, &dyn QuoteLifecycle),
+    h: &RequestContext,
+    op: &str,
+    v: &Value,
+) -> Result<Value> {
+    let (carts, lifecycle) = ports;
     let t = tenant(h)?;
     let admin = ["quotes.merchant", "quote.offer", "quote.transition"].contains(&op);
     if admin {
-        merchant(a, h)?;
-        auth::permit(h, "b2b.manage")?;
-        auth::permit(h, "customers.pii")?;
+        merchant(h)?;
+        permit(h, "b2b.manage")?;
+        permit(h, "customers.pii")?;
     }
     let c = if ["quote.request", "quote.get", "quote.current"].contains(&op) {
-        Some(load_cart(a, h).await?)
+        Some(carts.load(h).await?)
     } else {
         None
     };
     let q = if let Some(c) = c.as_ref().filter(|_| op == "quote.request") {
         {
-            let mut snapshot = cart_json(a, c).await?;
+            let mut snapshot = carts.view(c).await?;
             if let Some(v) = snapshot.as_object_mut() {
                 v.remove("token");
             }
@@ -26,17 +45,17 @@ pub(super) async fn invoke(a: &App, h: &RequestContext, op: &str, v: &Value) -> 
         None
     };
     let mut tx = a.db.begin().await?;
-    history::context(&mut tx, h, "b2b.procurement").await?;
+    context(&mut tx, h, "b2b.procurement").await?;
     let customer = if admin {
         None
     } else {
         Some(identity(&mut tx, h).await?)
     };
     if let Some(customer) = &customer {
-        history::customer_context(&mut tx, customer).await?;
+        customer_context(&mut tx, customer).await?;
     }
     if op == "quotes.merchant" {
-        auth::permit(h, "customers.pii")?;
+        permit(h, "customers.pii")?;
         let rows=sqlx::query("SELECT id,unit_id,buyer_id,state,revision,data FROM b2b_quotes WHERE tenant=$1 ORDER BY created_at DESC LIMIT 100").bind(&t).fetch_all(&mut *tx).await?;
         return Ok(json!({"elements":rows.iter().map(|r| wire(r, h, admin)).collect::<Vec<_>>()}));
     }
@@ -51,7 +70,7 @@ pub(super) async fn invoke(a: &App, h: &RequestContext, op: &str, v: &Value) -> 
         return cart_quotes(&mut tx, h, &t, op, v, c.as_ref().unwrap()).await;
     }
     if let Some(c) = &c {
-        return request(tx, h, &t, v, c, q).await;
+        return request(tx, lifecycle, h, &t, (v, c, q)).await;
     }
     let id = v["id"].as_str().ok_or(bad("Quote required"))?;
     if !admin {
@@ -168,12 +187,12 @@ async fn cart_quotes(
 /// Records a quote request for the reviewed, unchanged company cart.
 async fn request(
     mut tx: Tx<'_>,
+    lifecycle: &dyn QuoteLifecycle,
     h: &RequestContext,
     t: &str,
-    v: &Value,
-    c: &StoredCart,
-    q: Option<Value>,
+    input: (&Value, &StoredCart, Option<Value>),
 ) -> Result<Value> {
+    let (v, c, q) = input;
     if c.status != "open" || c.data.items.is_empty() || v["revision"].as_i64() != Some(c.revision) {
         return Err(conflict("Review a current nonempty company cart first"));
     }
@@ -198,7 +217,7 @@ async fn request(
     }
     let id = uid();
     let context = c.data.b2b.as_ref().unwrap();
-    let accepted = apps::native_lifecycle::capture(&mut tx, t, "quote").await?;
+    let accepted = lifecycle.capture(&mut tx, t).await?;
     sqlx::query("INSERT INTO b2b_quotes(tenant,id,unit_id,buyer_id,cart_id,data) VALUES($1,$2,$3,$4,$5,$6)").bind(t).bind(&id).bind(&context.unit_id).bind(&context.customer_id).bind(&c.id).bind(json!({"quote":q,"currency":c.data.currency,"items":c.data.items,"message":message(v)?,"messages":[],"nativeLifecycle":accepted})).execute(&mut *tx).await?;
     organization::event(
         &mut tx,
@@ -256,6 +275,7 @@ async fn offer(tx: &mut Tx<'_>, v: &Value, data: &mut Value, state: &str) -> Res
     data["validUntil"] = json!(until);
     Ok(())
 }
+/// The buyer's or merchant's bounded message.
 fn message(v: &Value) -> Result<&str> {
     let s = v["message"].as_str().unwrap_or("");
     if s.len() > 4000
@@ -266,6 +286,7 @@ fn message(v: &Value) -> Result<&str> {
     }
     Ok(s)
 }
+/// A quote row as a response; the merchant view adds the lifecycle actions.
 fn wire(r: &sqlx::postgres::PgRow, h: &RequestContext, admin: bool) -> Value {
     let mut data: Value = r.get("data");
     let state: String = r.get("state");

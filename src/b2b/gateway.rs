@@ -113,7 +113,14 @@ pub(crate) async fn invoke(a: &App, h: &RequestContext, name: &str, v: &Value) -
         }
         op @ ("quotes" | "quotes.merchant" | "quote.request" | "quote.offer" | "quote.message"
         | "quote.reject" | "quote.get" | "quote.current" | "quote.transition") => {
-            quotes::invoke(a, h, op, v).await
+            veyndo_b2b::service::quotes::invoke(
+                a,
+                (&crate::cart_storage::Carts(a), &QuoteLifecycle),
+                h,
+                op,
+                v,
+            )
+            .await
         }
         "quote.accept" => quote_contract::select(a, h, v, true).await,
         "quote.release" => quote_contract::select(a, h, v, false).await,
@@ -216,4 +223,16 @@ async fn select(a: &App, h: &RequestContext, v: &Value) -> Result<Value> {
         .await?;
     tx.commit().await?;
     cart_json(a, &c).await
+}
+
+/// The app platform compiles the lifecycle a new quote is accepted under.
+struct QuoteLifecycle;
+impl veyndo_b2b::ports::QuoteLifecycle for QuoteLifecycle {
+    fn capture<'a>(
+        &'a self,
+        conn: &'a mut sqlx::PgConnection,
+        tenant: &'a str,
+    ) -> veyndo_core::PortFuture<'a, Value> {
+        Box::pin(apps::native_lifecycle::capture(conn, tenant, "quote"))
+    }
 }

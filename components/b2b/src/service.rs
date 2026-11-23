@@ -3,4 +3,5 @@ pub mod approval;
 pub mod onboarding;
 pub mod quick_order;
 pub mod quote_contract;
+pub mod quotes;
 pub mod requisition;

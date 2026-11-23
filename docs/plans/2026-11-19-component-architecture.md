@@ -431,9 +431,13 @@ Order follows the dependency report, lowest first. Each line is one move.
   and company guards on a cart row the caller locked itself. The requisition
   import lives in `service/`; the bounds of cart lines moved to
   `veyndo_shop::domain::cart_lines`. Company onboarding with its first
-  unit is `service/onboarding`. Open: lists (app configuration
-  selections), quotes and their lifecycle (app lifecycle), the gateway and
-  routes.
+  unit is `service/onboarding`. Company quotes (request for the reviewed
+  cart, exact merchant offers, transitions, acceptance) are
+  `service/quotes`; their app lifecycle rules (`domain/quote_lifecycle`) read
+  the accepted snapshot through the shared lifecycle model, and the snapshot
+  a new quote captures comes through `ports::QuoteLifecycle`, because the app
+  platform compiles it and already depends on b2b through orders.
+  Open: lists (app configuration selections), the gateway and routes.
 - [ ] pos. Started: `components/pos` owns the cashier input envelope and the
   capability schema; the POS location of a channel lives with the channel in
   marketing. `service/` holds the cashier customer search and attachment,

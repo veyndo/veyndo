@@ -641,7 +641,7 @@
         "outbox",
         "products"
       ],
-      "glob_imports": 9,
+      "glob_imports": 7,
       "untyped_access": 108,
       "sql_outside_store": 8
     },

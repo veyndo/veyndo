@@ -25,9 +25,9 @@ run SQL without being in a `store` folder. Both numbers only fall.
 | orders | 5885 | 24 | 454 | 12 | 7 | apps (27), b2b (1), catalog (12), checkout (6), core (213), customers (5), identity (65), inventory (1), marketing (6), payments (2), pricing (7), shipping (2), shop (17), studio (7) | 15 |
 | payments | 4838 | 1 | 264 | 13 | 7 | apps (5), core (198), host (3), identity (10), inventory (1), orders (1), pos (1), pricing (8), shop (7), studio (1) | 14 |
 | marketing | 6275 | 19 | 338 | 14 | 8 | apps (14), automation (19), b2b (2), catalog (5), checkout (2), core (173), identity (34), intelligence (14), orders (1), payments (1), pos (1), pricing (14), shop (32), studio (2) | 24 |
-| b2b | 2492 | 9 | 108 | 8 | 8 | apps (16), checkout (10), core (110), customers (2), identity (17), marketing (1), orders (1), pos (1), pricing (8), shop (26), studio (7) | 8 |
+| b2b | 2623 | 7 | 108 | 8 | 8 | apps (10), checkout (9), core (89), customers (2), identity (16), marketing (1), orders (1), pos (1), pricing (7), shop (26), studio (5) | 8 |
 | pos | 1178 | 5 | 68 | 4 | 0 | apps (1), catalog (3), checkout (17), core (40), customers (1), identity (15), marketing (5), orders (1), payments (3), pricing (5), shop (20) | 8 |
-| apps | 15526 | 56 | 434 | 28 | 22 | b2b (3), catalog (11), checkout (5), core (415), host (7), identity (65), intelligence (5), inventory (2), marketing (8), orders (17), payments (7), pos (1), pricing (12), shipping (2), shop (33), studio (11) | 20 |
+| apps | 15524 | 56 | 434 | 28 | 22 | b2b (3), catalog (11), checkout (5), core (415), host (7), identity (65), intelligence (5), inventory (2), marketing (8), orders (17), payments (7), pos (1), pricing (12), shipping (2), shop (33), studio (11) | 20 |
 | automation | 1443 | 8 | 97 | 0 | 0 | core (2) | 0 |
 | intelligence | 12772 | 70 | 736 | 34 | 28 | apps (45), catalog (23), checkout (19), core (626), customers (1), identity (74), inventory (1), marketing (17), orders (1), payments (1), pricing (19), protocols (8), shipping (1), shop (54), studio (7) | 25 |
 | studio | 3516 | 15 | 168 | 7 | 5 | apps (27), b2b (4), catalog (7), core (129), customers (1), identity (39), intelligence (2), marketing (9), orders (1), pos (1), pricing (2), shop (14) | 36 |
@@ -40,7 +40,7 @@ run SQL without being in a `store` folder. Both numbers only fall.
 57 pairs of components depend on each other. A crate boundary needs each pair
 reduced to one direction first.
 
-- apps ↔ b2b: 3 and 16 references
+- apps ↔ b2b: 3 and 10 references
 - apps ↔ catalog: 11 and 19 references
 - apps ↔ checkout: 5 and 21 references
 - apps ↔ host: 7 and 1 references
@@ -52,10 +52,10 @@ reduced to one direction first.
 - apps ↔ pos: 1 and 1 references
 - apps ↔ shop: 33 and 4 references
 - apps ↔ studio: 11 and 27 references
-- b2b ↔ checkout: 10 and 16 references
+- b2b ↔ checkout: 9 and 16 references
 - b2b ↔ marketing: 1 and 2 references
 - b2b ↔ orders: 1 and 1 references
-- b2b ↔ studio: 7 and 4 references
+- b2b ↔ studio: 5 and 4 references
 - catalog ↔ checkout: 5 and 11 references
 - catalog ↔ identity: 21 and 15 references
 - catalog ↔ intelligence: 8 and 23 references

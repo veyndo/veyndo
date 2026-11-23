@@ -84,7 +84,7 @@ EXTERNAL = {
     'veyndo-marketing': {'serde', 'serde_json', 'sqlx', 'axum'},
     'veyndo-orders': {'serde', 'serde_json', 'sqlx', 'axum', 'chrono', 'reqwest', 'sha2', 'uuid', 'pdf-extract', 'image', 'base64', 'tokio'},
     'veyndo-payments': {'serde', 'serde_json', 'sqlx', 'chrono', 'reqwest', 'hmac', 'sha2'},
-    'veyndo-b2b': {'serde', 'serde_json', 'sqlx'},
+    'veyndo-b2b': {'serde', 'serde_json', 'sqlx', 'chrono'},
     'veyndo-pos': {'serde', 'serde_json', 'sqlx'},
     'veyndo-checkout': {'serde', 'serde_json', 'chrono', 'sqlx', 'uuid', 'axum', 'base64', 'reqwest', 'ring', 'sha2'},
     'veyndo-intelligence': {'serde', 'serde_json', 'sqlx', 'reqwest', 'sha2', 'tokio', 'uuid', 'libc', 'pdf-extract', 'chrono', 'ring', 'base64', 'tracing', 'axum'},

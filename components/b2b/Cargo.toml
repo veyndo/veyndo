@@ -8,6 +8,7 @@ description = "Company procurement: units, budgets, approvals and their purchasi
 [dependencies]
 serde.workspace = true
 serde_json.workspace = true
+chrono.workspace = true
 sqlx.workspace = true
 veyndo-core = { path = "../core" }
 veyndo-identity = { path = "../identity" }
