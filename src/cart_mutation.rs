@@ -104,7 +104,7 @@ type Modules = HashMap<String, Arc<Sandbox>>;
 type Consent = (String, HashMap<String, bool>);
 
 /// The server side of one cart edit: the app selections it carries, its consent, and what it prepared on the way.
-struct Edits<'a> {
+pub(crate) struct Edits<'a> {
     app: &'a App,
     selections: Option<&'a [apps::ConfigurationSelection]>,
     consent: Mutex<Option<Consent>>,
@@ -112,7 +112,7 @@ struct Edits<'a> {
     modules: Mutex<Option<Modules>>,
 }
 impl<'a> Edits<'a> {
-    fn new(
+    pub(crate) fn new(
         app: &'a App,
         selections: Option<&'a [apps::ConfigurationSelection]>,
         consent: Option<Consent>,

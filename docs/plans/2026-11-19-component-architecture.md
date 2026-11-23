@@ -342,7 +342,11 @@ Order follows the dependency report, lowest first. Each line is one move.
   fingerprint, the locked write) is `store/cart_edit`; app configuration
   selections, protocol consent and the agent run fence reach it through the
   port `ports::CartEdits`, implemented per edit by `cart_mutation::Edits`.
-  Open: the selection, the four steps of the checkout
+  The checkout selection (country, methods, contact email, saved and entered
+  addresses, refused when the quote cannot honour it) is
+  `store/cart_selection`; the public method discovery is
+  `service/checkout_options`, with the provider pairs from `Quotes::available`.
+  Open: the four steps of the checkout
   transaction (they call apps, B2B, payments, marketing and legal and need a
   host port). `http/buyer_identity` seals and inspects the
   short-lived Checkout grant of a live customer session and

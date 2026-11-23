@@ -251,7 +251,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/commerce/catalog_ports.rs](../src/commerce/catalog_ports.rs) | The server's implementation of what the catalog component reads from carts, orders, environments and the history. |
 | [src/commerce/configuration.rs](../src/commerce/configuration.rs) | Tenant checkout configuration loading. |
 | [src/commerce/content_text.rs](../src/commerce/content_text.rs) | Translated names are checked against the enabled content languages of the shop; the fallback rules are owned by the catalog component. |
-| [src/commerce/context_routes.rs](../src/commerce/context_routes.rs) | Public method discovery and revision-checked checkout context changes. |
+| [src/commerce/context_routes.rs](../src/commerce/context_routes.rs) | Method discovery and checkout context changes are owned by the checkout component; the server supplies its ports. |
 | [src/commerce/customer_groups.rs](../src/commerce/customer_groups.rs) | Tenant-owned translated customer groups preserve exact rule IDs and select an explicit existing price/tax presentation basis. |
 | [src/commerce/delivery.rs](../src/commerce/delivery.rs) | Shipping costs, proportional taxes and calendar delivery windows. |
 | [src/commerce/delivery_split.rs](../src/commerce/delivery_split.rs) | Partial-package allocation is owned by the orders component. |
@@ -263,7 +263,6 @@ This lists every checked-in source module in these roots, including files with n
 | [src/commerce/international_capabilities.rs](../src/commerce/international_capabilities.rs) | International configuration and translation MCP tools call the exact same scoped native handlers as HTTP. |
 | [src/commerce/inventory.rs](../src/commerce/inventory.rs) | Stock allocation, consumption and release are owned by the inventory component. |
 | [src/commerce/inventory_ports.rs](../src/commerce/inventory_ports.rs) | The server's implementation of what the inventory component reads from environments and the product index. |
-| [src/commerce/method_text.rs](../src/commerce/method_text.rs) | Shared translated names and descriptions with field-wise shop-main-language inheritance. |
 | [src/commerce/method_usage.rs](../src/commerce/method_usage.rs) | Authoritative deletion guards for methods; the reference counts are owned by the shipping component. |
 | [src/commerce/mod.rs](../src/commerce/mod.rs) | Native catalogue and checkout domains; pricing ports remain in the library. |
 | [src/commerce/order_fields.rs](../src/commerce/order_fields.rs) | Derived order fields are owned by the orders component. |
@@ -810,6 +809,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/checkout/src/ports.rs](../components/checkout/src/ports.rs) | What the cart projection needs from the server: localized cart products, the payment methods providers admit, and the app hooks and cashier discount that run after native pricing. |
 | [components/checkout/src/service/app_adjustments.rs](../components/checkout/src/service/app_adjustments.rs) | Apply admitted integer app adjustments through native pricing/tax calculation; extensions cannot replace quote JSON. |
 | [components/checkout/src/service/cart_projection.rs](../components/checkout/src/service/cart_projection.rs) | The priced cart as storefront, Studio and agents receive it: native quote, promotions, app hooks, taxes, legal flags, delivery dates and exact minor totals. |
+| [components/checkout/src/service/checkout_options.rs](../components/checkout/src/service/checkout_options.rs) | Public method discovery: the active shipping methods with converted prices and the payment methods this visitor may choose. |
 | [components/checkout/src/service/delivery.rs](../components/checkout/src/service/delivery.rs) | Shipping costs, proportional taxes and calendar delivery windows. |
 | [components/checkout/src/service/language.rs](../components/checkout/src/service/language.rs) | The language chain of a stored cart, prepared before the checkout transaction holds a pool connection. |
 | [components/checkout/src/service.rs](../components/checkout/src/service.rs) | service of this component. |
@@ -817,6 +817,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/checkout/src/store/cart_create.rs](../components/checkout/src/store/cart_create.rs) | A new buyer cart: inserted with the shop defaults, then bound to the request's language, channel, currency and signed-in customer. |
 | [components/checkout/src/store/cart_edit.rs](../components/checkout/src/store/cart_edit.rs) | Optimistic cart edits: normalized quantities, the expected revision, an optional review fingerprint and the locked write. |
 | [components/checkout/src/store/cart_load.rs](../components/checkout/src/store/cart_load.rs) | The buyer's cart of a request: loaded by tenant and context token, then guarded by cashier, company and sales channel rules. |
+| [components/checkout/src/store/cart_selection.rs](../components/checkout/src/store/cart_selection.rs) | The checkout choices of a cart: country, methods, contact email and addresses, priced as a candidate and written at the reviewed revision. |
 | [components/checkout/src/store/customer_snapshot.rs](../components/checkout/src/store/customer_snapshot.rs) | Checkout-owned immutable customer and address records; future account edits cannot rewrite an order. |
 | [components/checkout/src/store/hosted_parent.rs](../components/checkout/src/store/hosted_parent.rs) | The storefront origin that may frame the hosted checkout: exactly the mounted shop and sales channel, over plain HTTPS. |
 | [components/checkout/src/store/legal_snapshot.rs](../components/checkout/src/store/legal_snapshot.rs) | Explicit document and digital acknowledgement, checked under the purchase locks and frozen into the order. |

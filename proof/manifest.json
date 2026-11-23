@@ -1793,8 +1793,8 @@
     },
     "components/checkout/src/ports.rs": {
       "status": "unproved",
-      "sha256": "eb65cfd94cf78cc7743f7da03aa88f4a9a85f74af77197aebfc7dbc1f053b815",
-      "review": "Cart edits move into checkout behind the cart edit port"
+      "sha256": "f578aa7e60a984768e3ee55bb48e1f4bf50a7a77876999ea870b78f5ed83816b",
+      "review": "Checkout selection and method discovery move into checkout"
     },
     "components/checkout/src/service/app_adjustments.rs": {
       "status": "unproved",
@@ -1805,6 +1805,11 @@
       "status": "unproved",
       "sha256": "df4a21eaa29c6c4b94ea23224820e93058a1958ae2e5c05ae680015183fd1d4d",
       "review": "Cart projection and product detail move into checkout behind a quote port"
+    },
+    "components/checkout/src/service/checkout_options.rs": {
+      "status": "unproved",
+      "sha256": "6a09edf23137b02dcf1fd074df658436bafab1ed000021537e69334602f9fca1",
+      "review": "Checkout selection and method discovery move into checkout"
     },
     "components/checkout/src/service/delivery.rs": {
       "status": "unproved",
@@ -1818,8 +1823,8 @@
     },
     "components/checkout/src/service.rs": {
       "status": "unproved",
-      "sha256": "567c6bb91f3da77cafb56f3c562fdae649f6907a3eed504049a7e3455b50b072",
-      "review": "Cart projection and product detail move into checkout behind a quote port"
+      "sha256": "e392dc267a69de16c0668add7be08567aac1917bcdd2a5b1e4bd1a7fa1116ae0",
+      "review": "Checkout selection and method discovery move into checkout"
     },
     "components/checkout/src/store/admin_order.rs": {
       "status": "unproved",
@@ -1840,6 +1845,11 @@
       "status": "unproved",
       "sha256": "0230a61925d0f2a022705dca89d911dcbfb8c7922f481de623edb6b01ac8ab72",
       "review": "Cart projection and product detail move into checkout behind a quote port"
+    },
+    "components/checkout/src/store/cart_selection.rs": {
+      "status": "unproved",
+      "sha256": "77795f07b088dc62e7d93fc9414ccc43afddf0c42c9ad8959bb7f92bf88cec2f",
+      "review": "Checkout selection and method discovery move into checkout"
     },
     "components/checkout/src/store/customer_snapshot.rs": {
       "status": "unproved",
@@ -1878,8 +1888,8 @@
     },
     "components/checkout/src/store.rs": {
       "status": "unproved",
-      "sha256": "02de517b7060920f3c066d455529d754bac20fa4ee042f38753b5f078e3ce417",
-      "review": "Cart edits move into checkout behind the cart edit port"
+      "sha256": "3becba777e552222d38ee1b38cd52132c67314d93598162e47e6a34dc68f9ddb",
+      "review": "Checkout selection and method discovery move into checkout"
     },
     "components/core/src/access.rs": {
       "status": "unproved",
@@ -6418,13 +6428,13 @@
     },
     "src/cart_mutation.rs": {
       "status": "unproved",
-      "sha256": "981eb1254f093dfb099e6e83f7bb2e1998f723dada3b53c91cdfac1d73729344",
-      "review": "Cart edits move into checkout behind the cart edit port"
+      "sha256": "19fe76afc0c996c00a0c86588af1891c75fd85faf512f15a88a61bdbded3fe9b",
+      "review": "Checkout selection and method discovery move into checkout"
     },
     "src/cart_price.rs": {
       "status": "unproved",
-      "sha256": "32b9f63ecd956c1dc9cb7db997ea0f84f6d491a5d4e90cea954c2f22a610738b",
-      "review": "Cart projection and product detail move into checkout behind a quote port"
+      "sha256": "e5a723acb63e5f16641b2c26087325d85b840a2be2308ead1c6a050927e2d297",
+      "review": "Checkout selection and method discovery move into checkout"
     },
     "src/cart_routes.rs": {
       "status": "unproved",
@@ -6723,8 +6733,8 @@
     },
     "src/commerce/context_routes.rs": {
       "status": "unproved",
-      "sha256": "0ccd4ca9bb4ebc52ad6823b5cfe6645cae45f3c718827201d03a924941808820",
-      "review": "Customer scenarios: independent scenario_security_review completed; native signed-role, cohort, replay, injection, cancellation and post-lock lease-expiry regressions pass. Shared checkout preflight avoids nested-pool deadlock; authority is rechecked at the fenced transaction commit."
+      "sha256": "8a83d9ee90ae7c0f8d6ee5f8328d0502f97715936e799a9959be7f7e68a6b83c",
+      "review": "Checkout selection and method discovery move into checkout"
     },
     "src/commerce/customer_groups.rs": {
       "status": "unproved",
@@ -6781,11 +6791,6 @@
       "sha256": "43d94a027111abb992f3ef3d46357ed1238bef6f9480ab388bca02bd6e6b2f59",
       "review": "inventory component crate created; no kernel binding changed"
     },
-    "src/commerce/method_text.rs": {
-      "status": "unproved",
-      "sha256": "6c20658d803047c3d22060ef040770747b526031a8eb93d19819c071b38edf45",
-      "review": "Delivery enrichment, app adjustments and funding moved into components; kernel call sites unchanged"
-    },
     "src/commerce/method_usage.rs": {
       "status": "unproved",
       "sha256": "c86782d000915b1158593a629bdebb2d7072d4844e865132dd50a79dcfebc9a7",
@@ -6793,8 +6798,8 @@
     },
     "src/commerce/mod.rs": {
       "status": "unproved",
-      "sha256": "dc320e3ec8670b4ce8ecb35c18701d92dfd0a3a34acdd030427d388d98074d9a",
-      "review": "Cart projection, product detail, checkout handoff, cart creation and supply proposals move into components"
+      "sha256": "f314f4ab613693a40d86c51941deb598000cb0d9760c37c69b587e3cc6566112",
+      "review": "Checkout selection and method discovery move into checkout"
     },
     "src/commerce/order_fields.rs": {
       "status": "unproved",

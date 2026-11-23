@@ -13,7 +13,6 @@ This folder owns the Rust modules listed below. Each source begins with its resp
 - [`geography.rs`](geography.rs): Bundled MIT country catalogue, tenant-owned overrides and typed region admission.
 - [`group_usage.rs`](group_usage.rs): Removing a customer group rejects live customer, price and native/source-rule dependencies under the settings lock.
 - [`international_capabilities.rs`](international_capabilities.rs): International configuration and translation MCP tools call the exact same scoped native handlers as HTTP.
-- [`method_text.rs`](method_text.rs): Shared translated names and descriptions with field-wise shop-main-language inheritance.
 - [`method_usage.rs`](method_usage.rs): Tenant-scoped dependency preflight and authoritative deletion guards; order snapshots remain immutable.
 - [`mod.rs`](mod.rs): Native catalogue and checkout domains; pricing ports remain in the library.
 - [`order_fields.rs`](order_fields.rs): Standard order read fields are projected from the authoritative quote/payment, never maintained twice.
@@ -44,7 +43,7 @@ The [source inventory](../../docs/module-inventory.md) is checked in CI. [The be
 International additions: `geography.rs` catalogue/overlay/address validation;
 `tax_rules.rs` guarded destination resolution; `tax_context.rs` authoritative
 Rule Builder facts; `settings_defaults.rs` compatibility enrichment;
-`method_text.rs` translated methods; `content_text.rs` per-field metadata fallback;
+`content_text.rs` per-field metadata fallback;
 `product_languages.rs` enabled locales and stable registration;
 `international_capabilities.rs` native configuration/translation MCP operations.
 [The international contract](../../docs/international-commerce.md) names limits

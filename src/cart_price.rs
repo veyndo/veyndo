@@ -44,6 +44,16 @@ impl veyndo_checkout::ports::Quotes for Quotes<'_> {
             self.0, tenant, channel, currency, settings,
         ))
     }
+    fn available<'a>(
+        &'a self,
+        tenant: &'a str,
+        channel: &'a str,
+        currency: &'a str,
+    ) -> veyndo_core::PortFuture<'a, std::collections::HashSet<(String, String)>> {
+        Box::pin(payments::registry::available(
+            self.0, tenant, channel, currency,
+        ))
+    }
     fn adjust<'a>(
         &'a self,
         cart: &'a StoredCart,

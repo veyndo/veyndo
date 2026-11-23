@@ -23,6 +23,13 @@ pub trait Quotes: Send + Sync {
         currency: &'a str,
         settings: Settings,
     ) -> PortFuture<'a, (Settings, Option<String>)>;
+    /// The provider and method pairs the installed payment providers offer for the currency.
+    fn available<'a>(
+        &'a self,
+        tenant: &'a str,
+        channel: &'a str,
+        currency: &'a str,
+    ) -> PortFuture<'a, std::collections::HashSet<(String, String)>>;
     /// App commerce hooks on the previewed cart, then the cashier discount on the stored cart.
     fn adjust<'a>(
         &'a self,

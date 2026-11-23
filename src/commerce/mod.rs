@@ -64,7 +64,6 @@ pub(crate) use product_channels::*;
 mod geography;
 pub(crate) use geography::catalogue as company_countries;
 pub(crate) use geography::{country_catalogue, validate_address_geography};
-mod method_text;
 mod tax_context;
 pub(crate) use tax_context::*;
 

@@ -131,7 +131,6 @@
         "catalog",
         "checkout",
         "core",
-        "customers",
         "host",
         "identity",
         "intelligence",
@@ -167,8 +166,8 @@
         "tenants"
       ],
       "glob_imports": 32,
-      "untyped_access": 105,
-      "sql_outside_store": 23
+      "untyped_access": 98,
+      "sql_outside_store": 22
     },
     "catalog": {
       "title": "Products, categories, media, reviews, translations and catalogue reads",
@@ -311,7 +310,6 @@
         "components/shipping",
         "src/commerce/delivery.rs",
         "src/commerce/delivery_split.rs",
-        "src/commerce/method_text.rs",
         "src/commerce/method_usage.rs",
         "src/commerce/geography.rs",
         "src/commerce/international_capabilities.rs",
@@ -398,7 +396,7 @@
         "tenants"
       ],
       "glob_imports": 10,
-      "untyped_access": 212,
+      "untyped_access": 219,
       "sql_outside_store": 6
     },
     "customers": {
