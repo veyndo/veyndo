@@ -124,7 +124,7 @@ IDs, so subsequent releases continue to compare against actual live state.
 | `src/operations/master_data.rs` | Shared/channel persistence, revision/transaction boundaries and issuer resolution |
 | `src/operations/company_logo.rs` | Decoder limits, immutable storage, authenticated preview and linked public bytes |
 | `src/operations/company_public.rs` | Deliberate public projection without private banking/tax fields |
-| `src/staging/company.rs` | Selective company/override/logo release and canonical baseline |
+| `components/orders/src/store/company_release.rs` | Selective company/override/logo release and canonical baseline |
 | `frontend/src/admin/settings/Company*.tsx` | Modular factual fields, logo, content-language editor |
 | `frontend/src/storefront/shell/CompanyLegalPage.tsx` | Public channel legal view |
 | `migrations/030-company-settings.sql` | Tenant/channel foreign keys, revisioned overrides and logo storage |

@@ -43,21 +43,6 @@ impl axum::extract::FromRef<App> for SettingsHost {
         }
     }
 }
-pub(crate) async fn publish_scope(
-    tx: &mut sqlx::Transaction<'_, sqlx::Postgres>,
-    t: &str,
-    channel: &str,
-    value: &Value,
-) -> Result<()> {
-    veyndo_shop::service::settings_writes::publish_scope(&Guards, tx, t, channel, value).await
-}
-pub(crate) async fn validate_settings_release(
-    tx: &mut sqlx::Transaction<'_, sqlx::Postgres>,
-    t: &str,
-    previous: &Value,
-) -> Result<()> {
-    veyndo_shop::service::settings_writes::validate_settings_release(&Guards, tx, t, previous).await
-}
 pub(crate) use veyndo_shop::service::settings_writes::{
-    get_scope, merchant_config, save_config, save_scope, snapshot_scopes,
+    get_scope, merchant_config, save_config, save_scope,
 };

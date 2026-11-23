@@ -1,18 +1,10 @@
-//! Private cloned shops, scope admission and selective atomic release of reviewed changes.
+//! Private cloned shops live in the studio component; the server registers their routes and lends the release port.
 use crate::*;
-mod access;
-mod assets;
-mod categories;
-mod clone;
-mod company;
-mod documents;
-mod final_config;
-mod products;
-mod release;
-mod snapshot;
-pub(crate) use clone::create_preview;
-pub(crate) use release::*;
-pub(crate) use snapshot::*;
+mod release_host;
+pub(crate) use release_host::Releases;
+pub(crate) use veyndo_core::shop_scope::live_parent as parent_conn;
+pub(crate) use veyndo_core::shop_scope::parent;
+pub(crate) use veyndo_studio::service::staging::snapshot;
 pub(crate) fn router() -> Router<App> {
     Router::new()
         .secure_route(
@@ -21,12 +13,12 @@ pub(crate) fn router() -> Router<App> {
                 ("GET", "environments.read"),
                 ("POST", "environments.manage"),
             ],
-            get(list).post(clone::create),
+            get(veyndo_studio::service::staging::list).post(create),
         )
         .secure_route(
             "/api/environments/{id}/diff",
             &[("GET", "environments.read")],
-            get(diff),
+            get(veyndo_studio::service::staging::diff),
         )
         .secure_route(
             "/api/environments/{id}/release",
@@ -34,50 +26,36 @@ pub(crate) fn router() -> Router<App> {
             post(release),
         )
 }
-pub(crate) use veyndo_core::shop_scope::live_parent as parent_conn;
-pub(crate) use veyndo_core::shop_scope::parent;
 pub(crate) async fn live(a: &App, h: &RequestContext) -> Result<String> {
-    let t = merchant(a, h)?;
-    if parent(a, &t).await?.is_some() {
-        return Err(bad("Use the live workspace for environment management"));
-    }
-    Ok(t)
+    veyndo_studio::service::staging::live(a, h).await
 }
 pub(crate) async fn owned(a: &App, live: &str, stage: &str) -> Result<Value> {
-    owned_on(&a.db, live, stage).await
+    veyndo_studio::service::staging::owned(a, live, stage).await
 }
-/// Transactional callers retain their current backend and the same live/stage ownership guard.
-pub(crate) use veyndo_core::shop_scope::owned_stage as owned_on;
-async fn list(State(a): State<App>, h: RequestContext) -> Result<Json<Value>> {
-    let t = live(&a, &h).await?;
-    let rows=sqlx::query("SELECT tenant,name,created_at::text AS created_at FROM shop_environments WHERE live_tenant=$1 AND preview_owner IS NULL ORDER BY created_at DESC").bind(&t).fetch_all(&a.db).await?;
-    let history=sqlx::query("SELECT id,environment,selections,created_at::text AS created_at FROM shop_releases WHERE live_tenant=$1 ORDER BY created_at DESC LIMIT 30").bind(&t).fetch_all(&a.db).await?;
+async fn create(
+    State(a): State<App>,
+    h: RequestContext,
+    Json(v): Json<Value>,
+) -> Result<Json<Value>> {
     Ok(Json(
-        json!({"live":t,"environments":rows.iter().map(|r|json!({"id":r.get::<String,_>("tenant"),"name":r.get::<String,_>("name"),"createdAt":r.get::<String,_>("created_at")})).collect::<Vec<_>>(),"releases":history.iter().map(|r|json!({"id":r.get::<String,_>("id"),"environment":r.get::<String,_>("environment"),"selections":r.get::<Value,_>("selections"),"createdAt":r.get::<String,_>("created_at")})).collect::<Vec<_>>() }),
+        veyndo_studio::service::staging::create(&Releases(&a), h, v).await?,
     ))
 }
-async fn diff(
+pub(crate) async fn create_preview(
+    a: &App,
+    h: &RequestContext,
+    name: &str,
+    actor: &str,
+) -> Result<Value> {
+    veyndo_studio::service::staging::create_preview(&Releases(a), h.clone(), name, actor).await
+}
+async fn release(
     State(a): State<App>,
     h: RequestContext,
     Path(id): Path<String>,
+    Json(v): Json<Value>,
 ) -> Result<Json<Value>> {
-    let t = live(&a, &h).await?;
-    let base = owned(&a, &t, &id).await?;
-    let mut tx = a.db.begin().await?;
-    operations::lock_company(&mut tx, &t).await?;
-    operations::lock_company(&mut tx, &id).await?;
-    let current = snapshot(&mut tx, &id).await?;
-    let actual = snapshot(&mut tx, &t).await?;
-    let mut changes = vec![];
-    for (key, value) in current.as_object().unwrap() {
-        if !access::can_read_unit(&h, key, &current)? {
-            continue;
-        }
-        if base["stage"].get(key) != Some(value) {
-            changes.push(json!({"key":key,"before":access::before(&h,key,&base["stage"],&current),"after":value,"digest":hash(&value.to_string()),"conflict":actual.get(key)!=base["live"].get(key)}));
-        }
-    }
     Ok(Json(
-        json!({"environment":id,"mainLocale":current["settings"]["mainLocale"],"changes":changes,"excluded":["inventory","customers","orders","payments","credentials","observations","b2b-employees","b2b-spending","b2b-approvals","b2b-quotes","b2b-lists"]}),
+        veyndo_studio::service::staging::release(&Releases(&a), h, id, v).await?,
     ))
 }

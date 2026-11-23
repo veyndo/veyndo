@@ -298,7 +298,7 @@ content-review decision, not a mechanism for sharing an entire mailbox.
 - `components/intelligence/src/knowledge.rs`: transactional SQL document reassignment and public graph filtering.
 - `src/marketing/flows.rs`, `catalog.rs`: shared native trigger registry, non-order source event admission and durable execution.
 - `src/planner.rs`: document passages actually feed and persist with merchant proposals.
-- `src/staging/documents.rs`: clone/diff/release metadata and chunks as one unit.
+- `components/studio/src/store/staging_documents.rs`: clone/diff/release metadata and chunks as one unit.
 - `frontend/src/admin/intelligence/`: small workspace, source editor/library, product
   explorer/facts, observations and preview modules; UI vocabulary in shared i18n.
 

@@ -24,6 +24,5 @@ pub(crate) fn router() -> Router<App> {
                 .post(veyndo_catalog::http::categories::navigation),
         )
 }
-pub(crate) use veyndo_catalog::service::product_identity::assign_categories as assignments;
 
 pub(crate) use veyndo_catalog::store::categories::seed;

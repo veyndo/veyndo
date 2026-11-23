@@ -1,17 +1,33 @@
 //! Fixed publishable units: product content/translations, settings, experience and app packages.
-use super::*;
-pub(crate) type Tx<'a> = sqlx::Transaction<'a, sqlx::Postgres>;
-pub(crate) async fn snapshot(tx: &mut Tx<'_>, t: &str) -> Result<Value> {
+use crate::store::{
+    staging_assets as assets, staging_categories as categories, staging_documents as documents,
+};
+use serde_json::{Value, json};
+use sqlx::Row;
+use veyndo_app_model::manifest::Manifest;
+use veyndo_app_platform::domain::core_extensions::configuration;
+use veyndo_app_platform::store::records::rows as record_rows;
+use veyndo_b2b::store::staging as b2b;
+use veyndo_catalog::service::product_identity::assign_categories;
+use veyndo_catalog::store::products::product;
+use veyndo_core::{Result, bad, conflict};
+use veyndo_intelligence::knowledge::sync_product;
+use veyndo_orders::domain::order_machine::default_machine;
+use veyndo_orders::store::company_release as company;
+use veyndo_shop::service::settings_writes::snapshot_scopes;
+/// The transaction every staging step shares.
+pub type Tx<'a> = sqlx::Transaction<'a, sqlx::Postgres>;
+pub async fn snapshot(tx: &mut Tx<'_>, t: &str) -> Result<Value> {
     let mut result = serde_json::Map::new();
     // Same settings-before-purchasing-policy lock order as native organization writes.
     sqlx::query("SELECT revision FROM commerce_settings WHERE tenant=$1 FOR UPDATE")
         .bind(t)
         .fetch_optional(&mut **tx)
         .await?;
-    crate::b2b::snapshot_configuration(tx, t, &mut result).await?;
+    b2b::snapshot_configuration(tx, t, &mut result).await?;
     assets::snapshot_assets(tx, t, &mut result).await?;
     company::snapshot(tx, t, &mut result).await?;
-    commerce::snapshot_scopes(tx, t, &mut result).await?;
+    snapshot_scopes(tx, t, &mut result).await?;
     let rows=sqlx::query("SELECT to_jsonb(p)-'tenant'-'stock'-'revision'-'content_revision' AS data FROM products p WHERE tenant=$1 ORDER BY id FOR UPDATE").bind(t).fetch_all(&mut **tx).await?;
     for r in rows {
         let value: Value = r.get("data");
@@ -44,7 +60,7 @@ pub(crate) async fn snapshot(tx: &mut Tx<'_>, t: &str) -> Result<Value> {
     {
         let app: String = r.get("id");
         let manifest: Value = r.get("manifest");
-        let m: apps::Manifest =
+        let m: Manifest =
             serde_json::from_value(manifest.clone()).map_err(|_| bad("Invalid app"))?;
         result.insert(
             format!("app:{app}"),
@@ -55,13 +71,13 @@ pub(crate) async fn snapshot(tx: &mut Tx<'_>, t: &str) -> Result<Value> {
             .execute(&mut **tx)
             .await?;
         for e in m.entities.iter().filter(|e| {
-            apps::core_extensions::configuration(e)
+            configuration(e)
                 && !m
                     .actions
                     .iter()
                     .any(|a| a.entity.as_deref() == Some(e.name.as_str()) && a.handler == "submit")
         }) {
-            let records = apps::records::rows(tx, t, &app, e, 1001).await?;
+            let records = record_rows(tx, t, &app, e, 1001).await?;
             if records.len() > 1000 {
                 return Err(bad(
                     "Prototype release supports at most 1000 records per app entity",
@@ -108,12 +124,12 @@ pub(crate) async fn snapshot(tx: &mut Tx<'_>, t: &str) -> Result<Value> {
             .await?;
     result.insert(
         "order-workflow".into(),
-        data.unwrap_or_else(|| json!(commerce::default_machine())),
+        data.unwrap_or_else(|| json!(default_machine())),
     );
     documents::snapshot(tx, t, &mut result).await?;
     Ok(Value::Object(result))
 }
-pub(crate) async fn product_content(tx: &mut Tx<'_>, t: &str, value: &Value) -> Result<()> {
+pub async fn product_content(tx: &mut Tx<'_>, t: &str, value: &Value) -> Result<()> {
     let mut published = value.clone();
     live_asset_urls(&mut published, t);
     let value = &published;
@@ -128,7 +144,7 @@ pub(crate) async fn product_content(tx: &mut Tx<'_>, t: &str, value: &Value) -> 
         ));
     }
     if let Some(ids) = value["categoryIds"].as_array() {
-        crate::categories::assignments(
+        assign_categories(
             tx,
             t,
             id,
@@ -166,7 +182,7 @@ pub(crate) async fn product_content(tx: &mut Tx<'_>, t: &str, value: &Value) -> 
         .bind(id)
         .fetch_one(&mut **tx)
         .await?;
-    knowledge::sync_product(tx, t, &json!(crate::product(&r))).await?;
+    sync_product(tx, t, &json!(product(&r))).await?;
     sqlx::query("INSERT INTO outbox(tenant,kind,data) VALUES($1,'product.published',$2)")
         .bind(t)
         .bind(json!({"productId":id,"revision":r.get::<i64,_>("revision")}))
@@ -206,7 +222,7 @@ fn live_asset_urls(value: &mut Value, tenant: &str) {
     }
 }
 /// Exact selected-product readback includes database defaults and the live asset delivery URLs, without a whole-shop rescan.
-pub(super) async fn product_snapshot(tx: &mut Tx<'_>, t: &str, id: &str) -> Result<Value> {
+pub async fn product_snapshot(tx: &mut Tx<'_>, t: &str, id: &str) -> Result<Value> {
     let value:Value=sqlx::query_scalar("SELECT to_jsonb(p)-'tenant'-'stock'-'revision'-'content_revision' FROM products p WHERE tenant=$1 AND id=$2 FOR UPDATE").bind(t).bind(id).fetch_one(&mut **tx).await?;
     product_projection(tx, t, value).await
 }

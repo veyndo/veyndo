@@ -44,7 +44,6 @@ This lists every checked-in source module in these roots, including files with n
 | [src/apps/data.rs](../src/apps/data.rs) | Managed app records live in the apps component; this module supplies the record rules of the bundled site builder. |
 | [src/apps/discovery.rs](../src/apps/discovery.rs) | App capability discovery lives in the apps component; this module keeps the server-side entry for MCP and capabilities. |
 | [src/apps/distribution.rs](../src/apps/distribution.rs) | Signed publisher namespaces and tenant-local dependency/version gates; the rules live in the apps component, this module supplies the operator's publisher keys. |
-| [src/apps/editor_contract.rs](../src/apps/editor_contract.rs) | Editor mounts, enumerated fields and tenant-owned core references; no app alters core tables. |
 | [src/apps/editor_tests.rs](../src/apps/editor_tests.rs) | Assistant fixture contracts exercise real validation, not only the client-side builder. |
 | [src/apps/egress.rs](../src/apps/egress.rs) | Pinned egress clients live in the apps component; this module supplies the operator's private service origins. |
 | [src/apps/events.rs](../src/apps/events.rs) | App event delivery lives in the apps component; this module supplies its state to the worker and the outbox. |
@@ -70,7 +69,6 @@ This lists every checked-in source module in these roots, including files with n
 | [src/apps/planning.rs](../src/apps/planning.rs) | App planning lives in the apps component; this module keeps the short path for the planner and proposals. |
 | [src/apps/record_history.rs](../src/apps/record_history.rs) | App record history lives in the apps component; this module registers its routes and keeps the capability path. |
 | [src/apps/record_import.rs](../src/apps/record_import.rs) | Managed record import lives in the apps component; this module keeps the short path for the import operations. |
-| [src/apps/records.rs](../src/apps/records.rs) | The app record store lives in the apps component; this module keeps the short path for the app adapters. |
 | [src/apps/registry.rs](../src/apps/registry.rs) | Atomic installation and additive schema upgrades; immutable version digests preserve history. |
 | [src/apps/routes.rs](../src/apps/routes.rs) | Tenant-scoped package lifecycle, generated data endpoints and a shared action adapter. |
 | [src/apps/schedules.rs](../src/apps/schedules.rs) | App schedules live in the apps component; this module keeps the short path for installation and the worker. |
@@ -140,7 +138,6 @@ This lists every checked-in source module in these roots, including files with n
 | [src/b2b/quote_contract.rs](../src/b2b/quote_contract.rs) | Accepted offer prices feed the existing currency/tax calculator; checkout consumes the offer atomically. |
 | [src/b2b/requisition.rs](../src/b2b/requisition.rs) | Requisition import is owned by the B2B component; merchant admission and shop settings are resolved here. |
 | [src/b2b/settings.rs](../src/b2b/settings.rs) | B2B feature switches live in shared commerce settings; disabling never relaxes existing financial policy. |
-| [src/b2b/staging.rs](../src/b2b/staging.rs) | Clone and publish purchasing configuration only; employees, orders, approvals and spending remain live-only. |
 | [src/bin/automation_rules.rs](../src/bin/automation_rules.rs) | JSON batch transport for comparisons with original Shopware rule classes; not a production authority endpoint. |
 | [src/bin/connectors.rs](../src/bin/connectors.rs) | Independent Rust standard-app service; no provider code executes in commerce request workers. |
 | [src/bin/context.rs](../src/bin/context.rs) | Bounded ports of original language-chain, rule priority and quantity selection. |
@@ -419,17 +416,8 @@ This lists every checked-in source module in these roots, including files with n
 | [src/shop_domains/frontend_editor.rs](../src/shop_domains/frontend_editor.rs) | Operator-owned editor navigation for hosted frontends; no private editor or identity implementation. |
 | [src/shop_domains/frontends.rs](../src/shop_domains/frontends.rs) | Generic operator-allowlisted frontend mounts. Host scope is derived from storage, never client headers. |
 | [src/shop_domains.rs](../src/shop_domains.rs) | Resolve configured shop subdomains before authentication; reject unknown hosts and conflicting scopes. |
-| [src/staging/access.rs](../src/staging/access.rs) | Release-unit rights live in the studio component. |
-| [src/staging/assets.rs](../src/staging/assets.rs) | Binary assets are immutable, staged independently through metadata/digest units; paid entitlements never clone. |
-| [src/staging/categories.rs](../src/staging/categories.rs) | Category release units and dependency-ordered tree publication; stock is never part of a catalog release. |
-| [src/staging/clone.rs](../src/staging/clone.rs) | Clone only catalog/configuration into a private tenant; customer/order/payment state is excluded. |
-| [src/staging/company.rs](../src/staging/company.rs) | The company identity release is owned by the orders component, next to the company basis it publishes. |
-| [src/staging/documents.rs](../src/staging/documents.rs) | Knowledge documents/chunks clone and publish with their source provenance; publication visibility is a reviewed unit. |
-| [src/staging/final_config.rs](../src/staging/final_config.rs) | Validate the final published channel/automation aggregate and initialize native POS defaults. |
-| [src/staging/mod.rs](../src/staging/mod.rs) | Private cloned shops, scope admission and selective atomic release of reviewed changes. |
-| [src/staging/products.rs](../src/staging/products.rs) | Selected products publish before their image assets and in native parent-before-variant order, without copying stock. |
-| [src/staging/release.rs](../src/staging/release.rs) | Selected units publish in one transaction with staged digests and live baseline conflict checks. |
-| [src/staging/snapshot.rs](../src/staging/snapshot.rs) | Fixed publishable units: product content/translations, settings, experience and app packages. |
+| [src/staging/mod.rs](../src/staging/mod.rs) | Private cloned shops live in the studio component; the server registers their routes and lends the release port. |
+| [src/staging/release_host.rs](../src/staging/release_host.rs) | The server side of the release port: app installation and managed record saves with the bundled rules, flow checks, settings guards and the sandbox policy cache. |
 | [src/storefront_pages.rs](../src/storefront_pages.rs) | Deep-link HTML transport for stable SKU URLs with optional localized SEO slugs. |
 | [src/studio/facts.rs](../src/studio/facts.rs) | Dashboard facts are owned by the studio component. |
 | [src/studio/personal.rs](../src/studio/personal.rs) | The personal workspace lives in the studio component; the server registers its routes. |
@@ -1212,6 +1200,12 @@ This lists every checked-in source module in these roots, including files with n
 | [components/studio/src/service/proposal_admission.rs](../components/studio/src/service/proposal_admission.rs) | Native admission of model proposals and list views; every initial or repaired proposal traverses the same read-only checks. |
 | [components/studio/src/service/proposal_apply.rs](../components/studio/src/service/proposal_apply.rs) | Transactional application of approved, revision-bound proposals: product changes, experience, app saves, translation drafts and bounded price autonomy. |
 | [components/studio/src/service/reports.rs](../components/studio/src/service/reports.rs) | Shared commerce reports for Studio, the workspace, the API and agent reads; there is no second analytics ledger. |
+| [components/studio/src/service/staging/clone.rs](../components/studio/src/service/staging/clone.rs) | Clone only catalog/configuration into a private tenant; customer/order/payment state is excluded. |
+| [components/studio/src/service/staging/final_config.rs](../components/studio/src/service/staging/final_config.rs) | Validate the final published channel/automation aggregate and initialize native POS defaults. |
+| [components/studio/src/service/staging/products.rs](../components/studio/src/service/staging/products.rs) | Selected products publish before their image assets and in native parent-before-variant order, without copying stock. |
+| [components/studio/src/service/staging/release.rs](../components/studio/src/service/staging/release.rs) | Selected units publish in one transaction with staged digests and live baseline conflict checks. |
+| [components/studio/src/service/staging/snapshot.rs](../components/studio/src/service/staging/snapshot.rs) | Fixed publishable units: product content/translations, settings, experience and app packages. |
+| [components/studio/src/service/staging.rs](../components/studio/src/service/staging.rs) | Private cloned shops: clone, snapshot, reviewed diff and selective atomic release of changes. The server lends app installation, record saves, flow checks and settings guards through the release port. |
 | [components/studio/src/service/work_execution.rs](../components/studio/src/service/work_execution.rs) | Approved work runs under the existing task lease; each native write is fenced against cancellation and recorded before advancing. Translation steps reuse native draft storage and yield the worker while drafts are prepared. |
 | [components/studio/src/service/work_plan.rs](../components/studio/src/service/work_plan.rs) | Reviewed work binds bounded native configuration commands and managed app saves before any worker effect; approval re-binds and queues it. |
 | [components/studio/src/service.rs](../components/studio/src/service.rs) | Operations of the studio component. |

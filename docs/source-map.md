@@ -115,7 +115,7 @@ catalog hosting boundary remain with their current owners.
 
 **App package installation service:** Pinned Apps `src/models.rs` owns the original
 model install/rebuild sequence and required compatibility port. Native
-`src/apps/records.rs` delegates with actual core-extension compatibility on its
+`components/apps/src/store/records.rs` delegates with actual core-extension compatibility on its
 existing transaction. Apps `data-service/src/installer.rs`, `install_hooks.rs` and
 `install_policy.rs` compose full compilation, explicit review/approval and the
 shared installer for portable private data packages; they own no native resource
@@ -133,7 +133,7 @@ provisioning and exact nonowner control-only grants are explicit operator work.
 
 **App persistence:** `veyndo/apps` owns `veyndo-app-storage`; the exact source
 snapshot in `extensions/services/app-storage/` is verified by
-`components.lock.json`. `src/apps/records.rs`, `jobs.rs` and `job_callbacks.rs`
+`components.lock.json`. `components/apps/src/store/records.rs`, `jobs.rs` and `job_callbacks.rs`
 use its record/job SQL through the same scoped transaction. Native admission,
 field/reference validation, evidence and publication admission remain in Core.
 Record history storage/restoration now uses Apps 0.21.0 as described below. Apps 0.2.0 also owns record CAS/replay and page/filter/window SQL;
@@ -735,7 +735,7 @@ caches; this is not a machine/database cold-start or failover test.
 | `src/operations/{customers,orders,addresses,workflow,receipts,receipt_text,receipt_pdf}.rs` | Bounded CRM/order details, shared MCP address operations, workflow settings, central issuer settings, audited notes and immutable multilingual document issuance. `merchant_operations.py` + `customer_accounts.py`. |
 | `src/commerce/{order_machine,order_workflow,order_fields,fulfillment}.rs` | Extensible validated state graph, eligible next actions/business guards, authoritative standard order projection and idempotent committed state transitions/events. Unit tests and actual concurrent workflow/flow/app effects. |
 | `components/catalog/src/store/product_fields.rs` | Revision-bound native priced/media/property fields; quantity/tier/media validation in the central product write transaction. Product editor integration tests. |
-| `src/assets/*`, `src/staging/assets.rs` | Immutable MIME-checked upload bytes, publication digests, paid owning order download entitlement, typed rich blocks and selective asset release. `merchant_operations.py`. |
+| `src/assets/*`, `components/studio/src/store/staging_assets.rs` | Immutable MIME-checked upload bytes, publication digests, paid owning order download entitlement, typed rich blocks and selective asset release. `merchant_operations.py`. |
 | `src/auth/{permissions,integrations,members,invitations,middleware}.rs` | Current named scopes and persisted workspace roles, hashed keys with bounded expiry or explicit personal-administrator no-expiry, immediate revocation and non-escalating delegation. Permission units and HTTP/MCP negative tests. |
 | `src/payments/{paypal,provider,storage,worker,routes}.rs` | Per-shop Sandbox/Live wallet configuration, pinned official attribution, durable jobs and pending-refund GET recovery. Local wire fixture `payments.py`; no live PSP proof. |
 | `frontend/src/shared/customer/`, `storefront/{account,checkout}/`, `admin/customers/` | Same four-language contact/address interactions in buyer account, checkout and merchant CRM. Strict frontend build, locale tests and browser review. |
@@ -868,7 +868,7 @@ See [history boundaries](entity-history.md).
 
 ## Guided app extension path
 
-App assistants compile the shared Manifest in `frontend/src/admin/developer/assistant-model.ts`. Product/customer/order mounts reuse the native renderer with explicit object context. `src/apps/editor_contract.rs` owns field/context and direct-route scopes; `src/apps/planning.rs` filters merchant grounding and rechecks app proposal access at bind/apply. `src/apps/schedules.rs` and `webhooks.rs` persist emitted events/receipts via migration 036. `scripts/app_assistants.py` and `app_surfaces.py` exercise actual private stages, public/MCP boundaries, service fixtures, event/Flow writes, restart and scope rejection; frontend assistant tests cover editing and regional language inheritance. See [guide and upstream extension requirements](app-assistants.md).
+App assistants compile the shared Manifest in `frontend/src/admin/developer/assistant-model.ts`. Product/customer/order mounts reuse the native renderer with explicit object context. `components/apps/src/domain/entity_access.rs` owns field/context and direct-route scopes; `src/apps/planning.rs` filters merchant grounding and rechecks app proposal access at bind/apply. `src/apps/schedules.rs` and `webhooks.rs` persist emitted events/receipts via migration 036. `scripts/app_assistants.py` and `app_surfaces.py` exercise actual private stages, public/MCP boundaries, service fixtures, event/Flow writes, restart and scope rejection; frontend assistant tests cover editing and regional language inheritance. See [guide and upstream extension requirements](app-assistants.md).
 
 ## Platform control plane
 

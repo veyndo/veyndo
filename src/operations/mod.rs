@@ -14,7 +14,7 @@ pub(crate) use master_data::save as restore_company;
 pub(crate) use veyndo_studio::http::customers::restore_customer;
 use veyndo_studio::http::{customers, orders, workflow};
 mod master_data;
-pub(crate) use master_data::{lock as lock_company, validate_release as validate_company_release};
+pub(crate) use master_data::lock as lock_company;
 mod redacted_reads;
 pub(crate) use redacted_reads::redacted_read;
 mod receipt_pdf;

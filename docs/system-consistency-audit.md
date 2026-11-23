@@ -18,7 +18,7 @@ exhaustive proof of every module or endpoint.
 but staging `document:*` units incorrectly used catalog rights. A synthetic catalog
 reader without knowledge rights was denied direct access yet could see an edited
 private source in the stage diff. Conversely, a knowledge-only editor could write
-sources but could not see/publish them. `src/staging/access.rs` now uses the source
+sources but could not see/publish them. `components/studio/src/domain/staging_access.rs` now uses the source
 owner's knowledge scopes for both diff and publication. Regressions verify denied
 reads/releases, unchanged live state, successful knowledge-only publication and actor
 history. Asset/catalog permissions are unaffected.

@@ -1,11 +1,8 @@
 //! Selected products publish before their image assets and in native parent-before-variant order, without copying stock.
-use super::*;
-pub(super) async fn publish(
-    tx: &mut Tx<'_>,
-    live: &str,
-    current: &Value,
-    keys: &[String],
-) -> Result<()> {
+use super::snapshot::{Tx, product_content};
+use serde_json::Value;
+use veyndo_core::{Result, conflict};
+pub async fn publish(tx: &mut Tx<'_>, live: &str, current: &Value, keys: &[String]) -> Result<()> {
     let mut remaining = keys
         .iter()
         .filter(|s| s.starts_with("product:"))

@@ -77,9 +77,8 @@ impl HostActions for ServerActions {
         actor: &'a str,
     ) -> EnvironmentFuture<'a> {
         Box::pin(async move {
-            let created =
-                staging::create_preview(self.0.clone(), h.clone(), "App Studio", actor).await?;
-            created.0["id"]
+            let created = staging::create_preview(&self.0, h, "App Studio", actor).await?;
+            created["id"]
                 .as_str()
                 .map(str::to_owned)
                 .ok_or(bad("Preview environment unavailable"))

@@ -1,42 +1,60 @@
 //! Clone only catalog/configuration into a private tenant; customer/order/payment state is excluded.
-use super::*;
-pub(crate) async fn create(
-    State(a): State<App>,
-    h: RequestContext,
-    Json(v): Json<Value>,
-) -> Result<Json<Value>> {
-    create_inner(a, h, v, None).await
+use super::live;
+use super::snapshot::{Tx, snapshot};
+use crate::ports::ReleaseHost;
+use crate::store::staging_documents as documents;
+use serde_json::{Value, json};
+use sqlx::Row;
+use veyndo_app_model::manifest::Manifest;
+use veyndo_app_platform::domain::core_extensions::configuration;
+use veyndo_app_platform::domain::entity_access::entity_access;
+use veyndo_app_platform::store::records::{get as get_record, rows as record_rows};
+use veyndo_b2b::store::staging as b2b;
+use veyndo_core::history_context::context;
+use veyndo_core::{RequestContext, Result, bad, hash, uid};
+use veyndo_identity::permit;
+use veyndo_orders::store::company::lock as lock_company;
+/// Clones the live shop's catalogue and configuration into a new private environment.
+pub async fn create<H: ReleaseHost>(host: &H, h: RequestContext, v: Value) -> Result<Value> {
+    create_inner(host, h, v, None).await
 }
-pub(crate) async fn create_preview(
-    a: App,
+/// Clones a short-lived developer preview environment owned by one actor.
+pub async fn create_preview<H: ReleaseHost>(
+    host: &H,
     h: RequestContext,
     name: &str,
     actor: &str,
-) -> Result<Json<Value>> {
-    create_inner(a, h, json!({"name":name}), Some(actor.to_owned())).await
+) -> Result<Value> {
+    create_inner(host, h, json!({"name":name}), Some(actor.to_owned())).await
 }
 /// Installs the live shop's declarative apps in the sandbox and copies their readable configuration records.
-async fn clone_apps(tx: &mut Tx<'_>, h: &RequestContext, t: &str, id: &str) -> Result<()> {
+async fn clone_apps<H: ReleaseHost>(
+    host: &H,
+    tx: &mut Tx<'_>,
+    h: &RequestContext,
+    t: &str,
+    id: &str,
+) -> Result<()> {
     let rows =
         sqlx::query("SELECT manifest FROM app_packages WHERE tenant=$1 AND active ORDER BY id")
             .bind(t)
             .fetch_all(&mut **tx)
             .await?;
     for r in rows {
-        let m: apps::Manifest =
+        let m: Manifest =
             serde_json::from_value(r.get("manifest")).map_err(|_| bad("Invalid app"))?;
         if m.runtime == "declarative" {
-            apps::install_tx(tx, id, m.clone()).await?;
+            host.install_app(tx, id, m.clone()).await?;
             for entity in m.entities.iter().filter(|e| {
-                apps::core_extensions::configuration(e)
+                configuration(e)
                     && (e.public_read
-                        || (e.extends.is_some() && apps::record_access(&m, e, h, "list").is_ok()))
+                        || (e.extends.is_some() && entity_access(&m, e, h, "list").is_ok()))
             }) {
                 sqlx::query("SELECT set_config('rac.tenant',$1,true)")
                     .bind(t)
                     .execute(&mut **tx)
                     .await?;
-                let records = apps::records::rows(tx, t, &m.id, entity, 1001).await?;
+                let records = record_rows(tx, t, &m.id, entity, 1001).await?;
                 if records.len() > 1000 {
                     return Err(bad(
                         "Prototype sandbox supports at most 1000 public records per app entity",
@@ -48,7 +66,7 @@ async fn clone_apps(tx: &mut Tx<'_>, h: &RequestContext, t: &str, id: &str) -> R
                     let record = fields.as_object_mut().unwrap().remove("id").unwrap();
                     // Installation may have seeded this exact configuration record. Update
                     // it through its actual CAS instead of colliding with revision zero.
-                    let revision = apps::records::get(
+                    let revision = get_record(
                         tx,
                         id,
                         &m.id,
@@ -59,7 +77,7 @@ async fn clone_apps(tx: &mut Tx<'_>, h: &RequestContext, t: &str, id: &str) -> R
                     .await?
                     .and_then(|value| value["revision"].as_i64())
                     .unwrap_or(0);
-                    apps::data::save_tx(
+                    host.save_record(
                         tx,
                         id,
                         &m,
@@ -73,13 +91,15 @@ async fn clone_apps(tx: &mut Tx<'_>, h: &RequestContext, t: &str, id: &str) -> R
     }
     Ok(())
 }
-async fn create_inner(
-    a: App,
+/// The shared clone of an environment.
+async fn create_inner<H: ReleaseHost>(
+    host: &H,
     h: RequestContext,
     v: Value,
     preview_owner: Option<String>,
-) -> Result<Json<Value>> {
-    auth::permit(
+) -> Result<Value> {
+    let a = host.core();
+    permit(
         &h,
         if preview_owner.is_some() {
             "developer.manage"
@@ -87,14 +107,14 @@ async fn create_inner(
             "environments.manage"
         },
     )?;
-    let t = live(&a, &h).await?;
+    let t = live(a, &h).await?;
     let name = v["name"]
         .as_str()
         .filter(|s| !s.trim().is_empty() && s.len() <= 80)
         .ok_or(bad("Environment name required, maximum 80 bytes"))?;
     let id = format!("stage-{}", &uid()[..20]);
     let mut tx = a.db.begin().await?;
-    history::context(&mut tx, &h, "staging.clone").await?;
+    context(&mut tx, &h, "staging.clone").await?;
     sqlx::query("SELECT pg_advisory_xact_lock(hashtextextended($1,16))")
         .bind(&t)
         .execute(&mut *tx)
@@ -107,7 +127,7 @@ async fn create_inner(
     if count >= 10 {
         return Err(bad("Maximum 10 private environments per shop"));
     }
-    operations::lock_company(&mut tx, &t).await?;
+    lock_company(&mut tx, &t).await?;
     let base = snapshot(&mut tx, &t).await?;
     sqlx::query("INSERT INTO tenants(id,name) VALUES($1,$2)")
         .bind(&id)
@@ -150,13 +170,13 @@ async fn create_inner(
             .execute(&mut *tx)
             .await?;
     }
-    crate::b2b::clone_configuration(&mut tx, &t, &id).await?;
-    clone_apps(&mut tx, &h, &t, &id).await?;
+    b2b::clone_configuration(&mut tx, &t, &id).await?;
+    clone_apps(host, &mut tx, &h, &t, &id).await?;
     sqlx::query("INSERT INTO policy(tenant,variant) VALUES($1,'discovery'),($1,'comparison')")
         .bind(&id)
         .execute(&mut *tx)
         .await?;
-    let wat = include_str!("../../extensions/company-limit.wat");
+    let wat = include_str!("../../../../../extensions/company-limit.wat");
     sqlx::query("INSERT INTO extensions(tenant,wat,digest) VALUES($1,$2,$3)")
         .bind(&id)
         .bind(wat)
@@ -181,9 +201,8 @@ async fn create_inner(
         sqlx::query("UPDATE shop_environments SET preview_owner=$1,preview_until=now()+interval '1 hour' WHERE tenant=$2").bind(owner).bind(&id).execute(&mut *tx).await?;
     }
     tx.commit().await?;
-    a.sandboxes
-        .insert(id.clone(), Arc::new(Sandbox::new(wat).map_err(bad)?));
-    Ok(Json(
+    host.register_sandbox(&id, wat)?;
+    Ok(
         json!({"id":id,"name":name,"private":true,"previewPath":format!("/?shop={id}&sandbox=1#"),"payments":"simulated-only"}),
-    ))
+    )
 }

@@ -1,6 +1,32 @@
 //! Selected units publish in one transaction with staged digests and live baseline conflict checks.
-use super::*;
-use crate::commerce::OrderMachineValidation;
+use super::snapshot::{Tx, snapshot};
+use super::{final_config, products};
+use super::{live, owned};
+use crate::domain::staging_access as access;
+use crate::ports::ReleaseHost;
+use crate::store::{
+    staging_assets as assets, staging_categories as categories, staging_documents as documents,
+};
+use serde::Deserialize;
+use serde_json::{Value, json};
+use sqlx::Row;
+use veyndo_app_model::manifest::Manifest;
+use veyndo_app_platform::domain::consent::actor_permissions;
+use veyndo_app_platform::domain::core_extensions::configuration;
+use veyndo_app_platform::domain::entity_access::entity_access;
+use veyndo_app_platform::store::records::{get as get_record, lock_key};
+use veyndo_b2b::store::staging as b2b;
+use veyndo_core::history_context::context;
+use veyndo_core::shop_scope::header;
+use veyndo_core::{RequestContext, Result, bad, conflict, hash, uid};
+use veyndo_identity::permit;
+use veyndo_marketing::types::promotion::preserve_import;
+use veyndo_orders::domain::order_machine::{OrderMachine, OrderMachineValidation};
+use veyndo_orders::store::company::{
+    lock as lock_company, validate_release as validate_company_release,
+};
+use veyndo_orders::store::company_release as company;
+use veyndo_shop::service::settings_writes::{publish_scope, validate_settings_release};
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 struct Selection {
@@ -14,10 +40,16 @@ struct Release {
     selections: Vec<Selection>,
 }
 /// Takes every lock of a release in the order native writers take them.
-async fn lock_units(tx: &mut Tx<'_>, t: &str, id: &str, keys: &[String]) -> Result<()> {
-    marketing::lock_config(tx, t).await?;
-    operations::lock_company(tx, t).await?;
-    operations::lock_company(tx, id).await?;
+async fn lock_units<H: ReleaseHost>(
+    host: &H,
+    tx: &mut Tx<'_>,
+    t: &str,
+    id: &str,
+    keys: &[String],
+) -> Result<()> {
+    host.settings_guards().lock(tx, t).await?;
+    lock_company(tx, t).await?;
+    lock_company(tx, id).await?;
     sqlx::query("SELECT pg_advisory_xact_lock(hashtextextended($1,16))")
         .bind(t)
         .execute(&mut **tx)
@@ -56,7 +88,7 @@ async fn lock_units(tx: &mut Tx<'_>, t: &str, id: &str, keys: &[String]) -> Resu
             return Err(bad("Invalid app data selection"));
         }
         sqlx::query("SELECT pg_advisory_xact_lock(hashtextextended($1,8))")
-            .bind(apps::records::lock_key(t, parts[1], parts[2], parts[3]))
+            .bind(lock_key(t, parts[1], parts[2], parts[3]))
             .execute(&mut **tx)
             .await?;
     }
@@ -96,18 +128,17 @@ fn admit_selections(
     Ok(())
 }
 /// Publishes one selected unit through its native writer.
-async fn publish_unit(
+async fn publish_unit<H: ReleaseHost>(
+    host: &H,
     tx: &mut Tx<'_>,
     h: &RequestContext,
-    t: &str,
-    id: &str,
-    key: &str,
-    value: &Value,
+    (t, id): (&str, &str),
+    (key, value): (&str, &Value),
     actual: &Value,
 ) -> Result<()> {
     if let Some(channel) = key.strip_prefix("settings-channel:") {
-        auth::permit(h, "settings.write")?;
-        commerce::publish_scope(tx, t, channel, value).await?;
+        permit(h, "settings.write")?;
+        publish_scope(host.settings_guards(), tx, t, channel, value).await?;
     } else if key == "company" || key.starts_with("company-channel:") {
         company::publish(tx, t, id, key, value).await?;
     } else if key.starts_with("b2b-company:") || key.starts_with("b2b-unit:") {
@@ -115,8 +146,8 @@ async fn publish_unit(
     } else if key.starts_with("category:") {
         // Category units were published above in parent-first dependency order.
     } else if key == "order-workflow" {
-        auth::permit(h, "settings.write")?;
-        let m: commerce::OrderMachine =
+        permit(h, "settings.write")?;
+        let m: OrderMachine =
             serde_json::from_value(value.clone()).map_err(|_| bad("Invalid workflow"))?;
         m.validate()?;
         let ids = m.states.iter().map(|s| s.id.clone()).collect::<Vec<_>>();
@@ -132,13 +163,13 @@ async fn publish_unit(
     } else if key.starts_with("product:") {
         // Product parents and content were published above, before dependent assets.
     } else if let Some(app) = key.strip_prefix("app:") {
-        let m: apps::Manifest = serde_json::from_value(value["manifest"].clone())
+        let m: Manifest = serde_json::from_value(value["manifest"].clone())
             .map_err(|_| bad("Invalid app package"))?;
         if m.runtime != "declarative" {
             return Err(bad("External services need a separate deployment"));
         }
-        apps::actor_permissions(h, &m)?;
-        apps::install_tx(tx, t, m).await?;
+        actor_permissions(h, &m)?;
+        host.install_app(tx, t, m).await?;
         sqlx::query("UPDATE app_packages SET active=$1 WHERE tenant=$2 AND id=$3")
             .bind(value["active"].as_bool())
             .bind(t)
@@ -153,26 +184,26 @@ async fn publish_unit(
             .fetch_optional(&mut **tx)
             .await?
             .ok_or(bad("Publish the app package before its data"))?;
-        let m: apps::Manifest =
+        let m: Manifest =
             serde_json::from_value(row.get("manifest")).map_err(|_| bad("Invalid app"))?;
         let e = m
             .entities
             .iter()
             .find(|e| e.name == parts[2])
             .ok_or(bad("App entity missing"))?;
-        if !apps::core_extensions::configuration(e) {
+        if !configuration(e) {
             return Err(bad(
                 "Operational customer/order extension records are never release units",
             ));
         }
-        let revision = apps::records::get(tx, t, &m.id, &e.name, parts[3], false)
+        let revision = get_record(tx, t, &m.id, &e.name, parts[3], false)
             .await?
             .and_then(|r| r["revision"].as_i64())
             .unwrap_or(0);
         let mut fields = value.clone();
         fields.as_object_mut().unwrap().remove("id");
-        apps::record_access(&m, e, h, "save")?;
-        apps::data::save_tx(
+        entity_access(&m, e, h, "save")?;
+        host.save_record(
             tx,
             t,
             &m,
@@ -189,7 +220,7 @@ async fn publish_unit(
             _ => return Err(bad("Unsupported release unit")),
         };
         if kind == "promotion" {
-            marketing::preserve_import(&actual[key], value)?;
+            preserve_import(&actual[key], value)?;
         }
         if kind == "rule" {
             sqlx::query("INSERT INTO commerce_rules(tenant,id,name,condition,active) VALUES($1,$2,$3,$4,$5) ON CONFLICT(tenant,id) DO UPDATE SET name=EXCLUDED.name,condition=EXCLUDED.condition,active=EXCLUDED.active,revision=commerce_rules.revision+1").bind(t).bind(unit).bind(&value["name"]).bind(&value["condition"]).bind(value["active"].as_bool()).execute(&mut **tx).await?;
@@ -241,15 +272,17 @@ async fn live_value(tx: &mut Tx<'_>, t: &str, key: &str, value: &Value) -> Resul
         value.clone()
     })
 }
-pub(crate) async fn release(
-    State(a): State<App>,
+/// Publishes the selected, approved sandbox units to the live shop in one transaction.
+pub async fn release<H: ReleaseHost>(
+    host: &H,
     h: RequestContext,
-    Path(id): Path<String>,
-    Json(v): Json<Value>,
-) -> Result<Json<Value>> {
-    auth::permit(&h, "environments.manage")?;
-    let t = live(&a, &h).await?;
-    owned(&a, &t, &id).await?;
+    id: String,
+    v: Value,
+) -> Result<Value> {
+    let a = host.core();
+    permit(&h, "environments.manage")?;
+    let t = live(a, &h).await?;
+    owned(a, &t, &id).await?;
     let req: Release = serde_json::from_value(v).map_err(|_| bad("Invalid release"))?;
     if !req.approve || req.selections.is_empty() || req.selections.len() > 50 {
         return Err(bad("Select 1..50 reviewed changes and approve"));
@@ -266,8 +299,8 @@ pub(crate) async fn release(
     }
     access::permit(&h, &keys)?;
     let mut tx = a.db.begin().await?;
-    history::context(&mut tx, &h, "staging.release").await?;
-    lock_units(&mut tx, &t, &id, &keys).await?;
+    context(&mut tx, &h, "staging.release").await?;
+    lock_units(host, &mut tx, &t, &id, &keys).await?;
     let mut base: Value = sqlx::query_scalar(
         "SELECT baseline FROM shop_environments WHERE tenant=$1 AND live_tenant=$2 FOR UPDATE",
     )
@@ -278,9 +311,7 @@ pub(crate) async fn release(
     let current = snapshot(&mut tx, &id).await?;
     let actual = snapshot(&mut tx, &t).await?;
     for key in keys.iter().filter(|k| k.starts_with("flow:")) {
-        let flow: marketing::Flow =
-            serde_json::from_value(current[key].clone()).map_err(|_| bad("Invalid flow"))?;
-        marketing::authorize_flow(&h, &flow)?;
+        host.authorize_flow(&h, &current[key])?;
     }
     admit_selections(&req.selections, &keys, &current, &actual, &base)?;
     categories::publish(&mut tx, &t, &current, &keys).await?;
@@ -293,13 +324,13 @@ pub(crate) async fn release(
     for key in configuration.chain(records) {
         let s = req.selections.iter().find(|s| s.key == *key).unwrap();
         let value = &current[&s.key];
-        publish_unit(&mut tx, &h, &t, &id, &s.key, value, &actual).await?;
+        publish_unit(host, &mut tx, &h, (&t, &id), (&s.key, value), &actual).await?;
         base["stage"][&s.key] = value.clone();
         base["live"][&s.key] = live_value(&mut tx, &t, &s.key, value).await?;
     }
     assets::validate_product_media(&mut tx, &t, &keys).await?;
-    crate::b2b::publish_configuration(&mut tx, &t, &keys, &current).await?;
-    final_config::validate(&mut tx, &t, &h, &keys, &current, &actual, &mut base).await?;
+    b2b::publish_configuration(&mut tx, &t, &keys, &current).await?;
+    final_config::validate(host, &mut tx, &t, &h, &keys, (&current, &actual), &mut base).await?;
     let release = uid();
     let selected = json!(keys);
     sqlx::query("UPDATE shop_environments SET baseline=$1 WHERE tenant=$2")
@@ -313,8 +344,8 @@ pub(crate) async fn release(
         .bind(json!({"releaseId":release,"selections":selected}))
         .execute(&mut *tx)
         .await?;
-    commerce::validate_settings_release(&mut tx, &t, &actual["settings"]).await?;
-    operations::validate_company_release(&mut tx, &t).await?;
+    validate_settings_release(host.settings_guards(), &mut tx, &t, &actual["settings"]).await?;
+    validate_company_release(&mut tx, &t).await?;
     tx.commit().await?;
-    Ok(Json(json!({"id":release,"published":selected})))
+    Ok(json!({"id":release,"published":selected}))
 }

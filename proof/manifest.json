@@ -4063,8 +4063,8 @@
     },
     "components/studio/src/ports.rs": {
       "status": "unproved",
-      "sha256": "d9b616ec105e07c26275885365a2659f642654f6f510b2929d00906be3a008ee",
-      "review": "Batch F1: proposals, list views, reviewed work, its execution and proposal application moved into studio behind the WorkHost port"
+      "sha256": "302aa9b0a69b9a35220034362634b3603970585452b7fd2b0dcbacf60d6a2811",
+      "review": "Batch F2: sandbox clone, snapshot, diff and release moved into studio behind the ReleaseHost port"
     },
     "components/studio/src/service/grid_plan.rs": {
       "status": "unproved",
@@ -4086,6 +4086,36 @@
       "sha256": "da5119df249ac3978c65f61c4f66c6578f0599d33855bc5b6ced8ece89e0b17a",
       "review": "Report service moved into the studio component and the cart language chain into the checkout component; behaviour unchanged"
     },
+    "components/studio/src/service/staging/clone.rs": {
+      "status": "unproved",
+      "sha256": "3086ea6b38ec5d3aa1d71d45d0603207d9226034115214273b0e85b21c9b21d4",
+      "review": "Batch F2: sandbox clone, snapshot, diff and release moved into studio behind the ReleaseHost port"
+    },
+    "components/studio/src/service/staging/final_config.rs": {
+      "status": "unproved",
+      "sha256": "aeae20ba0a47dbbed77a89b22db41f1b0e17f2ba8f11a2a5b8ea76691e8cf38c",
+      "review": "Batch F2: sandbox clone, snapshot, diff and release moved into studio behind the ReleaseHost port"
+    },
+    "components/studio/src/service/staging/products.rs": {
+      "status": "unproved",
+      "sha256": "bf0edd0e526ebdd002383f97004e6e25cca394897d0e617c5b6450293a9fae70",
+      "review": "Batch F2: sandbox clone, snapshot, diff and release moved into studio behind the ReleaseHost port"
+    },
+    "components/studio/src/service/staging/release.rs": {
+      "status": "unproved",
+      "sha256": "fd5d0e57180638fb63c1ea7235875d93c2a683880fc9e95a8ae2a54f172b97db",
+      "review": "Batch F2: sandbox clone, snapshot, diff and release moved into studio behind the ReleaseHost port"
+    },
+    "components/studio/src/service/staging/snapshot.rs": {
+      "status": "unproved",
+      "sha256": "b78ddd3296e942ee8a8817d6461ee3231de57b46121843a414ad1f76aa046c52",
+      "review": "Batch F2: sandbox clone, snapshot, diff and release moved into studio behind the ReleaseHost port"
+    },
+    "components/studio/src/service/staging.rs": {
+      "status": "unproved",
+      "sha256": "a8720bb47b300b55df6d31528194f5dbb535dd9aca00d7baef29c5908fb41465",
+      "review": "Batch F2: sandbox clone, snapshot, diff and release moved into studio behind the ReleaseHost port"
+    },
     "components/studio/src/service/work_execution.rs": {
       "status": "unproved",
       "sha256": "6ce18b7f91e2c0ed14bda5b3a02a3f207f1815146bbd5070c849b48271d77551",
@@ -4098,8 +4128,8 @@
     },
     "components/studio/src/service.rs": {
       "status": "unproved",
-      "sha256": "dc783ea34da29c54648a7526e3e085f3f69ab76042cb6e866d257d501a0b3a5c",
-      "review": "Batch F1: proposals, list views, reviewed work, its execution and proposal application moved into studio behind the WorkHost port"
+      "sha256": "452fc05a05dfbe4fef97fafcf33696c915e46e55cbde432e63fe69c21e272ae0",
+      "review": "Batch F2: sandbox clone, snapshot, diff and release moved into studio behind the ReleaseHost port"
     },
     "components/studio/src/store/history.rs": {
       "status": "unproved",
@@ -6078,8 +6108,8 @@
     },
     "src/apps/core_extensions.rs": {
       "status": "unproved",
-      "sha256": "05e5d943ba9a717b9d91bbd5c9bb4b51c447535ca524df93ee66689403af8319",
-      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
+      "sha256": "e4f2e62c6fa80144985d7f63d01364421016cb2a33d97117d4b51ab2f9708fa9",
+      "review": "Batch F2: sandbox clone, snapshot, diff and release moved into studio behind the ReleaseHost port"
     },
     "src/apps/credentials.rs": {
       "status": "unproved",
@@ -6100,11 +6130,6 @@
       "status": "unproved",
       "sha256": "066f7933b2efb344bc6b7c248efcacb1bb83166c2ca6a363d472ce96a21a94c7",
       "review": "Job callbacks, completion evidence, package verification, installation, activation and upgrade review moved into the apps component behind host ports without behavior change"
-    },
-    "src/apps/editor_contract.rs": {
-      "status": "unproved",
-      "sha256": "1611592a7f6512b09e78f54c81a1f4634d60f300b856c1e8299ca6c0ce1d9800",
-      "review": "Managed app records, restoration, import and native-object projection moved into the apps component behind a record rules port without behavior change"
     },
     "src/apps/editor_tests.rs": {
       "status": "unproved",
@@ -6138,8 +6163,8 @@
     },
     "src/apps/gateway.rs": {
       "status": "unproved",
-      "sha256": "5ffe8540e26e9b70dab4608cea2efc63ec15a5812337a3d4bac7ff8fa998d662",
-      "review": "App Studio immediate preview moved into the apps component behind the host port; behaviour unchanged"
+      "sha256": "0ddd3f1aabb6201635e00391398c99a11da360700c54f72b75d72464418ceed4",
+      "review": "Batch F2: sandbox clone, snapshot, diff and release moved into studio behind the ReleaseHost port"
     },
     "src/apps/hosted.rs": {
       "status": "unproved",
@@ -6183,8 +6208,8 @@
     },
     "src/apps/mod.rs": {
       "status": "unproved",
-      "sha256": "723ceb0ce93c20aa07c9566038254521232d36e1dcc07ceba69df2239fadaddb",
-      "review": "Batch F1: proposals, list views, reviewed work, its execution and proposal application moved into studio behind the WorkHost port"
+      "sha256": "8c949ed6f365789b70f88bfe250ae038df4d5c757e74519249d5889c236fec1d",
+      "review": "Batch F2: sandbox clone, snapshot, diff and release moved into studio behind the ReleaseHost port"
     },
     "src/apps/model_contract.rs": {
       "status": "unproved",
@@ -6230,11 +6255,6 @@
       "status": "unproved",
       "sha256": "e838fed75c8145962515aa12db15cf49895d80e88a1e7dc76fa89252fc830882",
       "review": "Managed app records, restoration, import and native-object projection moved into the apps component behind a record rules port without behavior change"
-    },
-    "src/apps/records.rs": {
-      "status": "unproved",
-      "sha256": "49cf7b091f03d805a69d0ed8565562e401878e61e0171188199bfc14a6a62fc8",
-      "review": "App Studio immediate preview moved into the apps component behind the host port; behaviour unchanged"
     },
     "src/apps/registry.rs": {
       "status": "unproved",
@@ -6533,8 +6553,8 @@
     },
     "src/b2b/mod.rs": {
       "status": "unproved",
-      "sha256": "1de51834d2ba954e3acef0ce4b4ee36750f0444cc2bde20edcdcbacd059c50f4",
-      "review": "Procurement lists move into b2b; configuration selection rules into shop"
+      "sha256": "2495cc74a36c9b54f2d87160c4597b6cd962b0c7bcb921e8ab40a638193d6506",
+      "review": "Batch F2: sandbox clone, snapshot, diff and release moved into studio behind the ReleaseHost port"
     },
     "src/b2b/model.rs": {
       "status": "unproved",
@@ -6580,11 +6600,6 @@
       "status": "unproved",
       "sha256": "eabef82b62f5006f17d4018b0434f751f67be8ffd4b7a800535aabec0a906d9a",
       "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
-    },
-    "src/b2b/staging.rs": {
-      "status": "unproved",
-      "sha256": "7890097243e4b487ec890d3f6a14494e34d0c29c176acf64e1297733368573d6",
-      "review": "B2B access, organization and purchasing storage and flow job claims moved into their components"
     },
     "src/bin/automation_rules.rs": {
       "status": "unproved",
@@ -6758,8 +6773,8 @@
     },
     "src/categories/mod.rs": {
       "status": "unproved",
-      "sha256": "fd7826328a2034ddfbe551c2d8f6dadfc7c374498bac85fc184bd1e05fd568bb",
-      "review": "Batch F1: proposals, list views, reviewed work, its execution and proposal application moved into studio behind the WorkHost port"
+      "sha256": "afd50321799b0e8f15c503e531a5448ef30a259762ea558f1b646a7ea7b98148",
+      "review": "Batch F2: sandbox clone, snapshot, diff and release moved into studio behind the ReleaseHost port"
     },
     "src/categories/navigation.rs": {
       "status": "unproved",
@@ -7013,8 +7028,8 @@
     },
     "src/commerce/order_machine.rs": {
       "status": "unproved",
-      "sha256": "0bfeb2e7557e0f136c7eac6d60f926e517b3338be0a0ae98ac4f99b1deaf3e5f",
-      "review": "order workflow kernel bindings follow the move into components/orders"
+      "sha256": "cc805507458701db46a6d3bd8b7b3c2b6a7ff87ae9d56e0c3695292f0fbbf8a7",
+      "review": "Batch F2: sandbox clone, snapshot, diff and release moved into studio behind the ReleaseHost port"
     },
     "src/commerce/product_admin.rs": {
       "status": "unproved",
@@ -7033,8 +7048,8 @@
     },
     "src/commerce/settings_guards.rs": {
       "status": "unproved",
-      "sha256": "66e888e51e206be9d53be8cb029a9577283711b69596f233e5e898b1c9dbc4f9",
-      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
+      "sha256": "037c5446c71f4b8ace3e2f302ad5b1c3cc20313769de6408ade01636445cf755",
+      "review": "Batch F2: sandbox clone, snapshot, diff and release moved into studio behind the ReleaseHost port"
     },
     "src/commerce/settings_patch.rs": {
       "status": "unproved",
@@ -7383,8 +7398,8 @@
     },
     "src/marketing/mod.rs": {
       "status": "unproved",
-      "sha256": "cfb8c5ee096e5ce59f125732de1c10c38cfbd2848c1e1da8802d51911a1855a8",
-      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
+      "sha256": "2da014d6bd7cf97c5a87f3bdc1c29623cfafbd3881345df307381a50da93f1f7",
+      "review": "Batch F2: sandbox clone, snapshot, diff and release moved into studio behind the ReleaseHost port"
     },
     "src/marketing/pipeline.rs": {
       "status": "unproved",
@@ -7588,13 +7603,13 @@
     },
     "src/operations/master_data.rs": {
       "status": "unproved",
-      "sha256": "76b286520761078a7969883a3baa18566abdf2e30da01488ddf106a1171f78e0",
-      "review": "Company basis and logo transport moved into the orders component, tax rule conditions into checkout; behaviour unchanged"
+      "sha256": "527a0b7812d74b2e0ec1dbc3c79ac63821b8dcddb94c9be6d9a3a8510e53476c",
+      "review": "Batch F2: sandbox clone, snapshot, diff and release moved into studio behind the ReleaseHost port"
     },
     "src/operations/mod.rs": {
       "status": "unproved",
-      "sha256": "d4f3ceb5bae0826b6a67be387eb2308c363de3c2108091711a5202567f4cfa91",
-      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
+      "sha256": "a85e8822badfd4e1397b3c9ef6737080617797a8bc9b30e124f1ed4e408f0476",
+      "review": "Batch F2: sandbox clone, snapshot, diff and release moved into studio behind the ReleaseHost port"
     },
     "src/operations/order_documents.rs": {
       "status": "unproved",
@@ -7976,60 +7991,15 @@
       "sha256": "322675823e0e7b346faa68e88b5e30fbabd82a61871d7eb450b46ba07ae382d0",
       "review": "Hosted frontend transport moves into shop"
     },
-    "src/staging/access.rs": {
-      "status": "unproved",
-      "sha256": "db5563196d5dc98e91dad91d1a63d3f2909188509ea070f93b389a20df1cb5c4",
-      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
-    },
-    "src/staging/assets.rs": {
-      "status": "unproved",
-      "sha256": "530ccc1ab809d7488bec27a5d9a9ee1193405b35b1a94ee359992521db5b6794",
-      "review": "Local flow mutations moved verbatim into the marketing component and staged knowledge sources, assets and categories into the studio component; the flow owner and release selection stay in the server."
-    },
-    "src/staging/categories.rs": {
-      "status": "unproved",
-      "sha256": "b3442424e0a533a4e52e5dbd1e99c1758bf7b5c46133cab2ad2cdb29b85f4caf",
-      "review": "Local flow mutations moved verbatim into the marketing component and staged knowledge sources, assets and categories into the studio component; the flow owner and release selection stay in the server."
-    },
-    "src/staging/clone.rs": {
-      "status": "unproved",
-      "sha256": "d46200a93813f466e3de99ae8e9c035e37856c44e62bdb755eb61f8c598024af",
-      "review": "Functions above 150 lines split into named steps without behaviour change; function length limit lowered to 150"
-    },
-    "src/staging/company.rs": {
-      "status": "unproved",
-      "sha256": "5847a2015383d6894e2d79b8c23c40d1c5cfd1e88c4b3345abfaea1b848e2f09",
-      "review": "Access overview, session revocation, company release and rule metadata moved into components"
-    },
-    "src/staging/documents.rs": {
-      "status": "unproved",
-      "sha256": "1abf0bbb5befc5041852ce9abd1025964855f7b79a44dc1d3fed90784f95304c",
-      "review": "Local flow mutations moved verbatim into the marketing component and staged knowledge sources, assets and categories into the studio component; the flow owner and release selection stay in the server."
-    },
-    "src/staging/final_config.rs": {
-      "status": "unproved",
-      "sha256": "c24836be4ce4f6e1ccf5187509d97e924e0d0068e812d1d6fe798ffc4e29e5a7",
-      "review": "Review native lifecycle labels across immutable builds, atomic installation, settings main-language edits and final selected-release validation. Existing aggregate configuration lock precedes package admission and private preview resets. Accepted historical snapshots retain their original language; the pure native-admission conjunction is unchanged."
-    },
     "src/staging/mod.rs": {
       "status": "unproved",
-      "sha256": "ddcc032f7be26287582685d182696f44cc6a4e2490cb49f7c06fba2bc684abef",
-      "review": "Job callbacks, completion evidence, package verification, installation, activation and upgrade review moved into the apps component behind host ports without behavior change"
+      "sha256": "694cd18bb7bfd50f9069c1238fe8b0337376b0ec6685014695f2f805098dbd9e",
+      "review": "Batch F2: sandbox clone, snapshot, diff and release moved into studio behind the ReleaseHost port"
     },
-    "src/staging/products.rs": {
+    "src/staging/release_host.rs": {
       "status": "unproved",
-      "sha256": "42b63ed7ffca5e9bda2540ffa3e5c0e89e3a64fb35e9bffdd6f47be62024ca09",
-      "review": "Independent review of native imported immutable image boundaries and selected parent/product-before-asset publication; exact persisted product baseline, attachment-only guard, source-position ordering and recoverable two-step association verified through real HTTP/PostgreSQL regressions. Pure extracted policies unchanged."
-    },
-    "src/staging/release.rs": {
-      "status": "unproved",
-      "sha256": "4a3613bb315e6741a677c8d2588b5352efecfcde5a8d293bf6147a478d09a995",
-      "review": "Functions above 150 lines split into named steps without behaviour change; function length limit lowered to 150"
-    },
-    "src/staging/snapshot.rs": {
-      "status": "unproved",
-      "sha256": "2c58a161212c097a0c97d4c4e4df4a5dc2e081e0bf9cb49c6a5005d6f2650ce4",
-      "review": "Restore the product-only catalog evidence callback under installed app scope and project selected publication through the native outbox transaction. Local Core and isolated Knowledge PostgreSQL composition verifies event retry, private staging, locale, withdrawal, restart, one order, and current source inventory."
+      "sha256": "0d50a8af0c90b406e4e73ac254409d88fed4480d31a637e53fdaf8ca00bf4a5e",
+      "review": "Batch F2: sandbox clone, snapshot, diff and release moved into studio behind the ReleaseHost port"
     },
     "src/storefront_pages.rs": {
       "status": "unproved",
@@ -8153,8 +8123,8 @@
       "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
     },
     "Cargo.lock": {
-      "sha256": "4709e466b0f5267c8a36a0df19a2906ed56660e1e1a1875802a872debcd43f4e",
-      "review": "Batch E: payment status reads into payments, the image provider adapter into cognition"
+      "sha256": "651248de44166eca9759b21cd8b4f31a33cb2ceee598563c2c8cfb3b96539a20",
+      "review": "Batch F2: sandbox clone, snapshot, diff and release moved into studio behind the ReleaseHost port"
     },
     "Cargo.toml": {
       "sha256": "12d2d79a98f6913d20b8e912afb9ea8de0539b9e83428de8a9d7412c406896f6",

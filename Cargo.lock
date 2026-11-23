@@ -4033,6 +4033,7 @@ dependencies = [
  "uuid",
  "veyndo-app-model",
  "veyndo-app-platform",
+ "veyndo-b2b",
  "veyndo-catalog",
  "veyndo-cognition",
  "veyndo-core",
@@ -4041,6 +4042,7 @@ dependencies = [
  "veyndo-intelligence",
  "veyndo-marketing",
  "veyndo-orders",
+ "veyndo-pos",
  "veyndo-pricing",
  "veyndo-shop",
 ]

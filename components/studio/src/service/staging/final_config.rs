@@ -1,28 +1,38 @@
 //! Validate the final published channel/automation aggregate and initialize native POS defaults.
-use super::*;
-pub(super) async fn validate(
+use super::snapshot::Tx;
+use crate::ports::ReleaseHost;
+use serde_json::Value;
+use veyndo_core::{RequestContext, Result, bad};
+use veyndo_marketing::store::channel_config::validate_channel_config;
+use veyndo_marketing::store::configuration_lifecycle::validate_references;
+use veyndo_pos::store::channel_setup::configure as configure_pos;
+use veyndo_shop::domain::defaults::decode;
+/// Validates the final published channel and automation aggregate and initializes native POS defaults.
+pub async fn validate<H: ReleaseHost>(
+    host: &H,
     tx: &mut Tx<'_>,
     t: &str,
     h: &RequestContext,
     keys: &[String],
-    current: &Value,
-    actual: &Value,
+    (current, actual): (&Value, &Value),
     base: &mut Value,
 ) -> Result<()> {
     if keys.iter().any(|key| key == "settings") {
-        let settings = commerce::decode_config(
+        let settings = decode(
             sqlx::query_scalar("SELECT data FROM commerce_settings WHERE tenant=$1")
                 .bind(t)
                 .fetch_one(&mut **tx)
                 .await?,
         )?;
-        apps::native_lifecycle::validate_active_locale(tx, t, &settings.main_locale).await?;
+        host.settings_guards()
+            .locale(tx, t, &settings.main_locale)
+            .await?;
     }
     // Validate references against the final aggregate, including jointly selected new rules.
     for key in keys {
         if let Some((kind, unit)) = key.split_once(':') {
             if ["rule", "promotion", "flow", "channel"].contains(&kind) {
-                marketing::validate_references(
+                validate_references(
                     tx,
                     t,
                     if kind == "rule" { "rules" } else { kind },
@@ -32,7 +42,7 @@ pub(super) async fn validate(
                 .await?;
             }
             if kind == "flow" {
-                marketing::validate_flow_config(tx, t, h, &current[key]).await?;
+                host.validate_flow(tx, t, h, &current[key]).await?;
             }
             if kind == "channel"
                 && !matches!(
@@ -46,15 +56,15 @@ pub(super) async fn validate(
                 return Err(bad("Main channel must remain storefront"));
             }
             if kind == "channel" {
-                let settings = commerce::decode_config(
+                let settings = decode(
                     sqlx::query_scalar("SELECT data FROM commerce_settings WHERE tenant=$1")
                         .bind(t)
                         .fetch_one(&mut **tx)
                         .await?,
                 )?;
-                marketing::validate_channel_config(tx, t, unit, &current[key], &settings).await?;
+                validate_channel_config(tx, t, unit, &current[key], &settings).await?;
                 let configured: bool = sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM commerce_overrides WHERE tenant=$1 AND channel_id=$2)").bind(t).bind(unit).fetch_one(&mut **tx).await?;
-                crate::pos::configure(
+                configure_pos(
                     tx,
                     t,
                     unit,

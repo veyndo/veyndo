@@ -116,7 +116,7 @@ verified separately by native integration tests rather than proved by Lean.
 | `destination_tax_admissible` | Condition, country, state, postcode and date guards must all match | `src/commerce/tax_rules.rs` |
 | `customer_group_net` | Net basis requires a configured business group; unknown groups cannot claim it | `src/commerce/customer_groups.rs` |
 | `app_tool_admissible` | Tool admission requires explicit enablement and current authorization | `src/apps/gateway.rs` |
-| `app_core_reference_admissible` | Product references may be public; customer/order references require private data | `src/apps/editor_contract.rs` |
+| `app_core_reference_admissible` | Product references may be public; customer/order references require private data | `components/apps/src/domain/entity_access.rs` |
 | `planning_request_admissible` | Admission is exactly a read classification or an explicitly allowed planning operation | `src/agent_runs/controls.rs` |
 | `agent_preview_admissible` | Private continuation requires an active shop, personal session, matching owner and current preview | `src/agent_runs/authority.rs` |
 | `shop_request_admissible` | Active shops admit requests; paused shops require an admitted read; archived shops deny ordinary operations while settlement callbacks remain available | `src/platform/lifecycle.rs` |

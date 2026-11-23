@@ -26,3 +26,5 @@ reqwest.workspace = true
 veyndo-customers = { path = "../customers" }
 veyndo-cognition = { path = "../../crates/cognition" }
 uuid.workspace = true
+veyndo-b2b = { path = "../b2b" }
+veyndo-pos = { path = "../pos" }
