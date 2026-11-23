@@ -345,7 +345,6 @@
         "src/checkout",
         "src/checkout_handoff.rs",
         "src/checkout_page.rs",
-        "src/commerce/app_adjustments.rs",
         "src/order_checkout.rs"
       ],
       "tables": [
@@ -722,7 +721,6 @@
         "marketing",
         "orders",
         "payments",
-        "pos",
         "pricing",
         "shipping",
         "shop",
@@ -750,7 +748,7 @@
         "tenants",
         "workspace_roles"
       ],
-      "glob_imports": 56,
+      "glob_imports": 55,
       "untyped_access": 434,
       "sql_outside_store": 28
     },

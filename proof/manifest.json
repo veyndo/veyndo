@@ -1051,6 +1051,16 @@
       "sha256": "dbf3a7dadea4bd7a01498aa490d66a574b3bd5ad3d4577d65968e0a0518e470e",
       "review": "Delivery split and carrier booking intents moved into the orders and apps components"
     },
+    "components/apps/src/service/cart_contributions.rs": {
+      "status": "unproved",
+      "sha256": "62a017351745f696dfb4105de34f4e782daea5791362fb85d1a055a2d6f56cba",
+      "review": "Batch B: commerce hooks, cart contributions and app source ingestion move into apps"
+    },
+    "components/apps/src/service/commerce_hooks.rs": {
+      "status": "unproved",
+      "sha256": "bc176b73d95c92459377054562b8bd2b490fb38bc24ab560c0599d21254a4713",
+      "review": "Batch B: commerce hooks, cart contributions and app source ingestion move into apps"
+    },
     "components/apps/src/service/configuration_examples.rs": {
       "status": "unproved",
       "sha256": "d8f5c5a4f9ab3ac341f43166b10233b9c47d3af76e27cfe6e9ac90b372aebfd8",
@@ -1143,8 +1153,8 @@
     },
     "components/apps/src/service.rs": {
       "status": "unproved",
-      "sha256": "7130718d28556e86e302ad06f62503fd9c45ea39110f797a4449ddb496d034d0",
-      "review": "Delivery split and carrier booking intents moved into the orders and apps components"
+      "sha256": "7f487b8b2175f83c05cec2a6a13abc2c02eb6ff10315bbd439f50266b48c13eb",
+      "review": "Batch B: commerce hooks, cart contributions and app source ingestion move into apps"
     },
     "components/apps/src/store/action_log.rs": {
       "status": "unproved",
@@ -1198,8 +1208,8 @@
     },
     "components/apps/src/store/evidence.rs": {
       "status": "unproved",
-      "sha256": "0c73580b47f9df39bc878a2d1738a32fa8837659a13c86be8a5c8772215975a1",
-      "review": "App jobs and private evidence reads moved into the apps component without changing rules"
+      "sha256": "de1713a59a4cde01097ffe4d78dcf6a6dadb9d5005839437cb7a2801e96e1624",
+      "review": "Batch B: commerce hooks, cart contributions and app source ingestion move into apps"
     },
     "components/apps/src/store/extension_filter.rs": {
       "status": "unproved",
@@ -5828,13 +5838,8 @@
     },
     "src/apps/cart_contributions.rs": {
       "status": "unproved",
-      "sha256": "c8b866fb11af6932a4775dca8cdfee198badbc6162b0be449903706e53cd7f9a",
-      "review": "Cart configuration checks, saved selections, the purchase projection and hosted app installation moved into the apps component without behavior change"
-    },
-    "src/apps/commerce_hooks.rs": {
-      "status": "unproved",
-      "sha256": "ab9780dfed9dbdfd76ec38fb29c0ca510a231861fbf25320e82cfc5cb5fc5a7b",
-      "review": "App Studio builds, autosaves, archive and staging moved into the apps component; behaviour unchanged"
+      "sha256": "b3f54070342416bb8657977d9ed2d4173cfa8f461bd48baa835002e15e452713",
+      "review": "Batch B: commerce hooks, cart contributions and app source ingestion move into apps"
     },
     "src/apps/configuration_events.rs": {
       "status": "unproved",
@@ -5918,8 +5923,8 @@
     },
     "src/apps/evidence.rs": {
       "status": "unproved",
-      "sha256": "7351c3560cb06af0a31169dfd7eb63e7113cb60077d73800accb485b4b079c86",
-      "review": "App jobs and private evidence reads moved into the apps component without changing rules"
+      "sha256": "2eeaa1158a500e2c22d24ff76e90290bb79f1187f6d3a7c0e5d6070d75d50f96",
+      "review": "Batch B: commerce hooks, cart contributions and app source ingestion move into apps"
     },
     "src/apps/evidence_routes.rs": {
       "status": "unproved",
@@ -5983,8 +5988,8 @@
     },
     "src/apps/mod.rs": {
       "status": "unproved",
-      "sha256": "08202b15f146c8dbfbbc8a5045dd5b9abdd7d75cecc6ed1ae7d925d8868d4484",
-      "review": "Procurement lists move into b2b; configuration selection rules into shop"
+      "sha256": "ac48c51f7c3d2cf32dac7465502734a5f9a6135b8dca397abbee8f724145fdff",
+      "review": "Batch B: commerce hooks, cart contributions and app source ingestion move into apps"
     },
     "src/apps/model_contract.rs": {
       "status": "unproved",
@@ -6528,8 +6533,8 @@
     },
     "src/cart_price.rs": {
       "status": "unproved",
-      "sha256": "e5a723acb63e5f16641b2c26087325d85b840a2be2308ead1c6a050927e2d297",
-      "review": "Checkout selection and method discovery move into checkout"
+      "sha256": "9c0d7f7a7d321b8a91aaadc65256d83e7ca9a064fda39f064344cb3393cc18f0",
+      "review": "Batch B: commerce hooks, cart contributions and app source ingestion move into apps"
     },
     "src/cart_routes.rs": {
       "status": "unproved",
@@ -6746,11 +6751,6 @@
       "sha256": "f27a0de2d451a1d070135e2679baf0c52698340daf2f69f5c1a92c8d8345eac6",
       "review": "Reviewed final response presentation metadata: only executed server App view references are attached, record claims cannot forge them, no rights, browser receipt or commerce fact is inferred. Unit and actual HTTP audience regressions cover the shared path."
     },
-    "src/commerce/app_adjustments.rs": {
-      "status": "unproved",
-      "sha256": "307f311fc41396f970799bf599a968cf3a72dc4ec59cfa4a1a0dd87f97737635",
-      "review": "Delivery enrichment, app adjustments and funding moved into components; kernel call sites unchanged"
-    },
     "src/commerce/catalog.rs": {
       "status": "unproved",
       "sha256": "257b1335971c4b7c81d371e6ee92ac3965a3799938b001bacd2cc1ae692ec9a9",
@@ -6858,8 +6858,8 @@
     },
     "src/commerce/mod.rs": {
       "status": "unproved",
-      "sha256": "46a9866f7583529ed770b5d50bdf725b01b8c44cdc06a37fd44d51e2ff833caa",
-      "review": "Batch A: customer accounts, account orders, sign-in throttle, handoff and roles move into customers, orders and identity"
+      "sha256": "3a860b9ef471d2aa7e4bca5226830541957b9364db94533da80c2012f4f4ac4c",
+      "review": "Batch B: commerce hooks, cart contributions and app source ingestion move into apps"
     },
     "src/commerce/order_fields.rs": {
       "status": "unproved",
@@ -8113,8 +8113,8 @@
       "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
     },
     "Cargo.lock": {
-      "sha256": "9c5c6f11317cb8cb90fc3b3cf863c7d8985c5aa9f59ec65906607b5fe2d66fa9",
-      "review": "Batch A: customer accounts, account orders, sign-in throttle, handoff and roles move into customers, orders and identity"
+      "sha256": "3f0ad818b57927310dbb1b167df1a299cbee0c42c2b4fcc84c499a087e714476",
+      "review": "Batch B: commerce hooks, cart contributions and app source ingestion move into apps"
     },
     "Cargo.toml": {
       "sha256": "12d2d79a98f6913d20b8e912afb9ea8de0539b9e83428de8a9d7412c406896f6",

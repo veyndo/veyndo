@@ -43,8 +43,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/apps/asset_surfaces.rs](../src/apps/asset_surfaces.rs) | App file uploads reuse the product asset parser/store and require the current package plus either callback consent or a surface grant. |
 | [src/apps/business_capability/mod.rs](../src/apps/business_capability/mod.rs) | Native complete-package and bounded-guest adapters for the independent business contracts and executable examples. |
 | [src/apps/business_capability/tests.rs](../src/apps/business_capability/tests.rs) | Acceptance examples exercise the same Wasm module as checkout, including changed inputs and failed-contract admission. |
-| [src/apps/cart_contributions.rs](../src/apps/cart_contributions.rs) | Generic app contributions: configure a cart, bind package/data revisions and persist audited pricing inputs. |
-| [src/apps/commerce_hooks.rs](../src/apps/commerce_hooks.rs) | Typed pure commerce hooks share the compiled sandbox cache and receive explicit immutable snapshots, never SQL or credentials. |
+| [src/apps/cart_contributions.rs](../src/apps/cart_contributions.rs) | App cart contributions are owned by the apps component; the server projects the configured cart. |
 | [src/apps/configuration_events.rs](../src/apps/configuration_events.rs) | Configuration budget and change events live in the apps component; this module keeps the short path for the cart. |
 | [src/apps/configuration_selection.rs](../src/apps/configuration_selection.rs) | Saved selections resolve in the apps component; this module adds the main language of the shop. |
 | [src/apps/consent.rs](../src/apps/consent.rs) | Package approval binds all requested permissions to a reviewed digest; current actor rights apply before every installation path. |
@@ -227,7 +226,6 @@ This lists every checked-in source module in these roots, including files with n
 | [src/cognition/signed_offer.rs](../src/cognition/signed_offer.rs) | Signed cart offer transport; the intelligence component signs and checks offers through the cart port. |
 | [src/cognition/stream.rs](../src/cognition/stream.rs) | Compatible SSE transport waits on the same persisted run; detached request handling retains native tenant scope. |
 | [src/cognition/tools.rs](../src/cognition/tools.rs) | Bounded agent read rounds use the same capability dispatcher and current actor rights; never execute writes. |
-| [src/commerce/app_adjustments.rs](../src/commerce/app_adjustments.rs) | Apply admitted integer app adjustments through native pricing/tax calculation; extensions cannot replace quote JSON. |
 | [src/commerce/catalog.rs](../src/commerce/catalog.rs) | SKU loading with parent translation fallback; owned by the catalog component. |
 | [src/commerce/catalog_intake/csv.rs](../src/commerce/catalog_intake/csv.rs) | Bounded UTF-8 CSV parser accepts quoted delimiters, escaped quotes and multiline fields; no formula evaluation or silent row loss. |
 | [src/commerce/catalog_intake/mod.rs](../src/commerce/catalog_intake/mod.rs) | Merchant catalogue intake prepares bounded drafts; approved saves reuse native products, history and outbox in a private stage. |
@@ -632,6 +630,8 @@ This lists every checked-in source module in these roots, including files with n
 | [components/apps/src/service/app_builds.rs](../components/apps/src/service/app_builds.rs) | App Studio builds: immutable development versions saved after admission, listed, archived, and staged into an environment the shop owns. |
 | [components/apps/src/service/app_preview.rs](../components/apps/src/service/app_preview.rs) | Immediate App Studio preview: the native runtime in an expiring personal environment. No build, version or release is created. |
 | [components/apps/src/service/carrier_booking.rs](../components/apps/src/service/carrier_booking.rs) | Provider-neutral package admission freezes allocation before a paid carrier effect; approved apps reconcile only their own intent. |
+| [components/apps/src/service/cart_contributions.rs](../components/apps/src/service/cart_contributions.rs) | Generic app contributions: configure a cart, bind package/data revisions and persist audited pricing inputs. |
+| [components/apps/src/service/commerce_hooks.rs](../components/apps/src/service/commerce_hooks.rs) | Typed pure commerce hooks share the compiled sandbox cache and receive explicit immutable snapshots, never SQL or credentials. |
 | [components/apps/src/service/configuration_examples.rs](../components/apps/src/service/configuration_examples.rs) | Frozen configuration cases use the same field validation and bounded guest as real cart configuration. |
 | [components/apps/src/service/configuration_runtime.rs](../components/apps/src/service/configuration_runtime.rs) | Generic pure-Wasm contribution executor; the installed package supplies all business predicates. |
 | [components/apps/src/service/configuration_selection.rs](../components/apps/src/service/configuration_selection.rs) | Reusable input-only selections resolve current package/library revisions before one native cart mutation. |

@@ -1,7 +1,8 @@
 //! Private provenance-bearing app sources for merchant retrieval; never public PDP answers.
 use serde_json::{Value, json};
 use sqlx::Row;
-use veyndo_core::{Result, State};
+use veyndo_core::{Result, State, bad, hash};
+use veyndo_intelligence::knowledge::sync_integration;
 
 /// The best matching private sources of active apps for a merchant query.
 pub async fn private_evidence(a: &State, t: &str, query: &str) -> Result<Value> {
@@ -18,4 +19,108 @@ pub async fn private_graph(a: &State, t: &str) -> Result<Value> {
     let sources:Vec<Value>=sqlx::query_scalar("SELECT jsonb_build_object('app',app,'sourceId',source_id,'title',title,'kind',kind) FROM app_evidence WHERE tenant=$1 AND app=ANY($2) ORDER BY app,source_id LIMIT 100").bind(t).bind(&active).fetch_all(&a.db).await?;
     let products:Vec<Value>=sqlx::query_scalar("SELECT jsonb_build_object('app',r.data->>'app','sourceId',r.data->>'sourceId','productId',p.id) FROM knowledge_relations r JOIN products p ON p.tenant=r.tenant AND p.id=r.target_id JOIN app_evidence e ON e.tenant=r.tenant AND e.app=r.data->>'app' AND e.source_id=r.data->>'sourceId' WHERE r.tenant=$1 AND r.kind='REFERENCES_PRODUCT' AND e.app=ANY($2) ORDER BY e.app,e.source_id,p.id LIMIT 100").bind(t).bind(&active).fetch_all(&a.db).await?;
     Ok(json!({"sources":sources,"productRelations":products,"visibility":"merchant-private"}))
+}
+
+/// Stores one export page of an app's private sources at its cursor, mirrors them into the knowledge graph and announces new ones.
+pub async fn ingest(a: &State, t: &str, app: &str, previous: i64, v: &Value) -> Result<()> {
+    let cursor = v["cursor"]
+        .as_i64()
+        .filter(|n| *n >= previous)
+        .ok_or(bad("Invalid export cursor"))?;
+    let sources = v["sources"]
+        .as_array()
+        .filter(|s| s.len() <= 10)
+        .ok_or(bad("Invalid app sources"))?;
+    if sources.is_empty() {
+        return Ok(());
+    }
+    let mut tx = a.db.begin().await?;
+    // AGE MERGE has no unique constraint: serialize shared Shop-node writes across apps.
+    sqlx::query("SELECT pg_advisory_xact_lock(hashtextextended($1,39))")
+        .bind(t)
+        .execute(&mut *tx)
+        .await?;
+    let current: i64 = sqlx::query_scalar(
+        "SELECT coalesce((SELECT cursor FROM app_export_cursors WHERE tenant=$1 AND app=$2),0)",
+    )
+    .bind(t)
+    .bind(app)
+    .fetch_one(&mut *tx)
+    .await?;
+    if current != previous {
+        return Ok(());
+    }
+    for s in sources {
+        let id = s["id"]
+            .as_str()
+            .filter(|s| !s.is_empty() && s.len() <= 150)
+            .ok_or(bad("Invalid source ID"))?;
+        if s["deleted"] == true {
+            // The connector's existing reset tombstone must survive a lost action reply.
+            // It is still scoped to this admitted package and tenant.
+            sqlx::query("DELETE FROM app_evidence WHERE tenant=$1 AND app=$2 AND ($3='reset' OR source_id=$3)")
+                .bind(t)
+                .bind(app)
+                .bind(id)
+                .execute(&mut *tx)
+                .await?;
+            sync_integration(
+                &mut tx,
+                t,
+                app,
+                if id == "reset" { "" } else { id },
+                s,
+                true,
+            )
+            .await?;
+            continue;
+        }
+        let title = s["title"]
+            .as_str()
+            .filter(|s| s.len() <= 300)
+            .ok_or(bad("Invalid source title"))?;
+        let text = s["text"]
+            .as_str()
+            .filter(|s| s.len() <= 12000)
+            .ok_or(bad("Invalid source text"))?;
+        let url = s["sourceUrl"]
+            .as_str()
+            .filter(|s| s.starts_with("https://") && s.len() <= 1500)
+            .ok_or(bad("Invalid source URL"))?;
+        let kind = s["kind"]
+            .as_str()
+            .filter(|s| s.len() <= 50)
+            .ok_or(bad("Invalid source kind"))?;
+        let digest = hash(&s.to_string());
+        let n=sqlx::query("INSERT INTO app_evidence(tenant,app,source_id,kind,title,body,source_url,metadata,digest) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9) ON CONFLICT(tenant,app,source_id) DO UPDATE SET title=EXCLUDED.title,body=EXCLUDED.body,source_url=EXCLUDED.source_url,metadata=EXCLUDED.metadata,digest=EXCLUDED.digest,updated_at=now() WHERE app_evidence.digest<>EXCLUDED.digest").bind(t).bind(app).bind(id).bind(kind).bind(title).bind(text).bind(url).bind(&s["metadata"]).bind(&digest).execute(&mut *tx).await?.rows_affected();
+        if n > 0 {
+            sync_integration(&mut tx, t, app, id, s, false).await?;
+            sqlx::query("INSERT INTO outbox(tenant,kind,data) VALUES($1,$2,$3)").bind(t).bind(format!("app.{app}.source_imported")).bind(json!({"sourceId":id,"app":app,"sourceKind":kind,"title":title,"metadata":s["metadata"]})).execute(&mut *tx).await?;
+        }
+    }
+    sqlx::query("INSERT INTO app_export_cursors(tenant,app,cursor) VALUES($1,$2,$3) ON CONFLICT(tenant,app) DO UPDATE SET cursor=greatest(app_export_cursors.cursor,EXCLUDED.cursor)").bind(t).bind(app).bind(cursor).execute(&mut *tx).await?;
+    tx.commit().await?;
+    Ok(())
+}
+/// Removes every private source of an app and resets its export cursor.
+pub async fn purge_sources(a: &State, t: &str, app: &str, cursor: i64) -> Result<()> {
+    let mut tx = a.db.begin().await?;
+    sqlx::query("SELECT pg_advisory_xact_lock(hashtextextended($1,39))")
+        .bind(t)
+        .execute(&mut *tx)
+        .await?;
+    sqlx::query("DELETE FROM app_evidence WHERE tenant=$1 AND app=$2")
+        .bind(t)
+        .bind(app)
+        .execute(&mut *tx)
+        .await?;
+    sqlx::query("INSERT INTO app_export_cursors(tenant,app,cursor) VALUES($1,$2,$3) ON CONFLICT(tenant,app) DO UPDATE SET cursor=EXCLUDED.cursor")
+        .bind(t)
+        .bind(app)
+        .bind(cursor)
+        .execute(&mut *tx)
+        .await?;
+    sync_integration(&mut tx, t, app, "", &json!({}), true).await?;
+    tx.commit().await?;
+    Ok(())
 }

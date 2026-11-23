@@ -1,14 +1,32 @@
 //! Typed pure commerce hooks share the compiled sandbox cache and receive explicit immutable snapshots, never SQL or credentials.
-use super::*;
+use crate::domain::approval;
+use crate::service::configuration_runtime::prepare_source;
+use crate::store::commerce_hooks::rows;
+use crate::store::records;
+use serde_json::{Value, json};
+use sqlx::Row;
+use std::collections::HashMap;
 use std::sync::Arc;
-use veyndo::component_runtime::{
+use veyndo_app_model::manifest::Manifest;
+use veyndo_apps::component_runtime::{
     self as wit, AppRecord, CartItem, CartSnapshot, Money, ProductSnapshot, Snapshot,
 };
-pub(crate) struct Prepared {
+use veyndo_apps::sandbox::Sandbox;
+use veyndo_checkout::service::app_adjustments::apply as app_adjustment;
+use veyndo_checkout::service::delivery::enrich;
+use veyndo_core::{Result, State, bad, conflict, hash};
+use veyndo_pricing::catalog::Product;
+use veyndo_pricing::service::conversion as currencies;
+use veyndo_shop::Settings;
+use veyndo_shop::types::cart::StoredCart;
+
+/// The compiled hook modules of a shop's active packages, keyed by their source digest.
+pub struct Prepared {
+    /// The sandboxes by source digest.
     pub modules: HashMap<String, Arc<Sandbox>>,
 }
-pub(super) use veyndo_app_platform::store::commerce_hooks::rows;
-pub(crate) async fn prepare(a: &App, t: &str) -> Result<Prepared> {
+/// Compiles the hook modules before the checkout takes its locks.
+pub async fn prepare(a: &State, t: &str) -> Result<Prepared> {
     let mut conn = a.db.begin().await?;
     let ms = rows(&mut conn, t).await?;
     conn.rollback().await?;
@@ -17,13 +35,11 @@ pub(crate) async fn prepare(a: &App, t: &str) -> Result<Prepared> {
         let m: Manifest =
             serde_json::from_value(row.get("manifest")).map_err(|_| bad("Invalid hook package"))?;
         let c = m.commerce_hooks.unwrap();
-        modules.insert(
-            hash(&c.source),
-            veyndo_app_platform::service::configuration_runtime::prepare_source(c.source).await?,
-        );
+        modules.insert(hash(&c.source), prepare_source(c.source).await?);
     }
     Ok(Prepared { modules })
 }
+/// An amount of the quote in exact minor units.
 fn money(amount: f64, code: &str, scale: u8) -> Result<Money> {
     Ok(Money {
         minor: currencies::amount(amount, code, scale)?.minor(),
@@ -31,6 +47,7 @@ fn money(amount: f64, code: &str, scale: u8) -> Result<Money> {
         scale,
     })
 }
+/// The immutable cart, product and record snapshot a hook sees.
 fn snapshot(
     c: &StoredCart,
     ps: &[Product],
@@ -96,12 +113,13 @@ fn snapshot(
         records,
     })
 }
-pub(crate) async fn apply(
+/// Runs the price, discount, shipping and validation hooks in fixed order on the quote and records their outcomes.
+pub async fn apply(
     conn: &mut sqlx::PgConnection,
     c: &StoredCart,
     ps: &[Product],
     mut q: Value,
-    s: &commerce::Settings,
+    s: &Settings,
     revision: i64,
     prepared: &Prepared,
 ) -> Result<Value> {
@@ -121,7 +139,7 @@ pub(crate) async fn apply(
             .ok_or(conflict("Commerce hooks changed; review checkout again"))?;
         let mut records = HashMap::new();
         for r in &contract.records {
-            let value = super::records::get(conn, &c.tenant, &m.id, &r.entity, &r.id, false)
+            let value = records::get(conn, &c.tenant, &m.id, &r.entity, &r.id, false)
                 .await?
                 .ok_or(conflict("Hook record missing"))?;
             let revision = value["revision"]
@@ -173,9 +191,9 @@ pub(crate) async fn apply(
                     m.id, out.reason_code
                 )));
             }
-            commerce::app_adjustment(&mut q, kind, out.adjustment.minor)?;
+            app_adjustment(&mut q, kind, out.adjustment.minor)?;
             if kind != "validation" {
-                q = commerce::enrich(q, c, ps, s, revision)?;
+                q = enrich(q, c, ps, s, revision)?;
             }
             audit.push(json!({"app":m.id,"version":m.version,"digest":approval::canonical_digest(&m),"hook":kind,"minor":out.adjustment.minor,"currency":out.adjustment.currency,"scale":out.adjustment.scale,"reasonCode":out.reason_code,"recordRevisions":record_revisions}));
         }

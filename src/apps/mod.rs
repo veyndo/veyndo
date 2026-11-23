@@ -6,9 +6,10 @@ pub(crate) use record_import::{import_record, inspect_import_record};
 mod asset_surfaces;
 mod business_capability;
 mod cart_contributions;
-mod commerce_hooks;
-pub(crate) use commerce_hooks::Prepared as PreparedCheckoutHooks;
-pub(crate) use commerce_hooks::{apply as apply_hooks, prepare as prepare_hooks};
+pub(crate) use veyndo_app_platform::service::commerce_hooks::Prepared as PreparedCheckoutHooks;
+pub(crate) use veyndo_app_platform::service::commerce_hooks::{
+    apply as apply_hooks, prepare as prepare_hooks,
+};
 mod configuration_events;
 pub(crate) use configuration_events::{configuration_budget, configuration_events};
 pub(crate) use veyndo_app_platform::store::configuration_orders::configurations;

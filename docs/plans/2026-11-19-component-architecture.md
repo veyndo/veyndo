@@ -512,10 +512,14 @@ Order follows the dependency report, lowest first. Each line is one move.
   (`service/external_orders`) and carrier booking intents of approved
   apps (`service/carrier_booking`) live here; order downloads are granted
   by the catalog store (`store/order_downloads`).
-  Open (about 3,000 lines remain in `src/apps`, 360 in `src/developer`): core
-  callbacks, documents and exchange (they call operations, assets and B2B),
-  job import, evidence ingest (knowledge sync), cart contributions and
-  commerce hook evaluation (cart and currencies), submissions (cart and site
+  Commerce hook evaluation on the quote is `service/commerce_hooks`, the cart
+  configuration of an app `service/cart_contributions` (the server projects
+  the configured cart), and the ingest and purge of an app's private sources
+  with their knowledge graph mirror `store/evidence`.
+  Open (about 2,600 lines remain in `src/apps`, 360 in `src/developer`; batch
+  F, because they implement the platform's host ports over operations,
+  assets, B2B and the gateway transport): core callbacks, documents and
+  exchange, job import, fetching app exports, submissions (cart and site
   forms), asset surfaces, the package list and installation route (shop
   settings, hosted frontends), the site builder, and in `developer` the
   generation orchestrator and coding-agent task export (inference and design
@@ -759,7 +763,7 @@ source.
 | Batch | Scope | Server lines today | Target owner |
 | --- | --- | ---: | --- |
 | A (done 23 Nov) | Accounts and login: profile, registration, account orders, sign-in throttle, Studio handoff, roles. Shop provisioning, identity resolution in the middleware and the operator platform compose many components and move to F | about 2,300 | identity, customers, orders |
-| B | App platform: the rest of `src/apps` (packages, hooks, surfaces, callbacks, jobs), `src/developer`, app-backed asset and document helpers | about 3,800 | apps |
+| B (done 23 Nov) | App platform: commerce hooks, cart contributions, app source ingestion. The rest of `src/apps` and `src/developer` implements host ports over operations, assets, B2B, inference and the gateway and moves to F | about 3,800 | apps |
 | C | Agents and planning: `src/agent_runs`, `src/cognition`, `src/planner*`, `agent.rs`, `concierge.rs`, `proposal_apply.rs` | about 5,400 | intelligence |
 | D | Merchant operations: `src/operations`, the rest of `src/commerce`, `src/staging`, `src/studio*`, settings release | about 5,600 | orders, catalog, shop, studio |
 | E | Remaining storefront and money paths: rest of `src/marketing`, `src/payments`, `src/pos`, `src/legal`, `src/currencies`, `src/assets`, `src/documents`, `src/translations`, storefront routes | about 5,000 | marketing, payments, pos, shop, catalog, intelligence |
