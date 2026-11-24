@@ -6523,8 +6523,8 @@
     },
     "src/apps/job_import.rs": {
       "status": "unproved",
-      "sha256": "de70c6f28816a2722a42a14d544fc7c771ddb42d53532a944f0fddcbb5f6aab2",
-      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
+      "sha256": "e25c253657e3c53ec62e869ebfc27d26cda3209d6906a5610136c0d6b79ceda3",
+      "review": "F31 typed server capability inputs: proof bindings unchanged"
     },
     "src/apps/jobs.rs": {
       "status": "unproved",
@@ -7003,8 +7003,8 @@
     },
     "src/capabilities.rs": {
       "status": "unproved",
-      "sha256": "2af57d0c04421a849ca39fe96094ddd14c1185b6a514f84dfd1afa6ba34da46c",
-      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
+      "sha256": "7cbd8cc0078e4ea1cc81aeeb45c2409153e3d5ccf3555ae5e6b7e55be3a8e746",
+      "review": "F31 typed server capability inputs: proof bindings unchanged"
     },
     "src/cart_mutation.rs": {
       "status": "unproved",
@@ -7018,8 +7018,8 @@
     },
     "src/cart_routes.rs": {
       "status": "unproved",
-      "sha256": "2b49c53423b5bbc3d1fdceca2d31133898f4b6118cc316d39478d57bab1ce137",
-      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
+      "sha256": "347ae6067d67f8e68850c516c5c155117ddeb0d3423184db780f553472b14bbd",
+      "review": "F31 typed server capability inputs: proof bindings unchanged"
     },
     "src/cart_storage.rs": {
       "status": "unproved",
@@ -7243,8 +7243,8 @@
     },
     "src/commerce/international_capabilities.rs": {
       "status": "unproved",
-      "sha256": "a156f55c579d2793a06326f6c979c87829771da109d7660d21e0556e695b8cb5",
-      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
+      "sha256": "69716df3f38f402f0618609d5905fc8b631b4567496de320e2c9f8da3b789d76",
+      "review": "F31 typed server capability inputs: proof bindings unchanged"
     },
     "src/commerce/inventory_ports.rs": {
       "status": "unproved",
@@ -7378,8 +7378,8 @@
     },
     "src/developer/generation.rs": {
       "status": "unproved",
-      "sha256": "46d1b02fa92cf601ac2db3c41186f9344a46866642b6649c080258aaf286137f",
-      "review": "F18: server state composed of component-owned state"
+      "sha256": "df2014114175e9689110103fbfb58e2d18f583de9b1b720b7da0b9e75dade7ae",
+      "review": "F31 typed server capability inputs: proof bindings unchanged"
     },
     "src/developer/mod.rs": {
       "status": "unproved",

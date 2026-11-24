@@ -4,20 +4,41 @@ use crate::foundation::App;
 use crate::localization::language_context;
 use crate::{assets, commerce, staging};
 use axum::http::StatusCode;
+use serde::Deserialize;
 use serde_json::Value;
 use serde_json::json;
 use veyndo_cognition::inference::Choice;
 use veyndo_core::Error;
 use veyndo_core::Result;
 use veyndo_core::bad;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::request_context::RequestContext;
+/// An App Studio generation request: the private environment, the task, the model and the current definition.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct GenerationRequest {
+    #[serde(deserialize_with = "lenient")]
+    environment: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    prompt: Option<String>,
+    inference: Value,
+    references: Value,
+    #[serde(deserialize_with = "lenient")]
+    mode: Option<String>,
+    manifest: Value,
+}
+
+/// Generates, repairs and saves one reviewable app build from the provider's structured output.
 pub(super) async fn generate(a: &App, t: &str, h: &RequestContext, v: &Value) -> Result<Value> {
-    let stage = v["environment"]
-        .as_str()
+    let input: GenerationRequest = view(v);
+    let stage = input
+        .environment
+        .as_deref()
         .ok_or(bad("Private environment required"))?;
     staging::owned(a, t, stage).await?;
-    let prompt = v["prompt"]
-        .as_str()
+    let prompt = input
+        .prompt
+        .as_deref()
         .filter(|s| !s.trim().is_empty() && s.len() <= 8000)
         .ok_or(bad("Prompt required, maximum 8000 bytes"))?;
     if v.get("manifest")
@@ -27,7 +48,7 @@ pub(super) async fn generate(a: &App, t: &str, h: &RequestContext, v: &Value) ->
             "Current app definition exceeds the model context limit",
         ));
     }
-    let choice: Choice = serde_json::from_value(v["inference"].clone())
+    let choice: Choice = serde_json::from_value(input.inference.clone())
         .map_err(|_| bad("Select an inference provider"))?;
     let _slot = a.models.slots.clone().try_acquire_owned().map_err(|_| {
         Error(
@@ -39,15 +60,16 @@ pub(super) async fn generate(a: &App, t: &str, h: &RequestContext, v: &Value) ->
     let versions = veyndo_app_platform::store::developer_builds::recent(a, t).await?;
     let (settings, _) = commerce::config(a, t).await?;
     let editor = design_context::validate(v, &settings.locales)?;
-    let (references, images) = assets::design_references::capture(&v["references"]).await?;
+    let (references, images) = assets::design_references::capture(&input.references).await?;
     let evidence = design_context::receipt(&editor, &references);
-    let editing = v.get("manifest").is_some_and(Value::is_object) && v["mode"] != "compose";
+    let editing =
+        v.get("manifest").is_some_and(Value::is_object) && input.mode.as_deref() != Some("compose");
     if v.get("mode")
         .is_some_and(|mode| mode != "compose" && mode != "edit")
     {
         return Err(bad("Unknown generation mode"));
     }
-    let guided = !editing && generation_brief::empty(&v["manifest"]);
+    let guided = !editing && generation_brief::empty(&input.manifest);
     let app_schema = if guided {
         generation_brief::schema(&settings.locales)
     } else if editing {
@@ -86,16 +108,16 @@ pub(super) async fn generate(a: &App, t: &str, h: &RequestContext, v: &Value) ->
         let candidate = out.value.to_string();
         let saved = async {
             let mut result = if guided {
-                generation_brief::apply(&v["manifest"], &out.value, &versions)?
+                generation_brief::apply(&input.manifest, &out.value, &versions)?
             } else if editing {
-                generation_edits::apply(&v["manifest"], &out.value, &versions)?
+                generation_edits::apply(&input.manifest, &out.value, &versions)?
             } else {
                 out.value
             };
             routes::actions(&mut result["manifest"])?;
-            app_generation::preserve_access(&v["manifest"], &mut result["manifest"]);
+            app_generation::preserve_access(&input.manifest, &mut result["manifest"]);
             veyndo_app_platform::domain::generation_contract::retain(
-                &v["manifest"],
+                &input.manifest,
                 &mut result["manifest"],
             )?;
             result["environment"] = json!(stage);

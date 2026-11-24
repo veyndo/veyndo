@@ -5,11 +5,13 @@ use crate::{auth, translations};
 use axum::Json;
 use axum::extract::Path;
 use axum::extract::State;
+use serde::Deserialize;
 use serde_json::Value;
 use serde_json::json;
 use std::collections::HashMap;
 use veyndo_core::Result;
 use veyndo_core::bad;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::request_context::RequestContext;
 pub(crate) fn international_permission(name: &str) -> Option<&'static str> {
     match name {
@@ -22,6 +24,26 @@ pub(crate) fn international_permission(name: &str) -> Option<&'static str> {
         _ => None,
     }
 }
+/// The arguments an international commerce capability takes from its call.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct InternationalArgs {
+    #[serde(deserialize_with = "lenient")]
+    id: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    channel_id: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    area: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    method_id: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    cursor: Option<String>,
+    action: Value,
+    product_id: Value,
+    #[serde(deserialize_with = "lenient")]
+    after_product_id: Option<String>,
+}
+
 pub(crate) async fn international_invoke(
     a: &App,
     h: &RequestContext,
@@ -34,15 +56,11 @@ pub(crate) async fn international_invoke(
     )?;
     let state = State(a.clone());
     let headers = h.clone();
-    let id = || {
-        v["id"]
-            .as_str()
-            .map(String::from)
-            .ok_or(bad("Translation ID required"))
-    };
+    let args: InternationalArgs = view(v);
+    let id = || args.id.clone().ok_or(bad("Translation ID required"));
     let Json(result) = match name {
         "merchant.commerce.read" => {
-            if let Some(channel) = v["channelId"].as_str() {
+            if let Some(channel) = args.channel_id.as_deref() {
                 get_scope(
                     State(axum::extract::FromRef::from_ref(a)),
                     headers,
@@ -58,20 +76,14 @@ pub(crate) async fn international_invoke(
                 state,
                 headers,
                 Path((
-                    v["area"]
-                        .as_str()
-                        .ok_or(bad("Method area required"))?
-                        .into(),
-                    v["methodId"]
-                        .as_str()
-                        .ok_or(bad("Method ID required"))?
-                        .into(),
+                    args.area.clone().ok_or(bad("Method area required"))?,
+                    args.method_id.clone().ok_or(bad("Method ID required"))?,
                 )),
             )
             .await?
         }
         "merchant.commerce.save" => {
-            if let Some(channel) = v["channelId"].as_str() {
+            if let Some(channel) = args.channel_id.as_deref() {
                 save_scope(
                     State(axum::extract::FromRef::from_ref(a)),
                     headers,
@@ -99,7 +111,7 @@ pub(crate) async fn international_invoke(
                 Path(id()?),
                 axum::extract::Query(HashMap::from([(
                     "cursor".into(),
-                    v["cursor"].as_str().unwrap_or("").into(),
+                    args.cursor.clone().unwrap_or_default(),
                 )])),
             )
             .await?
@@ -109,7 +121,7 @@ pub(crate) async fn international_invoke(
                 State(a.core.clone()),
                 headers,
                 Path(id()?),
-                Json(json!({"action":v["action"]})),
+                Json(json!({"action":args.action})),
             )
             .await?
         }
@@ -118,14 +130,14 @@ pub(crate) async fn international_invoke(
                 state,
                 headers,
                 Path(id()?),
-                Json(json!({"productId":v["productId"]})),
+                Json(json!({"productId":args.product_id})),
             )
             .await?
         }
         _ => return Err(bad("Unknown international capability")),
     };
-    if name == "merchant.commerce.read" && v["area"] == "aiPolicy" {
-        return Ok(price_policy_view(&result, v["afterProductId"].as_str()));
+    if name == "merchant.commerce.read" && args.area.as_deref() == Some("aiPolicy") {
+        return Ok(price_policy_view(&result, args.after_product_id.as_deref()));
     }
     Ok(result)
 }

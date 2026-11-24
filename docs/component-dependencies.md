@@ -32,8 +32,8 @@ run SQL without being in a `store` folder. Both numbers only fall.
 | inference | 2032 | 0 | 124 | 2 | 0 | core (13) | 5 |
 | intelligence | 11495 | 0 | 463 | 29 | 28 | catalog (10), checkout (11), core (192), customers (1), identity (29), inference (10), inventory (1), marketing (13), pricing (20), shipping (3), shop (52) | 28 |
 | studio | 7270 | 0 | 330 | 23 | 5 | apps (30), b2b (3), catalog (29), checkout (2), core (105), customers (7), identity (40), inference (4), intelligence (23), marketing (12), orders (20), pos (2), pricing (12), shop (30) | 42 |
-| protocols | 2935 | 0 | 132 | 2 | 0 | catalog (1), checkout (2), core (104), host (209), inference (1), intelligence (2), pricing (2), shop (5) | 2 |
-| host | 16238 | 0 | 333 | 11 | 1 | apps (49), catalog (56), checkout (14), core (1443), identity (8), inference (2), intelligence (32), inventory (4), marketing (11), orders (2), payments (8), pricing (46), shipping (1), shop (65), studio (18) | 15 |
+| protocols | 2956 | 0 | 122 | 2 | 0 | catalog (1), checkout (2), core (105), host (209), inference (1), intelligence (2), pricing (2), shop (5) | 2 |
+| host | 16340 | 0 | 297 | 11 | 1 | apps (49), catalog (56), checkout (14), core (1443), identity (8), inference (2), intelligence (32), inventory (4), marketing (11), orders (2), payments (8), pricing (46), shipping (1), shop (65), studio (18) | 15 |
 | connectors | 0 | 0 | 0 | 0 | 6 | none | 0 |
 
 ## Cycles

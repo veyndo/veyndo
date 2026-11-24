@@ -4,6 +4,7 @@ use crate::auth;
 use crate::foundation::App;
 use crate::foundation::merchant;
 use axum::http::StatusCode;
+use serde::Deserialize;
 use serde_json::Value;
 use serde_json::json;
 use veyndo_app_platform::store::app_host_reads;
@@ -11,6 +12,7 @@ use veyndo_core::Error;
 use veyndo_core::Result;
 use veyndo_core::bad;
 use veyndo_core::conflict;
+use veyndo_core::document::{Raw, lenient, view};
 use veyndo_core::hash;
 use veyndo_core::request_context::RequestContext;
 // Retain a connection for the native owner even on the supported two-connection pool.
@@ -73,11 +75,37 @@ fn admit_app(
     Ok(())
 }
 /// The native import input: the reviewed record with exactly the acknowledged source warnings.
+/// An import job service's callback: the job, its lease and the source record it hands over.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct ImportCallback {
+    #[serde(deserialize_with = "lenient")]
+    id: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    lease: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    record: Raw<CallbackRecord>,
+}
+
+/// The fields of a handed-over source record this callback checks.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct CallbackRecord {
+    #[serde(deserialize_with = "lenient")]
+    kind: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    warnings: Option<Vec<Value>>,
+}
+
 fn import_input(v: &Value, intent: &Value, inspect: bool) -> Result<Value> {
-    let mut input = json!({"approve":true,"record":v["record"],"options":intent["options"]});
+    let callback: ImportCallback = view(v);
+    let mut input =
+        json!({"approve":true,"record":callback.record.raw,"options":intent["options"]});
     if let Some(approved) = intent["options"]["acknowledgedWarnings"].as_array() {
-        let warnings = v["record"]["warnings"]
-            .as_array()
+        let warnings = callback
+            .record
+            .warnings
+            .as_ref()
             .ok_or(bad("Invalid source warnings"))?;
         if approved.len() > 20
             || approved
@@ -127,8 +155,11 @@ pub(super) async fn execute(
     if veyndo_core::shop_scope::parent(a, &live).await?.is_some() {
         return Err(bad("Job callback requires its live workspace"));
     }
-    let kind = v["record"]["kind"]
-        .as_str()
+    let callback: ImportCallback = view(v);
+    let kind = callback
+        .record
+        .kind
+        .as_deref()
         .ok_or(bad("Import kind required"))?;
     let (capability, read_capability) = capabilities(kind)?;
     admit_app(h, m, kind, (capability, read_capability), inspect)?;
@@ -147,7 +178,7 @@ pub(super) async fn execute(
     let (actor, action_name, package_digest, intent) = app_host_reads::claimed_job(
         &mut tx,
         &live,
-        (&m.id, v["id"].as_str(), v["lease"].as_str()),
+        (&m.id, callback.id.as_deref(), callback.lease.as_deref()),
     )
     .await?;
     if package_digest != approval::canonical_digest(m) {
@@ -185,7 +216,9 @@ pub(super) async fn execute(
         || !intent["recordDigests"].as_array().is_some_and(|ds| {
             !ds.is_empty()
                 && ds.len() <= 100
-                && ds.iter().any(|d| *d == hash(&v["record"].to_string()))
+                && ds
+                    .iter()
+                    .any(|d| *d == hash(&callback.record.raw.to_string()))
         })
     {
         return Err(conflict(
