@@ -1,5 +1,5 @@
 //! Declared app settings reuse the digest-bound encrypted secret owner; secret values never have a browser read path.
-use super::*;
+use crate::{App, Router, SecureRoutes, get};
 pub(super) fn router() -> Router<App> {
     Router::new().secure_route(
         "/api/apps/{id}/settings",

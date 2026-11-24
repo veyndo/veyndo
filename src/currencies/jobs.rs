@@ -1,5 +1,6 @@
 //! The background loop that runs queued price jobs and refreshes automatic rates; the batch itself is owned by the pricing component.
-use super::*;
+use super::rates;
+use crate::{App, RequestContext, env};
 use axum::extract::FromRef;
 use veyndo_pricing::ports::Pricing;
 use veyndo_pricing::service::price_job_worker::batch;

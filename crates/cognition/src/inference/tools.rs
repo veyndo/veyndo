@@ -1,5 +1,5 @@
 //! Native provider read-tool transport; normalization grants no execution authority.
-use super::*;
+use super::Value;
 mod request;
 mod response;
 #[cfg(test)]

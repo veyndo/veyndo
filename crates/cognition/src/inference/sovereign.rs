@@ -1,5 +1,5 @@
 //! Sovereign mode: one switch that admits only the self-operated model route and reports where each model call goes.
-use super::*;
+use super::{Inference, Provider, Value, env, json};
 use std::net::IpAddr;
 
 const REFUSED: &str = "Sovereign AI mode admits only self-hosted models";

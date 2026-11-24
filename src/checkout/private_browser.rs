@@ -1,5 +1,5 @@
 //! Relay only the browser's two Checkout session commands to a private service.
-use crate::*;
+use crate::{App, Router, post};
 use axum::extract::DefaultBodyLimit;
 use veyndo_checkout::http::private_browser::{MAX_BODY, confirm, create};
 

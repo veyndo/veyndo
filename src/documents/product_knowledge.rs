@@ -1,5 +1,6 @@
 //! Product knowledge route; the intelligence component owns the facts and graph evidence.
-use super::*;
+use super::{Knowledge, product_questions};
+use crate::{App, Json, Path, RequestContext, Result, State, Value};
 pub(crate) async fn product_knowledge(
     State(a): State<App>,
     h: RequestContext,

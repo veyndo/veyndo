@@ -1,5 +1,9 @@
 //! Public append-only intake uses declared schemas, existing cart admission, quotas, records and outbox.
-use super::*;
+use super::{Entity, Manifest, data, site_forms};
+use crate::{
+    App, Error, RequestContext, Result, StatusCode, Value, hash, json, load_cart, marketing,
+    tenant, verified_kernel,
+};
 use veyndo_app_platform::store::app_host_reads;
 pub(super) async fn submit(
     a: &App,

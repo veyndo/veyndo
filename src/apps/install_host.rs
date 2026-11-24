@@ -1,5 +1,5 @@
 //! The commerce side of an app installation: the configuration lock, flows that survive a replacement and payment methods.
-use super::*;
+use super::Manifest;
 use veyndo_app_platform::ports::{CommerceInstall, RuleFuture};
 /// Installation reaches marketing and payments only through this host.
 pub(crate) struct CommerceHost;

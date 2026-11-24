@@ -1,5 +1,5 @@
 //! Legal and privacy operations live in the intelligence component (consent) and the shop component (configuration, requests); the server registers their routes.
-use crate::*;
+use crate::{App, Router, SecureRoutes, get, post};
 mod buyer_consent;
 mod model;
 pub(crate) use buyer_consent::missing_contact;

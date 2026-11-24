@@ -1,5 +1,10 @@
 //! Startup, additive migrations, persisted extensions and outbox worker.
-use crate::*;
+use crate::{
+    App, Arc, Inference, PgPool, PgPoolOptions, Sandbox, apps, channel_metrics, currencies,
+    demo_catalog, env, knowledge, marketing, migrations, performance, platform, router,
+    runtime_config, sandbox_cache, workers,
+};
+use crate::{capabilities, documents};
 
 pub(crate) async fn bootstrap() -> App {
     tracing_subscriber::fmt()

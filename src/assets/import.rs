@@ -1,5 +1,5 @@
 //! Imported product images: the catalog component stores them; the server supplies the shop's content languages.
-use super::*;
+use crate::{App, RequestContext, Result, Value, commerce, merchant};
 pub(crate) async fn image(
     a: &App,
     h: &RequestContext,

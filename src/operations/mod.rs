@@ -1,5 +1,8 @@
 //! Merchant CRM and fulfillment APIs, shared verbatim with MCP operations capabilities.
-use crate::*;
+use crate::{
+    App, Json, Path, RequestContext, Result, State, Value, accounts, auth, bad, commerce, merchant,
+    payments,
+};
 mod addresses;
 mod company_model;
 mod company_public;

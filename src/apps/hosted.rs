@@ -1,5 +1,6 @@
 //! Hosted-app installation lives in the apps component; this module adds the connected frontends and their local answers.
-use super::*;
+use super::{data, install_host};
+use crate::{App, Result, Value, conflict, env, json};
 use sqlx::{Postgres, Transaction};
 use veyndo_app_platform::store::hosted_apps;
 

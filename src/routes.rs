@@ -1,5 +1,16 @@
 //! HTTP transport registry; domain behavior lives in dedicated modules.
-use crate::*;
+use crate::{
+    App, Router, SecureRoutes, StatusCode, accounts, activate_extension, add_items, admin_catalog,
+    agent_apply, agent_plan, agent_runs, apps, assets, auth, b2b, brand_redirect, capabilities,
+    catalog_request, categories, checkout, checkout_handoff, cognition, commerce, concierge,
+    context_info, conversation, conversations, create_cart, currencies, developer, documents,
+    edit_cart, experience, extension_state, forget_personalization, get, get_cart, health, history,
+    http_limits, knowledge_graph, knowledge_status, legal, login, marketing, mcp, merchant_chat,
+    merchant_overview, model_providers, observability, operations, orders, payments, performance,
+    personalization, place_order, platform, policy_stats, pos, post, preview_cart, preview_quote,
+    reindex, security_headers, semantic_search, shop_domains, staging, storefront_pages, studio,
+    tasks, track_channels, translations, ucp,
+};
 mod http_profile;
 pub(crate) use http_profile::api_host;
 /// Routers that the owning modules build themselves.

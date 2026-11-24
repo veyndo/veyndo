@@ -1,5 +1,5 @@
 //! Merchant channel previews are owned by the marketing component; the server registers their routes.
-use crate::*;
+use crate::{App, Router, SecureRoutes, get, post};
 use veyndo_marketing::http::channel_preview::{create, end, redeem};
 pub(crate) use veyndo_marketing::service::channel_preview::cookie;
 pub(crate) fn router() -> Router<App> {

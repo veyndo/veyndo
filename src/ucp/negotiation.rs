@@ -1,5 +1,10 @@
 //! UCP B2B commands route to native RFQ/CAS/approval owners; a checkout token alone never identifies an employee.
-use super::*;
+use super::{consent, profile, ucp_document, ucp_load};
+use crate::ucp::messages;
+use crate::{
+    App, Json, Path, RequestContext, Result, State, StoredCart, Value, accounts, b2b, bad,
+    cart_json, checkout_handoff, conflict, json, shop_domains,
+};
 fn operation(op: &str) -> Result<String> {
     if op == "checkout.handoff" {
         return Ok(op.into());

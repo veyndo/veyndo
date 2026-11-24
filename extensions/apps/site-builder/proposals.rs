@@ -1,5 +1,8 @@
 //! Native revision-bound proposal validation and persistence shared by every design agent.
-use super::*;
+use super::site_builder;
+use crate::{
+    App, Proposal, RequestContext, Result, Value, apps, bad, conflict, json, merchant, uid,
+};
 pub(super) struct ResultContext<'a> {
     pub instruction: &'a str,
     pub output: &'a Value,

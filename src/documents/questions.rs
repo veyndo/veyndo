@@ -1,5 +1,6 @@
 //! Product question route; the intelligence component owns the answer, its citations and the re-admission.
-use super::*;
+use super::{Knowledge, product_questions};
+use crate::{App, Json, Path, RequestContext, Result, State, Value};
 pub(crate) async fn question(
     State(a): State<App>,
     h: RequestContext,

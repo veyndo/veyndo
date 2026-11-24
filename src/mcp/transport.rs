@@ -1,5 +1,5 @@
 //! MCP visibility and shared read-scope memoization, independent of internal planning tools.
-use super::*;
+use crate::{App, RequestContext, Result, Value, apps, bad, invoke, performance};
 /// MCP opt-out is independent of a merchant's selected internal planning tools.
 pub(super) async fn invoke_transport(
     a: &App,

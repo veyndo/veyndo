@@ -1,6 +1,9 @@
 //! Read-only storefront shopping advisor.
 use crate::agent_host::Host;
-use crate::*;
+use crate::{
+    App, Error, IntoResponse, Json, RequestContext, Result, State, StatusCode, Value, bad,
+    conflict, json, performance, tenant,
+};
 use axum::{
     Extension,
     http::{HeaderName, header::CACHE_CONTROL},

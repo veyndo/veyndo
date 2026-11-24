@@ -1,5 +1,5 @@
 //! The merchant product list lives in the studio component; the server registers it with product creation.
-use super::*;
+use crate::{App, Router, SecureRoutes, get};
 
 pub(crate) use veyndo_studio::http::products::list_products;
 pub(crate) fn product_admin_router() -> Router<App> {

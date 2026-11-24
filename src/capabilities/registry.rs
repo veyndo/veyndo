@@ -1,5 +1,6 @@
 //! One immutable native operation record for dispatch, schemas, MCP discovery and bounded agent reads.
-use super::*;
+use super::{admission, catalog, dispatch, schema};
+use crate::{App, Error, RequestContext, Result, Value, apps, json};
 use dispatch::Owner;
 use std::sync::LazyLock;
 #[derive(Clone, Copy, PartialEq)]
@@ -158,6 +159,7 @@ pub(crate) fn export() -> Value {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::{CatalogCriteria, marketing};
     #[test]
     fn catalog_contract_preserves_native_categories_and_search_alias() {
         let schema = tool_schema("catalog.search");

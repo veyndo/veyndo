@@ -1,5 +1,5 @@
 //! Tenant-scoped, resumable AI translation drafts; applying is revision checked and emits native product events.
-use crate::*;
+use crate::{App, Router, SecureRoutes, get, post};
 mod apply;
 mod routes;
 pub(crate) mod selection;

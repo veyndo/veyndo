@@ -1,5 +1,9 @@
 //! Reviewed job records use current creator rights and a locked live package; private targets never become app credentials.
-use super::*;
+use super::{Manifest, approval, credentials, gateway, input_schema, lock_package_write};
+use crate::{
+    App, Error, RequestContext, Result, StatusCode, Value, auth, bad, conflict, hash, json,
+    merchant,
+};
 use veyndo_app_platform::store::app_host_reads;
 // Retain a connection for the native owner even on the supported two-connection pool.
 // This is process admission, not a claim of fleet-wide throughput isolation.

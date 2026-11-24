@@ -1,5 +1,6 @@
 //! Scoped checkout configuration: basis row lock orders all override writes and authoritative checkout reads.
-use super::*;
+use super::Settings;
+use crate::{App, Arc, Result, marketing, performance};
 pub(crate) async fn scoped_config(a: &App, t: &str, channel: &str) -> Result<(Arc<Settings>, i64)> {
     performance::settings(a, t, channel).await
 }

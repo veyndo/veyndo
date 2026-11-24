@@ -1,5 +1,6 @@
 //! Self-hosted chat-completions adapter and opt-in provider prompt caching; neither caches private commerce responses.
-use super::*;
+use super::{Provider, Value, env, json};
+use crate::inference::strict_schema;
 pub(super) fn chat_request(
     model: &str,
     system: &str,

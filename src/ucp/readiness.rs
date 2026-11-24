@@ -1,5 +1,6 @@
 //! Merchant readiness reports native implementation and current channel configuration, never external programme approval or settlement.
-use super::*;
+use crate::{App, RequestContext, Result, Value, auth, commerce, json, marketing, merchant};
+use crate::{cognition, mcp};
 pub(crate) async fn readiness(a: &App, h: &RequestContext) -> Result<Value> {
     let t = merchant(a, h)?;
     auth::permit(h, "catalog.read")?;

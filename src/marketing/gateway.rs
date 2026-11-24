@@ -1,5 +1,6 @@
 //! MCP automation tools call the same tenant-bound handlers and validators as HTTP; no separate mutation semantics.
-use super::*;
+use super::{catalog, flow_policy, lifecycle, routes, rule_history};
+use crate::{App, Json, Path, RequestContext, Result, State, Value, auth, bad, merchant};
 /// Discovery admits exactly the domain scopes used by the invoked native handlers.
 pub(crate) fn capability_visible(h: &RequestContext, name: &str) -> bool {
     let any = |scopes: &[&str]| scopes.iter().any(|scope| auth::allowed(h, scope));

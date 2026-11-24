@@ -1,5 +1,5 @@
 //! Offline first-operator setup: migration-only process, supplied strong credentials, password proof for existing accounts.
-use crate::*;
+use crate::{Row, auth, env, json, uid};
 pub(crate) async fn bootstrap_operator() {
     assert_eq!(
         env::var("BOOTSTRAP_MODE").as_deref(),

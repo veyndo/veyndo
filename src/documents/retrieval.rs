@@ -1,5 +1,8 @@
 //! Route that queues a document for vector indexing; retrieval itself is owned by the intelligence component.
-use super::*;
+use crate::{
+    App, Error, Json, Path, RequestContext, Result, State, StatusCode, Value, auth, cognition,
+    json, merchant,
+};
 use veyndo_intelligence::store::documents as store;
 pub(crate) async fn index(
     State(a): State<App>,

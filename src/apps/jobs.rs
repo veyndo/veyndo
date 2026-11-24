@@ -1,5 +1,5 @@
 //! Durable long actions piggyback on the existing outbox. Apps claim a fenced lease; unknown side effects are never retried automatically.
-use super::*;
+use crate::{App, Router, SecureRoutes, get};
 pub(super) fn router() -> Router<App> {
     Router::new()
         .secure_route(

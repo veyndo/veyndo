@@ -1,5 +1,5 @@
 //! The unit order receipt PDF renders in the server after the B2B component admits the unit order.
-use super::*;
+use crate::{App, Path, RequestContext, Response, Result, State, json, tenant};
 pub(super) async fn receipt(
     State(a): State<App>,
     h: RequestContext,

@@ -1,5 +1,5 @@
 //! App-owned nested page format shared by merchant planning and external coding agents.
-use super::*;
+use crate::{Value, json};
 
 pub(crate) fn contract() -> Value {
     json!({

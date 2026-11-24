@@ -1,5 +1,6 @@
 //! Live control-plane telemetry: database probes and pool/cache diagnostics, explicit process-only scope.
-use super::*;
+use super::auth;
+use crate::{App, Json, RequestContext, Result, State, Value, env, json};
 pub(super) async fn snapshot(State(a): State<App>, h: RequestContext) -> Result<Json<Value>> {
     auth::actor(&h)?;
     let start = std::time::Instant::now();

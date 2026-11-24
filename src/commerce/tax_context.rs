@@ -1,5 +1,6 @@
 //! Tax conditions consume private authoritative pre-tax cart facts without a recursive quote.
-use super::*;
+use super::{Settings, cart_products};
+use crate::{App, Result, StoredCart};
 pub(crate) use veyndo_checkout::store::tax_conditions::tax_settings_for_cart;
 pub(crate) async fn tax_settings_for_header(
     a: &App,

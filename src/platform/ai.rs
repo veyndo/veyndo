@@ -1,5 +1,5 @@
 //! Platform inference routes; the intelligence component owns the configuration, sealing and audit.
-use super::*;
+use crate::{App, Json, RequestContext, Result, State, Value};
 use veyndo_intelligence::service::platform_ai;
 pub(super) async fn get(State(a): State<App>, h: RequestContext) -> Result<Json<Value>> {
     Ok(Json(platform_ai::get(a.models(), &h).await?))

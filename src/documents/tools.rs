@@ -1,5 +1,6 @@
 //! Knowledge workspace/source MCP tools delegate to the same authorized HTTP operations and schemas.
-use super::*;
+use super::{ingest, lifecycle, preview, product_knowledge, publish};
+use crate::{App, Json, Path, RequestContext, Result, State, Value, bad, json};
 pub(crate) fn knowledge_schema(name: &str) -> Option<Value> {
     let props = match name {
         "knowledge.workspace" => {

@@ -1,6 +1,6 @@
 //! Imported promotions are saved by the marketing component's configuration owner.
 use super::configuration_host::Configuration;
-use super::*;
+use crate::{App, RequestContext, Result, Value};
 pub(crate) async fn import_promotion(
     a: &App,
     h: &RequestContext,

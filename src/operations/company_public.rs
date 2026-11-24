@@ -1,5 +1,8 @@
 //! Explicit public legal/brand projection; bank account, domestic tax ID and unlinked uploads remain private.
-use super::*;
+use super::{company_model, master_data};
+use crate::{
+    App, Json, RequestContext, Result, State, Value, commerce, header, json, marketing, tenant,
+};
 pub(super) async fn get(State(a): State<App>, h: RequestContext) -> Result<Json<Value>> {
     let t = tenant(&h)?;
     let channel = marketing::channel_id(&h);

@@ -1,5 +1,5 @@
 //! Entry point for capabilities; applying reviewed drafts is owned by the catalog component.
-use super::*;
+use crate::{App, Json, Path, RequestContext, Result, State, Value};
 pub(crate) async fn apply(
     State(a): State<App>,
     h: RequestContext,

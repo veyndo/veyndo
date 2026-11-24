@@ -1,5 +1,5 @@
 //! The company basis lives in the orders component; these entries keep the server-side signatures.
-use super::*;
+use crate::{App, Json, RequestContext, Result, Value};
 pub(crate) use veyndo_orders::store::company::{lock, public_source};
 pub(super) async fn read(
     a: &App,

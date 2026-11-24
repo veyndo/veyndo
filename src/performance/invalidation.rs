@@ -1,5 +1,5 @@
 //! Commit-only outbox notifications eagerly evict replica caches; authoritative version probes survive missed events.
-use crate::*;
+use crate::{Value, runtime_config};
 use sqlx::postgres::PgListener;
 pub(crate) fn start() {
     veyndo::tenant_scope::spawn(async move {

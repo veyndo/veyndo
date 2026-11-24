@@ -1,5 +1,6 @@
 //! Forms validate answers against a published page's declared fields; inbox entries stay private.
-use super::*;
+use super::Manifest;
+use crate::{Deserialize, Result, Value, bad};
 pub(super) async fn admit(
     tx: &mut sqlx::Transaction<'_, sqlx::Postgres>,
     t: &str,

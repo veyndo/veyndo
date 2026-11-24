@@ -1,5 +1,6 @@
 //! The server side of the settings port: rule conditions, payment capture configuration, the marketing configuration lock and app lifecycle locales.
-use super::*;
+use super::Settings;
+use crate::{App, Arc, Result, Value, apps, marketing, payments};
 use veyndo_core::PortFuture;
 use veyndo_shop::ports::{SettingsGuards, SettingsHost};
 

@@ -1,5 +1,4 @@
 //! Durable continuation extends native tasks; the intelligence component owns admission, controls and run storage, the server executes runs over its tools.
-use crate::*;
 mod authority;
 pub(crate) mod checkpoint;
 mod contract;

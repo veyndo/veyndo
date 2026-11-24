@@ -1,5 +1,6 @@
 //! Retrieval preview route; the intelligence component owns the audience and locale rules.
-use super::*;
+use super::{Knowledge, product_questions};
+use crate::{App, Json, RequestContext, Result, State, Value};
 pub(crate) async fn preview(
     State(a): State<App>,
     h: RequestContext,

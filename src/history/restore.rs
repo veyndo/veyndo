@@ -1,5 +1,9 @@
 //! Restore snapshots by replaying validated entity edits; financial effects and publication are never copied from historical state.
-use super::*;
+use super::product;
+use crate::{
+    App, Json, Path, RequestContext, Result, State, Value, auth, b2b, bad, categories, commerce,
+    documents, json, marketing, merchant, operations,
+};
 pub(super) async fn apply(
     a: App,
     h: RequestContext,

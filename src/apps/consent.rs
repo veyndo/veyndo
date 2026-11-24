@@ -1,5 +1,9 @@
 //! Package approval binds all requested permissions to a reviewed digest; current actor rights apply before every installation path.
-use super::*;
+use super::{Manifest, approval, service_limits, validate};
+use crate::{
+    App, Json, RequestContext, Result, Router, SecureRoutes, State, Value, auth, bad, json,
+    merchant, post,
+};
 pub(super) fn decode(v: &Value) -> Result<Manifest> {
     let m = if let Some(s) = v["builtIn"].as_str().and_then(approval::built_in) {
         serde_json::from_str(s).map_err(|_| bad("Invalid built-in"))?

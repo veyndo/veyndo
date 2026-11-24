@@ -1,5 +1,9 @@
 //! Structured provider output becomes a reviewable immutable manifest; it cannot write files or call shell tools.
-use super::*;
+use super::{app_generation, builds, design_context, generation_brief, generation_edits, routes};
+use crate::{
+    App, Choice, Error, RequestContext, Result, StatusCode, Value, assets, bad, commerce, json,
+    language_context, staging,
+};
 pub(super) async fn generate(a: &App, t: &str, h: &RequestContext, v: &Value) -> Result<Value> {
     let stage = v["environment"]
         .as_str()

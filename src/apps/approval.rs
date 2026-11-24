@@ -1,5 +1,6 @@
 //! Operator service authority is bound to immutable package content, never to a merchant-chosen ID; the rules live in the apps component.
-use super::*;
+use super::Manifest;
+use crate::{Result, env};
 pub(super) use veyndo_app_platform::domain::approval::{approved, built_in, canonical_digest};
 pub(super) fn installation(m: &Manifest) -> Result<()> {
     veyndo_app_platform::domain::approval::installation(m, &crate::runtime_config::get().services)

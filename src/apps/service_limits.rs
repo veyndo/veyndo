@@ -1,5 +1,6 @@
 //! Shared network-app admission lives in the apps component; this module builds its state from the server state.
-use super::*;
+use super::{data, gateway, install_host};
+use crate::{App, Result};
 pub(crate) use veyndo_app_platform::ports::Platform;
 pub(crate) use veyndo_app_platform::service::admission::Admission;
 pub(crate) use veyndo_app_platform::service::limits::ServiceLimits;

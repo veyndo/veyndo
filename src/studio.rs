@@ -1,5 +1,9 @@
 //! Verified merchant overview facts consumed by the chat and activity views.
-use super::*;
+use super::{
+    App, CatalogCriteria, Json, RequestContext, Response, Result, State, Value, auth, bad,
+    commerce, env, header, json, knowledge, language_context, merchant, product_page, tenant,
+};
+use crate::OPERATIONS;
 use axum::{extract::Request, middleware::Next};
 pub(crate) mod facts;
 pub(crate) mod personal;

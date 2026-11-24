@@ -1,6 +1,9 @@
 //! Scoped visual proposals reuse central inference and native revision-bound tasks; models cannot publish or execute.
 use crate::apps::site_builder;
-use crate::*;
+use crate::{
+    App, Error, Json, RequestContext, Result, Router, SecureRoutes, State, StatusCode, Value,
+    apply, apps, auth, bad, conflict, json, language_context, merchant, performance, post, staging,
+};
 #[path = "agent_handoff.rs"]
 mod agent_handoff;
 #[path = "proposals.rs"]

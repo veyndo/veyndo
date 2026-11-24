@@ -1,5 +1,5 @@
 //! Entry points of product file operations for capabilities and app upload surfaces; rules and storage are owned by the catalog component.
-use super::*;
+use crate::{App, Json, Path, RequestContext, Result, State, Value};
 use axum::extract::FromRef;
 pub(crate) async fn list(
     State(a): State<App>,

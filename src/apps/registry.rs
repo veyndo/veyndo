@@ -1,5 +1,6 @@
 //! Atomic installation and additive schema upgrades; immutable version digests preserve history.
-use super::*;
+use super::{Manifest, data, install_host, service_limits};
+use crate::{App, Result, Value};
 use veyndo_app_platform::store::package_install;
 pub(crate) use veyndo_app_platform::store::packages::package;
 pub(crate) async fn install(a: &App, t: &str, m: Manifest) -> Result<Value> {

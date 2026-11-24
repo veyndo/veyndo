@@ -1,5 +1,7 @@
 //! Project the native checkout and current purchasing constraints into UCP; never authorize a purchase.
-use super::*;
+use crate::ucp::messages;
+use crate::ucp::ucp_meta;
+use crate::{StoredCart, Value, json};
 pub(crate) fn ucp_document(c: &StoredCart, q: &Value) -> Value {
     let factor = 10_f64.powi(q["price"]["currencyScale"].as_i64().unwrap_or(2) as i32);
     let minor = |v: &Value| (v.as_f64().unwrap_or(0.) * factor).round() as i64;

@@ -1,5 +1,6 @@
 //! Assistant app views live in the apps component; this module adds the caller's language and the gateway calls.
-use super::*;
+use super::gateway;
+use crate::{App, RequestContext, Response, Result, Value, bad, json};
 pub(super) use veyndo_app_platform::domain::mcp_views::Mode;
 pub(super) use veyndo_app_platform::domain::mcp_views::document;
 pub(crate) use veyndo_app_platform::domain::mcp_views::{EXTENSION, MIME};

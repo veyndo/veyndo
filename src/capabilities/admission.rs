@@ -1,5 +1,8 @@
 //! MCP discovery applies current merchant permissions through the same capability owners as invocation.
-use crate::*;
+use crate::{
+    App, RequestContext, agent, agent_runs, assets, auth, b2b, commerce, currencies, history,
+    legal, marketing, merchant, operations, studio,
+};
 pub(super) fn visible(a: &App, h: &RequestContext, name: &str) -> bool {
     let n = &name;
     if name == "merchant.reports.read" {

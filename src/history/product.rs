@@ -1,5 +1,5 @@
 //! Rebuild a product edit from an audited snapshot; stock stays current and all associations/media pass normal admission.
-use super::*;
+use crate::{App, Json, Path, RequestContext, Result, State, Value, commerce, conflict, merchant};
 pub(super) async fn restore(
     a: App,
     h: RequestContext,

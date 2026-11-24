@@ -1,5 +1,8 @@
 //! Resolve configured shop subdomains before authentication; reject unknown hosts and conflicting scopes.
-use crate::*;
+use crate::{
+    App, Error, IntoResponse, Response, State, StatusCode, api_host, bad, env, header,
+    runtime_config, validate_tenant,
+};
 use axum::{extract::Request, middleware::Next};
 mod frontend_bindings;
 pub(crate) mod frontend_editor;

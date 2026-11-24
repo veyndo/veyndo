@@ -1,5 +1,13 @@
 //! Tenant-scoped package lifecycle, generated data endpoints and a shared action adapter.
-use super::*;
+use super::{
+    Manifest, approval, asset_surfaces, configure, consent, core_callbacks, core_documents,
+    credentials, evidence_routes, gateway, hosted, install, jobs, observability, record_history,
+    secrets, settings, surface_grants, surfaces, ui_bundles, ui_documents,
+};
+use crate::{
+    App, HashMap, Json, Path, RequestContext, Result, Router, SecureRoutes, State, Value, auth,
+    bad, commerce, get, json, merchant, payments, post,
+};
 use veyndo_app_platform::http::actions::{app_action, entity_list, entity_save, slots};
 use veyndo_app_platform::http::packages;
 pub(crate) fn app_router() -> Router<App> {

@@ -1,5 +1,6 @@
 //! Fail-closed normalization of bounded calls; malformed, truncated or unknown operations never execute.
-use super::*;
+use super::super::{Provider, Value, env, json};
+use super::operation;
 pub(in crate::inference) fn parse(
     provider: &Provider,
     schema: &Value,

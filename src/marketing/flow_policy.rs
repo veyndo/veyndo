@@ -1,6 +1,6 @@
 //! Flow configuration policy lives in the marketing component; the server lends it templates, apps and channel setup.
 use super::configuration_host::Configuration;
-use super::*;
+use crate::{App, Json, Path, RequestContext, Result, State, Value};
 use veyndo_marketing::service::configuration_writes as owner;
 pub(crate) use veyndo_marketing::service::configuration_writes::{
     DRAFT_CAPABILITY, authorize_flow,

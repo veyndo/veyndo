@@ -1,6 +1,9 @@
 //! Deep-link HTML transport for stable SKU URLs with optional localized SEO slugs.
 //! Product visibility uses the same tenant/channel admission as the Store API; assets and unknown APIs retain 404s.
-use crate::*;
+use crate::{
+    App, Deserialize, Error, Path, RequestContext, Result, State, StatusCode, bad, header,
+    marketing,
+};
 use axum::{extract::Query, response::Html};
 #[derive(Default, Deserialize)]
 pub(crate) struct PageContext {

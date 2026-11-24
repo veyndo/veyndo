@@ -1,5 +1,6 @@
 //! Currency MCP operations reuse the native HTTP handlers and existing settings/catalog permissions.
-use super::*;
+use super::routes;
+use crate::{App, Json, Path, RequestContext, Result, State, Value, bad, json};
 pub(crate) fn permission(name: &str) -> Option<&'static str> {
     match name {
         "merchant.currencies.refresh" => Some("settings.write"),

@@ -1,5 +1,5 @@
 //! Bounded metadata-only app telemetry, storage usage and explicitly approved cursor-based event replay.
-use super::*;
+use crate::{App, Router, SecureRoutes, get, post};
 pub(super) fn router() -> Router<App> {
     Router::new()
         .secure_route(

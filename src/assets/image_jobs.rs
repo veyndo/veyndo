@@ -1,5 +1,5 @@
 //! Entry points for routes, capabilities and the worker; image jobs are owned by the catalog component.
-use crate::*;
+use crate::{App, Json, Path, RequestContext, Result, State, Value};
 use axum::extract::FromRef;
 use veyndo_catalog::http::image_jobs as owner;
 pub(super) async fn provider(State(a): State<App>, h: RequestContext) -> Result<Json<Value>> {

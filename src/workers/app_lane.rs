@@ -1,5 +1,5 @@
 //! App jobs stop claiming work before shutdown and get a bounded window to save receipts.
-use crate::*;
+use crate::{App, apps, marketing, work_signal};
 use std::{future::Future, time::Duration};
 use tokio::{sync::watch, task::JoinHandle};
 

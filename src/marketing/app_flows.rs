@@ -1,5 +1,6 @@
 //! App flow dispatch uses the same permission/schema gateway as HTTP/MCP, with a stable job key; admission lives in the app platform.
-use super::*;
+use super::flows;
+use crate::{App, Result, Value, apps, auth, bad, json, payments};
 pub(crate) use veyndo_app_platform::service::flow_apps::validate_replacement;
 use veyndo_app_platform::service::flow_apps::{arguments, eligible, require_instruction_grants};
 pub(crate) async fn execute_app_flow(

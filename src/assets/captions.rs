@@ -1,5 +1,5 @@
 //! Caption route and the server's public egress; the intelligence component owns the proposal and its image evidence.
-use crate::*;
+use crate::{App, Json, RequestContext, Result, State, Value, apps, capabilities};
 pub(crate) use veyndo_intelligence::service::media_captions::schema;
 /// The DNS-pinned public HTTPS client of this process.
 pub(crate) struct Egress;

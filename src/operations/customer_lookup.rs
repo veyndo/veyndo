@@ -1,5 +1,6 @@
 //! Fast customer-only lookup for native identity bindings; the search is owned by the customers component.
-use super::*;
+use super::Criteria;
+use crate::{App, Json, RequestContext, Result, State, Value, auth, merchant};
 pub(super) async fn lookup(
     State(a): State<App>,
     h: RequestContext,

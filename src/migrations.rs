@@ -1,5 +1,5 @@
 //! Versioned setup is separate from serving; no catalog-wide startup repair.
-use crate::*;
+use crate::{App, Value, apps, hash, json, knowledge, product, seed};
 use sqlx::PgPool;
 
 mod identity_checksums;

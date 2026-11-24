@@ -1,5 +1,6 @@
 //! Credential-free local coding-agent connection shared by native editors.
-use crate::*;
+use crate::{Result, Value, env};
+use crate::{bad, json};
 pub(crate) fn configuration(tenant: &str) -> Result<Value> {
     let origin =
         env::var("COMMERCE_PUBLIC_ORIGIN").unwrap_or_else(|_| "http://127.0.0.1:8787".into());

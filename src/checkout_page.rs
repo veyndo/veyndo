@@ -1,5 +1,8 @@
 //! The existing checkout may be framed only by its registered tenant/channel storefront.
-use crate::*;
+use crate::{
+    App, Error, HashMap, IntoResponse, RequestContext, Response, Result, State, StatusCode, bad,
+    tenant, validate_tenant,
+};
 use axum::extract::Query;
 use axum::response::Html;
 pub(crate) async fn page(

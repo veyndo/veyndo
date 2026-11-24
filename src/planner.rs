@@ -1,5 +1,5 @@
 //! Grounded model planning lives in the intelligence component; the server keeps the native proposal admission it calls through the agent port.
-use crate::*;
+use crate::{App, Choice, RequestContext, Result, Value};
 /// One planning turn over the server's agent port.
 pub(crate) async fn plan_with(
     a: &App,

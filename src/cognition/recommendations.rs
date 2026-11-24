@@ -1,5 +1,8 @@
 //! Merchant-approved associations are consumed by the public shop without exposing order counts or identities.
-use super::*;
+use crate::{
+    App, CatalogCriteria, Json, Path, RequestContext, Result, State, Value, catalog_page, json,
+    marketing, tenant,
+};
 pub(crate) use veyndo_intelligence::store::observations::public_pairs;
 pub(crate) async fn recommendations(
     State(a): State<App>,

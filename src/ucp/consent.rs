@@ -1,5 +1,10 @@
 //! Explicit UCP consent reuses native cart-bound privacy receipts; source documents never define consent policy or authority.
-use super::*;
+use crate::ucp::UCP_VERSION;
+use crate::ucp::messages;
+use crate::{
+    App, HashMap, RequestContext, Result, State, StoredCart, Value, bad, commerce, conflict, json,
+    legal, marketing, tenant,
+};
 pub(super) const CAPABILITY: &str = "dev.ucp.shopping.buyer_consent";
 const PURPOSES: &[(&str, &str)] = &[
     ("dev.ucp.consent.analytics", "analytics"),

@@ -1,5 +1,9 @@
 //! Immutable private carrier documents belong to the existing order receipt store, never product assets.
-use super::*;
+use super::receipts;
+use crate::{
+    App, Error, IntoResponse, RequestContext, Response, Result, StatusCode, Value, apps, assets,
+    auth, bad, merchant,
+};
 pub(crate) use veyndo_orders::store::carrier_documents::allocation_digest;
 use veyndo_orders::store::carrier_documents::{Document, record};
 pub(crate) async fn import_document(

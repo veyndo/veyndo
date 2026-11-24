@@ -1,5 +1,9 @@
 //! Operator shop creation commits ownership, settings and audit atomically; never issues another user's credentials.
-use super::*;
+use super::auth;
+use crate::{
+    App, Arc, Json, RequestContext, Result, State, Value, bad, json, knowledge, prototype_products,
+    validate_tenant,
+};
 pub(super) async fn create(
     State(a): State<App>,
     h: RequestContext,

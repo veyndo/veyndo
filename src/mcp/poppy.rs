@@ -1,5 +1,9 @@
 //! Personal Agent Protocol discovery: a configured shop domain publishes poppy.json naming its guest MCP endpoint; no sign-in, session or UCP entry is claimed.
-use crate::*;
+use crate::{
+    App, Error, IntoResponse, Json, Response, State, StatusCode, header, runtime_config,
+    shop_domains,
+};
+use crate::{Value, json};
 pub(crate) const PATH: &str = "/.well-known/poppy.json";
 /// The published path of a shop's document, or nothing when shops have no own domain on this installation.
 pub(crate) fn published_url(shop: &str) -> Option<String> {

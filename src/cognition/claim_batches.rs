@@ -1,5 +1,5 @@
 //! Public claim batches live in the intelligence component; this module registers their storefront routes.
-use super::*;
+use crate::{App, Router, post};
 use veyndo_intelligence::http::claims::{compile, intake};
 pub(super) fn router() -> Router<App> {
     Router::new()

@@ -1,5 +1,6 @@
 //! Country catalogue of a shop; the bundled world and the admission rules are owned by the shipping component.
-use super::*;
+use super::{Settings, config};
+use crate::{App, Json, RequestContext, Result, State, Value, json, tenant};
 use veyndo_shipping::domain::geography;
 pub(crate) use veyndo_shipping::domain::geography::Country;
 pub(crate) fn catalogue(s: &Settings) -> Vec<Country> {

@@ -1,5 +1,5 @@
 //! Public synthetic fashion template; provisioning copies only this versioned fixture into a new tenant.
-use crate::*;
+use crate::{App, Result, Value, bad, env, json, knowledge, prototype_products};
 
 pub(crate) fn template() -> Value {
     serde_json::from_str(include_str!("../fixtures/fashion-catalog.json"))

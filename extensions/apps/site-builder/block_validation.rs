@@ -1,5 +1,7 @@
 //! App-owned block admission with bounded field paths; never echo untrusted content in errors.
-use super::*;
+use super::super::identifier;
+use super::{Block, safe_image};
+use crate::{Error, Result, assets, bad, commerce};
 
 fn invalid(index: usize, field: &str, rule: &str) -> Error {
     bad(format!("content.blocks[{index}].{field}: {rule}"))

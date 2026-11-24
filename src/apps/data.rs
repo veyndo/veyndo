@@ -1,5 +1,6 @@
 //! Managed app records live in the apps component; this module supplies the record rules of the bundled site builder.
-use super::*;
+use super::{Entity, Manifest, field_values, site_builder};
+use crate::{Result, Value, json};
 use veyndo_app_platform::ports::{RecordRules, RuleFuture};
 use veyndo_app_platform::store::managed_data;
 pub(crate) use veyndo_app_platform::store::managed_data::{list_page, record_revision};

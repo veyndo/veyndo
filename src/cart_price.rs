@@ -1,5 +1,5 @@
 //! Authoritative quantity pricing and localized checkout quote assembly.
-use crate::*;
+use crate::{App, Item, Product, Result, StoredCart, Value, apps, commerce, payments, pos};
 
 pub(crate) use veyndo_checkout::domain::cart_quote::{normalized_quantity, quote};
 pub(crate) async fn cart_json(a: &App, c: &StoredCart) -> Result<Value> {

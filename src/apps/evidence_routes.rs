@@ -1,5 +1,9 @@
 //! Scoped merchant-only evidence retrieval; sources never enter public product answers.
-use super::*;
+use super::private_evidence;
+use crate::{
+    App, HashMap, Json, RequestContext, Result, Router, SecureRoutes, State, Value, auth, get,
+    json, merchant,
+};
 pub(crate) fn router() -> Router<App> {
     Router::new().secure_route(
         "/api/knowledge/external",

@@ -1,6 +1,6 @@
 //! Provider response contracts, strict schemas and truncation rejection.
 
-use super::*;
+use super::{Inference, Provider, Value, json, parse, strict_schema};
 #[test]
 fn provider_protocols_and_incomplete_output() {
     assert!(

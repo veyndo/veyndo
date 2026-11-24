@@ -1,5 +1,7 @@
 //! Product attachments and paid digital downloads: bounded binary persistence and tenant/account ACL.
-use crate::*;
+use crate::{
+    App, Json, Path, RequestContext, Result, Router, SecureRoutes, State, Value, bad, get, post,
+};
 mod import;
 pub(crate) use import::image as import_image;
 mod captions;

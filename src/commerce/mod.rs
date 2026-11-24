@@ -1,5 +1,4 @@
 //! Native catalogue and checkout domains; pricing ports remain in the library.
-use crate::*;
 mod types;
 pub(crate) use types::*;
 mod customer_groups;

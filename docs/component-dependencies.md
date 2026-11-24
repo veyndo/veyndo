@@ -29,11 +29,11 @@ run SQL without being in a `store` folder. Both numbers only fall.
 | pos | 1191 | 0 | 70 | 4 | 0 | catalog (2), checkout (5), core (12), customers (1), identity (4), intelligence (1), marketing (3), orders (1), payments (2), pricing (4), shop (19) | 8 |
 | apps | 13492 | 0 | 369 | 20 | 22 | b2b (1), catalog (2), checkout (5), core (209), identity (41), inference (4), intelligence (2), inventory (2), marketing (5), orders (10), pricing (6), shipping (2), shop (21) | 21 |
 | automation | 1443 | 8 | 97 | 0 | 0 | core (2) | 0 |
-| inference | 2024 | 9 | 124 | 2 | 0 | core (13) | 5 |
+| inference | 2032 | 0 | 124 | 2 | 0 | core (13) | 5 |
 | intelligence | 11157 | 0 | 609 | 29 | 28 | catalog (10), checkout (11), core (168), customers (1), identity (29), inference (10), inventory (1), marketing (13), pricing (21), shipping (3), shop (53) | 28 |
 | studio | 7161 | 0 | 365 | 23 | 5 | apps (30), b2b (3), catalog (29), checkout (2), core (96), customers (7), identity (40), inference (4), intelligence (23), marketing (12), orders (20), pos (2), pricing (12), shop (30) | 42 |
-| protocols | 2755 | 16 | 132 | 2 | 0 | catalog (1), checkout (2), core (104), host (177), inference (1), intelligence (2), pricing (2), shop (5) | 2 |
-| host | 14693 | 207 | 352 | 11 | 1 | apps (52), catalog (55), checkout (14), core (1509), identity (9), inference (4), intelligence (30), inventory (4), marketing (11), orders (2), payments (10), pricing (49), shipping (1), shop (67), studio (18) | 15 |
+| protocols | 2807 | 0 | 132 | 2 | 0 | catalog (2), checkout (2), core (140), host (177), inference (1), intelligence (2), pricing (3), shop (9) | 2 |
+| host | 14936 | 0 | 352 | 11 | 1 | apps (55), catalog (59), checkout (14), core (1889), identity (58), inference (6), intelligence (32), inventory (4), marketing (11), orders (2), payments (10), pricing (60), shipping (1), shop (79), studio (19) | 15 |
 | connectors | 0 | 0 | 0 | 0 | 6 | none | 0 |
 
 ## Cycles
@@ -47,46 +47,46 @@ those pairs close when the server files that still hold their logic move into th
 
 | From | To | Item | References |
 | --- | --- | --- | ---: |
-| host | core | `State` | 419 |
-| host | core | `Result` | 404 |
-| host | core | `RequestContext` | 347 |
+| host | core | `Result` | 558 |
+| host | core | `State` | 502 |
+| host | core | `RequestContext` | 469 |
 | apps | core | `veyndo_core::` | 186 |
 | intelligence | core | `veyndo_core::` | 153 |
 | studio | core | `veyndo_core::` | 94 |
+| host | core | `Error` | 92 |
 | checkout | shop | `veyndo_shop::` | 80 |
 | host | core | `PortFuture` | 78 |
 | shop | core | `veyndo_core::` | 72 |
-| host | core | `Error` | 71 |
 | catalog | core | `veyndo_core::` | 68 |
 | marketing | core | `veyndo_core::` | 66 |
 | identity | core | `veyndo_core::` | 65 |
 | checkout | core | `veyndo_core::` | 57 |
 | intelligence | shop | `veyndo_shop::` | 53 |
+| host | identity | `SecureRoutes` | 51 |
+| host | shop | `StoredCart` | 49 |
 | payments | core | `veyndo_core::` | 44 |
 | apps | identity | `veyndo_identity::` | 41 |
 | studio | identity | `veyndo_identity::` | 40 |
-| host | shop | `StoredCart` | 39 |
 | checkout | pricing | `veyndo_pricing::` | 39 |
+| protocols | core | `RequestContext` | 37 |
+| protocols | core | `Result` | 35 |
 | orders | core | `veyndo_core::` | 35 |
 | b2b | core | `veyndo_core::` | 35 |
 | host | core | `header` | 34 |
 | b2b | shop | `veyndo_shop::` | 34 |
+| protocols | core | `State` | 33 |
 | protocols | host | `auth::` | 32 |
 | studio | shop | `veyndo_shop::` | 30 |
 | studio | apps | `veyndo_app_platform::` | 30 |
 | studio | catalog | `veyndo_catalog::` | 29 |
 | intelligence | identity | `veyndo_identity::` | 29 |
-| protocols | core | `State` | 26 |
-| protocols | core | `Result` | 26 |
 | customers | core | `veyndo_core::` | 26 |
+| host | pricing | `Item` | 25 |
 | host | core | `tenant` | 25 |
-| protocols | core | `RequestContext` | 24 |
 | marketing | shop | `veyndo_shop::` | 24 |
 | studio | intelligence | `veyndo_intelligence::` | 23 |
 | pricing | core | `veyndo_core::` | 23 |
 | protocols | host | `apps::` | 22 |
-| shop | pricing | `veyndo_pricing::` | 21 |
-| intelligence | pricing | `veyndo_pricing::` | 21 |
 
 ## Foreign table access
 

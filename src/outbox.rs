@@ -1,5 +1,5 @@
 //! Durable outbox and audit projection worker.
-use crate::*;
+use crate::{App, Result, Value, apps, cognition, marketing};
 mod retention;
 
 pub(crate) use veyndo_core::outbox::SUBSCRIBERS;

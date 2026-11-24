@@ -1,5 +1,5 @@
 //! Entry points of category writes for capabilities, imports and history; the rules and storage are owned by the catalog component.
-use super::*;
+use crate::{App, Json, Path, RequestContext, Result, State, Uuid, Value, apps, bad};
 use axum::extract::FromRef;
 use veyndo_catalog::ports::Catalog;
 use veyndo_catalog::service::categories as service;

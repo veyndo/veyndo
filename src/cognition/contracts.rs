@@ -1,5 +1,9 @@
 //! Evidence APIs and MCP contracts dispatch into one authorized owner; the claim compiler rejects free prose.
-use super::*;
+use super::{autonomy, autonomy_revert, evidence, experiments, extraction};
+use crate::{
+    App, Json, Path, RequestContext, Result, Router, SecureRoutes, State, Value, auth, bad, get,
+    json, merchant, post,
+};
 pub(crate) fn schema(name: &str) -> Option<Value> {
     if let Some(schema) = super::behavior::schema(name) {
         return Some(schema);

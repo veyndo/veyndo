@@ -1,5 +1,5 @@
 //! Idempotent synthetic template catalogue initialization.
-use crate::*;
+use crate::{App, Argon2, PasswordHasher, Result, SaltString, Uuid, accounts, json};
 
 pub(crate) async fn seed(a: &App) -> Result<()> {
     let demo = [

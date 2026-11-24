@@ -1,5 +1,4 @@
 //! Evidence-based shop memory: event receipts, observed pairs, reviewable hypotheses and bounded context.
-use crate::*;
 pub(crate) use veyndo_intelligence::service::{autonomy, autonomy_revert};
 pub(crate) mod behavior;
 mod claim_batches;

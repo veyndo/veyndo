@@ -1,5 +1,10 @@
 //! Discover the versioned B2B extension and intersect opt-in platform profiles through bounded public HTTPS.
-use super::*;
+use super::{UCP_VERSION, cart, consent};
+use crate::json;
+use crate::{
+    Error, Json, RequestContext, Result, StatusCode, Value, apps, bad, conflict, header,
+    shop_domains, tenant,
+};
 pub(super) const B2B: &str = "ai.veyndo.app.shopping.b2b_negotiation";
 pub(super) const VERSION: &str = "2026-10-13";
 const CHECKOUT: &str = "dev.ucp.shopping.checkout";

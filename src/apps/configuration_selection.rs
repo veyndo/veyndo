@@ -1,5 +1,6 @@
 //! Saved selections resolve in the apps component; this module adds the main language of the shop.
-use super::*;
+use super::Configuration;
+use crate::{App, HashMap, Result, StoredCart, commerce};
 pub(crate) use veyndo_app_platform::domain::configuration_selection::Selection;
 use veyndo_app_platform::service::configuration_selection as resolver;
 pub(crate) async fn resolve_selection(

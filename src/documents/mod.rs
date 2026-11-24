@@ -1,5 +1,5 @@
 //! Source-bound knowledge ingestion, retrieval and product questions share tenant/product visibility.
-use crate::*;
+use crate::{App, Router, SecureRoutes, get, post};
 use knowledge_host::Knowledge;
 use veyndo_intelligence::service::product_questions;
 mod ingestion;

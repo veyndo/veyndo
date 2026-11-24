@@ -1,5 +1,9 @@
 //! Generic channel/product projections and imported sales delegate to native owners with explicit app capabilities.
-use super::*;
+use super::{Manifest, approval, credentials, input_schema};
+use crate::{
+    App, Error, RequestContext, Result, StatusCode, Value, bad, commerce, conflict, currencies,
+    json, merchant,
+};
 pub(super) async fn execute(
     a: &App,
     h: &RequestContext,

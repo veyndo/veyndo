@@ -1,5 +1,5 @@
 //! Independent platform authorization: live personal sessions, current grants, no integration/bootstrap escalation.
-use crate::*;
+use crate::{App, Error, RequestContext, Result, StatusCode, auth, header, verified_kernel};
 pub(crate) async fn authenticate(a: &App, h: &RequestContext) -> Result<String> {
     let token = header(h, "authorization")
         .and_then(|s| s.strip_prefix("Bearer "))

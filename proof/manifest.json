@@ -4548,13 +4548,13 @@
     },
     "crates/cognition/src/inference/protocol.rs": {
       "status": "unproved",
-      "sha256": "d81c2653d383299212245ace76a492fc252b1b52a26263f1d0ca4762374de686",
-      "review": "Identity-only Veyndo namespace and canonical-domain rename; reviewed migration checksum compatibility for six historical SQL versions, unchanged checkout predicates, 42 library and 169 binary tests pass; native component legacy boundary remains configured and guarded."
+      "sha256": "a3f7236d4abdd35019a47a13a57f4a8641e931b51492e67836444726891acc2c",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "crates/cognition/src/inference/request.rs": {
       "status": "unproved",
-      "sha256": "2f6ca130ee35b25009e7fbf9d259d55450ca1fa1c2c0a45b0ca9c6bd8c52f278",
-      "review": "Functions above 150 lines split into named steps without behaviour change; function length limit lowered to 150"
+      "sha256": "1a667faa5d3f9b1ab07045842ddadb8a0ab2f18a8f7cf19fcb08c30f96ad72e9",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "crates/cognition/src/inference/schema.rs": {
       "status": "unproved",
@@ -4563,38 +4563,38 @@
     },
     "crates/cognition/src/inference/settings.rs": {
       "status": "unproved",
-      "sha256": "e5180407795d64b38be4ad989f724a3dc62a02b1abe8ca674f6eb51dcfa23218",
-      "review": "Stage 8 adds the sovereign AI gate in the inference crate and its callers; no extracted policy changes."
+      "sha256": "bf9e692cdfbb3c1d1ac43459a4f7174b2c01e2b559b4e9c6a6aaad03edc7279b",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "crates/cognition/src/inference/sovereign.rs": {
       "status": "reviewed-binding",
-      "sha256": "f83e10ddf87be6f0822bb7dc85aab3a0ae8eefb5f57dc4bc04712e15d1cd8f76",
-      "review": "Three further proved rules with production bindings: a signed offer is honoured only unexpired and for the unchanged cart, revision and total (signed_offer.rs, result identical to the former expression); sovereign AI mode admits only the self-operated provider on a self-hosted endpoint (sovereign.rs, same decision, endpoint check no longer short-circuited and free of effects); workspace ID length bounds (core). Three SQL statements gained explicit parameter casts matching their bound types. Kernel, core and cognition unit tests pass. SQL, HTTP and provider behaviour is not formally proved."
+      "sha256": "2f7b0cc9da944ed13879ee6812fd8eec089afc956ebdcc664ea2fab9c104f914",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "crates/cognition/src/inference/tests.rs": {
       "status": "unproved",
-      "sha256": "bd3ced1c7be5050a988ef0b9e894380ac10744aa1f4defde3a3aff57f9738619",
-      "review": "Review compiler-enforced foundation crates with unchanged native owners; native provider read-tool aliases and current authorization, private checkpoint continuation and versioned prompt evidence; fixed subscriber acknowledgements preserve commit gaps, independent quarantine and explicit replay; traced requests/tasks/outbox without payloads; exact decimal-to-minor-unit rounding retains legacy price boundary; real SQL poison-isolation regression passes and workspace unit/clippy checks pass"
+      "sha256": "3497ef05e369206db2fef45cba33afc6d72d39878be573b3eea03a756d02fd75",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "crates/cognition/src/inference/tools/request.rs": {
       "status": "unproved",
-      "sha256": "83c696102b94ed55bd50e10e43adcfcc88c4cef70e0f8a5e2de35553c6790ecc",
-      "review": "Review compiler-enforced foundation crates with unchanged native owners; native provider read-tool aliases and current authorization, private checkpoint continuation and versioned prompt evidence; fixed subscriber acknowledgements preserve commit gaps, independent quarantine and explicit replay; traced requests/tasks/outbox without payloads; exact decimal-to-minor-unit rounding retains legacy price boundary; real SQL poison-isolation regression passes and workspace unit/clippy checks pass"
+      "sha256": "55951e049e837dc0f00a0ec3575b9d0884cf49297b310c0232e161b0a650c2af",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "crates/cognition/src/inference/tools/response.rs": {
       "status": "unproved",
-      "sha256": "514c02ce65edd8893e7bf7ac72bbd7c8a3b3459fdb1f663e0ed0a9f9b76693f5",
-      "review": "Review compiler-enforced foundation crates with unchanged native owners; native provider read-tool aliases and current authorization, private checkpoint continuation and versioned prompt evidence; fixed subscriber acknowledgements preserve commit gaps, independent quarantine and explicit replay; traced requests/tasks/outbox without payloads; exact decimal-to-minor-unit rounding retains legacy price boundary; real SQL poison-isolation regression passes and workspace unit/clippy checks pass"
+      "sha256": "0cd4e7f1551736889148def00d6ad910c0793c62ae888d8754190601648bf482",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "crates/cognition/src/inference/tools/tests.rs": {
       "status": "unproved",
-      "sha256": "6d56e60c83cd1bb504c37e0700ad32cc4fac58ef4982597fb3a64bb7c6733f06",
-      "review": "Review compiler-enforced foundation crates with unchanged native owners; native provider read-tool aliases and current authorization, private checkpoint continuation and versioned prompt evidence; fixed subscriber acknowledgements preserve commit gaps, independent quarantine and explicit replay; traced requests/tasks/outbox without payloads; exact decimal-to-minor-unit rounding retains legacy price boundary; real SQL poison-isolation regression passes and workspace unit/clippy checks pass"
+      "sha256": "a3520a2f53d061db369b73610b2c854df5b8479dfd602dceace46941d5535ab9",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "crates/cognition/src/inference/tools.rs": {
       "status": "unproved",
-      "sha256": "baff9881691278d70342685f450d273cb5633bba6df8d896dd431d23407e4c01",
-      "review": "Review compiler-enforced foundation crates with unchanged native owners; native provider read-tool aliases and current authorization, private checkpoint continuation and versioned prompt evidence; fixed subscriber acknowledgements preserve commit gaps, independent quarantine and explicit replay; traced requests/tasks/outbox without payloads; exact decimal-to-minor-unit rounding retains legacy price boundary; real SQL poison-isolation regression passes and workspace unit/clippy checks pass"
+      "sha256": "9ea1537d5a3805a06f4ba35d818eef0b1ef337f9d0cbd96b40e5b7b2e34237bb",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "crates/cognition/src/inference.rs": {
       "status": "unproved",
@@ -5153,38 +5153,38 @@
     },
     "extensions/apps/site-builder/agent_handoff.rs": {
       "status": "unproved",
-      "sha256": "03e25eee856bdc596b02097b3aae5bcf5661a821e6dd63b18b5d4b1c798db303",
-      "review": "Review shared read-only planner admission and one checkpointed correction using original context, current authorized app contracts and unchanged personal approval; managed page fields use app-owned schema; translation and malicious checkout-correction HTTP regressions pass, workspace units and clippy pass"
+      "sha256": "7c8fce5cd4f111280589c00e7996c2ddd2c397ea0149b75741778724e14020cc",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "extensions/apps/site-builder/block_validation.rs": {
       "status": "unproved",
-      "sha256": "a77996d49842c2ab81e9f304ba2945cd6a93cf81cd0d7d05a8e4c7c7eb3b6696",
-      "review": "Reviewed app-owned layout admission. Only named product and category templates accept native sections, and required sections appear once. Focused Rust tests cover valid reordering, wrong template and missing sections. Existing revision and publication paths are reused."
+      "sha256": "16f287ad20b78921bc99a97a7bad9c24c1718f8bb02d3e0093a57a36c085e31c",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "extensions/apps/site-builder/context.rs": {
       "status": "unproved",
-      "sha256": "ace5934dd123c849bf3ecf5d97ec22707aa467b32a456d511fce95c22daa775e",
-      "review": "Reviewed native designer task handoff through existing sandbox, membership, revision and proposal owners; app elements admit only active same-tenant public native surfaces; read-only preview grants narrow server action allowlists. HTTP/PostgreSQL regressions cover own/foreign/private/inactive elements, CAS/release and explicit approval. No verified decision or proof boundary changed."
+      "sha256": "1ef9f53ceda2b8e9c5297d1858ff5dcdf27f7f8976813b18aa53e46f44be9350",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "extensions/apps/site-builder/design_agent.rs": {
       "status": "unproved",
-      "sha256": "5adb8ba8ba52bfa648e27432ebba088ca1d45b17f13a2a1ae2917e94550687d7",
-      "review": "Review selected-section admission before inference; page-wide theme is never widened into a selected request. SQL/provider adapters remain unproved."
+      "sha256": "d811818c46838463ebb285896ef209bd88abd0e4e19429cfaf66c30e0e9f98df",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "extensions/apps/site-builder/elements.rs": {
       "status": "unproved",
-      "sha256": "7210f4df61f7a448e27a1a0a48cf2527d3022e316fc4c5e4dc282b9f5c1f6be6",
-      "review": "Reviewed native designer task handoff through existing sandbox, membership, revision and proposal owners; app elements admit only active same-tenant public native surfaces; read-only preview grants narrow server action allowlists. HTTP/PostgreSQL regressions cover own/foreign/private/inactive elements, CAS/release and explicit approval. No verified decision or proof boundary changed."
+      "sha256": "e786612ef87e07f2f1417d4cd1d6a04004a1a31eb01433fbdfba80a59a7c238a",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "extensions/apps/site-builder/planning.rs": {
       "status": "unproved",
-      "sha256": "413995059007d063348dcc1c3d259361586aca0174fdaa32fbe7349a3aaa88e4",
-      "review": "Reviewed app-owned layout admission. Only named product and category templates accept native sections, and required sections appear once. Focused Rust tests cover valid reordering, wrong template and missing sections. Existing revision and publication paths are reused."
+      "sha256": "d653169515a19f11c98676e5debf0d74bbb5e0e7a13d4aa3933ec08cea6d1bb9",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "extensions/apps/site-builder/proposals.rs": {
       "status": "unproved",
-      "sha256": "ccaf67f9d468c2586e2e4ab8e5a1bc0148ad7ff5bd52d065e93c3cbef5139498",
-      "review": "Reviewed persistent copilot navigation as unproved adapter: registered views, current domain and PII rights, tenant-scoped record existence, no URLs or mutations; prompt v5 and isolated HTTP invalid-target regressions."
+      "sha256": "971a5818f173654707677e667393e6d20b81e09741442e86e5af39298b82d733",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "extensions/apps/site-builder/references.rs": {
       "status": "unproved",
@@ -5193,13 +5193,13 @@
     },
     "extensions/apps/site-builder/server.rs": {
       "status": "unproved",
-      "sha256": "fcd8ef8ede14b574f8e8076af6cd9affe69a9c1e9cb572212e61a5ceb4f4d7b8",
-      "review": "Reviewed app-owned layout admission. Only named product and category templates accept native sections, and required sections appear once. Focused Rust tests cover valid reordering, wrong template and missing sections. Existing revision and publication paths are reused."
+      "sha256": "070b61d8f822e537e7585ee5a237025f3d4842175cbeb0e6e12031db29421782",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "extensions/apps/site-forms/server.rs": {
       "status": "unproved",
-      "sha256": "b3c250142ba8234f1bed247063bd3765e66765e71ebf0c261a2d1fa51fe316c0",
-      "review": "Reviewed fixed app-record store, tenant/app/model identity, forced signed RLS, trigger-maintained unique/reference/quota projections, scoped schema/preview/staging/checkout consumers and atomic maintenance consolidation; actual PostgreSQL app/checkout/schema/F5 suites and independent security re-review pass. Existing frozen-record WIT conversion remains equivalent; SQL/async adapters remain outside Lean proof boundary."
+      "sha256": "1d8369a95448934658e282862c03236900c1a468820e532f7fc881e51551590f",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "extensions/apps/slack/src/actions.rs": {
       "status": "unproved",
@@ -6248,33 +6248,33 @@
     },
     "src/accounts/demo.rs": {
       "status": "unproved",
-      "sha256": "2fb9abd04c3ee4d0641ea839fc94946e6c33ba136dd85cffef1a3daef2779a37",
-      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
+      "sha256": "9c878ea5bfb498f95e5937a7a71b1d61e7d1dd442beceea664c181a6436f435f",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/accounts/mod.rs": {
       "status": "unproved",
-      "sha256": "c14c8a690aefe15055b6c49c568e6f36d09782d4acfc22185e4c14db0333ed92",
-      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
+      "sha256": "e1d023e31ddeb17c2fe69be9fc4705ef5b3c933a03f8d3e19a888f46ff82498c",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/accounts/orders.rs": {
       "status": "unproved",
-      "sha256": "22da24dd4bdbf8ab411acba7034a72a570f607e6a135d804d2ddffe85fa0d86f",
-      "review": "Batch A: customer accounts, account orders, sign-in throttle, handoff and roles move into customers, orders and identity"
+      "sha256": "49bab8a70b8264ed2902bf596cbaa653642cbdf39211d58f671c2743a7f54138",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/accounts/payment_preference.rs": {
       "status": "unproved",
-      "sha256": "4fb192db418fabd61dbd5d3907dfb54f4c4bfc4e3584e1e60639012c27080d5c",
-      "review": "customers component crate created; no kernel binding changed"
+      "sha256": "81e1ec5af486d9e7b625205f0cf91e93c45329aedac05e67bf170ac2415f5230",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/agent.rs": {
       "status": "unproved",
-      "sha256": "f30a50910d2b0e9ccee4fbb738eb33fdff97d402ba46e9a1935855e0fdada31a",
-      "review": "F10: manual orders, the merchant operation catalogue and catalogue intake moved into components"
+      "sha256": "f9b112c3c89c2ee346f4586a4cea2e6482af6bf40f2aad52b8f95940d55f78e0",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/agent_host.rs": {
       "status": "unproved",
-      "sha256": "5dde457744db73817f74f4370a173951fcc89e1d4c8831c7138a4251455ef639",
-      "review": "Batch F1: proposals, list views, reviewed work, its execution and proposal application moved into studio behind the WorkHost port"
+      "sha256": "ae5ba662bfca4c77a7a7294d05f3bca565a0f9ea4b5048ee3eeb222c49013558",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/agent_runs/authority.rs": {
       "status": "unproved",
@@ -6288,13 +6288,13 @@
     },
     "src/agent_runs/contract.rs": {
       "status": "unproved",
-      "sha256": "503bce16dd591b9b252ba5880c43d6902475f6f0e1ab81901ef11d1c04150700",
-      "review": "Batch F1: proposals, list views, reviewed work, its execution and proposal application moved into studio behind the WorkHost port"
+      "sha256": "8d2dca468b9df5ccea565478492f80d580cba9f437ff2ef775e54ceff0163edd",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/agent_runs/controls.rs": {
       "status": "unproved",
-      "sha256": "0253ed5b2b8a375450d138421c0ac592ed1d2cc408adbb773e2d9f7394cc4ea3",
-      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
+      "sha256": "4d233d5c1b1874be8182c5a055d4706feff708ba13f28845fdce9026c25ff22b",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/agent_runs/navigation.rs": {
       "status": "unproved",
@@ -6303,8 +6303,8 @@
     },
     "src/agent_runs/scenarios.rs": {
       "status": "unproved",
-      "sha256": "9b67fb6c92b9c7e791c6fbaeb51ac210fdc574429d48a35f504334fb4d4f6e12",
-      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
+      "sha256": "99cf57ca71bfcfa40ce7d8d6890b3bfaa925126ec882662b42f19e64ff23c4cf",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/agent_runs/view.rs": {
       "status": "unproved",
@@ -6313,33 +6313,33 @@
     },
     "src/agent_runs/work_plan.rs": {
       "status": "unproved",
-      "sha256": "99c051d53ef7b6aa160adf2cf9958f11342dc4253f8fe824dd25ead8bfc420cf",
-      "review": "F7: marketing configuration, channel admission and flow templates move into components"
+      "sha256": "2c2ba408decec18c08b76d6d5fdf03686fc4b4062b1c0bb8cd40de27c340564c",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/agent_runs/worker.rs": {
       "status": "unproved",
-      "sha256": "d382a76872a29e78faf93cc8ca297a625c9b4a8c953bc05896abfeb0cc55dd59",
-      "review": "Batch F1: proposals, list views, reviewed work, its execution and proposal application moved into studio behind the WorkHost port"
+      "sha256": "cf4eb9276627aa15b024ae5e1ec5fc62e3688dc0a815cc86ea475a1871421b8e",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/agent_runs.rs": {
       "status": "unproved",
-      "sha256": "18fb148d575c9aa5a8a7536c03bd97a0babc7a321995c60e582ecf342e7ce261",
-      "review": "F9: media captions, design references, product knowledge and the translation worker moved into components"
+      "sha256": "8588483722ccd77a3af4d80c720af51cd23224a14923e29dedb17053332241a2",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/apps/approval.rs": {
       "status": "unproved",
-      "sha256": "a7f8c54e7a0b9954f585dd2e406f6846523076293fe69e0ad27b56ff346b1ff5",
-      "review": "Package approval, distribution, schema adapters, event projection and service transport policy moved into components/apps without a change in behaviour"
+      "sha256": "f0697a195e57754ca718f137a9fd777d0f1cedfc22bdea5dd005426f6fec263e",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/apps/asset_surfaces.rs": {
       "status": "unproved",
-      "sha256": "7a5949201defdcbbed750f23cabfab8dc46a1314b485367dae5a279e615cc4ef",
-      "review": "Reviewed app authority and current creator rights, isolated schemas/RLS and atomic migration rollback, fenced job/event leases, minimized payloads, signature/digest pins, opaque UI grants, pinned DNS egress and bounded Wasm/WIT quote adapters. Actual isolated PostgreSQL own/foreign callback, schema, jobs, events, assets, export, distribution and production-foundation regressions passed. Added extracted package, surface, resource and exact callback-consent policies with negative Lean claims; async/network/UI and general Rust modules remain explicitly unproved."
+      "sha256": "ae0fc9c38fd5be0a9de55a472bececf6bd654dfe8f0950a298b7eb54d46e8e3c",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/apps/cart_contributions.rs": {
       "status": "unproved",
-      "sha256": "b3f54070342416bb8657977d9ed2d4173cfa8f461bd48baa835002e15e452713",
-      "review": "Batch B: commerce hooks, cart contributions and app source ingestion move into apps"
+      "sha256": "47e5b8fe69eaffd41f408b01b4d21ca6b82026b68196d4d6b3eb16f17e5bea6c",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/apps/configuration_events.rs": {
       "status": "unproved",
@@ -6348,28 +6348,28 @@
     },
     "src/apps/configuration_selection.rs": {
       "status": "unproved",
-      "sha256": "3beb5a7c1aef44ffb8b222319845984d0043404df57b097846f21441906adc6a",
-      "review": "Address book entries and storefront routes move into customers"
+      "sha256": "1b1371a84a83480280f941d232cd5e731367cd487ec87ad81efde812ae797457",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/apps/consent.rs": {
       "status": "unproved",
-      "sha256": "9102507025f7a9d08e590b823a8954d7e4a73456d5f13473c5596ec634e6e176",
-      "review": "Job callbacks, completion evidence, package verification, installation, activation and upgrade review moved into the apps component behind host ports without behavior change"
+      "sha256": "afad473b26769919de89b066eb3cd213774fd1204d9938687682c7ba108edd52",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/apps/core_callbacks.rs": {
       "status": "unproved",
-      "sha256": "9049cf029320333b616404d6ef19472eef326a2b2350995b2da262b2bd579e81",
-      "review": "F12: app host SQL moved into component stores; no mutual component pair remains"
+      "sha256": "6f4bd602277e7c1e2c4b5dc2eb8ba6ffe97df2cb252d878e2b4924c8cc67dab5",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/apps/core_documents.rs": {
       "status": "unproved",
-      "sha256": "63c675c9ce253d5f084c4b2fb885603a9d835654f167515f1d18c51ee2b2f81d",
-      "review": "Review 2026-10-14: bounded modular fulfillment predicates; native carrier intent freezes allocation/dispatch across unknown effects and cross-provider calls, confirmed rejection releases its own intent, exact PDFs acknowledge the original intent. Reviewed split/machine binding, tenant/package/CAS/quota checks and local paid-effect negative fixtures; SQL, crypto and carrier protocols remain unproved."
+      "sha256": "06f5ccbeca3a3c4677187e55057d3cbfd30905bcbf283c2aaa52b4dcf9078bbc",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/apps/core_exchange.rs": {
       "status": "unproved",
-      "sha256": "adcdd202af013e5554383137cd5bf7819a984631cd947cd8d3d41a49ea16e443",
-      "review": "F12: app host SQL moved into component stores; no mutual component pair remains"
+      "sha256": "0e8ed5b7e4512b98df0bd1e736adc99e7b9830ed2df0f2baaf3b3546fbaa842f",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/apps/core_extensions.rs": {
       "status": "unproved",
@@ -6378,43 +6378,43 @@
     },
     "src/apps/credentials.rs": {
       "status": "unproved",
-      "sha256": "e520a63ce913b27e9c58a025bf6c5c72ea6717a85f6617d1207f2f4fa7d8aeb0",
-      "review": "App secret, settings, activity, credential and webhook handlers moved into the apps component without changing rules"
+      "sha256": "53481fd80066588fe4ebe4ecca5d8b2a1de26903751f197d5fd8bde67d8e26d3",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/apps/data.rs": {
       "status": "unproved",
-      "sha256": "2b8ccde3700fd5504520dc64a2e33bc0690005111c63b6f5fbf2e43905f5391e",
-      "review": "Batch F3: bundled app contract tests, the app view read and the catalogue evidence callback moved into the apps component"
+      "sha256": "269de162c99fca125150fbcc04317d1a16652a397fad03276f40079367006918",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/apps/discovery.rs": {
       "status": "unproved",
-      "sha256": "4cfb1fc8b7ed99c71b501c1698438a906e86f46da7faa4c5330efd9a56c81b8b",
-      "review": "App discovery, package activation and consent adapter moved into the apps component; behaviour unchanged"
+      "sha256": "459736de8a2d1ed9918c4d4a7634432adeaec98991e8c9370674450fb2b42db5",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/apps/distribution.rs": {
       "status": "unproved",
-      "sha256": "066f7933b2efb344bc6b7c248efcacb1bb83166c2ca6a363d472ce96a21a94c7",
-      "review": "Job callbacks, completion evidence, package verification, installation, activation and upgrade review moved into the apps component behind host ports without behavior change"
+      "sha256": "64f5249af64e26f4d2585bcaf2c44d8ab461907110426e1600a4f4a266d6f66f",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/apps/egress.rs": {
       "status": "unproved",
-      "sha256": "12292c3aa4d37b14b7263ac303cf81313c38e4cc93237ed0fca01ee509b4e192",
-      "review": "Surface contract and sandboxed documents moved into the apps component without changing rules"
+      "sha256": "f65b5df31b11a8217373c7dd9c60ded46e19820410b3e654b88ed111d60a1cdf",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/apps/events.rs": {
       "status": "unproved",
-      "sha256": "ac834760b8daf835e45deb2044c477d4637649d518dda85e0aeabb9db5f630d4",
-      "review": "Service calls and event delivery moved into the apps component without changing rules"
+      "sha256": "afc80273bfe7094046a1510b146e32985e1897dd9803440ab16865ce004d5e81",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/apps/evidence.rs": {
       "status": "unproved",
-      "sha256": "ed2c6212f338275584b479c4024af555ee79f66e40a24e1da3ad78d0e106640a",
-      "review": "F12: app host SQL moved into component stores; no mutual component pair remains"
+      "sha256": "7309a82e3c825940fa7b44102a7d6dcd6a5783a7b8521f82e57a9a39df72fe33",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/apps/evidence_routes.rs": {
       "status": "unproved",
-      "sha256": "708d782ca729b2befffc559d895b6b6d2344883d3e86eaddc5f4d50159f64f76",
-      "review": "Reviewed eighteen core findings: typed trusted identity and explicit route rights; consolidated current grants; durable auth and fenced shared limits; scoped transactions and one-backend PgBouncer including nested borrow fixes; bounded Wasm/PNG work; notified workers, savepoint quarantine and conservative retention; separate runtime roles and startup configuration. Real PostgreSQL/provider regressions preserve current tenant/customer/payment behavior. SQL/network adapters remain unproved."
+      "sha256": "679ad3294b76289a289aada6635a0a7c6108497464513e2c26cf6e4153132db7",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/apps/field_values.rs": {
       "status": "unproved",
@@ -6423,13 +6423,13 @@
     },
     "src/apps/gateway.rs": {
       "status": "unproved",
-      "sha256": "1d168a23a5d09e0fe57751c95e09929062d9000dc87e823af29ab08a280591aa",
-      "review": "F7: marketing configuration, channel admission and flow templates move into components"
+      "sha256": "0100046df64fdf859fd74660e5ec54d12c5f97dee264aa679f87ef0c1fb6f8da",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/apps/hosted.rs": {
       "status": "unproved",
-      "sha256": "bf74bbad669fb92414d3fb5296c4895c47e57f3cded448f5dc98f769f6727c10",
-      "review": "F12: app host SQL moved into component stores; no mutual component pair remains"
+      "sha256": "ad28a55e21736d352265f5717c251bbbadf72065aefe85057eb930250e671bb0",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/apps/input_schema.rs": {
       "status": "unproved",
@@ -6438,18 +6438,18 @@
     },
     "src/apps/install_host.rs": {
       "status": "unproved",
-      "sha256": "3e3380cd613505e47498973b032f512f3c58ba984ac57d61530388618527c735",
-      "review": "Job callbacks, completion evidence, package verification, installation, activation and upgrade review moved into the apps component behind host ports without behavior change"
+      "sha256": "3e90b639d91ad460fe664a1c762461398e368cab78e3f503797062e250c30a6c",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/apps/job_import.rs": {
       "status": "unproved",
-      "sha256": "43ea5bb7c4ed10173ab09f8c5bf283fc5013bee60923c7d50019c020e4d1104b",
-      "review": "F12: app host SQL moved into component stores; no mutual component pair remains"
+      "sha256": "1d50757362ae3804f911813827bf8dc62fcbe2f7593b5e12f51fc5252f470d71",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/apps/jobs.rs": {
       "status": "unproved",
-      "sha256": "542867a32b5f45b67f19facadb0686656c1e5b0f6c2369d1c4881f6a3c00d769",
-      "review": "The app action gateway moved into the apps component; server-owned handlers are reached through a host port without behavior change"
+      "sha256": "51699b0e037dc7e85fd254b51cd3a4f6f4f7209c568aa6fafe35d2fe99c4c2ff",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/apps/manifest.rs": {
       "status": "unproved",
@@ -6458,18 +6458,18 @@
     },
     "src/apps/manifest_validation.rs": {
       "status": "unproved",
-      "sha256": "e557e461323fe1b00bfddf169494b3d0d8653d1222dd2d21a22b51b76fd559d8",
-      "review": "Field, reference, view and manifest policy moved into the apps component without changing rules"
+      "sha256": "e780a975ef557537a39f0145bd37af1365d19c8875ce04b30bb7e797a15165f0",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/apps/mcp_views.rs": {
       "status": "unproved",
-      "sha256": "f22c0e9cd33b26c441c72bda330f26572bc4390000df69c1ec5ae6d0a50da9f6",
-      "review": "Batch F3: bundled app contract tests, the app view read and the catalogue evidence callback moved into the apps component"
+      "sha256": "3d945d8e141a78d5a3ca5b7c0a7ecb9aa5da283bfa0710a32749362234148e15",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/apps/mod.rs": {
       "status": "unproved",
-      "sha256": "48e42ddcca300ab46aa02afd62c459a9c3bdb8a8e4ed6f35b1024d037816cef2",
-      "review": "F7: marketing configuration, channel admission and flow templates move into components"
+      "sha256": "4c5afd7180449914a17483e718aceb57b45c6fbbb50b2924717dae5178adae75",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/apps/model_contract.rs": {
       "status": "unproved",
@@ -6483,8 +6483,8 @@
     },
     "src/apps/observability.rs": {
       "status": "unproved",
-      "sha256": "297e834b57f54579d21e325c6be3fd97996e960ef4a95dec8ce77f6aaf023d7b",
-      "review": "App secret, settings, activity, credential and webhook handlers moved into the apps component without changing rules"
+      "sha256": "df68703cc82eef31c2c48b090df301425da9ec29654ed8964fd8fbb395ad118f",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/apps/package_fence.rs": {
       "status": "unproved",
@@ -6493,28 +6493,28 @@
     },
     "src/apps/planning.rs": {
       "status": "unproved",
-      "sha256": "622d925e31de46d9fee3090327d2edae5c3c4b96a125f61d8db7af8fec6937bf",
-      "review": "App planning, planning contracts and the app tool catalogue moved into the apps component; the tool wire contract moved to core without behavior change"
+      "sha256": "03e251441ec5b2585a91b1ec33920f321e445a587678c990d1f7877b13d4c3ac",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/apps/record_history.rs": {
       "status": "unproved",
-      "sha256": "edf57abcf3639858144e82a926cd028592b01106807b6c2a2bb8f2b59839d7f1",
-      "review": "Managed app records, restoration, import and native-object projection moved into the apps component behind a record rules port without behavior change"
+      "sha256": "c5fec1e97791c3c2b758f95e710ec7684f66a052399e5e0d6d7eaa613a68aa59",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/apps/record_import.rs": {
       "status": "unproved",
-      "sha256": "e838fed75c8145962515aa12db15cf49895d80e88a1e7dc76fa89252fc830882",
-      "review": "Managed app records, restoration, import and native-object projection moved into the apps component behind a record rules port without behavior change"
+      "sha256": "0653a7a7a7b6872a7a658252d23e34985b06acdbb57833c666e7cb3b19a97eb4",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/apps/registry.rs": {
       "status": "unproved",
-      "sha256": "adc8ee7e1840931482ce6afaf31ed4b19d7d6a34557fd5882b018affa9fdeae8",
-      "review": "App Studio immediate preview moved into the apps component behind the host port; behaviour unchanged"
+      "sha256": "5eaf9e18b8a1ae617ca2ccd7de56ba80c2f327da051593daafc46f2c5e9d5aef",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/apps/routes.rs": {
       "status": "unproved",
-      "sha256": "6e9144cc71d5c1a3323bfa408bfc984756f3a9ae5612723ee65920b1beb228da",
-      "review": "F12: app host SQL moved into component stores; no mutual component pair remains"
+      "sha256": "1b460468134e50e96a2cd585ed26519a312f1937b0aacbb565d651e231654a4b",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/apps/schedules.rs": {
       "status": "unproved",
@@ -6523,13 +6523,13 @@
     },
     "src/apps/secrets.rs": {
       "status": "unproved",
-      "sha256": "fbddf7a18385c3826e0cf5d2c469fe8c2c0aa23d921b7ce773771cd92fd536e9",
-      "review": "Service calls and event delivery moved into the apps component without changing rules"
+      "sha256": "b304bf319a01bfd20c3f2e47091338131f7d9672a8c85a37192ac3d606cf5351",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/apps/service_limits.rs": {
       "status": "unproved",
-      "sha256": "bcd36ca852cc2727fc759ba62571fb46ce2e981d1301655790138599bda37297",
-      "review": "Surface grants, declared app routes, UI bundle loading and the action and entity handlers moved into the apps component without behavior change"
+      "sha256": "5d24c4c0627fdf022e3b44cdc6c7e37330d7e6d1a91ee8ac964d5a995eb33cd1",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/apps/service_policy.rs": {
       "status": "unproved",
@@ -6538,43 +6538,43 @@
     },
     "src/apps/settings.rs": {
       "status": "unproved",
-      "sha256": "6e6bb92c24a510520587ce828ee029b5c76a807ca55718d38353c1eae8450956",
-      "review": "App secret, settings, activity, credential and webhook handlers moved into the apps component without changing rules"
+      "sha256": "62c560226e9a7e01b30c0356212c4624b05a44e28b2cd57f35fc10869a1f1463",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/apps/submissions.rs": {
       "status": "reviewed-binding",
-      "sha256": "cd76de2fae3dfc9315ae22469cf6dd1b7052224cdc4217373ffe0b8d3e53501b",
-      "review": "F12: app host SQL moved into component stores; no mutual component pair remains"
+      "sha256": "5a7f23290df3f60671b8797e85cddf3b3a5e12b9853e4c3aa37975f20fa2632f",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/apps/surface_grants.rs": {
       "status": "unproved",
-      "sha256": "37e2606a4050b603b64eb7523b24e9a9baaf059a62ff233d65b5f8423c85f9fd",
-      "review": "Surface grants, declared app routes, UI bundle loading and the action and entity handlers moved into the apps component without behavior change"
+      "sha256": "36ccace2a82df424a603f3d96646449e385de578be915db554cab191fe14f920",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/apps/surface_registry.rs": {
       "status": "unproved",
-      "sha256": "a07721a7ca8b2aa6ae78921bf293983142adf7208ff62cc98a9800029a461f41",
-      "review": "Assistant app views and the surface registry moved into the apps component without behavior change"
+      "sha256": "1ff91a320ddcee3bd76bb50e40248b2c80590529c52394a4114073329d03958c",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/apps/surfaces.rs": {
       "status": "unproved",
-      "sha256": "9eedd548be4dc6637cbce18a29117caefbc47ee642b801ef2d5564d80b9224c4",
-      "review": "Surface grants, declared app routes, UI bundle loading and the action and entity handlers moved into the apps component without behavior change"
+      "sha256": "cd559aa68313f09b0645eed968256f4116824ee0453fd8459b9e9e833d602118",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/apps/tool_contract.rs": {
       "status": "unproved",
-      "sha256": "be24064d2b1a439206639cab941a7a3f13c6c98ab0389aa37645175dbb05bab3",
-      "review": "App planning, planning contracts and the app tool catalogue moved into the apps component; the tool wire contract moved to core without behavior change"
+      "sha256": "130b35bea539d48d29226b7bf11f63d11031cf9e311432682239b771df2f23ed",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/apps/ui_bundles.rs": {
       "status": "unproved",
-      "sha256": "c2b58ee2f648224fbf4cddf5c029119d923c0eb4d84099dec733d211a0fba506",
-      "review": "Surface grants, declared app routes, UI bundle loading and the action and entity handlers moved into the apps component without behavior change"
+      "sha256": "6b72b1749a683022024fdaa32ec0f8a93ff225d7e930f0fb882a735ae1cdd568",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/apps/ui_documents.rs": {
       "status": "unproved",
-      "sha256": "f477bdb0a3a6bf89cb15f5af6eb534fe88eb913e80e4d7929f78f3d910acc234",
-      "review": "Surface contract and sandboxed documents moved into the apps component without changing rules"
+      "sha256": "87d3ca17177955f6d3324f59a1f5f13783e378cee52ddb353df51f40066f9ee5",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/apps/webhook_scope.rs": {
       "status": "unproved",
@@ -6583,33 +6583,33 @@
     },
     "src/apps/webhooks.rs": {
       "status": "unproved",
-      "sha256": "3633c643db3c6d42b79d40288323c27c80f4acd061ed499fe77bce15d035c25f",
-      "review": "App secret, settings, activity, credential and webhook handlers moved into the apps component without changing rules"
+      "sha256": "8866abee7d79c1ada6b5ffca0d03a8c8f27f30940b418d263003abce5cb9d907",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/assets/app_files.rs": {
       "status": "unproved",
-      "sha256": "0b69dc106f5b5b069478b3b3480ebc87a2f4f8661d9210f141838064f44a092f",
-      "review": "F9: media captions, design references, product knowledge and the translation worker moved into components"
+      "sha256": "d1faa05fde240ba0c7e377116bdc8027f643c17bf45221c5e5e8ecd97308cd3e",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/assets/captions.rs": {
       "status": "unproved",
-      "sha256": "779a1491a583a1ccbf13e43c6224d2a9cd78280b95691b6765615c4b972f3578",
-      "review": "F9: media captions, design references, product knowledge and the translation worker moved into components"
+      "sha256": "4c41804d763cac9acfd72142a0ef326a06dc28be32ca64a9d2d79ac13cd6bbc8",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/assets/design_references.rs": {
       "status": "unproved",
-      "sha256": "5cd9755267abe296148900a4cc441c535cdb771c8c00e80eb9d9b0110a1de3b7",
-      "review": "F9: media captions, design references, product knowledge and the translation worker moved into components"
+      "sha256": "1d7195491e6f3d180368d5a99b10c932e30e0771ad866c250c28b5299d89f94c",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/assets/image_jobs.rs": {
       "status": "unproved",
-      "sha256": "409412df571135492577073d91fac8219b4a451cd8cf12b44067af5daaedce12",
-      "review": "image jobs moved into components/catalog; no kernel binding changed"
+      "sha256": "b5f2e7a00dd742aabc87aa66c2c64105b27d9659c471548aac5d26378bbacc09",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/assets/import.rs": {
       "status": "unproved",
-      "sha256": "b7bde1adcb59023ed7a74fc9216d7bfdfeb5b49f3926085936301c2a6572b426",
-      "review": "F9: media captions, design references, product knowledge and the translation worker moved into components"
+      "sha256": "df7efe82a95141965b5ef8ef989b5e7f482c006f9a9d9810fffe3f99174c172a",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/assets/ingestion.rs": {
       "status": "unproved",
@@ -6618,8 +6618,8 @@
     },
     "src/assets/mod.rs": {
       "status": "unproved",
-      "sha256": "0b3538cdcc1b1700db5dceb5c31b5f5713e137c45d0f338677af707ce89e6884",
-      "review": "F10: manual orders, the merchant operation catalogue and catalogue intake moved into components"
+      "sha256": "f70349bf036336dea6c9635c2fe8ebb71aab4c5373ff830b9d3bbb93b187216f",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/assets/model_format.rs": {
       "status": "unproved",
@@ -6638,8 +6638,8 @@
     },
     "src/assets/upload.rs": {
       "status": "unproved",
-      "sha256": "c1d6e087ecc6887aa907fee6d718791aa8edb52212edc1f35db7a81532fec1f0",
-      "review": "F9: media captions, design references, product knowledge and the translation worker moved into components"
+      "sha256": "6cd8b94e88887956475870c503a1f1971edb3111dc2101d03ddf71cd1dc01e00",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/auth/broker.rs": {
       "status": "unproved",
@@ -6703,8 +6703,8 @@
     },
     "src/auth/knowledge_identity.rs": {
       "status": "unproved",
-      "sha256": "882db39af5c2bf4e13aa6ace9bcd5a0e9d63782ff89fef0e72106871903158db",
-      "review": "Knowledge introspection reuses current scoped native identity, expiring integration keys and app package approval. Real catalog delivery, read-only evidence, foreign-shop and revoked-key checks and Checkout tenant isolation passed locally."
+      "sha256": "c2a349c5023cb27571df6eaf7d116f04c9f01e1162a94e902fc12dbe463d2839",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/auth/members.rs": {
       "status": "unproved",
@@ -6713,8 +6713,8 @@
     },
     "src/auth/mfa.rs": {
       "status": "unproved",
-      "sha256": "9171bdf803ae9f03f0076a66dda901e1e9fb0eaa90aa13b819f31c35bf14ade2",
-      "review": "Sessions, invitations, MFA, integration keys and broker assertions moved into the identity component without behaviour change"
+      "sha256": "f95c30ff054f6936d2c26f47ec876573c7fa963a18323b08008ad8b362d06446",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/auth/middleware.rs": {
       "status": "reviewed-binding",
@@ -6738,8 +6738,8 @@
     },
     "src/auth/recovery_entry.rs": {
       "status": "unproved",
-      "sha256": "e12b4742eb7a12e5278c4da896a13ca569dd18922de8d5a35c2a23127e7638e4",
-      "review": "Reviewed native factor gate, RFC6238 vectors, current personal proof, credential CAS, parent-session handoff revocation and system-only operational identity schema; own/foreign/revoked/replay real HTTP PostgreSQL cases pass; cryptography SQL provider and browser code remain unproved"
+      "sha256": "18d9906a3dcaffffe1002ebd5c2103464de0ec7865b2d93e67759e21607fbe97",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/auth/registration.rs": {
       "status": "unproved",
@@ -6748,13 +6748,13 @@
     },
     "src/auth/roles.rs": {
       "status": "unproved",
-      "sha256": "fdf716672447554edc18c43dd5b4376e35b907d98237581628b01776f7907e3c",
-      "review": "Batch A: customer accounts, account orders, sign-in throttle, handoff and roles move into customers, orders and identity"
+      "sha256": "7d22aed2d1f60e0d08079cf27880e57b782dd4ce8ffc28596bd01b6c205bbbe2",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/auth/routes.rs": {
       "status": "unproved",
-      "sha256": "f0c6e8fc577a1dea8df003e9381b765e4b15579821d749532087639e5d4b67ce",
-      "review": "Knowledge introspection reuses current scoped native identity, expiring integration keys and app package approval. Real catalog delivery, read-only evidence, foreign-shop and revoked-key checks and Checkout tenant isolation passed locally."
+      "sha256": "c343d3576138ee1e60e806e1c3fc52525d9ef5562af547f59ba30fc08e786319",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/auth/sessions.rs": {
       "status": "unproved",
@@ -6783,13 +6783,13 @@
     },
     "src/b2b/mod.rs": {
       "status": "unproved",
-      "sha256": "975d738f19c6dc26704dd90e39a9566770ffc8afa35f84f4638d22456e2a2204",
-      "review": "F8: payment providers, POS register and B2B commands moved into their components"
+      "sha256": "7e2ddda043279bef4f82f8d93ef4706210e9b0b87dff1b2cc0ce68c91ba87443",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/b2b/orders.rs": {
       "status": "unproved",
-      "sha256": "9ed53fa0a484f6e7e5c6f4a313db0ef67cd9b0ee1f1b76e093dab532b1ad81d2",
-      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
+      "sha256": "f445b996559749cbf3089d293fc6b96117dccf59428d84f0af84660e98a38945",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/b2b/organization.rs": {
       "status": "unproved",
@@ -6883,18 +6883,18 @@
     },
     "src/bootstrap.rs": {
       "status": "unproved",
-      "sha256": "d487e84d87295e95cfb5b1ce77ecb61c268338a42b2732c50a3ac05883d203b3",
-      "review": "Batch A with the migration-mode configuration fix"
+      "sha256": "628c403b373c55c7bb5072793fa663d10b8118b386a74d975fbaf4c6f490fd67",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/brand_redirect.rs": {
       "status": "unproved",
-      "sha256": "8141e23d0ef6c9a924c333889374dd0cd8b23fa9d9a28ec0eb3c58f9275bd7b6",
-      "review": "Payment commands, worker and provider sessions moved behind the payments gateway port"
+      "sha256": "5aa3e097bd17016ddfa8b1147aef0842b6e0b309f14745ee546683cbbc12128e",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/capabilities/admission.rs": {
       "status": "unproved",
-      "sha256": "b25b5161ab326757fc5e2223bd90719a8040aeb0ff2ab6c7565b2db751865058",
-      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
+      "sha256": "67b220d7c2df9903cfa3c74cd111f3985320b0ea7f50e19f3721fccc7eb14fcf",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/capabilities/catalog.rs": {
       "status": "unproved",
@@ -6908,23 +6908,23 @@
     },
     "src/capabilities/dispatch.rs": {
       "status": "unproved",
-      "sha256": "f51182b9ba4ba71e892720e3b6748b407663e61bea8fd4dabd6c7dac250e7b2e",
-      "review": "Reviewed generic saved-payment consent/session and opaque instrument ownership, forced signed-scope RLS and tenant FKs, immutable funding in native payment jobs, non-financial revocation receipt handling and optional metadata savepoint isolation. Actual local Rust/PG save/reuse/revoke, invalid late metadata, restart and distinct restricted-login cases pass. Existing extracted kernel unchanged; asynchronous SQL/provider paths remain unproved."
+      "sha256": "b81e99d568e44e88d9e783d60cdac27aa46f40d004cbe55d72430154f3b60f16",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/capabilities/registry.rs": {
       "status": "unproved",
-      "sha256": "37b0b0499534ec07d07e7e2a691bc0f25208f8ecd13dbf7621e950fe1fe95b55",
-      "review": "Signed offers: cognition/signed_offer.rs signs a closed projection of the native cart quote with the existing Ed25519 owner and verifies signature, shop, expiry and current cart match; signed.rs gains key_id and verify helpers; readiness reports signing status; no extracted policy changed; providers suite verifies independently and covers forged, foreign, malformed, changed-cart and changed-price cases"
+      "sha256": "6df72ecdedfd58f9eb9154cbebf2c45c5f751b57f7cdb6a0aa40293e39d88ce2",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/capabilities/schema.rs": {
       "status": "unproved",
-      "sha256": "e9a2d31c79f74b404e92b8cdafe782c8b72f0932472c4c40c87633fbacd27d91",
-      "review": "Functions above 150 lines split into named steps without behaviour change; function length limit lowered to 150"
+      "sha256": "2601737b78764182684dece9bda01d353035f53d64dc17f15a2a2e711419bd57",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/capabilities.rs": {
       "status": "unproved",
-      "sha256": "751b7645342a359de370bf87b7db24a02ddacfd7c6c133ab1971c6f052d2c788",
-      "review": "Cart projection and product detail move into checkout behind a quote port"
+      "sha256": "d8740a1a1cbf36bc0d637ca0961601bcc01d4acf4925e0202c9abd74af09b556",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/cart_model.rs": {
       "status": "unproved",
@@ -6933,23 +6933,23 @@
     },
     "src/cart_mutation.rs": {
       "status": "unproved",
-      "sha256": "19fe76afc0c996c00a0c86588af1891c75fd85faf512f15a88a61bdbded3fe9b",
-      "review": "Checkout selection and method discovery move into checkout"
+      "sha256": "c9f631ab766d0e819c40e8bf95ffbdca1efaaaea2508238e4241565ebf3fb081",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/cart_price.rs": {
       "status": "unproved",
-      "sha256": "9c0d7f7a7d321b8a91aaadc65256d83e7ca9a064fda39f064344cb3393cc18f0",
-      "review": "Batch B: commerce hooks, cart contributions and app source ingestion move into apps"
+      "sha256": "1f9ba8bc9b8368ca95d2ac799740fe47ee366a855c05d51d0ce33634a3e0dfef",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/cart_routes.rs": {
       "status": "unproved",
-      "sha256": "0d65b97ff1efbd8ffda1885bb598fe2cea56a142637798f0efa8a97a933cd84a",
-      "review": "Reviewed chat cart preview and conditional edit reuse native quote and optimistic mutation, and app metadata derives from an admitted public product reference. Catalogue approval checks original task actor and current scopes before applying. The Rust/PostgreSQL regression covers stale quotes, wrong items, foreign cart scope, and same-shop approval denial."
+      "sha256": "f5f804ba0d6f942fc12e8064b4dfe2d0529c41f99f21d550b2eeaa513b259802",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/cart_storage.rs": {
       "status": "unproved",
-      "sha256": "c532e4ed543bd146c0beb20c6f0da61131e7443d21cb2443af46c4868889132b",
-      "review": "Cart projection, product detail, checkout handoff, cart creation and supply proposals move into components"
+      "sha256": "0df528a6edad96df076ab97dd6271363e45d5bf9e44de8cd80a40b124b5bef8b",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/catalog_model.rs": {
       "status": "unproved",
@@ -6963,23 +6963,23 @@
     },
     "src/catalog_routes.rs": {
       "status": "unproved",
-      "sha256": "571ac66734ccbb02851d6b55ed835b6d10120843529a17a2d15a0de887f38517",
-      "review": "Review combined native business capability and hardening: typed material/dimension guests remain app-owned and bounded; native CAS/FX/current B2B approval and immutable order snapshots; isolated app crate consumer preserves compiler boundary; independent per-event subscriber retry/quarantine preserves healthy events, commit gaps and explicit recovery; signed tenant/system authority, provider-native read tools and real document withdrawal, workspace image closure and source inventory. SQL/async/provider adapters remain tested, not proved."
+      "sha256": "348eb51127417fb10736675cb321d410f7b267d5fccaa522b103968680046f50",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/categories/admin.rs": {
       "status": "unproved",
-      "sha256": "d6f31382aa4822faea6f3155a4c7fe5b943797745e4b0e74b2c897b6f6d283ba",
-      "review": "Batch F1: proposals, list views, reviewed work, its execution and proposal application moved into studio behind the WorkHost port"
+      "sha256": "9d3aeb0cd20330d1d3d3ae9f695c1371fd5e1019da5dada509c411de38da7615",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/categories/mod.rs": {
       "status": "unproved",
-      "sha256": "e79a0afb08a967e68d0803fa6895788f6aa441ab726b88aa80abd5258b11776b",
-      "review": "Batch F4: source-record imports moved into studio behind the ImportHost port"
+      "sha256": "e461856244fa0d27d597a018e935b48c7b5ca591fe9d7c14465ad5b904919467",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/categories/navigation.rs": {
       "status": "unproved",
-      "sha256": "25d4da90aa77e60a8c5cf95edcda4943f678b49a0c68058a42aaf12e1b9b449a",
-      "review": "Category navigation and seeding moved into components/catalog; no rule changed"
+      "sha256": "d1c370aa1e8130ebb9346afed0fd1aab4bf906966a309aa711982e8d376351dd",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/checkout/buyer_identity.rs": {
       "status": "unproved",
@@ -6993,8 +6993,8 @@
     },
     "src/checkout/private_browser.rs": {
       "status": "unproved",
-      "sha256": "318bde5cb992e67f60b0ca4d735680fb93660f53d65eba84d4183ba065370f0f",
-      "review": "Process configuration moved into core; browser session transports, Checkout buyer grants, the private Checkout relay, trusted geography and provider startup validation moved into their components without behaviour change"
+      "sha256": "1fe8d99d07e66b005fdc8b429a398968aabd4f5f1aba75dbd0ce8321a8522d0f",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/checkout/purchase.rs": {
       "status": "unproved",
@@ -7003,108 +7003,108 @@
     },
     "src/checkout/session_order.rs": {
       "status": "unproved",
-      "sha256": "37820cb158ca759addffa0f813b57ac0abe376402c0bbc3e1e2eb2406b1a5647",
-      "review": "The purchase transaction moves into checkout behind the purchase port"
+      "sha256": "0ba05893f3b09425054ee4778586338c8111f7bee7158cef8adcfa7817990c63",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/checkout/session_quote.rs": {
       "status": "unproved",
-      "sha256": "c182961b99cc86a5e2295aa0d6de175feac05dbad441398e479a357346932c16",
-      "review": "Batch F5: inference component for crates/cognition, crate-cycle gate, core paths for history attribution and environment parent"
+      "sha256": "43863da81daecc2f250e7c10beed70c368162a9bb1518e9bd7e29b739477492b",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/checkout_handoff.rs": {
       "status": "unproved",
-      "sha256": "9cd025e1488dd5edc0f682d7864eb4f98640392be44bdf1cf137c829e9073e74",
-      "review": "Cart projection, product detail, checkout handoff, cart creation and supply proposals move into components"
+      "sha256": "1c4c253b19bb221cf479131e149b760903278aee192370cb605ecd681fa8dfc2",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/checkout_page.rs": {
       "status": "unproved",
-      "sha256": "3f16b5aed3fc91c8335814cd9f47fd8de200f12c879b059ce3c8f9f8127d5d6e",
-      "review": "Cart projection, product detail, checkout handoff, cart creation and supply proposals move into components"
+      "sha256": "b09c3518b20c12d974e057833a6e2031e1e7414bf5635703dcb45039783868a5",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/cognition/behavior/mod.rs": {
       "status": "unproved",
-      "sha256": "a0b6b9074c2db647cdc68fa34b35f6eb811ccf6ef16f2371305a0ca8c9a6b994",
-      "review": "Batch F6: consent, legal acknowledgement and requests, behavior capture, preferences and the storefront experience moved into intelligence"
+      "sha256": "581a19ca5cf851814cab675db778cba172d8fe23662b305de372c1858ab4e399",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/cognition/claim_batches.rs": {
       "status": "unproved",
-      "sha256": "234fe4b5950c6b8417ac4d54be4aa5588ab76cae407f382692110c95ffa879ed",
-      "review": "Claim lifecycle, public claim batches and the knowledge workspace moved into the intelligence component; behaviour unchanged"
+      "sha256": "749e3265ea58a537b0480ac2bb9d2540ef691f192e91a0da4edb76750f84ba79",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/cognition/contracts.rs": {
       "status": "unproved",
-      "sha256": "2d969ca9d434b92aab5e4148eee6f3c96587e6654443d68583d17ac542efe43c",
-      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
+      "sha256": "6afced8082b10e95bb51f157acc0cd986b99f6cc74fc5fcd00d2cb784984aa89",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/cognition/evidence.rs": {
       "status": "unproved",
-      "sha256": "19a01654f30142018513dc274c1a577de669ef996641c5b70ba46d7f11901d3d",
-      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
+      "sha256": "87bc272c5032b93f7484dbad91d6b9e0acf527339d7a5e77aef696a51477bbd4",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/cognition/experiments/mod.rs": {
       "status": "unproved",
-      "sha256": "7ff637c92099ceeb3fd22e3bd4df5263ab80a2af87a9b93e533f3cf91957a8f9",
-      "review": "Batch F6: consent, legal acknowledgement and requests, behavior capture, preferences and the storefront experience moved into intelligence"
+      "sha256": "8d9f1d7332da7e29e43dd4298c30daba9ac659733960b30dce59836f6cf1e57b",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/cognition/extraction.rs": {
       "status": "unproved",
-      "sha256": "2e385d5a13ee9ef5fc0b7c5fd276662fe99291ddb28ddd7d8d529fe3deef1779",
-      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
+      "sha256": "63c4c3d37d0ccfb8f71461a0f7b528c264ed2b63e248f6296c01d70eda5f8310",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/cognition/indexing.rs": {
       "status": "unproved",
-      "sha256": "9d47424f93bd18d5694423f3f05abe5d1eb70c503d6852379ab2203afe6edde0",
-      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
+      "sha256": "99103ce9166eca4d6fcb7b533c8307f0614ddcbc0771bbdb1d7037d4dbadb159",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/cognition/mod.rs": {
       "status": "unproved",
-      "sha256": "75bb750bda3921fa087ae6d355ac820c3ddd3d7080593b44f7398bbcf995c23d",
-      "review": "F9: media captions, design references, product knowledge and the translation worker moved into components"
+      "sha256": "60101ff375e1ffbf19d80a36bfeee1c43661eb9aabf5a8baa6630367fa6f1bbc",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/cognition/preferences.rs": {
       "status": "unproved",
-      "sha256": "0ca4b283d06b0c0c5caeb78f3df1528bea6f8c9f7bfd6738db2ed592d26df771",
-      "review": "Batch F6: consent, legal acknowledgement and requests, behavior capture, preferences and the storefront experience moved into intelligence"
+      "sha256": "dac4b776f0be8365eeeeff714bd242d459e90dac840d66c952f8641249d77705",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/cognition/projection.rs": {
       "status": "unproved",
-      "sha256": "5cde32d76ba6495cf9ae13812528b157557574dac4776e5dd09d875b97cceda5",
-      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
+      "sha256": "f69977d61c7aab148849530cf56647d8f406c1706b34ea7cc1aa7337bba61152",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/cognition/recommendations.rs": {
       "status": "unproved",
-      "sha256": "8c418fac9ea6ec4c2529bf67f8c58b0216f53a82cf5e07e4dbeb15368de1ddb2",
-      "review": "Claim evidence, claim batches, order observation projection, embedding jobs, source search, knowledge inventory, product facts and prompt snapshots moved verbatim into the intelligence component; permissions, settings, provider admission and leases stay in the server. Kernel admission calls unchanged."
+      "sha256": "afddc7a102068e3d2bf6c7af25c8b841098fc9905ac7bddb7d44ab299fd11691",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/cognition/routes.rs": {
       "status": "unproved",
-      "sha256": "d73707681bfb8c6fdfa40708d8c82b83a8837e7925e812d07ba568d8462f6c8c",
-      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
+      "sha256": "481d4641c54a3dd8bddf11aba605141a059bdcbbfafe467f14c647766ac332e8",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/cognition/signed.rs": {
       "status": "unproved",
-      "sha256": "a6df267f492808243400554b407ccab111834e7529a21af398bb350f927c1fb8",
-      "review": "Cart projection and product detail move into checkout behind a quote port"
+      "sha256": "ab182868b97bdb9e291ef6ac9a1c873a54766a88f5b79a0a00c44495331829fb",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/cognition/signed_offer.rs": {
       "status": "unproved",
-      "sha256": "c9f589bd5db455f466b1bfa87f6050ecfaf8f3b960c6d786fc9aa5f31d12d7e1",
-      "review": "Signed offers and fact signing moved into the intelligence component behind the cart port"
+      "sha256": "98744b9a6a61abe26648e4f388352c7aae84db6c680759bc8bc89fe9c985dccf",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/cognition/stream.rs": {
       "status": "unproved",
-      "sha256": "a3bed65586894714559432d8798b6223b72e5fbe4ef46fea40e95e0bebc9a3c5",
-      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
+      "sha256": "6b4a890f0f27d61989d8eb1bcc722f7c7bf782d8e1bf207c942ad4d1af5c0872",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/commerce/catalog.rs": {
       "status": "unproved",
-      "sha256": "257b1335971c4b7c81d371e6ee92ac3965a3799938b001bacd2cc1ae692ec9a9",
-      "review": "Cart projection and product detail move into checkout behind a quote port"
+      "sha256": "57e328af4a70261cb73c1c521623eca5a2565d2bde1ff5ccb677b757627b4d66",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/commerce/catalog_intake/mod.rs": {
       "status": "unproved",
-      "sha256": "380f2829ac2c89e6471b7f121d837e80339ff95bbc1d24f1350e629690f45d5c",
-      "review": "F10: manual orders, the merchant operation catalogue and catalogue intake moved into components"
+      "sha256": "2df8a101dd3355e3920c898d8023cc7cd1d243ebd1b7a77f8348d36aa2d57ba9",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/commerce/catalog_intake/schema.rs": {
       "status": "unproved",
@@ -7118,23 +7118,23 @@
     },
     "src/commerce/configuration.rs": {
       "status": "unproved",
-      "sha256": "2e341f70743d966164bc28c4ca7b610226bbf905009d1d6b1f06e524bcc60acd",
-      "review": "shop component crate created; settings types moved; no kernel binding changed"
+      "sha256": "83ac70dd9a7c899c14a6a0060006db06fafc8ea7df92c8f4f35143a2d9c3c408",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/commerce/content_text.rs": {
       "status": "unproved",
-      "sha256": "831a305a46df952312fc76db4aed8959131a8e2d261e9220b34104f75992690d",
-      "review": "Product hydration, list query and preparation moved into components/catalog; no rule changed"
+      "sha256": "2280199e7ba9e7ce136720b50b91dc8c95b09bed390cf854248c588d4d970911",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/commerce/context_routes.rs": {
       "status": "unproved",
-      "sha256": "8a83d9ee90ae7c0f8d6ee5f8328d0502f97715936e799a9959be7f7e68a6b83c",
-      "review": "Checkout selection and method discovery move into checkout"
+      "sha256": "9883ad9fc7e1151356cc42e6bb3dc246a69062f01f71f80fa8984a24565434bd",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/commerce/customer_groups.rs": {
       "status": "unproved",
-      "sha256": "d8920ed76741516a8dadd55533b1b0c1dd9abe6837d2bfcc762db3126fbcd34a",
-      "review": "shop component crate created; settings types moved; no kernel binding changed"
+      "sha256": "6d87a70609eeb89f7bfe368dd61577979b02a260b5982d632c29cb4477e8f7d9",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/commerce/delivery.rs": {
       "status": "unproved",
@@ -7163,13 +7163,13 @@
     },
     "src/commerce/geography.rs": {
       "status": "unproved",
-      "sha256": "177fc17cb0a6da5e1a375a1055d0b745fe8167bede6c18b89776a1ad51812bde",
-      "review": "Batch A: customer accounts, account orders, sign-in throttle, handoff and roles move into customers, orders and identity"
+      "sha256": "49ef8ce6a0e0de7450f30c52271b2b0edb228db5de7cad146ea731f82a97c1d4",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/commerce/international_capabilities.rs": {
       "status": "unproved",
-      "sha256": "f7eacfebfbebad412efa34f02d7a1e43e55dfd7b7daf2d8f349e8c2b5e60380b",
-      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
+      "sha256": "44506f172440877c6939ec037179a2f16de153ec927847a6e29ab527e7355a51",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/commerce/inventory_ports.rs": {
       "status": "unproved",
@@ -7178,13 +7178,13 @@
     },
     "src/commerce/method_usage.rs": {
       "status": "unproved",
-      "sha256": "83231e5b1f43b8c5705c2863d73681186fe9e6096b34b334df10149668c99f72",
-      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
+      "sha256": "79cd5f2ab149639727c5bf5cb6fbc0fd62c4e2dd4c68005ed8f52bd0a0327a08",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/commerce/mod.rs": {
       "status": "unproved",
-      "sha256": "080fa044917afc31075509125108b4ccfde18539b2b43a9a6f6569a00e09791f",
-      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
+      "sha256": "2d3918e733623d75e07675ba8590bfe5a066455fb2a9b74af715d584fbbc555b",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/commerce/order_machine.rs": {
       "status": "unproved",
@@ -7193,8 +7193,8 @@
     },
     "src/commerce/product_admin.rs": {
       "status": "unproved",
-      "sha256": "8dccd65d3bb08fa26fc7ed213b4db44ca987ff3a8ff1a9f810a13505a2175734",
-      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
+      "sha256": "003d3cbfdbd07adfbba867b04283a4811d7497762feb48437359f9dff239a627",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/commerce/selection.rs": {
       "status": "unproved",
@@ -7203,23 +7203,23 @@
     },
     "src/commerce/settings_guards.rs": {
       "status": "unproved",
-      "sha256": "037c5446c71f4b8ace3e2f302ad5b1c3cc20313769de6408ade01636445cf755",
-      "review": "Batch F2: sandbox clone, snapshot, diff and release moved into studio behind the ReleaseHost port"
+      "sha256": "02f5267555f0ba6bfb1095171d16c5817a119eb877f0f45b0b00beb268374770",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/commerce/settings_patch.rs": {
       "status": "unproved",
-      "sha256": "51256008d86636c66795b905f1c95e90b71092caad1bcd6150eb96cac450fbb3",
-      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
+      "sha256": "344687ddcb8fe041d6df460f484aee93568a88946f88219e924e33f1127a6971",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/commerce/settings_scope.rs": {
       "status": "unproved",
-      "sha256": "c9e6eeb985bbea6160b4695fda6c7352540b6b02369a39b1209090a0707595d8",
-      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
+      "sha256": "0061efbbd6a95324ff9e05b4047f171a2f295fd956323a9620bda700fb1c0955",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/commerce/supply_proposal.rs": {
       "status": "unproved",
-      "sha256": "2b9d66d90b24a2f9fa43e5180e3f093485bf07349b7d9c8bc430b60d3631b2dd",
-      "review": "Cart projection, product detail, checkout handoff, cart creation and supply proposals move into components"
+      "sha256": "549a2c074008411b48f51abc93970e5de05d4710bf0e5a6c3e497211af21dc68",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/commerce/tax.rs": {
       "status": "unproved",
@@ -7228,13 +7228,13 @@
     },
     "src/commerce/tax_context.rs": {
       "status": "unproved",
-      "sha256": "01c4220c642e7335cfbdecee03501e092066769d96081f3f12db77386408db41",
-      "review": "Company basis and logo transport moved into the orders component, tax rule conditions into checkout; behaviour unchanged"
+      "sha256": "b0951a886fe4786dda175b285641c5915d5c4a4caf0dbd229ba8eff9f78fd596",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/commerce/test_stock.rs": {
       "status": "unproved",
-      "sha256": "d0f4bc82298434858eb0e40e3904a520bf8471188bb59bf1d322598a0d481636",
-      "review": "inventory component crate created; no kernel binding changed"
+      "sha256": "d1c34224de9834bd66d2f55d2a227c3ff2634efada73957900137f703000cabf",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/commerce/types.rs": {
       "status": "unproved",
@@ -7243,23 +7243,23 @@
     },
     "src/concierge.rs": {
       "status": "unproved",
-      "sha256": "49a57ecb7594c3e8cc2dc57e6ab75a068220ef86a9bb20f7721796f68578646e",
-      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
+      "sha256": "fe53e266e57d0afd512f816aad31ade7f86148fd7350da528311ac9e133afd95",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/currencies/capabilities.rs": {
       "status": "unproved",
-      "sha256": "b03ebd884ce1e9b9b6cccb2af5006c3cb4659abe6fede269bd46d2958d07d995",
-      "review": "Customer groups and price job creation moved into components/pricing; the customer group rule is bound there"
+      "sha256": "29b05a240fb1cb2e22e84f0b06ff5fb29b374bba64a3d1d6c13807f63f9a3bd2",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/currencies/jobs.rs": {
       "status": "unproved",
-      "sha256": "95d39f69c3e1df8a9f1fc3687396d12ae3f06844be856e6f065c4bd3c98a9d68",
-      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
+      "sha256": "128fd3aeae361e7fd69bf869f93ccd538a5ba30bafe8bb7f7e4c5c877093be2e",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/currencies/mod.rs": {
       "status": "unproved",
-      "sha256": "3cdb56903d9920254b1804296b845a949c3e4b7454e24bbbbc9da97ea991cd58",
-      "review": "F10: manual orders, the merchant operation catalogue and catalogue intake moved into components"
+      "sha256": "6245f2286d74c59024f4a3a092b694f798d56668b0894a1ff77c030f86eecf64",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/currencies/ports.rs": {
       "status": "unproved",
@@ -7268,8 +7268,8 @@
     },
     "src/currencies/rates.rs": {
       "status": "unproved",
-      "sha256": "d9706c67e90f6d81b03d45bad39d8f8d76cedd68f1b69a7f044f8c81c577519b",
-      "review": "Rate refresh, company onboarding, POS channel setup, rule comparison and facts and source lifecycle handlers moved into their components; behaviour unchanged"
+      "sha256": "3c0ca4022bc87adaebc8fe2dfd046288a63ad6b96699a77074acfa6226f0c65f",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/currencies/request.rs": {
       "status": "unproved",
@@ -7278,43 +7278,43 @@
     },
     "src/currencies/routes.rs": {
       "status": "unproved",
-      "sha256": "74a01e5ddf8b89485099eb791b30ed72d489a38d5e28bbde224d3584c5e6d636",
-      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
+      "sha256": "899f6b034c857ee9dd8f22e0dc96ab7e0d0e1e6996572c185ddb0c8752c1273a",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/customer.rs": {
       "status": "unproved",
-      "sha256": "63616c3d87f3254eed0de46f0e9244a24357e38186ead88e383ec1b6f2320ba2",
-      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
+      "sha256": "ea272703b819163a6c1db65256450cb1bfbda6120df86d43a3138c1284e81abd",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/demo_catalog.rs": {
       "status": "unproved",
-      "sha256": "99d90c7caefdbc92916b973868157bd33a539b63a44916b5a9562554132cfe3e",
-      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
+      "sha256": "80efb6d076748bd9cffa81b4306179c30f0d97b4692701af843c65b71987536e",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/developer/agent_connection.rs": {
       "status": "unproved",
-      "sha256": "a77db06f9474e69d4b2e68eee4695d6acd52091ef4a1e6802b1f6aee77529eea",
-      "review": "Reviewed native designer task handoff through existing sandbox, membership, revision and proposal owners; app elements admit only active same-tenant public native surfaces; read-only preview grants narrow server action allowlists. HTTP/PostgreSQL regressions cover own/foreign/private/inactive elements, CAS/release and explicit approval. No verified decision or proof boundary changed."
+      "sha256": "f923d6aca7f506bf82d16843cdf3a04b4f18b21fc8ced3d4fe7d5348d7fb0aa3",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/developer/builds.rs": {
       "status": "unproved",
-      "sha256": "4227ba7f4e2c925590d5574d362b003c86d42106e0b4bc2dd1ab72bf3ad0e94a",
-      "review": "App Studio immediate preview moved into the apps component behind the host port; behaviour unchanged"
+      "sha256": "106fa2742d8a1ba706d4413c68d3183e238bd7e072ff2d9b83562e1bd2add490",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/developer/generation.rs": {
       "status": "unproved",
-      "sha256": "35e59c91cf46d40e6e1b58966de4a0128c432b03a42e8b737a400a06e00062cf",
-      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
+      "sha256": "e9933f008799fccd0bb5f978bd0c3a96b88c3b597b546d411be42db9f5123c30",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/developer/mod.rs": {
       "status": "unproved",
-      "sha256": "5f88097b12a3f1f9695ae70b505c6416ea0443d190d3d2699c74b122f9cc3057",
-      "review": "App Studio immediate preview moved into the apps component behind the host port; behaviour unchanged"
+      "sha256": "591dbadd41651923d85505b70b914fa35ad077d4db4ec84f3f9812ac9a5b8e33",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/developer/routes.rs": {
       "status": "unproved",
-      "sha256": "c1f7f10b5990373b508b03e384aea33fb39b8b78f945a2e4a6d949cc18fc77dd",
-      "review": "App Studio immediate preview moved into the apps component behind the host port; behaviour unchanged"
+      "sha256": "22b8f15ede030494dc3493f7a3db3af02af87319b351ba26166f3d78c574914e",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/documents/ingestion.rs": {
       "status": "unproved",
@@ -7328,13 +7328,13 @@
     },
     "src/documents/lifecycle.rs": {
       "status": "unproved",
-      "sha256": "ec7d1b8c6c0520821633bfb65a89c84f5b8e0142bb97a30440ebae1b3f3febb9",
-      "review": "Rate refresh, company onboarding, POS channel setup, rule comparison and facts and source lifecycle handlers moved into their components; behaviour unchanged"
+      "sha256": "55524268103ae8c6b454f5315ece194ed514566b50e857c3a3e7483bd5bc8566",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/documents/mod.rs": {
       "status": "unproved",
-      "sha256": "b1c6ee85fada390ecfab2fce4470881bc7c70b28e84ee64bca44e096c32867cf",
-      "review": "F9: media captions, design references, product knowledge and the translation worker moved into components"
+      "sha256": "13efef31ba118bae286fd773265025d825b146223088739196e25beb8cdc6973",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/documents/parser.rs": {
       "status": "unproved",
@@ -7343,68 +7343,68 @@
     },
     "src/documents/preview.rs": {
       "status": "unproved",
-      "sha256": "831104c0d2efd9b717b474579151f0e895f9b617ce581f37309de6c3cd8858f8",
-      "review": "F9: media captions, design references, product knowledge and the translation worker moved into components"
+      "sha256": "18101bb644df75d2b6f41a7090d68da643774b1511fec3e007eed35a0976d106",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/documents/product_knowledge.rs": {
       "status": "unproved",
-      "sha256": "c6e0c005f9d0d11ce133901c4ee5342581e7f489981336c8b7ca3bc206d231f8",
-      "review": "F9: media captions, design references, product knowledge and the translation worker moved into components"
+      "sha256": "3f6f3316bd49576dfb5cfdda7453ebcda40c7754680eeadfe36ab75d06a600e2",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/documents/questions.rs": {
       "status": "unproved",
-      "sha256": "eb14844ae0f69d6dc018e9738660c6eda72787d0f4674d78d36a6367f6250a8f",
-      "review": "F9: media captions, design references, product knowledge and the translation worker moved into components"
+      "sha256": "44c9b8c5e1d1c33439aa5aa524440fbabbfa80ec1ce486756b8bc818ad5cc85d",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/documents/retrieval.rs": {
       "status": "unproved",
-      "sha256": "1e710afdda4d92af4b9a2c4679a9b29967d8667f6f95f03c4253166011bd109d",
-      "review": "F9: media captions, design references, product knowledge and the translation worker moved into components"
+      "sha256": "65bd64dbba12b6cca6d68c19bb85f7273c84663aaf089828ce9dc3f48bdc7870",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/documents/tools.rs": {
       "status": "unproved",
-      "sha256": "772e11c098685a405fa51695dab799921a3221deb60ee543a4f9f12a6b145ee0",
-      "review": "Knowledge source ingestion and guidance reads move into intelligence"
+      "sha256": "a07574f769447eb55c1acf77717572124e7aa47a116271c1ff7c02eca8ef4da3",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/experience.rs": {
       "status": "unproved",
-      "sha256": "804cefc273048080d231f10a084d5ccc379796955495bf9b4e993a3a1443f8e8",
-      "review": "Batch F6: consent, legal acknowledgement and requests, behavior capture, preferences and the storefront experience moved into intelligence"
+      "sha256": "9ac44f971e84799e920283f93295b8160f2147c1f5feddfa81036df1ab3feb33",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/extensions.rs": {
       "status": "unproved",
-      "sha256": "6de7963599207e17e0fa706792ac1e691a3b28ff81bf956857f056a65c134531",
-      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
+      "sha256": "9704880bab1ca9a0cbea89ec717efa0eb7558e20906a6be782996e5ded12b92c",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/foundation.rs": {
       "status": "unproved",
-      "sha256": "9ec49ad9e512147d946773e2ddcaeb33679f298b3ffe6b53485ca1148f09a217",
-      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
+      "sha256": "c2bd5223ac2c6bd9d642bbc302f8d76463cc8e850b2586287847bf26ff04468c",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/history/capability.rs": {
       "status": "unproved",
-      "sha256": "c50fe2b634a01eaaee340786d7eec0844abfc8e7aa8af28e2f6c315f14313b01",
-      "review": "History access rules, version reads and the product restoration projection moved into the studio component; behaviour unchanged"
+      "sha256": "1ff915419ab8890b4434f891b5dee9c7757c7f6d1a145589ed46f83462f8a83d",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/history/mod.rs": {
       "status": "unproved",
-      "sha256": "7771c46666004786244984d6bd54f3628f74baf5533c3cec8763031596cd8081",
-      "review": "F8: payment providers, POS register and B2B commands moved into their components"
+      "sha256": "20aa380a4b8b73eee45f545d273033cab134d7ed871aaeb765602aef8671dae0",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/history/product.rs": {
       "status": "unproved",
-      "sha256": "7fa94a80cd390f2e0d80f8a2e0d1911b7ea4fa959bf5a2c96f520444346ec1cd",
-      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
+      "sha256": "603a17da99972f7c13e6faefe6027895dbe9d4a234a2dd64ac61409f1a3d0955",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/history/restore.rs": {
       "status": "unproved",
-      "sha256": "ab6b48d6cad88aa7fb161b6dd46d0e7fbe230b13147287d68295924f426abb75",
-      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
+      "sha256": "37d30a2cee4d6e143809550813d3dbecb5b8a773f943258f0044abafadf483c9",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/history/routes.rs": {
       "status": "unproved",
-      "sha256": "b943b3571947715e562de8c464cfe2232fb6d0dbc76c27402f2d31a5613ffec4",
-      "review": "History access rules, version reads and the product restoration projection moved into the studio component; behaviour unchanged"
+      "sha256": "59a52644bd8f74611ca2a6936b2942a157a65e179ee11f0e11e03837fcda61f0",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/legal/buyer_consent.rs": {
       "status": "unproved",
@@ -7413,8 +7413,8 @@
     },
     "src/legal/mod.rs": {
       "status": "unproved",
-      "sha256": "68f6dab90bf0d04f327b4a2743ae811c2f9b86675e35e8bd66ed93d407f9d3a4",
-      "review": "Batch F6: consent, legal acknowledgement and requests, behavior capture, preferences and the storefront experience moved into intelligence"
+      "sha256": "05422a73b1a4f7c2819f06ec1feff05af6e94f3eee14160d0a6fd8ac659b96f3",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/legal/model.rs": {
       "status": "unproved",
@@ -7428,8 +7428,8 @@
     },
     "src/localization.rs": {
       "status": "unproved",
-      "sha256": "416491f5482f4835f6dd5e865c1896cfca1145f51140ca232a9a067781741ab6",
-      "review": "Request language selection moved into the shop component and sales channel admission into the marketing component; behaviour unchanged"
+      "sha256": "453e1038f6126f7e8ff513643be5aa6d50ec3f418805235bba436417565b685a",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/main.rs": {
       "status": "unproved",
@@ -7438,13 +7438,13 @@
     },
     "src/marketing/app_flows.rs": {
       "status": "unproved",
-      "sha256": "57570f98a41c20f958bc2c9106e8a4c52c15a42ea19ff0fb286aaf14340c8dae",
-      "review": "F7: marketing configuration, channel admission and flow templates move into components"
+      "sha256": "c86fe89ff8a7ec6067440cb2fd3ff8de79bf90d0a52acd82889570698370fc6e",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/marketing/catalog.rs": {
       "status": "unproved",
-      "sha256": "c31732117bd605c16614e44cb38c2a8a0daec3aff70817754744c4541845f178",
-      "review": "Automation catalogue, rule preview, flow job list and the pipeline runner move into marketing"
+      "sha256": "5429f634dfddd25ec8a447b2846e8901abd9ab58c0fc7cd716bc6daebd4f25f8",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/marketing/channel_access.rs": {
       "status": "unproved",
@@ -7453,13 +7453,13 @@
     },
     "src/marketing/channel_preview.rs": {
       "status": "unproved",
-      "sha256": "e4dc5f2cda341e6d0c8cec6daef24df6ad1be224d131056f35d12bcaad748323",
-      "review": "F7: marketing configuration, channel admission and flow templates move into components"
+      "sha256": "5e81c9a89b76c7562902349150d056eaaa5fc05e17939fa35c16df8767fbece9",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/marketing/channels.rs": {
       "status": "unproved",
-      "sha256": "05930e6584dabe4f02fbb0e9e7c13aa2d21db0620e812b6974fdc84a0aef32a3",
-      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
+      "sha256": "f96af44b1f472113544710f2c3b5cea686685a77629c4702d9b2e99b97a655d1",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/marketing/condition_gateway.rs": {
       "status": "unproved",
@@ -7468,13 +7468,13 @@
     },
     "src/marketing/configuration_host.rs": {
       "status": "unproved",
-      "sha256": "ce92c51805a8bbbf33166caa946b6d3efed97bb29f113c1c25d9f71653b5b6e3",
-      "review": "F7: marketing configuration, channel admission and flow templates move into components"
+      "sha256": "dfe9ca0647d53140d719dbc8a3766e8a0abe7d82147baa1bcc47f45fa7012b1d",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/marketing/coupons.rs": {
       "status": "unproved",
-      "sha256": "3f024c573680218a4ec63d203bf33c2f01840852c640651c4d63fbce623e74c7",
-      "review": "Coupons, flow job summaries, requisition import, customer snapshot, address restore and account orders moved into components"
+      "sha256": "65ffca6234c20745193775b8af0e3dbd9e184eafcf5716f82d890d86ff6108cc",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/marketing/flow_access.rs": {
       "status": "unproved",
@@ -7483,8 +7483,8 @@
     },
     "src/marketing/flow_actions.rs": {
       "status": "unproved",
-      "sha256": "18dda80492ed5409eb3a724d889240404b64a776b7803756c8654093c07e8766",
-      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
+      "sha256": "c8b88e6e4ad1c293a78e98e230e71ec16c14e4812a4ce044445c41c99b17e845",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/marketing/flow_jobs.rs": {
       "status": "unproved",
@@ -7493,13 +7493,13 @@
     },
     "src/marketing/flow_mutations.rs": {
       "status": "unproved",
-      "sha256": "42a9727712c8ecd5e7c13d080f270c386dfee093eb917c70d8ed9f5affc429fa",
-      "review": "Local flow mutations moved verbatim into the marketing component and staged knowledge sources, assets and categories into the studio component; the flow owner and release selection stay in the server."
+      "sha256": "71256df3800bf29cb8b9b15c22fa59420a555b34dd6e9417d997e60c2642fcc1",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/marketing/flow_policy.rs": {
       "status": "unproved",
-      "sha256": "e868c3a7360de846ca4cbc75df490fe244d9ee786ed92714d4ee35f4133c3af2",
-      "review": "F7: marketing configuration, channel admission and flow templates move into components"
+      "sha256": "8b63ca1e4cbd271031a828deb1b160a2638c6bc5284d8c441347e706480af454",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/marketing/flow_text.rs": {
       "status": "unproved",
@@ -7508,13 +7508,13 @@
     },
     "src/marketing/flows.rs": {
       "status": "unproved",
-      "sha256": "26e57af18fd805d1f7ad95e018d391487f737504e28ef8dc5e47c5b8cc2f32d9",
-      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
+      "sha256": "6686ba8712d0c3e3bc5631203f49276cbb34522725a7a1d740f1202a9b82e687",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/marketing/gateway.rs": {
       "status": "unproved",
-      "sha256": "0a9ef4bc03fe41e82ae764349c845fb4c0839db75db0eccf15592a9e5277b06b",
-      "review": "Automation catalogue, rule preview, flow job list and the pipeline runner move into marketing"
+      "sha256": "841dfa51f65f7be09a1f526658985af6a853ed24ddee6bef83ab55bf6543e275",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/marketing/jobs.rs": {
       "status": "unproved",
@@ -7528,53 +7528,53 @@
     },
     "src/marketing/metadata.rs": {
       "status": "unproved",
-      "sha256": "b0592c5337809ad58624f21dbc8d798e4c33e8d9399ee4774b05ead5a58928f6",
-      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
+      "sha256": "8f96553b0edc912767dda14e1c9069217060bfafd8ff1296d54e8aaa0391bf22",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/marketing/mod.rs": {
       "status": "unproved",
-      "sha256": "61df6057c6cfb164c2fedac31aac4ff663c7d1e93613ee4c3033dc327119cd9c",
-      "review": "F7: marketing configuration, channel admission and flow templates move into components"
+      "sha256": "c8ee3870ebd6fcff7ad4080b352f3940fac6d1c2bd2ea39aec35485a4f9b97ee",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/marketing/pipeline_runtime.rs": {
       "status": "unproved",
-      "sha256": "3e45cd43efa91f527a64d37939dd126271a2b189f498e913f145c9f8f51d142c",
-      "review": "Automation catalogue, rule preview, flow job list and the pipeline runner move into marketing"
+      "sha256": "7323b5c3944486b1ec7329c9ecc286bb632f38f44f35506a3eac344fed63716c",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/marketing/promotion_import.rs": {
       "status": "unproved",
-      "sha256": "ec35544d472fc044c40f38886d32821584810bf04619878b201d1f27c42e08c2",
-      "review": "F7: marketing configuration, channel admission and flow templates move into components"
+      "sha256": "2aba0aae2de55f480d9d42518e99619a98e7516de5473c97b47c1ba6d80ef179",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/marketing/routes.rs": {
       "status": "unproved",
-      "sha256": "23d4fd212b86b7bdcd50dcf6bbb32cdb71cc17e1cc0bb9e9dcb57b1b6de0aa51",
-      "review": "F7: marketing configuration, channel admission and flow templates move into components"
+      "sha256": "fe0ee896612e49caba7355a4e9841624ade5a91d27bd9dcca1e93723766a9286",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/marketing/rule_history.rs": {
       "status": "unproved",
-      "sha256": "d690292cbe373dc9a61fd65f38496c25e11a8103bb24acda58dfd1b07d5e2fbe",
-      "review": "Rate refresh, company onboarding, POS channel setup, rule comparison and facts and source lifecycle handlers moved into their components; behaviour unchanged"
+      "sha256": "e5f69d236179047da700a24b3abec27a7e3e41cae72393ad7ee17b82bd7c77cc",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/mcp/poppy.rs": {
       "status": "unproved",
-      "sha256": "1ffb18a7d8675b0b09e2bb3224cd0ee11a66a64570b119bfa55dbcf9d9cea844",
-      "review": "Poppy discovery: mcp/poppy.rs serves a static Personal Agent Protocol 1.0 document only on the exact configured shop host derived from the existing HostShop resolution, naming the existing MCP endpoint; no authority, sign-in or UCP claim; readiness reports the published address; no extracted policy changed; providers suite covers host binding and negative hosts"
+      "sha256": "82a059292416839e4aa3a8d86990fb43b460b3083eeabe16be75c2904fb8a948",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/mcp/protocol.rs": {
       "status": "unproved",
-      "sha256": "23668a0d83a1823fa77cb00503e32d6416cd6ca00d6e6af0da254810f6aad57e",
-      "review": "Review MCP read admission against the same active manifest at dispatch, native app placements with explicit list-action opt-in and tenant revision URI, and existing opaque document CSP. App model, direct HTTP and hosted composition checks cover their corresponding runtime contracts."
+      "sha256": "d2ae751aeacd94f075798ab724486b1b5fc451216e20afa799074a7756ca1b53",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/mcp/transport.rs": {
       "status": "unproved",
-      "sha256": "38bf12eb27ac6410ad33fae55d4f275db960d7cd290621c892ace2368ecaa7a7",
-      "review": "Signed offers: cognition/signed_offer.rs signs a closed projection of the native cart quote with the existing Ed25519 owner and verifies signature, shop, expiry and current cart match; signed.rs gains key_id and verify helpers; readiness reports signing status; no extracted policy changed; providers suite verifies independently and covers forged, foreign, malformed, changed-cart and changed-price cases"
+      "sha256": "29acc3fc37b2da1832e5aa11e68a2283360b37a6bbcea388e18d0f1b261d2d8f",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/mcp.rs": {
       "status": "unproved",
-      "sha256": "eae4ac545d125c52e4135e89b16b39c6bf420dc83e79849291c2af82ef66502e",
-      "review": "Poppy discovery: mcp/poppy.rs serves a static Personal Agent Protocol 1.0 document only on the exact configured shop host derived from the existing HostShop resolution, naming the existing MCP endpoint; no authority, sign-in or UCP claim; readiness reports the published address; no extracted policy changed; providers suite covers host binding and negative hosts"
+      "sha256": "c76d2c0efee36e86d8520874425b5ccfcf39e48e7a9967b9c55144fcb0da6636",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/migrations/identity_checksums.rs": {
       "status": "unproved",
@@ -7593,8 +7593,8 @@
     },
     "src/migrations.rs": {
       "status": "unproved",
-      "sha256": "755aa7f0e8ddffd0728700b4aa733e47b4a101f7ea195cd8c2285a942bfd7cc1",
-      "review": "Reviewed fixed app-record store, tenant/app/model identity, forced signed RLS, trigger-maintained unique/reference/quota projections, scoped schema/preview/staging/checkout consumers and atomic maintenance consolidation; actual PostgreSQL app/checkout/schema/F5 suites and independent security re-review pass. Existing frozen-record WIT conversion remains equivalent; SQL/async adapters remain outside Lean proof boundary."
+      "sha256": "6ab74f372343f2fd457fd97b6926f4663c8e0e63e7ec9fa747b974378690e175",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/operations/addresses.rs": {
       "status": "unproved",
@@ -7608,8 +7608,8 @@
     },
     "src/operations/company_public.rs": {
       "status": "unproved",
-      "sha256": "1904bfe5c8764d64c238d932136cafbd134fb42991bb3b6b3fa2b2cc88b7da90",
-      "review": "POS, checkout session review, company data, receipts and carrier documents moved into components"
+      "sha256": "8a2fc5a0054265029f54a16c85af77cd55f2793342659afaa03237ced0b4800c",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/operations/creation_schema.rs": {
       "status": "unproved",
@@ -7623,8 +7623,8 @@
     },
     "src/operations/customer_lookup.rs": {
       "status": "unproved",
-      "sha256": "ba1175ba4b2e26f8f6e7ff6ac56a8d1aa4b1ef9470bfe76e1d382c1c3ed099f6",
-      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
+      "sha256": "76725316342674afc774d9af85abfbf9b73edcef6db92981c0f1def3ba3b34d5",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/operations/delivery_booking.rs": {
       "status": "unproved",
@@ -7633,8 +7633,8 @@
     },
     "src/operations/grid_plan.rs": {
       "status": "unproved",
-      "sha256": "b9ad9c8e523462399a30653b985c6f8e23bbc70385ebab0ad49406cd875c82a2",
-      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
+      "sha256": "cbadc47cecb223dc472d2440bb0d44731782f9366381d1913b3d783715a9b30f",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/operations/grid_schema.rs": {
       "status": "unproved",
@@ -7643,28 +7643,28 @@
     },
     "src/operations/imports.rs": {
       "status": "unproved",
-      "sha256": "efbcae8c918a87ba2ac24b30d7c6bbaaa1b356d6570d4a6b5183ff38095cf7e2",
-      "review": "Batch F4: source-record imports moved into studio behind the ImportHost port"
+      "sha256": "1a96353663bc0d8a4679710c75ba711559538ea689b6872bbeba91f4118b5f43",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/operations/manual_orders.rs": {
       "status": "unproved",
-      "sha256": "ce1f5de6ec2a2ae84b2c00d81e7cc19d650dcc411bdfde5bb9a0840569d68f63",
-      "review": "F10: manual orders, the merchant operation catalogue and catalogue intake moved into components"
+      "sha256": "4184f9f40bf4ecc515cf90db2a0fab681645e38ca170ec7300d689249caa256c",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/operations/master_data.rs": {
       "status": "unproved",
-      "sha256": "527a0b7812d74b2e0ec1dbc3c79ac63821b8dcddb94c9be6d9a3a8510e53476c",
-      "review": "Batch F2: sandbox clone, snapshot, diff and release moved into studio behind the ReleaseHost port"
+      "sha256": "09fc4cd7714c9b48b5f1e7c3318cd1b9c5bf3351c9519ba22554f44318ac683d",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/operations/mod.rs": {
       "status": "unproved",
-      "sha256": "d997eb6eb46e2bc2d00254259e6f7af5bda972013a2547157b02827912b5791b",
-      "review": "F10: manual orders, the merchant operation catalogue and catalogue intake moved into components"
+      "sha256": "745690bfd4dbb8d56950622f11e2c94d1934171c6385d9d5d53f525cf68dffe9",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/operations/order_documents.rs": {
       "status": "unproved",
-      "sha256": "ca4f9f515d7bf36eded4523a6b02980fc1297f3ce8bac7edcb88aec72b5d0827",
-      "review": "Batch F5: inference component for crates/cognition, crate-cycle gate, core paths for history attribution and environment parent"
+      "sha256": "341b6a46a299d9500ae8bab8aef39b77be986b49ab7044e5fac99ab3c71cbbb9",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/operations/receipt_pdf.rs": {
       "status": "unproved",
@@ -7678,8 +7678,8 @@
     },
     "src/operations/receipts.rs": {
       "status": "unproved",
-      "sha256": "34f160ee1c9eb736079b4fb25f4ac8b045cb880ab0d4a22d193a1d094b54731b",
-      "review": "POS, checkout session review, company data, receipts and carrier documents moved into components"
+      "sha256": "9c4766ca3db2620c67598e10715a835d7935278fe31f2d499634d0257fbc2649",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/operations/redacted_reads.rs": {
       "status": "unproved",
@@ -7688,8 +7688,8 @@
     },
     "src/operations/routes.rs": {
       "status": "unproved",
-      "sha256": "7b3893462653bf3553d8132e427a3d36c74f8102ef5c516df0017742303642de",
-      "review": "Company basis and logo transport moved into the orders component, tax rule conditions into checkout; behaviour unchanged"
+      "sha256": "c7b176db13a60e6e3e5baa845f36a8b691848d279e18e5efc8dca4b8bbba2373",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/order_checkout.rs": {
       "status": "unproved",
@@ -7698,8 +7698,8 @@
     },
     "src/order_routes.rs": {
       "status": "unproved",
-      "sha256": "74014ee508634c82ffcb48b48c792c83aab582fb17945acdfbcf0f8a54d5f49e",
-      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
+      "sha256": "a4508ca9c68db16b9ae8c9f05aa5a5ee46c5adf1501bfb50696640598c71631e",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/outbox/retention.rs": {
       "status": "unproved",
@@ -7708,8 +7708,8 @@
     },
     "src/outbox.rs": {
       "status": "unproved",
-      "sha256": "51e30c44d413e075cc52e100bb342a300524a15326004a6203251c041fe727c4",
-      "review": "Order transitions, external order intake and saved agent authority moved into the orders, apps and identity components"
+      "sha256": "f967dadbf2e0bb6c5dd82fa56133b529c14e2b2444a5a460c79ee8bc79472331",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/payments/accounts.rs": {
       "status": "unproved",
@@ -7763,8 +7763,8 @@
     },
     "src/payments/instruments.rs": {
       "status": "unproved",
-      "sha256": "de5e519867b8aa35c7fa88c8a701db4bec1277b3f8fa668a0b99a87ce297318a",
-      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
+      "sha256": "203c707b370de4282f6848b9d4247eb85f14748f1430c4b6ddef053213884c77",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/payments/merchant.rs": {
       "status": "unproved",
@@ -7838,8 +7838,8 @@
     },
     "src/performance/access_snapshot.rs": {
       "status": "unproved",
-      "sha256": "a4db5220b82835b8244241980d79af18b125460daaca37975d3366c862f9e2a3",
-      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
+      "sha256": "b49ad1b687cdf215d39660899e7a01305261864fa4938916327ed258ba84c2b2",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/performance/delivery.rs": {
       "status": "unproved",
@@ -7848,43 +7848,43 @@
     },
     "src/performance/invalidation.rs": {
       "status": "unproved",
-      "sha256": "d00bbe6bbdd42d57c674adba2fd932d15afbe46e75f0dbecda3e327ca9304fbf",
-      "review": "Settings and language read cache moved into the shop component; condition check registered at startup; behaviour unchanged"
+      "sha256": "ec51944dd41098e58ea9cf15cec93085fa7af20168273cc33a582141246d5346",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/performance/mod.rs": {
       "status": "unproved",
-      "sha256": "6b966ee27981eca13ad3eed849349877e0ea2b4e65db8cfa719f675308100370",
-      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
+      "sha256": "8bcd3aa66bef6c03180f5c0a2531ddd150d4cbf8c7b7737e50df44e47090f24a",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/planner.rs": {
       "status": "unproved",
-      "sha256": "2d0ff5787ddde966eade4abb5c4311a7af405b239a1081615c3cb2a5a1037973",
-      "review": "Batch F1: proposals, list views, reviewed work, its execution and proposal application moved into studio behind the WorkHost port"
+      "sha256": "f9d1d5f8b2b44f8729b65b6d39c4deeacc201969eb1d536b1dff56812e43e3ec",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/platform/ai.rs": {
       "status": "unproved",
-      "sha256": "b44f7b6e289ddc4c431ea0f4b436b5e57e807ca4cf211f0b1f194dbe21d60a54",
-      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
+      "sha256": "4c299998ecb5fde5e3bde64386fabe10cc60ff6f95813d43c5a2691b0cf392fc",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/platform/auth.rs": {
       "status": "reviewed-binding",
-      "sha256": "b0146bb12e57ad928e6f3a4a5ccd7c14f3d03aa3ca270fd1cb12a0fa158de30c",
-      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
+      "sha256": "3e96d74b5d9185439910872989cf9cbc1ca75a5d8a292b6e8077f5763f5178c5",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/platform/bootstrap.rs": {
       "status": "unproved",
-      "sha256": "03f2ebb9948db2e7f3296c07a3efdaec344d66c7815a4e5dc0f37cc993b022a8",
-      "review": "Reviewed operator session grant binding and bootstrap/signup restrictions; additive migration 024; atomic ownership/audit provisioning without demo accounts; bounded aggregate SQL excludes staging and separates simulated/confirmed currency amounts. platform.py 10 HTTP/PG groups and platform_setup.py 4 fresh production-mode bootstrap groups passed; existing Rust 48 unit tests/clippy/structure passed. SQL, async setup and hosting adapters remain unproved."
+      "sha256": "3ad6625a5b59cf66b384a296b14eb88cffc38667a04d7d750ea94e312737043a",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/platform/infrastructure.rs": {
       "status": "unproved",
-      "sha256": "fa26e1f2324ceabb2075fe839c7efd3df308bade54e0b03f3bc9be039bda7a9f",
-      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
+      "sha256": "7d49d2897bb4dd13beea47b60becf1ed453f88a020ec6d38a02a6051ca234d81",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/platform/lifecycle.rs": {
       "status": "unproved",
-      "sha256": "8206553100f78771dc6149c1d9fc6f85b9d3a77c1f864aba52fa98cb82fbf7b2",
-      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
+      "sha256": "849e3ee2ac12ec60ef3f82105453b28a5e026604f17084263dbef1f1755afe42",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/platform/metrics.rs": {
       "status": "unproved",
@@ -7893,13 +7893,13 @@
     },
     "src/platform/mod.rs": {
       "status": "unproved",
-      "sha256": "ac012832ffd200cd49a69adf44b764413500dbc414f8c2ec57b698c449a58315",
-      "review": "Operator session and audit handlers moved into shop; product write admission and the CSV reader moved into catalog without behaviour change"
+      "sha256": "bd1b3f723944d9f9da1b58935ca3bfd6e7e3dd3a7e36724d7d42ba0ab90df777",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/platform/provision.rs": {
       "status": "unproved",
-      "sha256": "aa6f7c9f04368407f66a10ebb1e31d8c58b3be214ebde2e2cdab3f9f69cc7929",
-      "review": "Reviewed eighteen core findings: typed trusted identity and explicit route rights; consolidated current grants; durable auth and fenced shared limits; scoped transactions and one-backend PgBouncer including nested borrow fixes; bounded Wasm/PNG work; notified workers, savepoint quarantine and conservative retention; separate runtime roles and startup configuration. Real PostgreSQL/provider regressions preserve current tenant/customer/payment behavior. SQL/network adapters remain unproved."
+      "sha256": "e540f274c37d2e6d2766b8f589be5e1bc0a27a04eb103a512d8570a93f6938b7",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/platform/quotas.rs": {
       "status": "unproved",
@@ -7928,8 +7928,8 @@
     },
     "src/pos/mod.rs": {
       "status": "unproved",
-      "sha256": "c0395b15bb4938a0e6b3393fa133b18d3739c1c0841d95af5c33cc3362c469ea",
-      "review": "F10: manual orders, the merchant operation catalogue and catalogue intake moved into components"
+      "sha256": "62409021df1d0adda286184a0e1aef2b10c10c188210b198b2b5edd1a9af6943",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/pos/register_host.rs": {
       "status": "unproved",
@@ -7953,8 +7953,8 @@
     },
     "src/proposal_apply.rs": {
       "status": "unproved",
-      "sha256": "9c9993dd10ce0eec0bc9dee3f2062c2ffe3b9be80159ec3e0cfd043b4de9912f",
-      "review": "Batch F1: proposals, list views, reviewed work, its execution and proposal application moved into studio behind the WorkHost port"
+      "sha256": "f35fc6c8f5f44270d6e0d3169a4c4d850a93f7199942584644c007a2ad51633c",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/proposal_model.rs": {
       "status": "unproved",
@@ -7963,8 +7963,8 @@
     },
     "src/proposal_routes.rs": {
       "status": "unproved",
-      "sha256": "3dacb55ad84dceda907db1376bc021ca80552a5771d28d8d0000f38b38bf854f",
-      "review": "Batch F1: proposals, list views, reviewed work, its execution and proposal application moved into studio behind the WorkHost port"
+      "sha256": "e2c0357c6bd796258c9060a1c0ab9f4e8bb8616901eb4c34a804383a694fb6e3",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/routes/http_profile.rs": {
       "status": "unproved",
@@ -7973,8 +7973,8 @@
     },
     "src/routes.rs": {
       "status": "unproved",
-      "sha256": "db5b116f43b244e1da6eafad15f319f59e824f36b0c4a5d3031149f6d30dfea6",
-      "review": "Order transitions, external order intake and saved agent authority moved into the orders, apps and identity components"
+      "sha256": "0d85768d0cdd216270365dda3e1ae39a8bb4c85602e4e601896c248ef231c76c",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/runtime_config.rs": {
       "status": "unproved",
@@ -7993,43 +7993,43 @@
     },
     "src/seed.rs": {
       "status": "unproved",
-      "sha256": "b6b0f03c6bf5b85da3df6cfae3b13909a7ab4a074869dc550209660a70122066",
-      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
+      "sha256": "4ea7590407ca0a784fddf8fd46469282179bdc570b6a29140e40115a3c59da04",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/shop_domains/frontend_bindings.rs": {
       "status": "unproved",
-      "sha256": "c7ded88bdd167aee9382ed36bbb1128e14104a34e0832e9e7f0b96c10c356ba2",
-      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
+      "sha256": "7a11509bb500a7ccb5a50186af42eb99d0b0696283ac3ad2da5003cc1edd1ea7",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/shop_domains/frontend_editor.rs": {
       "status": "unproved",
-      "sha256": "afdd882637b16ccb2a916f4a48927f37411c1ab56888f1af9d739fb390976ac4",
-      "review": "Reviewed tenant-scoped hosted app association, transactional immutable Storyfront installation and one-time validated migration 055; dependency deactivation shares config/app locks; private renderer excluded. PostgreSQL regressions cover foreign references and cold restart. SQL/network adapters remain unproved."
+      "sha256": "2107c6220025884416e5d415874a25eb6b038e7c960fddbe31ae48a28246352c",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/shop_domains/frontends.rs": {
       "status": "unproved",
-      "sha256": "482451ac1e9954cc48418d269c5d93218cf3a41747a24ed377886899ccd433d7",
-      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
+      "sha256": "f57934dbb1478766f4a29280033fee8367b984d947ea19be04b93f207cadeb8b",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/shop_domains.rs": {
       "status": "unproved",
-      "sha256": "322675823e0e7b346faa68e88b5e30fbabd82a61871d7eb450b46ba07ae382d0",
-      "review": "Hosted frontend transport moves into shop"
+      "sha256": "74811cbfe792f35c60f39223884c2c8ef6964b532e25cfae3f018a43c69f6822",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/staging/mod.rs": {
       "status": "unproved",
-      "sha256": "694cd18bb7bfd50f9069c1238fe8b0337376b0ec6685014695f2f805098dbd9e",
-      "review": "Batch F2: sandbox clone, snapshot, diff and release moved into studio behind the ReleaseHost port"
+      "sha256": "c788d7860e68adfd438c41be0ad5899f7005ba6661b0a7c89610d3b5959051eb",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/staging/release_host.rs": {
       "status": "unproved",
-      "sha256": "15a1e7575b267f67a417f1d7b849214ec13be9ec6a746f1def1dd50c28472b18",
-      "review": "F7: marketing configuration, channel admission and flow templates move into components"
+      "sha256": "d1a0131d9039b95367aaf7f73e3ff3dc328f5de587a22d2422c9e86c6fd98ba8",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/storefront_pages.rs": {
       "status": "unproved",
-      "sha256": "f3424a84d8a9c9b41df3fe6ad76ab1a9ce003aefd759547cb4cfad6a923efcb8",
-      "review": "Reviewed eighteen core findings: typed trusted identity and explicit route rights; consolidated current grants; durable auth and fenced shared limits; scoped transactions and one-backend PgBouncer including nested borrow fixes; bounded Wasm/PNG work; notified workers, savepoint quarantine and conservative retention; separate runtime roles and startup configuration. Real PostgreSQL/provider regressions preserve current tenant/customer/payment behavior. SQL/network adapters remain unproved."
+      "sha256": "b6581b06847cafe951ceec4c52ce2e669b5dff53a47b3c8d2ef72db36d93b5d6",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/studio/facts.rs": {
       "status": "unproved",
@@ -8038,8 +8038,8 @@
     },
     "src/studio/personal.rs": {
       "status": "unproved",
-      "sha256": "667aba631ae1979dfeecca1fd792132abb3446606c061d07501e00d7e0066ae9",
-      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
+      "sha256": "42643b11fee92d05329ed26d0115e9b5d79703d9e047753ee3e0ca5847bcdb7d",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/studio/reports/config.rs": {
       "status": "unproved",
@@ -8048,28 +8048,28 @@
     },
     "src/studio/reports.rs": {
       "status": "unproved",
-      "sha256": "3f9ef182f365761bded4b659a04cb749ecd34dd822f4e92febb0ddcd02c85fbd",
-      "review": "Report service moved into the studio component and the cart language chain into the checkout component; behaviour unchanged"
+      "sha256": "fd893b9c8355cfc7496a028b6f170a722d445fc6432cdc99b5bc2bd8fbe5385f",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/studio.rs": {
       "status": "unproved",
-      "sha256": "37c97c81c0068a0d7b60c2cf8480bc83d4ec911c4a6e0fc0e18da13d629f4c93",
-      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
+      "sha256": "50c05a924e6ef0465403fb95cad3640c75ec7eb4a5b0a8d690b36b7ffc0a397b",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/translations/apply.rs": {
       "status": "unproved",
-      "sha256": "6749004d7ffa23088ee115820ee70149cde24e93677749f90969cd724d8f5bcb",
-      "review": "revision_admissible binding for applying translation drafts moved into components/catalog"
+      "sha256": "6ba0d66fa531c241ea76fd14020874b3846c216f599c33282f1f3a12489b7854",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/translations/mod.rs": {
       "status": "unproved",
-      "sha256": "971568d192d36d350e94cf29e7a078a85b74d5c7933a061b7f014864ddffe352",
-      "review": "F9: media captions, design references, product knowledge and the translation worker moved into components"
+      "sha256": "a407d8c1e6540dce91eb1e313e934cb04749d1c02fe56c2bb7f967e1c35df50e",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/translations/routes.rs": {
       "status": "unproved",
-      "sha256": "557e06b66d042e7cdae431ce7ffda5949440476161c22bf6ccf733417e80662e",
-      "review": "Batch F1: proposals, list views, reviewed work, its execution and proposal application moved into studio behind the WorkHost port"
+      "sha256": "ae63d186eb4b720e3665e782696f0777701b6b4db443e52159f79c5c40a0c8d0",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/translations/selection.rs": {
       "status": "unproved",
@@ -8078,23 +8078,23 @@
     },
     "src/translations/worker.rs": {
       "status": "unproved",
-      "sha256": "73cd28a3773b6dd3e0a289c2142e32ec876ed7208328a4f97a37b695b0dcec78",
-      "review": "F9: media captions, design references, product knowledge and the translation worker moved into components"
+      "sha256": "2da8e6cdd44afba2d4beac3a8bd57b6b21f3b26c18fdb7bf45020c584eb3c405",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/ucp/cart.rs": {
       "status": "unproved",
-      "sha256": "468da10f988ae9051ded22d9c872f37b86092634c29336c2bc81cd9f8f4b6179",
-      "review": "Cart projection, product detail, checkout handoff, cart creation and supply proposals move into components"
+      "sha256": "4d256beef1ad16b0d2f6247123cadbea19ba3f2a26ad7a07fcdba7361aee693a",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/ucp/consent.rs": {
       "status": "unproved",
-      "sha256": "30f1cc62a979de5485098d66e4acbfaf8e4c90bbd694d7434bf27268841a146b",
-      "review": "Batch F6: consent, legal acknowledgement and requests, behavior capture, preferences and the storefront experience moved into intelligence"
+      "sha256": "f6558f5a175ceca11ec6ee135819de8242e99da6ed5c9d5e07865941108877ac",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/ucp/document.rs": {
       "status": "unproved",
-      "sha256": "f9743e0b65bb6849a9d2851c6a2990795156368c9021abb56b06617999c2fcfb",
-      "review": "Reviewed native UCP B2B transport: exact public schema only; bounded namespace/version profile selection without authority; current employee and original-cart RFQ reads; unchanged quote CAS, expiry, pricing, budget and separate approval owners; single-use native checkout handoff; shared idempotent order/outbox. New UCP adapters remain unproved."
+      "sha256": "3dde19fcbaa5d7f64b2dc8ead0be9e64a6b2f5c4688dd61ec09354206568d0e4",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/ucp/messages.rs": {
       "status": "unproved",
@@ -8103,23 +8103,23 @@
     },
     "src/ucp/mod.rs": {
       "status": "unproved",
-      "sha256": "e957713bc601f7530e6bff12b1bb8003b6fbe256da05c444b4fe1a2f0fc08f30",
-      "review": "Reviewed inbound UCP/native cart and consent transactions, native finalization contact guard, immutable order snapshots, explicit optional negotiation, public HTTPS app-owned catalogue adapters; independent whole-branch review findings repaired and six isolated HTTP/PG suites pass. No extracted kernel policy changed; SQL/provider behavior remains unproved."
+      "sha256": "308c3ac6bb731b6026f809a363882becf396f5d02d449ab6f00fd1ea7575f8ae",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/ucp/negotiation.rs": {
       "status": "unproved",
-      "sha256": "9bda7a57b27217aeeb45e855a1cd917fd8842407594bf06fabbb2d8153411ef3",
-      "review": "Cart projection, product detail, checkout handoff, cart creation and supply proposals move into components"
+      "sha256": "0b72265e285076fd5f2a8e900bfcf110809a2861bce238ee1f3bd2da8665b81c",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/ucp/profile.rs": {
       "status": "unproved",
-      "sha256": "57a674d26dbb9de0a278d37a69d2369709f191690d3585108837786bff00c887",
-      "review": "Codex source review: UCP discovery changes only the public B2B negotiation guide URL from a verified HTTP 404 to the canonical HTTP 200 location. Real HTTP/PostgreSQL regression asserts the URL and verifies negotiation, approvals, immutable order and exact replay. Schema, authorization and kernel policies are unchanged."
+      "sha256": "20a80b1ac18e81bc9aa22c2b1cabf091a0cce64004e44387cce271978084a813",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/ucp/readiness.rs": {
       "status": "unproved",
-      "sha256": "d98669994dfbdfaec13d3320a9288512e794ce06ffc65c8bd16d2841d4aee601",
-      "review": "Batch F5: inference component for crates/cognition, crate-cycle gate, core paths for history attribution and environment parent"
+      "sha256": "bc1de0901a1cb16b6c8e74a517cef3ff7db0eca08280336d785d6b4686e7711b",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/workers/app_lane/queue_health.rs": {
       "status": "unproved",
@@ -8128,13 +8128,13 @@
     },
     "src/workers/app_lane.rs": {
       "status": "unproved",
-      "sha256": "d040cb90920f73cf1f014a77d70d761202f59d2346ae5c09fe7e86d5b6b38a74",
-      "review": "Reviewed worker-only queue diagnostics: two oldest due index reads share one bounded SQL query, use the existing scoped pool and report aggregate ages without identifiers. The service integration asserts real worker sampling and existing durable order, restart and rollback behavior."
+      "sha256": "8bc88b4dc73856ef03bebbd33bb0c2175c1d765a9400fe881ff2b84bf1cdeb3c",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     },
     "src/workers.rs": {
       "status": "unproved",
-      "sha256": "8795e718c2831b768719e4a8a302b7c2b56564c3b96f44542a211e1684703925",
-      "review": "Self-running experiments: Design gains an optional immutable automation flag pair; experiments/automation.rs adds a read-only suggestion from live payment figures and worker steps that repeat the manual finish transition, call the existing report owner and record a decision, fixing the treatment layout mode only when the unchanged extracted experiment_result_admissible reports a proved uplift; cognitive_experiments suite covers kept, seeded published and manual cases"
+      "sha256": "299747abe62535075ec974719b3ad0fa99f362b8446fbfe0336fc7f48cd8b574",
+      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
     }
   },
   "inputs": {

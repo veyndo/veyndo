@@ -1,5 +1,6 @@
 //! Provider-native messages and correlated tool results, including opaque reasoning continuation.
-use super::*;
+use super::super::{Provider, Value, env, json};
+use super::{alias, definitions};
 pub(in crate::inference) fn request(
     provider: &Provider,
     schema: &Value,

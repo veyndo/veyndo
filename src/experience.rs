@@ -1,5 +1,5 @@
 //! The storefront experience lives in the intelligence component; this handler supplies the experiment assignment secret.
-use crate::*;
+use crate::{App, Json, RequestContext, Result, State, Value, env};
 pub(crate) use veyndo_intelligence::http::experience::{
     forget_personalization, personalization, policy_stats,
 };

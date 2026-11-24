@@ -1,5 +1,6 @@
 //! Customer receipt PDFs render in the server; the order reads and projection are owned by the orders component.
-use super::*;
+use super::identity;
+use crate::{App, Error, Path, RequestContext, Response, Result, State, StatusCode};
 use veyndo_orders::http::account_orders::owned;
 pub(crate) use veyndo_orders::http::account_orders::{detail, list, project};
 use veyndo_orders::store::account_orders;

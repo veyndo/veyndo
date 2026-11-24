@@ -1,5 +1,6 @@
 //! Native wire and injection negative cases exercise the same parser used before dispatch.
-use super::*;
+use super::super::{Provider, Value, json};
+use super::{parse, request};
 fn schema() -> Value {
     json!({"x-veyndo-tools":[{"name":"merchant.orders","inputSchema":{"type":"object"}}],"x-veyndo-history":[]})
 }

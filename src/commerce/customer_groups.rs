@@ -1,5 +1,6 @@
 //! Tenant-owned translated customer groups preserve exact rule IDs and select an explicit existing price/tax presentation basis.
-use super::*;
+use super::config;
+use crate::{App, Json, RequestContext, Result, State, Value, auth, json, merchant};
 pub(crate) async fn groups(State(a): State<App>, h: RequestContext) -> Result<Json<Value>> {
     let t = merchant(&a, &h)?;
     if auth::permit(&h, "customers.read").is_err() {

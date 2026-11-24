@@ -1,5 +1,5 @@
 //! Scoped app access to the existing asset store; the catalog component owns the listing and binary reads.
-use super::*;
+use crate::{App, RequestContext, Result, Value};
 pub(crate) async fn callback(
     a: &App,
     h: &RequestContext,

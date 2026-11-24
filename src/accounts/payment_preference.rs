@@ -1,5 +1,5 @@
 //! Optional last-used payment preference is written after purchase commit, without holding cart/unit/product locks.
-use super::*;
+use crate::{App, StoredCart};
 pub(crate) async fn remember_payment(a: &App, c: &StoredCart, method: &str) {
     let Some(customer) = &c.data.customer_id else {
         return;

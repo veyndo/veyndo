@@ -1,5 +1,5 @@
 //! Authenticated POS adapters reuse the native catalog/cart/checkout/receipt and durable event owners.
-use crate::*;
+use crate::{App, Router, SecureRoutes, get, post};
 mod config;
 pub(crate) use veyndo_pos::service::discount::apply as adjust_quote;
 mod gateway;

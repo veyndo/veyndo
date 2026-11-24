@@ -1,5 +1,5 @@
 //! Rule comparison lives in the marketing component; these entries keep the server-side signatures.
-use super::*;
+use crate::{App, Json, RequestContext, Result, State, Value};
 pub(crate) const HISTORY_CAPABILITIES: &[(&str, &str)] = &[(
     "automation.compare_history",
     "Compare a saved rule and draft on frozen order.placed Flow inputs without replaying actions or reading current commerce data",

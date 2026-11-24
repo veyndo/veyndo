@@ -1,5 +1,10 @@
 //! Public Ed25519 attestations bind exact native facts and channel context for five minutes; signatures do not guarantee source truth.
-use super::*;
+use super::evidence;
+use crate::marketing;
+use crate::{
+    App, CatalogCriteria, Json, Path, RequestContext, Result, Router, State, Value, commerce, get,
+    json, tenant,
+};
 use veyndo_intelligence::service::fact_signing::keys;
 pub(crate) use veyndo_intelligence::service::fact_signing::{attest, key_id};
 pub(crate) async fn facts(a: &App, h: &RequestContext, id: &str) -> Result<Value> {

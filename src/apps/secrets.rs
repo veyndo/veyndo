@@ -1,5 +1,5 @@
 //! Digest-bound per-shop app secret rotation is handled in the apps component; this module registers its routes.
-use super::*;
+use crate::{App, Router, SecureRoutes, get};
 pub(super) fn router() -> Router<App> {
     Router::new()
         .secure_route(

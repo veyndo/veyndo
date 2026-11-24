@@ -1,5 +1,5 @@
 //! JSON-RPC envelope errors differ from actionable domain/tool failures; no transport invents authorization.
-use super::*;
+use crate::{App, Error, RequestContext, Value, apps, bad, capabilities, json};
 pub(super) struct RpcError {
     code: i32,
     error: Error,

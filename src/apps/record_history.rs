@@ -1,5 +1,6 @@
 //! App record history lives in the apps component; this module registers its routes and keeps the capability path.
-use super::*;
+use super::service_limits;
+use crate::{App, RequestContext, Result, Router, SecureRoutes, Value, get, post};
 use veyndo_app_platform::http::record_history;
 pub(crate) use veyndo_app_platform::http::record_history::schema;
 pub(super) fn router() -> Router<App> {

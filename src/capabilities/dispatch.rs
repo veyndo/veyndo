@@ -1,5 +1,9 @@
 //! Closed native domain routing selected once by the operation registry; inactive futures stay boxed.
-use super::*;
+use super::{CapabilityFuture, invoke_native};
+use crate::{
+    App, RequestContext, Value, agent_runs, apps, assets, auth, b2b, bad, cognition, commerce,
+    currencies, developer, documents, history, legal, marketing, operations, payments, pos, studio,
+};
 #[derive(Clone, Copy)]
 pub(super) enum Owner {
     PaymentMethods,

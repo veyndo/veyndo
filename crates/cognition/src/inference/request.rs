@@ -1,5 +1,9 @@
 //! One provider request owns native wire translation, bounded model admission and network egress.
-use super::*;
+use super::{
+    Choice, Inference, InferenceError, Output, Provider, Value, budget, env, json, parse, protocol,
+    schema, tools,
+};
+use crate::inference::strict_schema;
 impl Inference {
     /// The request body in the provider's own wire format and the URL it goes to.
     fn wire_request(
