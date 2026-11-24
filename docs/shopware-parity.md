@@ -200,7 +200,7 @@ financial events are not rewound. Historical Shopware versions are not imported
 or synthesized. [The history contract](entity-history.md) lists all boundaries.
 
 Checkout review and approval return: `order_checkout.rs`, `payments/storage.rs`,
-`payments/return_urls.rs` and `frontend/src/storefront/checkout/*` provide native
+`components/payments/src/domain/return_urls.rs` and `frontend/src/storefront/checkout/*` provide native
 one-page selection, revision/amount confirmation and verified approval capture.
 Local PostgreSQL/provider fixtures cover stale reviews, replay and forged returns.
 No full Shopware Payments, accelerated wallet/card or conversion-uplift parity is claimed.

@@ -504,7 +504,7 @@ isolation, document and stock state effects; frontend tests exercise controls.
 The [illustrated architecture guide](production-architecture.md) connects ingress,
 tenant scope, stock/money/payment transactions, outbox projections, AI and deployment.
 New boundaries live in `money.rs`, `tenant_scope.rs`, `performance/{row_security,
-admission,invalidation}.rs`, `commerce/inventory.rs`, `payments/state.rs`,
+admission,invalidation}.rs`, `commerce/inventory.rs`, `components/payments/src/domain/state.rs`,
 `platform/quotas.rs` and `migrations/schema.rs`. Unit tests, the strict
 `production_foundations` suite, payment fixtures and original-Shopware money boundary
 comparison cover their effects; asynchronous SQL and provider code remain unproved.
@@ -736,7 +736,7 @@ caches; this is not a machine/database cold-start or failover test.
 | `components/catalog/src/store/product_fields.rs` | Revision-bound native priced/media/property fields; quantity/tier/media validation in the central product write transaction. Product editor integration tests. |
 | `src/assets/*`, `components/studio/src/store/staging_assets.rs` | Immutable MIME-checked upload bytes, publication digests, paid owning order download entitlement, typed rich blocks and selective asset release. `merchant_operations.py`. |
 | `src/auth/{permissions,integrations,members,invitations,middleware}.rs` | Current named scopes and persisted workspace roles, hashed keys with bounded expiry or explicit personal-administrator no-expiry, immediate revocation and non-escalating delegation. Permission units and HTTP/MCP negative tests. |
-| `src/payments/{paypal,provider,storage,worker,routes}.rs` | Per-shop Sandbox/Live wallet configuration, pinned official attribution, durable jobs and pending-refund GET recovery. Local wire fixture `payments.py`; no live PSP proof. |
+| `extensions/apps/paypal` (`veyndo-paypal` crate), `src/payments/{provider,storage,worker,routes}.rs` | Per-shop Sandbox/Live wallet configuration, pinned official attribution, durable jobs and pending-refund GET recovery. Local wire fixture `payments.py`; no live PSP proof. |
 | `frontend/src/shared/customer/`, `storefront/{account,checkout}/`, `admin/customers/` | Same four-language contact/address interactions in buyer account, checkout and merchant CRM. Strict frontend build, locale tests and browser review. |
 | `frontend/src/admin/orders/` | Direct eligible commands, same-job payment polling, immutable address/document views and event activity. |
 | `frontend/src/admin/settings/`, `frontend/src/admin/apps/` | Central configuration and issuer, app categories and individual package workspaces; operational layouts use the full available width. |
@@ -753,7 +753,6 @@ this does not claim every source line or every original Shopware operation is co
 | [`crates/kernel/src/verified_kernel.rs`](../crates/kernel/src/verified_kernel.rs) | Closed facade over seven domains and 63 pure production policies | 149 Lean theorems; compiled Rust/Lean conformance; broken-policy mutations |
 | [`proof/Commerce/Claims.lean`](../proof/Commerce/Claims.lean) | Stable entry to seven independently checked proof domains | Exact registered theorem/import inventory; one handwritten file per domain |
 | [`src/bin/verified_kernel/main.rs`](../src/bin/verified_kernel/main.rs) | Generated JSON comparison driver calling the real policy module | 156,741 comparison cases; generated drift guard |
-| [`src/payments/receipt_guard.rs`](../src/payments/receipt_guard.rs) | Checked amount conversion and provider receipt policy binding | `payments.py`; reviewed binding, not a proof of the parser |
 
 The current Rust module status and review inventory are maintained in
 [`proof/manifest.json`](../proof/manifest.json). The 63 consumer modules are

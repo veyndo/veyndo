@@ -4,7 +4,6 @@ use serde_json::Value;
 use veyndo_core::Result;
 use veyndo_core::request_context::RequestContext;
 
-pub(crate) use veyndo_payments::store::jobs::enqueue_tx;
 pub(crate) async fn enqueue(
     a: &App,
     h: &RequestContext,

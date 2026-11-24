@@ -3,9 +3,6 @@ use super::{Attempt, generic_receipts};
 use serde_json::Value;
 use veyndo_core::Result;
 
-#[path = "../../extensions/apps/paypal/src/receipts.rs"]
-mod legacy_receipts;
-
 pub(crate) async fn persist(
     tx: &mut sqlx::Transaction<'_, sqlx::Postgres>,
     p: &Attempt,
@@ -14,16 +11,8 @@ pub(crate) async fn persist(
     v: &Value,
 ) -> Result<()> {
     if p.provider == "paypal" {
-        legacy_receipts::persist(tx, p, op, input, v).await
+        veyndo_paypal::receipts::persist(&super::host::PaymentHost, tx, p, op, input, v).await
     } else {
         generic_receipts::persist(tx, p, op, input, v).await
     }
-}
-pub(crate) async fn update_order(
-    tx: &mut sqlx::Transaction<'_, sqlx::Postgres>,
-    p: &Attempt,
-    state: &str,
-) -> Result<()> {
-    veyndo_payments::store::order_ledger::update_order(&super::host::PaymentHost, tx, p, state)
-        .await
 }

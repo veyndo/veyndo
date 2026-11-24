@@ -105,7 +105,7 @@ verified separately by native integration tests rather than proved by Lean.
 | `checkout_review_admissible` | Exact revision and amount equality plus confirmed methods are required when a client supplies the review headers | `src/order_checkout.rs` |
 | `admin_payment_admissible` | Admin orders admit only manual or simulated payment; ordinary buyer checkout retains its provider path | `components/checkout/src/domain/admin_order.rs`, `src/order_checkout.rs` |
 | `checkout_contact_admissible` | Financial checkout requires email and billing data; simulated checkout has an explicit exception | `src/order_checkout.rs` |
-| `receipt_admissible` | Accepted provider receipts match amount and currency and confirm the outcome | `src/payments/receipt_guard.rs` |
+| `receipt_admissible` | Accepted provider receipts match amount and currency and confirm the outcome | `components/payments/src/domain/receipt_guard.rs` |
 | `platform_admissible` | Operator access requires a personal identity, active grant and account | `src/platform/auth.rs` |
 | `app_read_admissible` | Read aliases admit declared read-only, non-mutating handlers | `src/apps/surfaces.rs` |
 | `rule_authenticated` | A guest cannot satisfy the authenticated-customer condition; both Boolean branches match exactly | `src/marketing/rule_match.rs` |
@@ -300,7 +300,7 @@ Three further extracted decisions add seven properties: `currency_scale_admissib
 limits decimal precision, `resource_quota_admissible` admits positive bounded operator
 limits, and `payment_transition_admissible` defines the monotonic ledger graph,
 including late capture. `components/pricing/src/domain/money.rs`, `src/platform/quotas.rs` and
-`src/payments/state.rs` are their real consumers. This increment brought the then-reviewed
+`components/payments/src/domain/state.rs` are their real consumers. This increment brought the then-reviewed
 manifest to 34 policies and 72 named theorems; compiled Rust/Lean comparisons and negative
 mutations remain required. These proofs do not cover signed integer parsing,
 floating-point conversion, SQL hooks/transactions, provider evidence, or the whole

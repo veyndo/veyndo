@@ -3509,6 +3509,7 @@ dependencies = [
  "veyndo-marketing",
  "veyndo-orders",
  "veyndo-payments",
+ "veyndo-paypal",
  "veyndo-pos",
  "veyndo-pricing",
  "veyndo-runtime",
@@ -3965,6 +3966,19 @@ dependencies = [
  "veyndo-kernel",
  "veyndo-orders",
  "veyndo-pricing",
+ "veyndo-shop",
+]
+
+[[package]]
+name = "veyndo-paypal"
+version = "0.5.0"
+dependencies = [
+ "axum",
+ "reqwest",
+ "serde_json",
+ "sqlx",
+ "veyndo-core",
+ "veyndo-payments",
  "veyndo-shop",
 ]
 

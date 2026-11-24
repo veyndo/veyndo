@@ -85,7 +85,7 @@ impl veyndo_payments::ports::Gateway for Gateway<'_> {
         (tenants, providers)
     }
     fn cancellable(&self, attempt: &Attempt, evidence: &Value) -> Result<()> {
-        super::paypal::validate_order(attempt, evidence)
+        veyndo_paypal::compatibility::validate_order(attempt, evidence)
     }
     fn package<'a>(
         &'a self,

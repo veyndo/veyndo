@@ -1,26 +1,30 @@
 //! Legacy PayPal admission/account wiring belongs to the PayPal package, not a second pricing owner.
-use super::{Attempt, PaymentProvider};
-use crate::foundation::App;
-use crate::payments::paypal;
+use crate::compatibility as paypal;
 use axum::http::StatusCode;
 use serde_json::Value;
 use serde_json::json;
 use veyndo_core::Error;
 use veyndo_core::Result;
+use veyndo_core::State;
 use veyndo_core::bad;
 use veyndo_core::conflict;
 use veyndo_core::uid;
+use veyndo_payments::domain::attempt::Attempt;
+use veyndo_payments::store::jobs::enqueue_tx;
+use veyndo_payments::store::provider_registry::prepare_remote;
 use veyndo_shop::types::cart::StoredCart;
+/// The configured PayPal account of a shop.
 #[derive(Clone)]
-pub(crate) struct Account {
+pub struct Account {
     pub client: String,
     pub secret: String,
     pub webhook: String,
     pub merchant: Option<String>,
     pub bn_code: String,
 }
-pub(crate) fn account(t: &str) -> Result<Account> {
-    let all = &crate::runtime_config::get().paypal_accounts;
+/// The PayPal account the operator configured for the shop.
+pub fn account(t: &str) -> Result<Account> {
+    let all = &veyndo_core::process_config::get().paypal_accounts;
     let v = &all[t];
     Ok(Account {
         client: v["clientId"]
@@ -45,13 +49,16 @@ pub(crate) fn account(t: &str) -> Result<Account> {
             .to_string(),
     })
 }
-pub(crate) fn base() -> Result<String> {
-    Ok(crate::runtime_config::get().paypal_base.clone())
+/// The PayPal API base URL of the configured environment.
+pub fn base() -> Result<String> {
+    Ok(veyndo_core::process_config::get().paypal_base.clone())
 }
-pub(crate) fn environment() -> &'static str {
-    crate::runtime_config::get().paypal_environment
+/// The configured PayPal environment (`sandbox` or `live`).
+pub fn environment() -> &'static str {
+    veyndo_core::process_config::get().paypal_environment
 }
-pub(crate) async fn prepare(
+/// Creates the pending PayPal attempt of a new order, its inventory reservations and the create job; adapter providers go through the generic path.
+pub async fn prepare(
     tx: &mut sqlx::Transaction<'_, sqlx::Postgres>,
     c: &StoredCart,
     order: &mut Value,
@@ -59,7 +66,7 @@ pub(crate) async fn prepare(
     return_origin: Option<&str>,
 ) -> Result<()> {
     if order["cart"]["paymentMethod"]["provider"].is_string() {
-        return crate::payments::prepare_remote(tx, c, order, minor, return_origin).await;
+        return prepare_remote(tx, c, order, minor, return_origin).await;
     }
     let version: Option<String> = sqlx::query_scalar(
         "SELECT version FROM app_packages WHERE tenant=$1 AND id='paypal' AND active FOR SHARE",
@@ -75,7 +82,7 @@ pub(crate) async fn prepare(
     for item in &c.data.items {
         sqlx::query("INSERT INTO inventory_reservations(tenant,attempt_id,product_id,quantity) VALUES($1,$2,$3,$4)").bind(&c.tenant).bind(&id).bind(&item.id).bind(item.quantity as i32).execute(&mut **tx).await?;
     }
-    crate::payments::enqueue_tx(
+    enqueue_tx(
         tx,
         &c.tenant,
         &id,
@@ -86,31 +93,17 @@ pub(crate) async fn prepare(
     .await?;
     Ok(())
 }
-struct PaypalSandbox;
-impl PaymentProvider for PaypalSandbox {
-    async fn execute(
-        &self,
-        a: &App,
-        p: &Attempt,
-        op: &str,
-        key: &str,
-        input: &Value,
-    ) -> Result<Value> {
-        if p.adapter_version != "1.0.0"
-            || p.environment != environment()
-            || p.bn_code != account(&p.tenant)?.bn_code
-        {
-            return Err(Error(StatusCode::SERVICE_UNAVAILABLE,"Payment adapter version/environment mismatch; use the original adapter to reconcile".into()));
-        }
-        paypal::execute(a, p, op, key, input).await
+/// Executes a payment operation at PayPal; an attempt made under another adapter version, environment or attribution code is refused.
+pub async fn execute(a: &State, p: &Attempt, op: &str, key: &str, input: &Value) -> Result<Value> {
+    if p.adapter_version != "1.0.0"
+        || p.environment != environment()
+        || p.bn_code != account(&p.tenant)?.bn_code
+    {
+        return Err(Error(
+            StatusCode::SERVICE_UNAVAILABLE,
+            "Payment adapter version/environment mismatch; use the original adapter to reconcile"
+                .into(),
+        ));
     }
-}
-pub(crate) async fn execute(
-    a: &App,
-    p: &Attempt,
-    op: &str,
-    key: &str,
-    input: &Value,
-) -> Result<Value> {
-    PaypalSandbox.execute(a, p, op, key, input).await
+    paypal::execute(a, p, op, key, input).await
 }

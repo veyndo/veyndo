@@ -5148,23 +5148,28 @@
     },
     "extensions/apps/paypal/src/adapter.rs": {
       "status": "unproved",
-      "sha256": "880315ca99a1d2b060604515008a48693a519325f558c9add686e7f560330482",
-      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
+      "sha256": "e33cc9b1c2f77bd37430885fe2e4f81573b11151d5527b82e813fb068d7a1800",
+      "review": "F19: PayPal adapter as its own crate over the payments ledger"
     },
     "extensions/apps/paypal/src/compatibility.rs": {
       "status": "unproved",
-      "sha256": "1f4411f37275742754470bba934c8731abb28cffabff8661cdfb52a897405696",
-      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
+      "sha256": "01eb69c225ea0a68c47fbb19079c3cc344ca764c2c00424981a12e7d7ebee2e2",
+      "review": "F19: PayPal adapter as its own crate over the payments ledger"
+    },
+    "extensions/apps/paypal/src/lib.rs": {
+      "status": "unproved",
+      "sha256": "550602b26983d204ed71e84aa2331bc1f64b5c0864b5396da652551e19a8d272",
+      "review": "F19: PayPal adapter as its own crate over the payments ledger"
     },
     "extensions/apps/paypal/src/receipts.rs": {
       "status": "unproved",
-      "sha256": "561aaf3878a280d70757479130fea3900ddb8b4aaa951f262d6f12ceac7a55dd",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "6ef59f528fdc32194f7ee6a498df3e71e51c1f10912b5610fe4a74a09d310726",
+      "review": "F19: PayPal adapter as its own crate over the payments ledger"
     },
     "extensions/apps/paypal/src/webhooks.rs": {
       "status": "unproved",
-      "sha256": "a92c9328c9081b7f2c7cf948d356229d56b1687be50fee67a0501d009ec999a4",
-      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
+      "sha256": "2daf5fe6637dc22221a21cc6ffd132630ebf848fe920cafa50a1fa92cf401677",
+      "review": "F19: PayPal adapter as its own crate over the payments ledger"
     },
     "extensions/apps/site-builder/agent_handoff.rs": {
       "status": "unproved",
@@ -7763,8 +7768,8 @@
     },
     "src/payments/host.rs": {
       "status": "unproved",
-      "sha256": "45fd0b8b15ded25c0ac7093913f5e429477f97571776626868d14442b5bcfb38",
-      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
+      "sha256": "006f77b6215fd6699e319957385befcced6fedb5927be620087b6b893506bf8e",
+      "review": "F19: PayPal adapter as its own crate over the payments ledger"
     },
     "src/payments/instructions.rs": {
       "status": "unproved",
@@ -7783,63 +7788,48 @@
     },
     "src/payments/mod.rs": {
       "status": "unproved",
-      "sha256": "470bc2a62f0791a4e936057bd13383df34c12a81b6e2fedf5a1891f7a92d79d5",
-      "review": "F8: payment providers, POS register and B2B commands moved into their components"
+      "sha256": "76d17e7918c20fbc585effd51f530f6d47641288ef98ff0dd91568e6360e090b",
+      "review": "F19: PayPal adapter as its own crate over the payments ledger"
     },
     "src/payments/operations.rs": {
       "status": "unproved",
-      "sha256": "7154befec62e51e746bdf872dd11f772f7469dc4abf0d49995d1dfa033581425",
-      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
+      "sha256": "275795542969f12de2869fe355778fc3bf64c71530319030a711bf61e47314e0",
+      "review": "F19: PayPal adapter as its own crate over the payments ledger"
     },
     "src/payments/provider.rs": {
       "status": "unproved",
-      "sha256": "91b155ba532e6857841be47eae796372d3946a6871fd93c0ad0f0011e5ce1628",
-      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
+      "sha256": "d0497b9d49432f02e215196668fdb5092f7589cbb7fa6a88aa3c4e4aad51ce0a",
+      "review": "F19: PayPal adapter as its own crate over the payments ledger"
     },
     "src/payments/provider_webhooks.rs": {
       "status": "unproved",
       "sha256": "c5a15567c54302fab15eb302ef5e16e4ce9a84da22c1042c2a58424ba5265fbb",
       "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
-    "src/payments/receipt_guard.rs": {
-      "status": "unproved",
-      "sha256": "d125d138144e2120c51efe969f17c674ea0ba3caee5e5ec89f422f3515845bd9",
-      "review": "Payment ledger rules moved into components/payments; kernel call sites unchanged"
-    },
     "src/payments/registry.rs": {
       "status": "unproved",
-      "sha256": "d127d1182ee8019998a9fbc5f96ee3f0abec9a35bf7d7d047b3ee26f1a939c74",
-      "review": "The payment provider registry moves into payments"
+      "sha256": "0797baff516e002a62f81b56c3ca28bbe033d2ba5b1f32a286fed88d0329a09f",
+      "review": "F19: PayPal adapter as its own crate over the payments ledger"
     },
     "src/payments/remote.rs": {
       "status": "unproved",
       "sha256": "5a0463a36cee6cc9600ff1c81c97926a300d1e79f6f5cb20ac6ce5c0a0c15a54",
       "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
-    "src/payments/return_urls.rs": {
-      "status": "unproved",
-      "sha256": "f381eb70df9e02eaa2bbcec3f11f8fb24ae7a19bca92807bd6e308b2474b0812",
-      "review": "Payment ledger rules moved into components/payments; kernel call sites unchanged"
-    },
     "src/payments/routes.rs": {
       "status": "unproved",
-      "sha256": "232179f2fe5b9d898f72adc0a1e812e730ccca41c3fbfbd77233aa13fb859a53",
-      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
+      "sha256": "dd18ab355e92c6ebf4a37864da65e5dfc8b49ffd4d8fda8fb4364c2562e20bb0",
+      "review": "F19: PayPal adapter as its own crate over the payments ledger"
     },
     "src/payments/sessions.rs": {
       "status": "unproved",
       "sha256": "7ca89062b0dafe3c8d5f890aaff9f94d1af993d31e8d7a7bb6d0be5c5c863bf9",
       "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
-    "src/payments/state.rs": {
-      "status": "unproved",
-      "sha256": "510bb7c08d62d7f9951fe62d24d6cd96413343903822f51aca21e0d54167775c",
-      "review": "Payment ledger rules moved into components/payments; kernel call sites unchanged"
-    },
     "src/payments/storage.rs": {
       "status": "unproved",
-      "sha256": "5b82ad083f573cba77237dee8346e7f4cc8ddbe47560b16960ac7276c408cabd",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "2208a19a7e7bf19e506e99065b80d64e25bbf257ef366a41256d3555be61cf8a",
+      "review": "F19: PayPal adapter as its own crate over the payments ledger"
     },
     "src/payments/worker.rs": {
       "status": "unproved",
@@ -8143,12 +8133,12 @@
       "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
     },
     "Cargo.lock": {
-      "sha256": "707d2713f14605d4075a182af6ee18856e30890aa465db34cd4775ad0558d91a",
-      "review": "F16: path attributes removed from the kernel driver, the capability catalogue, the connector service and component tests"
+      "sha256": "5cdc78122c1abcc59af52ae60eed034ebeb2d16d14c41be3b715c5cd740347b1",
+      "review": "F19: PayPal adapter as its own crate over the payments ledger"
     },
     "Cargo.toml": {
-      "sha256": "31b07b8b98a80478f2120d1719d0c78430b408c93b4478208a820e46a91b5b19",
-      "review": "F16: path attributes removed from the kernel driver, the capability catalogue, the connector service and component tests"
+      "sha256": "5b7fafdbb03e7e027345143408d3320c64f2fb648e500128f6361ed3d7b15aef",
+      "review": "F19: PayPal adapter as its own crate over the payments ledger"
     },
     "components.lock.json": {
       "sha256": "7b4a931ad81c6665d5d95e6b42b8ef4d09ebe8971ac24998d8f94bb6a737ff53",

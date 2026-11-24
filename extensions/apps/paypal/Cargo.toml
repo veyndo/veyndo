@@ -1,0 +1,15 @@
+[package]
+name = "veyndo-paypal"
+version.workspace = true
+edition.workspace = true
+license-file.workspace = true
+description = "Bundled PayPal adapter: Orders API client, receipt admission and signed webhooks over the payments ledger"
+
+[dependencies]
+axum.workspace = true
+reqwest.workspace = true
+serde_json.workspace = true
+sqlx.workspace = true
+veyndo-core = { path = "../../../components/core" }
+veyndo-payments = { path = "../../../components/payments" }
+veyndo-shop = { path = "../../../components/shop" }

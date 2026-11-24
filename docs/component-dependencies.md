@@ -33,7 +33,7 @@ run SQL without being in a `store` folder. Both numbers only fall.
 | intelligence | 11180 | 0 | 609 | 29 | 28 | catalog (10), checkout (11), core (184), customers (1), identity (29), inference (10), inventory (1), marketing (13), pricing (21), shipping (3), shop (53) | 28 |
 | studio | 7169 | 0 | 365 | 23 | 5 | apps (30), b2b (3), catalog (29), checkout (2), core (102), customers (7), identity (40), inference (4), intelligence (23), marketing (12), orders (20), pos (2), pricing (12), shop (30) | 42 |
 | protocols | 2927 | 0 | 132 | 2 | 0 | catalog (1), checkout (2), core (104), host (207), inference (1), intelligence (2), pricing (2), shop (5) | 2 |
-| host | 16196 | 0 | 352 | 11 | 1 | apps (49), catalog (55), checkout (14), core (1432), identity (8), inference (2), intelligence (32), inventory (4), marketing (11), orders (2), payments (10), pricing (48), shipping (1), shop (66), studio (18) | 15 |
+| host | 16154 | 0 | 352 | 11 | 1 | apps (49), catalog (55), checkout (14), core (1430), identity (8), inference (2), intelligence (32), inventory (4), marketing (11), orders (2), payments (8), pricing (48), shipping (1), shop (66), studio (18) | 15 |
 | connectors | 0 | 0 | 0 | 0 | 6 | none | 0 |
 
 ## Cycles
@@ -48,7 +48,7 @@ those pairs close when the server files that still hold their logic move into th
 | From | To | Item | References |
 | --- | --- | --- | ---: |
 | host | core | `State` | 405 |
-| host | core | `Result` | 372 |
+| host | core | `Result` | 370 |
 | host | core | `RequestContext` | 324 |
 | apps | core | `veyndo_core::` | 200 |
 | intelligence | core | `veyndo_core::` | 169 |

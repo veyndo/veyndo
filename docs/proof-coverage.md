@@ -6,7 +6,7 @@ This page answers one question per source file of the commerce core: is its
 rule proved by machine, does it call a proved rule, or neither? It is
 generated from the same manifest the proof check uses, so it cannot say more
 than the check verifies. **It is not a claim that the shop is free of errors:**
-93.6 % of the Rust source files are unproved.
+93.5 % of the Rust source files are unproved.
 
 ## In numbers
 
@@ -17,8 +17,8 @@ than the check verifies. **It is not a claim that the shop is free of errors:**
 | Rule files | 8 | 0.5 % | The files that contain the proved rules |
 | Reviewed callers | 79 | 5.3 % | Files that call a proved rule; a person reviewed how the rule is fed, the surrounding code is not proved |
 | Comparison drivers | 9 | 0.6 % | Test programs that compare the compiled Rust rules with the Lean versions |
-| **Unproved files** | 1394 | 93.6 % | Everything else: database access, HTTP, providers, the user interface server |
-| All Rust source files | 1490 | 100 % | |
+| **Unproved files** | 1392 | 93.5 % | Everything else: database access, HTTP, providers, the user interface server |
+| All Rust source files | 1488 | 100 % | |
 
 A proved rule looks like this one, which caps a discount at the amount it is
 taken from:
@@ -45,10 +45,10 @@ rounding still has to be argued by tests rather than by the type.
 | Money primitives and discounts | 13 | 3 | 10 | 3 |
 | Cart and prices | 4 | 0 | 4 | 0 |
 | Checkout and orders | 10 | 0 | 10 | 0 |
-| Payments and refunds | 25 | 0 | 25 | 0 |
+| Payments and refunds | 22 | 0 | 22 | 0 |
 | Currencies and taxes | 9 | 0 | 9 | 0 |
 | Stock | 1 | 0 | 1 | 0 |
-| **Money path in total** | **62** | **3** | **59** | **3** |
+| **Money path in total** | **59** | **3** | **56** | **3** |
 
 The money path is also checked by tests that are not shown here: the
 differential comparison against the original PHP price calculation and the

@@ -1,13 +1,21 @@
 //! PayPal receipt interpretation; shared payment storage owns order and inventory effects.
-use crate::payments::{Attempt, enqueue_tx, paypal, receipt_matches, state, storage::update_order};
+use crate::compatibility as paypal;
 use axum::http::StatusCode;
 use serde_json::Value;
 use serde_json::json;
 use veyndo_core::Error;
 use veyndo_core::Result;
 use veyndo_core::bad;
+use veyndo_payments::domain::attempt::Attempt;
+use veyndo_payments::domain::receipt_guard::receipt_matches;
+use veyndo_payments::domain::state;
+use veyndo_payments::ports::Host;
+use veyndo_payments::store::jobs::enqueue_tx;
+use veyndo_payments::store::order_ledger::update_order;
 
-pub(crate) async fn persist(
+/// Admits PayPal evidence for an attempt and applies the ledger transition, order state and follow-up jobs in the worker transaction.
+pub async fn persist(
+    host: &dyn Host,
     tx: &mut sqlx::Transaction<'_, sqlx::Postgres>,
     p: &Attempt,
     op: &str,
@@ -131,7 +139,7 @@ pub(crate) async fn persist(
         .await?;
     }
     if transitioned {
-        update_order(tx, p, &state).await?;
+        update_order(host, tx, p, &state).await?;
     }
     Ok(())
 }

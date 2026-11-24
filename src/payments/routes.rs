@@ -1,7 +1,5 @@
 //! Customer payment status/capture and merchant refund operations share the durable command API.
-use super::{
-    customer, enqueue, onboarding_route, provider_webhooks, providers_route, sessions, webhooks,
-};
+use super::{customer, enqueue, onboarding_route, provider_webhooks, providers_route, sessions};
 use crate::auth;
 use crate::auth::SecureRoutes;
 use crate::foundation::App;
@@ -76,7 +74,7 @@ pub(crate) fn payment_router() -> Router<App> {
         )
         .route(
             "/store-api/payments/paypal/webhooks",
-            post(webhooks::webhook),
+            post(veyndo_paypal::webhooks::webhook),
         )
 }
 pub(crate) async fn status(State(a): State<App>, h: RequestContext) -> Result<Json<Value>> {

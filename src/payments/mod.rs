@@ -23,23 +23,14 @@ pub(crate) use registry::*;
 pub(crate) mod capture_configuration;
 mod generic_receipts;
 mod operations;
-#[path = "../../extensions/apps/paypal/src/compatibility.rs"]
-mod paypal;
 mod provider;
 mod provider_webhooks;
 pub(crate) mod remote;
-mod return_urls;
 mod routes;
 pub(crate) mod sessions;
 mod storage;
-#[path = "../../extensions/apps/paypal/src/webhooks.rs"]
-mod webhooks;
 mod worker;
 pub(crate) use operations::*;
 pub(crate) use provider::*;
 pub(crate) use routes::*;
 pub(crate) use worker::*;
-
-mod receipt_guard;
-use receipt_guard::receipt_matches;
-mod state;

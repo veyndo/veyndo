@@ -318,13 +318,10 @@ This lists every checked-in source module in these roots, including files with n
 | [src/payments/operations.rs](../src/payments/operations.rs) | Durable idempotent payment commands, customer context binding and serial refund admission. |
 | [src/payments/provider.rs](../src/payments/provider.rs) | Payment provider identity, tenant account configuration and immutable wire context. |
 | [src/payments/provider_webhooks.rs](../src/payments/provider_webhooks.rs) | Version-pinned HMAC notifications enqueue reconciliation; external event payloads never write monetary state. |
-| [src/payments/receipt_guard.rs](../src/payments/receipt_guard.rs) | Bind integer provider receipt amounts and status to the formally checked exact-match predicate. |
 | [src/payments/registry.rs](../src/payments/registry.rs) | The installed payment registry is owned by the payments component; the server keeps these paths for its callers. |
 | [src/payments/remote.rs](../src/payments/remote.rs) | Dedicated payment RPC, pinned service version and operator-owned egress; never ordinary app-action receipts. |
-| [src/payments/return_urls.rs](../src/payments/return_urls.rs) | Provider return/cancel URLs preserve the tenant and sales channel; navigation is never payment evidence. |
 | [src/payments/routes.rs](../src/payments/routes.rs) | Customer payment status/capture and merchant refund operations share the durable command API. |
 | [src/payments/sessions.rs](../src/payments/sessions.rs) | Customer-bound, short-lived provider UI sessions; iframe messages are never ledger receipts. |
-| [src/payments/state.rs](../src/payments/state.rs) | One monotonic provider-neutral ledger state machine; evidence validation and authorization stay in receipt adapters. |
 | [src/payments/storage.rs](../src/payments/storage.rs) | Transactional provider receipts and order state updates; external responses cannot invent amounts or tenants. |
 | [src/payments/worker.rs](../src/payments/worker.rs) | Leased payment jobs; the component owns the claim, the fence and the receipt, this file binds the server ports. |
 | [src/performance/access_snapshot.rs](../src/performance/access_snapshot.rs) | The per-request admission snapshot shared by domain, identity, availability, channel and proxy middleware; the shop component reads it. |
@@ -2315,6 +2312,7 @@ This lists every checked-in source module in these roots, including files with n
 | [extensions/apps/migration/tests/visibility.py](../extensions/apps/migration/tests/visibility.py) | Original source publication status must never silently become an active target product. |
 | [extensions/apps/paypal/src/adapter.rs](../extensions/apps/paypal/src/adapter.rs) | Legacy PayPal admission/account wiring belongs to the PayPal package, not a second pricing owner. |
 | [extensions/apps/paypal/src/compatibility.rs](../extensions/apps/paypal/src/compatibility.rs) | Native PayPal Orders v2 sandbox wire adapter; credentials never enter prompts or browser responses. |
+| [extensions/apps/paypal/src/lib.rs](../extensions/apps/paypal/src/lib.rs) | The bundled PayPal adapter: account configuration, the attributed Orders API client, receipt admission and signed webhooks; the payments component owns the ledger. |
 | [extensions/apps/paypal/src/receipts.rs](../extensions/apps/paypal/src/receipts.rs) | PayPal receipt interpretation; shared payment storage owns order and inventory effects. |
 | [extensions/apps/paypal/src/webhooks.rs](../extensions/apps/paypal/src/webhooks.rs) | PayPal verifies webhook signatures before inbox insertion; provider reconciliation confirms monetary state. |
 | [extensions/apps/product-lab/app.js](../extensions/apps/product-lab/app.js) | A complete guest surface can use any UI framework; this example needs no build or host imports. |
