@@ -1,6 +1,10 @@
 //! Merchant readiness reports native implementation and current channel configuration, never external programme approval or settlement.
-use crate::{App, RequestContext, Result, Value, auth, commerce, json, marketing, merchant};
+use crate::{App, auth, commerce, marketing, merchant};
 use crate::{cognition, mcp};
+use serde_json::Value;
+use serde_json::json;
+use veyndo_core::Result;
+use veyndo_core::request_context::RequestContext;
 pub(crate) async fn readiness(a: &App, h: &RequestContext) -> Result<Value> {
     let t = merchant(a, h)?;
     auth::permit(h, "catalog.read")?;

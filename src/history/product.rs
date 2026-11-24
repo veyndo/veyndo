@@ -1,5 +1,12 @@
 //! Rebuild a product edit from an audited snapshot; stock stays current and all associations/media pass normal admission.
-use crate::{App, Json, Path, RequestContext, Result, State, Value, commerce, conflict, merchant};
+use crate::{App, commerce, merchant};
+use axum::Json;
+use axum::extract::Path;
+use axum::extract::State;
+use serde_json::Value;
+use veyndo_core::Result;
+use veyndo_core::conflict;
+use veyndo_core::request_context::RequestContext;
 pub(super) async fn restore(
     a: App,
     h: RequestContext,

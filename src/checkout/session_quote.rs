@@ -1,9 +1,17 @@
 //! Project the current native cart quote for the independent checkout session service.
-use crate::{
-    App, Deserialize, Error, IntoResponse, Json, RequestContext, Result, State, StatusCode,
-    StoredCart, b2b, cart_price, conflict, json, load_cart, marketing,
-};
+use crate::{App, b2b, cart_price, load_cart, marketing};
+use axum::Json;
+use axum::extract::State;
+use axum::http::StatusCode;
 use axum::http::header::CACHE_CONTROL;
+use axum::response::IntoResponse;
+use serde::Deserialize;
+use serde_json::json;
+use veyndo_core::Error;
+use veyndo_core::Result;
+use veyndo_core::conflict;
+use veyndo_core::request_context::RequestContext;
+use veyndo_shop::types::cart::StoredCart;
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]

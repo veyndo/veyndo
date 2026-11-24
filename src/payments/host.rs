@@ -1,7 +1,9 @@
 //! The server side of the payment ledger port: adapter configuration and the POS sale completion.
 use super::Attempt;
-use crate::{App, Result, Value};
+use crate::App;
+use serde_json::Value;
 use veyndo_core::PortFuture;
+use veyndo_core::Result;
 
 pub(crate) struct PaymentHost;
 impl veyndo_payments::ports::Host for PaymentHost {

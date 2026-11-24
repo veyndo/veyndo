@@ -1,8 +1,16 @@
 //! Independent customer sessions, profile/password management and owning-account order history.
-use crate::{
-    App, Json, RequestContext, Result, Router, State, Value, get, header, json, load_cart, post,
-    tenant,
-};
+use crate::{App, load_cart};
+use axum::Json;
+use axum::Router;
+use axum::extract::State;
+use axum::routing::get;
+use axum::routing::post;
+use serde_json::Value;
+use serde_json::json;
+use veyndo_core::Result;
+use veyndo_core::request_context::RequestContext;
+use veyndo_core::shop_scope::header;
+use veyndo_core::shop_scope::tenant;
 mod payment_preference;
 pub(crate) use payment_preference::remember_payment;
 mod address_store;

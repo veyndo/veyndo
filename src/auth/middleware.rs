@@ -1,8 +1,16 @@
 //! Resolve sessions from PostgreSQL on every request: role changes/revocation work across replicas.
 //! Remove all client-supplied principal headers before adding server-derived identities.
-use crate::{App, Error, RequestContext, Response, State, StatusCode, apps, bad, header, tenant};
+use crate::{App, apps};
+use axum::extract::State;
+use axum::http::StatusCode;
 use axum::response::IntoResponse;
+use axum::response::Response;
 use axum::{extract::Request, middleware::Next};
+use veyndo_core::Error;
+use veyndo_core::bad;
+use veyndo_core::request_context::RequestContext;
+use veyndo_core::shop_scope::header;
+use veyndo_core::shop_scope::tenant;
 fn forbidden(s: &str) -> Error {
     Error(StatusCode::FORBIDDEN, s.into())
 }
@@ -12,7 +20,7 @@ fn checkout_shop(request: &Request, h: &mut RequestContext, path: &str) -> Resul
         && let Ok(url) = reqwest::Url::parse(&format!("http://local{}", request.uri()))
         && let Some((_, shop)) = url.query_pairs().find(|(k, _)| k == "shop")
     {
-        if crate::validate_tenant(&shop).is_err()
+        if veyndo_core::validate_tenant(&shop).is_err()
             || header(h, "x-tenant").is_some_and(|selected| selected != shop)
         {
             return Err(bad("Checkout shop scope is inconsistent"));
@@ -130,7 +138,7 @@ async fn authenticate_scoped(State(a): State<App>, mut request: Request, next: N
     }
     // Only the public native shell/assets bypass identity. Hosted shop assets still
     // require current tenant/channel admission and authorized private previews.
-    if crate::verified_kernel::native_asset_bypass(
+    if veyndo_kernel::verified_kernel::native_asset_bypass(
         crate::performance::delivery::native_static(&path),
         request
             .extensions()

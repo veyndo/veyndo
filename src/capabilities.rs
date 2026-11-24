@@ -1,11 +1,23 @@
 //! Shared HTTP/MCP capability dispatch and tool authorization.
 use crate::marketing;
 use crate::{
-    App, Error, Json, Path, RequestContext, Result, State, StatusCode, Value, agent_runs, apply,
-    apps, auth, bad, cart_json, catalog_page, checkout, cognition, commerce, json, knowledge,
-    language_context, load_cart, merchant, new_cart_context, orders, retrieve, set_items, tenant,
+    App, agent_runs, apply, apps, auth, cart_json, catalog_page, checkout, cognition, commerce,
+    language_context, load_cart, merchant, orders, retrieve, set_items,
 };
+use axum::Json;
+use axum::extract::Path;
+use axum::extract::State;
+use axum::http::StatusCode;
+use serde_json::Value;
+use serde_json::json;
 use tracing::Instrument;
+use veyndo_checkout::store::cart_create::new_cart_context;
+use veyndo_core::Error;
+use veyndo_core::Result;
+use veyndo_core::bad;
+use veyndo_core::request_context::RequestContext;
+use veyndo_core::shop_scope::tenant;
+use veyndo_intelligence::knowledge;
 
 mod admission;
 mod catalog;

@@ -1,5 +1,7 @@
 //! Incoming app webhooks are handled in the apps component; this module registers their public route.
-use crate::{App, Router, post};
+use crate::App;
+use axum::Router;
+use axum::routing::post;
 pub(super) fn router() -> Router<App> {
     Router::new().route(
         "/webhooks/apps/{tenant}/{app}/{webhook}",

@@ -1,6 +1,9 @@
 //! Proposal application lives in the studio component; these entries lend it the server's ports.
+use crate::App;
 use crate::agent_host::Host;
-use crate::{App, RequestContext, Result, Value};
+use serde_json::Value;
+use veyndo_core::Result;
+use veyndo_core::request_context::RequestContext;
 pub(crate) async fn apply(a: &App, t: &str, id: &str, h: &RequestContext) -> Result<Value> {
     veyndo_studio::service::proposal_apply::apply(&Host(a), t, id, h).await
 }

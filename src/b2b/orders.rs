@@ -1,5 +1,12 @@
 //! The unit order receipt PDF renders in the server after the B2B component admits the unit order.
-use crate::{App, Path, RequestContext, Response, Result, State, json, tenant};
+use crate::App;
+use axum::extract::Path;
+use axum::extract::State;
+use axum::response::Response;
+use serde_json::json;
+use veyndo_core::Result;
+use veyndo_core::request_context::RequestContext;
+use veyndo_core::shop_scope::tenant;
 pub(super) async fn receipt(
     State(a): State<App>,
     h: RequestContext,

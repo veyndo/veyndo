@@ -1,8 +1,12 @@
 //! Merchant CRM and fulfillment APIs, shared verbatim with MCP operations capabilities.
-use crate::{
-    App, Json, Path, RequestContext, Result, State, Value, accounts, auth, bad, commerce, merchant,
-    payments,
-};
+use crate::{App, accounts, auth, commerce, merchant, payments};
+use axum::Json;
+use axum::extract::Path;
+use axum::extract::State;
+use serde_json::Value;
+use veyndo_core::Result;
+use veyndo_core::bad;
+use veyndo_core::request_context::RequestContext;
 mod addresses;
 mod company_model;
 mod company_public;

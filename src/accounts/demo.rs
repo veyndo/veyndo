@@ -1,5 +1,8 @@
 //! Public synthetic customer fixture for newly provisioned demo shops; never fills real customer addresses.
-use crate::{Result, Value, accounts, commerce, json};
+use crate::{accounts, commerce};
+use serde_json::Value;
+use serde_json::json;
+use veyndo_core::Result;
 pub(crate) async fn seed_address(conn: &mut sqlx::PgConnection, t: &str) -> Result<()> {
     let fixture: Value = serde_json::from_str(include_str!("../../fixtures/demo-customer.json"))
         .expect("static demo customer");

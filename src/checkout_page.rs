@@ -1,10 +1,18 @@
 //! The existing checkout may be framed only by its registered tenant/channel storefront.
-use crate::{
-    App, Error, HashMap, IntoResponse, RequestContext, Response, Result, State, StatusCode, bad,
-    tenant, validate_tenant,
-};
+use crate::App;
 use axum::extract::Query;
+use axum::extract::State;
+use axum::http::StatusCode;
 use axum::response::Html;
+use axum::response::IntoResponse;
+use axum::response::Response;
+use std::collections::HashMap;
+use veyndo_core::Error;
+use veyndo_core::Result;
+use veyndo_core::bad;
+use veyndo_core::request_context::RequestContext;
+use veyndo_core::shop_scope::tenant;
+use veyndo_core::validate_tenant;
 pub(crate) async fn page(
     State(a): State<App>,
     h: RequestContext,

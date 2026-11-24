@@ -1,9 +1,11 @@
 //! Native operation input contracts; transports consume this owner instead of maintaining their own schemas.
 use crate::categories;
 use crate::{
-    Value, agent_runs, apps, assets, auth, b2b, cognition, commerce, currencies, documents,
-    history, json, legal, marketing, operations, pos, studio,
+    agent_runs, apps, assets, auth, b2b, cognition, commerce, currencies, documents, history,
+    legal, marketing, operations, pos, studio,
 };
+use serde_json::Value;
+use serde_json::json;
 /// Start with operations whose domain owners guarantee a stable result shape.
 pub(super) fn output(name: &str) -> Option<Value> {
     if name != marketing::DRAFT_CAPABILITY.0 {

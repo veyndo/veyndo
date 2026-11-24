@@ -1,10 +1,21 @@
 //! Create an isolated merchant workspace from synthetic template data.
 //! Registration cannot claim existing tenants or assign a global administrator.
 use super::{email, hash_password, issue_session, name, password};
-use crate::{
-    App, Arc, Error, Json, Result, State, StatusCode, Value, bad, conflict, env, json, knowledge,
-    prototype_products, uid, validate_tenant,
-};
+use crate::{App, prototype_products};
+use axum::Json;
+use axum::extract::State;
+use axum::http::StatusCode;
+use serde_json::Value;
+use serde_json::json;
+use std::env;
+use std::sync::Arc;
+use veyndo_core::Error;
+use veyndo_core::Result;
+use veyndo_core::bad;
+use veyndo_core::conflict;
+use veyndo_core::uid;
+use veyndo_core::validate_tenant;
+use veyndo_intelligence::knowledge;
 
 pub(crate) async fn register_user(
     State(a): State<App>,

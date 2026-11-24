@@ -1,5 +1,11 @@
 //! Buyer sign-in route and the server side of its port; the customers component owns credentials, cart binding and rotation.
-use crate::{App, Json, RequestContext, Result, State, StoredCart, Value, cart_json, pos};
+use crate::{App, cart_json, pos};
+use axum::Json;
+use axum::extract::State;
+use serde_json::Value;
+use veyndo_core::Result;
+use veyndo_core::request_context::RequestContext;
+use veyndo_shop::types::cart::StoredCart;
 
 pub(crate) async fn login(
     State(a): State<App>,

@@ -1,8 +1,13 @@
 //! Hosted-app installation lives in the apps component; this module adds the connected frontends and their local answers.
 use super::{data, install_host};
-use crate::{App, Result, Value, conflict, env, json};
+use crate::App;
+use serde_json::Value;
+use serde_json::json;
 use sqlx::{Postgres, Transaction};
+use std::env;
 use veyndo_app_platform::store::hosted_apps;
+use veyndo_core::Result;
+use veyndo_core::conflict;
 
 pub(crate) async fn ensure(
     tx: &mut Transaction<'_, Postgres>,

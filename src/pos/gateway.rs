@@ -1,6 +1,14 @@
 //! HTTP/MCP POS routes; the POS component owns the cashier gateway behind the register port.
 use super::register_host::Register;
-use crate::{App, Json, Path, RequestContext, Result, State, Value, bad, json};
+use crate::App;
+use axum::Json;
+use axum::extract::Path;
+use axum::extract::State;
+use serde_json::Value;
+use serde_json::json;
+use veyndo_core::Result;
+use veyndo_core::bad;
+use veyndo_core::request_context::RequestContext;
 use veyndo_pos::service::register;
 pub(super) async fn channels(State(a): State<App>, h: RequestContext) -> Result<Json<Value>> {
     Ok(Json(register::channels(&a, &h).await?))

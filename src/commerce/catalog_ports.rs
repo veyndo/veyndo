@@ -1,13 +1,13 @@
 //! The server's implementation of what the catalog component reads from carts, orders, environments and the history.
-use crate::{
-    App, RequestContext, commerce, language_context, load_cart, marketing, performance, tenant,
-};
+use crate::{App, commerce, language_context, load_cart, marketing, performance};
 use sqlx::PgConnection;
 use std::sync::Arc;
 use veyndo_catalog::ports::{
     Catalog, ContentLanguages, ImageProvider, Images, Shop, Shopper, Shoppers, Visit,
 };
 use veyndo_core::PortFuture;
+use veyndo_core::request_context::RequestContext;
+use veyndo_core::shop_scope::tenant;
 
 struct Server(App);
 

@@ -5133,58 +5133,58 @@
     },
     "extensions/apps/paypal/src/adapter.rs": {
       "status": "unproved",
-      "sha256": "e779979cf45e5d38957f76b6c0d8aeaf0c4c39943c625487691d35701349ddee",
-      "review": "Relocated app implementation into owner packages; generic connector binary and payment ledger preserve existing contracts; reviewed receipt and inventory bindings unchanged"
+      "sha256": "c8030cdb0138f7c63d28f8316da75cfc192aa6f154595f7dabb2d948c44f4fad",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "extensions/apps/paypal/src/compatibility.rs": {
       "status": "unproved",
-      "sha256": "58726878560f0d6b8e979d920d755f36760874c567fd93b7f98255aaf7338c9a",
-      "review": "Reviewed eighteen core findings: typed trusted identity and explicit route rights; consolidated current grants; durable auth and fenced shared limits; scoped transactions and one-backend PgBouncer including nested borrow fixes; bounded Wasm/PNG work; notified workers, savepoint quarantine and conservative retention; separate runtime roles and startup configuration. Real PostgreSQL/provider regressions preserve current tenant/customer/payment behavior. SQL/network adapters remain unproved."
+      "sha256": "d832ec077810e6f9bfd0bcb98a325fa5972cacdfd72d2051274a4dd3a51d1993",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "extensions/apps/paypal/src/receipts.rs": {
       "status": "unproved",
-      "sha256": "c536bea6bc33c3396437e7e8fff093e839c6dbce7b63627c521bdf397d0d6c5c",
-      "review": "Relocated app implementation into owner packages; generic connector binary and payment ledger preserve existing contracts; reviewed receipt and inventory bindings unchanged"
+      "sha256": "561aaf3878a280d70757479130fea3900ddb8b4aaa951f262d6f12ceac7a55dd",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "extensions/apps/paypal/src/webhooks.rs": {
       "status": "unproved",
-      "sha256": "ffa5bb4e821f1de6f27ca9e9fb511e6be430727458d3db22f8286c9e833c8c1a",
-      "review": "Relocated app implementation into owner packages; generic connector binary and payment ledger preserve existing contracts; reviewed receipt and inventory bindings unchanged"
+      "sha256": "8df40b649ac792c84e4d7459fb0898293c4ef4a4239b7671e5625309fc1884c8",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "extensions/apps/site-builder/agent_handoff.rs": {
       "status": "unproved",
-      "sha256": "7c8fce5cd4f111280589c00e7996c2ddd2c397ea0149b75741778724e14020cc",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "65ccab6794b187aaf5b5295fa7459f4f93c484e2be538e598468d60eee7fa1e3",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "extensions/apps/site-builder/block_validation.rs": {
       "status": "unproved",
-      "sha256": "16f287ad20b78921bc99a97a7bad9c24c1718f8bb02d3e0093a57a36c085e31c",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "7af12a0b9f2beca0ebeba8a233510bf47c055c51451f26173abf6074b0f80f02",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "extensions/apps/site-builder/context.rs": {
       "status": "unproved",
-      "sha256": "1ef9f53ceda2b8e9c5297d1858ff5dcdf27f7f8976813b18aa53e46f44be9350",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "9a990980fe6386f934d0dd1af34501ec6491937bb89b9082ee1d346604e595bb",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "extensions/apps/site-builder/design_agent.rs": {
       "status": "unproved",
-      "sha256": "d811818c46838463ebb285896ef209bd88abd0e4e19429cfaf66c30e0e9f98df",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "4f7073f5591d006750b9ced2a422a07db99dbeec0979e2fe4d2edd8fc8545f00",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "extensions/apps/site-builder/elements.rs": {
       "status": "unproved",
-      "sha256": "e786612ef87e07f2f1417d4cd1d6a04004a1a31eb01433fbdfba80a59a7c238a",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "902ff5ce59c2fe4030614082b353064c4184c8bde938f06f7231350cf41a5a02",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "extensions/apps/site-builder/planning.rs": {
       "status": "unproved",
-      "sha256": "d653169515a19f11c98676e5debf0d74bbb5e0e7a13d4aa3933ec08cea6d1bb9",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "f8c862754097b9013b61ef990bb4383a838c743222956638c1aeb521c9ef2310",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "extensions/apps/site-builder/proposals.rs": {
       "status": "unproved",
-      "sha256": "971a5818f173654707677e667393e6d20b81e09741442e86e5af39298b82d733",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "648a6ab22c979fdb8979b611687f7c320f85974a10b825074a93059cee3845fb",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "extensions/apps/site-builder/references.rs": {
       "status": "unproved",
@@ -5193,13 +5193,13 @@
     },
     "extensions/apps/site-builder/server.rs": {
       "status": "unproved",
-      "sha256": "070b61d8f822e537e7585ee5a237025f3d4842175cbeb0e6e12031db29421782",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "6901e3ffb4a495707bbf33d186e89879c739ca18431e0c5e9a31f907c2d89d8e",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "extensions/apps/site-forms/server.rs": {
       "status": "unproved",
-      "sha256": "1d8369a95448934658e282862c03236900c1a468820e532f7fc881e51551590f",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "17785be3356ae47c9dad19c4159408d1d4d837dcff9d5e02862d896c5f01ec71",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "extensions/apps/slack/src/actions.rs": {
       "status": "unproved",
@@ -6248,33 +6248,33 @@
     },
     "src/accounts/demo.rs": {
       "status": "unproved",
-      "sha256": "9c878ea5bfb498f95e5937a7a71b1d61e7d1dd442beceea664c181a6436f435f",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "652ed06ea736f69c9b65c4cf683f8dcb52f7f2f5a21debfb735b0f533dc2d29a",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/accounts/mod.rs": {
       "status": "unproved",
-      "sha256": "e1d023e31ddeb17c2fe69be9fc4705ef5b3c933a03f8d3e19a888f46ff82498c",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "3f4d749054e59e9d1ba11c85f4bbdddc12bd94c8d2c1306deb0ddb8f44ab320f",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/accounts/orders.rs": {
       "status": "unproved",
-      "sha256": "49bab8a70b8264ed2902bf596cbaa653642cbdf39211d58f671c2743a7f54138",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "d034b2e66657bea3b8ccf29e45714f181596934533cc7834505539b00d30df46",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/accounts/payment_preference.rs": {
       "status": "unproved",
-      "sha256": "81e1ec5af486d9e7b625205f0cf91e93c45329aedac05e67bf170ac2415f5230",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "146cb9179d568c6ec2c0f97c43e3f4ec2e35ea1a20e82c22860566de827750a5",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/agent.rs": {
       "status": "unproved",
-      "sha256": "f9b112c3c89c2ee346f4586a4cea2e6482af6bf40f2aad52b8f95940d55f78e0",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "905c133c4b61ece2d04e8ffe99631ccbd5eeb41942eb81bb07403837ff7270c0",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/agent_host.rs": {
       "status": "unproved",
-      "sha256": "ae5ba662bfca4c77a7a7294d05f3bca565a0f9ea4b5048ee3eeb222c49013558",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "f4198be81178757dce5492db91d57c3088c54112473f0de594d604246c038ce2",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/agent_runs/authority.rs": {
       "status": "unproved",
@@ -6288,13 +6288,13 @@
     },
     "src/agent_runs/contract.rs": {
       "status": "unproved",
-      "sha256": "8d2dca468b9df5ccea565478492f80d580cba9f437ff2ef775e54ceff0163edd",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "99974b4d1e4bec2141a0e6d3721a97b5e8c47d1720d10649f8d6b3ba3f519f54",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/agent_runs/controls.rs": {
       "status": "unproved",
-      "sha256": "4d233d5c1b1874be8182c5a055d4706feff708ba13f28845fdce9026c25ff22b",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "ecdc7f1c40456b449d4f62036dfd01846f06166d28fe0a762a980d1c962f09f9",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/agent_runs/navigation.rs": {
       "status": "unproved",
@@ -6303,8 +6303,8 @@
     },
     "src/agent_runs/scenarios.rs": {
       "status": "unproved",
-      "sha256": "99cf57ca71bfcfa40ce7d8d6890b3bfaa925126ec882662b42f19e64ff23c4cf",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "7f6f84b9007cfe1715699ff59c0a9c41a99bee5afc4f2461f44e8ceb085edab0",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/agent_runs/view.rs": {
       "status": "unproved",
@@ -6313,13 +6313,13 @@
     },
     "src/agent_runs/work_plan.rs": {
       "status": "unproved",
-      "sha256": "2c2ba408decec18c08b76d6d5fdf03686fc4b4062b1c0bb8cd40de27c340564c",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "cfce1470fcaa975c6ba4c39b5fa9602fcd8f69666e8a81c124c38856ed45adb6",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/agent_runs/worker.rs": {
       "status": "unproved",
-      "sha256": "cf4eb9276627aa15b024ae5e1ec5fc62e3688dc0a815cc86ea475a1871421b8e",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "35039c129490d234aeb7ab69375fc6fa245ba31e4da60e69b298d5d7d42b2d88",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/agent_runs.rs": {
       "status": "unproved",
@@ -6328,18 +6328,18 @@
     },
     "src/apps/approval.rs": {
       "status": "unproved",
-      "sha256": "f0697a195e57754ca718f137a9fd777d0f1cedfc22bdea5dd005426f6fec263e",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "bc5c0c48f39d2fe7b33616f535227d7361880f16489d2f2c415bb335dcb42606",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/apps/asset_surfaces.rs": {
       "status": "unproved",
-      "sha256": "ae0fc9c38fd5be0a9de55a472bececf6bd654dfe8f0950a298b7eb54d46e8e3c",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "b5b537e7932888da826047f4025721e39665cf5671a93dbff5337bcac92aaff3",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/apps/cart_contributions.rs": {
       "status": "unproved",
-      "sha256": "47e5b8fe69eaffd41f408b01b4d21ca6b82026b68196d4d6b3eb16f17e5bea6c",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "513c087b717acd798c010a1d061661e543782e27c3436619cff6c8da6c10ffb7",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/apps/configuration_events.rs": {
       "status": "unproved",
@@ -6348,73 +6348,73 @@
     },
     "src/apps/configuration_selection.rs": {
       "status": "unproved",
-      "sha256": "1b1371a84a83480280f941d232cd5e731367cd487ec87ad81efde812ae797457",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "121d086f16ac230eba97e864aa44040b1de3654101b95dfcefd93e3d85267c08",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/apps/consent.rs": {
       "status": "unproved",
-      "sha256": "afad473b26769919de89b066eb3cd213774fd1204d9938687682c7ba108edd52",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "fc2fe96d9be2f74df9766e6fcd966c9515bf83f1d3a6283ef8c59173cec3d9ea",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/apps/core_callbacks.rs": {
       "status": "unproved",
-      "sha256": "6f4bd602277e7c1e2c4b5dc2eb8ba6ffe97df2cb252d878e2b4924c8cc67dab5",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "d1c2d0ce59c698a5793e7248f837f681a01d0303177f96ded741f8dcce1f7b1e",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/apps/core_documents.rs": {
       "status": "unproved",
-      "sha256": "06f5ccbeca3a3c4677187e55057d3cbfd30905bcbf283c2aaa52b4dcf9078bbc",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "cb9626a9f5c74f3580c7bd037d0197ed7ce7942609197fdb4cf14eccfdd68726",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/apps/core_exchange.rs": {
       "status": "unproved",
-      "sha256": "0e8ed5b7e4512b98df0bd1e736adc99e7b9830ed2df0f2baaf3b3546fbaa842f",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "1c42f7cb161ed6125661de10e25ea82a6d8b775d6e3f2de46a61965e0d329a22",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/apps/core_extensions.rs": {
       "status": "unproved",
-      "sha256": "742bd7c707e994524d8c6dca99d5e47917841d99655f873d5d8cd1bc6297428b",
-      "review": "F7: marketing configuration, channel admission and flow templates move into components"
+      "sha256": "51c12b4d6179458eca7b67d05453028ad82a871d90c9fed9030613b8eaa7c977",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/apps/credentials.rs": {
       "status": "unproved",
-      "sha256": "53481fd80066588fe4ebe4ecca5d8b2a1de26903751f197d5fd8bde67d8e26d3",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "2f2a9ca0de7137ace65be2a91ce5c4a3237d745f4a055e2ee270c0dc05689a33",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/apps/data.rs": {
       "status": "unproved",
-      "sha256": "269de162c99fca125150fbcc04317d1a16652a397fad03276f40079367006918",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "f5bc67b65cde4464aea39c09a1803986eb5b43f9b9a67ed0f4dd73c4e151b4af",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/apps/discovery.rs": {
       "status": "unproved",
-      "sha256": "459736de8a2d1ed9918c4d4a7634432adeaec98991e8c9370674450fb2b42db5",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "25fc49d8d7827bf69ae03591da8bff2b0203219ac879808f16a8ced08c775358",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/apps/distribution.rs": {
       "status": "unproved",
-      "sha256": "64f5249af64e26f4d2585bcaf2c44d8ab461907110426e1600a4f4a266d6f66f",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "a25308b565928addbd68309f7614f901551909ee6480f4084395ad516f24704f",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/apps/egress.rs": {
       "status": "unproved",
-      "sha256": "f65b5df31b11a8217373c7dd9c60ded46e19820410b3e654b88ed111d60a1cdf",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "d48dc59ffc29d3bdd3e18b9bf03f32328f1d29086d74aa90a36ee5805ec301b1",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/apps/events.rs": {
       "status": "unproved",
-      "sha256": "afc80273bfe7094046a1510b146e32985e1897dd9803440ab16865ce004d5e81",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "3c68074d986b3588cee2b26deab631ab1296d9cfa5cd7f0046a8c3785d7949ed",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/apps/evidence.rs": {
       "status": "unproved",
-      "sha256": "7309a82e3c825940fa7b44102a7d6dcd6a5783a7b8521f82e57a9a39df72fe33",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "c30ed6aab50399d8f0b5a9f0df2d69024b520f5c54823860f18e6f838ef9064e",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/apps/evidence_routes.rs": {
       "status": "unproved",
-      "sha256": "679ad3294b76289a289aada6635a0a7c6108497464513e2c26cf6e4153132db7",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "ba99ecf6eca82f331bcd9e6c024f111c31dfce0274c13571347adca336129b8d",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/apps/field_values.rs": {
       "status": "unproved",
@@ -6423,13 +6423,13 @@
     },
     "src/apps/gateway.rs": {
       "status": "unproved",
-      "sha256": "0100046df64fdf859fd74660e5ec54d12c5f97dee264aa679f87ef0c1fb6f8da",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "f55fd7c59f7767882671265677c70d4d1224a08bd8fe436abf978fdbb9e38cc0",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/apps/hosted.rs": {
       "status": "unproved",
-      "sha256": "ad28a55e21736d352265f5717c251bbbadf72065aefe85057eb930250e671bb0",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "ad2a48ffbc8744593d80b2dae535f043530955450df8be69033c531a9d72ce6d",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/apps/input_schema.rs": {
       "status": "unproved",
@@ -6443,13 +6443,13 @@
     },
     "src/apps/job_import.rs": {
       "status": "unproved",
-      "sha256": "1d50757362ae3804f911813827bf8dc62fcbe2f7593b5e12f51fc5252f470d71",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "0c4acbebce606bb0132bac73a1e37a18e839263516115c24d56e08727d7d8140",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/apps/jobs.rs": {
       "status": "unproved",
-      "sha256": "51699b0e037dc7e85fd254b51cd3a4f6f4f7209c568aa6fafe35d2fe99c4c2ff",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "0cdc0ea6b6831a1c3d3c968d3e9884036ebc780db406d397ae7cca1326074bdb",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/apps/manifest.rs": {
       "status": "unproved",
@@ -6458,13 +6458,13 @@
     },
     "src/apps/manifest_validation.rs": {
       "status": "unproved",
-      "sha256": "e780a975ef557537a39f0145bd37af1365d19c8875ce04b30bb7e797a15165f0",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "650976816aaec28a93c96eaabc72b400750bd5c974632017dd4f0d4f5b80804f",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/apps/mcp_views.rs": {
       "status": "unproved",
-      "sha256": "3d945d8e141a78d5a3ca5b7c0a7ecb9aa5da283bfa0710a32749362234148e15",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "cc67311ce922ed61e8846d318e785bed1b59c362a7431549fcf138e915ad3ba6",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/apps/mod.rs": {
       "status": "unproved",
@@ -6483,8 +6483,8 @@
     },
     "src/apps/observability.rs": {
       "status": "unproved",
-      "sha256": "df68703cc82eef31c2c48b090df301425da9ec29654ed8964fd8fbb395ad118f",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "04e69d4024ac9f8d9b5df1a9e0690175100301d9530c6dd2e7c08a156299ac78",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/apps/package_fence.rs": {
       "status": "unproved",
@@ -6493,28 +6493,28 @@
     },
     "src/apps/planning.rs": {
       "status": "unproved",
-      "sha256": "03e251441ec5b2585a91b1ec33920f321e445a587678c990d1f7877b13d4c3ac",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "f48662f48633798cd0fea71332d3891a695a0be1a456414b7bc9d415ddf4477a",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/apps/record_history.rs": {
       "status": "unproved",
-      "sha256": "c5fec1e97791c3c2b758f95e710ec7684f66a052399e5e0d6d7eaa613a68aa59",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "3294573e77be7ed227ddd19ef7a636181e65c12d1dcb9fbed4fafd62c3659f0e",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/apps/record_import.rs": {
       "status": "unproved",
-      "sha256": "0653a7a7a7b6872a7a658252d23e34985b06acdbb57833c666e7cb3b19a97eb4",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "f36d313b0c1ce392220833b6592f498b21cd5e8e53ce12cfaa3722aef79d8973",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/apps/registry.rs": {
       "status": "unproved",
-      "sha256": "5eaf9e18b8a1ae617ca2ccd7de56ba80c2f327da051593daafc46f2c5e9d5aef",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "7ed00fd0157cafd34b193985b5a871437029ee4ea868f0101f2b0cb4a1c2e305",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/apps/routes.rs": {
       "status": "unproved",
-      "sha256": "1b460468134e50e96a2cd585ed26519a312f1937b0aacbb565d651e231654a4b",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "d37afb0aaa35ceff8e0487dd9dcc40488a754fe9ba7e981e68bb8348ca62b764",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/apps/schedules.rs": {
       "status": "unproved",
@@ -6523,13 +6523,13 @@
     },
     "src/apps/secrets.rs": {
       "status": "unproved",
-      "sha256": "b304bf319a01bfd20c3f2e47091338131f7d9672a8c85a37192ac3d606cf5351",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "0eba019d819d9173f7b279688192888d9c70f1fe920039feddb04e6e1d1931de",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/apps/service_limits.rs": {
       "status": "unproved",
-      "sha256": "5d24c4c0627fdf022e3b44cdc6c7e37330d7e6d1a91ee8ac964d5a995eb33cd1",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "f0fd4ca52a4622c6bba165717b184c93f0c1f47ee7e106d547af9981ef37e6a3",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/apps/service_policy.rs": {
       "status": "unproved",
@@ -6538,43 +6538,43 @@
     },
     "src/apps/settings.rs": {
       "status": "unproved",
-      "sha256": "62c560226e9a7e01b30c0356212c4624b05a44e28b2cd57f35fc10869a1f1463",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "1d85669f011673dbee624aee925f1c1e6f75a2a0ecde62174a570bcfe6d9c2fd",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/apps/submissions.rs": {
       "status": "reviewed-binding",
-      "sha256": "5a7f23290df3f60671b8797e85cddf3b3a5e12b9853e4c3aa37975f20fa2632f",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "43bf6c5c931b3bf19a071d4d5663d6c9838413d11ecfb9ea2b9b5b0bb6853e16",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/apps/surface_grants.rs": {
       "status": "unproved",
-      "sha256": "36ccace2a82df424a603f3d96646449e385de578be915db554cab191fe14f920",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "a7f9ef1eb3746693752c7645f253caf1c9abf12c7d383b9dc61c00b48e7b45cc",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/apps/surface_registry.rs": {
       "status": "unproved",
-      "sha256": "1ff91a320ddcee3bd76bb50e40248b2c80590529c52394a4114073329d03958c",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "ea9edb9845c6551743fc3850ed885869d3025bde114e41d21820647f42b58544",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/apps/surfaces.rs": {
       "status": "unproved",
-      "sha256": "cd559aa68313f09b0645eed968256f4116824ee0453fd8459b9e9e833d602118",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "07c1c0e759790971ba6292319b8d53a24442e4ce4f18c643a4252ecc93e6a801",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/apps/tool_contract.rs": {
       "status": "unproved",
-      "sha256": "130b35bea539d48d29226b7bf11f63d11031cf9e311432682239b771df2f23ed",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "e580e8be43aebb7cc2bc35bcc3d4c752df40f67266ce372515d312ff8449f8d0",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/apps/ui_bundles.rs": {
       "status": "unproved",
-      "sha256": "6b72b1749a683022024fdaa32ec0f8a93ff225d7e930f0fb882a735ae1cdd568",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "a2f2d466c5be7949fb168498da139de9a9a928f40389498e3c466d65be6ff242",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/apps/ui_documents.rs": {
       "status": "unproved",
-      "sha256": "87d3ca17177955f6d3324f59a1f5f13783e378cee52ddb353df51f40066f9ee5",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "f880e583578bf6b0fc3a2699eda04bb6ed8d90624f360bc9b5e9f5905b33b930",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/apps/webhook_scope.rs": {
       "status": "unproved",
@@ -6583,33 +6583,33 @@
     },
     "src/apps/webhooks.rs": {
       "status": "unproved",
-      "sha256": "8866abee7d79c1ada6b5ffca0d03a8c8f27f30940b418d263003abce5cb9d907",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "b9efe5fcbd2182045bbee1139374483602d10a82e09615cc3d01bd1950901729",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/assets/app_files.rs": {
       "status": "unproved",
-      "sha256": "d1faa05fde240ba0c7e377116bdc8027f643c17bf45221c5e5e8ecd97308cd3e",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "0d5a0b4c37c39772c162a735bd605e8fdd4db658d72fb5e054070b1e22ded43a",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/assets/captions.rs": {
       "status": "unproved",
-      "sha256": "4c41804d763cac9acfd72142a0ef326a06dc28be32ca64a9d2d79ac13cd6bbc8",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "94bf1ef966559d2a766372ed43fb181a6e7e272b1aa62fc14a31f6281b849f73",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/assets/design_references.rs": {
       "status": "unproved",
-      "sha256": "1d7195491e6f3d180368d5a99b10c932e30e0771ad866c250c28b5299d89f94c",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "9b5689ed0d70d529b8deed8f45a0a6ea98fa527a5edeac6d6f7bbc58a556da32",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/assets/image_jobs.rs": {
       "status": "unproved",
-      "sha256": "b5f2e7a00dd742aabc87aa66c2c64105b27d9659c471548aac5d26378bbacc09",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "bbacce0d32d1e3c0a038362c99c2ac785f3f60a9c455847c25c0e7bfb42a595b",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/assets/import.rs": {
       "status": "unproved",
-      "sha256": "df7efe82a95141965b5ef8ef989b5e7f482c006f9a9d9810fffe3f99174c172a",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "618588167891ed511f017eb3daebc6c53b817111de56570ccbb40eb460f27177",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/assets/ingestion.rs": {
       "status": "unproved",
@@ -6618,8 +6618,8 @@
     },
     "src/assets/mod.rs": {
       "status": "unproved",
-      "sha256": "f70349bf036336dea6c9635c2fe8ebb71aab4c5373ff830b9d3bbb93b187216f",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "6e6e5438a79126484159f800faa718a0c90f9b6ffb74b3804f895939a5ecf391",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/assets/model_format.rs": {
       "status": "unproved",
@@ -6638,13 +6638,13 @@
     },
     "src/assets/upload.rs": {
       "status": "unproved",
-      "sha256": "6cd8b94e88887956475870c503a1f1971edb3111dc2101d03ddf71cd1dc01e00",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "a17726d9e3d78951df42b567628eefe8eaae79d6e2baedd3a4fff79c1275d08b",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/auth/broker.rs": {
       "status": "unproved",
-      "sha256": "a14cc17f34e5c6b52d5c1ff22befa8f4e131db256440998e5ff0a93fb912bc54",
-      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
+      "sha256": "f58d6a0be176e58a91903751e1b7a4a5241477fd4c18ca08f38fa72a7e5e048e",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/auth/broker_credentials.rs": {
       "status": "unproved",
@@ -6653,8 +6653,8 @@
     },
     "src/auth/broker_inference.rs": {
       "status": "unproved",
-      "sha256": "b19fe1524c1df14e41b18c20cf7ce4edb6d36ffacde125064ecd5bfcc91e0173",
-      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
+      "sha256": "4d04b1fbba944847d3e578da39fd762b45cf7b8518471793d3928dd80716479c",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/auth/broker_recovery.rs": {
       "status": "unproved",
@@ -6688,8 +6688,8 @@
     },
     "src/auth/identity.rs": {
       "status": "unproved",
-      "sha256": "dd9efc75d5b7acb4ee76d7bcf2a42695b609ddd1d9f0dcd52f636685a311c891",
-      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
+      "sha256": "aac105c74f6ce2e907dbbe6b82411befb44d0cd52c1906bdebe08b8edebabf35",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/auth/integrations.rs": {
       "status": "unproved",
@@ -6703,8 +6703,8 @@
     },
     "src/auth/knowledge_identity.rs": {
       "status": "unproved",
-      "sha256": "c2a349c5023cb27571df6eaf7d116f04c9f01e1162a94e902fc12dbe463d2839",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "8b0f5d034d8f756694bc594159f54bc72a7784ebd4112af6cb3128b51ea9cca9",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/auth/members.rs": {
       "status": "unproved",
@@ -6713,13 +6713,13 @@
     },
     "src/auth/mfa.rs": {
       "status": "unproved",
-      "sha256": "f95c30ff054f6936d2c26f47ec876573c7fa963a18323b08008ad8b362d06446",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "f73ee23489e2a94dc79427106e5b98cf47053e86daa01cc40cc2208883c913d1",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/auth/middleware.rs": {
       "status": "reviewed-binding",
-      "sha256": "c0486b2869f756db4aeb1f69c98614cb1e761c156e081a428fb10dfbee4f3876",
-      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
+      "sha256": "882ecd84546b7707df4a49d2b2891eb7bdd072db70d822cd87aba2059693e752",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/auth/mod.rs": {
       "status": "unproved",
@@ -6733,28 +6733,28 @@
     },
     "src/auth/provision.rs": {
       "status": "unproved",
-      "sha256": "6c10734e6aa19a46be57c0d94667ea30d5d093bc333ee9bebc0ac8d75f207d43",
-      "review": "Reviewed both shop creation routes and removed only the per-account count check and its Studio-only lock. Real HTTP and PostgreSQL regressions cover both routes above the old limit, current personal proof, existing foreign ownership and tenant isolation."
+      "sha256": "d3aaa44d3c333531b1a18748f198293a37a9df91246d1c19128a309a32268bb5",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/auth/recovery_entry.rs": {
       "status": "unproved",
-      "sha256": "18d9906a3dcaffffe1002ebd5c2103464de0ec7865b2d93e67759e21607fbe97",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "c6425989fecd0343230ceb684abf13f31d23fe816a1030a5b97ae13f8a40cbf8",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/auth/registration.rs": {
       "status": "unproved",
-      "sha256": "1be4f21948365c2a18c81746fd8128db91294a4ef1e3a5ca1f5923bd9366f320",
-      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
+      "sha256": "7cafd77146e889955acdce04d7b90d220b97e7eaf4e44c31393c43c23fad176d",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/auth/roles.rs": {
       "status": "unproved",
-      "sha256": "7d22aed2d1f60e0d08079cf27880e57b782dd4ce8ffc28596bd01b6c205bbbe2",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "c116a27edc81143d65780d19cf6013aeaf489f78df2772cffa56598ebf951095",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/auth/routes.rs": {
       "status": "unproved",
-      "sha256": "c343d3576138ee1e60e806e1c3fc52525d9ef5562af547f59ba30fc08e786319",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "75dbafabf7be6aa2f84ad8d5cb8f4e258f182988ed70fb7eeae66b1104f29667",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/auth/sessions.rs": {
       "status": "unproved",
@@ -6778,18 +6778,18 @@
     },
     "src/b2b/gateway.rs": {
       "status": "unproved",
-      "sha256": "c4b516272dd281d6d8fc736c3460674409b32c77e8666121cbd5409e36a22409",
-      "review": "F9: media captions, design references, product knowledge and the translation worker moved into components"
+      "sha256": "33c1ae153e5bc1b31250ca39c92003682a1a016208e2345125664494ba344a07",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/b2b/mod.rs": {
       "status": "unproved",
-      "sha256": "7e2ddda043279bef4f82f8d93ef4706210e9b0b87dff1b2cc0ce68c91ba87443",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "a95904e1b4fe439f9ae7c413ba99595331ddef590e12b63ef75d278187c657a3",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/b2b/orders.rs": {
       "status": "unproved",
-      "sha256": "f445b996559749cbf3089d293fc6b96117dccf59428d84f0af84660e98a38945",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "c66828f42b2d93018039ec9f1eccd1395a7d8d341272c8dc7e53e9cc2011fc5d",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/b2b/organization.rs": {
       "status": "unproved",
@@ -6883,18 +6883,18 @@
     },
     "src/bootstrap.rs": {
       "status": "unproved",
-      "sha256": "628c403b373c55c7bb5072793fa663d10b8118b386a74d975fbaf4c6f490fd67",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "f178020e17a5e85e9184b3e1806dfa9b3db3766c20b1c366c8675df821d80a7e",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/brand_redirect.rs": {
       "status": "unproved",
-      "sha256": "5aa3e097bd17016ddfa8b1147aef0842b6e0b309f14745ee546683cbbc12128e",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "bfbabb784638d97f3eb6097d7ce0dd80162e36ca73a5d74334f7a4236f8b999a",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/capabilities/admission.rs": {
       "status": "unproved",
-      "sha256": "67b220d7c2df9903cfa3c74cd111f3985320b0ea7f50e19f3721fccc7eb14fcf",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "41ead7208cd6f067f8cc6c89e56a42cf76246757a81bf726cb1b88f8c2f8f5a7",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/capabilities/catalog.rs": {
       "status": "unproved",
@@ -6908,78 +6908,73 @@
     },
     "src/capabilities/dispatch.rs": {
       "status": "unproved",
-      "sha256": "b81e99d568e44e88d9e783d60cdac27aa46f40d004cbe55d72430154f3b60f16",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "12fab5d7938ed627848d88cf632388984f7a8c55c7f01c038e27029db7ac5509",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/capabilities/registry.rs": {
       "status": "unproved",
-      "sha256": "6df72ecdedfd58f9eb9154cbebf2c45c5f751b57f7cdb6a0aa40293e39d88ce2",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "6594243495be9317e09842b93ddf63c3f88f8639d6b823a5135a6511fd87f141",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/capabilities/schema.rs": {
       "status": "unproved",
-      "sha256": "2601737b78764182684dece9bda01d353035f53d64dc17f15a2a2e711419bd57",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "b8ad16358f16f04b109c664cc4e96bcf46facd945ed6ec60998255cd93b8957c",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/capabilities.rs": {
       "status": "unproved",
-      "sha256": "d8740a1a1cbf36bc0d637ca0961601bcc01d4acf4925e0202c9abd74af09b556",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
-    },
-    "src/cart_model.rs": {
-      "status": "unproved",
-      "sha256": "11684d38326d59cce25f7b737a4fe810d8e4cec679e3b8c26fe77475ba10c7f2",
-      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
+      "sha256": "8b17e2f523fdb3cbe5aabfa8a8209c7792ec16922f9e1bf5470828fec812606f",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/cart_mutation.rs": {
       "status": "unproved",
-      "sha256": "c9f631ab766d0e819c40e8bf95ffbdca1efaaaea2508238e4241565ebf3fb081",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "fcea4a9923c4d1b7bba30d63cc78bc7181829d5dbb605a37bfe51ff3f16a8fb4",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/cart_price.rs": {
       "status": "unproved",
-      "sha256": "1f9ba8bc9b8368ca95d2ac799740fe47ee366a855c05d51d0ce33634a3e0dfef",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "3be4567866b8781222c1351669c40219140395fd221b3e49cb278f2b71e080f4",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/cart_routes.rs": {
       "status": "unproved",
-      "sha256": "f5f804ba0d6f942fc12e8064b4dfe2d0529c41f99f21d550b2eeaa513b259802",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "d6f3fee43dda834ee004b5aab74bd57bccb38cbbdc90a67abe7cf773a9e1435a",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/cart_storage.rs": {
       "status": "unproved",
-      "sha256": "0df528a6edad96df076ab97dd6271363e45d5bf9e44de8cd80a40b124b5bef8b",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "7b661cba3bcfca0443fab1e414a73681e0c561168b137a6cdecf5ae17732077e",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/catalog_model.rs": {
       "status": "unproved",
-      "sha256": "55a707dcd2a87e8109bc644663357d58be28eca3d276a5b2fc79a5efb2746caf",
-      "review": "Catalog component crate created; no rule changed"
+      "sha256": "0a72ec96dd0f5928a3efcd234896a5cfd5700fb591d97c85f23f87fc7281e9af",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/catalog_page.rs": {
       "status": "unproved",
-      "sha256": "2dce07c669a134e746d28436382c7b540b04699f00ec429b2f330a6556578b07",
-      "review": "Storefront catalogue reads and public attachments moved into components/catalog; no rule changed"
+      "sha256": "6a77a81080aaff0aee996328bdef475d0a5044ed48ab96265878efcc73a8a8b1",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/catalog_routes.rs": {
       "status": "unproved",
-      "sha256": "348eb51127417fb10736675cb321d410f7b267d5fccaa522b103968680046f50",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "3739ee56790cc602fc6b0b1c7b7976df33b3525ddf9fffcc659ad900a72bcfe9",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/categories/admin.rs": {
       "status": "unproved",
-      "sha256": "9d3aeb0cd20330d1d3d3ae9f695c1371fd5e1019da5dada509c411de38da7615",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "2843a5ff5dc18b33a8a1918deb6c379ae0fb80f22aa213127b7fbbe0a33b5628",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/categories/mod.rs": {
       "status": "unproved",
-      "sha256": "e461856244fa0d27d597a018e935b48c7b5ca591fe9d7c14465ad5b904919467",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "1ae3c27e632b8b31cebebfdfa39495338b4f96609e0187b85ea72889b3cd2281",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/categories/navigation.rs": {
       "status": "unproved",
-      "sha256": "d1c370aa1e8130ebb9346afed0fd1aab4bf906966a309aa711982e8d376351dd",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "c606ac5fc3403656f36746c9cc34c61f552c9645f02d5b9693d91b1c8fc08712",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/checkout/buyer_identity.rs": {
       "status": "unproved",
@@ -6988,73 +6983,73 @@
     },
     "src/checkout/mod.rs": {
       "status": "unproved",
-      "sha256": "6841e754cfbf13aa091da60e35cf0813b42a1974397251992e53475d7d340004",
-      "review": "The purchase transaction moves into checkout behind the purchase port"
+      "sha256": "5522a1cd4ee376dd65daa0bc0749e6254881a7288c466f2384637af75175c0b0",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/checkout/private_browser.rs": {
       "status": "unproved",
-      "sha256": "1fe8d99d07e66b005fdc8b429a398968aabd4f5f1aba75dbd0ce8321a8522d0f",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "5dfc31ce83e87c1d8657f9cd6137388c155e619729d833b571b07ad53d5bbb01",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/checkout/purchase.rs": {
       "status": "unproved",
-      "sha256": "0a78912b5d038bf7303c935b488586722ba69e7c0f6b434fbb0737101d6ef289",
-      "review": "The purchase transaction moves into checkout behind the purchase port"
+      "sha256": "f449e3860faa10a4ef7449ea3665dbcdef6c7a1036c3222c2245ed0b4e46877b",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/checkout/session_order.rs": {
       "status": "unproved",
-      "sha256": "0ba05893f3b09425054ee4778586338c8111f7bee7158cef8adcfa7817990c63",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "b467ef638da1c83df967b93e2eb7c15f4d849ed5baa3928e8eb509c5abf4aec1",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/checkout/session_quote.rs": {
       "status": "unproved",
-      "sha256": "43863da81daecc2f250e7c10beed70c368162a9bb1518e9bd7e29b739477492b",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "9b4a0df4ed579c509fe82d7bcd06ac4f1226e739ce22b4e5ab29d330e9e26a94",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/checkout_handoff.rs": {
       "status": "unproved",
-      "sha256": "1c4c253b19bb221cf479131e149b760903278aee192370cb605ecd681fa8dfc2",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "c7e84c3e104b557fb9f494870c0d3eb765ab982b0e01a92ca39f3a588660ff6a",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/checkout_page.rs": {
       "status": "unproved",
-      "sha256": "b09c3518b20c12d974e057833a6e2031e1e7414bf5635703dcb45039783868a5",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "f20368dc3091dac4c6b2db57dd0a8aa7bede13080f25365afd59eff392ab4e01",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/cognition/behavior/mod.rs": {
       "status": "unproved",
-      "sha256": "581a19ca5cf851814cab675db778cba172d8fe23662b305de372c1858ab4e399",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "99bdf67f9586bbef217672986f7d5332a789d8be8848ac3edf0b88086dd59648",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/cognition/claim_batches.rs": {
       "status": "unproved",
-      "sha256": "749e3265ea58a537b0480ac2bb9d2540ef691f192e91a0da4edb76750f84ba79",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "a28c85d6cd79b699459bf9f2ec9d8edceb3d3dc0206d46d47b34e0fc84d11909",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/cognition/contracts.rs": {
       "status": "unproved",
-      "sha256": "6afced8082b10e95bb51f157acc0cd986b99f6cc74fc5fcd00d2cb784984aa89",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "8d50c23edfc43e5cb6916eb1fdc5524b3815a0946f55e1781436c69705c62b41",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/cognition/evidence.rs": {
       "status": "unproved",
-      "sha256": "87bc272c5032b93f7484dbad91d6b9e0acf527339d7a5e77aef696a51477bbd4",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "f48f2895a5585727aa9b95a8eb4bda697e9d94be5467fea43aaee7c6062e2f43",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/cognition/experiments/mod.rs": {
       "status": "unproved",
-      "sha256": "8d9f1d7332da7e29e43dd4298c30daba9ac659733960b30dce59836f6cf1e57b",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "30597aa6ae9107a77a241f3abef3eafaa5d8a7b74430f65791bc545881d0efa9",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/cognition/extraction.rs": {
       "status": "unproved",
-      "sha256": "63c4c3d37d0ccfb8f71461a0f7b528c264ed2b63e248f6296c01d70eda5f8310",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "586d8aaa781b6cc5889005f2012976d0a8d58814a09c5b06f5991aa0ae6d7eec",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/cognition/indexing.rs": {
       "status": "unproved",
-      "sha256": "99103ce9166eca4d6fcb7b533c8307f0614ddcbc0771bbdb1d7037d4dbadb159",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "8693bef67249e7e31897cd9f2346b1dcd6ae84b0ab2dd826de96df6837f791ea",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/cognition/mod.rs": {
       "status": "unproved",
@@ -7063,48 +7058,48 @@
     },
     "src/cognition/preferences.rs": {
       "status": "unproved",
-      "sha256": "dac4b776f0be8365eeeeff714bd242d459e90dac840d66c952f8641249d77705",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "03b45c0b58fd30d27cbd7627ab6ac2d608ed3c685db35e6d4f3150fb906ac787",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/cognition/projection.rs": {
       "status": "unproved",
-      "sha256": "f69977d61c7aab148849530cf56647d8f406c1706b34ea7cc1aa7337bba61152",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "6e05fd0dd73a65ff5d6d3fa8de5692048a4cc379028b530ccfd8e34cd3ee73ee",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/cognition/recommendations.rs": {
       "status": "unproved",
-      "sha256": "afddc7a102068e3d2bf6c7af25c8b841098fc9905ac7bddb7d44ab299fd11691",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "b6fd13f9bc2a520bc52358760ab7df1995084ca0b985a2a273a8c6fb9958db16",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/cognition/routes.rs": {
       "status": "unproved",
-      "sha256": "481d4641c54a3dd8bddf11aba605141a059bdcbbfafe467f14c647766ac332e8",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "aea8a0ba7b384817a2fc9d10ae1fbd9a5e2e144ec7e558f97868c88e3d064d77",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/cognition/signed.rs": {
       "status": "unproved",
-      "sha256": "ab182868b97bdb9e291ef6ac9a1c873a54766a88f5b79a0a00c44495331829fb",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "d166525f881693f99a8ef316b450d18e504ce7af85e1ebe2085bf32424ee834c",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/cognition/signed_offer.rs": {
       "status": "unproved",
-      "sha256": "98744b9a6a61abe26648e4f388352c7aae84db6c680759bc8bc89fe9c985dccf",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "e962bccb98c1686656d4af5aa467a7203dfb621cfdfbe682b09ba989de7a20cc",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/cognition/stream.rs": {
       "status": "unproved",
-      "sha256": "6b4a890f0f27d61989d8eb1bcc722f7c7bf782d8e1bf207c942ad4d1af5c0872",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "ea34754eec685718d4be07c2c683f71488cb252c0f94c9f00ae929723b19d5ad",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/commerce/catalog.rs": {
       "status": "unproved",
-      "sha256": "57e328af4a70261cb73c1c521623eca5a2565d2bde1ff5ccb677b757627b4d66",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "b0f71706b1fd67663233ff0e9ccf0c45c5d7bf3dfae7531878c9b4895ed1f122",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/commerce/catalog_intake/mod.rs": {
       "status": "unproved",
-      "sha256": "2df8a101dd3355e3920c898d8023cc7cd1d243ebd1b7a77f8348d36aa2d57ba9",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "7658f7c4e96b9e0bc0c63f32a63261a13868ab71006b8ef7872642c73f99ddaa",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/commerce/catalog_intake/schema.rs": {
       "status": "unproved",
@@ -7113,28 +7108,28 @@
     },
     "src/commerce/catalog_ports.rs": {
       "status": "unproved",
-      "sha256": "4aceebae8970e24219cb3a0acf2ba1f0dcfe768709af500eb8479733a2fb38b7",
-      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
+      "sha256": "702084036390f3e656faedfc55d77fdbe6e58787bc02f9f3e250f301d9d70082",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/commerce/configuration.rs": {
       "status": "unproved",
-      "sha256": "83ac70dd9a7c899c14a6a0060006db06fafc8ea7df92c8f4f35143a2d9c3c408",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "922ef64605f1088f956a681c0283ed78132ce9e2debe60fc500b57ca4b981fc6",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/commerce/content_text.rs": {
       "status": "unproved",
-      "sha256": "2280199e7ba9e7ce136720b50b91dc8c95b09bed390cf854248c588d4d970911",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "bb9b110cbcb2924c608bf6885e9b4e8c595995c0677097c8879cf60135400275",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/commerce/context_routes.rs": {
       "status": "unproved",
-      "sha256": "9883ad9fc7e1151356cc42e6bb3dc246a69062f01f71f80fa8984a24565434bd",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "c0f1c30be6d5ea8f6e3d89a8dd40370727645e7f78c8217b7e07c7f518fcd3a9",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/commerce/customer_groups.rs": {
       "status": "unproved",
-      "sha256": "6d87a70609eeb89f7bfe368dd61577979b02a260b5982d632c29cb4477e8f7d9",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "dfe15c06dc74a014f8ca7d40b360b7bdd561be8e8c7521415dd7782d0369dfb5",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/commerce/delivery.rs": {
       "status": "unproved",
@@ -7163,23 +7158,23 @@
     },
     "src/commerce/geography.rs": {
       "status": "unproved",
-      "sha256": "49ef8ce6a0e0de7450f30c52271b2b0edb228db5de7cad146ea731f82a97c1d4",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "8993935fc02ee85286e4d44f329aabfc1d50e65052fee3af8898e6bc236561c4",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/commerce/international_capabilities.rs": {
       "status": "unproved",
-      "sha256": "44506f172440877c6939ec037179a2f16de153ec927847a6e29ab527e7355a51",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "86893f73cbfd18d9337f6382f94b86f319411949b5f99f997ce4c13dae05fa14",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/commerce/inventory_ports.rs": {
       "status": "unproved",
-      "sha256": "3a6d6fa91f9dd91552c68482e091cacbf4015b1bc9428436d5cc04f533f4f155",
-      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
+      "sha256": "af444d6db7ad5ab979a20f14d875e1bb92915499c649ec146eaf9185a49826c2",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/commerce/method_usage.rs": {
       "status": "unproved",
-      "sha256": "79cd5f2ab149639727c5bf5cb6fbc0fd62c4e2dd4c68005ed8f52bd0a0327a08",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "b843c1263a226a70fd4aae6e561796606cb0862c548f8fcac478c8e6f5891259",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/commerce/mod.rs": {
       "status": "unproved",
@@ -7193,8 +7188,8 @@
     },
     "src/commerce/product_admin.rs": {
       "status": "unproved",
-      "sha256": "003d3cbfdbd07adfbba867b04283a4811d7497762feb48437359f9dff239a627",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "3692ec2ee1270ee3f298a1721537b6cbd6765109463906b8dffc3770d51a2653",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/commerce/selection.rs": {
       "status": "unproved",
@@ -7203,23 +7198,23 @@
     },
     "src/commerce/settings_guards.rs": {
       "status": "unproved",
-      "sha256": "02f5267555f0ba6bfb1095171d16c5817a119eb877f0f45b0b00beb268374770",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "d30bcd23f2687646baf82262f23a09c4773cdd4ff1885f9e0458fafe05f73833",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/commerce/settings_patch.rs": {
       "status": "unproved",
-      "sha256": "344687ddcb8fe041d6df460f484aee93568a88946f88219e924e33f1127a6971",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "0b9aa0f6f001871227916cf198bcf0f2f5bdf27f85ae34408b43472b9d1272b7",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/commerce/settings_scope.rs": {
       "status": "unproved",
-      "sha256": "0061efbbd6a95324ff9e05b4047f171a2f295fd956323a9620bda700fb1c0955",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "79b640bb42564e4801f3b36f0fb10f0f1e22efc17316a57ec2e4ef026e9bec35",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/commerce/supply_proposal.rs": {
       "status": "unproved",
-      "sha256": "549a2c074008411b48f51abc93970e5de05d4710bf0e5a6c3e497211af21dc68",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "cd5c47709039cbe787eb1df684381d88fc1e617c772c45184fa2a55abf982b3f",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/commerce/tax.rs": {
       "status": "unproved",
@@ -7228,13 +7223,13 @@
     },
     "src/commerce/tax_context.rs": {
       "status": "unproved",
-      "sha256": "b0951a886fe4786dda175b285641c5915d5c4a4caf0dbd229ba8eff9f78fd596",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "7fc14cd80de9780f85941a1f473b592c8d6d80a6d3784ff56525edae5146c743",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/commerce/test_stock.rs": {
       "status": "unproved",
-      "sha256": "d1c34224de9834bd66d2f55d2a227c3ff2634efada73957900137f703000cabf",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "6eab4820b48e00d4a944b590bfe103016b6c317f28171bb4c9200a03c5c2304e",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/commerce/types.rs": {
       "status": "unproved",
@@ -7243,18 +7238,18 @@
     },
     "src/concierge.rs": {
       "status": "unproved",
-      "sha256": "fe53e266e57d0afd512f816aad31ade7f86148fd7350da528311ac9e133afd95",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "e3312c8714be5a36b305f9b516d1f19be535d6fcde611bbd4f86bfbe83913bf2",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/currencies/capabilities.rs": {
       "status": "unproved",
-      "sha256": "29b05a240fb1cb2e22e84f0b06ff5fb29b374bba64a3d1d6c13807f63f9a3bd2",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "53e0ca092b8b17cc03a56093dd847186a0441910d63e5453c375dcfcfdf73cd7",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/currencies/jobs.rs": {
       "status": "unproved",
-      "sha256": "128fd3aeae361e7fd69bf869f93ccd538a5ba30bafe8bb7f7e4c5c877093be2e",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "50fa65192facc2220056569330a2b40fd8bc0c5326197f6102cf6677f5f56453",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/currencies/mod.rs": {
       "status": "unproved",
@@ -7263,58 +7258,58 @@
     },
     "src/currencies/ports.rs": {
       "status": "unproved",
-      "sha256": "b9b34e94ce5941ca39d7b9e24fee38104add7d2560cc92d17b1eb90df5c97891",
-      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
+      "sha256": "6d46f7dce6c24dc12bdc7cc1b68b282d9cca6fcf337bfc6ab2acb9abc7a63231",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/currencies/rates.rs": {
       "status": "unproved",
-      "sha256": "3c0ca4022bc87adaebc8fe2dfd046288a63ad6b96699a77074acfa6226f0c65f",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "4dfb42a9759f363a727c8ba0a3cd74d5ba5b489d6357eb59897e23bf6ec88daf",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/currencies/request.rs": {
       "status": "unproved",
-      "sha256": "844765aac0cde8a7936fb4d5e922f7ea245029d6f3c12e74c7e3a25a6fe00bcf",
-      "review": "Currency configuration, conversion and reference-rate retrieval moved unchanged into components/pricing; the currency context rule is bound there"
+      "sha256": "ab1138a9251b998f677d3bf9f0119ae02343b91a0a9b7df3e2908c81c52fcec6",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/currencies/routes.rs": {
       "status": "unproved",
-      "sha256": "899f6b034c857ee9dd8f22e0dc96ab7e0d0e1e6996572c185ddb0c8752c1273a",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "1e4b28be17f0a4bf35ea5647f6df4c73702dd8623fd0553874a227ef03275713",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/customer.rs": {
       "status": "unproved",
-      "sha256": "ea272703b819163a6c1db65256450cb1bfbda6120df86d43a3138c1284e81abd",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "e3b692b5bb2a94da04de135f06fc79cc1e32e3d9b4215bd1a0a7b714511effd8",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/demo_catalog.rs": {
       "status": "unproved",
-      "sha256": "80efb6d076748bd9cffa81b4306179c30f0d97b4692701af843c65b71987536e",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "aa25bb7dbb8e8a22d85f4100d42494ea93596e0cc8c10372e5cdd00de5c98b11",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/developer/agent_connection.rs": {
       "status": "unproved",
-      "sha256": "f923d6aca7f506bf82d16843cdf3a04b4f18b21fc8ced3d4fe7d5348d7fb0aa3",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "b4e06c5b510786bd8067a6695248f5e87c902f4ef28496f42e7abaadfdfafe62",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/developer/builds.rs": {
       "status": "unproved",
-      "sha256": "106fa2742d8a1ba706d4413c68d3183e238bd7e072ff2d9b83562e1bd2add490",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "5799c8b89868801884380fd9a1e3da9163baa9c6ba07db053c6398f6b75b44d8",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/developer/generation.rs": {
       "status": "unproved",
-      "sha256": "e9933f008799fccd0bb5f978bd0c3a96b88c3b597b546d411be42db9f5123c30",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "99ac21c063c32e283df90891b56ea46ca4960468d743cd59a7cae0181e96a371",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/developer/mod.rs": {
       "status": "unproved",
-      "sha256": "591dbadd41651923d85505b70b914fa35ad077d4db4ec84f3f9812ac9a5b8e33",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "b293549a7c8edc8c5aeaa1d29af12386dbe07ddec1cf7245cd5682afed9992a1",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/developer/routes.rs": {
       "status": "unproved",
-      "sha256": "22b8f15ede030494dc3493f7a3db3af02af87319b351ba26166f3d78c574914e",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "16c93457c791c51cf420e712c8a8d5d4d8ba54b130e99fee95b7d8c83610d45c",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/documents/ingestion.rs": {
       "status": "unproved",
@@ -7323,18 +7318,18 @@
     },
     "src/documents/knowledge_host.rs": {
       "status": "unproved",
-      "sha256": "577ea7eec88672638bec0044beeb1490577f5da17734eadc93f75c1caf597a7a",
-      "review": "F9: media captions, design references, product knowledge and the translation worker moved into components"
+      "sha256": "e71df36d4928e9b300fcff6d37cb3060eeab119989595f81dd36a0ad42290c64",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/documents/lifecycle.rs": {
       "status": "unproved",
-      "sha256": "55524268103ae8c6b454f5315ece194ed514566b50e857c3a3e7483bd5bc8566",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "339a873c01ed6160d7f98faf72b1a0f199dabf9b2204840e4dfb35a6f3fc38dd",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/documents/mod.rs": {
       "status": "unproved",
-      "sha256": "13efef31ba118bae286fd773265025d825b146223088739196e25beb8cdc6973",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "4b8e31443de706480df528605c79ff0f76cca059d6ed1e15861fdf49c63d4554",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/documents/parser.rs": {
       "status": "unproved",
@@ -7343,68 +7338,68 @@
     },
     "src/documents/preview.rs": {
       "status": "unproved",
-      "sha256": "18101bb644df75d2b6f41a7090d68da643774b1511fec3e007eed35a0976d106",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "a58677d79540935ba0a34df754f82018f613cfd1738f0f83aeb3687bdf4f3ce8",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/documents/product_knowledge.rs": {
       "status": "unproved",
-      "sha256": "3f6f3316bd49576dfb5cfdda7453ebcda40c7754680eeadfe36ab75d06a600e2",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "5b51e6855cae831d3e5ba9c0cc32a8bbef98aae52976701d26ae57cfd2ed3d7d",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/documents/questions.rs": {
       "status": "unproved",
-      "sha256": "44c9b8c5e1d1c33439aa5aa524440fbabbfa80ec1ce486756b8bc818ad5cc85d",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "d97ed8feea0e0b887ecb8bb8543c4b67ceb609bb61735cf5d9fb597bce468a87",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/documents/retrieval.rs": {
       "status": "unproved",
-      "sha256": "65bd64dbba12b6cca6d68c19bb85f7273c84663aaf089828ce9dc3f48bdc7870",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "774276d4ec6e436484f9435ab7814b643aae8f77d06a092e388f1afedcb4f0ea",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/documents/tools.rs": {
       "status": "unproved",
-      "sha256": "a07574f769447eb55c1acf77717572124e7aa47a116271c1ff7c02eca8ef4da3",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "df87c5f2002bd5e079e277650c7102641ff4851e09738e4b90f1dc3acecb5365",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/experience.rs": {
       "status": "unproved",
-      "sha256": "9ac44f971e84799e920283f93295b8160f2147c1f5feddfa81036df1ab3feb33",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "85e9c8b788e319157abae3351e9965aa0ba82b6d2133a15a92cf97a4eed84351",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/extensions.rs": {
       "status": "unproved",
-      "sha256": "9704880bab1ca9a0cbea89ec717efa0eb7558e20906a6be782996e5ded12b92c",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "7666c117d68770c8f3f21502701cffab33eebd6fbbcc86c799e2bcdab3a93978",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/foundation.rs": {
       "status": "unproved",
-      "sha256": "c2bd5223ac2c6bd9d642bbc302f8d76463cc8e850b2586287847bf26ff04468c",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "d22eff1d82cd8aa56ae87805e58d102f288ae18d38093825bc8baaf4180f572a",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/history/capability.rs": {
       "status": "unproved",
-      "sha256": "1ff915419ab8890b4434f891b5dee9c7757c7f6d1a145589ed46f83462f8a83d",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "2b915b73cf7878d69b9c785dc3306805f7a2ab4ef476477f143744aa01ff8cf8",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/history/mod.rs": {
       "status": "unproved",
-      "sha256": "20aa380a4b8b73eee45f545d273033cab134d7ed871aaeb765602aef8671dae0",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "1ea14b98122ab39d97a124e88c56579fb505b1ce7cecf5517f99cda5ba8ee8da",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/history/product.rs": {
       "status": "unproved",
-      "sha256": "603a17da99972f7c13e6faefe6027895dbe9d4a234a2dd64ac61409f1a3d0955",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "c2da220bd8a60e56cf0b3ac9924ccd3c1bafbd5f2510538f213ec327eec38835",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/history/restore.rs": {
       "status": "unproved",
-      "sha256": "37d30a2cee4d6e143809550813d3dbecb5b8a773f943258f0044abafadf483c9",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "f7de3edcb7494709d94ea38cb2fa383729ba6659f9dbfb51bddeb082330b8efe",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/history/routes.rs": {
       "status": "unproved",
-      "sha256": "59a52644bd8f74611ca2a6936b2942a157a65e179ee11f0e11e03837fcda61f0",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "4cc0f8ab660a1e70ef995f9e048e88f0fd196d573c6f09dec4944c38fcef6fcc",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/legal/buyer_consent.rs": {
       "status": "unproved",
@@ -7413,8 +7408,8 @@
     },
     "src/legal/mod.rs": {
       "status": "unproved",
-      "sha256": "05422a73b1a4f7c2819f06ec1feff05af6e94f3eee14160d0a6fd8ac659b96f3",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "281347c017e66aa9e7b28ee75fe9d83a8a6e9097a135ca8638f6b5bb8aa90061",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/legal/model.rs": {
       "status": "unproved",
@@ -7428,23 +7423,23 @@
     },
     "src/localization.rs": {
       "status": "unproved",
-      "sha256": "453e1038f6126f7e8ff513643be5aa6d50ec3f418805235bba436417565b685a",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "328745198f9110295f1a8155ed48d7991cfbb38881f2bfa49cfd0876637697b2",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/main.rs": {
       "status": "unproved",
-      "sha256": "ad6f66f3fb653cbc13f2d9f38e95a8dce8601c509499e2eeda1e327492f0ade6",
-      "review": "F7: marketing configuration, channel admission and flow templates move into components"
+      "sha256": "039d7d36a1533f21a562b70642d8862a6e50af31b1ffd5868890eaa8fdd44650",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/marketing/app_flows.rs": {
       "status": "unproved",
-      "sha256": "c86fe89ff8a7ec6067440cb2fd3ff8de79bf90d0a52acd82889570698370fc6e",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "ff82e92f664f17926951a35db233e7f7628a36927bd106342a034590a7b27d48",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/marketing/catalog.rs": {
       "status": "unproved",
-      "sha256": "5429f634dfddd25ec8a447b2846e8901abd9ab58c0fc7cd716bc6daebd4f25f8",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "57fb0e0a68f5bc822d4ef869c6d4285a0d7a2aeea03ece737bc1a7b7ef11b2fd",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/marketing/channel_access.rs": {
       "status": "unproved",
@@ -7453,13 +7448,13 @@
     },
     "src/marketing/channel_preview.rs": {
       "status": "unproved",
-      "sha256": "5e81c9a89b76c7562902349150d056eaaa5fc05e17939fa35c16df8767fbece9",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "0ec530e05e78906951acc562dcd4751afca08e585a3b9ec21ee75c53e00d31cc",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/marketing/channels.rs": {
       "status": "unproved",
-      "sha256": "f96af44b1f472113544710f2c3b5cea686685a77629c4702d9b2e99b97a655d1",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "58ed1951e9312cc3f8f2e4b2a2827e3cf6b7b3eda1151f4ad4625d38ade67de7",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/marketing/condition_gateway.rs": {
       "status": "unproved",
@@ -7468,13 +7463,13 @@
     },
     "src/marketing/configuration_host.rs": {
       "status": "unproved",
-      "sha256": "dfe9ca0647d53140d719dbc8a3766e8a0abe7d82147baa1bcc47f45fa7012b1d",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "9b3792e23ffd20959fc3a2c13eeefdbfd75fba36995af2a8008de106acd73690",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/marketing/coupons.rs": {
       "status": "unproved",
-      "sha256": "65ffca6234c20745193775b8af0e3dbd9e184eafcf5716f82d890d86ff6108cc",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "0e1b0e4eaa6981777ac00c20603fd5799514a4216ee1aac43f676017f2304445",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/marketing/flow_access.rs": {
       "status": "unproved",
@@ -7483,8 +7478,8 @@
     },
     "src/marketing/flow_actions.rs": {
       "status": "unproved",
-      "sha256": "c8b88e6e4ad1c293a78e98e230e71ec16c14e4812a4ce044445c41c99b17e845",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "539c3b117a1b70dbdd81c05d562229484a79b7d7e7948640098a9b94a11d680f",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/marketing/flow_jobs.rs": {
       "status": "unproved",
@@ -7493,13 +7488,13 @@
     },
     "src/marketing/flow_mutations.rs": {
       "status": "unproved",
-      "sha256": "71256df3800bf29cb8b9b15c22fa59420a555b34dd6e9417d997e60c2642fcc1",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "9fe38c55ae3837dabda99bd4199ad76de116e215628d7f71dc890a8b7e17f71c",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/marketing/flow_policy.rs": {
       "status": "unproved",
-      "sha256": "8b63ca1e4cbd271031a828deb1b160a2638c6bc5284d8c441347e706480af454",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "198d4b3ec8e081b907891a9f4cc3527bd3e0be518a1df3fee64fb1ba5b9cbf14",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/marketing/flow_text.rs": {
       "status": "unproved",
@@ -7508,13 +7503,13 @@
     },
     "src/marketing/flows.rs": {
       "status": "unproved",
-      "sha256": "6686ba8712d0c3e3bc5631203f49276cbb34522725a7a1d740f1202a9b82e687",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "10ea346634f81ec4994de624d5313ee9a6ba1e97d097c4543bd0a1e536588401",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/marketing/gateway.rs": {
       "status": "unproved",
-      "sha256": "841dfa51f65f7be09a1f526658985af6a853ed24ddee6bef83ab55bf6543e275",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "cd58f3b6e2bb58d9918810840ad7b396be2ac4bf453e6f33e90fc1b9d1caa5a1",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/marketing/jobs.rs": {
       "status": "unproved",
@@ -7528,8 +7523,8 @@
     },
     "src/marketing/metadata.rs": {
       "status": "unproved",
-      "sha256": "8f96553b0edc912767dda14e1c9069217060bfafd8ff1296d54e8aaa0391bf22",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "168c6e67603018d9ce0d15efd2f9248b9a536b4b74e1760f112c80b89ab5ca15",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/marketing/mod.rs": {
       "status": "unproved",
@@ -7538,48 +7533,48 @@
     },
     "src/marketing/pipeline_runtime.rs": {
       "status": "unproved",
-      "sha256": "7323b5c3944486b1ec7329c9ecc286bb632f38f44f35506a3eac344fed63716c",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "dbb6f9cd1e4455ebd56850fad44084d2d9f74dff116c126eb06800b2c7494d6e",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/marketing/promotion_import.rs": {
       "status": "unproved",
-      "sha256": "2aba0aae2de55f480d9d42518e99619a98e7516de5473c97b47c1ba6d80ef179",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "e73be0f264e5af3a14b6dd54d43d908fe243b0632a15dd02b9e4b613d6be49d6",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/marketing/routes.rs": {
       "status": "unproved",
-      "sha256": "fe0ee896612e49caba7355a4e9841624ade5a91d27bd9dcca1e93723766a9286",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "7ec3a67ab4a93d045846f2a46405e4084e1a8bb48c851d9a6debd8cb0b62bfbf",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/marketing/rule_history.rs": {
       "status": "unproved",
-      "sha256": "e5f69d236179047da700a24b3abec27a7e3e41cae72393ad7ee17b82bd7c77cc",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "123f4210514ff78e039d7ee307a7f20dcde6cd937379490cafef112f2b8cd484",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/mcp/poppy.rs": {
       "status": "unproved",
-      "sha256": "82a059292416839e4aa3a8d86990fb43b460b3083eeabe16be75c2904fb8a948",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "26c3670337a7ec8ee9228a168cee55200b64edc601b0b88cd2c93a8ed6a582c5",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/mcp/protocol.rs": {
       "status": "unproved",
-      "sha256": "d2ae751aeacd94f075798ab724486b1b5fc451216e20afa799074a7756ca1b53",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "6fa55c95fceb8e5c6e7416b42b8352203030b66e6ca159575ffa91dee91751ce",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/mcp/transport.rs": {
       "status": "unproved",
-      "sha256": "29acc3fc37b2da1832e5aa11e68a2283360b37a6bbcea388e18d0f1b261d2d8f",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "631d5a21edadcafa0267e4ade29f76edd00470512553fc04cbdf0e87a413e9dc",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/mcp.rs": {
       "status": "unproved",
-      "sha256": "c76d2c0efee36e86d8520874425b5ccfcf39e48e7a9967b9c55144fcb0da6636",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "b7d575428c04c94fb52f3231fccf4c99ce5ded878a89423bc8f444a6784a274e",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/migrations/identity_checksums.rs": {
       "status": "unproved",
-      "sha256": "5fc5c7491c427f461539445c60ac31e15eac11d145dd26a193f5c540d665ca53",
-      "review": "Identity-only Veyndo namespace and canonical-domain rename; reviewed migration checksum compatibility for six historical SQL versions, unchanged checkout predicates, 42 library and 169 binary tests pass; native component legacy boundary remains configured and guarded."
+      "sha256": "24eaf9616bfca4c4ffbf59fd3681a9d9eb58a20f16d6286b124efacebd64c48f",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/migrations/recent_schema.rs": {
       "status": "unproved",
@@ -7593,8 +7588,8 @@
     },
     "src/migrations.rs": {
       "status": "unproved",
-      "sha256": "6ab74f372343f2fd457fd97b6926f4663c8e0e63e7ec9fa747b974378690e175",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "2e2d287612516c846d0460a70f6e5a19f5071beb867d2796749b843e7ecc6102",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/operations/addresses.rs": {
       "status": "unproved",
@@ -7608,8 +7603,8 @@
     },
     "src/operations/company_public.rs": {
       "status": "unproved",
-      "sha256": "8a2fc5a0054265029f54a16c85af77cd55f2793342659afaa03237ced0b4800c",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "d96a448d42d72a7a7def7e8c079986b227db7a17b266474356c6b633a021ea2c",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/operations/creation_schema.rs": {
       "status": "unproved",
@@ -7623,8 +7618,8 @@
     },
     "src/operations/customer_lookup.rs": {
       "status": "unproved",
-      "sha256": "76725316342674afc774d9af85abfbf9b73edcef6db92981c0f1def3ba3b34d5",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "b295e8db25426c340d9ac0f838e156124394abfbcceea73d98bf37356b576adc",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/operations/delivery_booking.rs": {
       "status": "unproved",
@@ -7633,8 +7628,8 @@
     },
     "src/operations/grid_plan.rs": {
       "status": "unproved",
-      "sha256": "cbadc47cecb223dc472d2440bb0d44731782f9366381d1913b3d783715a9b30f",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "38531ff5e8c7aea190841e29a58cbdd271c346e6c1f04dd766309662a15bf70e",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/operations/grid_schema.rs": {
       "status": "unproved",
@@ -7643,28 +7638,28 @@
     },
     "src/operations/imports.rs": {
       "status": "unproved",
-      "sha256": "1a96353663bc0d8a4679710c75ba711559538ea689b6872bbeba91f4118b5f43",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "7b91bac2384bb26a117c9d5ff635f5839686584fa0ab0057beaa979514f04f6f",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/operations/manual_orders.rs": {
       "status": "unproved",
-      "sha256": "4184f9f40bf4ecc515cf90db2a0fab681645e38ca170ec7300d689249caa256c",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "666589c684da582f58314a38a91444dc21415857b840b7962ae7ebcf056e5578",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/operations/master_data.rs": {
       "status": "unproved",
-      "sha256": "09fc4cd7714c9b48b5f1e7c3318cd1b9c5bf3351c9519ba22554f44318ac683d",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "e0d85e2564e207ed39a29f1b6ca6a83f91f327399375213a6147a58c28f0a7db",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/operations/mod.rs": {
       "status": "unproved",
-      "sha256": "745690bfd4dbb8d56950622f11e2c94d1934171c6385d9d5d53f525cf68dffe9",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "147d7f9d6f69d0bced4b2eb5da12d2c98322791ad8be4dbb8abf36499937a265",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/operations/order_documents.rs": {
       "status": "unproved",
-      "sha256": "341b6a46a299d9500ae8bab8aef39b77be986b49ab7044e5fac99ab3c71cbbb9",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "9de8d7fc07629fbe842d95c9aa568b1131faf57064883a72df63a74ed77bc187",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/operations/receipt_pdf.rs": {
       "status": "unproved",
@@ -7678,8 +7673,8 @@
     },
     "src/operations/receipts.rs": {
       "status": "unproved",
-      "sha256": "9c4766ca3db2620c67598e10715a835d7935278fe31f2d499634d0257fbc2649",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "c46f995da434a397d470162baafd45bd27cca5b55597feb5a14d9ed684445082",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/operations/redacted_reads.rs": {
       "status": "unproved",
@@ -7688,38 +7683,38 @@
     },
     "src/operations/routes.rs": {
       "status": "unproved",
-      "sha256": "c7b176db13a60e6e3e5baa845f36a8b691848d279e18e5efc8dca4b8bbba2373",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "07db00eeed96a14244a2f5b47cf0d82adc86f4d8f067b5d523d28d44ca8d5d2c",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/order_checkout.rs": {
       "status": "unproved",
-      "sha256": "1503d86a4e841814c0ebb1c4a7c39c9c7a5c994aaa6093f41252bfd563ca9427",
-      "review": "Reviewed checkout stage move and buyer-scoped host contract. Native stock, replay and contact predicates retain their consumers; isolated Commerce and Checkout tests verify legal review, current B2B authority, original receipt recovery and one atomic purchase."
+      "sha256": "7d34cbfc467a794ced1368bd000fa8b1155d0d34bd663252c675970f21f338bf",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/order_routes.rs": {
       "status": "unproved",
-      "sha256": "a4508ca9c68db16b9ae8c9f05aa5a5ee46c5adf1501bfb50696640598c71631e",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "5e06f9909fe3375553d19dbd4ded3a7589ace8327cb4fac72672a2a6ae9a1d7b",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/outbox/retention.rs": {
       "status": "unproved",
-      "sha256": "ab2c4030ccc699606f5679ca03b7f915076c68aae7d1e3e3e45b6563e9c6e410",
-      "review": "Channel metrics and the outbox consumer moved into the core crate; no rule changed"
+      "sha256": "556eab101e96378ad9f0d958b2d22903a3da528d8e20e994d9d109d0ccf07dcd",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/outbox.rs": {
       "status": "unproved",
-      "sha256": "f967dadbf2e0bb6c5dd82fa56133b529c14e2b2444a5a460c79ee8bc79472331",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "9f9eb2c65babd52ceff3a67c0468b82208e2266028910c15d0624af2aca3e5cf",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/payments/accounts.rs": {
       "status": "unproved",
-      "sha256": "9c8bfdc21670e99b67500ff33c4f0df92c8bc3cb7d9e44cac23cd88544ebc7c4",
-      "review": "F8: payment providers, POS register and B2B commands moved into their components"
+      "sha256": "571307a42d7e76bcae8eae836770faa67d5768c5435b820ca021c3e1afd04fef",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/payments/app_commands.rs": {
       "status": "unproved",
-      "sha256": "75cfaf26aeaddb8ba3918108a4af653588139e5e3a28c120f1219756a3027c4e",
-      "review": "Payment commands, worker and provider sessions moved behind the payments gateway port"
+      "sha256": "378f713bc95b8e80950bd9577dcd7befd2ddea35f0963cf21f3d81d110f813dc",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/payments/capture_configuration.rs": {
       "status": "unproved",
@@ -7733,13 +7728,13 @@
     },
     "src/payments/contract.rs": {
       "status": "unproved",
-      "sha256": "c397b139c024c9e36c3e95ab5d048c9db25913ac9abef370173dd821152934b0",
-      "review": "AI price guardrails moved into the intelligence component and capture configuration into payments; behaviour unchanged"
+      "sha256": "1d114032686f83b418363dcf91ad92ad4e2eb5e893cd47c8205781e992e97c42",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/payments/details.rs": {
       "status": "unproved",
-      "sha256": "279735124c072f4762e309ea7d705cc69c03b6081538a23c1c29e4311e412c92",
-      "review": "F8: payment providers, POS register and B2B commands moved into their components"
+      "sha256": "497582d4384995bdb016613b44b64cd82e0ec40e6c3c82c58d8a23cdf572eabc",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/payments/diagnostics.rs": {
       "status": "unproved",
@@ -7748,28 +7743,28 @@
     },
     "src/payments/generic_receipts.rs": {
       "status": "unproved",
-      "sha256": "41336daefd9472414637e09987e85056f46e5283ff86fc8e9c850da61f189808",
-      "review": "Payment commands, worker and provider sessions moved behind the payments gateway port"
+      "sha256": "be8a3a69d50b96d29c5410a42eafe689d859c38ed1ecfd3264ef192693ab24d0",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/payments/host.rs": {
       "status": "unproved",
-      "sha256": "8a23fba60169fa19c79cb05cd611c7bf64038fe3654aae14141117302ec40736",
-      "review": "F8: payment providers, POS register and B2B commands moved into their components"
+      "sha256": "e471b793b9e16d15066ebc81fa198a314f376235c0f99475cffecf74d820c02a",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/payments/instructions.rs": {
       "status": "unproved",
-      "sha256": "089a6ada83e68a3feee9871d80a1230b299a7be850aade8b4baa77e8f1ba5e2c",
-      "review": "F8: payment providers, POS register and B2B commands moved into their components"
+      "sha256": "e9253d75983d398921429b6514a8450d6c8d4c54b4e6cfdde902bad8da42258a",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/payments/instruments.rs": {
       "status": "unproved",
-      "sha256": "203c707b370de4282f6848b9d4247eb85f14748f1430c4b6ddef053213884c77",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "1a2dc5bc63a25cb6183b8bcdcab864278abd729071b80b8b8ff6e75a7196aadd",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/payments/merchant.rs": {
       "status": "unproved",
-      "sha256": "36ac353c4bd347080013e47b86783e71c19b4e3dc3f3745ad25d5da8a702d771",
-      "review": "F8: payment providers, POS register and B2B commands moved into their components"
+      "sha256": "2f6b14a7461cfbc2d119d114e04c030c28fbffbc91d31020b939718d6cc645fd",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/payments/mod.rs": {
       "status": "unproved",
@@ -7778,18 +7773,18 @@
     },
     "src/payments/operations.rs": {
       "status": "unproved",
-      "sha256": "3f5ed12c6c8955038fd21086678d4b44fbef237f407c50dd6aff1da319a49813",
-      "review": "Payment commands, worker and provider sessions moved behind the payments gateway port"
+      "sha256": "89033c8b80f40c920abbc799070698d8672d6841e80efe8f96d523a1966fa826",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/payments/provider.rs": {
       "status": "unproved",
-      "sha256": "6f3ea2573daf6add28a3efbc61648dae83d83e7619fc8972d685f1d392b4b2a2",
-      "review": "F8: payment providers, POS register and B2B commands moved into their components"
+      "sha256": "0cc28e710f4556253e9ba53eefd377fc0f13a6d7f216ad35a12aba2defe2685e",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/payments/provider_webhooks.rs": {
       "status": "unproved",
-      "sha256": "e46c4688ee869cb50ad49e8913edee9b8ed4537bf2704022f0ace43e080f0712",
-      "review": "Payment commands, worker and provider sessions moved behind the payments gateway port"
+      "sha256": "dfa00a3ed5ec8fe4b5bfe0c81ccd8559b85638151dd6cf350455ce85f4a06643",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/payments/receipt_guard.rs": {
       "status": "unproved",
@@ -7803,8 +7798,8 @@
     },
     "src/payments/remote.rs": {
       "status": "unproved",
-      "sha256": "8bbc0246270f4f9d00f3ea065bafcac7e0ebf85684d31990fb1136a763010200",
-      "review": "F8: payment providers, POS register and B2B commands moved into their components"
+      "sha256": "45fe7957da8e9c0a1b40bd22d64d3c1205e3f9e858be9d27b2450ae3d8da9ade",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/payments/return_urls.rs": {
       "status": "unproved",
@@ -7813,13 +7808,13 @@
     },
     "src/payments/routes.rs": {
       "status": "unproved",
-      "sha256": "e602d474928ecdf7e779ee83bc1f84ad7493f27dc451629c0994f3aa494e3f96",
-      "review": "F8: payment providers, POS register and B2B commands moved into their components"
+      "sha256": "09fd74ced407c11c674652ef2e347c8ba2149c0fb4984eb01b95a15017e4fb80",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/payments/sessions.rs": {
       "status": "unproved",
-      "sha256": "0974bbd94f244912a10eb090942e116b834630c547d2e0ae4dd24ac7a93f7d2e",
-      "review": "The purchase transaction moves into checkout behind the purchase port"
+      "sha256": "959fb801de7cd4b99d3ed99435f212db9e6c0b9a885ae3686be459132e2fdd19",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/payments/state.rs": {
       "status": "unproved",
@@ -7828,18 +7823,18 @@
     },
     "src/payments/storage.rs": {
       "status": "unproved",
-      "sha256": "1f4fd52577b38c279dceee1b0970aa11955d5fc0099c2c580ac4425c9dbbe5eb",
-      "review": "Payment commands, worker and provider sessions moved behind the payments gateway port"
+      "sha256": "5b82ad083f573cba77237dee8346e7f4cc8ddbe47560b16960ac7276c408cabd",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/payments/worker.rs": {
       "status": "unproved",
-      "sha256": "f93cca11739ee7a085f400fdeee961d8de46a04ea1703e1be59c8bc182789daa",
-      "review": "Payment commands, worker and provider sessions moved behind the payments gateway port"
+      "sha256": "1e1e2fb23f5e20019ffcf59196a366609e5e693ad22e72c1a4d45aa2e6867b57",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/performance/access_snapshot.rs": {
       "status": "unproved",
-      "sha256": "b49ad1b687cdf215d39660899e7a01305261864fa4938916327ed258ba84c2b2",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "2010bb993a82016171b93623d5bf98287e22b78c9ce7bc127bebcb8c9ab79b7d",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/performance/delivery.rs": {
       "status": "unproved",
@@ -7848,43 +7843,43 @@
     },
     "src/performance/invalidation.rs": {
       "status": "unproved",
-      "sha256": "ec51944dd41098e58ea9cf15cec93085fa7af20168273cc33a582141246d5346",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "376ed03fa7bd8475925742c240f0dcbf0598bf93eced91ff201b235da645a514",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/performance/mod.rs": {
       "status": "unproved",
-      "sha256": "8bcd3aa66bef6c03180f5c0a2531ddd150d4cbf8c7b7737e50df44e47090f24a",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "e41684f4ab41ac500a1b6c3ad593b26f3f8c7effbddccf2936d9eeea5dc1c944",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/planner.rs": {
       "status": "unproved",
-      "sha256": "f9d1d5f8b2b44f8729b65b6d39c4deeacc201969eb1d536b1dff56812e43e3ec",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "57119b4208682b589d776a9089dd3c4bcc238dd193d52d903d8c2462d7fe53a2",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/platform/ai.rs": {
       "status": "unproved",
-      "sha256": "4c299998ecb5fde5e3bde64386fabe10cc60ff6f95813d43c5a2691b0cf392fc",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "5aaa930301b569db95e30958fe5e780f3d74df1044f9b91979503c670c941a25",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/platform/auth.rs": {
       "status": "reviewed-binding",
-      "sha256": "3e96d74b5d9185439910872989cf9cbc1ca75a5d8a292b6e8077f5763f5178c5",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "4a1773cde78c2e98d26cb7f5062e0f1a9f75195c232841f99ac91d96f0129706",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/platform/bootstrap.rs": {
       "status": "unproved",
-      "sha256": "3ad6625a5b59cf66b384a296b14eb88cffc38667a04d7d750ea94e312737043a",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "0f0b474b4f6c703d995ae37a0badf0fe7be9c318912831b34aba705230330dff",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/platform/infrastructure.rs": {
       "status": "unproved",
-      "sha256": "7d49d2897bb4dd13beea47b60becf1ed453f88a020ec6d38a02a6051ca234d81",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "f98b7b6be9556da6795c951074be1beaba589691aded1515c78d6fef4d9b688c",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/platform/lifecycle.rs": {
       "status": "unproved",
-      "sha256": "849e3ee2ac12ec60ef3f82105453b28a5e026604f17084263dbef1f1755afe42",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "c1c31e7bd5cac04d20fe4e421b86ef683ab7f594f7c60c00d3f88653c820aac0",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/platform/metrics.rs": {
       "status": "unproved",
@@ -7893,13 +7888,13 @@
     },
     "src/platform/mod.rs": {
       "status": "unproved",
-      "sha256": "bd1b3f723944d9f9da1b58935ca3bfd6e7e3dd3a7e36724d7d42ba0ab90df777",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "d15cb9c67ff0dfa86d73df6afc267a9e672b3003807ba2eea34489f15ebaac59",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/platform/provision.rs": {
       "status": "unproved",
-      "sha256": "e540f274c37d2e6d2766b8f589be5e1bc0a27a04eb103a512d8570a93f6938b7",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "9c11b1c3f5146b3ebca8628349143031f2a5172d7ee39acaa135b62bce7049a4",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/platform/quotas.rs": {
       "status": "unproved",
@@ -7923,18 +7918,18 @@
     },
     "src/pos/gateway.rs": {
       "status": "unproved",
-      "sha256": "27fcefcd670b1d022c90f45c971412c4848e27ff063ab30636aa0319f24ea187",
-      "review": "F8: payment providers, POS register and B2B commands moved into their components"
+      "sha256": "7d98cbb53feb335297c9f83720e6afaa5ec56f47ecd9e0f9f40fd1b1f62164c1",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/pos/mod.rs": {
       "status": "unproved",
-      "sha256": "62409021df1d0adda286184a0e1aef2b10c10c188210b198b2b5edd1a9af6943",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "e1bcd73b8cfa80fea274072cc12f4bb2647a23ece7b3ba05b8e889dcdfe35745",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/pos/register_host.rs": {
       "status": "unproved",
-      "sha256": "aa148ad10afaf5de6c8024bbd39f3f37c8d8d9b046e86bd12810ab68d3d2dc2e",
-      "review": "F10: manual orders, the merchant operation catalogue and catalogue intake moved into components"
+      "sha256": "d28317d503b0ad260694b9f0eb3338cf1d85ffac44346af7bd1164ece5603ba4",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/pos/schema.rs": {
       "status": "unproved",
@@ -7946,35 +7941,25 @@
       "sha256": "bdeae03cfb21a7fd36e7dab262b646af1949682d4d544eb2efa021b8f84743df",
       "review": "POS guard, customer, discount and settlement and the checkout session review moved into components"
     },
-    "src/prelude.rs": {
-      "status": "unproved",
-      "sha256": "e6a5cdca0126955c206a7817c7fda22c879967a34537e1a21ec408fe4b781b56",
-      "review": "F9: media captions, design references, product knowledge and the translation worker moved into components"
-    },
     "src/proposal_apply.rs": {
       "status": "unproved",
-      "sha256": "f35fc6c8f5f44270d6e0d3169a4c4d850a93f7199942584644c007a2ad51633c",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
-    },
-    "src/proposal_model.rs": {
-      "status": "unproved",
-      "sha256": "0f21da99b5b288e1b87217ef186e7b8043fe1ec32f03eed691bc48ed5327947e",
-      "review": "Batch F1: proposals, list views, reviewed work, its execution and proposal application moved into studio behind the WorkHost port"
+      "sha256": "7d34d12229564204d851e7a09b2052238518f863c27c0f6280c02d2aebbe6a8d",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/proposal_routes.rs": {
       "status": "unproved",
-      "sha256": "e2c0357c6bd796258c9060a1c0ab9f4e8bb8616901eb4c34a804383a694fb6e3",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "e0381a091d1c48ed10ca8de8c70fad76bc8d9ab3a8714421b3c1b329e594272f",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/routes/http_profile.rs": {
       "status": "unproved",
-      "sha256": "76bb9bbe304f222c2a79562d5f9d77a084ddd66c8c7cced4236feb2bcc29b2c1",
-      "review": "Reviewed API-only ingress, startup profile validation, and reserved API hostname resolution. Isolated HTTP and PostgreSQL cover presentation rejection, explicit Store and MCP shop context, UCP, existing merchant authorization, and tenant isolation."
+      "sha256": "c6f6eba1e1c05d5c335c95b6c3186b63a7a3cf6a163f474a58cbd565a2688af7",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/routes.rs": {
       "status": "unproved",
-      "sha256": "0d85768d0cdd216270365dda3e1ae39a8bb4c85602e4e601896c248ef231c76c",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "7ce1f38ad685e9246a237673e1787feb26317510379bd88de27a2ed1de5b088e",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/runtime_config.rs": {
       "status": "unproved",
@@ -7983,8 +7968,8 @@
     },
     "src/sandbox_cache.rs": {
       "status": "unproved",
-      "sha256": "8547cdadb0359632ba0183d1715245bc07897cda2710ff276b9fe37caea8b3c3",
-      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
+      "sha256": "25d866e6279ac7593af0ab5e5e1048b64251bfc416d0ae8d20718d3e51b7715a",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/security_headers.rs": {
       "status": "unproved",
@@ -7993,43 +7978,43 @@
     },
     "src/seed.rs": {
       "status": "unproved",
-      "sha256": "4ea7590407ca0a784fddf8fd46469282179bdc570b6a29140e40115a3c59da04",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "60d487d73cab804191a158ec93aa208a7660a0d11a7f499e961c75efdd54f1e1",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/shop_domains/frontend_bindings.rs": {
       "status": "unproved",
-      "sha256": "7a11509bb500a7ccb5a50186af42eb99d0b0696283ac3ad2da5003cc1edd1ea7",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "2399326e17894cbe79e245fd6ce18ae42accbb1ede29da674dbcb2453bf825e3",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/shop_domains/frontend_editor.rs": {
       "status": "unproved",
-      "sha256": "2107c6220025884416e5d415874a25eb6b038e7c960fddbe31ae48a28246352c",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "3c3c7b0da6e63240a6b09ebe9f6cdc6f874bd4e60870b7242424851d4654a0b8",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/shop_domains/frontends.rs": {
       "status": "unproved",
-      "sha256": "f57934dbb1478766f4a29280033fee8367b984d947ea19be04b93f207cadeb8b",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "db216e3dbf563bfa5bc836f7e3a4baab5436a36c41ad1fc645620b541dd97121",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/shop_domains.rs": {
       "status": "unproved",
-      "sha256": "74811cbfe792f35c60f39223884c2c8ef6964b532e25cfae3f018a43c69f6822",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "e7e21547bea44736cab1e9af5ac6dd84cebbf5c05287256450a857bd3652da77",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/staging/mod.rs": {
       "status": "unproved",
-      "sha256": "c788d7860e68adfd438c41be0ad5899f7005ba6661b0a7c89610d3b5959051eb",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "b1691019eeaf8e198c526e536bc806265390c0f5ddbf03cc12fa4d280eadfda8",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/staging/release_host.rs": {
       "status": "unproved",
-      "sha256": "d1a0131d9039b95367aaf7f73e3ff3dc328f5de587a22d2422c9e86c6fd98ba8",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "4eebdbc40c6b5f614cce4fa5987d633341d0f3739f08f1435189859522928c8e",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/storefront_pages.rs": {
       "status": "unproved",
-      "sha256": "b6581b06847cafe951ceec4c52ce2e669b5dff53a47b3c8d2ef72db36d93b5d6",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "850b67bdb6a53de13108584207510a3ca343d0375cdf669c98c276aa43dcc8ae",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/studio/facts.rs": {
       "status": "unproved",
@@ -8038,8 +8023,8 @@
     },
     "src/studio/personal.rs": {
       "status": "unproved",
-      "sha256": "42643b11fee92d05329ed26d0115e9b5d79703d9e047753ee3e0ca5847bcdb7d",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "c57c57f8fe456506acdf171bae2debe9944d0793aa23fb102b0da282c611e83a",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/studio/reports/config.rs": {
       "status": "unproved",
@@ -8048,28 +8033,28 @@
     },
     "src/studio/reports.rs": {
       "status": "unproved",
-      "sha256": "fd893b9c8355cfc7496a028b6f170a722d445fc6432cdc99b5bc2bd8fbe5385f",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "11407a2a9e426445deb59695896aa14cb784a6065b39cadda4e23a46ec259999",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/studio.rs": {
       "status": "unproved",
-      "sha256": "50c05a924e6ef0465403fb95cad3640c75ec7eb4a5b0a8d690b36b7ffc0a397b",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "9a96a2d877d1e9a265b92485dc86192eeebb910230a39414eb2972e7ec092d67",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/translations/apply.rs": {
       "status": "unproved",
-      "sha256": "6ba0d66fa531c241ea76fd14020874b3846c216f599c33282f1f3a12489b7854",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "92977a8c6fe147a0f67816b37c91e4a01b6cd999f79b8c6f83bf6eec45fe462b",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/translations/mod.rs": {
       "status": "unproved",
-      "sha256": "a407d8c1e6540dce91eb1e313e934cb04749d1c02fe56c2bb7f967e1c35df50e",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "70288e3f577d615dce7c3b347a52ef583cb0cdb1c08a3e9351d41af77355f19f",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/translations/routes.rs": {
       "status": "unproved",
-      "sha256": "ae63d186eb4b720e3665e782696f0777701b6b4db443e52159f79c5c40a0c8d0",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "4ddbf7154044bd36255fb9581f5786a359ffa0825827472c7fe76f6a88e99e8d",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/translations/selection.rs": {
       "status": "unproved",
@@ -8078,23 +8063,23 @@
     },
     "src/translations/worker.rs": {
       "status": "unproved",
-      "sha256": "2da8e6cdd44afba2d4beac3a8bd57b6b21f3b26c18fdb7bf45020c584eb3c405",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "1cf4bf76bba75ba2576c34fe0dda4cc127d7c299868740f58e6f69d72380a67c",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/ucp/cart.rs": {
       "status": "unproved",
-      "sha256": "4d256beef1ad16b0d2f6247123cadbea19ba3f2a26ad7a07fcdba7361aee693a",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "60f376a75c072bdb78c14b37efe7444581e710f9a221abbcefb7a2cc83df0c50",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/ucp/consent.rs": {
       "status": "unproved",
-      "sha256": "f6558f5a175ceca11ec6ee135819de8242e99da6ed5c9d5e07865941108877ac",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "8a27a42c578048655782078f64f7a5fc75671643b88daba2c579109ed091697d",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/ucp/document.rs": {
       "status": "unproved",
-      "sha256": "3dde19fcbaa5d7f64b2dc8ead0be9e64a6b2f5c4688dd61ec09354206568d0e4",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "b64f2e7787e8f50b51a7a593144340497ea4b0933d307d5e4ce566fd97044ada",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/ucp/messages.rs": {
       "status": "unproved",
@@ -8103,23 +8088,23 @@
     },
     "src/ucp/mod.rs": {
       "status": "unproved",
-      "sha256": "308c3ac6bb731b6026f809a363882becf396f5d02d449ab6f00fd1ea7575f8ae",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "0985709f72cc60a2e0f31a8cac2e33916dd1c9bff56bdf6b97d41281ef95a933",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/ucp/negotiation.rs": {
       "status": "unproved",
-      "sha256": "0b72265e285076fd5f2a8e900bfcf110809a2861bce238ee1f3bd2da8665b81c",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "53a8f73da22c6e5354ffc1db62d8865f2e96831f34a8e2a43c8027632bbdf2c9",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/ucp/profile.rs": {
       "status": "unproved",
-      "sha256": "20a80b1ac18e81bc9aa22c2b1cabf091a0cce64004e44387cce271978084a813",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "b1ed3ea2e7cd3769c55a685b434b22123b4e67e253212503e35fe539b3e92f3d",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/ucp/readiness.rs": {
       "status": "unproved",
-      "sha256": "bc1de0901a1cb16b6c8e74a517cef3ff7db0eca08280336d785d6b4686e7711b",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "fbf398d9b25c967b459b4bbc145fdcd55773b8ecf2a6af6e42e863f9be126f1a",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/workers/app_lane/queue_health.rs": {
       "status": "unproved",
@@ -8128,13 +8113,13 @@
     },
     "src/workers/app_lane.rs": {
       "status": "unproved",
-      "sha256": "8bc88b4dc73856ef03bebbd33bb0c2175c1d765a9400fe881ff2b84bf1cdeb3c",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "61afd89118258d5630f78f27bf2b426912b0752cc3fceb05146fc58f674da775",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     },
     "src/workers.rs": {
       "status": "unproved",
-      "sha256": "299747abe62535075ec974719b3ad0fa99f362b8446fbfe0336fc7f48cd8b574",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "ed44a26c7fbbe43da8a68316aedc796bc952317549db3eadfe0174cec333dcd5",
+      "review": "F14: prelude and unused compatibility re-exports removed"
     }
   },
   "inputs": {

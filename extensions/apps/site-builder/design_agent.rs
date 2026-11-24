@@ -1,9 +1,20 @@
 //! Scoped visual proposals reuse central inference and native revision-bound tasks; models cannot publish or execute.
 use crate::apps::site_builder;
 use crate::{
-    App, Error, Json, RequestContext, Result, Router, SecureRoutes, State, StatusCode, Value,
-    apply, apps, auth, bad, conflict, json, language_context, merchant, performance, post, staging,
+    App, SecureRoutes, apply, apps, auth, language_context, merchant, performance, staging,
 };
+use axum::Json;
+use axum::Router;
+use axum::extract::State;
+use axum::http::StatusCode;
+use axum::routing::post;
+use serde_json::Value;
+use serde_json::json;
+use veyndo_core::Error;
+use veyndo_core::Result;
+use veyndo_core::bad;
+use veyndo_core::conflict;
+use veyndo_core::request_context::RequestContext;
 #[path = "agent_handoff.rs"]
 mod agent_handoff;
 #[path = "proposals.rs"]

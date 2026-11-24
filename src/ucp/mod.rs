@@ -1,9 +1,24 @@
 //! UCP transport adapters reuse native cart, B2B, pricing, approval and checkout owners.
-use crate::{
-    App, Error, Item, Json, Path, RequestContext, Result, Router, State, StatusCode, StoredCart,
-    Value, bad, cart_json, cart_mutation, checkout, conflict, get, header, json, load_cart,
-    new_cart_context, post, validate_items,
-};
+use crate::{App, cart_json, cart_mutation, checkout, load_cart};
+use axum::Json;
+use axum::Router;
+use axum::extract::Path;
+use axum::extract::State;
+use axum::http::StatusCode;
+use axum::routing::get;
+use axum::routing::post;
+use serde_json::Value;
+use serde_json::json;
+use veyndo_checkout::store::cart_create::new_cart_context;
+use veyndo_core::Error;
+use veyndo_core::Result;
+use veyndo_core::bad;
+use veyndo_core::conflict;
+use veyndo_core::request_context::RequestContext;
+use veyndo_core::shop_scope::header;
+use veyndo_shop::domain::cart_lines::validate as validate_items;
+use veyndo_shop::types::cart::Item;
+use veyndo_shop::types::cart::StoredCart;
 mod cart;
 mod consent;
 mod document;

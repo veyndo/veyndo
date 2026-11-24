@@ -1,6 +1,9 @@
 //! Publish only the operator-configured verified identity recovery entry; browsers cannot choose a broker.
-use crate::json;
-use crate::{Json, Result, Value, env};
+use axum::Json;
+use serde_json::Value;
+use serde_json::json;
+use std::env;
+use veyndo_core::Result;
 pub(crate) async fn entry() -> Result<Json<Value>> {
     let configured = env::var("IDENTITY_BROKER_KEY").is_ok_and(|k| k.len() >= 64)
         && env::var("IDENTITY_BROKER_ISSUER").is_ok();

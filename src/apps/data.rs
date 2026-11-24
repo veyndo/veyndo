@@ -1,9 +1,11 @@
 //! Managed app records live in the apps component; this module supplies the record rules of the bundled site builder.
 use super::{Entity, Manifest, field_values, site_builder};
-use crate::{Result, Value, json};
+use serde_json::Value;
+use serde_json::json;
 use veyndo_app_platform::ports::{RecordRules, RuleFuture};
 use veyndo_app_platform::store::managed_data;
 pub(crate) use veyndo_app_platform::store::managed_data::{list_page, record_revision};
+use veyndo_core::Result;
 /// The bundled site builder normalizes and checks its own pages; every other app has no extra rules.
 pub(crate) struct BundledRules;
 pub(crate) static BUNDLED: BundledRules = BundledRules;

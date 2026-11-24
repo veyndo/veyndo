@@ -1,12 +1,19 @@
 //! Bind an explicitly reviewed session purchase to the native transaction and its original order.
 use super::execute;
-use crate::{
-    App, Error, IntoResponse, Json, RequestContext, Result, State, StatusCode, b2b, bad, conflict,
-    marketing, runtime_config, staging, tenant,
-};
+use crate::{App, b2b, marketing, runtime_config, staging};
+use axum::Json;
+use axum::extract::State;
+use axum::http::StatusCode;
 use axum::http::header::CACHE_CONTROL;
+use axum::response::IntoResponse;
 pub(crate) use veyndo_checkout::domain::session_review::{Recovery, Review, key, receipt};
 use veyndo_checkout::store::session;
+use veyndo_core::Error;
+use veyndo_core::Result;
+use veyndo_core::bad;
+use veyndo_core::conflict;
+use veyndo_core::request_context::RequestContext;
+use veyndo_core::shop_scope::tenant;
 
 pub(crate) async fn confirm_session(
     State(a): State<App>,

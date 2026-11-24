@@ -1,5 +1,10 @@
 //! JSON-RPC envelope errors differ from actionable domain/tool failures; no transport invents authorization.
-use crate::{App, Error, RequestContext, Value, apps, bad, capabilities, json};
+use crate::{App, apps, capabilities};
+use serde_json::Value;
+use serde_json::json;
+use veyndo_core::Error;
+use veyndo_core::bad;
+use veyndo_core::request_context::RequestContext;
 pub(super) struct RpcError {
     code: i32,
     error: Error,

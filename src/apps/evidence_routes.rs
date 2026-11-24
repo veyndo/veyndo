@@ -1,9 +1,15 @@
 //! Scoped merchant-only evidence retrieval; sources never enter public product answers.
 use super::private_evidence;
-use crate::{
-    App, HashMap, Json, RequestContext, Result, Router, SecureRoutes, State, Value, auth, get,
-    json, merchant,
-};
+use crate::{App, SecureRoutes, auth, merchant};
+use axum::Json;
+use axum::Router;
+use axum::extract::State;
+use axum::routing::get;
+use serde_json::Value;
+use serde_json::json;
+use std::collections::HashMap;
+use veyndo_core::Result;
+use veyndo_core::request_context::RequestContext;
 pub(crate) fn router() -> Router<App> {
     Router::new().secure_route(
         "/api/knowledge/external",

@@ -146,7 +146,6 @@ This lists every checked-in source module in these roots, including files with n
 | [src/capabilities/registry.rs](../src/capabilities/registry.rs) | One immutable native operation record for dispatch, schemas, MCP discovery and bounded agent reads. |
 | [src/capabilities/schema.rs](../src/capabilities/schema.rs) | Native operation input contracts; transports consume this owner instead of maintaining their own schemas. |
 | [src/capabilities.rs](../src/capabilities.rs) | Shared HTTP/MCP capability dispatch and tool authorization. |
-| [src/cart_model.rs](../src/cart_model.rs) | The cart contract bound to native contexts is owned by the shop component. |
 | [src/cart_mutation.rs](../src/cart_mutation.rs) | Optimistic cart mutations and quantity normalization. |
 | [src/cart_price.rs](../src/cart_price.rs) | Authoritative quantity pricing and localized checkout quote assembly. |
 | [src/cart_routes.rs](../src/cart_routes.rs) | Store API cart and order route adapters. |
@@ -350,9 +349,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/pos/register_host.rs](../src/pos/register_host.rs) | The server side of the assisted-selling register port (POS and manual orders): the guarded cart, quotes, currencies, checkout context, purchase, catalogue and receipt owners of this process. |
 | [src/pos/schema.rs](../src/pos/schema.rs) | Strict protocol schemas for the same POS operations used by HTTP and MCP. |
 | [src/pos/settlement.rs](../src/pos/settlement.rs) | Cash admission and the POS order annotation are owned by the POS component. |
-| [src/prelude.rs](../src/prelude.rs) | Shared dependency names for native domain modules; no process setup or business rules. |
 | [src/proposal_apply.rs](../src/proposal_apply.rs) | Proposal application lives in the studio component; these entries lend it the server's ports. |
-| [src/proposal_model.rs](../src/proposal_model.rs) | Typed proposals live in the studio component. |
 | [src/proposal_routes.rs](../src/proposal_routes.rs) | HTTP proposal creation, approval and task listing. |
 | [src/routes/http_profile.rs](../src/routes/http_profile.rs) | Serve the same commerce operations without the native storefront or Studio shell. |
 | [src/routes.rs](../src/routes.rs) | HTTP transport registry; domain behavior lives in dedicated modules. |

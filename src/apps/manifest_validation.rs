@@ -1,6 +1,6 @@
 //! The package compiler adapter lives in the apps component; this module supplies the operator's publisher keys.
 use super::Manifest;
-use crate::Result;
+use veyndo_core::Result;
 pub(crate) fn validate(m: &Manifest) -> Result<()> {
     veyndo_app_platform::domain::manifest_validation::validate(
         m,

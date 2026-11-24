@@ -1,10 +1,14 @@
 //! UCP cart transfer adapts the native cart and single-use browser handoff; supplier totals and return URLs are never trusted.
 use super::create_session;
 use crate::ucp::UCP_VERSION;
-use crate::{
-    App, Json, RequestContext, Result, State, Value, bad, checkout_handoff, json, load_cart,
-    shop_domains,
-};
+use crate::{App, checkout_handoff, load_cart, shop_domains};
+use axum::Json;
+use axum::extract::State;
+use serde_json::Value;
+use serde_json::json;
+use veyndo_core::Result;
+use veyndo_core::bad;
+use veyndo_core::request_context::RequestContext;
 pub(super) const CAPABILITY: &str = "dev.ucp.shopping.cart";
 pub(super) async fn create(
     State(a): State<App>,

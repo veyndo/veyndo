@@ -1,5 +1,8 @@
 //! App cart contributions are owned by the apps component; the server projects the configured cart.
-use crate::{App, RequestContext, Result, Value, cart_json};
+use crate::{App, cart_json};
+use serde_json::Value;
+use veyndo_core::Result;
+use veyndo_core::request_context::RequestContext;
 pub(crate) use veyndo_shop::types::cart::AppConfiguration as Configuration;
 pub(crate) async fn configure(a: &App, h: &RequestContext, id: &str, v: &Value) -> Result<Value> {
     let cart = veyndo_app_platform::service::cart_contributions::configure(a, h, id, v).await?;

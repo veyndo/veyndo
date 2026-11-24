@@ -1,5 +1,6 @@
 //! Exactly-once local observation projection is owned by the intelligence component; the payment kind of an order is read here.
-use crate::{Result, Value};
+use serde_json::Value;
+use veyndo_core::Result;
 pub(crate) async fn project(
     tx: &mut sqlx::Transaction<'_, sqlx::Postgres>,
     t: &str,

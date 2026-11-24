@@ -1,8 +1,16 @@
 //! Fictional shopper cohorts live in the intelligence component; the server registers their routes and lends the agent port.
 use crate::agent_host::Host;
-use crate::{
-    App, Json, Path, RequestContext, Result, Router, SecureRoutes, State, Value, get, json, post,
-};
+use crate::{App, SecureRoutes};
+use axum::Json;
+use axum::Router;
+use axum::extract::Path;
+use axum::extract::State;
+use axum::routing::get;
+use axum::routing::post;
+use serde_json::Value;
+use serde_json::json;
+use veyndo_core::Result;
+use veyndo_core::request_context::RequestContext;
 pub(crate) use veyndo_intelligence::service::scenarios::{CAPABILITIES, schema, visible};
 pub(crate) async fn invoke(a: &App, h: &RequestContext, name: &str, v: &Value) -> Result<Value> {
     veyndo_intelligence::service::scenarios::invoke(&Host(a), h, name, v).await

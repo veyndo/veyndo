@@ -1,5 +1,13 @@
 //! Customer-owned saved instruments expose only redacted metadata; immediate revocation and provider cleanup share payment jobs.
-use crate::{App, Json, Path, RequestContext, Result, State, Value, accounts, bad, header};
+use crate::{App, accounts};
+use axum::Json;
+use axum::extract::Path;
+use axum::extract::State;
+use serde_json::Value;
+use veyndo_core::Result;
+use veyndo_core::bad;
+use veyndo_core::request_context::RequestContext;
+use veyndo_core::shop_scope::header;
 pub(crate) async fn identity(a: &App, h: &RequestContext) -> Result<(String, String)> {
     let (t, email) = accounts::identity(a, h).await?;
     let id = veyndo_customers::store::customers::active_id(a, &t, &email).await?;

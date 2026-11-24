@@ -1,7 +1,8 @@
 //! Signed publisher namespaces and tenant-local dependency/version gates; the rules live in the apps component, this module supplies the operator's publisher keys.
 use super::Manifest;
-use crate::{env, json};
 use base64::{Engine as _, engine::general_purpose::STANDARD};
+use serde_json::json;
+use std::env;
 use veyndo_app_platform::domain::distribution::message;
 /// Offline signing shares the server canonical representation. The 32-byte seed is supplied on stdin, never logged.
 pub(crate) fn sign_package() {

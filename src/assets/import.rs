@@ -1,5 +1,8 @@
 //! Imported product images: the catalog component stores them; the server supplies the shop's content languages.
-use crate::{App, RequestContext, Result, Value, commerce, merchant};
+use crate::{App, commerce, merchant};
+use serde_json::Value;
+use veyndo_core::Result;
+use veyndo_core::request_context::RequestContext;
 pub(crate) async fn image(
     a: &App,
     h: &RequestContext,

@@ -1,8 +1,17 @@
 //! Designer context projects native channels, languages and calculated products; no second catalogue or price engine.
-use crate::{
-    App, CatalogCriteria, HashMap, Json, RequestContext, Result, Router, Row, SecureRoutes, State,
-    Value, apps, auth, bad, catalog_page, commerce, get, json, merchant,
-};
+use crate::{App, SecureRoutes, apps, auth, catalog_page, commerce, merchant};
+use axum::Json;
+use axum::Router;
+use axum::extract::State;
+use axum::routing::get;
+use serde_json::Value;
+use serde_json::json;
+use sqlx::Row;
+use std::collections::HashMap;
+use veyndo_catalog::types::catalog_page::CatalogCriteria;
+use veyndo_core::Result;
+use veyndo_core::bad;
+use veyndo_core::request_context::RequestContext;
 pub(super) fn router() -> Router<App> {
     Router::new().secure_route(
         "/api/merchant/site/context",

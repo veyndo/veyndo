@@ -1,6 +1,13 @@
 //! MCP automation tools call the same tenant-bound handlers and validators as HTTP; no separate mutation semantics.
 use super::{catalog, flow_policy, lifecycle, routes, rule_history};
-use crate::{App, Json, Path, RequestContext, Result, State, Value, auth, bad, merchant};
+use crate::{App, auth, merchant};
+use axum::Json;
+use axum::extract::Path;
+use axum::extract::State;
+use serde_json::Value;
+use veyndo_core::Result;
+use veyndo_core::bad;
+use veyndo_core::request_context::RequestContext;
 /// Discovery admits exactly the domain scopes used by the invoked native handlers.
 pub(crate) fn capability_visible(h: &RequestContext, name: &str) -> bool {
     let any = |scopes: &[&str]| scopes.iter().any(|scope| auth::allowed(h, scope));

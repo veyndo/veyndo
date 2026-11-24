@@ -1,9 +1,17 @@
 //! Generic operator-allowlisted frontend mounts. Host scope is derived from storage, never client headers.
-use crate::{
-    App, Error, IntoResponse, Response, Result, Router, SecureRoutes, State, StatusCode, bad, env,
-    get, header,
-};
+use crate::{App, SecureRoutes};
+use axum::Router;
+use axum::extract::State;
+use axum::http::StatusCode;
+use axum::response::IntoResponse;
+use axum::response::Response;
+use axum::routing::get;
 use axum::{extract::Request, middleware::Next};
+use std::env;
+use veyndo_core::Error;
+use veyndo_core::Result;
+use veyndo_core::bad;
+use veyndo_core::shop_scope::header;
 pub(crate) fn router() -> Router<App> {
     Router::new()
         .secure_route(

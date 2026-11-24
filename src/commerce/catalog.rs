@@ -1,7 +1,10 @@
 //! SKU loading with parent translation fallback; owned by the catalog component.
-use crate::{App, Item, Product, Result};
+use crate::App;
 use axum::extract::FromRef;
 use veyndo_catalog::service::catalog_reads;
+use veyndo_core::Result;
+use veyndo_pricing::catalog::Product;
+use veyndo_shop::types::cart::Item;
 
 pub(crate) async fn cart_products(
     a: &App,

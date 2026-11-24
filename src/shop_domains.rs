@@ -1,9 +1,15 @@
 //! Resolve configured shop subdomains before authentication; reject unknown hosts and conflicting scopes.
-use crate::{
-    App, Error, IntoResponse, Response, State, StatusCode, api_host, bad, env, header,
-    runtime_config, validate_tenant,
-};
+use crate::{App, api_host, runtime_config};
+use axum::extract::State;
+use axum::http::StatusCode;
+use axum::response::IntoResponse;
+use axum::response::Response;
 use axum::{extract::Request, middleware::Next};
+use std::env;
+use veyndo_core::Error;
+use veyndo_core::bad;
+use veyndo_core::shop_scope::header;
+use veyndo_core::validate_tenant;
 mod frontend_bindings;
 pub(crate) mod frontend_editor;
 pub(crate) mod frontends;

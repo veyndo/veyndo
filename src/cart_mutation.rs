@@ -1,11 +1,17 @@
 //! Optimistic cart mutations and quantity normalization.
 use crate::cart_price::Quotes;
-use crate::{
-    App, Arc, HashMap, Item, RequestContext, Result, Sandbox, StoredCart, Value, agent_runs, apps,
-    cart_json, json, legal,
-};
+use crate::{App, agent_runs, apps, cart_json, legal};
+use serde_json::Value;
+use serde_json::json;
+use std::collections::HashMap;
+use std::sync::Arc;
 use std::sync::Mutex;
+use veyndo_apps::sandbox::Sandbox;
 use veyndo_checkout::store::cart_edit::{self, Edit};
+use veyndo_core::Result;
+use veyndo_core::request_context::RequestContext;
+use veyndo_shop::types::cart::Item;
+use veyndo_shop::types::cart::StoredCart;
 
 pub(crate) async fn set_items(
     a: &App,

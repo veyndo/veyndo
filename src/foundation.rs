@@ -1,5 +1,9 @@
 //! Application dependencies, error responses and request context helpers.
-use crate::{Arc, Inference, RequestContext, apps, channel_metrics, performance, sandbox_cache};
+use crate::{apps, performance, sandbox_cache};
+use std::sync::Arc;
+use veyndo_cognition::inference::Inference;
+use veyndo_core::channel_metrics;
+use veyndo_core::request_context::RequestContext;
 
 #[derive(Clone)]
 pub(crate) struct App {
@@ -36,8 +40,7 @@ impl axum::extract::FromRef<App> for veyndo_core::State {
         app.core.clone()
     }
 }
-pub(crate) use veyndo_core::shop_scope::{header, tenant};
-pub(crate) use veyndo_core::{Error, Result, bad, conflict, hash, uid, validate_tenant};
+pub(crate) use veyndo_core::Result;
 pub(crate) fn merchant(_a: &App, h: &RequestContext) -> Result<String> {
     veyndo_identity::merchant(h)
 }

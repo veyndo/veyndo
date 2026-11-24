@@ -1,5 +1,11 @@
 //! Independent platform authorization: live personal sessions, current grants, no integration/bootstrap escalation.
-use crate::{App, Error, RequestContext, Result, StatusCode, auth, header, verified_kernel};
+use crate::{App, auth};
+use axum::http::StatusCode;
+use veyndo_core::Error;
+use veyndo_core::Result;
+use veyndo_core::request_context::RequestContext;
+use veyndo_core::shop_scope::header;
+use veyndo_kernel::verified_kernel;
 pub(crate) async fn authenticate(a: &App, h: &RequestContext) -> Result<String> {
     let token = header(h, "authorization")
         .and_then(|s| s.strip_prefix("Bearer "))

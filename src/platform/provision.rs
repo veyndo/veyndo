@@ -1,9 +1,16 @@
 //! Operator shop creation commits ownership, settings and audit atomically; never issues another user's credentials.
 use super::auth;
-use crate::{
-    App, Arc, Json, RequestContext, Result, State, Value, bad, json, knowledge, prototype_products,
-    validate_tenant,
-};
+use crate::{App, prototype_products};
+use axum::Json;
+use axum::extract::State;
+use serde_json::Value;
+use serde_json::json;
+use std::sync::Arc;
+use veyndo_core::Result;
+use veyndo_core::bad;
+use veyndo_core::request_context::RequestContext;
+use veyndo_core::validate_tenant;
+use veyndo_intelligence::knowledge;
 pub(super) async fn create(
     State(a): State<App>,
     h: RequestContext,

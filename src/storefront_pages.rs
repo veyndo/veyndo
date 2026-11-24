@@ -1,10 +1,16 @@
 //! Deep-link HTML transport for stable SKU URLs with optional localized SEO slugs.
 //! Product visibility uses the same tenant/channel admission as the Store API; assets and unknown APIs retain 404s.
-use crate::{
-    App, Deserialize, Error, Path, RequestContext, Result, State, StatusCode, bad, header,
-    marketing,
-};
+use crate::{App, marketing};
+use axum::extract::Path;
+use axum::extract::State;
+use axum::http::StatusCode;
 use axum::{extract::Query, response::Html};
+use serde::Deserialize;
+use veyndo_core::Error;
+use veyndo_core::Result;
+use veyndo_core::bad;
+use veyndo_core::request_context::RequestContext;
+use veyndo_core::shop_scope::header;
 #[derive(Default, Deserialize)]
 pub(crate) struct PageContext {
     language: Option<String>,

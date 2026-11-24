@@ -2,8 +2,10 @@
 use super::remote;
 #[path = "../../extensions/apps/paypal/src/adapter.rs"]
 mod legacy;
-use crate::{App, Result, Value};
+use crate::App;
 pub(crate) use legacy::{account, base, environment, prepare};
+use serde_json::Value;
+use veyndo_core::Result;
 
 pub(crate) use veyndo_payments::domain::amounts::{format_amount, parse_amount};
 pub(crate) use veyndo_payments::domain::attempt::Attempt;

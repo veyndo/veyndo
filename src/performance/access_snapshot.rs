@@ -1,5 +1,9 @@
 //! The per-request admission snapshot shared by domain, identity, availability, channel and proxy middleware; the shop component reads it.
-use crate::{App, Arc, RequestContext, Result, tenant};
+use crate::App;
+use std::sync::Arc;
+use veyndo_core::Result;
+use veyndo_core::request_context::RequestContext;
+use veyndo_core::shop_scope::tenant;
 
 pub(crate) use veyndo_core::access::AccessSnapshot;
 

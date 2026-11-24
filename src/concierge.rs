@@ -1,16 +1,25 @@
 //! Read-only storefront shopping advisor.
 use crate::agent_host::Host;
-use crate::{
-    App, Error, IntoResponse, Json, RequestContext, Result, State, StatusCode, Value, bad,
-    conflict, json, performance, tenant,
-};
+use crate::{App, performance};
+use axum::Json;
+use axum::extract::State;
+use axum::http::StatusCode;
+use axum::response::IntoResponse;
 use axum::{
     Extension,
     http::{HeaderName, header::CACHE_CONTROL},
     response::sse::{Event, KeepAlive, Sse},
 };
+use serde_json::Value;
+use serde_json::json;
 use std::{convert::Infallible, time::Duration};
 use tokio::sync::mpsc;
+use veyndo_core::Error;
+use veyndo_core::Result;
+use veyndo_core::bad;
+use veyndo_core::conflict;
+use veyndo_core::request_context::RequestContext;
+use veyndo_core::shop_scope::tenant;
 
 pub(crate) async fn concierge(
     State(a): State<App>,

@@ -1,8 +1,15 @@
 //! Prompt-generated declarative apps and native coding-agent handoff, never unsandboxed model code.
-use crate::{App, Json, RequestContext, Result, State, Value, apps, auth, bad, json};
+use crate::{App, apps, auth};
+use axum::Json;
+use axum::extract::State;
+use serde_json::Value;
+use serde_json::json;
 use veyndo_app_platform::domain::{
     app_generation, design_context, generation_brief, generation_edits,
 };
+use veyndo_core::Result;
+use veyndo_core::bad;
+use veyndo_core::request_context::RequestContext;
 pub(crate) mod agent_connection;
 mod builds;
 mod generation;

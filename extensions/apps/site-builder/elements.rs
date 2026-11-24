@@ -1,6 +1,9 @@
 //! Placed app elements resolve only active, public surfaces of this tenant; app code stays in its own package.
 use super::ElementRef;
-use crate::{Result, Value, apps, bad};
+use crate::apps;
+use serde_json::Value;
+use veyndo_core::Result;
+use veyndo_core::bad;
 pub(super) async fn validate_owned(
     tx: &mut sqlx::Transaction<'_, sqlx::Postgres>,
     tenant: &str,

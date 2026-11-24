@@ -1,8 +1,14 @@
 //! Merchant-approved associations are consumed by the public shop without exposing order counts or identities.
-use crate::{
-    App, CatalogCriteria, Json, Path, RequestContext, Result, State, Value, catalog_page, json,
-    marketing, tenant,
-};
+use crate::{App, catalog_page, marketing};
+use axum::Json;
+use axum::extract::Path;
+use axum::extract::State;
+use serde_json::Value;
+use serde_json::json;
+use veyndo_catalog::types::catalog_page::CatalogCriteria;
+use veyndo_core::Result;
+use veyndo_core::request_context::RequestContext;
+use veyndo_core::shop_scope::tenant;
 pub(crate) use veyndo_intelligence::store::observations::public_pairs;
 pub(crate) async fn recommendations(
     State(a): State<App>,

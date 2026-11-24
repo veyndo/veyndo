@@ -1,8 +1,17 @@
 //! Typed MCP schemas and JSON-RPC transport.
-use crate::{
-    App, IntoResponse, Json, RequestContext, Response, State, Value, apps, env, header, json,
-};
-use crate::{Error, OPERATIONS, StatusCode};
+use crate::OPERATIONS;
+use crate::{App, apps};
+use axum::Json;
+use axum::extract::State;
+use axum::http::StatusCode;
+use axum::response::IntoResponse;
+use axum::response::Response;
+use serde_json::Value;
+use serde_json::json;
+use std::env;
+use veyndo_core::Error;
+use veyndo_core::request_context::RequestContext;
+use veyndo_core::shop_scope::header;
 pub(crate) mod poppy;
 mod protocol;
 mod transport;

@@ -1,8 +1,13 @@
 //! One immutable native operation record for dispatch, schemas, MCP discovery and bounded agent reads.
 use super::{admission, catalog, dispatch, schema};
-use crate::{App, Error, RequestContext, Result, Value, apps, json};
+use crate::{App, apps};
 use dispatch::Owner;
+use serde_json::Value;
+use serde_json::json;
 use std::sync::LazyLock;
+use veyndo_core::Error;
+use veyndo_core::Result;
+use veyndo_core::request_context::RequestContext;
 #[derive(Clone, Copy, PartialEq)]
 enum Effect {
     Read,
@@ -159,7 +164,8 @@ pub(crate) fn export() -> Value {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{CatalogCriteria, marketing};
+    use crate::marketing;
+    use veyndo_catalog::types::catalog_page::CatalogCriteria;
     #[test]
     fn catalog_contract_preserves_native_categories_and_search_alias() {
         let schema = tool_schema("catalog.search");

@@ -1,5 +1,9 @@
 //! Offline first-operator setup: migration-only process, supplied strong credentials, password proof for existing accounts.
-use crate::{Row, auth, env, json, uid};
+use crate::auth;
+use serde_json::json;
+use sqlx::Row;
+use std::env;
+use veyndo_core::uid;
 pub(crate) async fn bootstrap_operator() {
     assert_eq!(
         env::var("BOOTSTRAP_MODE").as_deref(),

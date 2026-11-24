@@ -1,7 +1,16 @@
 //! Legacy PayPal admission/account wiring belongs to the PayPal package, not a second pricing owner.
 use super::{Attempt, PaymentProvider};
+use crate::App;
 use crate::payments::paypal;
-use crate::{App, Error, Result, StatusCode, StoredCart, Value, bad, conflict, json, uid};
+use axum::http::StatusCode;
+use serde_json::Value;
+use serde_json::json;
+use veyndo_core::Error;
+use veyndo_core::Result;
+use veyndo_core::bad;
+use veyndo_core::conflict;
+use veyndo_core::uid;
+use veyndo_shop::types::cart::StoredCart;
 #[derive(Clone)]
 pub(crate) struct Account {
     pub client: String,

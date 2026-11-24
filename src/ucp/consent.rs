@@ -1,10 +1,17 @@
 //! Explicit UCP consent reuses native cart-bound privacy receipts; source documents never define consent policy or authority.
 use crate::ucp::UCP_VERSION;
 use crate::ucp::messages;
-use crate::{
-    App, HashMap, RequestContext, Result, State, StoredCart, Value, bad, commerce, conflict, json,
-    legal, marketing, tenant,
-};
+use crate::{App, commerce, legal, marketing};
+use axum::extract::State;
+use serde_json::Value;
+use serde_json::json;
+use std::collections::HashMap;
+use veyndo_core::Result;
+use veyndo_core::bad;
+use veyndo_core::conflict;
+use veyndo_core::request_context::RequestContext;
+use veyndo_core::shop_scope::tenant;
+use veyndo_shop::types::cart::StoredCart;
 pub(super) const CAPABILITY: &str = "dev.ucp.shopping.buyer_consent";
 const PURPOSES: &[(&str, &str)] = &[
     ("dev.ucp.consent.analytics", "analytics"),

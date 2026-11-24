@@ -1,5 +1,9 @@
 //! Grounded model planning lives in the intelligence component; the server keeps the native proposal admission it calls through the agent port.
-use crate::{App, Choice, RequestContext, Result, Value};
+use crate::App;
+use serde_json::Value;
+use veyndo_cognition::inference::Choice;
+use veyndo_core::Result;
+use veyndo_core::request_context::RequestContext;
 /// One planning turn over the server's agent port.
 pub(crate) async fn plan_with(
     a: &App,

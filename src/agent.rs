@@ -1,10 +1,13 @@
 //! Model provider listing and product retrieval over the server's model context; conversations and knowledge handlers live in the intelligence component.
-use super::{App, Json, RequestContext, Result, State, Value, auth, bad, merchant, tenant};
+use super::{App, auth, merchant};
+use axum::Json;
+use axum::extract::State;
+use serde_json::Value;
+use veyndo_core::Result;
+use veyndo_core::bad;
+use veyndo_core::request_context::RequestContext;
+use veyndo_core::shop_scope::tenant;
 pub(crate) use veyndo_identity::assistant_access;
-pub(crate) use veyndo_intelligence::http::agents::{
-    chat as merchant_chat, conversation, conversation_list as conversations, knowledge_graph,
-    knowledge_status, reindex,
-};
 
 pub(super) async fn model_providers(
     State(a): State<App>,

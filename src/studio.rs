@@ -1,10 +1,20 @@
 //! Verified merchant overview facts consumed by the chat and activity views.
-use super::{
-    App, CatalogCriteria, Json, RequestContext, Response, Result, State, Value, auth, bad,
-    commerce, env, header, json, knowledge, language_context, merchant, product_page, tenant,
-};
+use super::{App, auth, commerce, language_context, merchant, product_page};
 use crate::OPERATIONS;
+use axum::Json;
+use axum::extract::State;
+use axum::response::Response;
 use axum::{extract::Request, middleware::Next};
+use serde_json::Value;
+use serde_json::json;
+use std::env;
+use veyndo_catalog::types::catalog_page::CatalogCriteria;
+use veyndo_core::Result;
+use veyndo_core::bad;
+use veyndo_core::request_context::RequestContext;
+use veyndo_core::shop_scope::header;
+use veyndo_core::shop_scope::tenant;
+use veyndo_intelligence::knowledge;
 pub(crate) mod facts;
 pub(crate) mod personal;
 pub(crate) mod reports;

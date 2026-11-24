@@ -1,5 +1,7 @@
 //! The personal workspace lives in the studio component; the server registers its routes.
-use crate::{App, Router, SecureRoutes, get};
+use crate::{App, SecureRoutes};
+use axum::Router;
+use axum::routing::get;
 pub(crate) use veyndo_studio::domain::workspace::schema;
 pub(crate) use veyndo_studio::http::workspace::invoke;
 use veyndo_studio::http::workspace::{read, save, work};

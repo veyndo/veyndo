@@ -1,5 +1,8 @@
 //! The automation catalogue is owned by the marketing component; the server registers its routes.
-use crate::{App, Router, SecureRoutes, get, post};
+use crate::{App, SecureRoutes};
+use axum::Router;
+use axum::routing::get;
+use axum::routing::post;
 pub(super) use veyndo_marketing::http::catalog::{catalog, import};
 pub(crate) fn router() -> Router<App> {
     Router::new()

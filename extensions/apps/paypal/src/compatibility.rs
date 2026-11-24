@@ -1,6 +1,15 @@
 //! Native PayPal Orders v2 sandbox wire adapter; credentials never enter prompts or browser responses.
 use super::{Attempt, account, base, environment, format_amount, parse_amount};
-use crate::{App, Error, Result, StatusCode, Value, bad, conflict, hash, http_limits, json};
+use crate::App;
+use axum::http::StatusCode;
+use serde_json::Value;
+use serde_json::json;
+use veyndo_core::Error;
+use veyndo_core::Result;
+use veyndo_core::bad;
+use veyndo_core::conflict;
+use veyndo_core::hash;
+use veyndo_core::http_limits;
 
 async fn access(a: &App, t: &str) -> Result<String> {
     let c = account(t)?;

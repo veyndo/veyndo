@@ -1,5 +1,11 @@
 //! Idempotent synthetic template catalogue initialization.
-use crate::{App, Argon2, PasswordHasher, Result, SaltString, Uuid, accounts, json};
+use crate::{App, accounts};
+use argon2::Argon2;
+use argon2::PasswordHasher;
+use argon2::password_hash::SaltString;
+use serde_json::json;
+use uuid::Uuid;
+use veyndo_core::Result;
 
 pub(crate) async fn seed(a: &App) -> Result<()> {
     let demo = [

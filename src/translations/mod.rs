@@ -1,5 +1,8 @@
 //! Tenant-scoped, resumable AI translation drafts; applying is revision checked and emits native product events.
-use crate::{App, Router, SecureRoutes, get, post};
+use crate::{App, SecureRoutes};
+use axum::Router;
+use axum::routing::get;
+use axum::routing::post;
 mod apply;
 mod routes;
 pub(crate) mod selection;

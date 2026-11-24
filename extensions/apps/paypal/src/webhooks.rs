@@ -1,9 +1,18 @@
 //! PayPal verifies webhook signatures before inbox insertion; provider reconciliation confirms monetary state.
 use super::{account, enqueue_tx, paypal};
-use crate::{
-    App, Error, Json, RequestContext, Result, State, StatusCode, Value, bad, hash, header, json,
-    tenant,
-};
+use crate::App;
+use axum::Json;
+use axum::extract::State;
+use axum::http::StatusCode;
+use serde_json::Value;
+use serde_json::json;
+use veyndo_core::Error;
+use veyndo_core::Result;
+use veyndo_core::bad;
+use veyndo_core::hash;
+use veyndo_core::request_context::RequestContext;
+use veyndo_core::shop_scope::header;
+use veyndo_core::shop_scope::tenant;
 
 pub(crate) async fn webhook(
     State(a): State<App>,

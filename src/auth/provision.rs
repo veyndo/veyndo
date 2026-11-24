@@ -1,10 +1,21 @@
 //! Reusable synthetic shop provisioning for initial signup and additional shops owned by the same merchant.
 use super::hash_password;
-use crate::{
-    App, Arc, Json, RequestContext, Result, Sandbox, State, Value, accounts, auth, bad, categories,
-    conflict, demo_catalog, env, hash, header, json, knowledge, prototype_products,
-    validate_tenant,
-};
+use crate::{App, accounts, auth, categories, demo_catalog, prototype_products};
+use axum::Json;
+use axum::extract::State;
+use serde_json::Value;
+use serde_json::json;
+use std::env;
+use std::sync::Arc;
+use veyndo_apps::sandbox::Sandbox;
+use veyndo_core::Result;
+use veyndo_core::bad;
+use veyndo_core::conflict;
+use veyndo_core::hash;
+use veyndo_core::request_context::RequestContext;
+use veyndo_core::shop_scope::header;
+use veyndo_core::validate_tenant;
+use veyndo_intelligence::knowledge;
 
 pub(super) async fn provision(
     tx: &mut sqlx::Transaction<'_, sqlx::Postgres>,
@@ -144,8 +155,8 @@ pub(crate) async fn create_workspace(
         .fetch_one(&mut *tx)
         .await?;
     if !super::mfa::trusted_session_tx(&mut tx, user, token).await? {
-        return Err(crate::Error(
-            crate::StatusCode::UNAUTHORIZED,
+        return Err(veyndo_core::Error(
+            axum::http::StatusCode::UNAUTHORIZED,
             "Personal session expired".into(),
         ));
     }

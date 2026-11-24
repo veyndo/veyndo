@@ -1,5 +1,7 @@
 //! Tenant-scoped category tree, localized navigation and product assignment boundaries.
-use crate::{App, Router, SecureRoutes, get};
+use crate::{App, SecureRoutes};
+use axum::Router;
+use axum::routing::get;
 mod admin;
 mod navigation;
 pub(crate) use admin::{

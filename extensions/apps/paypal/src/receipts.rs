@@ -1,6 +1,11 @@
 //! PayPal receipt interpretation; shared payment storage owns order and inventory effects.
 use crate::payments::{Attempt, enqueue_tx, paypal, receipt_matches, state, storage::update_order};
-use crate::{Error, Result, StatusCode, Value, bad, json};
+use axum::http::StatusCode;
+use serde_json::Value;
+use serde_json::json;
+use veyndo_core::Error;
+use veyndo_core::Result;
+use veyndo_core::bad;
 
 pub(crate) async fn persist(
     tx: &mut sqlx::Transaction<'_, sqlx::Postgres>,

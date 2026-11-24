@@ -1,6 +1,8 @@
 //! Merchant memory endpoints and revision-bound experiment/dismissal decisions.
 use super::{behavior, contracts, preferences, recommendations, signed, signed_offer, stream};
-use crate::{App, Router, SecureRoutes, get};
+use crate::{App, SecureRoutes};
+use axum::Router;
+use axum::routing::get;
 pub(crate) fn cognition_router() -> Router<App> {
     Router::new()
         .merge(contracts::router())

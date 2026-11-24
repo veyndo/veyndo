@@ -1,10 +1,17 @@
 //! UCP B2B commands route to native RFQ/CAS/approval owners; a checkout token alone never identifies an employee.
 use super::{consent, profile, ucp_document, ucp_load};
 use crate::ucp::messages;
-use crate::{
-    App, Json, Path, RequestContext, Result, State, StoredCart, Value, accounts, b2b, bad,
-    cart_json, checkout_handoff, conflict, json, shop_domains,
-};
+use crate::{App, accounts, b2b, cart_json, checkout_handoff, shop_domains};
+use axum::Json;
+use axum::extract::Path;
+use axum::extract::State;
+use serde_json::Value;
+use serde_json::json;
+use veyndo_core::Result;
+use veyndo_core::bad;
+use veyndo_core::conflict;
+use veyndo_core::request_context::RequestContext;
+use veyndo_shop::types::cart::StoredCart;
 fn operation(op: &str) -> Result<String> {
     if op == "checkout.handoff" {
         return Ok(op.into());

@@ -1,5 +1,7 @@
 //! UI bundle loading lives in the apps component; this module registers its routes.
-use crate::{App, Router, SecureRoutes, post};
+use crate::{App, SecureRoutes};
+use axum::Router;
+use axum::routing::post;
 use veyndo_app_platform::http::ui_bundles::load;
 pub(super) fn router() -> Router<App> {
     Router::new()

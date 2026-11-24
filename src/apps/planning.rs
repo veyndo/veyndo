@@ -1,9 +1,12 @@
 //! App planning lives in the apps component; this module keeps the short path for the planner and proposals.
 use super::{data, service_limits};
-use crate::{App, RequestContext, Result, Value};
+use crate::App;
+use serde_json::Value;
 pub(crate) use veyndo_app_platform::domain::planning::AppChange;
 use veyndo_app_platform::store::planning;
 pub(crate) use veyndo_app_platform::store::planning::planning_context;
+use veyndo_core::Result;
+use veyndo_core::request_context::RequestContext;
 pub(crate) async fn bind_change(
     a: &App,
     t: &str,

@@ -1,6 +1,13 @@
 //! Serve the same commerce operations without the native storefront or Studio shell.
-use crate::{Error, Json, Response, StatusCode, bad, header, json, validate_tenant};
+use axum::Json;
+use axum::http::StatusCode;
+use axum::response::Response;
 use axum::{extract::Request, http::uri::Authority, middleware::Next, response::IntoResponse};
+use serde_json::json;
+use veyndo_core::Error;
+use veyndo_core::bad;
+use veyndo_core::shop_scope::header;
+use veyndo_core::validate_tenant;
 
 pub(crate) fn api_host(host: &str, suffix: &str) -> bool {
     crate::brand_redirect::domain(suffix)

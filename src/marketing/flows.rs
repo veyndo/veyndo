@@ -1,6 +1,12 @@
 //! Durable order-event flows: conditions, shop notes and AI proposals; no unapproved model mutations.
 use super::execute_app_flow;
-use crate::{App, Error, Result, StatusCode, Value, bad, commerce, json, plan_with};
+use crate::{App, commerce, plan_with};
+use axum::http::StatusCode;
+use serde_json::Value;
+use serde_json::json;
+use veyndo_core::Error;
+use veyndo_core::Result;
+use veyndo_core::bad;
 pub(crate) use veyndo_marketing::store::flow_projection::project as project_flows;
 pub(crate) use veyndo_marketing::types::flow::{AppFlowAction, Flow};
 pub(crate) async fn flow_once(a: &App) -> Result<bool> {

@@ -1,5 +1,11 @@
 //! Source detail, editing and publication live in the intelligence component; these entries keep the server-side signatures.
-use crate::{App, Json, Path, RequestContext, Result, State, Value};
+use crate::App;
+use axum::Json;
+use axum::extract::Path;
+use axum::extract::State;
+use serde_json::Value;
+use veyndo_core::Result;
+use veyndo_core::request_context::RequestContext;
 use veyndo_intelligence::http::sources;
 pub(crate) async fn detail(
     State(a): State<App>,

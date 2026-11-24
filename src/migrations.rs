@@ -1,6 +1,11 @@
 //! Versioned setup is separate from serving; no catalog-wide startup repair.
-use crate::{App, Value, apps, hash, json, knowledge, product, seed};
+use crate::{App, apps, seed};
+use serde_json::Value;
+use serde_json::json;
 use sqlx::PgPool;
+use veyndo_catalog::store::products::product;
+use veyndo_core::hash;
+use veyndo_intelligence::knowledge;
 
 mod identity_checksums;
 mod recent_schema;

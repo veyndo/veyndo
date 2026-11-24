@@ -1,8 +1,15 @@
 //! International configuration and translation MCP tools call the exact same scoped native handlers as HTTP.
 use super::{get_scope, merchant_config, method_dependencies, save_config, save_scope};
-use crate::{
-    App, HashMap, Json, Path, RequestContext, Result, State, Value, auth, bad, json, translations,
-};
+use crate::{App, auth, translations};
+use axum::Json;
+use axum::extract::Path;
+use axum::extract::State;
+use serde_json::Value;
+use serde_json::json;
+use std::collections::HashMap;
+use veyndo_core::Result;
+use veyndo_core::bad;
+use veyndo_core::request_context::RequestContext;
 pub(crate) fn international_permission(name: &str) -> Option<&'static str> {
     match name {
         "merchant.commerce.read" | "merchant.commerce.dependencies" => Some("settings.read"),

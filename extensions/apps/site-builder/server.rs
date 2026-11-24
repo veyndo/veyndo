@@ -1,5 +1,13 @@
 //! Standard-shop page contract. App-owned content and theme validation; no HTML, CSS or script evaluation.
-use crate::{App, Deserialize, HashMap, Result, Router, Serialize, Value, bad, commerce, conflict};
+use crate::{App, commerce};
+use axum::Router;
+use serde::Deserialize;
+use serde::Serialize;
+use serde_json::Value;
+use std::collections::HashMap;
+use veyndo_core::Result;
+use veyndo_core::bad;
+use veyndo_core::conflict;
 mod block_validation;
 mod context;
 pub(crate) mod design_agent;
@@ -211,7 +219,7 @@ pub(crate) use planning::contract as planning_contract;
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::json;
+    use serde_json::json;
     #[test]
     fn page_rejects_scripts_unbounded_theme_and_duplicate_ids() {
         let mut v = json!({"slug":"home","content":{"blocks":[]},"theme":{}});

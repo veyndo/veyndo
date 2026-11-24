@@ -1,5 +1,13 @@
 //! Hosted frontend routes and the server side of the managed-app install; the apps component owns binding and disconnection.
-use crate::{App, Json, Path, RequestContext, Result, State, Value, apps, auth, json, tenant};
+use crate::{App, apps, auth};
+use axum::Json;
+use axum::extract::Path;
+use axum::extract::State;
+use serde_json::Value;
+use serde_json::json;
+use veyndo_core::Result;
+use veyndo_core::request_context::RequestContext;
+use veyndo_core::shop_scope::tenant;
 pub(super) async fn list(State(a): State<App>, h: RequestContext) -> Result<Json<Value>> {
     auth::permit(&h, "settings.read")?;
     Ok(Json(

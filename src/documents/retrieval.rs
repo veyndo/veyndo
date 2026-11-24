@@ -1,8 +1,14 @@
 //! Route that queues a document for vector indexing; retrieval itself is owned by the intelligence component.
-use crate::{
-    App, Error, Json, Path, RequestContext, Result, State, StatusCode, Value, auth, cognition,
-    json, merchant,
-};
+use crate::{App, auth, cognition, merchant};
+use axum::Json;
+use axum::extract::Path;
+use axum::extract::State;
+use axum::http::StatusCode;
+use serde_json::Value;
+use serde_json::json;
+use veyndo_core::Error;
+use veyndo_core::Result;
+use veyndo_core::request_context::RequestContext;
 use veyndo_intelligence::store::documents as store;
 pub(crate) async fn index(
     State(a): State<App>,

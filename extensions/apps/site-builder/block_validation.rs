@@ -1,7 +1,10 @@
 //! App-owned block admission with bounded field paths; never echo untrusted content in errors.
 use super::super::identifier;
 use super::{Block, safe_image};
-use crate::{Error, Result, assets, bad, commerce};
+use crate::{assets, commerce};
+use veyndo_core::Error;
+use veyndo_core::Result;
+use veyndo_core::bad;
 
 fn invalid(index: usize, field: &str, rule: &str) -> Error {
     bad(format!("content.blocks[{index}].{field}: {rule}"))

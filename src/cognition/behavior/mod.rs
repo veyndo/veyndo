@@ -1,5 +1,12 @@
 //! Native behavior analytics projects the existing event ledger into private shop knowledge.
-use crate::{App, Json, RequestContext, Result, Router, SecureRoutes, State, Value, post};
+use crate::{App, SecureRoutes};
+use axum::Json;
+use axum::Router;
+use axum::extract::State;
+use axum::routing::post;
+use serde_json::Value;
+use veyndo_core::Result;
+use veyndo_core::request_context::RequestContext;
 use veyndo_intelligence::http::behavior_capture as capture;
 pub(crate) fn router() -> Router<App> {
     Router::new()

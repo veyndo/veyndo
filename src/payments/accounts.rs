@@ -1,6 +1,12 @@
 //! Routes of the provider onboarding and listing; the payments component owns the account binding rules.
 use super::host::{Gateway, PaymentHost};
-use crate::{App, Json, Path, RequestContext, Result, State, Value};
+use crate::App;
+use axum::Json;
+use axum::extract::Path;
+use axum::extract::State;
+use serde_json::Value;
+use veyndo_core::Result;
+use veyndo_core::request_context::RequestContext;
 use veyndo_payments::service::providers;
 
 pub(crate) async fn onboarding(

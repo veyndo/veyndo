@@ -1,5 +1,10 @@
 //! Coupon selection is owned by the marketing component; the server supplies the guarded, priced cart.
-use crate::{App, Json, RequestContext, Result, State, Value};
+use crate::App;
+use axum::Json;
+use axum::extract::State;
+use serde_json::Value;
+use veyndo_core::Result;
+use veyndo_core::request_context::RequestContext;
 pub(crate) async fn coupons(
     State(a): State<App>,
     h: RequestContext,

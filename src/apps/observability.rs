@@ -1,5 +1,8 @@
 //! Bounded metadata-only app telemetry, storage usage and explicitly approved cursor-based event replay.
-use crate::{App, Router, SecureRoutes, get, post};
+use crate::{App, SecureRoutes};
+use axum::Router;
+use axum::routing::get;
+use axum::routing::post;
 pub(super) fn router() -> Router<App> {
     Router::new()
         .secure_route(

@@ -1,5 +1,8 @@
 //! Native modular company procurement; protocol-specific EDI adapters remain in their app packages.
-use crate::{App, Router, SecureRoutes, get, post};
+use crate::{App, SecureRoutes};
+use axum::Router;
+use axum::routing::get;
+use axum::routing::post;
 mod access;
 mod catalog;
 mod contract;

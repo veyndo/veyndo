@@ -1,8 +1,14 @@
 //! Native revision-bound proposal validation and persistence shared by every design agent.
 use super::site_builder;
-use crate::{
-    App, Proposal, RequestContext, Result, Value, apps, bad, conflict, json, merchant, uid,
-};
+use crate::{App, apps, merchant};
+use serde_json::Value;
+use serde_json::json;
+use veyndo_core::Result;
+use veyndo_core::bad;
+use veyndo_core::conflict;
+use veyndo_core::request_context::RequestContext;
+use veyndo_core::uid;
+use veyndo_studio::domain::proposal::Proposal;
 pub(super) struct ResultContext<'a> {
     pub instruction: &'a str,
     pub output: &'a Value,

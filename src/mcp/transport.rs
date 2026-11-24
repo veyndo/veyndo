@@ -1,5 +1,9 @@
 //! MCP visibility and shared read-scope memoization, independent of internal planning tools.
-use crate::{App, RequestContext, Result, Value, apps, bad, invoke, performance};
+use crate::{App, apps, invoke, performance};
+use serde_json::Value;
+use veyndo_core::Result;
+use veyndo_core::bad;
+use veyndo_core::request_context::RequestContext;
 /// MCP opt-out is independent of a merchant's selected internal planning tools.
 pub(super) async fn invoke_transport(
     a: &App,

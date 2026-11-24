@@ -1,9 +1,14 @@
 //! Idempotent immutable invoices/delivery notes with transactional per-shop number ranges.
 use super::{master_data, receipt_pdf, receipt_text};
-use crate::{
-    App, IntoResponse, Json, Path, RequestContext, Response, Result, State, Value, auth, merchant,
-    payments,
-};
+use crate::{App, auth, merchant, payments};
+use axum::Json;
+use axum::extract::Path;
+use axum::extract::State;
+use axum::response::IntoResponse;
+use axum::response::Response;
+use serde_json::Value;
+use veyndo_core::Result;
+use veyndo_core::request_context::RequestContext;
 use veyndo_orders::store::receipts;
 pub(super) async fn settings(State(a): State<App>, h: RequestContext) -> Result<Json<Value>> {
     merchant(&a, &h)?;

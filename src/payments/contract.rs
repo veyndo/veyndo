@@ -1,6 +1,8 @@
 //! Adapt the shared provider declaration grammar; native payment authority and actual effects remain attached.
 #[cfg(test)]
-use crate::{Result, apps};
+use crate::apps;
+#[cfg(test)]
+use veyndo_core::Result;
 #[cfg(test)]
 pub(crate) fn validate_contract(m: &apps::Manifest) -> Result<()> {
     veyndo_app_model::payment_provider::validate_contract(m).map_err(apps::model_contract::error)

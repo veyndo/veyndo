@@ -1,10 +1,16 @@
 //! Public append-only intake uses declared schemas, existing cart admission, quotas, records and outbox.
 use super::{Entity, Manifest, data, site_forms};
-use crate::{
-    App, Error, RequestContext, Result, StatusCode, Value, hash, json, load_cart, marketing,
-    tenant, verified_kernel,
-};
+use crate::{App, load_cart, marketing};
+use axum::http::StatusCode;
+use serde_json::Value;
+use serde_json::json;
 use veyndo_app_platform::store::app_host_reads;
+use veyndo_core::Error;
+use veyndo_core::Result;
+use veyndo_core::hash;
+use veyndo_core::request_context::RequestContext;
+use veyndo_core::shop_scope::tenant;
+use veyndo_kernel::verified_kernel;
 pub(super) async fn submit(
     a: &App,
     h: &RequestContext,

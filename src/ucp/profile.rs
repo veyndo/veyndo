@@ -1,10 +1,17 @@
 //! Discover the versioned B2B extension and intersect opt-in platform profiles through bounded public HTTPS.
 use super::{UCP_VERSION, cart, consent};
-use crate::json;
-use crate::{
-    Error, Json, RequestContext, Result, StatusCode, Value, apps, bad, conflict, header,
-    shop_domains, tenant,
-};
+use crate::{apps, shop_domains};
+use axum::Json;
+use axum::http::StatusCode;
+use serde_json::Value;
+use serde_json::json;
+use veyndo_core::Error;
+use veyndo_core::Result;
+use veyndo_core::bad;
+use veyndo_core::conflict;
+use veyndo_core::request_context::RequestContext;
+use veyndo_core::shop_scope::header;
+use veyndo_core::shop_scope::tenant;
 pub(super) const B2B: &str = "ai.veyndo.app.shopping.b2b_negotiation";
 pub(super) const VERSION: &str = "2026-10-13";
 const CHECKOUT: &str = "dev.ucp.shopping.checkout";

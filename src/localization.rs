@@ -1,10 +1,21 @@
 //! Shop locale resolution, translated catalog hydration and non-mutating merchant quote.
-use super::{
-    App, Cart, HashMap, Item, Json, Product, RequestContext, Result, State, StoredCart, Value, bad,
-    commerce, currencies, header, json, load_cart, marketing, merchant, normalized_quantity,
-    tenant,
-};
-use crate::quote;
+use super::{App, commerce, currencies, load_cart, marketing, merchant};
+use axum::Json;
+use axum::extract::State;
+use serde_json::Value;
+use serde_json::json;
+use std::collections::HashMap;
+use veyndo_checkout::domain::cart_quote::normalized_quantity;
+use veyndo_checkout::domain::cart_quote::quote;
+use veyndo_core::Result;
+use veyndo_core::bad;
+use veyndo_core::request_context::RequestContext;
+use veyndo_core::shop_scope::header;
+use veyndo_core::shop_scope::tenant;
+use veyndo_pricing::catalog::Product;
+use veyndo_shop::types::cart::Cart;
+use veyndo_shop::types::cart::Item;
+use veyndo_shop::types::cart::StoredCart;
 
 pub(super) async fn language_context(a: &App, h: &RequestContext) -> Result<(String, Vec<String>)> {
     veyndo_shop::service::language::language_context(&a.core, h).await

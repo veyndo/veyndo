@@ -1,8 +1,10 @@
 //! The server's implementation of what the pricing component reads from the shop settings, the cart and the catalogue.
-use crate::{App, RequestContext, bad, commerce, load_cart};
+use crate::{App, commerce, load_cart};
 use serde_json::Value;
 use sqlx::PgConnection;
 use std::sync::Arc;
+use veyndo_core::bad;
+use veyndo_core::request_context::RequestContext;
 use veyndo_pricing::catalog::Product;
 use veyndo_pricing::ports::{Carts, Catalogue, PortFuture, Pricing, ShopSettings};
 use veyndo_pricing::types::currency::Config;

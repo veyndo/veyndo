@@ -1,8 +1,10 @@
 //! The server side of the assisted-selling register port (POS and manual orders): the guarded cart, quotes, currencies, checkout context, purchase, catalogue and receipt owners of this process.
-use crate::{App, RequestContext, Value};
+use crate::App;
 use axum::extract::{FromRef, Json, Path, Query, State};
+use serde_json::Value;
 use veyndo_catalog::types::catalog_page::CatalogCriteria;
 use veyndo_core::PortFuture;
+use veyndo_core::request_context::RequestContext;
 
 pub(crate) struct Register<'s> {
     app: &'s App,

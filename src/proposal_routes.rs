@@ -1,7 +1,13 @@
 //! HTTP proposal creation, approval and task listing.
-use crate::{App, Json, Path, RequestContext, Result, State, Value, agent, apply, bad, merchant};
+use crate::{App, agent, apply, merchant};
+use axum::Json;
+use axum::extract::Path;
+use axum::extract::State;
+use serde_json::Value;
+use veyndo_core::Result;
+use veyndo_core::bad;
+use veyndo_core::request_context::RequestContext;
 
-pub(crate) use veyndo_studio::http::proposals::{agent_plan, tasks};
 pub(crate) async fn agent_apply(
     State(a): State<App>,
     h: RequestContext,

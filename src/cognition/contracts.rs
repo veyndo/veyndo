@@ -1,9 +1,17 @@
 //! Evidence APIs and MCP contracts dispatch into one authorized owner; the claim compiler rejects free prose.
 use super::{autonomy, autonomy_revert, evidence, experiments, extraction};
-use crate::{
-    App, Json, Path, RequestContext, Result, Router, SecureRoutes, State, Value, auth, bad, get,
-    json, merchant, post,
-};
+use crate::{App, SecureRoutes, auth, merchant};
+use axum::Json;
+use axum::Router;
+use axum::extract::Path;
+use axum::extract::State;
+use axum::routing::get;
+use axum::routing::post;
+use serde_json::Value;
+use serde_json::json;
+use veyndo_core::Result;
+use veyndo_core::bad;
+use veyndo_core::request_context::RequestContext;
 pub(crate) fn schema(name: &str) -> Option<Value> {
     if let Some(schema) = super::behavior::schema(name) {
         return Some(schema);

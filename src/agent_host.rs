@@ -1,12 +1,17 @@
 //! The server side of the agent port: native capabilities, installed app tools, consent-bound preferences, studio order facts, the native work vocabulary and proposal admission.
 use crate::{
-    App, Product, Proposal, RequestContext, Value, agent_runs, apps, auth, capabilities, cognition,
-    commerce, hash, json, operations, staging, studio,
+    App, agent_runs, apps, auth, capabilities, cognition, commerce, operations, staging, studio,
 };
+use serde_json::Value;
+use serde_json::json;
 use veyndo_core::PortFuture;
+use veyndo_core::hash;
+use veyndo_core::request_context::RequestContext;
 use veyndo_intelligence::ports::{AgentHost, WorkSchemas};
 use veyndo_intelligence::service::models::Models;
 use veyndo_intelligence::store::preferences::AdviceContext;
+use veyndo_pricing::catalog::Product;
+use veyndo_studio::domain::proposal::Proposal;
 
 /// The server lends its state, tools and native review to agent work.
 pub(crate) struct Host<'a>(pub(crate) &'a App);

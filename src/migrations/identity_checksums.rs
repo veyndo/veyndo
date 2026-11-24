@@ -1,5 +1,5 @@
 //! Explicit source-hash pairs for the reviewed identity-only migration source update.
-use crate::hash;
+use veyndo_core::hash;
 // Stored ledger bytes remain unchanged. Only these exact pre-rename hashes qualify.
 const APPROVED: &[(&str, &str, &str)] = &[
     (

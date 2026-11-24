@@ -1,6 +1,11 @@
 //! Fast customer-only lookup for native identity bindings; the search is owned by the customers component.
 use super::Criteria;
-use crate::{App, Json, RequestContext, Result, State, Value, auth, merchant};
+use crate::{App, auth, merchant};
+use axum::Json;
+use axum::extract::State;
+use serde_json::Value;
+use veyndo_core::Result;
+use veyndo_core::request_context::RequestContext;
 pub(super) async fn lookup(
     State(a): State<App>,
     h: RequestContext,

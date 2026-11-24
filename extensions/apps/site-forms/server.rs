@@ -1,6 +1,9 @@
 //! Forms validate answers against a published page's declared fields; inbox entries stay private.
 use super::Manifest;
-use crate::{Deserialize, Result, Value, bad};
+use serde::Deserialize;
+use serde_json::Value;
+use veyndo_core::Result;
+use veyndo_core::bad;
 pub(super) async fn admit(
     tx: &mut sqlx::Transaction<'_, sqlx::Postgres>,
     t: &str,

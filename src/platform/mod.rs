@@ -1,5 +1,8 @@
 //! Global SaaS control plane: operator-only aggregate statistics and audited shop provisioning.
-use crate::{App, Router, SecureRoutes, get, post};
+use crate::{App, SecureRoutes};
+use axum::Router;
+use axum::routing::get;
+use axum::routing::post;
 mod auth;
 mod bootstrap;
 pub(crate) use bootstrap::bootstrap_operator;

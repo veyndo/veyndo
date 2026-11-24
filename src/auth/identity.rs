@@ -1,7 +1,14 @@
 //! Resolve the current credential and membership once; bootstrap and sandbox checks share the same boundary.
 use super::{credentials, permissions, resolve_identity_channel};
-use crate::{App, Error, RequestContext, Result, StatusCode, bad, header, tenant};
+use crate::App;
+use axum::http::StatusCode;
 use serde_json::json;
+use veyndo_core::Error;
+use veyndo_core::Result;
+use veyndo_core::bad;
+use veyndo_core::request_context::RequestContext;
+use veyndo_core::shop_scope::header;
+use veyndo_core::shop_scope::tenant;
 fn denied(message: &str) -> Error {
     Error(StatusCode::FORBIDDEN, message.into())
 }

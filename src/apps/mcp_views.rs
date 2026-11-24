@@ -1,10 +1,16 @@
 //! Assistant app views live in the apps component; this module adds the caller's language and the gateway calls.
 use super::gateway;
-use crate::{App, RequestContext, Response, Result, Value, bad, json};
+use crate::App;
+use axum::response::Response;
+use serde_json::Value;
+use serde_json::json;
 pub(super) use veyndo_app_platform::domain::mcp_views::Mode;
 pub(super) use veyndo_app_platform::domain::mcp_views::document;
 pub(crate) use veyndo_app_platform::domain::mcp_views::{EXTENSION, MIME};
 pub(crate) use veyndo_app_platform::store::mcp_views::{list, read};
+use veyndo_core::Result;
+use veyndo_core::bad;
+use veyndo_core::request_context::RequestContext;
 
 /// MCP opt-out applies to discovery and direct invocation, without disabling the UI/HTTP action.
 pub(crate) async fn invoke_mcp(

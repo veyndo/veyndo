@@ -1,9 +1,14 @@
 //! Structured provider output becomes a reviewable immutable manifest; it cannot write files or call shell tools.
 use super::{app_generation, builds, design_context, generation_brief, generation_edits, routes};
-use crate::{
-    App, Choice, Error, RequestContext, Result, StatusCode, Value, assets, bad, commerce, json,
-    language_context, staging,
-};
+use crate::{App, assets, commerce, language_context, staging};
+use axum::http::StatusCode;
+use serde_json::Value;
+use serde_json::json;
+use veyndo_cognition::inference::Choice;
+use veyndo_core::Error;
+use veyndo_core::Result;
+use veyndo_core::bad;
+use veyndo_core::request_context::RequestContext;
 pub(super) async fn generate(a: &App, t: &str, h: &RequestContext, v: &Value) -> Result<Value> {
     let stage = v["environment"]
         .as_str()

@@ -1,5 +1,6 @@
 //! Namespaced core-object extension contracts live in the apps component; this module adds the native projections.
-use crate::{RequestContext, Result};
+use veyndo_core::Result;
+use veyndo_core::request_context::RequestContext;
 
 pub(crate) use veyndo_app_model::Object;
 

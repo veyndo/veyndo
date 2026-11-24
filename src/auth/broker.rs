@@ -1,9 +1,17 @@
 //! Optional trusted identity exchange: signatures bind route, audience, expiry and one-use nonce.
 use super::{email, hash_password, provision_shop};
-use crate::{
-    App, Arc, Json, Result, State, Value, bad, conflict, json, knowledge, prototype_products, uid,
-    validate_tenant,
-};
+use crate::{App, prototype_products};
+use axum::Json;
+use axum::extract::State;
+use serde_json::Value;
+use serde_json::json;
+use std::sync::Arc;
+use veyndo_core::Result;
+use veyndo_core::bad;
+use veyndo_core::conflict;
+use veyndo_core::uid;
+use veyndo_core::validate_tenant;
+use veyndo_intelligence::knowledge;
 
 pub(crate) use veyndo_identity::store::broker::assertion;
 use veyndo_identity::store::merchant_accounts as accounts;

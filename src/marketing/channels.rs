@@ -1,5 +1,7 @@
 //! Sales channel admission lives in the marketing component; these entries keep the server-side signatures.
-use crate::{App, RequestContext, Result};
+use crate::App;
+use veyndo_core::Result;
+use veyndo_core::request_context::RequestContext;
 use veyndo_marketing::service::channels as owner;
 pub(crate) use veyndo_marketing::types::channel::Channel;
 pub(crate) async fn channel(

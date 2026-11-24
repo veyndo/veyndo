@@ -1,16 +1,31 @@
 //! HTTP transport registry; domain behavior lives in dedicated modules.
 use crate::{
-    App, Router, SecureRoutes, StatusCode, accounts, activate_extension, add_items, admin_catalog,
-    agent_apply, agent_plan, agent_runs, apps, assets, auth, b2b, brand_redirect, capabilities,
-    catalog_request, categories, checkout, checkout_handoff, cognition, commerce, concierge,
-    context_info, conversation, conversations, create_cart, currencies, developer, documents,
-    edit_cart, experience, extension_state, forget_personalization, get, get_cart, health, history,
-    http_limits, knowledge_graph, knowledge_status, legal, login, marketing, mcp, merchant_chat,
-    merchant_overview, model_providers, observability, operations, orders, payments, performance,
-    personalization, place_order, platform, policy_stats, pos, post, preview_cart, preview_quote,
-    reindex, security_headers, semantic_search, shop_domains, staging, storefront_pages, studio,
-    tasks, track_channels, translations, ucp,
+    App, SecureRoutes, accounts, activate_extension, add_items, admin_catalog, agent_apply,
+    agent_runs, apps, assets, auth, b2b, brand_redirect, capabilities, catalog_request, categories,
+    checkout, checkout_handoff, cognition, commerce, concierge, context_info, create_cart,
+    currencies, developer, documents, edit_cart, experience, extension_state, get_cart, health,
+    history, legal, login, marketing, mcp, merchant_overview, model_providers, operations, orders,
+    payments, performance, place_order, platform, pos, preview_cart, preview_quote,
+    security_headers, semantic_search, shop_domains, staging, storefront_pages, studio,
+    track_channels, translations, ucp,
 };
+use axum::Router;
+use axum::http::StatusCode;
+use axum::routing::get;
+use axum::routing::post;
+use veyndo_core::http_limits;
+use veyndo_core::observability;
+use veyndo_intelligence::http::agents::chat as merchant_chat;
+use veyndo_intelligence::http::agents::conversation;
+use veyndo_intelligence::http::agents::conversation_list as conversations;
+use veyndo_intelligence::http::agents::knowledge_graph;
+use veyndo_intelligence::http::agents::knowledge_status;
+use veyndo_intelligence::http::agents::reindex;
+use veyndo_intelligence::http::experience::forget_personalization;
+use veyndo_intelligence::http::experience::personalization;
+use veyndo_intelligence::http::experience::policy_stats;
+use veyndo_studio::http::proposals::agent_plan;
+use veyndo_studio::http::proposals::tasks;
 mod http_profile;
 pub(crate) use http_profile::api_host;
 /// Routers that the owning modules build themselves.

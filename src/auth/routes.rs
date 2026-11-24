@@ -1,5 +1,8 @@
 //! Identity, recovery and personal-security routes share canonical authentication admission.
-use crate::{App, Router, SecureRoutes, auth, get, post};
+use crate::{App, SecureRoutes, auth};
+use axum::Router;
+use axum::routing::get;
+use axum::routing::post;
 pub(crate) fn entry_router() -> Router<App> {
     Router::new()
         .merge(auth::roles::router())

@@ -1,10 +1,17 @@
 //! Startup, additive migrations, persisted extensions and outbox worker.
 use crate::{
-    App, Arc, Inference, PgPool, PgPoolOptions, Sandbox, apps, channel_metrics, currencies,
-    demo_catalog, env, knowledge, marketing, migrations, performance, platform, router,
+    App, apps, currencies, demo_catalog, marketing, migrations, performance, platform, router,
     runtime_config, sandbox_cache, workers,
 };
 use crate::{capabilities, documents};
+use sqlx::postgres::PgPoolOptions;
+use std::env;
+use std::sync::Arc;
+use veyndo_apps::sandbox::Sandbox;
+use veyndo_cognition::inference::Inference;
+use veyndo_core::channel_metrics;
+use veyndo_intelligence::knowledge;
+use veyndo_runtime::scoped_pool::ScopedPool as PgPool;
 
 pub(crate) async fn bootstrap() -> App {
     tracing_subscriber::fmt()

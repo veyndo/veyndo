@@ -1,6 +1,7 @@
 //! Transactional provider receipts and order state updates; external responses cannot invent amounts or tenants.
 use super::{Attempt, generic_receipts};
-use crate::{Result, Value};
+use serde_json::Value;
+use veyndo_core::Result;
 
 #[path = "../../extensions/apps/paypal/src/receipts.rs"]
 mod legacy_receipts;

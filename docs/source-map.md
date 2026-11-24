@@ -74,7 +74,7 @@ through Core's locked stock and commit transaction.
 
 `veyndo-pricing::cart` owns Item and the persisted Cart data contract.
 Its four context parameters retain the host's concrete discount, business,
-app configuration and checkout types. Native `src/cart_model.rs` binds
+app configuration and checkout types. `veyndo_shop::types::cart` binds
 those parameters to the existing POS, B2B, App and checkout definitions.
 They keep their original serializers and validators. The native StoredCart
 still owns tenant identity, bearer token, status, revision and database
@@ -539,7 +539,6 @@ See [international commerce](international-commerce.md) for the exact contract.
 | [`src/bin/price.rs`](../src/bin/price.rs) | Batch price fixture transport for the original-PHP differential comparator. | `original-PHP differential scripts` |
 | [`src/bootstrap.rs`](../src/bootstrap.rs) | Startup, additive migrations, persisted extensions and outbox worker. | `integration.py + users.py + extensions.py + restart.py` |
 | [`src/capabilities.rs`](../src/capabilities.rs) | Shared HTTP/MCP capability dispatch and tool authorization. | `protocols.py + integration.py + commerce.py + users.py` |
-| [`src/cart_model.rs`](../src/cart_model.rs) | Persisted cart, item and customer-context types. | `integration.py + commerce.py + protocols.py + users.py + restart.py` |
 | [`src/cart_mutation.rs`](../src/cart_mutation.rs) | Optimistic cart mutations and quantity normalization. | `integration.py + commerce.py + protocols.py + users.py + restart.py` |
 | [`src/cart_price.rs`](../src/cart_price.rs) | Authoritative quantity pricing and localized checkout quote assembly. | `integration.py + commerce.py + protocols.py + users.py + restart.py` |
 | [`src/cart_routes.rs`](../src/cart_routes.rs) | Store API cart and order route adapters. | `integration.py + commerce.py + protocols.py + users.py + restart.py` |
@@ -579,7 +578,6 @@ See [international commerce](international-commerce.md) for the exact contract.
 | [`components/intelligence/src/service/planner.rs`](../components/intelligence/src/service/planner.rs), [`components/studio/src/service/proposal_admission.rs`](../components/studio/src/service/proposal_admission.rs) | Grounded model planning and one checkpointed correction of invalid output (intelligence); the shared native admission of proposals, views and work (studio, behind the work port). | `providers.py + live intelligence.py/studio.py + protocols.py` |
 | [`components/pricing/src/domain/pricing.rs`](../components/pricing/src/domain/pricing.rs) | Behavioral port of Shopware 6.7.14.2 quantity calculators. | `differential.py + delivery_differential.py + Rust numeric regressions + commerce.py` |
 | [`src/proposal_apply.rs`](../src/proposal_apply.rs) | Transactional application of approved, revision-bound proposals. | `providers.py + live intelligence.py/studio.py + protocols.py` |
-| [`src/proposal_model.rs`](../src/proposal_model.rs) | Typed proposals and validation before persistence or execution. | `providers.py + live intelligence.py/studio.py + protocols.py` |
 | [`src/proposal_routes.rs`](../src/proposal_routes.rs) | HTTP proposal creation, approval and task listing. | `providers.py + live intelligence.py/studio.py + protocols.py` |
 | [`src/routes.rs`](../src/routes.rs) | HTTP transport registry; domain behavior lives in dedicated modules. | `protocols.py + integration.py + commerce.py + users.py` |
 | [`crates/apps/src/sandbox.rs`](../crates/apps/src/sandbox.rs) | Native verified resource-policy adapter for independent app execution. | `Independent runtime and native adapter tests + app_components + business_capability` |
