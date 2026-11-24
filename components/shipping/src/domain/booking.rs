@@ -1,5 +1,7 @@
 //! A carrier booking occupies one open package; only the intent that reserved it can release it.
+use serde::Deserialize;
 use serde_json::{Value, json};
+use veyndo_core::document::view;
 use veyndo_core::{Result, conflict};
 use veyndo_pricing::verified_kernel;
 
@@ -11,23 +13,33 @@ pub enum Step {
 }
 
 /// Reserves or releases the package for `intent`. `closed` says the order's delivery no longer accepts bookings.
+/// The facts of a package a carrier booking depends on.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct ParcelBooking {
+    state: Value,
+    label: Value,
+    booking: Value,
+}
+
 pub fn transition(parcel: &mut Value, reserve: bool, closed: bool, intent: &Value) -> Result<Step> {
+    let current: ParcelBooking = view(parcel);
     if !verified_kernel::carrier_booking_admissible(
-        parcel["state"] == "open",
+        current.state == "open",
         closed,
-        !parcel["label"].is_null(),
-        !parcel["booking"].is_null(),
-        parcel["booking"] == *intent,
+        !current.label.is_null(),
+        !current.booking.is_null(),
+        current.booking == *intent,
     ) {
         return Err(conflict(
             "Package is closed, labelled or held by another carrier booking",
         ));
     }
     if reserve {
-        if parcel["booking"] == *intent {
+        if current.booking == *intent {
             return Ok(Step::Settled(json!({"reserved":true,"reused":true})));
         }
-        if !parcel["booking"].is_null() {
+        if !current.booking.is_null() {
             return Err(conflict(
                 "Another unresolved carrier booking occupies this package",
             ));
@@ -35,10 +47,10 @@ pub fn transition(parcel: &mut Value, reserve: bool, closed: bool, intent: &Valu
         parcel["booking"] = intent.clone();
         Ok(Step::Changed("delivery.booking_reserved"))
     } else {
-        if parcel["booking"].is_null() {
+        if current.booking.is_null() {
             return Ok(Step::Settled(json!({"released":true})));
         }
-        if parcel["booking"] != *intent {
+        if current.booking != *intent {
             return Err(conflict("Only the original carrier intent can be released"));
         }
         if let Some(fields) = parcel.as_object_mut() {

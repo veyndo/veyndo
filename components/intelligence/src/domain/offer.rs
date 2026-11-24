@@ -1,24 +1,86 @@
 //! The positive projection of a native quote that the shop signs as an offer: a statement, not a price lock.
+use serde::Deserialize;
 use serde_json::{Value, json};
+use veyndo_core::document::{lenient, view};
 use veyndo_core::{Result, bad, conflict};
 
 const VALID_SECONDS: i64 = 600;
+/// The quote fields an offer signs; everything else (buyer data, the cart capability) is never read.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct OfferQuote {
+    id: Value,
+    revision: Value,
+    configuration_revision: Value,
+    #[serde(deserialize_with = "lenient")]
+    price: OfferPrice,
+    #[serde(deserialize_with = "lenient")]
+    shipping_costs: PriceOnly,
+    #[serde(deserialize_with = "lenient")]
+    checkout: OfferSelection,
+    #[serde(deserialize_with = "lenient")]
+    line_items: Option<Vec<Value>>,
+}
+
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct OfferPrice {
+    currency: Value,
+    currency_scale: Value,
+    #[serde(deserialize_with = "lenient")]
+    total_minor: Option<String>,
+    total_price: Value,
+}
+
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct PriceOnly {
+    total_price: Value,
+}
+
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct OfferSelection {
+    country: Value,
+    shipping_method_id: Value,
+    payment_method_id: Value,
+}
+
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct OfferLine {
+    id: Value,
+    label: Value,
+    quantity: Value,
+    #[serde(deserialize_with = "lenient")]
+    price: LinePrice,
+}
+
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct LinePrice {
+    unit_price: Value,
+    total_price: Value,
+}
+
 /// The positive projection that is signed: totals, lines and the reviewed selection, never buyer data or the cart capability.
 pub fn payload(t: &str, channel: &str, q: &Value, now: i64) -> Result<Value> {
-    let lines = q["lineItems"]
-        .as_array()
+    let q: OfferQuote = view(q);
+    let lines = q
+        .line_items
         .filter(|lines| !lines.is_empty())
         .ok_or(conflict("An empty cart has no offer"))?;
-    let total = q["price"]["totalMinor"]
-        .as_str()
+    let total = q
+        .price
+        .total_minor
         .ok_or(bad("Native quote has no exact total"))?;
     Ok(
         json!({"schemaVersion":1,"kind":"offer","tenant":t,"channel":channel,
-        "cartId":q["id"],"cartRevision":q["revision"],"configurationRevision":q["configurationRevision"],
-        "currency":q["price"]["currency"],"currencyScale":q["price"]["currencyScale"],"totalMinor":total,"totalPrice":q["price"]["totalPrice"],
-        "shippingPrice":q["shippingCosts"]["totalPrice"],
-        "country":q["checkout"]["country"],"shippingMethodId":q["checkout"]["shippingMethodId"],"paymentMethodId":q["checkout"]["paymentMethodId"],
-        "lineItems":lines.iter().map(|i|json!({"id":i["id"],"label":i["label"],"quantity":i["quantity"],"unitPrice":i["price"]["unitPrice"],"totalPrice":i["price"]["totalPrice"]})).collect::<Vec<_>>(),
+        "cartId":q.id,"cartRevision":q.revision,"configurationRevision":q.configuration_revision,
+        "currency":q.price.currency,"currencyScale":q.price.currency_scale,"totalMinor":total,"totalPrice":q.price.total_price,
+        "shippingPrice":q.shipping_costs.total_price,
+        "country":q.checkout.country,"shippingMethodId":q.checkout.shipping_method_id,"paymentMethodId":q.checkout.payment_method_id,
+        "lineItems":lines.iter().map(view::<OfferLine>).map(|i|json!({"id":i.id,"label":i.label,"quantity":i.quantity,"unitPrice":i.price.unit_price,"totalPrice":i.price.total_price})).collect::<Vec<_>>(),
         "issuedAt":now,"expiresAt":now+VALID_SECONDS,
         "meaning":"The shop's calculated quote for this cart revision at issue time. Checkout confirms exactly this revision and total, or refuses and a new offer is needed. It reserves no stock and does not lock a price the merchant changes afterwards."}),
     )

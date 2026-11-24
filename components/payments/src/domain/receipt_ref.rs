@@ -54,6 +54,11 @@ pub struct ProviderReceipt {
 #[derive(Deserialize, Default, Debug, Clone)]
 #[serde(default, rename_all = "camelCase")]
 pub struct RefundReceipt {
+    pub id: Value,
+    #[serde(deserialize_with = "lenient")]
+    pub request_key: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    pub capture_id: Option<String>,
     #[serde(deserialize_with = "lenient")]
     pub amount_minor: Option<i64>,
     #[serde(deserialize_with = "lenient")]

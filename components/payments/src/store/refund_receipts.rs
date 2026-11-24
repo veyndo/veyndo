@@ -1,11 +1,12 @@
 //! Exactly-once provider refund admission, including refunds initiated outside Studio.
 use crate::domain::attempt::Attempt;
-use crate::domain::receipt_ref::reference;
+use crate::domain::receipt_ref::{RefundReceipt, is, reference};
 use crate::domain::refunds::{self, checked_total};
 use crate::domain::settlements;
 use crate::store::receipt_claims::claim;
 use serde_json::{Value, json};
 use sqlx::Row;
+use veyndo_core::document::view;
 use veyndo_core::{Result, bad, conflict};
 
 pub async fn apply(
@@ -15,23 +16,26 @@ pub async fn apply(
     refund: &Value,
     native_key: Option<&str>,
 ) -> Result<i64> {
-    let id = reference(&refund["id"])?;
+    let receipt: RefundReceipt = view(refund);
+    let id = reference(&receipt.id)?;
     let (capture, capture_amount) = refunds::capture(p, context, refund)?;
-    let amount = refund["amountMinor"]
-        .as_i64()
+    let amount = receipt
+        .amount_minor
         .filter(|n| *n > 0 && *n <= capture_amount)
         .ok_or(bad("Invalid provider refund amount"))?;
-    if refund["currency"] != p.currency {
+    if !is(&receipt.currency, &p.currency) {
         return Err(bad("Provider refund currency mismatch"));
     }
-    let key = native_key.or(refund["requestKey"].as_str());
+    let key = native_key.or(receipt.request_key.as_deref());
     if let Some(key) = key {
         let expected: Option<Value> = sqlx::query_scalar("SELECT request FROM payment_jobs WHERE tenant=$1 AND attempt_id=$2 AND id=$3 AND operation='refund'")
             .bind(&p.tenant).bind(&p.id).bind(key).fetch_optional(&mut **tx).await?;
-        if expected.as_ref().is_none_or(|v| {
-            v["amountMinor"].as_i64() != Some(amount)
-                || v["captureId"].as_str().is_some_and(|c| c != capture)
-        }) {
+        if expected
+            .map(|v| view::<RefundReceipt>(&v))
+            .is_none_or(|job| {
+                job.amount_minor != Some(amount) || job.capture_id.is_some_and(|c| c != capture)
+            })
+        {
             return Err(bad("Provider refund does not match its native job"));
         }
     }

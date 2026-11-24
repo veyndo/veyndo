@@ -2,6 +2,7 @@
 use crate::domain::session_payment;
 use serde::Deserialize;
 use serde_json::{Value, json};
+use veyndo_core::document::{Raw, lenient, view};
 use veyndo_core::{Error, Result, StatusCode, bad, conflict};
 use veyndo_shop::types::cart::StoredCart;
 
@@ -40,6 +41,87 @@ pub fn key(session: &str) -> Result<String> {
     Ok(format!("checkout-session-v1:{id}"))
 }
 
+/// The placed order facts a checkout session compares and reports; every field keeps its stored JSON value.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ReviewedOrder {
+    checkout_session_id: Value,
+    id: Value,
+    order_number: Value,
+    state: Value,
+    #[serde(deserialize_with = "lenient")]
+    cart: Raw<CartFacts>,
+    #[serde(deserialize_with = "lenient")]
+    order_customer: OrderCustomer,
+    #[serde(deserialize_with = "lenient")]
+    payment: Raw<PaymentFacts>,
+    #[serde(deserialize_with = "lenient")]
+    legal: LegalFacts,
+}
+
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct CartFacts {
+    id: Value,
+    #[serde(deserialize_with = "lenient")]
+    price: PriceFacts,
+}
+
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct PriceFacts {
+    currency: Value,
+    total_minor: Value,
+}
+
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct OrderCustomer {
+    customer_id: Value,
+}
+
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct PaymentFacts {
+    provider: Value,
+    real_money_charged: Value,
+    state: Value,
+    attempt_id: Value,
+}
+
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct LegalFacts {
+    policy_version: Value,
+}
+
+/// The quote facts a reviewed checkout must still match.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ReviewedQuote {
+    revision: Value,
+    #[serde(deserialize_with = "lenient")]
+    price: PriceFacts,
+    #[serde(deserialize_with = "lenient")]
+    checkout: CheckoutFacts,
+    #[serde(deserialize_with = "lenient")]
+    payment_method: Raw<MethodFacts>,
+    selection_needs_confirmation: Value,
+}
+
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct CheckoutFacts {
+    country: Value,
+}
+
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct MethodFacts {
+    mode: Value,
+    id: Value,
+}
+
 /// What the session service learns about its order; `strict` excludes the contract fixture as a test environment.
 pub fn receipt(
     order: &Value,
@@ -48,13 +130,14 @@ pub fn receipt(
     customer: &str,
     strict: bool,
 ) -> Result<Value> {
-    let payment = &order["payment"];
-    let sandbox_attempt = session_payment::attempt(payment, strict);
-    if order["checkoutSessionId"] != session
-        || order["cart"]["id"] != cart
-        || order["orderCustomer"]["customerId"] != customer
+    let order: ReviewedOrder = view(order);
+    let payment = &order.payment;
+    let sandbox_attempt = session_payment::attempt(&payment.raw, strict);
+    if order.checkout_session_id != session
+        || order.cart.id != cart
+        || order.order_customer.customer_id != customer
         || !(sandbox_attempt
-            || (payment["provider"] == "simulated" && payment["realMoneyCharged"] == false))
+            || (payment.provider == "simulated" && payment.real_money_charged == false))
     {
         return Err(Error(
             StatusCode::NOT_FOUND,
@@ -65,15 +148,15 @@ pub fn receipt(
         "sessionId": session,
         "cartId": cart,
         "customerId": customer,
-        "orderId": order["id"],
-        "orderNumber": order["orderNumber"],
-        "orderState": order["state"],
-        "paymentState": order["payment"]["state"],
-        "currency": order["cart"]["price"]["currency"],
-        "totalMinor": order["cart"]["price"]["totalMinor"],
+        "orderId": order.id,
+        "orderNumber": order.order_number,
+        "orderState": order.state,
+        "paymentState": payment.state,
+        "currency": order.cart.price.currency,
+        "totalMinor": order.cart.price.total_minor,
     });
     if sandbox_attempt {
-        result["paymentAttemptId"] = payment["attemptId"].clone();
+        result["paymentAttemptId"] = payment.attempt_id.clone();
     }
     Ok(result)
 }
@@ -109,24 +192,25 @@ impl Review {
     }
 
     pub fn check_quote(&self, q: &Value, policy: &Value, minor: i64) -> Result<()> {
-        let method = &q["paymentMethod"];
+        let q: ReviewedQuote = view(q);
+        let method = &q.payment_method;
         let allowed = if self.paypal_sandbox {
-            session_payment::provider(method).is_some()
+            session_payment::provider(&method.raw).is_some()
         } else {
-            method["mode"] == "simulated"
+            method.mode == "simulated"
         };
         if !allowed {
             return Err(conflict(
                 "The reviewed payment method is unavailable for this checkout profile",
             ));
         }
-        if q["revision"] != self.cart_revision
-            || q["price"]["currency"] != self.currency
-            || q["checkout"]["country"] != self.country
-            || q["paymentMethod"]["id"] != self.payment_method
+        if q.revision != self.cart_revision
+            || q.price.currency != self.currency
+            || q.checkout.country != self.country
+            || method.id != self.payment_method
             || policy != &self.legal_policy_version
             || minor.to_string() != self.total_minor
-            || q["selectionNeedsConfirmation"] == true
+            || q.selection_needs_confirmation == true
         {
             return Err(conflict("Checkout changed; review your order again"));
         }
@@ -141,14 +225,18 @@ impl Review {
             &self.customer_id,
             strict,
         )?;
-        if self.paypal_sandbox != session_payment::attempt(&order["payment"], strict) {
+        let order: ReviewedOrder = view(order);
+        if self.paypal_sandbox != session_payment::attempt(&order.payment.raw, strict) {
             return Err(conflict("Review the original checkout payment profile"));
         }
-        let total = order["cart"]["price"]["totalMinor"]
+        let total = order
+            .cart
+            .price
+            .total_minor
             .as_str()
             .and_then(|value| value.parse().ok())
             .ok_or(conflict("Checkout receipt amount unavailable"))?;
-        self.check_quote(&order["cart"], &order["legal"]["policyVersion"], total)
+        self.check_quote(&order.cart.raw, &order.legal.policy_version, total)
     }
 
     pub fn check_prepared_payment(&self, payment: &Value, strict: bool) -> Result<()> {

@@ -1,8 +1,10 @@
 //! Serializes unit spending and binds an approved purchase to the authoritative native checkout quote.
 use crate::store::access::{access, catalog_guard, guard_conn, require};
 use crate::types::model::{Access, Context};
+use serde::Deserialize;
 use serde_json::{Value, json};
 use sqlx::Row;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad, conflict, hash};
 use veyndo_kernel::verified_kernel;
 use veyndo_shop::types::cart::StoredCart;
@@ -24,7 +26,46 @@ pub fn needs_approval(policy: &Access, total: u64) -> bool {
     .any(|limit| total > limit)
 }
 pub fn fingerprint(c: &StoredCart, q: &Value, version: &str) -> String {
-    hash(&json!({"cart":c.id,"revision":c.revision,"context":c.data.b2b,"items":c.data.items,"checkout":c.data.checkout,"currency":c.data.currency,"coupons":c.data.coupons,"appConfigurations":c.data.app_configurations,"buyer":c.data.buyer,"policy":version,"price":json!({"total":q["price"]["totalPrice"],"net":q["price"]["netPrice"],"tax":q["price"]["tax"],"currency":q["price"]["currency"],"scale":q["price"]["currencyScale"]}),"lineItems":q["lineItems"].as_array().map(|lines|lines.iter().map(|line|json!({"id":line["id"],"quantity":line["quantity"],"price":line["price"]})).collect::<Vec<_>>()),"shipping":q["shippingMethod"],"payment":q["paymentMethod"],"currencyContext":q["currencyContext"]}).to_string())
+    let q: FingerprintedQuote = view(q);
+    let lines = q.line_items.map(|lines| {
+        lines
+            .iter()
+            .map(view::<FingerprintedLine>)
+            .map(|line| json!({"id":line.id,"quantity":line.quantity,"price":line.price}))
+            .collect::<Vec<_>>()
+    });
+    hash(&json!({"cart":c.id,"revision":c.revision,"context":c.data.b2b,"items":c.data.items,"checkout":c.data.checkout,"currency":c.data.currency,"coupons":c.data.coupons,"appConfigurations":c.data.app_configurations,"buyer":c.data.buyer,"policy":version,"price":json!({"total":q.price.total_price,"net":q.price.net_price,"tax":q.price.tax,"currency":q.price.currency,"scale":q.price.currency_scale}),"lineItems":lines,"shipping":q.shipping_method,"payment":q.payment_method,"currencyContext":q.currency_context}).to_string())
+}
+
+/// The quote values a company purchase approval is bound to.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct FingerprintedQuote {
+    #[serde(deserialize_with = "lenient")]
+    price: FingerprintedPrice,
+    #[serde(deserialize_with = "lenient")]
+    line_items: Option<Vec<Value>>,
+    shipping_method: Value,
+    payment_method: Value,
+    currency_context: Value,
+}
+
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct FingerprintedPrice {
+    total_price: Value,
+    net_price: Value,
+    tax: Value,
+    currency: Value,
+    currency_scale: Value,
+}
+
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct FingerprintedLine {
+    id: Value,
+    quantity: Value,
+    price: Value,
 }
 pub async fn usage(
     conn: &mut sqlx::PgConnection,

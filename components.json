@@ -225,7 +225,7 @@
         "orders": "read: reads order documents in the same statement as its own records to project or admit them (method_usage.rs)"
       },
       "glob_imports": 0,
-      "untyped_access": 26,
+      "untyped_access": 18,
       "sql_outside_store": 0
     },
     "checkout": {
@@ -270,7 +270,7 @@
         "tenants": "read: reads shop existence, status or the agent stop switch inside a larger claim or join; simple reads go through veyndo_core::tenants (buyer_identity.rs)"
       },
       "glob_imports": 0,
-      "untyped_access": 151,
+      "untyped_access": 127,
       "sql_outside_store": 6
     },
     "customers": {
@@ -376,7 +376,7 @@
         "sales_channels": "read: reads the sales channel document (kind, activity, catalogue scope) to admit the request channel inside the same statement (providers.rs)"
       },
       "glob_imports": 0,
-      "untyped_access": 205,
+      "untyped_access": 199,
       "sql_outside_store": 11
     },
     "marketing": {
@@ -431,7 +431,7 @@
         "user_sessions": "read: reads merchant sessions to resolve the actor of a flow (channel_preview.rs)"
       },
       "glob_imports": 0,
-      "untyped_access": 219,
+      "untyped_access": 207,
       "sql_outside_store": 9
     },
     "b2b": {
@@ -465,7 +465,7 @@
         "products": "read: reads product rows in the same statement as its own data (prices, stock, visibility) (access.rs, catalog.rs, lists.rs, quick_order.rs)"
       },
       "glob_imports": 0,
-      "untyped_access": 80,
+      "untyped_access": 68,
       "sql_outside_store": 7
     },
     "pos": {
@@ -686,7 +686,7 @@
         "translation_jobs": "write: agent runs cancel translation jobs they started (agent_runs.rs)"
       },
       "glob_imports": 0,
-      "untyped_access": 463,
+      "untyped_access": 446,
       "sql_outside_store": 29
     },
     "studio": {

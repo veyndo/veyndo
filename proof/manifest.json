@@ -1463,8 +1463,8 @@
     },
     "components/b2b/src/store/purchase.rs": {
       "status": "reviewed-binding",
-      "sha256": "6aa647c874fec3bfb2b3282c02678b808e21cd0f6f9d19fbb82ae4fec4ace762",
-      "review": "B2B access, organization and purchasing storage and flow job claims moved into their components"
+      "sha256": "1ac10104133d84bf8b01458ff0e5cdf88bbc00e5c302498f05ec5e8d4b202008",
+      "review": "F33 typed document views: proof bindings unchanged"
     },
     "components/b2b/src/store/staging.rs": {
       "status": "unproved",
@@ -1833,8 +1833,8 @@
     },
     "components/checkout/src/domain/session_review.rs": {
       "status": "unproved",
-      "sha256": "4de88b390747839d67ff28a978582f1a80c59a8e3907801957f1a40e14ba3366",
-      "review": "Unit tests for every public domain function of the components; no production code changed"
+      "sha256": "3f08808536e13b4caa64a0f625e8d1af3e6dcb05ebe3bd510d164b284dd1410c",
+      "review": "F33 typed document views: proof bindings unchanged"
     },
     "components/checkout/src/domain/tax_lines.rs": {
       "status": "unproved",
@@ -2463,8 +2463,8 @@
     },
     "components/intelligence/src/domain/offer.rs": {
       "status": "unproved",
-      "sha256": "a6d22181e047b36a715776e29ee8a9cdef60946bab27a24587074b03e16a3b20",
-      "review": "Experiment store, readout and automation, behaviour analytics store and the private preference graph moved verbatim into the intelligence component; consent, settings and channel admission stay in the server. No kernel policy changed."
+      "sha256": "cff714e56437a893854bd93f15f8c796e7242fd8989cb8428b7327f255d2bc5b",
+      "review": "F33 typed document views: proof bindings unchanged"
     },
     "components/intelligence/src/domain/preference_graph.rs": {
       "status": "unproved",
@@ -3158,8 +3158,8 @@
     },
     "components/marketing/src/store/flow_mutations.rs": {
       "status": "unproved",
-      "sha256": "638541f0dc7cba57e0e41eeed04f9c234d599e66ab9bd697a6bb28b2d6bdc646",
-      "review": "Functions above 150 lines split into named steps without behaviour change; function length limit lowered to 150"
+      "sha256": "28da6fe62e4d3226e72bdecda74ea5a29ba17fdb2f99673fcf510fc3122cb761",
+      "review": "F33 typed document views: proof bindings unchanged"
     },
     "components/marketing/src/store/flow_projection.rs": {
       "status": "unproved",
@@ -3453,8 +3453,8 @@
     },
     "components/payments/src/domain/receipt_ref.rs": {
       "status": "unproved",
-      "sha256": "8af54b39c5fc2cb14475affdbc6f70c2ecf175ea56f00b450cb66a9b523da3ea",
-      "review": "F30 typed provider receipts and operation args: proof bindings unchanged"
+      "sha256": "ad01acdfccf59f8fc57044dd68ac4acc3933fad362082eb0a74d7daf2208324e",
+      "review": "F33 typed document views: proof bindings unchanged"
     },
     "components/payments/src/domain/refunds.rs": {
       "status": "reviewed-binding",
@@ -3628,8 +3628,8 @@
     },
     "components/payments/src/store/refund_receipts.rs": {
       "status": "unproved",
-      "sha256": "9f649ed63fd9466ffd1ef62c3030d9f0d3cdfdc5be914e103c083a1baaf1a3c4",
-      "review": "Payment ledger rules moved into components/payments; kernel call sites unchanged"
+      "sha256": "8d830080759f385c33b1eda7b587f96813497bf0a7aa87429a49e62a9a41338a",
+      "review": "F33 typed document views: proof bindings unchanged"
     },
     "components/payments/src/store/saved_instruments.rs": {
       "status": "unproved",
@@ -3908,8 +3908,8 @@
     },
     "components/shipping/src/domain/booking.rs": {
       "status": "reviewed-binding",
-      "sha256": "3f609441b5c493c3a1e3d3b68eab9fa37f9655f0305b3b8f219638d1896b90c0",
-      "review": "delivery_split_admissible and carrier_booking_admissible bindings moved into components/shipping"
+      "sha256": "b800a57153bae0c73ab8cfd1bf5cbb144cdff6752f981a312e29e1874827f1de",
+      "review": "F33 typed document views: proof bindings unchanged"
     },
     "components/shipping/src/domain/geography.rs": {
       "status": "unproved",
