@@ -1,4 +1,4 @@
-//! What the cashier gateway needs from the server: the guarded cart port, cart quotes, currency selection, checkout context changes, the purchase, catalogue reads and receipt snapshots.
+//! What assisted selling (the cashier gateway and merchant manual orders) needs from the server: the guarded cart port, cart quotes, currency selection, checkout context changes, the purchase, catalogue reads and receipt snapshots.
 use serde_json::Value;
 use veyndo_catalog::types::catalog_page::CatalogCriteria;
 use veyndo_checkout::ports::Quotes;

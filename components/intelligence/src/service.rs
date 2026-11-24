@@ -6,6 +6,7 @@ pub mod autonomy;
 pub mod autonomy_revert;
 pub mod behavior;
 pub mod caption_source;
+pub mod catalog_intake;
 pub mod claims;
 pub mod concierge;
 pub mod consent;

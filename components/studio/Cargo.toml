@@ -18,6 +18,7 @@ veyndo-identity = { path = "../identity" }
 veyndo-app-platform = { path = "../apps" }
 veyndo-orders = { path = "../orders" }
 veyndo-pricing = { path = "../pricing" }
+veyndo-checkout = { path = "../checkout" }
 veyndo-shop = { path = "../shop" }
 veyndo-marketing = { path = "../marketing" }
 veyndo-catalog = { path = "../catalog" }

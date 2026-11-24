@@ -160,7 +160,7 @@ checks actual prices, checkout snapshots, invalid geography and tenant boundarie
 This is **native prototype equivalence for the documented subset**, not an
 original-PHP tax-detection comparison or full Shopware DAL/API parity.
 
-`localization.rs`, `commerce/content_text.rs`, `product_languages.rs` and
+`localization.rs`, `commerce/content_text.rs`, `veyndo_core::localized` and
 `product_edit.rs` implement configurable main-language and per-field inheritance.
 `translations/` is a native AI extension with durable drafts, bounded jobs and
 revision-protected apply, covered by the restart/provider/permissions fixture suite.

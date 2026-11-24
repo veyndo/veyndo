@@ -1,4 +1,4 @@
-//! The server side of the cashier register port: the guarded cart, quotes, currencies, checkout context, purchase, catalogue and receipt owners of this process.
+//! The server side of the assisted-selling register port (POS and manual orders): the guarded cart, quotes, currencies, checkout context, purchase, catalogue and receipt owners of this process.
 use crate::{App, RequestContext, Value};
 use axum::extract::{FromRef, Json, Path, Query, State};
 use veyndo_catalog::types::catalog_page::CatalogCriteria;

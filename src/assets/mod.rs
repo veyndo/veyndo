@@ -3,6 +3,7 @@ use crate::*;
 mod import;
 pub(crate) use import::image as import_image;
 mod captions;
+pub(crate) use captions::Egress;
 pub(crate) mod design_references;
 mod image_jobs;
 pub(crate) use captions::schema as caption_schema;

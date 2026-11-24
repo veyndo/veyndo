@@ -4,6 +4,7 @@ mod config;
 pub(crate) use veyndo_pos::service::discount::apply as adjust_quote;
 mod gateway;
 mod register_host;
+pub(crate) use register_host::Register;
 mod schema;
 mod settlement;
 pub(crate) use config::configure;

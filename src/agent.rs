@@ -5,7 +5,6 @@ pub(crate) use veyndo_intelligence::http::agents::{
     chat as merchant_chat, conversation, conversation_list as conversations, knowledge_graph,
     knowledge_status, reindex,
 };
-pub(crate) use veyndo_intelligence::service::models::choice;
 
 pub(super) async fn model_providers(
     State(a): State<App>,

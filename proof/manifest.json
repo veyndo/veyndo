@@ -2548,8 +2548,8 @@
     },
     "components/intelligence/src/ports.rs": {
       "status": "unproved",
-      "sha256": "f46ccca40d074c32ffc5879deee1cabbeb1f34f53846f551db1c0d6a291f8bfb",
-      "review": "F9: media captions, design references, product knowledge and the translation worker moved into components"
+      "sha256": "e78f60ef1786cd971b224e0027be1177d56e8a43c48e94e8e534d257c5353fef",
+      "review": "F10: manual orders, the merchant operation catalogue and catalogue intake moved into components"
     },
     "components/intelligence/src/service/advisor.rs": {
       "status": "unproved",
@@ -2585,6 +2585,26 @@
       "status": "unproved",
       "sha256": "f10ad2c1ce74074143c0265eaabee6e91f1c5b5262040a1b7f0525e9e5ea962b",
       "review": "F9: media captions, design references, product knowledge and the translation worker moved into components"
+    },
+    "components/intelligence/src/service/catalog_intake/csv.rs": {
+      "status": "unproved",
+      "sha256": "f5f4ef5ee3e6cb2c940e10032bb42410f2ad7dca62d4962b967af84843a4449b",
+      "review": "F10: manual orders, the merchant operation catalogue and catalogue intake moved into components"
+    },
+    "components/intelligence/src/service/catalog_intake/prepare.rs": {
+      "status": "unproved",
+      "sha256": "826c20c1adae5e3ceed42c7779920e8187627fb880acc271e0624726b02e26fc",
+      "review": "F10: manual orders, the merchant operation catalogue and catalogue intake moved into components"
+    },
+    "components/intelligence/src/service/catalog_intake/save.rs": {
+      "status": "unproved",
+      "sha256": "8367e60f6cd58ae3b8a73d06bb6963aac426aad44d1b76d66c62b1db59512d42",
+      "review": "F10: manual orders, the merchant operation catalogue and catalogue intake moved into components"
+    },
+    "components/intelligence/src/service/catalog_intake.rs": {
+      "status": "unproved",
+      "sha256": "37bbe20a6e915722ef3eb0214ae528253f20dcc5759911661f0d408e3e19eb1c",
+      "review": "F10: manual orders, the merchant operation catalogue and catalogue intake moved into components"
     },
     "components/intelligence/src/service/claims.rs": {
       "status": "unproved",
@@ -2748,8 +2768,8 @@
     },
     "components/intelligence/src/service.rs": {
       "status": "unproved",
-      "sha256": "ae56138f1ee39021615275ff11545197eefed3bf63dd092f1191c1ecb9aa3129",
-      "review": "F9: media captions, design references, product knowledge and the translation worker moved into components"
+      "sha256": "797ba9031e789672ea267c649149c4bd35b2ceb010663a7fad70d0c8fc63be23",
+      "review": "F10: manual orders, the merchant operation catalogue and catalogue intake moved into components"
     },
     "components/intelligence/src/store/agent_runs.rs": {
       "status": "unproved",
@@ -3578,8 +3598,8 @@
     },
     "components/pos/src/ports.rs": {
       "status": "unproved",
-      "sha256": "168d2d7791ed9510ead2e6d8b5dfd1974a9db30548f1e08d1e2755ed4307ae33",
-      "review": "F8: payment providers, POS register and B2B commands moved into their components"
+      "sha256": "ce05cd24a244f6d0100022d52ae6756576c6c45f71871a5f3e9b41a932cad6ab",
+      "review": "F10: manual orders, the merchant operation catalogue and catalogue intake moved into components"
     },
     "components/pos/src/service/customer.rs": {
       "status": "unproved",
@@ -4081,6 +4101,11 @@
       "sha256": "0c6c9b6370a1747e9d917a00aa46af6353fd563487f20c49a53d04ecc2d476e6",
       "review": "History access rules, version reads and the product restoration projection moved into the studio component; behaviour unchanged"
     },
+    "components/studio/src/domain/merchant_operations.rs": {
+      "status": "unproved",
+      "sha256": "cd7742bce8918ad94bbb6f4fc813b8049efe991c67a87cdd55832231f5a1b030",
+      "review": "F10: manual orders, the merchant operation catalogue and catalogue intake moved into components"
+    },
     "components/studio/src/domain/product_restore.rs": {
       "status": "unproved",
       "sha256": "68089b69f100f8767bb5084bc5b66d171d8ecc9e97ab76e43ec6f3b55167d8ab",
@@ -4118,8 +4143,8 @@
     },
     "components/studio/src/domain.rs": {
       "status": "unproved",
-      "sha256": "f75e05ee10b176911ba73bc86b314001efb5ea276857dcf06ab9139c73c8e55f",
-      "review": "Batch F1: proposals, list views, reviewed work, its execution and proposal application moved into studio behind the WorkHost port"
+      "sha256": "744e8a048e619dacc9961e7e5dc0a2fa41155415cda6f82cbe17d0da588926d4",
+      "review": "F10: manual orders, the merchant operation catalogue and catalogue intake moved into components"
     },
     "components/studio/src/http/customers.rs": {
       "status": "unproved",
@@ -4261,6 +4286,11 @@
       "sha256": "cd799d962d0d819bd8d099eaea585fc9a1b842b90ce7cd1100685da8377d5933",
       "review": "Batch F4: source-record imports moved into studio behind the ImportHost port"
     },
+    "components/studio/src/service/manual_orders.rs": {
+      "status": "unproved",
+      "sha256": "18e4c0f413017c049032f2b5f7d13c24f7a17dc16856bf6fbbbbba7d398ef4ca",
+      "review": "F10: manual orders, the merchant operation catalogue and catalogue intake moved into components"
+    },
     "components/studio/src/service/proposal_admission.rs": {
       "status": "unproved",
       "sha256": "e368e88de91c8317f234080db1273898c8fc208aa536cba00c4aafdad483e634",
@@ -4323,8 +4353,8 @@
     },
     "components/studio/src/service.rs": {
       "status": "unproved",
-      "sha256": "d123177424d8596498a78a2411910ed9986cfcffb45fcd3a48a5c89a7bad3f33",
-      "review": "F9: media captions, design references, product knowledge and the translation worker moved into components"
+      "sha256": "a0ce6cee30c97056e33f97c0d88f90d098fc201c9427305b7ac0120f6a2dc061",
+      "review": "F10: manual orders, the merchant operation catalogue and catalogue intake moved into components"
     },
     "components/studio/src/store/history.rs": {
       "status": "unproved",
@@ -4643,8 +4673,8 @@
     },
     "extensions/apps/catalog-import/shop_mcp.rs": {
       "status": "unproved",
-      "sha256": "ac78a57fea357161bfeb639e3c8b2a23e73af9a9ec5d172fc769ea8c648f8b51",
-      "review": "Reviewed final provider locality request and consent lint cleanup after independent whole-branch review; UCP transfer, native locked contact checks, explicit negotiation, atomic currency/cart/consent and six isolated PostgreSQL suites verified. Existing extracted kernel unchanged; no provider or SQL proof claimed."
+      "sha256": "3a51305911eef4b00c9cd87b898b2a70c5a05d7a139b46a72c26014147c6686d",
+      "review": "F10: manual orders, the merchant operation catalogue and catalogue intake moved into components"
     },
     "extensions/apps/catalog-import/shopify_csv.rs": {
       "status": "unproved",
@@ -6178,8 +6208,8 @@
     },
     "src/agent.rs": {
       "status": "unproved",
-      "sha256": "18469e6d856a1d8d5c4cb084b0a8d4313526a9b68943942787c1395052c6b63c",
-      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
+      "sha256": "f30a50910d2b0e9ccee4fbb738eb33fdff97d402ba46e9a1935855e0fdada31a",
+      "review": "F10: manual orders, the merchant operation catalogue and catalogue intake moved into components"
     },
     "src/agent_host.rs": {
       "status": "unproved",
@@ -6528,8 +6558,8 @@
     },
     "src/assets/mod.rs": {
       "status": "unproved",
-      "sha256": "4135ec4f896835c75c82a164f9035c1dd31902ca7bf84fda599bcf62cc24bf56",
-      "review": "F9: media captions, design references, product knowledge and the translation worker moved into components"
+      "sha256": "0b3538cdcc1b1700db5dceb5c31b5f5713e137c45d0f338677af707ce89e6884",
+      "review": "F10: manual orders, the merchant operation catalogue and catalogue intake moved into components"
     },
     "src/assets/model_format.rs": {
       "status": "unproved",
@@ -7011,25 +7041,10 @@
       "sha256": "257b1335971c4b7c81d371e6ee92ac3965a3799938b001bacd2cc1ae692ec9a9",
       "review": "Cart projection and product detail move into checkout behind a quote port"
     },
-    "src/commerce/catalog_intake/csv.rs": {
-      "status": "unproved",
-      "sha256": "cd8b2cec102f40e90fb3553d953ee1d8fb321d00551a5b165e8ad643fffd95b7",
-      "review": "Operator session and audit handlers moved into shop; product write admission and the CSV reader moved into catalog without behaviour change"
-    },
     "src/commerce/catalog_intake/mod.rs": {
       "status": "unproved",
-      "sha256": "ba01c1fe9e70bfac731e5c0a3317b71eb24369b20c3a82468fa7c459d25af303",
-      "review": "Batch F5: inference component for crates/cognition, crate-cycle gate, core paths for history attribution and environment parent"
-    },
-    "src/commerce/catalog_intake/prepare.rs": {
-      "status": "unproved",
-      "sha256": "32ac4be079a9c66a00c776f2ea05e7e82d4b298cd050fe38d0788bb6e624d0ef",
-      "review": "Reviewed inbound UCP/native cart and consent transactions, native finalization contact guard, immutable order snapshots, explicit optional negotiation, public HTTPS app-owned catalogue adapters; independent whole-branch review findings repaired and six isolated HTTP/PG suites pass. No extracted kernel policy changed; SQL/provider behavior remains unproved."
-    },
-    "src/commerce/catalog_intake/save.rs": {
-      "status": "unproved",
-      "sha256": "e3582d91169b0d3e63ecaba2e38492aa3cd8682a0f8f5553164dd5d76bbda416",
-      "review": "Batch F5: inference component for crates/cognition, crate-cycle gate, core paths for history attribution and environment parent"
+      "sha256": "380f2829ac2c89e6471b7f121d837e80339ff95bbc1d24f1350e629690f45d5c",
+      "review": "F10: manual orders, the merchant operation catalogue and catalogue intake moved into components"
     },
     "src/commerce/catalog_intake/schema.rs": {
       "status": "unproved",
@@ -7108,8 +7123,8 @@
     },
     "src/commerce/mod.rs": {
       "status": "unproved",
-      "sha256": "71f2e590cbe7ce6d1a23235d1e291a4ac172e4252ad308c53827827ef4fba06d",
-      "review": "F9: media captions, design references, product knowledge and the translation worker moved into components"
+      "sha256": "f6b235942404278562eb080c86e85e1bb59e1d73d3c2b1b413578bf2644db90e",
+      "review": "F10: manual orders, the merchant operation catalogue and catalogue intake moved into components"
     },
     "src/commerce/order_fields.rs": {
       "status": "unproved",
@@ -7125,11 +7140,6 @@
       "status": "unproved",
       "sha256": "8dccd65d3bb08fa26fc7ed213b4db44ca987ff3a8ff1a9f810a13505a2175734",
       "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
-    },
-    "src/commerce/product_languages.rs": {
-      "status": "unproved",
-      "sha256": "82273f9f178c102edb03591d46d1712363bf4b66158ba458c0d1931d18a184a9",
-      "review": "F9: media captions, design references, product knowledge and the translation worker moved into components"
     },
     "src/commerce/selection.rs": {
       "status": "unproved",
@@ -7193,8 +7203,8 @@
     },
     "src/currencies/mod.rs": {
       "status": "unproved",
-      "sha256": "cde044ace056339049dff9a73f5599efc491b33c9aa0b4650a76344e86dfac4a",
-      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
+      "sha256": "3cdb56903d9920254b1804296b845a949c3e4b7454e24bbbbc9da97ea991cd58",
+      "review": "F10: manual orders, the merchant operation catalogue and catalogue intake moved into components"
     },
     "src/currencies/ports.rs": {
       "status": "unproved",
@@ -7583,8 +7593,8 @@
     },
     "src/operations/manual_orders.rs": {
       "status": "unproved",
-      "sha256": "c5f4538fd3d70022757757f1b4470b00a534e8d91757b2b9946f066e48cb9fc7",
-      "review": "Functions above 150 lines split into named steps without behaviour change; function length limit lowered to 150"
+      "sha256": "ce1f5de6ec2a2ae84b2c00d81e7cc19d650dcc411bdfde5bb9a0840569d68f63",
+      "review": "F10: manual orders, the merchant operation catalogue and catalogue intake moved into components"
     },
     "src/operations/master_data.rs": {
       "status": "unproved",
@@ -7593,8 +7603,8 @@
     },
     "src/operations/mod.rs": {
       "status": "unproved",
-      "sha256": "76c027bb673d468ce1024c4a19c956f7eada897c8fa91f2201e532ffc5567627",
-      "review": "F8: payment providers, POS register and B2B commands moved into their components"
+      "sha256": "d997eb6eb46e2bc2d00254259e6f7af5bda972013a2547157b02827912b5791b",
+      "review": "F10: manual orders, the merchant operation catalogue and catalogue intake moved into components"
     },
     "src/operations/order_documents.rs": {
       "status": "unproved",
@@ -7863,13 +7873,13 @@
     },
     "src/pos/mod.rs": {
       "status": "unproved",
-      "sha256": "b6c26b3c00c27e9bee196f2acb80b9c490c6ec710ae476ae7bb5725c670a2d3b",
-      "review": "F8: payment providers, POS register and B2B commands moved into their components"
+      "sha256": "c0395b15bb4938a0e6b3393fa133b18d3739c1c0841d95af5c33cc3362c469ea",
+      "review": "F10: manual orders, the merchant operation catalogue and catalogue intake moved into components"
     },
     "src/pos/register_host.rs": {
       "status": "unproved",
-      "sha256": "ebcf2482a45dfa7589cfe8b42e42823947589e0ed56eca219c549615adc29b42",
-      "review": "F8: payment providers, POS register and B2B commands moved into their components"
+      "sha256": "aa148ad10afaf5de6c8024bbd39f3f37c8d8d9b046e86bd12810ab68d3d2dc2e",
+      "review": "F10: manual orders, the merchant operation catalogue and catalogue intake moved into components"
     },
     "src/pos/schema.rs": {
       "status": "unproved",
@@ -8078,8 +8088,8 @@
       "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
     },
     "Cargo.lock": {
-      "sha256": "903d650bb5f5d7369d0b50ec2c100fd31a99db843e201a4c329ca2dce3181827",
-      "review": "F9: media captions, design references, product knowledge and the translation worker moved into components"
+      "sha256": "d7e089837758d417bb80c34b12917808726794f245c8ad13d1c893c0db0067aa",
+      "review": "F10: manual orders, the merchant operation catalogue and catalogue intake moved into components"
     },
     "Cargo.toml": {
       "sha256": "12d2d79a98f6913d20b8e912afb9ea8de0539b9e83428de8a9d7412c406896f6",

@@ -181,10 +181,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/cognition/signed_offer.rs](../src/cognition/signed_offer.rs) | Signed cart offer transport; the intelligence component signs and checks offers through the cart port. |
 | [src/cognition/stream.rs](../src/cognition/stream.rs) | Compatible SSE transport waits on the same persisted run; detached request handling retains native tenant scope. |
 | [src/commerce/catalog.rs](../src/commerce/catalog.rs) | SKU loading with parent translation fallback; owned by the catalog component. |
-| [src/commerce/catalog_intake/csv.rs](../src/commerce/catalog_intake/csv.rs) | Bounded UTF-8 CSV parser accepts quoted delimiters, escaped quotes and multiline fields; no formula evaluation or silent row loss. |
-| [src/commerce/catalog_intake/mod.rs](../src/commerce/catalog_intake/mod.rs) | Merchant catalogue intake prepares bounded drafts; approved saves reuse native products, history and outbox in a private stage. |
-| [src/commerce/catalog_intake/prepare.rs](../src/commerce/catalog_intake/prepare.rs) | Native CSV parsing and read-only model extraction use existing inference admission and DNS-pinned public egress. |
-| [src/commerce/catalog_intake/save.rs](../src/commerce/catalog_intake/save.rs) | One explicit sandbox-only product creation delegates to native CAS/history/outbox; stable IDs reconcile retries without overwrites. |
+| [src/commerce/catalog_intake/mod.rs](../src/commerce/catalog_intake/mod.rs) | Catalogue intake routes and the server side of the intake port; the intelligence component owns drafts, extraction and the approved sandbox save. |
 | [src/commerce/catalog_intake/schema.rs](../src/commerce/catalog_intake/schema.rs) | One catalogue-intake contract is shared by HTTP, MCP and explicit UI review; it cannot publish or overwrite products. |
 | [src/commerce/catalog_ports.rs](../src/commerce/catalog_ports.rs) | The server's implementation of what the catalog component reads from carts, orders, environments and the history. |
 | [src/commerce/configuration.rs](../src/commerce/configuration.rs) | Tenant checkout configuration loading. |
@@ -204,7 +201,6 @@ This lists every checked-in source module in these roots, including files with n
 | [src/commerce/order_fields.rs](../src/commerce/order_fields.rs) | Derived order fields are owned by the orders component. |
 | [src/commerce/order_machine.rs](../src/commerce/order_machine.rs) | The order state machine is owned by the orders component. |
 | [src/commerce/product_admin.rs](../src/commerce/product_admin.rs) | The merchant product list lives in the studio component; the server registers it with product creation. |
-| [src/commerce/product_languages.rs](../src/commerce/product_languages.rs) | Enabled content languages, NULL field inheritance and stable global language registration. |
 | [src/commerce/selection.rs](../src/commerce/selection.rs) | Recover a quote after configuration changes without losing items or silently committing new choices. |
 | [src/commerce/settings_guards.rs](../src/commerce/settings_guards.rs) | The server side of the settings port: rule conditions, payment capture configuration, the marketing configuration lock and app lifecycle locales. |
 | [src/commerce/settings_patch.rs](../src/commerce/settings_patch.rs) | Sparse settings overrides are owned by the shop component. |
@@ -295,7 +291,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/operations/grid_plan.rs](../src/operations/grid_plan.rs) | Grid filter planning lives in the studio component; this handler lends it the server's model context. |
 | [src/operations/grid_schema.rs](../src/operations/grid_schema.rs) | The allowlisted list-filter schema now lives in the studio component; model plans, MCP and saved views share it. |
 | [src/operations/imports.rs](../src/operations/imports.rs) | Source-record imports live in the studio component; the server registers their routes and lends the import port. |
-| [src/operations/manual_orders.rs](../src/operations/manual_orders.rs) | Actor-private manual-order quotes reuse native cart, legal, pricing, inventory and checkout; no second order ledger. |
+| [src/operations/manual_orders.rs](../src/operations/manual_orders.rs) | Manual order route; the studio component owns the draft, review and approved completion behind the register port. |
 | [src/operations/master_data.rs](../src/operations/master_data.rs) | The company basis lives in the orders component; these entries keep the server-side signatures. |
 | [src/operations/mod.rs](../src/operations/mod.rs) | Merchant CRM and fulfillment APIs, shared verbatim with MCP operations capabilities. |
 | [src/operations/order_documents.rs](../src/operations/order_documents.rs) | Immutable private carrier documents belong to the existing order receipt store, never product assets. |
@@ -352,7 +348,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/pos/config.rs](../src/pos/config.rs) | POS channel setup lives in the POS component. |
 | [src/pos/gateway.rs](../src/pos/gateway.rs) | HTTP/MCP POS routes; the POS component owns the cashier gateway behind the register port. |
 | [src/pos/mod.rs](../src/pos/mod.rs) | Authenticated POS adapters reuse the native catalog/cart/checkout/receipt and durable event owners. |
-| [src/pos/register_host.rs](../src/pos/register_host.rs) | The server side of the cashier register port: the guarded cart, quotes, currencies, checkout context, purchase, catalogue and receipt owners of this process. |
+| [src/pos/register_host.rs](../src/pos/register_host.rs) | The server side of the assisted-selling register port (POS and manual orders): the guarded cart, quotes, currencies, checkout context, purchase, catalogue and receipt owners of this process. |
 | [src/pos/schema.rs](../src/pos/schema.rs) | Strict protocol schemas for the same POS operations used by HTTP and MCP. |
 | [src/pos/settlement.rs](../src/pos/settlement.rs) | Cash admission and the POS order annotation are owned by the POS component. |
 | [src/prelude.rs](../src/prelude.rs) | Shared dependency names for native domain modules; no process setup or business rules. |
@@ -844,6 +840,10 @@ This lists every checked-in source module in these roots, including files with n
 | [components/intelligence/src/service/autonomy_revert.rs](../components/intelligence/src/service/autonomy_revert.rs) | Takes today's automatic price changes back to the day's baseline, by request or when the daily exposure limit is exceeded. |
 | [components/intelligence/src/service/behavior.rs](../components/intelligence/src/service/behavior.rs) | Merchant reads of native behavior analytics: the indexed channel report and the private journey, under the current receipt policy and tenant predicates. Observations never imply causation or model learning. |
 | [components/intelligence/src/service/caption_source.rs](../components/intelligence/src/service/caption_source.rs) | Image evidence uses owned assets, bundled demo fixtures or DNS-pinned public HTTPS; decoded thumbnails strip metadata before inference. |
+| [components/intelligence/src/service/catalog_intake/csv.rs](../components/intelligence/src/service/catalog_intake/csv.rs) | Bounded UTF-8 CSV parser accepts quoted delimiters, escaped quotes and multiline fields; no formula evaluation or silent row loss. |
+| [components/intelligence/src/service/catalog_intake/prepare.rs](../components/intelligence/src/service/catalog_intake/prepare.rs) | Native CSV parsing and read-only model extraction use existing inference admission and DNS-pinned public egress. |
+| [components/intelligence/src/service/catalog_intake/save.rs](../components/intelligence/src/service/catalog_intake/save.rs) | One explicit sandbox-only product creation delegates to native CAS/history/outbox; stable IDs reconcile retries without overwrites. |
+| [components/intelligence/src/service/catalog_intake.rs](../components/intelligence/src/service/catalog_intake.rs) | Merchant catalogue intake prepares bounded drafts; approved saves reuse native products, history and outbox in a private stage. |
 | [components/intelligence/src/service/claims.rs](../components/intelligence/src/service/claims.rs) | The source-bound claim lifecycle and public claim batches: rights and shop languages here, the ledger in `store::evidence`. |
 | [components/intelligence/src/service/concierge.rs](../components/intelligence/src/service/concierge.rs) | Read-only storefront shopping advisor over admitted catalog evidence; it cannot change a cart or place an order. |
 | [components/intelligence/src/service/consent.rs](../components/intelligence/src/service/consent.rs) | Cart- and channel-bound affirmative consent choices; stale or expired policy receipts never authorize processing, and withdrawal deletes the personalization and analytics data at once. Successive carts share one revocable receipt, never copied grants. |
@@ -1049,7 +1049,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/pos/src/domain/schema.rs](../components/pos/src/domain/schema.rs) | Strict protocol schemas for the same POS operations used by HTTP and MCP. |
 | [components/pos/src/domain.rs](../components/pos/src/domain.rs) | domain of this component. |
 | [components/pos/src/lib.rs](../components/pos/src/lib.rs) | POS component: the cashier input contract and its capability schema. |
-| [components/pos/src/ports.rs](../components/pos/src/ports.rs) | What the cashier gateway needs from the server: the guarded cart port, cart quotes, currency selection, checkout context changes, the purchase, catalogue reads and receipt snapshots. |
+| [components/pos/src/ports.rs](../components/pos/src/ports.rs) | What assisted selling (the cashier gateway and merchant manual orders) needs from the server: the guarded cart port, cart quotes, currency selection, checkout context changes, the purchase, catalogue reads and receipt snapshots. |
 | [components/pos/src/service/customer.rs](../components/pos/src/service/customer.rs) | Cashier-only customer lookup/card resolution and revision-checked account attachment; never issues customer credentials. |
 | [components/pos/src/service/discount.rs](../components/pos/src/service/discount.rs) | Audited cashier discounts use exact minor units and the existing native tax allocator in both quote and commit. |
 | [components/pos/src/service/guard.rs](../components/pos/src/service/guard.rs) | The cart admission cashier operations share with every other cart adapter is owned by the shop component. |
@@ -1151,6 +1151,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/shop/src/types.rs](../components/shop/src/types.rs) | The configuration a shop stores. |
 | [components/studio/src/domain/grid_criteria.rs](../components/studio/src/domain/grid_criteria.rs) | One allowlisted list-filter schema for model plans and MCP; no model-supplied SQL or tenant identity. |
 | [components/studio/src/domain/history_access.rs](../components/studio/src/domain/history_access.rs) | Which entities keep a history, the rights their versions need, and what a restoration request must state. |
+| [components/studio/src/domain/merchant_operations.rs](../components/studio/src/domain/merchant_operations.rs) | The merchant operation catalogue shared by HTTP and MCP: the native right of each operation, compound manual-order admission and the operations that touch personal data. |
 | [components/studio/src/domain/product_restore.rs](../components/studio/src/domain/product_restore.rs) | Rebuilds a product edit from a recorded version; stock stays current and associations pass the normal product admission afterwards. |
 | [components/studio/src/domain/proposal.rs](../components/studio/src/domain/proposal.rs) | Typed proposals, list views and reviewed work steps, with their checks before persistence or execution. |
 | [components/studio/src/domain/report_config.rs](../components/studio/src/domain/report_config.rs) | One bounded report definition for HTTP, MCP and private workspace presentation preferences. |
@@ -1187,6 +1188,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/studio/src/service/imports/relations.rs](../components/studio/src/service/imports/relations.rs) | Identity and product relations of imported source records are owned by the orders component. |
 | [components/studio/src/service/imports/reviews.rs](../components/studio/src/service/imports/reviews.rs) | Versioned generic review records resolve native product identity and preserve source claims outside native purchase authority. |
 | [components/studio/src/service/imports.rs](../components/studio/src/service/imports.rs) | Generic source-record admission; adapters own source formats, native domain owners retain every write. |
+| [components/studio/src/service/manual_orders.rs](../components/studio/src/service/manual_orders.rs) | Actor-private manual-order quotes reuse native cart, legal, pricing, inventory and checkout through the assisted-selling register port; no second order ledger. |
 | [components/studio/src/service/proposal_admission.rs](../components/studio/src/service/proposal_admission.rs) | Native admission of model proposals and list views; every initial or repaired proposal traverses the same read-only checks. |
 | [components/studio/src/service/proposal_apply.rs](../components/studio/src/service/proposal_apply.rs) | Transactional application of approved, revision-bound proposals: product changes, experience, app saves, translation drafts and bounded price autonomy. |
 | [components/studio/src/service/reports.rs](../components/studio/src/service/reports.rs) | Shared commerce reports for Studio, the workspace, the API and agent reads; there is no second analytics ledger. |

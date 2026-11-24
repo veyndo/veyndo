@@ -33,82 +33,9 @@ pub(crate) mod grid_schema;
 pub(crate) use grid_schema::fields as grid_fields;
 mod grid_plan;
 pub(crate) use grid_plan::visible as grid_visible;
-pub(crate) fn permission(name: &str) -> Option<&'static str> {
-    Some(match name {
-        "merchant.import.record" | "merchant.import.inspect" => "apps.manage",
-        "merchant.grid.plan" => "assistant.use",
-        "merchant.company" => "settings.read",
-        "merchant.company.save" => "settings.write",
-        "merchant.workflow" => "orders.read",
-        "merchant.workflow.save" => "settings.write",
-        "merchant.customer.lookup" | "merchant.customers" | "merchant.customer" => "customers.read",
-        "merchant.customer.creation"
-        | "merchant.customer.create"
-        | "merchant.customer.save"
-        | "merchant.customer.address.save"
-        | "merchant.customer.address.delete" => "customers.write",
-        "merchant.customer.addresses" => "customers.read",
-        "merchant.orders" | "merchant.order" => "orders.read",
-        "merchant.order.context"
-        | "merchant.order.review"
-        | "merchant.order.complete"
-        | "merchant.order.transition"
-        | "merchant.order.note"
-        | "merchant.delivery.split" => "orders.write",
-        "merchant.receipts" => "documents.read",
-        "merchant.receipt.create" => "documents.create",
-        "merchant.payment" | "merchant.payment.onboarding" => "payments.manage",
-        "merchant.payment.providers"
-        | "merchant.payment.details"
-        | "merchant.payment.instructions" => "payments.read",
-        "merchant.products"
-        | "merchant.categories"
-        | "merchant.product.assets"
-        | "merchant.product.content" => "catalog.read",
-        "merchant.product.create"
-        | "merchant.category.create"
-        | "merchant.category.save"
-        | "merchant.asset.publish"
-        | "merchant.product.save" => "catalog.write",
-        _ => return None,
-    })
-}
-/// Compound admission for manual ordering is identical in discovery and invocation.
-pub(crate) fn creation_visible(h: &RequestContext, name: &str) -> bool {
-    if name == "merchant.payment.instructions" {
-        return auth::allowed(h, "orders.read");
-    }
-    !matches!(
-        name,
-        "merchant.order.context" | "merchant.order.review" | "merchant.order.complete"
-    ) || [
-        "orders.write",
-        "customers.read",
-        "customers.pii",
-        "catalog.read",
-    ]
-    .iter()
-    .all(|s| auth::allowed(h, s))
-}
-pub(crate) fn requires_pii(name: &str) -> bool {
-    name.starts_with("merchant.customer.")
-        || matches!(
-            name,
-            "merchant.payment.instructions"
-                | "merchant.customers"
-                | "merchant.customer"
-                | "merchant.orders"
-                | "merchant.order"
-                | "merchant.order.transition"
-                | "merchant.order.note"
-                | "merchant.order.context"
-                | "merchant.order.review"
-                | "merchant.order.complete"
-                | "merchant.delivery.split"
-                | "merchant.receipts"
-                | "merchant.receipt.create"
-        )
-}
+pub(crate) use veyndo_studio::domain::merchant_operations::{
+    creation_visible, permission, requires_pii,
+};
 /// The record a merchant operation names.
 fn record_id(v: &Value) -> Result<String> {
     v["id"]

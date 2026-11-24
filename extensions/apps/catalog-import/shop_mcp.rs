@@ -1,10 +1,11 @@
 //! Read-only Shop MCP catalogue connector. Never calls foreign carts, checkout, account, wallet or purchase tools.
 use super::*;
 pub(crate) async fn prepare(
+    egress: &dyn PublicEgress,
     query: &str,
     shop: Option<&str>,
     count: usize,
-    settings: &commerce::Settings,
+    settings: &Settings,
 ) -> Result<Vec<Draft>> {
     if query.trim().is_empty() || query.len() > 2000 {
         return Err(bad("A bounded product search is required"));
@@ -28,7 +29,7 @@ pub(crate) async fn prepare(
         catalog["filters"] = json!({"shops":[shop]});
     }
     let url = reqwest::Url::parse("https://mcp.shop.com/").unwrap();
-    let client = public_client(&url).await?;
+    let client = public_client(egress, &url).await?;
     let mut response=client.post(url).header("Accept","application/json, text/event-stream").header("MCP-Protocol-Version","2026-07-28").header("Mcp-Method","tools/call").header("Mcp-Name","search_catalog").json(&json!({"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"search_catalog","arguments":{"catalog":catalog},"_meta":{"io.modelcontextprotocol/protocolVersion":"2026-07-28","io.modelcontextprotocol/clientInfo":{"name":"veyndo-catalog-import","version":"1.0.0"},"io.modelcontextprotocol/clientCapabilities":{}}}})).send().await.map_err(|_|bad("Shop catalogue is unavailable; retry explicitly or upload an export"))?;
     if !response.status().is_success() || response.content_length().is_some_and(|n| n > 1_000_000) {
         return Err(bad(
@@ -71,7 +72,7 @@ fn parse(document: &Value, count: usize, currency: &str) -> Result<Vec<Draft>> {
         let variant=product["variants"].as_array().and_then(|v|v.first()).ok_or(bad("Shop result has no priced variant"))?;
         if variant["price"]["currency"]!=currency {return Err(bad("Supplier price currency differs from the Veyndo shop; upload explicitly converted prices instead"));}
         let minor=variant["price"]["amount"].as_i64().filter(|n|*n>=0).ok_or(bad("Invalid supplier price"))?;
-        let scale=crate::currencies::scale(currency).ok_or(bad("Unknown supplier currency"))?;
+        let scale=scale(currency).ok_or(bad("Unknown supplier currency"))?;
         let external_id=variant["id"].as_str().filter(|s|!s.is_empty() && s.len()<=500).ok_or(bad("Supplier variant identity required"))?;
         let url=variant["url"].as_str().filter(|s|s.len()<=2000).ok_or(bad("Supplier product URL required"))?;
         let title=product["title"].as_str().unwrap_or_default();

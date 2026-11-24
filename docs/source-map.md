@@ -24,7 +24,7 @@ remain connected while shared contracts move into crates.
 | Cart and checkout | `src/cart_*.rs`, `src/order_checkout.rs` and `src/checkout/` serve Store API, reviewed merchant orders, agents, POS and the separate Checkout host ports. | Cart revision, legal and payment review, idempotency, original receipt recovery and the single commit transaction. |
 | Pricing and taxes | `components/pricing/`, `components/checkout/src/service/cart_projection.rs`, `components/checkout/src/service/purchase/price.rs`, `src/commerce/tax*.rs` and `src/currencies/` price the same current cart across those consumers. | Currency/rounding behavior, authoritative rule facts, price snapshots and tax context. |
 | Inventory | `components/checkout/src/service/purchase/commit.rs` and `components/inventory/` allocate and consume stock on the checkout transaction; cancellation releases persisted reservations. | Ordered product locks, aggregate stock revisions, one allocation per purchase and idempotent release. |
-| Orders | `components/checkout/src/service/purchase/commit.rs`, `src/commerce/external_orders.rs` and `src/operations/{orders,order_list,manual_orders}.rs` connect native purchase and imported orders to the same ledger. | Immutable amounts and buyer snapshots, tenant identity, order state guards and atomic order events. |
+| Orders | `components/checkout/src/service/purchase/commit.rs`, `src/commerce/external_orders.rs` and `src/operations/{orders,order_list}.rs`, `components/studio/src/service/manual_orders.rs` connect native purchase and imported orders to the same ledger. | Immutable amounts and buyer snapshots, tenant identity, order state guards and atomic order events. |
 | Payments and refunds | `src/payments/` admits commands and signed receipts from the separate Payments adapter; native checkout and merchant actions reuse that owner. | Verified amounts, allocations, receipt uniqueness, current authority and uncertainty after interrupted provider calls. |
 | Fulfillment and documents | `src/commerce/{fulfillment,delivery,delivery_split}.rs` and `src/operations/{order_documents,receipts,delivery_booking}.rs` serve Studio, Flow actions and carrier apps. | Persisted order quantities, split delivery conservation, original receipt identity and provider callback evidence. |
 | Settings and international context | `src/commerce/settings_*.rs`, `components/shipping/src/domain/geography.rs`, `src/currencies/` and language configuration supply shared native contexts to HTTP, MCP and UCP adapters. | Current grants, basis/channel inheritance, revisions, dependent method usage and selective publication. |
@@ -514,9 +514,9 @@ comparison cover their effects; asynchronous SQL and provider code remain unprov
 `components/shipping/src/domain/geography.rs` owns catalogue/overlay/address admission; `tax_rules.rs`
 owns guarded destination selection and `tax_context.rs` its private Rule Builder
 facts. `settings_defaults.rs`, `method_text.rs`, `content_text.rs` and
-`product_languages.rs` own compatibility defaults, translations and language
+`components/core/src/localized/` own compatibility defaults, translations and language
 registration. `international_capabilities.rs` shares native HTTP operations with MCP.
-`translations/{routes,worker,fields,apply}.rs` own durable translation lifecycle,
+`translations/{routes,apply}.rs` and `components/studio/src/service/translation_worker.rs` own durable translation lifecycle,
 text-only inference and locked revision-checked apply. The real PostgreSQL suites
 `international_commerce.py` and `translations.py` plus catalog tests cover these
 paths. `frontend/src/shared/geography` owns controls reused in Studio and checkout.
@@ -1068,7 +1068,7 @@ PostgreSQL/Store API/HTTP/MCP/model wire checks. [Guide and ownership boundaries
 
 ## Admin customer and reviewed order creation
 
-`operations/customer_create.rs` commits profile/default addresses through native accounts/history/outbox; `manual_orders.rs` adapts native carts and checkout; `components/checkout/src/{domain,store}/admin_order.rs` own actor-private and locked final admission; `creation_schema.rs` exports the same MCP contract. Studio uses modular `CustomerCreate`, `OrderCreate`, `useOrderCreation`, `OrderProductPicker`, `OrderReview` and the shared native customer picker. [Workflow and proof boundaries](admin-workflows.md).
+`operations/customer_create.rs` commits profile/default addresses through native accounts/history/outbox; `components/studio/src/service/manual_orders.rs` adapts native carts and checkout behind the assisted-selling `Register` port of `components/pos/src/ports.rs`, and `components/studio/src/domain/merchant_operations.rs` holds the operation rights and PII markers; `components/checkout/src/{domain,store}/admin_order.rs` own actor-private and locked final admission; `creation_schema.rs` exports the same MCP contract. Studio uses modular `CustomerCreate`, `OrderCreate`, `useOrderCreation`, `OrderProductPicker`, `OrderReview` and the shared native customer picker. [Workflow and proof boundaries](admin-workflows.md).
 
 Shared content editing styles belong to `frontend/src/shared/i18n/content-editors.css`,
 imported by the language picker and localized field themselves. Bounded customer
@@ -1098,7 +1098,8 @@ See the [illustrated workbench guide](app-studio-workspace.md) for multiple plac
 `src/ucp/` adapts native carts, single-use handoff and native privacy receipts;
 `src/legal/buyer_consent.rs` protects contact requirements in every checkout.
 `extensions/apps/catalog-import/` owns provider parsers and read-only Shop MCP
-egress; the existing native catalogue intake owns review, private save and release.
+egress; the native catalogue intake (`components/intelligence/src/service/catalog_intake.rs`
+behind `IntakeHost`) owns review, private save and release.
 `frontend/src/admin/channels/AgenticChannels.tsx` owns readiness presentation,
 and `frontend/src/storefront/shell/storefront-actions.ts` shares actual UI and
 optional browser-agent cart commands. [Workflow and boundaries](agentic-commerce.md).

@@ -170,7 +170,6 @@
         "src/commerce/detail.rs",
         "src/commerce/content_text.rs",
         "src/commerce/product_admin.rs",
-        "src/commerce/product_languages.rs",
         "src/commerce/catalog_ports.rs",
         "src/commerce/selection.rs",
         "src/categories",
@@ -225,9 +224,9 @@
         "shop_environments",
         "tenants"
       ],
-      "glob_imports": 27,
-      "untyped_access": 161,
-      "sql_outside_store": 7
+      "glob_imports": 23,
+      "untyped_access": 145,
+      "sql_outside_store": 6
     },
     "inventory": {
       "title": "Stock, reservations and supply",
@@ -436,13 +435,13 @@
         "apps",
         "b2b",
         "catalog",
-        "checkout",
         "core",
         "customers",
         "identity",
         "inventory",
         "marketing",
         "payments",
+        "pos",
         "pricing",
         "shipping",
         "shop",
@@ -461,8 +460,8 @@
         "tenants"
       ],
       "glob_imports": 10,
-      "untyped_access": 306,
-      "sql_outside_store": 5
+      "untyped_access": 293,
+      "sql_outside_store": 4
     },
     "payments": {
       "title": "Provider-independent payment ledger, captures, refunds and provider workers",
@@ -855,8 +854,8 @@
         "translation_jobs"
       ],
       "glob_imports": 35,
-      "untyped_access": 604,
-      "sql_outside_store": 28
+      "untyped_access": 620,
+      "sql_outside_store": 29
     },
     "studio": {
       "title": "Merchant overview, reports, private staging shops and history",
@@ -878,6 +877,7 @@
         "apps",
         "b2b",
         "catalog",
+        "checkout",
         "core",
         "customers",
         "identity",
@@ -935,8 +935,8 @@
         "translation_jobs"
       ],
       "glob_imports": 10,
-      "untyped_access": 390,
-      "sql_outside_store": 23
+      "untyped_access": 403,
+      "sql_outside_store": 24
     },
     "protocols": {
       "title": "MCP, UCP and the shared capability dispatch; adapters without business rules",

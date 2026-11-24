@@ -1,6 +1,7 @@
 //! Bounded UTF-8 CSV parser accepts quoted delimiters, escaped quotes and multiline fields; no formula evaluation or silent row loss.
-use super::*;
+use super::Draft;
 pub(super) use veyndo_catalog::domain::csv_rows::rows;
+use veyndo_core::{Error, Result, bad};
 pub(super) fn parse(source: &str) -> Result<Vec<Draft>> {
     let mut rows = rows(source)?;
     if rows.len() > 51 {
@@ -66,7 +67,7 @@ pub(super) fn parse(source: &str) -> Result<Vec<Draft>> {
 }
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use super::parse;
     #[test]
     fn quotes_bom_and_decimal_comma() {
         let d=parse("\u{feff}name;price;description\r\n\"Oak; chair\";\"19,90\";\"Line 1\nLine \"\"2\"\"\"\r\n").unwrap();

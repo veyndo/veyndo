@@ -1,13 +1,20 @@
 //! One explicit sandbox-only product creation delegates to native CAS/history/outbox; stable IDs reconcile retries without overwrites.
-use super::*;
+use super::{Draft, public_client};
+use crate::ports::IntakeHost;
+use serde_json::{Value, json};
+use uuid::Uuid;
+use veyndo_core::shop_scope::parent;
+use veyndo_core::{RequestContext, Result, bad, conflict, hash};
+use veyndo_shop::Settings;
+
 pub(super) async fn save(
-    a: &App,
+    host: &dyn IntakeHost,
     h: &RequestContext,
-    t: &str,
-    s: &commerce::Settings,
+    (t, s): (&str, &Settings),
     v: &Value,
 ) -> Result<Value> {
-    if veyndo_core::shop_scope::parent(a, t).await?.is_none() {
+    let a = host.models().core;
+    if parent(a, t).await?.is_none() {
         return Err(bad(
             "Catalogue intake saves require a private sandbox; live products were not changed",
         ));
@@ -46,18 +53,17 @@ pub(super) async fn save(
             "Product ID already exists; no existing product was overwritten",
         ));
     }
-    let locale = super::super::product_languages::key(&s.main_locale, s);
+    let locale = s.languages().key(&s.main_locale);
     let media = if draft.image_url.is_empty() {
         json!([])
     } else {
         public_client(
+            host.egress(),
             &reqwest::Url::parse(&draft.image_url).map_err(|_| bad("Invalid image URL"))?,
         )
         .await?;
         json!([{"id":format!("intake-{id}"),"url":draft.image_url,"view":"","alt":{}}])
     };
     let payload = json!({"id":id,"revision":0,"settingsRevision":v["settingsRevision"],"translations":{locale:{"name":draft.name,"description":draft.description}},"extra":{"priceCurrency":s.currencies.base_currency,"demo":v["demo"],"identity":{"catalogIntakeDigest":digest,"importSource":draft.source}},"catalog":{"active":true,"productNumber":if draft.product_number.is_empty(){format!("IMPORT-{id}")}else{draft.product_number},"categoryIds":["catalog-root"],"options":{}},"commerce":{"price":draft.price,"taxRate":rate,"stock":if v["demo"]==true{20}else{0},"minPurchase":1,"purchaseSteps":1,"maxPurchase":null,"deliveryDays":0,"listPrice":null,"advancedPrices":[],"media":media,"properties":{}}});
-    let Json(result) =
-        commerce::create_product(State(a.core.clone()), h.clone(), Json(payload)).await?;
-    Ok(result)
+    host.create(h, payload).await
 }

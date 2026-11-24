@@ -105,3 +105,21 @@ pub trait KnowledgeHost: Send + Sync {
     /// The merchant-private app evidence graph of the shop.
     fn graph<'a>(&'a self, tenant: &'a str) -> PortFuture<'a, Value>;
 }
+
+/// What catalogue intake needs from the server: models, public egress, provider admission, agentic readiness and the native product creation.
+pub trait IntakeHost: Send + Sync {
+    /// The model context: state, providers and inference slots.
+    fn models(&self) -> Models<'_>;
+    /// The DNS-pinned public HTTPS egress.
+    fn egress(&self) -> &dyn PublicEgress;
+    /// Admits one call of a bounded external provider for the shop; dropping the guard releases it.
+    fn admit<'a>(
+        &'a self,
+        tenant: &'a str,
+        provider: &'a str,
+    ) -> PortFuture<'a, Box<dyn Send + Sync>>;
+    /// The agentic commerce readiness of the request's channel.
+    fn readiness<'a>(&'a self, h: &'a RequestContext) -> PortFuture<'a, Value>;
+    /// Creates one product through the native product editor.
+    fn create<'a>(&'a self, h: &'a RequestContext, product: Value) -> PortFuture<'a, Value>;
+}

@@ -1,16 +1,11 @@
-//! Merchant catalogue intake prepares bounded drafts; approved saves reuse native products, history and outbox in a private stage.
+//! Catalogue intake routes and the server side of the intake port; the intelligence component owns drafts, extraction and the approved sandbox save.
 use crate::*;
-mod csv;
-#[path = "../../../extensions/apps/catalog-import/mod.rs"]
-mod inbound;
-mod prepare;
-mod save;
 mod schema;
 pub(crate) use schema::{CAPABILITIES, schema};
-pub(crate) fn visible(h: &RequestContext, name: &str) -> bool {
-    auth::allowed(h, "catalog.read")
-        && (name == "merchant.catalog.context" || auth::allowed(h, "catalog.write"))
-}
+use veyndo_core::PortFuture;
+use veyndo_intelligence::ports::PublicEgress;
+pub(crate) use veyndo_intelligence::service::catalog_intake::visible;
+use veyndo_intelligence::service::models::Models;
 pub(crate) fn router() -> Router<App> {
     Router::new()
         .secure_route(
@@ -45,80 +40,38 @@ async fn save_route(
     Ok(Json(invoke(&a, &h, "merchant.catalog.save", &v).await?))
 }
 pub(crate) async fn invoke(a: &App, h: &RequestContext, name: &str, v: &Value) -> Result<Value> {
-    let t = merchant(a, h)?;
-    if !visible(h, name) {
-        return Err(Error(
-            StatusCode::FORBIDDEN,
-            "Catalogue intake requires current catalogue permissions".into(),
-        ));
-    }
-    apps::validate_native_input(
-        &schema(name).ok_or(bad("Unknown catalogue intake operation"))?,
-        v,
-    )?;
-    let (settings, settings_revision) = commerce::config(a, &t).await?;
-    match name {
-        "merchant.catalog.context" => Ok(
-            json!({"mainLocale":settings.main_locale,"locales":settings.locales,"currency":settings.currencies.base_currency,"taxes":settings.taxes,"sandbox":veyndo_core::shop_scope::parent(a,&t).await?.is_some(),"settingsRevision":settings_revision,"agentic":crate::ucp::readiness(a,h).await?}),
-        ),
-        "merchant.catalog.prepare" => {
-            prepare::prepare(a, h, &t, &settings, settings_revision, v).await
-        }
-        "merchant.catalog.save" => save::save(a, h, &t, &settings, v).await,
-        _ => Err(bad("Unknown catalogue intake operation")),
-    }
-}
-#[derive(Deserialize, Serialize, Clone)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
-pub(super) struct Draft {
-    pub name: String,
-    pub description: String,
-    pub price: f64,
-    #[serde(default)]
-    pub product_number: String,
-    #[serde(default)]
-    pub image_url: String,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub source: Option<inbound::Source>,
-}
-impl Draft {
-    fn validate(&self) -> Result<()> {
-        if let Some(source) = &self.source {
-            source.validate()?;
-        }
-        if self.name.trim().is_empty()
-            || self.name.len() > 200
-            || self.description.len() > 4000
-            || self.product_number.len() > 100
-            || !self.price.is_finite()
-            || !(0.0..=1_000_000.).contains(&self.price)
-            || self.image_url.len() > 2000
-        {
-            return Err(bad(
-                "Product draft needs a name, valid price and bounded description",
-            ));
-        }
-        if !self.image_url.is_empty() {
-            let url = reqwest::Url::parse(&self.image_url)
-                .map_err(|_| bad("Invalid product image URL"))?;
-            if url.scheme() != "https" || !url.username().is_empty() || url.password().is_some() {
-                return Err(bad(
-                    "Product images require a public HTTPS URL without credentials",
-                ));
-            }
-            // DNS pinning is checked before returning remotely loaded image references too.
-        }
-        Ok(())
-    }
+    veyndo_intelligence::service::catalog_intake::invoke(&Intake(a), h, name, v).await
 }
 
-/// Reuse DNS-pinned public egress while allowing product query parameters, never URL credentials or redirects.
-pub(super) async fn public_client(url: &reqwest::Url) -> Result<reqwest::Client> {
-    if !url.username().is_empty() || url.password().is_some() {
-        return Err(bad("Product URL credentials are forbidden"));
+/// Models, egress, provider admission, readiness and the native product editor of this process.
+struct Intake<'s>(&'s App);
+impl veyndo_intelligence::ports::IntakeHost for Intake<'_> {
+    fn models(&self) -> Models<'_> {
+        self.0.models()
     }
-    let mut origin = url.clone();
-    origin.set_query(None);
-    origin.set_fragment(None);
-    apps::public_https_client(&origin).await
+    fn egress(&self) -> &dyn PublicEgress {
+        &crate::assets::Egress
+    }
+    fn admit<'a>(
+        &'a self,
+        tenant: &'a str,
+        provider: &'a str,
+    ) -> PortFuture<'a, Box<dyn Send + Sync>> {
+        Box::pin(async move {
+            let guard = apps::service_limits::admit(self.0, tenant, provider).await?;
+            Ok(Box::new(guard) as Box<dyn Send + Sync>)
+        })
+    }
+    fn readiness<'a>(&'a self, h: &'a RequestContext) -> PortFuture<'a, Value> {
+        Box::pin(crate::ucp::readiness(self.0, h))
+    }
+    fn create<'a>(&'a self, h: &'a RequestContext, product: Value) -> PortFuture<'a, Value> {
+        Box::pin(async move {
+            Ok(
+                commerce::create_product(State(self.0.core.clone()), h.clone(), Json(product))
+                    .await?
+                    .0,
+            )
+        })
+    }
 }

@@ -2,6 +2,7 @@
 pub mod flow_templates;
 pub mod grid_plan;
 pub mod imports;
+pub mod manual_orders;
 pub mod proposal_admission;
 pub mod proposal_apply;
 pub mod reports;
