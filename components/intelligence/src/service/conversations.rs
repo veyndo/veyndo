@@ -2,8 +2,10 @@
 use super::agent_controls::conversation_actor;
 use super::agent_runs::{conversation_run, enqueue, wait};
 use super::models::choice;
+use serde::Deserialize;
 use serde_json::{Value, json};
 use sqlx::Row;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::shop_scope::{channel as channel_id, header};
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad, uid};
 use veyndo_identity::{SCOPES, allowed, assistant_access, merchant, permit};
@@ -66,27 +68,42 @@ fn history(previous: &[Value]) -> String {
         .collect::<Vec<_>>()
         .join("\n")
 }
+/// One merchant chat turn: the message, the conversation it continues and the run options.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ChatTurn {
+    #[serde(deserialize_with = "lenient")]
+    message: Option<String>,
+    conversation_id: Value,
+    workspace_context: Value,
+    request_id: Value,
+    #[serde(deserialize_with = "lenient")]
+    background: Option<bool>,
+}
+
 /// Queues a merchant chat turn as a durable run; a background turn returns at once.
 pub async fn chat(a: &State, h: &RequestContext, v: &Value) -> Result<Value> {
     assistant_access(h)?;
     let t = merchant(h)?;
     permit(h, "knowledge.read")?;
-    let instruction = v["message"]
-        .as_str()
+    let input: ChatTurn = view(v);
+    let instruction = input
+        .message
+        .as_deref()
         .filter(|s| !s.is_empty() && s.len() <= 4000)
         .ok_or(bad("Message must contain 1..4000 characters"))?;
     let selection = choice(v)?;
-    let id = if let Some(id) = v["conversationId"].as_str() {
+    let id = if let Some(id) = input.conversation_id.as_str() {
         admit(a, &t, id, h).await?;
         id.to_string()
     } else {
         uid()
     };
     let history = history(&messages(a, &t, &id).await?);
-    let queued=enqueue(a,h,json!({"instruction":instruction,"inference":selection,"history":history,"locale":language_context(a,h).await?.0,"channel":channel_id(h),"workspaceContext":v["workspaceContext"],"requestId":v["requestId"],"newConversation":v["conversationId"].is_null(),"requestedConversation":v["conversationId"]}),Some(&id)).await?;
+    let queued=enqueue(a,h,json!({"instruction":instruction,"inference":selection,"history":history,"locale":language_context(a,h).await?.0,"channel":channel_id(h),"workspaceContext":input.workspace_context,"requestId":input.request_id,"newConversation":input.conversation_id.is_null(),"requestedConversation":input.conversation_id}),Some(&id)).await?;
     let id = queued["conversationId"].as_str().unwrap_or(&id).to_string();
     admit(a, &t, &id, h).await?;
-    if v["background"] == true {
+    if input.background == Some(true) {
         return Ok(json!({"conversationId":id,"messages":messages(a,&t,&id).await?,"run":queued}));
     }
     complete(a, h, queued).await

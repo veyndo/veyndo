@@ -1,8 +1,10 @@
 //! Fictional shopper cohorts reuse native task authority, checkpoints and private commerce operations.
 use super::agent_runs::{enqueue, operate};
 use crate::ports::AgentHost;
+use serde::Deserialize;
 use serde_json::{Value, json};
 use sqlx::Row;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::model_contract::validate_native;
 use veyndo_core::shop_scope::{channel as channel_id, header};
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad, conflict, hash};
@@ -111,6 +113,38 @@ pub async fn admit(a: &State, h: &RequestContext) -> Result<String> {
     }
     Ok(t)
 }
+/// The input of a scenario operation, already checked against its schema.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ScenarioOperation {
+    #[serde(deserialize_with = "lenient")]
+    approve: Option<bool>,
+    #[serde(deserialize_with = "lenient")]
+    quantity: Option<i64>,
+    #[serde(deserialize_with = "lenient")]
+    request_id: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    source_task_id: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    profiles: Vec<Value>,
+    instruction: Value,
+    title: Value,
+    #[serde(deserialize_with = "lenient")]
+    id: Option<String>,
+}
+
+/// The identifying fields of one fictional customer profile.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct ProfileKeys {
+    #[serde(deserialize_with = "lenient")]
+    id: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    locale: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    country: Option<String>,
+}
+
 /// Runs a scenario operation.
 pub async fn invoke<H: AgentHost>(
     host: &H,
@@ -121,6 +155,7 @@ pub async fn invoke<H: AgentHost>(
     let a = host.models().core;
     validate_native(&schema(name).ok_or(bad("Unknown scenario operation"))?, v)?;
     let t = admit(a, h).await?;
+    let input: ScenarioOperation = view(v);
     if name == "merchant.scenario.readiness" {
         return readiness::read(host, h, &t).await;
     }
@@ -132,40 +167,45 @@ pub async fn invoke<H: AgentHost>(
     }
     if name == "merchant.scenario.stock" {
         permit(h, "catalog.write")?;
-        if v["approve"] != true {
+        if input.approve != Some(true) {
             return Err(bad("Explicit approve=true required"));
         }
         return host
-            .fill_test_stock(&t, v["quantity"].as_i64().unwrap_or(0) as i32)
+            .fill_test_stock(&t, input.quantity.unwrap_or(0) as i32)
             .await;
     }
     if name == "merchant.scenario.attacks" {
         return Ok(json!({"latest":attack_store::latest(host, h, &t).await?}));
     }
     if name == "merchant.scenario.create" {
-        let group = v["requestId"].as_str().unwrap();
-        let source = match v["sourceTaskId"].as_str() {
+        let group = input
+            .request_id
+            .as_deref()
+            .ok_or(bad("Invalid scenario request ID"))?;
+        let source = match input.source_task_id.as_deref() {
             Some(id) => source::resolve(a, h, id).await?,
             None => Value::Null,
         };
         if !identifier(group) {
             return Err(bad("Invalid scenario request ID"));
         }
-        let profiles = v["profiles"].as_array().unwrap();
+        let profiles = &input.profiles;
         let settings = catalogue::settings(a, h, &t).await?;
         let mut ids = std::collections::HashSet::new();
-        for p in profiles {
-            if !identifier(p["id"].as_str().unwrap()) || !ids.insert(p["id"].as_str().unwrap()) {
+        let keys = profiles.iter().map(view::<ProfileKeys>).collect::<Vec<_>>();
+        for p in &keys {
+            let id = p.id.as_deref().unwrap_or("");
+            if !identifier(id) || !ids.insert(id) {
                 return Err(bad("Customer profile IDs must be unique identifiers"));
             }
             if !settings
                 .locales
                 .iter()
-                .any(|l| Some(l.as_str()) == p["locale"].as_str())
+                .any(|l| Some(l.as_str()) == p.locale.as_deref())
                 || !settings
                     .countries
                     .iter()
-                    .any(|c| Some(c.as_str()) == p["country"].as_str())
+                    .any(|c| Some(c.as_str()) == p.country.as_deref())
             {
                 return Err(bad(
                     "Customer profiles must use enabled shop languages and countries",
@@ -174,21 +214,20 @@ pub async fn invoke<H: AgentHost>(
         }
         let currency = settings.currencies.selected("")?;
         let digest = hash(&v.to_string());
-        let comparison = hash(&json!({"instruction":v["instruction"],"profiles":profiles,"inference":v.get("inference"),"channel":channel_id(h),"currency":currency.code,"scale":currency.scale}).to_string());
+        let comparison = hash(&json!({"instruction":input.instruction,"profiles":profiles,"inference":v.get("inference"),"channel":channel_id(h),"currency":currency.code,"scale":currency.scale}).to_string());
         // Each member has its own provider fence. A transport retry safely completes
         // a partially queued cohort without recharging or duplicating earlier members.
         let mut runs = Vec::new();
-        for (index, profile) in profiles.iter().enumerate() {
-            let mut request = json!({"instruction":v["instruction"],"requestId":format!("{group}-{index}"),"locale":profile["locale"],"channel":channel_id(h),"inference":v.get("inference"),
-                "scenario":{"group":group,"title":v["title"],"profile":profile,"instruction":v["instruction"],"channel":channel_id(h),"inference":v.get("inference"),"index":index,"comparisonDigest":comparison,"currency":currency.code,"scale":currency.scale,"inputDigest":digest,"members":profiles.len(),"stepLimit":8}});
-            request["scenario"]["source"] = source.clone();
+        for (index, (profile, keys)) in profiles.iter().zip(&keys).enumerate() {
+            let request = json!({"instruction":input.instruction,"requestId":format!("{group}-{index}"),"locale":keys.locale,"channel":channel_id(h),"inference":v.get("inference"),
+                "scenario":{"group":group,"title":input.title,"profile":profile,"instruction":input.instruction,"channel":channel_id(h),"inference":v.get("inference"),"index":index,"comparisonDigest":comparison,"currency":currency.code,"scale":currency.scale,"inputDigest":digest,"members":profiles.len(),"stepLimit":8,"source":source}});
             runs.push(enqueue(a, h, request, None).await?);
         }
         return Ok(json!({"id":group,"runs":runs,"private":true,"synthetic":true}));
     }
     let actor = header(h, "x-rac-user").ok_or(bad("Scenario actor required"))?;
     let rows = sqlx::query("SELECT id,run_request,run_scopes,run_updated::text AS updated_text FROM tasks WHERE tenant=$1 AND run_actor=$2 AND run_request ? 'scenario' AND (run_request->>'agentId') IS NOT DISTINCT FROM $4 AND ($3::text IS NULL OR run_request->'scenario'->>'group'=$3) ORDER BY run_updated DESC,id LIMIT 120")
-        .bind(&t).bind(actor).bind(v["id"].as_str()).bind(&h.principal.agent_key).fetch_all(&a.db).await?;
+        .bind(&t).bind(actor).bind(input.id.as_deref()).bind(&h.principal.agent_key).fetch_all(&a.db).await?;
     if name == "merchant.scenario.list" {
         let mut seen = std::collections::HashSet::new();
         let mut items = Vec::new();
@@ -258,7 +297,7 @@ pub async fn invoke<H: AgentHost>(
             ));
         }
     }
-    Ok(json!({"id":v["id"],"runs":runs,"synthetic":true,"execution":"native-commerce-api"}))
+    Ok(json!({"id":input.id,"runs":runs,"synthetic":true,"execution":"native-commerce-api"}))
 }
 /// Whether a request or profile ID is a plain identifier.
 fn identifier(s: &str) -> bool {

@@ -1,6 +1,8 @@
 //! Source-bound claim lifecycle on the knowledge relation ledger; no model text becomes a confirmed fact automatically.
+use serde::Deserialize;
 use serde_json::{Value, json};
 use sqlx::{Postgres, Row, Transaction};
+use veyndo_core::document::{lenient, view};
 use veyndo_core::{Error, Result, State, StatusCode, bad, conflict, uid};
 use veyndo_kernel::verified_kernel;
 
@@ -41,6 +43,40 @@ pub async fn claim_facts(a: &State, t: &str, ids: &[String], locale: &str) -> Re
         .await?;
     Ok(rows)
 }
+/// A proposed claim: the product, the source and its hash, the claim text and the quote that supports it.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ClaimProposal {
+    #[serde(deserialize_with = "lenient")]
+    product_id: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    source_id: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    text: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    quote: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    locale: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    content_hash: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    node_type: Option<String>,
+}
+
+/// A merchant decision on a claim at the revision it was shown.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct ClaimDecision {
+    #[serde(deserialize_with = "lenient")]
+    approve: Option<bool>,
+    #[serde(deserialize_with = "lenient")]
+    state: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    id: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    revision: Option<u64>,
+}
+
 /// Records a proposed claim whose quote is present in the current source; a merchant decides on it later.
 pub async fn propose_in(
     tx: &mut Transaction<'_, Postgres>,
@@ -51,17 +87,20 @@ pub async fn propose_in(
     locales: &[String],
 ) -> Result<Value> {
     let confidence = confidence(v)?;
-    let product = v["productId"].as_str().ok_or(bad("Product required"))?;
-    let source = v["sourceId"].as_str().ok_or(bad("Source required"))?;
-    let text = v["text"]
-        .as_str()
+    let input: ClaimProposal = view(v);
+    let product = input.product_id.as_deref().ok_or(bad("Product required"))?;
+    let source = input.source_id.as_deref().ok_or(bad("Source required"))?;
+    let text = input
+        .text
+        .as_deref()
         .filter(|s| !s.trim().is_empty() && s.len() <= 1200)
         .ok_or(bad("Claim must be 1..1200 bytes"))?;
-    let quote = v["quote"]
-        .as_str()
+    let quote = input
+        .quote
+        .as_deref()
         .filter(|s| !s.trim().is_empty() && s.len() <= 2400)
         .ok_or(bad("Source quote required"))?;
-    let locale = v["locale"].as_str().unwrap_or(main_locale);
+    let locale = input.locale.as_deref().unwrap_or(main_locale);
     if !locales.iter().any(|l| l == locale) {
         return Err(bad("Claim language must be enabled"));
     }
@@ -76,7 +115,7 @@ pub async fn propose_in(
         return Err(Error(StatusCode::NOT_FOUND, "Product not found".into()));
     }
     let row=sqlx::query("SELECT content_hash,revision FROM knowledge_documents WHERE tenant=$1 AND id=$2 AND NOT archived AND (product_id IS NULL OR product_id=$3) FOR SHARE").bind(t).bind(source).bind(product).fetch_optional(&mut **tx).await?.ok_or(Error(StatusCode::NOT_FOUND,"Source not found for product".into()))?;
-    if v["contentHash"] != row.get::<String, _>("content_hash") {
+    if input.content_hash.as_deref() != Some(row.get::<&str, _>("content_hash")) {
         return Err(conflict("Source changed; retrieve current evidence"));
     }
     let sourced:bool=sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM knowledge_chunks WHERE tenant=$1 AND document_id=$2 AND locale=$3 AND position($4 in text)>0)").bind(t).bind(source).bind(locale).bind(quote).fetch_one(&mut **tx).await?;
@@ -84,11 +123,11 @@ pub async fn propose_in(
         return Err(bad("Quote is absent from this source/language"));
     }
     let id = uid();
-    let node_type = v["nodeType"].as_str().unwrap_or("claim");
+    let node_type = input.node_type.as_deref().unwrap_or("claim");
     if !NODE_TYPES.contains(&node_type) {
         return Err(bad("Unknown fact node type"));
     }
-    let data = json!({"text":text,"quote":quote,"locale":locale,"sourceId":source,"sourceRevision":row.get::<i64,_>("revision"),"contentHash":v["contentHash"],"sourceType":"document","truthVerified":false,"nodeType":node_type});
+    let data = json!({"text":text,"quote":quote,"locale":locale,"sourceId":source,"sourceRevision":row.get::<i64,_>("revision"),"contentHash":input.content_hash,"sourceType":"document","truthVerified":false,"nodeType":node_type});
     sqlx::query("INSERT INTO knowledge_relations(tenant,kind,source_id,target_id,target_kind,state,data,actor,confidence) VALUES($1,'CLAIMS',$2,$3,$7,'proposed',$4,$5,$6)").bind(t).bind(product).bind(&id).bind(data).bind(actor).bind(confidence).bind(node_type).execute(&mut **tx).await?;
 
     Ok(json!({"id":id,"revision":1,"state":"proposed","approvalRequired":true}))
@@ -107,18 +146,20 @@ fn confidence(v: &Value) -> Result<f64> {
 }
 /// A merchant decision on a claim at the expected revision; confirming needs the unchanged source.
 pub async fn decide(a: &State, t: &str, actor: Option<&str>, v: &Value) -> Result<Value> {
-    if v["approve"] != true {
+    let input: ClaimDecision = view(v);
+    if input.approve != Some(true) {
         return Err(bad("Explicit approve=true required"));
     }
-    let state = v["state"]
-        .as_str()
+    let state = input
+        .state
+        .as_deref()
         .filter(|s| ["evidenced", "confirmed", "rejected"].contains(s))
         .ok_or(bad("Invalid evidence state"))?;
-    let id = v["id"].as_str().ok_or(bad("Claim ID required"))?;
+    let id = input.id.as_deref().ok_or(bad("Claim ID required"))?;
     let mut tx = a.db.begin().await?;
     let row=sqlx::query("SELECT source_id,data,revision FROM knowledge_relations WHERE tenant=$1 AND kind='CLAIMS' AND target_id=$2 FOR UPDATE").bind(t).bind(id).fetch_optional(&mut *tx).await?.ok_or(Error(StatusCode::NOT_FOUND,"Claim not found".into()))?;
     let revision = row.get::<i64, _>("revision");
-    if !verified_kernel::revision_admissible(revision as u64, v["revision"].as_u64().unwrap_or(0)) {
+    if !verified_kernel::revision_admissible(revision as u64, input.revision.unwrap_or(0)) {
         return Err(conflict("Claim revision changed"));
     }
     let data: Value = row.get("data");

@@ -2,10 +2,12 @@
 use super::agent_controls::conversation_actor;
 use super::models::choice;
 use crate::store::agent_runs::{claim_conversation, project};
+use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 use sqlx::Row;
 use veyndo_cognition::inference::{InferenceError, budget};
 use veyndo_core::admission::reserve_ai_attempt_tx;
+use veyndo_core::document::{lenient, merge, view};
 use veyndo_core::model_contract::validate_native;
 use veyndo_core::shop_scope::{channel as channel_id, header};
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad, conflict, hash, uid};
@@ -88,17 +90,23 @@ pub async fn enqueue(
 ) -> Result<Value> {
     assistant_access(h)?;
     let t = merchant(h)?;
-    request["workspaceContext"] = normalize(&request["workspaceContext"])?;
-    request["agentId"] = json!(h.principal.agent_key);
+    let mut admission = RunAdmission {
+        workspace_context: normalize(request.get("workspaceContext").unwrap_or(&Value::Null))?,
+        agent_id: h.principal.agent_key.clone(),
+        inference: None,
+    };
     let requested = choice(&request)?;
     if h.principal.agent_key.is_some() {
-        request["inference"] = json!(
+        admission.inference = Some(json!(
             budget::choice(Some(&a.db), requested.as_ref())
                 .await
                 .map_err(|e| Error::from(InferenceError::Admission(e)))?
-        );
+        ));
     }
-    let instruction = request["instruction"]
+    merge(&mut request, admission)?;
+    let input: RunRequest = view(&request);
+    let instruction = input
+        .instruction
         .as_str()
         .filter(|s| !s.is_empty() && s.len() <= 4000)
         .ok_or(bad("Instruction must contain 1..4000 characters"))?;
@@ -152,20 +160,18 @@ pub async fn enqueue(
                 .ok_or(bad("Invalid agent request ID"))
         })
         .transpose()?;
-    let mut fingerprint_input = json!([
-        request["instruction"],
-        request["inference"],
-        request["locale"],
-        request["channel"],
-        request["requestedConversation"],
-        request["workspaceContext"]
-    ]);
-    if request["scenario"].is_object() {
-        fingerprint_input
-            .as_array_mut()
-            .unwrap()
-            .push(request["scenario"].clone());
+    let mut fingerprint_input = vec![
+        input.instruction.clone(),
+        input.inference,
+        input.locale,
+        input.channel,
+        input.requested_conversation,
+        input.workspace_context,
+    ];
+    if input.scenario.is_object() {
+        fingerprint_input.push(input.scenario);
     }
+    let fingerprint_input = json!(fingerprint_input);
     let fingerprint = hash(&fingerprint_input.to_string());
     if let Some(key)=request_key && let Some(existing)=sqlx::query("SELECT *,run_updated::text AS updated_text FROM tasks WHERE tenant=$1 AND run_actor=$2 AND run_key=$3 AND (run_request->>'agentId') IS NOT DISTINCT FROM $4").bind(&t).bind(actor).bind(key).bind(&h.principal.agent_key).fetch_optional(&mut *tx).await? {
         if existing.get::<Option<String>,_>("run_fingerprint").as_deref()!=Some(&fingerprint) {return Err(conflict("Agent request ID was already used with different input"));}
@@ -180,7 +186,7 @@ pub async fn enqueue(
             "Agent backlog limit reached; finish or cancel a saved run".into(),
         ));
     }
-    if request["newConversation"] == true
+    if input.new_conversation == Some(true)
         && let Some(c) = conversation
     {
         sqlx::query("INSERT INTO conversations(tenant,id,title,owner_id) VALUES($1,$2,$3,$4)")
@@ -216,14 +222,57 @@ pub async fn enqueue(
     )
 }
 
+/// A durable run request as it is stored and fingerprinted.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct RunRequest {
+    instruction: Value,
+    inference: Value,
+    locale: Value,
+    channel: Value,
+    requested_conversation: Value,
+    workspace_context: Value,
+    scenario: Value,
+    #[serde(deserialize_with = "lenient")]
+    new_conversation: Option<bool>,
+    #[serde(deserialize_with = "lenient")]
+    agent_id: Option<String>,
+}
+
+/// What admission adds to a run request: its normalized context, the admitting agent and the budgeted model.
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct RunAdmission {
+    workspace_context: Value,
+    agent_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    inference: Option<Value>,
+}
+
+/// The input of a run operation: create, status, cancel or resume.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct RunOperation {
+    #[serde(deserialize_with = "lenient")]
+    id: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    approve: Option<bool>,
+    #[serde(deserialize_with = "lenient")]
+    revision: Option<i64>,
+    instruction: Value,
+    request_id: Value,
+    workspace_context: Value,
+}
+
 /// Reads, cancels or explicitly resumes a saved run with current rights and revision.
 pub async fn operate(a: &State, h: &RequestContext, name: &str, v: &Value) -> Result<Value> {
     let schema = schema(name).ok_or(bad("Unknown agent run operation"))?;
     validate_native(&schema, v)?;
     assistant_access(h)?;
     let t = merchant(h)?;
+    let input: RunOperation = view(v);
     if name == "merchant.run.create" {
-        return enqueue(a,h,json!({"instruction":v["instruction"],"inference":v.get("inference"),"locale":language_context(a,h).await?.0,"channel":channel_id(h),"requestId":v["requestId"],"workspaceContext":v["workspaceContext"]}),None).await;
+        return enqueue(a,h,json!({"instruction":input.instruction,"inference":v.get("inference"),"locale":language_context(a,h).await?.0,"channel":channel_id(h),"requestId":input.request_id,"workspaceContext":input.workspace_context}),None).await;
     }
     // Resume charges the shared live-shop budget in the same transaction.
     // Status/cancel retain the ordinary actor-scoped connection.
@@ -240,16 +289,16 @@ pub async fn operate(a: &State, h: &RequestContext, name: &str, v: &Value) -> Re
         "SELECT *,run_updated::text AS updated_text FROM tasks WHERE tenant=$1 AND id=$2 AND run_state IS NOT NULL FOR UPDATE",
     )
     .bind(&t)
-    .bind(v["id"].as_str().unwrap())
+    .bind(input.id.as_deref().ok_or(bad("Agent run ID required"))?)
     .fetch_optional(&mut *tx)
     .await?
     .ok_or(Error(StatusCode::NOT_FOUND, "Agent run not found".into()))?;
     let actor: String = row.get("run_actor");
-    let request: Value = row.get("run_request");
+    let request: RunRequest = view(&row.get::<Value, _>("run_request"));
     if !h.principal.personal_session
         && actor != "bootstrap"
         && (h.principal.agent_key.is_none()
-            || request["agentId"].as_str() != h.principal.agent_key.as_deref())
+            || request.agent_id.as_deref() != h.principal.agent_key.as_deref())
     {
         return Err(Error(
             StatusCode::FORBIDDEN,
@@ -290,7 +339,7 @@ pub async fn operate(a: &State, h: &RequestContext, name: &str, v: &Value) -> Re
         }
         return Ok(value);
     }
-    if v["approve"] != true || v["revision"].as_i64() != Some(revision) {
+    if input.approve != Some(true) || input.revision != Some(revision) {
         return Err(conflict(
             "Explicit approval and current run revision required",
         ));

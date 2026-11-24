@@ -1,12 +1,28 @@
 //! Knowledge sources: hash-bound chunks, revision-checked edits, archive and publication, written atomically with their graph relations.
 use crate::domain::source_content::{Source, admit_guidance};
 use crate::knowledge::{sync_document, sync_product, vectors};
+use serde::Deserialize;
 use serde_json::{Value, json};
 use sqlx::Row;
 use veyndo_catalog::store::products;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::{
     Error, RequestContext, Result, State, StatusCode, bad, conflict, history_context, uid,
 };
+
+/// A merchant decision on a source: its expected revision, approval, archive state or visibility.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct SourceDecision {
+    #[serde(deserialize_with = "lenient")]
+    revision: Option<i64>,
+    #[serde(deserialize_with = "lenient")]
+    approve: Option<bool>,
+    #[serde(deserialize_with = "lenient")]
+    archived: Option<bool>,
+    #[serde(deserialize_with = "lenient")]
+    visibility: Option<String>,
+}
 
 /// Rebuilds the chunks of a source from its content and translations; returns how many were written.
 pub async fn chunks(
@@ -52,7 +68,9 @@ pub async fn edit(
     v: &Value,
     data: &Source,
 ) -> Result<Value> {
-    let rev = v["revision"].as_i64().ok_or(bad("Revision required"))?;
+    let rev = view::<SourceDecision>(v)
+        .revision
+        .ok_or(bad("Revision required"))?;
     let mut tx = a.db.begin().await?;
     history_context::context(&mut tx, h, "merchant").await?;
     sqlx::query("SELECT pg_advisory_xact_lock(hashtextextended($1,15))")
@@ -104,13 +122,12 @@ pub async fn lifecycle(
     id: &str,
     v: &Value,
 ) -> Result<Value> {
-    if v["approve"] != true {
+    let input: SourceDecision = view(v);
+    if input.approve != Some(true) {
         return Err(bad("Explicit decision required"));
     }
-    let archived = v["archived"]
-        .as_bool()
-        .ok_or(bad("Archived must be boolean"))?;
-    let rev = v["revision"].as_i64().ok_or(bad("Revision required"))?;
+    let archived = input.archived.ok_or(bad("Archived must be boolean"))?;
+    let rev = input.revision.ok_or(bad("Revision required"))?;
     let mut tx = a.db.begin().await?;
     history_context::context(&mut tx, h, "merchant").await?;
     let n=sqlx::query("UPDATE knowledge_documents SET archived=$1,visibility='private',revision=revision+1 WHERE tenant=$2 AND id=$3 AND revision=$4 AND archived<>$1").bind(archived).bind(t).bind(id).bind(rev).execute(&mut *tx).await?.rows_affected();
@@ -204,16 +221,18 @@ pub async fn list(a: &State, t: &str) -> Result<Value> {
 
 /// Changes the visibility of a source after an explicit publication decision.
 pub async fn publish(a: &State, h: &RequestContext, t: &str, id: &str, v: &Value) -> Result<Value> {
-    let visibility = v["visibility"]
-        .as_str()
+    let input: SourceDecision = view(v);
+    let visibility = input
+        .visibility
+        .as_deref()
         .filter(|v| ["private", "public"].contains(v))
         .ok_or(bad("Visibility must be private/public"))?;
-    if v["approve"] != true {
+    if input.approve != Some(true) {
         return Err(bad("Explicit publication decision required"));
     }
     let mut tx = a.db.begin().await?;
     history_context::context(&mut tx, h, "merchant").await?;
-    let n=sqlx::query("UPDATE knowledge_documents SET visibility=$1,revision=revision+1 WHERE tenant=$2 AND id=$3 AND revision=$4 AND NOT archived AND (kind<>'guidance' OR $1='private')").bind(visibility).bind(t).bind(id).bind(v["revision"].as_i64()).execute(&mut *tx).await?.rows_affected();
+    let n=sqlx::query("UPDATE knowledge_documents SET visibility=$1,revision=revision+1 WHERE tenant=$2 AND id=$3 AND revision=$4 AND NOT archived AND (kind<>'guidance' OR $1='private')").bind(visibility).bind(t).bind(id).bind(input.revision).execute(&mut *tx).await?.rows_affected();
     if n != 1 {
         return Err(conflict("Document changed or unavailable"));
     }

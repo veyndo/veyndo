@@ -2068,8 +2068,8 @@
     },
     "components/core/src/document.rs": {
       "status": "unproved",
-      "sha256": "49f61a725abd25fa3a8b5ff6900ec1a84ddd1bae1b435b38f0265b9197d42647",
-      "review": "F25 typed write paths: proof bindings unchanged"
+      "sha256": "8fc0cac53d532f5e8b3bdd8d986e8af33933fc6901091910ba9e0043f8714e76",
+      "review": "F27 typed request inputs: proof bindings unchanged"
     },
     "components/core/src/failure.rs": {
       "status": "unproved",
@@ -2623,8 +2623,8 @@
     },
     "components/intelligence/src/service/agent_runs.rs": {
       "status": "unproved",
-      "sha256": "5940a7de7b80e7558ab33ca3b46e79d5c9b42663bfe8e49b43f847366355034b",
-      "review": "F17: shared outbox and shop registry helpers in core; written reasons for foreign table access"
+      "sha256": "e7f566b254190aa729f2bdfbb6eff590d410c151b9fecfdf06ebf92605d28c43",
+      "review": "F27 typed request inputs: proof bindings unchanged"
     },
     "components/intelligence/src/service/autonomy.rs": {
       "status": "reviewed-binding",
@@ -2658,8 +2658,8 @@
     },
     "components/intelligence/src/service/catalog_intake/save.rs": {
       "status": "unproved",
-      "sha256": "8367e60f6cd58ae3b8a73d06bb6963aac426aad44d1b76d66c62b1db59512d42",
-      "review": "F10: manual orders, the merchant operation catalogue and catalogue intake moved into components"
+      "sha256": "e54da776cd3d45727462e2ba03d19d6f7da5a1b4c23ee4b64f455a319836e44e",
+      "review": "F27 typed request inputs: proof bindings unchanged"
     },
     "components/intelligence/src/service/catalog_intake.rs": {
       "status": "unproved",
@@ -2683,8 +2683,8 @@
     },
     "components/intelligence/src/service/conversations.rs": {
       "status": "unproved",
-      "sha256": "54d9f0d31d3b879ae824a57cf5145e919d32c48f71ff409868ecb0bf298f9bad",
-      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
+      "sha256": "192c62a07043a72cc691fda83278e8970e940304f2dcb6283b0c5aad45e22c23",
+      "review": "F27 typed request inputs: proof bindings unchanged"
     },
     "components/intelligence/src/service/design_references.rs": {
       "status": "unproved",
@@ -2813,8 +2813,8 @@
     },
     "components/intelligence/src/service/scenarios.rs": {
       "status": "unproved",
-      "sha256": "64fd279aee8892bb3fe513fa8ae26c057a5719a1389f185c5203bb2adc2768bf",
-      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
+      "sha256": "8b99a3fe1e0f2198b6641c417d332ec348612d9eeb13389b365f6cead7536e65",
+      "review": "F27 typed request inputs: proof bindings unchanged"
     },
     "components/intelligence/src/service/signed_offer.rs": {
       "status": "reviewed-binding",
@@ -2853,8 +2853,8 @@
     },
     "components/intelligence/src/store/documents.rs": {
       "status": "unproved",
-      "sha256": "7f973b73ed125b57dd06bea4ad13a90df6582105fd5ef2bc12566513c5c53f21",
-      "review": "F23 typed views: proof bindings unchanged"
+      "sha256": "2ee0cfb6551143872d11ae19ef8b9b4b21fcfad1d0490016e0c355c6c91d4aaf",
+      "review": "F27 typed request inputs: proof bindings unchanged"
     },
     "components/intelligence/src/store/embedding_generations.rs": {
       "status": "unproved",
@@ -2868,8 +2868,8 @@
     },
     "components/intelligence/src/store/evidence.rs": {
       "status": "reviewed-binding",
-      "sha256": "aa13ff822e1f49090a64d3ea0775864d34b6be81a33517570b4f4279a7566889",
-      "review": "F17: shared outbox and shop registry helpers in core; written reasons for foreign table access"
+      "sha256": "3dbbab6f9f0bcef2246ae0df50ca1327ec40ae3d77ea0070a25c140a78e8a9a9",
+      "review": "F27 typed request inputs: proof bindings unchanged"
     },
     "components/intelligence/src/store/experiments.rs": {
       "status": "unproved",

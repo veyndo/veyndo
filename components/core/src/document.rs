@@ -181,6 +181,70 @@ mod tests {
         assert!(merge(&mut json!({}), 7).is_err());
     }
 
+    #[derive(Deserialize, Default, Debug)]
+    #[serde(default)]
+    struct Fields {
+        #[serde(deserialize_with = "lenient")]
+        s: Option<String>,
+        #[serde(deserialize_with = "lenient")]
+        i: Option<i64>,
+        #[serde(deserialize_with = "lenient")]
+        u: Option<u64>,
+        #[serde(deserialize_with = "lenient")]
+        f: Option<f64>,
+        #[serde(deserialize_with = "lenient")]
+        b: Option<bool>,
+        #[serde(deserialize_with = "lenient")]
+        a: Option<Vec<Value>>,
+        #[serde(deserialize_with = "lenient")]
+        o: Option<serde_json::Map<String, Value>>,
+        raw: Value,
+    }
+
+    /// The equivalence request inputs rely on: every lenient field reads exactly what the matching
+    /// accessor on the indexed JSON value returned, for every shape a client can send.
+    #[test]
+    fn lenient_fields_equal_the_json_accessors() {
+        let shapes = [
+            json!(null),
+            json!(true),
+            json!(false),
+            json!(0),
+            json!(-1),
+            json!(7),
+            json!(u64::MAX),
+            json!(i64::MIN),
+            json!(2.0),
+            json!(2.5),
+            json!(-0.0),
+            json!(""),
+            json!("x"),
+            json!("7"),
+            json!([]),
+            json!([1, "a"]),
+            json!({}),
+            json!({"k":1}),
+        ];
+        for shape in &shapes {
+            let doc = json!({"s":shape,"i":shape,"u":shape,"f":shape,"b":shape,"a":shape,"o":shape,"raw":shape});
+            let typed: Fields = view(&doc);
+            assert_eq!(typed.s.as_deref(), doc["s"].as_str(), "{shape}");
+            assert_eq!(typed.i, doc["i"].as_i64(), "{shape}");
+            assert_eq!(typed.u, doc["u"].as_u64(), "{shape}");
+            assert_eq!(typed.f, doc["f"].as_f64(), "{shape}");
+            assert_eq!(typed.b, doc["b"].as_bool(), "{shape}");
+            assert_eq!(typed.a.as_ref(), doc["a"].as_array(), "{shape}");
+            assert_eq!(typed.o.as_ref(), doc["o"].as_object(), "{shape}");
+            assert_eq!(&typed.raw, &doc["raw"], "{shape}");
+            assert_eq!(typed.b == Some(true), doc["b"] == true, "{shape}");
+            assert_eq!(typed.s.as_deref() == Some("x"), doc["s"] == "x", "{shape}");
+        }
+        let missing: Fields = view(&json!({}));
+        assert!(missing.s.is_none() && missing.i.is_none() && missing.raw.is_null());
+        let not_object: Fields = view(&json!([1, 2, 3, 4, 5, 6, 7, 8]));
+        assert!(not_object.s.is_none() && not_object.raw.is_null());
+    }
+
     #[test]
     fn misshaped_fields_read_like_json_indexing() {
         let o: Outer = view(&json!({"inner":null,"items":[{"a":1},"x"],"plain":2}));
