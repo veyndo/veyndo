@@ -7,8 +7,36 @@ use sqlx::Row;
 use veyndo_catalog::domain::family::inherited_extra;
 use veyndo_catalog::store::products::product;
 use veyndo_core::Result;
-use veyndo_core::document::{lenient, view};
+use veyndo_core::document::{Raw, lenient, view};
 use veyndo_shop::types::cart::{StoredCart, selection};
+/// The quote fields rule facts are assembled from.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct FactsQuote {
+    #[serde(deserialize_with = "lenient")]
+    line_items: Option<Vec<Value>>,
+    #[serde(deserialize_with = "lenient")]
+    price: Raw<QuoteCurrency>,
+    shipping_costs: Value,
+    #[serde(deserialize_with = "lenient")]
+    discounts: Option<Vec<Value>>,
+    #[serde(deserialize_with = "lenient")]
+    discount_total: Option<f64>,
+}
+
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct QuoteCurrency {
+    currency: Value,
+}
+
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ItemReference {
+    #[serde(deserialize_with = "lenient")]
+    referenced_id: Option<String>,
+}
+
 pub async fn rule_facts(conn: &mut sqlx::PgConnection, c: &StoredCart, q: &Value) -> Result<Value> {
     let ids = c
         .data
@@ -31,10 +59,12 @@ pub async fn rule_facts(conn: &mut sqlx::PgConnection, c: &StoredCart, q: &Value
         .fetch_all(&mut *conn)
         .await?;
     let mut lines = vec![];
-    for item in q["lineItems"].as_array().into_iter().flatten() {
+    let quote: FactsQuote = view(q);
+    for item in quote.line_items.iter().flatten() {
+        let referenced = view::<ItemReference>(item).referenced_id;
         if let Some(r) = rows
             .iter()
-            .find(|r| Some(r.get::<String, _>("id").as_str()) == item["referencedId"].as_str())
+            .find(|r| Some(r.get::<String, _>("id").as_str()) == referenced.as_deref())
         {
             let mut p = product(r);
             if let Some(parent) = parents
@@ -47,7 +77,7 @@ pub async fn rule_facts(conn: &mut sqlx::PgConnection, c: &StoredCart, q: &Value
         }
     }
     let selected = selection(&c.data);
-    let mut facts = json!({"lines":lines,"price":q["price"],"shippingCosts":q["shippingCosts"],"checkout":selected,"salesChannel":c.data.sales_channel,"currency":q["price"]["currency"],"language":if c.data.locale.is_empty(){"en-GB"}else{&c.data.locale},"adminSource":false,"goodsCount":lines.len(),"lineCount":lines.len(),"goodsPrice":lines.iter().map(|l|l["totalPrice"].as_f64().unwrap_or(0.)).sum::<f64>(),"weight":lines.iter().map(|l|l["weight"].as_f64().unwrap_or(0.)*l["quantity"].as_f64().unwrap_or(0.)).sum::<f64>(),"volume":lines.iter().map(|l|l["volume"].as_f64().unwrap_or(0.)*l["quantity"].as_f64().unwrap_or(0.)).sum::<f64>(),"hasDeliveryFreeItem":lines.iter().any(|l|l["shippingFree"]==true),"promotionCount":q["discounts"].as_array().map(Vec::len).unwrap_or(0),"promotionValue":q["discountTotal"].as_f64().unwrap_or(0.)});
+    let mut facts = json!({"lines":lines,"price":quote.price.raw,"shippingCosts":quote.shipping_costs,"checkout":selected,"salesChannel":c.data.sales_channel,"currency":quote.price.currency,"language":if c.data.locale.is_empty(){"en-GB"}else{&c.data.locale},"adminSource":false,"goodsCount":lines.len(),"lineCount":lines.len(),"goodsPrice":lines.iter().map(|l|l["totalPrice"].as_f64().unwrap_or(0.)).sum::<f64>(),"weight":lines.iter().map(|l|l["weight"].as_f64().unwrap_or(0.)*l["quantity"].as_f64().unwrap_or(0.)).sum::<f64>(),"volume":lines.iter().map(|l|l["volume"].as_f64().unwrap_or(0.)*l["quantity"].as_f64().unwrap_or(0.)).sum::<f64>(),"hasDeliveryFreeItem":lines.iter().any(|l|l["shippingFree"]==true),"promotionCount":quote.discounts.as_ref().map(Vec::len).unwrap_or(0),"promotionValue":quote.discount_total.unwrap_or(0.)});
     for (key, address) in [
         ("billing", selected.billing_address),
         ("shipping", selected.address),

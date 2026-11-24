@@ -1,15 +1,33 @@
 //! Orders a merchant places for a customer: only manual or simulated payment, and the actor is kept on the record.
+use serde::Deserialize;
 use serde_json::{Value, json};
+use veyndo_core::document::{lenient, view};
 use veyndo_core::{Result, bad};
 use veyndo_pricing::verified_kernel;
 use veyndo_shop::types::cart::StoredCart;
 
 /// The final locked checkout quote must never enter an external provider for admin orders.
+/// The payment method of a manual order quote.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ManualQuote {
+    #[serde(deserialize_with = "lenient")]
+    payment_method: MethodMode,
+}
+
+/// The mode of a payment method.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct MethodMode {
+    mode: Value,
+}
+
 pub fn admit_payment(c: &StoredCart, quote: &Value) -> Result<()> {
+    let mode = view::<ManualQuote>(quote).payment_method.mode;
     if !verified_kernel::admin_payment_admissible(
         c.data.admin_actor.is_some(),
-        quote["paymentMethod"]["mode"] == "manual",
-        quote["paymentMethod"]["mode"] == "simulated",
+        mode == "manual",
+        mode == "simulated",
     ) {
         return Err(bad(
             "Buyer payment required for this provider; review the configured manual payment again",

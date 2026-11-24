@@ -10,21 +10,42 @@ use veyndo_core::bad;
 use veyndo_core::document::{lenient, view};
 use veyndo_shipping::domain::geography::catalogue;
 use veyndo_shop::service::read_cache::settings as scoped_config;
+/// The language, channel and currency a fictional shopper uses.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct ShopperRun {
+    #[serde(deserialize_with = "lenient")]
+    locale: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    channel: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    scenario: ScenarioCurrency,
+}
+
+/// The currency of a scenario.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct ScenarioCurrency {
+    #[serde(deserialize_with = "lenient")]
+    currency: Option<String>,
+}
+
 pub fn headers(t: &str, request: &Value, token: Option<&str>) -> Result<RequestContext> {
+    let run: ShopperRun = view(request);
     let mut h = RequestContext::new();
     for (key, value) in [
         ("x-tenant", t),
         (
             "x-commerce-locale",
-            request["locale"].as_str().unwrap_or("en-GB"),
+            run.locale.as_deref().unwrap_or("en-GB"),
         ),
         (
             "sw-sales-channel-id",
-            request["channel"].as_str().unwrap_or("default"),
+            run.channel.as_deref().unwrap_or("default"),
         ),
         (
             "x-commerce-currency",
-            request["scenario"]["currency"].as_str().unwrap_or(""),
+            run.scenario.currency.as_deref().unwrap_or(""),
         ),
     ] {
         h.insert(

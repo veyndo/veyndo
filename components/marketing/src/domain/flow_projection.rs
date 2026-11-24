@@ -33,18 +33,40 @@ pub fn public_event(kind: &str, data: &Value) -> Value {
 
 /// The rule context of an event: the order's cart with the event, its kind and the order, payment and delivery states.
 pub fn rule_context(kind: &str, event: &Value, order: &Value) -> Value {
-    let mut context = order["cart"].clone();
+    let order: ContextOrder = view(order);
+    let mut context = order.cart;
     context["event"] = event.clone();
     context["eventKind"] = json!(kind);
-    context["orderState"] = order["state"].clone();
-    context["paymentState"] = order["payment"]["state"].clone();
+    context["orderState"] = order.state;
+    context["paymentState"] = order.payment.state;
     context["deliveryStates"] = json!(
-        order["deliveries"]
-            .as_array()
-            .map(|ds| ds.iter().map(|d| d["state"].clone()).collect::<Vec<_>>())
+        order
+            .deliveries
+            .map(|ds| ds
+                .iter()
+                .map(|d| view::<StateField>(d).state)
+                .collect::<Vec<_>>())
             .unwrap_or_default()
     );
     context
+}
+
+/// The order fields a flow's rule context is built from.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct ContextOrder {
+    cart: Value,
+    state: Value,
+    #[serde(deserialize_with = "lenient")]
+    payment: StateField,
+    #[serde(deserialize_with = "lenient")]
+    deliveries: Option<Vec<Value>>,
+}
+
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct StateField {
+    state: Value,
 }
 
 /// The frozen definition a matched flow job runs from.

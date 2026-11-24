@@ -1463,8 +1463,8 @@
     },
     "components/b2b/src/store/purchase.rs": {
       "status": "reviewed-binding",
-      "sha256": "1ac10104133d84bf8b01458ff0e5cdf88bbc00e5c302498f05ec5e8d4b202008",
-      "review": "F33 typed document views: proof bindings unchanged"
+      "sha256": "53b6ea18ae01c30539c43ce86b8f20d4619224647bf9e99cb79a348a083e20d7",
+      "review": "F42 typed nested readers: proof bindings unchanged"
     },
     "components/b2b/src/store/staging.rs": {
       "status": "unproved",
@@ -1813,8 +1813,8 @@
     },
     "components/checkout/src/domain/admin_order.rs": {
       "status": "reviewed-binding",
-      "sha256": "ac2575fa3657d4126f0df2411d2652c15b7748b6c4154fc8360e1d1b84384cbd",
-      "review": "Unit tests for every public domain function of the components; no production code changed"
+      "sha256": "c8209191b2e4d9cd638d329f8831aa23b515a3119178ee187491a8036c76176b",
+      "review": "F42 typed nested readers: proof bindings unchanged"
     },
     "components/checkout/src/domain/cart_quote.rs": {
       "status": "reviewed-binding",
@@ -2803,8 +2803,8 @@
     },
     "components/intelligence/src/service/scenarios/shopper.rs": {
       "status": "unproved",
-      "sha256": "6e4f5b9c461c05d122a70a892050d32fb759868edd6c98202ba8550ae5e3b3c5",
-      "review": "F40 typed inputs (automatic, accessor-equivalent): proof bindings unchanged"
+      "sha256": "c7680afd89db265f850be468ee5c24f584ab6bc87ab5d7232af5888edcbde4c9",
+      "review": "F42 typed nested readers: proof bindings unchanged"
     },
     "components/intelligence/src/service/scenarios/source.rs": {
       "status": "unproved",
@@ -2968,8 +2968,8 @@
     },
     "components/marketing/src/domain/flow_projection.rs": {
       "status": "unproved",
-      "sha256": "c9b1a33c863c95f541ba429dddc45238f32ab5e1eb448533c80c9d4c00d591fa",
-      "review": "F34 typed document views: proof bindings unchanged"
+      "sha256": "47e613a4b85ccbb533096fadc615bd00462b1592cb68f829d9df814e0317bd18",
+      "review": "F42 typed nested readers: proof bindings unchanged"
     },
     "components/marketing/src/domain/flow_steps.rs": {
       "status": "unproved",
@@ -3013,8 +3013,8 @@
     },
     "components/marketing/src/domain/rule_match.rs": {
       "status": "reviewed-binding",
-      "sha256": "3bf79723a9e101d2f10e441e75ef9ce6e440114aa4fbf3f1148dc385e7fede24",
-      "review": "Unit tests for every public domain function of the components; no production code changed"
+      "sha256": "e3e20f8477cd95d96fedcaa6f90b7f88c3fc00fb216eb639032bdca5b1ccbaf4",
+      "review": "F42 typed nested readers: proof bindings unchanged"
     },
     "components/marketing/src/domain/rules/tests.rs": {
       "status": "unproved",
@@ -3093,8 +3093,8 @@
     },
     "components/marketing/src/service/configuration_writes.rs": {
       "status": "unproved",
-      "sha256": "d6646268fa24ab2e38f48620f9becb0287638f637baa348b6040b4491ff86577",
-      "review": "F40 typed inputs (automatic, accessor-equivalent): proof bindings unchanged"
+      "sha256": "5148dfe9d025b9775eb31089ee54438614c05501cdf38e17b16f4d073f49dd19",
+      "review": "F42 typed nested readers: proof bindings unchanged"
     },
     "components/marketing/src/service/coupons.rs": {
       "status": "unproved",
@@ -3138,8 +3138,8 @@
     },
     "components/marketing/src/store/facts.rs": {
       "status": "unproved",
-      "sha256": "39b3eaa296329c6aabc80d60ce6973c7a19acdb986ca7b2ab952cde7b29c9896",
-      "review": "F34 typed document views: proof bindings unchanged"
+      "sha256": "1608ba8d8bebeeebb2f76758ecb567c0c81ee4e06ebd469d8e4e632455bfcd99",
+      "review": "F42 typed nested readers: proof bindings unchanged"
     },
     "components/marketing/src/store/flow_access.rs": {
       "status": "unproved",
@@ -3253,8 +3253,8 @@
     },
     "components/orders/src/domain/order_transitions.rs": {
       "status": "reviewed-binding",
-      "sha256": "ff8b2ab65471613f006e6c68080a59852e59666af78dd0f5529c57127d7ebf6a",
-      "review": "F38 typed inputs: proof bindings unchanged"
+      "sha256": "0aad0892e6e1c3b6743d2ef0dfee69f5254dea0360dc303d743e02de8702759a",
+      "review": "F42 typed nested readers: proof bindings unchanged"
     },
     "components/orders/src/domain/order_workflow.rs": {
       "status": "reviewed-binding",
@@ -3333,8 +3333,8 @@
     },
     "components/orders/src/store/carrier_documents.rs": {
       "status": "unproved",
-      "sha256": "f3c184da140f7e553336e203ee92a336dff637a4c9c1684ea0565a3f5637e1ef",
-      "review": "POS, checkout session review, company data, receipts and carrier documents moved into components"
+      "sha256": "4fe98999ec844c94910415684dd5ae6868cdac55efb51cdc4ddb328642899da9",
+      "review": "F42 typed nested readers: proof bindings unchanged"
     },
     "components/orders/src/store/company.rs": {
       "status": "unproved",
@@ -3523,8 +3523,8 @@
     },
     "components/payments/src/service/instructions.rs": {
       "status": "unproved",
-      "sha256": "c61cec073b17d05aee14f697ea3b12e32f85b7f4285447e68aec25585ee226de",
-      "review": "F8: payment providers, POS register and B2B commands moved into their components"
+      "sha256": "5274c434197986ec58cb1d664dbbaa3ef29d75eaaf7bfccb8ae41bd556c8fd26",
+      "review": "F42 typed nested readers: proof bindings unchanged"
     },
     "components/payments/src/service/merchant_operations.rs": {
       "status": "unproved",
@@ -3968,8 +3968,8 @@
     },
     "components/shop/src/domain/buyer_consent.rs": {
       "status": "unproved",
-      "sha256": "f22f9b328f8805407d3be0d26462e38b192811c0eb017ebe1199a5ee43fe38ad",
-      "review": "Unit tests for every public domain function of the components; no production code changed"
+      "sha256": "9d42f369bf0131549932963b9647d316b89a304a29d4fb38a4c6c12a37f71ce1",
+      "review": "F42 typed nested readers: proof bindings unchanged"
     },
     "components/shop/src/domain/cart_admission.rs": {
       "status": "unproved",

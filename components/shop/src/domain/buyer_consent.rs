@@ -1,6 +1,8 @@
 //! Required contact data for explicit registered marketing segments; shared by protocol review and locked native checkout.
 use crate::types::cart::StoredCart;
+use serde::Deserialize;
 use serde_json::{Value, json};
+use veyndo_core::document::{lenient, view};
 use veyndo_core::{Result, bad};
 pub fn missing_contact(buyer: &Value) -> bool {
     let marketing = &buyer["consent"]["dev.ucp.consent.marketing"];
@@ -16,8 +18,27 @@ pub fn missing_contact(buyer: &Value) -> bool {
         granted && buyer[*contact].as_str().is_none_or(|s| s.trim().is_empty())
     })
 }
+/// A buyer consent decision.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct ConsentReceipt {
+    #[serde(deserialize_with = "lenient")]
+    decided: Option<bool>,
+    #[serde(deserialize_with = "lenient")]
+    choices: ConsentChoices,
+}
+
+/// The consent choices of a buyer.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct ConsentChoices {
+    #[serde(deserialize_with = "lenient")]
+    marketing: Option<bool>,
+}
+
 pub fn check(c: &StoredCart, receipt: &Value) -> Result<()> {
-    if receipt["decided"] != true || receipt["choices"]["marketing"] != true {
+    let receipt: ConsentReceipt = view(receipt);
+    if receipt.decided != Some(true) || receipt.choices.marketing != Some(true) {
         return Ok(());
     }
     let mut buyer = c.data.buyer.clone().unwrap_or(json!({}));

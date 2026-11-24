@@ -106,7 +106,8 @@ pub async fn check_locked(
     require(&policy, "buy")?;
     catalog_guard(conn, c, &policy).await?;
     let (period, spent) = usage(conn, c, &policy).await?;
-    if q["price"]["currency"] != policy.unit.currency {
+    let price = view::<PreviewQuote>(q).price;
+    if price.currency.as_deref() != Some(policy.unit.currency.as_str()) {
         return Err(conflict(
             "Company budget currency differs; select the unit currency",
         ));
@@ -182,6 +183,24 @@ pub async fn record(
     }
     crate::store::organization::event(conn,&c.tenant,"b2b.purchase_completed",json!({"orderId":id,"companyId":p.company_id,"unitId":p.context.unit_id,"currency":p.currency,"totalMinor":p.total,"approvalId":p.approval})).await
 }
+/// The quote total a company budget preview checks.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct PreviewQuote {
+    #[serde(deserialize_with = "lenient")]
+    price: PreviewPrice,
+}
+
+/// The currency and total of a previewed quote.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct PreviewPrice {
+    #[serde(deserialize_with = "lenient")]
+    currency: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    total_price: Option<f64>,
+}
+
 pub async fn preview(a: &State, c: &StoredCart, q: &mut Value) -> Result<()> {
     let Some(context) = &c.data.b2b else {
         return Ok(());
@@ -190,15 +209,14 @@ pub async fn preview(a: &State, c: &StoredCart, q: &mut Value) -> Result<()> {
     let policy = access(&mut tx, &c.tenant, &context.unit_id, &context.customer_id).await?;
     catalog_guard(&mut tx, c, &policy).await?;
     let (period, spent) = usage(&mut tx, c, &policy).await?;
-    if q["price"]["currency"] != policy.unit.currency {
+    let price = view::<PreviewQuote>(q).price;
+    if price.currency.as_deref() != Some(policy.unit.currency.as_str()) {
         return Err(conflict(
             "Select the purchasing unit currency before reviewing its budget",
         ));
     }
     let total = veyndo_pricing::service::conversion::amount(
-        q["price"]["totalPrice"]
-            .as_f64()
-            .ok_or(bad("Invalid company quote"))?,
+        price.total_price.ok_or(bad("Invalid company quote"))?,
         &policy.unit.currency,
         veyndo_pricing::types::currency::scale(&policy.unit.currency)
             .ok_or(bad("Unknown unit currency"))?,

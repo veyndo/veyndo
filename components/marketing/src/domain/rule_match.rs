@@ -1,6 +1,8 @@
 //! Evaluate typed rule trees against server-owned cart, customer and event facts.
 use super::rules::Condition;
+use serde::Deserialize;
 use serde_json::Value;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::{Result, bad};
 use veyndo_shop::types::cart::{StoredCart, selection};
 impl Condition {
@@ -53,7 +55,7 @@ impl Condition {
             Self::Not { child } => !child.matches(c, q),
             Self::Always => true,
             Self::Amount { operator, amount } => numeric(
-                q["price"]["totalPrice"].as_f64().unwrap_or(0.),
+                view::<MatchedQuote>(q).price.total_price.unwrap_or(0.),
                 *amount,
                 operator,
             ),
@@ -79,21 +81,22 @@ impl Condition {
                 operator,
             ),
             Self::OriginalProduct { values, operator } => {
-                q["lineItems"].as_array().is_some_and(|items| {
-                    items.iter().any(|item| {
-                        let Some(id) = item["referencedId"].as_str() else {
+                view::<MatchedQuote>(q).line_items.is_some_and(|items| {
+                    items.iter().map(view::<MatchedItem>).any(|item| {
+                        let Some(id) = item.referenced_id.as_deref() else {
                             return false;
                         };
-                        item["parentId"]
-                            .as_str()
+                        item.parent_id
+                            .as_deref()
                             .is_some_and(|parent| set_matches(&[parent.into()], values, operator))
                             || set_matches(&[id.into()], values, operator)
                     })
                 })
             }
             Self::OrderState { values, operator } => set_matches(
-                &q["orderState"]
-                    .as_str()
+                &view::<MatchedQuote>(q)
+                    .order_state
+                    .as_deref()
                     .map(String::from)
                     .into_iter()
                     .collect::<Vec<_>>(),
@@ -101,8 +104,9 @@ impl Condition {
                 operator,
             ),
             Self::PaymentState { values, operator } => set_matches(
-                &q["paymentState"]
-                    .as_str()
+                &view::<MatchedQuote>(q)
+                    .payment_state
+                    .as_deref()
                     .map(String::from)
                     .into_iter()
                     .collect::<Vec<_>>(),
@@ -110,8 +114,8 @@ impl Condition {
                 operator,
             ),
             Self::DeliveryState { values, operator } => set_matches(
-                &q["deliveryStates"]
-                    .as_array()
+                &view::<MatchedQuote>(q)
+                    .delivery_states
                     .map(|v| {
                         v.iter()
                             .filter_map(|s| s.as_str().map(String::from))
@@ -374,4 +378,36 @@ mod tests {
         assert!(!wildcard("buyer@example.test", "buyer"));
         assert!(!wildcard("", "a"));
     }
+}
+
+/// The evaluated quote facts native conditions compare.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct MatchedQuote {
+    #[serde(deserialize_with = "lenient")]
+    price: MatchedPrice,
+    #[serde(deserialize_with = "lenient")]
+    line_items: Option<Vec<Value>>,
+    #[serde(deserialize_with = "lenient")]
+    order_state: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    payment_state: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    delivery_states: Option<Vec<Value>>,
+}
+
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct MatchedPrice {
+    #[serde(deserialize_with = "lenient")]
+    total_price: Option<f64>,
+}
+
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct MatchedItem {
+    #[serde(deserialize_with = "lenient")]
+    referenced_id: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    parent_id: Option<String>,
 }

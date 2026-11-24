@@ -5,7 +5,9 @@ use crate::ports::Gateway;
 use crate::service::remote::execute;
 use crate::store::attempts::attempt;
 use crate::store::commands::customer;
+use serde::Deserialize;
 use serde_json::{Value, json};
+use veyndo_core::document::{lenient, view};
 use veyndo_core::shop_scope::tenant;
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad, conflict, uid};
 use veyndo_identity::{merchant, permit};
@@ -77,19 +79,38 @@ fn compound(h: &RequestContext) -> Result<String> {
 }
 
 /// The issuer already holds the order lock and document/PII authority. This immutable read takes no reverse payment lock and performs no provider I/O.
+/// The order and payment attempt a document carries instructions for.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct DocumentOrder {
+    #[serde(deserialize_with = "lenient")]
+    id: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    payment: DocumentPayment,
+}
+
+/// The payment attempt of an order.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct DocumentPayment {
+    #[serde(deserialize_with = "lenient")]
+    attempt_id: Option<String>,
+}
+
 pub async fn for_document(
     tx: &mut sqlx::PgConnection,
     t: &str,
     order: &Value,
 ) -> Result<Option<Value>> {
-    let Some(id) = order["payment"]["attemptId"].as_str() else {
+    let order: DocumentOrder = view(order);
+    let Some(id) = order.payment.attempt_id.as_deref() else {
         return Ok(None);
     };
     let row =
         sqlx::query("SELECT * FROM payment_attempts WHERE tenant=$1 AND id=$2 AND order_id=$3")
             .bind(t)
             .bind(id)
-            .bind(order["id"].as_str().unwrap_or(""))
+            .bind(order.id.as_deref().unwrap_or(""))
             .fetch_optional(tx)
             .await?
             .ok_or(bad("Document payment is not bound to this order"))?;

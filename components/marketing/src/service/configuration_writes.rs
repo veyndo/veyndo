@@ -15,7 +15,7 @@ use serde::Deserialize;
 use serde_json::{Value, json};
 use sqlx::{Postgres, Row, Transaction};
 use veyndo_app_model::declarations::identifier;
-use veyndo_core::document::{lenient, view};
+use veyndo_core::document::{Raw, lenient, view};
 use veyndo_core::shop_scope::{header, parent};
 use veyndo_core::{RequestContext, Result, State, bad, conflict, history_context};
 use veyndo_identity::domain::permissions::allowed;
@@ -412,6 +412,24 @@ async fn write(
 }
 
 /// Imported promotions use the ordinary revisioned owner and retain immutable provenance until a merchant reviews activation.
+/// An imported coupon: its activation state and its source provenance.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ImportedPromotion {
+    #[serde(deserialize_with = "lenient")]
+    active: Option<bool>,
+    #[serde(deserialize_with = "lenient")]
+    source_import: Raw<ImportReview>,
+}
+
+/// Whether the merchant reviewed an imported coupon before activation.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ImportReview {
+    #[serde(deserialize_with = "lenient")]
+    activation_reviewed: Option<bool>,
+}
+
 pub async fn import_promotion<H: ConfigurationHost>(
     host: &H,
     h: &RequestContext,
@@ -426,7 +444,8 @@ pub async fn import_promotion<H: ConfigurationHost>(
             "Coupon migration needs its live workspace; activation remains separate",
         ));
     }
-    if data["active"] != false || data["sourceImport"]["activationReviewed"] != false {
+    let imported: ImportedPromotion = view(data);
+    if imported.active != Some(false) || imported.source_import.activation_reviewed != Some(false) {
         return Err(bad("Imported coupons must start inactive and unreviewed"));
     }
     let previous: Option<Value> =
@@ -436,7 +455,7 @@ pub async fn import_promotion<H: ConfigurationHost>(
             .fetch_optional(&a.db)
             .await?;
     if let Some(previous) = previous {
-        let incoming = &data["sourceImport"];
+        let incoming = &imported.source_import.raw;
         let stored = &previous["sourceImport"];
         preserve_import(&previous, data)?;
         if stored.is_null() || stored["recordDigest"] != incoming["recordDigest"] {

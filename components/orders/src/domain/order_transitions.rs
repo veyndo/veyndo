@@ -9,18 +9,39 @@ use veyndo_core::{Result, bad, conflict};
 use veyndo_kernel::verified_kernel;
 
 /// A merchant marks a manual payment; external payments change only on a provider receipt.
+/// The order facts manual payment and cancellation transitions check.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct TransitionFacts {
+    #[serde(deserialize_with = "lenient")]
+    state: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    payment: PaymentState,
+    #[serde(deserialize_with = "lenient")]
+    deliveries: Option<Vec<Value>>,
+}
+
+/// A payment or delivery state.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct PaymentState {
+    #[serde(deserialize_with = "lenient")]
+    state: Option<String>,
+}
+
 pub fn payment(o: &mut Value, machine: &OrderMachine, target: &str) -> Result<()> {
     if external(o) {
         return Err(conflict(
             "External payments require a confirmed provider receipt",
         ));
     }
-    let current = o["payment"]["state"].as_str().unwrap_or("");
+    let facts: TransitionFacts = view(o);
+    let current = facts.payment.state.as_deref().unwrap_or("");
     if !verified_kernel::manual_payment_admissible(
         machine
             .states
             .iter()
-            .any(|s| s.id == o["state"].as_str().unwrap_or("") && s.terminal),
+            .any(|s| s.id == facts.state.as_deref().unwrap_or("") && s.terminal),
         external(o),
         ["pending", "authorized"].contains(&current),
         target == "paid",
@@ -91,13 +112,22 @@ pub fn cancellation_blocker(o: &Value) -> Option<&'static str> {
             "partially_captured",
             "partially_refunded",
         ]
-        .contains(&o["payment"]["state"].as_str().unwrap_or(""))
+        .contains(
+            &view::<TransitionFacts>(o)
+                .payment
+                .state
+                .as_deref()
+                .unwrap_or(""),
+        )
     {
         return Some("Reconcile or refund payment before cancellation");
     }
-    o["deliveries"]
-        .as_array()
-        .is_some_and(|ds| ds.iter().any(|d| d["state"] != "open"))
+    view::<TransitionFacts>(o)
+        .deliveries
+        .is_some_and(|ds| {
+            ds.iter()
+                .any(|d| view::<PaymentState>(d).state.as_deref() != Some("open"))
+        })
         .then_some("Shipped orders require a return workflow")
 }
 

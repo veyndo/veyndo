@@ -1,12 +1,45 @@
 //! Immutable private carrier documents belong to the existing order receipt store, never product assets.
 use crate::store::order_mutation::{self, Audit, Tx};
+use serde::Deserialize;
 use serde_json::{Value, json};
 use sqlx::Row;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::{Error, RequestContext, Result, StatusCode, bad, conflict, hash, uid};
 
 /// The digest a carrier app must echo: it changes whenever the package, its method or the destination changes.
+/// The order fields a carrier document allocation is bound to.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct AllocatedOrder {
+    id: Value,
+    shipping_address: Value,
+    #[serde(deserialize_with = "lenient")]
+    deliveries: Option<Vec<Value>>,
+}
+
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct AllocatedDelivery {
+    positions: Value,
+    #[serde(deserialize_with = "lenient")]
+    shipping_method: MethodId,
+}
+
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct MethodId {
+    id: Value,
+}
+
 pub fn allocation_digest(order: &Value, index: usize) -> String {
-    hash(&json!({"id":order["id"],"deliveryIndex":index,"positions":order["deliveries"][index]["positions"],"method":order["deliveries"][index]["shippingMethod"]["id"],"address":order["shippingAddress"]}).to_string())
+    let order: AllocatedOrder = view(order);
+    let delivery: AllocatedDelivery = order
+        .deliveries
+        .as_ref()
+        .and_then(|ds| ds.get(index))
+        .map(view)
+        .unwrap_or_default();
+    hash(&json!({"id":order.id,"deliveryIndex":index,"positions":delivery.positions,"method":delivery.shipping_method.id,"address":order.shipping_address}).to_string())
 }
 
 /// A carrier document an approved app hands in, validated before any lock is taken.
