@@ -2,4 +2,5 @@
 pub mod customer;
 pub mod discount;
 pub mod guard;
+pub mod register;
 pub mod settlement;

@@ -1,5 +1,6 @@
 //! Procurement operations on the buyer cart; the server supplies the cart through the shop port.
 pub mod approval;
+pub mod commands;
 pub mod lists;
 pub mod onboarding;
 pub mod quick_order;

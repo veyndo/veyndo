@@ -85,4 +85,14 @@ impl veyndo_payments::ports::Gateway for Gateway<'_> {
     fn cancellable(&self, attempt: &Attempt, evidence: &Value) -> Result<()> {
         super::paypal::validate_order(attempt, evidence)
     }
+    fn package<'a>(
+        &'a self,
+        tenant: &'a str,
+        id: &'a str,
+    ) -> PortFuture<'a, crate::apps::Manifest> {
+        Box::pin(crate::apps::package(self.0, tenant, id, true))
+    }
+    fn builtin(&self, tenant: &str) -> Value {
+        serde_json::json!({"id":"paypal","environment":super::environment(),"configured":super::account(tenant).is_ok(),"apiContract":"PayPal Orders v2"})
+    }
 }

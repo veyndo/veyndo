@@ -1,5 +1,15 @@
-//! One native command contract for Store API, merchant API and MCP; actor identity never comes from arguments.
-use super::*;
+//! Company command routes and the server side of the procurement port; the B2B component owns the command contract.
+use crate::{
+    App, Error, Json, Path, RequestContext, Result, State, StatusCode, Value, apps, auth, bad,
+    merchant,
+};
+use axum::extract::FromRef;
+use std::collections::HashMap;
+use veyndo_b2b::domain::contract::permission;
+use veyndo_core::PortFuture;
+use veyndo_pricing::domain::cart::Item;
+use veyndo_shop::types::cart::StoredCart;
+
 pub(super) async fn admin(
     State(a): State<App>,
     h: RequestContext,
@@ -30,206 +40,87 @@ pub(super) async fn customer(
     Ok(Json(invoke(&a, &h, &name, &v).await?))
 }
 pub(crate) async fn invoke(a: &App, h: &RequestContext, name: &str, v: &Value) -> Result<Value> {
-    if v.as_object().is_none_or(|o| {
-        o.len() > 14
-            || o.keys().any(|k| {
-                ![
-                    "id",
-                    "action",
-                    "unitId",
-                    "companyId",
-                    "parentId",
-                    "customerId",
-                    "productIds",
-                    "cartRevision",
-                    "lines",
-                    "message",
-                    "purchaseOrder",
-                    "revision",
-                    "state",
-                    "data",
-                ]
-                .contains(&k.as_str())
-            })
-    }) || v.to_string().len() > 64_000
-    {
-        return Err(bad("Invalid B2B command fields"));
+    veyndo_b2b::service::commands::invoke(&Procurement::new(a), a, h, name, v).await
+}
+
+/// The cart, order, settings and app owners the company commands reach.
+pub(super) struct Procurement<'s> {
+    app: &'s App,
+    carts: crate::cart_storage::Carts<'s>,
+    lists: ListCarts<'s>,
+}
+impl<'s> Procurement<'s> {
+    pub(super) fn new(app: &'s App) -> Self {
+        Self {
+            app,
+            carts: crate::cart_storage::Carts(app),
+            lists: ListCarts(app),
+        }
     }
-    if let Some(scope) = permission(name) {
-        merchant(a, h)?;
-        auth::permit(h, scope)?;
-    } else {
-        accounts::identity(a, h).await?;
+}
+impl veyndo_b2b::ports::Procurement for Procurement<'_> {
+    fn carts(&self) -> &dyn veyndo_shop::ports::Carts {
+        &self.carts
     }
-    let (settings, revision) = commerce::config(a, &tenant(h)?).await?;
-    settings
-        .b2b
-        .admit(name.strip_prefix("b2b.").unwrap_or(""))?;
-    match name
-        .strip_prefix("b2b.")
-        .ok_or(bad("Unknown company command"))?
-    {
-        "settings.save" => settings::save(a, h, v).await,
-        "configuration" => {
-            let s = json!(settings);
-            let methods = |key: &str| {
-                json!(s[key].as_array().map(|v|v.iter().map(|m|json!({"id":m["id"],"name":m["name"],"translations":m["translations"],"active":m["active"]})).collect::<Vec<_>>()).unwrap_or_default())
-            };
+    fn lists(&self) -> &dyn veyndo_b2b::ports::ListCarts {
+        &self.lists
+    }
+    fn lifecycle(&self) -> &dyn veyndo_b2b::ports::QuoteLifecycle {
+        &QuoteLifecycle
+    }
+    fn customer<'a>(&'a self, h: &'a RequestContext) -> PortFuture<'a, ()> {
+        Box::pin(async move {
+            crate::accounts::identity(self.app, h).await?;
+            Ok(())
+        })
+    }
+    fn order(&self, raw: &Value, created: &str) -> Value {
+        crate::accounts::project_order(raw, created)
+    }
+    fn labels<'a>(&'a self, tenant: &'a str) -> PortFuture<'a, Value> {
+        Box::pin(async move {
+            let (machine, _) = crate::commerce::machine(&self.app.db, tenant).await?;
+            Ok(serde_json::json!(
+                machine
+                    .states
+                    .iter()
+                    .map(|s| (&s.id, &s.label))
+                    .collect::<HashMap<_, _>>()
+            ))
+        })
+    }
+    fn cashier(&self, h: &RequestContext, cart: &StoredCart) -> Result<()> {
+        crate::pos::guard_cart(h, cart)
+    }
+    fn locked<'a, 'c: 'a>(
+        &'a self,
+        tx: &'a mut sqlx::Transaction<'c, sqlx::Postgres>,
+        tenant: &'a str,
+        channel: &'a str,
+    ) -> PortFuture<'a, (veyndo_shop::Settings, i64)> {
+        Box::pin(crate::commerce::scoped_locked(tx, tenant, channel))
+    }
+    fn save<'a>(&'a self, h: &'a RequestContext, v: Value) -> PortFuture<'a, Value> {
+        Box::pin(async move {
             Ok(
-                json!({"features":s["b2b"],"revision":revision,"mainLocale":s["mainLocale"],"locales":s["locales"],"currencies":{"defaultCurrency":s["currencies"]["defaultCurrency"],"enabled":s["currencies"]["enabled"]},"shipping":methods("shipping"),"payments":methods("payments")}),
+                crate::commerce::save_config(
+                    State(FromRef::from_ref(self.app)),
+                    h.clone(),
+                    Json(v),
+                )
+                .await?
+                .0,
             )
-        }
-        "company.create" => onboarding::create(a, h, v).await,
-        "companies" => {
-            let mut value = organization::list(a, &tenant(h)?).await?;
-            if let Some(rows) = value["companies"].as_array_mut() {
-                apps::core_extensions::attach(a, h, apps::core_extensions::Object::Company, rows)
-                    .await?;
-            }
-            Ok(value)
-        }
-        "company" => {
-            auth::permit(h, "customers.pii")?;
-            let mut value = organization::detail(
-                a,
-                &tenant(h)?,
-                v["id"].as_str().ok_or(bad("Company required"))?,
-            )
-            .await?;
-            apps::core_extensions::attach(
-                a,
-                h,
-                apps::core_extensions::Object::Company,
-                std::slice::from_mut(&mut value),
-            )
-            .await?;
-            Ok(value)
-        }
-        op @ ("company.save" | "unit.save") => organization::save(a, h, op, v).await,
-        "member.save" => organization::member(a, h, v).await,
-        "catalog.save" => catalog::save(a, h, v).await,
-        op @ ("lists" | "list.save" | "list.delete" | "list.apply") => {
-            veyndo_b2b::service::lists::invoke(
-                a,
-                (&crate::cart_storage::Carts(a), &ListCarts(a)),
-                h,
-                op,
-                v,
-            )
-            .await
-        }
-        op @ ("quotes" | "quotes.merchant" | "quote.request" | "quote.offer" | "quote.message"
-        | "quote.reject" | "quote.get" | "quote.current" | "quote.transition") => {
-            veyndo_b2b::service::quotes::invoke(
-                a,
-                (&crate::cart_storage::Carts(a), &QuoteLifecycle),
-                h,
-                op,
-                v,
-            )
-            .await
-        }
-        "quote.accept" => quote_contract::select(a, h, v, true).await,
-        "quote.release" => quote_contract::select(a, h, v, false).await,
-        "requisition.import" => requisition::import(a, h, v).await,
-        "unit.orders" => orders::read(a, h, v).await,
-        "quick-order" => quick_order::apply(a, h, v).await,
-        "contexts" => contexts(a, h).await,
-        "select" => select(a, h, v).await,
-        "approval.request" => approval::request(a, h, v).await,
-        "approvals" => approval::inbox(a, h, v).await,
-        "approval.decide" => approval::decide(a, h, v).await,
-        _ => Err(bad("Unknown B2B command")),
+        })
     }
-}
-async fn contexts(a: &App, h: &RequestContext) -> Result<Value> {
-    let t = tenant(h)?;
-    let (settings, _) = commerce::config(a, &t).await?;
-    let mut tx = a.db.begin().await?;
-    let customer = identity(&mut tx, h).await?;
-    history::customer_context(&mut tx, &customer).await?;
-    let rows=sqlx::query("SELECT u.id,u.company_id,u.data,c.data AS company,m.data AS member FROM b2b_members m JOIN b2b_units u ON u.tenant=m.tenant AND u.id=m.unit_id JOIN b2b_companies c ON c.tenant=u.tenant AND c.id=u.company_id WHERE m.tenant=$1 AND m.customer_id=$2 AND m.data->>'active'='true' AND u.data->>'active'='true' AND c.data->>'active'='true' ORDER BY u.id LIMIT 100").bind(t).bind(customer).fetch_all(&mut *tx).await?;
-    Ok(
-        json!({"mainLocale":settings.main_locale,"locales":settings.locales,"elements":rows.iter().map(|r|json!({"id":r.get::<String,_>("id"),"companyId":r.get::<String,_>("company_id"),"data":r.get::<Value,_>("data"),"company":r.get::<Value,_>("company"),"member":r.get::<Value,_>("member")})).collect::<Vec<_>>()}),
-    )
-}
-async fn select(a: &App, h: &RequestContext, v: &Value) -> Result<Value> {
-    let mut c = load_cart(a, h).await?;
-    if c.data.pos_actor.is_some() {
-        return Err(bad("POS carts cannot select procurement units"));
+    fn companies<'a>(&'a self, h: &'a RequestContext, rows: &'a mut [Value]) -> PortFuture<'a, ()> {
+        Box::pin(apps::core_extensions::attach(
+            self.app,
+            h,
+            apps::core_extensions::Object::Company,
+            rows,
+        ))
     }
-    let unit = v["unitId"].as_str().ok_or(bad("Unit required"))?;
-    let po = v["purchaseOrder"].as_str().unwrap_or("");
-    if po.len() > 140 || po.chars().any(char::is_control) {
-        return Err(bad("Invalid purchase order reference"));
-    }
-    let mut tx = a.db.begin().await?;
-    let row = sqlx::query("SELECT * FROM carts WHERE tenant=$1 AND token=$2 FOR UPDATE")
-        .bind(&c.tenant)
-        .bind(&c.token)
-        .fetch_one(&mut *tx)
-        .await?;
-    c = stored(&row)?;
-    pos::guard_cart(h, &c)?;
-    if c.status != "open" || v["revision"].as_i64() != Some(c.revision) {
-        return Err(conflict("Cart changed or is terminal"));
-    }
-    if c.data.b2b.as_ref().is_some_and(|b| b.quote_id.is_some()) {
-        return Err(conflict(
-            "Release the accepted quote before changing purchasing units",
-        ));
-    }
-    let customer = identity(&mut tx, h).await?;
-    history::customer_context(&mut tx, &customer).await?;
-    if c.data.customer_id.as_deref() != Some(&customer) {
-        return Err(Error(
-            StatusCode::FORBIDDEN,
-            "Sign in to your own cart before selecting a company".into(),
-        ));
-    }
-    let policy = access(&mut tx, &c.tenant, unit, &customer).await?;
-    require(&policy, "buy")?;
-    c.data.b2b = Some(Context {
-        unit_id: unit.into(),
-        customer_id: customer,
-        purchase_order: po.into(),
-        quote_id: None,
-    });
-    catalog_guard(&mut tx, &c, &policy).await?;
-    let (config, _) = commerce::scoped_locked(&mut tx, &c.tenant, &c.data.sales_channel).await?;
-    config.currencies.selected(&policy.unit.currency)?;
-    // Keep customer-group pricing under the native configured group owner.
-    if !config.is_business("business") {
-        return Err(bad(
-            "Configure an enabled business customer group before company purchases",
-        ));
-    }
-    c.data.group = "business".into();
-    c.data.currency = policy.unit.currency;
-    c.data.company = Some(
-        policy
-            .company
-            .name
-            .get(&config.main_locale)
-            .or_else(|| {
-                policy
-                    .company
-                    .name
-                    .get(config.main_locale.split('-').next().unwrap_or(""))
-            })
-            .cloned()
-            .unwrap_or_default(),
-    );
-    c.revision += 1;
-    sqlx::query("UPDATE carts SET data=$3,revision=$4 WHERE tenant=$1 AND id=$2")
-        .bind(&c.tenant)
-        .bind(&c.id)
-        .bind(json!(c.data))
-        .bind(c.revision)
-        .execute(&mut *tx)
-        .await?;
-    tx.commit().await?;
-    cart_json(a, &c).await
 }
 
 /// The app platform compiles the lifecycle a new quote is accepted under.
@@ -239,7 +130,7 @@ impl veyndo_b2b::ports::QuoteLifecycle for QuoteLifecycle {
         &'a self,
         conn: &'a mut sqlx::PgConnection,
         tenant: &'a str,
-    ) -> veyndo_core::PortFuture<'a, Value> {
+    ) -> PortFuture<'a, Value> {
         Box::pin(apps::native_lifecycle::capture(conn, tenant, "quote"))
     }
 }
@@ -251,7 +142,7 @@ impl veyndo_b2b::ports::ListCarts for ListCarts<'_> {
         &'a self,
         tenant: &'a str,
         selection: &'a apps::ConfigurationSelection,
-    ) -> veyndo_core::PortFuture<'a, ()> {
+    ) -> PortFuture<'a, ()> {
         Box::pin(async move {
             apps::configuration_selection_for_list(self.0, tenant, selection).await?;
             Ok(())
@@ -263,7 +154,7 @@ impl veyndo_b2b::ports::ListCarts for ListCarts<'_> {
         items: Vec<Item>,
         expected: i64,
         selections: &'a [apps::ConfigurationSelection],
-    ) -> veyndo_core::PortFuture<'a, Value> {
+    ) -> PortFuture<'a, Value> {
         Box::pin(async move {
             let c = crate::cart_mutation::set_configured_cart(
                 self.0,
@@ -274,7 +165,7 @@ impl veyndo_b2b::ports::ListCarts for ListCarts<'_> {
                 Some(selections),
             )
             .await?;
-            cart_json(self.0, &c).await
+            crate::cart_json(self.0, &c).await
         })
     }
 }

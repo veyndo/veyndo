@@ -1,11 +1,10 @@
 //! Customer payment status/capture and merchant refund operations share the durable command API.
 use super::{
-    account, customer, enqueue, environment, onboarding_route, provider_webhooks, providers_route,
-    sessions, webhooks,
+    customer, enqueue, onboarding_route, provider_webhooks, providers_route, sessions, webhooks,
 };
 use crate::{
-    App, Json, Path, RequestContext, Result, Router, Row, SecureRoutes, State, Value, auth, bad,
-    get, header, json, merchant, post, tenant,
+    App, Json, Path, RequestContext, Result, Router, SecureRoutes, State, Value, auth, bad, get,
+    header, merchant, post, tenant,
 };
 
 pub(crate) fn payment_router() -> Router<App> {
@@ -69,36 +68,8 @@ pub(crate) fn payment_router() -> Router<App> {
         )
 }
 pub(crate) async fn status(State(a): State<App>, h: RequestContext) -> Result<Json<Value>> {
-    let t = merchant(&a, &h)?;
-    auth::permit(&h, "payments.read")?;
-    let rows = sqlx::query(
-        "SELECT * FROM payment_attempts WHERE tenant=$1 ORDER BY created_at DESC LIMIT 100",
-    )
-    .bind(&t)
-    .fetch_all(&a.db)
-    .await?;
-    let jobs=sqlx::query("SELECT id,attempt_id,operation,state,error FROM payment_jobs WHERE tenant=$1 ORDER BY created_at DESC LIMIT 100").bind(&t).fetch_all(&a.db).await?;
-    let generic = providers_route(State(a.clone()), h.clone()).await?.0;
-    let mut providers = vec![
-        json!({"id":"paypal","environment":environment(),"configured":account(&t).is_ok(),"apiContract":"PayPal Orders v2"}),
-    ];
-    for p in generic["providers"].as_array().unwrap() {
-        let mut p = p.clone();
-        p["configured"] = json!(
-            p["active"] == true
-                && generic["accounts"]
-                    .as_array()
-                    .unwrap()
-                    .iter()
-                    .any(|c| c["provider"] == p["id"] && c["ready"] == true)
-        );
-        providers.push(p);
-    }
-    if !providers.iter().any(|p| p["id"] == "shopware_payments") {
-        providers.push(json!({"id":"shopware_payments","configured":false,"status":"private-adapter-required"}));
-    }
     Ok(Json(
-        json!({"providers":providers,"attempts":rows.iter().map(|r|json!({"provider":r.get::<String,_>("provider"),"id":r.get::<String,_>("id"),"orderId":r.get::<String,_>("order_id"),"state":r.get::<String,_>("state"),"amountMinor":r.get::<i64,_>("amount_minor"),"currency":r.get::<String,_>("currency"),"currencyScale":r.get::<i16,_>("currency_scale"),"refundedMinor":r.get::<i64,_>("refunded_minor"),"adapterVersion":r.get::<String,_>("adapter_version"),"environment":r.get::<String,_>("environment"),"settlement":super::settlements::summary(&super::attempt(r))})).collect::<Vec<_>>(),"jobs":jobs.iter().map(|r|json!({"id":r.get::<String,_>("id"),"attemptId":r.get::<String,_>("attempt_id"),"operation":r.get::<String,_>("operation"),"state":r.get::<String,_>("state"),"error":r.get::<Option<String>,_>("error")})).collect::<Vec<_>>()}),
+        veyndo_payments::service::providers::status(&super::host::Gateway(&a), &a, &h).await?,
     ))
 }
 async fn customer_status(
@@ -155,17 +126,7 @@ async fn merchant_command(
 ) -> Result<Json<Value>> {
     merchant(&a, &h)?;
     auth::permit(&h, "payments.manage")?;
-    if ![
-        "refund",
-        "reconcile",
-        "cancel",
-        "capture",
-        "authorize",
-        "void",
-    ]
-    .contains(&op.as_str())
-        || v["approve"] != true
-    {
+    if !veyndo_payments::service::merchant_operations::admitted(&op, &v) {
         return Err(bad("Supported payment operation and approve=true required"));
     }
     Ok(Json(
@@ -183,4 +144,4 @@ async fn merchant_command(
     ))
 }
 
-pub(crate) use veyndo_payments::http::status::{read, read_sale};
+pub(crate) use veyndo_payments::http::status::read;

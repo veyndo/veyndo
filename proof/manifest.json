@@ -1373,13 +1373,18 @@
     },
     "components/b2b/src/ports.rs": {
       "status": "unproved",
-      "sha256": "f107dcb7815dcd8250759c1814069782d2f2ed5e6dec7793bdfa74bac07b3309",
-      "review": "Procurement lists move into b2b; configuration selection rules into shop"
+      "sha256": "c619ae3897cfab95e17da9699deb8c77145c97bbd54a6803431e44bc561b54b6",
+      "review": "F8: payment providers, POS register and B2B commands moved into their components"
     },
     "components/b2b/src/service/approval.rs": {
       "status": "reviewed-binding",
       "sha256": "6d9a709d6ec4d241b5d51a79aaf790b2dc3a2c2fb09dcfd5fbdfb8b847ef8e4f",
       "review": "B2B approvals, quick order and offer contract moved behind the shop cart port"
+    },
+    "components/b2b/src/service/commands.rs": {
+      "status": "unproved",
+      "sha256": "633ef7f5f41fad9eea5597cff8e9bc0a49258f890f7b306d1c2b95318452c340",
+      "review": "F8: payment providers, POS register and B2B commands moved into their components"
     },
     "components/b2b/src/service/lists.rs": {
       "status": "unproved",
@@ -1413,8 +1418,8 @@
     },
     "components/b2b/src/service.rs": {
       "status": "unproved",
-      "sha256": "27fd97a068bd8cfb1cd7392a74021b9ada2ec1e1b9bbf1639e8b048ae9f38d53",
-      "review": "Procurement lists move into b2b; configuration selection rules into shop"
+      "sha256": "0525c4b544b19503732e26cd99fffaa13d3f66b47751326e20b06c41577fa663",
+      "review": "F8: payment providers, POS register and B2B commands moved into their components"
     },
     "components/b2b/src/store/access.rs": {
       "status": "unproved",
@@ -3383,8 +3388,8 @@
     },
     "components/payments/src/ports.rs": {
       "status": "unproved",
-      "sha256": "50ff0bc6e1772f940c99f777a06b3edc3c2d54852fb789362ac3ec381e39b3ba",
-      "review": "Payment commands, worker and provider sessions moved behind the payments gateway port"
+      "sha256": "b5f869b2bfcf84f0a0fa3d5e79cc7dd632528ba3157d625f219eef2c43e0da7c",
+      "review": "F8: payment providers, POS register and B2B commands moved into their components"
     },
     "components/payments/src/service/commands.rs": {
       "status": "unproved",
@@ -3403,8 +3408,13 @@
     },
     "components/payments/src/service/instructions.rs": {
       "status": "unproved",
-      "sha256": "3bffe97c5241891314e48a3736daed8b75093d2d40453753895d8114b87a5c7b",
-      "review": "Payment commands, worker and provider sessions moved behind the payments gateway port"
+      "sha256": "c61cec073b17d05aee14f697ea3b12e32f85b7f4285447e68aec25585ee226de",
+      "review": "F8: payment providers, POS register and B2B commands moved into their components"
+    },
+    "components/payments/src/service/merchant_operations.rs": {
+      "status": "unproved",
+      "sha256": "7e086cf3c5fe923a814408bf3723a5965ee3fce2b997e9c53ee307edde73b588",
+      "review": "F8: payment providers, POS register and B2B commands moved into their components"
     },
     "components/payments/src/service/notifications.rs": {
       "status": "unproved",
@@ -3415,6 +3425,11 @@
       "status": "unproved",
       "sha256": "ee899455b638edc1f143b2b05522b33bd09f42ed56280979f9638cbece5f45e8",
       "review": "Process configuration moved into core; browser session transports, Checkout buyer grants, the private Checkout relay, trusted geography and provider startup validation moved into their components without behaviour change"
+    },
+    "components/payments/src/service/providers.rs": {
+      "status": "unproved",
+      "sha256": "cb7764ab8b1fdb0de88c6605210f899aac1fd12d87260ad6ce6607adc77ea062",
+      "review": "F8: payment providers, POS register and B2B commands moved into their components"
     },
     "components/payments/src/service/receipts.rs": {
       "status": "unproved",
@@ -3438,8 +3453,8 @@
     },
     "components/payments/src/service.rs": {
       "status": "unproved",
-      "sha256": "d57d24ac47ce0526499542d9ddb8780e451d367e8aab8f850c8b45c0088bf917",
-      "review": "Process configuration moved into core; browser session transports, Checkout buyer grants, the private Checkout relay, trusted geography and provider startup validation moved into their components without behaviour change"
+      "sha256": "0ee1a935bd29b36addb3782d8d72444a09d6910de33f0a3b57770c1dec85034e",
+      "review": "F8: payment providers, POS register and B2B commands moved into their components"
     },
     "components/payments/src/store/attempts.rs": {
       "status": "unproved",
@@ -3533,8 +3548,13 @@
     },
     "components/pos/src/lib.rs": {
       "status": "unproved",
-      "sha256": "d107d2d2fa9836464c6a3fb7e4e9d1bf07fb79fe8ff03c37f4ac3290bf7cb916",
-      "review": "POS guard, customer, discount and settlement and the checkout session review moved into components"
+      "sha256": "3e7fc40e78245c1b6876051097d3e4627a0c0817e31b566a1ef8c01e23b947f1",
+      "review": "F8: payment providers, POS register and B2B commands moved into their components"
+    },
+    "components/pos/src/ports.rs": {
+      "status": "unproved",
+      "sha256": "168d2d7791ed9510ead2e6d8b5dfd1974a9db30548f1e08d1e2755ed4307ae33",
+      "review": "F8: payment providers, POS register and B2B commands moved into their components"
     },
     "components/pos/src/service/customer.rs": {
       "status": "unproved",
@@ -3551,6 +3571,11 @@
       "sha256": "7190001030eb7d9a85665494d7587a509fa0ed431f47e64c9ef0766683aa10bf",
       "review": "POS guard, customer, discount and settlement and the checkout session review moved into components"
     },
+    "components/pos/src/service/register.rs": {
+      "status": "unproved",
+      "sha256": "45394c1cc6c9a3ffefa7e5165ce17984ac896672e0dfb69d8d6db827ba9618cb",
+      "review": "F8: payment providers, POS register and B2B commands moved into their components"
+    },
     "components/pos/src/service/settlement.rs": {
       "status": "reviewed-binding",
       "sha256": "f55ca6885caf2776438ee31fbd7eb9855401459b0c747f6152b1f28eb3ced75e",
@@ -3558,8 +3583,8 @@
     },
     "components/pos/src/service.rs": {
       "status": "unproved",
-      "sha256": "331c07deef28d2c8ef8784f6c8380d3c5c8cbca3287e8fba06a60543b5cacfff",
-      "review": "POS guard, customer, discount and settlement and the checkout session review moved into components"
+      "sha256": "319fd6d0d2093d6f231c396f157c5279a648fcb4d4d997bc735ba85126b4dd09",
+      "review": "F8: payment providers, POS register and B2B commands moved into their components"
     },
     "components/pos/src/store/channel_setup.rs": {
       "status": "unproved",
@@ -6631,11 +6656,6 @@
       "sha256": "bfc048fefc0015fe21d96d4f547163845f1103294e0ce9fc9c49fa5d71ed60cc",
       "review": "B2B access, organization and purchasing storage and flow job claims moved into their components"
     },
-    "src/b2b/approval.rs": {
-      "status": "unproved",
-      "sha256": "98c54181ec4336ee1511a8133439e21a9d4e634bb423f3f9cc5330ba3e7efc13",
-      "review": "B2B approvals, quick order and offer contract moved behind the shop cart port"
-    },
     "src/b2b/catalog.rs": {
       "status": "unproved",
       "sha256": "77b8ee5c5fff4998ce4c854029d10bcd66012496f4cea8d89cc5fb97056f3b22",
@@ -6648,28 +6668,18 @@
     },
     "src/b2b/gateway.rs": {
       "status": "unproved",
-      "sha256": "b84931457d89114a90326535250916cad15fb0bddd19180c17c332a2ad35969b",
-      "review": "Procurement lists move into b2b; configuration selection rules into shop"
+      "sha256": "0dd89c8053e2f8d0da9d03852de1deb573382928441a2e50b41ce60e2eb58713",
+      "review": "F8: payment providers, POS register and B2B commands moved into their components"
     },
     "src/b2b/mod.rs": {
       "status": "unproved",
-      "sha256": "2495cc74a36c9b54f2d87160c4597b6cd962b0c7bcb921e8ab40a638193d6506",
-      "review": "Batch F2: sandbox clone, snapshot, diff and release moved into studio behind the ReleaseHost port"
-    },
-    "src/b2b/model.rs": {
-      "status": "unproved",
-      "sha256": "929e06ad30430f915eb4feaa0c129a7df99f7f91bc1d57c4b171ad89c698f5f7",
-      "review": "Identity credentials, B2B and POS contracts and checkout tax lines moved into components; kernel call sites unchanged"
-    },
-    "src/b2b/onboarding.rs": {
-      "status": "unproved",
-      "sha256": "09e59441db6f5beb5787071a550cf8083b9304bedb67770481fe7bbcf9bb6615",
-      "review": "Rate refresh, company onboarding, POS channel setup, rule comparison and facts and source lifecycle handlers moved into their components; behaviour unchanged"
+      "sha256": "975d738f19c6dc26704dd90e39a9566770ffc8afa35f84f4638d22456e2a2204",
+      "review": "F8: payment providers, POS register and B2B commands moved into their components"
     },
     "src/b2b/orders.rs": {
       "status": "unproved",
-      "sha256": "70219eea68a14bec153e2974f713a2f930bb270e75d653852e53fcfabd52581f",
-      "review": "Reviewed native B2B authority, unit-first locking, revision-bound approvals and offers, exact budget allocation/release, private variant pagination, current app callbacks and forced tenant FKs/RLS; EDI codecs remain app-owned and bounded. Real PostgreSQL approval/concurrent budget/revocation/PDF/MCP and app/checkout baseline suites passed; schema/build/proof and changed Rust owners reviewed. Two extracted decisions add four Lean properties, not whole-server verification."
+      "sha256": "fa6118c4f3c026e5bd0b5b89346ea579229c792d31c290662f6635dea515fb14",
+      "review": "F8: payment providers, POS register and B2B commands moved into their components"
     },
     "src/b2b/organization.rs": {
       "status": "unproved",
@@ -6680,26 +6690,6 @@
       "status": "unproved",
       "sha256": "098e865b3b59b8148dc70239bdb449f9aa6faccd62d26bd680ec48b6aee720fc",
       "review": "B2B access, organization and purchasing storage and flow job claims moved into their components"
-    },
-    "src/b2b/quick_order.rs": {
-      "status": "unproved",
-      "sha256": "362ba68b36592b66305b5b71f9d80fc92b42b9a624e4aceae77a143541895816",
-      "review": "Coupons, flow job summaries, requisition import, customer snapshot, address restore and account orders moved into components"
-    },
-    "src/b2b/quote_contract.rs": {
-      "status": "unproved",
-      "sha256": "b64b06d79644eecc5d74f8e097b480572eec0e2b71117896213c042a994d9f6f",
-      "review": "The purchase transaction moves into checkout behind the purchase port"
-    },
-    "src/b2b/requisition.rs": {
-      "status": "unproved",
-      "sha256": "08c6172260fb000951c7cd16e5526612409f029f64fddee4988a3e3f888a8957",
-      "review": "Coupons, flow job summaries, requisition import, customer snapshot, address restore and account orders moved into components"
-    },
-    "src/b2b/settings.rs": {
-      "status": "unproved",
-      "sha256": "eabef82b62f5006f17d4018b0434f751f67be8ffd4b7a800535aabec0a906d9a",
-      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
     },
     "src/bin/automation_rules.rs": {
       "status": "unproved",
@@ -7313,8 +7303,8 @@
     },
     "src/history/mod.rs": {
       "status": "unproved",
-      "sha256": "23e7f60007fc2db468006a2856364c72855e3dd18c74c9ce5b77789e6eea6da0",
-      "review": "Batch F5: inference component for crates/cognition, crate-cycle gate, core paths for history attribution and environment parent"
+      "sha256": "7771c46666004786244984d6bd54f3628f74baf5533c3cec8763031596cd8081",
+      "review": "F8: payment providers, POS register and B2B commands moved into their components"
     },
     "src/history/product.rs": {
       "status": "unproved",
@@ -7583,8 +7573,8 @@
     },
     "src/operations/mod.rs": {
       "status": "unproved",
-      "sha256": "a85e8822badfd4e1397b3c9ef6737080617797a8bc9b30e124f1ed4e408f0476",
-      "review": "Batch F2: sandbox clone, snapshot, diff and release moved into studio behind the ReleaseHost port"
+      "sha256": "76c027bb673d468ce1024c4a19c956f7eada897c8fa91f2201e532ffc5567627",
+      "review": "F8: payment providers, POS register and B2B commands moved into their components"
     },
     "src/operations/order_documents.rs": {
       "status": "unproved",
@@ -7638,8 +7628,8 @@
     },
     "src/payments/accounts.rs": {
       "status": "unproved",
-      "sha256": "3dfe30d6261e5ef87ad75b9e1e80dca28b2a28e6149cce0bb27aff0ad11ff3cf",
-      "review": "Reviewed payment account binding update: start alone activates; status/disconnect match tenant/app/channel/account/environment. Real Core/PG negative cases and provider lifecycle acceptance pass. No change to extracted money policies; surrounding adapter remains unproved."
+      "sha256": "9c8bfdc21670e99b67500ff33c4f0df92c8bc3cb7d9e44cac23cd88544ebc7c4",
+      "review": "F8: payment providers, POS register and B2B commands moved into their components"
     },
     "src/payments/app_commands.rs": {
       "status": "unproved",
@@ -7663,8 +7653,8 @@
     },
     "src/payments/details.rs": {
       "status": "unproved",
-      "sha256": "8fd9eb2d04020b8cd4984a8de3b6e4439454f54f0995a09d22c46c3f7b77748b",
-      "review": "Payment commands, worker and provider sessions moved behind the payments gateway port"
+      "sha256": "279735124c072f4762e309ea7d705cc69c03b6081538a23c1c29e4311e412c92",
+      "review": "F8: payment providers, POS register and B2B commands moved into their components"
     },
     "src/payments/diagnostics.rs": {
       "status": "unproved",
@@ -7678,18 +7668,13 @@
     },
     "src/payments/host.rs": {
       "status": "unproved",
-      "sha256": "89b57599fbe56eb54ad003c7e9a9928011abdaf384c60111a8ac90e279b2d966",
-      "review": "Payment commands, worker and provider sessions moved behind the payments gateway port"
+      "sha256": "8a23fba60169fa19c79cb05cd611c7bf64038fe3654aae14141117302ec40736",
+      "review": "F8: payment providers, POS register and B2B commands moved into their components"
     },
     "src/payments/instructions.rs": {
       "status": "unproved",
-      "sha256": "6c8b56a9768c558543b2adec1af4d621bb18f0cd387e7a25872ac90b379819d2",
-      "review": "Payment commands, worker and provider sessions moved behind the payments gateway port"
-    },
-    "src/payments/instructions_state.rs": {
-      "status": "unproved",
-      "sha256": "276a48ae750f9ebf65e396b838e84925f403542342e6dbcdc21df76f1f1ebaed",
-      "review": "POS, checkout session review, company data, receipts and carrier documents moved into components"
+      "sha256": "089a6ada83e68a3feee9871d80a1230b299a7be850aade8b4baa77e8f1ba5e2c",
+      "review": "F8: payment providers, POS register and B2B commands moved into their components"
     },
     "src/payments/instruments.rs": {
       "status": "unproved",
@@ -7698,13 +7683,13 @@
     },
     "src/payments/merchant.rs": {
       "status": "unproved",
-      "sha256": "a805dc26ed3dddac27f777cb70584d355842e80024f338b1679576952086331e",
-      "review": "Reviewed typed recipient-only payment reads, customer capability and compound merchant rights, read-only registry/HTTP/MCP routing and order-payload omission. Actual native/private Rust PostgreSQL invoice fixtures, current rights, foreign cart/tenant, pending capture and immutable recipient checks passed. SQL/network adapters remain unproved; no extracted kernel policy changed."
+      "sha256": "36ac353c4bd347080013e47b86783e71c19b4e3dc3f3745ad25d5da8a702d771",
+      "review": "F8: payment providers, POS register and B2B commands moved into their components"
     },
     "src/payments/mod.rs": {
       "status": "unproved",
-      "sha256": "08b97dc5f4ca63c287e82c3a9cfa3a3b8e13e8a7b420671191e0e5d93544aa05",
-      "review": "The purchase transaction moves into checkout behind the purchase port"
+      "sha256": "470bc2a62f0791a4e936057bd13383df34c12a81b6e2fedf5a1891f7a92d79d5",
+      "review": "F8: payment providers, POS register and B2B commands moved into their components"
     },
     "src/payments/operations.rs": {
       "status": "unproved",
@@ -7713,8 +7698,8 @@
     },
     "src/payments/provider.rs": {
       "status": "unproved",
-      "sha256": "70aa6d25fb7d975467e4cd7996b31105600437d98bff4bc4331d96f32d561c88",
-      "review": "Payment ledger rules moved into components/payments; kernel call sites unchanged"
+      "sha256": "6f3ea2573daf6add28a3efbc61648dae83d83e7619fc8972d685f1d392b4b2a2",
+      "review": "F8: payment providers, POS register and B2B commands moved into their components"
     },
     "src/payments/provider_webhooks.rs": {
       "status": "unproved",
@@ -7733,8 +7718,8 @@
     },
     "src/payments/remote.rs": {
       "status": "unproved",
-      "sha256": "b7a669cb51e56985fdcc2084d3b132722a7893fd61cf3343deafff5b2249bd23",
-      "review": "Batch F5: inference component for crates/cognition, crate-cycle gate, core paths for history attribution and environment parent"
+      "sha256": "8bbc0246270f4f9d00f3ea065bafcac7e0ebf85684d31990fb1136a763010200",
+      "review": "F8: payment providers, POS register and B2B commands moved into their components"
     },
     "src/payments/return_urls.rs": {
       "status": "unproved",
@@ -7743,18 +7728,13 @@
     },
     "src/payments/routes.rs": {
       "status": "unproved",
-      "sha256": "b889e359ba3638abe2e0f2a99f01f3f49d41b2dc27ca43c613127c92c8dff99a",
-      "review": "Batch E: payment status reads into payments, the image provider adapter into cognition"
+      "sha256": "e602d474928ecdf7e779ee83bc1f84ad7493f27dc451629c0994f3aa494e3f96",
+      "review": "F8: payment providers, POS register and B2B commands moved into their components"
     },
     "src/payments/sessions.rs": {
       "status": "unproved",
       "sha256": "0974bbd94f244912a10eb090942e116b834630c547d2e0ae4dd24ac7a93f7d2e",
       "review": "The purchase transaction moves into checkout behind the purchase port"
-    },
-    "src/payments/settlements.rs": {
-      "status": "unproved",
-      "sha256": "bd68ce889d0d72250926adc70932c4fa9a8c94ac902292b64c04e7b2e7926e21",
-      "review": "Receipt persistence and order ledger moved behind the payments host port; kernel call sites unchanged"
     },
     "src/payments/state.rs": {
       "status": "unproved",
@@ -7856,30 +7836,20 @@
       "sha256": "3dad660c66335e9b7a6929ceefa3550be07ccfdde265dca4b5c50c0ecc7cb0a3",
       "review": "Rate refresh, company onboarding, POS channel setup, rule comparison and facts and source lifecycle handlers moved into their components; behaviour unchanged"
     },
-    "src/pos/customer.rs": {
-      "status": "unproved",
-      "sha256": "1b83f19779572cfa4e1512a667e4aff74da399ad496bc0525343947928d5fea0",
-      "review": "Merchant customer writes moved into the customers component and admin order admission into checkout without behaviour change"
-    },
-    "src/pos/discount.rs": {
-      "status": "unproved",
-      "sha256": "d5b1ad11e809680a13f78ba272455e9e140c1f64b999e227b0f2fd86fbab64d0",
-      "review": "POS guard, customer, discount and settlement and the checkout session review moved into components"
-    },
     "src/pos/gateway.rs": {
       "status": "unproved",
-      "sha256": "1ba2427164b3f93d5009b683eddacc4cbdd91fa2d3ba792a44a3fcfe8b8e93e3",
-      "review": "Cart projection and product detail move into checkout behind a quote port"
-    },
-    "src/pos/input.rs": {
-      "status": "unproved",
-      "sha256": "96ba686a5daf446045f6b9a9b8aca9ea4efaf4c671219a15030ea1e26d878f37",
-      "review": "Identity credentials, B2B and POS contracts and checkout tax lines moved into components; kernel call sites unchanged"
+      "sha256": "27fcefcd670b1d022c90f45c971412c4848e27ff063ab30636aa0319f24ea187",
+      "review": "F8: payment providers, POS register and B2B commands moved into their components"
     },
     "src/pos/mod.rs": {
       "status": "unproved",
-      "sha256": "df5e6777153de5ec263495a2f65d78d4dc6b6262f87f6c52e1bbdb6345507a2e",
-      "review": "Merchant customer writes moved into the customers component and admin order admission into checkout without behaviour change"
+      "sha256": "b6c26b3c00c27e9bee196f2acb80b9c490c6ec710ae476ae7bb5725c670a2d3b",
+      "review": "F8: payment providers, POS register and B2B commands moved into their components"
+    },
+    "src/pos/register_host.rs": {
+      "status": "unproved",
+      "sha256": "ebcf2482a45dfa7589cfe8b42e42823947589e0ed56eca219c549615adc29b42",
+      "review": "F8: payment providers, POS register and B2B commands moved into their components"
     },
     "src/pos/schema.rs": {
       "status": "unproved",
@@ -7890,11 +7860,6 @@
       "status": "unproved",
       "sha256": "bdeae03cfb21a7fd36e7dab262b646af1949682d4d544eb2efa021b8f84743df",
       "review": "POS guard, customer, discount and settlement and the checkout session review moved into components"
-    },
-    "src/pos/workspace_gateway.rs": {
-      "status": "unproved",
-      "sha256": "9a0e34b9cf68e3cdd56d4e253660e87d99f4f5457c23fc450ad06e83d9c626dd",
-      "review": "POS cashier guard reviewed: exact currency/reason/actor/goods bound; native customer selection and receipt projection remain SQL adapters covered by isolated POS regressions; bound new domain futures"
     },
     "src/prelude.rs": {
       "status": "unproved",
@@ -8098,8 +8063,8 @@
       "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
     },
     "Cargo.lock": {
-      "sha256": "0b0552e60a0e43d598fb8ce5860c80c9be32bfc3e8e085e7bd02a1cb929ec9ee",
-      "review": "F7: marketing configuration, channel admission and flow templates move into components"
+      "sha256": "7ec5f6129f9ad558942885b6a8c8a38202910674281f46411f2c2eb37b474bee",
+      "review": "F8: payment providers, POS register and B2B commands moved into their components"
     },
     "Cargo.toml": {
       "sha256": "12d2d79a98f6913d20b8e912afb9ea8de0539b9e83428de8a9d7412c406896f6",

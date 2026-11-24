@@ -371,8 +371,9 @@ scoped active-package shared lock/read. Native `approval.rs` and `package_fence.
 retain reserved/provider trust and full typed installed-digest comparison.
 [Evidence](evidence/app-admission-component-2026-11-05.md).
 
-**Invoice checkout:** `src/payments/instructions.rs` owns the typed recipient
-projection and customer/compound merchant rights. `PaymentInstructions.tsx` and
+**Invoice checkout:** `components/payments/src/service/instructions.rs` owns the typed recipient
+projection, customer/compound merchant rights and the immutable document and flow snapshots;
+`src/payments/instructions.rs` only binds the routes. `PaymentInstructions.tsx` and
 its adjacent stylesheet render it in the existing native completion checkout.
 Provider source creation, recipient persistence and polling stay in the private
 Rust payment service. [Contract, migration and acceptance](payment-invoice-checkout.md).
@@ -496,7 +497,7 @@ isolation, document and stock state effects; frontend tests exercise controls.
 
 ## Native POS
 
-`src/pos/{config,gateway,input,workspace_gateway,customer,discount,schema,settlement}.rs` are native channel adapters. Catalog/cart/currencies/promotions, `order_checkout.rs`, `checkout_review.rs`, inventory, payments, documents and outbox remain the commerce owners. `marketing/coupons.rs` retains the existing coupon handler with private-cart admission. `customer.rs` delegates to shared accounts with current PII admission; `discount.rs` delegates to native allocation/tax and transactional outbox. `operations/receipt_text.rs` exposes the same immutable invoice projection to the system printer. `frontend/src/admin/pos` owns the focus/scanner, customer, discount, printer and read-only advice workspace; app code stays in its own package. Real `pos.py`/`payment_providers.py` and UI regressions cover state effects. [Architecture, proof scope and limits](pos.md).
+`components/pos/src/service/register.rs` owns the cashier gateway shared by HTTP and MCP (cashier admission, register context, cart, payment, listing and workspace commands) behind the `Register` port of `components/pos/src/ports.rs`; `src/pos/register_host.rs` implements that port and `src/pos/gateway.rs` binds the routes. `src/pos/{config,schema,settlement}.rs` re-export the component contracts. Catalog/cart/currencies/promotions, `order_checkout.rs`, `checkout_review.rs`, inventory, payments, documents and outbox remain the commerce owners. `marketing/coupons.rs` retains the existing coupon handler with private-cart admission. The component `customer.rs` delegates to shared accounts with current PII admission; `discount.rs` delegates to native allocation/tax and transactional outbox. `operations/receipt_text.rs` exposes the same immutable invoice projection to the system printer. `frontend/src/admin/pos` owns the focus/scanner, customer, discount, printer and read-only advice workspace; app code stays in its own package. Real `pos.py`/`payment_providers.py` and UI regressions cover state effects. [Architecture, proof scope and limits](pos.md).
 
 ## Production foundations
 

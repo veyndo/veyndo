@@ -7,7 +7,6 @@ pub(crate) use legacy::{account, base, environment, prepare};
 
 pub(crate) use veyndo_payments::domain::amounts::{format_amount, parse_amount};
 pub(crate) use veyndo_payments::domain::attempt::Attempt;
-pub(crate) use veyndo_payments::store::attempts::attempt;
 /// Each adapter implements this command boundary; the core owns ledger transitions.
 pub(crate) trait PaymentProvider {
     async fn execute(

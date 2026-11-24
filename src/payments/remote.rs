@@ -59,6 +59,3 @@ pub(crate) async fn execute(
 ) -> Result<Value> {
     veyndo_payments::service::remote::execute(&super::host::Gateway(a), a, p, op, key, input).await
 }
-pub(crate) fn approval_url(p: &Attempt, value: &Value) -> Result<Option<String>> {
-    veyndo_payments::domain::service_config::approval_url(&super::host::PaymentHost, p, value)
-}

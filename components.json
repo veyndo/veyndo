@@ -508,8 +508,8 @@
         "sales_channels"
       ],
       "glob_imports": 1,
-      "untyped_access": 264,
-      "sql_outside_store": 14
+      "untyped_access": 263,
+      "sql_outside_store": 12
     },
     "marketing": {
       "title": "Rules, coupons, promotions, flows and sales channels",
@@ -598,8 +598,7 @@
         "orders",
         "pos",
         "pricing",
-        "shop",
-        "studio"
+        "shop"
       ],
       "foreign_tables": [
         "carts",
@@ -611,7 +610,7 @@
         "outbox",
         "products"
       ],
-      "glob_imports": 6,
+      "glob_imports": 2,
       "untyped_access": 108,
       "sql_outside_store": 8
     },
@@ -623,17 +622,18 @@
       ],
       "tables": [],
       "uses": [
-        "apps",
         "catalog",
         "checkout",
         "core",
         "customers",
         "identity",
+        "intelligence",
         "marketing",
         "orders",
         "payments",
         "pricing",
-        "shop"
+        "shop",
+        "studio"
       ],
       "foreign_tables": [
         "carts",
@@ -645,8 +645,8 @@
         "products",
         "sales_channels"
       ],
-      "glob_imports": 5,
-      "untyped_access": 68,
+      "glob_imports": 1,
+      "untyped_access": 71,
       "sql_outside_store": 4
     },
     "apps": {

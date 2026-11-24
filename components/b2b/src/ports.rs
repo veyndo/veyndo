@@ -27,3 +27,36 @@ pub trait ListCarts: Send + Sync {
         selections: &'a [Selection],
     ) -> PortFuture<'a, Value>;
 }
+
+/// What the company command gateway needs from components that depend on B2B: carts, lists, the quote lifecycle, customer sessions, order projection and state labels, the cashier guard, scoped settings, the settings writer and app extension fields.
+pub trait Procurement: Send + Sync {
+    /// The guarded request cart, its priced view and line replacement.
+    fn carts(&self) -> &dyn veyndo_shop::ports::Carts;
+    /// App configuration admission and the configured cart edit of procurement lists.
+    fn lists(&self) -> &dyn ListCarts;
+    /// The compiled app lifecycle of a new quote.
+    fn lifecycle(&self) -> &dyn QuoteLifecycle;
+    /// Refuses a request without a current customer session.
+    fn customer<'a>(&'a self, h: &'a RequestContext) -> PortFuture<'a, ()>;
+    /// The customer-safe projection of one stored order.
+    fn order(&self, raw: &Value, created: &str) -> Value;
+    /// The configured order state labels of the shop, by state ID.
+    fn labels<'a>(&'a self, tenant: &'a str) -> PortFuture<'a, Value>;
+    /// Refuses a cart that belongs to another cashier or a POS register.
+    fn cashier(
+        &self,
+        h: &RequestContext,
+        cart: &veyndo_shop::types::cart::StoredCart,
+    ) -> veyndo_core::Result<()>;
+    /// The settings of a sales channel under the basis row lock, with native rule conditions checked.
+    fn locked<'a, 'c: 'a>(
+        &'a self,
+        tx: &'a mut sqlx::Transaction<'c, sqlx::Postgres>,
+        tenant: &'a str,
+        channel: &'a str,
+    ) -> PortFuture<'a, (veyndo_shop::Settings, i64)>;
+    /// The revisioned settings writer with its audit and outbox.
+    fn save<'a>(&'a self, h: &'a RequestContext, v: Value) -> PortFuture<'a, Value>;
+    /// Attaches the app extension fields of companies to the rows.
+    fn companies<'a>(&'a self, h: &'a RequestContext, rows: &'a mut [Value]) -> PortFuture<'a, ()>;
+}

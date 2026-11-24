@@ -1,11 +1,14 @@
 //! Typed recipient instructions of an attempt: the stored snapshot or the provider's current answer; reads never settle an invoice.
-use crate::domain::instructions::{Instructions, validated};
+use crate::domain::instructions::{Instructions, snapshot, validated};
 use crate::domain::receipt_ref::identity;
 use crate::ports::Gateway;
 use crate::service::remote::execute;
 use crate::store::attempts::attempt;
+use crate::store::commands::customer;
 use serde_json::{Value, json};
-use veyndo_core::{Error, Result, State, StatusCode, bad, uid};
+use veyndo_core::shop_scope::tenant;
+use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad, conflict, uid};
+use veyndo_identity::{merchant, permit};
 
 pub async fn read(gateway: &dyn Gateway, a: &State, t: &str, id: &str) -> Result<Value> {
     let row = sqlx::query("SELECT * FROM payment_attempts WHERE tenant=$1 AND id=$2")
@@ -40,5 +43,76 @@ pub async fn read(gateway: &dyn Gateway, a: &State, t: &str, id: &str) -> Result
     };
     Ok(
         json!({"status":v["status"],"instructions":instructions,"amountMinor":p.amount,"currency":p.currency,"currencyScale":p.currency_scale,"simulated":p.environment!="live"}),
+    )
+}
+
+/// A customer reads the instructions of a payment bound to their own cart.
+pub async fn customer_read(
+    gateway: &dyn Gateway,
+    a: &State,
+    h: &RequestContext,
+    id: &str,
+) -> Result<Value> {
+    customer(a, h, id).await?;
+    read(gateway, a, &tenant(h)?, id).await
+}
+
+/// Merchant reads need the compound payment, order and PII rights.
+pub async fn merchant_read(
+    gateway: &dyn Gateway,
+    a: &State,
+    h: &RequestContext,
+    id: &str,
+) -> Result<Value> {
+    let t = compound(h)?;
+    read(gateway, a, &t, id).await
+}
+
+fn compound(h: &RequestContext) -> Result<String> {
+    let t = merchant(h)?;
+    for scope in ["payments.read", "orders.read", "customers.pii"] {
+        permit(h, scope)?;
+    }
+    Ok(t)
+}
+
+/// The issuer already holds the order lock and document/PII authority. This immutable read takes no reverse payment lock and performs no provider I/O.
+pub async fn for_document(
+    tx: &mut sqlx::PgConnection,
+    t: &str,
+    order: &Value,
+) -> Result<Option<Value>> {
+    let Some(id) = order["payment"]["attemptId"].as_str() else {
+        return Ok(None);
+    };
+    let row =
+        sqlx::query("SELECT * FROM payment_attempts WHERE tenant=$1 AND id=$2 AND order_id=$3")
+            .bind(t)
+            .bind(id)
+            .bind(order["id"].as_str().unwrap_or(""))
+            .fetch_optional(tx)
+            .await?
+            .ok_or(bad("Document payment is not bound to this order"))?;
+    let p = attempt(&row);
+    if !p.context["capabilities"]
+        .as_array()
+        .is_some_and(|caps| caps.iter().any(|cap| cap == "instructions"))
+    {
+        return Ok(None);
+    }
+    let value=p.context.get("recipientInstructions").ok_or(conflict("Invoice payment instructions are still pending; check the payment before issuing the invoice"))?;
+    snapshot(&p, value).map(Some)
+}
+
+/// Flow actions recheck current compound rights and fetch the original order's cached evidence at execution time.
+pub async fn for_flow(a: &State, h: &RequestContext, order: &str) -> Result<Value> {
+    let t = compound(h)?;
+    let row=sqlx::query("SELECT p.* FROM payment_attempts p JOIN orders o ON o.tenant=p.tenant AND o.id=p.order_id AND o.data#>>'{payment,attemptId}'=p.id WHERE p.tenant=$1 AND o.id=$2").bind(t).bind(order).fetch_one(&a.db).await?;
+    let p = attempt(&row);
+    snapshot(
+        &p,
+        p.context
+            .get("recipientInstructions")
+            .ok_or(bad("Payment instructions unavailable"))?,
     )
 }

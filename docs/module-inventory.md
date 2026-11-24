@@ -116,20 +116,13 @@ This lists every checked-in source module in these roots, including files with n
 | [src/auth/routes.rs](../src/auth/routes.rs) | Identity, recovery and personal-security routes share canonical authentication admission. |
 | [src/auth/sessions.rs](../src/auth/sessions.rs) | Login/logout and personal workspace discovery are owned by the identity component. |
 | [src/b2b/access.rs](../src/b2b/access.rs) | Re-resolves active customer sessions, company policy and unit membership at every procurement boundary. |
-| [src/b2b/approval.rs](../src/b2b/approval.rs) | Revision-bound purchasing approval inbox; approvers must be active peers and cannot approve themselves. |
 | [src/b2b/catalog.rs](../src/b2b/catalog.rs) | Private unit catalog scope is derived from the current employee/cart, never caller criteria; indexed before pagination. |
 | [src/b2b/contract.rs](../src/b2b/contract.rs) | Native B2B operation catalogue and bounded request schema shared by HTTP, MCP and UCP adapters. |
-| [src/b2b/gateway.rs](../src/b2b/gateway.rs) | One native command contract for Store API, merchant API and MCP; actor identity never comes from arguments. |
+| [src/b2b/gateway.rs](../src/b2b/gateway.rs) | Company command routes and the server side of the procurement port; the B2B component owns the command contract. |
 | [src/b2b/mod.rs](../src/b2b/mod.rs) | Native modular company procurement; protocol-specific EDI adapters remain in their app packages. |
-| [src/b2b/model.rs](../src/b2b/model.rs) | Bounded typed native company, purchasing-unit and employee policies. Money is currency-bound minor units. |
-| [src/b2b/onboarding.rs](../src/b2b/onboarding.rs) | Atomic company setup lives in the B2B component; this entry keeps the server-side signature. |
-| [src/b2b/orders.rs](../src/b2b/orders.rs) | Explicit unit-wide order permission reuses the customer-safe order projection; no email-based ownership. |
+| [src/b2b/orders.rs](../src/b2b/orders.rs) | The unit order receipt PDF renders in the server after the B2B component admits the unit order. |
 | [src/b2b/organization.rs](../src/b2b/organization.rs) | Merchant-managed firms, unit hierarchies, employee grants and tenant-bound catalogs with optimistic revisions. |
 | [src/b2b/purchase.rs](../src/b2b/purchase.rs) | Serializes unit spending and binds an approved purchase to the authoritative native checkout quote. |
-| [src/b2b/quick_order.rs](../src/b2b/quick_order.rs) | Bounded SKU bulk entry resolves native products then uses the ordinary cart's permissions, quantities and prices. |
-| [src/b2b/quote_contract.rs](../src/b2b/quote_contract.rs) | Accepted offer prices feed the existing currency/tax calculator; checkout consumes the offer atomically. |
-| [src/b2b/requisition.rs](../src/b2b/requisition.rs) | Requisition import is owned by the B2B component; merchant admission and shop settings are resolved here. |
-| [src/b2b/settings.rs](../src/b2b/settings.rs) | B2B feature switches live in shared commerce settings; disabling never relaxes existing financial policy. |
 | [src/bin/automation_rules.rs](../src/bin/automation_rules.rs) | JSON batch transport for comparisons with original Shopware rule classes; not a production authority endpoint. |
 | [src/bin/connectors.rs](../src/bin/connectors.rs) | Independent Rust standard-app service; no provider code executes in commerce request workers. |
 | [src/bin/context.rs](../src/bin/context.rs) | Bounded ports of original language-chain, rule priority and quantity selection. |
@@ -317,19 +310,18 @@ This lists every checked-in source module in these roots, including files with n
 | [src/order_routes.rs](../src/order_routes.rs) | Merchant order read adapter. |
 | [src/outbox/retention.rs](../src/outbox/retention.rs) | Once a minute: expired sign-in buckets, behaviour evidence and delivered outbox payloads are retired. |
 | [src/outbox.rs](../src/outbox.rs) | Durable outbox and audit projection worker. |
-| [src/payments/accounts.rs](../src/payments/accounts.rs) | Merchant-authorized onboarding bridge; only authenticated provider responses establish account bindings. |
+| [src/payments/accounts.rs](../src/payments/accounts.rs) | Routes of the provider onboarding and listing; the payments component owns the account binding rules. |
 | [src/payments/app_commands.rs](../src/payments/app_commands.rs) | App/Flow/MCP payment actions enqueue core jobs; provider-bound attempts prevent cross-app command authority. |
 | [src/payments/capture_configuration.rs](../src/payments/capture_configuration.rs) | Capture timing lives in the payments component; the server keeps this path for its callers. |
 | [src/payments/catalog.rs](../src/payments/catalog.rs) | Native payment operation descriptions, composed by the canonical operation registry. |
 | [src/payments/contract.rs](../src/payments/contract.rs) | Adapt the shared provider declaration grammar; native payment authority and actual effects remain attached. |
-| [src/payments/details.rs](../src/payments/details.rs) | Native payment-only history projection and optional owned provider observation; no financial command is executed. |
+| [src/payments/details.rs](../src/payments/details.rs) | Route of the native payment-only history projection; no financial command is executed. |
 | [src/payments/diagnostics.rs](../src/payments/diagnostics.rs) | Safe, provider-neutral operational hints. These never authorize a financial transition. |
 | [src/payments/generic_receipts.rs](../src/payments/generic_receipts.rs) | Provider-neutral receipt admission and atomic allocation; verified evidence owns ledger transitions. |
 | [src/payments/host.rs](../src/payments/host.rs) | The server side of the payment ledger port: adapter configuration and the POS sale completion. |
-| [src/payments/instructions.rs](../src/payments/instructions.rs) | Customer-capability and compound merchant access to typed recipient instructions; reads never settle an invoice. |
-| [src/payments/instructions_state.rs](../src/payments/instructions_state.rs) | Immutable recipient evidence in the existing payment context, native invoice snapshots and one scoped outbox event. |
+| [src/payments/instructions.rs](../src/payments/instructions.rs) | Routes of typed recipient instructions; the payments component owns the customer and compound merchant checks. |
 | [src/payments/instruments.rs](../src/payments/instruments.rs) | Customer-owned saved instruments expose only redacted metadata; immediate revocation and provider cleanup share payment jobs. |
-| [src/payments/merchant.rs](../src/payments/merchant.rs) | Shared merchant payment operation bridge; HTTP, MCP and Flows retain native rights and durable jobs. |
+| [src/payments/merchant.rs](../src/payments/merchant.rs) | Shared merchant payment operation bridge; the payments component owns the rights and durable jobs. |
 | [src/payments/mod.rs](../src/payments/mod.rs) | Provider-independent payment ledger and durable workers; the PayPal adapter supports explicit Sandbox/Live environments. |
 | [src/payments/operations.rs](../src/payments/operations.rs) | Durable idempotent payment commands, customer context binding and serial refund admission. |
 | [src/payments/provider.rs](../src/payments/provider.rs) | Payment provider identity, tenant account configuration and immutable wire context. |
@@ -340,7 +332,6 @@ This lists every checked-in source module in these roots, including files with n
 | [src/payments/return_urls.rs](../src/payments/return_urls.rs) | Provider return/cancel URLs preserve the tenant and sales channel; navigation is never payment evidence. |
 | [src/payments/routes.rs](../src/payments/routes.rs) | Customer payment status/capture and merchant refund operations share the durable command API. |
 | [src/payments/sessions.rs](../src/payments/sessions.rs) | Customer-bound, short-lived provider UI sessions; iframe messages are never ledger receipts. |
-| [src/payments/settlements.rs](../src/payments/settlements.rs) | Immutable capture receipts and exact cumulative settlement for native partial/multiple captures. |
 | [src/payments/state.rs](../src/payments/state.rs) | One monotonic provider-neutral ledger state machine; evidence validation and authorization stay in receipt adapters. |
 | [src/payments/storage.rs](../src/payments/storage.rs) | Transactional provider receipts and order state updates; external responses cannot invent amounts or tenants. |
 | [src/payments/worker.rs](../src/payments/worker.rs) | Leased payment jobs; the component owns the claim, the fence and the receipt, this file binds the server ports. |
@@ -361,14 +352,11 @@ This lists every checked-in source module in these roots, including files with n
 | [src/platform/resources.rs](../src/platform/resources.rs) | Linux container resource readings; unavailable fields stay null on other hosts and the first CPU sample. |
 | [src/platform/shop_detail.rs](../src/platform/shop_detail.rs) | Operator shop dossier: registration, business identity, access roster, channels and measured HTTP activity. |
 | [src/pos/config.rs](../src/pos/config.rs) | POS channel setup lives in the POS component. |
-| [src/pos/customer.rs](../src/pos/customer.rs) | Cashier customer lookup and attachment are owned by the POS component; the server supplies the priced cart. |
-| [src/pos/discount.rs](../src/pos/discount.rs) | Cashier discounts are owned by the POS component; the server supplies the priced cart. |
-| [src/pos/gateway.rs](../src/pos/gateway.rs) | HTTP/MCP POS operations construct a trusted cashier context, then call existing commerce owners. |
-| [src/pos/input.rs](../src/pos/input.rs) | Strict input envelope shared by HTTP and MCP cashier commands. |
+| [src/pos/gateway.rs](../src/pos/gateway.rs) | HTTP/MCP POS routes; the POS component owns the cashier gateway behind the register port. |
 | [src/pos/mod.rs](../src/pos/mod.rs) | Authenticated POS adapters reuse the native catalog/cart/checkout/receipt and durable event owners. |
+| [src/pos/register_host.rs](../src/pos/register_host.rs) | The server side of the cashier register port: the guarded cart, quotes, currencies, checkout context, purchase, catalogue and receipt owners of this process. |
 | [src/pos/schema.rs](../src/pos/schema.rs) | Strict protocol schemas for the same POS operations used by HTTP and MCP. |
 | [src/pos/settlement.rs](../src/pos/settlement.rs) | Cash admission and the POS order annotation are owned by the POS component. |
-| [src/pos/workspace_gateway.rs](../src/pos/workspace_gateway.rs) | Cashier workspace commands delegate to CRM, native discounts and immutable receipt projection. |
 | [src/prelude.rs](../src/prelude.rs) | Shared dependency names for native domain modules; no process setup or business rules. |
 | [src/proposal_apply.rs](../src/proposal_apply.rs) | Proposal application lives in the studio component; these entries lend it the server's ports. |
 | [src/proposal_model.rs](../src/proposal_model.rs) | Typed proposals live in the studio component. |
@@ -609,6 +597,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/b2b/src/lib.rs](../components/b2b/src/lib.rs) | B2B component: company procurement records, their bounds and the purchasing contract. |
 | [components/b2b/src/ports.rs](../components/b2b/src/ports.rs) | What quotes and procurement lists need from the server: the compiled app lifecycle of a new quote, app configuration admission and the configured cart edit. |
 | [components/b2b/src/service/approval.rs](../components/b2b/src/service/approval.rs) | Revision-bound purchasing approval inbox; approvers must be active peers and cannot approve themselves. |
+| [components/b2b/src/service/commands.rs](../components/b2b/src/service/commands.rs) | One native company command contract for Store API, merchant API and MCP: field bounds, feature admission and the dispatch to the B2B owners; actor identity never comes from arguments. |
 | [components/b2b/src/service/lists.rs](../components/b2b/src/service/lists.rs) | Reusable private/shared procurement lists; applying them reuses native cart admission and pricing. |
 | [components/b2b/src/service/onboarding.rs](../components/b2b/src/service/onboarding.rs) | Atomic company setup through the same company, unit and member writers; a foreign customer rolls back the whole setup. |
 | [components/b2b/src/service/quick_order.rs](../components/b2b/src/service/quick_order.rs) | Bounded SKU bulk entry resolves native products then uses the ordinary cart's permissions, quantities and prices. |
@@ -1030,8 +1019,10 @@ This lists every checked-in source module in these roots, including files with n
 | [components/payments/src/service/details.rs](../components/payments/src/service/details.rs) | Native payment-only history projection and optional owned provider observation; no financial command is executed. |
 | [components/payments/src/service/funding.rs](../components/payments/src/service/funding.rs) | Account-authorized funding choice, immutable consent and saved-instrument admission; cart possession is insufficient. |
 | [components/payments/src/service/instructions.rs](../components/payments/src/service/instructions.rs) | Typed recipient instructions of an attempt: the stored snapshot or the provider's current answer; reads never settle an invoice. |
+| [components/payments/src/service/merchant_operations.rs](../components/payments/src/service/merchant_operations.rs) | The shared merchant payment operation bridge: HTTP, MCP and Flows reach the same native rights and durable jobs. |
 | [components/payments/src/service/notifications.rs](../components/payments/src/service/notifications.rs) | Version-pinned HMAC notifications enqueue reconciliation; external event payloads never write monetary state. |
 | [components/payments/src/service/provider_configuration.rs](../components/payments/src/service/provider_configuration.rs) | Pure startup validation of the native provider origin; no live credentials or provider calls. |
+| [components/payments/src/service/providers.rs](../components/payments/src/service/providers.rs) | Adapter providers of a shop: merchant-approved account onboarding, the public provider listing and the ledger status overview; only authenticated provider responses establish account bindings. |
 | [components/payments/src/service/receipts.rs](../components/payments/src/service/receipts.rs) | Provider-neutral receipt admission and atomic allocation; verified evidence owns ledger transitions. |
 | [components/payments/src/service/remote.rs](../components/payments/src/service/remote.rs) | Builds the pinned adapter request of one payment operation; the gateway owns transport and admission. |
 | [components/payments/src/service/sessions.rs](../components/payments/src/service/sessions.rs) | Customer-bound, short-lived provider UI sessions; iframe messages are never ledger receipts. |
@@ -1056,9 +1047,11 @@ This lists every checked-in source module in these roots, including files with n
 | [components/pos/src/domain/schema.rs](../components/pos/src/domain/schema.rs) | Strict protocol schemas for the same POS operations used by HTTP and MCP. |
 | [components/pos/src/domain.rs](../components/pos/src/domain.rs) | domain of this component. |
 | [components/pos/src/lib.rs](../components/pos/src/lib.rs) | POS component: the cashier input contract and its capability schema. |
+| [components/pos/src/ports.rs](../components/pos/src/ports.rs) | What the cashier gateway needs from the server: the guarded cart port, cart quotes, currency selection, checkout context changes, the purchase, catalogue reads and receipt snapshots. |
 | [components/pos/src/service/customer.rs](../components/pos/src/service/customer.rs) | Cashier-only customer lookup/card resolution and revision-checked account attachment; never issues customer credentials. |
 | [components/pos/src/service/discount.rs](../components/pos/src/service/discount.rs) | Audited cashier discounts use exact minor units and the existing native tax allocator in both quote and commit. |
 | [components/pos/src/service/guard.rs](../components/pos/src/service/guard.rs) | The cart admission cashier operations share with every other cart adapter is owned by the shop component. |
+| [components/pos/src/service/register.rs](../components/pos/src/service/register.rs) | The cashier gateway shared by HTTP and MCP: a trusted cashier context for one register, then the existing cart, checkout, payment, catalogue and receipt owners. |
 | [components/pos/src/service/settlement.rs](../components/pos/src/service/settlement.rs) | Exact cash admission and order annotation execute in the existing checkout transaction. |
 | [components/pos/src/service.rs](../components/pos/src/service.rs) | Cashier operations on top of the ordinary cart and checkout. |
 | [components/pos/src/store/channel_setup.rs](../components/pos/src/store/channel_setup.rs) | A new POS channel brings its cash payment and collection delivery as channel overrides; there is no second settings store. |

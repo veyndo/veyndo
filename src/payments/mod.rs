@@ -12,14 +12,12 @@ mod contract;
 mod merchant;
 pub(crate) use merchant::invoke as merchant_operation;
 mod instructions;
-mod instructions_state;
 pub(crate) use instructions::customer_read as customer_instructions;
-pub(crate) use instructions_state::{
+pub(crate) use veyndo_payments::service::instructions::{
     for_document as document_instructions, for_flow as flow_instructions,
 };
 mod details;
 mod diagnostics;
-pub(crate) use details::read as transaction_details;
 pub(crate) mod registry;
 pub(crate) use registry::*;
 pub(crate) mod capture_configuration;
@@ -33,7 +31,6 @@ pub(crate) mod remote;
 mod return_urls;
 mod routes;
 pub(crate) mod sessions;
-mod settlements;
 mod storage;
 #[path = "../../extensions/apps/paypal/src/webhooks.rs"]
 mod webhooks;

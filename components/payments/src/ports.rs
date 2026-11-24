@@ -1,6 +1,7 @@
 //! What the payment ledger needs from the server: adapter service configuration and the effects other components attach to a captured order.
 use crate::domain::attempt::Attempt;
 use serde_json::Value;
+use veyndo_app_model::manifest::Manifest;
 use veyndo_core::{PortFuture, Result};
 
 pub trait Host: Send + Sync {
@@ -49,4 +50,8 @@ pub trait Gateway: Send + Sync {
     fn scope(&self) -> (Vec<String>, Vec<String>);
     /// Whether a built-in provider's order evidence permits cancelling the attempt.
     fn cancellable(&self, attempt: &Attempt, evidence: &Value) -> Result<()>;
+    /// The installed app package that declares an adapter provider; an inactive one is refused.
+    fn package<'a>(&'a self, tenant: &'a str, id: &'a str) -> PortFuture<'a, Manifest>;
+    /// The status entry of the built-in provider for this tenant: environment, configuration and API contract.
+    fn builtin(&self, tenant: &str) -> Value;
 }
