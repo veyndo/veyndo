@@ -2103,8 +2103,8 @@
     },
     "components/core/src/model_contract.rs": {
       "status": "unproved",
-      "sha256": "43ea76abfe29ce51f43c4462efd01a1365268e6341ebbd8ca62966bde8c922fc",
-      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
+      "sha256": "d908b35a25fd083055aa3e84994158c834a188a96157a07b56bb2e06559f141a",
+      "review": "F16: path attributes removed from the kernel driver, the capability catalogue, the connector service and component tests"
     },
     "components/core/src/observability.rs": {
       "status": "unproved",
@@ -2971,15 +2971,15 @@
       "sha256": "2a9f06449f0c171b58488e9934271a9f23d85714c7c3a90f819088e228a103d3",
       "review": "Access overview, session revocation, company release and rule metadata moved into components"
     },
-    "components/marketing/src/domain/pipeline.rs": {
-      "status": "reviewed-binding",
-      "sha256": "0c47c4043354bb55d2a3cbe6f0a5346d47c1d2eee7ffa0ed51c68653c79c0519",
-      "review": "Flow pipeline and promotion types moved into components/marketing; kernel call sites unchanged"
-    },
-    "components/marketing/src/domain/pipeline_tests.rs": {
+    "components/marketing/src/domain/pipeline/tests.rs": {
       "status": "unproved",
       "sha256": "6cc1fc3354fdc1aa37b12e6c45bfcc358e776dbe7116a94dce50c6d18bc3aba8",
-      "review": "Flow pipeline and promotion types moved into components/marketing; kernel call sites unchanged"
+      "review": "F16: path attributes removed from the kernel driver, the capability catalogue, the connector service and component tests"
+    },
+    "components/marketing/src/domain/pipeline.rs": {
+      "status": "reviewed-binding",
+      "sha256": "2547d5768237698f52175d86425dda19a5f88cbc8f40105a73ea38580295727b",
+      "review": "F16: path attributes removed from the kernel driver, the capability catalogue, the connector service and component tests"
     },
     "components/marketing/src/domain/rule_comparison.rs": {
       "status": "unproved",
@@ -2996,15 +2996,15 @@
       "sha256": "3bf79723a9e101d2f10e441e75ef9ce6e440114aa4fbf3f1148dc385e7fede24",
       "review": "Unit tests for every public domain function of the components; no production code changed"
     },
-    "components/marketing/src/domain/rule_tests.rs": {
+    "components/marketing/src/domain/rules/tests.rs": {
       "status": "unproved",
       "sha256": "4bdfdf108626281b815f9cb2acf952f4129314fcaa99d99cb84fe6e26f27e00e",
-      "review": "cart types and rule engine moved into components; checking bindings"
+      "review": "F16: path attributes removed from the kernel driver, the capability catalogue, the connector service and component tests"
     },
     "components/marketing/src/domain/rules.rs": {
       "status": "unproved",
-      "sha256": "4b5e72a815d8459f8f9446d7c21c3789acf5db1c40b6c1a62667fd7fed56ec47",
-      "review": "cart types and rule engine moved into components; checking bindings"
+      "sha256": "bf64ec8ef8a82c09d3b44b3736e88801c7948f3eeaf7bcb4a707127d3871c540",
+      "review": "F16: path attributes removed from the kernel driver, the capability catalogue, the connector service and component tests"
     },
     "components/marketing/src/domain.rs": {
       "status": "unproved",
@@ -3401,15 +3401,15 @@
       "sha256": "5d93df4c2be4dcf15d17c5314f7bbb2340ffc8a5ef50cd89a5e470b66574a479",
       "review": "Payment ledger rules moved into components/payments; kernel call sites unchanged"
     },
-    "components/payments/src/domain/details_model.rs": {
-      "status": "unproved",
-      "sha256": "7fb4ac5f1d1eb32ad2dc78b2a7d8e8bd93637e394040c46b2058b218093f7980",
-      "review": "Payment ledger rules moved into components/payments; kernel call sites unchanged"
-    },
-    "components/payments/src/domain/details_tests.rs": {
+    "components/payments/src/domain/details_model/tests.rs": {
       "status": "unproved",
       "sha256": "75d2ac7a2863508e2c7375e4970736e4266c530e35daed6b114316e703e171e4",
-      "review": "Payment ledger rules moved into components/payments; kernel call sites unchanged"
+      "review": "F16: path attributes removed from the kernel driver, the capability catalogue, the connector service and component tests"
+    },
+    "components/payments/src/domain/details_model.rs": {
+      "status": "unproved",
+      "sha256": "11e99e253d187f6272a858ca9f5f3217bcc971a0c6665d9c9771c877b19c4719",
+      "review": "F16: path attributes removed from the kernel driver, the capability catalogue, the connector service and component tests"
     },
     "components/payments/src/domain/diagnostics.rs": {
       "status": "unproved",
@@ -3736,15 +3736,15 @@
       "sha256": "7b2eaa1a522ea30aba4a7a33c339dea7d2575982d7285d11ac533c0b3cae6fb1",
       "review": "Unit tests for every public domain function of the components; no production code changed"
     },
-    "components/pricing/src/domain/discount.rs": {
-      "status": "reviewed-binding",
-      "sha256": "908c8d2c7d2c4200a1ad704abad971c124a205caa5b22807cbe79c1fa8eddcba",
-      "review": "Reviewed shared discount allocator: u128 positive sum and bounded per-line remainder carry preserve cumulative rounding; app price targets reject overflow before quote mutation; independent boundary and native promotion regressions."
-    },
-    "components/pricing/src/domain/discount_boundaries.rs": {
+    "components/pricing/src/domain/discount/boundaries.rs": {
       "status": "unproved",
       "sha256": "716482f6adf361b9e445d7b8242c82432df11f98938a013f325e16fcd0bd55e9",
-      "review": "Reviewed shared discount allocator: u128 positive sum and bounded per-line remainder carry preserve cumulative rounding; app price targets reject overflow before quote mutation; independent boundary and native promotion regressions."
+      "review": "F16: path attributes removed from the kernel driver, the capability catalogue, the connector service and component tests"
+    },
+    "components/pricing/src/domain/discount.rs": {
+      "status": "reviewed-binding",
+      "sha256": "b60775385158824e722f10a974bc38e4a4a9a6e8635c53b5c341ec5eea627205",
+      "review": "F16: path attributes removed from the kernel driver, the capability catalogue, the connector service and component tests"
     },
     "components/pricing/src/domain/external_order.rs": {
       "status": "reviewed-binding",
@@ -4803,18 +4803,18 @@
     },
     "extensions/apps/email/src/payment_templates.rs": {
       "status": "unproved",
-      "sha256": "56be40a365ae6ffce5fa9addb4573556a90ff445a100f064a5b4debaad2bd39e",
-      "review": "Reviewed invoice recipient caching and immutable native documents; explicit app/PII event consent and current Flow rehydration; existing encrypted email queue and localized templates. Targeted native service and adversarial projection tests; no new formal proof claim."
+      "sha256": "19a1d399767a6d7a409a041acd76c4cb159dbcf77ae9d6dafaca468f4071787a",
+      "review": "F16: path attributes removed from the kernel driver, the capability catalogue, the connector service and component tests"
     },
     "extensions/apps/email/src/smtp.rs": {
       "status": "unproved",
-      "sha256": "c08344d1b415a938b8ec779ca646cb2a5607f98a06c79dfb93e4c07fd6266b6e",
-      "review": "Identity-only Veyndo namespace and canonical-domain rename; reviewed migration checksum compatibility for six historical SQL versions, unchanged checkout predicates, 42 library and 169 binary tests pass; native component legacy boundary remains configured and guarded."
+      "sha256": "1dbbc11f79bb4d5d20e0c24a4078fd29319a719246d3617000ddeeab1769d367",
+      "review": "F16: path attributes removed from the kernel driver, the capability catalogue, the connector service and component tests"
     },
     "extensions/apps/email/src/templates.rs": {
       "status": "unproved",
-      "sha256": "5cd0655114c4ca028a105af4fd54c5a91acf440124ada2bb63a1e3c2e48072d9",
-      "review": "Reviewed invoice recipient caching and immutable native documents; explicit app/PII event consent and current Flow rehydration; existing encrypted email queue and localized templates. Targeted native service and adversarial projection tests; no new formal proof claim."
+      "sha256": "c808f0ead4058db43414e2eb2c69275947bc24cd846163e010c1805f916cbb5b",
+      "review": "F16: path attributes removed from the kernel driver, the capability catalogue, the connector service and component tests"
     },
     "extensions/apps/erp-handoff/service/config.rs": {
       "status": "unproved",
@@ -6186,10 +6186,10 @@
       "sha256": "d968d2471b477fda3daa19ccb7422b61076257c405e3b9e1ee524312de2ccc6c",
       "review": "Reviewed Rust-only standard connector service: typed mail settings, tenant-bound AES-GCM, composite PostgreSQL queue/RLS, fenced distributed leases and explicit-only retry; original app/flow/MCP contract and actual SMTP/OAuth/migration regressions. SQL and providers remain unproved."
     },
-    "extensions/services/connectors/src/mod.rs": {
+    "extensions/services/connectors/src/lib.rs": {
       "status": "unproved",
       "sha256": "f6b429b806a25ed0ad9885b543b9700cfb4fcb402dff28cc17af8421c5937a62",
-      "review": "Reviewed invoice recipient caching and immutable native documents; explicit app/PII event consent and current Flow rehydration; existing encrypted email queue and localized templates. Targeted native service and adversarial projection tests; no new formal proof claim."
+      "review": "F16: path attributes removed from the kernel driver, the capability catalogue, the connector service and component tests"
     },
     "extensions/services/connectors/src/network.rs": {
       "status": "unproved",
@@ -6223,13 +6223,13 @@
     },
     "extensions/services/connectors/src/tests.rs": {
       "status": "unproved",
-      "sha256": "88084ef3557d398d1b27a69f1bff1780c521b1bf1b8da6f6e9ec95cb6fa01701",
-      "review": "Reviewed multi-currency selected-context adapters, rational minor-unit prices, immutable order/payment scales, row-locked creation-bounded price jobs and exact order mail snapshots; API/tenant/restart/protocol fixtures passed."
+      "sha256": "0fa31b651095e9f01006067a55a4cde28da14d8a3a620ad9c8a6a1382f7553d3",
+      "review": "F16: path attributes removed from the kernel driver, the capability catalogue, the connector service and component tests"
     },
     "extensions/services/connectors/src/worker.rs": {
       "status": "reviewed-binding",
-      "sha256": "bb9f5ccfbe4da5045b7a416da83de897fe70bbcca34db6d28ea0afbea5d181dd",
-      "review": "Reviewed app-owned Vercel/Klaviyo/HubSpot/Contentful/Algolia fixed transports, bounded redacted receipts, native compound action rights and encrypted CAS/lease fences; Shopware 6 read-only OAuth/currency/language projection delegates exact native import/reconciliation; generic tenant/app source reset and bounded source count use existing storage/admission owners. Provider protocols and SQL remain outside the extracted Lean proof scope; native two-worker, private/foreign, signed-login, migration and checkout regressions exercised."
+      "sha256": "12309d832b17786cdc8a9145c0c29acee4a8e12e9aecf4acdad816cc91e7617e",
+      "review": "F16: path attributes removed from the kernel driver, the capability catalogue, the connector service and component tests"
     },
     "extensions/services/connectors/tests/integration_contracts.rs": {
       "status": "unproved",
@@ -6808,8 +6808,8 @@
     },
     "src/bin/connectors.rs": {
       "status": "unproved",
-      "sha256": "e2fe2d9c1340263da167dc53d624356c84bc4c98f940c76fc6b910c0eff4ff5b",
-      "review": "Identity-only Veyndo namespace and canonical-domain rename; reviewed migration checksum compatibility for six historical SQL versions, unchanged checkout predicates, 42 library and 169 binary tests pass; native component legacy boundary remains configured and guarded."
+      "sha256": "d94c888f9270c4a9bc6f91bfd5cdd004ab2b5bae9b74a5aec0b3e053dd5bd85e",
+      "review": "F16: path attributes removed from the kernel driver, the capability catalogue, the connector service and component tests"
     },
     "src/bin/context.rs": {
       "status": "unproved",
@@ -6873,13 +6873,13 @@
     },
     "src/bin/verified_kernel/dispatch.rs": {
       "status": "conformance-driver",
-      "sha256": "3aec2b72f6ab964cc0cd48128955674b52dd0bce4bd3f49193b4d5e5f26924c6",
-      "review": "The merchant check is bound to the proved merchant_scope_admissible rule: a credential of one shop never acts for another. Status codes and messages are unchanged."
+      "sha256": "695fde61bb98e51912182b81e7eddaa04cc2ab49d543a679fa08299dcc56c5d6",
+      "review": "F16: verified-kernel driver uses the directory layout instead of path attributes"
     },
-    "src/bin/verified_kernel.rs": {
+    "src/bin/verified_kernel/main.rs": {
       "status": "conformance-driver",
-      "sha256": "5eb0bed95d09c45797f122edbd13a9119e022dca59326a3b08d2c73febc156a4",
-      "review": "Native POS cash admission, shared currency/coupon forwarding and private cart consumer guards reviewed. Original coupon owner extracted and tenant-scoped; provider confirmation rejoins POS outbox once. Generated conformance dispatcher moved to a small dedicated module without policy duplication."
+      "sha256": "df325fa90b815aaea625d2a84cca2f5df9a982f1f8b027f7a89f8f990bbc944a",
+      "review": "F16: verified-kernel driver uses the directory layout instead of path attributes"
     },
     "src/bootstrap.rs": {
       "status": "unproved",
@@ -6896,15 +6896,15 @@
       "sha256": "b40e96e55d80f582549bbeef58408703d78b38d417a5be80868b25930db51777",
       "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
-    "src/capabilities/catalog.rs": {
-      "status": "unproved",
-      "sha256": "961654d203da7ca449e449993bf02e8637d13c49f44cca1f104c3f6991b6a873",
-      "review": "Self-running experiments: Design gains an optional immutable automation flag pair; experiments/automation.rs adds a read-only suggestion from live payment figures and worker steps that repeat the manual finish transition, call the existing report owner and record a decision, fixing the treatment layout mode only when the unchanged extracted experiment_result_admissible reports a proved uplift; cognitive_experiments suite covers kept, seeded published and manual cases"
-    },
-    "src/capabilities/core_catalog.rs": {
+    "src/capabilities/catalog/core_catalog.rs": {
       "status": "unproved",
       "sha256": "d2ccdc8fdf60d94f8fa476d5cfdfbf2bcdfcf2485127cd15211572024a6a2e34",
-      "review": "Signed offers: cognition/signed_offer.rs signs a closed projection of the native cart quote with the existing Ed25519 owner and verifies signature, shop, expiry and current cart match; signed.rs gains key_id and verify helpers; readiness reports signing status; no extracted policy changed; providers suite verifies independently and covers forged, foreign, malformed, changed-cart and changed-price cases"
+      "review": "F16: path attributes removed from the kernel driver, the capability catalogue, the connector service and component tests"
+    },
+    "src/capabilities/catalog.rs": {
+      "status": "unproved",
+      "sha256": "241958410bc8eabcf6ee9e454e3739cccec92ffa2757faae88c3e5983c7ee916",
+      "review": "F16: path attributes removed from the kernel driver, the capability catalogue, the connector service and component tests"
     },
     "src/capabilities/dispatch.rs": {
       "status": "unproved",
@@ -8128,12 +8128,12 @@
       "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
     },
     "Cargo.lock": {
-      "sha256": "d7e089837758d417bb80c34b12917808726794f245c8ad13d1c893c0db0067aa",
-      "review": "F10: manual orders, the merchant operation catalogue and catalogue intake moved into components"
+      "sha256": "707d2713f14605d4075a182af6ee18856e30890aa465db34cd4775ad0558d91a",
+      "review": "F16: path attributes removed from the kernel driver, the capability catalogue, the connector service and component tests"
     },
     "Cargo.toml": {
-      "sha256": "12d2d79a98f6913d20b8e912afb9ea8de0539b9e83428de8a9d7412c406896f6",
-      "review": "Package approval, distribution, schema adapters, event projection and service transport policy moved into components/apps without a change in behaviour"
+      "sha256": "31b07b8b98a80478f2120d1719d0c78430b408c93b4478208a820e46a91b5b19",
+      "review": "F16: path attributes removed from the kernel driver, the capability catalogue, the connector service and component tests"
     },
     "components.lock.json": {
       "sha256": "7b4a931ad81c6665d5d95e6b42b8ef4d09ebe8971ac24998d8f94bb6a737ff53",
@@ -8872,16 +8872,16 @@
       "review": "The merchant check is bound to the proved merchant_scope_admissible rule: a credential of one shop never acts for another. Status codes and messages are unchanged."
     },
     "scripts/formal/registry.py": {
-      "sha256": "24cd8fe49325e4cd8a972a30249962670088a692204892683408fc2617f05fd0",
-      "review": "Component architecture phase 0 and first core crate: the error contract moved unchanged from src/failure.rs and src/foundation.rs to components/core (wire messages, status mapping and retry header identical; the permission scope is resolved by the caller, the inference conversion lives beside its error type). Structure check drops the file length limit and adds the component map; clippy limits function length. Core and cognition unit tests pass. SQL, HTTP and provider behaviour is not formally proved."
+      "sha256": "662174de15326e656892e14839f181ee1c82214cb20061b0c28e4d93d1c1301d",
+      "review": "F16: verified-kernel driver uses the directory layout instead of path attributes"
     },
     "scripts/formal/runners.py": {
-      "sha256": "30249280fde2b234aaa1fc6dfd6eff9c0423e7e8e5cca72cb4221325468dc58f",
-      "review": "Native capture budget and receipt review; bounded generated conformance domains; SQL/network adapters remain unproved"
+      "sha256": "09efc8549b043980c7f823b08f9d3d6217f1259b1c306f4b67eb80823e258ed9",
+      "review": "F16: verified-kernel driver uses the directory layout instead of path attributes"
     },
     "scripts/formal.py": {
-      "sha256": "bdc69ffcb028c7572db393ccb93fcc63b5c3b4b7ca410ba7cd07d53878f0bdf3",
-      "review": "Native capture budget and receipt review; bounded generated conformance domains; SQL/network adapters remain unproved"
+      "sha256": "dd0936e21afa3d8eeb4e32d845178f2f1e58b51e0ded5d428e891167cf490124",
+      "review": "F16: verified-kernel driver uses the directory layout instead of path attributes"
     },
     "scripts/testing/prompt_governance.py": {
       "sha256": "a9ece67d4975e6c5e44cf26f4d6e397a3780449d8e3f8fbb3860627211b9fda5",

@@ -218,5 +218,4 @@ fn equal() -> String {
     "=".into()
 }
 #[cfg(test)]
-#[path = "rule_tests.rs"]
 mod tests;

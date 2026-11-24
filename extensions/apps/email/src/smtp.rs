@@ -42,7 +42,7 @@ pub async fn target(s: &Settings) -> Result<Vec<SocketAddr>> {
                 if testing {
                     a.ip().is_loopback()
                 } else {
-                    crate::network_policy::public_address(a.ip())
+                    veyndo_runtime::network_policy::public_address(a.ip())
                 }
             }),
         "SMTP address is not allowed",

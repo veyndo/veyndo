@@ -136,12 +136,12 @@ This lists every checked-in source module in these roots, including files with n
 | [src/bin/verified_kernel/dispatch/fulfillment.rs](../src/bin/verified_kernel/dispatch/fulfillment.rs) | Generated conformance driver; invokes the same production policy functions as the commerce server. |
 | [src/bin/verified_kernel/dispatch/intelligence.rs](../src/bin/verified_kernel/dispatch/intelligence.rs) | Generated conformance driver; invokes the same production policy functions as the commerce server. |
 | [src/bin/verified_kernel/dispatch.rs](../src/bin/verified_kernel/dispatch.rs) | Generated domain dispatcher; each bounded module calls the original production policies. |
-| [src/bin/verified_kernel.rs](../src/bin/verified_kernel.rs) | Generated input/output driver; production policies are dispatched by the generated module. |
+| [src/bin/verified_kernel/main.rs](../src/bin/verified_kernel/main.rs) | Generated input/output driver; production policies are dispatched by the generated module. |
 | [src/bootstrap.rs](../src/bootstrap.rs) | Startup, additive migrations, persisted extensions and outbox worker. |
 | [src/brand_redirect.rs](../src/brand_redirect.rs) | Move browser pages to the configured domain while retaining integration and checkout endpoints. |
 | [src/capabilities/admission.rs](../src/capabilities/admission.rs) | MCP discovery applies current merchant permissions through the same capability owners as invocation. |
+| [src/capabilities/catalog/core_catalog.rs](../src/capabilities/catalog/core_catalog.rs) | Public HTTP/MCP capability catalogue, separate from authorization and dispatch. |
 | [src/capabilities/catalog.rs](../src/capabilities/catalog.rs) | Shared catalogue composes native capabilities and cognitive contracts without duplicating authorization. |
-| [src/capabilities/core_catalog.rs](../src/capabilities/core_catalog.rs) | Public HTTP/MCP capability catalogue, separate from authorization and dispatch. |
 | [src/capabilities/dispatch.rs](../src/capabilities/dispatch.rs) | Closed native domain routing selected once by the operation registry; inactive futures stay boxed. |
 | [src/capabilities/registry.rs](../src/capabilities/registry.rs) | One immutable native operation record for dispatch, schemas, MCP discovery and bounded agent reads. |
 | [src/capabilities/schema.rs](../src/capabilities/schema.rs) | Native operation input contracts; transports consume this owner instead of maintaining their own schemas. |
@@ -920,12 +920,12 @@ This lists every checked-in source module in these roots, including files with n
 | [components/marketing/src/domain/flow_text.rs](../components/marketing/src/domain/flow_text.rs) | Shop-language validation and main-language fallback for both simple flows and graphical action nodes. |
 | [components/marketing/src/domain/line_facts.rs](../components/marketing/src/domain/line_facts.rs) | Rule line facts use immutable priced lines plus current tenant product metadata; protected values override metadata. |
 | [components/marketing/src/domain/metadata.rs](../components/marketing/src/domain/metadata.rs) | Revision-bound source facts a rule may read on products, customers and orders; secrets and pricing authority are excluded. |
+| [components/marketing/src/domain/pipeline/tests.rs](../components/marketing/src/domain/pipeline/tests.rs) | Flow graph and source action schema regression tests reject unsafe graphs before any event dispatch. |
 | [components/marketing/src/domain/pipeline.rs](../components/marketing/src/domain/pipeline.rs) | A bounded acyclic flow graph models source-style true/false branches, ordered actions, delays and stop nodes. |
-| [components/marketing/src/domain/pipeline_tests.rs](../components/marketing/src/domain/pipeline_tests.rs) | Flow graph and source action schema regression tests reject unsafe graphs before any event dispatch. |
 | [components/marketing/src/domain/rule_comparison.rs](../components/marketing/src/domain/rule_comparison.rs) | Side-effect-free comparison of two rule conditions on a frozen Flow order input. |
 | [components/marketing/src/domain/rule_fields.rs](../components/marketing/src/domain/rule_fields.rs) | Typed rule fields share the original comparison operators and server-derived checkout/event facts. |
 | [components/marketing/src/domain/rule_match.rs](../components/marketing/src/domain/rule_match.rs) | Evaluate typed rule trees against server-owned cart, customer and event facts. |
-| [components/marketing/src/domain/rule_tests.rs](../components/marketing/src/domain/rule_tests.rs) | Regression cases for native rule facts and original container boundaries. |
+| [components/marketing/src/domain/rules/tests.rs](../components/marketing/src/domain/rules/tests.rs) | Regression cases for native rule facts and original container boundaries. |
 | [components/marketing/src/domain/rules.rs](../components/marketing/src/domain/rules.rs) | Bounded Shopware-style boolean/numeric rule AST. Unknown operators/conditions fail closed. |
 | [components/marketing/src/domain.rs](../components/marketing/src/domain.rs) | Rule conditions, flow actions and the flow graph, free of I/O. |
 | [components/marketing/src/http/catalog.rs](../components/marketing/src/http/catalog.rs) | Native condition metadata, app action/event discovery and source-compatible condition import. |
@@ -1006,8 +1006,8 @@ This lists every checked-in source module in these roots, including files with n
 | [components/payments/src/domain/attempt.rs](../components/payments/src/domain/attempt.rs) | One payment attempt of an order as the ledger stores it. |
 | [components/payments/src/domain/capture_intent.rs](../components/payments/src/domain/capture_intent.rs) | Capture timing of a payment method: capture at once or authorize first, as configured and as the provider method supports. |
 | [components/payments/src/domain/catalog.rs](../components/payments/src/domain/catalog.rs) | Native payment operation descriptions, composed by the canonical operation registry. |
+| [components/payments/src/domain/details_model/tests.rs](../components/payments/src/domain/details_model/tests.rs) | Transaction observations reject untyped and foreign evidence without touching payment state. |
 | [components/payments/src/domain/details_model.rs](../components/payments/src/domain/details_model.rs) | Typed, PII-free provider transaction details; these observations never mutate native payment state. |
-| [components/payments/src/domain/details_tests.rs](../components/payments/src/domain/details_tests.rs) | Transaction observations reject untyped and foreign evidence without touching payment state. |
 | [components/payments/src/domain/diagnostics.rs](../components/payments/src/domain/diagnostics.rs) | Safe, provider-neutral operational hints. These never authorize a financial transition. |
 | [components/payments/src/domain/instructions.rs](../components/payments/src/domain/instructions.rs) | Typed recipient instructions of a payment method and their immutable admission into the attempt context. |
 | [components/payments/src/domain/receipt_guard.rs](../components/payments/src/domain/receipt_guard.rs) | Bind integer provider receipt amounts and status to the formally checked exact-match predicate. |
@@ -1073,8 +1073,8 @@ This lists every checked-in source module in these roots, including files with n
 | [components/pricing/src/domain/customer/contact.rs](../components/pricing/src/domain/customer/contact.rs) | Customer-editable contact contract and bounded syntax checks; no account identity or persistence. |
 | [components/pricing/src/domain/customer/contract_tests.rs](../components/pricing/src/domain/customer/contract_tests.rs) | Compatibility and hostile-field cases for portable contact/address inputs; no authorization is inferred. |
 | [components/pricing/src/domain/customer/mod.rs](../components/pricing/src/domain/customer/mod.rs) | Portable customer contact and address contracts; credentials, identity and PII authorization belong to hosts. |
+| [components/pricing/src/domain/discount/boundaries.rs](../components/pricing/src/domain/discount/boundaries.rs) | Discount conservation at signed limits and against an independent prefix-rounding oracle. |
 | [components/pricing/src/domain/discount.rs](../components/pricing/src/domain/discount.rs) | Integer-cent proportional discount allocation; cumulative rounding conserves the exact basket discount. |
-| [components/pricing/src/domain/discount_boundaries.rs](../components/pricing/src/domain/discount_boundaries.rs) | Discount conservation at signed limits and against an independent prefix-rounding oracle. |
 | [components/pricing/src/domain/external_order.rs](../components/pricing/src/domain/external_order.rs) | Portable paid-order input and minor-unit reconciliation; host still verifies source authority and commits stock. |
 | [components/pricing/src/domain/money.rs](../components/pricing/src/domain/money.rs) | Exact signed minor-unit amounts with explicit currency scale; legacy Shopware float pricing stays isolated. |
 | [components/pricing/src/domain/pricing.rs](../components/pricing/src/domain/pricing.rs) | Behavioral port of Shopware 6.7.14.2 quantity calculators. |
@@ -2630,7 +2630,7 @@ This lists every checked-in source module in these roots, including files with n
 | [extensions/services/connectors/src/integrations/settings.rs](../extensions/services/connectors/src/integrations/settings.rs) | Existing encrypted connector configuration remains the single provider credential owner. |
 | [extensions/services/connectors/src/integrations.rs](../extensions/services/connectors/src/integrations.rs) | API-key app hosting reuses encrypted connector settings, durable jobs and live configuration fences. |
 | [extensions/services/connectors/src/legacy.rs](../extensions/services/connectors/src/legacy.rs) | Explicit offline SQLite export import: all records are rebound/encrypted atomically; ambiguous jobs stay uncertain. |
-| [extensions/services/connectors/src/mod.rs](../extensions/services/connectors/src/mod.rs) | Language-neutral app HTTP contract backed by a Rust-only standard connector runtime. |
+| [extensions/services/connectors/src/lib.rs](../extensions/services/connectors/src/lib.rs) | Language-neutral app HTTP contract backed by a Rust-only standard connector runtime. |
 | [extensions/services/connectors/src/network.rs](../extensions/services/connectors/src/network.rs) | Fixed provider endpoints, no redirects, bounded response streaming and loopback-only fixture overrides. |
 | [extensions/services/connectors/src/oauth.rs](../extensions/services/connectors/src/oauth.rs) | Single-use tenant/app-bound OAuth state, PKCE, encrypted tokens and serialized refresh/disconnect. |
 | [extensions/services/connectors/src/providers.rs](../extensions/services/connectors/src/providers.rs) | Provider-specific read imports and notification mapping stay outside the commerce kernel. |

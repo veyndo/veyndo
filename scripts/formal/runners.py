@@ -31,7 +31,7 @@ def rust_domain(functions):
 
 def rust_runner(functions):
     lines = ['//! Generated input/output driver; production policies are dispatched by the generated module.',
-        '#[path = "verified_kernel/dispatch.rs"] mod dispatch;',
+        'mod dispatch;',
         'use serde_json::Value;',
         'fn main() -> Result<(), Box<dyn std::error::Error>> {',
         '    use std::io::{self, BufRead};',
@@ -43,7 +43,7 @@ def rust_runner(functions):
 def rust_dispatch(functions):
     from modules import KERNEL_MODULES
     lines=['//! Generated domain dispatcher; each bounded module calls the original production policies.','use serde_json::Value;']
-    lines += ['#[path = "dispatch/'+name+'.rs"] mod '+name+';' for name in KERNEL_MODULES]
+    lines += ['mod '+name+';' for name in KERNEL_MODULES]
     lines += ['pub(super) fn eval(j: &Value) -> Result<Value,String> {','    match j["function"].as_str() {']
     for name,names in KERNEL_MODULES.items():
         choices=' | '.join('Some("'+n+'")' for n in names)

@@ -1,5 +1,4 @@
 //! Generated input/output driver; production policies are dispatched by the generated module.
-#[path = "verified_kernel/dispatch.rs"]
 mod dispatch;
 use serde_json::Value;
 fn main() -> Result<(), Box<dyn std::error::Error>> {

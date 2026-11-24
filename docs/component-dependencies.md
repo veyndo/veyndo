@@ -13,18 +13,18 @@ run SQL without being in a `store` folder. Both numbers only fall.
 
 | Component | Lines of Rust | Glob imports | Untyped accesses | SQL outside store | Tables | Uses | Foreign tables |
 | --- | ---: | ---: | ---: | ---: | ---: | --- | ---: |
-| core | 4005 | 0 | 4 | 12 | 10 | none | 10 |
+| core | 4004 | 0 | 4 | 12 | 10 | none | 10 |
 | identity | 2985 | 0 | 66 | 11 | 13 | core (77), inference (2) | 5 |
 | shop | 3983 | 0 | 63 | 9 | 15 | catalog (1), core (75), identity (3), inventory (1), pricing (21), shipping (4) | 19 |
 | catalog | 5938 | 0 | 133 | 2 | 11 | core (68), identity (10), pricing (13) | 7 |
 | inventory | 405 | 0 | 3 | 0 | 2 | catalog (1), core (7), pricing (2) | 1 |
-| pricing | 3185 | 0 | 13 | 1 | 2 | core (27), identity (1) | 3 |
+| pricing | 3184 | 0 | 13 | 1 | 2 | core (27), identity (1) | 3 |
 | shipping | 553 | 0 | 26 | 0 | 0 | core (8), identity (1), pricing (2) | 6 |
 | checkout | 4263 | 0 | 192 | 6 | 3 | b2b (13), catalog (10), core (59), customers (2), identity (2), inventory (2), marketing (11), orders (1), payments (2), pricing (39), shipping (3), shop (80) | 16 |
 | customers | 1857 | 0 | 56 | 3 | 3 | core (28), identity (6), marketing (3), pricing (6), shipping (3), shop (9) | 4 |
 | orders | 4066 | 0 | 282 | 3 | 7 | b2b (1), catalog (4), core (40), customers (2), identity (8), inventory (1), pricing (3), shipping (2), shop (4) | 10 |
-| payments | 4311 | 0 | 254 | 11 | 7 | core (45), identity (4), inventory (1), orders (1), pricing (8), shop (7) | 14 |
-| marketing | 5473 | 0 | 287 | 9 | 8 | automation (19), b2b (2), catalog (3), core (69), identity (16), inference (1), pricing (12), shop (24) | 24 |
+| payments | 4310 | 0 | 261 | 11 | 7 | core (45), identity (4), inventory (1), orders (1), pricing (8), shop (7) | 14 |
+| marketing | 5471 | 0 | 287 | 9 | 8 | automation (19), b2b (2), catalog (3), core (69), identity (16), inference (1), pricing (12), shop (24) | 24 |
 | b2b | 2572 | 0 | 108 | 7 | 8 | core (38), identity (12), pricing (6), shop (34) | 8 |
 | pos | 1191 | 0 | 70 | 4 | 0 | catalog (2), checkout (5), core (12), customers (1), identity (4), intelligence (1), marketing (3), orders (1), payments (2), pricing (4), shop (19) | 8 |
 | apps | 13492 | 0 | 369 | 20 | 22 | b2b (1), catalog (2), checkout (5), core (209), identity (41), inference (4), intelligence (2), inventory (2), marketing (5), orders (10), pricing (6), shipping (2), shop (21) | 21 |
@@ -32,8 +32,8 @@ run SQL without being in a `store` folder. Both numbers only fall.
 | inference | 2032 | 0 | 124 | 2 | 0 | core (13) | 5 |
 | intelligence | 11157 | 0 | 609 | 29 | 28 | catalog (10), checkout (11), core (168), customers (1), identity (29), inference (10), inventory (1), marketing (13), pricing (21), shipping (3), shop (53) | 28 |
 | studio | 7161 | 0 | 365 | 23 | 5 | apps (30), b2b (3), catalog (29), checkout (2), core (96), customers (7), identity (40), inference (4), intelligence (23), marketing (12), orders (20), pos (2), pricing (12), shop (30) | 42 |
-| protocols | 2928 | 0 | 132 | 2 | 0 | catalog (1), checkout (2), core (104), host (207), inference (1), intelligence (2), pricing (2), shop (5) | 2 |
-| host | 16204 | 0 | 352 | 11 | 1 | apps (49), catalog (55), checkout (14), core (1432), identity (8), inference (3), intelligence (32), inventory (4), marketing (11), orders (2), payments (10), pricing (48), shipping (1), shop (66), studio (18) | 15 |
+| protocols | 2927 | 0 | 132 | 2 | 0 | catalog (1), checkout (2), core (104), host (207), inference (1), intelligence (2), pricing (2), shop (5) | 2 |
+| host | 16193 | 0 | 352 | 11 | 1 | apps (49), catalog (55), checkout (14), core (1432), identity (8), inference (3), intelligence (32), inventory (4), marketing (11), orders (2), payments (10), pricing (48), shipping (1), shop (66), studio (18) | 15 |
 | connectors | 0 | 0 | 0 | 0 | 6 | none | 0 |
 
 ## Cycles

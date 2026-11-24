@@ -3498,6 +3498,7 @@ dependencies = [
  "veyndo-catalog",
  "veyndo-checkout",
  "veyndo-cognition",
+ "veyndo-connectors",
  "veyndo-core",
  "veyndo-customers",
  "veyndo-flow-graph",
@@ -3713,6 +3714,33 @@ dependencies = [
  "veyndo-core",
  "veyndo-kernel",
  "veyndo-runtime",
+]
+
+[[package]]
+name = "veyndo-connectors"
+version = "0.5.0"
+dependencies = [
+ "aes-gcm",
+ "axum",
+ "base64 0.22.1",
+ "chrono",
+ "hmac 0.12.1",
+ "lettre",
+ "regex",
+ "reqwest",
+ "rustls-pemfile",
+ "scraper",
+ "serde",
+ "serde_json",
+ "sha2 0.10.9",
+ "sqlx",
+ "tokio",
+ "tokio-rustls",
+ "uuid",
+ "veyndo-kernel",
+ "veyndo-pricing",
+ "veyndo-runtime",
+ "webpki-roots",
 ]
 
 [[package]]

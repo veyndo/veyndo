@@ -1,6 +1,5 @@
 //! Integer-cent proportional discount allocation; cumulative rounding conserves the exact basket discount.
 #[cfg(test)]
-#[path = "discount_boundaries.rs"]
 mod boundaries;
 /// Return discounted line totals in cents. Target is clamped to available positive goods value.
 pub fn allocate(totals: &[i64], discount: i64) -> Vec<i64> {

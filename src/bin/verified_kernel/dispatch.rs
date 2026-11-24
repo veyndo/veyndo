@@ -1,18 +1,11 @@
 //! Generated domain dispatcher; each bounded module calls the original production policies.
 use serde_json::Value;
-#[path = "dispatch/access.rs"]
 mod access;
-#[path = "dispatch/agents.rs"]
 mod agents;
-#[path = "dispatch/apps.rs"]
 mod apps;
-#[path = "dispatch/automation.rs"]
 mod automation;
-#[path = "dispatch/commerce.rs"]
 mod commerce;
-#[path = "dispatch/fulfillment.rs"]
 mod fulfillment;
-#[path = "dispatch/intelligence.rs"]
 mod intelligence;
 pub(super) fn eval(j: &Value) -> Result<Value, String> {
     match j["function"].as_str() {

@@ -20,9 +20,10 @@ pub fn block(event: &Value, locale: &str) -> Result<String> {
         .as_u64()
         .and_then(|n| u8::try_from(n).ok())
         .ok_or(Error::Invalid("Invalid invoice currency scale"))?;
-    let currency = crate::money::Currency::new(v["currency"].as_str().unwrap_or(""), scale)
-        .map_err(Error::Invalid)?;
-    let amount = crate::money::Money::new(minor, currency).decimal();
+    let currency =
+        veyndo_pricing::money::Currency::new(v["currency"].as_str().unwrap_or(""), scale)
+            .map_err(Error::Invalid)?;
+    let amount = veyndo_pricing::money::Money::new(minor, currency).decimal();
     let index = match locale {
         "de" => 1,
         "fr" => 2,

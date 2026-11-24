@@ -106,5 +106,4 @@ impl Details {
 }
 
 #[cfg(test)]
-#[path = "details_tests.rs"]
 mod tests;

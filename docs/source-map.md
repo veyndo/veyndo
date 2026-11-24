@@ -752,7 +752,7 @@ this does not claim every source line or every original Shopware operation is co
 |---|---|---|
 | [`crates/kernel/src/verified_kernel.rs`](../crates/kernel/src/verified_kernel.rs) | Closed facade over seven domains and 63 pure production policies | 149 Lean theorems; compiled Rust/Lean conformance; broken-policy mutations |
 | [`proof/Commerce/Claims.lean`](../proof/Commerce/Claims.lean) | Stable entry to seven independently checked proof domains | Exact registered theorem/import inventory; one handwritten file per domain |
-| [`src/bin/verified_kernel.rs`](../src/bin/verified_kernel.rs) | Generated JSON comparison driver calling the real policy module | 156,741 comparison cases; generated drift guard |
+| [`src/bin/verified_kernel/main.rs`](../src/bin/verified_kernel/main.rs) | Generated JSON comparison driver calling the real policy module | 156,741 comparison cases; generated drift guard |
 | [`src/payments/receipt_guard.rs`](../src/payments/receipt_guard.rs) | Checked amount conversion and provider receipt policy binding | `payments.py`; reviewed binding, not a proof of the parser |
 
 The current Rust module status and review inventory are maintained in
@@ -1135,7 +1135,7 @@ now dispatches through bounded files matching the existing seven policy domains.
 
 ## Payment transaction observations
 
-`src/payments/{catalog,details,details_model,details_tests}.rs` own the provider-neutral
+`components/payments/src/domain/{catalog,details_model,details_model/tests}.rs` own the provider-neutral
 read contract and safe durable history projection. `remote.rs` omits customer/order
 payloads for inspection. Provider protocol and fee extraction remain in the private
 Rust payment service. `frontend/src/admin/payments/PaymentDetails` is shared by

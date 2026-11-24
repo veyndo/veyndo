@@ -122,18 +122,12 @@ fn consumer_receipts_preserve_declaration_and_do_not_claim_resolution() {
 #[test]
 fn notification_retry_policy_denies_ambiguous_results_and_attempt_eight() {
     for n in [0, 1, 7] {
-        assert!(crate::verified_kernel::notification_retry_admissible(
-            true, n
-        ));
+        assert!(veyndo_kernel::verified_kernel::notification_retry_admissible(true, n));
     }
     for n in [0, 1, 7, 8, u64::MAX] {
-        assert!(!crate::verified_kernel::notification_retry_admissible(
-            false, n
-        ));
+        assert!(!veyndo_kernel::verified_kernel::notification_retry_admissible(false, n));
     }
     for n in [8, 9, u64::MAX] {
-        assert!(!crate::verified_kernel::notification_retry_admissible(
-            true, n
-        ));
+        assert!(!veyndo_kernel::verified_kernel::notification_retry_admissible(true, n));
     }
 }

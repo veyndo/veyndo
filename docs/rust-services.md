@@ -44,7 +44,7 @@ issuer is introduced. Its non-root runtime image contains no Python or compiler.
 
 | Module | Responsibility |
 |---|---|
-| `src/bin/connectors.rs` | Process entry only |
+| `src/bin/connectors.rs` | Process entry only; calls the `veyndo-connectors` library crate (`extensions/services/connectors/Cargo.toml`, root `src/lib.rs`) |
 | `extensions/services/connectors/src/server.rs` | HTTP authentication, OAuth completion, size limits, graceful shutdown |
 | Host `actions.rs`, app `extensions/apps/email/src/email.rs` | Existing app actions, events and exports; unchanged API/MCP/flow contracts |
 | `extensions/apps/email/src/{config,templates}.rs` | Rust setting types, runtime validation, bounded multilingual templates |

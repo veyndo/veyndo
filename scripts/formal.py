@@ -25,7 +25,7 @@ def artifacts(functions):
     rust=subprocess.run(['rustfmt','--edition','2024'],input=rust,capture_output=True,text=True,check=True).stdout
     dispatch=subprocess.run(['rustfmt','--edition','2024'],input=rust_dispatch(functions),capture_output=True,text=True,check=True).stdout
     domains={name:subprocess.run(['rustfmt','--edition','2024'],input=content,capture_output=True,text=True,check=True).stdout for name,content in rust_domains(functions).items()}
-    return {'src/bin/verified_kernel/dispatch.rs':dispatch,'proof/Commerce/Generated.lean':lean,'proof/Main.lean':main,'src/bin/verified_kernel.rs':rust,**domains}
+    return {'src/bin/verified_kernel/dispatch.rs':dispatch,'proof/Commerce/Generated.lean':lean,'proof/Main.lean':main,'src/bin/verified_kernel/main.rs':rust,**domains}
 
 def audit(manifest):
     root=ROOT/'proof'

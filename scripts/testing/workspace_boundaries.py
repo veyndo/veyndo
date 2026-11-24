@@ -29,7 +29,8 @@ OWNERS.update({'veyndo': ROOT, 'veyndo-migration': ROOT / 'extensions/apps/migra
                'veyndo-app-storage': ROOT / 'extensions/services/app-storage',
                'veyndo-app-model': ROOT / 'extensions/services/app-storage/model',
                'veyndo-app-runtime': ROOT / 'extensions/services/app-storage/runtime',
-               'veyndo-app-authority': ROOT / 'extensions/services/app-storage/authority'})
+               'veyndo-app-authority': ROOT / 'extensions/services/app-storage/authority',
+               'veyndo-connectors': ROOT / 'extensions/services/connectors'})
 ALLOWED = {
     'veyndo-app-model': set(),
     'veyndo-app-runtime': {'veyndo-app-model'},
@@ -40,6 +41,8 @@ ALLOWED = {
     'veyndo-automation': {'veyndo-kernel'},
     'veyndo-runtime': {'veyndo-app-authority'},
     'veyndo-app-authority': set(),
+    # Standard app services: provider code never runs inside commerce request workers.
+    'veyndo-connectors': {'veyndo-kernel', 'veyndo-pricing', 'veyndo-runtime'},
     # The optional `service` feature adds the shared error contract; the domain alone needs only the kernel.
     'veyndo-pricing': {'veyndo-kernel', 'veyndo-core', 'veyndo-identity'},
     'veyndo-apps': {'veyndo-kernel', 'veyndo-app-runtime'},
@@ -68,6 +71,7 @@ EXTERNAL = {
     'veyndo-app-model': {'serde', 'serde_json', 'chrono', 'cron', 'sha2', 'semver', 'url'},
     'veyndo-app-runtime': {'wasmtime', 'wat', 'sha2', 'serde_json'},
     'veyndo-app-storage': {'sqlx', 'serde_json', 'sha2', 'tokio', 'chrono', 'base64', 'ring', 'zeroize'},
+    'veyndo-connectors': {'aes-gcm', 'axum', 'base64', 'chrono', 'hmac', 'lettre', 'regex', 'reqwest', 'rustls-pemfile', 'scraper', 'serde', 'serde_json', 'sha2', 'sqlx', 'tokio', 'tokio-rustls', 'uuid', 'webpki-roots'},
     'veyndo-app-authority': {'zeroize', 'hmac', 'sha2', 'uuid', 'sqlx', 'reqwest', 'serde', 'serde_json', 'aes-gcm', 'base64'},
     'veyndo-marketplaces': {'axum', 'tokio', 'serde', 'serde_json', 'sha2', 'hmac', 'ring', 'chrono', 'reqwest'},
     'veyndo-kernel': set(),

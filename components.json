@@ -383,7 +383,7 @@
         "sales_channels"
       ],
       "glob_imports": 0,
-      "untyped_access": 254,
+      "untyped_access": 261,
       "sql_outside_store": 11
     },
     "marketing": {

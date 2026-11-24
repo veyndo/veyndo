@@ -26,7 +26,6 @@ pub fn validate_value(schema: &Value, value: &Value) -> Result<()> {
     veyndo_app_model::schema::validate_value(schema, value).map_err(error)
 }
 #[cfg(test)]
-#[path = "model_contract/schema_tests.rs"]
 mod schema_tests;
 
 #[cfg(test)]
