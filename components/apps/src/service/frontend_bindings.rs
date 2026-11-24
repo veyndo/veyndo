@@ -1,8 +1,10 @@
 //! Revisioned hosted frontend addresses point to an existing tenant-owned Experience; origin selection remains operator-only.
 use crate::ports::HostedInstall;
+use serde::Deserialize;
 use serde_json::{Value, json};
 use sqlx::Row;
 use veyndo_app_model::declarations::identifier;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::host_names::{links, valid_origin};
 use veyndo_core::shop_scope::{header, tenant};
 use veyndo_core::{
@@ -11,6 +13,19 @@ use veyndo_core::{
 use veyndo_identity::permit;
 use veyndo_marketing::store::configuration_lifecycle::lock;
 
+/// A hosted frontend binding: its address, channel, hosted app and experience address.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct BindingRequest {
+    #[serde(deserialize_with = "lenient")]
+    alias: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    channel: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    app_id: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    experience_alias: Option<String>,
+}
 /// Points a revisioned frontend address at a channel and an Experience of this shop; the operator chooses the origin, a managed app is installed in the same transaction.
 pub async fn bind(
     install: &dyn HostedInstall,
@@ -20,8 +35,10 @@ pub async fn bind(
 ) -> Result<Value> {
     permit(h, "settings.write")?;
     let t = tenant(h)?;
-    let alias = v["alias"]
-        .as_str()
+    let input: BindingRequest = view(v);
+    let alias = input
+        .alias
+        .as_deref()
         .ok_or(bad("Frontend address required"))?;
     validate_tenant(alias)?;
     if [
@@ -37,16 +54,17 @@ pub async fn bind(
     {
         return Err(bad("Reserved address"));
     }
-    let channel = v["channel"]
-        .as_str()
+    let channel = input
+        .channel
+        .as_deref()
         .filter(|s| identifier(s))
         .ok_or(bad("Channel required"))?;
-    let requested_app = v["appId"].as_str();
+    let requested_app = input.app_id.as_deref();
     if v.get("appId").is_some() && requested_app != Some("storyfront") {
         return Err(bad("Unknown hosted app"));
     }
     let mut app_id = requested_app.map(str::to_owned);
-    let experience = v["experienceAlias"].as_str().unwrap_or(alias);
+    let experience = input.experience_alias.as_deref().unwrap_or(alias);
     validate_tenant(experience)?;
     let origin = std::env::var("HOSTED_FRONTEND_ORIGIN").map_err(|_| {
         Error(

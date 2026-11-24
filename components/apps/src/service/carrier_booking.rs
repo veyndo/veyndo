@@ -1,7 +1,9 @@
 //! Provider-neutral package admission freezes allocation before a paid carrier effect; approved apps reconcile only their own intent.
 use crate::store::package_fence::lock_package_write;
+use serde::Deserialize;
 use serde_json::{Value, json};
 use veyndo_app_model::manifest::Manifest;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::{
     Error, RequestContext, Result, State, StatusCode, bad, conflict, history_context, shop_scope,
 };
@@ -12,6 +14,18 @@ use veyndo_orders::store::machine::machine;
 use veyndo_orders::store::order_mutation;
 use veyndo_shipping::domain::booking;
 
+/// The package a carrier app books: the order, the shipment, the request key and the allocation it saw.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct CarrierIntent {
+    #[serde(deserialize_with = "lenient")]
+    id: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    delivery_index: Option<u64>,
+    #[serde(deserialize_with = "lenient")]
+    request_key: Option<String>,
+    allocation_digest: Value,
+}
 /// Reserves or releases a carrier booking for the approved app that owns the intent.
 pub async fn booking_intent(
     a: &State,
@@ -33,17 +47,19 @@ pub async fn booking_intent(
     if shop_scope::parent(a, &t).await?.is_some() {
         return Err(bad("Operational carrier intents cannot be staged"));
     }
-    let id = v["id"].as_str().ok_or(bad("Order required"))?;
-    let index = v["deliveryIndex"]
-        .as_u64()
+    let input: CarrierIntent = view(v);
+    let id = input.id.as_deref().ok_or(bad("Order required"))?;
+    let index = input
+        .delivery_index
         .and_then(|n| usize::try_from(n).ok())
         .ok_or(bad("Shipment index required"))?;
-    let key = v["requestKey"]
-        .as_str()
+    let key = input
+        .request_key
+        .as_deref()
         .filter(|s| (8..=128).contains(&s.len()))
         .ok_or(bad("Carrier request key required"))?;
     let intent =
-        json!({"sourceApp":m.id,"requestKey":key,"allocationDigest":v["allocationDigest"]});
+        json!({"sourceApp":m.id,"requestKey":key,"allocationDigest":input.allocation_digest});
     let (machine, _) = machine(&a.db, &t).await?;
     let mut tx = a.db.begin().await?;
     history_context::context(&mut tx, h, "app").await?;

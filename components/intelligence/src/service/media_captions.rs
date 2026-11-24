@@ -2,9 +2,11 @@
 use crate::ports::PublicEgress;
 use crate::service::caption_source;
 use crate::service::models::Models;
+use serde::Deserialize;
 use serde_json::{Value, json};
 use veyndo_core::admission::reserve_ai_attempt;
 use veyndo_core::database::lease::Lease;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::model_contract::validate_native;
 use veyndo_core::{Error, RequestContext, Result, StatusCode, bad};
 use veyndo_identity::{merchant, permit};
@@ -25,6 +27,18 @@ fn output_schema() -> Value {
         "caption":{"type":"string","minLength":1,"maxLength":600},"alt":{"type":"string","maxLength":400}
     }})
 }
+/// A caption request: the language, the image and the existing texts and context.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct CaptionRequest {
+    #[serde(deserialize_with = "lenient")]
+    locale: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    image_url: Option<String>,
+    context: Value,
+    alt: Value,
+    caption: Value,
+}
 /// A caption and alt text proposal in an enabled shop language; nothing is saved.
 pub async fn prepare(
     m: Models<'_>,
@@ -36,7 +50,11 @@ pub async fn prepare(
     let tenant = merchant(h)?;
     permit(h, "assistant.use")?;
     validate_native(&schema("merchant.media.caption").unwrap(), v)?;
-    let locale = v["locale"].as_str().unwrap();
+    let input: CaptionRequest = view(v);
+    let locale = input
+        .locale
+        .as_deref()
+        .ok_or(bad("Caption language required"))?;
     let (settings, _) = config(a, &tenant).await?;
     if !settings.languages().allowed(locale) {
         return Err(bad("Caption language is not enabled for this shop"));
@@ -49,9 +67,10 @@ pub async fn prepare(
         )
     })?;
     let _lease = Lease::acquire(a, &tenant, "model", 2).await?;
-    let image = caption_source::read(egress, a, h, v["imageUrl"].as_str().unwrap_or("")).await?;
+    let image =
+        caption_source::read(egress, a, h, input.image_url.as_deref().unwrap_or("")).await?;
     let basis = if image.is_some() { "image" } else { "context" };
-    let evidence = json!({"locale":locale,"context":v["context"],"existingAlt":v["alt"],"existingCaption":v["caption"],"imageAvailable":image.is_some()});
+    let evidence = json!({"locale":locale,"context":input.context,"existingAlt":input.alt,"existingCaption":input.caption,"imageAvailable":image.is_some()});
     let result = m
         .inference
         .structured_with_images(

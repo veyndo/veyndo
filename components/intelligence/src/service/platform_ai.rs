@@ -1,8 +1,10 @@
 //! Operator-only platform inference administration: optimistic revision, encrypted write-only keys and an audit without secrets.
 use crate::service::models::Models;
+use serde::Deserialize;
 use serde_json::{Value, json};
 use sqlx::Row;
 use veyndo_cognition::inference::{settings, sovereign};
+use veyndo_core::document::{lenient, view};
 use veyndo_core::{Error, RequestContext, Result, StatusCode, bad, conflict};
 use veyndo_kernel::verified_kernel;
 use veyndo_shop::http::operator::actor;
@@ -38,25 +40,67 @@ async fn snapshot(m: Models<'_>) -> Result<Value> {
         "effective":m.inference.public_providers().await.ok(),"inheritance":"all tenants; replica refresh within 5 seconds"}),
     )
 }
+/// A platform inference configuration save.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct PlatformSettings {
+    #[serde(deserialize_with = "lenient")]
+    settings: SettingsInput,
+}
+
+/// The submitted settings: default provider, per-provider routes and the sovereignty switch.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct SettingsInput {
+    #[serde(deserialize_with = "lenient")]
+    default_provider: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    providers: serde_json::Map<String, Value>,
+    #[serde(deserialize_with = "lenient")]
+    sovereign: Option<bool>,
+}
+
+/// One provider route.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct ProviderSettings {
+    #[serde(deserialize_with = "lenient")]
+    model: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    endpoint: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    enabled: Option<bool>,
+}
+
 /// Saves the platform inference configuration at its revision; keys are sealed write-only and the audit never holds secrets.
 pub async fn save(m: Models<'_>, h: &RequestContext, v: &Value) -> Result<Value> {
     let a = m.core;
     let actor = actor(h)?;
-    let provider = v["settings"]["defaultProvider"]
-        .as_str()
+    let input: PlatformSettings = view(v);
+    let provider = input
+        .settings
+        .default_provider
+        .as_deref()
         .filter(|v| ["ollama", "openai", "anthropic"].contains(v))
         .ok_or(bad("Choose a supported default provider"))?;
     let mut data = json!({"defaultProvider":provider,"providers":{}});
     for id in ["ollama", "openai", "anthropic"] {
-        let row = &v["settings"]["providers"][id];
-        let model = row["model"]
-            .as_str()
+        let row: ProviderSettings = input
+            .settings
+            .providers
+            .get(id)
+            .map(view)
+            .unwrap_or_default();
+        let model = row
+            .model
+            .as_deref()
             .filter(|s| {
                 !s.is_empty() && s.len() <= 128 && s.is_ascii() && !s.chars().any(char::is_control)
             })
             .ok_or(bad("Invalid model identifier"))?;
-        let endpoint = row["endpoint"]
-            .as_str()
+        let endpoint = row
+            .endpoint
+            .as_deref()
             .filter(|s| {
                 settings::valid_endpoint(s)
                     || m.inference.environment_configuration()["providers"][id]["endpoint"].as_str()
@@ -65,16 +109,14 @@ pub async fn save(m: Models<'_>, h: &RequestContext, v: &Value) -> Result<Value>
             .ok_or(bad(
                 "Provider endpoint must be HTTPS without credentials, query or fragment",
             ))?;
-        let enabled = row["enabled"]
-            .as_bool()
-            .ok_or(bad("Provider enabled state required"))?;
+        let enabled = row.enabled.ok_or(bad("Provider enabled state required"))?;
         if id == provider && !enabled {
             return Err(bad("The default provider must be enabled"));
         }
         data["providers"][id] =
             json!({"model":model,"endpoint":endpoint.trim_end_matches('/'),"enabled":enabled});
     }
-    let sovereign = v["settings"]["sovereign"].as_bool().unwrap_or(false);
+    let sovereign = input.settings.sovereign.unwrap_or(false);
     data["sovereign"] = json!(sovereign);
     // Refuse a switch that would only fail closed later: every configured model route must be self-operated.
     if sovereign || sovereign::locked() {

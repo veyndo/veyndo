@@ -3,8 +3,10 @@ use crate::domain::{action_admission, approval};
 use crate::store::packages::package;
 use axum::Json;
 use axum::extract::{Path, State as Shared};
+use serde::Deserialize;
 use serde_json::{Value, json};
 use veyndo_app_model::admission::callback_scope;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::shop_scope::parent;
 use veyndo_core::{RequestContext, Result, State, bad, conflict, hash, uid};
 use veyndo_identity::{merchant, permit};
@@ -21,6 +23,18 @@ pub async fn list(
     Ok(Json(
         json!({"canManage":permit(&h,"team.manage").is_ok() && h.principal.user.as_deref().is_some_and(|u|u!="bootstrap") && parent(&a,&t).await?.is_none(),"keys":rows,"digest":approval::canonical_digest(&m),"permissions":m.permissions.iter().filter(|p|callback_scope(p).is_some()).collect::<Vec<_>>()}),
     ))
+}
+/// An app callback key request: the approved package digest, the permissions and the expiry.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct KeyRequest {
+    #[serde(deserialize_with = "lenient")]
+    approve: Option<bool>,
+    #[serde(deserialize_with = "lenient")]
+    digest: Option<String>,
+    permissions: Value,
+    #[serde(deserialize_with = "lenient")]
+    expires_in_days: Option<i64>,
 }
 /// Issues one callback key for the approved digest and permissions; the key is shown once.
 pub async fn create(
@@ -42,7 +56,8 @@ pub async fn create(
     }
     let m = package(&a, &t, &id, true).await?;
     let digest = approval::canonical_digest(&m);
-    if v["approve"] != true || v["digest"] != digest {
+    let input: KeyRequest = view(&v);
+    if input.approve != Some(true) || input.digest.as_deref() != Some(digest.as_str()) {
         return Err(conflict(
             "Approve the current app package digest and its requested callback permissions",
         ));
@@ -50,12 +65,12 @@ pub async fn create(
     let scopes = veyndo_app_model::admission::requested_scopes(
         &action_admission::Authority(&h),
         &m.permissions,
-        &v["permissions"],
+        &input.permissions,
     )
     .map_err(action_admission::error)?;
-    let requested = &v["permissions"];
-    let days = v["expiresInDays"]
-        .as_i64()
+    let requested = &input.permissions;
+    let days = input
+        .expires_in_days
         .filter(|n| (1..=90).contains(n))
         .ok_or(bad("Expiry must be 1..90 days"))?;
     let mut tx = a.db.begin().await?;

@@ -973,8 +973,8 @@
     },
     "components/apps/src/http/credentials.rs": {
       "status": "unproved",
-      "sha256": "27754c951a68a2e57f4e754dbc355b66afe9858935886c376e1084051aca3a58",
-      "review": "F17: shared outbox and shop registry helpers in core; written reasons for foreign table access"
+      "sha256": "6e12a92dfc8f18d54ae6a7a4164d9e560c7301cf75d514c6cca2ba1b83fb9920",
+      "review": "F36 typed inputs: proof bindings unchanged"
     },
     "components/apps/src/http/jobs.rs": {
       "status": "unproved",
@@ -1058,8 +1058,8 @@
     },
     "components/apps/src/service/carrier_booking.rs": {
       "status": "unproved",
-      "sha256": "dbf3a7dadea4bd7a01498aa490d66a574b3bd5ad3d4577d65968e0a0518e470e",
-      "review": "Delivery split and carrier booking intents moved into the orders and apps components"
+      "sha256": "b5e120433b674ae907d87cbc8f1cdbc99bb0b170177012fbd299d73627dfb767",
+      "review": "F36 typed inputs: proof bindings unchanged"
     },
     "components/apps/src/service/cart_contributions.rs": {
       "status": "unproved",
@@ -1088,8 +1088,8 @@
     },
     "components/apps/src/service/discovery.rs": {
       "status": "unproved",
-      "sha256": "1330f04ef3d3ec37535e61c44c794f999734cf1e83a213f0174c1597938878dd",
-      "review": "App discovery, package activation and consent adapter moved into the apps component; behaviour unchanged"
+      "sha256": "277949ba9b991342b784b71736f185e8d82b9b428504d4e7888e8d2f7a22154b",
+      "review": "F36 typed inputs: proof bindings unchanged"
     },
     "components/apps/src/service/egress.rs": {
       "status": "unproved",
@@ -1113,8 +1113,8 @@
     },
     "components/apps/src/service/frontend_bindings.rs": {
       "status": "unproved",
-      "sha256": "216ad234791d64db1995b8d1eb196bc043d34554bb00bd3b7ba94eec14458c98",
-      "review": "F17: shared outbox and shop registry helpers in core; written reasons for foreign table access"
+      "sha256": "1961a0daa4da53b39ea4357453c7ce07473a4d350bb55150ac35e763e5e444ed",
+      "review": "F36 typed inputs: proof bindings unchanged"
     },
     "components/apps/src/service/gateway.rs": {
       "status": "unproved",
@@ -2723,8 +2723,8 @@
     },
     "components/intelligence/src/service/media_captions.rs": {
       "status": "unproved",
-      "sha256": "d839ad96560339e064e7a7ac2fe60548ba2ea49515d89fcb62fbe2226472c036",
-      "review": "F9: media captions, design references, product knowledge and the translation worker moved into components"
+      "sha256": "4bb9ecbef26bad2add12e55e16aa36be28fd67637001cf8e2b1ba959cd128a4d",
+      "review": "F36 typed inputs: proof bindings unchanged"
     },
     "components/intelligence/src/service/models.rs": {
       "status": "unproved",
@@ -2748,8 +2748,8 @@
     },
     "components/intelligence/src/service/platform_ai.rs": {
       "status": "reviewed-binding",
-      "sha256": "44966b462ef76d5707d1c775c2330fd18873bce9d3eba3fd965bac665f321d4f",
-      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
+      "sha256": "167e7f6c2b763f4edae9701ad8439c2341d7069536216d5057675904add71898",
+      "review": "F36 typed inputs: proof bindings unchanged"
     },
     "components/intelligence/src/service/product_questions.rs": {
       "status": "unproved",
@@ -2828,8 +2828,8 @@
     },
     "components/intelligence/src/service/supply_proposal.rs": {
       "status": "unproved",
-      "sha256": "beb9eb4361ce604937ca82ce5cddaf7918379479dac59d2193bb42666e6e1ac5",
-      "review": "F17: shared outbox and shop registry helpers in core; written reasons for foreign table access"
+      "sha256": "0ba06786ccfb7ff4bb78f48265cbef656b881b3a1a4f801326e9eaa7449888e1",
+      "review": "F36 typed inputs: proof bindings unchanged"
     },
     "components/intelligence/src/service.rs": {
       "status": "unproved",
@@ -4048,8 +4048,8 @@
     },
     "components/shop/src/http/operator_lifecycle.rs": {
       "status": "reviewed-binding",
-      "sha256": "bcf0bad1498dbc55edb1b601f92f7cd37563e2fd2f99ff21ebe25dcb52ff9cb3",
-      "review": "Operator control plane (quotas, aggregate metrics, shop dossier, audited lifecycle change, container readings) moved verbatim into the shop component; operator authentication and availability admission stay in the server. Kernel admission calls unchanged."
+      "sha256": "e6761218f21815cc74438b5116e65cf288b9d3fb6d5bbf04282bfab1ec6f4f7b",
+      "review": "F36 typed inputs: proof bindings unchanged"
     },
     "components/shop/src/http/operator_metrics.rs": {
       "status": "unproved",

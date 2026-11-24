@@ -4,9 +4,11 @@ use crate::domain::input_schema::validate_native;
 use crate::ports::Platform;
 use crate::service::gateway;
 use crate::store::packages::package;
+use serde::Deserialize;
 use serde_json::{Value, json};
 use sqlx::Row;
 use veyndo_app_model::manifest::Manifest;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::{RequestContext, Result, bad, conflict};
 use veyndo_identity::{merchant, permit};
 
@@ -40,6 +42,22 @@ pub fn page(
     )
 }
 
+/// An app discovery request: a managed read with its arguments, or a search page.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct DiscoveryRequest {
+    #[serde(deserialize_with = "lenient")]
+    app: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    action: Option<String>,
+    arguments: Value,
+    #[serde(deserialize_with = "lenient")]
+    query: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    after: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    limit: Option<u64>,
+}
 /// Runs `merchant.apps.search` or `merchant.apps.read` with the rights of the caller.
 pub async fn invoke(a: &Platform, h: &RequestContext, name: &str, v: &Value) -> Result<Value> {
     let t = merchant(h)?;
@@ -48,14 +66,15 @@ pub async fn invoke(a: &Platform, h: &RequestContext, name: &str, v: &Value) -> 
         &schema(name).ok_or(bad("Unknown app discovery operation"))?,
         v,
     )?;
+    let input: DiscoveryRequest = view(v);
     if name == "merchant.apps.read" {
-        let app = v["app"].as_str().ok_or(bad("App required"))?;
+        let app = input.app.as_deref().ok_or(bad("App required"))?;
         let m = package(a, &t, app, true).await?;
         let action = m
             .actions
             .iter()
             .find(|act| {
-                act.name == v["action"]
+                Some(&act.name) == input.action.as_ref()
                     && admitted(h, &m, act)
                     && READS.contains(&act.handler.as_str())
             })
@@ -65,7 +84,7 @@ pub async fn invoke(a: &Platform, h: &RequestContext, name: &str, v: &Value) -> 
             h,
             &m.id,
             &action.name,
-            &v["arguments"],
+            &input.arguments,
             None,
         ))
         .await;
@@ -75,7 +94,7 @@ pub async fn invoke(a: &Platform, h: &RequestContext, name: &str, v: &Value) -> 
             .bind(&t)
             .fetch_all(&a.db)
             .await?;
-    let query = v["query"].as_str().unwrap_or("");
+    let query = input.query.as_deref().unwrap_or("");
     let mut apps = vec![];
     for row in rows {
         let m: Manifest = serde_json::from_value(row.get("manifest"))
@@ -98,8 +117,8 @@ pub async fn invoke(a: &Platform, h: &RequestContext, name: &str, v: &Value) -> 
     }
     page(
         apps,
-        v["after"].as_str(),
-        v["limit"].as_u64().unwrap_or(8) as usize,
+        input.after.as_deref(),
+        input.limit.unwrap_or(8) as usize,
     )
 }
 

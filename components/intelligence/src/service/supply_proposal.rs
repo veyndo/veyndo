@@ -3,10 +3,12 @@ use crate::service::signed_offer;
 use axum::Json;
 use axum::extract::State as Shared;
 use base64::{Engine, engine::general_purpose::URL_SAFE_NO_PAD};
+use serde::Deserialize;
 use serde_json::{Value, json};
 use sqlx::Row;
 use veyndo_checkout::http::handoff;
 use veyndo_checkout::store::cart_create::new_cart_context;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::shop_scope::header;
 use veyndo_core::{RequestContext, Result, State, bad, conflict, uid};
 use veyndo_identity::{merchant, permit};
@@ -113,18 +115,35 @@ pub async fn propose(a: &State, carts: &dyn Carts, h: &RequestContext) -> Result
 }
 
 /// Approval re-checks the signed offer and the ceiling, then issues the supplier's own single-use checkout link.
+/// An approved signed supply proposal and the cart it was made for.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct SignedSupply {
+    #[serde(deserialize_with = "lenient")]
+    approve: Option<bool>,
+    #[serde(deserialize_with = "lenient")]
+    product_id: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    payload_base64: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    signature: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    cart_token: Option<String>,
+}
+
 pub async fn approve(a: &State, carts: &dyn Carts, h: &RequestContext, v: &Value) -> Result<Value> {
     let t = merchant(h)?;
     permit(h, "settings.write")?;
     permit(h, "catalog.read")?;
-    if v["approve"] != true {
+    let input: SignedSupply = view(v);
+    if input.approve != Some(true) {
         return Err(bad("Explicit approve=true required"));
     }
     let (Some(product), Some(encoded), Some(signature), Some(token)) = (
-        v["productId"].as_str(),
-        v["payloadBase64"].as_str(),
-        v["signature"].as_str(),
-        v["cartToken"].as_str(),
+        input.product_id.as_deref(),
+        input.payload_base64.as_deref(),
+        input.signature.as_deref(),
+        input.cart_token.as_deref(),
     ) else {
         return Err(bad(
             "productId, payloadBase64, signature and cartToken required",
