@@ -431,7 +431,7 @@
         "user_sessions": "read: reads merchant sessions to resolve the actor of a flow (channel_preview.rs)"
       },
       "glob_imports": 0,
-      "untyped_access": 250,
+      "untyped_access": 219,
       "sql_outside_store": 9
     },
     "b2b": {
@@ -497,7 +497,7 @@
         "sales_channels": "read: reads the sales channel document (kind, activity, catalogue scope) to admit the request channel inside the same statement (register.rs, settlement.rs)"
       },
       "glob_imports": 0,
-      "untyped_access": 70,
+      "untyped_access": 43,
       "sql_outside_store": 4
     },
     "apps": {

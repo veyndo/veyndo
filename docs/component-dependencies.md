@@ -13,7 +13,7 @@ run SQL without being in a `store` folder. Both numbers only fall.
 
 | Component | Lines of Rust | Glob imports | Untyped accesses | SQL outside store | Tables | Uses | Foreign tables |
 | --- | ---: | ---: | ---: | ---: | ---: | --- | ---: |
-| core | 4278 | 0 | 4 | 13 | 10 | none | 10 |
+| core | 4317 | 0 | 4 | 13 | 10 | none | 10 |
 | identity | 2972 | 0 | 66 | 11 | 13 | core (89), inference (2) | 4 |
 | shop | 3991 | 0 | 63 | 9 | 15 | catalog (1), core (82), identity (3), inventory (1), pricing (21), shipping (4) | 19 |
 | catalog | 6017 | 0 | 104 | 2 | 11 | core (69), identity (10), pricing (13) | 7 |
@@ -24,9 +24,9 @@ run SQL without being in a `store` folder. Both numbers only fall.
 | customers | 1855 | 0 | 56 | 2 | 3 | core (31), identity (6), marketing (3), pricing (6), shipping (3), shop (9) | 2 |
 | orders | 4738 | 0 | 198 | 3 | 7 | b2b (1), catalog (4), core (49), customers (2), identity (8), inventory (1), pricing (3), shipping (2), shop (4) | 8 |
 | payments | 4370 | 0 | 249 | 11 | 7 | core (50), identity (4), inventory (1), orders (1), pricing (8), shop (7) | 13 |
-| marketing | 5650 | 0 | 250 | 9 | 8 | automation (19), b2b (2), catalog (3), core (70), identity (16), inference (1), pricing (12), shop (24) | 24 |
+| marketing | 6004 | 0 | 219 | 9 | 8 | automation (19), b2b (2), catalog (3), core (72), identity (16), inference (1), pricing (15), shop (24) | 24 |
 | b2b | 2567 | 0 | 108 | 7 | 8 | core (39), identity (12), pricing (6), shop (34) | 7 |
-| pos | 1188 | 0 | 70 | 4 | 0 | catalog (2), checkout (5), core (17), customers (1), identity (4), intelligence (1), marketing (3), orders (1), payments (2), pricing (4), shop (19) | 7 |
+| pos | 1449 | 0 | 43 | 4 | 0 | catalog (2), checkout (5), core (22), customers (1), identity (4), intelligence (1), marketing (3), orders (1), payments (2), pricing (4), shop (19) | 7 |
 | apps | 13491 | 0 | 369 | 18 | 22 | b2b (1), catalog (2), checkout (5), core (223), identity (41), inference (4), intelligence (2), inventory (2), marketing (5), orders (10), pricing (6), shipping (2), shop (21) | 21 |
 | automation | 1443 | 8 | 97 | 0 | 0 | core (2) | 0 |
 | inference | 2032 | 0 | 124 | 2 | 0 | core (13) | 5 |
@@ -57,8 +57,8 @@ those pairs close when the server files that still hold their logic move into th
 | checkout | shop | `veyndo_shop::` | 80 |
 | shop | core | `veyndo_core::` | 79 |
 | identity | core | `veyndo_core::` | 77 |
+| marketing | core | `veyndo_core::` | 69 |
 | catalog | core | `veyndo_core::` | 69 |
-| marketing | core | `veyndo_core::` | 67 |
 | host | core | `Error` | 63 |
 | checkout | core | `veyndo_core::` | 59 |
 | intelligence | shop | `veyndo_shop::` | 52 |
@@ -85,8 +85,8 @@ those pairs close when the server files that still hold their logic move into th
 | studio | intelligence | `veyndo_intelligence::` | 23 |
 | protocols | host | `apps::` | 23 |
 | pricing | core | `veyndo_core::` | 23 |
+| pos | core | `veyndo_core::` | 22 |
 | shop | pricing | `veyndo_pricing::` | 21 |
-| apps | shop | `veyndo_shop::` | 21 |
 
 ## Foreign table access
 

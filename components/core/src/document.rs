@@ -1,7 +1,27 @@
 //! Typed views of stored JSON documents. A field with an unexpected shape reads as its default, exactly as indexing into the JSON yields null, so a view never rejects a document the untyped reader accepted.
 use serde::de::{DeserializeOwned, Error as _, Visitor};
-use serde::{Deserialize, Deserializer};
+use serde::{Deserialize, Deserializer, Serialize};
 use serde_json::Value;
+
+/// Writes a typed update into the object at `slot`: each serialized field replaces the stored one,
+/// other stored fields stay. A missing (null) slot becomes an object, exactly as assigning through
+/// JSON indexing did; any other shape is an error instead of the panic indexing would raise.
+pub fn merge(slot: &mut Value, update: impl Serialize) -> crate::Result<()> {
+    let shape = || {
+        crate::Error(
+            crate::StatusCode::INTERNAL_SERVER_ERROR,
+            "Stored document has an unexpected shape".into(),
+        )
+    };
+    let Ok(Value::Object(fields)) = serde_json::to_value(update) else {
+        return Err(shape());
+    };
+    if slot.is_null() {
+        *slot = Value::Object(serde_json::Map::new());
+    }
+    slot.as_object_mut().ok_or_else(shape)?.extend(fields);
+    Ok(())
+}
 
 /// Reads the whole document as `T`; a document of another shape reads as the default.
 /// A record (struct) reads only from an object: serde would also accept a positional array, where indexing yields null.
@@ -123,7 +143,7 @@ where
 
 #[cfg(test)]
 mod tests {
-    use super::{lenient, lenient_list, view};
+    use super::{lenient, lenient_list, merge, view};
     use serde::Deserialize;
     use serde_json::{Value, json};
 
@@ -140,6 +160,25 @@ mod tests {
         #[serde(deserialize_with = "lenient_list")]
         items: Vec<Inner>,
         plain: Value,
+    }
+
+    #[derive(serde::Serialize)]
+    struct Update {
+        a: i32,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        b: Option<i32>,
+    }
+
+    #[test]
+    fn a_merge_writes_like_indexed_assignment_and_refuses_other_shapes() {
+        let mut v = json!({"a":0,"b":1,"c":2});
+        merge(&mut v, Update { a: 5, b: None }).unwrap();
+        assert_eq!(v, json!({"a":5,"b":1,"c":2}));
+        let mut missing = Value::Null;
+        merge(&mut missing, Update { a: 1, b: Some(2) }).unwrap();
+        assert_eq!(missing, json!({"a":1,"b":2}));
+        assert!(merge(&mut json!("text"), Update { a: 1, b: None }).is_err());
+        assert!(merge(&mut json!({}), 7).is_err());
     }
 
     #[test]

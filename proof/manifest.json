@@ -2068,8 +2068,8 @@
     },
     "components/core/src/document.rs": {
       "status": "unproved",
-      "sha256": "7ca2f7533c54cdd908415048495017536964c8f9e77d8b113b69154772a40c77",
-      "review": "F23 typed views: proof bindings unchanged"
+      "sha256": "49f61a725abd25fa3a8b5ff6900ec1a84ddd1bae1b435b38f0265b9197d42647",
+      "review": "F25 typed write paths: proof bindings unchanged"
     },
     "components/core/src/failure.rs": {
       "status": "unproved",
@@ -3168,8 +3168,8 @@
     },
     "components/marketing/src/store/promotions.rs": {
       "status": "unproved",
-      "sha256": "896263af5daf1d00568fd189ebd8b37ced2c3d0dfa59366d9f652697867d372b",
-      "review": "Functions above 150 lines split into named steps without behaviour change; function length limit lowered to 150"
+      "sha256": "2b38ebb04162dcaf65930c415999453dbdb520d0a192d47b6e99ec691e2d4439",
+      "review": "F25 typed write paths: proof bindings unchanged"
     },
     "components/marketing/src/store/rule_entities.rs": {
       "status": "unproved",
@@ -3693,8 +3693,8 @@
     },
     "components/pos/src/service/settlement.rs": {
       "status": "reviewed-binding",
-      "sha256": "12425fc765cc8102ad71e9eb6ca95658dbf2e0d6f83e002dd3f1711ee600dda4",
-      "review": "F17: shared outbox and shop registry helpers in core; written reasons for foreign table access"
+      "sha256": "3d2092ed8624303f78a4d393c0680e6830eb0acfc8e73ca6a916373e66e75f7f",
+      "review": "F25 typed write paths: proof bindings unchanged"
     },
     "components/pos/src/service.rs": {
       "status": "unproved",
