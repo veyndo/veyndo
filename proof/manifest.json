@@ -1883,8 +1883,8 @@
     },
     "components/checkout/src/service/app_adjustments.rs": {
       "status": "unproved",
-      "sha256": "5def5e0eab01f7dfcb65a74c4f1580d2fb39facab32e81ba57ace2d15e2fa5df",
-      "review": "Delivery enrichment, app adjustments and funding moved into components; kernel call sites unchanged"
+      "sha256": "5a15221b6da227f9c6e5f2b615b644a858883723dd19bbee68bb7da04b21d858",
+      "review": "F26 shared quote types: proof bindings unchanged"
     },
     "components/checkout/src/service/cart_projection.rs": {
       "status": "unproved",
@@ -1898,8 +1898,8 @@
     },
     "components/checkout/src/service/delivery.rs": {
       "status": "unproved",
-      "sha256": "1c05a33580f96c16101404dec4f39082d60eed6aa9511c6958ad0c5f875fdf91",
-      "review": "F24 typed views: proof bindings unchanged"
+      "sha256": "75b15ee49ce55f90df8f1ec7bdb6f224a7b54d5d72088256b372d8f5f4d8e2f6",
+      "review": "F26 shared quote types: proof bindings unchanged"
     },
     "components/checkout/src/service/language.rs": {
       "status": "unproved",
@@ -3168,8 +3168,8 @@
     },
     "components/marketing/src/store/promotions.rs": {
       "status": "unproved",
-      "sha256": "2b38ebb04162dcaf65930c415999453dbdb520d0a192d47b6e99ec691e2d4439",
-      "review": "F25 typed write paths: proof bindings unchanged"
+      "sha256": "1b917fbf58774e9ded4918b2896248114e9660b739be648ac3d7b2c8d1929db4",
+      "review": "F26 shared quote types: proof bindings unchanged"
     },
     "components/marketing/src/store/rule_entities.rs": {
       "status": "unproved",
@@ -3786,6 +3786,11 @@
       "sha256": "983c67e4bb69285a82601055f7624797b9b3634199c8d2e31c5ffb18b9cd0b83",
       "review": "Unit tests for every public domain function of the components; no production code changed"
     },
+    "components/pricing/src/domain/quote.rs": {
+      "status": "unproved",
+      "sha256": "3c31fb4329ce35e130f0e6b1b4044ee826113dd71cf9adaf9cb4ca274206048a",
+      "review": "F26 shared quote types: proof bindings unchanged"
+    },
     "components/pricing/src/domain/validation.rs": {
       "status": "unproved",
       "sha256": "199e84135d5a4489f8098035737d0cdb4baabd10cd807b069f783b1ed102b28b",
@@ -3793,8 +3798,8 @@
     },
     "components/pricing/src/domain.rs": {
       "status": "unproved",
-      "sha256": "86592d78c112badeb507dd01c517a1fce43973d7768595e574ed24a501ed603e",
-      "review": "inventory component crate created; no kernel binding changed"
+      "sha256": "87bdd739437b2b26507fb05bf19f42be12dc1ef7c04fefd98acf6407ec66f5c5",
+      "review": "F26 shared quote types: proof bindings unchanged"
     },
     "components/pricing/src/http/currencies.rs": {
       "status": "unproved",
@@ -3813,8 +3818,8 @@
     },
     "components/pricing/src/lib.rs": {
       "status": "unproved",
-      "sha256": "092b78420233c5f698ca4e4e21ee92b76395c37033578310669aebe59902fdf5",
-      "review": "inventory component crate created; no kernel binding changed"
+      "sha256": "4f3b13f3dd9010f424cd2422ae036b479d676b13c0e04f7ccb42f85032f7f08e",
+      "review": "F26 shared quote types: proof bindings unchanged"
     },
     "components/pricing/src/ports.rs": {
       "status": "unproved",

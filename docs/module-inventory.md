@@ -1079,6 +1079,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/pricing/src/domain/external_order.rs](../components/pricing/src/domain/external_order.rs) | Portable paid-order input and minor-unit reconciliation; host still verifies source authority and commits stock. |
 | [components/pricing/src/domain/money.rs](../components/pricing/src/domain/money.rs) | Exact signed minor-unit amounts with explicit currency scale; legacy Shopware float pricing stays isolated. |
 | [components/pricing/src/domain/pricing.rs](../components/pricing/src/domain/pricing.rs) | Behavioral port of Shopware 6.7.14.2 quantity calculators. |
+| [components/pricing/src/domain/quote.rs](../components/pricing/src/domain/quote.rs) | The priced quote as checkout, promotions and app adjustments rewrite it: line taxes in quote field names, a line's recalculated price and the quote totals. |
 | [components/pricing/src/domain/validation.rs](../components/pricing/src/domain/validation.rs) | Shared static validation errors carry no private values or transport authority. |
 | [components/pricing/src/domain.rs](../components/pricing/src/domain.rs) | Pure rules and data contracts: no database, no transport. This is the part that is proved. |
 | [components/pricing/src/http/currencies.rs](../components/pricing/src/http/currencies.rs) | Storefront currency discovery: the selected currency, the ones the channel offers and the catalogue of supported codes. |

@@ -17,8 +17,8 @@ than the check verifies. **It is not a claim that the shop is free of errors:**
 | Rule files | 8 | 0.5 % | The files that contain the proved rules |
 | Reviewed callers | 79 | 5.3 % | Files that call a proved rule; a person reviewed how the rule is fed, the surrounding code is not proved |
 | Comparison drivers | 9 | 0.6 % | Test programs that compare the compiled Rust rules with the Lean versions |
-| **Unproved files** | 1403 | 93.6 % | Everything else: database access, HTTP, providers, the user interface server |
-| All Rust source files | 1499 | 100 % | |
+| **Unproved files** | 1404 | 93.6 % | Everything else: database access, HTTP, providers, the user interface server |
+| All Rust source files | 1500 | 100 % | |
 
 A proved rule looks like this one, which caps a discount at the amount it is
 taken from:
@@ -42,13 +42,13 @@ rounding still has to be argued by tests rather than by the type.
 
 | Area | Files | Call a proved rule | Unproved | Use floating point |
 | --- | ---: | ---: | ---: | ---: |
-| Money primitives and discounts | 13 | 3 | 10 | 3 |
+| Money primitives and discounts | 14 | 3 | 11 | 4 |
 | Cart and prices | 4 | 0 | 4 | 0 |
 | Checkout and orders | 10 | 0 | 10 | 0 |
 | Payments and refunds | 22 | 0 | 22 | 0 |
 | Currencies and taxes | 9 | 0 | 9 | 0 |
 | Stock | 1 | 0 | 1 | 0 |
-| **Money path in total** | **59** | **3** | **56** | **3** |
+| **Money path in total** | **60** | **3** | **57** | **4** |
 
 The money path is also checked by tests that are not shown here: the
 differential comparison against the original PHP price calculation and the

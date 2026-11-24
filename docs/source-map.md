@@ -699,6 +699,7 @@ Shopware compatibility claim is made.
 | `components/marketing/src/{domain/rules,types/promotion,service/configuration_writes,service/channels}.rs`, `src/marketing/{flows,routes,mod}.rs` | Bounded AST, authoritative campaigns, revision-bound configuration saves, durable note/proposal jobs and sales-channel scope | Rust rule tests, `marketing_accounts.py`, `developer_documents.py` |
 | `crates/automation/src/rule_comparison.rs`, `src/bin/rules.rs`, `reference/rules.php` | Original Shopware numeric comparison behavior, independent batch oracle | `rule_differential.py`: 1,280 comparisons |
 | `components/pricing/src/domain/discount.rs` | Exact-cent proportional basket discount allocation | Rust conservation/bounds tests, concurrent coupon HTTP checkout |
+| `components/pricing/src/domain/quote.rs` | Shared priced-quote parts rewritten by delivery, promotions and app adjustments: line taxes, line price updates, totals | Rust field-name/rounding test and the promotion/app-adjustment oracles |
 | `components/studio/src/http/product_editor.rs` | Revision-bound translations and advanced metadata; own product/reference validation | `marketing_accounts.py` and selected release |
 | `components/intelligence/src/http/experience.rs` | Persisted layout policy plus owned-session signal ranking/clearing | `intelligence.py`, `marketing_accounts.py` |
 | `frontend/src/admin/{developer,environments,storyfronts,automation,catalog}/` | Dedicated merchant workbench forms and review surfaces | Strict frontend build, actual browser review |

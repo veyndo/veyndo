@@ -7,6 +7,7 @@ use sqlx::Row;
 use veyndo_core::document::{lenient, merge};
 use veyndo_core::{Error, Result, StatusCode, bad};
 use veyndo_pricing::pricing::{PriceInput, calculate, math_round};
+use veyndo_pricing::quote::{LinePriceUpdate, QuoteTotals};
 use veyndo_shop::types::cart::StoredCart;
 
 /// The promotions that apply to this cart right now, highest priority first.
@@ -123,35 +124,7 @@ struct Line {
     total: f64,
     tax_rate: f64,
     quantity: f64,
-    update: Option<LineUpdate>,
-}
-
-/// The recalculated price of a discounted line, merged into its stored price.
-#[derive(Serialize)]
-#[serde(rename_all = "camelCase")]
-struct LineUpdate {
-    total_price: f64,
-    unit_price: f64,
-    calculated_taxes: Vec<CalculatedTax>,
-}
-
-/// One tax of a recalculated line, in the quote's field names.
-#[derive(Serialize)]
-#[serde(rename_all = "camelCase")]
-struct CalculatedTax {
-    tax: f64,
-    tax_rate: f64,
-    price: f64,
-}
-
-/// The quote totals after the promotions, merged into the quote price.
-#[derive(Serialize)]
-#[serde(rename_all = "camelCase")]
-struct Totals {
-    position_price: f64,
-    total_price: f64,
-    tax: f64,
-    net_price: f64,
+    update: Option<LinePriceUpdate>,
 }
 
 /// What the promotions decided, merged into the quote.
@@ -195,44 +168,18 @@ fn discount_lines(
             gross: !b2b,
             ..PriceInput::default()
         });
-        let taxes = calc
-            .calculated_taxes
-            .iter()
-            .map(|t| CalculatedTax {
-                tax: t.tax,
-                tax_rate: t.tax_rate,
-                price: t.price,
-            })
-            .collect::<Vec<_>>();
         line.total = calc.total_price;
-        line.tax_rate = taxes.first().map_or(0., |t| t.tax_rate);
-        line.update = Some(LineUpdate {
-            total_price: calc.total_price,
-            unit_price: math_round(calc.total_price / line.quantity, decimals),
-            calculated_taxes: taxes,
-        });
+        line.tax_rate = calc.calculated_taxes.first().map_or(0., |t| t.tax_rate);
+        line.update = Some(LinePriceUpdate::new(
+            calc.total_price,
+            line.quantity,
+            decimals,
+            &calc.calculated_taxes,
+        ));
         after += calc.total_price;
         tax += calc.tax;
     }
     (math_round(after, decimals), math_round(tax, decimals))
-}
-
-/// The quote totals for a position total and its tax, gross or net.
-fn totals(position: f64, tax: f64, decimals: i32, b2b: bool) -> Totals {
-    Totals {
-        position_price: position,
-        tax,
-        net_price: if b2b {
-            position
-        } else {
-            math_round(position - tax, decimals)
-        },
-        total_price: if b2b {
-            math_round(position + tax, decimals)
-        } else {
-            position
-        },
-    }
 }
 
 /// Applies the promotions in order to a priced quote: discounted lines, totals, discounts and coupon codes.
@@ -262,7 +209,7 @@ fn apply(q: &mut Value, applicable: Vec<(String, Promotion)>, coupons: &[String]
         .map(|t| t.tax)
         .sum::<f64>();
     let original = math_round(if b2b { positions + tax } else { positions }, decimals);
-    let mut current = Totals {
+    let mut current = QuoteTotals {
         position_price: math_round(positions, decimals),
         total_price: original,
         tax: math_round(tax, decimals),
@@ -300,7 +247,7 @@ fn apply(q: &mut Value, applicable: Vec<(String, Promotion)>, coupons: &[String]
                 (p.amount * rate / total).min(1.)
             };
             let (after, tax) = discount_lines(&mut lines, total * ratio, (decimals, factor, b2b));
-            current = totals(after, tax, decimals, b2b);
+            current = QuoteTotals::new(after, tax, decimals, b2b);
             discounts.push(
                 json!({"id":id,"name":p.name,"kind":p.kind,"amount":math_round(total-after,decimals)}),
             );

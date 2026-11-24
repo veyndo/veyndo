@@ -7,4 +7,5 @@ pub mod discount;
 pub mod external_order;
 pub mod money;
 pub mod pricing;
+pub mod quote;
 pub(crate) mod validation;

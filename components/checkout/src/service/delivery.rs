@@ -7,6 +7,7 @@ use veyndo_pricing::catalog::Product;
 use veyndo_pricing::pricing::{
     CalculatedTax, PriceInput, TaxRule, calculate, math_round, proportional_tax_rules,
 };
+use veyndo_pricing::quote::QuoteTax;
 use veyndo_pricing::service::conversion as currencies;
 use veyndo_shop::domain::method_text;
 use veyndo_shop::types::cart::StoredCart;
@@ -43,15 +44,7 @@ struct PricedLine {
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct LinePrice {
-    calculated_taxes: Vec<LineTax>,
-}
-
-#[derive(Deserialize)]
-#[serde(rename_all = "camelCase")]
-struct LineTax {
-    tax_rate: f64,
-    tax: f64,
-    price: f64,
+    calculated_taxes: Vec<QuoteTax>,
 }
 
 impl PricedQuote {
