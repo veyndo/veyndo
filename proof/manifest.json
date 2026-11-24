@@ -2066,6 +2066,11 @@
       "sha256": "44de91545c4e661928ea53e6f6292a68864edcb86e744f0de176930672bff532",
       "review": "Database pools, row security, leases and the read cache moved into the core crate; no rule changed"
     },
+    "components/core/src/document.rs": {
+      "status": "unproved",
+      "sha256": "3e849f2caa411d41226067c23c27dcdf65ef9acd840c0fa02b5d582bb58314b6",
+      "review": "F22: typed order, receipt and scenario request views"
+    },
     "components/core/src/failure.rs": {
       "status": "unproved",
       "sha256": "0815662afae602e0085a566eb35ddcb10a8922a651e82af579436b281ba35432",
@@ -2088,8 +2093,8 @@
     },
     "components/core/src/lib.rs": {
       "status": "reviewed-binding",
-      "sha256": "7bdac3901cdde75e4ea68ee8aed22363ee970d2f591afb161bb0e0c5cdfe3120",
-      "review": "F17: shared outbox and shop registry helpers in core; written reasons for foreign table access"
+      "sha256": "88fe1c09f1138a23c48b9c2740748f9e62827a78db6101c10620b14be2026a75",
+      "review": "F22: typed order, receipt and scenario request views"
     },
     "components/core/src/localized/languages.rs": {
       "status": "unproved",
@@ -2783,8 +2788,8 @@
     },
     "components/intelligence/src/service/scenarios/journey.rs": {
       "status": "unproved",
-      "sha256": "ca58d0e5e637d0af9c6646b814e0d64bc54098d21fd337cebf3bd774deb75f09",
-      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
+      "sha256": "f757591aa185c45a49ce40b39cfca9ef2901cc149d41e9f6c9186eece1d67cb3",
+      "review": "F22: typed order, receipt and scenario request views"
     },
     "components/intelligence/src/service/scenarios/probes.rs": {
       "status": "unproved",
@@ -3238,8 +3243,8 @@
     },
     "components/orders/src/domain/order_fields.rs": {
       "status": "unproved",
-      "sha256": "5cae0dc3862a0a52d9e06b7d5391b623575d0bab1414646f828885a41427a682",
-      "review": "order workflow kernel bindings follow the move into components/orders"
+      "sha256": "b9c9963e4d704d5edea684cc0ba77d5eb27de2b7588af325d00f789e1d216e7d",
+      "review": "F22: typed order, receipt and scenario request views"
     },
     "components/orders/src/domain/order_machine.rs": {
       "status": "unproved",
@@ -3268,8 +3273,8 @@
     },
     "components/orders/src/domain/receipt_text.rs": {
       "status": "unproved",
-      "sha256": "00afdca335e2922d11dc72103e119e270ef922f013cab5ad143d78b1ba91d475",
-      "review": "Functions above 150 lines split into named steps without behaviour change; function length limit lowered to 150"
+      "sha256": "e05a973228b3ed32e487e63765eddb1a1cc023d2a40443850b3944df9cb47a93",
+      "review": "F22: typed order, receipt and scenario request views"
     },
     "components/orders/src/domain.rs": {
       "status": "unproved",
@@ -3386,6 +3391,11 @@
       "sha256": "8fcad14ce0984b66e24f40f7673ecdbc63ca70f73f7a7b8693856ab95a977dd1",
       "review": "Order list criteria, company model and receipts moved into components; kernel call sites unchanged"
     },
+    "components/orders/src/types/order_document.rs": {
+      "status": "unproved",
+      "sha256": "00aac67fce3d42f848f5e27aa3828d0b4bb85bfae1d525e01655d92ac293054e",
+      "review": "F22: typed order, receipt and scenario request views"
+    },
     "components/orders/src/types/source_record.rs": {
       "status": "unproved",
       "sha256": "a0bc8f34a353f33a2267c86508a1cc0111f9941a16709cbf7242f79eed639d3d",
@@ -3393,8 +3403,8 @@
     },
     "components/orders/src/types.rs": {
       "status": "unproved",
-      "sha256": "840b603c5883287c9054e74b6355e8c223797e6f9dd7bdb7a8fa624ce6c9351d",
-      "review": "Order list criteria, company model and receipts moved into components; kernel call sites unchanged"
+      "sha256": "38a2c04506ea10f4aeff1315ff3dee735854d7f82151f37ea812e86bb413893d",
+      "review": "F22: typed order, receipt and scenario request views"
     },
     "components/payments/src/domain/amounts.rs": {
       "status": "unproved",

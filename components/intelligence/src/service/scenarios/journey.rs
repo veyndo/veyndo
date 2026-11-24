@@ -5,6 +5,7 @@ use super::super::run_journal as checkpoint;
 use super::admit;
 use super::{evidence, shopper, source};
 use crate::ports::AgentHost;
+use serde::Deserialize;
 use serde_json::Value;
 use serde_json::json;
 use veyndo_checkout::store::cart_load::load as load_cart;
@@ -13,6 +14,7 @@ use veyndo_core::RequestContext;
 use veyndo_core::Result;
 use veyndo_core::bad;
 use veyndo_core::conflict;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::hash;
 use veyndo_core::model_contract::validate_native;
 use veyndo_shop::service::read_cache::settings as scoped_config;
@@ -76,13 +78,14 @@ pub async fn execute<H: AgentHost>(
     request: &Value,
 ) -> Result<Value> {
     let a = host.models().core;
+    let req: ScenarioRequest = view(request);
     admit(a, h).await?;
-    source::recheck(a, h, &request["scenario"]["source"]).await?;
-    let profile = &request["scenario"]["profile"];
+    source::recheck(a, h, &req.scenario.source).await?;
+    let profile = &req.scenario.profile;
     let mut customer = profile.clone();
     let currency = veyndo_pricing::money::Currency::new(
-        request["scenario"]["currency"].as_str().unwrap_or(""),
-        request["scenario"]["scale"].as_u64().unwrap_or(255) as u8,
+        req.scenario.currency.as_str().unwrap_or(""),
+        req.scenario.scale.as_u64().unwrap_or(255) as u8,
     )
     .map_err(bad)?;
     customer
@@ -93,7 +96,7 @@ pub async fn execute<H: AgentHost>(
         veyndo_pricing::money::Money::new(profile["budgetMinor"].as_i64().unwrap_or(0), currency)
             .decimal()
     );
-    customer["budgetCurrency"] = request["scenario"]["currency"].clone();
+    customer["budgetCurrency"] = req.scenario.currency.clone();
     let choice = choice(request)?;
     let mut state = if let Some(saved) = checkpoint::load(host, "scenario-state").await? {
         saved
@@ -109,7 +112,7 @@ pub async fn execute<H: AgentHost>(
         .await?;
         let products = shopper::products(host, &guest, "").await?;
         let (settings, revision) =
-            scoped_config(a, t, request["channel"].as_str().unwrap_or("default")).await?;
+            scoped_config(a, t, req.channel.as_str().unwrap_or("default")).await?;
         let extensions: String = sqlx::query_scalar("SELECT md5(coalesce(string_agg(stamp,'|' ORDER BY stamp),'')) FROM (SELECT 'app:'||id||':'||digest||':'||revision||':'||active AS stamp FROM app_packages WHERE tenant=$1 UNION ALL SELECT 'rule:'||id||':'||revision FROM commerce_rules WHERE tenant=$1 UNION ALL SELECT 'flow:'||id||':'||revision FROM commerce_flows WHERE tenant=$1 UNION ALL SELECT 'promotion:'||id||':'||revision FROM commerce_promotions WHERE tenant=$1 UNION ALL SELECT 'channel:'||id||':'||revision FROM sales_channels WHERE tenant=$1) versions")
             .bind(t).fetch_one(&a.db).await?;
         let state = json!({"token":cart["token"],"products":products,"configurationDigest":configuration,"snapshotDigest":hash(&json!({"products":products,"settings":settings,"revision":revision,"extensions":extensions}).to_string()),"steps":[],"outcome":"step_limit","orderId":null,"totalMinor":null});
@@ -124,9 +127,9 @@ pub async fn execute<H: AgentHost>(
         }
         checkpoint::authorize(host).await?;
         admit(a, h).await?;
-        source::recheck(a, h, &request["scenario"]["source"]).await?;
+        source::recheck(a, h, &req.scenario.source).await?;
         let cart = shopper::call(host, &guest, "cart.quote", &json!({})).await?;
-        let prompt = json!({"instruction":request["instruction"],"profile":customer,"currency":request["scenario"]["currency"],"minorUnitScale":request["scenario"]["scale"],"products":state["products"],"steps":state["steps"],"cart":shopper::observation(&cart)}).to_string();
+        let prompt = json!({"instruction":req.instruction,"profile":customer,"currency":req.scenario.currency,"minorUnitScale":req.scenario.scale,"products":state["products"],"steps":state["steps"],"cart":shopper::observation(&cart)}).to_string();
         let action_key = format!("scenario-action-{index}");
         let output: Output = if let Some(saved) = checkpoint::load(host, &action_key).await? {
             serde_json::from_value(saved).map_err(|_| bad("Invalid saved shopper action"))?
@@ -147,7 +150,7 @@ pub async fn execute<H: AgentHost>(
         };
         let action = &output.value;
         checkpoint::authorize(host).await?;
-        source::recheck(a, h, &request["scenario"]["source"]).await?;
+        source::recheck(a, h, &req.scenario.source).await?;
         let run = CURRENT
             .try_with(Clone::clone)
             .map_err(|_| bad("Scenario requires worker admission"))?;
@@ -178,9 +181,9 @@ pub async fn execute<H: AgentHost>(
             break;
         }
     }
-    source::recheck(a, h, &request["scenario"]["source"]).await?;
+    source::recheck(a, h, &req.scenario.source).await?;
     let finished_configuration = evidence::capture(host, t).await;
-    let report = json!({"scenario":{"title":request["scenario"]["title"],"group":request["scenario"]["group"],"profile":profile,"inputDigest":request["scenario"]["inputDigest"],"comparisonDigest":request["scenario"]["comparisonDigest"],"currency":request["scenario"]["currency"],"scale":request["scenario"]["scale"],"snapshotDigest":state["snapshotDigest"],"configurationEvidence":{"schemaVersion":1,"startedDigest":state["configurationDigest"],"finishedDigest":finished_configuration},"steps":state["steps"],"outcome":state["outcome"],"orderId":state["orderId"],"totalMinor":state["totalMinor"],"synthetic":true,"execution":"native-commerce-api","prompt":veyndo_cognition::prompts::evidence(PROMPT)}});
+    let report = json!({"scenario":{"title":req.scenario.title,"group":req.scenario.group,"profile":profile,"inputDigest":req.scenario.input_digest,"comparisonDigest":req.scenario.comparison_digest,"currency":req.scenario.currency,"scale":req.scenario.scale,"snapshotDigest":state["snapshotDigest"],"configurationEvidence":{"schemaVersion":1,"startedDigest":state["configurationDigest"],"finishedDigest":finished_configuration},"steps":state["steps"],"outcome":state["outcome"],"orderId":state["orderId"],"totalMinor":state["totalMinor"],"synthetic":true,"execution":"native-commerce-api","prompt":veyndo_cognition::prompts::evidence(PROMPT)}});
     checkpoint::authorize(host).await?;
     let run = CURRENT
         .try_with(Clone::clone)
@@ -253,4 +256,28 @@ async fn perform<H: AgentHost>(
         Some("finish") => Ok(json!({"stopped":true})),
         _ => Err(bad("Unsupported customer action")),
     }
+}
+
+/// The typed view of a stored scenario run request: its channel, instruction and the scenario it plays.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct ScenarioRequest {
+    channel: Value,
+    instruction: Value,
+    #[serde(deserialize_with = "lenient")]
+    scenario: Scenario,
+}
+
+/// The scenario a run plays: source, synthetic profile, currency and the digests that bind its evidence.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct Scenario {
+    comparison_digest: Value,
+    currency: Value,
+    group: Value,
+    input_digest: Value,
+    profile: Value,
+    scale: Value,
+    source: Value,
+    title: Value,
 }

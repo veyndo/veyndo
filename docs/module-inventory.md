@@ -722,6 +722,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/core/src/database/pool.rs](../components/core/src/database/pool.rs) | Explicit per-process database budgets and bounded queue waits; invalid deployment values fail fast. |
 | [components/core/src/database/row_security.rs](../components/core/src/database/row_security.rs) | Bind each borrowed PostgreSQL connection to task scope, and reject unsafe strict-runtime roles. |
 | [components/core/src/database.rs](../components/core/src/database.rs) | Database access of the process: deployment values, connection pools, row security and cluster-wide leases. |
+| [components/core/src/document.rs](../components/core/src/document.rs) | Typed views of stored JSON documents. A field with an unexpected shape reads as its default, exactly as indexing into the JSON yields null, so a view never rejects a document the untyped reader accepted. |
 | [components/core/src/failure.rs](../components/core/src/failure.rs) | Stable safe error details shared by HTTP, MCP and agent streams; legacy constructors retain their wire message. |
 | [components/core/src/history_context.rs](../components/core/src/history_context.rs) | Transaction-local actor, source and reason that the history triggers record with every change. |
 | [components/core/src/host_names.rs](../components/core/src/host_names.rs) | Public host names: a syntactically valid domain, the shop alias under a configured suffix and origins of one family. |
@@ -975,7 +976,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/orders/src/domain/order_workflow.rs](../components/orders/src/domain/order_workflow.rs) | One server-derived action catalogue drives UI, HTTP and MCP; built-in business guards cannot be bypassed. |
 | [components/orders/src/domain/receipt_instructions.rs](../components/orders/src/domain/receipt_instructions.rs) | Four-language invoice recipient footer from the immutable native receipt snapshot; cancellations never request payment. |
 | [components/orders/src/domain/receipt_pdf.rs](../components/orders/src/domain/receipt_pdf.rs) | Minimal paginated PDF serializer with WinAnsi Helvetica; snapshot retains complete Unicode originals. |
-| [components/orders/src/domain/receipt_text.rs](../components/orders/src/domain/receipt_text.rs) | Four-language document labels and authoritative snapshot-to-print projection. |
+| [components/orders/src/domain/receipt_text.rs](../components/orders/src/domain/receipt_text.rs) | Four-language document labels and authoritative snapshot-to-print projection over the typed receipt snapshot. |
 | [components/orders/src/domain.rs](../components/orders/src/domain.rs) | Rules of orders, free of I/O. |
 | [components/orders/src/http/account_orders.rs](../components/orders/src/http/account_orders.rs) | Customer-owned order reads share one tenant/identity predicate and a public projection. |
 | [components/orders/src/http/company.rs](../components/orders/src/http/company.rs) | Company basis transport: reading and saving the shop-wide or channel-specific company data under the settings rights. |
@@ -999,6 +1000,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/orders/src/store/redacted_reads.rs](../components/orders/src/store/redacted_reads.rs) | Explicit non-PII domain read views for separately scoped app callbacks; never elevate an identity. |
 | [components/orders/src/store.rs](../components/orders/src/store.rs) | SQL of the orders component. |
 | [components/orders/src/types/list_criteria.rs](../components/orders/src/types/list_criteria.rs) | Bounded order and customer list filters and sorts, reused by HTTP, MCP and reviewed grid plans; the app host admits the app filter. |
+| [components/orders/src/types/order_document.rs](../components/orders/src/types/order_document.rs) | Typed read views of the stored order document and of an issued receipt snapshot; open subtrees (prices, line items) stay JSON where they are copied verbatim. |
 | [components/orders/src/types/source_record.rs](../components/orders/src/types/source_record.rs) | One versioned record of a source system as an adapter hands it over; its identity is stable per tenant. |
 | [components/orders/src/types.rs](../components/orders/src/types.rs) | Stored and exchanged records of the orders component. |
 | [components/payments/src/domain/amounts.rs](../components/payments/src/domain/amounts.rs) | Provider wire amounts: decimal strings at the ISO precision of their currency, exact in minor units. |

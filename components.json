@@ -335,7 +335,7 @@
         "sales_channels": "read: reads the sales channel document (kind, activity, catalogue scope) to admit the request channel inside the same statement (company.rs, company_logos.rs)"
       },
       "glob_imports": 0,
-      "untyped_access": 282,
+      "untyped_access": 198,
       "sql_outside_store": 3
     },
     "payments": {
@@ -686,7 +686,7 @@
         "translation_jobs": "write: agent runs cancel translation jobs they started (agent_runs.rs)"
       },
       "glob_imports": 0,
-      "untyped_access": 609,
+      "untyped_access": 591,
       "sql_outside_store": 29
     },
     "studio": {
