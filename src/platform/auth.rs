@@ -1,5 +1,6 @@
 //! Independent platform authorization: live personal sessions, current grants, no integration/bootstrap escalation.
-use crate::{App, auth};
+use crate::auth;
+use crate::foundation::App;
 use axum::http::StatusCode;
 use veyndo_core::Error;
 use veyndo_core::Result;

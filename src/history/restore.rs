@@ -1,6 +1,8 @@
 //! Restore snapshots by replaying validated entity edits; financial effects and publication are never copied from historical state.
 use super::product;
-use crate::{App, auth, b2b, categories, commerce, documents, marketing, merchant, operations};
+use crate::foundation::App;
+use crate::foundation::merchant;
+use crate::{auth, b2b, categories, commerce, documents, marketing, operations};
 use axum::Json;
 use axum::extract::Path;
 use axum::extract::State;

@@ -1,6 +1,9 @@
 //! App file uploads reuse the product asset parser/store and require the current package plus either callback consent or a surface grant.
 use super::{Manifest, credentials, package, surface_grants};
-use crate::{App, SecureRoutes, assets, auth, merchant};
+use crate::auth::SecureRoutes;
+use crate::foundation::App;
+use crate::foundation::merchant;
+use crate::{assets, auth};
 use axum::Json;
 use axum::Router;
 use axum::extract::Path;

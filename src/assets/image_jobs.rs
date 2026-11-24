@@ -1,5 +1,5 @@
 //! Entry points for routes, capabilities and the worker; image jobs are owned by the catalog component.
-use crate::App;
+use crate::foundation::App;
 use axum::Json;
 use axum::extract::FromRef;
 use axum::extract::Path;

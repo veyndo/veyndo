@@ -1,6 +1,9 @@
 //! Package approval binds all requested permissions to a reviewed digest; current actor rights apply before every installation path.
 use super::{Manifest, approval, service_limits, validate};
-use crate::{App, SecureRoutes, auth, merchant};
+use crate::auth;
+use crate::auth::SecureRoutes;
+use crate::foundation::App;
+use crate::foundation::merchant;
 use axum::Json;
 use axum::Router;
 use axum::extract::State;

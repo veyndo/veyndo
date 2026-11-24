@@ -1,5 +1,9 @@
 //! Designer context projects native channels, languages and calculated products; no second catalogue or price engine.
-use crate::{App, SecureRoutes, apps, auth, catalog_page, commerce, merchant};
+use crate::auth::SecureRoutes;
+use crate::catalog_routes::catalog_page;
+use crate::foundation::App;
+use crate::foundation::merchant;
+use crate::{apps, auth, commerce};
 use axum::Json;
 use axum::Router;
 use axum::extract::State;

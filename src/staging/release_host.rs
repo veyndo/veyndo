@@ -1,5 +1,6 @@
 //! The server side of the release port: app installation and managed record saves with the bundled rules, flow checks, settings guards and the sandbox policy cache.
-use crate::{App, apps, commerce, marketing};
+use crate::foundation::App;
+use crate::{apps, commerce, marketing};
 use serde_json::Value;
 use std::sync::Arc;
 use veyndo_app_model::Entity;

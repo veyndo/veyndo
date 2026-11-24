@@ -1,5 +1,7 @@
 //! Merchant CRM and fulfillment APIs, shared verbatim with MCP operations capabilities.
-use crate::{App, accounts, auth, commerce, merchant, payments};
+use crate::foundation::App;
+use crate::foundation::merchant;
+use crate::{accounts, auth, commerce, payments};
 use axum::Json;
 use axum::extract::Path;
 use axum::extract::State;

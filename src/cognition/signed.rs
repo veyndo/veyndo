@@ -1,7 +1,8 @@
 //! Public Ed25519 attestations bind exact native facts and channel context for five minutes; signatures do not guarantee source truth.
 use super::evidence;
+use crate::commerce;
+use crate::foundation::App;
 use crate::marketing;
-use crate::{App, commerce};
 use axum::Json;
 use axum::Router;
 use axum::extract::Path;

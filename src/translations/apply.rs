@@ -1,5 +1,5 @@
 //! Entry point for capabilities; applying reviewed drafts is owned by the catalog component.
-use crate::App;
+use crate::foundation::App;
 use axum::Json;
 use axum::extract::Path;
 use axum::extract::State;

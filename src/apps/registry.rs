@@ -1,6 +1,6 @@
 //! Atomic installation and additive schema upgrades; immutable version digests preserve history.
 use super::{Manifest, data, install_host, service_limits};
-use crate::App;
+use crate::foundation::App;
 use serde_json::Value;
 use veyndo_app_platform::store::package_install;
 pub(crate) use veyndo_app_platform::store::packages::package;

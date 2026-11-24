@@ -1,5 +1,5 @@
 //! Leased payment jobs; the component owns the claim, the fence and the receipt, this file binds the server ports.
-use crate::App;
+use crate::foundation::App;
 use veyndo_core::Result;
 
 pub(crate) async fn payment_once(a: &App) -> Result<bool> {

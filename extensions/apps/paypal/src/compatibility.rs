@@ -1,6 +1,6 @@
 //! Native PayPal Orders v2 sandbox wire adapter; credentials never enter prompts or browser responses.
 use super::{Attempt, account, base, environment, format_amount, parse_amount};
-use crate::App;
+use crate::foundation::App;
 use axum::http::StatusCode;
 use serde_json::Value;
 use serde_json::json;

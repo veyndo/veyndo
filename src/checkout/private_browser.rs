@@ -1,5 +1,5 @@
 //! Relay only the browser's two Checkout session commands to a private service.
-use crate::App;
+use crate::foundation::App;
 use axum::Router;
 use axum::extract::DefaultBodyLimit;
 use axum::routing::post;

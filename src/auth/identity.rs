@@ -1,6 +1,6 @@
 //! Resolve the current credential and membership once; bootstrap and sandbox checks share the same boundary.
 use super::{credentials, permissions, resolve_identity_channel};
-use crate::App;
+use crate::foundation::App;
 use axum::http::StatusCode;
 use serde_json::json;
 use veyndo_core::Error;

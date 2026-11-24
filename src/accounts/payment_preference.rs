@@ -1,5 +1,5 @@
 //! Optional last-used payment preference is written after purchase commit, without holding cart/unit/product locks.
-use crate::App;
+use crate::foundation::App;
 use veyndo_shop::types::cart::StoredCart;
 pub(crate) async fn remember_payment(a: &App, c: &StoredCart, method: &str) {
     let Some(customer) = &c.data.customer_id else {

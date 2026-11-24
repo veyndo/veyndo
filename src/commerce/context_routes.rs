@@ -1,5 +1,5 @@
 //! Method discovery and checkout context changes are owned by the checkout component; the server supplies its ports.
-use crate::App;
+use crate::foundation::App;
 use axum::Json;
 use axum::extract::State;
 use serde_json::Value;

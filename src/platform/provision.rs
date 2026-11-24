@@ -1,6 +1,7 @@
 //! Operator shop creation commits ownership, settings and audit atomically; never issues another user's credentials.
 use super::auth;
-use crate::{App, prototype_products};
+use crate::catalog_model::prototype_products;
+use crate::foundation::App;
 use axum::Json;
 use axum::extract::State;
 use serde_json::Value;

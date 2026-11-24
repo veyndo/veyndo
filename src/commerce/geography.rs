@@ -1,6 +1,6 @@
 //! Country catalogue of a shop; the bundled world and the admission rules are owned by the shipping component.
 use super::{Settings, config};
-use crate::App;
+use crate::foundation::App;
 use axum::Json;
 use axum::extract::State;
 use serde_json::Value;

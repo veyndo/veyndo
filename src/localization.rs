@@ -1,5 +1,8 @@
 //! Shop locale resolution, translated catalog hydration and non-mutating merchant quote.
-use super::{App, commerce, currencies, load_cart, marketing, merchant};
+use super::{commerce, currencies, marketing};
+use crate::cart_storage::load_cart;
+use crate::foundation::App;
+use crate::foundation::merchant;
 use axum::Json;
 use axum::extract::State;
 use serde_json::Value;

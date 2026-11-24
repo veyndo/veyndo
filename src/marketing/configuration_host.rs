@@ -1,6 +1,6 @@
 //! The server side of saving marketing configuration: actor-private work templates, installed app actions and POS channel setup.
 use super::Flow;
-use crate::App;
+use crate::foundation::App;
 use serde_json::Value;
 use veyndo_core::request_context::RequestContext;
 use veyndo_marketing::ports::ConfigurationHost;

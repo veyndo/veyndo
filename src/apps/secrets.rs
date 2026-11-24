@@ -1,5 +1,6 @@
 //! Digest-bound per-shop app secret rotation is handled in the apps component; this module registers its routes.
-use crate::{App, SecureRoutes};
+use crate::auth::SecureRoutes;
+use crate::foundation::App;
 use axum::Router;
 use axum::routing::get;
 pub(super) fn router() -> Router<App> {

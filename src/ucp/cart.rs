@@ -1,7 +1,9 @@
 //! UCP cart transfer adapts the native cart and single-use browser handoff; supplier totals and return URLs are never trusted.
 use super::create_session;
+use crate::cart_storage::load_cart;
+use crate::foundation::App;
 use crate::ucp::UCP_VERSION;
-use crate::{App, checkout_handoff, load_cart, shop_domains};
+use crate::{checkout_handoff, shop_domains};
 use axum::Json;
 use axum::extract::State;
 use serde_json::Value;

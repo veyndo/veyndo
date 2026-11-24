@@ -1,5 +1,7 @@
 //! Merchant catalogue route and the business policy routes; the apps component owns policy activation and state.
-use crate::{App, catalog_request, merchant};
+use crate::catalog_routes::catalog_request;
+use crate::foundation::App;
+use crate::foundation::merchant;
 use axum::Json;
 use axum::extract::State;
 use serde_json::Value;

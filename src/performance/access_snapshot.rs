@@ -1,5 +1,5 @@
 //! The per-request admission snapshot shared by domain, identity, availability, channel and proxy middleware; the shop component reads it.
-use crate::App;
+use crate::foundation::App;
 use std::sync::Arc;
 use veyndo_core::Result;
 use veyndo_core::request_context::RequestContext;

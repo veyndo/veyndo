@@ -1,6 +1,7 @@
 //! HTTP/MCP parity for history; per-entity read/write scopes are checked again at invocation time.
 use super::{routes, transport};
-use crate::{App, auth, commerce};
+use crate::foundation::App;
+use crate::{auth, commerce};
 use axum::Json;
 use axum::extract::Path;
 use axum::extract::State;

@@ -1,5 +1,5 @@
 //! SKU loading with parent translation fallback; owned by the catalog component.
-use crate::App;
+use crate::foundation::App;
 use axum::extract::FromRef;
 use veyndo_catalog::service::catalog_reads;
 use veyndo_core::Result;

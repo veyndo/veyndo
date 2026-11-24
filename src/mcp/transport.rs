@@ -1,5 +1,7 @@
 //! MCP visibility and shared read-scope memoization, independent of internal planning tools.
-use crate::{App, apps, invoke, performance};
+use crate::capabilities::invoke;
+use crate::foundation::App;
+use crate::{apps, performance};
 use serde_json::Value;
 use veyndo_core::Result;
 use veyndo_core::bad;

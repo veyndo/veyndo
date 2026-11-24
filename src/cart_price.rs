@@ -1,5 +1,6 @@
 //! Authoritative quantity pricing and localized checkout quote assembly.
-use crate::{App, apps, commerce, payments, pos};
+use crate::foundation::App;
+use crate::{apps, commerce, payments, pos};
 use serde_json::Value;
 use veyndo_core::Result;
 use veyndo_pricing::catalog::Product;

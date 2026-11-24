@@ -1,8 +1,11 @@
 //! Scoped visual proposals reuse central inference and native revision-bound tasks; models cannot publish or execute.
 use crate::apps::site_builder;
-use crate::{
-    App, SecureRoutes, apply, apps, auth, language_context, merchant, performance, staging,
-};
+use crate::auth::SecureRoutes;
+use crate::foundation::App;
+use crate::foundation::merchant;
+use crate::localization::language_context;
+use crate::proposal_apply::apply;
+use crate::{apps, auth, performance, staging};
 use axum::Json;
 use axum::Router;
 use axum::extract::State;

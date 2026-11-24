@@ -1,5 +1,6 @@
 //! Shared read-context caching with authoritative versions; mutations and checkout locks stay outside memoization.
-use crate::{App, commerce};
+use crate::commerce;
+use crate::foundation::App;
 use axum::http::StatusCode;
 use axum::response::Response;
 use axum::{extract::Request, middleware::Next};

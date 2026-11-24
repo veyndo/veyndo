@@ -2,7 +2,10 @@
 use super::{
     customer, enqueue, onboarding_route, provider_webhooks, providers_route, sessions, webhooks,
 };
-use crate::{App, SecureRoutes, auth, merchant};
+use crate::auth;
+use crate::auth::SecureRoutes;
+use crate::foundation::App;
+use crate::foundation::merchant;
 use axum::Json;
 use axum::Router;
 use axum::extract::Path;

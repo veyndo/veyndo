@@ -1,6 +1,6 @@
 //! Hosted-app installation lives in the apps component; this module adds the connected frontends and their local answers.
 use super::{data, install_host};
-use crate::App;
+use crate::foundation::App;
 use serde_json::Value;
 use serde_json::json;
 use sqlx::{Postgres, Transaction};

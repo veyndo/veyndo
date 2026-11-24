@@ -1,5 +1,5 @@
 //! The server side of the assisted-selling register port (POS and manual orders): the guarded cart, quotes, currencies, checkout context, purchase, catalogue and receipt owners of this process.
-use crate::App;
+use crate::foundation::App;
 use axum::extract::{FromRef, Json, Path, Query, State};
 use serde_json::Value;
 use veyndo_catalog::types::catalog_page::CatalogCriteria;
@@ -45,7 +45,7 @@ impl veyndo_pos::ports::Register for Register<'_> {
         })
     }
     fn checkout<'a>(&'a self, h: &'a RequestContext, key: &'a str) -> PortFuture<'a, Value> {
-        Box::pin(crate::checkout(self.app, h, key))
+        Box::pin(crate::order_checkout::checkout(self.app, h, key))
     }
     fn catalog<'a>(
         &'a self,
@@ -54,7 +54,7 @@ impl veyndo_pos::ports::Register for Register<'_> {
     ) -> PortFuture<'a, Value> {
         Box::pin(async move {
             Ok(
-                crate::catalog_page(State(self.app.clone()), h.clone(), criteria)
+                crate::catalog_routes::catalog_page(State(self.app.clone()), h.clone(), criteria)
                     .await?
                     .0,
             )

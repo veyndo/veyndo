@@ -1,5 +1,5 @@
 //! Entry points of product file operations for capabilities and app upload surfaces; rules and storage are owned by the catalog component.
-use crate::App;
+use crate::foundation::App;
 use axum::Json;
 use axum::extract::FromRef;
 use axum::extract::Path;

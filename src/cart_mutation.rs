@@ -1,6 +1,8 @@
 //! Optimistic cart mutations and quantity normalization.
 use crate::cart_price::Quotes;
-use crate::{App, agent_runs, apps, cart_json, legal};
+use crate::cart_price::cart_json;
+use crate::foundation::App;
+use crate::{agent_runs, apps, legal};
 use serde_json::Value;
 use serde_json::json;
 use std::collections::HashMap;

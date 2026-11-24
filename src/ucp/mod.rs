@@ -1,5 +1,9 @@
 //! UCP transport adapters reuse native cart, B2B, pricing, approval and checkout owners.
-use crate::{App, cart_json, cart_mutation, checkout, load_cart};
+use crate::cart_mutation;
+use crate::cart_price::cart_json;
+use crate::cart_storage::load_cart;
+use crate::foundation::App;
+use crate::order_checkout::checkout;
 use axum::Json;
 use axum::Router;
 use axum::extract::Path;

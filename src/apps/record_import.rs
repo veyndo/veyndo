@@ -1,6 +1,6 @@
 //! Managed record import lives in the apps component; this module keeps the short path for the import operations.
 use super::service_limits;
-use crate::App;
+use crate::foundation::App;
 use serde_json::Value;
 use veyndo_app_platform::service::record_import;
 use veyndo_core::Result;

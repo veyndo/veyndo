@@ -1,6 +1,7 @@
 //! The server side of the agent port: native capabilities, installed app tools, consent-bound preferences, studio order facts, the native work vocabulary and proposal admission.
+use crate::foundation::App;
 use crate::{
-    App, agent_runs, apps, auth, capabilities, cognition, commerce, operations, staging, studio,
+    agent_runs, apps, auth, capabilities, cognition, commerce, operations, staging, studio,
 };
 use serde_json::Value;
 use serde_json::json;

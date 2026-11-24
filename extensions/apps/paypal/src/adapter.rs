@@ -1,6 +1,6 @@
 //! Legacy PayPal admission/account wiring belongs to the PayPal package, not a second pricing owner.
 use super::{Attempt, PaymentProvider};
-use crate::App;
+use crate::foundation::App;
 use crate::payments::paypal;
 use axum::http::StatusCode;
 use serde_json::Value;

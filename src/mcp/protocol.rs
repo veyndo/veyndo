@@ -1,5 +1,6 @@
 //! JSON-RPC envelope errors differ from actionable domain/tool failures; no transport invents authorization.
-use crate::{App, apps, capabilities};
+use crate::foundation::App;
+use crate::{apps, capabilities};
 use serde_json::Value;
 use serde_json::json;
 use veyndo_core::Error;

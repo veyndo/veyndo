@@ -1,6 +1,6 @@
 //! Proposal application lives in the studio component; these entries lend it the server's ports.
-use crate::App;
 use crate::agent_host::Host;
+use crate::foundation::App;
 use serde_json::Value;
 use veyndo_core::Result;
 use veyndo_core::request_context::RequestContext;

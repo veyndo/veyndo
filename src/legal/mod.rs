@@ -1,5 +1,6 @@
 //! Legal and privacy operations live in the intelligence component (consent) and the shop component (configuration, requests); the server registers their routes.
-use crate::{App, SecureRoutes};
+use crate::auth::SecureRoutes;
+use crate::foundation::App;
 use axum::Router;
 use axum::routing::get;
 use axum::routing::post;

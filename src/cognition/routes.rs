@@ -1,6 +1,7 @@
 //! Merchant memory endpoints and revision-bound experiment/dismissal decisions.
 use super::{behavior, contracts, preferences, recommendations, signed, signed_offer, stream};
-use crate::{App, SecureRoutes};
+use crate::auth::SecureRoutes;
+use crate::foundation::App;
 use axum::Router;
 use axum::routing::get;
 pub(crate) fn cognition_router() -> Router<App> {

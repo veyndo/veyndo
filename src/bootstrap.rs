@@ -1,7 +1,9 @@
 //! Startup, additive migrations, persisted extensions and outbox worker.
+use crate::foundation::App;
+use crate::routes::router;
 use crate::{
-    App, apps, currencies, demo_catalog, marketing, migrations, performance, platform, router,
-    runtime_config, sandbox_cache, workers,
+    apps, currencies, demo_catalog, marketing, migrations, performance, platform, runtime_config,
+    sandbox_cache, workers,
 };
 use crate::{capabilities, documents};
 use sqlx::postgres::PgPoolOptions;

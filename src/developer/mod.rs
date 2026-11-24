@@ -1,5 +1,6 @@
 //! Prompt-generated declarative apps and native coding-agent handoff, never unsandboxed model code.
-use crate::{App, apps, auth};
+use crate::foundation::App;
+use crate::{apps, auth};
 use axum::Json;
 use axum::extract::State;
 use serde_json::Value;

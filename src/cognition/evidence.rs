@@ -1,5 +1,5 @@
 //! The source-bound claim lifecycle lives in the intelligence component; these entries keep the server-side signatures.
-use crate::App;
+use crate::foundation::App;
 use serde_json::Value;
 use veyndo_core::Result;
 use veyndo_core::request_context::RequestContext;

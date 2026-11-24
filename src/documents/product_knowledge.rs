@@ -1,6 +1,6 @@
 //! Product knowledge route; the intelligence component owns the facts and graph evidence.
 use super::{Knowledge, product_questions};
-use crate::App;
+use crate::foundation::App;
 use axum::Json;
 use axum::extract::Path;
 use axum::extract::State;

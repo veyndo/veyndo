@@ -1,5 +1,5 @@
 //! Route of the native payment-only history projection; no financial command is executed.
-use crate::App;
+use crate::foundation::App;
 use axum::Json;
 use axum::extract::Path;
 use axum::extract::State;

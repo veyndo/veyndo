@@ -1,5 +1,6 @@
 //! Reorder proposal routes; the intelligence component owns the supplier offers, the ceiling check and the checkout handover.
-use crate::{App, SecureRoutes};
+use crate::auth::SecureRoutes;
+use crate::foundation::App;
 use axum::Json;
 use axum::Router;
 use axum::extract::State;

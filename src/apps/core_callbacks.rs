@@ -3,7 +3,10 @@ use super::{
     Manifest, core_documents, core_exchange, credentials, input_schema, invoke_app, job_import,
     observability, package, service_limits, settings,
 };
-use crate::{App, SecureRoutes, assets, auth, merchant};
+use crate::auth::SecureRoutes;
+use crate::foundation::App;
+use crate::foundation::merchant;
+use crate::{assets, auth};
 use axum::Json;
 use axum::Router;
 use axum::extract::Path;

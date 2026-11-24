@@ -1,5 +1,6 @@
 //! Durable long actions piggyback on the existing outbox. Apps claim a fenced lease; unknown side effects are never retried automatically.
-use crate::{App, SecureRoutes};
+use crate::auth::SecureRoutes;
+use crate::foundation::App;
 use axum::Router;
 use axum::routing::get;
 pub(super) fn router() -> Router<App> {

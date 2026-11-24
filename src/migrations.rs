@@ -1,5 +1,7 @@
 //! Versioned setup is separate from serving; no catalog-wide startup repair.
-use crate::{App, apps, seed};
+use crate::apps;
+use crate::foundation::App;
+use crate::seed::seed;
 use serde_json::Value;
 use serde_json::json;
 use sqlx::PgPool;

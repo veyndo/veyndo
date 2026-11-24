@@ -1,5 +1,5 @@
 //! Manual order route; the studio component owns the draft, review and approved completion behind the register port.
-use crate::App;
+use crate::foundation::App;
 use axum::Json;
 use axum::extract::Path;
 use axum::extract::State;

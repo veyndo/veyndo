@@ -1,5 +1,6 @@
 //! Independently deployable worker roles; leases and durable receipts coordinate replicas.
-use crate::{App, agent_runs, assets, cognition, outbox, payments, runtime_config, translations};
+use crate::foundation::App;
+use crate::{agent_runs, assets, cognition, outbox, payments, runtime_config, translations};
 use std::env;
 use std::sync::Arc;
 use veyndo_core::work_signal;

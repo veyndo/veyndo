@@ -1,6 +1,7 @@
 //! App keys reuse the core integration-key store, current creator rights, expiry and immutable package digest.
 use super::{approval, package};
-use crate::{App, SecureRoutes};
+use crate::auth::SecureRoutes;
+use crate::foundation::App;
 use axum::Router;
 use axum::routing::get;
 use veyndo_core::Result;

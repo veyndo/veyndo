@@ -1,6 +1,9 @@
 //! Scoped merchant-only evidence retrieval; sources never enter public product answers.
 use super::private_evidence;
-use crate::{App, SecureRoutes, auth, merchant};
+use crate::auth;
+use crate::auth::SecureRoutes;
+use crate::foundation::App;
+use crate::foundation::merchant;
 use axum::Json;
 use axum::Router;
 use axum::extract::State;

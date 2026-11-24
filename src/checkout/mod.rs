@@ -1,5 +1,6 @@
 //! Expose the commerce host contract through the existing native checkout transaction.
-use crate::{App, accounts};
+use crate::accounts;
+use crate::foundation::App;
 use axum::{Router, routing::post};
 use serde_json::Value;
 use veyndo_core::Result;

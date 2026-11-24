@@ -1,6 +1,6 @@
 //! Assistant app views live in the apps component; this module adds the caller's language and the gateway calls.
 use super::gateway;
-use crate::App;
+use crate::foundation::App;
 use axum::response::Response;
 use serde_json::Value;
 use serde_json::json;

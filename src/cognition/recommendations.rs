@@ -1,5 +1,7 @@
 //! Merchant-approved associations are consumed by the public shop without exposing order counts or identities.
-use crate::{App, catalog_page, marketing};
+use crate::catalog_routes::catalog_page;
+use crate::foundation::App;
+use crate::marketing;
 use axum::Json;
 use axum::extract::Path;
 use axum::extract::State;

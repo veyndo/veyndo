@@ -1,6 +1,8 @@
 //! Generic channel/product projections and imported sales delegate to native owners with explicit app capabilities.
 use super::{Manifest, approval, credentials, input_schema};
-use crate::{App, commerce, currencies, merchant};
+use crate::foundation::App;
+use crate::foundation::merchant;
+use crate::{commerce, currencies};
 use axum::http::StatusCode;
 use serde_json::Value;
 use serde_json::json;

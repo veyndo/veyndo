@@ -1,5 +1,7 @@
 //! Catalogue intake routes and the server side of the intake port; the intelligence component owns drafts, extraction and the approved sandbox save.
-use crate::{App, SecureRoutes, apps, commerce};
+use crate::auth::SecureRoutes;
+use crate::foundation::App;
+use crate::{apps, commerce};
 use axum::Json;
 use axum::Router;
 use axum::extract::State;

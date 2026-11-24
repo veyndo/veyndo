@@ -1,6 +1,6 @@
 //! PayPal verifies webhook signatures before inbox insertion; provider reconciliation confirms monetary state.
 use super::{account, enqueue_tx, paypal};
-use crate::App;
+use crate::foundation::App;
 use axum::Json;
 use axum::extract::State;
 use axum::http::StatusCode;

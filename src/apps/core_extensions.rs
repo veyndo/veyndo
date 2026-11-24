@@ -6,7 +6,7 @@ pub(crate) use veyndo_app_model::Object;
 
 /// Native lists and details share one bounded, permission-filtered app projection.
 pub(crate) async fn attach(
-    a: &crate::App,
+    a: &crate::foundation::App,
     h: &RequestContext,
     object: Object,
     rows: &mut [serde_json::Value],

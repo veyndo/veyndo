@@ -1,6 +1,7 @@
 //! The server side of the settings port: rule conditions, payment capture configuration, the marketing configuration lock and app lifecycle locales.
 use super::Settings;
-use crate::{App, apps, marketing, payments};
+use crate::foundation::App;
+use crate::{apps, marketing, payments};
 use serde_json::Value;
 use std::sync::Arc;
 use veyndo_core::PortFuture;

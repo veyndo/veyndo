@@ -1,6 +1,9 @@
 //! Dedicated bounded order-document upload requires exact app capabilities, current actor rights and native receipt ownership.
 use super::{Manifest, credentials, input_schema, package};
-use crate::{App, SecureRoutes, auth, merchant};
+use crate::auth;
+use crate::auth::SecureRoutes;
+use crate::foundation::App;
+use crate::foundation::merchant;
 use axum::Json;
 use axum::Router;
 use axum::extract::Path;

@@ -1,5 +1,6 @@
 //! Idempotent synthetic template catalogue initialization.
-use crate::{App, accounts};
+use crate::accounts;
+use crate::foundation::App;
 use argon2::Argon2;
 use argon2::PasswordHasher;
 use argon2::password_hash::SaltString;

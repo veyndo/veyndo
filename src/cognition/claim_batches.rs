@@ -1,5 +1,5 @@
 //! Public claim batches live in the intelligence component; this module registers their storefront routes.
-use crate::App;
+use crate::foundation::App;
 use axum::Router;
 use axum::routing::post;
 use veyndo_intelligence::http::claims::{compile, intake};

@@ -1,6 +1,6 @@
 //! Knowledge workspace/source MCP tools delegate to the same authorized HTTP operations and schemas.
 use super::{ingest, lifecycle, preview, product_knowledge, publish};
-use crate::App;
+use crate::foundation::App;
 use axum::Json;
 use axum::extract::Path;
 use axum::extract::State;

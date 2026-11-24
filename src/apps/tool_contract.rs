@@ -1,5 +1,5 @@
 //! The app tool catalogue lives in the apps component; this module keeps the short path for MCP and the assistant.
-use crate::App;
+use crate::foundation::App;
 use serde_json::Value;
 pub(crate) use veyndo_app_platform::store::tool_catalogue::app_tools_for;
 use veyndo_core::Result;

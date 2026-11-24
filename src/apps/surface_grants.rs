@@ -1,6 +1,7 @@
 //! Surface grants live in the apps component; this module registers their routes and keeps the short path for uploads.
 use super::{Manifest, Surface, service_limits};
-use crate::{App, SecureRoutes};
+use crate::auth::SecureRoutes;
+use crate::foundation::App;
 use axum::Router;
 use axum::routing::post;
 use serde_json::Value;

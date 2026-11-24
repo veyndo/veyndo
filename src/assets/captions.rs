@@ -1,5 +1,6 @@
 //! Caption route and the server's public egress; the intelligence component owns the proposal and its image evidence.
-use crate::{App, apps, capabilities};
+use crate::foundation::App;
+use crate::{apps, capabilities};
 use axum::Json;
 use axum::extract::State;
 use serde_json::Value;

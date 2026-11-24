@@ -1,5 +1,7 @@
 //! Merchant readiness reports native implementation and current channel configuration, never external programme approval or settlement.
-use crate::{App, auth, commerce, marketing, merchant};
+use crate::foundation::App;
+use crate::foundation::merchant;
+use crate::{auth, commerce, marketing};
 use crate::{cognition, mcp};
 use serde_json::Value;
 use serde_json::json;

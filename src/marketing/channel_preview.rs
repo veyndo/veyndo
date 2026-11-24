@@ -1,5 +1,6 @@
 //! Merchant channel previews are owned by the marketing component; the server registers their routes.
-use crate::{App, SecureRoutes};
+use crate::auth::SecureRoutes;
+use crate::foundation::App;
 use axum::Router;
 use axum::routing::get;
 use axum::routing::post;

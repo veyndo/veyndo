@@ -1,5 +1,7 @@
 //! Model provider listing and product retrieval over the server's model context; conversations and knowledge handlers live in the intelligence component.
-use super::{App, auth, merchant};
+use super::auth;
+use crate::foundation::App;
+use crate::foundation::merchant;
 use axum::Json;
 use axum::extract::State;
 use serde_json::Value;

@@ -1,6 +1,6 @@
 //! Routes of the provider onboarding and listing; the payments component owns the account binding rules.
 use super::host::{Gateway, PaymentHost};
-use crate::App;
+use crate::foundation::App;
 use axum::Json;
 use axum::extract::Path;
 use axum::extract::State;

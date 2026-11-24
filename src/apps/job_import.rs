@@ -1,6 +1,8 @@
 //! Reviewed job records use current creator rights and a locked live package; private targets never become app credentials.
 use super::{Manifest, approval, credentials, gateway, input_schema, lock_package_write};
-use crate::{App, auth, merchant};
+use crate::auth;
+use crate::foundation::App;
+use crate::foundation::merchant;
 use axum::http::StatusCode;
 use serde_json::Value;
 use serde_json::json;

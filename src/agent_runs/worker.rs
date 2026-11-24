@@ -1,6 +1,6 @@
 //! The run worker executes claimed runs over the server's tools; claims, recovery and failure records live in the intelligence component.
 use super::{CURRENT, Run, authority, scenarios, work_plan};
-use crate::App;
+use crate::foundation::App;
 use axum::http::StatusCode;
 use serde_json::Value;
 use sqlx::Row;

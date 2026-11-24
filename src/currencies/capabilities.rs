@@ -1,6 +1,6 @@
 //! Currency MCP operations reuse the native HTTP handlers and existing settings/catalog permissions.
 use super::routes;
-use crate::App;
+use crate::foundation::App;
 use axum::Json;
 use axum::extract::Path;
 use axum::extract::State;

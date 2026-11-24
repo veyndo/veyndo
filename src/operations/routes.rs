@@ -3,7 +3,9 @@ use super::{
     addresses, company_public, customer_create, customer_lookup, customers, grid_plan, imports,
     manual_orders, orders, receipts, workflow,
 };
-use crate::{App, SecureRoutes, commerce};
+use crate::auth::SecureRoutes;
+use crate::commerce;
+use crate::foundation::App;
 use axum::Router;
 use axum::routing::get;
 use axum::routing::post;

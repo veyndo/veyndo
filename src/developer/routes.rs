@@ -1,6 +1,8 @@
 //! Developer HTTP transport and coding-agent task export; explicit staging precedes live release.
 use super::{app_generation, builds, design_context, generation};
-use crate::{App, SecureRoutes, assets, auth, commerce, staging};
+use crate::auth::SecureRoutes;
+use crate::foundation::App;
+use crate::{assets, auth, commerce, staging};
 use axum::Json;
 use axum::Router;
 use axum::extract::State;

@@ -1,6 +1,6 @@
 //! Trusted server-to-server inference inherits operator settings without disclosing any provider credentials.
 use super::email;
-use crate::App;
+use crate::foundation::App;
 use axum::Json;
 use axum::extract::State;
 use axum::http::StatusCode;

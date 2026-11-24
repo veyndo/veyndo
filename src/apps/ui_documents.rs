@@ -1,5 +1,5 @@
 //! Sandboxed app documents are served by the apps component; this module registers their routes.
-use crate::App;
+use crate::foundation::App;
 use axum::Router;
 use axum::routing::get;
 pub(crate) use veyndo_app_platform::http::ui_documents::SandboxedAppDocument;

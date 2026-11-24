@@ -1,6 +1,6 @@
 //! The server side of the payment ledger port: adapter configuration and the POS sale completion.
 use super::Attempt;
-use crate::App;
+use crate::foundation::App;
 use serde_json::Value;
 use veyndo_core::PortFuture;
 use veyndo_core::Result;

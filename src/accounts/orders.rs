@@ -1,6 +1,6 @@
 //! Customer receipt PDFs render in the server; the order reads and projection are owned by the orders component.
 use super::identity;
-use crate::App;
+use crate::foundation::App;
 use axum::extract::Path;
 use axum::extract::State;
 use axum::http::StatusCode;

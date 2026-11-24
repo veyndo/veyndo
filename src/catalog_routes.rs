@@ -1,8 +1,9 @@
 //! Health and localized catalogue HTTP routes.
-use crate::{
-    App, b2b, categories, commerce, currencies, language_context, load_cart, marketing,
-    product_page,
-};
+use crate::cart_storage::load_cart;
+use crate::catalog_page::product_page;
+use crate::foundation::App;
+use crate::localization::language_context;
+use crate::{b2b, categories, commerce, currencies, marketing};
 use axum::Json;
 use axum::extract::State;
 use serde_json::Value;

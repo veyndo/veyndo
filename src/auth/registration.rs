@@ -1,7 +1,8 @@
 //! Create an isolated merchant workspace from synthetic template data.
 //! Registration cannot claim existing tenants or assign a global administrator.
 use super::{email, hash_password, issue_session, name, password};
-use crate::{App, prototype_products};
+use crate::catalog_model::prototype_products;
+use crate::foundation::App;
 use axum::Json;
 use axum::extract::State;
 use axum::http::StatusCode;

@@ -1,6 +1,6 @@
 //! Signed cart offer transport; the intelligence component signs and checks offers through the cart port.
-use crate::App;
 use crate::cart_storage::Carts;
+use crate::foundation::App;
 use axum::Json;
 use axum::Router;
 use axum::extract::State;

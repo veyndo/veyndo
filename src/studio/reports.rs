@@ -1,5 +1,6 @@
 //! Shared commerce reports live in the studio component; this module keeps the server registration and capability entries.
-use crate::{App, SecureRoutes};
+use crate::auth::SecureRoutes;
+use crate::foundation::App;
 use axum::Router;
 use axum::routing::post;
 use serde_json::Value;

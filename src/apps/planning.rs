@@ -1,6 +1,6 @@
 //! App planning lives in the apps component; this module keeps the short path for the planner and proposals.
 use super::{data, service_limits};
-use crate::App;
+use crate::foundation::App;
 use serde_json::Value;
 pub(crate) use veyndo_app_platform::domain::planning::AppChange;
 use veyndo_app_platform::store::planning;

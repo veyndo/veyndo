@@ -1,5 +1,5 @@
 //! The unit order receipt PDF renders in the server after the B2B component admits the unit order.
-use crate::App;
+use crate::foundation::App;
 use axum::extract::Path;
 use axum::extract::State;
 use axum::response::Response;

@@ -1,13 +1,31 @@
 //! HTTP transport registry; domain behavior lives in dedicated modules.
+use crate::agent::model_providers;
+use crate::agent::semantic_search;
+use crate::auth::SecureRoutes;
+use crate::cart_routes::add_items;
+use crate::cart_routes::create_cart;
+use crate::cart_routes::edit_cart;
+use crate::cart_routes::get_cart;
+use crate::cart_routes::place_order;
+use crate::cart_routes::preview_cart;
+use crate::catalog_routes::catalog_request;
+use crate::catalog_routes::health;
+use crate::customer::login;
+use crate::extensions::activate_extension;
+use crate::extensions::admin_catalog;
+use crate::extensions::extension_state;
+use crate::foundation::App;
+use crate::localization::context_info;
+use crate::localization::preview_quote;
+use crate::order_routes::orders;
+use crate::proposal_routes::agent_apply;
+use crate::studio::merchant_overview;
+use crate::studio::track_channels;
 use crate::{
-    App, SecureRoutes, accounts, activate_extension, add_items, admin_catalog, agent_apply,
-    agent_runs, apps, assets, auth, b2b, brand_redirect, capabilities, catalog_request, categories,
-    checkout, checkout_handoff, cognition, commerce, concierge, context_info, create_cart,
-    currencies, developer, documents, edit_cart, experience, extension_state, get_cart, health,
-    history, legal, login, marketing, mcp, merchant_overview, model_providers, operations, orders,
-    payments, performance, place_order, platform, pos, preview_cart, preview_quote,
-    security_headers, semantic_search, shop_domains, staging, storefront_pages, studio,
-    track_channels, translations, ucp,
+    accounts, agent_runs, apps, assets, auth, b2b, brand_redirect, categories, checkout,
+    checkout_handoff, cognition, commerce, currencies, developer, documents, history, legal,
+    marketing, mcp, operations, payments, performance, platform, pos, security_headers,
+    shop_domains, staging, storefront_pages, studio, translations, ucp,
 };
 use axum::Router;
 use axum::http::StatusCode;
@@ -177,7 +195,11 @@ fn commerce_routes() -> Router<App> {
             &[("POST", "catalog.read")],
             post(preview_quote),
         )
-        .secure_route("/api/capabilities", &[("GET", "public")], get(capabilities))
+        .secure_route(
+            "/api/capabilities",
+            &[("GET", "public")],
+            get(crate::capabilities::capabilities),
+        )
         .route("/store-api/product", post(catalog_request))
         .route(
             "/store-api/product/{id}",
@@ -296,13 +318,21 @@ fn assistant_routes() -> Router<App> {
             &[("GET", "knowledge.read")],
             get(policy_stats),
         )
-        .secure_route("/api/experience", &[("POST", "public")], post(experience))
+        .secure_route(
+            "/api/experience",
+            &[("POST", "public")],
+            post(crate::experience::experience),
+        )
         .route("/store-api/personalization/events", post(personalization))
         .route(
             "/store-api/personalization",
             axum::routing::delete(forget_personalization),
         )
-        .secure_route("/api/concierge", &[("POST", "public")], post(concierge))
+        .secure_route(
+            "/api/concierge",
+            &[("POST", "public")],
+            post(crate::concierge::concierge),
+        )
         .secure_route(
             "/api/runtime",
             &[("GET", "settings.read")],
@@ -320,7 +350,7 @@ fn assistant_routes() -> Router<App> {
         )
         .route(
             "/mcp",
-            post(mcp).get(|| async { StatusCode::METHOD_NOT_ALLOWED }),
+            post(crate::mcp::mcp).get(|| async { StatusCode::METHOD_NOT_ALLOWED }),
         )
         .merge(ucp::ucp_router())
 }

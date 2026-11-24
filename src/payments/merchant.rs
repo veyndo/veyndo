@@ -1,6 +1,6 @@
 //! Shared merchant payment operation bridge; the payments component owns the rights and durable jobs.
 use super::host::{Gateway, PaymentHost};
-use crate::App;
+use crate::foundation::App;
 use serde_json::Value;
 use veyndo_core::Result;
 use veyndo_core::request_context::RequestContext;

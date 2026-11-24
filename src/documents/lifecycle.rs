@@ -1,5 +1,5 @@
 //! Source detail, editing and publication live in the intelligence component; these entries keep the server-side signatures.
-use crate::App;
+use crate::foundation::App;
 use axum::Json;
 use axum::extract::Path;
 use axum::extract::State;

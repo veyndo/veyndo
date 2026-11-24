@@ -1,6 +1,8 @@
 //! Native revision-bound proposal validation and persistence shared by every design agent.
 use super::site_builder;
-use crate::{App, apps, merchant};
+use crate::apps;
+use crate::foundation::App;
+use crate::foundation::merchant;
 use serde_json::Value;
 use serde_json::json;
 use veyndo_core::Result;

@@ -1,5 +1,6 @@
 //! Source-bound knowledge ingestion, retrieval and product questions share tenant/product visibility.
-use crate::{App, SecureRoutes};
+use crate::auth::SecureRoutes;
+use crate::foundation::App;
 use axum::Router;
 use axum::routing::get;
 use axum::routing::post;

@@ -1,5 +1,5 @@
 //! The server side of the knowledge port: model context, product detail, catalogue localization and private app evidence.
-use crate::App;
+use crate::foundation::App;
 use axum::extract::{FromRef, Path, Query, State};
 use serde_json::Value;
 use veyndo_catalog::types::catalog_page::CatalogCriteria;
@@ -31,7 +31,9 @@ impl veyndo_intelligence::ports::KnowledgeHost for Knowledge<'_> {
         chain: &'a [String],
         products: Vec<Product>,
     ) -> PortFuture<'a, Vec<Product>> {
-        Box::pin(crate::localize_products(self.0, tenant, chain, products))
+        Box::pin(crate::localization::localize_products(
+            self.0, tenant, chain, products,
+        ))
     }
     fn evidence<'a>(&'a self, tenant: &'a str, query: &'a str) -> PortFuture<'a, Value> {
         Box::pin(crate::apps::private_evidence(self.0, tenant, query))

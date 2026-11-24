@@ -1,6 +1,8 @@
 //! Structured provider output becomes a reviewable immutable manifest; it cannot write files or call shell tools.
 use super::{app_generation, builds, design_context, generation_brief, generation_edits, routes};
-use crate::{App, assets, commerce, language_context, staging};
+use crate::foundation::App;
+use crate::localization::language_context;
+use crate::{assets, commerce, staging};
 use axum::http::StatusCode;
 use serde_json::Value;
 use serde_json::json;

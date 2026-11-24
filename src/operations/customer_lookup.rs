@@ -1,6 +1,8 @@
 //! Fast customer-only lookup for native identity bindings; the search is owned by the customers component.
 use super::Criteria;
-use crate::{App, auth, merchant};
+use crate::auth;
+use crate::foundation::App;
+use crate::foundation::merchant;
 use axum::Json;
 use axum::extract::State;
 use serde_json::Value;

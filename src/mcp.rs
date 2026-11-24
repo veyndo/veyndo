@@ -1,6 +1,7 @@
 //! Typed MCP schemas and JSON-RPC transport.
-use crate::OPERATIONS;
-use crate::{App, apps};
+use crate::apps;
+use crate::capabilities::OPERATIONS;
+use crate::foundation::App;
 use axum::Json;
 use axum::extract::State;
 use axum::http::StatusCode;

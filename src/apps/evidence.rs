@@ -1,6 +1,6 @@
 //! Private provenance-bearing app exports feed merchant retrieval and durable app events; never public PDP answers.
 use super::gateway;
-use crate::App;
+use crate::foundation::App;
 use serde_json::json;
 use veyndo_core::Result;
 pub(crate) async fn collect_sources(a: &App) -> Result<()> {

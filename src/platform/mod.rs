@@ -1,5 +1,6 @@
 //! Global SaaS control plane: operator-only aggregate statistics and audited shop provisioning.
-use crate::{App, SecureRoutes};
+use crate::auth::SecureRoutes;
+use crate::foundation::App;
 use axum::Router;
 use axum::routing::get;
 use axum::routing::post;

@@ -1,6 +1,8 @@
 //! Native action schema and permissions use original Core names; no arbitrary SQL, shell or unguarded payment transitions.
 use super::{execute_app_flow, flows};
-use crate::{App, auth, commerce, operations, plan_with};
+use crate::foundation::App;
+use crate::planner::plan_with;
+use crate::{auth, commerce, operations};
 use serde_json::Value;
 use serde_json::json;
 use veyndo_core::Result;

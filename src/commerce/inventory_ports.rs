@@ -1,5 +1,5 @@
 //! The server's implementation of what the inventory component reads from environments and the product index.
-use crate::App;
+use crate::foundation::App;
 use sqlx::PgConnection;
 use std::sync::Arc;
 use veyndo_core::PortFuture;

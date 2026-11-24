@@ -1,5 +1,5 @@
 //! Rule comparison lives in the marketing component; these entries keep the server-side signatures.
-use crate::App;
+use crate::foundation::App;
 use axum::Json;
 use axum::extract::State;
 use serde_json::Value;

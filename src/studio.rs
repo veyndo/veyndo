@@ -1,6 +1,10 @@
 //! Verified merchant overview facts consumed by the chat and activity views.
-use super::{App, auth, commerce, language_context, merchant, product_page};
-use crate::OPERATIONS;
+use super::{auth, commerce};
+use crate::capabilities::OPERATIONS;
+use crate::catalog_page::product_page;
+use crate::foundation::App;
+use crate::foundation::merchant;
+use crate::localization::language_context;
 use axum::Json;
 use axum::extract::State;
 use axum::response::Response;

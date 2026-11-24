@@ -1,5 +1,5 @@
 //! The storefront experience lives in the intelligence component; this handler supplies the experiment assignment secret.
-use crate::App;
+use crate::foundation::App;
 use axum::Json;
 use axum::extract::State;
 use serde_json::Value;

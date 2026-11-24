@@ -1,5 +1,5 @@
 //! Durable idempotent payment commands, customer context binding and serial refund admission.
-use crate::App;
+use crate::foundation::App;
 use serde_json::Value;
 use veyndo_core::Result;
 use veyndo_core::request_context::RequestContext;

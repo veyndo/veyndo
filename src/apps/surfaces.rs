@@ -1,5 +1,6 @@
 //! App-owned UI surfaces and namespaced HTTP routes reuse the authorized action gateway.
-use crate::{App, SecureRoutes};
+use crate::auth::SecureRoutes;
+use crate::foundation::App;
 use axum::Json;
 use axum::Router;
 use axum::extract::State;

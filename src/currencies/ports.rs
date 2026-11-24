@@ -1,5 +1,7 @@
 //! The server's implementation of what the pricing component reads from the shop settings, the cart and the catalogue.
-use crate::{App, commerce, load_cart};
+use crate::cart_storage::load_cart;
+use crate::commerce;
+use crate::foundation::App;
 use serde_json::Value;
 use sqlx::PgConnection;
 use std::sync::Arc;

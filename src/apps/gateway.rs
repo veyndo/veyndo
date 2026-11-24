@@ -2,7 +2,10 @@
 use super::{
     configurations, configure, input_schema, mcp_views, purge_sources, service_limits, submissions,
 };
-use crate::{App, assets, auth, language_context, marketing, merchant, staging};
+use crate::foundation::App;
+use crate::foundation::merchant;
+use crate::localization::language_context;
+use crate::{assets, auth, marketing, staging};
 use serde_json::Value;
 use veyndo_app_platform::ports::{
     ActionFuture, EnvironmentFuture, HostActions, HostCall, HostedFuture, RuleFuture,

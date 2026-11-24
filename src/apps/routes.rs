@@ -4,7 +4,10 @@ use super::{
     credentials, evidence_routes, gateway, hosted, install, jobs, observability, record_history,
     secrets, settings, surface_grants, surfaces, ui_bundles, ui_documents,
 };
-use crate::{App, SecureRoutes, auth, commerce, merchant, payments};
+use crate::auth::SecureRoutes;
+use crate::foundation::App;
+use crate::foundation::merchant;
+use crate::{auth, commerce, payments};
 use axum::Json;
 use axum::Router;
 use axum::extract::Path;

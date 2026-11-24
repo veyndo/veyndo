@@ -1,6 +1,7 @@
 //! App record history lives in the apps component; this module registers its routes and keeps the capability path.
 use super::service_limits;
-use crate::{App, SecureRoutes};
+use crate::auth::SecureRoutes;
+use crate::foundation::App;
 use axum::Router;
 use axum::routing::get;
 use axum::routing::post;

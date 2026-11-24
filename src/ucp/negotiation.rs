@@ -1,7 +1,9 @@
 //! UCP B2B commands route to native RFQ/CAS/approval owners; a checkout token alone never identifies an employee.
 use super::{consent, profile, ucp_document, ucp_load};
+use crate::cart_price::cart_json;
+use crate::foundation::App;
 use crate::ucp::messages;
-use crate::{App, accounts, b2b, cart_json, checkout_handoff, shop_domains};
+use crate::{accounts, b2b, checkout_handoff, shop_domains};
 use axum::Json;
 use axum::extract::Path;
 use axum::extract::State;

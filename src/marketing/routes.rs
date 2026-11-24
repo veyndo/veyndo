@@ -2,7 +2,8 @@
 use super::{
     catalog, channel_preview, coupons, flow_policy, jobs, lifecycle, metadata, rule_history,
 };
-use crate::{App, SecureRoutes};
+use crate::auth::SecureRoutes;
+use crate::foundation::App;
 use axum::Json;
 use axum::Router;
 use axum::extract::Path;

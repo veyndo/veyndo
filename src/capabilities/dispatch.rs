@@ -1,8 +1,9 @@
 //! Closed native domain routing selected once by the operation registry; inactive futures stay boxed.
 use super::{CapabilityFuture, invoke_native};
+use crate::foundation::App;
 use crate::{
-    App, agent_runs, apps, assets, auth, b2b, cognition, commerce, currencies, developer,
-    documents, history, legal, marketing, operations, payments, pos, studio,
+    agent_runs, apps, assets, auth, b2b, cognition, commerce, currencies, developer, documents,
+    history, legal, marketing, operations, payments, pos, studio,
 };
 use serde_json::Value;
 use veyndo_core::bad;

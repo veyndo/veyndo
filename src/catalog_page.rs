@@ -1,5 +1,5 @@
 //! Storefront catalogue pages; criteria, queries and translation are owned by the catalog component.
-use crate::App;
+use crate::foundation::App;
 pub(crate) use veyndo_catalog::types::catalog_page::{CatalogCriteria, CatalogPage};
 use veyndo_core::Result;
 

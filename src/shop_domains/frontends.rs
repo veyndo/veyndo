@@ -1,5 +1,6 @@
 //! Generic operator-allowlisted frontend mounts. Host scope is derived from storage, never client headers.
-use crate::{App, SecureRoutes};
+use crate::auth::SecureRoutes;
+use crate::foundation::App;
 use axum::Router;
 use axum::extract::State;
 use axum::http::StatusCode;

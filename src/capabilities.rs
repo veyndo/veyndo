@@ -1,9 +1,17 @@
 //! Shared HTTP/MCP capability dispatch and tool authorization.
+use crate::agent::retrieve;
+use crate::cart_mutation::set_items;
+use crate::cart_price::cart_json;
+use crate::cart_storage::load_cart;
+use crate::catalog_routes::catalog_page;
+use crate::foundation::App;
+use crate::foundation::merchant;
+use crate::localization::language_context;
 use crate::marketing;
-use crate::{
-    App, agent_runs, apply, apps, auth, cart_json, catalog_page, checkout, cognition, commerce,
-    language_context, load_cart, merchant, orders, retrieve, set_items,
-};
+use crate::order_checkout::checkout;
+use crate::order_routes::orders;
+use crate::proposal_apply::apply;
+use crate::{agent_runs, apps, auth, cognition, commerce};
 use axum::Json;
 use axum::extract::Path;
 use axum::extract::State;

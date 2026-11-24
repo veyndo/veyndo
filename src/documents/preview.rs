@@ -1,6 +1,6 @@
 //! Retrieval preview route; the intelligence component owns the audience and locale rules.
 use super::{Knowledge, product_questions};
-use crate::App;
+use crate::foundation::App;
 use axum::Json;
 use axum::extract::State;
 use serde_json::Value;

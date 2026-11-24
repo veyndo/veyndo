@@ -1,5 +1,8 @@
 //! HTTP proposal creation, approval and task listing.
-use crate::{App, agent, apply, merchant};
+use crate::agent;
+use crate::foundation::App;
+use crate::foundation::merchant;
+use crate::proposal_apply::apply;
 use axum::Json;
 use axum::extract::Path;
 use axum::extract::State;

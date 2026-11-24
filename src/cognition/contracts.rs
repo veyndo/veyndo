@@ -1,6 +1,9 @@
 //! Evidence APIs and MCP contracts dispatch into one authorized owner; the claim compiler rejects free prose.
 use super::{autonomy, autonomy_revert, evidence, experiments, extraction};
-use crate::{App, SecureRoutes, auth, merchant};
+use crate::auth;
+use crate::auth::SecureRoutes;
+use crate::foundation::App;
+use crate::foundation::merchant;
 use axum::Json;
 use axum::Router;
 use axum::extract::Path;

@@ -1,6 +1,11 @@
 //! Native currency discovery, revision-safe selection and authenticated FX/price job operations.
 use super::rates;
-use crate::{App, SecureRoutes, auth, cart_json, commerce, load_cart, merchant};
+use crate::auth::SecureRoutes;
+use crate::cart_price::cart_json;
+use crate::cart_storage::load_cart;
+use crate::foundation::App;
+use crate::foundation::merchant;
+use crate::{auth, commerce};
 use axum::Json;
 use axum::Router;
 use axum::extract::State;

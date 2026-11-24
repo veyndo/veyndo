@@ -1,6 +1,6 @@
 //! Dedicated payment RPC, pinned service version and operator-owned egress; never ordinary app-action receipts.
 use super::Attempt;
-use crate::App;
+use crate::foundation::App;
 use axum::http::StatusCode;
 use serde_json::Value;
 use veyndo_core::Error;

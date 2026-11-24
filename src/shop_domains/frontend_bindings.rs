@@ -1,5 +1,6 @@
 //! Hosted frontend routes and the server side of the managed-app install; the apps component owns binding and disconnection.
-use crate::{App, apps, auth};
+use crate::foundation::App;
+use crate::{apps, auth};
 use axum::Json;
 use axum::extract::Path;
 use axum::extract::State;

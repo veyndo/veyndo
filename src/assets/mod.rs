@@ -1,5 +1,6 @@
 //! Product attachments and paid digital downloads: bounded binary persistence and tenant/account ACL.
-use crate::{App, SecureRoutes};
+use crate::auth::SecureRoutes;
+use crate::foundation::App;
 use axum::Json;
 use axum::Router;
 use axum::extract::Path;

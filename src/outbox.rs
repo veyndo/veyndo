@@ -1,5 +1,6 @@
 //! Durable outbox and audit projection worker.
-use crate::{App, apps, cognition, marketing};
+use crate::foundation::App;
+use crate::{apps, cognition, marketing};
 use serde_json::Value;
 use veyndo_core::Result;
 mod retention;

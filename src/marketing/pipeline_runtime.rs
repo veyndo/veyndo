@@ -1,7 +1,7 @@
 //! The pipeline runner is owned by the marketing component; the server supplies the action effects.
 use super::flow_jobs::Claim;
 use super::flows;
-use crate::App;
+use crate::foundation::App;
 use serde_json::Value;
 use veyndo_core::Result;
 pub(super) use veyndo_marketing::service::pipeline_runtime::Outcome;

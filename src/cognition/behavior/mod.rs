@@ -1,5 +1,6 @@
 //! Native behavior analytics projects the existing event ledger into private shop knowledge.
-use crate::{App, SecureRoutes};
+use crate::auth::SecureRoutes;
+use crate::foundation::App;
 use axum::Json;
 use axum::Router;
 use axum::extract::State;

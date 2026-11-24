@@ -1,5 +1,5 @@
 //! Version-pinned HMAC notifications enqueue reconciliation; external event payloads never write monetary state.
-use crate::App;
+use crate::foundation::App;
 use axum::Json;
 use axum::extract::Path;
 use axum::extract::State;

@@ -1,5 +1,5 @@
 //! Grid filter planning lives in the studio component; this handler lends it the server's model context.
-use crate::App;
+use crate::foundation::App;
 use axum::Json;
 use axum::extract::State;
 use serde_json::Value;

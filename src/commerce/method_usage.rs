@@ -1,5 +1,5 @@
 //! Authoritative deletion guards for methods; the reference counts are owned by the shipping component.
-use crate::App;
+use crate::foundation::App;
 use axum::Json;
 use axum::extract::Path;
 use axum::extract::State;

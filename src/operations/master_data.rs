@@ -1,5 +1,5 @@
 //! The company basis lives in the orders component; these entries keep the server-side signatures.
-use crate::App;
+use crate::foundation::App;
 use axum::Json;
 use serde_json::Value;
 use veyndo_core::Result;

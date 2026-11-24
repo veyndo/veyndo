@@ -1,5 +1,7 @@
 //! Route that queues a document for vector indexing; retrieval itself is owned by the intelligence component.
-use crate::{App, auth, cognition, merchant};
+use crate::foundation::App;
+use crate::foundation::merchant;
+use crate::{auth, cognition};
 use axum::Json;
 use axum::extract::Path;
 use axum::extract::State;

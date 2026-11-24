@@ -1,6 +1,7 @@
 //! Optional trusted identity exchange: signatures bind route, audience, expiry and one-use nonce.
 use super::{email, hash_password, provision_shop};
-use crate::{App, prototype_products};
+use crate::catalog_model::prototype_products;
+use crate::foundation::App;
 use axum::Json;
 use axum::extract::State;
 use serde_json::Value;

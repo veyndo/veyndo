@@ -1,6 +1,7 @@
 //! International configuration and translation MCP tools call the exact same scoped native handlers as HTTP.
 use super::{get_scope, merchant_config, method_dependencies, save_config, save_scope};
-use crate::{App, auth, translations};
+use crate::foundation::App;
+use crate::{auth, translations};
 use axum::Json;
 use axum::extract::Path;
 use axum::extract::State;

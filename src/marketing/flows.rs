@@ -1,6 +1,8 @@
 //! Durable order-event flows: conditions, shop notes and AI proposals; no unapproved model mutations.
 use super::execute_app_flow;
-use crate::{App, commerce, plan_with};
+use crate::commerce;
+use crate::foundation::App;
+use crate::planner::plan_with;
 use axum::http::StatusCode;
 use serde_json::Value;
 use serde_json::json;

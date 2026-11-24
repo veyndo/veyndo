@@ -1,5 +1,6 @@
 //! Source-record imports live in the studio component; the server registers their routes and lends the import port.
-use crate::{App, apps, assets, marketing};
+use crate::foundation::App;
+use crate::{apps, assets, marketing};
 use axum::Json;
 use axum::extract::State;
 use serde_json::Value;

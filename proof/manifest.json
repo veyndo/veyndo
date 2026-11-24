@@ -5133,13 +5133,13 @@
     },
     "extensions/apps/paypal/src/adapter.rs": {
       "status": "unproved",
-      "sha256": "c8030cdb0138f7c63d28f8316da75cfc192aa6f154595f7dabb2d948c44f4fad",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "880315ca99a1d2b060604515008a48693a519325f558c9add686e7f560330482",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "extensions/apps/paypal/src/compatibility.rs": {
       "status": "unproved",
-      "sha256": "d832ec077810e6f9bfd0bcb98a325fa5972cacdfd72d2051274a4dd3a51d1993",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "1f4411f37275742754470bba934c8731abb28cffabff8661cdfb52a897405696",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "extensions/apps/paypal/src/receipts.rs": {
       "status": "unproved",
@@ -5148,13 +5148,13 @@
     },
     "extensions/apps/paypal/src/webhooks.rs": {
       "status": "unproved",
-      "sha256": "8df40b649ac792c84e4d7459fb0898293c4ef4a4239b7671e5625309fc1884c8",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "a92c9328c9081b7f2c7cf948d356229d56b1687be50fee67a0501d009ec999a4",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "extensions/apps/site-builder/agent_handoff.rs": {
       "status": "unproved",
-      "sha256": "65ccab6794b187aaf5b5295fa7459f4f93c484e2be538e598468d60eee7fa1e3",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "437dce07e9b57f2ddd2c7b17b955626262b1eff5dc4c1fd4ca3cb026d658c46f",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "extensions/apps/site-builder/block_validation.rs": {
       "status": "unproved",
@@ -5163,13 +5163,13 @@
     },
     "extensions/apps/site-builder/context.rs": {
       "status": "unproved",
-      "sha256": "9a990980fe6386f934d0dd1af34501ec6491937bb89b9082ee1d346604e595bb",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "18b204c8e65fde2ac553384088cdb69a508090a32525de5b9e9bbc24d0e0b97d",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "extensions/apps/site-builder/design_agent.rs": {
       "status": "unproved",
-      "sha256": "4f7073f5591d006750b9ced2a422a07db99dbeec0979e2fe4d2edd8fc8545f00",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "da72edf7b8412b9150246b790447e90c4f2c5b4d14226be026975d09be767005",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "extensions/apps/site-builder/elements.rs": {
       "status": "unproved",
@@ -5183,8 +5183,8 @@
     },
     "extensions/apps/site-builder/proposals.rs": {
       "status": "unproved",
-      "sha256": "648a6ab22c979fdb8979b611687f7c320f85974a10b825074a93059cee3845fb",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "e1245c0171d761879dd4a7effe3bffb38edd6000cc67c18679f25478cdcd3892",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "extensions/apps/site-builder/references.rs": {
       "status": "unproved",
@@ -5193,8 +5193,8 @@
     },
     "extensions/apps/site-builder/server.rs": {
       "status": "unproved",
-      "sha256": "6901e3ffb4a495707bbf33d186e89879c739ca18431e0c5e9a31f907c2d89d8e",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "eca84bb10f9a7d19842a269dd7a7a6e2df3e1ecd26ff0846bbb69cab0a393411",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "extensions/apps/site-forms/server.rs": {
       "status": "unproved",
@@ -6253,28 +6253,28 @@
     },
     "src/accounts/mod.rs": {
       "status": "unproved",
-      "sha256": "3f4d749054e59e9d1ba11c85f4bbdddc12bd94c8d2c1306deb0ddb8f44ab320f",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "0c97d406723861cc4862c19027328a792f757445497208800d4fbd1446b29950",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/accounts/orders.rs": {
       "status": "unproved",
-      "sha256": "d034b2e66657bea3b8ccf29e45714f181596934533cc7834505539b00d30df46",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "5bb89c73d08cc34be041b5d04b26a716fcdfe81ed8e296f52d9721f30a477a42",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/accounts/payment_preference.rs": {
       "status": "unproved",
-      "sha256": "146cb9179d568c6ec2c0f97c43e3f4ec2e35ea1a20e82c22860566de827750a5",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "c2dd09f96d3cf3a71f0809d95aea910d0f98a141d3662b39452825483f81e346",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/agent.rs": {
       "status": "unproved",
-      "sha256": "905c133c4b61ece2d04e8ffe99631ccbd5eeb41942eb81bb07403837ff7270c0",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "ad8a67392bb212c67959b3ab923c16dd7c35ce19a298e63d9a3dde76557d0211",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/agent_host.rs": {
       "status": "unproved",
-      "sha256": "f4198be81178757dce5492db91d57c3088c54112473f0de594d604246c038ce2",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "bd23460a057ed1212bce36100aea08d1eae765a24684b422e107244af8da1115",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/agent_runs/authority.rs": {
       "status": "unproved",
@@ -6288,13 +6288,13 @@
     },
     "src/agent_runs/contract.rs": {
       "status": "unproved",
-      "sha256": "99974b4d1e4bec2141a0e6d3721a97b5e8c47d1720d10649f8d6b3ba3f519f54",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "8b05bd654ede785ec7b04acd0f3d290fb45e4fc2102b6b1ae3b029ad484ad628",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/agent_runs/controls.rs": {
       "status": "unproved",
-      "sha256": "ecdc7f1c40456b449d4f62036dfd01846f06166d28fe0a762a980d1c962f09f9",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "898e5415b90a0b91605b7fe3ed2818f8d2f814990337d03182290f7ab75b2c14",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/agent_runs/navigation.rs": {
       "status": "unproved",
@@ -6303,8 +6303,8 @@
     },
     "src/agent_runs/scenarios.rs": {
       "status": "unproved",
-      "sha256": "7f6f84b9007cfe1715699ff59c0a9c41a99bee5afc4f2461f44e8ceb085edab0",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "e09f3b9fe07268a647550b8e813abb075e6dbb15780fdd6201d1412f4291e509",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/agent_runs/view.rs": {
       "status": "unproved",
@@ -6313,13 +6313,13 @@
     },
     "src/agent_runs/work_plan.rs": {
       "status": "unproved",
-      "sha256": "cfce1470fcaa975c6ba4c39b5fa9602fcd8f69666e8a81c124c38856ed45adb6",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "0ec276181bb201a8539d6f80e0225ebf10d1f5cb75d8b23db49ab0561996b114",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/agent_runs/worker.rs": {
       "status": "unproved",
-      "sha256": "35039c129490d234aeb7ab69375fc6fa245ba31e4da60e69b298d5d7d42b2d88",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "1dd5b366ce8ef04c4fe9689470d93d2f8dea023517d4456e4470f538aee868c2",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/agent_runs.rs": {
       "status": "unproved",
@@ -6333,13 +6333,13 @@
     },
     "src/apps/asset_surfaces.rs": {
       "status": "unproved",
-      "sha256": "b5b537e7932888da826047f4025721e39665cf5671a93dbff5337bcac92aaff3",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "0cca6982b9c5c0ce26bbac3cdc1487826e9a37650db021892832ab9a5b19c804",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/apps/cart_contributions.rs": {
       "status": "unproved",
-      "sha256": "513c087b717acd798c010a1d061661e543782e27c3436619cff6c8da6c10ffb7",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "abd0f7ce9b470576dfb647a90a49a52f5575d429e9b487fb877a25cb80ccb1a8",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/apps/configuration_events.rs": {
       "status": "unproved",
@@ -6348,38 +6348,38 @@
     },
     "src/apps/configuration_selection.rs": {
       "status": "unproved",
-      "sha256": "121d086f16ac230eba97e864aa44040b1de3654101b95dfcefd93e3d85267c08",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "a90705075c4ce9532fa40bf000ae0cd4cbe348622de54736daa8e731f9ef59fa",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/apps/consent.rs": {
       "status": "unproved",
-      "sha256": "fc2fe96d9be2f74df9766e6fcd966c9515bf83f1d3a6283ef8c59173cec3d9ea",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "f78357f13182c05726046415fdfe8a28dc236a6e79168a554aee88f418e7cad2",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/apps/core_callbacks.rs": {
       "status": "unproved",
-      "sha256": "d1c2d0ce59c698a5793e7248f837f681a01d0303177f96ded741f8dcce1f7b1e",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "0e88685587cf7a84c6b06c1045f9b93001b9de73aad3e0e62f49dbd12985b374",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/apps/core_documents.rs": {
       "status": "unproved",
-      "sha256": "cb9626a9f5c74f3580c7bd037d0197ed7ce7942609197fdb4cf14eccfdd68726",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "18f6fba079c96ec623e1773633cc9eec5a378a6809800dee746849bcb01679ff",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/apps/core_exchange.rs": {
       "status": "unproved",
-      "sha256": "1c42f7cb161ed6125661de10e25ea82a6d8b775d6e3f2de46a61965e0d329a22",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "0026d8c162a3f534ab1732857fa3798ee7eb9466fc26e522da521fa9ebc3aa4c",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/apps/core_extensions.rs": {
       "status": "unproved",
-      "sha256": "51c12b4d6179458eca7b67d05453028ad82a871d90c9fed9030613b8eaa7c977",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "f7671c9576ac35a785f062c4754c07a865b9aef7a4b7d27df8ad730ff26c2086",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/apps/credentials.rs": {
       "status": "unproved",
-      "sha256": "2f2a9ca0de7137ace65be2a91ce5c4a3237d745f4a055e2ee270c0dc05689a33",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "34109dd858fc2c104bae5e3cf4a8a86544c3c4b87d0be8b519d55f338e195166",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/apps/data.rs": {
       "status": "unproved",
@@ -6388,8 +6388,8 @@
     },
     "src/apps/discovery.rs": {
       "status": "unproved",
-      "sha256": "25fc49d8d7827bf69ae03591da8bff2b0203219ac879808f16a8ced08c775358",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "5ac388904fef0a96b75393f550621bf6017ba2804799b1eeb50c400ef91a43b2",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/apps/distribution.rs": {
       "status": "unproved",
@@ -6403,18 +6403,18 @@
     },
     "src/apps/events.rs": {
       "status": "unproved",
-      "sha256": "3c68074d986b3588cee2b26deab631ab1296d9cfa5cd7f0046a8c3785d7949ed",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "ef13da6fdb9c66b509f1ed3fec5f5bf822a1e8b1131e0d917f46c7b25e91bb79",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/apps/evidence.rs": {
       "status": "unproved",
-      "sha256": "c30ed6aab50399d8f0b5a9f0df2d69024b520f5c54823860f18e6f838ef9064e",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "56534af33dcebef8b642b2f6a78fd45395f1172f358d7e262648957dcb48a266",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/apps/evidence_routes.rs": {
       "status": "unproved",
-      "sha256": "ba99ecf6eca82f331bcd9e6c024f111c31dfce0274c13571347adca336129b8d",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "ac0e517cdbf9104c51b68fd51293a6d0171a85921fd27adb5a1d6a58470cbd9f",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/apps/field_values.rs": {
       "status": "unproved",
@@ -6423,13 +6423,13 @@
     },
     "src/apps/gateway.rs": {
       "status": "unproved",
-      "sha256": "f55fd7c59f7767882671265677c70d4d1224a08bd8fe436abf978fdbb9e38cc0",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "d297d7abb6b62d0ed7261ba268c7e8a69c3ed878cbe534ec20414c8d97e20623",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/apps/hosted.rs": {
       "status": "unproved",
-      "sha256": "ad2a48ffbc8744593d80b2dae535f043530955450df8be69033c531a9d72ce6d",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "776f52e33f5a301e597d24dd94bde66f5992927689535ff52637a1f4e5a660da",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/apps/input_schema.rs": {
       "status": "unproved",
@@ -6443,13 +6443,13 @@
     },
     "src/apps/job_import.rs": {
       "status": "unproved",
-      "sha256": "0c4acbebce606bb0132bac73a1e37a18e839263516115c24d56e08727d7d8140",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "de70c6f28816a2722a42a14d544fc7c771ddb42d53532a944f0fddcbb5f6aab2",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/apps/jobs.rs": {
       "status": "unproved",
-      "sha256": "0cdc0ea6b6831a1c3d3c968d3e9884036ebc780db406d397ae7cca1326074bdb",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "9abe726e28805ab2c34489fcf4246b28ec95933d25bf690a45eca77f8768d14c",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/apps/manifest.rs": {
       "status": "unproved",
@@ -6463,8 +6463,8 @@
     },
     "src/apps/mcp_views.rs": {
       "status": "unproved",
-      "sha256": "cc67311ce922ed61e8846d318e785bed1b59c362a7431549fcf138e915ad3ba6",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "94992599f87a464db1a1a82022fe9a8c2ebeb2cb50d59b729c42d73c64cac698",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/apps/mod.rs": {
       "status": "unproved",
@@ -6483,8 +6483,8 @@
     },
     "src/apps/observability.rs": {
       "status": "unproved",
-      "sha256": "04e69d4024ac9f8d9b5df1a9e0690175100301d9530c6dd2e7c08a156299ac78",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "2489299db79fff9752647505580f2184847b7424e197ee15019db93cb9892ac6",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/apps/package_fence.rs": {
       "status": "unproved",
@@ -6493,28 +6493,28 @@
     },
     "src/apps/planning.rs": {
       "status": "unproved",
-      "sha256": "f48662f48633798cd0fea71332d3891a695a0be1a456414b7bc9d415ddf4477a",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "68b1955a5ca9c545a0e0c31df6f6cd92cdc4ab5fdcc0948dd55cd3a4268ff408",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/apps/record_history.rs": {
       "status": "unproved",
-      "sha256": "3294573e77be7ed227ddd19ef7a636181e65c12d1dcb9fbed4fafd62c3659f0e",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "63d0b33b545659daa2e26c4298a0c5fd0298927a97930e6bb9a4cf3888dc42ad",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/apps/record_import.rs": {
       "status": "unproved",
-      "sha256": "f36d313b0c1ce392220833b6592f498b21cd5e8e53ce12cfaa3722aef79d8973",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "2ccb43ddf9cb856cd507c252a312842ff9a56e607fcabc0cdbd914853427a2e8",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/apps/registry.rs": {
       "status": "unproved",
-      "sha256": "7ed00fd0157cafd34b193985b5a871437029ee4ea868f0101f2b0cb4a1c2e305",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "058195a1fe96afbfced9d49bba8a4c49178adee9805e1d807887d2753a30d8a3",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/apps/routes.rs": {
       "status": "unproved",
-      "sha256": "d37afb0aaa35ceff8e0487dd9dcc40488a754fe9ba7e981e68bb8348ca62b764",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "c9aaa98ecb8f9d4a46d1a2ca77d10a42906a6bbb74ab6ea205b55688d3399bbe",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/apps/schedules.rs": {
       "status": "unproved",
@@ -6523,13 +6523,13 @@
     },
     "src/apps/secrets.rs": {
       "status": "unproved",
-      "sha256": "0eba019d819d9173f7b279688192888d9c70f1fe920039feddb04e6e1d1931de",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "83a47e3830f838c950892fb44b3d02a137417d012775b8f6464f303d8e0fd588",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/apps/service_limits.rs": {
       "status": "unproved",
-      "sha256": "f0fd4ca52a4622c6bba165717b184c93f0c1f47ee7e106d547af9981ef37e6a3",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "f9726d4d898b8d46697001a2dbd7e00ae21d1401b00bb2fff7938e35253832b3",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/apps/service_policy.rs": {
       "status": "unproved",
@@ -6538,43 +6538,43 @@
     },
     "src/apps/settings.rs": {
       "status": "unproved",
-      "sha256": "1d85669f011673dbee624aee925f1c1e6f75a2a0ecde62174a570bcfe6d9c2fd",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "58b70f5aaec7db79a4bfe666583693cc2484791bf21dd51c225f94076595e776",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/apps/submissions.rs": {
       "status": "reviewed-binding",
-      "sha256": "43bf6c5c931b3bf19a071d4d5663d6c9838413d11ecfb9ea2b9b5b0bb6853e16",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "0490788eb2346510bbb9d84ee5a15125174cb8a89fdc3a77d01d782ed0eefdb6",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/apps/surface_grants.rs": {
       "status": "unproved",
-      "sha256": "a7f9ef1eb3746693752c7645f253caf1c9abf12c7d383b9dc61c00b48e7b45cc",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "1c82cc26d22f664360fb7896994d239b733561a2d78d25024178e74ef19ff590",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/apps/surface_registry.rs": {
       "status": "unproved",
-      "sha256": "ea9edb9845c6551743fc3850ed885869d3025bde114e41d21820647f42b58544",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "ae1e09ca0914eb9fdd7a1b19fb4c61e7cc2ec428c77ffe7e8363caa3cc7a2f9d",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/apps/surfaces.rs": {
       "status": "unproved",
-      "sha256": "07c1c0e759790971ba6292319b8d53a24442e4ce4f18c643a4252ecc93e6a801",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "e2836adca631e2f3e5d1896fa5ea9edba3ddf0e5897727413eede13a5d2ef9b7",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/apps/tool_contract.rs": {
       "status": "unproved",
-      "sha256": "e580e8be43aebb7cc2bc35bcc3d4c752df40f67266ce372515d312ff8449f8d0",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "ba98f1b1b5ab6cb2f4f19b4f01a351e1b12bc58414b40c9138d1dca362fa4bde",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/apps/ui_bundles.rs": {
       "status": "unproved",
-      "sha256": "a2f2d466c5be7949fb168498da139de9a9a928f40389498e3c466d65be6ff242",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "aca3241956efb539aec7ba7cfa650b5d857aebba0e594163efbdad3f0d6a679f",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/apps/ui_documents.rs": {
       "status": "unproved",
-      "sha256": "f880e583578bf6b0fc3a2699eda04bb6ed8d90624f360bc9b5e9f5905b33b930",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "45211da43b6e211bdd5fe7c80ba270080a44cfe652f180c569340de89e94e1b3",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/apps/webhook_scope.rs": {
       "status": "unproved",
@@ -6583,18 +6583,18 @@
     },
     "src/apps/webhooks.rs": {
       "status": "unproved",
-      "sha256": "b9efe5fcbd2182045bbee1139374483602d10a82e09615cc3d01bd1950901729",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "ce29cbae4eb1acc26aa0c9b2745ef763f8977328c642af9c5eeef3b89a89cbf2",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/assets/app_files.rs": {
       "status": "unproved",
-      "sha256": "0d5a0b4c37c39772c162a735bd605e8fdd4db658d72fb5e054070b1e22ded43a",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "705f23b5094d834ecbb0aed07897876ef1ecc9ad80887d685dfc0525e4f05f6f",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/assets/captions.rs": {
       "status": "unproved",
-      "sha256": "94bf1ef966559d2a766372ed43fb181a6e7e272b1aa62fc14a31f6281b849f73",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "e41de973756ef068e067440ba354fcb96bac9486df1a615e566b937ddf78d224",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/assets/design_references.rs": {
       "status": "unproved",
@@ -6603,13 +6603,13 @@
     },
     "src/assets/image_jobs.rs": {
       "status": "unproved",
-      "sha256": "bbacce0d32d1e3c0a038362c99c2ac785f3f60a9c455847c25c0e7bfb42a595b",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "b044024defeeac5cdc3be0ba719998ad06d22deb25f883536e5a6794b86ba5f7",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/assets/import.rs": {
       "status": "unproved",
-      "sha256": "618588167891ed511f017eb3daebc6c53b817111de56570ccbb40eb460f27177",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "d7431521d3734f5dfd515dac841461184e41465b696033232819251baa471c00",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/assets/ingestion.rs": {
       "status": "unproved",
@@ -6618,8 +6618,8 @@
     },
     "src/assets/mod.rs": {
       "status": "unproved",
-      "sha256": "6e6e5438a79126484159f800faa718a0c90f9b6ffb74b3804f895939a5ecf391",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "ee32b48527cbd0c75a76bc0d02e02594c715d13bd3e2045dfe69c4f1d22e06ac",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/assets/model_format.rs": {
       "status": "unproved",
@@ -6638,13 +6638,13 @@
     },
     "src/assets/upload.rs": {
       "status": "unproved",
-      "sha256": "a17726d9e3d78951df42b567628eefe8eaae79d6e2baedd3a4fff79c1275d08b",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "3dabdc75de4635ba9a330f38240a288bea4b25257dac8a1a81de8a2bdb90b14c",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/auth/broker.rs": {
       "status": "unproved",
-      "sha256": "f58d6a0be176e58a91903751e1b7a4a5241477fd4c18ca08f38fa72a7e5e048e",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "506ca50ee008191abfdcc9c30507298ae204d21e83f550dc4c9f8a633b3d48ab",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/auth/broker_credentials.rs": {
       "status": "unproved",
@@ -6653,8 +6653,8 @@
     },
     "src/auth/broker_inference.rs": {
       "status": "unproved",
-      "sha256": "4d04b1fbba944847d3e578da39fd762b45cf7b8518471793d3928dd80716479c",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "24fa0122abe1a51f62eb65f944e590ef9c90c1211dc0b6e29c0875dc90231988",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/auth/broker_recovery.rs": {
       "status": "unproved",
@@ -6688,8 +6688,8 @@
     },
     "src/auth/identity.rs": {
       "status": "unproved",
-      "sha256": "aac105c74f6ce2e907dbbe6b82411befb44d0cd52c1906bdebe08b8edebabf35",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "223ec13459e33a90e7453ef61c68de328172825d4fa25a117cf9b30206cb2107",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/auth/integrations.rs": {
       "status": "unproved",
@@ -6703,8 +6703,8 @@
     },
     "src/auth/knowledge_identity.rs": {
       "status": "unproved",
-      "sha256": "8b0f5d034d8f756694bc594159f54bc72a7784ebd4112af6cb3128b51ea9cca9",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "34daee684e87c988971e4093bcd0720f936f1acad5be39e90cf9d5b317b8f180",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/auth/members.rs": {
       "status": "unproved",
@@ -6713,13 +6713,13 @@
     },
     "src/auth/mfa.rs": {
       "status": "unproved",
-      "sha256": "f73ee23489e2a94dc79427106e5b98cf47053e86daa01cc40cc2208883c913d1",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "4cfdc9da4feb47853f8ea0721757bf99b1f0cd7713f183ec5f907f693e92692e",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/auth/middleware.rs": {
       "status": "reviewed-binding",
-      "sha256": "882ecd84546b7707df4a49d2b2891eb7bdd072db70d822cd87aba2059693e752",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "e585f865d3ec8b1c367c9e3c37bdd0b634b93d3032f4031ae81cbe5b0e296b44",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/auth/mod.rs": {
       "status": "unproved",
@@ -6733,8 +6733,8 @@
     },
     "src/auth/provision.rs": {
       "status": "unproved",
-      "sha256": "d3aaa44d3c333531b1a18748f198293a37a9df91246d1c19128a309a32268bb5",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "224646cc03487daadf43ce8a5c191d66335112dc3d3a157472a378b4d12094c7",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/auth/recovery_entry.rs": {
       "status": "unproved",
@@ -6743,18 +6743,18 @@
     },
     "src/auth/registration.rs": {
       "status": "unproved",
-      "sha256": "7cafd77146e889955acdce04d7b90d220b97e7eaf4e44c31393c43c23fad176d",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "05c8c618c2f6d0969ce635f7ffbfd987ae700b56bc43d884ed92fba43448f10d",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/auth/roles.rs": {
       "status": "unproved",
-      "sha256": "c116a27edc81143d65780d19cf6013aeaf489f78df2772cffa56598ebf951095",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "18e3826dc709e4a73df8b39bb50c52e5bcb33e9d11fcb170c6791564e4c409ee",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/auth/routes.rs": {
       "status": "unproved",
-      "sha256": "75dbafabf7be6aa2f84ad8d5cb8f4e258f182988ed70fb7eeae66b1104f29667",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "546e6196c275f500bde5d9d51243f7bcded8e087f8c1e47b33838ba4b3a17ff5",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/auth/sessions.rs": {
       "status": "unproved",
@@ -6778,18 +6778,18 @@
     },
     "src/b2b/gateway.rs": {
       "status": "unproved",
-      "sha256": "33c1ae153e5bc1b31250ca39c92003682a1a016208e2345125664494ba344a07",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "16a32015132b9821e2b799d16253cb664d0a26d9f428d885ca3f838969bcb7be",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/b2b/mod.rs": {
       "status": "unproved",
-      "sha256": "a95904e1b4fe439f9ae7c413ba99595331ddef590e12b63ef75d278187c657a3",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "21623bd45cd62cf83791de13236b79232bbaa330a001b30c5b61e77290041aa5",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/b2b/orders.rs": {
       "status": "unproved",
-      "sha256": "c66828f42b2d93018039ec9f1eccd1395a7d8d341272c8dc7e53e9cc2011fc5d",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "35236c590aa1f85a247188fa7b6ca3540f5fa19418ff7706ecc3c81611eb4ccc",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/b2b/organization.rs": {
       "status": "unproved",
@@ -6883,8 +6883,8 @@
     },
     "src/bootstrap.rs": {
       "status": "unproved",
-      "sha256": "f178020e17a5e85e9184b3e1806dfa9b3db3766c20b1c366c8675df821d80a7e",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "ed763a92e70cb5428442d2dfc1e67ffd7f92335fd38981e0ec12ff4f5890cb05",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/brand_redirect.rs": {
       "status": "unproved",
@@ -6893,8 +6893,8 @@
     },
     "src/capabilities/admission.rs": {
       "status": "unproved",
-      "sha256": "41ead7208cd6f067f8cc6c89e56a42cf76246757a81bf726cb1b88f8c2f8f5a7",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "b40e96e55d80f582549bbeef58408703d78b38d417a5be80868b25930db51777",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/capabilities/catalog.rs": {
       "status": "unproved",
@@ -6908,13 +6908,13 @@
     },
     "src/capabilities/dispatch.rs": {
       "status": "unproved",
-      "sha256": "12fab5d7938ed627848d88cf632388984f7a8c55c7f01c038e27029db7ac5509",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "84ebcb4c47f7c6e0caba5e97f60d737e009f773ecabc3d9cc6f8bf844a279ab9",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/capabilities/registry.rs": {
       "status": "unproved",
-      "sha256": "6594243495be9317e09842b93ddf63c3f88f8639d6b823a5135a6511fd87f141",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "461e09929c7f7c8f9e3080499f4685263903583d0268e0f7efc6ed3f10a72a9a",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/capabilities/schema.rs": {
       "status": "unproved",
@@ -6923,58 +6923,58 @@
     },
     "src/capabilities.rs": {
       "status": "unproved",
-      "sha256": "8b17e2f523fdb3cbe5aabfa8a8209c7792ec16922f9e1bf5470828fec812606f",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "2af57d0c04421a849ca39fe96094ddd14c1185b6a514f84dfd1afa6ba34da46c",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/cart_mutation.rs": {
       "status": "unproved",
-      "sha256": "fcea4a9923c4d1b7bba30d63cc78bc7181829d5dbb605a37bfe51ff3f16a8fb4",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "c9692992bc7e398ab8801c8f6e495d5caf76f7a20d8faf43872d5ff36909132e",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/cart_price.rs": {
       "status": "unproved",
-      "sha256": "3be4567866b8781222c1351669c40219140395fd221b3e49cb278f2b71e080f4",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "3b47704cf5e09e9130a7c2f30250bac78ddeb7549fed2ea46119ce7931442319",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/cart_routes.rs": {
       "status": "unproved",
-      "sha256": "d6f3fee43dda834ee004b5aab74bd57bccb38cbbdc90a67abe7cf773a9e1435a",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "2b49c53423b5bbc3d1fdceca2d31133898f4b6118cc316d39478d57bab1ce137",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/cart_storage.rs": {
       "status": "unproved",
-      "sha256": "7b661cba3bcfca0443fab1e414a73681e0c561168b137a6cdecf5ae17732077e",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "6366f9b78f2de4243ca99055ee5fe36f7ea104a2808e1bcf518796ec57a1e0a4",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/catalog_model.rs": {
       "status": "unproved",
-      "sha256": "0a72ec96dd0f5928a3efcd234896a5cfd5700fb591d97c85f23f87fc7281e9af",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "67e03d97d6bb0c75d0bdfbd566974aa951eb2c7b8a7d1b196a493b3fd2681053",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/catalog_page.rs": {
       "status": "unproved",
-      "sha256": "6a77a81080aaff0aee996328bdef475d0a5044ed48ab96265878efcc73a8a8b1",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "1ae5aae0c350a6c6b59ea06cf889fcfcef7c8817707c8abe1c196234fe6e2f82",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/catalog_routes.rs": {
       "status": "unproved",
-      "sha256": "3739ee56790cc602fc6b0b1c7b7976df33b3525ddf9fffcc659ad900a72bcfe9",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "5781a5442e831dda4cfe901d436d197203728d20daa44b8166372ccaac409bd8",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/categories/admin.rs": {
       "status": "unproved",
-      "sha256": "2843a5ff5dc18b33a8a1918deb6c379ae0fb80f22aa213127b7fbbe0a33b5628",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "76ef23a95c6f8f35152c5cf4f1c3b5d398e68aa259d99cff103b45f7bf95d9eb",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/categories/mod.rs": {
       "status": "unproved",
-      "sha256": "1ae3c27e632b8b31cebebfdfa39495338b4f96609e0187b85ea72889b3cd2281",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "ac2264d965e0a80ca03bb7ddee178d35d52e1c3b97e750c58975f77240b192c2",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/categories/navigation.rs": {
       "status": "unproved",
-      "sha256": "c606ac5fc3403656f36746c9cc34c61f552c9645f02d5b9693d91b1c8fc08712",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "b00cbecedbfc95c8ce5ddd3ca478c1440055873612efa4579c24326d00d41231",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/checkout/buyer_identity.rs": {
       "status": "unproved",
@@ -6983,73 +6983,73 @@
     },
     "src/checkout/mod.rs": {
       "status": "unproved",
-      "sha256": "5522a1cd4ee376dd65daa0bc0749e6254881a7288c466f2384637af75175c0b0",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "89f583aaf9c5ead385fe55c8759b2f89958c6dcb8d16aa0b8564915c4d74a1f6",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/checkout/private_browser.rs": {
       "status": "unproved",
-      "sha256": "5dfc31ce83e87c1d8657f9cd6137388c155e619729d833b571b07ad53d5bbb01",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "78e871cb362963fba2ca32ca0ad0c0e03d2d0496401ff1425b144cdce68d11fb",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/checkout/purchase.rs": {
       "status": "unproved",
-      "sha256": "f449e3860faa10a4ef7449ea3665dbcdef6c7a1036c3222c2245ed0b4e46877b",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "3a14159b480f88c01de43cb2a16a67f302cc6f3b8cb0f529fd1a7510803dcb53",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/checkout/session_order.rs": {
       "status": "unproved",
-      "sha256": "b467ef638da1c83df967b93e2eb7c15f4d849ed5baa3928e8eb509c5abf4aec1",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "3835c3a1eeb442265b09c6af15b775b2759f3b6c582a91e05b974d31dc6ed168",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/checkout/session_quote.rs": {
       "status": "unproved",
-      "sha256": "9b4a0df4ed579c509fe82d7bcd06ac4f1226e739ce22b4e5ab29d330e9e26a94",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "3ba8c81cf88d99fc317b36838f1def863dcf8147ac24bb12769e84576e134073",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/checkout_handoff.rs": {
       "status": "unproved",
-      "sha256": "c7e84c3e104b557fb9f494870c0d3eb765ab982b0e01a92ca39f3a588660ff6a",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "2be7806357556948033b6f3fdf8ad4ea29079442be39012e7ef76c50306b4067",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/checkout_page.rs": {
       "status": "unproved",
-      "sha256": "f20368dc3091dac4c6b2db57dd0a8aa7bede13080f25365afd59eff392ab4e01",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "23a106d595ec791d983b8ca0952582e6be3fdec3a9702f975daeb8538b742b87",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/cognition/behavior/mod.rs": {
       "status": "unproved",
-      "sha256": "99bdf67f9586bbef217672986f7d5332a789d8be8848ac3edf0b88086dd59648",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "0ab4ff80ba250be216c3c62ad6b214355be205977cab8004bb703f6b1b70ddd7",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/cognition/claim_batches.rs": {
       "status": "unproved",
-      "sha256": "a28c85d6cd79b699459bf9f2ec9d8edceb3d3dc0206d46d47b34e0fc84d11909",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "d06a435d82e85fa8d9245ae9d1e0384946c5f5a237e13e32eca102492748f165",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/cognition/contracts.rs": {
       "status": "unproved",
-      "sha256": "8d50c23edfc43e5cb6916eb1fdc5524b3815a0946f55e1781436c69705c62b41",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "bc09510d7a1a2b13e443c5a13488ded7e6cf2c7f4a1fa051aeacbbc8a23fbc27",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/cognition/evidence.rs": {
       "status": "unproved",
-      "sha256": "f48f2895a5585727aa9b95a8eb4bda697e9d94be5467fea43aaee7c6062e2f43",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "7910cdf907358abaf1d7d9decb66430d95beeeb6c80b462611d0ed0a93fef78d",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/cognition/experiments/mod.rs": {
       "status": "unproved",
-      "sha256": "30597aa6ae9107a77a241f3abef3eafaa5d8a7b74430f65791bc545881d0efa9",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "8ac7710725165c4ac4f338ce8324c556a0c083b6071034e6cff0b1d57487a3e7",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/cognition/extraction.rs": {
       "status": "unproved",
-      "sha256": "586d8aaa781b6cc5889005f2012976d0a8d58814a09c5b06f5991aa0ae6d7eec",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "a0bac5a27d8257389ddd2d92dc4186eaa6181d06af71d77542a38289d81bc104",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/cognition/indexing.rs": {
       "status": "unproved",
-      "sha256": "8693bef67249e7e31897cd9f2346b1dcd6ae84b0ab2dd826de96df6837f791ea",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "b6af1149428496f55459118950719dd10a999d539cc833f95ca5cb20e0dc954a",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/cognition/mod.rs": {
       "status": "unproved",
@@ -7058,8 +7058,8 @@
     },
     "src/cognition/preferences.rs": {
       "status": "unproved",
-      "sha256": "03b45c0b58fd30d27cbd7627ab6ac2d608ed3c685db35e6d4f3150fb906ac787",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "5a4cdca9587d8dadddeeb6f2246e4100e209d7e885d1c738881da414a1abcaea",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/cognition/projection.rs": {
       "status": "unproved",
@@ -7068,38 +7068,38 @@
     },
     "src/cognition/recommendations.rs": {
       "status": "unproved",
-      "sha256": "b6fd13f9bc2a520bc52358760ab7df1995084ca0b985a2a273a8c6fb9958db16",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "b1611248c764cf0a6926b560169ee71320e585fcfcefa24b901ff6f5a0868275",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/cognition/routes.rs": {
       "status": "unproved",
-      "sha256": "aea8a0ba7b384817a2fc9d10ae1fbd9a5e2e144ec7e558f97868c88e3d064d77",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "fb6e96741b865620f59d6ced1253895850c8dcbb3a33467927770d7c3123ddde",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/cognition/signed.rs": {
       "status": "unproved",
-      "sha256": "d166525f881693f99a8ef316b450d18e504ce7af85e1ebe2085bf32424ee834c",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "12c87243b1f625aa5cdb1d1f3b7267c6de08d98fd65ffd97aca10261725fc58c",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/cognition/signed_offer.rs": {
       "status": "unproved",
-      "sha256": "e962bccb98c1686656d4af5aa467a7203dfb621cfdfbe682b09ba989de7a20cc",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "60085854c5454393ff4d84c3d33c550738d85cb1de8351af16296ab65ab93a7e",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/cognition/stream.rs": {
       "status": "unproved",
-      "sha256": "ea34754eec685718d4be07c2c683f71488cb252c0f94c9f00ae929723b19d5ad",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "bc8423a80122a6b9a380c49ad1d076b5a28af1c46b0f711bc918091a795f38fe",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/commerce/catalog.rs": {
       "status": "unproved",
-      "sha256": "b0f71706b1fd67663233ff0e9ccf0c45c5d7bf3dfae7531878c9b4895ed1f122",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "f2ea0e01dea18960a8889fdf57af956899fc54cdce936b7e23acbf983a8b807a",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/commerce/catalog_intake/mod.rs": {
       "status": "unproved",
-      "sha256": "7658f7c4e96b9e0bc0c63f32a63261a13868ab71006b8ef7872642c73f99ddaa",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "a7ed84044aa632a32711ba3cbfb6fe80a04d0e5eecb8c9a1d7940e1d22446163",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/commerce/catalog_intake/schema.rs": {
       "status": "unproved",
@@ -7108,13 +7108,13 @@
     },
     "src/commerce/catalog_ports.rs": {
       "status": "unproved",
-      "sha256": "702084036390f3e656faedfc55d77fdbe6e58787bc02f9f3e250f301d9d70082",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "de3ff1cfe96e354d6c104c4e2c6db72936d2a84a4fa347af5b5b037726e0ff21",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/commerce/configuration.rs": {
       "status": "unproved",
-      "sha256": "922ef64605f1088f956a681c0283ed78132ce9e2debe60fc500b57ca4b981fc6",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "8b684de8b69e7bbe04adfb69d7b8362d28a08548cb2d8a4a60707a81ff9dce2b",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/commerce/content_text.rs": {
       "status": "unproved",
@@ -7123,13 +7123,13 @@
     },
     "src/commerce/context_routes.rs": {
       "status": "unproved",
-      "sha256": "c0f1c30be6d5ea8f6e3d89a8dd40370727645e7f78c8217b7e07c7f518fcd3a9",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "b3b637f08e3850dbe0ce946ad1b8d48a5b661e463cedf3b0b55d844bb5926b3a",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/commerce/customer_groups.rs": {
       "status": "unproved",
-      "sha256": "dfe15c06dc74a014f8ca7d40b360b7bdd561be8e8c7521415dd7782d0369dfb5",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "22815183e419e5ef5edc9e9a27b5444abba4551dc99a23f7ca36167cb7c51911",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/commerce/delivery.rs": {
       "status": "unproved",
@@ -7158,23 +7158,23 @@
     },
     "src/commerce/geography.rs": {
       "status": "unproved",
-      "sha256": "8993935fc02ee85286e4d44f329aabfc1d50e65052fee3af8898e6bc236561c4",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "f154f40e713d57bacb7b3b1444bf55888d0932ca70f49fc9f0385b89b9a95e6f",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/commerce/international_capabilities.rs": {
       "status": "unproved",
-      "sha256": "86893f73cbfd18d9337f6382f94b86f319411949b5f99f997ce4c13dae05fa14",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "a156f55c579d2793a06326f6c979c87829771da109d7660d21e0556e695b8cb5",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/commerce/inventory_ports.rs": {
       "status": "unproved",
-      "sha256": "af444d6db7ad5ab979a20f14d875e1bb92915499c649ec146eaf9185a49826c2",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "8be8ea5ee99096b30d4f9a5e940d4e57ee77c12148fe4e2193a2157183e27f5d",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/commerce/method_usage.rs": {
       "status": "unproved",
-      "sha256": "b843c1263a226a70fd4aae6e561796606cb0862c548f8fcac478c8e6f5891259",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "b59a42beb14a9af03c23cc6fa980804d41e2d633b3bda0f4eb1e7704b592ed84",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/commerce/mod.rs": {
       "status": "unproved",
@@ -7188,8 +7188,8 @@
     },
     "src/commerce/product_admin.rs": {
       "status": "unproved",
-      "sha256": "3692ec2ee1270ee3f298a1721537b6cbd6765109463906b8dffc3770d51a2653",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "887f417567e248172057c7ebb090bf6f7539bbba3a65e5b593f9e7938d030e26",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/commerce/selection.rs": {
       "status": "unproved",
@@ -7198,8 +7198,8 @@
     },
     "src/commerce/settings_guards.rs": {
       "status": "unproved",
-      "sha256": "d30bcd23f2687646baf82262f23a09c4773cdd4ff1885f9e0458fafe05f73833",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "a43003cf29f8229a673854939c6d4fc240b947238d052248e3e554649ca7c4f4",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/commerce/settings_patch.rs": {
       "status": "unproved",
@@ -7208,13 +7208,13 @@
     },
     "src/commerce/settings_scope.rs": {
       "status": "unproved",
-      "sha256": "79b640bb42564e4801f3b36f0fb10f0f1e22efc17316a57ec2e4ef026e9bec35",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "e165bd39423dfa1d36bd3f315fe1f64b32896e82909bc9ab766b1f7db0c90dd4",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/commerce/supply_proposal.rs": {
       "status": "unproved",
-      "sha256": "cd5c47709039cbe787eb1df684381d88fc1e617c772c45184fa2a55abf982b3f",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "9b61c2b79ef726ce2ad42b7f75468bc3ef3779180c607f53dc568e8876ff957f",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/commerce/tax.rs": {
       "status": "unproved",
@@ -7223,13 +7223,13 @@
     },
     "src/commerce/tax_context.rs": {
       "status": "unproved",
-      "sha256": "7fc14cd80de9780f85941a1f473b592c8d6d80a6d3784ff56525edae5146c743",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "fd3de31716e4c89876ecc003841123aef200c3daf3b0da0c812a00f5379836a2",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/commerce/test_stock.rs": {
       "status": "unproved",
-      "sha256": "6eab4820b48e00d4a944b590bfe103016b6c317f28171bb4c9200a03c5c2304e",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "a25a81e0ef2b2fe9a78ca1ab273f490f9a7fffbc90b93c3d8943aeb33724a599",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/commerce/types.rs": {
       "status": "unproved",
@@ -7238,18 +7238,18 @@
     },
     "src/concierge.rs": {
       "status": "unproved",
-      "sha256": "e3312c8714be5a36b305f9b516d1f19be535d6fcde611bbd4f86bfbe83913bf2",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "0566580904197bf9dbb09c0b2aec1ab96be0a18a4e32dc56762c595220089820",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/currencies/capabilities.rs": {
       "status": "unproved",
-      "sha256": "53e0ca092b8b17cc03a56093dd847186a0441910d63e5453c375dcfcfdf73cd7",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "cd3b1579dce743e49d7c3904493f7bded736cf13389fb626086c25f5befcb308",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/currencies/jobs.rs": {
       "status": "unproved",
-      "sha256": "50fa65192facc2220056569330a2b40fd8bc0c5326197f6102cf6677f5f56453",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "6b44c13cb91ee8d8a613128af5fc9b6b6c6546f8b8e6d0cda57d7121b04d0d81",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/currencies/mod.rs": {
       "status": "unproved",
@@ -7258,13 +7258,13 @@
     },
     "src/currencies/ports.rs": {
       "status": "unproved",
-      "sha256": "6d46f7dce6c24dc12bdc7cc1b68b282d9cca6fcf337bfc6ab2acb9abc7a63231",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "5f8e06ab7b8dc2b11b30125407d795586ad854944b07cd1a44c2803659820025",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/currencies/rates.rs": {
       "status": "unproved",
-      "sha256": "4dfb42a9759f363a727c8ba0a3cd74d5ba5b489d6357eb59897e23bf6ec88daf",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "a117b37702eb26aa9103ba5c59184014e26f23fa7af08957668cb13a2a1355ee",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/currencies/request.rs": {
       "status": "unproved",
@@ -7273,18 +7273,18 @@
     },
     "src/currencies/routes.rs": {
       "status": "unproved",
-      "sha256": "1e4b28be17f0a4bf35ea5647f6df4c73702dd8623fd0553874a227ef03275713",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "c5dc39f4ae0d59289ec375846f3d9b2c00c587b967cb77466673316759458f64",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/customer.rs": {
       "status": "unproved",
-      "sha256": "e3b692b5bb2a94da04de135f06fc79cc1e32e3d9b4215bd1a0a7b714511effd8",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "cabee475e1b4fb6de5a17776ec22585e7cde6bf4e49c0c1aff1b881b86853f09",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/demo_catalog.rs": {
       "status": "unproved",
-      "sha256": "aa25bb7dbb8e8a22d85f4100d42494ea93596e0cc8c10372e5cdd00de5c98b11",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "dd1e8f8c88a2c58ce219f9f3b5d8269f336020577453fddaef2d82540d34aa23",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/developer/agent_connection.rs": {
       "status": "unproved",
@@ -7293,23 +7293,23 @@
     },
     "src/developer/builds.rs": {
       "status": "unproved",
-      "sha256": "5799c8b89868801884380fd9a1e3da9163baa9c6ba07db053c6398f6b75b44d8",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "f6970c88c70c33a1cdccea63f1fad569d4c803c5c3885c865684cc811980e767",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/developer/generation.rs": {
       "status": "unproved",
-      "sha256": "99ac21c063c32e283df90891b56ea46ca4960468d743cd59a7cae0181e96a371",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "67d6cd738bae79658e29e301bde8d6d1ee8627d673ad36eb8605add3a8ada7a7",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/developer/mod.rs": {
       "status": "unproved",
-      "sha256": "b293549a7c8edc8c5aeaa1d29af12386dbe07ddec1cf7245cd5682afed9992a1",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "b4e81286f0cc2353b510a220f5cd1f18032fabccce9b63ae93d9484a9ed3276b",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/developer/routes.rs": {
       "status": "unproved",
-      "sha256": "16c93457c791c51cf420e712c8a8d5d4d8ba54b130e99fee95b7d8c83610d45c",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "474bdb658551bdb238a4b8e7a7f14a9a6fdc33d7a2376bb625f43a6f5bb7c2a6",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/documents/ingestion.rs": {
       "status": "unproved",
@@ -7318,18 +7318,18 @@
     },
     "src/documents/knowledge_host.rs": {
       "status": "unproved",
-      "sha256": "e71df36d4928e9b300fcff6d37cb3060eeab119989595f81dd36a0ad42290c64",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "47c944bc51df91fa045b022c850c561853735ea5265e48f7a8d9d6408eae409c",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/documents/lifecycle.rs": {
       "status": "unproved",
-      "sha256": "339a873c01ed6160d7f98faf72b1a0f199dabf9b2204840e4dfb35a6f3fc38dd",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "fe3e94d7d44602aa1d44d71cd899f423cb0aec06c56e95bdafa0f41c8bbce42e",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/documents/mod.rs": {
       "status": "unproved",
-      "sha256": "4b8e31443de706480df528605c79ff0f76cca059d6ed1e15861fdf49c63d4554",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "145634ea3c67ccfc9854bc45a86915e101e45c561a6ff08c9d5da27186d9fc9a",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/documents/parser.rs": {
       "status": "unproved",
@@ -7338,38 +7338,38 @@
     },
     "src/documents/preview.rs": {
       "status": "unproved",
-      "sha256": "a58677d79540935ba0a34df754f82018f613cfd1738f0f83aeb3687bdf4f3ce8",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "4c85a703fb851387666c0ca6c9aacd01b9e5f4aa7e71993b27d52617668eb52d",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/documents/product_knowledge.rs": {
       "status": "unproved",
-      "sha256": "5b51e6855cae831d3e5ba9c0cc32a8bbef98aae52976701d26ae57cfd2ed3d7d",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "b1ea491f2a0031327af897f71d61e32ea0dedc2742b0f92312f269a970ec2bbe",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/documents/questions.rs": {
       "status": "unproved",
-      "sha256": "d97ed8feea0e0b887ecb8bb8543c4b67ceb609bb61735cf5d9fb597bce468a87",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "d29b0e50eb28a559f33a3e69dff366eeb0d98dec129343feb9a9f5ad8529d5cf",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/documents/retrieval.rs": {
       "status": "unproved",
-      "sha256": "774276d4ec6e436484f9435ab7814b643aae8f77d06a092e388f1afedcb4f0ea",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "6e6d76f412eb6ad7069957c773bea992ee42921e674434602ca66266f0b463c6",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/documents/tools.rs": {
       "status": "unproved",
-      "sha256": "df87c5f2002bd5e079e277650c7102641ff4851e09738e4b90f1dc3acecb5365",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "bfe928d46812d71f510b018d0f8374f323263fab51db6af1a503ab48ce5417a2",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/experience.rs": {
       "status": "unproved",
-      "sha256": "85e9c8b788e319157abae3351e9965aa0ba82b6d2133a15a92cf97a4eed84351",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "ccc079a7c5e96bbaf5e5b347cbffe277c706b36406296504b8472900e360e5c9",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/extensions.rs": {
       "status": "unproved",
-      "sha256": "7666c117d68770c8f3f21502701cffab33eebd6fbbcc86c799e2bcdab3a93978",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "23409399179b13a0124f3d1617edb64e5cf17960b2a27c210b0c3c042120160f",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/foundation.rs": {
       "status": "unproved",
@@ -7378,28 +7378,28 @@
     },
     "src/history/capability.rs": {
       "status": "unproved",
-      "sha256": "2b915b73cf7878d69b9c785dc3306805f7a2ab4ef476477f143744aa01ff8cf8",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "0c21832167f699188da48808f58a2f0657d1e2ea6cec3d27579db12c6edd8c76",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/history/mod.rs": {
       "status": "unproved",
-      "sha256": "1ea14b98122ab39d97a124e88c56579fb505b1ce7cecf5517f99cda5ba8ee8da",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "e3248f3002e0c84ca56c08d15b5fe20ec40f8bde20791615041af0dd42dfba2a",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/history/product.rs": {
       "status": "unproved",
-      "sha256": "c2da220bd8a60e56cf0b3ac9924ccd3c1bafbd5f2510538f213ec327eec38835",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "d040149fea36b12a40e00ef6107321b35874e8d5d7a2b6c0dbcaab97251b21b6",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/history/restore.rs": {
       "status": "unproved",
-      "sha256": "f7de3edcb7494709d94ea38cb2fa383729ba6659f9dbfb51bddeb082330b8efe",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "11d57139af3cac2120efe3764a3cadc8f37907256a9811d3582e5f1e3aae8b1e",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/history/routes.rs": {
       "status": "unproved",
-      "sha256": "4cc0f8ab660a1e70ef995f9e048e88f0fd196d573c6f09dec4944c38fcef6fcc",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "74e2cb8f8217fc76ec486b1409b04e932845e05712c885d7c5d5d781f754a8a1",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/legal/buyer_consent.rs": {
       "status": "unproved",
@@ -7408,8 +7408,8 @@
     },
     "src/legal/mod.rs": {
       "status": "unproved",
-      "sha256": "281347c017e66aa9e7b28ee75fe9d83a8a6e9097a135ca8638f6b5bb8aa90061",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "da95b6ba6e6dd7ac6d8dc0dd3cfc03ec18ecca3fc4b2583c6ec64418e539b149",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/legal/model.rs": {
       "status": "unproved",
@@ -7423,23 +7423,23 @@
     },
     "src/localization.rs": {
       "status": "unproved",
-      "sha256": "328745198f9110295f1a8155ed48d7991cfbb38881f2bfa49cfd0876637697b2",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "2de0691a53097c3849f681cb4bbb2f74757f93d09f1ac5b334ec8ec442f3b93b",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/main.rs": {
       "status": "unproved",
-      "sha256": "039d7d36a1533f21a562b70642d8862a6e50af31b1ffd5868890eaa8fdd44650",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "cf835392eca90845920517811f8f8805acccc5de172d27c219c2ae7913e9c720",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/marketing/app_flows.rs": {
       "status": "unproved",
-      "sha256": "ff82e92f664f17926951a35db233e7f7628a36927bd106342a034590a7b27d48",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "d51aec2734d69fcb48a1c791ec785d816a3cdef7ef1244f9a3ea66926cd05d3c",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/marketing/catalog.rs": {
       "status": "unproved",
-      "sha256": "57fb0e0a68f5bc822d4ef869c6d4285a0d7a2aeea03ece737bc1a7b7ef11b2fd",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "1868ff741a1faa7f3dbf1efe285e8aab88367125f7efe1e2c7537ee86196940a",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/marketing/channel_access.rs": {
       "status": "unproved",
@@ -7448,13 +7448,13 @@
     },
     "src/marketing/channel_preview.rs": {
       "status": "unproved",
-      "sha256": "0ec530e05e78906951acc562dcd4751afca08e585a3b9ec21ee75c53e00d31cc",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "0996ff755de7540598d14bb341e2cda002d3e4dcb4b4b2614d785c26001c432d",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/marketing/channels.rs": {
       "status": "unproved",
-      "sha256": "58ed1951e9312cc3f8f2e4b2a2827e3cf6b7b3eda1151f4ad4625d38ade67de7",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "7acc62c07f91b6bad958ea2653489663dc79abb496c831b5cb4c19e37367a619",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/marketing/condition_gateway.rs": {
       "status": "unproved",
@@ -7463,13 +7463,13 @@
     },
     "src/marketing/configuration_host.rs": {
       "status": "unproved",
-      "sha256": "9b3792e23ffd20959fc3a2c13eeefdbfd75fba36995af2a8008de106acd73690",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "75f7e2c0a44ed30a043423e2ff8c7b967c6e46311cdf54c5aa76439b3ece980a",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/marketing/coupons.rs": {
       "status": "unproved",
-      "sha256": "0e1b0e4eaa6981777ac00c20603fd5799514a4216ee1aac43f676017f2304445",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "5309e96ab8fce0b286c23f2764d4e60941ef7de51832aa05518571efd95761e0",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/marketing/flow_access.rs": {
       "status": "unproved",
@@ -7478,8 +7478,8 @@
     },
     "src/marketing/flow_actions.rs": {
       "status": "unproved",
-      "sha256": "539c3b117a1b70dbdd81c05d562229484a79b7d7e7948640098a9b94a11d680f",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "8b710e44468ab6ee9ee92cf2d6a267c5f438768ec3fa9cd987a375c2dc4d9050",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/marketing/flow_jobs.rs": {
       "status": "unproved",
@@ -7488,13 +7488,13 @@
     },
     "src/marketing/flow_mutations.rs": {
       "status": "unproved",
-      "sha256": "9fe38c55ae3837dabda99bd4199ad76de116e215628d7f71dc890a8b7e17f71c",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "2a3256547afbe69c98a1199890ea5c031fc77ae1c8e1187f3e798dbbb47da735",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/marketing/flow_policy.rs": {
       "status": "unproved",
-      "sha256": "198d4b3ec8e081b907891a9f4cc3527bd3e0be518a1df3fee64fb1ba5b9cbf14",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "23223298a952da94c096daa0f935c955045deb73b6f4e27d5e850ded2b48dec9",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/marketing/flow_text.rs": {
       "status": "unproved",
@@ -7503,13 +7503,13 @@
     },
     "src/marketing/flows.rs": {
       "status": "unproved",
-      "sha256": "10ea346634f81ec4994de624d5313ee9a6ba1e97d097c4543bd0a1e536588401",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "361b35d40b10d32087e2b6600c347c9c4fe41ef61d0f1b80d65f0551321aefbf",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/marketing/gateway.rs": {
       "status": "unproved",
-      "sha256": "cd58f3b6e2bb58d9918810840ad7b396be2ac4bf453e6f33e90fc1b9d1caa5a1",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "32841f2e7a860fe491c9f15c162ab7424dcebf6af13b7396af31d2dbe7466d6f",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/marketing/jobs.rs": {
       "status": "unproved",
@@ -7523,8 +7523,8 @@
     },
     "src/marketing/metadata.rs": {
       "status": "unproved",
-      "sha256": "168c6e67603018d9ce0d15efd2f9248b9a536b4b74e1760f112c80b89ab5ca15",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "54f11ec0b99450a71cff5f7bd932b7e07dc34b083e1adc33b0a025d48718bc86",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/marketing/mod.rs": {
       "status": "unproved",
@@ -7533,43 +7533,43 @@
     },
     "src/marketing/pipeline_runtime.rs": {
       "status": "unproved",
-      "sha256": "dbb6f9cd1e4455ebd56850fad44084d2d9f74dff116c126eb06800b2c7494d6e",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "a5edbd1b9cc660852d34efbeba2441fd6dc51d0cf3a215e83d1ee829456870cb",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/marketing/promotion_import.rs": {
       "status": "unproved",
-      "sha256": "e73be0f264e5af3a14b6dd54d43d908fe243b0632a15dd02b9e4b613d6be49d6",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "eb4b0878e9a20fbe0e5fe1ecb7aa9361c509c95d9e838c74d77181482e3e3a86",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/marketing/routes.rs": {
       "status": "unproved",
-      "sha256": "7ec3a67ab4a93d045846f2a46405e4084e1a8bb48c851d9a6debd8cb0b62bfbf",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "08e80e98593d74ce7979a96e4a716b4deba0f5f6162065cdf721212728de7405",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/marketing/rule_history.rs": {
       "status": "unproved",
-      "sha256": "123f4210514ff78e039d7ee307a7f20dcde6cd937379490cafef112f2b8cd484",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "3737af8cef4ca956d39c8a69485c8ad57a48b5f6f9923112156f8e0cce7a0a04",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/mcp/poppy.rs": {
       "status": "unproved",
-      "sha256": "26c3670337a7ec8ee9228a168cee55200b64edc601b0b88cd2c93a8ed6a582c5",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "501187f3d7cbf0a362c25f17a1403099680a2618c17243c957cb975801953627",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/mcp/protocol.rs": {
       "status": "unproved",
-      "sha256": "6fa55c95fceb8e5c6e7416b42b8352203030b66e6ca159575ffa91dee91751ce",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "5c293d1d2d97e281f794a19152ddcecb2012eceb167a0bb08d5ab1c16d4ed12b",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/mcp/transport.rs": {
       "status": "unproved",
-      "sha256": "631d5a21edadcafa0267e4ade29f76edd00470512553fc04cbdf0e87a413e9dc",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "82bfd35eaa78fa02c8c83a135ab63435ce16a6eb07aa3cbd3f7f3f805f2117a0",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/mcp.rs": {
       "status": "unproved",
-      "sha256": "b7d575428c04c94fb52f3231fccf4c99ce5ded878a89423bc8f444a6784a274e",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "8c9b2ad307f74eebcb06b4154059b276e76ada844fef2c3b8b48a75fd0fa715b",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/migrations/identity_checksums.rs": {
       "status": "unproved",
@@ -7588,8 +7588,8 @@
     },
     "src/migrations.rs": {
       "status": "unproved",
-      "sha256": "2e2d287612516c846d0460a70f6e5a19f5071beb867d2796749b843e7ecc6102",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "cee712114574d9a63b0049fb0a80219efd342efe707b5bd6ee974f9dba3f55ed",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/operations/addresses.rs": {
       "status": "unproved",
@@ -7603,8 +7603,8 @@
     },
     "src/operations/company_public.rs": {
       "status": "unproved",
-      "sha256": "d96a448d42d72a7a7def7e8c079986b227db7a17b266474356c6b633a021ea2c",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "e656b3632fe001136490b74985ab3fee8135b37d9201328ec0610915eb3ed031",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/operations/creation_schema.rs": {
       "status": "unproved",
@@ -7618,8 +7618,8 @@
     },
     "src/operations/customer_lookup.rs": {
       "status": "unproved",
-      "sha256": "b295e8db25426c340d9ac0f838e156124394abfbcceea73d98bf37356b576adc",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "f95bc80fe74bfe6d63a6c4607fd5cc94a5721303bc1e70ae2b845a89f9e8a100",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/operations/delivery_booking.rs": {
       "status": "unproved",
@@ -7628,8 +7628,8 @@
     },
     "src/operations/grid_plan.rs": {
       "status": "unproved",
-      "sha256": "38531ff5e8c7aea190841e29a58cbdd271c346e6c1f04dd766309662a15bf70e",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "9eb11eca4546f88e5f59ec70bf14c7e9cdd8ec5bd2db53c3003a0c5673e845ca",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/operations/grid_schema.rs": {
       "status": "unproved",
@@ -7638,28 +7638,28 @@
     },
     "src/operations/imports.rs": {
       "status": "unproved",
-      "sha256": "7b91bac2384bb26a117c9d5ff635f5839686584fa0ab0057beaa979514f04f6f",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "5740df910d69afaa12b342f5a4bff831b03a6b0601a73f5cb7c1cb7706e904b2",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/operations/manual_orders.rs": {
       "status": "unproved",
-      "sha256": "666589c684da582f58314a38a91444dc21415857b840b7962ae7ebcf056e5578",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "bd821c90ca6058a80aec7d7af95d53ad7fbdb815d34617d21d85602b2078b870",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/operations/master_data.rs": {
       "status": "unproved",
-      "sha256": "e0d85e2564e207ed39a29f1b6ca6a83f91f327399375213a6147a58c28f0a7db",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "7c12fb0493e4d61160d1faf9a218f8ea13e8b22e08fbdb059ec3c78b721aaa3d",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/operations/mod.rs": {
       "status": "unproved",
-      "sha256": "147d7f9d6f69d0bced4b2eb5da12d2c98322791ad8be4dbb8abf36499937a265",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "b66efce0db43d805ea50bc96970b220348bce2a7397c2548b5b0e41590da9c18",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/operations/order_documents.rs": {
       "status": "unproved",
-      "sha256": "9de8d7fc07629fbe842d95c9aa568b1131faf57064883a72df63a74ed77bc187",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "6864d1fa985b8c5b3675f6cdf73ce117710dcb66c55d9481b33db6a57514993f",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/operations/receipt_pdf.rs": {
       "status": "unproved",
@@ -7673,8 +7673,8 @@
     },
     "src/operations/receipts.rs": {
       "status": "unproved",
-      "sha256": "c46f995da434a397d470162baafd45bd27cca5b55597feb5a14d9ed684445082",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "be532a1b9415adc67c289b9b78b8624a76d016fed66315b26740d86bc20094c2",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/operations/redacted_reads.rs": {
       "status": "unproved",
@@ -7683,38 +7683,38 @@
     },
     "src/operations/routes.rs": {
       "status": "unproved",
-      "sha256": "07db00eeed96a14244a2f5b47cf0d82adc86f4d8f067b5d523d28d44ca8d5d2c",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "19f74ffb889a45daad6bfcab2d7e9cba1a2bc223cb49fb3b5e2aa4e1c2baeb6a",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/order_checkout.rs": {
       "status": "unproved",
-      "sha256": "7d34cbfc467a794ced1368bd000fa8b1155d0d34bd663252c675970f21f338bf",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "f8843230a2c3b8ee9e19789c21e2ea5095584c091bb9ae35e5f9a77a31db0633",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/order_routes.rs": {
       "status": "unproved",
-      "sha256": "5e06f9909fe3375553d19dbd4ded3a7589ace8327cb4fac72672a2a6ae9a1d7b",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "c655a2815591e3444dd83c6c7df7cb6d0b470c6c150d30d871dd30a6c95dfec7",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/outbox/retention.rs": {
       "status": "unproved",
-      "sha256": "556eab101e96378ad9f0d958b2d22903a3da528d8e20e994d9d109d0ccf07dcd",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "efd42db347c26ffe1146220b69f3efc78bfe66faf0e4a6b7c440b21e2d528c6e",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/outbox.rs": {
       "status": "unproved",
-      "sha256": "9f9eb2c65babd52ceff3a67c0468b82208e2266028910c15d0624af2aca3e5cf",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "6b94104d384ff2c04c8c495a348a98695b80900c371bc03636c5335b40ad7144",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/payments/accounts.rs": {
       "status": "unproved",
-      "sha256": "571307a42d7e76bcae8eae836770faa67d5768c5435b820ca021c3e1afd04fef",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "122f18421f1ed9c6e9df55a92de92a20f066d7aadca0abe9f65d1635b60f7649",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/payments/app_commands.rs": {
       "status": "unproved",
-      "sha256": "378f713bc95b8e80950bd9577dcd7befd2ddea35f0963cf21f3d81d110f813dc",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "10bdd50527af4791f9bec32b54daa6c586714f3e988bc50e6a65e94e899d82ba",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/payments/capture_configuration.rs": {
       "status": "unproved",
@@ -7733,8 +7733,8 @@
     },
     "src/payments/details.rs": {
       "status": "unproved",
-      "sha256": "497582d4384995bdb016613b44b64cd82e0ec40e6c3c82c58d8a23cdf572eabc",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "68b2c7acba585ae82b6220b75e80843e7917a0225df5085edbd5bc7fe40c93c1",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/payments/diagnostics.rs": {
       "status": "unproved",
@@ -7748,23 +7748,23 @@
     },
     "src/payments/host.rs": {
       "status": "unproved",
-      "sha256": "e471b793b9e16d15066ebc81fa198a314f376235c0f99475cffecf74d820c02a",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "45fd0b8b15ded25c0ac7093913f5e429477f97571776626868d14442b5bcfb38",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/payments/instructions.rs": {
       "status": "unproved",
-      "sha256": "e9253d75983d398921429b6514a8450d6c8d4c54b4e6cfdde902bad8da42258a",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "3ad00905fcdaf148edad8ffe283c84dc1506d949222efbc98a43cc21718c75f2",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/payments/instruments.rs": {
       "status": "unproved",
-      "sha256": "1a2dc5bc63a25cb6183b8bcdcab864278abd729071b80b8b8ff6e75a7196aadd",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "2477a8b5281e69c53c145b45abe8e6855dc59545518f6c8f45f7cd9c2b205a37",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/payments/merchant.rs": {
       "status": "unproved",
-      "sha256": "2f6b14a7461cfbc2d119d114e04c030c28fbffbc91d31020b939718d6cc645fd",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "0544b12eb954afcd0183451f069065b630a9deff8a96f67bf2cccc6a1df20be1",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/payments/mod.rs": {
       "status": "unproved",
@@ -7773,18 +7773,18 @@
     },
     "src/payments/operations.rs": {
       "status": "unproved",
-      "sha256": "89033c8b80f40c920abbc799070698d8672d6841e80efe8f96d523a1966fa826",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "7154befec62e51e746bdf872dd11f772f7469dc4abf0d49995d1dfa033581425",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/payments/provider.rs": {
       "status": "unproved",
-      "sha256": "0cc28e710f4556253e9ba53eefd377fc0f13a6d7f216ad35a12aba2defe2685e",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "91b155ba532e6857841be47eae796372d3946a6871fd93c0ad0f0011e5ce1628",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/payments/provider_webhooks.rs": {
       "status": "unproved",
-      "sha256": "dfa00a3ed5ec8fe4b5bfe0c81ccd8559b85638151dd6cf350455ce85f4a06643",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "c5a15567c54302fab15eb302ef5e16e4ce9a84da22c1042c2a58424ba5265fbb",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/payments/receipt_guard.rs": {
       "status": "unproved",
@@ -7798,8 +7798,8 @@
     },
     "src/payments/remote.rs": {
       "status": "unproved",
-      "sha256": "45fe7957da8e9c0a1b40bd22d64d3c1205e3f9e858be9d27b2450ae3d8da9ade",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "5a0463a36cee6cc9600ff1c81c97926a300d1e79f6f5cb20ac6ce5c0a0c15a54",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/payments/return_urls.rs": {
       "status": "unproved",
@@ -7808,13 +7808,13 @@
     },
     "src/payments/routes.rs": {
       "status": "unproved",
-      "sha256": "09fd74ced407c11c674652ef2e347c8ba2149c0fb4984eb01b95a15017e4fb80",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "232179f2fe5b9d898f72adc0a1e812e730ccca41c3fbfbd77233aa13fb859a53",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/payments/sessions.rs": {
       "status": "unproved",
-      "sha256": "959fb801de7cd4b99d3ed99435f212db9e6c0b9a885ae3686be459132e2fdd19",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "7ca89062b0dafe3c8d5f890aaff9f94d1af993d31e8d7a7bb6d0be5c5c863bf9",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/payments/state.rs": {
       "status": "unproved",
@@ -7828,13 +7828,13 @@
     },
     "src/payments/worker.rs": {
       "status": "unproved",
-      "sha256": "1e1e2fb23f5e20019ffcf59196a366609e5e693ad22e72c1a4d45aa2e6867b57",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "9bc08114e091de7ca0f4d906022e7867957c555c35685bb7e2ed83a39c73d1cf",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/performance/access_snapshot.rs": {
       "status": "unproved",
-      "sha256": "2010bb993a82016171b93623d5bf98287e22b78c9ce7bc127bebcb8c9ab79b7d",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "bc20d9afd08074df0248b6688573efaf5d684b6581331ec7d9d78039d4165073",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/performance/delivery.rs": {
       "status": "unproved",
@@ -7848,23 +7848,23 @@
     },
     "src/performance/mod.rs": {
       "status": "unproved",
-      "sha256": "e41684f4ab41ac500a1b6c3ad593b26f3f8c7effbddccf2936d9eeea5dc1c944",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "c468269c7018111a6b061140717a05bc34088f6406cc6110ad5ee6c91029257e",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/planner.rs": {
       "status": "unproved",
-      "sha256": "57119b4208682b589d776a9089dd3c4bcc238dd193d52d903d8c2462d7fe53a2",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "fd83c2edab9af52fa2907a4f40bfdb7ec29b383d28ac05577ff9752af91d3110",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/platform/ai.rs": {
       "status": "unproved",
-      "sha256": "5aaa930301b569db95e30958fe5e780f3d74df1044f9b91979503c670c941a25",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "e8a2be8960d333d6321ef24e94c2a450b733556868867f98b6d45d060a600418",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/platform/auth.rs": {
       "status": "reviewed-binding",
-      "sha256": "4a1773cde78c2e98d26cb7f5062e0f1a9f75195c232841f99ac91d96f0129706",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "cd9ee0f15e1c25865716a9bd986e699089f9c2769ec1a593add4abe8cbe9992c",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/platform/bootstrap.rs": {
       "status": "unproved",
@@ -7873,13 +7873,13 @@
     },
     "src/platform/infrastructure.rs": {
       "status": "unproved",
-      "sha256": "f98b7b6be9556da6795c951074be1beaba589691aded1515c78d6fef4d9b688c",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "fb09bad346af00a08dc94dda65429ebca7e3bcdbb3f6851d45ba47726f34d542",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/platform/lifecycle.rs": {
       "status": "unproved",
-      "sha256": "c1c31e7bd5cac04d20fe4e421b86ef683ab7f594f7c60c00d3f88653c820aac0",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "68ff47d14aa518c234199df899079607376ff8f9589a77ff812ab76a14c3f2d4",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/platform/metrics.rs": {
       "status": "unproved",
@@ -7888,13 +7888,13 @@
     },
     "src/platform/mod.rs": {
       "status": "unproved",
-      "sha256": "d15cb9c67ff0dfa86d73df6afc267a9e672b3003807ba2eea34489f15ebaac59",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "10ab8c1ae83bbee4cea417103a813933e2c926814a48360cd0b92a127bb8b071",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/platform/provision.rs": {
       "status": "unproved",
-      "sha256": "9c11b1c3f5146b3ebca8628349143031f2a5172d7ee39acaa135b62bce7049a4",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "e59c1a5e9d71968d1fcd8356a58484e724a3dfb046e44e7fb7e3879665298d0f",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/platform/quotas.rs": {
       "status": "unproved",
@@ -7918,18 +7918,18 @@
     },
     "src/pos/gateway.rs": {
       "status": "unproved",
-      "sha256": "7d98cbb53feb335297c9f83720e6afaa5ec56f47ecd9e0f9f40fd1b1f62164c1",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "6b339a2bb3e1f4339970c745a17b9c4ffd5cb987c545c961307210c6b79fdff5",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/pos/mod.rs": {
       "status": "unproved",
-      "sha256": "e1bcd73b8cfa80fea274072cc12f4bb2647a23ece7b3ba05b8e889dcdfe35745",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "2e4ce66221e4153ce8001d4d9d1a80d77c89c3c91d6dcdc2f47fd3772fed52c4",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/pos/register_host.rs": {
       "status": "unproved",
-      "sha256": "d28317d503b0ad260694b9f0eb3338cf1d85ffac44346af7bd1164ece5603ba4",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "3587d042f9e952ecab5db2d0d110c576c38ac85b5b359be4c430cab4f4895f8e",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/pos/schema.rs": {
       "status": "unproved",
@@ -7943,13 +7943,13 @@
     },
     "src/proposal_apply.rs": {
       "status": "unproved",
-      "sha256": "7d34d12229564204d851e7a09b2052238518f863c27c0f6280c02d2aebbe6a8d",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "136b636417ebfde951f9bec1774754cf6346e041b7236c93038dfcbcd429851b",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/proposal_routes.rs": {
       "status": "unproved",
-      "sha256": "e0381a091d1c48ed10ca8de8c70fad76bc8d9ab3a8714421b3c1b329e594272f",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "7a327a2482f57de12cb824c0c7aca9cc7e5f0e10da8d8b59a889b0959a4ea838",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/routes/http_profile.rs": {
       "status": "unproved",
@@ -7958,8 +7958,8 @@
     },
     "src/routes.rs": {
       "status": "unproved",
-      "sha256": "7ce1f38ad685e9246a237673e1787feb26317510379bd88de27a2ed1de5b088e",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "20c8957492172c56d7fa463b6220710dbf33715ee3b8b11ae7bb147cde669f5e",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/runtime_config.rs": {
       "status": "unproved",
@@ -7968,8 +7968,8 @@
     },
     "src/sandbox_cache.rs": {
       "status": "unproved",
-      "sha256": "25d866e6279ac7593af0ab5e5e1048b64251bfc416d0ae8d20718d3e51b7715a",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "c1902c816b069bb7f9b58f571859f874646620763ef439bd09ccfebe7860ed63",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/security_headers.rs": {
       "status": "unproved",
@@ -7978,13 +7978,13 @@
     },
     "src/seed.rs": {
       "status": "unproved",
-      "sha256": "60d487d73cab804191a158ec93aa208a7660a0d11a7f499e961c75efdd54f1e1",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "a054ba70241be88eee2cd3c636c5f5fa0fff325db7a638dcdbcf238da013ae7b",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/shop_domains/frontend_bindings.rs": {
       "status": "unproved",
-      "sha256": "2399326e17894cbe79e245fd6ce18ae42accbb1ede29da674dbcb2453bf825e3",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "45a9789ff472c415e171aea93bc657cd7a5203e0d52d9eeef8023017b5473b40",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/shop_domains/frontend_editor.rs": {
       "status": "unproved",
@@ -7993,28 +7993,28 @@
     },
     "src/shop_domains/frontends.rs": {
       "status": "unproved",
-      "sha256": "db216e3dbf563bfa5bc836f7e3a4baab5436a36c41ad1fc645620b541dd97121",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "72a501392c13c5c3069d380b37c5d52adbebe38a641c5e56010a4b534bb190b9",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/shop_domains.rs": {
       "status": "unproved",
-      "sha256": "e7e21547bea44736cab1e9af5ac6dd84cebbf5c05287256450a857bd3652da77",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "e3293e2474e376aabddc35769d13afc27845f5819207f6b2e5ae2ff476514852",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/staging/mod.rs": {
       "status": "unproved",
-      "sha256": "b1691019eeaf8e198c526e536bc806265390c0f5ddbf03cc12fa4d280eadfda8",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "228f39a8557d981bfddba26a26f98906216971610edda913e7d6f32025b58959",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/staging/release_host.rs": {
       "status": "unproved",
-      "sha256": "4eebdbc40c6b5f614cce4fa5987d633341d0f3739f08f1435189859522928c8e",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "5543d310ab6e58076f911dfc27ccb9414f11c90d16295aac3c97c9f8af802b71",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/storefront_pages.rs": {
       "status": "unproved",
-      "sha256": "850b67bdb6a53de13108584207510a3ca343d0375cdf669c98c276aa43dcc8ae",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "5eb9dac436be4bbde3033ebfc1d8e8bbb74b14ee84c69f90b9575f3ccc3fe66a",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/studio/facts.rs": {
       "status": "unproved",
@@ -8023,8 +8023,8 @@
     },
     "src/studio/personal.rs": {
       "status": "unproved",
-      "sha256": "c57c57f8fe456506acdf171bae2debe9944d0793aa23fb102b0da282c611e83a",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "893d91757d801433c976ba8df1ba19ce65170cfa1de0d49995e9166cddb45116",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/studio/reports/config.rs": {
       "status": "unproved",
@@ -8033,28 +8033,28 @@
     },
     "src/studio/reports.rs": {
       "status": "unproved",
-      "sha256": "11407a2a9e426445deb59695896aa14cb784a6065b39cadda4e23a46ec259999",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "28acf5104d1fc74502bfd3163198f75cad740738f932579313714543b7cd88be",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/studio.rs": {
       "status": "unproved",
-      "sha256": "9a96a2d877d1e9a265b92485dc86192eeebb910230a39414eb2972e7ec092d67",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "9ae1ce26646fb509557df44b0f0130583c51510be81c0c426f45b7219bc26de6",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/translations/apply.rs": {
       "status": "unproved",
-      "sha256": "92977a8c6fe147a0f67816b37c91e4a01b6cd999f79b8c6f83bf6eec45fe462b",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "eb13ebab83732a8c4d3899f1ff491fcc01829f00713ec2357789cc528455083c",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/translations/mod.rs": {
       "status": "unproved",
-      "sha256": "70288e3f577d615dce7c3b347a52ef583cb0cdb1c08a3e9351d41af77355f19f",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "bf5f05e7bc759cea37421f3b81f358f700c6259e805e0eeeb30190a7b62caec4",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/translations/routes.rs": {
       "status": "unproved",
-      "sha256": "4ddbf7154044bd36255fb9581f5786a359ffa0825827472c7fe76f6a88e99e8d",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "22a30a8a17d9d1fea0d167123088db09a5a89c26653dc7d461920305b58b5dc7",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/translations/selection.rs": {
       "status": "unproved",
@@ -8063,18 +8063,18 @@
     },
     "src/translations/worker.rs": {
       "status": "unproved",
-      "sha256": "1cf4bf76bba75ba2576c34fe0dda4cc127d7c299868740f58e6f69d72380a67c",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "91b1c98de67d50240a92f67c1203bcdf1fb60ec2eee395973d3ec2626f56fe5a",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/ucp/cart.rs": {
       "status": "unproved",
-      "sha256": "60f376a75c072bdb78c14b37efe7444581e710f9a221abbcefb7a2cc83df0c50",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "ab4564787d62556bd1b912d5bdd428a4917cbd38083379fa33c7a03f3b48edf7",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/ucp/consent.rs": {
       "status": "unproved",
-      "sha256": "8a27a42c578048655782078f64f7a5fc75671643b88daba2c579109ed091697d",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "bbcddee258caf2fd9295291ace046bdc52e7e3f5572391d1fbf911e0fd047fef",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/ucp/document.rs": {
       "status": "unproved",
@@ -8088,13 +8088,13 @@
     },
     "src/ucp/mod.rs": {
       "status": "unproved",
-      "sha256": "0985709f72cc60a2e0f31a8cac2e33916dd1c9bff56bdf6b97d41281ef95a933",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "fdf2f6560a6efb4caeb778b0161479d23bd36cde701e68554280ec220524cab3",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/ucp/negotiation.rs": {
       "status": "unproved",
-      "sha256": "53a8f73da22c6e5354ffc1db62d8865f2e96831f34a8e2a43c8027632bbdf2c9",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "7f7d4594648af28a4aec525d6ed9aa0752248c3ea396af636810134f5f216163",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/ucp/profile.rs": {
       "status": "unproved",
@@ -8103,8 +8103,8 @@
     },
     "src/ucp/readiness.rs": {
       "status": "unproved",
-      "sha256": "fbf398d9b25c967b459b4bbc145fdcd55773b8ecf2a6af6e42e863f9be126f1a",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "82e763d769789a6abe2f51de5851a341f635e5feeefa5407cb15351a86637720",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/workers/app_lane/queue_health.rs": {
       "status": "unproved",
@@ -8113,13 +8113,13 @@
     },
     "src/workers/app_lane.rs": {
       "status": "unproved",
-      "sha256": "61afd89118258d5630f78f27bf2b426912b0752cc3fceb05146fc58f674da775",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "2101901bd0fb7331a4c5916d58a32fbf43bc57fd0958e0e253f183e0ec9a646a",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
     "src/workers.rs": {
       "status": "unproved",
-      "sha256": "ed44a26c7fbbe43da8a68316aedc796bc952317549db3eadfe0174cec333dcd5",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "6ccfd54439ad0137e58a5cf7b1f9346bae7e89e8f4700583ea65d03e88f47670",
+      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     }
   },
   "inputs": {

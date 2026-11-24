@@ -1,6 +1,8 @@
 //! Public append-only intake uses declared schemas, existing cart admission, quotas, records and outbox.
 use super::{Entity, Manifest, data, site_forms};
-use crate::{App, load_cart, marketing};
+use crate::cart_storage::load_cart;
+use crate::foundation::App;
+use crate::marketing;
 use axum::http::StatusCode;
 use serde_json::Value;
 use serde_json::json;

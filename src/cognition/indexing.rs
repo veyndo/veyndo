@@ -1,5 +1,5 @@
 //! Durable bounded embedding jobs live in the intelligence component; these entries lend it the server's model context.
-use crate::App;
+use crate::foundation::App;
 use veyndo_core::Result;
 use veyndo_intelligence::service::indexing as service;
 pub(crate) use veyndo_intelligence::service::indexing::enqueue;

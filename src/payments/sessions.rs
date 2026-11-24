@@ -1,5 +1,5 @@
 //! Customer-bound, short-lived provider UI sessions; iframe messages are never ledger receipts.
-use crate::App;
+use crate::foundation::App;
 use axum::Json;
 use axum::extract::Path;
 use axum::extract::State;

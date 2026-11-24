@@ -1,5 +1,5 @@
 //! Platform inference routes; the intelligence component owns the configuration, sealing and audit.
-use crate::App;
+use crate::foundation::App;
 use axum::Json;
 use axum::extract::State;
 use serde_json::Value;

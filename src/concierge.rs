@@ -1,6 +1,7 @@
 //! Read-only storefront shopping advisor.
 use crate::agent_host::Host;
-use crate::{App, performance};
+use crate::foundation::App;
+use crate::performance;
 use axum::Json;
 use axum::extract::State;
 use axum::http::StatusCode;

@@ -1,5 +1,8 @@
 //! The server's implementation of what the catalog component reads from carts, orders, environments and the history.
-use crate::{App, commerce, language_context, load_cart, marketing, performance};
+use crate::cart_storage::load_cart;
+use crate::foundation::App;
+use crate::localization::language_context;
+use crate::{commerce, marketing, performance};
 use sqlx::PgConnection;
 use std::sync::Arc;
 use veyndo_catalog::ports::{

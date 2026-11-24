@@ -1,5 +1,5 @@
 //! Controlled experiments live in the intelligence component; this module keeps the capability entry.
-use crate::App;
+use crate::foundation::App;
 use serde_json::Value;
 use veyndo_core::Result;
 use veyndo_core::request_context::RequestContext;

@@ -1,5 +1,6 @@
 //! Private cloned shops live in the studio component; the server registers their routes and lends the release port.
-use crate::{App, SecureRoutes};
+use crate::auth::SecureRoutes;
+use crate::foundation::App;
 use axum::Json;
 use axum::Router;
 use axum::extract::Path;

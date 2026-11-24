@@ -1,5 +1,6 @@
 //! Public synthetic fashion template; provisioning copies only this versioned fixture into a new tenant.
-use crate::{App, prototype_products};
+use crate::catalog_model::prototype_products;
+use crate::foundation::App;
 use serde_json::Value;
 use serde_json::json;
 use std::env;

@@ -1,6 +1,6 @@
 //! Live control-plane telemetry: database probes and pool/cache diagnostics, explicit process-only scope.
 use super::auth;
-use crate::App;
+use crate::foundation::App;
 use axum::Json;
 use axum::extract::State;
 use serde_json::Value;

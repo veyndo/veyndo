@@ -1,5 +1,5 @@
 //! Once a minute: expired sign-in buckets, behaviour evidence and delivered outbox payloads are retired.
-use crate::App;
+use crate::foundation::App;
 use veyndo_core::Result;
 pub(super) async fn once(a: &App) -> Result<()> {
     if !veyndo_core::outbox::retention::due() {

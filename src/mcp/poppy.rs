@@ -1,5 +1,6 @@
 //! Personal Agent Protocol discovery: a configured shop domain publishes poppy.json naming its guest MCP endpoint; no sign-in, session or UCP entry is claimed.
-use crate::{App, runtime_config, shop_domains};
+use crate::foundation::App;
+use crate::{runtime_config, shop_domains};
 use axum::Json;
 use axum::extract::State;
 use axum::http::StatusCode;

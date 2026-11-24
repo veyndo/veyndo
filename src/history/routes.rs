@@ -1,7 +1,9 @@
 //! Restoring a version: rights, approval and the recorded state are checked here; the owning domain validates the replayed edit.
 use super::{requires_pii, rights};
+use crate::auth;
+use crate::foundation::App;
+use crate::foundation::merchant;
 use crate::history::restore;
-use crate::{App, auth, merchant};
 use axum::Json;
 use axum::extract::Path;
 use axum::extract::State;

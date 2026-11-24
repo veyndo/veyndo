@@ -1,5 +1,8 @@
 //! Compatible SSE transport waits on the same persisted run; detached request handling retains native tenant scope.
-use crate::{App, SecureRoutes, agent, merchant};
+use crate::agent;
+use crate::auth::SecureRoutes;
+use crate::foundation::App;
+use crate::foundation::merchant;
 use axum::Json;
 use axum::Router;
 use axum::extract::State;

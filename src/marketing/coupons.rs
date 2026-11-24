@@ -1,5 +1,5 @@
 //! Coupon selection is owned by the marketing component; the server supplies the guarded, priced cart.
-use crate::App;
+use crate::foundation::App;
 use axum::Json;
 use axum::extract::State;
 use serde_json::Value;

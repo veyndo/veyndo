@@ -1,5 +1,5 @@
 //! Shop lifecycle routes and request availability; the shop component owns both rules.
-use crate::App;
+use crate::foundation::App;
 use veyndo_core::Result;
 use veyndo_core::request_context::RequestContext;
 pub(super) use veyndo_shop::http::operator_lifecycle::change;

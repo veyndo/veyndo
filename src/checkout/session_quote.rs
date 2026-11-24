@@ -1,5 +1,7 @@
 //! Project the current native cart quote for the independent checkout session service.
-use crate::{App, b2b, cart_price, load_cart, marketing};
+use crate::cart_storage::load_cart;
+use crate::foundation::App;
+use crate::{b2b, cart_price, marketing};
 use axum::Json;
 use axum::extract::State;
 use axum::http::StatusCode;

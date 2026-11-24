@@ -1,6 +1,7 @@
 //! Bind an explicitly reviewed session purchase to the native transaction and its original order.
 use super::execute;
-use crate::{App, b2b, marketing, runtime_config, staging};
+use crate::foundation::App;
+use crate::{b2b, marketing, runtime_config, staging};
 use axum::Json;
 use axum::extract::State;
 use axum::http::StatusCode;

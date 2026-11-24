@@ -1,6 +1,6 @@
 //! App capability discovery lives in the apps component; this module keeps the server-side entry for MCP and capabilities.
 use super::service_limits;
-use crate::App;
+use crate::foundation::App;
 use serde_json::Value;
 pub(crate) use veyndo_app_platform::domain::discovery::{CAPABILITIES, schema};
 use veyndo_core::Result;

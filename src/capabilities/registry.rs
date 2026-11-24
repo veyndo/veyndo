@@ -1,6 +1,7 @@
 //! One immutable native operation record for dispatch, schemas, MCP discovery and bounded agent reads.
 use super::{admission, catalog, dispatch, schema};
-use crate::{App, apps};
+use crate::apps;
+use crate::foundation::App;
 use dispatch::Owner;
 use serde_json::Value;
 use serde_json::json;

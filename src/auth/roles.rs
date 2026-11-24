@@ -1,5 +1,7 @@
 //! Tenant-owned roles: current grants, revisioned edits, dependency-checked removal and shared history.
-use crate::{App, SecureRoutes, commerce};
+use crate::auth::SecureRoutes;
+use crate::commerce;
+use crate::foundation::App;
 use axum::Json;
 use axum::Router;
 use axum::extract::Path;

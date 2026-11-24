@@ -1,5 +1,6 @@
 //! Entry points of category writes for capabilities, imports and history; the rules and storage are owned by the catalog component.
-use crate::{App, apps};
+use crate::apps;
+use crate::foundation::App;
 use axum::Json;
 use axum::extract::FromRef;
 use axum::extract::Path;

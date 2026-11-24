@@ -1,6 +1,7 @@
 //! App Studio builds live in the apps component; this module supplies the shop main language and the payment provider actions.
 use super::routes;
-use crate::{App, commerce};
+use crate::commerce;
+use crate::foundation::App;
 use serde_json::Value;
 use veyndo_app_platform::service::app_builds::{self, Origin};
 use veyndo_core::Result;

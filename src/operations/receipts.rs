@@ -1,6 +1,8 @@
 //! Idempotent immutable invoices/delivery notes with transactional per-shop number ranges.
 use super::{master_data, receipt_pdf, receipt_text};
-use crate::{App, auth, merchant, payments};
+use crate::foundation::App;
+use crate::foundation::merchant;
+use crate::{auth, payments};
 use axum::Json;
 use axum::extract::Path;
 use axum::extract::State;

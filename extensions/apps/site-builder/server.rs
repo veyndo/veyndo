@@ -1,5 +1,6 @@
 //! Standard-shop page contract. App-owned content and theme validation; no HTML, CSS or script evaluation.
-use crate::{App, commerce};
+use crate::commerce;
+use crate::foundation::App;
 use axum::Router;
 use serde::Deserialize;
 use serde::Serialize;

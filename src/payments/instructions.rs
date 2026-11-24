@@ -1,5 +1,5 @@
 //! Routes of typed recipient instructions; the payments component owns the customer and compound merchant checks.
-use crate::App;
+use crate::foundation::App;
 use axum::Json;
 use axum::extract::Path;
 use axum::extract::State;

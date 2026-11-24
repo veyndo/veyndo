@@ -1,6 +1,7 @@
 //! Explicit public legal/brand projection; bank account, domestic tax ID and unlinked uploads remain private.
 use super::{company_model, master_data};
-use crate::{App, commerce, marketing};
+use crate::foundation::App;
+use crate::{commerce, marketing};
 use axum::Json;
 use axum::extract::State;
 use serde_json::Value;

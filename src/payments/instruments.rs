@@ -1,5 +1,6 @@
 //! Customer-owned saved instruments expose only redacted metadata; immediate revocation and provider cleanup share payment jobs.
-use crate::{App, accounts};
+use crate::accounts;
+use crate::foundation::App;
 use axum::Json;
 use axum::extract::Path;
 use axum::extract::State;

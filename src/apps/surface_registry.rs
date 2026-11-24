@@ -1,5 +1,6 @@
 //! The surface projection lives in the apps component; this module adds the languages of the shop.
-use crate::{App, commerce};
+use crate::commerce;
+use crate::foundation::App;
 use serde_json::Value;
 use serde_json::json;
 use veyndo_app_platform::store::surface_registry::Languages;

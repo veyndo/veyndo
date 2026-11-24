@@ -1,5 +1,5 @@
 //! The consent-bound preference graph lives in the intelligence component; the server registers its route.
-use crate::App;
+use crate::foundation::App;
 use axum::Router;
 use axum::routing::get;
 pub(crate) use veyndo_intelligence::http::preferences::capture;

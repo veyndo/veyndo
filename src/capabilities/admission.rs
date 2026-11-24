@@ -1,7 +1,9 @@
 //! MCP discovery applies current merchant permissions through the same capability owners as invocation.
+use crate::foundation::App;
+use crate::foundation::merchant;
 use crate::{
-    App, agent, agent_runs, assets, auth, b2b, commerce, currencies, history, legal, marketing,
-    merchant, operations, studio,
+    agent, agent_runs, assets, auth, b2b, commerce, currencies, history, legal, marketing,
+    operations, studio,
 };
 use veyndo_core::request_context::RequestContext;
 pub(super) fn visible(a: &App, h: &RequestContext, name: &str) -> bool {

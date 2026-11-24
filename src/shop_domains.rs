@@ -1,5 +1,7 @@
 //! Resolve configured shop subdomains before authentication; reject unknown hosts and conflicting scopes.
-use crate::{App, api_host, runtime_config};
+use crate::foundation::App;
+use crate::routes::api_host;
+use crate::runtime_config;
 use axum::extract::State;
 use axum::http::StatusCode;
 use axum::response::IntoResponse;

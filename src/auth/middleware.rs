@@ -1,6 +1,7 @@
 //! Resolve sessions from PostgreSQL on every request: role changes/revocation work across replicas.
 //! Remove all client-supplied principal headers before adding server-derived identities.
-use crate::{App, apps};
+use crate::apps;
+use crate::foundation::App;
 use axum::extract::State;
 use axum::http::StatusCode;
 use axum::response::IntoResponse;

@@ -1,6 +1,6 @@
 //! Product question route; the intelligence component owns the answer, its citations and the re-admission.
 use super::{Knowledge, product_questions};
-use crate::App;
+use crate::foundation::App;
 use axum::Json;
 use axum::extract::Path;
 use axum::extract::State;

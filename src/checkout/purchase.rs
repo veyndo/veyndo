@@ -1,5 +1,6 @@
 //! The server side of the purchase transaction: app sandboxes and hooks, the cashier, the built-in payment provider and the agent run fence.
-use crate::{App, agent_runs, apps, commerce, payments, pos, sandbox_cache};
+use crate::foundation::App;
+use crate::{agent_runs, apps, commerce, payments, pos, sandbox_cache};
 use serde_json::Value;
 use std::{collections::HashMap, sync::Arc};
 use veyndo_apps::sandbox::Sandbox;

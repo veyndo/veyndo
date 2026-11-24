@@ -1,6 +1,6 @@
 //! Flow configuration policy lives in the marketing component; the server lends it templates, apps and channel setup.
 use super::configuration_host::Configuration;
-use crate::App;
+use crate::foundation::App;
 use axum::Json;
 use axum::extract::Path;
 use axum::extract::State;

@@ -1,7 +1,9 @@
 //! Coding agents edit the same page schema through credential-free tasks and explicit native review.
 use crate::apps::site_builder;
 use crate::developer;
-use crate::{App, apps, commerce, merchant};
+use crate::foundation::App;
+use crate::foundation::merchant;
+use crate::{apps, commerce};
 use serde_json::Value;
 use serde_json::json;
 use veyndo_core::Result;

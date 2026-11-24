@@ -1,7 +1,8 @@
 //! Explicit UCP consent reuses native cart-bound privacy receipts; source documents never define consent policy or authority.
+use crate::foundation::App;
 use crate::ucp::UCP_VERSION;
 use crate::ucp::messages;
-use crate::{App, commerce, legal, marketing};
+use crate::{commerce, legal, marketing};
 use axum::extract::State;
 use serde_json::Value;
 use serde_json::json;

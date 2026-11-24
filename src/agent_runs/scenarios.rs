@@ -1,6 +1,7 @@
 //! Fictional shopper cohorts live in the intelligence component; the server registers their routes and lends the agent port.
 use crate::agent_host::Host;
-use crate::{App, SecureRoutes};
+use crate::auth::SecureRoutes;
+use crate::foundation::App;
 use axum::Json;
 use axum::Router;
 use axum::extract::Path;

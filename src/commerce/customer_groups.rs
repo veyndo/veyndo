@@ -1,6 +1,8 @@
 //! Tenant-owned translated customer groups preserve exact rule IDs and select an explicit existing price/tax presentation basis.
 use super::config;
-use crate::{App, auth, merchant};
+use crate::auth;
+use crate::foundation::App;
+use crate::foundation::merchant;
 use axum::Json;
 use axum::extract::State;
 use serde_json::Value;

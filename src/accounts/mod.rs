@@ -1,5 +1,6 @@
 //! Independent customer sessions, profile/password management and owning-account order history.
-use crate::{App, load_cart};
+use crate::cart_storage::load_cart;
+use crate::foundation::App;
 use axum::Json;
 use axum::Router;
 use axum::extract::State;

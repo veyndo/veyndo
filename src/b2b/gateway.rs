@@ -1,5 +1,7 @@
 //! Company command routes and the server side of the procurement port; the B2B component owns the command contract.
-use crate::{App, apps, auth, merchant};
+use crate::foundation::App;
+use crate::foundation::merchant;
+use crate::{apps, auth};
 use axum::Json;
 use axum::extract::FromRef;
 use axum::extract::Path;
@@ -171,7 +173,7 @@ impl veyndo_b2b::ports::ListCarts for ListCarts<'_> {
                 Some(selections),
             )
             .await?;
-            crate::cart_json(self.0, &c).await
+            crate::cart_price::cart_json(self.0, &c).await
         })
     }
 }

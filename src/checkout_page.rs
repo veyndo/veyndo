@@ -1,5 +1,5 @@
 //! The existing checkout may be framed only by its registered tenant/channel storefront.
-use crate::App;
+use crate::foundation::App;
 use axum::extract::Query;
 use axum::extract::State;
 use axum::http::StatusCode;

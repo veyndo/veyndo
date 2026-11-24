@@ -1,5 +1,6 @@
 //! Uniform tenant-scoped history from transactional database snapshots; reading lives in the studio component, restoration delegates to the owning domain validators.
-use crate::{App, SecureRoutes};
+use crate::auth::SecureRoutes;
+use crate::foundation::App;
 use axum::Router;
 use axum::routing::get;
 use axum::routing::post;

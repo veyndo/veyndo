@@ -1,5 +1,6 @@
 //! Inspect current, expiring native credentials for the one configured Knowledge catalog pilot.
-use crate::{App, apps};
+use crate::apps;
+use crate::foundation::App;
 use axum::Json;
 use axum::extract::State;
 use axum::http::StatusCode;

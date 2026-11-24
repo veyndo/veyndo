@@ -1,5 +1,7 @@
 //! Rebuild a product edit from an audited snapshot; stock stays current and all associations/media pass normal admission.
-use crate::{App, commerce, merchant};
+use crate::commerce;
+use crate::foundation::App;
+use crate::foundation::merchant;
 use axum::Json;
 use axum::extract::Path;
 use axum::extract::State;

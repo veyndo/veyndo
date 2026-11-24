@@ -1,5 +1,9 @@
 //! Store API cart and order route adapters.
-use crate::{App, cart_json, cart_mutation, checkout, legal, load_cart, set_items};
+use crate::cart_mutation::set_items;
+use crate::cart_price::cart_json;
+use crate::cart_storage::load_cart;
+use crate::foundation::App;
+use crate::{cart_mutation, legal};
 use axum::Json;
 use axum::extract::State;
 use serde_json::Value;
@@ -102,7 +106,7 @@ pub(crate) async fn add_items(
 }
 pub(crate) async fn place_order(State(a): State<App>, h: RequestContext) -> Result<Json<Value>> {
     Ok(Json(
-        checkout(
+        crate::order_checkout::checkout(
             &a,
             &h,
             header(&h, "idempotency-key").ok_or(bad("Idempotency-Key required"))?,

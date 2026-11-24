@@ -1,6 +1,8 @@
 //! Reusable synthetic shop provisioning for initial signup and additional shops owned by the same merchant.
 use super::hash_password;
-use crate::{App, accounts, auth, categories, demo_catalog, prototype_products};
+use crate::catalog_model::prototype_products;
+use crate::foundation::App;
+use crate::{accounts, auth, categories, demo_catalog};
 use axum::Json;
 use axum::extract::State;
 use serde_json::Value;

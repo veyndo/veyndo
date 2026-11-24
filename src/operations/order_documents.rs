@@ -1,6 +1,8 @@
 //! Immutable private carrier documents belong to the existing order receipt store, never product assets.
 use super::receipts;
-use crate::{App, apps, assets, auth, merchant};
+use crate::foundation::App;
+use crate::foundation::merchant;
+use crate::{apps, assets, auth};
 use axum::http::StatusCode;
 use axum::response::IntoResponse;
 use axum::response::Response;

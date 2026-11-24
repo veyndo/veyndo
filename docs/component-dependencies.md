@@ -32,8 +32,8 @@ run SQL without being in a `store` folder. Both numbers only fall.
 | inference | 2032 | 0 | 124 | 2 | 0 | core (13) | 5 |
 | intelligence | 11157 | 0 | 609 | 29 | 28 | catalog (10), checkout (11), core (168), customers (1), identity (29), inference (10), inventory (1), marketing (13), pricing (21), shipping (3), shop (53) | 28 |
 | studio | 7161 | 0 | 365 | 23 | 5 | apps (30), b2b (3), catalog (29), checkout (2), core (96), customers (7), identity (40), inference (4), intelligence (23), marketing (12), orders (20), pos (2), pricing (12), shop (30) | 42 |
-| protocols | 2900 | 0 | 132 | 2 | 0 | catalog (1), checkout (2), core (104), host (177), inference (1), intelligence (2), pricing (2), shop (5) | 2 |
-| host | 15990 | 0 | 352 | 11 | 1 | apps (49), catalog (55), checkout (14), core (1432), identity (58), inference (3), intelligence (32), inventory (4), marketing (11), orders (2), payments (10), pricing (48), shipping (1), shop (66), studio (18) | 15 |
+| protocols | 2928 | 0 | 132 | 2 | 0 | catalog (1), checkout (2), core (104), host (207), inference (1), intelligence (2), pricing (2), shop (5) | 2 |
+| host | 16204 | 0 | 352 | 11 | 1 | apps (49), catalog (55), checkout (14), core (1432), identity (8), inference (3), intelligence (32), inventory (4), marketing (11), orders (2), payments (10), pricing (48), shipping (1), shop (66), studio (18) | 15 |
 | connectors | 0 | 0 | 0 | 0 | 6 | none | 0 |
 
 ## Cycles
@@ -62,7 +62,6 @@ those pairs close when the server files that still hold their logic move into th
 | host | core | `Error` | 63 |
 | checkout | core | `veyndo_core::` | 57 |
 | intelligence | shop | `veyndo_shop::` | 53 |
-| host | identity | `SecureRoutes` | 51 |
 | payments | core | `veyndo_core::` | 44 |
 | apps | identity | `veyndo_identity::` | 41 |
 | studio | identity | `veyndo_identity::` | 40 |
@@ -87,6 +86,7 @@ those pairs close when the server files that still hold their logic move into th
 | pricing | core | `veyndo_core::` | 23 |
 | protocols | host | `apps::` | 22 |
 | shop | pricing | `veyndo_pricing::` | 21 |
+| intelligence | pricing | `veyndo_pricing::` | 21 |
 
 ## Foreign table access
 
