@@ -1,32 +1,94 @@
 //! Shipping costs, proportional taxes and calendar delivery windows.
+use serde::Deserialize;
 use serde_json::{Value, json};
-use veyndo_core::{Result, bad};
+use veyndo_core::document::lenient;
+use veyndo_core::{Error, Result, StatusCode, bad};
 use veyndo_pricing::catalog::Product;
-use veyndo_pricing::pricing::{PriceInput, TaxRule, calculate, math_round, proportional_tax_rules};
+use veyndo_pricing::pricing::{
+    CalculatedTax, PriceInput, TaxRule, calculate, math_round, proportional_tax_rules,
+};
 use veyndo_pricing::service::conversion as currencies;
 use veyndo_shop::domain::method_text;
 use veyndo_shop::types::cart::StoredCart;
 use veyndo_shop::types::settings::{CheckoutSelection, Settings, Shipping};
 
 pub use veyndo_shop::types::cart::selection;
-/// The tax rules of the delivery cost: the highest rate of the basket or its proportional mix.
-fn shipping_tax_rules(q: &Value, shipping: &Shipping, position: f64) -> Vec<TaxRule> {
-    let mut taxes: Vec<veyndo_pricing::pricing::CalculatedTax> = vec![];
-    for line in q["lineItems"].as_array().unwrap() {
-        for v in line["price"]["calculatedTaxes"].as_array().unwrap() {
-            let rate = v["taxRate"].as_f64().unwrap();
-            if let Some(t) = taxes.iter_mut().find(|t| t.tax_rate == rate) {
-                t.price += v["price"].as_f64().unwrap();
-                t.tax += v["tax"].as_f64().unwrap();
+/// The parts of a priced quote the delivery cost reads. Totals and line taxes are required:
+/// a quote without them is refused, never priced from defaults.
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct PricedQuote {
+    price: QuoteTotals,
+    line_items: Vec<PricedLine>,
+    #[serde(default, deserialize_with = "lenient")]
+    promotion_free_shipping: Option<bool>,
+    #[serde(default, deserialize_with = "lenient")]
+    app_shipping_adjustment_minor: Option<i64>,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct QuoteTotals {
+    position_price: f64,
+    total_price: f64,
+    net_price: f64,
+    tax: f64,
+}
+
+#[derive(Deserialize)]
+struct PricedLine {
+    price: LinePrice,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct LinePrice {
+    calculated_taxes: Vec<LineTax>,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct LineTax {
+    tax_rate: f64,
+    tax: f64,
+    price: f64,
+}
+
+impl PricedQuote {
+    fn read(q: &Value) -> Result<Self> {
+        serde_json::from_value(q.clone()).map_err(|_| {
+            Error(
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "Priced quote is incomplete".into(),
+            )
+        })
+    }
+
+    /// The basket taxes summed per rate, in the order the rates first appear.
+    fn taxes(&self) -> Vec<CalculatedTax> {
+        let mut taxes: Vec<CalculatedTax> = vec![];
+        for v in self
+            .line_items
+            .iter()
+            .flat_map(|l| &l.price.calculated_taxes)
+        {
+            if let Some(t) = taxes.iter_mut().find(|t| t.tax_rate == v.tax_rate) {
+                t.price += v.price;
+                t.tax += v.tax;
             } else {
-                taxes.push(veyndo_pricing::pricing::CalculatedTax {
-                    tax_rate: rate,
-                    tax: v["tax"].as_f64().unwrap(),
-                    price: v["price"].as_f64().unwrap(),
+                taxes.push(CalculatedTax {
+                    tax_rate: v.tax_rate,
+                    tax: v.tax,
+                    price: v.price,
                 });
             }
         }
+        taxes
     }
+}
+
+/// The tax rules of the delivery cost: the highest rate of the basket or its proportional mix.
+fn shipping_tax_rules(taxes: &[CalculatedTax], shipping: &Shipping, position: f64) -> Vec<TaxRule> {
     if shipping.tax_type == "highest" {
         taxes
             .iter()
@@ -40,7 +102,7 @@ fn shipping_tax_rules(q: &Value, shipping: &Shipping, position: f64) -> Vec<TaxR
             })
             .unwrap_or_default()
     } else {
-        proportional_tax_rules(&taxes, position)
+        proportional_tax_rules(taxes, position)
     }
 }
 /// The method candidates for every country and the methods available in the selected one.
@@ -133,8 +195,9 @@ pub fn enrich(
                 && v.available_in(&selected.country)
         })
         .ok_or(bad("Payment method is unavailable for this customer"))?;
-    let position = q["price"]["positionPrice"].as_f64().unwrap();
-    let gross_items = q["price"]["totalPrice"].as_f64().unwrap();
+    let priced = PricedQuote::read(&q)?;
+    let position = priced.price.position_price;
+    let gross_items = priced.price.total_price;
     let free = shipping
         .free_above
         .map(|limit| currencies::convert(limit, &s.currencies, currency))
@@ -146,15 +209,17 @@ pub fn enrich(
                 .find(|p| p.id == i.id)
                 .is_some_and(|p| p.extra["shippingFree"] == true || p.extra["digital"] == true)
         });
-    let gross = if c.data.items.is_empty() || free || all_free || q["promotionFreeShipping"] == true
+    let gross = if c.data.items.is_empty()
+        || free
+        || all_free
+        || priced.promotion_free_shipping == Some(true)
     {
         0.
     } else {
         currencies::convert(shipping.price, &s.currencies, currency)?
     };
     let gross = math_round(
-        gross
-            + q["appShippingAdjustmentMinor"].as_i64().unwrap_or(0) as f64 / 10_f64.powi(decimals),
+        gross + priced.app_shipping_adjustment_minor.unwrap_or(0) as f64 / 10_f64.powi(decimals),
         decimals,
     );
     if gross < 0. {
@@ -162,7 +227,7 @@ pub fn enrich(
             "App shipping adjustment cannot make delivery cost negative",
         ));
     }
-    let rules = shipping_tax_rules(&q, shipping, position);
+    let rules = shipping_tax_rules(&priced.taxes(), shipping, position);
     let gross_calc = calculate(&PriceInput {
         price: gross,
         decimals,
@@ -175,14 +240,8 @@ pub fn enrich(
     // Native method prices are gross amounts; explicit net component for B2B display.
     let cost = json!({"unitPrice":if s.is_business(&c.data.group){shipping_net}else{gross},"totalPrice":gross,"netPrice":shipping_net,"tax":gross_calc.tax,"calculatedTaxes":gross_calc.calculated_taxes});
     q["price"]["totalPrice"] = json!(math_round(gross_items + gross, decimals));
-    q["price"]["netPrice"] = json!(math_round(
-        q["price"]["netPrice"].as_f64().unwrap() + shipping_net,
-        decimals
-    ));
-    q["price"]["tax"] = json!(math_round(
-        q["price"]["tax"].as_f64().unwrap() + gross_calc.tax,
-        decimals
-    ));
+    q["price"]["netPrice"] = json!(math_round(priced.price.net_price + shipping_net, decimals));
+    q["price"]["tax"] = json!(math_round(priced.price.tax + gross_calc.tax, decimals));
     q["shippingCosts"] = cost.clone();
     q["checkout"] = json!(selected);
     q["configurationRevision"] = json!(revision);
@@ -222,4 +281,75 @@ pub async fn dates_conn(conn: &mut sqlx::PgConnection, q: &mut Value) -> Result<
         d["deliveryDate"] = json!({"earliest":earliest,"latest":latest,"basis":"calendar-days"});
     }
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::PricedQuote;
+    use serde_json::{Value, json};
+    use veyndo_pricing::pricing::CalculatedTax;
+
+    /// The previous untyped reading, kept as the oracle of the typed one.
+    fn legacy(q: &Value) -> (f64, f64, f64, f64, Vec<CalculatedTax>, bool, i64) {
+        let mut taxes: Vec<CalculatedTax> = vec![];
+        for line in q["lineItems"].as_array().unwrap() {
+            for v in line["price"]["calculatedTaxes"].as_array().unwrap() {
+                let rate = v["taxRate"].as_f64().unwrap();
+                if let Some(t) = taxes.iter_mut().find(|t| t.tax_rate == rate) {
+                    t.price += v["price"].as_f64().unwrap();
+                    t.tax += v["tax"].as_f64().unwrap();
+                } else {
+                    taxes.push(CalculatedTax {
+                        tax_rate: rate,
+                        tax: v["tax"].as_f64().unwrap(),
+                        price: v["price"].as_f64().unwrap(),
+                    });
+                }
+            }
+        }
+        (
+            q["price"]["positionPrice"].as_f64().unwrap(),
+            q["price"]["totalPrice"].as_f64().unwrap(),
+            q["price"]["netPrice"].as_f64().unwrap(),
+            q["price"]["tax"].as_f64().unwrap(),
+            taxes,
+            q["promotionFreeShipping"] == true,
+            q["appShippingAdjustmentMinor"].as_i64().unwrap_or(0),
+        )
+    }
+
+    #[test]
+    fn the_typed_quote_reads_what_the_untyped_reader_read_and_refuses_what_it_panicked_on() {
+        let line = |rate: f64, tax: f64, price: f64| json!({"id":"l","quantity":1,"price":{"unitPrice":price,"totalPrice":price,"calculatedTaxes":[{"taxRate":rate,"tax":tax,"price":price}]}});
+        for extra in [
+            json!({}),
+            json!({"promotionFreeShipping":true,"appShippingAdjustmentMinor":-150}),
+            json!({"promotionFreeShipping":"true","appShippingAdjustmentMinor":1.5}),
+            json!({"promotionFreeShipping":[true],"appShippingAdjustmentMinor":"9"}),
+        ] {
+            let mut q = json!({"price":{"positionPrice":30,"totalPrice":30.0,"netPrice":25.5,"tax":4.5,"currency":"EUR"},
+                "lineItems":[line(19., 1.6, 10.), line(7., 0.65, 10.), line(19., 1.6, 10.), {"price":{"calculatedTaxes":[]}}]});
+            q.as_object_mut()
+                .unwrap()
+                .extend(extra.as_object().unwrap().clone());
+            let typed = PricedQuote::read(&q).unwrap();
+            let typed = (
+                typed.price.position_price,
+                typed.price.total_price,
+                typed.price.net_price,
+                typed.price.tax,
+                typed.taxes(),
+                typed.promotion_free_shipping == Some(true),
+                typed.app_shipping_adjustment_minor.unwrap_or(0),
+            );
+            assert_eq!(typed, legacy(&q), "{q}");
+        }
+        for broken in [
+            json!({"price":{"positionPrice":"30","totalPrice":30,"netPrice":25,"tax":5},"lineItems":[]}),
+            json!({"price":{"positionPrice":30,"totalPrice":30,"netPrice":25,"tax":5}}),
+            json!({"price":{"positionPrice":30,"totalPrice":30,"netPrice":25,"tax":5},"lineItems":[{"price":{"calculatedTaxes":[{"taxRate":19,"tax":null,"price":1}]}}]}),
+        ] {
+            assert!(PricedQuote::read(&broken).is_err());
+        }
+    }
 }

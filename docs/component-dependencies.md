@@ -20,17 +20,17 @@ run SQL without being in a `store` folder. Both numbers only fall.
 | inventory | 405 | 0 | 3 | 0 | 2 | catalog (1), core (7), pricing (2) | 1 |
 | pricing | 3184 | 0 | 13 | 1 | 2 | core (27), identity (1) | 3 |
 | shipping | 553 | 0 | 26 | 0 | 0 | core (8), identity (1), pricing (2) | 6 |
-| checkout | 4265 | 0 | 192 | 6 | 3 | b2b (13), catalog (10), core (60), customers (2), identity (2), inventory (2), marketing (11), orders (1), payments (2), pricing (39), shipping (3), shop (80) | 15 |
+| checkout | 4395 | 0 | 179 | 6 | 3 | b2b (13), catalog (10), core (61), customers (2), identity (2), inventory (2), marketing (11), orders (1), payments (2), pricing (38), shipping (3), shop (80) | 15 |
 | customers | 1855 | 0 | 56 | 2 | 3 | core (31), identity (6), marketing (3), pricing (6), shipping (3), shop (9) | 2 |
 | orders | 4738 | 0 | 198 | 3 | 7 | b2b (1), catalog (4), core (49), customers (2), identity (8), inventory (1), pricing (3), shipping (2), shop (4) | 8 |
 | payments | 4370 | 0 | 249 | 11 | 7 | core (50), identity (4), inventory (1), orders (1), pricing (8), shop (7) | 13 |
-| marketing | 5471 | 0 | 287 | 9 | 8 | automation (19), b2b (2), catalog (3), core (69), identity (16), inference (1), pricing (12), shop (24) | 24 |
+| marketing | 5650 | 0 | 250 | 9 | 8 | automation (19), b2b (2), catalog (3), core (70), identity (16), inference (1), pricing (12), shop (24) | 24 |
 | b2b | 2567 | 0 | 108 | 7 | 8 | core (39), identity (12), pricing (6), shop (34) | 7 |
 | pos | 1188 | 0 | 70 | 4 | 0 | catalog (2), checkout (5), core (17), customers (1), identity (4), intelligence (1), marketing (3), orders (1), payments (2), pricing (4), shop (19) | 7 |
 | apps | 13491 | 0 | 369 | 18 | 22 | b2b (1), catalog (2), checkout (5), core (223), identity (41), inference (4), intelligence (2), inventory (2), marketing (5), orders (10), pricing (6), shipping (2), shop (21) | 21 |
 | automation | 1443 | 8 | 97 | 0 | 0 | core (2) | 0 |
 | inference | 2032 | 0 | 124 | 2 | 0 | core (13) | 5 |
-| intelligence | 11190 | 0 | 569 | 29 | 28 | catalog (10), checkout (11), core (185), customers (1), identity (29), inference (10), inventory (1), marketing (13), pricing (20), shipping (3), shop (52) | 28 |
+| intelligence | 11304 | 0 | 536 | 29 | 28 | catalog (10), checkout (11), core (186), customers (1), identity (29), inference (10), inventory (1), marketing (13), pricing (20), shipping (3), shop (52) | 28 |
 | studio | 7169 | 0 | 365 | 23 | 5 | apps (30), b2b (3), catalog (29), checkout (2), core (102), customers (7), identity (40), inference (4), intelligence (23), marketing (12), orders (20), pos (2), pricing (12), shop (30) | 42 |
 | protocols | 2935 | 0 | 132 | 2 | 0 | catalog (1), checkout (2), core (104), host (209), inference (1), intelligence (2), pricing (2), shop (5) | 2 |
 | host | 16195 | 0 | 352 | 11 | 1 | apps (49), catalog (56), checkout (14), core (1441), identity (8), inference (2), intelligence (32), inventory (4), marketing (11), orders (2), payments (8), pricing (46), shipping (1), shop (65), studio (18) | 15 |
@@ -51,22 +51,22 @@ those pairs close when the server files that still hold their logic move into th
 | host | core | `Result` | 371 |
 | host | core | `RequestContext` | 327 |
 | apps | core | `veyndo_core::` | 200 |
-| intelligence | core | `veyndo_core::` | 170 |
+| intelligence | core | `veyndo_core::` | 171 |
 | studio | core | `veyndo_core::` | 100 |
 | host | core | `PortFuture` | 83 |
 | checkout | shop | `veyndo_shop::` | 80 |
 | shop | core | `veyndo_core::` | 79 |
 | identity | core | `veyndo_core::` | 77 |
 | catalog | core | `veyndo_core::` | 69 |
-| marketing | core | `veyndo_core::` | 66 |
+| marketing | core | `veyndo_core::` | 67 |
 | host | core | `Error` | 63 |
-| checkout | core | `veyndo_core::` | 58 |
+| checkout | core | `veyndo_core::` | 59 |
 | intelligence | shop | `veyndo_shop::` | 52 |
 | payments | core | `veyndo_core::` | 49 |
 | orders | core | `veyndo_core::` | 44 |
 | apps | identity | `veyndo_identity::` | 41 |
 | studio | identity | `veyndo_identity::` | 40 |
-| checkout | pricing | `veyndo_pricing::` | 39 |
+| checkout | pricing | `veyndo_pricing::` | 38 |
 | host | shop | `StoredCart` | 36 |
 | b2b | core | `veyndo_core::` | 36 |
 | host | core | `header` | 34 |

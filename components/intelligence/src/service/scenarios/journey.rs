@@ -5,7 +5,7 @@ use super::super::run_journal as checkpoint;
 use super::admit;
 use super::{evidence, shopper, source};
 use crate::ports::AgentHost;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use serde_json::json;
 use veyndo_checkout::store::cart_load::load as load_cart;
@@ -25,50 +25,88 @@ fn action_schema() -> Value {
         "action":{"type":"string","enum":["search","detail","add","checkout","finish"]},"productId":{"type":"string","maxLength":160},
         "quantity":{"type":"integer","minimum":1,"maximum":10},"query":{"type":"string","maxLength":200},"reason":{"type":"string","maxLength":800}}})
 }
+/// The durable state of one customer journey, saved after every step in this exact camelCase form.
+#[derive(Serialize, Deserialize, Debug, PartialEq)]
+#[serde(rename_all = "camelCase")]
+struct JourneyState {
+    token: Value,
+    products: Vec<Value>,
+    configuration_digest: Value,
+    snapshot_digest: Value,
+    steps: Vec<Value>,
+    outcome: String,
+    order_id: Value,
+    total_minor: Value,
+}
+
+impl JourneyState {
+    fn load(saved: Value) -> Result<Self> {
+        serde_json::from_value(saved).map_err(|_| bad("Invalid scenario journal"))
+    }
+    fn knows(&self, product: &str) -> bool {
+        self.products
+            .iter()
+            .any(|p| p.get("id").and_then(Value::as_str) == Some(product))
+    }
+}
+
+/// One shopper action chosen by the model; a saved action is read as it was stored.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ShopperAction {
+    #[serde(deserialize_with = "lenient")]
+    action: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    product_id: Option<String>,
+    quantity: Value,
+    #[serde(deserialize_with = "lenient")]
+    query: Option<String>,
+    reason: Value,
+}
+
 /// Records what a shopper action led to in the step and the journey; true once the journey is over.
 fn record(
-    state: &mut Value,
+    state: &mut JourneyState,
     step: &mut Value,
-    action: &Value,
+    action: &ShopperAction,
     result: Result<Value>,
-) -> Result<bool> {
-    let mut done = false;
+) -> bool {
     match result {
         Ok(value) => {
             step["observation"] = value.clone();
-            match action["action"].as_str() {
+            match action.action.as_deref() {
                 Some("search") => {
-                    let known = state["products"]
-                        .as_array_mut()
-                        .ok_or(bad("Invalid observed catalogue"))?;
                     for product in value.as_array().into_iter().flatten() {
-                        if let Some(old) = known.iter_mut().find(|p| p["id"] == product["id"]) {
+                        let id = product.get("id");
+                        if let Some(old) = state.products.iter_mut().find(|p| {
+                            p.get("id").unwrap_or(&Value::Null) == id.unwrap_or(&Value::Null)
+                        }) {
                             *old = product.clone();
                         } else {
-                            known.push(product.clone());
+                            state.products.push(product.clone());
                         }
                     }
+                    false
                 }
                 Some("checkout") => {
-                    state["outcome"] = json!("purchased");
-                    state["orderId"] = value["orderId"].clone();
-                    state["totalMinor"] = value["totalMinor"].clone();
-                    done = true;
+                    state.outcome = "purchased".into();
+                    state.order_id = value.get("orderId").cloned().unwrap_or_default();
+                    state.total_minor = value.get("totalMinor").cloned().unwrap_or_default();
+                    true
                 }
                 Some("finish") => {
-                    state["outcome"] = json!("stopped_by_customer");
-                    done = true;
+                    state.outcome = "stopped_by_customer".into();
+                    true
                 }
-                _ => {}
+                _ => false,
             }
         }
         Err(error) => {
             step["error"] = json!({"status":error.0.as_u16(),"detail":error.1.chars().take(300).collect::<String>()});
-            state["outcome"] = json!("blocked");
-            done = true;
+            state.outcome = "blocked".into();
+            true
         }
     }
-    Ok(done)
 }
 pub async fn execute<H: AgentHost>(
     host: &H,
@@ -99,7 +137,7 @@ pub async fn execute<H: AgentHost>(
     customer["budgetCurrency"] = req.scenario.currency.clone();
     let choice = choice(request)?;
     let mut state = if let Some(saved) = checkpoint::load(host, "scenario-state").await? {
-        saved
+        JourneyState::load(saved)?
     } else {
         let configuration = evidence::capture(host, t).await;
         let guest = shopper::headers(t, request, None)?;
@@ -115,21 +153,30 @@ pub async fn execute<H: AgentHost>(
             scoped_config(a, t, req.channel.as_str().unwrap_or("default")).await?;
         let extensions: String = sqlx::query_scalar("SELECT md5(coalesce(string_agg(stamp,'|' ORDER BY stamp),'')) FROM (SELECT 'app:'||id||':'||digest||':'||revision||':'||active AS stamp FROM app_packages WHERE tenant=$1 UNION ALL SELECT 'rule:'||id||':'||revision FROM commerce_rules WHERE tenant=$1 UNION ALL SELECT 'flow:'||id||':'||revision FROM commerce_flows WHERE tenant=$1 UNION ALL SELECT 'promotion:'||id||':'||revision FROM commerce_promotions WHERE tenant=$1 UNION ALL SELECT 'channel:'||id||':'||revision FROM sales_channels WHERE tenant=$1) versions")
             .bind(t).fetch_one(&a.db).await?;
-        let state = json!({"token":cart["token"],"products":products,"configurationDigest":configuration,"snapshotDigest":hash(&json!({"products":products,"settings":settings,"revision":revision,"extensions":extensions}).to_string()),"steps":[],"outcome":"step_limit","orderId":null,"totalMinor":null});
-        checkpoint::save(host, "scenario-state", &state).await?;
+        let state = JourneyState {
+            token: cart.get("token").cloned().unwrap_or_default(),
+            snapshot_digest: json!(hash(&json!({"products":products,"settings":settings,"revision":revision,"extensions":extensions}).to_string())),
+            products: products.as_array().cloned().ok_or(bad("Invalid observed catalogue"))?,
+            configuration_digest: json!(configuration),
+            steps: vec![],
+            outcome: "step_limit".into(),
+            order_id: Value::Null,
+            total_minor: Value::Null,
+        };
+        checkpoint::save(host, "scenario-state", &json!(state)).await?;
         state
     };
-    let guest = shopper::headers(t, request, state["token"].as_str())?;
-    let start = state["steps"].as_array().map_or(0, Vec::len);
+    let guest = shopper::headers(t, request, state.token.as_str())?;
+    let start = state.steps.len();
     for index in start..8 {
-        if state["outcome"] != "step_limit" {
+        if state.outcome != "step_limit" {
             break;
         }
         checkpoint::authorize(host).await?;
         admit(a, h).await?;
         source::recheck(a, h, &req.scenario.source).await?;
         let cart = shopper::call(host, &guest, "cart.quote", &json!({})).await?;
-        let prompt = json!({"instruction":req.instruction,"profile":customer,"currency":req.scenario.currency,"minorUnitScale":req.scenario.scale,"products":state["products"],"steps":state["steps"],"cart":shopper::observation(&cart)}).to_string();
+        let prompt = json!({"instruction":req.instruction,"profile":customer,"currency":req.scenario.currency,"minorUnitScale":req.scenario.scale,"products":state.products,"steps":state.steps,"cart":shopper::observation(&cart)}).to_string();
         let action_key = format!("scenario-action-{index}");
         let output: Output = if let Some(saved) = checkpoint::load(host, &action_key).await? {
             serde_json::from_value(saved).map_err(|_| bad("Invalid saved shopper action"))?
@@ -148,7 +195,7 @@ pub async fn execute<H: AgentHost>(
             checkpoint::save(host, &action_key, &json!(output)).await?;
             output
         };
-        let action = &output.value;
+        let action: ShopperAction = view(&output.value);
         checkpoint::authorize(host).await?;
         source::recheck(a, h, &req.scenario.source).await?;
         let run = CURRENT
@@ -163,27 +210,24 @@ pub async fn execute<H: AgentHost>(
             host,
             &guest,
             profile,
-            action,
+            &action,
             &state,
             &format!("scenario-{id}-{index}"),
         )
         .await;
         // Do not publish late evidence after cancellation or a permission change.
         checkpoint::authorize(host).await?;
-        let mut step = json!({"index":index,"action":action["action"],"reason":action["reason"],"model":output.model,"provider":output.provider});
-        let done = record(&mut state, &mut step, action, result)?;
-        state["steps"]
-            .as_array_mut()
-            .ok_or(bad("Invalid scenario journal"))?
-            .push(step);
-        checkpoint::save(host, "scenario-state", &state).await?;
+        let mut step = json!({"index":index,"action":action.action,"reason":action.reason,"model":output.model,"provider":output.provider});
+        let done = record(&mut state, &mut step, &action, result);
+        state.steps.push(step);
+        checkpoint::save(host, "scenario-state", &json!(state)).await?;
         if done {
             break;
         }
     }
     source::recheck(a, h, &req.scenario.source).await?;
     let finished_configuration = evidence::capture(host, t).await;
-    let report = json!({"scenario":{"title":req.scenario.title,"group":req.scenario.group,"profile":profile,"inputDigest":req.scenario.input_digest,"comparisonDigest":req.scenario.comparison_digest,"currency":req.scenario.currency,"scale":req.scenario.scale,"snapshotDigest":state["snapshotDigest"],"configurationEvidence":{"schemaVersion":1,"startedDigest":state["configurationDigest"],"finishedDigest":finished_configuration},"steps":state["steps"],"outcome":state["outcome"],"orderId":state["orderId"],"totalMinor":state["totalMinor"],"synthetic":true,"execution":"native-commerce-api","prompt":veyndo_cognition::prompts::evidence(PROMPT)}});
+    let report = json!({"scenario":{"title":req.scenario.title,"group":req.scenario.group,"profile":profile,"inputDigest":req.scenario.input_digest,"comparisonDigest":req.scenario.comparison_digest,"currency":req.scenario.currency,"scale":req.scenario.scale,"snapshotDigest":state.snapshot_digest,"configurationEvidence":{"schemaVersion":1,"startedDigest":state.configuration_digest,"finishedDigest":finished_configuration},"steps":state.steps,"outcome":state.outcome,"orderId":state.order_id,"totalMinor":state.total_minor,"synthetic":true,"execution":"native-commerce-api","prompt":veyndo_cognition::prompts::evidence(PROMPT)}});
     checkpoint::authorize(host).await?;
     let run = CURRENT
         .try_with(Clone::clone)
@@ -199,23 +243,19 @@ async fn perform<H: AgentHost>(
     host: &H,
     h: &RequestContext,
     profile: &Value,
-    action: &Value,
-    state: &Value,
+    action: &ShopperAction,
+    state: &JourneyState,
     key: &str,
 ) -> Result<Value> {
     let a = host.models().core;
-    let product = action["productId"].as_str().unwrap_or("");
-    if matches!(action["action"].as_str(), Some("detail" | "add"))
-        && !state["products"]
-            .as_array()
-            .is_some_and(|ps| ps.iter().any(|p| p["id"].as_str() == Some(product)))
-    {
+    let product = action.product_id.as_deref().unwrap_or("");
+    if matches!(action.action.as_deref(), Some("detail" | "add")) && !state.knows(product) {
         return Err(bad(
             "Customer selected a product outside its observed catalogue",
         ));
     }
-    match action["action"].as_str() {
-        Some("search") => shopper::products(host, h, action["query"].as_str().unwrap_or("")).await,
+    match action.action.as_deref() {
+        Some("search") => shopper::products(host, h, action.query.as_deref().unwrap_or("")).await,
         Some("detail") => {
             let value =
                 shopper::call(host, h, "catalog.detail", &json!({"productId":product})).await?;
@@ -235,7 +275,7 @@ async fn perform<H: AgentHost>(
                 .collect();
             // Set this product's exact quantity while retaining the rest of the
             // basket. A lost acknowledgement cannot increment it a second time.
-            items.push(json!({"id":product,"quantity":action["quantity"]}));
+            items.push(json!({"id":product,"quantity":action.quantity}));
             let value = shopper::call(
                 host,
                 h,
@@ -280,4 +320,78 @@ struct Scenario {
     scale: Value,
     source: Value,
     title: Value,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{JourneyState, ShopperAction, record};
+    use serde_json::{Value, json};
+    use veyndo_core::{Error, StatusCode, document::view};
+
+    fn fresh() -> JourneyState {
+        JourneyState {
+            token: json!("tok"),
+            products: vec![json!({"id":"p1","name":"Lamp"})],
+            configuration_digest: json!("c"),
+            snapshot_digest: json!("s"),
+            steps: vec![],
+            outcome: "step_limit".into(),
+            order_id: Value::Null,
+            total_minor: Value::Null,
+        }
+    }
+
+    #[test]
+    fn the_checkpoint_keeps_its_stored_form_and_refuses_a_broken_journal() {
+        let saved = json!(fresh());
+        assert_eq!(
+            saved,
+            json!({"token":"tok","products":[{"id":"p1","name":"Lamp"}],"configurationDigest":"c","snapshotDigest":"s","steps":[],"outcome":"step_limit","orderId":null,"totalMinor":null})
+        );
+        assert_eq!(JourneyState::load(saved).unwrap(), fresh());
+        assert!(JourneyState::load(json!({"token":"tok","steps":"x"})).is_err());
+    }
+
+    #[test]
+    fn steps_update_the_catalogue_and_end_the_journey_like_before() {
+        let action = |a: Value| -> ShopperAction { view(&a) };
+        let mut state = fresh();
+        let mut step = json!({});
+        let found = json!([{"id":"p1","name":"Lamp 2"},{"id":"p2"},"odd"]);
+        assert!(!record(
+            &mut state,
+            &mut step,
+            &action(json!({"action":"search"})),
+            Ok(found.clone())
+        ));
+        assert_eq!(
+            state.products,
+            vec![
+                json!({"id":"p1","name":"Lamp 2"}),
+                json!({"id":"p2"}),
+                json!("odd")
+            ]
+        );
+        assert_eq!(step["observation"], found);
+        assert!(state.knows("p2") && !state.knows("p3"));
+        assert!(record(
+            &mut state,
+            &mut step,
+            &action(json!({"action":"checkout"})),
+            Ok(json!({"orderId":"o1","totalMinor":1200}))
+        ));
+        assert_eq!(
+            (state.outcome.as_str(), &state.order_id, &state.total_minor),
+            ("purchased", &json!("o1"), &json!(1200))
+        );
+        let mut blocked = fresh();
+        assert!(record(
+            &mut blocked,
+            &mut step,
+            &action(json!({"action":7})),
+            Err(Error(StatusCode::CONFLICT, "stop".into()))
+        ));
+        assert_eq!(blocked.outcome, "blocked");
+        assert_eq!(step["error"], json!({"status":409,"detail":"stop"}));
+    }
 }

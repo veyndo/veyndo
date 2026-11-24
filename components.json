@@ -270,7 +270,7 @@
         "tenants": "read: reads shop existence, status or the agent stop switch inside a larger claim or join; simple reads go through veyndo_core::tenants (buyer_identity.rs)"
       },
       "glob_imports": 0,
-      "untyped_access": 192,
+      "untyped_access": 179,
       "sql_outside_store": 6
     },
     "customers": {
@@ -431,7 +431,7 @@
         "user_sessions": "read: reads merchant sessions to resolve the actor of a flow (channel_preview.rs)"
       },
       "glob_imports": 0,
-      "untyped_access": 287,
+      "untyped_access": 250,
       "sql_outside_store": 9
     },
     "b2b": {
@@ -686,7 +686,7 @@
         "translation_jobs": "write: agent runs cancel translation jobs they started (agent_runs.rs)"
       },
       "glob_imports": 0,
-      "untyped_access": 569,
+      "untyped_access": 536,
       "sql_outside_store": 29
     },
     "studio": {

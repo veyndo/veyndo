@@ -1898,8 +1898,8 @@
     },
     "components/checkout/src/service/delivery.rs": {
       "status": "unproved",
-      "sha256": "d3a5714f589229d0ce2d7492765e4b0680600f31f19222adb324ce8878e3f934",
-      "review": "Functions above 150 lines split into named steps without behaviour change; function length limit lowered to 150"
+      "sha256": "1c05a33580f96c16101404dec4f39082d60eed6aa9511c6958ad0c5f875fdf91",
+      "review": "F24 typed views: proof bindings unchanged"
     },
     "components/checkout/src/service/language.rs": {
       "status": "unproved",
@@ -2788,8 +2788,8 @@
     },
     "components/intelligence/src/service/scenarios/journey.rs": {
       "status": "unproved",
-      "sha256": "f757591aa185c45a49ce40b39cfca9ef2901cc149d41e9f6c9186eece1d67cb3",
-      "review": "F22: typed order, receipt and scenario request views"
+      "sha256": "1183d62467194e8688617e062cf067bfa722f3fc8a46f920cef65d2642a7364d",
+      "review": "F24 typed views: proof bindings unchanged"
     },
     "components/intelligence/src/service/scenarios/probes.rs": {
       "status": "unproved",
@@ -2983,8 +2983,8 @@
     },
     "components/marketing/src/domain/line_facts.rs": {
       "status": "unproved",
-      "sha256": "ff247bca0184408f03d4ab3ab7b27e64fe48a5243c8a27d3ec6b68fc58591b84",
-      "review": "Unit tests for every public domain function of the components; no production code changed"
+      "sha256": "6df155a5c201a869e332efd2320922386876521fdd02eb50f617f53ca75ac526",
+      "review": "F24 typed views: proof bindings unchanged"
     },
     "components/marketing/src/domain/metadata.rs": {
       "status": "unproved",
