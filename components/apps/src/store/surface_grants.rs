@@ -3,10 +3,12 @@ use crate::domain::approval;
 use crate::domain::surface_grant::actor;
 use crate::ports::Platform;
 use crate::store::packages::package;
+use serde::Deserialize;
 use serde_json::Value;
 use sqlx::Row;
 use veyndo_app_model::manifest::Manifest;
 use veyndo_app_model::surfaces::Surface;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::shop_scope::tenant;
 use veyndo_core::{Error, RequestContext, Result, StatusCode, bad, hash};
 use veyndo_identity::{merchant, permit};
@@ -79,6 +81,14 @@ pub async fn context(a: &Platform, h: &RequestContext, v: &Value) -> Result<()> 
     }
     Ok(())
 }
+/// The JSON fields `load` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct LoadInput {
+    #[serde(deserialize_with = "lenient")]
+    grant: Option<String>,
+}
+
 /// Recheck current actor, immutable digest, role and object ownership for actions and UI bundle reads.
 pub async fn load(
     a: &Platform,
@@ -87,11 +97,16 @@ pub async fn load(
     surface: &str,
     v: &Value,
 ) -> Result<(Manifest, Surface, Value, Value)> {
+    let input: LoadInput = view(v);
     let t = tenant(h)?;
-    let token = v["grant"].as_str().filter(|s| s.len() == 64).ok_or(Error(
-        StatusCode::UNAUTHORIZED,
-        "Surface grant required".into(),
-    ))?;
+    let token = input
+        .grant
+        .as_deref()
+        .filter(|s| s.len() == 64)
+        .ok_or(Error(
+            StatusCode::UNAUTHORIZED,
+            "Surface grant required".into(),
+        ))?;
     let row = sqlx::query("SELECT package_digest,actions,context FROM app_surface_grants WHERE tenant=$1 AND token_hash=$2 AND app=$3 AND surface=$4 AND actor_hash=$5 AND expires_at>now()")
         .bind(&t).bind(hash(token)).bind(id).bind(surface).bind(actor(h)).fetch_optional(&a.db).await?.ok_or(Error(StatusCode::UNAUTHORIZED,"Surface grant expired or belongs to another actor".into()))?;
     let m = package(a, &t, id, true).await?;

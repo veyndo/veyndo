@@ -2,6 +2,7 @@
 use crate::domain::action_admission::authorized;
 use crate::domain::action_policy::readonly;
 use crate::domain::{approval, native_views};
+use serde::Deserialize;
 use serde_json::{Value, json};
 use veyndo_app_model::manifest::Manifest;
 use veyndo_app_model::surfaces::Surface;
@@ -130,13 +131,22 @@ pub fn resource(
     )
 }
 
+/// The JSON fields `view_entity` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ViewEntityInput {
+    entities: Value,
+}
+
 fn view_entity<'a>(m: &'a Manifest, s: &Surface, view: &Value) -> Option<&'a Entity> {
+    let input: ViewEntityInput = veyndo_core::document::view(view);
     let action = m.actions.iter().find(|a| a.name == s.actions[0])?;
     let entity = m
         .entities
         .iter()
         .find(|e| Some(&e.name) == action.entity.as_ref())?;
-    view["entities"]
+    input
+        .entities
         .as_array()?
         .iter()
         .any(|e| e["name"] == entity.name)

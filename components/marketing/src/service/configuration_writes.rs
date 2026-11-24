@@ -11,9 +11,11 @@ use crate::store::configuration_lifecycle::{lock, validate_references};
 use crate::types::channel::normalize_channel;
 use crate::types::flow::Flow;
 use crate::types::promotion::{Promotion, preserve_import, validate_promotion};
+use serde::Deserialize;
 use serde_json::{Value, json};
 use sqlx::{Postgres, Row, Transaction};
 use veyndo_app_model::declarations::identifier;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::shop_scope::{header, parent};
 use veyndo_core::{RequestContext, Result, State, bad, conflict, history_context};
 use veyndo_identity::domain::permissions::allowed;
@@ -103,6 +105,15 @@ pub fn authorize_flow(h: &RequestContext, f: &Flow) -> Result<()> {
     Ok(())
 }
 
+/// The JSON fields `validate_draft` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ValidateDraftInput {
+    #[serde(deserialize_with = "lenient")]
+    revision: Option<i64>,
+    data: Value,
+}
+
 /// Validates a flow draft at its expected revision without saving or queuing it.
 pub async fn validate_draft<H: ConfigurationHost>(
     host: &H,
@@ -110,13 +121,14 @@ pub async fn validate_draft<H: ConfigurationHost>(
     id: &str,
     v: &Value,
 ) -> Result<Value> {
+    let input: ValidateDraftInput = view(v);
     permit(h, "automation.manage")?;
     let t = merchant(h)?;
     if !identifier(id) {
         return Err(bad("Invalid configuration ID"));
     }
-    let revision = v["revision"].as_i64().ok_or(bad("Revision required"))?;
-    let mut data = v["data"].clone();
+    let revision = input.revision.ok_or(bad("Revision required"))?;
+    let mut data = input.data.clone();
     bind_actor(h, &mut data)?;
     preflight(host, &t, h, (id, revision), &data).await
 }
@@ -156,6 +168,13 @@ pub async fn validate_flow_config<H: ConfigurationHost>(
     validate_config(host, tx, (t, h), value, true).await
 }
 
+/// The JSON fields `validate_config` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ValidateConfigInput {
+    name: Value,
+}
+
 async fn validate_config<H: ConfigurationHost>(
     host: &H,
     tx: &mut Transaction<'_, Postgres>,
@@ -163,6 +182,7 @@ async fn validate_config<H: ConfigurationHost>(
     value: &Value,
     lock: bool,
 ) -> Result<()> {
+    let input: ValidateConfigInput = view(value);
     let f: Flow = serde_json::from_value(value.clone()).map_err(|_| bad("Invalid flow"))?;
     f.validate()?;
     authorize_flow(h, &f)?;
@@ -178,7 +198,7 @@ async fn validate_config<H: ConfigurationHost>(
             .fetch_one(&mut **tx)
             .await?,
     )?;
-    settings.languages().validate_names(&value["name"], 100)?;
+    settings.languages().validate_names(&input.name, 100)?;
     flow_text::validate(&f, &settings)?;
     host.validate_apps(tx, t, h, &f, lock).await
 }
@@ -228,6 +248,15 @@ async fn admit(a: &State, kind: &str, id: &str, data: &mut Value, t: &str) -> Re
     settings.languages().validate_names(&data["name"], 100)
 }
 
+/// The JSON fields `save` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct SaveInput {
+    data: Value,
+    #[serde(deserialize_with = "lenient")]
+    revision: Option<i64>,
+}
+
 /// Saves one definition at its expected revision; `validateOnly` previews a flow draft.
 pub async fn save<H: ConfigurationHost>(
     host: &H,
@@ -235,14 +264,15 @@ pub async fn save<H: ConfigurationHost>(
     (kind, id): (&str, &str),
     v: &Value,
 ) -> Result<Value> {
+    let input: SaveInput = view(v);
     permit(h, configuration_right(kind, true)?)?;
     let t = merchant(h)?;
     if !identifier(id) {
         return Err(bad("Invalid configuration ID"));
     }
     let table = table(kind)?;
-    let mut data = v["data"].clone();
-    let expected = v["revision"].as_i64().ok_or(bad("Revision required"))?;
+    let mut data = input.data.clone();
+    let expected = input.revision.ok_or(bad("Revision required"))?;
     let validate_only = v
         .get("validateOnly")
         .map(|flag| flag.as_bool().ok_or(bad("validateOnly must be a boolean")))
@@ -313,6 +343,15 @@ async fn locked_revision(
         .await?)
 }
 
+/// The JSON fields `admit_import` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct AdmitImportInput {
+    source_import: Value,
+    #[serde(deserialize_with = "lenient")]
+    code: Option<String>,
+}
+
 /// Imported provenance stays immutable and an imported coupon code never shadows another native promotion.
 async fn admit_import(
     tx: &mut Transaction<'_, Postgres>,
@@ -320,6 +359,7 @@ async fn admit_import(
     id: &str,
     data: &Value,
 ) -> Result<()> {
+    let input: AdmitImportInput = view(data);
     let old: Option<Value> =
         sqlx::query_scalar("SELECT data FROM commerce_promotions WHERE tenant=$1 AND id=$2")
             .bind(t)
@@ -327,8 +367,8 @@ async fn admit_import(
             .fetch_optional(&mut **tx)
             .await?;
     preserve_import(&old.unwrap_or(Value::Null), data)?;
-    if !data["sourceImport"].is_null() {
-        let duplicate:bool=sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM commerce_promotions WHERE tenant=$1 AND id<>$2 AND data->>'code'=$3)").bind(t).bind(id).bind(data["code"].as_str()).fetch_one(&mut **tx).await?;
+    if !input.source_import.is_null() {
+        let duplicate:bool=sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM commerce_promotions WHERE tenant=$1 AND id<>$2 AND data->>'code'=$3)").bind(t).bind(id).bind(input.code.as_deref()).fetch_one(&mut **tx).await?;
         if duplicate {
             return Err(conflict(
                 "Coupon code already belongs to another native promotion; review the mapping",
@@ -338,14 +378,25 @@ async fn admit_import(
     Ok(())
 }
 
+/// The JSON fields `write` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct WriteInput {
+    name: Value,
+    condition: Value,
+    #[serde(deserialize_with = "lenient")]
+    active: Option<bool>,
+}
+
 async fn write(
     tx: &mut Transaction<'_, Postgres>,
     (t, table): (&str, &str),
     id: &str,
     data: &Value,
 ) -> Result<()> {
+    let input: WriteInput = view(data);
     if table == "commerce_rules" {
-        sqlx::query("INSERT INTO commerce_rules(tenant,id,name,condition,active) VALUES($1,$2,$3,$4,$5) ON CONFLICT(tenant,id) DO UPDATE SET name=EXCLUDED.name,condition=EXCLUDED.condition,active=EXCLUDED.active,revision=commerce_rules.revision+1").bind(t).bind(id).bind(&data["name"]).bind(&data["condition"]).bind(data["active"].as_bool()).execute(&mut **tx).await?;
+        sqlx::query("INSERT INTO commerce_rules(tenant,id,name,condition,active) VALUES($1,$2,$3,$4,$5) ON CONFLICT(tenant,id) DO UPDATE SET name=EXCLUDED.name,condition=EXCLUDED.condition,active=EXCLUDED.active,revision=commerce_rules.revision+1").bind(t).bind(id).bind(&input.name).bind(&input.condition).bind(input.active).execute(&mut **tx).await?;
     } else {
         let sql = format!(
             "INSERT INTO {table}(tenant,id,data) VALUES($1,$2,$3) ON CONFLICT(tenant,id) DO UPDATE SET data=EXCLUDED.data,revision={table}.revision+1"

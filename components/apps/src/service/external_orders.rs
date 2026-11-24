@@ -1,7 +1,9 @@
 //! Generic authorized external order intake reuses native stock, customer snapshots, documents, history and outbox.
+use serde::Deserialize;
 use serde_json::{Value, json};
 use sqlx::Row;
 use std::collections::HashMap;
+use veyndo_core::document::view;
 use veyndo_core::{
     RequestContext, Result, State, bad, conflict, hash, history_context, shop_scope, uid,
 };
@@ -68,6 +70,13 @@ async fn replayed(
     }
     Ok(None)
 }
+/// The JSON fields `order_lines` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct OrderLinesInput {
+    product_ids: Value,
+}
+
 /// Locks the products of the order and their parents and builds the order lines from the external snapshot.
 async fn order_lines(
     tx: &mut sqlx::Transaction<'_, sqlx::Postgres>,
@@ -78,6 +87,7 @@ async fn order_lines(
     main_locale: &str,
     scale: u8,
 ) -> Result<Vec<Value>> {
+    let args: OrderLinesInput = view(channel);
     let mut locks:Vec<String>=sqlx::query_scalar("SELECT DISTINCT parent_id FROM products WHERE tenant=$1 AND id=ANY($2) AND parent_id IS NOT NULL").bind(t).bind(ids).fetch_all(&mut **tx).await?;
     locks.extend(ids.to_vec());
     locks.sort();
@@ -95,7 +105,8 @@ async fn order_lines(
     if hidden {
         return Err(bad("Imported product is hidden in this channel"));
     }
-    let selected = channel["productIds"]
+    let selected = args
+        .product_ids
         .as_array()
         .ok_or(bad("Invalid channel selection"))?;
     let chain = vec![

@@ -1,12 +1,25 @@
 //! Paginated app-specific immutable purchase projections; filtering happens before LIMIT and never exposes buyer PII.
+use serde::Deserialize;
 use serde_json::{Value, json};
 use sqlx::Row;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::{Result, State, bad};
+
+/// The JSON fields `configurations` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ConfigurationsInput {
+    #[serde(deserialize_with = "lenient")]
+    limit: Option<i64>,
+    #[serde(deserialize_with = "lenient")]
+    after: Option<String>,
+}
 
 /// One page of the orders that carry a configuration of this app, newest first.
 pub async fn configurations(a: &State, t: &str, id: &str, input: &Value) -> Result<Value> {
-    let limit = input["limit"].as_i64().unwrap_or(100);
-    let after = input["after"].as_str().unwrap_or("");
+    let args: ConfigurationsInput = view(input);
+    let limit = args.limit.unwrap_or(100);
+    let after = args.after.as_deref().unwrap_or("");
     if !(1..=100).contains(&limit) || after.len() > 100 {
         return Err(bad("Invalid configuration order page"));
     }

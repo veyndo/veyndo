@@ -16,6 +16,14 @@ use veyndo_identity::{merchant, permit};
 use veyndo_shop::service::language::language_context;
 use veyndo_shop::service::read_cache::config;
 
+/// The JSON fields `question` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct QuestionInput {
+    #[serde(deserialize_with = "lenient")]
+    question: Option<String>,
+}
+
 /// A read-only customer answer from the authoritative product snapshot and published sources, with validated citations; the answer is refused when the product or a source changed meanwhile.
 pub async fn question(
     host: &dyn KnowledgeHost,
@@ -23,11 +31,13 @@ pub async fn question(
     id: &str,
     v: &Value,
 ) -> Result<Value> {
+    let input: QuestionInput = view(v);
     let m = host.models();
     let a = m.core;
     let t = tenant(h)?;
-    let request = v["question"]
-        .as_str()
+    let request = input
+        .question
+        .as_deref()
         .filter(|s| !s.trim().is_empty() && s.len() <= 2000)
         .ok_or(bad("Question must contain 1..2000 bytes"))?;
     let detail = host.detail(h, id).await?;

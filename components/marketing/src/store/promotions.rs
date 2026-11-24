@@ -4,7 +4,7 @@ use crate::types::promotion::Promotion;
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 use sqlx::Row;
-use veyndo_core::document::{lenient, merge};
+use veyndo_core::document::{lenient, merge, view};
 use veyndo_core::{Error, Result, StatusCode, bad};
 use veyndo_pricing::pricing::{PriceInput, calculate, math_round};
 use veyndo_pricing::quote::{LinePriceUpdate, QuoteTotals};
@@ -282,13 +282,21 @@ pub async fn promote(tx: &mut sqlx::PgConnection, c: &StoredCart, mut q: Value) 
     apply(&mut q, applicable, &c.data.coupons)?;
     Ok(q)
 }
+/// The JSON fields `record_uses` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct RecordUsesInput {
+    discounts: Value,
+}
+
 pub async fn record_uses(
     tx: &mut sqlx::PgConnection,
     t: &str,
     order: &str,
     q: &Value,
 ) -> Result<()> {
-    for d in q["discounts"].as_array().unwrap_or(&vec![]) {
+    let input: RecordUsesInput = view(q);
+    for d in input.discounts.as_array().unwrap_or(&vec![]) {
         sqlx::query("INSERT INTO promotion_uses(tenant,promotion,order_id) VALUES($1,$2,$3) ON CONFLICT DO NOTHING").bind(t).bind(d["id"].as_str()).bind(order).execute(&mut *tx).await?;
     }
     Ok(())

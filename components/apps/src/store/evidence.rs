@@ -1,6 +1,8 @@
 //! Private provenance-bearing app sources for merchant retrieval; never public PDP answers.
+use serde::Deserialize;
 use serde_json::{Value, json};
 use sqlx::Row;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::{Result, State, bad, hash};
 use veyndo_intelligence::knowledge::sync_integration;
 
@@ -21,13 +23,24 @@ pub async fn private_graph(a: &State, t: &str) -> Result<Value> {
     Ok(json!({"sources":sources,"productRelations":products,"visibility":"merchant-private"}))
 }
 
+/// The JSON fields `ingest` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct IngestInput {
+    #[serde(deserialize_with = "lenient")]
+    cursor: Option<i64>,
+    sources: Value,
+}
+
 /// Stores one export page of an app's private sources at its cursor, mirrors them into the knowledge graph and announces new ones.
 pub async fn ingest(a: &State, t: &str, app: &str, previous: i64, v: &Value) -> Result<()> {
-    let cursor = v["cursor"]
-        .as_i64()
+    let input: IngestInput = view(v);
+    let cursor = input
+        .cursor
         .filter(|n| *n >= previous)
         .ok_or(bad("Invalid export cursor"))?;
-    let sources = v["sources"]
+    let sources = input
+        .sources
         .as_array()
         .filter(|s| s.len() <= 10)
         .ok_or(bad("Invalid app sources"))?;

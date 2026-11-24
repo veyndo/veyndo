@@ -1,11 +1,13 @@
 //! A closed shopper adapter uses native carts and exact reviewed totals; no model-supplied authority or payment mode.
 use crate::ports::AgentHost;
+use serde::Deserialize;
 use serde_json::Value;
 use serde_json::json;
 use veyndo_checkout::store::cart_load::load as load_cart;
 use veyndo_core::RequestContext;
 use veyndo_core::Result;
 use veyndo_core::bad;
+use veyndo_core::document::{lenient, view};
 use veyndo_shipping::domain::geography::catalogue;
 use veyndo_shop::service::read_cache::settings as scoped_config;
 pub fn headers(t: &str, request: &Value, token: Option<&str>) -> Result<RequestContext> {
@@ -46,18 +48,41 @@ pub async fn call<H: AgentHost>(
 ) -> Result<Value> {
     Box::pin(host.read(h, name, v)).await
 }
+/// The JSON fields `observation` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ObservationInput {
+    revision: Value,
+    status: Value,
+    price: Value,
+    selection_needs_confirmation: Value,
+    line_items: Value,
+}
+
 pub fn observation(v: &Value) -> Value {
+    let args: ObservationInput = view(v);
     // Positive projection: nested customer/configuration payloads and capabilities
     // never enter model input or reports, including after a completed checkout.
-    json!({"revision":v["revision"],"status":v["status"],"price":v["price"],"selectionNeedsConfirmation":v["selectionNeedsConfirmation"],
-        "items":v["lineItems"].as_array().map(|items|items.iter().map(|i|json!({"id":i["id"],"name":i["label"],"quantity":i["quantity"],"price":i["price"],"stock":i["stock"]})).collect::<Vec<_>>())})
+    json!({"revision":args.revision,"status":args.status,"price":args.price,"selectionNeedsConfirmation":args.selection_needs_confirmation,
+        "items":args.line_items.as_array().map(|items|items.iter().map(|i|json!({"id":i["id"],"name":i["label"],"quantity":i["quantity"],"price":i["price"],"stock":i["stock"]})).collect::<Vec<_>>())})
 }
+/// The JSON fields `purchase` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct PurchaseInput {
+    #[serde(deserialize_with = "lenient")]
+    country: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    budget_minor: Option<i64>,
+}
+
 pub async fn purchase<H: AgentHost>(
     host: &H,
     h: &RequestContext,
     profile: &Value,
     key: &str,
 ) -> Result<Value> {
+    let input: PurchaseInput = view(profile);
     let a = host.models().core;
     let cart = load_cart(a, h).await?;
     if cart.status == "completed" {
@@ -67,11 +92,12 @@ pub async fn purchase<H: AgentHost>(
             .clone()
             .ok_or(bad("Completed cart has no order"));
     }
-    let country = profile["country"]
-        .as_str()
+    let country = input
+        .country
+        .as_deref()
         .ok_or(bad("Profile country required"))?;
     let (revision, minor) = review(host, h, country).await?;
-    if minor > profile["budgetMinor"].as_i64().unwrap_or(0) {
+    if minor > input.budget_minor.unwrap_or(0) {
         return Err(bad("Native checkout total exceeds this customer's budget"));
     }
     accept(host, h).await?;

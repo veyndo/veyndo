@@ -1,12 +1,14 @@
 //! Approved work runs under the existing task lease; each native write is fenced against cancellation and recorded before advancing. Translation steps reuse native draft storage and yield the worker while drafts are prepared.
 use crate::domain::proposal::Step;
 use crate::ports::WorkHost;
+use serde::Deserialize;
 use serde_json::{Value, json};
 use sqlx::Row;
 use veyndo_catalog::domain::selection::parse as parse_selection;
 use veyndo_catalog::http::translation_jobs;
 use veyndo_catalog::service::translation_apply::admit_selection;
 use veyndo_cognition::inference::{Choice, Inference};
+use veyndo_core::document::{lenient, view};
 use veyndo_core::history_context::context;
 use veyndo_core::{RequestContext, Result, State, bad, conflict};
 use veyndo_identity::permit;
@@ -46,6 +48,13 @@ pub async fn admit_provider(inference: &Inference, choice: &Choice) -> Result<()
     }
     Ok(())
 }
+/// The JSON fields `execute` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ExecuteInput {
+    execution: Value,
+}
+
 /// Executes approved work step by step under the task lease; each native write is fenced and recorded before advancing.
 pub async fn execute<H: WorkHost>(
     host: &H,
@@ -54,8 +63,9 @@ pub async fn execute<H: WorkHost>(
     h: &RequestContext,
     request: &Value,
 ) -> Result<Value> {
+    let input: ExecuteInput = view(request);
     let a = host.models().core;
-    let steps: Vec<Step> = serde_json::from_value(request["execution"].clone())
+    let steps: Vec<Step> = serde_json::from_value(input.execution.clone())
         .map_err(|_| bad("Invalid approved work"))?;
     let run = CURRENT
         .try_with(Clone::clone)
@@ -119,11 +129,23 @@ pub async fn execute<H: WorkHost>(
     tx.commit().await?;
     Ok(json!({"taskId":id,"applied":true}))
 }
+/// The JSON fields `request` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct RequestInput {
+    #[serde(deserialize_with = "lenient")]
+    target_locale: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    overwrite: Option<bool>,
+}
+
 /// The target, provider, overwrite flag and product selection of a translation step.
 fn request(v: &Value) -> Result<(String, Choice, bool, Option<Vec<String>>)> {
+    let input: RequestInput = view(v);
     Ok((
-        v["targetLocale"]
-            .as_str()
+        input
+            .target_locale
+            .as_deref()
             .ok_or(bad("Target language required"))?
             .into(),
         serde_json::from_value(
@@ -132,7 +154,7 @@ fn request(v: &Value) -> Result<(String, Choice, bool, Option<Vec<String>>)> {
                 .unwrap_or(json!({"provider":"platform","model":null})),
         )
         .map_err(|_| bad("Invalid translation provider"))?,
-        v["overwrite"].as_bool().unwrap_or(false),
+        input.overwrite.unwrap_or(false),
         parse_selection(v.get("productIds"))?,
     ))
 }

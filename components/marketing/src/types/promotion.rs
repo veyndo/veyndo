@@ -3,6 +3,7 @@ use crate::domain::rules;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::collections::HashMap;
+use veyndo_core::document::view;
 use veyndo_core::{Result, bad, conflict};
 use veyndo_pricing::types::currency as currencies;
 #[derive(Clone, Deserialize, Serialize)]
@@ -71,10 +72,18 @@ pub struct PromotionImport {
     pub record_digest: String,
     pub activation_reviewed: bool,
 }
+/// The JSON fields `preserve_import` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct PreserveImportInput {
+    source_import: Value,
+}
+
 pub fn preserve_import(previous: &Value, next: &Value) -> Result<()> {
+    let input: PreserveImportInput = view(next);
     if let Some(old) = previous.get("sourceImport").filter(|v| !v.is_null()) {
         let mut old = old.clone();
-        let mut new = next["sourceImport"].clone();
+        let mut new = input.source_import.clone();
         old.as_object_mut()
             .ok_or(bad("Invalid promotion provenance"))?
             .remove("activationReviewed");

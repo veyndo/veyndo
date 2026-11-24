@@ -14,7 +14,7 @@ use serde_json::{Value, json};
 use sqlx::Row;
 use veyndo_cognition::inference::{Choice, Output, Provider};
 use veyndo_core::database::lease::Lease;
-use veyndo_core::document::view;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::shop_scope::{header, parent};
 use veyndo_core::{Error, RequestContext, Result, StatusCode, bad, conflict, uid};
 use veyndo_identity::{allowed, assistant_access, merchant};
@@ -284,6 +284,14 @@ struct SavedContext {
     private_sources: Value,
 }
 
+/// The JSON fields `validate_context` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ValidateContextInput {
+    #[serde(deserialize_with = "lenient")]
+    instruction: Option<String>,
+}
+
 /// A saved prompt is not continuing permission to disclose withdrawn app/document evidence.
 pub async fn validate_context<H: AgentHost>(
     host: &H,
@@ -292,8 +300,9 @@ pub async fn validate_context<H: AgentHost>(
     request: &Value,
     saved: &Value,
 ) -> Result<()> {
+    let input: ValidateContextInput = view(request);
     let context: SavedContext = view(saved);
-    let instruction = request["instruction"].as_str().unwrap_or("");
+    let instruction = input.instruction.as_deref().unwrap_or("");
     let apps = if allowed(h, "apps.read") {
         host.planning_context(t, h, instruction).await?
     } else {
@@ -311,6 +320,16 @@ pub async fn validate_context<H: AgentHost>(
     }
     Ok(())
 }
+/// The JSON fields `repair` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct RepairInput {
+    prompt: Value,
+    #[serde(deserialize_with = "lenient")]
+    system: Option<String>,
+    schema: Value,
+}
+
 /// One checkpointed correction of rejected output; original evidence, budget and native review remain authoritative.
 async fn repair<H: AgentHost>(
     host: &H,
@@ -321,6 +340,7 @@ async fn repair<H: AgentHost>(
     output: &Output,
     error: &Error,
 ) -> Result<Output> {
+    let input: RepairInput = view(prepared);
     if output.value.to_string().len() > 32768 {
         return Err(bad("Rejected proposal exceeds the repair context limit"));
     }
@@ -342,13 +362,13 @@ async fn repair<H: AgentHost>(
     } else {
         host.planning_contracts(&t, h, &ids).await?
     };
-    let context = json!({"originalContext":prepared["prompt"],"nativeReadTranscript":trace,"rejectedCandidate":output.value,"validationError":error.1,"managedSaveContracts":contracts});
+    let context = json!({"originalContext":input.prompt,"nativeReadTranscript":trace,"rejectedCandidate":output.value,"validationError":error.1,"managedSaveContracts":contracts});
     if context.to_string().len() > 131072 {
         return Err(bad("Proposal repair context exceeds its limit"));
     }
     let system = format!(
         "{}\n{}\n{}",
-        prepared["system"].as_str().unwrap_or(""),
+        input.system.as_deref().unwrap_or(""),
         SOURCE_POLICY,
         include_str!("../../../../crates/cognition/prompts/merchant-repair.v1.txt")
     );
@@ -358,7 +378,7 @@ async fn repair<H: AgentHost>(
         choice,
         &system,
         &context.to_string(),
-        &prepared["schema"],
+        &input.schema,
         false,
     )
     .await

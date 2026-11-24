@@ -1,11 +1,25 @@
 //! Admission of an adapter service configuration and of the approval URLs it may hand to a buyer.
 use crate::domain::attempt::Attempt;
 use crate::ports::Host;
+use serde::Deserialize;
 use serde_json::Value;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::{Error, Result, StatusCode, bad};
 
+/// The JSON fields `validate_service` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ValidateServiceInput {
+    #[serde(deserialize_with = "lenient")]
+    url: Option<String>,
+    environment: Value,
+    #[serde(deserialize_with = "lenient")]
+    token: Option<String>,
+}
+
 pub fn validate_service(c: &Value, environment: &str) -> Result<()> {
-    let url = reqwest::Url::parse(c["url"].as_str().ok_or(Error(
+    let input: ValidateServiceInput = view(c);
+    let url = reqwest::Url::parse(input.url.as_deref().ok_or(Error(
         StatusCode::SERVICE_UNAVAILABLE,
         "Payment service version unavailable".into(),
     ))?)
@@ -18,9 +32,9 @@ pub fn validate_service(c: &Value, environment: &str) -> Result<()> {
         || url.password().is_some()
         || url.query().is_some()
         || url.fragment().is_some()
-        || c["environment"] != environment
+        || input.environment != environment
         || (fixture && environment != "contract-fixture")
-        || c["token"].as_str().is_none_or(|v| v.len() < 24)
+        || input.token.as_deref().is_none_or(|v| v.len() < 24)
     {
         return Err(bad(
             "Payment service requires matching environment, HTTPS and a private credential",

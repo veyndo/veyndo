@@ -2,7 +2,9 @@
 use crate::ports::{Gateway, Host};
 use crate::service::{details, instructions, providers};
 use crate::store::commands::enqueue;
+use serde::Deserialize;
 use serde_json::Value;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::{RequestContext, Result, State, bad};
 use veyndo_identity::{merchant, permit};
 
@@ -28,6 +30,18 @@ pub async fn details(
     details::read(gateway, a, &tenant, id).await
 }
 
+/// The JSON fields `invoke` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct InvokeInput {
+    #[serde(deserialize_with = "lenient")]
+    id: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    operation: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    request_key: Option<String>,
+}
+
 /// One merchant payment operation by name: instructions, details, providers, onboarding or an approved ledger command.
 pub async fn invoke(
     ports: (&dyn Host, &dyn Gateway),
@@ -36,14 +50,18 @@ pub async fn invoke(
     name: &str,
     v: &Value,
 ) -> Result<Value> {
-    let id = || v["id"].as_str().ok_or(bad("id required"));
+    let input: InvokeInput = view(v);
+    let id = || input.id.as_deref().ok_or(bad("id required"));
     match name {
         "merchant.payment.instructions" => instructions::merchant_read(ports.1, a, h, id()?).await,
         "merchant.payment.details" => details(ports.1, a, h, id()?).await,
         "merchant.payment.providers" => providers::providers(a, h).await,
         "merchant.payment.onboarding" => providers::onboarding(ports, a, h, id()?, v).await,
         "merchant.payment" => {
-            let op = v["operation"].as_str().ok_or(bad("operation required"))?;
+            let op = input
+                .operation
+                .as_deref()
+                .ok_or(bad("operation required"))?;
             if !admitted(op, v) {
                 return Err(bad("Payment operation and approval required"));
             }
@@ -52,7 +70,10 @@ pub async fn invoke(
                 h,
                 id()?,
                 op,
-                v["requestKey"].as_str().ok_or(bad("requestKey required"))?,
+                input
+                    .request_key
+                    .as_deref()
+                    .ok_or(bad("requestKey required"))?,
                 v,
             )
             .await
@@ -61,9 +82,18 @@ pub async fn invoke(
     }
 }
 
+/// The JSON fields `admitted` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct AdmittedInput {
+    #[serde(deserialize_with = "lenient")]
+    approve: Option<bool>,
+}
+
 /// A merchant ledger command names a supported operation and carries `approve=true`.
 pub fn admitted(op: &str, v: &Value) -> bool {
-    OPERATIONS.contains(&op) && v["approve"] == true
+    let input: AdmittedInput = view(v);
+    OPERATIONS.contains(&op) && input.approve == Some(true)
 }
 
 #[cfg(test)]

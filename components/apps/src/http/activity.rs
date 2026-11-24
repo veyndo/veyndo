@@ -3,8 +3,10 @@ use crate::domain::event_projection;
 use crate::store::packages::package;
 use axum::Json;
 use axum::extract::{Path, State as Shared};
+use serde::Deserialize;
 use serde_json::{Value, json};
 use sqlx::Row;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::shop_scope::parent;
 use veyndo_core::{RequestContext, Result, State, bad};
 use veyndo_identity::merchant;
@@ -24,6 +26,18 @@ pub async fn activity(
         json!({"calls":calls,"deliveries":deliveries,"storage":usage,"delivery":"at-least-once","retentionCalls":1000}),
     ))
 }
+/// The JSON fields `replay` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ReplayInput {
+    #[serde(deserialize_with = "lenient")]
+    approve: Option<bool>,
+    #[serde(deserialize_with = "lenient")]
+    after: Option<i64>,
+    #[serde(deserialize_with = "lenient")]
+    limit: Option<i64>,
+}
+
 /// Queues eligible outbox events after a cursor again; the caller approves repeated external effects.
 pub async fn replay(
     Shared(a): Shared<State>,
@@ -31,8 +45,9 @@ pub async fn replay(
     Path(id): Path<String>,
     Json(v): Json<Value>,
 ) -> Result<Json<Value>> {
+    let input: ReplayInput = view(&v);
     let t = merchant(&h)?;
-    if v["approve"] != true {
+    if input.approve != Some(true) {
         return Err(bad(
             "Approve event replay; external effects may occur again",
         ));
@@ -41,15 +56,15 @@ pub async fn replay(
         return Err(bad("Private sandbox events cannot be delivered externally"));
     }
     let m = package(&a, &t, &id, true).await?;
-    let after = v["after"]
-        .as_i64()
+    let after = input
+        .after
         .filter(|n| *n >= 0)
         .ok_or(bad("Nonnegative event cursor required"))?;
     let limit = if v.get("limit").is_none() {
         50
     } else {
-        v["limit"]
-            .as_i64()
+        input
+            .limit
             .filter(|n| (1..=100).contains(n))
             .ok_or(bad("Replay limit must be 1..100"))?
     };

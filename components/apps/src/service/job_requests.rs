@@ -2,12 +2,26 @@
 use crate::domain::tool_output::checked_output;
 use crate::domain::{action_admission, callback_grant, input_schema};
 use crate::store::jobs;
+use serde::Deserialize;
 use serde_json::Value;
 use veyndo_app_model::manifest::Manifest;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad};
+
+/// The JSON fields `execute` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ExecuteInput {
+    #[serde(deserialize_with = "lenient")]
+    action: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    request_key: Option<String>,
+    input: Value,
+}
 
 /// Queues a declared job for a service that asks with its own request key.
 pub async fn execute(a: &State, h: &RequestContext, m: &Manifest, v: &Value) -> Result<Value> {
+    let args: ExecuteInput = view(v);
     let contract: Value = serde_json::from_str(include_str!(
         "../../../../extensions/sdk/host-exchange-v1.json"
     ))
@@ -20,8 +34,8 @@ pub async fn execute(a: &State, h: &RequestContext, m: &Manifest, v: &Value) -> 
         ));
     }
     callback_grant::permit(h, "jobs.write")?;
-    let name = v["action"].as_str().unwrap();
-    let key = v["requestKey"].as_str().unwrap();
+    let name = args.action.as_deref().unwrap();
+    let key = args.request_key.as_deref().unwrap();
     if key.is_empty() || key.chars().any(char::is_control) {
         return Err(bad(
             "A nonempty job request key without control characters is required",
@@ -34,7 +48,7 @@ pub async fn execute(a: &State, h: &RequestContext, m: &Manifest, v: &Value) -> 
     );
     // Preserve the authenticated principal. The gateway rechecks every action right,
     // schema, live-only admission and current package before creating the native job.
-    invoke_job(a, &context, m, name, &v["input"]).await
+    invoke_job(a, &context, m, name, &args.input).await
 }
 // A job callback holds its admitted manifest/action through enqueue. Re-reading
 // the package must never turn a formerly declared job into a service invocation.

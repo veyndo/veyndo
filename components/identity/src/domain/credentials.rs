@@ -1,10 +1,21 @@
 //! Argon2 password operations run off the asynchronous request executor.
 use argon2::{Argon2, PasswordHash, PasswordHasher, PasswordVerifier, password_hash::SaltString};
+use serde::Deserialize;
 use serde_json::Value;
 use uuid::Uuid;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::{Result, bad};
+/// The JSON fields `email` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct EmailInput {
+    #[serde(deserialize_with = "lenient")]
+    email: Option<String>,
+}
+
 pub fn email(v: &Value) -> Result<String> {
-    let s = v["email"].as_str().unwrap_or("").trim().to_lowercase();
+    let input: EmailInput = view(v);
+    let s = input.email.as_deref().unwrap_or("").trim().to_lowercase();
     if s.len() > 254
         || s.len() < 3
         || s.split('@').count() != 2
@@ -16,15 +27,33 @@ pub fn email(v: &Value) -> Result<String> {
     }
     Ok(s)
 }
+/// The JSON fields `password` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct PasswordInput {
+    #[serde(deserialize_with = "lenient")]
+    password: Option<String>,
+}
+
 pub fn password(v: &Value) -> Result<String> {
-    let p = v["password"].as_str().unwrap_or("");
+    let input: PasswordInput = view(v);
+    let p = input.password.as_deref().unwrap_or("");
     if !(12..=128).contains(&p.len()) {
         return Err(bad("Password must contain 12..128 characters"));
     }
     Ok(p.into())
 }
+/// The JSON fields `name` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct NameInput {
+    #[serde(deserialize_with = "lenient")]
+    name: Option<String>,
+}
+
 pub fn name(v: &Value) -> Result<String> {
-    let n = v["name"].as_str().unwrap_or("").trim();
+    let input: NameInput = view(v);
+    let n = input.name.as_deref().unwrap_or("").trim();
     if n.is_empty() || n.len() > 100 {
         return Err(bad("Name must contain 1..100 characters"));
     }

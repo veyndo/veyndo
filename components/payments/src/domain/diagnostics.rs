@@ -1,5 +1,7 @@
 //! Safe, provider-neutral operational hints. These never authorize a financial transition.
+use serde::Deserialize;
 use serde_json::Value;
+use veyndo_core::document::{lenient, view};
 
 pub fn code(value: Option<&str>) -> Option<&'static str> {
     match value {
@@ -12,8 +14,17 @@ pub fn code(value: Option<&str>) -> Option<&'static str> {
     }
 }
 
+/// The JSON fields `response` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ResponseInput {
+    #[serde(deserialize_with = "lenient")]
+    error: Option<String>,
+}
+
 pub fn response(value: &Value) -> &'static str {
-    code(value["error"].as_str()).unwrap_or("Payment service rejected operation")
+    let input: ResponseInput = view(value);
+    code(input.error.as_deref()).unwrap_or("Payment service rejected operation")
 }
 
 #[cfg(test)]

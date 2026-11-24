@@ -1,8 +1,21 @@
 //! Atomic restoration of the owning customer's address aggregate; geography, references and immutable order snapshots remain guarded.
+use serde::Deserialize;
 use serde_json::{Value, json};
 use sqlx::PgConnection;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::{Result, bad};
 use veyndo_pricing::customer::Address;
+
+/// The JSON fields `restore` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct RestoreInput {
+    addresses: Value,
+    #[serde(deserialize_with = "lenient")]
+    default_billing_address_id: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    default_shipping_address_id: Option<String>,
+}
 
 /// `admit` decides whether the shop still accepts an address: its country, and its region within that country.
 pub async fn restore(
@@ -12,7 +25,9 @@ pub async fn restore(
     state: &Value,
     admit: &(dyn Fn(&Address) -> Result<()> + Sync),
 ) -> Result<()> {
-    let entries = state["addresses"]
+    let input: RestoreInput = view(state);
+    let entries = input
+        .addresses
         .as_array()
         .filter(|v| v.len() <= 100)
         .ok_or(bad("Invalid historical address book"))?;
@@ -47,8 +62,8 @@ pub async fn restore(
         .bind(&ids)
         .execute(&mut *conn)
         .await?;
-    let bill = state["defaultBillingAddressId"].as_str();
-    let ship = state["defaultShippingAddressId"].as_str();
+    let bill = input.default_billing_address_id.as_deref();
+    let ship = input.default_shipping_address_id.as_deref();
     if [bill, ship]
         .into_iter()
         .flatten()

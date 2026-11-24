@@ -1,14 +1,25 @@
 //! Revision-bound purchasing approval inbox; approvers must be active peers and cannot approve themselves.
 use crate::store::access::{access, catalog_guard, guard_conn, identity, require};
 use crate::store::purchase;
+use serde::Deserialize;
 use serde_json::{Value, json};
 use sqlx::Row;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::history_context as history;
 use veyndo_core::shop_scope::tenant;
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad, conflict, uid};
 use veyndo_kernel::verified_kernel;
 use veyndo_shop::ports::Carts;
+/// The JSON fields `request` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct RequestInput {
+    #[serde(deserialize_with = "lenient")]
+    revision: Option<i64>,
+}
+
 pub async fn request(carts: &dyn Carts, a: &State, h: &RequestContext, v: &Value) -> Result<Value> {
+    let input: RequestInput = view(v);
     let c = carts.load(h).await?;
     let context = c
         .data
@@ -18,7 +29,7 @@ pub async fn request(carts: &dyn Carts, a: &State, h: &RequestContext, v: &Value
     if c.status != "open" || c.data.items.is_empty() {
         return Err(bad("Open nonempty cart required"));
     }
-    if v["revision"].as_i64() != Some(c.revision) {
+    if input.revision != Some(c.revision) {
         return Err(conflict("Cart changed; reload before requesting approval"));
     }
     let mut q = carts.view(&c).await?;
@@ -64,9 +75,18 @@ pub async fn request(carts: &dyn Carts, a: &State, h: &RequestContext, v: &Value
         json!({"id":actual,"state":r.get::<String,_>("state"),"revision":r.get::<i64,_>("revision")}),
     )
 }
+/// The JSON fields `inbox` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct InboxInput {
+    #[serde(deserialize_with = "lenient")]
+    unit_id: Option<String>,
+}
+
 pub async fn inbox(a: &State, h: &RequestContext, v: &Value) -> Result<Value> {
+    let input: InboxInput = view(v);
     let t = tenant(h)?;
-    let unit = v["unitId"].as_str().ok_or(bad("Unit required"))?;
+    let unit = input.unit_id.as_deref().ok_or(bad("Unit required"))?;
     let mut tx = a.db.begin().await?;
     history::context(&mut tx, h, "b2b.procurement").await?;
     let customer = identity(&mut tx, h).await?;
@@ -78,16 +98,28 @@ pub async fn inbox(a: &State, h: &RequestContext, v: &Value) -> Result<Value> {
         json!({"elements":rows.iter().map(|r|json!({"id":r.get::<String,_>("id"),"buyerId":r.get::<String,_>("buyer_id"),"state":r.get::<String,_>("state"),"data":r.get::<Value,_>("data"),"revision":r.get::<i64,_>("revision"),"createdAt":r.get::<String,_>("created")})).collect::<Vec<_>>()}),
     )
 }
+/// The JSON fields `decide` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct DecideInput {
+    #[serde(deserialize_with = "lenient")]
+    id: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    state: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    revision: Option<i64>,
+}
+
 pub async fn decide(a: &State, h: &RequestContext, v: &Value) -> Result<Value> {
+    let input: DecideInput = view(v);
     let t = tenant(h)?;
-    let id = v["id"].as_str().ok_or(bad("Approval required"))?;
-    let target = v["state"]
-        .as_str()
+    let id = input.id.as_deref().ok_or(bad("Approval required"))?;
+    let target = input
+        .state
+        .as_deref()
         .filter(|s| ["approved", "rejected"].contains(s))
         .ok_or(bad("Approve or reject required"))?;
-    let revision = v["revision"]
-        .as_i64()
-        .ok_or(bad("Approval revision required"))?;
+    let revision = input.revision.ok_or(bad("Approval revision required"))?;
     let mut tx = a.db.begin().await?;
     history::context(&mut tx, h, "b2b.procurement").await?;
     let customer = identity(&mut tx, h).await?;

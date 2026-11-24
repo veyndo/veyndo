@@ -1,11 +1,13 @@
 //! A customer test can reference only its actor's completed, applied native proposal in this sandbox.
 use super::super::agent_runs::operate;
+use serde::Deserialize;
 use serde_json::Value;
 use serde_json::json;
 use veyndo_core::RequestContext;
 use veyndo_core::Result;
 use veyndo_core::State;
 use veyndo_core::conflict;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::hash;
 use veyndo_core::shop_scope::channel as channel_id;
 
@@ -26,8 +28,17 @@ pub async fn resolve(a: &State, h: &RequestContext, id: &str) -> Result<Value> {
     )
 }
 
+/// The JSON fields `recheck` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct RecheckInput {
+    #[serde(deserialize_with = "lenient")]
+    task_id: Option<String>,
+}
+
 pub async fn recheck(a: &State, h: &RequestContext, source: &Value) -> Result<()> {
-    if let Some(id) = source["taskId"].as_str()
+    let input: RecheckInput = view(source);
+    if let Some(id) = input.task_id.as_deref()
         && resolve(a, h, id).await? != *source
     {
         return Err(conflict(

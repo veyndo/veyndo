@@ -2,7 +2,9 @@
 use crate::store::observations::observations;
 use axum::Json;
 use axum::extract::{Path, State as Shared};
+use serde::Deserialize;
 use serde_json::{Value, json};
+use veyndo_core::document::{lenient, view};
 use veyndo_core::{RequestContext, Result, State, bad, conflict};
 use veyndo_identity::{merchant, permit};
 
@@ -11,6 +13,18 @@ pub async fn memory(Shared(a): Shared<State>, h: RequestContext) -> Result<Json<
     permit(&h, "knowledge.read")?;
     Ok(Json(observations(&a, &merchant(&h)?).await?))
 }
+/// The JSON fields `decide` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct DecideInput {
+    #[serde(deserialize_with = "lenient")]
+    state: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    approve: Option<bool>,
+    #[serde(deserialize_with = "lenient")]
+    revision: Option<i64>,
+}
+
 /// Dismisses, marks for experiment or publishes a hypothesis at its revision; it never starts an experiment.
 pub async fn decide(
     Shared(a): Shared<State>,
@@ -18,17 +32,19 @@ pub async fn decide(
     Path(id): Path<String>,
     Json(v): Json<Value>,
 ) -> Result<Json<Value>> {
+    let input: DecideInput = view(&v);
     permit(&h, "catalog")?;
     let t = merchant(&h)?;
-    let state = v["state"]
-        .as_str()
+    let state = input
+        .state
+        .as_deref()
         .filter(|v| ["dismissed", "experiment", "published"].contains(v))
         .ok_or(bad("Choose dismissed, experiment or published"))?;
-    if v["approve"] != true {
+    if input.approve != Some(true) {
         return Err(bad("Explicit approve=true required"));
     }
     let mut tx = a.db.begin().await?;
-    let changed=sqlx::query("UPDATE knowledge_hypotheses SET state=$1,revision=revision+1 WHERE tenant=$2 AND id=$3 AND revision=$4").bind(state).bind(&t).bind(&id).bind(v["revision"].as_i64().ok_or(bad("revision required"))?).execute(&mut *tx).await?.rows_affected();
+    let changed=sqlx::query("UPDATE knowledge_hypotheses SET state=$1,revision=revision+1 WHERE tenant=$2 AND id=$3 AND revision=$4").bind(state).bind(&t).bind(&id).bind(input.revision.ok_or(bad("revision required"))?).execute(&mut *tx).await?.rows_affected();
     if changed != 1 {
         return Err(conflict("Hypothesis revision changed"));
     }

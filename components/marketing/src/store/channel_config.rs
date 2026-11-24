@@ -1,8 +1,18 @@
 //! Shared transactional channel validation for merchant edits, history restoration and selective release.
 use crate::types::channel::{Channel, validate_pos};
+use serde::Deserialize;
 use serde_json::Value;
+use veyndo_core::document::view;
 use veyndo_core::{Result, bad, conflict};
 use veyndo_shop::types::settings::Settings;
+
+/// The JSON fields `validate_channel_config` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ValidateChannelConfigInput {
+    name: Value,
+    kind: Value,
+}
 
 pub async fn validate_channel_config(
     tx: &mut sqlx::Transaction<'_, sqlx::Postgres>,
@@ -11,6 +21,7 @@ pub async fn validate_channel_config(
     data: &Value,
     settings: &Settings,
 ) -> Result<()> {
+    let input: ValidateChannelConfigInput = view(data);
     let c: Channel = serde_json::from_value(data.clone()).map_err(|_| bad("Invalid channel"))?;
     if id == "default" && (c.kind != "storefront" || c.locales != settings.locales) {
         return Err(bad(
@@ -48,7 +59,7 @@ pub async fn validate_channel_config(
             return Err(bad("Unknown channel product"));
         }
     }
-    settings.languages().validate_names(&data["name"], 100)?;
+    settings.languages().validate_names(&input.name, 100)?;
     let old: Option<String> =
         sqlx::query_scalar("SELECT data->>'kind' FROM sales_channels WHERE tenant=$1 AND id=$2")
             .bind(t)
@@ -56,8 +67,8 @@ pub async fn validate_channel_config(
             .fetch_optional(&mut **tx)
             .await?;
     if old.is_some_and(|v| {
-        (v == "pos") != (data["kind"] == "pos")
-            || (v == "marketplace") != (data["kind"] == "marketplace")
+        (v == "pos") != (input.kind == "pos")
+            || (v == "marketplace") != (input.kind == "marketplace")
     }) {
         return Err(conflict(
             "Operational channel type cannot be changed; create a new channel",

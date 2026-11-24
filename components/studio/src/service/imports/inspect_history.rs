@@ -1,12 +1,22 @@
 //! Operational history comparison reads actual CRM/address/order/review values with paired current PII rights.
 use super::{SourceRecord, relations};
+use serde::Deserialize;
 use serde_json::{Value, json};
 use sqlx::Row;
+use veyndo_core::document::view;
 use veyndo_core::{RequestContext, Result, State, bad, hash};
 use veyndo_customers::service::address_entries::address_list;
 use veyndo_customers::store::crm::address_plan;
 use veyndo_identity::domain::credentials::email;
 use veyndo_identity::{merchant, permit};
+/// The JSON fields `inspect` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct InspectInput {
+    customer_group: Value,
+    channel_id: Value,
+}
+
 pub async fn inspect(
     a: &State,
     h: &RequestContext,
@@ -14,6 +24,7 @@ pub async fn inspect(
     options: &Value,
     id: &str,
 ) -> Result<(Value, Option<Value>)> {
+    let input: InspectInput = view(options);
     permit(h, "customers.pii")?;
     let t = merchant(h)?;
     match r.kind.as_str() {
@@ -61,7 +72,7 @@ pub async fn inspect(
             }
             addresses.sort_by_key(Value::to_string);
             Ok((
-                json!({"email":email(&r.data)?,"profile":{"name":format!("{first} {last}"),"firstName":first,"lastName":last},"customerGroup":options["customerGroup"],"sourceDigest":hash(&json!(r).to_string()),"billingAddress":billing,"shippingAddress":shipping,"addresses":addresses}),
+                json!({"email":email(&r.data)?,"profile":{"name":format!("{first} {last}"),"firstName":first,"lastName":last},"customerGroup":input.customer_group,"sourceDigest":hash(&json!(r).to_string()),"billingAddress":billing,"shippingAddress":shipping,"addresses":addresses}),
                 actual,
             ))
         }
@@ -78,7 +89,7 @@ pub async fn inspect(
             .to_rfc3339_opts(chrono::SecondsFormat::Micros, true);
             let lines=r.data["lines"].as_array().ok_or(bad("Source order lines required"))?.iter().enumerate().map(|(index,line)|json!({"id":format!("historical-{index}"),"label":line["label"],"quantity":line["quantity"],"type":"historical","sourceSnapshot":line})).collect::<Vec<_>>();
             Ok((
-                json!({"orderNumber":r.data["number"],"state":"historical","sourceCreatedAt":created,"salesChannelId":options["channelId"],"money":{"minor":r.data["total"]["minor"],"currency":{"code":r.data["total"]["currency"],"scale":r.data["total"]["scale"]}},"cart":{"lineItems":lines,"price":{"totalMinor":r.data["total"]["minor"],"currency":r.data["total"]["currency"],"currencyScale":r.data["total"]["scale"]}},"historicalImport":{"snapshot":r.data,"fingerprint":hash(&json!({"record":r,"options":options}).to_string())},"billingAddress":r.data["billingAddress"],"shippingAddress":r.data["shippingAddress"],"payment":{"state":"historical","realMoneyCharged":false}}),
+                json!({"orderNumber":r.data["number"],"state":"historical","sourceCreatedAt":created,"salesChannelId":input.channel_id,"money":{"minor":r.data["total"]["minor"],"currency":{"code":r.data["total"]["currency"],"scale":r.data["total"]["scale"]}},"cart":{"lineItems":lines,"price":{"totalMinor":r.data["total"]["minor"],"currency":r.data["total"]["currency"],"currencyScale":r.data["total"]["scale"]}},"historicalImport":{"snapshot":r.data,"fingerprint":hash(&json!({"record":r,"options":options}).to_string())},"billingAddress":r.data["billingAddress"],"shippingAddress":r.data["shippingAddress"],"payment":{"state":"historical","realMoneyCharged":false}}),
                 actual,
             ))
         }

@@ -26,6 +26,13 @@ struct CarrierIntent {
     request_key: Option<String>,
     allocation_digest: Value,
 }
+/// The JSON fields `booking_intent` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct BookingIntentInput {
+    allocation_digest: Value,
+}
+
 /// Reserves or releases a carrier booking for the approved app that owns the intent.
 pub async fn booking_intent(
     a: &State,
@@ -34,6 +41,7 @@ pub async fn booking_intent(
     operation: &str,
     v: &Value,
 ) -> Result<Value> {
+    let args: BookingIntentInput = view(v);
     let t = merchant(h)?;
     for right in ["orders.write", "documents.create", "customers.pii"] {
         permit(h, right)?;
@@ -71,7 +79,7 @@ pub async fn booking_intent(
             .fetch_optional(&mut *tx)
             .await?
             .ok_or(Error(StatusCode::NOT_FOUND, "Order not found".into()))?;
-    if v["allocationDigest"] != allocation_digest(&order, index) {
+    if args.allocation_digest != allocation_digest(&order, index) {
         return Err(conflict(
             "Package allocation changed; no carrier booking admitted",
         ));

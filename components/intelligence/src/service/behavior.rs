@@ -1,7 +1,9 @@
 //! Merchant reads of native behavior analytics: the indexed channel report and the private journey, under the current receipt policy and tenant predicates. Observations never imply causation or model learning.
 use crate::domain::trusted_geography::configured;
 use crate::store::behavior as store;
+use serde::Deserialize;
 use serde_json::{Value, json};
+use veyndo_core::document::{lenient, view};
 use veyndo_core::model_contract::validate;
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad};
 use veyndo_identity::{allowed, merchant, permit};
@@ -37,11 +39,22 @@ pub async fn invoke(a: &State, h: &RequestContext, name: &str, v: &Value) -> Res
         _ => Err(bad("Unknown behavioral capability")),
     }
 }
+/// The JSON fields `report` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ReportInput {
+    #[serde(deserialize_with = "lenient")]
+    days: Option<i64>,
+    #[serde(deserialize_with = "lenient")]
+    sales_channel_id: Option<String>,
+}
+
 /// The channel report with its derived graph.
 async fn report(a: &State, h: &RequestContext, t: &str, v: &Value) -> Result<Value> {
+    let input: ReportInput = view(v);
     validate(&schema("knowledge.behavior").unwrap(), v)?;
-    let requested_days = v["days"].as_i64().unwrap_or(7) as i32;
-    let channel = v["salesChannelId"].as_str().unwrap_or("default");
+    let requested_days = input.days.unwrap_or(7) as i32;
+    let channel = input.sales_channel_id.as_deref().unwrap_or("default");
     let (settings, _) = settings(a, t, channel).await?;
     let policy = &settings.legal.behavior_analytics;
     let days = requested_days.min(policy.retention_days as i32);
@@ -70,10 +83,19 @@ async fn report(a: &State, h: &RequestContext, t: &str, v: &Value) -> Result<Val
     )
     .await
 }
+/// The JSON fields `journey` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct JourneyInput {
+    #[serde(deserialize_with = "lenient")]
+    session: Option<String>,
+}
+
 /// One private visitor journey; it needs `customers.pii`.
 async fn journey(a: &State, h: &RequestContext, t: &str, v: &Value) -> Result<Value> {
+    let input: JourneyInput = view(v);
     validate(&schema("knowledge.behavior.journey").unwrap(), v)?;
-    let session = v["session"].as_str().ok_or(bad("Session required"))?;
+    let session = input.session.as_deref().ok_or(bad("Session required"))?;
     let channel = store::journey_channel(a, t, session).await?;
     let (s, _) = settings(a, t, &channel).await?;
     if !s.legal.behavior_analytics.enabled || s.legal.purposes.get("analytics") != Some(&true) {

@@ -1,6 +1,7 @@
 //! Saved attack test reports are actor-private applied task rows of the sandbox; freshness reuses the release configuration digest.
 use super::evidence;
 use crate::ports::AgentHost;
+use serde::Deserialize;
 use serde_json::Value;
 use serde_json::json;
 use sqlx::Row;
@@ -8,6 +9,7 @@ use veyndo_core::RequestContext;
 use veyndo_core::Result;
 use veyndo_core::State;
 use veyndo_core::bad;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::shop_scope::channel as channel_id;
 use veyndo_core::shop_scope::header;
 const SCOPES: [&str; 7] = [
@@ -19,14 +21,24 @@ const SCOPES: [&str; 7] = [
     "orders.read",
     "knowledge.read",
 ];
+/// The JSON fields `save` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct SaveInput {
+    #[serde(deserialize_with = "lenient")]
+    id: Option<String>,
+    channel: Value,
+}
+
 pub async fn save(a: &State, h: &RequestContext, t: &str, report: &Value) -> Result<()> {
+    let input: SaveInput = view(report);
     let actor = header(h, "x-rac-user").ok_or(bad("Scenario actor required"))?;
-    let id = report["id"].as_str().ok_or(bad("Attack report required"))?;
+    let id = input.id.as_deref().ok_or(bad("Attack report required"))?;
     let mut tx = a.db.begin().await?;
     // The report is evidence, not a proposal: it is stored already applied and never queued.
     sqlx::query("INSERT INTO tasks(id,tenant,proposal,applied,applied_at,run_state,run_actor,run_scopes,run_request) VALUES($1,$2,$3,true,now(),'ready',$4,$5,$6)")
         .bind(id).bind(t).bind(json!({"attack":report})).bind(actor).bind(json!(SCOPES))
-        .bind(json!({"attack":{"channel":report["channel"]},"agentId":h.principal.agent_key}))
+        .bind(json!({"attack":{"channel":input.channel},"agentId":h.principal.agent_key}))
         .execute(&mut *tx).await?;
     // Keep the ten most recent reports per person and sandbox.
     sqlx::query("DELETE FROM tasks WHERE tenant=$1 AND run_actor=$2 AND run_request ? 'attack' AND id NOT IN (SELECT id FROM tasks WHERE tenant=$1 AND run_actor=$2 AND run_request ? 'attack' ORDER BY created_at DESC,id LIMIT 10)")

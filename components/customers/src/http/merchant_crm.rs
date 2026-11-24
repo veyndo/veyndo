@@ -3,7 +3,9 @@ use crate::service::address_entries::{address_delete, address_list, address_save
 use crate::store::crm;
 use axum::Json;
 use axum::extract::{Path, State as Shared};
+use serde::Deserialize;
 use serde_json::Value;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::{RequestContext, Result, State, bad};
 use veyndo_identity::{merchant, permit};
 use veyndo_marketing::service::conditions::validate_condition;
@@ -77,6 +79,14 @@ pub async fn save_address(
     permit(&h, "customers.pii")?;
     Ok(Json(address_save(&a, &t, &email, Some(&id), &v, &h).await?))
 }
+/// The JSON fields `remove_address` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct RemoveAddressInput {
+    #[serde(deserialize_with = "lenient")]
+    revision: Option<i64>,
+}
+
 /// Deletes a customer address at its revision.
 pub async fn remove_address(
     Shared(a): Shared<State>,
@@ -84,6 +94,7 @@ pub async fn remove_address(
     Path((email, id)): Path<(String, String)>,
     Json(v): Json<Value>,
 ) -> Result<Json<Value>> {
+    let input: RemoveAddressInput = view(&v);
     let t = merchant(&h)?;
     permit(&h, "customers.write")?;
     permit(&h, "customers.pii")?;
@@ -93,7 +104,7 @@ pub async fn remove_address(
             &t,
             &email,
             &id,
-            v["revision"].as_i64().ok_or(bad("revision required"))?,
+            input.revision.ok_or(bad("revision required"))?,
             &h,
         )
         .await?,

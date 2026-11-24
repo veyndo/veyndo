@@ -4,13 +4,26 @@ use crate::domain::credentials::email;
 use crate::store::sessions::trusted_session_tx;
 use base64::{Engine, engine::general_purpose::URL_SAFE_NO_PAD};
 use hmac::{Hmac, Mac};
+use serde::Deserialize;
 use serde_json::Value;
 use sha2::Sha256;
 use sqlx::Row;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::{Error, Result, State, StatusCode, bad, hash};
+
+/// The JSON fields `assertion` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct AssertionInput {
+    #[serde(deserialize_with = "lenient")]
+    payload: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    signature: Option<String>,
+}
 
 /// Verifies a broker assertion for `route` and consumes its nonce; returns the signed claims.
 pub async fn assertion(a: &State, route: &str, v: &Value) -> Result<Value> {
+    let input: AssertionInput = view(v);
     let key = std::env::var("IDENTITY_BROKER_KEY")
         .ok()
         .filter(|k| k.len() >= 64)
@@ -25,12 +38,13 @@ pub async fn assertion(a: &State, route: &str, v: &Value) -> Result<Value> {
     } else {
         32000
     };
-    let encoded = v["payload"]
-        .as_str()
+    let encoded = input
+        .payload
+        .as_deref()
         .filter(|s| s.len() <= limit)
         .ok_or(bad("Invalid identity assertion"))?;
     let signature = URL_SAFE_NO_PAD
-        .decode(v["signature"].as_str().unwrap_or(""))
+        .decode(input.signature.as_deref().unwrap_or(""))
         .map_err(|_| bad("Invalid assertion signature"))?;
     let mut mac = Hmac::<Sha256>::new_from_slice(key.as_bytes())
         .map_err(|_| bad("Invalid broker configuration"))?;

@@ -1,7 +1,9 @@
 //! Keep knowledge provenance and relations in the same transaction as canonical commerce data.
 use super::PgPool;
+use serde::Deserialize;
 use serde_json::{Value, json};
 use sqlx::PgConnection;
+use veyndo_core::document::{lenient, view};
 async fn edge(
     conn: &mut PgConnection,
     tenant: &str,
@@ -14,15 +16,24 @@ async fn edge(
         .bind(tenant).bind(kind).bind(left).bind(right).bind(data).execute(conn).await?;
     Ok(())
 }
+/// The JSON fields `sync_product` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct SyncProductInput {
+    #[serde(deserialize_with = "lenient")]
+    id: Option<String>,
+}
+
 pub async fn sync_product(
     conn: &mut PgConnection,
     tenant: &str,
     product: &Value,
 ) -> Result<(), sqlx::Error> {
+    let input: SyncProductInput = view(product);
     // Preserve canonical-product locking used by order observation transactions.
     sqlx::query("SELECT id FROM products WHERE tenant=$1 AND id=$2 FOR UPDATE")
         .bind(tenant)
-        .bind(product["id"].as_str())
+        .bind(input.id.as_deref())
         .fetch_one(conn)
         .await?;
     Ok(())

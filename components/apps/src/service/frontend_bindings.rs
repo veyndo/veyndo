@@ -26,6 +26,14 @@ struct BindingRequest {
     #[serde(deserialize_with = "lenient")]
     experience_alias: Option<String>,
 }
+/// The JSON fields `bind` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct BindInput {
+    #[serde(deserialize_with = "lenient")]
+    revision: Option<i64>,
+}
+
 /// Points a revisioned frontend address at a channel and an Experience of this shop; the operator chooses the origin, a managed app is installed in the same transaction.
 pub async fn bind(
     install: &dyn HostedInstall,
@@ -33,6 +41,7 @@ pub async fn bind(
     h: &RequestContext,
     v: &Value,
 ) -> Result<Value> {
+    let args: BindInput = view(v);
     permit(h, "settings.write")?;
     let t = tenant(h)?;
     let input: BindingRequest = view(v);
@@ -129,7 +138,7 @@ pub async fn bind(
         let unchanged = row.get::<String, _>("channel") == channel
             && row.get::<String, _>("experience_alias") == experience
             && row.get::<Option<String>, _>("app_id") == app_id;
-        if !unchanged && v["revision"].as_i64() != Some(row.get("revision")) {
+        if !unchanged && args.revision != Some(row.get("revision")) {
             return Err(conflict("Frontend revision changed"));
         }
         if unchanged {
@@ -141,7 +150,7 @@ pub async fn bind(
                 json!({"alias":alias,"channel":channel,"revision":row.get::<i64,_>("revision"),"urls":links(alias)}),
             );
         }
-    } else if v["revision"].as_i64().is_some_and(|r| r != 0) {
+    } else if args.revision.is_some_and(|r| r != 0) {
         return Err(conflict("Frontend revision changed"));
     }
     if let Some(id) = &app_id {
@@ -154,13 +163,20 @@ pub async fn bind(
     Ok(json!({"alias":alias,"channel":channel,"revision":revision,"urls":links(alias)}))
 }
 
+/// The JSON fields `remove` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct RemoveInput {
+    #[serde(deserialize_with = "lenient")]
+    revision: Option<i64>,
+}
+
 /// Disconnects a frontend address at its current revision.
 pub async fn remove(a: &State, h: &RequestContext, alias: &str, v: &Value) -> Result<Value> {
+    let input: RemoveInput = view(v);
     permit(h, "settings.write")?;
     let t = tenant(h)?;
-    let revision = v["revision"]
-        .as_i64()
-        .ok_or(bad("Frontend revision required"))?;
+    let revision = input.revision.ok_or(bad("Frontend revision required"))?;
     let mut tx = a.db.begin().await?;
     lock(&mut tx, &t).await?;
     let n =

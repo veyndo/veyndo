@@ -1,10 +1,21 @@
 //! Bind the reviewed revision and exact total for every checkout transport.
+use serde::Deserialize;
 use serde_json::Value;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::shop_scope::header;
 use veyndo_core::{RequestContext, Result, bad, conflict};
 use veyndo_pricing::verified_kernel;
 use veyndo_shop::types::cart::StoredCart;
+/// The JSON fields `validate` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ValidateInput {
+    #[serde(deserialize_with = "lenient")]
+    selection_needs_confirmation: Option<bool>,
+}
+
 pub fn validate(h: &RequestContext, c: &StoredCart, q: &Value, minor: i64) -> Result<()> {
+    let input: ValidateInput = view(q);
     // Legacy API clients may omit the pair. Browser checkout always binds its reviewed quote.
     match (
         header(h, "x-commerce-cart-revision"),
@@ -26,7 +37,7 @@ pub fn validate(h: &RequestContext, c: &StoredCart, q: &Value, minor: i64) -> Re
                         verified_kernel::revision_admissible(c.revision as u64, revision),
                         expected,
                         actual,
-                        q["selectionNeedsConfirmation"] != true,
+                        input.selection_needs_confirmation != Some(true),
                     )
                 })
             {

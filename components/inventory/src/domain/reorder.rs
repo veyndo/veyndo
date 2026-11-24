@@ -1,6 +1,8 @@
 //! Whether a supplier's signed offer is the reorder the merchant saved, and within the ceiling.
 use crate::domain::supply::Link;
+use serde::Deserialize;
 use serde_json::Value;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::{Result, bad, conflict};
 
 /// A proposal line may be approved only in the pricing currency and at or below the ceiling.
@@ -11,17 +13,30 @@ pub fn within_ceiling(same_currency: bool, total: Option<u64>, ceiling: Option<u
             .is_some_and(|(total, limit)| total <= limit)
 }
 
+/// The JSON fields `admit` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct AdmitInput {
+    line_items: Value,
+    #[serde(deserialize_with = "lenient")]
+    total_minor: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    currency: Option<String>,
+}
+
 /// The exact total of an offer that matches the saved link: one line, that product, that quantity, the pricing currency.
 pub fn admit(offer: &Value, link: &Link, currency: &str, ceiling: u64) -> Result<u64> {
-    let line = &offer["lineItems"];
-    let total = offer["totalMinor"]
-        .as_str()
+    let input: AdmitInput = view(offer);
+    let line = &input.line_items;
+    let total = input
+        .total_minor
+        .as_deref()
         .and_then(|value| value.parse::<u64>().ok())
         .ok_or(bad("Offer has no exact total"))?;
     if line.as_array().map_or(0, Vec::len) != 1
         || line[0]["id"].as_str() != Some(link.supplier_product_id.as_str())
         || line[0]["quantity"].as_i64() != Some(i64::from(link.reorder_quantity))
-        || offer["currency"].as_str() != Some(currency)
+        || input.currency.as_deref() != Some(currency)
     {
         return Err(conflict("The offer does not match the saved supplier link"));
     }

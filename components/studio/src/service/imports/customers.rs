@@ -1,16 +1,26 @@
 //! Historical CRM import reuses native validation and addresses, without credentials or ordinary new-customer events.
 use super::SourceRecord;
 use axum::Json;
+use serde::Deserialize;
 use serde_json::{Value, json};
+use veyndo_core::document::view;
 use veyndo_core::shop_scope::parent;
 use veyndo_core::{RequestContext, Result, State, bad, hash};
 use veyndo_identity::{merchant, permit};
+/// The JSON fields `import` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ImportInput {
+    customer_group: Value,
+}
+
 pub async fn import(
     a: &State,
     h: &RequestContext,
     r: &SourceRecord,
     options: &Value,
 ) -> Result<Value> {
+    let input: ImportInput = view(options);
     permit(h, "customers.write")?;
     permit(h, "customers.pii")?;
     let t = merchant(h)?;
@@ -24,7 +34,7 @@ pub async fn import(
     let last = d["lastName"].as_str().unwrap_or("");
     let address = &d["billingAddress"];
     let id = r.identity(&t);
-    let mut payload = json!({"email":d["email"],"profile":{"name":format!("{first} {last}"),"firstName":first,"lastName":last},"customerGroup":options["customerGroup"],"billingAddress":address,"requestKey":format!("migration:{id}")});
+    let mut payload = json!({"email":d["email"],"profile":{"name":format!("{first} {last}"),"firstName":first,"lastName":last},"customerGroup":input.customer_group,"billingAddress":address,"requestKey":format!("migration:{id}")});
     if !d["shippingAddress"].is_null() {
         payload["shippingAddress"] = d["shippingAddress"].clone();
     }

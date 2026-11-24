@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 use veyndo_app_platform::domain::planning::AppChange;
 use veyndo_catalog::domain::selection::validate as validate_selection;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::{Result, bad, conflict};
 pub use veyndo_intelligence::domain::price_guardrails::Change;
 use veyndo_intelligence::service::navigation::{Entity, Navigation};
@@ -103,15 +104,26 @@ pub struct Proposal {
     /// The experience revision the change was reviewed against.
     pub expected_experience_revision: Option<i64>,
 }
+/// The JSON fields `validate_experience` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ValidateExperienceInput {
+    #[serde(deserialize_with = "lenient")]
+    mode: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    headline: Option<String>,
+}
+
 /// Checks an experience change: a known mode and a bounded headline.
 pub fn validate_experience(v: &Value) -> Result<()> {
+    let input: ValidateExperienceInput = view(v);
     if !v.is_object() {
         return Err(bad("Experience must be an object"));
     }
-    if !["balanced", "discovery", "comparison"].contains(&v["mode"].as_str().unwrap_or("")) {
+    if !["balanced", "discovery", "comparison"].contains(&input.mode.as_deref().unwrap_or("")) {
         return Err(bad("Invalid experience mode"));
     }
-    if v["headline"].as_str().is_none_or(|s| s.len() > 200) {
+    if input.headline.as_deref().is_none_or(|s| s.len() > 200) {
         return Err(bad("Experience headline must be <= 200 characters"));
     }
     Ok(())

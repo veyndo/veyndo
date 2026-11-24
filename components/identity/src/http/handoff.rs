@@ -3,8 +3,10 @@ use crate::permit;
 use crate::store::sessions::{SessionProof, issue_verified_tx};
 use axum::Json;
 use axum::extract::State as Shared;
+use serde::Deserialize;
 use serde_json::Value;
 use sqlx::Row;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::shop_scope::{header, tenant};
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad, hash};
 
@@ -21,10 +23,20 @@ pub async fn create(Shared(a): Shared<State>, h: RequestContext) -> Result<Json<
         crate::store::handoffs::create(&a, user, &tenant(&h)?, token).await?,
     ))
 }
+/// The JSON fields `redeem` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct RedeemInput {
+    #[serde(deserialize_with = "lenient")]
+    ticket: Option<String>,
+}
+
 /// `POST /api/auth/redeem`: redeems the link once and issues a fresh session for an active member.
 pub async fn redeem(Shared(a): Shared<State>, Json(v): Json<Value>) -> Result<Json<Value>> {
-    let ticket = v["ticket"]
-        .as_str()
+    let input: RedeemInput = view(&v);
+    let ticket = input
+        .ticket
+        .as_deref()
         .filter(|s| s.len() == 64 && s.bytes().all(|c| c.is_ascii_hexdigit()))
         .ok_or(bad("Invalid login link"))?;
     let mut tx = a.db.begin().await?;

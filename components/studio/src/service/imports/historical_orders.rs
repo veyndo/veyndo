@@ -1,20 +1,33 @@
 //! Immutable native historical orders preserve exact amounts and provenance without purchase, stock, account or payment effects.
 use super::SourceRecord;
+use serde::Deserialize;
 use serde_json::{Value, json};
 use sqlx::Row;
 use veyndo_app_platform::store::package_fence::lock_package_write;
 use veyndo_app_platform::store::packages::package;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::history_context::context;
 use veyndo_core::shop_scope::parent;
 use veyndo_core::{RequestContext, Result, State, bad, conflict, hash};
 use veyndo_identity::{merchant, permit};
 use veyndo_orders::domain::order_fields::order_fields;
+/// The JSON fields `import` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ImportInput {
+    #[serde(deserialize_with = "lenient")]
+    channel_id: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    locale: Option<String>,
+}
+
 pub async fn import(
     a: &State,
     h: &RequestContext,
     r: &SourceRecord,
     options: &Value,
 ) -> Result<Value> {
+    let input: ImportInput = view(options);
     permit(h, "orders.write")?;
     permit(h, "customers.pii")?;
     let t = merchant(h)?;
@@ -62,8 +75,9 @@ pub async fn import(
             .ok_or(bad("Original positive integer line quantity required"))?;
         lines.push(json!({"id":format!("historical-{index}"),"label":name,"quantity":quantity,"type":"historical","sourceSnapshot":line}));
     }
-    let channel = options["channelId"]
-        .as_str()
+    let channel = input
+        .channel_id
+        .as_deref()
         .filter(|s| !s.is_empty() && s.len() <= 100)
         .ok_or(bad("Target channel required"))?;
     let id = r.identity(&t);
@@ -104,7 +118,7 @@ pub async fn import(
         .decimal()
         .parse::<f64>()
         .map_err(|_| bad("Historical display amount unavailable"))?;
-    let quote = json!({"lineItems":lines,"price":{"totalPrice":display,"netPrice":null,"totalMinor":minor,"currency":code,"currencyScale":scale,"taxStatus":"historical","calculatedTaxes":[]},"shippingCosts":{"totalPrice":null},"locale":options["locale"].as_str().unwrap_or("en-GB"),"salesChannelId":channel});
+    let quote = json!({"lineItems":lines,"price":{"totalPrice":display,"netPrice":null,"totalMinor":minor,"currency":code,"currencyScale":scale,"taxStatus":"historical","calculatedTaxes":[]},"shippingCosts":{"totalPrice":null},"locale":input.locale.as_deref().unwrap_or("en-GB"),"salesChannelId":channel});
     let mut order = json!({"id":id,"orderNumber":number,"revision":1,"state":"historical","salesChannelId":channel,"channel":"historical_import","cart":quote,"deliveries":[],"payment":{"state":"historical","provider":"historical_import","realMoneyCharged":false},"money":{"minor":minor,"currency":{"code":code,"scale":scale}},"historicalImport":{"source":r.source,"sourceShop":r.source_shop,"sourceId":r.source_id,"snapshot":r.data,"fingerprint":fingerprint,"importedAt":chrono::Utc::now().to_rfc3339(),"sourceAmount":exact.decimal()}});
     order["billingAddress"] = r.data["billingAddress"].clone();
     order["shippingAddress"] = r.data["shippingAddress"].clone();

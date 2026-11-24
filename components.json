@@ -68,7 +68,7 @@
         "tenants": "read: reads shop existence, status or the agent stop switch inside a larger claim or join; simple reads go through veyndo_core::tenants (agent_authority.rs, broker.rs, identity.sql, sessions.rs)"
       },
       "glob_imports": 0,
-      "untyped_access": 56,
+      "untyped_access": 44,
       "sql_outside_store": 11
     },
     "shop": {
@@ -123,7 +123,7 @@
         "tenants": "write: operator lifecycle changes the shop status and status revision (access_snapshot.sql, availability.rs, operator_lifecycle.rs, operator_metrics.rs)"
       },
       "glob_imports": 0,
-      "untyped_access": 53,
+      "untyped_access": 46,
       "sql_outside_store": 9
     },
     "catalog": {
@@ -159,7 +159,7 @@
         "tenants": "read: reads shop existence, status or the agent stop switch inside a larger claim or join; simple reads go through veyndo_core::tenants (media_jobs.rs)"
       },
       "glob_imports": 0,
-      "untyped_access": 87,
+      "untyped_access": 77,
       "sql_outside_store": 2
     },
     "inventory": {
@@ -180,7 +180,7 @@
         "products": "write: stock reservations and releases update the product stock in the reservation transaction (release.sql, reservations.rs, test_stock.rs)"
       },
       "glob_imports": 0,
-      "untyped_access": 3,
+      "untyped_access": 0,
       "sql_outside_store": 0
     },
     "pricing": {
@@ -202,7 +202,7 @@
         "products": "read: reads product rows in the same statement as its own data (prices, stock, visibility) (currency_usage.rs, price_jobs.rs)"
       },
       "glob_imports": 0,
-      "untyped_access": 13,
+      "untyped_access": 10,
       "sql_outside_store": 1
     },
     "shipping": {
@@ -270,7 +270,7 @@
         "tenants": "read: reads shop existence, status or the agent stop switch inside a larger claim or join; simple reads go through veyndo_core::tenants (buyer_identity.rs)"
       },
       "glob_imports": 0,
-      "untyped_access": 108,
+      "untyped_access": 104,
       "sql_outside_store": 6
     },
     "customers": {
@@ -296,7 +296,7 @@
         "orders": "read: reads order documents in the same statement as its own records to project or admit them (customers.rs)"
       },
       "glob_imports": 0,
-      "untyped_access": 46,
+      "untyped_access": 32,
       "sql_outside_store": 2
     },
     "orders": {
@@ -335,7 +335,7 @@
         "sales_channels": "read: reads the sales channel document (kind, activity, catalogue scope) to admit the request channel inside the same statement (company.rs, company_logos.rs)"
       },
       "glob_imports": 0,
-      "untyped_access": 116,
+      "untyped_access": 107,
       "sql_outside_store": 3
     },
     "payments": {
@@ -376,7 +376,7 @@
         "sales_channels": "read: reads the sales channel document (kind, activity, catalogue scope) to admit the request channel inside the same statement (providers.rs)"
       },
       "glob_imports": 0,
-      "untyped_access": 184,
+      "untyped_access": 153,
       "sql_outside_store": 11
     },
     "marketing": {
@@ -431,7 +431,7 @@
         "user_sessions": "read: reads merchant sessions to resolve the actor of a flow (channel_preview.rs)"
       },
       "glob_imports": 0,
-      "untyped_access": 184,
+      "untyped_access": 147,
       "sql_outside_store": 9
     },
     "b2b": {
@@ -465,7 +465,7 @@
         "products": "read: reads product rows in the same statement as its own data (prices, stock, visibility) (access.rs, catalog.rs, lists.rs, quick_order.rs)"
       },
       "glob_imports": 0,
-      "untyped_access": 56,
+      "untyped_access": 42,
       "sql_outside_store": 7
     },
     "pos": {
@@ -497,7 +497,7 @@
         "sales_channels": "read: reads the sales channel document (kind, activity, catalogue scope) to admit the request channel inside the same statement (register.rs, settlement.rs)"
       },
       "glob_imports": 0,
-      "untyped_access": 43,
+      "untyped_access": 42,
       "sql_outside_store": 4
     },
     "apps": {
@@ -569,7 +569,7 @@
         "workspace_roles": "read: reads role definitions to recheck the job creator rights (app_host_reads.rs, job_callbacks.rs)"
       },
       "glob_imports": 0,
-      "untyped_access": 312,
+      "untyped_access": 265,
       "sql_outside_store": 18
     },
     "automation": {
@@ -686,7 +686,7 @@
         "translation_jobs": "write: agent runs cancel translation jobs they started (agent_runs.rs)"
       },
       "glob_imports": 0,
-      "untyped_access": 412,
+      "untyped_access": 352,
       "sql_outside_store": 29
     },
     "studio": {
@@ -762,7 +762,7 @@
         "translation_jobs": "write: the translation worker leases and advances translation jobs (translation_worker.rs, work_execution.rs, work_items.rs)"
       },
       "glob_imports": 0,
-      "untyped_access": 325,
+      "untyped_access": 298,
       "sql_outside_store": 23
     },
     "protocols": {

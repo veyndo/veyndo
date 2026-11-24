@@ -2,9 +2,11 @@
 use crate::service::translation_apply::admit_selection;
 use axum::Json;
 use axum::extract::{Path, Query, State as Shared};
+use serde::Deserialize;
 use serde_json::{Value, json};
 use sqlx::Row;
 use std::collections::HashMap;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::{RequestContext, Result, State, bad, conflict};
 use veyndo_identity::{merchant, permit};
 
@@ -56,6 +58,14 @@ pub async fn detail(
         json!({"job":job,"counts":counts,"items":items.iter().take(50).collect::<Vec<_>>(),"nextCursor":if items.len()>50 {items[49]["product_id"].clone()}else{Value::Null}}),
     ))
 }
+/// The JSON fields `control` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ControlInput {
+    #[serde(deserialize_with = "lenient")]
+    action: Option<String>,
+}
+
 /// `PUT /api/merchant/translations/{id}`: resume or cancel a job that no task controls.
 pub async fn control(
     Shared(a): Shared<State>,
@@ -63,9 +73,10 @@ pub async fn control(
     Path(id): Path<String>,
     Json(v): Json<Value>,
 ) -> Result<Json<Value>> {
+    let input: ControlInput = view(&v);
     permit(&h, "catalog")?;
     let t = merchant(&h)?;
-    let status = match v["action"].as_str() {
+    let status = match input.action.as_deref() {
         Some("resume") => "queued",
         Some("cancel") => "cancelled",
         _ => return Err(bad("Invalid translation action")),

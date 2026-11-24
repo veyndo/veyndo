@@ -3,10 +3,12 @@ use super::work_execution::{admit_provider, enqueue_translation};
 use super::work_plan::approve;
 use crate::domain::proposal::{Change, Proposal, validate_proposal};
 use crate::ports::WorkHost;
+use serde::Deserialize;
 use serde_json::{Value, json};
 use sqlx::Row;
 use veyndo_catalog::store::products::product;
 use veyndo_cognition::inference::Choice;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::history_context::context;
 use veyndo_core::shop_scope::header;
 use veyndo_core::{Error, RequestContext, Result, StatusCode, bad, conflict};
@@ -25,6 +27,14 @@ pub async fn apply<H: WorkHost>(host: &H, t: &str, id: &str, h: &RequestContext)
     }
     apply_mode(host, t, id, h, false).await
 }
+/// The JSON fields `admit_actor` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct AdmitActorInput {
+    #[serde(deserialize_with = "lenient")]
+    actor: Option<String>,
+}
+
 /// A merchant approval needs the original actor of the run and every scope it was planned with.
 fn admit_actor(
     h: &RequestContext,
@@ -32,11 +42,12 @@ fn admit_actor(
     v: &Value,
     autonomous: bool,
 ) -> Result<()> {
+    let input: AdmitActorInput = view(v);
     if !autonomous
         && (r
             .get::<Option<String>, _>("run_actor")
             .as_deref()
-            .or(v["actor"].as_str())
+            .or(input.actor.as_deref())
             != header(h, "x-rac-user")
             || r.get::<Option<Value>, _>("run_scopes")
                 .is_some_and(|scopes| {

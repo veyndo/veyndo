@@ -1,15 +1,32 @@
 //! Source-compatible condition import: converts original payloads without guessing identifiers or dropping configuration.
+use serde::Deserialize;
 use serde_json::{Value, json};
+use veyndo_core::document::{lenient, view};
 use veyndo_core::{Result, bad};
+
+/// The JSON fields `normalize` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct NormalizeInput {
+    #[serde(deserialize_with = "lenient")]
+    r#type: Option<String>,
+    children: Value,
+    value: Value,
+}
 
 /// Translates one source condition tree into the native shape; unknown types are kept as source conditions.
 pub fn normalize(v: &Value, depth: usize) -> Result<Value> {
+    let input: NormalizeInput = view(v);
     if depth > 8 {
         return Err(bad("Maximum rule depth 8"));
     }
-    let typ = v["type"].as_str().ok_or(bad("Condition type required"))?;
+    let typ = input
+        .r#type
+        .as_deref()
+        .ok_or(bad("Condition type required"))?;
     if ["andContainer", "orContainer"].contains(&typ) {
-        let children = v["children"]
+        let children = input
+            .children
             .as_array()
             .filter(|c| c.len() <= 20)
             .ok_or(bad("Container children required"))?;
@@ -21,7 +38,8 @@ pub fn normalize(v: &Value, depth: usize) -> Result<Value> {
         let child = v
             .get("child")
             .or_else(|| {
-                v["children"]
+                input
+                    .children
                     .as_array()
                     .filter(|c| c.len() == 1)
                     .and_then(|c| c.first())
@@ -29,8 +47,8 @@ pub fn normalize(v: &Value, depth: usize) -> Result<Value> {
             .ok_or(bad("NOT requires one child"))?;
         return Ok(json!({"type":typ,"child":normalize(child,depth+1)?}));
     }
-    let mut result = if v["value"].is_object() {
-        v["value"].clone()
+    let mut result = if input.value.is_object() {
+        input.value.clone()
     } else {
         let mut copy = v.clone();
         for k in ["id", "parentId", "ruleId", "position", "children"] {
@@ -64,13 +82,23 @@ pub fn normalize(v: &Value, depth: usize) -> Result<Value> {
     Ok(result)
 }
 
+/// The JSON fields `source_node` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct SourceNodeInput {
+    #[serde(deserialize_with = "lenient")]
+    r#type: Option<String>,
+}
+
 /// Convert original source payloads recursively without guessing identifiers or dropping configuration.
 fn source_node(v: &Value, depth: usize) -> Result<Value> {
+    let input: SourceNodeInput = view(v);
     if depth > 8 {
         return Err(bad("Maximum rule depth 8"));
     }
-    let name = v["type"]
-        .as_str()
+    let name = input
+        .r#type
+        .as_deref()
         .ok_or(bad("Source condition type required"))?;
     let mut config = v
         .get("value")

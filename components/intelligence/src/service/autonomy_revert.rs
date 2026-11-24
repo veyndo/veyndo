@@ -1,10 +1,12 @@
 //! Takes today's automatic price changes back to the day's baseline, by request or when the daily exposure limit is exceeded.
 use super::autonomy::today;
 use crate::knowledge;
+use serde::Deserialize;
 use serde_json::{Value, json};
 use sqlx::Row;
 use std::sync::atomic::{AtomicU64, Ordering};
 use veyndo_catalog::store::products::product;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::shop_scope::header;
 use veyndo_core::{Error, RequestContext, Result, State, bad};
 use veyndo_identity::permit;
@@ -92,18 +94,29 @@ pub async fn revert(
     tx.commit().await?;
     Ok(json!({"reverted":reverted,"skipped":skipped,"automatic":automatic}))
 }
+/// The JSON fields `request` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct RequestInput {
+    #[serde(deserialize_with = "lenient")]
+    approve: Option<bool>,
+    #[serde(deserialize_with = "lenient")]
+    product_id: Option<String>,
+}
+
 /// Takes back today's automatic changes on explicit request.
 pub async fn request(a: &State, t: &str, h: &RequestContext, v: &Value) -> Result<Value> {
+    let input: RequestInput = view(v);
     permit(h, "catalog.write")?;
     permit(h, "settings.write")?;
-    if v["approve"] != true {
+    if input.approve != Some(true) {
         return Err(bad("Explicit approve=true required"));
     }
     revert(
         a,
         t,
         header(h, "x-rac-user").unwrap_or("integration"),
-        v["productId"].as_str(),
+        input.product_id.as_deref(),
         false,
     )
     .await

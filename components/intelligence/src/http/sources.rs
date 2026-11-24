@@ -4,7 +4,9 @@ use crate::service::sources::validate_content;
 use crate::store::documents as store;
 use axum::Json;
 use axum::extract::{Path, State as Shared};
+use serde::Deserialize;
 use serde_json::Value;
+use veyndo_core::document::view;
 use veyndo_core::{RequestContext, Result, State};
 use veyndo_identity::{merchant, permit};
 
@@ -19,6 +21,13 @@ pub async fn detail(
     Ok(Json(store::detail(&a, &t, &id).await?))
 }
 
+/// The JSON fields `edit` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct EditInput {
+    kind: Value,
+}
+
 /// Edits a source in the shop's languages; guidance sources keep their own admission.
 pub async fn edit(
     Shared(a): Shared<State>,
@@ -26,9 +35,10 @@ pub async fn edit(
     Path(id): Path<String>,
     Json(v): Json<Value>,
 ) -> Result<Json<Value>> {
+    let input: EditInput = view(&v);
     let t = merchant(&h)?;
     permit(&h, "knowledge.write")?;
-    admit_guidance(&h, &v["kind"])?;
+    admit_guidance(&h, &input.kind)?;
     let data = validate_content(&a, &t, &v).await?;
     Ok(Json(store::edit(&a, &h, &t, &id, &v, &data).await?))
 }

@@ -4,6 +4,7 @@ use crate::service::consent::{require, require_locked};
 use crate::store::experiments;
 use axum::Json;
 use axum::extract::State as Shared;
+use serde::Deserialize;
 use serde_json::{Value, json};
 use sha2::{Digest, Sha256};
 use sqlx::Row;
@@ -11,6 +12,7 @@ use veyndo_catalog::ports::Catalog;
 use veyndo_catalog::service::catalog_reads::page;
 use veyndo_catalog::types::catalog_page::CatalogCriteria;
 use veyndo_checkout::store::cart_load::load as load_cart;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::shop_scope::tenant;
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad, hash};
 use veyndo_identity::merchant;
@@ -145,22 +147,37 @@ pub async fn policy_stats(Shared(a): Shared<State>, h: RequestContext) -> Result
     ))
 }
 
+/// The JSON fields `personalization` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct PersonalizationInput {
+    #[serde(deserialize_with = "lenient")]
+    product_id: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    event_id: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    kind: Option<String>,
+}
+
 /// Product behavior updates a tenant/session profile; the response immediately ranks available channel products.
 pub async fn personalization(
     Shared(catalog): Shared<Catalog>,
     h: RequestContext,
     Json(v): Json<Value>,
 ) -> Result<Json<Value>> {
+    let input: PersonalizationInput = view(&v);
     let a = catalog.core.clone();
     let c = load_cart(&a, &h).await?;
     require(&a, &c, "personalization").await?;
-    let id = v["productId"].as_str().ok_or(bad("Product required"))?;
-    let event = v["eventId"]
-        .as_str()
+    let id = input.product_id.as_deref().ok_or(bad("Product required"))?;
+    let event = input
+        .event_id
+        .as_deref()
         .filter(|s| s.len() == 32 && s.bytes().all(|b| b.is_ascii_hexdigit()))
         .ok_or(bad("Event ID required"))?;
-    let kind = v["kind"]
-        .as_str()
+    let kind = input
+        .kind
+        .as_deref()
         .filter(|s| ["view", "cart_add"].contains(s))
         .ok_or(bad("Unsupported behavior signal"))?;
     let exists: bool =

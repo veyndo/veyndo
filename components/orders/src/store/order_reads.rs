@@ -1,6 +1,8 @@
 //! Token-redacted merchant order detail with its activity, and append-only operational notes.
+use serde::Deserialize;
 use serde_json::{Value, json};
 use sqlx::Row;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::shop_scope::header;
 use veyndo_core::{
     Error, RequestContext, Result, State, StatusCode, bad, conflict, history_context,
@@ -18,15 +20,27 @@ pub async fn detail(a: &State, t: &str, id: &str) -> Result<Value> {
     Ok(v)
 }
 
+/// The JSON fields `note` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct NoteInput {
+    #[serde(deserialize_with = "lenient")]
+    text: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    revision: Option<i64>,
+}
+
 /// Appends a merchant note when the order still has the revision the merchant read.
 pub async fn note(a: &State, h: &RequestContext, t: &str, id: &str, v: &Value) -> Result<()> {
-    let text = v["text"]
-        .as_str()
+    let input: NoteInput = view(v);
+    let text = input
+        .text
+        .as_deref()
         .filter(|s| !s.trim().is_empty() && s.len() <= 4000)
         .ok_or(bad("Note must contain 1..4000 characters"))?;
     let mut tx = a.db.begin().await?;
     history_context::context(&mut tx, h, "merchant").await?;
-    let n=sqlx::query("UPDATE orders SET data=jsonb_set(data,'{revision}',to_jsonb((data->>'revision')::bigint+1)) WHERE tenant=$1 AND id=$2 AND (data->>'revision')::bigint=$3").bind(t).bind(id).bind(v["revision"].as_i64().ok_or(bad("revision required"))?).execute(&mut *tx).await?.rows_affected();
+    let n=sqlx::query("UPDATE orders SET data=jsonb_set(data,'{revision}',to_jsonb((data->>'revision')::bigint+1)) WHERE tenant=$1 AND id=$2 AND (data->>'revision')::bigint=$3").bind(t).bind(id).bind(input.revision.ok_or(bad("revision required"))?).execute(&mut *tx).await?.rows_affected();
     if n != 1 {
         return Err(conflict("Order revision changed"));
     }

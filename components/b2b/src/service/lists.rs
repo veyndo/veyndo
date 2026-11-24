@@ -41,6 +41,14 @@ struct ListInput {
     revision: Option<i64>,
 }
 
+/// The JSON fields `invoke` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct InvokeInput {
+    #[serde(deserialize_with = "lenient")]
+    cart_revision: Option<i64>,
+}
+
 pub async fn invoke(
     a: &State,
     ports: (&dyn Carts, &dyn ListCarts),
@@ -48,6 +56,7 @@ pub async fn invoke(
     op: &str,
     v: &Value,
 ) -> Result<Value> {
+    let args: InvokeInput = view(v);
     let (carts, lists) = ports;
     let t = tenant(h)?;
     let input: ListInput = view(v);
@@ -129,8 +138,8 @@ pub async fn invoke(
         if c.data.b2b.as_ref().is_none_or(|c| c.unit_id != unit) {
             return Err(bad("Select the list's purchasing unit before applying it"));
         }
-        let expected = v["cartRevision"]
-            .as_i64()
+        let expected = args
+            .cart_revision
             .ok_or(bad("Current cart revision required"))?;
         return lists
             .apply(h, data.items, expected, &data.configurations)

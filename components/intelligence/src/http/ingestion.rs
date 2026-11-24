@@ -5,7 +5,9 @@ use crate::service::sources::validate_content;
 use crate::store::documents as store;
 use axum::Json;
 use axum::extract::{Multipart, Path, State as Shared};
+use serde::Deserialize;
 use serde_json::{Value, json};
+use veyndo_core::document::view;
 use veyndo_core::shop_scope::tenant;
 use veyndo_core::{RequestContext, Result, State, bad};
 use veyndo_identity::{merchant, permit};
@@ -77,9 +79,17 @@ pub async fn upload(
         save(&a, &h, &t, &v, if pdf { "pdf" } else { "upload-text" }).await?,
     ))
 }
+/// The JSON fields `save` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct SaveInput {
+    kind: Value,
+}
+
 /// Admits guidance, validates the content against the shop languages and stores it with its chunks.
 async fn save(a: &State, h: &RequestContext, t: &str, v: &Value, source: &str) -> Result<Value> {
-    admit_guidance(h, &v["kind"])?;
+    let input: SaveInput = view(v);
+    admit_guidance(h, &input.kind)?;
     let data = validate_content(a, t, v).await?;
     store::save(a, h, t, &data, source).await
 }

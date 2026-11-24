@@ -194,6 +194,14 @@ pub fn validate(data: &Value, settings: &Settings, partial: bool) -> Result<()> 
     }
     Ok(())
 }
+/// The JSON fields `public` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct PublicInput {
+    #[serde(deserialize_with = "lenient")]
+    logo_id: Option<String>,
+}
+
 /// What a storefront may show of the company: legal and brand details, never the bank account, the domestic tax ID or unlinked uploads.
 pub fn public(
     data: &Value,
@@ -202,6 +210,7 @@ pub fn public(
     t: &str,
     channel: &str,
 ) -> Value {
+    let input: PublicInput = view(data);
     let mut public = json!({});
     for key in [
         "name",
@@ -246,7 +255,7 @@ pub fn public(
     if let Some(name) = default_brand {
         public["brandName"] = json!(name);
     }
-    if let Some(logo) = data["logoId"].as_str().filter(|s| !s.is_empty()) {
+    if let Some(logo) = input.logo_id.as_deref().filter(|s| !s.is_empty()) {
         public["logoId"] = json!(logo);
         public["logoUrl"] = json!(format!(
             "/store-api/company-logo/{logo}?shop={t}&channel={channel}"

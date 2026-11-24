@@ -4,7 +4,9 @@ use crate::store::configuration_lifecycle::{lock, revision};
 use crate::store::dependencies::inspect;
 use axum::Json;
 use axum::extract::{Path, State};
+use serde::Deserialize;
 use serde_json::{Value, json};
+use veyndo_core::document::{lenient, view};
 use veyndo_core::{RequestContext, Result, bad, conflict, history_context};
 use veyndo_identity::{merchant, permit};
 
@@ -22,6 +24,14 @@ pub async fn dependencies(
     v["revision"] = json!(rev);
     Ok(Json(v))
 }
+/// The JSON fields `delete` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct DeleteInput {
+    #[serde(deserialize_with = "lenient")]
+    revision: Option<i64>,
+}
+
 /// Deletes an unused definition at the expected revision.
 pub async fn delete(
     State(a): State<veyndo_core::State>,
@@ -29,9 +39,10 @@ pub async fn delete(
     Path((kind, id)): Path<(String, String)>,
     Json(v): Json<Value>,
 ) -> Result<Json<Value>> {
+    let input: DeleteInput = view(&v);
     permit(&h, configuration_right(&kind, true)?)?;
     let t = merchant(&h)?;
-    let expected = v["revision"].as_i64().ok_or(bad("Revision required"))?;
+    let expected = input.revision.ok_or(bad("Revision required"))?;
     let mut tx = a.db.begin().await?;
     history_context::context(&mut tx, &h, "merchant").await?;
     lock(&mut tx, &t).await?;

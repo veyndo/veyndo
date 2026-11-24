@@ -1,6 +1,8 @@
 //! Operator service authority is bound to immutable package content, never to a merchant-chosen ID.
+use serde::Deserialize;
 use serde_json::Value;
 use veyndo_app_model::manifest::Manifest;
+use veyndo_core::document::view;
 use veyndo_core::{Error, Result, StatusCode};
 
 /// The bundled manifest of a first-party app.
@@ -94,10 +96,19 @@ pub fn legacy_built_in(id: &str) -> Option<&'static str> {
 pub fn canonical_digest(m: &Manifest) -> String {
     veyndo_app_model::manifest::canonical_digest(m)
 }
+/// The JSON fields `approved` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ApprovedInput {
+    approved_digests: Value,
+}
+
 /// Whether exactly this package content is pinned by the operator or bundled with the server.
 pub fn approved(m: &Manifest, service: &Value) -> bool {
+    let input: ApprovedInput = view(service);
     let digest = canonical_digest(m);
-    let pinned = service["approvedDigests"]
+    let pinned = input
+        .approved_digests
         .as_array()
         .is_some_and(|pins| pins.iter().any(|p| p.as_str() == Some(digest.as_str())));
     let previous = (m.id == "email").then_some(include_str!(

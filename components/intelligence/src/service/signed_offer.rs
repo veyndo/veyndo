@@ -2,7 +2,9 @@
 use crate::domain::offer::payload;
 use crate::service::fact_signing::{attest, verify as verify_signature};
 use base64::{Engine, engine::general_purpose::URL_SAFE_NO_PAD};
+use serde::Deserialize;
 use serde_json::{Value, json};
+use veyndo_core::document::{lenient, view};
 use veyndo_core::{RequestContext, Result, bad, conflict, shop_scope::tenant};
 use veyndo_kernel::verified_kernel;
 use veyndo_shop::ports::Carts;
@@ -21,10 +23,22 @@ pub async fn issue(carts: &dyn Carts, h: &RequestContext) -> Result<Value> {
         chrono::Utc::now().timestamp(),
     )?)
 }
+/// The JSON fields `verify` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct VerifyInput {
+    #[serde(deserialize_with = "lenient")]
+    payload_base64: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    signature: Option<String>,
+}
+
 /// Checks signature, shop, expiry and, when the caller holds the cart, whether checkout would still confirm it.
 pub async fn verify(carts: &dyn Carts, h: &RequestContext, v: &Value) -> Result<Value> {
+    let input: VerifyInput = view(v);
     let t = tenant(h)?;
-    let (Some(encoded), Some(signature)) = (v["payloadBase64"].as_str(), v["signature"].as_str())
+    let (Some(encoded), Some(signature)) =
+        (input.payload_base64.as_deref(), input.signature.as_deref())
     else {
         return Err(bad("payloadBase64 and signature required"));
     };

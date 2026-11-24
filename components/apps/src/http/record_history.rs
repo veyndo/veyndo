@@ -65,6 +65,15 @@ pub async fn list(
         json!({"versions":rows.iter().map(|r|json!({"revision":r.get::<i64,_>("revision"),"fields":e.fields.iter().map(|f|(f.name.clone(),r.get::<Value,_>("fields")[&f.name].clone())).collect::<serde_json::Map<String,Value>>(),"actor":r.get::<Option<String>,_>("actor"),"source":r.get::<String,_>("source"),"createdAt":r.get::<String,_>("created_at")})).collect::<Vec<_>>(),"canRestore":entity(&m,&e.name,&h,true).is_ok()}),
     ))
 }
+/// The JSON fields `restore` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct RestoreInput {
+    #[serde(deserialize_with = "lenient")]
+    approve: Option<bool>,
+    revision: Value,
+}
+
 /// Restores a stored version through the ordinary save of the entity, after explicit approval.
 pub async fn restore(
     Shared(a): Shared<Platform>,
@@ -72,10 +81,11 @@ pub async fn restore(
     Path((app, name, id, revision)): Path<(String, String, String, i64)>,
     Json(v): Json<Value>,
 ) -> Result<Json<Value>> {
+    let input: RestoreInput = view(&v);
     let t = merchant(&h)?;
     let m = package(&a, &t, &app, true).await?;
     let e = entity(&m, &name, &h, true)?;
-    if v["approve"] != true || v["revision"].as_i64().is_none() {
+    if input.approve != Some(true) || input.revision.as_i64().is_none() {
         return Err(bad("Approve restoration with the current revision"));
     }
     let mut tx = a.db.begin().await?;
@@ -93,7 +103,7 @@ pub async fn restore(
             actor: &h,
             manifest: &m,
             entity: e,
-            revision: &v["revision"],
+            revision: &input.revision,
         },
     )
     .await

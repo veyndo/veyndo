@@ -5,7 +5,9 @@ use crate::service::assets as service;
 use crate::store::assets;
 use axum::Json;
 use axum::extract::{Multipart, Path, State};
+use serde::Deserialize;
 use serde_json::{Value, json};
+use veyndo_core::document::{lenient, view};
 use veyndo_core::{RequestContext, Result, bad, conflict};
 use veyndo_identity::{merchant, permit};
 
@@ -33,16 +35,27 @@ pub async fn upload(
     service::persist(&c, &h, &product, upload).await.map(Json)
 }
 
+/// The JSON fields `publish` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct PublishInput {
+    #[serde(deserialize_with = "lenient")]
+    public: Option<bool>,
+    #[serde(deserialize_with = "lenient")]
+    digest: Option<String>,
+}
+
 pub async fn publish(
     State(a): State<veyndo_core::State>,
     h: RequestContext,
     Path(id): Path<String>,
     Json(v): Json<Value>,
 ) -> Result<Json<Value>> {
+    let input: PublishInput = view(&v);
     let tenant = merchant(&h)?;
     permit(&h, "catalog")?;
-    let public = v["public"].as_bool().ok_or(bad("public required"))?;
-    let digest = v["digest"].as_str().ok_or(bad("digest required"))?;
+    let public = input.public.ok_or(bad("public required"))?;
+    let digest = input.digest.as_deref().ok_or(bad("digest required"))?;
     if !assets::set_public(&a, &tenant, &id, digest, public).await? {
         return Err(conflict("Asset digest changed or unavailable"));
     }

@@ -2,12 +2,22 @@
 use crate::domain::attempt::Attempt;
 use crate::domain::receipt_ref::reference;
 use crate::domain::settlements;
+use serde::Deserialize;
 use serde_json::Value;
+use veyndo_core::document::view;
 use veyndo_core::{Result, bad, conflict};
 use veyndo_pricing::verified_kernel;
 
+/// The JSON fields `capture` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct CaptureInput {
+    capture_receipts: Value,
+}
+
 pub fn capture(p: &Attempt, context: &Value, refund: &Value) -> Result<(String, i64)> {
-    let captures = context["captureReceipts"].as_object();
+    let input: CaptureInput = view(context);
+    let captures = input.capture_receipts.as_object();
     let id = refund["captureId"]
         .as_str()
         .or_else(|| match captures {
@@ -25,8 +35,16 @@ pub fn capture(p: &Attempt, context: &Value, refund: &Value) -> Result<(String, 
         .ok_or(bad("Refund capture does not belong to this payment"))?;
     Ok((id.into(), amount))
 }
+/// The JSON fields `used` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct UsedInput {
+    provider_refunds: Value,
+}
+
 pub fn used(p: &Attempt, context: &Value, capture: &str) -> i64 {
-    let Some(rows) = context["providerRefunds"].as_object() else {
+    let input: UsedInput = view(context);
+    let Some(rows) = input.provider_refunds.as_object() else {
         return p.refunded;
     };
     let known: i64 = rows

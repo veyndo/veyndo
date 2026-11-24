@@ -3,8 +3,10 @@ use crate::ports::Platform;
 use crate::service::{app_builds, app_preview};
 use axum::Json;
 use axum::extract::{Path, State as Shared};
+use serde::Deserialize;
 use serde_json::{Value, json};
 use veyndo_app_storage::drafts as shared;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::shop_scope::header;
 use veyndo_core::{RequestContext, Result, State, hash};
 use veyndo_identity::merchant;
@@ -34,6 +36,17 @@ pub async fn drafts(Shared(a): Shared<State>, h: RequestContext) -> Result<Json<
     Ok(Json(json!({"drafts":rows})))
 }
 
+/// The JSON fields `save_draft` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct SaveDraftInput {
+    manifest: Value,
+    #[serde(deserialize_with = "lenient")]
+    environment: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    revision: Option<i64>,
+}
+
 /// Saves one autosave under optimistic revision control; nothing is installed or published.
 pub async fn save_draft(
     Shared(a): Shared<State>,
@@ -41,6 +54,7 @@ pub async fn save_draft(
     Path(id): Path<String>,
     Json(v): Json<Value>,
 ) -> Result<Json<Value>> {
+    let input: SaveDraftInput = view(&v);
     let t = merchant(&h)?;
     let owner = actor(&h);
     let mut tx = a.db.begin().await?;
@@ -52,9 +66,9 @@ pub async fn save_draft(
         },
         &shared::Draft {
             id: &id,
-            manifest: &v["manifest"],
-            environment: v["environment"].as_str(),
-            revision: v["revision"].as_i64(),
+            manifest: &input.manifest,
+            environment: input.environment.as_deref(),
+            revision: input.revision,
         },
         &OwnedEnvironment,
     )
@@ -107,6 +121,13 @@ impl shared::EnvironmentAdmission for OwnedEnvironment {
     }
 }
 
+/// The JSON fields `remove` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct RemoveInput {
+    approve: Value,
+}
+
 /// Moves an App Studio project to the trash after explicit approval.
 pub async fn remove(
     Shared(a): Shared<State>,
@@ -114,8 +135,16 @@ pub async fn remove(
     Path(app): Path<String>,
     Json(v): Json<Value>,
 ) -> Result<Json<Value>> {
-    let request = json!({"app":app,"archived":true,"approve":v["approve"]});
+    let input: RemoveInput = view(&v);
+    let request = json!({"app":app,"archived":true,"approve":input.approve});
     Ok(Json(app_builds::archive(&a, &h, &request).await?))
+}
+
+/// The JSON fields `restore` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct RestoreInput {
+    approve: Value,
 }
 
 /// Restores an App Studio project from the trash after explicit approval.
@@ -125,7 +154,8 @@ pub async fn restore(
     Path(app): Path<String>,
     Json(v): Json<Value>,
 ) -> Result<Json<Value>> {
-    let request = json!({"app":app,"archived":false,"approve":v["approve"]});
+    let input: RestoreInput = view(&v);
+    let request = json!({"app":app,"archived":false,"approve":input.approve});
     Ok(Json(app_builds::archive(&a, &h, &request).await?))
 }
 

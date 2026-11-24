@@ -2,16 +2,27 @@
 use crate::store::evidence::claims;
 use axum::Json;
 use axum::extract::{Path, State as Shared};
+use serde::Deserialize;
 use serde_json::{Value, json};
+use veyndo_core::document::view;
 use veyndo_core::shop_scope::tenant;
 use veyndo_core::{RequestContext, Result, State, bad, conflict};
 use veyndo_kernel::verified_kernel;
 use veyndo_marketing::service::channels::admit_product;
 
+/// The JSON fields `compile` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct CompileInput {
+    claims: Value,
+}
+
 /// Renders requested statements that exactly match a current confirmed public claim, or refuses all.
 pub async fn compile(a: &State, t: &str, product: &str, v: &Value) -> Result<Value> {
+    let input: CompileInput = view(v);
     let facts = claims(a, t, product, true).await?;
-    let statements = v["claims"]
+    let statements = input
+        .claims
         .as_array()
         .filter(|a| a.len() <= 20)
         .ok_or(bad("At most 20 fact statements required"))?;

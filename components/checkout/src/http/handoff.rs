@@ -8,10 +8,21 @@ use axum::response::IntoResponse;
 use serde::Deserialize;
 use serde_json::{Value, json};
 use veyndo_b2b::store::access::guard_conn;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::shop_scope::{channel, tenant, token};
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad, conflict, hash, uid};
 use veyndo_shop::domain::cart_admission::request;
 use veyndo_shop::types::cart::{StoredCart, stored};
+
+/// The JSON fields `issue` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct IssueInput {
+    #[serde(deserialize_with = "lenient")]
+    revision: Option<i64>,
+    #[serde(deserialize_with = "lenient")]
+    parent_origin: Option<String>,
+}
 
 /// `POST /store-api/checkout/handoff`: a ten-minute single-use ticket for the hosted checkout, with an optional recovery key for a framing storefront.
 pub async fn issue(
@@ -19,6 +30,7 @@ pub async fn issue(
     h: RequestContext,
     Json(v): Json<Value>,
 ) -> Result<Json<Value>> {
+    let input: IssueInput = view(&v);
     let t = tenant(&h)?;
     let _ = cart_load::load(&a, &h).await?;
     let mut tx = a.db.begin().await?;
@@ -31,11 +43,11 @@ pub async fn issue(
     let c = stored(&r)?;
     request(&h, &c)?;
     guard_conn(&mut tx, &h, &c).await?;
-    if c.status != "open" || c.data.items.is_empty() || v["revision"].as_i64() != Some(c.revision) {
+    if c.status != "open" || c.data.items.is_empty() || input.revision != Some(c.revision) {
         return Err(conflict("Cart changed, empty or terminal"));
     }
     let ticket = uid();
-    let parent = v["parentOrigin"].as_str();
+    let parent = input.parent_origin.as_deref();
     let recovery = if let Some(origin) = parent {
         registered_parent(&mut tx, &t, &c.data.sales_channel, origin).await?;
         Some(uid())
@@ -159,11 +171,21 @@ pub async fn recover(
     tx.commit().await?;
     Ok(([(CACHE_CONTROL, "no-store")], Json(result)))
 }
+/// The JSON fields `consume` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ConsumeInput {
+    #[serde(deserialize_with = "lenient")]
+    ticket: Option<String>,
+}
+
 /// Redeems a ticket once: the cart gets a fresh token the hosted checkout continues with.
 pub async fn consume(a: &State, h: &RequestContext, v: &Value) -> Result<StoredCart> {
+    let input: ConsumeInput = view(v);
     let t = tenant(h)?;
-    let ticket = v["ticket"]
-        .as_str()
+    let ticket = input
+        .ticket
+        .as_deref()
         .filter(|s| s.len() == 32 && s.bytes().all(|b| b.is_ascii_hexdigit()))
         .ok_or(bad("Invalid checkout ticket"))?;
     let mut tx = a.db.begin().await?;

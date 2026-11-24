@@ -1,8 +1,20 @@
 //! Bind integer provider receipt amounts and status to the formally checked exact-match predicate.
 use crate::domain::amounts::parse_amount;
+use serde::Deserialize;
 use serde_json::Value;
 use veyndo_core::Result;
+use veyndo_core::document::{lenient, view};
 use veyndo_pricing::verified_kernel;
+
+/// The JSON fields `receipt_matches` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ReceiptMatchesInput {
+    #[serde(deserialize_with = "lenient")]
+    value: Option<String>,
+    #[serde(rename = "currency_code")]
+    currency_code: Value,
+}
 
 pub fn receipt_matches(
     expected: i64,
@@ -10,7 +22,8 @@ pub fn receipt_matches(
     currency: &str,
     confirmed: bool,
 ) -> Result<bool> {
-    let received = parse_amount(amount["value"].as_str().unwrap_or(""), currency)?;
+    let input: ReceiptMatchesInput = view(amount);
+    let received = parse_amount(input.value.as_deref().unwrap_or(""), currency)?;
     Ok(u64::try_from(expected)
         .ok()
         .zip(u64::try_from(received).ok())
@@ -18,7 +31,7 @@ pub fn receipt_matches(
             verified_kernel::receipt_admissible(
                 expected,
                 received,
-                amount["currency_code"] == currency,
+                input.currency_code == currency,
                 confirmed,
             )
         }))

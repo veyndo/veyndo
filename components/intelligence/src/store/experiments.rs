@@ -1,8 +1,10 @@
 //! Controlled experiments on the storefront layout: preregistration, transitions, assignment, the delayed readout from the payment ledger and the worker steps.
 use crate::domain::experiment_model::{Automation, Design, interval};
+use serde::Deserialize;
 use serde_json::{Value, json};
 use sqlx::{Postgres, Row, Transaction};
 use std::sync::atomic::{AtomicU64, Ordering};
+use veyndo_core::document::{lenient, view};
 use veyndo_core::{Error, Result, State, bad, conflict, hash};
 use veyndo_pricing::types::currency::scale;
 
@@ -17,6 +19,17 @@ pub async fn list(a: &State, t: &str) -> Result<Value> {
     )
 }
 
+/// The JSON fields `change` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ChangeInput {
+    design: Value,
+    #[serde(deserialize_with = "lenient")]
+    id: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    revision: Option<i64>,
+}
+
 /// Registers a design or moves an experiment through its fixed transitions at the expected revision.
 pub async fn change(
     a: &State,
@@ -26,13 +39,14 @@ pub async fn change(
     actor: &str,
     currencies: &[String],
 ) -> Result<Value> {
+    let input: ChangeInput = view(v);
     let mut tx = a.db.begin().await?;
     sqlx::query("SELECT pg_advisory_xact_lock(hashtextextended($1,24))")
         .bind(t)
         .execute(&mut *tx)
         .await?;
     let id = if name == "knowledge.experiment.create" {
-        let design: Design = serde_json::from_value(v["design"].clone())
+        let design: Design = serde_json::from_value(input.design.clone())
             .map_err(|_| bad("Invalid experiment design"))?;
         design.validate()?;
         let count: i64 =
@@ -60,9 +74,9 @@ pub async fn change(
         sqlx::query("INSERT INTO intelligence_experiments(tenant,id,channel,data,state,actor) VALUES($1,$2,$3,$4,'draft',$5)").bind(t).bind(&id).bind(&design.channel).bind(json!(design)).bind(actor).execute(&mut *tx).await?;
         id
     } else {
-        let id = v["id"].as_str().ok_or(bad("Experiment required"))?;
+        let id = input.id.as_deref().ok_or(bad("Experiment required"))?;
         let r=sqlx::query("SELECT data,revision,state FROM intelligence_experiments WHERE tenant=$1 AND id=$2 FOR UPDATE").bind(t).bind(id).fetch_optional(&mut *tx).await?.ok_or(bad("Experiment not found"))?;
-        if v["revision"].as_i64() != Some(r.get("revision")) {
+        if input.revision != Some(r.get("revision")) {
             return Err(conflict("Experiment revision changed"));
         }
         let state: String = r.get("state");

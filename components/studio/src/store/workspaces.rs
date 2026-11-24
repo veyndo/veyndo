@@ -1,7 +1,9 @@
 //! Actor-private workspace preferences: compare-and-swap on the revision, a bounded version trail and the current membership.
 use crate::domain::workspace;
+use serde::Deserialize;
 use serde_json::{Value, json};
 use sqlx::{Postgres, Row, Transaction};
+use veyndo_core::document::{lenient, view};
 use veyndo_core::{Error, Result, State, StatusCode, bad, conflict};
 
 /// Opens a transaction scoped to the person and refuses anyone whose membership is no longer active.
@@ -47,12 +49,22 @@ pub async fn read(a: &State, t: &str, user: &str) -> Result<Value> {
     )
 }
 
+/// The JSON fields `save` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct SaveInput {
+    data: Value,
+    #[serde(deserialize_with = "lenient")]
+    revision: Option<i64>,
+}
+
 /// Saves the workspace at the expected revision and keeps the last twenty versions.
 pub async fn save(a: &State, t: &str, user: &str, v: &Value) -> Result<Value> {
+    let input: SaveInput = view(v);
     let mut tx = begin(a, t, user).await?;
-    let data = workspace::validate(&v["data"])?;
-    let expected = v["revision"]
-        .as_i64()
+    let data = workspace::validate(&input.data)?;
+    let expected = input
+        .revision
         .filter(|n| *n >= 0)
         .ok_or(bad("Workspace revision required"))?;
     sqlx::query("SELECT pg_advisory_xact_lock(hashtextextended($1,945))")

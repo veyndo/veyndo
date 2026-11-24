@@ -1,6 +1,8 @@
 //! Explicit non-PII domain read views for separately scoped app callbacks; never elevate an identity.
+use serde::Deserialize;
 use serde_json::{Value, json};
 use sqlx::Row;
+use veyndo_core::document::view;
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad};
 fn projection(value: &Value, keys: &[&str]) -> Value {
     json!(
@@ -40,7 +42,15 @@ pub async fn redacted_read(a: &State, h: &RequestContext, kind: &str, id: &str) 
         _ => Err(bad("Unknown redacted read")),
     }
 }
+/// The JSON fields `order_view` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct OrderViewInput {
+    line_items: Value,
+}
+
 fn order_view(value: &Value) -> Value {
+    let input: OrderViewInput = view(value);
     let mut clean = projection(
         value,
         &[
@@ -58,7 +68,8 @@ fn order_view(value: &Value) -> Value {
         ],
     );
     clean["items"] = json!(
-        value["lineItems"]
+        input
+            .line_items
             .as_array()
             .map(|items| items
                 .iter()

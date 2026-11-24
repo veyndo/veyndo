@@ -13,6 +13,23 @@ use veyndo_core::{
 };
 use veyndo_identity::{merchant, permit};
 
+/// The JSON fields `onboarding` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct OnboardingInput {
+    #[serde(deserialize_with = "lenient")]
+    operation: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    approve: Option<bool>,
+    #[serde(deserialize_with = "lenient")]
+    channel: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    environment: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    request_key: Option<String>,
+    country: Value,
+}
+
 /// Starts, inspects or disconnects the provider account of one sales channel; every effect needs `approve`.
 pub async fn onboarding(
     (host, gateway): (&dyn Host, &dyn Gateway),
@@ -21,6 +38,7 @@ pub async fn onboarding(
     id: &str,
     input: &Value,
 ) -> Result<Value> {
+    let args: OnboardingInput = view(input);
     let t = merchant(h)?;
     permit(h, "payments.manage")?;
     let m = gateway.package(&t, id).await?;
@@ -28,13 +46,13 @@ pub async fn onboarding(
         .payment_provider
         .as_ref()
         .ok_or(bad("App has no payment provider contract"))?;
-    let op = input["operation"].as_str().unwrap_or("status");
+    let op = args.operation.as_deref().unwrap_or("status");
     if !["status", "start", "disconnect"].contains(&op)
-        || (op != "status" && input["approve"] != true)
+        || (op != "status" && args.approve != Some(true))
     {
         return Err(bad("Supported onboarding operation and approval required"));
     }
-    let channel = input["channel"].as_str().unwrap_or("default");
+    let channel = args.channel.as_deref().unwrap_or("default");
     let owned: bool =
         sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM sales_channels WHERE tenant=$1 AND id=$2)")
             .bind(&t)
@@ -48,19 +66,21 @@ pub async fn onboarding(
         ));
     }
     let configured = &process_config::get().payment_services[id][&m.version];
-    let environment = input["environment"]
-        .as_str()
+    let environment = args
+        .environment
+        .as_deref()
         .or_else(|| configured["defaultEnvironment"].as_str())
         .or_else(|| configured["environment"].as_str())
         .ok_or(Error(
             StatusCode::SERVICE_UNAVAILABLE,
             "Payment service not configured".into(),
         ))?;
-    let key = input["requestKey"]
-        .as_str()
+    let key = args
+        .request_key
+        .as_deref()
         .filter(|v| v.len() >= 8 && v.len() <= 128)
         .ok_or(bad("Onboarding requestKey required"))?;
-    let body = json!({"apiVersion":"1","provider":id,"adapterVersion":m.version,"tenant":t,"channel":channel,"environment":environment,"operation":op,"requestKey":key,"country":input["country"]});
+    let body = json!({"apiVersion":"1","provider":id,"adapterVersion":m.version,"tenant":t,"channel":channel,"environment":environment,"operation":op,"requestKey":key,"country":args.country});
     let result = gateway
         .call(&t, id, &m.version, environment, "onboarding", &body)
         .await?;
@@ -204,13 +224,24 @@ async fn bind_account(
     Ok(())
 }
 
+/// The JSON fields `configured_environments` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ConfiguredEnvironmentsInput {
+    url: Value,
+    environment: Value,
+    #[serde(deserialize_with = "lenient")]
+    default_environment: Option<String>,
+}
+
 /// Only public deployment metadata is exposed; service URLs and credentials remain server-side.
 pub fn configured_environments(c: &Value) -> Value {
+    let input: ConfiguredEnvironmentsInput = view(c);
     let environments: Vec<_> = ["simulation", "sandbox", "live", "contract-fixture"]
         .into_iter()
-        .filter(|env| c[*env].is_object() || (c["url"].is_string() && c["environment"] == *env))
+        .filter(|env| c[*env].is_object() || (input.url.is_string() && input.environment == *env))
         .collect();
-    json!({"environments":environments,"defaultEnvironment":c["defaultEnvironment"].as_str().or(c["environment"].as_str()).or(environments.first().copied())})
+    json!({"environments":environments,"defaultEnvironment":input.default_environment.as_deref().or(input.environment.as_str()).or(environments.first().copied())})
 }
 
 /// Installed adapter providers, their channel accounts and public environment metadata.
@@ -236,10 +267,20 @@ pub async fn providers(a: &State, h: &RequestContext) -> Result<Value> {
     )
 }
 
+/// The JSON fields `mark_configured` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct MarkConfiguredInput {
+    accounts: Value,
+    providers: Value,
+}
+
 /// An adapter provider is configured once it is active and one of its channel accounts is ready.
 pub fn mark_configured(generic: &Value) -> Vec<Value> {
-    let accounts = generic["accounts"].as_array().cloned().unwrap_or_default();
-    generic["providers"]
+    let input: MarkConfiguredInput = view(generic);
+    let accounts = input.accounts.as_array().cloned().unwrap_or_default();
+    input
+        .providers
         .as_array()
         .into_iter()
         .flatten()

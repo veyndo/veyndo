@@ -1,7 +1,19 @@
 //! Four-language invoice recipient footer from the immutable native receipt snapshot; cancellations never request payment.
+use serde::Deserialize;
 use serde_json::Value;
+use veyndo_core::document::{lenient, view};
+/// The JSON fields `lines` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct LinesInput {
+    instructions: Value,
+    #[serde(deserialize_with = "lenient")]
+    simulated: Option<bool>,
+}
+
 pub fn lines(v: &Value, index: usize) -> Vec<String> {
-    let i = &v["instructions"];
+    let input: LinesInput = view(v);
+    let i = &input.instructions;
     if i["kind"] != "bank_transfer" {
         return vec![];
     }
@@ -15,7 +27,7 @@ pub fn lines(v: &Value, index: usize) -> Vec<String> {
             "Datos del pago por factura",
         ]),
     ];
-    if v["simulated"] == true {
+    if input.simulated == Some(true) {
         lines.push(word([
             "Simulated bank details. Do not transfer money.",
             "Simulierte Bankdaten. Bitte kein Geld überweisen.",

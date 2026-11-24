@@ -1,17 +1,28 @@
 //! Bounded reference capture uses the shared public-only DNS-pinned egress client; partial failures remain visible.
 use crate::ports::PublicEgress;
 use base64::Engine;
+use serde::Deserialize;
 use serde_json::{Value, json};
+use veyndo_core::document::view;
 use veyndo_core::{Result, bad, hash};
+/// The JSON fields `capture` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct CaptureInput {
+    urls: Value,
+    images: Value,
+}
+
 /// Captures up to three public HTTPS pages and two inline images as design evidence; images are also returned for the model.
 pub async fn capture(egress: &dyn PublicEgress, v: &Value) -> Result<(Value, Vec<String>)> {
+    let input: CaptureInput = view(v);
     for name in ["urls", "images"] {
         if v.get(name).is_some_and(|value| !value.is_array()) {
             return Err(bad("Reference URLs and images must be arrays"));
         }
     }
-    let urls = v["urls"].as_array().cloned().unwrap_or_default();
-    let images = v["images"].as_array().cloned().unwrap_or_default();
+    let urls = input.urls.as_array().cloned().unwrap_or_default();
+    let images = input.images.as_array().cloned().unwrap_or_default();
     if urls.len() > 3 || images.len() > 2 {
         return Err(bad("Use at most three URLs and two reference images"));
     }

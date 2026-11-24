@@ -7,19 +7,30 @@ use crate::store::sessions::issue_session;
 use crate::{merchant, permit, validate_permissions};
 use axum::Json;
 use axum::extract::State;
+use serde::Deserialize;
 use serde_json::{Value, json};
 use sqlx::Row;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::shop_scope::header;
 use veyndo_core::{Error, RequestContext, Result, StatusCode, bad, hash, uid};
+
+/// The JSON fields `invite_user` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct InviteUserInput {
+    #[serde(deserialize_with = "lenient")]
+    role: Option<String>,
+}
 
 pub async fn invite_user(
     State(a): State<veyndo_core::State>,
     h: RequestContext,
     Json(v): Json<Value>,
 ) -> Result<Json<Value>> {
+    let input: InviteUserInput = view(&v);
     let t = merchant(&h)?;
     permit(&h, "users")?;
-    let role = v["role"].as_str().unwrap_or("viewer");
+    let role = input.role.as_deref().unwrap_or("viewer");
     let mut tx = a.db.begin().await?;
     veyndo_core::tenants::lock(&mut *tx, &t).await?;
     let h = roles::current(&mut tx, &h, &t).await?;
@@ -45,12 +56,22 @@ pub async fn invite_user(
         json!({"id":id,"token":token,"role":role,"workspace":t,"expiresIn":86400,"emailSent":false}),
     ))
 }
+/// The JSON fields `accept_invite` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct AcceptInviteInput {
+    #[serde(deserialize_with = "lenient")]
+    invitation_token: Option<String>,
+}
+
 pub async fn accept_invite(
     State(a): State<veyndo_core::State>,
     Json(v): Json<Value>,
 ) -> Result<Json<Value>> {
-    let token = v["invitationToken"]
-        .as_str()
+    let input: AcceptInviteInput = view(&v);
+    let token = input
+        .invitation_token
+        .as_deref()
         .filter(|s| s.len() == 64)
         .ok_or(bad("Invitation token required"))?;
     let password = password(&v)?;

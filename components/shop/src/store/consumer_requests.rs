@@ -3,6 +3,7 @@ use crate::types::cart::StoredCart;
 use serde::Deserialize;
 use serde_json::{Value, json};
 use sqlx::Row;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::shop_scope::header;
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad, conflict, hash};
 use veyndo_identity::domain::credentials::email;
@@ -109,15 +110,30 @@ pub async fn list(a: &State, t: &str) -> Result<Value> {
     )
 }
 
+/// The JSON fields `review` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ReviewInput {
+    #[serde(deserialize_with = "lenient")]
+    state: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    revision: Option<i64>,
+    #[serde(deserialize_with = "lenient")]
+    note: Option<String>,
+}
+
 /// Moves a request to a reviewed state at the expected revision and keeps the reviewer's note.
 pub async fn review(a: &State, h: &RequestContext, t: &str, id: &str, v: &Value) -> Result<Value> {
-    let state = v["state"]
-        .as_str()
+    let input: ReviewInput = view(v);
+    let state = input
+        .state
+        .as_deref()
         .filter(|s| ["in_review", "completed", "declined"].contains(s))
         .ok_or(bad("Invalid consumer request state"))?;
-    let revision = v["revision"].as_i64().ok_or(bad("Revision required"))?;
-    let note = v["note"]
-        .as_str()
+    let revision = input.revision.ok_or(bad("Revision required"))?;
+    let note = input
+        .note
+        .as_deref()
         .filter(|s| !s.trim().is_empty() && s.len() <= 6000)
         .ok_or(bad("Review note required"))?;
     let mut tx = a.db.begin().await?;

@@ -1,7 +1,9 @@
 //! Saved instruments a verified receipt may add: only for the original account's consent, only redacted metadata.
 use crate::domain::attempt::Attempt;
 use crate::domain::receipt_ref::reference;
+use serde::Deserialize;
 use serde_json::{Value, json};
+use veyndo_core::document::{lenient, view};
 use veyndo_core::{Result, bad, conflict};
 
 /// Optional instrument storage can never roll back an already verified financial receipt.
@@ -30,12 +32,21 @@ pub async fn observe(
     sqlx::query("UPDATE payment_attempts SET provider_context=jsonb_set(provider_context,'{vaultStatus}',$3) WHERE tenant=$1 AND id=$2").bind(&p.tenant).bind(&p.id).bind(json!(status)).execute(&mut **tx).await?;
     Ok(())
 }
+/// The JSON fields `accept` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct AcceptInput {
+    #[serde(deserialize_with = "lenient")]
+    status: Option<String>,
+}
+
 /// A financial provider receipt may add a handle only for the original account's explicit save consent.
 pub async fn accept(
     tx: &mut sqlx::Transaction<'_, sqlx::Postgres>,
     p: &Attempt,
     v: &Value,
 ) -> Result<()> {
+    let input: AcceptInput = view(v);
     let Some(vault) = v.get("vault") else {
         return Ok(());
     };
@@ -44,7 +55,7 @@ pub async fn accept(
         || f["customerId"] != vault["customerId"]
         || f["consentId"] != vault["consentId"]
         || !["captured", "authorized", "partially_captured"]
-            .contains(&v["status"].as_str().unwrap_or(""))
+            .contains(&input.status.as_deref().unwrap_or(""))
     {
         return Err(bad(
             "Saved instrument lacks original customer consent and successful payment",

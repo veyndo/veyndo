@@ -9,9 +9,22 @@ use crate::store::order_ledger::{release_stock, update_order};
 use crate::store::receipt_claims::claim;
 use crate::store::settlements as store_settlements;
 use crate::store::{instructions as store_instructions, instruments, refund_receipts};
+use serde::Deserialize;
 use serde_json::{Value, json};
-use veyndo_core::document::view;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::{Error, Result, StatusCode, bad, conflict};
+
+/// The JSON fields `persist` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct PersistInput {
+    #[serde(deserialize_with = "lenient")]
+    amount_minor: Option<i64>,
+    #[serde(deserialize_with = "lenient")]
+    ledger_job_key: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    expiry: Option<bool>,
+}
 
 pub async fn persist(
     host: &dyn Host,
@@ -21,6 +34,7 @@ pub async fn persist(
     input: &Value,
     v: &Value,
 ) -> Result<()> {
+    let args: PersistInput = view(input);
     identity(p, v)?;
     let r: ProviderReceipt = view(v);
     if op == "capture" && r.capture_pending == Some(true) {
@@ -38,8 +52,8 @@ pub async fn persist(
     let instructions_changed = instructions::admit(p, &mut context, v)?;
     let url = approval_url(host, p, &r.approval_url)?;
     if op == "refund" {
-        let amount = input["amountMinor"]
-            .as_i64()
+        let amount = args
+            .amount_minor
             .filter(|n| *n > 0)
             .ok_or(bad("Refund amount required"))?;
         if status == "refund_pending" {
@@ -55,8 +69,9 @@ pub async fn persist(
         {
             return Err(bad("Refund receipt mismatch"));
         }
-        let key = input["ledgerJobKey"]
-            .as_str()
+        let key = args
+            .ledger_job_key
+            .as_deref()
             .ok_or(bad("Refund ledger job required"))?;
         let delta = refund_receipts::apply(tx, p, &mut context, &r.refund.raw, Some(key)).await?;
         refunded = refunds::checked_total(settlements::captured(p), refunded, delta)?;
@@ -98,7 +113,7 @@ pub async fn persist(
             host,
             tx,
             p,
-            if input["expiry"] == true {
+            if args.expiry == Some(true) {
                 "expired"
             } else {
                 "cancelled"

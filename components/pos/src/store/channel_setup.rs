@@ -1,6 +1,8 @@
 //! A new POS channel brings its cash payment and collection delivery as channel overrides; there is no second settings store.
+use serde::Deserialize;
 use serde_json::{Value, json};
 use sqlx::{Postgres, Transaction};
+use veyndo_core::document::view;
 use veyndo_core::{Result, bad};
 use veyndo_marketing::types::channel::validate_pos;
 use veyndo_shop::Settings;
@@ -22,6 +24,13 @@ pub fn pos_settings(base: &Settings) -> Result<Settings> {
     Ok(next)
 }
 
+/// The JSON fields `configure` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ConfigureInput {
+    kind: Value,
+}
+
 /// Installs the overrides of a newly saved POS channel; called inside the channel save with the settings locked first.
 pub async fn configure(
     tx: &mut Transaction<'_, Postgres>,
@@ -30,7 +39,8 @@ pub async fn configure(
     data: &Value,
     new: bool,
 ) -> Result<()> {
-    if data["kind"] != "pos" || !new {
+    let input: ConfigureInput = view(data);
+    if input.kind != "pos" || !new {
         return Ok(());
     }
     let base = decode(

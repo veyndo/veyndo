@@ -4,12 +4,14 @@ use crate::domain::grid_criteria::validate as validate_criteria;
 use crate::domain::proposal::{Proposal, View, validate_proposal};
 use crate::domain::view_components::validate as validate_components;
 use crate::ports::WorkHost;
+use serde::Deserialize;
 use serde_json::Value;
 use serde_json::json;
 use veyndo_app_model::Object;
 use veyndo_app_platform::store::extension_filter::admit as admit_filter;
 use veyndo_catalog::service::translation_apply::admit_selection;
 use veyndo_catalog::store::products::product;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::{RequestContext, Result, State, bad};
 use veyndo_identity::{allowed, permit};
 use veyndo_intelligence::domain::price_guardrails::check;
@@ -63,6 +65,16 @@ async fn validate_plan(a: &State, t: &str, p: &Proposal, ps: &[Product]) -> Resu
     }
     Ok(revision)
 }
+/// The JSON fields `admit` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct AdmitInput {
+    products: Value,
+    experience: Value,
+    #[serde(deserialize_with = "lenient")]
+    experience_revision: Option<i64>,
+}
+
 /// Native read-only admission of a model proposal: navigation, view, work, products, app change, experience and translation.
 pub async fn admit<H: WorkHost>(
     host: &H,
@@ -72,8 +84,9 @@ pub async fn admit<H: WorkHost>(
     locale: &str,
     candidate: &Value,
 ) -> Result<(Proposal, Vec<Product>, i64)> {
+    let input: AdmitInput = view(prepared);
     let a = host.models().core;
-    let mut ps: Vec<Product> = serde_json::from_value(prepared["products"].clone())
+    let mut ps: Vec<Product> = serde_json::from_value(input.products.clone())
         .map_err(|_| bad("Invalid saved agent context"))?;
     let (commerce_settings, _) = config(a, t).await?;
     let mut p: Proposal = serde_json::from_value(candidate.clone())
@@ -145,11 +158,11 @@ pub async fn admit<H: WorkHost>(
         }
     }
     p.changes.retain(|c| c.price.is_some() || c.stock.is_some());
-    if p.experience.as_ref() == Some(&prepared["experience"].clone()) {
+    if p.experience.as_ref() == Some(&input.experience.clone()) {
         p.experience = None;
         p.expected_experience_revision = None;
     } else if p.experience.is_some() {
-        p.expected_experience_revision = Some(prepared["experienceRevision"].as_i64().unwrap());
+        p.expected_experience_revision = Some(input.experience_revision.unwrap());
     }
     if let Some(experience) = p.experience.as_mut() {
         experience["headlineLocale"] = json!(locale);

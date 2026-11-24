@@ -3,8 +3,10 @@ use crate::domain::selection;
 use crate::domain::translation_fields::merge_metadata;
 use crate::ports::Catalog;
 use crate::store::{product_edit, translation_jobs};
+use serde::Deserialize;
 use serde_json::{Value, json};
 use sqlx::PgConnection;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::{RequestContext, Result, bad, conflict, outbox};
 use veyndo_identity::{merchant, permit};
 use veyndo_pricing::verified_kernel;
@@ -32,7 +34,16 @@ fn current(product_revision: i64, draft_revision: i64) -> bool {
         .is_some_and(|(current, expected)| verified_kernel::revision_admissible(current, expected))
 }
 
+/// The JSON fields `apply` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ApplyInput {
+    #[serde(deserialize_with = "lenient")]
+    product_id: Option<String>,
+}
+
 pub async fn apply(c: &Catalog, h: &RequestContext, id: &str, v: &Value) -> Result<Value> {
+    let input: ApplyInput = view(v);
     permit(h, "catalog")?;
     let tenant = merchant(h)?;
     let mut tx = c.core.db.begin().await?;
@@ -45,7 +56,7 @@ pub async fn apply(c: &Catalog, h: &RequestContext, id: &str, v: &Value) -> Resu
     }
     let key = languages.as_ref().key(&job.target_locale);
     let drafts =
-        translation_jobs::lock_drafts(&mut tx, &tenant, id, v["productId"].as_str()).await?;
+        translation_jobs::lock_drafts(&mut tx, &tenant, id, input.product_id.as_deref()).await?;
     let mut applied = 0;
     let mut conflicts = 0;
     for draft in drafts {

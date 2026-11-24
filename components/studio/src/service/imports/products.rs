@@ -3,7 +3,9 @@ use super::SourceRecord;
 use crate::http::product_editor::create_product;
 use axum::Json;
 use axum::extract::State as Shared;
+use serde::Deserialize;
 use serde_json::{Value, json};
+use veyndo_core::document::{lenient, view};
 use veyndo_core::shop_scope::parent;
 use veyndo_core::{RequestContext, Result, State, bad, conflict, hash};
 use veyndo_identity::{merchant, permit};
@@ -43,8 +45,18 @@ pub async fn import(
     Ok(json!({"id":result["id"],"replayed":false,"stockActivated":false}))
 }
 
+/// The JSON fields `mapped` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct MappedInput {
+    #[serde(deserialize_with = "lenient")]
+    tax_rate: Option<f64>,
+    source_price_basis: Value,
+}
+
 /// Shared native mapping for writes and read-only reconciliation; no second price/translation calculator.
 pub async fn mapped(a: &State, t: &str, r: &SourceRecord, options: &Value) -> Result<Value> {
+    let input: MappedInput = view(options);
     let active = match r.data.get("catalogActive") {
         None | Some(Value::Null) => true,
         Some(value) => value
@@ -55,8 +67,8 @@ pub async fn mapped(a: &State, t: &str, r: &SourceRecord, options: &Value) -> Re
     let id = r.identity(&namespace);
     let digest = hash(&json!({"record":r,"options":options}).to_string());
     let (settings, revision) = config(a, t).await?;
-    let tax = options["taxRate"]
-        .as_f64()
+    let tax = input
+        .tax_rate
         .filter(|n| n.is_finite() && (0.0..=50.0).contains(n))
         .ok_or(bad("Explicitly review the native tax rate"))?;
     let amount = &r.data["price"];
@@ -86,12 +98,12 @@ pub async fn mapped(a: &State, t: &str, r: &SourceRecord, options: &Value) -> Re
     if !price.is_finite() || price * 10_f64.powi(scale.into()) > 9_007_199_254_740_991.0 {
         return Err(bad("Source price exceeds exact native compatibility range"));
     }
-    let basis = options["sourcePriceBasis"].as_str().unwrap_or("gross");
+    let basis = input.source_price_basis.as_str().unwrap_or("gross");
     if let Some(source) = r.data.get("priceBasis").filter(|value| !value.is_null())
         && (!source
             .as_str()
             .is_some_and(|value| ["gross", "net"].contains(&value))
-            || options["sourcePriceBasis"] != *source)
+            || input.source_price_basis != *source)
     {
         return Err(bad("Explicitly confirm the declared source price basis"));
     }

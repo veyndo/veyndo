@@ -4,8 +4,10 @@ use crate::store::roles;
 use crate::{merchant, permit, validate_permissions};
 use axum::Json;
 use axum::extract::{Path, State};
+use serde::Deserialize;
 use serde_json::{Value, json};
 use sqlx::Row;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::shop_scope::header;
 use veyndo_core::{Error, RequestContext, Result, StatusCode, bad, conflict};
 
@@ -21,18 +23,28 @@ pub async fn members(
         json!({"members":rows.iter().map(|r|json!({"id":r.get::<String,_>("id"),"name":r.get::<String,_>("name"),"email":r.get::<String,_>("email"),"role":r.get::<String,_>("role"),"active":r.get::<bool,_>("active"),"permissions":r.get::<Value,_>("permissions")})).collect::<Vec<_>>(),"invitations":invites.iter().map(|r|json!({"id":r.get::<String,_>("id"),"email":r.get::<String,_>("email"),"role":r.get::<String,_>("role"),"expires":r.get::<String,_>("expires")})).collect::<Vec<_>>()}),
     ))
 }
+/// The JSON fields `update_member` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct UpdateMemberInput {
+    #[serde(deserialize_with = "lenient")]
+    role: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    active: Option<bool>,
+    permissions: Value,
+}
+
 pub async fn update_member(
     State(a): State<veyndo_core::State>,
     h: RequestContext,
     Path(user): Path<String>,
     Json(v): Json<Value>,
 ) -> Result<Json<Value>> {
+    let input: UpdateMemberInput = view(&v);
     let t = merchant(&h)?;
     permit(&h, "users")?;
-    let role = v["role"].as_str().ok_or(bad("Role required"))?;
-    let active = v["active"]
-        .as_bool()
-        .ok_or(bad("Active boolean required"))?;
+    let role = input.role.as_deref().ok_or(bad("Role required"))?;
+    let active = input.active.ok_or(bad("Active boolean required"))?;
     let mut tx = a.db.begin().await?;
     veyndo_core::tenants::lock(&mut *tx, &t).await?;
     let h = roles::current(&mut tx, &h, &t).await?;
@@ -78,7 +90,7 @@ pub async fn update_member(
         }
     }
     let permissions = if v.get("permissions").is_some() {
-        validate_permissions(&h, &v["permissions"])?
+        validate_permissions(&h, &input.permissions)?
     } else {
         old.get("permissions")
     };

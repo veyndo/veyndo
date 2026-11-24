@@ -1,6 +1,7 @@
 //! Native lifecycle/history hooks around the shared record mutation engine; package and typed field validation stay with the caller.
 use crate::domain::{model_contract, persistence};
 use crate::store::records;
+use serde::Deserialize;
 use serde_json::Value;
 use veyndo_app_model::Entity;
 use veyndo_app_model::manifest::Manifest;
@@ -8,7 +9,17 @@ use veyndo_app_storage::{
     managed_hooks,
     mutations::{Mutation, WriteError},
 };
+use veyndo_core::document::{lenient, view};
 use veyndo_core::{Error, Result, bad, conflict};
+
+/// The JSON fields `apply` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ApplyInput {
+    #[serde(deserialize_with = "lenient")]
+    revision: Option<i64>,
+    fields: Value,
+}
 
 /// Writes one record through the shared mutation engine with lifecycle and history hooks.
 pub async fn apply(
@@ -20,11 +31,12 @@ pub async fn apply(
     value: &Value,
     replay: bool,
 ) -> Result<Value> {
+    let input: ApplyInput = view(value);
     let names = e.fields.iter().map(|f| f.name.as_str()).collect::<Vec<_>>();
     let mutation = Mutation {
         key: records::key(t, &m.id, &e.name, id),
-        expected_revision: value["revision"].as_i64().unwrap_or(0),
-        fields: &value["fields"],
+        expected_revision: input.revision.unwrap_or(0),
+        fields: &input.fields,
         declared_fields: &names,
         replay,
     };

@@ -1,7 +1,9 @@
 //! Private unit catalog scope is derived from the current employee/cart, never caller criteria; indexed before pagination.
 use crate::store::access::guard_conn;
 use crate::types::model::Access;
+use serde::Deserialize;
 use serde_json::{Value, json};
+use veyndo_core::document::{lenient, view};
 use veyndo_core::shop_scope::{header, tenant};
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad, conflict};
 use veyndo_shop::types::cart::stored;
@@ -50,10 +52,22 @@ pub async fn save(a: &State, h: &RequestContext, v: &Value) -> Result<Value> {
     tx.commit().await?;
     Ok(result)
 }
+/// The JSON fields `save_tx` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct SaveTxInput {
+    #[serde(deserialize_with = "lenient")]
+    unit_id: Option<String>,
+    product_ids: Value,
+    #[serde(deserialize_with = "lenient")]
+    revision: Option<i64>,
+}
+
 /// Same catalog admission and revision fence for direct edits and atomic releases.
 pub async fn save_tx(conn: &mut sqlx::PgConnection, t: &str, v: &Value) -> Result<Value> {
-    let unit = v["unitId"].as_str().ok_or(bad("Unit required"))?;
-    let ids: Vec<String> = serde_json::from_value(v["productIds"].clone())
+    let input: SaveTxInput = view(v);
+    let unit = input.unit_id.as_deref().ok_or(bad("Unit required"))?;
+    let ids: Vec<String> = serde_json::from_value(input.product_ids.clone())
         .map_err(|_| bad("Product ID list required"))?;
     if ids.len() > 1000 || ids.iter().collect::<std::collections::HashSet<_>>().len() != ids.len() {
         return Err(bad("Catalog edit accepts up to 1000 distinct product IDs"));
@@ -65,7 +79,7 @@ pub async fn save_tx(conn: &mut sqlx::PgConnection, t: &str, v: &Value) -> Resul
             .fetch_optional(&mut *conn)
             .await?;
     let revision = revision.ok_or(Error(StatusCode::NOT_FOUND, "Unit not found".into()))?;
-    if v["revision"].as_i64() != Some(revision) {
+    if input.revision != Some(revision) {
         return Err(conflict("Unit catalog changed; reload before saving"));
     }
     let count: i64 =

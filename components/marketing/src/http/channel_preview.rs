@@ -3,14 +3,24 @@ use crate::service::channel_preview::token;
 use axum::Json;
 use axum::extract::{Path, State};
 use axum::response::{IntoResponse, Redirect, Response};
+use serde::Deserialize;
 use serde_json::{Value, json};
 use sqlx::Row;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::host_names::links;
 use veyndo_core::request_context::HostShop;
 use veyndo_core::shop_scope::{channel, header, tenant};
 use veyndo_core::{Error, RequestContext, Result, StatusCode, bad, hash, uid};
 use veyndo_identity::{merchant, permit};
 use veyndo_runtime::tenant_scope::{Scope, scoped};
+
+/// The JSON fields `create` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct CreateInput {
+    #[serde(deserialize_with = "lenient")]
+    alias: Option<String>,
+}
 
 /// `POST /api/automation/channels/{id}/preview`: a one-use, sixty-second link for the merchant's own browser session.
 pub async fn create(
@@ -19,6 +29,7 @@ pub async fn create(
     Path(id): Path<String>,
     Json(v): Json<Value>,
 ) -> Result<Json<Value>> {
+    let input: CreateInput = view(&v);
     permit(&h, "channels.read")?;
     let t = merchant(&h)?;
     let credential = header(&h, "authorization")
@@ -37,7 +48,7 @@ pub async fn create(
             .fetch_optional(&a.db)
             .await?
             .ok_or(Error(StatusCode::NOT_FOUND, "Channel not found".into()))?;
-    let alias = v["alias"].as_str();
+    let alias = input.alias.as_deref();
     let origin = if let Some(alias) = alias {
         let own: bool = sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM hosted_frontends WHERE tenant=$1 AND channel=$2 AND alias=$3)")
             .bind(&t).bind(&id).bind(alias).fetch_one(&a.db).await?;

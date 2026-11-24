@@ -1,6 +1,8 @@
 //! The manifest schema a model answers in, specialised to the shop's languages, and the access a regeneration keeps.
 use crate::domain::native_lifecycle::generation_context;
+use serde::Deserialize;
 use serde_json::{Value, json};
+use veyndo_core::document::view;
 use veyndo_core::{Result, bad};
 use veyndo_identity::SCOPES;
 /// Adds the list and save actions every entity gets when a draft declares none; payment providers also get the supplied actions.
@@ -29,14 +31,24 @@ pub fn default_actions(m: &mut Value, payment: &[Value]) -> Result<()> {
     m["actions"] = json!(list);
     Ok(())
 }
+/// The JSON fields `preserve_access` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct PreserveAccessInput {
+    id: Value,
+    actions: Value,
+}
+
 /// Restricted model generation does not silently reopen existing actions to agents or weaken team scopes.
 pub fn preserve_access(old: &Value, next: &mut Value) {
-    if old["id"] != next["id"] {
+    let input: PreserveAccessInput = view(old);
+    if input.id != next["id"] {
         return;
     }
     if let Some(actions) = next["actions"].as_array_mut() {
         for action in actions {
-            if let Some(prior) = old["actions"]
+            if let Some(prior) = input
+                .actions
                 .as_array()
                 .and_then(|rows| rows.iter().find(|a| a["name"] == action["name"]))
             {

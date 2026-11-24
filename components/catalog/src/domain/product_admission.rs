@@ -1,6 +1,7 @@
 //! Admit native product edits and expand explicit category-only changes through the same revisioned editor.
 use serde::Deserialize;
 use serde_json::{Value, json};
+use veyndo_core::document::view;
 use veyndo_core::{Error, Result, bad};
 /// A change of category assignments only, against the clock the merchant read.
 #[derive(Deserialize)]
@@ -59,8 +60,18 @@ pub fn admit_product_write(v: &Value, create: bool) -> Result<()> {
 pub fn product_write_guidance() -> Value {
     json!({"categoryOnly":{"example":{"revision":1,"categoryIds":["selected_category"]},"semantics":"Replace only category assignments. Preserve existing category IDs when adding one. Read merchant.product.content first and use its original revision; optionally include its contentRevision. No translations, prices, inventory, media, identity or channel fields are changed. Cannot be combined with full product fields."},"fullEdit":"Read merchant.product.content; preserve revision, translations, extra and untouched catalog fields. Omit commerce for content-only changes. Product creation requires full metadata including catalog. Never invent metadata or refresh a reviewed revision."})
 }
+/// The JSON fields `category_assignment` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct CategoryAssignmentInput {
+    translations: Value,
+    extra: Value,
+    catalog: Value,
+}
+
 /// The full edit that replaces only the category assignments of the product as currently read.
 pub fn category_assignment(edit: &CategoryEdit, current: &Value) -> Result<Value> {
+    let args: CategoryAssignmentInput = view(current);
     // The native writer checks this original clock again under its product lock.
     // Do not substitute the freshly read revision and silently accept stale input.
     let (clock, expected) = edit
@@ -73,7 +84,7 @@ pub fn category_assignment(edit: &CategoryEdit, current: &Value) -> Result<Value
             "Product changed",
         ));
     }
-    let mut result = json!({"revision":edit.revision,"translations":current["translations"],"extra":current["extra"],"catalog":current["catalog"]});
+    let mut result = json!({"revision":edit.revision,"translations":args.translations,"extra":args.extra,"catalog":args.catalog});
     if let Some(revision) = edit.content_revision {
         result["contentRevision"] = json!(revision);
     }

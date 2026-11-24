@@ -1,7 +1,9 @@
 //! One allowlisted list-filter schema for model plans and MCP; no model-supplied SQL or tenant identity.
+use serde::Deserialize;
 use serde_json::{Value, json};
 use veyndo_app_platform::domain::extension_filter::decode;
 use veyndo_catalog::types::product_list::ProductCriteria;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::{Result, bad};
 use veyndo_orders::types::list_criteria::Criteria;
 
@@ -63,9 +65,18 @@ pub fn schema(entity: &str) -> Result<Value> {
     }
     Ok(json!({"type":"object","properties":fields,"additionalProperties":false}))
 }
+/// The JSON fields `validate` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ValidateInput {
+    #[serde(deserialize_with = "lenient")]
+    low_stock: Option<bool>,
+}
+
 /// Admits caller or model criteria and returns them without null placeholders.
 pub fn validate(entity: &str, v: &Value) -> Result<Value> {
-    if entity == "products" && v["lowStock"] == false {
+    let input: ValidateInput = view(v);
+    if entity == "products" && input.low_stock == Some(false) {
         return Err(bad("lowStock=false does not express a stock constraint"));
     }
     let fields = fields(entity)?;

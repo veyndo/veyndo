@@ -1,6 +1,8 @@
 //! Side-effect-free comparison of two rule conditions on a frozen Flow order input.
 use super::rules::Condition;
+use serde::Deserialize;
 use serde_json::{Value, json};
+use veyndo_core::document::{lenient, view};
 use veyndo_core::hash;
 use veyndo_shop::types::cart::{Cart, StoredCart};
 
@@ -9,22 +11,34 @@ pub fn digest(v: &Value) -> String {
     hash(&v.to_string())
 }
 
+/// The JSON fields `evaluate` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct EvaluateInput {
+    event: Value,
+    rule_context: Value,
+    #[serde(deserialize_with = "lenient")]
+    order_id: Option<String>,
+    cart_data: Value,
+}
+
 /// Evaluates both conditions on one frozen order input; anything incomplete is reported as unavailable, never guessed.
 pub fn evaluate(t: &str, d: &Value, before: &Condition, after: &Condition) -> Value {
+    let input: EvaluateInput = view(d);
     let unavailable = |reason| json!({"status":"unavailable","reason":reason});
-    if d["event"] != "order.placed" {
+    if input.event != "order.placed" {
         return unavailable("not_order_placed");
     }
-    let q = &d["ruleContext"];
+    let q = &input.rule_context;
     if !q["ruleFacts"].is_object()
         || !q["price"]["totalPrice"].is_number()
         || !q["lineItems"].is_array()
         || !q["ruleFacts"]["currentTime"].is_string()
-        || d["orderId"].as_str().is_none_or(str::is_empty)
+        || input.order_id.as_deref().is_none_or(str::is_empty)
     {
         return unavailable("incomplete_snapshot");
     }
-    let Ok(data) = serde_json::from_value::<Cart>(d["cartData"].clone()) else {
+    let Ok(data) = serde_json::from_value::<Cart>(input.cart_data.clone()) else {
         return unavailable("incomplete_snapshot");
     };
     let cart = StoredCart {
@@ -46,7 +60,7 @@ pub fn evaluate(t: &str, d: &Value, before: &Condition, after: &Condition) -> Va
     ) {
         (Ok(a), Ok(b)) => json!({"status":"evaluated","before":a,"after":b,
             "capturedAt":q["ruleFacts"]["currentTime"],
-            "snapshotDigest":digest(&json!({"cartData":d["cartData"],"ruleContext":q}))}),
+            "snapshotDigest":digest(&json!({"cartData":input.cart_data,"ruleContext":q}))}),
         _ => unavailable("required_facts_unavailable"),
     }
 }

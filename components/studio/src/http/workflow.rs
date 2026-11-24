@@ -1,8 +1,10 @@
 //! Revision-bound order workflow configuration used by installed apps and selective sandbox releases.
 use axum::Json;
 use axum::extract::State as Shared;
+use serde::Deserialize;
 use serde_json::{Value, json};
 use veyndo_app_platform::store::native_lifecycle::{current_order, validate_order_base};
+use veyndo_core::document::{lenient, view};
 use veyndo_core::shop_scope::header;
 use veyndo_core::{RequestContext, Result, State, bad, conflict};
 use veyndo_identity::{merchant, permit};
@@ -21,23 +23,33 @@ pub async fn get(Shared(a): Shared<State>, h: RequestContext) -> Result<Json<Val
         json!({"data":m,"revision":r,"mainLocale":settings.main_locale,"effectiveStates":effective.states}),
     ))
 }
+/// The JSON fields `save` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct SaveInput {
+    data: Value,
+    #[serde(deserialize_with = "lenient")]
+    revision: Option<i64>,
+}
+
 /// Saves the workflow at its revision; it never strands an active order state.
 pub async fn save(
     Shared(a): Shared<State>,
     h: RequestContext,
     Json(v): Json<Value>,
 ) -> Result<Json<Value>> {
+    let input: SaveInput = view(&v);
     let t = merchant(&h)?;
     permit(&h, "settings.write")?;
     let m: OrderMachine =
-        serde_json::from_value(v["data"].clone()).map_err(|_| bad("Invalid workflow schema"))?;
+        serde_json::from_value(input.data.clone()).map_err(|_| bad("Invalid workflow schema"))?;
     m.validate()?;
     if m.transitions.iter().any(|edge| edge.policy.is_some()) {
         return Err(bad(
             "App transition policies belong to a reviewed app package",
         ));
     }
-    let revision = v["revision"].as_i64().ok_or(bad("revision required"))?;
+    let revision = input.revision.ok_or(bad("revision required"))?;
     let mut tx = a.db.begin().await?;
     lock_config(&mut tx, &t).await?;
     sqlx::query("SELECT pg_advisory_xact_lock(hashtextextended($1,27))")

@@ -46,6 +46,13 @@ struct RoleChange {
     #[serde(deserialize_with = "lenient")]
     approve: Option<bool>,
 }
+/// The JSON fields `invoke` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct InvokeInput {
+    data: Value,
+}
+
 /// Lists, saves, inspects or deletes a tenant role; edits are revision checked and never delegate more than the actor holds.
 pub async fn invoke(
     a: &State,
@@ -54,6 +61,7 @@ pub async fn invoke(
     name: &str,
     v: &Value,
 ) -> Result<Value> {
+    let args: InvokeInput = view(v);
     if schema(name).is_none()
         || v.as_object().is_none_or(|o| {
             o.keys()
@@ -119,7 +127,7 @@ pub async fn invoke(
             .execute(&mut *tx)
             .await?;
     } else {
-        let d = &v["data"];
+        let d = &args.data;
         if d.as_object().is_none_or(|o| {
             o.len() != 3
                 || o.keys()

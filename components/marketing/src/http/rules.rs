@@ -3,7 +3,9 @@ use crate::domain::metadata::validate;
 use crate::store::{rule_entities, rule_history};
 use axum::Json;
 use axum::extract::{Path, State as Shared};
+use serde::Deserialize;
 use serde_json::{Value, json};
+use veyndo_core::document::{lenient, view};
 use veyndo_core::{RequestContext, Result, State, bad};
 use veyndo_identity::domain::permissions::allowed;
 use veyndo_identity::{merchant, permit};
@@ -48,6 +50,15 @@ pub async fn compare(
     Ok(Json(rule_history::compare(&a, &t, v).await?))
 }
 
+/// The JSON fields `save_facts` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct SaveFactsInput {
+    data: Value,
+    #[serde(deserialize_with = "lenient")]
+    revision: Option<i64>,
+}
+
 /// Saves the rule facts of one product, customer or order under its revision.
 pub async fn save_facts(
     Shared(a): Shared<State>,
@@ -55,11 +66,12 @@ pub async fn save_facts(
     Path((entity, id)): Path<(String, String)>,
     Json(v): Json<Value>,
 ) -> Result<Json<Value>> {
+    let input: SaveFactsInput = view(&v);
     let t = merchant(&h)?;
     permit(&h, fact_scope(&entity)?)?;
-    validate(&entity, &v["data"])?;
-    let rev = v["revision"].as_i64().ok_or(bad("Revision required"))?;
-    rule_entities::save(&a, &t, &entity, &id, &v["data"], rev).await?;
+    validate(&entity, &input.data)?;
+    let rev = input.revision.ok_or(bad("Revision required"))?;
+    rule_entities::save(&a, &t, &entity, &id, &input.data, rev).await?;
     Ok(Json(json!({"saved":true,"revision":rev+1})))
 }
 

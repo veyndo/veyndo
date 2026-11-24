@@ -3,6 +3,7 @@ use crate::store::access::{guard_conn, require};
 use serde::Deserialize;
 use serde_json::Value;
 use sqlx::Row;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::{RequestContext, Result, State, bad};
 use veyndo_pricing::domain::cart::Item;
 use veyndo_shop::ports::Carts;
@@ -12,18 +13,26 @@ struct Line {
     sku: String,
     quantity: u32,
 }
+/// The JSON fields `apply` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ApplyInput {
+    lines: Value,
+    #[serde(deserialize_with = "lenient")]
+    revision: Option<i64>,
+}
+
 pub async fn apply(carts: &dyn Carts, a: &State, h: &RequestContext, v: &Value) -> Result<Value> {
+    let input: ApplyInput = view(v);
     let c = carts.load(h).await?;
     let mut tx = a.db.begin().await?;
     let policy = guard_conn(&mut tx, h, &c)
         .await?
         .ok_or(bad("Select a company unit first"))?;
     require(&policy, "buy")?;
-    let items = resolve(&mut tx, &c.tenant, &v["lines"]).await?;
+    let items = resolve(&mut tx, &c.tenant, &input.lines).await?;
     tx.commit().await?;
-    let revision = v["revision"]
-        .as_i64()
-        .ok_or(bad("Cart revision required"))?;
+    let revision = input.revision.ok_or(bad("Cart revision required"))?;
     let c = carts.replace(h, items, Some(revision)).await?;
     carts.view(&c).await
 }

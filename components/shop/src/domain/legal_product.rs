@@ -1,8 +1,10 @@
 //! Explicit product safety/sector facts, with market-language fallback; no inference of certifications.
 use crate::types::legal::{Config, SECTORS};
 use crate::types::settings::Settings;
+use serde::Deserialize;
 use serde_json::Value;
 use veyndo_catalog::domain::content::translated_string;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::{Result, bad};
 pub const FIELDS: &[&str] = &[
     "manufacturer",
@@ -66,13 +68,25 @@ pub fn validate_product(v: &Value, s: &Settings) -> Result<()> {
     }
     Ok(())
 }
+/// The JSON fields `product_gaps` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ProductGapsInput {
+    compliance: Value,
+    #[serde(deserialize_with = "lenient")]
+    digital: Option<bool>,
+}
+
 pub fn product_gaps(extra: &Value, config: &Config, locale: &str, main: &str) -> Vec<String> {
-    let v = &extra["compliance"];
-    let sector = v["sector"].as_str().unwrap_or(if extra["digital"] == true {
-        "digital"
-    } else {
-        "general"
-    });
+    let input: ProductGapsInput = view(extra);
+    let v = &input.compliance;
+    let sector = v["sector"]
+        .as_str()
+        .unwrap_or(if input.digital == Some(true) {
+            "digital"
+        } else {
+            "general"
+        });
     let mut required = vec![];
     if sector != "digital" && sector != "food" {
         required.extend([

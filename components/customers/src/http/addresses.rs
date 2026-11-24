@@ -3,7 +3,9 @@ use crate::service::address_entries::{address_delete, address_list, address_save
 use crate::service::sessions::identify;
 use axum::Json;
 use axum::extract::{Path, State as Shared};
+use serde::Deserialize;
 use serde_json::Value;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::shop_scope::{session_digest, tenant};
 use veyndo_core::{RequestContext, Result, State, bad};
 
@@ -41,6 +43,14 @@ pub async fn save(
     Ok(Json(address_save(&a, &t, &e, Some(&id), &v, &h).await?))
 }
 
+/// The JSON fields `remove` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct RemoveInput {
+    #[serde(deserialize_with = "lenient")]
+    revision: Option<i64>,
+}
+
 /// `DELETE /store-api/account/addresses/{id}` at the expected revision.
 pub async fn remove(
     Shared(a): Shared<State>,
@@ -48,7 +58,8 @@ pub async fn remove(
     Path(id): Path<String>,
     Json(v): Json<Value>,
 ) -> Result<Json<Value>> {
+    let input: RemoveInput = view(&v);
     let (t, e) = customer(&a, &h).await?;
-    let revision = v["revision"].as_i64().ok_or(bad("revision required"))?;
+    let revision = input.revision.ok_or(bad("revision required"))?;
     Ok(Json(address_delete(&a, &t, &e, &id, revision, &h).await?))
 }

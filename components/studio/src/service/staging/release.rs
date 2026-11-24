@@ -16,6 +16,7 @@ use veyndo_app_platform::domain::core_extensions::configuration;
 use veyndo_app_platform::domain::entity_access::entity_access;
 use veyndo_app_platform::store::records::{get as get_record, lock_key};
 use veyndo_b2b::store::staging as b2b;
+use veyndo_core::document::view;
 use veyndo_core::history_context::context;
 use veyndo_core::shop_scope::header;
 use veyndo_core::{RequestContext, Result, bad, conflict, hash, uid};
@@ -94,6 +95,14 @@ async fn lock_units<H: ReleaseHost>(
     }
     Ok(())
 }
+/// The JSON fields `admit_selections` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct AdmitSelectionsInput {
+    stage: Value,
+    live: Value,
+}
+
 /// A selection must still be the reviewed staged value on an unchanged live baseline.
 fn admit_selections(
     selections: &[Selection],
@@ -102,12 +111,13 @@ fn admit_selections(
     actual: &Value,
     base: &Value,
 ) -> Result<()> {
+    let input: AdmitSelectionsInput = view(base);
     for s in selections {
         let value = current.get(&s.key).ok_or(bad("Unknown change"))?;
-        if hash(&value.to_string()) != s.digest || base["stage"].get(&s.key) == Some(value) {
+        if hash(&value.to_string()) != s.digest || input.stage.get(&s.key) == Some(value) {
             return Err(conflict("Staged change changed or was already published"));
         }
-        if actual.get(&s.key) != base["live"].get(&s.key) {
+        if actual.get(&s.key) != input.live.get(&s.key) {
             return Err(conflict("Live content changed; resolve before release"));
         }
     }

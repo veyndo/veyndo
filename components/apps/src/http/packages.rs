@@ -5,8 +5,10 @@ use crate::store::activation;
 use axum::Json;
 use axum::extract::{Path, State as Shared};
 use axum::response::IntoResponse;
+use serde::Deserialize;
 use serde_json::Value;
 use veyndo_app_storage::Scope;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::{RequestContext, Result, bad};
 use veyndo_identity::{merchant, permit};
 
@@ -32,6 +34,16 @@ pub async fn read(
     ))
 }
 
+/// The JSON fields `state` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct StateInput {
+    #[serde(deserialize_with = "lenient")]
+    active: Option<bool>,
+    #[serde(deserialize_with = "lenient")]
+    revision: Option<i64>,
+}
+
 /// Activates or deactivates an installed package under optimistic revision control.
 pub async fn state(
     Shared(a): Shared<Platform>,
@@ -39,9 +51,10 @@ pub async fn state(
     Path(id): Path<String>,
     Json(v): Json<Value>,
 ) -> Result<Json<Value>> {
+    let input: StateInput = view(&v);
     permit(&h, "users")?;
     let t = merchant(&h)?;
-    let active = v["active"].as_bool().ok_or(bad("active required"))?;
+    let active = input.active.ok_or(bad("active required"))?;
     let mut tx = a.db.begin().await?;
     let result = veyndo_app_storage::activation::set(
         &mut tx,
@@ -51,7 +64,7 @@ pub async fn state(
                 app: &id,
             },
             active,
-            revision: v["revision"].as_i64(),
+            revision: input.revision,
         },
         &activation::Host {
             tenant: &t,

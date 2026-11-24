@@ -1,8 +1,10 @@
 //! Package approval binds all requested permissions to a reviewed digest; current actor rights apply before every installation path.
 use crate::domain::approval;
+use serde::Deserialize;
 use serde_json::Value;
 use veyndo_app_model::admission::callback_scope;
 use veyndo_app_model::manifest::Manifest;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::{RequestContext, Result, bad, conflict};
 use veyndo_identity::permit;
 
@@ -48,13 +50,24 @@ pub fn actor_permissions(h: &RequestContext, m: &Manifest) -> Result<()> {
     }
     Ok(())
 }
+/// The JSON fields `approved` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ApprovedInput {
+    permissions: Value,
+    #[serde(deserialize_with = "lenient")]
+    approve: Option<bool>,
+    digest: Value,
+}
+
 /// Requires an approval of exactly the current digest and the complete permission list.
 pub fn approved(h: &RequestContext, m: &Manifest, v: &Value) -> Result<()> {
+    let input: ApprovedInput = view(v);
     actor_permissions(h, m)?;
     let mut expected = m.permissions.clone();
     expected.sort();
     expected.dedup();
-    let Some(requested) = v["permissions"].as_array() else {
+    let Some(requested) = input.permissions.as_array() else {
         return Err(conflict("Review and approve the package permissions"));
     };
     let mut actual = requested
@@ -63,7 +76,10 @@ pub fn approved(h: &RequestContext, m: &Manifest, v: &Value) -> Result<()> {
         .collect::<Option<Vec<_>>>()
         .ok_or(bad("Invalid consent permissions"))?;
     actual.sort();
-    if v["approve"] != true || v["digest"] != approval::canonical_digest(m) || actual != expected {
+    if input.approve != Some(true)
+        || input.digest != approval::canonical_digest(m)
+        || actual != expected
+    {
         return Err(conflict(
             "Package approval must match its current digest and complete permission list",
         ));

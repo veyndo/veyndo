@@ -1,9 +1,19 @@
 //! Exactly-once local observation projection; associations retain order/event evidence and simulation labels.
 use crate::knowledge::{sync_observation, sync_product};
+use serde::Deserialize;
 use serde_json::{Value, json};
 use sqlx::{Postgres, Row, Transaction};
 use veyndo_catalog::store::products;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::{Result, State, bad, hash};
+
+/// The JSON fields `project` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ProjectInput {
+    #[serde(deserialize_with = "lenient")]
+    order_id: Option<String>,
+}
 
 /// Projects one order event once; `external` tells whether an order waits for a confirmed capture.
 pub async fn project(
@@ -14,6 +24,7 @@ pub async fn project(
     data: &Value,
     external: fn(&Value) -> bool,
 ) -> Result<()> {
+    let input: ProjectInput = view(data);
     if kind != "order.placed" && kind != "payment.captured" {
         return Ok(());
     }
@@ -32,8 +43,9 @@ pub async fn project(
     if fresh == 0 {
         return Ok(());
     }
-    let id = data["orderId"]
-        .as_str()
+    let id = input
+        .order_id
+        .as_deref()
         .ok_or(bad("Order event lacks ID"))?;
     let order: Value = sqlx::query_scalar("SELECT data FROM orders WHERE tenant=$1 AND id=$2")
         .bind(t)

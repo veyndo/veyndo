@@ -2,8 +2,10 @@
 use crate::ports::SignIn;
 use crate::service::address_entries::address_get;
 use crate::service::sessions;
+use serde::Deserialize;
 use serde_json::{Value, json};
 use sqlx::Row;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::shop_scope::{tenant, token};
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad, conflict, uid};
 use veyndo_identity::domain::credentials::verify_password;
@@ -12,11 +14,22 @@ use veyndo_shop::domain::checkout_selection::resolve_selection;
 use veyndo_shop::store::settings::scoped_locked;
 use veyndo_shop::types::cart::{selection, stored};
 
+/// The JSON fields `login` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct LoginInput {
+    #[serde(deserialize_with = "lenient")]
+    email: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    password: Option<String>,
+}
+
 /// Verifies the buyer's credentials, binds the open cart to the account with its default addresses and payment method, and rotates the cart token; returns the priced cart and a customer session.
 pub async fn login(host: &dyn SignIn, a: &State, h: &RequestContext, v: &Value) -> Result<Value> {
+    let input: LoginInput = view(v);
     let t = tenant(h)?;
-    let email = v["email"].as_str().unwrap_or("");
-    let password = v["password"].as_str().unwrap_or("");
+    let email = input.email.as_deref().unwrap_or("");
+    let password = input.password.as_deref().unwrap_or("");
     let r = sqlx::query("SELECT * FROM customers WHERE tenant=$1 AND email=$2 AND active")
         .bind(&t)
         .bind(email)

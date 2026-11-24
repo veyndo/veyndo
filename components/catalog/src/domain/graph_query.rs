@@ -1,5 +1,7 @@
 //! Saved category predicates select only current confirmed public source claims; no inference at browse time.
+use serde::Deserialize;
 use serde_json::Value;
+use veyndo_core::document::view;
 use veyndo_core::localized::Languages;
 use veyndo_core::{Result, bad};
 
@@ -7,13 +9,21 @@ pub const TYPES: &[&str] = &[
     "intent", "problem", "occasion", "audience", "material", "property",
 ];
 
+/// The JSON fields `validate` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ValidateInput {
+    r#type: Value,
+}
+
 /// A saved fact query belongs to a listing, names a supported node type and has text in the main language.
 pub fn validate(data: &Value, languages: Languages) -> Result<()> {
+    let input: ValidateInput = view(data);
     let Some(query) = data.get("graphQuery").filter(|v| !v.is_null()) else {
         return Ok(());
     };
     let object = query.as_object().ok_or(bad("Invalid saved fact query"))?;
-    if data["type"] != "page"
+    if input.r#type != "page"
         || object.len() != 3
         || object
             .keys()

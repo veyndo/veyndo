@@ -1,6 +1,8 @@
 //! Entries of the address book: country admission against the shop settings and history attribution, around the address book persistence.
 use crate::service::address_book;
+use serde::Deserialize;
 use serde_json::{Value, json};
+use veyndo_core::document::{lenient, view};
 use veyndo_core::history_context::{context, customer_context};
 use veyndo_core::shop_scope::header;
 use veyndo_core::{RequestContext, Result, State, bad};
@@ -12,6 +14,13 @@ use veyndo_shop::service::read_cache::settings;
 pub async fn address_list(a: &State, t: &str, email: &str) -> Result<Value> {
     Ok(json!(address_book::list(a, t, email).await?))
 }
+/// The JSON fields `address_save` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct AddressSaveInput {
+    address: Value,
+}
+
 /// Validates an address against the shop countries and saves it, attributed to the merchant or the customer.
 pub async fn address_save(
     a: &State,
@@ -21,8 +30,9 @@ pub async fn address_save(
     v: &Value,
     h: &RequestContext,
 ) -> Result<Value> {
+    let input: AddressSaveInput = view(v);
     let mut address: Address =
-        serde_json::from_value(v["address"].clone()).map_err(|_| bad("Invalid address"))?;
+        serde_json::from_value(input.address.clone()).map_err(|_| bad("Invalid address"))?;
     address.validate()?;
     let (s, _) = settings(a, t, "default").await?;
     validate_address(
@@ -54,6 +64,18 @@ pub async fn address_save_conn(
 ) -> Result<Value> {
     address_store_conn(conn, t, email, id, v, address).await
 }
+/// The JSON fields `address_store_conn` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct AddressStoreConnInput {
+    #[serde(deserialize_with = "lenient")]
+    revision: Option<i64>,
+    #[serde(deserialize_with = "lenient")]
+    default_billing: Option<bool>,
+    #[serde(deserialize_with = "lenient")]
+    default_shipping: Option<bool>,
+}
+
 /// Persists the address through the address book and announces the change.
 async fn address_store_conn(
     conn: &mut sqlx::PgConnection,
@@ -63,15 +85,16 @@ async fn address_store_conn(
     v: &Value,
     address: &Address,
 ) -> Result<Value> {
+    let input: AddressStoreConnInput = view(v);
     let address_id = address_book::save(
         conn,
         t,
         email,
         address_book::Save {
             id,
-            revision: v["revision"].as_i64(),
-            default_billing: v["defaultBilling"].as_bool().unwrap_or(false),
-            default_shipping: v["defaultShipping"].as_bool().unwrap_or(false),
+            revision: input.revision,
+            default_billing: input.default_billing.unwrap_or(false),
+            default_shipping: input.default_shipping.unwrap_or(false),
             announce: true,
         },
         address,

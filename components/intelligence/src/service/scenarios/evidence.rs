@@ -1,7 +1,9 @@
 //! Scenario evidence uses the release owner's configuration projection, never orders or inventory.
 use crate::ports::AgentHost;
+use serde::Deserialize;
 use serde_json::Value;
 use veyndo_core::Result;
+use veyndo_core::document::{lenient, view};
 
 pub async fn capture<H: AgentHost>(host: &H, t: &str) -> Option<String> {
     // Evidence is diagnostic: lock contention or the release projection's size
@@ -22,17 +24,26 @@ pub async fn capture<H: AgentHost>(host: &H, t: &str) -> Option<String> {
 async fn snapshot<H: AgentHost>(host: &H, t: &str) -> Result<String> {
     host.configuration_digest(t).await
 }
+/// The JSON fields `review` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ReviewInput {
+    #[serde(deserialize_with = "lenient")]
+    started_digest: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    finished_digest: Option<String>,
+    schema_version: Value,
+}
+
 pub fn review(evidence: &Value, current: Option<&str>) -> &'static str {
-    let Some(started) = evidence["startedDigest"].as_str().filter(|s| !s.is_empty()) else {
+    let input: ReviewInput = view(evidence);
+    let Some(started) = input.started_digest.as_deref().filter(|s| !s.is_empty()) else {
         return "unverified";
     };
-    let Some(finished) = evidence["finishedDigest"]
-        .as_str()
-        .filter(|s| !s.is_empty())
-    else {
+    let Some(finished) = input.finished_digest.as_deref().filter(|s| !s.is_empty()) else {
         return "unverified";
     };
-    if current.is_none() || evidence["schemaVersion"] != 1 {
+    if current.is_none() || input.schema_version != 1 {
         "unverified"
     } else if started != finished {
         "changed_during_run"

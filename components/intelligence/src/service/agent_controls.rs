@@ -1,8 +1,10 @@
 //! Live-only agent stop and existing-key admission; no control becomes a sandbox release or credential snapshot.
+use serde::Deserialize;
 use serde_json::{Value, json};
 use sqlx::Row;
 use veyndo_app_model::declarations::identifier;
 use veyndo_cognition::inference::budget::Authority;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::model_contract::validate_native;
 use veyndo_core::shop_scope::{header, tenant};
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad, conflict};
@@ -103,8 +105,21 @@ pub async fn admit_key(a: &State, h: &RequestContext, path: &str, method: &str) 
     }
     Ok(())
 }
+/// The JSON fields `invoke` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct InvokeInput {
+    #[serde(deserialize_with = "lenient")]
+    approve: Option<bool>,
+    #[serde(deserialize_with = "lenient")]
+    revision: Option<i64>,
+    #[serde(deserialize_with = "lenient")]
+    stopped: Option<bool>,
+}
+
 /// Reads or changes the live shop's agent stop state.
 pub async fn invoke(a: &State, h: &RequestContext, name: &str, v: &Value) -> Result<Value> {
+    let input: InvokeInput = view(v);
     validate_native(&schema(name).ok_or(bad("Unknown agent control"))?, v)?;
     if !visible(h) {
         return Err(Error(
@@ -112,7 +127,7 @@ pub async fn invoke(a: &State, h: &RequestContext, name: &str, v: &Value) -> Res
             "Personal AI administration permission required".into(),
         ));
     }
-    if name.ends_with("control") && v["approve"] != true {
+    if name.ends_with("control") && input.approve != Some(true) {
         return Err(bad("Explicit approval required for agent controls"));
     }
     let t = merchant(h)?;
@@ -134,10 +149,10 @@ pub async fn invoke(a: &State, h: &RequestContext, name: &str, v: &Value) -> Res
     if name.ends_with("status") {
         return Ok(json!({"stopped":stopped,"revision":revision,"liveShop":live}));
     }
-    if v["revision"].as_i64() != Some(revision) {
+    if input.revision != Some(revision) {
         return Err(conflict("Agent controls changed; reload before confirming"));
     }
-    let stopped = v["stopped"].as_bool().unwrap();
+    let stopped = input.stopped.unwrap();
     sqlx::query(
         "UPDATE tenants SET agents_stopped=$2,agents_revision=agents_revision+1 WHERE id=$1",
     )

@@ -1,6 +1,8 @@
 //! Translate only human-readable text; preserve identifiers, URLs, rich structure and source specification keys.
 use crate::domain::rich::validate_rich;
+use serde::Deserialize;
 use serde_json::{Value, json};
+use veyndo_core::document::view;
 use veyndo_core::{Result, bad};
 
 /// The texts of a product in the source language, as far as they are stored.
@@ -76,11 +78,20 @@ pub fn texts(value: &Value) -> Vec<(String, String)> {
     visit(value, "", &mut out);
     out
 }
+/// The JSON fields `translated` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct TranslatedInput {
+    translations: Value,
+}
+
 /// Applies a model response to the source: exactly the known paths, each once, within the product limits.
 /// Anything else is refused, so the model cannot add, drop or restructure fields.
 pub fn translated(source: &Value, response: &Value) -> Result<Value> {
+    let input: TranslatedInput = view(response);
     let original = texts(source);
-    let entries = response["translations"]
+    let entries = input
+        .translations
         .as_array()
         .ok_or(bad("Translation response missing"))?;
     if entries.len() != original.len() {

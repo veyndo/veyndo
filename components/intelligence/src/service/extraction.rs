@@ -2,40 +2,76 @@
 use super::claims::propose_in;
 use super::models::{Models, choice};
 use crate::store::evidence::NODE_TYPES;
+use serde::Deserialize;
 use serde_json::{Value, json};
 use sqlx::Row;
 use veyndo_core::admission::reserve_ai_attempt;
 use veyndo_core::database::lease::Lease;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::{Error, RequestContext, Result, StatusCode, bad};
 use veyndo_identity::{merchant, permit};
 
+/// The JSON fields `supported` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct SupportedInput {
+    #[serde(deserialize_with = "lenient")]
+    quote: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    text: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    node_type: Option<String>,
+}
+
 /// Whether a model candidate quotes one supplied chunk exactly and names a known claim type.
 fn supported(c: &Value, chunks: &[String]) -> bool {
-    c["quote"]
-        .as_str()
+    let input: SupportedInput = view(c);
+    input
+        .quote
+        .as_deref()
         .is_some_and(|q| !q.trim().is_empty() && chunks.iter().any(|text| text.contains(q)))
-        && c["text"]
-            .as_str()
+        && input
+            .text
+            .as_deref()
             .is_some_and(|s| !s.is_empty() && s.len() <= 1200)
-        && c["nodeType"]
-            .as_str()
+        && input
+            .node_type
+            .as_deref()
             .is_some_and(|t| NODE_TYPES.contains(&t))
 }
+/// The JSON fields `extract` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ExtractInput {
+    #[serde(deserialize_with = "lenient")]
+    source_id: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    product_id: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    locale: Option<String>,
+}
+
 /// Extracts reviewable claim candidates from one source in one language.
 pub async fn extract(m: Models<'_>, h: &RequestContext, v: &Value) -> Result<Value> {
+    let input: ExtractInput = view(v);
     let t = merchant(h)?;
     permit(h, "knowledge.write")?;
     permit(h, "knowledge.read")?;
     let a = m.core;
-    let source = v["sourceId"].as_str().ok_or(bad("Source ID required"))?;
+    let source = input
+        .source_id
+        .as_deref()
+        .ok_or(bad("Source ID required"))?;
     let row=sqlx::query("SELECT content_hash,product_id,locale FROM knowledge_documents WHERE tenant=$1 AND id=$2 AND NOT archived").bind(&t).bind(source).fetch_optional(&a.db).await?.ok_or(Error(StatusCode::NOT_FOUND,"Source not found".into()))?;
-    let product = v["productId"]
-        .as_str()
+    let product = input
+        .product_id
+        .as_deref()
         .map(str::to_owned)
         .or(row.get::<Option<String>, _>("product_id"))
         .ok_or(bad("Extraction requires a product reference"))?;
-    let locale = v["locale"]
-        .as_str()
+    let locale = input
+        .locale
+        .as_deref()
         .map(str::to_owned)
         .unwrap_or(row.get("locale"));
     let chunks:Vec<String>=sqlx::query_scalar("SELECT text FROM knowledge_chunks WHERE tenant=$1 AND document_id=$2 AND locale=$3 ORDER BY position LIMIT 16").bind(&t).bind(source).bind(&locale).fetch_all(&a.db).await?;

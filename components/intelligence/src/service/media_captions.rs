@@ -92,7 +92,16 @@ pub async fn prepare(
         json!({"caption":result.value["caption"],"alt":result.value["alt"],"locale":locale,"basis":basis,"promptId":"media-caption@1","model":result.model}),
     )
 }
+/// The JSON fields `validate_output` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ValidateOutputInput {
+    #[serde(deserialize_with = "lenient")]
+    caption: Option<String>,
+}
+
 fn validate_output(v: &Value) -> Result<()> {
+    let input: ValidateOutputInput = view(v);
     validate_native(&output_schema(), v)?;
     for (field, limit) in [("caption", 600), ("alt", 400)] {
         let s = v[field].as_str().ok_or(bad("Invalid caption proposal"))?;
@@ -100,7 +109,7 @@ fn validate_output(v: &Value) -> Result<()> {
             return Err(bad("Caption proposal must be bounded plain text"));
         }
     }
-    if v["caption"].as_str().unwrap().trim().is_empty() {
+    if input.caption.as_deref().unwrap().trim().is_empty() {
         return Err(bad("Caption proposal is empty"));
     }
     Ok(())

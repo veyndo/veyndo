@@ -1,9 +1,21 @@
 //! Scheduled Flow results become native reviewable tasks; only personal approval supplies execution authority.
+use serde::Deserialize;
 use serde_json::{Value, json};
+use veyndo_core::document::{lenient, view};
 use veyndo_core::shop_scope::{channel as channel_id, header};
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad, conflict};
 use veyndo_identity::{SCOPES, allowed};
 use veyndo_marketing::store::flow_access::proposal_headers;
+
+/// The JSON fields `persist` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct PersistInput {
+    instruction: Value,
+    locale: Value,
+    #[serde(deserialize_with = "lenient")]
+    flow_template_limit: Option<u64>,
+}
 
 /// Publishes a scheduled flow's planning result as a reviewable task under the flow job's lease.
 pub async fn persist(
@@ -13,6 +25,7 @@ pub async fn persist(
     evidence: &Value,
     original: &RequestContext,
 ) -> Result<()> {
+    let input: PersistInput = view(evidence);
     let actor = header(original, "x-rac-user").ok_or(bad("Flow actor required"))?;
     let job = header(original, "x-rac-flow-job").ok_or(bad("Flow job required"))?;
     // Inference may outlive a membership/permission change. Never publish evidence
@@ -29,7 +42,7 @@ pub async fn persist(
             "Flow owner permissions changed during planning".into(),
         ));
     }
-    let request = json!({"instruction":evidence["instruction"],"locale":evidence["locale"],"channel":channel_id(original),"source":"flow","sourceJobId":job});
+    let request = json!({"instruction":input.instruction,"locale":input.locale,"channel":channel_id(original),"source":"flow","sourceJobId":job});
     let mut tx = a.db.begin_privileged().await?;
     // The same live-shop lock as enqueue/approval fences completion against stop.
     let stopped: bool = veyndo_core::tenants::agents_stopped_locked(&mut *tx, t).await?;
@@ -46,7 +59,7 @@ pub async fn persist(
     if held != Some(true) {
         return Err(conflict("Flow worker lost its lease"));
     }
-    if let Some(limit) = evidence["flowTemplateLimit"].as_u64() {
+    if let Some(limit) = input.flow_template_limit {
         // Preparation uses no model call. Bound its saved review queue under the
         // same live-shop lock; concurrent workers cannot each spend the last slot.
         if !(1..=100).contains(&limit) {

@@ -3,10 +3,20 @@ use crate::domain::settlements;
 use crate::store::attempts::attempt;
 use crate::store::jobs::enqueue_tx;
 use crate::store::{capture_admission, refund_allocation};
+use serde::Deserialize;
 use serde_json::{Value, json};
+use veyndo_core::document::{lenient, view};
 use veyndo_core::shop_scope::{tenant, token};
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad, conflict, hash};
 use veyndo_kernel::verified_kernel;
+
+/// The JSON fields `enqueue` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct EnqueueInput {
+    #[serde(deserialize_with = "lenient")]
+    amount_minor: Option<i64>,
+}
 
 pub async fn enqueue(
     a: &State,
@@ -16,6 +26,7 @@ pub async fn enqueue(
     key: &str,
     v: &Value,
 ) -> Result<Value> {
+    let input: EnqueueInput = view(v);
     let t = tenant(h)?;
     let mut tx = a.db.begin().await?;
     let r = sqlx::query("SELECT * FROM payment_attempts WHERE tenant=$1 AND id=$2 FOR UPDATE")
@@ -45,8 +56,8 @@ pub async fn enqueue(
         if op == "capture" {
             capture_admission::validate(&mut tx, &p, v).await?;
         } else if op == "refund" {
-            let amount = v["amountMinor"]
-                .as_i64()
+            let amount = input
+                .amount_minor
                 .filter(|v| *v > 0)
                 .ok_or(bad("Positive amountMinor required"))?;
             let reserved:i64=sqlx::query_scalar("SELECT coalesce(sum((request->>'amountMinor')::bigint),0)::bigint FROM payment_jobs WHERE tenant=$1 AND attempt_id=$2 AND operation='refund' AND state IN ('queued','running','uncertain')").bind(&t).bind(id).fetch_one(&mut *tx).await?;

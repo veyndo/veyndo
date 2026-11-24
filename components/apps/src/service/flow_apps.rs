@@ -1,9 +1,11 @@
 //! App steps of flows use the same permission and schema gateway as HTTP and MCP: admission, installed-package checks, upgrade safety and argument binding.
 use crate::domain::{action_admission, core_extensions, field_values};
+use serde::Deserialize;
 use serde_json::{Value, json};
 use sqlx::Row;
 use veyndo_app_model::Action;
 use veyndo_app_model::manifest::Manifest;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::model_contract::validate as validate_input;
 use veyndo_core::{RequestContext, Result, bad, conflict};
 use veyndo_identity::permit;
@@ -170,6 +172,14 @@ pub async fn validate_replacement(
     Ok(())
 }
 
+/// The JSON fields `arguments` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ArgumentsInput {
+    #[serde(deserialize_with = "lenient")]
+    order_id: Option<String>,
+}
+
 /// Binds the declared inputs of an app action: the canonical order ID of order-bound events, kind, request key, event and template.
 pub fn arguments(
     action: &Action,
@@ -178,13 +188,14 @@ pub fn arguments(
     event: &Value,
     kind: &str,
 ) -> Value {
+    let input: ArgumentsInput = view(event);
     let mut args = base.clone();
     let props = &action.input_schema["properties"];
     // Native order-bound events supply their canonical ID; explicit non-empty
     // merchant arguments remain unchanged. No string interpolation or AI identity.
     if props.get("orderId").is_some()
         && args["orderId"].as_str().is_none_or(str::is_empty)
-        && let Some(id) = event["orderId"].as_str().filter(|id| !id.is_empty())
+        && let Some(id) = input.order_id.as_deref().filter(|id| !id.is_empty())
     {
         args["orderId"] = json!(id);
     }

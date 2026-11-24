@@ -6,6 +6,7 @@ use axum::extract::{Path, State as Shared};
 use serde::Deserialize;
 use serde_json::{Value, json};
 use veyndo_checkout::store::cart_load::load as load_cart;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::{RequestContext, Result, State, bad, conflict};
 use veyndo_identity::{merchant, permit};
 use veyndo_marketing::service::conditions::validate_condition;
@@ -123,8 +124,17 @@ pub fn schema(name: &str) -> Option<Value> {
         json!({"type":"object","properties":properties,"required":required,"additionalProperties":false}),
     )
 }
+/// The JSON fields `invoke` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct InvokeInput {
+    #[serde(deserialize_with = "lenient")]
+    id: Option<String>,
+}
+
 /// Runs a legal capability through the same handlers as HTTP.
 pub async fn invoke(a: &State, h: &RequestContext, name: &str, v: &Value) -> Result<Value> {
+    let input: InvokeInput = view(v);
     match name {
         "privacy.policy" => Ok(policy(Shared(a.clone()), h.clone()).await?.0),
         "privacy.consent" => Ok(write(
@@ -152,7 +162,13 @@ pub async fn invoke(a: &State, h: &RequestContext, name: &str, v: &Value) -> Res
         "merchant.legal.review" => Ok(update(
             Shared(a.clone()),
             h.clone(),
-            Path(v["id"].as_str().ok_or(bad("Request ID required"))?.into()),
+            Path(
+                input
+                    .id
+                    .as_deref()
+                    .ok_or(bad("Request ID required"))?
+                    .into(),
+            ),
             Json(v.clone()),
         )
         .await?

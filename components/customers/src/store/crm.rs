@@ -4,7 +4,7 @@ use crate::store::address_restore;
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 use sqlx::Row;
-use veyndo_core::document::view;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::shop_scope::header;
 use veyndo_core::{RequestContext, Result, State, bad, conflict, hash, history_context, uid};
 use veyndo_identity::domain::credentials::email as email_of;
@@ -142,6 +142,18 @@ pub async fn create(
 }
 
 // Imported address books share native validation/storage, without ordinary address-change workflows.
+/// The JSON fields `save_address` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct SaveAddressInput {
+    #[serde(deserialize_with = "lenient")]
+    revision: Option<i64>,
+    #[serde(deserialize_with = "lenient")]
+    default_billing: Option<bool>,
+    #[serde(deserialize_with = "lenient")]
+    default_shipping: Option<bool>,
+}
+
 async fn save_address(
     conn: &mut sqlx::PgConnection,
     tenant: &str,
@@ -150,15 +162,16 @@ async fn save_address(
     flags: &Value,
     address: &Address,
 ) -> Result<()> {
+    let input: SaveAddressInput = view(flags);
     address_book::save(
         conn,
         tenant,
         email,
         Save {
             id: None,
-            revision: flags["revision"].as_i64(),
-            default_billing: flags["defaultBilling"].as_bool().unwrap_or(false),
-            default_shipping: flags["defaultShipping"].as_bool().unwrap_or(false),
+            revision: input.revision,
+            default_billing: input.default_billing.unwrap_or(false),
+            default_shipping: input.default_shipping.unwrap_or(false),
             announce: !imported,
         },
         address,

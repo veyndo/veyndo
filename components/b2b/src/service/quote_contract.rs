@@ -1,12 +1,26 @@
 //! Accepted offer prices feed the existing currency/tax calculator; checkout consumes the offer atomically.
 use crate::store::access::{guard_conn, require};
 use crate::store::purchase;
+use serde::Deserialize;
 use serde_json::{Value, json};
 use sqlx::Row;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::history_context as history;
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad, conflict};
 use veyndo_shop::ports::Carts;
 use veyndo_shop::types::cart::{StoredCart, stored};
+/// The JSON fields `select` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct SelectInput {
+    #[serde(deserialize_with = "lenient")]
+    cart_revision: Option<i64>,
+    #[serde(deserialize_with = "lenient")]
+    id: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    revision: Option<i64>,
+}
+
 pub async fn select(
     carts: &dyn Carts,
     a: &State,
@@ -14,6 +28,7 @@ pub async fn select(
     v: &Value,
     accept: bool,
 ) -> Result<Value> {
+    let input: SelectInput = view(v);
     let mut c = carts.load(h).await?;
     let mut tx = a.db.begin().await?;
     history::context(&mut tx, h, "b2b.procurement").await?;
@@ -23,7 +38,7 @@ pub async fn select(
         .fetch_one(&mut *tx)
         .await?;
     c = stored(&row)?;
-    if c.status != "open" || v["cartRevision"].as_i64() != Some(c.revision) {
+    if c.status != "open" || input.cart_revision != Some(c.revision) {
         return Err(conflict("Cart changed; review before selecting the offer"));
     }
     purchase::lock_unit(&mut tx, &c).await?;
@@ -33,7 +48,7 @@ pub async fn select(
     require(&policy, "quotes")?;
     let context = c.data.b2b.as_mut().unwrap();
     if accept {
-        let id = v["id"].as_str().ok_or(bad("Quote required"))?;
+        let id = input.id.as_deref().ok_or(bad("Quote required"))?;
         let row=sqlx::query("SELECT buyer_id,unit_id,cart_id,state,revision,data,(data->>'validUntil')::timestamptz>now() AS valid FROM b2b_quotes WHERE tenant=$1 AND id=$2 FOR UPDATE").bind(&c.tenant).bind(id).fetch_optional(&mut *tx).await?.ok_or(Error(StatusCode::NOT_FOUND,"Quote not found".into()))?;
         if row.get::<String, _>("buyer_id") != context.customer_id
             || row.get::<String, _>("unit_id") != context.unit_id
@@ -46,7 +61,7 @@ pub async fn select(
         }
         let data: Value = row.get("data");
         if row.get::<String, _>("state") != "offered"
-            || v["revision"].as_i64() != Some(row.get::<i64, _>("revision"))
+            || input.revision != Some(row.get::<i64, _>("revision"))
             || !row.get::<Option<bool>, _>("valid").unwrap_or(false)
             || data["currency"] != c.data.currency
             || data["items"] != json!(c.data.items)
