@@ -9,7 +9,6 @@ pub(crate) use axum::{
 };
 pub(crate) use serde::{Deserialize, Serialize};
 pub(crate) use serde_json::{Value, json};
-pub(crate) use sha2::{Digest, Sha256};
 pub(crate) use sqlx::{Row, postgres::PgPoolOptions};
 pub(crate) use std::{collections::HashMap, env, sync::Arc};
 pub(crate) use uuid::Uuid;

@@ -970,8 +970,9 @@ behavioral coverage is implied.
 `migrations/079-knowledge-lexical-indexes.sql` owns transactional word projection
 backfill/triggers and composite source containment. `components/intelligence/src/knowledge/search.sql`
 and `components/intelligence/src/store/source_search.sql` narrow candidates, then hydrate/rank/admit current
-native records. `src/documents/retrieval.rs` remains the public/private retrieval
-adapter. `scripts/lexical_search.py`, registered in the existing integration suite
+native records. `components/intelligence/src/service/retrieval.rs` remains the public/private
+retrieval owner; product questions, the no-model preview and the product knowledge view use it
+from `components/intelligence/src/service/product_questions.rs` behind the `KnowledgeHost` port. `scripts/lexical_search.py`, registered in the existing integration suite
 registry, checks real non-owner plans, native edits, withdrawal, source deletion
 and foreign-context rejection. These are rebuildable indexes, not another source
 registry. See [the performance and migration boundary](cognitive-commerce.md#lexical-candidates-under-forced-row-security).

@@ -15,8 +15,8 @@ run SQL without being in a `store` folder. Both numbers only fall.
 | --- | ---: | ---: | ---: | ---: | ---: | --- | ---: |
 | core | 3980 | 0 | 4 | 12 | 10 | none | 10 |
 | identity | 4071 | 5 | 88 | 16 | 13 | apps (7), catalog (11), checkout (1), core (183), customers (1), host (2), inference (2), intelligence (2), marketing (5), shop (12) | 11 |
-| shop | 5211 | 23 | 93 | 16 | 15 | apps (4), catalog (8), checkout (2), core (180), host (4), identity (3), inventory (1), marketing (7), payments (1), pricing (22), shipping (4) | 19 |
-| catalog | 7908 | 29 | 176 | 10 | 11 | apps (9), b2b (1), checkout (5), core (260), customers (1), identity (17), intelligence (4), marketing (9), pricing (23), protocols (1), shop (6), studio (4) | 13 |
+| shop | 5210 | 23 | 93 | 16 | 15 | apps (4), catalog (8), checkout (2), core (180), host (4), identity (3), inventory (1), marketing (7), payments (1), pricing (22), shipping (4) | 19 |
+| catalog | 7473 | 27 | 161 | 7 | 11 | apps (6), b2b (1), checkout (5), core (247), customers (1), identity (14), intelligence (1), marketing (9), pricing (23), protocols (1), shop (5), studio (4) | 12 |
 | inventory | 504 | 2 | 3 | 1 | 2 | catalog (1), checkout (2), core (22), pricing (3) | 2 |
 | pricing | 3513 | 6 | 17 | 4 | 2 | catalog (1), checkout (4), core (63), identity (4), shop (7) | 4 |
 | shipping | 779 | 3 | 52 | 0 | 0 | catalog (5), core (28), identity (2), pricing (2), shop (5) | 6 |
@@ -25,15 +25,15 @@ run SQL without being in a `store` folder. Both numbers only fall.
 | orders | 4983 | 10 | 306 | 5 | 7 | apps (5), b2b (1), catalog (11), checkout (6), core (160), customers (4), identity (30), inventory (1), marketing (5), payments (2), pricing (5), shipping (2), shop (9), studio (1) | 10 |
 | payments | 5030 | 1 | 263 | 12 | 7 | apps (6), core (175), host (1), identity (7), inventory (1), orders (1), pos (1), pricing (8), shop (7) | 14 |
 | marketing | 6135 | 17 | 327 | 11 | 8 | apps (5), automation (19), b2b (2), catalog (3), checkout (2), core (125), identity (22), inference (1), intelligence (4), orders (1), payments (1), pos (1), pricing (12), shop (26) | 24 |
-| b2b | 2796 | 2 | 108 | 8 | 8 | apps (6), checkout (3), core (74), customers (2), identity (13), orders (1), pos (1), pricing (7), shop (36) | 8 |
+| b2b | 2806 | 2 | 108 | 8 | 8 | apps (6), checkout (3), core (74), customers (2), identity (13), orders (1), pos (1), pricing (7), shop (36) | 8 |
 | pos | 1334 | 1 | 71 | 4 | 0 | catalog (4), checkout (9), core (42), customers (1), identity (4), intelligence (1), marketing (3), orders (2), payments (2), pricing (5), shop (20), studio (2) | 8 |
 | apps | 15521 | 47 | 440 | 28 | 22 | b2b (3), catalog (11), checkout (7), core (396), host (7), identity (67), inference (4), intelligence (7), inventory (2), marketing (14), orders (17), payments (7), pricing (6), shipping (2), shop (37), studio (8) | 21 |
 | automation | 1443 | 8 | 97 | 0 | 0 | core (2) | 0 |
 | inference | 2024 | 9 | 124 | 2 | 0 | core (13) | 5 |
-| intelligence | 11380 | 35 | 592 | 27 | 28 | apps (11), catalog (13), checkout (12), core (350), customers (1), identity (31), inference (9), inventory (1), marketing (14), payments (1), pricing (21), protocols (4), shipping (3), shop (50), studio (4) | 25 |
-| studio | 7058 | 10 | 387 | 22 | 5 | apps (33), b2b (4), catalog (31), core (136), customers (7), identity (56), inference (3), intelligence (22), marketing (15), orders (20), pos (1), pricing (12), shop (31) | 43 |
-| protocols | 2755 | 16 | 132 | 2 | 0 | apps (23), b2b (9), catalog (9), checkout (20), core (104), customers (1), host (2), identity (32), inference (1), intelligence (23), marketing (9), orders (8), payments (3), pos (3), pricing (6), shipping (3), shop (21), studio (10) | 2 |
-| host | 2943 | 7 | 40 | 4 | 1 | apps (1), catalog (4), core (104), inference (4), pricing (12) | 6 |
+| intelligence | 11862 | 35 | 604 | 28 | 28 | apps (11), catalog (12), checkout (12), core (359), customers (1), identity (32), inference (9), inventory (1), marketing (14), payments (1), pricing (23), protocols (4), shipping (3), shop (49), studio (6) | 26 |
+| studio | 7234 | 10 | 390 | 23 | 5 | apps (33), b2b (4), catalog (32), core (141), customers (7), identity (56), inference (4), intelligence (24), marketing (15), orders (20), pos (1), pricing (12), shop (32) | 43 |
+| protocols | 2755 | 16 | 132 | 2 | 0 | apps (23), b2b (9), catalog (9), checkout (20), core (104), customers (1), host (2), identity (32), inference (1), intelligence (24), marketing (9), orders (8), payments (3), pos (3), pricing (6), shipping (3), shop (21), studio (10) | 2 |
+| host | 2942 | 7 | 40 | 4 | 1 | apps (1), catalog (4), core (104), inference (4), pricing (12) | 6 |
 | connectors | 0 | 0 | 0 | 0 | 6 | none | 0 |
 
 ## Cycles
@@ -43,7 +43,7 @@ run SQL without being in a `store` folder. Both numbers only fall.
 those pairs close when the server files that still hold their logic move into the components.
 
 - apps ↔ b2b: 3 and 6 references
-- apps ↔ catalog: 11 and 9 references
+- apps ↔ catalog: 11 and 6 references
 - apps ↔ checkout: 7 and 21 references
 - apps ↔ host: 7 and 1 references
 - apps ↔ identity: 67 and 7 references
@@ -56,13 +56,13 @@ those pairs close when the server files that still hold their logic move into th
 - b2b ↔ checkout: 3 and 16 references
 - b2b ↔ orders: 1 and 1 references
 - catalog ↔ checkout: 5 and 11 references
-- catalog ↔ identity: 17 and 11 references
-- catalog ↔ intelligence: 4 and 13 references
+- catalog ↔ identity: 14 and 11 references
+- catalog ↔ intelligence: 1 and 12 references
 - catalog ↔ marketing: 9 and 3 references
 - catalog ↔ pricing: 23 and 1 references
 - catalog ↔ protocols: 1 and 9 references
-- catalog ↔ shop: 6 and 8 references
-- catalog ↔ studio: 4 and 31 references
+- catalog ↔ shop: 5 and 8 references
+- catalog ↔ studio: 4 and 32 references
 - checkout ↔ customers: 3 and 2 references
 - checkout ↔ identity: 3 and 1 references
 - checkout ↔ intelligence: 2 and 12 references
@@ -75,12 +75,12 @@ those pairs close when the server files that still hold their logic move into th
 - customers ↔ identity: 8 and 1 references
 - customers ↔ orders: 1 and 4 references
 - customers ↔ pos: 1 and 1 references
-- identity ↔ intelligence: 2 and 31 references
+- identity ↔ intelligence: 2 and 32 references
 - identity ↔ marketing: 5 and 22 references
 - identity ↔ shop: 12 and 3 references
 - intelligence ↔ marketing: 14 and 4 references
-- intelligence ↔ protocols: 4 and 23 references
-- intelligence ↔ studio: 4 and 22 references
+- intelligence ↔ protocols: 4 and 24 references
+- intelligence ↔ studio: 6 and 24 references
 - marketing ↔ orders: 1 and 5 references
 - marketing ↔ pos: 1 and 3 references
 - marketing ↔ shop: 26 and 7 references
@@ -97,27 +97,27 @@ those pairs close when the server files that still hold their logic move into th
 | From | To | Item | References |
 | --- | --- | --- | ---: |
 | apps | core | `veyndo_core::` | 179 |
-| intelligence | core | `veyndo_core::` | 133 |
-| studio | core | `veyndo_core::` | 83 |
+| intelligence | core | `veyndo_core::` | 143 |
+| studio | core | `veyndo_core::` | 86 |
 | apps | core | `Result` | 82 |
 | checkout | shop | `veyndo_shop::` | 80 |
-| intelligence | core | `State` | 70 |
+| intelligence | core | `State` | 69 |
 | shop | core | `veyndo_core::` | 66 |
+| catalog | core | `veyndo_core::` | 66 |
 | marketing | core | `veyndo_core::` | 65 |
 | identity | core | `veyndo_core::` | 64 |
-| catalog | core | `veyndo_core::` | 64 |
-| catalog | core | `Result` | 60 |
+| intelligence | core | `RequestContext` | 59 |
 | catalog | core | `State` | 59 |
-| intelligence | core | `RequestContext` | 57 |
 | checkout | core | `veyndo_core::` | 56 |
 | apps | core | `RequestContext` | 55 |
+| catalog | core | `Result` | 54 |
 | payments | core | `Result` | 51 |
 | orders | core | `State` | 51 |
-| intelligence | core | `Result` | 48 |
-| intelligence | shop | `veyndo_shop::` | 45 |
+| intelligence | shop | `veyndo_shop::` | 48 |
+| intelligence | core | `Result` | 47 |
 | payments | core | `veyndo_core::` | 44 |
 | apps | core | `State` | 42 |
-| catalog | core | `RequestContext` | 41 |
+| catalog | core | `RequestContext` | 40 |
 | checkout | pricing | `veyndo_pricing::` | 39 |
 | apps | identity | `veyndo_identity::` | 39 |
 | studio | identity | `veyndo_identity::` | 38 |
@@ -131,11 +131,11 @@ those pairs close when the server files that still hold their logic move into th
 | checkout | core | `Result` | 31 |
 | studio | apps | `veyndo_app_platform::` | 30 |
 | orders | core | `RequestContext` | 30 |
+| studio | catalog | `veyndo_catalog::` | 29 |
 | checkout | shop | `StoredCart` | 29 |
-| studio | catalog | `veyndo_catalog::` | 28 |
 | apps | identity | `auth::` | 28 |
-| studio | shop | `veyndo_shop::` | 26 |
-| protocols | core | `State` | 26 |
+| studio | shop | `veyndo_shop::` | 27 |
+| intelligence | identity | `veyndo_identity::` | 27 |
 
 ## Foreign table access
 
@@ -181,7 +181,6 @@ those pairs close when the server files that still hold their logic move into th
 | catalog | `policy` | intelligence | write |
 | catalog | `sales_channels` | marketing | read |
 | catalog | `shop_environments` | studio | read |
-| catalog | `tasks` | intelligence | write |
 | catalog | `tenants` | core | write |
 | checkout | `commerce_settings` | shop | read |
 | checkout | `customer_sessions` | customers | read |
@@ -253,6 +252,7 @@ those pairs close when the server files that still hold their logic move into th
 | intelligence | `payment_attempts` | payments | read |
 | intelligence | `privacy_consent_log` | shop | write |
 | intelligence | `privacy_consents` | shop | write |
+| intelligence | `product_assets` | catalog | read |
 | intelligence | `product_reviews` | catalog | read |
 | intelligence | `product_translations` | catalog | read |
 | intelligence | `products` | catalog | write |
@@ -390,5 +390,5 @@ those pairs close when the server files that still hold their logic move into th
 | studio | `session_signal_events` | intelligence | read |
 | studio | `tasks` | intelligence | write |
 | studio | `tenants` | core | write |
-| studio | `translation_items` | catalog | read |
+| studio | `translation_items` | catalog | write |
 | studio | `translation_jobs` | catalog | write |

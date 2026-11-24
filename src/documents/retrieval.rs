@@ -1,24 +1,6 @@
-//! Bounded lexical/vector source retrieval; public questions use only explicitly published documents.
+//! Route that queues a document for vector indexing; retrieval itself is owned by the intelligence component.
 use super::*;
 use veyndo_intelligence::store::documents as store;
-pub(crate) async fn search_in(
-    a: &App,
-    t: &str,
-    product: Option<&str>,
-    query: &str,
-    public: bool,
-    locale: &str,
-    semantic: bool,
-) -> Result<Value> {
-    let q = veyndo_intelligence::service::retrieval::SourceQuery {
-        product,
-        query,
-        public,
-        locale,
-        semantic,
-    };
-    veyndo_intelligence::service::retrieval::search_in(a.models(), t, q).await
-}
 pub(crate) async fn index(
     State(a): State<App>,
     h: RequestContext,

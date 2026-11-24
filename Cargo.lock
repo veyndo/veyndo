@@ -3785,6 +3785,7 @@ dependencies = [
  "axum",
  "base64 0.22.1",
  "chrono",
+ "image",
  "libc",
  "pdf-extract",
  "reqwest",
@@ -4055,6 +4056,7 @@ dependencies = [
  "veyndo-orders",
  "veyndo-pos",
  "veyndo-pricing",
+ "veyndo-runtime",
  "veyndo-shop",
 ]
 

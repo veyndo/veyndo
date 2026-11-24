@@ -17,6 +17,7 @@ axum.workspace = true
 reqwest.workspace = true
 sha2.workspace = true
 tokio.workspace = true
+image.workspace = true
 uuid.workspace = true
 veyndo-runtime = { path = "../../crates/runtime" }
 veyndo-pricing = { path = "../pricing" }

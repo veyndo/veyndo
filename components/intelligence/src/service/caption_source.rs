@@ -1,15 +1,23 @@
-//! Image evidence uses owned assets or DNS-pinned public HTTPS; decoded thumbnails strip metadata before inference.
-use crate::*;
+//! Image evidence uses owned assets, bundled demo fixtures or DNS-pinned public HTTPS; decoded thumbnails strip metadata before inference.
+use crate::ports::PublicEgress;
 use base64::{Engine as _, engine::general_purpose::STANDARD};
-pub(super) async fn read(a: &App, h: &RequestContext, url: &str) -> Result<Option<String>> {
+use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad};
+use veyndo_identity::{merchant, permit};
+/// The bounded PNG thumbnail of the image at `url`, or none when the URL is no pixel evidence.
+pub async fn read(
+    egress: &dyn PublicEgress,
+    a: &State,
+    h: &RequestContext,
+    url: &str,
+) -> Result<Option<String>> {
     if url.is_empty() {
         return Ok(None);
     }
     let bytes = if let Some(path) = url.strip_prefix("/store-api/assets/") {
-        auth::permit(h, "catalog.read")?;
+        permit(h, "catalog.read")?;
         let id = path.split('?').next().unwrap_or("");
         let bytes: Option<Vec<u8>> = sqlx::query_scalar("SELECT content FROM product_assets WHERE tenant=$1 AND id=$2 AND mime IN ('image/png','image/jpeg','image/webp') AND octet_length(content)<=8388608")
-            .bind(merchant(a,h)?).bind(id).fetch_optional(&a.db).await?;
+            .bind(merchant(h)?).bind(id).fetch_optional(&a.db).await?;
         bytes.ok_or(Error(
             StatusCode::NOT_FOUND,
             "Owned image unavailable".into(),
@@ -33,7 +41,7 @@ pub(super) async fn read(a: &App, h: &RequestContext, url: &str) -> Result<Optio
         if !parsed.username().is_empty() || parsed.password().is_some() {
             return Err(bad("Caption image credentials are forbidden"));
         }
-        let client = apps::public_https_client(&parsed).await?;
+        let client = egress.client(&parsed).await?;
         let response = client
             .get(parsed)
             .timeout(std::time::Duration::from_secs(8))
@@ -63,15 +71,16 @@ pub(super) async fn read(a: &App, h: &RequestContext, url: &str) -> Result<Optio
         .map_err(|_| bad("Caption image worker failed"))?
 }
 fn bundled_demo(url: &str) -> bool {
-    crate::demo_catalog::template()["products"]
-        .as_array()
-        .is_some_and(|ps| {
-            ps.iter().any(|p| {
-                p["media"]
-                    .as_array()
-                    .is_some_and(|ms| ms.iter().any(|m| m["url"].as_str() == Some(url)))
-            })
+    let template: serde_json::Value =
+        serde_json::from_str(include_str!("../../../../fixtures/fashion-catalog.json"))
+            .unwrap_or_default();
+    template["products"].as_array().is_some_and(|ps| {
+        ps.iter().any(|p| {
+            p["media"]
+                .as_array()
+                .is_some_and(|ms| ms.iter().any(|m| m["url"].as_str() == Some(url)))
         })
+    })
 }
 fn thumbnail(bytes: &[u8]) -> Result<Option<String>> {
     let reader = image::ImageReader::new(std::io::Cursor::new(bytes))
@@ -107,7 +116,7 @@ fn thumbnail(bytes: &[u8]) -> Result<Option<String>> {
 }
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use super::{bundled_demo, thumbnail};
     #[test]
     fn bundled_images_require_exact_public_fixture_paths() {
         assert!(bundled_demo("/media/demo/fashion/coat.webp"));

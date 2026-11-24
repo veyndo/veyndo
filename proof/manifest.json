@@ -1606,6 +1606,11 @@
       "sha256": "1d082dc672c47dd8936a1dc0ee188ac0c949e849977ffd8ea003f7049e2146e5",
       "review": "image jobs moved into components/catalog; no kernel binding changed"
     },
+    "components/catalog/src/service/asset_access.rs": {
+      "status": "unproved",
+      "sha256": "ddbfdeafcf94e3f80de79d9a308d510d09fdee83a2e504f03fa9b20236131ba2",
+      "review": "F9: media captions, design references, product knowledge and the translation worker moved into components"
+    },
     "components/catalog/src/service/assets.rs": {
       "status": "unproved",
       "sha256": "5cd233db052dde213b710828e6ce32e59badffc1f52d736f7bddc0565afe36d7",
@@ -1658,8 +1663,8 @@
     },
     "components/catalog/src/service.rs": {
       "status": "unproved",
-      "sha256": "89dbe876062ee83383303435348f03e7ecb35d54b77d6cdd2edcc10159914679",
-      "review": "image jobs moved into components/catalog; no kernel binding changed"
+      "sha256": "de08a9b68b72c3c68cc531ca1a3c7edbcce993e0813357ebe7cc012b45b05972",
+      "review": "F9: media captions, design references, product knowledge and the translation worker moved into components"
     },
     "components/catalog/src/store/assets.rs": {
       "status": "unproved",
@@ -2543,8 +2548,8 @@
     },
     "components/intelligence/src/ports.rs": {
       "status": "unproved",
-      "sha256": "e8b93d17081e16b43e1434f54432b6a8077f18475c27229b4e93fb11a7154ee4",
-      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
+      "sha256": "f46ccca40d074c32ffc5879deee1cabbeb1f34f53846f551db1c0d6a291f8bfb",
+      "review": "F9: media captions, design references, product knowledge and the translation worker moved into components"
     },
     "components/intelligence/src/service/advisor.rs": {
       "status": "unproved",
@@ -2576,6 +2581,11 @@
       "sha256": "1c42932a623e21959e179368e146ee2b8ea8e388896fad2660ca6e2df0c6bde5",
       "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
     },
+    "components/intelligence/src/service/caption_source.rs": {
+      "status": "unproved",
+      "sha256": "f10ad2c1ce74074143c0265eaabee6e91f1c5b5262040a1b7f0525e9e5ea962b",
+      "review": "F9: media captions, design references, product knowledge and the translation worker moved into components"
+    },
     "components/intelligence/src/service/claims.rs": {
       "status": "unproved",
       "sha256": "3e8430117d495ad9148aa54ecb02cd8479c95e70f6dc551baa54d1bc6705424d",
@@ -2595,6 +2605,11 @@
       "status": "unproved",
       "sha256": "54d9f0d31d3b879ae824a57cf5145e919d32c48f71ff409868ecb0bf298f9bad",
       "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
+    },
+    "components/intelligence/src/service/design_references.rs": {
+      "status": "unproved",
+      "sha256": "17b0a9c2a7701a7f52e3cf5289e20238750eae00bed786c9c65ff803acfd9093",
+      "review": "F9: media captions, design references, product knowledge and the translation worker moved into components"
     },
     "components/intelligence/src/service/experiments.rs": {
       "status": "unproved",
@@ -2626,6 +2641,11 @@
       "sha256": "b5c3be41cb59dd30201d776db0c9f8fd0a193a9b825c8a61fa3b5f3dc24c09cb",
       "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
     },
+    "components/intelligence/src/service/media_captions.rs": {
+      "status": "unproved",
+      "sha256": "d839ad96560339e064e7a7ac2fe60548ba2ea49515d89fcb62fbe2226472c036",
+      "review": "F9: media captions, design references, product knowledge and the translation worker moved into components"
+    },
     "components/intelligence/src/service/models.rs": {
       "status": "unproved",
       "sha256": "47966e65794779fd191243c7d01cfd91cf4b9face2167bd9f2acef2f13df6474",
@@ -2645,6 +2665,11 @@
       "status": "unproved",
       "sha256": "157db3784b8f940b51fbffb6106c8891456ae027fdbbb5ff2e8710fb11aeaf03",
       "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
+    },
+    "components/intelligence/src/service/product_questions.rs": {
+      "status": "unproved",
+      "sha256": "de7fa32240c99e99c7b963264a46c1a04905e14a367cd6e9b0afbefdb8e490e9",
+      "review": "F9: media captions, design references, product knowledge and the translation worker moved into components"
     },
     "components/intelligence/src/service/read_rounds.rs": {
       "status": "unproved",
@@ -2723,8 +2748,8 @@
     },
     "components/intelligence/src/service.rs": {
       "status": "unproved",
-      "sha256": "7ecb17634c5b7f40f91a604684440fae214fa3714964be0b1e064f22b295736f",
-      "review": "Batch F6: consent, legal acknowledgement and requests, behavior capture, preferences and the storefront experience moved into intelligence"
+      "sha256": "ae56138f1ee39021615275ff11545197eefed3bf63dd092f1191c1ecb9aa3129",
+      "review": "F9: media captions, design references, product knowledge and the translation worker moved into components"
     },
     "components/intelligence/src/store/agent_runs.rs": {
       "status": "unproved",
@@ -4281,6 +4306,11 @@
       "sha256": "a8720bb47b300b55df6d31528194f5dbb535dd9aca00d7baef29c5908fb41465",
       "review": "Batch F2: sandbox clone, snapshot, diff and release moved into studio behind the ReleaseHost port"
     },
+    "components/studio/src/service/translation_worker.rs": {
+      "status": "unproved",
+      "sha256": "7d87d4da7fc54274fbc2b039813935ebe3e0bf11f90f59729c9981732e0a17a4",
+      "review": "F9: media captions, design references, product knowledge and the translation worker moved into components"
+    },
     "components/studio/src/service/work_execution.rs": {
       "status": "unproved",
       "sha256": "6ce18b7f91e2c0ed14bda5b3a02a3f207f1815146bbd5070c849b48271d77551",
@@ -4293,8 +4323,8 @@
     },
     "components/studio/src/service.rs": {
       "status": "unproved",
-      "sha256": "cc7704ee0ea4496e5ff90b2411deaee4b31368d10022e464e054492f2f43798a",
-      "review": "F7: marketing configuration, channel admission and flow templates move into components"
+      "sha256": "d123177424d8596498a78a2411910ed9986cfcffb45fcd3a48a5c89a7bad3f33",
+      "review": "F9: media captions, design references, product knowledge and the translation worker moved into components"
     },
     "components/studio/src/store/history.rs": {
       "status": "unproved",
@@ -6186,11 +6216,6 @@
       "sha256": "9b67fb6c92b9c7e791c6fbaeb51ac210fdc574429d48a35f504334fb4d4f6e12",
       "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
     },
-    "src/agent_runs/translation.rs": {
-      "status": "unproved",
-      "sha256": "058c135c40600a756e04395399bf2743ea8342445e0abb11d1fc9ac24939bd21",
-      "review": "Batch F1: proposals, list views, reviewed work, its execution and proposal application moved into studio behind the WorkHost port"
-    },
     "src/agent_runs/view.rs": {
       "status": "unproved",
       "sha256": "dc2b296baa17309189f07b1d6e73e1f60fbbba67ed4a1a0c907730b0ac281351",
@@ -6208,8 +6233,8 @@
     },
     "src/agent_runs.rs": {
       "status": "unproved",
-      "sha256": "1a75744442c41e109d8b7fd080aeb55d5951845061ceebc337e3b3424bb58de8",
-      "review": "Batch F1: proposals, list views, reviewed work, its execution and proposal application moved into studio behind the WorkHost port"
+      "sha256": "18fb148d575c9aa5a8a7536c03bd97a0babc7a321995c60e582ecf342e7ce261",
+      "review": "F9: media captions, design references, product knowledge and the translation worker moved into components"
     },
     "src/apps/approval.rs": {
       "status": "unproved",
@@ -6473,23 +6498,18 @@
     },
     "src/assets/app_files.rs": {
       "status": "unproved",
-      "sha256": "005cfc70e72cbb91c9e05855feddd256f1a5eb4ffe019369bfb4cf09b56faea3",
-      "review": "Reviewed app authority and current creator rights, isolated schemas/RLS and atomic migration rollback, fenced job/event leases, minimized payloads, signature/digest pins, opaque UI grants, pinned DNS egress and bounded Wasm/WIT quote adapters. Actual isolated PostgreSQL own/foreign callback, schema, jobs, events, assets, export, distribution and production-foundation regressions passed. Added extracted package, surface, resource and exact callback-consent policies with negative Lean claims; async/network/UI and general Rust modules remain explicitly unproved."
-    },
-    "src/assets/caption_source.rs": {
-      "status": "unproved",
-      "sha256": "3f74820107c24028e2353f66934604875909a17ff950f553d69432246ba04610",
-      "review": "Reviewed caption proposal admission, owned and DNS-pinned bounded image evidence, product/page locale limits and native registry dispatch; existing HTTP/MCP, tenant denial and sandbox publication regressions passed. No new financial or kernel decision and no expanded Lean claim."
+      "sha256": "0b69dc106f5b5b069478b3b3480ebc87a2f4f8661d9210f141838064f44a092f",
+      "review": "F9: media captions, design references, product knowledge and the translation worker moved into components"
     },
     "src/assets/captions.rs": {
       "status": "unproved",
-      "sha256": "f5b8a7f26722e15ac417138cf59460907286fd58ed58e9a4295e4f535d15dfa8",
-      "review": "Reviewed caption proposal admission, owned and DNS-pinned bounded image evidence, product/page locale limits and native registry dispatch; existing HTTP/MCP, tenant denial and sandbox publication regressions passed. No new financial or kernel decision and no expanded Lean claim."
+      "sha256": "779a1491a583a1ccbf13e43c6224d2a9cd78280b95691b6765615c4b972f3578",
+      "review": "F9: media captions, design references, product knowledge and the translation worker moved into components"
     },
     "src/assets/design_references.rs": {
       "status": "unproved",
-      "sha256": "eda440b4084ec8df20d54abf2450e20228f108ef012ffbfd8f5e631361e8157b",
-      "review": "Reviewed final canvas adapters: bounded shared reference capture rejects credential URLs and private destinations; context validated before provider calls; immutable version provenance excludes raw pixels/HTML; existing staging, authorization and generated MCP contracts retained. Native screenshot HTTP/MCP, denied-access and app-generation lifecycle regressions passed."
+      "sha256": "5cd9755267abe296148900a4cc441c535cdb771c8c00e80eb9d9b0110a1de3b7",
+      "review": "F9: media captions, design references, product knowledge and the translation worker moved into components"
     },
     "src/assets/image_jobs.rs": {
       "status": "unproved",
@@ -6498,8 +6518,8 @@
     },
     "src/assets/import.rs": {
       "status": "unproved",
-      "sha256": "63ec0a49bb425e28e7c23da52339b4cfbf22cac6587c7a105370ce4ea55cbb10",
-      "review": "Independent review of native imported immutable image boundaries and selected parent/product-before-asset publication; exact persisted product baseline, attachment-only guard, source-position ordering and recoverable two-step association verified through real HTTP/PostgreSQL regressions. Pure extracted policies unchanged."
+      "sha256": "b7bde1adcb59023ed7a74fc9216d7bfdfeb5b49f3926085936301c2a6572b426",
+      "review": "F9: media captions, design references, product knowledge and the translation worker moved into components"
     },
     "src/assets/ingestion.rs": {
       "status": "unproved",
@@ -6508,8 +6528,8 @@
     },
     "src/assets/mod.rs": {
       "status": "unproved",
-      "sha256": "4d6685981730bab9152aa475a856acac691131da8ba41070484023978b9bf25f",
-      "review": "Batch E: payment status reads into payments, the image provider adapter into cognition"
+      "sha256": "4135ec4f896835c75c82a164f9035c1dd31902ca7bf84fda599bcf62cc24bf56",
+      "review": "F9: media captions, design references, product knowledge and the translation worker moved into components"
     },
     "src/assets/model_format.rs": {
       "status": "unproved",
@@ -6528,8 +6548,8 @@
     },
     "src/assets/upload.rs": {
       "status": "unproved",
-      "sha256": "30e60d8bfa8618222d6620a570ca36fe1f5a60b65e7095d919befbbf8f2ab245",
-      "review": "Asset upload, listing and publishing moved into components/catalog; no rule changed"
+      "sha256": "c1d6e087ecc6887aa907fee6d718791aa8edb52212edc1f35db7a81532fec1f0",
+      "review": "F9: media captions, design references, product knowledge and the translation worker moved into components"
     },
     "src/auth/broker.rs": {
       "status": "unproved",
@@ -6668,8 +6688,8 @@
     },
     "src/b2b/gateway.rs": {
       "status": "unproved",
-      "sha256": "0dd89c8053e2f8d0da9d03852de1deb573382928441a2e50b41ce60e2eb58713",
-      "review": "F8: payment providers, POS register and B2B commands moved into their components"
+      "sha256": "c4b516272dd281d6d8fc736c3460674409b32c77e8666121cbd5409e36a22409",
+      "review": "F9: media captions, design references, product knowledge and the translation worker moved into components"
     },
     "src/b2b/mod.rs": {
       "status": "unproved",
@@ -6678,8 +6698,8 @@
     },
     "src/b2b/orders.rs": {
       "status": "unproved",
-      "sha256": "fa6118c4f3c026e5bd0b5b89346ea579229c792d31c290662f6635dea515fb14",
-      "review": "F8: payment providers, POS register and B2B commands moved into their components"
+      "sha256": "22242eb8f912c18a3f27046126ef44a8a15b936f7533c0bb813458eff69f592e",
+      "review": "F9: media captions, design references, product knowledge and the translation worker moved into components"
     },
     "src/b2b/organization.rs": {
       "status": "unproved",
@@ -6921,11 +6941,6 @@
       "sha256": "234fe4b5950c6b8417ac4d54be4aa5588ab76cae407f382692110c95ffa879ed",
       "review": "Claim lifecycle, public claim batches and the knowledge workspace moved into the intelligence component; behaviour unchanged"
     },
-    "src/cognition/context.rs": {
-      "status": "unproved",
-      "sha256": "ab4ecefcddf528675f9e064f384d5ca080f896db5fee30aa5a5f1e8f2029e447",
-      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
-    },
     "src/cognition/contracts.rs": {
       "status": "unproved",
       "sha256": "2d969ca9d434b92aab5e4148eee6f3c96587e6654443d68583d17ac542efe43c",
@@ -6953,8 +6968,8 @@
     },
     "src/cognition/mod.rs": {
       "status": "unproved",
-      "sha256": "6b7cab844a31fbdf3c76f1a8f6af5902f1e7c086636edb00940bd2377365f1e0",
-      "review": "Batch F1: proposals, list views, reviewed work, its execution and proposal application moved into studio behind the WorkHost port"
+      "sha256": "75bb750bda3921fa087ae6d355ac820c3ddd3d7080593b44f7398bbcf995c23d",
+      "review": "F9: media captions, design references, product knowledge and the translation worker moved into components"
     },
     "src/cognition/preferences.rs": {
       "status": "unproved",
@@ -7093,8 +7108,8 @@
     },
     "src/commerce/mod.rs": {
       "status": "unproved",
-      "sha256": "67fc13b3b52b89eafd9f442eb3989c1b198b8a16c5580eb759334485c0d3f84c",
-      "review": "Batch F4: source-record imports moved into studio behind the ImportHost port"
+      "sha256": "71f2e590cbe7ce6d1a23235d1e291a4ac172e4252ad308c53827827ef4fba06d",
+      "review": "F9: media captions, design references, product knowledge and the translation worker moved into components"
     },
     "src/commerce/order_fields.rs": {
       "status": "unproved",
@@ -7113,8 +7128,8 @@
     },
     "src/commerce/product_languages.rs": {
       "status": "unproved",
-      "sha256": "852c77bd8776a176a0d39608a2cfaf71e10e71b59fc52e7d36e83bcd26970ba6",
-      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
+      "sha256": "82273f9f178c102edb03591d46d1712363bf4b66158ba458c0d1931d18a184a9",
+      "review": "F9: media captions, design references, product knowledge and the translation worker moved into components"
     },
     "src/commerce/selection.rs": {
       "status": "unproved",
@@ -7241,6 +7256,11 @@
       "sha256": "dbc2a37f16258164fd483f9e1eb0cd981ad9508a39e474d6c36c6dda5d131ca1",
       "review": "Knowledge source ingestion and guidance reads move into intelligence"
     },
+    "src/documents/knowledge_host.rs": {
+      "status": "unproved",
+      "sha256": "577ea7eec88672638bec0044beeb1490577f5da17734eadc93f75c1caf597a7a",
+      "review": "F9: media captions, design references, product knowledge and the translation worker moved into components"
+    },
     "src/documents/lifecycle.rs": {
       "status": "unproved",
       "sha256": "ec7d1b8c6c0520821633bfb65a89c84f5b8e0142bb97a30440ebae1b3f3febb9",
@@ -7248,8 +7268,8 @@
     },
     "src/documents/mod.rs": {
       "status": "unproved",
-      "sha256": "de151c6331e89e9b861b3615e4f9665b81a6829e92d35ceb32e25eaf774f5d59",
-      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
+      "sha256": "b1c6ee85fada390ecfab2fce4470881bc7c70b28e84ee64bca44e096c32867cf",
+      "review": "F9: media captions, design references, product knowledge and the translation worker moved into components"
     },
     "src/documents/parser.rs": {
       "status": "unproved",
@@ -7258,23 +7278,23 @@
     },
     "src/documents/preview.rs": {
       "status": "unproved",
-      "sha256": "270b989a3c029daf691120f5aac989cb855d500a4d03fbb6b53becfc709dd86c",
-      "review": "Cart projection and product detail move into checkout behind a quote port"
+      "sha256": "831104c0d2efd9b717b474579151f0e895f9b617ce581f37309de6c3cd8858f8",
+      "review": "F9: media captions, design references, product knowledge and the translation worker moved into components"
     },
     "src/documents/product_knowledge.rs": {
       "status": "unproved",
-      "sha256": "03caf019ae4434fd32f6e4e0ebc184a33672af61e6889ae132bcb70127809b79",
-      "review": "Claim evidence, claim batches, order observation projection, embedding jobs, source search, knowledge inventory, product facts and prompt snapshots moved verbatim into the intelligence component; permissions, settings, provider admission and leases stay in the server. Kernel admission calls unchanged."
+      "sha256": "c6e0c005f9d0d11ce133901c4ee5342581e7f489981336c8b7ca3bc206d231f8",
+      "review": "F9: media captions, design references, product knowledge and the translation worker moved into components"
     },
     "src/documents/questions.rs": {
       "status": "unproved",
-      "sha256": "7d8b2636d8d819a2c0dea57be69ac918039d4ba6c3b5633ca4fb02f9150273f1",
-      "review": "Cart projection and product detail move into checkout behind a quote port"
+      "sha256": "eb14844ae0f69d6dc018e9738660c6eda72787d0f4674d78d36a6367f6250a8f",
+      "review": "F9: media captions, design references, product knowledge and the translation worker moved into components"
     },
     "src/documents/retrieval.rs": {
       "status": "unproved",
-      "sha256": "38aab437c1e27b63b0bb1a853684cb7b605eddc133da1cdb64151a67ebc37075",
-      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
+      "sha256": "1e710afdda4d92af4b9a2c4679a9b29967d8667f6f95f03c4253166011bd109d",
+      "review": "F9: media captions, design references, product knowledge and the translation worker moved into components"
     },
     "src/documents/tools.rs": {
       "status": "unproved",
@@ -7863,8 +7883,8 @@
     },
     "src/prelude.rs": {
       "status": "unproved",
-      "sha256": "a792fd1a4261b2a97d6a08f0dcf97516b77214dbbf5162f30a06c337687fd606",
-      "review": "Batch F4: source-record imports moved into studio behind the ImportHost port"
+      "sha256": "e6a5cdca0126955c206a7817c7fda22c879967a34537e1a21ec408fe4b781b56",
+      "review": "F9: media captions, design references, product knowledge and the translation worker moved into components"
     },
     "src/proposal_apply.rs": {
       "status": "unproved",
@@ -7976,15 +7996,10 @@
       "sha256": "6749004d7ffa23088ee115820ee70149cde24e93677749f90969cd724d8f5bcb",
       "review": "revision_admissible binding for applying translation drafts moved into components/catalog"
     },
-    "src/translations/fields.rs": {
-      "status": "unproved",
-      "sha256": "56a0b934dcd8458f0a132d94221077d0b8e66bf32752a9b5a837f22be6849a6a",
-      "review": "revision_admissible binding for applying translation drafts moved into components/catalog"
-    },
     "src/translations/mod.rs": {
       "status": "unproved",
-      "sha256": "b44da9863a1859883caae6eece9a6e1395beb842b1a3b0c2735f3a868757cedc",
-      "review": "Batch F1: proposals, list views, reviewed work, its execution and proposal application moved into studio behind the WorkHost port"
+      "sha256": "971568d192d36d350e94cf29e7a078a85b74d5c7933a061b7f014864ddffe352",
+      "review": "F9: media captions, design references, product knowledge and the translation worker moved into components"
     },
     "src/translations/routes.rs": {
       "status": "unproved",
@@ -7998,8 +8013,8 @@
     },
     "src/translations/worker.rs": {
       "status": "unproved",
-      "sha256": "f8d34df835cf8b9c63d14222924a6ba4e3548ada6625f7a45eb34716b4d39f52",
-      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
+      "sha256": "73cd28a3773b6dd3e0a289c2142e32ec876ed7208328a4f97a37b695b0dcec78",
+      "review": "F9: media captions, design references, product knowledge and the translation worker moved into components"
     },
     "src/ucp/cart.rs": {
       "status": "unproved",
@@ -8063,8 +8078,8 @@
       "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
     },
     "Cargo.lock": {
-      "sha256": "7ec5f6129f9ad558942885b6a8c8a38202910674281f46411f2c2eb37b474bee",
-      "review": "F8: payment providers, POS register and B2B commands moved into their components"
+      "sha256": "903d650bb5f5d7369d0b50ec2c100fd31a99db843e201a4c329ca2dce3181827",
+      "review": "F9: media captions, design references, product knowledge and the translation worker moved into components"
     },
     "Cargo.toml": {
       "sha256": "12d2d79a98f6913d20b8e912afb9ea8de0539b9e83428de8a9d7412c406896f6",

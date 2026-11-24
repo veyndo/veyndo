@@ -1,7 +1,6 @@
 //! Entry points of product file operations for capabilities and app upload surfaces; rules and storage are owned by the catalog component.
 use super::*;
 use axum::extract::FromRef;
-pub(super) use veyndo_catalog::domain::asset_file::validate_bytes;
 pub(crate) async fn list(
     State(a): State<App>,
     h: RequestContext,

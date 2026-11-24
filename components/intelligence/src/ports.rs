@@ -80,3 +80,28 @@ pub trait AgentHost: Send + Sync {
     /// Gives empty products of a private sandbox a test stock quantity.
     fn fill_test_stock<'a>(&'a self, t: &'a str, quantity: i32) -> PortFuture<'a, Value>;
 }
+
+/// Public network evidence: a DNS-pinned client that reaches only public HTTPS addresses, without proxies or redirects.
+pub trait PublicEgress: Send + Sync {
+    /// A pinned client for the origin of a public HTTPS URL.
+    fn client<'a>(&'a self, url: &'a reqwest::Url) -> PortFuture<'a, reqwest::Client>;
+}
+
+/// What product questions, retrieval previews and the product knowledge view need from the server: the model context, the product detail, catalogue localization and private app evidence.
+pub trait KnowledgeHost: Send + Sync {
+    /// The model context: state, providers and inference slots.
+    fn models(&self) -> Models<'_>;
+    /// The storefront product detail of the request, with its authoritative snapshot under `product`.
+    fn detail<'a>(&'a self, h: &'a RequestContext, id: &'a str) -> PortFuture<'a, Value>;
+    /// The products translated along the reader's language chain.
+    fn localize<'a>(
+        &'a self,
+        tenant: &'a str,
+        chain: &'a [String],
+        products: Vec<Product>,
+    ) -> PortFuture<'a, Vec<Product>>;
+    /// Merchant-private app evidence matching a query.
+    fn evidence<'a>(&'a self, tenant: &'a str, query: &'a str) -> PortFuture<'a, Value>;
+    /// The merchant-private app evidence graph of the shop.
+    fn graph<'a>(&'a self, tenant: &'a str) -> PortFuture<'a, Value>;
+}

@@ -1,6 +1,9 @@
 //! Source-bound knowledge ingestion, retrieval and product questions share tenant/product visibility.
 use crate::*;
+use knowledge_host::Knowledge;
+use veyndo_intelligence::service::product_questions;
 mod ingestion;
+mod knowledge_host;
 mod lifecycle;
 mod preview;
 mod product_knowledge;

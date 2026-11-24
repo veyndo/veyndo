@@ -1,4 +1,5 @@
 //! Catalogue operations that combine rules and stored state.
+pub mod asset_access;
 pub mod assets;
 pub mod catalog_reads;
 pub mod categories;

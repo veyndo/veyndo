@@ -5,6 +5,3 @@ pub(crate) use veyndo_core::localized::valid_locale_key;
 pub(crate) fn key(locale: &str, s: &Settings) -> String {
     s.languages().key(locale)
 }
-pub(crate) fn allowed(key: &str, s: &Settings) -> bool {
-    s.languages().allowed(key)
-}

@@ -6,5 +6,6 @@ pub mod proposal_admission;
 pub mod proposal_apply;
 pub mod reports;
 pub mod staging;
+pub mod translation_worker;
 pub mod work_execution;
 pub mod work_plan;

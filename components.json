@@ -223,12 +223,11 @@
         "policy",
         "sales_channels",
         "shop_environments",
-        "tasks",
         "tenants"
       ],
-      "glob_imports": 29,
-      "untyped_access": 176,
-      "sql_outside_store": 10
+      "glob_imports": 27,
+      "untyped_access": 161,
+      "sql_outside_store": 7
     },
     "inventory": {
       "title": "Stock, reservations and supply",
@@ -846,6 +845,7 @@
         "payment_attempts",
         "privacy_consent_log",
         "privacy_consents",
+        "product_assets",
         "product_reviews",
         "product_translations",
         "products",
@@ -855,8 +855,8 @@
         "translation_jobs"
       ],
       "glob_imports": 35,
-      "untyped_access": 592,
-      "sql_outside_store": 27
+      "untyped_access": 604,
+      "sql_outside_store": 28
     },
     "studio": {
       "title": "Merchant overview, reports, private staging shops and history",
@@ -935,8 +935,8 @@
         "translation_jobs"
       ],
       "glob_imports": 10,
-      "untyped_access": 387,
-      "sql_outside_store": 22
+      "untyped_access": 390,
+      "sql_outside_store": 23
     },
     "protocols": {
       "title": "MCP, UCP and the shared capability dispatch; adapters without business rules",
