@@ -1,6 +1,8 @@
 //! Self-hosted chat-completions adapter and opt-in provider prompt caching; neither caches private commerce responses.
 use super::{Provider, Value, env, json};
 use crate::inference::strict_schema;
+use serde::Deserialize;
+use veyndo_core::document::view;
 pub(super) fn chat_request(
     model: &str,
     system: &str,
@@ -16,8 +18,17 @@ pub(super) fn chat_request(
     );
     json!({"model":model,"stream":false,"temperature":0,"max_tokens":8192,"messages":[{"role":"system","content":system},{"role":"user","content":if images.is_empty(){json!(user)}else{json!(content)}}],"response_format":{"type":"json_schema","json_schema":{"name":"commerce_result","strict":true,"schema":strict_schema(schema.clone())}}})
 }
+/// The JSON fields `chat_response` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ChatResponseInput {
+    choices: Value,
+}
+
 pub(super) fn chat_response(raw: &Value) -> Result<Value, String> {
-    let choices = raw["choices"]
+    let input: ChatResponseInput = view(raw);
+    let choices = input
+        .choices
         .as_array()
         .filter(|c| c.len() == 1)
         .ok_or("Invalid chat completions result")?;

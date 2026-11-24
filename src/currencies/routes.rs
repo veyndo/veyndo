@@ -11,10 +11,12 @@ use axum::Router;
 use axum::extract::State;
 use axum::routing::get;
 use axum::routing::post;
+use serde::Deserialize;
 use serde_json::Value;
 use veyndo_core::Result;
 use veyndo_core::bad;
 use veyndo_core::conflict;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::request_context::RequestContext;
 pub(crate) fn router() -> Router<App> {
     Router::new()
@@ -40,21 +42,32 @@ pub(crate) fn router() -> Router<App> {
             get(veyndo_pricing::http::price_jobs::detail),
         )
 }
+/// The JSON fields `select` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct SelectInput {
+    #[serde(deserialize_with = "lenient")]
+    currency: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    revision: Option<i64>,
+}
+
 pub(super) async fn select(
     State(a): State<App>,
     h: RequestContext,
     Json(v): Json<Value>,
 ) -> Result<Json<Value>> {
+    let input: SelectInput = view(&v);
     let current = load_cart(&a, &h).await?;
     let (s, _) = commerce::scoped_config(&a, &current.tenant, &current.data.sales_channel).await?;
     let code = s
         .currencies
-        .selected(v["currency"].as_str().ok_or(bad("Currency required"))?)?
+        .selected(input.currency.as_deref().ok_or(bad("Currency required"))?)?
         .code
         .clone();
     let mut c = current.clone();
     c.data.currency = code;
-    if c.status != "open" || v["revision"].as_i64() != Some(c.revision) {
+    if c.status != "open" || input.revision != Some(c.revision) {
         return Err(conflict("Cart changed or terminal"));
     }
     c.revision += 1;
@@ -64,20 +77,23 @@ pub(super) async fn select(
     }
     Ok(Json(q))
 }
+/// The JSON fields `refresh` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct RefreshInput {
+    #[serde(deserialize_with = "lenient")]
+    revision: Option<i64>,
+}
+
 pub(super) async fn refresh(
     State(a): State<App>,
     h: RequestContext,
     Json(v): Json<Value>,
 ) -> Result<Json<Value>> {
+    let input: RefreshInput = view(&v);
     auth::permit(&h, "settings.write")?;
     let t = merchant(&a, &h)?;
     Ok(Json(
-        rates::refresh(
-            &a,
-            &t,
-            v["revision"].as_i64().ok_or(bad("Revision required"))?,
-            &h,
-        )
-        .await?,
+        rates::refresh(&a, &t, input.revision.ok_or(bad("Revision required"))?, &h).await?,
     ))
 }

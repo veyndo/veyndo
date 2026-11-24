@@ -11,6 +11,7 @@ use axum::extract::State;
 use axum::http::StatusCode;
 use axum::routing::get;
 use axum::routing::post;
+use serde::Deserialize;
 use serde_json::Value;
 use serde_json::json;
 use veyndo_checkout::store::cart_create::new_cart_context;
@@ -18,6 +19,7 @@ use veyndo_core::Error;
 use veyndo_core::Result;
 use veyndo_core::bad;
 use veyndo_core::conflict;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::request_context::RequestContext;
 use veyndo_core::shop_scope::header;
 use veyndo_shop::domain::cart_lines::validate as validate_items;
@@ -35,8 +37,18 @@ pub(crate) use negotiation::command as ucp_b2b;
 pub(crate) use profile::{schema as ucp_b2b_schema, ucp_meta, ucp_profile};
 pub(crate) use readiness::readiness;
 pub(crate) const UCP_VERSION: &str = "2026-08-25";
+/// The JSON fields `ucp_items` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct UcpItemsInput {
+    #[serde(rename = "line_items")]
+    line_items: Value,
+}
+
 pub(crate) fn ucp_items(v: &Value) -> Result<Vec<Item>> {
-    let rows = v["line_items"]
+    let input: UcpItemsInput = view(v);
+    let rows = input
+        .line_items
         .as_array()
         .ok_or(bad("line_items required"))?;
     let mut items = vec![];
@@ -105,12 +117,21 @@ pub(crate) async fn ucp_get(
     let c = ucp_load(&a, &h, &id).await?;
     Ok(Json(negotiation::response(&a, &h, &c, selected).await?))
 }
+/// The JSON fields `ucp_update` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct UcpUpdateInput {
+    #[serde(deserialize_with = "lenient")]
+    currency: Option<String>,
+}
+
 pub(crate) async fn ucp_update(
     State(a): State<App>,
     h: RequestContext,
     Path(id): Path<String>,
     Json(v): Json<Value>,
 ) -> Result<Json<Value>> {
+    let input: UcpUpdateInput = view(&v);
     let selected = profile::select(&h, false).await?;
     consent::admit(&v, selected.consent)?;
     let c = ucp_load(&a, &h, &id).await?;
@@ -123,7 +144,7 @@ pub(crate) async fn ucp_update(
         c.revision,
         buyer,
         privacy,
-        v["currency"].as_str(),
+        input.currency.as_deref(),
     )
     .await?;
     Ok(Json(negotiation::response(&a, &h, &c, selected).await?))

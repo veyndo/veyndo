@@ -4,10 +4,12 @@ use crate::foundation::App;
 use axum::Json;
 use axum::extract::Path;
 use axum::extract::State;
+use serde::Deserialize;
 use serde_json::Value;
 use serde_json::json;
 use veyndo_core::Result;
 use veyndo_core::bad;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::request_context::RequestContext;
 pub(crate) fn knowledge_schema(name: &str) -> Option<Value> {
     let props = match name {
@@ -31,15 +33,25 @@ pub(crate) fn knowledge_schema(name: &str) -> Option<Value> {
     };
     Some(json!({"type":"object","properties":props,"additionalProperties":false}))
 }
+/// The JSON fields `knowledge_invoke` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct KnowledgeInvokeInput {
+    #[serde(deserialize_with = "lenient")]
+    id: Option<String>,
+}
+
 pub(crate) async fn knowledge_invoke(
     a: &App,
     h: &RequestContext,
     name: &str,
     v: &Value,
 ) -> Result<Value> {
+    let input: KnowledgeInvokeInput = view(v);
     let id = || {
-        v["id"]
-            .as_str()
+        input
+            .id
+            .as_deref()
             .map(String::from)
             .ok_or(bad("Source ID required"))
     };

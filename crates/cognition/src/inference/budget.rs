@@ -6,6 +6,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 use sqlx::Row;
 use std::future::Future;
+use veyndo_core::document::{lenient, view};
 
 #[derive(Clone, Debug)]
 pub struct Authority {
@@ -117,12 +118,21 @@ pub fn allocation(request: &Value, images: bool, tariff: u64) -> Result<(u64, u6
     Ok((tokens, cost))
 }
 
+/// The JSON fields `reserve` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ReserveInput {
+    #[serde(deserialize_with = "lenient")]
+    model: Option<String>,
+}
+
 pub async fn reserve(
     db: Option<&ScopedPool>,
     request: &Value,
     images: bool,
     provider: &str,
 ) -> Result<(), Admission> {
+    let input: ReserveInput = view(request);
     let Some(authority) = CURRENT.try_with(Clone::clone).ok() else {
         return Ok(());
     };
@@ -148,7 +158,7 @@ pub async fn reserve(
             .ok_or(Admission::Denied("Agent key expired, revoked or membership withdrawn"))?;
         let budget:Budget=serde_json::from_value(row.get("agent_budget")).map_err(|_|"Agent budget is missing or invalid")?;
         budget.validate()?;
-        if budget.provider!=provider || request["model"].as_str()!=Some(budget.model.as_str()) {return Err(Admission::Denied("Agent provider or model differs from its approved budget"));}
+        if budget.provider!=provider || input.model.as_deref()!=Some(budget.model.as_str()) {return Err(Admission::Denied("Agent provider or model differs from its approved budget"));}
         let (tokens,cost)=allocation(request,images,budget.price_per_million_micros)?;
         let used_tokens=u64::try_from(row.get::<i64,_>("agent_tokens_allocated")).map_err(|_|"Invalid agent usage")?;
         let used_cost=u64::try_from(row.get::<i64,_>("agent_cost_allocated")).map_err(|_|"Invalid agent usage")?;

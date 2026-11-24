@@ -11,6 +11,7 @@ use axum::{
     http::{HeaderName, header::CACHE_CONTROL},
     response::sse::{Event, KeepAlive, Sse},
 };
+use serde::Deserialize;
 use serde_json::Value;
 use serde_json::json;
 use std::{convert::Infallible, time::Duration};
@@ -19,8 +20,17 @@ use veyndo_core::Error;
 use veyndo_core::Result;
 use veyndo_core::bad;
 use veyndo_core::conflict;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::request_context::RequestContext;
 use veyndo_core::shop_scope::tenant;
+
+/// The JSON fields `concierge` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ConciergeInput {
+    #[serde(deserialize_with = "lenient")]
+    request: Option<String>,
+}
 
 pub(crate) async fn concierge(
     State(a): State<App>,
@@ -28,9 +38,11 @@ pub(crate) async fn concierge(
     stream: Option<Extension<performance::AiStreamAdmission>>,
     Json(v): Json<Value>,
 ) -> Result<axum::response::Response> {
+    let input: ConciergeInput = view(&v);
     let t = tenant(&h)?;
-    let request = v["request"]
-        .as_str()
+    let request = input
+        .request
+        .as_deref()
         .filter(|s| !s.is_empty() && s.len() <= 2000)
         .ok_or(bad("Request required, maximum 2000 characters"))?;
     let _slot = a.models.slots.clone().try_acquire_owned().map_err(|_| {

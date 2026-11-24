@@ -4,15 +4,24 @@ use crate::cart_storage::load_cart;
 use crate::foundation::App;
 use crate::marketing;
 use axum::http::StatusCode;
+use serde::Deserialize;
 use serde_json::Value;
 use serde_json::json;
 use veyndo_app_platform::store::app_host_reads;
 use veyndo_core::Error;
 use veyndo_core::Result;
+use veyndo_core::document::view;
 use veyndo_core::hash;
 use veyndo_core::request_context::RequestContext;
 use veyndo_core::shop_scope::tenant;
 use veyndo_kernel::verified_kernel;
+/// The JSON fields `submit` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct SubmitInput {
+    fields: Value,
+}
+
 pub(super) async fn submit(
     a: &App,
     h: &RequestContext,
@@ -20,6 +29,7 @@ pub(super) async fn submit(
     e: &Entity,
     v: &Value,
 ) -> Result<Value> {
+    let input: SubmitInput = view(v);
     let t = tenant(h)?;
     let live = veyndo_core::shop_scope::parent(a, &t).await?.is_none();
     let cart = load_cart(a, h).await?;
@@ -53,7 +63,7 @@ pub(super) async fn submit(
         &t,
         m,
         e,
-        &json!({"id":id,"revision":0,"fields":v["fields"]}),
+        &json!({"id":id,"revision":0,"fields":input.fields}),
     )
     .await?;
     app_host_reads::submitted(

@@ -10,9 +10,11 @@ use axum::extract::Path;
 use axum::extract::State;
 use axum::routing::get;
 use axum::routing::post;
+use serde::Deserialize;
 use serde_json::Value;
 use veyndo_core::Result;
 use veyndo_core::bad;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::request_context::RequestContext;
 use veyndo_core::shop_scope::header;
 use veyndo_core::shop_scope::tenant;
@@ -90,12 +92,21 @@ async fn customer_status(
     customer(&a, &h, &id).await?;
     Ok(Json(read(&a, &tenant(&h)?, &id).await?))
 }
+/// The JSON fields `customer_command` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct CustomerCommandInput {
+    #[serde(deserialize_with = "lenient")]
+    request_key: Option<String>,
+}
+
 async fn customer_command(
     State(a): State<App>,
     h: RequestContext,
     Path((id, op)): Path<(String, String)>,
     Json(v): Json<Value>,
 ) -> Result<Json<Value>> {
+    let input: CustomerCommandInput = view(&v);
     customer(&a, &h, &id).await?;
     if !["capture", "reconcile", "cancel"].contains(&op.as_str()) {
         return Err(bad("Unsupported customer payment operation"));
@@ -121,19 +132,28 @@ async fn customer_command(
             &id,
             op,
             header(&h, "idempotency-key")
-                .or_else(|| v["requestKey"].as_str())
+                .or(input.request_key.as_deref())
                 .ok_or(bad("Idempotency-Key required"))?,
             &v,
         )
         .await?,
     ))
 }
+/// The JSON fields `merchant_command` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct MerchantCommandInput {
+    #[serde(deserialize_with = "lenient")]
+    request_key: Option<String>,
+}
+
 async fn merchant_command(
     State(a): State<App>,
     h: RequestContext,
     Path((id, op)): Path<(String, String)>,
     Json(v): Json<Value>,
 ) -> Result<Json<Value>> {
+    let input: MerchantCommandInput = view(&v);
     merchant(&a, &h)?;
     auth::permit(&h, "payments.manage")?;
     if !veyndo_payments::service::merchant_operations::admitted(&op, &v) {
@@ -146,7 +166,7 @@ async fn merchant_command(
             &id,
             &op,
             header(&h, "idempotency-key")
-                .or_else(|| v["requestKey"].as_str())
+                .or(input.request_key.as_deref())
                 .ok_or(bad("Idempotency-Key required"))?,
             &v,
         )

@@ -4,10 +4,12 @@ use crate::foundation::App;
 use axum::Json;
 use axum::extract::Path;
 use axum::extract::State;
+use serde::Deserialize;
 use serde_json::Value;
 use serde_json::json;
 use veyndo_core::Result;
 use veyndo_core::bad;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::request_context::RequestContext;
 pub(crate) fn permission(name: &str) -> Option<&'static str> {
     match name {
@@ -37,7 +39,16 @@ pub(crate) fn schema(name: &str) -> Option<Value> {
         json!({"type":"object","properties":props,"required":required,"additionalProperties":false}),
     )
 }
+/// The JSON fields `invoke` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct InvokeInput {
+    #[serde(deserialize_with = "lenient")]
+    id: Option<String>,
+}
+
 pub(crate) async fn invoke(a: &App, h: &RequestContext, name: &str, v: &Value) -> Result<Value> {
+    let input: InvokeInput = view(v);
     let state = State(a.clone());
     let h = h.clone();
     let Json(result) = match name {
@@ -63,7 +74,7 @@ pub(crate) async fn invoke(a: &App, h: &RequestContext, name: &str, v: &Value) -
             veyndo_pricing::http::price_jobs::detail(
                 State(a.core.clone()),
                 h,
-                Path(v["id"].as_str().ok_or(bad("Job ID required"))?.into()),
+                Path(input.id.as_deref().ok_or(bad("Job ID required"))?.into()),
             )
             .await?
         }

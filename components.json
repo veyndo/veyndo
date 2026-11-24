@@ -604,7 +604,7 @@
         "tenants": "read: reads shop existence, status or the agent stop switch inside a larger claim or join; simple reads go through veyndo_core::tenants (budget.rs)"
       },
       "glob_imports": 0,
-      "untyped_access": 124,
+      "untyped_access": 108,
       "sql_outside_store": 2
     },
     "intelligence": {
@@ -790,7 +790,7 @@
         "tenants": "read: reads shop existence, status or the agent stop switch inside a larger claim or join; simple reads go through veyndo_core::tenants (poppy.rs)"
       },
       "glob_imports": 0,
-      "untyped_access": 117,
+      "untyped_access": 111,
       "sql_outside_store": 2
     },
     "host": {
@@ -937,7 +937,7 @@
         "tenants": "write: shop provisioning creates the shop row (demo_catalog.rs, provision.rs)"
       },
       "glob_imports": 0,
-      "untyped_access": 253,
+      "untyped_access": 220,
       "sql_outside_store": 11
     },
     "connectors": {

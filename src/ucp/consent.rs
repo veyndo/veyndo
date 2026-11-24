@@ -4,12 +4,14 @@ use crate::ucp::UCP_VERSION;
 use crate::ucp::messages;
 use crate::{commerce, legal, marketing};
 use axum::extract::State;
+use serde::Deserialize;
 use serde_json::Value;
 use serde_json::json;
 use std::collections::HashMap;
 use veyndo_core::Result;
 use veyndo_core::bad;
 use veyndo_core::conflict;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::request_context::RequestContext;
 use veyndo_core::shop_scope::tenant;
 use veyndo_shop::types::cart::StoredCart;
@@ -23,8 +25,16 @@ const PURPOSES: &[(&str, &str)] = &[
 const EMAIL: &str = "dev.ucp.consent.marketing.email";
 const SMS: &str = "dev.ucp.consent.marketing.sms";
 const MARKETING: &str = "dev.ucp.consent.marketing";
+/// The JSON fields `admit` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct AdmitInput {
+    buyer: Value,
+}
+
 pub(super) fn admit(v: &Value, negotiated: bool) -> Result<()> {
-    if !negotiated && v["buyer"].get("consent").is_some() {
+    let input: AdmitInput = view(v);
+    if !negotiated && input.buyer.get("consent").is_some() {
         return Err(conflict(
             "capabilities_incompatible: negotiate buyer_consent before supplying choices",
         ));
@@ -69,10 +79,20 @@ pub(super) fn buyer(v: &Value, current: Option<&Value>) -> Result<Option<Value>>
     }
     Ok(Some(buyer))
 }
+/// The JSON fields `validate` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ValidateInput {
+    #[serde(deserialize_with = "lenient")]
+    granted: Option<bool>,
+    source: Value,
+}
+
 fn validate(v: &Value, segments: bool) -> Result<()> {
+    let input: ValidateInput = view(v);
     let object = v.as_object().ok_or(bad("Invalid consent decision"))?;
-    if v["granted"].as_bool().is_none()
-        || v["source"] != "platform"
+    if input.granted.is_none()
+        || input.source != "platform"
         || object
             .keys()
             .any(|k| !matches!(k.as_str(), "granted" | "source" | "segments"))

@@ -10,11 +10,13 @@ use axum::extract::Path;
 use axum::extract::State;
 use axum::http::StatusCode;
 use axum::routing::post;
+use serde::Deserialize;
 use serde_json::Value;
 use serde_json::json;
 use veyndo_core::Error;
 use veyndo_core::Result;
 use veyndo_core::bad;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::request_context::RequestContext;
 pub(super) fn router() -> Router<App> {
     Router::new()
@@ -108,20 +110,30 @@ async fn upload(
     .await
     .map(Json)
 }
+/// The JSON fields `snapshot` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct SnapshotInput {
+    id: Value,
+    #[serde(deserialize_with = "lenient")]
+    delivery_index: Option<u64>,
+}
+
 pub(super) async fn snapshot(
     a: &App,
     h: &RequestContext,
     m: &Manifest,
     v: &Value,
 ) -> Result<Value> {
+    let input: SnapshotInput = view(v);
     permitted(h, m, false)?;
     input_schema::validate(
         &json!({"type":"object","properties":{"id":{"type":"string","maxLength":100},"deliveryIndex":{"type":"integer","minimum":0}},"required":["id","deliveryIndex"],"additionalProperties":false}),
         v,
     )?;
-    let order = crate::operations::invoke(a, h, "merchant.order", &json!({"id":v["id"]})).await?;
-    let index = v["deliveryIndex"]
-        .as_u64()
+    let order = crate::operations::invoke(a, h, "merchant.order", &json!({"id":input.id})).await?;
+    let index = input
+        .delivery_index
         .and_then(|n| usize::try_from(n).ok())
         .ok_or(bad("Shipment index required"))?;
     let delivery = order["deliveries"]

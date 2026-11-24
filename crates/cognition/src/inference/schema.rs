@@ -1,5 +1,7 @@
 //! Provider wire adaptation for strict fixed-object schemas; dynamic JSON is encoded only on the model wire and restored before domain validation.
+use serde::Deserialize;
 use serde_json::{Value, json};
+use veyndo_core::document::{lenient, view};
 pub(super) fn strict_schema(mut v: Value) -> Value {
     // OpenAI's strict array subset excludes uniqueItems. Preserve the domain
     // schema and reject duplicates during restoration before any proposal exists.
@@ -37,11 +39,24 @@ pub(super) fn strict_schema(mut v: Value) -> Value {
     }
     v
 }
+/// The JSON fields `restore` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct RestoreInput {
+    r#type: Value,
+    properties: Value,
+    any_of: Value,
+    required: Value,
+    #[serde(deserialize_with = "lenient")]
+    unique_items: Option<bool>,
+}
+
 pub(super) fn restore(schema: &Value, mut value: Value) -> Result<Value, String> {
+    let input: RestoreInput = view(schema);
     if value.is_null() {
         return Ok(value);
     }
-    if (schema["type"] == "object" && !schema["properties"].is_object())
+    if (input.r#type == "object" && !input.properties.is_object())
         || (schema.get("type").is_none()
             && schema.get("anyOf").is_none()
             && schema.get("enum").is_none())
@@ -54,7 +69,7 @@ pub(super) fn restore(schema: &Value, mut value: Value) -> Result<Value, String>
         }
         return Ok(value);
     }
-    if let Some(branches) = schema["anyOf"].as_array() {
+    if let Some(branches) = input.any_of.as_array() {
         for branch in branches {
             let t = branch["type"].as_str().unwrap_or("");
             if (t == "object" && (value.is_object() || value.is_string()))
@@ -65,14 +80,15 @@ pub(super) fn restore(schema: &Value, mut value: Value) -> Result<Value, String>
             }
         }
     }
-    if let Some(properties) = schema["properties"].as_object()
+    if let Some(properties) = input.properties.as_object()
         && let Some(object) = value.as_object_mut()
     {
         for (key, shape) in properties {
             // Strict providers require every property and encode omitted optional
             // fields as null. Undo only that wire adaptation: a required null or
             // an explicitly nullable/dynamic domain value must still be validated.
-            let required = schema["required"]
+            let required = input
+                .required
                 .as_array()
                 .is_some_and(|keys| keys.iter().any(|name| name.as_str() == Some(key)));
             if !required
@@ -93,7 +109,7 @@ pub(super) fn restore(schema: &Value, mut value: Value) -> Result<Value, String>
         for v in array.iter_mut() {
             *v = restore(items, v.clone())?;
         }
-        if schema["uniqueItems"] == true {
+        if input.unique_items == Some(true) {
             let mut seen = std::collections::HashSet::new();
             for item in array {
                 if !seen.insert(item.to_string()) {

@@ -4,11 +4,13 @@ use crate::foundation::App;
 use axum::Json;
 use axum::extract::State;
 use axum::http::StatusCode;
+use serde::Deserialize;
 use serde_json::Value;
 use serde_json::json;
 use veyndo_core::Error;
 use veyndo_core::Result;
 use veyndo_core::bad;
+use veyndo_core::document::{lenient, view};
 
 pub(crate) async fn generate(State(a): State<App>, Json(v): Json<Value>) -> Result<Json<Value>> {
     let c = super::broker::assertion(&a, "/api/identity/inference", &v).await?;
@@ -70,15 +72,27 @@ pub(crate) async fn generate(State(a): State<App>, Json(v): Json<Value>) -> Resu
         json!({"value":output.value,"model":output.model,"provider":output.provider,"usage":output.usage}),
     ))
 }
+/// The JSON fields `schema_valid` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct SchemaValidInput {
+    #[serde(deserialize_with = "lenient")]
+    r#type: Option<String>,
+    properties: Value,
+    items: Value,
+}
+
 fn schema_valid(v: &Value, depth: usize) -> bool {
+    let input: SchemaValidInput = view(v);
     if depth > 12 || !v.is_object() || v.get("$ref").is_some() {
         return false;
     }
-    match v["type"].as_str() {
-        Some("object") => v["properties"]
+    match input.r#type.as_deref() {
+        Some("object") => input
+            .properties
             .as_object()
             .is_some_and(|p| p.len() <= 40 && p.values().all(|s| schema_valid(s, depth + 1))),
-        Some("array") => schema_valid(&v["items"], depth + 1),
+        Some("array") => schema_valid(&input.items, depth + 1),
         Some("string" | "number" | "integer" | "boolean" | "null") => true,
         _ => false,
     }

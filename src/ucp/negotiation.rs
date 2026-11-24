@@ -7,11 +7,13 @@ use crate::{accounts, b2b, checkout_handoff, shop_domains};
 use axum::Json;
 use axum::extract::Path;
 use axum::extract::State;
+use serde::Deserialize;
 use serde_json::Value;
 use serde_json::json;
 use veyndo_core::Result;
 use veyndo_core::bad;
 use veyndo_core::conflict;
+use veyndo_core::document::view;
 use veyndo_core::request_context::RequestContext;
 use veyndo_shop::types::cart::StoredCart;
 fn operation(op: &str) -> Result<String> {
@@ -38,12 +40,20 @@ fn operation(op: &str) -> Result<String> {
     }
     Ok(format!("b2b.{op}"))
 }
+/// The JSON fields `command` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct CommandInput {
+    id: Value,
+}
+
 pub(crate) async fn command(
     State(a): State<App>,
     h: RequestContext,
     Path((id, op)): Path<(String, String)>,
     Json(v): Json<Value>,
 ) -> Result<Json<Value>> {
+    let input: CommandInput = view(&v);
     let name = operation(&op)?;
     let selection = profile::select(&h, false).await?;
     if !selection.b2b {
@@ -56,7 +66,13 @@ pub(crate) async fn command(
     b2b::guard(&a, &h, &c).await?;
     accounts::identity(&a, &h).await?;
     if ["quote.message", "quote.reject"].contains(&op.as_str()) {
-        Box::pin(b2b::invoke(&a, &h, "b2b.quote.get", &json!({"id":v["id"]}))).await?;
+        Box::pin(b2b::invoke(
+            &a,
+            &h,
+            "b2b.quote.get",
+            &json!({"id":input.id}),
+        ))
+        .await?;
     }
     let result = if name == "checkout.handoff" {
         if v.as_object()

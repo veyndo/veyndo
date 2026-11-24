@@ -14,6 +14,7 @@ use axum::extract::Path;
 use axum::extract::State;
 use axum::routing::get;
 use axum::routing::post;
+use serde::Deserialize;
 use serde_json::Value;
 use serde_json::json;
 use std::collections::HashMap;
@@ -21,6 +22,7 @@ use veyndo_app_platform::http::actions::{app_action, entity_list, entity_save, s
 use veyndo_app_platform::http::packages;
 use veyndo_core::Result;
 use veyndo_core::bad;
+use veyndo_core::document::view;
 use veyndo_core::request_context::RequestContext;
 pub(crate) fn app_router() -> Router<App> {
     Router::new()
@@ -106,17 +108,25 @@ async fn app_list(State(a): State<App>, h: RequestContext) -> Result<Json<Value>
         "serviceExecution":"digest-approved external services and bounded typed Wasm commerce hooks"
     })))
 }
+/// The JSON fields `app_install` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct AppInstallInput {
+    built_in: Value,
+}
+
 async fn app_install(
     State(a): State<App>,
     h: RequestContext,
     Json(v): Json<Value>,
 ) -> Result<Json<Value>> {
+    let input: AppInstallInput = view(&v);
     auth::permit(&h, "users")?;
     let t = merchant(&a, &h)?;
     let m = consent::decode(&v)?;
     consent::approved(&h, &m, &v)?;
     let result = install(&a, &t, m).await?;
-    if v["builtIn"] == "paypal" {
+    if input.built_in == "paypal" {
         let mut tx = a.db.begin().await?;
         let mut config: commerce::Settings = serde_json::from_value(
             veyndo_shop::store::settings::basis_for_update(&mut tx, &t).await?,

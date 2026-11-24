@@ -141,9 +141,18 @@ pub(crate) async fn international_invoke(
     }
     Ok(result)
 }
+/// The JSON fields `price_policy_view` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct PricePolicyViewInput {
+    data: Value,
+    revision: Value,
+}
+
 /// Small native projection for the existing MCP/planner read, preserving exact amounts and pagination.
 fn price_policy_view(snapshot: &Value, after: Option<&str>) -> Value {
-    let data = &snapshot["data"];
+    let input: PricePolicyViewInput = view(snapshot);
+    let data = &input.data;
     let mut rows = data["aiPolicy"]["corridors"]
         .as_array()
         .cloned()
@@ -167,7 +176,7 @@ fn price_policy_view(snapshot: &Value, after: Option<&str>) -> Value {
         })
         .map(|c| json!({"code":c["code"],"scale":c["scale"]}))
         .collect::<Vec<_>>();
-    json!({"revision":snapshot["revision"],"data":{"aiPolicy":{"autonomy":data["aiPolicy"]["autonomy"],"corridors":page},"currencies":{"pricingCurrency":data["currencies"]["pricingCurrency"],"definitions":definitions}},"totalCorridors":total,"nextAfterProductId":if remaining.len()>8 {page.last().map(|r|r["productId"].clone()).unwrap_or(Value::Null)} else {Value::Null}})
+    json!({"revision":input.revision,"data":{"aiPolicy":{"autonomy":data["aiPolicy"]["autonomy"],"corridors":page},"currencies":{"pricingCurrency":data["currencies"]["pricingCurrency"],"definitions":definitions}},"totalCorridors":total,"nextAfterProductId":if remaining.len()>8 {page.last().map(|r|r["productId"].clone()).unwrap_or(Value::Null)} else {Value::Null}})
 }
 
 #[cfg(test)]

@@ -4568,8 +4568,8 @@
     },
     "crates/cognition/src/inference/budget.rs": {
       "status": "reviewed-binding",
-      "sha256": "e4e8afb7108e03974371cd768bf94aef9f27d7b4bfc8f009d665af6b30018719",
-      "review": "Reviewed agent scope construction and locking: synchronously box the child before constructing the task-local future; retain authority only while polling and verify no context leak. Live-root NO KEY UPDATE serializes allocation/enqueue/stop while admitting FK KEY SHARE, avoiding tenant/task inversion. Real held-reference HTTP stop fails before and passes after; actual worker stop and signed-role allocation cases pass. Existing kernel proof unchanged; async/SQL/provider code remains unproved and the Linux instrumented POS repeat is still required."
+      "sha256": "b9d17a8eb878e6c481c182dc00dd72341c33db1cac4f753e10ab641db8d3881d",
+      "review": "F41 typed server and extension inputs: proof bindings unchanged"
     },
     "crates/cognition/src/inference/error.rs": {
       "status": "unproved",
@@ -4578,8 +4578,8 @@
     },
     "crates/cognition/src/inference/protocol.rs": {
       "status": "unproved",
-      "sha256": "a3f7236d4abdd35019a47a13a57f4a8641e931b51492e67836444726891acc2c",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "688424dda861d1704a9265752769cfc664088f082f05e12112743b557dc8d9cc",
+      "review": "F41 typed server and extension inputs: proof bindings unchanged"
     },
     "crates/cognition/src/inference/request.rs": {
       "status": "unproved",
@@ -4588,8 +4588,8 @@
     },
     "crates/cognition/src/inference/schema.rs": {
       "status": "unproved",
-      "sha256": "3406af7dc0fcdddbe7561d3b48952628c777f88a0e54bf6ef082e65a780ce7cc",
-      "review": "Review strict provider wire-only uniqueItems removal, original-schema duplicate rejection before proposals, nullable/distinct selection tests and rejecting HTTP provider fixture; no commerce policy or authority changes"
+      "sha256": "7850de866a926232f94c8c32338564daffb0b7b085f7245a58fec4609bdbfcc6",
+      "review": "F41 typed server and extension inputs: proof bindings unchanged"
     },
     "crates/cognition/src/inference/settings.rs": {
       "status": "unproved",
@@ -4613,8 +4613,8 @@
     },
     "crates/cognition/src/inference/tools/response.rs": {
       "status": "unproved",
-      "sha256": "0cd4e7f1551736889148def00d6ad910c0793c62ae888d8754190601648bf482",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "294950c16da80fc91eba3e42f0689368792f6c7e4c099dbaf674172236743de6",
+      "review": "F41 typed server and extension inputs: proof bindings unchanged"
     },
     "crates/cognition/src/inference/tools/tests.rs": {
       "status": "unproved",
@@ -5263,13 +5263,13 @@
     },
     "extensions/apps/site-builder/server.rs": {
       "status": "unproved",
-      "sha256": "b41111be62bfa0af71127652ea9fad7ddbee998e19eaba3223b82046992f5455",
-      "review": "F20: site builder and site forms as crates behind the SiteHost port; no path attribute left in src"
+      "sha256": "9687e98c676b699ce5983b49ed25d4519be5c7b959a42db98569a6c61977336c",
+      "review": "F41 typed server and extension inputs: proof bindings unchanged"
     },
     "extensions/apps/site-forms/server.rs": {
       "status": "unproved",
-      "sha256": "4f387da4c8e46f5aef16f91f92ba4520ab3bcd1a1fcbcc0a91c80c2e7cf35e7a",
-      "review": "F20: site builder and site forms as crates behind the SiteHost port; no path attribute left in src"
+      "sha256": "2746769d369b0b2c9058db084389e2f8a342d4401759d66722d6ff50cd38c2c0",
+      "review": "F41 typed server and extension inputs: proof bindings unchanged"
     },
     "extensions/apps/slack/src/actions.rs": {
       "status": "unproved",
@@ -6353,8 +6353,8 @@
     },
     "src/agent.rs": {
       "status": "unproved",
-      "sha256": "e96895adaf486ad2ec0a94ad4b0187a7af98d218da702db1cfcac469a431f77b",
-      "review": "F18: server state composed of component-owned state"
+      "sha256": "fa91f715e61473fbab47869b61cd512eb9ecb2cf74167bf3bab97264b881fcad",
+      "review": "F41 typed server and extension inputs: proof bindings unchanged"
     },
     "src/agent_host.rs": {
       "status": "unproved",
@@ -6438,18 +6438,18 @@
     },
     "src/apps/consent.rs": {
       "status": "unproved",
-      "sha256": "f78357f13182c05726046415fdfe8a28dc236a6e79168a554aee88f418e7cad2",
-      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
+      "sha256": "e07fa6ec8017ce2da9cac70187782938c6cdc72c0991d6157b5d4696a2efc6e0",
+      "review": "F41 typed server and extension inputs: proof bindings unchanged"
     },
     "src/apps/core_callbacks.rs": {
       "status": "unproved",
-      "sha256": "0e88685587cf7a84c6b06c1045f9b93001b9de73aad3e0e62f49dbd12985b374",
-      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
+      "sha256": "d33258a4b3a413d96c9282fe4c440ecd941250b18d73057f86a504ad486c1c09",
+      "review": "F41 typed server and extension inputs: proof bindings unchanged"
     },
     "src/apps/core_documents.rs": {
       "status": "unproved",
-      "sha256": "18f6fba079c96ec623e1773633cc9eec5a378a6809800dee746849bcb01679ff",
-      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
+      "sha256": "6b1f72a6d430b8a01b0741f7e0daacc28383e7e310c0ddadb97b8acff298921e",
+      "review": "F41 typed server and extension inputs: proof bindings unchanged"
     },
     "src/apps/core_exchange.rs": {
       "status": "unproved",
@@ -6593,8 +6593,8 @@
     },
     "src/apps/routes.rs": {
       "status": "unproved",
-      "sha256": "c9aaa98ecb8f9d4a46d1a2ca77d10a42906a6bbb74ab6ea205b55688d3399bbe",
-      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
+      "sha256": "f0cb29a7dc30d54967a8e3993de7507c6dff76acba8b44b726ff2f024101c685",
+      "review": "F41 typed server and extension inputs: proof bindings unchanged"
     },
     "src/apps/schedules.rs": {
       "status": "unproved",
@@ -6628,8 +6628,8 @@
     },
     "src/apps/submissions.rs": {
       "status": "reviewed-binding",
-      "sha256": "0490788eb2346510bbb9d84ee5a15125174cb8a89fdc3a77d01d782ed0eefdb6",
-      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
+      "sha256": "e4659707de5c21e11ca7526e1255a405e4fddfe3759d63356435b2785295830d",
+      "review": "F41 typed server and extension inputs: proof bindings unchanged"
     },
     "src/apps/surface_grants.rs": {
       "status": "unproved",
@@ -6733,8 +6733,8 @@
     },
     "src/auth/broker_inference.rs": {
       "status": "unproved",
-      "sha256": "fe707415b57354ef49478bb2dd4913db944b90f4c95afbf5bbe39cdcd2d9ee44",
-      "review": "F18: server state composed of component-owned state"
+      "sha256": "674186a5e79260fdeba430ef2f5964e48b740667fe55bcf362d2d628e9e1ff65",
+      "review": "F41 typed server and extension inputs: proof bindings unchanged"
     },
     "src/auth/broker_recovery.rs": {
       "status": "unproved",
@@ -6813,8 +6813,8 @@
     },
     "src/auth/provision.rs": {
       "status": "unproved",
-      "sha256": "78c283c94ec757bc3bdd8916ebe6e3626d2f91a48b2776ae08ea04b82dca5089",
-      "review": "F18: server state composed of component-owned state"
+      "sha256": "97579e4f123dd34ca6089cd9952cbd8aad1a8fc42f02f8e4c8cfe96476483f23",
+      "review": "F41 typed server and extension inputs: proof bindings unchanged"
     },
     "src/auth/recovery_entry.rs": {
       "status": "unproved",
@@ -7108,8 +7108,8 @@
     },
     "src/cognition/contracts.rs": {
       "status": "unproved",
-      "sha256": "bc09510d7a1a2b13e443c5a13488ded7e6cf2c7f4a1fa051aeacbbc8a23fbc27",
-      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
+      "sha256": "9b521d9dc9f43506ca70e886ab8df0023c2c8ab4a780f7c0cda631936e697206",
+      "review": "F41 typed server and extension inputs: proof bindings unchanged"
     },
     "src/cognition/evidence.rs": {
       "status": "unproved",
@@ -7243,8 +7243,8 @@
     },
     "src/commerce/international_capabilities.rs": {
       "status": "unproved",
-      "sha256": "69716df3f38f402f0618609d5905fc8b631b4567496de320e2c9f8da3b789d76",
-      "review": "F31 typed server capability inputs: proof bindings unchanged"
+      "sha256": "14bea6ddc9821462140ae2c1533f1c3055bbd543524bbe582e8c2dd396423936",
+      "review": "F41 typed server and extension inputs: proof bindings unchanged"
     },
     "src/commerce/inventory_ports.rs": {
       "status": "unproved",
@@ -7318,13 +7318,13 @@
     },
     "src/concierge.rs": {
       "status": "unproved",
-      "sha256": "156a2883872701de408ba8dc4110179642281d6311455da40bb762eec4a01007",
-      "review": "F18: server state composed of component-owned state"
+      "sha256": "407025bb1a554fc63a525c9d33c309d7b70b73a539860412ca3e87252a646bec",
+      "review": "F41 typed server and extension inputs: proof bindings unchanged"
     },
     "src/currencies/capabilities.rs": {
       "status": "unproved",
-      "sha256": "cd3b1579dce743e49d7c3904493f7bded736cf13389fb626086c25f5befcb308",
-      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
+      "sha256": "3f28b92302ef002a9b323e3c47f4e2734815b069f01e1049ccebe8b92f430b5d",
+      "review": "F41 typed server and extension inputs: proof bindings unchanged"
     },
     "src/currencies/jobs.rs": {
       "status": "unproved",
@@ -7353,8 +7353,8 @@
     },
     "src/currencies/routes.rs": {
       "status": "unproved",
-      "sha256": "c5dc39f4ae0d59289ec375846f3d9b2c00c587b967cb77466673316759458f64",
-      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
+      "sha256": "d2b5ca78b82d0fbb26ab2480d1c15458b3499590a99930e9d327e751229e826a",
+      "review": "F41 typed server and extension inputs: proof bindings unchanged"
     },
     "src/customer.rs": {
       "status": "unproved",
@@ -7438,8 +7438,8 @@
     },
     "src/documents/tools.rs": {
       "status": "unproved",
-      "sha256": "bfe928d46812d71f510b018d0f8374f323263fab51db6af1a503ab48ce5417a2",
-      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
+      "sha256": "b6395b1cbd6fc294d006f85883029d81429705ede1fe643e1cc8cba9159c84b6",
+      "review": "F41 typed server and extension inputs: proof bindings unchanged"
     },
     "src/experience.rs": {
       "status": "unproved",
@@ -7838,8 +7838,8 @@
     },
     "src/payments/instruments.rs": {
       "status": "unproved",
-      "sha256": "4757c58d6945df102e4acffe359a792ceeeb5bf7cca0d334b9346fea9474eb30",
-      "review": "F39 typed inputs: proof bindings unchanged"
+      "sha256": "5236542df3448c7ce641c5e21dfe9b26d9af7a3807b9246139f5a15990e81b9d",
+      "review": "F41 typed server and extension inputs: proof bindings unchanged"
     },
     "src/payments/merchant.rs": {
       "status": "unproved",
@@ -7878,8 +7878,8 @@
     },
     "src/payments/routes.rs": {
       "status": "unproved",
-      "sha256": "dd18ab355e92c6ebf4a37864da65e5dfc8b49ffd4d8fda8fb4364c2562e20bb0",
-      "review": "F19: PayPal adapter as its own crate over the payments ledger"
+      "sha256": "747159585ec0e40c8f82377b99dbf7a2d4a851cc457f06a672d23439c9ce9c87",
+      "review": "F41 typed server and extension inputs: proof bindings unchanged"
     },
     "src/payments/sessions.rs": {
       "status": "unproved",
@@ -8013,8 +8013,8 @@
     },
     "src/proposal_routes.rs": {
       "status": "unproved",
-      "sha256": "7a327a2482f57de12cb824c0c7aca9cc7e5f0e10da8d8b59a889b0959a4ea838",
-      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
+      "sha256": "b0eda7b12fdb99050ba0a07f904cb739224eafa3010adbee1d08d9d167d923f4",
+      "review": "F41 typed server and extension inputs: proof bindings unchanged"
     },
     "src/routes/http_profile.rs": {
       "status": "unproved",
@@ -8118,8 +8118,8 @@
     },
     "src/translations/routes.rs": {
       "status": "unproved",
-      "sha256": "8e74d40bf5600ce49b75907355fa95427c5547bb5744ec1da637d1ef0bd78066",
-      "review": "F18: server state composed of component-owned state"
+      "sha256": "ece144944fd6aa509b775d043e01c6e2d5b048ba7a505b0af21a56bd0cccb712",
+      "review": "F41 typed server and extension inputs: proof bindings unchanged"
     },
     "src/translations/selection.rs": {
       "status": "unproved",
@@ -8138,8 +8138,8 @@
     },
     "src/ucp/consent.rs": {
       "status": "unproved",
-      "sha256": "bbcddee258caf2fd9295291ace046bdc52e7e3f5572391d1fbf911e0fd047fef",
-      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
+      "sha256": "bf3b0c72c25bbbfcdb4621931625e3bf2b3deec0d852b2a326d02d7aee270f8e",
+      "review": "F41 typed server and extension inputs: proof bindings unchanged"
     },
     "src/ucp/document.rs": {
       "status": "unproved",
@@ -8153,13 +8153,13 @@
     },
     "src/ucp/mod.rs": {
       "status": "unproved",
-      "sha256": "fdf2f6560a6efb4caeb778b0161479d23bd36cde701e68554280ec220524cab3",
-      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
+      "sha256": "5f6cb6f9ba36af2810abefae9a8acc7d3cbe93dab940d2bf161c5165dd1a98bc",
+      "review": "F41 typed server and extension inputs: proof bindings unchanged"
     },
     "src/ucp/negotiation.rs": {
       "status": "unproved",
-      "sha256": "7f7d4594648af28a4aec525d6ed9aa0752248c3ea396af636810134f5f216163",
-      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
+      "sha256": "755d98a126ddf187941abb363e1868b20d6a5f2753bac8cda2f2e1b3aef0f6e8",
+      "review": "F41 typed server and extension inputs: proof bindings unchanged"
     },
     "src/ucp/profile.rs": {
       "status": "unproved",

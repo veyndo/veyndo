@@ -4,6 +4,14 @@ use serde_json::Value;
 use veyndo_app_model::manifest::Manifest;
 use veyndo_core::Result;
 use veyndo_core::bad;
+use veyndo_core::document::view;
+/// The JSON fields `admit` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct AdmitInput {
+    fields: Value,
+}
+
 /// Admits one public form submission against the published form definition of the channel.
 pub async fn admit(
     tx: &mut sqlx::Transaction<'_, sqlx::Postgres>,
@@ -11,7 +19,8 @@ pub async fn admit(
     channel: &str,
     v: &Value,
 ) -> Result<()> {
-    let fields = &v["fields"];
+    let input: AdmitInput = view(v);
+    let fields = &input.fields;
     if fields["channel"] != channel || fields["consent"] != true {
         return Err(bad("Form channel and privacy acknowledgement required"));
     }

@@ -5,6 +5,7 @@ use crate::foundation::App;
 use crate::{accounts, auth, categories, demo_catalog};
 use axum::Json;
 use axum::extract::State;
+use serde::Deserialize;
 use serde_json::Value;
 use serde_json::json;
 use std::env;
@@ -13,6 +14,7 @@ use veyndo_apps::sandbox::Sandbox;
 use veyndo_core::Result;
 use veyndo_core::bad;
 use veyndo_core::conflict;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::hash;
 use veyndo_core::request_context::RequestContext;
 use veyndo_core::shop_scope::header;
@@ -130,23 +132,36 @@ pub(crate) async fn provision_shop(
     }
     Ok(sandbox)
 }
+/// The JSON fields `create_workspace` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct CreateWorkspaceInput {
+    #[serde(deserialize_with = "lenient")]
+    workspace_id: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    workspace_name: Option<String>,
+}
+
 pub(crate) async fn create_workspace(
     State(a): State<App>,
     h: RequestContext,
     Json(v): Json<Value>,
 ) -> Result<Json<Value>> {
+    let input: CreateWorkspaceInput = view(&v);
     auth::permit(&h, "read")?;
     let user = header(&h, "x-rac-user")
         .filter(|u| *u != "bootstrap")
         .ok_or(bad("Use a personal merchant account"))?;
     // Only a live personal session may create another workspace or carry MFA proof.
     super::mfa::personal(&a, &h).await?;
-    let slug = v["workspaceId"]
-        .as_str()
+    let slug = input
+        .workspace_id
+        .as_deref()
         .ok_or(bad("Workspace ID required"))?;
     validate_tenant(slug)?;
-    let name = v["workspaceName"]
-        .as_str()
+    let name = input
+        .workspace_name
+        .as_deref()
         .filter(|s| !s.trim().is_empty() && s.len() <= 100)
         .ok_or(bad("Workspace name required"))?;
     let demo = hash_password("demo-business".into()).await?;

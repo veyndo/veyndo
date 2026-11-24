@@ -59,19 +59,29 @@ pub(crate) async fn revoke(a: &App, h: &RequestContext, id: &str, key: &str) -> 
 pub(crate) async fn route_list(State(a): State<App>, h: RequestContext) -> Result<Json<Value>> {
     Ok(Json(list(&a, &h).await?))
 }
+/// The JSON fields `route_revoke` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct RouteRevokeInput {
+    #[serde(deserialize_with = "lenient")]
+    request_key: Option<String>,
+}
+
 pub(crate) async fn route_revoke(
     State(a): State<App>,
     h: RequestContext,
     Path(id): Path<String>,
     Json(v): Json<Value>,
 ) -> Result<Json<Value>> {
+    let input: RouteRevokeInput = view(&v);
     Ok(Json(
         revoke(
             &a,
             &h,
             &id,
-            v["requestKey"]
-                .as_str()
+            input
+                .request_key
+                .as_deref()
                 .or_else(|| header(&h, "idempotency-key"))
                 .ok_or(bad("requestKey required"))?,
         )

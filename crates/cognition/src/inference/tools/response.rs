@@ -1,19 +1,40 @@
 //! Fail-closed normalization of bounded calls; malformed, truncated or unknown operations never execute.
 use super::super::{Provider, Value, env, json};
 use super::operation;
+use serde::Deserialize;
+use veyndo_core::document::{lenient, view};
+/// The JSON fields `parse` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ParseInput {
+    status: Value,
+    output: Value,
+    choices: Value,
+    #[serde(deserialize_with = "lenient")]
+    #[serde(rename = "stop_reason")]
+    stop_reason: Option<String>,
+    content: Value,
+    #[serde(deserialize_with = "lenient")]
+    done: Option<bool>,
+    #[serde(rename = "done_reason")]
+    done_reason: Value,
+    message: Value,
+}
+
 pub(in crate::inference) fn parse(
     provider: &Provider,
     schema: &Value,
     raw: &Value,
 ) -> Result<(Value, Value), String> {
+    let args: ParseInput = view(raw);
     let chat = matches!(provider, Provider::Openai)
         && env::var("OPENAI_PROTOCOL").as_deref() == Ok("chat");
     let (assistant, calls) = match provider {
         Provider::Openai if !chat => {
-            if raw["status"] != "completed" {
+            if args.status != "completed" {
                 return Err("Tool response did not complete".into());
             }
-            let items = raw["output"].as_array().ok_or("Invalid tool output")?;
+            let items = args.output.as_array().ok_or("Invalid tool output")?;
             if items.iter().any(|v| {
                 v["type"] == "message"
                     && v["content"]
@@ -32,7 +53,8 @@ pub(in crate::inference) fn parse(
             )
         }
         Provider::Openai => {
-            let choices = raw["choices"]
+            let choices = args
+                .choices
                 .as_array()
                 .filter(|v| v.len() == 1)
                 .ok_or("Invalid tool choices")?;
@@ -53,10 +75,10 @@ pub(in crate::inference) fn parse(
             )
         }
         Provider::Anthropic => {
-            if !["end_turn", "tool_use"].contains(&raw["stop_reason"].as_str().unwrap_or("")) {
+            if !["end_turn", "tool_use"].contains(&args.stop_reason.as_deref().unwrap_or("")) {
                 return Err("Tool response interrupted".into());
             }
-            let items = raw["content"].as_array().ok_or("Invalid tool content")?;
+            let items = args.content.as_array().ok_or("Invalid tool content")?;
             (
                 json!(items),
                 items
@@ -67,10 +89,10 @@ pub(in crate::inference) fn parse(
             )
         }
         Provider::Ollama => {
-            if raw["done"] != true || raw["done_reason"] == "length" {
+            if args.done != Some(true) || args.done_reason == "length" {
                 return Err("Local tool response interrupted".into());
             }
-            let message = &raw["message"];
+            let message = &args.message;
             (
                 message.clone(),
                 message["tool_calls"]

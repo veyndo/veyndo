@@ -9,6 +9,7 @@ use std::sync::Arc;
 use veyndo_core::Result;
 use veyndo_core::bad;
 use veyndo_core::conflict;
+use veyndo_core::document::{lenient, view};
 mod block_validation;
 mod context;
 pub mod design_agent;
@@ -91,15 +92,26 @@ pub fn normalize(v: &Value) -> Result<Value> {
     next["content"] = serde_json::to_value(content).map_err(|_| bad("Invalid page blocks"))?;
     Ok(next)
 }
+/// The JSON fields `validate` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ValidateInput {
+    content: Value,
+    theme: Value,
+    #[serde(deserialize_with = "lenient")]
+    slug: Option<String>,
+}
+
 pub fn validate(entity: &str, v: &Value) -> Result<()> {
+    let input: ValidateInput = view(v);
     if entity != "pages" {
         return Err(bad("Unknown site model"));
     }
     let content: Content =
-        serde_json::from_value(v["content"].clone()).map_err(|_| bad("Invalid page blocks"))?;
+        serde_json::from_value(input.content.clone()).map_err(|_| bad("Invalid page blocks"))?;
     let theme: Theme =
-        serde_json::from_value(v["theme"].clone()).map_err(|_| bad("Invalid shop theme"))?;
-    let slug = v["slug"].as_str().unwrap_or("");
+        serde_json::from_value(input.theme.clone()).map_err(|_| bad("Invalid shop theme"))?;
+    let slug = input.slug.as_deref().unwrap_or("");
     if slug.is_empty()
         || slug.len() > 100
         || !slug
@@ -140,13 +152,28 @@ fn safe_image(s: &str) -> bool {
             u.scheme() == "https" && u.username().is_empty() && u.password().is_none()
         })
 }
+/// The JSON fields `validate_owned` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ValidateOwnedInput {
+    #[serde(deserialize_with = "lenient")]
+    channel: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    slug: Option<String>,
+    content: Value,
+}
+
 pub async fn validate_owned(
     tx: &mut sqlx::Transaction<'_, sqlx::Postgres>,
     t: &str,
     v: &Value,
     record_id: &str,
 ) -> Result<()> {
-    let channel = v["channel"].as_str().ok_or(bad("Page channel required"))?;
+    let input: ValidateOwnedInput = view(v);
+    let channel = input
+        .channel
+        .as_deref()
+        .ok_or(bad("Page channel required"))?;
     if channel != "*"
         && !sqlx::query_scalar::<_, bool>(
             "SELECT EXISTS(SELECT 1 FROM sales_channels WHERE tenant=$1 AND id=$2)",
@@ -169,7 +196,7 @@ pub async fn validate_owned(
     if sqlx::query_scalar::<_, bool>("SELECT EXISTS(SELECT 1 FROM app_records WHERE tenant=$1 AND app='site_builder' AND entity='pages' AND fields->>'channel'=$2 AND fields->>'slug'=$3 AND id<>$4)")
         .bind(t)
         .bind(channel)
-        .bind(v["slug"].as_str())
+        .bind(input.slug.as_deref())
         .bind(record_id)
         .fetch_one(&mut **tx)
         .await?
@@ -182,7 +209,7 @@ pub async fn validate_owned(
         .await?;
     let settings = veyndo_shop::domain::defaults::decode(settings)?;
     let content: Content =
-        serde_json::from_value(v["content"].clone()).map_err(|_| bad("Invalid page"))?;
+        serde_json::from_value(input.content.clone()).map_err(|_| bad("Invalid page"))?;
     for b in content.blocks {
         if let Some(element) = &b.extension {
             elements::validate_owned(tx, t, element).await?;

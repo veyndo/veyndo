@@ -13,11 +13,13 @@ use axum::extract::Path;
 use axum::extract::State;
 use axum::http::StatusCode;
 use axum::routing::post;
+use serde::Deserialize;
 use serde_json::Value;
 use serde_json::json;
 use veyndo_core::Error;
 use veyndo_core::Result;
 use veyndo_core::bad;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::request_context::RequestContext;
 use veyndo_core::shop_scope::header;
 pub(super) fn router() -> Router<App> {
@@ -88,8 +90,19 @@ async fn job_progress(
     }
     Ok(result)
 }
+/// The JSON fields `receipt` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ReceiptInput {
+    #[serde(deserialize_with = "lenient")]
+    id: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    receipt_id: Option<String>,
+}
+
 /// A receipt export needs explicit document, order and personal data consent.
 async fn receipt(a: &App, h: &RequestContext, m: &Manifest, v: &Value) -> Result<Value> {
+    let input: ReceiptInput = view(v);
     input_schema::validate(
         &json!({"type":"object","properties":{"id":{"type":"string","maxLength":100},"receiptId":{"type":"string","maxLength":100}},"required":["id","receiptId"],"additionalProperties":false}),
         v,
@@ -107,11 +120,20 @@ async fn receipt(a: &App, h: &RequestContext, m: &Manifest, v: &Value) -> Result
     crate::operations::receipt_snapshot(
         a,
         h,
-        v["id"].as_str().unwrap(),
-        v["receiptId"].as_str().unwrap(),
+        input.id.as_deref().unwrap(),
+        input.receipt_id.as_deref().unwrap(),
     )
     .await
 }
+/// The JSON fields `record_action` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct RecordActionInput {
+    #[serde(deserialize_with = "lenient")]
+    action: Option<String>,
+    input: Value,
+}
+
 /// Runs a declared native list or save action of the app's own records.
 async fn record_action(
     a: &App,
@@ -120,11 +142,12 @@ async fn record_action(
     m: &Manifest,
     v: &Value,
 ) -> Result<Value> {
+    let args: RecordActionInput = view(v);
     input_schema::validate(
         &json!({"type":"object","properties":{"action":{"type":"string","maxLength":32},"input":{"type":"object"}},"required":["action","input"],"additionalProperties":false}),
         v,
     )?;
-    let name = v["action"].as_str().ok_or(bad("Action required"))?;
+    let name = args.action.as_deref().ok_or(bad("Action required"))?;
     let action = m
         .actions
         .iter()
@@ -142,7 +165,7 @@ async fn record_action(
         ));
     }
     credentials::permit(h, permission)?;
-    invoke_app(a, h, id, name, &v["input"]).await
+    invoke_app(a, h, id, name, &args.input).await
 }
 async fn execute(
     a: &App,

@@ -10,10 +10,12 @@ use axum::extract::Path;
 use axum::extract::State;
 use axum::routing::get;
 use axum::routing::post;
+use serde::Deserialize;
 use serde_json::Value;
 use serde_json::json;
 use veyndo_core::Result;
 use veyndo_core::bad;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::request_context::RequestContext;
 pub(crate) fn schema(name: &str) -> Option<Value> {
     if let Some(schema) = super::behavior::schema(name) {
@@ -46,12 +48,23 @@ pub(crate) fn schema(name: &str) -> Option<Value> {
     };
     Some(json!({"type":"object","properties":props,"additionalProperties":false}))
 }
+/// The JSON fields `invoke_contract` reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct InvokeContractInput {
+    #[serde(deserialize_with = "lenient")]
+    product_id: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    task_id: Option<String>,
+}
+
 pub(crate) async fn invoke_contract(
     a: &App,
     h: &RequestContext,
     name: &str,
     v: &Value,
 ) -> Result<Value> {
+    let input: InvokeContractInput = view(v);
     if super::behavior::schema(name).is_some() {
         return super::behavior::invoke(a, h, name, v).await;
     }
@@ -60,13 +73,13 @@ pub(crate) async fn invoke_contract(
     if name == "knowledge.experiments" || name.starts_with("knowledge.experiment.") {
         return experiments::invoke(a, h, name, v).await;
     }
-    let product = || v["productId"].as_str().ok_or(bad("Product required"));
+    let product = || input.product_id.as_deref().ok_or(bad("Product required"));
     match name {
         "knowledge.autonomy.apply" => {
             crate::proposal_apply::apply_mode(
                 a,
                 &t,
-                v["taskId"].as_str().ok_or(bad("Task required"))?,
+                input.task_id.as_deref().ok_or(bad("Task required"))?,
                 h,
                 true,
             )
