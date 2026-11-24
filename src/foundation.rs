@@ -36,7 +36,7 @@ impl axum::extract::FromRef<App> for veyndo_core::State {
         app.core.clone()
     }
 }
-pub(crate) use veyndo_core::shop_scope::{header, tenant, token};
+pub(crate) use veyndo_core::shop_scope::{header, tenant};
 pub(crate) use veyndo_core::{Error, Result, bad, conflict, hash, uid, validate_tenant};
 pub(crate) fn merchant(_a: &App, h: &RequestContext) -> Result<String> {
     veyndo_identity::merchant(h)

@@ -24,13 +24,13 @@ impl Shoppers for Server {
     }
     fn bought<'a>(&'a self, shopper: &'a Shopper, product: &'a str) -> PortFuture<'a, bool> {
         Box::pin(async move {
-            Ok(sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM orders o WHERE o.tenant=$1 AND (o.cart_id=$2 OR ($3::text IS NOT NULL AND o.data->'orderCustomer'->>'customerId'=$3)) AND EXISTS(SELECT 1 FROM jsonb_array_elements(o.data->'cart'->'lineItems') i WHERE i->>'id'=$4))")
-                .bind(&shopper.tenant)
-                .bind(&shopper.cart)
-                .bind(&shopper.customer)
-                .bind(product)
-                .fetch_one(&self.0.db)
-                .await?)
+            veyndo_orders::store::order_reads::bought(
+                &self.0,
+                &shopper.tenant,
+                (&shopper.cart, shopper.customer.as_deref()),
+                product,
+            )
+            .await
         })
     }
 }
@@ -51,12 +51,7 @@ impl Shop for Server {
         tenant: &'a str,
     ) -> PortFuture<'a, ContentLanguages> {
         Box::pin(async move {
-            let data: serde_json::Value =
-                sqlx::query_scalar("SELECT data FROM commerce_settings WHERE tenant=$1 FOR SHARE")
-                    .bind(tenant)
-                    .fetch_one(tx)
-                    .await?;
-            let settings = commerce::decode_config(data)?;
+            let settings = veyndo_shop::store::settings::shared(tx, tenant).await?;
             Ok(ContentLanguages {
                 main: settings.main_locale,
                 enabled: settings.locales,

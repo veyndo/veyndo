@@ -1,5 +1,5 @@
 //! The server's implementation of what the pricing component reads from the shop settings, the cart and the catalogue.
-use crate::{App, RequestContext, Row, bad, commerce, load_cart};
+use crate::{App, RequestContext, bad, commerce, load_cart};
 use serde_json::Value;
 use sqlx::PgConnection;
 use std::sync::Arc;
@@ -26,16 +26,8 @@ impl ShopSettings for Server {
         tenant: &'a str,
     ) -> PortFuture<'a, (Config, i64)> {
         Box::pin(async move {
-            let row = sqlx::query(
-                "SELECT data,revision FROM commerce_settings WHERE tenant=$1 FOR UPDATE",
-            )
-            .bind(tenant)
-            .fetch_one(tx)
-            .await?;
-            Ok((
-                commerce::decode_config(row.get("data"))?.currencies,
-                row.get("revision"),
-            ))
+            let (settings, revision) = veyndo_shop::store::settings::for_update(tx, tenant).await?;
+            Ok((settings.currencies, revision))
         })
     }
 }

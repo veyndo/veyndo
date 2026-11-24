@@ -23,6 +23,7 @@ pub mod models;
 pub mod navigation;
 pub mod pdf;
 pub mod planner;
+pub mod platform_ai;
 pub mod product_questions;
 pub mod read_rounds;
 pub mod retrieval;

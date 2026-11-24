@@ -9,6 +9,7 @@ pub mod configuration_events;
 pub mod configuration_orders;
 pub mod core_references;
 pub mod dependencies;
+pub mod developer_builds;
 pub mod event_deliveries;
 pub mod evidence;
 pub mod extension_filter;

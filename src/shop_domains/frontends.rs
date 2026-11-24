@@ -14,17 +14,7 @@ pub(crate) fn router() -> Router<App> {
             axum::routing::delete(super::frontend_bindings::remove),
         )
 }
-pub(super) fn valid_origin(s: &str) -> bool {
-    reqwest::Url::parse(s).is_ok_and(|u| {
-        u.username().is_empty()
-            && u.password().is_none()
-            && u.query().is_none()
-            && u.fragment().is_none()
-            && u.path() == "/"
-            && (u.scheme() == "https"
-                || u.scheme() == "http" && matches!(u.host_str(), Some("127.0.0.1" | "localhost")))
-    })
-}
+pub(super) use veyndo_core::host_names::valid_origin;
 pub(crate) use veyndo_core::host_names::{public_api_path, public_path};
 /// Only an operator-bound hostname may delegate an otherwise unregistered route.
 /// Registered Core routes always keep their own permission and handler.
@@ -68,7 +58,7 @@ async fn proxy(
     request: Request,
     alias: &str,
     access: &crate::performance::access_snapshot::AccessSnapshot,
-    mount: &crate::performance::access_snapshot::FrontendMount,
+    mount: &veyndo_core::access::FrontendMount,
 ) -> Result<Response> {
     let origin = &mount.origin;
     if !valid_origin(origin)

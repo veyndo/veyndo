@@ -3,6 +3,7 @@ pub mod assets;
 pub mod catalog_reads;
 pub mod categories;
 pub mod channels;
+pub mod demo_template;
 pub mod media_jobs;
 pub mod order_downloads;
 pub mod product_edit;

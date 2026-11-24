@@ -119,7 +119,7 @@ verified separately by native integration tests rather than proved by Lean.
 | `app_core_reference_admissible` | Product references may be public; customer/order references require private data | `components/apps/src/domain/entity_access.rs` |
 | `planning_request_admissible` | Admission is exactly a read classification or an explicitly allowed planning operation | `src/agent_runs/controls.rs` |
 | `agent_preview_admissible` | Private continuation requires an active shop, personal session, matching owner and current preview | `src/agent_runs/authority.rs` |
-| `shop_request_admissible` | Active shops admit requests; paused shops require an admitted read; archived shops deny ordinary operations while settlement callbacks remain available | `src/platform/lifecycle.rs` |
+| `shop_request_admissible` | Active shops admit requests; paused shops require an admitted read; archived shops deny ordinary operations while settlement callbacks remain available | `components/shop/src/service/availability.rs` |
 | `external_amount_admissible` | Gross and tax are bounded, tax cannot exceed gross, rates are bounded and zero rate cannot carry nonzero tax | `components/pricing/src/domain/external_order.rs` |
 | `external_paid_total_admissible` | A source order is paid with a positive, exactly reconciled total | `components/pricing/src/domain/external_order.rs` |
 

@@ -8,11 +8,7 @@ pub(crate) async fn authenticate(a: &App, h: &RequestContext) -> Result<String> 
             "Personal operator login required".into(),
         ))?;
     let (user, _, scopes) = auth::resolve_credential(a, token).await?;
-    let active: Option<bool> =
-        sqlx::query_scalar("SELECT active FROM platform_operators WHERE user_id=$1")
-            .bind(&user)
-            .fetch_optional(&a.db)
-            .await?;
+    let active = veyndo_shop::store::operators::grant(a, &user).await?;
     if !verified_kernel::platform_admissible(
         scopes.is_none() && token != *a.token,
         active.is_some(),

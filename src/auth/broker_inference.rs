@@ -37,7 +37,7 @@ pub(crate) async fn generate(State(a): State<App>, Json(v): Json<Value>) -> Resu
         .clone()
         .try_acquire_owned()
         .map_err(|_| Error(StatusCode::TOO_MANY_REQUESTS, "Model capacity busy".into()))?;
-    let count:i32=sqlx::query_scalar("INSERT INTO identity_inference_daily(email,day,calls) VALUES($1,current_date,1) ON CONFLICT(email,day) DO UPDATE SET calls=identity_inference_daily.calls+1 RETURNING calls").bind(email).fetch_one(&a.db).await?;
+    let count = veyndo_identity::store::merchant_accounts::count_inference(&a, &email).await?;
     if count > 50 {
         return Err(Error(
             StatusCode::TOO_MANY_REQUESTS,

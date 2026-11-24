@@ -6,7 +6,7 @@ This page answers one question per source file of the commerce core: is its
 rule proved by machine, does it call a proved rule, or neither? It is
 generated from the same manifest the proof check uses, so it cannot say more
 than the check verifies. **It is not a claim that the shop is free of errors:**
-93.5 % of the Rust source files are unproved.
+93.6 % of the Rust source files are unproved.
 
 ## In numbers
 
@@ -17,8 +17,8 @@ than the check verifies. **It is not a claim that the shop is free of errors:**
 | Rule files | 8 | 0.5 % | The files that contain the proved rules |
 | Reviewed callers | 79 | 5.3 % | Files that call a proved rule; a person reviewed how the rule is fed, the surrounding code is not proved |
 | Comparison drivers | 9 | 0.6 % | Test programs that compare the compiled Rust rules with the Lean versions |
-| **Unproved files** | 1383 | 93.5 % | Everything else: database access, HTTP, providers, the user interface server |
-| All Rust source files | 1479 | 100 % | |
+| **Unproved files** | 1393 | 93.6 % | Everything else: database access, HTTP, providers, the user interface server |
+| All Rust source files | 1489 | 100 % | |
 
 A proved rule looks like this one, which caps a discount at the amount it is
 taken from:
@@ -85,7 +85,7 @@ that call it.
 | `pos_discount_admissible` | No comment in the source | 2: `pos_discount_exact`, `pos_discount_exceeds_denied` | `components/shop/src/types/cart.rs` |
 | `refund_admissible` | No comment in the source | 5: `refund_bounded`, `refund_zero_denied`, `refund_exact`, `refund_sequence_bounded`, `refund_lowered_capture_denied` | `components/payments/src/store/commands.rs`, `components/payments/src/domain/refunds.rs` |
 | `replay_admissible` | No comment in the source | 3: `replay_same_cart`, `replay_open_fingerprint`, `replay_exact` | `components/checkout/src/service/purchase/lock.rs` |
-| `revision_admissible` | No comment in the source | 2: `revision_exact`, `revision_exact_behavior` | `components/orders/src/http/transitions.rs`, `components/catalog/src/service/translation_apply.rs`, `src/platform/ai.rs`, `components/shop/src/http/operator_quotas.rs`, `components/shop/src/http/operator_lifecycle.rs`, `components/orders/src/http/delivery_split.rs`, `components/intelligence/src/store/evidence.rs`, `components/checkout/src/domain/review_binding.rs` |
+| `revision_admissible` | No comment in the source | 2: `revision_exact`, `revision_exact_behavior` | `components/orders/src/http/transitions.rs`, `components/catalog/src/service/translation_apply.rs`, `components/intelligence/src/service/platform_ai.rs`, `components/shop/src/http/operator_quotas.rs`, `components/shop/src/http/operator_lifecycle.rs`, `components/orders/src/http/delivery_split.rs`, `components/intelligence/src/store/evidence.rs`, `components/checkout/src/domain/review_binding.rs` |
 | `stock_admissible` | No comment in the source | 5: `stock_positive_bounded`, `stock_conservation`, `stock_exact`, `stock_sequence_bounded`, `stock_sequence_conservation` | `components/checkout/src/service/purchase/price.rs`, `components/apps/src/service/external_orders.rs` |
 
 ### Orders, delivery and returns
@@ -122,7 +122,7 @@ that call it.
 | `persistent_key_admissible` | Permanent credentials and credential settings require a current personal administrator. | 2: `persistent_key_exact`, `persistent_key_nonpersonal_denied` | `components/identity/src/http/integrations.rs`, `components/apps/src/http/settings.rs` |
 | `platform_admissible` | Global administration requires a personal session and a current independent operator grant. | 2: `platform_exact`, `platform_personal_required` | `src/platform/auth.rs` |
 | `scope_admissible` | No comment in the source | 3: `scope_authenticated_known`, `scope_explicit_no_escalation`, `scope_exact` | `components/identity/src/domain/permissions.rs` |
-| `shop_request_admissible` | Availability fence: paused merchant reads and existing payment settlement may continue. | 2: `shop_availability_exact`, `shop_archived_denied` | `src/platform/lifecycle.rs` |
+| `shop_request_admissible` | Availability fence: paused merchant reads and existing payment settlement may continue. | 2: `shop_availability_exact`, `shop_archived_denied` | `components/shop/src/service/availability.rs` |
 | `workspace_length_admissible` | A workspace ID has between 2 and 48 characters. | 2: `workspace_length_exact`, `workspace_length_short_denied` | `components/core/src/lib.rs` |
 
 ### Agent budgets

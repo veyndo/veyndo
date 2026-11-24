@@ -31,8 +31,14 @@ pub(crate) async fn register_user(
     let demo_password = hash_password("demo-business".into()).await?;
     let user = uid();
     let mut tx = a.db.begin().await?;
-    let changed=sqlx::query("INSERT INTO merchant_users(id,email,name,password_hash) VALUES($1,$2,$3,$4) ON CONFLICT(email) DO NOTHING").bind(&user).bind(email).bind(name).bind(password).execute(&mut *tx).await?;
-    if changed.rows_affected() == 0 {
+    if !veyndo_identity::store::merchant_accounts::register(
+        &mut tx,
+        &user,
+        (&email, &name),
+        password,
+    )
+    .await?
+    {
         return Err(conflict("Email already registered; sign in instead"));
     }
     let sandbox =

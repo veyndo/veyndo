@@ -33,9 +33,6 @@ pub(crate) mod catalog_intake;
 mod order_machine;
 pub(crate) use order_machine::*;
 
-mod order_fields;
-pub(crate) use order_fields::*;
-
 mod product_admin;
 pub(crate) use product_admin::*;
 

@@ -58,7 +58,7 @@ pub(super) async fn resolve(
             ));
         }
         let t = tenant(h)?;
-        let private: bool = sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM shop_environments WHERE tenant=$1 AND preview_owner IS NOT NULL)").bind(&t).fetch_one(&a.db).await?;
+        let private = veyndo_studio::store::workspaces::is_personal_preview(a, &t).await?;
         if private {
             return Err(denied("Personal preview requires its owner session"));
         }

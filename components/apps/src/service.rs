@@ -2,6 +2,7 @@
 pub mod admission;
 pub mod app_builds;
 pub mod app_preview;
+pub mod business_policy;
 pub mod carrier_booking;
 pub mod cart_contributions;
 pub mod commerce_hooks;
@@ -13,6 +14,7 @@ pub mod egress;
 pub mod event_delivery;
 pub mod external_orders;
 pub mod flow_apps;
+pub mod frontend_bindings;
 pub mod gateway;
 pub mod job_callbacks;
 pub mod job_evidence;

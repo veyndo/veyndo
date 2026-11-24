@@ -95,3 +95,24 @@ pub async fn save(a: &State, t: &str, user: &str, v: &Value) -> Result<Value> {
     tx.commit().await?;
     Ok(json!({"revision":next,"data":data}))
 }
+
+/// Whether the shop is a private sandbox without a personal preview owner.
+pub async fn is_private_sandbox(
+    tx: &mut sqlx::PgConnection,
+    tenant: &str,
+) -> veyndo_core::Result<bool> {
+    Ok(sqlx::query_scalar(
+        "SELECT EXISTS(SELECT 1 FROM shop_environments WHERE tenant=$1 AND preview_owner IS NULL)",
+    )
+    .bind(tenant)
+    .fetch_one(tx)
+    .await?)
+}
+
+/// Whether the shop is a personal preview that only its owner may open.
+pub async fn is_personal_preview(
+    a: &veyndo_core::State,
+    tenant: &str,
+) -> veyndo_core::Result<bool> {
+    Ok(sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM shop_environments WHERE tenant=$1 AND preview_owner IS NOT NULL)").bind(tenant).fetch_one(&a.db).await?)
+}

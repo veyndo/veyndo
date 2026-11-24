@@ -24,10 +24,19 @@ pub(crate) fn worker(a: &App) {
                     refreshing = true;
                     cursor.clear();
                 }
-                if refreshing && ticks.is_multiple_of(60)
-                  && let Ok(rows)=sqlx::query("SELECT tenant,revision FROM commerce_settings WHERE data->'currencies'->>'autoRefresh'='true' AND tenant>$1 ORDER BY tenant LIMIT 50").bind(&cursor).fetch_all(&a.db).await {
-                    refreshing=rows.len()==50;
-                    for row in rows {cursor=row.get("tenant");if let Err(error)=rates::refresh(&a,&cursor,row.get("revision"),&RequestContext::new()).await {eprintln!("currency rate refresh retained previous rates: {}",error.1);}}
+                if refreshing
+                    && ticks.is_multiple_of(60)
+                    && let Ok(rows) = veyndo_shop::store::settings::auto_refresh(&a, &cursor).await
+                {
+                    refreshing = rows.len() == 50;
+                    for (tenant, revision) in rows {
+                        cursor = tenant;
+                        if let Err(error) =
+                            rates::refresh(&a, &cursor, revision, &RequestContext::new()).await
+                        {
+                            eprintln!("currency rate refresh retained previous rates: {}", error.1);
+                        }
+                    }
                 }
                 ticks += 1;
                 tokio::time::sleep(std::time::Duration::from_secs(1)).await;

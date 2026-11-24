@@ -62,6 +62,19 @@ pub fn links(shop: &str) -> serde_json::Value {
     serde_json::json!({"storefrontUrl":storefront,"studioUrl":format!("{}/?shop={shop}#merchant",origin.trim_end_matches('/'))})
 }
 
+/// An operator frontend origin: HTTPS or loopback HTTP, no credentials, path, query or fragment.
+pub fn valid_origin(s: &str) -> bool {
+    reqwest::Url::parse(s).is_ok_and(|u| {
+        u.username().is_empty()
+            && u.password().is_none()
+            && u.query().is_none()
+            && u.fragment().is_none()
+            && u.path() == "/"
+            && (u.scheme() == "https"
+                || u.scheme() == "http" && matches!(u.host_str(), Some("127.0.0.1" | "localhost")))
+    })
+}
+
 /// Paths a hosted frontend may serve: never Core APIs, Store API, UCP, MCP, health or internal services.
 pub fn public_path(path: &str) -> bool {
     if path.starts_with("/channel-preview/")
@@ -95,7 +108,7 @@ pub fn public_api_path(path: &str) -> bool {
 }
 #[cfg(test)]
 mod tests {
-    use super::{configured_alias, public_path, same_origin_family};
+    use super::{configured_alias, public_path, same_origin_family, valid_origin};
     #[test]
     fn aliases_keep_exact_suffix_boundaries_and_existing_prefix_validation() {
         for host in ["shop.veyndo.ai", "shop.previous.test"] {
@@ -141,6 +154,18 @@ mod tests {
                 allowed,
                 "{value}"
             );
+        }
+    }
+    #[test]
+    fn operator_origins_are_bare_https_or_loopback() {
+        assert!(valid_origin("https://frontends.example/"));
+        assert!(valid_origin("http://127.0.0.1:8790/"));
+        for bad in [
+            "http://frontends.example/",
+            "https://u:p@x.example/",
+            "https://x.example/path",
+        ] {
+            assert!(!valid_origin(bad), "{bad}");
         }
     }
     #[test]

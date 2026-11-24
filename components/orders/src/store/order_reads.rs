@@ -43,3 +43,67 @@ pub async fn note(a: &State, h: &RequestContext, t: &str, id: &str, v: &Value) -
     tx.commit().await?;
     Ok(())
 }
+
+/// The latest 100 orders of the shop without cart tokens, with the derived order fields.
+pub async fn recent(a: &State, t: &str) -> Result<Vec<Value>> {
+    let rows = sqlx::query(
+        "SELECT data #- '{cart,token}' AS data FROM orders WHERE tenant=$1 ORDER BY created_at DESC LIMIT 100",
+    )
+    .bind(t)
+    .fetch_all(&a.db)
+    .await?;
+    Ok(rows
+        .iter()
+        .map(|r| {
+            let mut v: Value = r.get("data");
+            crate::domain::order_fields::order_fields(&mut v);
+            v
+        })
+        .collect())
+}
+
+/// The stored order document of one order.
+pub async fn data(a: &State, t: &str, id: &str) -> Result<Value> {
+    Ok(
+        sqlx::query_scalar("SELECT data FROM orders WHERE tenant=$1 AND id=$2")
+            .bind(t)
+            .bind(id)
+            .fetch_one(&a.db)
+            .await?,
+    )
+}
+
+/// Appends a flow note to the order activity inside the caller's transaction.
+pub async fn flow_note(
+    tx: &mut sqlx::PgConnection,
+    t: &str,
+    (order, actor): (&str, &str),
+    data: &Value,
+) -> Result<()> {
+    sqlx::query(
+        "INSERT INTO order_activity(tenant,order_id,actor,kind,data) VALUES($1,$2,$3,'flow',$4)",
+    )
+    .bind(t)
+    .bind(order)
+    .bind(actor)
+    .bind(data)
+    .execute(tx)
+    .await?;
+    Ok(())
+}
+
+/// Whether the shopper's cart or customer account already ordered the product.
+pub async fn bought(
+    a: &State,
+    t: &str,
+    (cart, customer): (&str, Option<&str>),
+    product: &str,
+) -> Result<bool> {
+    Ok(sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM orders o WHERE o.tenant=$1 AND (o.cart_id=$2 OR ($3::text IS NOT NULL AND o.data->'orderCustomer'->>'customerId'=$3)) AND EXISTS(SELECT 1 FROM jsonb_array_elements(o.data->'cart'->'lineItems') i WHERE i->>'id'=$4))")
+        .bind(t)
+        .bind(cart)
+        .bind(customer)
+        .bind(product)
+        .fetch_one(&a.db)
+        .await?)
+}

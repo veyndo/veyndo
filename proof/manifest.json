@@ -45,7 +45,7 @@
       "bindings": [
         "components/orders/src/http/transitions.rs",
         "components/catalog/src/service/translation_apply.rs",
-        "src/platform/ai.rs",
+        "components/intelligence/src/service/platform_ai.rs",
         "components/shop/src/http/operator_quotas.rs",
         "components/shop/src/http/operator_lifecycle.rs",
         "components/orders/src/http/delivery_split.rs",
@@ -251,7 +251,7 @@
     },
     "shop_request_admissible": {
       "bindings": [
-        "src/platform/lifecycle.rs"
+        "components/shop/src/service/availability.rs"
       ],
       "theorems": [
         "shop_availability_exact",
@@ -1033,8 +1033,8 @@
     },
     "components/apps/src/ports.rs": {
       "status": "unproved",
-      "sha256": "bbdcf3116af477ac81cac8e7b198d59705b5c1dafa54338f3a898cc70cdf7557",
-      "review": "App Studio immediate preview moved into the apps component behind the host port; behaviour unchanged"
+      "sha256": "63120ccc4f9ea2ad6cb7f1a5c75b1bb5d66cb35e5398e3eaa500f4a8aca78c4d",
+      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
     },
     "components/apps/src/service/admission.rs": {
       "status": "unproved",
@@ -1050,6 +1050,11 @@
       "status": "unproved",
       "sha256": "30c655df456b79bdf998a1fea7f1d94eb6cbde5aa52d03fdaa07bc40b9d83c9c",
       "review": "App Studio immediate preview moved into the apps component behind the host port; behaviour unchanged"
+    },
+    "components/apps/src/service/business_policy.rs": {
+      "status": "unproved",
+      "sha256": "f51bdc163e74edaa117b7cf80e9d6e6ef42d31bdd24c841d2d86332daa8d523f",
+      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
     },
     "components/apps/src/service/carrier_booking.rs": {
       "status": "unproved",
@@ -1105,6 +1110,11 @@
       "status": "reviewed-binding",
       "sha256": "17e29d1fbd7e638463a11feeec64b58962fe21ca9c1a605a9fe6ddd060cb4e57",
       "review": "F7: marketing configuration, channel admission and flow templates move into components"
+    },
+    "components/apps/src/service/frontend_bindings.rs": {
+      "status": "unproved",
+      "sha256": "c12631d40e71453bbc4e370bc3fbc4c44a3bbcee03c77b394d79375831708f85",
+      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
     },
     "components/apps/src/service/gateway.rs": {
       "status": "unproved",
@@ -1163,8 +1173,8 @@
     },
     "components/apps/src/service.rs": {
       "status": "unproved",
-      "sha256": "7fdbdbf7187fb0c42ea9268f113ee1de296c97c4e9e7e0180ae95947e4eb2015",
-      "review": "F7: marketing configuration, channel admission and flow templates move into components"
+      "sha256": "be4c4f4813d79917cef60f8161a72616de9da727632fc6a7c8af96dfcf2c94e0",
+      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
     },
     "components/apps/src/store/action_log.rs": {
       "status": "unproved",
@@ -1215,6 +1225,11 @@
       "status": "unproved",
       "sha256": "52f889580ca300c0e41c1336e0cd0dc2c75b15839b9262e6d1a57535ac1210a0",
       "review": "Package approval, distribution, schema adapters, event projection and service transport policy moved into components/apps without a change in behaviour"
+    },
+    "components/apps/src/store/developer_builds.rs": {
+      "status": "unproved",
+      "sha256": "0468c565dda5f810024f27c36d3d6007d663fc232daea30d30f9e2edc3148681",
+      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
     },
     "components/apps/src/store/event_deliveries.rs": {
       "status": "unproved",
@@ -1348,8 +1363,8 @@
     },
     "components/apps/src/store.rs": {
       "status": "unproved",
-      "sha256": "5ff6fe8fc6e761c76a17c79bba6fc0b20c08aa2b7ad6e3820d9e29f9cbc8495f",
-      "review": "Batch F3: bundled app contract tests, the app view read and the catalogue evidence callback moved into the apps component"
+      "sha256": "a8074be4fec735ee6fda2760be95ae4aa7b3c0214668bb90614e95736ee53d73",
+      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
     },
     "components/b2b/src/domain/contract.rs": {
       "status": "unproved",
@@ -1686,6 +1701,11 @@
       "sha256": "c3f471aaf3d6f2b877c5a0af8b916f68c8ef8f46db2a0503810466ebed44d775",
       "review": "Product edit types, stores and language rules moved into components; no rule changed"
     },
+    "components/catalog/src/store/demo_template.rs": {
+      "status": "unproved",
+      "sha256": "0c0641e202bff020340673f0d716c321c66e760dcc79c078eea5e53fc3913291",
+      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
+    },
     "components/catalog/src/store/media_jobs.rs": {
       "status": "unproved",
       "sha256": "87a0926f2f6761be525c239c091cca183dc2a061c1c3508383de0119567f6587",
@@ -1733,8 +1753,8 @@
     },
     "components/catalog/src/store.rs": {
       "status": "unproved",
-      "sha256": "0a2249077ab954c82407c30e19e34825d024c55715ed54f0b553b90f4da4a4dd",
-      "review": "Order transitions, external order intake and saved agent authority moved into the orders, apps and identity components"
+      "sha256": "809eb61a0e963cdbce827a8d64757ee48bbd435633d54258bd0da8371f8446a7",
+      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
     },
     "components/catalog/src/types/asset.rs": {
       "status": "unproved",
@@ -1918,8 +1938,8 @@
     },
     "components/checkout/src/store/cart_load.rs": {
       "status": "unproved",
-      "sha256": "0230a61925d0f2a022705dca89d911dcbfb8c7922f481de623edb6b01ac8ab72",
-      "review": "Cart projection and product detail move into checkout behind a quote port"
+      "sha256": "6c2f8383ab3b6076faf23ca385c46adef16a53fb1270db770f8238c514f237d1",
+      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
     },
     "components/checkout/src/store/cart_selection.rs": {
       "status": "unproved",
@@ -2048,8 +2068,8 @@
     },
     "components/core/src/host_names.rs": {
       "status": "unproved",
-      "sha256": "9eaee3c98dfabb7b41b9fb2be601b0141ea83ac65592242d4307bc821c80a71b",
-      "review": "F7: marketing configuration, channel admission and flow templates move into components"
+      "sha256": "eb09af2947b814c5b5773c2b53c7664db6d5c36d4219462df4ec420a8b7e9204",
+      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
     },
     "components/core/src/http_limits.rs": {
       "status": "unproved",
@@ -2173,8 +2193,13 @@
     },
     "components/customers/src/lib.rs": {
       "status": "unproved",
-      "sha256": "67d6bb06aeacc470f682b0bb996288b11af2f47e9a4ce26272ea01ed5361578c",
-      "review": "Process configuration moved into core; browser session transports, Checkout buyer grants, the private Checkout relay, trusted geography and provider startup validation moved into their components without behaviour change"
+      "sha256": "a005fb207e589ee1b4fd0c56fa94f70dd654bf9121b929f1061f6ab143832694",
+      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
+    },
+    "components/customers/src/ports.rs": {
+      "status": "unproved",
+      "sha256": "1ab054b8093f95358f992603697dfb739cdd98d132b3c9b305e0e7822dc753cd",
+      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
     },
     "components/customers/src/service/address_book.rs": {
       "status": "unproved",
@@ -2196,10 +2221,15 @@
       "sha256": "df3f4fc8ba41f7e2ca8f4e127996a2c54269199f4698caf17bd72eb2d35b5e23",
       "review": "customers component crate created; no kernel binding changed"
     },
+    "components/customers/src/service/sign_in.rs": {
+      "status": "unproved",
+      "sha256": "66206ce5a550868ac8540358d3ec48cff8f8626ed47e4622953789e637c9251b",
+      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
+    },
     "components/customers/src/service.rs": {
       "status": "unproved",
-      "sha256": "98bf664956ae582a84454326668c5127c06f0b1acdf2ed6e06096558346c6225",
-      "review": "Address book entries and storefront routes move into customers"
+      "sha256": "355c3e70c85a4a07151b87657895789b5c14cc83060d3c7dfff433ce41cccdac",
+      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
     },
     "components/customers/src/store/accounts.rs": {
       "status": "unproved",
@@ -2223,8 +2253,8 @@
     },
     "components/customers/src/store/customers.rs": {
       "status": "unproved",
-      "sha256": "5da5f1a4fd2dae5d5c904729f3d258e799aadf2c4ad8e8c6d755180fb72b0d9e",
-      "review": "customers component crate created; no kernel binding changed"
+      "sha256": "32760f65281f1c7256d7f824cd0be7d82285bdbb26fc1278e63c3b1a3dd702d6",
+      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
     },
     "components/customers/src/store/sessions.rs": {
       "status": "unproved",
@@ -2361,6 +2391,11 @@
       "sha256": "0b2a6bd9abf4dc167d68fe7a419649c1a857f9c81bdeb661f9cf0d72913ae8f7",
       "review": "Role grants, workspace members and the Studio handoff ticket moved into the identity component"
     },
+    "components/identity/src/store/merchant_accounts.rs": {
+      "status": "unproved",
+      "sha256": "8e24a79c23e09b376cb0cdff28294a4d1dff4cb475d53ea4c6f1c84f5c4d557f",
+      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
+    },
     "components/identity/src/store/roles.rs": {
       "status": "unproved",
       "sha256": "77b1a530c7779668b89cf152a693b5f472988c902ad8bdd373414a39035b17bc",
@@ -2373,8 +2408,8 @@
     },
     "components/identity/src/store.rs": {
       "status": "unproved",
-      "sha256": "c6f082c067dac12a36f0c503dbb2bc75336aecff87eb7436fd6dc176d9131a29",
-      "review": "Order transitions, external order intake and saved agent authority moved into the orders, apps and identity components"
+      "sha256": "448211616599bcdc9d5b83590fbdf761110762350cb254b820c226937c9efacf",
+      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
     },
     "components/identity/src/types/envelopes.rs": {
       "status": "unproved",
@@ -2686,6 +2721,11 @@
       "sha256": "157db3784b8f940b51fbffb6106c8891456ae027fdbbb5ff2e8710fb11aeaf03",
       "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
     },
+    "components/intelligence/src/service/platform_ai.rs": {
+      "status": "reviewed-binding",
+      "sha256": "44966b462ef76d5707d1c775c2330fd18873bce9d3eba3fd965bac665f321d4f",
+      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
+    },
     "components/intelligence/src/service/product_questions.rs": {
       "status": "unproved",
       "sha256": "de7fa32240c99e99c7b963264a46c1a04905e14a367cd6e9b0afbefdb8e490e9",
@@ -2768,8 +2808,8 @@
     },
     "components/intelligence/src/service.rs": {
       "status": "unproved",
-      "sha256": "797ba9031e789672ea267c649149c4bd35b2ceb010663a7fad70d0c8fc63be23",
-      "review": "F10: manual orders, the merchant operation catalogue and catalogue intake moved into components"
+      "sha256": "4c6dabbe9e3355305da6c49d8b529fd62e225bfc0948364f203d4cf00dd4ea41",
+      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
     },
     "components/intelligence/src/store/agent_runs.rs": {
       "status": "unproved",
@@ -3303,13 +3343,13 @@
     },
     "components/orders/src/store/order_reads.rs": {
       "status": "unproved",
-      "sha256": "76e6fe2f2ef5495daafe4da4f5a0c795a9532e835e7070297a6a3766e672e2a6",
-      "review": "POS, checkout session review, company data, receipts and carrier documents moved into components"
+      "sha256": "d99c2622094919a4afb3af5d78b5c1c419e41724a266f74773fbb029d02d27ac",
+      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
     },
     "components/orders/src/store/receipts.rs": {
       "status": "unproved",
-      "sha256": "e759fa38deb9d661d6cc24c6fb2bc2f6560dd1cc82fe79c28a1b150bf5f25967",
-      "review": "POS, checkout session review, company data, receipts and carrier documents moved into components"
+      "sha256": "d213ca67ec2f12092b81967cc7497e08487a62ba7b53ba82ea0b0065cf8ea025",
+      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
     },
     "components/orders/src/store/redacted_reads.rs": {
       "status": "unproved",
@@ -4011,6 +4051,11 @@
       "sha256": "f210e2265a9331358dc353f49a5234a82e91430f03d7ce8cd09199f946a920de",
       "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
     },
+    "components/shop/src/service/availability.rs": {
+      "status": "reviewed-binding",
+      "sha256": "dd52b897389e753fa7d085c300c7d3440b67297228c4581429a107b1cf0fad3d",
+      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
+    },
     "components/shop/src/service/container_resources.rs": {
       "status": "unproved",
       "sha256": "8e8b3e25eed9b774c65248e0a5c9393f1a09f3ef4b22b0c84be129c073f2dd3f",
@@ -4038,8 +4083,13 @@
     },
     "components/shop/src/service.rs": {
       "status": "unproved",
-      "sha256": "a0aea2822ee907c2fff46c09072f32ac043e428e967ee08fef5ef0c7991a7b4f",
-      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
+      "sha256": "250f7e645f011d49022c9a37403d3b555db2a3cb13a2fae40b1d8ef1a94855ce",
+      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
+    },
+    "components/shop/src/store/access_snapshot.rs": {
+      "status": "unproved",
+      "sha256": "70bade41971eef698b6cc4764b76eeed76050318c84d9065cbd247ab2463c189",
+      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
     },
     "components/shop/src/store/consumer_requests.rs": {
       "status": "unproved",
@@ -4051,15 +4101,20 @@
       "sha256": "ace9347f4b68a8a840bcc669953725d244555192c350601d9aad1c7a73eb6297",
       "review": "Order list criteria, company model and receipts moved into components; kernel call sites unchanged"
     },
+    "components/shop/src/store/operators.rs": {
+      "status": "unproved",
+      "sha256": "abc81a2086cc177beb157b421612f98aad633e159cd9450484ae04791f39106b",
+      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
+    },
     "components/shop/src/store/settings.rs": {
       "status": "unproved",
-      "sha256": "d7eeaf590b1f0856748b86dcd4ec09909e172bd712dbd4c5934b73fe9fa2ed1c",
-      "review": "Customer account writes, the legal snapshot of an order and the locked settings read moved into components"
+      "sha256": "5ba6fe009f87d0a73595f3783717eb00f6fdf993122647c8e727bc028ae64d37",
+      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
     },
     "components/shop/src/store.rs": {
       "status": "unproved",
-      "sha256": "23c8d0f23703b4a690a810c789dcd187875a7bd1ac802392bbfc33a187dff1eb",
-      "review": "Consumer requests moved into the shop component and the frozen rule comparison into marketing without behaviour change"
+      "sha256": "f98f5ea553fb7994487afd6a3e545c615b8ecee14907bf1f952589e7d8935e8a",
+      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
     },
     "components/shop/src/types/b2b.rs": {
       "status": "unproved",
@@ -4398,8 +4453,8 @@
     },
     "components/studio/src/store/workspaces.rs": {
       "status": "unproved",
-      "sha256": "8704551e0e3f11b2bdb565f9cfbcd4d9634a03c0b23019db525f0802d3753fa1",
-      "review": "Personal Studio workspace model and store moved into the studio component without behaviour change"
+      "sha256": "caeeb4e6d5ca7739fc69670a8145b3249f0b8d0aa0c3a135fdf91b886492c16f",
+      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
     },
     "components/studio/src/store.rs": {
       "status": "unproved",
@@ -6178,8 +6233,8 @@
     },
     "src/accounts/address_store.rs": {
       "status": "unproved",
-      "sha256": "5c19a225980af6ea294fcedbccb745f06a4a4abd7f07f46fdbadc55896670ae5",
-      "review": "Batch F4: source-record imports moved into studio behind the ImportHost port"
+      "sha256": "0c62b37af006548e709e0908675a1ea551f863f3b9a4097ae1edbaf8d2e48ee4",
+      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
     },
     "src/accounts/browser.rs": {
       "status": "unproved",
@@ -6188,13 +6243,13 @@
     },
     "src/accounts/demo.rs": {
       "status": "unproved",
-      "sha256": "6afac85cdfe1abf40d35346ccd695eff4ff8fdcb3ce245d230e2472da8c4c5f6",
-      "review": "Initial extraction of 13 production policies; surrounding Rust explicitly unproved; existing HTTP regression suites retained"
+      "sha256": "2fb9abd04c3ee4d0641ea839fc94946e6c33ba136dd85cffef1a3daef2779a37",
+      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
     },
     "src/accounts/mod.rs": {
       "status": "unproved",
-      "sha256": "08817a5223b5948cbec4392ed36c713f1d1c535ba6f67ce73dfbc4a06ddd2a2f",
-      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
+      "sha256": "c14c8a690aefe15055b6c49c568e6f36d09782d4acfc22185e4c14db0333ed92",
+      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
     },
     "src/accounts/orders.rs": {
       "status": "unproved",
@@ -6583,8 +6638,8 @@
     },
     "src/auth/broker.rs": {
       "status": "unproved",
-      "sha256": "8cd3618aa61858b11e1610a607f04653ea5136540cca2298ca6c378a1551f99b",
-      "review": "Sessions, invitations, MFA, integration keys and broker assertions moved into the identity component without behaviour change"
+      "sha256": "a14cc17f34e5c6b52d5c1ff22befa8f4e131db256440998e5ff0a93fb912bc54",
+      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
     },
     "src/auth/broker_credentials.rs": {
       "status": "unproved",
@@ -6593,8 +6648,8 @@
     },
     "src/auth/broker_inference.rs": {
       "status": "unproved",
-      "sha256": "e86b8ec9923397c1a0ebed01ef40fe1e2c96dbebdc7d4496fb2bd18744ef3fe9",
-      "review": "Reviewed eighteen core findings: typed trusted identity and explicit route rights; consolidated current grants; durable auth and fenced shared limits; scoped transactions and one-backend PgBouncer including nested borrow fixes; bounded Wasm/PNG work; notified workers, savepoint quarantine and conservative retention; separate runtime roles and startup configuration. Real PostgreSQL/provider regressions preserve current tenant/customer/payment behavior. SQL/network adapters remain unproved."
+      "sha256": "b19fe1524c1df14e41b18c20cf7ce4edb6d36ffacde125064ecd5bfcc91e0173",
+      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
     },
     "src/auth/broker_recovery.rs": {
       "status": "unproved",
@@ -6628,8 +6683,8 @@
     },
     "src/auth/identity.rs": {
       "status": "unproved",
-      "sha256": "695da362fce9f30f59129d146a6ca5ed7f73ab548085641653e6a438391be26a",
-      "review": "Request context, principal, POS admission, host shop and the access snapshot data types moved unchanged into components/core; loading the snapshot and matching it to a request stay in the server as free functions with the same queries. Core unit tests (identity headers cannot be forged) pass. SQL, HTTP and provider behaviour is not formally proved."
+      "sha256": "dd9efc75d5b7acb4ee76d7bcf2a42695b609ddd1d9f0dcd52f636685a311c891",
+      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
     },
     "src/auth/integrations.rs": {
       "status": "unproved",
@@ -6683,8 +6738,8 @@
     },
     "src/auth/registration.rs": {
       "status": "unproved",
-      "sha256": "49fc9d4038dc42c817034f8fb9db4ec83cbccdfe25cc2813af575a027681cba8",
-      "review": "Reviewed eighteen core findings: typed trusted identity and explicit route rights; consolidated current grants; durable auth and fenced shared limits; scoped transactions and one-backend PgBouncer including nested borrow fixes; bounded Wasm/PNG work; notified workers, savepoint quarantine and conservative retention; separate runtime roles and startup configuration. Real PostgreSQL/provider regressions preserve current tenant/customer/payment behavior. SQL/network adapters remain unproved."
+      "sha256": "1be4f21948365c2a18c81746fd8128db91294a4ef1e3a5ca1f5923bd9366f320",
+      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
     },
     "src/auth/roles.rs": {
       "status": "unproved",
@@ -6728,8 +6783,8 @@
     },
     "src/b2b/orders.rs": {
       "status": "unproved",
-      "sha256": "22242eb8f912c18a3f27046126ef44a8a15b936f7533c0bb813458eff69f592e",
-      "review": "F9: media captions, design references, product knowledge and the translation worker moved into components"
+      "sha256": "9ed53fa0a484f6e7e5c6f4a313db0ef67cd9b0ee1f1b76e093dab532b1ad81d2",
+      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
     },
     "src/b2b/organization.rs": {
       "status": "unproved",
@@ -6868,8 +6923,8 @@
     },
     "src/cart_model.rs": {
       "status": "unproved",
-      "sha256": "135b5ee27c2eb25aa0fc503b6cc8a5a802376832f67fde6c92b99ffb8e0353a0",
-      "review": "cart types and rule engine moved into components; checking bindings"
+      "sha256": "11684d38326d59cce25f7b737a4fe810d8e4cec679e3b8c26fe77475ba10c7f2",
+      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
     },
     "src/cart_mutation.rs": {
       "status": "unproved",
@@ -7053,8 +7108,8 @@
     },
     "src/commerce/catalog_ports.rs": {
       "status": "unproved",
-      "sha256": "105e8c6e6e20d7d53d4c2bd8a7fb199cc89d1e8cf1d2011edc007aa39c0ac8bb",
-      "review": "Batch F5: inference component for crates/cognition, crate-cycle gate, core paths for history attribution and environment parent"
+      "sha256": "4aceebae8970e24219cb3a0acf2ba1f0dcfe768709af500eb8479733a2fb38b7",
+      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
     },
     "src/commerce/configuration.rs": {
       "status": "unproved",
@@ -7113,8 +7168,8 @@
     },
     "src/commerce/inventory_ports.rs": {
       "status": "unproved",
-      "sha256": "43d94a027111abb992f3ef3d46357ed1238bef6f9480ab388bca02bd6e6b2f59",
-      "review": "inventory component crate created; no kernel binding changed"
+      "sha256": "3a6d6fa91f9dd91552c68482e091cacbf4015b1bc9428436d5cc04f533f4f155",
+      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
     },
     "src/commerce/method_usage.rs": {
       "status": "unproved",
@@ -7123,13 +7178,8 @@
     },
     "src/commerce/mod.rs": {
       "status": "unproved",
-      "sha256": "f6b235942404278562eb080c86e85e1bb59e1d73d3c2b1b413578bf2644db90e",
-      "review": "F10: manual orders, the merchant operation catalogue and catalogue intake moved into components"
-    },
-    "src/commerce/order_fields.rs": {
-      "status": "unproved",
-      "sha256": "d8ec5e20ef36d2913b79a1162fb4ceefafd5b09c27fd0caea9cf0f4303c904ea",
-      "review": "order workflow kernel bindings follow the move into components/orders"
+      "sha256": "080fa044917afc31075509125108b4ccfde18539b2b43a9a6f6569a00e09791f",
+      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
     },
     "src/commerce/order_machine.rs": {
       "status": "unproved",
@@ -7198,8 +7248,8 @@
     },
     "src/currencies/jobs.rs": {
       "status": "unproved",
-      "sha256": "99a5b516d472f1aabf0ce78f0fc42f5967bc6db9e48a963bf1ed1bf469dcc7d7",
-      "review": "Price job worker moved into components/pricing behind a catalogue port"
+      "sha256": "95d39f69c3e1df8a9f1fc3687396d12ae3f06844be856e6f065c4bd3c98a9d68",
+      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
     },
     "src/currencies/mod.rs": {
       "status": "unproved",
@@ -7208,8 +7258,8 @@
     },
     "src/currencies/ports.rs": {
       "status": "unproved",
-      "sha256": "721491b3232dca376bc162fb44348bcf502fab170759302d0fab318df0c1fa8f",
-      "review": "Batch F5: inference component for crates/cognition, crate-cycle gate, core paths for history attribution and environment parent"
+      "sha256": "b9b34e94ce5941ca39d7b9e24fee38104add7d2560cc92d17b1eb90df5c97891",
+      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
     },
     "src/currencies/rates.rs": {
       "status": "unproved",
@@ -7223,18 +7273,18 @@
     },
     "src/currencies/routes.rs": {
       "status": "unproved",
-      "sha256": "ef8f735c46f4315a3655ac9c1b52a01fabf984d4e1a0a52ff99ab337d3fca475",
-      "review": "The currency removal guard moved into components/pricing as store and service; no rule changed"
+      "sha256": "74a01e5ddf8b89485099eb791b30ed72d489a38d5e28bbde224d3584c5e6d636",
+      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
     },
     "src/customer.rs": {
       "status": "unproved",
-      "sha256": "114988d139ef265f4443c3dfa0a94d7978099fb0429b7d1537f903ca6b344d67",
-      "review": "Reviewed native B2B authority, unit-first locking, revision-bound approvals and offers, exact budget allocation/release, private variant pagination, current app callbacks and forced tenant FKs/RLS; EDI codecs remain app-owned and bounded. Real PostgreSQL approval/concurrent budget/revocation/PDF/MCP and app/checkout baseline suites passed; schema/build/proof and changed Rust owners reviewed. Two extracted decisions add four Lean properties, not whole-server verification."
+      "sha256": "63616c3d87f3254eed0de46f0e9244a24357e38186ead88e383ec1b6f2320ba2",
+      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
     },
     "src/demo_catalog.rs": {
       "status": "unproved",
-      "sha256": "a467d5d664a423e9dbebd7cc3ce67f8bf2a220f8783c1d1bc4879746e469fecd",
-      "review": "Reviewed eighteen core findings: typed trusted identity and explicit route rights; consolidated current grants; durable auth and fenced shared limits; scoped transactions and one-backend PgBouncer including nested borrow fixes; bounded Wasm/PNG work; notified workers, savepoint quarantine and conservative retention; separate runtime roles and startup configuration. Real PostgreSQL/provider regressions preserve current tenant/customer/payment behavior. SQL/network adapters remain unproved."
+      "sha256": "99d90c7caefdbc92916b973868157bd33a539b63a44916b5a9562554132cfe3e",
+      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
     },
     "src/developer/agent_connection.rs": {
       "status": "unproved",
@@ -7248,8 +7298,8 @@
     },
     "src/developer/generation.rs": {
       "status": "unproved",
-      "sha256": "2143e0af52ec1884ffb70a0b5744b459ed4e2de7631790b0ff67c044afb00854",
-      "review": "App Studio generation rules moved into the apps component; behaviour unchanged"
+      "sha256": "35e59c91cf46d40e6e1b58966de4a0128c432b03a42e8b737a400a06e00062cf",
+      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
     },
     "src/developer/mod.rs": {
       "status": "unproved",
@@ -7318,13 +7368,13 @@
     },
     "src/extensions.rs": {
       "status": "unproved",
-      "sha256": "e23d3a3aab80fe28704010cbdcf9e01bcbdf69718f0f39af04e538d894e6c32f",
-      "review": "Reviewed eighteen core findings: typed trusted identity and explicit route rights; consolidated current grants; durable auth and fenced shared limits; scoped transactions and one-backend PgBouncer including nested borrow fixes; bounded Wasm/PNG work; notified workers, savepoint quarantine and conservative retention; separate runtime roles and startup configuration. Real PostgreSQL/provider regressions preserve current tenant/customer/payment behavior. SQL/network adapters remain unproved."
+      "sha256": "6de7963599207e17e0fa706792ac1e691a3b28ff81bf956857f056a65c134531",
+      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
     },
     "src/foundation.rs": {
       "status": "unproved",
-      "sha256": "9058faaaa1447236ad21adc406495582b494b99019c32f6ddd1e4fa005336b7f",
-      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
+      "sha256": "9ec49ad9e512147d946773e2ddcaeb33679f298b3ffe6b53485ca1148f09a217",
+      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
     },
     "src/history/capability.rs": {
       "status": "unproved",
@@ -7343,8 +7393,8 @@
     },
     "src/history/restore.rs": {
       "status": "unproved",
-      "sha256": "47a0d68ad383b3ffdcc066853d1559e7ef1da74cdc592e705d4ab9beee315a50",
-      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
+      "sha256": "ab6b48d6cad88aa7fb161b6dd46d0e7fbe230b13147287d68295924f426abb75",
+      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
     },
     "src/history/routes.rs": {
       "status": "unproved",
@@ -7428,8 +7478,8 @@
     },
     "src/marketing/flow_actions.rs": {
       "status": "unproved",
-      "sha256": "07b6412c856206c71a67bf3284ff8516a3e9c7a2236bbb11dd13171fe96ddb1c",
-      "review": "Flow pipeline and promotion types moved into components/marketing; kernel call sites unchanged"
+      "sha256": "18dda80492ed5409eb3a724d889240404b64a776b7803756c8654093c07e8766",
+      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
     },
     "src/marketing/flow_jobs.rs": {
       "status": "unproved",
@@ -7453,8 +7503,8 @@
     },
     "src/marketing/flows.rs": {
       "status": "unproved",
-      "sha256": "7efd934cf7b73f19a9e7ea7a61fc6a98ea77fc07f546ecf521708918185e7b4b",
-      "review": "F7: marketing configuration, channel admission and flow templates move into components"
+      "sha256": "26e57af18fd805d1f7ad95e018d391487f737504e28ef8dc5e47c5b8cc2f32d9",
+      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
     },
     "src/marketing/gateway.rs": {
       "status": "unproved",
@@ -7643,8 +7693,8 @@
     },
     "src/order_routes.rs": {
       "status": "unproved",
-      "sha256": "ef47050aa7d513062744f421a39de09ff59faa6025bac29ff8af84b1bdb8d16b",
-      "review": "Tenant roles and current grants independently reviewed; owner/retained-override/acceptance races repaired and PostgreSQL-blocked regressions passed; PII and Flow projection boundaries documented; B2B feature settings delegate shared CAS/history and preserve financial guards. Existing extracted policies unchanged; SQL/async/UI remain reviewed adapters, not full proofs."
+      "sha256": "74014ee508634c82ffcb48b48c792c83aab582fb17945acdfbcf0f8a54d5f49e",
+      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
     },
     "src/outbox/retention.rs": {
       "status": "unproved",
@@ -7708,8 +7758,8 @@
     },
     "src/payments/instruments.rs": {
       "status": "unproved",
-      "sha256": "4656b6515d93c18090245c6f377217d6208301075895fa5ec0b1b3f799d3e640",
-      "review": "Payment commands, worker and provider sessions moved behind the payments gateway port"
+      "sha256": "de5e519867b8aa35c7fa88c8a701db4bec1277b3f8fa668a0b99a87ce297318a",
+      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
     },
     "src/payments/merchant.rs": {
       "status": "unproved",
@@ -7783,8 +7833,8 @@
     },
     "src/performance/access_snapshot.rs": {
       "status": "unproved",
-      "sha256": "87d4614160f768dd0adb2603aac94f7a7e3c96608f94c26e424e9bd6044ffd81",
-      "review": "Request context, principal, POS admission, host shop and the access snapshot data types moved unchanged into components/core; loading the snapshot and matching it to a request stay in the server as free functions with the same queries. Core unit tests (identity headers cannot be forged) pass. SQL, HTTP and provider behaviour is not formally proved."
+      "sha256": "a4db5220b82835b8244241980d79af18b125460daaca37975d3366c862f9e2a3",
+      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
     },
     "src/performance/delivery.rs": {
       "status": "unproved",
@@ -7807,14 +7857,14 @@
       "review": "Batch F1: proposals, list views, reviewed work, its execution and proposal application moved into studio behind the WorkHost port"
     },
     "src/platform/ai.rs": {
-      "status": "reviewed-binding",
-      "sha256": "db43f8f5914f1e42a559ddf468e70eff002be4247b2d7d7459ddbd37562bf78c",
-      "review": "Stage 8 adds the sovereign AI gate in the inference crate and its callers; no extracted policy changes."
+      "status": "unproved",
+      "sha256": "b44f7b6e289ddc4c431ea0f4b436b5e57e807ca4cf211f0b1f194dbe21d60a54",
+      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
     },
     "src/platform/auth.rs": {
       "status": "reviewed-binding",
-      "sha256": "e0b8ffa88e2b0ad19dee630437af55408ac18336235c2209b90b07b1783f6144",
-      "review": "Operator control plane (quotas, aggregate metrics, shop dossier, audited lifecycle change, container readings) moved verbatim into the shop component; operator authentication and availability admission stay in the server. Kernel admission calls unchanged."
+      "sha256": "b0146bb12e57ad928e6f3a4a5ccd7c14f3d03aa3ca270fd1cb12a0fa158de30c",
+      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
     },
     "src/platform/bootstrap.rs": {
       "status": "unproved",
@@ -7823,13 +7873,13 @@
     },
     "src/platform/infrastructure.rs": {
       "status": "unproved",
-      "sha256": "e84ce3faf98a7618b0abfa531844e004b119f5779d0f9f930913cb04294d99b2",
-      "review": "Settings and language read cache moved into the shop component; condition check registered at startup; behaviour unchanged"
+      "sha256": "fa26e1f2324ceabb2075fe839c7efd3df308bade54e0b03f3bc9be039bda7a9f",
+      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
     },
     "src/platform/lifecycle.rs": {
-      "status": "reviewed-binding",
-      "sha256": "45a6401a223a952787509070db36ae546203e739b864910724b87965ce94f2ab",
-      "review": "Operator control plane (quotas, aggregate metrics, shop dossier, audited lifecycle change, container readings) moved verbatim into the shop component; operator authentication and availability admission stay in the server. Kernel admission calls unchanged."
+      "status": "unproved",
+      "sha256": "8206553100f78771dc6149c1d9fc6f85b9d3a77c1f864aba52fa98cb82fbf7b2",
+      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
     },
     "src/platform/metrics.rs": {
       "status": "unproved",
@@ -7928,8 +7978,8 @@
     },
     "src/sandbox_cache.rs": {
       "status": "unproved",
-      "sha256": "6fb4a9754e0dc80e84fd51a391023f43bbe79e1724eb735d45ff1a7355d4a02b",
-      "review": "Sandbox cache, configuration runtime and package fence moved into the apps component without changing rules"
+      "sha256": "8547cdadb0359632ba0183d1715245bc07897cda2710ff276b9fe37caea8b3c3",
+      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
     },
     "src/security_headers.rs": {
       "status": "unproved",
@@ -7938,13 +7988,13 @@
     },
     "src/seed.rs": {
       "status": "unproved",
-      "sha256": "4a554597971628d11b39438eff9e87d3968c79ca43f60e7ba0f1c269655b4eb3",
-      "review": "Reviewed eighteen core findings: typed trusted identity and explicit route rights; consolidated current grants; durable auth and fenced shared limits; scoped transactions and one-backend PgBouncer including nested borrow fixes; bounded Wasm/PNG work; notified workers, savepoint quarantine and conservative retention; separate runtime roles and startup configuration. Real PostgreSQL/provider regressions preserve current tenant/customer/payment behavior. SQL/network adapters remain unproved."
+      "sha256": "b6b0f03c6bf5b85da3df6cfae3b13909a7ab4a074869dc550209660a70122066",
+      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
     },
     "src/shop_domains/frontend_bindings.rs": {
       "status": "unproved",
-      "sha256": "1a9d26a0a896f1cc34be8dbb9d8b607bedd78c67353ce06eca5863ecade6e603",
-      "review": "Retain reviewed separate role-bound SQL scope and 099 staged rollout; native frontend alias allocation requires global collision visibility and atomic managed app DDL while retaining explicit tenant predicates. Added an actual-login negative case proving PUBLIC TEMP allowed table shadowing; configure now revokes PUBLIC TEMP and startup rejects effective tenant CREATE/TEMP grants. No pure Lean policies changed."
+      "sha256": "c7ded88bdd167aee9382ed36bbb1128e14104a34e0832e9e7f0b96c10c356ba2",
+      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
     },
     "src/shop_domains/frontend_editor.rs": {
       "status": "unproved",
@@ -7953,8 +8003,8 @@
     },
     "src/shop_domains/frontends.rs": {
       "status": "unproved",
-      "sha256": "5832fcf2b483168533fe4cc4a2cc3aa0b42cac65263af12dcd51119d00bd9615",
-      "review": "F7: marketing configuration, channel admission and flow templates move into components"
+      "sha256": "482451ac1e9954cc48418d269c5d93218cf3a41747a24ed377886899ccd433d7",
+      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
     },
     "src/shop_domains.rs": {
       "status": "unproved",
@@ -8846,10 +8896,6 @@
     "scripts/testing/prompt_governance.py": {
       "sha256": "a9ece67d4975e6c5e44cf26f4d6e397a3780449d8e3f8fbb3860627211b9fda5",
       "review": "Designer acceptance: app-owned versioned style prompt, bounded style-only schema preserving native page content/structure, shared proposal validation unchanged for content edits. Registered visual_workspace RED to GREEN and real Qwen screenshot returns three review-only alternatives. Prompt registry/governance extends app-owned version files. SQL/inference/rendering remain unproved."
-    },
-    "src/performance/access_snapshot.sql": {
-      "sha256": "d675ee530b12560085e5335e93fbc60caa9ec45c4b2cb6d6d2950abdd7e50887",
-      "review": "Reviewed native-only static bypass with hosted denial and Lean exact acceptance; one fresh domain/environment/status/channel/mount SQL snapshot and current membership lookup preserve scoped admission, binding identity and revocation; immutable Arc settings retain locked mutation/checkout reads; secret-free compression opt-in and deterministic precompressed assets preserve streams/ranges; batched inventory uses existing checkout locks and ordered idempotent release; bounded overview SQL preserves currency-separated historical facts. Real two-replica read/channel/tenant/checkout and strict-runtime regressions passed; SQL and build inputs now explicitly locked. These adapters remain unproved."
     },
     "src/ucp/b2b-negotiation.json": {
       "sha256": "80049231fb689a5a8a105ff73046ec0a5b97caa480e0a5029e8688ad7dfacba7",

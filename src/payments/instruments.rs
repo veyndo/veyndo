@@ -2,12 +2,7 @@
 use crate::*;
 pub(crate) async fn identity(a: &App, h: &RequestContext) -> Result<(String, String)> {
     let (t, email) = accounts::identity(a, h).await?;
-    let id: String =
-        sqlx::query_scalar("SELECT id FROM customers WHERE tenant=$1 AND email=$2 AND active")
-            .bind(&t)
-            .bind(email)
-            .fetch_one(&a.db)
-            .await?;
+    let id = veyndo_customers::store::customers::active_id(a, &t, &email).await?;
     Ok((t, id))
 }
 pub(crate) async fn invoke(a: &App, h: &RequestContext, name: &str, v: &Value) -> Result<Value> {

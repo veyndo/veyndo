@@ -287,7 +287,7 @@ and applying outcomes retain their owners. [Evidence](evidence/app-business-cont
 bounded pooled stores. Its `wit/commerce.wit` is the compiler input; snapshot checks
 require exact bytes in the native SDK mirror. Native `crates/apps` supplies the
 required verified resource policy and operator-configured namespaces through small
-adapters; it contains no duplicate engine. `src/sandbox_cache.rs`, app/runtime and
+adapters; it contains no duplicate engine. `components/apps/src/service/business_policy.rs`, app/runtime and
 commerce hook owners retain preparation/cache, admitted snapshots and current
 package/checkout authority. [Evidence](evidence/app-wasm-runtime-component-2026-11-05.md).
 
@@ -563,9 +563,9 @@ See [international commerce](international-commerce.md) for the exact contract.
 | [`src/commerce/types.rs`](../src/commerce/types.rs) | Checkout selection and configuration data contracts. | `commerce.py + Rust settings/recovery tests + delivery_differential.py` |
 | [`src/concierge.rs`](../src/concierge.rs) | Read-only storefront shopping advisor. | `providers.py + live intelligence.py/studio.py + protocols.py` |
 | [`src/context.rs`](../src/context.rs) | Bounded behavioral ports of Shopware 6.7.14.2 context and product-cart selection. | `context_differential.py + Rust selectors + studio.py` |
-| [`src/customer.rs`](../src/customer.rs) | Customer credential verification and context rotation. | `server startup/build + integration.py + structure.py` |
+| [`src/customer.rs`](../src/customer.rs) | Buyer sign-in route; `components/customers/src/service/sign_in.rs` owns credential verification, cart binding and context rotation. | `server startup/build + integration.py + structure.py` |
 | [`components/intelligence/src/http/experience.rs`](../components/intelligence/src/http/experience.rs) | Persisted storefront layout policy and observed synthetic rewards. | `integration.py + protocols.py + studio.py + restart.py` |
-| [`src/extensions.rs`](../src/extensions.rs) | Merchant catalogue and Wasm extension activation/state. | `integration.py + users.py + extensions.py + restart.py` |
+| [`src/extensions.rs`](../src/extensions.rs) | Merchant catalogue route and business policy routes; `components/apps/src/service/business_policy.rs` owns activation, state and preparation. | `integration.py + users.py + extensions.py + restart.py` |
 | [`src/foundation.rs`](../src/foundation.rs) | Application dependencies, error responses and request context helpers. | `protocols.py + integration.py + commerce.py + users.py` |
 | [`crates/cognition/src/inference.rs`](../crates/cognition/src/inference.rs) | Provider adapters. Credentials stay on the server; domain validation is separate. | `Rust parsing/schema tests + providers.py + live intelligence.py/studio.py` |
 | [`components/intelligence/src/knowledge.rs`](../components/intelligence/src/knowledge.rs) | Transactional PostgreSQL relations and private Qdrant retrieval with authoritative tenant/model/digest hydration. | `intelligence.py + studio.py + users.py + restart.py` |
@@ -574,7 +574,7 @@ See [international commerce](international-commerce.md) for the exact contract.
 | [`src/main.rs`](../src/main.rs) | Process lifetime only. See docs/source-map.md for domain responsibilities. | `server startup/build + integration.py + structure.py` |
 | [`src/mcp.rs`](../src/mcp.rs) | Typed MCP schemas and JSON-RPC transport. | `protocols.py + integration.py + commerce.py + users.py` |
 | [`src/order_checkout.rs`](../src/order_checkout.rs) and [`src/checkout/`](../src/checkout/README.md) | Shared native checkout entry and typed Commerce host stages for locks, pricing, commit and receipt recovery. | `checkout_review.py + checkout_handoff.py + payments.py` |
-| [`src/order_routes.rs`](../src/order_routes.rs) | Merchant order read adapter. | `integration.py + commerce.py + protocols.py + users.py + restart.py` |
+| [`src/order_routes.rs`](../src/order_routes.rs) | Merchant order read route over `veyndo_orders::store::order_reads::recent`. | `integration.py + commerce.py + protocols.py + users.py + restart.py` |
 | [`src/outbox.rs`](../src/outbox.rs) | Durable outbox and audit projection worker. | `integration.py + protocols.py + studio.py + restart.py` |
 | [`components/intelligence/src/service/planner.rs`](../components/intelligence/src/service/planner.rs), [`components/studio/src/service/proposal_admission.rs`](../components/studio/src/service/proposal_admission.rs) | Grounded model planning and one checkpointed correction of invalid output (intelligence); the shared native admission of proposals, views and work (studio, behind the work port). | `providers.py + live intelligence.py/studio.py + protocols.py` |
 | [`components/pricing/src/domain/pricing.rs`](../components/pricing/src/domain/pricing.rs) | Behavioral port of Shopware 6.7.14.2 quantity calculators. | `differential.py + delivery_differential.py + Rust numeric regressions + commerce.py` |
@@ -927,7 +927,7 @@ reads, historical preservation and display. See [the measurement boundary](platf
 
 - `components/core/src/request_context.rs`, `components/identity/src/route_policy.rs`, `src/auth/{identity,abuse}.rs`, `components/identity/src/types/envelopes.rs` and `components/identity/src/store/identity.sql`: trusted Principal, explicit method rights, one current grant lookup, persistent login admission and typed auth requests.
 - `crates/runtime/src/scoped_pool.rs`, `src/performance/{pool,row_security,cluster_lease}.rs`, `src/runtime_config.rs`: local transaction scope, guarded session borrows, validated startup contracts and shared resource/connection budgets.
-- `src/sandbox_cache.rs`, `src/apps/runtime.rs`, `crates/cognition/src/images.rs`: bounded Wasm compilation/execution cache and blocking-pool image processing.
+- `components/apps/src/service/{sandbox_cache,business_policy}.rs`, `src/apps/runtime.rs`, `crates/cognition/src/images.rs`: bounded Wasm compilation/execution cache and blocking-pool image processing.
 - `src/work_signal.rs`, `src/outbox.rs`, `src/outbox/{control,retention}.rs`, `retention.sql` and migration 057: commit hints, isolated retries/quarantine, permission-checked recovery and bounded retention.
 - `deploy/sql/provision-runtime.sh`, `scripts/security/core_hardening.py`, `scripts/testing/pooler.py`, `scripts/transaction_pooler.py`: least-privilege provisioning and actual two-replica/one-backend PgBouncer regression paths.
 

@@ -40,9 +40,6 @@ pub(crate) fn router() -> Router<App> {
             post(veyndo_customers::http::account::password),
         )
 }
-pub(crate) async fn session(a: &App, t: &str, email: &str) -> Result<String> {
-    veyndo_customers::service::sessions::open(&a.core, t, email).await
-}
 pub(crate) use veyndo_core::shop_scope::session_digest;
 
 pub(crate) async fn identity(a: &App, h: &RequestContext) -> Result<(String, String)> {
@@ -63,7 +60,7 @@ async fn logout(State(a): State<App>, h: RequestContext) -> Result<Json<Value>> 
     )
     .await?;
     if let Some(token) = header(&h, "sw-context-token") {
-        sqlx::query("UPDATE carts SET data=jsonb_set(jsonb_set(jsonb_set(jsonb_set(jsonb_set(data,'{email}','null'),'{customer_id}','null'),'{group}','\"consumer\"'),'{company}','null'),'{b2b}','null'),token=$1,revision=revision+1 WHERE tenant=$2 AND token=$3 AND status='open' AND data->>'email'=$4").bind(uid()).bind(&t).bind(token).bind(&email).execute(&a.db).await?;
+        veyndo_checkout::store::cart_load::forget_customer(&a, &t, token, &email).await?;
     }
     Ok(Json(json!({"loggedOut":true})))
 }

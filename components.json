@@ -40,8 +40,7 @@
     "identity": {
       "title": "Merchant accounts, memberships, sessions, roles and route policy",
       "sources": [
-        "components/identity",
-        "src/auth"
+        "components/identity"
       ],
       "tables": [
         "auth_attempt_buckets",
@@ -59,52 +58,24 @@
         "workspace_roles"
       ],
       "uses": [
-        "apps",
-        "catalog",
-        "checkout",
         "core",
-        "customers",
-        "host",
-        "inference",
-        "intelligence",
-        "marketing",
-        "shop"
+        "inference"
       ],
       "foreign_tables": [
         "app_packages",
-        "commerce_settings",
-        "customers",
-        "experiences",
-        "extensions",
-        "hosted_frontends",
         "outbox",
-        "policy",
         "sales_channels",
         "shop_environments",
         "tenants"
       ],
-      "glob_imports": 5,
-      "untyped_access": 88,
-      "sql_outside_store": 16
+      "glob_imports": 0,
+      "untyped_access": 66,
+      "sql_outside_store": 11
     },
     "shop": {
       "title": "Shop configuration, domains, legal texts and the operator control plane",
       "sources": [
-        "src/commerce/mod.rs",
-        "src/commerce/types.rs",
-        "src/commerce/configuration.rs",
-        "src/commerce/context_routes.rs",
-        "components/shop",
-        "src/commerce/settings_patch.rs",
-        "src/commerce/settings_scope.rs",
-        "src/performance",
-        "src/currencies/rates.rs",
-        "src/shop_domains.rs",
-        "src/shop_domains",
-        "src/brand_redirect.rs",
-        "src/legal",
-        "src/platform",
-        "src/commerce/settings_guards.rs"
+        "components/shop"
       ],
       "tables": [
         "commerce_overrides",
@@ -124,15 +95,10 @@
         "tenant_resource_limits"
       ],
       "uses": [
-        "apps",
         "catalog",
-        "checkout",
         "core",
-        "host",
         "identity",
         "inventory",
-        "marketing",
-        "payments",
         "pricing",
         "shipping"
       ],
@@ -157,31 +123,14 @@
         "tenant_ai_usage",
         "tenants"
       ],
-      "glob_imports": 23,
-      "untyped_access": 93,
-      "sql_outside_store": 16
+      "glob_imports": 0,
+      "untyped_access": 63,
+      "sql_outside_store": 9
     },
     "catalog": {
       "title": "Products, categories, media, reviews, translations and catalogue reads",
       "sources": [
-        "components/catalog",
-        "src/commerce/catalog.rs",
-        "src/commerce/catalog_intake",
-        "src/commerce/detail.rs",
-        "src/commerce/content_text.rs",
-        "src/commerce/product_admin.rs",
-        "src/commerce/catalog_ports.rs",
-        "src/commerce/selection.rs",
-        "src/categories",
-        "src/assets",
-        "src/translations",
-        "src/catalog_model.rs",
-        "src/catalog_page.rs",
-        "src/catalog_routes.rs",
-        "src/storefront_pages.rs",
-        "src/localization.rs",
-        "src/seed.rs",
-        "src/demo_catalog.rs"
+        "components/catalog"
       ],
       "tables": [
         "categories",
@@ -197,44 +146,27 @@
         "translation_jobs"
       ],
       "uses": [
-        "apps",
-        "b2b",
-        "checkout",
         "core",
-        "customers",
         "identity",
-        "intelligence",
-        "marketing",
-        "pricing",
-        "protocols",
-        "shop",
-        "studio"
+        "pricing"
       ],
       "foreign_tables": [
         "b2b_catalog",
-        "commerce_settings",
-        "customers",
-        "experiences",
         "knowledge_documents",
         "knowledge_relations",
         "languages",
-        "orders",
-        "policy",
         "sales_channels",
         "shop_environments",
         "tenants"
       ],
-      "glob_imports": 23,
-      "untyped_access": 145,
-      "sql_outside_store": 6
+      "glob_imports": 0,
+      "untyped_access": 133,
+      "sql_outside_store": 2
     },
     "inventory": {
       "title": "Stock, reservations and supply",
       "sources": [
-        "components/inventory",
-        "src/commerce/inventory_ports.rs",
-        "src/commerce/supply_proposal.rs",
-        "src/commerce/test_stock.rs"
+        "components/inventory"
       ],
       "tables": [
         "inventory_reservations",
@@ -242,66 +174,48 @@
       ],
       "uses": [
         "catalog",
-        "checkout",
         "core",
         "pricing"
       ],
       "foreign_tables": [
-        "products",
-        "shop_environments"
+        "products"
       ],
-      "glob_imports": 2,
+      "glob_imports": 0,
       "untyped_access": 3,
-      "sql_outside_store": 1
+      "sql_outside_store": 0
     },
     "pricing": {
       "title": "Money, price calculation, discounts, currencies, taxes and customer groups",
       "sources": [
-        "components/pricing",
-        "src/currencies",
-        "src/commerce/tax.rs",
-        "src/commerce/tax_context.rs",
-        "src/commerce/customer_groups.rs"
+        "components/pricing"
       ],
       "tables": [
         "commerce_customer_groups",
         "currency_price_jobs"
       ],
       "uses": [
-        "catalog",
-        "checkout",
         "core",
-        "identity",
-        "shop"
+        "identity"
       ],
       "foreign_tables": [
         "b2b_units",
         "carts",
-        "commerce_settings",
         "products"
       ],
-      "glob_imports": 6,
-      "untyped_access": 17,
-      "sql_outside_store": 4
+      "glob_imports": 0,
+      "untyped_access": 13,
+      "sql_outside_store": 1
     },
     "shipping": {
       "title": "Delivery methods, destinations, delivery splits and carrier booking",
       "sources": [
-        "components/shipping",
-        "src/commerce/delivery.rs",
-        "src/commerce/delivery_split.rs",
-        "src/commerce/method_usage.rs",
-        "src/commerce/geography.rs",
-        "src/commerce/international_capabilities.rs",
-        "src/operations/delivery_booking.rs"
+        "components/shipping"
       ],
       "tables": [],
       "uses": [
-        "catalog",
         "core",
         "identity",
-        "pricing",
-        "shop"
+        "pricing"
       ],
       "foreign_tables": [
         "b2b_units",
@@ -311,23 +225,14 @@
         "commerce_rules",
         "orders"
       ],
-      "glob_imports": 3,
-      "untyped_access": 52,
+      "glob_imports": 0,
+      "untyped_access": 26,
       "sql_outside_store": 0
     },
     "checkout": {
       "title": "Cart, quote, checkout transaction and order placement",
       "sources": [
-        "components/checkout",
-        "src/cart_model.rs",
-        "src/cart_mutation.rs",
-        "src/cart_price.rs",
-        "src/cart_routes.rs",
-        "src/cart_storage.rs",
-        "src/checkout",
-        "src/checkout_handoff.rs",
-        "src/checkout_page.rs",
-        "src/order_checkout.rs"
+        "components/checkout"
       ],
       "tables": [
         "carts",
@@ -335,23 +240,18 @@
         "exposures"
       ],
       "uses": [
-        "apps",
         "b2b",
         "catalog",
         "core",
         "customers",
-        "host",
         "identity",
-        "intelligence",
         "inventory",
         "marketing",
         "orders",
         "payments",
-        "pos",
         "pricing",
         "shipping",
-        "shop",
-        "studio"
+        "shop"
       ],
       "foreign_tables": [
         "commerce_settings",
@@ -371,19 +271,14 @@
         "shop_environments",
         "tenants"
       ],
-      "glob_imports": 9,
-      "untyped_access": 219,
+      "glob_imports": 0,
+      "untyped_access": 192,
       "sql_outside_store": 6
     },
     "customers": {
       "title": "Customer accounts, sessions, addresses and the merchant customer directory",
       "sources": [
-        "components/customers",
-        "src/accounts",
-        "src/customer.rs",
-        "src/operations/addresses.rs",
-        "src/operations/customer_create.rs",
-        "src/operations/customer_lookup.rs"
+        "components/customers"
       ],
       "tables": [
         "customer_addresses",
@@ -391,12 +286,9 @@
         "customers"
       ],
       "uses": [
-        "checkout",
         "core",
         "identity",
         "marketing",
-        "orders",
-        "pos",
         "pricing",
         "shipping",
         "shop"
@@ -407,20 +299,14 @@
         "outbox",
         "tenants"
       ],
-      "glob_imports": 6,
-      "untyped_access": 58,
-      "sql_outside_store": 5
+      "glob_imports": 0,
+      "untyped_access": 56,
+      "sql_outside_store": 3
     },
     "orders": {
       "title": "Order state, fulfilment, receipts, documents and merchant order work",
       "sources": [
-        "components/orders",
-        "src/operations",
-        "src/order_routes.rs",
-        "src/commerce/order_fields.rs",
-        "src/commerce/order_machine.rs",
-        "src/commerce/external_orders.rs",
-        "src/commerce/fulfillment.rs"
+        "components/orders"
       ],
       "tables": [
         "order_activity",
@@ -432,20 +318,15 @@
         "receipt_settings"
       ],
       "uses": [
-        "apps",
         "b2b",
         "catalog",
         "core",
         "customers",
         "identity",
         "inventory",
-        "marketing",
-        "payments",
-        "pos",
         "pricing",
         "shipping",
-        "shop",
-        "studio"
+        "shop"
       ],
       "foreign_tables": [
         "carts",
@@ -459,15 +340,14 @@
         "sales_channels",
         "tenants"
       ],
-      "glob_imports": 10,
-      "untyped_access": 293,
-      "sql_outside_store": 4
+      "glob_imports": 0,
+      "untyped_access": 282,
+      "sql_outside_store": 3
     },
     "payments": {
       "title": "Provider-independent payment ledger, captures, refunds and provider workers",
       "sources": [
-        "components/payments",
-        "src/payments"
+        "components/payments"
       ],
       "tables": [
         "payment_attempts",
@@ -479,13 +359,10 @@
         "payment_refunds"
       ],
       "uses": [
-        "apps",
         "core",
-        "host",
         "identity",
         "inventory",
         "orders",
-        "pos",
         "pricing",
         "shop"
       ],
@@ -505,15 +382,14 @@
         "policy",
         "sales_channels"
       ],
-      "glob_imports": 1,
-      "untyped_access": 263,
-      "sql_outside_store": 12
+      "glob_imports": 0,
+      "untyped_access": 254,
+      "sql_outside_store": 11
     },
     "marketing": {
       "title": "Rules, coupons, promotions, flows and sales channels",
       "sources": [
-        "components/marketing",
-        "src/marketing"
+        "components/marketing"
       ],
       "tables": [
         "channel_previews",
@@ -526,18 +402,12 @@
         "sales_channels"
       ],
       "uses": [
-        "apps",
         "automation",
         "b2b",
         "catalog",
-        "checkout",
         "core",
         "identity",
         "inference",
-        "intelligence",
-        "orders",
-        "payments",
-        "pos",
         "pricing",
         "shop"
       ],
@@ -567,15 +437,14 @@
         "tenants",
         "user_sessions"
       ],
-      "glob_imports": 17,
-      "untyped_access": 327,
-      "sql_outside_store": 11
+      "glob_imports": 0,
+      "untyped_access": 287,
+      "sql_outside_store": 9
     },
     "b2b": {
       "title": "Company procurement: organisations, budgets, approvals and quotes",
       "sources": [
-        "components/b2b",
-        "src/b2b"
+        "components/b2b"
       ],
       "tables": [
         "b2b_approvals",
@@ -588,13 +457,8 @@
         "b2b_units"
       ],
       "uses": [
-        "apps",
-        "checkout",
         "core",
-        "customers",
         "identity",
-        "orders",
-        "pos",
         "pricing",
         "shop"
       ],
@@ -608,15 +472,14 @@
         "outbox",
         "products"
       ],
-      "glob_imports": 2,
+      "glob_imports": 0,
       "untyped_access": 108,
-      "sql_outside_store": 8
+      "sql_outside_store": 7
     },
     "pos": {
       "title": "Point-of-sale register adapters",
       "sources": [
-        "components/pos",
-        "src/pos"
+        "components/pos"
       ],
       "tables": [],
       "uses": [
@@ -630,8 +493,7 @@
         "orders",
         "payments",
         "pricing",
-        "shop",
-        "studio"
+        "shop"
       ],
       "foreign_tables": [
         "carts",
@@ -643,8 +505,8 @@
         "products",
         "sales_channels"
       ],
-      "glob_imports": 1,
-      "untyped_access": 71,
+      "glob_imports": 0,
+      "untyped_access": 70,
       "sql_outside_store": 4
     },
     "apps": {
@@ -652,9 +514,6 @@
       "sources": [
         "components/apps",
         "src/apps",
-        "src/developer",
-        "src/extensions.rs",
-        "src/sandbox_cache.rs",
         "crates/apps"
       ],
       "tables": [
@@ -693,11 +552,9 @@
         "inventory",
         "marketing",
         "orders",
-        "payments",
         "pricing",
         "shipping",
-        "shop",
-        "studio"
+        "shop"
       ],
       "foreign_tables": [
         "b2b_companies",
@@ -722,9 +579,9 @@
         "tenants",
         "workspace_roles"
       ],
-      "glob_imports": 47,
-      "untyped_access": 440,
-      "sql_outside_store": 28
+      "glob_imports": 41,
+      "untyped_access": 423,
+      "sql_outside_store": 27
     },
     "automation": {
       "title": "Deterministic rule evaluation and flow graphs",
@@ -764,19 +621,7 @@
     "intelligence": {
       "title": "Shop memory, knowledge retrieval, agents, proposals and model inference",
       "sources": [
-        "components/intelligence",
-        "src/agent.rs",
-        "src/agent_host.rs",
-        "src/agent_runs",
-        "src/agent_runs.rs",
-        "src/cognition",
-        "src/concierge.rs",
-        "src/documents",
-        "src/experience.rs",
-        "src/planner.rs",
-        "src/proposal_apply.rs",
-        "src/proposal_model.rs",
-        "src/proposal_routes.rs"
+        "components/intelligence"
       ],
       "tables": [
         "ai_price_budget",
@@ -809,7 +654,6 @@
         "vector_index_queue"
       ],
       "uses": [
-        "apps",
         "catalog",
         "checkout",
         "core",
@@ -818,12 +662,9 @@
         "inference",
         "inventory",
         "marketing",
-        "payments",
         "pricing",
-        "protocols",
         "shipping",
-        "shop",
-        "studio"
+        "shop"
       ],
       "foreign_tables": [
         "app_evidence",
@@ -842,6 +683,8 @@
         "orders",
         "outbox",
         "payment_attempts",
+        "platform_ai",
+        "platform_audit",
         "privacy_consent_log",
         "privacy_consents",
         "product_assets",
@@ -853,18 +696,14 @@
         "tenants",
         "translation_jobs"
       ],
-      "glob_imports": 35,
-      "untyped_access": 620,
+      "glob_imports": 0,
+      "untyped_access": 609,
       "sql_outside_store": 29
     },
     "studio": {
       "title": "Merchant overview, reports, private staging shops and history",
       "sources": [
-        "components/studio",
-        "src/history",
-        "src/staging",
-        "src/studio",
-        "src/studio.rs"
+        "components/studio"
       ],
       "tables": [
         "entity_history",
@@ -925,7 +764,6 @@
         "product_translations",
         "products",
         "projections",
-        "receipt_settings",
         "sales_channels",
         "semantic_products",
         "session_signal_events",
@@ -934,9 +772,9 @@
         "translation_items",
         "translation_jobs"
       ],
-      "glob_imports": 10,
-      "untyped_access": 403,
-      "sql_outside_store": 24
+      "glob_imports": 0,
+      "untyped_access": 365,
+      "sql_outside_store": 23
     },
     "protocols": {
       "title": "MCP, UCP and the shared capability dispatch; adapters without business rules",
@@ -950,23 +788,14 @@
       "tables": [],
       "uses": [
         "apps",
-        "b2b",
         "catalog",
         "checkout",
         "core",
-        "customers",
         "host",
-        "identity",
         "inference",
         "intelligence",
-        "marketing",
-        "orders",
-        "payments",
-        "pos",
         "pricing",
-        "shipping",
-        "shop",
-        "studio"
+        "shop"
       ],
       "foreign_tables": [
         "carts",
@@ -979,23 +808,110 @@
     "host": {
       "title": "Process entry, route registry, worker roles, migrations and command-line tools",
       "sources": [
-        "src/main.rs",
-        "src/lib.rs",
-        "src/prelude.rs",
-        "src/bootstrap.rs",
-        "src/routes.rs",
-        "src/routes",
-        "src/workers.rs",
-        "src/workers",
-        "src/migrations.rs",
-        "src/migrations",
+        "src/accounts",
+        "src/agent.rs",
+        "src/agent_host.rs",
+        "src/agent_runs",
+        "src/agent_runs.rs",
+        "src/assets",
+        "src/auth",
+        "src/b2b",
         "src/bin",
-        "src/runtime_config.rs",
+        "src/bootstrap.rs",
+        "src/brand_redirect.rs",
+        "src/cart_model.rs",
+        "src/cart_mutation.rs",
+        "src/cart_price.rs",
+        "src/cart_routes.rs",
+        "src/cart_storage.rs",
+        "src/catalog_model.rs",
+        "src/catalog_page.rs",
+        "src/catalog_routes.rs",
+        "src/categories",
+        "src/checkout",
+        "src/checkout_handoff.rs",
+        "src/checkout_page.rs",
+        "src/cognition",
+        "src/commerce/catalog.rs",
+        "src/commerce/catalog_intake",
+        "src/commerce/catalog_ports.rs",
+        "src/commerce/configuration.rs",
+        "src/commerce/content_text.rs",
+        "src/commerce/context_routes.rs",
+        "src/commerce/customer_groups.rs",
+        "src/commerce/delivery.rs",
+        "src/commerce/delivery_split.rs",
+        "src/commerce/detail.rs",
+        "src/commerce/external_orders.rs",
+        "src/commerce/fulfillment.rs",
+        "src/commerce/geography.rs",
+        "src/commerce/international_capabilities.rs",
+        "src/commerce/inventory_ports.rs",
+        "src/commerce/method_usage.rs",
+        "src/commerce/mod.rs",
+        "src/commerce/order_machine.rs",
+        "src/commerce/product_admin.rs",
+        "src/commerce/selection.rs",
+        "src/commerce/settings_guards.rs",
+        "src/commerce/settings_patch.rs",
+        "src/commerce/settings_scope.rs",
+        "src/commerce/supply_proposal.rs",
+        "src/commerce/tax.rs",
+        "src/commerce/tax_context.rs",
+        "src/commerce/test_stock.rs",
+        "src/commerce/types.rs",
+        "src/concierge.rs",
+        "src/currencies",
+        "src/currencies/rates.rs",
+        "src/customer.rs",
+        "src/demo_catalog.rs",
+        "src/developer",
+        "src/documents",
+        "src/experience.rs",
+        "src/extensions.rs",
         "src/foundation.rs",
-        "src/outbox.rs",
+        "src/history",
+        "src/legal",
+        "src/lib.rs",
+        "src/localization.rs",
+        "src/main.rs",
+        "src/marketing",
+        "src/migrations",
+        "src/migrations.rs",
+        "src/operations",
+        "src/operations/addresses.rs",
+        "src/operations/customer_create.rs",
+        "src/operations/customer_lookup.rs",
+        "src/operations/delivery_booking.rs",
+        "src/order_checkout.rs",
+        "src/order_routes.rs",
         "src/outbox",
+        "src/outbox.rs",
+        "src/payments",
+        "src/performance",
         "src/performance/delivery.rs",
-        "src/security_headers.rs"
+        "src/planner.rs",
+        "src/platform",
+        "src/pos",
+        "src/prelude.rs",
+        "src/proposal_apply.rs",
+        "src/proposal_model.rs",
+        "src/proposal_routes.rs",
+        "src/routes",
+        "src/routes.rs",
+        "src/runtime_config.rs",
+        "src/sandbox_cache.rs",
+        "src/security_headers.rs",
+        "src/seed.rs",
+        "src/shop_domains",
+        "src/shop_domains.rs",
+        "src/staging",
+        "src/storefront_pages.rs",
+        "src/studio",
+        "src/studio.rs",
+        "src/translations",
+        "src/workers",
+        "src/workers.rs"
       ],
       "tables": [
         "seed_versions"
@@ -1003,21 +919,40 @@
       "uses": [
         "apps",
         "catalog",
+        "checkout",
         "core",
+        "identity",
         "inference",
-        "pricing"
+        "intelligence",
+        "inventory",
+        "marketing",
+        "orders",
+        "payments",
+        "pricing",
+        "shipping",
+        "shop",
+        "studio"
       ],
       "foreign_tables": [
         "app_deliveries",
         "auth_attempt_buckets",
         "commerce_settings",
+        "customers",
+        "experiences",
         "extensions",
         "flow_jobs",
-        "products"
+        "hosted_frontends",
+        "memberships",
+        "merchant_users",
+        "platform_audit",
+        "platform_operators",
+        "policy",
+        "products",
+        "tenants"
       ],
-      "glob_imports": 7,
-      "untyped_access": 40,
-      "sql_outside_store": 4
+      "glob_imports": 166,
+      "untyped_access": 293,
+      "sql_outside_store": 11
     },
     "connectors": {
       "title": "Standard provider services and their delivery queue; hosted by the separate connector binary in extensions/services/connectors",

@@ -43,8 +43,7 @@ pub(super) async fn select(
     }
     c.revision += 1;
     let q = cart_json(&a, &c).await?;
-    let n=sqlx::query("UPDATE carts SET data=$1,revision=$2 WHERE tenant=$3 AND token=$4 AND revision=$5 AND status='open'").bind(json!(c.data)).bind(c.revision).bind(&c.tenant).bind(&c.token).bind(current.revision).execute(&a.db).await?.rows_affected();
-    if n != 1 {
+    if !veyndo_checkout::store::cart_load::replace_open(&a, &c, current.revision).await? {
         return Err(conflict("Cart changed; reload first"));
     }
     Ok(Json(q))

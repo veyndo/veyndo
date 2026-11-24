@@ -23,7 +23,7 @@ pub(super) async fn apply(
  "settings"=>commerce::save_config(State(axum::extract::FromRef::from_ref(&a)),h,Json(json!({"revision":revision,"data":data}))).await,
  "company"=>operations::restore_company(&a,&h,json!({"revision":revision,"data":data}),None).await,
  "companyChannel"=>{
-  let t=merchant(&a,&h)?;let base:i64=sqlx::query_scalar("SELECT revision FROM receipt_settings WHERE tenant=$1").bind(t).fetch_one(&a.db).await?;
+  let t=merchant(&a,&h)?;let base=veyndo_orders::store::receipts::settings_revision(&a,&t).await?;
   operations::restore_company(&a,&h,json!({"revision":revision,"data":data,"baseRevision":base}),Some(&id)).await
  },
  "checkoutChannel"=>{

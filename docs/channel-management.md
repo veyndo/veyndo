@@ -52,7 +52,7 @@ Previews permit bounded cart simulations and catalog reads. They **cannot place 
 | Shared request admission | `components/marketing/src/service/channel_access.rs`, called by `src/auth/middleware.rs` |
 | Session-bound handoff and revocation | `components/marketing/src/http/channel_preview.rs` and `service/channel_preview.rs`; migration 053 and forced tenant RLS |
 | Catalog/cart/navigation/legal reads | Existing consumers use only the server-derived preview marker |
-| Frontend alias CRUD and revision checks | `src/shop_domains/frontend_bindings.rs`; existing `hosted_frontends` table |
+| Frontend alias CRUD and revision checks | `components/apps/src/service/frontend_bindings.rs` (managed-app install through the `HostedInstall` port); existing `hosted_frontends` table |
 | Actual proxy and streamed responses | `src/shop_domains/frontends.rs`, `frontend_transport.rs` |
 | Channel editor / lifecycle actions / domains | `frontend/src/admin/channels/ChannelEditor.tsx`, `ChannelActions.tsx`, `ChannelConnections.tsx` |
 | Standard shop preview notice | `frontend/src/storefront/shell/ChannelPreview.tsx` and four-language `channel-preview-i18n.ts` |

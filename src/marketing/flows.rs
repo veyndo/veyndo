@@ -74,7 +74,16 @@ pub(crate) async fn flow_once(a: &App) -> Result<bool> {
         && f.action == "note"
         && !definition["orderId"].as_str().unwrap_or("").is_empty()
     {
-        sqlx::query("INSERT INTO order_activity(tenant,order_id,actor,kind,data) VALUES($1,$2,$3,'flow',$4)").bind(t).bind(definition["orderId"].as_str().unwrap_or("")).bind(f.actor.as_deref().unwrap_or("flow")).bind(json!({"text":instruction,"flowJob":id,"event":definition["event"],"locale":f.locale})).execute(&mut *tx).await?;
+        veyndo_orders::store::order_reads::flow_note(
+            &mut tx,
+            t,
+            (
+                definition["orderId"].as_str().unwrap_or(""),
+                f.actor.as_deref().unwrap_or("flow"),
+            ),
+            &json!({"text":instruction,"flowJob":id,"event":definition["event"],"locale":f.locale}),
+        )
+        .await?;
     }
     tx.commit().await?;
     Ok(true)

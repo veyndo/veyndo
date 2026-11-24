@@ -12,14 +12,7 @@ pub(super) async fn receipt(
         &json!({"unitId":unit,"id":id}),
     )
     .await?;
-    let snapshot: Value = sqlx::query_scalar(
-        "SELECT snapshot FROM order_receipts WHERE tenant=$1 AND order_id=$2 AND id=$3",
-    )
-    .bind(tenant(&h)?)
-    .bind(id)
-    .bind(receipt)
-    .fetch_optional(&a.db)
-    .await?
-    .ok_or(Error(StatusCode::NOT_FOUND, "Receipt not found".into()))?;
+    let snapshot =
+        veyndo_orders::store::receipts::stored_snapshot(&a, &tenant(&h)?, &id, &receipt).await?;
     Ok(crate::operations::receipt_response(&snapshot))
 }

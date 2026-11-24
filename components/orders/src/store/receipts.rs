@@ -190,3 +190,26 @@ pub async fn snapshot(a: &State, t: &str, order: &str, id: &str) -> Result<Value
     }
     Ok(v)
 }
+
+/// The stored snapshot of one receipt of an order, as the document renderer receives it.
+pub async fn stored_snapshot(a: &State, t: &str, order: &str, id: &str) -> Result<Value> {
+    sqlx::query_scalar(
+        "SELECT snapshot FROM order_receipts WHERE tenant=$1 AND order_id=$2 AND id=$3",
+    )
+    .bind(t)
+    .bind(order)
+    .bind(id)
+    .fetch_optional(&a.db)
+    .await?
+    .ok_or(Error(StatusCode::NOT_FOUND, "Receipt not found".into()))
+}
+
+/// The current revision of the shop's receipt settings.
+pub async fn settings_revision(a: &State, t: &str) -> Result<i64> {
+    Ok(
+        sqlx::query_scalar("SELECT revision FROM receipt_settings WHERE tenant=$1")
+            .bind(t)
+            .fetch_one(&a.db)
+            .await?,
+    )
+}

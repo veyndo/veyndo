@@ -78,11 +78,7 @@ pub(crate) async fn execute(
         .filter(|s| !s.is_empty())
         .ok_or(bad("Action requires an order event"))?;
     if action == "action.set.order.state" || action == "action.generate.document" {
-        let o: Value = sqlx::query_scalar("SELECT data FROM orders WHERE tenant=$1 AND id=$2")
-            .bind(t)
-            .bind(id)
-            .fetch_one(&a.db)
-            .await?;
+        let o = veyndo_orders::store::order_reads::data(a, t, id).await?;
         let mut args = config.clone();
         args["id"] = json!(id);
         args["revision"] = o["revision"].clone();

@@ -123,3 +123,24 @@ pub async fn remember_payment(a: &State, t: &str, customer: &str, method: &str) 
         .await?;
     Ok(())
 }
+
+/// The ID of an active customer account by its email.
+pub async fn active_id(a: &State, t: &str, email: &str) -> Result<String> {
+    Ok(
+        sqlx::query_scalar("SELECT id FROM customers WHERE tenant=$1 AND email=$2 AND active")
+            .bind(t)
+            .bind(email)
+            .fetch_one(&a.db)
+            .await?,
+    )
+}
+
+/// Fills the empty profile of the synthetic demo buyer of a newly provisioned shop.
+pub async fn seed_demo_profile(
+    conn: &mut sqlx::PgConnection,
+    t: &str,
+    profile: &Value,
+) -> Result<()> {
+    sqlx::query("UPDATE customers SET profile=$1 WHERE tenant=$2 AND email='buyer@example.test' AND profile='{}'::jsonb").bind(profile).bind(t).execute(conn).await?;
+    Ok(())
+}

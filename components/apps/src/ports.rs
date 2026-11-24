@@ -100,3 +100,14 @@ impl std::ops::Deref for Platform {
         &self.core
     }
 }
+
+/// Installs a managed hosted app of the shop inside the caller's transaction, from the bundled packages of this process.
+pub trait HostedInstall: Send + Sync {
+    /// Installs or keeps the app `id` for the tenant.
+    fn ensure<'a, 'c: 'a>(
+        &'a self,
+        tx: &'a mut sqlx::Transaction<'c, sqlx::Postgres>,
+        tenant: &'a str,
+        id: &'a str,
+    ) -> veyndo_core::PortFuture<'a, ()>;
+}

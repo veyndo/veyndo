@@ -60,7 +60,13 @@ pub(crate) async fn seed(a: &App) -> Result<()> {
     ];
     for t in ["atelier", "workshop"] {
         for (id, name, category, description, price, tax, stock) in demo {
-            sqlx::query("INSERT INTO products(tenant,id,name,category,description,price,tax_rate,stock) VALUES($1,$2,$3,$4,$5,$6,$7,$8) ON CONFLICT DO NOTHING").bind(t).bind(id).bind(name).bind(category).bind(description).bind(price).bind(tax).bind(stock).execute(&a.db).await?;
+            veyndo_catalog::store::demo_template::insert_basic(
+                a,
+                t,
+                (id, name, category, description),
+                (price, tax, stock),
+            )
+            .await?;
         }
         let salt = SaltString::encode_b64(Uuid::new_v4().as_bytes()).unwrap();
         let password_hash = Argon2::default()

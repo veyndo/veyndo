@@ -25,13 +25,7 @@ pub(super) async fn generate(a: &App, t: &str, h: &RequestContext, v: &Value) ->
         )
     })?;
     let locale = language_context(a, h).await?.0;
-    let existing=sqlx::query("SELECT app,version FROM developer_builds WHERE tenant=$1 ORDER BY created_at DESC LIMIT 30").bind(t).fetch_all(&a.db).await?;
-    let versions = json!(
-        existing
-            .iter()
-            .map(|r| json!({"app":r.get::<String,_>("app"),"version":r.get::<String,_>("version")}))
-            .collect::<Vec<_>>()
-    );
+    let versions = veyndo_app_platform::store::developer_builds::recent(a, t).await?;
     let (settings, _) = commerce::config(a, t).await?;
     let editor = design_context::validate(v, &settings.locales)?;
     let (references, images) = assets::design_references::capture(&v["references"]).await?;

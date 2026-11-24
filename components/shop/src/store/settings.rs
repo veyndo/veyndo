@@ -45,3 +45,34 @@ pub async fn scoped_locked(
         revision,
     ))
 }
+
+/// The basis settings of the shop under a share lock on the caller's connection.
+pub async fn shared(tx: &mut sqlx::PgConnection, t: &str) -> Result<Settings> {
+    let data: Value =
+        sqlx::query_scalar("SELECT data FROM commerce_settings WHERE tenant=$1 FOR SHARE")
+            .bind(t)
+            .fetch_one(tx)
+            .await?;
+    decode(data)
+}
+
+/// The basis settings row and revision of the shop under an update lock on the caller's connection.
+pub async fn for_update(tx: &mut sqlx::PgConnection, t: &str) -> Result<(Settings, i64)> {
+    let row = sqlx::query("SELECT data,revision FROM commerce_settings WHERE tenant=$1 FOR UPDATE")
+        .bind(t)
+        .fetch_one(tx)
+        .await?;
+    Ok((decode(row.get("data"))?, row.get("revision")))
+}
+
+/// Up to 50 shops after `cursor` whose currency rates refresh automatically, with their settings revision.
+pub async fn auto_refresh(a: &veyndo_core::State, cursor: &str) -> Result<Vec<(String, i64)>> {
+    let rows = sqlx::query("SELECT tenant,revision FROM commerce_settings WHERE data->'currencies'->>'autoRefresh'='true' AND tenant>$1 ORDER BY tenant LIMIT 50")
+        .bind(cursor)
+        .fetch_all(&a.db)
+        .await?;
+    Ok(rows
+        .iter()
+        .map(|r| (r.get("tenant"), r.get("revision")))
+        .collect())
+}

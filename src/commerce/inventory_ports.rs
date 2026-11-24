@@ -14,14 +14,9 @@ impl Environments for Server {
         tx: &'a mut PgConnection,
         tenant: &'a str,
     ) -> PortFuture<'a, bool> {
-        Box::pin(async move {
-            Ok(sqlx::query_scalar(
-                "SELECT EXISTS(SELECT 1 FROM shop_environments WHERE tenant=$1 AND preview_owner IS NULL)",
-            )
-            .bind(tenant)
-            .fetch_one(tx)
-            .await?)
-        })
+        Box::pin(
+            async move { veyndo_studio::store::workspaces::is_private_sandbox(tx, tenant).await },
+        )
     }
 }
 
