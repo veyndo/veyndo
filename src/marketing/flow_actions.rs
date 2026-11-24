@@ -3,11 +3,27 @@ use super::{execute_app_flow, flows};
 use crate::foundation::App;
 use crate::planner::plan_with;
 use crate::{auth, commerce, operations};
+use serde::Deserialize;
 use serde_json::Value;
 use serde_json::json;
 use veyndo_core::Result;
 use veyndo_core::bad;
+use veyndo_core::document::{lenient, view};
 pub(crate) use veyndo_marketing::domain::flow_actions::{normalize, permission, validate};
+/// The saved configuration of one flow action.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ActionConfig {
+    #[serde(deserialize_with = "lenient")]
+    action: Option<String>,
+    app: Value,
+    arguments: Value,
+    instruction: Value,
+    #[serde(deserialize_with = "lenient")]
+    product_id: Option<String>,
+    source_id: Value,
+}
+
 pub(crate) async fn execute(
     a: &App,
     t: &str,
@@ -17,18 +33,20 @@ pub(crate) async fn execute(
     config: &Value,
     definition: &Value,
 ) -> Result<Value> {
+    let action_config: ActionConfig = view(config);
     let normalized = normalize(action, config);
     let config = &normalized;
     validate(action, config)?;
     let h = super::flow_access::headers(a, t, f.actor.as_deref()).await?;
     auth::permit(&h, permission(action))?;
     if action == "knowledge.extract" {
-        let source = config["sourceId"]
+        let source = action_config
+            .source_id
             .as_str()
             .filter(|s| !s.is_empty())
             .or_else(|| definition["eventContext"]["documentId"].as_str())
             .ok_or(bad("Extraction requires a document event or sourceId"))?;
-        let mut args = json!({"sourceId":source,"productId":config["productId"].as_str().filter(|s| !s.is_empty())});
+        let mut args = json!({"sourceId":source,"productId":action_config.product_id.as_deref().filter(|s| !s.is_empty())});
         if let Some(choice) = &f.inference {
             args["inference"] = json!(choice);
         }
@@ -43,8 +61,11 @@ pub(crate) async fn execute(
         let h = super::flow_access::proposal_headers(a, t, f.actor.as_deref(), job).await?;
         crate::performance::reserve_ai_attempt(a, t).await?;
         let (settings, _) = commerce::config(a, t).await?;
-        let instruction =
-            super::flow_text::effective(&config["instruction"], &f.locale, &settings.main_locale);
+        let instruction = super::flow_text::effective(
+            &action_config.instruction,
+            &f.locale,
+            &settings.main_locale,
+        );
         return plan_with(
             a,
             t,
@@ -63,7 +84,8 @@ pub(crate) async fn execute(
         let mut step = f.clone();
         step.action = "app_action".into();
         step.app_action = Some(flows::AppFlowAction {
-            app: config["app"]
+            app: action_config
+                .app
                 .as_str()
                 .unwrap_or(if action == "action.mail.send" {
                     "email"
@@ -71,11 +93,15 @@ pub(crate) async fn execute(
                     ""
                 })
                 .into(),
-            action: config["action"].as_str().unwrap_or("send_order").into(),
+            action: action_config
+                .action
+                .as_deref()
+                .unwrap_or("send_order")
+                .into(),
             arguments: if action == "action.mail.send" {
                 json!({"locale":&f.locale[..2],"dryRun":false})
             } else {
-                config["arguments"].clone()
+                action_config.arguments.clone()
             },
         });
         return execute_app_flow(a, t, &step, key, "", definition).await;

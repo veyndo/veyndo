@@ -686,7 +686,7 @@
         "translation_jobs": "write: agent runs cancel translation jobs they started (agent_runs.rs)"
       },
       "glob_imports": 0,
-      "untyped_access": 415,
+      "untyped_access": 412,
       "sql_outside_store": 29
     },
     "studio": {
@@ -937,7 +937,7 @@
         "tenants": "write: shop provisioning creates the shop row (demo_catalog.rs, provision.rs)"
       },
       "glob_imports": 0,
-      "untyped_access": 277,
+      "untyped_access": 253,
       "sql_outside_store": 11
     },
     "connectors": {

@@ -5,6 +5,7 @@ use crate::foundation::App;
 use crate::foundation::merchant;
 use axum::Json;
 use axum::extract::State;
+use serde::Deserialize;
 use serde_json::Value;
 use serde_json::json;
 use std::collections::HashMap;
@@ -12,6 +13,7 @@ use veyndo_checkout::domain::cart_quote::normalized_quantity;
 use veyndo_checkout::domain::cart_quote::quote;
 use veyndo_core::Result;
 use veyndo_core::bad;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::request_context::RequestContext;
 use veyndo_core::shop_scope::header;
 use veyndo_core::shop_scope::tenant;
@@ -53,14 +55,30 @@ pub(super) async fn context_info(State(a): State<App>, h: RequestContext) -> Res
         json!({"locale":locale,"mainLocale":settings.main_locale,"languageIdChain":chain,"availableLocales":settings.locales,"currency":currency.code,"currencyContext":currencies::context(&settings.currencies,currency),"currencies":settings.currencies.enabled,"taxStates":["gross","net"]}),
     ))
 }
+/// A localized price preview for a product, quantity and customer group.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct QuotePreview {
+    #[serde(deserialize_with = "lenient")]
+    product_id: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    quantity: Option<u64>,
+    #[serde(deserialize_with = "lenient")]
+    customer_group: Option<String>,
+}
+
 pub(super) async fn preview_quote(
     State(a): State<App>,
     h: RequestContext,
     Json(v): Json<Value>,
 ) -> Result<Json<Value>> {
+    let input: QuotePreview = view(&v);
     let t = merchant(&a, &h)?;
     let (locale, chain) = language_context(&a, &h).await?;
-    let id = v["productId"].as_str().ok_or(bad("Product ID required"))?;
+    let id = input
+        .product_id
+        .as_deref()
+        .ok_or(bad("Product ID required"))?;
     let ps = commerce::cart_products(
         &a,
         &t,
@@ -75,11 +93,11 @@ pub(super) async fn preview_quote(
         .iter()
         .find(|p| p.id == id)
         .ok_or(bad("Unknown product"))?;
-    let requested = v["quantity"]
-        .as_u64()
+    let requested = input
+        .quantity
         .filter(|q| *q > 0 && *q <= 10000)
         .ok_or(bad("Quantity must be 1..10000"))? as u32;
-    let group = v["customerGroup"].as_str().unwrap_or("consumer");
+    let group = input.customer_group.as_deref().unwrap_or("consumer");
     let (settings, _) = commerce::config(&a, &t).await?;
     if !settings.customer_groups.iter().any(|g| g.id == group) {
         return Err(bad("Unknown customer group"));

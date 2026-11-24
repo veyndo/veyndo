@@ -2743,8 +2743,8 @@
     },
     "components/intelligence/src/service/planner.rs": {
       "status": "unproved",
-      "sha256": "157db3784b8f940b51fbffb6106c8891456ae027fdbbb5ff2e8710fb11aeaf03",
-      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
+      "sha256": "b3a2e9946ec36e913ede103a052a7a34ceea819ad5574d25e818b8f6e2d68b89",
+      "review": "F39 typed inputs: proof bindings unchanged"
     },
     "components/intelligence/src/service/platform_ai.rs": {
       "status": "reviewed-binding",
@@ -6453,8 +6453,8 @@
     },
     "src/apps/core_exchange.rs": {
       "status": "unproved",
-      "sha256": "0026d8c162a3f534ab1732857fa3798ee7eb9466fc26e522da521fa9ebc3aa4c",
-      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
+      "sha256": "23637461c7e109ce0862e0b7b092b0a4adb6f72a2a1e3ab76a525431cc22c556",
+      "review": "F39 typed inputs: proof bindings unchanged"
     },
     "src/apps/core_extensions.rs": {
       "status": "unproved",
@@ -6468,8 +6468,8 @@
     },
     "src/apps/data.rs": {
       "status": "unproved",
-      "sha256": "42e958379559f41c1f545308aa39b08160f362a25305fe7333006a3491ee75c8",
-      "review": "F20: site builder and site forms as crates behind the SiteHost port; no path attribute left in src"
+      "sha256": "503a602edd20f237ea7085ffaf8fbffcfcb2bf0b70557fd69f73bc63510f030e",
+      "review": "F39 typed inputs: proof bindings unchanged"
     },
     "src/apps/discovery.rs": {
       "status": "unproved",
@@ -6703,8 +6703,8 @@
     },
     "src/assets/mod.rs": {
       "status": "unproved",
-      "sha256": "3d4759af131de9ce79a35f59e3de46bc1253bc163fe7cebf841ed1a6f63b36c7",
-      "review": "F20: site builder and site forms as crates behind the SiteHost port; no path attribute left in src"
+      "sha256": "892127e23b80388e75db08ccb4680a7a95ec9bdf9b288ffe25fb83d0de6db2a8",
+      "review": "F39 typed inputs: proof bindings unchanged"
     },
     "src/assets/model_format.rs": {
       "status": "unproved",
@@ -7383,8 +7383,8 @@
     },
     "src/developer/mod.rs": {
       "status": "unproved",
-      "sha256": "b4e81286f0cc2353b510a220f5cd1f18032fabccce9b63ae93d9484a9ed3276b",
-      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
+      "sha256": "ed1705ad27571a0cf915e54f22ad60caf19ae2c9b307c000cb11a7d2dde456d5",
+      "review": "F39 typed inputs: proof bindings unchanged"
     },
     "src/developer/routes.rs": {
       "status": "unproved",
@@ -7503,8 +7503,8 @@
     },
     "src/localization.rs": {
       "status": "unproved",
-      "sha256": "2de0691a53097c3849f681cb4bbb2f74757f93d09f1ac5b334ec8ec442f3b93b",
-      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
+      "sha256": "d42a4ae6bdce59f5c92351433558173660ffc015d8a2cfdaaf3b0b3b1af4bfa1",
+      "review": "F39 typed inputs: proof bindings unchanged"
     },
     "src/main.rs": {
       "status": "unproved",
@@ -7558,8 +7558,8 @@
     },
     "src/marketing/flow_actions.rs": {
       "status": "unproved",
-      "sha256": "8b710e44468ab6ee9ee92cf2d6a267c5f438768ec3fa9cd987a375c2dc4d9050",
-      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
+      "sha256": "7b3e88b1f0f6988f5c415e662572dd28e2f5b400d08e85500b0f5b8ca850c56a",
+      "review": "F39 typed inputs: proof bindings unchanged"
     },
     "src/marketing/flow_jobs.rs": {
       "status": "unproved",
@@ -7838,8 +7838,8 @@
     },
     "src/payments/instruments.rs": {
       "status": "unproved",
-      "sha256": "2477a8b5281e69c53c145b45abe8e6855dc59545518f6c8f45f7cd9c2b205a37",
-      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
+      "sha256": "4757c58d6945df102e4acffe359a792ceeeb5bf7cca0d334b9346fea9474eb30",
+      "review": "F39 typed inputs: proof bindings unchanged"
     },
     "src/payments/merchant.rs": {
       "status": "unproved",

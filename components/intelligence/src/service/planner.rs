@@ -9,10 +9,12 @@ use crate::knowledge;
 use crate::ports::AgentHost;
 use crate::store::documents::{guidance, sources_current};
 use crate::store::observations::observations;
+use serde::Deserialize;
 use serde_json::{Value, json};
 use sqlx::Row;
 use veyndo_cognition::inference::{Choice, Output, Provider};
 use veyndo_core::database::lease::Lease;
+use veyndo_core::document::view;
 use veyndo_core::shop_scope::{header, parent};
 use veyndo_core::{Error, RequestContext, Result, StatusCode, bad, conflict, uid};
 use veyndo_identity::{allowed, assistant_access, merchant};
@@ -273,6 +275,15 @@ async fn prepare<H: AgentHost>(
     )
 }
 
+/// The saved planning context a resumed plan is checked against.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct SavedContext {
+    app_context: Value,
+    document_sources: Value,
+    private_sources: Value,
+}
+
 /// A saved prompt is not continuing permission to disclose withdrawn app/document evidence.
 pub async fn validate_context<H: AgentHost>(
     host: &H,
@@ -281,17 +292,18 @@ pub async fn validate_context<H: AgentHost>(
     request: &Value,
     saved: &Value,
 ) -> Result<()> {
+    let context: SavedContext = view(saved);
     let instruction = request["instruction"].as_str().unwrap_or("");
     let apps = if allowed(h, "apps.read") {
         host.planning_context(t, h, instruction).await?
     } else {
         json!([])
     };
-    let sources_current = sources_current(host.models().core, t, &saved["documentSources"]).await?;
+    let sources_current = sources_current(host.models().core, t, &context.document_sources).await?;
     let private = host.private_evidence(t, instruction).await?;
-    if apps != saved["appContext"]
+    if apps != context.app_context
         || !sources_current
-        || snapshot(&private, 4000) != saved["privateSources"]
+        || snapshot(&private, 4000) != context.private_sources
     {
         return Err(conflict(
             "Agent source permissions or content changed; prepare a new proposal",

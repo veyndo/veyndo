@@ -3,6 +3,7 @@ use crate::foundation::App;
 use crate::{apps, auth};
 use axum::Json;
 use axum::extract::State;
+use serde::Deserialize;
 use serde_json::Value;
 use serde_json::json;
 use veyndo_app_platform::domain::{
@@ -10,6 +11,7 @@ use veyndo_app_platform::domain::{
 };
 use veyndo_core::Result;
 use veyndo_core::bad;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::request_context::RequestContext;
 pub(crate) mod agent_connection;
 mod builds;
@@ -33,7 +35,18 @@ pub(crate) async fn invoke(a: &App, h: &RequestContext, name: &str, v: &Value) -
     )
     .await
 }
+/// An App Studio build decision: the build, its digest and the approval.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct BuildDecision {
+    approve: Value,
+    digest: Value,
+    #[serde(deserialize_with = "lenient")]
+    build_id: Option<String>,
+}
+
 async fn invoke_admitted(a: &App, h: &RequestContext, name: &str, v: &Value) -> Result<Value> {
+    let input: BuildDecision = view(v);
     Ok(match name {
         "developer.archive" => {
             veyndo_app_platform::service::app_builds::archive(&a.core, h, v).await?
@@ -45,12 +58,12 @@ async fn invoke_admitted(a: &App, h: &RequestContext, name: &str, v: &Value) -> 
                 .0
         }
         "developer.stage" => {
-            let id = v["buildId"].as_str().ok_or(bad("Build ID required"))?;
+            let id = input.build_id.as_deref().ok_or(bad("Build ID required"))?;
             veyndo_app_platform::service::app_builds::stage(
                 &apps::service_limits::platform(a),
                 h,
                 id,
-                &json!({"approve":v["approve"],"digest":v["digest"]}),
+                &json!({"approve":input.approve,"digest":input.digest}),
             )
             .await?
         }

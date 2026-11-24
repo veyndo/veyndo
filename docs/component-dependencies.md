@@ -30,10 +30,10 @@ run SQL without being in a `store` folder. Both numbers only fall.
 | apps | 13685 | 0 | 312 | 18 | 22 | b2b (1), catalog (2), checkout (5), core (233), identity (41), inference (4), intelligence (2), inventory (2), marketing (5), orders (10), pricing (6), shipping (2), shop (21) | 21 |
 | automation | 1443 | 8 | 97 | 0 | 0 | core (2) | 0 |
 | inference | 2032 | 0 | 124 | 2 | 0 | core (13) | 5 |
-| intelligence | 11694 | 0 | 415 | 29 | 28 | catalog (10), checkout (11), core (199), customers (1), identity (29), inference (10), inventory (1), marketing (13), pricing (20), shipping (3), shop (52) | 28 |
+| intelligence | 11706 | 0 | 412 | 29 | 28 | catalog (10), checkout (11), core (200), customers (1), identity (29), inference (10), inventory (1), marketing (13), pricing (20), shipping (3), shop (52) | 28 |
 | studio | 7283 | 0 | 325 | 23 | 5 | apps (30), b2b (3), catalog (29), checkout (2), core (106), customers (7), identity (40), inference (4), intelligence (23), marketing (12), orders (20), pos (2), pricing (12), shop (30) | 42 |
 | protocols | 2988 | 0 | 117 | 2 | 0 | catalog (1), checkout (2), core (106), host (209), inference (1), intelligence (2), pricing (2), shop (5) | 2 |
-| host | 16390 | 0 | 277 | 11 | 1 | apps (49), catalog (56), checkout (14), core (1443), identity (8), inference (2), intelligence (32), inventory (4), marketing (11), orders (2), payments (8), pricing (46), shipping (1), shop (65), studio (18) | 15 |
+| host | 16508 | 0 | 253 | 11 | 1 | apps (49), catalog (56), checkout (14), core (1443), identity (8), inference (2), intelligence (32), inventory (4), marketing (11), orders (2), payments (8), pricing (46), shipping (1), shop (65), studio (18) | 15 |
 | connectors | 0 | 0 | 0 | 0 | 6 | none | 0 |
 
 ## Cycles
@@ -51,7 +51,7 @@ those pairs close when the server files that still hold their logic move into th
 | host | core | `Result` | 372 |
 | host | core | `RequestContext` | 328 |
 | apps | core | `veyndo_core::` | 210 |
-| intelligence | core | `veyndo_core::` | 184 |
+| intelligence | core | `veyndo_core::` | 185 |
 | studio | core | `veyndo_core::` | 104 |
 | host | core | `PortFuture` | 83 |
 | shop | core | `veyndo_core::` | 81 |

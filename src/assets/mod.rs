@@ -7,9 +7,11 @@ use axum::extract::Path;
 use axum::extract::State;
 use axum::routing::get;
 use axum::routing::post;
+use serde::Deserialize;
 use serde_json::Value;
 use veyndo_core::Result;
 use veyndo_core::bad;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::request_context::RequestContext;
 mod import;
 pub(crate) use import::image as import_image;
@@ -96,17 +98,29 @@ pub(crate) fn media_permission(name: &str) -> Option<&'static str> {
         _ => None,
     }
 }
+/// The product and image a media capability names.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct MediaArgs {
+    #[serde(deserialize_with = "lenient")]
+    id: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    product_id: Option<String>,
+}
+
 pub(crate) async fn media_invoke(
     a: &App,
     h: &RequestContext,
     name: &str,
     v: &Value,
 ) -> Result<Value> {
+    let input: MediaArgs = view(v);
     let state = State(a.clone());
     let headers = h.clone();
     let id = || {
-        v["id"]
-            .as_str()
+        input
+            .id
+            .as_deref()
             .map(String::from)
             .ok_or(bad("Image ID required"))
     };
@@ -118,8 +132,9 @@ pub(crate) async fn media_invoke(
                 state,
                 headers,
                 Path(
-                    v["productId"]
-                        .as_str()
+                    input
+                        .product_id
+                        .as_deref()
                         .ok_or(bad("Product ID required"))?
                         .into(),
                 ),
@@ -132,8 +147,9 @@ pub(crate) async fn media_invoke(
                 state,
                 headers,
                 Path(
-                    v["productId"]
-                        .as_str()
+                    input
+                        .product_id
+                        .as_deref()
                         .ok_or(bad("Product ID required"))?
                         .into(),
                 ),

@@ -4,13 +4,27 @@ use crate::foundation::App;
 use crate::foundation::merchant;
 use crate::{commerce, currencies};
 use axum::http::StatusCode;
+use serde::Deserialize;
 use serde_json::Value;
 use serde_json::json;
 use veyndo_core::Error;
 use veyndo_core::Result;
 use veyndo_core::bad;
 use veyndo_core::conflict;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::request_context::RequestContext;
+/// The record, channel and currency a core exchange names.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ExchangeArgs {
+    #[serde(deserialize_with = "lenient")]
+    id: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    channel_id: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    currency: Option<String>,
+}
+
 pub(super) async fn execute(
     a: &App,
     h: &RequestContext,
@@ -18,6 +32,7 @@ pub(super) async fn execute(
     op: &str,
     v: &Value,
 ) -> Result<Value> {
+    let input: ExchangeArgs = view(v);
     let t = merchant(a, h)?;
     let required = if op == "order_import" {
         vec![
@@ -46,7 +61,7 @@ pub(super) async fn execute(
         &json!({"type":"object","properties":{"id":{"type":"string","maxLength":100},"channelId":{"type":"string","maxLength":100},"currency":{"type":"string","maxLength":3}},"required":["channelId"],"additionalProperties":false}),
         v,
     )?;
-    let id = v["channelId"].as_str().unwrap();
+    let id = input.channel_id.as_deref().unwrap();
     let (c, channel_revision) = veyndo_marketing::store::channel_config::stored(a, &t, id)
         .await?
         .ok_or(Error(StatusCode::NOT_FOUND, "Channel unavailable".into()))?;
@@ -56,7 +71,7 @@ pub(super) async fn execute(
     let (cfg, rev) = commerce::scoped_config(a, &t, id).await?;
     let mut result = json!({"id":id,"revision":channel_revision,"data":c,"mainLocale":cfg.main_locale,"currencies":cfg.currencies,"settingsRevision":rev});
     if op == "channel_product" {
-        let pid = v["id"].as_str().ok_or(bad("Product ID required"))?;
+        let pid = input.id.as_deref().ok_or(bad("Product ID required"))?;
         let (p, visible) = veyndo_catalog::store::products::in_channel(a, &t, pid, id)
             .await?
             .ok_or(Error(StatusCode::NOT_FOUND, "Product unavailable".into()))?;
@@ -73,7 +88,7 @@ pub(super) async fn execute(
         }
         let currency = cfg
             .currencies
-            .selected(v["currency"].as_str().unwrap_or(""))?;
+            .selected(input.currency.as_deref().unwrap_or(""))?;
         result["product"] =
             crate::operations::invoke(a, h, "merchant.product.content", &json!({"id":pid})).await?;
         result["money"] = json!(currencies::amount(

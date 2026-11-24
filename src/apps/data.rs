@@ -1,10 +1,12 @@
 //! Managed app records live in the apps component; this module supplies the record rules of the bundled site builder.
 use super::{Entity, Manifest, site_builder};
+use serde::Deserialize;
 use serde_json::Value;
 use serde_json::json;
 use veyndo_app_platform::ports::{RecordRules, RuleFuture};
 use veyndo_app_platform::store::managed_data;
 use veyndo_core::Result;
+use veyndo_core::document::view;
 /// The bundled site builder normalizes and checks its own pages; every other app has no extra rules.
 pub(crate) struct BundledRules;
 pub(crate) static BUNDLED: BundledRules = BundledRules;
@@ -52,11 +54,21 @@ pub(crate) async fn save_tx(
 ) -> Result<Value> {
     managed_data::save_tx(&BUNDLED, tx, t, m, e, v).await
 }
+/// A managed record save: its ID, revision and fields.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct RecordInput {
+    id: Value,
+    revision: Value,
+    fields: Value,
+}
+
 /// Every generic import and ordinary save uses the same app-owned normalization.
 pub(crate) fn normalize_input(m: &Manifest, v: &Value) -> Result<Value> {
+    let input: RecordInput = view(v);
     if m.id == "site_builder" {
         Ok(
-            json!({"id":v["id"],"revision":v["revision"],"fields":site_builder::normalize(&v["fields"])?}),
+            json!({"id":input.id,"revision":input.revision,"fields":site_builder::normalize(&input.fields)?}),
         )
     } else {
         Ok(v.clone())
