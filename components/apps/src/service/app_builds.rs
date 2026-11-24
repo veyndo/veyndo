@@ -6,12 +6,14 @@ use crate::domain::{build_admission, design_context, generation_bindings};
 use crate::ports::{CommerceInstall, Platform, RecordRules};
 use crate::service::package_verification::verify_package;
 use crate::store::package_install::install_tx;
+use serde::Deserialize;
 use serde_json::{Value, json};
 use sqlx::Row;
 use sqlx::postgres::PgRow;
 use veyndo_app_model::manifest::Manifest;
 use veyndo_app_storage::Scope;
 use veyndo_app_storage::build_versions as shared;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::shop_scope::{owned_stage, parent};
 use veyndo_core::{
     Error, RequestContext, Result, State, StatusCode, bad, conflict, process_config, uid,
@@ -89,23 +91,45 @@ pub struct Origin<'a> {
     pub payment: &'a [Value],
 }
 
+/// The input of an App Studio build operation: save, archive or stage.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct BuildInput {
+    #[serde(deserialize_with = "lenient")]
+    environment: Option<String>,
+    manifest: Value,
+    #[serde(deserialize_with = "lenient")]
+    prompt: Option<String>,
+    summary: Value,
+    #[serde(deserialize_with = "lenient")]
+    app: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    archived: Option<bool>,
+    #[serde(deserialize_with = "lenient")]
+    approve: Option<bool>,
+    digest: Value,
+}
+
 /// Validates a manifest for a private environment of the shop and stores it as an immutable development version.
 pub async fn save(a: &State, t: &str, v: &Value, origin: &Origin<'_>) -> Result<Value> {
-    let stage = v["environment"]
-        .as_str()
+    let input: BuildInput = view(v);
+    let stage = input
+        .environment
+        .as_deref()
         .ok_or(bad("Private environment required"))?;
     owned_stage(&a.db, t, stage).await?;
-    let mut value = v["manifest"].clone();
+    let mut value = input.manifest.clone();
     default_actions(&mut value, origin.payment)?;
     generation_bindings::complete(&mut value)?;
     let m: Manifest = serde_json::from_value(value).map_err(|e| bad(e.to_string()))?;
     build_admission::validate(&m, &process_config::get().publishers)?;
-    let prompt = v["prompt"]
-        .as_str()
+    let prompt = input
+        .prompt
+        .as_deref()
         .filter(|s| !s.trim().is_empty() && s.len() <= 8000)
         .ok_or(bad("Prompt required, maximum 8000 bytes"))?;
     validate_locale(&m, origin.main)?;
-    build_admission::main_language(&m, &v["summary"], origin.main)?;
+    build_admission::main_language(&m, &input.summary, origin.main)?;
     verify_package(&m).await?;
     let manifest = json!(m);
     let id = uid();
@@ -125,14 +149,14 @@ pub async fn save(a: &State, t: &str, v: &Value, origin: &Origin<'_>) -> Result<
             prompt: &retained,
             provider: origin.provider,
             model: origin.model,
-            summary: &v["summary"],
+            summary: &input.summary,
         },
     )
     .await
     .map_err(error)?;
     tx.commit().await?;
     Ok(
-        json!({"id":id,"app":m.id,"version":m.version,"digest":digest,"manifest":manifest,"summary":v["summary"],"state":"draft","environment":stage,"designEvidence":origin.evidence}),
+        json!({"id":id,"app":m.id,"version":m.version,"digest":digest,"manifest":manifest,"summary":input.summary,"state":"draft","environment":stage,"designEvidence":origin.evidence}),
     )
 }
 
@@ -156,14 +180,14 @@ pub async fn list(a: &State, t: &str) -> Result<(Vec<Value>, Vec<Value>)> {
 pub async fn archive(a: &State, h: &RequestContext, v: &Value) -> Result<Value> {
     permit(h, "developer.manage")?;
     let t = live(a, h).await?;
-    let app = v["app"]
-        .as_str()
+    let input: BuildInput = view(v);
+    let app = input
+        .app
+        .as_deref()
         .filter(|s| !s.is_empty() && s.len() <= 32)
         .ok_or(bad("App required"))?;
-    let archived = v["archived"]
-        .as_bool()
-        .ok_or(bad("Archived boolean required"))?;
-    if v["approve"] != true {
+    let archived = input.archived.ok_or(bad("Archived boolean required"))?;
+    if input.approve != Some(true) {
         return Err(bad("Approve the App Studio removal/restore first"));
     }
     let mut tx = a.db.begin().await?;
@@ -182,7 +206,8 @@ pub async fn archive(a: &State, h: &RequestContext, v: &Value) -> Result<Value> 
 pub async fn stage(a: &Platform, h: &RequestContext, id: &str, v: &Value) -> Result<Value> {
     permit(h, "developer.manage")?;
     let t = live(a, h).await?;
-    if v["approve"] != true {
+    let input: BuildInput = view(v);
+    if input.approve != Some(true) {
         return Err(bad("Approve the reviewed build first"));
     }
     let mut tx = a.db.begin_privileged().await?;
@@ -190,7 +215,7 @@ pub async fn stage(a: &Platform, h: &RequestContext, id: &str, v: &Value) -> Res
         &mut tx,
         &t,
         id,
-        &v["digest"],
+        &input.digest,
         &Admission {
             live: &t,
             actor: h,

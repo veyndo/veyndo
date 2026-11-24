@@ -1,8 +1,10 @@
 //! Merchant-managed firms, unit hierarchies, employee grants and tenant-bound catalogs with optimistic revisions.
 use crate::types::model::{Company, Member, Unit};
+use serde::Deserialize;
 use serde_json::{Value, json};
 use sqlx::Row;
 use std::collections::HashMap;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad, conflict};
 pub async fn list(a: &State, t: &str) -> Result<Value> {
     let companies=sqlx::query("SELECT id,data,revision,created_at::text AS created FROM b2b_companies WHERE tenant=$1 ORDER BY id LIMIT 100").bind(t).fetch_all(&a.db).await?;
@@ -57,14 +59,44 @@ pub async fn save(a: &State, h: &RequestContext, op: &str, v: &Value) -> Result<
     tx.commit().await?;
     Ok(result)
 }
+/// A company or unit save: its ID, the revision it was edited at, its fields and, for a unit, its place.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct OrganizationSave {
+    #[serde(deserialize_with = "lenient")]
+    id: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    revision: Option<i64>,
+    data: Value,
+    #[serde(deserialize_with = "lenient")]
+    company_id: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    parent_id: Option<String>,
+}
+
+/// An employee policy save for one customer in one unit.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct MembershipSave {
+    #[serde(deserialize_with = "lenient")]
+    unit_id: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    customer_id: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    revision: Option<i64>,
+    data: Value,
+}
+
 /// Shared validated writer for HTTP, history restore and selective staging publication.
 pub async fn save_tx(conn: &mut sqlx::PgConnection, t: &str, op: &str, v: &Value) -> Result<Value> {
-    let id = v["id"]
-        .as_str()
+    let input: OrganizationSave = view(v);
+    let id = input
+        .id
+        .as_deref()
         .filter(|s| veyndo_app_model::declarations::identifier(s))
         .ok_or(bad("Valid company/unit ID required"))?;
-    let expected = v["revision"]
-        .as_i64()
+    let expected = input
+        .revision
         .filter(|n| *n >= 0)
         .ok_or(bad("Expected revision required (zero creates)"))?;
     let settings = veyndo_shop::domain::defaults::decode(
@@ -74,8 +106,8 @@ pub async fn save_tx(conn: &mut sqlx::PgConnection, t: &str, op: &str, v: &Value
             .await?,
     )?;
     let data = if op == "company.save" {
-        let company: Company =
-            serde_json::from_value(v["data"].clone()).map_err(|_| bad("Invalid company fields"))?;
+        let company: Company = serde_json::from_value(input.data.clone())
+            .map_err(|_| bad("Invalid company fields"))?;
         name(&company.name, &settings)?;
         if company.vat_id.len() > 100 || company.external_id.len() > 100 {
             return Err(bad("Company identifiers are too long"));
@@ -83,7 +115,7 @@ pub async fn save_tx(conn: &mut sqlx::PgConnection, t: &str, op: &str, v: &Value
         json!(company)
     } else {
         let unit: Unit =
-            serde_json::from_value(v["data"].clone()).map_err(|_| bad("Invalid unit fields"))?;
+            serde_json::from_value(input.data.clone()).map_err(|_| bad("Invalid unit fields"))?;
         unit.validate()?;
         name(&unit.name, &settings)?;
         settings.currencies.selected(&unit.currency)?;
@@ -112,7 +144,7 @@ pub async fn save_tx(conn: &mut sqlx::PgConnection, t: &str, op: &str, v: &Value
     // Serialize hierarchy changes for the whole company before taking unit row locks.
     // Per-unit locks alone permit two concurrent edits to introduce a cycle.
     if op == "unit.save" {
-        let company = v["companyId"].as_str().ok_or(bad("Company required"))?;
+        let company = input.company_id.as_deref().ok_or(bad("Company required"))?;
         sqlx::query("SELECT pg_advisory_xact_lock(hashtextextended($1,0))")
             .bind(format!("b2b:hierarchy:{t}:{company}"))
             .execute(&mut *conn)
@@ -133,8 +165,8 @@ pub async fn save_tx(conn: &mut sqlx::PgConnection, t: &str, op: &str, v: &Value
     if op == "company.save" {
         sqlx::query("INSERT INTO b2b_companies(tenant,id,data) VALUES($1,$2,$3) ON CONFLICT(tenant,id) DO UPDATE SET data=excluded.data,revision=b2b_companies.revision+1").bind(t).bind(id).bind(data).execute(&mut *conn).await?;
     } else {
-        let company = v["companyId"].as_str().ok_or(bad("Company required"))?;
-        let parent = v["parentId"].as_str();
+        let company = input.company_id.as_deref().ok_or(bad("Company required"))?;
+        let parent = input.parent_id.as_deref();
         let exists: bool = sqlx::query_scalar(
             "SELECT EXISTS(SELECT 1 FROM b2b_companies WHERE tenant=$1 AND id=$2)",
         )
@@ -192,11 +224,15 @@ pub async fn member(a: &State, h: &RequestContext, v: &Value) -> Result<Value> {
     Ok(result)
 }
 pub async fn member_tx(conn: &mut sqlx::PgConnection, t: &str, v: &Value) -> Result<Value> {
-    let unit = v["unitId"].as_str().ok_or(bad("Unit required"))?;
-    let customer = v["customerId"].as_str().ok_or(bad("Customer required"))?;
-    let expected = v["revision"].as_i64().ok_or(bad("Revision required"))?;
+    let input: MembershipSave = view(v);
+    let unit = input.unit_id.as_deref().ok_or(bad("Unit required"))?;
+    let customer = input
+        .customer_id
+        .as_deref()
+        .ok_or(bad("Customer required"))?;
+    let expected = input.revision.ok_or(bad("Revision required"))?;
     let member: Member =
-        serde_json::from_value(v["data"].clone()).map_err(|_| bad("Invalid employee policy"))?;
+        serde_json::from_value(input.data).map_err(|_| bad("Invalid employee policy"))?;
     member.validate()?;
     let found: Option<String> =
         sqlx::query_scalar("SELECT id FROM b2b_units WHERE tenant=$1 AND id=$2 FOR UPDATE")

@@ -1043,8 +1043,8 @@
     },
     "components/apps/src/service/app_builds.rs": {
       "status": "unproved",
-      "sha256": "b1c4d6eb58c2d8e84a5c1abdc9fc6c88093cc7b6555f8512291215d4e75eeaa8",
-      "review": "App Studio builds, autosaves, archive and staging moved into the apps component; behaviour unchanged"
+      "sha256": "03da941922ff50e1d6c89495dbaef5e52e9b58650f9a0572a68b37700345d345",
+      "review": "F28 typed request inputs: proof bindings unchanged"
     },
     "components/apps/src/service/app_preview.rs": {
       "status": "unproved",
@@ -1408,8 +1408,8 @@
     },
     "components/b2b/src/service/commands.rs": {
       "status": "unproved",
-      "sha256": "633ef7f5f41fad9eea5597cff8e9bc0a49258f890f7b306d1c2b95318452c340",
-      "review": "F8: payment providers, POS register and B2B commands moved into their components"
+      "sha256": "e3b7d6ca57d60fc4b7bbb918c84a742bb6a50637e50df9c302c640cdd32db178",
+      "review": "F28 typed request inputs: proof bindings unchanged"
     },
     "components/b2b/src/service/lists.rs": {
       "status": "unproved",
@@ -1433,8 +1433,8 @@
     },
     "components/b2b/src/service/quotes.rs": {
       "status": "unproved",
-      "sha256": "9c7cffba003d1eea4b77b83f1764b2c1b0f94625a91744bbc4f3764f4ff31f47",
-      "review": "Company quotes and their lifecycle rules move into b2b"
+      "sha256": "494a559000aae97e17044aab617ee0539c457be3e4f5c0252d0387af82d0b026",
+      "review": "F28 typed request inputs: proof bindings unchanged"
     },
     "components/b2b/src/service/requisition.rs": {
       "status": "unproved",
@@ -1458,8 +1458,8 @@
     },
     "components/b2b/src/store/organization.rs": {
       "status": "unproved",
-      "sha256": "25b3c033907cad6119952cf3cc2b85866c245c48411692ed0614ac082a71fdab",
-      "review": "F17: shared outbox and shop registry helpers in core; written reasons for foreign table access"
+      "sha256": "3efb7a9648051a67bde5f2692e7d4337f5f0bda40830a1839a3e79fb515d6915",
+      "review": "F28 typed request inputs: proof bindings unchanged"
     },
     "components/b2b/src/store/purchase.rs": {
       "status": "reviewed-binding",
@@ -3308,8 +3308,8 @@
     },
     "components/orders/src/http/transitions.rs": {
       "status": "reviewed-binding",
-      "sha256": "b2518f4a1f97bed5b6cb72ed275fe61364b6f3629f537d30bf488f0581b83f7c",
-      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
+      "sha256": "14d7b108ed781f0d34e85a600cd203f85340fb6b23f4c79972409c94396fc355",
+      "review": "F28 typed request inputs: proof bindings unchanged"
     },
     "components/orders/src/http.rs": {
       "status": "unproved",
@@ -3373,8 +3373,8 @@
     },
     "components/orders/src/store/receipts.rs": {
       "status": "unproved",
-      "sha256": "ecbb3abd6385ff660efa8722fe58822049b0efa75267c8cc0b29af950319236b",
-      "review": "F17: shared outbox and shop registry helpers in core; written reasons for foreign table access"
+      "sha256": "9bc8a8993bff53693965319b32c52a93b6435ecb34ca44c70015bdf1212721e5",
+      "review": "F28 typed request inputs: proof bindings unchanged"
     },
     "components/orders/src/store/redacted_reads.rs": {
       "status": "unproved",
@@ -4378,8 +4378,8 @@
     },
     "components/studio/src/service/manual_orders.rs": {
       "status": "unproved",
-      "sha256": "18e4c0f413017c049032f2b5f7d13c24f7a17dc16856bf6fbbbbba7d398ef4ca",
-      "review": "F10: manual orders, the merchant operation catalogue and catalogue intake moved into components"
+      "sha256": "d30f7596a985886a7d4d35f2d319c4496b4fc9d7ab3ef4db8616f05548dd9129",
+      "review": "F28 typed request inputs: proof bindings unchanged"
     },
     "components/studio/src/service/proposal_admission.rs": {
       "status": "unproved",

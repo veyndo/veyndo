@@ -335,7 +335,7 @@
         "sales_channels": "read: reads the sales channel document (kind, activity, catalogue scope) to admit the request channel inside the same statement (company.rs, company_logos.rs)"
       },
       "glob_imports": 0,
-      "untyped_access": 198,
+      "untyped_access": 178,
       "sql_outside_store": 3
     },
     "payments": {
@@ -465,7 +465,7 @@
         "products": "read: reads product rows in the same statement as its own data (prices, stock, visibility) (access.rs, catalog.rs, lists.rs, quick_order.rs)"
       },
       "glob_imports": 0,
-      "untyped_access": 108,
+      "untyped_access": 80,
       "sql_outside_store": 7
     },
     "pos": {
@@ -569,7 +569,7 @@
         "workspace_roles": "read: reads role definitions to recheck the job creator rights (app_host_reads.rs, job_callbacks.rs)"
       },
       "glob_imports": 0,
-      "untyped_access": 369,
+      "untyped_access": 358,
       "sql_outside_store": 18
     },
     "automation": {
@@ -762,7 +762,7 @@
         "translation_jobs": "write: the translation worker leases and advances translation jobs (translation_worker.rs, work_execution.rs, work_items.rs)"
       },
       "glob_imports": 0,
-      "untyped_access": 365,
+      "untyped_access": 354,
       "sql_outside_store": 23
     },
     "protocols": {

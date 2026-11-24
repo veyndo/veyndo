@@ -7,8 +7,10 @@ use crate::service::{
 use crate::store::access::{access, catalog_guard, identity, require};
 use crate::store::{catalog, organization};
 use crate::types::model::Context;
+use serde::Deserialize;
 use serde_json::{Value, json};
 use sqlx::Row;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::history_context::customer_context;
 use veyndo_core::shop_scope::tenant;
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad, conflict};
@@ -53,13 +55,27 @@ async fn save_features(
     permit(h, "settings.write")?;
     merchant(h)?;
     let mut data = json!(settings);
-    let config: Config = serde_json::from_value(v["data"].clone())
-        .map_err(|_| bad("Invalid B2B feature configuration"))?;
+    let input: CommandInput = view(v);
+    let config: Config =
+        serde_json::from_value(input.data).map_err(|_| bad("Invalid B2B feature configuration"))?;
     data["b2b"] = json!(config);
-    host.save(h, json!({"revision":v["revision"],"data":data}))
+    host.save(h, json!({"revision":input.revision,"data":data}))
         .await
 }
 
+/// The input of a procurement command: configuration, company, unit, purchase order and expected revision.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct CommandInput {
+    data: Value,
+    revision: Value,
+    #[serde(deserialize_with = "lenient")]
+    id: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    unit_id: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    purchase_order: Option<String>,
+}
 /// One company command after its merchant scope or the customer session, then the shop's B2B feature switch.
 pub async fn invoke(
     host: &dyn Procurement,
@@ -108,7 +124,7 @@ pub async fn invoke(
             let mut value = organization::detail(
                 a,
                 &tenant(h)?,
-                v["id"].as_str().ok_or(bad("Company required"))?,
+                &view::<CommandInput>(v).id.ok_or(bad("Company required"))?,
             )
             .await?;
             host.companies(h, std::slice::from_mut(&mut value)).await?;
@@ -156,8 +172,9 @@ async fn select(host: &dyn Procurement, a: &State, h: &RequestContext, v: &Value
     if c.data.pos_actor.is_some() {
         return Err(bad("POS carts cannot select procurement units"));
     }
-    let unit = v["unitId"].as_str().ok_or(bad("Unit required"))?;
-    let po = v["purchaseOrder"].as_str().unwrap_or("");
+    let input: CommandInput = view(v);
+    let unit = input.unit_id.as_deref().ok_or(bad("Unit required"))?;
+    let po = input.purchase_order.as_deref().unwrap_or("");
     if po.len() > 140 || po.chars().any(char::is_control) {
         return Err(bad("Invalid purchase order reference"));
     }
@@ -169,7 +186,7 @@ async fn select(host: &dyn Procurement, a: &State, h: &RequestContext, v: &Value
         .await?;
     c = stored(&row)?;
     host.cashier(h, &c)?;
-    if c.status != "open" || v["revision"].as_i64() != Some(c.revision) {
+    if c.status != "open" || input.revision.as_i64() != Some(c.revision) {
         return Err(conflict("Cart changed or is terminal"));
     }
     if c.data.b2b.as_ref().is_some_and(|b| b.quote_id.is_some()) {
@@ -240,13 +257,14 @@ pub async fn unit_orders(
     v: &Value,
 ) -> Result<Value> {
     let t = tenant(h)?;
-    let unit = v["unitId"].as_str().ok_or(bad("Unit required"))?;
+    let input: CommandInput = view(v);
+    let unit = input.unit_id.as_deref().ok_or(bad("Unit required"))?;
     let labels = host.labels(&t).await?;
     let mut tx = a.db.begin().await?;
     let customer = identity(&mut tx, h).await?;
     let policy = access(&mut tx, &t, unit, &customer).await?;
     require(&policy, "companyOrders")?;
-    let id = v["id"].as_str();
+    let id = input.id.as_deref();
     let rows=sqlx::query("SELECT data,created_at::text AS created FROM orders WHERE tenant=$1 AND data->'b2b'->>'unitId'=$2 AND ($3::text IS NULL OR id=$3) ORDER BY created_at DESC,id DESC LIMIT 100").bind(&t).bind(unit).bind(id).fetch_all(&mut *tx).await?;
     if id.is_some() && rows.is_empty() {
         return Err(Error(

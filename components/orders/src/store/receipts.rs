@@ -1,8 +1,10 @@
 //! Idempotent immutable invoices/delivery notes with transactional per-shop number ranges.
 use crate::ports::Payments;
 use crate::store::company;
+use serde::Deserialize;
 use serde_json::{Value, json};
 use sqlx::Row;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::shop_scope::header;
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad, conflict, hash, uid};
 
@@ -13,6 +15,21 @@ pub async fn list(a: &State, t: &str, id: &str) -> Result<Value> {
         json!({"elements":rows.iter().map(|r|json!({"id":r.get::<String,_>("id"),"kind":r.get::<String,_>("kind"),"number":r.get::<String,_>("number"),"locale":r.get::<String,_>("locale"),"createdAt":r.get::<String,_>("created"),"pdfPath":format!("/api/merchant/receipts/{}/pdf",r.get::<String,_>("id"))})).collect::<Vec<_>>() }),
     )
 }
+/// A receipt request: its idempotency key, kind, language, the order revision it was shown and what it refers to.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ReceiptRequest {
+    #[serde(deserialize_with = "lenient")]
+    request_key: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    kind: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    locale: Option<String>,
+    reference_id: Value,
+    delivery_index: Value,
+    revision: Value,
+}
+
 /// Issues one immutable receipt for the order, or returns the one the request key already issued.
 pub async fn create(
     payments: &dyn Payments,
@@ -22,29 +39,32 @@ pub async fn create(
     id: &str,
     v: &Value,
 ) -> Result<Value> {
-    let key = v["requestKey"]
-        .as_str()
+    let input: ReceiptRequest = view(v);
+    let key = input
+        .request_key
+        .as_deref()
         .or_else(|| header(h, "idempotency-key"))
         .filter(|s| (8..=128).contains(&s.len()))
         .ok_or(bad("requestKey must contain 8..128 characters"))?;
-    let kind = v["kind"]
-        .as_str()
+    let kind = input
+        .kind
+        .as_deref()
         .filter(|s| ["invoice", "delivery_note", "cancellation"].contains(s))
         .ok_or(bad("Invalid receipt kind"))?;
-    let locale = v["locale"].as_str().unwrap_or("en");
+    let locale = input.locale.as_deref().unwrap_or("en");
     if !["en", "de", "fr", "es"].contains(&locale) {
         return Err(bad("Unsupported receipt locale"));
     }
     // Preserve existing whole-order retry identities across deployment. Package
     // selection is additive and must never alias a historical whole-order note.
     let reference = if v.get("deliveryIndex").is_some() {
-        json!({"reference":v["referenceId"],"deliveryIndex":v["deliveryIndex"]})
+        json!({"reference":input.reference_id,"deliveryIndex":input.delivery_index})
     } else {
-        v["referenceId"].clone()
+        input.reference_id.clone()
     };
     let fingerprint = hash(&format!(
         "{id}:{kind}:{locale}:{}:{}",
-        v["revision"], reference
+        input.revision, reference
     ));
     let mut tx = a.db.begin().await?;
     sqlx::query("SELECT pg_advisory_xact_lock(hashtextextended($1,0))")
@@ -71,7 +91,7 @@ pub async fn create(
             "Historical invoices must be imported as original documents; no new invoice may be issued",
         ));
     }
-    if order["revision"] != v["revision"] {
+    if order["revision"] != input.revision {
         return Err(conflict("Order revision changed"));
     }
     let package = if let Some(index) = v.get("deliveryIndex") {
@@ -99,7 +119,8 @@ pub async fn create(
     )
     .await?;
     let reference = if kind == "cancellation" {
-        let ref_id = v["referenceId"]
+        let ref_id = input
+            .reference_id
             .as_str()
             .ok_or(bad("Original invoice reference required"))?;
         let original:Value=sqlx::query_scalar("SELECT snapshot FROM order_receipts WHERE tenant=$1 AND order_id=$2 AND id=$3 AND kind='invoice'").bind(t).bind(id).bind(ref_id).fetch_optional(&mut *tx).await?.ok_or(bad("Original invoice unavailable"))?;
@@ -131,12 +152,12 @@ pub async fn create(
     };
     let number = format!("{prefix}-{number:08}");
     let receipt = uid();
-    let mut snapshot = json!({"number":number,"kind":kind,"locale":locale,"seller":if let Some(ref original)=reference{original["seller"].clone()}else{seller},"order":if let Some(ref original)=reference{original["order"].clone()}else{order.clone()},"issuedAt":sqlx::query_scalar::<_,String>("SELECT now()::text").fetch_one(&mut *tx).await?,"referenceId":v["referenceId"],"referenceNumber":reference.map(|s|s["number"].clone())});
+    let mut snapshot = json!({"number":number,"kind":kind,"locale":locale,"seller":if let Some(ref original)=reference{original["seller"].clone()}else{seller},"order":if let Some(ref original)=reference{original["order"].clone()}else{order.clone()},"issuedAt":sqlx::query_scalar::<_,String>("SELECT now()::text").fetch_one(&mut *tx).await?,"referenceId":input.reference_id,"referenceNumber":reference.map(|s|s["number"].clone())});
     if let Some(instructions) = payment_instructions {
         snapshot["paymentInstructions"] = instructions;
     }
     if let Some(package) = package {
-        snapshot["deliveryIndex"] = v["deliveryIndex"].clone();
+        snapshot["deliveryIndex"] = input.delivery_index.clone();
         snapshot["delivery"] = package;
     }
     sqlx::query("INSERT INTO order_receipts(id,tenant,order_id,kind,number,locale,snapshot,request_key,fingerprint) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9)").bind(&receipt).bind(t).bind(id).bind(kind).bind(&number).bind(locale).bind(snapshot).bind(key).bind(fingerprint).execute(&mut *tx).await?;

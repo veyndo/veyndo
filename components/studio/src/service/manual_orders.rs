@@ -5,6 +5,7 @@ use sqlx::Row;
 use veyndo_app_model::declarations::identifier;
 use veyndo_checkout::service::checkout_options;
 use veyndo_checkout::store::cart_create::new_cart_context;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::shop_scope::{header, tenant};
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad, conflict};
 use veyndo_identity::{merchant, permit};
@@ -133,6 +134,31 @@ async fn review(reg: &dyn Register, a: &State, mut h: RequestContext, v: &Value)
         json!({"cart":quote,"policy":legal::invoke(a,&h,"privacy.policy",&json!({})).await?,"channelId":draft.channel_id,"locale":draft.locale}),
     )
 }
+/// The input of a manual order step; `complete` carries the reviewed cart, revision, exact total and consent.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ManualOrderStep {
+    #[serde(deserialize_with = "lenient")]
+    channel_id: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    locale: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    approve: Option<bool>,
+    #[serde(deserialize_with = "lenient")]
+    cart_token: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    customer_acknowledgement: Option<bool>,
+    policy_version: Value,
+    terms: Value,
+    digital_immediate: Value,
+    #[serde(deserialize_with = "lenient")]
+    revision: Option<i64>,
+    #[serde(deserialize_with = "lenient")]
+    total_minor: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    request_key: Option<String>,
+}
+
 /// One manual order step: `context`, `review` of a draft cart, or the approved `complete`.
 pub async fn invoke(
     reg: &dyn Register,
@@ -141,12 +167,14 @@ pub async fn invoke(
     operation: &str,
     v: &Value,
 ) -> Result<Value> {
-    let channel = v["channelId"]
-        .as_str()
+    let input: ManualOrderStep = view(v);
+    let channel = input
+        .channel_id
+        .as_deref()
         .ok_or(bad("Sales channel required"))?;
     let mut h = context(original, channel)?;
     let (cfg, _) = settings(a, &tenant(&h)?, channel).await?;
-    let locale = v["locale"].as_str().unwrap_or(&cfg.main_locale);
+    let locale = input.locale.as_deref().unwrap_or(&cfg.main_locale);
     h.insert(
         "x-commerce-locale",
         locale.parse().map_err(|_| bad("Invalid order language"))?,
@@ -178,13 +206,14 @@ pub async fn invoke(
     if operation == "review" {
         return Box::pin(review(reg, a, h, v)).await;
     }
-    if operation != "complete" || v["approve"] != true {
+    if operation != "complete" || input.approve != Some(true) {
         return Err(bad("Explicit reviewed order approval required"));
     }
     h.insert(
         "sw-context-token",
-        v["cartToken"]
-            .as_str()
+        input
+            .cart_token
+            .as_deref()
             .ok_or(bad("Reviewed cart required"))?
             .parse()
             .map_err(|_| bad("Invalid cart token"))?,
@@ -204,17 +233,17 @@ pub async fn invoke(
         ) {
             return Err(bad("Buyer payment required for this provider"));
         }
-        if v["customerAcknowledgement"] != true {
+        if input.customer_acknowledgement != Some(true) {
             return Err(bad(
                 "Confirm the customer's authorization before creating the order",
             ));
         }
-        legal::invoke(a,&h,"legal.accept",&json!({"policyVersion":v["policyVersion"],"terms":v["terms"],"digitalImmediate":v["digitalImmediate"]})).await?;
+        legal::invoke(a,&h,"legal.accept",&json!({"policyVersion":input.policy_version,"terms":input.terms,"digitalImmediate":input.digital_immediate})).await?;
     }
     h.insert(
         "x-commerce-cart-revision",
-        v["revision"]
-            .as_i64()
+        input
+            .revision
             .ok_or(bad("Reviewed revision required"))?
             .to_string()
             .parse()
@@ -222,8 +251,9 @@ pub async fn invoke(
     );
     h.insert(
         "x-commerce-total-minor",
-        v["totalMinor"]
-            .as_str()
+        input
+            .total_minor
+            .as_deref()
             .ok_or(bad("Reviewed exact total required"))?
             .parse()
             .map_err(|_| bad("Invalid exact total"))?,
@@ -231,8 +261,9 @@ pub async fn invoke(
     Box::pin(
         reg.checkout(
             &h,
-            v["requestKey"]
-                .as_str()
+            input
+                .request_key
+                .as_deref()
                 .ok_or(bad("Order request key required"))?,
         ),
     )

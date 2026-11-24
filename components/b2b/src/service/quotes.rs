@@ -4,8 +4,10 @@ use crate::ports::QuoteLifecycle;
 use crate::store::access::{access, guard_conn, identity, require};
 use crate::store::organization;
 use crate::types::model::OfferLine;
+use serde::Deserialize;
 use serde_json::{Value, json};
 use sqlx::Row;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::history_context::{context, customer_context};
 use veyndo_core::shop_scope::{header, tenant};
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad, conflict, uid};
@@ -60,10 +62,10 @@ pub async fn invoke(
         return Ok(json!({"elements":rows.iter().map(|r| wire(r, h, admin)).collect::<Vec<_>>()}));
     }
     if op == "quotes" {
-        let unit = v["unitId"].as_str().ok_or(bad("Unit required"))?;
-        let policy = access(&mut tx, &t, unit, customer.as_ref().unwrap()).await?;
+        let unit = view::<QuoteInput>(v).unit_id.ok_or(bad("Unit required"))?;
+        let policy = access(&mut tx, &t, &unit, customer.as_ref().unwrap()).await?;
         require(&policy, "quotes")?;
-        let rows=sqlx::query("SELECT id,unit_id,buyer_id,state,revision,data FROM b2b_quotes WHERE tenant=$1 AND unit_id=$2 AND buyer_id=$3 ORDER BY created_at DESC LIMIT 100").bind(&t).bind(unit).bind(customer).fetch_all(&mut *tx).await?;
+        let rows=sqlx::query("SELECT id,unit_id,buyer_id,state,revision,data FROM b2b_quotes WHERE tenant=$1 AND unit_id=$2 AND buyer_id=$3 ORDER BY created_at DESC LIMIT 100").bind(&t).bind(&unit).bind(customer).fetch_all(&mut *tx).await?;
         return Ok(json!({"elements":rows.iter().map(|r| wire(r, h, admin)).collect::<Vec<_>>()}));
     }
     if ["quote.get", "quote.current"].contains(&op) {
@@ -72,7 +74,8 @@ pub async fn invoke(
     if let Some(c) = &c {
         return request(tx, lifecycle, h, &t, (v, c, q)).await;
     }
-    let id = v["id"].as_str().ok_or(bad("Quote required"))?;
+    let input: QuoteInput = view(v);
+    let id = input.id.as_deref().ok_or(bad("Quote required"))?;
     if !admin {
         let metadata: Option<(String, String)> =
             sqlx::query_as("SELECT unit_id,buyer_id FROM b2b_quotes WHERE tenant=$1 AND id=$2")
@@ -92,7 +95,7 @@ pub async fn invoke(
     let buyer: String = r.get("buyer_id");
     let state: String = r.get("state");
     let revision: i64 = r.get("revision");
-    if v["revision"].as_i64() != Some(revision) {
+    if input.revision != Some(revision) {
         return Err(conflict("Quote changed; reload before editing"));
     }
     let mut data: Value = r.get("data");
@@ -104,8 +107,9 @@ pub async fn invoke(
                 h,
                 &data,
                 &state,
-                v["action"]
-                    .as_str()
+                input
+                    .action
+                    .as_deref()
                     .ok_or(bad("Transition action required"))?,
             )?;
             custom_state.as_str()
@@ -170,7 +174,7 @@ async fn cart_quotes(
     require(&policy, "quotes")?;
     let context = c.data.b2b.as_ref().unwrap();
     let id = if op == "quote.get" {
-        Some(v["id"].as_str().ok_or(bad("Quote required"))?)
+        Some(view::<QuoteInput>(v).id.ok_or(bad("Quote required"))?)
     } else {
         None
     };
@@ -193,7 +197,10 @@ async fn request(
     input: (&Value, &StoredCart, Option<Value>),
 ) -> Result<Value> {
     let (v, c, q) = input;
-    if c.status != "open" || c.data.items.is_empty() || v["revision"].as_i64() != Some(c.revision) {
+    if c.status != "open"
+        || c.data.items.is_empty()
+        || view::<QuoteInput>(v).revision != Some(c.revision)
+    {
         return Err(conflict("Review a current nonempty company cart first"));
     }
     let revision: Option<i64> = sqlx::query_scalar(
@@ -229,12 +236,40 @@ async fn request(
     tx.commit().await?;
     Ok(json!({"id":id,"revision":1,"state":"requested"}))
 }
+/// The input of a quote operation: unit, quote, expected revision, lifecycle action, offer and message.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct QuoteInput {
+    #[serde(deserialize_with = "lenient")]
+    unit_id: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    id: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    revision: Option<i64>,
+    #[serde(deserialize_with = "lenient")]
+    action: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    data: OfferInput,
+    #[serde(deserialize_with = "lenient")]
+    message: Option<String>,
+}
+
+/// A merchant offer: priced lines and an expiry.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct OfferInput {
+    lines: Value,
+    #[serde(deserialize_with = "lenient")]
+    valid_until: Option<String>,
+}
+
 /// Admits a merchant offer: exact requested items and quantities, bounded prices and an expiry within a year.
 async fn offer(tx: &mut Tx<'_>, v: &Value, data: &mut Value, state: &str) -> Result<()> {
     if !["requested", "offered"].contains(&state) {
         return Err(conflict("This quote cannot be revised"));
     }
-    let lines: Vec<OfferLine> = serde_json::from_value(v["data"]["lines"].clone())
+    let input: QuoteInput = view(v);
+    let lines: Vec<OfferLine> = serde_json::from_value(input.data.lines)
         .map_err(|_| bad("Expected offer lines with grossMinor in the quote currency"))?;
     let original: Vec<Item> = serde_json::from_value(data["items"].clone())
         .map_err(|_| bad("Invalid requested items"))?;
@@ -257,15 +292,13 @@ async fn offer(tx: &mut Tx<'_>, v: &Value, data: &mut Value, state: &str) -> Res
             "Offer must cover the exact requested items and quantities",
         ));
     }
-    let until = v["data"]["validUntil"]
-        .as_str()
-        .ok_or(bad("Offer expiry required"))?;
-    chrono::DateTime::parse_from_rfc3339(until)
+    let until = input.data.valid_until.ok_or(bad("Offer expiry required"))?;
+    chrono::DateTime::parse_from_rfc3339(&until)
         .map_err(|_| bad("Offer expiry must be an RFC3339 timestamp"))?;
     let valid: bool = sqlx::query_scalar(
         "SELECT $1::timestamptz>now() AND $1::timestamptz<now()+interval '1 year'",
     )
-    .bind(until)
+    .bind(&until)
     .fetch_one(&mut **tx)
     .await?;
     if !valid {
@@ -276,8 +309,8 @@ async fn offer(tx: &mut Tx<'_>, v: &Value, data: &mut Value, state: &str) -> Res
     Ok(())
 }
 /// The buyer's or merchant's bounded message.
-fn message(v: &Value) -> Result<&str> {
-    let s = v["message"].as_str().unwrap_or("");
+fn message(v: &Value) -> Result<String> {
+    let s = view::<QuoteInput>(v).message.unwrap_or_default();
     if s.len() > 4000
         || s.chars()
             .any(|c| c.is_control() && !['\n', '\t', '\r'].contains(&c))
