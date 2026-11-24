@@ -17,11 +17,9 @@ pub(crate) async fn backfill(tx: &mut Transaction<'_, Postgres>) -> Result<()> {
 }
 
 pub(crate) async fn connections(a: &App, tenant: &str) -> Result<Vec<Value>> {
-    let rows=sqlx::query("SELECT alias,channel,experience_alias,revision,app_id FROM hosted_frontends WHERE tenant=$1 ORDER BY alias")
-        .bind(tenant).fetch_all(&a.db).await?;
-    Ok(rows.iter().map(|r| {
-        let alias:String=r.get("alias"); let experience:String=r.get("experience_alias");
-        json!({"alias":alias,"channel":r.get::<String,_>("channel"),"experienceAlias":experience,"revision":r.get::<i64,_>("revision"),"appId":r.get::<Option<String>,_>("app_id"),"url":crate::shop_domains::links(&alias)["storefrontUrl"],"editorUrl":crate::shop_domains::frontend_editor::url(&experience,env::var("HOSTED_FRONTEND_EDITOR_URL").ok().as_deref())})
+    let rows = veyndo_app_platform::store::app_host_reads::connections(a, tenant).await?;
+    Ok(rows.into_iter().map(|c| {
+        json!({"alias":c.alias,"channel":c.channel,"experienceAlias":c.experience,"revision":c.revision,"appId":c.app,"url":crate::shop_domains::links(&c.alias)["storefrontUrl"],"editorUrl":crate::shop_domains::frontend_editor::url(&c.experience,env::var("HOSTED_FRONTEND_EDITOR_URL").ok().as_deref())})
     }).collect())
 }
 

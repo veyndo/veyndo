@@ -65,3 +65,14 @@ pub async fn validate_channel_config(
     }
     Ok(())
 }
+
+/// The stored document and revision of one sales channel.
+pub async fn stored(a: &veyndo_core::State, t: &str, id: &str) -> Result<Option<(Value, i64)>> {
+    use sqlx::Row;
+    let row = sqlx::query("SELECT data,revision FROM sales_channels WHERE tenant=$1 AND id=$2")
+        .bind(t)
+        .bind(id)
+        .fetch_optional(&a.db)
+        .await?;
+    Ok(row.map(|r| (r.get("data"), r.get("revision"))))
+}

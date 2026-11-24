@@ -550,6 +550,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/apps/src/service.rs](../components/apps/src/service.rs) | Process-side helpers of the app platform: pinned egress clients and local execution limits. |
 | [components/apps/src/store/action_log.rs](../components/apps/src/store/action_log.rs) | Bounded metadata-only app telemetry: who called which action with what outcome, never a payload. |
 | [components/apps/src/store/activation.rs](../components/apps/src/store/activation.rs) | Native current-actor/trust/connected-frontend/commerce admission for the shared package-state transaction; original configuration lock order retained. |
+| [components/apps/src/store/app_host_reads.rs](../components/apps/src/store/app_host_reads.rs) | Reads and guarded writes the server's app host needs: connected frontends, the package listing, submission throttling and the locked checks of a native job import. |
 | [components/apps/src/store/asset_references.rs](../components/apps/src/store/asset_references.rs) | Assets an app record refers to must belong to the same shop and fit the field. |
 | [components/apps/src/store/cart_configurations.rs](../components/apps/src/store/cart_configurations.rs) | Cart configurations stay bound to the package, rule revision and price they were made with. |
 | [components/apps/src/store/catalog_evidence.rs](../components/apps/src/store/catalog_evidence.rs) | Product-only app callback projects current catalog text and enabled translations in one snapshot. |

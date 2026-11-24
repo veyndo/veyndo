@@ -110,3 +110,22 @@ pub async fn parent_of(a: &State, tenant: &str, product: &str) -> Result<Option<
             .flatten(),
     )
 }
+
+/// A product and whether it is active (with an active parent) and not hidden in the channel.
+pub async fn in_channel(
+    a: &State,
+    t: &str,
+    id: &str,
+    channel: &str,
+) -> Result<Option<(Product, bool)>> {
+    let Some(row) = sqlx::query("SELECT * FROM products WHERE tenant=$1 AND id=$2")
+        .bind(t)
+        .bind(id)
+        .fetch_optional(&a.db)
+        .await?
+    else {
+        return Ok(None);
+    };
+    let visible:bool=sqlx::query_scalar("SELECT p.active AND (p.parent_id IS NULL OR EXISTS(SELECT 1 FROM products parent WHERE parent.tenant=p.tenant AND parent.id=p.parent_id AND parent.active)) AND NOT EXISTS(SELECT 1 FROM product_channel_visibility v WHERE v.tenant=p.tenant AND v.channel_id=$3 AND NOT v.visible AND (v.product_id=p.id OR v.product_id=p.parent_id)) FROM products p WHERE p.tenant=$1 AND p.id=$2").bind(t).bind(id).bind(channel).fetch_one(&a.db).await?;
+    Ok(Some((product(&row), visible)))
+}

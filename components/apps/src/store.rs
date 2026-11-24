@@ -1,6 +1,7 @@
 //! SQL of the apps component.
 pub mod action_log;
 pub mod activation;
+pub mod app_host_reads;
 pub mod asset_references;
 pub mod cart_configurations;
 pub mod catalog_evidence;

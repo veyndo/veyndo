@@ -36,28 +36,19 @@ pub(super) async fn execute(
         v,
     )?;
     let id = v["channelId"].as_str().unwrap();
-    let row = sqlx::query("SELECT data,revision FROM sales_channels WHERE tenant=$1 AND id=$2")
-        .bind(&t)
-        .bind(id)
-        .fetch_optional(&a.db)
+    let (c, channel_revision) = veyndo_marketing::store::channel_config::stored(a, &t, id)
         .await?
         .ok_or(Error(StatusCode::NOT_FOUND, "Channel unavailable".into()))?;
-    let c: Value = row.get("data");
     if c["kind"] != "marketplace" || c["active"] != true || c["visibility"] == "private" {
         return Err(conflict("Marketplace channel must be active and public"));
     }
     let (cfg, rev) = commerce::scoped_config(a, &t, id).await?;
-    let mut result = json!({"id":id,"revision":row.get::<i64,_>("revision"),"data":c,"mainLocale":cfg.main_locale,"currencies":cfg.currencies,"settingsRevision":rev});
+    let mut result = json!({"id":id,"revision":channel_revision,"data":c,"mainLocale":cfg.main_locale,"currencies":cfg.currencies,"settingsRevision":rev});
     if op == "channel_product" {
         let pid = v["id"].as_str().ok_or(bad("Product ID required"))?;
-        let row = sqlx::query("SELECT * FROM products WHERE tenant=$1 AND id=$2")
-            .bind(&t)
-            .bind(pid)
-            .fetch_optional(&a.db)
+        let (p, visible) = veyndo_catalog::store::products::in_channel(a, &t, pid, id)
             .await?
             .ok_or(Error(StatusCode::NOT_FOUND, "Product unavailable".into()))?;
-        let p = product(&row);
-        let visible:bool=sqlx::query_scalar("SELECT p.active AND (p.parent_id IS NULL OR EXISTS(SELECT 1 FROM products parent WHERE parent.tenant=p.tenant AND parent.id=p.parent_id AND parent.active)) AND NOT EXISTS(SELECT 1 FROM product_channel_visibility v WHERE v.tenant=p.tenant AND v.channel_id=$3 AND NOT v.visible AND (v.product_id=p.id OR v.product_id=p.parent_id)) FROM products p WHERE p.tenant=$1 AND p.id=$2").bind(&t).bind(pid).bind(id).fetch_one(&a.db).await?;
         let selected = c["productIds"]
             .as_array()
             .ok_or(bad("Invalid channel catalog"))?;

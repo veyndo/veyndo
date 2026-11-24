@@ -1186,6 +1186,11 @@
       "sha256": "f90abcb798f53a86137fcb256f98dd1807ee0f3445a97df5ad7f4106f9639db1",
       "review": "Job callbacks, completion evidence, package verification, installation, activation and upgrade review moved into the apps component behind host ports without behavior change"
     },
+    "components/apps/src/store/app_host_reads.rs": {
+      "status": "unproved",
+      "sha256": "10fead8bc65b018ba6ddc4397be24a487142ae32695116e040690c1cd38db5bb",
+      "review": "F12: app host SQL moved into component stores; no mutual component pair remains"
+    },
     "components/apps/src/store/asset_references.rs": {
       "status": "unproved",
       "sha256": "ff0ab16afc22e4716b2ea0fc7faa2ccd117c4caebd9399714dd082959e612835",
@@ -1238,8 +1243,8 @@
     },
     "components/apps/src/store/evidence.rs": {
       "status": "unproved",
-      "sha256": "de1713a59a4cde01097ffe4d78dcf6a6dadb9d5005839437cb7a2801e96e1624",
-      "review": "Batch B: commerce hooks, cart contributions and app source ingestion move into apps"
+      "sha256": "1bd519c0916b69a1729c4acb162fc234b8b4bdf71adc539c399da4416da91a61",
+      "review": "F12: app host SQL moved into component stores; no mutual component pair remains"
     },
     "components/apps/src/store/extension_filter.rs": {
       "status": "unproved",
@@ -1363,8 +1368,8 @@
     },
     "components/apps/src/store.rs": {
       "status": "unproved",
-      "sha256": "a8074be4fec735ee6fda2760be95ae4aa7b3c0214668bb90614e95736ee53d73",
-      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
+      "sha256": "f6a4523294578cb5a30a22c7e828508b2ce832b4ce65f274d6469c0ccd20b7e0",
+      "review": "F12: app host SQL moved into component stores; no mutual component pair remains"
     },
     "components/b2b/src/domain/contract.rs": {
       "status": "unproved",
@@ -1733,8 +1738,8 @@
     },
     "components/catalog/src/store/products.rs": {
       "status": "unproved",
-      "sha256": "35a08955fe883d907d21223e0ab413dd653c55219b5cd37496c7a81c852b86d8",
-      "review": "Storefront catalogue reads and public attachments moved into components/catalog; no rule changed"
+      "sha256": "2b3584a63472187054be958c50653822f13c3068f3b0705ec27a3a289c6efc64",
+      "review": "F12: app host SQL moved into component stores; no mutual component pair remains"
     },
     "components/catalog/src/store/reviews.rs": {
       "status": "unproved",
@@ -2253,8 +2258,8 @@
     },
     "components/customers/src/store/customers.rs": {
       "status": "unproved",
-      "sha256": "32760f65281f1c7256d7f824cd0be7d82285bdbb26fc1278e63c3b1a3dd702d6",
-      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
+      "sha256": "0ef3afc86b870f5c52cf0c2e89c9cef7b6565fc57a962b96910a9f32a4c3e9bc",
+      "review": "F12: app host SQL moved into component stores; no mutual component pair remains"
     },
     "components/customers/src/store/sessions.rs": {
       "status": "unproved",
@@ -3093,8 +3098,8 @@
     },
     "components/marketing/src/store/channel_config.rs": {
       "status": "unproved",
-      "sha256": "c611f47083fc6b43efc5aa93e5c3af94e13040d875799ab757d90b5fd120014d",
-      "review": "Flow pipeline and promotion types moved into components/marketing; kernel call sites unchanged"
+      "sha256": "a3c99a7c83b5e3e1eae24258dc786f14459e57b95c221cfdfca59cd7530b9496",
+      "review": "F12: app host SQL moved into component stores; no mutual component pair remains"
     },
     "components/marketing/src/store/configuration_lifecycle.rs": {
       "status": "unproved",
@@ -4108,8 +4113,8 @@
     },
     "components/shop/src/store/settings.rs": {
       "status": "unproved",
-      "sha256": "5ba6fe009f87d0a73595f3783717eb00f6fdf993122647c8e727bc028ae64d37",
-      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
+      "sha256": "90c2100ce089029ef963499ba4d45d1e974f58f78afd42bb310165b27645ac78",
+      "review": "F12: app host SQL moved into component stores; no mutual component pair remains"
     },
     "components/shop/src/store.rs": {
       "status": "unproved",
@@ -6353,8 +6358,8 @@
     },
     "src/apps/core_callbacks.rs": {
       "status": "unproved",
-      "sha256": "9a866991178e43fa199b458749093f33a9205fa3d8115766aa0ad4a52d711a95",
-      "review": "Batch F3: bundled app contract tests, the app view read and the catalogue evidence callback moved into the apps component"
+      "sha256": "9049cf029320333b616404d6ef19472eef326a2b2350995b2da262b2bd579e81",
+      "review": "F12: app host SQL moved into component stores; no mutual component pair remains"
     },
     "src/apps/core_documents.rs": {
       "status": "unproved",
@@ -6363,8 +6368,8 @@
     },
     "src/apps/core_exchange.rs": {
       "status": "unproved",
-      "sha256": "b312ae2547151bfa9cf1d008ff60ebad603008da6ee20ad02e226d1c524acc30",
-      "review": "Reviewed generic tenant-scoped paid external-order/channel exchange, native exact source amounts, existing stock/customer/document/outbox ownership, app capability/FK/ID lookup boundaries and app-owned bounded seller protocols/jobs; local provider PostgreSQL replay restart isolation and UI regressions. Async provider integration remains unproved."
+      "sha256": "adcdd202af013e5554383137cd5bf7819a984631cd947cd8d3d41a49ea16e443",
+      "review": "F12: app host SQL moved into component stores; no mutual component pair remains"
     },
     "src/apps/core_extensions.rs": {
       "status": "unproved",
@@ -6403,8 +6408,8 @@
     },
     "src/apps/evidence.rs": {
       "status": "unproved",
-      "sha256": "d27fa939181aa72e1d6439493787c66f8aa01d07f60d2a1d1cadcb44b23aa499",
-      "review": "Batch F5: inference component for crates/cognition, crate-cycle gate, core paths for history attribution and environment parent"
+      "sha256": "ed2c6212f338275584b479c4024af555ee79f66e40a24e1da3ad78d0e106640a",
+      "review": "F12: app host SQL moved into component stores; no mutual component pair remains"
     },
     "src/apps/evidence_routes.rs": {
       "status": "unproved",
@@ -6423,8 +6428,8 @@
     },
     "src/apps/hosted.rs": {
       "status": "unproved",
-      "sha256": "286f9ce778ddf91cf7238a6ff8043ef620c2d80aa3bdca282f14ed4a7b0f3f13",
-      "review": "Cart configuration checks, saved selections, the purchase projection and hosted app installation moved into the apps component without behavior change"
+      "sha256": "bf74bbad669fb92414d3fb5296c4895c47e57f3cded448f5dc98f769f6727c10",
+      "review": "F12: app host SQL moved into component stores; no mutual component pair remains"
     },
     "src/apps/input_schema.rs": {
       "status": "unproved",
@@ -6438,8 +6443,8 @@
     },
     "src/apps/job_import.rs": {
       "status": "unproved",
-      "sha256": "ea1d8e6aa750b7cd0a6b9e384613aba3b9959827b6c77745fc86a684ec4547a1",
-      "review": "Batch F5: inference component for crates/cognition, crate-cycle gate, core paths for history attribution and environment parent"
+      "sha256": "43ea5bb7c4ed10173ab09f8c5bf283fc5013bee60923c7d50019c020e4d1104b",
+      "review": "F12: app host SQL moved into component stores; no mutual component pair remains"
     },
     "src/apps/jobs.rs": {
       "status": "unproved",
@@ -6508,8 +6513,8 @@
     },
     "src/apps/routes.rs": {
       "status": "unproved",
-      "sha256": "c8db125f7d852622fa696cbf076e0ab5d825c6e471607957b200d79dc6647b9f",
-      "review": "App discovery, package activation and consent adapter moved into the apps component; behaviour unchanged"
+      "sha256": "6e9144cc71d5c1a3323bfa408bfc984756f3a9ae5612723ee65920b1beb228da",
+      "review": "F12: app host SQL moved into component stores; no mutual component pair remains"
     },
     "src/apps/schedules.rs": {
       "status": "unproved",
@@ -6538,8 +6543,8 @@
     },
     "src/apps/submissions.rs": {
       "status": "reviewed-binding",
-      "sha256": "4dbe3006a352cddccea244270e0fc99c54d2441d6dc80b0f518303fa68425719",
-      "review": "Batch F5: inference component for crates/cognition, crate-cycle gate, core paths for history attribution and environment parent"
+      "sha256": "cd76de2fae3dfc9315ae22469cf6dd1b7052224cdc4217373ffe0b8d3e53501b",
+      "review": "F12: app host SQL moved into component stores; no mutual component pair remains"
     },
     "src/apps/surface_grants.rs": {
       "status": "unproved",

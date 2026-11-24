@@ -1,5 +1,6 @@
 //! Reviewed job records use current creator rights and a locked live package; private targets never become app credentials.
 use super::*;
+use veyndo_app_platform::store::app_host_reads;
 // Retain a connection for the native owner even on the supported two-connection pool.
 // This is process admission, not a claim of fleet-wide throughput isolation.
 static IMPORT_WRITE: tokio::sync::Semaphore = tokio::sync::Semaphore::const_new(1);
@@ -131,31 +132,19 @@ pub(super) async fn execute(
     // The native coordinator must read and lock an admitted child environment.
     // This bounded privileged transaction never leaves Core; every query binds live tenant/job/actor.
     let mut tx = a.db.begin_privileged().await?;
-    sqlx::query("SELECT set_config('rac.tenant',$1,true)")
-        .bind(&live)
-        .execute(&mut *tx)
-        .await?;
-    let row=sqlx::query("SELECT actor,action,package_digest,input FROM app_jobs WHERE tenant=$1 AND app=$2 AND id=$3 AND status='running' AND lease=$4 AND lease_until>now() AND now()<started_at+interval '30 minutes' FOR SHARE").bind(&live).bind(&m.id).bind(v["id"].as_str()).bind(v["lease"].as_str()).fetch_optional(&mut *tx).await?.ok_or(conflict("Job is cancelled, expired or has another lease"))?;
-    if row.get::<String, _>("package_digest") != approval::canonical_digest(m) {
+    let (actor, action_name, package_digest, intent) = app_host_reads::claimed_job(
+        &mut tx,
+        &live,
+        (&m.id, v["id"].as_str(), v["lease"].as_str()),
+    )
+    .await?;
+    if package_digest != approval::canonical_digest(m) {
         return Err(conflict("Reviewed job package changed"));
     }
-    let actor: String = row.get("actor");
-    sqlx::query("SELECT m.user_id FROM memberships m JOIN workspace_roles r ON r.tenant=m.tenant AND r.id=m.role WHERE m.tenant=$1 AND m.user_id=$2 FOR SHARE OF m,r").bind(&live).bind(&actor).fetch_optional(&mut *tx).await?.ok_or(Error(StatusCode::FORBIDDEN,"Job creator no longer has access".into()))?;
-    let grants = sqlx::query(
-        "SELECT role,permissions FROM membership_grants WHERE tenant=$1 AND user_id=$2 AND active",
-    )
-    .bind(&live)
-    .bind(&actor)
-    .fetch_optional(&mut *tx)
-    .await?
-    .ok_or(Error(
-        StatusCode::FORBIDDEN,
-        "Job creator no longer has access".into(),
-    ))?;
+    let (role, rights) = app_host_reads::creator_grants(&mut tx, &live, &actor).await?;
     let mut identity = RequestContext::new();
     identity.principal.user = Some(actor.clone());
-    identity.principal.role = Some(grants.get("role"));
-    let rights: Value = grants.get("permissions");
+    identity.principal.role = Some(role);
     identity.principal.permissions = (!rights.is_null()).then(|| rights.to_string());
     auth::permit(&identity, "apps.manage")?;
     auth::permit(&identity, credentials::scope(capability).unwrap())?;
@@ -168,14 +157,13 @@ pub(super) async fn execute(
     let action = m
         .actions
         .iter()
-        .find(|x| x.name == row.get::<String, _>("action") && x.handler == "job")
+        .find(|x| x.name == action_name && x.handler == "job")
         .ok_or(conflict("Job action removed"))?;
     auth::permit(
         &identity,
         action.permission.as_deref().unwrap_or("apps.manage"),
     )?;
     gateway::additional_permissions(&identity, action)?;
-    let intent: Value = row.get("input");
     if intent["operation"] == "reconcile" && !inspect {
         return Err(conflict(
             "Read-only reconciliation does not authorize native writes",
@@ -197,7 +185,7 @@ pub(super) async fn execute(
         .ok_or(bad("Reviewed target required"))?;
     if ["products", "categories", "pages", "assets"].contains(&kind) {
         auth::permit(&identity, "environments.manage")?;
-        sqlx::query("SELECT tenant FROM shop_environments WHERE tenant=$1 AND live_tenant=$2 AND preview_owner IS NULL FOR SHARE").bind(target).bind(&live).fetch_optional(&mut *tx).await?.ok_or(Error(StatusCode::FORBIDDEN,"Job target is not an admitted private environment".into()))?;
+        app_host_reads::private_target(&mut tx, target, &live).await?;
     } else if target != live {
         return Err(Error(
             StatusCode::FORBIDDEN,

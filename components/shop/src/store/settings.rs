@@ -76,3 +76,23 @@ pub async fn auto_refresh(a: &veyndo_core::State, cursor: &str) -> Result<Vec<(S
         .map(|r| (r.get("tenant"), r.get("revision")))
         .collect())
 }
+
+/// The stored basis settings document under an update lock, exactly as saved.
+pub async fn basis_for_update(tx: &mut sqlx::PgConnection, t: &str) -> Result<Value> {
+    Ok(
+        sqlx::query_scalar("SELECT data FROM commerce_settings WHERE tenant=$1 FOR UPDATE")
+            .bind(t)
+            .fetch_one(tx)
+            .await?,
+    )
+}
+
+/// Replaces the basis settings document and advances its revision.
+pub async fn replace_basis(tx: &mut sqlx::PgConnection, t: &str, data: &Value) -> Result<()> {
+    sqlx::query("UPDATE commerce_settings SET data=$1,revision=revision+1 WHERE tenant=$2")
+        .bind(data)
+        .bind(t)
+        .execute(tx)
+        .await?;
+    Ok(())
+}

@@ -59,19 +59,25 @@ async fn app_list(State(a): State<App>, h: RequestContext) -> Result<Json<Value>
     let t = merchant(&a, &h)?;
     let (config, _) = commerce::config(&a, &t).await?;
     let connections = hosted::connections(&a, &t).await?;
-    let rows=sqlx::query("SELECT id,version,manifest,active,revision,digest FROM app_packages WHERE tenant=$1 ORDER BY id").bind(t).fetch_all(&a.db).await?;
+    let rows = veyndo_app_platform::store::app_host_reads::packages(&a, &t).await?;
     let packages: Vec<Value> = rows
-        .iter()
-        .map(|r| {
-            let id: String = r.get("id");
+        .into_iter()
+        .map(|mut r| {
+            let id = r["id"].as_str().unwrap_or_default().to_owned();
             let connected: Vec<&Value> = connections.iter().filter(|f| f["appId"] == id).collect();
-            json!({
-                "id":id, "version":r.get::<String,_>("version"),
-                "manifest":r.get::<Value,_>("manifest"), "uiUrl":serde_json::from_value::<Manifest>(r.get("manifest")).ok().filter(|m|approval::approved(m,&crate::runtime_config::get().services[&id])).and_then(|_|gateway::ui_url(&id)),
-                "active":r.get::<bool,_>("active"), "revision":r.get::<i64,_>("revision"),
-                "digest":r.get::<String,_>("digest"), "connections":connected,
-                "managedBy":if connected.is_empty() { None } else { Some("experience") }
-            })
+            r["uiUrl"] = json!(
+                serde_json::from_value::<Manifest>(r["manifest"].clone())
+                    .ok()
+                    .filter(|m| approval::approved(m, &crate::runtime_config::get().services[&id]))
+                    .and_then(|_| gateway::ui_url(&id))
+            );
+            r["connections"] = json!(connected);
+            r["managedBy"] = json!(if connected.is_empty() {
+                None
+            } else {
+                Some("experience")
+            });
+            r
         })
         .collect();
     Ok(Json(json!({
@@ -92,12 +98,10 @@ async fn app_install(
     let result = install(&a, &t, m).await?;
     if v["builtIn"] == "paypal" {
         let mut tx = a.db.begin().await?;
-        let row = sqlx::query("SELECT data FROM commerce_settings WHERE tenant=$1 FOR UPDATE")
-            .bind(&t)
-            .fetch_one(&mut *tx)
-            .await?;
-        let mut config: commerce::Settings =
-            serde_json::from_value(row.get("data")).map_err(|_| bad("Invalid settings"))?;
+        let mut config: commerce::Settings = serde_json::from_value(
+            veyndo_shop::store::settings::basis_for_update(&mut tx, &t).await?,
+        )
+        .map_err(|_| bad("Invalid settings"))?;
         let live = payments::environment() == "live";
         let method = if live {
             "paypal-live"
@@ -118,11 +122,7 @@ async fn app_install(
                 provider_method: None,
                 capture_mode: None,
             });
-            sqlx::query("UPDATE commerce_settings SET data=$1,revision=revision+1 WHERE tenant=$2")
-                .bind(json!(config))
-                .bind(&t)
-                .execute(&mut *tx)
-                .await?;
+            veyndo_shop::store::settings::replace_basis(&mut tx, &t, &json!(config)).await?;
         }
         tx.commit().await?;
     }

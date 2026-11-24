@@ -229,12 +229,8 @@ async fn execute(
     )?;
     let mut arguments = v;
     if operation == "customer" {
-        let email: Option<String> =
-            sqlx::query_scalar("SELECT email FROM customers WHERE tenant=$1 AND id=$2")
-                .bind(&t)
-                .bind(arguments["id"].as_str())
-                .fetch_optional(&a.db)
-                .await?;
+        let email =
+            veyndo_customers::store::customers::email_of(a, &t, arguments["id"].as_str()).await?;
         arguments["id"] =
             json!(email.ok_or(Error(StatusCode::NOT_FOUND, "Customer not found".into()))?);
     }

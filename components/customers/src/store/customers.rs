@@ -144,3 +144,14 @@ pub async fn seed_demo_profile(
     sqlx::query("UPDATE customers SET profile=$1 WHERE tenant=$2 AND email='buyer@example.test' AND profile='{}'::jsonb").bind(profile).bind(t).execute(conn).await?;
     Ok(())
 }
+
+/// The email of a customer by ID.
+pub async fn email_of(a: &State, t: &str, id: Option<&str>) -> Result<Option<String>> {
+    Ok(
+        sqlx::query_scalar("SELECT email FROM customers WHERE tenant=$1 AND id=$2")
+            .bind(t)
+            .bind(id)
+            .fetch_optional(&a.db)
+            .await?,
+    )
+}

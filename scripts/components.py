@@ -245,6 +245,9 @@ def findings(tree):
             problems.append(f'{name} no longer accesses table {table}; remove it from "foreign_tables"')
     for a, b in sorted(crate_cycles(tree)):
         problems.append(f'component crates {a} and {b} depend on each other; reduce the pair to one direction')
+    # Server files reach components only from the host; a pair through them is refused like a crate cycle.
+    for a, b in sorted({tuple(sorted(pair)) for pair in edges if (pair[1], pair[0]) in edges}):
+        problems.append(f'components {a} and {b} depend on each other through server files; reduce the pair to one direction')
     return problems, edges, use, table_owner
 
 
@@ -355,6 +358,11 @@ def main(argv=None):
     broken['components']['inference']['sources'].remove('crates/cognition')
     broken['components']['intelligence']['sources'].append('crates/cognition')
     assert any('depend on each other' in line for line in findings(Tree(mapping=broken))[0]), 'a crate cycle must fail'
+    broken = json.loads(json.dumps(tree.map))
+    # Counting a host file for a domain component again would reintroduce a pair through server files.
+    broken['components']['host']['sources'].remove('src/apps')
+    broken['components']['apps']['sources'].append('src/apps')
+    assert any('through server files' in line for line in findings(Tree(mapping=broken))[0]), 'a pair through server files must fail'
     cycles = len({tuple(sorted(pair)) for pair in edges if (pair[1], pair[0]) in edges})
     foreign = sum(len(row.get('foreign_tables', [])) for row in tree.map['components'].values())
     print(f'PASS {len(tree.map["components"])} components own {sum(p.suffix == ".rs" for p in tree.files.values())} Rust sources and '

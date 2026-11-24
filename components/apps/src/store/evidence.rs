@@ -124,3 +124,18 @@ pub async fn purge_sources(a: &State, t: &str, app: &str, cursor: i64) -> Result
     tx.commit().await?;
     Ok(())
 }
+
+/// Up to 100 active packages of the configured services that may write knowledge, least recently polled first, with their export cursor.
+pub async fn export_candidates(a: &State, ids: &[String]) -> Result<Vec<(String, String, i64)>> {
+    let rows=sqlx::query("SELECT p.tenant,p.id,coalesce(c.cursor,0) AS cursor FROM app_packages p LEFT JOIN app_export_cursors c ON c.tenant=p.tenant AND c.app=p.id WHERE p.active AND p.id=ANY($1) AND p.manifest->'permissions' ? 'knowledge.write' ORDER BY coalesce(c.last_poll,'epoch'),p.tenant,p.id LIMIT 100").bind(ids).fetch_all(&a.db).await?;
+    Ok(rows
+        .iter()
+        .map(|r| (r.get("tenant"), r.get("id"), r.get("cursor")))
+        .collect())
+}
+
+/// Records that the app's exports were polled now.
+pub async fn touch_export(a: &State, t: &str, app: &str) -> Result<()> {
+    sqlx::query("INSERT INTO app_export_cursors(tenant,app,last_poll) VALUES($1,$2,now()) ON CONFLICT(tenant,app) DO UPDATE SET last_poll=now()").bind(t).bind(app).execute(&a.db).await?;
+    Ok(())
+}

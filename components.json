@@ -513,7 +513,6 @@
       "title": "App packages, managed data, UI surfaces, Wasm extensions and the app builder",
       "sources": [
         "components/apps",
-        "src/apps",
         "crates/apps"
       ],
       "tables": [
@@ -545,7 +544,6 @@
         "catalog",
         "checkout",
         "core",
-        "host",
         "identity",
         "inference",
         "intelligence",
@@ -579,9 +577,9 @@
         "tenants",
         "workspace_roles"
       ],
-      "glob_imports": 41,
-      "untyped_access": 423,
-      "sql_outside_store": 27
+      "glob_imports": 0,
+      "untyped_access": 369,
+      "sql_outside_store": 20
     },
     "automation": {
       "title": "Deterministic rule evaluation and flow graphs",
@@ -787,7 +785,6 @@
       ],
       "tables": [],
       "uses": [
-        "apps",
         "catalog",
         "checkout",
         "core",
@@ -813,6 +810,7 @@
         "src/agent_host.rs",
         "src/agent_runs",
         "src/agent_runs.rs",
+        "src/apps",
         "src/assets",
         "src/auth",
         "src/b2b",
@@ -950,8 +948,8 @@
         "products",
         "tenants"
       ],
-      "glob_imports": 166,
-      "untyped_access": 293,
+      "glob_imports": 207,
+      "untyped_access": 352,
       "sql_outside_store": 11
     },
     "connectors": {
