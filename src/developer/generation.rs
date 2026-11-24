@@ -29,7 +29,7 @@ pub(super) async fn generate(a: &App, t: &str, h: &RequestContext, v: &Value) ->
     }
     let choice: Choice = serde_json::from_value(v["inference"].clone())
         .map_err(|_| bad("Select an inference provider"))?;
-    let _slot = a.inference_slots.clone().try_acquire_owned().map_err(|_| {
+    let _slot = a.models.slots.clone().try_acquire_owned().map_err(|_| {
         Error(
             StatusCode::TOO_MANY_REQUESTS,
             "Inference capacity busy".into(),
@@ -72,6 +72,7 @@ pub(super) async fn generate(a: &App, t: &str, h: &RequestContext, v: &Value) ->
     let mut repair = String::new();
     for attempt in 0..2 {
         let out = a
+            .models
             .inference
             .structured_with_images(
                 Some(&choice),

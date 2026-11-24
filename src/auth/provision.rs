@@ -164,7 +164,7 @@ pub(crate) async fn create_workspace(
     }
     let sandbox = provision(&mut tx, user, slug, name, demo).await?;
     tx.commit().await?;
-    a.sandboxes.insert(slug.into(), Arc::new(sandbox));
+    a.apps.sandboxes.insert(slug.into(), Arc::new(sandbox));
     for p in prototype_products(&a, slug).await? {
         knowledge::sync_product_scoped(&a.db, slug, &json!(p)).await?;
     }

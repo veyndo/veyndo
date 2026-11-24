@@ -27,7 +27,7 @@ pub(crate) async fn create(
     )
     .map_err(|_| bad("Invalid translation provider"))?;
     let products = selection::parse(v.get("productIds"))?;
-    veyndo_studio::service::work_execution::admit_provider(&a.inference, &choice).await?;
+    veyndo_studio::service::work_execution::admit_provider(&a.models.inference, &choice).await?;
     let mut tx = a.db.begin().await?;
     let id = Uuid::new_v4().to_string();
     veyndo_studio::service::work_execution::enqueue_translation(

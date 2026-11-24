@@ -11,6 +11,7 @@ pub(crate) async fn experience(
     h: RequestContext,
     Json(v): Json<Value>,
 ) -> Result<Json<Value>> {
-    let secret = env::var("PLATFORM_SECRET_KEY").unwrap_or_else(|_| a.token.to_string());
+    let secret =
+        env::var("PLATFORM_SECRET_KEY").unwrap_or_else(|_| a.identity.bootstrap_token.to_string());
     veyndo_intelligence::http::experience::experience(&a, &secret, h, v).await
 }

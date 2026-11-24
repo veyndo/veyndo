@@ -17,7 +17,7 @@ pub(crate) async fn authenticate(a: &App, h: &RequestContext) -> Result<String> 
     let (user, _, scopes) = auth::resolve_credential(a, token).await?;
     let active = veyndo_shop::store::operators::grant(a, &user).await?;
     if !verified_kernel::platform_admissible(
-        scopes.is_none() && token != *a.token,
+        scopes.is_none() && token != *a.identity.bootstrap_token,
         active.is_some(),
         active.unwrap_or(false),
     ) {

@@ -64,7 +64,6 @@ mod surface_registry;
 pub(crate) mod surfaces;
 mod ui_bundles;
 mod ui_documents;
-pub(crate) use service_limits::ServiceLimits;
 pub(crate) use ui_documents::SandboxedAppDocument;
 mod observability;
 mod planning;

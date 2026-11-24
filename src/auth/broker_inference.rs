@@ -41,7 +41,8 @@ pub(crate) async fn generate(State(a): State<App>, Json(v): Json<Value>) -> Resu
         return Err(bad("Invalid bounded JSON schema"));
     }
     let _permit = a
-        .inference_slots
+        .models
+        .slots
         .clone()
         .try_acquire_owned()
         .map_err(|_| Error(StatusCode::TOO_MANY_REQUESTS, "Model capacity busy".into()))?;
@@ -55,6 +56,7 @@ pub(crate) async fn generate(State(a): State<App>, Json(v): Json<Value>) -> Resu
     let _cluster =
         crate::performance::cluster_lease::Lease::acquire(&a, "__identity", "model", 4).await?;
     let output = a
+        .models
         .inference
         .structured_with_images(None, system, user, &c["schema"], &images)
         .await

@@ -3,7 +3,7 @@ use crate::foundation::App;
 use crate::routes::router;
 use crate::{
     apps, currencies, demo_catalog, marketing, migrations, performance, platform, runtime_config,
-    sandbox_cache, workers,
+    workers,
 };
 use crate::{capabilities, documents};
 use sqlx::postgres::PgPoolOptions;
@@ -68,24 +68,27 @@ pub(crate) async fn bootstrap() -> App {
         .expect("Cluster database connection budget exhausted");
     let a = App {
         _connection_budget: Arc::new(connection_budget),
-        inference_slots: Arc::new(tokio::sync::Semaphore::new(
-            env::var("INFERENCE_CONCURRENCY")
-                .ok()
-                .and_then(|s| s.parse::<usize>().ok())
-                .filter(|n| (1..=256).contains(n))
-                .unwrap_or(4),
-        )),
-        token: Arc::new(auth),
-        inference: Inference::from_env(http.clone()).with_database(db.clone()),
+        models: veyndo_intelligence::service::models::Inferencing {
+            inference: Inference::from_env(http.clone()).with_database(db.clone()),
+            slots: Arc::new(tokio::sync::Semaphore::new(
+                env::var("INFERENCE_CONCURRENCY")
+                    .ok()
+                    .and_then(|s| s.parse::<usize>().ok())
+                    .filter(|n| (1..=256).contains(n))
+                    .unwrap_or(4),
+            )),
+            model: Arc::new(env::var("OLLAMA_MODEL").unwrap_or("qwen3.6:35b".into())),
+        },
+        identity: veyndo_identity::service::bootstrap::IdentityState {
+            bootstrap_token: Arc::new(auth),
+        },
         core: veyndo_core::State {
             db: db.clone(),
             http,
             admission: Arc::new(performance::Admission::default()),
+            metrics: Arc::new(channel_metrics::ChannelMetrics::default()),
         },
-        model: Arc::new(env::var("OLLAMA_MODEL").unwrap_or("qwen3.6:35b".into())),
-        sandboxes: Arc::new(sandbox_cache::Cache::default()),
-        channel_metrics: Arc::new(channel_metrics::ChannelMetrics::default()),
-        app_limits: Arc::new(apps::ServiceLimits::default()),
+        apps: veyndo_app_platform::service::runtime_state::AppRuntime::default(),
     };
     veyndo_shop::service::read_cache::register_conditions(marketing::validate_condition);
     if let Some(setup) = setup {
@@ -117,7 +120,7 @@ pub(crate) async fn bootstrap() -> App {
                 .await
                 .expect("persisted extension")
         {
-            a.sandboxes.insert(
+            a.apps.sandboxes.insert(
                 t.into(),
                 Arc::new(Sandbox::new(&wat).expect("saved extension")),
             );
@@ -185,7 +188,7 @@ pub(crate) async fn run() {
     if let Some(worker) = app_workers {
         worker.drain().await;
     }
-    a.channel_metrics.flush(&a.db).await;
+    a.metrics.flush(&a.db).await;
     a._connection_budget.release().await;
     a.db.close().await;
 }

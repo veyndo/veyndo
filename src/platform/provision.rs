@@ -53,7 +53,7 @@ pub(super) async fn create(
     .execute(&mut *tx)
     .await?;
     tx.commit().await?;
-    a.sandboxes.insert(id.into(), Arc::new(sandbox));
+    a.apps.sandboxes.insert(id.into(), Arc::new(sandbox));
     // Product indexing uses the regular consumer and reports failure independently; committed shop ownership stays valid.
     let indexed = if seed {
         let result: Result<()> = async {

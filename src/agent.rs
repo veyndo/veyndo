@@ -27,7 +27,9 @@ pub(super) async fn model_providers(
     {
         auth::permit(&h, "assistant.use")?;
     }
-    Ok(Json(a.inference.public_providers().await.map_err(bad)?))
+    Ok(Json(
+        a.models.inference.public_providers().await.map_err(bad)?,
+    ))
 }
 pub(super) async fn retrieve(a: &App, t: &str, q: &str) -> Result<Value> {
     veyndo_intelligence::service::retrieval::retrieve(a.models(), t, q).await

@@ -75,7 +75,7 @@ pub(crate) async fn exchange(State(a): State<App>, Json(v): Json<Value>) -> Resu
     }
     tx.commit().await?;
     if let Some(sandbox) = sandbox {
-        a.sandboxes.insert(shop.into(), Arc::new(sandbox));
+        a.apps.sandboxes.insert(shop.into(), Arc::new(sandbox));
     }
     if seeded {
         for p in prototype_products(&a, shop).await? {

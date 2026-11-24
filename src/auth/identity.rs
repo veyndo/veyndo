@@ -57,7 +57,7 @@ pub(super) async fn resolve(
         }
         return Ok(None);
     };
-    if credentials::bootstrap_matches(&token, &a.token) {
+    if credentials::bootstrap_matches(&token, &a.identity.bootstrap_token) {
         if !crate::runtime_config::get().allow_bootstrap {
             return Err(Error(
                 StatusCode::UNAUTHORIZED,

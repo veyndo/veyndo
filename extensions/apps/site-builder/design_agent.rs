@@ -170,7 +170,7 @@ pub(crate) async fn invoke(a: &App, h: &RequestContext, name: &str, v: &Value) -
         language_context(a, h).await?.0
     );
     performance::reserve_ai_attempt(a, &t).await?;
-    let _slot = a.inference_slots.clone().try_acquire_owned().map_err(|_| {
+    let _slot = a.models.slots.clone().try_acquire_owned().map_err(|_| {
         Error(
             StatusCode::TOO_MANY_REQUESTS,
             "Design model busy; retry shortly".into(),
@@ -178,6 +178,7 @@ pub(crate) async fn invoke(a: &App, h: &RequestContext, name: &str, v: &Value) -
     })?;
     let _lease = performance::cluster_lease::Lease::acquire(a, &t, "model", 2).await?;
     let output = a
+        .models
         .inference
         .structured_with_images(None, DESIGN_PROMPT, &prompt, &schema, &images)
         .await

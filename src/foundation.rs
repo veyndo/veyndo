@@ -1,31 +1,26 @@
 //! Application dependencies, error responses and request context helpers.
-use crate::{apps, performance, sandbox_cache};
+use crate::performance;
 use std::sync::Arc;
-use veyndo_cognition::inference::Inference;
-use veyndo_core::channel_metrics;
 use veyndo_core::request_context::RequestContext;
 
+/// The server's state: only the composition of component-owned state plus the process connection budget.
 #[derive(Clone)]
 pub(crate) struct App {
-    /// Database pool and HTTP client; component crates take only this part.
+    /// Database pool, HTTP client, admission and channel metrics; component crates take only this part.
     pub(crate) core: veyndo_core::State,
+    /// Inference providers, slots and the default model name (intelligence).
+    pub(crate) models: veyndo_intelligence::service::models::Inferencing,
+    /// Policy compilation cache and service limits (app platform).
+    pub(crate) apps: veyndo_app_platform::service::runtime_state::AppRuntime,
+    /// The bootstrap credential (identity).
+    pub(crate) identity: veyndo_identity::service::bootstrap::IdentityState,
+    /// Held for the process lifetime: this replica's share of the cluster connection budget.
     pub(crate) _connection_budget: Arc<performance::cluster_lease::Lease>,
-    pub(crate) inference_slots: Arc<tokio::sync::Semaphore>,
-    pub(crate) token: Arc<String>,
-    pub(crate) inference: Inference,
-    pub(crate) model: Arc<String>,
-    pub(crate) sandboxes: Arc<sandbox_cache::Cache>,
-    pub(crate) channel_metrics: Arc<channel_metrics::ChannelMetrics>,
-    pub(crate) app_limits: Arc<apps::ServiceLimits>,
 }
 impl App {
     /// The model context intelligence operations borrow: state, providers and inference slots.
     pub(crate) fn models(&self) -> veyndo_intelligence::service::models::Models<'_> {
-        veyndo_intelligence::service::models::Models {
-            core: &self.core,
-            inference: &self.inference,
-            slots: &self.inference_slots,
-        }
+        self.models.models(&self.core)
     }
 }
 impl std::ops::Deref for App {

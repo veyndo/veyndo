@@ -97,7 +97,7 @@ pub(crate) fn start(a: &App, role: &str, app_enabled: bool) -> Option<AppWorkers
             let mut ticks = tokio::time::interval(std::time::Duration::from_secs(1));
             loop {
                 ticks.tick().await;
-                worker.channel_metrics.flush(&worker.db).await;
+                worker.metrics.flush(&worker.db).await;
             }
         });
     }

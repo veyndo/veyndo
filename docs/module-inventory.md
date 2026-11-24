@@ -540,6 +540,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/apps/src/service/limits.rs](../components/apps/src/service/limits.rs) | Local network-app admission: per-app and aggregate tenant bulkheads inside one process. |
 | [components/apps/src/service/package_verification.rs](../components/apps/src/service/package_verification.rs) | A package proves its executable parts before it is stored: frozen configuration examples and the commerce hook component. |
 | [components/apps/src/service/record_import.rs](../components/apps/src/service/record_import.rs) | Private source-record intake reuses an installed app's declared native save action, schema, rights and package fence. |
+| [components/apps/src/service/runtime_state.rs](../components/apps/src/service/runtime_state.rs) | The process-owned state of the app platform: the bounded policy compilation cache and the per-service execution limits. |
 | [components/apps/src/service/sandbox_cache.rs](../components/apps/src/service/sandbox_cache.rs) | Bounded module compilation cache. Prepare outside commerce locks; verify the digest under the lock. |
 | [components/apps/src/service/service_call.rs](../components/apps/src/service/service_call.rs) | Operator-configured service egress: no URL or credential comes from a package, merchant, model or event. |
 | [components/apps/src/service/ui_bundles.rs](../components/apps/src/service/ui_bundles.rs) | Operator-pinned, bounded self-contained UI bundles. |
@@ -789,6 +790,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/identity/src/lib.rs](../components/identity/src/lib.rs) | Identity component: the checks every other component uses to ask who a request acts for and what it may do. |
 | [components/identity/src/ports.rs](../components/identity/src/ports.rs) | What role management needs from the server: the shop languages role names are written in. |
 | [components/identity/src/route_policy.rs](../components/identity/src/route_policy.rs) | Rights are registered beside each API method. Missing registrations always deny access. |
+| [components/identity/src/service/bootstrap.rs](../components/identity/src/service/bootstrap.rs) | The process-owned identity state: the legacy instance bootstrap credential, empty when personal-only hosting disables it. |
 | [components/identity/src/service/roles.rs](../components/identity/src/service/roles.rs) | Tenant-owned roles: current grants, revisioned edits, dependency-checked removal and shared history. |
 | [components/identity/src/service.rs](../components/identity/src/service.rs) | service of this component. |
 | [components/identity/src/store/agent_authority.rs](../components/identity/src/store/agent_authority.rs) | Saved agent runs retain an upper authority bound; every continuation rechecks credential, membership and private stage admission. |

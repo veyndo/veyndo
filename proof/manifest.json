@@ -1151,6 +1151,11 @@
       "sha256": "c6332aeb38c38e11f1a11f1f1bbf43ddcfcd1f1c75ff902a41621e31cc5aeb53",
       "review": "Managed app records, restoration, import and native-object projection moved into the apps component behind a record rules port without behavior change"
     },
+    "components/apps/src/service/runtime_state.rs": {
+      "status": "unproved",
+      "sha256": "f82e91a67d21ab53c8ff444ee16f6cf511fa8ddad0d5946391abc2ed8e3dfe6a",
+      "review": "F18: server state composed of component-owned state"
+    },
     "components/apps/src/service/sandbox_cache.rs": {
       "status": "unproved",
       "sha256": "592fa48bca4482b403e468793ccb51b381d6a1bf6a73cd883fc16363b395a42d",
@@ -1173,8 +1178,8 @@
     },
     "components/apps/src/service.rs": {
       "status": "unproved",
-      "sha256": "be4c4f4813d79917cef60f8161a72616de9da727632fc6a7c8af96dfcf2c94e0",
-      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
+      "sha256": "455e728f7e1bb45a70d2fe58addb93f1c7bfa53ded834d5ebba3d41a64533c6f",
+      "review": "F18: server state composed of component-owned state"
     },
     "components/apps/src/store/action_log.rs": {
       "status": "unproved",
@@ -2138,8 +2143,8 @@
     },
     "components/core/src/state.rs": {
       "status": "unproved",
-      "sha256": "fc637540235bd74244db6605f69a3d74f85abf94ddfff9b06f693cbbefa3c45e",
-      "review": "Currency discovery moved into components/pricing behind the shop settings and cart ports; no rule changed"
+      "sha256": "94313a360dea76f045289d8c489e42c4f904f733f158e6f738579a31a8d3b998",
+      "review": "F18: server state composed of component-owned state"
     },
     "components/core/src/tenants.rs": {
       "status": "unproved",
@@ -2371,6 +2376,11 @@
       "sha256": "5e7aa39b24a5d51ebd41a9c115adf496790236d0bfe39376e71f1366b708c47c",
       "review": "The route permission registry moved unchanged into components/identity and is generic over the server state"
     },
+    "components/identity/src/service/bootstrap.rs": {
+      "status": "unproved",
+      "sha256": "61a39b1e46c5a1f39d5d86058e8955f81ae8b8a650e63b993f8cb096ec3860f8",
+      "review": "F18: server state composed of component-owned state"
+    },
     "components/identity/src/service/roles.rs": {
       "status": "unproved",
       "sha256": "42d711bb0b0de9470d8257be50fea1e17bba836233cb6be09c3c9dabd17109e3",
@@ -2378,8 +2388,8 @@
     },
     "components/identity/src/service.rs": {
       "status": "unproved",
-      "sha256": "d7610c08767f5c8303058a600db6411610a18d9e107339674facc8281ff40390",
-      "review": "Batch A: customer accounts, account orders, sign-in throttle, handoff and roles move into customers, orders and identity"
+      "sha256": "fde828201255b70d9fb8118e0d5b663c66ff61c978706374886cc00eacba022f",
+      "review": "F18: server state composed of component-owned state"
     },
     "components/identity/src/store/agent_authority.rs": {
       "status": "reviewed-binding",
@@ -2713,8 +2723,8 @@
     },
     "components/intelligence/src/service/models.rs": {
       "status": "unproved",
-      "sha256": "47966e65794779fd191243c7d01cfd91cf4b9face2167bd9f2acef2f13df6474",
-      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
+      "sha256": "620b43a11a8534a2dceae4e4f2bb002f1c973aafe4636a2e9e3b124a6d82ddbe",
+      "review": "F18: server state composed of component-owned state"
     },
     "components/intelligence/src/service/navigation.rs": {
       "status": "unproved",
@@ -5173,8 +5183,8 @@
     },
     "extensions/apps/site-builder/design_agent.rs": {
       "status": "unproved",
-      "sha256": "da72edf7b8412b9150246b790447e90c4f2c5b4d14226be026975d09be767005",
-      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
+      "sha256": "630c8d4d1f505342005f8d4a8214818cdca88ad593f7d3b7b26805e681131f91",
+      "review": "F18: server state composed of component-owned state"
     },
     "extensions/apps/site-builder/elements.rs": {
       "status": "unproved",
@@ -6273,8 +6283,8 @@
     },
     "src/agent.rs": {
       "status": "unproved",
-      "sha256": "ad8a67392bb212c67959b3ab923c16dd7c35ce19a298e63d9a3dde76557d0211",
-      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
+      "sha256": "e96895adaf486ad2ec0a94ad4b0187a7af98d218da702db1cfcac469a431f77b",
+      "review": "F18: server state composed of component-owned state"
     },
     "src/agent_host.rs": {
       "status": "unproved",
@@ -6473,8 +6483,8 @@
     },
     "src/apps/mod.rs": {
       "status": "unproved",
-      "sha256": "4c5afd7180449914a17483e718aceb57b45c6fbbb50b2924717dae5178adae75",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "132d5bd8c015b6e6a246c91987b9a9081a922c4a4cb1d95a5e2e6198862e36d7",
+      "review": "F18: server state composed of component-owned state"
     },
     "src/apps/model_contract.rs": {
       "status": "unproved",
@@ -6533,8 +6543,8 @@
     },
     "src/apps/service_limits.rs": {
       "status": "unproved",
-      "sha256": "f9726d4d898b8d46697001a2dbd7e00ae21d1401b00bb2fff7938e35253832b3",
-      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
+      "sha256": "daeb5fb066220c8474c5e19e98e79afd575834e40c4bdf61ff47cabd9fc01d09",
+      "review": "F18: server state composed of component-owned state"
     },
     "src/apps/service_policy.rs": {
       "status": "unproved",
@@ -6648,8 +6658,8 @@
     },
     "src/auth/broker.rs": {
       "status": "unproved",
-      "sha256": "506ca50ee008191abfdcc9c30507298ae204d21e83f550dc4c9f8a633b3d48ab",
-      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
+      "sha256": "2f198c178737168dc5630f3517079ae5633b366040d0f989a4048f546a1a04ef",
+      "review": "F18: server state composed of component-owned state"
     },
     "src/auth/broker_credentials.rs": {
       "status": "unproved",
@@ -6658,8 +6668,8 @@
     },
     "src/auth/broker_inference.rs": {
       "status": "unproved",
-      "sha256": "24fa0122abe1a51f62eb65f944e590ef9c90c1211dc0b6e29c0875dc90231988",
-      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
+      "sha256": "fe707415b57354ef49478bb2dd4913db944b90f4c95afbf5bbe39cdcd2d9ee44",
+      "review": "F18: server state composed of component-owned state"
     },
     "src/auth/broker_recovery.rs": {
       "status": "unproved",
@@ -6693,8 +6703,8 @@
     },
     "src/auth/identity.rs": {
       "status": "unproved",
-      "sha256": "223ec13459e33a90e7453ef61c68de328172825d4fa25a117cf9b30206cb2107",
-      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
+      "sha256": "72c7d69bfcf5b89bd9841a834239a33e9e35c6963da64edad25276972b5e4db7",
+      "review": "F18: server state composed of component-owned state"
     },
     "src/auth/integrations.rs": {
       "status": "unproved",
@@ -6738,8 +6748,8 @@
     },
     "src/auth/provision.rs": {
       "status": "unproved",
-      "sha256": "224646cc03487daadf43ce8a5c191d66335112dc3d3a157472a378b4d12094c7",
-      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
+      "sha256": "78c283c94ec757bc3bdd8916ebe6e3626d2f91a48b2776ae08ea04b82dca5089",
+      "review": "F18: server state composed of component-owned state"
     },
     "src/auth/recovery_entry.rs": {
       "status": "unproved",
@@ -6748,8 +6758,8 @@
     },
     "src/auth/registration.rs": {
       "status": "unproved",
-      "sha256": "05c8c618c2f6d0969ce635f7ffbfd987ae700b56bc43d884ed92fba43448f10d",
-      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
+      "sha256": "806fe097f81b910be92c65ff9b08935b66bc86b7191f4fd03facbef663224918",
+      "review": "F18: server state composed of component-owned state"
     },
     "src/auth/roles.rs": {
       "status": "unproved",
@@ -6888,8 +6898,8 @@
     },
     "src/bootstrap.rs": {
       "status": "unproved",
-      "sha256": "ed763a92e70cb5428442d2dfc1e67ffd7f92335fd38981e0ec12ff4f5890cb05",
-      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
+      "sha256": "a51d01e30fee0f6e1b9c40c4e31de5d3378ecb14338c1d3d59af6c3d08516a9d",
+      "review": "F18: server state composed of component-owned state"
     },
     "src/brand_redirect.rs": {
       "status": "unproved",
@@ -6963,8 +6973,8 @@
     },
     "src/catalog_routes.rs": {
       "status": "unproved",
-      "sha256": "5781a5442e831dda4cfe901d436d197203728d20daa44b8166372ccaac409bd8",
-      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
+      "sha256": "f027864ca2b1557c8927fa016bb00f392f6b19344f99e63197a1bfc09975118b",
+      "review": "F18: server state composed of component-owned state"
     },
     "src/categories/admin.rs": {
       "status": "unproved",
@@ -7113,8 +7123,8 @@
     },
     "src/commerce/catalog_ports.rs": {
       "status": "unproved",
-      "sha256": "de3ff1cfe96e354d6c104c4e2c6db72936d2a84a4fa347af5b5b037726e0ff21",
-      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
+      "sha256": "cc16dce5aad37367692c1fd19d53ee6f93de85302f0f540a3059e2f7ee43bd05",
+      "review": "F18: server state composed of component-owned state"
     },
     "src/commerce/configuration.rs": {
       "status": "unproved",
@@ -7243,8 +7253,8 @@
     },
     "src/concierge.rs": {
       "status": "unproved",
-      "sha256": "0566580904197bf9dbb09c0b2aec1ab96be0a18a4e32dc56762c595220089820",
-      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
+      "sha256": "156a2883872701de408ba8dc4110179642281d6311455da40bb762eec4a01007",
+      "review": "F18: server state composed of component-owned state"
     },
     "src/currencies/capabilities.rs": {
       "status": "unproved",
@@ -7303,8 +7313,8 @@
     },
     "src/developer/generation.rs": {
       "status": "unproved",
-      "sha256": "67d6cd738bae79658e29e301bde8d6d1ee8627d673ad36eb8605add3a8ada7a7",
-      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
+      "sha256": "46d1b02fa92cf601ac2db3c41186f9344a46866642b6649c080258aaf286137f",
+      "review": "F18: server state composed of component-owned state"
     },
     "src/developer/mod.rs": {
       "status": "unproved",
@@ -7313,8 +7323,8 @@
     },
     "src/developer/routes.rs": {
       "status": "unproved",
-      "sha256": "474bdb658551bdb238a4b8e7a7f14a9a6fdc33d7a2376bb625f43a6f5bb7c2a6",
-      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
+      "sha256": "fc04e1b75d56d4c98c1748222fc88b083126a826f6b2eb5d5b74f6543866cc0c",
+      "review": "F18: server state composed of component-owned state"
     },
     "src/documents/ingestion.rs": {
       "status": "unproved",
@@ -7368,18 +7378,18 @@
     },
     "src/experience.rs": {
       "status": "unproved",
-      "sha256": "ccc079a7c5e96bbaf5e5b347cbffe277c706b36406296504b8472900e360e5c9",
-      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
+      "sha256": "819e30d661fe857a69e62fd5391c54b26b24dc33673d1e89e0d215a4808621f7",
+      "review": "F18: server state composed of component-owned state"
     },
     "src/extensions.rs": {
       "status": "unproved",
-      "sha256": "23409399179b13a0124f3d1617edb64e5cf17960b2a27c210b0c3c042120160f",
-      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
+      "sha256": "afce6457c317a68299831f146abf8247b295304843c2400db1d5115045cbb320",
+      "review": "F18: server state composed of component-owned state"
     },
     "src/foundation.rs": {
       "status": "unproved",
-      "sha256": "d22eff1d82cd8aa56ae87805e58d102f288ae18d38093825bc8baaf4180f572a",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "e9d844dd21db3f6fd1394488e1992462c731d7a551c913b217d4ec2a1fe552d8",
+      "review": "F18: server state composed of component-owned state"
     },
     "src/history/capability.rs": {
       "status": "unproved",
@@ -7868,8 +7878,8 @@
     },
     "src/platform/auth.rs": {
       "status": "reviewed-binding",
-      "sha256": "cd9ee0f15e1c25865716a9bd986e699089f9c2769ec1a593add4abe8cbe9992c",
-      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
+      "sha256": "98c4682485a7520b8815df4a39541594d5f8e16e3712870b9fc34a73971dcd29",
+      "review": "F18: server state composed of component-owned state"
     },
     "src/platform/bootstrap.rs": {
       "status": "unproved",
@@ -7898,8 +7908,8 @@
     },
     "src/platform/provision.rs": {
       "status": "unproved",
-      "sha256": "e59c1a5e9d71968d1fcd8356a58484e724a3dfb046e44e7fb7e3879665298d0f",
-      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
+      "sha256": "d254ffb6743ad8098b48f56416fbacb8f48b08c29d2b98ddc41479c33c026722",
+      "review": "F18: server state composed of component-owned state"
     },
     "src/platform/quotas.rs": {
       "status": "unproved",
@@ -7973,8 +7983,8 @@
     },
     "src/sandbox_cache.rs": {
       "status": "unproved",
-      "sha256": "c1902c816b069bb7f9b58f571859f874646620763ef439bd09ccfebe7860ed63",
-      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
+      "sha256": "ca3b74acca06fd0b2239a0514c4bbf9a1f14101ec18a31d6819607779490abb9",
+      "review": "F18: server state composed of component-owned state"
     },
     "src/security_headers.rs": {
       "status": "unproved",
@@ -8013,8 +8023,8 @@
     },
     "src/staging/release_host.rs": {
       "status": "unproved",
-      "sha256": "5543d310ab6e58076f911dfc27ccb9414f11c90d16295aac3c97c9f8af802b71",
-      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
+      "sha256": "bad95eba9bfd80bf54a859777287e0e78c3be814f941eba9b71fb9f03c77ee70",
+      "review": "F18: server state composed of component-owned state"
     },
     "src/storefront_pages.rs": {
       "status": "unproved",
@@ -8043,8 +8053,8 @@
     },
     "src/studio.rs": {
       "status": "unproved",
-      "sha256": "9ae1ce26646fb509557df44b0f0130583c51510be81c0c426f45b7219bc26de6",
-      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
+      "sha256": "cfaf7d7e11729429d83ab65d931d6401a631f0e5798b0c3f6e891dab6f06a4f0",
+      "review": "F18: server state composed of component-owned state"
     },
     "src/translations/apply.rs": {
       "status": "unproved",
@@ -8058,8 +8068,8 @@
     },
     "src/translations/routes.rs": {
       "status": "unproved",
-      "sha256": "22a30a8a17d9d1fea0d167123088db09a5a89c26653dc7d461920305b58b5dc7",
-      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
+      "sha256": "8e74d40bf5600ce49b75907355fa95427c5547bb5744ec1da637d1ef0bd78066",
+      "review": "F18: server state composed of component-owned state"
     },
     "src/translations/selection.rs": {
       "status": "unproved",
@@ -8123,8 +8133,8 @@
     },
     "src/workers.rs": {
       "status": "unproved",
-      "sha256": "6ccfd54439ad0137e58a5cf7b1f9346bae7e89e8f4700583ea65d03e88f47670",
-      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
+      "sha256": "4c64f6404ec88afd44e4f4fddf8356499ea6962ecc028314ceeda555862f39f7",
+      "review": "F18: server state composed of component-owned state"
     }
   },
   "inputs": {

@@ -58,7 +58,7 @@ pub(super) async fn track_channels(State(a): State<App>, request: Request, next:
         }
         // Diagnostic counters are best-effort and do not delay commerce. They
         // count HTTP calls (including synthetic tests/admin reads), never people.
-        a.channel_metrics.record(
+        a.metrics.record(
             t,
             channel,
             response.status(),
@@ -113,7 +113,7 @@ pub(super) async fn merchant_overview(
         || auth::allowed(&h, "developer.read")
         || auth::allowed(&h, "ai.manage")
     {
-        a.inference.public_providers().await.map_err(bad)?
+        a.models.inference.public_providers().await.map_err(bad)?
     } else {
         json!({"providers":[]})
     };

@@ -55,6 +55,7 @@ impl ReleaseHost for Releases<'_> {
     }
     fn register_sandbox(&self, id: &str, wat: &str) -> Result<()> {
         self.0
+            .apps
             .sandboxes
             .insert(id.into(), Arc::new(Sandbox::new(wat).map_err(bad)?));
         Ok(())

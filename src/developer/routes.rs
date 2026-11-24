@@ -81,7 +81,7 @@ pub(crate) async fn list(State(a): State<App>, h: RequestContext) -> Result<Json
     let (settings, _) = commerce::config(&a, &t).await?;
     let (builds, archived) = app_builds::list(&a.core, &t).await?;
     Ok(Json(
-        json!({"builds":builds,"archivedBuilds":archived,"mainLocale":settings.main_locale,"locales":settings.locales,"providers":a.inference.public_providers().await.map_err(bad)?,"codingAgents":[{"id":"codex","transport":"mcp + task export"},{"id":"claude_code","transport":"mcp + task export"}],"runtime":"declarative native data/API/UI; arbitrary service code requires an external build"}),
+        json!({"builds":builds,"archivedBuilds":archived,"mainLocale":settings.main_locale,"locales":settings.locales,"providers":a.models.inference.public_providers().await.map_err(bad)?,"codingAgents":[{"id":"codex","transport":"mcp + task export"},{"id":"claude_code","transport":"mcp + task export"}],"runtime":"declarative native data/API/UI; arbitrary service code requires an external build"}),
     ))
 }
 async fn generate(

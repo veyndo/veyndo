@@ -26,6 +26,26 @@ impl Models<'_> {
         })
     }
 }
+/// The model state the server owns for its lifetime: configured providers, inference slots and the default model name.
+#[derive(Clone)]
+pub struct Inferencing {
+    /// The configured providers with their admission.
+    pub inference: Inference,
+    /// Process-wide inference concurrency.
+    pub slots: Arc<Semaphore>,
+    /// The default local model name shown in health and provider views.
+    pub model: Arc<String>,
+}
+impl Inferencing {
+    /// The borrowed model context of one operation.
+    pub fn models<'a>(&'a self, core: &'a State) -> Models<'a> {
+        Models {
+            core,
+            inference: &self.inference,
+            slots: &self.slots,
+        }
+    }
+}
 /// The inference selection of a request; absent or null means the shop default.
 pub fn choice(v: &Value) -> Result<Option<Choice>> {
     v.get("inference")

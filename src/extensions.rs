@@ -22,7 +22,8 @@ pub(crate) async fn activate_extension(
     Json(v): Json<Value>,
 ) -> Result<Json<Value>> {
     Ok(Json(
-        veyndo_app_platform::service::business_policy::activate(&a, &a.sandboxes, &h, &v).await?,
+        veyndo_app_platform::service::business_policy::activate(&a, &a.apps.sandboxes, &h, &v)
+            .await?,
     ))
 }
 

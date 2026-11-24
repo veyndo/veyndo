@@ -56,7 +56,7 @@ pub(crate) async fn register_user(
     let sandbox =
         super::provision::provision(&mut tx, &user, slug, shop_name, demo_password).await?;
     tx.commit().await?;
-    a.sandboxes.insert(slug.into(), Arc::new(sandbox));
+    a.apps.sandboxes.insert(slug.into(), Arc::new(sandbox));
     for p in prototype_products(&a, slug).await? {
         knowledge::sync_product_scoped(&a.db, slug, &json!(p)).await?;
     }

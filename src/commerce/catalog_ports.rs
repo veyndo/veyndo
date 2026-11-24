@@ -119,7 +119,7 @@ impl Images for Server {
     fn provider<'a>(&'a self) -> PortFuture<'a, ImageProvider> {
         Box::pin(async move {
             Ok(ImageProvider {
-                configured: veyndo_cognition::images::configured(&self.0.inference).await,
+                configured: veyndo_cognition::images::configured(&self.0.models.inference).await,
                 model: veyndo_cognition::images::model(),
             })
         })
@@ -133,7 +133,7 @@ impl Images for Server {
         Box::pin(async move {
             let _cluster =
                 performance::cluster_lease::Lease::acquire(&self.0, tenant, "model", 2).await?;
-            veyndo_cognition::images::create(&self.0.inference, prompt, source).await
+            veyndo_cognition::images::create(&self.0.models.inference, prompt, source).await
         })
     }
 }

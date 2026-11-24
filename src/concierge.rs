@@ -33,7 +33,7 @@ pub(crate) async fn concierge(
         .as_str()
         .filter(|s| !s.is_empty() && s.len() <= 2000)
         .ok_or(bad("Request required, maximum 2000 characters"))?;
-    let _slot = a.inference_slots.clone().try_acquire_owned().map_err(|_| {
+    let _slot = a.models.slots.clone().try_acquire_owned().map_err(|_| {
         Error(
             StatusCode::TOO_MANY_REQUESTS,
             "Inference capacity busy".into(),
