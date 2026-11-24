@@ -2,10 +2,12 @@
 use crate::domain::capture_intent::intent;
 use crate::domain::service_config::validate_service;
 use crate::store::jobs::enqueue_tx;
+use serde::Deserialize;
 use serde_json::{Value, json};
 use sqlx::Row;
 use std::collections::{HashMap, HashSet};
 use veyndo_app_model::manifest::Manifest;
+use veyndo_core::document::{Raw, lenient, view};
 use veyndo_core::{Result, State, bad, conflict, process_config, uid};
 use veyndo_shop::domain::patch::resolve;
 use veyndo_shop::domain::validation::validate;
@@ -159,6 +161,53 @@ pub async fn install_methods(
     Ok(())
 }
 /// Records the pending provider payment attempt of an order with its reservations and enqueues its creation.
+/// The placed order facts a provider payment is prepared from.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct PlacedOrder {
+    #[serde(deserialize_with = "lenient")]
+    id: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    cart: PlacedCart,
+}
+
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct PlacedCart {
+    #[serde(deserialize_with = "lenient")]
+    payment_method: Raw<SelectedMethod>,
+    #[serde(deserialize_with = "lenient")]
+    price: PlacedPrice,
+    #[serde(deserialize_with = "lenient")]
+    checkout: PlacedCheckout,
+}
+
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct SelectedMethod {
+    #[serde(deserialize_with = "lenient")]
+    provider: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    capture_mode: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    provider_method: Option<String>,
+}
+
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct PlacedPrice {
+    #[serde(deserialize_with = "lenient")]
+    currency: Option<String>,
+    currency_scale: Value,
+}
+
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct PlacedCheckout {
+    #[serde(deserialize_with = "lenient")]
+    country: Option<String>,
+}
+
 pub async fn prepare_remote(
     tx: &mut sqlx::Transaction<'_, sqlx::Postgres>,
     c: &StoredCart,
@@ -166,9 +215,11 @@ pub async fn prepare_remote(
     minor: i64,
     return_origin: Option<&str>,
 ) -> Result<()> {
-    let method = o["cart"]["paymentMethod"].clone();
-    let provider = method["provider"]
-        .as_str()
+    let order: PlacedOrder = view(o);
+    let selected = &order.cart.payment_method;
+    let provider = selected
+        .provider
+        .as_deref()
         .ok_or(bad("Provider required"))?;
     let row = sqlx::query(
         "SELECT manifest FROM app_packages WHERE tenant=$1 AND id=$2 AND active FOR SHARE",
@@ -184,22 +235,24 @@ pub async fn prepare_remote(
         .payment_provider
         .as_ref()
         .ok_or(bad("Payment provider contract missing"))?;
-    let configured_intent = method["captureMode"].as_str();
+    let configured_intent = selected.capture_mode.as_deref();
     let method = contract
         .methods
         .iter()
-        .find(|v| Some(v.id.as_str()) == method["providerMethod"].as_str())
+        .find(|v| Some(v.id.as_str()) == selected.provider_method.as_deref())
         .ok_or(bad("Unknown provider method"))?;
-    let currency = o["cart"]["price"]["currency"]
-        .as_str()
-        .unwrap_or("EUR")
-        .to_owned();
+    let currency = order
+        .cart
+        .price
+        .currency
+        .clone()
+        .unwrap_or_else(|| "EUR".into());
     if !method.currencies.iter().any(|c| c == &currency)
         || (!method.countries.is_empty()
             && !method
                 .countries
                 .iter()
-                .any(|v| Some(v.as_str()) == o["cart"]["checkout"]["country"].as_str()))
+                .any(|v| Some(v.as_str()) == order.cart.checkout.country.as_deref()))
     {
         return Err(bad("Provider method unavailable for currency or country"));
     }
@@ -219,10 +272,10 @@ pub async fn prepare_remote(
     }
     let environment: String = r.get("environment");
     config(provider, &m.version, &environment)?;
-    let context = json!({"apiVersion":"1","accountRef":r.get::<String,_>("account_ref"),"method":method.id,"capabilities":method.capabilities,"checkout":method.checkout,"intent":intent,"channel":channel,"returnOrigin":return_origin,"currencyScale":o["cart"]["price"]["currencyScale"]});
+    let context = json!({"apiVersion":"1","accountRef":r.get::<String,_>("account_ref"),"method":method.id,"capabilities":method.capabilities,"checkout":method.checkout,"intent":intent,"channel":channel,"returnOrigin":return_origin,"currencyScale":order.cart.price.currency_scale});
     let id = uid();
-    o["payment"] = json!({"method":o["cart"]["paymentMethod"],"provider":provider,"state":"pending","attemptId":id,"environment":environment,"realMoneyCharged":false});
-    sqlx::query("INSERT INTO payment_attempts(id,tenant,order_id,provider,adapter_version,amount_minor,currency,environment,bn_code,provider_context,currency_scale) VALUES($1,$2,$3,$4,$5,$6,$9,$7,'',$8,$10)").bind(&id).bind(&c.tenant).bind(o["id"].as_str().unwrap()).bind(provider).bind(&m.version).bind(minor).bind(environment).bind(context).bind(currency).bind(o["cart"]["price"]["currencyScale"].as_i64().unwrap_or(2) as i16).execute(&mut **tx).await?;
+    o["payment"] = json!({"method":selected.raw,"provider":provider,"state":"pending","attemptId":id,"environment":environment,"realMoneyCharged":false});
+    sqlx::query("INSERT INTO payment_attempts(id,tenant,order_id,provider,adapter_version,amount_minor,currency,environment,bn_code,provider_context,currency_scale) VALUES($1,$2,$3,$4,$5,$6,$9,$7,'',$8,$10)").bind(&id).bind(&c.tenant).bind(order.id.as_deref().ok_or(bad("Order ID required"))?).bind(provider).bind(&m.version).bind(minor).bind(environment).bind(context).bind(currency).bind(order.cart.price.currency_scale.as_i64().unwrap_or(2) as i16).execute(&mut **tx).await?;
     for item in &c.data.items {
         sqlx::query("INSERT INTO inventory_reservations(tenant,attempt_id,product_id,quantity) VALUES($1,$2,$3,$4)").bind(&c.tenant).bind(&id).bind(&item.id).bind(item.quantity as i32).execute(&mut **tx).await?;
     }

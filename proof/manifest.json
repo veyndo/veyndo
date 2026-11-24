@@ -1633,8 +1633,8 @@
     },
     "components/catalog/src/service/asset_access.rs": {
       "status": "unproved",
-      "sha256": "ddbfdeafcf94e3f80de79d9a308d510d09fdee83a2e504f03fa9b20236131ba2",
-      "review": "F9: media captions, design references, product knowledge and the translation worker moved into components"
+      "sha256": "36e3e9e7c104fe4e0d087b6d2f20a0e9d0ac4f34ecc13c35d906cc6117051b9e",
+      "review": "F34 typed document views: proof bindings unchanged"
     },
     "components/catalog/src/service/assets.rs": {
       "status": "unproved",
@@ -2968,8 +2968,8 @@
     },
     "components/marketing/src/domain/flow_projection.rs": {
       "status": "unproved",
-      "sha256": "efbc1603f0ac178f880f2b4be37fc3115ca8b98b9147301d1e09c4c3f2e0ab9a",
-      "review": "Outbox flow projection moved into the marketing component; behaviour unchanged"
+      "sha256": "c9b1a33c863c95f541ba429dddc45238f32ab5e1eb448533c80c9d4c00d591fa",
+      "review": "F34 typed document views: proof bindings unchanged"
     },
     "components/marketing/src/domain/flow_steps.rs": {
       "status": "unproved",
@@ -3138,8 +3138,8 @@
     },
     "components/marketing/src/store/facts.rs": {
       "status": "unproved",
-      "sha256": "b742130c3e216d15c87b619f1da50534fcf809c3af85881fd60abda60ba56347",
-      "review": "cart types and rule engine moved into components; checking bindings"
+      "sha256": "39b3eaa296329c6aabc80d60ce6973c7a19acdb986ca7b2ab952cde7b29c9896",
+      "review": "F34 typed document views: proof bindings unchanged"
     },
     "components/marketing/src/store/flow_access.rs": {
       "status": "unproved",
@@ -3228,8 +3228,8 @@
     },
     "components/orders/src/domain/import_product.rs": {
       "status": "unproved",
-      "sha256": "48f1b3a7db016e46f193c0bd410c8dc19445cbbde5d922e66ee7225c6b791ab0",
-      "review": "Unit tests for every public domain function of the components; no production code changed"
+      "sha256": "49140b240c07b94c28639a9d909c3e90b90b7bf3687f2979a13712241113e7b9",
+      "review": "F34 typed document views: proof bindings unchanged"
     },
     "components/orders/src/domain/import_relations.rs": {
       "status": "unproved",
@@ -3258,8 +3258,8 @@
     },
     "components/orders/src/domain/order_workflow.rs": {
       "status": "reviewed-binding",
-      "sha256": "33b9f9325cfb8157d39a69019091a46831938a5f1726dbbe371af886099826a7",
-      "review": "Unit tests for every public domain function of the components; no production code changed"
+      "sha256": "5ab6f75f4901595e6513919ad3ab77be0b3721017d21b9603ea3f0f6a9197058",
+      "review": "F34 typed document views: proof bindings unchanged"
     },
     "components/orders/src/domain/receipt_instructions.rs": {
       "status": "unproved",
@@ -3283,8 +3283,8 @@
     },
     "components/orders/src/http/account_orders.rs": {
       "status": "unproved",
-      "sha256": "f2a457d53ca18c92e47a3ef0ecd9d6b066f80d9214db28f83f4786c3d250715c",
-      "review": "Batch A: customer accounts, account orders, sign-in throttle, handoff and roles move into customers, orders and identity"
+      "sha256": "1e473de22edabe0b1db4b7c3a57686412b94da0c46d09770774e9d5a533311e8",
+      "review": "F34 typed document views: proof bindings unchanged"
     },
     "components/orders/src/http/company.rs": {
       "status": "unproved",
@@ -3613,8 +3613,8 @@
     },
     "components/payments/src/store/provider_registry.rs": {
       "status": "unproved",
-      "sha256": "1dd9cdfd1c9b6ba3ecf4b32c3517c690dbcfb60d9e21e8c811f9608a8a296dca",
-      "review": "The payment provider registry moves into payments"
+      "sha256": "4e61cf27a781988a3d1e8b65fa1156cecec69c9bbd7982fad1b4c224f1fea4ef",
+      "review": "F34 typed document views: proof bindings unchanged"
     },
     "components/payments/src/store/receipt_claims.rs": {
       "status": "unproved",

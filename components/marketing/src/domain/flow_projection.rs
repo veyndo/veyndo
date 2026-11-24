@@ -1,6 +1,8 @@
 //! What a flow sees of an outbox event: personal receipts and payment instructions removed, the order states and the event folded into one rule context.
 use crate::types::flow::{knowledge_event, valid_app_event};
+use serde::Deserialize;
 use serde_json::{Value, json};
+use veyndo_core::document::{lenient, view};
 use veyndo_flow_graph::catalog::EVENTS;
 
 /// Whether an event kind can start a flow at all.
@@ -55,7 +57,32 @@ pub fn job_definition(
     cart: &Value,
     context: &Value,
 ) -> Value {
-    json!({"flow":flow,"orderId":order_id,"orderNumber":order["orderNumber"],"totalPrice":order["cart"]["price"]["totalPrice"],"event":kind,"transition":event,"eventContext":event,"cartData":cart,"ruleContext":context,"orderSnapshot":{"orderCustomer":order["orderCustomer"],"currencyId":order["currencyId"],"orderNumber":order["orderNumber"],"state":order["state"],"cart":{"price":order["cart"]["price"]}}})
+    let order: FlowOrder = view(order);
+    let total = order
+        .cart
+        .price
+        .get("totalPrice")
+        .cloned()
+        .unwrap_or_default();
+    json!({"flow":flow,"orderId":order_id,"orderNumber":order.order_number,"totalPrice":total,"event":kind,"transition":event,"eventContext":event,"cartData":cart,"ruleContext":context,"orderSnapshot":{"orderCustomer":order.order_customer,"currencyId":order.currency_id,"orderNumber":order.order_number,"state":order.state,"cart":{"price":order.cart.price}}})
+}
+
+/// The order snapshot a flow job carries.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct FlowOrder {
+    order_number: Value,
+    order_customer: Value,
+    currency_id: Value,
+    state: Value,
+    #[serde(deserialize_with = "lenient")]
+    cart: FlowCart,
+}
+
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct FlowCart {
+    price: Value,
 }
 
 #[cfg(test)]

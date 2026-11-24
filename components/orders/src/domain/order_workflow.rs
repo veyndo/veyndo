@@ -1,18 +1,21 @@
 //! One server-derived action catalogue drives UI, HTTP and MCP; built-in business guards cannot be bypassed.
 use crate::domain::order_machine::OrderMachine;
+use serde::Deserialize;
 use serde_json::{Value, json};
 use veyndo_core::RequestContext;
+use veyndo_core::document::{lenient, view};
 use veyndo_identity::permit;
 use veyndo_pricing::verified_kernel;
 pub fn guard(o: &Value, m: &OrderMachine, kind: &str, target: &str) -> Option<&'static str> {
-    let state = o["state"].as_str().unwrap_or("");
+    let order: WorkflowOrder = view(o);
+    let state = order.state.as_deref().unwrap_or("");
     let terminal = m.states.iter().any(|s| s.id == state && s.terminal)
         || ["expired", "payment_review"].contains(&state);
     if !verified_kernel::order_edit_admissible(terminal) {
         return Some("terminalOrder");
     }
-    let external = external(o);
-    let ps = o["payment"]["state"].as_str().unwrap_or("");
+    let external = order.external();
+    let ps = order.payment.state.as_str().unwrap_or("");
     let refund = [
         "paid",
         "captured",
@@ -20,14 +23,15 @@ pub fn guard(o: &Value, m: &OrderMachine, kind: &str, target: &str) -> Option<&'
         "partially_refunded",
     ]
     .contains(&ps);
-    let deliveries_open = o["deliveries"]
-        .as_array()
-        .is_none_or(|ds| ds.iter().all(|d| d["state"] == "open"));
-    let delivered = o["deliveries"]
-        .as_array()
-        .is_none_or(|ds| ds.iter().all(|d| d["state"] == "delivered"));
+    let deliveries = order.deliveries();
+    let deliveries_open = deliveries
+        .as_ref()
+        .is_none_or(|ds| ds.iter().all(|d| d.state == "open"));
+    let delivered = deliveries
+        .as_ref()
+        .is_none_or(|ds| ds.iter().all(|d| d.state == "delivered"));
     let payment_ready = ["paid", "captured"].contains(&ps)
-        || o["payment"]["provider"] == "simulated" && ps == "authorized";
+        || order.payment.provider == "simulated" && ps == "authorized";
     match (kind, target) {
         ("order", "cancelled")
             if !verified_kernel::cancellation_admissible(
@@ -58,9 +62,10 @@ pub fn guard(o: &Value, m: &OrderMachine, kind: &str, target: &str) -> Option<&'
 }
 pub fn workflow(o: &Value, m: &OrderMachine, revision: i64, h: &RequestContext) -> Value {
     let mut actions = Vec::new();
-    let current = o["state"].as_str().unwrap_or("placed");
+    let order: WorkflowOrder = view(o);
+    let current = order.state.as_deref().unwrap_or("placed");
     if m.states.iter().any(|s| s.id == current && s.terminal) {
-        return json!({"revision":revision,"mainLocale":o["nativeLifecycle"]["mainLocale"],"states":m.states,"actions":[]});
+        return json!({"revision":revision,"mainLocale":order.native_lifecycle.main_locale,"states":m.states,"actions":[]});
     }
     if !m.states.iter().any(|s| s.id == current && s.terminal) {
         for e in m.transitions.iter().filter(|e| e.from == current) {
@@ -70,42 +75,98 @@ pub fn workflow(o: &Value, m: &OrderMachine, revision: i64, h: &RequestContext) 
             actions.push(json!({"id":e.id,"kind":"order","from":e.from,"state":e.to,"label":e.label,"enabled":reason.is_none(),"reason":reason,"source":e.policy}));
         }
     }
-    if ["pending", "authorized"].contains(&o["payment"]["state"].as_str().unwrap_or(""))
-        && !external(o)
+    if ["pending", "authorized"].contains(&order.payment.state.as_str().unwrap_or(""))
+        && !order.external()
     {
         let reason = guard(o, m, "payment", "paid");
-        actions.push(json!({"id":"mark_paid","kind":"payment","from":o["payment"]["state"],"state":"paid","enabled":reason.is_none(),"reason":reason}));
+        actions.push(json!({"id":"mark_paid","kind":"payment","from":order.payment.state,"state":"paid","enabled":reason.is_none(),"reason":reason}));
     }
-    if let Some(ds) = o["deliveries"].as_array() {
+    let deliveries = order.deliveries();
+    if let Some(ds) = &deliveries {
         for (index, d) in ds.iter().enumerate() {
-            let next = match d["state"].as_str() {
+            let next = match d.state.as_str() {
                 Some("open") => Some("shipped"),
                 Some("shipped") => Some("delivered"),
                 _ => None,
             };
             if let Some(next) = next {
-                let reason = if !d["booking"].is_null() {
+                let reason = if !d.booking.is_null() {
                     Some("carrierBooking")
                 } else {
                     guard(o, m, "delivery", next)
                 };
-                actions.push(json!({"id":format!("delivery_{index}_{next}"),"kind":"delivery","from":d["state"],"state":next,"deliveryIndex":index,"enabled":reason.is_none(),"reason":reason}));
+                actions.push(json!({"id":format!("delivery_{index}_{next}"),"kind":"delivery","from":d.state,"state":next,"deliveryIndex":index,"enabled":reason.is_none(),"reason":reason}));
             }
         }
     }
-    let splits = o["deliveries"].as_array().map(|ds| ds.iter().enumerate().map(|(index,d)| {
-        let quantity = d["positions"].as_array().map(|ps| ps.iter().filter_map(|p| p["quantity"].as_u64()).sum::<u64>()).unwrap_or(0);
-        json!({"deliveryIndex":index,"enabled":verified_kernel::delivery_split_admissible(d["state"]=="open",guard(o,m,"delivery","shipped").is_some(),quantity,1) && d["label"].is_null() && d["booking"].is_null() && ds.len()<30})
+    let splits = deliveries.as_ref().map(|ds| ds.iter().enumerate().map(|(index,d)| {
+        let quantity = d.positions.as_ref().map(|ps| ps.iter().filter_map(|p| view::<Position>(p).quantity).sum::<u64>()).unwrap_or(0);
+        json!({"deliveryIndex":index,"enabled":verified_kernel::delivery_split_admissible(d.state=="open",guard(o,m,"delivery","shipped").is_some(),quantity,1) && d.label.is_null() && d.booking.is_null() && ds.len()<30})
     }).collect::<Vec<_>>()).unwrap_or_default();
-    json!({"revision":revision,"mainLocale":o["nativeLifecycle"]["mainLocale"],"states":m.states,"actions":actions,"shipmentSplits":splits})
+    json!({"revision":revision,"mainLocale":order.native_lifecycle.main_locale,"states":m.states,"actions":actions,"shipmentSplits":splits})
 }
 
 /// Whether an external payment provider holds the money of this order; manual and simulated payments do not.
 pub fn external(o: &Value) -> bool {
-    !matches!(
-        o["payment"]["provider"].as_str(),
-        Some("manual" | "simulated") | None
-    )
+    view::<WorkflowOrder>(o).external()
+}
+
+/// The order facts its action catalogue and business guards read.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct WorkflowOrder {
+    #[serde(deserialize_with = "lenient")]
+    state: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    payment: WorkflowPayment,
+    #[serde(deserialize_with = "lenient")]
+    deliveries: Option<Vec<Value>>,
+    #[serde(deserialize_with = "lenient")]
+    native_lifecycle: Lifecycle,
+}
+
+impl WorkflowOrder {
+    fn external(&self) -> bool {
+        !matches!(
+            self.payment.provider.as_str(),
+            Some("manual" | "simulated") | None
+        )
+    }
+    fn deliveries(&self) -> Option<Vec<WorkflowDelivery>> {
+        self.deliveries
+            .as_ref()
+            .map(|ds| ds.iter().map(view).collect())
+    }
+}
+
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct WorkflowPayment {
+    state: Value,
+    provider: Value,
+}
+
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct Lifecycle {
+    main_locale: Value,
+}
+
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct WorkflowDelivery {
+    state: Value,
+    booking: Value,
+    label: Value,
+    #[serde(deserialize_with = "lenient")]
+    positions: Option<Vec<Value>>,
+}
+
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct Position {
+    #[serde(deserialize_with = "lenient")]
+    quantity: Option<u64>,
 }
 
 #[cfg(test)]

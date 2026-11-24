@@ -1,14 +1,29 @@
 //! Asset writes and reads on behalf of imports and apps: immutable imported product images and scoped app access to the product file store.
 use crate::domain::asset_file::validate_bytes;
 use base64::{Engine as _, engine::general_purpose::STANDARD};
+use serde::Deserialize;
 use serde_json::{Value, json};
 use sha2::{Digest, Sha256};
 use sqlx::Row;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::localized::Languages;
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad, conflict};
 use veyndo_identity::{merchant, permit};
 
 /// Stores one imported product image once: the same identity with different bytes or metadata is a conflict, and a product holds at most 50 assets.
+/// The metadata of an imported product image: its format, file name, localized title and content digest.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct ImportedImage {
+    #[serde(deserialize_with = "lenient")]
+    mime: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    filename: Option<String>,
+    title: Value,
+    #[serde(deserialize_with = "lenient")]
+    digest: Option<String>,
+}
+
 pub async fn import_image(
     a: &State,
     h: &RequestContext,
@@ -19,18 +34,21 @@ pub async fn import_image(
 ) -> Result<Value> {
     let t = merchant(h)?;
     permit(h, "catalog.write")?;
-    let mime = metadata["mime"]
-        .as_str()
+    let input: ImportedImage = view(metadata);
+    let mime = input
+        .mime
+        .as_deref()
         .filter(|m| ["image/png", "image/jpeg", "image/webp"].contains(m))
         .ok_or(bad("Imported image format unavailable"))?;
     validate_bytes(mime, &bytes)?;
-    let filename = metadata["filename"]
-        .as_str()
+    let filename = input
+        .filename
+        .as_deref()
         .filter(|n| !n.is_empty() && n.len() <= 180 && !n.contains(['/', '\\', '\r', '\n', '"']))
         .ok_or(bad("Invalid imported image filename"))?;
-    languages.validate_names(&metadata["title"], 200)?;
+    languages.validate_names(&input.title, 200)?;
     let digest = format!("{:x}", Sha256::digest(&bytes));
-    if metadata["digest"] != digest {
+    if input.digest.as_deref() != Some(digest.as_str()) {
         return Err(bad("Imported image digest differs"));
     }
     let mut tx = a.db.begin().await?;
@@ -51,7 +69,7 @@ pub async fn import_image(
             || previous.get::<String, _>("digest") != digest
             || previous.get::<String, _>("mime") != mime
             || previous.get::<String, _>("filename") != filename
-            || previous.get::<Value, _>("title") != metadata["title"]
+            || previous.get::<Value, _>("title") != input.title
             || !previous.get::<bool, _>("public")
         {
             return Err(conflict(
@@ -69,11 +87,11 @@ pub async fn import_image(
         if count >= 50 {
             return Err(bad("Maximum 50 assets per product"));
         }
-        sqlx::query("INSERT INTO product_assets(tenant,id,product_id,title,filename,mime,kind,public,content,digest) VALUES($1,$2,$3,$4,$5,$6,'attachment',true,$7,$8)").bind(&t).bind(id).bind(product).bind(&metadata["title"]).bind(filename).bind(mime).bind(bytes).bind(digest).execute(&mut *tx).await?;
+        sqlx::query("INSERT INTO product_assets(tenant,id,product_id,title,filename,mime,kind,public,content,digest) VALUES($1,$2,$3,$4,$5,$6,'attachment',true,$7,$8)").bind(&t).bind(id).bind(product).bind(&input.title).bind(filename).bind(mime).bind(bytes).bind(digest).execute(&mut *tx).await?;
     }
     tx.commit().await?;
     Ok(
-        json!({"id":id,"url":format!("/store-api/assets/{id}?shop={t}"),"view":"","alt":metadata["title"]}),
+        json!({"id":id,"url":format!("/store-api/assets/{id}?shop={t}"),"view":"","alt":input.title}),
     )
 }
 

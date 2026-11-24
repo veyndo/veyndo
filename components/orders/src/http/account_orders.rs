@@ -4,10 +4,11 @@ use crate::store::account_orders;
 use crate::store::machine::machine;
 use axum::Json;
 use axum::extract::{Path, Query, State as Shared};
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 use std::collections::HashMap;
 use veyndo_app_model::native_lifecycle_snapshot::project_labels;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::shop_scope::{session_digest, tenant};
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode};
 use veyndo_customers::service::sessions::identify;
@@ -34,25 +35,47 @@ pub async fn owned(
         .collect())
 }
 /// The public projection of an order: no operational notes, activity, cart token or payment attempt.
+/// The order a customer may see: a closed whitelist, never operational notes, activity or session data.
+#[derive(Deserialize, Serialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct CustomerOrder {
+    id: Value,
+    order_number: Value,
+    revision: Value,
+    state: Value,
+    order_date_time: Value,
+    billing_address: Value,
+    shipping_address: Value,
+    billing_address_id: Value,
+    shipping_address_id: Value,
+    deliveries: Value,
+    legal: Value,
+    #[serde(deserialize_with = "lenient")]
+    cart: CustomerCart,
+    #[serde(deserialize_with = "lenient")]
+    payment: CustomerPayment,
+}
+
+#[derive(Deserialize, Serialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct CustomerCart {
+    id: Value,
+    price: Value,
+    shipping_costs: Value,
+    line_items: Value,
+}
+
+#[derive(Deserialize, Serialize, Default)]
+#[serde(default)]
+struct CustomerPayment {
+    state: Value,
+    provider: Value,
+    method: Value,
+}
+
 pub fn project(raw: &Value, created: &str) -> Value {
-    let mut v = json!({});
-    for key in [
-        "id",
-        "orderNumber",
-        "revision",
-        "state",
-        "orderDateTime",
-        "billingAddress",
-        "shippingAddress",
-        "billingAddressId",
-        "shippingAddressId",
-        "deliveries",
-        "legal",
-    ] {
-        v[key] = raw[key].clone();
-    }
-    v["cart"] = json!({"id":raw["cart"]["id"], "price":raw["cart"]["price"], "shippingCosts":raw["cart"]["shippingCosts"], "lineItems":raw["cart"]["lineItems"]});
-    v["payment"] = json!({"state":raw["payment"]["state"], "provider":raw["payment"]["provider"], "method":raw["payment"]["method"]});
+    let order: CustomerOrder = view(raw);
+    let mut v = json!(order);
     v["createdAt"] = json!(created);
     order_fields(&mut v);
     project_labels(raw, &mut v);

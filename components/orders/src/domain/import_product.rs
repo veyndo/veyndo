@@ -1,35 +1,82 @@
 //! Explicit catalogue-only preview: whitelist current mapped/native fields, bound text/media, reuse native money formatting.
+use serde::Deserialize;
 use serde_json::{Value, json};
+use veyndo_core::document::{lenient, view};
 use veyndo_core::{Result, bad};
+/// The product fields a catalogue-only import preview shows.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct PreviewProduct {
+    #[serde(deserialize_with = "lenient")]
+    extra: PreviewExtra,
+    #[serde(deserialize_with = "lenient")]
+    commerce: PreviewCommerce,
+    #[serde(deserialize_with = "lenient")]
+    catalog: PreviewCatalog,
+    #[serde(deserialize_with = "lenient")]
+    translations: Option<serde_json::Map<String, Value>>,
+}
+
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct PreviewExtra {
+    #[serde(deserialize_with = "lenient")]
+    price_currency: Option<String>,
+}
+
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct PreviewCommerce {
+    price: Value,
+    tax_rate: Value,
+    #[serde(deserialize_with = "lenient")]
+    media: Option<Vec<Value>>,
+}
+
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct PreviewCatalog {
+    product_number: Value,
+    active: Value,
+    parent_id: Value,
+    options: Value,
+}
+
+/// A text field of a nested record, as the preview shows it.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct PreviewText {
+    name: Value,
+    description: Value,
+    url: Value,
+}
+
 pub fn projection(value: &Value, scale: u8) -> Result<Value> {
-    let code = value["extra"]["priceCurrency"].as_str().unwrap_or("EUR");
+    let value: PreviewProduct = view(value);
+    let code = value.extra.price_currency.as_deref().unwrap_or("EUR");
     let currency = veyndo_pricing::money::Currency::new(code, scale)
         .map_err(|_| bad("Invalid product currency"))?;
-    let amount =
-        veyndo_pricing::money::Money::rounded(&value["commerce"]["price"].to_string(), currency)
-            .map_err(|_| bad("Invalid native product price"))?
-            .decimal();
+    let amount = veyndo_pricing::money::Money::rounded(&value.commerce.price.to_string(), currency)
+        .map_err(|_| bad("Invalid native product price"))?
+        .decimal();
     let mut translations = serde_json::Map::new();
-    for (locale, fields) in value["translations"]
-        .as_object()
-        .into_iter()
-        .flatten()
-        .take(16)
-    {
+    for (locale, fields) in value.translations.iter().flatten().take(16) {
+        let fields: PreviewText = view(fields);
         translations.insert(
             locale.clone(),
-            json!({"name":text(&fields["name"]),"description":text(&fields["description"])}),
+            json!({"name":text(&fields.name),"description":text(&fields.description)}),
         );
     }
-    let media: Vec<Value> = value["commerce"]["media"]
-        .as_array()
-        .into_iter()
+    let media: Vec<Value> = value
+        .commerce
+        .media
+        .iter()
         .flatten()
         .take(8)
-        .map(|item| json!({"url":text(&item["url"])}))
+        .map(|item| json!({"url":text(&view::<PreviewText>(item).url)}))
         .collect();
     Ok(
-        json!({"translations":translations,"sku":text(&value["catalog"]["productNumber"]),"active":value["catalog"]["active"],"parentId":value["catalog"]["parentId"],"options":value["catalog"]["options"],"price":{"amount":amount,"currency":code},"taxRate":value["commerce"]["taxRate"],"media":media}),
+        json!({"translations":translations,"sku":text(&value.catalog.product_number),"active":value.catalog.active,"parentId":value.catalog.parent_id,"options":value.catalog.options,"price":{"amount":amount,"currency":code},"taxRate":value.commerce.tax_rate,"media":media}),
     )
 }
 fn text(v: &Value) -> String {

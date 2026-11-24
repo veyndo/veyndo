@@ -159,7 +159,7 @@
         "tenants": "read: reads shop existence, status or the agent stop switch inside a larger claim or join; simple reads go through veyndo_core::tenants (media_jobs.rs)"
       },
       "glob_imports": 0,
-      "untyped_access": 98,
+      "untyped_access": 91,
       "sql_outside_store": 2
     },
     "inventory": {
@@ -335,7 +335,7 @@
         "sales_channels": "read: reads the sales channel document (kind, activity, catalogue scope) to admit the request channel inside the same statement (company.rs, company_logos.rs)"
       },
       "glob_imports": 0,
-      "untyped_access": 172,
+      "untyped_access": 128,
       "sql_outside_store": 3
     },
     "payments": {
@@ -376,7 +376,7 @@
         "sales_channels": "read: reads the sales channel document (kind, activity, catalogue scope) to admit the request channel inside the same statement (providers.rs)"
       },
       "glob_imports": 0,
-      "untyped_access": 199,
+      "untyped_access": 189,
       "sql_outside_store": 11
     },
     "marketing": {
@@ -431,7 +431,7 @@
         "user_sessions": "read: reads merchant sessions to resolve the actor of a flow (channel_preview.rs)"
       },
       "glob_imports": 0,
-      "untyped_access": 207,
+      "untyped_access": 189,
       "sql_outside_store": 9
     },
     "b2b": {

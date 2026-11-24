@@ -1,11 +1,13 @@
 //! Assemble private server-owned rule context once per quote/event; never publish customer facts in cart responses.
 use crate::domain::line_facts::line;
 use crate::store::customer_facts::customer;
+use serde::Deserialize;
 use serde_json::{Value, json};
 use sqlx::Row;
 use veyndo_catalog::domain::family::inherited_extra;
 use veyndo_catalog::store::products::product;
 use veyndo_core::Result;
+use veyndo_core::document::{lenient, view};
 use veyndo_shop::types::cart::{StoredCart, selection};
 pub async fn rule_facts(conn: &mut sqlx::PgConnection, c: &StoredCart, q: &Value) -> Result<Value> {
     let ids = c
@@ -62,6 +64,46 @@ pub async fn rule_facts(conn: &mut sqlx::PgConnection, c: &StoredCart, q: &Value
     );
     Ok(facts)
 }
+/// The order fields order rules read.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct OrderFacts {
+    state: Value,
+    #[serde(deserialize_with = "lenient")]
+    automation: AutomationFacts,
+    affiliate_code: Value,
+    campaign_code: Value,
+    #[serde(deserialize_with = "lenient")]
+    created_by_admin: Option<bool>,
+    #[serde(deserialize_with = "lenient")]
+    deliveries: Option<Vec<Value>>,
+    #[serde(deserialize_with = "lenient")]
+    payment: StateOnly,
+}
+
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct AutomationFacts {
+    #[serde(deserialize_with = "lenient")]
+    tags: Option<Vec<Value>>,
+    #[serde(deserialize_with = "lenient")]
+    custom_fields: Option<serde_json::Map<String, Value>>,
+}
+
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct StateOnly {
+    state: Value,
+}
+
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct DeliveryFacts {
+    state: Value,
+    #[serde(deserialize_with = "lenient")]
+    tracking_code: Option<String>,
+}
+
 pub async fn order_facts(
     conn: &mut sqlx::PgConnection,
     t: &str,
@@ -76,6 +118,13 @@ pub async fn order_facts(
     .bind(id)
     .fetch_all(&mut *conn)
     .await?;
-    facts["order"] = json!({"state":q["state"],"tags":q["automation"]["tags"].as_array().cloned().unwrap_or_default(),"customFields":q["automation"]["customFields"].as_object().cloned().unwrap_or_default(),"affiliateCode":q["affiliateCode"],"campaignCode":q["campaignCode"],"createdByAdmin":q["createdByAdmin"].as_bool().unwrap_or(false),"documentTypes":receipts,"sentDocumentTypes":[],"deliveryStates":q["deliveries"].as_array().into_iter().flatten().map(|d|d["state"].clone()).collect::<Vec<_>>(),"paymentStates":[q["payment"]["state"].clone()],"trackingSet":q["deliveries"].as_array().into_iter().flatten().any(|d|d["trackingCode"].as_str().is_some_and(|s|!s.is_empty()))});
+    let q: OrderFacts = view(q);
+    let deliveries = q
+        .deliveries
+        .iter()
+        .flatten()
+        .map(view::<DeliveryFacts>)
+        .collect::<Vec<_>>();
+    facts["order"] = json!({"state":q.state,"tags":q.automation.tags.unwrap_or_default(),"customFields":q.automation.custom_fields.unwrap_or_default(),"affiliateCode":q.affiliate_code,"campaignCode":q.campaign_code,"createdByAdmin":q.created_by_admin.unwrap_or(false),"documentTypes":receipts,"sentDocumentTypes":[],"deliveryStates":deliveries.iter().map(|d|d.state.clone()).collect::<Vec<_>>(),"paymentStates":[q.payment.state],"trackingSet":deliveries.iter().any(|d|d.tracking_code.as_deref().is_some_and(|s|!s.is_empty()))});
     Ok(())
 }
