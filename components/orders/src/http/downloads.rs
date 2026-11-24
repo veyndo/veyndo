@@ -3,9 +3,11 @@ use crate::store::account_orders::ACCOUNT_SCOPE;
 use axum::Json;
 use axum::extract::{Path, State as Shared};
 use axum::response::Response;
+use serde::Deserialize;
 use serde_json::{Value, json};
 use sqlx::Row;
 use veyndo_catalog::domain::content::translated_string;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::shop_scope::{header, session_digest, tenant};
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode};
 use veyndo_customers::service::sessions::identify;
@@ -29,12 +31,29 @@ fn response(r: &sqlx::postgres::PgRow) -> Response {
 }
 /// Whether the order's payment unlocks its downloads.
 fn paid(o: &Value) -> bool {
+    let o: DownloadOrder = view(o);
+    let state = o.payment.state.as_str().unwrap_or("");
     verified_kernel::download_admissible(
-        ["cancelled", "expired", "payment_review"].contains(&o["state"].as_str().unwrap_or("")),
-        ["paid", "captured", "partially_refunded"]
-            .contains(&o["payment"]["state"].as_str().unwrap_or("")),
-        o["payment"]["provider"] == "simulated" && o["payment"]["state"] == "authorized",
+        ["cancelled", "expired", "payment_review"].contains(&o.state.as_str().unwrap_or("")),
+        ["paid", "captured", "partially_refunded"].contains(&state),
+        o.payment.provider == "simulated" && o.payment.state == "authorized",
     )
+}
+
+/// The order facts that unlock its downloads.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct DownloadOrder {
+    state: Value,
+    #[serde(deserialize_with = "lenient")]
+    payment: DownloadPayment,
+}
+
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct DownloadPayment {
+    state: Value,
+    provider: Value,
 }
 /// `GET /store-api/account/downloads`: the downloads of the customer's paid orders.
 pub async fn owned(Shared(a): Shared<State>, h: RequestContext) -> Result<Json<Value>> {

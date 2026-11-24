@@ -1953,8 +1953,8 @@
     },
     "components/checkout/src/store/cart_selection.rs": {
       "status": "unproved",
-      "sha256": "77795f07b088dc62e7d93fc9414ccc43afddf0c42c9ad8959bb7f92bf88cec2f",
-      "review": "Checkout selection and method discovery move into checkout"
+      "sha256": "8580c6facce792eb8991981e027ec3c6a08d6784fb717279225ca280cbcd31e1",
+      "review": "F37 typed inputs and views: proof bindings unchanged"
     },
     "components/checkout/src/store/customer_snapshot.rs": {
       "status": "unproved",
@@ -2388,8 +2388,8 @@
     },
     "components/identity/src/service/roles.rs": {
       "status": "unproved",
-      "sha256": "42d711bb0b0de9470d8257be50fea1e17bba836233cb6be09c3c9dabd17109e3",
-      "review": "F17: shared outbox and shop registry helpers in core; written reasons for foreign table access"
+      "sha256": "6ee85d1f10e9986529e5081f93308c9e74d8cf347fa877f0022ebe6212e65a20",
+      "review": "F37 typed inputs and views: proof bindings unchanged"
     },
     "components/identity/src/service.rs": {
       "status": "unproved",
@@ -2488,8 +2488,8 @@
     },
     "components/intelligence/src/domain/source_content.rs": {
       "status": "unproved",
-      "sha256": "4520d0522bfa5084445d1151791313e583919422c342b3d127249a10211907f3",
-      "review": "F23 typed views: proof bindings unchanged"
+      "sha256": "c3df54685fa8e942e1f3b97c5fdda1860a3362684806d0eb0f969facba5505b2",
+      "review": "F37 typed inputs and views: proof bindings unchanged"
     },
     "components/intelligence/src/domain/tool_trace.rs": {
       "status": "unproved",
@@ -3008,8 +3008,8 @@
     },
     "components/marketing/src/domain/rule_fields.rs": {
       "status": "unproved",
-      "sha256": "def4650ed34898ff3bb23ad822a4b357bb2ad7fb532b99b4fa118c60767f57e3",
-      "review": "Unit tests for every public domain function of the components; no production code changed"
+      "sha256": "303662614fed13e4002bbeda9d7172daee52ccf04653085fecb829215960139d",
+      "review": "F37 typed inputs and views: proof bindings unchanged"
     },
     "components/marketing/src/domain/rule_match.rs": {
       "status": "reviewed-binding",
@@ -3218,8 +3218,8 @@
     },
     "components/orders/src/domain/company_model.rs": {
       "status": "unproved",
-      "sha256": "9d60abb00d683772aa02ae26337c0de7f3acc2d6d9a665f677f81569be54a4b7",
-      "review": "Unit tests for every public domain function of the components; no production code changed"
+      "sha256": "a8eebce95d3db6ba32a10e9795f7e09ef8031fabc63fca4e963831b6f6d35802",
+      "review": "F37 typed inputs and views: proof bindings unchanged"
     },
     "components/orders/src/domain/creation_schema.rs": {
       "status": "unproved",
@@ -3303,8 +3303,8 @@
     },
     "components/orders/src/http/downloads.rs": {
       "status": "reviewed-binding",
-      "sha256": "a1c92c972a6839e4b6e05f2ae8dcb61f2bd03aee39bacba8629dd7162d508b5f",
-      "review": "Paid order downloads move into orders"
+      "sha256": "242e27c824fdbfdf0d0cb7f042e787d4ea613a1af237770e5fbf1f833511d2b5",
+      "review": "F37 typed inputs and views: proof bindings unchanged"
     },
     "components/orders/src/http/transitions.rs": {
       "status": "reviewed-binding",
@@ -3918,8 +3918,8 @@
     },
     "components/shipping/src/domain/split.rs": {
       "status": "reviewed-binding",
-      "sha256": "0b1f387f30e64b34c96b848e110d55187b37ab28550cc01129b91663321df154",
-      "review": "delivery_split_admissible and carrier_booking_admissible bindings moved into components/shipping"
+      "sha256": "0944dc59ccb0eb702b264a4b4e109e597210acc14bc9604be47e806255178997",
+      "review": "F37 typed inputs and views: proof bindings unchanged"
     },
     "components/shipping/src/domain.rs": {
       "status": "unproved",

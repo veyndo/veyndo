@@ -1,29 +1,61 @@
 //! Provider-neutral partial-package allocation; quantities and fiscal order snapshots remain conserved.
+use serde::Deserialize;
 use serde_json::{Value, json};
+use veyndo_core::document::{lenient, view};
 use veyndo_core::{Result, bad, conflict};
 use veyndo_pricing::verified_kernel;
 
 /// Splits the requested quantities off an open package: the original keeps the rest, the new package costs nothing.
 /// `terminal` says the order's delivery is already closed.
+/// The shipment being split: its positions, state, label and carrier booking.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct ShipmentSource {
+    #[serde(deserialize_with = "lenient")]
+    positions: Option<Vec<Value>>,
+    state: Value,
+    label: Value,
+    booking: Value,
+}
+
+/// One shipment position: a product and its quantity.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct ShipmentPosition {
+    #[serde(deserialize_with = "lenient")]
+    id: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    quantity: Option<u64>,
+}
+
 pub fn allocate(
     source: &Value,
     requested: &Value,
     terminal: bool,
     id: &str,
 ) -> Result<(Value, Value)> {
-    let positions = source["positions"]
-        .as_array()
+    let shipment: ShipmentSource = view(source);
+    let positions = shipment
+        .positions
+        .as_ref()
         .ok_or(bad("Shipment has no positions"))?;
+    let listed = positions
+        .iter()
+        .map(view::<ShipmentPosition>)
+        .collect::<Vec<_>>();
     let requested = requested
         .as_array()
         .filter(|v| !v.is_empty() && v.len() <= 100)
-        .ok_or(bad("Select shipment positions and quantities"))?;
+        .ok_or(bad("Select shipment positions and quantities"))?
+        .iter()
+        .map(view::<ShipmentPosition>)
+        .collect::<Vec<_>>();
     let mut amounts = std::collections::BTreeMap::new();
     let mut total = 0_u64;
-    for p in positions {
-        let sku = p["id"].as_str().ok_or(bad("Invalid shipment position"))?;
-        let q = p["quantity"]
-            .as_u64()
+    for p in &listed {
+        let sku = p.id.as_deref().ok_or(bad("Invalid shipment position"))?;
+        let q = p
+            .quantity
             .filter(|q| *q > 0 && *q <= u32::MAX as u64)
             .ok_or(bad("Invalid shipment quantity"))?;
         if amounts.insert(sku, q).is_some() {
@@ -35,10 +67,10 @@ pub fn allocate(
     }
     let mut moved = 0_u64;
     let mut chosen = std::collections::BTreeMap::new();
-    for p in requested {
-        let sku = p["id"].as_str().ok_or(bad("Product identity required"))?;
-        let q = p["quantity"]
-            .as_u64()
+    for p in &requested {
+        let sku = p.id.as_deref().ok_or(bad("Product identity required"))?;
+        let q = p
+            .quantity
             .filter(|q| *q > 0)
             .ok_or(bad("Shipment quantities must be positive integers"))?;
         if !amounts.get(sku).is_some_and(|available| q <= *available)
@@ -52,17 +84,13 @@ pub fn allocate(
             .checked_add(q)
             .ok_or(bad("Shipment quantity overflow"))?;
     }
-    if !verified_kernel::delivery_split_admissible(
-        source["state"] == "open",
-        terminal,
-        total,
-        moved,
-    ) {
+    if !verified_kernel::delivery_split_admissible(shipment.state == "open", terminal, total, moved)
+    {
         return Err(conflict(
             "Only open shipments can be split; keep at least one item in the original package",
         ));
     }
-    if !source["label"].is_null() || !source["booking"].is_null() {
+    if !shipment.label.is_null() || !shipment.booking.is_null() {
         return Err(conflict(
             "Reconcile the existing carrier label or booking before changing its package",
         ));

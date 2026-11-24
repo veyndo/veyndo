@@ -3,9 +3,11 @@ use crate::domain::permissions::{SCOPES, validate_permissions};
 use crate::ports::RoleLanguages;
 use crate::store::roles::{current, usage};
 use crate::{merchant, permit};
+use serde::Deserialize;
 use serde_json::{Value, json};
 use sqlx::Row;
 use veyndo_app_model::declarations::identifier;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::history_context::context;
 use veyndo_core::shop_scope::header;
 use veyndo_core::{RequestContext, Result, State, bad, conflict};
@@ -33,6 +35,17 @@ pub const CAPABILITIES: &[(&str, &str)] = &[
 pub fn schema(name: &str) -> Option<Value> {
     CAPABILITIES.iter().any(|(n, _)| *n == name).then(|| json!({"type":"object","properties":{"id":{"type":"string","maxLength":32},"revision":{"type":"integer","minimum":0},"approve":{"type":"boolean"},"data":{"type":"object","properties":{"name":{"type":"object","additionalProperties":{"type":"string"}},"permissions":{"type":"array","items":{"type":"string","enum":SCOPES}},"active":{"type":"boolean"}},"required":["name","permissions","active"],"additionalProperties":false}},"additionalProperties":false}))
 }
+/// A role operation: the role, its expected revision and the approval of a deletion.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct RoleChange {
+    #[serde(deserialize_with = "lenient")]
+    id: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    revision: Option<i64>,
+    #[serde(deserialize_with = "lenient")]
+    approve: Option<bool>,
+}
 /// Lists, saves, inspects or deletes a tenant role; edits are revision checked and never delegate more than the actor holds.
 pub async fn invoke(
     a: &State,
@@ -58,8 +71,10 @@ pub async fn invoke(
             json!({"mainLocale":main_locale,"locales":locales,"elements":rows.iter().map(|r|json!({"id":r.get::<String,_>("id"),"data":r.get::<Value,_>("data"),"builtin":r.get::<bool,_>("builtin"),"revision":r.get::<i64,_>("revision")})).collect::<Vec<_>>()}),
         );
     }
-    let id = v["id"]
-        .as_str()
+    let input: RoleChange = view(v);
+    let id = input
+        .id
+        .as_deref()
         .filter(|s| identifier(s))
         .ok_or(bad("Invalid role ID"))?;
     let mut tx = a.db.begin().await?;
@@ -80,9 +95,7 @@ pub async fn invoke(
     if id == "owner" {
         return Err(bad("Owner authority cannot be changed"));
     }
-    let expected = v["revision"]
-        .as_i64()
-        .ok_or(bad("Role revision required"))?;
+    let expected = input.revision.ok_or(bad("Role revision required"))?;
     if row
         .as_ref()
         .map(|r| r.get::<i64, _>("revision"))
@@ -94,7 +107,7 @@ pub async fn invoke(
     context(&mut tx, &actor, "team.roles").await?;
     if name == "team.role.delete" {
         let row = row.ok_or(bad("Role not found"))?;
-        if v["approve"] != true
+        if input.approve != Some(true)
             || row.get::<bool, _>("builtin")
             || usage(&mut tx, &t, id).await?["blocked"] == true
         {

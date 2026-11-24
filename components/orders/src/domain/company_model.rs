@@ -1,5 +1,7 @@
 //! Company profile admission, sparse channel inheritance and structured-address print projection.
+use serde::Deserialize;
 use serde_json::{Value, json};
+use veyndo_core::document::{lenient, view};
 use veyndo_core::{Result, bad};
 use veyndo_shipping::domain::geography;
 use veyndo_shop::types::settings::Settings;
@@ -98,6 +100,26 @@ pub fn address(v: &Value) -> String {
     .collect::<Vec<_>>()
     .join(", ")
 }
+/// The company fields a complete master data record must carry consistently.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct CompanyFacts {
+    #[serde(deserialize_with = "lenient")]
+    name: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    street: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    city: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    country: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    country_state_id: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    website: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    professional_rules_url: Option<String>,
+}
+
 pub fn validate(data: &Value, settings: &Settings, partial: bool) -> Result<()> {
     let object = data.as_object().ok_or(bad("Master data object required"))?;
     for (key, v) in object {
@@ -130,34 +152,36 @@ pub fn validate(data: &Value, settings: &Settings, partial: bool) -> Result<()> 
     if partial {
         return Ok(());
     }
-    if data["name"].as_str().is_none_or(|s| s.trim().is_empty()) || address(data).is_empty() {
+    let company: CompanyFacts = view(data);
+    if company.name.as_deref().is_none_or(|s| s.trim().is_empty()) || address(data).is_empty() {
         return Err(bad("Company name and address required"));
     }
-    if data["street"].as_str().is_some_and(|s| !s.is_empty())
-        && ["city", "country"]
+    if company.street.as_deref().is_some_and(|s| !s.is_empty())
+        && [&company.city, &company.country]
             .iter()
-            .any(|k| data[k].as_str().is_none_or(|s| s.is_empty()))
+            .any(|v| v.as_deref().is_none_or(|s| s.is_empty()))
     {
         return Err(bad("Structured address requires city and country"));
     }
-    let country = data["country"].as_str().unwrap_or("");
+    let country = company.country.as_deref().unwrap_or("");
     if !country.is_empty() {
         let row = geography::catalogue(&settings.country_definitions)
             .into_iter()
             .find(|c| c.code == country)
             .ok_or(bad("Unknown company country"))?;
-        let state = data["countryStateId"].as_str().unwrap_or("");
+        let state = company.country_state_id.as_deref().unwrap_or("");
         if !state.is_empty() && !row.states.iter().any(|s| s.code == state) {
             return Err(bad("Unknown company subdivision"));
         }
-    } else if data["countryStateId"]
-        .as_str()
+    } else if company
+        .country_state_id
+        .as_deref()
         .is_some_and(|s| !s.is_empty())
     {
         return Err(bad("Subdivision requires country"));
     }
-    for key in ["website", "professionalRulesUrl"] {
-        if let Some(url) = data[key].as_str().filter(|s| !s.is_empty()) {
+    for url in [&company.website, &company.professional_rules_url] {
+        if let Some(url) = url.as_deref().filter(|s| !s.is_empty()) {
             let parsed = reqwest::Url::parse(url).map_err(|_| bad("Invalid company URL"))?;
             if !["https", "http"].contains(&parsed.scheme())
                 || parsed.host_str().is_none()

@@ -1,9 +1,11 @@
 //! The checkout choices of a cart: country, methods, contact email and addresses, priced as a candidate and written at the reviewed revision.
 use crate::ports::CartEdits;
 use crate::store::cart_load;
+use serde::Deserialize;
 use serde_json::{Value, json};
 use sqlx::Row;
 use veyndo_b2b::store::access::guard_conn;
+use veyndo_core::document::{Raw, lenient, view};
 use veyndo_core::shop_scope::{session_digest, tenant};
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad, conflict};
 use veyndo_customers::service::{address_book, sessions};
@@ -43,16 +45,37 @@ async fn saved_addresses(
 }
 
 /// `POST /store-api/checkout/context`: validates the requested selection, refuses one the quote cannot honour, and writes it.
+/// A checkout selection edit at the cart revision it was made on.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct SelectionRequest {
+    #[serde(deserialize_with = "lenient")]
+    checkout: Raw<SelectionAddress>,
+    #[serde(deserialize_with = "lenient")]
+    revision: Option<i64>,
+}
+
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct SelectionAddress {
+    address: Value,
+}
+
 pub async fn select(
     a: &State,
     edits: &dyn CartEdits,
     h: &RequestContext,
     v: &Value,
 ) -> Result<Value> {
-    let mut requested: CheckoutSelection = serde_json::from_value(v["checkout"].clone())
+    let input: SelectionRequest = view(v);
+    let mut requested: CheckoutSelection = serde_json::from_value(input.checkout.raw.clone())
         .map_err(|_| bad("Invalid checkout selection"))?;
-    if v["checkout"]["address"].is_object()
-        && v["checkout"]["address"]["country"].is_null()
+    if input.checkout.address.is_object()
+        && input
+            .checkout
+            .address
+            .get("country")
+            .is_none_or(Value::is_null)
         && let Some(ad) = &mut requested.address
     {
         ad.country = requested.country.clone();
@@ -64,7 +87,7 @@ pub async fn select(
     if c.status != "open" {
         return Err(conflict("Cart is terminal"));
     }
-    if v["revision"].as_i64() != Some(c.revision) {
+    if input.revision != Some(c.revision) {
         return Err(conflict("Cart revision changed; reload before editing"));
     }
     saved_addresses(a, h, &c, &mut requested).await?;

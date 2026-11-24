@@ -1,5 +1,7 @@
 //! Bounds of a knowledge source: enabled languages, kinds, translated fields and the digest that binds its chunks.
+use serde::Deserialize;
 use serde_json::{Value, json};
+use veyndo_core::document::{lenient, view};
 use veyndo_core::{Error, RequestContext, Result, StatusCode, bad, hash};
 
 /// A validated source in canonical form; `translations` keeps its stored JSON shape, which the digest binds.
@@ -27,6 +29,21 @@ impl Source {
     }
 }
 
+/// The submitted fields of a knowledge source.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct SourceInput {
+    #[serde(deserialize_with = "lenient")]
+    locale: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    title: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    content: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    kind: Option<String>,
+    product_id: Value,
+}
+
 /// Admits a source in the shop's enabled languages and returns it in canonical form with its content digest.
 pub fn validate(locales: &[String], main_locale: &str, v: &Value) -> Result<Source> {
     if v.as_object().is_none_or(|o| {
@@ -45,19 +62,22 @@ pub fn validate(locales: &[String], main_locale: &str, v: &Value) -> Result<Sour
     }) {
         return Err(bad("Unsupported source field"));
     }
-    let locale = v["locale"].as_str().unwrap_or(main_locale);
+    let input: SourceInput = view(v);
+    let locale = input.locale.as_deref().unwrap_or(main_locale);
     if !locales.iter().any(|l| l == locale) {
         return Err(bad("Source language must be enabled"));
     }
-    let title = v["title"]
-        .as_str()
+    let title = input
+        .title
+        .as_deref()
         .filter(|s| !s.trim().is_empty() && s.len() <= 200)
         .ok_or(bad("Title required, maximum 200 bytes"))?;
-    let text = v["content"]
-        .as_str()
+    let text = input
+        .content
+        .as_deref()
         .filter(|s| !s.trim().is_empty() && s.len() <= 100_000)
         .ok_or(bad("Document text must be 1..100000 UTF-8 bytes"))?;
-    let kind = v["kind"].as_str().unwrap_or("document");
+    let kind = input.kind.as_deref().unwrap_or("document");
     if ![
         "document",
         "datasheet",
@@ -103,7 +123,7 @@ pub fn validate(locales: &[String], main_locale: &str, v: &Value) -> Result<Sour
     if translations.to_string().len() + text.len() > 200_000 {
         return Err(bad("Combined source content exceeds 200000 bytes"));
     }
-    if !v["productId"].is_null() && v["productId"].as_str().is_none() {
+    if !input.product_id.is_null() && input.product_id.as_str().is_none() {
         return Err(bad("Invalid product reference"));
     }
     let digest = if map.is_empty() {
@@ -114,7 +134,8 @@ pub fn validate(locales: &[String], main_locale: &str, v: &Value) -> Result<Sour
     Ok(Source {
         title: title.into(),
         content: text.into(),
-        product_id: v["productId"]
+        product_id: input
+            .product_id
             .as_str()
             .filter(|s| !s.is_empty())
             .map(str::to_string),

@@ -1,5 +1,7 @@
 //! Typed rule fields share the original comparison operators and server-derived checkout/event facts.
+use serde::Deserialize;
 use serde_json::{Value, json};
+use veyndo_core::document::{lenient, view};
 use veyndo_core::{Result, bad};
 use veyndo_shop::types::cart::{StoredCart, selection};
 pub const FIELDS: &[&str] = &[
@@ -41,8 +43,27 @@ pub fn validate_value(operator: &str, value: &Value) -> Result<()> {
     }
     Ok(())
 }
+/// The evaluated quote and event facts a field condition can name.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct QuoteFacts {
+    order_state: Value,
+    payment_state: Value,
+    event_kind: Value,
+    #[serde(deserialize_with = "lenient")]
+    event: EventFacts,
+}
+
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct EventFacts {
+    title: Value,
+    source_kind: Value,
+}
+
 pub fn matches(c: &StoredCart, q: &Value, field: &str, operator: &str, value: &Value) -> bool {
     let selection = selection(&c.data);
+    let facts: QuoteFacts = view(q);
     let actual = match field {
         "customer.email" => json!(c.data.email),
         "customer.company" => json!(c.data.company),
@@ -60,11 +81,11 @@ pub fn matches(c: &StoredCart, q: &Value, field: &str, operator: &str, value: &V
         "cart.billingCountry" => json!(selection.billing_address.map(|a| a.country)),
         "cart.shippingCountry" => json!(selection.country),
         "cart.salesChannel" => json!(c.data.sales_channel),
-        "order.state" => q["orderState"].clone(),
-        "payment.state" => q["paymentState"].clone(),
-        "event.kind" => q["eventKind"].clone(),
-        "event.title" => q["event"]["title"].clone(),
-        "event.sourceKind" => q["event"]["sourceKind"].clone(),
+        "order.state" => facts.order_state,
+        "payment.state" => facts.payment_state,
+        "event.kind" => facts.event_kind,
+        "event.title" => facts.event.title,
+        "event.sourceKind" => facts.event.source_kind,
         _ => return false,
     };
     compare(&actual, operator, value)
