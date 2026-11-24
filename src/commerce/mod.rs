@@ -40,8 +40,6 @@ pub(crate) use geography::country_catalogue;
 mod tax_context;
 pub(crate) use tax_context::*;
 
-pub(crate) use veyndo_core::localized::valid_locale_key;
-
 mod content_text;
 pub(crate) use content_text::translated_string;
 pub(crate) use content_text::*;

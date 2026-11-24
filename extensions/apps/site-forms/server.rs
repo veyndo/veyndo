@@ -1,10 +1,11 @@
 //! Forms validate answers against a published page's declared fields; inbox entries stay private.
-use super::Manifest;
 use serde::Deserialize;
 use serde_json::Value;
+use veyndo_app_model::manifest::Manifest;
 use veyndo_core::Result;
 use veyndo_core::bad;
-pub(super) async fn admit(
+/// Admits one public form submission against the published form definition of the channel.
+pub async fn admit(
     tx: &mut sqlx::Transaction<'_, sqlx::Postgres>,
     t: &str,
     channel: &str,

@@ -18,7 +18,6 @@ pub(crate) use captions::Egress;
 pub(crate) mod design_references;
 mod image_jobs;
 pub(crate) use captions::schema as caption_schema;
-mod rich;
 mod rich_document;
 pub(crate) use rich_document::safe_url;
 pub(crate) mod ingestion;
@@ -28,7 +27,6 @@ pub(crate) use upload::persist as persist_app_upload;
 mod app_files;
 pub(crate) use app_files::callback as app_file_callback;
 pub(crate) use image_jobs::image_once;
-pub(crate) use rich::validate_rich;
 pub(crate) use upload::{list, publish};
 pub(crate) fn router() -> Router<App> {
     Router::new()

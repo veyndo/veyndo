@@ -13,7 +13,6 @@ use veyndo_core::request_context::RequestContext;
 mod release_host;
 pub(crate) use release_host::Releases;
 pub(crate) use veyndo_core::shop_scope::live_parent as parent_conn;
-pub(crate) use veyndo_core::shop_scope::parent;
 pub(crate) use veyndo_studio::service::staging::snapshot;
 pub(crate) fn router() -> Router<App> {
     Router::new()

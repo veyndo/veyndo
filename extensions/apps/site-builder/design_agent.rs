@@ -1,31 +1,34 @@
 //! Scoped visual proposals reuse central inference and native revision-bound tasks; models cannot publish or execute.
-use crate::apps::site_builder;
-use crate::auth::SecureRoutes;
-use crate::foundation::App;
-use crate::foundation::merchant;
-use crate::localization::language_context;
-use crate::proposal_apply::apply;
-use crate::{apps, auth, performance, staging};
+use crate::{SiteHost, SiteState};
 use axum::Json;
 use axum::Router;
+use axum::extract::FromRef;
 use axum::extract::State;
 use axum::http::StatusCode;
 use axum::routing::post;
 use serde_json::Value;
 use serde_json::json;
+use veyndo_app_platform::store::managed_data::list_page;
+use veyndo_app_platform::store::packages::package;
 use veyndo_core::Error;
 use veyndo_core::Result;
+use veyndo_core::admission::reserve_ai_attempt;
 use veyndo_core::bad;
 use veyndo_core::conflict;
+use veyndo_core::database::lease::Lease;
 use veyndo_core::request_context::RequestContext;
-#[path = "agent_handoff.rs"]
+use veyndo_core::shop_scope::parent;
+use veyndo_identity::route_policy::SecureRoutes;
+use veyndo_identity::{merchant, permit};
+use veyndo_shop::service::language::language_context;
 mod agent_handoff;
-#[path = "proposals.rs"]
 mod proposals;
-#[path = "references.rs"]
-mod references;
 const DESIGN_PROMPT: &str = include_str!("prompts/site-design.v1.txt");
-pub(crate) fn router() -> Router<App> {
+pub(crate) fn router<S>() -> Router<S>
+where
+    S: Clone + Send + Sync + 'static,
+    SiteState: FromRef<S>,
+{
     Router::new()
         .secure_route(
             "/api/merchant/site/task",
@@ -49,7 +52,8 @@ pub(crate) fn router() -> Router<App> {
         )
         .layer(axum::extract::DefaultBodyLimit::max(4 * 1024 * 1024))
 }
-pub(crate) fn schema(name: &str) -> Option<Value> {
+/// The input schema of a design operation.
+pub fn schema(name: &str) -> Option<Value> {
     let p = match name {
         "merchant.site.plan" => {
             json!({"id":{"type":"string"},"revision":{"type":"integer"},"selected":{"type":"string"},"instruction":{"type":"string","minLength":1,"maxLength":2000},"urls":{"type":"array","maxItems":3,"items":{"type":"string"}},"images":{"type":"array","maxItems":2,"items":{"type":"string"}},"style":{"type":"boolean"},"structure":{"type":"boolean"},"content":{"type":"boolean"}})
@@ -67,12 +71,19 @@ pub(crate) fn schema(name: &str) -> Option<Value> {
         json!({"type":"object","properties":p,"additionalProperties":false,"required":if name.ends_with("apply"){vec!["taskId","approve"]}else if name.ends_with("propose"){vec!["id","revision","fields","instruction"]}else{vec!["id","revision","instruction"]}}),
     )
 }
-pub(crate) async fn invoke(a: &App, h: &RequestContext, name: &str, v: &Value) -> Result<Value> {
-    let t = merchant(a, h)?;
-    auth::permit(h, "channels.manage")?;
-    auth::permit(h, "channels.read")?;
-    auth::permit(h, "assistant.use")?;
-    if staging::parent(a, &t).await?.is_none() {
+/// One design operation on the saved page of a design sandbox: plan alternatives, export a coding-agent task, propose agent results or apply an approved proposal.
+pub async fn invoke(
+    site: &dyn SiteHost,
+    h: &RequestContext,
+    name: &str,
+    v: &Value,
+) -> Result<Value> {
+    let a = site.core();
+    let t = merchant(h)?;
+    permit(h, "channels.manage")?;
+    permit(h, "channels.read")?;
+    permit(h, "assistant.use")?;
+    if parent(a, &t).await?.is_none() {
         return Err(bad(
             "Create or select a design sandbox before preparing changes",
         ));
@@ -94,7 +105,7 @@ pub(crate) async fn invoke(a: &App, h: &RequestContext, name: &str, v: &Value) -
         {
             return Err(bad("Not a shop design proposal"));
         }
-        return apply(a, &t, id, h).await;
+        return site.apply(&t, id, h).await;
     }
     if ![
         "merchant.site.plan",
@@ -116,14 +127,13 @@ pub(crate) async fn invoke(a: &App, h: &RequestContext, name: &str, v: &Value) -
         .as_str()
         .filter(|s| !s.trim().is_empty() && s.len() <= 2000)
         .ok_or(bad("Describe a design change in 1..2000 bytes"))?;
-    let m = apps::package(a, &t, "site_builder", true).await?;
+    let m = package(a, &t, "site_builder", true).await?;
     let entity = m
         .entities
         .iter()
         .find(|e| e.name == "pages")
         .ok_or(bad("Pages unavailable"))?;
-    let current =
-        apps::data::list_page(a, &t, &m, entity, &json!({"id":v["id"],"limit":1})).await?;
+    let current = list_page(a, &t, &m, entity, &json!({"id":v["id"],"limit":1})).await?;
     let row = current["elements"]
         .as_array()
         .and_then(|r| r.first())
@@ -136,23 +146,23 @@ pub(crate) async fn invoke(a: &App, h: &RequestContext, name: &str, v: &Value) -
     fields.as_object_mut().unwrap().remove("id");
     fields.as_object_mut().unwrap().remove("revision");
     if name == "merchant.site.task" {
-        return agent_handoff::export(a, h, &fields, v).await;
+        return agent_handoff::export(site, h, &fields, v).await;
     }
     if name == "merchant.site.propose" {
-        return agent_handoff::propose(a, h, &m, entity, &fields, v, instruction).await;
+        return agent_handoff::propose(site, h, (&m, entity), &fields, v, instruction).await;
     }
     if selected.is_some() && v["structure"] != true && v["content"] != true {
         return Err(bad(
             "Choose the whole page for theme changes, or enable content or structure for the selected section",
         ));
     }
-    let (sources, images) = references::capture(v).await?;
+    let (sources, images) = site.references(v).await?;
     let mut schema = json!({"type":"object","additionalProperties":false,"required":["interpretation","variants"],"properties":{"interpretation":{"type":"string","maxLength":2000},"variants":{"type":"array","minItems":2,"maxItems":3,"items":{"type":"object","additionalProperties":false,"required":["summary","content_json","theme_json"],"properties":{"summary":{"type":"string","maxLength":500},"content_json":{"type":"string","maxLength":8192},"theme_json":{"type":"string","maxLength":1024}}}}}});
     if v["structure"] != true && v["content"] != true {
         schema["properties"]["variants"]["items"]["properties"]["content_json"] =
             json!({"type":"string","enum":["{}"]});
     }
-    let registry = apps::surfaces::registry(a, h, true).await?;
+    let registry = site.surfaces(h, true).await?;
     let elements = registry["surfaces"]
         .as_array()
         .into_iter()
@@ -169,16 +179,16 @@ pub(crate) async fn invoke(a: &App, h: &RequestContext, name: &str, v: &Value) -
         v["content"] == true,
         language_context(a, h).await?.0
     );
-    performance::reserve_ai_attempt(a, &t).await?;
-    let _slot = a.models.slots.clone().try_acquire_owned().map_err(|_| {
+    reserve_ai_attempt(a, &t).await?;
+    let models = site.models();
+    let _slot = models.slots.clone().try_acquire_owned().map_err(|_| {
         Error(
             StatusCode::TOO_MANY_REQUESTS,
             "Design model busy; retry shortly".into(),
         )
     })?;
-    let _lease = performance::cluster_lease::Lease::acquire(a, &t, "model", 2).await?;
-    let output = a
-        .models
+    let _lease = Lease::acquire(a, &t, "model", 2).await?;
+    let output = models
         .inference
         .structured_with_images(None, DESIGN_PROMPT, &prompt, &schema, &images)
         .await
@@ -213,31 +223,31 @@ pub(crate) async fn invoke(a: &App, h: &RequestContext, name: &str, v: &Value) -
 }
 
 async fn plan_route(
-    State(a): State<App>,
+    State(SiteState(site)): State<SiteState>,
     h: RequestContext,
     Json(v): Json<Value>,
 ) -> Result<Json<Value>> {
-    Ok(Json(invoke(&a, &h, "merchant.site.plan", &v).await?))
+    Ok(Json(invoke(&*site, &h, "merchant.site.plan", &v).await?))
 }
 async fn apply_route(
-    State(a): State<App>,
+    State(SiteState(site)): State<SiteState>,
     h: RequestContext,
     Json(v): Json<Value>,
 ) -> Result<Json<Value>> {
-    Ok(Json(invoke(&a, &h, "merchant.site.apply", &v).await?))
+    Ok(Json(invoke(&*site, &h, "merchant.site.apply", &v).await?))
 }
 
 async fn task_route(
-    State(a): State<App>,
+    State(SiteState(site)): State<SiteState>,
     h: RequestContext,
     Json(v): Json<Value>,
 ) -> Result<Json<Value>> {
-    Ok(Json(invoke(&a, &h, "merchant.site.task", &v).await?))
+    Ok(Json(invoke(&*site, &h, "merchant.site.task", &v).await?))
 }
 async fn propose_route(
-    State(a): State<App>,
+    State(SiteState(site)): State<SiteState>,
     h: RequestContext,
     Json(v): Json<Value>,
 ) -> Result<Json<Value>> {
-    Ok(Json(invoke(&a, &h, "merchant.site.propose", &v).await?))
+    Ok(Json(invoke(&*site, &h, "merchant.site.propose", &v).await?))
 }

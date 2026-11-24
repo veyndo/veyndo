@@ -38,7 +38,6 @@ async fn no_store(request: axum::extract::Request, next: axum::middleware::Next)
     response
 }
 pub(crate) use super::surface_registry::registry;
-pub(crate) use veyndo_app_platform::domain::surfaces::validate_contract;
 async fn admin_surfaces(State(a): State<App>, h: RequestContext) -> Result<Json<Value>> {
     Ok(Json(registry(&a, &h, false).await?))
 }

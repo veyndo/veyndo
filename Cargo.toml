@@ -1,6 +1,6 @@
 [workspace]
 resolver = "3"
-members = [".", "crates/*", "components/*", "extensions/apps/migration", "extensions/apps/marketplaces", "extensions/services/app-storage", "extensions/services/app-storage/model", "extensions/services/app-storage/runtime", "extensions/services/connectors", "extensions/apps/paypal"]
+members = [".", "crates/*", "components/*", "extensions/apps/migration", "extensions/apps/marketplaces", "extensions/services/app-storage", "extensions/services/app-storage/model", "extensions/services/app-storage/runtime", "extensions/services/connectors", "extensions/apps/paypal", "extensions/apps/site-builder", "extensions/apps/site-forms"]
 
 [workspace.package]
 version = "0.5.0"
@@ -67,6 +67,8 @@ tracing.workspace = true
 veyndo-kernel = { path = "crates/kernel" }
 veyndo-connectors = { path = "extensions/services/connectors" }
 veyndo-paypal = { path = "extensions/apps/paypal" }
+veyndo-site-builder = { path = "extensions/apps/site-builder" }
+veyndo-site-forms = { path = "extensions/apps/site-forms" }
 veyndo-core = { path = "components/core" }
 veyndo-identity = { path = "components/identity" }
 veyndo-automation = { path = "crates/automation" }

@@ -1,15 +1,18 @@
 //! Native revision-bound proposal validation and persistence shared by every design agent.
-use super::site_builder;
-use crate::apps;
-use crate::foundation::App;
-use crate::foundation::merchant;
 use serde_json::Value;
 use serde_json::json;
+use veyndo_app_model::Entity;
+use veyndo_app_model::manifest::Manifest;
+use veyndo_app_platform::domain::field_values;
+use veyndo_app_platform::domain::planning::AppChange;
+use veyndo_app_platform::store::managed_data::record_revision;
 use veyndo_core::Result;
+use veyndo_core::State;
 use veyndo_core::bad;
 use veyndo_core::conflict;
 use veyndo_core::request_context::RequestContext;
 use veyndo_core::uid;
+use veyndo_identity::merchant;
 use veyndo_studio::domain::proposal::Proposal;
 pub(super) struct ResultContext<'a> {
     pub instruction: &'a str,
@@ -19,10 +22,10 @@ pub(super) struct ResultContext<'a> {
     pub usage: &'a Value,
 }
 pub(super) async fn prepare(
-    a: &App,
+    a: &State,
     h: &RequestContext,
-    m: &apps::Manifest,
-    entity: &apps::Entity,
+    m: &Manifest,
+    entity: &Entity,
     fields: &Value,
     v: &Value,
     result: ResultContext<'_>,
@@ -34,7 +37,7 @@ pub(super) async fn prepare(
         model,
         usage,
     } = result;
-    let t = merchant(a, h)?;
+    let t = merchant(h)?;
     let selected = v["selected"].as_str().filter(|s| !s.is_empty());
     let variants = output["variants"]
         .as_array()
@@ -125,11 +128,11 @@ pub(super) async fn prepare(
             next["theme"] = fields["theme"].clone();
         }
         next["content"] = content;
-        next = site_builder::normalize(&next)?;
-        site_builder::validate("pages", &next)?;
-        apps::data::fields(entity, &next)?;
+        next = crate::normalize(&next)?;
+        crate::validate("pages", &next)?;
+        field_values::validate(entity, &next)?;
         let mut validation = a.db.begin().await?;
-        site_builder::validate_owned(
+        crate::validate_owned(
             &mut validation,
             &t,
             &next,
@@ -153,7 +156,7 @@ pub(super) async fn prepare(
             expected_experience_revision: None,
             translation: None,
             translation_products: None,
-            app_action: Some(apps::AppChange {
+            app_action: Some(AppChange {
                 app: "site_builder".into(),
                 action: "save_page".into(),
                 arguments_json: args.to_string(),
@@ -163,7 +166,7 @@ pub(super) async fn prepare(
         prepared.push((uid(), next, p));
     }
     // All alternatives are validated before any review task becomes visible.
-    if apps::data::record_revision(a, &t, m, entity, v["id"].as_str().unwrap()).await?
+    if record_revision(a, &t, m, entity, v["id"].as_str().unwrap()).await?
         != v["revision"].as_i64().unwrap_or(-1)
     {
         return Err(conflict("Page changed during design generation"));

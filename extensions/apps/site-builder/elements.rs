@@ -1,7 +1,7 @@
 //! Placed app elements resolve only active, public surfaces of this tenant; app code stays in its own package.
 use super::ElementRef;
-use crate::apps;
 use serde_json::Value;
+use veyndo_app_model::manifest::Manifest;
 use veyndo_core::Result;
 use veyndo_core::bad;
 pub(super) async fn validate_owned(
@@ -17,7 +17,7 @@ pub(super) async fn validate_owned(
     .fetch_optional(&mut **tx)
     .await?
     .ok_or(bad("Page element app is not active in this shop"))?;
-    let manifest: apps::Manifest =
+    let manifest: Manifest =
         serde_json::from_value(manifest).map_err(|_| bad("Invalid element app"))?;
     let surface = manifest
         .surfaces
@@ -31,6 +31,6 @@ pub(super) async fn validate_owned(
     {
         return Err(bad("Page element exposes a private action"));
     }
-    apps::surfaces::validate_contract(&manifest)?;
+    veyndo_app_platform::domain::surfaces::validate_contract(&manifest)?;
     Ok(())
 }

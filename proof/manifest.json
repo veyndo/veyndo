@@ -5171,55 +5171,55 @@
       "sha256": "2daf5fe6637dc22221a21cc6ffd132630ebf848fe920cafa50a1fa92cf401677",
       "review": "F19: PayPal adapter as its own crate over the payments ledger"
     },
-    "extensions/apps/site-builder/agent_handoff.rs": {
-      "status": "unproved",
-      "sha256": "437dce07e9b57f2ddd2c7b17b955626262b1eff5dc4c1fd4ca3cb026d658c46f",
-      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
-    },
     "extensions/apps/site-builder/block_validation.rs": {
       "status": "unproved",
-      "sha256": "7af12a0b9f2beca0ebeba8a233510bf47c055c51451f26173abf6074b0f80f02",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "80b012283a5dad46bdd8fc7610c738962307d4ffa99374f80b53ba31dfb4ccab",
+      "review": "F20: site builder and site forms as crates behind the SiteHost port; no path attribute left in src"
     },
     "extensions/apps/site-builder/context.rs": {
       "status": "unproved",
-      "sha256": "18b204c8e65fde2ac553384088cdb69a508090a32525de5b9e9bbc24d0e0b97d",
-      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
+      "sha256": "099e11495cc32ce83fcbf7cf804a37e0a3208b7043ebed305fd01cdc597f2efd",
+      "review": "F20: site builder and site forms as crates behind the SiteHost port; no path attribute left in src"
+    },
+    "extensions/apps/site-builder/design_agent/agent_handoff.rs": {
+      "status": "unproved",
+      "sha256": "b350a3cb2652fee755de41af79f19d386231151ebf00a78bd480c75fe9ca55e7",
+      "review": "F20: site builder and site forms as crates behind the SiteHost port; no path attribute left in src"
+    },
+    "extensions/apps/site-builder/design_agent/proposals.rs": {
+      "status": "unproved",
+      "sha256": "ca22212d92aeed98c78f024ea6fd8a9ec64bcfc6fb03a274ea3cbbd635e92863",
+      "review": "F20: site builder and site forms as crates behind the SiteHost port; no path attribute left in src"
     },
     "extensions/apps/site-builder/design_agent.rs": {
       "status": "unproved",
-      "sha256": "630c8d4d1f505342005f8d4a8214818cdca88ad593f7d3b7b26805e681131f91",
-      "review": "F18: server state composed of component-owned state"
+      "sha256": "e9b8fb5a1df0ba4cb978c0db0488734eff05ff77162a12370d34a1028d60dfa4",
+      "review": "F20: site builder and site forms as crates behind the SiteHost port; no path attribute left in src"
     },
     "extensions/apps/site-builder/elements.rs": {
       "status": "unproved",
-      "sha256": "902ff5ce59c2fe4030614082b353064c4184c8bde938f06f7231350cf41a5a02",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "a10f9b258cb9df6e3e758e7dea5df1ab0cd0fa6b0e0cc2d0cccb60079b16eb9f",
+      "review": "F20: site builder and site forms as crates behind the SiteHost port; no path attribute left in src"
     },
     "extensions/apps/site-builder/planning.rs": {
       "status": "unproved",
-      "sha256": "f8c862754097b9013b61ef990bb4383a838c743222956638c1aeb521c9ef2310",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "3815b7ac6e6989ac71e6cb9543ae17e07089497d5a48a5261451190bbe596775",
+      "review": "F20: site builder and site forms as crates behind the SiteHost port; no path attribute left in src"
     },
-    "extensions/apps/site-builder/proposals.rs": {
+    "extensions/apps/site-builder/ports.rs": {
       "status": "unproved",
-      "sha256": "e1245c0171d761879dd4a7effe3bffb38edd6000cc67c18679f25478cdcd3892",
-      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
-    },
-    "extensions/apps/site-builder/references.rs": {
-      "status": "unproved",
-      "sha256": "fc5980fba3459fb7605b9a52037f48c585a935bc146c20893bac8f2e20eeb82d",
-      "review": "Canvas reference capture uses bounded public-only egress and native vision; developer context is validated before inference, redacted evidence retained in existing immutable versions, HTTP/MCP task schemas preserve native staging and current rights. Native app-generation HTTP/PostgreSQL and context unit regressions passed."
+      "sha256": "763ada642a3fae65123b2037dde63587d6f26907c9321fb6ddd0f74557a9b5ff",
+      "review": "F20: site builder and site forms as crates behind the SiteHost port; no path attribute left in src"
     },
     "extensions/apps/site-builder/server.rs": {
       "status": "unproved",
-      "sha256": "eca84bb10f9a7d19842a269dd7a7a6e2df3e1ecd26ff0846bbb69cab0a393411",
-      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
+      "sha256": "b41111be62bfa0af71127652ea9fad7ddbee998e19eaba3223b82046992f5455",
+      "review": "F20: site builder and site forms as crates behind the SiteHost port; no path attribute left in src"
     },
     "extensions/apps/site-forms/server.rs": {
       "status": "unproved",
-      "sha256": "17785be3356ae47c9dad19c4159408d1d4d837dcff9d5e02862d896c5f01ec71",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "4f387da4c8e46f5aef16f91f92ba4520ab3bcd1a1fcbcc0a91c80c2e7cf35e7a",
+      "review": "F20: site builder and site forms as crates behind the SiteHost port; no path attribute left in src"
     },
     "extensions/apps/slack/src/actions.rs": {
       "status": "unproved",
@@ -6403,8 +6403,8 @@
     },
     "src/apps/data.rs": {
       "status": "unproved",
-      "sha256": "f5bc67b65cde4464aea39c09a1803986eb5b43f9b9a67ed0f4dd73c4e151b4af",
-      "review": "F14: prelude and unused compatibility re-exports removed"
+      "sha256": "42e958379559f41c1f545308aa39b08160f362a25305fe7333006a3491ee75c8",
+      "review": "F20: site builder and site forms as crates behind the SiteHost port; no path attribute left in src"
     },
     "src/apps/discovery.rs": {
       "status": "unproved",
@@ -6435,11 +6435,6 @@
       "status": "unproved",
       "sha256": "ac0e517cdbf9104c51b68fd51293a6d0171a85921fd27adb5a1d6a58470cbd9f",
       "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
-    },
-    "src/apps/field_values.rs": {
-      "status": "unproved",
-      "sha256": "9e6ddf615c0691a1b3a6db466693dbf4fcdb0f45becc91a4a19176471a0d4e82",
-      "review": "Batch F3: bundled app contract tests, the app view read and the catalogue evidence callback moved into the apps component"
     },
     "src/apps/gateway.rs": {
       "status": "unproved",
@@ -6488,8 +6483,8 @@
     },
     "src/apps/mod.rs": {
       "status": "unproved",
-      "sha256": "132d5bd8c015b6e6a246c91987b9a9081a922c4a4cb1d95a5e2e6198862e36d7",
-      "review": "F18: server state composed of component-owned state"
+      "sha256": "d8c7775ec72a5a92959bf4068d866dcede8e434f731773da6338ce153d404989",
+      "review": "F20: site builder and site forms as crates behind the SiteHost port; no path attribute left in src"
     },
     "src/apps/model_contract.rs": {
       "status": "unproved",
@@ -6561,6 +6556,11 @@
       "sha256": "58b70f5aaec7db79a4bfe666583693cc2484791bf21dd51c225f94076595e776",
       "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
     },
+    "src/apps/site_host.rs": {
+      "status": "unproved",
+      "sha256": "2b12fe7d834526f7565827e4ec3cab273f42b95917f4c444bcd8027304f13108",
+      "review": "F20: site builder and site forms as crates behind the SiteHost port; no path attribute left in src"
+    },
     "src/apps/submissions.rs": {
       "status": "reviewed-binding",
       "sha256": "0490788eb2346510bbb9d84ee5a15125174cb8a89fdc3a77d01d782ed0eefdb6",
@@ -6578,8 +6578,8 @@
     },
     "src/apps/surfaces.rs": {
       "status": "unproved",
-      "sha256": "e2836adca631e2f3e5d1896fa5ea9edba3ddf0e5897727413eede13a5d2ef9b7",
-      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
+      "sha256": "5ce4fc1816f491a3dfcc57e5d100c5d5f94342bdb29f657b55820a9cfa8c0e54",
+      "review": "F20: site builder and site forms as crates behind the SiteHost port; no path attribute left in src"
     },
     "src/apps/tool_contract.rs": {
       "status": "unproved",
@@ -6638,18 +6638,13 @@
     },
     "src/assets/mod.rs": {
       "status": "unproved",
-      "sha256": "ee32b48527cbd0c75a76bc0d02e02594c715d13bd3e2045dfe69c4f1d22e06ac",
-      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
+      "sha256": "3d4759af131de9ce79a35f59e3de46bc1253bc163fe7cebf841ed1a6f63b36c7",
+      "review": "F20: site builder and site forms as crates behind the SiteHost port; no path attribute left in src"
     },
     "src/assets/model_format.rs": {
       "status": "unproved",
       "sha256": "5a69518e100b220811d65dc4530c216b4e703459e5ab8482913dabaf620249a7",
       "review": "Asset upload, listing and publishing moved into components/catalog; no rule changed"
-    },
-    "src/assets/rich.rs": {
-      "status": "unproved",
-      "sha256": "8bb3f257c8c1f53dc72c33985b13ef504909cfdfb2f1427d1896460b8a87192e",
-      "review": "Product edit types, stores and language rules moved into components; no rule changed"
     },
     "src/assets/rich_document.rs": {
       "status": "unproved",
@@ -6928,8 +6923,8 @@
     },
     "src/capabilities/dispatch.rs": {
       "status": "unproved",
-      "sha256": "84ebcb4c47f7c6e0caba5e97f60d737e009f773ecabc3d9cc6f8bf844a279ab9",
-      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
+      "sha256": "e6c2f1bf0a4fdf8ace4564fc42ca4cb8ba64edc908e32bd7bca1b800e9670b38",
+      "review": "F20: site builder and site forms as crates behind the SiteHost port; no path attribute left in src"
     },
     "src/capabilities/registry.rs": {
       "status": "unproved",
@@ -7133,8 +7128,8 @@
     },
     "src/commerce/configuration.rs": {
       "status": "unproved",
-      "sha256": "8b684de8b69e7bbe04adfb69d7b8362d28a08548cb2d8a4a60707a81ff9dce2b",
-      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
+      "sha256": "db3afd049d4c52a18ba649f9cb8a718757ba0c5adf2c2dcf38c7981655ccccce",
+      "review": "F20: site builder and site forms as crates behind the SiteHost port; no path attribute left in src"
     },
     "src/commerce/content_text.rs": {
       "status": "unproved",
@@ -7198,8 +7193,8 @@
     },
     "src/commerce/mod.rs": {
       "status": "unproved",
-      "sha256": "2d3918e733623d75e07675ba8590bfe5a066455fb2a9b74af715d584fbbc555b",
-      "review": "F13: glob imports replaced by named imports in the server and the inference crate"
+      "sha256": "abaffbc07e11685b26da0ccb54e14ca64ddbe28d215d81b426744c6d32d4ac43",
+      "review": "F20: site builder and site forms as crates behind the SiteHost port; no path attribute left in src"
     },
     "src/commerce/order_machine.rs": {
       "status": "unproved",
@@ -8008,8 +8003,8 @@
     },
     "src/staging/mod.rs": {
       "status": "unproved",
-      "sha256": "228f39a8557d981bfddba26a26f98906216971610edda913e7d6f32025b58959",
-      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
+      "sha256": "8603714910fc22e273665c1d62c57dfec3bdc374967be434a63887e103818272",
+      "review": "F20: site builder and site forms as crates behind the SiteHost port; no path attribute left in src"
     },
     "src/staging/release_host.rs": {
       "status": "unproved",
@@ -8133,12 +8128,12 @@
       "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
     },
     "Cargo.lock": {
-      "sha256": "5cdc78122c1abcc59af52ae60eed034ebeb2d16d14c41be3b715c5cd740347b1",
-      "review": "F19: PayPal adapter as its own crate over the payments ledger"
+      "sha256": "d55e35c85b4d839fd119a7d3ba493619e2fe63c367e776d1b3be1978786cb636",
+      "review": "F20: site builder and site forms as crates behind the SiteHost port; no path attribute left in src"
     },
     "Cargo.toml": {
-      "sha256": "5b7fafdbb03e7e027345143408d3320c64f2fb648e500128f6361ed3d7b15aef",
-      "review": "F19: PayPal adapter as its own crate over the payments ledger"
+      "sha256": "5c523b42c9d82746582f1aece604dfbc2ad8387f3c0c237a0998026d32967964",
+      "review": "F20: site builder and site forms as crates behind the SiteHost port; no path attribute left in src"
     },
     "components.lock.json": {
       "sha256": "7b4a931ad81c6665d5d95e6b42b8ef4d09ebe8971ac24998d8f94bb6a737ff53",

@@ -1,10 +1,14 @@
 # Shop design app
 
 `manifest.json` defines the canonical pages, theme overrides and managed actions.
-`server.rs` validates the bounded document. `design_agent.rs` prepares ordinary
-revision-bound native tasks with the centrally configured inference service.
-`references.rs` captures bounded public HTTPS evidence or supplied images; partial
-capture is explicit. No browser source executes.
+The Rust side is the `veyndo-site-builder` crate (`Cargo.toml`, library root
+`server.rs`): `server.rs` validates the bounded document, `design_agent.rs` and
+`design_agent/` prepare ordinary revision-bound native tasks with the centrally
+configured inference service. Server-owned steps (catalogue page, proposal
+application, surface registry, reference capture, coding-agent connection) are
+reached through the `SiteHost` port in `ports.rs`; reference capture takes bounded
+public HTTPS evidence or supplied images, and partial capture is explicit. No
+browser source executes.
 
 `Renderer.tsx` and `site.css` render both Studio previews and published pages.
 `studio/` owns graphical controls, Tiptap text, reference alternatives and history.

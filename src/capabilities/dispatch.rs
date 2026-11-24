@@ -109,7 +109,15 @@ impl Owner {
             Self::CatalogIntake => Box::pin(commerce::catalog_intake::invoke(a, h, name, v)),
             Self::Runs => Box::pin(agent_runs::invoke(a, h, name, v)),
             Self::Personal => Box::pin(studio::personal::invoke(a, h, name, v)),
-            Self::Site => Box::pin(apps::site_builder::design_agent::invoke(a, h, name, v)),
+            Self::Site => Box::pin(async move {
+                apps::site_builder::design_agent::invoke(
+                    &apps::site_host::Site(a.clone()),
+                    h,
+                    name,
+                    v,
+                )
+                .await
+            }),
             Self::AppHistory => Box::pin(apps::record_history::invoke(a, h, name, v)),
             Self::Roles => Box::pin(auth::roles::invoke(a, h, name, v)),
             Self::B2b => Box::pin(b2b::invoke(a, h, name, v)),

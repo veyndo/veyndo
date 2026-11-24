@@ -1,22 +1,23 @@
 //! Coding agents edit the same page schema through credential-free tasks and explicit native review.
-use crate::apps::site_builder;
-use crate::developer;
-use crate::foundation::App;
-use crate::foundation::merchant;
-use crate::{apps, commerce};
+use crate::SiteHost;
 use serde_json::Value;
 use serde_json::json;
+use veyndo_app_model::Entity;
+use veyndo_app_model::manifest::Manifest;
 use veyndo_core::Result;
 use veyndo_core::bad;
 use veyndo_core::request_context::RequestContext;
+use veyndo_identity::merchant;
+use veyndo_shop::service::read_cache::settings;
 pub(super) async fn export(
-    a: &App,
+    site: &dyn SiteHost,
     h: &RequestContext,
     fields: &Value,
     v: &Value,
 ) -> Result<Value> {
-    let tenant = merchant(a, h)?;
-    let registry = apps::surfaces::registry(a, h, true).await?;
+    let a = site.core();
+    let tenant = merchant(h)?;
+    let registry = site.surfaces(h, true).await?;
     let elements: Vec<_> = registry["surfaces"]
         .as_array()
         .into_iter()
@@ -25,16 +26,15 @@ pub(super) async fn export(
         .take(64)
         .map(|s| json!({"app":s["app"],"surface":s["surface"]["id"],"label":s["surface"]["label"],"version":s["version"]}))
         .collect();
-    let (settings, _) = commerce::config(a, &tenant).await?;
+    let (settings, _) = settings(a, &tenant, "default").await?;
     Ok(
-        json!({"agent":v["agent"],"task":format!("Edit this native Veyndo page in its private sandbox. Request: {}. Return the resultTemplate with content/theme edits only. Preserve all IDs, localized maps and product facts. If selected is nonempty, return only that block in content.blocks and preserve the theme. Use only the supplied registered app elements. No HTML/CSS/JS, copied code, secrets, direct writes or publication. Submit the returned JSON for merchant review through merchant.site.propose; only explicit merchant.site.apply may save the approved proposal. Publishing remains a separate selected release.",v["instruction"]),"resultTemplate":{"id":v["id"],"revision":v["revision"],"instruction":v["instruction"],"selected":v["selected"],"summary":"","fields":fields},"schema":site_builder::planning_contract(),"elements":elements,"locales":settings.locales,"mainLocale":settings.main_locale,"mcpEndpoint":"/mcp","mcpConfig":developer::agent_connection::configuration(&tenant)?,"credentials":"No credentials are exported. Configure your personal session locally; the Python bridge is optional client tooling only."}),
+        json!({"agent":v["agent"],"task":format!("Edit this native Veyndo page in its private sandbox. Request: {}. Return the resultTemplate with content/theme edits only. Preserve all IDs, localized maps and product facts. If selected is nonempty, return only that block in content.blocks and preserve the theme. Use only the supplied registered app elements. No HTML/CSS/JS, copied code, secrets, direct writes or publication. Submit the returned JSON for merchant review through merchant.site.propose; only explicit merchant.site.apply may save the approved proposal. Publishing remains a separate selected release.",v["instruction"]),"resultTemplate":{"id":v["id"],"revision":v["revision"],"instruction":v["instruction"],"selected":v["selected"],"summary":"","fields":fields},"schema":crate::planning_contract(),"elements":elements,"locales":settings.locales,"mainLocale":settings.main_locale,"mcpEndpoint":"/mcp","mcpConfig":site.agent_connection(&tenant)?,"credentials":"No credentials are exported. Configure your personal session locally; the Python bridge is optional client tooling only."}),
     )
 }
 pub(super) async fn propose(
-    a: &App,
+    site: &dyn SiteHost,
     h: &RequestContext,
-    m: &apps::Manifest,
-    entity: &apps::Entity,
+    (m, entity): (&Manifest, &Entity),
     fields: &Value,
     v: &Value,
     instruction: &str,
@@ -55,7 +55,7 @@ pub(super) async fn propose(
     input["structure"] = json!(true);
     input["content"] = json!(true);
     super::proposals::prepare(
-        a,
+        site.core(),
         h,
         m,
         entity,

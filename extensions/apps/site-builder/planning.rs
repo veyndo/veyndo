@@ -2,7 +2,8 @@
 use serde_json::Value;
 use serde_json::json;
 
-pub(crate) fn contract() -> Value {
+/// The JSON contract of the page fields a planning agent edits.
+pub fn contract() -> Value {
     json!({
         "slug":"1–100 lowercase ASCII letters, digits or hyphens",
         "content":{

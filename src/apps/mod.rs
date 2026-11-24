@@ -44,7 +44,6 @@ pub(crate) use evidence::*;
 mod egress;
 // Shared bounded public HTTPS transport; protocols must never forward customer credentials.
 pub(crate) use egress::public_client as public_https_client;
-mod field_values;
 mod gateway;
 pub(crate) mod mcp_views;
 pub(crate) use mcp_views::{invoke_mcp, invoke_mcp_read};
@@ -70,10 +69,9 @@ mod planning;
 pub(crate) use planning::*;
 mod manifest;
 mod manifest_validation;
-#[path = "../../extensions/apps/site-builder/server.rs"]
-pub(crate) mod site_builder;
-#[path = "../../extensions/apps/site-forms/server.rs"]
-mod site_forms;
+pub(crate) mod site_host;
+pub(crate) use veyndo_site_builder as site_builder;
+use veyndo_site_forms as site_forms;
 mod submissions;
 pub(crate) use manifest_validation::validate;
 pub(crate) mod model_contract;

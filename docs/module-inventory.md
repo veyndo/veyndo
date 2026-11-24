@@ -44,7 +44,6 @@ This lists every checked-in source module in these roots, including files with n
 | [src/apps/events.rs](../src/apps/events.rs) | App event delivery lives in the apps component; this module supplies its state to the worker and the outbox. |
 | [src/apps/evidence.rs](../src/apps/evidence.rs) | Private provenance-bearing app exports feed merchant retrieval and durable app events; never public PDP answers. |
 | [src/apps/evidence_routes.rs](../src/apps/evidence_routes.rs) | Scoped merchant-only evidence retrieval; sources never enter public product answers. |
-| [src/apps/field_values.rs](../src/apps/field_values.rs) | The field value policy lives in the apps component; this module keeps the short path for the app adapters. |
 | [src/apps/gateway.rs](../src/apps/gateway.rs) | One permission-aware action gateway serves HTTP, UI and MCP; service egress is operator configured. |
 | [src/apps/hosted.rs](../src/apps/hosted.rs) | Hosted-app installation lives in the apps component; this module adds the connected frontends and their local answers. |
 | [src/apps/input_schema.rs](../src/apps/input_schema.rs) | The bounded input schema validator lives in the apps component; this module keeps the short path for the app adapters. |
@@ -69,6 +68,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/apps/service_limits.rs](../src/apps/service_limits.rs) | Shared network-app admission lives in the apps component; this module builds its state from the server state. |
 | [src/apps/service_policy.rs](../src/apps/service_policy.rs) | The service transport policy lives in the apps component; this module keeps the short path for the app adapters. |
 | [src/apps/settings.rs](../src/apps/settings.rs) | Declared app settings reuse the digest-bound encrypted secret owner; secret values never have a browser read path. |
+| [src/apps/site_host.rs](../src/apps/site_host.rs) | The server side of the site builder port: shared state, model context, catalogue page, proposal application, surface registry, design references and the coding-agent connection. |
 | [src/apps/submissions.rs](../src/apps/submissions.rs) | Public append-only intake uses declared schemas, existing cart admission, quotas, records and outbox. |
 | [src/apps/surface_grants.rs](../src/apps/surface_grants.rs) | Surface grants live in the apps component; this module registers their routes and keeps the short path for uploads. |
 | [src/apps/surface_registry.rs](../src/apps/surface_registry.rs) | The surface projection lives in the apps component; this module adds the languages of the shop. |
@@ -86,7 +86,6 @@ This lists every checked-in source module in these roots, including files with n
 | [src/assets/ingestion.rs](../src/assets/ingestion.rs) | The bounded multipart parser is owned by the catalog component. |
 | [src/assets/mod.rs](../src/assets/mod.rs) | Product attachments and paid digital downloads: bounded binary persistence and tenant/account ACL. |
 | [src/assets/model_format.rs](../src/assets/model_format.rs) | GLB validation is owned by the catalog component. |
-| [src/assets/rich.rs](../src/assets/rich.rs) | Safe structured rich content is validated by the catalog component. |
 | [src/assets/rich_document.rs](../src/assets/rich_document.rs) | The URL rule of rich documents is owned by the catalog component. |
 | [src/assets/upload.rs](../src/assets/upload.rs) | Entry points of product file operations for capabilities and app upload surfaces; rules and storage are owned by the catalog component. |
 | [src/auth/broker.rs](../src/auth/broker.rs) | Optional trusted identity exchange: signatures bind route, audience, expiry and one-use nonce. |
@@ -2322,16 +2321,16 @@ This lists every checked-in source module in these roots, including files with n
 | [extensions/apps/service-example/server.py](../extensions/apps/service-example/server.py) | Standalone app service with its own UI and durable event inbox. Run separately from the core. |
 | [extensions/apps/site-builder/AppElement.tsx](../extensions/apps/site-builder/AppElement.tsx) | Placed native app surfaces use the existing public registry, renderer and server-bound read-only preview grants. |
 | [extensions/apps/site-builder/Renderer.tsx](../extensions/apps/site-builder/Renderer.tsx) | Shared page renderer: Studio previews and published shops use exactly these registered components. |
-| [extensions/apps/site-builder/agent_handoff.rs](../extensions/apps/site-builder/agent_handoff.rs) | Coding agents edit the same page schema through credential-free tasks and explicit native review. |
 | [extensions/apps/site-builder/block_validation.rs](../extensions/apps/site-builder/block_validation.rs) | App-owned block admission with bounded field paths; never echo untrusted content in errors. |
 | [extensions/apps/site-builder/commerce-layout.ts](../extensions/apps/site-builder/commerce-layout.ts) | Native commerce sections share the channel page document and its existing publication boundary. |
 | [extensions/apps/site-builder/context.rs](../extensions/apps/site-builder/context.rs) | Designer context projects native channels, languages and calculated products; no second catalogue or price engine. |
+| [extensions/apps/site-builder/design_agent/agent_handoff.rs](../extensions/apps/site-builder/design_agent/agent_handoff.rs) | Coding agents edit the same page schema through credential-free tasks and explicit native review. |
+| [extensions/apps/site-builder/design_agent/proposals.rs](../extensions/apps/site-builder/design_agent/proposals.rs) | Native revision-bound proposal validation and persistence shared by every design agent. |
 | [extensions/apps/site-builder/design_agent.rs](../extensions/apps/site-builder/design_agent.rs) | Scoped visual proposals reuse central inference and native revision-bound tasks; models cannot publish or execute. |
 | [extensions/apps/site-builder/elements.rs](../extensions/apps/site-builder/elements.rs) | Placed app elements resolve only active, public surfaces of this tenant; app code stays in its own package. |
 | [extensions/apps/site-builder/model.ts](../extensions/apps/site-builder/model.ts) | One app-owned document contract for manual editing, agents, API/MCP and the storefront renderer. |
 | [extensions/apps/site-builder/planning.rs](../extensions/apps/site-builder/planning.rs) | App-owned nested page format shared by merchant planning and external coding agents. |
-| [extensions/apps/site-builder/proposals.rs](../extensions/apps/site-builder/proposals.rs) | Native revision-bound proposal validation and persistence shared by every design agent. |
-| [extensions/apps/site-builder/references.rs](../extensions/apps/site-builder/references.rs) | Site design reuses generic bounded reference capture; page interpretation remains app-owned. |
+| [extensions/apps/site-builder/ports.rs](../extensions/apps/site-builder/ports.rs) | What the site builder needs from the server: the shared state, the model context, the catalogue page, proposal application, the app surface registry, design reference capture and the coding-agent connection. |
 | [extensions/apps/site-builder/server.rs](../extensions/apps/site-builder/server.rs) | Standard-shop page contract. App-owned content and theme validation; no HTML, CSS or script evaluation. |
 | [extensions/apps/site-builder/site.css](../extensions/apps/site-builder/site.css) | Shared, responsive site renderer; merchant design data never becomes arbitrary CSS. |
 | [extensions/apps/site-builder/storefront/CommerceLayout.tsx](../extensions/apps/site-builder/storefront/CommerceLayout.tsx) | Render a published channel template around the storefront's original commerce controls. |

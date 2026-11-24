@@ -1,20 +1,31 @@
 //! Standard-shop page contract. App-owned content and theme validation; no HTML, CSS or script evaluation.
-use crate::commerce;
-use crate::foundation::App;
 use axum::Router;
+use axum::extract::FromRef;
 use serde::Deserialize;
 use serde::Serialize;
 use serde_json::Value;
 use std::collections::HashMap;
+use std::sync::Arc;
 use veyndo_core::Result;
 use veyndo_core::bad;
 use veyndo_core::conflict;
 mod block_validation;
 mod context;
-pub(crate) mod design_agent;
+pub mod design_agent;
 mod elements;
 mod planning;
-pub(crate) fn router() -> Router<App> {
+pub mod ports;
+pub use ports::SiteHost;
+/// What the site builder routes extract from the server state: the host port of this process.
+#[derive(Clone)]
+pub struct SiteState(pub Arc<dyn SiteHost>);
+
+/// The page context and design routes; the server provides `SiteState` from its own state.
+pub fn router<S>() -> Router<S>
+where
+    S: Clone + Send + Sync + 'static,
+    SiteState: FromRef<S>,
+{
     Router::new()
         .merge(context::router())
         .merge(design_agent::router())
@@ -73,14 +84,14 @@ struct Theme {
     spacing: Option<u8>,
     columns: Option<u8>,
 }
-pub(crate) fn normalize(v: &Value) -> Result<Value> {
+pub fn normalize(v: &Value) -> Result<Value> {
     let mut next = v.clone();
     let content: Content =
         serde_json::from_value(next["content"].clone()).map_err(|_| bad("Invalid page blocks"))?;
     next["content"] = serde_json::to_value(content).map_err(|_| bad("Invalid page blocks"))?;
     Ok(next)
 }
-pub(crate) fn validate(entity: &str, v: &Value) -> Result<()> {
+pub fn validate(entity: &str, v: &Value) -> Result<()> {
     if entity != "pages" {
         return Err(bad("Unknown site model"));
     }
@@ -129,7 +140,7 @@ fn safe_image(s: &str) -> bool {
             u.scheme() == "https" && u.username().is_empty() && u.password().is_none()
         })
 }
-pub(crate) async fn validate_owned(
+pub async fn validate_owned(
     tx: &mut sqlx::Transaction<'_, sqlx::Postgres>,
     t: &str,
     v: &Value,
@@ -169,7 +180,7 @@ pub(crate) async fn validate_owned(
         .bind(t)
         .fetch_one(&mut **tx)
         .await?;
-    let settings = commerce::decode_config(settings)?;
+    let settings = veyndo_shop::domain::defaults::decode(settings)?;
     let content: Content =
         serde_json::from_value(v["content"].clone()).map_err(|_| bad("Invalid page"))?;
     for b in content.blocks {
@@ -215,7 +226,7 @@ pub(crate) async fn validate_owned(
     }
     Ok(())
 }
-pub(crate) use planning::contract as planning_contract;
+pub use planning::contract as planning_contract;
 
 #[cfg(test)]
 mod tests {
