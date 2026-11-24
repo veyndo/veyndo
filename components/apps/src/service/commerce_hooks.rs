@@ -3,6 +3,7 @@ use crate::domain::approval;
 use crate::service::configuration_runtime::prepare_source;
 use crate::store::commerce_hooks::rows;
 use crate::store::records;
+use serde::Deserialize;
 use serde_json::{Value, json};
 use sqlx::Row;
 use std::collections::HashMap;
@@ -14,6 +15,7 @@ use veyndo_apps::component_runtime::{
 use veyndo_apps::sandbox::Sandbox;
 use veyndo_checkout::service::app_adjustments::apply as app_adjustment;
 use veyndo_checkout::service::delivery::enrich;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::{Result, State, bad, conflict, hash};
 use veyndo_pricing::catalog::Product;
 use veyndo_pricing::service::conversion as currencies;
@@ -47,6 +49,26 @@ fn money(amount: f64, code: &str, scale: u8) -> Result<Money> {
         scale,
     })
 }
+/// The quote an app commerce hook snapshot is built from.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct HookQuote {
+    #[serde(deserialize_with = "lenient")]
+    price: HookPrice,
+    #[serde(deserialize_with = "lenient")]
+    line_items: Option<Vec<Value>>,
+}
+
+/// The currency, scale and position total of the quote.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct HookPrice {
+    #[serde(deserialize_with = "lenient")]
+    currency: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    currency_scale: Option<u64>,
+    position_price: Value,
+}
 /// The immutable cart, product and record snapshot a hook sees.
 fn snapshot(
     c: &StoredCart,
@@ -54,16 +76,21 @@ fn snapshot(
     q: &Value,
     records: HashMap<(String, String), AppRecord>,
 ) -> Result<Snapshot> {
-    let code = q["price"]["currency"]
-        .as_str()
+    let quote: HookQuote = view(q);
+    let code = quote
+        .price
+        .currency
+        .as_deref()
         .ok_or(bad("Quote currency missing"))?;
-    let scale = q["price"]["currencyScale"]
-        .as_u64()
+    let scale = quote
+        .price
+        .currency_scale
         .ok_or(bad("Quote scale missing"))? as u8;
     let mut products = HashMap::new();
     let mut items = vec![];
-    for line in q["lineItems"]
-        .as_array()
+    for line in quote
+        .line_items
+        .as_ref()
         .ok_or(bad("Quote items missing"))?
     {
         let id = line["id"].as_str().ok_or(bad("Quote item ID missing"))?;
@@ -102,7 +129,9 @@ fn snapshot(
         cart: CartSnapshot {
             items,
             subtotal: money(
-                q["price"]["positionPrice"]
+                quote
+                    .price
+                    .position_price
                     .as_f64()
                     .ok_or(bad("Quote subtotal missing"))?,
                 code,

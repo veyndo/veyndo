@@ -1,0 +1,237 @@
+{
+  "categories": {
+    "model-output-repair": "Structural merge or repair of untrusted model output (app manifests and briefs) before it is parsed into the typed Manifest; the JSON level is the subject of these functions.",
+    "structural-validation": "Key-by-key validation of schema-less documents (rich text, image job input, review import, app field values) whose admission defines the accepted shape; typing them first would accept or reject differently.",
+    "keyed-lookup": "Lookups by a runtime key in keyed maps (rule ids, event paths, configured fields, provider ids, consent purposes) whose keys are data, not field names.",
+    "in-place-edit": "Functions that rewrite a stored document in place (product restore, history restoration, cart and order projections, delivery dates) and read the fields they are about to change.",
+    "attempt-context": "The per-attempt provider context of the payment ledger, a keyed document of receipts and settlements read and written together across the ledger modules.",
+    "protocol-adapter": "Translation of an external wire protocol (UCP documents and profiles, the MCP JSON-RPC envelope) at the adapter boundary."
+  },
+  "functions": [
+    {
+      "file": "components/apps/src/domain/app_generation.rs",
+      "function": "default_actions",
+      "category": "model-output-repair"
+    },
+    {
+      "file": "components/apps/src/domain/app_generation.rs",
+      "function": "preserve_access",
+      "category": "model-output-repair"
+    },
+    {
+      "file": "components/apps/src/domain/app_generation.rs",
+      "function": "walk",
+      "category": "model-output-repair"
+    },
+    {
+      "file": "components/apps/src/domain/design_context.rs",
+      "function": "validate",
+      "category": "model-output-repair"
+    },
+    {
+      "file": "components/apps/src/domain/field_values.rs",
+      "function": "money",
+      "category": "structural-validation"
+    },
+    {
+      "file": "components/apps/src/domain/generation_brief.rs",
+      "function": "apply",
+      "category": "model-output-repair"
+    },
+    {
+      "file": "components/apps/src/domain/generation_brief.rs",
+      "function": "empty",
+      "category": "model-output-repair"
+    },
+    {
+      "file": "components/apps/src/domain/generation_contract.rs",
+      "function": "retain",
+      "category": "model-output-repair"
+    },
+    {
+      "file": "components/apps/src/domain/generation_contract.rs",
+      "function": "retain_lifecycles",
+      "category": "model-output-repair"
+    },
+    {
+      "file": "components/apps/src/domain/generation_edits.rs",
+      "function": "apply",
+      "category": "model-output-repair"
+    },
+    {
+      "file": "components/apps/src/domain/surface_grant.rs",
+      "function": "bind_input",
+      "category": "keyed-lookup"
+    },
+    {
+      "file": "components/b2b/src/service/quotes.rs",
+      "function": "offer",
+      "category": "in-place-edit"
+    },
+    {
+      "file": "components/catalog/src/domain/image_job.rs",
+      "function": "parse",
+      "category": "structural-validation"
+    },
+    {
+      "file": "components/catalog/src/domain/rich_document.rs",
+      "function": "validate",
+      "category": "structural-validation"
+    },
+    {
+      "file": "components/catalog/src/domain/translation_fields.rs",
+      "function": "merge_metadata",
+      "category": "keyed-lookup"
+    },
+    {
+      "file": "components/catalog/src/types/review.rs",
+      "function": "parse",
+      "category": "structural-validation"
+    },
+    {
+      "file": "components/checkout/src/service/cart_projection.rs",
+      "function": "checkout_service",
+      "category": "in-place-edit"
+    },
+    {
+      "file": "components/checkout/src/service/delivery.rs",
+      "function": "dates_conn",
+      "category": "in-place-edit"
+    },
+    {
+      "file": "components/customers/src/domain/profile.rs",
+      "function": "project_contacts",
+      "category": "keyed-lookup"
+    },
+    {
+      "file": "components/customers/src/service/directory.rs",
+      "function": "decorate",
+      "category": "in-place-edit"
+    },
+    {
+      "file": "components/intelligence/src/service/platform_ai.rs",
+      "function": "save",
+      "category": "keyed-lookup"
+    },
+    {
+      "file": "components/marketing/src/domain/rule_comparison.rs",
+      "function": "bounded",
+      "category": "keyed-lookup"
+    },
+    {
+      "file": "components/marketing/src/domain/rule_match.rs",
+      "function": "checked_at",
+      "category": "keyed-lookup"
+    },
+    {
+      "file": "components/marketing/src/domain/rule_match.rs",
+      "function": "matches",
+      "category": "keyed-lookup"
+    },
+    {
+      "file": "components/marketing/src/service/configuration_writes.rs",
+      "function": "admit",
+      "category": "in-place-edit"
+    },
+    {
+      "file": "components/orders/src/domain/order_transitions.rs",
+      "function": "delivery",
+      "category": "in-place-edit"
+    },
+    {
+      "file": "components/payments/src/domain/instructions.rs",
+      "function": "admit",
+      "category": "attempt-context"
+    },
+    {
+      "file": "components/payments/src/domain/refunds.rs",
+      "function": "capture",
+      "category": "attempt-context"
+    },
+    {
+      "file": "components/payments/src/service/funding.rs",
+      "function": "prepare",
+      "category": "attempt-context"
+    },
+    {
+      "file": "components/payments/src/store/refund_receipts.rs",
+      "function": "apply",
+      "category": "attempt-context"
+    },
+    {
+      "file": "components/payments/src/store/refund_receipts.rs",
+      "function": "reconcile",
+      "category": "attempt-context"
+    },
+    {
+      "file": "components/payments/src/store/settlements.rs",
+      "function": "admit",
+      "category": "attempt-context"
+    },
+    {
+      "file": "components/shop/src/domain/buyer_consent.rs",
+      "function": "missing_contact",
+      "category": "keyed-lookup"
+    },
+    {
+      "file": "components/shop/src/types/cart.rs",
+      "function": "upgrade_cart",
+      "category": "in-place-edit"
+    },
+    {
+      "file": "components/studio/src/domain/history_access.rs",
+      "function": "restoration",
+      "category": "in-place-edit"
+    },
+    {
+      "file": "components/studio/src/domain/product_restore.rs",
+      "function": "edit",
+      "category": "in-place-edit"
+    },
+    {
+      "file": "components/studio/src/service/flow_templates.rs",
+      "function": "resolve",
+      "category": "keyed-lookup"
+    },
+    {
+      "file": "components/studio/src/service/staging/final_config.rs",
+      "function": "validate",
+      "category": "keyed-lookup"
+    },
+    {
+      "file": "src/mcp/protocol.rs",
+      "function": "call",
+      "category": "protocol-adapter"
+    },
+    {
+      "file": "src/mcp/protocol.rs",
+      "function": "envelope",
+      "category": "protocol-adapter"
+    },
+    {
+      "file": "src/ucp/consent.rs",
+      "function": "project",
+      "category": "protocol-adapter"
+    },
+    {
+      "file": "src/ucp/document.rs",
+      "function": "ucp_document",
+      "category": "protocol-adapter"
+    },
+    {
+      "file": "src/ucp/negotiation.rs",
+      "function": "blocker",
+      "category": "protocol-adapter"
+    },
+    {
+      "file": "src/ucp/profile.rs",
+      "function": "intersect",
+      "category": "protocol-adapter"
+    },
+    {
+      "file": "src/ucp/profile.rs",
+      "function": "supports",
+      "category": "protocol-adapter"
+    }
+  ]
+}

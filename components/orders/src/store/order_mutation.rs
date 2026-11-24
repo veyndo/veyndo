@@ -1,7 +1,9 @@
 //! Shared operational order writes: one replay ledger, immutable quote, audit, cart projection and outbox.
 use crate::domain::order_fields::order_fields;
+use serde::Deserialize;
 use serde_json::{Value, json};
 use sqlx::Row;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::{RequestContext, Result, bad, conflict};
 pub type Tx<'a> = sqlx::Transaction<'a, sqlx::Postgres>;
 
@@ -36,6 +38,15 @@ pub struct Audit<'a> {
     pub event: Value,
 }
 
+/// The identity, revision and import origin of an order being persisted.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct MutatedOrder {
+    historical_import: Value,
+    #[serde(deserialize_with = "lenient")]
+    id: Option<String>,
+    revision: Value,
+}
 pub async fn persist(
     tx: &mut Tx<'_>,
     t: &str,
@@ -43,13 +54,17 @@ pub async fn persist(
     o: &mut Value,
     audit: Audit<'_>,
 ) -> Result<()> {
-    if !o["historicalImport"].is_null() {
+    let stored: MutatedOrder = view(o);
+    if !stored.historical_import.is_null() {
         return Err(conflict(
             "Historical order snapshots cannot execute new operational transitions",
         ));
     }
     order_fields(o);
-    let id = o["id"].as_str().ok_or(bad("Order identity unavailable"))?;
+    let id = stored
+        .id
+        .as_deref()
+        .ok_or(bad("Order identity unavailable"))?;
     sqlx::query(
         "INSERT INTO order_activity(tenant,order_id,actor,kind,data) VALUES($1,$2,$3,$4,$5)",
     )
@@ -68,7 +83,7 @@ pub async fn persist(
         .await?;
     sqlx::query("UPDATE carts SET data=jsonb_set(carts.data,'{order}',$1) FROM orders o WHERE carts.tenant=$2 AND carts.id=o.cart_id AND o.tenant=$2 AND o.id=$3")
         .bind(&*o).bind(t).bind(id).execute(&mut **tx).await?;
-    veyndo_core::outbox::publish_on(&mut **tx, t, "order.updated", &json!({"orderId":id,"kind":audit.data["kind"],"state":audit.data["state"],"revision":o["revision"]})).await?;
+    veyndo_core::outbox::publish_on(&mut **tx, t, "order.updated", &json!({"orderId":id,"kind":audit.data["kind"],"state":audit.data["state"],"revision":stored.revision})).await?;
     veyndo_core::outbox::publish_on(&mut **tx, t, audit.event_kind, &audit.event).await?;
     Ok(())
 }

@@ -37,6 +37,7 @@ async fn applicable(
         )
         .await?;
     }
+    let quote_currency = view::<QuotePriceOnly>(q).price.currency;
     let mut applicable = vec![];
     for r in rows {
         let p: Promotion =
@@ -50,9 +51,9 @@ async fn applicable(
         .fetch_one(&mut *tx)
         .await?;
         if !p.active
-            || p.source_import
-                .as_ref()
-                .is_some_and(|s| !s.activation_reviewed || q["price"]["currency"] != s.currency)
+            || p.source_import.as_ref().is_some_and(|s| {
+                !s.activation_reviewed || quote_currency.as_deref() != Some(s.currency.as_str())
+            })
             || p.max_uses.is_some_and(|n| uses >= n)
             || p.code.as_ref().is_some_and(|v| !c.data.coupons.contains(v))
             || !p.rule.checked_matches(c, &evaluated)?
@@ -79,9 +80,19 @@ struct PromotedQuote {
     line_items: Vec<PricedLine>,
 }
 
+/// The quote price settings alone, for promotion admission.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct QuotePriceOnly {
+    #[serde(deserialize_with = "lenient")]
+    price: QuoteSettings,
+}
+
 #[derive(Deserialize, Default)]
 #[serde(default, rename_all = "camelCase")]
 struct QuoteSettings {
+    #[serde(deserialize_with = "lenient")]
+    currency: Option<String>,
     #[serde(deserialize_with = "lenient")]
     tax_status: Option<String>,
     #[serde(deserialize_with = "lenient")]

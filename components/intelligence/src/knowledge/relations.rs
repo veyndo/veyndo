@@ -167,6 +167,21 @@ pub async fn sync_observation(
     )
     .await
 }
+/// The products an integration source names in its metadata.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct IntegrationSource {
+    #[serde(deserialize_with = "lenient")]
+    metadata: SourceMetadata,
+}
+
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct SourceMetadata {
+    #[serde(deserialize_with = "lenient")]
+    product_ids: Option<Vec<Value>>,
+}
+
 pub async fn sync_integration(
     conn: &mut PgConnection,
     tenant: &str,
@@ -178,7 +193,7 @@ pub async fn sync_integration(
     // JSON tuple identity avoids ambiguity from separators in provider IDs.
     let key = json!([app, id]).to_string();
     sqlx::query("DELETE FROM knowledge_relations WHERE tenant=$1 AND kind='REFERENCES_PRODUCT' AND data->>'app'=$2 AND ($3='' OR data->>'sourceId'=$3)").bind(tenant).bind(app).bind(id).execute(&mut *conn).await?;
-    if !deleted && let Some(ids) = source["metadata"]["productIds"].as_array() {
+    if !deleted && let Some(ids) = view::<IntegrationSource>(source).metadata.product_ids {
         for product in ids.iter().filter_map(Value::as_str).take(30) {
             edge(
                 conn,

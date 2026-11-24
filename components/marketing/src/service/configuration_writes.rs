@@ -203,15 +203,24 @@ async fn validate_config<H: ConfigurationHost>(
     host.validate_apps(tx, t, h, &f, lock).await
 }
 
+/// A saved commerce rule: its condition and active flag.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct SavedRule {
+    condition: Value,
+    active: Value,
+}
+
 /// Kind-specific admission before the write transaction: rule shape, promotion schema and campaign window, channel defaults.
 async fn admit(a: &State, kind: &str, id: &str, data: &mut Value, t: &str) -> Result<()> {
     let (settings, _) = config(a, t).await?;
     match kind {
         "rules" => {
-            let c: Condition = serde_json::from_value(data["condition"].clone())
+            let rule: SavedRule = view(data);
+            let c: Condition = serde_json::from_value(rule.condition)
                 .map_err(|_| bad("Unsupported rule condition"))?;
             c.validate(0)?;
-            if !data["active"].is_boolean() {
+            if !rule.active.is_boolean() {
                 return Err(bad("Rule active flag required"));
             }
         }

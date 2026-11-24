@@ -10,6 +10,25 @@ use veyndo_core::Result;
 use veyndo_core::bad;
 use veyndo_core::document::{lenient, view};
 pub(crate) use veyndo_marketing::domain::flow_actions::{normalize, permission, validate};
+/// The saved flow job an action runs from: its event, order and event context.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct FlowDefinition {
+    event: Value,
+    #[serde(deserialize_with = "lenient")]
+    order_id: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    event_context: EventDocument,
+}
+
+/// The document an event names.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct EventDocument {
+    #[serde(deserialize_with = "lenient")]
+    document_id: Option<String>,
+}
+
 /// The saved configuration of one flow action.
 #[derive(Deserialize, Default)]
 #[serde(default, rename_all = "camelCase")]
@@ -34,6 +53,7 @@ pub(crate) async fn execute(
     definition: &Value,
 ) -> Result<Value> {
     let action_config: ActionConfig = view(config);
+    let flow_job: FlowDefinition = view(definition);
     let normalized = normalize(action, config);
     let config = &normalized;
     validate(action, config)?;
@@ -44,7 +64,7 @@ pub(crate) async fn execute(
             .source_id
             .as_str()
             .filter(|s| !s.is_empty())
-            .or_else(|| definition["eventContext"]["documentId"].as_str())
+            .or(flow_job.event_context.document_id.as_deref())
             .ok_or(bad("Extraction requires a document event or sourceId"))?;
         let mut args = json!({"sourceId":source,"productId":action_config.product_id.as_deref().filter(|s| !s.is_empty())});
         if let Some(choice) = &f.inference {
@@ -71,7 +91,7 @@ pub(crate) async fn execute(
             t,
             &format!(
                 "Flow event {}. {}. Create a reviewable proposal only.",
-                definition["event"], instruction
+                flow_job.event, instruction
             ),
             f.inference.as_ref(),
             "",
@@ -106,8 +126,9 @@ pub(crate) async fn execute(
         });
         return execute_app_flow(a, t, &step, key, "", definition).await;
     }
-    let id = definition["orderId"]
-        .as_str()
+    let id = flow_job
+        .order_id
+        .as_deref()
         .filter(|s| !s.is_empty())
         .ok_or(bad("Action requires an order event"))?;
     if action == "action.set.order.state" || action == "action.generate.document" {

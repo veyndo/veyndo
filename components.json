@@ -335,7 +335,7 @@
         "sales_channels": "read: reads the sales channel document (kind, activity, catalogue scope) to admit the request channel inside the same statement (company.rs, company_logos.rs)"
       },
       "glob_imports": 0,
-      "untyped_access": 98,
+      "untyped_access": 95,
       "sql_outside_store": 3
     },
     "payments": {
@@ -431,7 +431,7 @@
         "user_sessions": "read: reads merchant sessions to resolve the actor of a flow (channel_preview.rs)"
       },
       "glob_imports": 0,
-      "untyped_access": 125,
+      "untyped_access": 122,
       "sql_outside_store": 9
     },
     "b2b": {
@@ -569,7 +569,7 @@
         "workspace_roles": "read: reads role definitions to recheck the job creator rights (app_host_reads.rs, job_callbacks.rs)"
       },
       "glob_imports": 0,
-      "untyped_access": 265,
+      "untyped_access": 261,
       "sql_outside_store": 18
     },
     "automation": {
@@ -686,7 +686,7 @@
         "translation_jobs": "write: agent runs cancel translation jobs they started (agent_runs.rs)"
       },
       "glob_imports": 0,
-      "untyped_access": 349,
+      "untyped_access": 346,
       "sql_outside_store": 29
     },
     "studio": {
@@ -937,7 +937,7 @@
         "tenants": "write: shop provisioning creates the shop row (demo_catalog.rs, provision.rs)"
       },
       "glob_imports": 0,
-      "untyped_access": 220,
+      "untyped_access": 215,
       "sql_outside_store": 11
     },
     "connectors": {

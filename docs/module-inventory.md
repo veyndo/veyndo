@@ -2894,6 +2894,7 @@ This lists every checked-in source module in these roots, including files with n
 | [scripts/testing/test_parallel_check.py](../scripts/testing/test_parallel_check.py) | Exercise actual parallel child overlap, failure propagation, owned cleanup and fixture isolation. |
 | [scripts/testing/test_partition_coverage.py](../scripts/testing/test_partition_coverage.py) | Reject incomplete, stale or modified partition profiles before combining coverage. |
 | [scripts/testing/tooling_tests.py](../scripts/testing/tooling_tests.py) | Ordered Studio layout. |
+| [scripts/testing/typed_inputs.py](../scripts/testing/typed_inputs.py) | Typed inputs gate: component and server functions read their JSON parameters through typed views. |
 | [scripts/testing/workspace_boundaries.py](../scripts/testing/workspace_boundaries.py) | Enforce reviewed Cargo owners and dependency capabilities, including aliases and unnamed helper crates. |
 | [scripts/testing/workspace_boundary_tests.py](../scripts/testing/workspace_boundary_tests.py) | Mutation controls against real Cargo metadata: aliases, hidden helpers, build scripts and source-owner escapes. |
 | [scripts/testing/workspace_composition.py](../scripts/testing/workspace_composition.py) | Current-role and foreign-shop admission through the real merchant planner and directory. |

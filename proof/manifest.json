@@ -1068,8 +1068,8 @@
     },
     "components/apps/src/service/commerce_hooks.rs": {
       "status": "unproved",
-      "sha256": "bc176b73d95c92459377054562b8bd2b490fb38bc24ab560c0599d21254a4713",
-      "review": "Batch B: commerce hooks, cart contributions and app source ingestion move into apps"
+      "sha256": "8a48ce4fe785d24ead20d495be508d2a9dc66f02e8651676233ec27b87efc9bc",
+      "review": "F43 typed inputs gate: proof bindings unchanged"
     },
     "components/apps/src/service/configuration_examples.rs": {
       "status": "unproved",
@@ -2568,8 +2568,8 @@
     },
     "components/intelligence/src/knowledge/relations.rs": {
       "status": "unproved",
-      "sha256": "45d67342c5552357ce82b5d1027a200c798b9608b13b341c60a84761810c673b",
-      "review": "F40 typed inputs (automatic, accessor-equivalent): proof bindings unchanged"
+      "sha256": "2d24a068ae97196b1c29cd8c3cde59e2f57c44970a55072fb624a8881f51d2e0",
+      "review": "F43 typed inputs gate: proof bindings unchanged"
     },
     "components/intelligence/src/knowledge/rerank.rs": {
       "status": "unproved",
@@ -2793,8 +2793,8 @@
     },
     "components/intelligence/src/service/scenarios/probes.rs": {
       "status": "unproved",
-      "sha256": "e24d05ed9f51add517283886f158509209e55943c3cc0a9515089c5b49373a3c",
-      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
+      "sha256": "30ec2d2a67a1282c7f0fe461738e29bc6f91de478d8aca9fd7c53a280c80a17b",
+      "review": "F43 typed inputs gate: proof bindings unchanged"
     },
     "components/intelligence/src/service/scenarios/readiness.rs": {
       "status": "unproved",
@@ -2838,8 +2838,8 @@
     },
     "components/intelligence/src/store/agent_runs.rs": {
       "status": "unproved",
-      "sha256": "84bc01f82cd414aa98e06b8be87d0d69da712cd97673dedf2167e65b5c98f482",
-      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
+      "sha256": "255dfaa6bacd71336a06a33beec0e7af8fa67b3906d57f94a3a3e9e996703fa1",
+      "review": "F43 typed inputs gate: proof bindings unchanged"
     },
     "components/intelligence/src/store/behavior.rs": {
       "status": "unproved",
@@ -3093,8 +3093,8 @@
     },
     "components/marketing/src/service/configuration_writes.rs": {
       "status": "unproved",
-      "sha256": "5148dfe9d025b9775eb31089ee54438614c05501cdf38e17b16f4d073f49dd19",
-      "review": "F42 typed nested readers: proof bindings unchanged"
+      "sha256": "05916d370e5fb266ced1ebbf6021e959f856b7aa42366863c557497802483dc9",
+      "review": "F43 typed inputs gate: proof bindings unchanged"
     },
     "components/marketing/src/service/coupons.rs": {
       "status": "unproved",
@@ -3168,8 +3168,8 @@
     },
     "components/marketing/src/store/promotions.rs": {
       "status": "unproved",
-      "sha256": "ff15e08b52ae78ed22cb4bd3f3419a54993603eed63217f7084932ba80f78da7",
-      "review": "F40 typed inputs (automatic, accessor-equivalent): proof bindings unchanged"
+      "sha256": "c6d94ba4070dfb294ba75413a344b7b4c8d4e7e38af62c1a1fb11dc0509bed54",
+      "review": "F43 typed inputs gate: proof bindings unchanged"
     },
     "components/marketing/src/store/rule_entities.rs": {
       "status": "unproved",
@@ -3363,8 +3363,8 @@
     },
     "components/orders/src/store/order_mutation.rs": {
       "status": "unproved",
-      "sha256": "e5e5a66ea31b5819d5b811e79c5d9862a29c04fbdc616250c6baab61a5db68cc",
-      "review": "F17: shared outbox and shop registry helpers in core; written reasons for foreign table access"
+      "sha256": "b85ac008d9bced90d38246096126d7f06629f97f77f4cbd4fd2fcb4a591c394f",
+      "review": "F43 typed inputs gate: proof bindings unchanged"
     },
     "components/orders/src/store/order_reads.rs": {
       "status": "unproved",
@@ -6523,8 +6523,8 @@
     },
     "src/apps/job_import.rs": {
       "status": "unproved",
-      "sha256": "e25c253657e3c53ec62e869ebfc27d26cda3209d6906a5610136c0d6b79ceda3",
-      "review": "F31 typed server capability inputs: proof bindings unchanged"
+      "sha256": "2c9d41d8b26b13cd73f10a5e61b34e7a3934a5ba17a1bd2ffe41730b36712efa",
+      "review": "F43 typed inputs gate: proof bindings unchanged"
     },
     "src/apps/jobs.rs": {
       "status": "unproved",
@@ -7558,8 +7558,8 @@
     },
     "src/marketing/flow_actions.rs": {
       "status": "unproved",
-      "sha256": "7b3e88b1f0f6988f5c415e662572dd28e2f5b400d08e85500b0f5b8ca850c56a",
-      "review": "F39 typed inputs: proof bindings unchanged"
+      "sha256": "983d662ff0fdaed24affd5a6f978cc3112e6faf924db536c6bc6b90ec97429ce",
+      "review": "F43 typed inputs gate: proof bindings unchanged"
     },
     "src/marketing/flow_jobs.rs": {
       "status": "unproved",

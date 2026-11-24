@@ -1,7 +1,9 @@
 //! Durable agent runs in storage: the caller projection, the conversation turn fence, publication under the run lease and the checkpoint journal.
+use serde::Deserialize;
 use serde_json::{Value, json};
 use sqlx::postgres::PgRow;
 use sqlx::{Postgres, Row, Transaction};
+use veyndo_core::document::{lenient, view};
 use veyndo_core::{Error, Result, State, StatusCode, conflict};
 
 /// The lease a worker holds on one running task.
@@ -55,6 +57,22 @@ pub fn project(row: &PgRow) -> Value {
 }
 
 /// Publishes the finished proposal while the lease is still held, and releases the conversation turn.
+/// The published evidence of an agent run.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct RunEvidence {
+    #[serde(deserialize_with = "lenient")]
+    proposal: ProposalSummary,
+}
+
+/// The summary of a proposal.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct ProposalSummary {
+    #[serde(deserialize_with = "lenient")]
+    summary: Option<String>,
+}
+
 pub async fn publish(a: &State, t: &str, id: &str, evidence: &Value, lease: &str) -> Result<()> {
     let mut tx = a.db.begin().await?;
     let row=sqlx::query("UPDATE tasks SET proposal=$1,run_state='ready',run_pending=NULL,run_lease=NULL,run_until=NULL,run_revision=run_revision+1,run_updated=now() WHERE tenant=$2 AND id=$3 AND run_state='running' AND run_lease=$4 AND run_until>now() RETURNING conversation_id")
@@ -62,7 +80,7 @@ pub async fn publish(a: &State, t: &str, id: &str, evidence: &Value, lease: &str
     if let Some(c) = row.get::<Option<String>, _>("conversation_id") {
         sqlx::query("UPDATE conversations SET turn_owner=NULL,turn_until=NULL WHERE tenant=$1 AND id=$2 AND turn_owner=$3").bind(t).bind(&c).bind(id).execute(&mut *tx).await?;
         let data = json!({"taskId":id,"preview":evidence,"approvalRequired":true});
-        sqlx::query("INSERT INTO chat_messages(tenant,conversation_id,role,content,data) VALUES($1,$2,'assistant',$3,$4)").bind(t).bind(c).bind(evidence["proposal"]["summary"].as_str().unwrap_or("")).bind(data).execute(&mut *tx).await?;
+        sqlx::query("INSERT INTO chat_messages(tenant,conversation_id,role,content,data) VALUES($1,$2,'assistant',$3,$4)").bind(t).bind(c).bind(view::<RunEvidence>(evidence).proposal.summary.as_deref().unwrap_or("")).bind(data).execute(&mut *tx).await?;
     }
     tx.commit().await?;
     Ok(())

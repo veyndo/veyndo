@@ -22,6 +22,7 @@ subprocess.run(["python3", "scripts/security_route_gate.py"], cwd=root, check=Tr
 # File length is not limited: a component keeps related code together. Function length is limited by clippy
 # (clippy.toml), and component boundaries, table ownership and SQL placement by scripts/components.py.
 subprocess.run(['python3', 'scripts/components.py'], cwd=root, check=True)
+subprocess.run(['python3', 'scripts/testing/typed_inputs.py'], cwd=root, check=True)
 print(f'PASS {len(files)} Rust modules: responsibility documented; main <=120; every WAT example documented')
 
 subprocess.run(["node", "frontend/scripts/architecture.mjs"], cwd=root, check=True)

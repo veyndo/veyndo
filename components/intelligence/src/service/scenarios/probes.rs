@@ -1,6 +1,7 @@
 //! Scripted hostile shoppers probe native cart and checkout fences in a private sandbox; no model call, no live effect.
 use super::{catalogue, evidence, shopper};
 use crate::ports::AgentHost;
+use serde::Deserialize;
 use serde_json::Value;
 use serde_json::json;
 use veyndo_checkout::store::cart_load::load as load_cart;
@@ -9,6 +10,7 @@ use veyndo_core::RequestContext;
 use veyndo_core::Result;
 use veyndo_core::bad;
 use veyndo_core::conflict;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::shop_scope::channel as channel_id;
 use veyndo_core::uid;
 /// A refusal by the native owner is the expected result; an accepted attack is reported with a closed finding code.
@@ -50,8 +52,23 @@ async fn fresh<H: AgentHost>(
     let revision = load_cart(a, &h).await?.revision;
     Ok((h, revision))
 }
-fn total(v: &Value) -> Option<&str> {
-    v["price"]["totalMinor"].as_str()
+fn total(v: &Value) -> Option<String> {
+    view::<ProbedQuote>(v).price.total_minor
+}
+
+/// The exact total of a probed quote.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct ProbedQuote {
+    #[serde(deserialize_with = "lenient")]
+    price: ProbedPrice,
+}
+
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ProbedPrice {
+    #[serde(deserialize_with = "lenient")]
+    total_minor: Option<String>,
 }
 /// The product with this ID, or the first one that has stock.
 fn stocked(products: &Value, id: Option<&str>) -> Option<Value> {

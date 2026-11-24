@@ -97,11 +97,28 @@ struct CallbackRecord {
     warnings: Option<Vec<Value>>,
 }
 
+/// The reviewed import intent: the options the merchant approved.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct ImportIntent {
+    #[serde(deserialize_with = "lenient")]
+    options: Raw<ApprovedOptions>,
+}
+
+/// The source limitations the merchant acknowledged.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ApprovedOptions {
+    #[serde(deserialize_with = "lenient")]
+    acknowledged_warnings: Option<Vec<Value>>,
+}
+
 fn import_input(v: &Value, intent: &Value, inspect: bool) -> Result<Value> {
     let callback: ImportCallback = view(v);
+    let intent: ImportIntent = view(intent);
     let mut input =
-        json!({"approve":true,"record":callback.record.raw,"options":intent["options"]});
-    if let Some(approved) = intent["options"]["acknowledgedWarnings"].as_array() {
+        json!({"approve":true,"record":callback.record.raw,"options":intent.options.raw});
+    if let Some(approved) = intent.options.acknowledged_warnings.as_ref() {
         let warnings = callback
             .record
             .warnings
