@@ -68,7 +68,7 @@
         "tenants": "read: reads shop existence, status or the agent stop switch inside a larger claim or join; simple reads go through veyndo_core::tenants (agent_authority.rs, broker.rs, identity.sql, sessions.rs)"
       },
       "glob_imports": 0,
-      "untyped_access": 66,
+      "untyped_access": 59,
       "sql_outside_store": 11
     },
     "shop": {
@@ -123,7 +123,7 @@
         "tenants": "write: operator lifecycle changes the shop status and status revision (access_snapshot.sql, availability.rs, operator_lifecycle.rs, operator_metrics.rs)"
       },
       "glob_imports": 0,
-      "untyped_access": 63,
+      "untyped_access": 57,
       "sql_outside_store": 9
     },
     "catalog": {
@@ -159,7 +159,7 @@
         "tenants": "read: reads shop existence, status or the agent stop switch inside a larger claim or join; simple reads go through veyndo_core::tenants (media_jobs.rs)"
       },
       "glob_imports": 0,
-      "untyped_access": 104,
+      "untyped_access": 98,
       "sql_outside_store": 2
     },
     "inventory": {
@@ -296,7 +296,7 @@
         "orders": "read: reads order documents in the same statement as its own records to project or admit them (customers.rs)"
       },
       "glob_imports": 0,
-      "untyped_access": 56,
+      "untyped_access": 50,
       "sql_outside_store": 2
     },
     "orders": {
@@ -335,7 +335,7 @@
         "sales_channels": "read: reads the sales channel document (kind, activity, catalogue scope) to admit the request channel inside the same statement (company.rs, company_logos.rs)"
       },
       "glob_imports": 0,
-      "untyped_access": 178,
+      "untyped_access": 172,
       "sql_outside_store": 3
     },
     "payments": {

@@ -9,8 +9,10 @@ use crate::store::group_usage::guard as group_guard;
 use crate::store::settings::scoped_locked;
 use axum::Json;
 use axum::extract::{Path, State as Shared};
+use serde::Deserialize;
 use serde_json::{Value, json};
 use sqlx::Row;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::history_context::context;
 use veyndo_core::{RequestContext, Result, bad, conflict};
 use veyndo_identity::{merchant, permit};
@@ -69,6 +71,16 @@ async fn guard(
     }
     Ok(())
 }
+/// A settings save: the complete configuration and the revisions it was edited at.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct SettingsSave {
+    data: Value,
+    #[serde(deserialize_with = "lenient")]
+    revision: Option<i64>,
+    base_revision: Value,
+}
+
 /// Saves the shared settings basis at its revision after every dependency guard.
 pub async fn save_config(
     Shared(host): Shared<SettingsHost>,
@@ -78,10 +90,11 @@ pub async fn save_config(
     permit(&h, "settings.write")?;
     let a = &host.core;
     let t = merchant(&h)?;
-    let s = decode(v["data"].clone())?;
+    let input: SettingsSave = view(&v);
+    let s = decode(input.data)?;
     validate(&s, &|v| host.guards.condition(v))?;
-    let revision = v["revision"]
-        .as_i64()
+    let revision = input
+        .revision
         .ok_or(bad("Configuration revision required"))?;
     let mut tx = a.db.begin().await?;
     context(&mut tx, &h, "merchant").await?;
@@ -239,7 +252,8 @@ pub async fn save_scope(
     if channel == "default" {
         return Err(bad("Default channel uses the shared settings basis"));
     }
-    let next = decode(v["data"].clone())?;
+    let input: SettingsSave = view(&v);
+    let next = decode(input.data)?;
     validate(&next, &|v| host.guards.condition(v))?;
     let mut tx = a.db.begin().await?;
     context(&mut tx, &h, "merchant").await?;
@@ -248,7 +262,7 @@ pub async fn save_scope(
         .fetch_one(&mut *tx)
         .await?;
     let base = decode(row.get("data"))?;
-    if v["baseRevision"].as_i64() != Some(row.get("revision")) {
+    if input.base_revision.as_i64() != Some(row.get("revision")) {
         return Err(conflict("Settings basis changed; reload first"));
     }
     let (old, _) = scoped_locked(&mut tx, &t, &channel, &|v| host.guards.condition(v)).await?;
@@ -259,7 +273,7 @@ pub async fn save_scope(
     .bind(&channel)
     .fetch_optional(&mut *tx)
     .await?;
-    if v["revision"].as_i64() != Some(revision.unwrap_or(0)) {
+    if input.revision != Some(revision.unwrap_or(0)) {
         return Err(conflict("Channel settings changed; reload first"));
     }
     guard(&*host.guards, &mut tx, &t, &old, &next, Some(&channel)).await?;
@@ -284,7 +298,7 @@ pub async fn save_scope(
     .await?;
     tx.commit().await?;
     Ok(Json(
-        json!({"data":next,"revision":revision.unwrap_or(0)+1,"baseRevision":v["baseRevision"],"inherited":base,"overrides":patch,"channelId":channel}),
+        json!({"data":next,"revision":revision.unwrap_or(0)+1,"baseRevision":input.base_revision,"inherited":base,"overrides":patch,"channelId":channel}),
     ))
 }
 /// The shop settings with recent reviews and orders for the merchant settings view.

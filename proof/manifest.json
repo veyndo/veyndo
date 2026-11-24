@@ -1653,8 +1653,8 @@
     },
     "components/catalog/src/service/image_jobs.rs": {
       "status": "unproved",
-      "sha256": "4c89f2c87c4cf8cd6a17fb491f7f375cdc93e2f4581b03f3f37751e5bdff30c9",
-      "review": "image jobs moved into components/catalog; no kernel binding changed"
+      "sha256": "de8775911dc3617d2b4c9fa41244ad52c7d251c7bdd4f5a11d7855a82019189e",
+      "review": "F32 typed request inputs: proof bindings unchanged"
     },
     "components/catalog/src/service/model_media.rs": {
       "status": "unproved",
@@ -2183,8 +2183,8 @@
     },
     "components/customers/src/http/account.rs": {
       "status": "unproved",
-      "sha256": "aca980bf3e6cf36f0d9e9718c0818369261b4c26beb305bc4a49586567f5cfa9",
-      "review": "F17: shared outbox and shop registry helpers in core; written reasons for foreign table access"
+      "sha256": "7e72638970b8a5d4a2bb73261a9d98df8f08810b018da5594af8450a162e4226",
+      "review": "F32 typed request inputs: proof bindings unchanged"
     },
     "components/customers/src/http/addresses.rs": {
       "status": "unproved",
@@ -2353,8 +2353,8 @@
     },
     "components/identity/src/http/mfa.rs": {
       "status": "unproved",
-      "sha256": "6b413024752e71dd1cfa1bd45e4107a54a65f81cedda74f3f3dbf23f34f249f6",
-      "review": "F17: shared outbox and shop registry helpers in core; written reasons for foreign table access"
+      "sha256": "f8361d2c5d1562597b3ff12c502779c20cb012c6f17ce3ad6ace84dacc7ad80a",
+      "review": "F32 typed request inputs: proof bindings unchanged"
     },
     "components/identity/src/http/sessions.rs": {
       "status": "unproved",
@@ -3298,8 +3298,8 @@
     },
     "components/orders/src/http/delivery_split.rs": {
       "status": "reviewed-binding",
-      "sha256": "36b59a2b14d231d9b6143974d863cb7a049638fa749c213f600b3cca1ae59b64",
-      "review": "Delivery split and carrier booking intents moved into the orders and apps components"
+      "sha256": "e5abac0997c19cc48f4bc158d10cad861fde0d1ff1759941ad2e3cc0c8685003",
+      "review": "F32 typed request inputs: proof bindings unchanged"
     },
     "components/orders/src/http/downloads.rs": {
       "status": "reviewed-binding",
@@ -4113,8 +4113,8 @@
     },
     "components/shop/src/service/settings_writes.rs": {
       "status": "unproved",
-      "sha256": "2aca528d9a22c0fcc1f49dd6282756341b5310ec27525a56156cc368cdcc6560",
-      "review": "F17: shared outbox and shop registry helpers in core; written reasons for foreign table access"
+      "sha256": "d27c7fa045d400f7856c80033ee286b7a1d87127074e28ea1955af0b27c4c5df",
+      "review": "F32 typed request inputs: proof bindings unchanged"
     },
     "components/shop/src/service.rs": {
       "status": "unproved",

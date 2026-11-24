@@ -5,7 +5,9 @@ use crate::service::sessions::{identify, open};
 use crate::store::accounts;
 use axum::Json;
 use axum::extract::State as Shared;
+use serde::Deserialize;
 use serde_json::{Value, json};
+use veyndo_core::document::{lenient, view};
 use veyndo_core::shop_scope::{channel as channel_id, session_digest, tenant};
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad};
 use veyndo_identity::domain::credentials::{
@@ -24,6 +26,29 @@ async fn customer(a: &State, h: &RequestContext) -> Result<(String, String)> {
     Ok((t, email))
 }
 
+/// The contact fields of a customer registration; a missing or non-text field is empty.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct Registration {
+    #[serde(deserialize_with = "lenient")]
+    first_name: String,
+    #[serde(deserialize_with = "lenient")]
+    last_name: String,
+    #[serde(deserialize_with = "lenient")]
+    company: String,
+    #[serde(deserialize_with = "lenient")]
+    phone_number: String,
+}
+
+/// A customer password change.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct PasswordChange {
+    #[serde(deserialize_with = "lenient")]
+    old_password: Option<String>,
+    new_password: Value,
+}
+
 /// `POST /store-api/account/register`: a customer with contact and optional first addresses, signed in at once.
 pub async fn register(
     Shared(a): Shared<State>,
@@ -38,7 +63,8 @@ pub async fn register(
     if !exists {
         return Err(bad("Unknown shop"));
     }
-    let mut contact:Contact=serde_json::from_value(json!({"name":name,"firstName":v["firstName"].as_str().unwrap_or(""),"lastName":v["lastName"].as_str().unwrap_or(""),"company":v["company"].as_str().unwrap_or(""),"phoneNumber":v["phoneNumber"].as_str().unwrap_or("")})).map_err(|_|bad("Invalid customer contact"))?;
+    let input: Registration = view(&v);
+    let mut contact: Contact = serde_json::from_value(json!({"name":name,"firstName":input.first_name,"lastName":input.last_name,"company":input.company,"phoneNumber":input.phone_number})).map_err(|_|bad("Invalid customer contact"))?;
     contact.validate()?;
     let mut initial = Vec::new();
     let (settings, _) = settings(&a, &t, "default").await?;
@@ -119,8 +145,10 @@ pub async fn password(
 ) -> Result<Json<Value>> {
     let (t, email) = customer(&a, &h).await?;
     let current = accounts::password_hash(&a, &t, &email).await?;
-    let old = v["oldPassword"]
-        .as_str()
+    let input: PasswordChange = view(&v);
+    let old = input
+        .old_password
+        .as_deref()
         .ok_or(bad("Current password required"))?;
     if !verify_password(old.to_string(), current.clone()).await? {
         return Err(Error(
@@ -128,7 +156,7 @@ pub async fn password(
             "Invalid credentials".into(),
         ));
     }
-    let new = hash_password(new_password(&json!({"password":v["newPassword"]}))?).await?;
+    let new = hash_password(new_password(&json!({"password":input.new_password}))?).await?;
     accounts::replace_password(&a, &t, &email, current, new).await?;
     Ok(Json(json!({"customerToken":open(&a,&t,&email).await?})))
 }

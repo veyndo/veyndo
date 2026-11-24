@@ -3,8 +3,10 @@ use crate::domain::image_job::{self, Mode};
 use crate::ports::Catalog;
 use crate::store::media_jobs;
 use base64::{Engine, engine::general_purpose::STANDARD};
+use serde::Deserialize;
 use serde_json::{Value, json};
 use sha2::{Digest, Sha256};
+use veyndo_core::document::{lenient, view};
 use veyndo_core::{Error, RequestContext, Result, StatusCode, bad, conflict, uid};
 use veyndo_identity::{merchant, permit};
 
@@ -15,16 +17,39 @@ pub async fn provider(c: &Catalog, h: &RequestContext) -> Result<Value> {
     Ok(json!({"configured":provider.configured,"model":provider.model}))
 }
 
+/// The product revision an image request or decision was made at, and the source image it names.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ImageDecision {
+    #[serde(deserialize_with = "lenient")]
+    revision: Option<i64>,
+    source_id: Value,
+}
+
+/// A queued image job as it was stored.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct StoredImageJob {
+    #[serde(deserialize_with = "lenient")]
+    mode: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    source_id: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    prompt: Option<String>,
+}
+
+/// Queues one image job for a product at the revision the merchant saw.
 pub async fn enqueue(c: &Catalog, h: &RequestContext, product: &str, v: &Value) -> Result<Value> {
     permit(h, "catalog")?;
     let t = merchant(h)?;
     let request = image_job::parse(v)?;
+    let input: ImageDecision = view(v);
     let mut tx = c.core.db.begin().await?;
     media_jobs::lock_shop(&mut tx, &t).await?;
     let p = media_jobs::lock_product_facts(&mut tx, &t, product)
         .await?
         .ok_or(Error(StatusCode::NOT_FOUND, "Product not found".into()))?;
-    if v["revision"].as_i64() != Some(p.revision) {
+    if input.revision != Some(p.revision) {
         return Err(conflict("Product changed; save or reload first"));
     }
     if request.mode == Mode::Optimize {
@@ -52,7 +77,7 @@ pub async fn enqueue(c: &Catalog, h: &RequestContext, product: &str, v: &Value) 
         &id,
         product,
         p.revision,
-        json!({"mode":request.mode.name(),"sourceId":v["sourceId"],"prompt":instruction}),
+        json!({"mode":request.mode.name(),"sourceId":input.source_id,"prompt":instruction}),
     )
     .await?;
     tx.commit().await?;
@@ -91,7 +116,7 @@ pub async fn apply(c: &Catalog, h: &RequestContext, id: &str, v: &Value) -> Resu
         return Err(conflict("Image is not ready for review"));
     };
     let revision = media_jobs::lock_product_revision(&mut tx, &t, &job.product_id).await?;
-    if v["revision"].as_i64() != Some(revision) || revision != job.product_revision {
+    if view::<ImageDecision>(v).revision != Some(revision) || revision != job.product_revision {
         return Err(conflict(
             "Product changed since image generation; start a fresh draft",
         ));
@@ -118,21 +143,23 @@ pub async fn once(c: &Catalog) -> Result<bool> {
 }
 
 async fn generate(c: &Catalog, t: &str, product: &str, request: &Value) -> Result<String> {
-    let source = if request["mode"] == "optimize" {
+    let request: StoredImageJob = view(request);
+    let source = if request.mode.as_deref() == Some("optimize") {
         Some(
             media_jobs::source(
                 &c.core,
                 t,
                 product,
-                request["sourceId"].as_str().unwrap_or(""),
+                request.source_id.as_deref().unwrap_or(""),
             )
             .await?,
         )
     } else {
         None
     };
-    let prompt = request["prompt"]
-        .as_str()
+    let prompt = request
+        .prompt
+        .as_deref()
         .ok_or(bad("Invalid image instructions"))?;
     let bytes = c.images.create(t, prompt, source).await?;
     let digest = format!("{:x}", Sha256::digest(&bytes));
