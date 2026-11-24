@@ -5,9 +5,11 @@ use crate::{accounts, auth, commerce, payments};
 use axum::Json;
 use axum::extract::Path;
 use axum::extract::State;
+use serde::Deserialize;
 use serde_json::Value;
 use veyndo_core::Result;
 use veyndo_core::bad;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::request_context::RequestContext;
 mod addresses;
 mod company_model;
@@ -47,10 +49,65 @@ pub(crate) use veyndo_studio::domain::merchant_operations::{
 };
 /// The record a merchant operation names.
 fn record_id(v: &Value) -> Result<String> {
-    v["id"]
-        .as_str()
-        .map(str::to_string)
-        .ok_or(bad("id required"))
+    view::<OperationArgs>(v).id.ok_or(bad("id required"))
+}
+
+/// The arguments merchant operations take from a call besides the body they pass on.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct OperationArgs {
+    #[serde(deserialize_with = "lenient")]
+    id: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    address_id: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    revision: Option<i64>,
+    #[serde(deserialize_with = "lenient")]
+    channel_id: Option<String>,
+    product: Value,
+    category: Value,
+    customer: Value,
+}
+/// Customer addresses and the company master data through their native owners.
+async fn account_operation(
+    a: &App,
+    h: &RequestContext,
+    name: &str,
+    v: &Value,
+) -> Result<Json<Value>> {
+    let id = || record_id(v);
+    let args: OperationArgs = view(v);
+    Ok(match name {
+        "merchant.customer.address.save" => Json(
+            accounts::address_save(
+                a,
+                &merchant(a, h)?,
+                &id()?,
+                args.address_id.as_deref(),
+                v,
+                h,
+            )
+            .await?,
+        ),
+        "merchant.customer.address.delete" => Json(
+            accounts::address_delete(
+                a,
+                &merchant(a, h)?,
+                &id()?,
+                args.address_id
+                    .as_deref()
+                    .ok_or(bad("addressId required"))?,
+                args.revision.ok_or(bad("revision required"))?,
+                h,
+            )
+            .await?,
+        ),
+        "merchant.company" => master_data::read(a, h, args.channel_id.as_deref()).await?,
+        "merchant.company.save" => {
+            master_data::save(a, h, v.clone(), args.channel_id.as_deref()).await?
+        }
+        _ => return Err(bad("Unknown operation")),
+    })
 }
 /// Products, categories and product files through their native handlers.
 async fn catalog_operation(a: &App, h: &RequestContext, name: &str, v: &Value) -> Result<Value> {
@@ -71,14 +128,18 @@ async fn catalog_operation(a: &App, h: &RequestContext, name: &str, v: &Value) -
             crate::categories::list_categories(State(a.clone()), h.clone()).await?
         }
         "merchant.product.create" => {
-            commerce::create_product(State(a.core.clone()), h.clone(), Json(v["product"].clone()))
-                .await?
+            commerce::create_product(
+                State(a.core.clone()),
+                h.clone(),
+                Json(view::<OperationArgs>(v).product),
+            )
+            .await?
         }
         "merchant.category.create" => {
             crate::categories::create_category(
                 State(a.clone()),
                 h.clone(),
-                Json(v["category"].clone()),
+                Json(view::<OperationArgs>(v).category),
             )
             .await?
         }
@@ -87,7 +148,7 @@ async fn catalog_operation(a: &App, h: &RequestContext, name: &str, v: &Value) -
                 State(a.clone()),
                 h.clone(),
                 Path(id()?),
-                Json(v["category"].clone()),
+                Json(view::<OperationArgs>(v).category),
             )
             .await?
         }
@@ -99,7 +160,7 @@ async fn catalog_operation(a: &App, h: &RequestContext, name: &str, v: &Value) -
                 State(a.core.clone()),
                 h.clone(),
                 Path(id()?),
-                Json(v["product"].clone()),
+                Json(view::<OperationArgs>(v).product),
             )
             .await?
         }
@@ -157,25 +218,10 @@ pub(crate) async fn invoke(a: &App, h: &RequestContext, name: &str, v: &Value) -
         "merchant.customer.addresses" => {
             addresses::list(State(a.core.clone()), h.clone(), Path(id()?)).await?
         }
-        "merchant.customer.address.save" => Json(
-            accounts::address_save(a, &merchant(a, h)?, &id()?, v["addressId"].as_str(), v, h)
-                .await?,
-        ),
-        "merchant.customer.address.delete" => Json(
-            accounts::address_delete(
-                a,
-                &merchant(a, h)?,
-                &id()?,
-                v["addressId"].as_str().ok_or(bad("addressId required"))?,
-                v["revision"].as_i64().ok_or(bad("revision required"))?,
-                h,
-            )
-            .await?,
-        ),
-        "merchant.company" => master_data::read(a, h, v["channelId"].as_str()).await?,
-        "merchant.company.save" => {
-            master_data::save(a, h, v.clone(), v["channelId"].as_str()).await?
-        }
+        "merchant.customer.address.save"
+        | "merchant.customer.address.delete"
+        | "merchant.company"
+        | "merchant.company.save" => account_operation(a, h, name, v).await?,
         "merchant.workflow" => workflow::get(State(a.core.clone()), h.clone()).await?,
         "merchant.workflow.save" => {
             workflow::save(State(a.core.clone()), h.clone(), Json(v.clone())).await?
@@ -223,7 +269,7 @@ pub(crate) async fn invoke(a: &App, h: &RequestContext, name: &str, v: &Value) -
                 State(a.core.clone()),
                 h.clone(),
                 Path(id()?),
-                Json(v["customer"].clone()),
+                Json(view::<OperationArgs>(v).customer),
             )
             .await?
         }

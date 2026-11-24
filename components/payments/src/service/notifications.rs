@@ -1,10 +1,12 @@
 //! Version-pinned HMAC notifications enqueue reconciliation; external event payloads never write monetary state.
+use crate::domain::receipt_ref::{ProviderReceipt, is};
 use crate::ports::Host;
 use crate::store::attempts::attempt;
 use crate::store::jobs::enqueue_tx;
 use hmac::{Hmac, Mac};
 use serde_json::{Value, json};
 use sha2::Sha256;
+use veyndo_core::document::view;
 use veyndo_core::shop_scope::header;
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad, hash};
 
@@ -19,7 +21,8 @@ pub async fn accept(
 ) -> Result<Value> {
     let v: Value =
         serde_json::from_slice(bytes).map_err(|_| bad("Invalid provider notification"))?;
-    let id = v["attemptId"].as_str().ok_or(bad("Attempt required"))?;
+    let r: ProviderReceipt = view(&v);
+    let id = r.attempt_id.as_deref().ok_or(bad("Attempt required"))?;
     let row =
         sqlx::query("SELECT * FROM payment_attempts WHERE tenant=$1 AND id=$2 AND provider=$3")
             .bind(t)
@@ -58,18 +61,19 @@ pub async fn accept(
             "Invalid provider signature".into(),
         )
     })?;
-    if v["apiVersion"] != "1"
-        || v["tenant"] != t
-        || v["provider"] != p.provider
-        || v["adapterVersion"] != p.adapter_version
-        || v["environment"] != p.environment
-        || v["accountRef"] != p.context["accountRef"]
-        || v["reference"].as_str() != p.provider_order.as_deref()
+    if !is(&r.api_version, "1")
+        || !is(&r.tenant, t)
+        || !is(&r.provider, &p.provider)
+        || !is(&r.adapter_version, &p.adapter_version)
+        || !is(&r.environment, &p.environment)
+        || r.account_ref != p.context["accountRef"]
+        || r.reference.as_str() != p.provider_order.as_deref()
     {
         return Err(bad("Provider event identity mismatch"));
     }
-    let event = v["eventId"]
-        .as_str()
+    let event = r
+        .event_id
+        .as_deref()
         .filter(|s| !s.is_empty() && s.len() <= 100)
         .ok_or(bad("Event id required"))?;
     let mut tx = a.db.begin().await?;

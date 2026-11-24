@@ -1123,8 +1123,8 @@
     },
     "components/apps/src/service/job_callbacks.rs": {
       "status": "reviewed-binding",
-      "sha256": "49c8d0d0b0d47b12d970c3dae4e7cb23f868f7ee4206582a2dd7c222bc3aae0e",
-      "review": "F29 typed request inputs: proof bindings unchanged"
+      "sha256": "cb9968c8eb172b90d5288db80c726e07e536b8674b2fb18514bac6cf82e12c50",
+      "review": "F30 typed provider receipts and operation args: proof bindings unchanged"
     },
     "components/apps/src/service/job_evidence.rs": {
       "status": "unproved",
@@ -3453,8 +3453,8 @@
     },
     "components/payments/src/domain/receipt_ref.rs": {
       "status": "unproved",
-      "sha256": "665408e762f5f0d27cc4866ef68c704bcd5b6a4228f2f77d74610ee128f9605e",
-      "review": "Unit tests for every public domain function of the components; no production code changed"
+      "sha256": "8af54b39c5fc2cb14475affdbc6f70c2ecf175ea56f00b450cb66a9b523da3ea",
+      "review": "F30 typed provider receipts and operation args: proof bindings unchanged"
     },
     "components/payments/src/domain/refunds.rs": {
       "status": "reviewed-binding",
@@ -3533,8 +3533,8 @@
     },
     "components/payments/src/service/notifications.rs": {
       "status": "unproved",
-      "sha256": "ce9273df8fd33063634aa13e4d53f8f2a34f68cad678676ae5a0c65fe121bc18",
-      "review": "Payment commands, worker and provider sessions moved behind the payments gateway port"
+      "sha256": "f58622e90ff164c9bd6a3a1bf7388d999b66116aa67125f82709992ebd2d6691",
+      "review": "F30 typed provider receipts and operation args: proof bindings unchanged"
     },
     "components/payments/src/service/provider_configuration.rs": {
       "status": "unproved",
@@ -3548,8 +3548,8 @@
     },
     "components/payments/src/service/receipts.rs": {
       "status": "unproved",
-      "sha256": "ee9db556202da6e72daa169aeda57b7772db64460b7c3b5f055f461f4123a9f3",
-      "review": "Receipt persistence and order ledger moved behind the payments host port; kernel call sites unchanged"
+      "sha256": "1ff1321b25a171e2574b7b76c7e0b488eb5ac3052e422c926326c0635ce7e892",
+      "review": "F30 typed provider receipts and operation args: proof bindings unchanged"
     },
     "components/payments/src/service/remote.rs": {
       "status": "unproved",
@@ -3638,8 +3638,8 @@
     },
     "components/payments/src/store/settlements.rs": {
       "status": "unproved",
-      "sha256": "3bc83b3412c71dda1d1e26aa253d6609c6c9165bdb6e5c6e4f222c0bf38ce202",
-      "review": "Payment ledger rules moved into components/payments; kernel call sites unchanged"
+      "sha256": "73d91d9e3775025cbe0e48a4c8137ed4dca1fb28f8ee85761e76cbdaee8afa81",
+      "review": "F30 typed provider receipts and operation args: proof bindings unchanged"
     },
     "components/payments/src/store.rs": {
       "status": "unproved",
@@ -7588,8 +7588,8 @@
     },
     "src/marketing/gateway.rs": {
       "status": "unproved",
-      "sha256": "32841f2e7a860fe491c9f15c162ab7424dcebf6af13b7396af31d2dbe7466d6f",
-      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
+      "sha256": "6959da2045501d3dfa1aa86eac6f05d8a4dfab122f5d5150cd5726319eb85f40",
+      "review": "F30 typed provider receipts and operation args: proof bindings unchanged"
     },
     "src/marketing/jobs.rs": {
       "status": "unproved",
@@ -7733,8 +7733,8 @@
     },
     "src/operations/mod.rs": {
       "status": "unproved",
-      "sha256": "b66efce0db43d805ea50bc96970b220348bce2a7397c2548b5b0e41590da9c18",
-      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
+      "sha256": "785c13d3e6ba837ef9c675eea9d13782c9174a2a23562256a1cb574f2c25857f",
+      "review": "F30 typed provider receipts and operation args: proof bindings unchanged"
     },
     "src/operations/order_documents.rs": {
       "status": "unproved",

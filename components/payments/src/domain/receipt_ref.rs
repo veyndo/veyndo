@@ -1,22 +1,90 @@
 //! Receipt identity: a provider answer must name exactly the attempt, account and invoice it was issued for.
 use crate::domain::attempt::Attempt;
+use serde::Deserialize;
 use serde_json::Value;
+use veyndo_core::document::{Raw, lenient, view};
 use veyndo_core::{Result, bad};
 
+/// A provider adapter's receipt or notification as the ledger reads it; a field of another shape reads as absent.
+#[derive(Deserialize, Default, Debug)]
+#[serde(default, rename_all = "camelCase")]
+pub struct ProviderReceipt {
+    #[serde(deserialize_with = "lenient")]
+    pub api_version: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    pub provider: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    pub adapter_version: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    pub tenant: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    pub attempt_id: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    pub order_id: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    pub environment: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    pub currency: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    pub status: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    pub event_id: Option<String>,
+    pub account_ref: Value,
+    pub reference: Value,
+    pub authorization_id: Value,
+    pub capture_id: Value,
+    pub approval_url: Value,
+    #[serde(deserialize_with = "lenient")]
+    pub amount_minor: Option<i64>,
+    #[serde(deserialize_with = "lenient")]
+    pub authorized_amount_minor: Option<i64>,
+    #[serde(deserialize_with = "lenient")]
+    pub settled_amount_minor: Option<i64>,
+    #[serde(deserialize_with = "lenient")]
+    pub confirmed: Option<bool>,
+    #[serde(deserialize_with = "lenient")]
+    pub capture_pending: Option<bool>,
+    #[serde(deserialize_with = "lenient")]
+    pub capture_closed: Option<bool>,
+    #[serde(deserialize_with = "lenient")]
+    pub refund: Raw<RefundReceipt>,
+}
+
+/// The refund a receipt confirms.
+#[derive(Deserialize, Default, Debug, Clone)]
+#[serde(default, rename_all = "camelCase")]
+pub struct RefundReceipt {
+    #[serde(deserialize_with = "lenient")]
+    pub amount_minor: Option<i64>,
+    #[serde(deserialize_with = "lenient")]
+    pub currency: Option<String>,
+}
+
+impl ProviderReceipt {
+    /// Whether the provider confirmed this receipt.
+    pub fn confirmed(&self) -> bool {
+        self.confirmed == Some(true)
+    }
+}
+
+/// Whether an optional text field holds exactly .
+pub fn is(field: &Option<String>, expected: &str) -> bool {
+    field.as_deref() == Some(expected)
+}
+
 pub fn identity(p: &Attempt, v: &Value) -> Result<()> {
-    if v["apiVersion"] != "1"
-        || v["provider"] != p.provider
-        || v["adapterVersion"] != p.adapter_version
-        || v["tenant"] != p.tenant
-        || v["attemptId"] != p.id
-        || v["orderId"] != p.order
-        || v["environment"] != p.environment
-        || v["accountRef"] != p.context["accountRef"]
-        || v["currency"] != p.currency
-        || v["amountMinor"].as_i64() != Some(p.amount)
-        || p.provider_order
-            .as_ref()
-            .is_some_and(|r| v["reference"] != *r)
+    let r: ProviderReceipt = view(v);
+    if !is(&r.api_version, "1")
+        || !is(&r.provider, &p.provider)
+        || !is(&r.adapter_version, &p.adapter_version)
+        || !is(&r.tenant, &p.tenant)
+        || !is(&r.attempt_id, &p.id)
+        || !is(&r.order_id, &p.order)
+        || !is(&r.environment, &p.environment)
+        || r.account_ref != p.context["accountRef"]
+        || !is(&r.currency, &p.currency)
+        || r.amount_minor != Some(p.amount)
+        || p.provider_order.as_ref().is_some_and(|x| r.reference != *x)
     {
         return Err(bad("Payment receipt identity, account or invoice mismatch"));
     }

@@ -376,7 +376,7 @@
         "sales_channels": "read: reads the sales channel document (kind, activity, catalogue scope) to admit the request channel inside the same statement (providers.rs)"
       },
       "glob_imports": 0,
-      "untyped_access": 249,
+      "untyped_access": 205,
       "sql_outside_store": 11
     },
     "marketing": {
@@ -937,7 +937,7 @@
         "tenants": "write: shop provisioning creates the shop row (demo_catalog.rs, provision.rs)"
       },
       "glob_imports": 0,
-      "untyped_access": 352,
+      "untyped_access": 333,
       "sql_outside_store": 11
     },
     "connectors": {

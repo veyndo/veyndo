@@ -1,10 +1,11 @@
 //! Capture settlement admission: receipt claims, native job matching and the captured total in one transaction.
 use crate::domain::attempt::Attempt;
-use crate::domain::receipt_ref::reference;
+use crate::domain::receipt_ref::{ProviderReceipt, is, reference};
 use crate::domain::settlements::{captured, closed, multi};
 use crate::store::receipt_claims::claim;
 use serde_json::{Value, json};
 use sqlx::Row;
+use veyndo_core::document::view;
 use veyndo_core::{Result, bad, conflict};
 
 pub async fn admit(
@@ -13,7 +14,8 @@ pub async fn admit(
     context: &mut Value,
     v: &Value,
 ) -> Result<(i64, String, bool)> {
-    if v["confirmed"] != true {
+    let r: ProviderReceipt = view(v);
+    if !r.confirmed() {
         return Err(bad("Settlement must be provider confirmed"));
     }
     let legacy;
@@ -23,10 +25,10 @@ pub async fn admit(
             .filter(|rs| !rs.is_empty() && rs.len() <= 1000)
             .ok_or(bad("Invalid provider capture collection"))?
     } else {
-        if v["settledAmountMinor"].as_i64() != Some(p.amount) {
+        if r.settled_amount_minor != Some(p.amount) {
             return Err(bad("Legacy settlement must match the full invoice"));
         }
-        legacy = vec![json!({"id":v["captureId"],"amountMinor":p.amount,"currency":p.currency})];
+        legacy = vec![json!({"id":r.capture_id,"amountMinor":p.amount,"currency":p.currency})];
         &legacy
     };
     let mut receipts = context["captureReceipts"]
@@ -89,7 +91,7 @@ pub async fn admit(
     if receipts.len() > 1000 {
         return Err(bad("Too many capture receipts for one payment"));
     }
-    if v["settledAmountMinor"].as_i64() != Some(snapshot) {
+    if r.settled_amount_minor != Some(snapshot) {
         return Err(bad("Capture collection does not match settlement total"));
     }
     let mut total = 0_i64;
@@ -107,27 +109,27 @@ pub async fn admit(
     if snapshot < p.amount || receipts.len() > 1 {
         let authorization = context["authorizationId"]
             .as_str()
-            .or(v["authorizationId"].as_str())
+            .or(r.authorization_id.as_str())
             .ok_or(bad(
                 "Partial capture requires confirmed authorization evidence",
             ))?
             .to_owned();
         reference(&json!(authorization))?;
-        if v["authorizationId"]
+        if r.authorization_id
             .as_str()
             .is_some_and(|id| id != authorization)
             || (context["authorizationId"].is_null() || v.get("authorizedAmountMinor").is_some())
-                && v["authorizedAmountMinor"].as_i64() != Some(p.amount)
+                && r.authorized_amount_minor != Some(p.amount)
         {
             return Err(bad("Partial capture authorization changed"));
         }
         claim(tx, p, "authorization", &authorization, "").await?;
         context["authorizationId"] = json!(authorization);
     }
-    if snapshot < p.amount && v["status"] != "partially_captured" {
+    if snapshot < p.amount && !is(&r.status, "partially_captured") {
         return Err(bad("Partial settlement cannot report a full capture"));
     }
-    let closed = closed(p) || total == p.amount || v["captureClosed"] == true;
+    let closed = closed(p) || total == p.amount || r.capture_closed == Some(true);
     let first = p
         .capture
         .clone()
