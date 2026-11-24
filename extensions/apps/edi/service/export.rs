@@ -377,5 +377,4 @@ pub async fn handle(
     Ok(Json(execute(&a, &t, v).await?))
 }
 #[cfg(test)]
-#[path = "export_tests.rs"]
 mod tests;

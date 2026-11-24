@@ -10,7 +10,7 @@ See [setup, document profiles and explicit limits](../../../docs/edi.md).
 | `service/main.rs`, `config.rs`, `callbacks.rs` | Independent Rust gateway, bounded admission, fixed tenant callback origins and scoped approved credentials. |
 | `service/document.rs`, `edifact.rs`, `xml.rs` | Bounded normalized document model and untrusted syntax parsing. |
 | `service/import.rs` | Active partner match, native private requisition and durable app receipt idempotency. |
-| `service/export.rs`, `export_tests.rs` | Native immutable receipt/order serialization and parser/escaping counterexamples. |
+| `service/export.rs`, `service/export/tests.rs` | Native immutable receipt/order serialization and parser/escaping counterexamples. |
 | `tests/integration.py` | Isolated real Core/PostgreSQL+gateway import → buyer checkout → native document export and restart/revocation tests. |
 | `Dockerfile` | Non-root Rust-only production gateway, built from repository-root context. |
 

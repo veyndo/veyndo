@@ -1,7 +1,10 @@
 //! Read-only Shop MCP catalogue connector. Never calls foreign carts, checkout, account, wallet or purchase tools.
 use super::*;
-pub(crate) async fn prepare(
-    egress: &dyn PublicEgress,
+/// The public Shop MCP catalogue endpoint the caller opens a pinned client for.
+pub const ENDPOINT: &str = "https://mcp.shop.com/";
+/// Searches the Shop catalogue read-only and maps one selected variant per product to a draft.
+pub async fn prepare(
+    client: &reqwest::Client,
     query: &str,
     shop: Option<&str>,
     count: usize,
@@ -28,8 +31,7 @@ pub(crate) async fn prepare(
         }
         catalog["filters"] = json!({"shops":[shop]});
     }
-    let url = reqwest::Url::parse("https://mcp.shop.com/").unwrap();
-    let client = public_client(egress, &url).await?;
+    let url = reqwest::Url::parse(ENDPOINT).unwrap();
     let mut response=client.post(url).header("Accept","application/json, text/event-stream").header("MCP-Protocol-Version","2026-07-28").header("Mcp-Method","tools/call").header("Mcp-Name","search_catalog").json(&json!({"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"search_catalog","arguments":{"catalog":catalog},"_meta":{"io.modelcontextprotocol/protocolVersion":"2026-07-28","io.modelcontextprotocol/clientInfo":{"name":"veyndo-catalog-import","version":"1.0.0"},"io.modelcontextprotocol/clientCapabilities":{}}}})).send().await.map_err(|_|bad("Shop catalogue is unavailable; retry explicitly or upload an export"))?;
     if !response.status().is_success() || response.content_length().is_some_and(|n| n > 1_000_000) {
         return Err(bad(

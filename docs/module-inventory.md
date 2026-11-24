@@ -2121,24 +2121,27 @@ This lists every checked-in source module in these roots, including files with n
 
 | Module | Responsibility |
 |---|---|
+| [extensions/apps/algolia/src/lib.rs](../extensions/apps/algolia/src/lib.rs) | The Algolia app: bounded, verified index record writes. |
 | [extensions/apps/algolia/src/provider.rs](../extensions/apps/algolia/src/provider.rs) | Search projections contain explicit catalogue fields only; commerce remains authoritative in Veyndo. |
 | [extensions/apps/catalog-export/server.py](../extensions/apps/catalog-export/server.py) | Independent, language-neutral export example. Only scoped commerce callbacks; no core SQL or hosted Python dependency. |
-| [extensions/apps/catalog-import/mod.rs](../extensions/apps/catalog-import/mod.rs) | Inbound provider formats belong to this app; reviewed creation and publication remain native Veyndo operations. |
-| [extensions/apps/catalog-import/shop_mcp.rs](../extensions/apps/catalog-import/shop_mcp.rs) | Read-only Shop MCP catalogue connector. Never calls foreign carts, checkout, account, wallet or purchase tools. |
-| [extensions/apps/catalog-import/shopify_csv.rs](../extensions/apps/catalog-import/shopify_csv.rs) | Deterministic Shopify product-export adapter; image-only rows are not products and variant prices/SKUs remain distinct. |
+| [extensions/apps/catalog-import/src/lib.rs](../extensions/apps/catalog-import/src/lib.rs) | Inbound provider formats belong to this app: product drafts, Shopify product exports and read-only Shop MCP searches; reviewed creation and publication remain native Veyndo operations. |
+| [extensions/apps/catalog-import/src/shop_mcp.rs](../extensions/apps/catalog-import/src/shop_mcp.rs) | Read-only Shop MCP catalogue connector. Never calls foreign carts, checkout, account, wallet or purchase tools. |
+| [extensions/apps/catalog-import/src/shopify_csv.rs](../extensions/apps/catalog-import/src/shopify_csv.rs) | Deterministic Shopify product-export adapter; image-only rows are not products and variant prices/SKUs remain distinct. |
+| [extensions/apps/contentful/src/lib.rs](../extensions/apps/contentful/src/lib.rs) | The Contentful app: paged entry reads imported as private knowledge sources. |
 | [extensions/apps/contentful/src/provider.rs](../extensions/apps/contentful/src/provider.rs) | Contentful reads a bounded, explicitly paged source into the existing knowledge export path. |
 | [extensions/apps/edi/service/callbacks.rs](../extensions/apps/edi/service/callbacks.rs) | Scoped canonical callbacks retain installed digest, consent, actor rights and native app storage ownership. |
 | [extensions/apps/edi/service/config.rs](../extensions/apps/edi/service/config.rs) | Only operator configuration supplies core callback destinations; documents cannot choose URLs or credentials. |
 | [extensions/apps/edi/service/document.rs](../extensions/apps/edi/service/document.rs) | Protocol-neutral requisitions preserve partner identity and SKUs; commerce prices remain native. |
 | [extensions/apps/edi/service/edifact.rs](../extensions/apps/edi/service/edifact.rs) | Bounded EDIFACT ORDERS profile with release-aware tokenization and checked message/interchange envelopes. |
+| [extensions/apps/edi/service/export/tests.rs](../extensions/apps/edi/service/export/tests.rs) | Outbound negative controls retain native amounts, escapes and explicit unsupported invoice profiles. |
 | [extensions/apps/edi/service/export.rs](../extensions/apps/edi/service/export.rs) | Partner-bound outbound messages serialize existing orders/issued receipts; no fiscal numbers, prices or shipping events are invented. |
-| [extensions/apps/edi/service/export_tests.rs](../extensions/apps/edi/service/export_tests.rs) | Outbound negative controls retain native amounts, escapes and explicit unsupported invoice profiles. |
 | [extensions/apps/edi/service/import.rs](../extensions/apps/edi/service/import.rs) | Mapped partner documents create private native requisitions, never orders or a second pricing ledger. |
 | [extensions/apps/edi/service/main.rs](../extensions/apps/edi/service/main.rs) | Independent EDI gateway: app-owned codecs and mappings use the existing permission-aware commerce callback contract. |
 | [extensions/apps/edi/service/xml.rs](../extensions/apps/edi/service/xml.rs) | Namespace-aware UBL Order and cXML OrderRequest ingestion without DTDs, external entities or network fetching. |
 | [extensions/apps/edi/tests/integration.py](../extensions/apps/edi/tests/integration.py) | Real installed-package -> Rust EDI gateway -> consent-bound callbacks -> buyer-owned requisition -> native checkout; no external network. |
 | [extensions/apps/email/src/config.rs](../extensions/apps/email/src/config.rs) | Compile-time mail setting types plus bounded runtime validation and write-only credentials. |
 | [extensions/apps/email/src/email.rs](../extensions/apps/email/src/email.rs) | Email app actions/events retain the published gateway, flow and MCP payload contract. |
+| [extensions/apps/email/src/lib.rs](../extensions/apps/email/src/lib.rs) | The email app: settings and credentials, bounded multilingual templates, SMTP and provider delivery and the order event mapping; the connector runtime owns storage, queue and egress. |
 | [extensions/apps/email/src/payment_templates.rs](../extensions/apps/email/src/payment_templates.rs) | Localized recipient instructions use native exact money and escaped template substitution; no mail implies paid status. |
 | [extensions/apps/email/src/smtp.rs](../extensions/apps/email/src/smtp.rs) | Pinned SMTP/STARTTLS/TLS with verified hostname, bounded dialogue and no retry after ambiguous DATA. |
 | [extensions/apps/email/src/templates.rs](../extensions/apps/email/src/templates.rs) | Bounded immutable envelopes and non-executable multilingual templates; HTML substitutions are escaped. |
@@ -2159,11 +2162,15 @@ This lists every checked-in source module in these roots, including files with n
 | [extensions/apps/furniture-configurator/tests/workflow.py](../extensions/apps/furniture-configurator/tests/workflow.py) | Actual app library/dimensions → exact-cart B2B approval → immutable order → saved-input reorder; no paid providers. |
 | [extensions/apps/gift-message/configuration.wat](../extensions/apps/gift-message/configuration.wat) | Gift-message-owned rules: printable input is checked by the host; app defines length and fee. |
 | [extensions/apps/gmail/src/actions.rs](../extensions/apps/gmail/src/actions.rs) | App-owned connector capabilities and provider settings; shared host supplies tenant-bound storage. |
+| [extensions/apps/gmail/src/lib.rs](../extensions/apps/gmail/src/lib.rs) | The Gmail app: its OAuth policy and settings, label actions and the private message source import. |
 | [extensions/apps/gmail/src/provider.rs](../extensions/apps/gmail/src/provider.rs) | Read-only Gmail incremental imports preserve high-water cursors, bounded windows and deletion evidence. |
 | [extensions/apps/google-analytics/src/actions.rs](../extensions/apps/google-analytics/src/actions.rs) | App-owned connector capabilities and provider settings; shared host supplies tenant-bound storage. |
+| [extensions/apps/google-analytics/src/lib.rs](../extensions/apps/google-analytics/src/lib.rs) | The Google Analytics app: its OAuth policy and settings, property actions and the report source import. |
 | [extensions/apps/google-analytics/src/provider.rs](../extensions/apps/google-analytics/src/provider.rs) | Exact bounded GA4 source rows, quota metadata and stale-report tombstones; no invented causal claims. |
 | [extensions/apps/google-analytics/storefront/ShopAnalytics.tsx](../extensions/apps/google-analytics/storefront/ShopAnalytics.tsx) | Customer consent and real GA4 ecommerce events; absent apps produce no external script. |
+| [extensions/apps/hubspot/src/lib.rs](../extensions/apps/hubspot/src/lib.rs) | The HubSpot app: verified contact upserts. |
 | [extensions/apps/hubspot/src/provider.rs](../extensions/apps/hubspot/src/provider.rs) | Explicit bounded CRM contact upsert; no subscriptions, bulk customer reads or implicit opt-ins. |
+| [extensions/apps/klaviyo/src/lib.rs](../extensions/apps/klaviyo/src/lib.rs) | The Klaviyo app: order events for marketing profiles. |
 | [extensions/apps/klaviyo/src/provider.rs](../extensions/apps/klaviyo/src/provider.rs) | Klaviyo event ingestion uses a stable unique ID and never enrolls a profile into marketing. |
 | [extensions/apps/marketplaces/service/amazon.rs](../extensions/apps/marketplaces/service/amazon.rs) | Official amazon listing adapter, isolated inside the marketplace app. |
 | [extensions/apps/marketplaces/service/config.rs](../extensions/apps/marketplaces/service/config.rs) | Operator-only destinations and per-tenant credentials; marketplace records can select aliases, never supply secrets or URLs. |
@@ -2404,6 +2411,7 @@ This lists every checked-in source module in these roots, including files with n
 | [extensions/apps/site-forms/studio/FormInbox.tsx](../extensions/apps/site-forms/studio/FormInbox.tsx) | Private response cards use the authorized app action; answer values never become public page content. |
 | [extensions/apps/site-forms/studio/inbox.css](../extensions/apps/site-forms/studio/inbox.css) | Response values wrap inside their private app panel; no raw JSON editing surface. |
 | [extensions/apps/slack/src/actions.rs](../extensions/apps/slack/src/actions.rs) | App-owned connector capabilities and provider settings; shared host supplies tenant-bound storage. |
+| [extensions/apps/slack/src/lib.rs](../extensions/apps/slack/src/lib.rs) | The Slack app: its OAuth policy and settings, channel actions and order notifications. |
 | [extensions/apps/slack/src/provider.rs](../extensions/apps/slack/src/provider.rs) | Slack notification execution belongs to the Slack app, admitted by the connector host. |
 | [extensions/apps/storyfront/studio/StoryfrontConnections.tsx](../extensions/apps/storyfront/studio/StoryfrontConnections.tsx) | Shared passive navigation from Apps and Storyfronts to the same authorized original editor. |
 | [extensions/apps/storyfront/studio/StoryfrontCreate.tsx](../extensions/apps/storyfront/studio/StoryfrontCreate.tsx) | Self-service entry retains the current tenant and an eligible native storefront channel; no installation on a read. |
@@ -2414,6 +2422,7 @@ This lists every checked-in source module in these roots, including files with n
 | [extensions/apps/storyfront/studio/storyfronts.css](../extensions/apps/storyfront/studio/storyfronts.css) | Tenant-bound Experience cards share Studio tokens and keep long hostnames inside mobile columns. |
 | [extensions/apps/storyfront/ui.html](../extensions/apps/storyfront/ui.html) | Independent app entry; see extensions/README.md for its public contract. |
 | [extensions/apps/vercel/frontend/client.ts](../extensions/apps/vercel/frontend/client.ts) | Stateless headless Store API client: every cart token is explicit and no merchant credential is accepted. |
+| [extensions/apps/vercel/src/lib.rs](../extensions/apps/vercel/src/lib.rs) | The Vercel app: deploy hook triggers. |
 | [extensions/apps/vercel/src/provider.rs](../extensions/apps/vercel/src/provider.rs) | Vercel Deploy Hooks accept a deployment request; they do not prove deployment success. |
 | [extensions/budget-reserve.wat](../extensions/budget-reserve.wat) | Keep EUR 100 of the supplied budget unused. Inputs are integer cents. |
 | [extensions/company-limit.wat](../extensions/company-limit.wat) | Independent app entry; see extensions/README.md for its public contract. |
@@ -2622,24 +2631,25 @@ This lists every checked-in source module in these roots, including files with n
 | [extensions/services/app-storage/tests/cases/schema_upgrade_host.rs](../extensions/services/app-storage/tests/cases/schema_upgrade_host.rs) | Mandatory synthetic validation and installation hooks for the real schema recovery transaction tests. |
 | [extensions/services/app-storage/tests/cases/secrets.rs](../extensions/services/app-storage/tests/cases/secrets.rs) | Independent encrypted storage: actual test AEAD binding, digest/CAS races, atomic events and webhook-share fencing. |
 | [extensions/services/app-storage/tests/postgres.rs](../extensions/services/app-storage/tests/postgres.rs) | Actual independent PostgreSQL persistence: composite scope, atomic handoff, replay, quota, restart and lease fences. |
+| [extensions/services/connector-runtime/src/crypto.rs](../extensions/services/connector-runtime/src/crypto.rs) | Authenticated encryption binds config, OAuth verifiers, messages and receipts to tenant and app. |
+| [extensions/services/connector-runtime/src/error.rs](../extensions/services/connector-runtime/src/error.rs) | Sanitized failures distinguish explicit rejection from ambiguous external side effects. |
+| [extensions/services/connector-runtime/src/exports.rs](../extensions/services/connector-runtime/src/exports.rs) | Tenant-scoped encrypted knowledge records and bounded monotonic exports preserve importer fences. |
+| [extensions/services/connector-runtime/src/lib.rs](../extensions/services/connector-runtime/src/lib.rs) | The shared runtime of the standard app services: errors, tenant-scoped encrypted storage and source exports, the delivery queue, pinned network egress, the OAuth flow and the contract types app providers implement. |
+| [extensions/services/connector-runtime/src/network.rs](../extensions/services/connector-runtime/src/network.rs) | Fixed provider endpoints, no redirects, bounded response streaming and loopback-only fixture overrides. |
+| [extensions/services/connector-runtime/src/oauth.rs](../extensions/services/connector-runtime/src/oauth.rs) | Single-use tenant/app-bound OAuth state, PKCE, encrypted tokens and serialized refresh/disconnect. |
+| [extensions/services/connector-runtime/src/queue.rs](../extensions/services/connector-runtime/src/queue.rs) | Atomic idempotent enqueue, fair tenant admission and lease-fenced SKIP LOCKED claims for many workers. |
+| [extensions/services/connector-runtime/src/store.rs](../extensions/services/connector-runtime/src/store.rs) | PostgreSQL transactions carry local RLS context; config mutation serializes with in-flight delivery. |
 | [extensions/services/connectors/src/actions.rs](../extensions/services/connectors/src/actions.rs) | Existing standard-app actions and event/export endpoints share validated tenant-bound dispatch. |
-| [extensions/services/connectors/src/crypto.rs](../extensions/services/connectors/src/crypto.rs) | Authenticated encryption binds config, OAuth verifiers, messages and receipts to tenant and app. |
-| [extensions/services/connectors/src/error.rs](../extensions/services/connectors/src/error.rs) | Sanitized failures distinguish explicit rejection from ambiguous external side effects. |
 | [extensions/services/connectors/src/events.rs](../extensions/services/connectors/src/events.rs) | One bounded event envelope feeds existing durable, idempotent connector queues; no parallel scheduler. |
-| [extensions/services/connectors/src/exports.rs](../extensions/services/connectors/src/exports.rs) | Tenant-scoped encrypted knowledge records and bounded monotonic exports preserve importer fences. |
+| [extensions/services/connectors/src/integration_contracts.rs](../extensions/services/connectors/src/integration_contracts.rs) | Provider projections reject arbitrary endpoints and preserve asynchronous acceptance semantics. |
 | [extensions/services/connectors/src/integrations/settings.rs](../extensions/services/connectors/src/integrations/settings.rs) | Existing encrypted connector configuration remains the single provider credential owner. |
 | [extensions/services/connectors/src/integrations.rs](../extensions/services/connectors/src/integrations.rs) | API-key app hosting reuses encrypted connector settings, durable jobs and live configuration fences. |
 | [extensions/services/connectors/src/legacy.rs](../extensions/services/connectors/src/legacy.rs) | Explicit offline SQLite export import: all records are rebound/encrypted atomically; ambiguous jobs stay uncertain. |
-| [extensions/services/connectors/src/lib.rs](../extensions/services/connectors/src/lib.rs) | Language-neutral app HTTP contract backed by a Rust-only standard connector runtime. |
-| [extensions/services/connectors/src/network.rs](../extensions/services/connectors/src/network.rs) | Fixed provider endpoints, no redirects, bounded response streaming and loopback-only fixture overrides. |
-| [extensions/services/connectors/src/oauth.rs](../extensions/services/connectors/src/oauth.rs) | Single-use tenant/app-bound OAuth state, PKCE, encrypted tokens and serialized refresh/disconnect. |
+| [extensions/services/connectors/src/lib.rs](../extensions/services/connectors/src/lib.rs) | Language-neutral app HTTP contract backed by a Rust-only standard connector runtime: the server, the worker, the app action and event dispatch and the app registries over the provider crates. |
 | [extensions/services/connectors/src/providers.rs](../extensions/services/connectors/src/providers.rs) | Provider-specific read imports and notification mapping stay outside the commerce kernel. |
-| [extensions/services/connectors/src/queue.rs](../extensions/services/connectors/src/queue.rs) | Atomic idempotent enqueue, fair tenant admission and lease-fenced SKIP LOCKED claims for many workers. |
 | [extensions/services/connectors/src/server.rs](../extensions/services/connectors/src/server.rs) | Authenticated bounded app HTTP service with private OAuth callback and graceful worker lifetime. |
-| [extensions/services/connectors/src/store.rs](../extensions/services/connectors/src/store.rs) | PostgreSQL transactions carry local RLS context; config mutation serializes with in-flight delivery. |
 | [extensions/services/connectors/src/tests.rs](../extensions/services/connectors/src/tests.rs) | Actual Rust parsers, encryption and template consumers reject escalation/injection and preserve language behavior. |
 | [extensions/services/connectors/src/worker.rs](../extensions/services/connectors/src/worker.rs) | Distributed delivery workers fence settings and leases, retry only proven rejection, and drain on shutdown. |
-| [extensions/services/connectors/tests/integration_contracts.rs](../extensions/services/connectors/tests/integration_contracts.rs) | Provider projections reject arbitrary endpoints and preserve asynchronous acceptance semantics. |
 | [extensions/services/connectors/tests/integrations.py](../extensions/services/connectors/tests/integrations.py) | Actual provider requests and native action admission using the existing Rust multi-worker fixture. |
 | [extensions/single-order-cap.wat](../extensions/single-order-cap.wat) | Limit any individual business purchase to EUR 250, within its budget. |
 

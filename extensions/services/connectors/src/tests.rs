@@ -1,5 +1,6 @@
 //! Actual Rust parsers, encryption and template consumers reject escalation/injection and preserve language behavior.
 use super::*;
+use veyndo_provider_email::templates;
 #[test]
 fn settings_have_compiler_types_and_fail_closed_runtime_boundaries() {
     let s = config::parse(&json!({})).unwrap();

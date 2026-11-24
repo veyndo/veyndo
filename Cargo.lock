@@ -3671,6 +3671,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "veyndo-catalog-import"
+version = "0.5.0"
+dependencies = [
+ "reqwest",
+ "serde",
+ "serde_json",
+ "veyndo-catalog",
+ "veyndo-core",
+ "veyndo-pricing",
+ "veyndo-shop",
+]
+
+[[package]]
 name = "veyndo-checkout"
 version = "0.5.0"
 dependencies = [
@@ -3720,30 +3733,46 @@ dependencies = [
 ]
 
 [[package]]
-name = "veyndo-connectors"
+name = "veyndo-connector-runtime"
 version = "0.5.0"
 dependencies = [
  "aes-gcm",
  "axum",
  "base64 0.22.1",
  "chrono",
- "hmac 0.12.1",
- "lettre",
  "regex",
  "reqwest",
- "rustls-pemfile",
- "scraper",
- "serde",
+ "serde_json",
+ "sha2 0.10.9",
+ "sqlx",
+ "uuid",
+ "veyndo-runtime",
+]
+
+[[package]]
+name = "veyndo-connectors"
+version = "0.5.0"
+dependencies = [
+ "axum",
+ "hmac 0.12.1",
+ "regex",
  "serde_json",
  "sha2 0.10.9",
  "sqlx",
  "tokio",
- "tokio-rustls",
- "uuid",
+ "veyndo-connector-runtime",
  "veyndo-kernel",
  "veyndo-pricing",
+ "veyndo-provider-algolia",
+ "veyndo-provider-contentful",
+ "veyndo-provider-email",
+ "veyndo-provider-gmail",
+ "veyndo-provider-google-analytics",
+ "veyndo-provider-hubspot",
+ "veyndo-provider-klaviyo",
+ "veyndo-provider-slack",
+ "veyndo-provider-vercel",
  "veyndo-runtime",
- "webpki-roots",
 ]
 
 [[package]]
@@ -3831,6 +3860,7 @@ dependencies = [
  "uuid",
  "veyndo-app-model",
  "veyndo-catalog",
+ "veyndo-catalog-import",
  "veyndo-checkout",
  "veyndo-cognition",
  "veyndo-core",
@@ -4020,6 +4050,100 @@ dependencies = [
  "veyndo-core",
  "veyndo-identity",
  "veyndo-kernel",
+]
+
+[[package]]
+name = "veyndo-provider-algolia"
+version = "0.5.0"
+dependencies = [
+ "serde_json",
+ "veyndo-connector-runtime",
+]
+
+[[package]]
+name = "veyndo-provider-contentful"
+version = "0.5.0"
+dependencies = [
+ "regex",
+ "reqwest",
+ "serde_json",
+ "veyndo-connector-runtime",
+]
+
+[[package]]
+name = "veyndo-provider-email"
+version = "0.5.0"
+dependencies = [
+ "base64 0.22.1",
+ "lettre",
+ "regex",
+ "rustls-pemfile",
+ "serde",
+ "serde_json",
+ "tokio",
+ "tokio-rustls",
+ "veyndo-connector-runtime",
+ "veyndo-pricing",
+ "veyndo-runtime",
+ "webpki-roots",
+]
+
+[[package]]
+name = "veyndo-provider-gmail"
+version = "0.5.0"
+dependencies = [
+ "base64 0.22.1",
+ "regex",
+ "reqwest",
+ "scraper",
+ "serde_json",
+ "veyndo-connector-runtime",
+]
+
+[[package]]
+name = "veyndo-provider-google-analytics"
+version = "0.5.0"
+dependencies = [
+ "serde_json",
+ "veyndo-connector-runtime",
+]
+
+[[package]]
+name = "veyndo-provider-hubspot"
+version = "0.5.0"
+dependencies = [
+ "serde_json",
+ "veyndo-connector-runtime",
+ "veyndo-provider-email",
+]
+
+[[package]]
+name = "veyndo-provider-klaviyo"
+version = "0.5.0"
+dependencies = [
+ "serde_json",
+ "veyndo-connector-runtime",
+ "veyndo-provider-email",
+]
+
+[[package]]
+name = "veyndo-provider-slack"
+version = "0.5.0"
+dependencies = [
+ "regex",
+ "serde_json",
+ "veyndo-connector-runtime",
+ "veyndo-provider-email",
+]
+
+[[package]]
+name = "veyndo-provider-vercel"
+version = "0.5.0"
+dependencies = [
+ "regex",
+ "reqwest",
+ "serde_json",
+ "veyndo-connector-runtime",
 ]
 
 [[package]]

@@ -1,0 +1,11 @@
+[package]
+name = "veyndo-provider-klaviyo"
+version.workspace = true
+edition.workspace = true
+license-file.workspace = true
+description = "Klaviyo app: order events"
+
+[dependencies]
+serde_json.workspace = true
+veyndo-connector-runtime = { path = "../../services/connector-runtime" }
+veyndo-provider-email = { path = "../email" }

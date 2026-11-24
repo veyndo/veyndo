@@ -1,0 +1,19 @@
+[package]
+name = "veyndo-connector-runtime"
+version.workspace = true
+edition.workspace = true
+license-file.workspace = true
+description = "Shared runtime of the standard app services: storage, queue, egress, OAuth and the provider contract"
+
+[dependencies]
+aes-gcm.workspace = true
+axum.workspace = true
+base64.workspace = true
+chrono.workspace = true
+regex.workspace = true
+reqwest.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+sqlx.workspace = true
+uuid.workspace = true
+veyndo-runtime = { path = "../../../crates/runtime" }

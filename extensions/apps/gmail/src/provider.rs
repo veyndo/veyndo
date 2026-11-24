@@ -135,7 +135,7 @@ async fn list(base: &str, token: &str, label: &str, ids: &mut BTreeSet<String>) 
 }
 pub async fn gmail(store: &Store, t: &str, settings: &Value) -> Result<Value> {
     let current = store.get(t, "gmail").await?;
-    let token = oauth::token(store, t, "gmail").await?;
+    let token = oauth::token(store, t, "gmail", &crate::actions::OAUTH).await?;
     let base = format!("{}/users/me", network::endpoint("gmail")?);
     let label = settings["labelId"].as_str().unwrap_or("INBOX");
     let mut ids = BTreeSet::new();

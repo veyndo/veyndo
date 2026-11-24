@@ -7,7 +7,7 @@ pub async fn analytics(store: &Store, t: &str, settings: &Value) -> Result<Value
         !property.is_empty() && property.bytes().all(|b| b.is_ascii_digit()),
         "Numeric GA4 property ID required",
     )?;
-    let token = oauth::token(store, t, "google_analytics").await?;
+    let token = oauth::token(store, t, "google_analytics", &crate::actions::OAUTH).await?;
     let mut records = vec![];
     for (name, dimensions, metrics) in [
         (

@@ -1,0 +1,10 @@
+[package]
+name = "veyndo-provider-google-analytics"
+version.workspace = true
+edition.workspace = true
+license-file.workspace = true
+description = "Google Analytics app: OAuth policy, property actions and the report source import"
+
+[dependencies]
+serde_json.workspace = true
+veyndo-connector-runtime = { path = "../../services/connector-runtime" }

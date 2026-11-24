@@ -110,7 +110,7 @@ pub fn integration_origin(name: &str, production: &str) -> Result<String> {
         Ok(production.into())
     }
 }
-pub async fn integration_request(call: integrations::Call) -> Result<(u16, Value)> {
+pub async fn integration_request(call: crate::Call) -> Result<(u16, Value)> {
     let client = client()?;
     let mut request = if let Some(body) = call.body {
         client.post(&call.url).json(&body)

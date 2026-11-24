@@ -44,15 +44,15 @@ issuer is introduced. Its non-root runtime image contains no Python or compiler.
 
 | Module | Responsibility |
 |---|---|
-| `src/bin/connectors.rs` | Process entry only; calls the `veyndo-connectors` library crate (`extensions/services/connectors/Cargo.toml`, root `src/lib.rs`) |
+| `src/bin/connectors.rs` | Process entry only; calls the `veyndo-connectors` service crate (`extensions/services/connectors`), which composes the `veyndo-connector-runtime` crate and one `veyndo-provider-<app>` crate per bundled app |
 | `extensions/services/connectors/src/server.rs` | HTTP authentication, OAuth completion, size limits, graceful shutdown |
 | Host `actions.rs`, app `extensions/apps/email/src/email.rs` | Existing app actions, events and exports; unchanged API/MCP/flow contracts |
 | `extensions/apps/email/src/{config,templates}.rs` | Rust setting types, runtime validation, bounded multilingual templates |
-| `crypto.rs`, `store.rs` | Authenticated encryption and transaction-local RLS/configuration context |
-| `queue.rs`, `worker.rs` | PostgreSQL idempotency, tenant admission, fair claims, leases and outcome handling |
-| App `extensions/apps/email/src/smtp.rs`, host `network.rs` | Pinned SMTP addresses, verified TLS, fixed HTTP endpoints, bounded responses |
-| Host `oauth.rs`, app `src/actions.rs` | Shared single-use state/token fencing; app-owned OAuth scope, protocol and field admission |
-| `extensions/apps/{gmail,google-analytics,slack}/src/`, host `exports.rs` | Gmail incremental cursors, exact GA4 rows, Slack notification and bounded exports |
+| Runtime `crypto.rs`, `store.rs` (`extensions/services/connector-runtime/src/`) | Authenticated encryption and transaction-local RLS/configuration context |
+| Runtime `queue.rs`, service `worker.rs` | PostgreSQL idempotency, tenant admission, fair claims, leases and outcome handling |
+| App `extensions/apps/email/src/smtp.rs`, runtime `network.rs` | Pinned SMTP addresses, verified TLS, fixed HTTP endpoints, bounded responses |
+| Runtime `oauth.rs`, app `src/actions.rs` | Shared single-use state/token fencing over the policy the app declares; app-owned OAuth scope, protocol and field admission |
+| `extensions/apps/{gmail,google-analytics,slack}/src/`, runtime `exports.rs` | Gmail incremental cursors, exact GA4 rows, Slack notification and bounded exports |
 | `legacy.rs` | Explicit atomic offline migration; no automatic import during normal serving |
 | Migration 049 | Six private tenant-scoped tables and forced RLS |
 

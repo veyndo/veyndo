@@ -15,7 +15,7 @@ These documents describe one connected system, not alternative implementations.
 | Existing owner | Responsibility / entry points |
 | --- | --- |
 | Rust commerce binary | `src/main.rs` is process entry only; domain modules own commerce operations. Store/Admin APIs, MCP and implemented UCP routes reuse those operations, permissions and tenant checks. |
-| Rust connector binary | `src/bin/connectors.rs` and `extensions/services/connectors/src/` own shared hosting; provider implementation belongs to the respective `extensions/apps/<app>/` package. This is a separate service reached through the permission-aware app gateway, not provider code embedded in checkout. |
+| Rust connector binary | `src/bin/connectors.rs`, the service crate `extensions/services/connectors/` and the shared runtime crate `extensions/services/connector-runtime/` own hosting, storage, queue and egress; provider implementation belongs to the respective `extensions/apps/<app>/` crate (`veyndo-provider-<app>`). This is a separate service reached through the permission-aware app gateway, not provider code embedded in checkout. |
 | Frontend | `frontend/src/` contains modular Studio/storefront clients of the existing APIs. Keep provider credentials and privileged gateway tokens server-side. |
 | Durable state and events | PostgreSQL owns commerce state, connector configuration and queues. Commerce outbox/Flow Builder events reach the connector through the existing app action/event contract. Qdrant supplies knowledge vector retrieval, not a second commerce ledger. |
 | External extensions | The language-neutral app gateway and documented extension contracts support independent services. Private Payments and Storyfront/Experience implementations stay in their separate repositories. |
@@ -105,7 +105,7 @@ and optional independent app images are separate scopes.
 
 The former `email_config.py`, `email_templates.py`, `email_service.py` and
 `email_delivery.py` are reference code, not current service owners. Configuration,
-templates and delivery belong to `extensions/apps/email/src/`; shared actions and queues belong to `extensions/services/connectors/src/`; use the
+templates and delivery belong to `extensions/apps/email/src/`; shared actions belong to `extensions/services/connectors/src/` and storage, queues and egress to `extensions/services/connector-runtime/src/`; use the
 module table in [the Rust service guide](docs/rust-services.md) to find each owner.
 Do not introduce SQLite, a filesystem spool or process-local authoritative queues
 beside the PostgreSQL connector queue. Preserve forced tenant RLS, the dedicated

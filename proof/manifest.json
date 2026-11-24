@@ -2648,8 +2648,8 @@
     },
     "components/intelligence/src/service/catalog_intake/prepare.rs": {
       "status": "unproved",
-      "sha256": "826c20c1adae5e3ceed42c7779920e8187627fb880acc271e0624726b02e26fc",
-      "review": "F10: manual orders, the merchant operation catalogue and catalogue intake moved into components"
+      "sha256": "ca7c5e9b89285d46f1a8faf328dc53c2b52b3f6ff53b9bd8080c9619eb8e9fa9",
+      "review": "F21: connector service split into runtime, provider crates and service; catalogue import crate"
     },
     "components/intelligence/src/service/catalog_intake/save.rs": {
       "status": "unproved",
@@ -2658,8 +2658,8 @@
     },
     "components/intelligence/src/service/catalog_intake.rs": {
       "status": "unproved",
-      "sha256": "37bbe20a6e915722ef3eb0214ae528253f20dcc5759911661f0d408e3e19eb1c",
-      "review": "F10: manual orders, the merchant operation catalogue and catalogue intake moved into components"
+      "sha256": "2efb9af19552edd8a8642fd91114bd1d034ad68b01bd7e38dd43d04dfe76cc35",
+      "review": "F21: connector service split into runtime, provider crates and service; catalogue import crate"
     },
     "components/intelligence/src/service/claims.rs": {
       "status": "unproved",
@@ -4736,25 +4736,35 @@
       "sha256": "da3dbe6dfaa083fcdcdff099d1756572ea75baa2ecec7cf499a9b72e42841c53",
       "review": "Review compiler-enforced foundation crates with unchanged native owners; native provider read-tool aliases and current authorization, private checkpoint continuation and versioned prompt evidence; fixed subscriber acknowledgements preserve commit gaps, independent quarantine and explicit replay; traced requests/tasks/outbox without payloads; exact decimal-to-minor-unit rounding retains legacy price boundary; real SQL poison-isolation regression passes and workspace unit/clippy checks pass"
     },
+    "extensions/apps/algolia/src/lib.rs": {
+      "status": "unproved",
+      "sha256": "42e4c9f2a5ec983cecab62f09b177b2e47de879960a21ccfab0c80b8d3d0e617",
+      "review": "F21: connector service split into runtime, provider crates and service; catalogue import crate"
+    },
     "extensions/apps/algolia/src/provider.rs": {
       "status": "unproved",
       "sha256": "41417bbdb4d5fb97e3e5750d12ee155f4e6c09d41dcb691a57c9092b1fd27ec7",
       "review": "Reviewed app-owned Vercel/Klaviyo/HubSpot/Contentful/Algolia fixed transports, bounded redacted receipts, native compound action rights and encrypted CAS/lease fences; Shopware 6 read-only OAuth/currency/language projection delegates exact native import/reconciliation; generic tenant/app source reset and bounded source count use existing storage/admission owners. Provider protocols and SQL remain outside the extracted Lean proof scope; native two-worker, private/foreign, signed-login, migration and checkout regressions exercised."
     },
-    "extensions/apps/catalog-import/mod.rs": {
+    "extensions/apps/catalog-import/src/lib.rs": {
       "status": "unproved",
-      "sha256": "25a9bcc34fbbaf4e76bd8daa74863ec862d6e811b4601d88fd33617c6fdd59ac",
-      "review": "Reviewed inbound UCP/native cart and consent transactions, native finalization contact guard, immutable order snapshots, explicit optional negotiation, public HTTPS app-owned catalogue adapters; independent whole-branch review findings repaired and six isolated HTTP/PG suites pass. No extracted kernel policy changed; SQL/provider behavior remains unproved."
+      "sha256": "93b2d674fc141aa0376e7e2b522e0d7a3f760369eb6978b55e1c84d0388ac08d",
+      "review": "F21: connector service split into runtime, provider crates and service; catalogue import crate"
     },
-    "extensions/apps/catalog-import/shop_mcp.rs": {
+    "extensions/apps/catalog-import/src/shop_mcp.rs": {
       "status": "unproved",
-      "sha256": "3a51305911eef4b00c9cd87b898b2a70c5a05d7a139b46a72c26014147c6686d",
-      "review": "F10: manual orders, the merchant operation catalogue and catalogue intake moved into components"
+      "sha256": "1d5e9ad35553e4d5faf16caef9d014a9bc42c20cf63f22015b4e9bf84a40d695",
+      "review": "F21: connector service split into runtime, provider crates and service; catalogue import crate"
     },
-    "extensions/apps/catalog-import/shopify_csv.rs": {
+    "extensions/apps/catalog-import/src/shopify_csv.rs": {
       "status": "unproved",
-      "sha256": "8cee1f40041d8e4a4a603067916a9349db19675c67e37ca910969719d5802bfb",
-      "review": "Reviewed inbound UCP/native cart and consent transactions, native finalization contact guard, immutable order snapshots, explicit optional negotiation, public HTTPS app-owned catalogue adapters; independent whole-branch review findings repaired and six isolated HTTP/PG suites pass. No extracted kernel policy changed; SQL/provider behavior remains unproved."
+      "sha256": "3f84f78bd5a43884e10dc0dbcfbc53edb9a58ee80928f81ea75ed03511a63c6d",
+      "review": "F21: connector service split into runtime, provider crates and service; catalogue import crate"
+    },
+    "extensions/apps/contentful/src/lib.rs": {
+      "status": "unproved",
+      "sha256": "219ebf499cf7fd6f9c427c55e4a8005980eddef19796a42e654a42937bb1005a",
+      "review": "F21: connector service split into runtime, provider crates and service; catalogue import crate"
     },
     "extensions/apps/contentful/src/provider.rs": {
       "status": "unproved",
@@ -4781,15 +4791,15 @@
       "sha256": "f838b45bdb47577d08d70b88146dd737637c06f9d5520bb6142ae9babef1d2e8",
       "review": "Reviewed native B2B authority, unit-first locking, revision-bound approvals and offers, exact budget allocation/release, private variant pagination, current app callbacks and forced tenant FKs/RLS; EDI codecs remain app-owned and bounded. Real PostgreSQL approval/concurrent budget/revocation/PDF/MCP and app/checkout baseline suites passed; schema/build/proof and changed Rust owners reviewed. Two extracted decisions add four Lean properties, not whole-server verification."
     },
-    "extensions/apps/edi/service/export.rs": {
-      "status": "unproved",
-      "sha256": "35f8fa0048337961537c45aeeddb04a19ac99fe2dad0c6e55381c0b16be0263a",
-      "review": "Functions above 150 lines split into named steps without behaviour change; function length limit lowered to 150"
-    },
-    "extensions/apps/edi/service/export_tests.rs": {
+    "extensions/apps/edi/service/export/tests.rs": {
       "status": "unproved",
       "sha256": "0b66df62d66ebb093f37f1e375d9a999342f32bc691423d4f54aaca89b168e63",
-      "review": "Reviewed native B2B authority, unit-first locking, revision-bound approvals and offers, exact budget allocation/release, private variant pagination, current app callbacks and forced tenant FKs/RLS; EDI codecs remain app-owned and bounded. Real PostgreSQL approval/concurrent budget/revocation/PDF/MCP and app/checkout baseline suites passed; schema/build/proof and changed Rust owners reviewed. Two extracted decisions add four Lean properties, not whole-server verification."
+      "review": "F21: connector service split into runtime, provider crates and service; catalogue import crate"
+    },
+    "extensions/apps/edi/service/export.rs": {
+      "status": "unproved",
+      "sha256": "3a9521327bd0fb5c805455d7d203757969f07960cdd6de6ebf128731b027b9ec",
+      "review": "F21: connector service split into runtime, provider crates and service; catalogue import crate"
     },
     "extensions/apps/edi/service/import.rs": {
       "status": "unproved",
@@ -4815,6 +4825,11 @@
       "status": "unproved",
       "sha256": "ca389147da7f8997abb63d09428ac5e50a40bc6ee6c81029eaee2a629de11c83",
       "review": "Reviewed invoice recipient caching and immutable native documents; explicit app/PII event consent and current Flow rehydration; existing encrypted email queue and localized templates. Targeted native service and adversarial projection tests; no new formal proof claim."
+    },
+    "extensions/apps/email/src/lib.rs": {
+      "status": "unproved",
+      "sha256": "4b35b6214cb5498dc53baa10010bd822559aea9b093e2548f6cd1fd73f45474a",
+      "review": "F21: connector service split into runtime, provider crates and service; catalogue import crate"
     },
     "extensions/apps/email/src/payment_templates.rs": {
       "status": "unproved",
@@ -4858,28 +4873,48 @@
     },
     "extensions/apps/gmail/src/actions.rs": {
       "status": "unproved",
-      "sha256": "52528b2a4c14878475560a0fbf39bd07df93634f22a974d47925500dba9a5943",
-      "review": "Reviewed package ownership for email UI, per-app provider actions/OAuth/settings metadata, PayPal receipts and separate connector binary; existing tenant, payment and notification predicates preserved"
+      "sha256": "84d9373be303b10d997e20a02c339a5d8d112fa160243756d00bdf028a0be017",
+      "review": "F21: connector service split into runtime, provider crates and service; catalogue import crate"
+    },
+    "extensions/apps/gmail/src/lib.rs": {
+      "status": "unproved",
+      "sha256": "80d9675cbfc139c7ae5c3890bfff0d278a2f26fc792f3e23b4ca3cdc75827530",
+      "review": "F21: connector service split into runtime, provider crates and service; catalogue import crate"
     },
     "extensions/apps/gmail/src/provider.rs": {
       "status": "unproved",
-      "sha256": "f56e0e15829b387755a614262c38a6e5860654e50af607843c4188da2129d9c3",
-      "review": "Functions above 150 lines split into named steps without behaviour change; function length limit lowered to 150"
+      "sha256": "d86a87cb3c74a648e0c2961e4026b044cc6c5b8340fcd473d1b7ff02656096d8",
+      "review": "F21: connector service split into runtime, provider crates and service; catalogue import crate"
     },
     "extensions/apps/google-analytics/src/actions.rs": {
       "status": "unproved",
-      "sha256": "4d0d240b7c7883ab4ba5f8b5510cd333d9a58b4aab876a5d404f21bb4c44b783",
-      "review": "Reviewed package ownership for email UI, per-app provider actions/OAuth/settings metadata, PayPal receipts and separate connector binary; existing tenant, payment and notification predicates preserved"
+      "sha256": "703f5b664d1b025de0673daed8a97b9f454b56ca88c5787b43d94710adedaddd",
+      "review": "F21: connector service split into runtime, provider crates and service; catalogue import crate"
+    },
+    "extensions/apps/google-analytics/src/lib.rs": {
+      "status": "unproved",
+      "sha256": "bb1b7b8b176443ed02e42f7894e96f0bc6f8436f90cb575f4ecc5d36d3f2f344",
+      "review": "F21: connector service split into runtime, provider crates and service; catalogue import crate"
     },
     "extensions/apps/google-analytics/src/provider.rs": {
       "status": "unproved",
-      "sha256": "d4ee48aa8006b1ff98d1f1d7ff7b42ed27e1fcf38ecb4738c0c40dea642415ba",
-      "review": "Reviewed Rust-only standard connector service: typed mail settings, tenant-bound AES-GCM, composite PostgreSQL queue/RLS, fenced distributed leases and explicit-only retry; original app/flow/MCP contract and actual SMTP/OAuth/migration regressions. SQL and providers remain unproved."
+      "sha256": "ddbd9f15aaddc95287a08af6dc85ebda40c53117c1d95ce805f5e9189ead0e4e",
+      "review": "F21: connector service split into runtime, provider crates and service; catalogue import crate"
+    },
+    "extensions/apps/hubspot/src/lib.rs": {
+      "status": "unproved",
+      "sha256": "2b1c16e2c4874268e5798733037a75e55a6bf0018e3c2e14b84832b031f0c3a2",
+      "review": "F21: connector service split into runtime, provider crates and service; catalogue import crate"
     },
     "extensions/apps/hubspot/src/provider.rs": {
       "status": "unproved",
       "sha256": "c1502dd7b1d3df45eee7a8b6248d258061323af1c3fce8a789053470f83e4272",
       "review": "Reviewed app-owned Vercel/Klaviyo/HubSpot/Contentful/Algolia fixed transports, bounded redacted receipts, native compound action rights and encrypted CAS/lease fences; Shopware 6 read-only OAuth/currency/language projection delegates exact native import/reconciliation; generic tenant/app source reset and bounded source count use existing storage/admission owners. Provider protocols and SQL remain outside the extracted Lean proof scope; native two-worker, private/foreign, signed-login, migration and checkout regressions exercised."
+    },
+    "extensions/apps/klaviyo/src/lib.rs": {
+      "status": "unproved",
+      "sha256": "0e42e645a45c35e217f7e0da7df9edc24d1f0b934417f663ff8db88af41fd679",
+      "review": "F21: connector service split into runtime, provider crates and service; catalogue import crate"
     },
     "extensions/apps/klaviyo/src/provider.rs": {
       "status": "unproved",
@@ -5223,13 +5258,23 @@
     },
     "extensions/apps/slack/src/actions.rs": {
       "status": "unproved",
-      "sha256": "199b9d499319e4b1bd653f6fdc41f805790cfd3260bff16993929e70297103d3",
-      "review": "Reviewed package ownership for email UI, per-app provider actions/OAuth/settings metadata, PayPal receipts and separate connector binary; existing tenant, payment and notification predicates preserved"
+      "sha256": "51b29ec780e7ab62405886d50088d15ee5bb9b7df40c885d41b812c1c95575bb",
+      "review": "F21: connector service split into runtime, provider crates and service; catalogue import crate"
+    },
+    "extensions/apps/slack/src/lib.rs": {
+      "status": "unproved",
+      "sha256": "b898560e72bb2e7e46a0c755752d1d84ebfd145f2c4d8fc94853cd28cc2a98e1",
+      "review": "F21: connector service split into runtime, provider crates and service; catalogue import crate"
     },
     "extensions/apps/slack/src/provider.rs": {
       "status": "unproved",
-      "sha256": "aab3801384ce5a1003cb3a47b2c2d9c2ac3371e7f767b8e67e04dd8d610495aa",
-      "review": "Relocated app implementation into owner packages; generic connector binary and payment ledger preserve existing contracts; reviewed receipt and inventory bindings unchanged"
+      "sha256": "a3f24b37cc64953ac5adf4f783c153fcba357f3b103589e12fca1701d17a62a5",
+      "review": "F21: connector service split into runtime, provider crates and service; catalogue import crate"
+    },
+    "extensions/apps/vercel/src/lib.rs": {
+      "status": "unproved",
+      "sha256": "60ab3243b53eef329b32aad0867699f1b9d8f059ca60afcd6d2806ac96847512",
+      "review": "F21: connector service split into runtime, provider crates and service; catalogue import crate"
     },
     "extensions/apps/vercel/src/provider.rs": {
       "status": "unproved",
@@ -6166,30 +6211,60 @@
       "sha256": "fb23164298c398c81c3f83e645870f46a2a1bc0d2b14f1b88f0eda5b9798f6a9",
       "review": "Reviewed Apps 0.23 exact schema conversion/recovery extraction and native required same-transaction field/language adapter. Actual independent PostgreSQL installer rollback, scoped snapshots, row/byte/quota/collision/overflow and both Linux runs pass; native 74 App units plus seven HTTP/PostgreSQL modules pass, including exhausted revision and disabled-language regressions. Kernel unchanged; SQL, host authority and full migration remain unproved."
     },
-    "extensions/services/connectors/src/actions.rs": {
-      "status": "unproved",
-      "sha256": "f03bbcefaa2f19c8421f2f4e9053a61d8edf2fceb01651647c3a67dd17d9b136",
-      "review": "Reviewed app-owned Vercel/Klaviyo/HubSpot/Contentful/Algolia fixed transports, bounded redacted receipts, native compound action rights and encrypted CAS/lease fences; Shopware 6 read-only OAuth/currency/language projection delegates exact native import/reconciliation; generic tenant/app source reset and bounded source count use existing storage/admission owners. Provider protocols and SQL remain outside the extracted Lean proof scope; native two-worker, private/foreign, signed-login, migration and checkout regressions exercised."
-    },
-    "extensions/services/connectors/src/crypto.rs": {
+    "extensions/services/connector-runtime/src/crypto.rs": {
       "status": "unproved",
       "sha256": "4f5a4545098f27397af3b69290819b1828f852261d9a0a3bef26011095b9a624",
-      "review": "Reviewed Rust-only standard connector service: typed mail settings, tenant-bound AES-GCM, composite PostgreSQL queue/RLS, fenced distributed leases and explicit-only retry; original app/flow/MCP contract and actual SMTP/OAuth/migration regressions. SQL and providers remain unproved."
+      "review": "F21: connector service split into runtime, provider crates and service; catalogue import crate"
     },
-    "extensions/services/connectors/src/error.rs": {
+    "extensions/services/connector-runtime/src/error.rs": {
       "status": "unproved",
       "sha256": "71f415f8754ed3ea355e5a7b8f56c201204903a64425da284469dd49ed967840",
-      "review": "Reviewed native quota/task atomic transactions and actor-bound continuation; removed connector Core identity reads, retained gateway/FK authority and sanitized missing references. Real one-backend PgBouncer create/resume/kill/restart and scoped connector regressions passed."
+      "review": "F21: connector service split into runtime, provider crates and service; catalogue import crate"
+    },
+    "extensions/services/connector-runtime/src/exports.rs": {
+      "status": "unproved",
+      "sha256": "085d1e341cd24df6848d4fd477f7415281df11e9c22ec7589d4258a46f2e415c",
+      "review": "F21: connector service split into runtime, provider crates and service; catalogue import crate"
+    },
+    "extensions/services/connector-runtime/src/lib.rs": {
+      "status": "unproved",
+      "sha256": "1b07ced52694a01ab31efcbef297af5c283ccad6772d2ad375d19a9e7ab916aa",
+      "review": "F21: connector service split into runtime, provider crates and service; catalogue import crate"
+    },
+    "extensions/services/connector-runtime/src/network.rs": {
+      "status": "unproved",
+      "sha256": "61b5540de167b8b5bec4bf09fefb8f9ca84f35ba9d70970adf5d03f213b73088",
+      "review": "F21: connector service split into runtime, provider crates and service; catalogue import crate"
+    },
+    "extensions/services/connector-runtime/src/oauth.rs": {
+      "status": "unproved",
+      "sha256": "b0fac2171e13fe5370f6a0e1a97b952fd91006470a7673ef059101339b3ef311",
+      "review": "F21: connector service split into runtime, provider crates and service; catalogue import crate"
+    },
+    "extensions/services/connector-runtime/src/queue.rs": {
+      "status": "unproved",
+      "sha256": "f8bcf7292dfb16beecd489e759d5a95e7d3dd5710357f5cdc1b95285e28b6313",
+      "review": "F21: connector service split into runtime, provider crates and service; catalogue import crate"
+    },
+    "extensions/services/connector-runtime/src/store.rs": {
+      "status": "unproved",
+      "sha256": "945bce137963fbf7a342ff5f889fd21e20c3cc1255c139e481e243686143369c",
+      "review": "F21: connector service split into runtime, provider crates and service; catalogue import crate"
+    },
+    "extensions/services/connectors/src/actions.rs": {
+      "status": "unproved",
+      "sha256": "d6050a461242f2a216affd062ff5849dc05952f7ec70cd8653facad350baace9",
+      "review": "F21: connector service split into runtime, provider crates and service; catalogue import crate"
     },
     "extensions/services/connectors/src/events.rs": {
       "status": "unproved",
       "sha256": "671787367189d7ac637631f501293d368a2346607d642d224d01b77ffd8551bd",
       "review": "Reviewed package ownership for email UI, per-app provider actions/OAuth/settings metadata, PayPal receipts and separate connector binary; existing tenant, payment and notification predicates preserved"
     },
-    "extensions/services/connectors/src/exports.rs": {
+    "extensions/services/connectors/src/integration_contracts.rs": {
       "status": "unproved",
-      "sha256": "085d1e341cd24df6848d4fd477f7415281df11e9c22ec7589d4258a46f2e415c",
-      "review": "Reviewed app-owned Vercel/Klaviyo/HubSpot/Contentful/Algolia fixed transports, bounded redacted receipts, native compound action rights and encrypted CAS/lease fences; Shopware 6 read-only OAuth/currency/language projection delegates exact native import/reconciliation; generic tenant/app source reset and bounded source count use existing storage/admission owners. Provider protocols and SQL remain outside the extracted Lean proof scope; native two-worker, private/foreign, signed-login, migration and checkout regressions exercised."
+      "sha256": "7dd250660934625e9fee8c09c77844b57a0fc18144812b52898d24466998dafb",
+      "review": "F21: connector service split into runtime, provider crates and service; catalogue import crate"
     },
     "extensions/services/connectors/src/integrations/settings.rs": {
       "status": "unproved",
@@ -6198,8 +6273,8 @@
     },
     "extensions/services/connectors/src/integrations.rs": {
       "status": "unproved",
-      "sha256": "0bd33d0de4b28cafc89ccc63ebe082066fa1b35cc6cc540770044a79dd861b2f",
-      "review": "Reviewed app-owned Vercel/Klaviyo/HubSpot/Contentful/Algolia fixed transports, bounded redacted receipts, native compound action rights and encrypted CAS/lease fences; Shopware 6 read-only OAuth/currency/language projection delegates exact native import/reconciliation; generic tenant/app source reset and bounded source count use existing storage/admission owners. Provider protocols and SQL remain outside the extracted Lean proof scope; native two-worker, private/foreign, signed-login, migration and checkout regressions exercised."
+      "sha256": "d51a180453e67d0ae2dbf2b53cbe9ee07dfe28b5d962331f7293b8daa3558842",
+      "review": "F21: connector service split into runtime, provider crates and service; catalogue import crate"
     },
     "extensions/services/connectors/src/legacy.rs": {
       "status": "unproved",
@@ -6208,53 +6283,28 @@
     },
     "extensions/services/connectors/src/lib.rs": {
       "status": "unproved",
-      "sha256": "f6b429b806a25ed0ad9885b543b9700cfb4fcb402dff28cc17af8421c5937a62",
-      "review": "F16: path attributes removed from the kernel driver, the capability catalogue, the connector service and component tests"
-    },
-    "extensions/services/connectors/src/network.rs": {
-      "status": "unproved",
-      "sha256": "8ef1c262b78acf4ca024a2d71097726ac7b7465a499f397b6b4f71045a9ff9f4",
-      "review": "Reviewed app-owned Vercel/Klaviyo/HubSpot/Contentful/Algolia fixed transports, bounded redacted receipts, native compound action rights and encrypted CAS/lease fences; Shopware 6 read-only OAuth/currency/language projection delegates exact native import/reconciliation; generic tenant/app source reset and bounded source count use existing storage/admission owners. Provider protocols and SQL remain outside the extracted Lean proof scope; native two-worker, private/foreign, signed-login, migration and checkout regressions exercised."
-    },
-    "extensions/services/connectors/src/oauth.rs": {
-      "status": "unproved",
-      "sha256": "bff7490b5c03e60abad534011445381f945027d53693577a76254c3bfe5ce074",
-      "review": "Reviewed package ownership for email UI, per-app provider actions/OAuth/settings metadata, PayPal receipts and separate connector binary; existing tenant, payment and notification predicates preserved"
+      "sha256": "28b59f70b6306213f2e3a0d8051322bb1603976ebd955a51972f1d9486c89d91",
+      "review": "F21: connector service split into runtime, provider crates and service; catalogue import crate"
     },
     "extensions/services/connectors/src/providers.rs": {
       "status": "unproved",
-      "sha256": "8b345484eccda269b01f9dc9526bcd38cab8ceb975c988d914d00c44a15eff0a",
-      "review": "Reviewed package ownership for email UI, per-app provider actions/OAuth/settings metadata, PayPal receipts and separate connector binary; existing tenant, payment and notification predicates preserved"
-    },
-    "extensions/services/connectors/src/queue.rs": {
-      "status": "unproved",
-      "sha256": "f8bcf7292dfb16beecd489e759d5a95e7d3dd5710357f5cdc1b95285e28b6313",
-      "review": "Reviewed Rust standard services and their actual app/flow consumers: encrypted PostgreSQL config/queue, lease fences, UTC quotas, bounded fair admission, SMTP TLS and explicit-only retry. SQL/provider adapters remain unproved; Rust fixtures cover two processes and offline migration."
+      "sha256": "d85d3cf7b75cf4544f869400ec73888c19b929a01619e5eede9fba369a92a1f3",
+      "review": "F21: connector service split into runtime, provider crates and service; catalogue import crate"
     },
     "extensions/services/connectors/src/server.rs": {
       "status": "unproved",
-      "sha256": "2e941dac5f2a0f3a64decfd0fc320fc76f25141c3540d9af81e79dbbc9152001",
-      "review": "Reviewed app-owned Vercel/Klaviyo/HubSpot/Contentful/Algolia fixed transports, bounded redacted receipts, native compound action rights and encrypted CAS/lease fences; Shopware 6 read-only OAuth/currency/language projection delegates exact native import/reconciliation; generic tenant/app source reset and bounded source count use existing storage/admission owners. Provider protocols and SQL remain outside the extracted Lean proof scope; native two-worker, private/foreign, signed-login, migration and checkout regressions exercised."
-    },
-    "extensions/services/connectors/src/store.rs": {
-      "status": "unproved",
-      "sha256": "945bce137963fbf7a342ff5f889fd21e20c3cc1255c139e481e243686143369c",
-      "review": "Reviewed connector strict non-owner runtime startup audit, dedicated least-privilege PostgreSQL service role, forced RLS and UTC transaction context. Two actual non-bypass replicas, tenant ownership, provider/flow/MCP protocols and migration are regression-tested; SQL and providers remain unproved."
+      "sha256": "0efb545f89cf3eefaad6e8d9f71dc140bbe4891d05fd5766dee7a2e250760415",
+      "review": "F21: connector service split into runtime, provider crates and service; catalogue import crate"
     },
     "extensions/services/connectors/src/tests.rs": {
       "status": "unproved",
-      "sha256": "0fa31b651095e9f01006067a55a4cde28da14d8a3a620ad9c8a6a1382f7553d3",
-      "review": "F16: path attributes removed from the kernel driver, the capability catalogue, the connector service and component tests"
+      "sha256": "acc3903ba93017978c7068a19bbcc69e8c536153637a22672dcbc99d067109fd",
+      "review": "F21: connector service split into runtime, provider crates and service; catalogue import crate"
     },
     "extensions/services/connectors/src/worker.rs": {
       "status": "reviewed-binding",
       "sha256": "12309d832b17786cdc8a9145c0c29acee4a8e12e9aecf4acdad816cc91e7617e",
       "review": "F16: path attributes removed from the kernel driver, the capability catalogue, the connector service and component tests"
-    },
-    "extensions/services/connectors/tests/integration_contracts.rs": {
-      "status": "unproved",
-      "sha256": "7dd250660934625e9fee8c09c77844b57a0fc18144812b52898d24466998dafb",
-      "review": "Reviewed app-owned Vercel/Klaviyo/HubSpot/Contentful/Algolia fixed transports, bounded redacted receipts, native compound action rights and encrypted CAS/lease fences; Shopware 6 read-only OAuth/currency/language projection delegates exact native import/reconciliation; generic tenant/app source reset and bounded source count use existing storage/admission owners. Provider protocols and SQL remain outside the extracted Lean proof scope; native two-worker, private/foreign, signed-login, migration and checkout regressions exercised."
     },
     "src/accounts/address_store.rs": {
       "status": "unproved",
@@ -8128,12 +8178,12 @@
       "review": "Shop resolution (default shop, tenant header, customer token), request tracing, bounded HTTP bodies and the worker wake-up signal moved unchanged into components/core; the default shop keeps the same environment rule and validation. Nightly workflow opens an issue when a scheduled run fails. No rule changed."
     },
     "Cargo.lock": {
-      "sha256": "d55e35c85b4d839fd119a7d3ba493619e2fe63c367e776d1b3be1978786cb636",
-      "review": "F20: site builder and site forms as crates behind the SiteHost port; no path attribute left in src"
+      "sha256": "95f53a51acab9323ff01c2306b18a5df2de9dd27e7e1668d53d6d0b948e4c403",
+      "review": "F21: connector service split into runtime, provider crates and service; catalogue import crate"
     },
     "Cargo.toml": {
-      "sha256": "5c523b42c9d82746582f1aece604dfbc2ad8387f3c0c237a0998026d32967964",
-      "review": "F20: site builder and site forms as crates behind the SiteHost port; no path attribute left in src"
+      "sha256": "11d2aa2e0df08c87b251bcd78d2b252f60a92f30ce56325e47b395e4adbf7d61",
+      "review": "F21: connector service split into runtime, provider crates and service; catalogue import crate"
     },
     "components.lock.json": {
       "sha256": "7b4a931ad81c6665d5d95e6b42b8ef4d09ebe8971ac24998d8f94bb6a737ff53",

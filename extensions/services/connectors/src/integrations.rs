@@ -1,24 +1,14 @@
 //! API-key app hosting reuses encrypted connector settings, durable jobs and live configuration fences.
 use super::*;
-#[path = "../../../apps/algolia/src/provider.rs"]
-mod algolia;
-#[path = "../../../apps/contentful/src/provider.rs"]
-mod contentful;
-#[path = "../../../apps/hubspot/src/provider.rs"]
-mod hubspot;
-#[path = "../../../apps/klaviyo/src/provider.rs"]
-mod klaviyo;
 mod settings;
-#[path = "../../../apps/vercel/src/provider.rs"]
-mod vercel;
 #[cfg(test)]
 pub use contentful::sources as content_sources;
+use veyndo_provider_algolia::provider as algolia;
+use veyndo_provider_contentful::provider as contentful;
+use veyndo_provider_hubspot::provider as hubspot;
+use veyndo_provider_klaviyo::provider as klaviyo;
+use veyndo_provider_vercel::provider as vercel;
 pub const APPS: [&str; 5] = ["vercel", "klaviyo", "hubspot", "contentful", "algolia"];
-pub struct Call {
-    pub url: String,
-    pub body: Option<Value>,
-    pub headers: Vec<(&'static str, String)>,
-}
 pub fn fields(a: &str) -> &'static [&'static str] {
     match a {
         "algolia" => &["applicationId", "index"],
@@ -135,31 +125,4 @@ pub async fn perform(store: &Store, j: &queue::Job) -> Result<Value> {
         result["sourceCount"] = json!(records.len());
     }
     Ok(result)
-}
-pub fn identifier(v: &Value, k: &str) -> Result<String> {
-    let s = text(v, k);
-    checked(
-        regex::Regex::new(r"^[a-zA-Z0-9_-]{1,100}$")
-            .unwrap()
-            .is_match(&s),
-        "Missing or invalid provider identifier",
-    )?;
-    Ok(s)
-}
-pub fn secret(key: &str) -> Result<()> {
-    checked(
-        !key.is_empty() && key.len() <= 4000 && !key.contains(['\r', '\n', '\0']),
-        "Provider credential required",
-    )
-}
-pub fn short(v: &Value, k: &str, max: usize) -> Result<String> {
-    let s = text(v, k);
-    checked(
-        !s.trim().is_empty() && s.len() <= max && !s.chars().any(char::is_control),
-        "Missing or invalid operation field",
-    )?;
-    Ok(s)
-}
-pub fn bearer(key: &str) -> Vec<(&'static str, String)> {
-    vec![("authorization", format!("Bearer {key}"))]
 }

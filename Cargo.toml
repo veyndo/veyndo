@@ -1,6 +1,6 @@
 [workspace]
 resolver = "3"
-members = [".", "crates/*", "components/*", "extensions/apps/migration", "extensions/apps/marketplaces", "extensions/services/app-storage", "extensions/services/app-storage/model", "extensions/services/app-storage/runtime", "extensions/services/connectors", "extensions/apps/paypal", "extensions/apps/site-builder", "extensions/apps/site-forms"]
+members = [".", "crates/*", "components/*", "extensions/apps/migration", "extensions/apps/marketplaces", "extensions/services/app-storage", "extensions/services/app-storage/model", "extensions/services/app-storage/runtime", "extensions/services/connectors", "extensions/services/connector-runtime", "extensions/apps/paypal", "extensions/apps/site-builder", "extensions/apps/site-forms", "extensions/apps/email", "extensions/apps/gmail", "extensions/apps/google-analytics", "extensions/apps/slack", "extensions/apps/algolia", "extensions/apps/contentful", "extensions/apps/hubspot", "extensions/apps/klaviyo", "extensions/apps/vercel", "extensions/apps/catalog-import"]
 
 [workspace.package]
 version = "0.5.0"

@@ -30,7 +30,19 @@ pub(super) async fn prepare(
     } else if mode == "shop_mcp" {
         let _admission = host.admit(t, "catalog_import").await?;
         (
-            inbound::shop_mcp(egress, source, v["shopDomain"].as_str(), count, s).await?,
+            inbound::shop_mcp(
+                &public_client(
+                    egress,
+                    &reqwest::Url::parse(inbound::ENDPOINT)
+                        .map_err(|_| bad("Invalid Shop catalogue endpoint"))?,
+                )
+                .await?,
+                source,
+                v["shopDomain"].as_str(),
+                count,
+                s,
+            )
+            .await?,
             None,
         )
     } else if mode == "csv" {

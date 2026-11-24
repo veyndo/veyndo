@@ -2,8 +2,8 @@
 use super::*;
 use base64::{Engine, engine::general_purpose::URL_SAFE_NO_PAD};
 use sha2::{Digest, Sha256};
-fn client(a: &str) -> Result<(String, String)> {
-    let prefix = providers::oauth(a)?.prefix;
+fn client(policy: &OAuth) -> Result<(String, String)> {
+    let prefix = policy.prefix;
     let id = env::var(format!("{prefix}_CLIENT_ID")).unwrap_or_default();
     let secret = env::var(format!("{prefix}_CLIENT_SECRET")).unwrap_or_default();
     checked(
@@ -35,9 +35,9 @@ fn expires(tokens: &mut Value) {
     tokens["expires_at"] =
         json!(chrono::Utc::now().timestamp() + tokens["expires_in"].as_i64().unwrap_or(3600));
 }
-pub async fn start(store: &Store, t: &str, a: &str) -> Result<Value> {
-    let policy = providers::oauth(a)?;
-    let (id, _) = client(a)?;
+/// Starts the OAuth flow of the app with a single-use, tenant-bound state and PKCE.
+pub async fn start(store: &Store, t: &str, a: &str, policy: &OAuth) -> Result<Value> {
+    let (id, _) = client(policy)?;
     let verifier = random();
     let state = random();
     let mut tx = store.tx(t).await?;
@@ -68,7 +68,13 @@ pub async fn start(store: &Store, t: &str, a: &str) -> Result<Value> {
     }
     Ok(json!({"authorizationUrl":url.as_str()}))
 }
-pub async fn complete(store: &Store, state: &str, code: &str) -> Result<String> {
+/// Completes the flow the state names; `policies` resolves the OAuth policy of the app stored with the state.
+pub async fn complete(
+    store: &Store,
+    state: &str,
+    code: &str,
+    policies: fn(&str) -> Result<&'static OAuth>,
+) -> Result<String> {
     checked(
         state.len() <= 200 && code.len() <= 4000 && !code.is_empty(),
         "Invalid authorization response",
@@ -80,9 +86,9 @@ pub async fn complete(store: &Store, state: &str, code: &str) -> Result<String> 
     checked(row.get("fresh"), "OAuth state expired")?;
     let t: String = row.get("tenant");
     let a: String = row.get("app");
-    let policy = providers::oauth(&a)?;
+    let policy = policies(&a)?;
     let pending = store.crypto.open(&t, &a, &row.get::<Vec<u8>, _>("data"))?;
-    let (id, secret) = client(&a)?;
+    let (id, secret) = client(policy)?;
     let mut body =
         json!({"client_id":id,"client_secret":secret,"code":code,"redirect_uri":callback()?});
     if !policy.slack {
@@ -121,8 +127,8 @@ pub async fn complete(store: &Store, state: &str, code: &str) -> Result<String> 
     tx.commit().await?;
     Ok(a)
 }
-pub async fn token(store: &Store, t: &str, a: &str) -> Result<String> {
-    let policy = providers::oauth(a)?;
+/// The current access token of the app, refreshed under the connection lock when it expires.
+pub async fn token(store: &Store, t: &str, a: &str, policy: &OAuth) -> Result<String> {
     let mut tx = store.tx(t).await?;
     store.lock(&mut tx, t, a).await?;
     let mut current = store.get_tx(&mut tx, t, a).await?;
@@ -138,7 +144,7 @@ pub async fn token(store: &Store, t: &str, a: &str) -> Result<String> {
             tokens["refresh_token"].is_string(),
             "Reconnect account to refresh access",
         )?;
-        let (id, secret) = client(a)?;
+        let (id, secret) = client(policy)?;
         let fresh=network::request(&network::endpoint(policy.token)?,Some(&json!({"client_id":id,"client_secret":secret,"refresh_token":tokens["refresh_token"],"grant_type":"refresh_token"})),None,true).await?;
         checked(
             fresh["access_token"].is_string(),
@@ -157,8 +163,8 @@ pub async fn token(store: &Store, t: &str, a: &str) -> Result<String> {
     tx.commit().await?;
     Ok(token)
 }
-pub async fn disconnect(store: &Store, t: &str, a: &str) -> Result<Value> {
-    let policy = providers::oauth(a)?;
+/// Revokes and removes the stored tokens of the app.
+pub async fn disconnect(store: &Store, t: &str, a: &str, policy: &OAuth) -> Result<Value> {
     let mut tx = store.tx(t).await?;
     store.lock(&mut tx, t, a).await?;
     let mut current = store.get_tx(&mut tx, t, a).await?;

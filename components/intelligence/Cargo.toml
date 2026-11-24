@@ -34,5 +34,6 @@ veyndo-shipping = { path = "../shipping" }
 veyndo-checkout = { path = "../checkout" }
 veyndo-inventory = { path = "../inventory" }
 veyndo-cognition = { path = "../../crates/cognition" }
+veyndo-catalog-import = { path = "../../extensions/apps/catalog-import" }
 veyndo-app-model = { path = "../../extensions/services/app-storage/model" }
 veyndo-customers = { path = "../customers" }

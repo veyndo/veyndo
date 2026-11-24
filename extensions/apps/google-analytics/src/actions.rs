@@ -1,6 +1,5 @@
 //! App-owned connector capabilities and provider settings; shared host supplies tenant-bound storage.
-use super::super::*;
-use super::{OAuth, Settings};
+use super::*;
 pub const OAUTH: OAuth = OAuth {
     prefix: "GOOGLE",
     scope: "https://www.googleapis.com/auth/analytics.readonly",

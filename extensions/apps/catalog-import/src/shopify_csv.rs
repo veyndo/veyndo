@@ -1,6 +1,7 @@
 //! Deterministic Shopify product-export adapter; image-only rows are not products and variant prices/SKUs remain distinct.
 use super::*;
-pub(crate) fn parse(source: &str) -> Result<Vec<Draft>> {
+/// Parses a Shopify product export: image-only rows are not products, variant prices and SKUs stay distinct.
+pub fn parse(source: &str) -> Result<Vec<Draft>> {
     let mut rows = csv::rows(source)?;
     let headers = rows.remove(0);
     let mut seen = std::collections::HashSet::new();

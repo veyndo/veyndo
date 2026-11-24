@@ -1,0 +1,10 @@
+[package]
+name = "veyndo-provider-algolia"
+version.workspace = true
+edition.workspace = true
+license-file.workspace = true
+description = "Algolia app: bounded index record writes"
+
+[dependencies]
+serde_json.workspace = true
+veyndo-connector-runtime = { path = "../../services/connector-runtime" }

@@ -1,0 +1,12 @@
+[package]
+name = "veyndo-provider-vercel"
+version.workspace = true
+edition.workspace = true
+license-file.workspace = true
+description = "Vercel app: deploy hook triggers"
+
+[dependencies]
+regex.workspace = true
+reqwest.workspace = true
+serde_json.workspace = true
+veyndo-connector-runtime = { path = "../../services/connector-runtime" }

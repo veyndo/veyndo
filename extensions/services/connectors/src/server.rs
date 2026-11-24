@@ -62,6 +62,7 @@ async fn callback(
         &s.store,
         q.get("state").map(String::as_str).unwrap_or(""),
         q.get("code").map(String::as_str).unwrap_or(""),
+        super::providers::oauth,
     )
     .await;
     let ok = result.is_ok();
