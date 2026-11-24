@@ -5,11 +5,13 @@ use crate::store::packages::package;
 use crate::store::{record_restore, records};
 use axum::Json;
 use axum::extract::{Path, State as Shared};
+use serde::Deserialize;
 use serde_json::{Value, json};
 use sqlx::Row;
 use veyndo_app_model::Entity;
 use veyndo_app_model::manifest::Manifest;
 use veyndo_app_storage::record_history as shared;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::history_context::context;
 use veyndo_core::{Error, RequestContext, Result, StatusCode, bad};
 use veyndo_identity::{merchant, permit};
@@ -109,14 +111,34 @@ pub fn schema(name: &str) -> Option<Value> {
         json!({"type":"object","additionalProperties":false,"properties":{"app":{"type":"string"},"entity":{"type":"string"},"id":{"type":"string"},"version":{"type":"integer"},"revision":{"type":"integer"},"approve":{"type":"boolean"}},"required":if name.ends_with("restore"){vec!["app","entity","id","version","revision","approve"]}else{vec!["app","entity","id"]}}),
     )
 }
+/// The app record and version a history capability names.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct RecordHistoryArgs {
+    #[serde(deserialize_with = "lenient")]
+    app: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    entity: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    id: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    version: Option<i64>,
+}
+
 /// Runs a history capability through the same operations as the HTTP routes.
 pub async fn invoke(a: &Platform, h: &RequestContext, name: &str, v: &Value) -> Result<Value> {
-    let app = v["app"].as_str().ok_or(bad("App required"))?.to_owned();
-    let entity = v["entity"]
-        .as_str()
+    let input: RecordHistoryArgs = view(v);
+    let app = input.app.as_deref().ok_or(bad("App required"))?.to_owned();
+    let entity = input
+        .entity
+        .as_deref()
         .ok_or(bad("Entity required"))?
         .to_owned();
-    let id = v["id"].as_str().ok_or(bad("Record required"))?.to_owned();
+    let id = input
+        .id
+        .as_deref()
+        .ok_or(bad("Record required"))?
+        .to_owned();
     if name == "merchant.app.history" {
         let Json(value) = list(Shared(a.clone()), h.clone(), Path((app, entity, id))).await?;
         return Ok(value);
@@ -131,7 +153,7 @@ pub async fn invoke(a: &Platform, h: &RequestContext, name: &str, v: &Value) -> 
             app,
             entity,
             id,
-            v["version"].as_i64().ok_or(bad("Version required"))?,
+            input.version.ok_or(bad("Version required"))?,
         )),
         Json(v.clone()),
     )

@@ -5,7 +5,9 @@ use crate::store::secrets::Crypto;
 use crate::store::settings::settings_error;
 use axum::Json;
 use axum::extract::{Path, State as Shared};
+use serde::Deserialize;
 use serde_json::{Value, json};
+use veyndo_core::document::{lenient, view};
 use veyndo_core::shop_scope::parent;
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad, conflict};
 use veyndo_identity::{merchant, permit};
@@ -46,6 +48,19 @@ pub async fn read(
     value["encryptionReady"] = json!(veyndo_cognition::inference::settings::encryption_ready());
     Ok(Json(value))
 }
+/// An app settings save for the approved package digest at its revision.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct SettingsSave {
+    #[serde(deserialize_with = "lenient")]
+    approve: Option<bool>,
+    #[serde(deserialize_with = "lenient")]
+    digest: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    revision: Option<i64>,
+    values: Value,
+}
+
 /// Saves declared settings under the approved package digest.
 pub async fn save(
     Shared(a): Shared<State>,
@@ -53,6 +68,7 @@ pub async fn save(
     Path(id): Path<String>,
     Json(v): Json<Value>,
 ) -> Result<Json<Value>> {
+    let input: SettingsSave = view(&v);
     let t = merchant(&h)?;
     permit(&h, "team.manage")?;
     if !verified_kernel::persistent_key_admissible(
@@ -67,13 +83,13 @@ pub async fn save(
     }
     let m = package(&a, &t, &id, true).await?;
     let digest = approval::canonical_digest(&m);
-    if v["approve"] != true || v["digest"] != digest {
+    if input.approve != Some(true) || input.digest.as_deref() != Some(digest.as_str()) {
         return Err(conflict(
             "Approve the current package before saving settings",
         ));
     }
-    let revision = v["revision"]
-        .as_i64()
+    let revision = input
+        .revision
         .filter(|n| *n >= 0)
         .ok_or(bad("Settings revision required"))?;
     let mut tx = a.db.begin().await?;
@@ -93,7 +109,7 @@ pub async fn save(
                 .as_deref()
                 .ok_or(bad("Personal account required"))?,
         },
-        &v["values"],
+        &input.values,
         &Crypto,
     )
     .await

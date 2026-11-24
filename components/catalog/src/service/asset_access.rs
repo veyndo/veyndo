@@ -95,13 +95,24 @@ pub async fn import_image(
     )
 }
 
+/// An app file request: a product, a page cursor or one file.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct FileRequest {
+    product_id: Value,
+    #[serde(deserialize_with = "lenient")]
+    after: Option<String>,
+    id: Value,
+}
+
 /// App access to product files: the paged `assets` listing, or one file's bytes (`asset_preview` only for small images).
 pub async fn app_files(a: &State, h: &RequestContext, operation: &str, v: &Value) -> Result<Value> {
+    let input: FileRequest = view(v);
     let t = merchant(h)?;
     permit(h, "catalog.read")?;
     if operation == "assets" {
-        let product = v["productId"].as_str();
-        let after = v["after"].as_str().unwrap_or("");
+        let product = input.product_id.as_str();
+        let after = input.after.as_deref().unwrap_or("");
         if product.is_some_and(|s| s.len() > 100) || after.len() > 100 {
             return Err(bad("Invalid asset cursor"));
         }
@@ -111,12 +122,14 @@ pub async fn app_files(a: &State, h: &RequestContext, operation: &str, v: &Value
         let cursor = more.then(|| items.last().unwrap()["id"].clone());
         return Ok(json!({"elements":items,"nextCursor":cursor}));
     }
-    let id = v["id"]
+    let id = input
+        .id
         .as_str()
         .filter(|s| !s.is_empty() && s.len() <= 100)
         .ok_or(bad("Asset ID required"))?;
     let row=sqlx::query("SELECT content,mime,digest,filename,product_id FROM product_assets WHERE tenant=$1 AND id=$2").bind(&t).bind(id).fetch_optional(&a.db).await?.ok_or(Error(StatusCode::NOT_FOUND,"Asset not found".into()))?;
-    if v["productId"]
+    if input
+        .product_id
         .as_str()
         .is_some_and(|p| row.get::<String, _>("product_id") != p)
     {

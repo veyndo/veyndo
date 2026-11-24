@@ -1,8 +1,10 @@
 //! Revision-free order transition rules: manual payment marks, delivery dispatch and the cancellation preconditions.
 use crate::domain::order_machine::OrderMachine;
 use crate::domain::order_workflow::external;
+use serde::Deserialize;
 use serde_json::{Value, json};
 use veyndo_catalog::domain::rich_document::safe_url;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::{Result, bad, conflict};
 use veyndo_kernel::verified_kernel;
 
@@ -28,9 +30,22 @@ pub fn payment(o: &mut Value, machine: &OrderMachine, target: &str) -> Result<()
     o["payment"]["state"] = json!(target);
     Ok(())
 }
+/// A requested delivery transition: the shipment and its tracking details.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct DeliveryTransition {
+    #[serde(deserialize_with = "lenient")]
+    delivery_index: Option<u64>,
+    #[serde(deserialize_with = "lenient")]
+    tracking_code: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    tracking_url: Option<String>,
+}
+
 /// Ships or delivers one delivery of the order and records safe tracking details.
 pub fn delivery(o: &mut Value, v: &Value, target: &str) -> Result<()> {
-    let index = v["deliveryIndex"].as_u64().unwrap_or(0) as usize;
+    let input: DeliveryTransition = view(v);
+    let index = input.delivery_index.unwrap_or(0) as usize;
     let d = o["deliveries"]
         .as_array_mut()
         .and_then(|v| v.get_mut(index))
@@ -46,14 +61,14 @@ pub fn delivery(o: &mut Value, v: &Value, target: &str) -> Result<()> {
         return Err(conflict("Invalid delivery transition"));
     }
     if target == "shipped"
-        && let Some(track) = v["trackingCode"].as_str()
+        && let Some(track) = input.tracking_code.as_deref()
     {
         if track.len() > 100 {
             return Err(bad("Tracking code too long"));
         }
         d["trackingCode"] = json!(track);
     }
-    if let Some(url) = v["trackingUrl"].as_str() {
+    if let Some(url) = input.tracking_url.as_deref() {
         if !url.is_empty() && (!url.starts_with("https://") || !safe_url(url)) {
             return Err(bad("Tracking link must be a safe HTTPS URL"));
         }

@@ -4,10 +4,12 @@ use crate::ports::KnowledgeHost;
 use crate::service::models::choice;
 use crate::service::retrieval::{SourceQuery, search_in};
 use crate::store::documents::{product_facts, sources_unchanged};
+use serde::Deserialize;
 use serde_json::{Value, json};
 use sqlx::Row;
 use veyndo_catalog::store::products;
 use veyndo_core::database::lease::Lease;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::shop_scope::tenant;
 use veyndo_core::{Error, RequestContext, Result, StatusCode, bad};
 use veyndo_identity::{merchant, permit};
@@ -78,21 +80,38 @@ pub async fn question(
     )
 }
 
+/// A product question preview: the question, the audience, the product and whether external sources count.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct QuestionPreview {
+    #[serde(deserialize_with = "lenient")]
+    query: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    audience: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    product_id: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    include_external: Option<bool>,
+}
+
 /// The sources a question would retrieve, without a model call; merchant sources never enter customer previews.
 pub async fn preview(host: &dyn KnowledgeHost, h: &RequestContext, v: &Value) -> Result<Value> {
+    let input: QuestionPreview = view(v);
     let m = host.models();
     let a = m.core;
     let t = merchant(h)?;
     permit(h, "knowledge.read")?;
-    let query = v["query"]
-        .as_str()
+    let query = input
+        .query
+        .as_deref()
         .filter(|s| !s.trim().is_empty() && s.len() <= 2000)
         .ok_or(bad("Question must be 1..2000 bytes"))?;
-    let audience = v["audience"]
-        .as_str()
+    let audience = input
+        .audience
+        .as_deref()
         .filter(|s| ["customer", "merchant"].contains(s))
         .ok_or(bad("Choose customer or merchant"))?;
-    let product = v["productId"].as_str().filter(|s| !s.is_empty());
+    let product = input.product_id.as_deref().filter(|s| !s.is_empty());
     let public = audience == "customer";
     if public && product.is_none() {
         return Err(bad("Customer preview requires product"));
@@ -111,7 +130,7 @@ pub async fn preview(host: &dyn KnowledgeHost, h: &RequestContext, v: &Value) ->
         semantic: false,
     };
     let sources = search_in(m, &t, q).await?;
-    let external = if public || v["includeExternal"] == false {
+    let external = if public || input.include_external == Some(false) {
         json!([])
     } else {
         host.evidence(&t, query).await?

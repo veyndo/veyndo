@@ -7,6 +7,7 @@ use serde_json::{Value, json};
 use sqlx::Row;
 use std::collections::HashMap;
 use veyndo_app_model::declarations::identifier;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::{RequestContext, Result, State, bad, conflict, history_context};
 use veyndo_shop::domain::cart_lines;
 use veyndo_shop::types::settings::Settings;
@@ -19,6 +20,19 @@ struct Input {
     #[serde(default)]
     currency: Option<String>,
 }
+/// An imported requisition for one purchasing unit and buyer.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct RequisitionImport {
+    #[serde(deserialize_with = "lenient")]
+    unit_id: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    customer_id: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    id: Option<String>,
+    data: Value,
+}
+
 /// `t` is the admitted merchant shop; the list is created once per requisition ID.
 pub async fn import(
     a: &State,
@@ -27,17 +41,21 @@ pub async fn import(
     settings: &Settings,
     v: &Value,
 ) -> Result<Value> {
-    let unit = v["unitId"]
-        .as_str()
+    let input: RequisitionImport = view(v);
+    let unit = input
+        .unit_id
+        .as_deref()
         .ok_or(bad("Purchasing unit required"))?;
-    let buyer = v["customerId"]
-        .as_str()
+    let buyer = input
+        .customer_id
+        .as_deref()
         .ok_or(bad("Mapped buyer required"))?;
-    let id = v["id"]
-        .as_str()
+    let id = input
+        .id
+        .as_deref()
         .filter(|s| identifier(s))
         .ok_or(bad("Valid requisition ID required"))?;
-    let data: Input = serde_json::from_value(v["data"].clone())
+    let data: Input = serde_json::from_value(input.data.clone())
         .map_err(|_| bad("Expected requisition name and SKU lines"))?;
     organization::name(&data.name, settings)?;
     let mut tx = a.db.begin().await?;

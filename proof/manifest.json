@@ -988,18 +988,18 @@
     },
     "components/apps/src/http/record_history.rs": {
       "status": "unproved",
-      "sha256": "d60cec3ac6237ddfc68dbb3a99845dbad460290010266aa6de82622483e19f1b",
-      "review": "Managed app records, restoration, import and native-object projection moved into the apps component behind a record rules port without behavior change"
+      "sha256": "5376874aca2be58ef6ebeb80ee88e979091200b04d4b5782eb2908dec9811928",
+      "review": "F38 typed inputs: proof bindings unchanged"
     },
     "components/apps/src/http/secrets.rs": {
       "status": "unproved",
-      "sha256": "beffdfdb79ac41904cf743349bdca60d7223a6b7408f5db26b11a13102207568",
-      "review": "App secret, settings, activity, credential and webhook handlers moved into the apps component without changing rules"
+      "sha256": "165ca51cf9db6c3f153434bba9af6c365fd72d7ffd8415eac6b174ce46f85ea5",
+      "review": "F38 typed inputs: proof bindings unchanged"
     },
     "components/apps/src/http/settings.rs": {
       "status": "reviewed-binding",
-      "sha256": "8adadfd03750d4172af796c971d7614f04fe1bf47feac34568da1a464ba70573",
-      "review": "App secret, settings, activity, credential and webhook handlers moved into the apps component without changing rules"
+      "sha256": "7224311187c581713313c07d65e9b766ed21ed5184c98559bb0925a92e45f27e",
+      "review": "F38 typed inputs: proof bindings unchanged"
     },
     "components/apps/src/http/surface_grants.rs": {
       "status": "reviewed-binding",
@@ -1418,8 +1418,8 @@
     },
     "components/b2b/src/service/onboarding.rs": {
       "status": "unproved",
-      "sha256": "ff04037b5e8cd01b7941019ec6d27a86fe68c8174e62319bf73e2c97ae4a8172",
-      "review": "Rate refresh, company onboarding, POS channel setup, rule comparison and facts and source lifecycle handlers moved into their components; behaviour unchanged"
+      "sha256": "c3969865170a1f9b8264bfe9b38129f8521c630e3901b21a59a68b8fe1f524f5",
+      "review": "F38 typed inputs: proof bindings unchanged"
     },
     "components/b2b/src/service/quick_order.rs": {
       "status": "unproved",
@@ -1438,8 +1438,8 @@
     },
     "components/b2b/src/service/requisition.rs": {
       "status": "unproved",
-      "sha256": "351faa9841a47a67441a06398b11a804ca1c563731913304512a7d9ccac04a44",
-      "review": "Coupons, flow job summaries, requisition import, customer snapshot, address restore and account orders moved into components"
+      "sha256": "7ff50d8939dc59a2382dd38d5c48d1ab7ce46af64de52181f9c286def62d83e9",
+      "review": "F38 typed inputs: proof bindings unchanged"
     },
     "components/b2b/src/service.rs": {
       "status": "unproved",
@@ -1633,8 +1633,8 @@
     },
     "components/catalog/src/service/asset_access.rs": {
       "status": "unproved",
-      "sha256": "36e3e9e7c104fe4e0d087b6d2f20a0e9d0ac4f34ecc13c35d906cc6117051b9e",
-      "review": "F34 typed document views: proof bindings unchanged"
+      "sha256": "4c6753b9335b6412d0b56c8cff9431a3a0f409fa76db3974fe784ce5cba4eacc",
+      "review": "F38 typed inputs: proof bindings unchanged"
     },
     "components/catalog/src/service/assets.rs": {
       "status": "unproved",
@@ -2268,8 +2268,8 @@
     },
     "components/customers/src/store/crm.rs": {
       "status": "unproved",
-      "sha256": "b38eb0ca16ecff15255ef7c5c5587240934ba4311752d468955668cf8e70fdd8",
-      "review": "F17: shared outbox and shop registry helpers in core; written reasons for foreign table access"
+      "sha256": "cb82324fe0d7cb81c6f9faf56eb4d4bd0cd45f314df66c1cce0593d0ed28f906",
+      "review": "F38 typed inputs: proof bindings unchanged"
     },
     "components/customers/src/store/customers.rs": {
       "status": "unproved",
@@ -2653,8 +2653,8 @@
     },
     "components/intelligence/src/service/catalog_intake/prepare.rs": {
       "status": "unproved",
-      "sha256": "ca7c5e9b89285d46f1a8faf328dc53c2b52b3f6ff53b9bd8080c9619eb8e9fa9",
-      "review": "F21: connector service split into runtime, provider crates and service; catalogue import crate"
+      "sha256": "2729caefbc20c4cf07ed847308d21d900948069e31a0da6cc0a197fb9a35b529",
+      "review": "F38 typed inputs: proof bindings unchanged"
     },
     "components/intelligence/src/service/catalog_intake/save.rs": {
       "status": "unproved",
@@ -2753,8 +2753,8 @@
     },
     "components/intelligence/src/service/product_questions.rs": {
       "status": "unproved",
-      "sha256": "de7fa32240c99e99c7b963264a46c1a04905e14a367cd6e9b0afbefdb8e490e9",
-      "review": "F9: media captions, design references, product knowledge and the translation worker moved into components"
+      "sha256": "02d564cfe499308b2c6d433f6d26454fbce373730074c7b0406b7bc2c71ad5ee",
+      "review": "F38 typed inputs: proof bindings unchanged"
     },
     "components/intelligence/src/service/read_rounds.rs": {
       "status": "unproved",
@@ -3253,8 +3253,8 @@
     },
     "components/orders/src/domain/order_transitions.rs": {
       "status": "reviewed-binding",
-      "sha256": "d7a7d9f3a7aa502f534c414ce3dd48fe40e7cd0feeecbef382680717114ab927",
-      "review": "Order transitions, external order intake and saved agent authority moved into the orders, apps and identity components"
+      "sha256": "ff8b2ab65471613f006e6c68080a59852e59666af78dd0f5529c57127d7ebf6a",
+      "review": "F38 typed inputs: proof bindings unchanged"
     },
     "components/orders/src/domain/order_workflow.rs": {
       "status": "reviewed-binding",
@@ -4338,8 +4338,8 @@
     },
     "components/studio/src/service/imports/inspect.rs": {
       "status": "unproved",
-      "sha256": "1be91e25fb0497cb952e4f6ea5d5a6b751ee93a44e89f2c005bfda3e251fc44a",
-      "review": "Batch F4: source-record imports moved into studio behind the ImportHost port"
+      "sha256": "dd67c2f3da93144c721e8976543ac43b07a415db69be73ae72ae852f0eb440ad",
+      "review": "F38 typed inputs: proof bindings unchanged"
     },
     "components/studio/src/service/imports/inspect_history.rs": {
       "status": "unproved",
@@ -7513,8 +7513,8 @@
     },
     "src/marketing/app_flows.rs": {
       "status": "unproved",
-      "sha256": "d51aec2734d69fcb48a1c791ec785d816a3cdef7ef1244f9a3ea66926cd05d3c",
-      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
+      "sha256": "9484b2f6ac2692ae252d97be1f6da6cce841c85f5663462eeeb8b5be644fa50b",
+      "review": "F38 typed inputs: proof bindings unchanged"
     },
     "src/marketing/catalog.rs": {
       "status": "unproved",

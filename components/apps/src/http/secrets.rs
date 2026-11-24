@@ -5,7 +5,9 @@ use crate::store::packages::package;
 use crate::store::secrets::{SecretWrite, store};
 use axum::Json;
 use axum::extract::{Path, State as Shared};
+use serde::Deserialize;
 use serde_json::{Value, json};
+use veyndo_core::document::{lenient, view};
 use veyndo_core::shop_scope::parent;
 use veyndo_core::{RequestContext, Result, State, bad, conflict};
 use veyndo_identity::{merchant, permit};
@@ -32,6 +34,20 @@ pub async fn list(
         json!({"digest":approval::canonical_digest(&m),"kinds":KINDS.iter().filter(|k|applicable(&m,k)).collect::<Vec<_>>(),"canManage":permit(&h,"team.manage").is_ok() && h.principal.user.as_deref().is_some_and(|u|u!="bootstrap") && parent(&a,&t).await?.is_none(),"secrets":secrets,"encryptionReady":veyndo_cognition::inference::settings::encryption_ready()}),
     ))
 }
+/// An app secret rotation for the approved package digest at its revision.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct SecretRotation {
+    #[serde(deserialize_with = "lenient")]
+    approve: Option<bool>,
+    #[serde(deserialize_with = "lenient")]
+    digest: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    revision: Option<i64>,
+    #[serde(deserialize_with = "lenient")]
+    secret: Option<String>,
+}
+
 /// Rotates one secret under the approved package digest.
 pub async fn rotate(
     Shared(a): Shared<State>,
@@ -39,6 +55,7 @@ pub async fn rotate(
     Path((id, kind)): Path<(String, String)>,
     Json(v): Json<Value>,
 ) -> Result<Json<Value>> {
+    let input: SecretRotation = view(&v);
     let t = merchant(&h)?;
     permit(&h, "team.manage")?;
     let actor = h
@@ -55,17 +72,18 @@ pub async fn rotate(
         return Err(bad("Secret kind is not declared by this app"));
     }
     let digest = approval::canonical_digest(&m);
-    let revision = v["revision"]
-        .as_i64()
+    let revision = input
+        .revision
         .filter(|v| *v >= 0)
         .ok_or(bad("Secret revision required"))?;
-    if v["approve"] != true || v["digest"] != digest {
+    if input.approve != Some(true) || input.digest.as_deref() != Some(digest.as_str()) {
         return Err(conflict(
             "Approve the current package digest before rotating its secret",
         ));
     }
-    let secret = v["secret"]
-        .as_str()
+    let secret = input
+        .secret
+        .as_deref()
         .filter(|s| (32..=4096).contains(&s.len()) && !s.chars().any(char::is_control))
         .ok_or(bad(
             "Secret must be 32..4096 characters without control characters",

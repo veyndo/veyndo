@@ -7,25 +7,38 @@ use crate::http::product_editor::product_editor;
 use crate::ports::ImportHost;
 use axum::Json;
 use axum::extract::{Path, State as Shared};
+use serde::Deserialize;
 use serde_json::{Value, json};
+use veyndo_core::document::{lenient, view};
 use veyndo_core::model_contract::validate_native;
 use veyndo_core::{RequestContext, Result, StatusCode, bad, hash};
 use veyndo_identity::{merchant, permit};
 use veyndo_shop::service::read_cache::config;
+/// A source record to compare and its import options.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct InspectRequest {
+    record: Value,
+    options: Value,
+    #[serde(deserialize_with = "lenient")]
+    details: Option<bool>,
+}
+
 pub async fn inspect<H: ImportHost>(host: &H, h: &RequestContext, v: &Value) -> Result<Value> {
+    let input: InspectRequest = view(v);
     let a = host.core();
     let t = merchant(h)?;
     permit(h, "apps.manage")?;
     validate_native(&schema("merchant.import.inspect").unwrap(), v)?;
     let r: SourceRecord =
-        serde_json::from_value(v["record"].clone()).map_err(|_| bad("Invalid source record"))?;
+        serde_json::from_value(input.record.clone()).map_err(|_| bad("Invalid source record"))?;
     r.validate()?;
     let namespace = identity_namespace(a, &t).await?;
     let mut id = r.identity(&namespace);
     let (expected, actual) = match r.kind.as_str() {
         "products" => {
             permit(h, "catalog.read")?;
-            let mapped = products::mapped(a, &t, &r, &v["options"]).await?;
+            let mapped = products::mapped(a, &t, &r, &input.options).await?;
             let actual = match product_editor(Shared(a.clone()), h.clone(), Path(id.clone())).await
             {
                 Ok(Json(value)) => Some(value),
@@ -52,7 +65,7 @@ pub async fn inspect<H: ImportHost>(host: &H, h: &RequestContext, v: &Value) -> 
         }
         "categories" => {
             permit(h, "catalog.read")?;
-            let mapped = categories::mapped(a, &t, &r, &v["options"]).await?;
+            let mapped = categories::mapped(a, &t, &r, &input.options).await?;
             let actual = sqlx::query_scalar::<_,Value>("SELECT jsonb_build_object('parentId',parent_id,'data',data) FROM categories WHERE tenant=$1 AND id=$2").bind(&t).bind(&id).fetch_optional(&a.db).await?;
             (
                 json!({"parentId":mapped["parentId"],"data":mapped["data"]}),
@@ -65,7 +78,7 @@ pub async fn inspect<H: ImportHost>(host: &H, h: &RequestContext, v: &Value) -> 
                 h,
                 &id,
                 &r.data["destination"],
-                v["options"]["destinationDigest"]
+                input.options["destinationDigest"]
                     .as_str()
                     .ok_or(bad("Reviewed destination digest required"))?,
             )
@@ -89,7 +102,7 @@ pub async fn inspect<H: ImportHost>(host: &H, h: &RequestContext, v: &Value) -> 
             (expected, actual)
         }
         "customers" | "orders" | "reviews" => {
-            history::inspect(a, h, &r, &v["options"], &id).await?
+            history::inspect(a, h, &r, &input.options, &id).await?
         }
         _ => return Err(bad("Unsupported native inspection domain")),
     };
@@ -98,7 +111,7 @@ pub async fn inspect<H: ImportHost>(host: &H, h: &RequestContext, v: &Value) -> 
         compare(&expected, actual, "", &mut differences);
     }
     let mut result = json!({"id":id,"kind":r.kind,"status":if actual.is_none(){"missing"}else if differences.is_empty(){"matching"}else{"changed"},"differences":differences,"checkedAt":chrono::Utc::now().to_rfc3339(),"comparison":"mapped-current-fields-v1","readOnly":true});
-    if r.kind == "products" && v["details"] == true {
+    if r.kind == "products" && input.details == Some(true) {
         let (settings, _) = config(a, &t).await?;
         let scale = settings
             .currencies

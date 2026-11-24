@@ -4,6 +4,7 @@ use crate::store::address_restore;
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 use sqlx::Row;
+use veyndo_core::document::view;
 use veyndo_core::shop_scope::header;
 use veyndo_core::{RequestContext, Result, State, bad, conflict, hash, history_context, uid};
 use veyndo_identity::domain::credentials::email as email_of;
@@ -166,8 +167,18 @@ async fn save_address(
     Ok(())
 }
 
+/// The addresses of a customer record: billing, shipping and additional ones.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct AddressInput {
+    billing_address: Value,
+    shipping_address: Value,
+    additional_addresses: Value,
+}
+
 /// One address creation plan preserves multiplicity and native first-row default assignment.
 pub fn address_plan(v: &Value) -> Result<Vec<(Address, Value)>> {
+    let input: AddressInput = view(v);
     let mut plan = vec![];
     let mut add = |value: &Value, flags: Value| -> Result<()> {
         if !value.is_null() {
@@ -179,11 +190,11 @@ pub fn address_plan(v: &Value) -> Result<Vec<(Address, Value)>> {
         Ok(())
     };
     add(
-        &v["billingAddress"],
-        json!({"defaultBilling":true,"defaultShipping":v["shippingAddress"].is_null()}),
+        &input.billing_address,
+        json!({"defaultBilling":true,"defaultShipping":input.shipping_address.is_null()}),
     )?;
-    add(&v["shippingAddress"], json!({"defaultShipping":true}))?;
-    if let Some(xs) = v["additionalAddresses"].as_array() {
+    add(&input.shipping_address, json!({"defaultShipping":true}))?;
+    if let Some(xs) = input.additional_addresses.as_array() {
         for value in xs {
             add(value, json!({}))?;
         }

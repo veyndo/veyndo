@@ -2,13 +2,29 @@
 use super::{Draft, csv, inbound, public_client};
 use crate::ports::{IntakeHost, PublicEgress};
 use crate::service::models::choice;
+use serde::Deserialize;
 use serde_json::{Value, json};
 use veyndo_core::admission::reserve_ai_attempt;
 use veyndo_core::database::lease::Lease;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::model_contract::validate_native;
 use veyndo_core::{Error, RequestContext, Result, StatusCode, bad};
 use veyndo_identity::permit;
 use veyndo_shop::Settings;
+
+/// A catalogue intake preparation: the source mode and content, the draft count and the shop domain.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct IntakePreparation {
+    #[serde(deserialize_with = "lenient")]
+    mode: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    source: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    count: Option<u64>,
+    #[serde(deserialize_with = "lenient")]
+    shop_domain: Option<String>,
+}
 
 pub(super) async fn prepare(
     host: &dyn IntakeHost,
@@ -16,15 +32,16 @@ pub(super) async fn prepare(
     (t, s, settings_revision): (&str, &Settings, i64),
     v: &Value,
 ) -> Result<Value> {
+    let input: IntakePreparation = view(v);
     let m = host.models();
     let a = m.core;
     let egress = host.egress();
-    let mode = v["mode"].as_str().unwrap();
-    let source = v["source"].as_str().unwrap();
+    let mode = input.mode.as_deref().unwrap();
+    let source = input.source.as_deref().unwrap();
     if source.len() > 200_000 {
         return Err(bad("Catalogue source exceeds 200 kB"));
     }
-    let count = v["count"].as_u64().unwrap() as usize;
+    let count = input.count.unwrap() as usize;
     let (drafts, model) = if mode == "shopify_csv" {
         (inbound::shopify_csv(source)?, None)
     } else if mode == "shop_mcp" {
@@ -38,7 +55,7 @@ pub(super) async fn prepare(
                 )
                 .await?,
                 source,
-                v["shopDomain"].as_str(),
+                input.shop_domain.as_deref(),
                 count,
                 s,
             )
