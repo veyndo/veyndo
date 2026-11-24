@@ -90,14 +90,9 @@ async fn execute(
             if v.to_string().len() > 16384 {
                 return Err(bad("App event exceeds limit"));
             }
-            let event: i64 = sqlx::query_scalar(
-                "INSERT INTO outbox(tenant,kind,data) VALUES($1,$2,$3) RETURNING id",
-            )
-            .bind(&t)
-            .bind(format!("app.{id}.{name}"))
-            .bind(v)
-            .fetch_one(&a.db)
-            .await?;
+            let event =
+                veyndo_core::outbox::publish_id_on(&a.db, &t, &format!("app.{id}.{name}"), v)
+                    .await?;
             Ok(json!({"eventId":event,"accepted":true}))
         }
         _ => {

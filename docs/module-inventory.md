@@ -743,6 +743,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/core/src/request_context.rs](../components/core/src/request_context.rs) | Trusted request identity lives in extensions; HTTP headers carry transport inputs only. |
 | [components/core/src/shop_scope.rs](../components/core/src/shop_scope.rs) | Which shop a request addresses: the transport header, or the deployment's default shop. No authentication. |
 | [components/core/src/state.rs](../components/core/src/state.rs) | The state every component may use: the tenant-scoped database pool, the outbound HTTP client and request admission. |
+| [components/core/src/tenants.rs](../components/core/src/tenants.rs) | Reads and locks of the shop registry every component shares: existence, name, lifecycle status, the lifecycle lock and the agent stop switch of the live shop. |
 | [components/core/src/tool_contract.rs](../components/core/src/tool_contract.rs) | Shared wire description for native operations and installed app actions; hints never grant execution rights. |
 | [components/core/src/work_signal.rs](../components/core/src/work_signal.rs) | One dedicated LISTEN connection per worker process. Commit notifications are hints; polling repairs lost hints. |
 | [components/customers/src/domain/profile.rs](../components/customers/src/domain/profile.rs) | Which profile fields are shown as top-level contact fields of a customer. |

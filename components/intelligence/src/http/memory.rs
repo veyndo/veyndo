@@ -32,11 +32,13 @@ pub async fn decide(
     if changed != 1 {
         return Err(conflict("Hypothesis revision changed"));
     }
-    sqlx::query("INSERT INTO outbox(tenant,kind,data) VALUES($1,'intelligence.decision',$2)")
-        .bind(t)
-        .bind(json!({"hypothesisId":id,"state":state,"experimentStarted":false}))
-        .execute(&mut *tx)
-        .await?;
+    veyndo_core::outbox::publish_on(
+        &mut *tx,
+        &t,
+        "intelligence.decision",
+        &json!({"hypothesisId":id,"state":state,"experimentStarted":false}),
+    )
+    .await?;
     tx.commit().await?;
     Ok(Json(
         json!({"state":state,"experimentStarted":false,"nextStep":"Configure a controlled experiment; marking an idea does not run one"}),

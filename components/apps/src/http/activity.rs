@@ -74,11 +74,13 @@ pub async fn replay(
             queued+=sqlx::query("INSERT INTO app_deliveries(tenant,app,event_id) VALUES($1,$2,$3) ON CONFLICT(tenant,app,event_id) DO UPDATE SET state='queued',attempts=0,error=NULL,available_at=now(),lease_until=NULL,lease_token=NULL WHERE app_deliveries.state IN ('failed','delivered')").bind(&t).bind(&id).bind(r.get::<i64,_>("id")).execute(&mut *tx).await?.rows_affected();
         }
     }
-    sqlx::query("INSERT INTO outbox(tenant,kind,data) VALUES($1,'app.replay_requested',$2)")
-        .bind(t)
-        .bind(json!({"app":id,"after":after,"queued":queued,"actor":h.principal.user}))
-        .execute(&mut *tx)
-        .await?;
+    veyndo_core::outbox::publish_on(
+        &mut *tx,
+        &t,
+        "app.replay_requested",
+        &json!({"app":id,"after":after,"queued":queued,"actor":h.principal.user}),
+    )
+    .await?;
     tx.commit().await?;
     Ok(Json(
         json!({"queued":queued,"nextCursor":rows.last().map(|r|r.get::<i64,_>("id")).unwrap_or(after),"hasMore":rows.len()==limit as usize}),

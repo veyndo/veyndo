@@ -114,3 +114,36 @@ pub async fn publish(
         .await?;
     Ok(())
 }
+
+/// Records an event on any executor: in the caller's transaction, or on the pool when the change already committed.
+pub async fn publish_on<'e>(
+    db: impl sqlx::Executor<'e, Database = sqlx::Postgres>,
+    tenant: &str,
+    kind: &str,
+    data: &serde_json::Value,
+) -> Result<()> {
+    sqlx::query("INSERT INTO outbox(tenant,kind,data) VALUES($1,$2,$3)")
+        .bind(tenant)
+        .bind(kind)
+        .bind(data)
+        .execute(db)
+        .await?;
+    Ok(())
+}
+
+/// Records an event and returns its outbox ID, for callers that hand the ID back as a receipt.
+pub async fn publish_id_on<'e>(
+    db: impl sqlx::Executor<'e, Database = sqlx::Postgres>,
+    tenant: &str,
+    kind: &str,
+    data: &serde_json::Value,
+) -> Result<i64> {
+    Ok(
+        sqlx::query_scalar("INSERT INTO outbox(tenant,kind,data) VALUES($1,$2,$3) RETURNING id")
+            .bind(tenant)
+            .bind(kind)
+            .bind(data)
+            .fetch_one(db)
+            .await?,
+    )
+}

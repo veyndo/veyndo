@@ -219,7 +219,7 @@ pub async fn approve<H: WorkHost>(
     // rebinding above authorize this one task. Lock live control before its task,
     // matching the global-stop owner and never widening the worker's data scope.
     let mut tx = a.db.begin_privileged().await?;
-    let stopped:bool=sqlx::query_scalar("SELECT agents_stopped FROM tenants WHERE id=coalesce((SELECT live_tenant FROM shop_environments WHERE tenant=$1),$1) FOR NO KEY UPDATE").bind(t).fetch_one(&mut *tx).await?;
+    let stopped: bool = veyndo_core::tenants::agents_stopped_locked(&mut *tx, t).await?;
     if stopped {
         return Err(Error(
             StatusCode::FORBIDDEN,

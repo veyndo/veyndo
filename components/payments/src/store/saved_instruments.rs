@@ -64,12 +64,12 @@ pub async fn revoke(a: &State, t: &str, customer: &str, id: &str, key: &str) -> 
     )
     .await?;
     if row.get::<String, _>("state") == "active" {
-        sqlx::query(
-            "INSERT INTO outbox(tenant,kind,data) VALUES($1,'payment.instrument.revoked',$2)",
+        veyndo_core::outbox::publish_on(
+            &mut *tx,
+            t,
+            "payment.instrument.revoked",
+            &json!({"instrumentId":id}),
         )
-        .bind(t)
-        .bind(json!({"instrumentId":id}))
-        .execute(&mut *tx)
         .await?;
     }
     tx.commit().await?;

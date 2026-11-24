@@ -121,7 +121,7 @@ pub async fn enqueue(
     // Quota shares the live shop across sandboxes. One admitted native transaction
     // commits both quota and work without acquiring a second pooler backend.
     let mut tx = a.db.begin_privileged().await?;
-    let stopped:bool=sqlx::query_scalar("SELECT agents_stopped FROM tenants WHERE id=coalesce((SELECT live_tenant FROM shop_environments WHERE tenant=$1),$1) FOR NO KEY UPDATE").bind(&t).fetch_one(&mut *tx).await?;
+    let stopped: bool = veyndo_core::tenants::agents_stopped_locked(&mut *tx, &t).await?;
     if stopped {
         return Err(Error(
             StatusCode::FORBIDDEN,
@@ -306,7 +306,7 @@ pub async fn operate(a: &State, h: &RequestContext, name: &str, v: &Value) -> Re
         if !["failed", "uncertain"].contains(&state.as_str()) {
             return Err(conflict("Only a stopped run can be explicitly resumed"));
         }
-        let stopped:bool=sqlx::query_scalar("SELECT agents_stopped FROM tenants WHERE id=coalesce((SELECT live_tenant FROM shop_environments WHERE tenant=$1),$1)").bind(&t).fetch_one(&mut *tx).await?;
+        let stopped: bool = veyndo_core::tenants::agents_stopped(&mut *tx, &t).await?;
         if stopped {
             return Err(Error(
                 StatusCode::FORBIDDEN,

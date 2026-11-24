@@ -127,11 +127,13 @@ pub async fn decide(a: &State, t: &str, actor: Option<&str>, v: &Value) -> Resul
         return Err(conflict("Source changed or archived; extract again"));
     }
     sqlx::query("UPDATE knowledge_relations SET state=$1,actor=$2 WHERE tenant=$3 AND kind='CLAIMS' AND target_id=$4").bind(state).bind(actor.unwrap_or("integration")).bind(t).bind(id).execute(&mut *tx).await?;
-    sqlx::query("INSERT INTO outbox(tenant,kind,data) VALUES($1,'intelligence.claim.reviewed',$2)")
-        .bind(t)
-        .bind(json!({"claimId":id,"state":state,"actor":actor}))
-        .execute(&mut *tx)
-        .await?;
+    veyndo_core::outbox::publish_on(
+        &mut *tx,
+        t,
+        "intelligence.claim.reviewed",
+        &json!({"claimId":id,"state":state,"actor":actor}),
+    )
+    .await?;
     tx.commit().await?;
     Ok(json!({"id":id,"state":state,"revision":revision+1}))
 }

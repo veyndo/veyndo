@@ -18,11 +18,13 @@ pub async fn refresh(a: &State, t: &str, expected: i64, actor: &RequestContext) 
     let mut tx = a.db.begin().await?;
     context(&mut tx, actor, "currency-rate-refresh").await?;
     sqlx::query("UPDATE commerce_settings SET data=jsonb_set(data,'{currencies}',$1),revision=revision+1 WHERE tenant=$2 AND revision=$3 RETURNING revision").bind(json!(next)).bind(t).bind(expected).fetch_optional(&mut *tx).await?.ok_or(conflict("Settings changed during rate refresh"))?;
-    sqlx::query("INSERT INTO outbox(tenant,kind,data) VALUES($1,'commerce.configured',$2)")
-        .bind(t)
-        .bind(json!({"revision":expected+1,"reason":"currency_rates"}))
-        .execute(&mut *tx)
-        .await?;
+    veyndo_core::outbox::publish_on(
+        &mut *tx,
+        t,
+        "commerce.configured",
+        &json!({"revision":expected+1,"reason":"currency_rates"}),
+    )
+    .await?;
     tx.commit().await?;
     Ok(json!({"currencies":next,"revision":expected+1}))
 }

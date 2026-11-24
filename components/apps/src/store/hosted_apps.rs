@@ -48,11 +48,13 @@ pub async fn ensure(
             .bind(id)
             .execute(&mut **tx)
             .await?;
-            sqlx::query("INSERT INTO outbox(tenant,kind,data) VALUES($1,'app.activated',$2)")
-                .bind(tenant)
-                .bind(json!({"app":id,"reason":"hosted_frontend"}))
-                .execute(&mut **tx)
-                .await?;
+            veyndo_core::outbox::publish_on(
+                &mut **tx,
+                tenant,
+                "app.activated",
+                &json!({"app":id,"reason":"hosted_frontend"}),
+            )
+            .await?;
         }
         Some(true) => {}
     }

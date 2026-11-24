@@ -82,16 +82,14 @@ pub async fn settle(
         order["pos"]["completionEvent"] = json!(true);
         // No electronic provider charge was performed. Cash is explicit and audited separately.
         order["pos"]["cash"] = json!({"tenderMinor":tender.to_string(),"changeMinor":(tender-total).to_string(),"receivedMinor":total.to_string(),"currency":c.data.currency});
-        sqlx::query("INSERT INTO outbox(tenant,kind,data) VALUES($1,'payment.state_changed',$2)")
-            .bind(&c.tenant).bind(json!({"orderId":order["id"],"state":"paid","kind":"payment","cashierId":p.actor,"salesChannelId":c.data.sales_channel})).execute(&mut **tx).await?;
+        veyndo_core::outbox::publish_on(&mut **tx, &c.tenant, "payment.state_changed", &json!({"orderId":order["id"],"state":"paid","kind":"payment","cashierId":p.actor,"salesChannelId":c.data.sales_channel})).await?;
     }
     let event = if order["payment"]["state"] == "paid" {
         "pos.sale_completed"
     } else {
         "pos.sale_created"
     };
-    sqlx::query("INSERT INTO outbox(tenant,kind,data) VALUES($1,$2,$3)").bind(&c.tenant).bind(event)
-        .bind(json!({"orderId":order["id"],"salesChannelId":c.data.sales_channel,"cashierId":p.actor,"paymentState":order["payment"]["state"],"totalMinor":order["money"]["minor"],"currency":c.data.currency})).execute(&mut **tx).await?;
+    veyndo_core::outbox::publish_on(&mut **tx, &c.tenant, event, &json!({"orderId":order["id"],"salesChannelId":c.data.sales_channel,"cashierId":p.actor,"paymentState":order["payment"]["state"],"totalMinor":order["money"]["minor"],"currency":c.data.currency})).await?;
     Ok(())
 }
 /// The shared configuration lock precedes this channel lock in both saves and checkout.
@@ -140,7 +138,6 @@ pub async fn payment_captured(
         return Ok(());
     }
     order["pos"]["completionEvent"] = json!(true);
-    sqlx::query("INSERT INTO outbox(tenant,kind,data) VALUES($1,'pos.sale_completed',$2)")
-        .bind(tenant).bind(json!({"orderId":order["id"],"salesChannelId":order["salesChannelId"],"paymentState":state,"totalMinor":order["money"]["minor"],"currency":order["cart"]["price"]["currency"]})).execute(&mut **tx).await?;
+    veyndo_core::outbox::publish_on(&mut **tx, tenant, "pos.sale_completed", &json!({"orderId":order["id"],"salesChannelId":order["salesChannelId"],"paymentState":state,"totalMinor":order["money"]["minor"],"currency":order["cart"]["price"]["currency"]})).await?;
     Ok(())
 }

@@ -120,11 +120,13 @@ pub async fn import(
         .await?;
     sqlx::query("INSERT INTO orders(id,tenant,cart_id,idempotency_key,fingerprint,data,created_at) VALUES($1,$2,$3,$4,$5,$6,$7::text::timestamptz)").bind(&id).bind(&t).bind(cart_id).bind(key).bind(fingerprint).bind(&order).bind(created.to_rfc3339()).execute(&mut *tx).await?;
     sqlx::query("INSERT INTO order_activity(tenant,order_id,actor,kind,data) VALUES($1,$2,$3,'historical_import',$4)").bind(&t).bind(&id).bind(h.principal.user.as_deref().unwrap_or("unknown")).bind(json!({"source":r.source,"sourceShop":r.source_shop,"sourceId":r.source_id})).execute(&mut *tx).await?;
-    sqlx::query("INSERT INTO outbox(tenant,kind,data) VALUES($1,'migration.record.imported',$2)")
-        .bind(&t)
-        .bind(json!({"kind":"orders","targetId":id}))
-        .execute(&mut *tx)
-        .await?;
+    veyndo_core::outbox::publish_on(
+        &mut *tx,
+        &t,
+        "migration.record.imported",
+        &json!({"kind":"orders","targetId":id}),
+    )
+    .await?;
     tx.commit().await?;
     Ok(json!({"id":id,"replayed":false,"historical":true}))
 }

@@ -82,8 +82,13 @@ pub async fn create(a: &State, c: &StoredCart, v: Intake) -> Result<Value> {
     }
     sqlx::query("INSERT INTO consumer_requests(tenant,id,cart_id,channel_id,kind,data) VALUES($1,$2,$3,$4,$5,$6)")
       .bind(&c.tenant).bind(&id).bind(&c.id).bind(&c.data.sales_channel).bind(&v.kind).bind(&data).execute(&mut *tx).await?;
-    sqlx::query("INSERT INTO outbox(tenant,kind,data) VALUES($1,$2,$3)")
-      .bind(&c.tenant).bind(format!("consumer.{}.requested",v.kind)).bind(json!({"requestId":id,"salesChannelId":c.data.sales_channel,"kind":v.kind,"receipt":data})).execute(&mut *tx).await?;
+    veyndo_core::outbox::publish_on(
+        &mut *tx,
+        &c.tenant,
+        &format!("consumer.{}.requested", v.kind),
+        &json!({"requestId":id,"salesChannelId":c.data.sales_channel,"kind":v.kind,"receipt":data}),
+    )
+    .await?;
     tx.commit().await?;
     Ok(json!({"id":id,"kind":v.kind,"data":data,"state":"received"}))
 }
@@ -118,11 +123,13 @@ pub async fn review(a: &State, h: &RequestContext, t: &str, id: &str, v: &Value)
     let mut tx = a.db.begin().await?;
     let n=sqlx::query("UPDATE consumer_requests SET state=$1,revision=revision+1,data=data||jsonb_build_object('reviewNote',$2::text,'reviewedAt',now()::text,'reviewedBy',$3::text) WHERE tenant=$4 AND id=$5 AND revision=$6 RETURNING revision")
       .bind(state).bind(note).bind(header(h,"x-rac-user").unwrap_or("merchant")) .bind(t).bind(id).bind(revision).fetch_optional(&mut *tx).await?.ok_or(conflict("Request changed or unavailable"))?;
-    sqlx::query("INSERT INTO outbox(tenant,kind,data) VALUES($1,'consumer.request.reviewed',$2)")
-        .bind(t)
-        .bind(json!({"requestId":id,"state":state,"revision":n.get::<i64,_>("revision")}))
-        .execute(&mut *tx)
-        .await?;
+    veyndo_core::outbox::publish_on(
+        &mut *tx,
+        t,
+        "consumer.request.reviewed",
+        &json!({"requestId":id,"state":state,"revision":n.get::<i64,_>("revision")}),
+    )
+    .await?;
     sqlx::query("INSERT INTO consumer_request_reviews(tenant,request_id,revision,actor,state,note) VALUES($1,$2,$3,$4,$5,$6)").bind(t).bind(id).bind(revision+1).bind(header(h,"x-rac-user").unwrap_or("merchant")).bind(state).bind(note).execute(&mut *tx).await?;
     tx.commit().await?;
     Ok(json!({"revision":revision+1}))

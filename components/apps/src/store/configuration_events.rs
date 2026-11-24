@@ -32,9 +32,7 @@ pub async fn configuration_events(
             .values()
             .map(|v| &v.product_id)
             .collect::<std::collections::BTreeSet<_>>();
-        sqlx::query("INSERT INTO outbox(tenant,kind,data) VALUES($1,'app.configuration.changed',$2)")
-            .bind(&c.tenant).bind(json!({"app":app,"cartId":c.id,"revision":c.revision,"salesChannelId":c.data.sales_channel,"operation":if new.is_empty() {"removed"} else {"configured"},"products":products}))
-            .execute(&mut **tx).await?;
+        veyndo_core::outbox::publish_on(&mut **tx, &c.tenant, "app.configuration.changed", &json!({"app":app,"cartId":c.id,"revision":c.revision,"salesChannelId":c.data.sales_channel,"operation":if new.is_empty() {"removed"} else {"configured"},"products":products})).await?;
     }
     Ok(())
 }

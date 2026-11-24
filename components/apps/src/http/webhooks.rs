@@ -91,12 +91,8 @@ pub async fn receive(
         if r.get::<String,_>("digest")!=digest {return Err(conflict("Webhook event id already used for a different payload"));}
         return Ok(Json(json!({"accepted":true,"replayed":true,"eventId":r.get::<i64,_>("event_id")})));
     }
-    let event: i64 =
-        sqlx::query_scalar("INSERT INTO outbox(tenant,kind,data) VALUES($1,$2,$3) RETURNING id")
-            .bind(&t)
-            .bind(format!("app.{id}.{}", w.action))
-            .bind(input)
-            .fetch_one(&mut *tx)
+    let event =
+        veyndo_core::outbox::publish_id_on(&mut *tx, &t, &format!("app.{id}.{}", w.action), &input)
             .await?;
     sqlx::query("INSERT INTO app_webhook_receipts(tenant,app,webhook,request_key,digest,event_id) VALUES($1,$2,$3,$4,$5,$6)").bind(t).bind(id).bind(webhook).bind(key).bind(digest).bind(event).execute(&mut *tx).await?;
     tx.commit().await?;

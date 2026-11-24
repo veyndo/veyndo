@@ -63,8 +63,7 @@ pub async fn credentials(
             .bind(&user)
             .execute(&mut *tx)
             .await?;
-        sqlx::query("INSERT INTO outbox(tenant,kind,data) VALUES($1,'account.security.updated',$2)")
-            .bind(shop).bind(json!({"userId":user,"action":"password.changed","credentialRevision":row.get::<i64,_>("credential_revision")+1})).execute(&mut *tx).await?;
+        veyndo_core::outbox::publish_on(&mut *tx, shop, "account.security.updated", &json!({"userId":user,"action":"password.changed","credentialRevision":row.get::<i64,_>("credential_revision")+1})).await?;
     }
     tx.commit().await?;
     Ok(Json(issue_session(&a, &user, shop).await?))

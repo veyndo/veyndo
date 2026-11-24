@@ -21,10 +21,7 @@ pub async fn invite_user(
     permit(&h, "users")?;
     let role = v["role"].as_str().unwrap_or("viewer");
     let mut tx = a.db.begin().await?;
-    sqlx::query("SELECT id FROM tenants WHERE id=$1 FOR UPDATE")
-        .bind(&t)
-        .fetch_one(&mut *tx)
-        .await?;
+    veyndo_core::tenants::lock(&mut *tx, &t).await?;
     let h = roles::current(&mut tx, &h, &t).await?;
     let actor_role = if header(&h, "x-rac-role") == Some("owner") {
         "owner"
@@ -61,10 +58,7 @@ pub async fn accept_invite(
     let mut tx = a.db.begin().await?;
     let invite_tenant: String = sqlx::query_scalar("SELECT tenant FROM user_invites WHERE digest=$1 AND redeemed_at IS NULL AND expires_at>now()")
         .bind(hash(token)).fetch_optional(&mut *tx).await?.ok_or(Error(StatusCode::NOT_FOUND,"Invitation expired or redeemed".into()))?;
-    sqlx::query("SELECT id FROM tenants WHERE id=$1 FOR UPDATE")
-        .bind(&invite_tenant)
-        .fetch_one(&mut *tx)
-        .await?;
+    veyndo_core::tenants::lock(&mut *tx, &invite_tenant).await?;
     let invite=sqlx::query("SELECT * FROM user_invites WHERE digest=$1 AND redeemed_at IS NULL AND expires_at>now() FOR UPDATE").bind(hash(token)).fetch_optional(&mut *tx).await?.ok_or(Error(StatusCode::NOT_FOUND,"Invitation expired or redeemed".into()))?;
     let email = invite.get::<String, _>("email");
     let tenant = invite.get::<String, _>("tenant");

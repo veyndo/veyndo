@@ -152,11 +152,13 @@ pub async fn write_locked(
     if choices.get("analytics") != Some(&true) {
         sqlx::query("DELETE FROM session_signal_events WHERE tenant=$1 AND session=ANY($2) AND purpose='analytics'").bind(&c.tenant).bind(&signals).execute(&mut **tx).await?;
     }
-    sqlx::query("INSERT INTO outbox(tenant,kind,data) VALUES($1,'privacy.consent_changed',$2)")
-        .bind(&c.tenant)
-        .bind(json!({"cartId":c.id,"salesChannelId":c.data.sales_channel,"choices":choices}))
-        .execute(&mut **tx)
-        .await?;
+    veyndo_core::outbox::publish_on(
+        &mut **tx,
+        &c.tenant,
+        "privacy.consent_changed",
+        &json!({"cartId":c.id,"salesChannelId":c.data.sales_channel,"choices":choices}),
+    )
+    .await?;
     Ok(receipt)
 }
 /// Requires a fresh receipt for the purpose under the current policy.

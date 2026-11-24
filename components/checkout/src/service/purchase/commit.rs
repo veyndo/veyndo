@@ -193,11 +193,13 @@ pub(super) async fn run<P: Purchase>(
     if !external && let Some(e)=sqlx::query("UPDATE exposures SET rewarded=true WHERE tenant=$1 AND session=$2 AND rewarded=false RETURNING variant").bind(&c.tenant).bind(&c.data.session).fetch_optional(&mut *tx).await? {
         sqlx::query("UPDATE policy SET purchases=purchases+1 WHERE tenant=$1 AND variant=$2").bind(&c.tenant).bind(e.get::<String,_>("variant")).execute(&mut *tx).await?;
     }
-    sqlx::query("INSERT INTO outbox(tenant,kind,data) VALUES($1,'order.placed',$2)")
-        .bind(&c.tenant)
-        .bind(json!({"orderId":id,"totalMinor":minor}))
-        .execute(&mut *tx)
-        .await?;
+    veyndo_core::outbox::publish_on(
+        &mut *tx,
+        &c.tenant,
+        "order.placed",
+        &json!({"orderId":id,"totalMinor":minor}),
+    )
+    .await?;
     port.fence(&mut tx).await?;
     tx.commit().await?;
     Ok(Placed {

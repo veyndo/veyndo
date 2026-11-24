@@ -74,13 +74,13 @@ pub async fn save(
         return Err(conflict("Workflow removes an active order state"));
     }
     sqlx::query("INSERT INTO order_state_machines(tenant,data) VALUES($1,$2) ON CONFLICT(tenant) DO UPDATE SET data=EXCLUDED.data,revision=order_state_machines.revision+1").bind(&t).bind(json!(m)).execute(&mut *tx).await?;
-    sqlx::query("INSERT INTO outbox(tenant,kind,data) VALUES($1,'order.workflow.updated',$2)")
-        .bind(&t)
-        .bind(
-            json!({"revision":revision+1,"actor":header(&h,"x-rac-user"),"sourceApp":m.source_app}),
-        )
-        .execute(&mut *tx)
-        .await?;
+    veyndo_core::outbox::publish_on(
+        &mut *tx,
+        &t,
+        "order.workflow.updated",
+        &json!({"revision":revision+1,"actor":header(&h,"x-rac-user"),"sourceApp":m.source_app}),
+    )
+    .await?;
     tx.commit().await?;
     Ok(Json(json!({"saved":true,"revision":revision+1})))
 }

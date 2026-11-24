@@ -183,11 +183,13 @@ pub async fn product_content(tx: &mut Tx<'_>, t: &str, value: &Value) -> Result<
         .fetch_one(&mut **tx)
         .await?;
     sync_product(tx, t, &json!(product(&r))).await?;
-    sqlx::query("INSERT INTO outbox(tenant,kind,data) VALUES($1,'product.published',$2)")
-        .bind(t)
-        .bind(json!({"productId":id,"revision":r.get::<i64,_>("revision")}))
-        .execute(&mut **tx)
-        .await?;
+    veyndo_core::outbox::publish_on(
+        &mut **tx,
+        t,
+        "product.published",
+        &json!({"productId":id,"revision":r.get::<i64,_>("revision")}),
+    )
+    .await?;
     Ok(())
 }
 

@@ -63,10 +63,7 @@ pub async fn invoke(
         .filter(|s| identifier(s))
         .ok_or(bad("Invalid role ID"))?;
     let mut tx = a.db.begin().await?;
-    sqlx::query("SELECT id FROM tenants WHERE id=$1 FOR UPDATE")
-        .bind(&t)
-        .fetch_one(&mut *tx)
-        .await?;
+    veyndo_core::tenants::lock(&mut *tx, &t).await?;
     let actor = current(&mut tx, h, &t).await?;
     let row = sqlx::query(
         "SELECT revision,builtin FROM workspace_roles WHERE tenant=$1 AND id=$2 FOR UPDATE",
@@ -136,7 +133,7 @@ pub async fn invoke(
         sqlx::query("INSERT INTO workspace_roles(tenant,id,data) VALUES($1,$2,$3) ON CONFLICT(tenant,id) DO UPDATE SET data=EXCLUDED.data,revision=workspace_roles.revision+1")
             .bind(&t).bind(id).bind(d).execute(&mut *tx).await?;
     }
-    sqlx::query("INSERT INTO outbox(tenant,kind,data) VALUES($1,'team.role_changed',$2)").bind(t).bind(json!({"actor":header(&actor,"x-rac-user"),"id":id,"revision":expected+1,"deleted":name=="team.role.delete"})).execute(&mut *tx).await?;
+    veyndo_core::outbox::publish_on(&mut *tx, &t, "team.role_changed", &json!({"actor":header(&actor,"x-rac-user"),"id":id,"revision":expected+1,"deleted":name=="team.role.delete"})).await?;
     tx.commit().await?;
     Ok(
         json!({"id":id,"revision":expected+1,"saved":name=="team.role.save","deleted":name=="team.role.delete"}),

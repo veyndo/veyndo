@@ -280,7 +280,7 @@ pub async fn import_external(
     veyndo_catalog::store::order_downloads::grant(&mut tx, &t, &ids, &id).await?;
     {
         let kind = "order.placed";
-        sqlx::query("INSERT INTO outbox(tenant,kind,data) VALUES($1,$2,$3)").bind(&t).bind(kind).bind(json!({"orderId":id,"totalMinor":input.total_minor,"salesChannelId":input.sales_channel_id,"appId":app})).execute(&mut *tx).await?;
+        veyndo_core::outbox::publish_on(&mut *tx, &t, kind, &json!({"orderId":id,"totalMinor":input.total_minor,"salesChannelId":input.sales_channel_id,"appId":app})).await?;
     }
     tx.commit().await?;
     // Customer/order reads must never expose the private completed-cart token.

@@ -67,12 +67,7 @@ pub async fn submitted(
     kind: &str,
     data: &Value,
 ) -> Result<()> {
-    sqlx::query("INSERT INTO outbox(tenant,kind,data) VALUES($1,$2,$3)")
-        .bind(t)
-        .bind(kind)
-        .bind(data)
-        .execute(tx)
-        .await?;
+    veyndo_core::outbox::publish_on(tx, t, kind, data).await?;
     Ok(())
 }
 

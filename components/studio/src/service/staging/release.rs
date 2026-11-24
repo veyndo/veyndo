@@ -339,11 +339,13 @@ pub async fn release<H: ReleaseHost>(
         .execute(&mut *tx)
         .await?;
     sqlx::query("INSERT INTO shop_releases(id,live_tenant,environment,selections,actor) VALUES($1,$2,$3,$4,$5)").bind(&release).bind(&t).bind(&id).bind(&selected).bind(header(&h,"x-rac-user").unwrap_or("unknown")).execute(&mut *tx).await?;
-    sqlx::query("INSERT INTO outbox(tenant,kind,data) VALUES($1,'shop.release.published',$2)")
-        .bind(&t)
-        .bind(json!({"releaseId":release,"selections":selected}))
-        .execute(&mut *tx)
-        .await?;
+    veyndo_core::outbox::publish_on(
+        &mut *tx,
+        &t,
+        "shop.release.published",
+        &json!({"releaseId":release,"selections":selected}),
+    )
+    .await?;
     validate_settings_release(host.settings_guards(), &mut tx, &t, &actual["settings"]).await?;
     validate_company_release(&mut tx, &t).await?;
     tx.commit().await?;

@@ -21,21 +21,21 @@
         "veyndo_authority"
       ],
       "uses": [],
-      "foreign_tables": [
-        "app_deliveries",
-        "app_schedule_runs",
-        "app_webhook_receipts",
-        "flow_jobs",
-        "knowledge_receipts",
-        "observed_pairs",
-        "pair_evidence",
-        "shop_environments",
-        "tenant_ai_usage",
-        "tenant_resource_limits"
-      ],
+      "foreign_tables": {
+        "app_deliveries": "read: reads app event delivery state for outbox fan-out and the operator view, inside the same statement as the event rows (retention.rs, retention.sql)",
+        "app_schedule_runs": "read: reads schedule run bookkeeping for the shared outbox cleanup (retention.sql)",
+        "app_webhook_receipts": "read: reads webhook receipt rows for the shared outbox cleanup (retention.sql)",
+        "flow_jobs": "read: reads flow job state for cleanup, retention or agent run status (retention.rs, retention.sql)",
+        "knowledge_receipts": "read: reads knowledge receipts for the shared retention cleanup (retention.sql)",
+        "observed_pairs": "read: reads observed product pairs for the shared retention cleanup (retention.sql)",
+        "pair_evidence": "read: reads pair evidence for the shared retention cleanup (retention.sql)",
+        "shop_environments": "read: reads the environment row (live shop, preview owner) to scope sandbox and preview requests to their live shop (admission.rs, next_tenant.sql, reads.rs, shop_scope.rs)",
+        "tenant_ai_usage": "write: the shared AI attempt admission counts usage in the request transaction (admission.rs)",
+        "tenant_resource_limits": "read: reads per-shop resource limits for admission (admission.rs)"
+      },
       "glob_imports": 0,
       "untyped_access": 4,
-      "sql_outside_store": 12
+      "sql_outside_store": 13
     },
     "identity": {
       "title": "Merchant accounts, memberships, sessions, roles and route policy",
@@ -61,13 +61,12 @@
         "core",
         "inference"
       ],
-      "foreign_tables": [
-        "app_packages",
-        "outbox",
-        "sales_channels",
-        "shop_environments",
-        "tenants"
-      ],
+      "foreign_tables": {
+        "app_packages": "read: reads installed package manifests and their active flag to admit app-provided actions, tools or providers in the same transaction (identity.sql)",
+        "sales_channels": "read: reads the sales channel document (kind, activity, catalogue scope) to admit the request channel inside the same statement (identity.sql)",
+        "shop_environments": "read: reads the environment row (live shop, preview owner) to scope sandbox and preview requests to their live shop (agent_authority.rs, identity.sql, mfa.rs)",
+        "tenants": "read: reads shop existence, status or the agent stop switch inside a larger claim or join; simple reads go through veyndo_core::tenants (agent_authority.rs, broker.rs, identity.sql, sessions.rs)"
+      },
       "glob_imports": 0,
       "untyped_access": 66,
       "sql_outside_store": 11
@@ -102,27 +101,27 @@
         "pricing",
         "shipping"
       ],
-      "foreign_tables": [
-        "app_evidence",
-        "app_packages",
-        "carts",
-        "commerce_flows",
-        "commerce_promotions",
-        "commerce_rules",
-        "customers",
-        "memberships",
-        "merchant_users",
-        "orders",
-        "outbox",
-        "product_reviews",
-        "products",
-        "read_context_versions",
-        "receipt_settings",
-        "sales_channels",
-        "shop_environments",
-        "tenant_ai_usage",
-        "tenants"
-      ],
+      "foreign_tables": {
+        "app_evidence": "read: reads merchant-private app evidence as retrieval context; the apps component owns ingestion and purge (operator_metrics.rs)",
+        "app_packages": "read: reads installed package manifests and their active flag to admit app-provided actions, tools or providers in the same transaction (operator_metrics.rs, operator_shop.rs)",
+        "carts": "read: reads the stored cart row (lines, context, token binding) in the same statement as its own data for a consistent snapshot (consumer_requests.rs)",
+        "commerce_flows": "read: reads flow definitions and revisions to resolve dependencies, staging snapshots or projections (group_usage.rs)",
+        "commerce_promotions": "read: reads promotion definitions and revisions for snapshots, dependency checks or projections (group_usage.rs)",
+        "commerce_rules": "read: reads rule definitions and revisions for snapshots, dependency checks or projections (group_usage.rs)",
+        "customers": "read: reads customer identity, group and company in the same statement as its own records to admit or project them (group_usage.rs, operator_metrics.rs, operator_shop.rs)",
+        "memberships": "read: reads membership rows to check the actor still belongs to the shop (operator_metrics.rs, operator_shop.rs)",
+        "merchant_users": "read: reads merchant account names and emails for operator and studio views (operator_metrics.rs, operator_session.rs, operator_shop.rs)",
+        "orders": "read: reads order documents in the same statement as its own records to project or admit them (operator_metrics.rs, settings_writes.rs)",
+        "outbox": "read: reads outbox events or counts (throttling, cursors, operator view); writes go through veyndo_core::outbox (operator_metrics.rs, operators.rs)",
+        "product_reviews": "read: reads published reviews as product facts in the same statement (settings_writes.rs)",
+        "products": "read: reads product rows in the same statement as its own data (prices, stock, visibility) (group_usage.rs, operator_metrics.rs, operator_shop.rs, settings_writes.rs)",
+        "read_context_versions": "read: reads read-context version stamps that invalidate the shop read cache (read_cache.rs)",
+        "receipt_settings": "read: reads receipt settings revision for the configuration view (operator_shop.rs)",
+        "sales_channels": "read: reads the sales channel document (kind, activity, catalogue scope) to admit the request channel inside the same statement (access_snapshot.sql, operator_metrics.rs, operator_shop.rs, read_cache_settings.sql)",
+        "shop_environments": "read: reads the environment row (live shop, preview owner) to scope sandbox and preview requests to their live shop (access_snapshot.sql, availability.rs, operator_lifecycle.rs, operator_metrics.rs)",
+        "tenant_ai_usage": "read: reads the AI usage counters for the operator view (operator_quotas.rs)",
+        "tenants": "write: operator lifecycle changes the shop status and status revision (access_snapshot.sql, availability.rs, operator_lifecycle.rs, operator_metrics.rs)"
+      },
       "glob_imports": 0,
       "untyped_access": 63,
       "sql_outside_store": 9
@@ -150,15 +149,15 @@
         "identity",
         "pricing"
       ],
-      "foreign_tables": [
-        "b2b_catalog",
-        "knowledge_documents",
-        "knowledge_relations",
-        "languages",
-        "sales_channels",
-        "shop_environments",
-        "tenants"
-      ],
+      "foreign_tables": {
+        "b2b_catalog": "read: reads the private unit catalogue scope inside the catalogue/rule query so pagination stays correct (catalog_channel.sql, catalog_reads.rs, catalog_search.sql, category_listing.sql)",
+        "knowledge_documents": "read: reads published knowledge documents linked to products for catalogue views (category_listing.sql)",
+        "knowledge_relations": "read: reads product relations from the knowledge graph for catalogue and app views (category_listing.sql)",
+        "languages": "read: reads the global language registry to map locales to language IDs (product_edit.rs)",
+        "sales_channels": "read: reads the sales channel document (kind, activity, catalogue scope) to admit the request channel inside the same statement (channels.rs)",
+        "shop_environments": "read: reads the environment row (live shop, preview owner) to scope sandbox and preview requests to their live shop (media_jobs.rs)",
+        "tenants": "read: reads shop existence, status or the agent stop switch inside a larger claim or join; simple reads go through veyndo_core::tenants (media_jobs.rs)"
+      },
       "glob_imports": 0,
       "untyped_access": 133,
       "sql_outside_store": 2
@@ -177,9 +176,9 @@
         "core",
         "pricing"
       ],
-      "foreign_tables": [
-        "products"
-      ],
+      "foreign_tables": {
+        "products": "write: stock reservations and releases update the product stock in the reservation transaction (release.sql, reservations.rs, test_stock.rs)"
+      },
       "glob_imports": 0,
       "untyped_access": 3,
       "sql_outside_store": 0
@@ -197,11 +196,11 @@
         "core",
         "identity"
       ],
-      "foreign_tables": [
-        "b2b_units",
-        "carts",
-        "products"
-      ],
+      "foreign_tables": {
+        "b2b_units": "read: reads purchasing unit currency, limits and catalogue scope inside the pricing or shipping query of the cart (currency_usage.rs)",
+        "carts": "read: reads the stored cart row (lines, context, token binding) in the same statement as its own data for a consistent snapshot (currency_usage.rs)",
+        "products": "read: reads product rows in the same statement as its own data (prices, stock, visibility) (currency_usage.rs, price_jobs.rs)"
+      },
       "glob_imports": 0,
       "untyped_access": 13,
       "sql_outside_store": 1
@@ -217,14 +216,14 @@
         "identity",
         "pricing"
       ],
-      "foreign_tables": [
-        "b2b_units",
-        "carts",
-        "commerce_flows",
-        "commerce_overrides",
-        "commerce_rules",
-        "orders"
-      ],
+      "foreign_tables": {
+        "b2b_units": "read: reads purchasing unit currency, limits and catalogue scope inside the pricing or shipping query of the cart (method_usage.rs)",
+        "carts": "read: reads the stored cart row (lines, context, token binding) in the same statement as its own data for a consistent snapshot (method_usage.rs)",
+        "commerce_flows": "read: reads flow definitions and revisions to resolve dependencies, staging snapshots or projections (method_usage.rs)",
+        "commerce_overrides": "read: reads the per-channel settings override that the scoped settings view merges (method_usage.rs)",
+        "commerce_rules": "read: reads rule definitions and revisions for snapshots, dependency checks or projections (method_usage.rs)",
+        "orders": "read: reads order documents in the same statement as its own records to project or admit them (method_usage.rs)"
+      },
       "glob_imports": 0,
       "untyped_access": 26,
       "sql_outside_store": 0
@@ -253,24 +252,23 @@
         "shipping",
         "shop"
       ],
-      "foreign_tables": [
-        "commerce_settings",
-        "customer_sessions",
-        "customers",
-        "extensions",
-        "hosted_frontends",
-        "legal_acceptances",
-        "orders",
-        "outbox",
-        "policy",
-        "privacy_consents",
-        "product_channel_visibility",
-        "product_reviews",
-        "products",
-        "sales_channels",
-        "shop_environments",
-        "tenants"
-      ],
+      "foreign_tables": {
+        "commerce_settings": "read: reads the shop settings document under the basis row lock so the change and the settings it was checked against stay consistent (customer_snapshot.rs)",
+        "customer_sessions": "read: reads the customer session to bind a buyer request to its account inside the same statement (buyer_identity.rs)",
+        "customers": "read: reads customer identity, group and company in the same statement as its own records to admit or project them (admin_order.rs, buyer_identity.rs, cart_create.rs, customer_snapshot.rs)",
+        "extensions": "read: reads the tenant business policy module digest to prepare the purchase sandbox (commit.rs)",
+        "hosted_frontends": "read: reads the hosted frontend binding (alias, origin, channel) to admit hosted requests or build links (hosted_parent.rs)",
+        "legal_acceptances": "read: reads the cart legal acceptance in the purchase transaction (legal_snapshot.rs)",
+        "orders": "write: the purchase transaction creates the order with the cart and inventory changes it depends on (commit.rs, lock.rs, session.rs)",
+        "policy": "write: the purchase records the experiment policy outcome atomically with the order (commit.rs)",
+        "privacy_consents": "read: reads the buyer privacy consent in the purchase transaction (legal_snapshot.rs)",
+        "product_channel_visibility": "read: reads channel visibility so a product hidden in the channel is excluded inside the query (price.rs)",
+        "product_reviews": "read: reads published reviews as product facts in the same statement (product_detail.rs)",
+        "products": "read: reads product rows in the same statement as its own data (prices, stock, visibility) (admin_order.rs, price.rs, product_detail.rs)",
+        "sales_channels": "read: reads the sales channel document (kind, activity, catalogue scope) to admit the request channel inside the same statement (admin_order.rs, session.rs)",
+        "shop_environments": "read: reads the environment row (live shop, preview owner) to scope sandbox and preview requests to their live shop (buyer_identity.rs)",
+        "tenants": "read: reads shop existence, status or the agent stop switch inside a larger claim or join; simple reads go through veyndo_core::tenants (buyer_identity.rs)"
+      },
       "glob_imports": 0,
       "untyped_access": 192,
       "sql_outside_store": 6
@@ -293,15 +291,13 @@
         "shipping",
         "shop"
       ],
-      "foreign_tables": [
-        "carts",
-        "orders",
-        "outbox",
-        "tenants"
-      ],
+      "foreign_tables": {
+        "carts": "write: buyer sign-in and CRM merges bind the open cart to the account and rotate its token (crm.rs, sign_in.rs)",
+        "orders": "read: reads order documents in the same statement as its own records to project or admit them (customers.rs)"
+      },
       "glob_imports": 0,
       "untyped_access": 56,
-      "sql_outside_store": 3
+      "sql_outside_store": 2
     },
     "orders": {
       "title": "Order state, fulfilment, receipts, documents and merchant order work",
@@ -328,18 +324,16 @@
         "shipping",
         "shop"
       ],
-      "foreign_tables": [
-        "carts",
-        "commerce_settings",
-        "company_logos",
-        "company_overrides",
-        "customers",
-        "order_downloads",
-        "outbox",
-        "product_assets",
-        "sales_channels",
-        "tenants"
-      ],
+      "foreign_tables": {
+        "carts": "write: order mutations and notes mirror the order into the cart order snapshot the buyer reads (account_orders.rs, downloads.rs, order_list.rs, order_mutation.rs)",
+        "commerce_settings": "read: reads the shop settings document under the basis row lock so the change and the settings it was checked against stay consistent (company.rs)",
+        "company_logos": "write: company master data releases write the company logo (company.rs, company_logos.rs, company_release.rs)",
+        "company_overrides": "write: company master data releases write per-channel company data (company.rs, company_release.rs)",
+        "customers": "read: reads customer identity, group and company in the same statement as its own records to admit or project them (account_orders.rs, redacted_reads.rs)",
+        "order_downloads": "read: reads download grants to project an order for the buyer (downloads.rs)",
+        "product_assets": "read: reads product asset metadata in the same statement as product rows (downloads.rs)",
+        "sales_channels": "read: reads the sales channel document (kind, activity, catalogue scope) to admit the request channel inside the same statement (company.rs, company_logos.rs)"
+      },
       "glob_imports": 0,
       "untyped_access": 282,
       "sql_outside_store": 3
@@ -366,22 +360,21 @@
         "pricing",
         "shop"
       ],
-      "foreign_tables": [
-        "app_packages",
-        "carts",
-        "commerce_overrides",
-        "commerce_settings",
-        "customer_sessions",
-        "customers",
-        "entity_history",
-        "exposures",
-        "hosted_frontends",
-        "inventory_reservations",
-        "orders",
-        "outbox",
-        "policy",
-        "sales_channels"
-      ],
+      "foreign_tables": {
+        "app_packages": "read: reads installed package manifests and their active flag to admit app-provided actions, tools or providers in the same transaction (capture_configuration.rs, provider_registry.rs, providers.rs, saved_instruments.rs)",
+        "carts": "write: payment commands and the ledger update the cart payment state under its lock (commands.rs, order_ledger.rs)",
+        "commerce_overrides": "read: reads the per-channel settings override that the scoped settings view merges (provider_registry.rs)",
+        "commerce_settings": "write: payment provider installation adds its methods to the settings document (provider_registry.rs)",
+        "customer_sessions": "read: reads the customer session to bind a buyer request to its account inside the same statement (funding.rs)",
+        "customers": "read: reads customer identity, group and company in the same statement as its own records to admit or project them (funding.rs)",
+        "entity_history": "read: reads native entity history for payment detail provenance (details.rs)",
+        "exposures": "write: a captured payment completes the experiment exposure (order_ledger.rs)",
+        "hosted_frontends": "read: reads the hosted frontend binding (alias, origin, channel) to admit hosted requests or build links (sessions.rs)",
+        "inventory_reservations": "write: a pending provider attempt reserves inventory; the ledger releases the reservation when the attempt fails (order_ledger.rs, provider_registry.rs)",
+        "orders": "write: the payment ledger updates the order payment state (commands.rs, instructions.rs, order_ledger.rs, remote.rs)",
+        "policy": "write: a captured payment updates the experiment policy outcome (order_ledger.rs)",
+        "sales_channels": "read: reads the sales channel document (kind, activity, catalogue scope) to admit the request channel inside the same statement (providers.rs)"
+      },
       "glob_imports": 0,
       "untyped_access": 261,
       "sql_outside_store": 11
@@ -411,32 +404,32 @@
         "pricing",
         "shop"
       ],
-      "foreign_tables": [
-        "app_packages",
-        "b2b_catalog",
-        "carts",
-        "categories",
-        "commerce_customer_groups",
-        "commerce_overrides",
-        "commerce_settings",
-        "company_overrides",
-        "customer_sessions",
-        "customers",
-        "hosted_frontends",
-        "memberships",
-        "order_activity",
-        "order_downloads",
-        "order_receipts",
-        "orders",
-        "product_assets",
-        "product_channel_visibility",
-        "product_reviews",
-        "products",
-        "shop_environments",
-        "tasks",
-        "tenants",
-        "user_sessions"
-      ],
+      "foreign_tables": {
+        "app_packages": "read: reads installed package manifests and their active flag to admit app-provided actions, tools or providers in the same transaction (catalog.rs)",
+        "b2b_catalog": "read: reads the private unit catalogue scope inside the catalogue/rule query so pagination stays correct (channels.rs)",
+        "carts": "write: coupon selection updates the cart at its revision; flow logout effects rotate the cart token (coupons.rs, dependencies.rs, flow_mutations.rs, flow_projection.rs)",
+        "categories": "read: reads category identity for rule conditions and channel scope (channel_config.rs)",
+        "commerce_customer_groups": "write: flow actions assign customer groups (flow_mutations.rs)",
+        "commerce_overrides": "read: reads the per-channel settings override that the scoped settings view merges (dependencies.rs)",
+        "commerce_settings": "read: reads the shop settings document under the basis row lock so the change and the settings it was checked against stay consistent (configuration_writes.rs, dependencies.rs)",
+        "company_overrides": "read: reads per-channel company master data for rule facts (dependencies.rs)",
+        "customer_sessions": "write: flow actions end customer sessions (flow_mutations.rs)",
+        "customers": "write: flow actions update customer flags and groups (customer_facts.rs, dependencies.rs, flow_mutations.rs, rule_entities.rs)",
+        "hosted_frontends": "read: reads the hosted frontend binding (alias, origin, channel) to admit hosted requests or build links (channel_preview.rs, dependencies.rs)",
+        "memberships": "read: reads membership rows to check the actor still belongs to the shop (channel_preview.rs)",
+        "order_activity": "write: flow actions append to the order activity (flow_mutations.rs)",
+        "order_downloads": "write: flow actions grant download access (flow_mutations.rs)",
+        "order_receipts": "read: reads issued receipt rows of an order for the buyer or flow projection (facts.rs)",
+        "orders": "write: flow actions update the order automation state (customer_facts.rs, dependencies.rs, flow_mutations.rs, flow_projection.rs)",
+        "product_assets": "read: reads product asset metadata in the same statement as product rows (flow_mutations.rs)",
+        "product_channel_visibility": "read: reads channel visibility so a product hidden in the channel is excluded inside the query (channels.rs, dependencies.rs)",
+        "product_reviews": "read: reads published reviews as product facts in the same statement (customer_facts.rs)",
+        "products": "write: rule evaluation stores its automation flags on the product, like on customers and orders (channel_config.rs, channels.rs, facts.rs, rule_entities.rs)",
+        "shop_environments": "read: reads the environment row (live shop, preview owner) to scope sandbox and preview requests to their live shop (flow_access.rs, flow_jobs.rs)",
+        "tasks": "read: reads work task state that a flow or proposal references (flow_job_summaries.rs)",
+        "tenants": "read: reads shop existence, status or the agent stop switch inside a larger claim or join; simple reads go through veyndo_core::tenants (flow_access.rs, flow_jobs.rs)",
+        "user_sessions": "read: reads merchant sessions to resolve the actor of a flow (channel_preview.rs)"
+      },
       "glob_imports": 0,
       "untyped_access": 287,
       "sql_outside_store": 9
@@ -462,16 +455,15 @@
         "pricing",
         "shop"
       ],
-      "foreign_tables": [
-        "carts",
-        "commerce_settings",
-        "customer_sessions",
-        "customers",
-        "order_receipts",
-        "orders",
-        "outbox",
-        "products"
-      ],
+      "foreign_tables": {
+        "carts": "write: procurement (approval, quotes, quick order, unit selection) changes the cart under its lock in the same transaction (approval.rs, catalog.rs, commands.rs, quote_contract.rs)",
+        "commerce_settings": "read: reads the shop settings document under the basis row lock so the change and the settings it was checked against stay consistent (access.rs, organization.rs)",
+        "customer_sessions": "read: reads the customer session to bind a buyer request to its account inside the same statement (access.rs)",
+        "customers": "read: reads customer identity, group and company in the same statement as its own records to admit or project them (access.rs, organization.rs)",
+        "order_receipts": "read: reads issued receipt rows of an order for the buyer or flow projection (commands.rs)",
+        "orders": "read: reads order documents in the same statement as its own records to project or admit them (commands.rs)",
+        "products": "read: reads product rows in the same statement as its own data (prices, stock, visibility) (access.rs, catalog.rs, lists.rs, quick_order.rs)"
+      },
       "glob_imports": 0,
       "untyped_access": 108,
       "sql_outside_store": 7
@@ -495,16 +487,15 @@
         "pricing",
         "shop"
       ],
-      "foreign_tables": [
-        "carts",
-        "commerce_overrides",
-        "commerce_settings",
-        "customers",
-        "orders",
-        "outbox",
-        "products",
-        "sales_channels"
-      ],
+      "foreign_tables": {
+        "carts": "write: cashier commands (customer, discount, cart) update the POS cart under its lock (customer.rs, discount.rs, register.rs)",
+        "commerce_overrides": "write: POS channel setup writes the channel settings override (channel_setup.rs)",
+        "commerce_settings": "read: reads the shop settings document under the basis row lock so the change and the settings it was checked against stay consistent (channel_setup.rs, settlement.rs)",
+        "customers": "read: reads customer identity, group and company in the same statement as its own records to admit or project them (customers.rs)",
+        "orders": "read: reads order documents in the same statement as its own records to project or admit them (register.rs)",
+        "products": "read: reads product rows in the same statement as its own data (prices, stock, visibility) (register.rs)",
+        "sales_channels": "read: reads the sales channel document (kind, activity, catalogue scope) to admit the request channel inside the same statement (register.rs, settlement.rs)"
+      },
       "glob_imports": 0,
       "untyped_access": 70,
       "sql_outside_store": 4
@@ -554,32 +545,32 @@
         "shipping",
         "shop"
       ],
-      "foreign_tables": [
-        "b2b_companies",
-        "b2b_units",
-        "carts",
-        "commerce_flows",
-        "commerce_settings",
-        "customers",
-        "hosted_frontends",
-        "integration_keys",
-        "knowledge_relations",
-        "languages",
-        "memberships",
-        "orders",
-        "outbox",
-        "product_assets",
-        "product_channel_visibility",
-        "product_translations",
-        "products",
-        "sales_channels",
-        "shop_environments",
-        "tenants",
-        "workspace_roles"
-      ],
+      "foreign_tables": {
+        "b2b_companies": "read: reads company identity to resolve app callbacks and references on company records (core_references.rs, surface_grants.rs)",
+        "b2b_units": "read: reads purchasing unit currency, limits and catalogue scope inside the pricing or shipping query of the cart (core_references.rs, surface_grants.rs)",
+        "carts": "write: cart contributions update the cart at its revision; external order import creates the cart that backs the imported order (cart_contributions.rs, external_orders.rs)",
+        "commerce_flows": "read: reads flow definitions and revisions to resolve dependencies, staging snapshots or projections (flow_apps.rs)",
+        "commerce_settings": "read: reads the shop settings document under the basis row lock so the change and the settings it was checked against stay consistent (extension_projection.rs, languages.rs, native_lifecycle.rs)",
+        "customers": "read: reads customer identity, group and company in the same statement as its own records to admit or project them (core_references.rs, surface_grants.rs)",
+        "hosted_frontends": "write: hosted frontend binding and managed-app activation write the frontend registry row in the install transaction (activation.rs, app_host_reads.rs, frontend_bindings.rs, hosted_apps.rs)",
+        "integration_keys": "write: app credentials are integration keys bound to the package digest; issued in the app credential transaction (credentials.rs)",
+        "knowledge_relations": "read: reads product relations from the knowledge graph for catalogue and app views (evidence.rs)",
+        "languages": "read: reads the global language registry to map locales to language IDs (catalog_evidence.rs, labels.sql)",
+        "memberships": "read: reads membership rows to check the actor still belongs to the shop (app_host_reads.rs, job_callbacks.rs)",
+        "orders": "write: external order import creates the imported order together with its cart in one transaction (carrier_booking.rs, configuration_orders.rs, core_references.rs, external_orders.rs)",
+        "outbox": "read: reads outbox events or counts (throttling, cursors, operator view); writes go through veyndo_core::outbox (activity.rs, app_host_reads.rs, event_deliveries.rs, event_delivery.rs)",
+        "product_assets": "read: reads product asset metadata in the same statement as product rows (asset_references.rs)",
+        "product_channel_visibility": "read: reads channel visibility so a product hidden in the channel is excluded inside the query (external_orders.rs)",
+        "product_translations": "read: reads product translations along the language chain inside the query (catalog_evidence.rs, labels.sql)",
+        "products": "read: reads product rows in the same statement as its own data (prices, stock, visibility) (catalog_evidence.rs, core_references.rs, evidence.rs, external_orders.rs)",
+        "sales_channels": "read: reads the sales channel document (kind, activity, catalogue scope) to admit the request channel inside the same statement (core_references.rs, external_orders.rs, frontend_bindings.rs, surface_grants.rs)",
+        "shop_environments": "write: app previews extend the expiry of a personal preview environment (app_host_reads.rs, app_preview.rs, app_studio.rs, event_delivery.rs)",
+        "tenants": "read: reads shop existence, status or the agent stop switch inside a larger claim or join; simple reads go through veyndo_core::tenants (event_delivery.rs, frontend_bindings.rs, schedules.rs)",
+        "workspace_roles": "read: reads role definitions to recheck the job creator rights (app_host_reads.rs, job_callbacks.rs)"
+      },
       "glob_imports": 0,
       "untyped_access": 369,
-      "sql_outside_store": 20
+      "sql_outside_store": 18
     },
     "automation": {
       "title": "Deterministic rule evaluation and flow graphs",
@@ -591,7 +582,7 @@
       "uses": [
         "core"
       ],
-      "foreign_tables": [],
+      "foreign_tables": {},
       "glob_imports": 8,
       "untyped_access": 97,
       "sql_outside_store": 0
@@ -605,13 +596,13 @@
         "core"
       ],
       "tables": [],
-      "foreign_tables": [
-        "integration_keys",
-        "outbox",
-        "platform_ai",
-        "shop_environments",
-        "tenants"
-      ],
+      "foreign_tables": {
+        "integration_keys": "write: agent model budgets are charged to the integration key that started the run (budget.rs)",
+        "outbox": "write: the model budget emits its exhaustion event in the charging transaction (budget.rs)",
+        "platform_ai": "read: reads the operator inference configuration that every model call inherits (settings.rs)",
+        "shop_environments": "read: reads the environment row (live shop, preview owner) to scope sandbox and preview requests to their live shop (budget.rs)",
+        "tenants": "read: reads shop existence, status or the agent stop switch inside a larger claim or join; simple reads go through veyndo_core::tenants (budget.rs)"
+      },
       "glob_imports": 0,
       "untyped_access": 124,
       "sql_outside_store": 2
@@ -664,36 +655,36 @@
         "shipping",
         "shop"
       ],
-      "foreign_tables": [
-        "app_evidence",
-        "app_packages",
-        "carts",
-        "channel_metrics",
-        "commerce_flows",
-        "commerce_promotions",
-        "commerce_rules",
-        "commerce_settings",
-        "customers",
-        "exposures",
-        "flow_jobs",
-        "integration_keys",
-        "legal_acceptances",
-        "orders",
-        "outbox",
-        "payment_attempts",
-        "platform_ai",
-        "platform_audit",
-        "privacy_consent_log",
-        "privacy_consents",
-        "product_assets",
-        "product_reviews",
-        "product_translations",
-        "products",
-        "sales_channels",
-        "shop_environments",
-        "tenants",
-        "translation_jobs"
-      ],
+      "foreign_tables": {
+        "app_evidence": "read: reads merchant-private app evidence as retrieval context; the apps component owns ingestion and purge (documents.rs)",
+        "app_packages": "read: reads installed package manifests and their active flag to admit app-provided actions, tools or providers in the same transaction (documents.rs, journey.rs)",
+        "carts": "read: reads the stored cart row (lines, context, token binding) in the same statement as its own data for a consistent snapshot (behavior.rs, behavior_capture.rs, consent.rs)",
+        "channel_metrics": "read: reads aggregated channel traffic counters for reports (planner.rs)",
+        "commerce_flows": "read: reads flow definitions and revisions to resolve dependencies, staging snapshots or projections (journey.rs)",
+        "commerce_promotions": "read: reads promotion definitions and revisions for snapshots, dependency checks or projections (journey.rs)",
+        "commerce_rules": "read: reads rule definitions and revisions for snapshots, dependency checks or projections (journey.rs)",
+        "commerce_settings": "read: reads the shop settings document under the basis row lock so the change and the settings it was checked against stay consistent (search.sql)",
+        "customers": "read: reads customer identity, group and company in the same statement as its own records to admit or project them (behavior.rs, behavior_capture.rs, navigation.rs)",
+        "exposures": "write: experiments and consent withdrawal record or delete exposure rows (consent.rs, experience.rs)",
+        "flow_jobs": "read: reads flow job state for cleanup, retention or agent run status (flow_proposals.rs)",
+        "integration_keys": "read: reads integration key scope to bind agent budgets to the key that started the run (agent_controls.rs)",
+        "legal_acceptances": "write: legal acknowledgement records the acceptance on the cart (legal.rs)",
+        "orders": "read: reads order documents in the same statement as its own records to project or admit them (behavior.rs, experiments_report.sql, navigation.rs, observations.rs)",
+        "outbox": "read: reads outbox events or counts (throttling, cursors, operator view); writes go through veyndo_core::outbox (documents.rs)",
+        "payment_attempts": "read: reads payment attempt state for reports and agent facts (experiments.rs, experiments_report.sql)",
+        "platform_ai": "write: platform AI administration saves the operator inference configuration (platform_ai.rs)",
+        "platform_audit": "write: platform AI administration appends its audit entry without secrets (platform_ai.rs)",
+        "privacy_consent_log": "write: consent changes append to the consent log (consent.rs)",
+        "privacy_consents": "write: consent changes write the current consent (behavior_eligible.sql, consent.rs)",
+        "product_assets": "read: reads product asset metadata in the same statement as product rows (caption_source.rs)",
+        "product_reviews": "read: reads published reviews as product facts in the same statement (documents.rs)",
+        "product_translations": "read: reads product translations along the language chain inside the query (behavior.rs, context_products.rs)",
+        "products": "write: autonomy revert restores a product price that an autonomous run changed, at the product revision (autonomy.rs, autonomy_revert.rs, behavior.rs, context_products.rs)",
+        "sales_channels": "read: reads the sales channel document (kind, activity, catalogue scope) to admit the request channel inside the same statement (behavior.rs, experiments.rs, journey.rs)",
+        "shop_environments": "read: reads the environment row (live shop, preview owner) to scope sandbox and preview requests to their live shop (agent_controls.rs, embedding_job_claim.sql, embedding_jobs.rs, readiness.rs)",
+        "tenants": "write: the agent stop switch updates the shop row; embedding and vector claims join it to skip inactive shops (agent_controls.rs, embedding_generations.rs, embedding_job_claim.sql, vector_claim.sql)",
+        "translation_jobs": "write: agent runs cancel translation jobs they started (agent_runs.rs)"
+      },
       "glob_imports": 0,
       "untyped_access": 609,
       "sql_outside_store": 29
@@ -726,50 +717,50 @@
         "pricing",
         "shop"
       ],
-      "foreign_tables": [
-        "app_jobs",
-        "app_packages",
-        "carts",
-        "categories",
-        "channel_metrics",
-        "commerce_flows",
-        "commerce_overrides",
-        "commerce_promotions",
-        "commerce_rules",
-        "commerce_settings",
-        "company_logos",
-        "company_overrides",
-        "conversations",
-        "customers",
-        "experiences",
-        "exposures",
-        "extensions",
-        "knowledge_chunks",
-        "knowledge_documents",
-        "languages",
-        "merchant_users",
-        "order_activity",
-        "order_state_machines",
-        "orders",
-        "outbox",
-        "outbox_subscriber_failures",
-        "payment_attempts",
-        "policy",
-        "product_assets",
-        "product_categories",
-        "product_channel_visibility",
-        "product_reviews",
-        "product_translations",
-        "products",
-        "projections",
-        "sales_channels",
-        "semantic_products",
-        "session_signal_events",
-        "tasks",
-        "tenants",
-        "translation_items",
-        "translation_jobs"
-      ],
+      "foreign_tables": {
+        "app_jobs": "read: reads app job state to show and admit reviewed work steps that reference a job (work_items.rs)",
+        "app_packages": "write: staging clone, snapshot and release copy app_packages between a sandbox and its live shop in one transaction (clone.rs, release.rs, snapshot.rs, work_items.rs)",
+        "carts": "write: manual orders, CRM merges and historical imports create or update carts (customers.rs, historical_orders.rs, manual_orders.rs, source.sql)",
+        "categories": "write: staging clone, snapshot and release copy categories between a sandbox and its live shop in one transaction (categories.rs, clone.rs, inspect.rs, staging_categories.rs)",
+        "channel_metrics": "read: reads aggregated channel traffic counters for reports (overview.sql)",
+        "commerce_flows": "read: reads flow definitions and revisions to resolve dependencies, staging snapshots or projections (release.rs)",
+        "commerce_overrides": "write: staging clone, snapshot and release copy commerce_overrides between a sandbox and its live shop in one transaction (clone.rs, final_config.rs, reports.rs)",
+        "commerce_promotions": "read: reads promotion definitions and revisions for snapshots, dependency checks or projections (inspect.rs)",
+        "commerce_rules": "write: staging clone, snapshot and release copy commerce_rules between a sandbox and its live shop in one transaction (clone.rs, release.rs)",
+        "commerce_settings": "write: staging clone, snapshot and release copy commerce_settings between a sandbox and its live shop in one transaction (clone.rs, final_config.rs, product_editor.rs, proposal_apply.rs)",
+        "company_logos": "write: staging clone, snapshot and release copy company_logos between a sandbox and its live shop in one transaction (clone.rs)",
+        "company_overrides": "write: staging clone, snapshot and release copy company_overrides between a sandbox and its live shop in one transaction (clone.rs)",
+        "conversations": "write: work execution records the conversation of an agent run (work_execution.rs)",
+        "customers": "read: reads customer identity, group and company in the same statement as its own records to admit or project them (customer_directory.sql, customer_directory_default.sql, customers.rs, inspect_history.rs)",
+        "experiences": "write: proposal application writes the storefront experience (proposal_apply.rs)",
+        "exposures": "read: reads experiment exposure rows for reports (overview.sql)",
+        "extensions": "write: staging clone, snapshot and release copy extensions between a sandbox and its live shop in one transaction (clone.rs)",
+        "knowledge_chunks": "write: staging copies knowledge documents and their chunks (staging_documents.rs)",
+        "knowledge_documents": "write: staging copies knowledge documents and their chunks (staging_documents.rs)",
+        "languages": "read: reads the global language registry to map locales to language IDs (product_editor.rs, translation_worker.rs)",
+        "merchant_users": "read: reads merchant account names and emails for operator and studio views (history.rs)",
+        "order_activity": "write: historical order import appends order activity (historical_orders.rs)",
+        "order_state_machines": "write: staging clone, snapshot and release copy order_state_machines between a sandbox and its live shop in one transaction (clone.rs, release.rs, snapshot.rs, workflow.rs)",
+        "orders": "write: historical order import and workflow changes write orders (customer_directory.sql, customer_directory_default.sql, customers.rs, grid_criteria.rs)",
+        "outbox": "write: the outbox operator control replays or discards events (outbox_control.rs)",
+        "outbox_subscriber_failures": "write: the outbox operator control clears subscriber failures (outbox_control.rs)",
+        "payment_attempts": "read: reads payment attempt state for reports and agent facts (source.sql)",
+        "policy": "write: staging clone, snapshot and release copy policy between a sandbox and its live shop in one transaction (clone.rs, overview.sql)",
+        "product_assets": "write: staging clone, snapshot and release copy product_assets between a sandbox and its live shop in one transaction (clone.rs, inspect_media.rs, staging_assets.rs)",
+        "product_categories": "write: staging clone, snapshot and release copy product_categories between a sandbox and its live shop in one transaction (clone.rs, snapshot.rs)",
+        "product_channel_visibility": "write: staging clone, snapshot and release copy product_channel_visibility between a sandbox and its live shop in one transaction (clone.rs, snapshot.rs)",
+        "product_reviews": "read: reads published reviews as product facts in the same statement (inspect_history.rs)",
+        "product_translations": "write: proposal application and staging write product translations (clone.rs, product_editor.rs, snapshot.rs, translation_worker.rs)",
+        "products": "write: proposal application and the product editor write products (clone.rs, inspect_media.rs, product_editor.rs, products.rs)",
+        "projections": "read: reads projection checkpoints for the outbox operator view (outbox_control.rs)",
+        "sales_channels": "read: reads the sales channel document (kind, activity, catalogue scope) to admit the request channel inside the same statement (historical_orders.rs, manual_orders.rs, reports.rs, source.sql)",
+        "semantic_products": "read: reads semantic product index state for reports (overview.sql)",
+        "session_signal_events": "read: reads session signals for reports (reports.rs)",
+        "tasks": "write: proposals, flow templates and the translation worker create and advance work tasks (flow_templates.rs, overview.sql, proposal_apply.rs, proposals.rs)",
+        "tenants": "write: staging clone creates the sandbox shop row; the translation worker claims only active shops (clone.rs, translation_worker.rs)",
+        "translation_items": "write: the translation worker stores reviewed translation items (translation_worker.rs, work_items.rs)",
+        "translation_jobs": "write: the translation worker leases and advances translation jobs (translation_worker.rs, work_execution.rs, work_items.rs)"
+      },
       "glob_imports": 0,
       "untyped_access": 365,
       "sql_outside_store": 23
@@ -794,10 +785,10 @@
         "pricing",
         "shop"
       ],
-      "foreign_tables": [
-        "carts",
-        "tenants"
-      ],
+      "foreign_tables": {
+        "carts": "write: the UCP adapter cancels a protocol cart at its revision (mod.rs)",
+        "tenants": "read: reads shop existence, status or the agent stop switch inside a larger claim or join; simple reads go through veyndo_core::tenants (poppy.rs)"
+      },
       "glob_imports": 0,
       "untyped_access": 132,
       "sql_outside_store": 2
@@ -928,23 +919,23 @@
         "shop",
         "studio"
       ],
-      "foreign_tables": [
-        "app_deliveries",
-        "auth_attempt_buckets",
-        "commerce_settings",
-        "customers",
-        "experiences",
-        "extensions",
-        "flow_jobs",
-        "hosted_frontends",
-        "memberships",
-        "merchant_users",
-        "platform_audit",
-        "platform_operators",
-        "policy",
-        "products",
-        "tenants"
-      ],
+      "foreign_tables": {
+        "app_deliveries": "read: reads app event delivery state for outbox fan-out and the operator view, inside the same statement as the event rows (queue_health.rs)",
+        "auth_attempt_buckets": "write: the host retention job prunes expired login throttle buckets (retention.rs)",
+        "commerce_settings": "write: shop provisioning and migrations write the initial settings document (demo_catalog.rs, migrations.rs, provision.rs)",
+        "customers": "write: shop provisioning creates the synthetic demo buyer (provision.rs, seed.rs)",
+        "experiences": "write: shop provisioning creates the initial storefront experience (demo_catalog.rs, provision.rs, seed.rs)",
+        "extensions": "write: shop provisioning and migrations install the default business policy module (bootstrap.rs, migrations.rs, provision.rs)",
+        "flow_jobs": "read: reads flow job state for cleanup, retention or agent run status (queue_health.rs)",
+        "hosted_frontends": "read: reads the hosted frontend binding (alias, origin, channel) to admit hosted requests or build links (provision.rs)",
+        "memberships": "write: shop provisioning grants the owner membership (provision.rs)",
+        "merchant_users": "write: operator bootstrap creates the first operator account (bootstrap.rs, provision.rs)",
+        "platform_audit": "write: operator bootstrap and shop provisioning append to the platform audit (bootstrap.rs, provision.rs)",
+        "platform_operators": "write: operator bootstrap grants the first operator (bootstrap.rs)",
+        "policy": "write: shop provisioning creates the initial experiment policy rows (demo_catalog.rs, provision.rs, seed.rs)",
+        "products": "read: reads product rows in the same statement as its own data (prices, stock, visibility) (migrations.rs)",
+        "tenants": "write: shop provisioning creates the shop row (demo_catalog.rs, provision.rs)"
+      },
       "glob_imports": 0,
       "untyped_access": 352,
       "sql_outside_store": 11
@@ -961,7 +952,7 @@
         "connector_sources"
       ],
       "uses": [],
-      "foreign_tables": [],
+      "foreign_tables": {},
       "glob_imports": 0,
       "untyped_access": 0,
       "sql_outside_store": 0

@@ -242,11 +242,13 @@ pub async fn apply_mode<H: WorkHost>(
         .bind(t)
         .execute(&mut *tx)
         .await?;
-    sqlx::query("INSERT INTO outbox(tenant,kind,data) VALUES($1,'merchant.change.applied',$2)")
-        .bind(t)
-        .bind(json!({"taskId":id,"autonomous":autonomous,"actor":header(h,"x-rac-user")}))
-        .execute(&mut *tx)
-        .await?;
+    veyndo_core::outbox::publish_on(
+        &mut *tx,
+        t,
+        "merchant.change.applied",
+        &json!({"taskId":id,"autonomous":autonomous,"actor":header(h,"x-rac-user")}),
+    )
+    .await?;
     tx.commit().await?;
     Ok(json!({"taskId":id,"applied":true,"translationJobId":p.translation.as_ref().map(|_|id)}))
 }

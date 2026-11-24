@@ -958,8 +958,8 @@
     },
     "components/apps/src/http/activity.rs": {
       "status": "unproved",
-      "sha256": "83b1021af5a2eaf004ef53fdd4c451c25d735d444b6797ea6013bfa44f0b063e",
-      "review": "App secret, settings, activity, credential and webhook handlers moved into the apps component without changing rules"
+      "sha256": "ab9fe466066a66860ac31aedb05a716dcc751403127b357d3052482556d0464e",
+      "review": "F17: shared outbox and shop registry helpers in core; written reasons for foreign table access"
     },
     "components/apps/src/http/app_routes.rs": {
       "status": "unproved",
@@ -973,8 +973,8 @@
     },
     "components/apps/src/http/credentials.rs": {
       "status": "unproved",
-      "sha256": "e1eec3e776baaaa071a9191c36e4901533d7d94caa32575ab60f54179b28d4be",
-      "review": "App secret, settings, activity, credential and webhook handlers moved into the apps component without changing rules"
+      "sha256": "27754c951a68a2e57f4e754dbc355b66afe9858935886c376e1084051aca3a58",
+      "review": "F17: shared outbox and shop registry helpers in core; written reasons for foreign table access"
     },
     "components/apps/src/http/jobs.rs": {
       "status": "unproved",
@@ -1018,8 +1018,8 @@
     },
     "components/apps/src/http/webhooks.rs": {
       "status": "unproved",
-      "sha256": "c92279c7a009616dfa38b10028bb55cba47dfaf7a2c340a13045b693c4a4a025",
-      "review": "App secret, settings, activity, credential and webhook handlers moved into the apps component without changing rules"
+      "sha256": "9ace282b6c81fe3b4726dbdaad4084b2b6946a0ad4d4b3d9e8c469adc93f4411",
+      "review": "F17: shared outbox and shop registry helpers in core; written reasons for foreign table access"
     },
     "components/apps/src/http.rs": {
       "status": "unproved",
@@ -1103,8 +1103,8 @@
     },
     "components/apps/src/service/external_orders.rs": {
       "status": "reviewed-binding",
-      "sha256": "ca1a3e7c37313d8090f7d77279ba07d7a0255480da38bc5a6fe1861318ef5854",
-      "review": "Order transitions, external order intake and saved agent authority moved into the orders, apps and identity components"
+      "sha256": "785473d3fcd03393023ca5f19a9c064f36d9ad098abe8b88d7811792c8805e87",
+      "review": "F17: shared outbox and shop registry helpers in core; written reasons for foreign table access"
     },
     "components/apps/src/service/flow_apps.rs": {
       "status": "reviewed-binding",
@@ -1113,13 +1113,13 @@
     },
     "components/apps/src/service/frontend_bindings.rs": {
       "status": "unproved",
-      "sha256": "c12631d40e71453bbc4e370bc3fbc4c44a3bbcee03c77b394d79375831708f85",
-      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
+      "sha256": "216ad234791d64db1995b8d1eb196bc043d34554bb00bd3b7ba94eec14458c98",
+      "review": "F17: shared outbox and shop registry helpers in core; written reasons for foreign table access"
     },
     "components/apps/src/service/gateway.rs": {
       "status": "unproved",
-      "sha256": "60f4102374725df6854935a8040a05bbec162d57302f5f1bed1aed0850b01954",
-      "review": "Surface grants, declared app routes, UI bundle loading and the action and entity handlers moved into the apps component without behavior change"
+      "sha256": "70037526b2ddc6d491b6c4fe872dae3c1ed6477f234c75cdaf21950d07d2a5f9",
+      "review": "F17: shared outbox and shop registry helpers in core; written reasons for foreign table access"
     },
     "components/apps/src/service/job_callbacks.rs": {
       "status": "reviewed-binding",
@@ -1158,8 +1158,8 @@
     },
     "components/apps/src/service/service_call.rs": {
       "status": "unproved",
-      "sha256": "ef7980e047cc341586d8137b393fe9452a7ded74318b7ea82845d935aa0640e6",
-      "review": "Service calls and event delivery moved into the apps component without changing rules"
+      "sha256": "5ad908ee532efb7ddad61b3f74f7b57802dfae43b0f8d928821182e2254ab836",
+      "review": "F17: shared outbox and shop registry helpers in core; written reasons for foreign table access"
     },
     "components/apps/src/service/ui_bundles.rs": {
       "status": "unproved",
@@ -1188,8 +1188,8 @@
     },
     "components/apps/src/store/app_host_reads.rs": {
       "status": "unproved",
-      "sha256": "10fead8bc65b018ba6ddc4397be24a487142ae32695116e040690c1cd38db5bb",
-      "review": "F12: app host SQL moved into component stores; no mutual component pair remains"
+      "sha256": "ae7203453e22b372784bba69c14655b171dc590d1b5ed9e30933df22b6670282",
+      "review": "F17: shared outbox and shop registry helpers in core; written reasons for foreign table access"
     },
     "components/apps/src/store/asset_references.rs": {
       "status": "unproved",
@@ -1213,8 +1213,8 @@
     },
     "components/apps/src/store/configuration_events.rs": {
       "status": "unproved",
-      "sha256": "b6727cf930830bffffa40307d0dea8f3fb3589974a225236e7f120d4522d662a",
-      "review": "Configuration, lifecycle, ontology and reference adapters moved into the apps component without changing rules"
+      "sha256": "05e619f35213a7a9bf8a8fdaeb4923c0964d35e4f85ce52368548f9d254b4334",
+      "review": "F17: shared outbox and shop registry helpers in core; written reasons for foreign table access"
     },
     "components/apps/src/store/configuration_orders.rs": {
       "status": "unproved",
@@ -1243,8 +1243,8 @@
     },
     "components/apps/src/store/evidence.rs": {
       "status": "unproved",
-      "sha256": "1bd519c0916b69a1729c4acb162fc234b8b4bdf71adc539c399da4416da91a61",
-      "review": "F12: app host SQL moved into component stores; no mutual component pair remains"
+      "sha256": "3bfe9a4eff2453d272b65f6e12ac4b7fad8dac5c8f939a321a5422a437416c09",
+      "review": "F17: shared outbox and shop registry helpers in core; written reasons for foreign table access"
     },
     "components/apps/src/store/extension_filter.rs": {
       "status": "unproved",
@@ -1258,8 +1258,8 @@
     },
     "components/apps/src/store/hosted_apps.rs": {
       "status": "unproved",
-      "sha256": "8838c41e7f230b07904cf2a0261fb5f9c3059b114ebbcae9bea04c04a1330d67",
-      "review": "Cart configuration checks, saved selections, the purchase projection and hosted app installation moved into the apps component without behavior change"
+      "sha256": "c459b8e04b6ec0a7161a81ebb53ae6549af4169ba6f8e1f10b0868408c58d8fd",
+      "review": "F17: shared outbox and shop registry helpers in core; written reasons for foreign table access"
     },
     "components/apps/src/store/job_control.rs": {
       "status": "unproved",
@@ -1328,8 +1328,8 @@
     },
     "components/apps/src/store/schedules.rs": {
       "status": "unproved",
-      "sha256": "0f4b83a186577d3b242c1a3689be6835422ff5bd6bc4950ac238adb8d0d60f4f",
-      "review": "Secret persistence, schedules and event projection moved into the apps component without changing rules"
+      "sha256": "5ae765ef43e5e0baa31c4d35e7338e105d57602d7d41df1ec9b817d830e3fc85",
+      "review": "F17: shared outbox and shop registry helpers in core; written reasons for foreign table access"
     },
     "components/apps/src/store/schema_upgrade.rs": {
       "status": "unproved",
@@ -1453,8 +1453,8 @@
     },
     "components/b2b/src/store/organization.rs": {
       "status": "unproved",
-      "sha256": "60c816f878bcb6ab0a4367f355dc0db937e4bc594530231fb9484991f5590251",
-      "review": "B2B access, organization and purchasing storage and flow job claims moved into their components"
+      "sha256": "25b3c033907cad6119952cf3cc2b85866c245c48411692ed0614ac082a71fdab",
+      "review": "F17: shared outbox and shop registry helpers in core; written reasons for foreign table access"
     },
     "components/b2b/src/store/purchase.rs": {
       "status": "reviewed-binding",
@@ -1713,8 +1713,8 @@
     },
     "components/catalog/src/store/media_jobs.rs": {
       "status": "unproved",
-      "sha256": "87a0926f2f6761be525c239c091cca183dc2a061c1c3508383de0119567f6587",
-      "review": "image jobs moved into components/catalog; no kernel binding changed"
+      "sha256": "3616d25c5622129ebff162981473b5f774120a27dff174664f49104a368e3e41",
+      "review": "F17: shared outbox and shop registry helpers in core; written reasons for foreign table access"
     },
     "components/catalog/src/store/order_downloads.rs": {
       "status": "unproved",
@@ -1903,8 +1903,8 @@
     },
     "components/checkout/src/service/purchase/commit.rs": {
       "status": "reviewed-binding",
-      "sha256": "dc735f31eeaaf5db707329942963ed9ad8274693e37f7ee107d0764b047a6de3",
-      "review": "The purchase transaction moves into checkout behind the purchase port"
+      "sha256": "a3051955cc3861a8b9c9acb4eabad3184eda7516f6e43864166cee4b5a6ab071",
+      "review": "F17: shared outbox and shop registry helpers in core; written reasons for foreign table access"
     },
     "components/checkout/src/service/purchase/lock.rs": {
       "status": "reviewed-binding",
@@ -2083,8 +2083,8 @@
     },
     "components/core/src/lib.rs": {
       "status": "reviewed-binding",
-      "sha256": "ed1dbed995eeb24d9593517382b1e3339e424f440fbc17a0cd534b72bb709217",
-      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
+      "sha256": "7bdac3901cdde75e4ea68ee8aed22363ee970d2f591afb161bb0e0c5cdfe3120",
+      "review": "F17: shared outbox and shop registry helpers in core; written reasons for foreign table access"
     },
     "components/core/src/localized/languages.rs": {
       "status": "unproved",
@@ -2118,8 +2118,8 @@
     },
     "components/core/src/outbox.rs": {
       "status": "unproved",
-      "sha256": "0d050ca2a43af1bed34dc45de5288c9ae42b1c151e94b8b8e808cb1f88bdb47b",
-      "review": "Reviews moved into components/catalog; no rule changed"
+      "sha256": "2cb4df1a5bdc44b121b7302bc0a150fb6ef8626b6798acf05450b4b55ae1bad0",
+      "review": "F17: shared outbox and shop registry helpers in core; written reasons for foreign table access"
     },
     "components/core/src/process_config.rs": {
       "status": "unproved",
@@ -2140,6 +2140,11 @@
       "status": "unproved",
       "sha256": "fc637540235bd74244db6605f69a3d74f85abf94ddfff9b06f693cbbefa3c45e",
       "review": "Currency discovery moved into components/pricing behind the shop settings and cart ports; no rule changed"
+    },
+    "components/core/src/tenants.rs": {
+      "status": "unproved",
+      "sha256": "f385dc4e32f63c76c873dea810be36ff98ff0ea8d114708ac29d674070b4ce7b",
+      "review": "F17: shared outbox and shop registry helpers in core; written reasons for foreign table access"
     },
     "components/core/src/tool_contract.rs": {
       "status": "unproved",
@@ -2168,8 +2173,8 @@
     },
     "components/customers/src/http/account.rs": {
       "status": "unproved",
-      "sha256": "0d33fb252f5275cf9899f9d67b9bbdf5e5aa851d0076ffd2727ad46ad56937ad",
-      "review": "Batch A: customer accounts, account orders, sign-in throttle, handoff and roles move into customers, orders and identity"
+      "sha256": "aca980bf3e6cf36f0d9e9718c0818369261b4c26beb305bc4a49586567f5cfa9",
+      "review": "F17: shared outbox and shop registry helpers in core; written reasons for foreign table access"
     },
     "components/customers/src/http/addresses.rs": {
       "status": "unproved",
@@ -2253,8 +2258,8 @@
     },
     "components/customers/src/store/crm.rs": {
       "status": "unproved",
-      "sha256": "6e94e881861fa13d3b00cd74b73c97abb1ed8b19b2a5e590bbb3f31127295f00",
-      "review": "Merchant customer writes moved into the customers component and admin order admission into checkout without behaviour change"
+      "sha256": "b38eb0ca16ecff15255ef7c5c5587240934ba4311752d468955668cf8e70fdd8",
+      "review": "F17: shared outbox and shop registry helpers in core; written reasons for foreign table access"
     },
     "components/customers/src/store/customers.rs": {
       "status": "unproved",
@@ -2308,8 +2313,8 @@
     },
     "components/identity/src/http/broker.rs": {
       "status": "unproved",
-      "sha256": "f5433e62325fa9a346244f7d626126b7a14247823fb027c81e34b304e37ca666",
-      "review": "Sessions, invitations, MFA, integration keys and broker assertions moved into the identity component without behaviour change"
+      "sha256": "33fad04701e53a00e796bbc123279d745823c2305b26286f3db1091859114ce0",
+      "review": "F17: shared outbox and shop registry helpers in core; written reasons for foreign table access"
     },
     "components/identity/src/http/browser.rs": {
       "status": "unproved",
@@ -2323,23 +2328,23 @@
     },
     "components/identity/src/http/integrations.rs": {
       "status": "reviewed-binding",
-      "sha256": "891f4413e799ffc0f5435cb83360992ffceecaf9a23079f177c1d6fbb00ed448",
-      "review": "Sessions, invitations, MFA, integration keys and broker assertions moved into the identity component without behaviour change"
+      "sha256": "2c08b23b5e33b6b236392b120481a1ea42fc5292196b713383caa983cd754769",
+      "review": "F17: shared outbox and shop registry helpers in core; written reasons for foreign table access"
     },
     "components/identity/src/http/invitations.rs": {
       "status": "unproved",
-      "sha256": "94799dae9b13d51960ddabf9cad442e3ec627783620f7abbc16483da7ae73d4e",
-      "review": "Sessions, invitations, MFA, integration keys and broker assertions moved into the identity component without behaviour change"
+      "sha256": "21b87a5138d9049788c50baee0cbf13ad80c6f34c9117496593704b9dbf46d29",
+      "review": "F17: shared outbox and shop registry helpers in core; written reasons for foreign table access"
     },
     "components/identity/src/http/members.rs": {
       "status": "unproved",
-      "sha256": "dfb778acb704d800782c01e0984c65b7851cb3ba1263cba2c3d3e703722d9c2e",
-      "review": "Role grants, workspace members and the Studio handoff ticket moved into the identity component"
+      "sha256": "6f409a8308099507a6b8da1ddbc23aace5fb7815e81ab592a9d42469017a372d",
+      "review": "F17: shared outbox and shop registry helpers in core; written reasons for foreign table access"
     },
     "components/identity/src/http/mfa.rs": {
       "status": "unproved",
-      "sha256": "c7e4d929c43ffd8e6455ac16e2eaeacbd55d4dfe7055ee8a5545295086d0f2da",
-      "review": "Sessions, invitations, MFA, integration keys and broker assertions moved into the identity component without behaviour change"
+      "sha256": "6b413024752e71dd1cfa1bd45e4107a54a65f81cedda74f3f3dbf23f34f249f6",
+      "review": "F17: shared outbox and shop registry helpers in core; written reasons for foreign table access"
     },
     "components/identity/src/http/sessions.rs": {
       "status": "unproved",
@@ -2368,8 +2373,8 @@
     },
     "components/identity/src/service/roles.rs": {
       "status": "unproved",
-      "sha256": "be182d9d23bab4832e02fcdf72a42e6625331b73da474d896a6ec57b2cd88e69",
-      "review": "Batch A: customer accounts, account orders, sign-in throttle, handoff and roles move into customers, orders and identity"
+      "sha256": "42d711bb0b0de9470d8257be50fea1e17bba836233cb6be09c3c9dabd17109e3",
+      "review": "F17: shared outbox and shop registry helpers in core; written reasons for foreign table access"
     },
     "components/identity/src/service.rs": {
       "status": "unproved",
@@ -2378,8 +2383,8 @@
     },
     "components/identity/src/store/agent_authority.rs": {
       "status": "reviewed-binding",
-      "sha256": "86c1770d3fc6c2a68bb4a3659ba4ccf06be05342850e0531db1d4fdf14931434",
-      "review": "Order transitions, external order intake and saved agent authority moved into the orders, apps and identity components"
+      "sha256": "a809bbf9f8870b2376fd43b3381449603a913d47ca9386ef2c9f1410cd000ce4",
+      "review": "F17: shared outbox and shop registry helpers in core; written reasons for foreign table access"
     },
     "components/identity/src/store/broker.rs": {
       "status": "unproved",
@@ -2398,8 +2403,8 @@
     },
     "components/identity/src/store/merchant_accounts.rs": {
       "status": "unproved",
-      "sha256": "8e24a79c23e09b376cb0cdff28294a4d1dff4cb475d53ea4c6f1c84f5c4d557f",
-      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
+      "sha256": "50d663dd9208f08acd0d94c6dc58ae518db66350c883d6903368085db40b2b37",
+      "review": "F17: shared outbox and shop registry helpers in core; written reasons for foreign table access"
     },
     "components/identity/src/store/roles.rs": {
       "status": "unproved",
@@ -2518,8 +2523,8 @@
     },
     "components/intelligence/src/http/memory.rs": {
       "status": "unproved",
-      "sha256": "50e91fbe5dfb2b5553f219411f42dbf8976dd4849373d24e1c6035697da093f8",
-      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
+      "sha256": "4e009040e4a3bd0953795034b142f2f9eaf2660a0e543d85cb3cd160cf168744",
+      "review": "F17: shared outbox and shop registry helpers in core; written reasons for foreign table access"
     },
     "components/intelligence/src/http/preferences.rs": {
       "status": "unproved",
@@ -2598,13 +2603,13 @@
     },
     "components/intelligence/src/service/agent_controls.rs": {
       "status": "reviewed-binding",
-      "sha256": "9032a47f046192a2c12f9d43f0446254ab5fb904011cfb737f9feb78eb4d09ed",
-      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
+      "sha256": "86c949ec936bef88830d24c0bb4456c7ae741b68534ae7085263caa3cae830c2",
+      "review": "F17: shared outbox and shop registry helpers in core; written reasons for foreign table access"
     },
     "components/intelligence/src/service/agent_runs.rs": {
       "status": "unproved",
-      "sha256": "9893740ce373b236803ca7d7f8ab5ae89c3fb250df5dd7ffcc602c980de6f5e1",
-      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
+      "sha256": "5940a7de7b80e7558ab33ca3b46e79d5c9b42663bfe8e49b43f847366355034b",
+      "review": "F17: shared outbox and shop registry helpers in core; written reasons for foreign table access"
     },
     "components/intelligence/src/service/autonomy.rs": {
       "status": "reviewed-binding",
@@ -2613,8 +2618,8 @@
     },
     "components/intelligence/src/service/autonomy_revert.rs": {
       "status": "unproved",
-      "sha256": "318d4c7c655684918f310c8c7e1f743c607ffcf42384eb7284d6b35463a2bb43",
-      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
+      "sha256": "bbb97b953a307dc164bf78e8a4d42315365b1466a65713d2c30754438a8c6189",
+      "review": "F17: shared outbox and shop registry helpers in core; written reasons for foreign table access"
     },
     "components/intelligence/src/service/behavior.rs": {
       "status": "unproved",
@@ -2658,8 +2663,8 @@
     },
     "components/intelligence/src/service/consent.rs": {
       "status": "reviewed-binding",
-      "sha256": "ab8b6af53afa02d7f90a38d87c8f84120018749a34dfdee3f81ce19f834e8125",
-      "review": "Batch F6: consent, legal acknowledgement and requests, behavior capture, preferences and the storefront experience moved into intelligence"
+      "sha256": "b8234ba1947efa1e29286f72145549f050d210112d3519509bb09bb17aa12483",
+      "review": "F17: shared outbox and shop registry helpers in core; written reasons for foreign table access"
     },
     "components/intelligence/src/service/conversations.rs": {
       "status": "unproved",
@@ -2693,8 +2698,8 @@
     },
     "components/intelligence/src/service/flow_proposals.rs": {
       "status": "unproved",
-      "sha256": "bc40c4b97e8c61214e13e77173d6b9bdca34883e35c03c63db573fcde22094d4",
-      "review": "Batch C: agent runs, planning, read rounds, run journal, scenarios, autonomy and conversations moved into the intelligence component behind the agent port"
+      "sha256": "f02a7c90002c0e11439f8409d0a87e9aa2ccf4c357227f47e2c83ddf1b51e14d",
+      "review": "F17: shared outbox and shop registry helpers in core; written reasons for foreign table access"
     },
     "components/intelligence/src/service/indexing.rs": {
       "status": "unproved",
@@ -2808,8 +2813,8 @@
     },
     "components/intelligence/src/service/supply_proposal.rs": {
       "status": "unproved",
-      "sha256": "532d7545faf69942dccccb24618c1426558862f949df8afe1630fc3a498e38eb",
-      "review": "Cart projection, product detail, checkout handoff, cart creation and supply proposals move into components"
+      "sha256": "beb9eb4361ce604937ca82ce5cddaf7918379479dac59d2193bb42666e6e1ac5",
+      "review": "F17: shared outbox and shop registry helpers in core; written reasons for foreign table access"
     },
     "components/intelligence/src/service.rs": {
       "status": "unproved",
@@ -2833,8 +2838,8 @@
     },
     "components/intelligence/src/store/documents.rs": {
       "status": "unproved",
-      "sha256": "d26c603099c4fe2db3359f1618138ecb0d1fea6069d6b5b202fcabe844b02ac3",
-      "review": "Knowledge source ingestion and guidance reads move into intelligence"
+      "sha256": "106e325690dc41f02f9a92e363166ebe192aa9dfc097da0cae2655555e524639",
+      "review": "F17: shared outbox and shop registry helpers in core; written reasons for foreign table access"
     },
     "components/intelligence/src/store/embedding_generations.rs": {
       "status": "unproved",
@@ -2848,13 +2853,13 @@
     },
     "components/intelligence/src/store/evidence.rs": {
       "status": "reviewed-binding",
-      "sha256": "ebbbc3b1a6e0b606a3d3ca0eb88fbafbd5de56c2e17dd03f34704cd8824965f2",
-      "review": "Claim evidence, claim batches, order observation projection, embedding jobs, source search, knowledge inventory, product facts and prompt snapshots moved verbatim into the intelligence component; permissions, settings, provider admission and leases stay in the server. Kernel admission calls unchanged."
+      "sha256": "aa13ff822e1f49090a64d3ea0775864d34b6be81a33517570b4f4279a7566889",
+      "review": "F17: shared outbox and shop registry helpers in core; written reasons for foreign table access"
     },
     "components/intelligence/src/store/experiments.rs": {
       "status": "unproved",
-      "sha256": "ede6adceb19e3f7fa57a28d8258f0357f3e6e9f9a84ebea97b9773b2f81c33a5",
-      "review": "Experiment store, readout and automation, behaviour analytics store and the private preference graph moved verbatim into the intelligence component; consent, settings and channel admission stay in the server. No kernel policy changed."
+      "sha256": "ddf7f7f51c816a1c44c9690d861122eac9f44c7823db2f6824a2c019376948d1",
+      "review": "F17: shared outbox and shop registry helpers in core; written reasons for foreign table access"
     },
     "components/intelligence/src/store/observations.rs": {
       "status": "unproved",
@@ -3318,8 +3323,8 @@
     },
     "components/orders/src/store/company.rs": {
       "status": "unproved",
-      "sha256": "e5cbaa0ec2fddfb59a62210e9a9c9fda6c60be70d7ff927d9b7da7cb2c0d4992",
-      "review": "POS, checkout session review, company data, receipts and carrier documents moved into components"
+      "sha256": "469f0c92aaaa3489b00789a6d43cc4c5e8b233a520ccd59e54e71631781b9eab",
+      "review": "F17: shared outbox and shop registry helpers in core; written reasons for foreign table access"
     },
     "components/orders/src/store/company_logos.rs": {
       "status": "unproved",
@@ -3328,8 +3333,8 @@
     },
     "components/orders/src/store/company_release.rs": {
       "status": "unproved",
-      "sha256": "a22bce58c20ab3db418d010f27c2d51270ec03c163c72a4a8637cec22c035329",
-      "review": "Access overview, session revocation, company release and rule metadata moved into components"
+      "sha256": "55e1eeff240f19a6536b754bc4ffcc7287189561cd98c52afa997aec97a8a738",
+      "review": "F17: shared outbox and shop registry helpers in core; written reasons for foreign table access"
     },
     "components/orders/src/store/machine.rs": {
       "status": "unproved",
@@ -3343,8 +3348,8 @@
     },
     "components/orders/src/store/order_mutation.rs": {
       "status": "unproved",
-      "sha256": "c1d6879e48447ba9ebd8840b97d27af2270e3561413ffabbb6e46ab6af14800c",
-      "review": "POS, checkout session review, company data, receipts and carrier documents moved into components"
+      "sha256": "e5e5a66ea31b5819d5b811e79c5d9862a29c04fbdc616250c6baab61a5db68cc",
+      "review": "F17: shared outbox and shop registry helpers in core; written reasons for foreign table access"
     },
     "components/orders/src/store/order_reads.rs": {
       "status": "unproved",
@@ -3353,8 +3358,8 @@
     },
     "components/orders/src/store/receipts.rs": {
       "status": "unproved",
-      "sha256": "d213ca67ec2f12092b81967cc7497e08487a62ba7b53ba82ea0b0065cf8ea025",
-      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
+      "sha256": "ecbb3abd6385ff660efa8722fe58822049b0efa75267c8cc0b29af950319236b",
+      "review": "F17: shared outbox and shop registry helpers in core; written reasons for foreign table access"
     },
     "components/orders/src/store/redacted_reads.rs": {
       "status": "unproved",
@@ -3568,8 +3573,8 @@
     },
     "components/payments/src/store/instructions.rs": {
       "status": "unproved",
-      "sha256": "044109fbd0d5171bda29aee4896b4c17f99015fddc8b2983d5606810507f1737",
-      "review": "Receipt persistence and order ledger moved behind the payments host port; kernel call sites unchanged"
+      "sha256": "5e28db7efb50c2b2262eea9a36a52b2c0a999b67c75866d99593beba004de0cc",
+      "review": "F17: shared outbox and shop registry helpers in core; written reasons for foreign table access"
     },
     "components/payments/src/store/instruments.rs": {
       "status": "unproved",
@@ -3583,8 +3588,8 @@
     },
     "components/payments/src/store/order_ledger.rs": {
       "status": "reviewed-binding",
-      "sha256": "5426cc725aac7d513ef49c6cb285b442be434b05e4d8e1ab731164e1af0f9af8",
-      "review": "Receipt persistence and order ledger moved behind the payments host port; kernel call sites unchanged"
+      "sha256": "309dc6c807275a01d687364cafbf36db066df41478cba2c910fc66e7f7fb733f",
+      "review": "F17: shared outbox and shop registry helpers in core; written reasons for foreign table access"
     },
     "components/payments/src/store/provider_registry.rs": {
       "status": "unproved",
@@ -3608,8 +3613,8 @@
     },
     "components/payments/src/store/saved_instruments.rs": {
       "status": "unproved",
-      "sha256": "a9dc32ebddfcdb06f6d9ad443b7bf972920e8f2a0cbdff391f749693a107faa1",
-      "review": "Payment commands, worker and provider sessions moved behind the payments gateway port"
+      "sha256": "09ca71970f02ae6d6c5b4495506898b3da3bbec6ac4cfa3786361d26e64f7231",
+      "review": "F17: shared outbox and shop registry helpers in core; written reasons for foreign table access"
     },
     "components/payments/src/store/settlements.rs": {
       "status": "unproved",
@@ -3648,13 +3653,13 @@
     },
     "components/pos/src/service/customer.rs": {
       "status": "unproved",
-      "sha256": "71addd90c13461234cd1bf5f0dc4d736ee5b52bc56648d8811d9f01acc0c3b5f",
-      "review": "POS guard, customer, discount and settlement and the checkout session review moved into components"
+      "sha256": "20a5f0c6b7d061c309a630f945cb1bb3249b690e865b1774040aec70bc554aa5",
+      "review": "F17: shared outbox and shop registry helpers in core; written reasons for foreign table access"
     },
     "components/pos/src/service/discount.rs": {
       "status": "unproved",
-      "sha256": "7bb005be5fe87d5ceff7055f0cc706bdcab11fba0f780d4eece5c79b0d8bf382",
-      "review": "POS guard, customer, discount and settlement and the checkout session review moved into components"
+      "sha256": "673040ba1552a0bd4a8ec3b8a20e209fa4554256b107abc271fbe0f2e5258e1f",
+      "review": "F17: shared outbox and shop registry helpers in core; written reasons for foreign table access"
     },
     "components/pos/src/service/guard.rs": {
       "status": "unproved",
@@ -3668,8 +3673,8 @@
     },
     "components/pos/src/service/settlement.rs": {
       "status": "reviewed-binding",
-      "sha256": "f55ca6885caf2776438ee31fbd7eb9855401459b0c747f6152b1f28eb3ced75e",
-      "review": "Merchant customer writes moved into the customers component and admin order admission into checkout without behaviour change"
+      "sha256": "12425fc765cc8102ad71e9eb6ca95658dbf2e0d6f83e002dd3f1711ee600dda4",
+      "review": "F17: shared outbox and shop registry helpers in core; written reasons for foreign table access"
     },
     "components/pos/src/service.rs": {
       "status": "unproved",
@@ -4028,8 +4033,8 @@
     },
     "components/shop/src/http/operator_quotas.rs": {
       "status": "reviewed-binding",
-      "sha256": "e8fc389fa9e551d3673f30e672d51376aaf888b2d6e3caeba227768abdab24fe",
-      "review": "Operator control plane (quotas, aggregate metrics, shop dossier, audited lifecycle change, container readings) moved verbatim into the shop component; operator authentication and availability admission stay in the server. Kernel admission calls unchanged."
+      "sha256": "5750086c599d392157863b6416650e898767d6356a2ab41a7519bc195c9e4be4",
+      "review": "F17: shared outbox and shop registry helpers in core; written reasons for foreign table access"
     },
     "components/shop/src/http/operator_session.rs": {
       "status": "unproved",
@@ -4068,8 +4073,8 @@
     },
     "components/shop/src/service/currency_rates.rs": {
       "status": "unproved",
-      "sha256": "550f20d45ae728f53277a1f4f3bf43527b7189d48adb12bc10ec0bfab52b85c5",
-      "review": "Rate refresh, company onboarding, POS channel setup, rule comparison and facts and source lifecycle handlers moved into their components; behaviour unchanged"
+      "sha256": "7a37f0f98a0c3d428093fa3763c5879549f5a8b7fa8d8e1c89c4e05cb016b138",
+      "review": "F17: shared outbox and shop registry helpers in core; written reasons for foreign table access"
     },
     "components/shop/src/service/language.rs": {
       "status": "unproved",
@@ -4083,8 +4088,8 @@
     },
     "components/shop/src/service/settings_writes.rs": {
       "status": "unproved",
-      "sha256": "5e5abe0ed95563eb2e37e3ec6e135b7bf147ebfe66fde007f89c436b8468712d",
-      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
+      "sha256": "2aca528d9a22c0fcc1f49dd6282756341b5310ec27525a56156cc368cdcc6560",
+      "review": "F17: shared outbox and shop registry helpers in core; written reasons for foreign table access"
     },
     "components/shop/src/service.rs": {
       "status": "unproved",
@@ -4098,8 +4103,8 @@
     },
     "components/shop/src/store/consumer_requests.rs": {
       "status": "unproved",
-      "sha256": "c4cc84f4a0629244cf875a93d2259ad9b58e23fc5c0c2f9288c1d8e7cb2a4cc6",
-      "review": "Consumer requests moved into the shop component and the frozen rule comparison into marketing without behaviour change"
+      "sha256": "aaa38c7b0f5f9498f6303b44047f636789994c1381662d2d87c710df06714992",
+      "review": "F17: shared outbox and shop registry helpers in core; written reasons for foreign table access"
     },
     "components/shop/src/store/group_usage.rs": {
       "status": "unproved",
@@ -4248,8 +4253,8 @@
     },
     "components/studio/src/http/workflow.rs": {
       "status": "unproved",
-      "sha256": "83a906cbb025858bce9b435e246b79ab46513fd321546994b71463e5345adf26",
-      "review": "Batch D: back office lists, product editor, workflow, workspace and grid plan moved into studio; settings writes into shop behind the settings port; merchant CRM writes into customers"
+      "sha256": "1ea50d67e1e4af419f7ac0f652a49098f26c57b1da6c7727dd6b5e2559309466",
+      "review": "F17: shared outbox and shop registry helpers in core; written reasons for foreign table access"
     },
     "components/studio/src/http/workspace.rs": {
       "status": "unproved",
@@ -4303,8 +4308,8 @@
     },
     "components/studio/src/service/imports/historical_orders.rs": {
       "status": "unproved",
-      "sha256": "9588154134ab3f30cba4fe0397048d8fa8f7cb5a625b97fdb5a3b7743340f466",
-      "review": "Batch F4: source-record imports moved into studio behind the ImportHost port"
+      "sha256": "0a881fc6e5a31074bdbefcac5d208907908c870626ffa76b0eb45c4b62e4a0c0",
+      "review": "F17: shared outbox and shop registry helpers in core; written reasons for foreign table access"
     },
     "components/studio/src/service/imports/inspect.rs": {
       "status": "unproved",
@@ -4358,8 +4363,8 @@
     },
     "components/studio/src/service/proposal_apply.rs": {
       "status": "unproved",
-      "sha256": "83b1773a2742a01408a34a6ce2ce7df78799d198822deb3b0096f2c92fab59a6",
-      "review": "Batch F1: proposals, list views, reviewed work, its execution and proposal application moved into studio behind the WorkHost port"
+      "sha256": "7b3f050e76fbfe964c226a44e86ce6901d966f2a321016918666d4c34023890c",
+      "review": "F17: shared outbox and shop registry helpers in core; written reasons for foreign table access"
     },
     "components/studio/src/service/reports.rs": {
       "status": "unproved",
@@ -4383,13 +4388,13 @@
     },
     "components/studio/src/service/staging/release.rs": {
       "status": "unproved",
-      "sha256": "fd5d0e57180638fb63c1ea7235875d93c2a683880fc9e95a8ae2a54f172b97db",
-      "review": "Batch F2: sandbox clone, snapshot, diff and release moved into studio behind the ReleaseHost port"
+      "sha256": "35c708134e8f0ba93726d4ddd2e63a8e00092bac9a10660b0bc294bb4a06a847",
+      "review": "F17: shared outbox and shop registry helpers in core; written reasons for foreign table access"
     },
     "components/studio/src/service/staging/snapshot.rs": {
       "status": "unproved",
-      "sha256": "b78ddd3296e942ee8a8817d6461ee3231de57b46121843a414ad1f76aa046c52",
-      "review": "Batch F2: sandbox clone, snapshot, diff and release moved into studio behind the ReleaseHost port"
+      "sha256": "eb41ce4161d5b89b53d13383f7d4f5094605bc597a4b5cb91fc918a7ba675e9e",
+      "review": "F17: shared outbox and shop registry helpers in core; written reasons for foreign table access"
     },
     "components/studio/src/service/staging.rs": {
       "status": "unproved",
@@ -4408,8 +4413,8 @@
     },
     "components/studio/src/service/work_plan.rs": {
       "status": "unproved",
-      "sha256": "864e0665d2f884852befc12f89e1b1b11ebbb41c1672e48510397b8edbd6e9b8",
-      "review": "Batch F1: proposals, list views, reviewed work, its execution and proposal application moved into studio behind the WorkHost port"
+      "sha256": "0ea1d96c1b81dcab6cf08c47e8a314e221b0dc3545e3fc578a115fa650bef7b9",
+      "review": "F17: shared outbox and shop registry helpers in core; written reasons for foreign table access"
     },
     "components/studio/src/service.rs": {
       "status": "unproved",

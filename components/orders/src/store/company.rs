@@ -139,12 +139,12 @@ pub async fn save(
     } else {
         sqlx::query("INSERT INTO receipt_settings(tenant,data) VALUES($1,$2) ON CONFLICT(tenant) DO UPDATE SET data=EXCLUDED.data,revision=receipt_settings.revision+1").bind(t).bind(&data).execute(&mut *tx).await?;
     }
-    sqlx::query(
-        "INSERT INTO outbox(tenant,kind,data) VALUES($1,'settings.master_data_changed',$2)",
+    veyndo_core::outbox::publish_on(
+        &mut *tx,
+        t,
+        "settings.master_data_changed",
+        &json!({"revision":expected+1,"salesChannelId":channel}),
     )
-    .bind(t)
-    .bind(json!({"revision":expected+1,"salesChannelId":channel}))
-    .execute(&mut *tx)
     .await?;
     let value = records(&mut tx, t, channel).await?;
     tx.commit().await?;
@@ -232,10 +232,7 @@ pub async fn public_source(
             .as_str()
             .is_none_or(|name| name.trim().is_empty())
     {
-        sqlx::query_scalar("SELECT name FROM tenants WHERE id=$1")
-            .bind(t)
-            .fetch_optional(&mut **tx)
-            .await?
+        veyndo_core::tenants::name(&mut **tx, t).await?
     } else {
         None
     };

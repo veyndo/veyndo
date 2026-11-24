@@ -59,7 +59,7 @@ pub async fn save(
         .bind(&c.id)
         .execute(&mut *tx)
         .await?;
-    sqlx::query("INSERT INTO outbox(tenant,kind,data) VALUES($1,'pos.discount_changed',$2)").bind(&c.tenant).bind(json!({"cartId":c.id,"salesChannelId":c.data.sales_channel,"cashierId":h.pos.as_ref().map(|p|&p.actor),"previous":previous,"discount":c.data.pos_discount,"revision":c.revision})).execute(&mut *tx).await?;
+    veyndo_core::outbox::publish_on(&mut *tx, &c.tenant, "pos.discount_changed", &json!({"cartId":c.id,"salesChannelId":c.data.sales_channel,"cashierId":h.pos.as_ref().map(|p|&p.actor),"previous":previous,"discount":c.data.pos_discount,"revision":c.revision})).await?;
     tx.commit().await?;
     Ok(quote)
 }

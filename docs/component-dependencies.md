@@ -13,25 +13,25 @@ run SQL without being in a `store` folder. Both numbers only fall.
 
 | Component | Lines of Rust | Glob imports | Untyped accesses | SQL outside store | Tables | Uses | Foreign tables |
 | --- | ---: | ---: | ---: | ---: | ---: | --- | ---: |
-| core | 4004 | 0 | 4 | 12 | 10 | none | 10 |
-| identity | 2985 | 0 | 66 | 11 | 13 | core (77), inference (2) | 5 |
-| shop | 3983 | 0 | 63 | 9 | 15 | catalog (1), core (75), identity (3), inventory (1), pricing (21), shipping (4) | 19 |
-| catalog | 5938 | 0 | 133 | 2 | 11 | core (68), identity (10), pricing (13) | 7 |
+| core | 4111 | 0 | 4 | 13 | 10 | none | 10 |
+| identity | 2962 | 0 | 66 | 11 | 13 | core (89), inference (2) | 4 |
+| shop | 3991 | 0 | 63 | 9 | 15 | catalog (1), core (82), identity (3), inventory (1), pricing (21), shipping (4) | 19 |
+| catalog | 5935 | 0 | 133 | 2 | 11 | core (69), identity (10), pricing (13) | 7 |
 | inventory | 405 | 0 | 3 | 0 | 2 | catalog (1), core (7), pricing (2) | 1 |
 | pricing | 3184 | 0 | 13 | 1 | 2 | core (27), identity (1) | 3 |
 | shipping | 553 | 0 | 26 | 0 | 0 | core (8), identity (1), pricing (2) | 6 |
-| checkout | 4263 | 0 | 192 | 6 | 3 | b2b (13), catalog (10), core (59), customers (2), identity (2), inventory (2), marketing (11), orders (1), payments (2), pricing (39), shipping (3), shop (80) | 16 |
-| customers | 1857 | 0 | 56 | 3 | 3 | core (28), identity (6), marketing (3), pricing (6), shipping (3), shop (9) | 4 |
-| orders | 4066 | 0 | 282 | 3 | 7 | b2b (1), catalog (4), core (40), customers (2), identity (8), inventory (1), pricing (3), shipping (2), shop (4) | 10 |
-| payments | 4310 | 0 | 261 | 11 | 7 | core (45), identity (4), inventory (1), orders (1), pricing (8), shop (7) | 14 |
+| checkout | 4265 | 0 | 192 | 6 | 3 | b2b (13), catalog (10), core (60), customers (2), identity (2), inventory (2), marketing (11), orders (1), payments (2), pricing (39), shipping (3), shop (80) | 15 |
+| customers | 1855 | 0 | 56 | 2 | 3 | core (31), identity (6), marketing (3), pricing (6), shipping (3), shop (9) | 2 |
+| orders | 4058 | 0 | 282 | 3 | 7 | b2b (1), catalog (4), core (46), customers (2), identity (8), inventory (1), pricing (3), shipping (2), shop (4) | 8 |
+| payments | 4310 | 0 | 261 | 11 | 7 | core (48), identity (4), inventory (1), orders (1), pricing (8), shop (7) | 13 |
 | marketing | 5471 | 0 | 287 | 9 | 8 | automation (19), b2b (2), catalog (3), core (69), identity (16), inference (1), pricing (12), shop (24) | 24 |
-| b2b | 2572 | 0 | 108 | 7 | 8 | core (38), identity (12), pricing (6), shop (34) | 8 |
-| pos | 1191 | 0 | 70 | 4 | 0 | catalog (2), checkout (5), core (12), customers (1), identity (4), intelligence (1), marketing (3), orders (1), payments (2), pricing (4), shop (19) | 8 |
-| apps | 13492 | 0 | 369 | 20 | 22 | b2b (1), catalog (2), checkout (5), core (209), identity (41), inference (4), intelligence (2), inventory (2), marketing (5), orders (10), pricing (6), shipping (2), shop (21) | 21 |
+| b2b | 2567 | 0 | 108 | 7 | 8 | core (39), identity (12), pricing (6), shop (34) | 7 |
+| pos | 1188 | 0 | 70 | 4 | 0 | catalog (2), checkout (5), core (17), customers (1), identity (4), intelligence (1), marketing (3), orders (1), payments (2), pricing (4), shop (19) | 7 |
+| apps | 13477 | 0 | 369 | 18 | 22 | b2b (1), catalog (2), checkout (5), core (223), identity (41), inference (4), intelligence (2), inventory (2), marketing (5), orders (10), pricing (6), shipping (2), shop (21) | 21 |
 | automation | 1443 | 8 | 97 | 0 | 0 | core (2) | 0 |
 | inference | 2032 | 0 | 124 | 2 | 0 | core (13) | 5 |
-| intelligence | 11157 | 0 | 609 | 29 | 28 | catalog (10), checkout (11), core (168), customers (1), identity (29), inference (10), inventory (1), marketing (13), pricing (21), shipping (3), shop (53) | 28 |
-| studio | 7161 | 0 | 365 | 23 | 5 | apps (30), b2b (3), catalog (29), checkout (2), core (96), customers (7), identity (40), inference (4), intelligence (23), marketing (12), orders (20), pos (2), pricing (12), shop (30) | 42 |
+| intelligence | 11160 | 0 | 609 | 29 | 28 | catalog (10), checkout (11), core (184), customers (1), identity (29), inference (10), inventory (1), marketing (13), pricing (21), shipping (3), shop (53) | 28 |
+| studio | 7169 | 0 | 365 | 23 | 5 | apps (30), b2b (3), catalog (29), checkout (2), core (102), customers (7), identity (40), inference (4), intelligence (23), marketing (12), orders (20), pos (2), pricing (12), shop (30) | 42 |
 | protocols | 2927 | 0 | 132 | 2 | 0 | catalog (1), checkout (2), core (104), host (207), inference (1), intelligence (2), pricing (2), shop (5) | 2 |
 | host | 16193 | 0 | 352 | 11 | 1 | apps (49), catalog (55), checkout (14), core (1432), identity (8), inference (3), intelligence (32), inventory (4), marketing (11), orders (2), payments (10), pricing (48), shipping (1), shop (66), studio (18) | 15 |
 | connectors | 0 | 0 | 0 | 0 | 6 | none | 0 |
@@ -50,25 +50,25 @@ those pairs close when the server files that still hold their logic move into th
 | host | core | `State` | 405 |
 | host | core | `Result` | 372 |
 | host | core | `RequestContext` | 324 |
-| apps | core | `veyndo_core::` | 186 |
-| intelligence | core | `veyndo_core::` | 153 |
-| studio | core | `veyndo_core::` | 94 |
+| apps | core | `veyndo_core::` | 200 |
+| intelligence | core | `veyndo_core::` | 169 |
+| studio | core | `veyndo_core::` | 100 |
 | checkout | shop | `veyndo_shop::` | 80 |
+| shop | core | `veyndo_core::` | 79 |
 | host | core | `PortFuture` | 78 |
-| shop | core | `veyndo_core::` | 72 |
-| catalog | core | `veyndo_core::` | 68 |
+| identity | core | `veyndo_core::` | 77 |
+| catalog | core | `veyndo_core::` | 69 |
 | marketing | core | `veyndo_core::` | 66 |
-| identity | core | `veyndo_core::` | 65 |
 | host | core | `Error` | 63 |
-| checkout | core | `veyndo_core::` | 57 |
+| checkout | core | `veyndo_core::` | 58 |
 | intelligence | shop | `veyndo_shop::` | 53 |
-| payments | core | `veyndo_core::` | 44 |
+| payments | core | `veyndo_core::` | 47 |
+| orders | core | `veyndo_core::` | 41 |
 | apps | identity | `veyndo_identity::` | 41 |
 | studio | identity | `veyndo_identity::` | 40 |
 | checkout | pricing | `veyndo_pricing::` | 39 |
 | host | shop | `StoredCart` | 36 |
-| orders | core | `veyndo_core::` | 35 |
-| b2b | core | `veyndo_core::` | 35 |
+| b2b | core | `veyndo_core::` | 36 |
 | host | core | `header` | 34 |
 | b2b | shop | `veyndo_shop::` | 34 |
 | protocols | host | `auth::` | 32 |
@@ -76,9 +76,9 @@ those pairs close when the server files that still hold their logic move into th
 | studio | apps | `veyndo_app_platform::` | 30 |
 | studio | catalog | `veyndo_catalog::` | 29 |
 | intelligence | identity | `veyndo_identity::` | 29 |
+| customers | core | `veyndo_core::` | 29 |
 | protocols | core | `State` | 26 |
 | protocols | core | `Result` | 26 |
-| customers | core | `veyndo_core::` | 26 |
 | host | core | `tenant` | 25 |
 | protocols | core | `RequestContext` | 24 |
 | marketing | shop | `veyndo_shop::` | 24 |
@@ -104,7 +104,7 @@ those pairs close when the server files that still hold their logic move into th
 | apps | `languages` | shop | read |
 | apps | `memberships` | identity | read |
 | apps | `orders` | orders | write |
-| apps | `outbox` | core | write |
+| apps | `outbox` | core | read |
 | apps | `product_assets` | catalog | read |
 | apps | `product_channel_visibility` | catalog | read |
 | apps | `product_translations` | catalog | read |
@@ -119,7 +119,6 @@ those pairs close when the server files that still hold their logic move into th
 | b2b | `customers` | customers | read |
 | b2b | `order_receipts` | orders | read |
 | b2b | `orders` | orders | read |
-| b2b | `outbox` | core | write |
 | b2b | `products` | catalog | read |
 | catalog | `b2b_catalog` | b2b | read |
 | catalog | `knowledge_documents` | intelligence | read |
@@ -135,7 +134,6 @@ those pairs close when the server files that still hold their logic move into th
 | checkout | `hosted_frontends` | shop | read |
 | checkout | `legal_acceptances` | shop | read |
 | checkout | `orders` | orders | write |
-| checkout | `outbox` | core | write |
 | checkout | `policy` | intelligence | write |
 | checkout | `privacy_consents` | shop | read |
 | checkout | `product_channel_visibility` | catalog | read |
@@ -156,8 +154,6 @@ those pairs close when the server files that still hold their logic move into th
 | core | `tenant_resource_limits` | shop | read |
 | customers | `carts` | checkout | write |
 | customers | `orders` | orders | read |
-| customers | `outbox` | core | write |
-| customers | `tenants` | core | read |
 | host | `app_deliveries` | apps | read |
 | host | `auth_attempt_buckets` | identity | write |
 | host | `commerce_settings` | shop | write |
@@ -174,7 +170,6 @@ those pairs close when the server files that still hold their logic move into th
 | host | `products` | catalog | read |
 | host | `tenants` | core | write |
 | identity | `app_packages` | apps | read |
-| identity | `outbox` | core | write |
 | identity | `sales_channels` | marketing | read |
 | identity | `shop_environments` | studio | read |
 | identity | `tenants` | core | read |
@@ -197,7 +192,7 @@ those pairs close when the server files that still hold their logic move into th
 | intelligence | `integration_keys` | identity | read |
 | intelligence | `legal_acceptances` | shop | write |
 | intelligence | `orders` | orders | read |
-| intelligence | `outbox` | core | write |
+| intelligence | `outbox` | core | read |
 | intelligence | `payment_attempts` | payments | read |
 | intelligence | `platform_ai` | shop | write |
 | intelligence | `platform_audit` | shop | write |
@@ -242,10 +237,8 @@ those pairs close when the server files that still hold their logic move into th
 | orders | `company_overrides` | shop | write |
 | orders | `customers` | customers | read |
 | orders | `order_downloads` | catalog | read |
-| orders | `outbox` | core | write |
 | orders | `product_assets` | catalog | read |
 | orders | `sales_channels` | marketing | read |
-| orders | `tenants` | core | read |
 | payments | `app_packages` | apps | read |
 | payments | `carts` | checkout | write |
 | payments | `commerce_overrides` | shop | read |
@@ -257,7 +250,6 @@ those pairs close when the server files that still hold their logic move into th
 | payments | `hosted_frontends` | shop | read |
 | payments | `inventory_reservations` | inventory | write |
 | payments | `orders` | orders | write |
-| payments | `outbox` | core | write |
 | payments | `policy` | intelligence | write |
 | payments | `sales_channels` | marketing | read |
 | pos | `carts` | checkout | write |
@@ -265,7 +257,6 @@ those pairs close when the server files that still hold their logic move into th
 | pos | `commerce_settings` | shop | read |
 | pos | `customers` | customers | read |
 | pos | `orders` | orders | read |
-| pos | `outbox` | core | write |
 | pos | `products` | catalog | read |
 | pos | `sales_channels` | marketing | read |
 | pricing | `b2b_units` | b2b | read |
@@ -289,7 +280,7 @@ those pairs close when the server files that still hold their logic move into th
 | shop | `memberships` | identity | read |
 | shop | `merchant_users` | identity | read |
 | shop | `orders` | orders | read |
-| shop | `outbox` | core | write |
+| shop | `outbox` | core | read |
 | shop | `product_reviews` | catalog | read |
 | shop | `products` | catalog | read |
 | shop | `read_context_versions` | core | read |

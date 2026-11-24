@@ -149,11 +149,13 @@ pub async fn create(
     .bind(json!({"id":receipt,"number":number,"kind":kind}))
     .execute(&mut *tx)
     .await?;
-    sqlx::query("INSERT INTO outbox(tenant,kind,data) VALUES($1,'document.created',$2)")
-        .bind(t)
-        .bind(json!({"orderId":id,"documentId":receipt,"kind":kind}))
-        .execute(&mut *tx)
-        .await?;
+    veyndo_core::outbox::publish_on(
+        &mut *tx,
+        t,
+        "document.created",
+        &json!({"orderId":id,"documentId":receipt,"kind":kind}),
+    )
+    .await?;
     tx.commit().await?;
     Ok(
         json!({"id":receipt,"number":number,"pdfPath":format!("/api/merchant/receipts/{receipt}/pdf")}),

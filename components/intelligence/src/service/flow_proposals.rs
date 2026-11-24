@@ -32,8 +32,7 @@ pub async fn persist(
     let request = json!({"instruction":evidence["instruction"],"locale":evidence["locale"],"channel":channel_id(original),"source":"flow","sourceJobId":job});
     let mut tx = a.db.begin_privileged().await?;
     // The same live-shop lock as enqueue/approval fences completion against stop.
-    let stopped:bool=sqlx::query_scalar("SELECT agents_stopped FROM tenants WHERE id=coalesce((SELECT live_tenant FROM shop_environments WHERE tenant=$1),$1) FOR NO KEY UPDATE")
-        .bind(t).fetch_one(&mut *tx).await?;
+    let stopped: bool = veyndo_core::tenants::agents_stopped_locked(&mut *tx, t).await?;
     if stopped {
         return Err(Error(
             StatusCode::FORBIDDEN,

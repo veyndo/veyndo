@@ -131,7 +131,7 @@ pub async fn bind(
     }
     let revision:i64=sqlx::query_scalar("INSERT INTO hosted_frontends(alias,tenant,channel,origin,experience_alias,app_id) VALUES($1,$2,$3,$4,$5,$6) ON CONFLICT(alias) DO UPDATE SET channel=excluded.channel,origin=excluded.origin,experience_alias=excluded.experience_alias,app_id=excluded.app_id,revision=hosted_frontends.revision+1 WHERE hosted_frontends.tenant=excluded.tenant RETURNING revision")
         .bind(alias).bind(&t).bind(channel).bind(origin).bind(experience).bind(&app_id).fetch_one(&mut *tx).await?;
-    sqlx::query("INSERT INTO outbox(tenant,kind,data) VALUES($1,'frontend.configured',$2)").bind(&t).bind(json!({"alias":alias,"channel":channel,"revision":revision,"actor":header(h,"x-rac-user")})).execute(&mut *tx).await?;
+    veyndo_core::outbox::publish_on(&mut *tx, &t, "frontend.configured", &json!({"alias":alias,"channel":channel,"revision":revision,"actor":header(h,"x-rac-user")})).await?;
     tx.commit().await?;
     Ok(json!({"alias":alias,"channel":channel,"revision":revision,"urls":links(alias)}))
 }
@@ -156,11 +156,13 @@ pub async fn remove(a: &State, h: &RequestContext, alias: &str, v: &Value) -> Re
     if n == 0 {
         return Err(conflict("Frontend absent or revision changed"));
     }
-    sqlx::query("INSERT INTO outbox(tenant,kind,data) VALUES($1,'frontend.disconnected',$2)")
-        .bind(&t)
-        .bind(json!({"alias":alias,"actor":header(h,"x-rac-user")}))
-        .execute(&mut *tx)
-        .await?;
+    veyndo_core::outbox::publish_on(
+        &mut *tx,
+        &t,
+        "frontend.disconnected",
+        &json!({"alias":alias,"actor":header(h,"x-rac-user")}),
+    )
+    .await?;
     tx.commit().await?;
     Ok(json!({"disconnected":true,"alias":alias}))
 }

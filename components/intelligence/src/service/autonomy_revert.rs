@@ -71,19 +71,23 @@ pub async fn revert(
             continue;
         };
         knowledge::sync_product(&mut tx, t, &json!(product(&changed))).await?;
-        sqlx::query("INSERT INTO outbox(tenant,kind,data) VALUES($1,'product.updated',$2)")
-            .bind(t)
-            .bind(json!({"productId":id,"revision":changed.get::<i64,_>("revision")}))
-            .execute(&mut *tx)
-            .await?;
+        veyndo_core::outbox::publish_on(
+            &mut *tx,
+            t,
+            "product.updated",
+            &json!({"productId":id,"revision":changed.get::<i64,_>("revision")}),
+        )
+        .await?;
         reverted.push(id);
     }
     if !reverted.is_empty() {
-        sqlx::query("INSERT INTO outbox(tenant,kind,data) VALUES($1,'ai.autonomy.reverted',$2)")
-            .bind(t)
-            .bind(json!({"actor":actor,"automatic":automatic,"productIds":reverted}))
-            .execute(&mut *tx)
-            .await?;
+        veyndo_core::outbox::publish_on(
+            &mut *tx,
+            t,
+            "ai.autonomy.reverted",
+            &json!({"actor":actor,"automatic":automatic,"productIds":reverted}),
+        )
+        .await?;
     }
     tx.commit().await?;
     Ok(json!({"reverted":reverted,"skipped":skipped,"automatic":automatic}))

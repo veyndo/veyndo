@@ -18,12 +18,12 @@ pub async fn publish(
         cart.remove("token");
     }
     let data = json!({"orderId":p.order,"attemptId":p.id,"order":order,"paymentInstructions":snapshot(p,&context["recipientInstructions"])?});
-    sqlx::query(
-        "INSERT INTO outbox(tenant,kind,data) VALUES($1,'payment.instructions.available',$2)",
+    veyndo_core::outbox::publish_on(
+        &mut **tx,
+        &p.tenant,
+        "payment.instructions.available",
+        &data,
     )
-    .bind(&p.tenant)
-    .bind(data)
-    .execute(&mut **tx)
     .await?;
     Ok(())
 }

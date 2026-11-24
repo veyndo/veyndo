@@ -154,7 +154,7 @@ pub async fn invoke(a: &State, h: &RequestContext, name: &str, v: &Value) -> Res
     } else {
         0
     };
-    sqlx::query("INSERT INTO outbox(tenant,kind,data) VALUES($1,'intelligence.agents.controlled',$2)").bind(&live).bind(json!({"stopped":stopped,"revision":revision+1,"actor":h.principal.user,"cancelled":cancelled})).execute(&mut *tx).await?;
+    veyndo_core::outbox::publish_on(&mut *tx, &live, "intelligence.agents.controlled", &json!({"stopped":stopped,"revision":revision+1,"actor":h.principal.user,"cancelled":cancelled})).await?;
     tx.commit().await?;
     Ok(json!({"stopped":stopped,"revision":revision+1,"liveShop":live,"cancelled":cancelled}))
 }

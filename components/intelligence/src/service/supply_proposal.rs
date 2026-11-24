@@ -171,10 +171,7 @@ pub async fn approve(a: &State, carts: &dyn Carts, h: &RequestContext, v: &Value
     )
     .await?
     .0;
-    sqlx::query("INSERT INTO outbox(tenant,kind,data) VALUES($1,'supply.reorder.approved',$2)")
-        .bind(&t)
-        .bind(json!({"productId":product,"supplierShop":link.supplier_shop,"quantity":link.reorder_quantity,"totalMinor":total.to_string(),"currency":signed["currency"],"actor":header(h,"x-rac-user")}))
-        .execute(&a.db).await?;
+    veyndo_core::outbox::publish_on(&a.db, &t, "supply.reorder.approved", &json!({"productId":product,"supplierShop":link.supplier_shop,"quantity":link.reorder_quantity,"totalMinor":total.to_string(),"currency":signed["currency"],"actor":header(h,"x-rac-user")})).await?;
     Ok(
         json!({"approved":true,"ordered":false,"supplierShop":link.supplier_shop,"checkoutPath":handoff["checkoutPath"],"expiresInSeconds":handoff["expiresInSeconds"],"totalMinor":total.to_string()}),
     )

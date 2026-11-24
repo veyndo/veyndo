@@ -125,16 +125,17 @@ pub async fn create(
     for (address, flags) in address_plan(&json!(input))? {
         save_address(&mut tx, t, &email, source.is_some(), &flags, &address).await?;
     }
-    sqlx::query("INSERT INTO outbox(tenant,kind,data) VALUES($1,$2,$3)")
-        .bind(t)
-        .bind(if source.is_some() {
+    veyndo_core::outbox::publish_on(
+        &mut *tx,
+        t,
+        if source.is_some() {
             "migration.record.imported"
         } else {
             "customer.created"
-        })
-        .bind(json!({"customerId":id,"actor":header(h,"x-rac-user"),"source":"merchant"}))
-        .execute(&mut *tx)
-        .await?;
+        },
+        &json!({"customerId":id,"actor":header(h,"x-rac-user"),"source":"merchant"}),
+    )
+    .await?;
     tx.commit().await?;
     Ok(json!({"id":id,"email":email,"created":true}))
 }
@@ -282,7 +283,7 @@ pub async fn save(
         .execute(&mut *tx)
         .await?;
     sqlx::query("UPDATE carts SET token=md5(id||$1),data=jsonb_set(jsonb_set(jsonb_set(jsonb_set(data,'{email}','null'),'{customer_id}','null'),'{group}','\"consumer\"'),'{company}','null'),revision=revision+1 WHERE tenant=$2 AND data->>'email'=$3 AND status='open'").bind(uid()).bind(t).bind(email).execute(&mut *tx).await?;
-    sqlx::query("INSERT INTO outbox(tenant,kind,data) VALUES($1,'customer.updated',$2)").bind(t).bind(json!({"actor":header(h,"x-rac-user"),"email":email,"revision":saved_revision,"active":e.active})).execute(&mut *tx).await?;
+    veyndo_core::outbox::publish_on(&mut *tx, t, "customer.updated", &json!({"actor":header(h,"x-rac-user"),"email":email,"revision":saved_revision,"active":e.active})).await?;
     tx.commit().await?;
     Ok(json!({"saved":true,"revision":saved_revision}))
 }

@@ -231,11 +231,6 @@ pub async fn member_tx(conn: &mut sqlx::PgConnection, t: &str, v: &Value) -> Res
     Ok(json!({"revision":expected+1}))
 }
 pub async fn event(conn: &mut sqlx::PgConnection, t: &str, kind: &str, data: Value) -> Result<()> {
-    sqlx::query("INSERT INTO outbox(tenant,kind,data) VALUES($1,$2,$3)")
-        .bind(t)
-        .bind(kind)
-        .bind(data)
-        .execute(conn)
-        .await?;
+    veyndo_core::outbox::publish_on(conn, t, kind, &data).await?;
     Ok(())
 }

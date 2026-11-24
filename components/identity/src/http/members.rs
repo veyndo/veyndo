@@ -34,10 +34,7 @@ pub async fn update_member(
         .as_bool()
         .ok_or(bad("Active boolean required"))?;
     let mut tx = a.db.begin().await?;
-    sqlx::query("SELECT id FROM tenants WHERE id=$1 FOR UPDATE")
-        .bind(&t)
-        .fetch_one(&mut *tx)
-        .await?;
+    veyndo_core::tenants::lock(&mut *tx, &t).await?;
     let h = roles::current(&mut tx, &h, &t).await?;
     let actor = if header(&h, "x-rac-role") == Some("owner") {
         "owner"
@@ -106,11 +103,7 @@ pub async fn update_member(
     .bind(&permissions)
     .execute(&mut *tx)
     .await?;
-    sqlx::query("INSERT INTO outbox(tenant,kind,data) VALUES($1,'membership.updated',$2)")
-        .bind(t)
-        .bind(json!({"actor":header(&h,"x-rac-user"),"subject":user,"role":role,"active":active,"permissions":permissions,"previousRole":old.get::<String,_>("role"),"previousActive":old.get::<bool,_>("active")}))
-        .execute(&mut *tx)
-        .await?;
+    veyndo_core::outbox::publish_on(&mut *tx, &t, "membership.updated", &json!({"actor":header(&h,"x-rac-user"),"subject":user,"role":role,"active":active,"permissions":permissions,"previousRole":old.get::<String,_>("role"),"previousActive":old.get::<bool,_>("active")})).await?;
     tx.commit().await?;
     Ok(Json(json!({"updated":true})))
 }

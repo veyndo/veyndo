@@ -130,13 +130,13 @@ pub async fn confirm(
     let digests: Vec<String> = codes.iter().map(|c| hash(c)).collect();
     sqlx::query("UPDATE merchant_mfa SET ciphertext=$2,enabled=true,pending_ciphertext=NULL,pending_expires_at=NULL,recovery_digests=$3,last_step=$4,revision=revision+1,updated_at=now() WHERE user_id=$1").bind(user).bind(cipher).bind(json!(digests)).bind(step).execute(&mut *tx).await?;
     revoke_tx(&mut tx, user).await?;
-    sqlx::query("INSERT INTO outbox(tenant,kind,data) VALUES($1,'account.security.updated',$2)")
-        .bind(tenant(&h)?)
-        .bind(
-            json!({"userId":user,"action":"mfa.enabled","revision":row.get::<i64,_>("revision")+1}),
-        )
-        .execute(&mut *tx)
-        .await?;
+    veyndo_core::outbox::publish_on(
+        &mut *tx,
+        &tenant(&h)?,
+        "account.security.updated",
+        &json!({"userId":user,"action":"mfa.enabled","revision":row.get::<i64,_>("revision")+1}),
+    )
+    .await?;
     let session =
         issue_verified_tx(&mut tx, user, &tenant(&h)?, SessionProof::SecondFactor).await?;
     tx.commit().await?;
@@ -202,7 +202,7 @@ pub async fn disable(
         return Err(conflict("Security settings changed; reload"));
     }
     revoke_tx(&mut tx, user).await?;
-    sqlx::query("INSERT INTO outbox(tenant,kind,data) VALUES($1,'account.security.updated',$2)").bind(tenant(&h)?).bind(json!({"userId":user,"action":"mfa.disabled","revision":v["revision"].as_i64().unwrap()+1})).execute(&mut *tx).await?;
+    veyndo_core::outbox::publish_on(&mut *tx, &tenant(&h)?, "account.security.updated", &json!({"userId":user,"action":"mfa.disabled","revision":v["revision"].as_i64().unwrap()+1})).await?;
     tx.commit().await?;
     Ok(Json(json!({"enabled":false,"signInRequired":true})))
 }

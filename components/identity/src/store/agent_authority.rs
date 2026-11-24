@@ -88,7 +88,7 @@ pub async fn headers_on(
                 }
             }
         }
-        let stopped:bool=sqlx::query_scalar("SELECT agents_stopped FROM tenants WHERE id=coalesce((SELECT live_tenant FROM shop_environments WHERE tenant=$1),$1)").bind(&t).fetch_one(&mut *connection).await?;
+        let stopped: bool = veyndo_core::tenants::agents_stopped(&mut *connection, &t).await?;
         if stopped {
             return Err(Error(
                 StatusCode::FORBIDDEN,

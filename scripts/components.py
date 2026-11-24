@@ -238,7 +238,10 @@ def findings(tree):
         for target in sorted(set(declared) - set(actual)):
             problems.append(f'{name} no longer depends on {target}; remove it from "uses"')
         foreign = sorted({table for (source, table) in use if source == name and table_owner.get(table) not in (None, name)})
-        shared = sorted(row.get('foreign_tables', []))
+        shared = sorted(row.get('foreign_tables', {}))
+        for table, reason in sorted(dict(row.get('foreign_tables', {})).items()):
+            if len(str(reason).strip()) < 20:
+                problems.append(f'{name} accesses table {table} of another component without a written reason in "foreign_tables"')
         for table in sorted(set(foreign) - set(shared)):
             problems.append(f'{name} now accesses table {table} of {table_owner[table]}; go through its owner or declare it')
         for table in sorted(set(shared) - set(foreign)):
@@ -277,7 +280,8 @@ def bootstrap(tree):
         row['sql_outside_store'] = scattered[name]
         row['tables'] = sorted(table for table, owner in declared.items() if owner == name and table in tables)
         row['uses'] = sorted({target for (source, target) in edges if source == name})
-        row['foreign_tables'] = sorted({table for (source, table) in use if source == name and declared[table] != name})
+        kept = dict(row.get('foreign_tables', {})) if isinstance(row.get('foreign_tables'), dict) else {}
+        row['foreign_tables'] = {table: kept.get(table, '') for table in sorted({table for (source, table) in use if source == name and declared[table] != name})}
     MAP.write_text(json.dumps(tree.map, indent=2) + '\n')
 
 
@@ -358,6 +362,11 @@ def main(argv=None):
     broken['components']['inference']['sources'].remove('crates/cognition')
     broken['components']['intelligence']['sources'].append('crates/cognition')
     assert any('depend on each other' in line for line in findings(Tree(mapping=broken))[0]), 'a crate cycle must fail'
+    broken = json.loads(json.dumps(tree.map))
+    reasoned = next(name for name, row in broken['components'].items() if row.get('foreign_tables'))
+    first_table = sorted(broken['components'][reasoned]['foreign_tables'])[0]
+    broken['components'][reasoned]['foreign_tables'][first_table] = ''
+    assert any('without a written reason' in line for line in findings(Tree(mapping=broken))[0]), 'a foreign table without a reason must fail'
     broken = json.loads(json.dumps(tree.map))
     # Counting a host file for a domain component again would reintroduce a pair through server files.
     broken['components']['host']['sources'].remove('src/apps')

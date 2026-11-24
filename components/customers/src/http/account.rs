@@ -34,10 +34,7 @@ pub async fn register(
     let email = email(&v)?;
     let name = name(&v)?;
     let password = hash_password(new_password(&v)?).await?;
-    let exists: bool = sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM tenants WHERE id=$1)")
-        .bind(&t)
-        .fetch_one(&a.db)
-        .await?;
+    let exists: bool = veyndo_core::tenants::exists(&a.db, &t).await?;
     if !exists {
         return Err(bad("Unknown shop"));
     }

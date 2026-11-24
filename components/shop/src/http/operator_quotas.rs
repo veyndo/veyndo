@@ -15,10 +15,7 @@ pub async fn get(
 ) -> Result<Json<Value>> {
     actor(&h)?;
     validate_tenant(&id)?;
-    let exists: bool = sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM tenants WHERE id=$1)")
-        .bind(&id)
-        .fetch_one(&a.db)
-        .await?;
+    let exists: bool = veyndo_core::tenants::exists(&a.db, &id).await?;
     if !exists {
         return Err(Error(StatusCode::NOT_FOUND, "Shop not found".into()));
     }
@@ -47,9 +44,7 @@ pub async fn save(
     let revision = v["revision"].as_u64().ok_or(bad("Revision required"))?;
     let mut tx = a.db.begin().await?;
     // Tenant row serializes first insert and every update without a missing-row race.
-    sqlx::query("SELECT id FROM tenants WHERE id=$1 FOR UPDATE")
-        .bind(&id)
-        .fetch_optional(&mut *tx)
+    veyndo_core::tenants::lock_if_exists(&mut *tx, &id)
         .await?
         .ok_or(Error(StatusCode::NOT_FOUND, "Shop not found".into()))?;
     let current: Option<i64> =

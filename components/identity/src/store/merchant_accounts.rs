@@ -69,10 +69,7 @@ pub async fn ownership(
     shop: &str,
     user: &str,
 ) -> Result<(bool, bool)> {
-    let exists: bool = sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM tenants WHERE id=$1)")
-        .bind(shop)
-        .fetch_one(&mut *tx)
-        .await?;
+    let exists: bool = veyndo_core::tenants::exists(&mut *tx, shop).await?;
     let owned:bool=sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM membership_grants WHERE tenant=$1 AND user_id=$2 AND role='owner' AND active)").bind(shop).bind(user).fetch_one(&mut *tx).await?;
     Ok((exists, owned))
 }

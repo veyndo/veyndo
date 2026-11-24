@@ -116,11 +116,13 @@ pub async fn save_config(
         return Err(bad("Tax class is assigned to products"));
     }
     let r=sqlx::query("UPDATE commerce_settings SET data=$1,revision=revision+1 WHERE tenant=$2 AND revision=$3 RETURNING revision").bind(json!(s)).bind(&t).bind(revision).fetch_optional(&mut *tx).await?.ok_or(conflict("Configuration changed; reload first"))?;
-    sqlx::query("INSERT INTO outbox(tenant,kind,data) VALUES($1,'commerce.configured',$2)")
-        .bind(t)
-        .bind(json!({"revision":r.get::<i64,_>("revision")}))
-        .execute(&mut *tx)
-        .await?;
+    veyndo_core::outbox::publish_on(
+        &mut *tx,
+        &t,
+        "commerce.configured",
+        &json!({"revision":r.get::<i64,_>("revision")}),
+    )
+    .await?;
     tx.commit().await?;
     Ok(Json(json!({"revision":r.get::<i64,_>("revision")})))
 }
@@ -273,11 +275,13 @@ pub async fn save_scope(
     }
     let patch = difference(&base, &next);
     sqlx::query("INSERT INTO commerce_overrides(tenant,channel_id,data) VALUES($1,$2,$3) ON CONFLICT(tenant,channel_id) DO UPDATE SET data=EXCLUDED.data,revision=commerce_overrides.revision+1").bind(&t).bind(&channel).bind(&patch).execute(&mut *tx).await?;
-    sqlx::query("INSERT INTO outbox(tenant,kind,data) VALUES($1,'commerce.configured',$2)")
-        .bind(&t)
-        .bind(json!({"channelId":channel,"revision":revision.unwrap_or(0)+1}))
-        .execute(&mut *tx)
-        .await?;
+    veyndo_core::outbox::publish_on(
+        &mut *tx,
+        &t,
+        "commerce.configured",
+        &json!({"channelId":channel,"revision":revision.unwrap_or(0)+1}),
+    )
+    .await?;
     tx.commit().await?;
     Ok(Json(
         json!({"data":next,"revision":revision.unwrap_or(0)+1,"baseRevision":v["baseRevision"],"inherited":base,"overrides":patch,"channelId":channel}),

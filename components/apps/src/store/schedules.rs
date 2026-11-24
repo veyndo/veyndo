@@ -47,13 +47,12 @@ pub async fn schedule_once(a: &State) -> Result<()> {
             .next()
             .ok_or(bad("Schedule exhausted"))?
             .to_rfc3339();
-        let event: i64 = sqlx::query_scalar(
-            "INSERT INTO outbox(tenant,kind,data) VALUES($1,$2,$3) RETURNING id",
+        let event = veyndo_core::outbox::publish_id_on(
+            &mut *tx,
+            &t,
+            &format!("app.{app}.{}", s.action),
+            &s.input,
         )
-        .bind(&t)
-        .bind(format!("app.{app}.{}", s.action))
-        .bind(&s.input)
-        .fetch_one(&mut *tx)
         .await?;
         sqlx::query("INSERT INTO app_schedule_runs(tenant,app,schedule,due,event_id) VALUES($1,$2,$3,$4::text::timestamptz,$5)").bind(&t).bind(&app).bind(&id).bind(r.get::<String,_>("due")).bind(event).execute(&mut *tx).await?;
         sqlx::query("UPDATE app_schedules SET next_run=$1::text::timestamptz WHERE tenant=$2 AND app=$3 AND id=$4").bind(next).bind(t).bind(app).bind(id).execute(&mut *tx).await?;
