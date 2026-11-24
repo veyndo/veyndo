@@ -191,6 +191,8 @@ mod tests {
             json!({"id":"o2","cart":null,"money":"x","payment":null,"billingAddress":{"name":"Ada"}}),
             json!({"cart":{"currencyContext":{"factor":"NaN"}}}),
             json!({"cart":{"currencyContext":{"factor":"inf"},"price":"flat"}}),
+            json!({"id":"o3","cart":[1,2],"money":[5,"EUR"],"payment":["x"],"billingAddress":["Ada"]}),
+            json!({"cart":{"price":[19.99,16.8],"currencyContext":["1.25"]}}),
             json!({}),
         ];
         for case in cases {

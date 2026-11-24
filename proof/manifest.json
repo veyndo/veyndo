@@ -1713,8 +1713,8 @@
     },
     "components/catalog/src/store/demo_template.rs": {
       "status": "unproved",
-      "sha256": "0c0641e202bff020340673f0d716c321c66e760dcc79c078eea5e53fc3913291",
-      "review": "F11: server wiring assigned to host; remaining server SQL moved into component stores"
+      "sha256": "845e74b9ddba4a24f33d623cac07be268bb2672c717a072c030aff2014240ff4",
+      "review": "F23 typed views: proof bindings unchanged"
     },
     "components/catalog/src/store/media_jobs.rs": {
       "status": "unproved",
@@ -2068,8 +2068,8 @@
     },
     "components/core/src/document.rs": {
       "status": "unproved",
-      "sha256": "3e849f2caa411d41226067c23c27dcdf65ef9acd840c0fa02b5d582bb58314b6",
-      "review": "F22: typed order, receipt and scenario request views"
+      "sha256": "7ca2f7533c54cdd908415048495017536964c8f9e77d8b113b69154772a40c77",
+      "review": "F23 typed views: proof bindings unchanged"
     },
     "components/core/src/failure.rs": {
       "status": "unproved",
@@ -2488,8 +2488,8 @@
     },
     "components/intelligence/src/domain/source_content.rs": {
       "status": "unproved",
-      "sha256": "36dc45534dea62bde4fe81527226ab83c94120b1ff1c0f264c9597198cf692b7",
-      "review": "Unit tests for every public domain function of the components; no production code changed"
+      "sha256": "4520d0522bfa5084445d1151791313e583919422c342b3d127249a10211907f3",
+      "review": "F23 typed views: proof bindings unchanged"
     },
     "components/intelligence/src/domain/tool_trace.rs": {
       "status": "unproved",
@@ -2823,8 +2823,8 @@
     },
     "components/intelligence/src/service/sources.rs": {
       "status": "unproved",
-      "sha256": "09875b35aa87235607feeb4fb306aa01c694e407ff52aba2cbe7bf0396a84bb1",
-      "review": "Experiment operations and source content checks moved into the intelligence component, CRM creation context into customers; behaviour unchanged"
+      "sha256": "e95eb51425b4501f0aee6b1974c7c428283180afa50176b53360561d03b587e1",
+      "review": "F23 typed views: proof bindings unchanged"
     },
     "components/intelligence/src/service/supply_proposal.rs": {
       "status": "unproved",
@@ -2853,8 +2853,8 @@
     },
     "components/intelligence/src/store/documents.rs": {
       "status": "unproved",
-      "sha256": "106e325690dc41f02f9a92e363166ebe192aa9dfc097da0cae2655555e524639",
-      "review": "F17: shared outbox and shop registry helpers in core; written reasons for foreign table access"
+      "sha256": "7f973b73ed125b57dd06bea4ad13a90df6582105fd5ef2bc12566513c5c53f21",
+      "review": "F23 typed views: proof bindings unchanged"
     },
     "components/intelligence/src/store/embedding_generations.rs": {
       "status": "unproved",
@@ -3243,8 +3243,8 @@
     },
     "components/orders/src/domain/order_fields.rs": {
       "status": "unproved",
-      "sha256": "b9c9963e4d704d5edea684cc0ba77d5eb27de2b7588af325d00f789e1d216e7d",
-      "review": "F22: typed order, receipt and scenario request views"
+      "sha256": "1d3d1ebb18cf330a46966664e32551fdfef9f5fa968e2d223f6a6a5c7790d6e7",
+      "review": "F23 typed views: proof bindings unchanged"
     },
     "components/orders/src/domain/order_machine.rs": {
       "status": "unproved",
@@ -3273,8 +3273,8 @@
     },
     "components/orders/src/domain/receipt_text.rs": {
       "status": "unproved",
-      "sha256": "e05a973228b3ed32e487e63765eddb1a1cc023d2a40443850b3944df9cb47a93",
-      "review": "F22: typed order, receipt and scenario request views"
+      "sha256": "a3a645f0cd0083251406107932a15d66e01c2a319a254063f0cc31573477303f",
+      "review": "F23 typed views: proof bindings unchanged"
     },
     "components/orders/src/domain.rs": {
       "status": "unproved",
@@ -3543,8 +3543,8 @@
     },
     "components/payments/src/service/providers.rs": {
       "status": "unproved",
-      "sha256": "cb7764ab8b1fdb0de88c6605210f899aac1fd12d87260ad6ce6607adc77ea062",
-      "review": "F8: payment providers, POS register and B2B commands moved into their components"
+      "sha256": "22f35f1b09d703b541f7a1fd16dc38143709de819a15f801c13470521d29acff",
+      "review": "F23 typed views: proof bindings unchanged"
     },
     "components/payments/src/service/receipts.rs": {
       "status": "unproved",

@@ -2,8 +2,33 @@
 use serde_json::{Value, json};
 use veyndo_core::{Error, RequestContext, Result, StatusCode, bad, hash};
 
+/// A validated source in canonical form; `translations` keeps its stored JSON shape, which the digest binds.
+#[derive(Debug, Clone, PartialEq)]
+pub struct Source {
+    pub title: String,
+    pub content: String,
+    pub product_id: Option<String>,
+    pub kind: String,
+    pub locale: String,
+    pub translations: Value,
+    pub digest: String,
+}
+
+impl Source {
+    /// The source text followed by every translated text, each with its language, in chunking order.
+    pub fn texts(&self) -> Vec<(&str, &str)> {
+        let mut texts = vec![(self.locale.as_str(), self.content.as_str())];
+        for (locale, fields) in self.translations.as_object().into_iter().flatten() {
+            if let Some(text) = fields.get("content").and_then(Value::as_str) {
+                texts.push((locale.as_str(), text));
+            }
+        }
+        texts
+    }
+}
+
 /// Admits a source in the shop's enabled languages and returns it in canonical form with its content digest.
-pub fn validate(locales: &[String], main_locale: &str, v: &Value) -> Result<Value> {
+pub fn validate(locales: &[String], main_locale: &str, v: &Value) -> Result<Source> {
     if v.as_object().is_none_or(|o| {
         o.keys().any(|k| {
             ![
@@ -86,9 +111,18 @@ pub fn validate(locales: &[String], main_locale: &str, v: &Value) -> Result<Valu
     } else {
         hash(&format!("{locale}:{text}:{translations}"))
     };
-    Ok(
-        json!({"title":title,"content":text,"productId":v["productId"].as_str().filter(|s|!s.is_empty()),"kind":kind,"locale":locale,"translations":translations,"digest":digest}),
-    )
+    Ok(Source {
+        title: title.into(),
+        content: text.into(),
+        product_id: v["productId"]
+            .as_str()
+            .filter(|s| !s.is_empty())
+            .map(str::to_string),
+        kind: kind.into(),
+        locale: locale.into(),
+        translations,
+        digest,
+    })
 }
 
 /// Remembered guidance is a personal merchant decision; apps and integration keys cannot write it.
@@ -104,31 +138,37 @@ pub fn admit_guidance(h: &RequestContext, kind: &Value) -> Result<()> {
 
 #[cfg(test)]
 mod tests {
-    use super::{admit_guidance, validate};
+    use super::{Source, admit_guidance, validate};
     use serde_json::{Value, json};
     use veyndo_core::{RequestContext, StatusCode};
 
-    fn check(v: Value) -> veyndo_core::Result<Value> {
+    fn check(v: Value) -> veyndo_core::Result<Source> {
         validate(&["en-GB".into(), "de-DE".into()], "en-GB", &v)
     }
 
     #[test]
     fn a_source_is_returned_in_canonical_form_with_a_digest_of_its_content() {
         let v = check(json!({"title":"Care","content":"Wash cold","productId":""})).unwrap();
-        assert_eq!(v["kind"], "document");
-        assert_eq!(v["locale"], "en-GB");
-        assert_eq!(v["productId"], Value::Null);
-        assert_eq!(v["translations"], json!({}));
+        assert_eq!(v.kind, "document");
+        assert_eq!(v.locale, "en-GB");
+        assert_eq!(v.product_id, None);
+        assert_eq!(v.translations, json!({}));
         let same = check(json!({"title":"Other title","content":"Wash cold"})).unwrap();
-        assert_eq!(v["digest"], same["digest"]);
+        assert_eq!(v.digest, same.digest);
         let translated = check(
             json!({"title":"Care","content":"Wash cold","kind":"care","productId":"p1",
             "translations":{"de-DE":{"title":"Pflege","content":null}}}),
         )
         .unwrap();
-        assert_ne!(v["digest"], translated["digest"]);
-        assert_eq!(translated["productId"], "p1");
-        assert_eq!(translated["kind"], "care");
+        assert_ne!(v.digest, translated.digest);
+        assert_eq!(translated.product_id.as_deref(), Some("p1"));
+        assert_eq!(translated.kind, "care");
+        assert_eq!(translated.texts(), vec![("en-GB", "Wash cold")]);
+        let both = check(json!({"title":"Care","content":"Wash cold","translations":{"de-DE":{"content":"Kalt waschen"}}})).unwrap();
+        assert_eq!(
+            both.texts(),
+            vec![("en-GB", "Wash cold"), ("de-DE", "Kalt waschen")]
+        );
     }
 
     #[test]

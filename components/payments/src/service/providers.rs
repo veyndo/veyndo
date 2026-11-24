@@ -4,8 +4,10 @@ use crate::domain::service_config::approval_url;
 use crate::domain::settlements::summary;
 use crate::ports::{Gateway, Host};
 use crate::store::attempts::attempt;
+use serde::Deserialize;
 use serde_json::{Value, json};
 use sqlx::Row;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::{
     Error, RequestContext, Result, State, StatusCode, bad, conflict, process_config,
 };
@@ -62,30 +64,33 @@ pub async fn onboarding(
     let result = gateway
         .call(&t, id, &m.version, environment, "onboarding", &body)
         .await?;
-    if result["apiVersion"] != "1"
-        || result["adapterVersion"] != m.version
-        || result["tenant"] != t
-        || result["provider"] != id
-        || result["environment"] != environment
-        || result["channel"] != channel
+    let receipt: OnboardingReceipt = view(&result);
+    if receipt.api_version.as_deref() != Some("1")
+        || receipt.adapter_version.as_deref() != Some(m.version.as_str())
+        || receipt.tenant.as_deref() != Some(t.as_str())
+        || receipt.provider.as_deref() != Some(id)
+        || receipt.environment.as_deref() != Some(environment)
+        || receipt.channel.as_deref() != Some(channel)
     {
         return Err(bad("Onboarding account identity mismatch"));
     }
-    let account = result["accountRef"]
-        .as_str()
+    let account = receipt
+        .account_ref
+        .as_deref()
         .filter(|v| !v.is_empty() && v.len() <= 200)
         .ok_or(bad("Provider account reference missing"))?;
-    let ready = result["ready"]
-        .as_bool()
+    let ready = receipt
+        .ready
         .ok_or(bad("Provider account readiness missing"))?;
     // No arbitrary service payload or credential is returned to merchant/model callers.
-    let mut response = json!({"provider":id,"channel":channel,"accountRef":account,"ready":ready,"environment":environment,"status":result["status"]});
-    if let Some(url) = result["onboardingUrl"].as_str() {
+    let mut response = json!({"provider":id,"channel":channel,"accountRef":account,"ready":ready,"environment":environment,"status":receipt.status});
+    if let Some(url) = &receipt.onboarding_url {
         let p = onboarding_attempt(id, &t, &m.version, environment);
         response["onboardingUrl"] = json!(approval_url(host, &p, &json!(url))?);
     }
-    let methods = result["methods"]
-        .as_array()
+    let methods = receipt
+        .methods
+        .as_ref()
         .filter(|ms| {
             ms.len() <= 32
                 && ms.iter().all(|v| {
@@ -98,7 +103,7 @@ pub async fn onboarding(
         return Err(bad("Ready account requires enabled methods"));
     }
     response["methods"] = json!(methods);
-    let public = json!({"accountRef":account,"ready":ready,"environment":environment,"methods":methods,"status":result["status"]});
+    let public = json!({"accountRef":account,"ready":ready,"environment":environment,"methods":methods,"status":receipt.status});
     bind_account(
         a,
         (&t, id, &m.version),
@@ -108,6 +113,33 @@ pub async fn onboarding(
     )
     .await?;
     Ok(response)
+}
+
+/// The adapter's onboarding answer; each field of another shape reads as absent, as indexing did.
+#[derive(Deserialize, Default, Debug, PartialEq)]
+#[serde(default, rename_all = "camelCase")]
+struct OnboardingReceipt {
+    #[serde(deserialize_with = "lenient")]
+    api_version: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    adapter_version: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    tenant: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    provider: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    environment: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    channel: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    account_ref: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    ready: Option<bool>,
+    #[serde(deserialize_with = "lenient")]
+    onboarding_url: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    methods: Option<Vec<Value>>,
+    status: Value,
 }
 
 /// The approval URL check validates against the provider identity of the onboarding call; no ledger attempt exists.
@@ -252,8 +284,36 @@ pub fn onboarding_action() -> Value {
 
 #[cfg(test)]
 mod tests {
-    use super::{configured_environments, mark_configured, onboarding_action};
-    use serde_json::json;
+    use super::{OnboardingReceipt, configured_environments, mark_configured, onboarding_action};
+    use serde_json::{Value, json};
+    use veyndo_core::document::view;
+
+    #[test]
+    fn the_typed_receipt_reads_exactly_what_indexing_read() {
+        let legacy = |r: &Value| OnboardingReceipt {
+            api_version: r["apiVersion"].as_str().map(str::to_string),
+            adapter_version: r["adapterVersion"].as_str().map(str::to_string),
+            tenant: r["tenant"].as_str().map(str::to_string),
+            provider: r["provider"].as_str().map(str::to_string),
+            environment: r["environment"].as_str().map(str::to_string),
+            channel: r["channel"].as_str().map(str::to_string),
+            account_ref: r["accountRef"].as_str().map(str::to_string),
+            ready: r["ready"].as_bool(),
+            onboarding_url: r["onboardingUrl"].as_str().map(str::to_string),
+            methods: r["methods"].as_array().cloned(),
+            status: r["status"].clone(),
+        };
+        for r in [
+            json!({"apiVersion":"1","adapterVersion":"1.0.0","tenant":"s","provider":"p","environment":"sandbox","channel":"default","accountRef":"acct","ready":true,"methods":["card"],"status":{"kyc":"ok"},"onboardingUrl":"https://x"}),
+            json!({"apiVersion":1,"ready":"yes","methods":"card","accountRef":7,"status":null,"onboardingUrl":false}),
+            json!({"methods":[1,"card",null],"ready":false}),
+            json!({}),
+            json!(null),
+            json!(["not", "an", "object"]),
+        ] {
+            assert_eq!(view::<OnboardingReceipt>(&r), legacy(&r), "{r}");
+        }
+    }
 
     #[test]
     fn environments_expose_only_public_metadata() {

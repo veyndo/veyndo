@@ -1,11 +1,103 @@
 //! Typed views of stored JSON documents. A field with an unexpected shape reads as its default, exactly as indexing into the JSON yields null, so a view never rejects a document the untyped reader accepted.
-use serde::de::DeserializeOwned;
+use serde::de::{DeserializeOwned, Error as _, Visitor};
 use serde::{Deserialize, Deserializer};
 use serde_json::Value;
 
 /// Reads the whole document as `T`; a document of another shape reads as the default.
+/// A record (struct) reads only from an object: serde would also accept a positional array, where indexing yields null.
 pub fn view<T: DeserializeOwned + Default>(v: &Value) -> T {
-    serde_json::from_value(v.clone()).unwrap_or_default()
+    T::deserialize(Record(v.clone())).unwrap_or_default()
+}
+
+/// A JSON value that refuses to deserialize a struct from anything but an object.
+struct Record(Value);
+
+macro_rules! forward {
+    ($($method:ident),*) => {$(
+        fn $method<V: Visitor<'de>>(self, visitor: V) -> Result<V::Value, Self::Error> {
+            self.0.$method(visitor)
+        }
+    )*};
+}
+
+impl<'de> Deserializer<'de> for Record {
+    type Error = serde_json::Error;
+    forward!(
+        deserialize_any,
+        deserialize_bool,
+        deserialize_i8,
+        deserialize_i16,
+        deserialize_i32,
+        deserialize_i64,
+        deserialize_i128,
+        deserialize_u8,
+        deserialize_u16,
+        deserialize_u32,
+        deserialize_u64,
+        deserialize_u128,
+        deserialize_f32,
+        deserialize_f64,
+        deserialize_char,
+        deserialize_str,
+        deserialize_string,
+        deserialize_bytes,
+        deserialize_byte_buf,
+        deserialize_option,
+        deserialize_unit,
+        deserialize_seq,
+        deserialize_map,
+        deserialize_identifier,
+        deserialize_ignored_any
+    );
+    fn deserialize_unit_struct<V: Visitor<'de>>(
+        self,
+        name: &'static str,
+        visitor: V,
+    ) -> Result<V::Value, Self::Error> {
+        self.0.deserialize_unit_struct(name, visitor)
+    }
+    fn deserialize_newtype_struct<V: Visitor<'de>>(
+        self,
+        name: &'static str,
+        visitor: V,
+    ) -> Result<V::Value, Self::Error> {
+        self.0.deserialize_newtype_struct(name, visitor)
+    }
+    fn deserialize_tuple<V: Visitor<'de>>(
+        self,
+        len: usize,
+        visitor: V,
+    ) -> Result<V::Value, Self::Error> {
+        self.0.deserialize_tuple(len, visitor)
+    }
+    fn deserialize_tuple_struct<V: Visitor<'de>>(
+        self,
+        name: &'static str,
+        len: usize,
+        visitor: V,
+    ) -> Result<V::Value, Self::Error> {
+        self.0.deserialize_tuple_struct(name, len, visitor)
+    }
+    fn deserialize_enum<V: Visitor<'de>>(
+        self,
+        name: &'static str,
+        variants: &'static [&'static str],
+        visitor: V,
+    ) -> Result<V::Value, Self::Error> {
+        self.0.deserialize_enum(name, variants, visitor)
+    }
+    fn deserialize_struct<V: Visitor<'de>>(
+        self,
+        name: &'static str,
+        fields: &'static [&'static str],
+        visitor: V,
+    ) -> Result<V::Value, Self::Error> {
+        if self.0.is_object() {
+            self.0.deserialize_struct(name, fields, visitor)
+        } else {
+            Err(Self::Error::custom("a record reads only from an object"))
+        }
+    }
 }
 
 /// Field deserializer: the field as `T`, or its default when the stored value has another shape.
@@ -60,5 +152,12 @@ mod tests {
         assert!(o.items.is_empty());
         let o: Outer = view(&json!("not an object"));
         assert_eq!(o, Outer::default());
+        let o: Outer = view(&json!({"inner":[7],"items":[[1]],"plain":[3]}));
+        assert_eq!(o.inner, Inner::default());
+        assert_eq!(o.items, vec![Inner::default()]);
+        assert_eq!(o.plain, json!([3]));
+        assert_eq!(view::<Outer>(&json!([{"a":1}, [], 2])), Outer::default());
+        assert_eq!(view::<Vec<String>>(&json!(["a", "b"])), vec!["a", "b"]);
+        assert_eq!(view::<Option<String>>(&json!(null)), None);
     }
 }

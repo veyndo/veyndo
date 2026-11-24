@@ -1,5 +1,5 @@
 //! Knowledge sources: hash-bound chunks, revision-checked edits, archive and publication, written atomically with their graph relations.
-use crate::domain::source_content::admit_guidance;
+use crate::domain::source_content::{Source, admit_guidance};
 use crate::knowledge::{sync_document, sync_product, vectors};
 use serde_json::{Value, json};
 use sqlx::Row;
@@ -13,24 +13,15 @@ pub async fn chunks(
     tx: &mut sqlx::Transaction<'_, sqlx::Postgres>,
     t: &str,
     id: &str,
-    v: &Value,
+    source: &Source,
 ) -> Result<usize> {
     sqlx::query("DELETE FROM knowledge_chunks WHERE tenant=$1 AND document_id=$2")
         .bind(t)
         .bind(id)
         .execute(&mut **tx)
         .await?;
-    let mut sources = vec![(
-        v["locale"].as_str().unwrap(),
-        v["content"].as_str().unwrap(),
-    )];
-    for (locale, fields) in v["translations"].as_object().unwrap() {
-        if let Some(text) = fields["content"].as_str() {
-            sources.push((locale, text));
-        }
-    }
     let mut position = 0;
-    for (locale, text) in sources {
+    for (locale, text) in source.texts() {
         for chunk in text.chars().collect::<Vec<_>>().chunks(1200) {
             sqlx::query("INSERT INTO knowledge_chunks(tenant,document_id,position,text,locale) VALUES($1,$2,$3,$4,$5)").bind(t).bind(id).bind(position as i32).bind(chunk.iter().collect::<String>()).bind(locale).execute(&mut **tx).await?;
             position += 1;
@@ -59,7 +50,7 @@ pub async fn edit(
     t: &str,
     id: &str,
     v: &Value,
-    data: &Value,
+    data: &Source,
 ) -> Result<Value> {
     let rev = v["revision"].as_i64().ok_or(bad("Revision required"))?;
     let mut tx = a.db.begin().await?;
@@ -70,7 +61,7 @@ pub async fn edit(
         .await?;
     let prior: String = sqlx::query_scalar("SELECT kind FROM knowledge_documents WHERE tenant=$1 AND id=$2 AND NOT archived FOR UPDATE").bind(t).bind(id).fetch_optional(&mut *tx).await?.ok_or(Error(StatusCode::NOT_FOUND,"Source unavailable".into()))?;
     admit_guidance(h, &json!(prior))?;
-    let product = data["productId"].as_str();
+    let product = data.product_id.as_deref();
     if let Some(p) = product {
         let r = sqlx::query("SELECT * FROM products WHERE tenant=$1 AND id=$2")
             .bind(t)
@@ -80,25 +71,17 @@ pub async fn edit(
             .ok_or(bad("Unknown owning product"))?;
         sync_product(&mut tx, t, &json!(products::product(&r))).await?;
     }
-    let duplicate:bool=sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM knowledge_documents WHERE tenant=$1 AND id<>$2 AND product_id IS NOT DISTINCT FROM $3 AND content_hash=$4)").bind(t).bind(id).bind(product).bind(data["digest"].as_str()).fetch_one(&mut *tx).await?;
+    let duplicate:bool=sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM knowledge_documents WHERE tenant=$1 AND id<>$2 AND product_id IS NOT DISTINCT FROM $3 AND content_hash=$4)").bind(t).bind(id).bind(product).bind(&data.digest).fetch_one(&mut *tx).await?;
     if duplicate {
         return Err(conflict("Identical source already exists"));
     }
     let n=sqlx::query("UPDATE knowledge_documents SET title=$1,content=$2,content_hash=$3,product_id=$4,kind=$5,locale=$6,translations=$7,visibility='private',revision=revision+1 WHERE tenant=$8 AND id=$9 AND revision=$10 AND NOT archived")
-        .bind(data["title"].as_str()).bind(data["content"].as_str()).bind(data["digest"].as_str()).bind(product).bind(data["kind"].as_str()).bind(data["locale"].as_str()).bind(&data["translations"]).bind(t).bind(id).bind(rev).execute(&mut *tx).await?.rows_affected();
+        .bind(&data.title).bind(&data.content).bind(&data.digest).bind(product).bind(&data.kind).bind(&data.locale).bind(&data.translations).bind(t).bind(id).bind(rev).execute(&mut *tx).await?.rows_affected();
     if n != 1 {
         return Err(conflict("Source changed, archived or unavailable"));
     }
     let chunks = chunks(&mut tx, t, id, data).await?;
-    sync_document(
-        &mut tx,
-        t,
-        id,
-        product,
-        data["title"].as_str().unwrap(),
-        data["digest"].as_str().unwrap(),
-    )
-    .await?;
+    sync_document(&mut tx, t, id, product, &data.title, &data.digest).await?;
     record(
         &mut tx,
         t,
@@ -109,7 +92,7 @@ pub async fn edit(
     .await?;
     tx.commit().await?;
     Ok(
-        json!({"id":id,"revision":rev+1,"visibility":"private","chunks":chunks,"contentHash":data["digest"]}),
+        json!({"id":id,"revision":rev+1,"visibility":"private","chunks":chunks,"contentHash":data.digest}),
     )
 }
 
@@ -173,13 +156,11 @@ pub async fn save(
     a: &State,
     h: &RequestContext,
     t: &str,
-    data: &Value,
+    data: &Source,
     source: &str,
 ) -> Result<Value> {
-    let title = data["title"].as_str().unwrap();
-    let text = data["content"].as_str().unwrap();
-    let product = data["productId"].as_str();
-    let digest = data["digest"].as_str().unwrap();
+    let (title, text, digest) = (&data.title, &data.content, &data.digest);
+    let product = data.product_id.as_deref();
     let mut tx = a.db.begin().await?;
     history_context::context(&mut tx, h, "merchant").await?;
     sqlx::query("SELECT pg_advisory_xact_lock(hashtextextended($1,15))")
@@ -197,7 +178,7 @@ pub async fn save(
     }
     if let Some(id)=sqlx::query_scalar::<_,String>("SELECT id FROM knowledge_documents WHERE tenant=$1 AND product_id IS NOT DISTINCT FROM $2 AND content_hash=$3").bind(t).bind(product).bind(digest).fetch_optional(&mut *tx).await? {return Ok(json!({"id":id,"reused":true,"visibility":"private-or-existing"}));}
     let id = uid();
-    sqlx::query("INSERT INTO knowledge_documents(tenant,id,product_id,title,content_hash,content,source_type,kind,locale,translations) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)").bind(t).bind(&id).bind(product).bind(title).bind(digest).bind(text).bind(source).bind(data["kind"].as_str()).bind(data["locale"].as_str()).bind(&data["translations"]).execute(&mut *tx).await?;
+    sqlx::query("INSERT INTO knowledge_documents(tenant,id,product_id,title,content_hash,content,source_type,kind,locale,translations) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)").bind(t).bind(&id).bind(product).bind(title).bind(digest).bind(text).bind(source).bind(&data.kind).bind(&data.locale).bind(&data.translations).execute(&mut *tx).await?;
     let chunks = chunks(&mut tx, t, &id, data).await?;
     sync_document(&mut tx, t, &id, product, title, digest).await?;
     veyndo_core::outbox::publish_on(

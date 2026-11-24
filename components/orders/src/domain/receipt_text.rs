@@ -557,6 +557,8 @@ mod tests {
         bare["pos"] = json!("x");
         cases.push(json!({"kind":"invoice","locale":"es","order":bare,"seller":null}));
         cases.push(json!({"kind":"invoice","order":{"cart":null}}));
+        cases.push(json!({"kind":"invoice","locale":"en","order":{"cart":[1],"billingAddress":["Ada","Berlin"]},"seller":["Shop"]}));
+        cases.push(json!({"kind":"delivery_note","locale":"en","order":order(),"delivery":["p1"]}));
         cases.push(json!(null));
         cases.push(json!({"kind":"invoice","locale":"de","order":{"pos":{"receiptMessage":{"de":"Hallo"}},"cart":{}}}));
         for case in cases {
