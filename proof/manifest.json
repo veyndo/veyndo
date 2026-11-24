@@ -2853,8 +2853,8 @@
     },
     "components/intelligence/src/store/documents.rs": {
       "status": "unproved",
-      "sha256": "2ee0cfb6551143872d11ae19ef8b9b4b21fcfad1d0490016e0c355c6c91d4aaf",
-      "review": "F27 typed request inputs: proof bindings unchanged"
+      "sha256": "f8d832def2e237223c5815c39afe9d3058b36c58e5c8cecaa384003ec0a701a6",
+      "review": "F44 checked query macros: proof bindings unchanged"
     },
     "components/intelligence/src/store/embedding_generations.rs": {
       "status": "unproved",
@@ -2873,8 +2873,8 @@
     },
     "components/intelligence/src/store/experiments.rs": {
       "status": "unproved",
-      "sha256": "1a5aa6affda64bb21d87efc4a80e3109ee3801bb975b4ecbaefe1647e7741ada",
-      "review": "F40 typed inputs (automatic, accessor-equivalent): proof bindings unchanged"
+      "sha256": "8d81ac0561a158c0fb298ff687e11cf8d86085fc809651e9efd5395b40d0b481",
+      "review": "F44 checked query macros: proof bindings unchanged"
     },
     "components/intelligence/src/store/observations.rs": {
       "status": "unproved",
@@ -3373,8 +3373,8 @@
     },
     "components/orders/src/store/receipts.rs": {
       "status": "unproved",
-      "sha256": "9bc8a8993bff53693965319b32c52a93b6435ecb34ca44c70015bdf1212721e5",
-      "review": "F28 typed request inputs: proof bindings unchanged"
+      "sha256": "67e0754d6262283e4196e370558d91de963297624a4447854b8c1a2eb360dfa4",
+      "review": "F44 checked query macros: proof bindings unchanged"
     },
     "components/orders/src/store/redacted_reads.rs": {
       "status": "unproved",
@@ -4128,8 +4128,8 @@
     },
     "components/shop/src/store/consumer_requests.rs": {
       "status": "unproved",
-      "sha256": "bfd7af16399aca41450096aa5c8a660d1123cf4fea5d89bc49bae48daec58fae",
-      "review": "F40 typed inputs (automatic, accessor-equivalent): proof bindings unchanged"
+      "sha256": "111f4fcf8def323339f39c3d8f8f58ff98ecf303ec5e1e5a0792a1e19941f5c8",
+      "review": "F44 checked query macros: proof bindings unchanged"
     },
     "components/shop/src/store/group_usage.rs": {
       "status": "unproved",
@@ -8337,8 +8337,8 @@
       "review": "Apps reader 0.25.0: current OAuth merchant/action admission, signed read-only fixed-schema host and shared original scope/page/field code; real independent PostgreSQL/HTTP/MCP/SDK and runtime/storage regressions pass. Native task context, privileged provisioning, object resolver and write owners retained. No new mathematical claim for host SQL or network."
     },
     "deploy/Dockerfile": {
-      "sha256": "e53df5076a41bce6343d848f0aacd726467e1f975da49d9ddf9d7473f817b69f",
-      "review": "Three further proved rules with production bindings: a signed offer is honoured only unexpired and for the unchanged cart, revision and total (signed_offer.rs, result identical to the former expression); sovereign AI mode admits only the self-operated provider on a self-hosted endpoint (sovereign.rs, same decision, endpoint check no longer short-circuited and free of effects); workspace ID length bounds (core). Three SQL statements gained explicit parameter casts matching their bound types. Kernel, core and cognition unit tests pass. SQL, HTTP and provider behaviour is not formally proved."
+      "sha256": "ebd59bc82d938bd683198cc2d7a552ced65a8521032ef5d71e881e7cc5c1d8e7",
+      "review": "F44 checked query macros: proof bindings unchanged"
     },
     "extensions/apps/marketplaces/Cargo.lock": {
       "sha256": "2b38dfedc96b9acb5ff19003964e3fcb1daa33df27ef594eb29bf4cdd1821e81",

@@ -2806,6 +2806,7 @@ This lists every checked-in source module in these roots, including files with n
 | [scripts/site_markdown.py](../scripts/site_markdown.py) | Render every tracked Markdown document with repository-aware links and search. |
 | [scripts/site_navigation.py](../scripts/site_navigation.py) | Curated reading paths and shared document navigation; Markdown remains authoritative. |
 | [scripts/sql_prepare.py](../scripts/sql_prepare.py) | Prepare every static SQL statement of the Rust sources against the migrated database; a wrong column, table or parameter type fails here instead of at run time. |
+| [scripts/sqlx_cache.py](../scripts/sqlx_cache.py) | Regenerate or check the `.sqlx` query cache of the `sqlx::query_as!` macros against a freshly migrated database. |
 | [scripts/staging.py](../scripts/staging.py) | Real PG proof: private sandbox, immutable app versions, selective release and conflicts. No paid inference. |
 | [scripts/startup_recovery.py](../scripts/startup_recovery.py) | An actual Core startup survives a briefly unreachable isolated PostgreSQL endpoint. |
 | [scripts/storefront_urls.py](../scripts/storefront_urls.py) | Real HTTP product deep links and host isolation in disposable shops. |

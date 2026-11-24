@@ -162,6 +162,21 @@ Removing all Python tooling would not make API latency lower. The architectural 
 verification tools outside production serving**. Any future bundled provider service must
 follow the Rust rule and use the documented gateway, tenant ownership and durable queue.
 
+## Typed inputs and checked queries
+
+- Component and server functions read JSON inputs and stored documents through typed views
+  (`veyndo_core::document::{view, lenient, Raw, merge}`): a lenient field reads exactly what
+  the JSON accessor read for every shape, proven once in `components/core/src/document.rs`.
+  `scripts/testing/typed_inputs.py` (part of `scripts/structure.py`) refuses a new untyped
+  read of a JSON parameter; the remaining readers are listed by category in
+  `scripts/testing/typed-inputs.json` and the list only shrinks.
+- Store reads written as `sqlx::query_as!` are checked at compile time from the committed
+  `.sqlx` cache (`.cargo/config.toml` sets `SQLX_OFFLINE`, so no build depends on a live
+  database). After adding or changing such a query run `scripts/sqlx_cache.py --write`; it
+  migrates a scratch database and regenerates the cache. The `sql_prepare` suite runs
+  `--check` and fails when the cache no longer matches the migrated schema. Every other
+  static statement is still prepared against the schema by `scripts/sql_prepare.py`.
+
 ## Verification and remaining limits
 
 - Rust parser/template/encryption tests include wrong tenant/app binding, tampering,

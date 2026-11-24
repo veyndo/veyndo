@@ -15,14 +15,14 @@ run SQL without being in a `store` folder. Both numbers only fall.
 | --- | ---: | ---: | ---: | ---: | ---: | --- | ---: |
 | core | 4409 | 0 | 4 | 13 | 10 | none | 10 |
 | identity | 3104 | 0 | 44 | 11 | 13 | core (96), inference (2) | 4 |
-| shop | 4087 | 0 | 44 | 9 | 15 | catalog (1), core (88), identity (3), inventory (1), pricing (21), shipping (4) | 19 |
+| shop | 4103 | 0 | 44 | 9 | 15 | catalog (1), core (88), identity (3), inventory (1), pricing (21), shipping (4) | 19 |
 | catalog | 6151 | 0 | 77 | 2 | 11 | core (78), identity (10), pricing (13) | 7 |
 | inventory | 420 | 0 | 0 | 0 | 2 | catalog (1), core (8), pricing (2) | 1 |
 | pricing | 3312 | 0 | 10 | 1 | 2 | core (28), identity (1) | 3 |
 | shipping | 593 | 0 | 10 | 0 | 0 | core (10), identity (1), pricing (2) | 6 |
 | checkout | 4916 | 0 | 102 | 6 | 3 | b2b (13), catalog (10), core (69), customers (2), identity (2), inventory (2), marketing (11), orders (1), payments (2), pricing (43), shipping (3), shop (80) | 15 |
 | customers | 1980 | 0 | 32 | 2 | 3 | core (38), identity (6), marketing (3), pricing (6), shipping (3), shop (9) | 2 |
-| orders | 5122 | 0 | 95 | 3 | 7 | b2b (1), catalog (4), core (64), customers (2), identity (8), inventory (1), pricing (3), shipping (2), shop (4) | 8 |
+| orders | 5138 | 0 | 95 | 3 | 7 | b2b (1), catalog (4), core (64), customers (2), identity (8), inventory (1), pricing (3), shipping (2), shop (4) | 8 |
 | payments | 4742 | 0 | 151 | 11 | 7 | core (67), identity (4), inventory (1), orders (1), pricing (8), shop (7) | 13 |
 | marketing | 6386 | 0 | 122 | 9 | 8 | automation (19), b2b (2), catalog (3), core (88), identity (16), inference (1), pricing (16), shop (24) | 24 |
 | b2b | 2842 | 0 | 39 | 7 | 8 | core (50), identity (12), pricing (6), shop (34) | 7 |
@@ -30,7 +30,7 @@ run SQL without being in a `store` folder. Both numbers only fall.
 | apps | 14006 | 0 | 261 | 18 | 22 | b2b (1), catalog (2), checkout (5), core (252), identity (41), inference (4), intelligence (2), inventory (2), marketing (5), orders (10), pricing (6), shipping (2), shop (21) | 21 |
 | automation | 1443 | 8 | 97 | 0 | 0 | core (2) | 0 |
 | inference | 2091 | 0 | 108 | 2 | 0 | core (17) | 5 |
-| intelligence | 12149 | 0 | 346 | 29 | 28 | catalog (10), checkout (11), core (224), customers (1), identity (29), inference (10), inventory (1), marketing (13), pricing (20), shipping (3), shop (52) | 28 |
+| intelligence | 12182 | 0 | 346 | 29 | 28 | catalog (10), checkout (11), core (224), customers (1), identity (29), inference (10), inventory (1), marketing (13), pricing (20), shipping (3), shop (52) | 28 |
 | studio | 7446 | 0 | 298 | 23 | 5 | apps (30), b2b (3), catalog (29), checkout (2), core (119), customers (7), identity (40), inference (4), intelligence (23), marketing (12), orders (20), pos (2), pricing (12), shop (30) | 42 |
 | protocols | 3045 | 0 | 111 | 2 | 0 | catalog (1), checkout (2), core (111), host (209), inference (1), intelligence (2), pricing (2), shop (5) | 2 |
 | host | 16790 | 0 | 215 | 11 | 1 | apps (49), catalog (56), checkout (14), core (1443), identity (8), inference (2), intelligence (32), inventory (4), marketing (11), orders (2), payments (8), pricing (46), shipping (1), shop (65), studio (18) | 15 |

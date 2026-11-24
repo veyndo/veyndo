@@ -104,10 +104,26 @@ pub async fn receipt(a: &State, c: &StoredCart, id: &str) -> Result<Value> {
 
 /// The most recent requests of a shop for operator review.
 pub async fn list(a: &State, t: &str) -> Result<Value> {
-    let rs=sqlx::query("SELECT id,kind,data,state,revision,channel_id FROM consumer_requests WHERE tenant=$1 ORDER BY created_at DESC,id LIMIT 100").bind(t).fetch_all(&a.db).await?;
-    Ok(
-        json!({"elements":rs.iter().map(|r|json!({"id":r.get::<String,_>("id"),"kind":r.get::<String,_>("kind"),"data":r.get::<Value,_>("data"),"state":r.get::<String,_>("state"),"revision":r.get::<i64,_>("revision"),"salesChannelId":r.get::<String,_>("channel_id")})).collect::<Vec<_>>(),"limit":100}),
+    let rs = sqlx::query_as!(
+        ListedRequest,
+        "SELECT id,kind,data,state,revision,channel_id FROM consumer_requests WHERE tenant=$1 ORDER BY created_at DESC,id LIMIT 100",
+        t
     )
+    .fetch_all(&a.db)
+    .await?;
+    Ok(
+        json!({"elements":rs.iter().map(|r|json!({"id":r.id,"kind":r.kind,"data":r.data,"state":r.state,"revision":r.revision,"salesChannelId":r.channel_id})).collect::<Vec<_>>(),"limit":100}),
+    )
+}
+
+/// One consumer request as the operator list shows it; columns checked at compile time.
+struct ListedRequest {
+    id: String,
+    kind: String,
+    data: Value,
+    state: String,
+    revision: i64,
+    channel_id: String,
 }
 
 /// The JSON fields `review` reads, typed as it reads them.

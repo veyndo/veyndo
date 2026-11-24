@@ -210,6 +210,9 @@ def main(argv=None):
           f'{len(utility)} utility or multi-statement, {len(dynamic)} built at run time, {len(outside)} with bound-value '
           'types or a separate service schema; '
           'negative controls rejected')
+    # Statements written as checked query macros are verified at compile time from the committed
+    # .sqlx cache; regenerate it against this migrated schema and require it to be current.
+    subprocess.run([sys.executable, str(ROOT / 'scripts/sqlx_cache.py'), '--check'], cwd=ROOT, check=True)
     return 0
 
 

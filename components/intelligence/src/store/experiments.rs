@@ -11,11 +11,27 @@ use veyndo_pricing::types::currency::scale;
 static LAST: AtomicU64 = AtomicU64::new(0);
 const ACTOR: &str = "experiment-autopilot";
 
+/// One registered experiment as the experiment list shows it; columns checked at compile time.
+struct ListedExperiment {
+    id: String,
+    data: Value,
+    revision: i64,
+    state: String,
+    started_at: Option<String>,
+    ends_at: Option<String>,
+}
+
 /// The registered experiments of a shop, newest first.
 pub async fn list(a: &State, t: &str) -> Result<Value> {
-    let rows=sqlx::query("SELECT id,data,revision,state,started_at::text,ends_at::text FROM intelligence_experiments WHERE tenant=$1 ORDER BY created_at DESC LIMIT 100").bind(t).fetch_all(&a.db).await?;
+    let rows = sqlx::query_as!(
+        ListedExperiment,
+        "SELECT id,data,revision,state,started_at::text,ends_at::text FROM intelligence_experiments WHERE tenant=$1 ORDER BY created_at DESC LIMIT 100",
+        t
+    )
+    .fetch_all(&a.db)
+    .await?;
     Ok(
-        json!({"experiments":rows.iter().map(|r|json!({"id":r.get::<String,_>("id"),"design":r.get::<Value,_>("data"),"revision":r.get::<i64,_>("revision"),"state":r.get::<String,_>("state"),"startedAt":r.get::<Option<String>,_>("started_at"),"endsAt":r.get::<Option<String>,_>("ends_at")})).collect::<Vec<_>>() }),
+        json!({"experiments":rows.iter().map(|r|json!({"id":r.id,"design":r.data,"revision":r.revision,"state":r.state,"startedAt":r.started_at,"endsAt":r.ends_at})).collect::<Vec<_>>() }),
     )
 }
 

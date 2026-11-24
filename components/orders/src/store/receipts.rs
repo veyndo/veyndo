@@ -10,10 +10,26 @@ use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad, conflic
 
 /// The receipts issued for an order, newest first.
 pub async fn list(a: &State, t: &str, id: &str) -> Result<Value> {
-    let rows=sqlx::query("SELECT id,kind,number,locale,created_at::text AS created FROM order_receipts WHERE tenant=$1 AND order_id=$2 ORDER BY created_at DESC LIMIT 100").bind(t).bind(id).fetch_all(&a.db).await?;
-    Ok(
-        json!({"elements":rows.iter().map(|r|json!({"id":r.get::<String,_>("id"),"kind":r.get::<String,_>("kind"),"number":r.get::<String,_>("number"),"locale":r.get::<String,_>("locale"),"createdAt":r.get::<String,_>("created"),"pdfPath":format!("/api/merchant/receipts/{}/pdf",r.get::<String,_>("id"))})).collect::<Vec<_>>() }),
+    let rows = sqlx::query_as!(
+        ListedReceipt,
+        r#"SELECT id,kind,number,locale,created_at::text AS "created!" FROM order_receipts WHERE tenant=$1 AND order_id=$2 ORDER BY created_at DESC LIMIT 100"#,
+        t,
+        id
     )
+    .fetch_all(&a.db)
+    .await?;
+    Ok(
+        json!({"elements":rows.iter().map(|r|json!({"id":r.id,"kind":r.kind,"number":r.number,"locale":r.locale,"createdAt":r.created,"pdfPath":format!("/api/merchant/receipts/{}/pdf",r.id)})).collect::<Vec<_>>() }),
+    )
+}
+
+/// One issued receipt of an order, as the receipt list shows it; columns checked at compile time.
+struct ListedReceipt {
+    id: String,
+    kind: String,
+    number: String,
+    locale: String,
+    created: String,
 }
 /// A receipt request: its idempotency key, kind, language, the order revision it was shown and what it refers to.
 #[derive(Deserialize, Default)]

@@ -211,11 +211,28 @@ pub async fn save(
     )
 }
 
+/// One knowledge source as the source list shows it; columns checked at compile time.
+struct ListedSource {
+    id: String,
+    product_id: Option<String>,
+    title: String,
+    source_type: String,
+    visibility: String,
+    revision: i64,
+    content_hash: String,
+}
+
 /// The most recent sources of a shop.
 pub async fn list(a: &State, t: &str) -> Result<Value> {
-    let rows=sqlx::query("SELECT id,product_id,title,source_type,visibility,revision,content_hash FROM knowledge_documents WHERE tenant=$1 ORDER BY created_at DESC LIMIT 100").bind(t).fetch_all(&a.db).await?;
+    let rows = sqlx::query_as!(
+        ListedSource,
+        "SELECT id,product_id,title,source_type,visibility,revision,content_hash FROM knowledge_documents WHERE tenant=$1 ORDER BY created_at DESC LIMIT 100",
+        t
+    )
+    .fetch_all(&a.db)
+    .await?;
     Ok(
-        json!({"elements":rows.iter().map(|r|json!({"id":r.get::<String,_>("id"),"productId":r.get::<Option<String>,_>("product_id"),"title":r.get::<String,_>("title"),"sourceType":r.get::<String,_>("source_type"),"visibility":r.get::<String,_>("visibility"),"revision":r.get::<i64,_>("revision"),"contentHash":r.get::<String,_>("content_hash")})).collect::<Vec<_>>() }),
+        json!({"elements":rows.iter().map(|r|json!({"id":r.id,"productId":r.product_id,"title":r.title,"sourceType":r.source_type,"visibility":r.visibility,"revision":r.revision,"contentHash":r.content_hash})).collect::<Vec<_>>() }),
     )
 }
 
