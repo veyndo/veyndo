@@ -3,12 +3,14 @@ use crate::domain::{action_admission, approval, callback_grant, core_extensions,
 use crate::ports::RecordRules;
 use crate::store::package_fence::lock_package_write;
 use crate::store::{managed_data, records};
+use serde::Deserialize;
 use serde_json::{Value, json};
 use sqlx::Row;
 use veyndo_app_model::Entity;
 use veyndo_app_model::admission::callback_scope;
 use veyndo_app_model::manifest::Manifest;
 use veyndo_cognition::inference::settings::{open, seal};
+use veyndo_core::document::{lenient, view};
 use veyndo_core::history_context::context;
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad, conflict, hash};
 use veyndo_identity::{merchant, permit};
@@ -52,7 +54,10 @@ pub async fn save(
     let Some(evidence) = v.get("evidence") else {
         return Ok(());
     };
-    if h.principal.app.as_deref() != Some(m.id.as_str()) || v["status"] != "succeeded" {
+    let report: CompletedReport = view(v);
+    if h.principal.app.as_deref() != Some(m.id.as_str())
+        || report.status.as_deref() != Some("succeeded")
+    {
         return Err(Error(
             StatusCode::FORBIDDEN,
             "Only the approved job service can seal completion evidence".into(),
@@ -97,14 +102,14 @@ pub async fn save(
             "Evidence destination differs from the reviewed job",
         ));
     }
-    if input["fields"]["result"] != v["result"] {
+    if input["fields"]["result"] != report.result {
         return Err(conflict("Evidence result differs from the completed job"));
     }
     let fields = input["fields"]
         .as_object_mut()
         .ok_or(bad("Evidence fields required"))?;
     fields.remove("evidence");
-    let proof = json!({"v":1,"job":v["id"],"actor":job.get::<String,_>("actor"),"action":job.get::<String,_>("action"),"inputHash":hash(&frozen.to_string()),"fieldsHash":hash(&document(entity,&input["fields"]).to_string()),"at":chrono::Utc::now().to_rfc3339()});
+    let proof = json!({"v":1,"job":report.id,"actor":job.get::<String,_>("actor"),"action":job.get::<String,_>("action"),"inputHash":hash(&frozen.to_string()),"fieldsHash":hash(&document(entity,&input["fields"]).to_string()),"at":chrono::Utc::now().to_rfc3339()});
     input["fields"]["evidence"] = json!(
         seal(&binding(t, m, &entity.name, &id), &proof.to_string()).map_err(|_| Error(
             StatusCode::SERVICE_UNAVAILABLE,
@@ -116,6 +121,26 @@ pub async fn save(
     managed_data::save_tx(rules, tx, t, m, entity, &input).await?;
     Ok(())
 }
+/// The completion report fields that evidence is bound to.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct CompletedReport {
+    #[serde(deserialize_with = "lenient")]
+    status: Option<String>,
+    result: Value,
+    id: Value,
+}
+
+/// The records a service asks to verify.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct EvidenceRequest {
+    #[serde(deserialize_with = "lenient")]
+    entity: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    ids: Vec<String>,
+}
+
 /// Verify actual current records, never caller-provided fields or booleans. Ordinary edits invalidate their evidence.
 pub async fn verify(a: &State, h: &RequestContext, m: &Manifest, v: &Value) -> Result<Value> {
     input_schema::validate(
@@ -127,17 +152,17 @@ pub async fn verify(a: &State, h: &RequestContext, m: &Manifest, v: &Value) -> R
         return Err(bad("Evidence read capability not declared"));
     }
     let t = merchant(h)?;
+    let request: EvidenceRequest = view(v);
     let e = m
         .entities
         .iter()
-        .find(|e| e.name == v["entity"] && !e.public_read)
+        .find(|e| Some(&e.name) == request.entity.as_ref() && !e.public_read)
         .ok_or(bad("Private evidence entity required"))?;
     core_extensions::access(e, h, false)?;
     let mut tx = a.db.begin().await?;
     lock_package_write(&mut tx, &t, m).await?;
     let mut verified = vec![];
-    for id in v["ids"].as_array().unwrap() {
-        let id = id.as_str().unwrap();
+    for id in &request.ids {
         let Some(row) = records::get(&mut tx, &t, &m.id, &e.name, id, false).await? else {
             continue;
         };

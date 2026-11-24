@@ -1,4 +1,5 @@
 //! Native revision-bound proposal validation and persistence shared by every design agent.
+use super::DesignRequest;
 use serde_json::Value;
 use serde_json::json;
 use veyndo_app_model::Entity;
@@ -27,7 +28,7 @@ pub(super) async fn prepare(
     m: &Manifest,
     entity: &Entity,
     fields: &Value,
-    v: &Value,
+    v: &DesignRequest,
     result: ResultContext<'_>,
 ) -> Result<Value> {
     let ResultContext {
@@ -38,7 +39,7 @@ pub(super) async fn prepare(
         usage,
     } = result;
     let t = merchant(h)?;
-    let selected = v["selected"].as_str().filter(|s| !s.is_empty());
+    let selected = v.selected.as_str().filter(|s| !s.is_empty());
     let variants = output["variants"]
         .as_array()
         .filter(|r| (1..=3).contains(&r.len()))
@@ -52,7 +53,7 @@ pub(super) async fn prepare(
     .await?;
     for candidate in variants {
         let mut next = fields.clone();
-        let mut content: Value = if v["structure"] != true && v["content"] != true {
+        let mut content: Value = if !v.structure() && !v.content() {
             // Style-only generation never needs to reproduce merchant documents.
             fields["content"].clone()
         } else {
@@ -79,7 +80,7 @@ pub(super) async fn prepare(
             next["theme"] = theme;
         }
         // Reference choices are enforced, not merely included in the model prompt.
-        if v["structure"] != true {
+        if !v.structure() {
             let before = fields["content"]["blocks"]
                 .as_array()
                 .ok_or(bad("Invalid current page"))?;
@@ -95,7 +96,7 @@ pub(super) async fn prepare(
                 return Err(bad("Structure changes were not selected"));
             }
         }
-        if v["content"] != true {
+        if !v.content() {
             for block in content["blocks"]
                 .as_array_mut()
                 .ok_or(bad("Invalid blocks"))?
@@ -124,7 +125,7 @@ pub(super) async fn prepare(
                 }
             }
         }
-        if v["style"] != true {
+        if !v.style() {
             next["theme"] = fields["theme"].clone();
         }
         next["content"] = content;
@@ -136,11 +137,11 @@ pub(super) async fn prepare(
             &mut validation,
             &t,
             &next,
-            v["id"].as_str().ok_or(bad("Page required"))?,
+            v.id.as_str().ok_or(bad("Page required"))?,
         )
         .await?;
         validation.rollback().await?;
-        let args = json!({"id":v["id"],"revision":v["revision"],"fields":next});
+        let args = json!({"id":v.id,"revision":v.revision,"fields":next});
         let p = Proposal {
             navigation: None,
             operations: vec![],
@@ -166,8 +167,8 @@ pub(super) async fn prepare(
         prepared.push((uid(), next, p));
     }
     // All alternatives are validated before any review task becomes visible.
-    if record_revision(a, &t, m, entity, v["id"].as_str().unwrap()).await?
-        != v["revision"].as_i64().unwrap_or(-1)
+    if record_revision(a, &t, m, entity, v.id.as_str().unwrap_or_default()).await?
+        != v.revision.as_i64().unwrap_or(-1)
     {
         return Err(conflict("Page changed during design generation"));
     }

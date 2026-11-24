@@ -1,8 +1,10 @@
 //! Knowledge documents/chunks clone and publish with their source provenance; publication visibility is a reviewed unit.
+use serde::Deserialize;
 use serde_json::{Map, Value, json};
 use sqlx::Row;
 use veyndo_catalog::store::products;
-use veyndo_core::Result;
+use veyndo_core::document::{lenient, view};
+use veyndo_core::{Error, Result, StatusCode};
 use veyndo_intelligence::knowledge::{sync_document, sync_product};
 
 /// The release transaction of a staging shop.
@@ -49,16 +51,50 @@ pub async fn snapshot(
     }
     Ok(())
 }
+/// A staged knowledge source as its release unit stores it, in the table's column names.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct StagedSource {
+    #[serde(deserialize_with = "lenient")]
+    product_id: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    title: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    content_hash: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    content: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    visibility: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    source_type: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    kind: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    locale: Option<String>,
+    translations: Value,
+    #[serde(deserialize_with = "lenient")]
+    archived: Option<bool>,
+}
+
 /// Publishes one reviewed source with its chunks and relations into the live shop.
 pub async fn publish(tx: &mut Tx<'_>, live: &str, stage: &str, id: &str, v: &Value) -> Result<()> {
-    sqlx::query("INSERT INTO knowledge_documents(tenant,id,product_id,title,content_hash,content,visibility,source_type,kind,locale,translations,archived) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) ON CONFLICT(tenant,id) DO UPDATE SET product_id=EXCLUDED.product_id,title=EXCLUDED.title,content_hash=EXCLUDED.content_hash,content=EXCLUDED.content,visibility=EXCLUDED.visibility,source_type=EXCLUDED.source_type,kind=EXCLUDED.kind,locale=EXCLUDED.locale,translations=EXCLUDED.translations,archived=EXCLUDED.archived,revision=knowledge_documents.revision+1").bind(live).bind(id).bind(v["product_id"].as_str()).bind(v["title"].as_str()).bind(v["content_hash"].as_str()).bind(v["content"].as_str()).bind(v["visibility"].as_str()).bind(v["source_type"].as_str()).bind(v["kind"].as_str()).bind(v["locale"].as_str()).bind(&v["translations"]).bind(v["archived"].as_bool().unwrap_or(false)).execute(&mut **tx).await?;
+    let source: StagedSource = view(v);
+    let incomplete = || {
+        Error(
+            StatusCode::INTERNAL_SERVER_ERROR,
+            "Staged knowledge source is incomplete".into(),
+        )
+    };
+    let title = source.title.as_deref().ok_or_else(incomplete)?;
+    let content_hash = source.content_hash.as_deref().ok_or_else(incomplete)?;
+    sqlx::query("INSERT INTO knowledge_documents(tenant,id,product_id,title,content_hash,content,visibility,source_type,kind,locale,translations,archived) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) ON CONFLICT(tenant,id) DO UPDATE SET product_id=EXCLUDED.product_id,title=EXCLUDED.title,content_hash=EXCLUDED.content_hash,content=EXCLUDED.content,visibility=EXCLUDED.visibility,source_type=EXCLUDED.source_type,kind=EXCLUDED.kind,locale=EXCLUDED.locale,translations=EXCLUDED.translations,archived=EXCLUDED.archived,revision=knowledge_documents.revision+1").bind(live).bind(id).bind(&source.product_id).bind(title).bind(content_hash).bind(&source.content).bind(&source.visibility).bind(&source.source_type).bind(&source.kind).bind(&source.locale).bind(&source.translations).bind(source.archived.unwrap_or(false)).execute(&mut **tx).await?;
     sqlx::query("DELETE FROM knowledge_chunks WHERE tenant=$1 AND document_id=$2")
         .bind(live)
         .bind(id)
         .execute(&mut **tx)
         .await?;
     sqlx::query("INSERT INTO knowledge_chunks SELECT (jsonb_populate_record(NULL::knowledge_chunks,to_jsonb(c)||jsonb_build_object('tenant',$3::text))).* FROM knowledge_chunks c WHERE tenant=$1 AND document_id=$2").bind(stage).bind(id).bind(live).execute(&mut **tx).await?;
-    if let Some(product) = v["product_id"].as_str() {
+    if let Some(product) = source.product_id.as_deref() {
         let r = sqlx::query("SELECT * FROM products WHERE tenant=$1 AND id=$2")
             .bind(live)
             .bind(product)
@@ -70,9 +106,9 @@ pub async fn publish(tx: &mut Tx<'_>, live: &str, stage: &str, id: &str, v: &Val
         tx,
         live,
         id,
-        v["product_id"].as_str(),
-        v["title"].as_str().unwrap(),
-        v["content_hash"].as_str().unwrap(),
+        source.product_id.as_deref(),
+        title,
+        content_hash,
     )
     .await?;
     Ok(())

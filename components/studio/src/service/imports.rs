@@ -1,6 +1,8 @@
 //! Generic source-record admission; adapters own source formats, native domain owners retain every write.
 use crate::ports::ImportHost;
+use serde::Deserialize;
 use serde_json::{Value, json};
+use veyndo_core::document::{Raw, lenient, view};
 use veyndo_core::model_contract::validate_native;
 use veyndo_core::shop_scope::parent;
 use veyndo_core::{RequestContext, Result, State, bad};
@@ -33,6 +35,35 @@ pub fn schema(name: &str) -> Option<Value> {
     }
     Some(schema)
 }
+/// One reviewed import step: the source record, its options and, for assets, the binary chunks.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ImportRequest {
+    #[serde(deserialize_with = "lenient")]
+    approve: Option<bool>,
+    #[serde(deserialize_with = "lenient")]
+    record: Raw<RecordKind>,
+    #[serde(deserialize_with = "lenient")]
+    options: Raw<ImportOptions>,
+    asset_chunks: Value,
+}
+
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct RecordKind {
+    #[serde(deserialize_with = "lenient")]
+    kind: Option<String>,
+}
+
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ImportOptions {
+    acknowledged_warnings: Value,
+    #[serde(deserialize_with = "lenient")]
+    destination_digest: Option<String>,
+}
+
+/// Imports one reviewed source record into its native owner.
 pub async fn invoke<H: ImportHost>(host: &H, h: &RequestContext, v: &Value) -> Result<Value> {
     let a = host.core();
     merchant(h)?;
@@ -44,38 +75,41 @@ pub async fn invoke<H: ImportHost>(host: &H, h: &RequestContext, v: &Value) -> R
         .ok_or(bad("Import object required"))?
         .remove("assetChunks");
     validate_native(&schema("merchant.import.record").unwrap(), &metadata)?;
-    if v.get("assetChunks").is_some() && v["record"]["kind"] != "assets" {
+    let input: ImportRequest = view(v);
+    if v.get("assetChunks").is_some() && input.record.kind.as_deref() != Some("assets") {
         return Err(bad("Binary import requires an asset record"));
     }
-    if v["approve"] != true {
+    if input.approve != Some(true) {
         return Err(bad("Review and explicitly approve the source record"));
     }
-    let record: SourceRecord =
-        serde_json::from_value(v["record"].clone()).map_err(|_| bad("Invalid source record"))?;
+    let record: SourceRecord = serde_json::from_value(input.record.raw.clone())
+        .map_err(|_| bad("Invalid source record"))?;
     record.validate()?;
-    if !record.warnings.is_empty() && v["options"]["acknowledgedWarnings"] != json!(record.warnings)
+    if !record.warnings.is_empty() && input.options.acknowledged_warnings != json!(record.warnings)
     {
         return Err(bad("Review all source limitations before importing"));
     }
     match record.kind.as_str() {
         "reviews" => reviews::import(host, h, &record).await,
         "coupons" => coupons::import(host, h, &record).await,
-        "assets" => assets::import(host, h, &record, &v["assetChunks"]).await,
+        "assets" => assets::import(host, h, &record, &input.asset_chunks).await,
         "pages" => {
             host.import_record(
                 h,
                 &record.identity(&identity_namespace(a, &merchant(h)?).await?),
                 &record.data["destination"],
-                v["options"]["destinationDigest"]
-                    .as_str()
+                input
+                    .options
+                    .destination_digest
+                    .as_deref()
                     .ok_or(bad("Reviewed destination package digest required"))?,
             )
             .await
         }
-        "categories" => categories::import(host, h, &record, &v["options"]).await,
-        "products" => products::import(a, h, &record, &v["options"]).await,
-        "customers" => customers::import(a, h, &record, &v["options"]).await,
-        "orders" => historical_orders::import(a, h, &record, &v["options"]).await,
+        "categories" => categories::import(host, h, &record, &input.options.raw).await,
+        "products" => products::import(a, h, &record, &input.options.raw).await,
+        "customers" => customers::import(a, h, &record, &input.options.raw).await,
+        "orders" => historical_orders::import(a, h, &record, &input.options.raw).await,
         _ => Err(bad(
             "Unsupported native import domain; no target data changed",
         )),

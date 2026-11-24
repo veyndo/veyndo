@@ -1123,13 +1123,13 @@
     },
     "components/apps/src/service/job_callbacks.rs": {
       "status": "reviewed-binding",
-      "sha256": "2a9d9f9b0d38b3d7ee17b95c61e00c27bb849460f4bbb42c66b605ba620627e8",
-      "review": "Job callbacks, completion evidence, package verification, installation, activation and upgrade review moved into the apps component behind host ports without behavior change"
+      "sha256": "49c8d0d0b0d47b12d970c3dae4e7cb23f868f7ee4206582a2dd7c222bc3aae0e",
+      "review": "F29 typed request inputs: proof bindings unchanged"
     },
     "components/apps/src/service/job_evidence.rs": {
       "status": "unproved",
-      "sha256": "dc93eac97cca7e6044525b961860c46de873ec2b5e81c15c9079e9d35d2d9c8e",
-      "review": "Job callbacks, completion evidence, package verification, installation, activation and upgrade review moved into the apps component behind host ports without behavior change"
+      "sha256": "aa3dd1b1760b02585086b36a1dcf0984a5c21b5d166770b8d53b757fb84410dc",
+      "review": "F29 typed request inputs: proof bindings unchanged"
     },
     "components/apps/src/service/job_requests.rs": {
       "status": "unproved",
@@ -2068,8 +2068,8 @@
     },
     "components/core/src/document.rs": {
       "status": "unproved",
-      "sha256": "8fc0cac53d532f5e8b3bdd8d986e8af33933fc6901091910ba9e0043f8714e76",
-      "review": "F27 typed request inputs: proof bindings unchanged"
+      "sha256": "1b28d90f134811d7dc04f1fe8ac1111a0b2af25142da2b2ea18f1caa1d80e00f",
+      "review": "F29 typed request inputs: proof bindings unchanged"
     },
     "components/core/src/failure.rs": {
       "status": "unproved",
@@ -4373,8 +4373,8 @@
     },
     "components/studio/src/service/imports.rs": {
       "status": "unproved",
-      "sha256": "cd799d962d0d819bd8d099eaea585fc9a1b842b90ce7cd1100685da8377d5933",
-      "review": "Batch F4: source-record imports moved into studio behind the ImportHost port"
+      "sha256": "3cb540cd2add5bd2204fba5b2f975a7bc6b250073e51713e445da01666712290",
+      "review": "F29 typed request inputs: proof bindings unchanged"
     },
     "components/studio/src/service/manual_orders.rs": {
       "status": "unproved",
@@ -4478,8 +4478,8 @@
     },
     "components/studio/src/store/staging_documents.rs": {
       "status": "unproved",
-      "sha256": "6edeb7c328284acbbd04aea890fab165770d9cd6e38da8f9b46a0d35fec11ea3",
-      "review": "Local flow mutations moved verbatim into the marketing component and staged knowledge sources, assets and categories into the studio component; the flow owner and release selection stay in the server."
+      "sha256": "befc0d483636f03c812f713e40aee995686655a617d04f7951e509baea8865b5",
+      "review": "F29 typed request inputs: proof bindings unchanged"
     },
     "components/studio/src/store/work_items.rs": {
       "status": "unproved",
@@ -5233,18 +5233,18 @@
     },
     "extensions/apps/site-builder/design_agent/agent_handoff.rs": {
       "status": "unproved",
-      "sha256": "b350a3cb2652fee755de41af79f19d386231151ebf00a78bd480c75fe9ca55e7",
-      "review": "F20: site builder and site forms as crates behind the SiteHost port; no path attribute left in src"
+      "sha256": "3c5e0832e43090442c51ed895963f372a784bb49b20c5ab94d4d9f6fc4901b47",
+      "review": "F29 typed request inputs: proof bindings unchanged"
     },
     "extensions/apps/site-builder/design_agent/proposals.rs": {
       "status": "unproved",
-      "sha256": "ca22212d92aeed98c78f024ea6fd8a9ec64bcfc6fb03a274ea3cbbd635e92863",
-      "review": "F20: site builder and site forms as crates behind the SiteHost port; no path attribute left in src"
+      "sha256": "74bff20bf79c3e9eae63af50152da0ec78c78796966f406196d31277cbbaa66d",
+      "review": "F29 typed request inputs: proof bindings unchanged"
     },
     "extensions/apps/site-builder/design_agent.rs": {
       "status": "unproved",
-      "sha256": "e9b8fb5a1df0ba4cb978c0db0488734eff05ff77162a12370d34a1028d60dfa4",
-      "review": "F20: site builder and site forms as crates behind the SiteHost port; no path attribute left in src"
+      "sha256": "75a5231a1c197db1ee1951b97d52917ef662b795132b7856b6a525215a8fbb24",
+      "review": "F29 typed request inputs: proof bindings unchanged"
     },
     "extensions/apps/site-builder/elements.rs": {
       "status": "unproved",

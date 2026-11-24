@@ -1,4 +1,5 @@
 //! Coding agents edit the same page schema through credential-free tasks and explicit native review.
+use super::DesignRequest;
 use crate::SiteHost;
 use serde_json::Value;
 use serde_json::json;
@@ -13,7 +14,7 @@ pub(super) async fn export(
     site: &dyn SiteHost,
     h: &RequestContext,
     fields: &Value,
-    v: &Value,
+    v: &DesignRequest,
 ) -> Result<Value> {
     let a = site.core();
     let tenant = merchant(h)?;
@@ -28,7 +29,7 @@ pub(super) async fn export(
         .collect();
     let (settings, _) = settings(a, &tenant, "default").await?;
     Ok(
-        json!({"agent":v["agent"],"task":format!("Edit this native Veyndo page in its private sandbox. Request: {}. Return the resultTemplate with content/theme edits only. Preserve all IDs, localized maps and product facts. If selected is nonempty, return only that block in content.blocks and preserve the theme. Use only the supplied registered app elements. No HTML/CSS/JS, copied code, secrets, direct writes or publication. Submit the returned JSON for merchant review through merchant.site.propose; only explicit merchant.site.apply may save the approved proposal. Publishing remains a separate selected release.",v["instruction"]),"resultTemplate":{"id":v["id"],"revision":v["revision"],"instruction":v["instruction"],"selected":v["selected"],"summary":"","fields":fields},"schema":crate::planning_contract(),"elements":elements,"locales":settings.locales,"mainLocale":settings.main_locale,"mcpEndpoint":"/mcp","mcpConfig":site.agent_connection(&tenant)?,"credentials":"No credentials are exported. Configure your personal session locally; the Python bridge is optional client tooling only."}),
+        json!({"agent":v.agent,"task":format!("Edit this native Veyndo page in its private sandbox. Request: {}. Return the resultTemplate with content/theme edits only. Preserve all IDs, localized maps and product facts. If selected is nonempty, return only that block in content.blocks and preserve the theme. Use only the supplied registered app elements. No HTML/CSS/JS, copied code, secrets, direct writes or publication. Submit the returned JSON for merchant review through merchant.site.propose; only explicit merchant.site.apply may save the approved proposal. Publishing remains a separate selected release.",v.instruction),"resultTemplate":{"id":v.id,"revision":v.revision,"instruction":v.instruction,"selected":v.selected,"summary":"","fields":fields},"schema":crate::planning_contract(),"elements":elements,"locales":settings.locales,"mainLocale":settings.main_locale,"mcpEndpoint":"/mcp","mcpConfig":site.agent_connection(&tenant)?,"credentials":"No credentials are exported. Configure your personal session locally; the Python bridge is optional client tooling only."}),
     )
 }
 pub(super) async fn propose(
@@ -36,24 +37,25 @@ pub(super) async fn propose(
     h: &RequestContext,
     (m, entity): (&Manifest, &Entity),
     fields: &Value,
-    v: &Value,
+    v: &DesignRequest,
     instruction: &str,
 ) -> Result<Value> {
-    let next = v["fields"].as_object().ok_or(bad("Return page fields"))?;
+    let next = v.fields.as_ref().ok_or(bad("Return page fields"))?;
     for (key, value) in next {
         if !["content", "theme"].contains(&key.as_str()) && fields.get(key) != Some(value) {
             return Err(bad("Coding agent may change only content and theme"));
         }
     }
-    let summary = v["summary"]
-        .as_str()
+    let summary = v
+        .summary
+        .as_deref()
         .filter(|s| !s.trim().is_empty() && s.len() <= 500)
         .ok_or(bad("Describe the proposed changes in 1..500 bytes"))?;
-    let output = json!({"interpretation":summary,"variants":[{"summary":summary,"content_json":v["fields"]["content"].to_string(),"theme_json":v["fields"]["theme"].to_string()}]});
+    let output = json!({"interpretation":summary,"variants":[{"summary":summary,"content_json":next.get("content").unwrap_or(&Value::Null).to_string(),"theme_json":next.get("theme").unwrap_or(&Value::Null).to_string()}]});
     let mut input = v.clone();
-    input["style"] = json!(true);
-    input["structure"] = json!(true);
-    input["content"] = json!(true);
+    input.style = Some(true);
+    input.structure = Some(true);
+    input.content = Some(true);
     super::proposals::prepare(
         site.core(),
         h,

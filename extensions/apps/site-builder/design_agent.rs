@@ -6,6 +6,7 @@ use axum::extract::FromRef;
 use axum::extract::State;
 use axum::http::StatusCode;
 use axum::routing::post;
+use serde::Deserialize;
 use serde_json::Value;
 use serde_json::json;
 use veyndo_app_platform::store::managed_data::list_page;
@@ -16,6 +17,7 @@ use veyndo_core::admission::reserve_ai_attempt;
 use veyndo_core::bad;
 use veyndo_core::conflict;
 use veyndo_core::database::lease::Lease;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::request_context::RequestContext;
 use veyndo_core::shop_scope::parent;
 use veyndo_identity::route_policy::SecureRoutes;
@@ -71,6 +73,44 @@ pub fn schema(name: &str) -> Option<Value> {
         json!({"type":"object","properties":p,"additionalProperties":false,"required":if name.ends_with("apply"){vec!["taskId","approve"]}else if name.ends_with("propose"){vec!["id","revision","fields","instruction"]}else{vec!["id","revision","instruction"]}}),
     )
 }
+/// The input of a design operation: the saved page and revision, the instruction, the selected block,
+/// what the change may touch, and for agent results the returned fields and summary.
+#[derive(Deserialize, Default, Clone)]
+#[serde(default, rename_all = "camelCase")]
+pub(crate) struct DesignRequest {
+    #[serde(deserialize_with = "lenient")]
+    approve: Option<bool>,
+    #[serde(deserialize_with = "lenient")]
+    task_id: Option<String>,
+    id: Value,
+    revision: Value,
+    instruction: Value,
+    selected: Value,
+    agent: Value,
+    #[serde(deserialize_with = "lenient")]
+    structure: Option<bool>,
+    #[serde(deserialize_with = "lenient")]
+    content: Option<bool>,
+    #[serde(deserialize_with = "lenient")]
+    style: Option<bool>,
+    #[serde(deserialize_with = "lenient")]
+    fields: Option<serde_json::Map<String, Value>>,
+    #[serde(deserialize_with = "lenient")]
+    summary: Option<String>,
+}
+
+impl DesignRequest {
+    fn structure(&self) -> bool {
+        self.structure == Some(true)
+    }
+    fn content(&self) -> bool {
+        self.content == Some(true)
+    }
+    fn style(&self) -> bool {
+        self.style == Some(true)
+    }
+}
+
 /// One design operation on the saved page of a design sandbox: plan alternatives, export a coding-agent task, propose agent results or apply an approved proposal.
 pub async fn invoke(
     site: &dyn SiteHost,
@@ -88,11 +128,12 @@ pub async fn invoke(
             "Create or select a design sandbox before preparing changes",
         ));
     }
+    let input: DesignRequest = view(v);
     if name == "merchant.site.apply" {
-        if v["approve"] != true {
+        if input.approve != Some(true) {
             return Err(bad("Explicit approval required"));
         }
-        let id = v["taskId"].as_str().ok_or(bad("Proposal required"))?;
+        let id = input.task_id.as_deref().ok_or(bad("Proposal required"))?;
         let proposal =
             sqlx::query_scalar::<_, Value>("SELECT proposal FROM tasks WHERE tenant=$1 AND id=$2")
                 .bind(&t)
@@ -116,14 +157,16 @@ pub async fn invoke(
     {
         return Err(bad("Unknown design operation"));
     }
-    if v["id"]
+    if input
+        .id
         .as_str()
         .is_none_or(|s| s.is_empty() || s.len() > 100)
-        || v["revision"].as_i64().is_none_or(|n| n < 1)
+        || input.revision.as_i64().is_none_or(|n| n < 1)
     {
         return Err(bad("Saved page ID and positive revision required"));
     }
-    let instruction = v["instruction"]
+    let instruction = input
+        .instruction
         .as_str()
         .filter(|s| !s.trim().is_empty() && s.len() <= 2000)
         .ok_or(bad("Describe a design change in 1..2000 bytes"))?;
@@ -133,32 +176,32 @@ pub async fn invoke(
         .iter()
         .find(|e| e.name == "pages")
         .ok_or(bad("Pages unavailable"))?;
-    let current = list_page(a, &t, &m, entity, &json!({"id":v["id"],"limit":1})).await?;
+    let current = list_page(a, &t, &m, entity, &json!({"id":input.id,"limit":1})).await?;
     let row = current["elements"]
         .as_array()
         .and_then(|r| r.first())
         .ok_or(bad("Save the page before asking the agent"))?;
-    if row["revision"] != v["revision"] {
+    if row["revision"] != input.revision {
         return Err(conflict("Page changed; reload before preparing a design"));
     }
-    let selected = v["selected"].as_str().filter(|s| !s.is_empty());
+    let selected = input.selected.as_str().filter(|s| !s.is_empty());
     let mut fields = row.clone();
     fields.as_object_mut().unwrap().remove("id");
     fields.as_object_mut().unwrap().remove("revision");
     if name == "merchant.site.task" {
-        return agent_handoff::export(site, h, &fields, v).await;
+        return agent_handoff::export(site, h, &fields, &input).await;
     }
     if name == "merchant.site.propose" {
-        return agent_handoff::propose(site, h, (&m, entity), &fields, v, instruction).await;
+        return agent_handoff::propose(site, h, (&m, entity), &fields, &input, instruction).await;
     }
-    if selected.is_some() && v["structure"] != true && v["content"] != true {
+    if selected.is_some() && !input.structure() && !input.content() {
         return Err(bad(
             "Choose the whole page for theme changes, or enable content or structure for the selected section",
         ));
     }
     let (sources, images) = site.references(v).await?;
     let mut schema = json!({"type":"object","additionalProperties":false,"required":["interpretation","variants"],"properties":{"interpretation":{"type":"string","maxLength":2000},"variants":{"type":"array","minItems":2,"maxItems":3,"items":{"type":"object","additionalProperties":false,"required":["summary","content_json","theme_json"],"properties":{"summary":{"type":"string","maxLength":500},"content_json":{"type":"string","maxLength":8192},"theme_json":{"type":"string","maxLength":1024}}}}}});
-    if v["structure"] != true && v["content"] != true {
+    if !input.structure() && !input.content() {
         schema["properties"]["variants"]["items"]["properties"]["content_json"] =
             json!({"type":"string","enum":["{}"]});
     }
@@ -174,9 +217,9 @@ pub async fn invoke(
     let prompt = format!(
         "Instruction: {instruction}\nSelected block: {selected:?}. Current fields: {fields}. Registered app elements: {elements:?}. App blocks use kind=app, extension={{app,surface}} from this registry only. Reference observations: {}. Apply reference style={}, structure={}, content={}. Preserve product IDs and facts. Return the same content/theme schema, no extra keys. If a block is selected, content_json must have blocks with only that one existing ID. text uses localized maps, rich uses localized safe rich-description blocks. Theme supports accent/background/foreground hex colors, font=sans/serif/mono, radius 0..32, spacing 12..96, columns 1..4. Missing references are unavailable, not evidence. Explain analysis and differences in {}.",
         sources,
-        v["style"] == true,
-        v["structure"] == true,
-        v["content"] == true,
+        input.style(),
+        input.structure(),
+        input.content(),
         language_context(a, h).await?.0
     );
     reserve_ai_attempt(a, &t).await?;
@@ -210,7 +253,7 @@ pub async fn invoke(
         &m,
         entity,
         &fields,
-        v,
+        &input,
         proposals::ResultContext {
             instruction,
             output: &output.value,

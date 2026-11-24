@@ -3,6 +3,31 @@ use serde::de::{DeserializeOwned, Error as _, Visitor};
 use serde::{Deserialize, Deserializer, Serialize};
 use serde_json::Value;
 
+/// A JSON value kept exactly as sent, together with the typed view of the fields a reader needs.
+/// Dereferences to the view; `raw` passes the original on unchanged.
+#[derive(Default, Debug, Clone)]
+pub struct Raw<T> {
+    pub raw: Value,
+    pub view: T,
+}
+
+impl<'de, T: DeserializeOwned + Default> Deserialize<'de> for Raw<T> {
+    fn deserialize<D: Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
+        let raw = Value::deserialize(d)?;
+        Ok(Raw {
+            view: view(&raw),
+            raw,
+        })
+    }
+}
+
+impl<T> std::ops::Deref for Raw<T> {
+    type Target = T;
+    fn deref(&self) -> &T {
+        &self.view
+    }
+}
+
 /// Writes a typed update into the object at `slot`: each serialized field replaces the stored one,
 /// other stored fields stay. A missing (null) slot becomes an object, exactly as assigning through
 /// JSON indexing did; any other shape is an error instead of the panic indexing would raise.
@@ -143,7 +168,7 @@ where
 
 #[cfg(test)]
 mod tests {
-    use super::{lenient, lenient_list, merge, view};
+    use super::{Raw, lenient, lenient_list, merge, view};
     use serde::Deserialize;
     use serde_json::{Value, json};
 
@@ -239,6 +264,9 @@ mod tests {
             assert_eq!(typed.b == Some(true), doc["b"] == true, "{shape}");
             assert_eq!(typed.s.as_deref() == Some("x"), doc["s"] == "x", "{shape}");
         }
+        let raw: Raw<Fields> = view(&json!({"s":"x","extra":[1]}));
+        assert_eq!(raw.raw, json!({"s":"x","extra":[1]}));
+        assert_eq!(raw.s.as_deref(), Some("x"));
         let missing: Fields = view(&json!({}));
         assert!(missing.s.is_none() && missing.i.is_none() && missing.raw.is_null());
         let not_object: Fields = view(&json!([1, 2, 3, 4, 5, 6, 7, 8]));

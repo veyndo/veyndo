@@ -3,9 +3,11 @@ use crate::domain::{action_admission, approval, input_schema};
 use crate::ports::Platform;
 use crate::service::job_evidence;
 use crate::store::package_fence::lock_package_write;
+use serde::Deserialize;
 use serde_json::{Value, json};
 use sqlx::Row;
 use veyndo_app_model::manifest::Manifest;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::localized::valid_locale_key;
 use veyndo_core::{Error, RequestContext, Result, StatusCode, bad, conflict, uid};
 use veyndo_identity::{merchant, permit};
@@ -40,12 +42,29 @@ async fn creator(
     identity.principal.permissions = (!rights.is_null()).then(|| rights.to_string());
     Ok(identity)
 }
+/// A job service's claim or progress report, already checked against its schema.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct JobReport {
+    #[serde(deserialize_with = "lenient")]
+    id: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    lease: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    progress: Option<i64>,
+    #[serde(deserialize_with = "lenient")]
+    status: Option<String>,
+    message: Value,
+    result: Value,
+    checkpoint: Value,
+}
+
 /// The localized progress message of a report, bounded in languages and length.
-fn message(v: &Value) -> Result<Value> {
-    let message = if v["message"].is_null() {
+fn message(message: &Value) -> Result<Value> {
+    let message = if message.is_null() {
         json!({})
     } else {
-        v["message"].clone()
+        message.clone()
     };
     if !message.as_object().is_some_and(|o| {
         o.len() <= 100
@@ -74,7 +93,8 @@ pub async fn execute(
         &json!({"type":"object","properties":{"id":{"type":"string","maxLength":100},"lease":{"type":"string","maxLength":100},"progress":{"type":"integer","minimum":0,"maximum":100},"status":{"type":"string","enum":["running","succeeded","failed","cancelled"]},"message":{"type":"object"},"result":{"type":"object"},"checkpoint":{"type":"object"}},"required":["id"],"additionalProperties":false}),
         &metadata,
     )?;
-    if v["result"].to_string().len() > 32768 || v["checkpoint"].to_string().len() > 32768 {
+    let report: JobReport = view(v);
+    if report.result.to_string().len() > 32768 || report.checkpoint.to_string().len() > 32768 {
         return Err(bad("App job result exceeds 32 KiB"));
     }
     // Results are bounded stored documents, not executable action arguments.
@@ -82,7 +102,7 @@ pub async fn execute(
         input_schema::validate_native(&json!({"type":"object"}), result)?;
     }
     let t = merchant(h)?;
-    let id = v["id"].as_str().unwrap();
+    let id = report.id.as_deref().unwrap_or_default();
     let mut tx = a.db.begin().await?;
     let scope = veyndo_app_storage::Scope {
         tenant: &t,
@@ -126,13 +146,13 @@ pub async fn execute(
         if !["running", "cancel_requested"].contains(&state.as_str())
             || !row.get::<Option<bool>, _>("valid").unwrap_or(false)
             || !row.get::<Option<bool>, _>("within_window").unwrap_or(false)
-            || row.get::<Option<String>, _>("lease").as_deref() != v["lease"].as_str()
+            || row.get::<Option<String>, _>("lease").as_deref() != report.lease.as_deref()
         {
             return Err(conflict(
                 "Job lease expired or replaced; external outcome is uncertain",
             ));
         }
-        let status = v["status"].as_str().unwrap_or("running");
+        let status = report.status.as_deref().unwrap_or("running");
         if state == "cancel_requested" && status == "running" {
             return Ok(json!({"cancelRequested":true}));
         }
@@ -145,13 +165,13 @@ pub async fn execute(
         if status == "cancelled" && state != "cancel_requested" {
             return Err(conflict("No cancellation was requested"));
         }
-        let progress = v["progress"]
-            .as_i64()
+        let progress = report
+            .progress
             .unwrap_or(row.get::<i32, _>("progress") as i64);
         if progress < row.get::<i32, _>("progress") as i64 {
             return Err(bad("Job progress cannot move backwards"));
         }
-        let message = message(v)?;
+        let message = message(&report.message)?;
         job_evidence::save(
             a.rules,
             &mut tx,
@@ -170,7 +190,7 @@ pub async fn execute(
             scope,
             id,
             &veyndo_app_storage::progress::Progress {
-                lease: v["lease"].as_str().unwrap(),
+                lease: report.lease.as_deref().unwrap_or_default(),
                 status,
                 progress: if status == "succeeded" {
                     100
@@ -178,7 +198,7 @@ pub async fn execute(
                     progress as i32
                 },
                 message: &message,
-                result: &v["result"],
+                result: &report.result,
                 checkpoint: v.get("checkpoint"),
             },
         )
@@ -201,12 +221,12 @@ mod tests {
 
     #[test]
     fn progress_messages_are_bounded_localized_text() {
-        assert_eq!(message(&json!({})).unwrap(), json!({}));
-        let text = json!({"message":{"en-GB":"Half done","de-DE":"Zur Hälfte fertig"}});
-        assert_eq!(message(&text).unwrap(), text["message"]);
-        assert!(message(&json!({"message":"Half done"})).is_err());
-        assert!(message(&json!({"message":{"not a locale":"x"}})).is_err());
-        assert!(message(&json!({"message":{"en-GB":"x".repeat(501)}})).is_err());
-        assert!(message(&json!({"message":{"en-GB":7}})).is_err());
+        assert_eq!(message(&json!(null)).unwrap(), json!({}));
+        let text = json!({"en-GB":"Half done","de-DE":"Zur Hälfte fertig"});
+        assert_eq!(message(&text).unwrap(), text);
+        assert!(message(&json!("Half done")).is_err());
+        assert!(message(&json!({"not a locale":"x"})).is_err());
+        assert!(message(&json!({"en-GB":"x".repeat(501)})).is_err());
+        assert!(message(&json!({"en-GB":7})).is_err());
     }
 }
