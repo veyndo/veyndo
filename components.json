@@ -270,7 +270,7 @@
         "tenants": "read: reads shop existence, status or the agent stop switch inside a larger claim or join; simple reads go through veyndo_core::tenants (buyer_identity.rs)"
       },
       "glob_imports": 0,
-      "untyped_access": 127,
+      "untyped_access": 112,
       "sql_outside_store": 6
     },
     "customers": {
@@ -376,7 +376,7 @@
         "sales_channels": "read: reads the sales channel document (kind, activity, catalogue scope) to admit the request channel inside the same statement (providers.rs)"
       },
       "glob_imports": 0,
-      "untyped_access": 189,
+      "untyped_access": 184,
       "sql_outside_store": 11
     },
     "marketing": {
@@ -465,7 +465,7 @@
         "products": "read: reads product rows in the same statement as its own data (prices, stock, visibility) (access.rs, catalog.rs, lists.rs, quick_order.rs)"
       },
       "glob_imports": 0,
-      "untyped_access": 68,
+      "untyped_access": 64,
       "sql_outside_store": 7
     },
     "pos": {
@@ -790,7 +790,7 @@
         "tenants": "read: reads shop existence, status or the agent stop switch inside a larger claim or join; simple reads go through veyndo_core::tenants (poppy.rs)"
       },
       "glob_imports": 0,
-      "untyped_access": 122,
+      "untyped_access": 117,
       "sql_outside_store": 2
     },
     "host": {
@@ -937,7 +937,7 @@
         "tenants": "write: shop provisioning creates the shop row (demo_catalog.rs, provision.rs)"
       },
       "glob_imports": 0,
-      "untyped_access": 297,
+      "untyped_access": 282,
       "sql_outside_store": 11
     },
     "connectors": {

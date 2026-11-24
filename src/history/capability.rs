@@ -5,10 +5,12 @@ use crate::{auth, commerce};
 use axum::Json;
 use axum::extract::Path;
 use axum::extract::State;
+use serde::Deserialize;
 use serde_json::Value;
 use serde_json::json;
 use veyndo_core::Result;
 use veyndo_core::bad;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::request_context::RequestContext;
 use veyndo_studio::domain::history_access;
 pub(crate) fn schema(name: &str) -> Option<Value> {
@@ -24,15 +26,27 @@ pub(crate) fn visible(h: &RequestContext, name: &str) -> bool {
     }
     history_access::visible(h, name)
 }
+/// The record and version a history capability names.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct HistoryArgs {
+    #[serde(deserialize_with = "lenient")]
+    entity: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    id: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    before: Option<i64>,
+    #[serde(deserialize_with = "lenient")]
+    version: Option<i64>,
+}
+
 pub(crate) async fn invoke(a: &App, h: &RequestContext, name: &str, v: &Value) -> Result<Value> {
     let Json(value) = if name == "merchant.customer.groups" {
         commerce::groups(State(a.clone()), h.clone()).await?
     } else {
-        let entity = v["entity"]
-            .as_str()
-            .ok_or(bad("entity required"))?
-            .to_string();
-        let id = v["id"].as_str().ok_or(bad("id required"))?.to_string();
+        let args: HistoryArgs = view(v);
+        let entity = args.entity.ok_or(bad("entity required"))?;
+        let id = args.id.ok_or(bad("id required"))?;
         match name {
             "merchant.history" => {
                 transport::list(
@@ -40,7 +54,7 @@ pub(crate) async fn invoke(a: &App, h: &RequestContext, name: &str, v: &Value) -
                     h.clone(),
                     Path((entity, id)),
                     axum::extract::Query(transport::Page {
-                        before: v["before"].as_i64(),
+                        before: args.before,
                     }),
                 )
                 .await?
@@ -49,11 +63,7 @@ pub(crate) async fn invoke(a: &App, h: &RequestContext, name: &str, v: &Value) -
                 transport::detail(
                     State(a.core.clone()),
                     h.clone(),
-                    Path((
-                        entity,
-                        id,
-                        v["version"].as_i64().ok_or(bad("version required"))?,
-                    )),
+                    Path((entity, id, args.version.ok_or(bad("version required"))?)),
                 )
                 .await?
             }
@@ -61,11 +71,7 @@ pub(crate) async fn invoke(a: &App, h: &RequestContext, name: &str, v: &Value) -
                 routes::restore(
                     State(a.clone()),
                     h.clone(),
-                    Path((
-                        entity,
-                        id,
-                        v["version"].as_i64().ok_or(bad("version required"))?,
-                    )),
+                    Path((entity, id, args.version.ok_or(bad("version required"))?)),
                     Json(v.clone()),
                 )
                 .await?

@@ -2,10 +2,12 @@
 use crate::domain::cart_quote::normalized_quantity;
 use crate::ports::{CartEdits, Quotes};
 use crate::store::cart_load;
+use serde::Deserialize;
 use serde_json::{Value, json};
 use sha2::{Digest, Sha256};
 use sqlx::Row;
 use veyndo_b2b::store::access::guard_conn;
+use veyndo_core::document::view;
 use veyndo_core::{RequestContext, Result, State, bad, conflict};
 use veyndo_marketing::service::channels::admit_product;
 use veyndo_shop::domain::cart_lines::validate as validate_items;
@@ -24,18 +26,30 @@ pub struct Edit<'a> {
 }
 
 /// The fingerprint of a reviewed quote: a precondition for a conditional edit, never a credential or a source of prices.
+/// The quote parts a cart review digest binds.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ReviewedParts {
+    line_items: Value,
+    price: Value,
+    checkout: Value,
+    shipping_costs: Value,
+    deliveries: Value,
+}
+
 pub fn review_digest(c: &StoredCart, quote: &Value) -> String {
+    let quote: ReviewedParts = view(quote);
     format!(
         "{:x}",
         Sha256::digest(
             json!([
                 c.id,
                 c.revision,
-                quote["lineItems"],
-                quote["price"],
-                quote["checkout"],
-                quote["shippingCosts"],
-                quote["deliveries"]
+                quote.line_items,
+                quote.price,
+                quote.checkout,
+                quote.shipping_costs,
+                quote.deliveries
             ])
             .to_string()
         )

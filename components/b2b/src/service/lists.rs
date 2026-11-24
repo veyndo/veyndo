@@ -7,6 +7,7 @@ use serde_json::{Value, json};
 use sqlx::Row;
 use std::collections::HashMap;
 use veyndo_app_model::declarations::identifier;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::history_context::{context, customer_context};
 use veyndo_core::shop_scope::{channel, tenant};
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad, conflict};
@@ -27,6 +28,19 @@ struct ListData {
     configurations: Vec<Selection>,
 }
 /// The list operations of a unit member: list, save, delete and apply to the cart.
+/// The input of a shopping list operation: the unit, the list, its revision and its fields.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ListInput {
+    #[serde(deserialize_with = "lenient")]
+    unit_id: Option<String>,
+    data: Value,
+    #[serde(deserialize_with = "lenient")]
+    id: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    revision: Option<i64>,
+}
+
 pub async fn invoke(
     a: &State,
     ports: (&dyn Carts, &dyn ListCarts),
@@ -36,10 +50,11 @@ pub async fn invoke(
 ) -> Result<Value> {
     let (carts, lists) = ports;
     let t = tenant(h)?;
-    let unit = v["unitId"].as_str().ok_or(bad("Unit required"))?;
+    let input: ListInput = view(v);
+    let unit = input.unit_id.as_deref().ok_or(bad("Unit required"))?;
     let candidate = if op == "list.save" {
         let data: ListData =
-            serde_json::from_value(v["data"].clone()).map_err(|_| bad("Invalid list fields"))?;
+            serde_json::from_value(input.data.clone()).map_err(|_| bad("Invalid list fields"))?;
         validate_items(&data.items)?;
         selection_shape(&data.items, &data.configurations)?;
         let mut admission = a.db.begin().await?;
@@ -70,12 +85,13 @@ pub async fn invoke(
             json!({"elements":rows.iter().map(|r|json!({"id":r.get::<String,_>("id"),"data":r.get::<Value,_>("data"),"revision":r.get::<i64,_>("revision"),"ownerId":r.get::<String,_>("owner_id")})).collect::<Vec<_>>()}),
         );
     }
-    let id = v["id"]
-        .as_str()
+    let id = input
+        .id
+        .as_deref()
         .filter(|s| identifier(s))
         .ok_or(bad("Valid list ID required"))?;
-    let expected = v["revision"]
-        .as_i64()
+    let expected = input
+        .revision
         .filter(|r| *r >= 0)
         .ok_or(bad("List revision required"))?;
     sqlx::query("SELECT pg_advisory_xact_lock(hashtextextended($1,0))")

@@ -7,16 +7,42 @@ use axum::extract::State;
 use axum::http::StatusCode;
 use axum::response::IntoResponse;
 use axum::response::Response;
+use serde::Deserialize;
 use serde_json::Value;
 use serde_json::json;
 use std::env;
 use veyndo_core::Error;
+use veyndo_core::document::{Raw, lenient, view};
 use veyndo_core::request_context::RequestContext;
 use veyndo_core::shop_scope::header;
 pub(crate) mod poppy;
 mod protocol;
 mod transport;
 use protocol::RpcError;
+/// The JSON-RPC request fields this endpoint reads besides its envelope.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct RpcRequest {
+    #[serde(deserialize_with = "lenient")]
+    params: Raw<RpcParams>,
+}
+
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct RpcParams {
+    protocol_version: Value,
+    uri: Value,
+    #[serde(deserialize_with = "lenient")]
+    capabilities: ClientCapabilities,
+}
+
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct ClientCapabilities {
+    #[serde(deserialize_with = "lenient")]
+    extensions: serde_json::Map<String, Value>,
+}
+
 pub(crate) async fn mcp(State(a): State<App>, h: RequestContext, Json(v): Json<Value>) -> Response {
     if let Some(origin) = header(&h, "origin") {
         // Trust only explicit deployment configuration, never Host or forwarded headers.
@@ -52,16 +78,22 @@ pub(crate) async fn mcp(State(a): State<App>, h: RequestContext, Json(v): Json<V
     if v.get("id").is_none() {
         return StatusCode::ACCEPTED.into_response();
     }
+    let request: RpcRequest = view(&v);
+    let params = &request.params;
     let result = match method {
         "initialize" => {
             let mut capabilities = json!({"tools":{},"resources":{}});
-            if v["params"]["capabilities"]["extensions"][apps::mcp_views::EXTENSION]["mimeTypes"]
-                .as_array()
+            if params
+                .capabilities
+                .extensions
+                .get(apps::mcp_views::EXTENSION)
+                .and_then(|extension| extension.get("mimeTypes"))
+                .and_then(Value::as_array)
                 .is_some_and(|types| types.iter().any(|mime| mime == apps::mcp_views::MIME))
             {
                 capabilities["extensions"] = json!({apps::mcp_views::EXTENSION:{}});
             }
-            Ok(json!({"protocolVersion":if v["params"]["protocolVersion"]=="2025-11-25"{"2025-11-25"}else{"2026-07-28"},"capabilities":capabilities,"serverInfo":{"name":"veyndo","version":env!("CARGO_PKG_VERSION")}}))
+            Ok(json!({"protocolVersion":if params.protocol_version=="2025-11-25"{"2025-11-25"}else{"2026-07-28"},"capabilities":capabilities,"serverInfo":{"name":"veyndo","version":env!("CARGO_PKG_VERSION")}}))
         }
         "ping" => Ok(json!({})),
         "tools/list" => {
@@ -78,7 +110,7 @@ pub(crate) async fn mcp(State(a): State<App>, h: RequestContext, Json(v): Json<V
                 Err(e) => Err(RpcError::server(e)),
             }
         }
-        "tools/call" => protocol::call(&a, &h, &v["params"]).await,
+        "tools/call" => protocol::call(&a, &h, &params.raw).await,
         "resources/list" => apps::mcp_views::list(&a, &h)
             .await
             .map(|mut resources| {
@@ -86,10 +118,10 @@ pub(crate) async fn mcp(State(a): State<App>, h: RequestContext, Json(v): Json<V
                 json!({"resources":resources})
             })
             .map_err(RpcError::server),
-        "resources/read" if v["params"]["uri"] == "commerce://capabilities" => Ok(
+        "resources/read" if params.uri == "commerce://capabilities" => Ok(
             json!({"contents":[{"uri":"commerce://capabilities","mimeType":"application/json","text":json!({"capabilities": OPERATIONS.iter().map(|operation|operation.description()).collect::<Vec<_>>()}).to_string()}]}),
         ),
-        "resources/read" => match v["params"]["uri"].as_str() {
+        "resources/read" => match params.uri.as_str() {
             Some(uri) => apps::mcp_views::read(&a, &h, uri).await
                 .map_err(RpcError::server)
                 .and_then(|resource| resource

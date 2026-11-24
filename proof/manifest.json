@@ -1413,8 +1413,8 @@
     },
     "components/b2b/src/service/lists.rs": {
       "status": "unproved",
-      "sha256": "9a11d44dc579ed88fdc16193ecc62996b13793b87a620091858a1af5f9f9bd89",
-      "review": "Procurement lists move into b2b; configuration selection rules into shop"
+      "sha256": "5be5cc3f84288614f5c6779379954a6f3b76ccc7331d9b83828602d09eb755d7",
+      "review": "F35 typed inputs and views: proof bindings unchanged"
     },
     "components/b2b/src/service/onboarding.rs": {
       "status": "unproved",
@@ -1828,8 +1828,8 @@
     },
     "components/checkout/src/domain/session_payment.rs": {
       "status": "unproved",
-      "sha256": "cf17ede1d3dd8a064770b178f515d2d2b6b233b5a679504742ff3e12d63f4b38",
-      "review": "Unit tests for every public domain function of the components; no production code changed"
+      "sha256": "9fa007fa1d38251025c2f31b63dd3e44ec86a8fae7e033c2aa06eb05761176d9",
+      "review": "F35 typed inputs and views: proof bindings unchanged"
     },
     "components/checkout/src/domain/session_review.rs": {
       "status": "unproved",
@@ -1943,8 +1943,8 @@
     },
     "components/checkout/src/store/cart_edit.rs": {
       "status": "unproved",
-      "sha256": "e8fc4dcda5dfd957b1b0daa4327bc274abceadd4f01c6d845b99c3e8ef6e45bd",
-      "review": "Cart edits move into checkout behind the cart edit port"
+      "sha256": "50d483f1cb3d3574f73435914b856af23b80501fa3c3f3b8eccd5dad5c7e9010",
+      "review": "F35 typed inputs and views: proof bindings unchanged"
     },
     "components/checkout/src/store/cart_load.rs": {
       "status": "unproved",
@@ -3508,8 +3508,8 @@
     },
     "components/payments/src/service/commands.rs": {
       "status": "unproved",
-      "sha256": "f6444f017bee011ad3a6ada6ab9f69073b7dfa96f55a7f4a442bbb806a35333e",
-      "review": "Payment commands, worker and provider sessions moved behind the payments gateway port"
+      "sha256": "40bf564d1bd5d887eb7910b065baeeaae51db5c7c95ed0fd861940f43d33ff28",
+      "review": "F35 typed inputs and views: proof bindings unchanged"
     },
     "components/payments/src/service/details.rs": {
       "status": "unproved",
@@ -7388,8 +7388,8 @@
     },
     "src/developer/routes.rs": {
       "status": "unproved",
-      "sha256": "fc04e1b75d56d4c98c1748222fc88b083126a826f6b2eb5d5b74f6543866cc0c",
-      "review": "F18: server state composed of component-owned state"
+      "sha256": "44d12e75906a49a9de13704b9627739538941d70c111c96e641921a1cae0e5a0",
+      "review": "F35 typed inputs and views: proof bindings unchanged"
     },
     "src/documents/ingestion.rs": {
       "status": "unproved",
@@ -7458,8 +7458,8 @@
     },
     "src/history/capability.rs": {
       "status": "unproved",
-      "sha256": "0c21832167f699188da48808f58a2f0657d1e2ea6cec3d27579db12c6edd8c76",
-      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
+      "sha256": "6dd53fd63fb4796cf402047f5193985b594f9b37187ba1186295d560789db37e",
+      "review": "F35 typed inputs and views: proof bindings unchanged"
     },
     "src/history/mod.rs": {
       "status": "unproved",
@@ -7648,8 +7648,8 @@
     },
     "src/mcp.rs": {
       "status": "unproved",
-      "sha256": "8c9b2ad307f74eebcb06b4154059b276e76ada844fef2c3b8b48a75fd0fa715b",
-      "review": "F15: crate-root re-exports of server modules removed; imports name the owning module"
+      "sha256": "d5b80ba432f874a88bb6609985f1649d329ac9a77bc4dc6937b5523697a295f4",
+      "review": "F35 typed inputs and views: proof bindings unchanged"
     },
     "src/migrations/identity_checksums.rs": {
       "status": "unproved",
@@ -7958,8 +7958,8 @@
     },
     "src/platform/provision.rs": {
       "status": "unproved",
-      "sha256": "d254ffb6743ad8098b48f56416fbacb8f48b08c29d2b98ddc41479c33c026722",
-      "review": "F18: server state composed of component-owned state"
+      "sha256": "a7df243961af7cb1b4de283a3a916255fe23eaf4f3f8f3e7502d0b01bda72fd4",
+      "review": "F35 typed inputs and views: proof bindings unchanged"
     },
     "src/platform/quotas.rs": {
       "status": "unproved",

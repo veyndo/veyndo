@@ -1,10 +1,35 @@
 //! App/Flow/MCP payment actions enqueue core jobs; provider-bound attempts prevent cross-app command authority.
 use crate::store::commands::enqueue;
+use serde::Deserialize;
 use serde_json::{Value, json};
+use veyndo_core::document::{lenient, view};
 use veyndo_core::shop_scope::tenant;
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad};
 
 /// Queues an approved command for an attempt the calling provider owns.
+/// A payment command an app sends: the attempt (or the order event naming it), the operation and its approval.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct PaymentCommand {
+    #[serde(deserialize_with = "lenient")]
+    attempt_id: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    event: CommandEvent,
+    #[serde(deserialize_with = "lenient")]
+    operation: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    approve: Option<bool>,
+    #[serde(deserialize_with = "lenient")]
+    request_key: Option<String>,
+}
+
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct CommandEvent {
+    #[serde(deserialize_with = "lenient")]
+    order_id: Option<String>,
+}
+
 pub async fn app_command(
     a: &State,
     h: &RequestContext,
@@ -12,11 +37,14 @@ pub async fn app_command(
     v: &Value,
 ) -> Result<Value> {
     let t = tenant(h)?;
-    let attempt_id = if let Some(id) = v["attemptId"].as_str() {
-        id.to_owned()
+    let command: PaymentCommand = view(v);
+    let attempt_id = if let Some(id) = command.attempt_id.clone() {
+        id
     } else {
-        let order = v["event"]["orderId"]
-            .as_str()
+        let order = command
+            .event
+            .order_id
+            .as_deref()
             .ok_or(bad("Payment action requires attemptId or an order event"))?;
         sqlx::query_scalar::<_, Option<String>>(
             "SELECT data->'payment'->>'attemptId' FROM orders WHERE tenant=$1 AND id=$2",
@@ -45,8 +73,9 @@ pub async fn app_command(
             "Provider payment not found".into(),
         ));
     }
-    let op = v["operation"]
-        .as_str()
+    let op = command
+        .operation
+        .as_deref()
         .ok_or(bad("Payment operation required"))?;
     if ![
         "capture",
@@ -57,7 +86,7 @@ pub async fn app_command(
         "reconcile",
     ]
     .contains(&op)
-        || v["approve"] != true
+        || command.approve != Some(true)
     {
         return Err(bad("Explicit approved payment command required"));
     }
@@ -72,8 +101,9 @@ pub async fn app_command(
         h,
         &attempt_id,
         op,
-        v["requestKey"]
-            .as_str()
+        command
+            .request_key
+            .as_deref()
             .ok_or(bad("Request key required"))?,
         &input,
     )

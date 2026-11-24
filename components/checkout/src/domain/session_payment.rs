@@ -1,16 +1,18 @@
 //! Classify the opt-in Checkout test payment without introducing a second payment ledger.
+use serde::Deserialize;
 use serde_json::Value;
+use veyndo_core::document::view;
 use veyndo_shop::types::cart::StoredCart;
 
 pub fn provider(method: &Value) -> Option<&'static str> {
-    if method["mode"] != "app" {
+    let method: SessionMethod = view(method);
+    if method.mode != "app" {
         return None;
     }
-    match method["id"].as_str()? {
-        "paypal-sandbox" if method["provider"].is_null() => Some("paypal"),
+    match method.id.as_str()? {
+        "paypal-sandbox" if method.provider.is_null() => Some("paypal"),
         "shopware-payments-paypal"
-            if method["provider"] == "shopware_payments"
-                && method["providerMethod"] == "paypal" =>
+            if method.provider == "shopware_payments" && method.provider_method == "paypal" =>
         {
             Some("shopware_payments")
         }
@@ -24,14 +26,35 @@ pub fn test_environment(environment: &str, strict: bool) -> bool {
 }
 
 pub fn attempt(payment: &Value, strict: bool) -> bool {
-    provider(&payment["method"]).is_some_and(|provider| payment["provider"] == provider)
-        && payment["environment"]
+    let payment: SessionPaymentFacts = view(payment);
+    provider(&payment.method).is_some_and(|provider| payment.provider == provider)
+        && payment
+            .environment
             .as_str()
             .is_some_and(|environment| test_environment(environment, strict))
-        && payment["realMoneyCharged"] == false
-        && payment["attemptId"]
-            .as_str()
-            .is_some_and(|id| !id.is_empty())
+        && payment.real_money_charged == false
+        && payment.attempt_id.as_str().is_some_and(|id| !id.is_empty())
+}
+
+/// A selected payment method as the checkout session classifies it.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct SessionMethod {
+    mode: Value,
+    id: Value,
+    provider: Value,
+    provider_method: Value,
+}
+
+/// An order payment as the checkout session classifies it.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct SessionPaymentFacts {
+    method: Value,
+    provider: Value,
+    environment: Value,
+    real_money_charged: Value,
+    attempt_id: Value,
 }
 
 pub fn has_saved_funding(cart: &StoredCart) -> bool {
