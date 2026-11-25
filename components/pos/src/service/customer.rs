@@ -1,13 +1,16 @@
 //! Cashier-only customer lookup/card resolution and revision-checked account attachment; never issues customer credentials.
 use crate::service::guard;
+use crate::store::carts as cart_rows;
 use crate::store::customers;
+use serde::Deserialize;
 use serde_json::{Value, json};
+use veyndo_core::document::view;
 use veyndo_core::shop_scope::{tenant, token};
 use veyndo_core::{RequestContext, Result, State, bad, conflict};
 use veyndo_customers::service::address_book;
 use veyndo_identity::permit;
 use veyndo_shop::ports::Carts;
-use veyndo_shop::types::cart::{selection, stored};
+use veyndo_shop::types::cart::selection;
 
 pub async fn find(a: &State, h: &RequestContext, query: &str, card: Option<&str>) -> Result<Value> {
     permit(h, "customers.read")?;
@@ -17,6 +20,13 @@ pub async fn find(a: &State, h: &RequestContext, query: &str, card: Option<&str>
     }
     Ok(json!({"elements":customers::search(a, &tenant(h)?, query, card).await?}))
 }
+/// Whether the priced cart still asks for its checkout selection to be confirmed.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct SelectionReview {
+    selection_needs_confirmation: Value,
+}
+
 pub async fn select(
     carts: &dyn Carts,
     a: &State,
@@ -28,13 +38,9 @@ pub async fn select(
     permit(h, "customers.pii")?;
     permit(h, "orders.write")?;
     let mut tx = a.db.begin().await?;
-    let row = sqlx::query("SELECT * FROM carts WHERE tenant=$1 AND token=$2 FOR UPDATE")
-        .bind(tenant(h)?)
-        .bind(token(h)?)
-        .fetch_optional(&mut *tx)
+    let mut c = cart_rows::lock(&mut tx, &tenant(h)?, token(h)?)
         .await?
         .ok_or(bad("Cart unavailable"))?;
-    let mut c = stored(&row)?;
     guard::cart(h, &c)?;
     if c.data.pos_actor.is_none() || c.status != "open" || c.revision != revision {
         return Err(conflict(
@@ -66,18 +72,12 @@ pub async fn select(
     c.data.checkout = Some(selection);
     c.revision += 1;
     let quote = carts.view(&c).await?;
-    if quote["selectionNeedsConfirmation"] == true {
+    if view::<SelectionReview>(&quote).selection_needs_confirmation == true {
         return Err(bad(
             "Customer pricing requires a different available payment; change payment first",
         ));
     }
-    sqlx::query("UPDATE carts SET data=$1,revision=$2 WHERE tenant=$3 AND id=$4")
-        .bind(json!(c.data))
-        .bind(c.revision)
-        .bind(&c.tenant)
-        .bind(&c.id)
-        .execute(&mut *tx)
-        .await?;
+    cart_rows::save(&mut tx, &json!(c.data), c.revision, &c.tenant, &c.id).await?;
     veyndo_core::store::outbox::publish_on(&mut *tx, &c.tenant, "pos.customer_selected", &json!({"cartId":c.id,"customerId":id,"cashierId":h.pos.as_ref().map(|p|&p.actor),"salesChannelId":c.data.sales_channel})).await?;
     tx.commit().await?;
     Ok(quote)

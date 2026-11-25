@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT $1::text::timestamptz <= $2::text::timestamptz AS \"ordered!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "ordered!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "94beb8915def9aaf0f4a6ed02874c8c1176129db3e4eac81aefe7a4472aa40be"
+}

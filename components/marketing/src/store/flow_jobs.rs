@@ -1,6 +1,5 @@
 //! PostgreSQL ownership of Flow claims, cursor checkpoints and terminal results.
 use serde_json::Value;
-use sqlx::Row;
 use veyndo_core::{Result, State, conflict};
 
 pub struct Claim {
@@ -14,8 +13,8 @@ pub struct Claim {
 
 pub async fn claim(a: &State) -> Result<Option<Claim>> {
     // An expired claim can have dispatched an effect. Preserve uncertainty.
-    sqlx::query("UPDATE flow_jobs SET state='uncertain',error='Worker stopped before result confirmation' WHERE state='running' AND lease_until<now()").execute(&a.db).await?;
-    let row = sqlx::query(
+    sqlx::query!("UPDATE flow_jobs SET state='uncertain',error='Worker stopped before result confirmation' WHERE state='running' AND lease_until<now()").execute(&a.db).await?;
+    let row = sqlx::query!(
         "WITH ready AS (
            SELECT id FROM flow_jobs
            WHERE state='queued' AND available_at<=now()
@@ -27,44 +26,44 @@ pub async fn claim(a: &State) -> Result<Option<Claim>> {
          UPDATE flow_jobs j SET state='running',attempts=j.attempts+1,
            lease_until=now()+interval '5 minutes'
          FROM ready WHERE j.id=ready.id
-         RETURNING j.id,j.tenant,j.definition,j.cursor,j.execution,j.attempts",
+         RETURNING j.id,j.tenant,j.definition,j.cursor,j.execution,j.attempts"
     )
     .fetch_optional(&a.db)
     .await?;
     Ok(row.map(|row| Claim {
-        id: row.get("id"),
-        tenant: row.get("tenant"),
-        definition: row.get("definition"),
-        cursor: row.get("cursor"),
-        execution: row.get("execution"),
-        attempt: row.get("attempts"),
+        id: row.id.clone(),
+        tenant: row.tenant.clone(),
+        definition: row.definition.clone(),
+        cursor: row.cursor.clone(),
+        execution: row.execution.clone(),
+        attempt: row.attempts,
     }))
 }
 
 impl Claim {
     pub async fn renew(&self, a: &State) -> Result<()> {
-        let held = sqlx::query(
+        let held = sqlx::query!(
             "UPDATE flow_jobs SET lease_until=now()+interval '5 minutes'
              WHERE id=$1 AND tenant=$2 AND attempts=$3 AND state='running' AND lease_until>=now()",
+            &self.id,
+            &self.tenant,
+            self.attempt
         )
-        .bind(&self.id)
-        .bind(&self.tenant)
-        .bind(self.attempt)
         .execute(&a.db)
         .await?;
         self.require_claim(held.rows_affected())
     }
 
     pub async fn checkpoint(&self, a: &State, next: Option<&str>, execution: Value) -> Result<()> {
-        let saved = sqlx::query(
+        let saved = sqlx::query!(
             "UPDATE flow_jobs SET cursor=$4,execution=$5
              WHERE id=$1 AND tenant=$2 AND attempts=$3 AND state='running'",
+            &self.id,
+            &self.tenant,
+            self.attempt,
+            next,
+            execution
         )
-        .bind(&self.id)
-        .bind(&self.tenant)
-        .bind(self.attempt)
-        .bind(next)
-        .bind(execution)
         .execute(&a.db)
         .await?;
         self.require_claim(saved.rows_affected())
@@ -77,17 +76,17 @@ impl Claim {
         seconds: u64,
         execution: Value,
     ) -> Result<()> {
-        let saved = sqlx::query(
+        let saved = sqlx::query!(
             "UPDATE flow_jobs SET state='queued',cursor=$4,execution=$5,
                available_at=now()+make_interval(secs=>$6),lease_until=NULL
              WHERE id=$1 AND tenant=$2 AND attempts=$3 AND state='running'",
+            &self.id,
+            &self.tenant,
+            self.attempt,
+            next,
+            execution,
+            seconds as f64
         )
-        .bind(&self.id)
-        .bind(&self.tenant)
-        .bind(self.attempt)
-        .bind(next)
-        .bind(execution)
-        .bind(seconds as f64)
         .execute(&a.db)
         .await?;
         self.require_claim(saved.rows_affected())
@@ -100,16 +99,16 @@ impl Claim {
         result: &Option<Value>,
         error: Option<String>,
     ) -> Result<bool> {
-        let saved = sqlx::query(
+        let saved = sqlx::query!(
             "UPDATE flow_jobs SET state=$4,result=$5,error=$6,lease_until=NULL
              WHERE id=$1 AND tenant=$2 AND attempts=$3 AND state='running'",
+            &self.id,
+            &self.tenant,
+            self.attempt,
+            state,
+            result.as_ref(),
+            error.as_deref()
         )
-        .bind(&self.id)
-        .bind(&self.tenant)
-        .bind(self.attempt)
-        .bind(state)
-        .bind(result)
-        .bind(error)
         .execute(tx)
         .await?;
         Ok(saved.rows_affected() == 1)

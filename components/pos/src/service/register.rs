@@ -2,12 +2,14 @@
 use crate::domain::input::Input;
 use crate::ports::Register;
 use crate::service::{customer, discount};
+use crate::store::{carts, register};
+use serde::Deserialize;
 use serde_json::{Value, json};
-use sqlx::Row;
 use veyndo_app_model::declarations::identifier;
 use veyndo_catalog::types::catalog_page::CatalogCriteria;
 use veyndo_checkout::service::checkout_options;
 use veyndo_checkout::store::cart_create::new_cart_context;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::request_context::PosAdmission as Admission;
 use veyndo_core::shop_scope::header;
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad};
@@ -25,10 +27,10 @@ use veyndo_shop::service::read_cache::settings;
 pub async fn channels(a: &State, h: &RequestContext) -> Result<Value> {
     let t = merchant(h)?;
     permit(h, "pos.use")?;
-    let rows=sqlx::query("SELECT id,data,revision FROM sales_channels WHERE tenant=$1 AND data->>'kind'='pos' ORDER BY id LIMIT 100").bind(&t).fetch_all(&a.db).await?;
+    let rows = register::channels(a, &t).await?;
     let config = settings(a, &t, "default").await?.0;
     Ok(
-        json!({"channels":rows.iter().map(|r|json!({"id":r.get::<String,_>("id"),"data":r.get::<Value,_>("data"),"revision":r.get::<i64,_>("revision")})).collect::<Vec<_>>(),"mainLocale":config.main_locale}),
+        json!({"channels":rows.iter().map(|r|json!({"id":r.id,"data":r.data,"revision":r.revision})).collect::<Vec<_>>(),"mainLocale":config.main_locale}),
     )
 }
 
@@ -131,7 +133,10 @@ pub async fn invoke(
         "payment" | "reconcile" => {
             let c = reg.carts().load(&h).await?;
             let order = c.data.order.as_ref().ok_or(bad("POS sale not completed"))?;
-            let id = order["payment"]["attemptId"]
+            let sale: SaleAttempt = view(order);
+            let id = sale
+                .payment
+                .attempt_id
                 .as_str()
                 .ok_or(bad("Sale has no provider attempt"))?;
             commands::customer(a, &h, id).await?;
@@ -200,12 +205,7 @@ async fn cart_operation(
                 .clone();
             selection.shipping_method_id = "pickup".into();
             selection.payment_method_id = "pos-cash".into();
-            sqlx::query("UPDATE carts SET data=$1 WHERE tenant=$2 AND id=$3")
-                .bind(json!(c.data))
-                .bind(t)
-                .bind(&c.id)
-                .execute(&a.db)
-                .await?;
+            carts::set_data(a, &json!(c.data), t, &c.id).await?;
             let mut v = register_context(reg, a, &h).await?;
             v["cart"] = reg.carts().view(&c).await?;
             v["channel"] = json!(data);
@@ -301,16 +301,16 @@ async fn listing(
         .ok_or(bad("Cashier identity required"))?;
     match op {
         "held" => {
-            let rows=sqlx::query("SELECT token,revision,data FROM carts WHERE tenant=$1 AND status='open' AND data->>'sales_channel'=$2 AND data->>'pos_actor'=$3 AND jsonb_array_length(data->'items')>0 ORDER BY created_at DESC LIMIT 40").bind(t).bind(channel).bind(actor).fetch_all(&a.db).await?;
+            let rows = carts::held(a, t, channel, &actor).await?;
             Ok(
-                json!({"elements":rows.iter().map(|r|json!({"token":r.get::<String,_>("token"),"revision":r.get::<i64,_>("revision"),"items":r.get::<Value,_>("data")["items"]})).collect::<Vec<_>>() }),
+                json!({"elements":rows.iter().map(|r|json!({"token":r.token,"revision":r.revision,"items":r.items})).collect::<Vec<_>>() }),
             )
         }
         "sales" => {
             permit(&h, "orders.read")?;
-            let rows=sqlx::query("SELECT id,data->>'orderNumber' AS number,data->'money' AS money,data->'payment'->>'state' AS payment,data->'pos' AS pos,created_at::text AS created FROM orders WHERE tenant=$1 AND data->>'salesChannelId'=$2 ORDER BY created_at DESC LIMIT 30").bind(t).bind(channel).fetch_all(&a.db).await?;
+            let rows = register::sales(a, t, channel).await?;
             Ok(
-                json!({"elements":rows.iter().map(|r|json!({"id":r.get::<String,_>("id"),"number":r.get::<String,_>("number"),"money":r.get::<Value,_>("money"),"paymentState":r.get::<String,_>("payment"),"pos":r.get::<Option<Value>,_>("pos"),"createdAt":r.get::<String,_>("created")})).collect::<Vec<_>>() }),
+                json!({"elements":rows.iter().map(|r|json!({"id":r.id,"number":r.number,"money":r.money,"paymentState":r.payment,"pos":r.pos,"createdAt":r.created})).collect::<Vec<_>>() }),
             )
         }
         "catalog" => {
@@ -324,7 +324,7 @@ async fn listing(
                 if barcode.is_empty() || barcode.len() > 100 {
                     return Err(bad("Invalid barcode"));
                 }
-                let ids:Vec<String>=sqlx::query_scalar("SELECT id FROM products WHERE tenant=$1 AND active AND (id=$2 OR product_number=$2 OR extra->>'ean'=$2) ORDER BY id LIMIT 2").bind(t).bind(barcode).fetch_all(&a.db).await?;
+                let ids = register::barcode(a, t, &barcode).await?;
                 if ids.len() != 1 {
                     return Err(bad("Barcode is missing or ambiguous in this shop"));
                 }
@@ -394,18 +394,47 @@ async fn workspace(
                     input.receipt_id.as_deref().ok_or(bad("Receipt required"))?,
                 )
                 .await?;
-            if snapshot["order"]["salesChannelId"] != channel
-                || !snapshot["order"]["pos"].is_object()
-            {
+            let receipt: ReceiptSnapshot = view(&snapshot);
+            if receipt.order.sales_channel_id != channel || !receipt.order.pos.is_object() {
                 return Err(Error(
                     StatusCode::NOT_FOUND,
                     "POS receipt unavailable".into(),
                 ));
             }
-            Ok(json!({"number":snapshot["number"],"lines":receipt_text::lines(&snapshot)}))
+            Ok(json!({"number":receipt.number,"lines":receipt_text::lines(&snapshot)}))
         }
         _ => Err(bad("Unknown cashier operation")),
     }
+}
+
+/// The provider attempt of a completed sale.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct SaleAttempt {
+    #[serde(deserialize_with = "lenient")]
+    payment: AttemptRef,
+}
+
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct AttemptRef {
+    attempt_id: Value,
+}
+
+/// The receipt fields that bind it to a POS channel.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct ReceiptSnapshot {
+    number: Value,
+    #[serde(deserialize_with = "lenient")]
+    order: ReceiptOrder,
+}
+
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ReceiptOrder {
+    sales_channel_id: Value,
+    pos: Value,
 }
 
 #[cfg(test)]

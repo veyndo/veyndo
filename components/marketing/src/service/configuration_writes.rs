@@ -8,12 +8,13 @@ use crate::http::flow_jobs::values as job_values;
 use crate::ports::ConfigurationHost;
 use crate::store::channel_config::validate_channel_config;
 use crate::store::configuration_lifecycle::{lock, validate_references};
+use crate::store::configuration_writes as rows;
 use crate::types::channel::normalize_channel;
 use crate::types::flow::Flow;
 use crate::types::promotion::{Promotion, preserve_import, validate_promotion};
 use serde::Deserialize;
 use serde_json::{Value, json};
-use sqlx::{Postgres, Row, Transaction};
+use sqlx::{Postgres, Transaction};
 use veyndo_app_model::declarations::identifier;
 use veyndo_core::document::{Raw, lenient, view};
 use veyndo_core::shop_scope::header;
@@ -45,23 +46,19 @@ pub async fn list(a: &State, h: &RequestContext) -> Result<Value> {
             result[kind] = json!([]);
             continue;
         }
-        let table = table(kind)?;
-        let sql = if kind == "rules" {
-            format!(
-                "SELECT id,jsonb_build_object('name',name,'condition',condition,'active',active) AS data,revision FROM {table} WHERE tenant=$1 ORDER BY id LIMIT 100"
-            )
-        } else {
-            format!("SELECT id,data,revision FROM {table} WHERE tenant=$1 ORDER BY id LIMIT 100")
-        };
-        let rows = sqlx::query(sqlx::AssertSqlSafe(sql.as_str()))
-            .bind(&t)
-            .fetch_all(&a.db)
-            .await?;
-        result[kind]=json!(rows.iter().map(|r|json!({"id":r.get::<String,_>("id"),"data":r.get::<Value,_>("data"),"revision":r.get::<i64,_>("revision")})).collect::<Vec<_>>());
+        let rows = rows::list(a, &t, kind).await?;
+        result[kind] = json!(
+            rows.into_iter()
+                .map(|r| json!({"id":r.id,"data":r.data,"revision":r.revision}))
+                .collect::<Vec<_>>()
+        );
     }
     let settings = config(a, &t).await?.0;
     if let Some(channels) = result["channels"].as_array_mut() {
-        for channel in channels.iter_mut().filter(|c| c["id"] == "default") {
+        for channel in channels
+            .iter_mut()
+            .filter(|c| view::<Identified>(c).id == "default")
+        {
             channel["data"]["locales"] = json!(settings.locales);
         }
     }
@@ -145,12 +142,7 @@ async fn preflight<H: ConfigurationHost>(
     let mut tx = host.core().db.begin_read_snapshot().await?;
     validate_config(host, &mut tx, (t, h), data, false).await?;
     validate_references(&mut tx, t, "flows", id, data).await?;
-    let revision: Option<i64> =
-        sqlx::query_scalar("SELECT revision FROM commerce_flows WHERE tenant=$1 AND id=$2")
-            .bind(t)
-            .bind(id)
-            .fetch_optional(&mut *tx)
-            .await?;
+    let revision = rows::revision(&mut tx, t, "flows", id, false).await?;
     if revision.unwrap_or(0) != expected {
         return Err(conflict("Configuration revision changed"));
     }
@@ -188,17 +180,7 @@ async fn validate_config<H: ConfigurationHost>(
     f.validate()?;
     authorize_flow(h, &f)?;
     host.validate_template(tx, t, h, &f).await?;
-    let settings_query = if lock {
-        "SELECT data FROM commerce_settings WHERE tenant=$1 FOR UPDATE"
-    } else {
-        "SELECT data FROM commerce_settings WHERE tenant=$1"
-    };
-    let settings = decode(
-        sqlx::query_scalar(settings_query)
-            .bind(t)
-            .fetch_one(&mut **tx)
-            .await?,
-    )?;
+    let settings = decode(rows::settings(tx, t, lock).await?)?;
     settings.languages().validate_names(&input.name, 100)?;
     flow_text::validate(&f, &settings)?;
     host.validate_apps(tx, t, h, &f, lock).await
@@ -231,22 +213,14 @@ async fn admit(a: &State, kind: &str, id: &str, data: &mut Value, t: &str) -> Re
             validate_promotion(&p)?;
             for date in [&p.start, &p.end] {
                 if let Some(date) = date
-                    && !sqlx::query_scalar::<_, bool>("SELECT $1::timestamptz IS NOT NULL")
-                        .bind(date)
-                        .fetch_one(&a.db)
-                        .await
-                        .unwrap_or(false)
+                    && !rows::timestamp(a, date).await.unwrap_or(false)
                 {
                     return Err(bad("Invalid campaign timestamp"));
                 }
             }
             if p.start.is_some()
                 && p.end.is_some()
-                && !sqlx::query_scalar::<_, bool>("SELECT $1::timestamptz <= $2::timestamptz")
-                    .bind(&p.start)
-                    .bind(&p.end)
-                    .fetch_one(&a.db)
-                    .await?
+                && !rows::ordered(a, p.start.as_deref(), p.end.as_deref()).await?
             {
                 return Err(bad("Campaign end precedes start"));
             }
@@ -255,7 +229,16 @@ async fn admit(a: &State, kind: &str, id: &str, data: &mut Value, t: &str) -> Re
         "channels" => normalize_channel(data, id, &settings),
         _ => unreachable!(),
     }
-    settings.languages().validate_names(&data["name"], 100)
+    settings
+        .languages()
+        .validate_names(&view::<Named>(data).name, 100)
+}
+
+/// The localized name every definition carries.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct Named {
+    name: Value,
 }
 
 /// The JSON fields `save` reads, typed as it reads them.
@@ -302,16 +285,8 @@ pub async fn save<H: ConfigurationHost>(
     // Match selective release: automation admission precedes settings and app locks.
     lock(&mut tx, &t).await?;
     if kind == "channels" {
-        sqlx::query("SELECT revision FROM commerce_settings WHERE tenant=$1 FOR UPDATE")
-            .bind(&t)
-            .fetch_one(&mut *tx)
-            .await?;
-        let settings = decode(
-            sqlx::query_scalar("SELECT data FROM commerce_settings WHERE tenant=$1")
-                .bind(&t)
-                .fetch_one(&mut *tx)
-                .await?,
-        )?;
+        rows::lock_settings(&mut tx, &t).await?;
+        let settings = decode(rows::settings(&mut tx, &t, false).await?)?;
         validate_channel_config(&mut tx, &t, id, &data, &settings).await?;
     }
     if kind == "flows" {
@@ -319,14 +294,14 @@ pub async fn save<H: ConfigurationHost>(
     }
     history_context::context(&mut tx, h, "merchant").await?;
     validate_references(&mut tx, &t, kind, id, &data).await?;
-    let rev = locked_revision(&mut tx, &t, table, id).await?;
+    let rev = locked_revision(&mut tx, &t, (kind, table), id).await?;
     if rev.unwrap_or(0) != expected {
         return Err(conflict("Configuration revision changed"));
     }
     if kind == "promotions" {
         admit_import(&mut tx, &t, id, &data).await?;
     }
-    write(&mut tx, (&t, table), id, &data).await?;
+    write(&mut tx, (&t, kind), id, &data).await?;
     if kind == "channels" {
         host.configure_channel(&mut tx, &t, id, &data, rev.is_none())
             .await?;
@@ -338,19 +313,11 @@ pub async fn save<H: ConfigurationHost>(
 async fn locked_revision(
     tx: &mut Transaction<'_, Postgres>,
     t: &str,
-    table: &str,
+    (kind, table): (&str, &str),
     id: &str,
 ) -> Result<Option<i64>> {
-    let sql = format!("SELECT revision FROM {table} WHERE tenant=$1 AND id=$2 FOR UPDATE");
-    sqlx::query("SELECT pg_advisory_xact_lock(hashtextextended($1,17))")
-        .bind(format!("{t}:{table}:{id}"))
-        .execute(&mut **tx)
-        .await?;
-    Ok(sqlx::query_scalar(sqlx::AssertSqlSafe(sql.as_str()))
-        .bind(t)
-        .bind(id)
-        .fetch_optional(&mut **tx)
-        .await?)
+    rows::advisory_lock(tx, &format!("{t}:{table}:{id}")).await?;
+    rows::revision(tx, t, kind, id, true).await
 }
 
 /// The JSON fields `admit_import` reads, typed as it reads them.
@@ -370,15 +337,10 @@ async fn admit_import(
     data: &Value,
 ) -> Result<()> {
     let input: AdmitImportInput = view(data);
-    let old: Option<Value> =
-        sqlx::query_scalar("SELECT data FROM commerce_promotions WHERE tenant=$1 AND id=$2")
-            .bind(t)
-            .bind(id)
-            .fetch_optional(&mut **tx)
-            .await?;
+    let old = rows::promotion(&mut **tx, t, id).await?;
     preserve_import(&old.unwrap_or(Value::Null), data)?;
     if !input.source_import.is_null() {
-        let duplicate:bool=sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM commerce_promotions WHERE tenant=$1 AND id<>$2 AND data->>'code'=$3)").bind(t).bind(id).bind(input.code.as_deref()).fetch_one(&mut **tx).await?;
+        let duplicate = rows::code_taken(tx, t, id, input.code.as_deref()).await?;
         if duplicate {
             return Err(conflict(
                 "Coupon code already belongs to another native promotion; review the mapping",
@@ -400,25 +362,21 @@ struct WriteInput {
 
 async fn write(
     tx: &mut Transaction<'_, Postgres>,
-    (t, table): (&str, &str),
+    (t, kind): (&str, &str),
     id: &str,
     data: &Value,
 ) -> Result<()> {
     let input: WriteInput = view(data);
-    if table == "commerce_rules" {
-        sqlx::query("INSERT INTO commerce_rules(tenant,id,name,condition,active) VALUES($1,$2,$3,$4,$5) ON CONFLICT(tenant,id) DO UPDATE SET name=EXCLUDED.name,condition=EXCLUDED.condition,active=EXCLUDED.active,revision=commerce_rules.revision+1").bind(t).bind(id).bind(&input.name).bind(&input.condition).bind(input.active).execute(&mut **tx).await?;
+    if kind == "rules" {
+        let rule = rows::RuleColumns {
+            name: &input.name,
+            condition: &input.condition,
+            active: input.active,
+        };
+        rows::write_rule(tx, t, id, rule).await
     } else {
-        let sql = format!(
-            "INSERT INTO {table}(tenant,id,data) VALUES($1,$2,$3) ON CONFLICT(tenant,id) DO UPDATE SET data=EXCLUDED.data,revision={table}.revision+1"
-        );
-        sqlx::query(sqlx::AssertSqlSafe(sql.as_str()))
-            .bind(t)
-            .bind(id)
-            .bind(data)
-            .execute(&mut **tx)
-            .await?;
+        rows::write_document(tx, t, kind, id, data).await
     }
-    Ok(())
 }
 
 /// Imported promotions use the ordinary revisioned owner and retain immutable provenance until a merchant reviews activation.
@@ -458,17 +416,13 @@ pub async fn import_promotion<H: ConfigurationHost>(
     if imported.active != Some(false) || imported.source_import.activation_reviewed != Some(false) {
         return Err(bad("Imported coupons must start inactive and unreviewed"));
     }
-    let previous: Option<Value> =
-        sqlx::query_scalar("SELECT data FROM commerce_promotions WHERE tenant=$1 AND id=$2")
-            .bind(&t)
-            .bind(id)
-            .fetch_optional(&a.db)
-            .await?;
+    let previous = rows::promotion(&a.db, &t, id).await?;
     if let Some(previous) = previous {
-        let incoming = &imported.source_import.raw;
-        let stored = &previous["sourceImport"];
+        let incoming: ImportDigest = view(&imported.source_import.raw);
+        let stored = view::<StoredImport>(&previous).source_import;
         preserve_import(&previous, data)?;
-        if stored.is_null() || stored["recordDigest"] != incoming["recordDigest"] {
+        if stored.is_null() || view::<ImportDigest>(&stored).record_digest != incoming.record_digest
+        {
             return Err(conflict(
                 "Imported coupon source changed; review its conflict",
             ));
@@ -483,4 +437,25 @@ pub async fn import_promotion<H: ConfigurationHost>(
     )
     .await?;
     Ok(json!({"id":id,"replayed":false,"active":false}))
+}
+
+/// The provenance a stored imported promotion keeps.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct StoredImport {
+    source_import: Value,
+}
+
+/// The digest of the source record an imported promotion came from.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ImportDigest {
+    record_digest: Value,
+}
+
+/// The id of a listed definition.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct Identified {
+    id: Value,
 }

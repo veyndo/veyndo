@@ -442,9 +442,9 @@
         "user_sessions": "read: reads merchant sessions to resolve the actor of a flow (channel_preview.rs)"
       },
       "glob_imports": 0,
-      "untyped_access": 122,
-      "sql_outside_store": 9,
-      "runtime_sql": 92
+      "untyped_access": 52,
+      "sql_outside_store": 0,
+      "runtime_sql": 2
     },
     "b2b": {
       "title": "Company procurement: organisations, budgets, approvals and quotes",
@@ -477,9 +477,9 @@
         "products": "read: reads product rows in the same statement as its own data (prices, stock, visibility) (access.rs, catalog.rs, lists.rs, quick_order.rs)"
       },
       "glob_imports": 0,
-      "untyped_access": 39,
-      "sql_outside_store": 7,
-      "runtime_sql": 89
+      "untyped_access": 12,
+      "sql_outside_store": 0,
+      "runtime_sql": 0
     },
     "pos": {
       "title": "Point-of-sale register adapters",
@@ -510,9 +510,9 @@
         "sales_channels": "read: reads the sales channel document (kind, activity, catalogue scope) to admit the request channel inside the same statement (register.rs, settlement.rs)"
       },
       "glob_imports": 0,
-      "untyped_access": 42,
-      "sql_outside_store": 4,
-      "runtime_sql": 16
+      "untyped_access": 34,
+      "sql_outside_store": 0,
+      "runtime_sql": 0
     },
     "apps": {
       "title": "App packages, managed data, UI surfaces, Wasm extensions and the app builder",

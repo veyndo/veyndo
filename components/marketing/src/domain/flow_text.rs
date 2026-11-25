@@ -1,8 +1,10 @@
 //! Shop-language validation and main-language fallback for both simple flows and graphical action nodes.
+use crate::domain::flow_actions::ActionConfig;
 use crate::domain::pipeline;
 use crate::types::flow::Flow;
 use serde_json::{Value, json};
 use veyndo_catalog::domain::content::translated_string;
+use veyndo_core::document::view;
 use veyndo_core::localized::valid_locale_key;
 use veyndo_core::{Result, bad};
 use veyndo_shop::types::settings::Settings;
@@ -37,7 +39,7 @@ pub fn validate(f: &Flow, settings: &Settings) -> Result<()> {
             {
                 settings
                     .languages()
-                    .validate_names(&config["instruction"], 3200)?;
+                    .validate_names(&view::<ActionConfig>(config).instruction, 3200)?;
             }
         }
     }

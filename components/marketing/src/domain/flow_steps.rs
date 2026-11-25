@@ -1,7 +1,9 @@
 //! The app steps of a flow: a simple app action and every app or mail node of its pipeline, seen as one app flow each.
+use crate::domain::flow_actions::ActionConfig;
 use crate::domain::pipeline::Node;
 use crate::types::flow::{AppFlowAction, Flow};
 use serde_json::json;
+use veyndo_core::document::view;
 
 /// Configuration save, release and app replacement inspect the same app steps of a flow.
 pub fn app_steps(f: &Flow) -> Vec<Flow> {
@@ -14,15 +16,16 @@ pub fn app_steps(f: &Flow) -> Vec<Flow> {
             if let Node::Action { action, config, .. } = node
                 && (action == "app_action" || action == "action.mail.send")
             {
+                let fields: ActionConfig = view(config);
                 let mut step = f.clone();
                 step.action = "app_action".into();
                 step.app_action = Some(AppFlowAction {
-                    app: config["app"].as_str().unwrap_or("email").into(),
-                    action: config["action"].as_str().unwrap_or("send_order").into(),
+                    app: fields.app.as_str().unwrap_or("email").into(),
+                    action: fields.action.as_str().unwrap_or("send_order").into(),
                     arguments: if action == "action.mail.send" {
                         json!({"locale":&f.locale[..2],"dryRun":false})
                     } else {
-                        config["arguments"].clone()
+                        fields.arguments.clone()
                     },
                 });
                 steps.push(step);

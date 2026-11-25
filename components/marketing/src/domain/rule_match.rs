@@ -15,14 +15,15 @@ impl Condition {
         }
         match self {
             Self::Reference { rule_id } => {
-                let row = &q["ruleFacts"]["rules"][rule_id];
-                if !row["active"].is_boolean() {
+                // Rule facts are keyed by the referenced rule's id.
+                let row: ReferencedRule = view(&q["ruleFacts"]["rules"][rule_id]);
+                if !row.active.is_boolean() {
                     return Err(bad("Referenced rule unavailable in this tenant"));
                 }
-                if row["active"] == false {
+                if row.active == false {
                     return Err(bad("Referenced rule disabled"));
                 }
-                let rule: Condition = serde_json::from_value(row["condition"].clone())
+                let rule: Condition = serde_json::from_value(row.condition)
                     .map_err(|_| bad("Invalid referenced rule"))?;
                 rule.validate(0)?;
                 rule.checked_at(c, q, depth + 1)
@@ -225,6 +226,14 @@ fn wildcard(value: &str, pattern: &str) -> bool {
         j += 1;
     }
     j == p.len()
+}
+
+/// A referenced rule as the rule facts carry it.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct ReferencedRule {
+    active: Value,
+    condition: Value,
 }
 
 #[cfg(test)]

@@ -1,10 +1,10 @@
 //! Explicit integration permission imports requisitions into native lists; it never impersonates checkout buyers.
 use crate::service::quick_order;
 use crate::store::access::{access, require};
+use crate::store::lists;
 use crate::store::{catalog, organization};
 use serde::Deserialize;
 use serde_json::{Value, json};
-use sqlx::Row;
 use std::collections::HashMap;
 use veyndo_app_model::declarations::identifier;
 use veyndo_core::document::{lenient, view};
@@ -75,35 +75,16 @@ pub async fn import(
     for item in &items {
         catalog::admit_unit(&mut tx, t, unit, &item.id, &policy).await?;
     }
-    sqlx::query("SELECT pg_advisory_xact_lock(hashtextextended($1,0))")
-        .bind(format!("b2b:list:{t}:{id}"))
-        .execute(&mut *tx)
-        .await?;
+    lists::serialize(&mut tx, t, id).await?;
     let normalized = json!({"name":data.name,"shared":false,"items":items});
-    if let Some(row) = sqlx::query(
-        "SELECT owner_id,unit_id,data,revision FROM b2b_lists WHERE tenant=$1 AND id=$2 FOR UPDATE",
-    )
-    .bind(t)
-    .bind(id)
-    .fetch_optional(&mut *tx)
-    .await?
-    {
-        if row.get::<String, _>("owner_id") != buyer
-            || row.get::<String, _>("unit_id") != unit
-            || row.get::<Value, _>("data") != normalized
-        {
+    if let Some(row) = lists::locked(&mut tx, t, id).await? {
+        if row.owner_id != buyer || row.unit_id != unit || row.data != normalized {
             return Err(conflict("Requisition ID already has different content"));
         }
-        return Ok(json!({"id":id,"revision":row.get::<i64,_>("revision"),"replayed":true}));
+        return Ok(json!({"id":id,"revision":row.revision,"replayed":true}));
     }
-    sqlx::query("INSERT INTO b2b_lists(tenant,id,unit_id,owner_id,data)VALUES($1,$2,$3,$4,$5)")
-        .bind(t)
-        .bind(id)
-        .bind(unit)
-        .bind(buyer)
-        .bind(normalized)
-        .execute(&mut *tx)
-        .await?;
+    let owner = lists::Owner { unit, owner: buyer };
+    lists::insert(&mut tx, t, id, owner, &normalized).await?;
     organization::event(
         &mut tx,
         t,

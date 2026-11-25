@@ -4,10 +4,11 @@ use crate::domain::flow_projection::{
 };
 use crate::store::{facts, rule_snapshot};
 use crate::types::flow::Flow;
+use serde::Deserialize;
 use serde_json::{Value, json};
-use sqlx::Row;
+use veyndo_core::document::view;
 use veyndo_core::{Result, bad, uid};
-use veyndo_shop::types::cart::{StoredCart, stored};
+use veyndo_shop::types::cart::StoredCart;
 
 /// The empty cart an orderless event is evaluated against.
 fn event_cart(t: &str) -> Result<StoredCart> {
@@ -30,7 +31,7 @@ async fn failed(
     definition: Value,
     error: &str,
 ) -> Result<()> {
-    sqlx::query("INSERT INTO flow_jobs(id,tenant,flow,event_id,definition,state,error) VALUES($1,$2,$3,$4,$5,'failed',$6) ON CONFLICT(tenant,flow,event_id) DO NOTHING").bind(uid()).bind(t).bind(flow).bind(event).bind(definition).bind(error).execute(&mut *tx).await?;
+    sqlx::query!("INSERT INTO flow_jobs(id,tenant,flow,event_id,definition,state,error) VALUES($1,$2,$3,$4,$5,'failed',$6) ON CONFLICT(tenant,flow,event_id) DO NOTHING", uid(), t, flow, event, definition, error).execute(&mut *tx).await?;
     Ok(())
 }
 
@@ -46,22 +47,26 @@ pub async fn project(
         return Ok(());
     }
     let data = &public_event(kind, data);
-    let rows = sqlx::query("SELECT id,data FROM commerce_flows WHERE tenant=$1 AND data->>'event'=$2 AND data->>'active'='true' ORDER BY id FOR SHARE")
-        .bind(t)
-        .bind(kind)
+    let rows = sqlx::query!("SELECT id,data FROM commerce_flows WHERE tenant=$1 AND data->>'event'=$2 AND data->>'active'='true' ORDER BY id FOR SHARE", t, kind)
         .fetch_all(&mut *tx)
         .await?;
     if rows.is_empty() {
         return Ok(());
     }
-    let order_id = data["orderId"].as_str().unwrap_or("");
-    let order=sqlx::query("SELECT c.* ,o.data AS order_data FROM orders o JOIN carts c ON c.id=o.cart_id WHERE o.tenant=$1 AND o.id=$2").bind(t).bind(order_id).fetch_optional(&mut *tx).await?;
+    let subject: EventOrder = view(data);
+    let order_id = subject.order_id.as_str().unwrap_or("");
+    let order=sqlx::query!("SELECT c.id,c.tenant,c.token,c.data,c.revision,c.status,o.data AS order_data FROM orders o JOIN carts c ON c.id=o.cart_id WHERE o.tenant=$1 AND o.id=$2", t, order_id).fetch_optional(&mut *tx).await?;
     let (cart, q) = if let Some(order) = order {
         (
-            stored(&order)?,
+            super::carts::hydrate(
+                order.id,
+                order.tenant,
+                order.token,
+                (order.data, order.revision, order.status),
+            )?,
             data.get("order")
                 .cloned()
-                .unwrap_or_else(|| order.get("order_data")),
+                .unwrap_or_else(|| order.order_data.clone()),
         )
     } else {
         if !orderless(kind) {
@@ -75,8 +80,8 @@ pub async fn project(
         facts::order_facts(tx, t, order_id, &q, &mut context["ruleFacts"]).await?;
     }
     for row in rows {
-        let id: String = row.get("id");
-        let raw: Value = row.get("data");
+        let id: String = row.id.clone();
+        let raw: Value = row.data.clone();
         let f: Flow = match serde_json::from_value(raw.clone()) {
             Ok(flow) => flow,
             Err(_) => {
@@ -109,10 +114,17 @@ pub async fn project(
                     &json!(cart.data),
                     &frozen,
                 );
-                sqlx::query("INSERT INTO flow_jobs(id,tenant,flow,event_id,definition) VALUES($1,$2,$3,$4,$5) ON CONFLICT(tenant,flow,event_id) DO NOTHING").bind(uid()).bind(t).bind(&id).bind(event).bind(definition).execute(&mut *tx).await?;
+                sqlx::query!("INSERT INTO flow_jobs(id,tenant,flow,event_id,definition) VALUES($1,$2,$3,$4,$5) ON CONFLICT(tenant,flow,event_id) DO NOTHING", uid(), t, &id, event, definition).execute(&mut *tx).await?;
             }
             Ok(false) => {}
         }
     }
     Ok(())
+}
+
+/// The order an outbox event is about.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct EventOrder {
+    order_id: Value,
 }

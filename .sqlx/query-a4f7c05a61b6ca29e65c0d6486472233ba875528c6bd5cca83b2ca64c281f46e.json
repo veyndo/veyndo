@@ -1,0 +1,29 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT company_id FROM b2b_units WHERE tenant=$1 AND id=$2",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "company_id",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "b2b_units",
+            "name": "company_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "a4f7c05a61b6ca29e65c0d6486472233ba875528c6bd5cca83b2ca64c281f46e"
+}

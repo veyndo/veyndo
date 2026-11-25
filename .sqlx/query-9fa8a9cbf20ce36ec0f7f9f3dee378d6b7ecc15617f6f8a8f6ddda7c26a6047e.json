@@ -1,0 +1,29 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT automation FROM customers WHERE tenant=$1 AND id=$2 FOR UPDATE",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "automation",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "customers",
+            "name": "automation"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "9fa8a9cbf20ce36ec0f7f9f3dee378d6b7ecc15617f6f8a8f6ddda7c26a6047e"
+}

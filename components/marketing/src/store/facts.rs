@@ -44,6 +44,7 @@ pub async fn rule_facts(conn: &mut sqlx::PgConnection, c: &StoredCart, q: &Value
         .iter()
         .map(|i| i.id.clone())
         .collect::<Vec<_>>();
+    // dynamic SQL: complete product rows feed the catalog's shared hydrator `product(&PgRow)`, which owns the column list.
     let rows = sqlx::query("SELECT * FROM products WHERE tenant=$1 AND id=ANY($2)")
         .bind(&c.tenant)
         .bind(&ids)
@@ -53,6 +54,7 @@ pub async fn rule_facts(conn: &mut sqlx::PgConnection, c: &StoredCart, q: &Value
         .iter()
         .filter_map(|r| r.get::<Option<String>, _>("parent_id"))
         .collect::<Vec<_>>();
+    // dynamic SQL: complete product rows feed the catalog's shared hydrator `product(&PgRow)`, which owns the column list.
     let parents = sqlx::query("SELECT * FROM products WHERE tenant=$1 AND id=ANY($2)")
         .bind(&c.tenant)
         .bind(parent_ids)
@@ -77,17 +79,18 @@ pub async fn rule_facts(conn: &mut sqlx::PgConnection, c: &StoredCart, q: &Value
         }
     }
     let selected = selection(&c.data);
-    let mut facts = json!({"lines":lines,"price":quote.price.raw,"shippingCosts":quote.shipping_costs,"checkout":selected,"salesChannel":c.data.sales_channel,"currency":quote.price.currency,"language":if c.data.locale.is_empty(){"en-GB"}else{&c.data.locale},"adminSource":false,"goodsCount":lines.len(),"lineCount":lines.len(),"goodsPrice":lines.iter().map(|l|l["totalPrice"].as_f64().unwrap_or(0.)).sum::<f64>(),"weight":lines.iter().map(|l|l["weight"].as_f64().unwrap_or(0.)*l["quantity"].as_f64().unwrap_or(0.)).sum::<f64>(),"volume":lines.iter().map(|l|l["volume"].as_f64().unwrap_or(0.)*l["quantity"].as_f64().unwrap_or(0.)).sum::<f64>(),"hasDeliveryFreeItem":lines.iter().any(|l|l["shippingFree"]==true),"promotionCount":quote.discounts.as_ref().map(Vec::len).unwrap_or(0),"promotionValue":quote.discount_total.unwrap_or(0.)});
+    let totals = lines.iter().map(view::<LineTotals>).collect::<Vec<_>>();
+    let mut facts = json!({"lines":lines,"price":quote.price.raw,"shippingCosts":quote.shipping_costs,"checkout":selected,"salesChannel":c.data.sales_channel,"currency":quote.price.currency,"language":if c.data.locale.is_empty(){"en-GB"}else{&c.data.locale},"adminSource":false,"goodsCount":lines.len(),"lineCount":lines.len(),"goodsPrice":totals.iter().map(|l|l.total_price.as_f64().unwrap_or(0.)).sum::<f64>(),"weight":totals.iter().map(|l|l.weight.as_f64().unwrap_or(0.)*l.quantity.as_f64().unwrap_or(0.)).sum::<f64>(),"volume":totals.iter().map(|l|l.volume.as_f64().unwrap_or(0.)*l.quantity.as_f64().unwrap_or(0.)).sum::<f64>(),"hasDeliveryFreeItem":totals.iter().any(|l|l.shipping_free==true),"promotionCount":quote.discounts.as_ref().map(Vec::len).unwrap_or(0),"promotionValue":quote.discount_total.unwrap_or(0.)});
     for (key, address) in [
         ("billing", selected.billing_address),
         ("shipping", selected.address),
     ] {
-        facts[key]=address.map(|a|{let mut v=json!(a);v["zipcode"]=v["postalCode"].clone();v}).unwrap_or(json!({"country":if key=="shipping"{json!(selected.country.clone())}else{Value::Null},"city":null,"street":null,"zipcode":null,"countryStateId":null}));
+        facts[key]=address.map(|a|{let mut v=json!(a);v["zipcode"]=view::<PostalCode>(&v).postal_code;v}).unwrap_or(json!({"country":if key=="shipping"{json!(selected.country.clone())}else{Value::Null},"city":null,"street":null,"zipcode":null,"countryStateId":null}));
     }
     facts["customer"] = customer(conn, c, &facts).await?;
     facts["currentTime"] = json!(
-        sqlx::query_scalar::<_, String>(
-            "SELECT to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD\"T\"HH24:MI:SS\"Z\"')"
+        sqlx::query_scalar!(
+            r#"SELECT to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD"T"HH24:MI:SS"Z"') AS "now!""#
         )
         .fetch_one(&mut *conn)
         .await?
@@ -141,11 +144,11 @@ pub async fn order_facts(
     q: &Value,
     facts: &mut Value,
 ) -> Result<()> {
-    let receipts = sqlx::query_scalar::<_, String>(
+    let receipts = sqlx::query_scalar!(
         "SELECT kind FROM order_receipts WHERE tenant=$1 AND order_id=$2",
+        t,
+        id
     )
-    .bind(t)
-    .bind(id)
     .fetch_all(&mut *conn)
     .await?;
     let q: OrderFacts = view(q);
@@ -157,4 +160,22 @@ pub async fn order_facts(
         .collect::<Vec<_>>();
     facts["order"] = json!({"state":q.state,"tags":q.automation.tags.unwrap_or_default(),"customFields":q.automation.custom_fields.unwrap_or_default(),"affiliateCode":q.affiliate_code,"campaignCode":q.campaign_code,"createdByAdmin":q.created_by_admin.unwrap_or(false),"documentTypes":receipts,"sentDocumentTypes":[],"deliveryStates":deliveries.iter().map(|d|d.state.clone()).collect::<Vec<_>>(),"paymentStates":[q.payment.state],"trackingSet":deliveries.iter().any(|d|d.tracking_code.as_deref().is_some_and(|s|!s.is_empty()))});
     Ok(())
+}
+
+/// The per-line amounts cart totals are summed from.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct LineTotals {
+    total_price: Value,
+    weight: Value,
+    quantity: Value,
+    volume: Value,
+    shipping_free: Value,
+}
+
+/// The postal code of an address, which rules read as `zipcode`.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct PostalCode {
+    postal_code: Value,
 }

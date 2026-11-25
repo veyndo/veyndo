@@ -1,6 +1,5 @@
 //! Merchant preview grants of paused or private channels: bound to the current session, membership, channel revision and host.
-use serde_json::Value;
-use sqlx::Row;
+use crate::store::channel_preview as previews;
 use veyndo_core::request_context::HeaderReader;
 use veyndo_core::shop_scope::header;
 use veyndo_core::{RequestContext, Result, State, bad, hash};
@@ -28,12 +27,15 @@ pub async fn valid(
     if !token(grant) {
         return Ok(false);
     }
-    let row = scoped(Scope::System,sqlx::query("SELECT p.alias,m.role,m.permissions FROM channel_previews p JOIN user_sessions s ON s.digest=p.session_digest JOIN memberships m ON m.user_id=s.user_id AND m.tenant=p.tenant WHERE p.digest=$1 AND p.tenant=$2 AND p.channel=$3 AND p.channel_revision=$4 AND p.redeemed AND p.expires_at>now() AND s.expires_at>now() AND m.active")
-        .bind(hash(grant)).bind(t).bind(channel).bind(revision).fetch_optional(&a.db)).await?;
+    let row = scoped(
+        Scope::System,
+        previews::grant(a, &hash(grant), (t, channel, revision)),
+    )
+    .await?;
     let Some(row) = row else {
         return Ok(false);
     };
-    let alias: Option<String> = row.get("alias");
+    let alias = row.alias;
     // Server-to-server Store API has no host mount but still proves the exact tenant/channel/revision.
     if host.is_some_and(|h| alias.as_deref() != Some(h)) {
         return Ok(false);
@@ -41,11 +43,9 @@ pub async fn valid(
     let mut identity = RequestContext::new();
     identity.insert(
         "x-rac-role",
-        row.get::<String, _>("role")
-            .parse()
-            .map_err(|_| bad("Invalid membership"))?,
+        row.role.parse().map_err(|_| bad("Invalid membership"))?,
     );
-    let permissions: Value = row.get("permissions");
+    let permissions = row.permissions;
     if !permissions.is_null() {
         identity.insert(
             "x-rac-permissions",

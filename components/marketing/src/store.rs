@@ -1,6 +1,11 @@
 //! SQL reads of the marketing component.
+pub mod carts;
+pub mod catalog;
 pub mod channel_config;
+pub mod channel_preview;
+pub mod channels;
 pub mod configuration_lifecycle;
+pub mod configuration_writes;
 pub mod customer_facts;
 pub mod dependencies;
 pub mod facts;
@@ -9,6 +14,7 @@ pub mod flow_job_summaries;
 pub mod flow_jobs;
 pub mod flow_mutations;
 pub mod flow_projection;
+pub mod flow_steps;
 pub mod promotions;
 pub mod rule_entities;
 pub mod rule_history;

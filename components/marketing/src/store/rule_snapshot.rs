@@ -1,6 +1,5 @@
 //! Resolve only referenced tenant rule IDs with indexed batched reads; freeze active definitions and revisions into the event snapshot.
 use serde_json::{Value, json};
-use sqlx::Row;
 use veyndo_core::{Result, bad};
 pub async fn attach(
     conn: &mut sqlx::PgConnection,
@@ -43,13 +42,13 @@ pub async fn attach(
         if seen.len() + ids.len() > 100 {
             return Err(bad("Maximum 100 referenced rules"));
         }
-        let rows=sqlx::query("SELECT id,condition,active,revision FROM commerce_rules WHERE tenant=$1 AND id=ANY($2)").bind(t).bind(&ids).fetch_all(&mut *conn).await?;
+        let rows=sqlx::query!("SELECT id,condition,active,revision FROM commerce_rules WHERE tenant=$1 AND id=ANY($2)", t, &ids).fetch_all(&mut *conn).await?;
         seen.extend(ids);
         for row in rows {
-            let id: String = row.get("id");
-            let condition: Value = row.get("condition");
+            let id: String = row.id.clone();
+            let condition: Value = row.condition.clone();
             refs(&condition, &mut pending);
-            snapshot[&id] = json!({"condition":condition,"active":row.get::<bool,_>("active"),"revision":row.get::<i64,_>("revision")});
+            snapshot[&id] = json!({"condition":condition,"active":row.active.clone(),"revision":row.revision.clone()});
         }
     }
     facts["rules"] = snapshot;

@@ -1,5 +1,6 @@
 //! Exact cash admission and order annotation execute in the existing checkout transaction.
 use crate::service::guard;
+use crate::store::register;
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 use veyndo_checkout::store::selected_customer;
@@ -66,13 +67,8 @@ pub async fn settle(
     let Some(p) = &h.pos else {
         return Ok(());
     };
-    let main_locale = sqlx::query_scalar::<_, Value>(
-        "SELECT data->'mainLocale' FROM commerce_settings WHERE tenant=$1",
-    )
-    .bind(&c.tenant)
-    .fetch_one(&mut **tx)
-    .await?;
-    let receipt_message = sqlx::query_scalar::<_, Value>("SELECT coalesce(data->'pos'->'receiptMessage','{}'::jsonb) FROM sales_channels WHERE tenant=$1 AND id=$2").bind(&c.tenant).bind(&c.data.sales_channel).fetch_one(&mut **tx).await?;
+    let main_locale = register::main_locale(tx, &c.tenant).await?;
+    let receipt_message = register::receipt_message(tx, &c.tenant, &c.data.sales_channel).await?;
     let cash = annotate(
         order,
         p,
@@ -260,12 +256,7 @@ pub async fn check_locked(
     if c.data.pos_discount.is_some() {
         permit(h, "payments.manage")?;
     }
-    let data: Value =
-        sqlx::query_scalar("SELECT data FROM sales_channels WHERE tenant=$1 AND id=$2 FOR SHARE")
-            .bind(&c.tenant)
-            .bind(&c.data.sales_channel)
-            .fetch_one(&mut **tx)
-            .await?;
+    let data = register::channel_for_share(tx, &c.tenant, &c.data.sales_channel).await?;
     let channel: PosChannel = view(&data);
     if channel.kind.as_deref() != Some("pos")
         || channel.active != Some(true)

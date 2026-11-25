@@ -1,0 +1,86 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "WITH ready AS (\n           SELECT id FROM flow_jobs\n           WHERE state='queued' AND available_at<=now()\n             AND EXISTS(SELECT 1 FROM tenants t WHERE t.id=coalesce(\n               (SELECT live_tenant FROM shop_environments WHERE tenant=flow_jobs.tenant),\n               flow_jobs.tenant) AND t.status='active')\n           ORDER BY available_at,event_id LIMIT 1 FOR UPDATE SKIP LOCKED\n         )\n         UPDATE flow_jobs j SET state='running',attempts=j.attempts+1,\n           lease_until=now()+interval '5 minutes'\n         FROM ready WHERE j.id=ready.id\n         RETURNING j.id,j.tenant,j.definition,j.cursor,j.execution,j.attempts",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "flow_jobs",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "tenant",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "flow_jobs",
+            "name": "tenant"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "definition",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "flow_jobs",
+            "name": "definition"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "cursor",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "flow_jobs",
+            "name": "cursor"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "execution",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "flow_jobs",
+            "name": "execution"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "attempts",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "flow_jobs",
+            "name": "attempts"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true,
+      false,
+      false
+    ]
+  },
+  "hash": "e9aeb59c90874765f89ace0c4855a0ce7ecaeeeec2102023d23d3e562ac708c5"
+}

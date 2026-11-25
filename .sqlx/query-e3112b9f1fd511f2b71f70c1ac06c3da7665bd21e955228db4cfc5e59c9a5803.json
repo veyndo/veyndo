@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE carts SET data=$3,revision=$4 WHERE tenant=$1 AND id=$2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Jsonb",
+        "Int8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "e3112b9f1fd511f2b71f70c1ac06c3da7665bd21e955228db4cfc5e59c9a5803"
+}

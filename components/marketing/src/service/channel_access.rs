@@ -1,7 +1,9 @@
 //! Single admission boundary for Store API, UCP/MCP and hosted storefronts; previews cannot purchase.
 use crate::service::channel_preview::{cookie, valid};
-use sqlx::Row;
-use veyndo_core::access::ChannelSnapshot;
+use crate::store::channels as channel_rows;
+use serde::Deserialize;
+use serde_json::Value;
+use veyndo_core::document::view;
 use veyndo_core::host_names::public_path;
 use veyndo_core::shop_scope::{channel, header, tenant};
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode};
@@ -67,35 +69,27 @@ pub async fn admit(
     {
         access.channel.clone()
     } else {
-        sqlx::query("SELECT data,revision FROM sales_channels WHERE tenant=$1 AND id=$2")
-            .bind(&t)
-            .bind(id)
-            .fetch_optional(&a.db)
-            .await?
-            .map(|r| ChannelSnapshot {
-                data: r.get("data"),
-                revision: r.get("revision"),
-            })
+        channel_rows::snapshot(a, &t, id).await?
     }
     .ok_or(Error(
         StatusCode::NOT_FOUND,
         "Sales channel unavailable".into(),
     ))?;
-    let data = snapshot.data;
-    if data["kind"] == "marketplace" {
+    let data: ChannelAdmission = view(&snapshot.data);
+    if data.kind == "marketplace" {
         return Err(Error(
             StatusCode::FORBIDDEN,
             "Marketplace channels require authenticated connector access".into(),
         ));
     }
-    if data["kind"] == "pos" {
+    if data.kind == "pos" {
         return Err(Error(
             StatusCode::FORBIDDEN,
             "POS channels require the authenticated POS API".into(),
         ));
     }
-    let active = data["active"] == true;
-    let private = data["visibility"] == "private";
+    let active = data.active == true;
+    let private = data.visibility == "private";
     let supplied = header(h, "x-channel-preview")
         .map(str::to_owned)
         .or_else(|| cookie(h));
@@ -132,6 +126,15 @@ pub async fn admit(
         ));
     }
     Ok(preview)
+}
+
+/// The channel fields shopper admission reads.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct ChannelAdmission {
+    kind: Value,
+    active: Value,
+    visibility: Value,
 }
 
 #[cfg(test)]

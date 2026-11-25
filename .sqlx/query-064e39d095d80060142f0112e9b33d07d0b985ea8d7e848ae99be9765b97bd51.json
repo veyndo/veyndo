@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO b2b_catalog(tenant,unit_id,product_id) SELECT $2,unit_id,product_id FROM b2b_catalog WHERE tenant=$1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "064e39d095d80060142f0112e9b33d07d0b985ea8d7e848ae99be9765b97bd51"
+}

@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT count(*) AS \"reviews!\" FROM product_reviews WHERE tenant=$1 AND session='customer:'||$2",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "reviews!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "399143f4a520f691db23b1815e72c25349a1a16bbb34a947155f91eaa3753e68"
+}

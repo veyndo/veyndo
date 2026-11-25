@@ -1,7 +1,7 @@
 //! Sales channels share a shop but bind their own catalog visibility, languages and cart identity; storefront reads pass through them.
 use crate::domain::channel_admission::{admissible, selected, serves};
+use crate::store::channels as channel_rows;
 use crate::types::channel::Channel;
-use sqlx::Row;
 use std::collections::HashSet;
 use veyndo_core::shop_scope::{channel as channel_id, header, tenant};
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad};
@@ -12,16 +12,10 @@ use veyndo_shop::service::read_cache::config;
 /// The configuration of a channel as this request may see it; the main channel inherits the shop languages.
 pub async fn channel_configuration(a: &State, h: &RequestContext, id: &str) -> Result<Channel> {
     let t = tenant(h)?;
-    let data: serde_json::Value =
-        sqlx::query_scalar("SELECT data FROM sales_channels WHERE tenant=$1 AND id=$2")
-            .bind(&t)
-            .bind(id)
-            .fetch_optional(&a.db)
-            .await?
-            .ok_or(Error(
-                StatusCode::NOT_FOUND,
-                "Sales channel unavailable".into(),
-            ))?;
+    let data = channel_rows::document(a, &t, id).await?.ok_or(Error(
+        StatusCode::NOT_FOUND,
+        "Sales channel unavailable".into(),
+    ))?;
     let mut c: Channel = serde_json::from_value(data).map_err(|_| bad("Invalid channel"))?;
     if id == "default" {
         c.locales = config(a, &t).await?.0.locales.clone();
@@ -62,20 +56,15 @@ pub async fn admit_products(a: &State, h: &RequestContext, ids: &[String]) -> Re
         return Err(bad("Product admission batch must contain 1..24 IDs"));
     }
     veyndo_b2b::store::catalog::admit(a, h, ids).await?;
-    let rows=sqlx::query("SELECT p.id,p.parent_id FROM products p WHERE p.tenant=$1 AND p.id=ANY($3) AND p.active AND (p.parent_id IS NULL OR EXISTS(SELECT 1 FROM products parent WHERE parent.tenant=p.tenant AND parent.id=p.parent_id AND parent.active)) AND NOT EXISTS(SELECT 1 FROM product_channel_visibility v WHERE v.tenant=p.tenant AND v.channel_id=$2 AND NOT v.visible AND (v.product_id=p.id OR v.product_id=p.parent_id))").bind(tenant(h)?).bind(channel_id(h)).bind(ids).fetch_all(&a.db).await?;
+    let rows = channel_rows::visible(a, &tenant(h)?, channel_id(h), ids).await?;
     let selection = current(a, h)
         .await?
         .map(|c| c.product_ids)
         .unwrap_or_default();
     let denied = ids.iter().any(|id| {
-        !rows.iter().any(|r| {
-            r.get::<String, _>("id") == *id
-                && selected(
-                    &selection,
-                    id,
-                    r.get::<Option<String>, _>("parent_id").as_deref(),
-                )
-        })
+        !rows
+            .iter()
+            .any(|r| r.id == *id && selected(&selection, id, r.parent_id.as_deref()))
     });
     if denied {
         return Err(Error(
@@ -94,12 +83,10 @@ pub async fn filter_channel(
 ) -> Result<Vec<Product>> {
     let config = current(a, h).await?;
     let ids = ps.iter().map(|p| p.id.clone()).collect::<Vec<_>>();
-    let admitted: Vec<String> = sqlx::query_scalar("SELECT p.id FROM products p WHERE p.tenant=$1 AND p.id=ANY($2) AND p.active AND (p.parent_id IS NULL OR EXISTS(SELECT 1 FROM products parent WHERE parent.tenant=p.tenant AND parent.id=p.parent_id AND parent.active)) AND NOT EXISTS(SELECT 1 FROM product_channel_visibility v WHERE v.tenant=p.tenant AND v.channel_id=$3 AND NOT v.visible AND (v.product_id=p.id OR v.product_id=p.parent_id))")
-        .bind(tenant(h)?).bind(ids).bind(channel_id(h)).fetch_all(&a.db).await?;
+    let admitted = channel_rows::visible_ids(a, &tenant(h)?, &ids, channel_id(h)).await?;
     let unit = veyndo_b2b::store::catalog::scope(a, h).await?;
     let admitted = if let Some(unit) = unit {
-        sqlx::query_scalar("SELECT p.id FROM products p WHERE p.tenant=$1 AND p.id=ANY($2) AND EXISTS(SELECT 1 FROM b2b_catalog b WHERE b.tenant=p.tenant AND b.unit_id=$3 AND (b.product_id=p.id OR b.product_id=p.parent_id OR (p.parent_id IS NULL AND EXISTS(SELECT 1 FROM products child WHERE child.tenant=p.tenant AND child.parent_id=p.id AND child.id=b.product_id))))")
-            .bind(tenant(h)?).bind(admitted).bind(unit).fetch_all(&a.db).await?
+        channel_rows::in_unit_catalog(a, &tenant(h)?, &admitted, &unit).await?
     } else {
         admitted
     };

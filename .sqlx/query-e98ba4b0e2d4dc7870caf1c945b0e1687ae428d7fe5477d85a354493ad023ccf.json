@@ -1,0 +1,26 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT EXISTS(SELECT 1 FROM b2b_units u WHERE u.tenant=$1 AND u.id=$2 AND (u.data->>'currency' IS DISTINCT FROM $3::text OR u.data->>'budgetPeriod' IS DISTINCT FROM $4::text) AND EXISTS(SELECT 1 FROM b2b_budget_allocations b WHERE b.tenant=u.tenant AND b.unit_id=u.id AND NOT b.released)) AS \"v!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "v!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "e98ba4b0e2d4dc7870caf1c945b0e1687ae428d7fe5477d85a354493ad023ccf"
+}

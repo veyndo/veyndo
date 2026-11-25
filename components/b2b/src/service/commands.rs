@@ -5,12 +5,12 @@ use crate::service::{
     approval, lists, onboarding, quick_order, quote_contract, quotes, requisition,
 };
 use crate::store::access::{access, catalog_guard, identity, require};
+use crate::store::{carts as cart_rows, units};
 use crate::store::{catalog, organization};
 use crate::types::model::Context;
 use serde::Deserialize;
 use serde_json::{Value, json};
-use sqlx::Row;
-use veyndo_core::document::{lenient, view};
+use veyndo_core::document::{lenient, lenient_list, view};
 use veyndo_core::shop_scope::tenant;
 use veyndo_core::store::history_context::customer_context;
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad, conflict};
@@ -18,7 +18,6 @@ use veyndo_identity::{merchant, permit};
 use veyndo_shop::Settings;
 use veyndo_shop::service::read_cache;
 use veyndo_shop::types::b2b::Config;
-use veyndo_shop::types::cart::stored;
 
 /// The admitted company command fields; anything else is refused before dispatch.
 pub const FIELDS: [&str; 14] = [
@@ -103,12 +102,12 @@ pub async fn invoke(
     {
         "settings.save" => save_features(host, h, &settings, v).await,
         "configuration" => {
-            let s = json!(settings);
-            let methods = |key: &str| {
-                json!(s[key].as_array().map(|v|v.iter().map(|m|json!({"id":m["id"],"name":m["name"],"translations":m["translations"],"active":m["active"]})).collect::<Vec<_>>()).unwrap_or_default())
+            let s: ProcurementSettings = view(&json!(settings));
+            let methods = |list: &[MethodSummary]| {
+                json!(list.iter().map(|m|json!({"id":m.id,"name":m.name,"translations":m.translations,"active":m.active})).collect::<Vec<_>>())
             };
             Ok(
-                json!({"features":s["b2b"],"revision":revision,"mainLocale":s["mainLocale"],"locales":s["locales"],"currencies":{"defaultCurrency":s["currencies"]["defaultCurrency"],"enabled":s["currencies"]["enabled"]},"shipping":methods("shipping"),"payments":methods("payments")}),
+                json!({"features":s.b2b,"revision":revision,"mainLocale":s.main_locale,"locales":s.locales,"currencies":{"defaultCurrency":s.currencies.default_currency,"enabled":s.currencies.enabled},"shipping":methods(&s.shipping),"payments":methods(&s.payments)}),
             )
         }
         "company.create" => onboarding::create(a, h, v).await,
@@ -162,9 +161,9 @@ async fn contexts(a: &State, h: &RequestContext, settings: &Settings) -> Result<
     let mut tx = a.db.begin().await?;
     let customer = identity(&mut tx, h).await?;
     customer_context(&mut tx, &customer).await?;
-    let rows=sqlx::query("SELECT u.id,u.company_id,u.data,c.data AS company,m.data AS member FROM b2b_members m JOIN b2b_units u ON u.tenant=m.tenant AND u.id=m.unit_id JOIN b2b_companies c ON c.tenant=u.tenant AND c.id=u.company_id WHERE m.tenant=$1 AND m.customer_id=$2 AND m.data->>'active'='true' AND u.data->>'active'='true' AND c.data->>'active'='true' ORDER BY u.id LIMIT 100").bind(t).bind(customer).fetch_all(&mut *tx).await?;
+    let rows = units::memberships(&mut tx, &t, &customer).await?;
     Ok(
-        json!({"mainLocale":settings.main_locale,"locales":settings.locales,"elements":rows.iter().map(|r|json!({"id":r.get::<String,_>("id"),"companyId":r.get::<String,_>("company_id"),"data":r.get::<Value,_>("data"),"company":r.get::<Value,_>("company"),"member":r.get::<Value,_>("member")})).collect::<Vec<_>>()}),
+        json!({"mainLocale":settings.main_locale,"locales":settings.locales,"elements":rows.into_iter().map(|r|json!({"id":r.id,"companyId":r.company_id,"data":r.data,"company":r.company,"member":r.member})).collect::<Vec<_>>()}),
     )
 }
 async fn select(host: &dyn Procurement, a: &State, h: &RequestContext, v: &Value) -> Result<Value> {
@@ -179,12 +178,9 @@ async fn select(host: &dyn Procurement, a: &State, h: &RequestContext, v: &Value
         return Err(bad("Invalid purchase order reference"));
     }
     let mut tx = a.db.begin().await?;
-    let row = sqlx::query("SELECT * FROM carts WHERE tenant=$1 AND token=$2 FOR UPDATE")
-        .bind(&c.tenant)
-        .bind(&c.token)
-        .fetch_one(&mut *tx)
-        .await?;
-    c = stored(&row)?;
+    c = cart_rows::lock_by_token(&mut tx, &c.tenant, &c.token)
+        .await?
+        .ok_or(sqlx::Error::RowNotFound)?;
     host.cashier(h, &c)?;
     if c.status != "open" || input.revision.as_i64() != Some(c.revision) {
         return Err(conflict("Cart changed or is terminal"));
@@ -238,13 +234,7 @@ async fn select(host: &dyn Procurement, a: &State, h: &RequestContext, v: &Value
             .unwrap_or_default(),
     );
     c.revision += 1;
-    sqlx::query("UPDATE carts SET data=$3,revision=$4 WHERE tenant=$1 AND id=$2")
-        .bind(&c.tenant)
-        .bind(&c.id)
-        .bind(json!(c.data))
-        .bind(c.revision)
-        .execute(&mut *tx)
-        .await?;
+    cart_rows::save(&mut tx, &c.tenant, &c.id, &json!(c.data), c.revision).await?;
     tx.commit().await?;
     host.carts().view(&c).await
 }
@@ -265,7 +255,7 @@ pub async fn unit_orders(
     let policy = access(&mut tx, &t, unit, &customer).await?;
     require(&policy, "companyOrders")?;
     let id = input.id.as_deref();
-    let rows=sqlx::query("SELECT data,created_at::text AS created FROM orders WHERE tenant=$1 AND data->'b2b'->>'unitId'=$2 AND ($3::text IS NULL OR id=$3) ORDER BY created_at DESC,id DESC LIMIT 100").bind(&t).bind(unit).bind(id).fetch_all(&mut *tx).await?;
+    let rows = units::orders(&mut tx, &t, unit, id).await?;
     if id.is_some() && rows.is_empty() {
         return Err(Error(
             StatusCode::NOT_FOUND,
@@ -275,19 +265,50 @@ pub async fn unit_orders(
     let elements: Vec<Value> = rows
         .iter()
         .map(|r| {
-            let raw: Value = r.get("data");
-            let mut p = host.order(&raw, &r.get::<String, _>("created"));
-            p["b2b"] = raw["b2b"].clone();
+            let mut p = host.order(&r.data, &r.created);
+            p["b2b"] = r.b2b.clone().unwrap_or(Value::Null);
             p
         })
         .collect();
     let receipts = if let Some(id) = id {
-        sqlx::query("SELECT id,kind,number,locale,created_at::text AS created FROM order_receipts WHERE tenant=$1 AND order_id=$2 ORDER BY created_at DESC LIMIT 100").bind(&t).bind(id).fetch_all(&mut *tx).await?
+        units::receipts(&mut tx, &t, id).await?
     } else {
         vec![]
     };
-    let elements:Vec<Value>=elements.into_iter().map(|mut p|{p["stateLabels"]=labels.clone();if let Some(id)=id {p["receipts"]=json!(receipts.iter().map(|r|json!({"id":r.get::<String,_>("id"),"kind":r.get::<String,_>("kind"),"number":r.get::<String,_>("number"),"locale":r.get::<String,_>("locale"),"createdAt":r.get::<String,_>("created"),"pdfPath":format!("/store-api/b2b/units/{unit}/orders/{id}/receipts/{}/pdf",r.get::<String,_>("id"))})).collect::<Vec<_>>());}p}).collect();
+    let elements:Vec<Value>=elements.into_iter().map(|mut p|{p["stateLabels"]=labels.clone();if let Some(id)=id {p["receipts"]=json!(receipts.iter().map(|r|json!({"id":r.id,"kind":r.kind,"number":r.number,"locale":r.locale,"createdAt":r.created,"pdfPath":format!("/store-api/b2b/units/{unit}/orders/{id}/receipts/{}/pdf",r.id)})).collect::<Vec<_>>());}p}).collect();
     Ok(json!({"elements":elements}))
+}
+
+/// The settings a company configuration screen shows.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ProcurementSettings {
+    b2b: Value,
+    main_locale: Value,
+    locales: Value,
+    #[serde(deserialize_with = "lenient")]
+    currencies: CurrencySummary,
+    #[serde(deserialize_with = "lenient_list")]
+    shipping: Vec<MethodSummary>,
+    #[serde(deserialize_with = "lenient_list")]
+    payments: Vec<MethodSummary>,
+}
+
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct CurrencySummary {
+    default_currency: Value,
+    enabled: Value,
+}
+
+/// A shipping or payment method as the company configuration lists it.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct MethodSummary {
+    id: Value,
+    name: Value,
+    translations: Value,
+    active: Value,
 }
 
 #[cfg(test)]

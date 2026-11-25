@@ -1,16 +1,11 @@
 //! The tenant lock of marketing configuration, the revision of one definition and the admission of rule references.
-use crate::domain::configuration_kinds::table;
 use serde_json::Value;
-use sqlx::{PgConnection, Postgres, Row, Transaction};
+use sqlx::{PgConnection, Postgres, Transaction};
 use veyndo_core::{Error, Result, StatusCode, bad};
 
 /// Serializes every change to the marketing configuration of a shop.
 pub async fn lock(tx: &mut Transaction<'_, Postgres>, t: &str) -> Result<()> {
-    sqlx::query("SELECT pg_advisory_xact_lock(hashtextextended($1,17))")
-        .bind(format!("{t}:automation"))
-        .execute(&mut **tx)
-        .await?;
-    Ok(())
+    super::configuration_writes::advisory_lock(tx, &format!("{t}:automation")).await
 }
 /// The current revision of one definition, optionally locked for a change.
 pub async fn revision(
@@ -20,15 +15,7 @@ pub async fn revision(
     id: &str,
     locked: bool,
 ) -> Result<i64> {
-    let table = table(kind)?;
-    let sql = format!(
-        "SELECT revision FROM {table} WHERE tenant=$1 AND id=$2 {}",
-        if locked { "FOR UPDATE" } else { "" }
-    );
-    sqlx::query_scalar(sqlx::AssertSqlSafe(sql.as_str()))
-        .bind(t)
-        .bind(id)
-        .fetch_optional(conn)
+    super::configuration_writes::revision(conn, t, kind, id, locked)
         .await?
         .ok_or(Error(
             StatusCode::NOT_FOUND,
@@ -77,18 +64,19 @@ pub async fn validate_references(
         if seen.len() + ids.len() > 100 || (kind == "rules" && ids.iter().any(|i| i == id)) {
             return Err(bad("Cyclic or excessive rule references"));
         }
-        let rows =
-            sqlx::query("SELECT id,condition FROM commerce_rules WHERE tenant=$1 AND id=ANY($2)")
-                .bind(t)
-                .bind(&ids)
-                .fetch_all(&mut **tx)
-                .await?;
+        let rows = sqlx::query!(
+            "SELECT id,condition FROM commerce_rules WHERE tenant=$1 AND id=ANY($2)",
+            t,
+            &ids
+        )
+        .fetch_all(&mut **tx)
+        .await?;
         if rows.len() != ids.len() {
             return Err(bad("Referenced rule not found in this shop"));
         }
         seen.extend(ids);
         for row in rows {
-            collect(&row.get::<Value, _>("condition"), &mut pending);
+            collect(&row.condition, &mut pending);
         }
     }
     Err(bad("Rule reference depth exceeded"))

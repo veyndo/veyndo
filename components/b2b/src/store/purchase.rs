@@ -3,7 +3,6 @@ use crate::store::access::{access, catalog_guard, guard_conn, require};
 use crate::types::model::{Access, Context};
 use serde::Deserialize;
 use serde_json::{Value, json};
-use sqlx::Row;
 use veyndo_core::document::{lenient, view};
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad, conflict, hash};
 use veyndo_kernel::verified_kernel;
@@ -73,12 +72,13 @@ pub async fn usage(
     policy: &Access,
 ) -> Result<(String, u64)> {
     let context = c.data.b2b.as_ref().ok_or(bad("Company context required"))?;
-    let period: String =
-        sqlx::query_scalar("SELECT date_trunc($1,now() AT TIME ZONE 'UTC')::date::text")
-            .bind(&policy.unit.budget_period)
-            .fetch_one(&mut *conn)
-            .await?;
-    let spent:i64=sqlx::query_scalar("SELECT coalesce(sum(amount_minor),0)::bigint FROM b2b_budget_allocations WHERE tenant=$1 AND unit_id=$2 AND period_start=$3::date AND currency=$4 AND NOT released").bind(&c.tenant).bind(&context.unit_id).bind(&period).bind(&policy.unit.currency).fetch_one(conn).await?;
+    let period: String = sqlx::query_scalar!(
+        r#"SELECT date_trunc($1,now() AT TIME ZONE 'UTC')::date::text AS "period!""#,
+        &policy.unit.budget_period
+    )
+    .fetch_one(&mut *conn)
+    .await?;
+    let spent:i64=sqlx::query_scalar!(r#"SELECT coalesce(sum(amount_minor),0)::bigint AS "spent!" FROM b2b_budget_allocations WHERE tenant=$1 AND unit_id=$2 AND period_start=$3::text::date AND currency=$4 AND NOT released"#, &c.tenant, &context.unit_id, &period, &policy.unit.currency).fetch_one(conn).await?;
     Ok((
         period,
         u64::try_from(spent).map_err(|_| bad("Invalid company budget usage"))?,
@@ -95,11 +95,13 @@ pub async fn check_locked(
         return Ok(None);
     };
     // All allocation/period policy writers hold this exact unit lock. Parallel orders cannot overspend.
-    sqlx::query("SELECT id FROM b2b_units WHERE tenant=$1 AND id=$2 FOR UPDATE")
-        .bind(&c.tenant)
-        .bind(&context.unit_id)
-        .fetch_one(&mut *conn)
-        .await?;
+    sqlx::query!(
+        "SELECT id FROM b2b_units WHERE tenant=$1 AND id=$2 FOR UPDATE",
+        &c.tenant,
+        &context.unit_id
+    )
+    .fetch_one(&mut *conn)
+    .await?;
     let policy = guard_conn(conn, h, c)
         .await?
         .ok_or(bad("Company context required"))?;
@@ -141,9 +143,10 @@ pub async fn check_locked(
     }
     let approval = if needs_approval(&policy, total) {
         let digest = fingerprint(c, q, &policy.version);
-        let r=sqlx::query("SELECT id,data FROM b2b_approvals WHERE tenant=$1 AND cart_id=$2 AND fingerprint=$3 AND state='approved' FOR UPDATE").bind(&c.tenant).bind(&c.id).bind(digest).fetch_optional(&mut *conn).await?.ok_or(conflict("Purchase requires approval for this current cart and company policy"))?;
-        let data: Value = r.get("data");
-        let approver = data["approverId"]
+        let r=sqlx::query!("SELECT id,data FROM b2b_approvals WHERE tenant=$1 AND cart_id=$2 AND fingerprint=$3 AND state='approved' FOR UPDATE", &c.tenant, &c.id, digest).fetch_optional(&mut *conn).await?.ok_or(conflict("Purchase requires approval for this current cart and company policy"))?;
+        let decision: Decision = view(&r.data);
+        let approver = decision
+            .approver_id
             .as_str()
             .ok_or(bad("Missing purchase approver"))?;
         let approver_policy = access(conn, &c.tenant, &context.unit_id, approver).await?;
@@ -157,7 +160,7 @@ pub async fn check_locked(
                 "Purchase approver no longer has current authority",
             ));
         }
-        Some(r.get("id"))
+        Some(r.id.clone())
     } else {
         None
     };
@@ -177,9 +180,9 @@ pub async fn record(
     purchase: Option<&Purchase>,
 ) -> Result<()> {
     let Some(p) = purchase else { return Ok(()) };
-    sqlx::query("INSERT INTO b2b_budget_allocations(tenant,order_id,unit_id,period_start,currency,amount_minor) VALUES($1,$2,$3,$4::date,$5,$6)").bind(&c.tenant).bind(id).bind(&p.context.unit_id).bind(&p.period).bind(&p.currency).bind(p.total).execute(&mut *conn).await?;
+    sqlx::query!("INSERT INTO b2b_budget_allocations(tenant,order_id,unit_id,period_start,currency,amount_minor) VALUES($1,$2,$3,$4::text::date,$5,$6)", &c.tenant, id, &p.context.unit_id, &p.period, &p.currency, p.total).execute(&mut *conn).await?;
     if let Some(approval) = &p.approval {
-        sqlx::query("UPDATE b2b_approvals SET state='consumed',revision=revision+1,data=data||jsonb_build_object('orderId',$3::text) WHERE tenant=$1 AND id=$2 AND state='approved'").bind(&c.tenant).bind(approval).bind(id).execute(&mut *conn).await?;
+        sqlx::query!("UPDATE b2b_approvals SET state='consumed',revision=revision+1,data=data||jsonb_build_object('orderId',$3::text) WHERE tenant=$1 AND id=$2 AND state='approved'", &c.tenant, approval, id).execute(&mut *conn).await?;
     }
     crate::store::organization::event(conn,&c.tenant,"b2b.purchase_completed",json!({"orderId":id,"companyId":p.company_id,"unitId":p.context.unit_id,"currency":p.currency,"totalMinor":p.total,"approvalId":p.approval})).await
 }
@@ -222,36 +225,43 @@ pub async fn preview(a: &State, c: &StoredCart, q: &mut Value) -> Result<()> {
             .ok_or(bad("Unknown unit currency"))?,
     )?
     .minor() as u64;
-    let approval = sqlx::query(
+    let approval = sqlx::query!(
         "SELECT id,state FROM b2b_approvals WHERE tenant=$1 AND cart_id=$2 AND fingerprint=$3",
+        &c.tenant,
+        &c.id,
+        fingerprint(c, q, &policy.version)
     )
-    .bind(&c.tenant)
-    .bind(&c.id)
-    .bind(fingerprint(c, q, &policy.version))
     .fetch_optional(&mut *tx)
     .await?;
-    q["b2b"] = json!({"companyId":policy.company_id,"company":policy.company.name,"unitId":context.unit_id,"unit":policy.unit.name,"purchaseOrder":context.purchase_order,"purchaseOrderRequired":policy.unit.require_purchase_order,"quoteId":context.quote_id,"costCenter":policy.unit.cost_center,"currency":policy.unit.currency,"budgetPeriod":period,"budgetMinor":policy.unit.budget_minor,"spentMinor":spent,"quotesAllowed":policy.member.allows("quotes"),"approvalRequired":needs_approval(&policy,total),"approval":approval.map(|r|json!({"id":r.get::<String,_>("id"),"state":r.get::<String,_>("state")})),"budgetAvailable":policy.unit.budget_minor.is_none_or(|limit|verified_kernel::b2b_budget_admissible(limit,spent,total))});
+    q["b2b"] = json!({"companyId":policy.company_id,"company":policy.company.name,"unitId":context.unit_id,"unit":policy.unit.name,"purchaseOrder":context.purchase_order,"purchaseOrderRequired":policy.unit.require_purchase_order,"quoteId":context.quote_id,"costCenter":policy.unit.cost_center,"currency":policy.unit.currency,"budgetPeriod":period,"budgetMinor":policy.unit.budget_minor,"spentMinor":spent,"quotesAllowed":policy.member.allows("quotes"),"approvalRequired":needs_approval(&policy,total),"approval":approval.map(|r|json!({"id":r.id.clone(),"state":r.state.clone()})),"budgetAvailable":policy.unit.budget_minor.is_none_or(|limit|verified_kernel::b2b_budget_admissible(limit,spent,total))});
     Ok(())
 }
 
 /// Called only after the shared order state machine admits an actual cancellation.
 pub async fn release_budget(conn: &mut sqlx::PgConnection, t: &str, order: &str) -> Result<()> {
     // The same unit row serializes allocation and release across concurrent orders.
-    sqlx::query("SELECT u.id FROM b2b_units u JOIN b2b_budget_allocations b ON b.tenant=u.tenant AND b.unit_id=u.id WHERE b.tenant=$1 AND b.order_id=$2 FOR UPDATE OF u")
-        .bind(t).bind(order).fetch_optional(&mut *conn).await?;
-    sqlx::query("UPDATE b2b_budget_allocations SET released=true WHERE tenant=$1 AND order_id=$2 AND NOT released")
-        .bind(t).bind(order).execute(conn).await?;
+    sqlx::query!("SELECT u.id FROM b2b_units u JOIN b2b_budget_allocations b ON b.tenant=u.tenant AND b.unit_id=u.id WHERE b.tenant=$1 AND b.order_id=$2 FOR UPDATE OF u", t, order).fetch_optional(&mut *conn).await?;
+    sqlx::query!("UPDATE b2b_budget_allocations SET released=true WHERE tenant=$1 AND order_id=$2 AND NOT released", t, order).execute(conn).await?;
     Ok(())
 }
 
 /// Checkout takes the unit write lock before product locks, avoiding shared-lock upgrades.
 pub async fn lock_unit(conn: &mut sqlx::PgConnection, c: &StoredCart) -> Result<()> {
     if let Some(context) = &c.data.b2b {
-        sqlx::query("SELECT id FROM b2b_units WHERE tenant=$1 AND id=$2 FOR UPDATE")
-            .bind(&c.tenant)
-            .bind(&context.unit_id)
-            .fetch_one(conn)
-            .await?;
+        sqlx::query!(
+            "SELECT id FROM b2b_units WHERE tenant=$1 AND id=$2 FOR UPDATE",
+            &c.tenant,
+            &context.unit_id
+        )
+        .fetch_one(conn)
+        .await?;
     }
     Ok(())
+}
+
+/// Who approved a purchase.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct Decision {
+    approver_id: Value,
 }

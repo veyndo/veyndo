@@ -1,0 +1,89 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT m.unit_id,m.customer_id,m.data,m.revision,c.email,c.profile FROM b2b_members m JOIN b2b_units u ON u.tenant=m.tenant AND u.id=m.unit_id JOIN customers c ON c.tenant=m.tenant AND c.id=m.customer_id WHERE m.tenant=$1 AND u.company_id=$2 ORDER BY m.unit_id,m.customer_id LIMIT 500",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "unit_id",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "b2b_members",
+            "name": "unit_id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "customer_id",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "b2b_members",
+            "name": "customer_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "data",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "b2b_members",
+            "name": "data"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "revision",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "b2b_members",
+            "name": "revision"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "email",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "customers",
+            "name": "email"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "profile",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "customers",
+            "name": "profile"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "5a4d9f6108d0688e3ef5107cfb908462ea7e3ecb9c1a0433ca0db7957168a2b7"
+}

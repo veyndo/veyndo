@@ -38,34 +38,37 @@ pub async fn validate_channel_config(
     }
     validate_pos(&c, settings)?;
     if let Some(root) = &c.navigation_category_id {
-        let exists: bool =
-            sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM categories WHERE tenant=$1 AND id=$2)")
-                .bind(t)
-                .bind(root)
-                .fetch_one(&mut **tx)
-                .await?;
+        let exists: bool = sqlx::query_scalar!(
+            r#"SELECT EXISTS(SELECT 1 FROM categories WHERE tenant=$1 AND id=$2) AS "v!""#,
+            t,
+            root
+        )
+        .fetch_one(&mut **tx)
+        .await?;
         if !exists {
             return Err(bad("Unknown channel navigation category"));
         }
     }
     for product in &c.product_ids {
-        let exists: bool =
-            sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM products WHERE tenant=$1 AND id=$2)")
-                .bind(t)
-                .bind(product)
-                .fetch_one(&mut **tx)
-                .await?;
+        let exists: bool = sqlx::query_scalar!(
+            r#"SELECT EXISTS(SELECT 1 FROM products WHERE tenant=$1 AND id=$2) AS "v!""#,
+            t,
+            product
+        )
+        .fetch_one(&mut **tx)
+        .await?;
         if !exists {
             return Err(bad("Unknown channel product"));
         }
     }
     settings.languages().validate_names(&input.name, 100)?;
-    let old: Option<String> =
-        sqlx::query_scalar("SELECT data->>'kind' FROM sales_channels WHERE tenant=$1 AND id=$2")
-            .bind(t)
-            .bind(id)
-            .fetch_optional(&mut **tx)
-            .await?;
+    let old: Option<String> = sqlx::query_scalar!(
+        r#"SELECT data->>'kind' AS "kind!" FROM sales_channels WHERE tenant=$1 AND id=$2"#,
+        t,
+        id
+    )
+    .fetch_optional(&mut **tx)
+    .await?;
     if old.is_some_and(|v| {
         (v == "pos") != (input.kind == "pos")
             || (v == "marketplace") != (input.kind == "marketplace")
@@ -79,11 +82,12 @@ pub async fn validate_channel_config(
 
 /// The stored document and revision of one sales channel.
 pub async fn stored(a: &veyndo_core::State, t: &str, id: &str) -> Result<Option<(Value, i64)>> {
-    use sqlx::Row;
-    let row = sqlx::query("SELECT data,revision FROM sales_channels WHERE tenant=$1 AND id=$2")
-        .bind(t)
-        .bind(id)
-        .fetch_optional(&a.db)
-        .await?;
-    Ok(row.map(|r| (r.get("data"), r.get("revision"))))
+    let row = sqlx::query!(
+        "SELECT data,revision FROM sales_channels WHERE tenant=$1 AND id=$2",
+        t,
+        id
+    )
+    .fetch_optional(&a.db)
+    .await?;
+    Ok(row.map(|r| (r.data.clone(), r.revision)))
 }

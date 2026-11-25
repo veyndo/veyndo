@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT $1::text::timestamptz>now() AND $1::text::timestamptz<now()+interval '1 year' AS \"valid!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "valid!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "80bb44f775e9da0ca5aabdd4d3342a0ac87ceabcf8766477001bacc637a6c9c4"
+}

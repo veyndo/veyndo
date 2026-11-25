@@ -1,0 +1,29 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT product_id FROM b2b_catalog WHERE tenant=$1 AND unit_id=$2 ORDER BY product_id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "product_id",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "b2b_catalog",
+            "name": "product_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "447a31aeac2602ea00bd4a3425cf2047d63dd1d8d58366137d9384e0c805153e"
+}

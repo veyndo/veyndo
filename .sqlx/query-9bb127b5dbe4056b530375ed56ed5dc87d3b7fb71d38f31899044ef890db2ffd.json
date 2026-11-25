@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE flow_jobs SET lease_until=now()+interval '5 minutes'\n             WHERE id=$1 AND tenant=$2 AND attempts=$3 AND state='running' AND lease_until>=now()",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "9bb127b5dbe4056b530375ed56ed5dc87d3b7fb71d38f31899044ef890db2ffd"
+}

@@ -1,6 +1,7 @@
 //! Revision-bound deletion and the dependency read of marketing configuration share HTTP/MCP authorization and tenant locks.
-use crate::domain::configuration_kinds::{configuration_right, table};
+use crate::domain::configuration_kinds::configuration_right;
 use crate::store::configuration_lifecycle::{lock, revision};
+use crate::store::configuration_writes as rows;
 use crate::store::dependencies::inspect;
 use axum::Json;
 use axum::extract::{Path, State};
@@ -51,25 +52,19 @@ pub async fn delete(
         return Err(conflict("Configuration revision changed"));
     }
     let deps = inspect(&mut tx, &t, &kind, &id).await?;
-    if deps["blocked"] == true {
+    if view::<Blocked>(&deps).blocked == true {
         return Err(conflict(
             "Configuration is in use; remove references or deactivate it first",
         ));
     }
-    let table = table(&kind)?;
-    let sql = format!("DELETE FROM {table} WHERE tenant=$1 AND id=$2 AND revision=$3");
-    sqlx::query(sqlx::AssertSqlSafe(sql.as_str()))
-        .bind(&t)
-        .bind(&id)
-        .bind(rev)
-        .execute(&mut *tx)
-        .await
-        .map_err(|e| match &e {
-            sqlx::Error::Database(db) if db.code().as_deref() == Some("23503") => {
-                conflict("Configuration gained a dependency; reload and deactivate it instead")
-            }
-            _ => e.into(),
-        })?;
+    rows::delete(&mut tx, &t, &kind, &id, rev).await?;
     tx.commit().await?;
     Ok(Json(json!({"deleted":true,"id":id,"revision":rev})))
+}
+
+/// Whether something still uses a definition.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct Blocked {
+    blocked: Value,
 }

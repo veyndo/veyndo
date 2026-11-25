@@ -1,0 +1,26 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT coalesce(sum(amount_minor),0)::bigint AS \"spent!\" FROM b2b_budget_allocations WHERE tenant=$1 AND unit_id=$2 AND period_start=$3::text::date AND currency=$4 AND NOT released",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "spent!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "c4fdc17ce06d1428dfb2b1df79ef2c0bd3a8e27a1cb7b707129bad730d9a24b5"
+}

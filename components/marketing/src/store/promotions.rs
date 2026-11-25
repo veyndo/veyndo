@@ -3,7 +3,6 @@ use crate::store::{facts, rule_snapshot};
 use crate::types::promotion::Promotion;
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
-use sqlx::Row;
 use veyndo_core::document::{lenient, merge, view};
 use veyndo_core::{Error, Result, StatusCode, bad};
 use veyndo_pricing::pricing::{PriceInput, calculate, math_round};
@@ -16,10 +15,10 @@ async fn applicable(
     c: &StoredCart,
     q: &Value,
 ) -> Result<Vec<(String, Promotion)>> {
-    let rows = sqlx::query(
+    let rows = sqlx::query!(
         "SELECT id,data FROM commerce_promotions WHERE tenant=$1 ORDER BY id FOR UPDATE",
+        &c.tenant
     )
-    .bind(&c.tenant)
     .fetch_all(&mut *tx)
     .await?;
     let mut evaluated = q.clone();
@@ -28,11 +27,7 @@ async fn applicable(
         rule_snapshot::attach(
             tx,
             &c.tenant,
-            &json!(
-                rows.iter()
-                    .map(|r| r.get::<Value, _>("data"))
-                    .collect::<Vec<_>>()
-            ),
+            &json!(rows.iter().map(|r| r.data.clone()).collect::<Vec<_>>()),
             &mut evaluated["ruleFacts"],
         )
         .await?;
@@ -41,13 +36,13 @@ async fn applicable(
     let mut applicable = vec![];
     for r in rows {
         let p: Promotion =
-            serde_json::from_value(r.get("data")).map_err(|_| bad("Invalid promotion"))?;
+            serde_json::from_value(r.data.clone()).map_err(|_| bad("Invalid promotion"))?;
         // New statement snapshot after row locks: concurrent checkout sees the preceding committed use.
-        let uses: i64 = sqlx::query_scalar(
-            "SELECT count(*) FROM promotion_uses WHERE tenant=$1 AND promotion=$2",
+        let uses: i64 = sqlx::query_scalar!(
+            r#"SELECT count(*) AS "uses!" FROM promotion_uses WHERE tenant=$1 AND promotion=$2"#,
+            &c.tenant,
+            r.id.clone()
         )
-        .bind(&c.tenant)
-        .bind(r.get::<String, _>("id"))
         .fetch_one(&mut *tx)
         .await?;
         if !p.active
@@ -60,9 +55,9 @@ async fn applicable(
         {
             continue;
         }
-        let valid:bool=sqlx::query_scalar("SELECT ($1::text IS NULL OR now()>=$1::timestamptz) AND ($2::text IS NULL OR now()<=$2::timestamptz)").bind(&p.start).bind(&p.end).fetch_one(&mut *tx).await?;
+        let valid:bool=sqlx::query_scalar!(r#"SELECT ($1::text IS NULL OR now()>=$1::timestamptz) AND ($2::text IS NULL OR now()<=$2::timestamptz) AS "valid!""#, p.start.as_deref(), p.end.as_deref()).fetch_one(&mut *tx).await?;
         if valid {
-            applicable.push((r.get::<String, _>("id"), p));
+            applicable.push((r.id.clone(), p));
         }
     }
     applicable.sort_by(|a, b| b.1.priority.cmp(&a.1.priority).then(a.0.cmp(&b.0)));
@@ -308,9 +303,17 @@ pub async fn record_uses(
 ) -> Result<()> {
     let input: RecordUsesInput = view(q);
     for d in input.discounts.as_array().unwrap_or(&vec![]) {
-        sqlx::query("INSERT INTO promotion_uses(tenant,promotion,order_id) VALUES($1,$2,$3) ON CONFLICT DO NOTHING").bind(t).bind(d["id"].as_str()).bind(order).execute(&mut *tx).await?;
+        let used: Used = view(d);
+        sqlx::query!("INSERT INTO promotion_uses(tenant,promotion,order_id) VALUES($1,$2,$3) ON CONFLICT DO NOTHING", t, used.id.as_str(), order).execute(&mut *tx).await?;
     }
     Ok(())
+}
+
+/// The promotion a quote discount came from.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct Used {
+    id: Value,
 }
 
 #[cfg(test)]

@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM channel_previews WHERE expires_at<now() AND tenant=$1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "6b1e2b76577b834ae637272100c5ae3c24ccf641584e2d7e354fcd6a64a5fe95"
+}

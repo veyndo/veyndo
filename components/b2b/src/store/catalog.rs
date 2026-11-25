@@ -6,18 +6,13 @@ use serde_json::{Value, json};
 use veyndo_core::document::{lenient, view};
 use veyndo_core::shop_scope::{header, tenant};
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad, conflict};
-use veyndo_shop::types::cart::stored;
 pub async fn scope(a: &State, h: &RequestContext) -> Result<Option<String>> {
     let Some(token) = header(h, "sw-context-token") else {
         return Ok(None);
     };
-    let row = sqlx::query("SELECT * FROM carts WHERE tenant=$1 AND token=$2")
-        .bind(tenant(h)?)
-        .bind(token)
-        .fetch_optional(&a.db)
-        .await?;
-    let Some(row) = row else { return Ok(None) };
-    let c = stored(&row)?;
+    let Some(c) = super::carts::by_token(a, &tenant(h)?, token).await? else {
+        return Ok(None);
+    };
     if c.data.b2b.is_none() {
         return Ok(None);
     };
@@ -33,7 +28,7 @@ pub async fn admit(a: &State, h: &RequestContext, ids: &[String]) -> Result<()> 
     let Some(unit) = scope(a, h).await? else {
         return Ok(());
     };
-    let denied:bool=sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM products p WHERE p.tenant=$1 AND p.id=ANY($3) AND NOT EXISTS(SELECT 1 FROM b2b_catalog b WHERE b.tenant=p.tenant AND b.unit_id=$2 AND (b.product_id=p.id OR b.product_id=p.parent_id OR EXISTS(SELECT 1 FROM products child WHERE child.tenant=p.tenant AND child.parent_id=p.id AND child.id=b.product_id))))").bind(tenant(h)?).bind(unit).bind(ids).fetch_one(&a.db).await?;
+    let denied:bool=sqlx::query_scalar!(r#"SELECT EXISTS(SELECT 1 FROM products p WHERE p.tenant=$1 AND p.id=ANY($3) AND NOT EXISTS(SELECT 1 FROM b2b_catalog b WHERE b.tenant=p.tenant AND b.unit_id=$2 AND (b.product_id=p.id OR b.product_id=p.parent_id OR EXISTS(SELECT 1 FROM products child WHERE child.tenant=p.tenant AND child.parent_id=p.id AND child.id=b.product_id)))) AS "v!""#, tenant(h)?, unit, &ids).fetch_one(&a.db).await?;
     if denied {
         return Err(Error(
             StatusCode::NOT_FOUND,
@@ -72,43 +67,49 @@ pub async fn save_tx(conn: &mut sqlx::PgConnection, t: &str, v: &Value) -> Resul
     if ids.len() > 1000 || ids.iter().collect::<std::collections::HashSet<_>>().len() != ids.len() {
         return Err(bad("Catalog edit accepts up to 1000 distinct product IDs"));
     }
-    let revision: Option<i64> =
-        sqlx::query_scalar("SELECT revision FROM b2b_units WHERE tenant=$1 AND id=$2 FOR UPDATE")
-            .bind(t)
-            .bind(unit)
-            .fetch_optional(&mut *conn)
-            .await?;
+    let revision: Option<i64> = sqlx::query_scalar!(
+        "SELECT revision FROM b2b_units WHERE tenant=$1 AND id=$2 FOR UPDATE",
+        t,
+        unit
+    )
+    .fetch_optional(&mut *conn)
+    .await?;
     let revision = revision.ok_or(Error(StatusCode::NOT_FOUND, "Unit not found".into()))?;
     if input.revision != Some(revision) {
         return Err(conflict("Unit catalog changed; reload before saving"));
     }
-    let count: i64 =
-        sqlx::query_scalar("SELECT count(*) FROM products WHERE tenant=$1 AND id=ANY($2)")
-            .bind(t)
-            .bind(&ids)
-            .fetch_one(&mut *conn)
-            .await?;
+    let count: i64 = sqlx::query_scalar!(
+        r#"SELECT count(*) AS "count!" FROM products WHERE tenant=$1 AND id=ANY($2)"#,
+        t,
+        &ids
+    )
+    .fetch_one(&mut *conn)
+    .await?;
     if count != ids.len() as i64 {
         return Err(bad("Catalog references missing or foreign products"));
     }
-    sqlx::query("DELETE FROM b2b_catalog WHERE tenant=$1 AND unit_id=$2")
-        .bind(t)
-        .bind(unit)
-        .execute(&mut *conn)
-        .await?;
-    sqlx::query(
-        "INSERT INTO b2b_catalog(tenant,unit_id,product_id) SELECT $1,$2,unnest($3::text[])",
+    sqlx::query!(
+        "DELETE FROM b2b_catalog WHERE tenant=$1 AND unit_id=$2",
+        t,
+        unit
     )
-    .bind(t)
-    .bind(unit)
-    .bind(ids)
     .execute(&mut *conn)
     .await?;
-    sqlx::query("UPDATE b2b_units SET revision=revision+1 WHERE tenant=$1 AND id=$2")
-        .bind(t)
-        .bind(unit)
-        .execute(&mut *conn)
-        .await?;
+    sqlx::query!(
+        "INSERT INTO b2b_catalog(tenant,unit_id,product_id) SELECT $1,$2,unnest($3::text[])",
+        t,
+        unit,
+        &ids
+    )
+    .execute(&mut *conn)
+    .await?;
+    sqlx::query!(
+        "UPDATE b2b_units SET revision=revision+1 WHERE tenant=$1 AND id=$2",
+        t,
+        unit
+    )
+    .execute(&mut *conn)
+    .await?;
     crate::store::organization::event(
         conn,
         t,
@@ -129,7 +130,7 @@ pub async fn admit_unit(
     if !policy.unit.restricted_catalog {
         return Ok(());
     }
-    let admitted:bool=sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM products p JOIN b2b_catalog b ON b.tenant=p.tenant AND (b.product_id=p.id OR b.product_id=p.parent_id) WHERE p.tenant=$1 AND p.id=$2 AND b.unit_id=$3)").bind(t).bind(product).bind(unit).fetch_one(conn).await?;
+    let admitted:bool=sqlx::query_scalar!(r#"SELECT EXISTS(SELECT 1 FROM products p JOIN b2b_catalog b ON b.tenant=p.tenant AND (b.product_id=p.id OR b.product_id=p.parent_id) WHERE p.tenant=$1 AND p.id=$2 AND b.unit_id=$3) AS "v!""#, t, product, unit).fetch_one(conn).await?;
     if !admitted {
         return Err(Error(
             StatusCode::NOT_FOUND,

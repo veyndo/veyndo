@@ -60,7 +60,9 @@ pub fn normalize(v: &Value, depth: usize) -> Result<Value> {
     };
     if veyndo_automation::rules::definition(typ).is_some() && typ != "alwaysValid" {
         let node = source_node(v, depth)?;
-        return Ok(json!({"type":"shopwareCondition","name":typ,"config":node["config"]}));
+        return Ok(
+            json!({"type":"shopwareCondition","name":typ,"config":view::<SourceNode>(&node).config}),
+        );
     }
     let alias = match typ {
         "customerGroup" | "customerCustomerGroup" => Some("customerGroupIds"),
@@ -132,6 +134,13 @@ fn source_node(v: &Value, depth: usize) -> Result<Value> {
     }
     veyndo_automation::rules::validate(name, &config, depth).map_err(bad)?;
     Ok(json!({"type":name,"config":config}))
+}
+
+/// The configuration of an imported source condition.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct SourceNode {
+    config: Value,
 }
 
 #[cfg(test)]

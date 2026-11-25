@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE flow_steps SET state='failed',error=$1,finished_at=now() WHERE job=$2 AND node=$3",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "1a5eda8eec2ead660a3222057cdc9f6ceef0f10a392c3af7f5e3073d7b204eea"
+}

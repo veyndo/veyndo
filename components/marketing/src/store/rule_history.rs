@@ -3,8 +3,8 @@ use crate::domain::rule_comparison::{digest, evaluate};
 use crate::domain::rules;
 use serde::Deserialize;
 use serde_json::{Value, json};
-use sqlx::Row;
 use veyndo_app_model::declarations::identifier;
+use veyndo_core::document::view;
 use veyndo_core::{Error, Result, State, StatusCode, bad, conflict};
 
 #[derive(Deserialize)]
@@ -31,50 +31,56 @@ pub async fn compare(a: &State, t: &str, v: Value) -> Result<Value> {
         return Err(bad("Saved rule, Flow, revision and limit (1–50) required"));
     }
     input.condition.validate(0)?;
-    let row = sqlx::query(
+    let row = sqlx::query!(
         "SELECT condition,revision,active FROM commerce_rules WHERE tenant=$1 AND id=$2",
+        t,
+        &input.rule_id
     )
-    .bind(t)
-    .bind(&input.rule_id)
     .fetch_optional(&a.db)
     .await?
     .ok_or(Error(StatusCode::NOT_FOUND, "Rule unavailable".into()))?;
-    if row.get::<i64, _>("revision") != input.revision {
+    if row.revision != input.revision {
         return Err(conflict("Configuration revision changed"));
     }
     let baseline: rules::Condition =
-        serde_json::from_value(row.get("condition")).map_err(|_| bad("Invalid saved rule"))?;
+        serde_json::from_value(row.condition.clone()).map_err(|_| bad("Invalid saved rule"))?;
     baseline.validate(0)?;
     // Existing (tenant,flow,event_id) index bounds the sample. Never fetch current carts,
     // products/customers/references or dispatch any Flow action during comparison.
-    let rows = sqlx::query("SELECT id,event_id,CASE WHEN octet_length(definition::text)<=262144 THEN definition ELSE NULL END AS snapshot FROM flow_jobs WHERE tenant=$1 AND flow=$2 ORDER BY event_id DESC LIMIT $3")
-        .bind(t).bind(&input.flow_id).bind(i64::from(input.limit)).fetch_all(&a.db).await?;
+    let rows = sqlx::query!("SELECT id,event_id,CASE WHEN octet_length(definition::text)<=262144 THEN definition ELSE NULL END AS snapshot FROM flow_jobs WHERE tenant=$1 AND flow=$2 ORDER BY event_id DESC LIMIT $3", t, &input.flow_id, i64::from(input.limit)).fetch_all(&a.db).await?;
     let results: Vec<Value> = rows
         .iter()
         .map(|r| {
-            let snapshot: Option<Value> = r.get("snapshot");
+            let snapshot: Option<Value> = r.snapshot.clone();
             let mut result = match snapshot {
                 Some(d) => evaluate(t, &d, &baseline, &input.condition),
                 None => json!({"status":"unavailable","reason":"snapshot_too_large"}),
             };
-            result["jobId"] = json!(r.get::<String, _>("id"));
-            result["eventId"] = json!(r.get::<i64, _>("event_id"));
+            result["jobId"] = json!(r.id.clone());
+            result["eventId"] = json!(r.event_id.clone());
             result
         })
         .collect();
-    let evaluated = results
+    let outcomes = results.iter().map(view::<Outcome>).collect::<Vec<_>>();
+    let evaluated = outcomes.iter().filter(|r| r.status == "evaluated").count();
+    let changed = outcomes
         .iter()
-        .filter(|r| r["status"] == "evaluated")
-        .count();
-    let changed = results
-        .iter()
-        .filter(|r| r["status"] == "evaluated" && r["before"] != r["after"])
+        .filter(|r| r.status == "evaluated" && r.before != r.after)
         .count();
     Ok(
         json!({"sideEffects":false,"comparisonVersion":1,"ruleId":input.rule_id,
-        "revision":input.revision,"baselineActive":row.get::<bool,_>("active"),"flowId":input.flow_id,
+        "revision":input.revision,"baselineActive":row.active.clone(),"flowId":input.flow_id,
         "baselineDigest":digest(&json!(baseline)),"candidateDigest":digest(&json!(input.condition)),
         "sampled":results.len(),"evaluated":evaluated,"changed":changed,
         "unavailable":results.len()-evaluated,"results":results}),
     )
+}
+
+/// Whether one sampled event was evaluated and how its match changed.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct Outcome {
+    status: Value,
+    before: Value,
+    after: Value,
 }

@@ -44,8 +44,7 @@ pub async fn configure(
         return Ok(());
     }
     let base = decode(
-        sqlx::query_scalar("SELECT data FROM commerce_settings WHERE tenant=$1")
-            .bind(t)
+        sqlx::query_scalar!("SELECT data FROM commerce_settings WHERE tenant=$1", t)
             .fetch_one(&mut **tx)
             .await?,
     )?;
@@ -55,12 +54,14 @@ pub async fn configure(
     )?;
     let next = pos_settings(&base)?;
     validate(&next, &conditions)?;
-    sqlx::query("INSERT INTO commerce_overrides(tenant,channel_id,data) VALUES($1,$2,$3)")
-        .bind(t)
-        .bind(id)
-        .bind(difference(&base, &next))
-        .execute(&mut **tx)
-        .await?;
+    sqlx::query!(
+        "INSERT INTO commerce_overrides(tenant,channel_id,data) VALUES($1,$2,$3)",
+        t,
+        id,
+        difference(&base, &next)
+    )
+    .execute(&mut **tx)
+    .await?;
     Ok(())
 }
 

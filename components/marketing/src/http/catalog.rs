@@ -2,11 +2,13 @@
 use crate::domain::condition_import::normalize;
 use crate::domain::rule_fields::FIELDS;
 use crate::domain::rules::Condition;
+use crate::store::catalog;
 use axum::Json;
 use axum::extract::State as Shared;
+use serde::Deserialize;
 use serde_json::{Value, json};
-use sqlx::Row;
 use veyndo_automation::rules as automation_rules;
+use veyndo_core::document::view;
 use veyndo_core::{RequestContext, Result, State, bad};
 use veyndo_flow_graph::catalog as builtin;
 use veyndo_identity::{merchant, permit};
@@ -44,18 +46,19 @@ fn conditions() -> Value {
 pub async fn catalog(Shared(a): Shared<State>, h: RequestContext) -> Result<Json<Value>> {
     permit(&h, "automation.read")?;
     let t = merchant(&h)?;
-    let rows =
-        sqlx::query("SELECT id,manifest FROM app_packages WHERE tenant=$1 AND active ORDER BY id")
-            .bind(&t)
-            .fetch_all(&a.db)
-            .await?;
-    let mut result = json!({"upstream":"shopware/core 6.7.14.2","conditions":conditions(),"fields":FIELDS,"events":builtin::EVENTS,"apps":rows.iter().map(|r|json!({"id":r.get::<String,_>("id"),"manifest":r.get::<Value,_>("manifest")})).collect::<Vec<_>>(),"completeUpstreamConditionCatalog":false});
-    let rules=sqlx::query("SELECT id,name,revision FROM commerce_rules WHERE tenant=$1 AND active ORDER BY id LIMIT 100").bind(&t).fetch_all(&a.db).await?;
-    result["rules"]=json!(rules.iter().map(|r|json!({"id":r.get::<String,_>("id"),"name":r.get::<Value,_>("name"),"revision":r.get::<i64,_>("revision")})).collect::<Vec<_>>());
-    let source = automation_rules::catalog();
-    result["sourceConditions"] = source["conditions"].clone();
+    let rows = catalog::active_apps(&a, &t).await?;
+    let mut result = json!({"upstream":"shopware/core 6.7.14.2","conditions":conditions(),"fields":FIELDS,"events":builtin::EVENTS,"apps":rows.iter().map(|r|json!({"id":r.id,"manifest":r.manifest})).collect::<Vec<_>>(),"completeUpstreamConditionCatalog":false});
+    let rules = catalog::active_rules(&a, &t).await?;
+    result["rules"] = json!(
+        rules
+            .iter()
+            .map(|r| json!({"id":r.id,"name":r.name,"revision":r.revision}))
+            .collect::<Vec<_>>()
+    );
+    let source: SourceCatalog = view(automation_rules::catalog());
+    result["sourceConditions"] = source.conditions;
     result["actions"] = json!(builtin::PIPELINE_ACTIONS);
-    result["sourceActions"] = source["actions"].clone();
+    result["sourceActions"] = source.actions;
     result["flowCatalogVersion"] = json!(builtin::VERSION);
     result["pipelineContract"] = json!({"nodes":["condition","action","delay","stop"],"maxNodes":veyndo_flow_graph::MAX_NODES,"maxDelaySeconds":2592000,"cyclicGraphs":false});
     Ok(Json(result))
@@ -69,4 +72,12 @@ pub async fn import(h: RequestContext, Json(v): Json<Value>) -> Result<Json<Valu
         .map_err(|_| bad("Unsupported Shopware condition"))?;
     c.validate(0)?;
     Ok(Json(json!({"condition":normalized,"saved":false})))
+}
+
+/// The upstream condition and action catalogue of the automation rules.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct SourceCatalog {
+    conditions: Value,
+    actions: Value,
 }
