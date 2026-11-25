@@ -3,21 +3,11 @@ use serde_json::Value;
 use sqlx::PgConnection;
 use veyndo_core::{Result, State};
 
-/// A shop's daily interactive AI limit and its revision.
-pub struct Limit {
-    pub daily_ai: i64,
-    pub revision: i64,
-}
+pub use veyndo_core::store::resource_limits::Limit;
 
 /// The stored AI limit of a shop; none while it uses the defaults.
 pub async fn limit(a: &State, tenant: &str) -> Result<Option<Limit>> {
-    Ok(sqlx::query_as!(
-        Limit,
-        "SELECT daily_ai,revision FROM tenant_resource_limits WHERE tenant=$1",
-        tenant
-    )
-    .fetch_optional(&a.db)
-    .await?)
+    veyndo_core::store::resource_limits::limit(a, tenant).await
 }
 
 /// The interactive AI attempts of a shop on the current UTC day.
@@ -27,12 +17,7 @@ pub async fn used_today(a: &State, tenant: &str) -> Result<Option<i64>> {
 
 /// The revision of a shop's stored AI limit, on the caller's connection.
 pub async fn limit_revision(conn: &mut PgConnection, tenant: &str) -> Result<Option<i64>> {
-    Ok(sqlx::query_scalar!(
-        "SELECT revision FROM tenant_resource_limits WHERE tenant=$1",
-        tenant
-    )
-    .fetch_optional(conn)
-    .await?)
+    veyndo_core::store::resource_limits::revision(conn, tenant).await
 }
 
 /// Inserts the limit at `revision`, or replaces it and advances the stored revision.
@@ -42,15 +27,7 @@ pub async fn upsert_limit(
     daily_ai: i64,
     revision: i64,
 ) -> Result<()> {
-    sqlx::query!(
-        "INSERT INTO tenant_resource_limits(tenant,daily_ai,revision) VALUES($1,$2,$3) ON CONFLICT(tenant) DO UPDATE SET daily_ai=excluded.daily_ai,revision=tenant_resource_limits.revision+1",
-        tenant,
-        daily_ai,
-        revision
-    )
-    .execute(conn)
-    .await?;
-    Ok(())
+    veyndo_core::store::resource_limits::upsert(conn, tenant, daily_ai, revision).await
 }
 
 /// Records an operator action in the control-plane audit trail.

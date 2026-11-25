@@ -18,6 +18,7 @@
         "read_context_versions",
         "resource_leases",
         "tenant_ai_usage",
+        "tenant_resource_limits",
         "tenants",
         "veyndo_authority"
       ],
@@ -30,8 +31,7 @@
         "knowledge_receipts": "read: reads knowledge receipts for the shared retention cleanup (retention.sql)",
         "observed_pairs": "read: reads observed product pairs for the shared retention cleanup (retention.sql)",
         "pair_evidence": "read: reads pair evidence for the shared retention cleanup (retention.sql)",
-        "shop_environments": "read: reads the environment row (live shop, preview owner) to scope sandbox and preview requests to their live shop (admission.rs, next_tenant.sql, reads.rs, shop_scope.rs)",
-        "tenant_resource_limits": "read: reads per-shop resource limits for admission (admission.rs)"
+        "shop_environments": "read: reads the environment row (live shop, preview owner) to scope sandbox and preview requests to their live shop (admission.rs, next_tenant.sql, reads.rs, shop_scope.rs)"
       },
       "glob_imports": 0,
       "untyped_access": 0,
@@ -92,8 +92,7 @@
         "platform_audit",
         "platform_operators",
         "privacy_consent_log",
-        "privacy_consents",
-        "tenant_resource_limits"
+        "privacy_consents"
       ],
       "uses": [
         "catalog",
