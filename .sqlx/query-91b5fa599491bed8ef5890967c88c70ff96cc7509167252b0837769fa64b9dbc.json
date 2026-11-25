@@ -1,0 +1,42 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "-- Bounded imported-order names: locale first, then child before parent.\n-- Keep SQL blank-name filtering and the caller's final Rust trim fallback.\nSELECT DISTINCT ON (product.id) product.id, translation.name AS \"name!\"\nFROM products product\nJOIN product_translations translation\n  ON translation.tenant = product.tenant\n AND translation.product_id IN (product.id, product.parent_id)\nJOIN languages lang ON lang.id = translation.language_id\nWHERE product.tenant = $1 AND product.id = ANY($2)\n  AND lang.locale = ANY($3)\n  AND translation.name IS NOT NULL AND btrim(translation.name) <> ''\nORDER BY product.id, array_position($3, lang.locale),\n         CASE WHEN translation.product_id = product.id THEN 0 ELSE 1 END\n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "products",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "name!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "product_translations",
+            "name": "name"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "TextArray",
+        "TextArray"
+      ]
+    },
+    "nullable": [
+      false,
+      true
+    ]
+  },
+  "hash": "91b5fa599491bed8ef5890967c88c70ff96cc7509167252b0837769fa64b9dbc"
+}

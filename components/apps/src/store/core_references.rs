@@ -17,22 +17,51 @@ pub async fn validate_references(
         let Some(id) = fields[&f.name].as_str() else {
             continue;
         };
-        let query = match kind {
-            "product" => "SELECT EXISTS(SELECT 1 FROM products WHERE tenant=$1 AND id=$2)",
-            "customer" => "SELECT EXISTS(SELECT 1 FROM customers WHERE tenant=$1 AND id=$2)",
-            "salesChannel" => {
-                "SELECT EXISTS(SELECT 1 FROM sales_channels WHERE tenant=$1 AND id=$2)"
-            }
-            "order" => "SELECT EXISTS(SELECT 1 FROM orders WHERE tenant=$1 AND id=$2)",
-            "b2bCompany" => "SELECT EXISTS(SELECT 1 FROM b2b_companies WHERE tenant=$1 AND id=$2)",
-            "b2bUnit" => "SELECT EXISTS(SELECT 1 FROM b2b_units WHERE tenant=$1 AND id=$2)",
+        let owned = match kind {
+            "product" => sqlx::query_scalar!(
+                r#"SELECT EXISTS(SELECT 1 FROM products WHERE tenant=$1 AND id=$2) AS "owned!""#,
+                t,
+                id
+            )
+            .fetch_one(&mut **tx)
+            .await?,
+            "customer" => sqlx::query_scalar!(
+                r#"SELECT EXISTS(SELECT 1 FROM customers WHERE tenant=$1 AND id=$2) AS "owned!""#,
+                t,
+                id
+            )
+            .fetch_one(&mut **tx)
+            .await?,
+            "salesChannel" => sqlx::query_scalar!(
+                r#"SELECT EXISTS(SELECT 1 FROM sales_channels WHERE tenant=$1 AND id=$2) AS "owned!""#,
+                t,
+                id
+            )
+            .fetch_one(&mut **tx)
+            .await?,
+            "order" => sqlx::query_scalar!(
+                r#"SELECT EXISTS(SELECT 1 FROM orders WHERE tenant=$1 AND id=$2) AS "owned!""#,
+                t,
+                id
+            )
+            .fetch_one(&mut **tx)
+            .await?,
+            "b2bCompany" => sqlx::query_scalar!(
+                r#"SELECT EXISTS(SELECT 1 FROM b2b_companies WHERE tenant=$1 AND id=$2) AS "owned!""#,
+                t,
+                id
+            )
+            .fetch_one(&mut **tx)
+            .await?,
+            "b2bUnit" => sqlx::query_scalar!(
+                r#"SELECT EXISTS(SELECT 1 FROM b2b_units WHERE tenant=$1 AND id=$2) AS "owned!""#,
+                t,
+                id
+            )
+            .fetch_one(&mut **tx)
+            .await?,
             _ => return Err(bad("Unknown core reference")),
         };
-        let owned: bool = sqlx::query_scalar(query)
-            .bind(t)
-            .bind(id)
-            .fetch_one(&mut **tx)
-            .await?;
         if !owned {
             return Err(bad("Referenced core object does not belong to this shop"));
         }

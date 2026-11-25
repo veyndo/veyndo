@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT jsonb_build_object('eventId',d.event_id,'kind',o.kind,'state',d.state,'attempts',d.attempts,'error',d.error,'lastAttemptAt',d.last_attempt_at) AS \"delivery!\" FROM app_deliveries d JOIN outbox o ON o.tenant=d.tenant AND o.id=d.event_id WHERE d.tenant=$1 AND d.app=$2 ORDER BY d.event_id DESC LIMIT 50",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "delivery!",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "39e841800a1f564f3e5e95159811a9952559b2a14e386f7c0fe6de51cac7dc5f"
+}

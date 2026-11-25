@@ -49,11 +49,11 @@ impl<'db> shared::StateHooks<'db> for Host<'_> {
         'db: 'a,
     {
         Box::pin(async move {
-            let used: bool = sqlx::query_scalar(
-                "SELECT EXISTS(SELECT 1 FROM hosted_frontends WHERE tenant=$1 AND app_id=$2)",
+            let used = sqlx::query_scalar!(
+                r#"SELECT EXISTS(SELECT 1 FROM hosted_frontends WHERE tenant=$1 AND app_id=$2) AS "used!""#,
+                self.tenant,
+                self.app
             )
-            .bind(self.tenant)
-            .bind(self.app)
             .fetch_one(&mut **tx)
             .await?;
             if used {

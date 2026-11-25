@@ -1,6 +1,47 @@
 //! Provider-native messages and correlated tool results, including opaque reasoning continuation.
 use super::super::{Provider, Value, env, json};
 use super::{alias, definitions};
+use serde::Deserialize;
+use veyndo_core::document::{lenient, view};
+
+/// A host tool definition, typed as a provider request reads it.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ToolDefinition {
+    #[serde(deserialize_with = "lenient")]
+    name: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    description: Option<String>,
+    input_schema: Value,
+}
+
+/// The tool continuation the host records in the request schema.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct Continuation {
+    #[serde(rename = "x-veyndo-history", deserialize_with = "lenient")]
+    history: Option<Vec<Value>>,
+}
+
+/// One recorded tool turn: the provider, its opaque assistant output and the correlated results.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct Turn {
+    provider: Value,
+    #[serde(deserialize_with = "lenient")]
+    results: Option<Vec<Value>>,
+    assistant: Value,
+}
+
+/// One correlated tool result.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct ToolResult {
+    id: Value,
+    result: Value,
+    alias: Value,
+}
+
 pub(in crate::inference) fn request(
     provider: &Provider,
     schema: &Value,
@@ -15,11 +56,12 @@ pub(in crate::inference) fn request(
     let responses = matches!(provider, Provider::Openai) && !chat;
     let tools: Vec<_> = defs.iter().enumerate().map(|(i,t)| {
         let name=alias(i);
-        let description=format!("{}: {}",t["name"].as_str().unwrap_or(""),t["description"].as_str().unwrap_or("Authorized read"));
+        let t: ToolDefinition = view(t);
+        let description=format!("{}: {}",t.name.as_deref().unwrap_or(""),t.description.as_deref().unwrap_or("Authorized read"));
         match provider {
-            Provider::Anthropic => json!({"name":name,"description":description,"input_schema":t["inputSchema"]}),
-            Provider::Openai if responses => json!({"type":"function","name":name,"description":description,"parameters":t["inputSchema"],"strict":false}),
-            _ => json!({"type":"function","function":{"name":name,"description":description,"parameters":t["inputSchema"]}})
+            Provider::Anthropic => json!({"name":name,"description":description,"input_schema":t.input_schema}),
+            Provider::Openai if responses => json!({"type":"function","name":name,"description":description,"parameters":t.input_schema,"strict":false}),
+            _ => json!({"type":"function","function":{"name":name,"description":description,"parameters":t.input_schema}})
         }
     }).collect();
     request["tools"] = json!(tools);
@@ -31,25 +73,32 @@ pub(in crate::inference) fn request(
         request["include"] = json!(["reasoning.encrypted_content"]);
         request["parallel_tool_calls"] = json!(true);
     }
-    let history = schema["x-veyndo-history"]
-        .as_array()
+    let history = view::<Continuation>(schema)
+        .history
         .ok_or("Missing native tool history")?;
-    for turn in history {
-        if turn["provider"] != json!(provider) {
+    for turn in &history {
+        let turn: Turn = view(turn);
+        if turn.provider != json!(provider) {
             return Err("Model provider changed during tool continuation".into());
         }
-        let results = turn["results"].as_array().ok_or("Invalid native results")?;
+        let results: Vec<ToolResult> = turn
+            .results
+            .as_ref()
+            .ok_or("Invalid native results")?
+            .iter()
+            .map(view)
+            .collect();
         if responses {
             let input = request["input"].as_array_mut().unwrap();
             input.extend(
-                turn["assistant"]
+                turn.assistant
                     .as_array()
                     .ok_or("Invalid model continuation")?
                     .iter()
                     .cloned(),
             );
             for result in results {
-                input.push(json!({"type":"function_call_output","call_id":result["id"],"output":result["result"].to_string()}));
+                input.push(json!({"type":"function_call_output","call_id":result.id,"output":result.result.to_string()}));
             }
         } else {
             let messages = request["messages"]
@@ -57,13 +106,13 @@ pub(in crate::inference) fn request(
                 .ok_or("Missing tool messages")?;
             match provider {
                 Provider::Anthropic => {
-                    messages.push(json!({"role":"assistant","content":turn["assistant"]}));
-                    messages.push(json!({"role":"user","content":results.iter().map(|r|json!({"type":"tool_result","tool_use_id":r["id"],"content":r["result"].to_string()})).collect::<Vec<_>>()}));
+                    messages.push(json!({"role":"assistant","content":turn.assistant}));
+                    messages.push(json!({"role":"user","content":results.iter().map(|r|json!({"type":"tool_result","tool_use_id":r.id,"content":r.result.to_string()})).collect::<Vec<_>>()}));
                 }
                 _ => {
-                    messages.push(turn["assistant"].clone());
+                    messages.push(turn.assistant.clone());
                     for r in results {
-                        messages.push(if chat {json!({"role":"tool","tool_call_id":r["id"],"content":r["result"].to_string()})}else{json!({"role":"tool","tool_name":r["alias"],"content":r["result"].to_string()})});
+                        messages.push(if chat {json!({"role":"tool","tool_call_id":r.id,"content":r.result.to_string()})}else{json!({"role":"tool","tool_name":r.alias,"content":r.result.to_string()})});
                     }
                 }
             }

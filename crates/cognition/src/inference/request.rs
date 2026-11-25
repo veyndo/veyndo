@@ -4,6 +4,14 @@ use super::{
     schema, tools,
 };
 use crate::inference::strict_schema;
+use veyndo_core::document::view;
+
+/// The token count a local (Ollama) response reports, passed on as reported.
+#[derive(serde::Deserialize, Default)]
+#[serde(default)]
+struct LocalUsage {
+    eval_count: Value,
+}
 impl Inference {
     /// The request body in the provider's own wire format and the URL it goes to.
     fn wire_request(
@@ -178,7 +186,7 @@ impl Inference {
             .get("usage")
             .filter(|v| v.is_object())
             .cloned()
-            .unwrap_or_else(|| json!({"output_tokens":raw["eval_count"]}));
+            .unwrap_or_else(|| json!({"output_tokens":view::<LocalUsage>(&raw).eval_count}));
         usage["prompt"] = crate::prompts::evidence(system);
         if let Some(continuation) = continuation {
             usage["toolContinuation"] = continuation;

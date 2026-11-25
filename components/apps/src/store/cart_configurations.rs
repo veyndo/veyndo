@@ -3,7 +3,6 @@ use crate::domain::configuration_inputs;
 use crate::service::configuration_runtime::{configured_contribution, prepare};
 use crate::store::packages::package;
 use crate::store::records;
-use sqlx::Row;
 use std::collections::HashMap;
 use veyndo_app_model::manifest::Manifest;
 use veyndo_apps::sandbox::Sandbox;
@@ -16,19 +15,23 @@ pub async fn validate_configurations(
     c: &StoredCart,
     prepared: &HashMap<String, std::sync::Arc<Sandbox>>,
 ) -> Result<()> {
-    sqlx::query("SELECT set_config('rac.tenant',$1,true)")
-        .bind(&c.tenant)
-        .execute(&mut **tx)
-        .await?;
+    crate::store::locks::tenant_scope(tx, &c.tenant).await?;
     for config in c
         .data
         .app_configurations
         .values()
         .filter(|v| c.data.items.iter().any(|i| i.id == v.product_id))
     {
-        let row=sqlx::query("SELECT manifest,version FROM app_packages WHERE tenant=$1 AND id=$2 AND active FOR SHARE").bind(&c.tenant).bind(&config.app).fetch_optional(&mut **tx).await?.ok_or(conflict("Configuration app unavailable"))?;
+        let row = sqlx::query!(
+            "SELECT manifest,version FROM app_packages WHERE tenant=$1 AND id=$2 AND active FOR SHARE",
+            c.tenant,
+            config.app
+        )
+        .fetch_optional(&mut **tx)
+        .await?
+        .ok_or(conflict("Configuration app unavailable"))?;
         let m: Manifest =
-            serde_json::from_value(row.get("manifest")).map_err(|_| bad("Invalid package"))?;
+            serde_json::from_value(row.manifest).map_err(|_| bad("Invalid package"))?;
         let contract = m
             .configuration
             .as_ref()
@@ -62,7 +65,10 @@ pub async fn validate_configurations(
             &config.fields,
         )
         .await?;
-        if r["revision"].as_i64().ok_or(bad("App revision missing"))? != config.rule_revision
+        if records::RecordMeta::of(&r)
+            .revision
+            .ok_or(bad("App revision missing"))?
+            != config.rule_revision
             || fee != config.fee_minor
         {
             return Err(conflict("App price changed; configure again"));
@@ -89,4 +95,38 @@ pub async fn prepare_configurations(
         }
     }
     Ok(prepared)
+}
+
+/// Locks a cart by its token for a configuration change; older stored shapes are upgraded on the way.
+pub async fn lock_cart(conn: &mut sqlx::PgConnection, t: &str, token: &str) -> Result<StoredCart> {
+    let r = sqlx::query!(
+        "SELECT id,tenant,token,data,revision,status FROM carts WHERE tenant=$1 AND token=$2 FOR UPDATE",
+        t,
+        token
+    )
+    .fetch_one(conn)
+    .await?;
+    let mut data = r.data;
+    veyndo_shop::types::cart::upgrade_cart(&mut data);
+    Ok(StoredCart {
+        id: r.id,
+        tenant: r.tenant,
+        token: r.token,
+        data: serde_json::from_value(data).map_err(|e| bad(e.to_string()))?,
+        revision: r.revision,
+        status: r.status,
+    })
+}
+
+/// Stores the changed document and revision of a locked cart.
+pub async fn save_cart(conn: &mut sqlx::PgConnection, c: &StoredCart) -> Result<()> {
+    sqlx::query!(
+        "UPDATE carts SET data=$1,revision=$2 WHERE id=$3",
+        serde_json::json!(c.data),
+        c.revision,
+        c.id
+    )
+    .execute(conn)
+    .await?;
+    Ok(())
 }

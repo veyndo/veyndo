@@ -7,7 +7,16 @@ use serde_json::{Value, json};
 use sqlx::Row;
 use veyndo_app_model::manifest::Manifest;
 use veyndo_app_model::{Entity, Object};
+use veyndo_core::document::{lenient, view};
 use veyndo_core::{RequestContext, Result, State, bad};
+
+/// The immutable ID of a native list row, the object an extension binds to.
+#[derive(serde::Deserialize, Default)]
+#[serde(default)]
+struct NativeRow {
+    #[serde(deserialize_with = "lenient")]
+    id: Option<String>,
+}
 use veyndo_identity::merchant;
 
 /// Attaches the readable app extensions of up to 100 native objects in one indexed lookup.
@@ -28,7 +37,7 @@ pub async fn attach(
     let t = merchant(h)?;
     let ids: Vec<String> = rows
         .iter()
-        .filter_map(|r| r["id"].as_str().map(str::to_owned))
+        .filter_map(|r| view::<NativeRow>(r).id)
         .collect();
     // CRM guest contacts have no immutable native customer ID and receive no extension binding.
     if ids.is_empty() {
@@ -42,7 +51,12 @@ pub async fn attach(
         tx.commit().await?;
         return Ok(());
     }
-    let language: Value = sqlx::query_scalar("SELECT jsonb_build_object('mainLocale',data->'mainLocale','locales',data->'locales') FROM commerce_settings WHERE tenant=$1").bind(&t).fetch_one(&mut *tx).await?;
+    let language: Value = sqlx::query_scalar!(
+        r#"SELECT jsonb_build_object('mainLocale',data->'mainLocale','locales',data->'locales') AS "language!" FROM commerce_settings WHERE tenant=$1"#,
+        t
+    )
+    .fetch_one(&mut *tx)
+    .await?;
     let column = match object {
         Object::Product => "product_id",
         Object::Customer => "customer_id",
@@ -51,6 +65,7 @@ pub async fn attach(
     };
     let allowed = json!(models.iter().map(|(app,_,e,_,_,_,_)|json!({"app":app,"entity":e.name,"field":e.extends.as_ref().unwrap().field})).collect::<Vec<_>>());
     // One indexed lookup for the entire page; SQL identifiers come exclusively from Object above.
+    // dynamic SQL: the reference column is chosen per native object type.
     let mut query = sqlx::QueryBuilder::<sqlx::Postgres>::new(
         "WITH selected AS MATERIALIZED (SELECT r.app,r.entity,r.id,r.revision,r.fields,octet_length(r.fields::text) AS bytes,x.",
     );
@@ -73,7 +88,7 @@ pub async fn attach(
         .collect();
     tx.commit().await?;
     for row in rows {
-        let Some(id) = row["id"].as_str() else {
+        let Some(id) = view::<NativeRow>(row).id else {
             continue;
         };
         let mut projections = Vec::new();
@@ -124,11 +139,17 @@ async fn models(
     t: &str,
     object: Object,
 ) -> Result<Vec<Model>> {
-    let packages = sqlx::query("SELECT id,manifest FROM app_packages WHERE tenant=$1 AND active AND EXISTS(SELECT 1 FROM app_models m WHERE m.tenant=app_packages.tenant AND m.app=app_packages.id AND m.definition->'extends'->>'object'=$2) ORDER BY id FOR SHARE")
-        .bind(t).bind(json!(object).as_str().unwrap()).fetch_all(&mut *tx).await?;
+    let kind = json!(object);
+    let packages = sqlx::query!(
+        "SELECT id,manifest FROM app_packages WHERE tenant=$1 AND active AND EXISTS(SELECT 1 FROM app_models m WHERE m.tenant=app_packages.tenant AND m.app=app_packages.id AND m.definition->'extends'->>'object'=$2) ORDER BY id FOR SHARE",
+        t,
+        kind.as_str().unwrap()
+    )
+    .fetch_all(&mut *tx)
+    .await?;
     let mut models = Vec::new();
     for p in packages {
-        let m: Manifest = serde_json::from_value(p.get("manifest"))
+        let m: Manifest = serde_json::from_value(p.manifest)
             .map_err(|_| bad("Invalid active extension package"))?;
         let m = std::sync::Arc::new(m);
         for e in &m.entities {

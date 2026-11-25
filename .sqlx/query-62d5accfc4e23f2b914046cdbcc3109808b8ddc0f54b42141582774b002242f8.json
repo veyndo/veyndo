@@ -1,0 +1,12 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "ALTER TABLE hosted_frontends VALIDATE CONSTRAINT hosted_frontends_app_fk",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": []
+  },
+  "hash": "62d5accfc4e23f2b914046cdbcc3109808b8ddc0f54b42141582774b002242f8"
+}

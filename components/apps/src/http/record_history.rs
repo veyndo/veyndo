@@ -1,6 +1,7 @@
 //! Bounded app-record history, current entity rights and restoration through the normal managed save path.
 use crate::domain::entity_access::entity_access;
 use crate::ports::Platform;
+use crate::store::locks;
 use crate::store::packages::package;
 use crate::store::{record_restore, records};
 use axum::Json;
@@ -50,10 +51,7 @@ pub async fn list(
     let m = package(&a, &t, &app, true).await?;
     let e = entity(&m, &name, &h, false)?;
     let mut tx = a.db.begin().await?;
-    sqlx::query("SELECT set_config('rac.tenant',$1,true)")
-        .bind(&t)
-        .execute(&mut *tx)
-        .await?;
+    locks::tenant_scope(&mut tx, &t).await?;
     let rows = shared::list(
         &mut tx,
         records::key(&t, &app, &name, &id),
@@ -90,10 +88,7 @@ pub async fn restore(
     }
     let mut tx = a.db.begin().await?;
     context(&mut tx, &h, "app.history.restore").await?;
-    sqlx::query("SELECT set_config('rac.tenant',$1,true)")
-        .bind(&t)
-        .execute(&mut *tx)
-        .await?;
+    locks::tenant_scope(&mut tx, &t).await?;
     let result = shared::restore(
         &mut tx,
         records::key(&t, &app, &name, &id),

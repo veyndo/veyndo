@@ -109,15 +109,7 @@ impl shared::EnvironmentAdmission for OwnedEnvironment {
         tenant: &'a str,
         environment: &'a str,
     ) -> shared::AdmissionFuture<'a> {
-        Box::pin(async move {
-            sqlx::query_scalar(
-                "SELECT EXISTS(SELECT 1 FROM shop_environments WHERE live_tenant=$1 AND tenant=$2)",
-            )
-            .bind(tenant)
-            .bind(environment)
-            .fetch_one(tx)
-            .await
-        })
+        Box::pin(crate::store::environments::owned(tx, tenant, environment))
     }
 }
 

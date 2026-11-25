@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT jsonb_build_object('id',id,'action',action,'actor',actor,'status',status,'durationMs',duration_ms,'at',created_at) AS \"call!\" FROM app_action_log WHERE tenant=$1 AND app=$2 ORDER BY id DESC LIMIT 50",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "call!",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "6a5a6af368c834a68139f029dc94ced98d12c1b7c475abf0af9b45d524e72f9b"
+}

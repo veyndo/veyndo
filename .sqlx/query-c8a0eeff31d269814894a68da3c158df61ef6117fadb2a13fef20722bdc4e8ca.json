@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO app_export_cursors(tenant,app,cursor) VALUES($1,$2,$3) ON CONFLICT(tenant,app) DO UPDATE SET cursor=greatest(app_export_cursors.cursor,EXCLUDED.cursor)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Int8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "c8a0eeff31d269814894a68da3c158df61ef6117fadb2a13fef20722bdc4e8ca"
+}

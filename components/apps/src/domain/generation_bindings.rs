@@ -1,4 +1,5 @@
 //! Complete only deterministic native model/asset bindings; original validation and explicit consent remain authoritative.
+//! Binding contracts are read from the open manifest draft; native validation remains authoritative.
 use serde_json::{Value, json};
 use veyndo_app_model::manifest::Manifest;
 use veyndo_core::{Result, bad};

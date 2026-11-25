@@ -1,0 +1,22 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO app_evidence(tenant,app,source_id,kind,title,body,source_url,metadata,digest) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9) ON CONFLICT(tenant,app,source_id) DO UPDATE SET title=EXCLUDED.title,body=EXCLUDED.body,source_url=EXCLUDED.source_url,metadata=EXCLUDED.metadata,digest=EXCLUDED.digest,updated_at=now() WHERE app_evidence.digest<>EXCLUDED.digest",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text",
+        "Text",
+        "Text",
+        "Text",
+        "Text",
+        "Jsonb",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "31702eb9c1a0432d557989399cf10f1e81340c25a20412880f15ac2125411bf9"
+}

@@ -8,6 +8,14 @@ use veyndo_core::localized::valid_locale_key;
 use veyndo_kernel::verified_kernel;
 use veyndo_pricing::types::currency as currencies;
 
+/// The currency object of a money field value, read to check its exact wire shape.
+#[derive(serde::Deserialize, Default)]
+#[serde(default)]
+struct MoneyShape {
+    #[serde(deserialize_with = "veyndo_core::document::lenient")]
+    currency: Option<serde_json::Map<String, Value>>,
+}
+
 /// The native value rules every app field, configuration and view is checked with.
 pub struct Policy;
 impl veyndo_app_model::fields::ValuePolicy for Policy {
@@ -57,7 +65,9 @@ fn money(v: &Value) -> bool {
     };
     currencies::scale(m.currency().code()) == Some(m.currency().scale())
         && v.as_object().is_some_and(|o| o.len() == 2)
-        && v["currency"].as_object().is_some_and(|o| o.len() == 2)
+        && veyndo_core::document::view::<MoneyShape>(v)
+            .currency
+            .is_some_and(|o| o.len() == 2)
         // JSON clients must not lose precision. Larger amounts require a future string minor-unit wire revision.
         && m.minor().unsigned_abs() <= 9_007_199_254_740_991
 }

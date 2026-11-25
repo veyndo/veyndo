@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO extensions(tenant,wat,digest) VALUES($1,$2,$3) ON CONFLICT(tenant) DO UPDATE SET wat=$2,digest=$3,revision=extensions.revision+1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "a22eae7d4f5efc35ac31b662b7eb9e6825f3314dfe60984e696f73980aa90498"
+}

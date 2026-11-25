@@ -6,8 +6,10 @@ use crate::ports::Platform;
 use crate::service::app_builds::live;
 use crate::store::package_install::install_preview;
 use crate::store::records::reset_preview;
+use crate::store::{environments, packages};
 use serde_json::{Value, json};
 use veyndo_app_model::manifest::Manifest;
+use veyndo_core::document::view;
 use veyndo_core::store::lease::Lease;
 use veyndo_core::{RequestContext, Result, bad, process_config};
 use veyndo_identity::permit;
@@ -21,6 +23,16 @@ pub fn immediate(m: &Manifest) -> bool {
 }
 
 /// Installs the draft into the personal preview environment of the caller, creating that environment on first use.
+/// The installed package an install reports, passed on as reported.
+#[derive(serde::Deserialize, Default)]
+#[serde(default)]
+struct Installed {
+    id: Value,
+    version: Value,
+    digest: Value,
+}
+
+/// Previews a package in the merchant's personal environment; the request's `manifest` is the app's open manifest document.
 pub async fn run(a: &Platform, h: &RequestContext, mut v: Value) -> Result<Value> {
     let t = live(a, h).await?;
     let actor = h
@@ -43,13 +55,7 @@ pub async fn run(a: &Platform, h: &RequestContext, mut v: Value) -> Result<Value
     }
     actor_permissions(h, &m)?;
     let _lease = Lease::acquire(a, &t, &format!("app-preview:{actor}"), 1).await?;
-    let existing: Option<String> = sqlx::query_scalar(
-        "SELECT tenant FROM shop_environments WHERE live_tenant=$1 AND preview_owner=$2",
-    )
-    .bind(&t)
-    .bind(actor)
-    .fetch_optional(&a.db)
-    .await?;
+    let existing = environments::preview_of(a, &t, actor).await?;
     let environment = if let Some(id) = existing {
         id
     } else {
@@ -58,25 +64,15 @@ pub async fn run(a: &Platform, h: &RequestContext, mut v: Value) -> Result<Value
     };
     let mut tx = a.db.begin().await?;
     a.commerce.lock(&mut tx, &environment).await?;
-    sqlx::query("SELECT tenant FROM shop_environments WHERE tenant=$1 AND live_tenant=$2 AND preview_owner=$3 FOR UPDATE").bind(&environment).bind(&t).bind(actor).fetch_one(&mut *tx).await?;
-    let count: i64 =
-        sqlx::query_scalar("SELECT count(*) FROM app_packages WHERE tenant=$1 AND id<>$2")
-            .bind(&environment)
-            .bind(&m.id)
-            .fetch_one(&mut *tx)
-            .await?;
+    environments::lock_preview(&mut tx, &environment, &t, actor).await?;
+    let count = packages::count_other(&mut tx, &environment, &m.id).await?;
     if count >= 20 {
         return Err(bad(
             "Personal preview supports at most 20 apps; reuse the current app ID",
         ));
     }
     // A changed data model starts with empty preview records; view-only hot reload preserves them.
-    let previous: Option<Value> =
-        sqlx::query_scalar("SELECT manifest FROM app_packages WHERE tenant=$1 AND id=$2")
-            .bind(&environment)
-            .bind(&m.id)
-            .fetch_optional(&mut *tx)
-            .await?;
+    let previous = packages::manifest_value(&mut tx, &environment, &m.id).await?;
     if let Some(value) = previous {
         let old: Manifest =
             serde_json::from_value(value).map_err(|_| bad("Invalid previous preview"))?;
@@ -85,15 +81,11 @@ pub async fn run(a: &Platform, h: &RequestContext, mut v: Value) -> Result<Value
         }
     }
     let result = install_preview(a.rules, a.commerce, &mut tx, &environment, m).await?;
-    sqlx::query(
-        "UPDATE shop_environments SET preview_until=now()+interval '1 hour' WHERE tenant=$1",
-    )
-    .bind(&environment)
-    .execute(&mut *tx)
-    .await?;
+    environments::extend_preview(&mut tx, &environment).await?;
     tx.commit().await?;
+    let installed: Installed = view(&result);
     Ok(
-        json!({"environment":environment,"app":result["id"],"version":result["version"],"digest":result["digest"],"private":true,"expiresInSeconds":3600,"releaseAllowed":false}),
+        json!({"environment":environment,"app":installed.id,"version":installed.version,"digest":installed.digest,"private":true,"expiresInSeconds":3600,"releaseAllowed":false}),
     )
 }
 

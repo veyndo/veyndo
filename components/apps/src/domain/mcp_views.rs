@@ -1,4 +1,5 @@
 //! Revision-bound native MCP App views: which tools and views a caller may reach, and the view document.
+//! View documents and action input schemas are app-declared open JSON (JSON Schema and manifest views).
 use crate::domain::action_admission::authorized;
 use crate::domain::action_policy::readonly;
 use crate::domain::{approval, native_views};

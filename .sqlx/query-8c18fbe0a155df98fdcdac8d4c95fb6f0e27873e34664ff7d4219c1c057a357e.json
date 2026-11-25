@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO app_export_cursors(tenant,app,last_poll) VALUES($1,$2,now()) ON CONFLICT(tenant,app) DO UPDATE SET last_poll=now()",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "8c18fbe0a155df98fdcdac8d4c95fb6f0e27873e34664ff7d4219c1c057a357e"
+}

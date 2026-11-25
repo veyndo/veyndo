@@ -31,10 +31,7 @@ impl<'db> InstallHooks<'db> for Host<'_> {
     {
         Box::pin(async move {
             let (t, m) = (self.tenant, self.manifest);
-            sqlx::query("SELECT set_config('rac.tenant',$1,true)")
-                .bind(t)
-                .execute(&mut **tx)
-                .await?;
+            crate::store::locks::tenant_scope(tx, t).await?;
             let config = process_config::get();
             validate(m, &config.publishers)?;
             approval::installation(m, &config.services)?;
@@ -171,7 +168,12 @@ pub async fn install_preview(
     t: &str,
     m: Manifest,
 ) -> Result<Value> {
-    let private: bool = sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM shop_environments WHERE tenant=$1 AND preview_owner IS NOT NULL)").bind(t).fetch_one(&mut **tx).await?;
+    let private = sqlx::query_scalar!(
+        r#"SELECT EXISTS(SELECT 1 FROM shop_environments WHERE tenant=$1 AND preview_owner IS NOT NULL) AS "private!""#,
+        t
+    )
+    .fetch_one(&mut **tx)
+    .await?;
     if !private {
         return Err(bad(
             "Mutable app preview requires a personal preview environment",

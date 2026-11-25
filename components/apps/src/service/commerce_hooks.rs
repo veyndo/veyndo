@@ -5,7 +5,6 @@ use crate::store::commerce_hooks::rows;
 use crate::store::records;
 use serde::Deserialize;
 use serde_json::{Value, json};
-use sqlx::Row;
 use std::collections::HashMap;
 use std::sync::Arc;
 use veyndo_app_model::manifest::Manifest;
@@ -34,8 +33,7 @@ pub async fn prepare(a: &State, t: &str) -> Result<Prepared> {
     conn.rollback().await?;
     let mut modules = HashMap::new();
     for row in ms {
-        let m: Manifest =
-            serde_json::from_value(row.get("manifest")).map_err(|_| bad("Invalid hook package"))?;
+        let m: Manifest = serde_json::from_value(row).map_err(|_| bad("Invalid hook package"))?;
         let c = m.commerce_hooks.unwrap();
         modules.insert(hash(&c.source), prepare_source(c.source).await?);
     }
@@ -57,6 +55,25 @@ struct HookQuote {
     price: HookPrice,
     #[serde(deserialize_with = "lenient")]
     line_items: Option<Vec<Value>>,
+    shipping_costs: Value,
+}
+
+/// The line fields a hook snapshot reads, typed as it reads them.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct HookLine {
+    #[serde(deserialize_with = "lenient")]
+    id: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    price: LinePrice,
+}
+
+/// The unit price of a quote line.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct LinePrice {
+    #[serde(deserialize_with = "lenient")]
+    unit_price: Option<f64>,
 }
 
 /// The currency, scale and position total of the quote.
@@ -68,6 +85,7 @@ struct HookPrice {
     #[serde(deserialize_with = "lenient")]
     currency_scale: Option<u64>,
     position_price: Value,
+    tax_status: Value,
 }
 /// The immutable cart, product and record snapshot a hook sees.
 fn snapshot(
@@ -93,14 +111,15 @@ fn snapshot(
         .as_ref()
         .ok_or(bad("Quote items missing"))?
     {
-        let id = line["id"].as_str().ok_or(bad("Quote item ID missing"))?;
+        let line: HookLine = view(line);
+        let id = line.id.as_deref().ok_or(bad("Quote item ID missing"))?;
         let p = ps
             .iter()
             .find(|p| p.id == id)
             .ok_or(bad("Product snapshot missing"))?;
         let price = money(
-            line["price"]["unitPrice"]
-                .as_f64()
+            line.price
+                .unit_price
                 .ok_or(bad("Quote unit price missing"))?,
             code,
             scale,
@@ -155,8 +174,7 @@ pub async fn apply(
     let ms = rows(conn, &c.tenant).await?;
     let mut audit = vec![];
     for row in ms {
-        let m: Manifest =
-            serde_json::from_value(row.get("manifest")).map_err(|_| bad("Invalid hook package"))?;
+        let m: Manifest = serde_json::from_value(row).map_err(|_| bad("Invalid hook package"))?;
         let contract = m
             .commerce_hooks
             .as_ref()
@@ -171,8 +189,9 @@ pub async fn apply(
             let value = records::get(conn, &c.tenant, &m.id, &r.entity, &r.id, false)
                 .await?
                 .ok_or(conflict("Hook record missing"))?;
-            let revision = value["revision"]
-                .as_u64()
+            let revision = records::RecordMeta::of(&value)
+                .revision
+                .and_then(|r| u64::try_from(r).ok())
                 .ok_or(bad("Hook record revision missing"))?;
             let mut fields = value;
             fields.as_object_mut().unwrap().remove("tenant");
@@ -185,16 +204,12 @@ pub async fn apply(
                 },
             );
         }
-        let mut record_revisions: Vec<_> = records
-            .iter()
+        let mut keys: Vec<_> = records.iter().collect();
+        keys.sort_by_key(|((entity, id), _)| (entity.clone(), id.clone()));
+        let record_revisions: Vec<_> = keys
+            .into_iter()
             .map(|((entity, id), r)| json!({"entity":entity,"id":id,"revision":r.revision}))
             .collect();
-        record_revisions.sort_by_key(|r| {
-            (
-                r["entity"].as_str().unwrap().to_owned(),
-                r["id"].as_str().unwrap().to_owned(),
-            )
-        });
         // Fixed phase order, independent of merchant JSON ordering. Each phase sees the preceding result.
         for kind in ["price", "discount", "shipping", "validation"] {
             if !contract.hooks.iter().any(|h| h == kind) {
@@ -207,7 +222,8 @@ pub async fn apply(
                 "shipping" => wit::Kind::Shipping,
                 _ => wit::Kind::Validation,
             };
-            let input=json!({"taxStatus":q["price"]["taxStatus"],"salesChannel":c.data.sales_channel,"customerGroup":c.data.group,"shippingCosts":q["shippingCosts"]}).to_string();
+            let current: HookQuote = view(&q);
+            let input=json!({"taxStatus":current.price.tax_status,"salesChannel":c.data.sales_channel,"customerGroup":c.data.group,"shippingCosts":current.shipping_costs}).to_string();
             let active_guest = guest.clone();
             let out =
                 tokio::task::spawn_blocking(move || active_guest.evaluate(snap, hook, &input))

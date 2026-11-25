@@ -1,4 +1,5 @@
 //! Provider wire adaptation for strict fixed-object schemas; dynamic JSON is encoded only on the model wire and restored before domain validation.
+//! JSON Schema documents are open by design: every keyword and property name comes from the caller.
 use serde::Deserialize;
 use serde_json::{Value, json};
 use veyndo_core::document::{lenient, view};

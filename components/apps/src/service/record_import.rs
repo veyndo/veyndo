@@ -1,8 +1,8 @@
 //! Private source-record intake reuses an installed app's declared native save action, schema, rights and package fence.
 use crate::domain::{action_admission, approval, core_extensions, input_schema};
 use crate::ports::Platform;
-use crate::store::managed_data;
 use crate::store::packages::package;
+use crate::store::{managed_data, records};
 use serde::Deserialize;
 use serde_json::{Value, json};
 use veyndo_app_model::manifest::Manifest;
@@ -31,7 +31,8 @@ pub async fn import_record(
     context(&mut tx, h, "migration.record.import").await?;
     let result = managed_data::import_tx(a.rules, &mut tx, &t, &m, entity, &input).await?;
     tx.commit().await?;
-    Ok(json!({"id":result["id"],"replayed":result["replayed"]==true}))
+    let meta = records::RecordMeta::of(&result);
+    Ok(json!({"id":meta.id,"replayed":meta.replayed==Some(true)}))
 }
 
 /// The JSON fields `admitted` reads, typed as it reads them.

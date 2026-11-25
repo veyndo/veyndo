@@ -1,0 +1,18 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO app_schedules(tenant,app,id,definition,next_run) VALUES($1,$2,$3,$4,$5::text::timestamptz) ON CONFLICT(tenant,app,id) DO UPDATE SET next_run=CASE WHEN app_schedules.definition=$4 THEN app_schedules.next_run ELSE EXCLUDED.next_run END,definition=$4",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text",
+        "Jsonb",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "03416e9dd21690b6e1feb34813d1622955949bd7288cf4ca906b1388f3edbec2"
+}

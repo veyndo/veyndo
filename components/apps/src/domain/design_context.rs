@@ -1,4 +1,5 @@
 //! Editor context is validated against the supplied Manifest; references are untrusted evidence, never authority.
+//! Editor context and references are app-declared open JSON, checked against the typed `Manifest`.
 use serde_json::{Value, json};
 use veyndo_core::{Result, bad, conflict, hash};
 /// Reject stale element/language scope before contacting a provider or external reference.

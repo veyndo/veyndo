@@ -1,8 +1,8 @@
 //! The tenant business policy: a sandboxed Wasm module for company purchase approval, activated by the merchant, persisted with its digest and compiled on the bounded cache.
 use crate::service::sandbox_cache::Cache;
+use crate::store::business_policy as stored;
 use serde::Deserialize;
 use serde_json::{Value, json};
-use sqlx::Row;
 use std::sync::Arc;
 use veyndo_apps::sandbox::Sandbox;
 use veyndo_core::document::{lenient, view};
@@ -29,7 +29,7 @@ pub async fn activate(a: &State, cache: &Cache, h: &RequestContext, v: &Value) -
         .map_err(bad)?;
     compiled.approve(0, 100_000).map_err(bad)?;
     let digest = hash(&wat);
-    sqlx::query("INSERT INTO extensions(tenant,wat,digest) VALUES($1,$2,$3) ON CONFLICT(tenant) DO UPDATE SET wat=$2,digest=$3,revision=extensions.revision+1").bind(&t).bind(&wat).bind(&digest).execute(&a.db).await?;
+    stored::save(a, &t, &wat, &digest).await?;
     cache.insert(t, Arc::new(compiled));
     Ok(
         json!({"activated":true,"digest":digest,"hook":"company.purchase.approve","fuel":10000,"memoryBytes":1048576,"hostImports":false}),
@@ -39,13 +39,10 @@ pub async fn activate(a: &State, cache: &Cache, h: &RequestContext, v: &Value) -
 /// The persisted policy digest and revision, or the built-in policy.
 pub async fn state(a: &State, h: &RequestContext) -> Result<Value> {
     let t = merchant(h)?;
-    let r = sqlx::query("SELECT digest,revision FROM extensions WHERE tenant=$1")
-        .bind(t)
-        .fetch_optional(&a.db)
-        .await?;
+    let r = stored::state(a, &t).await?;
     Ok(match r {
         Some(r) => {
-            json!({"digest":r.get::<String,_>("digest"),"revision":r.get::<i64,_>("revision"),"source":"persisted"})
+            json!({"digest":r.digest,"revision":r.revision,"source":"persisted"})
         }
         None => json!({"source":"built-in"}),
     })
@@ -53,16 +50,14 @@ pub async fn state(a: &State, h: &RequestContext) -> Result<Value> {
 
 /// The compiled policy of a tenant; a stored source that no longer matches its digest is refused.
 pub async fn prepare(a: &State, cache: &Cache, tenant: &str) -> Result<Arc<Sandbox>> {
-    let row = sqlx::query("SELECT digest,wat FROM extensions WHERE tenant=$1")
-        .bind(tenant)
-        .fetch_optional(&a.db)
+    let row = stored::source(a, tenant)
         .await?
         .ok_or(bad("Business approval policy missing"))?;
-    let digest: String = row.get("digest");
+    let digest = row.digest;
     if let Some(cached) = cache.get(tenant, &digest) {
         return Ok(cached);
     }
-    let source: String = row.get("wat");
+    let source = row.wat;
     if hash(&source) != digest {
         return Err(conflict(
             "Business policy digest mismatch; ask the merchant to reactivate its policy",

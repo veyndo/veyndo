@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE integration_keys SET agent_tokens_allocated=agent_tokens_allocated+$3,agent_cost_allocated=agent_cost_allocated+$4 WHERE tenant=$1 AND id=$2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Int8",
+        "Int8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "861da5f6551ee9f648e8ea692e626f3e3c7f96fae642af0664592ea035638007"
+}

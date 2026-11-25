@@ -4,6 +4,22 @@ use base64::{Engine, engine::general_purpose::STANDARD};
 use serde_json::{Value, json};
 use std::env;
 use veyndo_core::{Result, bad};
+
+/// The image provider response, typed as it is read.
+#[derive(serde::Deserialize, Default)]
+#[serde(default)]
+struct Generated {
+    #[serde(deserialize_with = "veyndo_core::document::lenient_list")]
+    data: Vec<GeneratedImage>,
+}
+
+/// One generated image as base64 PNG.
+#[derive(serde::Deserialize, Default)]
+#[serde(default)]
+struct GeneratedImage {
+    #[serde(deserialize_with = "veyndo_core::document::lenient")]
+    b64_json: Option<String>,
+}
 /// Whether image generation is enabled and an OpenAI key is configured.
 pub async fn configured(a: &Inference) -> bool {
     env::var("IMAGE_GENERATION_ENABLED").as_deref() == Ok("true")
@@ -70,8 +86,11 @@ pub async fn create(
     }
     let result: Value =
         serde_json::from_slice(&bytes).map_err(|_| bad("Invalid image provider response"))?;
-    let encoded = result["data"][0]["b64_json"]
-        .as_str()
+    let generated: Generated = veyndo_core::document::view(&result);
+    let encoded = generated
+        .data
+        .first()
+        .and_then(|image| image.b64_json.as_deref())
         .ok_or(bad("Image provider did not return image bytes"))?;
     let decoded = STANDARD
         .decode(encoded)

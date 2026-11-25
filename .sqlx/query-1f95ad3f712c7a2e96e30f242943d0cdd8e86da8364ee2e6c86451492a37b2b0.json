@@ -1,0 +1,36 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT entity,count(*)::bigint AS \"records!\" FROM app_records WHERE tenant=$1 AND app=$2 GROUP BY entity ORDER BY entity",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "entity",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "app_records",
+            "name": "entity"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "records!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      null
+    ]
+  },
+  "hash": "1f95ad3f712c7a2e96e30f242943d0cdd8e86da8364ee2e6c86451492a37b2b0"
+}

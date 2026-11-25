@@ -1,4 +1,5 @@
 //! Compile a bounded new-app brief into the existing native Manifest; no model-authored wiring or new executor.
+//! The brief and the manifest draft stay open JSON: they are app-declared structures that only native `Manifest` validation types.
 use crate::domain::{app_generation, generation_bindings, generation_fields};
 use serde::Deserialize;
 use serde_json::{Value, json};

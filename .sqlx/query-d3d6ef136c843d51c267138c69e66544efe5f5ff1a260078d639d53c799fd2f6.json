@@ -1,0 +1,53 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT i.agent_budget,i.agent_tokens_allocated,i.agent_cost_allocated FROM integration_keys i JOIN membership_grants m ON m.tenant=i.tenant AND m.user_id=i.user_id AND m.active WHERE i.tenant=$1 AND i.id=$2 AND i.expires_at>now() AND i.app_id IS NULL FOR UPDATE OF i",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "agent_budget",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "integration_keys",
+            "name": "agent_budget"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "agent_tokens_allocated",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "integration_keys",
+            "name": "agent_tokens_allocated"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "agent_cost_allocated",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "integration_keys",
+            "name": "agent_cost_allocated"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      true,
+      false,
+      false
+    ]
+  },
+  "hash": "d3d6ef136c843d51c267138c69e66544efe5f5ff1a260078d639d53c799fd2f6"
+}

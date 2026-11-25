@@ -2,7 +2,6 @@
 use crate::domain::distribution::verify;
 use crate::domain::model_contract;
 use serde_json::Value;
-use sqlx::Row;
 use veyndo_app_model::distribution as shared;
 use veyndo_app_model::manifest::Manifest;
 use veyndo_core::{Result, bad, conflict};
@@ -18,20 +17,28 @@ pub async fn check(
         return Ok(());
     };
     for dep in &d.dependencies {
-        let row=sqlx::query("SELECT manifest,version FROM app_packages WHERE tenant=$1 AND id=$2 AND active FOR SHARE").bind(t).bind(&dep.app).fetch_optional(&mut **tx).await?.ok_or(conflict("Install and activate required app dependencies first"))?;
-        let prior: Manifest = serde_json::from_value(row.get("manifest"))
-            .map_err(|_| bad("Invalid dependency package"))?;
+        let row = sqlx::query!(
+            "SELECT manifest,version FROM app_packages WHERE tenant=$1 AND id=$2 AND active FOR SHARE",
+            t,
+            dep.app
+        )
+        .fetch_optional(&mut **tx)
+        .await?
+        .ok_or(conflict(
+            "Install and activate required app dependencies first",
+        ))?;
+        let prior: Manifest =
+            serde_json::from_value(row.manifest).map_err(|_| bad("Invalid dependency package"))?;
         verify(&prior, publishers)?;
-        shared::require_version(dep, &prior, &row.get::<String, _>("version"))
-            .map_err(model_contract::error)?;
+        shared::require_version(dep, &prior, &row.version).map_err(model_contract::error)?;
     }
     // Upgrading an existing dependency cannot silently break active installed dependants.
-    let rows =
-        sqlx::query("SELECT manifest FROM app_packages WHERE tenant=$1 AND id<>$2 AND active")
-            .bind(t)
-            .bind(&m.id)
-            .fetch_all(&mut **tx)
-            .await?;
-    let installed: Vec<Value> = rows.into_iter().map(|r| r.get("manifest")).collect();
+    let installed: Vec<Value> = sqlx::query_scalar!(
+        "SELECT manifest FROM app_packages WHERE tenant=$1 AND id<>$2 AND active",
+        t,
+        m.id
+    )
+    .fetch_all(&mut **tx)
+    .await?;
     shared::validate_graph(m, &installed).map_err(model_contract::error)
 }

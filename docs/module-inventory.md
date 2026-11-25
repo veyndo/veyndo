@@ -417,6 +417,9 @@ This lists every checked-in source module in these roots, including files with n
 | [crates/cognition/src/inference.rs](../crates/cognition/src/inference.rs) | Provider adapters. Credentials stay on the server; domain validation is separate. |
 | [crates/cognition/src/lib.rs](../crates/cognition/src/lib.rs) | Provider protocol adapters and prompt evidence; no commerce write capability. |
 | [crates/cognition/src/prompts.rs](../crates/cognition/src/prompts.rs) | Versioned system-prompt provenance; no prompt text or private context is exposed in evidence. |
+| [crates/cognition/src/store/budget.rs](../crates/cognition/src/store/budget.rs) | Agent key budgets: the approved model of a key, the live shop's stop switch and the reservation of tokens and cost with its audit event. |
+| [crates/cognition/src/store/settings.rs](../crates/cognition/src/store/settings.rs) | The operator inference configuration every model call inherits, read with its sealed provider secrets. |
+| [crates/cognition/src/store.rs](../crates/cognition/src/store.rs) | SQL of the inference component: the operator model configuration and agent key budgets. |
 | [crates/flow-graph/src/catalog.rs](../crates/flow-graph/src/catalog.rs) | Stable built-in Flow identifiers shared by discovery and native admission. |
 | [crates/flow-graph/src/execution.rs](../crates/flow-graph/src/execution.rs) | Typed instructions from a validated graph. The host evaluates facts and performs effects. |
 | [crates/flow-graph/src/lib.rs](../crates/flow-graph/src/lib.rs) | Dependency-free validation and indexed lookup for bounded commerce flow graphs. |
@@ -528,7 +531,6 @@ This lists every checked-in source module in these roots, including files with n
 | [components/apps/src/service/discovery.rs](../components/apps/src/service/discovery.rs) | Searches the installed app capabilities a caller may use; data reads run through the same admitted action gateway. |
 | [components/apps/src/service/egress.rs](../components/apps/src/service/egress.rs) | Bounded origin clients pin resolved addresses for each connection and never use ambient HTTP proxies. |
 | [components/apps/src/service/event_delivery.rs](../components/apps/src/service/event_delivery.rs) | Durable at-least-once app events: retry leases, stable idempotency keys and signed public HTTPS delivery on the existing outbox. |
-| [components/apps/src/service/external_orders/labels.sql](../components/apps/src/service/external_orders/labels.sql) | Bounded imported-order names: locale first, then child before parent. |
 | [components/apps/src/service/external_orders.rs](../components/apps/src/service/external_orders.rs) | Generic authorized external order intake reuses native stock, customer snapshots, documents, history and outbox. |
 | [components/apps/src/service/flow_apps.rs](../components/apps/src/service/flow_apps.rs) | App steps of flows use the same permission and schema gateway as HTTP and MCP: admission, installed-package checks, upgrade safety and argument binding. |
 | [components/apps/src/service/frontend_bindings.rs](../components/apps/src/service/frontend_bindings.rs) | Revisioned hosted frontend addresses point to an existing tenant-owned Experience; origin selection remains operator-only. |
@@ -547,24 +549,34 @@ This lists every checked-in source module in these roots, including files with n
 | [components/apps/src/service.rs](../components/apps/src/service.rs) | Process-side helpers of the app platform: pinned egress clients and local execution limits. |
 | [components/apps/src/store/action_log.rs](../components/apps/src/store/action_log.rs) | Bounded metadata-only app telemetry: who called which action with what outcome, never a payload. |
 | [components/apps/src/store/activation.rs](../components/apps/src/store/activation.rs) | Native current-actor/trust/connected-frontend/commerce admission for the shared package-state transaction; original configuration lock order retained. |
+| [components/apps/src/store/activity.rs](../components/apps/src/store/activity.rs) | The operator view of an app (latest calls, deliveries, storage use) and the replay of outbox events into its delivery queue. |
 | [components/apps/src/store/app_host_reads.rs](../components/apps/src/store/app_host_reads.rs) | Reads and guarded writes the server's app host needs: connected frontends, the package listing, submission throttling and the locked checks of a native job import. |
 | [components/apps/src/store/asset_references.rs](../components/apps/src/store/asset_references.rs) | Assets an app record refers to must belong to the same shop and fit the field. |
+| [components/apps/src/store/business_policy.rs](../components/apps/src/store/business_policy.rs) | The persisted business approval policy of a shop: its Wasm text source, digest and revision. |
 | [components/apps/src/store/cart_configurations.rs](../components/apps/src/store/cart_configurations.rs) | Cart configurations stay bound to the package, rule revision and price they were made with. |
 | [components/apps/src/store/catalog_evidence.rs](../components/apps/src/store/catalog_evidence.rs) | Product-only app callback projects current catalog text and enabled translations in one snapshot. |
 | [components/apps/src/store/commerce_hooks.rs](../components/apps/src/store/commerce_hooks.rs) | Which commerce hook packages a shop admits and checkout evaluates. |
 | [components/apps/src/store/configuration_events.rs](../components/apps/src/store/configuration_events.rs) | Configuration mutations publish minimized identifiers through the native outbox/Flows; no cart capability or shopper text is disclosed. |
 | [components/apps/src/store/configuration_orders.rs](../components/apps/src/store/configuration_orders.rs) | Paginated app-specific immutable purchase projections; filtering happens before LIMIT and never exposes buyer PII. |
 | [components/apps/src/store/core_references.rs](../components/apps/src/store/core_references.rs) | Core records an app field names must belong to the same shop; no app alters core tables. |
+| [components/apps/src/store/credentials.rs](../components/apps/src/store/credentials.rs) | App callback keys in the core integration-key table: list, count, issue and revoke; never a key value. |
 | [components/apps/src/store/dependencies.rs](../components/apps/src/store/dependencies.rs) | Tenant-local dependency and version gates of a signed package, read under the installing transaction. |
 | [components/apps/src/store/developer_builds.rs](../components/apps/src/store/developer_builds.rs) | The developer builds of a shop: the latest app versions a generation must not repeat. |
+| [components/apps/src/store/environments.rs](../components/apps/src/store/environments.rs) | The shop environments apps preview in: ownership by a live shop and the personal preview of one merchant. |
 | [components/apps/src/store/event_deliveries.rs](../components/apps/src/store/event_deliveries.rs) | Outbox events become queued deliveries for every active package that may receive them. |
 | [components/apps/src/store/evidence.rs](../components/apps/src/store/evidence.rs) | Private provenance-bearing app sources for merchant retrieval; never public PDP answers. |
 | [components/apps/src/store/extension_filter.rs](../components/apps/src/store/extension_filter.rs) | Admitted app-field predicates applied before native pagination. |
 | [components/apps/src/store/extension_projection.rs](../components/apps/src/store/extension_projection.rs) | Bounded native-object read projection from existing app models, references and current package permissions. |
+| [components/apps/src/store/external_orders/labels.sql](../components/apps/src/store/external_orders/labels.sql) | Bounded imported-order names: locale first, then child before parent. |
+| [components/apps/src/store/external_orders.rs](../components/apps/src/store/external_orders.rs) | Storage of the external order import: replay by idempotency key, the locked product lines and their labels, and the imported cart and order rows. |
+| [components/apps/src/store/flows.rs](../components/apps/src/store/flows.rs) | The active commerce flows an app upgrade must keep valid; read only. |
+| [components/apps/src/store/frontend_bindings.rs](../components/apps/src/store/frontend_bindings.rs) | The global hosted-frontend address registry: collisions with other shops, the owning shop's binding and its revisioned writes. |
 | [components/apps/src/store/hosted_apps.rs](../components/apps/src/store/hosted_apps.rs) | Persist hosted-app dependencies through the existing package installer; no private renderer or parallel registry. |
 | [components/apps/src/store/job_control.rs](../components/apps/src/store/job_control.rs) | Native current-action/right/input admission for the shared job-control transaction; no duplicate transition or outbox engine. |
+| [components/apps/src/store/job_creators.rs](../components/apps/src/store/job_creators.rs) | The current membership of the member who created a long job, share-locked so its rights cannot change mid-callback. |
 | [components/apps/src/store/jobs.rs](../components/apps/src/store/jobs.rs) | Durable long actions piggyback on the existing outbox. Apps claim a fenced lease; unknown side effects are never retried automatically. |
 | [components/apps/src/store/languages.rs](../components/apps/src/store/languages.rs) | App record translations use configured shop languages and field-level main-language inheritance. |
+| [components/apps/src/store/locks.rs](../components/apps/src/store/locks.rs) | Transaction-local settings of app writes: advisory locks, the tenant row scope, review timeouts and deferred constraints. |
 | [components/apps/src/store/managed_data.rs](../components/apps/src/store/managed_data.rs) | Shared managed app records: typed writes, optimistic revisions, bounded reads and local RLS context. |
 | [components/apps/src/store/mcp_views.rs](../components/apps/src/store/mcp_views.rs) | Which assistant views of the installed packages a caller may list and open. |
 | [components/apps/src/store/native_lifecycle.rs](../components/apps/src/store/native_lifecycle.rs) | Capture accepted definitions in existing operational JSON under native package locks; no app-specific tables. |
@@ -583,6 +595,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/apps/src/store/surface_grants.rs](../components/apps/src/store/surface_grants.rs) | Stored surface grants: the objects a context may name and the recheck of a presented grant. |
 | [components/apps/src/store/surface_registry.rs](../components/apps/src/store/surface_registry.rs) | Current-authority app surface projection shared by storefronts and native visual composition. |
 | [components/apps/src/store/tool_catalogue.rs](../components/apps/src/store/tool_catalogue.rs) | Installed app tools share native wire metadata and validate declared results without disclosing provider payloads. |
+| [components/apps/src/store/webhook_receipts.rs](../components/apps/src/store/webhook_receipts.rs) | Receipts of incoming app webhooks: one outbox event per (app, webhook, sender event ID), replayed on repeats. |
 | [components/apps/src/store.rs](../components/apps/src/store.rs) | SQL of the apps component. |
 | [components/apps/ui/admin/apps/AppAccess.tsx](../components/apps/ui/admin/apps/AppAccess.tsx) | Explicit consent for digest-bound server callback keys; plaintext is shown once and never persisted in the browser. |
 | [components/apps/ui/admin/apps/AppActivity.tsx](../components/apps/ui/admin/apps/AppActivity.tsx) | API-backed per-app call metadata, storage budgets and explicitly approved durable replay. |

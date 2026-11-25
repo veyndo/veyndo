@@ -1,4 +1,5 @@
 //! The manifest schema a model answers in, specialised to the shop's languages, and the access a regeneration keeps.
+//! Manifest drafts and their JSON Schema stay open JSON: they are app-declared structures typed only by native `Manifest` validation.
 use crate::domain::native_lifecycle::generation_context;
 use serde::Deserialize;
 use serde_json::{Value, json};

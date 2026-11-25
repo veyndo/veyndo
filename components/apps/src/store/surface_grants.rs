@@ -5,7 +5,6 @@ use crate::ports::Platform;
 use crate::store::packages::package;
 use serde::Deserialize;
 use serde_json::Value;
-use sqlx::Row;
 use veyndo_app_model::manifest::Manifest;
 use veyndo_app_model::surfaces::Surface;
 use veyndo_core::document::{lenient, view};
@@ -14,6 +13,63 @@ use veyndo_core::{Error, RequestContext, Result, StatusCode, bad, hash};
 use veyndo_identity::{merchant, permit};
 use veyndo_kernel::verified_kernel;
 
+/// Whether a core object of the named table belongs to the shop.
+async fn owned(a: &Platform, table: &str, t: &str, id: &str) -> Result<bool> {
+    let db = &a.db;
+    Ok(match table {
+        "products" => {
+            sqlx::query_scalar!(
+                r#"SELECT EXISTS(SELECT 1 FROM products WHERE tenant=$1 AND id=$2) AS "owned!""#,
+                t,
+                id
+            )
+            .fetch_one(db)
+            .await?
+        }
+        "customers" => {
+            sqlx::query_scalar!(
+                r#"SELECT EXISTS(SELECT 1 FROM customers WHERE tenant=$1 AND id=$2) AS "owned!""#,
+                t,
+                id
+            )
+            .fetch_one(db)
+            .await?
+        }
+        "b2b_companies" => sqlx::query_scalar!(
+            r#"SELECT EXISTS(SELECT 1 FROM b2b_companies WHERE tenant=$1 AND id=$2) AS "owned!""#,
+            t,
+            id
+        )
+        .fetch_one(db)
+        .await?,
+        "b2b_units" => {
+            sqlx::query_scalar!(
+                r#"SELECT EXISTS(SELECT 1 FROM b2b_units WHERE tenant=$1 AND id=$2) AS "owned!""#,
+                t,
+                id
+            )
+            .fetch_one(db)
+            .await?
+        }
+        "orders" => {
+            sqlx::query_scalar!(
+                r#"SELECT EXISTS(SELECT 1 FROM orders WHERE tenant=$1 AND id=$2) AS "owned!""#,
+                t,
+                id
+            )
+            .fetch_one(db)
+            .await?
+        }
+        "sales_channels" => sqlx::query_scalar!(
+            r#"SELECT EXISTS(SELECT 1 FROM sales_channels WHERE tenant=$1 AND id=$2) AS "owned!""#,
+            t,
+            id
+        )
+        .fetch_one(db)
+        .await?,
+        _ => false,
+    })
+}
 /// Checks every object a surface context names: it exists in this shop and the caller may see it.
 pub async fn context(a: &Platform, h: &RequestContext, v: &Value) -> Result<()> {
     let obj = v
@@ -29,31 +85,13 @@ pub async fn context(a: &Platform, h: &RequestContext, v: &Value) -> Result<()> 
             }
             continue;
         }
-        let (sql, scope) = match key.as_str() {
-            "productId" => (
-                "SELECT EXISTS(SELECT 1 FROM products WHERE tenant=$1 AND id=$2)",
-                "catalog.read",
-            ),
-            "customerId" => (
-                "SELECT EXISTS(SELECT 1 FROM customers WHERE tenant=$1 AND id=$2)",
-                "customers.read",
-            ),
-            "companyId" => (
-                "SELECT EXISTS(SELECT 1 FROM b2b_companies WHERE tenant=$1 AND id=$2)",
-                "b2b.read",
-            ),
-            "unitId" => (
-                "SELECT EXISTS(SELECT 1 FROM b2b_units WHERE tenant=$1 AND id=$2)",
-                "b2b.read",
-            ),
-            "orderId" => (
-                "SELECT EXISTS(SELECT 1 FROM orders WHERE tenant=$1 AND id=$2)",
-                "orders.read",
-            ),
-            "salesChannelId" | "salesChannel" => (
-                "SELECT EXISTS(SELECT 1 FROM sales_channels WHERE tenant=$1 AND id=$2)",
-                "catalog.read",
-            ),
+        let (table, scope) = match key.as_str() {
+            "productId" => ("products", "catalog.read"),
+            "customerId" => ("customers", "customers.read"),
+            "companyId" => ("b2b_companies", "b2b.read"),
+            "unitId" => ("b2b_units", "b2b.read"),
+            "orderId" => ("orders", "orders.read"),
+            "salesChannelId" | "salesChannel" => ("sales_channels", "catalog.read"),
             _ => return Err(bad("Unknown surface context field")),
         };
         let id = value
@@ -70,12 +108,7 @@ pub async fn context(a: &Platform, h: &RequestContext, v: &Value) -> Result<()> 
         } else {
             permit(h, scope)?;
         }
-        if !sqlx::query_scalar::<_, bool>(sql)
-            .bind(tenant(h)?)
-            .bind(id)
-            .fetch_one(&a.db)
-            .await?
-        {
+        if !owned(a, table, &tenant(h)?, id).await? {
             return Err(bad("Surface object does not belong to this shop"));
         }
     }
@@ -107,11 +140,23 @@ pub async fn load(
             StatusCode::UNAUTHORIZED,
             "Surface grant required".into(),
         ))?;
-    let row = sqlx::query("SELECT package_digest,actions,context FROM app_surface_grants WHERE tenant=$1 AND token_hash=$2 AND app=$3 AND surface=$4 AND actor_hash=$5 AND expires_at>now()")
-        .bind(&t).bind(hash(token)).bind(id).bind(surface).bind(actor(h)).fetch_optional(&a.db).await?.ok_or(Error(StatusCode::UNAUTHORIZED,"Surface grant expired or belongs to another actor".into()))?;
+    let row = sqlx::query!(
+        "SELECT package_digest,actions,context FROM app_surface_grants WHERE tenant=$1 AND token_hash=$2 AND app=$3 AND surface=$4 AND actor_hash=$5 AND expires_at>now()",
+        t,
+        hash(token),
+        id,
+        surface,
+        actor(h)
+    )
+    .fetch_optional(&a.db)
+    .await?
+    .ok_or(Error(
+        StatusCode::UNAUTHORIZED,
+        "Surface grant expired or belongs to another actor".into(),
+    ))?;
     let m = package(a, &t, id, true).await?;
     if !verified_kernel::app_surface_admissible(
-        row.get::<String, _>("package_digest") == approval::canonical_digest(&m),
+        row.package_digest == approval::canonical_digest(&m),
         true,
     ) {
         return Err(Error(
@@ -131,7 +176,66 @@ pub async fn load(
     if let Some(p) = &s.permission {
         permit(h, p)?;
     }
-    let ctx: Value = row.get("context");
+    let ctx: Value = row.context;
     context(a, h, &ctx).await?;
-    Ok((m, s, ctx, row.get("actions")))
+    Ok((m, s, ctx, row.actions))
+}
+
+/// Drops the expired surface grants of an app.
+pub async fn expire(conn: &mut sqlx::PgConnection, t: &str, app: &str) -> Result<()> {
+    sqlx::query!(
+        "DELETE FROM app_surface_grants WHERE tenant=$1 AND app=$2 AND expires_at<=now()",
+        t,
+        app
+    )
+    .execute(conn)
+    .await?;
+    Ok(())
+}
+
+/// How many live surface grants one actor holds for an app.
+pub async fn actor_count(
+    conn: &mut sqlx::PgConnection,
+    t: &str,
+    app: &str,
+    actor: &str,
+) -> Result<i64> {
+    Ok(sqlx::query_scalar!(
+        r#"SELECT count(*) AS "count!" FROM app_surface_grants WHERE tenant=$1 AND app=$2 AND actor_hash=$3"#,
+        t,
+        app,
+        actor
+    )
+    .fetch_one(conn)
+    .await?)
+}
+
+/// A surface grant to store for five minutes.
+pub struct NewGrant<'a> {
+    pub tenant: &'a str,
+    pub token_hash: &'a str,
+    pub app: &'a str,
+    pub surface: &'a str,
+    pub actor: &'a str,
+    pub package_digest: &'a str,
+    pub actions: &'a Value,
+    pub context: &'a Value,
+}
+
+/// Stores a surface grant that expires after five minutes.
+pub async fn grant(conn: &mut sqlx::PgConnection, g: NewGrant<'_>) -> Result<()> {
+    sqlx::query!(
+        "INSERT INTO app_surface_grants(tenant,token_hash,app,surface,actor_hash,package_digest,actions,context,expires_at) VALUES($1,$2,$3,$4,$5,$6,$7,$8,now()+interval '5 minutes')",
+        g.tenant,
+        g.token_hash,
+        g.app,
+        g.surface,
+        g.actor,
+        g.package_digest,
+        g.actions,
+        g.context
+    )
+    .execute(conn)
+    .await?;
+    Ok(())
 }

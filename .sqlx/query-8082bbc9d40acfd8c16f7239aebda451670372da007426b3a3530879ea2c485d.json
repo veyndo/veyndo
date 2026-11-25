@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT EXISTS(SELECT 1 FROM tenants WHERE id=$1 AND id<>$2) AS \"occupied!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "occupied!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "8082bbc9d40acfd8c16f7239aebda451670372da007426b3a3530879ea2c485d"
+}

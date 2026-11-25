@@ -1,4 +1,5 @@
 //! Current-authority app surface projection shared by storefronts and native visual composition.
+//! Surface view blocks are app-declared open JSON from the manifest; they are projected, not interpreted.
 use crate::domain::action_admission::authorized;
 use crate::domain::action_policy::readonly;
 use crate::domain::mcp_views::{available, location};

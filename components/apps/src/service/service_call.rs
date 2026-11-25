@@ -4,10 +4,22 @@ use crate::ports::Platform;
 use crate::service::{admission, egress};
 use crate::store::packages::package;
 use crate::store::{secrets, settings};
+use serde::Deserialize;
 use serde_json::Value;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::store::environments::parent;
 use veyndo_core::{Error, Result, StatusCode, bad, conflict, http_limits, process_config};
 use veyndo_kernel::verified_kernel;
+
+/// The operator's configuration of one app service, typed as it is read.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct ServiceConfig {
+    #[serde(deserialize_with = "lenient")]
+    url: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    token: Option<String>,
+}
 
 /// Calls the operator-configured service of an app.
 pub async fn service_call(a: &Platform, t: &str, id: &str, path: &str, v: &Value) -> Result<Value> {
@@ -56,7 +68,8 @@ pub async fn service_call_pinned(
             "Package is not approved for this operator service".into(),
         ));
     }
-    let url = config["url"].as_str().ok_or(Error(
+    let service: ServiceConfig = view(config);
+    let url = service.url.as_deref().ok_or(Error(
         StatusCode::SERVICE_UNAVAILABLE,
         "App service is not configured".into(),
     ))?;
@@ -68,7 +81,7 @@ pub async fn service_call_pinned(
     }
     let service_token = secrets::resolve(a, t, &manifest, "service")
         .await?
-        .unwrap_or_else(|| config["token"].as_str().unwrap_or("").to_owned());
+        .unwrap_or_else(|| service.token.clone().unwrap_or_default());
     let mut body = v.clone();
     if !manifest.settings.is_empty() {
         let private_action = path

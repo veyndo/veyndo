@@ -1,4 +1,5 @@
 //! Guided field alternatives express native cross-field rules before inference; native admission remains authoritative.
+//! Field alternatives read the manifest draft as open JSON; native `Manifest` validation types it afterwards.
 use serde_json::{Value, json};
 /// The field schema with one alternative per field family, so cross-field rules hold before inference.
 pub fn schema(base: &Value) -> Value {

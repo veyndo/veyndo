@@ -19,16 +19,14 @@ pub async fn ensure(
     if id != "storyfront" {
         return Err(bad("Unknown hosted app"));
     }
-    sqlx::query("SELECT pg_advisory_xact_lock(hashtextextended($1,7))")
-        .bind(id)
-        .execute(&mut **tx)
-        .await?;
-    let active: Option<bool> =
-        sqlx::query_scalar("SELECT active FROM app_packages WHERE tenant=$1 AND id=$2 FOR UPDATE")
-            .bind(tenant)
-            .bind(id)
-            .fetch_optional(&mut **tx)
-            .await?;
+    crate::store::locks::advisory(tx, id, 7).await?;
+    let active: Option<bool> = sqlx::query_scalar!(
+        "SELECT active FROM app_packages WHERE tenant=$1 AND id=$2 FOR UPDATE",
+        tenant,
+        id
+    )
+    .fetch_optional(&mut **tx)
+    .await?;
     match active {
         None => {
             install_tx(
@@ -41,11 +39,11 @@ pub async fn ensure(
             .await?;
         }
         Some(false) => {
-            sqlx::query(
+            sqlx::query!(
                 "UPDATE app_packages SET active=true,revision=revision+1 WHERE tenant=$1 AND id=$2",
+                tenant,
+                id
             )
-            .bind(tenant)
-            .bind(id)
             .execute(&mut **tx)
             .await?;
             veyndo_core::store::outbox::publish_on(
@@ -67,15 +65,15 @@ pub async fn backfill(
     commerce: &dyn CommerceInstall,
     tx: &mut Transaction<'_, Postgres>,
 ) -> Result<()> {
-    let tenants: Vec<String> = sqlx::query_scalar(
-        "SELECT DISTINCT tenant FROM hosted_frontends WHERE app_id='storyfront' ORDER BY tenant",
+    let tenants: Vec<String> = sqlx::query_scalar!(
+        "SELECT DISTINCT tenant FROM hosted_frontends WHERE app_id='storyfront' ORDER BY tenant"
     )
     .fetch_all(&mut **tx)
     .await?;
     for tenant in tenants {
         ensure(rules, commerce, tx, &tenant, "storyfront").await?;
     }
-    sqlx::query("ALTER TABLE hosted_frontends VALIDATE CONSTRAINT hosted_frontends_app_fk")
+    sqlx::query!("ALTER TABLE hosted_frontends VALIDATE CONSTRAINT hosted_frontends_app_fk")
         .execute(&mut **tx)
         .await?;
     Ok(())

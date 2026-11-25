@@ -26,6 +26,14 @@ struct CarrierIntent {
     request_key: Option<String>,
     allocation_digest: Value,
 }
+/// The aggregate revision of the stored order, typed as it is read.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct StoredRevision {
+    #[serde(deserialize_with = "lenient")]
+    revision: Option<u64>,
+}
+
 /// The JSON fields `booking_intent` reads, typed as it reads them.
 #[derive(Deserialize, Default)]
 #[serde(default, rename_all = "camelCase")]
@@ -75,13 +83,9 @@ pub async fn booking_intent(
     let mut tx = a.db.begin().await?;
     history_context::context(&mut tx, h, "app").await?;
     lock_package_write(&mut tx, &t, m).await?;
-    let mut order: Value =
-        sqlx::query_scalar("SELECT data FROM orders WHERE tenant=$1 AND id=$2 FOR UPDATE")
-            .bind(&t)
-            .bind(id)
-            .fetch_optional(&mut *tx)
-            .await?
-            .ok_or(Error(StatusCode::NOT_FOUND, "Order not found".into()))?;
+    let mut order: Value = order_mutation::lock_data(&mut tx, &t, id)
+        .await?
+        .ok_or(Error(StatusCode::NOT_FOUND, "Order not found".into()))?;
     if args.allocation_digest != allocation_digest(&order, index) {
         return Err(conflict(
             "Package allocation changed; no carrier booking admitted",
@@ -98,7 +102,8 @@ pub async fn booking_intent(
         booking::Step::Settled(answer) => return Ok(answer),
         booking::Step::Changed(event) => event,
     };
-    order["revision"] = json!(order["revision"].as_u64().unwrap_or(1) + 1);
+    let stored: StoredRevision = view(&order);
+    order["revision"] = json!(stored.revision.unwrap_or(1) + 1);
     order_mutation::persist(&mut tx,&t,h,&mut order,order_mutation::Audit{
         kind:event,data:json!({"kind":"delivery","state":operation,"deliveryIndex":index,"sourceApp":m.id}),
         event_kind:event,event:json!({"orderId":id,"deliveryIndex":index,"sourceApp":m.id}),
