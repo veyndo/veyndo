@@ -17,6 +17,7 @@
         "projections",
         "read_context_versions",
         "resource_leases",
+        "shop_environments",
         "tenant_ai_usage",
         "tenant_resource_limits",
         "tenants",
@@ -30,8 +31,7 @@
         "flow_jobs": "read: stays: the payload retirement and metadata expiry select unreferenced outbox events in the same locked (SKIP LOCKED) statement that retires or deletes them; the referencing rows hold foreign keys to outbox installed by their owner, so a separate read could race a new reference; unsettled flow jobs also keep a payload (retention.rs, retention.sql)",
         "knowledge_receipts": "read: stays: the payload retirement and metadata expiry select unreferenced outbox events in the same locked (SKIP LOCKED) statement that retires or deletes them; the referencing rows hold foreign keys to outbox installed by their owner, so a separate read could race a new reference (retention.sql)",
         "observed_pairs": "read: stays: the payload retirement and metadata expiry select unreferenced outbox events in the same locked (SKIP LOCKED) statement that retires or deletes them; the referencing rows hold foreign keys to outbox installed by their owner, so a separate read could race a new reference (retention.sql)",
-        "pair_evidence": "read: stays: the payload retirement and metadata expiry select unreferenced outbox events in the same locked (SKIP LOCKED) statement that retires or deletes them; the referencing rows hold foreign keys to outbox installed by their owner, so a separate read could race a new reference (retention.sql)",
-        "shop_environments": "read: resolves a preview or stage to its live shop inside the tenant registry statements (agent stop switch, AI quota, stage baseline, channel metrics, outbox tenant fairness); stays because core is the lowest layer every component calls with only a connection, and the owner (studio) sits above it (ai_usage.rs, channel_metrics.rs, environments.rs, next_tenant.sql, tenants.rs)"
+        "pair_evidence": "read: stays: the payload retirement and metadata expiry select unreferenced outbox events in the same locked (SKIP LOCKED) statement that retires or deletes them; the referencing rows hold foreign keys to outbox installed by their owner, so a separate read could race a new reference (retention.sql)"
       },
       "glob_imports": 0,
       "untyped_access": 0,
@@ -678,7 +678,6 @@
       ],
       "tables": [
         "entity_history",
-        "shop_environments",
         "shop_releases",
         "studio_workspace_versions",
         "studio_workspaces"
@@ -739,6 +738,7 @@
         "sales_channels": "read: reads the sales channel document (kind, activity, catalogue scope) to admit the request channel inside the same statement (historical_orders.rs, manual_orders.rs, reports.rs, source.sql)",
         "semantic_products": "read: reads semantic product index state for reports (overview.sql)",
         "session_signal_events": "read: reads session signals for reports (reports.rs)",
+        "shop_environments": "read: reads stages and previews of a live shop (list, count, baseline lock, preview checks, task and translation scopes); writes go through veyndo_core::store::environments_write (reports.rs, staging_clone.rs, staging_release.rs, tasks.rs, translation_runs.rs, workspaces.rs)",
         "tasks": "write: proposals, flow templates and the translation worker create and advance work tasks (flow_templates.rs, overview.sql, proposal_apply.rs, proposals.rs)",
         "tenants": "write: staging clone creates the sandbox shop row; the translation worker claims only active shops (clone.rs, translation_worker.rs)",
         "translation_items": "write: the translation worker stores reviewed translation items (translation_worker.rs, work_items.rs)",

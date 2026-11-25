@@ -1043,6 +1043,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/core/src/store/channel_metrics.rs](../components/core/src/store/channel_metrics.rs) | The persisted channel diagnostics: one bounded bulk add per flush interval, and the traffic read shared by operator overview, shop dossiers and infrastructure. |
 | [components/core/src/store/config.rs](../components/core/src/store/config.rs) | Database deployment values read once per process; an invalid value stops the start. |
 | [components/core/src/store/environments.rs](../components/core/src/store/environments.rs) | Reads of the staging registry (`shop_environments`): the live parent of a stage and a stage's baseline. |
+| [components/core/src/store/environments_write.rs](../components/core/src/store/environments_write.rs) | Writes of the staging registry (`shop_environments`): registering a stage, replacing its baseline and the preview ownership window. |
 | [components/core/src/store/history_context.rs](../components/core/src/store/history_context.rs) | Transaction-local actor, source and reason that the history triggers record with every change. |
 | [components/core/src/store/lease.rs](../components/core/src/store/lease.rs) | Cluster-wide tenant resource leases. DB serialization protects admission; cancellation releases the fenced lease. |
 | [components/core/src/store/outbox/next_tenant.sql](../components/core/src/store/outbox/next_tenant.sql) | Lock only this subscriber schedule. A failed event does not block later work. |

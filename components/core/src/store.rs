@@ -4,6 +4,7 @@ pub mod authority;
 pub mod channel_metrics;
 pub mod config;
 pub mod environments;
+pub mod environments_write;
 pub mod history_context;
 pub mod lease;
 pub mod outbox;
