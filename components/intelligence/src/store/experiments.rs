@@ -127,7 +127,7 @@ pub async fn change(
         }
         id.to_owned()
     };
-    veyndo_core::outbox::publish_on(
+    veyndo_core::store::outbox::publish_on(
         &mut *tx,
         t,
         "intelligence.experiment.changed",
@@ -259,7 +259,7 @@ pub async fn report(a: &State, t: &str, id: &str) -> Result<Value> {
         .execute(&mut *tx)
         .await?;
         sqlx::query("INSERT INTO knowledge_relations(tenant,kind,source_kind,source_id,target_kind,target_id,state,confidence,data,actor) VALUES($1,'EXPERIMENT_RESULT','experiment',$2,'channel',$3,'evidenced',1,$4,'native-payment-readout') ON CONFLICT(tenant,kind,source_id,target_id) DO UPDATE SET data=excluded.data").bind(t).bind(id).bind(&d.channel).bind(&result).execute(&mut *tx).await?;
-        veyndo_core::outbox::publish_on(&mut *tx, t, "intelligence.experiment.result", &json!({"id":id,"channelId":d.channel,"causalUpliftProven":result["causalUpliftProven"],"asOf":result["asOf"]})).await?;
+        veyndo_core::store::outbox::publish_on(&mut *tx, t, "intelligence.experiment.result", &json!({"id":id,"channelId":d.channel,"causalUpliftProven":result["causalUpliftProven"],"asOf":result["asOf"]})).await?;
     }
     tx.commit().await?;
     Ok(result)
@@ -355,7 +355,7 @@ pub async fn auto_once(a: &State) -> Result<bool> {
         .fetch_all(&a.db).await?;
     for row in due {
         worked = true;
-        veyndo_core::outbox::publish_on(&a.db, &row.get::<String,_>("tenant"), "intelligence.experiment.changed", &json!({"id":row.get::<String,_>("id"),"operation":"knowledge.experiment.finish","actor":ACTOR})).await?;
+        veyndo_core::store::outbox::publish_on(&a.db, &row.get::<String,_>("tenant"), "intelligence.experiment.changed", &json!({"id":row.get::<String,_>("id"),"operation":"knowledge.experiment.finish","actor":ACTOR})).await?;
     }
     let settled = sqlx::query("SELECT tenant,id,data FROM intelligence_experiments WHERE state='completed' AND withdrawn=0 AND coalesce((data->'automation'->>'finish')::boolean,false) AND (final_report IS NULL OR NOT final_report ? 'decision') AND now()>=ends_at+((data->>'settlementDays')::integer*interval '1 day') ORDER BY ends_at LIMIT 50")
         .fetch_all(&a.db).await?;
@@ -382,7 +382,7 @@ pub async fn auto_once(a: &State) -> Result<bool> {
                 sqlx::query("UPDATE experiences SET data=jsonb_set(data,'{mode}',to_jsonb($2::text)),revision=revision+1 WHERE tenant=$1")
                     .bind(&t).bind(&design.treatment).execute(&mut *tx).await?;
             }
-            veyndo_core::outbox::publish_on(&mut *tx, &t, "intelligence.experiment.changed", &json!({"id":id,"operation":"knowledge.experiment.decide","decision":if publish {"published"} else {"kept"},"actor":ACTOR})).await?;
+            veyndo_core::store::outbox::publish_on(&mut *tx, &t, "intelligence.experiment.changed", &json!({"id":id,"operation":"knowledge.experiment.decide","decision":if publish {"published"} else {"kept"},"actor":ACTOR})).await?;
             tx.commit().await?;
             Ok::<_, Error>(true)
         }

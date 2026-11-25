@@ -3,7 +3,7 @@ use crate::ports::Catalog;
 use crate::store::{products, reviews};
 use crate::types::review::{ImportedReview, NewReview};
 use serde_json::{Value, json};
-use veyndo_core::{RequestContext, Result, bad, conflict, outbox, uid};
+use veyndo_core::{RequestContext, Result, bad, conflict, store::outbox, uid};
 use veyndo_identity::{merchant, permit};
 
 /// Stores a shopper's review unpublished; whether it is a verified purchase comes from the orders, never from the request.

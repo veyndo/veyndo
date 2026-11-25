@@ -12,7 +12,7 @@ use veyndo_catalog::store::product_edit as store;
 use veyndo_catalog::store::product_fields::editable;
 use veyndo_catalog::store::{categories, channels, products};
 use veyndo_catalog::types::product_edit::Edit;
-use veyndo_core::history_context::context;
+use veyndo_core::store::history_context::context;
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad, conflict};
 use veyndo_identity::{merchant, permit};
 use veyndo_intelligence::knowledge::sync_product;
@@ -168,7 +168,7 @@ pub async fn save_product(
     }
     let (saved, content_revision) = store::saved(&mut tx, &t, &id).await?;
     sync_product(&mut tx, &t, &json!(saved)).await?;
-    veyndo_core::outbox::publish(
+    veyndo_core::store::outbox::publish(
         &mut tx,
         &t,
         if create {

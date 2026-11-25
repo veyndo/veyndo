@@ -39,7 +39,7 @@ pub async fn invoke(
     let (settings, settings_revision) = config(a, &t).await?;
     match name {
         "merchant.catalog.context" => Ok(
-            json!({"mainLocale":settings.main_locale,"locales":settings.locales,"currency":settings.currencies.base_currency,"taxes":settings.taxes,"sandbox":veyndo_core::shop_scope::parent(a,&t).await?.is_some(),"settingsRevision":settings_revision,"agentic":host.readiness(h).await?}),
+            json!({"mainLocale":settings.main_locale,"locales":settings.locales,"currency":settings.currencies.base_currency,"taxes":settings.taxes,"sandbox":veyndo_core::store::environments::parent(a,&t).await?.is_some(),"settingsRevision":settings_revision,"agentic":host.readiness(h).await?}),
         ),
         "merchant.catalog.prepare" => {
             prepare::prepare(host, h, (&t, &settings, settings_revision), v).await

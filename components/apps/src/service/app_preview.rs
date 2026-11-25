@@ -8,7 +8,7 @@ use crate::store::package_install::install_preview;
 use crate::store::records::reset_preview;
 use serde_json::{Value, json};
 use veyndo_app_model::manifest::Manifest;
-use veyndo_core::database::lease::Lease;
+use veyndo_core::store::lease::Lease;
 use veyndo_core::{RequestContext, Result, bad, process_config};
 use veyndo_identity::permit;
 

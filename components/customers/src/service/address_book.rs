@@ -3,7 +3,7 @@ use crate::store::addresses::{self, Entry};
 use serde::Serialize;
 use serde_json::json;
 use sqlx::PgConnection;
-use veyndo_core::{Error, Result, State, StatusCode, bad, conflict, outbox, uid};
+use veyndo_core::{Error, Result, State, StatusCode, bad, conflict, store::outbox, uid};
 use veyndo_pricing::customer::Address;
 
 #[derive(Serialize)]

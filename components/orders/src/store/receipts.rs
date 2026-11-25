@@ -186,7 +186,7 @@ pub async fn create(
     .bind(json!({"id":receipt,"number":number,"kind":kind}))
     .execute(&mut *tx)
     .await?;
-    veyndo_core::outbox::publish_on(
+    veyndo_core::store::outbox::publish_on(
         &mut *tx,
         t,
         "document.created",

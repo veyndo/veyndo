@@ -5,7 +5,7 @@ use crate::service::{admission, egress};
 use crate::store::packages::package;
 use crate::store::{secrets, settings};
 use serde_json::Value;
-use veyndo_core::shop_scope::parent;
+use veyndo_core::store::environments::parent;
 use veyndo_core::{Error, Result, StatusCode, bad, conflict, http_limits, process_config};
 use veyndo_kernel::verified_kernel;
 
@@ -27,7 +27,7 @@ pub async fn service_call_pinned(
     }
     // Background collectors/flows have no HTTP admission middleware. Recheck the
     // current live-shop status at the shared egress boundary as well.
-    let status: Option<String> = veyndo_core::tenants::status(&a.db, t).await?;
+    let status: Option<String> = veyndo_core::store::tenants::status(&a.db, t).await?;
     if !verified_kernel::shop_request_admissible(
         status.as_deref() == Some("active"),
         status.as_deref() == Some("paused"),

@@ -26,7 +26,10 @@ pub(crate) async fn collect_sources(a: &App) -> Result<()> {
     Ok(())
 }
 async fn collect_one(a: &App, t: String, id: String, cursor: i64) -> Result<()> {
-    if veyndo_core::shop_scope::parent(a, &t).await?.is_some() {
+    if veyndo_core::store::environments::parent(a, &t)
+        .await?
+        .is_some()
+    {
         return Ok(());
     }
     veyndo_app_platform::store::evidence::touch_export(a, &t, &id).await?;

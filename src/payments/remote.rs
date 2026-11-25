@@ -18,7 +18,10 @@ pub(crate) async fn call(
     path: &str,
     body: &Value,
 ) -> Result<Value> {
-    if veyndo_core::shop_scope::parent(a, t).await?.is_some() {
+    if veyndo_core::store::environments::parent(a, t)
+        .await?
+        .is_some()
+    {
         return Err(bad("External payments are disabled in private sandboxes"));
     }
     let c = config(provider, version, environment)?;

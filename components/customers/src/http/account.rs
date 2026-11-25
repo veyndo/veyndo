@@ -59,7 +59,7 @@ pub async fn register(
     let email = email(&v)?;
     let name = name(&v)?;
     let password = hash_password(new_password(&v)?).await?;
-    let exists: bool = veyndo_core::tenants::exists(&a.db, &t).await?;
+    let exists: bool = veyndo_core::store::tenants::exists(&a.db, &t).await?;
     if !exists {
         return Err(bad("Unknown shop"));
     }

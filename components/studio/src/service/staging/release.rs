@@ -17,8 +17,8 @@ use veyndo_app_platform::domain::entity_access::entity_access;
 use veyndo_app_platform::store::records::{get as get_record, lock_key};
 use veyndo_b2b::store::staging as b2b;
 use veyndo_core::document::view;
-use veyndo_core::history_context::context;
 use veyndo_core::shop_scope::header;
+use veyndo_core::store::history_context::context;
 use veyndo_core::{RequestContext, Result, bad, conflict, hash, uid};
 use veyndo_identity::permit;
 use veyndo_marketing::types::promotion::preserve_import;
@@ -349,7 +349,7 @@ pub async fn release<H: ReleaseHost>(
         .execute(&mut *tx)
         .await?;
     sqlx::query("INSERT INTO shop_releases(id,live_tenant,environment,selections,actor) VALUES($1,$2,$3,$4,$5)").bind(&release).bind(&t).bind(&id).bind(&selected).bind(header(&h,"x-rac-user").unwrap_or("unknown")).execute(&mut *tx).await?;
-    veyndo_core::outbox::publish_on(
+    veyndo_core::store::outbox::publish_on(
         &mut *tx,
         &t,
         "shop.release.published",

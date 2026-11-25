@@ -6,8 +6,8 @@ use serde::Deserialize;
 use serde_json::{Value, json};
 use sqlx::Row;
 use veyndo_core::admission::reserve_ai_attempt;
-use veyndo_core::database::lease::Lease;
 use veyndo_core::document::{lenient, view};
+use veyndo_core::store::lease::Lease;
 use veyndo_core::{Error, RequestContext, Result, StatusCode, bad};
 use veyndo_identity::{merchant, permit};
 

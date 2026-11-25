@@ -7,7 +7,7 @@ use crate::store::documents as sources;
 use serde_json::{Value, json};
 use sqlx::Row;
 use veyndo_cognition::inference::budget::is_budgeted;
-use veyndo_core::database::lease::Lease;
+use veyndo_core::store::lease::Lease;
 use veyndo_core::{Result, State, bad};
 use veyndo_pricing::domain::catalog::Product;
 use veyndo_shop::service::read_cache::config;

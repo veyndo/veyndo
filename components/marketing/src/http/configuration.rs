@@ -7,7 +7,7 @@ use axum::extract::{Path, State};
 use serde::Deserialize;
 use serde_json::{Value, json};
 use veyndo_core::document::{lenient, view};
-use veyndo_core::{RequestContext, Result, bad, conflict, history_context};
+use veyndo_core::{RequestContext, Result, bad, conflict, store::history_context};
 use veyndo_identity::{merchant, permit};
 
 /// What still uses a definition, with its current revision.

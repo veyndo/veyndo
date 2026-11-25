@@ -8,7 +8,7 @@ use sqlx::Row;
 use std::collections::HashMap;
 use veyndo_app_model::declarations::identifier;
 use veyndo_core::document::{lenient, view};
-use veyndo_core::{RequestContext, Result, State, bad, conflict, history_context};
+use veyndo_core::{RequestContext, Result, State, bad, conflict, store::history_context};
 use veyndo_shop::domain::cart_lines;
 use veyndo_shop::types::settings::Settings;
 

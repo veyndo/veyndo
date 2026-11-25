@@ -31,7 +31,9 @@ pub(super) async fn submit(
 ) -> Result<Value> {
     let input: SubmitInput = view(v);
     let t = tenant(h)?;
-    let live = veyndo_core::shop_scope::parent(a, &t).await?.is_none();
+    let live = veyndo_core::store::environments::parent(a, &t)
+        .await?
+        .is_none();
     let cart = load_cart(a, h).await?;
     if !verified_kernel::app_submission_admissible(
         !e.public_read,

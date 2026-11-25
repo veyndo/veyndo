@@ -48,7 +48,7 @@ pub async fn decide(
     if changed != 1 {
         return Err(conflict("Hypothesis revision changed"));
     }
-    veyndo_core::outbox::publish_on(
+    veyndo_core::store::outbox::publish_on(
         &mut *tx,
         &t,
         "intelligence.decision",

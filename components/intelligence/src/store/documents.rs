@@ -7,7 +7,7 @@ use sqlx::Row;
 use veyndo_catalog::store::products;
 use veyndo_core::document::{lenient, view};
 use veyndo_core::{
-    Error, RequestContext, Result, State, StatusCode, bad, conflict, history_context, uid,
+    Error, RequestContext, Result, State, StatusCode, bad, conflict, store::history_context, uid,
 };
 
 /// A merchant decision on a source: its expected revision, approval, archive state or visibility.
@@ -158,7 +158,7 @@ pub async fn record(
     kind: &str,
     data: Value,
 ) -> Result<()> {
-    veyndo_core::outbox::publish_on(
+    veyndo_core::store::outbox::publish_on(
         &mut **tx,
         t,
         kind,
@@ -198,7 +198,7 @@ pub async fn save(
     sqlx::query("INSERT INTO knowledge_documents(tenant,id,product_id,title,content_hash,content,source_type,kind,locale,translations) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)").bind(t).bind(&id).bind(product).bind(title).bind(digest).bind(text).bind(source).bind(&data.kind).bind(&data.locale).bind(&data.translations).execute(&mut *tx).await?;
     let chunks = chunks(&mut tx, t, &id, data).await?;
     sync_document(&mut tx, t, &id, product, title, digest).await?;
-    veyndo_core::outbox::publish_on(
+    veyndo_core::store::outbox::publish_on(
         &mut *tx,
         t,
         "knowledge.document.ingested",

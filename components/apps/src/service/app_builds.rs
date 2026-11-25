@@ -14,7 +14,7 @@ use veyndo_app_model::manifest::Manifest;
 use veyndo_app_storage::Scope;
 use veyndo_app_storage::build_versions as shared;
 use veyndo_core::document::{lenient, view};
-use veyndo_core::shop_scope::{owned_stage, parent};
+use veyndo_core::store::environments::{owned_stage, parent};
 use veyndo_core::{
     Error, RequestContext, Result, State, StatusCode, bad, conflict, process_config, uid,
 };

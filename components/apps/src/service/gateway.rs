@@ -90,9 +90,13 @@ async fn execute(
             if v.to_string().len() > 16384 {
                 return Err(bad("App event exceeds limit"));
             }
-            let event =
-                veyndo_core::outbox::publish_id_on(&a.db, &t, &format!("app.{id}.{name}"), v)
-                    .await?;
+            let event = veyndo_core::store::outbox::publish_id_on(
+                &a.db,
+                &t,
+                &format!("app.{id}.{name}"),
+                v,
+            )
+            .await?;
             Ok(json!({"eventId":event,"accepted":true}))
         }
         _ => {

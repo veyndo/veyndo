@@ -57,7 +57,7 @@ impl Catalogue for Server {
                     actor.parse().map_err(|_| bad("Invalid saved actor"))?,
                 );
             }
-            veyndo_core::history_context::context(tx, &request, reason).await
+            veyndo_core::store::history_context::context(tx, &request, reason).await
         })
     }
     fn lock_products<'a>(

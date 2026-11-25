@@ -169,7 +169,7 @@ pub async fn invoke(a: &State, h: &RequestContext, name: &str, v: &Value) -> Res
     } else {
         0
     };
-    veyndo_core::outbox::publish_on(&mut *tx, &live, "intelligence.agents.controlled", &json!({"stopped":stopped,"revision":revision+1,"actor":h.principal.user,"cancelled":cancelled})).await?;
+    veyndo_core::store::outbox::publish_on(&mut *tx, &live, "intelligence.agents.controlled", &json!({"stopped":stopped,"revision":revision+1,"actor":h.principal.user,"cancelled":cancelled})).await?;
     tx.commit().await?;
     Ok(json!({"stopped":stopped,"revision":revision+1,"liveShop":live,"cancelled":cancelled}))
 }

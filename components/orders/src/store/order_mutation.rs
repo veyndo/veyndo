@@ -83,8 +83,8 @@ pub async fn persist(
         .await?;
     sqlx::query("UPDATE carts SET data=jsonb_set(carts.data,'{order}',$1) FROM orders o WHERE carts.tenant=$2 AND carts.id=o.cart_id AND o.tenant=$2 AND o.id=$3")
         .bind(&*o).bind(t).bind(id).execute(&mut **tx).await?;
-    veyndo_core::outbox::publish_on(&mut **tx, t, "order.updated", &json!({"orderId":id,"kind":audit.data["kind"],"state":audit.data["state"],"revision":stored.revision})).await?;
-    veyndo_core::outbox::publish_on(&mut **tx, t, audit.event_kind, &audit.event).await?;
+    veyndo_core::store::outbox::publish_on(&mut **tx, t, "order.updated", &json!({"orderId":id,"kind":audit.data["kind"],"state":audit.data["state"],"revision":stored.revision})).await?;
+    veyndo_core::store::outbox::publish_on(&mut **tx, t, audit.event_kind, &audit.event).await?;
     Ok(())
 }
 

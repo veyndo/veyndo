@@ -17,7 +17,7 @@ pub async fn get(
 ) -> Result<Json<Value>> {
     actor(&h)?;
     validate_tenant(&id)?;
-    let exists: bool = veyndo_core::tenants::exists(&a.db, &id).await?;
+    let exists: bool = veyndo_core::store::tenants::exists(&a.db, &id).await?;
     if !exists {
         return Err(Error(StatusCode::NOT_FOUND, "Shop not found".into()));
     }
@@ -57,7 +57,7 @@ pub async fn save(
     let revision = input.revision.ok_or(bad("Revision required"))?;
     let mut tx = a.db.begin().await?;
     // Tenant row serializes first insert and every update without a missing-row race.
-    veyndo_core::tenants::lock_if_exists(&mut *tx, &id)
+    veyndo_core::store::tenants::lock_if_exists(&mut *tx, &id)
         .await?
         .ok_or(Error(StatusCode::NOT_FOUND, "Shop not found".into()))?;
     let current: Option<i64> =

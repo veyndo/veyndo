@@ -73,7 +73,7 @@ pub async fn revert(
             continue;
         };
         knowledge::sync_product(&mut tx, t, &json!(product(&changed))).await?;
-        veyndo_core::outbox::publish_on(
+        veyndo_core::store::outbox::publish_on(
             &mut *tx,
             t,
             "product.updated",
@@ -83,7 +83,7 @@ pub async fn revert(
         reverted.push(id);
     }
     if !reverted.is_empty() {
-        veyndo_core::outbox::publish_on(
+        veyndo_core::store::outbox::publish_on(
             &mut *tx,
             t,
             "ai.autonomy.reverted",

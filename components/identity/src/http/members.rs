@@ -46,7 +46,7 @@ pub async fn update_member(
     let role = input.role.as_deref().ok_or(bad("Role required"))?;
     let active = input.active.ok_or(bad("Active boolean required"))?;
     let mut tx = a.db.begin().await?;
-    veyndo_core::tenants::lock(&mut *tx, &t).await?;
+    veyndo_core::store::tenants::lock(&mut *tx, &t).await?;
     let h = roles::current(&mut tx, &h, &t).await?;
     let actor = if header(&h, "x-rac-role") == Some("owner") {
         "owner"
@@ -115,7 +115,7 @@ pub async fn update_member(
     .bind(&permissions)
     .execute(&mut *tx)
     .await?;
-    veyndo_core::outbox::publish_on(&mut *tx, &t, "membership.updated", &json!({"actor":header(&h,"x-rac-user"),"subject":user,"role":role,"active":active,"permissions":permissions,"previousRole":old.get::<String,_>("role"),"previousActive":old.get::<bool,_>("active")})).await?;
+    veyndo_core::store::outbox::publish_on(&mut *tx, &t, "membership.updated", &json!({"actor":header(&h,"x-rac-user"),"subject":user,"role":role,"active":active,"permissions":permissions,"previousRole":old.get::<String,_>("role"),"previousActive":old.get::<bool,_>("active")})).await?;
     tx.commit().await?;
     Ok(Json(json!({"updated":true})))
 }

@@ -6,7 +6,7 @@ use axum::Json;
 use axum::extract::{Path, State as Shared};
 use base64::{Engine as _, engine::general_purpose::STANDARD};
 use serde_json::{Value, json};
-use veyndo_core::shop_scope::parent;
+use veyndo_core::store::environments::parent;
 use veyndo_core::{RequestContext, Result, bad, conflict, hash};
 use veyndo_identity::{merchant, permit};
 pub async fn import<H: ImportHost>(

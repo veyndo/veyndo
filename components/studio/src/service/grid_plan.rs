@@ -6,7 +6,7 @@ use veyndo_app_model::Object;
 use veyndo_app_platform::store::extension_filter::admit;
 use veyndo_app_platform::store::extension_projection::descriptions;
 use veyndo_cognition::inference::InferenceError;
-use veyndo_core::database::lease::Lease;
+use veyndo_core::store::lease::Lease;
 use veyndo_core::{Error, RequestContext, Result, StatusCode, bad};
 use veyndo_identity::{allowed, merchant, permit};
 use veyndo_intelligence::service::models::Models;

@@ -48,7 +48,7 @@ pub async fn ensure(
             .bind(id)
             .execute(&mut **tx)
             .await?;
-            veyndo_core::outbox::publish_on(
+            veyndo_core::store::outbox::publish_on(
                 &mut **tx,
                 tenant,
                 "app.activated",

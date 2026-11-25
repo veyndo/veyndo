@@ -5,7 +5,7 @@ use sqlx::Row;
 use std::collections::HashMap;
 use veyndo_core::document::view;
 use veyndo_core::{
-    RequestContext, Result, State, bad, conflict, hash, history_context, shop_scope, uid,
+    RequestContext, Result, State, bad, conflict, hash, store::history_context, uid,
 };
 use veyndo_identity::{merchant, permit};
 use veyndo_inventory::InventoryLines;
@@ -179,7 +179,10 @@ pub async fn import_external(
     let mut input: Input =
         serde_json::from_value(v).map_err(|_| bad("Invalid external order snapshot"))?;
     input.validate()?;
-    if shop_scope::parent(a, &t).await?.is_some() {
+    if veyndo_core::store::environments::parent(a, &t)
+        .await?
+        .is_some()
+    {
         return Err(bad("External orders are disabled in sandboxes"));
     }
     let key = format!(
@@ -291,7 +294,7 @@ pub async fn import_external(
     veyndo_catalog::store::order_downloads::grant(&mut tx, &t, &ids, &id).await?;
     {
         let kind = "order.placed";
-        veyndo_core::outbox::publish_on(&mut *tx, &t, kind, &json!({"orderId":id,"totalMinor":input.total_minor,"salesChannelId":input.sales_channel_id,"appId":app})).await?;
+        veyndo_core::store::outbox::publish_on(&mut *tx, &t, kind, &json!({"orderId":id,"totalMinor":input.total_minor,"salesChannelId":input.sales_channel_id,"appId":app})).await?;
     }
     tx.commit().await?;
     // Customer/order reads must never expose the private completed-cart token.

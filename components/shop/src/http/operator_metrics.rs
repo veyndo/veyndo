@@ -5,8 +5,8 @@ use axum::extract::{Path, Query, State};
 use serde::Deserialize;
 use serde_json::{Value, json};
 use sqlx::Row;
-use veyndo_core::channel_metrics::traffic;
 use veyndo_core::host_names::links;
+use veyndo_core::store::channel_metrics::traffic;
 use veyndo_core::{Error, RequestContext, Result, StatusCode, bad, validate_tenant};
 
 #[derive(Deserialize)]

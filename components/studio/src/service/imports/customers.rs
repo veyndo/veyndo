@@ -4,7 +4,7 @@ use axum::Json;
 use serde::Deserialize;
 use serde_json::{Value, json};
 use veyndo_core::document::view;
-use veyndo_core::shop_scope::parent;
+use veyndo_core::store::environments::parent;
 use veyndo_core::{RequestContext, Result, State, bad, hash};
 use veyndo_identity::{merchant, permit};
 /// The JSON fields `import` reads, typed as it reads them.

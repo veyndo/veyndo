@@ -5,7 +5,7 @@ use sqlx::Row;
 use veyndo_core::document::{lenient, view};
 use veyndo_core::shop_scope::header;
 use veyndo_core::{
-    Error, RequestContext, Result, State, StatusCode, bad, conflict, history_context,
+    Error, RequestContext, Result, State, StatusCode, bad, conflict, store::history_context,
 };
 
 /// The order without its cart token, with creation time and the customer's email.

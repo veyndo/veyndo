@@ -54,7 +54,7 @@ pub async fn save(a: &State, h: &RequestContext, op: &str, v: &Value) -> Result<
     let t = veyndo_identity::merchant(h)?;
     veyndo_identity::permit(h, "b2b.manage")?;
     let mut tx = a.db.begin().await?;
-    veyndo_core::history_context::context(&mut tx, h, "b2b.organization").await?;
+    veyndo_core::store::history_context::context(&mut tx, h, "b2b.organization").await?;
     let result = save_tx(&mut tx, &t, op, v).await?;
     tx.commit().await?;
     Ok(result)
@@ -218,7 +218,7 @@ pub async fn member(a: &State, h: &RequestContext, v: &Value) -> Result<Value> {
     veyndo_identity::permit(h, "b2b.manage")?;
     veyndo_identity::permit(h, "customers.write")?;
     let mut tx = a.db.begin().await?;
-    veyndo_core::history_context::context(&mut tx, h, "b2b.membership").await?;
+    veyndo_core::store::history_context::context(&mut tx, h, "b2b.membership").await?;
     let result = member_tx(&mut tx, &t, v).await?;
     tx.commit().await?;
     Ok(result)
@@ -267,6 +267,6 @@ pub async fn member_tx(conn: &mut sqlx::PgConnection, t: &str, v: &Value) -> Res
     Ok(json!({"revision":expected+1}))
 }
 pub async fn event(conn: &mut sqlx::PgConnection, t: &str, kind: &str, data: Value) -> Result<()> {
-    veyndo_core::outbox::publish_on(conn, t, kind, &data).await?;
+    veyndo_core::store::outbox::publish_on(conn, t, kind, &data).await?;
     Ok(())
 }

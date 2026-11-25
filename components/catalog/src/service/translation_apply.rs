@@ -7,7 +7,7 @@ use serde::Deserialize;
 use serde_json::{Value, json};
 use sqlx::PgConnection;
 use veyndo_core::document::{lenient, view};
-use veyndo_core::{RequestContext, Result, bad, conflict, outbox};
+use veyndo_core::{RequestContext, Result, bad, conflict, store::outbox};
 use veyndo_identity::{merchant, permit};
 use veyndo_pricing::verified_kernel;
 

@@ -5,8 +5,7 @@ use std::collections::HashMap;
 use std::sync::Mutex;
 use veyndo_runtime::scoped_pool::ScopedPool;
 
-mod reads;
-pub use reads::traffic;
+pub use crate::store::channel_metrics::Totals;
 
 const MAX_KEYS: usize = 1024;
 
@@ -75,8 +74,18 @@ impl ChannelMetrics {
             responses.push(json!(counter.responses));
         }
         // One task and one bounded bulk write per interval; no task per request.
-        let write = sqlx::query("INSERT INTO channel_metrics(tenant,channel,calls,failures,total_ms,max_ms,response_counts,timed_calls) SELECT *,c FROM unnest($1::text[],$2::text[],$3::bigint[],$4::bigint[],$5::bigint[],$6::bigint[],$7::jsonb[]) AS v(t,ch,c,f,ms,mx,r) ON CONFLICT(tenant,channel) DO UPDATE SET calls=channel_metrics.calls+EXCLUDED.calls,failures=channel_metrics.failures+EXCLUDED.failures,timed_calls=channel_metrics.timed_calls+EXCLUDED.timed_calls,total_ms=channel_metrics.total_ms+EXCLUDED.total_ms,max_ms=greatest(channel_metrics.max_ms,EXCLUDED.max_ms),response_counts=veyndo_merge_http_counts(channel_metrics.response_counts,EXCLUDED.response_counts),last_seen=now()")
-            .bind(tenants).bind(channels).bind(calls).bind(failures).bind(total_ms).bind(max_ms).bind(responses).execute(db);
+        let write = crate::store::channel_metrics::add(
+            db,
+            Totals {
+                tenants,
+                channels,
+                calls,
+                failures,
+                total_ms,
+                max_ms,
+                responses,
+            },
+        );
         let _ = tokio::time::timeout(std::time::Duration::from_secs(1), write).await;
     }
 }

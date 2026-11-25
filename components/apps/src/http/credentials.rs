@@ -7,7 +7,7 @@ use serde::Deserialize;
 use serde_json::{Value, json};
 use veyndo_app_model::admission::callback_scope;
 use veyndo_core::document::{lenient, view};
-use veyndo_core::shop_scope::parent;
+use veyndo_core::store::environments::parent;
 use veyndo_core::{RequestContext, Result, State, bad, conflict, hash, uid};
 use veyndo_identity::{merchant, permit};
 
@@ -74,7 +74,7 @@ pub async fn create(
         .filter(|n| (1..=90).contains(n))
         .ok_or(bad("Expiry must be 1..90 days"))?;
     let mut tx = a.db.begin().await?;
-    veyndo_core::tenants::lock(&mut *tx, &t).await?;
+    veyndo_core::store::tenants::lock(&mut *tx, &t).await?;
     let count: i64 = sqlx::query_scalar(
         "SELECT count(*) FROM integration_keys WHERE tenant=$1 AND expires_at>now()",
     )
@@ -87,7 +87,7 @@ pub async fn create(
     let key = format!("rac_{}{}", uid(), uid());
     let key_id = uid();
     sqlx::query("INSERT INTO integration_keys(id,tenant,user_id,digest,name,permissions,app_id,package_digest,app_permissions,expires_at) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$10,now()+$9*interval '1 day')").bind(&key_id).bind(&t).bind(user).bind(hash(&key)).bind(format!("App {id}" )).bind(json!(scopes)).bind(&id).bind(&digest).bind(days as i32).bind(json!(requested)).execute(&mut *tx).await?;
-    veyndo_core::outbox::publish_on(
+    veyndo_core::store::outbox::publish_on(
         &mut *tx,
         &t,
         "app.callback_approved",

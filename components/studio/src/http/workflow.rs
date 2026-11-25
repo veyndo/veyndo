@@ -86,7 +86,7 @@ pub async fn save(
         return Err(conflict("Workflow removes an active order state"));
     }
     sqlx::query("INSERT INTO order_state_machines(tenant,data) VALUES($1,$2) ON CONFLICT(tenant) DO UPDATE SET data=EXCLUDED.data,revision=order_state_machines.revision+1").bind(&t).bind(json!(m)).execute(&mut *tx).await?;
-    veyndo_core::outbox::publish_on(
+    veyndo_core::store::outbox::publish_on(
         &mut *tx,
         &t,
         "order.workflow.updated",

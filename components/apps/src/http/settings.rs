@@ -8,7 +8,7 @@ use axum::extract::{Path, State as Shared};
 use serde::Deserialize;
 use serde_json::{Value, json};
 use veyndo_core::document::{lenient, view};
-use veyndo_core::shop_scope::parent;
+use veyndo_core::store::environments::parent;
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad, conflict};
 use veyndo_identity::{merchant, permit};
 use veyndo_kernel::verified_kernel;

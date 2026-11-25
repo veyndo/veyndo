@@ -1,8 +1,26 @@
-//! One persisted diagnostic read shared by operator overview, shop dossiers and infrastructure.
+//! The persisted channel diagnostics: one bounded bulk add per flush interval, and the traffic read shared by operator overview, shop dossiers and infrastructure.
 use crate::Result;
 use serde_json::{Value, json};
 use sqlx::Row;
 use veyndo_runtime::scoped_pool::ScopedPool;
+
+/// One flush interval's counters, one entry per (tenant, channel).
+pub struct Totals {
+    pub tenants: Vec<String>,
+    pub channels: Vec<&'static str>,
+    pub calls: Vec<i64>,
+    pub failures: Vec<i64>,
+    pub total_ms: Vec<i64>,
+    pub max_ms: Vec<i64>,
+    pub responses: Vec<Value>,
+}
+
+/// Adds a flush interval's counters to the persisted totals.
+pub async fn add(db: &ScopedPool, t: Totals) -> Result<()> {
+    sqlx::query("INSERT INTO channel_metrics(tenant,channel,calls,failures,total_ms,max_ms,response_counts,timed_calls) SELECT *,c FROM unnest($1::text[],$2::text[],$3::bigint[],$4::bigint[],$5::bigint[],$6::bigint[],$7::jsonb[]) AS v(t,ch,c,f,ms,mx,r) ON CONFLICT(tenant,channel) DO UPDATE SET calls=channel_metrics.calls+EXCLUDED.calls,failures=channel_metrics.failures+EXCLUDED.failures,timed_calls=channel_metrics.timed_calls+EXCLUDED.timed_calls,total_ms=channel_metrics.total_ms+EXCLUDED.total_ms,max_ms=greatest(channel_metrics.max_ms,EXCLUDED.max_ms),response_counts=veyndo_merge_http_counts(channel_metrics.response_counts,EXCLUDED.response_counts),last_seen=now()")
+        .bind(t.tenants).bind(t.channels).bind(t.calls).bind(t.failures).bind(t.total_ms).bind(t.max_ms).bind(t.responses).execute(db).await?;
+    Ok(())
+}
 
 pub async fn traffic(
     db: &ScopedPool,

@@ -47,7 +47,7 @@ pub async fn schedule_once(a: &State) -> Result<()> {
             .next()
             .ok_or(bad("Schedule exhausted"))?
             .to_rfc3339();
-        let event = veyndo_core::outbox::publish_id_on(
+        let event = veyndo_core::store::outbox::publish_id_on(
             &mut *tx,
             &t,
             &format!("app.{app}.{}", s.action),

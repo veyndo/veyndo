@@ -30,12 +30,15 @@ pub(crate) async fn import_document(
             "Carrier documents require the approved app callback identity".into(),
         ));
     }
-    if veyndo_core::shop_scope::parent(a, &t).await?.is_some() {
+    if veyndo_core::store::environments::parent(a, &t)
+        .await?
+        .is_some()
+    {
         return Err(bad("Operational documents cannot be staged"));
     }
     let document = Document::admit(&m.id, &metadata, &content, &assets::safe_url)?;
     let mut tx = a.db.begin().await?;
-    veyndo_core::history_context::context(&mut tx, h, "app").await?;
+    veyndo_core::store::history_context::context(&mut tx, h, "app").await?;
     apps::lock_package_write(&mut tx, &t, m).await?;
     let result = record(&mut tx, &t, h, &m.id, &m.version, document, content).await?;
     tx.commit().await?;

@@ -10,7 +10,7 @@ use veyndo_app_platform::domain::core_extensions::configuration;
 use veyndo_app_platform::domain::entity_access::entity_access;
 use veyndo_app_platform::store::records::{get as get_record, rows as record_rows};
 use veyndo_b2b::store::staging as b2b;
-use veyndo_core::history_context::context;
+use veyndo_core::store::history_context::context;
 use veyndo_core::{RequestContext, Result, bad, hash, uid};
 use veyndo_identity::permit;
 use veyndo_orders::store::company::lock as lock_company;

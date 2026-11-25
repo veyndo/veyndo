@@ -45,7 +45,7 @@ pub async fn persist(
     let request = json!({"instruction":input.instruction,"locale":input.locale,"channel":channel_id(original),"source":"flow","sourceJobId":job});
     let mut tx = a.db.begin_privileged().await?;
     // The same live-shop lock as enqueue/approval fences completion against stop.
-    let stopped: bool = veyndo_core::tenants::agents_stopped_locked(&mut *tx, t).await?;
+    let stopped: bool = veyndo_core::store::tenants::agents_stopped_locked(&mut *tx, t).await?;
     if stopped {
         return Err(Error(
             StatusCode::FORBIDDEN,

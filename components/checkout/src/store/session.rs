@@ -1,7 +1,7 @@
 //! What a checkout session reads under the checkout transaction: the channel it may sell on and the order it already placed.
 use serde_json::Value;
 use sqlx::PgConnection;
-use veyndo_core::shop_scope::live_parent;
+use veyndo_core::store::environments::live_parent;
 use veyndo_core::{Error, Result, StatusCode};
 use veyndo_shop::types::cart::StoredCart;
 

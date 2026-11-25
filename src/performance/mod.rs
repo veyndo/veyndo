@@ -7,13 +7,13 @@ use axum::{extract::Request, middleware::Next};
 use std::sync::Arc;
 use veyndo_core::Result;
 pub(crate) mod access_snapshot;
-pub(crate) use veyndo_core::database::lease as cluster_lease;
+pub(crate) use veyndo_core::store::lease as cluster_lease;
 pub(crate) mod delivery;
 pub(crate) use veyndo_core::admission::{Admission, AiStreamAdmission, reserve_ai_attempt};
 mod invalidation;
 pub(crate) use invalidation::start as start_invalidations;
-pub(crate) use veyndo_core::database::authority::connect as connect_database;
-pub(crate) use veyndo_core::database::row_security::verify as verify_row_security;
+pub(crate) use veyndo_core::store::authority::connect as connect_database;
+pub(crate) use veyndo_core::store::row_security::verify as verify_row_security;
 
 pub(crate) use veyndo_shop::service::read_cache::{LanguageRow, read_scope, reads};
 /// The settings of a sales channel through the shop read cache.

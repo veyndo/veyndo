@@ -5,7 +5,7 @@ use serde_json::{Value, json};
 use veyndo_checkout::store::selected_customer;
 use veyndo_core::document::{lenient, merge, view};
 use veyndo_core::request_context::PosAdmission;
-use veyndo_core::shop_scope::live_parent;
+use veyndo_core::store::environments::live_parent;
 use veyndo_core::{Error, RequestContext, Result, StatusCode, bad};
 use veyndo_identity::permit;
 use veyndo_pricing::verified_kernel;
@@ -81,14 +81,14 @@ pub async fn settle(
     )?;
     let placed: PlacedOrder = view(order);
     if cash {
-        veyndo_core::outbox::publish_on(&mut **tx, &c.tenant, "payment.state_changed", &json!({"orderId":placed.id,"state":"paid","kind":"payment","cashierId":p.actor,"salesChannelId":c.data.sales_channel})).await?;
+        veyndo_core::store::outbox::publish_on(&mut **tx, &c.tenant, "payment.state_changed", &json!({"orderId":placed.id,"state":"paid","kind":"payment","cashierId":p.actor,"salesChannelId":c.data.sales_channel})).await?;
     }
     let event = if placed.payment.state == "paid" {
         "pos.sale_completed"
     } else {
         "pos.sale_created"
     };
-    veyndo_core::outbox::publish_on(&mut **tx, &c.tenant, event, &json!({"orderId":placed.id,"salesChannelId":c.data.sales_channel,"cashierId":p.actor,"paymentState":placed.payment.state,"totalMinor":placed.money.minor,"currency":c.data.currency})).await?;
+    veyndo_core::store::outbox::publish_on(&mut **tx, &c.tenant, event, &json!({"orderId":placed.id,"salesChannelId":c.data.sales_channel,"cashierId":p.actor,"paymentState":placed.payment.state,"totalMinor":placed.money.minor,"currency":c.data.currency})).await?;
     Ok(())
 }
 
@@ -321,7 +321,7 @@ pub async fn payment_captured(
             },
         )?;
     }
-    veyndo_core::outbox::publish_on(&mut **tx, tenant, "pos.sale_completed", &json!({"orderId":placed.id,"salesChannelId":placed.sales_channel_id,"paymentState":state,"totalMinor":placed.money.minor,"currency":placed.cart.price.currency})).await?;
+    veyndo_core::store::outbox::publish_on(&mut **tx, tenant, "pos.sale_completed", &json!({"orderId":placed.id,"salesChannelId":placed.sales_channel_id,"paymentState":state,"totalMinor":placed.money.minor,"currency":placed.cart.price.currency})).await?;
     Ok(())
 }
 

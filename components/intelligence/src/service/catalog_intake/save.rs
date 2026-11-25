@@ -5,7 +5,7 @@ use serde::Deserialize;
 use serde_json::{Value, json};
 use uuid::Uuid;
 use veyndo_core::document::{lenient, view};
-use veyndo_core::shop_scope::parent;
+use veyndo_core::store::environments::parent;
 use veyndo_core::{RequestContext, Result, bad, conflict, hash};
 use veyndo_shop::Settings;
 

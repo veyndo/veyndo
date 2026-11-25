@@ -13,7 +13,7 @@ use serde::Deserialize;
 use serde_json::{Value, json};
 use sqlx::Row;
 use veyndo_core::document::{lenient, view};
-use veyndo_core::history_context::context;
+use veyndo_core::store::history_context::context;
 use veyndo_core::{RequestContext, Result, bad, conflict};
 use veyndo_identity::{merchant, permit};
 use veyndo_pricing::service::currency_change::guard as currency_guard;
@@ -129,7 +129,7 @@ pub async fn save_config(
         return Err(bad("Tax class is assigned to products"));
     }
     let r=sqlx::query("UPDATE commerce_settings SET data=$1,revision=revision+1 WHERE tenant=$2 AND revision=$3 RETURNING revision").bind(json!(s)).bind(&t).bind(revision).fetch_optional(&mut *tx).await?.ok_or(conflict("Configuration changed; reload first"))?;
-    veyndo_core::outbox::publish_on(
+    veyndo_core::store::outbox::publish_on(
         &mut *tx,
         &t,
         "commerce.configured",
@@ -289,7 +289,7 @@ pub async fn save_scope(
     }
     let patch = difference(&base, &next);
     sqlx::query("INSERT INTO commerce_overrides(tenant,channel_id,data) VALUES($1,$2,$3) ON CONFLICT(tenant,channel_id) DO UPDATE SET data=EXCLUDED.data,revision=commerce_overrides.revision+1").bind(&t).bind(&channel).bind(&patch).execute(&mut *tx).await?;
-    veyndo_core::outbox::publish_on(
+    veyndo_core::store::outbox::publish_on(
         &mut *tx,
         &t,
         "commerce.configured",

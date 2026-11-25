@@ -9,7 +9,8 @@ use veyndo_app_platform::domain::planning::AppChange;
 use veyndo_catalog::domain::product_admission::{admit_product_write, product_write_guidance};
 use veyndo_catalog::service::categories::admit as admit_category;
 use veyndo_core::model_contract::validate_native;
-use veyndo_core::shop_scope::{header, parent};
+use veyndo_core::shop_scope::header;
+use veyndo_core::store::environments::parent;
 use veyndo_core::{Error, RequestContext, Result, StatusCode, bad, conflict, hash};
 use veyndo_identity::allowed;
 use veyndo_intelligence::store::agent_runs::claim_conversation;
@@ -219,7 +220,7 @@ pub async fn approve<H: WorkHost>(
     // rebinding above authorize this one task. Lock live control before its task,
     // matching the global-stop owner and never widening the worker's data scope.
     let mut tx = a.db.begin_privileged().await?;
-    let stopped: bool = veyndo_core::tenants::agents_stopped_locked(&mut *tx, t).await?;
+    let stopped: bool = veyndo_core::store::tenants::agents_stopped_locked(&mut *tx, t).await?;
     if stopped {
         return Err(Error(
             StatusCode::FORBIDDEN,

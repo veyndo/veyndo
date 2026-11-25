@@ -64,7 +64,7 @@ pub async fn revoke(a: &State, t: &str, customer: &str, id: &str, key: &str) -> 
     )
     .await?;
     if row.get::<String, _>("state") == "active" {
-        veyndo_core::outbox::publish_on(
+        veyndo_core::store::outbox::publish_on(
             &mut *tx,
             t,
             "payment.instrument.revoked",

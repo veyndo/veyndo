@@ -83,7 +83,7 @@ pub async fn create(a: &State, c: &StoredCart, v: Intake) -> Result<Value> {
     }
     sqlx::query("INSERT INTO consumer_requests(tenant,id,cart_id,channel_id,kind,data) VALUES($1,$2,$3,$4,$5,$6)")
       .bind(&c.tenant).bind(&id).bind(&c.id).bind(&c.data.sales_channel).bind(&v.kind).bind(&data).execute(&mut *tx).await?;
-    veyndo_core::outbox::publish_on(
+    veyndo_core::store::outbox::publish_on(
         &mut *tx,
         &c.tenant,
         &format!("consumer.{}.requested", v.kind),
@@ -155,7 +155,7 @@ pub async fn review(a: &State, h: &RequestContext, t: &str, id: &str, v: &Value)
     let mut tx = a.db.begin().await?;
     let n=sqlx::query("UPDATE consumer_requests SET state=$1,revision=revision+1,data=data||jsonb_build_object('reviewNote',$2::text,'reviewedAt',now()::text,'reviewedBy',$3::text) WHERE tenant=$4 AND id=$5 AND revision=$6 RETURNING revision")
       .bind(state).bind(note).bind(header(h,"x-rac-user").unwrap_or("merchant")) .bind(t).bind(id).bind(revision).fetch_optional(&mut *tx).await?.ok_or(conflict("Request changed or unavailable"))?;
-    veyndo_core::outbox::publish_on(
+    veyndo_core::store::outbox::publish_on(
         &mut *tx,
         t,
         "consumer.request.reviewed",

@@ -10,7 +10,7 @@ use crate::store::{record_write, records};
 use serde_json::Value;
 use veyndo_app_model::Entity;
 use veyndo_app_model::manifest::Manifest;
-use veyndo_core::history_context::context;
+use veyndo_core::store::history_context::context;
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad};
 
 /// Keyset pages and indexed equality filters never hydrate an app's entire table.

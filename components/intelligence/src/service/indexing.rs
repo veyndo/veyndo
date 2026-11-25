@@ -5,7 +5,7 @@ use crate::store::embedding_generations::{advance, model_revision};
 use crate::store::embedding_jobs as store;
 use sqlx::Row;
 use veyndo_cognition::inference::budget::is_budgeted;
-use veyndo_core::database::lease::Lease;
+use veyndo_core::store::lease::Lease;
 use veyndo_core::{Result, State, bad};
 
 /// Interactive embedding reads share the same process and fleet admission as background indexing.

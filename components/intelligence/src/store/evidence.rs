@@ -168,7 +168,7 @@ pub async fn decide(a: &State, t: &str, actor: Option<&str>, v: &Value) -> Resul
         return Err(conflict("Source changed or archived; extract again"));
     }
     sqlx::query("UPDATE knowledge_relations SET state=$1,actor=$2 WHERE tenant=$3 AND kind='CLAIMS' AND target_id=$4").bind(state).bind(actor.unwrap_or("integration")).bind(t).bind(id).execute(&mut *tx).await?;
-    veyndo_core::outbox::publish_on(
+    veyndo_core::store::outbox::publish_on(
         &mut *tx,
         t,
         "intelligence.claim.reviewed",

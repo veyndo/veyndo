@@ -13,7 +13,8 @@ use sha2::{Digest, Sha256};
 use std::env;
 use std::sync::OnceLock;
 use veyndo_core::request_context::CheckoutBuyer;
-use veyndo_core::shop_scope::{header, live_parent, tenant};
+use veyndo_core::shop_scope::{header, tenant};
+use veyndo_core::store::environments::live_parent;
 use veyndo_core::{
     Error, RequestContext, Result, StatusCode, hash, process_config, validate_tenant,
 };

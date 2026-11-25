@@ -9,8 +9,8 @@ use sqlx::Row;
 use veyndo_catalog::store::products::product;
 use veyndo_cognition::inference::Choice;
 use veyndo_core::document::{lenient, view};
-use veyndo_core::history_context::context;
 use veyndo_core::shop_scope::header;
+use veyndo_core::store::history_context::context;
 use veyndo_core::{Error, RequestContext, Result, StatusCode, bad, conflict};
 use veyndo_identity::{allowed, permit};
 use veyndo_intelligence::domain::price_guardrails::check;
@@ -253,7 +253,7 @@ pub async fn apply_mode<H: WorkHost>(
         .bind(t)
         .execute(&mut *tx)
         .await?;
-    veyndo_core::outbox::publish_on(
+    veyndo_core::store::outbox::publish_on(
         &mut *tx,
         t,
         "merchant.change.applied",

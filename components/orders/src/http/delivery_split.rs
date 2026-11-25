@@ -10,8 +10,8 @@ use serde::Deserialize;
 use serde_json::{Value, json};
 use veyndo_core::document::{lenient, view};
 use veyndo_core::{
-    Error, RequestContext, Result, State, StatusCode, bad, conflict, hash, history_context,
-    shop_scope, shop_scope::header, uid,
+    Error, RequestContext, Result, State, StatusCode, bad, conflict, hash, shop_scope::header,
+    store::history_context, uid,
 };
 use veyndo_identity::{merchant, permit};
 use veyndo_kernel::verified_kernel;
@@ -39,7 +39,10 @@ pub async fn split_delivery(
     let t = merchant(&h)?;
     permit(&h, "orders.write")?;
     permit(&h, "customers.pii")?;
-    if shop_scope::parent(&a, &t).await?.is_some() {
+    if veyndo_core::store::environments::parent(&a, &t)
+        .await?
+        .is_some()
+    {
         return Err(bad("Operational shipments cannot be staged"));
     }
     let input: SplitRequest = view(&v);

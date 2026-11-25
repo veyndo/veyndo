@@ -5,7 +5,7 @@ use crate::store::package_install::install_tx;
 use serde_json::{Value, json};
 use sqlx::Row;
 use veyndo_app_model::manifest::Manifest;
-use veyndo_core::shop_scope::owned_stage;
+use veyndo_core::store::environments::owned_stage;
 use veyndo_core::{Result, bad};
 
 /// What installing a package would change, probed with the real installer and rolled back.

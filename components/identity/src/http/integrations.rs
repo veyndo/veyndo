@@ -76,7 +76,7 @@ pub async fn integration_create(
         .filter(|v| (1..=90).contains(v))
         .ok_or(bad("Integration expiry must be 1..90 days"))?;
     let mut tx = a.db.begin().await?;
-    veyndo_core::tenants::lock(&mut *tx, &t).await?;
+    veyndo_core::store::tenants::lock(&mut *tx, &t).await?;
     let count: i64 = sqlx::query_scalar(
         "SELECT count(*) FROM integration_keys WHERE tenant=$1 AND expires_at>now()",
     )

@@ -75,7 +75,7 @@ pub(crate) fn get() -> &'static Config {
                 "Invalid Studio frame origin"
             );
         }
-        let database = veyndo_core::database::config::get();
+        let database = veyndo_core::store::config::get();
         Config {
             http_api_only,
             shop_domain_suffix: env::var("SHOP_DOMAIN_SUFFIX").unwrap_or_default(),
@@ -110,8 +110,8 @@ pub(crate) fn get() -> &'static Config {
         }
     })
 }
-use veyndo_core::database::config::flag;
-pub(crate) use veyndo_core::database::config::number;
+use veyndo_core::store::config::flag;
+pub(crate) use veyndo_core::store::config::number;
 
 fn json_object(key: &str, fallback: Option<&str>) -> Value {
     let raw = env::var(key)

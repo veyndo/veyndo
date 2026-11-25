@@ -190,7 +190,7 @@ pub async fn approve(a: &State, carts: &dyn Carts, h: &RequestContext, v: &Value
     )
     .await?
     .0;
-    veyndo_core::outbox::publish_on(&a.db, &t, "supply.reorder.approved", &json!({"productId":product,"supplierShop":link.supplier_shop,"quantity":link.reorder_quantity,"totalMinor":total.to_string(),"currency":signed["currency"],"actor":header(h,"x-rac-user")})).await?;
+    veyndo_core::store::outbox::publish_on(&a.db, &t, "supply.reorder.approved", &json!({"productId":product,"supplierShop":link.supplier_shop,"quantity":link.reorder_quantity,"totalMinor":total.to_string(),"currency":signed["currency"],"actor":header(h,"x-rac-user")})).await?;
     Ok(
         json!({"approved":true,"ordered":false,"supplierShop":link.supplier_shop,"checkoutPath":handoff["checkoutPath"],"expiresInSeconds":handoff["expiresInSeconds"],"totalMinor":total.to_string()}),
     )

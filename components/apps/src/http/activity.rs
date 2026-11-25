@@ -7,7 +7,7 @@ use serde::Deserialize;
 use serde_json::{Value, json};
 use sqlx::Row;
 use veyndo_core::document::{lenient, view};
-use veyndo_core::shop_scope::parent;
+use veyndo_core::store::environments::parent;
 use veyndo_core::{RequestContext, Result, State, bad};
 use veyndo_identity::merchant;
 
@@ -89,7 +89,7 @@ pub async fn replay(
             queued+=sqlx::query("INSERT INTO app_deliveries(tenant,app,event_id) VALUES($1,$2,$3) ON CONFLICT(tenant,app,event_id) DO UPDATE SET state='queued',attempts=0,error=NULL,available_at=now(),lease_until=NULL,lease_token=NULL WHERE app_deliveries.state IN ('failed','delivered')").bind(&t).bind(&id).bind(r.get::<i64,_>("id")).execute(&mut *tx).await?.rows_affected();
         }
     }
-    veyndo_core::outbox::publish_on(
+    veyndo_core::store::outbox::publish_on(
         &mut *tx,
         &t,
         "app.replay_requested",

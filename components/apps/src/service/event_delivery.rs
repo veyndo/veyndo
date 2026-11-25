@@ -10,7 +10,7 @@ use serde_json::{Value, json};
 use sqlx::Row;
 use tracing::Instrument;
 use veyndo_app_model::manifest::Manifest;
-use veyndo_core::shop_scope::parent;
+use veyndo_core::store::environments::parent;
 use veyndo_core::{Error, Result, StatusCode, bad, conflict, process_config};
 
 /// Leases the next due deliveries of one app, sends them and records the outcome.

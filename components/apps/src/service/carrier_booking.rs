@@ -5,7 +5,7 @@ use serde_json::{Value, json};
 use veyndo_app_model::manifest::Manifest;
 use veyndo_core::document::{lenient, view};
 use veyndo_core::{
-    Error, RequestContext, Result, State, StatusCode, bad, conflict, history_context, shop_scope,
+    Error, RequestContext, Result, State, StatusCode, bad, conflict, store::history_context,
 };
 use veyndo_identity::{merchant, permit};
 use veyndo_orders::domain::order_workflow::guard;
@@ -52,7 +52,10 @@ pub async fn booking_intent(
             "Carrier intent requires the approved app callback identity".into(),
         ));
     }
-    if shop_scope::parent(a, &t).await?.is_some() {
+    if veyndo_core::store::environments::parent(a, &t)
+        .await?
+        .is_some()
+    {
         return Err(bad("Operational carrier intents cannot be staged"));
     }
     let input: CarrierIntent = view(v);

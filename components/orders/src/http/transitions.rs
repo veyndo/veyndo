@@ -12,8 +12,8 @@ use serde_json::{Value, json};
 use sqlx::Row;
 use veyndo_core::document::{lenient, view};
 use veyndo_core::{
-    Error, RequestContext, Result, State, StatusCode, bad, conflict, hash, history_context,
-    shop_scope::header,
+    Error, RequestContext, Result, State, StatusCode, bad, conflict, hash, shop_scope::header,
+    store::history_context,
 };
 use veyndo_identity::{merchant, permit};
 use veyndo_kernel::verified_kernel;

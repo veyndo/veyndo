@@ -12,7 +12,7 @@ use veyndo_app_model::Entity;
 use veyndo_app_model::manifest::Manifest;
 use veyndo_app_storage::record_history as shared;
 use veyndo_core::document::{lenient, view};
-use veyndo_core::history_context::context;
+use veyndo_core::store::history_context::context;
 use veyndo_core::{Error, RequestContext, Result, StatusCode, bad};
 use veyndo_identity::{merchant, permit};
 

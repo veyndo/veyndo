@@ -32,7 +32,7 @@ pub async fn configuration_events(
             .values()
             .map(|v| &v.product_id)
             .collect::<std::collections::BTreeSet<_>>();
-        veyndo_core::outbox::publish_on(&mut **tx, &c.tenant, "app.configuration.changed", &json!({"app":app,"cartId":c.id,"revision":c.revision,"salesChannelId":c.data.sales_channel,"operation":if new.is_empty() {"removed"} else {"configured"},"products":products})).await?;
+        veyndo_core::store::outbox::publish_on(&mut **tx, &c.tenant, "app.configuration.changed", &json!({"app":app,"cartId":c.id,"revision":c.revision,"salesChannelId":c.data.sales_channel,"operation":if new.is_empty() {"removed"} else {"configured"},"products":products})).await?;
     }
     Ok(())
 }

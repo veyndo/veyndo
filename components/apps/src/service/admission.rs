@@ -2,7 +2,7 @@
 use crate::ports::Platform;
 use tokio::sync::OwnedSemaphorePermit;
 use veyndo_core::Result;
-use veyndo_core::database::lease::Lease;
+use veyndo_core::store::lease::Lease;
 
 /// Held for the duration of one app network call.
 pub struct Admission {

@@ -5,7 +5,7 @@ use serde::Deserialize;
 use serde_json::{Value, json};
 use sqlx::Row;
 use veyndo_core::document::{lenient, view};
-use veyndo_core::history_context as history;
+use veyndo_core::store::history_context as history;
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad, conflict};
 use veyndo_shop::ports::Carts;
 use veyndo_shop::types::cart::{StoredCart, stored};

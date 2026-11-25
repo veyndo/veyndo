@@ -6,7 +6,9 @@ use serde_json::{Value, json};
 use sqlx::Row;
 use veyndo_core::document::{lenient, view};
 use veyndo_core::shop_scope::header;
-use veyndo_core::{RequestContext, Result, State, bad, conflict, hash, history_context, uid};
+use veyndo_core::{
+    RequestContext, Result, State, bad, conflict, hash, store::history_context, uid,
+};
 use veyndo_identity::domain::credentials::email as email_of;
 use veyndo_pricing::customer::{Address, Contact};
 use veyndo_shipping::domain::geography::validate_address;
@@ -126,7 +128,7 @@ pub async fn create(
     for (address, flags) in address_plan(&json!(input))? {
         save_address(&mut tx, t, &email, source.is_some(), &flags, &address).await?;
     }
-    veyndo_core::outbox::publish_on(
+    veyndo_core::store::outbox::publish_on(
         &mut *tx,
         t,
         if source.is_some() {
@@ -307,7 +309,7 @@ pub async fn save(
         .execute(&mut *tx)
         .await?;
     sqlx::query("UPDATE carts SET token=md5(id||$1),data=jsonb_set(jsonb_set(jsonb_set(jsonb_set(data,'{email}','null'),'{customer_id}','null'),'{group}','\"consumer\"'),'{company}','null'),revision=revision+1 WHERE tenant=$2 AND data->>'email'=$3 AND status='open'").bind(uid()).bind(t).bind(email).execute(&mut *tx).await?;
-    veyndo_core::outbox::publish_on(&mut *tx, t, "customer.updated", &json!({"actor":header(h,"x-rac-user"),"email":email,"revision":saved_revision,"active":e.active})).await?;
+    veyndo_core::store::outbox::publish_on(&mut *tx, t, "customer.updated", &json!({"actor":header(h,"x-rac-user"),"email":email,"revision":saved_revision,"active":e.active})).await?;
     tx.commit().await?;
     Ok(json!({"saved":true,"revision":saved_revision}))
 }

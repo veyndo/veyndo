@@ -72,7 +72,7 @@ pub async fn update_order(
     } else {
         "payment.updated"
     };
-    veyndo_core::outbox::publish_on(&mut **tx, &p.tenant, kind, &json!({"orderId":p.order,"attemptId":p.id,"state":state,"provider":p.provider,"environment":p.environment,"realMoneyCharged":p.environment=="live" && state=="captured","order":event_order})).await?;
+    veyndo_core::store::outbox::publish_on(&mut **tx, &p.tenant, kind, &json!({"orderId":p.order,"attemptId":p.id,"state":state,"provider":p.provider,"environment":p.environment,"realMoneyCharged":p.environment=="live" && state=="captured","order":event_order})).await?;
     if state == "captured" && let Some(e)=sqlx::query("UPDATE exposures SET rewarded=true WHERE tenant=$1 AND session=(SELECT data->>'session' FROM carts WHERE tenant=$1 AND id=$2) AND rewarded=false RETURNING variant").bind(&p.tenant).bind(o["cart"]["id"].as_str().unwrap()).fetch_optional(&mut **tx).await?{sqlx::query("UPDATE policy SET purchases=purchases+1 WHERE tenant=$1 AND variant=$2").bind(&p.tenant).bind(e.get::<String,_>("variant")).execute(&mut **tx).await?;}
     Ok(())
 }

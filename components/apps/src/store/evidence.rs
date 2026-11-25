@@ -108,7 +108,7 @@ pub async fn ingest(a: &State, t: &str, app: &str, previous: i64, v: &Value) -> 
         let n=sqlx::query("INSERT INTO app_evidence(tenant,app,source_id,kind,title,body,source_url,metadata,digest) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9) ON CONFLICT(tenant,app,source_id) DO UPDATE SET title=EXCLUDED.title,body=EXCLUDED.body,source_url=EXCLUDED.source_url,metadata=EXCLUDED.metadata,digest=EXCLUDED.digest,updated_at=now() WHERE app_evidence.digest<>EXCLUDED.digest").bind(t).bind(app).bind(id).bind(kind).bind(title).bind(text).bind(url).bind(&s["metadata"]).bind(&digest).execute(&mut *tx).await?.rows_affected();
         if n > 0 {
             sync_integration(&mut tx, t, app, id, s, false).await?;
-            veyndo_core::outbox::publish_on(&mut *tx, t, &format!("app.{app}.source_imported"), &json!({"sourceId":id,"app":app,"sourceKind":kind,"title":title,"metadata":s["metadata"]})).await?;
+            veyndo_core::store::outbox::publish_on(&mut *tx, t, &format!("app.{app}.source_imported"), &json!({"sourceId":id,"app":app,"sourceKind":kind,"title":title,"metadata":s["metadata"]})).await?;
         }
     }
     sqlx::query("INSERT INTO app_export_cursors(tenant,app,cursor) VALUES($1,$2,$3) ON CONFLICT(tenant,app) DO UPDATE SET cursor=greatest(app_export_cursors.cursor,EXCLUDED.cursor)").bind(t).bind(app).bind(cursor).execute(&mut *tx).await?;

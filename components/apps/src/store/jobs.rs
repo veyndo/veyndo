@@ -3,7 +3,8 @@ use crate::domain::{approval, persistence};
 use serde_json::Value;
 use veyndo_app_model::Action;
 use veyndo_app_model::manifest::Manifest;
-use veyndo_core::shop_scope::{header, parent};
+use veyndo_core::shop_scope::header;
+use veyndo_core::store::environments::parent;
 use veyndo_core::{RequestContext, Result, State, bad, uid};
 use veyndo_identity::merchant;
 

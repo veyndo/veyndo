@@ -437,6 +437,7 @@ This lists every checked-in source module in these roots, including files with n
 | [crates/runtime/src/lib.rs](../crates/runtime/src/lib.rs) | Shared scoped database and bounded network infrastructure. |
 | [crates/runtime/src/network_policy.rs](../crates/runtime/src/network_policy.rs) | Shared DNS destination classification for app HTTP egress and approved SMTP providers. |
 | [crates/runtime/src/scoped_pool.rs](../crates/runtime/src/scoped_pool.rs) | The commerce database executor: transaction-local tenant scope, including direct queries and cancelled streams. |
+| [crates/runtime/src/store.rs](../crates/runtime/src/store.rs) | The runtime's SQL: the database scope functions (key, ticket, configure, activate, rotate, status). Pools and signing stay in their modules. |
 | [crates/runtime/src/tenant_scope.rs](../crates/runtime/src/tenant_scope.rs) | Database lease context: unknown tasks fail closed; trusted workers explicitly retain their scope. |
 | [crates/runtime/src/trace.rs](../crates/runtime/src/trace.rs) | Private task-local correlation IDs; tracing never authorizes an operation or records payloads. |
 
@@ -978,18 +979,10 @@ This lists every checked-in source module in these roots, including files with n
 | [components/core/src/admission/tests.rs](../components/core/src/admission/tests.rs) | Regression checks for Core admission limits and the Checkout relay retry interval. |
 | [components/core/src/admission.rs](../components/core/src/admission.rs) | Bounded instance/tenant concurrency, durable UTC-day AI quotas, and low-cardinality latency telemetry. |
 | [components/core/src/cache.rs](../components/core/src/cache.rs) | Bounded weighted LRU for immutable decoded read models; no network I/O under its mutex. |
-| [components/core/src/channel_metrics/reads.rs](../components/core/src/channel_metrics/reads.rs) | One persisted diagnostic read shared by operator overview, shop dossiers and infrastructure. |
 | [components/core/src/channel_metrics.rs](../components/core/src/channel_metrics.rs) | Bounded, lossy diagnostic counters. Never use this buffer for business events. |
 | [components/core/src/conversions.rs](../components/core/src/conversions.rs) | Conversions from library errors into the shared error contract; the wire messages are part of the public API. |
-| [components/core/src/database/authority.rs](../components/core/src/database/authority.rs) | Connect separately admitted SQL roles within one process budget; rotate authenticated transaction scopes. |
-| [components/core/src/database/config.rs](../components/core/src/database/config.rs) | Database deployment values read once per process; an invalid value stops the start. |
-| [components/core/src/database/lease.rs](../components/core/src/database/lease.rs) | Cluster-wide tenant resource leases. DB serialization protects admission; cancellation releases the fenced lease. |
-| [components/core/src/database/pool.rs](../components/core/src/database/pool.rs) | Explicit per-process database budgets and bounded queue waits; invalid deployment values fail fast. |
-| [components/core/src/database/row_security.rs](../components/core/src/database/row_security.rs) | Bind each borrowed PostgreSQL connection to task scope, and reject unsafe strict-runtime roles. |
-| [components/core/src/database.rs](../components/core/src/database.rs) | Database access of the process: deployment values, connection pools, row security and cluster-wide leases. |
 | [components/core/src/document.rs](../components/core/src/document.rs) | Typed views of stored JSON documents. A field with an unexpected shape reads as its default, exactly as indexing into the JSON yields null, so a view never rejects a document the untyped reader accepted. |
 | [components/core/src/failure.rs](../components/core/src/failure.rs) | Stable safe error details shared by HTTP, MCP and agent streams; legacy constructors retain their wire message. |
-| [components/core/src/history_context.rs](../components/core/src/history_context.rs) | Transaction-local actor, source and reason that the history triggers record with every change. |
 | [components/core/src/host_names.rs](../components/core/src/host_names.rs) | Public host names: a syntactically valid domain, the shop alias under a configured suffix and origins of one family. |
 | [components/core/src/http_limits.rs](../components/core/src/http_limits.rs) | Bounded HTTP payloads and streaming responses for native settings and services. |
 | [components/core/src/lib.rs](../components/core/src/lib.rs) | Shared foundation of every component: the error contract, its conversions and basic identifiers. No business rules. |
@@ -998,15 +991,25 @@ This lists every checked-in source module in these roots, including files with n
 | [components/core/src/model_contract/schema_tests.rs](../components/core/src/model_contract/schema_tests.rs) | Adversarial schema cases exercise bounded inputs, nullable unions, escaped JSON pointers and output values. |
 | [components/core/src/model_contract.rs](../components/core/src/model_contract.rs) | The native error contract of the pure app model: problem kinds, revision conflicts, escaped JSON pointers and the bounded input schema validator. |
 | [components/core/src/observability.rs](../components/core/src/observability.rs) | Server-generated request correlation and safe structured events, without tokens, query strings or bodies. |
-| [components/core/src/outbox/next_tenant.sql](../components/core/src/outbox/next_tenant.sql) | Lock only this subscriber schedule. A failed event does not block later work. |
-| [components/core/src/outbox/retention.rs](../components/core/src/outbox/retention.rs) | Bounded retirement of duplicate delivered payloads; provenance IDs and unsettled app/flow work survive. |
-| [components/core/src/outbox/retention.sql](../components/core/src/outbox/retention.sql) | Remove only unreferenced delivered metadata after its separate audit window. |
-| [components/core/src/outbox.rs](../components/core/src/outbox.rs) | The transactional outbox consumer: each subscriber lane acknowledges an event and commits its effects in one transaction. |
 | [components/core/src/process_config.rs](../components/core/src/process_config.rs) | Immutable process configuration: the server validates it once at startup, every component reads the same value. |
 | [components/core/src/request_context.rs](../components/core/src/request_context.rs) | Trusted request identity lives in extensions; HTTP headers carry transport inputs only. |
 | [components/core/src/shop_scope.rs](../components/core/src/shop_scope.rs) | Which shop a request addresses: the transport header, or the deployment's default shop. No authentication. |
 | [components/core/src/state.rs](../components/core/src/state.rs) | The state every component may use: the tenant-scoped database pool, the outbound HTTP client and request admission. |
-| [components/core/src/tenants.rs](../components/core/src/tenants.rs) | Reads and locks of the shop registry every component shares: existence, name, lifecycle status, the lifecycle lock and the agent stop switch of the live shop. |
+| [components/core/src/store/ai_usage.rs](../components/core/src/store/ai_usage.rs) | The daily AI attempt counter of a shop; a stage counts against its live shop. |
+| [components/core/src/store/authority.rs](../components/core/src/store/authority.rs) | Connect separately admitted SQL roles within one process budget; rotate authenticated transaction scopes. |
+| [components/core/src/store/channel_metrics.rs](../components/core/src/store/channel_metrics.rs) | The persisted channel diagnostics: one bounded bulk add per flush interval, and the traffic read shared by operator overview, shop dossiers and infrastructure. |
+| [components/core/src/store/config.rs](../components/core/src/store/config.rs) | Database deployment values read once per process; an invalid value stops the start. |
+| [components/core/src/store/environments.rs](../components/core/src/store/environments.rs) | Reads of the staging registry (`shop_environments`): the live parent of a stage and a stage's baseline. |
+| [components/core/src/store/history_context.rs](../components/core/src/store/history_context.rs) | Transaction-local actor, source and reason that the history triggers record with every change. |
+| [components/core/src/store/lease.rs](../components/core/src/store/lease.rs) | Cluster-wide tenant resource leases. DB serialization protects admission; cancellation releases the fenced lease. |
+| [components/core/src/store/outbox/next_tenant.sql](../components/core/src/store/outbox/next_tenant.sql) | Lock only this subscriber schedule. A failed event does not block later work. |
+| [components/core/src/store/outbox/retention.rs](../components/core/src/store/outbox/retention.rs) | Bounded retirement of duplicate delivered payloads; provenance IDs and unsettled app/flow work survive. |
+| [components/core/src/store/outbox/retention.sql](../components/core/src/store/outbox/retention.sql) | Remove only unreferenced delivered metadata after its separate audit window. |
+| [components/core/src/store/outbox.rs](../components/core/src/store/outbox.rs) | The transactional outbox consumer: each subscriber lane acknowledges an event and commits its effects in one transaction. |
+| [components/core/src/store/pool.rs](../components/core/src/store/pool.rs) | Explicit per-process database budgets and bounded queue waits; invalid deployment values fail fast. |
+| [components/core/src/store/row_security.rs](../components/core/src/store/row_security.rs) | Bind each borrowed PostgreSQL connection to task scope, and reject unsafe strict-runtime roles. |
+| [components/core/src/store/tenants.rs](../components/core/src/store/tenants.rs) | Reads and locks of the shop registry every component shares: existence, name, lifecycle status, the lifecycle lock and the agent stop switch of the live shop. |
+| [components/core/src/store.rs](../components/core/src/store.rs) | The core store: deployment values, connection pools, row security, cluster-wide leases, the outbox, the shop registry and history attribution. Core SQL lives only here. |
 | [components/core/src/tool_contract.rs](../components/core/src/tool_contract.rs) | Shared wire description for native operations and installed app actions; hints never grant execution rights. |
 | [components/core/src/work_signal.rs](../components/core/src/work_signal.rs) | One dedicated LISTEN connection per worker process. Commit notifications are hints; polling repairs lost hints. |
 | [components/customers/src/domain/profile.rs](../components/customers/src/domain/profile.rs) | Which profile fields are shown as top-level contact fields of a customer. |

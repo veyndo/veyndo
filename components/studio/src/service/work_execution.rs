@@ -9,7 +9,7 @@ use veyndo_catalog::http::translation_jobs;
 use veyndo_catalog::service::translation_apply::admit_selection;
 use veyndo_cognition::inference::{Choice, Inference};
 use veyndo_core::document::{lenient, view};
-use veyndo_core::history_context::context;
+use veyndo_core::store::history_context::context;
 use veyndo_core::{RequestContext, Result, State, bad, conflict};
 use veyndo_identity::permit;
 use veyndo_identity::store::agent_authority::headers as authority;

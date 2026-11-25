@@ -88,7 +88,8 @@ pub async fn headers_on(
                 }
             }
         }
-        let stopped: bool = veyndo_core::tenants::agents_stopped(&mut *connection, &t).await?;
+        let stopped: bool =
+            veyndo_core::store::tenants::agents_stopped(&mut *connection, &t).await?;
         if stopped {
             return Err(Error(
                 StatusCode::FORBIDDEN,

@@ -1,6 +1,6 @@
 //! Bounded instance/tenant concurrency, durable UTC-day AI quotas, and low-cardinality latency telemetry.
-use crate::database::lease::Lease;
 use crate::shop_scope::{header, tenant};
+use crate::store::lease::Lease;
 use crate::{Error, RequestContext, Result, State, StatusCode};
 use axum::response::{IntoResponse, Response};
 use axum::{extract::Request, middleware::Next};
@@ -303,8 +303,8 @@ pub async fn reserve_ai_attempt_tx(
     tenant: &str,
     connection: &mut sqlx::PgConnection,
 ) -> Result<()> {
-    let reserved = sqlx::query_scalar::<_, i64>("WITH owner AS (SELECT coalesce((SELECT live_tenant FROM shop_environments WHERE tenant=$1),$1) AS tenant), scope AS (SELECT tenant,coalesce((SELECT daily_ai FROM tenant_resource_limits l WHERE l.tenant=owner.tenant),$2) AS maximum FROM owner) INSERT INTO tenant_ai_usage(tenant,day,attempts) SELECT tenant,(now() AT TIME ZONE 'UTC')::date,1 FROM scope WHERE maximum>0 ON CONFLICT(tenant,day) DO UPDATE SET attempts=tenant_ai_usage.attempts+1 WHERE tenant_ai_usage.attempts < (SELECT maximum FROM scope) RETURNING attempts")
-        .bind(tenant).bind(a.admission.daily_ai).fetch_optional(connection).await?;
+    let reserved =
+        crate::store::ai_usage::reserve(connection, tenant, a.admission.daily_ai).await?;
     if reserved.is_none() {
         a.admission.rejected.fetch_add(1, Ordering::Relaxed);
         return Err(Error(

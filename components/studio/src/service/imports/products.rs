@@ -6,7 +6,7 @@ use axum::extract::State as Shared;
 use serde::Deserialize;
 use serde_json::{Value, json};
 use veyndo_core::document::{lenient, view};
-use veyndo_core::shop_scope::parent;
+use veyndo_core::store::environments::parent;
 use veyndo_core::{RequestContext, Result, State, bad, conflict, hash};
 use veyndo_identity::{merchant, permit};
 use veyndo_shop::service::read_cache::config;

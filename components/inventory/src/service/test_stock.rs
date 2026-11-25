@@ -2,7 +2,7 @@
 use crate::ports::Inventory;
 use crate::store::test_stock;
 use serde_json::{Value, json};
-use veyndo_core::{Result, bad, conflict, outbox};
+use veyndo_core::{Result, bad, conflict, store::outbox};
 
 const BATCH: i64 = 500;
 

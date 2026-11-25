@@ -183,7 +183,7 @@ pub async fn product_content(tx: &mut Tx<'_>, t: &str, value: &Value) -> Result<
         .fetch_one(&mut **tx)
         .await?;
     sync_product(tx, t, &json!(product(&r))).await?;
-    veyndo_core::outbox::publish_on(
+    veyndo_core::store::outbox::publish_on(
         &mut **tx,
         t,
         "product.published",

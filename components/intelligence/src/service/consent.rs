@@ -152,7 +152,7 @@ pub async fn write_locked(
     if choices.get("analytics") != Some(&true) {
         sqlx::query("DELETE FROM session_signal_events WHERE tenant=$1 AND session=ANY($2) AND purpose='analytics'").bind(&c.tenant).bind(&signals).execute(&mut **tx).await?;
     }
-    veyndo_core::outbox::publish_on(
+    veyndo_core::store::outbox::publish_on(
         &mut **tx,
         &c.tenant,
         "privacy.consent_changed",

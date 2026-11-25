@@ -7,8 +7,8 @@ use serde::Deserialize;
 use serde_json::{Value, json};
 use veyndo_app_model::manifest::Manifest;
 use veyndo_core::document::{lenient, view};
-use veyndo_core::history_context::context;
-use veyndo_core::shop_scope::parent;
+use veyndo_core::store::environments::parent;
+use veyndo_core::store::history_context::context;
 use veyndo_core::{RequestContext, Result, bad, conflict};
 use veyndo_identity::{merchant, permit};
 

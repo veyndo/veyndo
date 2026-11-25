@@ -47,7 +47,7 @@ pub async fn save(a: &State, h: &RequestContext, v: &Value) -> Result<Value> {
     veyndo_identity::permit(h, "b2b.manage")?;
     veyndo_identity::permit(h, "catalog.read")?;
     let mut tx = a.db.begin().await?;
-    veyndo_core::history_context::context(&mut tx, h, "merchant").await?;
+    veyndo_core::store::history_context::context(&mut tx, h, "merchant").await?;
     let result = save_tx(&mut tx, &t, v).await?;
     tx.commit().await?;
     Ok(result)

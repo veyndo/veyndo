@@ -100,7 +100,7 @@ impl Shop for Server {
     }
     fn is_preview<'a>(&'a self, tenant: &'a str) -> PortFuture<'a, bool> {
         Box::pin(async move {
-            Ok(veyndo_core::shop_scope::parent(&self.0, tenant)
+            Ok(veyndo_core::store::environments::parent(&self.0, tenant)
                 .await?
                 .is_some())
         })
@@ -111,7 +111,9 @@ impl Shop for Server {
         request: &'a RequestContext,
         reason: &'a str,
     ) -> PortFuture<'a, ()> {
-        Box::pin(veyndo_core::history_context::context(tx, request, reason))
+        Box::pin(veyndo_core::store::history_context::context(
+            tx, request, reason,
+        ))
     }
 }
 

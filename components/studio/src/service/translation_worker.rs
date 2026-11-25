@@ -6,7 +6,7 @@ use sqlx::postgres::PgRow;
 use uuid::Uuid;
 use veyndo_catalog::domain::translation_fields::{Source, source, texts, translated};
 use veyndo_cognition::inference::{Choice, budget};
-use veyndo_core::database::lease::Lease;
+use veyndo_core::store::lease::Lease;
 use veyndo_core::{Result, bad, conflict};
 use veyndo_intelligence::service::agent_controls::model_authority;
 use veyndo_intelligence::service::models::Models;

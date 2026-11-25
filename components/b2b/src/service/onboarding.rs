@@ -3,7 +3,7 @@ use crate::store::organization::{member_tx, save_tx};
 use serde::Deserialize;
 use serde_json::{Value, json};
 use veyndo_core::document::{lenient, view};
-use veyndo_core::history_context::context;
+use veyndo_core::store::history_context::context;
 use veyndo_core::{RequestContext, Result, State, bad, uid};
 use veyndo_identity::{merchant, permit};
 use veyndo_shop::service::read_cache::conditions;

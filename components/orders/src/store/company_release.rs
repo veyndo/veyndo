@@ -84,7 +84,7 @@ pub async fn publish(
             .ok_or(bad("Invalid company release scope"))?;
         sqlx::query("INSERT INTO company_overrides(tenant,channel_id,data) VALUES($1,$2,$3) ON CONFLICT(tenant,channel_id) DO UPDATE SET data=EXCLUDED.data,revision=company_overrides.revision+1").bind(live).bind(channel).bind(&data).execute(&mut **tx).await?;
     }
-    veyndo_core::outbox::publish_on(
+    veyndo_core::store::outbox::publish_on(
         &mut **tx,
         live,
         "settings.master_data_changed",

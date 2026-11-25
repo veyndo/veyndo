@@ -11,7 +11,7 @@ use veyndo_app_model::admission::callback_scope;
 use veyndo_app_model::manifest::Manifest;
 use veyndo_cognition::inference::settings::{open, seal};
 use veyndo_core::document::{lenient, view};
-use veyndo_core::history_context::context;
+use veyndo_core::store::history_context::context;
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad, conflict, hash};
 use veyndo_identity::{merchant, permit};
 

@@ -28,7 +28,7 @@ pub async fn publish(
         cart.remove("token");
     }
     let data = json!({"orderId":p.order,"attemptId":p.id,"order":order,"paymentInstructions":snapshot(p,&input.recipient_instructions)?});
-    veyndo_core::outbox::publish_on(
+    veyndo_core::store::outbox::publish_on(
         &mut **tx,
         &p.tenant,
         "payment.instructions.available",

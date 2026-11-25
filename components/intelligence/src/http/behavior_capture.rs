@@ -26,7 +26,7 @@ pub async fn capture(
     v.validate()?;
     let c = load_cart(&a, &h).await?;
     if header(&h, "x-rac-channel-preview").is_some()
-        || veyndo_core::shop_scope::parent(&a, &c.tenant)
+        || veyndo_core::store::environments::parent(&a, &c.tenant)
             .await?
             .is_some()
     {

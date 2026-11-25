@@ -11,7 +11,8 @@ use sqlx::Row;
 use veyndo_b2b::service::quote_contract::consume as consume_quote;
 use veyndo_b2b::store::purchase::{check_locked, record};
 use veyndo_catalog::store::order_downloads::grant;
-use veyndo_core::shop_scope::{header, live_parent};
+use veyndo_core::shop_scope::header;
+use veyndo_core::store::environments::live_parent;
 use veyndo_core::{RequestContext, Result, bad, process_config, uid};
 use veyndo_inventory::InventoryLines;
 use veyndo_inventory::store::reservations::{allocate, consume};
@@ -193,7 +194,7 @@ pub(super) async fn run<P: Purchase>(
     if !external && let Some(e)=sqlx::query("UPDATE exposures SET rewarded=true WHERE tenant=$1 AND session=$2 AND rewarded=false RETURNING variant").bind(&c.tenant).bind(&c.data.session).fetch_optional(&mut *tx).await? {
         sqlx::query("UPDATE policy SET purchases=purchases+1 WHERE tenant=$1 AND variant=$2").bind(&c.tenant).bind(e.get::<String,_>("variant")).execute(&mut *tx).await?;
     }
-    veyndo_core::outbox::publish_on(
+    veyndo_core::store::outbox::publish_on(
         &mut *tx,
         &c.tenant,
         "order.placed",

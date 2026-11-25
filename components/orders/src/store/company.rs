@@ -3,7 +3,7 @@ use crate::domain::company_model;
 use serde_json::{Value, json};
 use sqlx::{Postgres, Row, Transaction};
 use veyndo_core::{
-    Error, RequestContext, Result, State, StatusCode, bad, conflict, history_context,
+    Error, RequestContext, Result, State, StatusCode, bad, conflict, store::history_context,
 };
 use veyndo_shop::domain::defaults::decode;
 pub async fn lock(tx: &mut Transaction<'_, Postgres>, t: &str) -> Result<()> {
@@ -139,7 +139,7 @@ pub async fn save(
     } else {
         sqlx::query("INSERT INTO receipt_settings(tenant,data) VALUES($1,$2) ON CONFLICT(tenant) DO UPDATE SET data=EXCLUDED.data,revision=receipt_settings.revision+1").bind(t).bind(&data).execute(&mut *tx).await?;
     }
-    veyndo_core::outbox::publish_on(
+    veyndo_core::store::outbox::publish_on(
         &mut *tx,
         t,
         "settings.master_data_changed",
@@ -232,7 +232,7 @@ pub async fn public_source(
             .as_str()
             .is_none_or(|name| name.trim().is_empty())
     {
-        veyndo_core::tenants::name(&mut **tx, t).await?
+        veyndo_core::store::tenants::name(&mut **tx, t).await?
     } else {
         None
     };

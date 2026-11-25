@@ -14,7 +14,7 @@ pub(super) async fn snapshot(State(a): State<App>, h: RequestContext) -> Result<
     let (mut database, pending) = veyndo_shop::store::operators::database_probe(&a).await?;
     database["healthy"] = json!(true);
     database["probeMs"] = json!(start.elapsed().as_millis());
-    let traffic = veyndo_core::channel_metrics::traffic(&a.db, None, false).await?;
+    let traffic = veyndo_core::store::channel_metrics::traffic(&a.db, None, false).await?;
     let qdrant_start = std::time::Instant::now();
     let mut qdrant_request = a
         .http

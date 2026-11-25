@@ -23,7 +23,7 @@ pub async fn latest(a: &State, tenant: &str, products: &[String]) -> Result<Vec<
 
 /// Serializes image job admission of a shop, so the pending limits cannot be exceeded concurrently.
 pub async fn lock_shop(tx: &mut PgConnection, tenant: &str) -> Result<()> {
-    veyndo_core::tenants::lock(tx, tenant).await?;
+    veyndo_core::store::tenants::lock(tx, tenant).await?;
     Ok(())
 }
 

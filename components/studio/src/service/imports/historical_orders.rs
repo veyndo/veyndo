@@ -6,8 +6,8 @@ use sqlx::Row;
 use veyndo_app_platform::store::package_fence::lock_package_write;
 use veyndo_app_platform::store::packages::package;
 use veyndo_core::document::{lenient, view};
-use veyndo_core::history_context::context;
-use veyndo_core::shop_scope::parent;
+use veyndo_core::store::environments::parent;
+use veyndo_core::store::history_context::context;
 use veyndo_core::{RequestContext, Result, State, bad, conflict, hash};
 use veyndo_identity::{merchant, permit};
 use veyndo_orders::domain::order_fields::order_fields;
@@ -134,7 +134,7 @@ pub async fn import(
         .await?;
     sqlx::query("INSERT INTO orders(id,tenant,cart_id,idempotency_key,fingerprint,data,created_at) VALUES($1,$2,$3,$4,$5,$6,$7::text::timestamptz)").bind(&id).bind(&t).bind(cart_id).bind(key).bind(fingerprint).bind(&order).bind(created.to_rfc3339()).execute(&mut *tx).await?;
     sqlx::query("INSERT INTO order_activity(tenant,order_id,actor,kind,data) VALUES($1,$2,$3,'historical_import',$4)").bind(&t).bind(&id).bind(h.principal.user.as_deref().unwrap_or("unknown")).bind(json!({"source":r.source,"sourceShop":r.source_shop,"sourceId":r.source_id})).execute(&mut *tx).await?;
-    veyndo_core::outbox::publish_on(
+    veyndo_core::store::outbox::publish_on(
         &mut *tx,
         &t,
         "migration.record.imported",

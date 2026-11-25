@@ -4,8 +4,8 @@ use axum::Json;
 use axum::extract::{Path, Query, State};
 use serde_json::{Value, json};
 use sqlx::Row;
-use veyndo_core::channel_metrics::traffic;
 use veyndo_core::host_names::links;
+use veyndo_core::store::channel_metrics::traffic;
 use veyndo_core::{RequestContext, Result};
 
 /// The operator dossier of one shop: registration, counts, access roster, channels, traffic and business identity.

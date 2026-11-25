@@ -4,7 +4,7 @@ use axum::Json;
 use axum::extract::{Path, State as Shared};
 use serde_json::{Value, json};
 use sqlx::Row;
-use veyndo_core::shop_scope::{owned_stage as owned_on, parent};
+use veyndo_core::store::environments::{owned_stage as owned_on, parent};
 use veyndo_core::{RequestContext, Result, State, bad, hash};
 use veyndo_identity::merchant;
 use veyndo_orders::store::company::lock as lock_company;

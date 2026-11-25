@@ -2,7 +2,7 @@
 use crate::service::address_book::{self, Save};
 use crate::store::customers::{Customer, customer};
 use serde_json::json;
-use veyndo_core::{Result, State, conflict, history_context};
+use veyndo_core::{Result, State, conflict, store::history_context};
 use veyndo_pricing::customer::{Address, Contact};
 
 /// The account row as the customer reads it.

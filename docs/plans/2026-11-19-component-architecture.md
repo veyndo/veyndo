@@ -1163,5 +1163,24 @@ source.
 | G (G1–G3 done 25 Nov: F1 tokens and ui with catalogue, admin styles ratchet; F2 generated api client; F3 extension registry, code-split routes, query layer; G4 orders on kit and query; G5 dead admin CSS removed, area sheets moved to their areas; G6 customers on kit and query; G7 kit buttons and notices across Studio; G8 kit cards; G9 kit fields and badges; G10 browser check with a local dev account; G11–G19 F4 complete: tokens only, kit only, all area reads through useRead; G21 storefront-kit contracts, elements and builder form; G22 storefront tiles and checkout steps on kit parts; G23 site-builder part blocks with Rust schema validation; G24 Rust product islands and the embeddable elements bundle; G25–G28 cart, account, product page and order detail on kit parts; G29 F6 storefront MCP App; G30 MCP cart view; G31 screens on catalogued paths; G32 frontend on tokens everywhere, dead module and rules removed; G33 browser journeys; G34 UI moved into component folders; G35 component UI dependencies enforced) | Frontends F1 to F6 (phase 4) | frontend | frontend |
 | H | Removal (phase 6), test suite (phase 7), proofs (phase 8), acceptance and images (5.2 to 5.6) | | all |
 
+### Batch H in detail (from 25 November, before the release)
+
+The release waits for all of it. Baseline on 25 November, measured by
+`scripts/components.py` and a SQL call count over the non-vendored Rust sources:
+
+| Step | Measure | Baseline | Target |
+| --- | --- | ---: | ---: |
+| H2 SQL into `store/` | SQL calls outside a store module (files) | 779 (about 180) | 0 |
+| H3 checked queries | runtime SQL calls (`sqlx::query*(` strings) | 1,519 of 1,523 | only dynamic `QueryBuilder` queries, each with a reason |
+| H4 typed access | untyped field accesses | 2,208 | 0 outside documented protocol adapters |
+| H5 ports | foreign table accesses | 239 | 0 |
+| H6 tests | property, store per component, mutation | none | money, stock, discounts, state machines; every component; `domain/` |
+| H7 proofs | Lean | price, stock bound, order states open | proved and bound |
+| H8 migrations, mirrors, upgrade | per-component migrations, generated mirrors, rolling upgrade | none | 5.3, 5.4, 5.5 |
+
+Each step lowers its ratchet in `components.json` (the check refuses growth and asks
+for the lower number), one component or a few files per commit, with the touched
+suites run on a fresh build.
+
 MCP, UCP and capability dispatch (`src/capabilities*`, `src/mcp*`, `src/ucp`,
 about 2,500 lines) stay in the server as protocol adapters.

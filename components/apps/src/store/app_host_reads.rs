@@ -67,7 +67,7 @@ pub async fn submitted(
     kind: &str,
     data: &Value,
 ) -> Result<()> {
-    veyndo_core::outbox::publish_on(tx, t, kind, data).await?;
+    veyndo_core::store::outbox::publish_on(tx, t, kind, data).await?;
     Ok(())
 }
 

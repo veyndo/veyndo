@@ -4,7 +4,7 @@ use serde::Deserialize;
 use serde_json::{Value, json};
 use veyndo_core::document::{Raw, lenient, view};
 use veyndo_core::model_contract::validate_native;
-use veyndo_core::shop_scope::parent;
+use veyndo_core::store::environments::parent;
 use veyndo_core::{RequestContext, Result, State, bad};
 use veyndo_identity::{merchant, permit};
 mod assets;

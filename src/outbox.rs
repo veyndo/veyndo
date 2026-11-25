@@ -5,11 +5,11 @@ use serde_json::Value;
 use veyndo_core::Result;
 mod retention;
 
-pub(crate) use veyndo_core::outbox::SUBSCRIBERS;
+pub(crate) use veyndo_core::store::outbox::SUBSCRIBERS;
 
 /// The subscribers that live outside the core crate.
 struct Components;
-impl veyndo_core::outbox::Projector for Components {
+impl veyndo_core::store::outbox::Projector for Components {
     fn project<'a>(
         &'a self,
         tx: &'a mut sqlx::Transaction<'static, sqlx::Postgres>,
@@ -18,7 +18,7 @@ impl veyndo_core::outbox::Projector for Components {
         event: i64,
         kind: &'a str,
         data: &'a Value,
-    ) -> veyndo_core::outbox::Projection<'a> {
+    ) -> veyndo_core::store::outbox::Projection<'a> {
         Box::pin(async move {
             match subscriber {
                 "cognition" => cognition::project(tx, tenant, event, kind, data).await,
@@ -31,7 +31,7 @@ impl veyndo_core::outbox::Projector for Components {
 }
 
 pub(crate) async fn consume_subscriber(a: &App, subscriber: &str) -> Result<bool> {
-    let worked = veyndo_core::outbox::consume(a, subscriber, &Components).await?;
+    let worked = veyndo_core::store::outbox::consume(a, subscriber, &Components).await?;
     retention::once(a).await?;
     Ok(worked)
 }

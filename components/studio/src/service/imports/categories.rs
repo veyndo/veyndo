@@ -4,7 +4,7 @@ use crate::ports::ImportHost;
 use axum::Json;
 use serde_json::{Value, json};
 use veyndo_catalog::service::categories::write as write_category;
-use veyndo_core::shop_scope::parent;
+use veyndo_core::store::environments::parent;
 use veyndo_core::{RequestContext, Result, State, bad, conflict, hash};
 use veyndo_identity::{merchant, permit};
 use veyndo_shop::service::read_cache::config;

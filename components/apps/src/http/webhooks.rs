@@ -8,7 +8,7 @@ use axum::extract::{Path, State as Shared};
 use serde_json::{Value, json};
 use sqlx::Row;
 use veyndo_app_model::manifest::Manifest;
-use veyndo_core::shop_scope::parent;
+use veyndo_core::store::environments::parent;
 use veyndo_core::{
     Error, RequestContext, Result, State, StatusCode, bad, conflict, hash, process_config,
 };
@@ -91,9 +91,13 @@ pub async fn receive(
         if r.get::<String,_>("digest")!=digest {return Err(conflict("Webhook event id already used for a different payload"));}
         return Ok(Json(json!({"accepted":true,"replayed":true,"eventId":r.get::<i64,_>("event_id")})));
     }
-    let event =
-        veyndo_core::outbox::publish_id_on(&mut *tx, &t, &format!("app.{id}.{}", w.action), &input)
-            .await?;
+    let event = veyndo_core::store::outbox::publish_id_on(
+        &mut *tx,
+        &t,
+        &format!("app.{id}.{}", w.action),
+        &input,
+    )
+    .await?;
     sqlx::query("INSERT INTO app_webhook_receipts(tenant,app,webhook,request_key,digest,event_id) VALUES($1,$2,$3,$4,$5,$6)").bind(t).bind(id).bind(webhook).bind(key).bind(digest).bind(event).execute(&mut *tx).await?;
     tx.commit().await?;
     Ok(Json(
