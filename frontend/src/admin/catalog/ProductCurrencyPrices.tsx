@@ -1,5 +1,5 @@
 /** Exact per-currency decimals live in the same revisioned product draft, including variants. */
-import { Button, Notice } from "../../kit/ui";
+import { Button, Field, Notice, Select } from "../../kit/ui";
 import "../../shared/styles/currencies.css";
 import { convertDraftPrice } from "../../shared/money/fx-draft";
 import { useEffect, useState } from "react";
@@ -56,9 +56,8 @@ export default function ProductCurrencyPrices({
   };
   return (
     <section className="currency-feed">
-      <label>
-        {c("priceCurrency")}
-        <select
+      <Field label={c("priceCurrency")}>
+        <Select
           value={draft.extra.priceCurrency ?? "EUR"}
           onChange={(e) => {
             const code = e.target.value;
@@ -88,21 +87,20 @@ export default function ProductCurrencyPrices({
               {d.code}
             </option>
           ))}
-        </select>
-      </label>
+        </Select>
+      </Field>
       <h2>{c("prices")}</h2>
       {error && <Notice tone="danger">{error}</Notice>}
-      <label>
-        {c("select")}
-        <select value={selected} onChange={(e) => setSelected(e.target.value)}>
+      <Field label={c("select")}>
+        <Select value={selected} onChange={(e) => setSelected(e.target.value)}>
           {definitions.map((d) => (
             <option key={d.code} value={d.code}>
               {d.code} ·{" "}
               {new Intl.DisplayNames(locale, { type: "currency" }).of(d.code)}
             </option>
           ))}
-        </select>
-      </label>
+        </Select>
+      </Field>
       <p>
         {value
           ? definitions.find((d) => d.code === selected)?.strategy === "fixed"

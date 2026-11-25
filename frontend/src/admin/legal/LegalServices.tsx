@@ -1,5 +1,5 @@
 /** Purpose inventory and provider disclosures edited in the selected content language. */
-import { Button } from "../../kit/ui";
+import { Button, Field, Select, TextInput } from "../../kit/ui";
 import { useLegalText } from "../../shared/i18n/legal-i18n";
 import LocalizedField from "../../shared/i18n/LocalizedField";
 import { purposes, type LegalConfig } from "../../shared/legal/legal-types";
@@ -18,16 +18,15 @@ export default function LegalServices({
   };
   return (
     <>
-      <label>
-        {l("retention")}
-        <input
+      <Field label={l("retention")}>
+        <TextInput
           type="number"
           min={1}
           max={365}
           value={c.consentDays}
           onChange={(e) => update({ consentDays: Number(e.target.value) })}
         />
-      </label>
+      </Field>
       <p>{l("necessaryHint")}</p>
       <article className="legal-service">
         <h3>{l("behaviorSettings")}</h3>
@@ -44,9 +43,8 @@ export default function LegalServices({
           />
           {l("behaviorEnabled")}
         </label>
-        <label>
-          {l("behaviorRetention")}
-          <input
+        <Field label={l("behaviorRetention")}>
+          <TextInput
             type="number"
             min={1}
             max={30}
@@ -60,10 +58,9 @@ export default function LegalServices({
               })
             }
           />
-        </label>
-        <label>
-          {l("behaviorAdmission")}
-          <input
+        </Field>
+        <Field label={l("behaviorAdmission")}>
+          <TextInput
             type="number"
             min={1}
             max={500}
@@ -77,7 +74,7 @@ export default function LegalServices({
               })
             }
           />
-        </label>
+        </Field>
       </article>
       <div className="legal-sector-grid">
         {purposes.map((p) => (
@@ -131,9 +128,8 @@ export default function LegalServices({
               />
             </label>
           ))}
-          <label>
-            {l("purpose")}
-            <select
+          <Field label={l("purpose")}>
+            <Select
               value={s.purpose}
               onChange={(e) =>
                 update({
@@ -153,8 +149,8 @@ export default function LegalServices({
                   {l(p)}
                 </option>
               ))}
-            </select>
-          </label>
+            </Select>
+          </Field>
           <LocalizedField
             label={l("service")}
             value={s.description}

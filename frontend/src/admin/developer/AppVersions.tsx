@@ -1,5 +1,5 @@
 /** Saved version inspection, digest-approved stage install and conflict-aware package-only live release. */
-import { Button, Notice } from "../../kit/ui";
+import { Badge, Button, Notice } from "../../kit/ui";
 import ScenarioLaunch from "../scenarios/ScenarioLaunch";
 import { useScenarioText } from "../scenarios/scenario-i18n";
 import AppDiagnostics from "./AppDiagnostics";
@@ -56,7 +56,7 @@ export default function AppVersions({
                 <strong>
                   {contentText(b.manifest.name, locale, studio.mainLocale)}
                 </strong>
-                <span className="soft-tag">{b.version}</span>
+                <Badge>{b.version}</Badge>
                 <span>{w(b.state)}</span>
                 <code>{b.digest.slice(0, 12)}</code>
               </div>

@@ -1,4 +1,5 @@
 /** Menu and injection sites are the existing surfaces, with explicit action allowlists and live role scopes. */
+import { Field, Select } from "../../kit/ui";
 import type { Manifest, Surface } from "../../shared/apps/native/types";
 import LocalizedField from "../../shared/i18n/LocalizedField";
 import { useAppStudioText } from "../../shared/i18n/app-studio-i18n";
@@ -48,9 +49,8 @@ export default function AppMenuEditor({
             required
             maxLength={100}
           />
-          <label>
-            {a("location")}
-            <select
+          <Field label={a("location")}>
+            <Select
               value={s.location}
               onChange={(e) => patch(s.id, { location: e.target.value })}
             >
@@ -59,11 +59,10 @@ export default function AppMenuEditor({
                   {placements[l] ? t(placements[l]) : a(locations[l])}
                 </option>
               ))}
-            </select>
-          </label>
-          <label>
-            {a("design")}
-            <select
+            </Select>
+          </Field>
+          <Field label={a("design")}>
+            <Select
               value={s.uiPath}
               onChange={(e) => patch(s.id, { uiPath: e.target.value })}
             >
@@ -75,11 +74,10 @@ export default function AppMenuEditor({
                   {v.id}
                 </option>
               ))}
-            </select>
-          </label>
-          <label>
-            {a("surfacePermission")}
-            <select
+            </Select>
+          </Field>
+          <Field label={a("surfacePermission")}>
+            <Select
               value={s.permission ?? ""}
               onChange={(e) =>
                 patch(s.id, { permission: e.target.value || undefined })
@@ -91,8 +89,8 @@ export default function AppMenuEditor({
                   {p}
                 </option>
               ))}
-            </select>
-          </label>
+            </Select>
+          </Field>
           <div className="app-tool-grid">
             {manifest.actions?.map((x) => (
               <label className="app-check" key={x.name}>

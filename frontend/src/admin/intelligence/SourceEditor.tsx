@@ -1,5 +1,5 @@
 /** Single-language source editor with inherited fields, product lookup and private-first API/file ingestion. */
-import { Button, Card, Notice } from "../../kit/ui";
+import { Button, Card, Field, Notice, Select } from "../../kit/ui";
 import Icon from "../../shared/ui/Icon";
 import { useState } from "react";
 import { useLocale } from "../../shared/i18n/i18n";
@@ -123,9 +123,8 @@ export default function SourceEditor({
                 : undefined
             }
           />
-          <label>
-            {k("kind")}
-            <select
+          <Field label={k("kind")}>
+            <Select
               value={kind}
               onChange={(e) => setKind(e.target.value as SourceKind)}
             >
@@ -134,8 +133,8 @@ export default function SourceEditor({
                   {k(kind)}
                 </option>
               ))}
-            </select>
-          </label>
+            </Select>
+          </Field>
         </div>
         {!file && (
           <LocalizedField
@@ -154,9 +153,8 @@ export default function SourceEditor({
         )}
       </ContentLanguage>
       <div className="knowledge-scope">
-        <label>
-          {k("scope")}
-          <select
+        <Field label={k("scope")}>
+          <Select
             value={productId}
             onChange={(e) => setProduct(e.target.value)}
           >
@@ -169,8 +167,8 @@ export default function SourceEditor({
                 {p.name}
               </option>
             ))}
-          </select>
-        </label>
+          </Select>
+        </Field>
         <form
           className="knowledge-search"
           onSubmit={async (e) => {

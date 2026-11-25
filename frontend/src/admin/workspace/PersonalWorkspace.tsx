@@ -1,5 +1,5 @@
 /** Personal entry point on the existing shell; requests and linked views retain current scope and rights. */
-import { Button, Notice } from "../../kit/ui";
+import { Button, Field, Notice, Select, TextInput } from "../../kit/ui";
 import { openPinnedView } from "../../shared/grid/pinned-view";
 import { useEffect, useRef, useState } from "react";
 import { useStudio } from "../shell/StudioContext";
@@ -328,17 +328,15 @@ export default function PersonalWorkspace() {
       <details className="studio-card">
         <summary>{t("create")}</summary>
         <div className="personal-create">
-          <label>
-            {t("areaName")}
-            <input
+          <Field label={t("areaName")}>
+            <TextInput
               value={name}
               maxLength={100}
               onChange={(e) => setName(e.target.value)}
             />
-          </label>
-          <label>
-            {t("preset")}
-            <select
+          </Field>
+          <Field label={t("preset")}>
+            <Select
               value={preset}
               onChange={(e) => setPreset(e.target.value as Preset)}
             >
@@ -347,8 +345,8 @@ export default function PersonalWorkspace() {
                   {t(p as Preset)}
                 </option>
               ))}
-            </select>
-          </label>
+            </Select>
+          </Field>
           <button
             disabled={!name.trim() || draft.areas.length >= 8}
             onClick={() => {

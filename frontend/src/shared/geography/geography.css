@@ -3,7 +3,7 @@
   position: relative;
   min-width: 0;
 }
-.geo-picker > label {
+.geo-picker > :is(label, .vy-field) {
   display: block;
   margin-bottom: 8px;
   font-size: 12px;

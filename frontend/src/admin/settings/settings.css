@@ -97,7 +97,7 @@
 .studio .settings-panel-header h2 {
   font-size: 18px;
 }
-.studio .settings-panel-header > .soft-tag {
+.studio .settings-panel-header > :is(.soft-tag, .vy-badge) {
   font-variant-numeric: tabular-nums;
 }
 
@@ -219,7 +219,7 @@
   .studio .settings-save-bar {
     padding: 18px;
   }
-  .studio .settings-panel-header > .soft-tag {
+  .studio .settings-panel-header > :is(.soft-tag, .vy-badge) {
     display: none;
   }
   .studio .settings-save-bar {

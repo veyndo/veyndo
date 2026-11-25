@@ -1,5 +1,5 @@
 /** Visual App Studio orchestrates modular editors over the same executable schema used by coding agents. */
-import { Button } from "../../kit/ui";
+import { Button, Field, Select, TextInput } from "../../kit/ui";
 import { useMemo, useState, useEffect } from "react";
 import type { Environment } from "../environments/EnvironmentManager";
 import type { RequestFn } from "../shell/studio-types";
@@ -219,9 +219,8 @@ export default function DeveloperView({
                   <Icon name="spark" size={17} />
                   {workspaceText("agentTitle")}
                 </button>
-                <label>
-                  {a("sandbox")}
-                  <select
+                <Field label={a("sandbox")}>
+                  <Select
                     value={studio.env}
                     onChange={(e) => {
                       studio.setEnv(e.target.value);
@@ -234,8 +233,8 @@ export default function DeveloperView({
                         {e.name}
                       </option>
                     ))}
-                  </select>
-                </label>
+                  </Select>
+                </Field>
                 <Button
                   tone="primary"
                   type="submit"
@@ -257,15 +256,14 @@ export default function DeveloperView({
                   });
                 }}
               >
-                <label>
-                  {w("stageName")}
-                  <input
+                <Field label={w("stageName")}>
+                  <TextInput
                     required
                     maxLength={80}
                     value={stageName}
                     onChange={(e) => setStageName(e.target.value)}
                   />
-                </label>
+                </Field>
                 <Button type="submit">{w("newStage")}</Button>
               </form>
             )}

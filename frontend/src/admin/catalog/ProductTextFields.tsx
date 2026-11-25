@@ -1,4 +1,5 @@
 /** Product text uses the shared single-language editor and field inheritance; product number stays language independent. */
+import { Field, TextInput } from "../../kit/ui";
 import { ContentLanguage } from "../../shared/i18n/ContentLanguage";
 import LocalizedField from "../../shared/i18n/LocalizedField";
 import { useCatalogText } from "../../shared/i18n/catalog-i18n";
@@ -63,9 +64,8 @@ export default function ProductTextFields({
     >
       <div className="catalog-form-grid">
         <div>{localized("name")}</div>
-        <label>
-          {c("number")}
-          <input
+        <Field label={c("number")}>
+          <TextInput
             required
             maxLength={100}
             value={d.catalog.productNumber}
@@ -76,7 +76,7 @@ export default function ProductTextFields({
               })
             }
           />
-        </label>
+        </Field>
         <div className="catalog-span">
           {localized("description")}
           <p className="product-content-hint product-content-short-hint">

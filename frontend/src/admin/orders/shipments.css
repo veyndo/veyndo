@@ -23,15 +23,15 @@
   border: 1px solid var(--vy-color-border);
   border-radius: 1rem;
 }
-.shipment-split-editor > label {
+.shipment-split-editor > :is(label, .vy-field) {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 6rem;
   gap: 0.35rem 1rem;
 }
-.shipment-split-editor > label > small {
+.shipment-split-editor > :is(label, .vy-field) > small {
   grid-column: 1;
 }
-.shipment-split-editor > label > input {
+.shipment-split-editor > :is(label, .vy-field) > input {
   grid-column: 2;
   grid-row: 1 / 3;
   width: 100%;

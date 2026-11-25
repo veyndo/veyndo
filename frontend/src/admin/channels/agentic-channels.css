@@ -51,7 +51,7 @@
   flex: 1;
   margin: 0 0 0.5rem;
 }
-.agentic-channels .soft-tag {
+.agentic-channels :is(.soft-tag, .vy-badge) {
   display: inline-flex;
   white-space: normal;
   margin: 0.25rem 0.5rem 0.25rem 0;

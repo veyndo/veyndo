@@ -6,7 +6,7 @@
   gap: 20px;
 }
 .studio .customer-field-grid label,
-.studio .operations form > label {
+.studio .operations form > :is(label, .vy-field) {
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -16,7 +16,7 @@
   font-weight: 500;
 }
 .studio .customer-field-grid :is(input, select, textarea),
-.studio .operations form > label :is(input, select, textarea) {
+.studio .operations form > :is(label, .vy-field) :is(input, select, textarea) {
   width: 100%;
   min-width: 0;
   background: var(--surface);
@@ -75,7 +75,7 @@
 .studio .operations form > button {
   margin-top: 20px;
 }
-.studio .operations form > label {
+.studio .operations form > :is(label, .vy-field) {
   margin: 16px 0;
 }
 .studio :is(input, select, textarea):disabled {

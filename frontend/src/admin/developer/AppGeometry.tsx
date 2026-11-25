@@ -1,4 +1,5 @@
 /** F4 presentation properties use one content language; layout values remain bounded grid units. */
+import { Field, Select, TextInput } from "../../kit/ui";
 import { useState } from "react";
 import type { Block } from "../../shared/apps/native/types";
 import { geometry, snap } from "../../shared/apps/native/geometry";
@@ -32,13 +33,12 @@ export default function AppGeometry({
     );
   return (
     <div className="app-properties-grid">
-      <label>
-        {a("propertySort")}
-        <select value={order} onChange={(e) => setOrder(e.target.value)}>
+      <Field label={a("propertySort")}>
+        <Select value={order} onChange={(e) => setOrder(e.target.value)}>
           <option value="categorized">{a("categorized")}</option>
           <option value="alphabetical">{a("alphabetical")}</option>
-        </select>
-      </label>
+        </Select>
+      </Field>
       {keys.map((key) => (
         <label key={key}>
           {a(
@@ -75,9 +75,8 @@ export default function AppGeometry({
           {a(key)}
         </label>
       ))}
-      <label>
-        {a("tabOrder")}
-        <input
+      <Field label={a("tabOrder")}>
+        <TextInput
           type="number"
           min="0"
           max="1000"
@@ -86,7 +85,7 @@ export default function AppGeometry({
             onChange({ ...block, tabOrder: Number(e.target.value) })
           }
         />
-      </label>
+      </Field>
       <LocalizedField
         label={a("tooltip")}
         value={block.tooltip ?? {}}

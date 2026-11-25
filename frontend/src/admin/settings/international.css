@@ -222,7 +222,7 @@
   border-bottom: 1px solid var(--border);
   flex-wrap: wrap;
 }
-.intl-scope-bar > label {
+.intl-scope-bar > :is(label, .vy-field) {
   display: grid;
   gap: 8px;
   flex: 1;
@@ -293,7 +293,7 @@
   .studio .intl-panel .currency-settings {
     padding: 20px;
   }
-  .studio .intl-scope-bar > label {
+  .studio .intl-scope-bar > :is(label, .vy-field) {
     min-width: 0;
   }
 }

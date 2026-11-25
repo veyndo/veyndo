@@ -1,5 +1,5 @@
 /** AgentsView renders verified shop state and typed user actions. */
-import { Button, Card, Notice } from "../../kit/ui";
+import { Badge, Button, Card, Notice } from "../../kit/ui";
 import { useState } from "react";
 import { useLocale } from "../../shared/i18n/i18n";
 import Icon from "../../shared/ui/Icon";
@@ -92,7 +92,7 @@ export function AgentsView({
         <Card>
           <div className="card-heading">
             <h2>{t("channelCalls")}</h2>
-            <span className="soft-tag">{t("api")}</span>
+            <Badge>{t("api")}</Badge>
           </div>
           {["storefront", "mcp", "ucp"].map((name) => (
             <div className="channel-stat" key={name}>

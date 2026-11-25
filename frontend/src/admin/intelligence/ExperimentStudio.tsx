@@ -1,5 +1,5 @@
 /** Immutable experiment designs and lifecycle controls share the core HTTP/MCP owner and current settings rights. */
-import { Button, Notice } from "../../kit/ui";
+import { Button, Field, Notice, Select, TextInput } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import type { Config } from "../../shared/api/shop-api";
 import type { RequestFn } from "../shell/studio-types";
@@ -164,18 +164,16 @@ export default function ExperimentStudio({ request }: { request: RequestFn }) {
         }}
       >
         <fieldset disabled={busy || !canWrite} className="studio-form-grid">
-          <label>
-            {k("experimentTitle")}
-            <input
+          <Field label={k("experimentTitle")}>
+            <TextInput
               required
               maxLength={240}
               value={draft.title}
               onChange={(e) => setDraft({ ...draft, title: e.target.value })}
             />
-          </label>
-          <label>
-            {k("experimentChannel")}
-            <select
+          </Field>
+          <Field label={k("experimentChannel")}>
+            <Select
               required
               value={draft.channel}
               onChange={(e) => setDraft({ ...draft, channel: e.target.value })}
@@ -183,11 +181,10 @@ export default function ExperimentStudio({ request }: { request: RequestFn }) {
               {channels.map((c) => (
                 <option key={c.id}>{c.id}</option>
               ))}
-            </select>
-          </label>
-          <label>
-            {k("experimentCurrency")}
-            <select
+            </Select>
+          </Field>
+          <Field label={k("experimentCurrency")}>
+            <Select
               required
               value={draft.currency}
               onChange={(e) => setDraft({ ...draft, currency: e.target.value })}
@@ -195,18 +192,17 @@ export default function ExperimentStudio({ request }: { request: RequestFn }) {
               {currencies.map((c) => (
                 <option key={c}>{c}</option>
               ))}
-            </select>
-          </label>
-          <label>
-            {k("experimentControl")}
-            <select
+            </Select>
+          </Field>
+          <Field label={k("experimentControl")}>
+            <Select
               value={draft.control}
               onChange={(e) => setDraft({ ...draft, control: e.target.value })}
             >
               <option value="discovery">{k("experimentDiscovery")}</option>
               <option value="comparison">{k("experimentComparison")}</option>
-            </select>
-          </label>
+            </Select>
+          </Field>
           {fields.map(([field, word, min, max]) => (
             <label key={field}>
               {k(word)}

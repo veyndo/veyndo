@@ -1,5 +1,5 @@
 /** Guided app kinds create normal editable manifests; all changes follow private-stage versioning. */
-import { Button } from "../../kit/ui";
+import { Button, Field, TextInput } from "../../kit/ui";
 import "./app-creation.css";
 import AppPlacementPicker from "./AppPlacementPicker";
 import AppCreationSummary from "./AppCreationSummary";
@@ -181,28 +181,26 @@ export default function AppAssistant({
               ) && (
                 <>
                   <p className="app-assistant-note">{t("serviceNotice")}</p>
-                  <label>
-                    {t("eventName")}
-                    <input
+                  <Field label={t("eventName")}>
+                    <TextInput
                       required
                       value={event}
                       onChange={(e) => setEvent(e.target.value)}
                       pattern="[A-Za-z0-9_.]+"
                       maxLength={100}
                     />
-                  </label>
+                  </Field>
                 </>
               )}
               {kind === "scheduled" && (
-                <label>
-                  {t("cron")}
-                  <input
+                <Field label={t("cron")}>
+                  <TextInput
                     value={cron}
                     required
                     maxLength={100}
                     onChange={(e) => setCron(e.target.value)}
                   />
-                </label>
+                </Field>
               )}
               {kind === "webhook" && (
                 <p className="app-assistant-note">{t("webhookNotice")}</p>

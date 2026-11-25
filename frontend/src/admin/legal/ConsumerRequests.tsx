@@ -1,5 +1,5 @@
 /** Permission-scoped consumer request queue and optimistic, recorded review actions. */
-import { Button, Notice } from "../../kit/ui";
+import { Button, Field, Notice, TextArea } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import type { RequestFn } from "../shell/studio-types";
 import { useLegalText, type LegalWord } from "../../shared/i18n/legal-i18n";
@@ -85,16 +85,15 @@ export default function ConsumerRequests({
           <small>
             {row.salesChannelId} · #{row.revision}
           </small>
-          <label>
-            {l("reviewNote")}
-            <textarea
+          <Field label={l("reviewNote")}>
+            <TextArea
               disabled={!canWrite || busy}
               required
               value={note}
               maxLength={6000}
               onChange={(e) => setNote(e.target.value)}
             />
-          </label>
+          </Field>
           <select
             aria-label={l("requests")}
             disabled={!canWrite || busy}

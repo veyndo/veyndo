@@ -1,5 +1,5 @@
 /** Country metadata and subdivision editing with multilingual names; custom definitions cannot invent ISO assignment. */
-import { Button } from "../../kit/ui";
+import { Badge, Button, Field, Select, TextInput } from "../../kit/ui";
 import { useState } from "react";
 import TranslationFields from "../../shared/geography/TranslationFields";
 import type { Country, TextMap } from "../../shared/geography/geography-types";
@@ -35,9 +35,7 @@ export default function CountryDefinition({
         <h3>
           {i("countryDefinition")} · {v.code}
         </h3>
-        <span className="soft-tag">
-          {i(v.isoAssigned ? "official" : "custom")}
-        </span>
+        <Badge>{i(v.isoAssigned ? "official" : "custom")}</Badge>
         <button type="button" onClick={onClose} aria-label={i("close")}>
           ×
         </button>
@@ -54,9 +52,8 @@ export default function CountryDefinition({
             />
           </label>
         ))}
-        <label>
-          {i("continent")}
-          <select
+        <Field label={i("continent")}>
+          <Select
             value={v.continent}
             onChange={(e) => set({ continent: e.target.value })}
           >
@@ -65,8 +62,8 @@ export default function CountryDefinition({
                 {i(c as "EU")}
               </option>
             ))}
-          </select>
-        </label>
+          </Select>
+        </Field>
       </div>
       <TranslationFields
         nameOnly
@@ -105,9 +102,8 @@ export default function CountryDefinition({
       </div>
       {region != null && v.states[region] && (
         <div className="intl-definition">
-          <label>
-            {i("regionCode")}
-            <input
+          <Field label={i("regionCode")}>
+            <TextInput
               maxLength={12}
               value={v.states[region].code}
               onChange={(e) =>
@@ -120,7 +116,7 @@ export default function CountryDefinition({
                 })
               }
             />
-          </label>
+          </Field>
           <TranslationFields
             nameOnly
             value={toText(v.states[region].name)}

@@ -41,7 +41,7 @@
   align-items: end;
   gap: 16px;
 }
-.app-creation-identity .intl-language-switcher > label {
+.app-creation-identity .intl-language-switcher > :is(label, .vy-field) {
   max-width: 300px;
 }
 .app-creation-identity .intl-language-switcher small {
@@ -294,7 +294,7 @@
   font-weight: 600;
   padding: 8px 0;
 }
-.app-creation-advanced > label {
+.app-creation-advanced > :is(label, .vy-field) {
   margin-top: 14px;
   max-width: 440px;
 }
@@ -368,7 +368,7 @@
   .app-creation-identity .intl-language-switcher {
     align-items: stretch;
   }
-  .app-creation-identity .intl-language-switcher > label,
+  .app-creation-identity .intl-language-switcher > :is(label, .vy-field),
   .app-creation-identity .intl-language-switcher small {
     max-width: none;
   }

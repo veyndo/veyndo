@@ -1,5 +1,5 @@
 /** Discover and create channels separately from rules; shared settings and independent SaaS shops remain explicit. */
-import { Button, Card, Notice } from "../../kit/ui";
+import { Badge, Button, Card, Notice } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import type { RequestFn } from "../shell/studio-types";
 import type { Category } from "../catalog/catalog-model";
@@ -218,7 +218,7 @@ export default function SalesChannelsWorkspace({
                     size={28}
                   />
                 </span>
-                <span className="soft-tag">
+                <Badge>
                   {t(
                     !c.data.active
                       ? "inactive"
@@ -226,10 +226,8 @@ export default function SalesChannelsWorkspace({
                         ? "private"
                         : "active",
                   )}
-                </span>
-                {c.id === "default" && (
-                  <span className="soft-tag">{t("default")}</span>
-                )}
+                </Badge>
+                {c.id === "default" && <Badge>{t("default")}</Badge>}
                 <h2>
                   {contentText(
                     c.data.name,

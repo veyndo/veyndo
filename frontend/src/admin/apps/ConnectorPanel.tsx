@@ -1,5 +1,5 @@
 /** Native app workspace: OAuth, provider settings, durable jobs and private sources. */
-import { Button, Notice } from "../../kit/ui";
+import { Button, Field, Notice, TextInput } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import { useConnectedText } from "../../shared/i18n/connected-i18n";
 import type { RequestFn } from "../shell/studio-types";
@@ -77,9 +77,8 @@ export default function ConnectorPanel({
     }
   };
   const field = (key: string, label: string, placeholder = "") => (
-    <label>
-      {x(label)}
-      <input
+    <Field label={x(label)}>
+      <TextInput
         value={settings[key] ?? ""}
         placeholder={placeholder}
         disabled={!manage || busy}
@@ -88,7 +87,7 @@ export default function ConnectorPanel({
           setSettings((s) => ({ ...s, [key]: e.target.value }));
         }}
       />
-    </label>
+    </Field>
   );
   return (
     <div className="connector-panel">

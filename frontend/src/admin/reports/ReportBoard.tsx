@@ -1,5 +1,5 @@
 /** Shared configurable reporting canvas; late data is fenced by request identity, filters and current rights. */
-import { Button } from "../../kit/ui";
+import { Button, Field, Select } from "../../kit/ui";
 import { useEffect, useRef, useState } from "react";
 import type { RequestFn } from "../../shared/api/types";
 import Icon from "../../shared/ui/Icon";
@@ -312,9 +312,8 @@ export default function ReportBoard({
                   </header>
                   {editing && (
                     <div className="report-widget-options">
-                      <label>
-                        {t("view")}
-                        <select
+                      <Field label={t("view")}>
+                        <Select
                           value={w.view}
                           onChange={(e) =>
                             changeWidgets(
@@ -339,11 +338,10 @@ export default function ReportBoard({
                               {t(v)}
                             </option>
                           ))}
-                        </select>
-                      </label>
-                      <label>
-                        {t("size")}
-                        <select
+                        </Select>
+                      </Field>
+                      <Field label={t("size")}>
+                        <Select
                           value={w.width}
                           onChange={(e) =>
                             changeWidgets(
@@ -360,8 +358,8 @@ export default function ReportBoard({
                         >
                           <option value="half">{t("half")}</option>
                           <option value="full">{t("full")}</option>
-                        </select>
-                      </label>
+                        </Select>
+                      </Field>
                     </div>
                   )}
                   <ReportCard

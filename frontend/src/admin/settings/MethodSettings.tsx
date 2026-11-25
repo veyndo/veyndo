@@ -1,5 +1,5 @@
 /** Master/detail shipping and payment configuration, translated content and searchable country availability. */
-import { Button } from "../../kit/ui";
+import { Button, Field, Select } from "../../kit/ui";
 import { useState } from "react";
 import type { Payment, Shipping } from "../../shared/api/shop-api";
 import CaptureModeSettings from "./CaptureModeSettings";
@@ -167,22 +167,20 @@ export default function MethodSettings({
                     </label>
                   ),
                 )}
-                <label>
-                  {i("taxType")}
-                  <select
+                <Field label={i("taxType")}>
+                  <Select
                     value={(method as Shipping).taxType}
                     onChange={(e) => update({ taxType: e.target.value })}
                   >
                     <option value="highest">{i("highest")}</option>
                     <option value="proportional">{i("proportional")}</option>
-                  </select>
-                </label>
+                  </Select>
+                </Field>
               </>
             ) : (
               <>
-                <label>
-                  {i("mode")}
-                  <select
+                <Field label={i("mode")}>
+                  <Select
                     value={(method as Payment).mode}
                     disabled={["app", "cash"].includes(
                       (method as Payment).mode,
@@ -197,8 +195,8 @@ export default function MethodSettings({
                     {(method as Payment).mode === "app" && (
                       <option value="app">{i("app")}</option>
                     )}
-                  </select>
-                </label>
+                  </Select>
+                </Field>
                 {(method as Payment).provider && (
                   <CaptureModeSettings
                     payment={method as Payment}

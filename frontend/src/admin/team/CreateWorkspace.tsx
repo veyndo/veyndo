@@ -1,5 +1,5 @@
 /** Visible native shop creation keeps identifiers editable and submits only through its account owner. */
-import { Button } from "../../kit/ui";
+import { Button, Field, TextInput } from "../../kit/ui";
 import { useId, useState } from "react";
 import { useShopText } from "../../shared/i18n/shop-i18n";
 import Icon from "../../shared/ui/Icon";
@@ -37,9 +37,8 @@ export default function CreateWorkspace({
       >
         <fieldset disabled={busy}>
           <div className="team-create-fields">
-            <label>
-              {s("workspaceName")}
-              <input
+            <Field label={s("workspaceName")}>
+              <TextInput
                 name="workspaceName"
                 required
                 maxLength={100}
@@ -59,11 +58,10 @@ export default function CreateWorkspace({
                     );
                 }}
               />
-            </label>
+            </Field>
             <div className="team-create-identifier">
-              <label>
-                {s("workspaceId")}
-                <input
+              <Field label={s("workspaceId")}>
+                <TextInput
                   name="workspaceId"
                   required
                   minLength={2}
@@ -78,7 +76,7 @@ export default function CreateWorkspace({
                     setId(e.target.value);
                   }}
                 />
-              </label>
+              </Field>
               <small id={hintId}>{t("idHint")}</small>
             </div>
           </div>

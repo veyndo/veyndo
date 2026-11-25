@@ -1,4 +1,5 @@
 /** Branching flow canvas edits the actual server graph, including true/false edges, reusable actions and durable delays. */
+import { Field, TextInput } from "../../kit/ui";
 import FlowTopology from "./FlowTopology";
 import RuleBuilder, { type AutomationCatalog } from "./RuleBuilder";
 import { useAutomationText } from "../../shared/i18n/automation-i18n";
@@ -159,9 +160,8 @@ export default function FlowCanvas({
             )}
             {node.kind === "delay" && (
               <>
-                <label>
-                  {a("seconds")}
-                  <input
+                <Field label={a("seconds")}>
+                  <TextInput
                     type="number"
                     min={0}
                     max={2592000}
@@ -173,7 +173,7 @@ export default function FlowCanvas({
                       })
                     }
                   />
-                </label>
+                </Field>
                 {edge(node, "next", a("next"))}
               </>
             )}

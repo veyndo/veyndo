@@ -1,5 +1,5 @@
 /** Behavioral workspace makes consent, channel/window, guest journeys and semantic projections inspectable. */
-import { Button } from "../../../kit/ui";
+import { Button, Field, Select } from "../../../kit/ui";
 import { useEffect, useState, useRef } from "react";
 import {
   useBehaviorText,
@@ -84,9 +84,8 @@ export default function BehaviorView({
     <div className="behavior-workspace">
       <div className="behavior-toolbar">
         <p>{k("behaviorIntro")}</p>
-        <label>
-          {k("channel")}
-          <select value={channel} onChange={(e) => setChannel(e.target.value)}>
+        <Field label={k("channel")}>
+          <Select value={channel} onChange={(e) => setChannel(e.target.value)}>
             {(channels.length
               ? channels
               : [{ id: "default", name: "default" }]
@@ -95,19 +94,18 @@ export default function BehaviorView({
                 {c.name || c.id}
               </option>
             ))}
-          </select>
-        </label>
-        <label>
-          {k("days")}
-          <select
+          </Select>
+        </Field>
+        <Field label={k("days")}>
+          <Select
             value={days}
             onChange={(e) => setDays(Number(e.target.value))}
           >
             <option value={1}>{k("day")}</option>
             <option value={7}>{k("week")}</option>
             <option value={30}>{k("month")}</option>
-          </select>
-        </label>
+          </Select>
+        </Field>
         <Button
           type="submit"
           disabled={busy}

@@ -1,5 +1,5 @@
 /** AutomationEditor: focused form view with explicit typed inputs and callbacks. */
-import { Button } from "../../kit/ui";
+import { Button, Field, Select, TextInput } from "../../kit/ui";
 import { useAutomationText } from "../../shared/i18n/automation-i18n";
 import { channelUrl } from "../channels/channel-model";
 import PromotionSchedule from "./PromotionSchedule";
@@ -97,16 +97,15 @@ export default function AutomationEditor({
         });
       }}
     >
-      <label>
-        {w("identifier")}
-        <input
+      <Field label={w("identifier")}>
+        <TextInput
           value={id}
           onChange={(e) => setId(e.target.value)}
           required
           pattern="[a-z][a-z0-9_]{0,31}"
           disabled={revision > 0}
         />
-      </label>
+      </Field>
       <ContentLanguagePicker />
       <LocalizedField
         label={w("title")}
@@ -167,38 +166,34 @@ export default function AutomationEditor({
       )}
       {kind === "promotions" && (
         <>
-          <label>
-            {w("coupon")}
-            <input
+          <Field label={w("coupon")}>
+            <TextInput
               value={data.code ?? ""}
               placeholder={w("automatic")}
               onChange={(e) => update("code", e.target.value || null)}
             />
-          </label>
-          <label>
-            {w("discountType")}
-            <select
+          </Field>
+          <Field label={w("discountType")}>
+            <Select
               value={data.kind}
               onChange={(e) => update("kind", e.target.value)}
             >
               <option value="percentage">{w("percentage")}</option>
               <option value="absolute">{w("absolute")}</option>
               <option value="free_shipping">{w("shippingFree")}</option>
-            </select>
-          </label>
-          <label>
-            {w("amount")}
-            <input
+            </Select>
+          </Field>
+          <Field label={w("amount")}>
+            <TextInput
               type="number"
               min={0}
               step=".01"
               value={data.amount}
               onChange={(e) => update("amount", Number(e.target.value))}
             />
-          </label>
-          <label>
-            {w("maxUses")}
-            <input
+          </Field>
+          <Field label={w("maxUses")}>
+            <TextInput
               type="number"
               min={1}
               value={data.maxUses ?? ""}
@@ -209,7 +204,7 @@ export default function AutomationEditor({
                 )
               }
             />
-          </label>
+          </Field>
         </>
       )}
       {kind === "promotions" && (
@@ -265,9 +260,8 @@ export default function AutomationEditor({
             data.pipeline?.nodes?.some(
               (n: any) => n.action === "ai_proposal",
             )) && (
-            <label>
-              {w("provider")}
-              <select
+            <Field label={w("provider")}>
+              <Select
                 value={data.inference?.provider ?? "ollama"}
                 onChange={(e) =>
                   update("inference", { provider: e.target.value })
@@ -276,26 +270,24 @@ export default function AutomationEditor({
                 <option value="ollama">{w("localModel")}</option>
                 <option value="openai">OpenAI</option>
                 <option value="anthropic">Claude</option>
-              </select>
-            </label>
+              </Select>
+            </Field>
           )}
         </>
       )}
       {kind === "channels" && (
         <>
-          <label>
-            {w("channelType")}
-            <select
+          <Field label={w("channelType")}>
+            <Select
               value={data.kind}
               onChange={(e) => update("kind", e.target.value)}
             >
               <option value="storefront">{w("storefrontType")}</option>
               <option value="headless">{a("headless")}</option>
-            </select>
-          </label>
-          <label>
-            {w("product")}
-            <input
+            </Select>
+          </Field>
+          <Field label={w("product")}>
+            <TextInput
               value={data.productIds.join(", ")}
               onChange={(e) =>
                 update(
@@ -307,10 +299,9 @@ export default function AutomationEditor({
                 )
               }
             />
-          </label>
-          <label>
-            {w("categoryNavigation")}
-            <select
+          </Field>
+          <Field label={w("categoryNavigation")}>
+            <Select
               value={data.navigationCategoryId ?? "catalog-root"}
               onChange={(e) => update("navigationCategoryId", e.target.value)}
             >
@@ -320,8 +311,8 @@ export default function AutomationEditor({
                     cat.data.translations.en.name}
                 </option>
               ))}
-            </select>
-          </label>
+            </Select>
+          </Field>
           <a
             href={channelUrl(shopScope(), id)}
             target="_blank"

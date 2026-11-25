@@ -1,4 +1,5 @@
 /** Explicit delegation limits; empty or invalid fields never create unbounded agent authority. */
+import { Field, Select, TextInput } from "../../../kit/ui";
 import { useAgentControlText } from "./agent-control-i18n";
 export function planningScope(scope: string) {
   return (
@@ -48,9 +49,8 @@ export default function AgentBudgetFields({
     <div>
       <p>{t("budgetHint")}</p>
       <div className="api-key-fields">
-        <label>
-          {t("provider")}
-          <select
+        <Field label={t("provider")}>
+          <Select
             required
             value={value.provider}
             onChange={(e) => onChange({ ...value, provider: e.target.value })}
@@ -59,17 +59,16 @@ export default function AgentBudgetFields({
             <option value="openai">{t("openai")}</option>
             <option value="anthropic">{t("anthropic")}</option>
             <option value="ollama">{t("ollama")}</option>
-          </select>
-        </label>
-        <label>
-          {t("model")}
-          <input
+          </Select>
+        </Field>
+        <Field label={t("model")}>
+          <TextInput
             required
             maxLength={128}
             value={value.model}
             onChange={(e) => onChange({ ...value, model: e.target.value })}
           />
-        </label>
+        </Field>
         {(["tokens", "cost", "tariff"] as const).map((key) => (
           <label key={key}>
             {t(key)}

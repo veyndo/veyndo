@@ -1,5 +1,5 @@
 /** One merchant entry for inbound shops and native agent checkout; technical support never masquerades as external approval. */
-import { Button, Card, Notice } from "../../kit/ui";
+import { Button, Card, Field, Notice, Select } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import type { RequestFn } from "../shell/studio-types";
 import type { IntakeMode } from "../catalog/catalog-intake-model";
@@ -104,9 +104,8 @@ export default function AgenticChannels({
           <h2>{t("title")}</h2>
           <p>{t("intro")}</p>
         </div>
-        <label>
-          {t("channel")}
-          <select value={channel} onChange={(e) => setChannel(e.target.value)}>
+        <Field label={t("channel")}>
+          <Select value={channel} onChange={(e) => setChannel(e.target.value)}>
             {channels.length ? (
               channels.map((c) => (
                 <option key={c.id} value={c.id}>
@@ -116,8 +115,8 @@ export default function AgenticChannels({
             ) : (
               <option value="default">{t("default")}</option>
             )}
-          </select>
-        </label>
+          </Select>
+        </Field>
       </header>
       {!canRead && <p role="status">{t("permission")}</p>}
       {error && <Notice tone="danger">{error}</Notice>}

@@ -1,5 +1,5 @@
 /** Bounded native catalogue search, not the sampled dashboard; stale replies never replace current results. */
-import { Notice } from "../../kit/ui";
+import { Field, Notice, TextInput } from "../../kit/ui";
 import { mediaImage } from "../../shared/media/product-media";
 import { useEffect, useState } from "react";
 import type { Product, RequestFn } from "../shell/studio-types";
@@ -51,9 +51,8 @@ export default function GuardrailProductSearch({
   }, [query, request]);
   return (
     <div className="guardrail-search">
-      <label>
-        {k("policySearch")}
-        <input
+      <Field label={k("policySearch")}>
+        <TextInput
           type="search"
           maxLength={200}
           value={query}
@@ -63,7 +62,7 @@ export default function GuardrailProductSearch({
             setBusy(true);
           }}
         />
-      </label>
+      </Field>
       {error && <Notice tone="danger">{error}</Notice>}
       <div className="guardrail-search-results">
         {results.map((p) => (

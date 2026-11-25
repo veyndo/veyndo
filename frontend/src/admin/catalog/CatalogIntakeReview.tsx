@@ -1,5 +1,5 @@
 /** Editable catalogue review is distinct from native creation and later publication; AI images reuse the product editor's job workflow. */
-import { Button, Notice } from "../../kit/ui";
+import { Button, Field, Notice, TextArea, TextInput } from "../../kit/ui";
 import type { IntakePreview, IntakeRow } from "./catalog-intake-model";
 import { useCatalogIntakeText } from "../../shared/i18n/catalog-intake-i18n";
 export default function CatalogIntakeReview({
@@ -48,9 +48,8 @@ export default function CatalogIntakeReview({
           {preview.mainLocale} · {preview.currency}
         </strong>
       </p>
-      <label>
-        {c("tax")}
-        <input
+      <Field label={c("tax")}>
+        <TextInput
           type="number"
           min="0"
           max="50"
@@ -60,7 +59,7 @@ export default function CatalogIntakeReview({
           disabled={busy || rows.some((r) => r.saved)}
           onChange={(e) => setTax(e.target.value)}
         />
-      </label>
+      </Field>
       {preview.demo && (
         <div className="catalog-intake-images">
           <label>
@@ -89,25 +88,23 @@ export default function CatalogIntakeReview({
               <strong>{index + 1}</strong>
             </label>
             <div>
-              <label>
-                {c("name")}
-                <input
+              <Field label={c("name")}>
+                <TextInput
                   value={row.draft.name}
                   maxLength={200}
                   disabled={busy || row.saved}
                   onChange={(e) => update(row, "name", e.target.value)}
                 />
-              </label>
-              <label>
-                {c("description")}
-                <textarea
+              </Field>
+              <Field label={c("description")}>
+                <TextArea
                   rows={2}
                   value={row.draft.description}
                   maxLength={4000}
                   disabled={busy || row.saved}
                   onChange={(e) => update(row, "description", e.target.value)}
                 />
-              </label>
+              </Field>
               <label>
                 {c("price")} · {preview.currency}
                 <input
@@ -122,9 +119,8 @@ export default function CatalogIntakeReview({
               </label>
               <details>
                 <summary>{c("sourceFields")}</summary>
-                <label>
-                  {c("productNumber")}
-                  <input
+                <Field label={c("productNumber")}>
+                  <TextInput
                     value={row.draft.productNumber ?? ""}
                     maxLength={100}
                     disabled={busy || row.saved}
@@ -132,17 +128,16 @@ export default function CatalogIntakeReview({
                       update(row, "productNumber", e.target.value)
                     }
                   />
-                </label>
-                <label>
-                  {c("imageUrl")}
-                  <input
+                </Field>
+                <Field label={c("imageUrl")}>
+                  <TextInput
                     type="url"
                     value={row.draft.imageUrl ?? ""}
                     maxLength={2000}
                     disabled={busy || row.saved}
                     onChange={(e) => update(row, "imageUrl", e.target.value)}
                   />
-                </label>
+                </Field>
               </details>
               {row.saved && (
                 <p role="status">

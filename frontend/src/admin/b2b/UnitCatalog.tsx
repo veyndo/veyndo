@@ -1,5 +1,5 @@
 /** Search the canonical merchant catalog; unit permissions persist through the native revision-bound catalog API. */
-import { Notice } from "../../kit/ui";
+import { Field, Notice, TextInput } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import type { RequestFn } from "../../shared/api/types";
 import { useB2BText } from "../../shared/i18n/b2b-i18n";
@@ -44,14 +44,13 @@ export default function UnitCatalog({
   return (
     <section className="b2b-catalog">
       <h3>{t("catalog")}</h3>
-      <label>
-        {t("searchProducts")}
-        <input
+      <Field label={t("searchProducts")}>
+        <TextInput
           type="search"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
         />
-      </label>
+      </Field>
       {error && <Notice tone="danger">{error}</Notice>}
       <div className="b2b-unit-tabs">
         {rows.map((p) => (

@@ -1,4 +1,5 @@
 /** Product-owned multilingual regulatory facts; collected evidence never claims automatic product certification. */
+import { Field, Select } from "../../kit/ui";
 import { sectors } from "../../shared/legal/legal-types";
 import { useLegalText } from "../../shared/i18n/legal-i18n";
 import {
@@ -60,9 +61,8 @@ export default function ProductCompliance({
   return (
     <div className="legal-documents">
       <p>{l("noCertification")}</p>
-      <label>
-        {l("sectors")}
-        <select
+      <Field label={l("sectors")}>
+        <Select
           value={sector}
           onChange={(e) => update({ sector: e.target.value })}
         >
@@ -71,8 +71,8 @@ export default function ProductCompliance({
               {l(s)}
             </option>
           ))}
-        </select>
-      </label>
+        </Select>
+      </Field>
       <label className="legal-toggle">
         <input
           type="checkbox"

@@ -1,5 +1,5 @@
 /** Localized category tree editor; parent moves and revisions are validated in the API. */
-import { Button, Card, Notice } from "../../kit/ui";
+import { Button, Card, Field, Notice, Select, TextInput } from "../../kit/ui";
 import "./catalog.css";
 import "./catalog-editor.css";
 import EntityHistory from "../../shared/history/EntityHistory";
@@ -183,9 +183,8 @@ export default function CategoriesWorkspace({
               disabled={!canWrite}
             >
               <div className="catalog-form-grid">
-                <label>
-                  {c("parent")}
-                  <select
+                <Field label={c("parent")}>
+                  <Select
                     value={selected.parentId ?? ""}
                     onChange={(e) =>
                       edit({ ...selected, parentId: e.target.value || null })
@@ -199,21 +198,19 @@ export default function CategoriesWorkspace({
                           {"—".repeat(depth)} {name(category, langLocale)}
                         </option>
                       ))}
-                  </select>
-                </label>
-                <label>
-                  {c("position")}
-                  <input
+                  </Select>
+                </Field>
+                <Field label={c("position")}>
+                  <TextInput
                     type="number"
                     value={selected.position}
                     onChange={(e) =>
                       edit({ ...selected, position: Number(e.target.value) })
                     }
                   />
-                </label>
-                <label>
-                  {c("type")}
-                  <select
+                </Field>
+                <Field label={c("type")}>
+                  <Select
                     value={selected.data.type}
                     onChange={(e) =>
                       edit({
@@ -238,12 +235,11 @@ export default function CategoriesWorkspace({
                         )}
                       </option>
                     ))}
-                  </select>
-                </label>
+                  </Select>
+                </Field>
                 {selected.data.type === "link" && (
-                  <label>
-                    {c("url")}
-                    <input
+                  <Field label={c("url")}>
+                    <TextInput
                       value={selected.data.url ?? ""}
                       onChange={(e) =>
                         edit({
@@ -252,11 +248,10 @@ export default function CategoriesWorkspace({
                         })
                       }
                     />
-                  </label>
+                  </Field>
                 )}
-                <label>
-                  {c("slug")}
-                  <input
+                <Field label={c("slug")}>
+                  <TextInput
                     value={tr.slug ?? ""}
                     placeholder={
                       lang !== mainKey && tr.slug == null
@@ -277,7 +272,7 @@ export default function CategoriesWorkspace({
                       })
                     }
                   />
-                </label>
+                </Field>
               </div>
               <div className="catalog-flags">
                 <label className="checkbox-label">

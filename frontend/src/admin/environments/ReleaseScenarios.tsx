@@ -1,5 +1,5 @@
 /** Actor-private saved scenario evidence sits beside native release diffs without becoming an approval gate. */
-import { Button, Notice } from "../../kit/ui";
+import { Button, Field, Notice, Select } from "../../kit/ui";
 import { useEffect, useMemo, useState } from "react";
 import type { RequestFn } from "../shell/studio-types";
 import type {
@@ -157,9 +157,8 @@ function Review({
       <h2>{t("title")}</h2>
       <p className="release-tests-hint">{t("hint")}</p>
       <div className="release-tests-controls">
-        <label>
-          {t("select")}
-          <select
+        <Field label={t("select")}>
+          <Select
             value={id}
             disabled={!currentList?.items.length}
             onChange={(e) => setSelection({ request, id: e.target.value })}
@@ -170,8 +169,8 @@ function Review({
                 {scenarioLabel(item, locale)}
               </option>
             ))}
-          </select>
-        </label>
+          </Select>
+        </Field>
         <Button
           type="button"
           disabled={loading}

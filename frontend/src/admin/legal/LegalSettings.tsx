@@ -1,5 +1,5 @@
 /** Central revisioned legal workspace, inherited channel settings, source-backed sector guidance and request review. */
-import { Button, Card, Notice } from "../../kit/ui";
+import { Button, Card, Field, Notice, TextArea } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import { useLegalText } from "../../shared/i18n/legal-i18n";
 import { ContentLanguage } from "../../shared/i18n/ContentLanguage";
@@ -210,9 +210,8 @@ export default function LegalSettings({
                           <a href={r.source} target="_blank" rel="noreferrer">
                             {l("source")} ↗
                           </a>
-                          <label>
-                            {l("operatorNotes")}
-                            <textarea
+                          <Field label={l("operatorNotes")}>
+                            <TextArea
                               rows={3}
                               value={c.operatorNotes[r.id] ?? ""}
                               maxLength={8000}
@@ -225,7 +224,7 @@ export default function LegalSettings({
                                 })
                               }
                             />
-                          </label>
+                          </Field>
                         </details>
                       ))}
                   </div>

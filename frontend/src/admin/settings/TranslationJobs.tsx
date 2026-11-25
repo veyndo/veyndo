@@ -1,5 +1,5 @@
 /** Start catalogue translations, poll durable progress, review paginated drafts and apply bounded revision-checked batches. */
-import { Button, Notice } from "../../kit/ui";
+import { Badge, Button, Field, Notice, Select } from "../../kit/ui";
 import { useControlText } from "../../shared/i18n/control-i18n";
 import { responseError } from "../../shared/i18n/errors-i18n";
 import { useEffect, useRef, useState } from "react";
@@ -113,13 +113,12 @@ export default function TranslationJobs({
     <div className="intl-translation-jobs">
       <div className="intl-section-heading">
         <h3>{i("aiTranslation")}</h3>
-        <span className="soft-tag">AI</span>
+        <Badge>AI</Badge>
       </div>
       <p className="intl-hint">{i("aiHint")}</p>
       <fieldset disabled={disabled || busy} className="intl-rule-grid">
-        <label>
-          {i("targetLanguage")}
-          <select
+        <Field label={i("targetLanguage")}>
+          <Select
             value={
               config.locales.includes(target) && target !== config.mainLocale
                 ? target
@@ -135,11 +134,10 @@ export default function TranslationJobs({
                   {l}
                 </option>
               ))}
-          </select>
-        </label>
-        <label>
-          {i("provider")}
-          <select
+          </Select>
+        </Field>
+        <Field label={i("provider")}>
+          <Select
             value={provider}
             onChange={(e) => setProvider(e.target.value)}
           >
@@ -149,8 +147,8 @@ export default function TranslationJobs({
                 {p.model}
               </option>
             ))}
-          </select>
-        </label>
+          </Select>
+        </Field>
         <label className="checkbox-label">
           <input
             type="checkbox"

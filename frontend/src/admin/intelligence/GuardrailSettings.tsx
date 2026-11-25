@@ -1,5 +1,5 @@
 /** Merchant AI boundaries use canonical settings revisions, native catalogue lookup and the shared assistant. */
-import { Button } from "../../kit/ui";
+import { Button, Field, TextInput } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import type { RequestFn, Product } from "../shell/studio-types";
 import { useSettingsDraft } from "../settings/useSettingsDraft";
@@ -175,9 +175,8 @@ function GuardrailEditor({
             </div>
             {policy.autonomy.enabled && (
               <div className="guardrail-fields guardrail-budget">
-                <label>
-                  {k("dailyProducts")}
-                  <input
+                <Field label={k("dailyProducts")}>
+                  <TextInput
                     type="number"
                     required
                     min={1}
@@ -193,7 +192,7 @@ function GuardrailEditor({
                       })
                     }
                   />
-                </label>
+                </Field>
                 <label>
                   {k("policyChange")}
                   <input

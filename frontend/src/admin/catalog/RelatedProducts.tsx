@@ -1,5 +1,5 @@
 /** Ordered recommendations retain selected native records across cursor-paginated searches, content-language changes and read-only inspection. */
-import { Button } from "../../kit/ui";
+import { Button, Field, TextInput } from "../../kit/ui";
 import { mediaImage } from "../../shared/media/product-media";
 import { useEffect, useState } from "react";
 import type { RequestFn } from "../shell/studio-types";
@@ -138,9 +138,8 @@ export default function RelatedProducts({
         )}
       </section>
       <section aria-label={t("search")}>
-        <label>
-          {t("search")}
-          <input
+        <Field label={t("search")}>
+          <TextInput
             type="search"
             value={search}
             onChange={(e) => {
@@ -148,7 +147,7 @@ export default function RelatedProducts({
               setCursor("");
             }}
           />
-        </label>
+        </Field>
         {selected.length >= 20 && (
           <p className="related-products-hint">{t("limit")}</p>
         )}

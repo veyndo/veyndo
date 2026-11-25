@@ -1,5 +1,5 @@
 /** One saved predicate on current public evidence; reuses category CAS and the editor's selected content language. */
-import { Card } from "../../kit/ui";
+import { Card, Field, Select, TextInput } from "../../kit/ui";
 import type { Category } from "./catalog-model";
 import LocalizedField from "../../shared/i18n/LocalizedField";
 import { useContentLanguage } from "../../shared/i18n/ContentLanguage";
@@ -36,9 +36,8 @@ export default function CategoryFactQuery({
       <p>{g("hint")}</p>
       {value && (
         <div className="catalog-form-grid">
-          <label>
-            {g("kind")}
-            <select
+          <Field label={g("kind")}>
+            <Select
               value={value.nodeType}
               onChange={(e) =>
                 onChange({
@@ -63,11 +62,10 @@ export default function CategoryFactQuery({
                   {g(kind)}
                 </option>
               ))}
-            </select>
-          </label>
-          <label>
-            {g("confidence")}
-            <input
+            </Select>
+          </Field>
+          <Field label={g("confidence")}>
+            <TextInput
               type="number"
               min="0"
               max="1"
@@ -80,7 +78,7 @@ export default function CategoryFactQuery({
                 })
               }
             />
-          </label>
+          </Field>
           <LocalizedField
             label={g("phrase")}
             value={value.text}

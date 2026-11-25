@@ -1,5 +1,5 @@
 /** Private environment creation and digest-bound selective release. */
-import { Button, Card, Notice } from "../../kit/ui";
+import { Button, Card, Field, Notice, Select, TextInput } from "../../kit/ui";
 import { useEffect, useMemo, useRef, useState } from "react";
 import ReleaseScenarios from "./ReleaseScenarios";
 import { useWorkbenchText } from "../../shared/i18n/workbench-i18n";
@@ -147,15 +147,14 @@ export default function EnvironmentManager({
             });
           }}
         >
-          <label>
-            {w("stageName")}
-            <input
+          <Field label={w("stageName")}>
+            <TextInput
               required
               maxLength={80}
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
-          </label>
+          </Field>
           <Button tone="primary" type="submit" disabled={busy || !manage}>
             {w("newStage")}
           </Button>
@@ -165,17 +164,16 @@ export default function EnvironmentManager({
       {environments.length > 0 && (
         <Card>
           <div className="workbench-row">
-            <label>
-              {w("stage")}
-              <select value={id} onChange={(e) => setId(e.target.value)}>
+            <Field label={w("stage")}>
+              <Select value={id} onChange={(e) => setId(e.target.value)}>
                 <option value="">{w("chooseStage")}</option>
                 {environments.map((e) => (
                   <option key={e.id} value={e.id}>
                     {e.name}
                   </option>
                 ))}
-              </select>
-            </label>
+              </Select>
+            </Field>
             <Button type="submit" disabled={!id} onClick={() => onSelect(id)}>
               {w("stage")}
             </Button>

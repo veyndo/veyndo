@@ -1,5 +1,5 @@
 /** OS-installed receipt printers receive the issued immutable invoice projection; no USB access, credentials or duplicate ledger. */
-import { Notice } from "../../kit/ui";
+import { Field, Notice, Select } from "../../kit/ui";
 import { useState } from "react";
 import Icon from "../../shared/ui/Icon";
 import { usePosText } from "./pos-i18n";
@@ -61,13 +61,12 @@ export default function ReceiptPrinter({
         {t("printer")}
       </h3>
       <p>{t("printHint")}</p>
-      <label>
-        {t("paper")}
-        <select value={width} onChange={(e) => setWidth(e.target.value)}>
+      <Field label={t("paper")}>
+        <Select value={width} onChange={(e) => setWidth(e.target.value)}>
           <option value="58">{t("paper58")}</option>
           <option value="80">{t("paper80")}</option>
-        </select>
-      </label>
+        </Select>
+      </Field>
       <button disabled={busy} onClick={() => void print()}>
         <Icon name="form" />
         {t(busy ? "busy" : "printReceipt")}

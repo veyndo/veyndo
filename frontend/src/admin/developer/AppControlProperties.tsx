@@ -1,5 +1,5 @@
 /** DataField and one-level container references are edited against the current typed model rather than free text. */
-import { Button } from "../../kit/ui";
+import { Button, Field, Select } from "../../kit/ui";
 import { useState } from "react";
 import type {
   Block,
@@ -49,9 +49,8 @@ export default function AppControlProperties({
         </label>
       )}
       {isDataBlock(block.kind) && (
-        <label>
-          {a("entity")}
-          <select
+        <Field label={a("entity")}>
+          <Select
             value={block.entity ?? ""}
             onChange={(e) => {
               const model = manifest.entities.find(
@@ -72,13 +71,12 @@ export default function AppControlProperties({
                 {contentText(e.label, locale, mainLocale) || e.name}
               </option>
             ))}
-          </select>
-        </label>
+          </Select>
+        </Field>
       )}
       {entity && !["form", "table", "cards"].includes(block.kind) && (
-        <label>
-          {a("sourceField")}
-          <select
+        <Field label={a("sourceField")}>
+          <Select
             value={block.dataField ?? ""}
             onChange={(e) => onChange({ ...block, dataField: e.target.value })}
           >
@@ -90,13 +88,12 @@ export default function AppControlProperties({
                   {contentText(f.label, locale, mainLocale) || f.name}
                 </option>
               ))}
-          </select>
-        </label>
+          </Select>
+        </Field>
       )}
       {["frame", "tabs"].includes(block.kind) && (
-        <label>
-          {a("children")}
-          <select
+        <Field label={a("children")}>
+          <Select
             multiple
             value={block.childBlocks ?? []}
             onChange={(e) =>
@@ -124,8 +121,8 @@ export default function AppControlProperties({
                   {contentText(b.title, locale, mainLocale) || b.id}
                 </option>
               ))}
-          </select>
-        </label>
+          </Select>
+        </Field>
       )}
       {["button", "textbox", "combobox", "checkbox", "datepicker"].includes(
         block.kind,

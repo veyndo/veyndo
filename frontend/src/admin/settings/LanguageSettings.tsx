@@ -1,5 +1,5 @@
 /** Shop main language and enabled locales with resumable provider-backed bulk product translation drafts. */
-import { Button } from "../../kit/ui";
+import { Badge, Button, Field, Select, TextInput } from "../../kit/ui";
 import { useState } from "react";
 import { useInternationalText } from "../../shared/i18n/international-i18n";
 import type { InternationalProps } from "./CommerceSettings";
@@ -31,9 +31,8 @@ export default function LanguageSettings({
   };
   return (
     <div className="intl-section">
-      <label>
-        {i("mainLanguage")}
-        <select
+      <Field label={i("mainLanguage")}>
+        <Select
           value={config.mainLocale}
           onChange={(e) => patch({ mainLocale: e.target.value })}
         >
@@ -42,8 +41,8 @@ export default function LanguageSettings({
               {label(l)} · {l}
             </option>
           ))}
-        </select>
-      </label>
+        </Select>
+      </Field>
       <h3>{i("enabledLanguages")}</h3>
       <div className="intl-language-list">
         {config.locales.map((l) => (
@@ -53,7 +52,7 @@ export default function LanguageSettings({
               <small>{l}</small>
             </span>
             {l === config.mainLocale ? (
-              <span className="soft-tag">{i("mainLanguage")}</span>
+              <Badge>{i("mainLanguage")}</Badge>
             ) : (
               <span>✓</span>
             )}
@@ -61,14 +60,13 @@ export default function LanguageSettings({
         ))}
       </div>
       <div className="intl-inline">
-        <label>
-          {i("newLocale")}
-          <input
+        <Field label={i("newLocale")}>
+          <TextInput
             maxLength={35}
             value={next}
             onChange={(e) => setNext(e.target.value)}
           />
-        </label>
+        </Field>
         <Button
           type="button"
           disabled={!canonical || config.locales.includes(canonical)}

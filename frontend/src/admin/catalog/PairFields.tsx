@@ -1,5 +1,5 @@
 /** Native map editing uses explicit row creation and collision-safe rename on blur, never whitespace keys or overwritten siblings. */
-import { Button } from "../../kit/ui";
+import { Button, Field, TextInput } from "../../kit/ui";
 import { useState, useId } from "react";
 import { useCatalogText } from "../../shared/i18n/catalog-i18n";
 import Icon from "../../shared/ui/Icon";
@@ -33,9 +33,8 @@ export default function PairFields({
       {!entries.length && <p className="product-spec-hint">{t("empty")}</p>}
       {entries.map(([key, val], index) => (
         <div className="catalog-pair" key={key}>
-          <label>
-            {c("key")}
-            <input
+          <Field label={c("key")}>
+            <TextInput
               defaultValue={key}
               disabled={disabled}
               aria-describedby={error ? `${id}-error` : undefined}
@@ -67,10 +66,9 @@ export default function PairFields({
                 );
               }}
             />
-          </label>
-          <label>
-            {c("value")}
-            <input
+          </Field>
+          <Field label={c("value")}>
+            <TextInput
               value={val}
               disabled={disabled}
               onChange={(e) => {
@@ -80,7 +78,7 @@ export default function PairFields({
                 if (!problem) onChange({ ...value, [key]: e.target.value });
               }}
             />
-          </label>
+          </Field>
           <Button
             type="button"
             disabled={disabled}
@@ -97,14 +95,18 @@ export default function PairFields({
       {!disabled && (
         <>
           <div className="catalog-pair product-spec-add">
-            <label>
-              {t("newKey")}
-              <input value={name} onChange={(e) => setName(e.target.value)} />
-            </label>
-            <label>
-              {t("newValue")}
-              <input value={text} onChange={(e) => setText(e.target.value)} />
-            </label>
+            <Field label={t("newKey")}>
+              <TextInput
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+            </Field>
+            <Field label={t("newValue")}>
+              <TextInput
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+              />
+            </Field>
             <Button
               type="button"
               disabled={!name.trim() || entries.length >= 40}

@@ -1,5 +1,5 @@
 /** Visual recursive rule tree: AND/OR/NOT groups, typed facts and editable leaf conditions. */
-import { Button } from "../../kit/ui";
+import { Button, Field, Select } from "../../kit/ui";
 import { useContentLanguage } from "../../shared/i18n/ContentLanguage";
 import { contentText } from "../../shared/i18n/content-language";
 import SourceRuleFields from "./SourceRuleFields";
@@ -102,9 +102,8 @@ export default function RuleBuilder({
         <span className="rule-depth">{depth + 1}</span>
       </div>
       {value.type === "ruleReference" && (
-        <label>
-          {a("ruleReference")}
-          <select
+        <Field label={a("ruleReference")}>
+          <Select
             value={value.ruleId ?? ""}
             onChange={(e) => set("ruleId", e.target.value)}
           >
@@ -114,8 +113,8 @@ export default function RuleBuilder({
                 {contentText(r.name, locale, mainLocale) || r.id}
               </option>
             ))}
-          </select>
-        </label>
+          </Select>
+        </Field>
       )}
       {source ? (
         <SourceRuleFields

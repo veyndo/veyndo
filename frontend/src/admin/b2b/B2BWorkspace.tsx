@@ -1,5 +1,5 @@
 /** Tenant-scoped company workspace; canonical API operations are also exposed through MCP. */
-import { Button, Card } from "../../kit/ui";
+import { Button, Card, Field, TextInput } from "../../kit/ui";
 import CompanyCreate from "./CompanyCreate";
 import { useB2BExperienceText } from "./experience-i18n";
 import { useEffect, useState } from "react";
@@ -296,16 +296,15 @@ export default function B2BWorkspace({
                 </div>
                 <h2>{t("company")}</h2>
                 <div className="b2b-fields">
-                  <label>
-                    {t("identifier")}
-                    <input
+                  <Field label={t("identifier")}>
+                    <TextInput
                       value={draft.id}
                       disabled={draft.revision > 0 || busy}
                       onChange={(e) =>
                         setDraft({ ...draft, id: e.target.value })
                       }
                     />
-                  </label>
+                  </Field>
                   <LocalizedField
                     label={t("name")}
                     value={draft.data.name}
@@ -314,9 +313,8 @@ export default function B2BWorkspace({
                     }
                     required
                   />
-                  <label>
-                    {t("vat")}
-                    <input
+                  <Field label={t("vat")}>
+                    <TextInput
                       value={draft.data.vatId}
                       onChange={(e) =>
                         setDraft({
@@ -325,7 +323,7 @@ export default function B2BWorkspace({
                         })
                       }
                     />
-                  </label>
+                  </Field>
                   <label className="b2b-toggle">
                     <input
                       type="checkbox"

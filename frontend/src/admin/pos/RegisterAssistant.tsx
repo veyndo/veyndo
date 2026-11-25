@@ -1,5 +1,5 @@
 /** In-register advice reuses the existing grounded merchant assistant; no task apply or money mutation is exposed. */
-import { Notice } from "../../kit/ui";
+import { Field, Notice, TextArea } from "../../kit/ui";
 import { useState } from "react";
 import Icon from "../../shared/ui/Icon";
 import { usePosText } from "./pos-i18n";
@@ -56,14 +56,13 @@ export default function RegisterAssistant({
           void ask();
         }}
       >
-        <label>
-          {t("assistantQuestion")}
-          <textarea
+        <Field label={t("assistantQuestion")}>
+          <TextArea
             value={question}
             maxLength={1500}
             onChange={(e) => setQuestion(e.target.value)}
           />
-        </label>
+        </Field>
         <button className="pos-pay" disabled={busy || !question.trim()}>
           <Icon name="spark" />
           {t(busy ? "thinking" : "ask")}

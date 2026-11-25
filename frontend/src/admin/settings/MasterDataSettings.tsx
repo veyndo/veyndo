@@ -1,5 +1,5 @@
 /** Structured company profile with single-language content, inherited channel scopes, logo drafts and revision-bound saves. */
-import { Card, Notice } from "../../kit/ui";
+import { Badge, Card, Field, Notice, Select } from "../../kit/ui";
 import EntityHistory from "../../shared/history/EntityHistory";
 import { useEffect, useState } from "react";
 import {
@@ -118,15 +118,14 @@ export default function MasterDataSettings({
           <p>{co("scopeHint")}</p>
         </div>
         {value && (
-          <span className="soft-tag">
+          <Badge>
             {c("revision")} {value.revision}
-          </span>
+          </Badge>
         )}
       </header>
       <div className="company-scope">
-        <label>
-          {co("scope")}
-          <select
+        <Field label={co("scope")}>
+          <Select
             value={scope}
             disabled={busy || uploading}
             onChange={(e) => {
@@ -140,9 +139,9 @@ export default function MasterDataSettings({
                 {displayName(c.data.name, locale, context.world?.mainLocale)}
               </option>
             ))}
-          </select>
-        </label>
-        <span className="soft-tag">{co(scope ? "custom" : "basis")}</span>
+          </Select>
+        </Field>
+        <Badge>{co(scope ? "custom" : "basis")}</Badge>
       </div>
       {pending !== undefined && (
         <div role="alert" className="company-scope-warning">

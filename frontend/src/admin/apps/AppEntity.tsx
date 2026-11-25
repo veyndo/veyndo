@@ -1,5 +1,5 @@
 /** Managed entity editor renders fields from the installed app contract. */
-import { Button, Notice } from "../../kit/ui";
+import { Button, Field, Notice, TextInput } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import { useAppText } from "../../shared/i18n/app-i18n";
 import type { RequestFn } from "../shell/studio-types";
@@ -118,9 +118,8 @@ export default function AppEntity({
           }
         }}
       >
-        <label>
-          {a("recordId")}
-          <input
+        <Field label={a("recordId")}>
+          <TextInput
             value={id}
             onChange={(e) => {
               setId(e.target.value);
@@ -132,7 +131,7 @@ export default function AppEntity({
             required
             maxLength={100}
           />
-        </label>
+        </Field>
         {entity.fields.map((f) =>
           f.translatable ? (
             <LocalizedField

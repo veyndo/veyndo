@@ -1,5 +1,5 @@
 /** Visual payment contracts use the same manifest as coding agents; onboarding uses the protected API. */
-import { Button } from "../../kit/ui";
+import { Button, Field, Select, TextInput } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import type { Manifest } from "../../shared/apps/native/types";
 import type { RequestFn } from "../shell/studio-types";
@@ -71,9 +71,8 @@ export default function AppPayments({
         <p>{t("deploy")}</p>
         {(m.paymentProvider?.methods ?? []).map((method, index) => (
           <section className="app-model-card" key={index}>
-            <label>
-              {t("id")}
-              <input
+            <Field label={t("id")}>
+              <TextInput
                 value={method.id}
                 maxLength={32}
                 onChange={(e) =>
@@ -84,7 +83,7 @@ export default function AppPayments({
                   )
                 }
               />
-            </label>
+            </Field>
             <LocalizedField
               label={t("name")}
               value={method.name}
@@ -96,9 +95,8 @@ export default function AppPayments({
                 )
               }
             />
-            <label>
-              {t("currency")}
-              <input
+            <Field label={t("currency")}>
+              <TextInput
                 value={method.currencies.join(", ")}
                 onChange={(e) =>
                   patch(
@@ -117,7 +115,7 @@ export default function AppPayments({
                   )
                 }
               />
-            </label>
+            </Field>
             <CountryPicker
               countries={geo?.countries ?? []}
               value={method.countries}
@@ -130,9 +128,8 @@ export default function AppPayments({
                 )
               }
             />
-            <label>
-              {t("checkout")}
-              <select
+            <Field label={t("checkout")}>
+              <Select
                 value={method.checkout}
                 onChange={(e) =>
                   patch(
@@ -152,11 +149,10 @@ export default function AppPayments({
                     {t(k)}
                   </option>
                 ))}
-              </select>
-            </label>
-            <label>
-              {t("intent")}
-              <select
+              </Select>
+            </Field>
+            <Field label={t("intent")}>
+              <Select
                 value={method.intent}
                 onChange={(e) =>
                   patch(
@@ -176,8 +172,8 @@ export default function AppPayments({
                     {t(k)}
                   </option>
                 ))}
-              </select>
-            </label>
+              </Select>
+            </Field>
             <div className="app-tool-grid">
               {(
                 [

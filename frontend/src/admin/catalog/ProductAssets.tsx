@@ -1,5 +1,5 @@
 /** Bounded upload and explicit digest-bound publication of attachments and paid files. */
-import { Button, Card, Notice } from "../../kit/ui";
+import { Button, Card, Field, Notice, Select } from "../../kit/ui";
 import { useCallback, useEffect, useState } from "react";
 import LocalizedField from "../../shared/i18n/LocalizedField";
 import type { LocalizedText } from "../../shared/i18n/content-language";
@@ -65,13 +65,12 @@ export default function ProductAssets({
             accept=".pdf,.txt,.png,.jpg,.jpeg,.webp,.zip,.mp4"
           />
         </label>
-        <label>
-          {o("assets")}
-          <select name="kind">
+        <Field label={o("assets")}>
+          <Select name="kind">
             <option value="attachment">{o("attachment")}</option>
             <option value="download">{o("download")}</option>
-          </select>
-        </label>
+          </Select>
+        </Field>
         <Button tone="primary" type="submit" disabled={busy}>
           {o("upload")}
         </Button>

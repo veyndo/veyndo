@@ -1,5 +1,5 @@
 /** PersonalAccountForm: focused account-form view with explicit typed inputs and callbacks. */
-import { Button } from "../../kit/ui";
+import { Button, Field, TextInput } from "../../kit/ui";
 import { useShopText } from "../../shared/i18n/shop-i18n";
 import type { Session } from "./UsersManager";
 
@@ -58,9 +58,8 @@ export default function PersonalAccountForm({
       }}
     >
       {mode !== "join" && (
-        <label>
-          {s("email")}
-          <input
+        <Field label={s("email")}>
+          <TextInput
             defaultValue={email}
             readOnly={!!email}
             type="email"
@@ -69,17 +68,15 @@ export default function PersonalAccountForm({
             required
             maxLength={254}
           />
-        </label>
+        </Field>
       )}
       {mode !== "login" && (
-        <label>
-          {s("accountName")}
-          <input name="name" autoComplete="name" required maxLength={100} />
-        </label>
+        <Field label={s("accountName")}>
+          <TextInput name="name" autoComplete="name" required maxLength={100} />
+        </Field>
       )}
-      <label>
-        {s("password")}
-        <input
+      <Field label={s("password")}>
+        <TextInput
           type="password"
           name="password"
           autoComplete={mode === "login" ? "current-password" : "new-password"}
@@ -87,16 +84,14 @@ export default function PersonalAccountForm({
           maxLength={128}
           required
         />
-      </label>
+      </Field>
       {mode === "register" && (
         <>
-          <label>
-            {s("workspaceName")}
-            <input name="workspaceName" required maxLength={100} />
-          </label>
-          <label>
-            {s("workspaceId")}
-            <input
+          <Field label={s("workspaceName")}>
+            <TextInput name="workspaceName" required maxLength={100} />
+          </Field>
+          <Field label={s("workspaceId")}>
+            <TextInput
               name="workspaceId"
               required
               minLength={2}
@@ -104,20 +99,19 @@ export default function PersonalAccountForm({
               pattern="[a-z0-9][a-z0-9\-]+"
               placeholder={s("shopSlugExample")}
             />
-          </label>
+          </Field>
         </>
       )}
       {mode === "join" && (
-        <label>
-          {s("invitationToken")}
-          <input
+        <Field label={s("invitationToken")}>
+          <TextInput
             name="invitationToken"
             required
             minLength={64}
             maxLength={64}
             autoComplete="off"
           />
-        </label>
+        </Field>
       )}
       <Button tone="primary" type="submit" disabled={busy}>
         {s(mode)}

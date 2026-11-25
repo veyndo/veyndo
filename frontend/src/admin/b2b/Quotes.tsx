@@ -1,5 +1,5 @@
 /** Native RFQ inbox and merchant offers use the same versioned contract as buyer API/MCP operations. */
-import { Notice } from "../../kit/ui";
+import { Field, Notice, TextArea, TextInput } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import type { RequestFn } from "../../shared/api/types";
 import { useB2BQuoteText } from "../../shared/i18n/b2b-quotes-i18n";
@@ -165,23 +165,21 @@ function Offer({
                 />
               </label>
             ))}
-            <label>
-              {t("expiry")}
-              <input
+            <Field label={t("expiry")}>
+              <TextInput
                 type="datetime-local"
                 value={until}
                 onChange={(e) => setUntil(e.target.value)}
               />
-            </label>
+            </Field>
           </div>
-          <label>
-            {t("message")}
-            <textarea
+          <Field label={t("message")}>
+            <TextArea
               value={message}
               maxLength={4000}
               onChange={(e) => setMessage(e.target.value)}
             />
-          </label>
+          </Field>
           <button
             disabled={
               busy ||

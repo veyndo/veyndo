@@ -80,7 +80,7 @@
   cursor: pointer;
   font-weight: 600;
 }
-.app-workflow-editor > label {
+.app-workflow-editor > :is(label, .vy-field) {
   display: grid;
   gap: 8px;
   margin-block: 14px;

@@ -1,5 +1,5 @@
 /** Optional image-provider jobs create private previews; applying a reviewed image is explicit and revision checked. */
-import { Button, Notice } from "../../kit/ui";
+import { Button, Field, Notice, TextArea } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import { useWorkspaceText } from "../../shared/i18n/workspace-i18n";
 import type { RequestFn } from "../shell/studio-types";
@@ -53,16 +53,15 @@ export default function AiImageStudio({
       <summary>✦ {w("aiImages")}</summary>
       <p>{w(configured ? "aiHint" : "aiDisabled")}</p>
       {configured && disabled && <p>{w("saveBeforeImage")}</p>}
-      <label>
-        {w("prompt")}
-        <textarea
+      <Field label={w("prompt")}>
+        <TextArea
           value={prompt}
           maxLength={2000}
           rows={3}
           onChange={(e) => setPrompt(e.target.value)}
           disabled={!configured || busy || waiting || disabled}
         />
-      </label>
+      </Field>
       <div className="media-actions">
         <Button
           tone="primary"

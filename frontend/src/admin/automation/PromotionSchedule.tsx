@@ -1,5 +1,5 @@
 /** Campaign scheduling uses ISO instants in the API and local times in the editor. */
-import { Card } from "../../kit/ui";
+import { Card, Field, TextInput } from "../../kit/ui";
 import { useLifecycleText } from "./lifecycle-i18n";
 export function localDate(iso: string | null): string {
   if (!iso) return "";
@@ -57,15 +57,14 @@ export default function PromotionSchedule({
           />
         </label>
       ))}
-      <label>
-        {t("priority")}
-        <input
+      <Field label={t("priority")}>
+        <TextInput
           type="number"
           step={1}
           value={data.priority ?? 0}
           onChange={(e) => update("priority", Number(e.target.value))}
         />
-      </label>
+      </Field>
       <label className="checkbox-label">
         <input
           type="checkbox"

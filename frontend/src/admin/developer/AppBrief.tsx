@@ -1,5 +1,5 @@
 /** A plain merchant brief opens an empty ordinary draft in the existing contextual agent. */
-import { Button } from "../../kit/ui";
+import { Button, Field, TextArea } from "../../kit/ui";
 import { useState } from "react";
 import type { Manifest } from "../../shared/apps/native/types";
 import LocalizedField from "../../shared/i18n/LocalizedField";
@@ -63,9 +63,8 @@ export default function AppBrief({
           maxLength={100}
           required
         />
-        <label>
-          {t("brief")}
-          <textarea
+        <Field label={t("brief")}>
+          <TextArea
             required
             maxLength={6000}
             rows={3}
@@ -73,7 +72,7 @@ export default function AppBrief({
             onChange={(event) => setBrief(event.target.value)}
             placeholder={t("placeholder")}
           />
-        </label>
+        </Field>
         <small>{t("hint")}</small>
         <div className="app-brief-actions">
           <Button

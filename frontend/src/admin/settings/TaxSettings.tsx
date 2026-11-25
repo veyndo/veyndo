@@ -1,5 +1,5 @@
 /** Editable tax classes and explicit fallback/country rates with destination rules using native Rule Builder references. */
-import { Button } from "../../kit/ui";
+import { Badge, Button, Field, TextInput } from "../../kit/ui";
 import { useWorkspaceText } from "../../shared/i18n/workspace-i18n";
 import { useState } from "react";
 import ConfirmDialog from "../../shared/ui/ConfirmDialog";
@@ -113,7 +113,7 @@ export default function TaxSettings({
         <div className="intl-record" key={tax.id}>
           <div className="intl-section-heading">
             <h3>{label(tax)}</h3>
-            <span className="soft-tag">{tax.id}</span>
+            <Badge>{tax.id}</Badge>
           </div>
           <TranslationFields
             nameOnly
@@ -122,9 +122,8 @@ export default function TaxSettings({
             value={tax.translations ?? {}}
             onChange={(translations) => update({ translations })}
           />
-          <label>
-            {i("defaultRate")}
-            <input
+          <Field label={i("defaultRate")}>
+            <TextInput
               type="number"
               min={0}
               max={100}
@@ -138,7 +137,7 @@ export default function TaxSettings({
                 })
               }
             />
-          </label>
+          </Field>
           <div className="intl-section-heading">
             <h3>{w("specialTax")}</h3>
             <Button type="button" onClick={addRule}>

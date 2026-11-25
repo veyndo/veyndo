@@ -1,4 +1,5 @@
 /** Source-specific input remains a compact part of the existing reviewed catalogue intake. */
+import { Field, TextInput } from "../../kit/ui";
 import { useCatalogIntakeText } from "../../shared/i18n/catalog-intake-i18n";
 import { csvTemplate, type IntakeMode } from "./catalog-intake-model";
 export default function CatalogIntakeSource({
@@ -94,19 +95,17 @@ export default function CatalogIntakeSource({
             )}
           </p>
           {mode === "shop_mcp" && (
-            <label>
-              {c("supplierShop")}
-              <input
+            <Field label={c("supplierShop")}>
+              <TextInput
                 value={shopDomain}
                 maxLength={253}
                 disabled={busy}
                 onChange={(e) => setShopDomain(e.target.value)}
               />
-            </label>
+            </Field>
           )}
-          <label>
-            {c("count")}
-            <input
+          <Field label={c("count")}>
+            <TextInput
               type="number"
               min="1"
               max="10"
@@ -114,7 +113,7 @@ export default function CatalogIntakeSource({
               disabled={busy}
               onChange={(e) => setCount(Number(e.target.value))}
             />
-          </label>
+          </Field>
         </section>
       )}
     </>

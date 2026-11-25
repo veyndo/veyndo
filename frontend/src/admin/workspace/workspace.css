@@ -264,7 +264,7 @@
   .personal-goal > strong {
     grid-column: 1;
   }
-  .personal-goal > label,
+  .personal-goal > :is(label, .vy-field),
   .personal-goal > select,
   .personal-goal > button:not(:last-child) {
     grid-column: 1/-1;

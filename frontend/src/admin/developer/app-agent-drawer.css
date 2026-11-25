@@ -89,7 +89,7 @@
 .app-agent-drawer .agent-prompt-label textarea {
   min-height: 150px;
 }
-.app-agent-drawer .app-agent-options > label {
+.app-agent-drawer .app-agent-options > :is(label, .vy-field) {
   flex: 1;
   min-width: 120px;
 }

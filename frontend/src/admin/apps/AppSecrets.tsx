@@ -1,5 +1,5 @@
 /** Metadata-only credentials screen; rotation sends plaintext once to the encrypted server store. */
-import { Button, Notice } from "../../kit/ui";
+import { Button, Field, Notice, Select, TextInput } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import type { RequestFn } from "../shell/studio-types";
 import ConfirmDialog from "../../shared/ui/ConfirmDialog";
@@ -97,9 +97,8 @@ export default function AppSecrets({
           disabled={busy || !data?.canManage || !data?.encryptionReady}
           className="app-access-permissions"
         >
-          <label>
-            {t("secretTitle")}
-            <select
+          <Field label={t("secretTitle")}>
+            <Select
               value={kind}
               onChange={(e) => {
                 setKind(e.target.value as Kind);
@@ -112,11 +111,10 @@ export default function AppSecrets({
                   {t(k)}
                 </option>
               ))}
-            </select>
-          </label>
-          <label>
-            {t("secretValue")}
-            <input
+            </Select>
+          </Field>
+          <Field label={t("secretValue")}>
+            <TextInput
               type="password"
               autoComplete="new-password"
               value={secret}
@@ -125,7 +123,7 @@ export default function AppSecrets({
               required
               onChange={(e) => setSecret(e.target.value)}
             />
-          </label>
+          </Field>
           <Button tone="primary" type="submit" disabled={secret.length < 32}>
             {t("rotate")}
           </Button>

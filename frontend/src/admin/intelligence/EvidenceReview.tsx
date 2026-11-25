@@ -1,5 +1,5 @@
 /** Review source-bound candidates through shared HTTP/MCP contracts; changed sources block publication. */
-import { Button, Card, Notice } from "../../kit/ui";
+import { Button, Card, Field, Notice, Select } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import { useKnowledgeText } from "../../shared/i18n/knowledge-i18n";
 import type { Product, RequestFn } from "../shell/studio-types";
@@ -70,9 +70,8 @@ export default function EvidenceReview({
         <p className="muted">{k("claimBoundary")}</p>
       </header>
       <div className="knowledge-form-grid">
-        <label>
-          {k("products")}
-          <select
+        <Field label={k("products")}>
+          <Select
             value={product}
             onChange={(e) => {
               setProduct(e.target.value);
@@ -84,19 +83,18 @@ export default function EvidenceReview({
                 {p.name}
               </option>
             ))}
-          </select>
-        </label>
-        <label>
-          {k("sources")}
-          <select value={source} onChange={(e) => setSource(e.target.value)}>
+          </Select>
+        </Field>
+        <Field label={k("sources")}>
+          <Select value={source} onChange={(e) => setSource(e.target.value)}>
             <option value="">{k("chooseEvidenceSource")}</option>
             {sources.map((s) => (
               <option key={s.id} value={s.id}>
                 {s.title}
               </option>
             ))}
-          </select>
-        </label>
+          </Select>
+        </Field>
       </div>
       <Button
         tone="primary"

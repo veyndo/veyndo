@@ -1,5 +1,5 @@
 /** Guided company creation is one atomic native API command; the main-language name is always visible. */
-import { Notice } from "../../kit/ui";
+import { Field, Notice, TextInput } from "../../kit/ui";
 import { useState } from "react";
 import type { RequestFn } from "../../shared/api/types";
 import { ContentLanguage } from "../../shared/i18n/ContentLanguage";
@@ -90,10 +90,9 @@ export default function CompanyCreate({
             }
             onChange={(n) => setName(n as Record<string, string>)}
           />
-          <label>
-            {t("vat")}
-            <input value={vat} onChange={(e) => setVat(e.target.value)} />
-          </label>
+          <Field label={t("vat")}>
+            <TextInput value={vat} onChange={(e) => setVat(e.target.value)} />
+          </Field>
           {canLink && (
             <CustomerPicker
               request={request}

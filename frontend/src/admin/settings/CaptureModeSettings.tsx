@@ -1,4 +1,5 @@
 /** Capture timing uses the installed provider declaration and the existing versioned settings draft. */
+import { Field, Select } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import type { Payment } from "../../shared/api/shop-api";
 import type { RequestFn } from "../shell/studio-types";
@@ -34,9 +35,8 @@ export default function CaptureModeSettings({
   }, [payment.provider, payment.providerMethod, request]);
   if (!capabilities.includes("authorize") && !payment.captureMode) return null;
   return (
-    <label>
-      {text("timing")}
-      <select
+    <Field label={text("timing")}>
+      <Select
         value={payment.captureMode ?? ""}
         onChange={(e) =>
           onChange({
@@ -48,7 +48,7 @@ export default function CaptureModeSettings({
         <option value="">{text("inherit")}</option>
         <option value="capture">{text("immediate")}</option>
         <option value="authorize">{text("deferred")}</option>
-      </select>
-    </label>
+      </Select>
+    </Field>
   );
 }

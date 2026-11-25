@@ -1,5 +1,5 @@
 /** Shop currency registry and inherited channel availability. Actions use saved revisions and native job APIs. */
-import { Button, Notice } from "../../kit/ui";
+import { Button, Field, Notice, Select, TextInput } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import type { CurrencyConfig } from "../../shared/api/shop-api";
 import { useCurrencyText } from "../../shared/i18n/currency-i18n";
@@ -137,9 +137,8 @@ export default function CurrencySettings({
             <small>{c("baseHint")}</small>
           </label>
         )}
-        <label>
-          {c("default")}
-          <select
+        <Field label={c("default")}>
+          <Select
             value={cfg.defaultCurrency}
             onChange={(e) => update({ defaultCurrency: e.target.value })}
           >
@@ -148,8 +147,8 @@ export default function CurrencySettings({
                 {label(code)}
               </option>
             ))}
-          </select>
-        </label>
+          </Select>
+        </Field>
       </div>
       <p>
         {c("sourceCurrency")}: <strong>{cfg.pricingCurrency ?? "EUR"}</strong>
@@ -177,9 +176,8 @@ export default function CurrencySettings({
       {!channel && (
         <>
           <div className="currency-add">
-            <label>
-              {c("add")}
-              <select value={add} onChange={(e) => setAdd(e.target.value)}>
+            <Field label={c("add")}>
+              <Select value={add} onChange={(e) => setAdd(e.target.value)}>
                 <option value="">—</option>
                 {catalogue
                   .filter(
@@ -190,8 +188,8 @@ export default function CurrencySettings({
                       {label(d.code)}
                     </option>
                   ))}
-              </select>
-            </label>
+              </Select>
+            </Field>
             <Button
               type="button"
               disabled={!add}
@@ -220,9 +218,8 @@ export default function CurrencySettings({
                   <strong>{label(d.code)}</strong>
                   <small>{d.scale}</small>
                 </header>
-                <label>
-                  {c("rate")}
-                  <input
+                <Field label={c("rate")}>
+                  <TextInput
                     inputMode="decimal"
                     value={d.rate}
                     disabled={d.code === cfg.baseCurrency}
@@ -238,10 +235,9 @@ export default function CurrencySettings({
                       })
                     }
                   />
-                </label>
-                <label>
-                  {c("strategy")}
-                  <select
+                </Field>
+                <Field label={c("strategy")}>
+                  <Select
                     value={d.strategy}
                     onChange={(e) =>
                       update({
@@ -259,8 +255,8 @@ export default function CurrencySettings({
                   >
                     <option value="automatic">{c("automatic")}</option>
                     <option value="fixed">{c("fixed")}</option>
-                  </select>
-                </label>
+                  </Select>
+                </Field>
                 {d.code !== cfg.baseCurrency && (
                   <Button
                     type="button"

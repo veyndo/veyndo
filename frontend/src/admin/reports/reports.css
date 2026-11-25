@@ -297,10 +297,10 @@
   cursor: pointer;
   flex-wrap: wrap;
 }
-.report-library label:has(input:checked) {
+.report-library :is(label, .vy-field):has(input:checked) {
   background: var(--hover, #eef4fb);
 }
-.report-library label:has(input:disabled) {
+.report-library :is(label, .vy-field):has(input:disabled) {
   opacity: 0.6;
   cursor: default;
 }

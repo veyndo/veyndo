@@ -1,5 +1,5 @@
 /** Coding agents receive the current Manifest IR and authoritative schema; imported edits round-trip to the canvas. */
-import { Button } from "../../kit/ui";
+import { Button, Field, Select, TextInput } from "../../kit/ui";
 import { useAppWorkspaceText } from "../../shared/i18n/app-workspace-i18n";
 import { useBuildingText } from "../../shared/i18n/app-building-i18n";
 import ReferenceInputs from "../../shared/canvas/ReferenceInputs";
@@ -186,9 +186,8 @@ export default function AppAgentPanel({
           />
           {agent === "platform" && (
             <div className="app-agent-options">
-              <label>
-                {t("generationMode")}
-                <select
+              <Field label={t("generationMode")}>
+                <Select
                   value={mode}
                   onChange={(e) =>
                     setMode(e.target.value as "edit" | "compose")
@@ -196,11 +195,10 @@ export default function AppAgentPanel({
                 >
                   <option value="edit">{t("editMode")}</option>
                   <option value="compose">{t("composeMode")}</option>
-                </select>
-              </label>
-              <label>
-                {w("provider")}
-                <select
+                </Select>
+              </Field>
+              <Field label={w("provider")}>
+                <Select
                   value={provider}
                   onChange={(event) => {
                     setProvider(event.target.value);
@@ -212,11 +210,10 @@ export default function AppAgentPanel({
                       {p.id === "platform" ? c("platformDefault") : p.name}
                     </option>
                   ))}
-                </select>
-              </label>
-              <label>
-                {w("model")}
-                <input
+                </Select>
+              </Field>
+              <Field label={w("model")}>
+                <TextInput
                   value={
                     model ||
                     studio.providers.find((p) => p.id === provider)?.model ||
@@ -225,7 +222,7 @@ export default function AppAgentPanel({
                   onChange={(event) => setModel(event.target.value)}
                   maxLength={128}
                 />
-              </label>
+              </Field>
             </div>
           )}
           {agent === "platform" && !configured && (

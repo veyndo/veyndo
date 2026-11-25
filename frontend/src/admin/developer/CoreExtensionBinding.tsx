@@ -1,4 +1,5 @@
 /** One understandable native-object selection; relationships, uniqueness and scopes compile together. */
+import { Field, Select } from "../../kit/ui";
 import type { Entity } from "../../shared/apps/native/types";
 import { useCoreExtensionText } from "../../shared/i18n/core-extension-i18n";
 import { bindExtension, type CoreObject } from "./core-extension-model";
@@ -12,9 +13,8 @@ export default function CoreExtensionBinding({
   const t = useCoreExtensionText();
   return (
     <div className="app-data-safety">
-      <label>
-        {t("binding")}
-        <select
+      <Field label={t("binding")}>
+        <Select
           value={entity.extends?.object ?? ""}
           disabled={!entity.extends && entity.fields.length >= 16}
           onChange={(e) =>
@@ -34,8 +34,8 @@ export default function CoreExtensionBinding({
               </option>
             ),
           )}
-        </select>
-      </label>
+        </Select>
+      </Field>
       <p>{t("hint")}</p>
     </div>
   );

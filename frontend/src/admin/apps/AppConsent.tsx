@@ -1,5 +1,5 @@
 /** Review the actual package and permission changes before installation; consent is enforced by the API. */
-import { Notice } from "../../kit/ui";
+import { Badge, Notice } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import type { RequestFn } from "../shell/studio-types";
 import ConfirmDialog from "../../shared/ui/ConfirmDialog";
@@ -92,9 +92,7 @@ export default function AppConsent({
             {review.permissions.map((p) => (
               <li key={p}>
                 <code>{p}</code>
-                {review.added.includes(p) && (
-                  <span className="soft-tag">{t("added")}</span>
-                )}
+                {review.added.includes(p) && <Badge>{t("added")}</Badge>}
               </li>
             ))}
           </ul>

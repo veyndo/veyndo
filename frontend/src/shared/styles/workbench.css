@@ -60,7 +60,7 @@
   padding: 18px 0;
   border-top: 1px solid var(--border);
 }
-.release-change > label {
+.release-change > :is(label, .vy-field) {
   flex-direction: row;
   align-items: center;
 }

@@ -1,5 +1,5 @@
 /** Merchant source chooser and explicit staged creation reuse native product, media and environment owners. */
-import { Button, Notice } from "../../kit/ui";
+import { Button, Field, Notice, Select } from "../../kit/ui";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useCatalogIntakeText } from "../../shared/i18n/catalog-intake-i18n";
 import Icon from "../../shared/ui/Icon";
@@ -233,9 +233,8 @@ export default function CatalogIntake({
         ))}
       </ol>
       <div className="catalog-intake-stage">
-        <label>
-          {c("sandbox")}
-          <select
+        <Field label={c("sandbox")}>
+          <Select
             value={stage}
             disabled={busy || !!preview}
             onChange={(e) => setStage(e.target.value)}
@@ -246,8 +245,8 @@ export default function CatalogIntake({
                 {e.name}
               </option>
             ))}
-          </select>
-        </label>
+          </Select>
+        </Field>
         {access.includes("environments.manage") && !preview && (
           <Button
             type="button"

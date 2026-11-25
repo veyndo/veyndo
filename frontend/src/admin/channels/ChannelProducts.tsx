@@ -1,5 +1,5 @@
 /** Search-based channel product assignment, preserving selected IDs across server-filtered result pages. */
-import { Button, Notice } from "../../kit/ui";
+import { Button, Field, Notice, TextInput } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import type { RequestFn } from "../shell/studio-types";
 import { useChannelText } from "./channel-i18n";
@@ -44,14 +44,13 @@ export default function ChannelProducts({
   }, [request, search]);
   return (
     <div>
-      <label>
-        {t("search")}
-        <input
+      <Field label={t("search")}>
+        <TextInput
           type="search"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
-      </label>
+      </Field>
       <div className="channel-product-chips">
         {value.map((id) => (
           <Button

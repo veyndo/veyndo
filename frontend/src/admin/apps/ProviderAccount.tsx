@@ -1,5 +1,5 @@
 /** Shared installed-provider onboarding and channel connection controls for merchant Apps and App Studio. */
-import { Button, Notice } from "../../kit/ui";
+import { Button, Field, Notice, Select } from "../../kit/ui";
 import { useEffect, useRef, useState } from "react";
 import type { RequestFn } from "../shell/studio-types";
 import type { CountryCatalogue } from "../../shared/geography/geography-types";
@@ -114,9 +114,8 @@ export default function ProviderAccount({
   return (
     <section className="provider-account">
       <h2>{t("account")}</h2>
-      <label>
-        {t("channel")}
-        <select
+      <Field label={t("channel")}>
+        <Select
           disabled={busy}
           value={channel}
           onChange={(e) => {
@@ -134,11 +133,10 @@ export default function ProviderAccount({
               {id}
             </option>
           ))}
-        </select>
-      </label>
-      <label>
-        {t("environment")}
-        <select
+        </Select>
+      </Field>
+      <Field label={t("environment")}>
+        <Select
           disabled={busy || !environments.length}
           value={environment}
           onChange={(e) => {
@@ -156,8 +154,8 @@ export default function ProviderAccount({
                 : t(env as "simulation" | "sandbox" | "live")}
             </option>
           ))}
-        </select>
-      </label>
+        </Select>
+      </Field>
       {!environments.length && <p role="status">{t("deploy")}</p>}
       {environment === "simulation" && (
         <p role="status">{t("simulationHint")}</p>

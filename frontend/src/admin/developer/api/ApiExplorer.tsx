@@ -1,5 +1,5 @@
 /** Source-derived static route explorer, runtime app discovery and isolated same-origin read tests. */
-import { Button, Card } from "../../../kit/ui";
+import { Badge, Button, Card, Field, TextInput } from "../../../kit/ui";
 import { useState } from "react";
 import { useQuery } from "../../../kit/query";
 import { fillPath, routes, type Route } from "../../../kit/api";
@@ -75,16 +75,15 @@ export default function ApiExplorer({
       <p>
         {t("scope")}: <code>{workspace}</code>
       </p>
-      <label>
-        {t("search")}
-        <input
+      <Field label={t("search")}>
+        <TextInput
           type="search"
           name="veyndo-api-route-filter"
           autoComplete="off"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
-      </label>
+      </Field>
       <div className="api-explorer-grid">
         <div className="api-route-list">
           {routes
@@ -106,15 +105,14 @@ export default function ApiExplorer({
                   setResult("");
                 }}
               >
-                <span className="soft-tag">{r.method}</span>
+                <Badge>{r.method}</Badge>
                 <code>{r.path}</code>
               </button>
             ))}
         </div>
         <div>
           <h3>
-            <span className="soft-tag">{selected.method}</span>{" "}
-            <code>{selected.path}</code>
+            <Badge>{selected.method}</Badge> <code>{selected.path}</code>
           </h3>
           <small>{selected.source}</small>
           {Array.from(selected.path.matchAll(/\{([^}]+)\}/g), (m) => m[1]).map(
@@ -131,16 +129,15 @@ export default function ApiExplorer({
               </label>
             ),
           )}
-          <label>
-            {t("key")}
-            <input
+          <Field label={t("key")}>
+            <TextInput
               type="password"
               name="veyndo-api-test-credential"
               autoComplete="new-password"
               value={key}
               onChange={(e) => setKey(e.target.value)}
             />
-          </label>
+          </Field>
           <div className="workbench-row">
             <Button
               tone="primary"

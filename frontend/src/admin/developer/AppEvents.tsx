@@ -1,4 +1,5 @@
 /** Edits the validated subscription/filter/batch contract; delivery uses the existing leased outbox. */
+import { Field, Select, TextInput } from "../../kit/ui";
 import type { Manifest } from "../../shared/apps/native/types";
 import { useAppStudioText } from "../../shared/i18n/app-studio-i18n";
 export default function AppEvents({
@@ -43,9 +44,8 @@ export default function AppEvents({
       <h3>{a("subscriptions")}</h3>
       {events.map((event, index) => (
         <div className="app-access-row" key={index}>
-          <label>
-            {a("eventPattern")}
-            <input
+          <Field label={a("eventPattern")}>
+            <TextInput
               value={event}
               maxLength={100}
               onChange={(e) => {
@@ -70,7 +70,7 @@ export default function AppEvents({
                 });
               }}
             />
-          </label>
+          </Field>
           <button
             type="button"
             onClick={() => setEvents(events.filter((_, i) => i !== index))}
@@ -91,9 +91,8 @@ export default function AppEvents({
           <p>{a("eventFilterHint")}</p>
           {filters.map((filter, index) => (
             <section className="app-model-card" key={index}>
-              <label>
-                {a("eventFilter")}
-                <select
+              <Field label={a("eventFilter")}>
+                <Select
                   value={filter.event}
                   onChange={(e) =>
                     onChange({
@@ -109,14 +108,13 @@ export default function AppEvents({
                       {event}
                     </option>
                   ))}
-                </select>
-              </label>
+                </Select>
+              </Field>
               {Object.entries(filter.equals).map(
                 ([field, value], condition) => (
                   <div className="app-access-row" key={condition}>
-                    <label>
-                      {a("filterField")}
-                      <input
+                    <Field label={a("filterField")}>
+                      <TextInput
                         value={field}
                         maxLength={64}
                         onChange={(e) =>
@@ -130,10 +128,9 @@ export default function AppEvents({
                           )
                         }
                       />
-                    </label>
-                    <label>
-                      {a("type")}
-                      <select
+                    </Field>
+                    <Field label={a("type")}>
+                      <Select
                         value={value === null ? "null" : typeof value}
                         onChange={(e) =>
                           editFilter(index, {
@@ -153,8 +150,8 @@ export default function AppEvents({
                         <option value="number">{a("integer")}</option>
                         <option value="boolean">{a("boolean")}</option>
                         <option value="null">{a("nullValue")}</option>
-                      </select>
-                    </label>
+                      </Select>
+                    </Field>
                     {typeof value === "boolean" ? (
                       <label className="app-check">
                         <input
@@ -249,9 +246,8 @@ export default function AppEvents({
           >
             {a("addEventFilter")}
           </button>
-          <label>
-            {a("eventBatch")}
-            <input
+          <Field label={a("eventBatch")}>
+            <TextInput
               type="number"
               min={1}
               max={25}
@@ -266,16 +262,15 @@ export default function AppEvents({
                 })
               }
             />
-          </label>
-          <label>
-            {a("eventDestination")}
-            <input
+          </Field>
+          <Field label={a("eventDestination")}>
+            <TextInput
               type="url"
               value={manifest.eventDelivery?.url ?? ""}
               maxLength={2048}
               onChange={(e) => destination(e.target.value)}
             />
-          </label>
+          </Field>
           <p>{a("eventDestinationHint")}</p>
         </>
       )}

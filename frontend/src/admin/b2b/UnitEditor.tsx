@@ -1,5 +1,5 @@
 /** Purchasing unit policies, hierarchy, catalogs and customer grants share current revision checks. */
-import { Button } from "../../kit/ui";
+import { Button, Field, Select, TextInput } from "../../kit/ui";
 import { useState } from "react";
 import type { RequestFn } from "../../shared/api/types";
 import LocalizedField from "../../shared/i18n/LocalizedField";
@@ -102,24 +102,22 @@ export default function UnitEditor({
       ) : (
         <>
           <div className="b2b-fields">
-            <label>
-              {t("identifier")}
-              <input
+            <Field label={t("identifier")}>
+              <TextInput
                 disabled={selected.revision > 0 || busy}
                 value={selected.id}
                 onChange={(e) =>
                   setSelected({ ...selected, id: e.target.value })
                 }
               />
-            </label>
+            </Field>
             <LocalizedField
               label={t("name")}
               value={selected.data.name}
               onChange={(name) => update({ name })}
             />
-            <label>
-              {t("company")}
-              <select
+            <Field label={t("company")}>
+              <Select
                 value={selected.parentId ?? ""}
                 onChange={(e) =>
                   setSelected({
@@ -138,29 +136,26 @@ export default function UnitEditor({
                       {contentText(u.data.name, locale, config.mainLocale)}
                     </option>
                   ))}
-              </select>
-            </label>
-            <label>
-              {t("currency")}
-              <select
+              </Select>
+            </Field>
+            <Field label={t("currency")}>
+              <Select
                 value={selected.data.currency}
                 onChange={(e) => update({ currency: e.target.value })}
               >
                 {config.currencies.enabled.map((c: string) => (
                   <option key={c}>{c}</option>
                 ))}
-              </select>
-            </label>
-            <label>
-              {t("costCenter")}
-              <input
+              </Select>
+            </Field>
+            <Field label={t("costCenter")}>
+              <TextInput
                 value={selected.data.costCenter}
                 onChange={(e) => update({ costCenter: e.target.value })}
               />
-            </label>
-            <label>
-              {t("period")}
-              <select
+            </Field>
+            <Field label={t("period")}>
+              <Select
                 value={selected.data.budgetPeriod}
                 onChange={(e) => update({ budgetPeriod: e.target.value })}
               >
@@ -169,11 +164,10 @@ export default function UnitEditor({
                     {t(p)}
                   </option>
                 ))}
-              </select>
-            </label>
-            <label>
-              {t("budget")}
-              <input
+              </Select>
+            </Field>
+            <Field label={t("budget")}>
+              <TextInput
                 type="number"
                 min={0}
                 step={1}
@@ -185,10 +179,9 @@ export default function UnitEditor({
                   })
                 }
               />
-            </label>
-            <label>
-              {t("threshold")}
-              <input
+            </Field>
+            <Field label={t("threshold")}>
+              <TextInput
                 type="number"
                 min={0}
                 step={1}
@@ -200,7 +193,7 @@ export default function UnitEditor({
                   })
                 }
               />
-            </label>
+            </Field>
           </div>
           <p className="b2b-muted">{t("moneyHint")}</p>
           <div className="b2b-toggles">

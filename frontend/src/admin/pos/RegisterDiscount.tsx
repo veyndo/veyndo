@@ -1,4 +1,5 @@
 /** Discretionary discounts send exact integer requests, never alter browser totals; shared pricing supplies tax and audit. */
+import { Field, TextInput } from "../../kit/ui";
 import { useState } from "react";
 import Icon from "../../shared/ui/Icon";
 import { useLocale } from "../../shared/i18n/i18n";
@@ -86,23 +87,21 @@ export default function RegisterDiscount({
             });
         }}
       >
-        <label>
-          {t(kind === "percent" ? "percentage" : "amount")}
-          <input
+        <Field label={t(kind === "percent" ? "percentage" : "amount")}>
+          <TextInput
             inputMode="decimal"
             value={value}
             onChange={(e) => setValue(e.target.value)}
           />
-        </label>
-        <label>
-          {t("reason")}
-          <input
+        </Field>
+        <Field label={t("reason")}>
+          <TextInput
             required
             value={reason}
             maxLength={240}
             onChange={(e) => setReason(e.target.value)}
           />
-        </label>
+        </Field>
         <button disabled={r.busy || !valid || !reason.trim()}>
           {t("apply")}
         </button>

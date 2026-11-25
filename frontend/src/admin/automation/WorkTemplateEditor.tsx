@@ -1,5 +1,5 @@
 /** Bounded field-to-event mapping over the original native operations, never a second executor. */
-import { Card, Notice } from "../../kit/ui";
+import { Card, Field, Notice, Select, TextInput } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import {
   scalarFields,
@@ -66,9 +66,8 @@ export default function WorkTemplateEditor({
     <section className="work-template-editor">
       <h3>{t("title")}</h3>
       <p>{t("hint")}</p>
-      <label>
-        {t("limit")}
-        <input
+      <Field label={t("limit")}>
+        <TextInput
           type="number"
           min={1}
           max={100}
@@ -78,7 +77,7 @@ export default function WorkTemplateEditor({
             onChange({ ...value, dailyLimit: Number(e.target.value) })
           }
         />
-      </label>
+      </Field>
       {steps.map((step, index) => {
         let args: unknown;
         try {
@@ -101,9 +100,8 @@ export default function WorkTemplateEditor({
               <code>{step.name}</code>
             </p>
             <div className="connector-settings">
-              <label>
-                {t("field")}
-                <select
+              <Field label={t("field")}>
+                <Select
                   value={pointer}
                   onChange={(e) =>
                     setSelected({ ...selected, [index]: e.target.value })
@@ -114,11 +112,10 @@ export default function WorkTemplateEditor({
                       {f.pointer}
                     </option>
                   ))}
-                </select>
-              </label>
-              <label>
-                {t("source")}
-                <select
+                </Select>
+              </Field>
+              <Field label={t("source")}>
+                <Select
                   value={source}
                   onChange={(e) =>
                     onChange({
@@ -153,8 +150,8 @@ export default function WorkTemplateEditor({
                     "number" && (
                     <option value="event.revision">{t("revision")}</option>
                   )}
-                </select>
-              </label>
+                </Select>
+              </Field>
             </div>
             <p>
               <code>

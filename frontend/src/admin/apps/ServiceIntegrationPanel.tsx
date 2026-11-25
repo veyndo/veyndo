@@ -1,5 +1,5 @@
 /** Revisioned encrypted connection forms and bounded operations on the existing app action gateway. */
-import { Button, Notice } from "../../kit/ui";
+import { Button, Field, Notice, TextInput } from "../../kit/ui";
 import { useEffect, useRef, useState } from "react";
 import type { RequestFn } from "../shell/studio-types";
 import { serviceIntegrations } from "./service-integrations";
@@ -133,16 +133,15 @@ export default function ServiceIntegrationPanel({
                 />
               </label>
             ))}
-            <label>
-              {t("credential")}
-              <input
+            <Field label={t("credential")}>
+              <TextInput
                 type="password"
                 autoComplete="new-password"
                 value={credential}
                 onChange={(e) => setCredential(e.target.value)}
                 maxLength={4000}
               />
-            </label>
+            </Field>
             <small>{t("protected")}</small>
             <p>{t(status?.credentialConfigured ? "saved" : "missing")}</p>
             <Button tone="primary" type="submit">

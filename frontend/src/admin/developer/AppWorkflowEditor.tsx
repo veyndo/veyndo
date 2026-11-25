@@ -1,4 +1,5 @@
 /** Visual status edges use the exact app manifest contract enforced by native record storage. */
+import { Field, Select } from "../../kit/ui";
 import type { Entity } from "../../shared/apps/native/types";
 import { useContentLanguage } from "../../shared/i18n/ContentLanguage";
 import { contentText } from "../../shared/i18n/content-language";
@@ -28,9 +29,8 @@ export default function AppWorkflowEditor({
     <details className="app-workflow-editor" open={!!w}>
       <summary>{a("recordWorkflow")}</summary>
       <p>{a("workflowHint")}</p>
-      <label>
-        {a("workflowField")}
-        <select
+      <Field label={a("workflowField")}>
+        <Select
           value={w?.field ?? ""}
           onChange={(e) => {
             const f = fields.find((f) => f.name === e.target.value);
@@ -53,13 +53,12 @@ export default function AppWorkflowEditor({
               {contentText(f.label, locale, mainLocale) || f.name}
             </option>
           ))}
-        </select>
-      </label>
+        </Select>
+      </Field>
       {w && field && (
         <>
-          <label>
-            {a("initialState")}
-            <select
+          <Field label={a("initialState")}>
+            <Select
               value={w.initial}
               onChange={(e) =>
                 onChange({
@@ -73,8 +72,8 @@ export default function AppWorkflowEditor({
                   {label(c.value)}
                 </option>
               ))}
-            </select>
-          </label>
+            </Select>
+          </Field>
           <div className="app-workflow-edges">
             {field.choices!.flatMap((from) =>
               field

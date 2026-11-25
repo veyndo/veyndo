@@ -1,4 +1,5 @@
 /** JSON editing retains incomplete input and invalidates the actual payload instead of silently saving the last valid value. */
+import { Field, TextArea } from "../../kit/ui";
 import { useEffect, useRef, useState } from "react";
 export default function JsonField({
   label,
@@ -21,9 +22,8 @@ export default function JsonField({
     }
   }, [encoded]);
   return (
-    <label>
-      {label}
-      <textarea
+    <Field label={label}>
+      <TextArea
         value={draft}
         onChange={(e) => {
           const text = e.target.value;
@@ -45,6 +45,6 @@ export default function JsonField({
           }
         }}
       />
-    </label>
+    </Field>
   );
 }

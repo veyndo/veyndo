@@ -1,4 +1,5 @@
 /** Original metadata drives typed condition inputs, including nested source scopes; unsupported runtimes stay visibly disabled. */
+import { Field, Select } from "../../kit/ui";
 import CustomFieldCondition from "./CustomFieldCondition";
 import type { ReactNode } from "react";
 import { useAutomationText } from "../../shared/i18n/automation-i18n";
@@ -27,17 +28,16 @@ export default function SourceRuleFields({
         {a("source")} · {definition.source}
       </small>
       {definition.config?.operatorSet && (
-        <label>
-          {a("operator")}
-          <select
+        <Field label={a("operator")}>
+          <Select
             value={config.operator ?? "="}
             onChange={(e) => set("operator", e.target.value)}
           >
             {definition.config.operatorSet.operators.map((op) => (
               <option key={op}>{op}</option>
             ))}
-          </select>
-        </label>
+          </Select>
+        </Field>
       )}
       {Object.values(definition.config?.fields ?? {})
         .filter(() => config.operator !== "empty")

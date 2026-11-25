@@ -1,5 +1,5 @@
 /** PreviewPanel renders verified shop state and typed user actions. */
-import { Button, Notice } from "../../kit/ui";
+import { Button, Field, Notice, Select } from "../../kit/ui";
 import { mediaImage } from "../../shared/media/product-media";
 import { useEffect, useRef, useState } from "react";
 import { useLocale } from "../../shared/i18n/i18n";
@@ -123,9 +123,8 @@ export function PreviewPanel({
               <Icon name="pulse" size={18} />
             </div>
             <p>{t("simulationHint")}</p>
-            <label>
-              {t("group")}
-              <select value={group} onChange={(e) => setGroup(e.target.value)}>
+            <Field label={t("group")}>
+              <Select value={group} onChange={(e) => setGroup(e.target.value)}>
                 {groups.map((g) => (
                   <option key={g.id} value={g.id}>
                     {inheritedText(
@@ -136,8 +135,8 @@ export function PreviewPanel({
                     ) || g.id}
                   </option>
                 ))}
-              </select>
-            </label>
+              </Select>
+            </Field>
             <label>
               {t("quantity")}
               <div className="quantity-input">

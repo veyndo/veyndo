@@ -1,4 +1,5 @@
 /** Editable triggers are declared alongside UI and actions; secrets remain operator-managed. */
+import { Field, TextInput } from "../../kit/ui";
 import { useAssistantText } from "../../shared/i18n/app-assistant-i18n";
 import type { Manifest } from "../../shared/apps/native/types";
 import AppEvents from "./AppEvents";
@@ -24,9 +25,8 @@ export default function AppAutomation({
       {schedules.map((s, i) => (
         <div className="app-access-row" key={s.id}>
           <code>{`app.${manifest.id}.${s.action}`}</code>
-          <label>
-            {t("cron")}
-            <input
+          <Field label={t("cron")}>
+            <TextInput
               value={s.cron}
               maxLength={100}
               onChange={(e) =>
@@ -38,7 +38,7 @@ export default function AppAutomation({
                 })
               }
             />
-          </label>
+          </Field>
           <label className="app-check">
             <input
               type="checkbox"

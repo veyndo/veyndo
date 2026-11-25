@@ -1,5 +1,5 @@
 /** Explicit consent for digest-bound server callback keys; plaintext is shown once and never persisted in the browser. */
-import { Button, Notice } from "../../kit/ui";
+import { Button, Field, Notice, TextInput } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import type { RequestFn } from "../shell/studio-types";
 import ConfirmDialog from "../../shared/ui/ConfirmDialog";
@@ -120,9 +120,8 @@ export default function AppAccess({
               {t(p)}
             </label>
           ))}
-          <label>
-            {t("days")}
-            <input
+          <Field label={t("days")}>
+            <TextInput
               type="number"
               required
               min="1"
@@ -130,7 +129,7 @@ export default function AppAccess({
               value={days}
               onChange={(e) => setDays(e.target.value)}
             />
-          </label>
+          </Field>
           <Button
             tone="primary"
             type="submit"

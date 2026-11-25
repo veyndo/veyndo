@@ -1,4 +1,5 @@
 /** Channel kind and POS presentation editor use the existing channel/content-language contract. */
+import { Field, Select } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import CountryPicker from "../../shared/geography/CountryPicker";
 import type { Country } from "../../shared/geography/geography-types";
@@ -111,9 +112,8 @@ export default function ChannelType({
             />
             {countryError && <small role="alert">{countryError}</small>}
           </div>
-          <label>
-            {p("columns")}
-            <select
+          <Field label={p("columns")}>
+            <Select
               value={config.columns}
               onChange={(e) =>
                 patch({ pos: { ...config, columns: Number(e.target.value) } })
@@ -124,8 +124,8 @@ export default function ChannelType({
                   {n}
                 </option>
               ))}
-            </select>
-          </label>
+            </Select>
+          </Field>
           <label>
             <input
               type="checkbox"

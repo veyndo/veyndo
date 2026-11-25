@@ -45,7 +45,7 @@
   cursor: default;
   opacity: 1;
 }
-.studio .company-field .geo-picker > label {
+.studio .company-field .geo-picker > :is(label, .vy-field) {
   display: none;
 }
 .studio .company-logo {

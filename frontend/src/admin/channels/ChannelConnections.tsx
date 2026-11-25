@@ -1,5 +1,5 @@
 /** Uses the existing tenant-owned frontend registry, not a parallel domain or Experience store. */
-import { Button, Notice } from "../../kit/ui";
+import { Button, Field, Notice, Select, TextInput } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import type { RequestFn } from "../shell/studio-types";
 import {
@@ -128,9 +128,8 @@ export default function ChannelConnections({
                 </a>
               )}
             </div>
-            <label>
-              {t("channel")}
-              <select
+            <Field label={t("channel")}>
+              <Select
                 value={f.channel}
                 disabled={disabled || busy}
                 onChange={(e) =>
@@ -147,8 +146,8 @@ export default function ChannelConnections({
                     {contentText(c.data.name, locale, mainLocale) || c.id}
                   </option>
                 ))}
-              </select>
-            </label>
+              </Select>
+            </Field>
             <Button
               type="submit"
               disabled={disabled || busy}
@@ -172,19 +171,17 @@ export default function ChannelConnections({
           }}
         >
           <h3>{t("add")}</h3>
-          <label>
-            {t("domain")}
-            <input
+          <Field label={t("domain")}>
+            <TextInput
               value={alias}
               onChange={(e) => setAlias(e.target.value.toLowerCase())}
               pattern="[a-z0-9][a-z0-9-]{0,46}[a-z0-9]"
               required
               disabled={disabled || busy}
             />
-          </label>
-          <label>
-            {t("experience")}
-            <select
+          </Field>
+          <Field label={t("experience")}>
+            <Select
               value={experience || experiences[0]}
               onChange={(e) => setExperience(e.target.value)}
               disabled={disabled || busy}
@@ -192,8 +189,8 @@ export default function ChannelConnections({
               {experiences.map((id) => (
                 <option key={id}>{id}</option>
               ))}
-            </select>
-          </label>
+            </Select>
+          </Field>
           <Button
             tone="primary"
             type="submit"

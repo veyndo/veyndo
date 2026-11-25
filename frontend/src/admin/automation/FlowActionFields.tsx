@@ -1,4 +1,5 @@
 /** Focused source action forms expose only supported native parameters; app service dispatch stays in the app gateway. */
+import { Field, Select } from "../../kit/ui";
 import JsonField from "./JsonField";
 import LocalizedField from "../../shared/i18n/LocalizedField";
 import FlowInputs from "./FlowInputs";
@@ -91,9 +92,8 @@ export default function FlowActionFields({
       )}
       {action === "app_action" && (
         <div>
-          <label>
-            {a("app")}
-            <select
+          <Field label={a("app")}>
+            <Select
               value={config.app ?? ""}
               onChange={(e) => {
                 const app = catalog?.apps.find((a) => a.id === e.target.value);
@@ -116,11 +116,10 @@ export default function FlowActionFields({
                     {app.manifest.name.en ?? app.id}
                   </option>
                 ))}
-            </select>
-          </label>
-          <label>
-            {a("action")}
-            <select
+            </Select>
+          </Field>
+          <Field label={a("action")}>
+            <Select
               value={config.action ?? ""}
               onChange={(e) =>
                 onChange({ ...config, action: e.target.value, arguments: {} })
@@ -135,8 +134,8 @@ export default function FlowActionFields({
                     {item.name}
                   </option>
                 ))}
-            </select>
-          </label>
+            </Select>
+          </Field>
           <FlowInputs
             key={`${config.app}:${config.action}`}
             action={catalog?.apps

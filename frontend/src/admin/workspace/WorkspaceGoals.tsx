@@ -1,5 +1,5 @@
 /** Goals reference the existing proposal owner; no parallel worker, executor or approval queue. */
-import { Button, Card, Notice } from "../../kit/ui";
+import { Button, Card, Field, Notice, Select, TextInput } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import { canOpenStudio } from "../shell/permissions";
 import type { Tab } from "../shell/navigation";
@@ -70,15 +70,14 @@ export default function WorkspaceGoals({
           setTitle("");
         }}
       >
-        <label>
-          {t("goal")}
-          <input
+        <Field label={t("goal")}>
+          <TextInput
             value={title}
             maxLength={1000}
             onChange={(e) => setTitle(e.target.value)}
             placeholder={t("placeholder")}
           />
-        </label>
+        </Field>
         <Button type="submit" disabled={!title.trim() || goals.length >= 30}>
           <Icon name="plus" />
           {t("addGoal")}
@@ -88,9 +87,8 @@ export default function WorkspaceGoals({
       {goals.map((g) => (
         <article className="personal-goal" key={g.id}>
           <strong>{g.title}</strong>
-          <label>
-            {t("status")}
-            <select
+          <Field label={t("status")}>
+            <Select
               value={g.status}
               onChange={(e) =>
                 patch(g.id, { status: e.target.value as Goal["status"] })
@@ -103,8 +101,8 @@ export default function WorkspaceGoals({
                   {t(s)}
                 </option>
               ))}
-            </select>
-          </label>
+            </Select>
+          </Field>
           {allowed && (
             <select
               aria-label={t("tasks")}

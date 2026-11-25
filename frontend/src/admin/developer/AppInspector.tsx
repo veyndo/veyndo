@@ -1,4 +1,5 @@
 /** One content language edits app/view/block metadata; changing bindings updates the actual manifest. */
+import { Badge, Field, Select, TextInput } from "../../kit/ui";
 import MediaCaptionEditor from "../../shared/media/MediaCaptionEditor";
 import type { RequestFn } from "../../shared/api/types";
 import AppControlProperties from "./AppControlProperties";
@@ -44,9 +45,9 @@ export default function AppInspector({
       <span className="app-panel-label">{a("inspector")}</span>
       {block ? (
         <>
-          <span className="soft-tag">
+          <Badge>
             {a(block.kind)} · {block.id}
-          </span>
+          </Badge>
           <LocalizedField
             label={a("title")}
             value={block.title}
@@ -155,31 +156,28 @@ export default function AppInspector({
           required
           maxLength={100}
         />
-        <label>
-          {a("id")}
-          <input
+        <Field label={a("id")}>
+          <TextInput
             value={manifest.id}
             maxLength={32}
             onChange={(e) => onChange({ ...manifest, id: e.target.value })}
           />
-        </label>
-        <label>
-          {a("version")}
-          <input
+        </Field>
+        <Field label={a("version")}>
+          <TextInput
             value={manifest.version}
             maxLength={32}
             onChange={(e) => onChange({ ...manifest, version: e.target.value })}
           />
-        </label>
+        </Field>
       </details>
       <div className="app-inspector-divider" />
       <details className="app-metadata">
         <summary>
           {a("layout")} · {a("location")}
         </summary>
-        <label>
-          {a("layout")}
-          <select
+        <Field label={a("layout")}>
+          <Select
             value={view.layout}
             onChange={(e) =>
               patch({ layout: e.target.value as NativeView["layout"] })
@@ -188,13 +186,12 @@ export default function AppInspector({
             <option value="stack">{a("stack")}</option>
             <option value="grid">{a("grid")}</option>
             <option value="form">{a("formDesigner")}</option>
-          </select>
-        </label>
+          </Select>
+        </Field>
         {surface && (
           <>
-            <label>
-              {a("location")}
-              <select
+            <Field label={a("location")}>
+              <Select
                 value={surface.location}
                 onChange={(e) =>
                   onChange({
@@ -214,8 +211,8 @@ export default function AppInspector({
                       {placements[key] ? t(placements[key]) : a(locations[key])}
                     </option>
                   ))}
-              </select>
-            </label>
+              </Select>
+            </Field>
             <LocalizedField
               label={a("title")}
               value={surface.label}

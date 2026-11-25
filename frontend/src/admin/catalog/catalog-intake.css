@@ -134,7 +134,7 @@
 .catalog-intake-images {
   padding: 16px 0;
 }
-.catalog-intake-images > label,
+.catalog-intake-images > :is(label, .vy-field),
 .catalog-intake-products .catalog-intake-select {
   display: flex;
   align-items: center;

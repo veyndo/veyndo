@@ -1,5 +1,5 @@
 /** OverviewView renders verified shop state and typed user actions. */
-import { Card } from "../../kit/ui";
+import { Badge, Card } from "../../kit/ui";
 import { useReportText } from "../reports/report-i18n";
 import StudioSlot from "../shell/registry/StudioSlot";
 import { useCatalogIntakeText } from "../../shared/i18n/catalog-intake-i18n";
@@ -35,7 +35,7 @@ export function OverviewView({
         <Card className="inventory-card">
           <div className="card-heading">
             <h2>{t("inventory")}</h2>
-            <span className="soft-tag">{t("api")}</span>
+            <Badge>{t("api")}</Badge>
           </div>
           {data.products.map((p) => (
             <button

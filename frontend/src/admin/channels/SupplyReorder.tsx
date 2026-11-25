@@ -1,5 +1,5 @@
 /** Supplier links in the native settings revision and reorder proposals with signed supplier offers; approval hands over to the supplier checkout. */
-import { Button, Card, Notice } from "../../kit/ui";
+import { Button, Card, Field, Notice, TextInput } from "../../kit/ui";
 import { useState } from "react";
 import type { Config } from "../../shared/api/shop-api";
 import type { RequestFn } from "../shell/studio-types";
@@ -179,9 +179,8 @@ export default function SupplyReorder({
                     />
                   </label>
                 ))}
-                <label>
-                  {t("point")}
-                  <input
+                <Field label={t("point")}>
+                  <TextInput
                     type="number"
                     min={0}
                     max={100000}
@@ -190,10 +189,9 @@ export default function SupplyReorder({
                       change({ reorderPoint: Number(e.target.value) })
                     }
                   />
-                </label>
-                <label>
-                  {t("quantity")}
-                  <input
+                </Field>
+                <Field label={t("quantity")}>
+                  <TextInput
                     type="number"
                     min={1}
                     max={1000}
@@ -202,7 +200,7 @@ export default function SupplyReorder({
                       change({ reorderQuantity: Number(e.target.value) })
                     }
                   />
-                </label>
+                </Field>
                 <Button
                   type="button"
                   onClick={() =>

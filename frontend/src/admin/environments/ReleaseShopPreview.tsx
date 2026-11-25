@@ -1,5 +1,5 @@
 /** Explicit native sandbox preview rechecks the saved run; it never attests a historical render. */
-import { Button, Notice } from "../../kit/ui";
+import { Button, Field, Notice, Select } from "../../kit/ui";
 import { useEffect, useRef, useState } from "react";
 import type { RequestFn } from "../shell/studio-types";
 import type { Report, Run } from "../scenarios/scenario-types";
@@ -73,9 +73,8 @@ export default function ReleaseShopPreview({
       <p>{t("hint")}</p>
       <div className="release-preview-controls">
         {report.runs.length > 1 && (
-          <label>
-            {t("profile")}
-            <select
+          <Field label={t("profile")}>
+            <Select
               value={task}
               onChange={(e) => {
                 close();
@@ -87,8 +86,8 @@ export default function ReleaseShopPreview({
                   {run.scenario?.profile.name ?? run.taskId}
                 </option>
               ))}
-            </select>
-          </label>
+            </Select>
+          </Field>
         )}
         <Button
           type="button"
@@ -112,16 +111,15 @@ export default function ReleaseShopPreview({
             <p className="release-preview-context">
               {scenario.channel} · {scenario.profile.locale}
             </p>
-            <label>
-              {t("device")}
-              <select
+            <Field label={t("device")}>
+              <Select
                 value={device}
                 onChange={(e) => setDevice(e.target.value)}
               >
                 <option value="desktop">{t("desktop")}</option>
                 <option value="mobile">{t("mobile")}</option>
-              </select>
-            </label>
+              </Select>
+            </Field>
             <a
               className="studio-secondary"
               href={url}

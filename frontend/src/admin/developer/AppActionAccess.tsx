@@ -1,4 +1,5 @@
 /** Team permissions and MCP visibility are independent from public storefront reads and AI grounding. */
+import { Field, Select } from "../../kit/ui";
 import { permissionScopes } from "../team/permission-i18n";
 import { usePermissionText } from "../team/permission-i18n";
 import { useAssistantText } from "../../shared/i18n/app-assistant-i18n";
@@ -25,9 +26,8 @@ export default function AppActionAccess({
       {manifest.actions?.map((action) => (
         <div className="app-access-row" key={action.name}>
           <code>{action.name}</code>
-          <label>
-            {t("permission")}
-            <select
+          <Field label={t("permission")}>
+            <Select
               value={action.permission ?? ""}
               disabled={action.public}
               onChange={(e) =>
@@ -49,8 +49,8 @@ export default function AppActionAccess({
                   {pt(s)} ({s})
                 </option>
               ))}
-            </select>
-          </label>
+            </Select>
+          </Field>
           <label className="app-check">
             <input
               type="checkbox"

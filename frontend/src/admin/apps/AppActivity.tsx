@@ -1,5 +1,5 @@
 /** API-backed per-app call metadata, storage budgets and explicitly approved durable replay. */
-import { Button, Notice } from "../../kit/ui";
+import { Button, Field, Notice, TextInput } from "../../kit/ui";
 import AppJobs from "./AppJobs";
 import { useEffect, useState } from "react";
 import type { RequestFn } from "../shell/studio-types";
@@ -151,9 +151,8 @@ export default function AppActivity({
             setConfirm(true);
           }}
         >
-          <label>
-            {t("cursor")}
-            <input
+          <Field label={t("cursor")}>
+            <TextInput
               type="number"
               min="0"
               step="1"
@@ -161,7 +160,7 @@ export default function AppActivity({
               value={cursor}
               onChange={(e) => setCursor(e.target.value)}
             />
-          </label>
+          </Field>
           <Button
             type="submit"
             disabled={

@@ -1,4 +1,5 @@
 /** Grants reference actual customer identities, never email guesses; pauses retain historical purchases. */
+import { Field, TextInput } from "../../kit/ui";
 import CustomerPicker from "./CustomerPicker";
 import { useEffect, useState } from "react";
 import type { RequestFn } from "../../shared/api/types";
@@ -41,9 +42,8 @@ export default function Members({
           onChange={setSelected}
           disabled={busy}
         />
-        <label>
-          {t("threshold")}
-          <input
+        <Field label={t("threshold")}>
+          <TextInput
             type="number"
             min={0}
             step={1}
@@ -54,7 +54,7 @@ export default function Members({
               )
             }
           />
-        </label>
+        </Field>
         <div className="b2b-permissions">
           {memberPermissions.map((p) => (
             <label key={p}>

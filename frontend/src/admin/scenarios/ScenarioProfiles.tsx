@@ -1,5 +1,5 @@
 /** Editable fictional customers share the channel's actual languages, countries and currency. */
-import { Button } from "../../kit/ui";
+import { Button, Field, Select, TextInput } from "../../kit/ui";
 import type { Dispatch, SetStateAction } from "react";
 import EntityPicker from "../../shared/geography/EntityPicker";
 import { useLocale } from "../../shared/i18n/i18n";
@@ -54,14 +54,13 @@ export default function ScenarioProfiles({
             >
               <Icon name="close" />
             </button>
-            <label>
-              {t("profile")}
-              <input
+            <Field label={t("profile")}>
+              <TextInput
                 value={p.name}
                 maxLength={80}
                 onChange={(e) => edit(index, { name: e.target.value })}
               />
-            </label>
+            </Field>
             <textarea
               aria-label={`${t("goal")} · ${p.name}`}
               value={p.goal}
@@ -86,9 +85,8 @@ export default function ScenarioProfiles({
               />
             </label>
             <div className="scenario-profile-context">
-              <label>
-                {t("language")}
-                <select
+              <Field label={t("language")}>
+                <Select
                   value={p.locale}
                   onChange={(e) => edit(index, { locale: e.target.value })}
                 >
@@ -97,8 +95,8 @@ export default function ScenarioProfiles({
                       {languageNames.of(l) ?? l}
                     </option>
                   ))}
-                </select>
-              </label>
+                </Select>
+              </Field>
               <EntityPicker
                 label={t("country")}
                 single

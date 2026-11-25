@@ -1,5 +1,12 @@
 /** Personal, expiring, least-privilege integration keys; plaintext stays in component memory and is never reloaded. */
-import { Button, Card, Notice } from "../../../kit/ui";
+import {
+  Button,
+  Card,
+  Field,
+  Notice,
+  Select,
+  TextInput,
+} from "../../../kit/ui";
 import "../api-console.css";
 import { useEffect, useRef, useState } from "react";
 import type { RequestFn } from "../../shell/studio-types";
@@ -134,9 +141,8 @@ export default function IntegrationKeys({ request }: { request: RequestFn }) {
       >
         <fieldset disabled={!manage || busy}>
           <div className="api-key-fields">
-            <label>
-              {at("kind")}
-              <select
+            <Field label={at("kind")}>
+              <Select
                 value={purpose}
                 onChange={(e) => {
                   setPurpose(e.target.value);
@@ -146,20 +152,18 @@ export default function IntegrationKeys({ request }: { request: RequestFn }) {
               >
                 <option value="api">{at("api")}</option>
                 {personal && <option value="agent">{at("agent")}</option>}
-              </select>
-            </label>
-            <label>
-              {t("name")}
-              <input
+              </Select>
+            </Field>
+            <Field label={t("name")}>
+              <TextInput
                 required
                 maxLength={100}
                 value={name}
                 onChange={(e) => setName(e.target.value)}
               />
-            </label>
-            <label>
-              {t("lifetime")}
-              <select
+            </Field>
+            <Field label={t("lifetime")}>
+              <Select
                 value={permanent ? "permanent" : "limited"}
                 onChange={(e) => setPermanent(e.target.value === "permanent")}
               >
@@ -167,12 +171,11 @@ export default function IntegrationKeys({ request }: { request: RequestFn }) {
                 {personal && (
                   <option value="permanent">{t("permanent")}</option>
                 )}
-              </select>
-            </label>
+              </Select>
+            </Field>
             {!permanent && (
-              <label>
-                {t("days")}
-                <input
+              <Field label={t("days")}>
+                <TextInput
                   required
                   type="number"
                   min={1}
@@ -181,7 +184,7 @@ export default function IntegrationKeys({ request }: { request: RequestFn }) {
                   value={Number.isFinite(days) ? days : ""}
                   onChange={(e) => setDays(e.target.valueAsNumber)}
                 />
-              </label>
+              </Field>
             )}
           </div>
           {permanent && <p>{t("permanentHint")}</p>}

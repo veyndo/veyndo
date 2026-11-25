@@ -89,8 +89,8 @@
   }
 }
 
-.api-console .vy-card > label,
-.api-explorer-grid > div > label {
+.api-console .vy-card > :is(label, .vy-field),
+.api-explorer-grid > div > :is(label, .vy-field) {
   display: grid;
   gap: 8px;
   margin: 16px 0;
@@ -99,7 +99,7 @@
 .api-explorer-grid h3 {
   overflow-wrap: anywhere;
 }
-.api-route .soft-tag {
+.api-route :is(.soft-tag, .vy-badge) {
   flex-shrink: 0;
 }
 

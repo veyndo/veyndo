@@ -1,5 +1,5 @@
 /** Customer groups share the translation/inheritance editor and revisioned settings aggregate. */
-import { Button, Card, Notice } from "../../kit/ui";
+import { Button, Card, Field, Notice, Select } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import type { Config } from "../../shared/api/shop-api";
 import type { CustomerGroup } from "../../shared/customer/customer-types";
@@ -131,9 +131,8 @@ export default function CustomerGroupsSettings({
                       update({ ...group, translations })
                     }
                   />
-                  <label>
-                    {r("priceBasis")}
-                    <select
+                  <Field label={r("priceBasis")}>
+                    <Select
                       value={group.priceBasis}
                       disabled={["consumer", "business"].includes(group.id)}
                       onChange={(e) =>
@@ -146,8 +145,8 @@ export default function CustomerGroupsSettings({
                     >
                       <option value="consumer">{r("consumer")}</option>
                       <option value="business">{r("business")}</option>
-                    </select>
-                  </label>
+                    </Select>
+                  </Field>
                   {["consumer", "business"].includes(group.id) ? (
                     <p>{r("baseGroup")}</p>
                   ) : (

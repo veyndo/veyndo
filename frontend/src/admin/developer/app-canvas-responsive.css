@@ -72,7 +72,7 @@
   .app-studio-editing .app-toolbar-actions .app-agent-toggle {
     display: none;
   }
-  .app-studio-editing .app-toolbar-actions > label {
+  .app-studio-editing .app-toolbar-actions > :is(label, .vy-field) {
     min-width: 0;
     width: 100%;
   }

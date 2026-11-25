@@ -1,5 +1,5 @@
 /** No-model evidence preview makes customer/private retrieval boundaries and missing facts inspectable. */
-import { Button, Card, Notice } from "../../kit/ui";
+import { Button, Card, Field, Notice, Select, TextArea } from "../../kit/ui";
 import { useState } from "react";
 import { useKnowledgeText } from "../../shared/i18n/knowledge-i18n";
 import Icon from "../../shared/ui/Icon";
@@ -73,9 +73,8 @@ export default function KnowledgePreview({
             }
           }}
         >
-          <label>
-            {k("audience")}
-            <select
+          <Field label={k("audience")}>
+            <Select
               value={audience}
               onChange={(e) => {
                 setAudience(e.target.value);
@@ -84,11 +83,10 @@ export default function KnowledgePreview({
             >
               <option value="customer">{k("customer")}</option>
               <option value="merchant">{k("merchant")}</option>
-            </select>
-          </label>
-          <label>
-            {k("products")}
-            <select
+            </Select>
+          </Field>
+          <Field label={k("products")}>
+            <Select
               value={product}
               onChange={(e) => {
                 setProduct(e.target.value);
@@ -108,11 +106,10 @@ export default function KnowledgePreview({
                   {p.name}
                 </option>
               ))}
-            </select>
-          </label>
-          <label>
-            {k("question")}
-            <textarea
+            </Select>
+          </Field>
+          <Field label={k("question")}>
+            <TextArea
               value={query}
               rows={5}
               maxLength={2000}
@@ -121,7 +118,7 @@ export default function KnowledgePreview({
                 setResult(undefined);
               }}
             />
-          </label>
+          </Field>
           <Button
             tone="primary"
             type="submit"

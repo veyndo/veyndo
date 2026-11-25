@@ -1,4 +1,5 @@
 /** Payment/contact options sit in the scrolling tool pane; final tender and completion stay visible. */
+import { Field, Select } from "../../kit/ui";
 import { useState } from "react";
 import { usePosText } from "./pos-i18n";
 import type { useRegister } from "./useRegister";
@@ -17,9 +18,8 @@ export default function RegisterCheckoutOptions({
     r.select({ ...c.checkout, ...value });
   return (
     <section className="pos-payment">
-      <label>
-        {t("payment")}
-        <select
+      <Field label={t("payment")}>
+        <Select
           value={c.checkout.paymentMethodId}
           disabled={r.busy}
           onChange={(e) => void select({ paymentMethodId: e.target.value })}
@@ -29,8 +29,8 @@ export default function RegisterCheckoutOptions({
               {p.name}
             </option>
           ))}
-        </select>
-      </label>
+        </Select>
+      </Field>
       <details>
         <summary>
           <Icon name="people" />

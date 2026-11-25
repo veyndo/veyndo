@@ -1,4 +1,5 @@
 /** Assign a product to an actual tenant tax class; legacy standard/reduced mapping remains explicit. */
+import { Field, Select } from "../../kit/ui";
 import { useEffect, useRef, useState } from "react";
 import { useInternationalText } from "../../shared/i18n/international-i18n";
 import {
@@ -36,16 +37,15 @@ export default function TaxClassSelect({
     };
   }, []);
   return (
-    <label>
-      {i("chooseClass")}
-      <select value={value} onChange={(e) => onChange(e.target.value)}>
+    <Field label={i("chooseClass")}>
+      <Select value={value} onChange={(e) => onChange(e.target.value)}>
         <option value="">{i("legacyTax")}</option>
         {classes.map((t) => (
           <option key={t.id} value={t.id}>
             {inheritedText(t.translations ?? {}, locale, main, "name") || t.id}
           </option>
         ))}
-      </select>
-    </label>
+      </Select>
+    </Field>
   );
 }

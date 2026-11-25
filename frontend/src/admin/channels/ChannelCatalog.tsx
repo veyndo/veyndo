@@ -1,4 +1,5 @@
 /** Catalog/language controls share the channel schema and content-language fallback. */
+import { Field, Select } from "../../kit/ui";
 import type { Channel } from "./channel-model";
 import type { Category } from "../catalog/catalog-model";
 import type { RequestFn } from "../shell/studio-types";
@@ -64,9 +65,8 @@ export default function ChannelCatalog({
         ))}
       </div>
       {languageError && <small role="alert">{languageError}</small>}
-      <label>
-        {t("root")}
-        <select
+      <Field label={t("root")}>
+        <Select
           value={draft.data.navigationCategoryId ?? ""}
           onChange={(e) =>
             patch({ navigationCategoryId: e.target.value || null })
@@ -87,8 +87,8 @@ export default function ChannelCatalog({
               ) || c.id}
             </option>
           ))}
-        </select>
-      </label>
+        </Select>
+      </Field>
       <div className="workbench-row">
         {[false, true].map((value) => (
           <button

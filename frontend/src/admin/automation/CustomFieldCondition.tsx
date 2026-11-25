@@ -1,4 +1,5 @@
 /** Typed custom field conditions support text, numeric, Boolean and date values using original field payload names. */
+import { Field, Select, TextInput } from "../../kit/ui";
 import { useAutomationText } from "../../shared/i18n/automation-i18n";
 import JsonField from "./JsonField";
 export default function CustomFieldCondition({
@@ -15,18 +16,16 @@ export default function CustomFieldCondition({
   const kind = field.type;
   return (
     <div className="flow-action-fields">
-      <label>
-        {a("field")}
-        <input
+      <Field label={a("field")}>
+        <TextInput
           value={field.name ?? ""}
           onChange={(e) =>
             set("renderedField", { ...field, name: e.target.value })
           }
         />
-      </label>
-      <label>
-        {a("type")}
-        <select
+      </Field>
+      <Field label={a("type")}>
+        <Select
           value={kind}
           onChange={(e) =>
             onChange({
@@ -48,11 +47,10 @@ export default function CustomFieldCondition({
               </option>
             ),
           )}
-        </select>
-      </label>
-      <label>
-        {a("operator")}
-        <select
+        </Select>
+      </Field>
+      <Field label={a("operator")}>
+        <Select
           value={config.operator ?? "="}
           onChange={(e) => set("operator", e.target.value)}
         >
@@ -66,8 +64,8 @@ export default function CustomFieldCondition({
           ].map((op) => (
             <option key={op}>{op}</option>
           ))}
-        </select>
-      </label>
+        </Select>
+      </Field>
       {kind === "select" ? (
         <JsonField
           label={a("value")}

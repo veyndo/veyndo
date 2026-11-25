@@ -1,5 +1,5 @@
 /** A model edits the same localized product media item; material choices come from the loaded GLB. */
-import { Button } from "../../kit/ui";
+import { Button, Field, Select } from "../../kit/ui";
 import { useState } from "react";
 import ModelViewer from "../../shared/media/ModelViewer";
 import { useModelText } from "../../shared/media/model-i18n";
@@ -45,9 +45,8 @@ export default function ProductModelCard({
           maxLength={600}
           onChange={(caption) => onChange({ ...model, caption })}
         />
-        <label>
-          {t("material")}
-          <select
+        <Field label={t("material")}>
+          <Select
             value={selected}
             onChange={(e) =>
               onChange({ ...model, modelVariant: e.target.value || null })
@@ -62,8 +61,8 @@ export default function ProductModelCard({
                 {name}
               </option>
             ))}
-          </select>
-        </label>
+          </Select>
+        </Field>
         {!names && <p>{t("discover")}</p>}
         <Button type="button" onClick={onRemove}>
           <Icon name="close" size={16} />

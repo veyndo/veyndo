@@ -1,4 +1,5 @@
 /** Touch checkout retains explicit payment/consent choices; cash input uses integer currency units. */
+import { Field, TextInput } from "../../kit/ui";
 import { useState } from "react";
 import { decimalMinor, inputMinor } from "./pos-model";
 import { usePosText } from "./pos-i18n";
@@ -48,15 +49,14 @@ export default function RegisterCheckout({
       {cash && (
         <>
           <div className="pos-tender">
-            <label>
-              {t("cash")}
-              <input
+            <Field label={t("cash")}>
+              <TextInput
                 inputMode="decimal"
                 value={tender}
                 placeholder={decimalMinor(c.price.totalMinor, scale)}
                 onChange={(e) => setTender(e.target.value)}
               />
-            </label>
+            </Field>
             <button
               className="pos-exact"
               onClick={() => setTender(decimalMinor(c.price.totalMinor, scale))}

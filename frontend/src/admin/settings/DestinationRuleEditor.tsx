@@ -1,5 +1,5 @@
 /** Geographical tax rule editor: country, subdivisions, postcode constraints, date window and persisted Rule Builder condition. */
-import { Button, Notice } from "../../kit/ui";
+import { Button, Field, Notice, Select, TextInput } from "../../kit/ui";
 import { useEffect, useRef, useState } from "react";
 import CountryPicker from "../../shared/geography/CountryPicker";
 import EntityPicker from "../../shared/geography/EntityPicker";
@@ -73,9 +73,8 @@ export default function DestinationRuleEditor({
         />
       )}
       <div className="intl-rule-grid">
-        <label>
-          {i("rate")}
-          <input
+        <Field label={i("rate")}>
+          <TextInput
             type="number"
             min={0}
             max={100}
@@ -83,16 +82,15 @@ export default function DestinationRuleEditor({
             value={v.rate}
             onChange={(e) => set({ rate: Number(e.target.value) })}
           />
-        </label>
-        <label>
-          {i("priority")}
-          <input
+        </Field>
+        <Field label={i("priority")}>
+          <TextInput
             type="number"
             step="1"
             value={v.priority}
             onChange={(e) => set({ priority: Number(e.target.value) })}
           />
-        </label>
+        </Field>
         {(["postalCodes", "postalPrefixes"] as const).map((k) => (
           <label key={k}>
             {i(k)}
@@ -121,9 +119,8 @@ export default function DestinationRuleEditor({
             </label>
           ),
         )}
-        <label>
-          {i("ruleCondition")}
-          <select
+        <Field label={i("ruleCondition")}>
+          <Select
             value={reference}
             onChange={(e) =>
               set({
@@ -143,8 +140,8 @@ export default function DestinationRuleEditor({
                 )}
               </option>
             ))}
-          </select>
-        </label>
+          </Select>
+        </Field>
       </div>
       {error && <Notice tone="danger">{error}</Notice>}
       <Button type="button" onClick={onRemove}>

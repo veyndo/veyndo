@@ -1,4 +1,5 @@
 /** One filter bar controls the same native report query in Shop today and personal areas. */
+import { Field, Select, TextInput } from "../../kit/ui";
 import type { ReportData, ReportQuery } from "./model";
 import { useReportText } from "./report-i18n";
 export default function ReportFilters({
@@ -14,9 +15,8 @@ export default function ReportFilters({
   const set = (patch: Partial<ReportQuery>) => onChange({ ...value, ...patch });
   return (
     <div className="report-filters">
-      <label>
-        {t("period")}
-        <select
+      <Field label={t("period")}>
+        <Select
           value={value.period}
           onChange={(e) => set({ period: e.target.value })}
         >
@@ -40,31 +40,28 @@ export default function ReportFilters({
               {t(v)}
             </option>
           ))}
-        </select>
-      </label>
+        </Select>
+      </Field>
       {value.period === "custom" && (
         <>
-          <label>
-            {t("from")}
-            <input
+          <Field label={t("from")}>
+            <TextInput
               type="date"
               value={value.from ?? ""}
               onChange={(e) => set({ from: e.target.value })}
             />
-          </label>
-          <label>
-            {t("to")}
-            <input
+          </Field>
+          <Field label={t("to")}>
+            <TextInput
               type="date"
               value={value.to ?? ""}
               onChange={(e) => set({ to: e.target.value })}
             />
-          </label>
+          </Field>
         </>
       )}
-      <label>
-        {t("interval")}
-        <select
+      <Field label={t("interval")}>
+        <Select
           value={value.interval}
           onChange={(e) => set({ interval: e.target.value })}
         >
@@ -73,11 +70,10 @@ export default function ReportFilters({
               {t(v === "auto" ? v : `${v}Group`)}
             </option>
           ))}
-        </select>
-      </label>
-      <label>
-        {t("currency")}
-        <select
+        </Select>
+      </Field>
+      <Field label={t("currency")}>
+        <Select
           value={value.currency ?? data?.filters.currency ?? ""}
           onChange={(e) => set({ currency: e.target.value })}
         >
@@ -87,11 +83,10 @@ export default function ReportFilters({
               {c}
             </option>
           ))}
-        </select>
-      </label>
-      <label>
-        {t("channelType")}
-        <select
+        </Select>
+      </Field>
+      <Field label={t("channelType")}>
+        <Select
           value={value.channelType}
           onChange={(e) => set({ channelType: e.target.value, channel: null })}
         >
@@ -102,11 +97,10 @@ export default function ReportFilters({
               {t(v === "all" ? "allTypes" : v)}
             </option>
           ))}
-        </select>
-      </label>
-      <label>
-        {t("channel")}
-        <select
+        </Select>
+      </Field>
+      <Field label={t("channel")}>
+        <Select
           value={value.channel ?? ""}
           onChange={(e) => set({ channel: e.target.value || null })}
         >
@@ -121,11 +115,10 @@ export default function ReportFilters({
                 {c.name}
               </option>
             ))}
-        </select>
-      </label>
-      <label>
-        {t("timezone")}
-        <select
+        </Select>
+      </Field>
+      <Field label={t("timezone")}>
+        <Select
           value={value.timezone}
           onChange={(e) => set({ timezone: e.target.value })}
         >
@@ -143,8 +136,8 @@ export default function ReportFilters({
               {v}
             </option>
           ))}
-        </select>
-      </label>
+        </Select>
+      </Field>
       <label className="report-compare">
         <input
           type="checkbox"

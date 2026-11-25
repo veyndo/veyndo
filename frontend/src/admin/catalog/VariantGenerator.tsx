@@ -1,5 +1,5 @@
 /** Reviewable, bounded batch creation uses saved parent data and keeps successful rows on partial failure. */
-import { Button, Notice } from "../../kit/ui";
+import { Badge, Button, Field, Notice, TextInput } from "../../kit/ui";
 import { useState } from "react";
 import type { RequestFn } from "../shell/studio-types";
 import type { ProductDraft } from "./catalog-model";
@@ -50,9 +50,8 @@ export default function VariantGenerator({
       <fieldset disabled={busy}>
         {axes.map((axis, index) => (
           <div className="variant-axis-row" key={index}>
-            <label>
-              {v("axis")}
-              <input
+            <Field label={v("axis")}>
+              <TextInput
                 maxLength={100}
                 placeholder={v("axisExample")}
                 value={axis.name}
@@ -65,10 +64,9 @@ export default function VariantGenerator({
                   );
                 }}
               />
-            </label>
-            <label>
-              {v("values")}
-              <input
+            </Field>
+            <Field label={v("values")}>
+              <TextInput
                 placeholder={v("valuesExample")}
                 value={axis.values}
                 onChange={(e) => {
@@ -80,7 +78,7 @@ export default function VariantGenerator({
                   );
                 }}
               />
-            </label>
+            </Field>
             <Button
               type="button"
               disabled={axes.length === 1}
@@ -185,9 +183,7 @@ export default function VariantGenerator({
                         />
                         {Object.values(row.options).join(" / ")}
                         {row.created && (
-                          <span className="soft-tag">
-                            {v(row.existing ? "existing" : "done")}
-                          </span>
+                          <Badge>{v(row.existing ? "existing" : "done")}</Badge>
                         )}
                       </label>
                     </td>

@@ -112,7 +112,7 @@
 .checkout-details h4 {
   margin: 20px 0 12px;
 }
-.checkout-details form > label {
+.checkout-details form > :is(label, .vy-field) {
   margin: 16px 0;
 }
 .checkout-details .customer-field-grid {

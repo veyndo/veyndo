@@ -1,5 +1,5 @@
 /** Versioned setting declarations share the native Manifest; no credential value enters a draft. */
-import { Button } from "../../kit/ui";
+import { Button, Field, Select, TextInput } from "../../kit/ui";
 import type { Manifest } from "../../shared/apps/native/types";
 import LocalizedField from "../../shared/i18n/LocalizedField";
 import { useAppSettingText } from "../../shared/i18n/app-settings-i18n";
@@ -23,9 +23,8 @@ export default function AppSettingsEditor({
       {fields.map((f, i) => (
         <article className="app-model-card" key={i}>
           <div className="app-key-fields">
-            <label>
-              {t("key")}
-              <input
+            <Field label={t("key")}>
+              <TextInput
                 value={f.key}
                 maxLength={32}
                 onChange={(e) =>
@@ -37,7 +36,7 @@ export default function AppSettingsEditor({
                   })
                 }
               />
-            </label>
+            </Field>
             <LocalizedField
               label={t("label")}
               value={f.label}
@@ -51,9 +50,8 @@ export default function AppSettingsEditor({
               }
               maxLength={100}
             />
-            <label>
-              {a("type")}
-              <select
+            <Field label={a("type")}>
+              <Select
                 value={f.kind}
                 onChange={(e) =>
                   onChange({
@@ -73,8 +71,8 @@ export default function AppSettingsEditor({
                     </option>
                   ),
                 )}
-              </select>
-            </label>
+              </Select>
+            </Field>
             <label className="app-check">
               <input
                 type="checkbox"

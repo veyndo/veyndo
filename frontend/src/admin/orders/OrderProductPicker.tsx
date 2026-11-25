@@ -1,5 +1,5 @@
 /** Bounded, debounced native product/SKU lookup; prices are only committed through the reviewed checkout quote. */
-import { Notice } from "../../kit/ui";
+import { Field, Notice, TextInput } from "../../kit/ui";
 import { mediaImage } from "../../shared/media/product-media";
 import { useEffect, useState } from "react";
 import type { RequestFn } from "../../shared/api/types";
@@ -49,16 +49,15 @@ export default function OrderProductPicker({
   }, [query, request]);
   return (
     <div>
-      <label>
-        {n("productSearch")}
-        <input
+      <Field label={n("productSearch")}>
+        <TextInput
           type="search"
           maxLength={200}
           disabled={disabled}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
         />
-      </label>
+      </Field>
       {error && <Notice tone="danger">{error}</Notice>}
       <div className="orders-product-results">
         {products.map((p) => (

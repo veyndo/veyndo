@@ -1,5 +1,5 @@
 /** SettingsDialog keeps merchant interaction separate from workspace orchestration. */
-import { Button } from "../../kit/ui";
+import { Button, Field, Select, TextInput } from "../../kit/ui";
 import { useControlText } from "../../shared/i18n/control-i18n";
 import { useEffect, useRef } from "react";
 import { useLocale } from "../../shared/i18n/i18n";
@@ -53,9 +53,8 @@ export default function SettingsDialog({
           <Icon name="spark" size={18} />
           {t("assistant")}
         </h3>
-        <label>
-          {t("provider")}
-          <select value={provider} onChange={(e) => onProvider(e.target.value)}>
+        <Field label={t("provider")}>
+          <Select value={provider} onChange={(e) => onProvider(e.target.value)}>
             {(providers.length
               ? providers
               : [
@@ -76,16 +75,15 @@ export default function SettingsDialog({
                 {p.configured ? "" : ` · ${t("missingKey")}`}
               </option>
             ))}
-          </select>
-        </label>
-        <label>
-          {t("model")}
-          <input
+          </Select>
+        </Field>
+        <Field label={t("model")}>
+          <TextInput
             value={model}
             onChange={(e) => onModel(e.target.value)}
             placeholder={t("serverDefault")}
           />
-        </label>
+        </Field>
         <p>{t("cloudDisclosure")}</p>
         <Button type="submit" disabled={!connected || busy} onClick={onIndex}>
           <Icon name="refresh" size={16} />

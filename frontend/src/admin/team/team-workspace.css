@@ -78,7 +78,7 @@
 .users-manager .commerce-card > h2 {
   margin-bottom: 8px;
 }
-.users-manager .commerce-card > label,
+.users-manager .commerce-card > :is(label, .vy-field),
 .users-manager .commerce-card > form {
   margin-top: 20px;
 }

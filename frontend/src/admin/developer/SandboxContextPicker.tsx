@@ -1,5 +1,5 @@
 /** Bounded server search selects an owned object for testing editor-bound apps in a private sandbox. */
-import { Notice } from "../../kit/ui";
+import { Field, Notice, Select, TextInput } from "../../kit/ui";
 import { useEffect, useRef, useState } from "react";
 import type { RequestFn } from "../../shared/api/types";
 import type { Block } from "../../shared/apps/native/types";
@@ -53,17 +53,15 @@ export default function SandboxContextPicker({
   }, [kind, query]);
   return (
     <div className="app-assistant-fields">
-      <label>
-        {t("findObject")}
-        <input
+      <Field label={t("findObject")}>
+        <TextInput
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           maxLength={100}
         />
-      </label>
-      <label>
-        {t("object")}
-        <select
+      </Field>
+      <Field label={t("object")}>
+        <Select
           value={id}
           onChange={(e) => {
             setId(e.target.value);
@@ -80,8 +78,8 @@ export default function SandboxContextPicker({
                   : (r.orderNumber ?? r.email ?? r.id)}
             </option>
           ))}
-        </select>
-      </label>
+        </Select>
+      </Field>
       {error && <Notice tone="danger">{error}</Notice>}
     </div>
   );

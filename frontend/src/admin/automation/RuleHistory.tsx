@@ -1,5 +1,5 @@
 /** Bounded read-only comparison; stale responses cannot cross a rule or workspace. */
-import { Button, Notice } from "../../kit/ui";
+import { Button, Field, Notice, Select } from "../../kit/ui";
 import { useEffect, useRef, useState } from "react";
 import type { RequestFn } from "../shell/studio-types";
 import type { Config } from "./automation-types";
@@ -93,20 +93,18 @@ export default function RuleHistory({
       ) : (
         <>
           <div className="rule-history-controls">
-            <label>
-              {t("flow")}
-              <select value={flow} onChange={(e) => setFlow(e.target.value)}>
+            <Field label={t("flow")}>
+              <Select value={flow} onChange={(e) => setFlow(e.target.value)}>
                 <option value="">{t("choose")}</option>
                 {flows.map((f) => (
                   <option key={f.id} value={f.id}>
                     {contentText(f.data.name, language, mainLocale) || f.id}
                   </option>
                 ))}
-              </select>
-            </label>
-            <label>
-              {t("limit")}
-              <select
+              </Select>
+            </Field>
+            <Field label={t("limit")}>
+              <Select
                 value={limit}
                 onChange={(e) => setLimit(Number(e.target.value))}
               >
@@ -115,8 +113,8 @@ export default function RuleHistory({
                     {n}
                   </option>
                 ))}
-              </select>
-            </label>
+              </Select>
+            </Field>
           </div>
           <Button
             type="button"

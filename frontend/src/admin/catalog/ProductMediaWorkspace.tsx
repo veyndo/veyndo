@@ -1,5 +1,5 @@
 /** One product-media workspace: cover, ordered gallery, multilingual image metadata, drag/drop and optional reviewed AI drafts. */
-import { Button } from "../../kit/ui";
+import { Button, Field, TextInput } from "../../kit/ui";
 import MediaCaptionEditor from "../../shared/media/MediaCaptionEditor";
 import { useGridAccess } from "../../shared/grid/useGridAccess";
 import { useRef, useState } from "react";
@@ -96,14 +96,13 @@ export default function ProductMediaWorkspace({
         ))}
       {canWrite && showUrl && (
         <div className="media-url-entry">
-          <label>
-            {w("url")}
-            <input
+          <Field label={w("url")}>
+            <TextInput
               type="url"
               value={url}
               onChange={(e) => setUrl(e.target.value)}
             />
-          </label>
+          </Field>
           <Button
             type="button"
             disabled={
@@ -181,9 +180,8 @@ export default function ProductMediaWorkspace({
                     )
                   }
                 />
-                <label>
-                  {w("url")}
-                  <input
+                <Field label={w("url")}>
+                  <TextInput
                     value={image.url}
                     onChange={(e) =>
                       change(
@@ -193,7 +191,7 @@ export default function ProductMediaWorkspace({
                       )
                     }
                   />
-                </label>
+                </Field>
                 <div className="media-actions">
                   <Button
                     type="button"

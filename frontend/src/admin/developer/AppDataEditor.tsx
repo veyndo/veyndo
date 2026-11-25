@@ -1,5 +1,5 @@
 /** Managed app models expose typed fields and opt-in public reads; removal cleans dependent bindings. */
-import { Button } from "../../kit/ui";
+import { Button, Field as FormField, Select, TextInput } from "../../kit/ui";
 import CoreExtensionBinding from "./CoreExtensionBinding";
 import { useAppWorkspaceText } from "../../shared/i18n/app-workspace-i18n";
 import AppModelDiagram from "./AppModelDiagram";
@@ -93,16 +93,15 @@ export default function AppDataEditor({
             </button>
           </header>
           <div className="app-model-meta">
-            <label>
-              {a("id")}
-              <input
+            <FormField label={a("id")}>
+              <TextInput
                 value={entity.name}
                 maxLength={27}
                 onChange={(e) =>
                   onChange(renameEntity(manifest, entity.name, e.target.value))
                 }
               />
-            </label>
+            </FormField>
             <LocalizedField
               label={a("entity")}
               value={entity.label}
@@ -143,14 +142,13 @@ export default function AppDataEditor({
                 });
               return (
                 <div className="app-field-row" key={index}>
-                  <label>
-                    {a("id")}
-                    <input
+                  <FormField label={a("id")}>
+                    <TextInput
                       value={field.name}
                       maxLength={32}
                       onChange={(e) => set({ name: e.target.value })}
                     />
-                  </label>
+                  </FormField>
                   <LocalizedField
                     label={a("field")}
                     value={field.label}
@@ -158,9 +156,8 @@ export default function AppDataEditor({
                     required
                     maxLength={100}
                   />
-                  <label>
-                    {a("type")}
-                    <select
+                  <FormField label={a("type")}>
+                    <Select
                       value={field.kind}
                       onChange={(e) =>
                         set({
@@ -195,8 +192,8 @@ export default function AppDataEditor({
                           {a(k)}
                         </option>
                       ))}
-                    </select>
-                  </label>
+                    </Select>
+                  </FormField>
                   <div className="app-field-flags">
                     {(
                       ["required", "translatable", "indexed", "unique"] as const
@@ -242,9 +239,8 @@ export default function AppDataEditor({
                       !field.translatable &&
                       !field.coreReference &&
                       !field.choices?.length)) && (
-                    <label>
-                      {a("relationTarget")}
-                      <select
+                    <FormField label={a("relationTarget")}>
+                      <Select
                         value={field.references ?? ""}
                         onChange={(e) =>
                           set({
@@ -260,8 +256,8 @@ export default function AppDataEditor({
                             {target.name}
                           </option>
                         ))}
-                      </select>
-                    </label>
+                      </Select>
+                    </FormField>
                   )}
                   <button
                     className="app-icon-button"

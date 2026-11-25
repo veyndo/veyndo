@@ -1,4 +1,5 @@
 /** Pure server modules edit the same WIT component contract consumed by quotes and checkout; no browser eval or live service code. */
+import { Field, Select, TextArea, TextInput } from "../../kit/ui";
 import type { Manifest } from "../../shared/apps/native/types";
 import { useAppStudioText } from "../../shared/i18n/app-studio-i18n";
 export default function AppModules({
@@ -70,9 +71,8 @@ export default function AppModules({
               ),
             )}
           </div>
-          <label>
-            {a("componentSource")}
-            <textarea
+          <Field label={a("componentSource")}>
+            <TextArea
               className="app-source"
               spellCheck={false}
               rows={18}
@@ -80,13 +80,12 @@ export default function AppModules({
               value={c.source}
               onChange={(e) => update({ ...c, source: e.target.value })}
             />
-          </label>
+          </Field>
           <p>{a("componentLimit")}</p>
           {(c.records ?? []).map((r, i) => (
             <div className="app-connection-row" key={i}>
-              <label>
-                {a("entity")}
-                <select
+              <Field label={a("entity")}>
+                <Select
                   value={r.entity}
                   onChange={(e) =>
                     update({
@@ -102,11 +101,10 @@ export default function AppModules({
                       {e.name}
                     </option>
                   ))}
-                </select>
-              </label>
-              <label>
-                {a("id")}
-                <input
+                </Select>
+              </Field>
+              <Field label={a("id")}>
+                <TextInput
                   value={r.id}
                   maxLength={100}
                   onChange={(e) =>
@@ -118,7 +116,7 @@ export default function AppModules({
                     })
                   }
                 />
-              </label>
+              </Field>
               <button
                 type="button"
                 onClick={() =>

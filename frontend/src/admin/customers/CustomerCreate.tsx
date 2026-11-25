@@ -1,5 +1,5 @@
 /** Native CRM creation with explicit address defaults, inline validation and unsaved-change recovery. */
-import { Button, Card, Notice } from "../../kit/ui";
+import { Button, Card, Field, Notice, Select, TextInput } from "../../kit/ui";
 import { useState } from "react";
 import CustomerFields from "../../shared/customer/CustomerFields";
 import AddressFields from "../../shared/customer/AddressFields";
@@ -101,9 +101,8 @@ export default function CustomerCreate({
         <fieldset disabled={busy} className="admin-create-section">
           <legend>{n("contact")}</legend>
           <div className="customer-field-grid">
-            <label>
-              {c("email")}
-              <input
+            <Field label={c("email")}>
+              <TextInput
                 type="email"
                 required
                 autoComplete="email"
@@ -111,17 +110,16 @@ export default function CustomerCreate({
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
-            </label>
-            <label>
-              {o("group")}
-              <select value={group} onChange={(e) => setGroup(e.target.value)}>
+            </Field>
+            <Field label={o("group")}>
+              <Select value={group} onChange={(e) => setGroup(e.target.value)}>
                 {groups.map((g) => (
                   <option key={g.id} value={g.id}>
                     {groupName(g.id)}
                   </option>
                 ))}
-              </select>
-            </label>
+              </Select>
+            </Field>
           </div>
           <CustomerFields
             requiredName

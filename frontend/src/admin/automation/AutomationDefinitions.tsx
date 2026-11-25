@@ -1,5 +1,5 @@
 /** Searchable, explicitly editable definitions with visible active state and version. */
-import { Button, Card } from "../../kit/ui";
+import { Button, Card, Field, TextInput } from "../../kit/ui";
 import { useState } from "react";
 import type { Config } from "./automation-types";
 import { contentText } from "../../shared/i18n/content-language";
@@ -38,14 +38,13 @@ export default function AutomationDefinitions({
       >
         + {t("create")}
       </Button>
-      <label>
-        {t("search")}
-        <input
+      <Field label={t("search")}>
+        <TextInput
           type="search"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
-      </label>
+      </Field>
       {!visible.length && <p className="muted">{t("empty")}</p>}
       {visible.map((r) => (
         <button

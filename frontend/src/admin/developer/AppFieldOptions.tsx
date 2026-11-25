@@ -1,5 +1,5 @@
 /** Core references and typed choice fields remain owned app data with a single content-language editor. */
-import { Button } from "../../kit/ui";
+import { Button, Field as FormField, Select, TextInput } from "../../kit/ui";
 import LocalizedField from "../../shared/i18n/LocalizedField";
 import {
   useAssistantText,
@@ -20,9 +20,8 @@ export default function AppFieldOptions({
   if (f.kind !== "string" || f.translatable || f.references) return null;
   return (
     <div className="app-field-options">
-      <label>
-        {t("object")}
-        <select
+      <FormField label={t("object")}>
+        <Select
           value={f.coreReference ?? ""}
           onChange={(e) =>
             onChange({
@@ -53,16 +52,15 @@ export default function AppFieldOptions({
                   )}
             </option>
           ))}
-        </select>
-      </label>
+        </Select>
+      </FormField>
       {!f.coreReference && (
         <>
           <span>{t("choices")}</span>
           {f.choices?.map((c, i) => (
             <div className="app-choice-row" key={i}>
-              <label>
-                {a("id")}
-                <input
+              <FormField label={a("id")}>
+                <TextInput
                   value={c.value}
                   maxLength={32}
                   onChange={(e) =>
@@ -73,7 +71,7 @@ export default function AppFieldOptions({
                     })
                   }
                 />
-              </label>
+              </FormField>
               <LocalizedField
                 label={a("title")}
                 value={c.label}

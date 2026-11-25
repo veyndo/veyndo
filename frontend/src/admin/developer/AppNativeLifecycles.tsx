@@ -1,4 +1,5 @@
 /** Visual native lifecycle contract editor; execution remains in native order/RFQ owners and accepted snapshots. */
+import { Field, Select, TextInput } from "../../kit/ui";
 import { useState } from "react";
 import type { Manifest, NativeLifecycle } from "../../shared/apps/native/types";
 import {
@@ -138,9 +139,8 @@ export default function AppNativeLifecycles({
             </div>
             {c.states.map((state, i) => (
               <div className="app-connection-row" key={i}>
-                <label>
-                  {t("id")}
-                  <input
+                <Field label={t("id")}>
+                  <TextInput
                     maxLength={16}
                     value={state.id}
                     onChange={(e) => {
@@ -158,7 +158,7 @@ export default function AppNativeLifecycles({
                       });
                     }}
                   />
-                </label>
+                </Field>
                 <LocalizedField
                   label={t("state")}
                   value={state.label}
@@ -234,9 +234,8 @@ export default function AppNativeLifecycles({
                   ))}
                 </div>
                 {c.object === "order" && (
-                  <label>
-                    {t("replace")}
-                    <select
+                  <Field label={t("replace")}>
+                    <Select
                       value={edge.replaces ?? ""}
                       onChange={(e) =>
                         updateEdge(i, { replaces: e.target.value || undefined })
@@ -248,8 +247,8 @@ export default function AppNativeLifecycles({
                           {t(k as "start" | "complete")}
                         </option>
                       ))}
-                    </select>
-                  </label>
+                    </Select>
+                  </Field>
                 )}
                 <fieldset>
                   <legend>{t("permissions")}</legend>

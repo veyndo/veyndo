@@ -1,5 +1,5 @@
 /** One revisioned international settings aggregate: drafts survive navigation between countries, taxes, methods and languages. */
-import { Button, Card, Notice } from "../../kit/ui";
+import { Badge, Button, Card, Field, Notice, Select } from "../../kit/ui";
 import CurrencySettings from "./CurrencySettings";
 import { useCurrencyText } from "../../shared/i18n/currency-i18n";
 import EntityHistory from "../../shared/history/EntityHistory";
@@ -148,14 +148,13 @@ export default function CommerceSettings({
                   )}
             </p>
           </div>
-          <span className="soft-tag">
+          <Badge>
             {i("revision")} {state.value.revision}
-          </span>
+          </Badge>
         </header>
         <div className="intl-scope-bar">
-          <label>
-            {w("scope")}
-            <select
+          <Field label={w("scope")}>
+            <Select
               value={channel}
               disabled={!canWrite || state.busy}
               onChange={(e) => {
@@ -180,8 +179,8 @@ export default function CommerceSettings({
                       c.id}
                   </option>
                 ))}
-            </select>
-          </label>
+            </Select>
+          </Field>
           {area !== "currencies" && <ContentLanguagePicker />}
         </div>
         {channel && (

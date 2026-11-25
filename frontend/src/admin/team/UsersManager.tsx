@@ -1,5 +1,5 @@
 /** Users Manager: Personal accounts, memberships, roles, invitations and scoped developer access.. */
-import { Button } from "../../kit/ui";
+import { Button, Field, Select, TextInput } from "../../kit/ui";
 import type { WorkspaceRole } from "./RolesManager";
 import { contentText } from "../../shared/i18n/content-language";
 import { usePermissionText } from "./permission-i18n";
@@ -234,9 +234,8 @@ export default function UsersManager({
             <section className="commerce-card">
               <h2>{session.user.name}</h2>
               <p>{session.user.email}</p>
-              <label>
-                {s("workspace")}
-                <select
+              <Field label={s("workspace")}>
+                <Select
                   value={workspace}
                   onChange={(e) => {
                     const w = session.workspaces.find(
@@ -250,8 +249,8 @@ export default function UsersManager({
                       {w.name} · {roleName(w.role)}
                     </option>
                   ))}
-                </select>
-              </label>
+                </Select>
+              </Field>
             </section>
             <AccountSecurity
               token={token}
@@ -282,13 +281,11 @@ export default function UsersManager({
                     });
                   }}
                 >
-                  <label>
-                    {s("email")}
-                    <input name="email" type="email" required />
-                  </label>
-                  <label>
-                    {s("role")}
-                    <select
+                  <Field label={s("email")}>
+                    <TextInput name="email" type="email" required />
+                  </Field>
+                  <Field label={s("role")}>
+                    <Select
                       name="role"
                       required
                       value={inviteAllowed ? inviteRole : ""}
@@ -302,8 +299,8 @@ export default function UsersManager({
                           {roleName(r)} ({r})
                         </option>
                       ))}
-                    </select>
-                  </label>
+                    </Select>
+                  </Field>
                   <Button
                     tone="primary"
                     type="submit"
@@ -315,14 +312,13 @@ export default function UsersManager({
                 {invitation && (
                   <div className="invite-code">
                     <p role="status">{s("inviteCreated")}</p>
-                    <label>
-                      {s("invitationToken")}
-                      <input
+                    <Field label={s("invitationToken")}>
+                      <TextInput
                         readOnly
                         value={invitation}
                         onFocus={(e) => e.target.select()}
                       />
-                    </label>
+                    </Field>
                   </div>
                 )}
               </section>

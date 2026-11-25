@@ -1,5 +1,5 @@
 /** Manual orders remain actor-private drafts until explicit native quote review and idempotent completion. */
-import { Button, Card, Notice } from "../../kit/ui";
+import { Button, Card, Field, Notice, Select, TextInput } from "../../kit/ui";
 import OrderReview from "./OrderReview";
 import useOrderCreation from "./useOrderCreation";
 import type { RequestFn } from "../../shared/api/types";
@@ -154,9 +154,8 @@ export default function OrderCreate({
           <fieldset className="admin-create-section" disabled={busy}>
             <legend>{n("configuration")}</legend>
             <div className="customer-field-grid">
-              <label>
-                {n("channel")}
-                <select
+              <Field label={n("channel")}>
+                <Select
                   value={channel}
                   onChange={(e) => setChannel(e.target.value)}
                 >
@@ -165,11 +164,10 @@ export default function OrderCreate({
                       {c.name}
                     </option>
                   ))}
-                </select>
-              </label>
-              <label>
-                {n("language")}
-                <select
+                </Select>
+              </Field>
+              <Field label={n("language")}>
+                <Select
                   value={language}
                   onChange={(e) => setLanguage(e.target.value)}
                 >
@@ -180,11 +178,10 @@ export default function OrderCreate({
                       ) ?? l}
                     </option>
                   ))}
-                </select>
-              </label>
-              <label>
-                {n("currency")}
-                <select
+                </Select>
+              </Field>
+              <Field label={n("currency")}>
+                <Select
                   value={currency}
                   onChange={(e) => setCurrency(e.target.value)}
                 >
@@ -193,8 +190,8 @@ export default function OrderCreate({
                       {c.code}
                     </option>
                   ))}
-                </select>
-              </label>
+                </Select>
+              </Field>
             </div>
           </fieldset>
           <section className="admin-create-section">
@@ -226,9 +223,8 @@ export default function OrderCreate({
             {items.map((i) => (
               <div className="orders-line" key={i.id}>
                 <strong>{i.name}</strong>
-                <label>
-                  {n("quantity")}
-                  <input
+                <Field label={n("quantity")}>
+                  <TextInput
                     type="number"
                     min={1}
                     max={10000}
@@ -245,7 +241,7 @@ export default function OrderCreate({
                       )
                     }
                   />
-                </label>
+                </Field>
                 <Button
                   type="button"
                   disabled={busy}
@@ -297,9 +293,8 @@ export default function OrderCreate({
           >
             <legend>{n("methods")}</legend>
             <div className="customer-field-grid">
-              <label>
-                {s("shipping")}
-                <select
+              <Field label={s("shipping")}>
+                <Select
                   value={selection.shippingMethodId}
                   onChange={(e) =>
                     setSelection({
@@ -320,11 +315,10 @@ export default function OrderCreate({
                         {m.name}
                       </option>
                     ))}
-                </select>
-              </label>
-              <label>
-                {s("payment")}
-                <select
+                </Select>
+              </Field>
+              <Field label={s("payment")}>
+                <Select
                   value={selection.paymentMethodId}
                   onChange={(e) =>
                     setSelection({
@@ -340,16 +334,15 @@ export default function OrderCreate({
                         {p.name}
                       </option>
                     ))}
-                </select>
-              </label>
-              <label>
-                {n("coupons")}
-                <input
+                </Select>
+              </Field>
+              <Field label={n("coupons")}>
+                <TextInput
                   value={codes}
                   maxLength={1000}
                   onChange={(e) => setCodes(e.target.value)}
                 />
-              </label>
+              </Field>
             </div>
             <p>{n("paymentHint")}</p>
           </fieldset>

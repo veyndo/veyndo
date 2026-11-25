@@ -1,5 +1,5 @@
 /** Native Studio register; all reads and writes use authenticated, tenant-scoped shared commerce operations. */
-import { Button } from "../../kit/ui";
+import { Button, Field, Select } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import type { RequestFn } from "../../shared/api/types";
 import type { Channel } from "../channels/channel-model";
@@ -93,9 +93,8 @@ export default function POSWorkspace(props: POSProps) {
               <Icon name="frame" />
             </button>
           )}
-          <label>
-            {t("choose")}
-            <select
+          <Field label={t("choose")}>
+            <Select
               value={selected}
               onChange={(e) => {
                 setSelected(e.target.value);
@@ -111,8 +110,8 @@ export default function POSWorkspace(props: POSProps) {
                     {contentText(c.data.name, locale, main) || c.id}
                   </option>
                 ))}
-            </select>
-          </label>
+            </Select>
+          </Field>
           <button onClick={props.onChannels}>
             <Icon name="settings" />
             {t("setup")}
