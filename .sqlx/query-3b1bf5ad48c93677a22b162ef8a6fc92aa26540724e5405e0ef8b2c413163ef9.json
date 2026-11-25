@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT condition AS \"data!\" FROM commerce_rules WHERE tenant=$1 UNION ALL SELECT data FROM commerce_flows WHERE tenant=$1 UNION ALL SELECT data FROM commerce_promotions WHERE tenant=$1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "data!",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "3b1bf5ad48c93677a22b162ef8a6fc92aa26540724e5405e0ef8b2c413163ef9"
+}

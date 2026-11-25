@@ -1,0 +1,30 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT channel_id FROM product_channel_visibility WHERE tenant=$1 AND product_id=$2 AND channel_id=ANY($3) AND NOT visible",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "channel_id",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "product_channel_visibility",
+            "name": "channel_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "TextArray"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "440674cbdf0eb6ab5c0cd0847b7fb1f8caecb633d955eeda9f9c8ef6a2e4b671"
+}

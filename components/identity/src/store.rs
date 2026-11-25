@@ -11,3 +11,4 @@ pub mod merchant_accounts;
 pub mod mfa;
 pub mod roles;
 pub mod sessions;
+pub mod shop_reads;

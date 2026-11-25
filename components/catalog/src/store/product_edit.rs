@@ -121,7 +121,14 @@ pub async fn upsert_translation(
     name: Option<String>,
     description: Option<String>,
 ) -> Result<()> {
-    sqlx::query!(r#"INSERT INTO product_translations(tenant,product_id,language_id,name,description) SELECT $1,$2,id,$3,$4 FROM languages WHERE locale=$5 ON CONFLICT(tenant,product_id,language_id) DO UPDATE SET name=EXCLUDED.name,description=EXCLUDED.description"#, tenant, id, name, description, locale)
+    // An unregistered locale stores nothing.
+    let Some(language) = crate::ports::registries()?
+        .language_id(&mut *tx, locale)
+        .await?
+    else {
+        return Ok(());
+    };
+    sqlx::query!(r#"INSERT INTO product_translations(tenant,product_id,language_id,name,description) VALUES($1,$2,$3,$4,$5) ON CONFLICT(tenant,product_id,language_id) DO UPDATE SET name=EXCLUDED.name,description=EXCLUDED.description"#, tenant, id, language, name, description)
         .execute(tx)
         .await?;
     Ok(())

@@ -1,43 +1,23 @@
-//! Operator control-plane records: per-shop AI limits, the shop lifecycle status, the audit trail, the operator's account and the shop dossier. Columns checked at compile time.
+//! Operator control-plane records: per-shop AI limits, the shop lifecycle status, the audit trail, the operator's account and the shop dossier. Accounts, products and AI usage come from the identity, catalog and core stores, customers, apps and receipts through the dependants port.
 use serde_json::Value;
 use sqlx::PgConnection;
 use veyndo_core::{Result, State};
 
-/// A shop's daily interactive AI limit and its revision.
-pub struct Limit {
-    pub daily_ai: i64,
-    pub revision: i64,
-}
+pub use veyndo_core::store::resource_limits::Limit;
 
 /// The stored AI limit of a shop; none while it uses the defaults.
 pub async fn limit(a: &State, tenant: &str) -> Result<Option<Limit>> {
-    Ok(sqlx::query_as!(
-        Limit,
-        "SELECT daily_ai,revision FROM tenant_resource_limits WHERE tenant=$1",
-        tenant
-    )
-    .fetch_optional(&a.db)
-    .await?)
+    veyndo_core::store::resource_limits::limit(a, tenant).await
 }
 
 /// The interactive AI attempts of a shop on the current UTC day.
 pub async fn used_today(a: &State, tenant: &str) -> Result<Option<i64>> {
-    Ok(sqlx::query_scalar!(
-        "SELECT attempts FROM tenant_ai_usage WHERE tenant=$1 AND day=(now() AT TIME ZONE 'UTC')::date",
-        tenant
-    )
-    .fetch_optional(&a.db)
-    .await?)
+    veyndo_core::store::ai_usage::used_today(&a.db, tenant).await
 }
 
 /// The revision of a shop's stored AI limit, on the caller's connection.
 pub async fn limit_revision(conn: &mut PgConnection, tenant: &str) -> Result<Option<i64>> {
-    Ok(sqlx::query_scalar!(
-        "SELECT revision FROM tenant_resource_limits WHERE tenant=$1",
-        tenant
-    )
-    .fetch_optional(conn)
-    .await?)
+    veyndo_core::store::resource_limits::revision(conn, tenant).await
 }
 
 /// Inserts the limit at `revision`, or replaces it and advances the stored revision.
@@ -47,15 +27,7 @@ pub async fn upsert_limit(
     daily_ai: i64,
     revision: i64,
 ) -> Result<()> {
-    sqlx::query!(
-        "INSERT INTO tenant_resource_limits(tenant,daily_ai,revision) VALUES($1,$2,$3) ON CONFLICT(tenant) DO UPDATE SET daily_ai=excluded.daily_ai,revision=tenant_resource_limits.revision+1",
-        tenant,
-        daily_ai,
-        revision
-    )
-    .execute(conn)
-    .await?;
-    Ok(())
+    veyndo_core::store::resource_limits::upsert(conn, tenant, daily_ai, revision).await
 }
 
 /// Records an operator action in the control-plane audit trail.
@@ -116,13 +88,12 @@ pub struct Account {
 
 /// The merchant account of a user.
 pub async fn account(a: &State, user: &str) -> Result<Account> {
-    Ok(sqlx::query_as!(
-        Account,
-        "SELECT id,name,email FROM merchant_users WHERE id=$1",
-        user
-    )
-    .fetch_one(&a.db)
-    .await?)
+    let account = veyndo_identity::store::shop_reads::account(a, user).await?;
+    Ok(Account {
+        id: account.id,
+        name: account.name,
+        email: account.email,
+    })
 }
 
 /// One control-plane action.
@@ -171,13 +142,21 @@ pub struct Counts {
 
 /// How many products, customers and active apps a shop has.
 pub async fn counts(a: &State, id: &str) -> Result<Counts> {
-    Ok(sqlx::query_as!(
-        Counts,
-        r#"SELECT (SELECT count(*) FROM products WHERE tenant=$1) AS "products!",(SELECT count(*) FROM customers WHERE tenant=$1) AS "customers!",(SELECT count(*) FROM app_packages WHERE tenant=$1 AND active) AS "apps!""#,
-        id
-    )
-    .fetch_one(&a.db)
-    .await?)
+    let ids = [id.to_owned()];
+    let products = veyndo_catalog::store::shop_reads::count_by_shop(a, &ids)
+        .await?
+        .first()
+        .map_or(0, |(_, count)| *count);
+    let held = crate::ports::dependants()?
+        .activity(&ids, 1)
+        .await?
+        .remove(id)
+        .unwrap_or_default();
+    Ok(Counts {
+        products,
+        customers: held.customers,
+        apps: held.apps,
+    })
 }
 
 /// A member of a shop's access roster.
@@ -190,13 +169,16 @@ pub struct Member {
 
 /// Up to a hundred members of a shop by name.
 pub async fn members(a: &State, id: &str) -> Result<Vec<Member>> {
-    Ok(sqlx::query_as!(
-        Member,
-        "SELECT u.name,u.email,m.role,m.active FROM memberships m JOIN merchant_users u ON u.id=m.user_id WHERE m.tenant=$1 ORDER BY u.name LIMIT 100",
-        id
-    )
-    .fetch_all(&a.db)
-    .await?)
+    Ok(veyndo_identity::store::shop_reads::roster(a, id)
+        .await?
+        .into_iter()
+        .map(|m| Member {
+            name: m.name,
+            email: m.email,
+            role: m.role,
+            active: m.active,
+        })
+        .collect())
 }
 
 /// A sales channel with its stored configuration.
@@ -217,10 +199,6 @@ pub async fn channels(a: &State, id: &str) -> Result<Vec<Channel>> {
 }
 
 /// The validated business identity of a shop's receipts.
-pub async fn receipt_settings(a: &State, id: &str) -> Result<Option<Value>> {
-    Ok(
-        sqlx::query_scalar!("SELECT data FROM receipt_settings WHERE tenant=$1", id)
-            .fetch_optional(&a.db)
-            .await?,
-    )
+pub async fn receipt_settings(id: &str) -> Result<Option<Value>> {
+    crate::ports::dependants()?.receipt_identity(id).await
 }

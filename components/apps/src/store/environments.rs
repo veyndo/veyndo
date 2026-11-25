@@ -48,11 +48,5 @@ pub async fn lock_preview(
 
 /// Keeps a preview environment for another hour.
 pub async fn extend_preview(conn: &mut PgConnection, environment: &str) -> Result<()> {
-    sqlx::query!(
-        "UPDATE shop_environments SET preview_until=now()+interval '1 hour' WHERE tenant=$1",
-        environment
-    )
-    .execute(conn)
-    .await?;
-    Ok(())
+    veyndo_core::store::environments_write::extend_preview(conn, environment).await
 }

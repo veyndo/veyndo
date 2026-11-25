@@ -25,7 +25,7 @@ pub async fn discover(State(p): State<Pricing>, h: RequestContext) -> Result<Jso
 mod tests {
     use super::discover;
     use crate::catalog::Product;
-    use crate::ports::{Carts, Catalogue, PortFuture, Pricing, ShopSettings};
+    use crate::ports::{Carts, Catalogue, PortFuture, Pricing, References, ShopSettings};
     use crate::types::currency::{Config, Definition};
     use axum::extract::State;
     use serde_json::Value;
@@ -95,12 +95,47 @@ mod tests {
             Box::pin(async { Ok(()) })
         }
     }
+    struct Unused;
+    impl References for Unused {
+        fn product_ceiling<'a>(
+            &'a self,
+            _: &'a mut PgConnection,
+            _: &'a str,
+        ) -> PortFuture<'a, String> {
+            Box::pin(async { Ok(String::new()) })
+        }
+        fn products_use<'a>(
+            &'a self,
+            _: &'a mut PgConnection,
+            _: &'a str,
+            _: &'a [String],
+        ) -> PortFuture<'a, bool> {
+            Box::pin(async { Ok(false) })
+        }
+        fn carts_use<'a>(
+            &'a self,
+            _: &'a mut PgConnection,
+            _: &'a str,
+            _: &'a [String],
+        ) -> PortFuture<'a, bool> {
+            Box::pin(async { Ok(false) })
+        }
+        fn units_use<'a>(
+            &'a self,
+            _: &'a mut PgConnection,
+            _: &'a str,
+            _: &'a [String],
+        ) -> PortFuture<'a, bool> {
+            Box::pin(async { Ok(false) })
+        }
+    }
     fn pricing() -> Pricing {
         Pricing {
             core: veyndo_core::State::detached(),
             settings: Arc::new(Shop),
             carts: Arc::new(Cart),
             catalogue: Arc::new(Shelf),
+            references: Arc::new(Unused),
         }
     }
     fn request(pairs: &[(&'static str, &str)]) -> RequestContext {

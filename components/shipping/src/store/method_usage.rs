@@ -1,4 +1,5 @@
-//! Where a delivery or payment method is still referenced; order snapshots remain immutable.
+//! Where a delivery or payment method is still referenced; order snapshots remain immutable. The documents belong to other components and are counted through their port.
+use crate::ports::{MethodReference, MethodReferences};
 use serde::Serialize;
 use sqlx::PgConnection;
 use veyndo_core::{Result, bad};
@@ -38,6 +39,7 @@ pub struct Usage {
 
 /// Counts the references to a method; with a channel, only that channel's carts and orders.
 pub async fn usage(
+    references: &dyn MethodReferences,
     tx: &mut PgConnection,
     t: &str,
     area: Area,
@@ -58,25 +60,25 @@ pub async fn usage(
             "allowedPayments",
         ),
     };
-    let orders: i64 = sqlx::query_scalar!(r#"SELECT count(*) AS "count!" FROM orders o JOIN carts c ON c.id=o.cart_id WHERE o.tenant=$1 AND ($4::text IS NULL OR COALESCE(c.data->>'sales_channel','default')=$4) AND (o.data #>> $2::text[]=$3 OR o.data->'cart'->'checkout'->>$5=$3)"#, t, &snapshot as &[&str], id, channel, selection)
-        .fetch_one(&mut *tx)
-        .await?;
-    let carts: i64 = sqlx::query_scalar!(r#"SELECT count(*) AS "count!" FROM carts WHERE tenant=$1 AND status='open' AND ($4::text IS NULL OR COALESCE(data->>'sales_channel','default')=$4) AND (data->'checkout'->>$2=$3 OR data->'checkout'->>$5=$3)"#, t, selection, id, channel, legacy)
-        .fetch_one(&mut *tx)
-        .await?;
-    let overrides: i64 = if channel.is_none() {
-        sqlx::query_scalar!(r#"SELECT count(*) AS "count!" FROM commerce_overrides WHERE tenant=$1 AND EXISTS(SELECT 1 FROM jsonb_array_elements(data) p WHERE p->'path'->>0=$2 AND p->'path'->>1=$3)"#, t, area.name(), id)
-            .fetch_one(&mut *tx)
-            .await?
+    let m = MethodReference {
+        tenant: t,
+        id,
+        channel,
+        area: area.name(),
+        snapshot: &snapshot,
+        selection,
+        legacy,
+        allowed,
+    };
+    let orders = references.orders(&mut *tx, &m).await?;
+    let carts = references.carts(&mut *tx, &m).await?;
+    let overrides = if channel.is_none() {
+        references.overrides(&mut *tx, &m).await?
     } else {
         0
     };
-    let rules: i64 = sqlx::query_scalar!(r#"SELECT (SELECT count(*) FROM commerce_rules WHERE tenant=$1 AND jsonb_path_exists(condition,'$.** ? (@ == $id)',jsonb_build_object('id',$2::text))) + (SELECT count(*) FROM commerce_flows WHERE tenant=$1 AND jsonb_path_exists(data,'$.** ? (@ == $id)',jsonb_build_object('id',$2::text))) AS "count!""#, t, id)
-        .fetch_one(&mut *tx)
-        .await?;
-    let b2b_units: i64 = sqlx::query_scalar!(r#"SELECT count(*) AS "count!" FROM b2b_units WHERE tenant=$1 AND COALESCE(data->$2,'[]'::jsonb) ? $3"#, t, allowed, id)
-    .fetch_one(tx)
-    .await?;
+    let rules = references.rules(&mut *tx, &m).await?;
+    let b2b_units = references.units(tx, &m).await?;
     Ok(Usage {
         rules,
         orders,

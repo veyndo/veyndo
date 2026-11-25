@@ -1,0 +1,26 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT tenant AS \"tenant!\" FROM shop_environments",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "tenant!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "shop_environments",
+            "name": "tenant"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "fc36d5367a5450a7ed61f35d7c776abdec1599b542cea992941b982643522bf7"
+}

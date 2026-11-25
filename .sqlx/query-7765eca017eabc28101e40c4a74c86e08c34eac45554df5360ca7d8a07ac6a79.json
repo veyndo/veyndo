@@ -1,0 +1,80 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT t.id,t.name,t.status,t.status_revision,t.created_at::text AS \"created!\",(SELECT count(*) FROM sales_channels WHERE tenant=t.id AND coalesce((data->>'active')::boolean,true)) AS \"channels!\" FROM tenants t WHERE t.id>$1 AND (strpos(lower(t.name),lower($2))>0 OR strpos(t.id,lower($2))>0) AND NOT EXISTS(SELECT 1 FROM shop_environments e WHERE e.tenant=t.id) ORDER BY t.id LIMIT $3",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "tenants",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "tenants",
+            "name": "name"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "status",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "tenants",
+            "name": "status"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "status_revision",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "tenants",
+            "name": "status_revision"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "created!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 5,
+        "name": "channels!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      null,
+      null
+    ]
+  },
+  "hash": "7765eca017eabc28101e40c4a74c86e08c34eac45554df5360ca7d8a07ac6a79"
+}

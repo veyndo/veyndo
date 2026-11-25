@@ -7,5 +7,6 @@ pub mod lists;
 pub mod organization;
 pub mod purchase;
 pub mod quotes;
+pub mod references;
 pub mod staging;
 pub mod units;

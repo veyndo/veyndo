@@ -34,7 +34,8 @@ pub async fn create(p: &Pricing, tenant: &str, job: NewJob<'_>) -> Result<String
     let mut enabled = currencies.clone();
     enabled.enabled.push(code.into());
     enabled.selected(code)?;
-    let ceiling = price_jobs::product_ceiling(&mut tx, tenant).await?;
+    // The highest product ID at creation; the job stops there, so products added later keep their prices.
+    let ceiling = p.references.product_ceiling(&mut tx, tenant).await?;
     let id = uid();
     let data = json!({"config":currencies,"currency":definition.code,"overwrite":job.overwrite,"actor":job.actor,"settingsRevision":revision});
     price_jobs::insert(&mut tx, tenant, &id, data, &ceiling).await?;

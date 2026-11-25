@@ -1,4 +1,4 @@
-//! The recent reviews and orders shown beside the merchant settings. Columns checked at compile time.
+//! The recent reviews and orders shown beside the merchant settings: reviews from the catalog store, orders through the dependants port.
 use serde_json::Value;
 use veyndo_core::{Result, State};
 
@@ -19,22 +19,28 @@ pub struct Review {
 
 /// The newest hundred reviews; imported ones only when `imports` is allowed.
 pub async fn reviews(a: &State, t: &str, imports: bool) -> Result<Vec<Review>> {
-    Ok(sqlx::query_as!(
-        Review,
-        r#"SELECT id,product_id,author,rating,title,content,verified,approved,demo,source_import,created_at::text AS "time!" FROM product_reviews WHERE tenant=$1 AND (source_import IS NULL OR $2) ORDER BY created_at DESC LIMIT 100"#,
-        t,
-        imports
+    Ok(
+        veyndo_catalog::store::shop_reads::recent_reviews(a, t, imports)
+            .await?
+            .into_iter()
+            .map(|r| Review {
+                id: r.id,
+                product_id: r.product_id,
+                author: r.author,
+                rating: r.rating,
+                title: r.title,
+                content: r.content,
+                verified: r.verified,
+                approved: r.approved,
+                demo: r.demo,
+                source_import: r.source_import,
+                time: r.time,
+            })
+            .collect(),
     )
-    .fetch_all(&a.db)
-    .await?)
 }
 
 /// The newest thirty order documents without their cart token.
-pub async fn orders(a: &State, t: &str) -> Result<Vec<Value>> {
-    Ok(sqlx::query_scalar!(
-        r#"SELECT data #- '{cart,token}' AS "data!" FROM orders WHERE tenant=$1 ORDER BY created_at DESC LIMIT 30"#,
-        t
-    )
-    .fetch_all(&a.db)
-    .await?)
+pub async fn orders(t: &str) -> Result<Vec<Value>> {
+    crate::ports::dependants()?.recent_orders(t).await
 }

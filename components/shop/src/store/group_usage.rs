@@ -1,4 +1,4 @@
-//! Removing a customer group rejects live customer, price and native/source-rule dependencies under the settings lock.
+//! Removing a customer group rejects live customer, price and native/source-rule dependencies under the settings lock; customers and rules are read through the dependants port.
 use crate::types::settings::Settings;
 use serde_json::{Value, json};
 use veyndo_core::{Result, bad};
@@ -57,13 +57,9 @@ pub async fn guard(
         .iter()
         .map(|g| g.id.clone())
         .collect::<Vec<_>>();
-    let used = sqlx::query_scalar!(
-        r#"SELECT EXISTS(SELECT 1 FROM customers WHERE tenant=$1 AND NOT(group_name=ANY($2))) AS "used!""#,
-        t,
-        &ids
-    )
-    .fetch_one(&mut *tx)
-    .await?;
+    let used = crate::ports::dependants()?
+        .customers_outside_groups(&mut *tx, t, &ids)
+        .await?;
     if used {
         return Err(bad("Customer group is assigned to customers"));
     }
@@ -76,11 +72,21 @@ pub async fn guard(
     if removed.is_empty() {
         return Ok(());
     }
-    let price = sqlx::query_scalar!(r#"SELECT EXISTS(SELECT 1 FROM products p CROSS JOIN LATERAL jsonb_array_elements(p.advanced_prices) x WHERE tenant=$1 AND x->>'rule_id'=ANY($2)) AS "price!""#, t, &removed).fetch_one(&mut *tx).await?;
+    let price = veyndo_catalog::store::shop_reads::group_prices(&mut *tx, t, &removed).await?;
     if price {
         return Err(bad("Customer group is assigned to advanced prices"));
     }
-    let rows = sqlx::query_scalar!(r#"SELECT condition AS "data!" FROM commerce_rules WHERE tenant=$1 UNION ALL SELECT data FROM commerce_flows WHERE tenant=$1 UNION ALL SELECT data FROM commerce_promotions WHERE tenant=$1 UNION ALL SELECT data FROM commerce_overrides WHERE tenant=$1"#, t).fetch_all(&mut *tx).await?;
+    let mut rows = crate::ports::dependants()?
+        .marketing_documents(&mut *tx, t)
+        .await?;
+    rows.extend(
+        sqlx::query_scalar!(
+            r#"SELECT data AS "data!" FROM commerce_overrides WHERE tenant=$1"#,
+            t
+        )
+        .fetch_all(&mut *tx)
+        .await?,
+    );
     if rows.iter().any(|v| references(v, &removed)) || references(&json!(next.taxes), &removed) {
         return Err(bad("Customer group is used by a rule or flow"));
     }

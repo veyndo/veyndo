@@ -1,4 +1,4 @@
-//! Per-product channel visibility overrides remain indexed even when an open catalog contains millions of products.
+//! Per-product channel visibility overrides remain indexed even when an open catalog contains millions of products. The channels themselves come through the registries port.
 use serde::Serialize;
 use serde_json::Value;
 use sqlx::PgConnection;
@@ -6,12 +6,7 @@ use veyndo_core::{Result, State};
 
 /// The IDs of all sales channels of the shop, locked so visibility is written against a stable set.
 pub async fn lock_all(tx: &mut PgConnection, tenant: &str) -> Result<Vec<String>> {
-    Ok(sqlx::query_scalar!(
-        r#"SELECT id FROM sales_channels WHERE tenant=$1 ORDER BY id FOR UPDATE"#,
-        tenant
-    )
-    .fetch_all(tx)
-    .await?)
+    crate::ports::registries()?.lock_channels(tx, tenant).await
 }
 
 pub async fn set_visible(
@@ -37,7 +32,17 @@ pub struct Visibility {
 
 /// Up to 101 channels, so the caller can refuse shops beyond the editor's limit of 100.
 pub async fn visibility(a: &State, tenant: &str, product: &str) -> Result<Vec<Visibility>> {
-    Ok(sqlx::query_as!(Visibility, r#"SELECT c.id,c.data,coalesce(v.visible,true) AS "visible!" FROM sales_channels c LEFT JOIN product_channel_visibility v ON v.tenant=c.tenant AND v.channel_id=c.id AND v.product_id=$2 WHERE c.tenant=$1 ORDER BY c.id LIMIT 101"#, tenant, product)
+    let channels = crate::ports::registries()?.channels(tenant, 101).await?;
+    let ids: Vec<&str> = channels.iter().map(|(id, _)| id.as_str()).collect();
+    let hidden = sqlx::query_scalar!(r#"SELECT channel_id FROM product_channel_visibility WHERE tenant=$1 AND product_id=$2 AND channel_id=ANY($3) AND NOT visible"#, tenant, product, &ids as &[&str])
         .fetch_all(&a.db)
-        .await?)
+        .await?;
+    Ok(channels
+        .into_iter()
+        .map(|(id, data)| Visibility {
+            visible: !hidden.contains(&id),
+            id,
+            data,
+        })
+        .collect())
 }

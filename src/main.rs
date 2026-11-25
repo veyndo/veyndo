@@ -46,6 +46,7 @@ mod payments;
 mod performance;
 mod planner;
 mod platform;
+mod ports;
 mod pos;
 mod proposal_apply;
 mod proposal_routes;

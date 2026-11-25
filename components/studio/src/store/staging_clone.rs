@@ -50,16 +50,7 @@ pub async fn insert_environment(
     sqlx::query!("INSERT INTO tenants(id,name) VALUES($1,$2)", id, name)
         .execute(&mut **tx)
         .await?;
-    sqlx::query!(
-        "INSERT INTO shop_environments(tenant,live_tenant,name,baseline) VALUES($1,$2,$3,$4)",
-        id,
-        live,
-        name,
-        baseline
-    )
-    .execute(&mut **tx)
-    .await?;
-    Ok(())
+    veyndo_core::store::environments_write::register(tx, id, live, name, baseline).await
 }
 
 /// Copies the live catalogue (products, translations, assets, categories) into the sandbox.
@@ -153,18 +144,10 @@ pub async fn copy_channel_configuration(tx: &mut Tx<'_>, t: &str, id: &str) -> R
 
 /// Replaces the environment's baseline.
 pub async fn set_baseline(tx: &mut Tx<'_>, id: &str, baseline: &Value) -> Result<()> {
-    sqlx::query!(
-        "UPDATE shop_environments SET baseline=$1 WHERE tenant=$2",
-        baseline,
-        id
-    )
-    .execute(&mut **tx)
-    .await?;
-    Ok(())
+    veyndo_core::store::environments_write::set_baseline(tx, id, baseline).await
 }
 
 /// Marks the environment as a developer preview owned by one actor for one hour.
 pub async fn mark_preview(tx: &mut Tx<'_>, id: &str, owner: &str) -> Result<()> {
-    sqlx::query!("UPDATE shop_environments SET preview_owner=$1,preview_until=now()+interval '1 hour' WHERE tenant=$2", owner, id).execute(&mut **tx).await?;
-    Ok(())
+    veyndo_core::store::environments_write::mark_preview(tx, id, owner).await
 }

@@ -42,6 +42,7 @@ pub mod schedules;
 pub mod schema_upgrade;
 pub mod secrets;
 pub mod settings;
+pub mod shop_reads;
 pub mod storage_usage;
 pub mod surface_grants;
 pub mod surface_registry;

@@ -2,6 +2,7 @@
 pub mod carts;
 pub mod catalog;
 pub mod channel_config;
+pub mod channel_ids;
 pub mod channel_preview;
 pub mod channels;
 pub mod configuration_lifecycle;
@@ -16,6 +17,7 @@ pub mod flow_mutations;
 pub mod flow_projection;
 pub mod flow_steps;
 pub mod promotions;
+pub mod references;
 pub mod rule_entities;
 pub mod rule_history;
 pub mod rule_snapshot;
