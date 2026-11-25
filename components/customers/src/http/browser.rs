@@ -1,4 +1,5 @@
 //! Host-only customer cookies adapt the existing tenant session ledger without granting merchant authority.
+use crate::store::sessions;
 use axum::Json;
 use axum::body::{Body, to_bytes};
 use axum::extract::{Request, State};
@@ -174,7 +175,12 @@ pub async fn apply(
     else {
         return Response::from_parts(parts, Body::from(bytes));
     };
-    let valid=veyndo_runtime::tenant_scope::scoped(veyndo_runtime::tenant_scope::Scope::Tenant(t.clone()),sqlx::query_scalar::<_,bool>("SELECT EXISTS(SELECT 1 FROM customer_sessions s JOIN customers c ON c.tenant=s.tenant AND c.email=s.email WHERE s.tenant=$1 AND s.digest=$2 AND s.expires_at>now() AND c.active)").bind(&t).bind(hash(&candidate)).fetch_one(&a.db)).await;
+    let digest = hash(&candidate);
+    let valid = veyndo_runtime::tenant_scope::scoped(
+        veyndo_runtime::tenant_scope::Scope::Tenant(t.clone()),
+        sessions::valid(&a, &t, &digest),
+    )
+    .await;
     if !matches!(valid, Ok(true)) {
         return Error(StatusCode::UNAUTHORIZED, "Customer session expired".into()).into_response();
     }

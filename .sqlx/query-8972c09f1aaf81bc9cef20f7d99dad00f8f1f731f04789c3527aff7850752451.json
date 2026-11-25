@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT public.veyndo_register_language($1)",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "veyndo_register_language",
+        "type_info": "Void",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "8972c09f1aaf81bc9cef20f7d99dad00f8f1f731f04789c3527aff7850752451"
+}

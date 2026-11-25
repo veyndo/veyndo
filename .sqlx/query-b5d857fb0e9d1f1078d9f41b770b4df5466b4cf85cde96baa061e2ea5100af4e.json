@@ -1,0 +1,111 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "-- Per-request MVCC snapshot; never cached between requests. Hosted bindings cannot be replaced by headers.\nWITH mount AS (\n SELECT tenant,channel,origin,experience_alias FROM hosted_frontends WHERE alias=$1\n), selected AS (\n SELECT coalesce((SELECT tenant FROM mount),$2) AS tenant,\n        coalesce((SELECT channel FROM mount),$3) AS channel\n)\nSELECT s.tenant AS \"tenant!\",s.channel AS \"channel!\",e.live_tenant AS \"parent?\",t.status AS \"status?\",\n EXISTS(SELECT 1 FROM tenants WHERE id=s.tenant) AS \"exists!\",\n c.data AS \"channel_data?\",c.revision AS \"channel_revision?\",m.origin AS \"origin?\",m.experience_alias AS \"experience_alias?\"\nFROM selected s\nLEFT JOIN shop_environments e ON e.tenant=s.tenant\nLEFT JOIN tenants t ON t.id=coalesce(e.live_tenant,s.tenant)\nLEFT JOIN sales_channels c ON c.tenant=s.tenant AND c.id=s.channel\nLEFT JOIN mount m ON true;\n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "tenant!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "channel!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "parent?",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "shop_environments",
+            "name": "live_tenant"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "status?",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "tenants",
+            "name": "status"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "exists!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 5,
+        "name": "channel_data?",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "sales_channels",
+            "name": "data"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "channel_revision?",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "sales_channels",
+            "name": "revision"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "origin?",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "hosted_frontends",
+            "name": "origin"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "experience_alias?",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "hosted_frontends",
+            "name": "experience_alias"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null,
+      null,
+      true,
+      true,
+      null,
+      true,
+      true,
+      true,
+      true
+    ]
+  },
+  "hash": "b5d857fb0e9d1f1078d9f41b770b4df5466b4cf85cde96baa061e2ea5100af4e"
+}

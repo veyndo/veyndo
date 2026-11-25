@@ -6,12 +6,12 @@ use crate::domain::validation::validate;
 use crate::ports::{SettingsGuards, SettingsHost};
 use crate::service::read_cache::config;
 use crate::store::group_usage::guard as group_guard;
-use crate::store::settings::scoped_locked;
+use crate::store::settings::{self, scoped_locked};
+use crate::store::settings_view;
 use axum::Json;
 use axum::extract::{Path, State as Shared};
 use serde::Deserialize;
 use serde_json::{Value, json};
-use sqlx::Row;
 use veyndo_core::document::{lenient, view};
 use veyndo_core::store::history_context::context;
 use veyndo_core::{RequestContext, Result, bad, conflict};
@@ -22,10 +22,7 @@ use veyndo_shipping::store::method_usage::{Area, usage};
 /// Registers every enabled language in the global language table.
 async fn register(tx: &mut sqlx::Transaction<'_, sqlx::Postgres>, s: &Settings) -> Result<()> {
     for locale in &s.locales {
-        sqlx::query("SELECT public.veyndo_register_language($1)")
-            .bind(locale)
-            .execute(&mut **tx)
-            .await?;
+        settings::register_language(tx, locale).await?;
     }
     Ok(())
 }
@@ -101,43 +98,34 @@ pub async fn save_config(
     host.guards.lock(&mut tx, &t).await?;
     // Serialize configuration with product assignments and translation apply, so
     // a concurrently removed class/language cannot be committed from an older read.
-    let previous =
-        sqlx::query("SELECT data,revision FROM commerce_settings WHERE tenant=$1 FOR UPDATE")
-            .bind(&t)
-            .fetch_one(&mut *tx)
-            .await?;
-    let previous = decode(previous.get("data"))?;
+    let (previous, _) = settings::for_update(&mut tx, &t).await?;
     if previous.main_locale != s.main_locale {
         host.guards.locale(&mut tx, &t, &s.main_locale).await?;
     }
     currency_guard(&mut tx, &t, &previous.currencies, &s.currencies).await?;
     group_guard(&mut tx, &t, &previous, &s).await?;
     guard(&*host.guards, &mut tx, &t, &previous, &s, None).await?;
-    let patches: Vec<Value> =
-        sqlx::query_scalar("SELECT data FROM commerce_overrides WHERE tenant=$1")
-            .bind(&t)
-            .fetch_all(&mut *tx)
-            .await?;
-    for patch in patches {
+    for patch in settings::overrides(&mut tx, &t).await? {
         let scoped = resolve(&s, patch, &|v| host.guards.condition(v))?;
         host.guards.capture(&mut tx, &t, &scoped).await?;
     }
     register(&mut tx, &s).await?;
     let tax_ids = s.taxes.iter().map(|t| t.id.clone()).collect::<Vec<_>>();
-    let stranded:bool=sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM products WHERE tenant=$1 AND extra->>'taxClassId' IS NOT NULL AND NOT(extra->>'taxClassId'=ANY($2)))").bind(&t).bind(tax_ids).fetch_one(&mut *tx).await?;
-    if stranded {
+    if settings::tax_class_stranded(&mut tx, &t, &tax_ids).await? {
         return Err(bad("Tax class is assigned to products"));
     }
-    let r=sqlx::query("UPDATE commerce_settings SET data=$1,revision=revision+1 WHERE tenant=$2 AND revision=$3 RETURNING revision").bind(json!(s)).bind(&t).bind(revision).fetch_optional(&mut *tx).await?.ok_or(conflict("Configuration changed; reload first"))?;
+    let r = settings::replace_basis_at(&mut tx, &t, &json!(s), revision)
+        .await?
+        .ok_or(conflict("Configuration changed; reload first"))?;
     veyndo_core::store::outbox::publish_on(
         &mut *tx,
         &t,
         "commerce.configured",
-        &json!({"revision":r.get::<i64,_>("revision")}),
+        &json!({"revision":r}),
     )
     .await?;
     tx.commit().await?;
-    Ok(Json(json!({"revision":r.get::<i64,_>("revision")})))
+    Ok(Json(json!({"revision":r})))
 }
 /// The channel overrides of a sandbox as release units.
 pub async fn snapshot_scopes(
@@ -145,9 +133,9 @@ pub async fn snapshot_scopes(
     t: &str,
     result: &mut serde_json::Map<String, Value>,
 ) -> Result<()> {
-    for row in sqlx::query("SELECT channel_id,data FROM commerce_overrides WHERE tenant=$1 ORDER BY channel_id FOR UPDATE").bind(t).fetch_all(&mut **tx).await? {
-  result.insert(format!("settings-channel:{}",row.get::<String,_>("channel_id")),row.get("data"));
- }
+    for (channel, data) in settings::overrides_for_update(tx, t).await? {
+        result.insert(format!("settings-channel:{channel}"), data);
+    }
     Ok(())
 }
 /// Publishes one channel override from a sandbox release after the method guards.
@@ -159,14 +147,10 @@ pub async fn publish_scope(
     value: &Value,
 ) -> Result<()> {
     let (old, _) = scoped_locked(tx, t, channel, &|v| guards.condition(v)).await?;
-    let base: Value =
-        sqlx::query_scalar("SELECT data FROM commerce_settings WHERE tenant=$1 FOR UPDATE")
-            .bind(t)
-            .fetch_one(&mut **tx)
-            .await?;
+    let base = settings::basis_for_update(tx, t).await?;
     let next = resolve(&decode(base)?, value.clone(), &|v| guards.condition(v))?;
     guard(guards, tx, t, &old, &next, Some(channel)).await?;
-    sqlx::query("INSERT INTO commerce_overrides(tenant,channel_id,data) VALUES($1,$2,$3) ON CONFLICT(tenant,channel_id) DO UPDATE SET data=EXCLUDED.data,revision=commerce_overrides.revision+1").bind(t).bind(channel).bind(value).execute(&mut **tx).await?;
+    settings::upsert_override(tx, t, channel, value).await?;
     Ok(())
 }
 /// Checks released shop settings against the live dependencies they must not strand.
@@ -176,27 +160,16 @@ pub async fn validate_settings_release(
     t: &str,
     previous: &Value,
 ) -> Result<()> {
-    let value: Value =
-        sqlx::query_scalar("SELECT data FROM commerce_settings WHERE tenant=$1 FOR UPDATE")
-            .bind(t)
-            .fetch_one(&mut **tx)
-            .await?;
-    let next = decode(value)?;
+    let next = decode(settings::basis_for_update(tx, t).await?)?;
     validate(&next, &|v| guards.condition(v))?;
     let previous = decode(previous.clone())?;
     currency_guard(tx, t, &previous.currencies, &next.currencies).await?;
     guard(guards, tx, t, &previous, &next, None).await?;
     let tax_ids = next.taxes.iter().map(|v| v.id.clone()).collect::<Vec<_>>();
-    let stranded:bool=sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM products WHERE tenant=$1 AND extra->>'taxClassId' IS NOT NULL AND NOT(extra->>'taxClassId'=ANY($2)))").bind(t).bind(tax_ids).fetch_one(&mut **tx).await?;
-    if stranded {
+    if settings::tax_class_stranded(tx, t, &tax_ids).await? {
         return Err(bad("Tax class is assigned to products"));
     }
-    let patches: Vec<Value> =
-        sqlx::query_scalar("SELECT data FROM commerce_overrides WHERE tenant=$1")
-            .bind(t)
-            .fetch_all(&mut **tx)
-            .await?;
-    for patch in patches {
+    for patch in settings::overrides(tx, t).await? {
         let scoped = resolve(&next, patch, &|v| guards.condition(v))?;
         guards.capture(tx, t, &scoped).await?;
     }
@@ -216,24 +189,9 @@ pub async fn get_scope(
     context(&mut tx, &h, "merchant").await?;
     let (data, base_revision) =
         scoped_locked(&mut tx, &t, &channel, &|v| host.guards.condition(v)).await?;
-    let row = sqlx::query(
-        "SELECT data,revision FROM commerce_overrides WHERE tenant=$1 AND channel_id=$2",
-    )
-    .bind(&t)
-    .bind(&channel)
-    .fetch_optional(&mut *tx)
-    .await?;
-    let base = decode(
-        sqlx::query_scalar("SELECT data FROM commerce_settings WHERE tenant=$1")
-            .bind(&t)
-            .fetch_one(&mut *tx)
-            .await?,
-    )?;
-    let patch = row
-        .as_ref()
-        .map(|r| r.get::<Value, _>("data"))
-        .unwrap_or(json!([]));
-    let revision = row.map(|r| r.get::<i64, _>("revision")).unwrap_or(0);
+    let row = settings::channel_override(&mut tx, &t, &channel).await?;
+    let base = decode(settings::basis(&mut tx, &t).await?)?;
+    let (patch, revision) = row.map_or((json!([]), 0), |r| (r.data, r.revision));
     tx.commit().await?;
     Ok(Json(
         json!({"data":data,"revision":revision,"baseRevision":base_revision,"inherited":base,"overrides":patch,"channelId":channel}),
@@ -257,22 +215,12 @@ pub async fn save_scope(
     validate(&next, &|v| host.guards.condition(v))?;
     let mut tx = a.db.begin().await?;
     context(&mut tx, &h, "merchant").await?;
-    let row = sqlx::query("SELECT data,revision FROM commerce_settings WHERE tenant=$1 FOR UPDATE")
-        .bind(&t)
-        .fetch_one(&mut *tx)
-        .await?;
-    let base = decode(row.get("data"))?;
-    if input.base_revision.as_i64() != Some(row.get("revision")) {
+    let (base, base_revision) = settings::for_update(&mut tx, &t).await?;
+    if input.base_revision.as_i64() != Some(base_revision) {
         return Err(conflict("Settings basis changed; reload first"));
     }
     let (old, _) = scoped_locked(&mut tx, &t, &channel, &|v| host.guards.condition(v)).await?;
-    let revision: Option<i64> = sqlx::query_scalar(
-        "SELECT revision FROM commerce_overrides WHERE tenant=$1 AND channel_id=$2",
-    )
-    .bind(&t)
-    .bind(&channel)
-    .fetch_optional(&mut *tx)
-    .await?;
+    let revision = settings::override_revision(&mut tx, &t, &channel).await?;
     if input.revision != Some(revision.unwrap_or(0)) {
         return Err(conflict("Channel settings changed; reload first"));
     }
@@ -288,7 +236,7 @@ pub async fn save_scope(
         ));
     }
     let patch = difference(&base, &next);
-    sqlx::query("INSERT INTO commerce_overrides(tenant,channel_id,data) VALUES($1,$2,$3) ON CONFLICT(tenant,channel_id) DO UPDATE SET data=EXCLUDED.data,revision=commerce_overrides.revision+1").bind(&t).bind(&channel).bind(&patch).execute(&mut *tx).await?;
+    settings::upsert_override(&mut tx, &t, &channel, &patch).await?;
     veyndo_core::store::outbox::publish_on(
         &mut *tx,
         &t,
@@ -310,16 +258,18 @@ pub async fn merchant_config(
     let t = merchant(&h)?;
     permit(&h, "settings.read")?;
     let (data, revision) = config(a, &t).await?;
-    let rs=sqlx::query("SELECT id,product_id,author,rating,title,content,verified,approved,demo,source_import,created_at::text AS time FROM product_reviews WHERE tenant=$1 AND (source_import IS NULL OR $2) ORDER BY created_at DESC LIMIT 100").bind(&t).bind(permit(&h, "catalog.read").is_ok() && permit(&h, "customers.pii").is_ok()).fetch_all(&a.db).await?;
+    let rs = settings_view::reviews(
+        a,
+        &t,
+        permit(&h, "catalog.read").is_ok() && permit(&h, "customers.pii").is_ok(),
+    )
+    .await?;
     let os = if permit(&h, "orders.read").is_ok() && permit(&h, "customers.pii").is_ok() {
-        sqlx::query("SELECT data #- '{cart,token}' AS data FROM orders WHERE tenant=$1 ORDER BY created_at DESC LIMIT 30")
-            .bind(&t)
-            .fetch_all(&a.db)
-            .await?
+        settings_view::orders(a, &t).await?
     } else {
         Vec::new()
     };
     Ok(Json(
-        json!({"data":data,"revision":revision,"reviews":rs.iter().map(|r|json!({"id":r.get::<String,_>("id"),"productId":r.get::<String,_>("product_id"),"author":r.get::<String,_>("author"),"rating":r.get::<i32,_>("rating"),"title":r.get::<String,_>("title"),"content":r.get::<String,_>("content"),"approved":r.get::<bool,_>("approved"),"verifiedPurchase":r.get::<bool,_>("verified"),"demo":r.get::<bool,_>("demo"),"sourceImport":r.get::<Option<Value>,_>("source_import"),"time":r.get::<String,_>("time")})).collect::<Vec<_>>(),"orders":os.iter().map(|r|r.get::<Value,_>("data")).collect::<Vec<_>>()}),
+        json!({"data":data,"revision":revision,"reviews":rs.iter().map(|r|json!({"id":r.id,"productId":r.product_id,"author":r.author,"rating":r.rating,"title":r.title,"content":r.content,"approved":r.approved,"verifiedPurchase":r.verified,"demo":r.demo,"sourceImport":r.source_import,"time":r.time})).collect::<Vec<_>>(),"orders":os}),
     ))
 }

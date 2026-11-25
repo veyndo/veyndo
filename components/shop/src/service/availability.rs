@@ -1,12 +1,8 @@
 //! Shop availability after identity derivation: paused shops keep merchant reads, archived and deleted shops are gone; settlement callbacks stay reachable.
+use crate::store::access_snapshot::live_status;
 use veyndo_core::shop_scope::{header, tenant};
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode};
 use veyndo_kernel::verified_kernel;
-
-/// The lifecycle status of the live shop behind a shop or its sandbox.
-async fn live_status(a: &State, t: &str) -> Result<Option<String>> {
-    Ok(sqlx::query_scalar::<_,String>("SELECT t.status FROM tenants t WHERE t.id=coalesce((SELECT live_tenant FROM shop_environments WHERE tenant=$1),$1)").bind(t).fetch_optional(&a.db).await?)
-}
 
 /// Evaluate availability after identity derivation. Paused shops retain merchant GET access; deleted shops require restoration.
 pub async fn admit(a: &State, h: &RequestContext, path: &str, method: &str) -> Result<bool> {

@@ -8,7 +8,7 @@ WITH scope AS (
     LEFT JOIN commerce_overrides o ON o.tenant=s.tenant AND o.channel_id=$2 AND $2 <> 'default'
     WHERE s.tenant=$1
 )
-SELECT revision, version, channel_exists,
+SELECT revision AS "revision!", version AS "version!", channel_exists AS "channel_exists!",
        CASE WHEN version IS DISTINCT FROM $3 THEN data END AS data,
        CASE WHEN version IS DISTINCT FROM $3 THEN patch END AS patch
 FROM scope

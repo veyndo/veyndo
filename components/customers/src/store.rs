@@ -5,3 +5,4 @@ pub mod addresses;
 pub mod crm;
 pub mod customers;
 pub mod sessions;
+pub mod sign_in;

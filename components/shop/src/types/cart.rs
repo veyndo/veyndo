@@ -25,16 +25,41 @@ pub struct StoredCart {
 
 /// Hydrates a complete `carts` row; older stored shapes are upgraded on the way.
 pub fn stored(r: &PgRow) -> Result<StoredCart> {
-    let mut data: Value = r.get("data");
-    upgrade_cart(&mut data);
-    Ok(StoredCart {
+    CartRow {
         id: r.get("id"),
         tenant: r.get("tenant"),
         token: r.get("token"),
-        data: serde_json::from_value(data).map_err(|e| bad(e.to_string()))?,
+        data: r.get("data"),
         revision: r.get("revision"),
         status: r.get("status"),
-    })
+    }
+    .hydrate()
+}
+
+/// The columns of a `carts` row as a compile-checked query selects them (`SELECT id,tenant,token,data,revision,status`).
+pub struct CartRow {
+    pub id: String,
+    pub tenant: String,
+    pub token: String,
+    pub data: Value,
+    pub revision: i64,
+    pub status: String,
+}
+
+impl CartRow {
+    /// The stored cart; older stored shapes are upgraded on the way.
+    pub fn hydrate(self) -> Result<StoredCart> {
+        let mut data = self.data;
+        upgrade_cart(&mut data);
+        Ok(StoredCart {
+            id: self.id,
+            tenant: self.tenant,
+            token: self.token,
+            data: serde_json::from_value(data).map_err(|e| bad(e.to_string()))?,
+            revision: self.revision,
+            status: self.status,
+        })
+    }
 }
 
 /// The checkout choices of a cart; a cart without any starts from the defaults.
