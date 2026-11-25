@@ -59,14 +59,18 @@ pub async fn plan_with<H: AgentHost>(
             value
         }
     };
-    let graph = &prepared["graph"];
-    let facts = &prepared["facts"];
-    let memory = &prepared["memory"];
-    let app_names = &prepared["appNames"];
-    let app_context = &prepared["appContext"];
-    let model_app_context = &prepared["modelAppContext"];
-    let document_sources = &prepared["documentSources"];
-    let private_sources = &prepared["privateSources"];
+    let context: PreparedContext = view(&prepared);
+    let PreparedContext {
+        graph,
+        facts,
+        memory,
+        app_names,
+        app_context,
+        model_app_context,
+        document_sources,
+        private_sources,
+        ..
+    } = &context;
     let _slot = a.slots.clone().try_acquire_owned().map_err(|_| {
         Error(
             StatusCode::TOO_MANY_REQUESTS,
@@ -78,9 +82,9 @@ pub async fn plan_with<H: AgentHost>(
         host,
         authority,
         choice,
-        prepared["system"].as_str().unwrap(),
-        prepared["prompt"].as_str().unwrap(),
-        &prepared["schema"],
+        context.system.as_str().unwrap(),
+        context.prompt.as_str().unwrap(),
+        &context.schema,
     )
     .await?;
     let initial = host
@@ -111,7 +115,7 @@ pub async fn plan_with<H: AgentHost>(
     };
     let id = current_id().unwrap_or_else(uid);
     let app_views = attachments(&tool_trace);
-    let evidence = json!({"workspaceContext":current_context(),"model":output.model,"inference":output.provider,"usage":output.usage,"evalCount":output.usage["output_tokens"],"knowledge":graph,"instruction":instruction,"locale":locale,"proposal":p,"translationInference":choice.cloned().unwrap_or(Choice{provider:Provider::Platform,model:None}),"verifiedFacts":facts,"catalogBefore":ps,"memory":memory,"contextLimit":24,"policyRevision":policy_revision,"actor":header(authority,"x-rac-user"),"toolTrace":tool_trace,"appViews":app_views,"proposalRepair":repair_evidence,"appActions":app_names,"appContext":app_context,"modelAppContext":model_app_context,"documentSources":document_sources,"externalSources":private_sources,"experienceBefore":prepared["experience"].clone(),"applied":false});
+    let evidence = json!({"workspaceContext":current_context(),"model":output.model,"inference":output.provider,"usage":output.usage,"evalCount":view::<Usage>(&output.usage).output_tokens,"knowledge":graph,"instruction":instruction,"locale":locale,"proposal":p,"translationInference":choice.cloned().unwrap_or(Choice{provider:Provider::Platform,model:None}),"verifiedFacts":facts,"catalogBefore":ps,"memory":memory,"contextLimit":24,"policyRevision":policy_revision,"actor":header(authority,"x-rac-user"),"toolTrace":tool_trace,"appViews":app_views,"proposalRepair":repair_evidence,"appActions":app_names,"appContext":app_context,"modelAppContext":model_app_context,"documentSources":document_sources,"externalSources":private_sources,"experienceBefore":context.experience,"applied":false});
     persist(host, t, &id, &evidence, authority).await?;
     Ok(json!({"taskId":id,"preview":evidence,"approvalRequired":true}))
 }
@@ -197,19 +201,24 @@ async fn prepare<H: AgentHost>(
         .collect::<Vec<_>>();
     let channels = signals::channel_calls(&a.db, t).await?;
     let calls=channels.iter().map(|r|json!({"channel":r.channel,"httpCallsIncludingTests":r.calls,"httpFailures":r.failures})).collect::<Vec<_>>();
-    let facts = json!({"learningSignals":signals,"learningMethod":"epsilon-greedy selection with smoothed estimate (purchases+1)/(views+2); observed associations only, no proven causal uplift","productPricingCurrency":commerce_settings.currencies.pricing_currency,"modelWeightsUpdated":false,"graphProvenance":"curated SERVES/PAIRS_WITH; event-derived CO_PURCHASED associations with order evidence","channelCalls":calls,"externalChatGPTAccountLinked":false,"externalClaudeAccountLinked":false,"orderCount":order_stats["summary"]["orders"],"orderAmounts":order_stats["summary"]["revenueByCurrency"],"payment":"Inspect each order/payment; order value is not captured revenue"});
+    let order_summary = view::<OrderStats>(&order_stats).summary;
+    let facts = json!({"learningSignals":signals,"learningMethod":"epsilon-greedy selection with smoothed estimate (purchases+1)/(views+2); observed associations only, no proven causal uplift","productPricingCurrency":commerce_settings.currencies.pricing_currency,"modelWeightsUpdated":false,"graphProvenance":"curated SERVES/PAIRS_WITH; event-derived CO_PURCHASED associations with order evidence","channelCalls":calls,"externalChatGPTAccountLinked":false,"externalClaudeAccountLinked":false,"orderCount":order_summary.orders,"orderAmounts":order_summary.revenue_by_currency,"payment":"Inspect each order/payment; order value is not captured revenue"});
     let memory = observations(a, t).await?;
-    let app_names = app_context
+    let apps = app_context
         .as_array()
         .unwrap()
         .iter()
-        .map(|v| json!({"id":v["app"],"actions":v["actions"]}))
+        .map(view::<PlanningApp>)
+        .collect::<Vec<_>>();
+    let app_names = apps
+        .iter()
+        .map(|app| json!({"id":app.app,"actions":app.actions}))
         .collect::<Vec<_>>();
     // Keep the existing bounded review projection intact; record the separately admitted model input as such.
     let model_app_context = snapshot(&app_context, 4000);
-    let app_ids = app_names
+    let app_ids = apps
         .iter()
-        .filter_map(|v| v["id"].as_str().map(str::to_owned))
+        .filter_map(|app| app.app.as_str().map(str::to_owned))
         .collect::<Vec<_>>();
     let write_contracts = host.planning_contracts(t, authority, &app_ids).await?;
     let prompt = format!(
@@ -234,7 +243,8 @@ async fn prepare<H: AgentHost>(
         .as_array_mut()
         .ok_or(bad("Invalid document retrieval"))?;
     for source in guidance.as_array().into_iter().flatten().rev() {
-        rows.retain(|r| r["sourceId"] != source["sourceId"]);
+        let id = view::<SourceRef>(source).source_id;
+        rows.retain(|r| view::<SourceRef>(r).source_id != id);
         rows.insert(0, source.clone());
     }
     rows.truncate(8);
@@ -265,6 +275,88 @@ async fn prepare<H: AgentHost>(
     Ok(
         json!({"products":products,"experience":er.data,"experienceRevision":er.revision,"schema":schema,"system":system,"prompt":prompt,"graph":graph,"facts":facts,"memory":memory,"appNames":app_names,"appContext":app_context,"modelAppContext":model_app_context,"documentSources":document_sources,"privateSources":private_sources}),
     )
+}
+
+/// The saved planning context a turn runs on.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct PreparedContext {
+    graph: Value,
+    facts: Value,
+    memory: Value,
+    app_names: Value,
+    app_context: Value,
+    model_app_context: Value,
+    document_sources: Value,
+    private_sources: Value,
+    system: Value,
+    prompt: Value,
+    schema: Value,
+    experience: Value,
+}
+
+/// The provider's token counts.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct Usage {
+    output_tokens: Value,
+}
+
+/// The order figures the planner shows.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct OrderStats {
+    #[serde(deserialize_with = "lenient")]
+    summary: OrderSummary,
+}
+
+/// Order count and amounts by currency.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct OrderSummary {
+    orders: Value,
+    revenue_by_currency: Value,
+}
+
+/// An installed app and its actions in the planning context.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct PlanningApp {
+    app: Value,
+    actions: Value,
+}
+
+/// The identity of a retrieved source passage.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct SourceRef {
+    source_id: Value,
+}
+
+/// The parts of a model proposal that name apps.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct Candidate {
+    #[serde(deserialize_with = "lenient")]
+    app_action: CandidateApp,
+    #[serde(deserialize_with = "lenient")]
+    operations: Option<Vec<Value>>,
+}
+
+/// The app of a proposed app action.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct CandidateApp {
+    #[serde(deserialize_with = "lenient")]
+    app: Option<String>,
+}
+
+/// The name of a proposed operation.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct Operation {
+    #[serde(deserialize_with = "lenient")]
+    name: Option<String>,
 }
 
 /// The saved planning context a resumed plan is checked against.
@@ -338,11 +430,15 @@ async fn repair<H: AgentHost>(
     }
     let t = merchant(h)?;
     let mut ids = Vec::new();
-    if let Some(id) = output.value["app_action"]["app"].as_str() {
+    let candidate: Candidate = view(&output.value);
+    if let Some(id) = candidate.app_action.app.as_deref() {
         ids.push(id.to_owned());
     }
-    for step in output.value["operations"].as_array().into_iter().flatten() {
-        if let Some(name) = step["name"].as_str().and_then(|n| n.strip_prefix("app."))
+    for step in candidate.operations.iter().flatten() {
+        if let Some(name) = view::<Operation>(step)
+            .name
+            .as_deref()
+            .and_then(|n| n.strip_prefix("app."))
             && let Some((id, _)) = name.split_once('.')
             && !ids.iter().any(|v| v == id)
         {

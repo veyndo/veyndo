@@ -241,9 +241,9 @@ pub async fn invoke<H: AgentHost>(
                 continue;
             }
             let r = &row.run_request;
-            let s = &r["scenario"];
-            if seen.insert(s["group"].as_str().unwrap_or("").to_owned()) {
-                items.push(json!({"id":s["group"],"title":s["title"],"members":s["members"],"updatedAt":row.updated_text}));
+            let s = view::<ScenarioRequest>(r).scenario;
+            if seen.insert(s.group.as_str().unwrap_or("").to_owned()) {
+                items.push(json!({"id":s.group,"title":s.title,"members":s.members,"updatedAt":row.updated_text}));
             }
         }
         let settings = catalogue::settings(a, h, &t).await?;
@@ -267,7 +267,7 @@ pub async fn invoke<H: AgentHost>(
         .await?;
         let attack = attack_store::latest(host, h, &t).await?;
         return Ok(
-            json!({"scenarios":items,"attack":if attack.is_null() {Value::Null} else {json!({"summary":attack["summary"],"total":attack["probes"].as_array().map_or(0, Vec::len),"savedAt":attack["savedAt"],"configurationReview":attack["configurationReview"]})},"configuration":{"channel":channel_id(h),"mainLocale":settings.main_locale,"locales":settings.locales,"countries":settings.countries,"currency":currency.code,"scale":currency.scale,"catalogue":catalogue}}),
+            json!({"scenarios":items,"attack":if attack.is_null() {Value::Null} else {let attack=view::<AttackSummary>(&attack);json!({"summary":attack.summary,"total":attack.probes.as_ref().map_or(0, Vec::len),"savedAt":attack.saved_at,"configurationReview":attack.configuration_review})},"configuration":{"channel":channel_id(h),"mainLocale":settings.main_locale,"locales":settings.locales,"countries":settings.countries,"currency":currency.code,"scale":currency.scale,"catalogue":catalogue}}),
         );
     }
     if rows.is_empty() {
@@ -278,16 +278,22 @@ pub async fn invoke<H: AgentHost>(
         runs.push(Box::pin(operate(a, h, "merchant.run.status", &json!({"id":row.id}))).await?);
     }
     // Running polls stay cheap. Completed evidence uses the release projection.
-    if runs
-        .iter()
-        .all(|r| !matches!(r["state"].as_str(), Some("queued" | "running")))
-    {
+    if runs.iter().all(|r| {
+        !matches!(
+            view::<RunState>(r).state.as_deref(),
+            Some("queued" | "running")
+        )
+    }) {
         let current = evidence::capture(host, &t).await;
         for run in &mut runs {
-            run["configurationReview"] = json!(evidence::review(
-                &run["preview"]["scenario"]["configurationEvidence"],
+            let review = evidence::review(
+                &view::<RunState>(run)
+                    .preview
+                    .scenario
+                    .configuration_evidence,
                 current.as_deref(),
-            ));
+            );
+            run["configurationReview"] = json!(review);
         }
     }
     Ok(json!({"id":input.id,"runs":runs,"synthetic":true,"execution":"native-commerce-api"}))
@@ -297,4 +303,57 @@ fn identifier(s: &str) -> bool {
     !s.is_empty()
         && s.bytes()
             .all(|b| b.is_ascii_alphanumeric() || b == b'_' || b == b'-')
+}
+
+/// The scenario a saved run request carries.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct ScenarioRequest {
+    #[serde(deserialize_with = "lenient")]
+    scenario: ScenarioSummary,
+}
+
+/// The group, title and size of a scenario.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct ScenarioSummary {
+    group: Value,
+    title: Value,
+    members: Value,
+}
+
+/// The summary of a saved attack report.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct AttackSummary {
+    summary: Value,
+    #[serde(deserialize_with = "lenient")]
+    probes: Option<Vec<Value>>,
+    saved_at: Value,
+    configuration_review: Value,
+}
+
+/// The state and configuration evidence of a scenario run.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct RunState {
+    #[serde(deserialize_with = "lenient")]
+    state: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    preview: RunPreview,
+}
+
+/// The preview of a finished scenario run.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct RunPreview {
+    #[serde(deserialize_with = "lenient")]
+    scenario: ScenarioEvidence,
+}
+
+/// The configuration evidence a scenario run recorded.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ScenarioEvidence {
+    configuration_evidence: Value,
 }

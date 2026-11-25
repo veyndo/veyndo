@@ -8,7 +8,7 @@ use serde::Deserialize;
 use serde_json::{Value, json};
 use veyndo_checkout::http::handoff;
 use veyndo_checkout::store::cart_create::new_cart_context;
-use veyndo_core::document::{lenient, view};
+use veyndo_core::document::{lenient, lenient_list, view};
 use veyndo_core::shop_scope::header;
 use veyndo_core::{RequestContext, Result, State, bad, conflict, uid};
 use veyndo_identity::{merchant, permit};
@@ -57,9 +57,14 @@ async fn offer(a: &State, carts: &dyn Carts, buyer: &str, link: &supply::Link) -
         .await?;
     let quote = carts.view(&replaced).await?;
     let signed = signed_offer::issue(carts, &holder).await?;
-    let stock = quote["lineItems"][0]["stock"].as_i64().unwrap_or(0);
+    let stock = view::<Quote>(&quote)
+        .line_items
+        .first()
+        .and_then(|l| l.stock)
+        .unwrap_or(0);
+    let signed: SignedOffer = view(&signed);
     Ok(
-        json!({"cartToken":cart.token,"payload":signed["payload"],"payloadBase64":signed["payloadBase64"],"signature":signed["signature"],"keyId":signed["keyId"],
+        json!({"cartToken":cart.token,"payload":signed.payload,"payloadBase64":signed.payload_base64,"signature":signed.signature,"keyId":signed.key_id,
         "supplierStockEnough":stock >= i64::from(link.reorder_quantity)}),
     )
 }
@@ -89,10 +94,13 @@ pub async fn propose(a: &State, carts: &dyn Carts, h: &RequestContext) -> Result
             "quantity":link.reorder_quantity,"supplierShop":link.supplier_shop,"supplierProductId":link.supplier_product_id});
         match offer(a, carts, &t, link).await {
             Ok(found) => {
-                let total = found["payload"]["totalMinor"]
-                    .as_str()
+                let terms = view::<SignedOffer>(&found).payload;
+                let terms = view::<OfferTerms>(&terms);
+                let total = terms
+                    .total_minor
+                    .as_deref()
                     .and_then(|v| v.parse::<u64>().ok());
-                let same = found["payload"]["currency"].as_str() == Some(currency.as_str());
+                let same = terms.currency.as_deref() == Some(currency.as_str());
                 line["offer"] = found;
                 line["sameCurrency"] = json!(same);
                 line["withinCeiling"] = json!(reorder::within_ceiling(same, total, ceiling));
@@ -163,7 +171,7 @@ pub async fn approve(a: &State, carts: &dyn Carts, h: &RequestContext, v: &Value
         &json!({"payloadBase64":encoded,"signature":signature}),
     )
     .await?;
-    if checked["honoured"] != true {
+    if view::<Verification>(&checked).honoured != true {
         return Err(conflict(
             "The supplier's offer is no longer valid; request a new proposal",
         ));
@@ -182,12 +190,72 @@ pub async fn approve(a: &State, carts: &dyn Carts, h: &RequestContext, v: &Value
     let handoff = handoff::issue(
         Shared(a.clone()),
         holder,
-        Json(json!({"revision":signed["cartRevision"]})),
+        Json(json!({"revision":view::<OfferPayload>(&signed).cart_revision})),
     )
     .await?
     .0;
-    veyndo_core::store::outbox::publish_on(&a.db, &t, "supply.reorder.approved", &json!({"productId":product,"supplierShop":link.supplier_shop,"quantity":link.reorder_quantity,"totalMinor":total.to_string(),"currency":signed["currency"],"actor":header(h,"x-rac-user")})).await?;
+    let handoff: Handoff = view(&handoff);
+    veyndo_core::store::outbox::publish_on(&a.db, &t, "supply.reorder.approved", &json!({"productId":product,"supplierShop":link.supplier_shop,"quantity":link.reorder_quantity,"totalMinor":total.to_string(),"currency":view::<OfferPayload>(&signed).currency,"actor":header(h,"x-rac-user")})).await?;
     Ok(
-        json!({"approved":true,"ordered":false,"supplierShop":link.supplier_shop,"checkoutPath":handoff["checkoutPath"],"expiresInSeconds":handoff["expiresInSeconds"],"totalMinor":total.to_string()}),
+        json!({"approved":true,"ordered":false,"supplierShop":link.supplier_shop,"checkoutPath":handoff.checkout_path,"expiresInSeconds":handoff.expires_in_seconds,"totalMinor":total.to_string()}),
     )
+}
+
+/// The supplier's quote of the reorder cart.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct Quote {
+    #[serde(deserialize_with = "lenient_list")]
+    line_items: Vec<QuoteLine>,
+}
+
+/// The supplier stock of a quoted line.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct QuoteLine {
+    #[serde(deserialize_with = "lenient")]
+    stock: Option<i64>,
+}
+
+/// A signed supplier offer.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct SignedOffer {
+    payload: Value,
+    payload_base64: Value,
+    signature: Value,
+    key_id: Value,
+}
+
+/// The offer terms a proposal compares with its ceiling.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct OfferTerms {
+    #[serde(deserialize_with = "lenient")]
+    total_minor: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    currency: Option<String>,
+}
+
+/// Whether the supplier still honours an offer.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct Verification {
+    honoured: Value,
+}
+
+/// The decoded offer payload an approval binds to.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct OfferPayload {
+    cart_revision: Value,
+    currency: Value,
+}
+
+/// The checkout handoff the supplier issued.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct Handoff {
+    checkout_path: Value,
+    expires_in_seconds: Value,
 }

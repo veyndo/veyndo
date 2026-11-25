@@ -24,11 +24,11 @@ async fn snapshot(m: Models<'_>) -> Result<Value> {
         visible["defaultProvider"] = provider.clone();
     }
     for id in ["ollama", "openai", "anthropic"] {
-        if let Some(provider) = stored["providers"].get(id) {
+        if let Some(provider) = view::<Configuration>(stored).providers.get(id) {
             visible["providers"][id] = provider.clone();
         }
     }
-    visible["sovereign"] = json!(stored["sovereign"] == true);
+    visible["sovereign"] = json!(view::<Configuration>(stored).sovereign == true);
     Ok(json!({"revision":row.revision,"settings":visible,
         "updatedAt":row.updated,"encryptedStorageReady":settings::encryption_ready(),
         "keyStored":{"ollama":secrets.get("ollama").is_some(),"openai":secrets.get("openai").is_some(),"anthropic":secrets.get("anthropic").is_some()},
@@ -37,9 +37,25 @@ async fn snapshot(m: Models<'_>) -> Result<Value> {
 /// A platform inference configuration save.
 #[derive(Deserialize, Default)]
 #[serde(default)]
+#[serde(rename_all = "camelCase")]
 struct PlatformSettings {
     #[serde(deserialize_with = "lenient")]
     settings: SettingsInput,
+    #[serde(deserialize_with = "lenient")]
+    revision: Option<u64>,
+    #[serde(deserialize_with = "lenient")]
+    clear_keys: serde_json::Map<String, Value>,
+    #[serde(deserialize_with = "lenient")]
+    keys: serde_json::Map<String, Value>,
+}
+
+/// The stored or environment configuration as the snapshot and checks read it.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct Configuration {
+    #[serde(deserialize_with = "lenient")]
+    providers: serde_json::Map<String, Value>,
+    sovereign: Value,
 }
 
 /// The submitted settings: default provider, per-provider routes and the sovereignty switch.
@@ -78,6 +94,7 @@ pub async fn save(m: Models<'_>, h: &RequestContext, v: &Value) -> Result<Value>
         .filter(|v| ["ollama", "openai", "anthropic"].contains(v))
         .ok_or(bad("Choose a supported default provider"))?;
     let mut data = json!({"defaultProvider":provider,"providers":{}});
+    let mut ollama_endpoint = String::new();
     for id in ["ollama", "openai", "anthropic"] {
         let row: ProviderSettings = input
             .settings
@@ -97,7 +114,12 @@ pub async fn save(m: Models<'_>, h: &RequestContext, v: &Value) -> Result<Value>
             .as_deref()
             .filter(|s| {
                 settings::valid_endpoint(s)
-                    || m.inference.environment_configuration()["providers"][id]["endpoint"].as_str()
+                    || view::<Configuration>(&m.inference.environment_configuration())
+                        .providers
+                        .get(id)
+                        .map(view::<ProviderSettings>)
+                        .and_then(|p| p.endpoint)
+                        .as_deref()
                         == Some(s)
             })
             .ok_or(bad(
@@ -107,18 +129,17 @@ pub async fn save(m: Models<'_>, h: &RequestContext, v: &Value) -> Result<Value>
         if id == provider && !enabled {
             return Err(bad("The default provider must be enabled"));
         }
-        data["providers"][id] =
-            json!({"model":model,"endpoint":endpoint.trim_end_matches('/'),"enabled":enabled});
+        let endpoint = endpoint.trim_end_matches('/');
+        if id == "ollama" {
+            ollama_endpoint = endpoint.to_owned();
+        }
+        data["providers"][id] = json!({"model":model,"endpoint":endpoint,"enabled":enabled});
     }
     let sovereign = input.settings.sovereign.unwrap_or(false);
     data["sovereign"] = json!(sovereign);
     // Refuse a switch that would only fail closed later: every configured model route must be self-operated.
     if sovereign || sovereign::locked() {
-        let blockers = m.inference.sovereign_blockers(
-            data["providers"]["ollama"]["endpoint"]
-                .as_str()
-                .unwrap_or_default(),
-        );
+        let blockers = m.inference.sovereign_blockers(&ollama_endpoint);
         if !blockers.is_empty() {
             return Err(Error(
                 StatusCode::UNPROCESSABLE_ENTITY,
@@ -132,8 +153,8 @@ pub async fn save(m: Models<'_>, h: &RequestContext, v: &Value) -> Result<Value>
     let mut tx = a.db.begin().await?;
     let row = store::lock(&mut *tx).await?;
     if !verified_kernel::revision_admissible(
-        v["revision"]
-            .as_u64()
+        input
+            .revision
             .filter(|r| *r > 0)
             .ok_or(bad("Positive revision required"))?,
         row.revision as u64,
@@ -142,10 +163,15 @@ pub async fn save(m: Models<'_>, h: &RequestContext, v: &Value) -> Result<Value>
     }
     let mut secrets = row.secrets;
     for id in ["ollama", "openai", "anthropic"] {
-        if v["clearKeys"][id].as_bool() == Some(true) {
+        if input.clear_keys.get(id).and_then(Value::as_bool) == Some(true) {
             secrets.as_object_mut().unwrap().remove(id);
         }
-        if let Some(key) = v["keys"][id].as_str().filter(|s| !s.is_empty()) {
+        if let Some(key) = input
+            .keys
+            .get(id)
+            .and_then(Value::as_str)
+            .filter(|s| !s.is_empty())
+        {
             if key.len() > 4096 || key.chars().any(char::is_control) {
                 return Err(bad("Invalid provider key"));
             }

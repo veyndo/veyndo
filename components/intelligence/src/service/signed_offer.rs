@@ -58,20 +58,22 @@ pub async fn verify(carts: &dyn Carts, h: &RequestContext, v: &Value) -> Result<
     let Ok(offer) = serde_json::from_slice::<Value>(&bytes) else {
         return refuse("malformed");
     };
-    if offer["kind"] != "offer" || offer["tenant"].as_str() != Some(t.as_str()) {
+    let offer: Offer = view(&offer);
+    if offer.kind != "offer" || offer.tenant.as_str() != Some(t.as_str()) {
         return refuse("other_shop");
     }
-    let expired = offer["expiresAt"]
+    let expired = offer
+        .expires_at
         .as_i64()
         .is_none_or(|at| at < chrono::Utc::now().timestamp());
     // Without the cart capability only the signature and expiry can be judged.
     let current = match carts.load(h).await {
         Ok(cart) if cart.status == "open" => {
-            let quote = carts.view(&cart).await?;
+            let quote: CartQuote = view(&carts.view(&cart).await?);
             Some((
-                quote["id"] == offer["cartId"],
-                quote["revision"] == offer["cartRevision"],
-                quote["price"]["totalMinor"] == offer["totalMinor"],
+                quote.id == offer.cart_id,
+                quote.revision == offer.cart_revision,
+                quote.price.total_minor == offer.total_minor,
             ))
         }
         Ok(_) => Some((false, false, false)),
@@ -83,6 +85,36 @@ pub async fn verify(carts: &dyn Carts, h: &RequestContext, v: &Value) -> Result<
     let current = current.map(|(cart, revision, total)| cart && revision && total);
     Ok(
         json!({"valid":true,"expired":expired,"matchesCart":current,"honoured":honoured,
-        "totalMinor":offer["totalMinor"],"currency":offer["currency"],"cartRevision":offer["cartRevision"],"expiresAt":offer["expiresAt"]}),
+        "totalMinor":offer.total_minor,"currency":offer.currency,"cartRevision":offer.cart_revision,"expiresAt":offer.expires_at}),
     )
+}
+
+/// The signed offer payload.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct Offer {
+    kind: Value,
+    tenant: Value,
+    expires_at: Value,
+    cart_id: Value,
+    cart_revision: Value,
+    total_minor: Value,
+    currency: Value,
+}
+
+/// The current quote of the offered cart.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct CartQuote {
+    id: Value,
+    revision: Value,
+    #[serde(deserialize_with = "lenient")]
+    price: QuotePrice,
+}
+
+/// The quoted total.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct QuotePrice {
+    total_minor: Value,
 }

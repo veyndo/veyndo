@@ -4,7 +4,7 @@ use serde::Deserialize;
 use serde_json::{Value, json};
 use sqlx::{Postgres, Transaction};
 use std::sync::atomic::{AtomicU64, Ordering};
-use veyndo_core::document::{lenient, view};
+use veyndo_core::document::{lenient, merge, view};
 use veyndo_core::{Error, Result, State, bad, conflict, hash};
 use veyndo_pricing::types::currency::scale;
 
@@ -211,11 +211,16 @@ pub async fn report(a: &State, t: &str, id: &str) -> Result<Value> {
     let cached = r.final_report;
     if let Some(mut cached) = cached {
         if withdrawn > 0 || state == "stopped" {
-            cached["causalUpliftProven"] = json!(false);
-            cached["withdrawals"] = json!(withdrawn);
-            cached["stoppedEarly"] = json!(state == "stopped");
-            cached["finalLook"] = json!(false);
-            cached["interval95"] = Value::Null;
+            merge(
+                &mut cached,
+                Invalidated {
+                    causal_uplift_proven: false,
+                    withdrawals: withdrawn,
+                    stopped_early: state == "stopped",
+                    final_look: false,
+                    interval95: Value::Null,
+                },
+            )?;
         }
         tx.commit().await?;
         return Ok(cached);
@@ -242,20 +247,25 @@ pub async fn report(a: &State, t: &str, id: &str) -> Result<Value> {
         && withdrawn == 0
         && !invalid;
     let mut result = interval(&values, mature, d.minimum_per_arm, d.cuped_theta);
-    result["id"] = json!(id);
-    result["currency"] = json!(d.currency);
-    result["currencyScale"] = json!(scale(&d.currency));
-    result["withdrawals"] = json!(withdrawn);
-    result["settled"] = json!(settled == Some(true));
-    result["stoppedEarly"] = json!(state == "stopped");
-    result["invalidCurrency"] = json!(invalid);
-    result["netCollectedMinor"] = json!(
-        rows.iter()
-            .map(|r| i128::from(r.net_minor))
-            .sum::<i128>()
-            .to_string()
-    );
-    result["asOf"] = json!(chrono::Utc::now().to_rfc3339());
+    let as_of = chrono::Utc::now().to_rfc3339();
+    merge(
+        &mut result,
+        ReadoutFacts {
+            id,
+            currency: &d.currency,
+            currency_scale: scale(&d.currency),
+            withdrawals: withdrawn,
+            settled: settled == Some(true),
+            stopped_early: state == "stopped",
+            invalid_currency: invalid,
+            net_collected_minor: rows
+                .iter()
+                .map(|r| i128::from(r.net_minor))
+                .sum::<i128>()
+                .to_string(),
+            as_of: &as_of,
+        },
+    )?;
     if mature {
         sqlx::query!(
             "UPDATE intelligence_experiments SET final_report=$3 WHERE tenant=$1 AND id=$2",
@@ -267,7 +277,7 @@ pub async fn report(a: &State, t: &str, id: &str) -> Result<Value> {
         .await?;
         sqlx::query!("INSERT INTO knowledge_relations(tenant,kind,source_kind,source_id,target_kind,target_id,state,confidence,data,actor) VALUES($1,'EXPERIMENT_RESULT','experiment',$2,'channel',$3,'evidenced',1,$4,'native-payment-readout') ON CONFLICT(tenant,kind,source_id,target_id) DO UPDATE SET data=excluded.data",
             t, id, d.channel, result).execute(&mut *tx).await?;
-        veyndo_core::store::outbox::publish_on(&mut *tx, t, "intelligence.experiment.result", &json!({"id":id,"channelId":d.channel,"causalUpliftProven":result["causalUpliftProven"],"asOf":result["asOf"]})).await?;
+        veyndo_core::store::outbox::publish_on(&mut *tx, t, "intelligence.experiment.result", &json!({"id":id,"channelId":d.channel,"causalUpliftProven":view::<Readout>(&result).causal_uplift_proven,"asOf":as_of})).await?;
     }
     tx.commit().await?;
     Ok(result)
@@ -345,6 +355,32 @@ pub async fn suggest(a: &State, t: &str, b: Basis<'_>) -> Result<Value> {
         json!({"design":design,"basis":{"scope":"shop","livePayments30Days":payments,"p95PaymentMinor":p95,"currentMode":mode,"currency":currency,"scale":scale(&currency)},"warnings":warnings,"saved":false}),
     )
 }
+/// What a cached readout becomes once withdrawals or an early stop invalidate it.
+#[derive(serde::Serialize)]
+#[serde(rename_all = "camelCase")]
+struct Invalidated {
+    causal_uplift_proven: bool,
+    withdrawals: i32,
+    stopped_early: bool,
+    final_look: bool,
+    interval95: Value,
+}
+
+/// The facts a readout records beside its interval.
+#[derive(serde::Serialize)]
+#[serde(rename_all = "camelCase")]
+struct ReadoutFacts<'a> {
+    id: &'a str,
+    currency: &'a str,
+    currency_scale: Option<u8>,
+    withdrawals: i32,
+    settled: bool,
+    stopped_early: bool,
+    invalid_currency: bool,
+    net_collected_minor: String,
+    as_of: &'a str,
+}
+
 /// The readout flags the worker decides on.
 #[derive(Deserialize, Default)]
 #[serde(default, rename_all = "camelCase")]

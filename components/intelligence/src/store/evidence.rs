@@ -25,10 +25,17 @@ pub const NODE_TYPES: &[&str] = &[
 ];
 /// The claims of a product; `public` keeps only confirmed ones on current public sources.
 pub async fn claims(a: &State, t: &str, id: &str, public: bool) -> Result<Value> {
-    let rows = sqlx::query_file_scalar!("src/store/evidence_read.sql", t, id, public)
-        .fetch_all(&a.db)
-        .await?;
+    let rows = claim_rows(a, t, id, public).await?;
     Ok(json!({"productId":id,"claims":rows,"nodeTypes":NODE_TYPES,"modelWeightsUpdated":false}))
+}
+
+/// The claim records of a product, newest first (at most 100).
+pub async fn claim_rows(a: &State, t: &str, id: &str, public: bool) -> Result<Vec<Value>> {
+    Ok(
+        sqlx::query_file_scalar!("src/store/evidence_read.sql", t, id, public)
+            .fetch_all(&a.db)
+            .await?,
+    )
 }
 /// The current confirmed public claims of several products in one language, in one bounded read.
 pub async fn claim_facts(a: &State, t: &str, ids: &[String], locale: &str) -> Result<Vec<Value>> {
