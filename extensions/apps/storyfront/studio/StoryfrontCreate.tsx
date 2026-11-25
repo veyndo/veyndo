@@ -5,7 +5,7 @@ import Icon from "../../../../frontend/src/shared/ui/Icon";
 import { useLocale } from "../../../../frontend/src/shared/i18n/i18n";
 import { contentText } from "../../../../frontend/src/shared/i18n/content-language";
 import type { RequestFn } from "../../../../frontend/src/shared/api/types";
-import type { Channel } from "../../../../frontend/src/admin/channels/channel-model";
+import type { Channel } from "../../../../components/marketing/ui/admin/channels/channel-model";
 import { useStoryfrontText } from "./storyfront-i18n";
 import { storyfrontCreateURL } from "./storyfront-create";
 export default function StoryfrontCreate({

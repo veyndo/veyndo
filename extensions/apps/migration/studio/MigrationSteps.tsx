@@ -1,6 +1,6 @@
 /** Compact migration step navigation keeps source, reviewed domains and the native design handoff together. */
 import { Button } from "../../../../frontend/src/kit/ui";
-import ScenarioLaunch from "../../../../frontend/src/admin/scenarios/ScenarioLaunch";
+import ScenarioLaunch from "../../../../components/intelligence/ui/admin/scenarios/ScenarioLaunch";
 import { isPrivate, type Kind } from "./model";
 import { useMigrationText } from "./i18n";
 export default function MigrationSteps({

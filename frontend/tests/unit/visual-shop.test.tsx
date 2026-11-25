@@ -15,7 +15,10 @@ import Renderer, {
 } from "../../../extensions/apps/site-builder/Renderer";
 import PublishedForm from "../../../extensions/apps/site-forms/storefront/PublishedForm";
 import { canOpenStudio } from "../../src/admin/shell/permissions";
-import { newArea, moveCard } from "../../src/admin/workspace/workspace-model";
+import {
+  newArea,
+  moveCard,
+} from "../../../components/studio/ui/admin/workspace/workspace-model";
 import usePageProducts from "../../../extensions/apps/site-builder/usePageProducts";
 
 it("resolves selected products outside the first catalogue page and drops stale scope responses", async () => {
@@ -189,7 +192,7 @@ it("pins only safe filters and hands them off once in memory without changing th
   expect(consumePinnedView("orders")).toBeUndefined();
   expect(location.href).toBe(url);
   const { prepareGoalFlow, goalTemplate } =
-    await import("../../src/admin/automation/goal-template");
+    await import("../../../components/marketing/ui/admin/automation/goal-template");
   prepareGoalFlow("Prepare a collection");
   expect(goalTemplate("de-DE")).toMatchObject({
     active: false,

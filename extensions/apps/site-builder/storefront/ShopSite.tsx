@@ -3,7 +3,7 @@ import { contentText } from "../../../../frontend/src/shared/i18n/content-langua
 import { useEffect, type ReactNode } from "react";
 import { useAppRegistry } from "../../../../frontend/src/shared/apps/AppSurfaces";
 import { useStorefront } from "../../../../frontend/src/storefront/shell/StorefrontContext";
-import { productURL } from "../../../../frontend/src/storefront/catalog/product-url";
+import { productURL } from "../../../../components/catalog/ui/storefront/catalog/product-url";
 import { effectivePages, inheritedTheme, explicitTheme } from "../model";
 import SiteRenderer from "../Renderer";
 import { useEditorText } from "../studio/editor-i18n";

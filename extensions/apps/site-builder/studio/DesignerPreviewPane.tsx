@@ -1,7 +1,7 @@
 /** Scrollable page preview and optional native record editor share the Studio layout. */
 import { Button } from "../../../../frontend/src/kit/ui";
 import type { RequestFn } from "../../../../frontend/src/shared/api/types";
-import CanvasCommerceEditor from "../../../../frontend/src/admin/catalog/CanvasCommerceEditor";
+import CanvasCommerceEditor from "../../../../components/catalog/ui/admin/catalog/CanvasCommerceEditor";
 import type { Page, Theme } from "../model";
 import type { CommerceLayout } from "../commerce-layout";
 import type { SiteProduct } from "../Renderer";

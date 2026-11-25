@@ -3,11 +3,11 @@ import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { it, expect, vi } from "vitest";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
-import CompanyLists from "../../src/storefront/account/CompanyLists";
-import CompanyPurchasing from "../../src/storefront/account/CompanyPurchasing";
-import UnitCatalog from "../../src/admin/b2b/UnitCatalog";
-import UnitMethods from "../../src/admin/b2b/UnitMethods";
-import Members from "../../src/admin/b2b/Members";
+import CompanyLists from "../../../components/customers/ui/storefront/account/CompanyLists";
+import CompanyPurchasing from "../../../components/customers/ui/storefront/account/CompanyPurchasing";
+import UnitCatalog from "../../../components/b2b/ui/admin/b2b/UnitCatalog";
+import UnitMethods from "../../../components/b2b/ui/admin/b2b/UnitMethods";
+import Members from "../../../components/b2b/ui/admin/b2b/Members";
 vi.mock("../../src/shared/apps/AppSurfaces", () => ({
   AppSurfaceSlot: () => null,
 }));

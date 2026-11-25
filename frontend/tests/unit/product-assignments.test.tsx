@@ -4,14 +4,14 @@ import { fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { expect, it, vi } from "vitest";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
-import ProductAssignments from "../../src/admin/catalog/ProductAssignments";
-import ProductEditor from "../../src/admin/catalog/ProductEditor";
+import ProductAssignments from "../../../components/catalog/ui/admin/catalog/ProductAssignments";
+import ProductEditor from "../../../components/catalog/ui/admin/catalog/ProductEditor";
 import {
   newDraft,
   type Category,
   type ProductDraft,
-} from "../../src/admin/catalog/catalog-model";
-import { categoryChoices } from "../../src/admin/catalog/product-assignment-model";
+} from "../../../components/catalog/ui/admin/catalog/catalog-model";
+import { categoryChoices } from "../../../components/catalog/ui/admin/catalog/product-assignment-model";
 const category = (
   id: string,
   name: string,

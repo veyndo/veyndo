@@ -7,6 +7,7 @@ RUN npm ci
 COPY frontend/ ./
 COPY extensions/sdk/ /build/extensions/sdk/
 COPY extensions/apps/ /build/extensions/apps/
+COPY components/ /build/components/
 COPY fixtures/ /build/fixtures/
 RUN npm run build
 FROM rust:1.96-bookworm AS rust

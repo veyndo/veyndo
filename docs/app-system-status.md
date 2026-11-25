@@ -146,7 +146,7 @@ fixtures for its own commerce calculations.
 | --- | --- | --- |
 | Canonical contract and example checks | `src/apps/manifest.rs`, `business_capability/`, `commerce_hooks.rs`; `src/developer/builds.rs` | [Business goals and exact test boundary](business-capabilities.md#executable-first-slice) |
 | Shared storage | `components/apps/src/store/records.rs`, `record_*`, `storage.rs`; migrations 101–102 | [Migration, invariants and hosted counts](app-data-storage.md) |
-| Studio / installed settings | `frontend/src/admin/developer/`, `frontend/src/admin/apps/`; `src/apps/settings.rs` | [Illustrated controls and actual configuration admission](app-studio-workspace.md) |
+| Studio / installed settings | `components/apps/ui/admin/developer/`, `components/apps/ui/admin/apps/`; `src/apps/settings.rs` | [Illustrated controls and actual configuration admission](app-studio-workspace.md) |
 | Pricing and order truth | `src/apps/cart_contributions.rs`, `commerce_hooks.rs`, `src/commerce/`, `src/order_checkout.rs` | [Checkout](checkout.md), [app components](app-platform.md#pure-commerce-components) |
 | B2B buying | `src/b2b/`, existing account and Studio consumers | [Company purchasing and explicit remaining scope](b2b-commerce.md) |
 | Saved agent work | `src/agent_runs/`, existing tasks/conversations and central inference | [Worker-kill/provider-fixture and hosted reload acceptance](durable-agent-runs.md) |

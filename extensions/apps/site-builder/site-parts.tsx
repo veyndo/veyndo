@@ -4,7 +4,7 @@ import {
   productSummary,
   type AnyPart,
 } from "../../../frontend/src/kit/storefront";
-import { productURL } from "../../../frontend/src/storefront/catalog/product-url";
+import { productURL } from "../../../components/catalog/ui/storefront/catalog/product-url";
 import { mediaImage } from "../../../frontend/src/shared/media/product-media";
 import type { Block, PartRef } from "./model";
 import type { SiteProduct } from "./Renderer";

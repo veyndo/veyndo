@@ -1,0 +1,134 @@
+/** Contextual agent drawer retains the shared proposal workflow and draft while the native dialog manages focus. */
+import { useEffect, useId, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import Icon from "../../../../../frontend/src/shared/ui/Icon";
+import { contentText } from "../../../../../frontend/src/shared/i18n/content-language";
+import { useLocale } from "../../../../../frontend/src/shared/i18n/i18n";
+import { useAppWorkspaceText } from "../../../../../frontend/src/shared/i18n/app-workspace-i18n";
+import type { RequestFn } from "../../../../../frontend/src/admin/shell/studio-types";
+import type { AppStudio } from "./useAppStudio";
+import AppAgentPanel, { type AppAgentRequest } from "./AppAgentPanel";
+export function useAppAgentEntry(
+  studio: AppStudio,
+  request: RequestFn,
+  sandboxRequest?: (environment: string) => RequestFn,
+) {
+  const requestScope = useMemo(() => crypto.randomUUID(), [request]);
+  const scope = `${requestScope}:${studio.env}`;
+  const [openScope, setOpenScope] = useState<string>(),
+    [requestSeed, setSeed] = useState<AppAgentRequest>();
+  return {
+    show: (
+      prompt?: string,
+      target?: { app: string; mode: "edit" | "compose"; environment?: string },
+    ) => {
+      if (prompt)
+        setSeed({
+          app: target?.app ?? studio.manifest.id,
+          environment: target?.environment ?? studio.env,
+          prompt,
+          mode: target?.mode,
+        });
+      setOpenScope(`${requestScope}:${target?.environment ?? studio.env}`);
+    },
+    drawer: {
+      key: scope,
+      studio,
+      request,
+      sandboxRequest,
+      open: openScope === scope,
+      onClose: () => setOpenScope(undefined),
+      requestSeed: openScope === scope ? requestSeed : undefined,
+      onRequestConsumed: () => setSeed(undefined),
+    },
+  };
+}
+export default function AppAgentDrawer({
+  open,
+  onClose,
+  studio,
+  request,
+  requestSeed,
+  onRequestConsumed,
+  sandboxRequest,
+}: {
+  open: boolean;
+  onClose: () => void;
+  studio: AppStudio;
+  request: RequestFn;
+  sandboxRequest?: (environment: string) => RequestFn;
+  requestSeed?: AppAgentRequest;
+  onRequestConsumed?: () => void;
+}) {
+  const dialog = useRef<HTMLDialogElement>(null),
+    title = useId();
+  const t = useAppWorkspaceText(),
+    { locale } = useLocale();
+  useEffect(() => {
+    const el = dialog.current!;
+    if (open && !el.open) el.showModal();
+    else if (!open && el.open) el.close();
+  }, [open]);
+  return createPortal(
+    <dialog
+      ref={dialog}
+      className="app-studio app-agent-drawer"
+      aria-labelledby={title}
+      onCancel={(event) => {
+        if (event.target === event.currentTarget) onClose();
+      }}
+      onClose={onClose}
+      onClick={(event) => {
+        if (event.target !== event.currentTarget) return;
+        const box = event.currentTarget.getBoundingClientRect();
+        if (
+          event.clientX < box.left ||
+          event.clientX > box.right ||
+          event.clientY < box.top ||
+          event.clientY > box.bottom
+        )
+          onClose();
+      }}
+    >
+      <header className="app-agent-drawer-header">
+        <span className="app-agent-badge">
+          <Icon name="spark" size={20} />
+        </span>
+        <div>
+          <h2 id={title}>{t("agentTitle")}</h2>
+          <p>
+            {t("agentContext")} ·{" "}
+            {contentText(studio.manifest.name, locale, studio.mainLocale) ||
+              studio.manifest.id}
+          </p>
+        </div>
+        <button
+          type="button"
+          className="app-icon-button"
+          aria-label={t("agentClose")}
+          onClick={onClose}
+          autoFocus
+        >
+          <Icon name="close" size={18} />
+        </button>
+      </header>
+      <p className="app-agent-drawer-hint">{t("agentHint")}</p>
+      {studio.error && (
+        <p role="alert" className="studio-notice is-error">
+          {studio.error}
+        </p>
+      )}
+      <fieldset disabled={studio.busy} className="app-agent-drawer-body">
+        <AppAgentPanel
+          key={studio.manifest.id}
+          studio={studio}
+          request={request}
+          sandboxRequest={sandboxRequest}
+          requestSeed={requestSeed}
+          onRequestConsumed={onRequestConsumed}
+        />
+      </fieldset>
+    </dialog>,
+    document.querySelector(".studio") ?? document.body,
+  );
+}

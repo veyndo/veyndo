@@ -3,7 +3,7 @@ import { render, screen, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { expect, it, vi } from "vitest";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
-import AppDetails from "../../src/admin/apps/AppDetails";
+import AppDetails from "../../../components/apps/ui/admin/apps/AppDetails";
 import StoryfrontView from "../../../extensions/apps/storyfront/studio/StoryfrontView";
 import { connectionUrl } from "../../../extensions/apps/storyfront/studio/storyfront-model";
 import { storyfrontWords } from "../../../extensions/apps/storyfront/studio/storyfront-i18n";

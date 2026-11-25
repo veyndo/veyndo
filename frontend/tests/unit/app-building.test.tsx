@@ -2,21 +2,24 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { expect, it, vi } from "vitest";
-import { appRecipe, recipeIds } from "../../src/admin/developer/app-recipes";
-import AppRecipes from "../../src/admin/developer/AppRecipes";
-import AppCanvas from "../../src/admin/developer/AppCanvas";
-import AppProposalReview from "../../src/admin/developer/AppProposalReview";
-import { proposalChanges } from "../../src/admin/developer/app-proposal";
+import {
+  appRecipe,
+  recipeIds,
+} from "../../../components/apps/ui/admin/developer/app-recipes";
+import AppRecipes from "../../../components/apps/ui/admin/developer/AppRecipes";
+import AppCanvas from "../../../components/apps/ui/admin/developer/AppCanvas";
+import AppProposalReview from "../../../components/apps/ui/admin/developer/AppProposalReview";
+import { proposalChanges } from "../../../components/apps/ui/admin/developer/app-proposal";
 import {
   compile,
   newBlock,
   problems,
-} from "../../src/admin/developer/app-model";
-import { inheritedContext } from "../../src/admin/developer/control-model";
+} from "../../../components/apps/ui/admin/developer/app-model";
+import { inheritedContext } from "../../../components/apps/ui/admin/developer/control-model";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
-import type { AppStudio } from "../../src/admin/developer/useAppStudio";
+import type { AppStudio } from "../../../components/apps/ui/admin/developer/useAppStudio";
 import NativeAppView from "../../src/shared/apps/native/NativeAppView";
-import ProposalCard from "../../src/admin/assistant/ProposalCard";
+import ProposalCard from "../../../components/intelligence/ui/admin/assistant/ProposalCard";
 import type { Message } from "../../src/admin/shell/studio-types";
 for (const kind of recipeIds)
   it(`compiles the ${kind} pattern with explicit access and bindings`, () => {

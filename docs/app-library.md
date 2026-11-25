@@ -81,11 +81,11 @@ does not mutate installed source code in place.
 
 | Path | Responsibility |
 |---|---|
-| `frontend/src/admin/apps/AppLibrary.tsx` | Search, filters, installed/discover cards |
-| `frontend/src/admin/apps/library-model.ts` | Catalog, categories and content fallback |
-| `frontend/src/admin/apps/AppArtwork.tsx` | Supplied images and generated fallbacks |
-| `frontend/src/admin/apps/AppDetails.tsx` | Detail tabs and confirmation-based activation |
-| `frontend/src/admin/apps/AppInterfaces.tsx` | Registered native/external admin surfaces |
+| `components/apps/ui/admin/apps/AppLibrary.tsx` | Search, filters, installed/discover cards |
+| `components/apps/ui/admin/apps/library-model.ts` | Catalog, categories and content fallback |
+| `components/apps/ui/admin/apps/AppArtwork.tsx` | Supplied images and generated fallbacks |
+| `components/apps/ui/admin/apps/AppDetails.tsx` | Detail tabs and confirmation-based activation |
+| `components/apps/ui/admin/apps/AppInterfaces.tsx` | Registered native/external admin surfaces |
 | `frontend/src/shared/i18n/app-library-i18n.ts` | English/German/French/Spanish UI and summaries |
 | `src/apps/presentation.rs` | Passive metadata bounds and safe asset validation |
 | `fixtures/app-studio-schema.json` | Shared optional package-generation schema |

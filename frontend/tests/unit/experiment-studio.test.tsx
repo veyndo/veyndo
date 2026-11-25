@@ -7,7 +7,7 @@ import {
   waitFor,
 } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
-import ExperimentStudio from "../../src/admin/intelligence/ExperimentStudio";
+import ExperimentStudio from "../../../components/intelligence/ui/admin/intelligence/ExperimentStudio";
 const permissions = vi.hoisted(() => ({ access: ["settings.write"] }));
 vi.mock("../../src/admin/shell/StudioContext", () => ({
   useStudio: () => permissions,

@@ -156,7 +156,7 @@ hosting by this change.
 - `src/cognition/behavior/{input,capture,geography,report,journey,mod}.rs` owns native admission, minimal observations, reports, private drilldown and retention.
 - `migrations/081-behavior-intelligence.sql` extends the existing ledger and indexes without a parallel analytics database.
 - `frontend/src/storefront/shell/BehaviorAnalytics.tsx` owns consent-aware capture; `ProductQuestion.tsx` emits only a successful product ID observation.
-- `frontend/src/admin/intelligence/behavior/` owns the charts, semantic graph and linked private timeline; `behavior-i18n.ts` provides EN/DE/FR/ES vocabulary.
+- `components/intelligence/ui/admin/intelligence/behavior/` owns the charts, semantic graph and linked private timeline; `behavior-i18n.ts` provides EN/DE/FR/ES vocabulary.
 - Registered `behavior_intelligence` exercises actual PostgreSQL, consent, replay, native order/customer association, MCP, permissions, foreign tenants, expiration and bounded intake. `tenant_isolation` checks the new composite references; related legal/account/knowledge suites preserve existing behavior. UI regressions verify capture, navigation, translations and failure recovery.
 
 This is tested behavioral functionality, not 100% coverage or a formal proof of the

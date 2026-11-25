@@ -1,7 +1,7 @@
 /** Visible edit, element, agent and history modes share the same native draft and approval path. */
 import { Button } from "../../../../frontend/src/kit/ui";
 import { useLayoutEffect, useRef, type ReactNode } from "react";
-import { AppPanelHandle } from "../../../../frontend/src/admin/developer/AppPanelSizing";
+import { AppPanelHandle } from "../../../../components/apps/ui/admin/developer/AppPanelSizing";
 import { useContentLanguage } from "../../../../frontend/src/shared/i18n/ContentLanguage";
 import ContentLanguagePicker from "../../../../frontend/src/shared/i18n/ContentLanguagePicker";
 import Icon from "../../../../frontend/src/shared/ui/Icon";

@@ -1,0 +1,169 @@
+/** Saved version inspection, digest-approved stage install and conflict-aware package-only live release. */
+import { Badge, Button, Notice } from "../../../../../frontend/src/kit/ui";
+import ScenarioLaunch from "../../../../intelligence/ui/admin/scenarios/ScenarioLaunch";
+import { useScenarioText } from "../../../../intelligence/ui/admin/scenarios/scenario-i18n";
+import AppDiagnostics from "./AppDiagnostics";
+import AppUpgradeCheck from "./AppUpgradeCheck";
+import type { AppStudioKey } from "../../../../../frontend/src/shared/i18n/app-studio-i18n";
+import { contentText } from "../../../../../frontend/src/shared/i18n/content-language";
+import { useAppStudioText } from "../../../../../frontend/src/shared/i18n/app-studio-i18n";
+import { useWorkbenchText } from "../../../../../frontend/src/shared/i18n/workbench-i18n";
+import type { AppStudio, Build } from "./useAppStudio";
+export default function AppVersions({
+  studio,
+  onTest,
+  rights,
+  onEdit,
+  onNavigate,
+  onAssist,
+}: {
+  studio: AppStudio;
+  onTest?: (target: string) => void | Promise<void>;
+  rights?: string[];
+  onNavigate?: (tab: AppStudioKey) => void;
+  onAssist?: (prompt: string) => void;
+  onEdit: (build: Build) => void;
+}) {
+  const { a, locale } = useAppStudioText(),
+    { w } = useWorkbenchText(),
+    scenario = useScenarioText();
+  return (
+    <div className="app-versions">
+      <AppDiagnostics
+        manifest={studio.manifest}
+        onNavigate={onNavigate}
+        onAssist={onAssist}
+      />
+      {onTest && studio.env && (
+        <section className="app-model-card">
+          <h2>{scenario("title")}</h2>
+          <p>{scenario("installedSandbox")}</p>
+          <ScenarioLaunch
+            rights={rights ?? []}
+            disabled={studio.busy || studio.dirty}
+            onClick={() => void onTest(studio.env)}
+          />
+        </section>
+      )}
+      <section className="app-model-card">
+        <h2>{a("versions")}</h2>
+        {!studio.builds.length && <p>{w("noBuilds")}</p>}
+        {studio.builds
+          .filter((b) => b.app === studio.manifest.id)
+          .map((b) => (
+            <article className="app-version-row" key={b.id}>
+              <div>
+                <strong>
+                  {contentText(b.manifest.name, locale, studio.mainLocale)}
+                </strong>
+                <Badge>{b.version}</Badge>
+                <span>{w(b.state)}</span>
+                <code>{b.digest.slice(0, 12)}</code>
+              </div>
+              <div>
+                <Button
+                  type="submit"
+                  disabled={studio.busy}
+                  onClick={() => onEdit(b)}
+                >
+                  {a("edit")}
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={studio.busy}
+                  onClick={() => studio.adopt(b)}
+                >
+                  {a("inspectVersion")}
+                </Button>
+                {b.state === "draft" && !rights?.includes("apps.manage") && (
+                  <Button
+                    tone="primary"
+                    type="submit"
+                    disabled={studio.busy}
+                    onClick={() => void studio.run(() => studio.stage(b))}
+                  >
+                    {w("installStage")}
+                  </Button>
+                )}
+              </div>
+              <details>
+                <summary>{w("contract")}</summary>
+                <pre>{JSON.stringify(b.manifest, null, 2)}</pre>
+              </details>
+              {rights?.includes("apps.manage") && (
+                <AppUpgradeCheck
+                  build={b}
+                  request={studio.request}
+                  disabled={studio.busy}
+                  install={
+                    b.state === "draft"
+                      ? {
+                          label: w("installStage"),
+                          run: () => void studio.run(() => studio.stage(b)),
+                        }
+                      : undefined
+                  }
+                />
+              )}
+            </article>
+          ))}
+      </section>
+      <section className="app-model-card">
+        <h2>{a("review")}</h2>
+        <p>{a("releaseHint")}</p>
+        <Button
+          type="submit"
+          disabled={
+            !studio.saved ||
+            studio.saved.state !== "staged" ||
+            studio.dirty ||
+            studio.saved.environment !== studio.env ||
+            studio.busy
+          }
+          onClick={() => void studio.run(studio.review)}
+        >
+          {w("changes")}
+        </Button>
+        {studio.reviewed && !studio.change && <p>{w("noChanges")}</p>}
+        {studio.change && (
+          <>
+            <p>
+              <code>{studio.change.key}</code> ·{" "}
+              {studio.change.digest.slice(0, 12)}
+            </p>
+            {studio.change.conflict && (
+              <Notice tone="danger">{w("conflict")}</Notice>
+            )}
+            <details>
+              <summary>{w("details")}</summary>
+              <div className="diff-columns">
+                <div>
+                  <strong>{w("before")}</strong>
+                  <pre>{JSON.stringify(studio.change.before, null, 2)}</pre>
+                </div>
+                <div>
+                  <strong>{w("after")}</strong>
+                  <pre>{JSON.stringify(studio.change.after, null, 2)}</pre>
+                </div>
+              </div>
+            </details>
+            <Button
+              tone="primary"
+              type="submit"
+              disabled={
+                studio.change.conflict ||
+                studio.busy ||
+                studio.dirty ||
+                studio.saved?.environment !== studio.env ||
+                studio.change.key !== `app:${studio.manifest.id}`
+              }
+              onClick={() => void studio.run(studio.publish)}
+            >
+              {a("publish")}
+            </Button>
+          </>
+        )}
+      </section>
+    </div>
+  );
+}

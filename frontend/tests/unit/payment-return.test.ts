@@ -1,6 +1,6 @@
 /** Real provider returns append token/payer fields after the fragment; only an owned attempt may be selected. */
 import { expect, it } from "vitest";
-import { paymentReturnAttempt } from "../../src/storefront/checkout/payment-return";
+import { paymentReturnAttempt } from "../../../components/checkout/ui/storefront/checkout/payment-return";
 it("retains native and provider-appended return attempt references", () => {
   expect(paymentReturnAttempt("#payment/attempt-a")).toBe("attempt-a");
   expect(

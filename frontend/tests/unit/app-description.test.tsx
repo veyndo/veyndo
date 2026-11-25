@@ -7,9 +7,9 @@ import {
   screen,
 } from "@testing-library/react";
 import { expect, it, vi } from "vitest";
-import AppAssistant from "../../src/admin/developer/AppAssistant";
-import AppAgentPanel from "../../src/admin/developer/AppAgentPanel";
-import { useAppAgentEntry } from "../../src/admin/developer/AppAgentDrawer";
+import AppAssistant from "../../../components/apps/ui/admin/developer/AppAssistant";
+import AppAgentPanel from "../../../components/apps/ui/admin/developer/AppAgentPanel";
+import { useAppAgentEntry } from "../../../components/apps/ui/admin/developer/AppAgentDrawer";
 import { ContentLanguage } from "../../src/shared/i18n/ContentLanguage";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
 it("starts from a merchant brief without inserting unrelated template fields or public authority", () => {
@@ -87,7 +87,7 @@ it("carries a new app brief into complete-app mode and immediately fences a chan
 });
 it("creates a first private sandbox before opening a new merchant brief", async () => {
   const { startDescribedApp } =
-    await import("../../src/admin/developer/start-described-app");
+    await import("../../../components/apps/ui/admin/developer/start-described-app");
   const show = vi.fn(),
     ready = vi.fn(),
     startDraft = vi.fn();
@@ -156,7 +156,7 @@ it.each(["Beratungsanfragen", "設計相談".repeat(30)])(
   "uses a bounded localized sandbox label independently of the selected app translation: %s",
   async (name) => {
     const { startDescribedApp } =
-      await import("../../src/admin/developer/start-described-app");
+      await import("../../../components/apps/ui/admin/developer/start-described-app");
     const studio = {
       env: "",
       mainLocale: "en-GB",

@@ -225,7 +225,7 @@ processor contracts and notification targets before sharing private consumer dat
   checkout guard/snapshot, product facts, private request review and MCP adapters.
 - `migrations/048-legal-privacy.sql`: composite tenant/cart/channel ownership,
   five RLS-protected tables, consent log and review audit.
-- `frontend/src/admin/legal/`, `shared/legal/`, `storefront/legal/`: inherited
+- `components/shop/ui/admin/legal/`, `shared/legal/`, `storefront/legal/`: inherited
   settings, requirement catalog, single-language editors, actual integration gates
   and public forms. Product safety shares these data, not another legal database.
 - `extensions/services/connectors/email_*`: existing encrypted service settings,

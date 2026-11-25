@@ -1,6 +1,6 @@
 /** Storefront adapter of the kit product card: maps a shop product to the part contract, keeps native URLs and texts. */
 import { mediaImage } from "../../shared/media/product-media";
-import { productURL } from "../catalog/product-url";
+import { productURL } from "../../../../components/catalog/ui/storefront/catalog/product-url";
 import { useShopText } from "../../shared/i18n/shop-i18n";
 import type { Product } from "../../shared/api/shop-api";
 import { productCard } from "../../kit/storefront";

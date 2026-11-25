@@ -8,7 +8,7 @@ import {
 import { useWorkbenchText } from "../../../../frontend/src/shared/i18n/workbench-i18n";
 import type { RequestFn } from "../../../../frontend/src/shared/api/types";
 import Icon from "../../../../frontend/src/shared/ui/Icon";
-import AppConsent from "../../../../frontend/src/admin/apps/AppConsent";
+import AppConsent from "../../../../components/apps/ui/admin/apps/AppConsent";
 import StoryfrontConnections from "./StoryfrontConnections";
 import { useStoryfrontText } from "./storyfront-i18n";
 import { type FrontendConnection } from "./storyfront-model";

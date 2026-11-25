@@ -10,7 +10,7 @@ import userEvent from "@testing-library/user-event";
 import { expect, it, vi } from "vitest";
 import { useState } from "react";
 import { useStorefrontActions } from "../../src/storefront/shell/useStorefrontActions";
-import ProductPage from "../../src/storefront/catalog/ProductPage";
+import ProductPage from "../../../components/catalog/ui/storefront/catalog/ProductPage";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
 import { cart, detail, product } from "./fixtures";
 import type { Detail } from "../../src/shared/api/shop-api";

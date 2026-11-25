@@ -1,11 +1,14 @@
 /** Payment definitions and scoped browser sessions cannot silently grant monetary authority. */
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { it, expect, vi } from "vitest";
-import AppPayments from "../../src/admin/developer/AppPayments";
-import PaymentSession from "../../src/storefront/checkout/PaymentSession";
-import EmbeddedPayment from "../../src/storefront/checkout/EmbeddedPayment";
-import { assistedManifest } from "../../src/admin/developer/assistant-model";
-import { compile, problems } from "../../src/admin/developer/app-model";
+import AppPayments from "../../../components/apps/ui/admin/developer/AppPayments";
+import PaymentSession from "../../../components/checkout/ui/storefront/checkout/PaymentSession";
+import EmbeddedPayment from "../../../components/checkout/ui/storefront/checkout/EmbeddedPayment";
+import { assistedManifest } from "../../../components/apps/ui/admin/developer/assistant-model";
+import {
+  compile,
+  problems,
+} from "../../../components/apps/ui/admin/developer/app-model";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
 const api = vi.hoisted(() => vi.fn());
 vi.mock("../../src/shared/api/shop-api", () => ({ shopApi: api }));

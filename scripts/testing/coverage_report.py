@@ -6,6 +6,7 @@ uses the checked-in regression floors; passing those floors never means 100%.
 """
 import argparse
 import json
+import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -18,6 +19,13 @@ UNMEASURED = [
 ]
 
 
+def type_only(path):
+    """True when a formatted TypeScript module declares only types: no top-level runtime statement."""
+    text = re.sub(r'/\*.*?\*/', '', path.read_text(), flags=re.S)
+    runtime = re.compile(r'^(export\s+(default|const|let|var|function|async|class|enum|\{|\*)|(const|let|var|function|async|class|enum)\s|import\s+(?!type\s))')
+    return not any(runtime.match(line) for line in text.splitlines())
+
+
 def read_frontend(root):
     frontend = json.loads((root / 'frontend/coverage/coverage-summary.json').read_text())
     metrics = {'frontend': {k: frontend['total'][k]['pct'] for k in ('lines', 'branches', 'functions', 'statements')}}
@@ -26,12 +34,17 @@ def read_frontend(root):
         if filename == 'total':
             continue
         owner = next((prefix for prefix in ('frontend/src/', 'extensions/apps/') if prefix in filename), None)
-        if owner is None:
+        # A component's UI folder (components/<name>/ui) is frontend source too.
+        component_ui = re.search(r'components/[a-z0-9_-]+/ui/', filename)
+        if owner is None and component_ui is None:
             raise ValueError('Coverage source has no frontend/app owner: ' + filename)
-        relative = filename[filename.index(owner):]
+        relative = filename[filename.index(owner) if owner else component_ui.start():]
         modules[relative] = {k: data[k]['pct'] for k in ('lines', 'branches', 'functions', 'statements')}
-    expected_frontend = {p.relative_to(root).as_posix() for directory in ('frontend/src', 'extensions/apps') for p in (root / directory).rglob('*') if p.suffix in {'.ts', '.tsx'} and 'tests' not in p.relative_to(root).parts}
-    omitted = expected_frontend - modules.keys()
+    roots = [root / 'frontend/src', root / 'extensions/apps', *sorted((root / 'components').glob('*/ui'))]
+    expected_frontend = {p.relative_to(root).as_posix() for directory in roots for p in directory.rglob('*') if p.suffix in {'.ts', '.tsx'} and 'tests' not in p.relative_to(root).parts}
+    # V8 reports no entry for a module outside frontend/ that has no runtime code
+    # (only types); such a module has nothing to cover. Every other gap still fails.
+    omitted = {name for name in expected_frontend - modules.keys() if not type_only(root / name)}
     if omitted:
         raise ValueError('Coverage report omits source files: ' + ', '.join(sorted(omitted)))
     return metrics, modules, [name for name, data in modules.items() if data['lines'] == 0]

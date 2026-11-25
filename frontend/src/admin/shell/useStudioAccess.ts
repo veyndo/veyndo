@@ -11,7 +11,7 @@ import {
   resumeMerchantToken,
 } from "../../shared/api/merchant-session";
 import { useConnectedText } from "../../shared/i18n/connected-i18n";
-import type { Session } from "../team/UsersManager";
+import type { Session } from "../../../../components/identity/ui/admin/team/UsersManager";
 import type { RequestFn } from "./studio-types";
 import { useStudioSession } from "./useStudioSession";
 import { resumeBrowserSession } from "./resume-browser-session";

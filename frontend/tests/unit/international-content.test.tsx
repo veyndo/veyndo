@@ -4,13 +4,13 @@ import userEvent from "@testing-library/user-event";
 import { useState } from "react";
 import { expect, it, vi } from "vitest";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
-import ProductSpecifications from "../../src/admin/catalog/ProductSpecifications";
+import ProductSpecifications from "../../../components/catalog/ui/admin/catalog/ProductSpecifications";
 import {
   newDraft,
   type ProductDraft,
-} from "../../src/admin/catalog/catalog-model";
-import ProductSeo from "../../src/admin/catalog/ProductSeo";
-import TranslationJobs from "../../src/admin/settings/TranslationJobs";
+} from "../../../components/catalog/ui/admin/catalog/catalog-model";
+import ProductSeo from "../../../components/catalog/ui/admin/catalog/ProductSeo";
+import TranslationJobs from "../../../components/shop/ui/admin/settings/TranslationJobs";
 import settings from "../../../fixtures/demo-settings.json";
 it("inherits SEO per field from Spanish and preserves explicit blanks and independent source fields", async () => {
   let draft = {

@@ -4,7 +4,7 @@ import {
   productURL,
   returnToCollection,
   routeProductId,
-} from "../../src/storefront/catalog/product-url";
+} from "../../../components/catalog/ui/storefront/catalog/product-url";
 it("retains the implicit demo tenant when opening a reloadable product URL", () => {
   history.replaceState(null, "", "/?language=de-DE");
   const url = new URL(productURL({ id: "tee" }), location.origin);

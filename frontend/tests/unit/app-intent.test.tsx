@@ -4,9 +4,9 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { it, expect, vi } from "vitest";
 import ContentLanguagePicker from "../../src/shared/i18n/ContentLanguagePicker";
-import AppCapabilityEditor from "../../src/admin/developer/AppCapabilityEditor";
-import AppAgentPanel from "../../src/admin/developer/AppAgentPanel";
-import { template } from "../../src/admin/developer/app-model";
+import AppCapabilityEditor from "../../../components/apps/ui/admin/developer/AppCapabilityEditor";
+import AppAgentPanel from "../../../components/apps/ui/admin/developer/AppAgentPanel";
+import { template } from "../../../components/apps/ui/admin/developer/app-model";
 import { ContentLanguage } from "../../src/shared/i18n/ContentLanguage";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
 const wrapper = ({ children }: { children: React.ReactNode }) => (

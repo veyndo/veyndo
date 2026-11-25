@@ -3,9 +3,9 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { it, expect, vi } from "vitest";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
-import ChannelEditor from "../../src/admin/channels/ChannelEditor";
-import ChannelConnections from "../../src/admin/channels/ChannelConnections";
-import { freshChannel } from "../../src/admin/channels/channel-model";
+import ChannelEditor from "../../../components/marketing/ui/admin/channels/ChannelEditor";
+import ChannelConnections from "../../../components/marketing/ui/admin/channels/ChannelConnections";
+import { freshChannel } from "../../../components/marketing/ui/admin/channels/channel-model";
 const main = {
   ...freshChannel("en-GB"),
   id: "default",

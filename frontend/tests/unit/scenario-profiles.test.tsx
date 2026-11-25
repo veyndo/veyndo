@@ -3,9 +3,9 @@ import { useState } from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { expect, it } from "vitest";
-import ScenarioProfiles from "../../src/admin/scenarios/ScenarioProfiles";
+import ScenarioProfiles from "../../../components/intelligence/ui/admin/scenarios/ScenarioProfiles";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
-import type { Profile } from "../../src/admin/scenarios/scenario-types";
+import type { Profile } from "../../../components/intelligence/ui/admin/scenarios/scenario-types";
 function Profiles() {
   const [profiles, setProfiles] = useState<Profile[]>([
     {

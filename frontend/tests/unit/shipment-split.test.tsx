@@ -2,7 +2,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { expect, it, vi } from "vitest";
-import ShipmentSplit from "../../src/admin/orders/ShipmentSplit";
+import ShipmentSplit from "../../../components/orders/ui/admin/orders/ShipmentSplit";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
 const delivery = {
   positions: [

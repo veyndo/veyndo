@@ -3,6 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import ts from "typescript";
 import { tokenDrift } from "./tokens.mjs";
+import { appFiles, componentUiRoots, logicalPath } from "./source-roots.mjs";
 const root = path.resolve(import.meta.dirname, "..");
 const source = path.resolve(root, process.argv[2] ?? "src");
 const walk = (dir) =>
@@ -17,11 +18,13 @@ const pluginFiles = process.argv[2]
   : walk(appRoot).filter(
       (f) => /\.(tsx?|css)$/.test(f) && !f.includes("/tests/"),
     );
+// Component UI folders (components/<name>/ui) belong to the same source tree.
+const uiRoots = process.argv[2] ? [] : componentUiRoots();
 const files = [
-  ...walk(source).filter((f) => /\.(tsx?|css)$/.test(f)),
+  ...[source, ...uiRoots].flatMap(walk).filter((f) => /\.(tsx?|css)$/.test(f)),
   ...pluginFiles,
 ];
-const relative = (f) => path.relative(source, f).replaceAll("\\", "/");
+const relative = (f) => logicalPath(f, source);
 const errors = [];
 const edges = new Map();
 const owners = [
@@ -163,7 +166,8 @@ for (const file of files) {
     if (target === path.resolve(root, "../extensions/sdk/analytics.js")) return; // Explicit public SDK boundary, contract-tested separately.
     if (
       !target.startsWith(source + path.sep) &&
-      !target.startsWith(appRoot + path.sep)
+      !target.startsWith(appRoot + path.sep) &&
+      !uiRoots.some((root) => target.startsWith(root + path.sep))
     ) {
       errors.push(
         `${relative(file)} imports outside the source ownership tree: ${spec}`,
@@ -301,7 +305,7 @@ if (!process.argv[2]) {
     0,
   );
   // Moving a sheet into its area does not count as removal: all admin CSS only falls too.
-  const adminLines = walk(path.join(source, "admin"))
+  const adminLines = appFiles("admin", source)
     .filter((f) => f.endsWith(".css"))
     .reduce(
       (sum, f) => sum + fs.readFileSync(f, "utf8").split("\n").length - 1,
@@ -318,7 +322,7 @@ if (!process.argv[2]) {
   // Studio areas read server data through kit/query (useRead); effects that call
   // the request function directly only fall until none is left.
   let effectReads = 0;
-  for (const file of walk(path.join(source, "admin")).filter((f) =>
+  for (const file of appFiles("admin", source).filter((f) =>
     /\.tsx?$/.test(f),
   )) {
     const text = fs.readFileSync(file, "utf8");

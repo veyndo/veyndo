@@ -1,0 +1,302 @@
+/** AppDetails: Installed app details, activation, version, data and isolated interface. */
+import { forApps } from "../../../../../frontend/src/shared/api/types";
+import { Button, Card } from "../../../../../frontend/src/kit/ui";
+import { useAppText } from "../../../../../frontend/src/shared/i18n/app-i18n";
+import { useCustomerText } from "../../../../../frontend/src/shared/i18n/customer-i18n";
+import type { ConfiguredOrders } from "./AppConfiguredOrders";
+import type { Package } from "./app-types";
+
+import StoryfrontConnections from "../../../../../extensions/apps/storyfront/studio/StoryfrontConnections";
+import { useStoryfrontText } from "../../../../../extensions/apps/storyfront/studio/storyfront-i18n";
+import AppInterfaces from "./AppInterfaces";
+import AppArtwork from "./AppArtwork";
+import { appName, appSummary } from "./library-model";
+import { useLibraryText } from "../../../../../frontend/src/shared/i18n/app-library-i18n";
+import ConfirmDialog from "../../../../../frontend/src/shared/ui/ConfirmDialog";
+import { useState } from "react";
+import "../../../../../frontend/src/shared/styles/apps.css";
+import AppActivity from "./AppActivity";
+import AppAccess from "./AppAccess";
+import AppSettings from "./AppSettings";
+import AppSecrets from "./AppSecrets";
+import AppEntity from "./AppEntity";
+import ConnectorPanel from "./ConnectorPanel";
+import ServiceIntegrationPanel from "./ServiceIntegrationPanel";
+import { serviceIntegrations } from "./service-integrations";
+import ProviderAccount from "./ProviderAccount";
+import MarketplacePanel from "../../../../../extensions/apps/marketplaces/studio/MarketplacePanel";
+import EmailPanel from "../../../../../extensions/apps/email/studio/EmailPanel";
+import { ContentLanguage } from "../../../../../frontend/src/shared/i18n/ContentLanguage";
+import ContentLanguagePicker from "../../../../../frontend/src/shared/i18n/ContentLanguagePicker";
+import { useCountryCatalogue } from "../../../../../frontend/src/shared/geography/useCountryCatalogue";
+export type AppDetailsProps = {
+  p: Package;
+  mainLocale: string;
+  locale: ReturnType<typeof useAppText>["locale"];
+  a: ReturnType<typeof useAppText>["a"];
+  manage: boolean;
+  busy: boolean;
+  run: (fn: () => Promise<void>) => Promise<void>;
+  request: import("../../../../../frontend/src/admin/shell/studio-types").RequestFn;
+  detailTab: string;
+  c: ReturnType<typeof useCustomerText>["c"];
+  appCategory: (p: Package) => string;
+  role: string;
+  setResultApp: React.Dispatch<React.SetStateAction<string>>;
+  setResult: React.Dispatch<React.SetStateAction<ConfiguredOrders | undefined>>;
+};
+export default function AppDetails({
+  p,
+  mainLocale,
+  locale,
+  a,
+  manage,
+  busy,
+  run,
+  request,
+  detailTab,
+  c,
+  appCategory,
+  role,
+  setResultApp,
+  setResult,
+}: AppDetailsProps) {
+  const l = useLibraryText();
+  const text = useStoryfrontText();
+  const catalogue = useCountryCatalogue(request);
+  const [confirm, setConfirm] = useState(false);
+  const toggle = () =>
+    void run(async () => {
+      await request(
+        `/api/apps/${p.id}`,
+        { active: !p.active, revision: p.revision },
+        "PUT",
+      );
+      setConfirm(false);
+    });
+  return (
+    <Card className="app-card app-detail" key={p.id}>
+      <AppArtwork
+        id={p.id}
+        category={appCategory(p)}
+        {...p.manifest.presentation}
+      />
+      <header className="app-detail-heading">
+        <div>
+          <span className="kicker">{c(`${appCategory(p)}Category`)}</span>
+          <h1>{appName(p, locale, mainLocale)}</h1>
+          <p>{appSummary(p, locale, mainLocale, l)}</p>
+          <span className="app-status" data-active={p.active}>
+            {l(p.active ? "enabled" : "disabled")}
+          </span>
+          <small> · {p.version}</small>
+        </div>
+        <Button
+          type="submit"
+          disabled={!manage || busy || !!p.managedBy}
+          onClick={() => (p.active ? setConfirm(true) : toggle())}
+        >
+          {p.managedBy ? text("managed") : a(p.active ? "disable" : "enable")}
+        </Button>
+      </header>
+      {confirm && (
+        <ConfirmDialog
+          title={l("pauseTitle")}
+          confirmLabel={a("disable")}
+          disabled={busy}
+          onCancel={() => setConfirm(false)}
+          onConfirm={toggle}
+        >
+          <p>{l("pauseHint")}</p>
+        </ConfirmDialog>
+      )}
+      <div className="app-detail-body">
+        {p.managedBy && <p>{text("managedHint")}</p>}
+        {detailTab === "appDetails" && !!p.connections?.length && (
+          <StoryfrontConnections frontends={p.connections} />
+        )}
+        <div className="app-capabilities">
+          {[
+            [l("entities"), p.manifest.entities.length],
+            [l("actions"), p.manifest.actions.length],
+            [
+              l("surfaces"),
+              (p.manifest.surfaces?.length ?? 0) +
+                (p.manifest.slots?.length ?? 0),
+            ],
+          ].map(([label, value]) => (
+            <div key={label}>
+              <strong>{value}</strong>
+              <span>{label}</span>
+            </div>
+          ))}
+        </div>
+        {!p.active && detailTab !== "appVersion" && (
+          <p className="app-library-empty">{l("disabledHint")}</p>
+        )}
+        {detailTab === "appVersion" && (
+          <dl>
+            <dt>{c("appVersion")}</dt>
+            <dd>
+              {p.version} · {p.revision}
+            </dd>
+            <dt>{c("appData")}</dt>
+            <dd>{p.manifest.entities.map((e) => e.name).join(", ") || "—"}</dd>
+            <dt>{c("apiCategory")}</dt>
+            <dd>{p.manifest.actions.map((e) => e.name).join(", ") || "—"}</dd>
+          </dl>
+        )}
+        {detailTab === "appDetails" &&
+          p.active &&
+          ["google_analytics", "gmail", "slack"].includes(p.id) && (
+            <ConnectorPanel app={p.id} request={request} manage={manage} />
+          )}
+        {detailTab === "appDetails" && p.active && p.id === "marketplaces" && (
+          <MarketplacePanel
+            request={forApps(request)}
+            manage={manage}
+            mainLocale={mainLocale}
+            channel={
+              new URLSearchParams(location.search).get("channel") ?? undefined
+            }
+          />
+        )}
+        {detailTab === "appDetails" &&
+          p.active &&
+          serviceIntegrations[p.id] && (
+            <ServiceIntegrationPanel
+              key={p.id}
+              app={p.id}
+              request={request}
+              manage={manage}
+            />
+          )}
+        {detailTab === "appDetails" && p.active && p.id === "email" && (
+          <EmailPanel request={request} manage={manage} />
+        )}
+        {detailTab === "appDetails" &&
+          p.active &&
+          p.manifest.paymentProvider && (
+            <ProviderAccount
+              provider={p.id}
+              request={request}
+              canWrite={manage}
+            />
+          )}
+        {detailTab === "appDetails" && (
+          <div className="app-contract-summary">
+            <details>
+              <summary>
+                {l("permissions")} · {p.manifest.permissions.length}
+              </summary>
+              <ul>
+                {p.manifest.permissions.map((v) => (
+                  <li key={v}>
+                    <code>{v}</code>
+                  </li>
+                ))}
+              </ul>
+            </details>
+            <details>
+              <summary>
+                {l("events")} · {p.manifest.events?.length ?? 0}
+              </summary>
+              {p.manifest.events?.length ? (
+                <ul>
+                  {p.manifest.events.map((v) => (
+                    <li key={v}>
+                      <code>{v}</code>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p>{l("noEvents")}</p>
+              )}
+            </details>
+            <small>
+              {p.id} · {l("revision")} {p.revision}
+            </small>
+          </div>
+        )}
+        {detailTab === "appDetails" && manage && (
+          <>
+            {!!p.manifest.settings?.length && (
+              <AppSettings
+                app={p.id}
+                request={request}
+                mainLocale={mainLocale}
+              />
+            )}
+            {serviceIntegrations[p.id] ? (
+              <details className="app-integration-diagnostics">
+                <summary>{l("advancedConnection")}</summary>
+                <p>{l("advancedConnectionHint")}</p>
+                <AppAccess app={p.id} request={request} />
+                <AppSecrets app={p.id} request={request} />
+                <AppActivity app={p.id} request={request} />
+              </details>
+            ) : (
+              <>
+                <AppAccess app={p.id} request={request} />
+                <AppSecrets app={p.id} request={request} />
+              </>
+            )}
+          </>
+        )}
+        {detailTab === "appDetails" && manage && !serviceIntegrations[p.id] && (
+          <AppActivity app={p.id} request={request} />
+        )}
+        {detailTab === "appInterface" && p.active && (
+          <AppInterfaces p={p} request={request} />
+        )}
+        {detailTab === "appData" && p.active && !p.manifest.entities.length && (
+          <p className="app-library-empty">{l("noData")}</p>
+        )}
+        {detailTab === "appData" &&
+          p.active &&
+          p.manifest.entities.length > 0 && (
+            <ContentLanguage
+              mainLocale={catalogue?.mainLocale ?? mainLocale}
+              locales={catalogue?.locales ?? [mainLocale]}
+            >
+              <ContentLanguagePicker />
+              {p.manifest.entities.map((e) => (
+                <AppEntity
+                  key={e.name}
+                  app={p.id}
+                  entity={e}
+                  request={request}
+                  canWrite={role !== "viewer"}
+                />
+              ))}
+            </ContentLanguage>
+          )}
+        {detailTab === "appData" && p.active && (
+          <div className="app-actions">
+            {p.manifest.actions
+              .filter((act) => act.handler === "configurations")
+              .map((act) => (
+                <Button
+                  type="submit"
+                  key={act.name}
+                  onClick={() =>
+                    void run(async () => {
+                      setResultApp(p.id);
+                      setResult(
+                        await request(
+                          `/api/apps/${p.id}/actions/${act.name}`,
+                          {},
+                        ),
+                      );
+                    })
+                  }
+                >
+                  {a("personalizedOrders")}
+                </Button>
+              ))}
+          </div>
+        )}
+      </div>
+    </Card>
+  );
+}

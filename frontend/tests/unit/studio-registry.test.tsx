@@ -258,7 +258,7 @@ describe("registry rules", () => {
   });
 });
 
-vi.mock("../../src/admin/reports/TodayReports", () => ({
+vi.mock("../../../components/studio/ui/admin/reports/TodayReports", () => ({
   default: () => <p>today board</p>,
 }));
 

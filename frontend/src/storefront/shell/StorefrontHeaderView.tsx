@@ -1,6 +1,6 @@
 /** Shared native shop header markup; callers supply authorized commands or a read-only preview. */
 import type { ReactNode } from "react";
-import { collectionURL } from "../catalog/product-url";
+import { collectionURL } from "../../../../components/catalog/ui/storefront/catalog/product-url";
 import Icon from "../../shared/ui/Icon";
 import { useShopText } from "../../shared/i18n/shop-i18n";
 import { useWorkbenchText } from "../../shared/i18n/workbench-i18n";

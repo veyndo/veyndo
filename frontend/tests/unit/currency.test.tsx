@@ -7,12 +7,12 @@ import {
   useLocale,
 } from "../../src/shared/i18n/i18n";
 import StorefrontCurrency from "../../src/storefront/shell/StorefrontCurrency";
-import ProductCurrencyPrices from "../../src/admin/catalog/ProductCurrencyPrices";
-import { placeCheckoutOrder } from "../../src/storefront/checkout/checkout-order";
+import ProductCurrencyPrices from "../../../components/catalog/ui/admin/catalog/ProductCurrencyPrices";
+import { placeCheckoutOrder } from "../../../components/checkout/ui/storefront/checkout/checkout-order";
 import { cart as fixture } from "./fixtures";
 import { convertDraftPrice } from "../../src/shared/money/fx-draft";
-import OrderPaymentDelivery from "../../src/admin/orders/OrderPaymentDelivery";
-import { newDraft } from "../../src/admin/catalog/catalog-model";
+import OrderPaymentDelivery from "../../../components/orders/ui/admin/orders/OrderPaymentDelivery";
+import { newDraft } from "../../../components/catalog/ui/admin/catalog/catalog-model";
 const shared = vi.hoisted(() => ({
   api: vi.fn(),
   controller: undefined as any,

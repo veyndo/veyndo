@@ -299,7 +299,7 @@ content-review decision, not a mechanism for sharing an entire mailbox.
 - `src/marketing/flows.rs`, `catalog.rs`: shared native trigger registry, non-order source event admission and durable execution.
 - `src/planner.rs`: document passages actually feed and persist with merchant proposals.
 - `components/studio/src/store/staging_documents.rs`: clone/diff/release metadata and chunks as one unit.
-- `frontend/src/admin/intelligence/`: small workspace, source editor/library, product
+- `components/intelligence/ui/admin/intelligence/`: small workspace, source editor/library, product
   explorer/facts, observations and preview modules; UI vocabulary in shared i18n.
 
 `scripts/knowledge_workspace.py` checks real PostgreSQL/Qdrant APIs: privacy, hashes,

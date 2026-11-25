@@ -16,7 +16,7 @@ These documents describe one connected system, not alternative implementations.
 | --- | --- |
 | Rust commerce binary | `src/main.rs` is process entry only; domain modules own commerce operations. Store/Admin APIs, MCP and implemented UCP routes reuse those operations, permissions and tenant checks. |
 | Rust connector binary | `src/bin/connectors.rs`, the service crate `extensions/services/connectors/` and the shared runtime crate `extensions/services/connector-runtime/` own hosting, storage, queue and egress; provider implementation belongs to the respective `extensions/apps/<app>/` crate (`veyndo-provider-<app>`). This is a separate service reached through the permission-aware app gateway, not provider code embedded in checkout. |
-| Frontend | `frontend/src/` contains modular Studio/storefront clients of the existing APIs. Keep provider credentials and privileged gateway tokens server-side. |
+| Frontend | `frontend/` builds one source tree: `frontend/src/` (entry, shells, shared building blocks, `kit/`) and each component's `components/<name>/ui/{admin,storefront}/<area>` screens, all clients of the existing APIs. Keep provider credentials and privileged gateway tokens server-side. |
 | Durable state and events | PostgreSQL owns commerce state, connector configuration and queues. Commerce outbox/Flow Builder events reach the connector through the existing app action/event contract. Qdrant supplies knowledge vector retrieval, not a second commerce ledger. |
 | External extensions | The language-neutral app gateway and documented extension contracts support independent services. Private Payments and Storyfront/Experience implementations stay in their separate repositories. |
 

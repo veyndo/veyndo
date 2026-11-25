@@ -11,8 +11,11 @@ import ContentLanguagePicker from "../../src/shared/i18n/ContentLanguagePicker";
 import { normalizeLayout } from "../../src/shared/grid/preferences";
 import { extensionColumns } from "../../src/shared/grid/extension-columns";
 import ExtensionFilter from "../../src/shared/grid/ExtensionFilter";
-import { bindExtension } from "../../src/admin/developer/core-extension-model";
-import { compile, template } from "../../src/admin/developer/app-model";
+import { bindExtension } from "../../../components/apps/ui/admin/developer/core-extension-model";
+import {
+  compile,
+  template,
+} from "../../../components/apps/ui/admin/developer/app-model";
 const extension: CoreExtension = {
   app: "context",
   version: "1.0.0",

@@ -9,11 +9,11 @@ import {
 } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
-import { template } from "../../src/admin/developer/app-model";
-import { useDraftStorage } from "../../src/admin/developer/useDraftStorage";
+import { template } from "../../../components/apps/ui/admin/developer/app-model";
+import { useDraftStorage } from "../../../components/apps/ui/admin/developer/useDraftStorage";
 import { geometry, snap } from "../../src/shared/apps/native/geometry";
 import AppFrame from "../../src/shared/apps/AppFrame";
-import AppGridCanvas from "../../src/admin/developer/AppGridCanvas";
+import AppGridCanvas from "../../../components/apps/ui/admin/developer/AppGridCanvas";
 import NativeAppView from "../../src/shared/apps/native/NativeAppView";
 afterEach(() => vi.useRealTimers());
 it("restores the latest actor draft before edits and persists later edits with its actual revision", async () => {

@@ -6,7 +6,7 @@ import { expect, it, vi } from "vitest";
 import { LocaleProvider, useLocale } from "../../src/shared/i18n/i18n";
 import { StudioContext } from "../../src/admin/shell/StudioContext";
 import type { StudioController } from "../../src/admin/shell/useStudioController";
-import WorkspaceCopilot from "../../src/admin/assistant/WorkspaceCopilot";
+import WorkspaceCopilot from "../../../components/intelligence/ui/admin/assistant/WorkspaceCopilot";
 function Fixture({ expired = false, busy = false } = {}) {
   const { t, locale } = useLocale();
   const [open, setOpen] = useState(false);
@@ -123,7 +123,7 @@ it("releases the native modal when the merchant session expires", async () => {
 
 it("opens a product through the shared entity route, making the selected reference available to contextual help", async () => {
   const { default: ProductDataView } =
-    await import("../../src/admin/catalog/ProductDataView");
+    await import("../../../components/catalog/ui/admin/catalog/ProductDataView");
   const request = vi.fn(async (path: string) => ({
     elements: path.includes("categories")
       ? []

@@ -1,10 +1,10 @@
 /** Attack results render native refusals, flag accepted attacks and never outlive their sandbox scope. */
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { expect, it, vi } from "vitest";
-import ScenarioAttacks from "../../src/admin/scenarios/ScenarioAttacks";
+import ScenarioAttacks from "../../../components/intelligence/ui/admin/scenarios/ScenarioAttacks";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
 import type { RequestFn } from "../../src/admin/shell/studio-types";
-import type { AttackProbe } from "../../src/admin/scenarios/scenario-types";
+import type { AttackProbe } from "../../../components/intelligence/ui/admin/scenarios/scenario-types";
 const report = (breached: boolean) => ({
   id: "run",
   product: { id: "lamp", name: "Desk lamp" },

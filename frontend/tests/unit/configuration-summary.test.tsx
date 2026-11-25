@@ -2,13 +2,13 @@
 import { render, screen } from "@testing-library/react";
 import { expect, it, vi } from "vitest";
 import ConfigurationSummary from "../../src/shared/apps/ConfigurationSummary";
-import CheckoutSummary from "../../src/storefront/checkout/CheckoutSummary";
-import OrderCompletion from "../../src/storefront/checkout/OrderCompletion";
-import AccountOrderDetail from "../../src/storefront/account/AccountOrderDetail";
+import CheckoutSummary from "../../../components/checkout/ui/storefront/checkout/CheckoutSummary";
+import OrderCompletion from "../../../components/checkout/ui/storefront/checkout/OrderCompletion";
+import AccountOrderDetail from "../../../components/customers/ui/storefront/account/AccountOrderDetail";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
 import type { ConfigurationSnapshot } from "../../src/shared/api/configuration-types";
 import type { Cart, Order } from "../../src/shared/api/shop-api";
-import type { CustomerOrder } from "../../src/storefront/account/account-types";
+import type { CustomerOrder } from "../../../components/customers/ui/storefront/account/account-types";
 import { cart } from "./fixtures";
 
 const config: ConfigurationSnapshot = {

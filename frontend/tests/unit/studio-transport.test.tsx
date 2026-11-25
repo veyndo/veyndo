@@ -3,6 +3,7 @@ import { describe, it, expect, vi } from "vitest";
 import { renderHook, act, waitFor } from "@testing-library/react";
 import {
   createStudioRequest,
+  requestScope,
   useStudioRequests,
 } from "../../src/admin/shell/requests";
 import { useServerHealth } from "../../src/admin/shell/useServerHealth";
@@ -15,6 +16,13 @@ import type { ApiPath } from "../../src/kit/api";
 const items = "/api/items" as ApiPath;
 const upload = "/api/upload" as ApiPath;
 describe("Studio transport", () => {
+  it("gives a missing request function no scope and a wrapper its own", () => {
+    expect(requestScope(undefined)).toBe("");
+    const wrapper = async () => ({});
+    expect(requestScope(wrapper)).toMatch(/^function:/);
+    expect(requestScope(wrapper)).toBe(requestScope(wrapper));
+    expect(requestScope(async () => ({}))).not.toBe(requestScope(wrapper));
+  });
   it("preserves tenant, principal, locale and explicit method", async () => {
     const fetcher = vi
       .fn()

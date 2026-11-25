@@ -1,0 +1,323 @@
+/** Managed app models expose typed fields and opt-in public reads; removal cleans dependent bindings. */
+import {
+  Button,
+  Field as FormField,
+  Select,
+  TextInput,
+} from "../../../../../frontend/src/kit/ui";
+import CoreExtensionBinding from "./CoreExtensionBinding";
+import { useAppWorkspaceText } from "../../../../../frontend/src/shared/i18n/app-workspace-i18n";
+import AppModelDiagram from "./AppModelDiagram";
+import AppSchemaMigrations from "./AppSchemaMigrations";
+import AppFieldOptions from "./AppFieldOptions";
+import AppWorkflowEditor from "./AppWorkflowEditor";
+import LocalizedField from "../../../../../frontend/src/shared/i18n/LocalizedField";
+import {
+  useAppStudioText,
+  appText,
+} from "../../../../../frontend/src/shared/i18n/app-studio-i18n";
+import type {
+  Entity,
+  Field,
+  Manifest,
+} from "../../../../../frontend/src/shared/apps/native/types";
+import Icon from "../../../../../frontend/src/shared/ui/Icon";
+import { nextId, removeEntity, renameEntity, textMap } from "./app-model";
+export default function AppDataEditor({
+  manifest,
+  onChange,
+}: {
+  manifest: Manifest;
+  onChange: (m: Manifest) => void;
+}) {
+  const { a } = useAppStudioText();
+  const w = useAppWorkspaceText();
+  const patch = (name: string, next: Entity) =>
+    onChange({
+      ...manifest,
+      entities: manifest.entities.map((e) => (e.name === name ? next : e)),
+    });
+  return (
+    <div className="app-data-editor">
+      <div className="app-section-top">
+        <div>
+          <h2>{a("data")}</h2>
+          <p>{a("privateHint")}</p>
+        </div>
+        <Button
+          tone="primary"
+          type="submit"
+          disabled={manifest.entities.length >= 12}
+          onClick={() =>
+            onChange({
+              ...manifest,
+              entities: [
+                ...manifest.entities,
+                {
+                  name: nextId(
+                    "model",
+                    manifest.entities.map((e) => e.name),
+                  ),
+                  label: appText("entity"),
+                  publicRead: false,
+                  fields: [
+                    {
+                      name: "title",
+                      label: appText("title"),
+                      kind: "string",
+                      required: true,
+                      translatable: true,
+                    },
+                  ],
+                },
+              ],
+            })
+          }
+        >
+          <Icon name="plus" size={16} />
+          {a("addEntity")}
+        </Button>
+      </div>
+      <details className="app-data-safety">
+        <summary>{a("privateHint")}</summary>
+        <p>{w("dataSafety")}</p>
+      </details>
+      <AppModelDiagram manifest={manifest} onChange={onChange} />
+      <AppSchemaMigrations
+        key={`${manifest.id}:${manifest.version}`}
+        manifest={manifest}
+        onChange={onChange}
+      />
+      {manifest.entities.map((entity, entityIndex) => (
+        <section className="app-model-card" key={entityIndex}>
+          <header>
+            <span className="app-model-id">
+              <Icon name="box" />
+              {entity.name}
+            </span>
+            <span>{entity.fields.length} / 16</span>
+            <button
+              className="app-icon-button"
+              aria-label={a("delete")}
+              onClick={() => onChange(removeEntity(manifest, entity.name))}
+            >
+              <Icon name="close" size={16} />
+            </button>
+          </header>
+          <div className="app-model-meta">
+            <FormField label={a("id")}>
+              <TextInput
+                value={entity.name}
+                maxLength={27}
+                onChange={(e) =>
+                  onChange(renameEntity(manifest, entity.name, e.target.value))
+                }
+              />
+            </FormField>
+            <LocalizedField
+              label={a("entity")}
+              value={entity.label}
+              onChange={(v) =>
+                patch(entity.name, { ...entity, label: textMap(v) })
+              }
+              required
+              maxLength={100}
+            />
+            <label className="app-check">
+              <input
+                type="checkbox"
+                checked={entity.publicRead}
+                disabled={!!entity.extends}
+                onChange={(e) =>
+                  patch(entity.name, {
+                    ...entity,
+                    publicRead: e.target.checked,
+                  })
+                }
+              />
+              {a("public")}
+            </label>
+          </div>
+          <CoreExtensionBinding
+            entity={entity}
+            onChange={(next) => patch(entity.name, next)}
+          />
+          <div className="app-field-list">
+            {entity.fields.map((field, index) => {
+              if (field.name === entity.extends?.field) return null;
+              const set = (f: Partial<Field>) =>
+                patch(entity.name, {
+                  ...entity,
+                  fields: entity.fields.map((n, i) =>
+                    i === index ? { ...n, ...f } : n,
+                  ),
+                });
+              return (
+                <div className="app-field-row" key={index}>
+                  <FormField label={a("id")}>
+                    <TextInput
+                      value={field.name}
+                      maxLength={32}
+                      onChange={(e) => set({ name: e.target.value })}
+                    />
+                  </FormField>
+                  <LocalizedField
+                    label={a("field")}
+                    value={field.label}
+                    onChange={(v) => set({ label: textMap(v) })}
+                    required
+                    maxLength={100}
+                  />
+                  <FormField label={a("type")}>
+                    <Select
+                      value={field.kind}
+                      onChange={(e) =>
+                        set({
+                          kind: e.target.value as Field["kind"],
+                          translatable: false,
+                          indexed: false,
+                          unique: false,
+                          validation: undefined,
+                          coreReference: null,
+                          choices: [],
+                          references: null,
+                        })
+                      }
+                    >
+                      {(
+                        [
+                          "string",
+                          "integer",
+                          "boolean",
+                          "json",
+                          "date",
+                          "datetime",
+                          "money",
+                          "decimal",
+                          "image",
+                          "file",
+                          "richtext",
+                          "relations",
+                        ] as const
+                      ).map((k) => (
+                        <option key={k} value={k}>
+                          {a(k)}
+                        </option>
+                      ))}
+                    </Select>
+                  </FormField>
+                  <div className="app-field-flags">
+                    {(
+                      ["required", "translatable", "indexed", "unique"] as const
+                    ).map((key) => (
+                      <label key={key} className="app-check">
+                        <input
+                          type="checkbox"
+                          disabled={
+                            (key === "translatable" &&
+                              field.kind !== "string") ||
+                            (["indexed", "unique"].includes(key) &&
+                              ([
+                                "json",
+                                "money",
+                                "richtext",
+                                "relations",
+                              ].includes(field.kind) ||
+                                field.translatable))
+                          }
+                          checked={field[key] ?? false}
+                          onChange={(e) =>
+                            set({
+                              [key]: e.target.checked,
+                              ...(key === "translatable" && e.target.checked
+                                ? {
+                                    indexed: false,
+                                    unique: false,
+                                    validation: undefined,
+                                    coreReference: null,
+                                    choices: [],
+                                  }
+                                : {}),
+                            })
+                          }
+                        />
+                        {a(key === "translatable" ? "translated" : key)}
+                      </label>
+                    ))}
+                  </div>
+                  <AppFieldOptions field={field} onChange={set} />
+                  {(field.kind === "relations" ||
+                    (field.kind === "string" &&
+                      !field.translatable &&
+                      !field.coreReference &&
+                      !field.choices?.length)) && (
+                    <FormField label={a("relationTarget")}>
+                      <Select
+                        value={field.references ?? ""}
+                        onChange={(e) =>
+                          set({
+                            references: e.target.value || null,
+                            choices: [],
+                            coreReference: null,
+                          })
+                        }
+                      >
+                        <option value="">—</option>
+                        {manifest.entities.map((target) => (
+                          <option key={target.name} value={target.name}>
+                            {target.name}
+                          </option>
+                        ))}
+                      </Select>
+                    </FormField>
+                  )}
+                  <button
+                    className="app-icon-button"
+                    aria-label={a("delete")}
+                    disabled={entity.fields.length === 1}
+                    onClick={() =>
+                      patch(entity.name, {
+                        ...entity,
+                        fields: entity.fields.filter((_, i) => i !== index),
+                      })
+                    }
+                  >
+                    <Icon name="close" size={16} />
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+          <AppWorkflowEditor
+            entity={entity}
+            onChange={(next) => patch(entity.name, next)}
+          />
+          <Button
+            type="submit"
+            disabled={entity.fields.length >= 16}
+            onClick={() =>
+              patch(entity.name, {
+                ...entity,
+                fields: [
+                  ...entity.fields,
+                  {
+                    name: nextId(
+                      "field",
+                      entity.fields.map((f) => f.name),
+                    ),
+                    label: appText("field"),
+                    kind: "string",
+                    required: false,
+                  },
+                ],
+              })
+            }
+          >
+            <Icon name="plus" size={15} />
+            {a("addField")}
+          </Button>
+        </section>
+      ))}
+    </div>
+  );
+}

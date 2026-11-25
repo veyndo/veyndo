@@ -7,11 +7,11 @@ import {
   cleanup,
 } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
-import PaymentActions from "../../src/admin/payments/PaymentActions";
+import PaymentActions from "../../../components/payments/ui/admin/payments/PaymentActions";
 import {
   paymentMinor,
   type Settlement,
-} from "../../src/admin/payments/payment-amount";
+} from "../../../components/payments/ui/admin/payments/payment-amount";
 vi.mock("../../src/shared/i18n/i18n", () => ({
   useLocale: () => ({ locale: "en-GB" }),
 }));

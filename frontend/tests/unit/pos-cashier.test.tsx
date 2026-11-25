@@ -7,15 +7,15 @@ import {
   waitFor,
   cleanup,
 } from "@testing-library/react";
-import RegisterCatalog from "../../src/admin/pos/RegisterCatalog";
-import RegisterCart from "../../src/admin/pos/RegisterCart";
-import RegisterDiscount from "../../src/admin/pos/RegisterDiscount";
-import RegisterCustomer from "../../src/admin/pos/RegisterCustomer";
-import RegisterAssistant from "../../src/admin/pos/RegisterAssistant";
-import ReceiptPrinter from "../../src/admin/pos/ReceiptPrinter";
-import type { Channel } from "../../src/admin/channels/channel-model";
-import type { useRegister } from "../../src/admin/pos/useRegister";
-vi.mock("../../src/admin/pos/pos-i18n", () => ({
+import RegisterCatalog from "../../../components/pos/ui/admin/pos/RegisterCatalog";
+import RegisterCart from "../../../components/pos/ui/admin/pos/RegisterCart";
+import RegisterDiscount from "../../../components/pos/ui/admin/pos/RegisterDiscount";
+import RegisterCustomer from "../../../components/pos/ui/admin/pos/RegisterCustomer";
+import RegisterAssistant from "../../../components/pos/ui/admin/pos/RegisterAssistant";
+import ReceiptPrinter from "../../../components/pos/ui/admin/pos/ReceiptPrinter";
+import type { Channel } from "../../../components/marketing/ui/admin/channels/channel-model";
+import type { useRegister } from "../../../components/pos/ui/admin/pos/useRegister";
+vi.mock("../../../components/pos/ui/admin/pos/pos-i18n", () => ({
   usePosText: () => (key: string) => key,
 }));
 vi.mock("../../src/shared/i18n/i18n", () => ({
@@ -24,13 +24,13 @@ vi.mock("../../src/shared/i18n/i18n", () => ({
 vi.mock("../../src/shared/apps/AppSurfaces", () => ({
   AppSurfaceSlot: () => null,
 }));
-vi.mock("../../src/admin/pos/RegisterAdjustments", () => ({
+vi.mock("../../../components/pos/ui/admin/pos/RegisterAdjustments", () => ({
   default: () => null,
 }));
-vi.mock("../../src/admin/pos/RegisterCheckoutOptions", () => ({
+vi.mock("../../../components/pos/ui/admin/pos/RegisterCheckoutOptions", () => ({
   default: () => <button>options</button>,
 }));
-vi.mock("../../src/admin/pos/RegisterCheckout", () => ({
+vi.mock("../../../components/pos/ui/admin/pos/RegisterCheckout", () => ({
   default: () => <button>checkout</button>,
 }));
 function register() {

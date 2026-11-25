@@ -2,14 +2,14 @@
 import { useState } from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { it, expect } from "vitest";
-import AppOntology from "../../src/admin/developer/AppOntology";
+import AppOntology from "../../../components/apps/ui/admin/developer/AppOntology";
 import {
   template,
   compile,
   problems,
   renameEntity,
   removeEntity,
-} from "../../src/admin/developer/app-model";
+} from "../../../components/apps/ui/admin/developer/app-model";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
 import { ContentLanguage } from "../../src/shared/i18n/ContentLanguage";
 import type { Manifest } from "../../src/shared/apps/native/types";

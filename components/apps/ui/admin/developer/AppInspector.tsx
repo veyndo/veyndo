@@ -1,0 +1,244 @@
+/** One content language edits app/view/block metadata; changing bindings updates the actual manifest. */
+import {
+  Badge,
+  Field,
+  Select,
+  TextInput,
+} from "../../../../../frontend/src/kit/ui";
+import MediaCaptionEditor from "../../../../../frontend/src/shared/media/MediaCaptionEditor";
+import type { ApiRequestFn as RequestFn } from "../../../../../frontend/src/shared/api/types";
+import AppControlProperties from "./AppControlProperties";
+import { useAppWorkspaceText } from "../../../../../frontend/src/shared/i18n/app-workspace-i18n";
+import AppFormFields from "./AppFormFields";
+import AppGeometry from "./AppGeometry";
+import AppContextBinding from "./AppContextBinding";
+import { placements } from "./assistant-model";
+import { useAssistantText } from "../../../../../frontend/src/shared/i18n/app-assistant-i18n";
+import LocalizedField from "../../../../../frontend/src/shared/i18n/LocalizedField";
+import { useAppStudioText } from "../../../../../frontend/src/shared/i18n/app-studio-i18n";
+import type {
+  Manifest,
+  NativeView,
+} from "../../../../../frontend/src/shared/apps/native/types";
+import { locations, textMap } from "./app-model";
+export default function AppInspector({
+  manifest,
+  request,
+  canGenerate = false,
+  view,
+  selected,
+  onChange,
+}: {
+  request?: RequestFn;
+  canGenerate?: boolean;
+  manifest: Manifest;
+  view: NativeView;
+  selected: string;
+  onChange: (m: Manifest) => void;
+}) {
+  const { a } = useAppStudioText();
+  const { t } = useAssistantText(),
+    w = useAppWorkspaceText();
+  const block = view.blocks.find((b) => b.id === selected),
+    surface = manifest.surfaces?.find((s) => s.uiPath === `native/${view.id}`);
+  const patch = (v: Partial<NativeView>) =>
+    onChange({
+      ...manifest,
+      views: manifest.views?.map((item) =>
+        item.id === view.id ? { ...item, ...v } : item,
+      ),
+    });
+  return (
+    <aside className="app-inspector">
+      <span className="app-panel-label">{a("inspector")}</span>
+      {block ? (
+        <>
+          <Badge>
+            {a(block.kind)} · {block.id}
+          </Badge>
+          <LocalizedField
+            label={a("title")}
+            value={block.title}
+            onChange={(v) =>
+              patch({
+                blocks: view.blocks.map((b) =>
+                  b.id === selected ? { ...b, title: textMap(v) } : b,
+                ),
+              })
+            }
+            required
+            maxLength={100}
+          />
+          {block.kind === "image" && (
+            <MediaCaptionEditor
+              key={block.id}
+              scopeKey={`${manifest.id}:${manifest.version}:${view.id}:${block.id}`}
+              value={block.text ?? {}}
+              request={request}
+              canGenerate={canGenerate}
+              context={JSON.stringify({
+                app: manifest.name,
+                image: block.title,
+              })}
+              onChange={(v) =>
+                patch({
+                  blocks: view.blocks.map((b) =>
+                    b.id === selected ? { ...b, text: textMap(v) } : b,
+                  ),
+                })
+              }
+            />
+          )}
+          {block.kind === "form" && (
+            <AppFormFields
+              manifest={manifest}
+              block={block}
+              onChange={onChange}
+            />
+          )}
+          <details className="app-metadata">
+            <summary>{w("geometry")}</summary>
+            <AppGeometry
+              index={view.blocks.indexOf(block)}
+              block={block}
+              onChange={(next) =>
+                patch({
+                  blocks: view.blocks.map((b) =>
+                    b.id === selected ? next : b,
+                  ),
+                })
+              }
+            />
+          </details>
+          {block.kind === "text" ? (
+            <LocalizedField
+              label={a("body")}
+              value={block.text ?? {}}
+              onChange={(v) =>
+                patch({
+                  blocks: view.blocks.map((b) =>
+                    b.id === selected ? { ...b, text: textMap(v) } : b,
+                  ),
+                })
+              }
+              multiline
+              maxLength={2000}
+            />
+          ) : (
+            <AppControlProperties
+              manifest={manifest}
+              view={view}
+              block={block}
+              onChange={(next) =>
+                patch({
+                  blocks: view.blocks.map((b) =>
+                    b.id === selected ? next : b,
+                  ),
+                })
+              }
+            />
+          )}
+          {block.kind !== "text" && (
+            <AppContextBinding
+              manifest={manifest}
+              block={block}
+              onChange={(next) =>
+                patch({
+                  blocks: view.blocks.map((b) =>
+                    b.id === block.id ? next : b,
+                  ),
+                })
+              }
+            />
+          )}
+        </>
+      ) : (
+        <p className="muted">{a("select")}</p>
+      )}
+      <details className="app-metadata">
+        <summary>{a("name")}</summary>
+        <LocalizedField
+          label={a("name")}
+          value={manifest.name}
+          onChange={(v) => onChange({ ...manifest, name: textMap(v) })}
+          required
+          maxLength={100}
+        />
+        <Field label={a("id")}>
+          <TextInput
+            value={manifest.id}
+            maxLength={32}
+            onChange={(e) => onChange({ ...manifest, id: e.target.value })}
+          />
+        </Field>
+        <Field label={a("version")}>
+          <TextInput
+            value={manifest.version}
+            maxLength={32}
+            onChange={(e) => onChange({ ...manifest, version: e.target.value })}
+          />
+        </Field>
+      </details>
+      <div className="app-inspector-divider" />
+      <details className="app-metadata">
+        <summary>
+          {a("layout")} · {a("location")}
+        </summary>
+        <Field label={a("layout")}>
+          <Select
+            value={view.layout}
+            onChange={(e) =>
+              patch({ layout: e.target.value as NativeView["layout"] })
+            }
+          >
+            <option value="stack">{a("stack")}</option>
+            <option value="grid">{a("grid")}</option>
+            <option value="form">{a("formDesigner")}</option>
+          </Select>
+        </Field>
+        {surface && (
+          <>
+            <Field label={a("location")}>
+              <Select
+                value={surface.location}
+                onChange={(e) =>
+                  onChange({
+                    ...manifest,
+                    surfaces: manifest.surfaces?.map((s) =>
+                      s.id === surface.id
+                        ? { ...s, location: e.target.value }
+                        : s,
+                    ),
+                  })
+                }
+              >
+                {Object.keys({ ...locations, ...placements })
+                  .map((value) => [value, value] as const)
+                  .map(([value, key]) => (
+                    <option value={value} key={value}>
+                      {placements[key] ? t(placements[key]) : a(locations[key])}
+                    </option>
+                  ))}
+              </Select>
+            </Field>
+            <LocalizedField
+              label={a("title")}
+              value={surface.label}
+              onChange={(v) =>
+                onChange({
+                  ...manifest,
+                  surfaces: manifest.surfaces?.map((s) =>
+                    s.id === surface.id ? { ...s, label: textMap(v) } : s,
+                  ),
+                })
+              }
+              required
+              maxLength={100}
+            />
+          </>
+        )}
+        <div className="app-inspector-divider" />
+      </details>
+    </aside>
+  );
+}

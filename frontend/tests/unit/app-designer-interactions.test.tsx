@@ -9,12 +9,12 @@ import {
 import { useState } from "react";
 import { expect, it, vi } from "vitest";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
-import { template } from "../../src/admin/developer/app-model";
-import AppGridCanvas from "../../src/admin/developer/AppGridCanvas";
-import AppLogicEditor from "../../src/admin/developer/AppLogicEditor";
-import AppModelDiagram from "../../src/admin/developer/AppModelDiagram";
-import AppMenuEditor from "../../src/admin/developer/AppMenuEditor";
-import AppJobArtifact from "../../src/admin/apps/AppJobArtifact";
+import { template } from "../../../components/apps/ui/admin/developer/app-model";
+import AppGridCanvas from "../../../components/apps/ui/admin/developer/AppGridCanvas";
+import AppLogicEditor from "../../../components/apps/ui/admin/developer/AppLogicEditor";
+import AppModelDiagram from "../../../components/apps/ui/admin/developer/AppModelDiagram";
+import AppMenuEditor from "../../../components/apps/ui/admin/developer/AppMenuEditor";
+import AppJobArtifact from "../../../components/apps/ui/admin/apps/AppJobArtifact";
 import NativeAppView from "../../src/shared/apps/native/NativeAppView";
 
 it("multi-select alignment and tab mode edit manifest geometry; Classic changes only the designer", () => {

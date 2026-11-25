@@ -7,7 +7,7 @@ import { ContentLanguage } from "../../src/shared/i18n/ContentLanguage";
 import { LocaleScope } from "../../src/shared/i18n/i18n";
 import type { LocalizedText } from "../../src/shared/i18n/content-language";
 import type { RequestFn } from "../../src/shared/api/types";
-import ProductGallery from "../../src/storefront/catalog/ProductGallery";
+import ProductGallery from "../../../components/catalog/ui/storefront/catalog/ProductGallery";
 import SiteRenderer from "../../../extensions/apps/site-builder/Renderer";
 import { newPage } from "../../../extensions/apps/site-builder/model";
 import { renderRichNode } from "../../src/shared/content/rich-document";

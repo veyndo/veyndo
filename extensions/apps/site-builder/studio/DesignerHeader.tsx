@@ -1,6 +1,6 @@
 /** Channel, private save and agent entry remain visible above the shared preview. */
 import { Button } from "../../../../frontend/src/kit/ui";
-import { canTestCustomers } from "../../../../frontend/src/admin/scenarios/scenario-access";
+import { canTestCustomers } from "../../../../components/intelligence/ui/admin/scenarios/scenario-access";
 import Icon from "../../../../frontend/src/shared/ui/Icon";
 import { contentText } from "../../../../frontend/src/shared/i18n/content-language";
 import { useContentLanguage } from "../../../../frontend/src/shared/i18n/ContentLanguage";

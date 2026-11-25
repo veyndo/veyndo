@@ -1,0 +1,96 @@
+/** Shop main language and enabled locales with resumable provider-backed bulk product translation drafts. */
+import {
+  Badge,
+  Button,
+  Field,
+  Select,
+  TextInput,
+} from "../../../../../frontend/src/kit/ui";
+import { useState } from "react";
+import { useInternationalText } from "../../../../../frontend/src/shared/i18n/international-i18n";
+import type { InternationalProps } from "./CommerceSettings";
+import TranslationJobs from "./TranslationJobs";
+export default function LanguageSettings({
+  config,
+  patch,
+  request,
+  dirty,
+  canWrite,
+}: InternationalProps & { dirty: boolean; canWrite: boolean }) {
+  const { i, locale } = useInternationalText();
+  const [next, setNext] = useState("");
+  let canonical: string | undefined;
+  try {
+    canonical = /^[a-z]{2,3}(?:-[A-Za-z0-9]{2,8}){0,2}$/.test(next)
+      ? Intl.getCanonicalLocales(next)[0]
+      : undefined;
+  } catch {
+    // Invalid subtags must never reach the shared translation editors.
+    canonical = undefined;
+  }
+  const label = (l: string) => {
+    try {
+      return new Intl.DisplayNames([locale], { type: "language" }).of(l) ?? l;
+    } catch {
+      return l;
+    }
+  };
+  return (
+    <div className="intl-section">
+      <Field label={i("mainLanguage")}>
+        <Select
+          value={config.mainLocale}
+          onChange={(e) => patch({ mainLocale: e.target.value })}
+        >
+          {config.locales.map((l) => (
+            <option value={l} key={l}>
+              {label(l)} · {l}
+            </option>
+          ))}
+        </Select>
+      </Field>
+      <h3>{i("enabledLanguages")}</h3>
+      <div className="intl-language-list">
+        {config.locales.map((l) => (
+          <div key={l}>
+            <span>
+              <strong>{label(l)}</strong>
+              <small>{l}</small>
+            </span>
+            {l === config.mainLocale ? (
+              <Badge>{i("mainLanguage")}</Badge>
+            ) : (
+              <span>✓</span>
+            )}
+          </div>
+        ))}
+      </div>
+      <div className="intl-inline">
+        <Field label={i("newLocale")}>
+          <TextInput
+            maxLength={35}
+            value={next}
+            onChange={(e) => setNext(e.target.value)}
+          />
+        </Field>
+        <Button
+          type="button"
+          disabled={!canonical || config.locales.includes(canonical)}
+          onClick={() => {
+            if (!canonical) return;
+            patch({ locales: [...config.locales, canonical] });
+            setNext("");
+          }}
+        >
+          + {i("add")}
+        </Button>
+      </div>
+      {dirty && <p className="intl-coverage">{i("saveFirst")}</p>}
+      <TranslationJobs
+        request={request}
+        config={config}
+        disabled={dirty || !canWrite}
+      />
+    </div>
+  );
+}

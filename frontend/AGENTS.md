@@ -2,6 +2,14 @@
 
 Root AGENTS.md also applies. Rules below were moved from the root, not weakened.
 
+## Where screens live
+
+A component's Studio and storefront screens belong in its UI folder,
+`components/<name>/ui/admin/<area>` or `components/<name>/ui/storefront/<area>`,
+not in `frontend/src`. `frontend/src` keeps the entry, shells, shared building blocks
+and `kit/`. A new area goes to the component that owns its data and API; these rules
+apply to both roots, and the gates read them as one tree (`scripts/source-roots.mjs`).
+
 ## Shared grid ownership
 
 New Studio entity directories reuse `frontend/src/shared/grid/AgenticGrid` and native

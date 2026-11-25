@@ -8,9 +8,9 @@ const temp = await mkdtemp(join(root, "node_modules", ".recipe-check-"));
 try {
   const result = await build({
     stdin: {
-      contents: `export {appRecipe, recipeIds} from './src/admin/developer/app-recipes';
-        export {compile, template} from './src/admin/developer/app-model';
-        export {bindExtension} from './src/admin/developer/core-extension-model';`,
+      contents: `export {appRecipe, recipeIds} from '../components/apps/ui/admin/developer/app-recipes';
+        export {compile, template} from '../components/apps/ui/admin/developer/app-model';
+        export {bindExtension} from '../components/apps/ui/admin/developer/core-extension-model';`,
       resolveDir: root,
       sourcefile: "native-patterns-fixture.ts",
       loader: "ts",

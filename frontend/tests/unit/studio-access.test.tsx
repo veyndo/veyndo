@@ -11,7 +11,7 @@ import { useStudioController } from "../../src/admin/shell/useStudioController";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
 import { ownerRights, session, overview, providers } from "./fixtures";
 import { reportMerchantSessionFailure } from "../../src/shared/api/merchant-session";
-import PersonalAccountForm from "../../src/admin/team/PersonalAccountForm";
+import PersonalAccountForm from "../../../components/identity/ui/admin/team/PersonalAccountForm";
 
 it("enforces shop slugs with modern HTML Unicode-set pattern validation", () => {
   render(

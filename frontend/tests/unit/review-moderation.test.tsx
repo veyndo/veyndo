@@ -3,7 +3,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { expect, it, vi } from "vitest";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
-import ReviewModeration from "../../src/admin/catalog/ReviewModeration";
+import ReviewModeration from "../../../components/catalog/ui/admin/catalog/ReviewModeration";
 const review = {
   id: "r1",
   productId: "lamp",

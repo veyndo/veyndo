@@ -8,7 +8,7 @@ import {
 } from "@testing-library/react";
 import { afterEach, it, expect, vi } from "vitest";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
-import PaymentInstructions from "../../src/storefront/checkout/PaymentInstructions";
+import PaymentInstructions from "../../../components/checkout/ui/storefront/checkout/PaymentInstructions";
 const { request } = vi.hoisted(() => ({ request: vi.fn() }));
 vi.mock("../../src/shared/api/shop-api", () => ({ shopApi: request }));
 afterEach(() => {

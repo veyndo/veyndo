@@ -5,12 +5,15 @@ import userEvent from "@testing-library/user-event";
 import { it, expect, vi } from "vitest";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
 import { ContentLanguage } from "../../src/shared/i18n/ContentLanguage";
-import ProductMediaWorkspace from "../../src/admin/catalog/ProductMediaWorkspace";
-import type { ProductDraft } from "../../src/admin/catalog/catalog-model";
-import { newDraft } from "../../src/admin/catalog/catalog-model";
-import { moveImage, validImages } from "../../src/admin/catalog/media-model";
-import { PreviewPanel } from "../../src/admin/preview/PreviewPanel";
-import MethodRemoval from "../../src/admin/settings/MethodRemoval";
+import ProductMediaWorkspace from "../../../components/catalog/ui/admin/catalog/ProductMediaWorkspace";
+import type { ProductDraft } from "../../../components/catalog/ui/admin/catalog/catalog-model";
+import { newDraft } from "../../../components/catalog/ui/admin/catalog/catalog-model";
+import {
+  moveImage,
+  validImages,
+} from "../../../components/catalog/ui/admin/catalog/media-model";
+import { PreviewPanel } from "../../../components/studio/ui/admin/preview/PreviewPanel";
+import MethodRemoval from "../../../components/shop/ui/admin/settings/MethodRemoval";
 it("closes pending media mutations when write access is revoked while preserving gallery reads", async () => {
   const draft = newDraft();
   draft.commerce.media = [

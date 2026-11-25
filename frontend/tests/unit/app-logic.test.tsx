@@ -2,8 +2,14 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { expect, it, vi } from "vitest";
-import { parseBasic, printBasic } from "../../src/admin/developer/basic-code";
-import { compile, template } from "../../src/admin/developer/app-model";
+import {
+  parseBasic,
+  printBasic,
+} from "../../../components/apps/ui/admin/developer/basic-code";
+import {
+  compile,
+  template,
+} from "../../../components/apps/ui/admin/developer/app-model";
 import { execute, type LogicHost } from "../../src/shared/apps/native/logic";
 import NativeAppView from "../../src/shared/apps/native/NativeAppView";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";

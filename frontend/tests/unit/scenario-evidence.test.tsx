@@ -1,9 +1,9 @@
 /** A successful purchase never substitutes for evidence about the current configuration. */
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, expect, it } from "vitest";
-import ScenarioEvidence from "../../src/admin/scenarios/ScenarioEvidence";
+import ScenarioEvidence from "../../../components/intelligence/ui/admin/scenarios/ScenarioEvidence";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
-import type { Run } from "../../src/admin/scenarios/scenario-types";
+import type { Run } from "../../../components/intelligence/ui/admin/scenarios/scenario-types";
 beforeEach(() => localStorage.setItem("rac-locale", "de-DE"));
 afterEach(cleanup);
 const run: Run = {

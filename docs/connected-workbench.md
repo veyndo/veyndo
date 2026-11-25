@@ -138,7 +138,7 @@ reported.
 
 | Owner | Change and evidence |
 |---|---|
-| `frontend/src/admin/developer/app-recipes.ts`, `AppRecipes.tsx` | Patterns compiled through the existing wizard; UI tests exercise an owned order-bound save without refund calls |
+| `components/apps/ui/admin/developer/app-recipes.ts`, `AppRecipes.tsx` | Patterns compiled through the existing wizard; UI tests exercise an owned order-bound save without refund calls |
 | `AppProposalReview.tsx`, `app-proposal.ts`, `useAppStudio.ts` | Explicit review, staleness protection and same native version lifecycle; frontend interaction tests |
 | `src/developer/generation_edits.rs` | Bounded JSON Patch model wire, atomic Manifest edits and host-assigned versions; no app runtime |
 | `src/developer/generation_contract.rs` | Existing schema/access/integration preservation; rejected removal/type-change unit cases |

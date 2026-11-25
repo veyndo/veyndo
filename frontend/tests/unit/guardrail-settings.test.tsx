@@ -8,12 +8,12 @@ import {
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import GuardrailSettings from "../../src/admin/intelligence/GuardrailSettings";
+import GuardrailSettings from "../../../components/intelligence/ui/admin/intelligence/GuardrailSettings";
 import {
   validPolicy,
   type Settings,
   type Policy,
-} from "../../src/admin/intelligence/guardrail-model";
+} from "../../../components/intelligence/ui/admin/intelligence/guardrail-model";
 import type { Product } from "../../src/admin/shell/studio-types";
 const studio = vi.hoisted(() => ({
   access: [

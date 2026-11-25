@@ -76,7 +76,7 @@ it("never renders the previous shop rights while admission for a new request sco
 
 it("native A2UI composition uses the released SDK registry and preserves domain and PII rights", async () => {
   const { composeNativeWorkspace } =
-    await import("../../src/admin/workspace/workspace-presentation");
+    await import("../../../components/studio/ui/admin/workspace/workspace-presentation");
   const candidate = {
     entity: "products",
     criteria: {},

@@ -2,23 +2,23 @@
 import { useState } from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import FlowExecution from "../../src/admin/automation/FlowExecution";
-import RuleBuilder from "../../src/admin/automation/RuleBuilder";
-import FlowBuilder from "../../src/admin/automation/FlowBuilder";
+import FlowExecution from "../../../components/marketing/ui/admin/automation/FlowExecution";
+import RuleBuilder from "../../../components/marketing/ui/admin/automation/RuleBuilder";
+import FlowBuilder from "../../../components/marketing/ui/admin/automation/FlowBuilder";
 import { knowledgeWords } from "../../src/shared/i18n/knowledge-i18n";
-import FlowCanvas from "../../src/admin/automation/FlowCanvas";
-import FlowActionFields from "../../src/admin/automation/FlowActionFields";
-import JsonField from "../../src/admin/automation/JsonField";
+import FlowCanvas from "../../../components/marketing/ui/admin/automation/FlowCanvas";
+import FlowActionFields from "../../../components/marketing/ui/admin/automation/FlowActionFields";
+import JsonField from "../../../components/marketing/ui/admin/automation/JsonField";
 import {
   appendNode,
   removeNode,
   type Pipeline,
-} from "../../src/admin/automation/pipeline-types";
+} from "../../../components/marketing/ui/admin/automation/pipeline-types";
 import {
   sourceRule,
   fromSource,
   toSource,
-} from "../../src/admin/automation/source-rules";
+} from "../../../components/marketing/ui/admin/automation/source-rules";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
 const catalog = {
   conditions: ["alwaysValid"],

@@ -1,7 +1,7 @@
 /** Saved release evidence returns to its exact sandbox/channel, with stale query context cleared. */
 import { act, renderHook } from "@testing-library/react";
 import { expect, it, vi } from "vitest";
-import { useScenarioNavigation } from "../../src/admin/scenarios/useScenarioNavigation";
+import { useScenarioNavigation } from "../../../components/intelligence/ui/admin/scenarios/useScenarioNavigation";
 const context = vi.hoisted(() => ({
   request: vi.fn(),
   environment: "",

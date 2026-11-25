@@ -4,7 +4,7 @@ import {
   checkoutParent,
   notifyCheckout,
   returnFromCheckout,
-} from "../../src/storefront/checkout/embedded-checkout";
+} from "../../../components/checkout/ui/storefront/checkout/embedded-checkout";
 import type { Order } from "../../src/shared/api/shop-api";
 const original = window.parent;
 afterEach(() =>

@@ -54,7 +54,7 @@ Previews permit bounded cart simulations and catalog reads. They **cannot place 
 | Catalog/cart/navigation/legal reads | Existing consumers use only the server-derived preview marker |
 | Frontend alias CRUD and revision checks | `components/apps/src/service/frontend_bindings.rs` (managed-app install through the `HostedInstall` port); existing `hosted_frontends` table |
 | Actual proxy and streamed responses | `src/shop_domains/frontends.rs`, `frontend_transport.rs` |
-| Channel editor / lifecycle actions / domains | `frontend/src/admin/channels/ChannelEditor.tsx`, `ChannelActions.tsx`, `ChannelConnections.tsx` |
+| Channel editor / lifecycle actions / domains | `components/marketing/ui/admin/channels/ChannelEditor.tsx`, `ChannelActions.tsx`, `ChannelConnections.tsx` |
 | Standard shop preview notice | `frontend/src/storefront/shell/ChannelPreview.tsx` and four-language `channel-preview-i18n.ts` |
 
 Domain CRUD is `GET/PUT /api/settings/frontends` and `DELETE /api/settings/frontends/{alias}`. Changes require `settings.write`; list requires `settings.read`. Aliases are globally unique, but ownership and channel references are tenant-scoped. PUT supports `alias`, `channel`, `experienceAlias` and `revision`; unchanged legacy provisioning remains idempotent.

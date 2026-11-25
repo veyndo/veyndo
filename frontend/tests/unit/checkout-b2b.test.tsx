@@ -6,8 +6,8 @@ import { describe, it, expect, vi } from "vitest";
 import { cart as base } from "./fixtures";
 import type { Cart } from "../../src/shared/api/shop-api";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
-import CheckoutPanel from "../../src/storefront/checkout/CheckoutPanel";
-vi.mock("../../src/storefront/legal/PrivacyProvider", () => ({
+import CheckoutPanel from "../../../components/checkout/ui/storefront/checkout/CheckoutPanel";
+vi.mock("../../../components/shop/ui/storefront/legal/PrivacyProvider", () => ({
   useLegalPolicy: () => ({
     policyVersion: "fixture",
     data: { strictCheckout: false },

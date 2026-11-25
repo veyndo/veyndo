@@ -3,9 +3,9 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { expect, it, vi } from "vitest";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
-import MasterDataSettings from "../../src/admin/settings/MasterDataSettings";
-import CompanyLogo from "../../src/admin/settings/CompanyLogo";
-import CompanyTranslations from "../../src/admin/settings/CompanyTranslations";
+import MasterDataSettings from "../../../components/shop/ui/admin/settings/MasterDataSettings";
+import CompanyLogo from "../../../components/shop/ui/admin/settings/CompanyLogo";
+import CompanyTranslations from "../../../components/shop/ui/admin/settings/CompanyTranslations";
 import { ContentLanguage } from "../../src/shared/i18n/ContentLanguage";
 const base = {
   name: "Synthetic GmbH",

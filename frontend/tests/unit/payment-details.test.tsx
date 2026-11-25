@@ -1,8 +1,8 @@
 /** Financial details remain lazy and read-only, including provider failures and independent refresh. */
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { it, expect, vi } from "vitest";
-import { paymentCommand } from "../../src/admin/payments/payment-command";
-import PaymentDetails from "../../src/admin/payments/PaymentDetails";
+import { paymentCommand } from "../../../components/payments/ui/admin/payments/payment-command";
+import PaymentDetails from "../../../components/payments/ui/admin/payments/PaymentDetails";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
 it("loads only when opened, renders exact provider fees and performs no command", async () => {
   localStorage.setItem("rac-locale", "en-GB");

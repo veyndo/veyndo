@@ -2,8 +2,8 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
 import { LocaleScope } from "../../src/shared/i18n/i18n";
-import AutomationView from "../../src/admin/automation/AutomationView";
-import FlowProposalReview from "../../src/admin/automation/FlowProposalReview";
+import AutomationView from "../../../components/marketing/ui/admin/automation/AutomationView";
+import FlowProposalReview from "../../../components/marketing/ui/admin/automation/FlowProposalReview";
 import type { Preview } from "../../src/admin/shell/studio-types";
 afterEach(() => vi.useRealTimers());
 const preview = {

@@ -1,13 +1,13 @@
 /** Typed Studio route ids, their locale-specific labels and the navigation entries the extensions register. */
-import { useSetupText } from "../setup/setup-i18n";
-import { useB2BExperienceText } from "../b2b/experience-i18n";
+import { useSetupText } from "../../../../components/shop/ui/admin/setup/setup-i18n";
+import { useB2BExperienceText } from "../../../../components/b2b/ui/admin/b2b/experience-i18n";
 import { useB2BText } from "../../shared/i18n/b2b-i18n";
-import { usePosText } from "../pos/pos-i18n";
+import { usePosText } from "../../../../components/pos/ui/admin/pos/pos-i18n";
 import { useLocale } from "../../shared/i18n/i18n";
 import { useOperationsText } from "../../shared/i18n/operations-i18n";
 import { useWorkbenchText } from "../../shared/i18n/workbench-i18n";
 import { type IconName } from "../../shared/ui/Icon";
-import { useWorkspaceText } from "../workspace/workspace-i18n";
+import { useWorkspaceText } from "../../../../components/studio/ui/admin/workspace/workspace-i18n";
 import { studioRegistry } from "./registry/first-party";
 export type Tab =
   | "setup"

@@ -2,6 +2,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import ts from "typescript";
+import { componentUiRoots } from "./source-roots.mjs";
 import {
   renderedLiterals,
   checkValues,
@@ -30,6 +31,9 @@ const walk = (dir) =>
     );
 const productionFiles = [
   ...walk(source),
+  ...(process.argv.includes("--source")
+    ? []
+    : componentUiRoots().flatMap(walk)),
   ...(process.argv.includes("--source")
     ? []
     : walk(path.resolve(root, "../extensions/apps"))),

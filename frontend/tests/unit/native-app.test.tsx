@@ -6,8 +6,8 @@ import { LocaleProvider } from "../../src/shared/i18n/i18n";
 import NativeAppView from "../../src/shared/apps/native/NativeAppView";
 import NativeRecordForm from "../../src/shared/apps/native/NativeRecordForm";
 import { ContentLanguage } from "../../src/shared/i18n/ContentLanguage";
-import { template } from "../../src/admin/developer/app-model";
-import SandboxPreview from "../../src/admin/developer/SandboxPreview";
+import { template } from "../../../components/apps/ui/admin/developer/app-model";
+import SandboxPreview from "../../../components/apps/ui/admin/developer/SandboxPreview";
 it("refreshes persisted control values and clears previous-record edits without writing on typing", async () => {
   const m = template();
   m.entities[0].fields[0].translatable = false;

@@ -32,7 +32,7 @@ parity has not been established. **Missing** means no implementation exists.
 | Order association memory and merchant-approved recommendations | `src/cognition/*`, outbox, PostgreSQL, `KnowledgeView.tsx`, `MemoryRecommendations.tsx` | **Native extension:** persisted order/event evidence, deduplication, hypothesis approval and actual public consumer | No original Shopware equivalence claimed; experiments/causal uplift/weight training missing |
 | Native external payment adapter | `src/payments/*`, payment UI, `scripts/payments.py` | Configured PayPal Sandbox/Live create/capture/reconcile/refund, reserved stock/release, webhook postback verification, restart and uncertain receipts using local contract server | No actual Sandbox account run or live charge; The provider-neutral interface, account onboarding and authorization/void lifecycle now exist; the Shopware Payments implementation stays private; original payment API/state parity missing |
 | Full DAL, category/search criteria, CMS, subscriptions, returns and currencies | — | **Missing**, except native bounded catalog/search paths | Port as separate source units with original fixtures and state/response comparisons; partial rules/flows/promotions/customer accounts are listed below |
-| B2B purchasing, independent implementation | `src/b2b/`, `frontend/src/admin/b2b/`, buyer account; `extensions/apps/edi/` | Companies/units, current employee permissions, exact budgets, approval, RFQ/offers, quick order/lists, private catalogs, unit orders/issued receipts and native Flow/App/MCP. [Contracts](b2b-commerce.md), [EDI profiles](edi.md) | No claim of licensed Shopware B2B source migration or complete parity. Multilevel approval, aggregate parent budgets, employee invitation/delegation, credit terms, PunchOut and certified partner transports remain open. |
+| B2B purchasing, independent implementation | `src/b2b/`, `components/b2b/ui/admin/b2b/`, buyer account; `extensions/apps/edi/` | Companies/units, current employee permissions, exact budgets, approval, RFQ/offers, quick order/lists, private catalogs, unit orders/issued receipts and native Flow/App/MCP. [Contracts](b2b-commerce.md), [EDI profiles](edi.md) | No claim of licensed Shopware B2B source migration or complete parity. Multilevel approval, aggregate parent budgets, employee invitation/delegation, credit terms, PunchOut and certified partner transports remain open. |
 
 ## Tests and evidence
 
@@ -200,7 +200,7 @@ financial events are not rewound. Historical Shopware versions are not imported
 or synthesized. [The history contract](entity-history.md) lists all boundaries.
 
 Checkout review and approval return: `order_checkout.rs`, `payments/storage.rs`,
-`components/payments/src/domain/return_urls.rs` and `frontend/src/storefront/checkout/*` provide native
+`components/payments/src/domain/return_urls.rs` and `components/checkout/ui/storefront/checkout/*` provide native
 one-page selection, revision/amount confirmation and verified approval capture.
 Local PostgreSQL/provider fixtures cover stale reviews, replay and forged returns.
 No full Shopware Payments, accelerated wallet/card or conversion-uplift parity is claimed.

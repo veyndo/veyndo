@@ -7,7 +7,7 @@ import {
   cleanup,
 } from "@testing-library/react";
 import { expect, it, vi } from "vitest";
-import CatalogPreparation from "../../src/admin/catalog/CatalogPreparation";
+import CatalogPreparation from "../../../components/catalog/ui/admin/catalog/CatalogPreparation";
 import { LocaleScope } from "../../src/shared/i18n/i18n";
 const product = (id: string, state: string | null) => ({
   id,

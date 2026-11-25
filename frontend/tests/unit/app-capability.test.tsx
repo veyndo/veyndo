@@ -6,8 +6,11 @@ import { it, expect } from "vitest";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
 import { ContentLanguage } from "../../src/shared/i18n/ContentLanguage";
 import ContentLanguagePicker from "../../src/shared/i18n/ContentLanguagePicker";
-import AppCapabilityEditor from "../../src/admin/developer/AppCapabilityEditor";
-import { compile, template } from "../../src/admin/developer/app-model";
+import AppCapabilityEditor from "../../../components/apps/ui/admin/developer/AppCapabilityEditor";
+import {
+  compile,
+  template,
+} from "../../../components/apps/ui/admin/developer/app-model";
 import type { Manifest } from "../../src/shared/apps/native/types";
 it("edits a goal in a fifth language without copying translations or discarding executable examples", () => {
   const example = {

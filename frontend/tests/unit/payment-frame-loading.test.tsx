@@ -7,7 +7,7 @@ import {
   screen,
 } from "@testing-library/react";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
-import EmbeddedPayment from "../../src/storefront/checkout/EmbeddedPayment";
+import EmbeddedPayment from "../../../components/checkout/ui/storefront/checkout/EmbeddedPayment";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
 const api = vi.hoisted(() => vi.fn());
 vi.mock("../../src/shared/api/shop-api", () => ({ shopApi: api }));

@@ -12,14 +12,14 @@ def check(root):
     forbidden = [
         'src/connectors', 'src/payments/paypal.rs', 'src/payments/webhooks.rs',
         'frontend/src/admin/storyfronts', 'frontend/src/admin/styles/storyfronts.css',
-        'frontend/src/storefront/analytics/ShopAnalytics.tsx',
-        'frontend/src/admin/apps/EmailPanel.tsx', 'frontend/src/admin/apps/EmailProviderFields.tsx',
-        'frontend/src/admin/apps/email-languages.ts', 'frontend/src/shared/i18n/email-i18n.ts',
+        'components/intelligence/ui/storefront/analytics/ShopAnalytics.tsx',
+        'components/apps/ui/admin/apps/EmailPanel.tsx', 'components/apps/ui/admin/apps/EmailProviderFields.tsx',
+        'components/apps/ui/admin/apps/email-languages.ts', 'frontend/src/shared/i18n/email-i18n.ts',
     ]
     for path in forbidden:
         assert not (root / path).exists(), 'App implementation leaked into system folder: ' + path
     assert 'mod connectors;' not in (root / 'src/lib.rs').read_text(), 'Connector service linked into commerce library'
-    loader = (root / 'frontend/src/admin/developer/app-recipes.ts').read_text()
+    loader = (root / 'components/apps/ui/admin/developer/app-recipes.ts').read_text()
     assert 'assistedManifest(' not in loader and 'modelWorkspace(' not in loader, 'Picker owns app-specific business definition'
     for folder in ['returns-workspace', 'product-advisor', 'erp-handoff']:
         package = root / 'extensions/apps' / folder
@@ -42,7 +42,7 @@ def negative_controls():
     # Work only in throwaway fixtures: verify that CI rejects file leaks and escaping app symlinks.
     with tempfile.TemporaryDirectory() as folder:
         root = Path(folder)
-        for name in ['src/lib.rs', 'frontend/src/admin/developer/app-recipes.ts']:
+        for name in ['src/lib.rs', 'components/apps/ui/admin/developer/app-recipes.ts']:
             destination = root / name
             destination.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(ROOT / name, destination)

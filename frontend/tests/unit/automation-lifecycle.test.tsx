@@ -3,10 +3,10 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { expect, it, vi } from "vitest";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
-import AutomationDelete from "../../src/admin/automation/AutomationDelete";
-import AutomationView from "../../src/admin/automation/AutomationView";
-import SalesChannelsWorkspace from "../../src/admin/channels/SalesChannelsWorkspace";
-import { localDate } from "../../src/admin/automation/PromotionSchedule";
+import AutomationDelete from "../../../components/marketing/ui/admin/automation/AutomationDelete";
+import AutomationView from "../../../components/marketing/ui/admin/automation/AutomationView";
+import SalesChannelsWorkspace from "../../../components/marketing/ui/admin/channels/SalesChannelsWorkspace";
+import { localDate } from "../../../components/marketing/ui/admin/automation/PromotionSchedule";
 const rule = {
   id: "eligible",
   revision: 2,
@@ -253,7 +253,7 @@ it("removes only after a successful response", async () => {
 });
 it("keeps imported coupon activation review explicit in its normal native editor", async () => {
   const { default: PromotionSchedule } =
-    await import("../../src/admin/automation/PromotionSchedule");
+    await import("../../../components/marketing/ui/admin/automation/PromotionSchedule");
   const update = vi.fn();
   render(
     <PromotionSchedule

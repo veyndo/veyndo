@@ -6,8 +6,8 @@ import { expect, it } from "vitest";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
 import { ContentLanguage } from "../../src/shared/i18n/ContentLanguage";
 import ContentLanguagePicker from "../../src/shared/i18n/ContentLanguagePicker";
-import CategoryFactQuery from "../../src/admin/catalog/CategoryFactQuery";
-import type { Category } from "../../src/admin/catalog/catalog-model";
+import CategoryFactQuery from "../../../components/catalog/ui/admin/catalog/CategoryFactQuery";
+import type { Category } from "../../../components/catalog/ui/admin/catalog/catalog-model";
 it("preserves source-language query, edits a fifth language and restores inheritance in a single field", async () => {
   let latest: Category["data"]["graphQuery"] = {
     nodeType: "intent",

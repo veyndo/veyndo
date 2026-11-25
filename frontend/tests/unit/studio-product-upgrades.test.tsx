@@ -4,14 +4,14 @@ import userEvent from "@testing-library/user-event";
 import { it, expect, vi } from "vitest";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
 import RichEditor from "../../src/shared/content/editor/RichEditor";
-import ProductEditor from "../../src/admin/catalog/ProductEditor";
-import ProductVariants from "../../src/admin/catalog/ProductVariants";
-import VariantGenerator from "../../src/admin/catalog/VariantGenerator";
-import { newDraft } from "../../src/admin/catalog/catalog-model";
+import ProductEditor from "../../../components/catalog/ui/admin/catalog/ProductEditor";
+import ProductVariants from "../../../components/catalog/ui/admin/catalog/ProductVariants";
+import VariantGenerator from "../../../components/catalog/ui/admin/catalog/VariantGenerator";
+import { newDraft } from "../../../components/catalog/ui/admin/catalog/catalog-model";
 import {
   variantCombinations,
   variantPayload,
-} from "../../src/admin/catalog/variant-model";
+} from "../../../components/catalog/ui/admin/catalog/variant-model";
 import {
   markdownCompatible,
   safeMarkdownDocument,

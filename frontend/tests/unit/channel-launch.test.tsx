@@ -3,7 +3,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { expect, it, vi } from "vitest";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
-import AppsManager from "../../src/admin/apps/AppsManager";
+import AppsManager from "../../../components/apps/ui/admin/apps/AppsManager";
 
 it("opens the marketplace workspace from an app deep link instead of dropping into the app store", async () => {
   history.replaceState(
@@ -75,7 +75,7 @@ it("opens the marketplace workspace from an app deep link instead of dropping in
 
 it("creates a marketplace channel, marks its missing name and opens its app in place with the channel preselected", async () => {
   const { default: SalesChannelsWorkspace } =
-    await import("../../src/admin/channels/SalesChannelsWorkspace");
+    await import("../../../components/marketing/ui/admin/channels/SalesChannelsWorkspace");
   let created: any;
   const request = vi.fn(async (path: string, body?: any) => {
     if (path.startsWith("/api/automation/channels/") && body) {

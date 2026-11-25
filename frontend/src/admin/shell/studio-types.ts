@@ -110,7 +110,8 @@ export type Preview = {
   catalogBefore: Product[];
   proposal: {
     navigation?:
-      import("../assistant/copilot-navigation").CopilotNavigation | null;
+      | import("../../../../components/intelligence/ui/admin/assistant/copilot-navigation").CopilotNavigation
+      | null;
     view?: {
       entity: "orders" | "customers" | "products";
       criteria: Record<string, string | boolean>;

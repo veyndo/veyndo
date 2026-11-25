@@ -2,9 +2,9 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { it, expect, vi } from "vitest";
-import AppConfiguredOrders from "../../src/admin/apps/AppConfiguredOrders";
+import AppConfiguredOrders from "../../../components/apps/ui/admin/apps/AppConfiguredOrders";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
-import type { Package } from "../../src/admin/apps/app-types";
+import type { Package } from "../../../components/apps/ui/admin/apps/app-types";
 it("keeps the current history page when loading another page fails", async () => {
   const page = vi
     .fn()

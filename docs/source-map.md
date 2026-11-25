@@ -396,7 +396,7 @@ extends the existing planner/approval owner; it is not another agent backend.
 **Personal workspace and standard-shop editor:** [Illustrated workflow, shared models, rights, history, forms and publication](personal-workspace-and-shop-design.md).
 
 **Guided shop setup:** [Six review steps, inline native company editing and local acceptance](shop-setup.md).
-`frontend/src/admin/setup/` owns the guide and return path, with its scoped
+`components/shop/ui/admin/setup/` owns the guide and return path, with its scoped
 `PRODUCT.md` brief retaining the existing Studio design. Its provider checks saved
 setup changes across tabs while preserving unrelated fresh workspace fields.
 `SetupBasics.tsx`
@@ -497,7 +497,7 @@ isolation, document and stock state effects; frontend tests exercise controls.
 
 ## Native POS
 
-`components/pos/src/service/register.rs` owns the cashier gateway shared by HTTP and MCP (cashier admission, register context, cart, payment, listing and workspace commands) behind the `Register` port of `components/pos/src/ports.rs`; `src/pos/register_host.rs` implements that port and `src/pos/gateway.rs` binds the routes. `src/pos/{config,schema,settlement}.rs` re-export the component contracts. Catalog/cart/currencies/promotions, `order_checkout.rs`, `checkout_review.rs`, inventory, payments, documents and outbox remain the commerce owners. `marketing/coupons.rs` retains the existing coupon handler with private-cart admission. The component `customer.rs` delegates to shared accounts with current PII admission; `discount.rs` delegates to native allocation/tax and transactional outbox. `operations/receipt_text.rs` exposes the same immutable invoice projection to the system printer. `frontend/src/admin/pos` owns the focus/scanner, customer, discount, printer and read-only advice workspace; app code stays in its own package. Real `pos.py`/`payment_providers.py` and UI regressions cover state effects. [Architecture, proof scope and limits](pos.md).
+`components/pos/src/service/register.rs` owns the cashier gateway shared by HTTP and MCP (cashier admission, register context, cart, payment, listing and workspace commands) behind the `Register` port of `components/pos/src/ports.rs`; `src/pos/register_host.rs` implements that port and `src/pos/gateway.rs` binds the routes. `src/pos/{config,schema,settlement}.rs` re-export the component contracts. Catalog/cart/currencies/promotions, `order_checkout.rs`, `checkout_review.rs`, inventory, payments, documents and outbox remain the commerce owners. `marketing/coupons.rs` retains the existing coupon handler with private-cart admission. The component `customer.rs` delegates to shared accounts with current PII admission; `discount.rs` delegates to native allocation/tax and transactional outbox. `operations/receipt_text.rs` exposes the same immutable invoice projection to the system printer. `components/pos/ui/admin/pos` owns the focus/scanner, customer, discount, printer and read-only advice workspace; app code stays in its own package. Real `pos.py`/`payment_providers.py` and UI regressions cover state effects. [Architecture, proof scope and limits](pos.md).
 
 ## Production foundations
 
@@ -620,6 +620,17 @@ See [international commerce](international-commerce.md) for the exact contract.
 
 ## Frontend
 
+`frontend/` builds one source tree. `frontend/src/` holds the entry, the Studio and
+storefront shells (`admin/shell`, `storefront/shell`, their global styles), the
+operator console, shared building blocks and the design `kit/`. Each component's
+screens live beside its Rust crate in `components/<name>/ui/admin/<area>` (Studio)
+and `components/<name>/ui/storefront/<area>`: orders, customers (and the buyer
+account), catalog (Studio and storefront), checkout, payments, pos, b2b, identity
+(team), shop (settings, setup, legal), marketing (channels, automation), apps (apps,
+developer), intelligence (agents, assistant, intelligence, scenarios, storefront
+analytics) and studio (dashboard, environments, preview, reports, workspace). The
+gates, type check, tests and coverage read both roots as one tree.
+
 | File/group | Responsibility | Verification |
 |---|---|---|
 | `application/ApplicationRouter.tsx` | Application routing and lazy entry recovery | Production typecheck/build; browser navigation |
@@ -703,7 +714,7 @@ Shopware compatibility claim is made.
 | `components/studio/src/http/product_editor.rs` | Revision-bound translations and advanced metadata; own product/reference validation | `marketing_accounts.py` and selected release |
 | `components/intelligence/src/http/experience.rs` | Persisted layout policy plus owned-session signal ranking/clearing | `intelligence.py`, `marketing_accounts.py` |
 | `frontend/src/admin/{developer,environments,storyfronts,automation,catalog}/` | Dedicated merchant workbench forms and review surfaces | Strict frontend build, actual browser review |
-| `frontend/src/storefront/account/CustomerAccount.tsx`, `admin/intelligence/KnowledgeSources.tsx`, `admin/intelligence/SourceEditor.tsx`, `storefront/catalog/ProductQuestion.tsx` | Customer account editing/history and private upload/cited shopper questions | Native HTTP suites and browser forms |
+| `components/customers/ui/storefront/account/CustomerAccount.tsx`, `admin/intelligence/KnowledgeSources.tsx`, `admin/intelligence/SourceEditor.tsx`, `storefront/catalog/ProductQuestion.tsx` | Customer account editing/history and private upload/cited shopper questions | Native HTTP suites and browser forms |
 | `frontend/src/shared/i18n/{workbench-i18n,errors-i18n}.ts`, `frontend/tests/locales.mjs` | Four-language typed vocabulary and exact/fallback errors | Locale parity/nonempty/error tests |
 | `deploy/*`, `scripts/prepare_vercel.py` | Self-hosted image/TLS network and credential-free Vercel API rewrite generation | Container build/start and Compose/static checks |
 
@@ -739,8 +750,8 @@ caches; this is not a machine/database cold-start or failover test.
 | `src/auth/{permissions,integrations,members,invitations,middleware}.rs` | Current named scopes and persisted workspace roles, hashed keys with bounded expiry or explicit personal-administrator no-expiry, immediate revocation and non-escalating delegation. Permission units and HTTP/MCP negative tests. |
 | `extensions/apps/paypal` (`veyndo-paypal` crate), `src/payments/{provider,storage,worker,routes}.rs` | Per-shop Sandbox/Live wallet configuration, pinned official attribution, durable jobs and pending-refund GET recovery. Local wire fixture `payments.py`; no live PSP proof. |
 | `frontend/src/shared/customer/`, `storefront/{account,checkout}/`, `admin/customers/` | Same four-language contact/address interactions in buyer account, checkout and merchant CRM. Strict frontend build, locale tests and browser review. |
-| `frontend/src/admin/orders/` | Direct eligible commands, same-job payment polling, immutable address/document views and event activity. |
-| `frontend/src/admin/settings/`, `frontend/src/admin/apps/` | Central configuration and issuer, app categories and individual package workspaces; operational layouts use the full available width. |
+| `components/orders/ui/admin/orders/` | Direct eligible commands, same-job payment polling, immutable address/document views and event activity. |
+| `components/shop/ui/admin/settings/`, `components/apps/ui/admin/apps/` | Central configuration and issuer, app categories and individual package workspaces; operational layouts use the full available width. |
 | Migrations `016`–`021` | Operations/documents/assets, fine-key storage, state-machine/idempotency storage, explicit schema repair, customer IDs/addresses/default foreign keys and explicitly synthetic demo-address backfill. Applied entries remain immutable/checksummed. |
 
 The file guard verifies every Rust module's responsibility header (`main.rs`
@@ -770,7 +781,7 @@ reviewed bindings, not whole-module proofs. See the
 | `components/intelligence/src/knowledge.rs` | Private PostgreSQL source and product provenance, separated from public graph |
 | `components/intelligence/src/service/planner.rs` | Actual private-source model context and persisted task evidence |
 | `components/marketing/src/domain/{rules,rule_match,rule_fields,flow_steps}.rs`, `components/apps/src/service/flow_apps.rs`, `src/marketing/{app_flows,flows}.rs` | Condition schema, original comparison/facts, upstream import, app-aware durable flow execution |
-| `frontend/src/admin/apps/ConnectorPanel.tsx`, `admin/automation/{RuleBuilder,FlowBuilder}.tsx`, `extensions/apps/google-analytics/storefront/ShopAnalytics.tsx` | Multilingual app details, recursive graphical automation, consent and commerce events |
+| `components/apps/ui/admin/apps/ConnectorPanel.tsx`, `admin/automation/{RuleBuilder,FlowBuilder}.tsx`, `extensions/apps/google-analytics/storefront/ShopAnalytics.tsx` | Multilingual app details, recursive graphical automation, consent and commerce events |
 | `extensions/sdk/analytics.js` | Reusable consent-bound GA4 adapter for headless frontends |
 | `scripts/{connected_apps,connector_store_tests,rule_differential}.py` | Actual provider/model wire path, state fences and original PHP comparison regressions |
 
@@ -817,7 +828,7 @@ manifest fields and shared app records.
 | `marketing/{pipeline,pipeline_runtime,flow_actions,flow_mutations,flow_access}.rs` | DAG admission, branches/actions/delays, step receipts, actual domain writes and current rights | `scripts/automation.py` real HTTP/PostgreSQL checks; all original triggers/configurations and external exactly-once effects remain open |
 | `marketing/flow_jobs.rs` | Claims and attempt-scoped renewal, cursor checkpoint, delay and completion | Terminal delay, expired lease and stale attempt in `scripts/automation.py` |
 | `crates/flow-graph/src/execution.rs` | Typed directives and branch selection with borrowed data from the validated graph | Native pipeline consumes the directives. `scripts/services.py` exercises a separate worker restart during a delay. |
-| `frontend/src/admin/automation/*`, `shared/i18n/automation-*.ts` | Connected graph, typed localized rule/action editors and stable graph transformations | Four-language component tests, source payload round-trips, dangling-edge and JSON draft regressions |
+| `components/marketing/ui/admin/automation/*`, `shared/i18n/automation-*.ts` | Connected graph, typed localized rule/action editors and stable graph transformations | Four-language component tests, source payload round-trips, dangling-edge and JSON draft regressions |
 
 See [automation](automation.md) for the precise supported/disabled catalog and action mappings.
 
@@ -867,7 +878,7 @@ See [history boundaries](entity-history.md).
 
 ## Guided app extension path
 
-App assistants compile the shared Manifest in `frontend/src/admin/developer/assistant-model.ts`. Product/customer/order mounts reuse the native renderer with explicit object context. `components/apps/src/domain/entity_access.rs` owns field/context and direct-route scopes; `src/apps/planning.rs` filters merchant grounding and rechecks app proposal access at bind/apply. `src/apps/schedules.rs` and `webhooks.rs` persist emitted events/receipts via migration 036. `scripts/app_assistants.py` and `app_surfaces.py` exercise actual private stages, public/MCP boundaries, service fixtures, event/Flow writes, restart and scope rejection; frontend assistant tests cover editing and regional language inheritance. See [guide and upstream extension requirements](app-assistants.md).
+App assistants compile the shared Manifest in `components/apps/ui/admin/developer/assistant-model.ts`. Product/customer/order mounts reuse the native renderer with explicit object context. `components/apps/src/domain/entity_access.rs` owns field/context and direct-route scopes; `src/apps/planning.rs` filters merchant grounding and rechecks app proposal access at bind/apply. `src/apps/schedules.rs` and `webhooks.rs` persist emitted events/receipts via migration 036. `scripts/app_assistants.py` and `app_surfaces.py` exercise actual private stages, public/MCP boundaries, service fixtures, event/Flow writes, restart and scope rejection; frontend assistant tests cover editing and regional language inheritance. See [guide and upstream extension requirements](app-assistants.md).
 
 ## Platform control plane
 
@@ -890,7 +901,7 @@ App assistants compile the shared Manifest in `frontend/src/admin/developer/assi
 - `src/storefront_pages.rs`: direct product URL HTML admission using existing tenant/channel policy.
 - `src/storefront_islands.rs`: server-side storefront-kit props (buy box island for admitted product pages, product cards for listings) from Store API answers.
 - `src/mcp/storefront_views.rs`: the storefront-kit MCP App view (`ui://veyndo/kit/storefront`), its tool links and the part payload of catalog tool results.
-- `frontend/src/storefront/catalog/product-url.ts`: localized product URLs, legacy SKU routes and collection navigation.
+- `components/catalog/ui/storefront/catalog/product-url.ts`: localized product URLs, legacy SKU routes and collection navigation.
 
 ## European operation
 
@@ -978,7 +989,7 @@ and foreign-context rejection. These are rebuildable indexes, not another source
 registry. See [the performance and migration boundary](cognitive-commerce.md#lexical-candidates-under-forced-row-security).
 
 - `src/apps/ontology.rs`: validated namespaced app-node/edge metadata and bounded projections of current authorized native records; no second graph fact store.
-- `frontend/src/admin/developer/AppOntology.tsx`: shared-language mapping controls over the exact human/agent app manifest.
+- `components/apps/ui/admin/developer/AppOntology.tsx`: shared-language mapping controls over the exact human/agent app manifest.
 - `scripts/app_ontology.py`: real API/MCP tenant, permission, reference and revision regression.
 
 ### Checkout continuity source owners
@@ -987,7 +998,7 @@ registry. See [the performance and migration boundary](cognitive-commerce.md#lex
 | --- | --- | --- |
 | `components/checkout/src/store/product_snapshot.rs` | Locked localized product/variant order snapshots using the catalog inheritance helper | `scripts/checkout_handoff.py` German variant and immutable label checks |
 | `src/checkout_page.rs` | Exact registered tenant/channel origin framing admission | Same suite: foreign origin, tenant, channel and invalid origin rejection |
-| `frontend/src/storefront/checkout/embedded-checkout.ts` | Exact-origin shopper completion and close messages | Frontend embedded-checkout unit tests |
+| `components/checkout/ui/storefront/checkout/embedded-checkout.ts` | Exact-origin shopper completion and close messages | Frontend embedded-checkout unit tests |
 | Private original Storyfront bag and runtime client | Verify completed Core cart; remove only purchased quantities once; keep cancellation intact | Original cart-store and rust-commerce tests, live acceptance recorded separately |
 
 App generation edits are adapted by `src/developer/generation_edits.rs` as bounded JSON Patch into the existing Manifest; `generation_contract.rs` and `builds.rs` remain the storage/access and validation owners.
@@ -1100,7 +1111,7 @@ See the [illustrated workbench guide](app-studio-workspace.md) for multiple plac
 `extensions/apps/catalog-import/` owns provider parsers and read-only Shop MCP
 egress; the native catalogue intake (`components/intelligence/src/service/catalog_intake.rs`
 behind `IntakeHost`) owns review, private save and release.
-`frontend/src/admin/channels/AgenticChannels.tsx` owns readiness presentation,
+`components/marketing/ui/admin/channels/AgenticChannels.tsx` owns readiness presentation,
 and `frontend/src/storefront/shell/storefront-actions.ts` shares actual UI and
 optional browser-agent cart commands. [Workflow and boundaries](agentic-commerce.md).
 
@@ -1118,7 +1129,7 @@ and credential-revision fences. Shopware 6 extraction/normalization stays in
 `src/studio/reports.rs` owns HTTP/MCP admission; `components/studio/src/store/reports.rs` the snapshot composition and traffic read;
 `components/studio/src/domain/{report_config,report_period}.rs` owns typed preferences, calendar
 bounds and reuse of native consent eligibility. Bundled SQL aggregates native
-orders/payment attempts without another ledger. `frontend/src/admin/reports/`
+orders/payment attempts without another ledger. `components/studio/ui/admin/reports/`
 is shared by Shop today and personal workspace areas. Existing private workspace
 CAS/history stores presentation choices only. `merchant_reports` tests real
 native checkout/POS, consent, current rights, isolation and historical fixtures.
@@ -1140,5 +1151,5 @@ now dispatches through bounded files matching the existing seven policy domains.
 `components/payments/src/domain/{catalog,details_model,details_model/tests}.rs` own the provider-neutral
 read contract and safe durable history projection. `remote.rs` omits customer/order
 payloads for inspection. Provider protocol and fee extraction remain in the private
-Rust payment service. `frontend/src/admin/payments/PaymentDetails` is shared by
+Rust payment service. `components/payments/ui/admin/payments/PaymentDetails` is shared by
 orders and payment management. [Usage](payment-transaction-details.md).

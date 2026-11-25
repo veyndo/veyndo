@@ -2,8 +2,8 @@
 import { render, screen, fireEvent, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { expect, it, vi } from "vitest";
-import AppAssistant from "../../src/admin/developer/AppAssistant";
-import { placements } from "../../src/admin/developer/assistant-model";
+import AppAssistant from "../../../components/apps/ui/admin/developer/AppAssistant";
+import { placements } from "../../../components/apps/ui/admin/developer/assistant-model";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
 import { ContentLanguage } from "../../src/shared/i18n/ContentLanguage";
 const wrapper = ({ children }: { children: React.ReactNode }) => (

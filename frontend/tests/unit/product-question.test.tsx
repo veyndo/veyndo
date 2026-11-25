@@ -2,7 +2,7 @@
 import { render, screen, waitFor, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { expect, it, vi } from "vitest";
-import ProductQuestion from "../../src/storefront/catalog/ProductQuestion";
+import ProductQuestion from "../../../components/catalog/ui/storefront/catalog/ProductQuestion";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
 const answer = {
   answer: "Fixture: steel housing",

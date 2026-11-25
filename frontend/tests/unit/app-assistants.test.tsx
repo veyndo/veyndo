@@ -2,12 +2,12 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { expect, it, vi } from "vitest";
-import SandboxContextPicker from "../../src/admin/developer/SandboxContextPicker";
-import AppAssistant from "../../src/admin/developer/AppAssistant";
+import SandboxContextPicker from "../../../components/apps/ui/admin/developer/SandboxContextPicker";
+import AppAssistant from "../../../components/apps/ui/admin/developer/AppAssistant";
 import { readFileSync } from "node:fs";
 import AppActionAccess, {
   appScopes,
-} from "../../src/admin/developer/AppActionAccess";
+} from "../../../components/apps/ui/admin/developer/AppActionAccess";
 import NativeAppView from "../../src/shared/apps/native/NativeAppView";
 import { ContentLanguage } from "../../src/shared/i18n/ContentLanguage";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
@@ -15,8 +15,8 @@ import {
   appKinds,
   assistedManifest,
   type AppKind,
-} from "../../src/admin/developer/assistant-model";
-import { compile } from "../../src/admin/developer/app-model";
+} from "../../../components/apps/ui/admin/developer/assistant-model";
+import { compile } from "../../../components/apps/ui/admin/developer/app-model";
 const draft = (kind: AppKind = "admin", location = "admin.product.tab") =>
   assistedManifest({
     kind,

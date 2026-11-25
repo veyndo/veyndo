@@ -3,7 +3,14 @@ import react from "@vitejs/plugin-react";
 export default defineConfig({
   plugins: [react()],
   resolve: {
-    dedupe: ["react", "react-dom"],
+    // Component UI folders (components/*/ui) resolve packages from this frontend.
+    dedupe: [
+      "react",
+      "react-dom",
+      "zod",
+      "@veyndo/sdk",
+      "@openuidev/react-lang",
+    ],
     alias: {
       "three/examples/jsm/libs/meshopt_decoder.module.js": new URL(
         "./src/shared/media/model-decoder-disabled.ts",

@@ -1,7 +1,7 @@
 /** Review and confirm an app-linked variant using the current native cart. */
 import { useRef, useState } from "react";
 import { shopApi, type Detail } from "../../shared/api/shop-api";
-import { productURL } from "../catalog/product-url";
+import { productURL } from "../../../../components/catalog/ui/storefront/catalog/product-url";
 import { useStorefront } from "./StorefrontContext";
 import { conversationPurchaseText as text } from "./conversation-purchase-i18n";
 import "../styles/conversation-purchase.css";

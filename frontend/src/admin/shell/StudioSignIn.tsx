@@ -9,7 +9,7 @@ import { useConnectedText } from "../../shared/i18n/connected-i18n";
 import { locales } from "../../shared/i18n/i18n";
 import PersonalAccountForm, {
   type AccountMode,
-} from "../team/PersonalAccountForm";
+} from "../../../../components/identity/ui/admin/team/PersonalAccountForm";
 import AuthenticationChallenge from "../../shared/auth/AuthenticationChallenge";
 import type { useStudioAccess } from "./useStudioAccess";
 import "../styles/studio-sign-in.css";

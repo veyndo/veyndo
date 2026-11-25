@@ -7,7 +7,7 @@ import {
   waitFor,
 } from "@testing-library/react";
 import { it, expect, vi } from "vitest";
-import EnvironmentManager from "../../src/admin/environments/EnvironmentManager";
+import EnvironmentManager from "../../../components/studio/ui/admin/environments/EnvironmentManager";
 it("opens release review for the active editor sandbox", async () => {
   const request = vi.fn(async (path: string) =>
     path.endsWith("/diff") ? { changes: [] } : { releases: [] },

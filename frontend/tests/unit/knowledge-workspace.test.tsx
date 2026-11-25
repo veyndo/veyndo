@@ -3,16 +3,16 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { it, expect, vi } from "vitest";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
-import { KnowledgeView } from "../../src/admin/intelligence/KnowledgeView";
-import KnowledgeSources from "../../src/admin/intelligence/KnowledgeSources";
-import SourceEditor from "../../src/admin/intelligence/SourceEditor";
-import KnowledgeExplorer from "../../src/admin/intelligence/KnowledgeExplorer";
-import KnowledgePreview from "../../src/admin/intelligence/KnowledgePreview";
-import MemoryView from "../../src/admin/intelligence/MemoryView";
+import { KnowledgeView } from "../../../components/intelligence/ui/admin/intelligence/KnowledgeView";
+import KnowledgeSources from "../../../components/intelligence/ui/admin/intelligence/KnowledgeSources";
+import SourceEditor from "../../../components/intelligence/ui/admin/intelligence/SourceEditor";
+import KnowledgeExplorer from "../../../components/intelligence/ui/admin/intelligence/KnowledgeExplorer";
+import KnowledgePreview from "../../../components/intelligence/ui/admin/intelligence/KnowledgePreview";
+import MemoryView from "../../../components/intelligence/ui/admin/intelligence/MemoryView";
 import type {
   Workspace,
   SourceDetail,
-} from "../../src/admin/intelligence/knowledge-types";
+} from "../../../components/intelligence/ui/admin/intelligence/knowledge-types";
 import type { Product } from "../../src/admin/shell/studio-types";
 import { overview } from "./fixtures";
 import { knowledgeWords } from "../../src/shared/i18n/knowledge-i18n";

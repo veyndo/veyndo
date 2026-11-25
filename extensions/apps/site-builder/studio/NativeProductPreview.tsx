@@ -3,12 +3,12 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import type { RequestFn } from "../../../../frontend/src/shared/api/types";
 import type { Detail } from "../../../../frontend/src/shared/api/shop-api";
 import { useShopText } from "../../../../frontend/src/shared/i18n/shop-i18n";
-import ProductGallery from "../../../../frontend/src/storefront/catalog/ProductGallery";
-import ProductPurchase from "../../../../frontend/src/storefront/catalog/ProductPurchase";
-import ProductDetails from "../../../../frontend/src/storefront/catalog/ProductDetails";
-import ProductSafety from "../../../../frontend/src/storefront/legal/ProductSafety";
-import ProductQuestion from "../../../../frontend/src/storefront/catalog/ProductQuestion";
-import ProductReviews from "../../../../frontend/src/storefront/catalog/ProductReviews";
+import ProductGallery from "../../../../components/catalog/ui/storefront/catalog/ProductGallery";
+import ProductPurchase from "../../../../components/catalog/ui/storefront/catalog/ProductPurchase";
+import ProductDetails from "../../../../components/catalog/ui/storefront/catalog/ProductDetails";
+import ProductSafety from "../../../../components/shop/ui/storefront/legal/ProductSafety";
+import ProductQuestion from "../../../../components/catalog/ui/storefront/catalog/ProductQuestion";
+import ProductReviews from "../../../../components/catalog/ui/storefront/catalog/ProductReviews";
 import { useOverviewText } from "./overview-i18n";
 
 type Props = {

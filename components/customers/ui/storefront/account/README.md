@@ -1,0 +1,53 @@
+# Customer account workspace
+
+The native dialog gives shoppers seven connected views: overview, orders, addresses,
+downloads, personal details, security and company purchasing. Sign-in and account
+creation use distinct forms. The customer session is independent of Studio
+credentials and scoped to the shop. Hosted browser sessions use the native HttpOnly
+ledger; no newly issued bearer token is persisted in browser storage.
+
+The storefront's Business account entry opens this same dialog at company
+purchasing. Unsigned buyers first use their own sign-in form; the selected
+destination survives successful sign-in. My account opens the overview. Neither
+entry submits demo credentials, creates company membership or changes pricing.
+Company contexts, budgets, quote actions and approvals still require the customer's
+current native employee grants.
+
+| File                     | Responsibility                                                           |
+| ------------------------ | ------------------------------------------------------------------------ |
+| `CustomerAccount.tsx`    | Dialog, focus restoration, scroll lock and account navigation            |
+| `CustomerSignIn.tsx`     | Separate auth modes, autofill and cart context creation/rotation         |
+| `useCustomerAccount.ts`  | Parallel reads, guarded mutations, feedback and expired-session recovery |
+| `account-types.ts`       | Shopper-safe response contracts                                          |
+| `AccountOverview.tsx`    | Recent purchases, counts and default-address shortcuts                   |
+| `AccountOrderList.tsx`   | Clickable purchase cards                                                 |
+| `AccountOrderDetail.tsx` | Immutable purchase addresses, current statuses, tracking and receipts    |
+| `AccountDownloads.tsx`   | Paid entitlements and authenticated binary retrieval                     |
+| `AccountProfile.tsx`     | Contact/preferences and password rotation                                |
+| `account-polish.css`     | Brand-aware orientation panel and small-screen interaction refinements   |
+| `account.css`            | Dialog, navigation and responsive layout                                 |
+| `account-fields.css`     | Authentication and shared address/profile form controls                  |
+| `account-purchases.css`  | Purchase, delivery and document views                                    |
+
+Shared `AddressBook` supplies revision-checked create/edit/delete and independent
+billing/delivery defaults. All interface text lives in `shared/i18n/account-i18n.ts`
+and existing shared vocabularies, with English, German, French and Spanish support.
+Tracking links reuse the shared safe-URL renderer. Binary endpoints receive the
+customer credential in headers; never in URLs. Internal merchant notes are absent
+from account order responses.
+
+Component tests exercise actual `shopApi` requests, sign-in without an existing
+cart, registration, detail navigation, address defaults, PDF/download retrieval,
+unsafe links and expired-session recovery. The full Storefront composition also
+checks unsigned/signed business entry, explicit login, current session transport,
+cancel and return to the ordinary overview. `scripts/customer_accounts.py` checks
+real PostgreSQL ownership, immutable receipts and live delivery transitions.
+`developer_documents.py` additionally verifies paid digital entitlements and
+foreign/anonymous rejection. See [operations](../../../../../docs/merchant-operations.md)
+and [testing](../../../../../docs/testing.md) for boundaries and commands.
+
+`ShoppingPreferences.tsx` adds consent-bound private cart-context memory to the
+profile. It preserves unrelated graph nodes, defaults AI sharing off and exposes
+the same native revision/export/delete operations. `preference-i18n.ts` supplies
+translated controls; tests include denied consent, deletion after withdrawal and
+stale saves. This is not authenticated cross-device customer memory.

@@ -7,7 +7,7 @@ import {
   waitFor,
 } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import ShoppingPreferences from "../../src/storefront/account/ShoppingPreferences";
+import ShoppingPreferences from "../../../components/customers/ui/storefront/account/ShoppingPreferences";
 const state = vi.hoisted(() => ({
   allowed: true,
   request: vi.fn(),

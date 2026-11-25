@@ -3,8 +3,8 @@ import { act, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { expect, it, vi } from "vitest";
 import { LocaleScope } from "../../src/shared/i18n/i18n";
-import CreateWorkspace from "../../src/admin/team/CreateWorkspace";
-import UsersManager from "../../src/admin/team/UsersManager";
+import CreateWorkspace from "../../../components/identity/ui/admin/team/CreateWorkspace";
+import UsersManager from "../../../components/identity/ui/admin/team/UsersManager";
 import { session } from "./fixtures";
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <LocaleScope locale="en-GB">{children}</LocaleScope>

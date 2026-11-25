@@ -2,8 +2,8 @@
 import { cleanup, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, afterEach, expect, it, vi } from "vitest";
-import ScenarioComparison from "../../src/admin/scenarios/ScenarioComparison";
-import ScenarioStudio from "../../src/admin/scenarios/ScenarioStudio";
+import ScenarioComparison from "../../../components/intelligence/ui/admin/scenarios/ScenarioComparison";
+import ScenarioStudio from "../../../components/intelligence/ui/admin/scenarios/ScenarioStudio";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
 const studio = vi.hoisted(() => ({
   environment: "",

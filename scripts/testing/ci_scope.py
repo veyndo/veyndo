@@ -12,13 +12,13 @@ SENSITIVE_UI = (
     'frontend/src/shared/api/', 'frontend/src/shared/apps/',
     'frontend/src/shared/auth/', 'frontend/src/shared/customer/',
     'frontend/src/shared/geography/', 'frontend/src/admin/shell/',
-    'frontend/src/admin/team/', 'frontend/src/admin/environments/',
-    'frontend/src/admin/orders/', 'frontend/src/admin/pos/',
-    'frontend/src/admin/b2b/', 'frontend/src/admin/settings/',
-    'frontend/src/storefront/checkout/', 'frontend/src/storefront/accounts/',
-    'frontend/src/storefront/account/', 'frontend/src/storefront/customer/',
+    'components/identity/ui/admin/team/', 'components/studio/ui/admin/environments/',
+    'components/orders/ui/admin/orders/', 'components/pos/ui/admin/pos/',
+    'components/b2b/ui/admin/b2b/', 'components/shop/ui/admin/settings/',
+    'components/checkout/ui/storefront/checkout/', 'frontend/src/storefront/accounts/',
+    'components/customers/ui/storefront/account/', 'frontend/src/storefront/customer/',
     'frontend/src/storefront/cart/', 'frontend/src/storefront/shell/',
-    'frontend/src/storefront/legal/',
+    'components/shop/ui/storefront/legal/',
 )
 IMAGES = {'.png', '.jpg', '.jpeg', '.webp', '.gif', '.svg', '.ico', '.avif'}
 
@@ -48,6 +48,11 @@ def presentation(path):
     if path.startswith('frontend/public/'):
         return p.suffix in IMAGES
     parts = p.parts
+    # A component's UI folder (components/<name>/ui) is frontend source like frontend/src.
+    if len(parts) >= 4 and parts[0] == 'components' and parts[2] == 'ui':
+        if p.suffix == '.css':
+            return True
+        return p.suffix in {'.ts', '.tsx'} and not path.startswith(SENSITIVE_UI)
     return (len(parts) >= 5 and parts[:2] == ('extensions', 'apps')
             and parts[3] == 'studio' and p.suffix in {'.ts', '.tsx', '.css'})
 

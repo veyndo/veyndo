@@ -1,7 +1,7 @@
 /** A locale/request refresh during native image creation must reconcile the committed job without a second provider POST. */
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { expect, it, vi } from "vitest";
-import { useImageJob } from "../../src/admin/catalog/useImageJob";
+import { useImageJob } from "../../../components/catalog/ui/admin/catalog/useImageJob";
 it("reconciles a late create after the new request initially saw no job", async () => {
   let finish!: (v: unknown) => void,
     committed = false;

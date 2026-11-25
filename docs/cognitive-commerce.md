@@ -326,7 +326,7 @@ after validation or an authenticated cross-device memory implementation.
 | `src/cognition/experiments/`; migration 075 | Native assignment, preregistration and actual payment-ledger readout |
 | `src/cognition/preferences.rs`; existing privacy owner | Private graph, current consent, advice admission and erasure |
 | `components/catalog/src/{domain/graph_query,store/categories}.rs`, `store/category_listing.sql`; migration 077 | Native saved fact-category predicates, source admission and existing catalog consumer |
-| `frontend/src/admin/intelligence/`, storefront account and shared i18n/API | Multilingual editors and native request transport |
+| `components/intelligence/ui/admin/intelligence/`, storefront account and shared i18n/API | Multilingual editors and native request transport |
 
 Registered verification includes `users`, `providers`, `knowledge_workspace`,
 `cognitive_experiments`, `managed_search` and `tenant_isolation`. Providers use local

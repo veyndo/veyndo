@@ -4,7 +4,7 @@ import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, expect, it, vi } from "vitest";
 import AgenticGrid from "../../src/shared/grid/AgenticGrid";
-import CustomerDirectory from "../../src/admin/customers/CustomerDirectory";
+import CustomerDirectory from "../../../components/customers/ui/admin/customers/CustomerDirectory";
 import { useGridPage } from "../../src/shared/grid/useGridPage";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
 import type { GridCriteria } from "../../src/shared/grid/types";

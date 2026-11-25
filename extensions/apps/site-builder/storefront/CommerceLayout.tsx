@@ -3,7 +3,7 @@ import { Fragment, useContext, type ReactNode } from "react";
 import { getContentLocale } from "../../../../frontend/src/shared/api/shop-api";
 import { useAppRegistry } from "../../../../frontend/src/shared/apps/AppSurfaces";
 import { StorefrontContext } from "../../../../frontend/src/storefront/shell/StorefrontContext";
-import { productURL } from "../../../../frontend/src/storefront/catalog/product-url";
+import { productURL } from "../../../../components/catalog/ui/storefront/catalog/product-url";
 import { inheritedTheme, explicitTheme } from "../model";
 import { commercePage, type CommerceLayout as Kind } from "../commerce-layout";
 import { usePublishedSite } from "./PublishedSite";

@@ -1,9 +1,9 @@
 /** Studio composition root: layout, scoped controller and modular workspace views. */
 import { forApps } from "../../shared/api/types";
 import { Button } from "../../kit/ui";
-import { SetupProvider } from "../setup/SetupProvider";
-import SetupBanner from "../setup/SetupBanner";
-import WorkspacePinBridge from "../workspace/WorkspacePinBridge";
+import { SetupProvider } from "../../../../components/shop/ui/admin/setup/SetupProvider";
+import SetupBanner from "../../../../components/shop/ui/admin/setup/SetupBanner";
+import WorkspacePinBridge from "../../../../components/studio/ui/admin/workspace/WorkspacePinBridge";
 import { Suspense } from "react";
 
 import { AppSurfaceProvider } from "../../shared/apps/AppSurfaces";
@@ -11,17 +11,17 @@ import { QueryProvider } from "../../kit/query";
 import "../../shared/styles/workbench.css";
 import Icon from "../../shared/ui/Icon";
 import WorkspaceBoundary from "../../shared/ui/WorkspaceBoundary";
-import SettingsDialog from "../assistant/SettingsDialog";
-import PreviewDialog from "../preview/PreviewDialog";
+import SettingsDialog from "../../../../components/intelligence/ui/admin/assistant/SettingsDialog";
+import PreviewDialog from "../../../../components/studio/ui/admin/preview/PreviewDialog";
 import "../styles/operations.css";
 import "../styles/studio.css";
 import "../styles/forms.css";
 import "../styles/workspace-polish.css";
 import "../styles/assistant-layout.css";
-import { PreviewPanel } from "../preview/PreviewPanel";
+import { PreviewPanel } from "../../../../components/studio/ui/admin/preview/PreviewPanel";
 
 import { StudioContext } from "./StudioContext";
-import WorkspaceCopilot from "../assistant/WorkspaceCopilot";
+import WorkspaceCopilot from "../../../../components/intelligence/ui/admin/assistant/WorkspaceCopilot";
 import "../styles/workspace-copilot.css";
 import StudioHeader from "./StudioHeader";
 import StudioSignIn from "./StudioSignIn";

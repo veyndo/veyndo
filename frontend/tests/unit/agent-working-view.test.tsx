@@ -1,7 +1,7 @@
 /** Composed work surfaces display the real native directory, preserve route bindings and pin only presentation. */
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { expect, it, vi } from "vitest";
-import AgentWorkSurface from "../../src/admin/workspace/AgentWorkSurface";
+import AgentWorkSurface from "../../../components/studio/ui/admin/workspace/AgentWorkSurface";
 import { StudioContext } from "../../src/admin/shell/StudioContext";
 import { LocaleScope } from "../../src/shared/i18n/i18n";
 

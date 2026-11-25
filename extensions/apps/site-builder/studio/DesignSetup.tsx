@@ -2,7 +2,7 @@
 import { Button } from "../../../../frontend/src/kit/ui";
 import { useEffect, useRef, useState } from "react";
 import type { RequestFn } from "../../../../frontend/src/shared/api/types";
-import AppConsent from "../../../../frontend/src/admin/apps/AppConsent";
+import AppConsent from "../../../../components/apps/ui/admin/apps/AppConsent";
 import Icon from "../../../../frontend/src/shared/ui/Icon";
 import { useSetupText } from "./setup-i18n";
 import "./setup.css";

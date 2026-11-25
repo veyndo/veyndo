@@ -5,7 +5,7 @@ import Icon from "../../shared/ui/Icon";
 import "../styles/operations.css";
 import "../styles/studio.css";
 import { canOpenStudio } from "./permissions";
-import { usePermissionText } from "../team/permission-i18n";
+import { usePermissionText } from "../../../../components/identity/ui/admin/team/permission-i18n";
 import StudioCommerceRoute from "./StudioCommerceRoute";
 import { useStudio } from "./StudioContext";
 import { studioRegistry } from "./registry/first-party";

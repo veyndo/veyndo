@@ -34,7 +34,7 @@ import {
   useControllable,
 } from "../../src/kit/ui";
 import { color, radius, space, tokens } from "../../src/kit/tokens";
-import UICatalogue from "../../src/admin/developer/catalogue/UICatalogue";
+import UICatalogue from "../../../components/apps/ui/admin/developer/catalogue/UICatalogue";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
 
 describe("primitives", () => {

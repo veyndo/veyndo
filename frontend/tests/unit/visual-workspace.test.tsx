@@ -10,16 +10,16 @@ import {
   act,
 } from "@testing-library/react";
 import { it, expect, vi } from "vitest";
-import AppInspector from "../../src/admin/developer/AppInspector";
-import AppCanvas from "../../src/admin/developer/AppCanvas";
+import AppInspector from "../../../components/apps/ui/admin/developer/AppInspector";
+import AppCanvas from "../../../components/apps/ui/admin/developer/AppCanvas";
 import VisualCanvas from "../../src/shared/canvas/VisualCanvas";
-import AppDesignWorkspace from "../../src/admin/developer/AppDesignWorkspace";
-import { template } from "../../src/admin/developer/app-model";
+import AppDesignWorkspace from "../../../components/apps/ui/admin/developer/AppDesignWorkspace";
+import { template } from "../../../components/apps/ui/admin/developer/app-model";
 import {
   useAppStudio,
   type AppStudio,
-} from "../../src/admin/developer/useAppStudio";
-import type { useAppPreview } from "../../src/admin/developer/useAppPreview";
+} from "../../../components/apps/ui/admin/developer/useAppStudio";
+import type { useAppPreview } from "../../../components/apps/ui/admin/developer/useAppPreview";
 import { LocaleScope } from "../../src/shared/i18n/i18n";
 import { ContentLanguage } from "../../src/shared/i18n/ContentLanguage";
 const wrapper = ({ children }: { children: React.ReactNode }) => (

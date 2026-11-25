@@ -1,5 +1,5 @@
 /** Reuse native package consent for migration and its private page-editor destination. */
-import AppConsent from "../../../../frontend/src/admin/apps/AppConsent";
+import AppConsent from "../../../../components/apps/ui/admin/apps/AppConsent";
 import type { RequestFn } from "../../../../frontend/src/shared/api/types";
 export default function InstallConsent({
   app,

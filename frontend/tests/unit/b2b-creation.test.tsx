@@ -3,7 +3,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { expect, it, vi } from "vitest";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
-import B2BWorkspace from "../../src/admin/b2b/B2BWorkspace";
+import B2BWorkspace from "../../../components/b2b/ui/admin/b2b/B2BWorkspace";
 vi.mock("../../src/shared/apps/AppSurfaces", () => ({
   AppSurfaceSlot: () => null,
 }));

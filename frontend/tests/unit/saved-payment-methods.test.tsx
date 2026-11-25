@@ -2,9 +2,9 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { it, expect, vi, beforeEach } from "vitest";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
-import SavedPaymentChoice from "../../src/storefront/checkout/SavedPaymentChoice";
-import SavedPaymentMethods from "../../src/storefront/account/SavedPaymentMethods";
-import SavedPaymentNotice from "../../src/storefront/checkout/SavedPaymentNotice";
+import SavedPaymentChoice from "../../../components/checkout/ui/storefront/checkout/SavedPaymentChoice";
+import SavedPaymentMethods from "../../../components/customers/ui/storefront/account/SavedPaymentMethods";
+import SavedPaymentNotice from "../../../components/checkout/ui/storefront/checkout/SavedPaymentNotice";
 import { cart } from "./fixtures";
 const api = vi.hoisted(() => vi.fn());
 vi.mock("../../src/shared/api/shop-api", () => ({ shopApi: api }));

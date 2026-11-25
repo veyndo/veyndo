@@ -1,6 +1,6 @@
 /** Saving a composed view persists presentation only through the existing actor-private CAS API. */
 import { expect, it, vi } from "vitest";
-import { pinWorkspaceView } from "../../src/admin/workspace/pin-workspace-view";
+import { pinWorkspaceView } from "../../../components/studio/ui/admin/workspace/pin-workspace-view";
 
 it("retains the component layout and safe filters without copied rows or personal search", async () => {
   const request = vi.fn(async (_path: string, body?: any) =>

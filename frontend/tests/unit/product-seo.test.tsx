@@ -3,12 +3,12 @@ import { useState } from "react";
 import { render, screen, within, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { expect, it, vi } from "vitest";
-import ProductSeo from "../../src/admin/catalog/ProductSeo";
-import ProductEditor from "../../src/admin/catalog/ProductEditor";
+import ProductSeo from "../../../components/catalog/ui/admin/catalog/ProductSeo";
+import ProductEditor from "../../../components/catalog/ui/admin/catalog/ProductEditor";
 import {
   newDraft,
   type ProductDraft,
-} from "../../src/admin/catalog/catalog-model";
+} from "../../../components/catalog/ui/admin/catalog/catalog-model";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
 import {
   productPath,

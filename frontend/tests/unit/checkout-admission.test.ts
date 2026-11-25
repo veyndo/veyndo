@@ -4,7 +4,7 @@ import {
   acceptCustomerSession,
   forgetCustomerSession,
 } from "../../src/shared/api/customer-session";
-import { placeCheckoutOrder } from "../../src/storefront/checkout/checkout-order";
+import { placeCheckoutOrder } from "../../../components/checkout/ui/storefront/checkout/checkout-order";
 import { cart } from "./fixtures";
 
 const tenant = "checkout-admission";

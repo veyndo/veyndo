@@ -4,10 +4,10 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { it, expect, vi } from "vitest";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
-import IntegrationKeys from "../../src/admin/developer/api/IntegrationKeys";
+import IntegrationKeys from "../../../components/apps/ui/admin/developer/api/IntegrationKeys";
 import ApiExplorer, {
   routePath,
-} from "../../src/admin/developer/api/ApiExplorer";
+} from "../../../components/apps/ui/admin/developer/api/ApiExplorer";
 it("creates a bounded explicit-scope key, shows it once and revokes only after confirmation", async () => {
   const user = userEvent.setup();
   let keys: any[] = [];

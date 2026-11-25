@@ -1,10 +1,10 @@
 /** The twin panel shows native readiness figures, links open steps to their owner and hides actions the role cannot use. */
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { expect, it, vi } from "vitest";
-import ScenarioTwin from "../../src/admin/scenarios/ScenarioTwin";
+import ScenarioTwin from "../../../components/intelligence/ui/admin/scenarios/ScenarioTwin";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
 import type { RequestFn } from "../../src/admin/shell/studio-types";
-import type { TwinReadiness } from "../../src/admin/scenarios/scenario-types";
+import type { TwinReadiness } from "../../../components/intelligence/ui/admin/scenarios/scenario-types";
 const twin = (change: Partial<TwinReadiness> = {}): TwinReadiness => ({
   sandbox: { id: "copy", name: "Winter copy" },
   catalogue: {

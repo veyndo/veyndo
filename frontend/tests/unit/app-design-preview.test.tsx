@@ -2,10 +2,10 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { expect, it, vi } from "vitest";
-import AppCanvas from "../../src/admin/developer/AppCanvas";
-import AppDesignPreview from "../../src/admin/developer/AppDesignPreview";
-import { appRecipe } from "../../src/admin/developer/app-recipes";
-import { controlIcons } from "../../src/admin/developer/app-visuals";
+import AppCanvas from "../../../components/apps/ui/admin/developer/AppCanvas";
+import AppDesignPreview from "../../../components/apps/ui/admin/developer/AppDesignPreview";
+import { appRecipe } from "../../../components/apps/ui/admin/developer/app-recipes";
+import { controlIcons } from "../../../components/apps/ui/admin/developer/app-visuals";
 import { LocaleProvider } from "../../src/shared/i18n/i18n";
 import { ContentLanguage } from "../../src/shared/i18n/ContentLanguage";
 import returns from "../../../extensions/apps/returns-workspace/manifest.json";
