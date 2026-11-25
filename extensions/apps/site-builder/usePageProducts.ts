@@ -2,9 +2,15 @@
 import { useEffect, useRef, useState } from "react";
 import type { Page } from "./model";
 import type { SiteProduct } from "./Renderer";
+import { partProducts } from "./site-parts";
 export function selectedProducts(page?: Page) {
   return [
-    ...new Set(page?.content.blocks.flatMap((block) => block.products) ?? []),
+    ...new Set(
+      page?.content.blocks.flatMap((block) => [
+        ...block.products,
+        ...partProducts(block),
+      ]) ?? [],
+    ),
   ].sort();
 }
 export default function usePageProducts<T extends SiteProduct>(

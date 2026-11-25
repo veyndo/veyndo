@@ -11,7 +11,14 @@ export type BlockKind =
   | "form"
   | "articles"
   | "app"
-  | "native";
+  | "native"
+  | "part";
+/** A storefront-kit part placed on a page: its contract id/version and builder configuration. */
+export type PartRef = {
+  id: string;
+  version: number;
+  config: Record<string, unknown>;
+};
 export type Block = {
   id: string;
   kind: BlockKind;
@@ -24,6 +31,7 @@ export type Block = {
   productMode?: "all" | "selected";
   fields: FormField[];
   extension?: { app: string; surface: string } | null;
+  part?: PartRef | null;
 };
 export type Theme = {
   accent?: string | null;

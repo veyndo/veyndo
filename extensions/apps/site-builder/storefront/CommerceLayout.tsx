@@ -46,7 +46,7 @@ export default function CommerceLayout({
         const product = products.find((p) => p.id === id);
         if (product) location.href = productURL(product);
       }}
-      onAdd={(id) => void add(id, 1)}
+      onAdd={(id, quantity = 1) => void add(id, quantity)}
     />
   );
 }

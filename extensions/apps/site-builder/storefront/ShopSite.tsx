@@ -122,9 +122,9 @@ export default function ShopSite({ fallback }: { fallback: ReactNode }) {
           const product = selection.products.find((p) => p.id === id);
           if (product) location.href = productURL(product);
         }}
-        onAdd={(id) => {
+        onAdd={(id, quantity = 1) => {
           const p = selection.products.find((p) => p.id === id);
-          if (p) void c.add(p.id, 1);
+          if (p) void c.add(p.id, quantity);
         }}
       />
     </main>

@@ -23,15 +23,26 @@ pub(super) fn validate(blocks: &[Block]) -> Result<()> {
             return Err(invalid(i, "id", "must be unique within this page"));
         }
         if ![
-            "hero", "text", "products", "image", "form", "articles", "app", "native",
+            "hero", "text", "products", "image", "form", "articles", "app", "native", "part",
         ]
         .contains(&b.kind.as_str())
         {
             return Err(invalid(
                 i,
                 "kind",
-                "use hero, text, products, image, form, articles, app or native",
+                "use hero, text, products, image, form, articles, app, native or part",
             ));
+        }
+        if (b.kind == "part") != b.part.is_some() {
+            return Err(invalid(
+                i,
+                "part",
+                "required only for kind=part; omit it for other kinds",
+            ));
+        }
+        if let Some(part) = &b.part {
+            super::part_schemas::validate(&part.id, part.version, &part.config)
+                .map_err(|(path, rule)| invalid(i, &path, &rule))?;
         }
         if (b.kind == "app") != b.extension.is_some() {
             return Err(invalid(
