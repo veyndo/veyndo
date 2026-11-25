@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE customers SET automation=$1 WHERE tenant=$2 AND email=$3",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Jsonb",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "35bc86d4071982066eacab6b83866fc5883548114962ad32f447ec0624e089e3"
+}

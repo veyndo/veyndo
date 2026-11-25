@@ -1,0 +1,30 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT version::text AS \"version!\",CASE WHEN version::text IS DISTINCT FROM $1 THEN (SELECT coalesce(jsonb_agg(to_jsonb(l) ORDER BY locale),'[]'::jsonb) FROM (SELECT id,locale,parent_id FROM languages) l) END AS data FROM read_context_versions WHERE namespace='languages'",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "version!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "data",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      null,
+      null
+    ]
+  },
+  "hash": "1ecb15f35283b70797d2c7961065770c854e3aad83735331253e4a3ca5650d2b"
+}

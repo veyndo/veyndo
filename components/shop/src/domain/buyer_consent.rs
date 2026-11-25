@@ -2,20 +2,65 @@
 use crate::types::cart::StoredCart;
 use serde::Deserialize;
 use serde_json::{Value, json};
+use std::collections::HashMap;
 use veyndo_core::document::{lenient, view};
 use veyndo_core::{Result, bad};
+/// The buyer contact and marketing consent fields the check reads.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct Buyer {
+    consent: Consents,
+    #[serde(deserialize_with = "lenient")]
+    email: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    phone_number: Option<String>,
+}
+
+/// The buyer's consent decisions by consent ID.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct Consents {
+    #[serde(rename = "dev.ucp.consent.marketing", deserialize_with = "lenient")]
+    marketing: Marketing,
+}
+
+/// The marketing consent with its per-segment decisions.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct Marketing {
+    #[serde(deserialize_with = "lenient")]
+    granted: Option<bool>,
+    #[serde(deserialize_with = "lenient")]
+    segments: HashMap<String, Value>,
+}
+
+/// One segment's decision.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct Segment {
+    #[serde(deserialize_with = "lenient")]
+    granted: Option<bool>,
+}
+
+/// Whether a granted marketing segment (or the whole consent) lacks the contact it needs.
 pub fn missing_contact(buyer: &Value) -> bool {
-    let marketing = &buyer["consent"]["dev.ucp.consent.marketing"];
+    missing(&view(buyer))
+}
+
+fn missing(buyer: &Buyer) -> bool {
+    let marketing = &buyer.consent.marketing;
     [
-        ("dev.ucp.consent.marketing.email", "email"),
-        ("dev.ucp.consent.marketing.sms", "phone_number"),
+        ("dev.ucp.consent.marketing.email", &buyer.email),
+        ("dev.ucp.consent.marketing.sms", &buyer.phone_number),
     ]
     .iter()
     .any(|(segment, contact)| {
-        let granted = marketing["segments"][*segment]["granted"]
-            .as_bool()
-            .unwrap_or(marketing["granted"] == true);
-        granted && buyer[*contact].as_str().is_none_or(|s| s.trim().is_empty())
+        let granted = marketing
+            .segments
+            .get(*segment)
+            .and_then(|s| view::<Segment>(s).granted)
+            .unwrap_or(marketing.granted == Some(true));
+        granted && contact.as_deref().is_none_or(|s| s.trim().is_empty())
     })
 }
 /// A buyer consent decision.
@@ -41,9 +86,9 @@ pub fn check(c: &StoredCart, receipt: &Value) -> Result<()> {
     if receipt.decided != Some(true) || receipt.choices.marketing != Some(true) {
         return Ok(());
     }
-    let mut buyer = c.data.buyer.clone().unwrap_or(json!({}));
+    let mut buyer: Buyer = view(&c.data.buyer.clone().unwrap_or(json!({})));
     if let Some(email) = c.data.email.as_ref().filter(|e| !e.is_empty()) {
-        buyer["email"] = json!(email);
+        buyer.email = Some(email.clone());
     }
     if let Some(address) = c
         .data
@@ -52,9 +97,9 @@ pub fn check(c: &StoredCart, receipt: &Value) -> Result<()> {
         .and_then(|s| s.address.as_ref())
         .filter(|a| !a.phone_number.is_empty())
     {
-        buyer["phone_number"] = json!(address.phone_number);
+        buyer.phone_number = Some(address.phone_number.clone());
     }
-    if missing_contact(&buyer) {
+    if missing(&buyer) {
         return Err(bad(
             "Consent contact data missing; enter the agreed email or phone, or withdraw marketing consent",
         ));

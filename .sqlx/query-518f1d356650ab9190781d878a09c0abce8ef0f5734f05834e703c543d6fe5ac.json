@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE customers SET first_login=coalesce(first_login,now()),last_login=now() WHERE tenant=$1 AND email=$2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "518f1d356650ab9190781d878a09c0abce8ef0f5734f05834e703c543d6fe5ac"
+}

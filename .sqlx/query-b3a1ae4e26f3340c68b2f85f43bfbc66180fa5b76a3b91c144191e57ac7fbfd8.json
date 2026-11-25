@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE customers SET last_payment_method_id=$1 WHERE tenant=$2 AND id=$3 AND active AND last_payment_method_id IS DISTINCT FROM $1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "b3a1ae4e26f3340c68b2f85f43bfbc66180fa5b76a3b91c144191e57ac7fbfd8"
+}

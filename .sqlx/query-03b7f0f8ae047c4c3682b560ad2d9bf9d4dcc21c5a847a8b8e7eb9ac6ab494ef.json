@@ -1,0 +1,20 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO customers(tenant,id,email,password_hash,profile,company,group_name,automation) VALUES($1,$2,$3,'!',$4,NULLIF($5,''),$6,$7) ON CONFLICT DO NOTHING",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text",
+        "Jsonb",
+        "Text",
+        "Text",
+        "Jsonb"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "03b7f0f8ae047c4c3682b560ad2d9bf9d4dcc21c5a847a8b8e7eb9ac6ab494ef"
+}

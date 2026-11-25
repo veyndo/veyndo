@@ -1,0 +1,40 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT daily_ai,revision FROM tenant_resource_limits WHERE tenant=$1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "daily_ai",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "tenant_resource_limits",
+            "name": "daily_ai"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "revision",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "tenant_resource_limits",
+            "name": "revision"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "1002f62f221ca3c82d1f38df2342bd1f0be699b4051a7bf2e290bc45dfbf9866"
+}

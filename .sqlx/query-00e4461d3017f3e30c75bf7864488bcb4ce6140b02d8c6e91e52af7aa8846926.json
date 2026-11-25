@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE customers SET revision=revision+1 WHERE tenant=$1 AND email=$2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "00e4461d3017f3e30c75bf7864488bcb4ce6140b02d8c6e91e52af7aa8846926"
+}

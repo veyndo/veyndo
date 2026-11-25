@@ -5,6 +5,7 @@ use serde_json::{Value, json};
 use sqlx::Row;
 use sqlx::postgres::PgRow;
 use std::collections::HashMap;
+use veyndo_core::document::{merge, view};
 use veyndo_core::{Result, bad};
 pub use veyndo_pricing::cart::Item;
 use veyndo_pricing::verified_kernel;
@@ -25,16 +26,41 @@ pub struct StoredCart {
 
 /// Hydrates a complete `carts` row; older stored shapes are upgraded on the way.
 pub fn stored(r: &PgRow) -> Result<StoredCart> {
-    let mut data: Value = r.get("data");
-    upgrade_cart(&mut data);
-    Ok(StoredCart {
+    CartRow {
         id: r.get("id"),
         tenant: r.get("tenant"),
         token: r.get("token"),
-        data: serde_json::from_value(data).map_err(|e| bad(e.to_string()))?,
+        data: r.get("data"),
         revision: r.get("revision"),
         status: r.get("status"),
-    })
+    }
+    .hydrate()
+}
+
+/// The columns of a `carts` row as a compile-checked query selects them (`SELECT id,tenant,token,data,revision,status`).
+pub struct CartRow {
+    pub id: String,
+    pub tenant: String,
+    pub token: String,
+    pub data: Value,
+    pub revision: i64,
+    pub status: String,
+}
+
+impl CartRow {
+    /// The stored cart; older stored shapes are upgraded on the way.
+    pub fn hydrate(self) -> Result<StoredCart> {
+        let mut data = self.data;
+        upgrade_cart(&mut data);
+        Ok(StoredCart {
+            id: self.id,
+            tenant: self.tenant,
+            token: self.token,
+            data: serde_json::from_value(data).map_err(|e| bad(e.to_string()))?,
+            revision: self.revision,
+            status: self.status,
+        })
+    }
 }
 
 /// The checkout choices of a cart; a cart without any starts from the defaults.
@@ -46,17 +72,29 @@ pub fn selection(c: &Cart) -> CheckoutSelection {
 
 /// Rewrites app configurations stored before apps were named, without touching anything else.
 pub fn upgrade_cart(data: &mut Value) {
-    if let Some(values) = data["app_configurations"].as_object_mut() {
-        for (product, value) in values {
-            if value.get("app").is_none() {
-                value["app"] = json!("engraving");
-                value["productId"] = json!(product);
-                value["fields"] = json!({"text":value["text"]});
-                value["entity"] = json!("rules");
-                value["record"] = json!("default");
-            }
+    let Some(values) = data
+        .get_mut("app_configurations")
+        .and_then(Value::as_object_mut)
+    else {
+        return;
+    };
+    for (product, value) in values {
+        if value.get("app").is_none() {
+            let legacy: LegacyConfiguration = view(value);
+            // A configuration without an app is null or an object, as indexing assumed; merge rejects anything else unchanged.
+            let _ = merge(
+                value,
+                json!({"app":"engraving","productId":product,"fields":{"text":legacy.text},"entity":"rules","record":"default"}),
+            );
         }
     }
+}
+
+/// The engraving text of an app configuration stored before apps were named.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct LegacyConfiguration {
+    text: Value,
 }
 
 /// A cashier's audited discount on a point-of-sale cart.

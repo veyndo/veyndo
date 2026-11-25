@@ -3,7 +3,6 @@ use crate::service::address_book::{self, Save};
 use crate::store::address_restore;
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
-use sqlx::Row;
 use veyndo_core::document::{lenient, view};
 use veyndo_core::shop_scope::header;
 use veyndo_core::{
@@ -30,6 +29,22 @@ struct Input {
     request_key: String,
 }
 
+/// The profile and automation data of a customer document, as sizes and restoration read them.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct Book {
+    profile: Value,
+    automation: Value,
+}
+
+/// The creation fingerprint and import source a CRM creation stores in the account's automation data.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct Automation {
+    admin_creation_fingerprint: Value,
+    import_source: Value,
+}
+
 /// Creates a contact without storefront credentials; the same request key returns the first result.
 pub async fn create(
     a: &State,
@@ -40,7 +55,7 @@ pub async fn create(
     source: Option<&Value>,
     conditions: Conditions<'_>,
 ) -> Result<Value> {
-    if v["profile"].to_string().len() > 4000 {
+    if view::<Book>(&v).profile.to_string().len() > 4000 {
         return Err(bad("Invalid customer profile"));
     }
     let mut input: Input = serde_json::from_value(v.clone())
@@ -98,28 +113,30 @@ pub async fn create(
             return Err(bad("Address country unavailable"));
         }
     }
-    if let Some(row) =
-        sqlx::query("SELECT email,automation FROM customers WHERE tenant=$1 AND id=$2")
-            .bind(t)
-            .bind(&id)
-            .fetch_optional(&mut *tx)
-            .await?
+    if let Some(row) = sqlx::query!(
+        "SELECT email,automation FROM customers WHERE tenant=$1 AND id=$2",
+        t,
+        id
+    )
+    .fetch_optional(&mut *tx)
+    .await?
     {
-        if row.get::<Value, _>("automation")["adminCreationFingerprint"] != fingerprint {
+        let automation: Automation = view(&row.automation);
+        if automation.admin_creation_fingerprint != fingerprint {
             return Err(conflict(
                 "Customer request key already used for different input",
             ));
         }
-        if source.is_some_and(|s| row.get::<Value, _>("automation")["importSource"] != *s) {
+        if source.is_some_and(|s| automation.import_source != *s) {
             return Err(conflict(
                 "Customer source snapshot changed; review an explicit update",
             ));
         }
-        return Ok(json!({"id":id,"email":row.get::<String,_>("email"),"created":true}));
+        return Ok(json!({"id":id,"email":row.email,"created":true}));
     }
     // An invalid credential hash cannot be used to sign in. Storefront access is not granted by a CRM creation.
-    let n = sqlx::query("INSERT INTO customers(tenant,id,email,password_hash,profile,company,group_name,automation) VALUES($1,$2,$3,'!',$4,NULLIF($5,''),$6,$7) ON CONFLICT DO NOTHING")
-        .bind(t).bind(&id).bind(&email).bind(json!(input.profile)).bind(&input.profile.company).bind(&input.customer_group).bind(json!({"adminCreationFingerprint":fingerprint,"importSource":source})).execute(&mut *tx).await?.rows_affected();
+    let n = sqlx::query!("INSERT INTO customers(tenant,id,email,password_hash,profile,company,group_name,automation) VALUES($1,$2,$3,'!',$4,NULLIF($5,''),$6,$7) ON CONFLICT DO NOTHING",
+        t, id, email, json!(input.profile), input.profile.company, input.customer_group, json!({"adminCreationFingerprint":fingerprint,"importSource":source})).execute(&mut *tx).await?.rows_affected();
     if n != 1 {
         return Err(conflict(
             "Customer already exists; select the existing customer",
@@ -254,11 +271,11 @@ pub async fn save(
     {
         return Err(bad("Unknown customer group"));
     }
-    let current: i64 = sqlx::query_scalar(
+    let current = sqlx::query_scalar!(
         "SELECT revision FROM customers WHERE tenant=$1 AND email=$2 FOR UPDATE",
+        t,
+        email
     )
-    .bind(t)
-    .bind(email)
     .fetch_optional(&mut *tx)
     .await?
     .ok_or(conflict("Customer changed or unavailable"))?;
@@ -268,21 +285,23 @@ pub async fn save(
     let mut contact: Contact = serde_json::from_value(e.profile.clone())
         .map_err(|_| bad("Invalid customer contact fields"))?;
     contact.validate()?;
-    let n=sqlx::query("UPDATE customers SET profile=$1,company=$2,group_name=$3,active=$4,revision=revision+1 WHERE tenant=$5 AND email=$6 AND revision=$7").bind(json!(contact)).bind(e.company).bind(&e.customer_group).bind(e.active).bind(t).bind(email).bind(e.revision).execute(&mut *tx).await?.rows_affected();
+    let n=sqlx::query!("UPDATE customers SET profile=$1,company=$2,group_name=$3,active=$4,revision=revision+1 WHERE tenant=$5 AND email=$6 AND revision=$7", json!(contact), e.company, e.customer_group, e.active, t, email, e.revision).execute(&mut *tx).await?.rows_affected();
     if n != 1 {
         return Err(conflict("Customer changed or unavailable"));
     }
     if let Some(book) = book {
-        let automation = &book["automation"];
+        let automation = &view::<Book>(&book).automation;
         if !automation.is_object() || automation.to_string().len() > 32768 {
             return Err(bad("Invalid customer automation data"));
         }
-        sqlx::query("UPDATE customers SET automation=$1 WHERE tenant=$2 AND email=$3")
-            .bind(automation)
-            .bind(t)
-            .bind(email)
-            .execute(&mut *tx)
-            .await?;
+        sqlx::query!(
+            "UPDATE customers SET automation=$1 WHERE tenant=$2 AND email=$3",
+            automation,
+            t,
+            email
+        )
+        .execute(&mut *tx)
+        .await?;
         address_restore::restore(&mut tx, t, email, &book, &|address| {
             validate_address(
                 &address.country,
@@ -296,19 +315,22 @@ pub async fn save(
         })
         .await?;
     }
-    let saved_revision: i64 =
-        sqlx::query_scalar("SELECT revision FROM customers WHERE tenant=$1 AND email=$2")
-            .bind(t)
-            .bind(email)
-            .fetch_one(&mut *tx)
-            .await?;
+    let saved_revision = sqlx::query_scalar!(
+        "SELECT revision FROM customers WHERE tenant=$1 AND email=$2",
+        t,
+        email
+    )
+    .fetch_one(&mut *tx)
+    .await?;
     // Access and group changes revoke sessions and invalidate all open privileged cart contexts.
-    sqlx::query("DELETE FROM customer_sessions WHERE tenant=$1 AND email=$2")
-        .bind(t)
-        .bind(email)
-        .execute(&mut *tx)
-        .await?;
-    sqlx::query("UPDATE carts SET token=md5(id||$1),data=jsonb_set(jsonb_set(jsonb_set(jsonb_set(data,'{email}','null'),'{customer_id}','null'),'{group}','\"consumer\"'),'{company}','null'),revision=revision+1 WHERE tenant=$2 AND data->>'email'=$3 AND status='open'").bind(uid()).bind(t).bind(email).execute(&mut *tx).await?;
+    sqlx::query!(
+        "DELETE FROM customer_sessions WHERE tenant=$1 AND email=$2",
+        t,
+        email
+    )
+    .execute(&mut *tx)
+    .await?;
+    sqlx::query!(r#"UPDATE carts SET token=md5(id||$1),data=jsonb_set(jsonb_set(jsonb_set(jsonb_set(data,'{email}','null'),'{customer_id}','null'),'{group}','"consumer"'),'{company}','null'),revision=revision+1 WHERE tenant=$2 AND data->>'email'=$3 AND status='open'"#, uid(), t, email).execute(&mut *tx).await?;
     veyndo_core::store::outbox::publish_on(&mut *tx, t, "customer.updated", &json!({"actor":header(h,"x-rac-user"),"email":email,"revision":saved_revision,"active":e.active})).await?;
     tx.commit().await?;
     Ok(json!({"saved":true,"revision":saved_revision}))

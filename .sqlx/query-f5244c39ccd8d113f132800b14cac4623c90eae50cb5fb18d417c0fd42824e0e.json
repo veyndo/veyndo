@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM customer_addresses WHERE tenant=$1 AND email=$2 AND NOT(id=ANY($3))",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "TextArray"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "f5244c39ccd8d113f132800b14cac4623c90eae50cb5fb18d417c0fd42824e0e"
+}

@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM customer_sessions WHERE tenant=$1 AND digest=$2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "5e9678cc22ce81fd7f05f30704cb1d121cf06bec8c819ee257d1a3a6f52e64e1"
+}

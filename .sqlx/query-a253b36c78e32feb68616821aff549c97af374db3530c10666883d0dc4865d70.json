@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT EXISTS(SELECT 1 FROM products p CROSS JOIN LATERAL jsonb_array_elements(p.advanced_prices) x WHERE tenant=$1 AND x->>'rule_id'=ANY($2)) AS \"price!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "price!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "TextArray"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "a253b36c78e32feb68616821aff549c97af374db3530c10666883d0dc4865d70"
+}

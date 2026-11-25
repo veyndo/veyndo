@@ -1,10 +1,13 @@
 //! Host-only customer cookies adapt the existing tenant session ledger without granting merchant authority.
+use crate::store::sessions;
 use axum::Json;
 use axum::body::{Body, to_bytes};
 use axum::extract::{Request, State};
 use axum::middleware::Next;
 use axum::response::{IntoResponse, Response};
+use serde::Deserialize;
 use serde_json::{Value, json};
+use veyndo_core::document::{lenient, merge, view};
 use veyndo_core::request_context::HostShop;
 use veyndo_core::shop_scope::{header, tenant};
 use veyndo_core::{Error, StatusCode, bad, hash};
@@ -161,26 +164,34 @@ pub async fn apply(
     let Ok(mut value) = serde_json::from_slice::<Value>(&bytes) else {
         return Response::from_parts(parts, Body::from(bytes));
     };
-    let issued = value["customerToken"].as_str().is_some();
+    let issued_token = view::<Issued>(&value).customer_token;
+    let issued = issued_token.is_some();
     if !issued && !using_cookie {
         return Response::from_parts(parts, Body::from(bytes));
     }
-    let candidate = value["customerToken"]
-        .as_str()
-        .map(str::to_owned)
-        .or(if using_cookie { cookie } else { supplied });
+    let candidate = issued_token.or(if using_cookie { cookie } else { supplied });
     let Some(candidate) =
         candidate.filter(|s| s.len() == 32 && s.bytes().all(|b| b.is_ascii_hexdigit()))
     else {
         return Response::from_parts(parts, Body::from(bytes));
     };
-    let valid=veyndo_runtime::tenant_scope::scoped(veyndo_runtime::tenant_scope::Scope::Tenant(t.clone()),sqlx::query_scalar::<_,bool>("SELECT EXISTS(SELECT 1 FROM customer_sessions s JOIN customers c ON c.tenant=s.tenant AND c.email=s.email WHERE s.tenant=$1 AND s.digest=$2 AND s.expires_at>now() AND c.active)").bind(&t).bind(hash(&candidate)).fetch_one(&a.db)).await;
+    let digest = hash(&candidate);
+    let valid = veyndo_runtime::tenant_scope::scoped(
+        veyndo_runtime::tenant_scope::Scope::Tenant(t.clone()),
+        sessions::valid(&a, &t, &digest),
+    )
+    .await;
     if !matches!(valid, Ok(true)) {
         return Error(StatusCode::UNAUTHORIZED, "Customer session expired".into()).into_response();
     }
-    value["customerToken"] = json!(MARKER);
-    value["customerBrowserSession"] = json!(true);
-    value["customerBrowserCsrf"] = json!(proof(&candidate, &t));
+    if merge(
+        &mut value,
+        json!({"customerToken":MARKER,"customerBrowserSession":true,"customerBrowserCsrf":proof(&candidate, &t)}),
+    )
+    .is_err()
+    {
+        return Response::from_parts(parts, Body::from(bytes));
+    }
     let mut response = Response::from_parts(parts, Body::from(value.to_string()));
     response.headers_mut().remove("content-length");
     if issued || !using_cookie {
@@ -191,4 +202,12 @@ pub async fn apply(
             .insert("cache-control", "no-store".parse().unwrap());
     }
     response
+}
+
+/// The customer token a sign-in or registration response issues.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct Issued {
+    #[serde(deserialize_with = "lenient")]
+    customer_token: Option<String>,
 }

@@ -4,6 +4,7 @@ use crate::domain::validation::{Conditions, validate};
 use crate::types::settings::Settings;
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
+use veyndo_core::document::{lenient, view};
 use veyndo_core::{Result, bad};
 
 #[derive(Clone, Deserialize, Serialize)]
@@ -13,13 +14,21 @@ struct Change {
     value: Value,
     remove: bool,
 }
+/// The stable ID of a keyed settings record.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct Keyed {
+    #[serde(deserialize_with = "lenient")]
+    id: Option<String>,
+}
+
 fn keyed(mut v: Value) -> Value {
     for key in ["shipping", "payments", "taxes"] {
         if let Some(array) = v[key].as_array() {
             v[key] = Value::Object(
                 array
                     .iter()
-                    .map(|v| (v["id"].as_str().unwrap_or("").into(), v.clone()))
+                    .map(|v| (view::<Keyed>(v).id.unwrap_or_default(), v.clone()))
                     .collect(),
             );
         }
@@ -105,13 +114,11 @@ pub fn resolve(base: &Settings, patch: Value, conditions: Conditions<'_>) -> Res
             .as_object()
             .ok_or(bad("Invalid override collection"))?;
         // Retain basis order, append channel-local records in deterministic ID order.
-        let basis = json!(base);
-        let ids = basis[key]
-            .as_array()
-            .unwrap()
-            .iter()
-            .filter_map(|v| v["id"].as_str())
-            .collect::<Vec<_>>();
+        let ids = match key {
+            "shipping" => base.shipping.iter().map(|m| m.id.as_str()).collect(),
+            "payments" => base.payments.iter().map(|m| m.id.as_str()).collect(),
+            _ => base.taxes.iter().map(|t| t.id.as_str()).collect::<Vec<_>>(),
+        };
         let mut records = ids
             .iter()
             .filter_map(|id| map.get(*id).cloned())

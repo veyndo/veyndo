@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT EXISTS(SELECT 1 FROM products WHERE tenant=$1 AND extra->>'taxClassId' IS NOT NULL AND NOT(extra->>'taxClassId'=ANY($2))) AS \"stranded!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "stranded!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "TextArray"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "18261b1515672aa3728bf5e49231a9c3b6eef5c389cae5f61aa4e6909d6116b0"
+}

@@ -1,0 +1,52 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT coalesce(data->'cart'->'price'->>'currency','EUR') AS \"currency!\", count(*) AS \"orders!\", coalesce(sum((data->'cart'->'price'->>'totalPrice')::numeric) FILTER(WHERE data->>'state' NOT IN ('cancelled','canceled')),0)::text AS \"booked!\", coalesce(sum((data->'cart'->'price'->>'totalPrice')::numeric) FILTER(WHERE data->'payment'->>'provider'='simulated' AND data->>'state' NOT IN ('cancelled','canceled')),0)::text AS \"simulated!\", coalesce(sum(CASE WHEN data#>>'{payment,capturedMinor}' IS NOT NULL THEN (data#>>'{payment,capturedMinor}')::numeric/power(10::numeric,coalesce((data#>>'{cart,price,currencyScale}')::int,2)) ELSE (data->'cart'->'price'->>'totalPrice')::numeric END) FILTER(WHERE data->'payment'->>'realMoneyCharged'='true' AND data->'payment'->>'state' IN ('captured','partially_captured','captured_late','partially_refunded','refunded')),0)::text AS \"captured!\" FROM orders o WHERE created_at>=current_date-($1::integer-1)*interval '1 day' AND NOT EXISTS(SELECT 1 FROM shop_environments e WHERE e.tenant=o.tenant) AND ($2::text IS NULL OR tenant=$2) GROUP BY 1 ORDER BY 1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "currency!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "orders!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "booked!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 3,
+        "name": "simulated!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 4,
+        "name": "captured!",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "cdea95e809c80634172c0dcbda647a4239604fdfc958179546c3937889a6ac74"
+}

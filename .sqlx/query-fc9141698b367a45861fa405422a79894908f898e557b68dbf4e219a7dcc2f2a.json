@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE customers SET profile=$1,company=NULLIF($2,''),revision=revision+1 WHERE tenant=$3 AND email=$4",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Jsonb",
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "fc9141698b367a45861fa405422a79894908f898e557b68dbf4e219a7dcc2f2a"
+}

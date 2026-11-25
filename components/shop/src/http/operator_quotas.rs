@@ -1,10 +1,10 @@
 //! Operator-only per-shop daily interactive AI limits, optimistic revisions and durable audit.
 use super::operator::actor;
+use crate::store::operator_control;
 use axum::Json;
 use axum::extract::{Path, State};
 use serde::Deserialize;
 use serde_json::{Value, json};
-use sqlx::Row;
 use veyndo_core::document::{lenient, view};
 use veyndo_core::{Error, RequestContext, Result, StatusCode, bad, conflict, validate_tenant};
 use veyndo_kernel::verified_kernel;
@@ -21,13 +21,10 @@ pub async fn get(
     if !exists {
         return Err(Error(StatusCode::NOT_FOUND, "Shop not found".into()));
     }
-    let r = sqlx::query("SELECT daily_ai,revision FROM tenant_resource_limits WHERE tenant=$1")
-        .bind(&id)
-        .fetch_optional(&a.db)
-        .await?;
-    let usage: Option<i64> = sqlx::query_scalar("SELECT attempts FROM tenant_ai_usage WHERE tenant=$1 AND day=(now() AT TIME ZONE 'UTC')::date").bind(&id).fetch_optional(&a.db).await?;
+    let r = operator_control::limit(&a, &id).await?;
+    let usage = operator_control::used_today(&a, &id).await?;
     Ok(Json(
-        json!({"tenant":id,"dailyAi":r.as_ref().map(|r|r.get::<i64,_>("daily_ai")),"revision":r.map(|r|r.get::<i64,_>("revision")).unwrap_or(1),"usedToday":usage.unwrap_or(0),"scope":"database / UTC day; interactive HTTP AI attempts","defaults":a.admission.snapshot()}),
+        json!({"tenant":id,"dailyAi":r.as_ref().map(|r|r.daily_ai),"revision":r.map(|r|r.revision).unwrap_or(1),"usedToday":usage.unwrap_or(0),"scope":"database / UTC day; interactive HTTP AI attempts","defaults":a.admission.snapshot()}),
     ))
 }
 /// The JSON fields `save` reads, typed as it reads them.
@@ -60,16 +57,19 @@ pub async fn save(
     veyndo_core::store::tenants::lock_if_exists(&mut *tx, &id)
         .await?
         .ok_or(Error(StatusCode::NOT_FOUND, "Shop not found".into()))?;
-    let current: Option<i64> =
-        sqlx::query_scalar("SELECT revision FROM tenant_resource_limits WHERE tenant=$1")
-            .bind(&id)
-            .fetch_optional(&mut *tx)
-            .await?;
+    let current = operator_control::limit_revision(&mut tx, &id).await?;
     if !verified_kernel::revision_admissible(current.unwrap_or(1) as u64, revision) {
         return Err(conflict("Quota revision changed"));
     }
-    sqlx::query("INSERT INTO tenant_resource_limits(tenant,daily_ai,revision) VALUES($1,$2,$3) ON CONFLICT(tenant) DO UPDATE SET daily_ai=excluded.daily_ai,revision=tenant_resource_limits.revision+1").bind(&id).bind(daily).bind(revision as i64+1).execute(&mut *tx).await?;
-    sqlx::query("INSERT INTO platform_audit(actor,action,tenant,data) VALUES($1,'shop.quota_changed',$2,$3)").bind(actor).bind(&id).bind(json!({"dailyAi":daily,"revision":revision+1})).execute(&mut *tx).await?;
+    operator_control::upsert_limit(&mut tx, &id, daily, revision as i64 + 1).await?;
+    operator_control::audit(
+        &mut tx,
+        actor,
+        "shop.quota_changed",
+        &id,
+        &json!({"dailyAi":daily,"revision":revision+1}),
+    )
+    .await?;
     tx.commit().await?;
     get(State(a), h, Path(id)).await
 }

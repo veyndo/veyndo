@@ -1,10 +1,10 @@
 //! The process-wide read cache of shop settings and the language registry. Every hit still probes the authoritative SQL version; mutations and checkout locks never read through it.
 use crate::domain::defaults::decode;
 use crate::domain::patch;
+use crate::store;
 use crate::types::settings::Settings;
 use serde::Deserialize;
 use serde_json::{Value, json};
-use sqlx::Row;
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::sync::atomic::{AtomicU64, Ordering};
@@ -138,28 +138,24 @@ pub async fn settings(a: &State, tenant: &str, channel: &str) -> Result<(Arc<Set
     };
     let known = cached.as_ref().map(|e| e.version.as_str());
     reads.probes.fetch_add(1, Ordering::Relaxed);
-    let row = sqlx::query(include_str!("read_cache_settings.sql"))
-        .bind(tenant)
-        .bind(channel)
-        .bind(known)
-        .fetch_optional(&a.db)
+    let row = store::settings::snapshot(a, tenant, channel, known)
         .await?
         .ok_or(Error(StatusCode::NOT_FOUND, "Workspace not found".into()))?;
-    if !row.get::<bool, _>("channel_exists") {
+    if !row.channel_exists {
         return Err(Error(
             StatusCode::NOT_FOUND,
             "Sales channel not found".into(),
         ));
     }
-    let version: String = row.get("version");
-    let revision: i64 = row.get("revision");
+    let version = row.version;
+    let revision = row.revision;
     let entry = if let Some(cached) = cached.filter(|e| e.version == version) {
         reads.hits.fetch_add(1, Ordering::Relaxed);
         cached
     } else {
         reads.loads.fetch_add(1, Ordering::Relaxed);
-        let base = decode(row.get("data"))?;
-        let overrides: Option<Value> = row.get("patch");
+        let base = decode(row.data.unwrap_or_default())?;
+        let overrides = row.patch;
         let value = if channel == "default" {
             base
         } else {
@@ -218,15 +214,15 @@ pub async fn languages(a: &State) -> Result<Arc<Vec<LanguageRow>>> {
         None
     };
     reads.probes.fetch_add(1, Ordering::Relaxed);
-    let row = sqlx::query("SELECT version::text AS version,CASE WHEN version::text IS DISTINCT FROM $1 THEN (SELECT coalesce(jsonb_agg(to_jsonb(l) ORDER BY locale),'[]'::jsonb) FROM (SELECT id,locale,parent_id FROM languages) l) END AS data FROM read_context_versions WHERE namespace='languages'")
-        .bind(cached.as_ref().map(|e| e.version.as_str())).fetch_one(&a.db).await?;
-    let version: String = row.get("version");
+    let row =
+        store::settings::language_registry(a, cached.as_ref().map(|e| e.version.as_str())).await?;
+    let version = row.version;
     let entry = if let Some(cached) = cached.filter(|e| e.version == version) {
         reads.hits.fetch_add(1, Ordering::Relaxed);
         cached
     } else {
         reads.loads.fetch_add(1, Ordering::Relaxed);
-        let data: Value = row.get("data");
+        let data = row.data.unwrap_or_default();
         let weight = data.to_string().len().saturating_mul(3);
         let rows = serde_json::from_value(data).map_err(|_| bad("Invalid language registry"))?;
         let entry = Arc::new(LanguageEntry {

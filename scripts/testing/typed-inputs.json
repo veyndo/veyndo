@@ -99,16 +99,6 @@
       "category": "in-place-edit"
     },
     {
-      "file": "components/customers/src/domain/profile.rs",
-      "function": "project_contacts",
-      "category": "keyed-lookup"
-    },
-    {
-      "file": "components/customers/src/service/directory.rs",
-      "function": "decorate",
-      "category": "in-place-edit"
-    },
-    {
       "file": "components/intelligence/src/service/platform_ai.rs",
       "function": "save",
       "category": "keyed-lookup"
@@ -167,16 +157,6 @@
       "file": "components/payments/src/store/settlements.rs",
       "function": "admit",
       "category": "attempt-context"
-    },
-    {
-      "file": "components/shop/src/domain/buyer_consent.rs",
-      "function": "missing_contact",
-      "category": "keyed-lookup"
-    },
-    {
-      "file": "components/shop/src/types/cart.rs",
-      "function": "upgrade_cart",
-      "category": "in-place-edit"
     },
     {
       "file": "components/studio/src/domain/history_access.rs",

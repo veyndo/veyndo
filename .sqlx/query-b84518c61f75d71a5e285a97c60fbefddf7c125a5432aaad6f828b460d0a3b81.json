@@ -1,0 +1,37 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT (SELECT count(*) FROM products WHERE tenant=$1) AS \"products!\",(SELECT count(*) FROM customers WHERE tenant=$1) AS \"customers!\",(SELECT count(*) FROM app_packages WHERE tenant=$1 AND active) AS \"apps!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "products!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "customers!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "apps!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "b84518c61f75d71a5e285a97c60fbefddf7c125a5432aaad6f828b460d0a3b81"
+}
