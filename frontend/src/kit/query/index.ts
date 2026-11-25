@@ -7,5 +7,6 @@ export {
   useMutation,
   useQueryCache,
   resetFallbackQueryCache,
+  useDebouncedValue,
 } from "./hooks";
 export type { QueryResult } from "./hooks";

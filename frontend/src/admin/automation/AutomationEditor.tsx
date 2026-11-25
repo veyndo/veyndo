@@ -1,4 +1,5 @@
 /** AutomationEditor: focused form view with explicit typed inputs and callbacks. */
+import { useRead } from "../shell/useRead";
 import { Button, Field, Select, TextInput } from "../../kit/ui";
 import { useAutomationText } from "../../shared/i18n/automation-i18n";
 import { channelUrl } from "../channels/channel-model";
@@ -8,7 +9,7 @@ import { useConnectedText } from "../../shared/i18n/connected-i18n";
 import { useWorkbenchText } from "../../shared/i18n/workbench-i18n";
 import { type Config, type Kind } from "./automation-types";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useContentLanguage } from "../../shared/i18n/ContentLanguage";
 import { contentText } from "../../shared/i18n/content-language";
 import LocalizedField from "../../shared/i18n/LocalizedField";
@@ -67,19 +68,10 @@ export default function AutomationEditor({
   const [checked, setChecked] = useState<string>();
   const draft = advanced.trim() || JSON.stringify(data);
   const draftKey = JSON.stringify([id, revision, draft]);
-  const [categories, setCategories] = useState<any[]>([]);
-  useEffect(() => {
-    let active = true;
-    if (kind === "channels")
-      request("/api/merchant/categories")
-        .then((v) => {
-          if (active) setCategories(v.elements);
-        })
-        .catch(() => {});
-    return () => {
-      active = false;
-    };
-  }, [kind, request]);
+  const categories: any[] =
+    useRead(request, "/api/merchant/categories", {
+      enabled: kind === "channels",
+    }).data?.elements ?? [];
   return (
     <form
       onSubmit={(e) => {

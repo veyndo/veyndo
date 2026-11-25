@@ -1,7 +1,9 @@
 /** Search the canonical merchant catalog; unit permissions persist through the native revision-bound catalog API. */
 import { Field, Notice, TextInput } from "../../kit/ui";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type { RequestFn } from "../../shared/api/types";
+import { useRead } from "../shell/useRead";
+import { useDebouncedValue } from "../../kit/query";
 import { useB2BText } from "../../shared/i18n/b2b-i18n";
 export default function UnitCatalog({
   request,
@@ -16,31 +18,14 @@ export default function UnitCatalog({
 }) {
   const t = useB2BText(),
     [query, setQuery] = useState(""),
-    [rows, setRows] = useState<
-      { id: string; name: string; productNumber?: string }[]
-    >([]),
-    [error, setError] = useState("");
-  useEffect(() => {
-    let active = true;
-    const timer = setTimeout(() => {
-      void request(
-        "/api/merchant/products?limit=20&search=" + encodeURIComponent(query),
-      )
-        .then((v) => {
-          if (active) {
-            setRows(v.elements);
-            setError("");
-          }
-        })
-        .catch((e) => {
-          if (active) setError(e.message);
-        });
-    }, 180);
-    return () => {
-      active = false;
-      clearTimeout(timer);
-    };
-  }, [request, query]);
+    search = useDebouncedValue(query, 180);
+  const products = useRead(
+    request,
+    "/api/merchant/products?limit=20&search=" + encodeURIComponent(search),
+  );
+  const rows: { id: string; name: string; productNumber?: string }[] =
+    products.data?.elements ?? [];
+  const error = (products.error as Error | undefined)?.message ?? "";
   return (
     <section className="b2b-catalog">
       <h3>{t("catalog")}</h3>

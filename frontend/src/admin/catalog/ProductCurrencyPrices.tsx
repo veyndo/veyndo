@@ -1,4 +1,5 @@
 /** Exact per-currency decimals live in the same revisioned product draft, including variants. */
+import { useRead } from "../shell/useRead";
 import { Button, Field, Notice, Select } from "../../kit/ui";
 import "../../shared/styles/currencies.css";
 import { convertDraftPrice } from "../../shared/money/fx-draft";
@@ -17,30 +18,24 @@ export default function ProductCurrencyPrices({
   request: RequestFn;
 }) {
   const { c, locale } = useCurrencyText();
-  const [definitions, setDefinitions] = useState<CurrencyDefinition[]>([]),
-    [selected, setSelected] = useState(""),
-    [error, setError] = useState("");
+  const [selected, setSelected] = useState("");
+  const currencies = useRead(request, "/store-api/currencies");
+  const list =
+    currencies.data?.configuredCurrencies ??
+    currencies.data?.availableCurrencies;
+  const definitions: CurrencyDefinition[] = Array.isArray(list) ? list : [];
+  const error =
+    (currencies.error as Error | undefined)?.message ??
+    (currencies.data && !Array.isArray(list) ? c("loading") : "");
+  // The first fixed-rate currency (else the default) is selected once loaded.
+  const loaded = currencies.data;
   useEffect(() => {
-    let active = true;
-    request("/store-api/currencies")
-      .then((v) => {
-        if (active) {
-          const list = v?.configuredCurrencies ?? v?.availableCurrencies;
-          if (!Array.isArray(list)) throw new Error(c("loading"));
-          setDefinitions(list);
-          setSelected(
-            list.find((d: CurrencyDefinition) => d.strategy === "fixed")
-              ?.code ?? v.defaultCurrency,
-          );
-        }
-      })
-      .catch((e) => {
-        if (active) setError(e.message);
-      });
-    return () => {
-      active = false;
-    };
-  }, [request]);
+    if (!loaded || !Array.isArray(list)) return;
+    setSelected(
+      list.find((d: CurrencyDefinition) => d.strategy === "fixed")?.code ??
+        loaded.defaultCurrency,
+    );
+  }, [loaded]);
   const prices = draft.extra.currencyPrices ?? {};
   const value = prices[selected];
   const patch = (field: string, text: string) => {

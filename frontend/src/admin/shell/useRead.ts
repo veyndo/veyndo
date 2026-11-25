@@ -5,15 +5,18 @@ import type { RequestFn } from "./studio-types";
 import { requestScope } from "./requests";
 
 /** The cache key of one read: tenant, path and (for POST reads) the body. */
+type Options = Parameters<RequestFn>[3];
 export const readKey = (
-  request: RequestFn,
+  request: RequestFn | undefined,
   path: string,
   body?: unknown,
+  options?: Options,
 ): QueryKey => [
   "read",
   requestScope(request),
   path,
   body === undefined ? null : JSON.stringify(body),
+  options === undefined ? null : JSON.stringify(options),
 ];
 
 /**
@@ -21,25 +24,33 @@ export const readKey = (
  * POST (for read operations exposed as POST). `path` null disables the read.
  */
 export function useRead<T = any>(
-  request: RequestFn,
+  request: RequestFn | undefined,
   path: string | null | undefined,
   {
     body,
+    options,
     enabled = true,
     staleMs,
     refetchMs,
   }: {
     body?: unknown;
+    /** Transport options such as the content locale; part of the cache key. */
+    options?: Options;
     enabled?: boolean;
     staleMs?: number;
     refetchMs?: number;
   } = {},
 ) {
   return useQuery<T>(
-    readKey(request, path ?? "", body),
+    readKey(request, path ?? "", body, options),
     // A body makes the transport send POST, exactly as a direct call would.
-    () => (body === undefined ? request(path!) : request(path!, body)),
-    { enabled: enabled && !!path, staleMs, refetchMs },
+    () =>
+      options !== undefined
+        ? request!(path!, body, undefined, options)
+        : body === undefined
+          ? request!(path!)
+          : request!(path!, body),
+    { enabled: enabled && !!path && !!request, staleMs, refetchMs },
   );
 }
 

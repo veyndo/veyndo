@@ -1,31 +1,21 @@
-/** Load the current shop's content-language context and ignore replies after the workspace changes. */
-import { useEffect, useState } from "react";
+/** The current shop's content-language context; a failed read reports its message once. */
+import { useEffect } from "react";
 import type { RequestFn } from "../shell/studio-types";
+import { useRead } from "../shell/useRead";
 
 export function useAutomationLanguages(
   request: RequestFn,
   onError: (message: string) => void,
 ) {
-  const [languages, setLanguages] = useState<{
-    locales: string[];
-    mainLocale: string;
-  } | null>(null);
+  const context = useRead(request, "/store-api/context");
+  const failure = (context.error as Error | undefined)?.message;
   useEffect(() => {
-    let active = true;
-    request("/store-api/context")
-      .then((value) => {
-        if (active)
-          setLanguages({
-            mainLocale: value.mainLocale,
-            locales: value.availableLocales,
-          });
-      })
-      .catch((error) => {
-        if (active) onError(error.message);
-      });
-    return () => {
-      active = false;
-    };
-  }, [request, onError]);
-  return languages;
+    if (failure) onError(failure);
+  }, [failure, onError]);
+  return context.data
+    ? {
+        mainLocale: context.data.mainLocale as string,
+        locales: context.data.availableLocales as string[],
+      }
+    : null;
 }

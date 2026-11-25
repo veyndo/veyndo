@@ -1,4 +1,5 @@
 /** Central catalog workspace uses shared server-paged grids, existing product editing and hierarchical categories. */
+import { useInvalidateRead, useRead } from "../shell/useRead";
 import { Button, Notice } from "../../kit/ui";
 import type { GridCriteria } from "../../shared/grid/types";
 import { lazy, useEffect, useState } from "react";
@@ -33,29 +34,15 @@ export default function ProductDataView({
   const { c } = useCatalogText();
   const preparation = usePreparationText();
   const [initialTab, setInitialTab] = useState("general");
-  const [mainLocale, setMainLocale] = useState("en-GB");
   const [view, setView] = useState("products"),
     [id, setId] = useState<string | null>(null),
-    [categories, setCategories] = useState<Category[]>([]),
-    [error, setError] = useState(""),
-    [reload, setReload] = useState(0);
+    categoryRead = useRead(request, "/api/merchant/categories"),
+    invalidate = useInvalidateRead(request);
+  const categories: Category[] = categoryRead.data?.elements ?? [];
+  const mainLocale: string = categoryRead.data?.mainLocale ?? "en-GB";
+  const error = (categoryRead.error as Error | undefined)?.message ?? "";
+  const refreshCategories = () => invalidate("/api/merchant/categories");
   useEffect(() => setId(initialId ?? null), [initialId]);
-  useEffect(() => {
-    let current = true;
-    request("/api/merchant/categories")
-      .then((v) => {
-        if (current) {
-          setCategories(v.elements);
-          setMainLocale(v.mainLocale ?? "en-GB");
-        }
-      })
-      .catch((e) => {
-        if (current) setError(e.message);
-      });
-    return () => {
-      current = false;
-    };
-  }, [request, reload]);
   if (id !== null)
     return (
       <ProductEditor
@@ -67,7 +54,7 @@ export default function ProductDataView({
         categories={categories}
         canWrite={canWrite}
         onBack={() => {
-          setReload((v) => v + 1);
+          refreshCategories();
           if (onEntityBack) onEntityBack();
           else setId(null);
         }}
@@ -133,7 +120,7 @@ export default function ProductDataView({
           request={request}
           categories={categories}
           canWrite={canWrite}
-          onRefresh={() => setReload((v) => v + 1)}
+          onRefresh={refreshCategories}
         />
       ) : (
         <CatalogDirectory

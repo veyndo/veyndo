@@ -1,12 +1,13 @@
 /** Bounded field-to-event mapping over the original native operations, never a second executor. */
 import { Card, Field, Notice, Select, TextInput } from "../../kit/ui";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   scalarFields,
   type WorkTemplate,
   type WorkStep,
 } from "./work-template";
 import type { RequestFn } from "../shell/studio-types";
+import { useRead } from "../shell/useRead";
 import { useWorkTemplateText } from "./work-template-i18n";
 export default function WorkTemplateEditor({
   value,
@@ -19,44 +20,28 @@ export default function WorkTemplateEditor({
 }) {
   const t = useWorkTemplateText();
   const [selected, setSelected] = useState<Record<number, string>>({});
-  const [loaded, setLoaded] = useState<{
-    id: string;
-    request: RequestFn;
-    steps?: WorkStep[];
-    error?: boolean;
-  }>();
   const taskId = value?.taskId;
-  useEffect(() => {
-    if (!request || !taskId) return;
-    let active = true;
-    void request(`/api/agent/runs/${encodeURIComponent(taskId)}`)
-      .then((run) => {
-        const steps =
-          run.state === "ready" &&
-          run.approvalRequired === false &&
-          run.execution?.total > 0 &&
-          run.execution.completed === run.execution.total
-            ? run.preview?.proposal?.operations
-            : undefined;
-        if (active)
-          setLoaded({
-            id: taskId,
-            request,
-            steps,
-            error: !Array.isArray(steps) || !steps.length,
-          });
-      })
-      .catch(() => {
-        if (active) setLoaded({ id: taskId, request, error: true });
-      });
-    return () => {
-      active = false;
-    };
-  }, [taskId, request]);
+  const run = useRead(
+    request,
+    taskId ? `/api/agent/runs/${encodeURIComponent(taskId)}` : null,
+  );
   if (!value) return <p>{t("empty")}</p>;
+  const runSteps: WorkStep[] | undefined =
+    run.data?.state === "ready" &&
+    run.data.approvalRequired === false &&
+    run.data.execution?.total > 0 &&
+    run.data.execution.completed === run.data.execution.total
+      ? run.data.preview?.proposal?.operations
+      : undefined;
   const current =
-    loaded && loaded.id === taskId && loaded.request === request
-      ? loaded
+    run.status === "success" || run.status === "error"
+      ? {
+          steps: runSteps,
+          error:
+            run.status === "error" ||
+            !Array.isArray(runSteps) ||
+            !runSteps.length,
+        }
       : undefined;
   if (!request || current?.error)
     return <Notice tone="danger">{t("unavailable")}</Notice>;

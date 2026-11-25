@@ -1,4 +1,5 @@
 /** Restore and reconcile native image jobs across request/locale changes; only explicit merchant actions create provider work. */
+import { useRead } from "../shell/useRead";
 import { useEffect, useRef, useState } from "react";
 import type { RequestFn } from "../shell/studio-types";
 export function useImageJob(
@@ -60,31 +61,21 @@ export function useImageJob(
     setBusy(true);
     void restore({ request, productId });
   }, [request, productId]);
+  // A queued or processing job is polled every two seconds until it settles.
+  const running = !!job && ["queued", "processing"].includes(job.state);
+  const polled = useRead(
+    request,
+    running ? `/api/merchant/media/jobs/${job.id}` : null,
+    { refetchMs: 2000 },
+  );
   useEffect(() => {
-    if (!job || !["queued", "processing"].includes(job.state)) return;
-    const scope = { request, productId };
-    let active = true,
-      polling = false;
-    const timer = setInterval(async () => {
-      if (polling) return;
-      polling = true;
-      try {
-        const result = await request(`/api/merchant/media/jobs/${job.id}`);
-        if (active && owns(scope)) {
-          setJob(result);
-          if (result.state === "failed") setError(failedText.current);
-        }
-      } catch (e) {
-        if (active && owns(scope)) setError((e as Error).message);
-      } finally {
-        polling = false;
-      }
-    }, 2000);
-    return () => {
-      active = false;
-      clearInterval(timer);
-    };
-  }, [request, productId, job?.id, job?.state]);
+    if (!running || !polled.data || polled.data.id !== job.id) return;
+    setJob(polled.data);
+    if (polled.data.state === "failed") setError(failedText.current);
+  }, [polled.data]);
+  useEffect(() => {
+    if (running && polled.error) setError((polled.error as Error).message);
+  }, [polled.error]);
   const mutate = async (
     path: string,
     payload: unknown,

@@ -1,4 +1,5 @@
 /** Native variant family browser with cursor pagination, explicit editing and a bounded creation wizard. */
+import { useInvalidateRead, useRead } from "../shell/useRead";
 import { Button, Notice } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import type { RequestFn } from "../shell/studio-types";
@@ -26,37 +27,23 @@ export default function ProductVariants({
 }) {
   const { c, money } = useCatalogText(),
     v = useVariantText();
-  const [items, setItems] = useState<any[]>([]),
-    [cursor, setCursor] = useState<string | null>(null),
-    [error, setError] = useState(""),
-    [busy, setBusy] = useState(false),
-    [reload, setReload] = useState(0);
-  useEffect(() => {
-    if (draft.catalog.parentId) return;
-    let active = true;
-    setItems([]);
-    setCursor(null);
-    setBusy(true);
-    setError("");
-    request(
-      `/api/merchant/products?limit=50&parentId=${encodeURIComponent(draft.id!)}`,
-    )
-      .then((result) => {
-        if (active) {
-          setItems(result.elements);
-          setCursor(result.nextCursor);
-        }
-      })
-      .catch((e) => {
-        if (active) setError(e.message);
-      })
-      .finally(() => {
-        if (active) setBusy(false);
-      });
-    return () => {
-      active = false;
-    };
-  }, [draft.id, draft.catalog.parentId, request, reload]);
+  const firstPath = `/api/merchant/products?limit=50&parentId=${encodeURIComponent(draft.id!)}`;
+  const first = useRead(request, draft.catalog.parentId ? null : firstPath);
+  const invalidate = useInvalidateRead(request);
+  // Later pages append to the first page until it is loaded again.
+  const [more, setMore] = useState<{ items: any[]; cursor: string | null }>();
+  useEffect(() => setMore(undefined), [first.data]);
+  const items: any[] = [
+    ...(first.data?.elements ?? []),
+    ...(more?.items ?? []),
+  ];
+  const cursor: string | null =
+    more?.cursor !== undefined ? more.cursor : (first.data?.nextCursor ?? null);
+  const [actionError, setError] = useState(""),
+    [paging, setBusy] = useState(false);
+  const busy = paging || first.status === "loading";
+  const error =
+    actionError || (first.error as Error | undefined)?.message || "";
   if (draft.catalog.parentId)
     return (
       <>
@@ -133,8 +120,10 @@ export default function ProductVariants({
               const result = await request(
                 `/api/merchant/products?limit=50&parentId=${encodeURIComponent(draft.id!)}&after=${encodeURIComponent(cursor)}`,
               );
-              setItems((old) => [...old, ...result.elements]);
-              setCursor(result.nextCursor);
+              setMore((old) => ({
+                items: [...(old?.items ?? []), ...result.elements],
+                cursor: result.nextCursor,
+              }));
             } catch (e) {
               setError((e as Error).message);
             } finally {
@@ -159,7 +148,7 @@ export default function ProductVariants({
             <VariantGenerator
               parent={draft}
               request={request}
-              onCreated={async () => setReload((n) => n + 1)}
+              onCreated={async () => invalidate(firstPath)}
             />
           </fieldset>
         </details>

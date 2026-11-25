@@ -11,7 +11,8 @@ let anonymous = 0;
  * The tenant of a request function. An unregistered function (a wrapper or a test
  * double) gets an identity of its own, so its reads are never shared with another.
  */
-export function requestScope(request: RequestFn) {
+export function requestScope(request: RequestFn | undefined) {
+  if (typeof request !== "function") return "";
   let scope = requestScopes.get(request);
   if (scope === undefined) {
     scope = `function:${++anonymous}`;

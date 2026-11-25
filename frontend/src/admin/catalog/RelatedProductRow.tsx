@@ -1,7 +1,7 @@
 /** A selected product resolves through the native merchant read; missing/forbidden records remain explicitly removable without losing the selection. */
+import { useRead } from "../shell/useRead";
 import { Button } from "../../kit/ui";
 import { mediaImage } from "../../shared/media/product-media";
-import { useEffect, useState } from "react";
 import type { RequestFn } from "../shell/studio-types";
 import { hydrateDraft, productName } from "./catalog-model";
 import Icon from "../../shared/ui/Icon";
@@ -25,54 +25,31 @@ export default function RelatedProductRow({
   onMove: (offset: number) => void;
   onRemove: () => void;
 }) {
-  const t = useRelatedProductsText(),
-    [loaded, setLoaded] = useState<{
-      request: RequestFn;
-      language: string;
-      name: string;
-      number: string;
-      image?: string;
-      active?: boolean;
-      failed?: boolean;
-    }>();
-  useEffect(() => {
-    let active = true;
-    request(
-      `/api/merchant/products/${encodeURIComponent(id)}`,
-      undefined,
-      undefined,
-      { locale: language },
-    )
-      .then((v) => {
-        if (active) {
-          const d = hydrateDraft(v);
-          setLoaded({
-            request,
-            language,
-            name: productName(d, language) || id,
-            number: d.catalog.productNumber,
-            image: mediaImage(d.commerce.media),
-            active: d.catalog.active,
-          });
+  const t = useRelatedProductsText();
+  const product = useRead(
+    request,
+    `/api/merchant/products/${encodeURIComponent(id)}`,
+    { options: { locale: language } },
+  );
+  const draft =
+    product.status === "success" ? hydrateDraft(product.data) : undefined;
+  const data:
+      | {
+          name: string;
+          number: string;
+          image?: string;
+          active?: boolean;
+          failed?: boolean;
         }
-      })
-      .catch(() => {
-        if (active)
-          setLoaded({
-            request,
-            language,
-            name: t("missing"),
-            number: id,
-            failed: true,
-          });
-      });
-    return () => {
-      active = false;
-    };
-  }, [id, request, language]);
-  const data =
-      loaded?.request === request && loaded.language === language
-        ? loaded
+      | undefined = draft
+      ? {
+          name: productName(draft, language) || id,
+          number: draft.catalog.productNumber,
+          image: mediaImage(draft.commerce.media),
+          active: draft.catalog.active,
+        }
+      : product.status === "error"
+        ? { name: t("missing"), number: id, failed: true }
         : undefined,
     name = data?.name ?? t("loading");
   return (

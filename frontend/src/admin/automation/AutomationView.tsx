@@ -16,11 +16,42 @@ import { type Config, type Kind } from "./automation-types";
 import AutomationEditor from "./AutomationEditor";
 import { type AutomationCatalog } from "./RuleBuilder";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { useWorkbenchText } from "../../shared/i18n/workbench-i18n";
 import FlowProposalReview from "./FlowProposalReview";
 import type { RequestFn } from "../shell/studio-types";
+import { useInvalidateRead, useRead, useSetRead } from "../shell/useRead";
+/** The built-in catalogue shown until the server catalogue arrives. */
+const defaultCatalog: AutomationCatalog = {
+  conditions: [
+    "andContainer",
+    "orContainer",
+    "notContainer",
+    "alwaysValid",
+    "cartCartAmount",
+    "cartLineItemCount",
+    "customerGroup",
+    "shippingCountry",
+    "salesChannel",
+    "lineItemId",
+    "customerLoggedIn",
+    "orderState",
+    "paymentState",
+    "deliveryState",
+    "contextField",
+    "eventField",
+  ],
+  fields: [],
+  events: ["order.placed"],
+  apps: [],
+};
+const noRows: Record<Kind, Config[]> = {
+  rules: [],
+  promotions: [],
+  flows: [],
+  channels: [],
+};
 export default function AutomationView({
   request,
   onChannels,
@@ -33,47 +64,12 @@ export default function AutomationView({
 }) {
   const t = useLifecycleText();
   const { x } = useConnectedText();
-  const [error, setError] = useState("");
+  const [actionError, setError] = useState("");
   const languages = useAutomationLanguages(request, setError);
   const [contentLanguage, setContentLanguage] = useState("");
   const [imported, setImported] = useState("");
   const { w, locale } = useWorkbenchText();
-  const [catalog, setCatalog] = useState<AutomationCatalog>({
-    conditions: [
-      "andContainer",
-      "orContainer",
-      "notContainer",
-      "alwaysValid",
-      "cartCartAmount",
-      "cartLineItemCount",
-      "customerGroup",
-      "shippingCountry",
-      "salesChannel",
-      "lineItemId",
-      "customerLoggedIn",
-      "orderState",
-      "paymentState",
-      "deliveryState",
-      "contextField",
-      "eventField",
-    ],
-    fields: [],
-    events: ["order.placed"],
-    apps: [],
-  });
-  useEffect(() => {
-    request("/api/automation/catalog")
-      .then(setCatalog)
-      .catch(() => {});
-  }, [request]);
   const [kind, setKind] = useState<Kind>("rules");
-  const [rows, setRows] = useState<Record<Kind, Config[]>>({
-    rules: [],
-    promotions: [],
-    flows: [],
-    channels: [],
-  });
-  const [jobs, setJobs] = useState<any[]>([]);
   const [id, setId] = useState("");
   const [revision, setRevision] = useState(0);
   const [data, setData] = useState<Record<string, any>>({
@@ -100,50 +96,46 @@ export default function AutomationView({
     setAdvanced("");
     setError("");
   };
-  const load = async () => {
-    const v = await request("/api/automation");
-    setRows(v);
-    setJobs(v.jobs);
-    setCatalog((c) => ({
-      ...c,
-      rules: v.rules.map((r: Config) => ({
-        id: r.id,
-        name: r.data.name,
-        revision: r.revision,
-      })),
-    }));
-  };
-  useEffect(() => {
-    let active = true;
-    request("/api/automation")
-      .then((v) => {
-        if (active) {
-          setRows(v);
-          setJobs(v.jobs);
-          if (!goal.current && v.rules[0]) choose(v.rules[0], "rules");
+  const catalogRead = useRead<AutomationCatalog>(
+    request,
+    "/api/automation/catalog",
+  );
+  const automation = useRead(request, "/api/automation");
+  // Execution states poll every three seconds while the view is open.
+  const executions = useRead(request, "/api/automation/executions", {
+    refetchMs: 3000,
+  });
+  const setRead = useSetRead(request);
+  const invalidate = useInvalidateRead(request);
+  const rows: Record<Kind, Config[]> = automation.data ?? noRows;
+  const jobs: any[] = executions.data?.jobs ?? automation.data?.jobs ?? [];
+  const catalog: AutomationCatalog = useMemo(() => {
+    const base = catalogRead.data ?? defaultCatalog;
+    return automation.data
+      ? {
+          ...base,
+          rules: automation.data.rules.map((r: Config) => ({
+            id: r.id,
+            name: r.data.name,
+            revision: r.revision,
+          })),
         }
-      })
-      .catch((e) => {
-        if (active) setError(e.message);
-      });
-    return () => {
-      active = false;
-    };
-  }, [request]);
+      : base;
+  }, [catalogRead.data, automation.data]);
+  const error =
+    actionError || (automation.error as Error | undefined)?.message || "";
+  const load = async () => {
+    setRead("/api/automation", await request("/api/automation"));
+    invalidate("/api/automation/executions");
+  };
+  // The first rule opens once the list arrives, unless a goal template chose.
+  const opened = useRef(false);
   useEffect(() => {
-    let active = true;
-    const timer = window.setInterval(() => {
-      request("/api/automation/executions")
-        .then((v) => {
-          if (active) setJobs(v.jobs);
-        })
-        .catch(() => {});
-    }, 3000);
-    return () => {
-      active = false;
-      window.clearInterval(timer);
-    };
-  }, [request]);
+    const v = automation.data;
+    if (!v || opened.current) return;
+    opened.current = true;
+    if (!goal.current && v.rules[0]) choose(v.rules[0], "rules");
+  }, [automation.data]);
   const fresh = (k: Kind) => {
     setKind(k);
     setContentLanguage(languages?.mainLocale ?? "en-GB");
@@ -321,8 +313,7 @@ export default function AutomationView({
                 }
                 onRestored={async () => {
                   const next = await request("/api/automation");
-                  setRows(next);
-                  setJobs(next.jobs);
+                  setRead("/api/automation", next);
                   const record = next[kind].find((r: Config) => r.id === id);
                   if (record) {
                     setData(record.data);

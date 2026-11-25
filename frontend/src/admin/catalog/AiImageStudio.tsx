@@ -1,6 +1,7 @@
 /** Optional image-provider jobs create private previews; applying a reviewed image is explicit and revision checked. */
+import { useRead } from "../shell/useRead";
 import { Button, Field, Notice, TextArea } from "../../kit/ui";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useWorkspaceText } from "../../shared/i18n/workspace-i18n";
 import type { RequestFn } from "../shell/studio-types";
 import { useImageJob } from "./useImageJob";
@@ -21,25 +22,14 @@ export default function AiImageStudio({
   disabled: boolean;
 }) {
   const { w } = useWorkspaceText();
-  const [configured, setConfigured] = useState(false),
-    [prompt, setPrompt] = useState("");
+  const [prompt, setPrompt] = useState("");
+  const configured: boolean =
+    useRead(request, "/api/merchant/media/provider").data?.configured ?? false;
   const { job, busy, error, start, apply } = useImageJob(
     request,
     productId,
     w("imageFailed"),
   );
-  useEffect(() => {
-    let active = true;
-    setConfigured(false);
-    request("/api/merchant/media/provider")
-      .then((v) => {
-        if (active) setConfigured(v.configured);
-      })
-      .catch(() => {});
-    return () => {
-      active = false;
-    };
-  }, [request]);
   const create = (mode: string) =>
     start({
       prompt,

@@ -1,4 +1,6 @@
 /** Ordered recommendations retain selected native records across cursor-paginated searches, content-language changes and read-only inspection. */
+import { useDebouncedValue } from "../../kit/query";
+import { useRead } from "../shell/useRead";
 import { Button, Field, TextInput } from "../../kit/ui";
 import { mediaImage } from "../../shared/media/product-media";
 import { useEffect, useState } from "react";
@@ -31,77 +33,37 @@ export default function RelatedProducts({
   const t = useRelatedProductsText(),
     [search, setSearch] = useState(""),
     [cursor, setCursor] = useState(""),
-    [retry, setRetry] = useState(0);
-  const [result, setResult] = useState<{
-    request: RequestFn;
-    language: string;
-    search: string;
-    elements: Choice[];
-    next?: string;
-    error?: string;
-    loading: boolean;
-  }>();
+    term = useDebouncedValue(search, 200);
+  const first = `/api/merchant/products?limit=25&search=${encodeURIComponent(term)}`;
+  const page = useRead(
+    request,
+    cursor ? `${first}&after=${encodeURIComponent(cursor)}` : first,
+    { options: { locale: language } },
+  );
+  // Later pages append to the earlier ones of the same search and language.
+  const listKey = JSON.stringify([language, term]);
+  const [pages, setPages] = useState<{ key: string; elements: Choice[] }>();
+  useEffect(() => {
+    if (!page.data) return;
+    setPages((old) => ({
+      key: listKey,
+      elements: [
+        ...(cursor && old?.key === listKey ? old.elements : []),
+        ...(page.data.elements ?? []),
+      ],
+    }));
+  }, [page.data]);
   const current =
-    result?.request === request &&
-    result.language === language &&
-    result.search === search
-      ? result
+    search === term
+      ? {
+          elements: pages?.key === listKey ? pages.elements : [],
+          next: page.data?.nextCursor ?? undefined,
+          error: (page.error as Error | undefined)?.message,
+          loading: page.status === "idle" || page.status === "loading",
+        }
       : undefined;
   const selected = [...new Set(value)],
     products = current?.elements ?? [];
-  useEffect(() => {
-    let active = true;
-    setResult((old) => ({
-      request,
-      language,
-      search,
-      elements:
-        cursor &&
-        old?.request === request &&
-        old.language === language &&
-        old.search === search
-          ? old.elements
-          : [],
-      loading: true,
-    }));
-    const timer = setTimeout(() => {
-      request(
-        `/api/merchant/products?limit=25&search=${encodeURIComponent(search)}${cursor ? `&after=${encodeURIComponent(cursor)}` : ""}`,
-        undefined,
-        undefined,
-        { locale: language },
-      )
-        .then((v) => {
-          if (active)
-            setResult((old) => ({
-              request,
-              language,
-              search,
-              elements: [
-                ...(cursor ? (old?.elements ?? []) : []),
-                ...(v.elements ?? []),
-              ],
-              next: v.nextCursor ?? undefined,
-              loading: false,
-            }));
-        })
-        .catch((e) => {
-          if (active)
-            setResult((old) => ({
-              request,
-              language,
-              search,
-              elements: old?.elements ?? [],
-              loading: false,
-              error: e.message,
-            }));
-        });
-    }, 200);
-    return () => {
-      active = false;
-      clearTimeout(timer);
-    };
-  }, [request, language, search, cursor, retry]);
   const move = (index: number, offset: number) => {
     const next = [...selected];
     [next[index], next[index + offset]] = [next[index + offset], next[index]];
@@ -200,7 +162,7 @@ export default function RelatedProducts({
         {current?.error && (
           <div role="alert">
             <p>{current.error}</p>
-            <Button type="button" onClick={() => setRetry((n) => n + 1)}>
+            <Button type="button" onClick={() => void page.refetch()}>
               {t("retry")}
             </Button>
           </div>

@@ -1,6 +1,7 @@
 /** Product-scoped review publication; authoritative authorization stays in the API. */
+import { useRead, useSetRead } from "../shell/useRead";
 import { Button, Card, Notice } from "../../kit/ui";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type { RequestFn } from "../../shared/api/types";
 import Icon from "../../shared/ui/Icon";
 import { useProductEditorText } from "./product-editor-i18n";
@@ -28,32 +29,16 @@ export default function ReviewModeration({
 }) {
   const { s } = useShopText();
   const e = useProductEditorText();
-  const [loading, setLoading] = useState(true);
-  const [reviews, setReviews] = useState<Review[]>([]);
-  const [error, setError] = useState("");
+  const commerce = useRead(request, "/api/merchant/commerce");
+  const setRead = useSetRead(request);
+  const loading = commerce.status === "idle" || commerce.status === "loading";
+  const reviews: Review[] = (commerce.data?.reviews ?? []).filter(
+    (r: Review) => r.productId === productId,
+  );
+  const [actionError, setError] = useState("");
+  const error =
+    actionError || (commerce.error as Error | undefined)?.message || "";
   const [busy, setBusy] = useState(false);
-  useEffect(() => {
-    let active = true;
-    setLoading(true);
-    setReviews([]);
-    setError("");
-    request("/api/merchant/commerce")
-      .then((v) => {
-        if (active)
-          setReviews(
-            v.reviews.filter((r: Review) => r.productId === productId),
-          );
-      })
-      .catch((e) => {
-        if (active) setError(e.message);
-      })
-      .finally(() => {
-        if (active) setLoading(false);
-      });
-    return () => {
-      active = false;
-    };
-  }, [request, productId]);
   return (
     <Card>
       <h2>{s("moderation")}</h2>
@@ -99,11 +84,12 @@ export default function ReviewModeration({
                   { approved: !r.approved },
                   "PUT",
                 );
-                setReviews((rows) =>
-                  rows.map((v) =>
+                setRead("/api/merchant/commerce", {
+                  ...commerce.data,
+                  reviews: commerce.data.reviews.map((v: Review) =>
                     v.id === r.id ? { ...v, approved: !r.approved } : v,
                   ),
-                );
+                });
               } catch (e) {
                 setError((e as Error).message);
               } finally {
