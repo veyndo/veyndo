@@ -1,0 +1,278 @@
+/** kit/storefront contracts: one schema per part validates props, yields JSON Schemas, web elements and builder forms. */
+import { act, fireEvent, render, screen } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
+import {
+  PartForm,
+  accountOverview,
+  addToCartEvent,
+  cartSummary,
+  checkoutEvent,
+  checkoutSteps,
+  partById,
+  parts,
+  productCard,
+  productSummary,
+  registerPartElements,
+} from "../../src/kit/storefront";
+
+const product = {
+  id: "p-1",
+  name: "Linen shirt",
+  url: "/p/linen-shirt",
+  price: 49.9,
+  currency: "EUR",
+  stock: 3,
+};
+
+describe("part contracts", () => {
+  it("names every part once and derives its element", () => {
+    expect(new Set(parts.map((p) => p.id)).size).toBe(parts.length);
+    for (const part of parts) {
+      expect(part.element).toBe(`veyndo-${part.id}`);
+      expect(partById(part.id)).toBe(part);
+    }
+    expect(partById("missing")).toBeUndefined();
+  });
+
+  it("validates untrusted props and fills defaults", () => {
+    const ok = productCard.parse({ product });
+    expect(ok).toMatchObject({
+      ok: true,
+      props: { locale: "en-GB", priceKind: "gross" },
+    });
+    const bad = productCard.parse({
+      product: { ...product, url: "javascript:alert(1)", currency: "eur" },
+    });
+    expect(bad.ok).toBe(false);
+    if (!bad.ok) {
+      expect(bad.issues.join(" ")).toContain("product.url");
+      expect(bad.issues.join(" ")).toContain("product.currency");
+    }
+    expect(
+      productCard.parse({ product: { ...product, url: "//evil" } }).ok,
+    ).toBe(false);
+    expect(productCard.parse(null).ok).toBe(false);
+  });
+
+  it("validates builder configurations separately from props", () => {
+    expect(productCard.parseConfig({ productId: "p-1" })).toEqual({
+      ok: true,
+      config: { productId: "p-1", priceKind: "gross" },
+    });
+    expect(productCard.parseConfig({}).ok).toBe(false);
+    expect(accountOverview.parseConfig({ orders: 99 }).ok).toBe(false);
+    expect(checkoutSteps.parseConfig({})).toEqual({
+      ok: true,
+      config: { current: "details" },
+    });
+  });
+
+  it("publishes JSON Schemas with patterns, formats and defaults", () => {
+    for (const part of parts) {
+      expect(part.jsonSchema()).toMatchObject({ type: "object" });
+      expect(part.configSchema()).toMatchObject({ type: "object" });
+    }
+    const props = productCard.jsonSchema() as any;
+    expect(props.$schema).toContain("2020-12");
+    expect(props.properties.product.properties.url.pattern).toBeTruthy();
+    const config = productCard.configSchema() as any;
+    expect(config.properties.productId.format).toBe("product-id");
+    expect(config.required).toEqual(["productId"]);
+    expect(config.properties.priceKind.enum).toEqual(["gross", "net"]);
+  });
+});
+
+describe("part components", () => {
+  it("renders a product card in the shop language", () => {
+    const P = productCard.Component;
+    render(<P locale="de-DE" product={product} priceKind="gross" />);
+    for (const link of screen.getAllByRole("link"))
+      expect(link).toHaveAttribute("href", "/p/linen-shirt");
+    expect(
+      screen.getByRole("heading", { name: "Linen shirt" }),
+    ).toBeInTheDocument();
+    expect(screen.getByText("inkl. MwSt.")).toBeInTheDocument();
+    expect(screen.getByText(/49,90/)).toBeInTheDocument();
+  });
+
+  it("asks the host to add the chosen quantity", () => {
+    const onAddToCart = vi.fn();
+    const P = productSummary.Component;
+    const props = productSummary.parse({
+      locale: "en-GB",
+      product: { ...product, purchaseSteps: 1, minPurchase: 1 },
+    });
+    if (!props.ok) throw Error(props.issues.join());
+    render(<P {...props.props} onAddToCart={onAddToCart} />);
+    fireEvent.change(screen.getByRole("spinbutton", { name: "Quantity" }), {
+      target: { value: "2" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Add to cart" }));
+    expect(onAddToCart).toHaveBeenCalledWith({ productId: "p-1", quantity: 2 });
+  });
+
+  it("disables buying when sold out", () => {
+    const P = productSummary.Component;
+    const props = productSummary.parse({ product: { ...product, stock: 0 } });
+    if (!props.ok) throw Error(props.issues.join());
+    render(<P {...props.props} />);
+    expect(screen.getByText("Sold out")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Add to cart" })).toBeDisabled();
+  });
+
+  it("summarizes a cart and offers checkout only with a handler", () => {
+    const P = cartSummary.Component;
+    const cart = {
+      locale: "es-ES",
+      currency: "EUR",
+      lines: [{ id: "l1", label: "Linen shirt", quantity: 2, total: 99.8 }],
+      subtotal: 99.8,
+      shipping: 4.9,
+      total: 104.7,
+      priceKind: "gross" as const,
+    };
+    const { rerender } = render(<P {...cart} />);
+    expect(screen.getByRole("region", { name: "Carrito" })).toBeInTheDocument();
+    expect(screen.queryByRole("button")).toBeNull();
+    const onCheckout = vi.fn();
+    rerender(<P {...cart} onCheckout={onCheckout} />);
+    fireEvent.click(screen.getByRole("button", { name: "Ir a la caja" }));
+    expect(onCheckout).toHaveBeenCalledOnce();
+    rerender(<P {...cart} lines={[]} />);
+    expect(screen.getByText("Tu carrito está vacío.")).toBeInTheDocument();
+  });
+
+  it("marks the current checkout step", () => {
+    const P = checkoutSteps.Component;
+    render(<P locale="en-GB" current="review" />);
+    const current = screen
+      .getAllByRole("listitem")
+      .filter((item) => item.getAttribute("aria-current") === "step");
+    expect(current).toHaveLength(1);
+  });
+
+  it("lists account orders", () => {
+    const P = accountOverview.Component;
+    render(
+      <P
+        locale="en-GB"
+        name="Ada"
+        orders={[
+          {
+            id: "o1",
+            number: "10001",
+            date: "2026-11-01",
+            state: "paid",
+            total: 20,
+            currency: "EUR",
+          },
+        ]}
+      />,
+    );
+    expect(screen.getByText(/10001/)).toBeInTheDocument();
+  });
+});
+
+describe("web elements", () => {
+  it("upgrades valid props and leaves invalid fallbacks in place", async () => {
+    registerPartElements(parts);
+    registerPartElements(parts); // idempotent
+    const host = document.createElement("div");
+    document.body.append(host);
+    const listener = vi.fn();
+    host.addEventListener(addToCartEvent, (event) =>
+      listener((event as CustomEvent).detail),
+    );
+    const checkout = vi.fn();
+    host.addEventListener(checkoutEvent, checkout);
+
+    const element = document.createElement(productSummary.element);
+    element.setAttribute("locale", "de-DE");
+    element.setAttribute("props", JSON.stringify({ product }));
+    await act(async () => host.append(element));
+    fireEvent.click(element.querySelector("button")!);
+    expect(listener).toHaveBeenCalledWith({ productId: "p-1", quantity: 1 });
+    expect(element.textContent).toContain("In den Warenkorb");
+
+    const broken = document.createElement(productCard.element);
+    broken.innerHTML = "<a href='/p/x'>Server markup</a>";
+    broken.setAttribute("props", "{not json");
+    await act(async () => host.append(broken));
+    expect(broken.dataset.invalid).toBe("true");
+    expect(broken.textContent).toBe("Server markup");
+
+    const cart = document.createElement(cartSummary.element);
+    cart.setAttribute(
+      "props",
+      JSON.stringify({
+        currency: "EUR",
+        lines: [{ id: "l", label: "A", quantity: 1, total: 1 }],
+        subtotal: 1,
+        total: 1,
+      }),
+    );
+    await act(async () => host.append(cart));
+    fireEvent.click(cart.querySelector("button")!);
+    expect(checkout).toHaveBeenCalledOnce();
+    await act(async () => host.remove());
+  });
+});
+
+describe("builder form", () => {
+  it("renders fields from the configuration schema", () => {
+    const onChange = vi.fn();
+    const { rerender } = render(
+      <PartForm
+        part={productCard}
+        value={{ productId: "p-1" }}
+        onChange={onChange}
+        label={(field) => `L:${field}`}
+      />,
+    );
+    fireEvent.change(screen.getByLabelText(/L:priceKind/), {
+      target: { value: "net" },
+    });
+    expect(onChange).toHaveBeenLastCalledWith({
+      productId: "p-1",
+      priceKind: "net",
+    });
+    rerender(
+      <PartForm
+        part={productCard}
+        value={{}}
+        onChange={onChange}
+        label={(field) => field}
+        renderFormat={(format, field) => (
+          <span>
+            picker {format} {field}
+          </span>
+        )}
+      />,
+    );
+    expect(screen.getByText("picker product-id productId")).toBeInTheDocument();
+
+    rerender(
+      <PartForm
+        part={cartSummary}
+        value={{}}
+        onChange={onChange}
+        label={(field) => field}
+      />,
+    );
+    expect(
+      screen.getByRole("checkbox", { name: "showCheckout" }),
+    ).toBeChecked();
+    rerender(
+      <PartForm
+        part={accountOverview}
+        value={{}}
+        onChange={onChange}
+        label={(field) => field}
+      />,
+    );
+    fireEvent.change(screen.getByRole("spinbutton", { name: /orders/ }), {
+      target: { value: "7" },
+    });
+    expect(onChange).toHaveBeenLastCalledWith({ orders: 7 });
+  });
+});
