@@ -5,8 +5,10 @@ use crate::knowledge;
 use crate::store::context_products::localized_products;
 use crate::store::documents as sources;
 use crate::store::vectors as store;
+use serde::Deserialize;
 use serde_json::{Value, json};
 use veyndo_cognition::inference::budget::is_budgeted;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::store::lease::Lease;
 use veyndo_core::{Result, State, bad};
 use veyndo_pricing::domain::catalog::Product;
@@ -35,7 +37,7 @@ pub async fn retrieve(m: Models<'_>, t: &str, q: &str) -> Result<Value> {
         && m.inference.admit_endpoint(&reranker).await.is_ok()
         && let Ok(_slot) = m.slot()
         && let Ok(_lease) = Lease::acquire(m.core, t, "reranker", 1).await
-        && let Some(hits) = result["hits"].as_array_mut()
+        && let Some(hits) = result.get_mut("hits").and_then(Value::as_array_mut)
     {
         let reranked = knowledge::rerank::apply(t, q, hits, &m.core.db).await;
         result["reranked"] = json!(reranked);
@@ -52,11 +54,11 @@ pub async fn context_retrieval(
     query: &str,
 ) -> Result<(Vec<Product>, Value)> {
     let search = retrieve(m, t, query).await?;
-    let ids = search["hits"]
-        .as_array()
+    let ids = view::<Search>(&search)
+        .hits
         .into_iter()
         .flatten()
-        .filter_map(|v| v["id"].as_str().map(str::to_owned))
+        .filter_map(|v| view::<Hit>(&v).id)
         .collect::<Vec<_>>();
     Ok((
         localized_products(m.core, t, chain, &ids, true).await?,
@@ -109,4 +111,20 @@ pub async fn knowledge_status(a: &State, t: &str) -> Result<Value> {
     Ok(
         json!({"indexedProducts":status.as_ref().map(|r|r.indexed_products).unwrap_or(0),"pending":status.as_ref().map(|r|r.pending_jobs).unwrap_or(0),"errors":errors,"documentsLimit":200,"documents":rows.iter().map(|r|json!({"productId":r.product_id,"model":r.embedding_model,"contentHash":r.content_hash,"vectorDigest":r.vector_digest})).collect::<Vec<_>>()}),
     )
+}
+
+/// The hits of a product search.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct Search {
+    #[serde(deserialize_with = "lenient")]
+    hits: Option<Vec<Value>>,
+}
+
+/// The product a hit names.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct Hit {
+    #[serde(deserialize_with = "lenient")]
+    id: Option<String>,
 }

@@ -1,5 +1,6 @@
 //! Price-only optional autonomy, atomic unique-SKU daily quotas, a non-compounding day baseline and a daily exposure ceiling.
 use crate::domain::price_guardrails::{Change, check};
+use crate::domain::prompt_context::price_currency;
 use crate::store::autonomy as store;
 use serde_json::{Value, json};
 use veyndo_core::shop_scope::header;
@@ -61,9 +62,8 @@ pub async fn reserve(
             .find(|p| p.id == c.product_id)
             .ok_or(bad("Product unavailable"))?;
         check(s, product, c, true)?;
-        let code = product.extra["priceCurrency"]
-            .as_str()
-            .unwrap_or(&s.currencies.pricing_currency);
+        let own = price_currency(&product.extra);
+        let code = own.as_deref().unwrap_or(&s.currencies.pricing_currency);
         let scale = s
             .currencies
             .definitions
@@ -101,9 +101,8 @@ pub async fn reserve(
                 .iter()
                 .find(|p| p.id == c.product_id)
                 .ok_or(bad("Product unavailable"))?;
-            let code = product.extra["priceCurrency"]
-                .as_str()
-                .unwrap_or(&s.currencies.pricing_currency);
+            let own = price_currency(&product.extra);
+            let code = own.as_deref().unwrap_or(&s.currencies.pricing_currency);
             if code != s.currencies.pricing_currency {
                 return Err(conflict(
                     "The daily exposure limit only covers products priced in the shop's pricing currency",

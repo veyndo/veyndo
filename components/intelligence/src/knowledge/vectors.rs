@@ -1,9 +1,11 @@
 //! Private Qdrant adapter: tenant/model filters, deterministic identities and durable PostgreSQL index queue.
 use super::PgPool;
 use crate::store::vectors as store;
+use serde::Deserialize;
 use serde_json::{Value, json};
 use sha2::{Digest, Sha256};
 use std::time::Duration;
+use veyndo_core::document::{lenient, view};
 fn collection(kind: &str, model: &str, dimensions: usize) -> String {
     format!(
         "veyndo_{kind}_v2_{}_{dimensions}",
@@ -63,8 +65,8 @@ async fn ensure(kind: &str, model: &str, dimensions: usize) -> Result<String, St
         .await;
     }
     let info = request(reqwest::Method::GET, &format!("/collections/{name}"), None).await?;
-    let v = &info["result"]["config"]["params"]["vectors"]["text"];
-    if v["size"] != dimensions || v["distance"] != "Cosine" {
+    let v = super::vector_namespace::vector_shape(&info);
+    if v.size != dimensions || v.distance != "Cosine" {
         return Err("Qdrant collection shape mismatch".into());
     }
     request(
@@ -87,10 +89,10 @@ pub async fn query(
     }
     let name = collection(kind, model, vector.len());
     let response=request(reqwest::Method::POST,&format!("/collections/{name}/points/query"),Some(json!({"query":vector,"using":"text","filter":{"must":[{"key":"tenant","match":{"value":tenant}},{"key":"model","match":{"value":model}}]},"limit":64,"with_payload":true,"with_vector":false}))).await?;
-    Ok(response["result"]["points"]
-        .as_array()
-        .ok_or("Invalid query result")?
-        .clone())
+    view::<QueryResponse>(&response)
+        .result
+        .points
+        .ok_or_else(|| "Invalid query result".into())
 }
 pub async fn drain(db: &PgPool) -> Result<usize, String> {
     let mut tx = db.begin().await.map_err(|_| "Index transaction")?;
@@ -149,4 +151,20 @@ pub fn start(db: PgPool) {
             tokio::time::sleep(Duration::from_secs(2)).await;
         }
     });
+}
+
+/// A Qdrant point query response.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct QueryResponse {
+    #[serde(deserialize_with = "lenient")]
+    result: QueryResult,
+}
+
+/// The matched points.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct QueryResult {
+    #[serde(deserialize_with = "lenient")]
+    points: Option<Vec<Value>>,
 }

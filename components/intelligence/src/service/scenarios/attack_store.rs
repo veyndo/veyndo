@@ -68,7 +68,7 @@ pub async fn latest<H: AgentHost>(host: &H, h: &RequestContext, t: &str) -> Resu
         return Ok(Value::Null);
     };
     let mut report = row.report;
-    let digest = report["configurationDigest"].clone();
+    let digest = view::<SavedDigest>(&report).configuration_digest;
     let current = evidence::capture(host, t).await;
     report["savedAt"] = json!(row.saved_at);
     report["configurationReview"] = json!(evidence::review(
@@ -76,4 +76,11 @@ pub async fn latest<H: AgentHost>(host: &H, h: &RequestContext, t: &str) -> Resu
         current.as_deref(),
     ));
     Ok(report)
+}
+
+/// The configuration digest a report was taken under.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct SavedDigest {
+    configuration_digest: Value,
 }

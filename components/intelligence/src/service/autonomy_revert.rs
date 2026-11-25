@@ -50,8 +50,9 @@ pub async fn revert(
             .and_then(|changes| {
                 changes.as_array().and_then(|list| {
                     list.iter()
-                        .find(|c| c["product_id"].as_str() == Some(id.as_str()))
-                        .and_then(|c| c["price"].as_f64())
+                        .map(view::<ProposedChange>)
+                        .find(|c| c.product_id.as_deref() == Some(id.as_str()))
+                        .and_then(|c| c.price)
                 })
             })
             .and_then(|price| minor(&s, &code, price).ok())
@@ -146,8 +147,8 @@ pub async fn guard_once(a: &State) -> Result<bool> {
             }
             let outcome = revert(a, &t, "autopilot-guard", None, true).await?;
             Ok::<_, Error>(
-                outcome["reverted"]
-                    .as_array()
+                view::<Reverted>(&outcome)
+                    .reverted
                     .is_some_and(|r| !r.is_empty()),
             )
         }
@@ -158,4 +159,22 @@ pub async fn guard_once(a: &State) -> Result<bool> {
         }
     }
     Ok(worked)
+}
+
+/// One change of the run's proposal.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct ProposedChange {
+    #[serde(deserialize_with = "lenient")]
+    product_id: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    price: Option<f64>,
+}
+
+/// The products a revert restored.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct Reverted {
+    #[serde(deserialize_with = "lenient")]
+    reverted: Option<Vec<Value>>,
 }

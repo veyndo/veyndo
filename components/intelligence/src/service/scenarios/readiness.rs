@@ -1,4 +1,5 @@
 //! Read-only readiness of a private sandbox as a shop twin: catalogue, stock, simulated checkout and saved customer tests.
+use super::AttackSummary;
 use super::{attack_store, catalogue};
 use crate::ports::AgentHost;
 use crate::store::scenario_reports as store;
@@ -7,6 +8,7 @@ use serde_json::json;
 use veyndo_core::RequestContext;
 use veyndo_core::Result;
 use veyndo_core::bad;
+use veyndo_core::document::view;
 use veyndo_core::shop_scope::channel as channel_id;
 use veyndo_core::shop_scope::header;
 pub async fn read<H: AgentHost>(host: &H, h: &RequestContext, t: &str) -> Result<Value> {
@@ -60,6 +62,6 @@ pub async fn read<H: AgentHost>(host: &H, h: &RequestContext, t: &str) -> Result
         json!({"sandbox":{"id":t,"name":name},"channel":channel,"currency":currency.code,
         "catalogue":{"products":products,"withStock":stocked,"withoutStock":row.empty,"inactive":row.inactive,"visibleSample":visible},
         "checkout":{"country":country,"simulatedPayment":payment,"shipping":shipping},
-        "tests":{"customerTests":tests,"attack":if attack.is_null() {Value::Null} else {json!({"summary":attack["summary"],"savedAt":attack["savedAt"],"configurationReview":attack["configurationReview"]})}},"ready":blockers.is_empty(),"blockers":blockers,"synthetic":true}),
+        "tests":{"customerTests":tests,"attack":if attack.is_null() {Value::Null} else {let attack=view::<AttackSummary>(&attack);json!({"summary":attack.summary,"savedAt":attack.saved_at,"configurationReview":attack.configuration_review})}},"ready":blockers.is_empty(),"blockers":blockers,"synthetic":true}),
     )
 }

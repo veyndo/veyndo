@@ -419,7 +419,7 @@ pub async fn wait(a: &State, h: &RequestContext, id: &str) -> Result<Value> {
     let start = std::time::Instant::now();
     loop {
         let value = operate(a, h, "merchant.run.status", &json!({"id":id})).await?;
-        if ![Some("queued"), Some("running")].contains(&value["state"].as_str())
+        if ![Some("queued"), Some("running")].contains(&view::<RunStatus>(&value).state.as_deref())
             || start.elapsed().as_secs() >= 185
         {
             return Ok(value);
@@ -444,6 +444,14 @@ pub async fn conversation_run(a: &State, h: &RequestContext, conversation: &str)
         Some(id) => operate(a, h, "merchant.run.status", &json!({"id":id})).await,
         None => Ok(Value::Null),
     }
+}
+
+/// The state of a saved run.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct RunStatus {
+    #[serde(deserialize_with = "lenient")]
+    state: Option<String>,
 }
 
 #[cfg(test)]

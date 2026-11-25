@@ -89,7 +89,7 @@ pub async fn prepare(
         })?;
     validate_output(&result.value)?;
     Ok(
-        json!({"caption":result.value["caption"],"alt":result.value["alt"],"locale":locale,"basis":basis,"promptId":"media-caption@1","model":result.model}),
+        json!({"caption":view::<Captioned>(&result.value).caption,"alt":view::<Captioned>(&result.value).alt,"locale":locale,"basis":basis,"promptId":"media-caption@1","model":result.model}),
     )
 }
 /// The JSON fields `validate_output` reads, typed as it reads them.
@@ -114,6 +114,14 @@ fn validate_output(v: &Value) -> Result<()> {
     }
     Ok(())
 }
+/// A generated caption and alt text.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct Captioned {
+    caption: Value,
+    alt: Value,
+}
+
 #[cfg(test)]
 mod tests {
     use super::validate_output;

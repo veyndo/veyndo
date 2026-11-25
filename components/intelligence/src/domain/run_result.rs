@@ -1,17 +1,21 @@
 //! The synchronous planning result of a saved run: a ready proposal, or the error the run stopped with.
+use serde::Deserialize;
 use serde_json::{Value, json};
+use veyndo_core::document::{lenient, view};
 use veyndo_core::{Error, Result, StatusCode};
 
 /// Preserve the synchronous planning error contract while the saved run remains inspectable.
 pub fn plan_result(run: Value) -> Result<Value> {
-    if run["state"] == "ready" {
+    let r: RunView = view(&run);
+    if r.state == "ready" {
         return Ok(
-            json!({"taskId":run["taskId"],"preview":run["preview"],"approvalRequired":true,"run":run}),
+            json!({"taskId":r.task_id,"preview":r.preview,"approvalRequired":true,"run":run}),
         );
     }
-    if [Some("failed"), Some("uncertain"), Some("cancelled")].contains(&run["state"].as_str()) {
-        let status = run["error"]["status"]
-            .as_u64()
+    if [Some("failed"), Some("uncertain"), Some("cancelled")].contains(&r.state.as_str()) {
+        let status = r
+            .error
+            .status
             .and_then(|v| u16::try_from(v).ok())
             .and_then(|v| StatusCode::from_u16(v).ok())
             .filter(|v| v.is_client_error() || v.is_server_error())
@@ -20,14 +24,36 @@ pub fn plan_result(run: Value) -> Result<Value> {
             status,
             format!(
                 "Saved agent run {} stopped: {}. Inspect its status before continuing.",
-                run["taskId"].as_str().unwrap_or(""),
-                run["error"]["detail"]
-                    .as_str()
+                r.task_id.as_str().unwrap_or(""),
+                r.error
+                    .detail
+                    .as_deref()
                     .unwrap_or("explicit review required")
             ),
         ));
     }
     Ok(run)
+}
+
+/// The saved run fields the planning result reads.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct RunView {
+    state: Value,
+    task_id: Value,
+    preview: Value,
+    #[serde(deserialize_with = "lenient")]
+    error: RunError,
+}
+
+/// The problem a stopped run recorded.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct RunError {
+    #[serde(deserialize_with = "lenient")]
+    status: Option<u64>,
+    #[serde(deserialize_with = "lenient")]
+    detail: Option<String>,
 }
 
 #[cfg(test)]

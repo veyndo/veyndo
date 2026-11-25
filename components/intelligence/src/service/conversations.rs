@@ -73,10 +73,11 @@ fn history(previous: &[Value]) -> String {
     previous[previous.len().saturating_sub(16)..]
         .iter()
         .map(|v| {
+            let m = view::<HistoryMessage>(v);
             format!(
                 "{}: {}",
-                v["role"].as_str().unwrap_or(""),
-                v["content"].as_str().unwrap_or("")
+                m.role.as_deref().unwrap_or(""),
+                m.content.as_deref().unwrap_or("")
             )
         })
         .collect::<Vec<_>>()
@@ -115,7 +116,7 @@ pub async fn chat(a: &State, h: &RequestContext, v: &Value) -> Result<Value> {
     };
     let history = history(&messages(a, &t, &id).await?);
     let queued=enqueue(a,h,json!({"instruction":instruction,"inference":selection,"history":history,"locale":language_context(a,h).await?.0,"channel":channel_id(h),"workspaceContext":input.workspace_context,"requestId":input.request_id,"newConversation":input.conversation_id.is_null(),"requestedConversation":input.conversation_id}),Some(&id)).await?;
-    let id = queued["conversationId"].as_str().unwrap_or(&id).to_string();
+    let id = view::<Queued>(&queued).conversation_id.unwrap_or(id);
     admit(a, &t, &id, h).await?;
     if input.background == Some(true) {
         return Ok(json!({"conversationId":id,"messages":messages(a,&t,&id).await?,"run":queued}));
@@ -125,17 +126,39 @@ pub async fn chat(a: &State, h: &RequestContext, v: &Value) -> Result<Value> {
 /// Waits for a queued turn and returns the conversation with its run.
 pub async fn complete(a: &State, h: &RequestContext, queued: Value) -> Result<Value> {
     let t = merchant(h)?;
-    let id = queued["conversationId"]
-        .as_str()
+    let turn: Queued = view(&queued);
+    let id = turn
+        .conversation_id
+        .as_deref()
         .ok_or(bad("Saved conversation required"))?;
     let run = wait(
         a,
         h,
-        queued["taskId"].as_str().ok_or(bad("Saved run required"))?,
+        turn.task_id.as_deref().ok_or(bad("Saved run required"))?,
     )
     .await?;
     admit(a, &t, id, h).await?;
     Ok(json!({"conversationId":id,"messages":messages(a,&t,id).await?,"run":run}))
+}
+
+/// A stored message as prompt history reads it.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct HistoryMessage {
+    #[serde(deserialize_with = "lenient")]
+    role: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    content: Option<String>,
+}
+
+/// A queued conversation turn.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct Queued {
+    #[serde(deserialize_with = "lenient")]
+    conversation_id: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    task_id: Option<String>,
 }
 
 #[cfg(test)]

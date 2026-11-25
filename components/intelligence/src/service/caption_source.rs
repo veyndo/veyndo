@@ -2,6 +2,9 @@
 use crate::ports::PublicEgress;
 use crate::store::product_reads::owned_image;
 use base64::{Engine as _, engine::general_purpose::STANDARD};
+use serde::Deserialize;
+use serde_json::Value;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad};
 use veyndo_identity::{merchant, permit};
 /// The bounded PNG thumbnail of the image at `url`, or none when the URL is no pixel evidence.
@@ -74,11 +77,12 @@ fn bundled_demo(url: &str) -> bool {
     let template: serde_json::Value =
         serde_json::from_str(include_str!("../../../../fixtures/fashion-catalog.json"))
             .unwrap_or_default();
-    template["products"].as_array().is_some_and(|ps| {
+    view::<Template>(&template).products.is_some_and(|ps| {
         ps.iter().any(|p| {
-            p["media"]
-                .as_array()
-                .is_some_and(|ms| ms.iter().any(|m| m["url"].as_str() == Some(url)))
+            view::<TemplateProduct>(p).media.is_some_and(|ms| {
+                ms.iter()
+                    .any(|m| view::<Media>(m).url.as_deref() == Some(url))
+            })
         })
     })
 }
@@ -114,6 +118,30 @@ fn thumbnail(bytes: &[u8]) -> Result<Option<String>> {
         STANDARD.encode(png.into_inner())
     )))
 }
+/// The bundled demo catalogue's products.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct Template {
+    #[serde(deserialize_with = "lenient")]
+    products: Option<Vec<Value>>,
+}
+
+/// A demo product's media.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct TemplateProduct {
+    #[serde(deserialize_with = "lenient")]
+    media: Option<Vec<Value>>,
+}
+
+/// One demo media file.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct Media {
+    #[serde(deserialize_with = "lenient")]
+    url: Option<String>,
+}
+
 #[cfg(test)]
 mod tests {
     use super::{bundled_demo, thumbnail};

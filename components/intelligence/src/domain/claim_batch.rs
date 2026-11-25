@@ -1,6 +1,7 @@
 //! Bounded claim batches: a compilation certifies only statements that are exact current confirmed public claims.
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
+use veyndo_core::document::view;
 use veyndo_core::{Result, bad, conflict};
 use veyndo_kernel::verified_kernel;
 
@@ -49,10 +50,10 @@ impl Compile {
         let v = self;
         for binding in &v.products {
             for statement in &binding.claims {
-                let exact = current.iter().any(|f| {
-                    f["productId"] == binding.product_id
-                        && f["id"] == statement.id
-                        && f["text"] == statement.text
+                let exact = current.iter().map(view::<CurrentClaim>).any(|f| {
+                    f.product_id == binding.product_id
+                        && f.id == statement.id
+                        && f.text == statement.text
                 });
                 if !verified_kernel::claim_render_admissible(true, true, true, true, exact) {
                     return Err(conflict(
@@ -63,6 +64,15 @@ impl Compile {
         }
         Ok(())
     }
+}
+
+/// A current confirmed claim of a product.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+pub struct CurrentClaim {
+    pub product_id: Value,
+    pub id: Value,
+    pub text: Value,
 }
 
 #[cfg(test)]

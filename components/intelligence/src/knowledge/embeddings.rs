@@ -1,5 +1,7 @@
 //! Bounded batched embeddings: Ollama and OpenAI-compatible self-hosted endpoints, model-defined dimensions.
-use serde_json::json;
+use serde::Deserialize;
+use serde_json::{Value, json};
+use veyndo_core::document::{lenient, view};
 /// Reject malformed vectors before SQL/Qdrant; dimensions belong to the embedding model.
 pub fn valid(vector: &[f32]) -> bool {
     (1..=8192).contains(&vector.len())
@@ -57,26 +59,25 @@ pub async fn batch(
         ));
     }
     let raw = veyndo_runtime::http_json::bounded(response, 8 * 1024 * 1024).await?;
+    let raw: EmbeddingResponse = view(&raw);
     let value = if openai {
-        let mut data = raw["data"]
-            .as_array()
+        let mut data = raw
+            .data
             .ok_or("Missing embedding data")?
-            .clone();
-        data.sort_by_key(|v| v["index"].as_u64());
+            .iter()
+            .map(view::<EmbeddingItem>)
+            .collect::<Vec<_>>();
+        data.sort_by_key(|v| v.index);
         if data
             .iter()
             .enumerate()
-            .any(|(i, v)| v["index"].as_u64() != Some(i as u64))
+            .any(|(i, v)| v.index != Some(i as u64))
         {
             return Err("Invalid embedding indexes".into());
         }
-        json!(
-            data.into_iter()
-                .map(|v| v["embedding"].clone())
-                .collect::<Vec<_>>()
-        )
+        json!(data.into_iter().map(|v| v.embedding).collect::<Vec<_>>())
     } else {
-        raw["embeddings"].clone()
+        raw.embeddings
     };
     let vectors: Vec<Vec<f32>> =
         serde_json::from_value(value).map_err(|_| "Invalid embedding vectors")?;
@@ -93,6 +94,24 @@ fn validate_batch(vectors: &[Vec<f32>], count: usize) -> Result<(), String> {
     }
     Ok(())
 }
+/// An embedding service response: OpenAI-style `data` or Ollama/TEI-style `embeddings`.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct EmbeddingResponse {
+    #[serde(deserialize_with = "lenient")]
+    data: Option<Vec<Value>>,
+    embeddings: Value,
+}
+
+/// One OpenAI-style embedding with its input position.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct EmbeddingItem {
+    #[serde(deserialize_with = "lenient")]
+    index: Option<u64>,
+    embedding: Value,
+}
+
 #[cfg(test)]
 mod tests {
     use super::{valid, validate_batch};

@@ -105,7 +105,7 @@ pub(super) async fn prepare(
                 )
             })?;
         validate_native(&schema, &out.value)?;
-        let drafts: Vec<Draft> = serde_json::from_value(out.value["products"].clone())
+        let drafts: Vec<Draft> = serde_json::from_value(view::<Prepared>(&out.value).products)
             .map_err(|_| bad("Invalid product preparation result"))?;
         if drafts.is_empty() || drafts.len() > count {
             return Err(bad(
@@ -197,4 +197,11 @@ async fn fetch(egress: &dyn PublicEgress, source: &str) -> Result<String> {
         structured.chars().take(20000).collect::<String>(),
         text.chars().take(16000).collect::<String>()
     ))
+}
+
+/// The products a preparation model returned.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct Prepared {
+    products: Value,
 }

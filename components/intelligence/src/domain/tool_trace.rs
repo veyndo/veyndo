@@ -1,5 +1,17 @@
 //! Conversation attachments come only from the server's executed tool trace, never from model prose or record claims.
+use serde::Deserialize;
 use serde_json::{Value, json};
+use veyndo_core::document::{lenient, view};
+
+/// A read transcript entry with the app view it returned.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct TraceEntry {
+    #[serde(deserialize_with = "lenient")]
+    app_view: Option<String>,
+    input: Value,
+    result: Value,
+}
 
 /// Only the server's executed tool trace can produce a conversation attachment.
 pub fn attachments(trace: &[Value]) -> Vec<Value> {
@@ -17,15 +29,16 @@ fn attachment_views(trace: &[Value], include_result: bool) -> Vec<Value> {
         .enumerate()
         .rev()
         .filter_map(|(index, entry)| {
-            let mut view = json!({
+            let entry = view::<TraceEntry>(entry);
+            let mut attachment = json!({
                 "attachmentId":index,
-                "resourceUri":entry["appView"].as_str()?,
-                "arguments":entry["input"],
+                "resourceUri":entry.app_view?,
+                "arguments":entry.input,
             });
             if include_result {
-                view["result"] = json!({"structuredContent":entry["result"]});
+                attachment["result"] = json!({"structuredContent":entry.result});
             }
-            Some(view)
+            Some(attachment)
         })
         .take(3)
         .collect()

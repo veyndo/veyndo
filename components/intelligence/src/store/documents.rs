@@ -282,8 +282,9 @@ pub async fn sources_current(a: &State, t: &str, sources: &Value) -> Result<bool
     };
     let mut records = Vec::new();
     for item in items {
-        if item["omittedRecords"].as_u64().is_some()
-            && item["readToolsRequired"] == true
+        let record: Evidence = view(item);
+        if record.omitted_records.is_some()
+            && record.read_tools_required == true
             && item.as_object().is_some_and(|o| o.len() == 2)
         {
             continue;
@@ -291,7 +292,7 @@ pub async fn sources_current(a: &State, t: &str, sources: &Value) -> Result<bool
         if !["sourceId", "documentId", "contentHash", "locale", "text"]
             .iter()
             .all(|key| item[*key].is_string())
-            || item["revision"].as_i64().is_none_or(|r| r <= 0)
+            || record.revision.is_none_or(|r| r <= 0)
             || !item
                 .get("productId")
                 .is_some_and(|v| v.is_null() || v.is_string())
@@ -308,6 +309,17 @@ pub async fn sources_current(a: &State, t: &str, sources: &Value) -> Result<bool
     .fetch_one(&a.db)
     .await
     .map_err(Into::into)
+}
+
+/// A supplied evidence record, or the marker that records were omitted.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct Evidence {
+    #[serde(deserialize_with = "lenient")]
+    omitted_records: Option<u64>,
+    read_tools_required: Value,
+    #[serde(deserialize_with = "lenient")]
+    revision: Option<i64>,
 }
 
 /// Whether any admitted chunk carries a vector of this model, so a semantic query is worth its cost.

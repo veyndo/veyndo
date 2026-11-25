@@ -3,7 +3,9 @@ use crate::domain::prompt_context::catalog_snapshot;
 use crate::knowledge;
 use crate::store::context_products::localized_products;
 use crate::store::observations::public_pairs;
+use serde::Deserialize;
 use serde_json::{Value, json};
+use veyndo_core::document::view;
 use veyndo_core::shop_scope::tenant;
 use veyndo_core::{RequestContext, Result, State, conflict};
 use veyndo_marketing::service::channels::filter_channel;
@@ -16,16 +18,18 @@ pub async fn graph(a: &State, h: &RequestContext, ps: &[Product]) -> Result<Valu
     let t = tenant(h)?;
     let ids = ps.iter().map(|p| p.id.clone()).collect::<Vec<_>>();
     let mut graph = knowledge::neighborhood(&a.db, &t, &ids).await?;
-    if let Some(edges) = graph["edges"].as_array_mut() {
+    if let Some(edges) = graph.get_mut("edges").and_then(Value::as_array_mut) {
         edges.retain(|e| {
-            ps.iter().any(|p| e["sourceId"] == p.id)
-                && (e["kind"] != "PAIRS_WITH" || ps.iter().any(|p| e["targetId"] == p.id))
+            let e = view::<Edge>(e);
+            ps.iter().any(|p| e.source_id == p.id)
+                && (e.kind != "PAIRS_WITH" || ps.iter().any(|p| e.target_id == p.id))
         });
     }
     let mut pairs = public_pairs(a, &t).await?;
     if let Some(pairs) = pairs.as_array_mut() {
         pairs.retain(|e| {
-            ps.iter().any(|p| e["left"] == p.id) && ps.iter().any(|p| e["right"] == p.id)
+            let e = view::<Pair>(e);
+            ps.iter().any(|p| e.left == p.id) && ps.iter().any(|p| e.right == p.id)
         });
     }
     graph["observedPairs"] = pairs;
@@ -66,4 +70,21 @@ pub async fn revalidate(
         return Err(changed());
     }
     Ok(())
+}
+
+/// A relation in the product neighborhood.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct Edge {
+    source_id: Value,
+    target_id: Value,
+    kind: Value,
+}
+
+/// A merchant-approved observed pair.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct Pair {
+    left: Value,
+    right: Value,
 }
