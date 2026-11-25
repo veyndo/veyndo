@@ -1,5 +1,5 @@
 /** Manual orders remain actor-private drafts until explicit native quote review and idempotent completion. */
-import { Button } from "../../kit/ui";
+import { Button, Notice } from "../../kit/ui";
 import OrderReview from "./OrderReview";
 import useOrderCreation from "./useOrderCreation";
 import type { RequestFn } from "../../shared/api/types";
@@ -104,11 +104,7 @@ export default function OrderCreate({
           {n("cancel")}
         </Button>
       </header>
-      {error && (
-        <p className="settings-error" role="alert">
-          {error}
-        </p>
-      )}
+      {error && <Notice tone="danger">{error}</Notice>}
       {!review ? (
         <form
           onSubmit={async (e) => {

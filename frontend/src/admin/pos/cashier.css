@@ -3,7 +3,6 @@
   grid-template-columns: 1fr;
 }
 .studio:has(.pos-workspace[data-focus="true"]) > .studio-sidebar,
-.studio:has(.pos-workspace[data-focus="true"]) .studio-header,
 .studio:has(.pos-workspace[data-focus="true"]) .studio-statusbar {
   display: none;
 }

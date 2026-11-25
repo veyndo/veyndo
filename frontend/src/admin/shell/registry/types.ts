@@ -31,6 +31,7 @@ export type StudioRoute<Id extends string = string> = {
  */
 export type SlotContexts = {
   "admin.dashboard": Record<string, never>;
+  "admin.customer": { customerId: string };
   "admin.order": { orderId: string };
   "admin.order.general": { orderId: string };
   "admin.product.general": { productId: string };
@@ -40,7 +41,7 @@ export type SlotLocation = keyof SlotContexts;
 /** The kinds of contribution; each kind may only use its own locations. */
 export type ContributionKind = "page-slot" | "dashboard-card" | "form-field";
 export const contributionLocations: Record<ContributionKind, SlotLocation[]> = {
-  "page-slot": ["admin.order", "admin.order.general"],
+  "page-slot": ["admin.customer", "admin.order", "admin.order.general"],
   "dashboard-card": ["admin.dashboard"],
   "form-field": ["admin.product.general"],
 };

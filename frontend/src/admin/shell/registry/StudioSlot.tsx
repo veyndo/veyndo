@@ -8,6 +8,7 @@ import { StudioContext } from "../StudioContext";
 import type { SlotContexts, SlotLocation } from "./types";
 
 const appLocations: SlotLocation[] = [
+  "admin.customer",
   "admin.order",
   "admin.order.general",
   "admin.product.general",

@@ -64,10 +64,7 @@
   color: var(--text, #162943);
   box-sizing: border-box;
 }
-.native-table-scroll {
-  overflow: auto;
-  max-height: 460px;
-}
+
 .native-data table {
   width: 100%;
   border-collapse: collapse;
@@ -252,7 +249,4 @@
 }
 .core-extension > header small {
   color: var(--muted);
-}
-.core-extension .content-language-picker {
-  margin-block: 12px;
 }

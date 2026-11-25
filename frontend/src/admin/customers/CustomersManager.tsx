@@ -1,7 +1,17 @@
 /** CRM list and editable customer profile with linked order history. */
 import type { GridCriteria } from "../../shared/grid/types";
 import CoreExtensions from "../../shared/apps/CoreExtensions";
-import { AppSurfaceSlot } from "../../shared/apps/AppSurfaces";
+import StudioSlot from "../shell/registry/StudioSlot";
+import { useQuery } from "../../kit/query";
+import {
+  Badge,
+  Button,
+  Card,
+  Checkbox,
+  Field,
+  Notice,
+  Select,
+} from "../../kit/ui";
 import CustomerCreate from "./CustomerCreate";
 import { useAdminCreationText } from "../../shared/i18n/admin-creation-i18n";
 import CustomerDirectory from "./CustomerDirectory";
@@ -40,15 +50,44 @@ export default function CustomersManager({
   const { o } = useOperationsText();
   const { c } = useCustomerText();
   const { r, locale } = useCrmText();
-  const [groups, setGroups] = useState<any[]>([]),
-    [mainLocale, setMainLocale] = useState("en-GB"),
-    [baseline, setBaseline] = useState(""),
+  const [baseline, setBaseline] = useState(""),
     [pending, setPending] = useState<(() => void) | null>(null);
-  const [countries, setCountries] = useState<string[]>(["DE"]);
   const [customer, setCustomer] = useState<any>(),
-    [canEdit, setCanEdit] = useState(false),
-    [error, setError] = useState(""),
+    [detailError, setError] = useState(""),
     [busy, setBusy] = useState(false);
+  // Rights decide which context to read: the creation context for writers, the
+  // group list for settings readers; equal keys share Studio's query cache.
+  const access = useQuery(["auth", "access"], () =>
+    request("/api/auth/access"),
+  );
+  const permissions: string[] = access.data?.permissions ?? [];
+  const canEdit = permissions.includes("customers.write");
+  const options = useQuery(["checkout", "options"], () =>
+    request("/store-api/checkout/options"),
+  );
+  const creation = useQuery(
+    ["customers", "create-context"],
+    () => request("/api/merchant/customers/create-context"),
+    { enabled: canEdit },
+  );
+  const groupList = useQuery(
+    ["customers", "groups"],
+    () => request("/api/merchant/customer-groups"),
+    { enabled: !canEdit && permissions.includes("settings.read") },
+  );
+  const context = canEdit ? creation.data : groupList.data;
+  const groups: any[] = context?.elements ?? [];
+  const mainLocale: string = context?.mainLocale ?? "en-GB";
+  const countries: string[] =
+    canEdit && creation.data
+      ? (creation.data.countries ?? ["DE"])
+      : (options.data?.countries ?? ["DE"]);
+  const error =
+    detailError ||
+    [access, options, creation, groupList]
+      .map((query) => (query.error as Error | undefined)?.message)
+      .find(Boolean) ||
+    "";
   const editable = canEdit && customer?.guest !== true;
   const [addressDirty, setAddressDirty] = useState(false);
   const dirty =
@@ -64,28 +103,6 @@ export default function CustomersManager({
     else action();
   };
   useUnsavedWorkspace(dirty || addressDirty, onDirtyChange);
-  useEffect(() => {
-    request("/store-api/checkout/options")
-      .then((v) => setCountries(v.countries))
-      .catch((e) => setError(e.message));
-    request("/api/auth/access")
-      .then(async (v) => {
-        setCanEdit(v.permissions.includes("customers.write"));
-        if (v.permissions.includes("customers.write")) {
-          const context = await request(
-            "/api/merchant/customers/create-context",
-          );
-          setGroups(context.elements ?? []);
-          setCountries(context.countries ?? ["DE"]);
-          setMainLocale(context.mainLocale);
-        } else if (v.permissions.includes("settings.read")) {
-          const context = await request("/api/merchant/customer-groups");
-          setGroups(context.elements ?? []);
-          setMainLocale(context.mainLocale);
-        }
-      })
-      .catch((e) => setError(e.message));
-  }, [request]);
   const detail = async (email: string) => {
     try {
       const next = await request(
@@ -122,12 +139,12 @@ export default function CustomersManager({
         <h1>{o("customers")}</h1>
         <p>{o("customersHint")}</p>
         {!customer && !creating && canEdit && (
-          <button className="studio-primary" onClick={() => setCreating(true)}>
+          <Button tone="primary" onClick={() => setCreating(true)}>
             {n("newCustomer")}
-          </button>
+          </Button>
         )}
       </div>
-      {error && <p role="alert">{error}</p>}
+      {error && <Notice tone="danger">{error}</Notice>}
       {creating ? (
         <CustomerCreate
           key={mainLocale}
@@ -144,8 +161,7 @@ export default function CustomersManager({
         />
       ) : customer ? (
         <>
-          <button
-            className="studio-secondary"
+          <Button
             onClick={() => {
               navigate(() => {
                 if (onEntityBack) onEntityBack();
@@ -156,8 +172,8 @@ export default function CustomersManager({
             }}
           >
             {onEntityBack ? r("back") : o("back")}
-          </button>
-          <section className="studio-card">
+          </Button>
+          <Card level={2}>
             <div className="customer-heading">
               <div>
                 <small>
@@ -168,11 +184,15 @@ export default function CustomersManager({
                 <h2>{customer.profile.name || customer.email}</h2>
                 <p>{customer.email}</p>
               </div>
-              <span className="operation-status">
+              <Badge
+                tone={
+                  customer.guest || customer.active ? "positive" : "neutral"
+                }
+              >
                 {customer.guest
                   ? r("guest")
                   : o(customer.active ? "active" : "inactive")}
-              </span>
+              </Badge>
             </div>
             {!customer.guest && (
               <form
@@ -209,9 +229,8 @@ export default function CustomersManager({
                     setCustomer({ ...customer, profile: p, company: p.company })
                   }
                 />
-                <label>
-                  {o("group")}
-                  <select
+                <Field label={o("group")}>
+                  <Select
                     disabled={!editable}
                     value={customer.customerGroup}
                     onChange={(e) =>
@@ -226,23 +245,20 @@ export default function CustomersManager({
                         {groupName(g.id)}
                       </option>
                     ))}
-                  </select>
-                </label>
-                <label className="checkbox-label">
-                  <input
-                    type="checkbox"
-                    disabled={!editable}
-                    checked={customer.active}
-                    onChange={(e) =>
-                      setCustomer({ ...customer, active: e.target.checked })
-                    }
-                  />
-                  {o("active")}
-                </label>
+                  </Select>
+                </Field>
+                <Checkbox
+                  label={o("active")}
+                  disabled={!editable}
+                  checked={customer.active}
+                  onChange={(e) =>
+                    setCustomer({ ...customer, active: e.target.checked })
+                  }
+                />
                 {editable && (
-                  <button disabled={busy} className="studio-primary">
+                  <Button type="submit" tone="primary" disabled={busy}>
                     {o("save")}
-                  </button>
+                  </Button>
                 )}
               </form>
             )}
@@ -290,7 +306,7 @@ export default function CustomersManager({
               />
             )}
             {!customer.guest && (
-              <AppSurfaceSlot
+              <StudioSlot
                 location="admin.customer"
                 context={{ customerId: customer.id }}
               />
@@ -305,7 +321,7 @@ export default function CustomersManager({
                 onRestored={() => detail(customer.email)}
               />
             )}
-          </section>
+          </Card>
         </>
       ) : (
         <CustomerDirectory

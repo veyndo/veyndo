@@ -1,4 +1,5 @@
 /** Native CRM creation with explicit address defaults, inline validation and unsaved-change recovery. */
+import { Button, Notice } from "../../kit/ui";
 import { useState } from "react";
 import CustomerFields from "../../shared/customer/CustomerFields";
 import AddressFields from "../../shared/customer/AddressFields";
@@ -66,20 +67,15 @@ export default function CustomerCreate({
           <h2>{n("newCustomer")}</h2>
           <p>{n("customerHint")}</p>
         </div>
-        <button
+        <Button
           type="button"
-          className="studio-secondary"
           disabled={busy}
           onClick={() => (dirty ? setDiscard(true) : onBack())}
         >
           {n("cancel")}
-        </button>
+        </Button>
       </header>
-      {error && (
-        <p role="alert" className="settings-error">
-          {error}
-        </p>
-      )}
+      {error && <Notice tone="danger">{error}</Notice>}
       <form
         onSubmit={async (e) => {
           e.preventDefault();
@@ -168,9 +164,9 @@ export default function CustomerCreate({
         )}
         <footer className="settings-save-bar">
           <span>{n("customerHint")}</span>
-          <button className="studio-primary" disabled={busy}>
+          <Button tone="primary" type="submit" disabled={busy}>
             {n(busy ? "busy" : "saveCustomer")}
-          </button>
+          </Button>
         </footer>
       </form>
       {discard && (
