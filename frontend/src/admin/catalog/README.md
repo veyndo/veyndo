@@ -62,6 +62,26 @@ Files and their individual responsibilities are listed in [the generated source 
 
 [`studio-extension.ts`](studio-extension.ts) declares this area's Studio routes and slot contributions for [the registry](../shell/registry/README.md); [`ProductDataRoute.tsx`](ProductDataRoute.tsx) adapt the Studio context to the area's views.
 
+## Styles
+
+Handwritten area styles moved from `admin/styles` (unchanged rules; rebuilding on `kit/ui` follows).
+
+- [`media-workspace.css`](media-workspace.css): Gallery workspace: airy tiles, focused image inspector and accessible upload surfaces using Studio theme tokens.
+- [`product-workspace.css`](product-workspace.css): Scoped compact product header, grouped navigation, responsive section selection and flat editing panels.
+- [`catalog.css`](catalog.css): Light, precise catalog workspace with accessible tables, focused detail panels and visual authoring.
+- [`catalog-editor.css`](catalog-editor.css): Visual editor and category workspace responsive styles.
+- [`variants.css`](variants.css): Variant family and review table share the catalog's responsive theme and focus treatment.
+- [`product-assignments.css`](product-assignments.css): Product assignments use compact searchable choices, native checkboxes and the Studio theme.
+- [`related-products.css`](related-products.css): Ordered product choices use retained compact rows, visible move/remove controls and bounded native search results.
+- [`product-specifications.css`](product-specifications.css): Product facts use compact labelled groups, explicit add rows and a native definition-list preview within the existing editor surface.
+- [`product-content.css`](product-content.css): Product content keeps a compact vertical rhythm and uses the incumbent Studio surfaces and native disclosures.
+- [`product-seo.css`](product-seo.css): Product SEO uses one readable field column and a responsive search-preview area on existing Studio theme surfaces.
+- [`product-models.css`](product-models.css): Model preview and settings extend the incumbent gallery without turning GLB files into image covers.
+- [`product-pricing.css`](product-pricing.css): Product pricing follows the native save path with grouped basics and optional conditions.
+- [`canvas-commerce-editor.css`](canvas-commerce-editor.css): Shared native commerce handoff spacing loads with its Canvas editor in every workspace.
+- [`catalog-preparation.css`](catalog-preparation.css): Readiness uses the shared paged grid; compact step controls route to native editors.
+- [`catalog-intake.css`](catalog-intake.css): Catalogue setup uses the Studio palette, native modal focus containment and bounded review cards.
+
 ## Verification
 
 During development, run affected frontend test suites, `npm run build` and `npm run architecture` from `frontend/`. Complete tests and coverage run daily through the existing workflow. Coverage includes untested source files; a module in this folder is not automatically fully tested. See the root [testing guide](../../../../docs/testing.md) for backend integration and coverage limits.

@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import type { RequestFn } from "../shell/studio-types";
 import Icon from "../../shared/ui/Icon";
 import { useSovereignText, type SovereignWord } from "./sovereign-i18n";
-import "../styles/sovereign.css";
+import "./sovereign.css";
 export type Sovereignty = {
   enabled: boolean;
   lockedByDeployment: boolean;

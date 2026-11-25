@@ -12,20 +12,7 @@
   padding: 0;
   min-width: 0;
 }
-.api-scope-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-  gap: 10px;
-  margin-bottom: 20px;
-}
-.api-scope-grid label {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-}
+
 .api-key-row {
   display: flex;
   align-items: center;
@@ -100,12 +87,6 @@
   .developer-workspace-tabs {
     padding: 16px;
   }
-}
-
-.api-scope-grid small {
-  display: block;
-  color: var(--muted);
-  margin-top: 3px;
 }
 
 .api-console .studio-card > label,

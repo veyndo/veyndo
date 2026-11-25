@@ -9,7 +9,7 @@ import type { RequestFn } from "../../shell/studio-types";
 import type { BehaviorReport, Journey } from "./types";
 import BehaviorGraph from "./BehaviorGraph";
 import BehaviorJourney from "./BehaviorJourney";
-import "../../styles/behavior.css";
+import "../behavior.css";
 export default function BehaviorView({
   request,
   onProduct,

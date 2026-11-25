@@ -1,6 +1,6 @@
 /** Localized category tree editor; parent moves and revisions are validated in the API. */
-import "../styles/catalog.css";
-import "../styles/catalog-editor.css";
+import "./catalog.css";
+import "./catalog-editor.css";
 import EntityHistory from "../../shared/history/EntityHistory";
 import { useUnsavedWorkspace } from "../../shared/ui/useUnsavedWorkspace";
 import { useState } from "react";
@@ -10,7 +10,7 @@ import { type Category } from "./catalog-model";
 import TranslationFields from "../../shared/geography/TranslationFields";
 import { useCountryCatalogue } from "../../shared/geography/useCountryCatalogue";
 import { inheritedText } from "../../shared/geography/geography-types";
-import "../styles/international.css";
+import "../settings/international.css";
 import { ContentLanguage } from "../../shared/i18n/ContentLanguage";
 import CategoryFactQuery from "./CategoryFactQuery";
 export function orderedCategories(

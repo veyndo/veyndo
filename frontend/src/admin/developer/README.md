@@ -45,3 +45,23 @@ Run frontend build, tests, coverage, localization and architecture checks. See [
 ## Studio registration
 
 [`studio-extension.ts`](studio-extension.ts) declares this area's Studio routes and slot contributions for [the registry](../shell/registry/README.md); [`DeveloperRoute.tsx`](DeveloperRoute.tsx) adapt the Studio context to the area's views.
+
+## Styles
+
+Handwritten area styles moved from `admin/styles` (unchanged rules; rebuilding on `kit/ui` follows).
+
+- [`app-creation.css`](app-creation.css): Grouped illustrated placements, compact language context and a responsive private-draft summary.
+- [`app-studio.css`](app-studio.css): App Studio: restrained light canvas, compact control density and responsive palette/inspector workspaces.
+- [`app-studio-panels.css`](app-studio-panels.css): App Studio model, connection, agent and version panels.
+- [`app-capability.css`](app-capability.css): Merchant-friendly idea brief, explicit next steps and optional bounded rule checks share Studio tokens.
+- [`app-canvas-workspace.css`](app-canvas-workspace.css): Scene overview and direct editing share the Studio canvas; tools never compete with the preview.
+- [`app-workspace.css`](app-workspace.css): App Studio panel sizing, visible insertions and shared automation presentation.
+- [`app-studio-preview.css`](app-studio-preview.css): Passive schema previews and semantic navigation. No alternative app runtime.
+- [`app-assistant.css`](app-assistant.css): Guided extension workspace: restrained colour, clear choices and responsive setup.
+- [`app-studio-inspector.css`](app-studio-inspector.css): App Studio binding indicators, empty canvas and properties inspector.
+- [`app-studio-responsive.css`](app-studio-responsive.css): Responsive App Studio layouts and reduced-motion settings.
+- [`app-agent-drawer.css`](app-agent-drawer.css): Contextual AI dialog presentation; native dialog owns modal focus and the editing canvas remains mounted.
+- [`app-building.css`](app-building.css): Modern recipe cards and structural AI review reuse Studio colors and responsive interaction rules.
+- [`app-canvas-responsive.css`](app-canvas-responsive.css): Shared app canvas keeps its native controls reachable at narrow and short viewport sizes.
+- [`app-brief.css`](app-brief.css): Description-led entry keeps one clear request above the optional visual app patterns.
+- [`api-console.css`](api-console.css): Responsive developer key management and bounded API explorer using Studio theme tokens.

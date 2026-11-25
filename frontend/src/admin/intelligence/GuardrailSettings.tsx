@@ -15,7 +15,7 @@ import {
   type Policy,
   type Settings,
 } from "./guardrail-model";
-import "../styles/guardrails.css";
+import "./guardrails.css";
 export default function GuardrailSettings(props: {
   request: RequestFn;
   products: Product[];

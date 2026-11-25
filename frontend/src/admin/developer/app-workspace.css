@@ -1,8 +1,5 @@
 /** App Studio panel sizing, visible insertions and shared automation presentation. */
-.app-editor-workspace {
-  position: relative;
-  grid-template-columns: minmax(0, 1fr) 10px var(--app-inspector-width, 340px);
-}
+
 .app-designer {
   grid-template-columns: var(--app-palette-width, 180px) 10px minmax(0, 1fr);
 }
@@ -75,47 +72,10 @@
   margin-bottom: 12px;
   cursor: pointer;
 }
-.app-metadata .localized-field,
 .app-metadata label {
   margin-bottom: 12px;
 }
-.app-placement-picker {
-  grid-column: 1/-1;
-  border: 0;
-  padding: 0;
-  min-width: 0;
-}
-.app-placement-picker p {
-  font-size: 13px;
-  color: var(--muted);
-  line-height: 1.6;
-}
-.app-placement-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-  gap: 10px;
-}
-.app-placement-grid .app-placement-card {
-  display: flex;
-  align-items: center;
-  padding: 16px;
-  gap: 12px;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  cursor: pointer;
-}
-.app-placement-card[data-selected="true"] {
-  background: var(--hover);
-  border-color: var(--accent);
-}
-.app-placement-grid input {
-  width: 18px;
-  min-height: 18px;
-  flex-shrink: 0;
-}
-.app-placement-card strong {
-  font-size: 12px;
-}
+
 .app-connections > details,
 .app-data-safety {
   border: 1px solid var(--border);
@@ -170,9 +130,6 @@
   color: var(--text);
 }
 @container (max-width:1100px) {
-  .app-editor-workspace {
-    grid-template-columns: minmax(0, 1fr) 8px minmax(260px, 30%);
-  }
   .app-designer {
     grid-template-columns:
       minmax(148px, var(--app-palette-width, 180px))
@@ -180,9 +137,6 @@
   }
 }
 @media (max-width: 900px) {
-  .app-editor-workspace {
-    grid-template-columns: 1fr;
-  }
   .app-designer {
     grid-template-columns: 160px minmax(0, 1fr);
   }
@@ -192,9 +146,6 @@
   .app-inspector {
     max-height: none;
     grid-template-columns: 1fr;
-  }
-  .app-placement-grid {
-    grid-template-columns: 1fr 1fr;
   }
 }
 @media (max-width: 600px) {
@@ -212,9 +163,6 @@
   }
   .app-palette > button > svg:last-child {
     display: none;
-  }
-  .app-placement-grid {
-    grid-template-columns: 1fr;
   }
 }
 

@@ -4,7 +4,7 @@ import { ProductRich } from "./ProductLocalizedContent";
 import { useCatalogText } from "../../shared/i18n/catalog-i18n";
 import { useProductContentText } from "./product-content-i18n";
 import type { ProductDraft } from "./catalog-model";
-import "../styles/product-content.css";
+import "./product-content.css";
 export default function ProductGeneral({
   draft,
   lang,

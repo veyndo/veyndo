@@ -21,6 +21,18 @@ Files and their individual responsibilities are listed in [the generated source 
 
 [`studio-extension.ts`](studio-extension.ts) declares this area's Studio routes and slot contributions for [the registry](../shell/registry/README.md); [`KnowledgeRoute.tsx`](KnowledgeRoute.tsx) adapt the Studio context to the area's views.
 
+## Styles
+
+Handwritten area styles moved from `admin/styles` (unchanged rules; rebuilding on `kit/ui` follows).
+
+- [`knowledge-evidence.css`](knowledge-evidence.css): Product evidence, retrieval excerpts, observed pairs and responsive knowledge layouts.
+- [`guardrails.css`](guardrails.css): Native pricing policy workbench: merchant units, bounded product lookup and shared Studio tokens.
+- [`behavior.css`](behavior.css): Consent-bound insights use the existing Studio tokens and a responsive, inspectable visual hierarchy.
+- [`knowledge.css`](knowledge.css): Unified knowledge workspace: evidence-first hierarchy, accessible cards and theme-aware responsive layouts.
+- [`knowledge-sources.css`](knowledge-sources.css): Knowledge source library/editor layouts: single-language forms and lifecycle controls.
+- [`autopilot.css`](autopilot.css): Autopilot summary: level per area, daily meters and today's autonomous price changes.
+- [`sovereign.css`](sovereign.css): Sovereign AI report: mode state and one row per model route.
+
 ## Verification
 
 Run `npm run build`, `npm test`, `npm run test:coverage` and `npm run architecture` from `frontend/`. Coverage includes untested source files; a module in this folder is not automatically fully tested. See the root [testing guide](../../../../docs/testing.md) for backend integration and coverage limits.

@@ -16,7 +16,7 @@ import type { IntakeMode } from "../catalog/catalog-intake-model";
 import MigrationWorkspace from "../../../../extensions/apps/migration/studio/MigrationWorkspace";
 import { useMigrationText } from "../../../../extensions/apps/migration/studio/i18n";
 import MarketplaceWorkspace from "../../../../extensions/apps/marketplaces/studio/MarketplaceWorkspace";
-import "../styles/sales-channels.css";
+import "./sales-channels.css";
 export default function SalesChannelsWorkspace({
   request,
   scopedRequest,

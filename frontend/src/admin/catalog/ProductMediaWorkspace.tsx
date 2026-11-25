@@ -14,7 +14,7 @@ import ProductGallery from "./ProductGallery";
 import { useProductMediaText } from "./product-media-i18n";
 import Icon from "../../shared/ui/Icon";
 import AiImageStudio from "./AiImageStudio";
-import "../styles/media-workspace.css";
+import "./media-workspace.css";
 import ProductModels from "./ProductModels";
 import { isModel } from "../../shared/media/product-media";
 export default function ProductMediaWorkspace({

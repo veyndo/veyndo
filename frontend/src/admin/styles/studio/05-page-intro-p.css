@@ -33,11 +33,7 @@
 .soft-tag.pending {
   color: var(--warning);
 }
-.metric-grid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 12px;
-}
+
 .metric {
   border: 1px solid var(--border);
   border-radius: 10px;
@@ -85,42 +81,7 @@
   gap: 20px;
   align-items: start;
 }
-.order-chart {
-  height: 220px;
-  display: flex;
-  gap: 10px;
-  padding-top: 12px;
-}
-.chart-day {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  align-items: center;
-  min-width: 0;
-  flex: 1;
-  font-size: 12px;
-  font-variant-numeric: tabular-nums;
-}
-.bar-track {
-  height: 155px;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  background: var(--panel);
-  border-radius: 4px;
-  overflow: hidden;
-}
-.bar-track > div {
-  background: var(--accent);
-  min-height: 2px;
-  border-radius: 4px;
-}
-.chart-day small {
-  font-size: 9px;
-  color: var(--muted);
-  white-space: nowrap;
-}
+
 .inventory-row {
   display: flex;
   align-items: center;
@@ -246,22 +207,4 @@
   font-size: 12px;
   color: var(--muted);
   line-height: 1.8;
-}
-.knowledge-stats {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  background: var(--surface);
-}
-.knowledge-stats > span {
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  font-size: 12px;
-  color: var(--muted);
-}
-.knowledge-stats > span + span {
-  border-left: 1px solid var(--border);
 }

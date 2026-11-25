@@ -11,7 +11,7 @@ import { useInternationalText } from "../../shared/i18n/international-i18n";
 import { useCatalogText } from "../../shared/i18n/catalog-i18n";
 import { useProductSpecificationText } from "./product-specification-i18n";
 import type { ProductDraft } from "./catalog-model";
-import "../styles/product-specifications.css";
+import "./product-specifications.css";
 export default function ProductSpecifications({
   draft,
   lang,

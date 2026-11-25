@@ -30,6 +30,16 @@ Files and their individual responsibilities are listed in [the generated source 
 
 [`studio-extension.ts`](studio-extension.ts) declares this area's Studio routes and slot contributions for [the registry](../shell/registry/README.md); [`SettingsRoute.tsx`](SettingsRoute.tsx) adapt the Studio context to the area's views.
 
+## Styles
+
+Handwritten area styles moved from `admin/styles` (unchanged rules; rebuilding on `kit/ui` follows).
+
+- [`settings.css`](settings.css): Independent settings navigation, grouped native forms and save feedback in Studio theme tokens.
+- [`international.css`](international.css): International commerce workbench: compact master/detail records, calm colour and clear field hierarchy.
+- [`international-details.css`](international-details.css): Destination rates, translation jobs and responsive international workbench layout.
+- [`company-settings.css`](company-settings.css): Company editor: structured addresses, visible scope inheritance and compact upload controls.
+- [`b2b-settings.css`](b2b-settings.css): Revisioned B2B settings cards, accessible switches and responsive spacing.
+
 ## Verification
 
 Run `npm run build`, `npm test`, `npm run test:coverage` and `npm run architecture` from `frontend/`. Coverage includes untested source files; a module in this folder is not automatically fully tested. See the root [testing guide](../../../../docs/testing.md) for backend integration and coverage limits.

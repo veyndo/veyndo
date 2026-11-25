@@ -1,13 +1,13 @@
 /** Revision-aware product aggregate editor: one save, translation tabs and product-scoped linked capabilities. */
-import "../styles/catalog.css";
-import "../styles/catalog-editor.css";
+import "./catalog.css";
+import "./catalog-editor.css";
 import { useCoreExtensions } from "../../shared/apps/CoreExtensions";
 import { contentLocale } from "../../shared/i18n/content-language";
 import { invalidProductSeo } from "../../shared/content/product-seo";
 import { useProductSeoText } from "./product-seo-i18n";
 import ProductEditorHeader from "./ProductEditorHeader";
 import { useProductEditorText } from "./product-editor-i18n";
-import "../styles/product-workspace.css";
+import "./product-workspace.css";
 import ProductCompliance from "../legal/ProductCompliance";
 import { useLegalText } from "../../shared/i18n/legal-i18n";
 import EntityHistory from "../../shared/history/EntityHistory";

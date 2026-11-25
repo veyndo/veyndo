@@ -1,5 +1,5 @@
 /** Merchant ideas, requirements and explicit agent handoff edit the canonical versioned Manifest without executing changes. */
-import "../styles/app-capability.css";
+import "./app-capability.css";
 import type { Manifest } from "../../shared/apps/native/types";
 import LocalizedField from "../../shared/i18n/LocalizedField";
 import { useAppCapabilityText } from "../../shared/i18n/app-capability-i18n";

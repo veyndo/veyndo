@@ -18,3 +18,11 @@ See [channel access and integration limits](../../../../docs/channel-management.
 ## Studio registration
 
 [`studio-extension.ts`](studio-extension.ts) declares this area's Studio routes and slot contributions for [the registry](../shell/registry/README.md); [`ChannelsRoute.tsx`](ChannelsRoute.tsx) adapt the Studio context to the area's views.
+
+## Styles
+
+Handwritten area styles moved from `admin/styles` (unchanged rules; rebuilding on `kit/ui` follows).
+
+- [`sales-channels.css`](sales-channels.css): Sales-channel cards, onboarding and scoped settings use the same responsive, accessible Studio design.
+- [`agentic-channels.css`](agentic-channels.css): Inbound catalogue setup keeps actions, permission state and external approval readable at every width.
+- [`supply.css`](supply.css): Supplier links and reorder proposals in the sales channel workspace.

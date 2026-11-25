@@ -138,13 +138,7 @@
   border-radius: 8px;
   font-size: 12px;
 }
-.app-preview-button {
-  gap: 6px;
-}
-.app-preview-button .app-preview-kind,
-.app-preview-button h3 {
-  display: none;
-}
+
 .app-preview-checkbox {
   display: flex;
   align-items: center;

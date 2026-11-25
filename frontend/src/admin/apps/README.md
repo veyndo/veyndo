@@ -24,6 +24,16 @@ Files and their individual responsibilities are listed in [the generated source 
 
 [`studio-extension.ts`](studio-extension.ts) declares this area's Studio routes and slot contributions for [the registry](../shell/registry/README.md); [`AppsRoute.tsx`](AppsRoute.tsx), [`StoryfrontsRoute.tsx`](StoryfrontsRoute.tsx) adapt the Studio context to the area's views.
 
+## Styles
+
+Handwritten area styles moved from `admin/styles` (unchanged rules; rebuilding on `kit/ui` follows).
+
+- [`app-catalog.css`](app-catalog.css): App library/detail presentation: bounded cards, passive artwork, accessible filters and theme-aware forms.
+- [`app-detail.css`](app-detail.css): Scoped app detail hierarchy, permission disclosure, data and integration forms.
+- [`service-integrations.css`](service-integrations.css): Compact, responsive provider setup and explicit operation feedback.
+- [`app-artwork.css`](app-artwork.css): Category cover and app icon artwork, with local deterministic fallbacks.
+- [`provider-account.css`](provider-account.css): Shared provider onboarding layout works independently of the lazy-loaded visual App Studio.
+
 ## Verification
 
 Run `npm run build`, `npm test`, `npm run test:coverage` and `npm run architecture` from `frontend/`. Coverage includes untested source files; a module in this folder is not automatically fully tested. See the root [testing guide](../../../../docs/testing.md) for backend integration and coverage limits.

@@ -6,8 +6,7 @@
   gap: 20px;
 }
 .studio .customer-field-grid label,
-.studio .operations form > label,
-.studio .settings-fields > label {
+.studio .operations form > label {
   display: flex;
   flex-direction: column;
   gap: 8px;

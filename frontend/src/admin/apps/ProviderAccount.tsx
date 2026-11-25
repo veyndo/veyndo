@@ -5,7 +5,7 @@ import type { CountryCatalogue } from "../../shared/geography/geography-types";
 import CountryPicker from "../../shared/geography/CountryPicker";
 import ConfirmDialog from "../../shared/ui/ConfirmDialog";
 import { usePaymentProviderText } from "../../shared/i18n/payment-provider-i18n";
-import "../styles/provider-account.css";
+import "./provider-account.css";
 export default function ProviderAccount({
   provider,
   request,

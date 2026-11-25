@@ -15,7 +15,7 @@ import {
 import { useCatalogText } from "../../shared/i18n/catalog-i18n";
 import { useProductSeoText } from "./product-seo-i18n";
 import type { ProductDraft } from "./catalog-model";
-import "../styles/product-seo.css";
+import "./product-seo.css";
 export default function ProductSeo({
   draft,
   lang,

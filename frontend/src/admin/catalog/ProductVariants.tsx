@@ -7,7 +7,7 @@ import PairFields from "./PairFields";
 import VariantGenerator from "./VariantGenerator";
 import Icon from "../../shared/ui/Icon";
 import { useVariantText } from "./variant-i18n";
-import "../styles/variants.css";
+import "./variants.css";
 export default function ProductVariants({
   draft,
   request,

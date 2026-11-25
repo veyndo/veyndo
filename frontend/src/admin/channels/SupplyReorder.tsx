@@ -6,7 +6,7 @@ import { useSettingsDraft } from "../settings/useSettingsDraft";
 import { useLocale } from "../../shared/i18n/i18n";
 import Icon from "../../shared/ui/Icon";
 import { useSupplyText } from "./supply-i18n";
-import "../styles/supply.css";
+import "./supply.css";
 type Link = {
   productId: string;
   supplierShop: string;

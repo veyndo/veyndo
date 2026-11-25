@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import type { RequestFn } from "../shell/studio-types";
 import { useRelatedProductsText } from "./related-products-i18n";
 import RelatedProductRow from "./RelatedProductRow";
-import "../styles/related-products.css";
+import "./related-products.css";
 type Choice = {
   id: string;
   name: string;

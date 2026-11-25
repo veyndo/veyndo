@@ -12,7 +12,7 @@ import ConfirmDialog from "../../shared/ui/ConfirmDialog";
 import type { RequestFn } from "../shell/studio-types";
 import SettingsSaveBar from "./SettingsSaveBar";
 import { useSettingsDraft } from "./useSettingsDraft";
-import "../styles/international.css";
+import "./international.css";
 export default function CustomerGroupsSettings({
   request,
   canWrite,

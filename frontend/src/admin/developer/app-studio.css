@@ -224,11 +224,7 @@
   border-color: #d8e6ff;
   color: #1769f3;
 }
-.app-editor-workspace {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 260px;
-  min-height: 630px;
-}
+
 .app-designer {
   display: grid;
   grid-template-columns: 170px minmax(0, 1fr);
@@ -323,15 +319,7 @@
   border-radius: 14px;
   color: var(--text, #19304f);
 }
-.app-node-kind {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  color: var(--muted, #64758c);
-  font-size: 10px;
-  letter-spacing: 0.02em;
-  margin-bottom: 14px;
-}
+
 .app-block-select h3 {
   margin: 0 0 12px;
   font-size: 17px;

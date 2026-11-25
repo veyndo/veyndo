@@ -20,7 +20,7 @@ import SettingsSaveBar from "../settings/SettingsSaveBar";
 import EntityHistory from "../../shared/history/EntityHistory";
 import LegalServices from "./LegalServices";
 import ConsumerRequests from "./ConsumerRequests";
-import "../styles/legal-settings.css";
+import "./legal-settings.css";
 export default function LegalSettings({
   request,
   canWrite,

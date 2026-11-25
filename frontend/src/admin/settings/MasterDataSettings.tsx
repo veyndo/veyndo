@@ -23,7 +23,7 @@ import CompanyField from "./CompanyField";
 import CompanyLogo from "./CompanyLogo";
 import CompanyTranslations from "./CompanyTranslations";
 import SettingsSaveBar from "./SettingsSaveBar";
-import "../styles/company-settings.css";
+import "./company-settings.css";
 const groups: {
   title: CompanyWord;
   hint?: CompanyWord;

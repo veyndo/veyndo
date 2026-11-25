@@ -2,7 +2,7 @@
 import type { Package } from "./app-types";
 import Icon from "../../shared/ui/Icon";
 import { useIntegrationDirectoryText } from "./integration-directory-text";
-import "../styles/service-integrations.css";
+import "./service-integrations.css";
 export const integrationRoutes = [
   { name: "Vercel", app: "vercel", kind: "frontend" },
   { name: "Shopware Nexus", app: "", kind: "http" },

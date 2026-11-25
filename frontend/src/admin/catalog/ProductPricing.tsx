@@ -10,7 +10,7 @@ import ProductCurrencyPrices from "./ProductCurrencyPrices";
 import ReferencePriceFields from "./ReferencePriceFields";
 import ProductPriceTiers from "./ProductPriceTiers";
 import { useProductPricingText } from "./product-pricing-i18n";
-import "../styles/product-pricing.css";
+import "./product-pricing.css";
 
 export default function ProductPricing({
   request,

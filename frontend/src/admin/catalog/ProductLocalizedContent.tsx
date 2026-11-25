@@ -5,7 +5,7 @@ import { useEditorBuffer } from "../../shared/content/editor/EditorBuffer";
 const RichEditor = lazy(() => import("../../shared/content/editor/RichEditor"));
 import { useInternationalText } from "../../shared/i18n/international-i18n";
 import type { ProductDraft } from "./catalog-model";
-import "../styles/international.css";
+import "../settings/international.css";
 import { productRichContent } from "./product-content-model";
 import { useProductContentText } from "./product-content-i18n";
 import { editorDocument } from "../../shared/content/editor/rich-conversion";

@@ -36,20 +36,7 @@
   margin-bottom: 20px;
   background: var(--surface, #fff);
 }
-.commerce-section-heading {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 20px;
-}
-.commerce-section-heading svg {
-  color: #1768eb;
-}
-.commerce-section-heading h2 {
-  font-size: 18px;
-  margin: 0;
-  font-weight: 600;
-}
+
 .commerce-manager label {
   display: grid;
   gap: 7px;
@@ -67,9 +54,7 @@
   background: var(--surface, #fff);
   color: inherit;
 }
-.commerce-table-wrap {
-  overflow-x: auto;
-}
+
 .commerce-manager table {
   width: 100%;
   text-align: left;
@@ -87,46 +72,7 @@
 .commerce-manager td input {
   max-width: 180px;
 }
-.shipping-methods {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
-}
-.shipping-methods fieldset {
-  min-width: 0;
-  border: 1px solid var(--border, #dfe7ef);
-  border-radius: 8px;
-  padding: 18px;
-  display: grid;
-  gap: 15px;
-}
-.shipping-methods legend {
-  font-weight: 600;
-  font-size: 13px;
-  padding: 0 7px;
-}
-.commerce-manager .commerce-check {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  min-height: 32px;
-  font-size: 12px;
-}
-.commerce-check input {
-  width: 17px;
-  height: 17px;
-  accent-color: #1768eb;
-}
-.commerce-day-fields {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-}
-.commerce-countries {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 4px;
-}
+
 .payment-methods {
   display: flex;
   gap: 25px;
@@ -137,16 +83,7 @@
   margin-top: 6px;
   font-size: 10px;
 }
-.commerce-save {
-  display: flex;
-  align-items: center;
-  gap: 18px;
-  margin: 20px 0 40px;
-}
-.commerce-save span {
-  font-size: 11px;
-  color: var(--muted, #62758b);
-}
+
 .commerce-review {
   display: flex;
   align-items: start;
@@ -158,8 +95,7 @@
 .commerce-review strong {
   font-size: 13px;
 }
-.commerce-review small,
-.commerce-order > small {
+.commerce-review small {
   display: block;
   font-size: 10px;
   color: var(--muted, #62758b);
@@ -173,33 +109,7 @@
 .commerce-review > button {
   flex-shrink: 0;
 }
-.commerce-order {
-  padding: 20px 0;
-  border-top: 1px solid var(--border, #dfe7ef);
-}
-.commerce-order-heading {
-  display: flex;
-  justify-content: space-between;
-  font-size: 13px;
-}
-.commerce-order-state {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-top: 14px;
-  font-size: 11px;
-  color: var(--muted, #62758b);
-}
-.commerce-order-actions {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  flex-wrap: wrap;
-  margin-top: 18px;
-}
-.commerce-order-actions input {
-  max-width: 200px;
-}
+
 .commerce-manager button {
   min-height: 44px;
 }
@@ -210,48 +120,17 @@
   border-radius: 7px;
   font-size: 13px;
 }
-.commerce-success {
-  padding: 16px;
-  background: #edf8f2;
-  color: #286243;
-  border-radius: 7px;
-  font-size: 13px;
-}
-.commerce-confirm {
-  position: fixed;
-  z-index: 100;
-  left: 50%;
-  top: 40%;
-  transform: translate(-50%, -50%);
-  width: min(450px, 90vw);
-  padding: 28px;
-  background: var(--surface, #fff);
-  border: 1px solid var(--border, #dfe7ef);
-  border-radius: 10px;
-  box-shadow: 0 0 0 100vmax #12223860;
-}
-.commerce-confirm p {
-  font-size: 12px;
-  line-height: 1.6;
-}
-.commerce-confirm button {
-  margin: 15px 8px 0 0;
-}
+
 @media (max-width: 900px) {
   .commerce-manager {
     padding: 25px 20px;
   }
-  .shipping-methods {
-    grid-template-columns: 1fr;
-  }
+
   .commerce-title {
     flex-wrap: wrap;
   }
   .commerce-card {
     padding: 18px;
-  }
-  .commerce-countries {
-    grid-template-columns: repeat(2, 1fr);
   }
 }
 .account-tabs {

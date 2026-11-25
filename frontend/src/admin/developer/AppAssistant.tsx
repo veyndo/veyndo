@@ -1,5 +1,5 @@
 /** Guided app kinds create normal editable manifests; all changes follow private-stage versioning. */
-import "../styles/app-creation.css";
+import "./app-creation.css";
 import AppPlacementPicker from "./AppPlacementPicker";
 import AppCreationSummary from "./AppCreationSummary";
 import AppRecipes from "./AppRecipes";

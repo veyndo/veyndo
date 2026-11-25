@@ -14,9 +14,9 @@ import { useLibraryText } from "../../shared/i18n/app-library-i18n";
 import AppLibrary from "./AppLibrary";
 import { appCategory } from "./library-model";
 import "../../shared/styles/apps.css";
-import "../styles/app-catalog.css";
-import "../styles/app-detail.css";
-import "../styles/app-artwork.css";
+import "./app-catalog.css";
+import "./app-detail.css";
+import "./app-artwork.css";
 import type { RequestFn } from "../shell/studio-types";
 export default function AppsManager({
   request,

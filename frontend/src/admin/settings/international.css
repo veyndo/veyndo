@@ -185,28 +185,7 @@
   display: grid;
   gap: 16px;
 }
-.studio .intl-language-tabs {
-  display: flex;
-  gap: 5px;
-  overflow: auto;
-  padding-bottom: 8px;
-  border-bottom: 1px solid var(--border);
-}
-.studio .intl-language-tabs button {
-  padding: 8px 11px;
-  border-radius: 8px;
-  font-size: 11px;
-  white-space: nowrap;
-  background: var(--surface);
-  color: var(--muted);
-}
-.studio .intl-language-tabs [aria-selected="true"] {
-  background: var(--hover);
-  color: var(--accent);
-}
-.studio .intl-language-tabs small {
-  font-size: 9px;
-}
+
 .studio .intl-rule-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -229,14 +208,6 @@
   color: var(--muted);
   font-size: 11px;
   line-height: 1.7;
-}
-
-.studio .catalog-translated-field {
-  display: grid;
-  gap: 8px;
-}
-.studio .catalog-translated-field > .intl-inherit {
-  justify-self: start;
 }
 
 .studio .catalog-detail-nav .intl-language-switcher {

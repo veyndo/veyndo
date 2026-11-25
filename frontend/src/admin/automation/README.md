@@ -27,3 +27,10 @@ Ownership, executable contracts and explicit migration boundaries are described 
 ## Studio registration
 
 [`studio-extension.ts`](studio-extension.ts) declares this area's Studio routes and slot contributions for [the registry](../shell/registry/README.md); [`AutomationRoute.tsx`](AutomationRoute.tsx) adapt the Studio context to the area's views.
+
+## Styles
+
+Handwritten area styles moved from `admin/styles` (unchanged rules; rebuilding on `kit/ui` follows).
+
+- [`automation.css`](automation.css): Actual graph nodes and original rule forms use the Studio theme and independent responsive columns.
+- [`automation-lifecycle.css`](automation-lifecycle.css): Configuration workspace: readable definitions, clear selection and contextual actions.

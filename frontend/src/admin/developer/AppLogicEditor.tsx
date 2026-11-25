@@ -12,7 +12,7 @@ import { useAppStudioText } from "../../shared/i18n/app-studio-i18n";
 import { parseBasic, printBasic, validateAst } from "./basic-code";
 import { AppCodeBuffer } from "./AppCodeBuffer";
 import AppLogicTopology from "./AppLogicTopology";
-import "../styles/automation.css";
+import "../automation/automation.css";
 import AppInstructionEditor from "./AppInstructionEditor";
 import ConfirmDialog from "../../shared/ui/ConfirmDialog";
 export default function AppLogicEditor({

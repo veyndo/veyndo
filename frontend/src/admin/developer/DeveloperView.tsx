@@ -32,15 +32,15 @@ import AppStudioStatus from "./AppStudioStatus";
 import AppCurrentIdentity from "./AppCurrentIdentity";
 import AppStudioIntro from "./AppStudioIntro";
 import { useDesignerKeys } from "./useDesignerKeys";
-import "../styles/app-studio.css";
-import "../styles/app-assistant.css";
-import "../styles/app-building.css";
-import "../styles/app-studio-inspector.css";
-import "../styles/app-studio-panels.css";
-import "../styles/app-studio-responsive.css";
-import "../styles/app-studio-preview.css";
-import "../styles/app-workspace.css";
-import "../styles/app-agent-drawer.css";
+import "./app-studio.css";
+import "./app-assistant.css";
+import "./app-building.css";
+import "./app-studio-inspector.css";
+import "./app-studio-panels.css";
+import "./app-studio-responsive.css";
+import "./app-studio-preview.css";
+import "./app-workspace.css";
+import "./app-agent-drawer.css";
 export default function DeveloperView({
   request,
   environments,

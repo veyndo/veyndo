@@ -1,6 +1,6 @@
 /** B2B controls edit the shared revisioned settings aggregate; no separate policy store or checkout engine. */
 import "../../shared/b2b/b2b.css";
-import "../styles/b2b-settings.css";
+import "./b2b-settings.css";
 import { b2bChanged } from "../shell/useB2BNavigation";
 import { useEffect } from "react";
 import type { RequestFn } from "../shell/studio-types";

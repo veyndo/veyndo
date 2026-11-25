@@ -7,7 +7,7 @@ import { useLocale } from "../../shared/i18n/i18n";
 import { contentText } from "../../shared/i18n/content-language";
 import Icon from "../../shared/ui/Icon";
 import { useAgenticChannelText } from "./agentic-channel-i18n";
-import "../styles/agentic-channels.css";
+import "./agentic-channels.css";
 type Readiness = {
   cartTransfer: boolean;
   buyerConsent: boolean;

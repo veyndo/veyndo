@@ -230,6 +230,21 @@ if (!process.argv[2]) {
     (sum, f) => sum + fs.readFileSync(f, "utf8").split("\n").length - 1,
     0,
   );
+  // Moving a sheet into its area does not count as removal: all admin CSS only falls too.
+  const adminLines = walk(path.join(source, "admin"))
+    .filter((f) => f.endsWith(".css"))
+    .reduce(
+      (sum, f) => sum + fs.readFileSync(f, "utf8").split("\n").length - 1,
+      0,
+    );
+  if (adminLines > budget.adminLines)
+    errors.push(
+      `admin CSS grew to ${adminLines} lines (budget ${budget.adminLines}); new screens use kit/ui`,
+    );
+  else if (adminLines < budget.adminLines)
+    errors.push(
+      `admin CSS shrank to ${adminLines} lines; lower adminLines in scripts/admin-styles-budget.json to match`,
+    );
   if (sheets.length > budget.files || lines > budget.lines)
     errors.push(
       `admin/styles grew to ${sheets.length} files / ${lines} lines (budget ${budget.files} / ${budget.lines}); new screens use kit/ui`,

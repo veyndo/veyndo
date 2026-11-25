@@ -3,9 +3,7 @@
   .app-tabs-caption {
     display: none;
   }
-  .app-editor-workspace {
-    grid-template-columns: minmax(0, 1fr) 230px;
-  }
+
   .app-designer {
     grid-template-columns: 145px minmax(0, 1fr);
   }
@@ -21,9 +19,7 @@
   .app-studio {
     padding: 18px !important;
   }
-  .app-editor-workspace {
-    grid-template-columns: 1fr;
-  }
+
   .app-inspector {
     border-left: 0;
     border-top: 1px solid var(--border, #dce5ef);

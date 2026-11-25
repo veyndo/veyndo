@@ -250,9 +250,7 @@
   background: var(--accent);
   border-color: var(--accent);
 }
-.channel-editor-heading > .content-language-picker {
-  flex: 0 1 360px;
-}
+
 .channel-editor .channel-status-hint {
   max-width: 65ch;
 }

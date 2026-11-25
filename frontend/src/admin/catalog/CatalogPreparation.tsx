@@ -5,7 +5,7 @@ import { useGridPage } from "../../shared/grid/useGridPage";
 import { StudioContext } from "../shell/StudioContext";
 import type { RequestFn } from "../shell/studio-types";
 import { usePreparationText, type PreparationWord } from "./preparation-i18n";
-import "../styles/catalog-preparation.css";
+import "./catalog-preparation.css";
 export default function CatalogPreparation({
   request,
   onOpen,

@@ -184,9 +184,7 @@
   .studio-card {
     padding: 18px;
   }
-  .metric-grid {
-    gap: 10px;
-  }
+
   .metric {
     padding: 14px;
   }
@@ -196,22 +194,7 @@
   .metric > small {
     font-size: 9px;
   }
-  .knowledge-stats > span {
-    padding: 15px 10px;
-    font-size: 10px;
-  }
-  .knowledge-stats strong {
-    font-size: 26px;
-  }
-  .knowledge-map {
-    min-height: 210px;
-  }
-  .semantic-search {
-    flex-direction: column;
-  }
-  .semantic-search input {
-    font-size: 16px;
-  }
+
   .agent-journey {
     grid-template-columns: 1fr;
     gap: 24px;
@@ -260,11 +243,5 @@
     grid-template-columns: 28px minmax(0, 1fr) 80px;
     gap: 9px;
     font-size: 10px;
-  }
-  .order-chart {
-    gap: 7px;
-  }
-  .chart-day small {
-    font-size: 8px;
   }
 }

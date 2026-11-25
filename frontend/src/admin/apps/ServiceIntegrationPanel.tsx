@@ -6,7 +6,7 @@ import {
   useIntegrationText,
   type IntegrationKey,
 } from "./service-integration-text";
-import "../styles/service-integrations.css";
+import "./service-integrations.css";
 type Status = {
   revision: number;
   settings: Record<string, string | boolean>;

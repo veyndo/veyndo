@@ -3,7 +3,7 @@ import { useState, useId } from "react";
 import { useCatalogText } from "../../shared/i18n/catalog-i18n";
 import Icon from "../../shared/ui/Icon";
 import { useProductSpecificationText } from "./product-specification-i18n";
-import "../styles/product-specifications.css";
+import "./product-specifications.css";
 export default function PairFields({
   value,
   onChange,

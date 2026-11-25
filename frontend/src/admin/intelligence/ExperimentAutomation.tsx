@@ -6,7 +6,7 @@ import {
   useExperimentAutomationText,
   type ExperimentAutomationWord,
 } from "./experiment-automation-i18n";
-import "../styles/autopilot.css";
+import "./autopilot.css";
 export type Automation = { finish?: boolean; apply?: boolean };
 type Suggestion = {
   design: Record<string, unknown> & { automation?: Automation };

@@ -22,9 +22,9 @@ import GuardrailSettings from "./GuardrailSettings";
 import SovereignAI from "./SovereignAI";
 import EvidenceReview from "./EvidenceReview";
 import MemoryView from "./MemoryView";
-import "../styles/knowledge.css";
-import "../styles/knowledge-sources.css";
-import "../styles/knowledge-evidence.css";
+import "./knowledge.css";
+import "./knowledge-sources.css";
+import "./knowledge-evidence.css";
 export function KnowledgeView({
   focus,
   data,

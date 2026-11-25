@@ -14,7 +14,7 @@ import { useWorkbenchText } from "../../shared/i18n/workbench-i18n";
 import { useStudioText } from "../../shared/i18n/studio-ui-i18n";
 import Icon, { type IconName } from "../../shared/ui/Icon";
 import type { RequestFn } from "../shell/studio-types";
-import "../styles/settings.css";
+import "./settings.css";
 import { useInternationalText } from "../../shared/i18n/international-i18n";
 import CommerceSettings from "./CommerceSettings";
 import MasterDataSettings from "./MasterDataSettings";

@@ -14,6 +14,14 @@ Files and their individual responsibilities are listed in [the generated source 
 
 [`studio-extension.ts`](studio-extension.ts) declares this area's Studio routes and slot contributions for [the registry](../shell/registry/README.md); [`TeamRoute.tsx`](TeamRoute.tsx) adapt the Studio context to the area's views.
 
+## Styles
+
+Handwritten area styles moved from `admin/styles` (unchanged rules; rebuilding on `kit/ui` follows).
+
+- [`commerce-manager.css`](commerce-manager.css): commerce manager: Studio visual system and merchant operational layouts.
+- [`team-workspace.css`](team-workspace.css): Account, shop creation and team access share a clear action and form hierarchy.
+- [`team-roles.css`](team-roles.css): Native team roles and readable scopes share Studio surfaces and responsive form rhythm.
+
 ## Verification
 
 Run `npm run build`, `npm test`, `npm run test:coverage` and `npm run architecture` from `frontend/`. Coverage includes untested source files; a module in this folder is not automatically fully tested. See the root [testing guide](../../../../docs/testing.md) for backend integration and coverage limits.

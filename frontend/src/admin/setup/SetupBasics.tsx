@@ -8,7 +8,7 @@ import type { CompanyData } from "../settings/company-types";
 import type { CountryCatalogue } from "../../shared/geography/geography-types";
 import type { CompanyWord } from "../../shared/i18n/company-i18n";
 import { useSetupText } from "./setup-i18n";
-import "../styles/company-settings.css";
+import "../settings/company-settings.css";
 export default function SetupBasics({
   onDirty,
   onSaved,

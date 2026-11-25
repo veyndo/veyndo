@@ -179,12 +179,7 @@
 .app-canvas-agent .app-agent-options {
   flex-wrap: wrap;
 }
-.app-canvas-agent .agent-engines {
-  flex-wrap: wrap;
-}
-.app-canvas-agent .agent-engines button {
-  flex: 1;
-}
+
 .app-canvas-agent .app-agent-options label {
   min-width: 0;
 }

@@ -4,7 +4,7 @@ import type { RequestFn } from "../shell/studio-types";
 import { useLocale } from "../../shared/i18n/i18n";
 import Icon from "../../shared/ui/Icon";
 import { useAutopilotText, type AutopilotWord } from "./autopilot-i18n";
-import "../styles/autopilot.css";
+import "./autopilot.css";
 export type AutopilotStatus = {
   level: number;
   currency: string;

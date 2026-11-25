@@ -8,7 +8,7 @@ import ApiExplorer from "./api/ApiExplorer";
 import { useApiText } from "./api/api-i18n";
 import { useCatalogueText } from "./catalogue/catalogue-i18n";
 const UICatalogue = lazy(() => import("./catalogue/UICatalogue"));
-import "../styles/api-console.css";
+import "./api-console.css";
 export default function DeveloperWorkspace(
   props: ComponentProps<typeof DeveloperView> & { workspace: string },
 ) {

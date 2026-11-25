@@ -2,7 +2,7 @@
 import { lazy, Suspense, useEffect, useState } from "react";
 import { useCatalogIntakeText } from "../../shared/i18n/catalog-intake-i18n";
 import type { IntakeMode } from "../catalog/catalog-intake-model";
-import "../styles/catalog-intake.css";
+import "../catalog/catalog-intake.css";
 const CatalogIntake = lazy(() => import("../catalog/CatalogIntake"));
 import MerchantSourceIntake from "../intelligence/MerchantSourceIntake";
 import { useExperienceUIText } from "../../shared/i18n/experience-ui-i18n";

@@ -8,7 +8,7 @@ import ContentLanguagePicker from "../../shared/i18n/ContentLanguagePicker";
 import Icon from "../../shared/ui/Icon";
 import { useAppBriefText } from "./brief-i18n";
 import { textMap } from "./app-model";
-import "../styles/app-brief.css";
+import "./app-brief.css";
 
 export default function AppBrief({
   onCreate,

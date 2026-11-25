@@ -8,7 +8,7 @@ import type { ProductDraft } from "./catalog-model";
 import type { GalleryImage } from "./media-model";
 import ProductModelCard from "./ProductModelCard";
 import Icon from "../../shared/ui/Icon";
-import "../styles/product-models.css";
+import "./product-models.css";
 export default function ProductModels({
   draft,
   request,

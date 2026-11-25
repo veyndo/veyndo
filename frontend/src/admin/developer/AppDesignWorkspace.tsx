@@ -22,8 +22,8 @@ import AppInspector from "./AppInspector";
 import AppLogicEditor from "./AppLogicEditor";
 import AppPlacementOverview, { AppScenePreview } from "./AppPlacementOverview";
 import SandboxPreview from "./SandboxPreview";
-import "../styles/app-canvas-workspace.css";
-import "../styles/app-canvas-responsive.css";
+import "./app-canvas-workspace.css";
+import "./app-canvas-responsive.css";
 export default function AppDesignWorkspace({
   studio,
   immediate,

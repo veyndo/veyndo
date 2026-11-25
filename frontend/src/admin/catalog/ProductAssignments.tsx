@@ -12,7 +12,7 @@ import {
 } from "./product-assignment-model";
 import { useProductAssignmentText } from "./product-assignment-i18n";
 import type { Category, ProductDraft } from "./catalog-model";
-import "../styles/product-assignments.css";
+import "./product-assignments.css";
 const kindIcons: Record<string, IconName> = {
   storefront: "globe",
   headless: "code",

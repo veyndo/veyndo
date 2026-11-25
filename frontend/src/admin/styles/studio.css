@@ -10,7 +10,7 @@
 @import "./studio/09-responsive.css";
 @import "./studio/10-studio-mobile-preview-button.css";
 
-@import "./automation.css";
+@import "../automation/automation.css";
 
 .agent-run-card {
   margin: 16px 0;

@@ -11,7 +11,7 @@ import PermissionPicker from "./PermissionPicker";
 import Icon from "../../shared/ui/Icon";
 import ConfirmDialog from "../../shared/ui/ConfirmDialog";
 import EntityHistory from "../../shared/history/EntityHistory";
-import "../styles/team-roles.css";
+import "./team-roles.css";
 export type WorkspaceRole = {
   id: string;
   revision: number;

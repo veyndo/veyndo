@@ -20,8 +20,8 @@ import CountriesSettings from "./CountriesSettings";
 import TaxSettings from "./TaxSettings";
 import MethodSettings from "./MethodSettings";
 import LanguageSettings from "./LanguageSettings";
-import "../styles/international.css";
-import "../styles/international-details.css";
+import "./international.css";
+import "./international-details.css";
 export type InternationalConfig = Config & {
   mainLocale: string;
   locales: string[];

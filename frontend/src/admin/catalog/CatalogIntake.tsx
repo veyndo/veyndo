@@ -13,7 +13,7 @@ import {
 } from "./catalog-intake-model";
 import CatalogIntakeSource from "./CatalogIntakeSource";
 import CatalogIntakeReview from "./CatalogIntakeReview";
-import "../styles/catalog-intake.css";
+import "./catalog-intake.css";
 export default function CatalogIntake({
   initialMode,
   initialSource = "",

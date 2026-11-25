@@ -3,7 +3,7 @@ import { useShopText } from "../../shared/i18n/shop-i18n";
 import type { Session } from "./UsersManager";
 
 import { shopApi } from "../../shared/api/shop-api";
-import "../styles/commerce-manager.css";
+import "./commerce-manager.css";
 import { useEffect, useState } from "react";
 import AuthenticationChallenge, {
   isMfaChallenge,

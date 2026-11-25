@@ -10,8 +10,8 @@ import CatalogPreparation from "./CatalogPreparation";
 import { usePreparationText } from "./preparation-i18n";
 import CatalogDirectory from "./CatalogDirectory";
 import CategoriesWorkspace from "./CategoriesWorkspace";
-import "../styles/catalog.css";
-import "../styles/catalog-editor.css";
+import "./catalog.css";
+import "./catalog-editor.css";
 export default function ProductDataView({
   request,
   initialId,
