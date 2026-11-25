@@ -5,7 +5,7 @@ use crate::service::sessions;
 use crate::store::sign_in as store;
 use serde::Deserialize;
 use serde_json::{Value, json};
-use veyndo_core::document::{lenient, view};
+use veyndo_core::document::{lenient, merge, view};
 use veyndo_core::shop_scope::{tenant, token};
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad, conflict, uid};
 use veyndo_identity::domain::credentials::verify_password;
@@ -87,6 +87,9 @@ pub async fn login(host: &dyn SignIn, a: &State, h: &RequestContext, v: &Value) 
     c.token = new_token;
     c.revision += 1;
     let mut result = host.view(&c).await?;
-    result["customerToken"] = json!(sessions::open(a, &t, email).await?);
+    merge(
+        &mut result,
+        json!({"customerToken": sessions::open(a, &t, email).await?}),
+    )?;
     Ok(result)
 }

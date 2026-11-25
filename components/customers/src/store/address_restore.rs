@@ -17,6 +17,15 @@ struct RestoreInput {
     default_shipping_address_id: Option<String>,
 }
 
+/// One address of a historical address book.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct HistoricalAddress {
+    #[serde(deserialize_with = "lenient")]
+    id: Option<String>,
+    address: Value,
+}
+
 /// `admit` decides whether the shop still accepts an address: its country, and its region within that country.
 pub async fn restore(
     conn: &mut PgConnection,
@@ -33,14 +42,16 @@ pub async fn restore(
         .ok_or(bad("Invalid historical address book"))?;
     let mut ids = Vec::new();
     for entry in entries {
-        let id = entry["id"]
-            .as_str()
+        let entry: HistoricalAddress = view(entry);
+        let id = entry
+            .id
+            .as_deref()
             .ok_or(bad("Historical address identity required"))?;
         if id.len() > 100 || ids.contains(&id.to_string()) {
             return Err(bad("Invalid historical address identity"));
         }
-        let mut address: Address = serde_json::from_value(entry["address"].clone())
-            .map_err(|_| bad("Invalid historical address"))?;
+        let mut address: Address =
+            serde_json::from_value(entry.address).map_err(|_| bad("Invalid historical address"))?;
         address.validate()?;
         admit(&address)?;
         let owner = sqlx::query_scalar!(

@@ -7,7 +7,7 @@ use axum::Json;
 use axum::extract::State as Shared;
 use serde::Deserialize;
 use serde_json::{Value, json};
-use veyndo_core::document::{lenient, view};
+use veyndo_core::document::{lenient, merge, view};
 use veyndo_core::shop_scope::{channel as channel_id, session_digest, tenant};
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad};
 use veyndo_identity::domain::credentials::{
@@ -103,7 +103,10 @@ pub async fn register(
 pub async fn get(Shared(a): Shared<State>, h: RequestContext) -> Result<Json<Value>> {
     let (t, email) = customer(&a, &h).await?;
     let mut v = json!(accounts::row(&a, &t, &email).await?);
-    v["addresses"] = address_list(&a, &t, &email).await?;
+    merge(
+        &mut v,
+        json!({"addresses": address_list(&a, &t, &email).await?}),
+    )?;
     decorate(&a, &t, &email, &mut v).await?;
     Ok(Json(v))
 }

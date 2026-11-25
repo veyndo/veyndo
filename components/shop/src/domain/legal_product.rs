@@ -77,10 +77,20 @@ struct ProductGapsInput {
     digital: Option<bool>,
 }
 
+/// The classification facts of a product's compliance object.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ComplianceFacts {
+    sector: Value,
+    non_eu_manufacturer: Value,
+}
+
 pub fn product_gaps(extra: &Value, config: &Config, locale: &str, main: &str) -> Vec<String> {
     let input: ProductGapsInput = view(extra);
     let v = &input.compliance;
-    let sector = v["sector"]
+    let facts: ComplianceFacts = view(v);
+    let sector = facts
+        .sector
         .as_str()
         .unwrap_or(if input.digital == Some(true) {
             "digital"
@@ -96,7 +106,7 @@ pub fn product_gaps(extra: &Value, config: &Config, locale: &str, main: &str) ->
             "identifier",
         ]);
     }
-    if v["nonEuManufacturer"] == true {
+    if facts.non_eu_manufacturer == true {
         required.extend([
             "responsiblePerson",
             "responsibleAddress",
@@ -119,7 +129,7 @@ pub fn product_gaps(extra: &Value, config: &Config, locale: &str, main: &str) ->
         _ => {}
     }
     // Sector inclusion activates checks for existing catalogs without a classified product.
-    if config.sectors.contains(&"textiles".into()) && v["sector"].is_null() {
+    if config.sectors.contains(&"textiles".into()) && facts.sector.is_null() {
         required.push("fibres");
     }
     required

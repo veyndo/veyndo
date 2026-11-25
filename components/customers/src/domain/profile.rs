@@ -1,23 +1,45 @@
 //! Which profile fields are shown as top-level contact fields of a customer.
-use serde_json::Value;
+use serde::Deserialize;
+use serde_json::{Map, Value};
+use veyndo_core::document::{lenient, merge, view};
+
+/// The profile fields that are shown as top-level contact fields.
+const CONTACT_FIELDS: [&str; 9] = [
+    "name",
+    "firstName",
+    "lastName",
+    "salutationId",
+    "title",
+    "phoneNumber",
+    "birthday",
+    "vatIds",
+    "defaultPaymentMethodId",
+];
+
+/// The stored profile of a customer value.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct Stored {
+    #[serde(deserialize_with = "lenient")]
+    profile: Map<String, Value>,
+}
 
 /// Copies the contact fields of the stored profile to the top level.
 /// Identity, status and price group never come from the profile.
 pub fn project_contacts(v: &mut Value) {
-    for key in [
-        "name",
-        "firstName",
-        "lastName",
-        "salutationId",
-        "title",
-        "phoneNumber",
-        "birthday",
-        "vatIds",
-        "defaultPaymentMethodId",
-    ] {
-        if let Some(value) = v["profile"].get(key).cloned() {
-            v[key] = value;
-        }
+    let stored: Stored = view(v);
+    let contacts: Map<String, Value> = CONTACT_FIELDS
+        .iter()
+        .filter_map(|key| {
+            stored
+                .profile
+                .get(*key)
+                .map(|value| ((*key).to_owned(), value.clone()))
+        })
+        .collect();
+    if !contacts.is_empty() {
+        // A value with a profile object is itself an object, so the merge cannot fail.
+        let _ = merge(v, Value::Object(contacts));
     }
 }
 

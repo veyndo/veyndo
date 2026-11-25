@@ -29,6 +29,14 @@ struct Input {
     request_key: String,
 }
 
+/// The profile and automation data of a customer document, as sizes and restoration read them.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct Book {
+    profile: Value,
+    automation: Value,
+}
+
 /// The creation fingerprint and import source a CRM creation stores in the account's automation data.
 #[derive(Deserialize, Default)]
 #[serde(default, rename_all = "camelCase")]
@@ -47,7 +55,7 @@ pub async fn create(
     source: Option<&Value>,
     conditions: Conditions<'_>,
 ) -> Result<Value> {
-    if v["profile"].to_string().len() > 4000 {
+    if view::<Book>(&v).profile.to_string().len() > 4000 {
         return Err(bad("Invalid customer profile"));
     }
     let mut input: Input = serde_json::from_value(v.clone())
@@ -282,7 +290,7 @@ pub async fn save(
         return Err(conflict("Customer changed or unavailable"));
     }
     if let Some(book) = book {
-        let automation = &book["automation"];
+        let automation = &view::<Book>(&book).automation;
         if !automation.is_object() || automation.to_string().len() > 32768 {
             return Err(bad("Invalid customer automation data"));
         }
