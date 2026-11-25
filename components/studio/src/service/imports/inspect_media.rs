@@ -3,7 +3,7 @@ use super::{SourceRecord, relations};
 use crate::store::imports as db;
 use serde::Deserialize;
 use serde_json::{Value, json};
-use veyndo_core::document::view;
+use veyndo_core::document::{merge, view};
 
 /// The reviewed fields of a source image record.
 #[derive(Deserialize, Default)]
@@ -47,12 +47,15 @@ pub async fn inspect(
     let mut actual = db::asset(a, &t, id).await?;
     if let Some(value) = &mut actual {
         let media = db::product_media(a, &t, &product).await?;
-        value["association"] = media
+        merge(
+            value,
+            json!({ "association": media
             .and_then(|xs| {
                 xs.as_array()
                     .and_then(|xs| xs.iter().find(|x| view::<Slot>(x).id == id).cloned())
             })
-            .unwrap_or(Value::Null);
+            .unwrap_or(Value::Null) }),
+        )?;
     }
     let group = hash(&json!([r.source, r.source_shop, source.product_source_id]).to_string());
     let expected = json!({"productId":product,"digest":source.digest,"byteLength":source.byte_length,"mime":source.mime,"filename":source.filename,"title":source.title,"public":true,"association":{"id":id,"url":format!("/store-api/assets/{id}?shop={t}"),"alt":source.title,"importGroup":group,"importPosition":source.position}});

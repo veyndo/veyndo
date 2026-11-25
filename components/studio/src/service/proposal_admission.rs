@@ -12,7 +12,7 @@ use serde_json::json;
 use veyndo_app_model::Object;
 use veyndo_app_platform::store::extension_filter::admit as admit_filter;
 use veyndo_catalog::service::translation_apply::admit_selection;
-use veyndo_core::document::{lenient, view};
+use veyndo_core::document::{lenient, merge, view};
 use veyndo_core::{RequestContext, Result, State, bad};
 use veyndo_identity::{allowed, permit};
 use veyndo_intelligence::domain::price_guardrails::check;
@@ -162,7 +162,7 @@ pub async fn admit<H: WorkHost>(
         p.expected_experience_revision = Some(input.experience_revision.unwrap());
     }
     if let Some(experience) = p.experience.as_mut() {
-        experience["headlineLocale"] = json!(locale);
+        merge(experience, json!({ "headlineLocale": locale }))?;
     }
     if p.translation.as_ref().is_some_and(|l| {
         !commerce_settings.locales.contains(l) || *l == commerce_settings.main_locale

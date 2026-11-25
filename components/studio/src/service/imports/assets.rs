@@ -7,7 +7,7 @@ use axum::extract::{Path, State as Shared};
 use base64::{Engine as _, engine::general_purpose::STANDARD};
 use serde::Deserialize;
 use serde_json::{Map, Value, json};
-use veyndo_core::document::{lenient, view};
+use veyndo_core::document::{lenient, merge, view};
 use veyndo_core::store::environments::parent;
 use veyndo_core::{RequestContext, Result, bad, conflict, hash};
 use veyndo_identity::{merchant, permit};
@@ -100,8 +100,8 @@ pub async fn import<H: ImportHost>(
         .ok_or(bad("Reviewed source image position must be 0..19"))?;
     let group = hash(&json!([r.source, r.source_shop, source.product_source_id]).to_string());
     let mut media = host.import_image(h, &product, &id, &r.data, bytes).await?;
-    media["importGroup"] = json!(group);
-    media["importPosition"] = json!(position);
+    merge(&mut media, json!({ "importGroup": group }))?;
+    merge(&mut media, json!({ "importPosition": position }))?;
     let Json(editor) = product_editor(Shared(a.clone()), h.clone(), Path(product.clone())).await?;
     let mut editor: EditorDocument = view(&editor);
     let items = editor

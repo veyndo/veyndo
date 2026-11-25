@@ -14,7 +14,7 @@ use veyndo_catalog::store::product_edit as store;
 use veyndo_catalog::store::product_fields::editable;
 use veyndo_catalog::store::{categories, channels, products};
 use veyndo_catalog::types::product_edit::Edit;
-use veyndo_core::document::view;
+use veyndo_core::document::{merge, view};
 use veyndo_core::store::history_context::context;
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad, conflict};
 use veyndo_identity::{merchant, permit};
@@ -82,10 +82,11 @@ pub async fn save_product(
     validate_metadata("products", &edit.extra.automation)?;
     edit.validate_fields(languages)?;
     if let Some(c) = &edit.catalog {
-        if edit.extra.automation.is_null() {
-            edit.extra.automation = json!({});
-        }
-        edit.extra.automation["categoryIds"] = json!(c.category_ids);
+        // A missing automation document becomes an object, as before.
+        merge(
+            &mut edit.extra.automation,
+            json!({ "categoryIds": c.category_ids }),
+        )?;
     }
     store::lock_numbers(&mut tx, &t).await?;
     if create {
@@ -219,7 +220,7 @@ pub async fn product_editor(
         .map(|c| c.id)
         .collect::<Vec<_>>();
     let category_ids = categories::of_product(&a, &t, &id).await?;
-    let mut value = json!({"id":id,"mainLocale":settings.main_locale,"availableLocales":settings.locales,"channels":channels,"catalog":{"salesChannelIds":selected_channels,"active":r.get::<bool,_>("active"),"productNumber":r.get::<Option<String>,_>("product_number").unwrap_or_else(||id.clone()),"categoryIds":category_ids,"parentId":r.get::<Option<String>,_>("parent_id"),"options":r.get::<Value,_>("options")},"revision":r.get::<i64,_>("revision"),"contentRevision":r.get::<i64,_>("content_revision"),"translations":translations,"extra":({let mut extra=r.get::<Value,_>("extra");if extra["priceCurrency"].is_null(){extra["priceCurrency"]=json!(settings.currencies.pricing_currency);}extra}),"commerce":editable(&r)});
+    let mut value = json!({"id":id,"mainLocale":settings.main_locale,"availableLocales":settings.locales,"channels":channels,"catalog":{"salesChannelIds":selected_channels,"active":r.get::<bool,_>("active"),"productNumber":r.get::<Option<String>,_>("product_number").unwrap_or_else(||id.clone()),"categoryIds":category_ids,"parentId":r.get::<Option<String>,_>("parent_id"),"options":r.get::<Value,_>("options")},"revision":r.get::<i64,_>("revision"),"contentRevision":r.get::<i64,_>("content_revision"),"translations":translations,"extra":({let mut extra=r.get::<Value,_>("extra");if extra.get("priceCurrency").is_none_or(Value::is_null){merge(&mut extra,json!({"priceCurrency":settings.currencies.pricing_currency}))?;}extra}),"commerce":editable(&r)});
     attach(&a, &h, Object::Product, std::slice::from_mut(&mut value)).await?;
     Ok(Json(value))
 }

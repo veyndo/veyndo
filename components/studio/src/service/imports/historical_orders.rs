@@ -5,7 +5,7 @@ use serde::Deserialize;
 use serde_json::{Value, json};
 use veyndo_app_platform::store::package_fence::lock_package_write;
 use veyndo_app_platform::store::packages::package;
-use veyndo_core::document::{lenient, view};
+use veyndo_core::document::{lenient, merge, view};
 use veyndo_core::store::environments::parent;
 use veyndo_core::store::history_context::context;
 use veyndo_core::{RequestContext, Result, State, bad, conflict, hash};
@@ -139,8 +139,14 @@ pub async fn import(
         .map_err(|_| bad("Historical display amount unavailable"))?;
     let quote = json!({"lineItems":lines,"price":{"totalPrice":display,"netPrice":null,"totalMinor":minor,"currency":code,"currencyScale":scale,"taxStatus":"historical","calculatedTaxes":[]},"shippingCosts":{"totalPrice":null},"locale":input.locale.as_deref().unwrap_or("en-GB"),"salesChannelId":channel});
     let mut order = json!({"id":id,"orderNumber":number,"revision":1,"state":"historical","salesChannelId":channel,"channel":"historical_import","cart":quote,"deliveries":[],"payment":{"state":"historical","provider":"historical_import","realMoneyCharged":false},"money":{"minor":minor,"currency":{"code":code,"scale":scale}},"historicalImport":{"source":r.source,"sourceShop":r.source_shop,"sourceId":r.source_id,"snapshot":r.data,"fingerprint":fingerprint,"importedAt":chrono::Utc::now().to_rfc3339(),"sourceAmount":exact.decimal()}});
-    order["billingAddress"] = source.billing_address.clone();
-    order["shippingAddress"] = source.shipping_address.clone();
+    merge(
+        &mut order,
+        json!({ "billingAddress": source.billing_address.clone() }),
+    )?;
+    merge(
+        &mut order,
+        json!({ "shippingAddress": source.shipping_address.clone() }),
+    )?;
     order_fields(&mut order);
     let cart_id = format!("history-{id}");
     let token = format!("history-private-{}", veyndo_core::uid());

@@ -24,16 +24,19 @@ pub use veyndo_orders::types::source_record::SourceRecord;
 pub async fn identity_namespace(a: &State, t: &str) -> Result<String> {
     Ok(parent(a, t).await?.unwrap_or_else(|| t.into()))
 }
+/// The input schema of an import operation: a reviewed record write with its approval and asset chunks, or an inspection that may ask for a bounded product preview.
 pub fn schema(name: &str) -> Option<Value> {
-    let mut schema = (matches!(name,"merchant.import.record"|"merchant.import.inspect")).then(||json!({"type":"object","properties":{"assetChunks":{"type":"array","maxItems":172,"items":{"type":"string","maxLength":65536}},"approve":{"type":"boolean"},"record":{"type":"object","properties":{"version":{"type":"integer","enum":[1]},"source":{"type":"string","minLength":1,"maxLength":200},"sourceShop":{"type":"string","minLength":1,"maxLength":200},"kind":{"type":"string","enum":["products","categories","pages","customers","orders","assets","reviews","coupons"]},"sourceId":{"type":"string","minLength":1,"maxLength":200},"data":{"type":"object"},"warnings":{"type":"array","maxItems":20,"items":{"type":"string","maxLength":2000}}},"required":["version","source","sourceShop","kind","sourceId","data","warnings"],"additionalProperties":false},"options":{"type":"object","properties":{"channelId":{"type":"string","maxLength":100},"taxRate":{"type":"number","minimum":0,"maximum":50},"sourcePriceBasis":{"type":"string","enum":["gross","net"]},"customerGroup":{"type":"string","maxLength":100},"locale":{"type":"string","maxLength":35},"destinationDigest":{"type":"string","minLength":64,"maxLength":64},"acknowledgedWarnings":{"type":"array","maxItems":20,"items":{"type":"string","maxLength":2000}}},"additionalProperties":false}},"required":["approve","record","options"],"additionalProperties":false}))
-    ?;
-    if name == "merchant.import.inspect" {
-        schema["properties"].as_object_mut()?.remove("approve");
-        schema["properties"].as_object_mut()?.remove("assetChunks");
-        schema["properties"]["details"] = json!({"type":"boolean","description":"Explicit bounded product catalogue preview; default comparisons contain no values"});
-        schema["required"] = json!(["record", "options"]);
+    let record = json!({"type":"object","properties":{"version":{"type":"integer","enum":[1]},"source":{"type":"string","minLength":1,"maxLength":200},"sourceShop":{"type":"string","minLength":1,"maxLength":200},"kind":{"type":"string","enum":["products","categories","pages","customers","orders","assets","reviews","coupons"]},"sourceId":{"type":"string","minLength":1,"maxLength":200},"data":{"type":"object"},"warnings":{"type":"array","maxItems":20,"items":{"type":"string","maxLength":2000}}},"required":["version","source","sourceShop","kind","sourceId","data","warnings"],"additionalProperties":false});
+    let options = json!({"type":"object","properties":{"channelId":{"type":"string","maxLength":100},"taxRate":{"type":"number","minimum":0,"maximum":50},"sourcePriceBasis":{"type":"string","enum":["gross","net"]},"customerGroup":{"type":"string","maxLength":100},"locale":{"type":"string","maxLength":35},"destinationDigest":{"type":"string","minLength":64,"maxLength":64},"acknowledgedWarnings":{"type":"array","maxItems":20,"items":{"type":"string","maxLength":2000}}},"additionalProperties":false});
+    match name {
+        "merchant.import.record" => Some(
+            json!({"type":"object","properties":{"assetChunks":{"type":"array","maxItems":172,"items":{"type":"string","maxLength":65536}},"approve":{"type":"boolean"},"record":record,"options":options},"required":["approve","record","options"],"additionalProperties":false}),
+        ),
+        "merchant.import.inspect" => Some(
+            json!({"type":"object","properties":{"record":record,"options":options,"details":{"type":"boolean","description":"Explicit bounded product catalogue preview; default comparisons contain no values"}},"required":["record","options"],"additionalProperties":false}),
+        ),
+        _ => None,
     }
-    Some(schema)
 }
 /// One reviewed import step: the source record, its options and, for assets, the binary chunks.
 #[derive(Deserialize, Default)]
@@ -132,5 +135,31 @@ pub async fn invoke<H: ImportHost>(host: &H, h: &RequestContext, v: &Value) -> R
         _ => Err(bad(
             "Unsupported native import domain; no target data changed",
         )),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::schema;
+    use serde_json::{Value, json};
+    fn indexed_schema(name: &str) -> Option<Value> {
+        let mut schema = (matches!(name,"merchant.import.record"|"merchant.import.inspect")).then(||json!({"type":"object","properties":{"assetChunks":{"type":"array","maxItems":172,"items":{"type":"string","maxLength":65536}},"approve":{"type":"boolean"},"record":{"type":"object","properties":{"version":{"type":"integer","enum":[1]},"source":{"type":"string","minLength":1,"maxLength":200},"sourceShop":{"type":"string","minLength":1,"maxLength":200},"kind":{"type":"string","enum":["products","categories","pages","customers","orders","assets","reviews","coupons"]},"sourceId":{"type":"string","minLength":1,"maxLength":200},"data":{"type":"object"},"warnings":{"type":"array","maxItems":20,"items":{"type":"string","maxLength":2000}}},"required":["version","source","sourceShop","kind","sourceId","data","warnings"],"additionalProperties":false},"options":{"type":"object","properties":{"channelId":{"type":"string","maxLength":100},"taxRate":{"type":"number","minimum":0,"maximum":50},"sourcePriceBasis":{"type":"string","enum":["gross","net"]},"customerGroup":{"type":"string","maxLength":100},"locale":{"type":"string","maxLength":35},"destinationDigest":{"type":"string","minLength":64,"maxLength":64},"acknowledgedWarnings":{"type":"array","maxItems":20,"items":{"type":"string","maxLength":2000}}},"additionalProperties":false}},"required":["approve","record","options"],"additionalProperties":false}))
+        ?;
+        if name == "merchant.import.inspect" {
+            schema["properties"].as_object_mut()?.remove("approve");
+            schema["properties"].as_object_mut()?.remove("assetChunks");
+            schema["properties"]["details"] = json!({"type":"boolean","description":"Explicit bounded product catalogue preview; default comparisons contain no values"});
+            schema["required"] = json!(["record", "options"]);
+        }
+        Some(schema)
+    }
+    #[test]
+    fn import_schemas_keep_the_indexed_shape() {
+        for name in ["merchant.import.record", "merchant.import.inspect", "other"] {
+            assert_eq!(
+                schema(name).map(|v| v.to_string()),
+                indexed_schema(name).map(|v| v.to_string())
+            );
+        }
     }
 }

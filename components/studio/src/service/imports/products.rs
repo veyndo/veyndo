@@ -5,7 +5,7 @@ use axum::Json;
 use axum::extract::State as Shared;
 use serde::Deserialize;
 use serde_json::{Value, json};
-use veyndo_core::document::{lenient, view};
+use veyndo_core::document::{lenient, merge, view};
 use veyndo_core::store::environments::parent;
 use veyndo_core::{RequestContext, Result, State, bad, conflict, hash};
 use veyndo_identity::{merchant, permit};
@@ -190,9 +190,10 @@ pub async fn mapped(a: &State, t: &str, r: &SourceRecord, options: &Value) -> Re
         .map(str::to_owned)
         .unwrap_or_else(|| format!("IMPORT-{id}"));
     let relations: Relations = view(&super::relations::product(r, &namespace)?);
-    let mut payload = json!({"id":id,"revision":0,"settingsRevision":revision,"translations":translations,"extra":{"priceCurrency":code,"identity":{"migrationDigest":digest,"importSource":{"system":r.source,"shop":r.source_shop,"id":r.source_id},"sourceRecordVersion":r.version,"sourceRecordDigest":hash(&json!(r).to_string()),"sourceStock":source.stock,"sourcePriceBasis":basis,"sourcePrice":amount}},"catalog":{"active":active,"productNumber":sku,"categoryIds":relations.category_ids,"parentId":relations.parent_id,"options":relations.options},"commerce":{"price":price,"taxRate":tax,"stock":0,"minPurchase":1,"purchaseSteps":1,"maxPurchase":null,"deliveryDays":0,"listPrice":null,"advancedPrices":[],"media":[],"properties":{}}});
+    let mut extra = json!({"priceCurrency":code,"identity":{"migrationDigest":digest,"importSource":{"system":r.source,"shop":r.source_shop,"id":r.source_id},"sourceRecordVersion":r.version,"sourceRecordDigest":hash(&json!(r).to_string()),"sourceStock":source.stock,"sourcePriceBasis":basis,"sourcePrice":amount}});
     if !rich.is_empty() {
-        payload["extra"]["richDescription"] = json!(rich);
+        merge(&mut extra, json!({ "richDescription": rich }))?;
     }
+    let payload = json!({"id":id,"revision":0,"settingsRevision":revision,"translations":translations,"extra":extra,"catalog":{"active":active,"productNumber":sku,"categoryIds":relations.category_ids,"parentId":relations.parent_id,"options":relations.options},"commerce":{"price":price,"taxRate":tax,"stock":0,"minPurchase":1,"purchaseSteps":1,"maxPurchase":null,"deliveryDays":0,"listPrice":null,"advancedPrices":[],"media":[],"properties":{}}});
     Ok(payload)
 }

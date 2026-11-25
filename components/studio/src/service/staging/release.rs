@@ -1,7 +1,7 @@
 //! Selected units publish in one transaction with staged digests and live baseline conflict checks.
 use super::snapshot::{Tx, snapshot};
+use super::{Baseline, live, owned};
 use super::{final_config, products};
-use super::{live, owned};
 use crate::domain::staging_access as access;
 use crate::ports::ReleaseHost;
 use crate::store::{
@@ -16,7 +16,7 @@ use veyndo_app_platform::domain::core_extensions::configuration;
 use veyndo_app_platform::domain::entity_access::entity_access;
 use veyndo_app_platform::store::records::{get as get_record, lock_key};
 use veyndo_b2b::store::staging as b2b;
-use veyndo_core::document::{lenient, view};
+use veyndo_core::document::{lenient, merge, view};
 use veyndo_core::shop_scope::header;
 use veyndo_core::store::history_context::context;
 use veyndo_core::{RequestContext, Result, bad, conflict, hash, uid};
@@ -111,23 +111,14 @@ async fn lock_units<H: ReleaseHost>(
     }
     Ok(())
 }
-/// The JSON fields `admit_selections` reads, typed as it reads them.
-#[derive(Deserialize, Default)]
-#[serde(default, rename_all = "camelCase")]
-struct AdmitSelectionsInput {
-    stage: Value,
-    live: Value,
-}
-
 /// A selection must still be the reviewed staged value on an unchanged live baseline.
 fn admit_selections(
     selections: &[Selection],
     keys: &[String],
     current: &Value,
     actual: &Value,
-    base: &Value,
+    input: &Baseline,
 ) -> Result<()> {
-    let input: AdmitSelectionsInput = view(base);
     for s in selections {
         let value = current.get(&s.key).ok_or(bad("Unknown change"))?;
         if hash(&value.to_string()) != s.digest || input.stage.get(&s.key) == Some(value) {
@@ -247,7 +238,10 @@ async fn publish_unit<H: ReleaseHost>(
         } else {
             let data = if kind == "flow" {
                 let mut flow = value.clone();
-                flow["actor"] = json!(header(h, "x-rac-user").unwrap_or("unknown"));
+                merge(
+                    &mut flow,
+                    json!({ "actor": header(h, "x-rac-user").unwrap_or("unknown") }),
+                )?;
                 flow
             } else {
                 value.clone()
@@ -305,7 +299,7 @@ pub async fn release<H: ReleaseHost>(
     let mut tx = a.db.begin().await?;
     context(&mut tx, &h, "staging.release").await?;
     lock_units(host, &mut tx, &t, &id, &keys).await?;
-    let mut base = db::baseline(&mut tx, &id, &t).await?;
+    let mut base: Baseline = view(&db::baseline(&mut tx, &id, &t).await?);
     let current = snapshot(&mut tx, &id).await?;
     let actual = snapshot(&mut tx, &t).await?;
     for key in keys.iter().filter(|k| k.starts_with("flow:")) {
@@ -323,15 +317,15 @@ pub async fn release<H: ReleaseHost>(
         let s = req.selections.iter().find(|s| s.key == *key).unwrap();
         let value = &current[&s.key];
         publish_unit(host, &mut tx, &h, (&t, &id), (&s.key, value), &actual).await?;
-        base["stage"][&s.key] = value.clone();
-        base["live"][&s.key] = live_value(&mut tx, &t, &s.key, value).await?;
+        let live = live_value(&mut tx, &t, &s.key, value).await?;
+        base.record(&s.key, Some(value.clone()), Some(live))?;
     }
     assets::validate_product_media(&mut tx, &t, &keys).await?;
     b2b::publish_configuration(&mut tx, &t, &keys, &current).await?;
     final_config::validate(host, &mut tx, &t, &h, &keys, (&current, &actual), &mut base).await?;
     let release = uid();
     let selected = json!(keys);
-    clone::set_baseline(&mut tx, &id, &base).await?;
+    clone::set_baseline(&mut tx, &id, &json!(base)).await?;
     db::insert_release(
         &mut tx,
         &release,
@@ -348,7 +342,13 @@ pub async fn release<H: ReleaseHost>(
         &json!({"releaseId":release,"selections":selected}),
     )
     .await?;
-    validate_settings_release(host.settings_guards(), &mut tx, &t, &actual["settings"]).await?;
+    validate_settings_release(
+        host.settings_guards(),
+        &mut tx,
+        &t,
+        actual.get("settings").unwrap_or(&Value::Null),
+    )
+    .await?;
     validate_company_release(&mut tx, &t).await?;
     tx.commit().await?;
     Ok(json!({"id":release,"published":selected}))

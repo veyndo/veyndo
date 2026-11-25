@@ -84,16 +84,6 @@
       "category": "attempt-context"
     },
     {
-      "file": "components/studio/src/domain/product_restore.rs",
-      "function": "edit",
-      "category": "in-place-edit"
-    },
-    {
-      "file": "components/studio/src/service/staging/final_config.rs",
-      "function": "validate",
-      "category": "keyed-lookup"
-    },
-    {
       "file": "src/mcp/protocol.rs",
       "function": "call",
       "category": "protocol-adapter"

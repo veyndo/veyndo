@@ -3,7 +3,7 @@ use super::SourceRecord;
 use axum::Json;
 use serde::Deserialize;
 use serde_json::{Value, json};
-use veyndo_core::document::{lenient, view};
+use veyndo_core::document::{lenient, merge, view};
 use veyndo_core::store::environments::parent;
 use veyndo_core::{RequestContext, Result, State, bad, hash};
 use veyndo_identity::{merchant, permit};
@@ -55,10 +55,16 @@ pub async fn import(
     let id = r.identity(&t);
     let mut payload = json!({"email":d.email,"profile":{"name":format!("{first} {last}"),"firstName":first,"lastName":last},"customerGroup":input.customer_group,"billingAddress":address,"requestKey":format!("migration:{id}")});
     if !d.shipping_address.is_null() {
-        payload["shippingAddress"] = d.shipping_address.clone();
+        merge(
+            &mut payload,
+            json!({ "shippingAddress": d.shipping_address.clone() }),
+        )?;
     }
     if !d.additional_addresses.is_null() {
-        payload["additionalAddresses"] = d.additional_addresses.clone();
+        merge(
+            &mut payload,
+            json!({ "additionalAddresses": d.additional_addresses.clone() }),
+        )?;
     }
     let provenance = json!({"source":r.source,"sourceShop":r.source_shop,"sourceId":r.source_id,"fingerprint":hash(&json!(r).to_string())});
     let Json(result) =

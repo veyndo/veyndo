@@ -4,13 +4,13 @@ use crate::domain::proposal::{NATIVE, Step};
 use crate::domain::views::{Evidence, ProposalParts};
 use crate::ports::WorkHost;
 use crate::store::{products, tasks};
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 use veyndo_app_model::declarations::identifier;
 use veyndo_app_platform::domain::planning::AppChange;
 use veyndo_catalog::domain::product_admission::{admit_product_write, product_write_guidance};
 use veyndo_catalog::service::categories::admit as admit_category;
-use veyndo_core::document::{lenient, view};
+use veyndo_core::document::{lenient, merge, view};
 use veyndo_core::model_contract::validate_native;
 use veyndo_core::shop_scope::header;
 use veyndo_core::store::environments::parent;
@@ -18,17 +18,29 @@ use veyndo_core::{Error, RequestContext, Result, StatusCode, bad, conflict, hash
 use veyndo_identity::allowed;
 use veyndo_intelligence::store::agent_runs::claim_conversation;
 
+/// A native operation the planner may propose, with the product write contract for product operations.
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct OperationEntry {
+    name: &'static str,
+    input_schema: Value,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    product_contract: Option<Value>,
+}
+
 /// The native configuration operations the actor may propose, with their schemas and the product write contract.
 pub fn catalogue<H: WorkHost>(host: &H, h: &RequestContext) -> Vec<Value> {
     host.work_operations(h)
         .into_iter()
         .filter(|(name, _)| NATIVE.contains(name))
         .map(|(name, schema)| {
-            let mut entry = json!({"name":name,"inputSchema":schema});
-            if name.starts_with("merchant.product.") {
-                entry["productContract"] = product_write_guidance();
-            }
-            entry
+            json!(OperationEntry {
+                name,
+                input_schema: schema,
+                product_contract: name
+                    .starts_with("merchant.product.")
+                    .then(product_write_guidance),
+            })
         })
         .collect()
 }
@@ -251,8 +263,8 @@ pub async fn approve<H: WorkHost>(
     if let Some(conversation) = row.conversation_id {
         claim_conversation(&mut tx, t, &conversation, id).await?;
     }
-    request["execution"] = json!(steps);
-    request["history"] = Value::Null;
+    merge(&mut request, json!({ "execution": steps }))?;
+    merge(&mut request, json!({ "history": Value::Null }))?;
     let credential = header(h, "authorization")
         .and_then(|s| s.strip_prefix("Bearer "))
         .map(hash);

@@ -3,7 +3,7 @@ use crate::domain::views::ReportScale;
 use crate::domain::{report_config, report_period};
 use serde_json::{Value, json};
 use sqlx::{Postgres, Transaction};
-use veyndo_core::document::view;
+use veyndo_core::document::{merge, view};
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad};
 use veyndo_identity::allowed;
 use veyndo_pricing::types::currency::scale;
@@ -98,7 +98,7 @@ pub async fn run(
         currencies.push(currency.to_string());
     }
     if !allowed(h, "catalog.read") {
-        data["products"] = json!([]);
+        merge(&mut data, json!({ "products": [] }))?;
     }
     let traffic = if allowed(h, "knowledge.read") {
         traffic(&mut tx, t, &q, &p, currency, &rows, &x).await?
@@ -106,20 +106,25 @@ pub async fn run(
         Value::Null
     };
     tx.commit().await?;
-    data["traffic"] = traffic;
+    merge(&mut data, json!({ "traffic": traffic }))?;
     let scale = view::<ReportScale>(&data)
         .currency_scale
         .unwrap_or(scale(currency).unwrap_or(2) as i64);
-    data["filters"] = json!({"from":p.from,"toExclusive":p.to,"previousFrom":p.previous,"interval":p.interval,"timezone":q.timezone,"currency":currency,"currencyScale":scale,"channels":channels,"currencies":currencies});
-    data["permissions"] =
-        json!({"traffic":allowed(h,"knowledge.read"),"products":allowed(h,"catalog.read")});
+    merge(
+        &mut data,
+        json!({ "filters": {"from":p.from,"toExclusive":p.to,"previousFrom":p.previous,"interval":p.interval,"timezone":q.timezone,"currency":currency,"currencyScale":scale,"channels":channels,"currencies":currencies} }),
+    )?;
+    merge(
+        &mut data,
+        json!({ "permissions": {"traffic":allowed(h,"knowledge.read"),"products":allowed(h,"catalog.read")} }),
+    )?;
     let live: Option<String> = sqlx::query_scalar!(
         "SELECT live_tenant FROM shop_environments WHERE tenant=$1",
         t
     )
     .fetch_optional(&a.db)
     .await?;
-    data["sandbox"] = json!(live.is_some());
+    merge(&mut data, json!({ "sandbox": live.is_some() }))?;
     Ok(data)
 }
 

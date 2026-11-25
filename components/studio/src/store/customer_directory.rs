@@ -4,6 +4,7 @@ use sqlx::postgres::PgRow;
 use veyndo_app_model::Object;
 use veyndo_app_platform::domain::extension_filter::Filter;
 use veyndo_app_platform::store::extension_filter::predicate;
+use veyndo_core::document::merge;
 use veyndo_core::{Result, State, bad};
 use veyndo_orders::types::list_criteria::Criteria;
 
@@ -89,12 +90,11 @@ pub async fn customer(a: &State, t: &str, email: &str) -> Result<Option<PgRow>> 
 /// The customer's 100 most recent orders (without cart tokens), each with `createdAt`.
 pub async fn orders(a: &State, t: &str, email: &str) -> Result<Vec<Value>> {
     let rows=sqlx::query!(r#"SELECT o.data #- '{cart,token}' AS "data!",o.created_at::text AS "created!" FROM orders o JOIN carts c ON c.id=o.cart_id AND c.tenant=o.tenant WHERE o.tenant=$1 AND ((o.data->'orderCustomer'->>'customerId')=(SELECT id FROM customers WHERE tenant=o.tenant AND email=$2) OR (o.data->'orderCustomer'->>'guest'='true' AND o.data->'orderCustomer'->>'email'=$2) OR (NOT o.data ? 'orderCustomer' AND c.data->>'email'=$2)) ORDER BY o.created_at DESC LIMIT 100"#, t, email).fetch_all(&a.db).await?;
-    Ok(rows
-        .into_iter()
+    rows.into_iter()
         .map(|r| {
             let mut o = r.data;
-            o["createdAt"] = json!(r.created);
-            o
+            merge(&mut o, json!({ "createdAt": r.created }))?;
+            Ok(o)
         })
-        .collect())
+        .collect()
 }
