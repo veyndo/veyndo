@@ -2,13 +2,30 @@
 use super::{CURRENT, Run, authority, scenarios, work_plan};
 use crate::foundation::App;
 use axum::http::StatusCode;
+use serde::Deserialize;
 use serde_json::Value;
 use sqlx::Row;
 use tracing::Instrument;
 use veyndo_core::Error;
 use veyndo_core::Result;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::uid;
 use veyndo_intelligence::store::agent_runs as store;
+/// The stored run request fields the worker dispatches on.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct RunRequest {
+    workspace_context: Value,
+    scenario: Value,
+    execution: Value,
+    #[serde(deserialize_with = "lenient")]
+    instruction: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    history: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    locale: Option<String>,
+}
+
 pub(crate) async fn once(a: &App) -> Result<bool> {
     // A dead worker can be resumed safely between calls; an in-flight provider result is ambiguous.
     store::recover(a).await?;
@@ -19,6 +36,7 @@ pub(crate) async fn once(a: &App) -> Result<bool> {
     let t: String = row.get("tenant");
     let id: String = row.get("id");
     let request: Value = row.get("run_request");
+    let fields: RunRequest = view(&request);
     let trace: String = row.get("run_trace");
     let result = veyndo::trace::scoped(
         trace.clone(),
@@ -40,7 +58,7 @@ pub(crate) async fn once(a: &App) -> Result<bool> {
                 tenant: t.clone(),
                 id: id.clone(),
                 lease: lease.clone(),
-                workspace: request["workspaceContext"].clone(),
+                workspace: fields.workspace_context.clone(),
                 conversation: row.get::<Option<String>, _>("conversation_id").is_some(),
             };
             veyndo::tenant_scope::scoped(
@@ -48,18 +66,18 @@ pub(crate) async fn once(a: &App) -> Result<bool> {
                 veyndo::inference::budget::scoped(
                     model_authority,
                     CURRENT.scope(run, async {
-                        if request["scenario"].is_object() {
+                        if fields.scenario.is_object() {
                             return Box::pin(scenarios::execute(a, &t, &id, &h, &request)).await;
                         }
-                        if request["execution"].is_array() {
+                        if fields.execution.is_array() {
                             return Box::pin(work_plan::execute(a, &t, &id, &h, &request)).await;
                         }
                         let choice = veyndo_intelligence::service::models::choice(&request)?;
                         let turn = veyndo_intelligence::service::planner::Turn {
-                            instruction: request["instruction"].as_str().unwrap_or(""),
+                            instruction: fields.instruction.as_deref().unwrap_or(""),
                             choice: choice.as_ref(),
-                            history: request["history"].as_str().unwrap_or(""),
-                            locale: request["locale"].as_str().unwrap_or("en-GB"),
+                            history: fields.history.as_deref().unwrap_or(""),
+                            locale: fields.locale.as_deref().unwrap_or("en-GB"),
                         };
                         tokio::time::timeout(
                             std::time::Duration::from_secs(190),

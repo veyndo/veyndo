@@ -6,7 +6,15 @@ use serde_json::json;
 use veyndo_app_platform::ports::{RecordRules, RuleFuture};
 use veyndo_app_platform::store::managed_data;
 use veyndo_core::Result;
-use veyndo_core::document::view;
+use veyndo_core::document::{lenient, view};
+/// A site builder record: its id and the app-declared fields the site builder validates.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct SiteRecord {
+    #[serde(deserialize_with = "lenient")]
+    id: Option<String>,
+    fields: Value,
+}
 /// The bundled site builder normalizes and checks its own pages; every other app has no extra rules.
 pub(crate) struct BundledRules;
 pub(crate) static BUNDLED: BundledRules = BundledRules;
@@ -37,9 +45,15 @@ impl RecordRules for BundledRules {
     ) -> RuleFuture<'a> {
         Box::pin(async move {
             if m.id == "site_builder" {
-                site_builder::validate(&e.name, &v["fields"])?;
-                site_builder::validate_owned(tx, t, &v["fields"], v["id"].as_str().unwrap_or(""))
-                    .await?;
+                let record: SiteRecord = view(v);
+                site_builder::validate(&e.name, &record.fields)?;
+                site_builder::validate_owned(
+                    tx,
+                    t,
+                    &record.fields,
+                    record.id.as_deref().unwrap_or(""),
+                )
+                .await?;
             }
             Ok(())
         })

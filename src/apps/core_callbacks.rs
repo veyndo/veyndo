@@ -13,13 +13,13 @@ use axum::extract::Path;
 use axum::extract::State;
 use axum::http::StatusCode;
 use axum::routing::post;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use serde_json::json;
 use veyndo_core::Error;
 use veyndo_core::Result;
 use veyndo_core::bad;
-use veyndo_core::document::{lenient, view};
+use veyndo_core::document::{lenient, merge, view};
 use veyndo_core::request_context::RequestContext;
 use veyndo_core::shop_scope::header;
 pub(super) fn router() -> Router<App> {
@@ -86,10 +86,32 @@ async fn job_progress(
     )
     .await?;
     if settings_allowed {
-        result["_appSettings"] = settings::resolve(a, t, m).await?;
+        let app_settings = settings::resolve(a, t, m).await?;
+        merge(&mut result, ResolvedSettings { app_settings })?;
     }
     Ok(result)
 }
+/// The resolved app settings a settings-reading job callback receives beside its result.
+#[derive(Serialize)]
+struct ResolvedSettings {
+    #[serde(rename = "_appSettings")]
+    app_settings: Value,
+}
+
+/// The record a core read callback names.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct CoreRead {
+    #[serde(deserialize_with = "lenient")]
+    id: Option<String>,
+}
+
+/// The customer address a customer read resolves its id to.
+#[derive(Serialize)]
+struct CoreReadId<'a> {
+    id: &'a str,
+}
+
 /// The JSON fields `receipt` reads, typed as it reads them.
 #[derive(Deserialize, Default)]
 #[serde(default, rename_all = "camelCase")]
@@ -262,7 +284,7 @@ async fn execute(
         return veyndo_app_platform::store::catalog_evidence::catalog_evidence(
             a,
             &t,
-            v["id"].as_str().unwrap(),
+            view::<CoreRead>(&v).id.as_deref().unwrap(),
         )
         .await;
     }
@@ -272,10 +294,10 @@ async fn execute(
     )?;
     let mut arguments = v;
     if operation == "customer" {
-        let email =
-            veyndo_customers::store::customers::email_of(a, &t, arguments["id"].as_str()).await?;
-        arguments["id"] =
-            json!(email.ok_or(Error(StatusCode::NOT_FOUND, "Customer not found".into()))?);
+        let id = view::<CoreRead>(&arguments).id;
+        let email = veyndo_customers::store::customers::email_of(a, &t, id.as_deref()).await?;
+        let id = email.ok_or(Error(StatusCode::NOT_FOUND, "Customer not found".into()))?;
+        merge(&mut arguments, CoreReadId { id: &id })?;
     }
     let pii = credentials::permit(h, "customers.pii").is_ok()
         && m.permissions.iter().any(|p| p == "customers.pii")
@@ -285,9 +307,45 @@ async fn execute(
             a,
             h,
             operation,
-            arguments["id"].as_str().unwrap(),
+            view::<CoreRead>(&arguments).id.as_deref().unwrap(),
         )
         .await;
     }
     crate::operations::invoke(a, h, command, &arguments).await
+}
+
+#[cfg(test)]
+mod typed_tests {
+    use super::{CoreReadId, ResolvedSettings};
+    use serde_json::json;
+    use veyndo_core::document::merge;
+
+    #[test]
+    fn callback_documents_keep_the_indexed_shape() {
+        let result = json!({"items":[1,2],"cursor":null});
+        let settings = json!({"apiBase":"https://example.test","limit":5});
+        let mut old = result.clone();
+        old["_appSettings"] = settings.clone();
+        let mut new = result;
+        merge(
+            &mut new,
+            ResolvedSettings {
+                app_settings: settings,
+            },
+        )
+        .unwrap();
+        assert_eq!(new, old);
+        let arguments = json!({"id":"c-1","product":{"id":"p"}});
+        let mut old = arguments.clone();
+        old["id"] = json!("buyer@example.test".to_string());
+        let mut new = arguments;
+        merge(
+            &mut new,
+            CoreReadId {
+                id: "buyer@example.test",
+            },
+        )
+        .unwrap();
+        assert_eq!(new, old);
+    }
 }

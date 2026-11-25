@@ -9,6 +9,7 @@ pub mod history_context;
 pub mod lease;
 pub mod outbox;
 pub mod pool;
+pub mod provisioning;
 pub mod read_context;
 pub mod resource_limits;
 pub mod row_security;

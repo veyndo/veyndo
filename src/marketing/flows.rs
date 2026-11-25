@@ -4,20 +4,38 @@ use crate::commerce;
 use crate::foundation::App;
 use crate::planner::plan_with;
 use axum::http::StatusCode;
+use serde::Deserialize;
 use serde_json::Value;
 use serde_json::json;
 use veyndo_core::Error;
 use veyndo_core::Result;
 use veyndo_core::bad;
+use veyndo_core::document::view;
 pub(crate) use veyndo_marketing::store::flow_projection::project as project_flows;
 pub(crate) use veyndo_marketing::types::flow::{AppFlowAction, Flow};
+/// The saved flow job: its flow, the event it answers and the order it names, each as stored.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct JobDefinition {
+    flow: Value,
+    event: Value,
+    order_id: Value,
+}
+
+/// The execution state of a delayed pipeline job.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct Execution {
+    finish_after_delay: Value,
+}
+
 pub(crate) async fn flow_once(a: &App) -> Result<bool> {
     let Some(job) = super::flow_jobs::claim(a).await? else {
         return Ok(false);
     };
     let (id, t, definition) = (job.id.as_str(), job.tenant.as_str(), &job.definition);
-    let f: Flow =
-        serde_json::from_value(definition["flow"].clone()).map_err(|_| bad("Invalid flow"))?;
+    let job_definition: JobDefinition = view(definition);
+    let f: Flow = serde_json::from_value(job_definition.flow).map_err(|_| bad("Invalid flow"))?;
     let (settings, _) = commerce::config(a, t).await?;
     let instruction =
         super::flow_text::effective(&json!(f.instruction), &f.locale, &settings.main_locale)
@@ -31,7 +49,7 @@ pub(crate) async fn flow_once(a: &App) -> Result<bool> {
             "Flow owner lost access".into(),
         ))
     } else if f.action == "pipeline" {
-        if job.execution["finishAfterDelay"] == true {
+        if view::<Execution>(&job.execution).finish_after_delay == true {
             Ok(json!({"completed":true}))
         } else {
             match super::pipeline_runtime::run(a, &job, &f).await {
@@ -57,11 +75,11 @@ pub(crate) async fn flow_once(a: &App) -> Result<bool> {
     } else if f.action == "app_action" {
         execute_app_flow(a, t, &f, id, &instruction, definition).await
     } else if f.action == "note" {
-        Ok(json!({"note":instruction,"orderId":definition["orderId"],"locale":f.locale}))
+        Ok(json!({"note":instruction,"orderId":job_definition.order_id,"locale":f.locale}))
     } else if f.action == "ai_proposal" {
         let context = format!(
             "Flow event {}. {}. Create a reviewable proposal only.",
-            definition["event"], instruction
+            job_definition.event, instruction
         );
         match super::flow_access::proposal_headers(a, t, f.actor.as_deref(), id).await {
             Ok(h) => match crate::performance::reserve_ai_attempt(a, t).await {
@@ -81,16 +99,16 @@ pub(crate) async fn flow_once(a: &App) -> Result<bool> {
     if job.finish(&mut tx, state, &value, error).await?
         && state == "completed"
         && f.action == "note"
-        && !definition["orderId"].as_str().unwrap_or("").is_empty()
+        && !job_definition.order_id.as_str().unwrap_or("").is_empty()
     {
         veyndo_orders::store::order_reads::flow_note(
             &mut tx,
             t,
             (
-                definition["orderId"].as_str().unwrap_or(""),
+                job_definition.order_id.as_str().unwrap_or(""),
                 f.actor.as_deref().unwrap_or("flow"),
             ),
-            &json!({"text":instruction,"flowJob":id,"event":definition["event"],"locale":f.locale}),
+            &json!({"text":instruction,"flowJob":id,"event":job_definition.event,"locale":f.locale}),
         )
         .await?;
     }

@@ -8,10 +8,12 @@ use axum::Router;
 use axum::extract::State;
 use axum::response::sse::{Event, KeepAlive, Sse};
 use axum::routing::post;
+use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use serde_json::json;
 use veyndo_core::Result;
 use veyndo_core::bad;
+use veyndo_core::document::{lenient, merge, view};
 use veyndo_core::request_context::RequestContext;
 pub(crate) fn router() -> Router<App> {
     Router::new().secure_route(
@@ -20,6 +22,29 @@ pub(crate) fn router() -> Router<App> {
         post(chat),
     )
 }
+/// The chat turn fields the stream checks before accepting it.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct ChatInput {
+    #[serde(deserialize_with = "lenient")]
+    message: Option<String>,
+    background: Value,
+}
+
+/// Marks the accepted turn as running in the background; the stream waits on its run.
+#[derive(Serialize)]
+struct Background {
+    background: bool,
+}
+
+/// The accepted turn the stream reports and waits on.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct Accepted {
+    conversation_id: Value,
+    run: Value,
+}
+
 async fn chat(
     State(a): State<App>,
     h: RequestContext,
@@ -27,23 +52,25 @@ async fn chat(
 ) -> Result<impl axum::response::IntoResponse> {
     merchant(&a, &h)?;
     agent::assistant_access(&h)?;
-    if !v["message"]
-        .as_str()
+    let input: ChatInput = view(&v);
+    if !input
+        .message
+        .as_deref()
         .is_some_and(|s| !s.is_empty() && s.len() <= 4000)
     {
         return Err(bad("Message must contain 1..4000 characters"));
     }
     // Commit acceptance (or return its HTTP error) before opening SSE. Waiting never enqueues another turn.
-    let background = v["background"] == true;
-    v["background"] = json!(true);
+    let background = input.background == true;
+    merge(&mut v, Background { background: true })?;
     let accepted = veyndo_intelligence::service::conversations::chat(&a, &h, &v).await?;
-    let progress = json!({"conversationId":accepted["conversationId"],"run":accepted["run"]});
+    let run: Accepted = view(&accepted);
+    let progress = json!({"conversationId":run.conversation_id,"run":run.run});
     let mut job = veyndo::tenant_scope::spawn(async move {
         if background {
             Ok(accepted)
         } else {
-            veyndo_intelligence::service::conversations::complete(&a, &h, accepted["run"].clone())
-                .await
+            veyndo_intelligence::service::conversations::complete(&a, &h, run.run).await
         }
     });
     let stream = async_stream::stream! {
@@ -67,4 +94,21 @@ async fn chat(
         }
     };
     Ok(Sse::new(stream).keep_alive(KeepAlive::default()))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::Background;
+    use serde_json::json;
+    use veyndo_core::document::merge;
+
+    #[test]
+    fn background_flag_keeps_the_indexed_shape() {
+        let body = json!({"message":"Hello","conversationId":"c-1","background":false});
+        let mut old = body.clone();
+        old["background"] = json!(true);
+        let mut new = body;
+        merge(&mut new, Background { background: true }).unwrap();
+        assert_eq!(new, old);
+    }
 }

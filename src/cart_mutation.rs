@@ -3,6 +3,7 @@ use crate::cart_price::Quotes;
 use crate::cart_price::cart_json;
 use crate::foundation::App;
 use crate::{agent_runs, apps, legal};
+use serde::Deserialize;
 use serde_json::Value;
 use serde_json::json;
 use std::collections::HashMap;
@@ -11,6 +12,7 @@ use std::sync::Mutex;
 use veyndo_apps::sandbox::Sandbox;
 use veyndo_checkout::store::cart_edit::{self, Edit};
 use veyndo_core::Result;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::request_context::RequestContext;
 use veyndo_shop::types::cart::Item;
 use veyndo_shop::types::cart::StoredCart;
@@ -65,6 +67,42 @@ pub(crate) async fn reviewed_cart(
     commit(a, h, edit, Edits::new(a, None, None)).await
 }
 
+/// The quote parts an item preview reports, each exactly as quoted.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct PreviewQuote {
+    line_items: Value,
+    price: Value,
+    #[serde(deserialize_with = "lenient")]
+    checkout: PreviewCheckout,
+    shipping_costs: Value,
+    #[serde(deserialize_with = "lenient")]
+    deliveries: Vec<Value>,
+}
+
+/// The destination of a quoted cart.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct PreviewCheckout {
+    country: Value,
+}
+
+/// The first quoted delivery: its date and method name.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct PreviewDelivery {
+    delivery_date: Value,
+    #[serde(deserialize_with = "lenient")]
+    shipping_method: PreviewMethod,
+}
+
+/// The name of a quoted shipping method.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct PreviewMethod {
+    name: Value,
+}
+
 pub(crate) async fn preview_items(
     a: &App,
     h: &RequestContext,
@@ -73,12 +111,18 @@ pub(crate) async fn preview_items(
 ) -> Result<Value> {
     let c = cart_edit::candidate(a, &Quotes(a), h, items, Some(revision)).await?;
     let q = cart_json(a, &c).await?;
+    let quote: PreviewQuote = view(&q);
+    let first = quote
+        .deliveries
+        .first()
+        .map(view::<PreviewDelivery>)
+        .unwrap_or_default();
     Ok(
         json!({"revision":c.revision,"review":cart_edit::review_digest(&c,&q),
-        "lineItems":q["lineItems"],"price":q["price"],"country":q["checkout"]["country"],
-        "shippingCosts":q["shippingCosts"],
-        "delivery":q["deliveries"][0]["deliveryDate"],
-        "shippingMethod":q["deliveries"][0]["shippingMethod"]["name"]}),
+        "lineItems":quote.line_items,"price":quote.price,"country":quote.checkout.country,
+        "shippingCosts":quote.shipping_costs,
+        "delivery":first.delivery_date,
+        "shippingMethod":first.shipping_method.name}),
     )
 }
 

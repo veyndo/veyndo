@@ -18,6 +18,12 @@ use veyndo_core::document::{lenient, view};
 use veyndo_core::request_context::RequestContext;
 use veyndo_core::shop_scope::header;
 use veyndo_core::shop_scope::tenant;
+/// The intent of a stored payment, compared exactly as stored.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct PaymentIntent {
+    intent: Value,
+}
 
 pub(crate) fn payment_router() -> Router<App> {
     Router::new()
@@ -120,7 +126,7 @@ async fn customer_command(
         ));
     }
     let status = read(&a, &tenant(&h)?, &id).await?;
-    let op = if op == "capture" && status["intent"] == "authorize" {
+    let op = if op == "capture" && view::<PaymentIntent>(&status).intent == "authorize" {
         "authorize"
     } else {
         &op

@@ -1,7 +1,10 @@
-//! Operator and merchant-account writes of the control plane: operator bootstrap, shop creation audit and account lookups. Columns checked at compile time.
+//! Operator bootstrap and shop-creation steps of the control plane. The email lock is the server's own; accounts belong to identity and the operator grant and audit to shop.
 use serde_json::Value;
 use sqlx::PgConnection;
 use veyndo_core::Result;
+pub(crate) use veyndo_identity::store::merchant_accounts::Credential as Account;
+pub(crate) use veyndo_identity::store::provisioning::account_id_by_email;
+pub(crate) use veyndo_shop::store::provisioning::{audit_operator_bootstrap, grant_operator};
 
 /// Serializes the operator bootstrap of one email address.
 pub(crate) async fn lock_operator_email(conn: &mut PgConnection, email: &str) -> Result<()> {
@@ -15,33 +18,11 @@ pub(crate) async fn lock_operator_email(conn: &mut PgConnection, email: &str) ->
 }
 
 /// A personal merchant account found by email.
-pub(crate) struct Account {
-    pub id: String,
-    pub password_hash: String,
-}
-
 pub(crate) async fn account_by_email(
     conn: &mut PgConnection,
     email: &str,
 ) -> Result<Option<Account>> {
-    Ok(sqlx::query_as!(
-        Account,
-        "SELECT id,password_hash FROM merchant_users WHERE email=$1",
-        email
-    )
-    .fetch_optional(conn)
-    .await?)
-}
-
-pub(crate) async fn account_id_by_email<'e>(
-    db: impl sqlx::PgExecutor<'e>,
-    email: &str,
-) -> Result<Option<String>> {
-    Ok(
-        sqlx::query_scalar!("SELECT id FROM merchant_users WHERE email=$1", email)
-            .fetch_optional(db)
-            .await?,
-    )
+    veyndo_identity::store::merchant_accounts::by_email(conn, email).await
 }
 
 pub(crate) async fn create_account(
@@ -51,40 +32,12 @@ pub(crate) async fn create_account(
     name: &str,
     password_hash: &str,
 ) -> Result<()> {
-    sqlx::query!(
-        "INSERT INTO merchant_users(id,email,name,password_hash) VALUES($1,$2,$3,$4)",
-        id,
-        email,
-        name,
-        password_hash
-    )
-    .execute(conn)
-    .await?;
-    Ok(())
+    veyndo_identity::store::provisioning::create_account(conn, id, email, name, password_hash).await
 }
 
 /// Locks a merchant account row for this transaction (fails when it does not exist).
 pub(crate) async fn lock_account(conn: &mut PgConnection, id: &str) -> Result<()> {
-    sqlx::query_scalar!("SELECT id FROM merchant_users WHERE id=$1 FOR UPDATE", id)
-        .fetch_one(conn)
-        .await?;
-    Ok(())
-}
-
-/// Grants (or re-activates) the operator role.
-pub(crate) async fn grant_operator(conn: &mut PgConnection, user: &str) -> Result<()> {
-    sqlx::query!("INSERT INTO platform_operators(user_id) VALUES($1) ON CONFLICT(user_id) DO UPDATE SET active=true", user)
-        .execute(conn)
-        .await?;
-    Ok(())
-}
-
-/// Records the operator bootstrap.
-pub(crate) async fn audit_operator_bootstrap(conn: &mut PgConnection, user: &str) -> Result<()> {
-    sqlx::query!("INSERT INTO platform_audit(actor,action,data) VALUES($1,'operator.bootstrap',jsonb_build_object('userId',$1::text))", user)
-        .execute(conn)
-        .await?;
-    Ok(())
+    veyndo_identity::store::merchant_accounts::lock(conn, id).await
 }
 
 /// Records an operator-created shop.
@@ -94,13 +47,5 @@ pub(crate) async fn audit_shop_created(
     tenant: &str,
     data: Value,
 ) -> Result<()> {
-    sqlx::query!(
-        "INSERT INTO platform_audit(actor,action,tenant,data) VALUES($1,'shop.created',$2,$3)",
-        actor,
-        tenant,
-        data
-    )
-    .execute(conn)
-    .await?;
-    Ok(())
+    veyndo_shop::store::provisioning::audit_shop_created(conn, actor, tenant, data).await
 }

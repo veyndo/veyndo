@@ -47,3 +47,25 @@ This folder owns the Rust modules listed below. Each source begins with its resp
 - [`workers.rs`](workers.rs): Independently deployable worker roles; leases and durable receipts coordinate replicas.
 
 The [source inventory](../docs/module-inventory.md) is checked in CI. [The behavioral map](../docs/source-map.md) identifies integration suites, and [testing](../docs/testing.md) describes actual coverage and limits. Every file is limited to 320 lines; `main.rs` to 120.
+
+## Open JSON
+
+Server files read and write stored documents through typed views (`veyndo_core::document::view`,
+lenient fields) and typed patches (`document::merge`); no `value["key"]` access remains outside
+tests. The following values stay `serde_json::Value` because their shape is open by contract;
+the typed views carry them through unchanged:
+
+- `history/restore.rs` `Snapshot.data`: an audited row snapshot of any entity; each entity's own
+  save handler validates it on replay.
+- `apps/data.rs` `SiteRecord.fields`, `apps/app_flows.rs` `InputSchema.properties` and the event
+  an app action receives: app-declared data and schemas, validated by the app platform.
+- `apps/job_import.rs` `ImportInput.record` / `options`: the source record and approved options of
+  an import job, admitted by the native import operations.
+- `developer/generation.rs` and `developer/routes.rs` `manifest`: model output or an agent's app
+  definition, repaired and validated by the app generation contract before it is saved.
+- `marketing/flow_actions.rs` order action arguments: the merchant's stored action configuration,
+  validated by the flow action schema; the flow adds the typed `OrderActionArgs`.
+- Passthrough parts of projections (`studio.rs` overview facts, `checkout/session_quote.rs`,
+  `cart_mutation.rs` and `catalog_routes.rs` quote parts, `catalog_routes.rs` product elements):
+  documents owned and shaped by another component, forwarded without interpretation.
+- `bin/` conformance and comparison drivers: test-case values handed to the policy under test.

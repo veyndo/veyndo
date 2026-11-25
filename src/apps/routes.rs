@@ -14,7 +14,7 @@ use axum::extract::Path;
 use axum::extract::State;
 use axum::routing::get;
 use axum::routing::post;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use serde_json::json;
 use std::collections::HashMap;
@@ -22,7 +22,7 @@ use veyndo_app_platform::http::actions::{app_action, entity_list, entity_save, s
 use veyndo_app_platform::http::packages;
 use veyndo_core::Result;
 use veyndo_core::bad;
-use veyndo_core::document::view;
+use veyndo_core::document::{lenient, merge, view};
 use veyndo_core::request_context::RequestContext;
 pub(crate) fn app_router() -> Router<App> {
     Router::new()
@@ -77,6 +77,24 @@ pub(crate) fn app_router() -> Router<App> {
         .route("/store-api/apps/slots", get(slots))
         .route("/store-api/apps/{id}/configure", post(configure_action))
 }
+/// The package row fields the app list reads.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct PackageRow {
+    #[serde(deserialize_with = "lenient")]
+    id: Option<String>,
+    manifest: Value,
+}
+
+/// The links the app list adds to each package row.
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct PackageLinks<'a> {
+    ui_url: Option<String>,
+    connections: Vec<&'a hosted::HostedConnection>,
+    managed_by: Option<&'static str>,
+}
+
 async fn app_list(State(a): State<App>, h: RequestContext) -> Result<Json<Value>> {
     let t = merchant(&a, &h)?;
     let (config, _) = commerce::config(&a, &t).await?;
@@ -85,23 +103,32 @@ async fn app_list(State(a): State<App>, h: RequestContext) -> Result<Json<Value>
     let packages: Vec<Value> = rows
         .into_iter()
         .map(|mut r| {
-            let id = r["id"].as_str().unwrap_or_default().to_owned();
-            let connected: Vec<&Value> = connections.iter().filter(|f| f["appId"] == id).collect();
-            r["uiUrl"] = json!(
-                serde_json::from_value::<Manifest>(r["manifest"].clone())
-                    .ok()
-                    .filter(|m| approval::approved(m, &crate::runtime_config::get().services[&id]))
-                    .and_then(|_| gateway::ui_url(&id))
-            );
-            r["connections"] = json!(connected);
-            r["managedBy"] = json!(if connected.is_empty() {
-                None
-            } else {
-                Some("experience")
-            });
-            r
+            let package: PackageRow = view(&r);
+            let id = package.id.unwrap_or_default();
+            let connected: Vec<&hosted::HostedConnection> = connections
+                .iter()
+                .filter(|f| f.app_id.as_deref() == Some(id.as_str()))
+                .collect();
+            merge(
+                &mut r,
+                PackageLinks {
+                    ui_url: serde_json::from_value::<Manifest>(package.manifest)
+                        .ok()
+                        .filter(|m| {
+                            approval::approved(m, &crate::runtime_config::get().services[&id])
+                        })
+                        .and_then(|_| gateway::ui_url(&id)),
+                    managed_by: if connected.is_empty() {
+                        None
+                    } else {
+                        Some("experience")
+                    },
+                    connections: connected,
+                },
+            )?;
+            Ok(r)
         })
-        .collect();
+        .collect::<Result<_>>()?;
     Ok(Json(json!({
         "apiVersion":"1", "mainLocale":config.main_locale, "packages":packages,
         "builtIns":["migration","site_builder","site_forms","marketplaces","engraving","paypal","shopware_payments","storyfront","google_analytics","gmail","slack","email","vercel","klaviyo","hubspot","contentful","algolia"],
@@ -165,4 +192,37 @@ async fn configure_action(
     Json(v): Json<Value>,
 ) -> Result<Json<Value>> {
     Ok(Json(configure(&a, &h, &id, &v).await?))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::PackageLinks;
+    use serde_json::json;
+    use veyndo_core::document::merge;
+
+    #[test]
+    fn package_links_keep_the_indexed_shape() {
+        let row = json!({"id":"storyfront","manifest":{"id":"storyfront"},"enabled":true});
+        for (ui, connected) in [
+            (Some("https://ui.example.test/".to_string()), false),
+            (None, false),
+        ] {
+            let mut old = row.clone();
+            let none: Vec<serde_json::Value> = vec![];
+            old["uiUrl"] = json!(ui);
+            old["connections"] = json!(none);
+            old["managedBy"] = json!(if connected { Some("experience") } else { None });
+            let mut new = row.clone();
+            merge(
+                &mut new,
+                PackageLinks {
+                    ui_url: ui,
+                    connections: vec![],
+                    managed_by: None,
+                },
+            )
+            .unwrap();
+            assert_eq!(new, old);
+        }
+    }
 }

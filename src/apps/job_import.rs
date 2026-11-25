@@ -4,7 +4,7 @@ use crate::auth;
 use crate::foundation::App;
 use crate::foundation::merchant;
 use axum::http::StatusCode;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use serde_json::json;
 use veyndo_app_platform::store::app_host_reads;
@@ -12,7 +12,7 @@ use veyndo_core::Error;
 use veyndo_core::Result;
 use veyndo_core::bad;
 use veyndo_core::conflict;
-use veyndo_core::document::{Raw, lenient, view};
+use veyndo_core::document::{Raw, lenient, merge, view};
 use veyndo_core::hash;
 use veyndo_core::request_context::RequestContext;
 // Retain a connection for the native owner even on the supported two-connection pool.
@@ -116,9 +116,8 @@ struct ApprovedOptions {
 fn import_input(v: &Value, intent: &Value, inspect: bool) -> Result<Value> {
     let callback: ImportCallback = view(v);
     let intent: ImportIntent = view(intent);
-    let mut input =
-        json!({"approve":true,"record":callback.record.raw,"options":intent.options.raw});
-    if let Some(approved) = intent.options.acknowledged_warnings.as_ref() {
+    let mut options = intent.options.raw;
+    if let Some(approved) = intent.options.view.acknowledged_warnings.as_ref() {
         let warnings = callback
             .record
             .warnings
@@ -135,23 +134,62 @@ fn import_input(v: &Value, intent: &Value, inspect: bool) -> Result<Value> {
             ));
         }
         if warnings.is_empty() {
-            input["options"]
+            options
                 .as_object_mut()
                 .unwrap()
                 .remove("acknowledgedWarnings");
         } else {
-            input["options"]["acknowledgedWarnings"] = json!(warnings);
+            merge(
+                &mut options,
+                Acknowledged {
+                    acknowledged_warnings: warnings,
+                },
+            )?;
         }
     }
-    if let Some(chunks) = v.get("assetChunks") {
-        input["assetChunks"] = chunks.clone();
-    }
-    if inspect {
-        input.as_object_mut().unwrap().remove("approve");
-        input.as_object_mut().unwrap().remove("assetChunks");
-    }
-    Ok(input)
+    Ok(json!(ImportInput {
+        approve: !inspect,
+        record: callback.record.raw,
+        options,
+        asset_chunks: if inspect {
+            None
+        } else {
+            v.get("assetChunks").cloned()
+        },
+    }))
 }
+
+/// The native import input: approval (omitted for an inspection), the reviewed record, the
+/// approved options and, for an import, the asset chunks exactly as the callback sent them.
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct ImportInput {
+    #[serde(skip_serializing_if = "std::ops::Not::not")]
+    approve: bool,
+    record: Value,
+    options: Value,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    asset_chunks: Option<Value>,
+}
+
+/// The source limitations an import acknowledges, written into the approved options.
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct Acknowledged<'a> {
+    acknowledged_warnings: &'a [Value],
+}
+
+/// The job snapshot the merchant reviewed: operation, record kind, record digests and target workspace.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ReviewedJob {
+    operation: Value,
+    kind: Value,
+    record_digests: Value,
+    #[serde(deserialize_with = "lenient")]
+    target: Option<String>,
+}
+
 pub(super) async fn execute(
     a: &App,
     h: &RequestContext,
@@ -227,13 +265,14 @@ pub(super) async fn execute(
         action.permission.as_deref().unwrap_or("apps.manage"),
     )?;
     gateway::additional_permissions(&identity, action)?;
-    if intent["operation"] == "reconcile" && !inspect {
+    let reviewed: ReviewedJob = view(&intent);
+    if reviewed.operation == "reconcile" && !inspect {
         return Err(conflict(
             "Read-only reconciliation does not authorize native writes",
         ));
     }
-    if intent["kind"] != kind
-        || !intent["recordDigests"].as_array().is_some_and(|ds| {
+    if reviewed.kind != kind
+        || !reviewed.record_digests.as_array().is_some_and(|ds| {
             !ds.is_empty()
                 && ds.len() <= 100
                 && ds
@@ -245,8 +284,9 @@ pub(super) async fn execute(
             "Record differs from the explicitly reviewed job snapshot",
         ));
     }
-    let target = intent["target"]
-        .as_str()
+    let target = reviewed
+        .target
+        .as_deref()
         .ok_or(bad("Reviewed target required"))?;
     if ["products", "categories", "pages", "assets"].contains(&kind) {
         auth::permit(&identity, "environments.manage")?;
@@ -282,4 +322,77 @@ pub(super) async fn execute(
     .await?;
     tx.commit().await?;
     Ok(result)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{ImportCallback, ImportIntent, import_input};
+    use serde_json::{Value, json};
+    use veyndo_core::Result;
+    use veyndo_core::bad;
+    use veyndo_core::document::view;
+
+    /// The former indexed construction, kept to compare the stored input shape.
+    fn indexed_import_input(v: &Value, intent: &Value, inspect: bool) -> Result<Value> {
+        let callback: ImportCallback = view(v);
+        let intent: ImportIntent = view(intent);
+        let mut input =
+            json!({"approve":true,"record":callback.record.raw,"options":intent.options.raw});
+        if let Some(approved) = intent.options.acknowledged_warnings.as_ref() {
+            let warnings = callback
+                .record
+                .warnings
+                .as_ref()
+                .ok_or(bad("Invalid source warnings"))?;
+            if approved.len() > 20
+                || approved
+                    .iter()
+                    .any(|value| value.as_str().is_none_or(|s| s.len() > 2000))
+                || warnings.iter().any(|warning| !approved.contains(warning))
+            {
+                return Err(bad(
+                    "Review every source limitation before importing this record",
+                ));
+            }
+            if warnings.is_empty() {
+                input["options"]
+                    .as_object_mut()
+                    .unwrap()
+                    .remove("acknowledgedWarnings");
+            } else {
+                input["options"]["acknowledgedWarnings"] = json!(warnings);
+            }
+        }
+        if let Some(chunks) = v.get("assetChunks") {
+            input["assetChunks"] = chunks.clone();
+        }
+        if inspect {
+            input.as_object_mut().unwrap().remove("approve");
+            input.as_object_mut().unwrap().remove("assetChunks");
+        }
+        Ok(input)
+    }
+
+    #[test]
+    fn import_input_keeps_the_indexed_shape() {
+        let callbacks = [
+            json!({"id":"j","lease":"l","record":{"kind":"products","warnings":["w1"]},"assetChunks":[{"id":"a"}]}),
+            json!({"id":"j","lease":"l","record":{"kind":"products","warnings":[]},"assetChunks":null}),
+            json!({"id":"j","lease":"l","record":{"kind":"orders"}}),
+        ];
+        let intents = [
+            json!({"options":{"acknowledgedWarnings":["w1"],"mode":"merge"}}),
+            json!({"options":{"mode":"replace"}}),
+            json!({}),
+        ];
+        for callback in &callbacks {
+            for intent in &intents {
+                for inspect in [false, true] {
+                    let old = indexed_import_input(callback, intent, inspect).ok();
+                    let new = import_input(callback, intent, inspect).ok();
+                    assert_eq!(new, old, "{callback} {intent} {inspect}");
+                }
+            }
+        }
+    }
 }

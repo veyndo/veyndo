@@ -32,11 +32,9 @@ pub(crate) async fn register_user(
     let email = email(&v)?;
     let name = name(&v)?;
     let password = hash_password(password(&v)?).await?;
-    let slug = v["workspaceId"]
-        .as_str()
-        .ok_or(bad("Workspace ID required"))?;
+    let slug = input.workspace_id.as_str();
     validate_tenant(slug)?;
-    let shop_name = v["workspaceName"].as_str().unwrap_or(slug).trim();
+    let shop_name = input.workspace_name.as_deref().unwrap_or(slug).trim();
     if shop_name.is_empty() || shop_name.len() > 100 {
         return Err(bad("Workspace name must contain 1..100 characters"));
     }

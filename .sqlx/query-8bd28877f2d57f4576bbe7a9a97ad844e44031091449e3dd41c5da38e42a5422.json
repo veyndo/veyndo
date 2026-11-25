@@ -1,0 +1,21 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT\n      (SELECT floor(extract(epoch FROM now() - available_at))::bigint\n       FROM flow_jobs WHERE state='queued' AND available_at<=now()\n       ORDER BY available_at LIMIT 1) AS \"flow?\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "flow?",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "8bd28877f2d57f4576bbe7a9a97ad844e44031091449e3dd41c5da38e42a5422"
+}
