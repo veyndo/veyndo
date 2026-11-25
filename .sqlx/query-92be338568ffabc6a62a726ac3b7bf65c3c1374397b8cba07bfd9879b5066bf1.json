@@ -1,0 +1,44 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT count(*) AS \"products!\", count(*) FILTER (WHERE active AND stock>0) AS \"stocked!\", count(*) FILTER (WHERE active AND stock<=0) AS \"empty!\", count(*) FILTER (WHERE NOT active) AS \"inactive!\" FROM products p WHERE tenant=$1 AND NOT EXISTS(SELECT 1 FROM products c WHERE c.tenant=p.tenant AND c.parent_id=p.id)",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "products!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "stocked!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "empty!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 3,
+        "name": "inactive!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "92be338568ffabc6a62a726ac3b7bf65c3c1374397b8cba07bfd9879b5066bf1"
+}

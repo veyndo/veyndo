@@ -6,4 +6,4 @@ WITH picked AS (
  ORDER BY available_at,tenant,kind,object_id LIMIT 16 FOR UPDATE SKIP LOCKED
 )
 UPDATE vector_index_queue q SET lease=$1,lease_until=now()+interval '180 seconds'
-FROM picked p WHERE q.tenant=p.tenant AND q.kind=p.kind AND q.object_id=p.object_id RETURNING q.*;
+FROM picked p WHERE q.tenant=p.tenant AND q.kind=p.kind AND q.object_id=p.object_id RETURNING q.tenant,q.kind,q.object_id,q.revision;

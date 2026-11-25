@@ -1,0 +1,33 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT proposal->'attack' AS \"report!\",to_char(created_at AT TIME ZONE 'UTC','YYYY-MM-DD\"T\"HH24:MI:SS\"Z\"') AS \"saved_at!\" FROM tasks WHERE tenant=$1 AND run_actor=$2 AND run_request ? 'attack' AND run_request->'attack'->>'channel'=$3 AND (run_request->>'agentId') IS NOT DISTINCT FROM $4 ORDER BY created_at DESC,id LIMIT 1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "report!",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "saved_at!",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null,
+      null
+    ]
+  },
+  "hash": "f0d7961c03c1c0b5a8d76685caa89b00abe0fa88d105cb664959b6a2c821064a"
+}

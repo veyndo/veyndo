@@ -1,5 +1,6 @@
 //! Merchant memory reads and revision-bound hypothesis decisions.
 use crate::store::observations::observations;
+use crate::store::product_reads::decide_hypothesis;
 use axum::Json;
 use axum::extract::{Path, State as Shared};
 use serde::Deserialize;
@@ -44,8 +45,8 @@ pub async fn decide(
         return Err(bad("Explicit approve=true required"));
     }
     let mut tx = a.db.begin().await?;
-    let changed=sqlx::query("UPDATE knowledge_hypotheses SET state=$1,revision=revision+1 WHERE tenant=$2 AND id=$3 AND revision=$4").bind(state).bind(&t).bind(&id).bind(input.revision.ok_or(bad("revision required"))?).execute(&mut *tx).await?.rows_affected();
-    if changed != 1 {
+    let revision = input.revision.ok_or(bad("revision required"))?;
+    if !decide_hypothesis(&mut *tx, &t, &id, state, revision).await? {
         return Err(conflict("Hypothesis revision changed"));
     }
     veyndo_core::store::outbox::publish_on(

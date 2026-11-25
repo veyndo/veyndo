@@ -1,9 +1,9 @@
 //! Fictional shopper cohorts reuse native task authority, checkpoints and private commerce operations.
 use super::agent_runs::{enqueue, operate};
 use crate::ports::AgentHost;
+use crate::store::product_reads::{private_sandbox, scenario_runs};
 use serde::Deserialize;
 use serde_json::{Value, json};
-use sqlx::Row;
 use veyndo_core::document::{lenient, view};
 use veyndo_core::model_contract::validate_native;
 use veyndo_core::shop_scope::{channel as channel_id, header};
@@ -100,12 +100,7 @@ pub async fn admit(a: &State, h: &RequestContext) -> Result<String> {
         ));
     }
     let t = merchant(h)?;
-    let private: bool = sqlx::query_scalar(
-        "SELECT EXISTS(SELECT 1 FROM shop_environments WHERE tenant=$1 AND preview_owner IS NULL)",
-    )
-    .bind(&t)
-    .fetch_one(&a.db)
-    .await?;
+    let private = private_sandbox(&a.db, &t).await?;
     if !private {
         return Err(conflict(
             "Open a private sandbox before simulating customers",
@@ -226,23 +221,29 @@ pub async fn invoke<H: AgentHost>(
         return Ok(json!({"id":group,"runs":runs,"private":true,"synthetic":true}));
     }
     let actor = header(h, "x-rac-user").ok_or(bad("Scenario actor required"))?;
-    let rows = sqlx::query("SELECT id,run_request,run_scopes,run_updated::text AS updated_text FROM tasks WHERE tenant=$1 AND run_actor=$2 AND run_request ? 'scenario' AND (run_request->>'agentId') IS NOT DISTINCT FROM $4 AND ($3::text IS NULL OR run_request->'scenario'->>'group'=$3) ORDER BY run_updated DESC,id LIMIT 120")
-        .bind(&t).bind(actor).bind(input.id.as_deref()).bind(&h.principal.agent_key).fetch_all(&a.db).await?;
+    let rows = scenario_runs(
+        &a.db,
+        &t,
+        actor,
+        input.id.as_deref(),
+        h.principal.agent_key.as_deref(),
+    )
+    .await?;
     if name == "merchant.scenario.list" {
         let mut seen = std::collections::HashSet::new();
         let mut items = Vec::new();
         for row in rows {
-            let scopes: Value = row.get("run_scopes");
+            let scopes = &row.run_scopes;
             if scopes
                 .as_array()
                 .is_none_or(|ss| ss.iter().any(|s| s.as_str().is_none_or(|s| !allowed(h, s))))
             {
                 continue;
             }
-            let r: Value = row.get("run_request");
+            let r = &row.run_request;
             let s = &r["scenario"];
             if seen.insert(s["group"].as_str().unwrap_or("").to_owned()) {
-                items.push(json!({"id":s["group"],"title":s["title"],"members":s["members"],"updatedAt":row.get::<String,_>("updated_text")}));
+                items.push(json!({"id":s["group"],"title":s["title"],"members":s["members"],"updatedAt":row.updated_text}));
             }
         }
         let settings = catalogue::settings(a, h, &t).await?;
@@ -274,15 +275,7 @@ pub async fn invoke<H: AgentHost>(
     }
     let mut runs = Vec::new();
     for row in rows {
-        runs.push(
-            Box::pin(operate(
-                a,
-                h,
-                "merchant.run.status",
-                &json!({"id":row.get::<String,_>("id")}),
-            ))
-            .await?,
-        );
+        runs.push(Box::pin(operate(a, h, "merchant.run.status", &json!({"id":row.id}))).await?);
     }
     // Running polls stay cheap. Completed evidence uses the release projection.
     if runs

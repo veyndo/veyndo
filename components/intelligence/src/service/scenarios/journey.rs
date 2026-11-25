@@ -5,6 +5,8 @@ use super::super::run_journal as checkpoint;
 use super::admit;
 use super::{evidence, shopper, source};
 use crate::ports::AgentHost;
+use crate::store::agent_runs::{Lease, complete_scenario, step_pending};
+use crate::store::scenario_reports::extension_digest;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use serde_json::json;
@@ -151,8 +153,7 @@ pub async fn execute<H: AgentHost>(
         let products = shopper::products(host, &guest, "").await?;
         let (settings, revision) =
             scoped_config(a, t, req.channel.as_str().unwrap_or("default")).await?;
-        let extensions: String = sqlx::query_scalar("SELECT md5(coalesce(string_agg(stamp,'|' ORDER BY stamp),'')) FROM (SELECT 'app:'||id||':'||digest||':'||revision||':'||active AS stamp FROM app_packages WHERE tenant=$1 UNION ALL SELECT 'rule:'||id||':'||revision FROM commerce_rules WHERE tenant=$1 UNION ALL SELECT 'flow:'||id||':'||revision FROM commerce_flows WHERE tenant=$1 UNION ALL SELECT 'promotion:'||id||':'||revision FROM commerce_promotions WHERE tenant=$1 UNION ALL SELECT 'channel:'||id||':'||revision FROM sales_channels WHERE tenant=$1) versions")
-            .bind(t).fetch_one(&a.db).await?;
+        let extensions = extension_digest(&a.db, t).await?;
         let state = JourneyState {
             token: cart.get("token").cloned().unwrap_or_default(),
             snapshot_digest: json!(hash(&json!({"products":products,"settings":settings,"revision":revision,"extensions":extensions}).to_string())),
@@ -201,9 +202,12 @@ pub async fn execute<H: AgentHost>(
         let run = CURRENT
             .try_with(Clone::clone)
             .map_err(|_| bad("Scenario requires worker admission"))?;
-        let admitted = sqlx::query("UPDATE tasks SET run_pending=$4 WHERE tenant=$1 AND id=$2 AND run_state='running' AND run_lease=$3 AND run_until>now()")
-            .bind(t).bind(id).bind(&run.lease).bind(format!("scenario-step-{index}")).execute(&a.db).await?.rows_affected();
-        if admitted != 1 {
+        let lease = Lease {
+            tenant: t,
+            id,
+            lease: &run.lease,
+        };
+        if !step_pending(a, lease, &format!("scenario-step-{index}")).await? {
             return Err(conflict("Customer simulation stopped"));
         }
         let result = perform(
@@ -232,9 +236,12 @@ pub async fn execute<H: AgentHost>(
     let run = CURRENT
         .try_with(Clone::clone)
         .map_err(|_| bad("Scenario requires worker admission"))?;
-    let changed = sqlx::query("UPDATE tasks SET proposal=$4,applied=true,run_state='ready',run_pending=NULL,run_lease=NULL,run_until=NULL,run_revision=run_revision+1,run_updated=now() WHERE tenant=$1 AND id=$2 AND run_state='running' AND run_lease=$3 AND run_until>now()")
-        .bind(t).bind(id).bind(&run.lease).bind(&report).execute(&a.db).await?.rows_affected();
-    if changed != 1 {
+    let lease = Lease {
+        tenant: t,
+        id,
+        lease: &run.lease,
+    };
+    if !complete_scenario(a, lease, &report).await? {
         return Err(conflict("Scenario completion lost its lease"));
     }
     Ok(report)

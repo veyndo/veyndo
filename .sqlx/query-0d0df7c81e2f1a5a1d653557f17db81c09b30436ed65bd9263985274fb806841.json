@@ -1,0 +1,30 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT text FROM knowledge_chunks WHERE tenant=$1 AND document_id=$2 AND locale=$3 ORDER BY position LIMIT 16",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "text",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "knowledge_chunks",
+            "name": "text"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "0d0df7c81e2f1a5a1d653557f17db81c09b30436ed65bd9263985274fb806841"
+}

@@ -28,5 +28,5 @@ WITH terms AS MATERIALIZED (SELECT unnest(tsvector_to_array(to_tsvector('simple'
 )
 SELECT jsonb_build_object('id',p.id,'name',p.name,'price',p.price,'currency',
  coalesce(p.extra->>'priceCurrency',(SELECT data->'currencies'->>'pricingCurrency' FROM commerce_settings WHERE tenant=$1),'EUR'),
- 'stock',p.stock,'revision',p.revision,'score',r.score)
+ 'stock',p.stock,'revision',p.revision,'score',r.score) AS "hit!"
 FROM ranks r JOIN products p ON p.tenant=$1 AND p.id=r.id ORDER BY r.score DESC,p.id LIMIT 24;

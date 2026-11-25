@@ -4,10 +4,9 @@ use crate::ports::KnowledgeHost;
 use crate::service::models::choice;
 use crate::service::retrieval::{SourceQuery, search_in};
 use crate::store::documents::{product_facts, sources_unchanged};
+use crate::store::product_reads::product as stored_product;
 use serde::Deserialize;
 use serde_json::{Value, json};
-use sqlx::Row;
-use veyndo_catalog::store::products;
 use veyndo_core::document::{lenient, view};
 use veyndo_core::shop_scope::tenant;
 use veyndo_core::store::lease::Lease;
@@ -159,27 +158,13 @@ pub async fn product_knowledge(
     let a = host.models().core;
     let t = merchant(h)?;
     permit(h, "knowledge.read")?;
-    let row = sqlx::query("SELECT * FROM products WHERE tenant=$1 AND id=$2")
-        .bind(&t)
-        .bind(id)
-        .fetch_optional(&a.db)
+    let (stored, parent) = stored_product(a, &t, id)
         .await?
         .ok_or(Error(StatusCode::NOT_FOUND, "Product unavailable".into()))?;
     let (locale, chain) = language_context(a, h).await?;
-    let product = host
-        .localize(&t, &chain, vec![products::product(&row)])
-        .await?
-        .remove(0);
+    let product = host.localize(&t, &chain, vec![stored]).await?.remove(0);
     let (settings, _) = config(a, &t).await?;
-    let f = product_facts(
-        a,
-        &t,
-        id,
-        row.get("parent_id"),
-        &locale,
-        &settings.main_locale,
-    )
-    .await?;
+    let f = product_facts(a, &t, id, parent, &locale, &settings.main_locale).await?;
     let external = host.graph(&t).await?;
     let refs = external["products"]
         .as_array()

@@ -1,13 +1,14 @@
 //! Cart- and channel-bound affirmative consent choices; stale or expired policy receipts never authorize processing, and withdrawal deletes the personalization and analytics data at once. Successive carts share one revocable receipt, never copied grants.
+use crate::store::consent as store;
+use crate::store::consent::ReceiptView;
 use crate::store::preferences::forget_many;
 use axum::Json;
 use axum::extract::State as Shared;
 use serde::Deserialize;
 use serde_json::{Value, json};
-use sqlx::Row;
 use std::collections::HashMap;
 use veyndo_checkout::store::cart_load::load as load_cart;
-pub use veyndo_checkout::store::legal_snapshot::RECEIPT_SQL;
+use veyndo_core::document::view;
 use veyndo_core::shop_scope::{channel as channel_id, tenant};
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad, conflict, hash};
 use veyndo_kernel::verified_kernel;
@@ -33,18 +34,11 @@ pub async fn policy(Shared(a): Shared<State>, h: RequestContext) -> Result<Json<
 pub async fn read(Shared(a): Shared<State>, h: RequestContext) -> Result<Json<Value>> {
     let c = load_cart(&a, &h).await?;
     let (s, _) = settings(&a, &c.tenant, &c.data.sales_channel).await?;
-    let r = sqlx::query(RECEIPT_SQL)
-        .bind(&c.tenant)
-        .bind(&c.id)
-        .bind(&c.data.sales_channel)
-        .fetch_optional(&a.db)
-        .await?;
+    let r = store::receipt(&a.db, &c.tenant, &c.id, &c.data.sales_channel).await?;
     Ok(Json(
-        r.filter(|r| {
-            r.get::<String, _>("policy_version") == version(&s.legal) && r.get::<bool, _>("fresh")
-        })
-        .map(|r| r.get::<Value, _>("data"))
-        .unwrap_or(json!({"choices":{},"policyVersion":version(&s.legal),"decided":false})),
+        r.filter(|r| r.policy_version == version(&s.legal) && r.fresh)
+            .map(|r| r.data)
+            .unwrap_or(json!({"choices":{},"policyVersion":version(&s.legal),"decided":false})),
     ))
 }
 #[derive(Deserialize)]
@@ -62,11 +56,7 @@ pub async fn write(
 ) -> Result<Json<Value>> {
     let c = load_cart(&a, &h).await?;
     let mut tx = a.db.begin().await?;
-    sqlx::query("SELECT revision FROM carts WHERE tenant=$1 AND id=$2 FOR UPDATE")
-        .bind(&c.tenant)
-        .bind(&c.id)
-        .fetch_one(&mut *tx)
-        .await?;
+    store::lock_cart(&mut *tx, &c.tenant, &c.id).await?;
     let receipt = write_locked(&mut tx, &c, &v.policy_version, v.choices, false).await?;
     tx.commit().await?;
     Ok(Json(receipt))
@@ -80,7 +70,7 @@ pub async fn write_locked(
     delta: bool,
 ) -> Result<Value> {
     let owner = receipt_owner(tx, c).await?;
-    let count:i64=sqlx::query_scalar("SELECT count(*) FROM privacy_consent_log WHERE tenant=$1 AND cart_id=$2 AND created_at>now()-interval '1 day'").bind(&c.tenant).bind(&owner).fetch_one(&mut **tx).await?;
+    let count = store::changes_today(&mut **tx, &c.tenant, &owner).await?;
     let (s, _) = scoped_locked(tx, &c.tenant, &c.data.sales_channel, &validate_condition).await?;
     if version(&s.legal) != policy {
         return Err(conflict("Privacy policy changed; review your choices"));
@@ -89,12 +79,16 @@ pub async fn write_locked(
         return Err(bad("Unknown consent purpose"));
     }
     if delta
-        && let Some(saved) = sqlx::query("SELECT data FROM privacy_consents WHERE tenant=$1 AND cart_id=$2 AND channel_id=$3 AND policy_version=$4 AND expires_at>now() FOR UPDATE")
-            .bind(&c.tenant).bind(&owner).bind(&c.data.sales_channel).bind(policy).fetch_optional(&mut **tx).await? {
-            let saved: Value = saved.get("data");
-            for purpose in PURPOSES {
-                incoming.entry((*purpose).into()).or_insert(saved["choices"][*purpose] == true);
-            }
+        && let Some(saved) =
+            store::current_locked(&mut **tx, &c.tenant, &owner, &c.data.sales_channel, policy)
+                .await?
+    {
+        let saved = view::<ReceiptView>(&saved);
+        for purpose in PURPOSES {
+            incoming
+                .entry((*purpose).into())
+                .or_insert(saved.grants(purpose));
+        }
     }
     let choices = PURPOSES
         .iter()
@@ -106,10 +100,11 @@ pub async fn write_locked(
         })
         .collect::<HashMap<_, _>>();
     // Revocation stays available even after admission is exhausted; identical choices do not renew expiry.
-    if let Some(r) = sqlx::query("SELECT data FROM privacy_consents WHERE tenant=$1 AND cart_id=$2 AND channel_id=$3 AND policy_version=$4 AND expires_at>now() FOR UPDATE")
-      .bind(&c.tenant).bind(&owner).bind(&c.data.sales_channel).bind(policy).fetch_optional(&mut **tx).await? {
-        let saved:Value=r.get("data");
-        if saved["choices"]==json!(choices) { return Ok(saved); }
+    if let Some(saved) =
+        store::current_locked(&mut **tx, &c.tenant, &owner, &c.data.sales_channel, policy).await?
+        && view::<ReceiptView>(&saved).choices == json!(choices)
+    {
+        return Ok(saved);
     }
     if count >= 100 && choices.values().any(|v| *v) {
         return Err(Error(
@@ -118,39 +113,33 @@ pub async fn write_locked(
         ));
     }
     let receipt = json!({"choices":choices,"policyVersion":policy,"decided":true,"behaviorAnalyticsEnabled":s.legal.behavior_analytics.enabled,"recordedAt":chrono::Utc::now().to_rfc3339(),"expiresAt":(chrono::Utc::now()+chrono::Duration::days(s.legal.consent_days.into())).to_rfc3339()});
-    sqlx::query("INSERT INTO privacy_consents(tenant,cart_id,channel_id,policy_version,data,expires_at) VALUES($1,$2,$3,$4,$5,now()+make_interval(days=>$6)) ON CONFLICT(tenant,cart_id,channel_id) DO UPDATE SET policy_version=EXCLUDED.policy_version,data=EXCLUDED.data,expires_at=EXCLUDED.expires_at")
-      .bind(&c.tenant).bind(&owner).bind(&c.data.sales_channel).bind(policy).bind(&receipt).bind(s.legal.consent_days as i32).execute(&mut **tx).await?;
-    sqlx::query(
-        "INSERT INTO privacy_consent_log(tenant,cart_id,channel_id,data) VALUES($1,$2,$3,$4)",
+    store::save(
+        &mut **tx,
+        &c.tenant,
+        &owner,
+        &c.data.sales_channel,
+        policy,
+        &receipt,
+        s.legal.consent_days as i32,
     )
-    .bind(&c.tenant)
-    .bind(&owner)
-    .bind(&c.data.sales_channel)
-    .bind(&receipt)
-    .execute(&mut **tx)
+    .await?;
+    store::log(
+        &mut **tx,
+        &c.tenant,
+        &owner,
+        &c.data.sales_channel,
+        &receipt,
+    )
     .await?;
     let carts = receipt_carts(tx, c, &owner).await?;
     let signals = carts.iter().map(|id| hash(id)).collect::<Vec<_>>();
     if choices.get("personalization") != Some(&true) {
         forget_many(tx, &c.tenant, &carts).await?;
-        sqlx::query("DELETE FROM exposures WHERE tenant=$1 AND session=$2")
-            .bind(&c.tenant)
-            .bind(&c.data.session)
-            .execute(&mut **tx)
-            .await?;
-        sqlx::query("DELETE FROM session_signals WHERE tenant=$1 AND session=ANY($2)")
-            .bind(&c.tenant)
-            .bind(&signals)
-            .execute(&mut **tx)
-            .await?;
-        sqlx::query("DELETE FROM session_signal_events WHERE tenant=$1 AND session=ANY($2) AND purpose='personalization'")
-            .bind(&c.tenant)
-            .bind(&signals)
-            .execute(&mut **tx)
-            .await?;
+        store::forget_exposure(&mut **tx, &c.tenant, &c.data.session).await?;
+        store::forget_personalization(tx, &c.tenant, &signals).await?;
     }
     if choices.get("analytics") != Some(&true) {
-        sqlx::query("DELETE FROM session_signal_events WHERE tenant=$1 AND session=ANY($2) AND purpose='analytics'").bind(&c.tenant).bind(&signals).execute(&mut **tx).await?;
+        store::forget_analytics(&mut **tx, &c.tenant, &signals).await?;
     }
     veyndo_core::store::outbox::publish_on(
         &mut **tx,
@@ -164,20 +153,8 @@ pub async fn write_locked(
 /// Requires a fresh receipt for the purpose under the current policy.
 pub async fn require(a: &State, c: &StoredCart, purpose: &str) -> Result<()> {
     let (s, _) = settings(a, &c.tenant, &c.data.sales_channel).await?;
-    let r = sqlx::query(RECEIPT_SQL)
-        .bind(&c.tenant)
-        .bind(&c.id)
-        .bind(&c.data.sales_channel)
-        .fetch_optional(&a.db)
-        .await?;
-    let valid = r.is_some_and(|r| {
-        verified_kernel::consent_admissible(
-            s.legal.purposes.get(purpose) == Some(&true),
-            r.get::<String, _>("policy_version") == version(&s.legal),
-            r.get::<bool, _>("fresh"),
-            r.get::<Value, _>("data")["choices"][purpose] == true,
-        )
-    });
+    let r = store::receipt(&a.db, &c.tenant, &c.id, &c.data.sales_channel).await?;
+    let valid = r.is_some_and(|r| admissible(&s.legal, &r, purpose));
     if !valid {
         return Err(Error(
             StatusCode::FORBIDDEN,
@@ -185,6 +162,16 @@ pub async fn require(a: &State, c: &StoredCart, purpose: &str) -> Result<()> {
         ));
     }
     Ok(())
+}
+
+/// Whether a receipt admits processing for the purpose under the current policy.
+fn admissible(legal: &Config, r: &store::Receipt, purpose: &str) -> bool {
+    verified_kernel::consent_admissible(
+        legal.purposes.get(purpose) == Some(&true),
+        r.policy_version == version(legal),
+        r.fresh,
+        view::<ReceiptView>(&r.data).grants(purpose),
+    )
 }
 
 /// Public disclosure excludes internal legal-review notes.
@@ -200,20 +187,8 @@ pub async fn require_locked(
     purpose: &str,
 ) -> Result<()> {
     let (s, _) = scoped_locked(tx, &c.tenant, &c.data.sales_channel, &validate_condition).await?;
-    let r = sqlx::query(RECEIPT_SQL)
-        .bind(&c.tenant)
-        .bind(&c.id)
-        .bind(&c.data.sales_channel)
-        .fetch_optional(&mut **tx)
-        .await?;
-    if !r.is_some_and(|r| {
-        verified_kernel::consent_admissible(
-            s.legal.purposes.get(purpose) == Some(&true),
-            r.get::<String, _>("policy_version") == version(&s.legal),
-            r.get::<bool, _>("fresh"),
-            r.get::<Value, _>("data")["choices"][purpose] == true,
-        )
-    }) {
+    let r = store::receipt(&mut **tx, &c.tenant, &c.id, &c.data.sales_channel).await?;
+    if !r.is_some_and(|r| admissible(&s.legal, &r, purpose)) {
         return Err(Error(
             StatusCode::FORBIDDEN,
             "Consent required for this purpose".into(),
@@ -227,9 +202,11 @@ pub async fn receipt_owner(
     tx: &mut sqlx::Transaction<'_, sqlx::Postgres>,
     c: &StoredCart,
 ) -> Result<String> {
-    Ok(sqlx::query_scalar("SELECT coalesce(source_cart_id,cart_id) FROM privacy_consents WHERE tenant=$1 AND cart_id=$2 AND channel_id=$3")
-        .bind(&c.tenant).bind(&c.id).bind(&c.data.sales_channel)
-        .fetch_optional(&mut **tx).await?.unwrap_or_else(|| c.id.clone()))
+    Ok(
+        store::owner(&mut **tx, &c.tenant, &c.id, &c.data.sales_channel)
+            .await?
+            .unwrap_or_else(|| c.id.clone()),
+    )
 }
 
 /// The carts that share one receipt.
@@ -238,8 +215,7 @@ pub async fn receipt_carts(
     c: &StoredCart,
     owner: &str,
 ) -> Result<Vec<String>> {
-    Ok(sqlx::query_scalar("SELECT cart_id FROM privacy_consents WHERE tenant=$1 AND channel_id=$2 AND (cart_id=$3 OR source_cart_id=$3) ORDER BY cart_id")
-        .bind(&c.tenant).bind(&c.data.sales_channel).bind(owner).fetch_all(&mut **tx).await?)
+    store::sharing_carts(&mut **tx, &c.tenant, &c.data.sales_channel, owner).await
 }
 
 /// The caller has authenticated the original cart capability through load_cart.
@@ -268,26 +244,33 @@ pub async fn continue_consent(a: &State, previous: &StoredCart, next: &StoredCar
     .await?;
     // A capability-checked successor points at the original receipt. It never copies
     // a grant: reads, revocation and processing all lock/read the same root row.
-    let saved = sqlx::query(RECEIPT_SQL)
-        .bind(&previous.tenant)
-        .bind(&previous.id)
-        .bind(&previous.data.sales_channel)
-        .fetch_optional(&mut *tx)
-        .await?;
-    if let Some(saved) = saved.filter(|r| {
-        r.get::<String, _>("policy_version") == version(&settings.legal)
-            && r.get::<bool, _>("fresh")
-    }) {
-        let source: String = saved.get("cart_id");
+    let saved = store::receipt(
+        &mut *tx,
+        &previous.tenant,
+        &previous.id,
+        &previous.data.sales_channel,
+    )
+    .await?;
+    if let Some(saved) = saved.filter(|r| r.policy_version == version(&settings.legal) && r.fresh) {
+        let source = saved.cart_id;
         // Old binaries fail closed on an alias during a rolling update/rollback.
-        let inserted = sqlx::query("INSERT INTO privacy_consents(tenant,cart_id,channel_id,policy_version,data,expires_at,source_cart_id) VALUES($1,$2,$3,'','{\"choices\":{},\"decided\":false}',now(),$4) ON CONFLICT(tenant,cart_id,channel_id) DO NOTHING")
-            .bind(&next.tenant).bind(&next.id).bind(&next.data.sales_channel)
-            .bind(&source).execute(&mut *tx).await?.rows_affected();
-        if inserted == 1 {
-            sqlx::query("INSERT INTO privacy_consent_log(tenant,cart_id,channel_id,data) VALUES($1,$2,$3,$4)")
-                .bind(&next.tenant).bind(&next.id).bind(&next.data.sales_channel)
-                .bind(json!({"continuedFromCartId":previous.id,"receiptCartId":source}))
-                .execute(&mut *tx).await?;
+        if store::alias(
+            &mut *tx,
+            &next.tenant,
+            &next.id,
+            &next.data.sales_channel,
+            &source,
+        )
+        .await?
+        {
+            store::log(
+                &mut *tx,
+                &next.tenant,
+                &next.id,
+                &next.data.sales_channel,
+                &json!({"continuedFromCartId":previous.id,"receiptCartId":source}),
+            )
+            .await?;
         }
     }
     tx.commit().await?;

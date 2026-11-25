@@ -1,0 +1,53 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT embedding,embedding_model AS model,content_hash AS digest FROM semantic_products WHERE tenant=$1 AND product_id=$2",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "embedding",
+        "type_info": "Float4Array",
+        "origin": {
+          "Table": {
+            "table": "semantic_products",
+            "name": "embedding"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "model",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "semantic_products",
+            "name": "embedding_model"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "digest",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "semantic_products",
+            "name": "content_hash"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "0adebbab0963e93577b7c39fa112b76459e2b6302302b3c657dd96719f8417f0"
+}

@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO platform_audit(actor,action,data) VALUES($1,'ai.updated',$2)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Jsonb"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "34b40970f1f35b4baef7b65d7345f7c441b7fadbaf239b72b6efc1124f3afc93"
+}

@@ -1,5 +1,6 @@
 //! Image evidence uses owned assets, bundled demo fixtures or DNS-pinned public HTTPS; decoded thumbnails strip metadata before inference.
 use crate::ports::PublicEgress;
+use crate::store::product_reads::owned_image;
 use base64::{Engine as _, engine::general_purpose::STANDARD};
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad};
 use veyndo_identity::{merchant, permit};
@@ -16,8 +17,7 @@ pub async fn read(
     let bytes = if let Some(path) = url.strip_prefix("/store-api/assets/") {
         permit(h, "catalog.read")?;
         let id = path.split('?').next().unwrap_or("");
-        let bytes: Option<Vec<u8>> = sqlx::query_scalar("SELECT content FROM product_assets WHERE tenant=$1 AND id=$2 AND mime IN ('image/png','image/jpeg','image/webp') AND octet_length(content)<=8388608")
-            .bind(merchant(h)?).bind(id).fetch_optional(&a.db).await?;
+        let bytes = owned_image(&a.db, &merchant(h)?, id).await?;
         bytes.ok_or(Error(
             StatusCode::NOT_FOUND,
             "Owned image unavailable".into(),

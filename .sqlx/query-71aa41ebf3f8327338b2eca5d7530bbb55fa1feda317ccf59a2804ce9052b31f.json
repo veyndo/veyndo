@@ -1,0 +1,52 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT variant,views,purchases FROM policy WHERE tenant=$1 ORDER BY variant",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "variant",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "policy",
+            "name": "variant"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "views",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "policy",
+            "name": "views"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "purchases",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "policy",
+            "name": "purchases"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "71aa41ebf3f8327338b2eca5d7530bbb55fa1feda317ccf59a2804ce9052b31f"
+}

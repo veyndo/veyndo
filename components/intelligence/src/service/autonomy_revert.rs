@@ -1,11 +1,10 @@
 //! Takes today's automatic price changes back to the day's baseline, by request or when the daily exposure limit is exceeded.
 use super::autonomy::today;
 use crate::knowledge;
+use crate::store::autonomy as store;
 use serde::Deserialize;
 use serde_json::{Value, json};
-use sqlx::Row;
 use std::sync::atomic::{AtomicU64, Ordering};
-use veyndo_catalog::store::products::product;
 use veyndo_core::document::{lenient, view};
 use veyndo_core::shop_scope::header;
 use veyndo_core::{Error, RequestContext, Result, State, bad};
@@ -36,19 +35,18 @@ pub async fn revert(
 ) -> Result<Value> {
     let (s, _) = config(a, t).await?;
     let mut tx = a.db.begin().await?;
-    let rows = sqlx::query("SELECT b.product_id,b.baseline_minor,b.currency,p.price,p.revision,k.proposal->'proposal'->'changes' AS changes FROM ai_price_budget b JOIN products p ON p.tenant=b.tenant AND p.id=b.product_id JOIN tasks k ON k.tenant=b.tenant AND k.id=b.task_id WHERE b.tenant=$1 AND b.day=(now() AT TIME ZONE 'UTC')::date AND ($2::text IS NULL OR b.product_id=$2) ORDER BY b.product_id FOR UPDATE OF p")
-        .bind(t).bind(only).fetch_all(&mut *tx).await?;
+    let rows = store::changed_locked(&mut *tx, t, only).await?;
     let (mut reverted, mut skipped) = (Vec::new(), Vec::new());
     for row in rows {
-        let (id, code): (String, String) = (row.get("product_id"), row.get("currency"));
-        let baseline: i64 = row.get("baseline_minor");
-        let (current, scale) = minor(&s, &code, row.get("price"))?;
+        let (id, code) = (row.product_id, row.currency);
+        let baseline = row.baseline_minor;
+        let (current, scale) = minor(&s, &code, row.price)?;
         if current == baseline {
             skipped.push(json!({"productId":id,"reason":"at_baseline"}));
             continue;
         }
         let set = row
-            .get::<Option<Value>, _>("changes")
+            .changes
             .and_then(|changes| {
                 changes.as_array().and_then(|list| {
                     list.iter()
@@ -66,18 +64,17 @@ pub async fn revert(
             .decimal()
             .parse::<f64>()
             .map_err(|_| bad("Invalid baseline price"))?;
-        let changed = sqlx::query("UPDATE products SET price=$1,revision=revision+1 WHERE tenant=$2 AND id=$3 AND revision=$4 RETURNING *")
-            .bind(price).bind(t).bind(&id).bind(row.get::<i64,_>("revision")).fetch_optional(&mut *tx).await?;
+        let changed = store::restore_price(&mut tx, t, &id, price, row.revision).await?;
         let Some(changed) = changed else {
             skipped.push(json!({"productId":id,"reason":"changed_since"}));
             continue;
         };
-        knowledge::sync_product(&mut tx, t, &json!(product(&changed))).await?;
+        knowledge::sync_product(&mut tx, t, &json!(changed)).await?;
         veyndo_core::store::outbox::publish_on(
             &mut *tx,
             t,
             "product.updated",
-            &json!({"productId":id,"revision":changed.get::<i64,_>("revision")}),
+            &json!({"productId":id,"revision":changed.revision}),
         )
         .await?;
         reverted.push(id);
@@ -134,8 +131,7 @@ pub async fn guard_once(a: &State) -> Result<bool> {
     {
         return Ok(false);
     }
-    let tenants: Vec<String> = sqlx::query_scalar("SELECT DISTINCT tenant FROM ai_price_budget WHERE day=(now() AT TIME ZONE 'UTC')::date ORDER BY tenant LIMIT 500")
-        .fetch_all(&a.db).await?;
+    let tenants = store::shops_today(&a.db).await?;
     let mut worked = false;
     for t in tenants {
         // One shop's failure must not stop the guard for the others.

@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE translation_jobs SET status=$3,error=NULL,error_code=NULL,lease=NULL,lease_until=NULL WHERE tenant=$1 AND run_task=$2 AND status IN ('queued','processing','failed')",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "29161ac32c2964b5ed3366378778e6707587353c7a6ef7c26f642e14f31122c5"
+}

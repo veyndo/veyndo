@@ -1,8 +1,8 @@
 //! Private Qdrant adapter: tenant/model filters, deterministic identities and durable PostgreSQL index queue.
 use super::PgPool;
+use crate::store::vectors as store;
 use serde_json::{Value, json};
 use sha2::{Digest, Sha256};
-use sqlx::Row;
 use std::time::Duration;
 fn collection(kind: &str, model: &str, dimensions: usize) -> String {
     format!(
@@ -95,34 +95,23 @@ pub async fn query(
 pub async fn drain(db: &PgPool) -> Result<usize, String> {
     let mut tx = db.begin().await.map_err(|_| "Index transaction")?;
     let lease = uuid::Uuid::new_v4().to_string();
-    let rows = sqlx::query(include_str!("vector_claim.sql"))
-        .bind(&lease)
-        .fetch_all(&mut *tx)
+    let rows = store::claim(&mut *tx, &lease)
         .await
         .map_err(|_| "Index queue")?;
     tx.commit().await.map_err(|_| "Index claim commit")?;
     for row in &rows {
         let result:Result<(),String>=async {
-        let tenant: String = row.get("tenant");
-        let kind: String = row.get("kind");
-        let id: String = row.get("object_id");
-        let current=if kind=="product"{
-            sqlx::query("SELECT embedding,embedding_model AS model,content_hash AS digest FROM semantic_products WHERE tenant=$1 AND product_id=$2").bind(&tenant).bind(&id).fetch_optional(db).await
-        }else{
-            sqlx::query("SELECT c.embedding,c.embedding_model AS model,d.content_hash AS digest FROM knowledge_chunks c JOIN knowledge_documents d ON d.tenant=c.tenant AND d.id=c.document_id WHERE c.tenant=$1 AND c.document_id||':'||c.position=$2 AND c.embedding IS NOT NULL").bind(&tenant).bind(&id).fetch_optional(db).await
-        }.map_err(|_|"Index source")?;
-        if let Some(current) = current {
-            let model: String = current.get("model");
-            let embedding: Vec<f32> = current.get("embedding");
-            let digest: String = current.get("digest");
-            let name = ensure(&kind, &model, embedding.len()).await?;
-            request(reqwest::Method::PUT,&format!("/collections/{name}/points?wait=true"),Some(json!({"points":[{"id":point(&tenant,&kind,&id),"vector":{"text":embedding},"payload":{"tenant":tenant,"object_id":id,"model":model,"digest":digest}}]}))).await?;
+        let (tenant, kind, id) = (&row.tenant, &row.kind, &row.object_id);
+        let current = store::source(db, tenant, kind, id).await.map_err(|_|"Index source")?;
+        if let Some(store::Source { embedding, model, digest }) = current {
+            let name = ensure(kind, &model, embedding.len()).await?;
+            request(reqwest::Method::PUT,&format!("/collections/{name}/points?wait=true"),Some(json!({"points":[{"id":point(tenant,kind,id),"vector":{"text":embedding},"payload":{"tenant":tenant,"object_id":id,"model":model,"digest":digest}}]}))).await?;
         } else {
-            for name in super::vector_namespace::names(&kind).await? {
+            for name in super::vector_namespace::names(kind).await? {
                 request(
                     reqwest::Method::POST,
                     &format!("/collections/{name}/points/delete?wait=true"),
-                    Some(json!({"points":[point(&tenant,&kind,&id)]})),
+                    Some(json!({"points":[point(tenant,kind,id)]})),
                 )
                 .await?;
             }
@@ -130,11 +119,13 @@ pub async fn drain(db: &PgPool) -> Result<usize, String> {
         Ok(())
         }.await;
         if result.is_ok() {
-            sqlx::query("DELETE FROM vector_index_queue WHERE tenant=$1 AND kind=$2 AND object_id=$3 AND revision=$4 AND lease=$5")
-            .bind(row.get::<String,_>("tenant")).bind(row.get::<String,_>("kind")).bind(row.get::<String,_>("object_id")).bind(row.get::<i64,_>("revision")).bind(&lease).execute(db).await.map_err(|_|"Index acknowledgment")?;
+            store::acknowledge(db, row, &lease)
+                .await
+                .map_err(|_| "Index acknowledgment")?;
         } else {
-            sqlx::query("UPDATE vector_index_queue SET attempts=attempts+1,lease=NULL,lease_until=NULL,error_code='vector_publication_unavailable',available_at=now()+least(300,power(2,least(attempts+1,8))::int)*interval '1 second' WHERE tenant=$1 AND kind=$2 AND object_id=$3 AND revision=$4 AND lease=$5")
-            .bind(row.get::<String,_>("tenant")).bind(row.get::<String,_>("kind")).bind(row.get::<String,_>("object_id")).bind(row.get::<i64,_>("revision")).bind(&lease).execute(db).await.map_err(|_|"Index retry")?;
+            store::retry(db, row, &lease)
+                .await
+                .map_err(|_| "Index retry")?;
         }
     }
     Ok(rows.len())

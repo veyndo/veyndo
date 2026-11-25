@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM exposures WHERE tenant=$1 AND session=$2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "6bec55c0ce9daaa3bb5130a1e87a86d2fab5eeb34dcece8b3a26b8357280a728"
+}

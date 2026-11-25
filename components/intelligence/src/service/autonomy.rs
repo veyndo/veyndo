@@ -1,7 +1,7 @@
 //! Price-only optional autonomy, atomic unique-SKU daily quotas, a non-compounding day baseline and a daily exposure ceiling.
 use crate::domain::price_guardrails::{Change, check};
+use crate::store::autonomy as store;
 use serde_json::{Value, json};
-use sqlx::Row;
 use veyndo_core::shop_scope::header;
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad, conflict};
 use veyndo_identity::{allowed, permit};
@@ -32,8 +32,8 @@ pub async fn reserve(
     let id = p.task;
     permit(h, "catalog.write")?;
     permit(h, "settings.write")?;
-    let used:i64=sqlx::query_scalar("SELECT count(*) FROM ai_price_budget WHERE tenant=$1 AND day=(now() AT TIME ZONE 'UTC')::date").bind(t).fetch_one(&mut **tx).await?;
-    let existing:Vec<String>=sqlx::query_scalar("SELECT product_id FROM ai_price_budget WHERE tenant=$1 AND day=(now() AT TIME ZONE 'UTC')::date").bind(t).fetch_all(&mut **tx).await?;
+    let used = store::used_today(&mut **tx, t).await?;
+    let existing = store::products_today(&mut **tx, t).await?;
     let added = p
         .changes
         .iter()
@@ -71,10 +71,20 @@ pub async fn reserve(
             .find(|d| d.code == code)
             .ok_or(bad("Currency missing"))?
             .scale;
-        let first:i64=sqlx::query_scalar("INSERT INTO ai_price_budget(tenant,day,product_id,baseline_minor,currency,task_id,actor) VALUES($1,(now() AT TIME ZONE 'UTC')::date,$2,$3,$4,$5,$6) ON CONFLICT(tenant,day,product_id) DO UPDATE SET task_id=EXCLUDED.task_id RETURNING baseline_minor")
-            .bind(t).bind(&product.id).bind(amount(product.price,code,scale)?.minor()).bind(code).bind(id).bind(header(h,"x-rac-user").unwrap_or("integration")).fetch_one(&mut **tx).await?;
+        let first = store::reserve(
+            &mut **tx,
+            t,
+            store::Baseline {
+                product: &product.id,
+                minor: amount(product.price, code, scale)?.minor(),
+                currency: code,
+                task: id,
+                actor: header(h, "x-rac-user").unwrap_or("integration"),
+            },
+        )
+        .await?;
         let proposed = amount(c.price.unwrap(), code, scale)?.minor();
-        let baseline_currency:String=sqlx::query_scalar("SELECT currency FROM ai_price_budget WHERE tenant=$1 AND day=(now() AT TIME ZONE 'UTC')::date AND product_id=$2").bind(t).bind(&product.id).fetch_one(&mut **tx).await?;
+        let baseline_currency = store::baseline_currency(&mut **tx, t, &product.id).await?;
         if code != baseline_currency
             || (first.abs_diff(proposed) as u128) * 10000
                 > first as u128 * u128::from(s.ai_policy.autonomy.max_change_bps)
@@ -142,22 +152,21 @@ pub async fn today<'e>(
     s: &Settings,
     proposed: &[(String, i64)],
 ) -> Result<(u128, Vec<Value>)> {
-    let rows = sqlx::query("SELECT b.product_id,b.baseline_minor,b.currency,p.name,p.price,p.stock FROM ai_price_budget b JOIN products p ON p.tenant=b.tenant AND p.id=b.product_id WHERE b.tenant=$1 AND b.day=(now() AT TIME ZONE 'UTC')::date ORDER BY b.product_id")
-        .bind(t).fetch_all(db).await?;
+    let rows = store::exposures(db, t).await?;
     let (mut total, mut changes) = (0u128, Vec::new());
     for row in rows {
-        let (id, code): (String, String) = (row.get("product_id"), row.get("currency"));
-        let (baseline, stock): (i64, i32) = (row.get("baseline_minor"), row.get("stock"));
+        let (id, code) = (row.product_id, row.currency);
+        let (baseline, stock) = (row.baseline_minor, row.stock);
         let current = match proposed.iter().find(|(p, _)| p == &id) {
             Some((_, price)) => *price,
-            None => minor(s, &code, row.get("price"))?,
+            None => minor(s, &code, row.price)?,
         };
         let counted = code == s.currencies.pricing_currency;
         let amount = exposure(baseline, current, i64::from(stock));
         if counted {
             total = total.saturating_add(amount);
         }
-        changes.push(json!({"productId":id,"name":row.get::<String,_>("name"),"currency":code,"baselineMinor":baseline,"currentMinor":current,"stock":stock,"exposureMinor":amount.min(u128::from(u64::MAX)) as u64,"counted":counted}));
+        changes.push(json!({"productId":id,"name":row.name,"currency":code,"baselineMinor":baseline,"currentMinor":current,"stock":stock,"exposureMinor":amount.min(u128::from(u64::MAX)) as u64,"counted":counted}));
     }
     Ok((total, changes))
 }

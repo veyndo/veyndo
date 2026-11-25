@@ -1,0 +1,38 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT revision,secrets FROM platform_ai WHERE id=true FOR UPDATE",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "revision",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "platform_ai",
+            "name": "revision"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "secrets",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "platform_ai",
+            "name": "secrets"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "79b9cee3b3c7f70c4bd037ccb63c8056cb4f55d1112e36daf368181db9db5f25"
+}

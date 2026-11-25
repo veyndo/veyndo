@@ -1,11 +1,23 @@
 //! SQL of the intelligence component.
+pub mod agent_controls;
 pub mod agent_runs;
+pub mod autonomy;
 pub mod behavior;
+pub mod consent;
 pub mod context_products;
+pub mod conversations;
 pub mod documents;
 pub mod embedding_generations;
 pub mod embedding_jobs;
 pub mod evidence;
 pub mod experiments;
+pub mod flow_proposals;
 pub mod observations;
+pub mod personalization;
+pub mod platform_ai;
 pub mod preferences;
+pub mod product_reads;
+pub mod relations;
+pub mod scenario_reports;
+pub mod search;
+pub mod vectors;

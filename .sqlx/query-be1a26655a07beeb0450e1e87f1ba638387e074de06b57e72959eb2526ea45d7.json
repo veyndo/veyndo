@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT EXISTS(SELECT 1 FROM conversations WHERE tenant=$1 AND id=$2 AND (turn_until IS NULL OR turn_until<now()) AND NOT EXISTS(SELECT 1 FROM tasks WHERE tenant=$1 AND conversation_id=$2 AND run_state IN ('queued','running','uncertain'))) AS \"free!\" FOR UPDATE",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "free!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "be1a26655a07beeb0450e1e87f1ba638387e074de06b57e72959eb2526ea45d7"
+}

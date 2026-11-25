@@ -1,8 +1,8 @@
 //! Operator-only platform inference administration: optimistic revision, encrypted write-only keys and an audit without secrets.
 use crate::service::models::Models;
+use crate::store::platform_ai as store;
 use serde::Deserialize;
 use serde_json::{Value, json};
-use sqlx::Row;
 use veyndo_cognition::inference::{settings, sovereign};
 use veyndo_core::document::{lenient, view};
 use veyndo_core::{Error, RequestContext, Result, StatusCode, bad, conflict};
@@ -16,13 +16,9 @@ pub async fn get(m: Models<'_>, h: &RequestContext) -> Result<Value> {
 }
 async fn snapshot(m: Models<'_>) -> Result<Value> {
     let a = m.core;
-    let row = sqlx::query(
-        "SELECT revision,data,secrets,updated_at::text AS updated FROM platform_ai WHERE id=true",
-    )
-    .fetch_one(&a.db)
-    .await?;
-    let secrets: Value = row.get("secrets");
-    let stored: Value = row.get("data");
+    let row = store::read(&a.db).await?;
+    let secrets = &row.secrets;
+    let stored = &row.data;
     let mut visible = m.inference.environment_configuration();
     if let Some(provider) = stored.get("defaultProvider") {
         visible["defaultProvider"] = provider.clone();
@@ -33,12 +29,10 @@ async fn snapshot(m: Models<'_>) -> Result<Value> {
         }
     }
     visible["sovereign"] = json!(stored["sovereign"] == true);
-    Ok(
-        json!({"revision":row.get::<i64,_>("revision"),"settings":visible,
-        "updatedAt":row.get::<String,_>("updated"),"encryptedStorageReady":settings::encryption_ready(),
+    Ok(json!({"revision":row.revision,"settings":visible,
+        "updatedAt":row.updated,"encryptedStorageReady":settings::encryption_ready(),
         "keyStored":{"ollama":secrets.get("ollama").is_some(),"openai":secrets.get("openai").is_some(),"anthropic":secrets.get("anthropic").is_some()},
-        "effective":m.inference.public_providers().await.ok(),"inheritance":"all tenants; replica refresh within 5 seconds"}),
-    )
+        "effective":m.inference.public_providers().await.ok(),"inheritance":"all tenants; replica refresh within 5 seconds"}))
 }
 /// A platform inference configuration save.
 #[derive(Deserialize, Default)]
@@ -136,19 +130,17 @@ pub async fn save(m: Models<'_>, h: &RequestContext, v: &Value) -> Result<Value>
         }
     }
     let mut tx = a.db.begin().await?;
-    let row = sqlx::query("SELECT revision,secrets FROM platform_ai WHERE id=true FOR UPDATE")
-        .fetch_one(&mut *tx)
-        .await?;
+    let row = store::lock(&mut *tx).await?;
     if !verified_kernel::revision_admissible(
         v["revision"]
             .as_u64()
             .filter(|r| *r > 0)
             .ok_or(bad("Positive revision required"))?,
-        row.get::<i64, _>("revision") as u64,
+        row.revision as u64,
     ) {
         return Err(conflict("AI configuration changed; reload before saving"));
     }
-    let mut secrets: Value = row.get("secrets");
+    let mut secrets = row.secrets;
     for id in ["ollama", "openai", "anthropic"] {
         if v["clearKeys"][id].as_bool() == Some(true) {
             secrets.as_object_mut().unwrap().remove(id);
@@ -160,12 +152,14 @@ pub async fn save(m: Models<'_>, h: &RequestContext, v: &Value) -> Result<Value>
             secrets[id] = json!(settings::seal(id, key).map_err(bad)?);
         }
     }
-    sqlx::query("UPDATE platform_ai SET revision=revision+1,data=$1,secrets=$2,updated_by=$3,updated_at=now() WHERE id=true").bind(data).bind(secrets).bind(actor).execute(&mut *tx).await?;
-    sqlx::query("INSERT INTO platform_audit(actor,action,data) VALUES($1,'ai.updated',$2)")
-        .bind(actor)
-        .bind(json!({"defaultProvider":provider,"sovereign":sovereign}))
-        .execute(&mut *tx)
-        .await?;
+    store::save(
+        &mut tx,
+        &data,
+        &secrets,
+        actor,
+        &json!({"defaultProvider":provider,"sovereign":sovereign}),
+    )
+    .await?;
     tx.commit().await?;
     m.inference.invalidate().await;
     snapshot(m).await

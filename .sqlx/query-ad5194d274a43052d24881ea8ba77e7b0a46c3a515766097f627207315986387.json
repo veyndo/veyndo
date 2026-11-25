@@ -1,0 +1,41 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT variant,propensity FROM exposures WHERE tenant=$1 AND session=$2",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "variant",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "exposures",
+            "name": "variant"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "propensity",
+        "type_info": "Float8",
+        "origin": {
+          "Table": {
+            "table": "exposures",
+            "name": "propensity"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "ad5194d274a43052d24881ea8ba77e7b0a46c3a515766097f627207315986387"
+}

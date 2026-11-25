@@ -2,9 +2,9 @@
 use super::claims::propose_in;
 use super::models::{Models, choice};
 use crate::store::evidence::NODE_TYPES;
+use crate::store::product_reads::{source as source_ref, source_chunks};
 use serde::Deserialize;
 use serde_json::{Value, json};
-use sqlx::Row;
 use veyndo_core::admission::reserve_ai_attempt;
 use veyndo_core::document::{lenient, view};
 use veyndo_core::store::lease::Lease;
@@ -62,19 +62,21 @@ pub async fn extract(m: Models<'_>, h: &RequestContext, v: &Value) -> Result<Val
         .source_id
         .as_deref()
         .ok_or(bad("Source ID required"))?;
-    let row=sqlx::query("SELECT content_hash,product_id,locale FROM knowledge_documents WHERE tenant=$1 AND id=$2 AND NOT archived").bind(&t).bind(source).fetch_optional(&a.db).await?.ok_or(Error(StatusCode::NOT_FOUND,"Source not found".into()))?;
+    let row = source_ref(&a.db, &t, source)
+        .await?
+        .ok_or(Error(StatusCode::NOT_FOUND, "Source not found".into()))?;
     let product = input
         .product_id
         .as_deref()
         .map(str::to_owned)
-        .or(row.get::<Option<String>, _>("product_id"))
+        .or(row.product_id.clone())
         .ok_or(bad("Extraction requires a product reference"))?;
     let locale = input
         .locale
         .as_deref()
         .map(str::to_owned)
-        .unwrap_or(row.get("locale"));
-    let chunks:Vec<String>=sqlx::query_scalar("SELECT text FROM knowledge_chunks WHERE tenant=$1 AND document_id=$2 AND locale=$3 ORDER BY position LIMIT 16").bind(&t).bind(source).bind(&locale).fetch_all(&a.db).await?;
+        .unwrap_or(row.locale.clone());
+    let chunks = source_chunks(&a.db, &t, source, &locale).await?;
     if chunks.is_empty() {
         return Err(bad("Source has no content in this language"));
     }
@@ -94,7 +96,7 @@ pub async fn extract(m: Models<'_>, h: &RequestContext, v: &Value) -> Result<Val
     let mut results = Vec::new();
     let mut tx = a.db.begin().await?;
     for c in candidates {
-        let proposal = json!({"productId":product,"sourceId":source,"contentHash":row.get::<String,_>("content_hash"),"locale":locale,"text":c["text"],"quote":c["quote"],"confidence":0.5,"nodeType":c["nodeType"]});
+        let proposal = json!({"productId":product,"sourceId":source,"contentHash":row.content_hash,"locale":locale,"text":c["text"],"quote":c["quote"],"confidence":0.5,"nodeType":c["nodeType"]});
         results.push(propose_in(a, &mut tx, &t, h, &proposal).await?);
     }
     tx.commit().await?;

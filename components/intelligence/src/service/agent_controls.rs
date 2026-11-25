@@ -1,7 +1,7 @@
 //! Live-only agent stop and existing-key admission; no control becomes a sandbox release or credential snapshot.
+use crate::store::agent_controls as store;
 use serde::Deserialize;
 use serde_json::{Value, json};
-use sqlx::Row;
 use veyndo_app_model::declarations::identifier;
 use veyndo_cognition::inference::budget::Authority;
 use veyndo_core::document::{lenient, view};
@@ -94,8 +94,7 @@ pub async fn admit_key(a: &State, h: &RequestContext, path: &str, method: &str) 
                 "Budgeted planning agents cannot mutate commerce or delegate credentials".into(),
             ));
         }
-        let permitted:bool=sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM integration_keys i JOIN tenants t ON t.id=i.tenant WHERE i.id=$1 AND i.tenant=coalesce((SELECT live_tenant FROM shop_environments WHERE tenant=$2),$2) AND i.expires_at>now() AND NOT t.agents_stopped)")
-            .bind(id).bind(tenant(h)?).fetch_one(&a.db).await?;
+        let permitted = store::key_permitted(&a.db, id, &tenant(h)?).await?;
         if !permitted {
             return Err(Error(
                 StatusCode::FORBIDDEN,
@@ -132,20 +131,10 @@ pub async fn invoke(a: &State, h: &RequestContext, name: &str, v: &Value) -> Res
     }
     let t = merchant(h)?;
     let mut tx = a.db.begin_privileged().await?;
-    let live: String = sqlx::query_scalar(
-        "SELECT coalesce((SELECT live_tenant FROM shop_environments WHERE tenant=$1),$1)",
-    )
-    .bind(&t)
-    .fetch_one(&mut *tx)
-    .await?;
-    let row = sqlx::query(
-        "SELECT agents_stopped,agents_revision FROM tenants WHERE id=$1 FOR NO KEY UPDATE",
-    )
-    .bind(&live)
-    .fetch_one(&mut *tx)
-    .await?;
-    let revision: i64 = row.get("agents_revision");
-    let stopped: bool = row.get("agents_stopped");
+    let live = store::live_shop(&mut *tx, &t).await?;
+    let row = store::switch_locked(&mut *tx, &live).await?;
+    let revision = row.agents_revision;
+    let stopped = row.agents_stopped;
     if name.ends_with("status") {
         return Ok(json!({"stopped":stopped,"revision":revision,"liveShop":live}));
     }
@@ -153,19 +142,9 @@ pub async fn invoke(a: &State, h: &RequestContext, name: &str, v: &Value) -> Res
         return Err(conflict("Agent controls changed; reload before confirming"));
     }
     let stopped = input.stopped.unwrap();
-    sqlx::query(
-        "UPDATE tenants SET agents_stopped=$2,agents_revision=agents_revision+1 WHERE id=$1",
-    )
-    .bind(&live)
-    .bind(stopped)
-    .execute(&mut *tx)
-    .await?;
+    store::set_stopped(&mut *tx, &live, stopped).await?;
     let cancelled = if stopped {
-        let count=sqlx::query("UPDATE tasks SET run_state='cancelled',run_lease=NULL,run_until=NULL,run_revision=run_revision+1,run_updated=now() WHERE (tenant=$1 OR tenant IN(SELECT tenant FROM shop_environments WHERE live_tenant=$1)) AND run_state IN('queued','running','uncertain')")
-            .bind(&live).execute(&mut *tx).await?.rows_affected();
-        sqlx::query("UPDATE conversations c SET turn_owner=NULL,turn_until=NULL WHERE (tenant=$1 OR tenant IN(SELECT tenant FROM shop_environments WHERE live_tenant=$1)) AND EXISTS(SELECT 1 FROM tasks k WHERE k.tenant=c.tenant AND k.id=c.turn_owner AND k.run_state='cancelled')")
-            .bind(&live).execute(&mut *tx).await?;
-        count
+        store::cancel_all(&mut tx, &live).await?
     } else {
         0
     };

@@ -1,6 +1,7 @@
 //! Hybrid exact/lexical + dense RRF; hydrate current tenant rows and retrieve only connected evidence.
 use super::PgPool;
 use super::vectors;
+use crate::store::search as store;
 use serde_json::{Value, json};
 pub async fn search(
     db: &PgPool,
@@ -19,13 +20,14 @@ pub async fn search(
     } else {
         "lexical"
     };
-    let hits: Vec<Value> = sqlx::query_scalar(include_str!("search.sql"))
-        .bind(tenant)
-        .bind(query)
-        .bind(json!(candidates.unwrap_or_default()))
-        .bind(model)
-        .fetch_all(db)
-        .await?;
+    let hits = store::products(
+        db,
+        tenant,
+        query,
+        &json!(candidates.unwrap_or_default()),
+        model,
+    )
+    .await?;
     // The application caller admits optional reranking through its shared inference budget.
     let reranked = false;
     let ids = hits
@@ -38,11 +40,7 @@ pub async fn search(
 }
 /// An inference context is a bounded relevant subgraph, never a shop-wide graph dump.
 pub async fn neighborhood(db: &PgPool, tenant: &str, ids: &[String]) -> Result<Value, sqlx::Error> {
-    let edges: Vec<Value> = sqlx::query_scalar(include_str!("neighborhood.sql"))
-        .bind(tenant)
-        .bind(ids)
-        .fetch_all(db)
-        .await?;
+    let edges = store::neighborhood(db, tenant, ids).await?;
     Ok(
         json!({"tenant":tenant,"engine":"PostgreSQL","edges":edges,"limit":48,"provenance":"curated or observed; association is not causal evidence"}),
     )

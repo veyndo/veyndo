@@ -1,7 +1,18 @@
 //! Optional TEI cross-encoder reranking on at most 24 tenant-hydrated texts; malformed or unavailable providers retain fused ordering.
 use super::PgPool;
+use crate::store::product_reads::texts;
+use serde::Deserialize;
 use serde_json::{Value, json};
-use sqlx::Row;
+use veyndo_core::document::{lenient, view};
+
+/// The product a search hit names.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct Hit {
+    #[serde(deserialize_with = "lenient")]
+    id: Option<String>,
+}
+
 pub async fn apply(tenant: &str, query: &str, hits: &mut [Value], db: &PgPool) -> bool {
     let Ok(url) = std::env::var("RERANKER_URL") else {
         return false;
@@ -11,31 +22,21 @@ pub async fn apply(tenant: &str, query: &str, hits: &mut [Value], db: &PgPool) -
     }
     let ids = hits
         .iter()
-        .filter_map(|v| v["id"].as_str())
+        .filter_map(|v| view::<Hit>(v).id)
         .collect::<Vec<_>>();
-    let Ok(rows) =
-        sqlx::query("SELECT id,name,description FROM products WHERE tenant=$1 AND id=ANY($2)")
-            .bind(tenant)
-            .bind(ids)
-            .fetch_all(db)
-            .await
-    else {
+    let Ok(rows) = texts(db, tenant, &ids).await else {
         return false;
     };
     let texts = hits
         .iter()
         .map(|hit| {
             rows.iter()
-                .find(|r| Some(r.get::<&str, _>("id")) == hit["id"].as_str())
+                .find(|r| Some(&r.id) == view::<Hit>(hit).id.as_ref())
                 .map(|r| {
-                    format!(
-                        "{} {}",
-                        r.get::<&str, _>("name"),
-                        r.get::<&str, _>("description")
-                    )
-                    .chars()
-                    .take(4000)
-                    .collect::<String>()
+                    format!("{} {}", r.name, r.description)
+                        .chars()
+                        .take(4000)
+                        .collect::<String>()
                 })
                 .unwrap_or_default()
         })

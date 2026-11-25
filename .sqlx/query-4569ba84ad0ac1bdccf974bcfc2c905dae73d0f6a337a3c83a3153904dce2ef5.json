@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE conversations c SET turn_owner=NULL,turn_until=NULL WHERE (tenant=$1 OR tenant IN(SELECT tenant FROM shop_environments WHERE live_tenant=$1)) AND EXISTS(SELECT 1 FROM tasks k WHERE k.tenant=c.tenant AND k.id=c.turn_owner AND k.run_state='cancelled')",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "4569ba84ad0ac1bdccf974bcfc2c905dae73d0f6a337a3c83a3153904dce2ef5"
+}

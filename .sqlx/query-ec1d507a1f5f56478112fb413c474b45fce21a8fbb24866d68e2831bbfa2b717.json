@@ -1,0 +1,29 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT currency FROM ai_price_budget WHERE tenant=$1 AND day=(now() AT TIME ZONE 'UTC')::date AND product_id=$2",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "currency",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "ai_price_budget",
+            "name": "currency"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "ec1d507a1f5f56478112fb413c474b45fce21a8fbb24866d68e2831bbfa2b717"
+}

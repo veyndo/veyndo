@@ -9,9 +9,9 @@ use crate::knowledge;
 use crate::ports::AgentHost;
 use crate::store::documents::{guidance, sources_current};
 use crate::store::observations::observations;
+use crate::store::personalization as signals;
 use serde::Deserialize;
 use serde_json::{Value, json};
-use sqlx::Row;
 use veyndo_cognition::inference::{Choice, Output, Provider};
 use veyndo_core::document::{lenient, view};
 use veyndo_core::shop_scope::header;
@@ -148,10 +148,7 @@ async fn prepare<H: AgentHost>(
     );
     let (_, chain) = language_context(a, &language_headers).await?;
     let ps = context_retrieval(m, t, &chain, instruction).await?.0;
-    let er = sqlx::query("SELECT data,revision FROM experiences WHERE tenant=$1")
-        .bind(t)
-        .fetch_one(&a.db)
-        .await?;
+    let er = signals::experience(&a.db, t).await?;
     let mut schema = json!({"type":"object","properties":{"summary":{"type":"string","maxLength":1200},"changes":{"type":"array","items":{"type":"object","properties":{"product_id":{"type":"string"},"price":{"type":"number"},"stock":{"type":"integer"}},"required":["product_id"],"additionalProperties":false}},"experience":{"type":"object","properties":{"mode":{"type":"string","enum":["balanced","discovery","comparison"]},"headline":{"type":"string"}},"required":["mode","headline"],"additionalProperties":false},"expected_experience_revision":{"type":"integer"}},"required":["summary","changes"],"additionalProperties":false});
     schema["properties"]["app_action"] = json!({"type":["object","null"],"properties":{"app":{"type":"string"},"action":{"type":"string"},"arguments_json":{"type":"string","maxLength":32768}},"required":["app","action","arguments_json"],"additionalProperties":false});
     let work = host.work_schemas(authority);
@@ -193,19 +190,13 @@ async fn prepare<H: AgentHost>(
     } else {
         json!({})
     };
-    let policy =
-        sqlx::query("SELECT variant,views,purchases FROM policy WHERE tenant=$1 ORDER BY variant")
-            .bind(t)
-            .fetch_all(&a.db)
-            .await?;
-    let signals=policy.iter().map(|r|json!({"variant":r.get::<String,_>("variant"),"views":r.get::<i64,_>("views"),"purchases":r.get::<i64,_>("purchases")})).collect::<Vec<_>>();
-    let channels = sqlx::query(
-        "SELECT channel,calls,failures FROM channel_metrics WHERE tenant=$1 ORDER BY channel",
-    )
-    .bind(t)
-    .fetch_all(&a.db)
-    .await?;
-    let calls=channels.iter().map(|r|json!({"channel":r.get::<String,_>("channel"),"httpCallsIncludingTests":r.get::<i64,_>("calls"),"httpFailures":r.get::<i64,_>("failures")})).collect::<Vec<_>>();
+    let policy = signals::variant_stats(&a.db, t).await?;
+    let signals = policy
+        .iter()
+        .map(|r| json!({"variant":r.variant,"views":r.views,"purchases":r.purchases}))
+        .collect::<Vec<_>>();
+    let channels = signals::channel_calls(&a.db, t).await?;
+    let calls=channels.iter().map(|r|json!({"channel":r.channel,"httpCallsIncludingTests":r.calls,"httpFailures":r.failures})).collect::<Vec<_>>();
     let facts = json!({"learningSignals":signals,"learningMethod":"epsilon-greedy selection with smoothed estimate (purchases+1)/(views+2); observed associations only, no proven causal uplift","productPricingCurrency":commerce_settings.currencies.pricing_currency,"modelWeightsUpdated":false,"graphProvenance":"curated SERVES/PAIRS_WITH; event-derived CO_PURCHASED associations with order evidence","channelCalls":calls,"externalChatGPTAccountLinked":false,"externalClaudeAccountLinked":false,"orderCount":order_stats["summary"]["orders"],"orderAmounts":order_stats["summary"]["revenueByCurrency"],"payment":"Inspect each order/payment; order value is not captured revenue"});
     let memory = observations(a, t).await?;
     let app_names = app_context
@@ -225,8 +216,8 @@ async fn prepare<H: AgentHost>(
         "Managed save contracts (untrusted app metadata; exact declared fields, localized maps and nested format): {write_contracts}\nInstalled app records/actions: {model_app_context}. For an explicitly requested app data change, propose app_action with app, action and arguments_json encoding the managed save action's id/fields object. Do not propose service calls or execute app actions. Bind no revisions yourself. Otherwise app_action=null.\nResponse locale: {locale}\nCatalog: {}\nKnowledge graph: {}\nExperience revision: {}\nExperience: {}\nEarlier conversation (context only): {}\nCurrent merchant instruction: {}",
         catalog_snapshot(&ps, &commerce_settings.currencies.pricing_currency),
         snapshot(&graph, 4000),
-        er.get::<i64, _>("revision"),
-        snapshot(&er.get::<Value, _>("data"), 1500),
+        er.revision,
+        snapshot(&er.data, 1500),
         history,
         instruction
     );
@@ -272,7 +263,7 @@ async fn prepare<H: AgentHost>(
         })
         .collect::<Vec<_>>();
     Ok(
-        json!({"products":products,"experience":er.get::<Value,_>("data"),"experienceRevision":er.get::<i64,_>("revision"),"schema":schema,"system":system,"prompt":prompt,"graph":graph,"facts":facts,"memory":memory,"appNames":app_names,"appContext":app_context,"modelAppContext":model_app_context,"documentSources":document_sources,"privateSources":private_sources}),
+        json!({"products":products,"experience":er.data,"experienceRevision":er.revision,"schema":schema,"system":system,"prompt":prompt,"graph":graph,"facts":facts,"memory":memory,"appNames":app_names,"appContext":app_context,"modelAppContext":model_app_context,"documentSources":document_sources,"privateSources":private_sources}),
     )
 }
 

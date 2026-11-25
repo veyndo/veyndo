@@ -1,11 +1,11 @@
 //! Reorder proposals: a signed offer from the supplier shop's public checkout on this installation, checked against the ceiling; approval hands over to that checkout and orders nothing.
 use crate::service::signed_offer;
+use crate::store::product_reads::stock as product_stock;
 use axum::Json;
 use axum::extract::State as Shared;
 use base64::{Engine, engine::general_purpose::URL_SAFE_NO_PAD};
 use serde::Deserialize;
 use serde_json::{Value, json};
-use sqlx::Row;
 use veyndo_checkout::http::handoff;
 use veyndo_checkout::store::cart_create::new_cart_context;
 use veyndo_core::document::{lenient, view};
@@ -75,21 +75,17 @@ pub async fn propose(a: &State, carts: &dyn Carts, h: &RequestContext) -> Result
     let ceiling = settings.supply.max_order_minor;
     let (mut lines, mut sufficient) = (Vec::new(), 0);
     for link in settings.supply.links.iter().take(50) {
-        let row = sqlx::query("SELECT name,stock FROM products WHERE tenant=$1 AND id=$2")
-            .bind(&t)
-            .bind(&link.product_id)
-            .fetch_optional(&a.db)
-            .await?;
+        let row = product_stock(&a.db, &t, &link.product_id).await?;
         let Some(row) = row else {
             lines.push(json!({"productId":link.product_id,"supplierShop":link.supplier_shop,"error":"product_missing"}));
             continue;
         };
-        let stock: i32 = row.get("stock");
+        let stock = row.stock;
         if stock > link.reorder_point {
             sufficient += 1;
             continue;
         }
-        let mut line = json!({"productId":link.product_id,"name":row.get::<String,_>("name"),"stock":stock,"reorderPoint":link.reorder_point,
+        let mut line = json!({"productId":link.product_id,"name":row.name,"stock":stock,"reorderPoint":link.reorder_point,
             "quantity":link.reorder_quantity,"supplierShop":link.supplier_shop,"supplierProductId":link.supplier_product_id});
         match offer(a, carts, &t, link).await {
             Ok(found) => {
