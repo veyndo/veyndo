@@ -1,6 +1,7 @@
 /** Review source-bound candidates through shared HTTP/MCP contracts; changed sources block publication. */
+import { useRead, useSetRead } from "../shell/useRead";
 import { Button, Card, Field, Notice, Select } from "../../kit/ui";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useKnowledgeText } from "../../shared/i18n/knowledge-i18n";
 import type { Product, RequestFn } from "../shell/studio-types";
 import type { Workspace } from "./knowledge-types";
@@ -24,30 +25,25 @@ export default function EvidenceReview({
   const k = useKnowledgeText();
   const [product, setProduct] = useState(products[0]?.id ?? ""),
     [source, setSource] = useState(""),
-    [claims, setClaims] = useState<Claim[]>([]),
     [busy, setBusy] = useState(false),
-    [error, setError] = useState("");
+    [actionError, setError] = useState("");
+  const claimRead = useRead(
+    request,
+    product ? "/api/intelligence/claims" : null,
+    { body: { productId: product } },
+  );
+  const setRead = useSetRead(request);
+  const claims: Claim[] = claimRead.data?.claims ?? [];
+  const error =
+    actionError || (claimRead.error as Error | undefined)?.message || "";
   const load = async () => {
-    const value = await request("/api/intelligence/claims", {
-      productId: product,
-    });
-    setClaims(value.claims);
+    const body = { productId: product };
+    setRead(
+      "/api/intelligence/claims",
+      await request("/api/intelligence/claims", body),
+      body,
+    );
   };
-  useEffect(() => {
-    let active = true;
-    setClaims([]);
-    if (product)
-      request("/api/intelligence/claims", { productId: product })
-        .then((v) => {
-          if (active) setClaims(v.claims);
-        })
-        .catch((e) => {
-          if (active) setError(e.message);
-        });
-    return () => {
-      active = false;
-    };
-  }, [product, request]);
   const run = async (action: () => Promise<unknown>) => {
     setBusy(true);
     setError("");

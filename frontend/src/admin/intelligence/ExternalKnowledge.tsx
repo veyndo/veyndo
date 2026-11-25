@@ -1,32 +1,24 @@
 /** Private connected-app evidence browser shows active-source provenance without exposing it to shoppers. */
+import { useRead } from "../shell/useRead";
 import { Button, Card, Notice } from "../../kit/ui";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useKnowledgeText } from "../../shared/i18n/knowledge-i18n";
 import Icon from "../../shared/ui/Icon";
 import type { RequestFn } from "../shell/studio-types";
 import type { ExternalSource } from "./knowledge-types";
 export default function ExternalKnowledge({ request }: { request: RequestFn }) {
   const k = useKnowledgeText();
-  const [data, setData] = useState<ExternalSource[]>([]),
-    [error, setError] = useState(""),
-    [query, setQuery] = useState(""),
-    [busy, setBusy] = useState(true);
-  useEffect(() => {
-    let active = true;
-    request("/api/knowledge/external")
-      .then((v) => {
-        if (active) setData(v.elements);
-      })
-      .catch((e) => {
-        if (active) setError(e.message);
-      })
-      .finally(() => {
-        if (active) setBusy(false);
-      });
-    return () => {
-      active = false;
-    };
-  }, [request]);
+  const [query, setQuery] = useState(""),
+    [searched, setSearched] = useState("");
+  const sources = useRead(
+    request,
+    searched
+      ? `/api/knowledge/external?query=${encodeURIComponent(searched)}`
+      : "/api/knowledge/external",
+  );
+  const data: ExternalSource[] = sources.data?.elements ?? [];
+  const error = (sources.error as Error | undefined)?.message ?? "";
+  const busy = sources.status === "idle" || sources.fetching;
   return (
     <Card>
       <div className="knowledge-section-heading">
@@ -39,23 +31,10 @@ export default function ExternalKnowledge({ request }: { request: RequestFn }) {
       <p>{k("externalHint")}</p>
       <form
         className="knowledge-search"
-        onSubmit={async (e) => {
+        onSubmit={(e) => {
           e.preventDefault();
-          setBusy(true);
-          setError("");
-          try {
-            setData(
-              (
-                await request(
-                  `/api/knowledge/external?query=${encodeURIComponent(query)}`,
-                )
-              ).elements,
-            );
-          } catch (e) {
-            setError((e as Error).message);
-          } finally {
-            setBusy(false);
-          }
+          if (query === searched) void sources.refetch();
+          else setSearched(query);
         }}
       >
         <input

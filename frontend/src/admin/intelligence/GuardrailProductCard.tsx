@@ -1,6 +1,6 @@
 /** Currency-aware editing of one native product corridor, with honest product/configuration links. */
+import { useRead } from "../shell/useRead";
 import { Button, Notice } from "../../kit/ui";
-import { useEffect, useState } from "react";
 import type { Product, RequestFn } from "../shell/studio-types";
 import { useKnowledgeText } from "../../shared/i18n/knowledge-i18n";
 import { useLocale } from "../../shared/i18n/i18n";
@@ -32,31 +32,21 @@ export default function GuardrailProductCard({
 }) {
   const k = useKnowledgeText(),
     { locale } = useLocale();
-  const [loaded, setCurrent] =
-      useState<Pick<Product, "id" | "name" | "price" | "extra">>(),
-    [error, setError] = useState("");
-  useEffect(() => {
-    if (!catalogAccess || product) return;
-    let active = true;
-    request(`/api/merchant/products/${encodeURIComponent(row.productId)}`)
-      .then((p) => {
-        if (active) {
-          const draft = hydrateDraft(p);
-          setCurrent({
-            id: p.id,
-            name: productName(draft, locale),
-            price: draft.commerce.price,
-            extra: draft.extra,
-          });
-        }
-      })
-      .catch((e) => {
-        if (active) setError(e.message);
-      });
-    return () => {
-      active = false;
+  const productRead = useRead(
+    request,
+    catalogAccess && !product
+      ? `/api/merchant/products/${encodeURIComponent(row.productId)}`
+      : null,
+  );
+  const draft = productRead.data ? hydrateDraft(productRead.data) : undefined;
+  const loaded: Pick<Product, "id" | "name" | "price" | "extra"> | undefined =
+    draft && {
+      id: productRead.data.id,
+      name: productName(draft, locale),
+      price: draft.commerce.price,
+      extra: draft.extra,
     };
-  }, [request, product, row.productId, catalogAccess, locale]);
+  const error = (productRead.error as Error | undefined)?.message ?? "";
   const current = product ?? loaded;
   const scale = settings.currencies?.definitions.find(
     (c) => c.code === row.currency,

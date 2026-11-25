@@ -1,5 +1,5 @@
 /** Read-only sovereign AI report: whether the mode is on and which host every model route uses; the operator owns the switch. */
-import { useEffect, useState } from "react";
+import { useRead } from "../shell/useRead";
 import type { RequestFn } from "../shell/studio-types";
 import Icon from "../../shared/ui/Icon";
 import { useSovereignText, type SovereignWord } from "./sovereign-i18n";
@@ -24,20 +24,11 @@ const providerNames: Record<string, string> = {
 };
 export default function SovereignAI({ request }: { request: RequestFn }) {
   const t = useSovereignText();
-  const [value, setValue] = useState<Sovereignty>();
-  useEffect(() => {
-    let active = true;
-    request("/api/agent/providers")
-      .then((next) => {
-        const report = (next as { sovereignty?: Sovereignty } | undefined)
-          ?.sovereignty;
-        if (active && Array.isArray(report?.routes)) setValue(report);
-      })
-      .catch(() => undefined);
-    return () => {
-      active = false;
-    };
-  }, [request]);
+  const report = (
+    useRead(request, "/api/agent/providers").data as
+      { sovereignty?: Sovereignty } | undefined
+  )?.sovereignty;
+  const value = Array.isArray(report?.routes) ? report : undefined;
   // Without the assistant permission there is nothing to report; the card stays out of the way.
   if (!value) return null;
   const state = value.enabled ? (value.holds ? "on" : "onBroken") : "off";

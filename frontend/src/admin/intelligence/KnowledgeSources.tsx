@@ -1,4 +1,5 @@
 /** Searchable cursor source library, guarded lifecycle decisions and single-language source editing. */
+import { useRead } from "../shell/useRead";
 import { Button, Card } from "../../kit/ui";
 import EntityHistory from "../../shared/history/EntityHistory";
 import { useEffect, useState } from "react";
@@ -37,9 +38,17 @@ export default function KnowledgeSources({
   const [editing, setEditing] = useState<SourceDetail>(),
     [selected, setSelected] = useState<SourceDetail>(),
     [newSource, setNew] = useState(create);
-  const [busy, setBusy] = useState(false),
-    [error, setError] = useState(""),
+  const [working, setBusy] = useState(false),
+    [actionError, setError] = useState(""),
     [notice, setNotice] = useState("");
+  // Changing the archive or kind filter reloads the first page.
+  const filtered = useRead(
+    request,
+    `/api/knowledge/workspace?archived=${archived}&kind=${encodeURIComponent(kind)}`,
+  );
+  const busy = working || filtered.status === "loading";
+  const error =
+    actionError || (filtered.error as Error | undefined)?.message || "";
   const [decision, setDecision] = useState<{
     source: SourceDetail;
     action: "publish" | "unpublish" | "archive" | "restore";
@@ -56,29 +65,14 @@ export default function KnowledgeSources({
     setNext(v.next);
   };
   useEffect(() => {
-    let active = true;
-    setBusy(true);
     setQuery("");
     setError("");
-    request(
-      `/api/knowledge/workspace?archived=${archived}&kind=${encodeURIComponent(kind)}`,
-    )
-      .then((v) => {
-        if (active) {
-          setRows(v.sources);
-          setNext(v.next);
-        }
-      })
-      .catch((e) => {
-        if (active) setError(e.message);
-      })
-      .finally(() => {
-        if (active) setBusy(false);
-      });
-    return () => {
-      active = false;
-    };
   }, [request, archived, kind]);
+  useEffect(() => {
+    if (!filtered.data) return;
+    setRows(filtered.data.sources);
+    setNext(filtered.data.next);
+  }, [filtered.data]);
   useEffect(() => {
     if (create) setNew(true);
   }, [create]);

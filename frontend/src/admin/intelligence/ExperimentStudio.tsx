@@ -1,4 +1,5 @@
 /** Immutable experiment designs and lifecycle controls share the core HTTP/MCP owner and current settings rights. */
+import { useRead, useSetRead } from "../shell/useRead";
 import { Button, Field, Notice, Select, TextInput } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import type { Config } from "../../shared/api/shop-api";
@@ -45,9 +46,17 @@ export default function ExperimentStudio({ request }: { request: RequestFn }) {
   const k = useKnowledgeText(),
     { locale, date } = useLocale(),
     { access } = useStudio();
-  const [rows, setRows] = useState<Experiment[]>([]),
-    [channels, setChannels] = useState<{ id: string }[]>([]),
-    [currencies, setCurrencies] = useState<string[]>([]);
+  const experiments = useRead(request, "/api/intelligence/experiments", {
+    body: {},
+    method: "POST",
+  });
+  const automation = useRead(request, "/api/automation");
+  const commerce = useRead(request, "/api/merchant/commerce");
+  const setRead = useSetRead(request);
+  const rows: Experiment[] = experiments.data?.experiments ?? [];
+  const channels: { id: string }[] = automation.data?.channels ?? [];
+  const config = commerce.data?.data as Config | undefined;
+  const currencies: string[] = config?.currencies?.enabled ?? [];
   const [draft, setDraft] = useState<Design>({
     title: "",
     locale,
@@ -62,41 +71,32 @@ export default function ExperimentStudio({ request }: { request: RequestFn }) {
     cupedTheta: 0,
   });
   const [busy, setBusy] = useState(false),
-    [error, setError] = useState(""),
+    [actionError, setError] = useState(""),
     [reports, setReports] = useState<Record<string, Readout>>({});
   const canWrite = access.includes("settings.write");
+  const error =
+    actionError ||
+    [experiments, automation, commerce]
+      .map((read) => (read.error as Error | undefined)?.message)
+      .find(Boolean) ||
+    (config && !config.currencies ? k("experimentUnavailable") : "");
   const refresh = async () =>
-    setRows(
-      (await request("/api/intelligence/experiments", {}, "POST")).experiments,
+    setRead(
+      "/api/intelligence/experiments",
+      await request("/api/intelligence/experiments", {}, "POST"),
+      {},
     );
+  // The first channel and the default currency preselect the draft once known.
+  const firstChannel = automation.data?.channels[0]?.id;
+  const defaultCurrency = config?.currencies?.defaultCurrency;
   useEffect(() => {
-    let active = true;
-    Promise.all([
-      request("/api/intelligence/experiments", {}, "POST"),
-      request("/api/automation"),
-      request("/api/merchant/commerce"),
-    ])
-      .then(([result, automation, settings]) => {
-        if (!active) return;
-        setRows(result.experiments);
-        setChannels(automation.channels);
-        const config = settings.data as Config;
-        if (!config.currencies) throw new Error(k("experimentUnavailable"));
-        const currencies = config.currencies;
-        setCurrencies(currencies.enabled);
-        setDraft((d) => ({
-          ...d,
-          channel: automation.channels[0]?.id ?? "",
-          currency: currencies.defaultCurrency,
-        }));
-      })
-      .catch((e) => {
-        if (active) setError(e.message);
-      });
-    return () => {
-      active = false;
-    };
-  }, [request]);
+    if (firstChannel === undefined || defaultCurrency === undefined) return;
+    setDraft((d) => ({
+      ...d,
+      channel: firstChannel ?? "",
+      currency: defaultCurrency,
+    }));
+  }, [firstChannel, defaultCurrency]);
   const run = async (operation: () => Promise<void>) => {
     if (busy) return;
     setBusy(true);

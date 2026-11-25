@@ -1,7 +1,9 @@
 /** Bounded native catalogue search, not the sampled dashboard; stale replies never replace current results. */
+import { useDebouncedValue } from "../../kit/query";
+import { useRead } from "../shell/useRead";
 import { Field, Notice, TextInput } from "../../kit/ui";
 import { mediaImage } from "../../shared/media/product-media";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type { Product, RequestFn } from "../shell/studio-types";
 import { useKnowledgeText } from "../../shared/i18n/knowledge-i18n";
 import Icon from "../../shared/ui/Icon";
@@ -20,35 +22,24 @@ export default function GuardrailProductSearch({
 }) {
   const k = useKnowledgeText();
   const [query, setQuery] = useState(""),
-    [results, setResults] = useState(products),
-    [busy, setBusy] = useState(false),
-    [error, setError] = useState("");
-  useEffect(() => {
-    let active = true;
-    const timer = setTimeout(() => {
-      setBusy(true);
-      setError("");
-      request(
-        `/api/merchant/products?limit=20&search=${encodeURIComponent(query)}`,
-      )
-        .then((v) => {
-          if (active) setResults(v.elements);
-        })
-        .catch((e) => {
-          if (active) {
-            setError(e.message);
-            setResults([]);
-          }
-        })
-        .finally(() => {
-          if (active) setBusy(false);
-        });
-    }, 250);
-    return () => {
-      active = false;
-      clearTimeout(timer);
-    };
-  }, [query, request]);
+    term = useDebouncedValue(query, 250);
+  const search = useRead(
+    request,
+    `/api/merchant/products?limit=20&search=${encodeURIComponent(term)}`,
+  );
+  const settled = query === term && !search.fetching;
+  const error = settled
+    ? ((search.error as Error | undefined)?.message ?? "")
+    : "";
+  // The given products show until the first search answers.
+  const results: Product[] = !settled
+    ? query
+      ? []
+      : products
+    : search.error
+      ? []
+      : (search.data?.elements ?? products);
+  const busy = !!query && !settled;
   return (
     <div className="guardrail-search">
       <Field label={k("policySearch")}>
@@ -58,8 +49,6 @@ export default function GuardrailProductSearch({
           value={query}
           onChange={(e) => {
             setQuery(e.target.value);
-            setResults([]);
-            setBusy(true);
           }}
         />
       </Field>

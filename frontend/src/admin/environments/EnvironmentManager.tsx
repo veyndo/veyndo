@@ -1,4 +1,5 @@
 /** Private environment creation and digest-bound selective release. */
+import { useRead, useSetRead } from "../shell/useRead";
 import {
   Button,
   Card,
@@ -47,81 +48,58 @@ export default function EnvironmentManager({
   ) => void | Promise<void>;
 }) {
   const { w, date, locale } = useWorkbenchText();
-  const [mainLocale, setMainLocale] = useState("");
   const [name, setName] = useState("");
   const [id, setId] = useState(
     environments.some((e) => e.id === initialId)
       ? initialId!
       : (environments[0]?.id ?? ""),
   );
-  const [changes, setChanges] = useState<Change[]>([]);
   const [selected, setSelected] = useState<string[]>([]);
-  const [error, setError] = useState("");
+  const [actionError, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState(false);
   const scope = useMemo(() => ({}), [request, id]);
   const currentScope = useRef(scope);
   currentScope.current = scope;
-  const [loadedScope, setLoadedScope] = useState<object>();
-  const visibleChanges = loadedScope === scope ? changes : [];
-  const visibleSelected = loadedScope === scope ? selected : [];
-  const [historyRequest, setHistoryRequest] = useState<RequestFn>();
-  const [history, setHistory] = useState<
-    {
-      id: string;
-      environment: string;
-      selections: string[];
-      createdAt: string;
-    }[]
-  >([]);
+  const diffPath = id ? `/api/environments/${id}/diff` : null;
+  const releases = useRead(request, "/api/environments");
+  const diff = useRead(request, diffPath);
+  const setRead = useSetRead(request);
+  const history: {
+    id: string;
+    environment: string;
+    selections: string[];
+    createdAt: string;
+  }[] = releases.data?.releases ?? [];
+  const changes: Change[] = diff.data?.changes ?? [];
+  const mainLocale: string = diff.data?.mainLocale ?? "";
+  const loaded = !!diff.data;
+  const visibleChanges = changes;
+  const visibleSelected = selected;
+  // A new comparison clears the selection.
+  useEffect(() => setSelected([]), [diff.data]);
+  const error =
+    actionError ||
+    (releases.error as Error | undefined)?.message ||
+    (diff.error as Error | undefined)?.message ||
+    "";
   const manage = rights
     ? rights.includes("environments.manage")
     : ["owner", "admin"].includes(role);
   const load = async () => {
     const data = await request("/api/environments");
     if (currentScope.current !== scope) return;
-    setHistory(data.releases);
-    setHistoryRequest(() => request);
-    if (id) {
-      const diff = await request(`/api/environments/${id}/diff`);
+    setRead("/api/environments", data);
+    if (diffPath) {
+      const next = await request(diffPath);
       if (currentScope.current !== scope) return;
-      setChanges(diff.changes);
-      setMainLocale(diff.mainLocale ?? "");
-      setSelected([]);
-      setLoadedScope(scope);
+      setRead(diffPath, next);
     }
   };
   useEffect(() => {
-    let active = true;
     setError("");
     setNotice(false);
     setBusy(false);
-    request("/api/environments")
-      .then((v) => {
-        if (active) {
-          setHistory(v.releases);
-          setHistoryRequest(() => request);
-        }
-      })
-      .catch((e) => {
-        if (active) setError(e.message);
-      });
-    if (id)
-      request(`/api/environments/${id}/diff`)
-        .then((v) => {
-          if (active) {
-            setChanges(v.changes);
-            setMainLocale(v.mainLocale ?? "");
-            setSelected([]);
-            setLoadedScope(scope);
-          }
-        })
-        .catch((e) => {
-          if (active) setError(e.message);
-        });
-    return () => {
-      active = false;
-    };
   }, [request, id, scope]);
   const run = async (fn: () => Promise<void>) => {
     setBusy(true);
@@ -209,9 +187,7 @@ export default function EnvironmentManager({
               onOpen={onTest}
             />
           )}
-          {loadedScope === scope && !visibleChanges.length && (
-            <p>{w("noChanges")}</p>
-          )}
+          {loaded && !visibleChanges.length && <p>{w("noChanges")}</p>}
           {visibleChanges.map((c) => (
             <article className="release-change" key={c.key}>
               <label>
@@ -271,7 +247,7 @@ export default function EnvironmentManager({
       {error && <Notice tone="danger">{error}</Notice>}
       <Card>
         <h2>{w("history")}</h2>
-        {(historyRequest === request ? history : []).map((r) => (
+        {history.map((r) => (
           <p key={r.id}>
             {date(r.createdAt)} · {r.selections.join(", ")}
           </p>

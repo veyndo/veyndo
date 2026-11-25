@@ -1,6 +1,7 @@
 /** Conversation intake reuses the real private versioned source editor and existing upload API. */
+import { useRead } from "../shell/useRead";
 import { Button, Notice } from "../../kit/ui";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import type { RequestFn } from "../shell/studio-types";
 import type { Workspace } from "./knowledge-types";
 import SourceEditor from "./SourceEditor";
@@ -16,22 +17,12 @@ export default function MerchantSourceIntake({
 }) {
   const dialog = useRef<HTMLDialogElement>(null),
     t = useAgentWorkspaceText();
-  const [workspace, setWorkspace] = useState<Workspace>(),
-    [error, setError] = useState("");
+  const workspaceRead = useRead<Workspace>(request, "/api/knowledge/workspace");
+  const workspace = workspaceRead.data;
+  const error = (workspaceRead.error as Error | undefined)?.message ?? "";
   useEffect(() => {
     dialog.current?.showModal();
-    let active = true;
-    request("/api/knowledge/workspace")
-      .then((v) => {
-        if (active) setWorkspace(v);
-      })
-      .catch((e) => {
-        if (active) setError(e.message);
-      });
-    return () => {
-      active = false;
-    };
-  }, [request]);
+  }, []);
   return (
     <dialog
       ref={dialog}

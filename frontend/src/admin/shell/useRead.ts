@@ -11,12 +11,14 @@ export const readKey = (
   path: string,
   body?: unknown,
   options?: Options,
+  version?: unknown,
 ): QueryKey => [
   "read",
   requestScope(request),
   path,
   body === undefined ? null : JSON.stringify(body),
   options === undefined ? null : JSON.stringify(options),
+  version === undefined ? null : JSON.stringify(version),
 ];
 
 /**
@@ -28,28 +30,34 @@ export function useRead<T = any>(
   path: string | null | undefined,
   {
     body,
+    method,
     options,
+    version,
     enabled = true,
     staleMs,
     refetchMs,
   }: {
     body?: unknown;
+    /** An explicit method for reads exposed as POST; omitted, a body implies POST. */
+    method?: string;
     /** Transport options such as the content locale; part of the cache key. */
     options?: Options;
+    /** Only part of the cache key: a new value (say a revision) reads again. */
+    version?: unknown;
     enabled?: boolean;
     staleMs?: number;
     refetchMs?: number;
   } = {},
 ) {
   return useQuery<T>(
-    readKey(request, path ?? "", body, options),
-    // A body makes the transport send POST, exactly as a direct call would.
-    () =>
-      options !== undefined
-        ? request!(path!, body, undefined, options)
-        : body === undefined
-          ? request!(path!)
-          : request!(path!, body),
+    readKey(request, path ?? "", body, options, version),
+    // Call exactly as a direct read would: no trailing undefined arguments, and
+    // a body alone lets the transport choose POST.
+    () => {
+      const args: Parameters<RequestFn> = [path!, body, method, options];
+      while (args.length > 1 && args[args.length - 1] === undefined) args.pop();
+      return request!(...args);
+    },
     { enabled: enabled && !!path && !!request, staleMs, refetchMs },
   );
 }

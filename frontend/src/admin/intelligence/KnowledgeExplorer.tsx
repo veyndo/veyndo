@@ -1,4 +1,5 @@
 /** Product-centred evidence inspector reads canonical facts and graph relationships beyond overview sampling. */
+import { useRead } from "../shell/useRead";
 import { Button, Card, Notice } from "../../kit/ui";
 import { mediaImage } from "../../shared/media/product-media";
 import { useEffect, useState } from "react";
@@ -52,31 +53,18 @@ export default function KnowledgeExplorer({
   const k = useKnowledgeText(),
     { number } = useLocale();
   const [selected, setSelected] = useState(focus || products[0]?.id || ""),
-    [evidence, setEvidence] = useState<Evidence>(),
-    [error, setError] = useState(""),
-    [busy, setBusy] = useState(false),
+    [actionError, setError] = useState(""),
     [query, setQuery] = useState(""),
     [found, setFound] = useState<Product[]>(products);
-  useEffect(() => {
-    if (!selected) return;
-    let active = true;
-    setEvidence(undefined);
-    setError("");
-    setBusy(true);
-    request(`/api/knowledge/product/${encodeURIComponent(selected)}`)
-      .then((v) => {
-        if (active) setEvidence(v);
-      })
-      .catch((e) => {
-        if (active) setError(e.message);
-      })
-      .finally(() => {
-        if (active) setBusy(false);
-      });
-    return () => {
-      active = false;
-    };
-  }, [selected, request]);
+  const evidenceRead = useRead<Evidence>(
+    request,
+    selected ? `/api/knowledge/product/${encodeURIComponent(selected)}` : null,
+  );
+  const evidence = evidenceRead.fetching ? undefined : evidenceRead.data;
+  const busy = evidenceRead.fetching;
+  const error =
+    actionError || (evidenceRead.error as Error | undefined)?.message || "";
+  useEffect(() => setError(""), [selected]);
   const relName = (id: string) =>
     found.find((p) => p.id === id)?.name ??
     products.find((p) => p.id === id)?.name ??

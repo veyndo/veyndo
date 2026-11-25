@@ -1,4 +1,5 @@
 /** Read-only autopilot summary: level per area, daily limits and today's native use; settings stay with the guardrail editor. */
+import { useRead } from "../shell/useRead";
 import { Button } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import type { RequestFn } from "../shell/studio-types";
@@ -42,8 +43,7 @@ export default function AutopilotToday({
 }) {
   const t = useAutopilotText(),
     { locale } = useLocale();
-  const [value, setValue] = useState<AutopilotStatus>(),
-    [error, setError] = useState(""),
+  const [actionError, setError] = useState(""),
     [local, setLocal] = useState(0),
     [notice, setNotice] = useState("");
   const revert = async (productId?: string) => {
@@ -70,29 +70,20 @@ export default function AutopilotToday({
       setError((e as Error).message);
     }
   };
-  useEffect(() => {
-    let active = true;
-    setError("");
-    request("/api/intelligence/autonomy.status", {}, "POST")
-      .then((next) => {
-        const status = next as Partial<AutopilotStatus> | undefined;
-        if (active)
-          setValue(
-            Array.isArray(status?.changes) && status.currency
-              ? (status as AutopilotStatus)
-              : undefined,
-          );
-      })
-      .catch((e) => {
-        if (active) {
-          setValue(undefined);
-          setError((e as Error).message);
-        }
-      });
-    return () => {
-      active = false;
-    };
-  }, [request, revision, local]);
+  // Read again after a settings revision or a local revert.
+  const statusRead = useRead(request, "/api/intelligence/autonomy.status", {
+    body: {},
+    method: "POST",
+    version: [revision, local],
+  });
+  const status = statusRead.data as Partial<AutopilotStatus> | undefined;
+  const value =
+    Array.isArray(status?.changes) && status.currency
+      ? (status as AutopilotStatus)
+      : undefined;
+  const error =
+    actionError || (statusRead.error as Error | undefined)?.message || "";
+  useEffect(() => setError(""), [request, revision, local]);
   if (error)
     return (
       <p className="knowledge-alert" role="alert">

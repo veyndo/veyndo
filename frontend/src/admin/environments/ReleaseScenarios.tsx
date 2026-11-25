@@ -1,6 +1,7 @@
 /** Actor-private saved scenario evidence sits beside native release diffs without becoming an approval gate. */
+import { useRead } from "../shell/useRead";
 import { Button, Field, Notice, Select } from "../../kit/ui";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import type { RequestFn } from "../shell/studio-types";
 import type {
   AttackSummary,
@@ -63,80 +64,43 @@ function Review({
     busy: boolean;
     error?: boolean;
   }>();
-  const [list, setList] = useState<{
-    request: RequestFn;
-    items: Scenario[];
-    attack?: AttackSummary | null;
-    error?: boolean;
-    refresh: number;
-  }>();
   const [selection, setSelection] = useState<{
     request: RequestFn;
     id: string;
   }>();
-  const [result, setResult] = useState<{
-    request: RequestFn;
-    id: string;
-    report?: Report;
-    error?: boolean;
-    at: string;
-    refresh: number;
-  }>();
-  const id = selection?.request === request ? selection.id : "";
-  const currentList =
-    list?.request === request && list.refresh === refresh ? list : undefined;
-  const currentResult =
-    result?.request === request &&
-    result.id === id &&
-    result.refresh === refresh
-      ? result
-      : undefined;
-  useEffect(() => {
-    let active = true;
-    request("/api/agent/scenarios")
-      .then((value) => {
-        if (!active) return;
-        setList({
-          request,
-          items: value.scenarios,
-          attack: value.attack,
-          refresh,
-        });
-        setSelection((previous) =>
-          previous?.request === request &&
-          value.scenarios.some((item: Scenario) => item.id === previous.id)
-            ? previous
-            : undefined,
-        );
-      })
-      .catch(() => {
-        if (active) setList({ request, items: [], error: true, refresh });
-      });
-    return () => {
-      active = false;
-    };
-  }, [request, refresh]);
-  useEffect(() => {
-    if (!id) return;
-    let active = true;
-    request(`/api/agent/scenarios/${encodeURIComponent(id)}`)
-      .then((report: Report) => {
-        if (active)
-          setResult({
-            request,
-            id,
-            report,
-            refresh,
-            at: new Date().toLocaleTimeString(),
-          });
-      })
-      .catch(() => {
-        if (active) setResult({ request, id, error: true, refresh, at: "" });
-      });
-    return () => {
-      active = false;
-    };
-  }, [request, id, refresh]);
+  const scenarios = useRead(request, "/api/agent/scenarios");
+  const currentList:
+    | { items: Scenario[]; attack?: AttackSummary | null; error?: boolean }
+    | undefined =
+    scenarios.status === "error"
+      ? { items: [], error: true }
+      : scenarios.data && !scenarios.fetching
+        ? { items: scenarios.data.scenarios, attack: scenarios.data.attack }
+        : undefined;
+  // A selection survives a reload only while its scenario is still listed.
+  const id =
+    selection?.request === request &&
+    currentList?.items.some((item) => item.id === selection.id)
+      ? selection.id
+      : "";
+  const checked = useRead<Report>(
+    request,
+    id ? `/api/agent/scenarios/${encodeURIComponent(id)}` : null,
+  );
+  const currentResult:
+    { report?: Report; error?: boolean; at: string } | undefined =
+    !id || checked.fetching
+      ? undefined
+      : checked.status === "error"
+        ? { error: true, at: "" }
+        : checked.data
+          ? {
+              report: checked.data,
+              at: new Date(
+                checked.updatedAt ?? Date.now(),
+              ).toLocaleTimeString(),
+            }
+          : undefined;
   const report = currentResult?.report;
   const loading = !currentList || (!!id && !currentResult);
   const navigate = async () => {
@@ -174,7 +138,11 @@ function Review({
         <Button
           type="button"
           disabled={loading}
-          onClick={() => setRefresh((v) => v + 1)}
+          onClick={() => {
+            setRefresh((v) => v + 1);
+            void scenarios.refetch();
+            if (id) void checked.refetch();
+          }}
         >
           {t("refresh")}
         </Button>
