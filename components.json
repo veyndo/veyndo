@@ -892,6 +892,7 @@
         "src/shop_domains",
         "src/shop_domains.rs",
         "src/staging",
+        "src/storefront_islands.rs",
         "src/storefront_pages.rs",
         "src/studio",
         "src/studio.rs",

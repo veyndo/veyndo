@@ -53,7 +53,8 @@ const vendored = (file) =>
   lockedRoots.some((prefix) => file.startsWith(prefix));
 const colourLiteral = /#[0-9a-fA-F]{3,8}\b|\b(?:rgb|rgba|hsl|hsla)\(/;
 const resolve = (from, spec) => {
-  const base = path.resolve(path.dirname(from), spec);
+  // Vite asset queries (`?inline`, `?url`) name the same file.
+  const base = path.resolve(path.dirname(from), spec.replace(/\?[a-z]+$/, ""));
   return [
     base,
     ...[".ts", ".tsx", ".css", ".js", "/index.ts", "/index.tsx"].map(
@@ -161,7 +162,17 @@ for (const file of files) {
       errors.push(
         `${relative(file)} breaks the kit layering (${from} may not import ${to})`,
       );
-    if (to && from !== to && !/\/kit\/[^/]+\/index\.tsx?$/.test(target))
+    // A standalone embed entry inlines lower kit stylesheets (`*.css?inline`).
+    const inlineStyle =
+      path.basename(file) === "embed.ts" &&
+      /\.css\?inline$/.test(spec) &&
+      (kitLayers[from] ?? []).includes(to);
+    if (
+      to &&
+      from !== to &&
+      !inlineStyle &&
+      !/\/kit\/[^/]+\/index\.tsx?$/.test(target)
+    )
       errors.push(
         `${relative(file)} imports kit/${to} internals; import its index`,
       );

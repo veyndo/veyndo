@@ -359,6 +359,7 @@ This lists every checked-in source module in these roots, including files with n
 | [src/shop_domains.rs](../src/shop_domains.rs) | Resolve configured shop subdomains before authentication; reject unknown hosts and conflicting scopes. |
 | [src/staging/mod.rs](../src/staging/mod.rs) | Private cloned shops live in the studio component; the server registers their routes and lends the release port. |
 | [src/staging/release_host.rs](../src/staging/release_host.rs) | The server side of the release port: app installation and managed record saves with the bundled rules, flow checks, settings guards and the sandbox policy cache. |
+| [src/storefront_islands.rs](../src/storefront_islands.rs) | Server-rendered storefront-kit islands for deep-linked product pages. |
 | [src/storefront_pages.rs](../src/storefront_pages.rs) | Deep-link HTML transport for stable SKU URLs with optional localized SEO slugs. |
 | [src/studio/facts.rs](../src/studio/facts.rs) | Dashboard facts are owned by the studio component. |
 | [src/studio/personal.rs](../src/studio/personal.rs) | The personal workspace lives in the studio component; the server registers its routes. |
@@ -1838,6 +1839,7 @@ This lists every checked-in source module in these roots, including files with n
 | [frontend/src/kit/storefront/ProductSummary.tsx](../frontend/src/kit/storefront/ProductSummary.tsx) | Product summary part: the purchase area of a product page with image, price, delivery and add-to-cart. |
 | [frontend/src/kit/storefront/contract.ts](../frontend/src/kit/storefront/contract.ts) | Part contracts: one typed schema per storefront part yields its React component, element, builder form and server checks. |
 | [frontend/src/kit/storefront/elements.tsx](../frontend/src/kit/storefront/elements.tsx) | Embeddable web elements from part contracts: validated `props` attributes, buyer intents as DOM events. |
+| [frontend/src/kit/storefront/embed.ts](../frontend/src/kit/storefront/embed.ts) | Standalone embed entry (`/assets/elements.js`): injects the kit styles once and defines every storefront part as a web element. |
 | [frontend/src/kit/storefront/index.ts](../frontend/src/kit/storefront/index.ts) | Public interface of kit/storefront: part contracts and the parts they define. |
 | [frontend/src/kit/storefront/storefront-i18n.ts](../frontend/src/kit/storefront/storefront-i18n.ts) | Vocabulary of the storefront parts in English, German, French and Spanish; hosts pass only the locale. |
 | [frontend/src/kit/storefront/storefront.css](../frontend/src/kit/storefront/storefront.css) | Storefront parts on design tokens only: card, product summary, cart, checkout steps and account. |

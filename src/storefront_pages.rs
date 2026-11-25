@@ -1,7 +1,9 @@
 //! Deep-link HTML transport for stable SKU URLs with optional localized SEO slugs.
 //! Product visibility uses the same tenant/channel admission as the Store API; assets and unknown APIs retain 404s.
+//! Admitted product pages carry a server-rendered kit island (`storefront_islands`).
 use crate::foundation::App;
 use crate::marketing;
+use crate::storefront_islands;
 use axum::extract::Path;
 use axum::extract::State;
 use axum::http::StatusCode;
@@ -59,6 +61,7 @@ async fn page(
         }
     }
     marketing::admit_product(a, &h, id).await?;
+    let island = storefront_islands::product_summary(a, &h, id).await;
     let html = tokio::fs::read_to_string("frontend/dist/index.html")
         .await
         .map_err(|_| {
@@ -67,5 +70,8 @@ async fn page(
                 "Storefront unavailable".into(),
             )
         })?;
-    Ok(Html(html))
+    Ok(Html(match island {
+        Some((island, title)) => storefront_islands::inject(&html, &island, &title),
+        None => html,
+    }))
 }

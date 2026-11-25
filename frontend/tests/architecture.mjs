@@ -34,6 +34,8 @@ try{
  file('kit/ui/Button.ts','/** Kit internal. */\nexport const b=1;\n');
  file('admin/orders/view.ts','/** Consumer fixture. */\nimport {b} from "../../kit/ui/Button";\nexport const read=()=>b;\n');assert.match(check().stderr,/internals; import its index/);
  file('admin/orders/view.ts','/** Consumer fixture. */\nexport const read=()=>1;\n');
+ file('admin/orders/view.ts','/** Consumer fixture. */\nimport css from "../../kit/ui/ui.css?inline";\nexport const read=()=>css;\n');assert.match(check().stderr,/internals; import its index/);
+ file('admin/orders/view.ts','/** Consumer fixture. */\nexport const read=()=>1;\n');
  file('kit/tokens/index.ts','/** Token fixture importing upward. */\nimport {gap} from "../ui";\nexport const space=gap;\n');assert.match(check().stderr,/kit layering/);
  file('kit/tokens/index.ts','/** Token fixture importing the app. */\nimport {value} from "../../shared/api/base";\nexport const space=value;\n');assert.match(check().stderr,/imports outside kit/);
  file('kit/tokens/index.ts','/** Token fixture. */\nexport const space=4;\n');
