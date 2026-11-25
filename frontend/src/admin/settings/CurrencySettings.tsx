@@ -1,6 +1,7 @@
 /** Shop currency registry and inherited channel availability. Actions use saved revisions and native job APIs. */
+import { useRead, useSetRead } from "../shell/useRead";
 import { Button, Field, Notice, Select, TextInput } from "../../kit/ui";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type { CurrencyConfig } from "../../shared/api/shop-api";
 import { useCurrencyText } from "../../shared/i18n/currency-i18n";
 import type { InternationalProps } from "./CommerceSettings";
@@ -36,54 +37,34 @@ export default function CurrencySettings({
 } & InternationalProps) {
   const { c, locale } = useCurrencyText();
   const cfg = config.currencies ?? defaultCurrencies;
-  const [catalogue, setCatalogue] = useState<{ code: string; scale: number }[]>(
-      [],
-    ),
-    [jobs, setJobs] = useState<
-      {
-        id: string;
-        state: string;
-        processed: number;
-        data: { currency: string };
-      }[]
-    >([]),
-    [error, setError] = useState(""),
+  const currencies = useRead(request, "/store-api/currencies");
+  const catalogue: { code: string; scale: number }[] =
+    currencies.data?.catalogue ?? [];
+  // Price jobs of the base shop poll every five seconds.
+  const jobsPath = "/api/merchant/currencies/price-jobs";
+  const jobRead = useRead(
+    request,
+    channel || !canReadCatalogue ? null : jobsPath,
+    { refetchMs: 5000 },
+  );
+  const setRead = useSetRead(request);
+  const jobs: {
+    id: string;
+    state: string;
+    processed: number;
+    data: { currency: string };
+  }[] = jobRead.data?.jobs ?? [];
+  const [actionError, setError] = useState(""),
     [busy, setBusy] = useState(false),
     [add, setAdd] = useState(""),
     [overwrite, setOverwrite] = useState(false);
   const update = (value: Partial<CurrencyConfig>) =>
     patch({ currencies: { ...cfg, ...value } });
-  useEffect(() => {
-    let active = true;
-    request("/store-api/currencies")
-      .then((v) => {
-        if (active) setCatalogue(v.catalogue);
-      })
-      .catch((e) => {
-        if (active) setError(e.message);
-      });
-    return () => {
-      active = false;
-    };
-  }, [request]);
-  useEffect(() => {
-    if (channel || !canReadCatalogue) return;
-    let active = true;
-    const load = () =>
-      request("/api/merchant/currencies/price-jobs")
-        .then((v) => {
-          if (active) setJobs(v.jobs);
-        })
-        .catch((e) => {
-          if (active) setError(e.message);
-        });
-    void load();
-    const timer = window.setInterval(load, 5000);
-    return () => {
-      active = false;
-      window.clearInterval(timer);
-    };
-  }, [request, channel, canReadCatalogue]);
+  const error =
+    actionError ||
+    (currencies.error as Error | undefined)?.message ||
+    (jobRead.error as Error | undefined)?.message ||
+    "";
   const action = async (path: string, body: unknown, refresh = false) => {
     if (dirty) {
       setError(c("saveFirst"));
@@ -94,7 +75,7 @@ export default function CurrencySettings({
     try {
       await request(path, body);
       if (refresh) reload();
-      else setJobs((await request("/api/merchant/currencies/price-jobs")).jobs);
+      else setRead(jobsPath, await request(jobsPath));
     } catch (e) {
       setError((e as Error).message);
     } finally {

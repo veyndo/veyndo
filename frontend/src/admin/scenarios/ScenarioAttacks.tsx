@@ -1,4 +1,5 @@
 /** Scripted attack results for the selected private sandbox; outcomes come from native refusals, never from a model. */
+import { useRead } from "../shell/useRead";
 import { Button } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import type { RequestFn } from "../shell/studio-types";
@@ -46,27 +47,21 @@ export default function ScenarioAttacks({
 }) {
   const t = useAttackText(),
     { locale } = useLocale();
-  const [report, setReport] = useState<AttackReport>(),
+  const [fresh, setReport] = useState<AttackReport>(),
     [busy, setBusy] = useState(false),
     [error, setError] = useState("");
+  // A missing or foreign history shows nothing and never blocks a new run.
+  const latest = (
+    useRead(request, "/api/agent/scenario-probes").data as
+      { latest?: AttackReport | null } | undefined
+  )?.latest;
+  const report =
+    fresh ?? (latest && Array.isArray(latest.probes) ? latest : undefined);
   // A result belongs to the shop, sandbox and channel it ran in; the last saved one is shown again.
   useEffect(() => {
-    let active = true;
     setReport(undefined);
     setError("");
     setBusy(false);
-    request("/api/agent/scenario-probes")
-      .then((value) => {
-        const latest = (value as { latest?: AttackReport | null } | undefined)
-          ?.latest;
-        if (active && latest && Array.isArray(latest.probes)) setReport(latest);
-      })
-      .catch(() => {
-        /* A missing history must not block a new run. */
-      });
-    return () => {
-      active = false;
-    };
   }, [request]);
   const start = async () => {
     setBusy(true);

@@ -1,4 +1,5 @@
 /** A compact private customer lab on the existing Studio scope and durable run controls. */
+import { useRead, useSetRead } from "../shell/useRead";
 import { Button } from "../../kit/ui";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { rememberScenario } from "./scenario-history";
@@ -44,13 +45,9 @@ export default function ScenarioStudio({
   const allowed = canTestCustomers(access);
   const [instruction, setInstruction] = useState(""),
     [profiles, setProfiles] = useState<Profile[]>([]);
-  const [config, setConfig] = useState<Configuration>(),
-    [scenarios, setScenarios] = useState<Scenario[]>([]);
   const [selected, setSelected] = useState(""),
-    [baseline, setBaseline] = useState(""),
-    [report, setReport] = useState<Report>(),
-    [comparison, setComparison] = useState<Report>();
-  const [error, setError] = useState(""),
+    [baseline, setBaseline] = useState("");
+  const [actionError, setError] = useState(""),
     [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState("");
   const [source, setSource] = useState(sourceTaskId);
@@ -62,100 +59,79 @@ export default function ScenarioStudio({
     retry = useRef<{ digest: string; id: string } | undefined>(undefined);
   const currentSelection = useRef(selected);
   currentSelection.current = selected;
+  const open = !!environment && allowed;
+  const scenarioPath = (id: string) =>
+    `/api/agent/scenarios/${encodeURIComponent(id)}`;
+  const listRead = useRead(request, open ? "/api/agent/scenarios" : null);
+  const setRead = useSetRead(request);
+  const config: Configuration | undefined = listRead.data?.configuration;
+  const scenarios: Scenario[] = listRead.data?.scenarios ?? [];
+  // Running scenarios poll every 1.8 seconds until they settle.
+  const running = (value?: Report) =>
+    !!value?.runs.some((r) => ["queued", "running"].includes(r.state));
+  const [reportPolling, setReportPolling] = useState(false);
+  const reportRead = useRead<Report>(
+    request,
+    open && selected ? scenarioPath(selected) : null,
+    { refetchMs: reportPolling ? 1800 : undefined },
+  );
+  const report = reportRead.data;
+  // Saved changes elsewhere ask for the selected report again.
   useEffect(() => {
-    const scope = ++generation.current;
-    setReport(undefined);
-    setComparison(undefined);
+    if (refresh) void reportRead.refetch();
+  }, [refresh]);
+  const [comparisonPolling, setComparisonPolling] = useState(false);
+  const comparisonRead = useRead<Report>(
+    request,
+    open && baseline ? scenarioPath(baseline) : null,
+    { refetchMs: comparisonPolling ? 1800 : undefined },
+  );
+  const comparison = comparisonRead.data;
+  useEffect(() => setReportPolling(running(report)), [report]);
+  useEffect(() => setComparisonPolling(running(comparison)), [comparison]);
+  const error =
+    actionError ||
+    [listRead, reportRead, comparisonRead]
+      .map((read) => (read.error as Error | undefined)?.message)
+      .find(Boolean) ||
+    "";
+  useEffect(() => {
+    ++generation.current;
     setSelected(initialScenarioId ?? "");
     setBaseline("");
     setProfiles([]);
-    setConfig(undefined);
     setBusy(false);
-    setScenarios([]);
     setError("");
     setNotice("");
     setInference(undefined);
     setInstruction("");
     setSource(sourceTaskId);
     retry.current = undefined;
-    if (!environment || !allowed) return;
-    request("/api/agent/scenarios")
-      .then((value) => {
-        if (scope !== generation.current) return;
-        const c = value.configuration as Configuration;
-        setConfig(c);
-        setScenarios(value.scenarios);
-        setProfiles(
-          (["budget", "first", "fast"] as const).map((id) => ({
-            id,
-            name: t(`${id}Name`),
-            goal: t(`${id}Goal`),
-            budgetMinor: 300 * 10 ** c.scale,
-            locale: c.locales.includes(c.mainLocale)
-              ? c.mainLocale
-              : (c.locales[0] ?? ""),
-            country: c.countries[0] ?? "",
-          })),
-        );
-      })
-      .catch((e) => {
-        if (scope === generation.current) setError(e.message);
-      });
     return () => {
       generation.current++;
     };
   }, [request, environment, allowed, sourceTaskId]);
+  // A loaded configuration proposes the three default customer profiles.
+  useEffect(() => {
+    if (!config) return;
+    const c = config;
+    setProfiles(
+      (["budget", "first", "fast"] as const).map((id) => ({
+        id,
+        name: t(`${id}Name`),
+        goal: t(`${id}Goal`),
+        budgetMinor: 300 * 10 ** c.scale,
+        locale: c.locales.includes(c.mainLocale)
+          ? c.mainLocale
+          : (c.locales[0] ?? ""),
+        country: c.countries[0] ?? "",
+      })),
+    );
+  }, [config]);
   useEffect(() => {
     if (initialScenarioId !== currentSelection.current)
       setSelected(initialScenarioId ?? "");
   }, [initialScenarioId]);
-  useEffect(() => {
-    setReport(undefined);
-    if (!selected || !environment || !allowed) return;
-    let active = true,
-      timer: ReturnType<typeof setTimeout>;
-    const load = async () => {
-      try {
-        const value = (await request(
-          `/api/agent/scenarios/${encodeURIComponent(selected)}`,
-        )) as Report;
-        if (!active) return;
-        setReport(value);
-        if (value.runs.some((r) => ["queued", "running"].includes(r.state)))
-          timer = setTimeout(load, 1800);
-      } catch (e) {
-        if (active) setError((e as Error).message);
-      }
-    };
-    void load();
-    return () => {
-      active = false;
-      clearTimeout(timer);
-    };
-  }, [request, selected, refresh, environment, allowed]);
-  useEffect(() => {
-    let active = true;
-    let timer: ReturnType<typeof setTimeout>;
-    setComparison(undefined);
-    const load = () =>
-      request(`/api/agent/scenarios/${encodeURIComponent(baseline)}`)
-        .then((value) => {
-          if (!active) return;
-          setComparison(value);
-          if (
-            value.runs.some((r: Run) => ["queued", "running"].includes(r.state))
-          )
-            timer = setTimeout(load, 1800);
-        })
-        .catch((e) => {
-          if (active) setError(e.message);
-        });
-    if (baseline && environment && allowed) void load();
-    return () => {
-      active = false;
-      clearTimeout(timer);
-    };
-  }, [request, baseline, environment, allowed]);
   const start = async () => {
     if (busy || !config) return;
     setBusy(true);
@@ -180,10 +156,10 @@ export default function ScenarioStudio({
       if (scope !== generation.current) return;
       rememberScenario(value.id, channel);
       setSelected(value.id);
-      setReport(value);
+      setRead(scenarioPath(value.id), value, undefined);
       retry.current = undefined;
       const list = await request("/api/agent/scenarios");
-      if (scope === generation.current) setScenarios(list.scenarios);
+      if (scope === generation.current) setRead("/api/agent/scenarios", list);
     } catch (e) {
       if (scope === generation.current) setError((e as Error).message);
     } finally {
@@ -204,7 +180,7 @@ export default function ScenarioStudio({
         scope === generation.current &&
         selected === currentSelection.current
       ) {
-        setReport(value);
+        setRead(scenarioPath(selected), value, undefined);
         setRefresh((value) => value + 1);
       }
     } catch (e) {

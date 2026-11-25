@@ -1,6 +1,6 @@
 /** Capture timing uses the installed provider declaration and the existing versioned settings draft. */
+import { useRead } from "../shell/useRead";
 import { Field, Select } from "../../kit/ui";
-import { useEffect, useState } from "react";
 import type { Payment } from "../../shared/api/shop-api";
 import type { RequestFn } from "../shell/studio-types";
 import { usePaymentLedgerText } from "../../shared/i18n/payment-ledger-i18n";
@@ -14,25 +14,11 @@ export default function CaptureModeSettings({
   onChange: (value: Pick<Payment, "captureMode">) => void;
 }) {
   const text = usePaymentLedgerText();
-  const [capabilities, setCapabilities] = useState<string[]>([]);
-  useEffect(() => {
-    let active = true;
-    setCapabilities([]);
-    request("/api/payment-providers")
-      .then((result) => {
-        const provider = result.providers?.find(
-          (p: any) => p.id === payment.provider,
-        );
-        const method = provider?.contract?.methods?.find(
-          (m: any) => m.id === payment.providerMethod,
-        );
-        if (active) setCapabilities(method?.capabilities ?? []);
-      })
-      .catch(() => {});
-    return () => {
-      active = false;
-    };
-  }, [payment.provider, payment.providerMethod, request]);
+  const providers = useRead(request, "/api/payment-providers").data;
+  const method = providers?.providers
+    ?.find((p: any) => p.id === payment.provider)
+    ?.contract?.methods?.find((m: any) => m.id === payment.providerMethod);
+  const capabilities: string[] = method?.capabilities ?? [];
   if (!capabilities.includes("authorize") && !payment.captureMode) return null;
   return (
     <Field label={text("timing")}>

@@ -1,4 +1,5 @@
 /** Readiness of the selected private copy as a shop twin; every figure is a native read and each open step links to its owner. */
+import { useRead } from "../shell/useRead";
 import { Button } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import type { RequestFn } from "../shell/studio-types";
@@ -21,8 +22,7 @@ export default function ScenarioTwin({
 }) {
   const t = useTwinText(),
     { locale } = useLocale();
-  const [value, setValue] = useState<TwinReadiness>(),
-    [error, setError] = useState(""),
+  const [actionError, setError] = useState(""),
     [local, setLocal] = useState(0),
     [notice, setNotice] = useState("");
   const fill = async () => {
@@ -39,30 +39,18 @@ export default function ScenarioTwin({
       setError((e as Error).message);
     }
   };
-  useEffect(() => {
-    let active = true;
-    setError("");
-    request("/api/agent/scenario-readiness")
-      .then((next) => {
-        // An older server or a foreign response shape shows nothing rather than wrong figures.
-        const twin = next as Partial<TwinReadiness> | undefined;
-        if (active)
-          setValue(
-            twin?.catalogue && twin.checkout && twin.tests && twin.sandbox
-              ? (twin as TwinReadiness)
-              : undefined,
-          );
-      })
-      .catch((e) => {
-        if (active) {
-          setValue(undefined);
-          setError((e as Error).message);
-        }
-      });
-    return () => {
-      active = false;
-    };
-  }, [request, refresh, local]);
+  const readiness = useRead(request, "/api/agent/scenario-readiness", {
+    version: [refresh, local],
+  });
+  // An older server or a foreign response shape shows nothing rather than wrong figures.
+  const twin = readiness.data as Partial<TwinReadiness> | undefined;
+  const value =
+    twin?.catalogue && twin.checkout && twin.tests && twin.sandbox
+      ? (twin as TwinReadiness)
+      : undefined;
+  const error =
+    actionError || (readiness.error as Error | undefined)?.message || "";
+  useEffect(() => setError(""), [request, refresh, local]);
   if (error)
     return (
       <p className="scenario-error" role="alert">
