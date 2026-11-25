@@ -339,7 +339,8 @@
   }
 }
 /* The storefront account theme on the kit account parts (kit/storefront). */
-.customer-account .vy-sf-account {
+.customer-account .vy-sf-account,
+.customer-account .account-panel .vy-sf-cart {
   display: block;
   padding: 0;
   border: 0;

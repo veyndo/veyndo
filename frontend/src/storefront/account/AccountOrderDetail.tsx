@@ -13,6 +13,8 @@ import AccountDownloads from "./AccountDownloads";
 import ConfigurationSummary from "../../shared/apps/ConfigurationSummary";
 import { configurationSnapshots } from "../../shared/api/configuration-types";
 import type { CustomerOrder, CustomerDownload } from "./account-types";
+import { cartSummary } from "../../kit/storefront";
+const Summary = cartSummary.Component;
 export default function AccountOrderDetail({
   id,
   onBack,
@@ -128,41 +130,39 @@ export default function AccountOrderDetail({
               </div>
             </div>
             <section className="account-panel">
-              <h3>{a("subtotal")}</h3>
-              {order.cart.lineItems.map((item) => (
-                <div className="account-line-item" key={item.id}>
-                  {mediaImage(item.media) && (
-                    <img src={mediaImage(item.media)} alt="" />
-                  )}
-                  <div>
-                    <strong>{item.label}</strong>
-                    <small>× {item.quantity}</small>
+              <Summary
+                locale={locale}
+                currency={order.cart.price.currency ?? "EUR"}
+                priceKind={
+                  order.cart.price.taxStatus === "net" ? "net" : "gross"
+                }
+                busy={false}
+                lines={order.cart.lineItems.map((item) => ({
+                  id: item.id,
+                  label: item.label,
+                  quantity: item.quantity,
+                  total: item.price.totalPrice,
+                  image: mediaImage(item.media) || undefined,
+                  minPurchase: 1,
+                  purchaseSteps: 1,
+                }))}
+                subtotal={order.cart.price.positionPrice}
+                discounts={[]}
+                shipping={order.cart.shippingCosts.totalPrice}
+                tax={order.cart.price.tax}
+                total={order.cart.price.totalPrice}
+                renderLineDetail={(lineId) => {
+                  const item = order.cart.lineItems.find(
+                    (l) => l.id === lineId,
+                  );
+                  return item ? (
                     <ConfigurationSummary
                       configurations={configurationSnapshots(item)}
                       language={locale}
                     />
-                  </div>
-                  <strong>{money(item.price.totalPrice)}</strong>
-                </div>
-              ))}
-              <dl className="account-totals">
-                <div>
-                  <dt>{a("subtotal")}</dt>
-                  <dd>{money(order.cart.price.positionPrice)}</dd>
-                </div>
-                <div>
-                  <dt>{a("shipping")}</dt>
-                  <dd>{money(order.cart.shippingCosts.totalPrice)}</dd>
-                </div>
-                <div>
-                  <dt>{a("taxes")}</dt>
-                  <dd>{money(order.cart.price.tax)}</dd>
-                </div>
-                <div>
-                  <dt>{a("total")}</dt>
-                  <dd>{money(order.cart.price.totalPrice)}</dd>
-                </div>
-              </dl>
+                  ) : null;
+                }}
+              />
             </section>
             <section className="account-panel">
               <h3>{a("shipping")}</h3>

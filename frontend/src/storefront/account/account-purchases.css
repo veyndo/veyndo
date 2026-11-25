@@ -56,49 +56,7 @@
   border-radius: 12px;
   background: #f6f8f9;
 }
-.account-line-item {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 16px 0;
-  border-bottom: 1px solid var(--account-line);
-}
-.account-line-item img {
-  width: 56px;
-  height: 72px;
-  border-radius: 8px;
-  object-fit: cover;
-  background: #f0f3f5;
-}
-.account-line-item > div {
-  display: grid;
-  gap: 6px;
-  flex: 1;
-  min-width: 0;
-}
-.account-line-item strong {
-  font-size: 13px;
-}
-.account-totals {
-  display: grid;
-  gap: 12px;
-  margin: 20px 0 0;
-  font-size: 13px;
-}
-.account-totals > div {
-  display: flex;
-  justify-content: space-between;
-  gap: 14px;
-}
-.account-totals dd {
-  margin: 0;
-}
-.account-totals > div:last-child {
-  border-top: 1px solid var(--account-line);
-  padding-top: 16px;
-  font-weight: 700;
-  font-size: 16px;
-}
+
 .account-delivery + .account-delivery {
   border-top: 1px solid var(--account-line);
   padding-top: 18px;

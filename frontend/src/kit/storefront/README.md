@@ -28,9 +28,14 @@ Prices, stock and totals always come from the server; parts only show them.
 
 ## Where the parts run
 
-- **Storefront app.** `storefront/shell/ProductTile` adapts shop products to the
-  product card; `storefront/checkout/CheckoutProgress` renders checkout steps. The
-  storefront theme styles the kit classes.
+- **Storefront app.** Every purchase surface renders kit parts through thin
+  adapters: product tiles (`shell/ProductTile`), the product page purchase area
+  (`catalog/ProductPurchase`, the buy box with variants, quantity prices and app
+  slots), the checkout order review and order completion (cart summary), checkout
+  steps, the account home and order lists, and the account order detail. Adapters
+  translate shop data and keep navigation, app slots and cart rules; the storefront
+  theme styles the kit classes. The chat purchase review (`ConversationPurchase`)
+  stays its own explicit confirm flow, and B2B quote lines belong to the B2B owner.
 - **Site builder.** Pages place the product card and the buy box as `kind: "part"`
   blocks (see `extensions/apps/site-builder/README.md`); the inspector is
   `PartForm`, and Rust validates the stored configuration against the schema

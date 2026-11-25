@@ -86,17 +86,14 @@
 .customer-account .account-order-heading {
   flex-wrap: wrap;
 }
-.customer-account .account-order-heading strong,
-.customer-account .account-line-item strong {
+.customer-account .account-order-heading strong {
   overflow-wrap: anywhere;
 }
 .customer-account .account-status-grid > div {
   min-width: 0;
   overflow-wrap: anywhere;
 }
-.customer-account .account-line-item {
-  flex-wrap: wrap;
-}
+
 .customer-account .customer-actions button {
   min-width: 0;
 }
