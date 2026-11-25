@@ -13,6 +13,9 @@ from testing.database import psql  # noqa: E402
 ROOT = Path(__file__).resolve().parents[1]
 FOLDERS = ('src', 'crates', 'extensions', 'components')
 CALL = re.compile(r'\bsqlx::(?:query|query_as|query_scalar)\b')
+# Checked macros (`query!`, `query_as!(Row, …)`, `query_file_scalar!("path", …)`) carry their SQL as the
+# first literal; the compiler checks them from `.sqlx`, and preparing them here checks the same schema again.
+MACRO = re.compile(r'\bsqlx::query(_file)?(_as|_scalar)?!\s*\(')
 # PostgreSQL prepares only these statement kinds; everything else is a utility command checked when it runs.
 PREPARABLE = re.compile(r'\s*(?:--[^\n]*\n\s*)*\(*\s*(SELECT|INSERT|UPDATE|DELETE|MERGE|VALUES|WITH|TABLE)\b', re.I)
 ESCAPES = {'n': '\n', 't': '\t', 'r': '\r', '0': '\0', '\\': '\\', '"': '"', "'": "'"}
@@ -85,6 +88,31 @@ def argument(path, text, at):
     return ('dynamic', 'built at run time')
 
 
+def crate_root(path):
+    """The directory of the nearest Cargo.toml, against which `query_file!` paths resolve."""
+    for folder in path.parents:
+        if (folder / 'Cargo.toml').exists():
+            return folder
+    return ROOT
+
+
+def macro(path, text, call):
+    """The SQL of one checked macro: ('static', sql) or ('dynamic', reason)."""
+    at = call.end()
+    if call.group(2) == '_as':
+        typed = re.compile(r'\s*[\w:<>]+\s*,').match(text, at)
+        if not typed:
+            return ('dynamic', 'macro without row type')
+        at = typed.end()
+    read = literal(text, skip_space(text, at))
+    if not read:
+        return ('dynamic', 'macro without literal')
+    if call.group(1):
+        file = crate_root(path) / read[0]
+        return ('static', file.read_text()) if file.exists() else ('dynamic', 'missing query file')
+    return ('static', read[0])
+
+
 def statements(root=ROOT):
     """Every query call as (file, line, kind, sql-or-reason)."""
     found = []
@@ -94,6 +122,9 @@ def statements(root=ROOT):
             if {'target', 'node_modules', 'tests'} & set(path.parts):
                 continue
             text = path.read_text()
+            for call in MACRO.finditer(text):
+                found.append((str(path.relative_to(root)), text.count('\n', 0, call.start()) + 1,
+                              *macro(path, text, call)))
             for call in CALL.finditer(text):
                 at = call.end()
                 generic = re.compile(r'\s*::\s*<').match(text, at)
