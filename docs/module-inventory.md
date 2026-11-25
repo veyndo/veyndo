@@ -2789,6 +2789,7 @@ This lists every checked-in source module in these roots, including files with n
 | [scripts/delivery_differential.py](../scripts/delivery_differential.py) | Compare the original PercentageTaxRuleBuilder with the live Rust port. |
 | [scripts/demo/fixtures.py](../scripts/demo/fixtures.py) | Four-language, provider-free commerce playground definitions; no credentials or real customer data. |
 | [scripts/demo/signed_offer.py](../scripts/demo/signed_offer.py) | Buying-agent view of a signed offer: fetch it for a cart, verify the Ed25519 signature offline, then ask the shop whether checkout would confirm it. |
+| [scripts/dev_account.py](../scripts/dev_account.py) | Create or verify a local development shop and its owner account for signing in to Studio. |
 | [scripts/developer_documents.py](../scripts/developer_documents.py) | Local model wire fixtures verify app generation, provenance and document privacy, without paid providers. |
 | [scripts/differential.py](../scripts/differential.py) | Independent PHP/Rust differential; fails on any money delta, not averaged error. |
 | [scripts/durable_agents.py](../scripts/durable_agents.py) | Actual HTTP/PostgreSQL task continuation, killed Rust workers, current rights and no unapproved mutations; synthetic model only. |

@@ -114,16 +114,21 @@ export const Select = forwardRef<
   );
 });
 
-/** A checkbox with its own label; usable inside or outside a Field. */
+/**
+ * A checkbox with its own label; usable inside or outside a Field. The wrapper is a
+ * span and the label is linked by id, so page-wide label rules never reflow the box.
+ */
 export const Checkbox = forwardRef<
   HTMLInputElement,
   Omit<InputHTMLAttributes<HTMLInputElement>, "type"> & { label: ReactNode }
->(function Checkbox({ label, className, ...rest }, ref) {
+>(function Checkbox({ label, className, id, ...rest }, ref) {
+  const own = useId();
+  const inputId = id ?? own;
   return (
-    <label className={["vy-check", className].filter(Boolean).join(" ")}>
-      <input ref={ref} type="checkbox" {...rest} />
-      <span>{label}</span>
-    </label>
+    <span className={["vy-check", className].filter(Boolean).join(" ")}>
+      <input ref={ref} id={inputId} type="checkbox" {...rest} />
+      <label htmlFor={inputId}>{label}</label>
+    </span>
   );
 });
 

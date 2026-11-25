@@ -8,6 +8,8 @@
   white-space: nowrap;
 }
 .vy-button {
+  /* Content width in grid layouts; contexts that want full width set it. */
+  justify-self: start;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -183,7 +185,13 @@
   color: var(--vy-color-text);
   font: inherit;
 }
-.vy-input[aria-invalid="true"] {
+/* Doubled class: page-wide input rules must not override the token colours. */
+.vy-input.vy-input {
+  border-color: var(--vy-color-border);
+  background: var(--vy-color-surface);
+  color: var(--vy-color-text);
+}
+.vy-input.vy-input[aria-invalid="true"] {
   border-color: var(--vy-color-danger);
 }
 .vy-check,
@@ -191,6 +199,15 @@
   display: inline-flex;
   align-items: center;
   gap: var(--vy-space-2);
+}
+.vy-check {
+  display: flex;
+  width: fit-content;
+}
+.vy-check input {
+  width: auto;
+  min-height: 0;
+  margin: 0;
 }
 .vy-switch button {
   position: relative;

@@ -530,6 +530,24 @@ original Storyfront container have separate evidence and no claimed percentage.
 a cycle, an oversized file and absent documentation into temporary directories;
 it verifies that the architecture checker actually rejects each defect.
 
+## Local Studio development account
+
+Visual checks of Studio need a signed-in merchant. With the local server running
+(`.claude/launch.json` entry `veyndo`, or `./scripts/dev.sh`), run:
+
+```sh
+python3 scripts/dev_account.py
+```
+
+The first run registers the shop `dev-shop` and its owner `owner@dev-shop.test`
+through the ordinary `/api/auth/register` endpoint and stores the generated
+password in the ignored `.run/dev-account.env` (mode 600); later runs only prove the
+stored account still signs in. `DEV_ACCOUNT_PASSWORD` chooses the password and
+`--shop`, `--name`, `--email` change the defaults. The script refuses any host other
+than this machine and never prints the password. Sign in at
+`http://127.0.0.1:8787/?shop=dev-shop#login`. After a frontend rebuild, run
+`node scripts/precompress.mjs` too: the server prefers the precompressed sidecars.
+
 ## Repeatable checks
 
 From the repository root:

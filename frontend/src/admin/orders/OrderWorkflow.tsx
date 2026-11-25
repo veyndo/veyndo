@@ -46,7 +46,7 @@ export default function OrderWorkflow({
         <small className="orders-eyebrow">{o("nextStep")}</small>
         {actions.length ? (
           actions.map((action) => (
-            <div key={action.id}>
+            <div className="workflow-choice" key={action.id}>
               <Button
                 tone={action.state === "cancelled" ? "danger" : "primary"}
                 disabled={busy || !canEdit || !action.enabled}
