@@ -69,26 +69,6 @@
       "category": "in-place-edit"
     },
     {
-      "file": "components/catalog/src/domain/image_job.rs",
-      "function": "parse",
-      "category": "structural-validation"
-    },
-    {
-      "file": "components/catalog/src/domain/rich_document.rs",
-      "function": "validate",
-      "category": "structural-validation"
-    },
-    {
-      "file": "components/catalog/src/domain/translation_fields.rs",
-      "function": "merge_metadata",
-      "category": "keyed-lookup"
-    },
-    {
-      "file": "components/catalog/src/types/review.rs",
-      "function": "parse",
-      "category": "structural-validation"
-    },
-    {
       "file": "components/checkout/src/service/cart_projection.rs",
       "function": "checkout_service",
       "category": "in-place-edit"

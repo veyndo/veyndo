@@ -1,7 +1,7 @@
 //! A carrier booking occupies one open package; only the intent that reserved it can release it.
 use serde::Deserialize;
 use serde_json::{Value, json};
-use veyndo_core::document::view;
+use veyndo_core::document::{merge, view};
 use veyndo_core::{Result, conflict};
 use veyndo_pricing::verified_kernel;
 
@@ -44,7 +44,7 @@ pub fn transition(parcel: &mut Value, reserve: bool, closed: bool, intent: &Valu
                 "Another unresolved carrier booking occupies this package",
             ));
         }
-        parcel["booking"] = intent.clone();
+        merge(parcel, json!({"booking": intent}))?;
         Ok(Step::Changed("delivery.booking_reserved"))
     } else {
         if current.booking.is_null() {

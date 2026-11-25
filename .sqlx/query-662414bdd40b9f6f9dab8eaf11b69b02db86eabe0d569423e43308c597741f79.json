@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT coalesce(max(id),'') AS \"ceiling!\" FROM products WHERE tenant=$1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "ceiling!",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "662414bdd40b9f6f9dab8eaf11b69b02db86eabe0d569423e43308c597741f79"
+}

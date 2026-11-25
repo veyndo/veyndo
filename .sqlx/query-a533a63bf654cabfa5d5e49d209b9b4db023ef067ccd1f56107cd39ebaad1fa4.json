@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE product_assets SET public=$1 WHERE tenant=$2 AND id=$3 AND digest=$4",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Bool",
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "a533a63bf654cabfa5d5e49d209b9b4db023ef067ccd1f56107cd39ebaad1fa4"
+}

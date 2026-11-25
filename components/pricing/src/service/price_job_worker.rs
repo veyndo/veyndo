@@ -4,9 +4,11 @@ use crate::ports::Pricing;
 use crate::service::conversion::{amount, convert_from};
 use crate::store::price_jobs;
 use crate::types::currency::{Config, Definition};
-use crate::types::price_job::QueuedJob;
+use crate::types::price_job::{JobData, QueuedJob};
+use crate::types::product_currency::ProductCurrencies;
 use serde_json::{Value, json};
 use sqlx::PgConnection;
+use veyndo_core::document::view;
 use veyndo_core::{Result, bad};
 
 /// The fixed prices of one product in the job's currency, converted with the rates frozen in the job.
@@ -16,8 +18,10 @@ pub fn fixed_prices(
     d: &Definition,
     generated_at: &str,
 ) -> Result<Value> {
-    let source = p.extra["priceCurrency"]
-        .as_str()
+    let currencies = ProductCurrencies::of(&p.extra);
+    let source = currencies
+        .price_currency
+        .as_deref()
         .unwrap_or(&cfg.pricing_currency);
     let exact = |value: f64| -> Result<String> {
         Ok(amount(convert_from(value, source, cfg, d)?, &d.code, d.scale)?.decimal())
@@ -35,15 +39,16 @@ pub fn fixed_prices(
 }
 
 async fn step(p: &Pricing, tx: &mut PgConnection, job: &QueuedJob) -> Result<()> {
+    let data: JobData = view(&job.data);
     p.catalogue
-        .attribute(tx, job.data["actor"].as_str(), "currency-price-job")
+        .attribute(tx, data.actor.as_deref(), "currency-price-job")
         .await?;
     let cfg: Config =
-        serde_json::from_value(job.data["config"].clone()).map_err(|_| bad("Invalid price job"))?;
+        serde_json::from_value(data.config.clone()).map_err(|_| bad("Invalid price job"))?;
     let d = cfg
         .definitions
         .iter()
-        .find(|d| Some(d.code.as_str()) == job.data["currency"].as_str())
+        .find(|d| Some(d.code.as_str()) == data.currency.as_deref())
         .ok_or(bad("Missing price job currency"))?;
     let products = p
         .catalogue
@@ -52,7 +57,8 @@ async fn step(p: &Pricing, tx: &mut PgConnection, job: &QueuedJob) -> Result<()>
     let mut cursor = job.cursor.clone();
     for product in &products {
         cursor = product.id.clone();
-        if job.data["overwrite"] != true && !product.extra["currencyPrices"][&d.code].is_null() {
+        if data.overwrite != Some(true) && ProductCurrencies::of(&product.extra).has_fixed(&d.code)
+        {
             continue;
         }
         let prices = fixed_prices(product, &cfg, d, &chrono::Utc::now().to_rfc3339())?;

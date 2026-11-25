@@ -1,8 +1,9 @@
 //! Public navigation: a hidden category hides its whole branch, and every entry is shown in the visitor's language.
 use crate::domain::content::translated_object;
-use crate::types::category::Category;
+use crate::types::category::{Category, CategoryData, CategoryText};
 use serde_json::{Value, json};
 use std::collections::HashMap;
+use veyndo_core::document::view;
 
 /// The entries of the navigation in the given order, without hidden categories and their descendants.
 pub fn entries(tree: &[Category], locale: &str, main: &str) -> Vec<Value> {
@@ -12,7 +13,10 @@ pub fn entries(tree: &[Category], locale: &str, main: &str) -> Vec<Value> {
         .map(|c| {
             (
                 c.id.as_str(),
-                (c.parent_id.as_deref(), c.data["visible"] != false),
+                (
+                    c.parent_id.as_deref(),
+                    view::<CategoryData>(&c.data).visible != false,
+                ),
             )
         })
         .collect();
@@ -30,8 +34,9 @@ pub fn entries(tree: &[Category], locale: &str, main: &str) -> Vec<Value> {
     tree.iter()
         .filter(|c| visible(&c.id))
         .map(|c| {
-            let tr = translated_object(&c.data["translations"], locale, main);
-            json!({"id":c.id,"parentId":c.parent_id,"name":tr["name"],"description":tr["description"],"slug":tr["slug"],"type":c.data["type"],"url":c.data["url"],"position":c.position})
+            let data: CategoryData = view(&c.data);
+            let tr: CategoryText = view(&translated_object(&data.translations, locale, main));
+            json!({"id":c.id,"parentId":c.parent_id,"name":tr.name,"description":tr.description,"slug":tr.slug,"type":data.r#type,"url":data.url,"position":c.position})
         })
         .collect()
 }

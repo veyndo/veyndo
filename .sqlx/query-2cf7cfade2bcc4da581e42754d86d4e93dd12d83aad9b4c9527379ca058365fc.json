@@ -1,0 +1,19 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE categories SET parent_id=$1,position=$2,data=$3,revision=revision+1 WHERE tenant=$4 AND id=$5 AND revision=$6",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Int4",
+        "Jsonb",
+        "Text",
+        "Text",
+        "Int8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "2cf7cfade2bcc4da581e42754d86d4e93dd12d83aad9b4c9527379ca058365fc"
+}

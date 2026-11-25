@@ -1,0 +1,286 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id,name,category,description,price,tax_rate,stock,revision,list_price,regulation_price,reference_price,advanced_prices,min_purchase,purchase_steps,max_purchase,parent_id,options,media,properties,delivery_days,extra,product_number FROM products WHERE tenant=$1 AND parent_id=$2 AND active AND NOT EXISTS(SELECT 1 FROM product_channel_visibility v WHERE v.tenant=products.tenant AND v.product_id=products.id AND v.channel_id=$6 AND NOT v.visible) AND id>$3 AND ($5::text[] IS NULL OR id=ANY($5)) AND ($7::text IS NULL OR EXISTS(SELECT 1 FROM b2b_catalog b WHERE b.tenant=products.tenant AND b.unit_id=$7 AND (b.product_id=products.id OR b.product_id=products.parent_id))) ORDER BY id LIMIT $4",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "products",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "products",
+            "name": "name"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "category",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "products",
+            "name": "category"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "description",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "products",
+            "name": "description"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "price",
+        "type_info": "Float8",
+        "origin": {
+          "Table": {
+            "table": "products",
+            "name": "price"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "tax_rate",
+        "type_info": "Float8",
+        "origin": {
+          "Table": {
+            "table": "products",
+            "name": "tax_rate"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "stock",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "products",
+            "name": "stock"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "revision",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "products",
+            "name": "revision"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "list_price",
+        "type_info": "Float8",
+        "origin": {
+          "Table": {
+            "table": "products",
+            "name": "list_price"
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "regulation_price",
+        "type_info": "Float8",
+        "origin": {
+          "Table": {
+            "table": "products",
+            "name": "regulation_price"
+          }
+        }
+      },
+      {
+        "ordinal": 10,
+        "name": "reference_price",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "products",
+            "name": "reference_price"
+          }
+        }
+      },
+      {
+        "ordinal": 11,
+        "name": "advanced_prices",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "products",
+            "name": "advanced_prices"
+          }
+        }
+      },
+      {
+        "ordinal": 12,
+        "name": "min_purchase",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "products",
+            "name": "min_purchase"
+          }
+        }
+      },
+      {
+        "ordinal": 13,
+        "name": "purchase_steps",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "products",
+            "name": "purchase_steps"
+          }
+        }
+      },
+      {
+        "ordinal": 14,
+        "name": "max_purchase",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "products",
+            "name": "max_purchase"
+          }
+        }
+      },
+      {
+        "ordinal": 15,
+        "name": "parent_id",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "products",
+            "name": "parent_id"
+          }
+        }
+      },
+      {
+        "ordinal": 16,
+        "name": "options",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "products",
+            "name": "options"
+          }
+        }
+      },
+      {
+        "ordinal": 17,
+        "name": "media",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "products",
+            "name": "media"
+          }
+        }
+      },
+      {
+        "ordinal": 18,
+        "name": "properties",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "products",
+            "name": "properties"
+          }
+        }
+      },
+      {
+        "ordinal": 19,
+        "name": "delivery_days",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "products",
+            "name": "delivery_days"
+          }
+        }
+      },
+      {
+        "ordinal": 20,
+        "name": "extra",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "products",
+            "name": "extra"
+          }
+        }
+      },
+      {
+        "ordinal": 21,
+        "name": "product_number",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "products",
+            "name": "product_number"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text",
+        "Int8",
+        "TextArray",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      true,
+      false,
+      false,
+      false,
+      true,
+      true,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "c1255dde87eb4ad02c23e3607a25c270ade9e79c370719e00c222f72a2843d56"
+}

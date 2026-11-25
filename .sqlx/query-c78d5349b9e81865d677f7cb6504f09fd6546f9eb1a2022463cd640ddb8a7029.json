@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "-- Persisted quantities only; releasing twice yields no changes. Lock affected products in checkout's ID order.\nWITH released AS (\n UPDATE order_inventory_reservations SET released_at=now()\n WHERE tenant=$1 AND order_id=$2 AND released_at IS NULL RETURNING product_id,quantity\n), locked AS MATERIALIZED (\n SELECT p.id FROM products p JOIN released r ON r.product_id=p.id\n WHERE p.tenant=$1 ORDER BY p.id FOR UPDATE OF p\n)\nUPDATE products p SET stock=p.stock+r.quantity,revision=p.revision+1\nFROM released r JOIN locked l ON l.id=r.product_id\nWHERE p.tenant=$1 AND p.id=r.product_id;\n",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "c78d5349b9e81865d677f7cb6504f09fd6546f9eb1a2022463cd640ddb8a7029"
+}

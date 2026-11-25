@@ -1,0 +1,29 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT source_import FROM product_reviews WHERE tenant=$1 AND id=$2 FOR UPDATE",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "source_import",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "product_reviews",
+            "name": "source_import"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      true
+    ]
+  },
+  "hash": "9aaa8a4b9c93ad5498ae2ae557d5dfdb752d70481bf86b66e56ec2d80f382fb2"
+}

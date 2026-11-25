@@ -1586,6 +1586,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/pricing/src/types/currency.rs](../components/pricing/src/types/currency.rs) | Explicit currency scales and rational exchange-rate settings, inherited by sales-channel overrides. |
 | [components/pricing/src/types/customer_group.rs](../components/pricing/src/types/customer_group.rs) | Shop-owned customer groups; each selects whether its prices are shown gross (consumer) or net (business). |
 | [components/pricing/src/types/price_job.rs](../components/pricing/src/types/price_job.rs) | One run that writes fixed prices of a currency into the catalogue, as the merchant API shows it. |
+| [components/pricing/src/types/product_currency.rs](../components/pricing/src/types/product_currency.rs) | The currency fields of a product's `extra` document: the currency its base prices are stated in and the fixed prices per currency as exact decimal strings. |
 | [components/pricing/src/types/tax.rs](../components/pricing/src/types/tax.rs) | Tax classes and their destination rules; current tax law is merchant configuration, not bundled tax advice. |
 | [components/pricing/src/types.rs](../components/pricing/src/types.rs) | The data contracts of the pricing component. |
 | [components/shipping/src/domain/booking.rs](../components/shipping/src/domain/booking.rs) | A carrier booking occupies one open package; only the intent that reserved it can release it. |

@@ -20,6 +20,7 @@ pub async fn page(
 ) -> Result<Vec<Listed>> {
     let (sort, direction) = c.order()?;
     let by_name = c.sort == "name";
+    // dynamic SQL: filters, sort column and caller predicates (app filters) are chosen at runtime.
     let mut q = QueryBuilder::<Postgres>::new(
         "SELECT p.*, (SELECT count(*) FROM products c WHERE c.tenant=p.tenant AND c.parent_id=p.id) AS variant_count, ARRAY(SELECT pc.category_id FROM product_categories pc WHERE pc.tenant=p.tenant AND pc.product_id=p.id ORDER BY pc.category_id) AS category_ids FROM products p",
     );

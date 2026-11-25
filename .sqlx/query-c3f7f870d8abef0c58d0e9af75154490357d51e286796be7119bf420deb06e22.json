@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT (SELECT count(*) FROM commerce_rules WHERE tenant=$1 AND jsonb_path_exists(condition,'$.** ? (@ == $id)',jsonb_build_object('id',$2::text))) + (SELECT count(*) FROM commerce_flows WHERE tenant=$1 AND jsonb_path_exists(data,'$.** ? (@ == $id)',jsonb_build_object('id',$2::text))) AS \"count!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "count!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "c3f7f870d8abef0c58d0e9af75154490357d51e286796be7119bf420deb06e22"
+}

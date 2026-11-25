@@ -1,5 +1,7 @@
 //! Allow-listed editor JSON with bounded depth and content; HTML/handlers/styles cannot enter the renderer.
+use serde::Deserialize;
 use serde_json::Value;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::{Result, bad};
 pub fn safe_url(url: &str) -> bool {
     if url.len() > 2000 || url.contains(['\\', '\n', '\r']) {
@@ -10,6 +12,46 @@ pub fn safe_url(url: &str) -> bool {
             u.scheme() == "https" && u.username().is_empty() && u.password().is_none()
         })
 }
+/// The fields of a document node the rules read.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct Node {
+    #[serde(deserialize_with = "lenient")]
+    r#type: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    text: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    attrs: NodeAttrs,
+}
+
+/// The node attributes the rules read: a heading level and a media source.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct NodeAttrs {
+    #[serde(deserialize_with = "lenient")]
+    level: Option<u64>,
+    #[serde(deserialize_with = "lenient")]
+    src: Option<String>,
+}
+
+/// A text mark and its link target.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct Mark {
+    #[serde(deserialize_with = "lenient")]
+    r#type: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    attrs: MarkAttrs,
+}
+
+/// The attributes of a link mark.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct MarkAttrs {
+    #[serde(deserialize_with = "lenient")]
+    href: Option<String>,
+}
+
 pub fn validate(node: &Value, depth: usize, count: &mut usize) -> Result<()> {
     *count += 1;
     if depth > 10
@@ -23,8 +65,10 @@ pub fn validate(node: &Value, depth: usize, count: &mut usize) -> Result<()> {
     {
         return Err(bad("Invalid rich document structure"));
     }
-    let typ = node["type"]
-        .as_str()
+    let fields: Node = view(node);
+    let typ = fields
+        .r#type
+        .as_deref()
         .ok_or(bad("Document node type required"))?;
     if ![
         "doc",
@@ -45,7 +89,7 @@ pub fn validate(node: &Value, depth: usize, count: &mut usize) -> Result<()> {
     {
         return Err(bad("Unsupported document node"));
     }
-    if typ == "text" && node["text"].as_str().is_none_or(|s| s.len() > 4000) {
+    if typ == "text" && fields.text.as_deref().is_none_or(|s| s.len() > 4000) {
         return Err(bad("Invalid document text"));
     }
     if let Some(attrs) = node.get("attrs") {
@@ -60,11 +104,7 @@ pub fn validate(node: &Value, depth: usize, count: &mut usize) -> Result<()> {
         }) {
             return Err(bad("Unsupported document attributes"));
         }
-        if typ == "heading"
-            && !node["attrs"]["level"]
-                .as_u64()
-                .is_some_and(|n| (2..=3).contains(&n))
-        {
+        if typ == "heading" && !fields.attrs.level.is_some_and(|n| (2..=3).contains(&n)) {
             return Err(bad("Invalid heading level"));
         }
         if attrs
@@ -74,7 +114,7 @@ pub fn validate(node: &Value, depth: usize, count: &mut usize) -> Result<()> {
             return Err(bad("Document attribute too long"));
         }
     }
-    if ["image", "video"].contains(&typ) && !node["attrs"]["src"].as_str().is_some_and(safe_url) {
+    if ["image", "video"].contains(&typ) && !fields.attrs.src.as_deref().is_some_and(safe_url) {
         return Err(bad("Unsafe document media URL"));
     }
     if let Some(marks) = node.get("marks") {
@@ -83,7 +123,8 @@ pub fn validate(node: &Value, depth: usize, count: &mut usize) -> Result<()> {
             .filter(|a| a.len() <= 8)
             .ok_or(bad("Invalid document marks"))?
         {
-            let typ = mark["type"].as_str().unwrap_or("");
+            let fields: Mark = view(mark);
+            let typ = fields.r#type.as_deref().unwrap_or("");
             if !["bold", "italic", "underline", "strike", "code", "link"].contains(&typ)
                 || mark
                     .as_object()
@@ -99,7 +140,7 @@ pub fn validate(node: &Value, depth: usize, count: &mut usize) -> Result<()> {
             {
                 return Err(bad("Invalid link attributes"));
             }
-            if typ == "link" && !mark["attrs"]["href"].as_str().is_some_and(safe_url) {
+            if typ == "link" && !fields.attrs.href.as_deref().is_some_and(safe_url) {
                 return Err(bad("Unsafe document link"));
             }
         }

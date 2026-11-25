@@ -1,10 +1,37 @@
 //! Which media a product may reference: images and at most four uploaded 3D models, with safe URLs and bounded labels.
+use serde::Deserialize;
 use serde_json::Value;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::{Result, bad};
+
+/// The fields of a media item the rules read.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct MediaItem {
+    #[serde(deserialize_with = "lenient")]
+    r#type: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    url: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    id: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    view: Option<String>,
+}
+
+impl MediaItem {
+    fn is_model(&self) -> bool {
+        self.r#type.as_deref() == Some("model")
+    }
+}
 
 /// Media types and the 3D model rules, independent of what is stored.
 pub fn validate_shape(media: &[Value]) -> Result<()> {
-    if media.iter().filter(|m| m["type"] == "model").count() > 4 {
+    if media
+        .iter()
+        .filter(|m| view::<MediaItem>(m).is_model())
+        .count()
+        > 4
+    {
         return Err(bad("Maximum four 3D models per product"));
     }
     for item in media {
@@ -14,9 +41,11 @@ pub fn validate_shape(media: &[Value]) -> Result<()> {
         {
             return Err(bad("Unknown product media type"));
         }
-        if item["type"] == "model" {
-            if !item["url"]
-                .as_str()
+        let fields: MediaItem = view(item);
+        if fields.is_model() {
+            if !fields
+                .url
+                .as_deref()
                 .is_some_and(|u| u.starts_with("/store-api/assets/"))
             {
                 return Err(bad("3D models require an uploaded GLB asset"));
@@ -42,7 +71,8 @@ pub fn validate(media: &Value) -> Result<()> {
         .filter(|a| a.len() <= 20)
         .ok_or(bad("Product media must be a bounded array"))?;
     for m in media {
-        let url = m["url"].as_str().ok_or(bad("Media URL required"))?;
+        let item: MediaItem = view(m);
+        let url = item.url.as_deref().ok_or(bad("Media URL required"))?;
         let local = url.starts_with("/store-api/assets/")
             || url.starts_with("/assets/")
             || url.starts_with("/media/");
@@ -53,8 +83,8 @@ pub fn validate(media: &Value) -> Result<()> {
         {
             return Err(bad("Unsafe product media URL"));
         }
-        if m["id"].as_str().is_none_or(|s| s.len() > 100)
-            || m["view"].as_str().is_none_or(|s| s.len() > 100)
+        if item.id.as_deref().is_none_or(|s| s.len() > 100)
+            || item.view.as_deref().is_none_or(|s| s.len() > 100)
         {
             return Err(bad("Invalid product media labels"));
         }

@@ -1,5 +1,7 @@
 //! Bounded self-contained GLB 2 admission; remote resources and runtime decoder downloads are forbidden.
+use serde::Deserialize;
 use serde_json::Value;
+use veyndo_core::document::{lenient, lenient_list, view};
 use veyndo_core::{Result, bad};
 pub const MODEL_LIMIT: usize = 20 * 1024 * 1024;
 const JSON_LIMIT: usize = 1024 * 1024;
@@ -42,6 +44,40 @@ fn safe_tree(v: &Value, depth: usize, nodes: &mut usize) -> bool {
         _ => true,
     }
 }
+/// A material variant of a GLB document.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct Variant {
+    #[serde(deserialize_with = "lenient")]
+    name: Option<String>,
+}
+
+/// The parts of a GLB document whose sizes are bounded.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct Limits {
+    #[serde(deserialize_with = "lenient_list")]
+    buffers: Vec<Buffer>,
+    #[serde(deserialize_with = "lenient_list")]
+    accessors: Vec<Accessor>,
+}
+
+/// A GLB buffer and its declared length.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct Buffer {
+    #[serde(deserialize_with = "lenient")]
+    byte_length: Option<u64>,
+}
+
+/// A GLB accessor and its element count.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct Accessor {
+    #[serde(deserialize_with = "lenient")]
+    count: Option<u64>,
+}
+
 pub fn variants(doc: &Value) -> Result<Vec<String>> {
     let mut names = vec![];
     if let Some(v) = doc.pointer("/extensions/KHR_materials_variants/variants") {
@@ -50,14 +86,15 @@ pub fn variants(doc: &Value) -> Result<Vec<String>> {
             .filter(|a| a.len() <= 100)
             .ok_or(bad("Invalid GLB material variants"))?;
         for item in list {
-            let name = item["name"]
-                .as_str()
+            let variant: Variant = view(item);
+            let name = variant
+                .name
                 .filter(|n| !n.is_empty() && n.len() <= 100 && !n.chars().any(char::is_control))
                 .ok_or(bad("Invalid GLB material variant name"))?;
-            if names.iter().any(|s| s == name) {
+            if names.contains(&name) {
                 return Err(bad("Duplicate GLB material variant"));
             }
-            names.push(name.to_owned());
+            names.push(name);
         }
     }
     Ok(names)
@@ -88,20 +125,20 @@ pub fn validate(b: &[u8]) -> Result<()> {
         }
         len
     };
-    let buffers = doc["buffers"].as_array().map(Vec::as_slice).unwrap_or(&[]);
-    if buffers.len() > 1
-        || buffers.iter().any(|v| {
-            v["byteLength"]
-                .as_u64()
+    let limits: Limits = view(&doc);
+    if limits.buffers.len() > 1
+        || limits.buffers.iter().any(|v| {
+            v.byte_length
                 .is_none_or(|n| n as usize > bin || bin - n as usize > 3)
         })
     {
         return Err(bad("Invalid GLB buffer size"));
     }
-    if doc["accessors"].as_array().is_some_and(|a| {
-        a.iter()
-            .any(|v| v["count"].as_u64().is_none_or(|n| n > 2_000_000))
-    }) {
+    if limits
+        .accessors
+        .iter()
+        .any(|v| v.count.is_none_or(|n| n > 2_000_000))
+    {
         return Err(bad("GLB geometry exceeds limits"));
     }
     Ok(())

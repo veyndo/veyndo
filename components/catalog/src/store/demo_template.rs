@@ -72,17 +72,10 @@ pub async fn insert_template(
 ) -> Result<()> {
     let template = parse(template)?;
     for p in &template.products {
-        sqlx::query("INSERT INTO products(tenant,id,name,category,description,price,tax_rate,stock,revision,list_price,regulation_price,reference_price,advanced_prices,min_purchase,purchase_steps,max_purchase,parent_id,options,media,properties,delivery_days,extra) VALUES($1,$2,$3,$4,$5,$6,$7,$8,1,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21)")
-            .bind(tenant).bind(&p.id).bind(&p.name).bind(&p.category).bind(&p.description)
-            .bind(p.price).bind(p.tax_rate).bind(p.stock)
-            .bind(p.list_price).bind(p.regulation_price).bind(p.reference_price.is_object().then(|| p.reference_price.clone()))
-            .bind(&p.advanced_prices).bind(p.min_purchase).bind(p.purchase_steps)
-            .bind(p.max_purchase).bind(&p.parent_id).bind(&p.options).bind(&p.media).bind(&p.properties)
-            .bind(p.delivery_days).bind(p.extra.clone().unwrap_or(json!({}))).execute(&mut *tx).await?;
+        sqlx::query!(r#"INSERT INTO products(tenant,id,name,category,description,price,tax_rate,stock,revision,list_price,regulation_price,reference_price,advanced_prices,min_purchase,purchase_steps,max_purchase,parent_id,options,media,properties,delivery_days,extra) VALUES($1,$2,$3,$4,$5,$6,$7,$8,1,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21)"#, tenant, p.id.as_deref(), p.name.as_deref(), p.category.as_deref(), p.description.as_deref(), p.price, p.tax_rate, p.stock, p.list_price, p.regulation_price, p.reference_price.is_object().then(|| p.reference_price.clone()), &p.advanced_prices, p.min_purchase, p.purchase_steps, p.max_purchase, p.parent_id.as_deref(), &p.options, &p.media, &p.properties, p.delivery_days, p.extra.clone().unwrap_or(json!({}))).execute(&mut *tx).await?;
     }
     for tr in &template.translations {
-        sqlx::query("INSERT INTO product_translations(tenant,product_id,language_id,name,description) VALUES($1,$2,$3,$4,$5)")
-            .bind(tenant).bind(&tr.product_id).bind(&tr.language_id).bind(&tr.name).bind(&tr.description).execute(&mut *tx).await?;
+        sqlx::query!(r#"INSERT INTO product_translations(tenant,product_id,language_id,name,description) VALUES($1,$2,$3,$4,$5)"#, tenant, tr.product_id.as_deref(), tr.language_id.as_deref(), tr.name.as_deref(), tr.description.as_deref()).execute(&mut *tx).await?;
     }
     Ok(())
 }
@@ -94,8 +87,7 @@ pub async fn translate_categories(
     template: &Value,
 ) -> Result<()> {
     for category in parse(template.clone())?.categories {
-        sqlx::query("UPDATE categories SET data=jsonb_set(data,'{translations}',$3) WHERE tenant=$1 AND id='legacy-'||md5($2)")
-            .bind(tenant).bind(&category.id).bind(&category.translations).execute(&mut *tx).await?;
+        sqlx::query!(r#"UPDATE categories SET data=jsonb_set(data,'{translations}',$3) WHERE tenant=$1 AND id='legacy-'||md5($2)"#, tenant, category.id.as_deref(), &category.translations).execute(&mut *tx).await?;
     }
     Ok(())
 }
@@ -107,7 +99,7 @@ pub async fn insert_basic(
     (id, name, category, description): (&str, &str, &str, &str),
     (price, tax, stock): (f64, f64, i32),
 ) -> Result<()> {
-    sqlx::query("INSERT INTO products(tenant,id,name,category,description,price,tax_rate,stock) VALUES($1,$2,$3,$4,$5,$6,$7,$8) ON CONFLICT DO NOTHING").bind(tenant).bind(id).bind(name).bind(category).bind(description).bind(price).bind(tax).bind(stock).execute(&a.db).await?;
+    sqlx::query!(r#"INSERT INTO products(tenant,id,name,category,description,price,tax_rate,stock) VALUES($1,$2,$3,$4,$5,$6,$7,$8) ON CONFLICT DO NOTHING"#, tenant, id, name, category, description, price, tax, stock).execute(&a.db).await?;
     Ok(())
 }
 

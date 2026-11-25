@@ -2,6 +2,7 @@
 use crate::domain::graph_query;
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
+use veyndo_core::document::view;
 use veyndo_core::localized::{Languages, valid_locale_key};
 use veyndo_core::{Result, bad};
 
@@ -25,6 +26,26 @@ pub struct Category {
     pub data: Value,
 }
 
+/// The fields of a category's `data` document, each kept as stored.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+pub struct CategoryData {
+    pub active: Value,
+    pub visible: Value,
+    pub r#type: Value,
+    pub url: Value,
+    pub translations: Value,
+}
+
+/// The texts of one category translation, each kept as stored.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+pub struct CategoryText {
+    pub name: Value,
+    pub description: Value,
+    pub slug: Value,
+}
+
 /// The JSON schema of a category write, as capabilities and agents see it.
 pub fn input_schema(create: bool) -> Value {
     let mut fields = json!({
@@ -37,8 +58,8 @@ pub fn input_schema(create: bool) -> Value {
             "translations":{"type":"object","description":"Content locale keys (for example en-GB), each containing name and optional description/slug. Include the shop main language."}
         }}
     });
-    if create {
-        fields["id"] = json!({"type":"string"});
+    if create && let Some(fields) = fields.as_object_mut() {
+        fields.insert("id".into(), json!({"type":"string"}));
     }
     json!({"type":"object","additionalProperties":false,"properties":fields,"required":if create {json!(["position","data"])} else {json!(["revision","position","data"])}})
 }
@@ -53,12 +74,13 @@ impl Edit {
     /// The shape of the data, independent of the shop: type, flags, bounded translations and HTTPS links.
     pub fn validate(&self) -> Result<()> {
         let d = &self.data;
+        let data: CategoryData = view(d);
         if !d.is_object()
             || d.to_string().len() > 16000
-            || !d["active"].is_boolean()
-            || !d["visible"].is_boolean()
+            || !data.active.is_boolean()
+            || !data.visible.is_boolean()
             || !["page", "folder", "structuring", "link"]
-                .contains(&d["type"].as_str().unwrap_or(""))
+                .contains(&data.r#type.as_str().unwrap_or(""))
         {
             return Err(bad("Invalid category data"));
         }
@@ -67,25 +89,29 @@ impl Edit {
         {
             return Err(bad("Invalid nested category listing flag"));
         }
-        let translations = d["translations"]
+        let translations = data
+            .translations
             .as_object()
             .filter(|m| !m.is_empty() && m.len() <= 100)
             .ok_or(bad("Category translations required"))?;
         for (lang, tr) in translations {
+            let tr: CategoryText = view(tr);
             if !valid_locale_key(lang)
-                || tr["name"]
+                || tr
+                    .name
                     .as_str()
                     .is_some_and(|s| s.is_empty() || s.len() > 200)
-                || tr["description"].as_str().is_some_and(|s| s.len() > 4000)
-                || tr["slug"]
+                || tr.description.as_str().is_some_and(|s| s.len() > 4000)
+                || tr
+                    .slug
                     .as_str()
                     .is_some_and(|s| s.len() > 200 || s.contains(['?', '#', '/']))
             {
                 return Err(bad("Invalid category translation"));
             }
         }
-        if d["type"] == "link"
-            && !d["url"].as_str().is_some_and(|s| {
+        if data.r#type == "link"
+            && !data.url.as_str().is_some_and(|s| {
                 reqwest::Url::parse(s).is_ok_and(|u| {
                     u.scheme() == "https" && u.username().is_empty() && u.password().is_none()
                 })
@@ -99,11 +125,13 @@ impl Edit {
     /// The checks that depend on the shop: the saved fact query and names in enabled languages including the main one.
     pub fn validate_for(&self, languages: Languages) -> Result<()> {
         graph_query::validate(&self.data, languages)?;
-        let names: Value = self.data["translations"]
+        let data: CategoryData = view(&self.data);
+        let names: Value = data
+            .translations
             .as_object()
             .into_iter()
             .flatten()
-            .map(|(key, tr)| (key.clone(), tr["name"].clone()))
+            .map(|(key, tr)| (key.clone(), view::<CategoryText>(tr).name))
             .collect();
         languages.validate_names(&names, 200)
     }

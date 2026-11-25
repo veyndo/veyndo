@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO order_inventory_reservations(tenant,order_id,product_id,quantity) SELECT $1,$2,id,quantity FROM unnest($3::text[],$4::int[]) AS items(id,quantity)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "TextArray",
+        "Int4Array"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "444602c4b1dae8c9bd34f053257834efff649f5d1b3c09ff1bf060e77a743580"
+}

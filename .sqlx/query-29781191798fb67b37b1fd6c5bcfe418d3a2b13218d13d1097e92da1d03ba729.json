@@ -1,0 +1,25 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT to_jsonb(i)-'tenant'-'job_id' AS \"draft!\" FROM translation_items i WHERE tenant=$1 AND job_id=$2 AND product_id>$3 ORDER BY product_id LIMIT 51",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "draft!",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "29781191798fb67b37b1fd6c5bcfe418d3a2b13218d13d1097e92da1d03ba729"
+}

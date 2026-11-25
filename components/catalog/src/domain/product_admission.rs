@@ -1,7 +1,7 @@
 //! Admit native product edits and expand explicit category-only changes through the same revisioned editor.
 use serde::Deserialize;
 use serde_json::{Value, json};
-use veyndo_core::document::view;
+use veyndo_core::document::{merge, view};
 use veyndo_core::{Error, Result, bad};
 /// A change of category assignments only, against the clock the merchant read.
 #[derive(Deserialize)]
@@ -84,14 +84,15 @@ pub fn category_assignment(edit: &CategoryEdit, current: &Value) -> Result<Value
             "Product changed",
         ));
     }
-    let mut result = json!({"revision":edit.revision,"translations":args.translations,"extra":args.extra,"catalog":args.catalog});
-    if let Some(revision) = edit.content_revision {
-        result["contentRevision"] = json!(revision);
-    }
-    result["catalog"]["categoryIds"] = json!(edit.category_ids);
+    let mut catalog = args.catalog;
+    merge(&mut catalog, json!({ "categoryIds": edit.category_ids }))?;
     // Keep channel writes out of an assignment-only operation as well as commerce.
-    if let Some(catalog) = result["catalog"].as_object_mut() {
+    if let Some(catalog) = catalog.as_object_mut() {
         catalog.remove("salesChannelIds");
+    }
+    let mut result = json!({"revision":edit.revision,"translations":args.translations,"extra":args.extra,"catalog":catalog});
+    if let Some(revision) = edit.content_revision {
+        merge(&mut result, json!({ "contentRevision": revision }))?;
     }
     Ok(result)
 }

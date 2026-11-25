@@ -10,10 +10,7 @@ pub async fn for_products(
     chain: &[String],
     products: &[String],
 ) -> Result<Vec<ProductText>> {
-    Ok(sqlx::query_as::<_, ProductText>("SELECT product_id,language_id,name,description FROM product_translations WHERE tenant=$1 AND language_id=ANY($2) AND product_id=ANY($3)")
-        .bind(tenant)
-        .bind(chain)
-        .bind(products)
+    Ok(sqlx::query_as!(ProductText, r#"SELECT product_id,language_id,name,description FROM product_translations WHERE tenant=$1 AND language_id=ANY($2) AND product_id=ANY($3)"#, tenant, chain, products)
         .fetch_all(&a.db)
         .await?)
 }
@@ -25,10 +22,7 @@ pub async fn lock_for_products(
     chain: &[String],
     products: &[String],
 ) -> Result<Vec<ProductText>> {
-    Ok(sqlx::query_as::<_, ProductText>("SELECT product_id,language_id,name,description FROM product_translations WHERE tenant=$1 AND product_id=ANY($2) AND language_id=ANY($3) FOR SHARE")
-        .bind(tenant)
-        .bind(products)
-        .bind(chain)
+    Ok(sqlx::query_as!(ProductText, r#"SELECT product_id,language_id,name,description FROM product_translations WHERE tenant=$1 AND product_id=ANY($2) AND language_id=ANY($3) FOR SHARE"#, tenant, products, chain)
         .fetch_all(tx)
         .await?)
 }
@@ -39,9 +33,7 @@ pub async fn all_for_products(
     tenant: &str,
     products: &[String],
 ) -> Result<Vec<ProductText>> {
-    Ok(sqlx::query_as::<_, ProductText>("SELECT product_id,language_id,name,description FROM product_translations WHERE tenant=$1 AND product_id=ANY($2)")
-        .bind(tenant)
-        .bind(products)
+    Ok(sqlx::query_as!(ProductText, r#"SELECT product_id,language_id,name,description FROM product_translations WHERE tenant=$1 AND product_id=ANY($2)"#, tenant, products)
         .fetch_all(&a.db)
         .await?)
 }

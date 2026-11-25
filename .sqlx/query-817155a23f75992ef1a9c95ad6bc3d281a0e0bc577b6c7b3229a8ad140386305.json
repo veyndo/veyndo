@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT count(*) AS \"count!\" FROM products e WHERE e.tenant=$1 AND e.active AND e.stock<=0 AND NOT EXISTS(SELECT 1 FROM products c WHERE c.tenant=e.tenant AND c.parent_id=e.id)",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "count!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "817155a23f75992ef1a9c95ad6bc3d281a0e0bc577b6c7b3229a8ad140386305"
+}

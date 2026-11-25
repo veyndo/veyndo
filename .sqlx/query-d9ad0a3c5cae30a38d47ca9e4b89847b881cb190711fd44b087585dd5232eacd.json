@@ -1,0 +1,48 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT c.id,c.data,coalesce(v.visible,true) AS \"visible!\" FROM sales_channels c LEFT JOIN product_channel_visibility v ON v.tenant=c.tenant AND v.channel_id=c.id AND v.product_id=$2 WHERE c.tenant=$1 ORDER BY c.id LIMIT 101",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "sales_channels",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "data",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "sales_channels",
+            "name": "data"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "visible!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      null
+    ]
+  },
+  "hash": "d9ad0a3c5cae30a38d47ca9e4b89847b881cb190711fd44b087585dd5232eacd"
+}

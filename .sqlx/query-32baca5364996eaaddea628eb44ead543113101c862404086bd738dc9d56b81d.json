@@ -1,0 +1,18 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE products SET active=$1,product_number=$2,options=$3 WHERE tenant=$4 AND id=$5",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Bool",
+        "Text",
+        "Jsonb",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "32baca5364996eaaddea628eb44ead543113101c862404086bd738dc9d56b81d"
+}

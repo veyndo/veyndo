@@ -1,7 +1,7 @@
 //! Provider-neutral partial-package allocation; quantities and fiscal order snapshots remain conserved.
 use serde::Deserialize;
 use serde_json::{Value, json};
-use veyndo_core::document::{lenient, view};
+use veyndo_core::document::{lenient, merge, view};
 use veyndo_core::{Result, bad, conflict};
 use veyndo_pricing::verified_kernel;
 
@@ -97,38 +97,38 @@ pub fn allocate(
     }
     let mut original = source.clone();
     let mut parcel = source.clone();
-    original["positions"] = json!(
-        positions
-            .iter()
-            .filter_map(|p| {
-                let left = p["quantity"].as_u64().unwrap()
-                    - chosen.get(p["id"].as_str().unwrap()).copied().unwrap_or(0);
-                (left > 0).then(|| {
-                    let mut p = p.clone();
-                    p["quantity"] = json!(left);
-                    p
-                })
-            })
-            .collect::<Vec<_>>()
-    );
-    parcel["id"] = json!(id);
-    parcel["positions"] = json!(
-        positions
-            .iter()
-            .filter_map(|p| chosen.get(p["id"].as_str().unwrap()).map(|q| {
-                let mut p = p.clone();
-                p["quantity"] = json!(q);
-                p
-            }))
-            .collect::<Vec<_>>()
-    );
+    let mut kept = Vec::new();
+    let mut split = Vec::new();
+    for (stored, p) in positions.iter().zip(&listed) {
+        let (Some(sku), Some(quantity)) = (p.id.as_deref(), p.quantity) else {
+            continue;
+        };
+        let moved = chosen.get(sku).copied().unwrap_or(0);
+        if quantity > moved {
+            kept.push(with_quantity(stored, quantity - moved)?);
+        }
+        if moved > 0 {
+            split.push(with_quantity(stored, moved)?);
+        }
+    }
+    merge(&mut original, json!({"positions": kept}))?;
+    merge(&mut parcel, json!({"id": id, "positions": split}))?;
     // Splitting fulfillment does not duplicate the original shipping charge or recalculate the tax snapshot.
-    parcel["shippingCosts"] =
-        json!({"unitPrice":0,"totalPrice":0,"netPrice":0,"tax":0,"calculatedTaxes":[]});
+    merge(
+        &mut parcel,
+        json!({"shippingCosts":{"unitPrice":0,"totalPrice":0,"netPrice":0,"tax":0,"calculatedTaxes":[]}}),
+    )?;
     for field in ["trackingCode", "trackingUrl", "label"] {
         parcel.as_object_mut().unwrap().remove(field);
     }
     Ok((original, parcel))
+}
+
+/// A stored position with another quantity; every other field stays as stored.
+fn with_quantity(position: &Value, quantity: u64) -> Result<Value> {
+    let mut position = position.clone();
+    merge(&mut position, json!({"quantity": quantity}))?;
+    Ok(position)
 }
 
 #[cfg(test)]

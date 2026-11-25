@@ -1,0 +1,22 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO translation_jobs(tenant,id,source_locale,target_locale,choice,overwrite,total,highwater,product_ids) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text",
+        "Text",
+        "Jsonb",
+        "Bool",
+        "Int8",
+        "Text",
+        "TextArray"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "a5217c9ce24e724b3da3723c4ec8d119fdd6b4cc5f436589bd79b6a4c37b1fcc"
+}
