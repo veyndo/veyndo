@@ -21,7 +21,7 @@ type Props = {
 };
 export default function NativeProductPreview(props: Props) {
   const t = useOverviewText();
-  const { s, locale } = useShopText();
+  const { s } = useShopText();
   const { id, request, workspace, channel, language } = props;
   const scope = `${workspace}:${channel}:${language}:${id}`;
   const [attempt, retry] = useState(0);
@@ -85,12 +85,7 @@ export default function NativeProductPreview(props: Props) {
               s={s}
               p={p}
               data={data}
-              money={(value) =>
-                new Intl.NumberFormat(locale, {
-                  style: "currency",
-                  currency: p.currency ?? "EUR",
-                }).format(value)
-              }
+              currency={p.currency ?? "EUR"}
               tier={tier}
               groups={[
                 ...new Set(

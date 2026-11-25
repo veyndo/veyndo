@@ -1,90 +1,90 @@
 /* shop: availability-span styles. Source order is preserved by the entry stylesheet. */
-.availability span {
+.pdp-purchase .vy-sf-availability span {
   margin-left: auto;
   color: var(--muted);
   font-size: 10px;
 }
-.out-of-stock {
+.pdp-purchase .vy-sf-availability[data-empty] {
   color: #b14e38;
 }
-.pdp-buy {
+.pdp-purchase .vy-sf-buy {
   display: flex;
   gap: 12px;
   align-items: end;
   margin: 18px 0 9px;
 }
-.pdp-buy label {
+.pdp-purchase .vy-sf-buy label {
   display: grid;
   gap: 7px;
   font-size: 11px;
   color: var(--muted);
 }
-.pdp-buy input {
+.pdp-purchase .vy-sf-buy input {
   width: 90px;
 }
-.pdp-buy button {
+.pdp-purchase .vy-sf-buy button {
   flex: 1;
 }
-.pdp-purchase > small {
+.pdp-purchase .vy-sf-rules {
   font-size: 11px;
   color: var(--muted);
 }
-.tier-prices {
+.pdp-purchase .vy-sf-tiers {
   border: 1px solid var(--line);
   border-radius: 8px;
   padding: 18px;
   margin-top: 28px;
 }
-.tier-prices h3 {
+.pdp-purchase .vy-sf-tiers h3 {
   font-size: 13px;
   margin: 0 0 12px;
 }
-.tier-prices table {
+.pdp-purchase .vy-sf-tiers table {
   border-collapse: collapse;
   width: 100%;
   font-size: 12px;
   text-align: left;
 }
-.tier-prices th {
+.pdp-purchase .vy-sf-tiers th {
   color: var(--muted);
   font-weight: 500;
   padding: 6px 0;
 }
-.tier-prices td {
+.pdp-purchase .vy-sf-tiers td {
   padding: 9px 8px;
   border-top: 1px solid #edf1f5;
 }
-.tier-prices td:last-child {
+.pdp-purchase .vy-sf-tiers td:last-child {
   text-align: right;
 }
-.tier-prices td span {
+.pdp-purchase .vy-sf-tiers td span {
   color: #245272;
   font-size: 10px;
   margin-left: 8px;
 }
-.tier-prices tr.selected {
+.pdp-purchase .vy-sf-tiers tr[data-selected] {
   background: #edf4ff;
   color: #1555b5;
 }
-.delivery-note {
+.pdp-purchase .vy-sf-delivery-note {
   display: flex;
   gap: 14px;
   margin: 25px 0;
   border-top: 1px solid var(--line);
   padding-top: 22px;
 }
-.delivery-note > svg {
+.pdp-purchase .vy-sf-delivery-note > svg {
   color: var(--blue);
 }
-.delivery-note strong {
+.pdp-purchase .vy-sf-delivery-note strong {
   font-size: 12px;
 }
-.delivery-note p {
+.pdp-purchase .vy-sf-delivery-note p {
   font-size: 12px;
   color: var(--muted);
   margin: 8px 0;
 }
-.delivery-note small {
+.pdp-purchase .vy-sf-delivery-note small {
   color: var(--muted);
   font-size: 11px;
 }

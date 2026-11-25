@@ -36,7 +36,7 @@ export default function ProductPage({
   onAdd: (id: string, q: number) => void;
   onConfigure: import("../../shared/apps/AppSlot").Props["onConfigure"];
 }) {
-  const { s, money, locale } = useShopText();
+  const { s, locale } = useShopText();
   const [data, setData] = useState<Detail>();
   const [error, setError] = useState("");
   const [image, setImage] = useState(0);
@@ -198,7 +198,6 @@ export default function ProductPage({
                   s={s}
                   p={p}
                   data={data}
-                  money={money}
                   tier={tier}
                   groups={groups}
                   variantsLoading={variantsLoading}

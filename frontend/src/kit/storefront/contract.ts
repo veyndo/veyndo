@@ -4,7 +4,14 @@ import type { ComponentType, ReactNode } from "react";
 
 export type PartEvents = {
   /** A buyer changed a cart line's quantity (0 removes it); the server reprices. */
-  onQuantity?: (detail: { lineId: string; quantity: number }) => void;
+  onQuantity?: (detail: {
+    lineId: string;
+    quantity: number;
+    /** The buyer left the quantity field; hosts may snap to purchase steps. */
+    settled?: boolean;
+  }) => void;
+  /** A buyer chose a variant option. */
+  onSelect?: (detail: { group: string; value: string }) => void;
   /** A buyer opened a line, order or link inside the part. */
   onOpen?: (detail: { kind: "line" | "order" | "page"; id: string }) => void;
   /**
@@ -12,7 +19,9 @@ export type PartEvents = {
    * coupon forms). Web elements and MCP hosts leave them out.
    */
   renderLineDetail?: (lineId: string) => ReactNode;
-  slot?: (name: "beforeTotals" | "afterTotals" | "end") => ReactNode;
+  slot?: (
+    name: "beforeTotals" | "afterTotals" | "end" | "beforeBuy",
+  ) => ReactNode;
   /** A buyer asked to add a product; hosts decide how (cart API, chat, app). */
   onAddToCart?: (detail: { productId: string; quantity: number }) => void;
   /** A buyer asked to continue to checkout. */

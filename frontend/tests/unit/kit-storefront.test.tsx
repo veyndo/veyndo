@@ -113,6 +113,88 @@ describe("part components", () => {
     expect(onAddToCart).toHaveBeenCalledWith({ productId: "p-1", quantity: 2 });
   });
 
+  it("offers variants, quantity prices, delivery and a host-controlled quantity", () => {
+    const P = productSummary.Component;
+    const parsed = productSummary.parse({
+      locale: "de-DE",
+      product: {
+        ...product,
+        kicker: "Brand / Coats",
+        sku: "C-1",
+        rating: { average: 4, count: 2 },
+      },
+      shippingExtra: true,
+      groups: [
+        {
+          id: "size",
+          label: "Größe",
+          selected: "M",
+          options: [
+            { value: "m", label: "M", available: true, selected: true },
+            { value: "xl", label: "XL", available: false, selected: false },
+            { value: "l", label: "L", available: true, selected: false },
+          ],
+        },
+      ],
+      moreVariants: "more",
+      showRules: true,
+      tiers: [
+        { quantity: 1, unitPrice: 49.9, discountPercent: 0 },
+        { quantity: 10, unitPrice: 44.9, discountPercent: 10 },
+      ],
+      selectedTier: 1,
+      delivery: {
+        minDays: 2,
+        maxDays: 4,
+        method: "Standard",
+        country: "Deutschland",
+      },
+      quantity: 3,
+    });
+    if (!parsed.ok) throw Error(parsed.issues.join());
+    const onSelect = vi.fn(),
+      onOpen = vi.fn(),
+      onQuantity = vi.fn();
+    render(
+      <P
+        {...parsed.props}
+        onSelect={onSelect}
+        onOpen={onOpen}
+        onQuantity={onQuantity}
+        slot={(name) => <p>slot {name}</p>}
+      />,
+    );
+    expect(screen.getByRole("button", { name: "XL" })).toBeDisabled();
+    fireEvent.click(screen.getByRole("button", { name: "L" }));
+    expect(onSelect).toHaveBeenCalledWith({ group: "size", value: "l" });
+    fireEvent.click(screen.getByRole("button", { name: /Bewertungen/ }));
+    fireEvent.click(
+      screen.getByRole("button", { name: "Weitere Varianten laden" }),
+    );
+    expect(onOpen.mock.calls.map((c) => c[0].id)).toEqual([
+      "reviews",
+      "variants",
+    ]);
+    const input = screen.getByRole("spinbutton");
+    expect(input).toHaveValue(3);
+    fireEvent.change(input, { target: { value: "5" } });
+    expect(onQuantity).toHaveBeenLastCalledWith({
+      lineId: "p-1",
+      quantity: 5,
+      settled: false,
+    });
+    fireEvent.blur(input);
+    expect(onQuantity).toHaveBeenLastCalledWith({
+      lineId: "p-1",
+      quantity: 3,
+      settled: true,
+    });
+    expect(screen.getByText("Mengenpreise")).toBeInTheDocument();
+    expect(screen.getByText("2–4 Kalendertage · Standard")).toBeInTheDocument();
+    expect(screen.getByText("slot beforeBuy")).toBeInTheDocument();
+    expect(screen.getByText("SKU C-1")).toBeInTheDocument();
+  });
+
   it("disables buying when sold out", () => {
     const P = productSummary.Component;
     const props = productSummary.parse({ product: { ...product, stock: 0 } });

@@ -129,7 +129,7 @@
   color: var(--muted);
 }
 .shop-filters button[aria-pressed="true"],
-.variant-group button[aria-pressed="true"] {
+.pdp-purchase .vy-sf-variants button[aria-pressed="true"] {
   background: var(--shop-soft);
   border-color: var(--blue);
   color: var(--blue);
@@ -177,7 +177,7 @@
 .gallery-thumbs img {
   object-fit: cover;
 }
-.pdp-purchase h1 {
+.pdp-purchase .vy-sf-summary-body h1 {
   font-family: Georgia, "Times New Roman", serif;
   font-weight: 400;
   font-size: clamp(32px, 3vw, 48px);

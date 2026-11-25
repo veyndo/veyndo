@@ -118,7 +118,7 @@
   .gallery-thumbs {
     gap: 10px;
   }
-  .pdp-purchase h1 {
+  .pdp-purchase .vy-sf-summary-body h1 {
     font-size: 35px;
   }
   .pdp-details,
@@ -137,7 +137,7 @@
   .bag-body {
     padding: 18px;
   }
-  .availability span {
+  .pdp-purchase .vy-sf-availability span {
     font-size: 9px;
   }
   .collection-title > span {

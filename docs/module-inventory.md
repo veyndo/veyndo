@@ -1836,7 +1836,7 @@ This lists every checked-in source module in these roots, including files with n
 | [frontend/src/kit/storefront/CheckoutSteps.tsx](../frontend/src/kit/storefront/CheckoutSteps.tsx) | Checkout steps part: where the buyer is; it never implies that a payment is confirmed. |
 | [frontend/src/kit/storefront/PartForm.tsx](../frontend/src/kit/storefront/PartForm.tsx) | Builder form of a part's configuration, generated from its JSON Schema; hosts supply labels and special pickers. |
 | [frontend/src/kit/storefront/ProductCard.tsx](../frontend/src/kit/storefront/ProductCard.tsx) | Product card part: image, name, price with tax note and stock, linking to the product page. |
-| [frontend/src/kit/storefront/ProductSummary.tsx](../frontend/src/kit/storefront/ProductSummary.tsx) | Product summary part: the purchase area of a product page with image, price, delivery and add-to-cart. |
+| [frontend/src/kit/storefront/ProductSummary.tsx](../frontend/src/kit/storefront/ProductSummary.tsx) | Product summary part: the purchase area of a product page with price, variants, quantity prices, delivery and add-to-cart. |
 | [frontend/src/kit/storefront/contract.ts](../frontend/src/kit/storefront/contract.ts) | Part contracts: one typed schema per storefront part yields its React component, element, builder form and server checks. |
 | [frontend/src/kit/storefront/elements.tsx](../frontend/src/kit/storefront/elements.tsx) | Embeddable web elements from part contracts: validated `props` attributes, buyer intents as DOM events. |
 | [frontend/src/kit/storefront/embed.ts](../frontend/src/kit/storefront/embed.ts) | Standalone embed entry (`/assets/elements.js`): injects the kit styles once and defines every storefront part as a web element. |
@@ -2119,7 +2119,7 @@ This lists every checked-in source module in these roots, including files with n
 | [frontend/src/storefront/catalog/ProductDetails.tsx](../frontend/src/storefront/catalog/ProductDetails.tsx) | Product details render identically in Studio and the native storefront. |
 | [frontend/src/storefront/catalog/ProductGallery.tsx](../frontend/src/storefront/catalog/ProductGallery.tsx) | Shared native product gallery; selection changes only local presentation state. |
 | [frontend/src/storefront/catalog/ProductPage.tsx](../frontend/src/storefront/catalog/ProductPage.tsx) | Product family, gallery, context pricing and moderated customer reviews. |
-| [frontend/src/storefront/catalog/ProductPurchase.tsx](../frontend/src/storefront/catalog/ProductPurchase.tsx) | ProductPurchase: focused pdp-purchase view with explicit typed inputs and callbacks. |
+| [frontend/src/storefront/catalog/ProductPurchase.tsx](../frontend/src/storefront/catalog/ProductPurchase.tsx) | Product page purchase area: adapts the product detail to the kit product-summary part and keeps variant navigation, app slots and cart rules. |
 | [frontend/src/storefront/catalog/ProductQuestion.tsx](../frontend/src/storefront/catalog/ProductQuestion.tsx) | Read-only product questions cite only tenant-owned, explicitly published source documents. |
 | [frontend/src/storefront/catalog/ProductReviews.tsx](../frontend/src/storefront/catalog/ProductReviews.tsx) | ProductReviews: focused pdp-reviews view with explicit typed inputs and callbacks. |
 | [frontend/src/storefront/catalog/product-url.ts](../frontend/src/storefront/catalog/product-url.ts) | Stable, collision-free product addresses: SKU identity plus the inherited localized SEO slug. |
@@ -2191,7 +2191,7 @@ This lists every checked-in source module in these roots, including files with n
 | [frontend/src/storefront/styles/payment-instructions.css](../frontend/src/storefront/styles/payment-instructions.css) | Recipient details use the same payment surface, with wrapping for small embedded checkouts. |
 | [frontend/src/storefront/styles/saved-payments.css](../frontend/src/storefront/styles/saved-payments.css) | Saved-method choices and account revocation retain the storefront's shared tokens and native form controls. |
 | [frontend/src/storefront/styles/shop/01--root.css](../frontend/src/storefront/styles/shop/01--root.css) | shop: -root styles. Source order is preserved by the entry stylesheet. |
-| [frontend/src/storefront/styles/shop/02-shop-product-image.css](../frontend/src/storefront/styles/shop/02-shop-product-image.css) | shop: storefront theme of the kit product card image. Source order is preserved by the entry stylesheet. |
+| [frontend/src/storefront/styles/shop/02-shop-product-image.css](../frontend/src/storefront/styles/shop/02-shop-product-image.css) | shop: product card images and the product page purchase area. Source order is preserved by the entry stylesheet. |
 | [frontend/src/storefront/styles/shop/03-availability-span.css](../frontend/src/storefront/styles/shop/03-availability-span.css) | shop: availability-span styles. Source order is preserved by the entry stylesheet. |
 | [frontend/src/storefront/styles/shop/04-shop-stepper.css](../frontend/src/storefront/styles/shop/04-shop-stepper.css) | shop: text buttons, checkout selection and disclosures. Source order is preserved by the entry stylesheet. |
 | [frontend/src/storefront/styles/shop/05-shop-grid-comparison.css](../frontend/src/storefront/styles/shop/05-shop-grid-comparison.css) | shop: shop-grid-comparison styles. Source order is preserved by the entry stylesheet. |

@@ -16,6 +16,7 @@ export {
   checkoutEvent,
   quantityEvent,
   openEvent,
+  selectEvent,
 } from "./elements";
 export { PartForm } from "./PartForm";
 export type { PartFormProps } from "./PartForm";

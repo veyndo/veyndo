@@ -1,4 +1,4 @@
-/* shop: storefront theme of the kit product card image. Source order is preserved by the entry stylesheet. */
+/* shop: product card images and the product page purchase area. Source order is preserved by the entry stylesheet. */
 .vy-sf-card .vy-sf-card-media {
   display: block;
   position: relative;
@@ -156,18 +156,18 @@
   font-size: 10px;
   padding: 7px 0;
 }
-.pdp-purchase h1 {
+.pdp-purchase .vy-sf-summary-body h1 {
   font-size: 40px;
   letter-spacing: -1.5px;
   line-height: 1.1;
   font-weight: 550;
   margin: 16px 0;
 }
-.pdp-purchase > p {
+.pdp-purchase .vy-sf-description {
   color: var(--muted);
   line-height: 1.75;
 }
-.rating-link {
+.pdp-purchase .vy-sf-rating {
   font-size: 12px !important;
   color: var(--muted);
   background: none;
@@ -175,49 +175,49 @@
   padding: 0;
   min-height: 36px;
 }
-.rating-link span {
+.pdp-purchase .vy-sf-rating span {
   color: #bd7c26;
   letter-spacing: 1px;
   margin-right: 8px;
 }
-.pdp-price {
+.pdp-purchase .vy-sf-price {
   margin: 26px 0 22px;
 }
-.pdp-price strong {
+.pdp-purchase .vy-sf-price strong {
   font-size: 33px;
   letter-spacing: -1px;
 }
-.pdp-price del {
+.pdp-purchase .vy-sf-price s {
   color: var(--muted);
   margin-left: 12px;
 }
-.pdp-price small {
+.pdp-purchase .vy-sf-price small {
   display: block;
   margin-top: 7px;
   color: var(--muted);
   font-size: 12px;
 }
-.variant-group {
+.pdp-purchase .vy-sf-variants {
   padding: 0;
   border: 0;
   margin: 25px 0;
 }
-.variant-group legend {
+.pdp-purchase .vy-sf-variants legend {
   font-size: 13px;
   font-weight: 650;
   margin-bottom: 12px;
 }
-.variant-group legend span {
+.pdp-purchase .vy-sf-variants legend span {
   font-weight: 400;
   color: var(--muted);
   margin-left: 10px;
 }
-.variant-group > div {
+.pdp-purchase .vy-sf-variants > div {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
 }
-.variant-group button {
+.pdp-purchase .vy-sf-variants button {
   border: 1px solid var(--line);
   background: #fff;
   border-radius: 6px;
@@ -229,31 +229,31 @@
   gap: 5px;
   align-items: center;
 }
-.variant-group button[aria-pressed="true"] {
+.pdp-purchase .vy-sf-variants button[aria-pressed="true"] {
   border-color: var(--blue);
   background: #edf4ff;
   color: #1458be;
 }
-.swatch {
+.pdp-purchase .vy-sf-swatch {
   display: inline-block;
   width: 14px;
   height: 14px;
   border-radius: 50%;
   border: 1px solid #0002;
 }
-.swatch-terracotta {
+.vy-sf-swatch[data-swatch="terracotta"] {
   background: #b57858;
 }
-.swatch-sage {
+.vy-sf-swatch[data-swatch="sage"] {
   background: #879299;
 }
-.swatch-natural {
+.vy-sf-swatch[data-swatch="natural"] {
   background: #d7cfbc;
 }
-.swatch-dark {
+.vy-sf-swatch[data-swatch="dark"] {
   background: #545754;
 }
-.availability {
+.pdp-purchase .vy-sf-availability {
   display: flex;
   align-items: center;
   gap: 7px;
@@ -261,7 +261,7 @@
   color: #356282;
   margin-top: 25px;
 }
-.availability i {
+.pdp-purchase .vy-sf-availability i {
   width: 6px;
   height: 6px;
   border-radius: 50%;
@@ -274,4 +274,20 @@
   font-size: 14px;
   line-height: 1.6;
   overflow-wrap: anywhere;
+}
+/* The storefront theme on the kit product-summary part of the product page. */
+.pdp-purchase .vy-sf-summary,
+.pdp-purchase .vy-sf-summary-body {
+  display: block;
+}
+.pdp-purchase .vy-sf-description {
+  margin: 1em 0;
+}
+.pdp-purchase .vy-sf-kicker {
+  font-size: 11px;
+  font-weight: 650;
+  letter-spacing: 2px;
+}
+.pdp-purchase .vy-sf-more {
+  margin-bottom: 12px;
 }

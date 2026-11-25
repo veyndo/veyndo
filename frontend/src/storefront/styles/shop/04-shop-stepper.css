@@ -92,7 +92,7 @@
   .shop-hero {
     gap: 30px;
   }
-  .pdp-purchase h1 {
+  .pdp-purchase .vy-sf-summary-body h1 {
     font-size: 32px;
   }
   .pdp-reviews,

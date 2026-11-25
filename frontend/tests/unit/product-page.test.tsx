@@ -112,7 +112,7 @@ it.each(["open", "completed"])(
       finishRefresh!();
     });
     await screen.findByText("Refreshed context price", {
-      selector: ".pdp-purchase > p:not(.shop-kicker)",
+      selector: ".vy-sf-description",
     });
     expect(screen.getByRole("textbox", { name: "Engraving" })).toHaveValue(
       "Made for you",
@@ -238,7 +238,7 @@ it("switches gallery/variants, applies normalized quantity and displays authorit
   fireEvent.change(quantity, { target: { value: "5" } });
   fireEvent.blur(quantity);
   expect(quantity).toHaveValue(4);
-  expect(document.querySelector(".pdp-price strong")).toHaveTextContent(
+  expect(document.querySelector(".vy-sf-price strong")).toHaveTextContent(
     "€40.00",
   );
   await user.click(screen.getByRole("button", { name: /Add to/i }));
