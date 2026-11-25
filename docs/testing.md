@@ -565,6 +565,183 @@ alone with `python3 scripts/verify_integration.py --container <postgres> --only
 browser_journeys` after `cargo build --workspace --bins` and a frontend build. A
 failing journey leaves a screenshot in `artifacts/browser-journeys/`.
 
+## Component test suite (phase 7)
+
+Phase 7 of [the component plan](plans/2026-11-19-component-architecture.md#phase-7-test-suite)
+adds test sets beside the per-function domain tests. Each is listed with what it proves.
+
+### Property tests
+
+`proptest` (dev-dependency only; `scripts/testing/workspace_boundaries.py` refuses it as
+a normal or build dependency) generates inputs for 37 properties in
+`components/<name>/tests/properties.rs` and `components/marketing/src/store/promotion_property_tests.rs`.
+Where a Lean property exists the test names it and states the same claim on the compiled
+Rust; the others are open proof obligations of phase 8 tested here first.
+
+| Crate | Properties |
+| --- | --- |
+| pricing (16) | currency scale bound; decimal text ↔ minor units bijection for every `i64` and scale; parsing refuses a wrong scale; half-away-from-zero rounding against an integer model; scaling error at most half a minor unit; checked addition exact or refused, never across currencies; float wire amounts round-trip in the exact range; negative/non-finite amounts have no minor units; `discount_cap` within base, requested, idempotent, monotone; discount allocation conserves cents, never takes a line below zero or above itself, monotone in the request; `amount_sum` exact or saturating and commutative; net plus tax equals gross; `math_round` idempotent, symmetric, within half a unit; quote totals add up for net and gross quotes; a line price is the rounded unit times the quantity, deterministic, tax within the gross |
+| inventory (5) | `stock_admissible` exact; any sequence of reservations and releases keeps stock non-negative, conserves units, keeps every order within what it ordered, and releasing all restores the opening stock; inventory batches aligned and positive; reorder ceiling; an admitted supplier offer is never above the ceiling |
+| orders (6) | every state reached from `placed` in a valid (app-extended) machine is listed and terminal states have no edge; validation admits only closed reachable machines; terminal orders refuse every action, including fulfilment and payment; the cancellation guard agrees with the blocker; completion needs payment and delivery; manual payments move only pending/authorized to paid |
+| payments (6) | exactly the listed ledger transitions are admitted; no walk returns money to a pre-capture state; captures stay within the authorization and refunds within the capture over any request sequence; provider refund totals; wire amounts round-trip and are never negative |
+| checkout (2) | the cart quote's total is the sum of its line totals (gross) or lines plus tax (net), net plus tax is the gross, the same cart gives the same quote; normalized quantities are on the step grid |
+| marketing (2) | applied promotions stay within their base: no negative total, line or discount and no line rises; an exclusive promotion ends the chain and free shipping changes no amount |
+
+Run them with `cargo test -p <crate> --test properties` (marketing: `cargo test -p
+veyndo-marketing --lib promotion`). The order total's shipping part is added by the
+checkout service (`service/delivery.rs`), not by a domain function, so the quote property
+covers lines and tax; shipping is covered by the HTTP contract and checkout suites.
+
+### Store isolation under forced row security
+
+`store_isolation` (provider group) runs on the isolated suite database with a dedicated
+login that is `NOSUPERUSER NOBYPASSRLS`, owns no table and has only row privileges, as the
+production runtime role.
+
+1. `tests/store_isolation.rs` calls component store functions through the scoped pool:
+   it writes under shop A (outbox event, webhook receipt, product, stock reservation,
+   price job, customer session; operator limits with system authority) and proves that
+   under shop B the same functions read nothing (`exists`, `queued`, `find`, `valid`,
+   cart locks of checkout, B2B, POS and marketing, orders, roles, settings, locale) and
+   change nothing (updates affect no row, releases leave the reservation held, every
+   insert for A is refused by row security). Fifteen components' stores take part.
+2. A sweep over every tenant table each component declares in `components.json` (135
+   tables in 16 components): under shop B no row of another shop is visible and an update
+   or delete aimed at a holding shop touches no row; under that shop a row cannot be moved
+   to another shop (row security `WITH CHECK`, SQLSTATE 42501). Every tenant table must
+   force row security and belong to a component.
+3. Negative control: a `BYPASSRLS` login sees shop A's products under the same probe.
+
+On an isolated run only seeded tables hold rows, so update, delete and move probes are
+meaningful for the tables that report "hold shop rows" (35 of 135 on the 25 November run);
+the visibility probe applies to all. In the complete registry the suite runs after the
+HTTP suites have filled the database.
+
+### Port contract tests
+
+`crates/port-contracts` (`veyndo-port-contracts`) holds one contract set per port and an
+in-memory test adapter that meets it. The crate's own tests run every set against its
+adapter; `src/port_contracts_tests.rs` and `src/payments/host_contract_tests.rs` run the
+same sets against the server's real implementations (`cargo test --bin veyndo contract`).
+A mirror repository depends on the crate and calls the same public functions with its
+own implementation.
+
+| Port | Contract | Test adapter | Real implementation |
+| --- | --- | --- | --- |
+| `veyndo_shop::ports::SettingsGuards::condition` | admits an always-valid condition; refuses unknown, non-string or missing types, non-objects and an unknown type nested in a container | `Conditions` | `commerce::Guards` |
+| `veyndo_payments::ports::Host::service` | an unconfigured provider version is refused in every environment; a configured one answers the same service every time | `Services` | `payments::host::PaymentHost` |
+| `veyndo_intelligence::ports::PublicEgress` | no client for plain HTTP, loopback, private, link-local, metadata or `localhost` destinations | `Offline` | `assets::Egress` |
+| `veyndo_app_platform::ports::RecordRules` (pure methods) | records of an app without rules are stored as given, admitted, have no planning format, and normalizing is idempotent; an app with rules refuses its invalid fields and publishes a planning format | `NoRules` | `apps::data::BUNDLED` (site builder) |
+
+Open: the transaction-bound port methods (`lock`, `capture`, `validate`, `captured`, …) and
+the ports whose real implementation needs the server's `App` with a database (pricing,
+inventory, checkout, orders, identity, customers, B2B, POS, studio, intelligence hosts).
+The server is a binary crate, so its implementations are reachable only from its own unit
+tests; running these sets needs a database-backed `App` fixture in those tests.
+
+### HTTP and MCP contracts generated from the schema
+
+`scripts/testing/schema_contracts.py` reads the route catalogue
+(`frontend/src/kit/api/generated/routes.ts`, generated by `scripts/api_catalogue.py`) and the
+operation contracts (`extensions/sdk/generated/operations.json`, generated by
+`scripts/testing/operation_contracts.py`) and builds one valid and one invalid case per
+route and per MCP tool. Its own check (tooling suite `testing/schema_contracts`) proves
+every generated valid tool input satisfies its schema and every invalid one breaks it,
+with negative controls. The HTTP suite `schema_contracts` runs the cases against the
+running server on two disposable shops (session-ending routes last):
+
+- HTTP valid: the route with path parameters set to a probe value, the shop's credential
+  and, for body methods, `{}`. Invalid: a malformed JSON body for body methods, otherwise
+  an invalid bearer credential. Six POST routes read no body (listed with reasons in
+  `NO_BODY`; the list fails when a route leaves the catalogue) and get the credential case.
+- MCP valid: the minimal arguments the input schema requires. Invalid: a missing required
+  property, an unknown property of a closed schema, or a wrongly typed property.
+- Assertions: no 5xx, except the documented 502/503/504 problem (retryable or
+  `provider_unavailable`) of the dependencies the suite leaves offline; a malformed body is
+  refused with 4xx; an invalid credential gets 4xx on every `/api/` route; every invalid
+  MCP input is refused (JSON-RPC -32602 or a tool error with a 4xx problem).
+
+25 November run: 350 routes (valid: 92 2xx, 251 4xx, 7 offline 503 from the unconfigured
+identity broker, checkout identity and PayPal webhooks; invalid: 348 refused with 4xx), 212 tools (all
+212 invalid inputs refused; of the valid inputs 50 succeed, 160 are refused for unknown
+probe IDs or missing setup, 2 report the offline model service). No unexplained server error.
+
+### Coverage floors per component
+
+`coverage_report.py` maps every measured file to its component through `components.json`
+(component UI under `components/<name>/ui/` counts for that component) and enforces a
+line floor per component and scope (`components` in `coverage-policy.json`), beside the
+global floors. A component measured without a floor, a floor with nothing measured, and
+a value below its floor each fail; `--ratchet` raises floors to the measured values and
+never lowers one. `--frontend-only` (every PR) enforces the frontend floors; the full
+report (nightly) enforces both. Tests with negative controls are in
+`scripts/testing/tooling_tests.py` (`ComponentCoverageFloors`); on the real policy,
+dropping one POS module to zero hits fails the gate.
+
+Floors of 25 November (Rust: workspace unit, property and contract tests instrumented
+with `-C instrument-coverage` and LLVM 23, so the nightly run with the integration suites
+measures more; frontend: vitest over this tree):
+
+| Component | Rust lines | UI lines | | Component | Rust lines | UI lines |
+| --- | --- | --- | --- | --- | --- | --- |
+| apps | 41.70 | 69.53 | | inventory | 70.90 | – |
+| automation | 75.13 | – | | marketing | 47.77 | 66.80 |
+| b2b | 8.02 | 54.25 | | orders | 59.90 | 63.14 |
+| catalog | 47.36 | 83.19 | | payments | 32.85 | 85.27 |
+| checkout | 34.33 | 81.91 | | pos | 28.56 | 46.93 |
+| core | 60.92 | – | | pricing | 81.57 | – |
+| customers | 2.81 | 73.50 | | protocols | 42.34 | – |
+| host | 10.56 | – | | shipping | 75.58 | – |
+| identity | 21.52 | 73.59 | | shop | 52.92 | 61.79 |
+| inference | 59.80 | – | | studio | 21.43 | 74.71 |
+| intelligence | 18.68 | 79.27 | | | | |
+
+Low Rust values (customers, B2B, host) are code reached only through the HTTP suites;
+the nightly measurement covers it, and its first run should be ratcheted.
+
+### Mutation testing of `domain/` (on demand)
+
+`scripts/testing/mutation_domain.py` runs `cargo-mutants` (27.1.0, installed with
+`cargo install --locked --root target/tools cargo-mutants`) on `src/domain/**` of pricing,
+inventory, checkout, payments and orders against each crate's own tests, in parallel
+copies of the tree (`--jobs`, default 8; about 20 minutes for all five on 32 cores).
+Every surviving mutant must be listed with its reason in
+`scripts/testing/mutation-survivors.json`; an unlisted survivor fails and so does a listed
+one that is now caught. It is too slow for every run and, like the coverage audit, is
+not in the suite registry: run it after changing `domain/` code.
+
+```sh
+python3 scripts/testing/mutation_domain.py [--crates pricing ...] [--jobs 12]
+python3 scripts/testing/mutation_domain.py --check-only   # evaluate artifacts/mutants again
+```
+
+Run of 25 November 2026 (1,137 mutants):
+
+| Crate | Mutants | First run: caught / survived | After the new tests: caught / survived | Unviable |
+| --- | --- | --- | --- | --- |
+| pricing | 341 | 227 / 101 | 325 / 3 | 13 |
+| inventory | 51 | 45 / 6 | 51 / 0 | 0 |
+| checkout | 192 | 123 / 67 | 186 / 4 | 2 |
+| payments | 293 | 255 / 35 | 289 / 1 | 3 |
+| orders | 260 | 224 / 34 | 256 / 2 | 2 |
+
+The killing tests are `components/<crate>/tests/domain_mutants.rs` (52 tests). They pin
+what the first run showed untested: inclusive limits of every validator, each clause of
+`||`/`&&` chains on its own, `calculate`'s net input, duplicate tax rates and
+list/regulation/reference prices, exact consumer and business quote amounts with app fees,
+tiers, a 7 % product and a zero-decimal currency, IBAN bounds with valid checksums, and
+order-machine limits. The ten remaining survivors, with reasons in the survivor list:
+
+- pricing `math_round` (3): equivalent; the exact-hit correction is redundant because the
+  half-unit check after it adds the same unit.
+- checkout `cart_quote` (4): equivalent; `calculated: true` and `round_for_net: false` equal
+  the defaults, and the cash interval `10^-decimals` never changes an amount already
+  rounded to the decimals (line price and app fee).
+- payments IBAN checksum (1): equivalent; adding 97 instead of reducing keeps the residue,
+  and a reducing digit step always follows.
+- orders (2): a re-encoded logo of exactly 2 MiB cannot be constructed; the NUL arm of the
+  PDF text encoder is defensive (NUL is refused upstream) and observable only in a PDF.
+
 ## Repeatable checks
 
 From the repository root:

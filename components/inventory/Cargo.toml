@@ -12,3 +12,6 @@ sqlx.workspace = true
 veyndo-catalog = { path = "../catalog" }
 veyndo-core = { path = "../core" }
 veyndo-pricing = { path = "../pricing" }
+
+[dev-dependencies]
+proptest.workspace = true

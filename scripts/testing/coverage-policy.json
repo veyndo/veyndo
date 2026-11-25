@@ -21,5 +21,84 @@
     "frontend/src/admin/shell/requests.ts",
     "frontend/src/admin/shell/useServerHealth.ts",
     "frontend/src/shared/ui/WorkspaceBoundary.tsx"
-  ]
+  ],
+  "components": {
+    "apps": {
+      "frontend": 69.52,
+      "rust": 41.69
+    },
+    "automation": {
+      "rust": 75.13
+    },
+    "b2b": {
+      "frontend": 54.25,
+      "rust": 8.02
+    },
+    "catalog": {
+      "frontend": 83.19,
+      "rust": 47.35
+    },
+    "checkout": {
+      "frontend": 81.9,
+      "rust": 34.32
+    },
+    "core": {
+      "rust": 60.92
+    },
+    "customers": {
+      "frontend": 73.5,
+      "rust": 2.81
+    },
+    "host": {
+      "rust": 10.55
+    },
+    "identity": {
+      "frontend": 73.58,
+      "rust": 21.51
+    },
+    "inference": {
+      "rust": 59.8
+    },
+    "intelligence": {
+      "frontend": 79.26,
+      "rust": 18.67
+    },
+    "inventory": {
+      "rust": 70.89
+    },
+    "marketing": {
+      "frontend": 66.8,
+      "rust": 47.76
+    },
+    "orders": {
+      "frontend": 63.14,
+      "rust": 59.9
+    },
+    "payments": {
+      "frontend": 85.27,
+      "rust": 32.84
+    },
+    "pos": {
+      "frontend": 46.92,
+      "rust": 28.55
+    },
+    "pricing": {
+      "rust": 81.56
+    },
+    "protocols": {
+      "rust": 42.33
+    },
+    "shipping": {
+      "rust": 75.57
+    },
+    "shop": {
+      "frontend": 61.78,
+      "rust": 52.91
+    },
+    "studio": {
+      "frontend": 74.71,
+      "rust": 21.42
+    }
+  },
+  "component_note": "Per-component line floors (Rust sources and component UI), mapped through components.json and set to the values measured on 25 November 2026: Rust from the workspace unit, property and contract tests (the nightly run adds the integration suites and measures more), frontend from vitest. They only rise: scripts/testing/coverage_report.py --ratchet."
 }

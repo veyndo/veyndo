@@ -24,7 +24,7 @@ OWNERS.update({'veyndo-core': ROOT / 'components/core', 'veyndo-pricing': ROOT /
                'veyndo-intelligence': ROOT / 'components/intelligence',
                'veyndo-studio': ROOT / 'components/studio',
                'veyndo-app-platform': ROOT / 'components/apps'})
-OWNERS.update({'veyndo': ROOT, 'veyndo-migration': ROOT / 'extensions/apps/migration',
+OWNERS.update({'veyndo': ROOT, 'veyndo-port-contracts': ROOT / 'crates/port-contracts', 'veyndo-migration': ROOT / 'extensions/apps/migration',
                'veyndo-marketplaces': ROOT / 'extensions/apps/marketplaces',
                'veyndo-app-storage': ROOT / 'extensions/services/app-storage',
                'veyndo-app-model': ROOT / 'extensions/services/app-storage/model',
@@ -46,6 +46,7 @@ OWNERS.update({'veyndo': ROOT, 'veyndo-migration': ROOT / 'extensions/apps/migra
                'veyndo-provider-klaviyo': ROOT / 'extensions/apps/klaviyo',
                'veyndo-provider-vercel': ROOT / 'extensions/apps/vercel'})
 ALLOWED = {
+    'veyndo-port-contracts': {'veyndo-core', 'veyndo-shop', 'veyndo-payments', 'veyndo-intelligence', 'veyndo-app-platform', 'veyndo-app-model'},
     'veyndo-app-model': set(),
     'veyndo-app-runtime': {'veyndo-app-model'},
     'veyndo-app-storage': {'veyndo-app-model'},
@@ -99,6 +100,7 @@ ALLOWED = {
 # when a manifest renames sqlx as something innocuous. New dependencies need an
 # explicit architecture decision, including build/dev/optional/target variants.
 EXTERNAL = {
+    'veyndo-port-contracts': {'serde_json', 'reqwest', 'sqlx', 'tokio'},
     'veyndo-app-model': {'serde', 'serde_json', 'chrono', 'cron', 'sha2', 'semver', 'url'},
     'veyndo-app-runtime': {'wasmtime', 'wat', 'sha2', 'serde_json'},
     'veyndo-app-storage': {'sqlx', 'serde_json', 'sha2', 'tokio', 'chrono', 'base64', 'ring', 'zeroize'},
@@ -146,6 +148,9 @@ EXTERNAL = {
                          'base64', 'sha2', 'sqlx', 'tracing', 'image'},
 }
 
+# Reviewed test-only crates: admitted as dev-dependencies only, never in a production build.
+TEST_ONLY = {'proptest'}
+
 
 def check(packages):
     names = {p['name'] for p in packages}
@@ -161,6 +166,8 @@ def check(packages):
         allowed = ALLOWED[name] | EXTERNAL[name]
         for dependency in package['dependencies']:
             dep = dependency['name']
+            if dependency.get('kind') == 'dev' and dep in TEST_ONLY:
+                continue
             assert dep in allowed, (name, 'Unreviewed dependency capability', dep)
             if dep == 'veyndo-app-authority':
                 if name == 'veyndo-cognition':

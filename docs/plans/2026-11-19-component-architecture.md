@@ -1092,13 +1092,34 @@ Each component carries its own tests; the suite runner composes them.
 - [x] Unit tests for every function in `domain/`. Each of the 216 public domain
       functions of the components is exercised by a test in its own file; private
       helpers are reached through them.
-- [ ] Property tests for money, stock, discounts and state machines.
-- [ ] Store tests per component against a real, isolated PostgreSQL database,
+- [x] Property tests for money, stock, discounts and state machines.
+      R2 (25 Nov): 37 `proptest` properties in pricing, inventory, orders, payments,
+      checkout and marketing mirror the Lean properties and add the open ones (money
+      scaling and rounding, quote total = lines + tax, reservations never below zero and
+      release restores, discounts within base, reachable and terminal order states).
+      The shipping part of the order total is added in the checkout service, not in
+      `domain/`; see `docs/testing.md#property-tests`.
+- [x] Store tests per component against a real, isolated PostgreSQL database,
       including tenant isolation under forced row security.
+      R2 (25 Nov): registered suite `store_isolation` on a non-owner `NOBYPASSRLS` login:
+      store functions of 15 components write under shop A and see or change nothing
+      under shop B; a sweep covers all 135 tenant tables of 16 components (visibility,
+      update, delete, row moves) with a `BYPASSRLS` negative control. Store functions are
+      sampled per component, not all 999.
 - [ ] Port contract tests: one test set runs against the real implementation and
       against the test adapter, so the mirror repositories test the same behaviour.
-- [ ] HTTP and MCP contract tests generated from the schema: every route and tool
+      R2 (25 Nov): crate `veyndo-port-contracts` with sets and adapters for four ports
+      (`SettingsGuards::condition`, payments `Host::service`, `PublicEgress`, the pure
+      `RecordRules` methods), run against adapters and the server's implementations.
+      Open: transaction-bound methods and ports whose real implementation needs a
+      database-backed `App` in the server's unit tests.
+- [x] HTTP and MCP contract tests generated from the schema: every route and tool
       has a valid and an invalid case.
+      R2 (25 Nov): `scripts/testing/schema_contracts.py` generates them from the route
+      catalogue and the operation contracts; suite `schema_contracts` runs 350 routes and
+      212 tools: no unexplained 5xx, malformed JSON, invalid credentials and every
+      schema-invalid tool input refused. HTTP request bodies have no schema yet, so the
+      HTTP valid case is a well-formed request, not a semantically valid one.
 - [x] Browser journeys for the admin and the storefront: purchase, refund, product
       edit while orders arrive, app installation, a non-English main language.
       G33 (25 Nov): the registered suite `browser_journeys` runs all five in Chromium
@@ -1109,8 +1130,16 @@ Each component carries its own tests; the suite runner composes them.
 - [x] Migration tests: fresh installation (`schema_baseline`, equal to the last
       incremental release). Upgrade and legacy-import tests are not needed by the
       decision of 25 November; the setup refuses a database of an earlier release.
-- [ ] Mutation testing on `domain/`; a surviving mutant is a missing test.
-- [ ] Coverage floors per component instead of one global floor.
+- [x] Mutation testing on `domain/`; a surviving mutant is a missing test.
+      R2 (25 Nov): `scripts/testing/mutation_domain.py` (on demand, `cargo-mutants`) on
+      pricing, inventory, checkout, payments and orders: 1,137 mutants; the first run left
+      243 survivors, 52 new tests kill all but 10, which are listed with reasons
+      (equivalent or not constructible) in `scripts/testing/mutation-survivors.json`.
+- [x] Coverage floors per component instead of one global floor.
+      R2 (25 Nov): `coverage_report.py` enforces line floors per component (Rust and
+      component UI, mapped through `components.json`) beside the global floors, with
+      `--ratchet` (only rises) and negative controls. Floors are the values measured on
+      25 November from workspace tests and vitest; ratchet after the first nightly run.
 - [x] The suite runner reports every failing suite of a run, not only the first.
 
 ## Phase 8: proofs

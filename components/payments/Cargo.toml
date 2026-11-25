@@ -22,3 +22,6 @@ veyndo-inventory = { path = "../inventory" }
 veyndo-orders = { path = "../orders" }
 axum.workspace = true
 veyndo-identity = { path = "../identity" }
+
+[dev-dependencies]
+proptest.workspace = true

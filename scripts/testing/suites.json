@@ -64,7 +64,8 @@
     "admin_creation",
     "agentic_commerce",
     "migration_assistant",
-    "product_models"
+    "product_models",
+    "schema_contracts"
   ],
   "providers": [
     "outbox_subscribers",
@@ -101,7 +102,8 @@
     "grid_directory",
     "visual_workspace",
     "browser_journeys",
-    "schema_baseline"
+    "schema_baseline",
+    "store_isolation"
   ],
   "browser_contracts": [
     "analytics",
@@ -118,6 +120,7 @@
     "money_boundary_differential",
     "testing/test_integration_partitions",
     "testing/test_partition_coverage",
-    "testing/component_mirrors_check"
+    "testing/component_mirrors_check",
+    "testing/schema_contracts"
   ]
 }
