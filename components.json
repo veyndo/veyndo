@@ -703,7 +703,7 @@
         "translation_jobs": "write: agent runs cancel translation jobs they started (agent_runs.rs)"
       },
       "glob_imports": 0,
-      "untyped_access": 49,
+      "untyped_access": 0,
       "sql_outside_store": 0,
       "runtime_sql": 16
     },

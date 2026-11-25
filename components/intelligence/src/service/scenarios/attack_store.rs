@@ -9,7 +9,7 @@ use veyndo_core::RequestContext;
 use veyndo_core::Result;
 use veyndo_core::State;
 use veyndo_core::bad;
-use veyndo_core::document::{lenient, view};
+use veyndo_core::document::{lenient, merge, view};
 use veyndo_core::shop_scope::channel as channel_id;
 use veyndo_core::shop_scope::header;
 const SCOPES: [&str; 7] = [
@@ -70,11 +70,14 @@ pub async fn latest<H: AgentHost>(host: &H, h: &RequestContext, t: &str) -> Resu
     let mut report = row.report;
     let digest = view::<SavedDigest>(&report).configuration_digest;
     let current = evidence::capture(host, t).await;
-    report["savedAt"] = json!(row.saved_at);
-    report["configurationReview"] = json!(evidence::review(
+    merge(&mut report, json!({ "savedAt": row.saved_at }))?;
+    merge(
+        &mut report,
+        json!({ "configurationReview": evidence::review(
         &json!({"schemaVersion":1,"startedDigest":digest,"finishedDigest":digest}),
         current.as_deref(),
-    ));
+    ) }),
+    )?;
     Ok(report)
 }
 

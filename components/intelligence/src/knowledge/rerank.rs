@@ -3,7 +3,7 @@ use super::PgPool;
 use crate::store::product_reads::texts;
 use serde::Deserialize;
 use serde_json::{Value, json};
-use veyndo_core::document::{lenient, view};
+use veyndo_core::document::{lenient, merge, view};
 
 /// The product a search hit names.
 #[derive(Deserialize, Default)]
@@ -72,8 +72,15 @@ pub async fn apply(tenant: &str, query: &str, hits: &mut [Value], db: &PgPool) -
         .zip(hits.iter().cloned())
         .collect::<Vec<_>>();
     scored.sort_by(|a, b| b.0.total_cmp(&a.0));
-    for (slot, (score, mut hit)) in hits.iter_mut().zip(scored) {
-        hit["rerankScore"] = json!(score);
+    let mut reranked = Vec::with_capacity(scored.len());
+    for (score, mut hit) in scored {
+        // A hit that is not an object cannot carry its score; keep the original order then.
+        if merge(&mut hit, json!({ "rerankScore": score })).is_err() {
+            return false;
+        }
+        reranked.push(hit);
+    }
+    for (slot, hit) in hits.iter_mut().zip(reranked) {
         *slot = hit;
     }
     true

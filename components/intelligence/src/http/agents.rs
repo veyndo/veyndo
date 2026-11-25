@@ -3,6 +3,7 @@ use crate::service::{agent_controls, agent_runs, conversations, retrieval};
 use axum::Json;
 use axum::extract::{Path, State as Shared};
 use serde_json::{Value, json};
+use veyndo_core::document::merge;
 use veyndo_core::{RequestContext, Result, State};
 use veyndo_identity::{merchant, permit};
 
@@ -33,7 +34,7 @@ pub async fn cancel(
     Path(id): Path<String>,
     Json(mut v): Json<Value>,
 ) -> Result<Json<Value>> {
-    v["id"] = json!(id);
+    merge(&mut v, json!({ "id": id }))?;
     Ok(Json(
         agent_runs::operate(&a, &h, "merchant.run.cancel", &v).await?,
     ))
@@ -45,7 +46,7 @@ pub async fn resume(
     Path(id): Path<String>,
     Json(mut v): Json<Value>,
 ) -> Result<Json<Value>> {
-    v["id"] = json!(id);
+    merge(&mut v, json!({ "id": id }))?;
     Ok(Json(
         agent_runs::operate(&a, &h, "merchant.run.resume", &v).await?,
     ))

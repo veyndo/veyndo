@@ -8,7 +8,7 @@ use crate::store::vectors as store;
 use serde::Deserialize;
 use serde_json::{Value, json};
 use veyndo_cognition::inference::budget::is_budgeted;
-use veyndo_core::document::{lenient, view};
+use veyndo_core::document::{lenient, merge, view};
 use veyndo_core::store::lease::Lease;
 use veyndo_core::{Result, State, bad};
 use veyndo_pricing::domain::catalog::Product;
@@ -40,10 +40,10 @@ pub async fn retrieve(m: Models<'_>, t: &str, q: &str) -> Result<Value> {
         && let Some(hits) = result.get_mut("hits").and_then(Value::as_array_mut)
     {
         let reranked = knowledge::rerank::apply(t, q, hits, &m.core.db).await;
-        result["reranked"] = json!(reranked);
+        merge(&mut result, json!({ "reranked": reranked }))?;
     }
-    result["embeddingModel"] = json!(model);
-    result["hasIndexedProducts"] = json!(indexed);
+    merge(&mut result, json!({ "embeddingModel": model }))?;
+    merge(&mut result, json!({ "hasIndexedProducts": indexed }))?;
     Ok(result)
 }
 /// One retrieval shared by the localized products of a prompt and the advisor's relevant graph.

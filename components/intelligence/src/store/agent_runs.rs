@@ -3,7 +3,7 @@ use serde::Deserialize;
 use serde_json::{Value, json};
 use sqlx::postgres::PgRow;
 use sqlx::{PgConnection, PgExecutor, Postgres, Row, Transaction};
-use veyndo_core::document::{lenient, view};
+use veyndo_core::document::{lenient, merge, view};
 use veyndo_core::{Error, Result, State, StatusCode, conflict};
 
 /// The lease a worker holds on one running task.
@@ -345,10 +345,15 @@ pub fn project(row: &TaskRun) -> Value {
     let steps = cp
         .as_object()
         .map_or(0, |o| o.keys().filter(|k| k.starts_with("model-")).count());
-    let scenario = request.get("scenario").map(|s| {
+    // A scenario request is an object; any other shape has no place for the steps and is not shown.
+    let scenario = request.get("scenario").and_then(|s| {
         let mut result = s.clone();
-        result["steps"] = view::<ScenarioCheckpoint>(cp).scenario_state.steps;
-        result
+        merge(
+            &mut result,
+            json!({ "steps": view::<ScenarioCheckpoint>(cp).scenario_state.steps }),
+        )
+        .ok()?;
+        Some(result)
     });
     json!({"taskId":row.id,"agentId":shown.agent_id,"channel":shown.channel,"state":state,"revision":row.run_revision,"completedModelSteps":steps,"scenario":scenario,"execution":execution,"error":row.run_error,"conversationId":row.conversation_id,"approvalRequired":!row.applied,"preview":if state=="ready" {row.proposal.clone()}else{Value::Null},"updatedAt":row.updated_text})
 }

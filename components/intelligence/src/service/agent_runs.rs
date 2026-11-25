@@ -78,7 +78,7 @@ pub const CAPABILITIES: &[(&str, &str)] = &[
 ];
 /// The input schema of a run operation.
 pub fn schema(name: &str) -> Option<Value> {
-    CAPABILITIES.iter().any(|(n,_)|*n==name).then(||json!({"type":"object","properties":{"requestId":{"type":"string","minLength":1,"maxLength":64},"id":{"type":"string","maxLength":64},"revision":{"type":"integer","minimum":1},"approve":{"type":"boolean"},"instruction":{"type":"string","minLength":1,"maxLength":4000},"inference":{"type":"object","properties":{"provider":{"type":"string","enum":["platform","ollama","openai","anthropic"]},"model":{"type":["string","null"],"maxLength":128}},"required":["provider"],"additionalProperties":false}},"required":if name=="merchant.run.create" {vec!["instruction"]}else if name=="merchant.run.status" {vec!["id"]}else{vec!["id","revision","approve"]},"additionalProperties":false})).map(|mut schema| { schema["properties"]["workspaceContext"] = context_schema(); schema })
+    CAPABILITIES.iter().any(|(n,_)|*n==name).then(||json!({"type":"object","properties":{"requestId":{"type":"string","minLength":1,"maxLength":64},"id":{"type":"string","maxLength":64},"revision":{"type":"integer","minimum":1},"approve":{"type":"boolean"},"instruction":{"type":"string","minLength":1,"maxLength":4000},"inference":{"type":"object","properties":{"provider":{"type":"string","enum":["platform","ollama","openai","anthropic"]},"model":{"type":["string","null"],"maxLength":128}},"required":["provider"],"additionalProperties":false},"workspaceContext":context_schema()},"required":if name=="merchant.run.create" {vec!["instruction"]}else if name=="merchant.run.status" {vec!["id"]}else{vec!["id","revision","approve"]},"additionalProperties":false}))
 }
 /// Queues a run after admission: shop agents live, request ID replay, backlog, conversation turn and the shared AI quota.
 pub async fn enqueue(
@@ -352,7 +352,7 @@ pub async fn operate(a: &State, h: &RequestContext, name: &str, v: &Value) -> Re
             && h.principal.agent_key.is_none()
             && let Some(views) = row.run_checkpoint.get("app-views")
         {
-            value["appViews"] = views.clone();
+            merge(&mut value, json!({ "appViews": views.clone() }))?;
         }
         return Ok(value);
     }
@@ -456,6 +456,32 @@ struct RunStatus {
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn run_schema_keeps_workspace_context_among_its_properties() {
+        for name in [
+            "merchant.run.create",
+            "merchant.run.status",
+            "merchant.run.cancel",
+        ] {
+            let schema = super::schema(name).unwrap();
+            let properties = schema["properties"].as_object().unwrap();
+            let mut keys = properties.keys().map(String::as_str).collect::<Vec<_>>();
+            keys.sort_unstable();
+            assert_eq!(
+                keys,
+                [
+                    "approve",
+                    "id",
+                    "inference",
+                    "instruction",
+                    "requestId",
+                    "revision",
+                    "workspaceContext"
+                ]
+            );
+            assert_eq!(properties["workspaceContext"], super::context_schema());
+        }
+    }
     use super::*;
     #[test]
     fn run_operations_have_closed_schemas() {

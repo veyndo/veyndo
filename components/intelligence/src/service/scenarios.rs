@@ -4,7 +4,7 @@ use crate::ports::AgentHost;
 use crate::store::product_reads::{private_sandbox, scenario_runs};
 use serde::Deserialize;
 use serde_json::{Value, json};
-use veyndo_core::document::{lenient, view};
+use veyndo_core::document::{lenient, merge, view};
 use veyndo_core::model_contract::validate_native;
 use veyndo_core::shop_scope::{channel as channel_id, header};
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad, conflict, hash};
@@ -157,7 +157,7 @@ pub async fn invoke<H: AgentHost>(
     if name == "merchant.scenario.probe" {
         let mut report = probes::run(host, h, &t).await?;
         attack_store::save(a, h, &t, &report).await?;
-        report["configurationReview"] = json!("current");
+        merge(&mut report, json!({ "configurationReview": "current" }))?;
         return Ok(report);
     }
     if name == "merchant.scenario.stock" {
@@ -293,7 +293,7 @@ pub async fn invoke<H: AgentHost>(
                     .configuration_evidence,
                 current.as_deref(),
             );
-            run["configurationReview"] = json!(review);
+            merge(run, json!({ "configurationReview": review }))?;
         }
     }
     Ok(json!({"id":input.id,"runs":runs,"synthetic":true,"execution":"native-commerce-api"}))
