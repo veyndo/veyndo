@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE b2b_approvals SET state=$3,revision=revision+1,data=data||jsonb_build_object('approverId',$4::text,'decidedAt',now()::text) WHERE tenant=$1 AND id=$2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "878e0568a9ef9f9375149f76866cdd3e1aa8a9d18093a8b3d0582725db6e5737"
+}

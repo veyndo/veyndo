@@ -3,10 +3,10 @@ use crate::domain::quote_lifecycle;
 use crate::ports::QuoteLifecycle;
 use crate::store::access::{access, guard_conn, identity, require};
 use crate::store::organization;
+use crate::store::{carts as cart_rows, quotes};
 use crate::types::model::OfferLine;
 use serde::Deserialize;
 use serde_json::{Value, json};
-use sqlx::Row;
 use veyndo_core::document::{lenient, view};
 use veyndo_core::shop_scope::{header, tenant};
 use veyndo_core::store::history_context::{context, customer_context};
@@ -58,14 +58,15 @@ pub async fn invoke(
     }
     if op == "quotes.merchant" {
         permit(h, "customers.pii")?;
-        let rows=sqlx::query("SELECT id,unit_id,buyer_id,state,revision,data FROM b2b_quotes WHERE tenant=$1 ORDER BY created_at DESC LIMIT 100").bind(&t).fetch_all(&mut *tx).await?;
+        let rows = quotes::latest(&mut tx, &t).await?;
         return Ok(json!({"elements":rows.iter().map(|r| wire(r, h, admin)).collect::<Vec<_>>()}));
     }
     if op == "quotes" {
         let unit = view::<QuoteInput>(v).unit_id.ok_or(bad("Unit required"))?;
         let policy = access(&mut tx, &t, &unit, customer.as_ref().unwrap()).await?;
         require(&policy, "quotes")?;
-        let rows=sqlx::query("SELECT id,unit_id,buyer_id,state,revision,data FROM b2b_quotes WHERE tenant=$1 AND unit_id=$2 AND buyer_id=$3 ORDER BY created_at DESC LIMIT 100").bind(&t).bind(&unit).bind(customer).fetch_all(&mut *tx).await?;
+        let buyer = customer.as_deref().unwrap_or_default();
+        let rows = quotes::of_buyer(&mut tx, &t, &unit, buyer).await?;
         return Ok(json!({"elements":rows.iter().map(|r| wire(r, h, admin)).collect::<Vec<_>>()}));
     }
     if ["quote.get", "quote.current"].contains(&op) {
@@ -77,28 +78,26 @@ pub async fn invoke(
     let input: QuoteInput = view(v);
     let id = input.id.as_deref().ok_or(bad("Quote required"))?;
     if !admin {
-        let metadata: Option<(String, String)> =
-            sqlx::query_as("SELECT unit_id,buyer_id FROM b2b_quotes WHERE tenant=$1 AND id=$2")
-                .bind(&t)
-                .bind(id)
-                .fetch_optional(&mut *tx)
-                .await?;
-        let (unit, buyer) =
-            metadata.ok_or(Error(StatusCode::NOT_FOUND, "Quote not found".into()))?;
+        let party = quotes::party(&mut tx, &t, id)
+            .await?
+            .ok_or(Error(StatusCode::NOT_FOUND, "Quote not found".into()))?;
+        let (unit, buyer) = (party.unit_id, party.buyer_id);
         if customer.as_deref() != Some(&buyer) {
             return Err(Error(StatusCode::NOT_FOUND, "Quote not found".into()));
         }
         let policy = access(&mut tx, &t, &unit, &buyer).await?;
         require(&policy, "quotes")?;
     }
-    let r=sqlx::query("SELECT unit_id,buyer_id,state,revision,data,cart_id FROM b2b_quotes WHERE tenant=$1 AND id=$2 FOR UPDATE").bind(&t).bind(id).fetch_optional(&mut *tx).await?.ok_or(Error(StatusCode::NOT_FOUND,"Quote not found".into()))?;
-    let buyer: String = r.get("buyer_id");
-    let state: String = r.get("state");
-    let revision: i64 = r.get("revision");
+    let r = quotes::for_transition(&mut tx, &t, id)
+        .await?
+        .ok_or(Error(StatusCode::NOT_FOUND, "Quote not found".into()))?;
+    let buyer = r.buyer_id.clone();
+    let state = r.state.clone();
+    let revision = r.revision;
     if input.revision != Some(revision) {
         return Err(conflict("Quote changed; reload before editing"));
     }
-    let mut data: Value = r.get("data");
+    let mut data = r.data.clone();
     let mut lifecycle = Value::Null;
     let custom_state;
     let next = match op {
@@ -139,15 +138,7 @@ pub async fn invoke(
         return Err(bad("Quote conversation is full"));
     }
     messages.push(json!({"actor":if admin{header(h,"x-rac-user").unwrap_or("merchant")}else{&buyer},"merchant":admin,"message":message(v)?,"operation":op,"lifecycle":lifecycle,"from":state,"to":next,"createdAt":chrono::Utc::now().to_rfc3339()}));
-    sqlx::query(
-        "UPDATE b2b_quotes SET state=$3,revision=revision+1,data=$4 WHERE tenant=$1 AND id=$2",
-    )
-    .bind(&t)
-    .bind(id)
-    .bind(next)
-    .bind(data)
-    .execute(&mut *tx)
-    .await?;
+    quotes::transition(&mut tx, &t, id, next, &data).await?;
     organization::event(
         &mut tx,
         &t,
@@ -178,8 +169,12 @@ async fn cart_quotes(
     } else {
         None
     };
-    let rows = sqlx::query("SELECT id,unit_id,buyer_id,state,revision,data FROM b2b_quotes WHERE tenant=$1 AND cart_id=$2 AND buyer_id=$3 AND unit_id=$4 AND ($5::text IS NULL OR id=$5) ORDER BY created_at DESC,id DESC LIMIT 20")
-        .bind(t).bind(&c.id).bind(&context.customer_id).bind(&context.unit_id).bind(id).fetch_all(&mut **tx).await?;
+    let owner = quotes::CartOwner {
+        cart: &c.id,
+        buyer: &context.customer_id,
+        unit: &context.unit_id,
+    };
+    let rows = quotes::of_cart(tx, t, owner, id.as_deref()).await?;
     if op == "quote.get" {
         return rows.first().map(|r| wire(r, h, false)).ok_or(Error(
             StatusCode::NOT_FOUND,
@@ -203,13 +198,7 @@ async fn request(
     {
         return Err(conflict("Review a current nonempty company cart first"));
     }
-    let revision: Option<i64> = sqlx::query_scalar(
-        "SELECT revision FROM carts WHERE tenant=$1 AND id=$2 AND status='open' FOR SHARE",
-    )
-    .bind(t)
-    .bind(&c.id)
-    .fetch_optional(&mut *tx)
-    .await?;
+    let revision = cart_rows::open_revision_shared(&mut tx, t, &c.id).await?;
     if revision != Some(c.revision) {
         return Err(conflict("Cart changed; request a new quote"));
     }
@@ -225,7 +214,13 @@ async fn request(
     let id = uid();
     let context = c.data.b2b.as_ref().unwrap();
     let accepted = lifecycle.capture(&mut tx, t).await?;
-    sqlx::query("INSERT INTO b2b_quotes(tenant,id,unit_id,buyer_id,cart_id,data) VALUES($1,$2,$3,$4,$5,$6)").bind(t).bind(&id).bind(&context.unit_id).bind(&context.customer_id).bind(&c.id).bind(json!({"quote":q,"currency":c.data.currency,"items":c.data.items,"message":message(v)?,"messages":[],"nativeLifecycle":accepted})).execute(&mut *tx).await?;
+    let owner = quotes::CartOwner {
+        cart: &c.id,
+        buyer: &context.customer_id,
+        unit: &context.unit_id,
+    };
+    let data = json!({"quote":q,"currency":c.data.currency,"items":c.data.items,"message":message(v)?,"messages":[],"nativeLifecycle":accepted});
+    quotes::request(&mut tx, t, &id, owner, &data).await?;
     organization::event(
         &mut tx,
         t,
@@ -295,12 +290,7 @@ async fn offer(tx: &mut Tx<'_>, v: &Value, data: &mut Value, state: &str) -> Res
     let until = input.data.valid_until.ok_or(bad("Offer expiry required"))?;
     chrono::DateTime::parse_from_rfc3339(&until)
         .map_err(|_| bad("Offer expiry must be an RFC3339 timestamp"))?;
-    let valid: bool = sqlx::query_scalar(
-        "SELECT $1::timestamptz>now() AND $1::timestamptz<now()+interval '1 year'",
-    )
-    .bind(&until)
-    .fetch_one(&mut **tx)
-    .await?;
+    let valid = quotes::offer_window(tx, &until).await?;
     if !valid {
         return Err(bad("Offer expires within the next year"));
     }
@@ -320,10 +310,10 @@ fn message(v: &Value) -> Result<String> {
     Ok(s)
 }
 /// A quote row as a response; the merchant view adds the lifecycle actions.
-fn wire(r: &sqlx::postgres::PgRow, h: &RequestContext, admin: bool) -> Value {
-    let mut data: Value = r.get("data");
-    let state: String = r.get("state");
-    let workflow = quote_lifecycle::projection(&data, &state, h, admin);
+fn wire(r: &quotes::QuoteRow, h: &RequestContext, admin: bool) -> Value {
+    let mut data = r.data.clone();
+    let state = &r.state;
+    let workflow = quote_lifecycle::projection(&data, state, h, admin);
     if !admin {
         if let Some(object) = data.as_object_mut() {
             object.remove("nativeLifecycle");
@@ -334,5 +324,5 @@ fn wire(r: &sqlx::postgres::PgRow, h: &RequestContext, admin: bool) -> Value {
             }
         }
     }
-    json!({"id":r.get::<String,_>("id"),"unitId":r.get::<String,_>("unit_id"),"buyerId":r.get::<String,_>("buyer_id"),"state":state,"revision":r.get::<i64,_>("revision"),"data":data,"workflow":workflow})
+    json!({"id":r.id,"unitId":r.unit_id,"buyerId":r.buyer_id,"state":state,"revision":r.revision,"data":data,"workflow":workflow})
 }

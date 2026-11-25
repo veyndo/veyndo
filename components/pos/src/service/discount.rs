@@ -1,5 +1,6 @@
 //! Audited cashier discounts use exact minor units and the existing native tax allocator in both quote and commit.
 use crate::service::guard;
+use crate::store::carts as cart_rows;
 use serde_json::{Value, json};
 use veyndo_checkout::service::{app_adjustments, delivery};
 use veyndo_core::shop_scope::{tenant, token};
@@ -8,7 +9,7 @@ use veyndo_identity::permit;
 use veyndo_pricing::catalog::Product;
 use veyndo_pricing::service::conversion as currencies;
 use veyndo_shop::ports::Carts;
-use veyndo_shop::types::cart::{Discount, StoredCart, stored};
+use veyndo_shop::types::cart::{Discount, StoredCart};
 use veyndo_shop::types::settings::Settings;
 pub async fn save(
     carts: &dyn Carts,
@@ -20,13 +21,9 @@ pub async fn save(
     permit(h, "orders.write")?;
     permit(h, "payments.manage")?;
     let mut tx = a.db.begin().await?;
-    let row = sqlx::query("SELECT * FROM carts WHERE tenant=$1 AND token=$2 FOR UPDATE")
-        .bind(tenant(h)?)
-        .bind(token(h)?)
-        .fetch_optional(&mut *tx)
+    let mut c = cart_rows::lock(&mut tx, &tenant(h)?, token(h)?)
         .await?
         .ok_or(bad("Cart unavailable"))?;
-    let mut c = stored(&row)?;
     guard::cart(h, &c)?;
     if c.data.pos_actor.is_none() || c.status != "open" || revision != c.revision {
         return Err(conflict("POS sale changed; reload before discounting"));
@@ -52,13 +49,7 @@ pub async fn save(
     };
     c.revision += 1;
     let quote = carts.view(&c).await?;
-    sqlx::query("UPDATE carts SET data=$1,revision=$2 WHERE tenant=$3 AND id=$4")
-        .bind(json!(c.data))
-        .bind(c.revision)
-        .bind(&c.tenant)
-        .bind(&c.id)
-        .execute(&mut *tx)
-        .await?;
+    cart_rows::save(&mut tx, &json!(c.data), c.revision, &c.tenant, &c.id).await?;
     veyndo_core::store::outbox::publish_on(&mut *tx, &c.tenant, "pos.discount_changed", &json!({"cartId":c.id,"salesChannelId":c.data.sales_channel,"cashierId":h.pos.as_ref().map(|p|&p.actor),"previous":previous,"discount":c.data.pos_discount,"revision":c.revision})).await?;
     tx.commit().await?;
     Ok(quote)

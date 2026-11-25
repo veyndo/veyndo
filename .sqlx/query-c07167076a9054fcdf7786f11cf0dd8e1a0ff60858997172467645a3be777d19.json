@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE flow_steps SET state='completed',result=$1,finished_at=now() WHERE job=$2 AND node=$3",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Jsonb",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "c07167076a9054fcdf7786f11cf0dd8e1a0ff60858997172467645a3be777d19"
+}

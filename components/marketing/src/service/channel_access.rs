@@ -1,7 +1,6 @@
 //! Single admission boundary for Store API, UCP/MCP and hosted storefronts; previews cannot purchase.
 use crate::service::channel_preview::{cookie, valid};
-use sqlx::Row;
-use veyndo_core::access::ChannelSnapshot;
+use crate::store::channels as channel_rows;
 use veyndo_core::host_names::public_path;
 use veyndo_core::shop_scope::{channel, header, tenant};
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode};
@@ -67,15 +66,7 @@ pub async fn admit(
     {
         access.channel.clone()
     } else {
-        sqlx::query("SELECT data,revision FROM sales_channels WHERE tenant=$1 AND id=$2")
-            .bind(&t)
-            .bind(id)
-            .fetch_optional(&a.db)
-            .await?
-            .map(|r| ChannelSnapshot {
-                data: r.get("data"),
-                revision: r.get("revision"),
-            })
+        channel_rows::snapshot(a, &t, id).await?
     }
     .ok_or(Error(
         StatusCode::NOT_FOUND,

@@ -1,11 +1,11 @@
 //! Revision-safe coupon selection for shared storefront/POS carts; pricing remains in promotions.
+use crate::store::carts as cart_rows;
 use serde::Deserialize;
 use serde_json::{Value, json};
 use veyndo_core::document::{lenient, view};
 use veyndo_core::shop_scope::{tenant, token};
 use veyndo_core::{RequestContext, Result, State, bad, conflict, store::history_context};
 use veyndo_shop::ports::Carts;
-use veyndo_shop::types::cart::stored;
 
 /// The JSON fields `select` reads, typed as it reads them.
 #[derive(Deserialize, Default)]
@@ -36,23 +36,13 @@ pub async fn select(carts: &dyn Carts, a: &State, h: &RequestContext, v: &Value)
     let t = tenant(h)?;
     let mut tx = a.db.begin().await?;
     history_context::context(&mut tx, h, "merchant").await?;
-    let r = sqlx::query("SELECT * FROM carts WHERE tenant=$1 AND token=$2 FOR UPDATE")
-        .bind(&t)
-        .bind(token(h)?)
-        .fetch_one(&mut *tx)
-        .await?;
-    let mut c = stored(&r)?;
+    let mut c = cart_rows::lock(&mut tx, &t, token(h)?).await?;
     carts.admit(&mut tx, h, &c).await?;
     if c.status != "open" || Some(c.revision) != input.revision {
         return Err(conflict("Cart changed or terminal"));
     }
     c.data.coupons = codes;
-    sqlx::query("UPDATE carts SET data=$1,revision=revision+1 WHERE tenant=$3 AND id=$2")
-        .bind(json!(c.data))
-        .bind(&c.id)
-        .bind(&t)
-        .execute(&mut *tx)
-        .await?;
+    cart_rows::save_next_revision(&mut tx, &json!(c.data), &c.id, &t).await?;
     c.revision += 1;
     tx.commit().await?;
     carts.view(&c).await

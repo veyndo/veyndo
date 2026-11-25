@@ -2,9 +2,9 @@
 use crate::ports::FlowEffects;
 use crate::store::flow_access::headers;
 use crate::store::flow_jobs::Claim;
+use crate::store::flow_steps;
 use crate::types::flow::Flow;
 use serde_json::{Value, json};
-use sqlx::Row;
 use veyndo_core::{Result, State, bad};
 use veyndo_flow_graph::execution::Directive;
 use veyndo_shop::types::cart::{Cart, StoredCart};
@@ -67,23 +67,14 @@ pub async fn run(a: &State, effects: &dyn FlowEffects, job: &Claim, f: &Flow) ->
                 if action == "action.stop.flow" {
                     return Ok(Outcome::Finished(json!({"stopped":true,"trace":trace})));
                 }
-                let existing =
-                    sqlx::query("SELECT state,result FROM flow_steps WHERE job=$1 AND node=$2")
-                        .bind(id)
-                        .bind(node_id)
-                        .fetch_optional(&a.db)
-                        .await?;
+                let existing = flow_steps::find(a, id, node_id).await?;
                 let result = if let Some(r) = existing {
-                    if r.get::<String, _>("state") != "completed" {
+                    if r.state != "completed" {
                         return Err(bad("Flow step has an uncertain previous execution"));
                     }
-                    r.get::<Value, _>("result")
+                    r.result.unwrap_or(Value::Null)
                 } else {
-                    sqlx::query("INSERT INTO flow_steps(job,node) VALUES($1,$2)")
-                        .bind(id)
-                        .bind(node_id)
-                        .execute(&a.db)
-                        .await?;
+                    flow_steps::start(a, id, node_id).await?;
                     let result = effects
                         .execute(
                             t,
@@ -96,11 +87,11 @@ pub async fn run(a: &State, effects: &dyn FlowEffects, job: &Claim, f: &Flow) ->
                         .await;
                     match result {
                         Ok(v) => {
-                            sqlx::query("UPDATE flow_steps SET state='completed',result=$1,finished_at=now() WHERE job=$2 AND node=$3").bind(&v).bind(id).bind(node_id).execute(&a.db).await?;
+                            flow_steps::complete(a, id, node_id, &v).await?;
                             v
                         }
                         Err(e) => {
-                            sqlx::query("UPDATE flow_steps SET state='failed',error=$1,finished_at=now() WHERE job=$2 AND node=$3").bind(&e.1).bind(id).bind(node_id).execute(&a.db).await?;
+                            flow_steps::fail(a, id, node_id, &e.1).await?;
                             return Err(e);
                         }
                     }

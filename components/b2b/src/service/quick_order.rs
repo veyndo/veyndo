@@ -1,8 +1,8 @@
 //! Bounded SKU bulk entry resolves native products then uses the ordinary cart's permissions, quantities and prices.
 use crate::store::access::{guard_conn, require};
+use crate::store::lists;
 use serde::Deserialize;
 use serde_json::Value;
-use sqlx::Row;
 use veyndo_core::document::{lenient, view};
 use veyndo_core::{RequestContext, Result, State, bad};
 use veyndo_pricing::domain::cart::Item;
@@ -49,24 +49,15 @@ pub async fn resolve(conn: &mut sqlx::PgConnection, t: &str, value: &Value) -> R
         return Err(bad("Enter 1..100 valid SKU lines with quantities 1..10000"));
     }
     let skus: Vec<_> = lines.iter().map(|l| l.sku.clone()).collect();
-    let rows = sqlx::query(
-        "SELECT id,product_number FROM products WHERE tenant=$1 AND product_number=ANY($2)",
-    )
-    .bind(t)
-    .bind(skus)
-    .fetch_all(conn)
-    .await?;
+    let rows = lists::by_sku(conn, t, &skus).await?;
     let mut items = Vec::new();
     for l in lines {
-        let matching: Vec<_> = rows
-            .iter()
-            .filter(|r| r.get::<String, _>("product_number") == l.sku)
-            .collect();
+        let matching: Vec<_> = rows.iter().filter(|r| r.product_number == l.sku).collect();
         if matching.len() != 1 {
             return Err(bad(format!("Unknown or ambiguous SKU: {}", l.sku)));
         }
         items.push(Item {
-            id: matching[0].get("id"),
+            id: matching[0].id.clone(),
             quantity: l.quantity,
         });
     }
