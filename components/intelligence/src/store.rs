@@ -15,6 +15,7 @@ pub mod flow_proposals;
 pub mod observations;
 pub mod personalization;
 pub mod platform_ai;
+pub mod policy_outcomes;
 pub mod preferences;
 pub mod product_reads;
 pub mod relations;

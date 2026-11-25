@@ -86,11 +86,30 @@ fn approval_transport(url: &reqwest::Url, environment: &str) -> bool {
 mod tests {
     use super::{approval_transport, approval_url, validate_service};
     use crate::domain::attempt::sample;
-    use crate::ports::Host;
+    use crate::ports::{Host, LedgerRecords};
     use serde_json::{Value, json};
     use veyndo_core::{PortFuture, Result};
 
     struct Fixed;
+    impl LedgerRecords for Fixed {
+        fn mirror_cart_order<'a>(
+            &'a self,
+            _: &'a mut sqlx::PgConnection,
+            _: &'a str,
+            _: &'a str,
+            _: &'a Value,
+        ) -> PortFuture<'a, ()> {
+            Box::pin(async { Ok(()) })
+        }
+        fn reward_capture<'a>(
+            &'a self,
+            _: &'a mut sqlx::PgConnection,
+            _: &'a str,
+            _: &'a str,
+        ) -> PortFuture<'a, ()> {
+            Box::pin(async { Ok(()) })
+        }
+    }
     impl Host for Fixed {
         fn service(&self, _: &str, _: &str, _: &str) -> Result<Value> {
             Ok(json!({"approvalOrigins":["https://pay.example"]}))

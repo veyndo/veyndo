@@ -1,4 +1,4 @@
-//! What checkout needs from the server: cart products, provider payment methods, app hooks and configurations, the cashier, the built-in payment provider and the agent run fence.
+//! What checkout needs from the server: records of components that build on checkout, cart products, provider payment methods, app hooks and configurations, the cashier, the built-in payment provider and the agent run fence.
 use serde_json::Value;
 use veyndo_core::{PortFuture, RequestContext, Result};
 use veyndo_pricing::catalog::Product;
@@ -70,8 +70,25 @@ pub struct LockedQuote<'a> {
     pub revision: i64,
 }
 
+/// Records of components that build on checkout, read or written on the purchase connection.
+pub trait PurchaseRecords: Send + Sync {
+    /// The tenant's business policy module digest, share-locked for the purchase sandbox.
+    fn policy_digest<'a>(
+        &'a self,
+        conn: &'a mut sqlx::PgConnection,
+        tenant: &'a str,
+    ) -> PortFuture<'a, String>;
+    /// Counts a purchase for the experiment variant the buyer was exposed to.
+    fn count_purchase<'a>(
+        &'a self,
+        conn: &'a mut sqlx::PgConnection,
+        tenant: &'a str,
+        variant: &'a str,
+    ) -> PortFuture<'a, ()>;
+}
+
 /// What the purchase transaction needs from the server: app sandboxes and hooks, the cashier, payment providers and the agent run fence.
-pub trait Purchase: Send + Sync {
+pub trait Purchase: PurchaseRecords + veyndo_payments::ports::Buyers + Send + Sync {
     /// App configuration modules, commerce hooks and, for a business cart, the tenant policy, prepared before any lock.
     type Prepared: Send + Sync;
     /// Prepares the app modules of the admitted cart.

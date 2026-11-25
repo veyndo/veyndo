@@ -8,9 +8,11 @@ use std::collections::{HashMap, HashSet};
 use veyndo_app_model::manifest::Manifest;
 use veyndo_core::document::{Raw, lenient, view};
 use veyndo_core::{Result, State, bad, conflict, process_config, uid};
+use veyndo_inventory::store::attempt_reservations::reserve;
 use veyndo_shop::domain::patch::resolve;
 use veyndo_shop::domain::validation::validate;
 use veyndo_shop::service::read_cache::conditions;
+use veyndo_shop::store::settings::{basis_for_update, overrides, replace_basis};
 use veyndo_shop::types::cart::StoredCart;
 use veyndo_shop::types::settings::{Payment, Settings};
 
@@ -65,19 +67,11 @@ pub async fn install_methods(
     if m.payment_provider.is_none() && old.as_ref().is_none_or(|p| p.payment_provider.is_none()) {
         return Ok(());
     }
-    let data = sqlx::query_scalar!(
-        "SELECT data FROM commerce_settings WHERE tenant=$1 FOR UPDATE",
-        t
-    )
-    .fetch_one(&mut **tx)
-    .await?;
+    let data = basis_for_update(tx, t).await?;
     let mut s: Settings = serde_json::from_value(data).map_err(|_| bad("Invalid settings"))?;
     // Basis locking serializes channel overrides. Check the actual resolved settings,
     // including an enabled channel method whose shared-basis counterpart is disabled.
-    let patches: Vec<Value> =
-        sqlx::query_scalar!("SELECT data FROM commerce_overrides WHERE tenant=$1", t)
-            .fetch_all(&mut **tx)
-            .await?;
+    let patches = overrides(tx, t).await?;
     let mut scopes = vec![s.clone()];
     for patch in patches {
         scopes.push(resolve(&s, patch, &conditions)?);
@@ -168,14 +162,7 @@ pub async fn install_methods(
         });
     }
     validate(&s, &conditions)?;
-    sqlx::query!(
-        "UPDATE commerce_settings SET data=$1,revision=revision+1 WHERE tenant=$2",
-        json!(s),
-        t
-    )
-    .execute(&mut **tx)
-    .await?;
-    Ok(())
+    replace_basis(tx, t, &json!(s)).await
 }
 /// Records the pending provider payment attempt of an order with its reservations and enqueues its creation.
 /// The placed order facts a provider payment is prepared from.
@@ -291,7 +278,7 @@ pub async fn prepare_remote(
     o["payment"] = json!({"method":selected.raw,"provider":provider,"state":"pending","attemptId":id,"environment":environment,"realMoneyCharged":false});
     sqlx::query!("INSERT INTO payment_attempts(id,tenant,order_id,provider,adapter_version,amount_minor,currency,environment,bn_code,provider_context,currency_scale) VALUES($1,$2,$3,$4,$5,$6,$9,$7,'',$8,$10)", id, c.tenant, order.id.as_deref().ok_or(bad("Order ID required"))?, provider, m.version, minor, environment, context, currency, order.cart.price.currency_scale.as_i64().unwrap_or(2) as i16).execute(&mut **tx).await?;
     for item in &c.data.items {
-        sqlx::query!("INSERT INTO inventory_reservations(tenant,attempt_id,product_id,quantity) VALUES($1,$2,$3,$4)", c.tenant, id, item.id, item.quantity as i32).execute(&mut **tx).await?;
+        reserve(tx, &c.tenant, &id, &item.id, item.quantity as i32).await?;
     }
     enqueue_tx(
         tx,

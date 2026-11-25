@@ -7,6 +7,7 @@ use veyndo_core::{
     Error, RequestContext, Result, State, StatusCode, bad, conflict, store::history_context,
 };
 use veyndo_shop::domain::defaults::decode;
+use veyndo_shop::store::settings::{basis, shared};
 pub async fn lock(tx: &mut Transaction<'_, Postgres>, t: &str) -> Result<()> {
     sqlx::query!("SELECT pg_advisory_xact_lock(hashtextextended($1,731))", t)
         .execute(&mut **tx)
@@ -85,13 +86,7 @@ pub async fn save(
     let mut tx = a.db.begin().await?;
     history_context::context(&mut tx, h, "merchant").await?;
     lock(&mut tx, t).await?;
-    let raw: Value = sqlx::query_scalar!(
-        "SELECT data FROM commerce_settings WHERE tenant=$1 FOR SHARE",
-        t
-    )
-    .fetch_one(&mut *tx)
-    .await?;
-    let settings = decode(raw)?;
+    let settings = shared(&mut tx, t).await?;
     company_model::validate(&request.data, &settings, channel.is_some())?;
     let current: CompanyRecord = view(&records(&mut tx, t, channel).await?);
     if current.revision.as_i64() != Some(expected)
@@ -170,9 +165,7 @@ pub async fn seller(tx: &mut Transaction<'_, Postgres>, t: &str, channel: &str) 
 
 /// Atomic release validates the resulting basis, all channel dependants and tenant-owned logo references.
 pub async fn validate_release(tx: &mut Transaction<'_, Postgres>, t: &str) -> Result<()> {
-    let raw: Value = sqlx::query_scalar!("SELECT data FROM commerce_settings WHERE tenant=$1", t)
-        .fetch_one(&mut **tx)
-        .await?;
+    let raw = basis(tx, t).await?;
     let settings = decode(raw)?;
     let base: Option<Value> =
         sqlx::query_scalar!("SELECT data FROM receipt_settings WHERE tenant=$1", t)

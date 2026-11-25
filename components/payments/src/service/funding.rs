@@ -1,5 +1,6 @@
 //! Account-authorized funding choice, immutable consent and saved-instrument admission; cart possession is insufficient.
 use crate::domain::attempt::Attempt;
+use crate::ports::Buyers;
 use crate::store::attempts;
 use crate::store::funding;
 use serde::Deserialize;
@@ -24,6 +25,7 @@ struct FundedPayment {
 }
 
 pub async fn prepare(
+    buyers: &dyn Buyers,
     tx: &mut sqlx::Transaction<'_, sqlx::Postgres>,
     h: &RequestContext,
     c: &StoredCart,
@@ -49,7 +51,7 @@ pub async fn prepare(
         StatusCode::UNAUTHORIZED,
         "Customer login required to save or use a payment method".into(),
     ))?;
-    let customer = funding::session_customer(tx, &c.tenant, &hash(token)).await?;
+    let customer = buyers.session_customer(tx, &c.tenant, &hash(token)).await?;
     let customer = customer
         .filter(|id| Some(id) == c.data.customer_id.as_ref())
         .ok_or(Error(

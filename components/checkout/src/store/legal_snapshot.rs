@@ -9,12 +9,10 @@ use veyndo_pricing::catalog::Product;
 use veyndo_pricing::verified_kernel;
 use veyndo_shop::domain::buyer_consent;
 use veyndo_shop::domain::legal_product::product_gaps;
+use veyndo_shop::store::purchase_consent::{consent_receipt, share_acceptance};
 use veyndo_shop::types::cart::StoredCart;
 use veyndo_shop::types::legal::version;
 use veyndo_shop::types::settings::Settings;
-
-// Aliases are server-created, one hop and immutable; both sides are tenant/channel scoped.
-pub const RECEIPT_SQL: &str = "SELECT root.cart_id,root.policy_version,root.data,root.expires_at>now() AS fresh FROM privacy_consents own JOIN privacy_consents root ON root.tenant=own.tenant AND root.channel_id=own.channel_id AND root.cart_id=coalesce(own.source_cart_id,own.cart_id) AND root.source_cart_id IS NULL WHERE own.tenant=$1 AND own.cart_id=$2 AND own.channel_id=$3 FOR SHARE OF root";
 
 /// The cart's legal acknowledgement.
 #[derive(Deserialize, Default)]
@@ -25,33 +23,6 @@ struct Acceptance {
     digital_immediate: Value,
 }
 
-/// The root consent receipt a cart's consent resolves to (`RECEIPT_SQL`), share-locked.
-pub struct ConsentReceipt {
-    pub cart_id: String,
-    pub policy_version: String,
-    pub data: Value,
-    /// The receipt has not expired.
-    pub fresh: bool,
-}
-
-/// The cart's consent receipt in the channel (through its one-hop alias), share-locked; the same statement as `RECEIPT_SQL`, checked at compile time.
-pub async fn consent_receipt(
-    tx: &mut sqlx::PgConnection,
-    tenant: &str,
-    cart: &str,
-    channel: &str,
-) -> Result<Option<ConsentReceipt>> {
-    Ok(sqlx::query_as!(
-        ConsentReceipt,
-        r#"SELECT root.cart_id,root.policy_version,root.data,root.expires_at>now() AS "fresh!" FROM privacy_consents own JOIN privacy_consents root ON root.tenant=own.tenant AND root.channel_id=own.channel_id AND root.cart_id=coalesce(own.source_cart_id,own.cart_id) AND root.source_cart_id IS NULL WHERE own.tenant=$1 AND own.cart_id=$2 AND own.channel_id=$3 FOR SHARE OF root"#,
-        tenant,
-        cart,
-        channel
-    )
-    .fetch_optional(tx)
-    .await?)
-}
-
 /// Rejects the purchase unless the current legal acknowledgement and consent hold, then freezes them for the order.
 pub async fn snapshot(
     tx: &mut sqlx::PgConnection,
@@ -59,14 +30,9 @@ pub async fn snapshot(
     s: &Settings,
     products: &[Product],
 ) -> Result<Value> {
-    let acceptance: Value = sqlx::query_scalar!(
-        "SELECT data FROM legal_acceptances WHERE tenant=$1 AND cart_id=$2 FOR SHARE",
-        c.tenant,
-        c.id
-    )
-    .fetch_optional(&mut *tx)
-    .await?
-    .unwrap_or(json!({}));
+    let acceptance = share_acceptance(&mut *tx, &c.tenant, &c.id)
+        .await?
+        .unwrap_or(json!({}));
     let consumer = !s.is_business(&c.data.group);
     let digital = consumer && products.iter().any(|p| is_digital(&p.extra));
     let accepted: Acceptance = view(&acceptance);

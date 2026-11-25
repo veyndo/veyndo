@@ -3,6 +3,7 @@ use serde::Deserialize;
 use serde_json::{Value, json};
 use veyndo_core::document::view;
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad};
+use veyndo_customers::store::purchase_customers::redacted;
 fn projection(value: &Value, keys: &[&str]) -> Value {
     json!(
         keys.iter()
@@ -31,8 +32,9 @@ pub async fn redacted_read(a: &State, h: &RequestContext, kind: &str, id: &str) 
         }
         "customer" => {
             veyndo_identity::permit(h, "customers.read")?;
-            let row = sqlx::query!("SELECT id,active,group_name,created_at::text AS created FROM customers WHERE tenant=$1 AND email=$2", tenant, id).fetch_optional(&a.db).await?
-                .ok_or(Error(StatusCode::NOT_FOUND,"Customer not found".into()))?;
+            let row = redacted(&a.db, &tenant, id)
+                .await?
+                .ok_or(Error(StatusCode::NOT_FOUND, "Customer not found".into()))?;
             Ok(
                 json!({"id":row.id,"active":row.active,"guest":false,"groupId":row.group_name,"createdAt":row.created}),
             )

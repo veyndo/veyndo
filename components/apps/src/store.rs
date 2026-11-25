@@ -35,6 +35,7 @@ pub mod package_fence;
 pub mod package_install;
 pub mod packages;
 pub mod planning;
+pub mod policy_lock;
 pub mod record_restore;
 pub mod record_write;
 pub mod records;

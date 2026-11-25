@@ -10,6 +10,7 @@ pub mod product_edit;
 pub mod product_fields;
 pub mod product_list;
 pub mod products;
+pub mod purchase_products;
 pub mod reviews;
 pub mod translation_jobs;
 pub mod translations;

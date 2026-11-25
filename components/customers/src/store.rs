@@ -4,5 +4,6 @@ pub mod address_restore;
 pub mod addresses;
 pub mod crm;
 pub mod customers;
+pub mod purchase_customers;
 pub mod sessions;
 pub mod sign_in;

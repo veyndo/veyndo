@@ -52,7 +52,7 @@ pub async fn onboarding(
         return Err(bad("Supported onboarding operation and approval required"));
     }
     let channel = args.channel.as_deref().unwrap_or("default");
-    if !provider_accounts::channel_exists(&a.db, &t, channel).await? {
+    if !gateway.channel_exists(&t, channel).await? {
         return Err(Error(
             StatusCode::NOT_FOUND,
             "Sales channel not found".into(),
@@ -235,12 +235,12 @@ pub fn configured_environments(c: &Value) -> Value {
 }
 
 /// Installed adapter providers, their channel accounts and public environment metadata.
-pub async fn providers(a: &State, h: &RequestContext) -> Result<Value> {
+pub async fn providers(gateway: &dyn Gateway, a: &State, h: &RequestContext) -> Result<Value> {
     let t = merchant(h)?;
     permit(h, "payments.read")?;
     let rows = provider_accounts::packages(&a.db, &t).await?;
     let accounts = provider_accounts::accounts(&a.db, &t).await?;
-    let channels = provider_accounts::channels(&a.db, &t).await?;
+    let channels = gateway.channel_ids(&t).await?;
     let services = &process_config::get().payment_services;
     let providers: Vec<_> = rows
         .iter()
@@ -302,7 +302,7 @@ pub async fn status(gateway: &dyn Gateway, a: &State, h: &RequestContext) -> Res
     let rows = attempts::latest(&a.db, &t).await?;
     let jobs = jobs::latest(&a.db, &t).await?;
     let mut list = vec![gateway.builtin(&t)];
-    list.extend(mark_configured(&providers(a, h).await?));
+    list.extend(mark_configured(&providers(gateway, a, h).await?));
     if !list
         .iter()
         .any(|p| view::<Listed>(p).id == "shopware_payments")

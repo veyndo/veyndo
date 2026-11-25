@@ -20,7 +20,7 @@ pub(crate) struct Modules {
 }
 
 /// The server's half of one purchase.
-pub(super) struct Server<'a>(pub(super) &'a App);
+pub(crate) struct Server<'a>(pub(super) &'a App);
 
 type Tx<'c> = sqlx::Transaction<'c, sqlx::Postgres>;
 

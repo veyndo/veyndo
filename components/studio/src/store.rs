@@ -6,6 +6,7 @@ pub mod manual_orders;
 pub mod order_workflow;
 pub mod outbox_control;
 pub mod overview;
+pub mod payment_history;
 pub mod products;
 pub mod reports;
 pub mod staging_assets;

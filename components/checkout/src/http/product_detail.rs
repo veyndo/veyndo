@@ -3,13 +3,13 @@ use crate::domain::cart_quote::{normalized_quantity, quote};
 use crate::domain::quote_view::quote_view;
 use crate::domain::tax_lines::tax_products;
 use crate::store::cart_load;
-use crate::store::product_reviews;
 use crate::store::tax_conditions::{conditional, tax_settings_for_cart};
 use axum::Json;
 use axum::extract::{Path, Query, State as Shared};
 use serde_json::{Value, json};
 use veyndo_catalog::ports::Catalog;
 use veyndo_catalog::service::catalog_reads;
+use veyndo_catalog::store::purchase_products as product_reviews;
 use veyndo_catalog::types::catalog_page::CatalogCriteria;
 use veyndo_core::shop_scope::{channel, header, tenant};
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode};
@@ -132,8 +132,8 @@ fn price_tiers(
 
 /// Approved reviews and their aggregate over the whole family, independently of variant pagination.
 async fn reviews(a: &State, t: &str, family: &str) -> Result<Value> {
-    let rows = product_reviews::published(&a.db, t, family).await?;
-    let stats = product_reviews::summary(&a.db, t, family).await?;
+    let rows = product_reviews::published_reviews(&a.db, t, family).await?;
+    let stats = product_reviews::review_summary(&a.db, t, family).await?;
     Ok(
         json!({"count":stats.count,"average":stats.rating,"elements":rows.iter().map(|r|json!({"id":r.id,"author":r.author,"rating":r.rating,"title":r.title,"content":r.content,"verifiedPurchase":r.verified,"demo":r.demo,"imported":r.imported,"time":r.time})).collect::<Vec<_>>()}),
     )

@@ -29,6 +29,6 @@ pub(crate) async fn providers_route(
     State(a): State<App>,
     h: RequestContext,
 ) -> Result<Json<Value>> {
-    Ok(Json(providers::providers(&a, &h).await?))
+    Ok(Json(providers::providers(&Gateway(&a), &a, &h).await?))
 }
 pub(crate) use providers::onboarding_action;

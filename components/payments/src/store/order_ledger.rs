@@ -7,6 +7,7 @@ use serde::Deserialize;
 use serde_json::{Value, json};
 use veyndo_core::document::{lenient, view};
 use veyndo_core::{Result, conflict};
+use veyndo_inventory::store::attempt_reservations::release_attempt;
 use veyndo_orders::domain::order_fields::order_fields;
 use veyndo_pricing::verified_kernel;
 
@@ -90,14 +91,7 @@ pub async fn update_order(
     )
     .execute(&mut **tx)
     .await?;
-    sqlx::query!(
-        "UPDATE carts SET data=jsonb_set(data,'{order}',$1) WHERE tenant=$2 AND id=$3",
-        o,
-        p.tenant,
-        cart
-    )
-    .execute(&mut **tx)
-    .await?;
+    host.mirror_cart_order(tx, &p.tenant, cart, &o).await?;
     let mut event_order = o.clone();
     if let Some(cart) = event_order["cart"].as_object_mut() {
         cart.remove("token");
@@ -108,16 +102,8 @@ pub async fn update_order(
         "payment.updated"
     };
     veyndo_core::store::outbox::publish_on(&mut **tx, &p.tenant, kind, &json!({"orderId":p.order,"attemptId":p.id,"state":state,"provider":p.provider,"environment":p.environment,"realMoneyCharged":p.environment=="live" && state=="captured","order":event_order})).await?;
-    if state == "captured"
-        && let Some(variant) = sqlx::query_scalar!("UPDATE exposures SET rewarded=true WHERE tenant=$1 AND session=(SELECT data->>'session' FROM carts WHERE tenant=$1 AND id=$2) AND rewarded=false RETURNING variant", p.tenant, cart).fetch_optional(&mut **tx).await?
-    {
-        sqlx::query!(
-            "UPDATE policy SET purchases=purchases+1 WHERE tenant=$1 AND variant=$2",
-            p.tenant,
-            variant
-        )
-        .execute(&mut **tx)
-        .await?;
+    if state == "captured" {
+        host.reward_capture(tx, &p.tenant, cart).await?;
     }
     Ok(())
 }
@@ -139,7 +125,7 @@ pub async fn release_stock(
     }
     state::transition(&p.state, state)?;
     veyndo_inventory::store::reservations::release(tx, &p.tenant, &p.order).await?;
-    sqlx::query!("UPDATE inventory_reservations SET released=true WHERE tenant=$1 AND attempt_id=$2 AND NOT released", p.tenant, p.id).execute(&mut **tx).await?;
+    release_attempt(tx, &p.tenant, &p.id).await?;
     sqlx::query!(
         "UPDATE payment_attempts SET state=$1,revision=revision+1 WHERE tenant=$2 AND id=$3",
         state,

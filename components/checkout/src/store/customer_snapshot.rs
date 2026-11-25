@@ -3,7 +3,9 @@ use serde::Deserialize;
 use serde_json::{Value, json};
 use veyndo_core::document::view;
 use veyndo_core::{Error, Result, StatusCode, uid};
+use veyndo_customers::store::purchase_customers::share_snapshot;
 use veyndo_shop::domain::defaults::decode;
+use veyndo_shop::store::settings::basis;
 use veyndo_shop::types::cart::StoredCart;
 use veyndo_shop::types::settings::CheckoutSelection;
 
@@ -25,18 +27,18 @@ pub async fn snapshot(
     selected: &CheckoutSelection,
 ) -> Result<Value> {
     let customer = if let Some(id) = &c.data.customer_id {
-        let r=sqlx::query!("SELECT id,customer_number,email,profile,company FROM customers WHERE tenant=$1 AND id=$2 AND active FOR SHARE", c.tenant, id).fetch_optional(&mut *conn).await?.ok_or(Error(StatusCode::UNAUTHORIZED,"Customer account unavailable".into()))?;
+        let r = share_snapshot(&mut *conn, &c.tenant, id)
+            .await?
+            .ok_or(Error(
+                StatusCode::UNAUTHORIZED,
+                "Customer account unavailable".into(),
+            ))?;
         let profile: CustomerProfile = view(&r.profile);
         json!({"customerId":id,"customerNumber":r.customer_number,"email":r.email,"name":profile.name,"firstName":profile.first_name,"lastName":profile.last_name,"salutationId":profile.salutation_id,"title":profile.title,"company":r.company,"vatIds":profile.vat_ids,"guest":false})
     } else {
         json!({"customerId":null,"customerNumber":null,"email":c.data.email,"name":selected.billing_address.as_ref().map(|a|a.name.clone()),"firstName":selected.billing_address.as_ref().map(|a|a.first_name.clone()),"lastName":selected.billing_address.as_ref().map(|a|a.last_name.clone()),"guest":true})
     };
-    let settings: Value = sqlx::query_scalar!(
-        "SELECT data FROM commerce_settings WHERE tenant=$1",
-        c.tenant
-    )
-    .fetch_one(&mut *conn)
-    .await?;
+    let settings = basis(&mut *conn, &c.tenant).await?;
     let settings = decode(settings)?;
     let billing_id = uid();
     let shipping_id = uid();

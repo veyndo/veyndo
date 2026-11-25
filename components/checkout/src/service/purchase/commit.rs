@@ -6,7 +6,7 @@ use crate::domain::review_binding::validate as validate_review;
 use crate::domain::session_review::Review;
 use crate::ports::Purchase;
 use crate::store::customer_snapshot::snapshot as customer_snapshot;
-use crate::store::purchase::{self, NewOrder};
+use crate::store::purchase;
 use crate::store::session::admit_channel;
 use serde::Deserialize;
 use serde_json::{Value, json};
@@ -21,6 +21,7 @@ use veyndo_inventory::InventoryLines;
 use veyndo_inventory::store::reservations::{allocate, consume};
 use veyndo_marketing::store::promotions::record_uses;
 use veyndo_orders::domain::order_fields::order_fields;
+use veyndo_orders::store::placement::{self, NewOrder};
 use veyndo_payments::service::funding::prepare as prepare_funding;
 use veyndo_payments::service::sessions::origin_conn;
 use veyndo_pricing::verified_kernel;
@@ -57,10 +58,10 @@ async fn prepare_external<P: Purchase>(
             process_config::get().strict,
         )?;
     }
-    prepare_funding(tx, h, c, order).await?;
+    prepare_funding(port, tx, h, c, order).await?;
     order_fields(order);
     let id = view::<OrderRef>(order).id;
-    purchase::update_order(tx, id.as_str(), order).await?;
+    placement::update_order(tx, id.as_str(), order).await?;
     Ok(())
 }
 
@@ -85,7 +86,7 @@ async fn admit<P: Purchase>(
         )?;
     }
     if priced.config.is_business(&c.data.group) {
-        let digest = purchase::policy_digest(tx, &c.tenant).await?;
+        let digest = port.policy_digest(tx, &c.tenant).await?;
         port.approve(modules, &digest, minor)?;
     }
     Ok(())
@@ -185,7 +186,7 @@ pub(super) async fn run<P: Purchase>(
     }
     port.settle(&mut tx, h, &c, &mut order).await?;
     order_fields(&mut order);
-    purchase::insert_order(
+    placement::insert_order(
         &mut tx,
         &NewOrder {
             id: &id,
@@ -210,8 +211,11 @@ pub(super) async fn run<P: Purchase>(
     consume(&mut tx, &c.tenant, &inventory).await?;
     c.data.order = Some(order.clone());
     purchase::complete_cart(&mut tx, &c.id, &json!(c.data)).await?;
-    if !external {
-        purchase::reward_exposure(&mut tx, &c.tenant, &c.data.session).await?;
+    if !external
+        && let Some(variant) =
+            purchase::reward_exposure(&mut tx, &c.tenant, &c.data.session).await?
+    {
+        port.count_purchase(&mut tx, &c.tenant, &variant).await?;
     }
     veyndo_core::store::outbox::publish_on(
         &mut *tx,

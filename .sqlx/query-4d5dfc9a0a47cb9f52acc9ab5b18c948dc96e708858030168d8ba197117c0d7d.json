@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT a.id,a.title,a.filename,o.id AS order_id,o.data FROM order_downloads d JOIN product_assets a ON a.tenant=d.tenant AND a.id=d.asset_id JOIN orders o ON o.tenant=d.tenant AND o.id=d.order_id WHERE d.tenant=$1 AND (o.data->'orderCustomer'->>'customerId')=(SELECT id FROM customers WHERE tenant=o.tenant AND email=$2) ORDER BY o.created_at DESC LIMIT 200",
+  "query": "SELECT a.id,a.title,a.filename,o.id AS order_id,o.data FROM order_downloads d JOIN product_assets a ON a.tenant=d.tenant AND a.id=d.asset_id JOIN orders o ON o.tenant=d.tenant AND o.id=d.order_id WHERE d.tenant=$1 AND (o.data->'orderCustomer'->>'customerId')=$2 ORDER BY o.created_at DESC LIMIT 200",
   "describe": {
     "columns": [
       {
@@ -73,5 +73,5 @@
       false
     ]
   },
-  "hash": "f9d3062b4debc15b474324123e517cbf5bac219470aeb0179470b55cb0e95e31"
+  "hash": "4d5dfc9a0a47cb9f52acc9ab5b18c948dc96e708858030168d8ba197117c0d7d"
 }
