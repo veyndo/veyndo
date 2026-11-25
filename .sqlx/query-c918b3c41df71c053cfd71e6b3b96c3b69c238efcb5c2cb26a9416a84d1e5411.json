@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT jsonb_build_object('need',target_id,'source',data->'source','confidence',data->'confidence') AS \"need!\" FROM knowledge_relations WHERE tenant=$1 AND kind='SERVES' AND source_id=$2 ORDER BY target_id LIMIT 50",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "need!",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "c918b3c41df71c053cfd71e6b3b96c3b69c238efcb5c2cb26a9416a84d1e5411"
+}

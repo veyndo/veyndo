@@ -1,10 +1,9 @@
 //! Durable agent runs extend native tasks: admission with quota and replay detection, revision-bound status, cancel and explicit resume. Leases fence checkpoints and publication, never approved writes.
 use super::agent_controls::conversation_actor;
 use super::models::choice;
-use crate::store::agent_runs::{claim_conversation, project};
+use crate::store::agent_runs::{self as store, NewRun, claim_conversation, project};
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
-use sqlx::Row;
 use veyndo_cognition::inference::{InferenceError, budget};
 use veyndo_core::admission::reserve_ai_attempt_tx;
 use veyndo_core::document::{lenient, merge, view};
@@ -142,24 +141,8 @@ pub async fn enqueue(
             "Use a dedicated agent key with explicit budgets".into(),
         ));
     }
-    sqlx::query("SELECT pg_advisory_xact_lock(hashtextextended($1,2))")
-        .bind(&t)
-        .execute(&mut *tx)
-        .await?;
-    let request_key = request
-        .get("requestId")
-        .filter(|v| !v.is_null())
-        .map(|v| {
-            v.as_str()
-                .filter(|s| {
-                    !s.is_empty()
-                        && s.len() <= 64
-                        && s.bytes()
-                            .all(|b| b.is_ascii_alphanumeric() || b == b'-' || b == b'_')
-                })
-                .ok_or(bad("Invalid agent request ID"))
-        })
-        .transpose()?;
+    store::lock_shop(&mut *tx, &t).await?;
+    let request_key = request_key(&request)?;
     let mut fingerprint_input = vec![
         input.instruction.clone(),
         input.inference,
@@ -173,13 +156,28 @@ pub async fn enqueue(
     }
     let fingerprint_input = json!(fingerprint_input);
     let fingerprint = hash(&fingerprint_input.to_string());
-    if let Some(key)=request_key && let Some(existing)=sqlx::query("SELECT *,run_updated::text AS updated_text FROM tasks WHERE tenant=$1 AND run_actor=$2 AND run_key=$3 AND (run_request->>'agentId') IS NOT DISTINCT FROM $4").bind(&t).bind(actor).bind(key).bind(&h.principal.agent_key).fetch_optional(&mut *tx).await? {
-        if existing.get::<Option<String>,_>("run_fingerprint").as_deref()!=Some(&fingerprint) {return Err(conflict("Agent request ID was already used with different input"));}
-        let admitted:Value=existing.get("run_scopes");
-        if admitted.as_array().is_none_or(|s|s.iter().any(|s|s.as_str().is_none_or(|s|!allowed(h,s)))) {return Err(Error(StatusCode::FORBIDDEN,"Saved request evidence requires its original permissions".into()));}
+    if let Some(key) = request_key
+        && let Some(existing) =
+            store::replay(&mut *tx, &t, actor, key, h.principal.agent_key.as_deref()).await?
+    {
+        if existing.run_fingerprint.as_deref() != Some(&fingerprint) {
+            return Err(conflict(
+                "Agent request ID was already used with different input",
+            ));
+        }
+        let admitted = &existing.run_scopes;
+        if admitted
+            .as_array()
+            .is_none_or(|s| s.iter().any(|s| s.as_str().is_none_or(|s| !allowed(h, s))))
+        {
+            return Err(Error(
+                StatusCode::FORBIDDEN,
+                "Saved request evidence requires its original permissions".into(),
+            ));
+        }
         return Ok(project(&existing));
     }
-    let count:i64=sqlx::query_scalar("SELECT count(*) FROM tasks WHERE tenant=$1 AND run_state IN ('queued','running','uncertain')").bind(&t).fetch_one(&mut *tx).await?;
+    let count = store::backlog(&mut *tx, &t).await?;
     if count >= 20 {
         return Err(Error(
             StatusCode::TOO_MANY_REQUESTS,
@@ -189,37 +187,63 @@ pub async fn enqueue(
     if input.new_conversation == Some(true)
         && let Some(c) = conversation
     {
-        sqlx::query("INSERT INTO conversations(tenant,id,title,owner_id) VALUES($1,$2,$3,$4)")
-            .bind(&t)
-            .bind(c)
-            .bind(instruction.chars().take(70).collect::<String>())
-            .bind(conversation_actor(h))
-            .execute(&mut *tx)
-            .await?;
+        let title = instruction.chars().take(70).collect::<String>();
+        let owner = conversation_actor(h);
+        store::create_conversation(&mut *tx, &t, c, &title, owner.as_deref()).await?;
     }
     if let Some(c) = conversation {
-        let free:bool=sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM conversations WHERE tenant=$1 AND id=$2 AND (turn_until IS NULL OR turn_until<now()) AND NOT EXISTS(SELECT 1 FROM tasks WHERE tenant=$1 AND conversation_id=$2 AND run_state IN ('queued','running','uncertain'))) FOR UPDATE").bind(&t).bind(c).fetch_one(&mut *tx).await?;
+        let free = store::conversation_free(&mut *tx, &t, c).await?;
         if !free {
             return Err(conflict(
                 "A saved turn is already active in this conversation",
             ));
         }
-        sqlx::query("INSERT INTO chat_messages(tenant,conversation_id,role,content,data) VALUES($1,$2,'user',$3,$4)").bind(&t).bind(c).bind(instruction).bind(json!({"runId":id})).execute(&mut *tx).await?;
+        store::message(&mut *tx, &t, c, "user", instruction, &json!({"runId":id})).await?;
     }
     // Only new work consumes the shared budget. Replays above remain recoverable at the daily limit.
     reserve_ai_attempt_tx(a, &t, &mut tx).await?;
-    sqlx::query("INSERT INTO tasks(tenant,id,proposal,run_state,run_request,run_actor,run_scopes,run_credential,run_personal,conversation_id,run_key,run_fingerprint) VALUES($1,$2,'{}','queued',$3,$4,$5,$6,$7,$8,$9,$10)")
-        .bind(&t).bind(&id).bind(&request).bind(actor).bind(json!(scopes)).bind(credential).bind(h.principal.personal_session).bind(conversation).bind(request_key).bind(&fingerprint).execute(&mut *tx).await?;
+    store::insert(
+        &mut *tx,
+        &t,
+        NewRun {
+            id: &id,
+            request: &request,
+            actor,
+            scopes: &json!(scopes),
+            credential: credential.as_deref(),
+            personal: h.principal.personal_session,
+            conversation,
+            key: request_key,
+            fingerprint: &fingerprint,
+        },
+    )
+    .await?;
     if let Some(c) = conversation {
-        sqlx::query("UPDATE conversations SET turn_owner=$3,turn_until='infinity' WHERE tenant=$1 AND id=$2").bind(&t).bind(c).bind(&id).execute(&mut *tx).await?;
+        store::take_turn(&mut *tx, &t, c, &id).await?;
     }
     tx.commit().await?;
-    sqlx::query("SELECT pg_notify('veyndo_work_ready','')")
-        .execute(&a.db)
-        .await?;
+    store::notify_ready(&a.db).await?;
     Ok(
         json!({"taskId":id,"agentId":h.principal.agent_key,"state":"queued","revision":1,"approvalRequired":true,"conversationId":conversation}),
     )
+}
+
+/// The caller's replay key: absent, or 1..64 ASCII letters, digits, `-` or `_`.
+fn request_key(request: &Value) -> Result<Option<&str>> {
+    request
+        .get("requestId")
+        .filter(|v| !v.is_null())
+        .map(|v| {
+            v.as_str()
+                .filter(|s| {
+                    !s.is_empty()
+                        && s.len() <= 64
+                        && s.bytes()
+                            .all(|b| b.is_ascii_alphanumeric() || b == b'-' || b == b'_')
+                })
+                .ok_or(bad("Invalid agent request ID"))
+        })
+        .transpose()
 }
 
 /// A durable run request as it is stored and fingerprinted.
@@ -281,20 +305,13 @@ pub async fn operate(a: &State, h: &RequestContext, name: &str, v: &Value) -> Re
     } else {
         a.db.begin().await?
     };
-    sqlx::query("SELECT pg_advisory_xact_lock(hashtextextended($1,2))")
-        .bind(&t)
-        .execute(&mut *tx)
-        .await?;
-    let row = sqlx::query(
-        "SELECT *,run_updated::text AS updated_text FROM tasks WHERE tenant=$1 AND id=$2 AND run_state IS NOT NULL FOR UPDATE",
-    )
-    .bind(&t)
-    .bind(input.id.as_deref().ok_or(bad("Agent run ID required"))?)
-    .fetch_optional(&mut *tx)
-    .await?
-    .ok_or(Error(StatusCode::NOT_FOUND, "Agent run not found".into()))?;
-    let actor: String = row.get("run_actor");
-    let request: RunRequest = view(&row.get::<Value, _>("run_request"));
+    store::lock_shop(&mut *tx, &t).await?;
+    let run_id = input.id.as_deref().ok_or(bad("Agent run ID required"))?;
+    let row = store::locked(&mut *tx, &t, run_id)
+        .await?
+        .ok_or(Error(StatusCode::NOT_FOUND, "Agent run not found".into()))?;
+    let actor = row.run_actor.clone();
+    let request: RunRequest = view(&row.run_request);
     if !h.principal.personal_session
         && actor != "bootstrap"
         && (h.principal.agent_key.is_none()
@@ -315,7 +332,7 @@ pub async fn operate(a: &State, h: &RequestContext, name: &str, v: &Value) -> Re
             "Only the original run actor may access its continuation".into(),
         ));
     }
-    let scopes: Value = row.get("run_scopes");
+    let scopes = &row.run_scopes;
     if name != "merchant.run.cancel"
         && scopes
             .as_array()
@@ -326,14 +343,14 @@ pub async fn operate(a: &State, h: &RequestContext, name: &str, v: &Value) -> Re
             "Run evidence requires its original permissions".into(),
         ));
     }
-    let state: String = row.get("run_state");
-    let revision: i64 = row.get("run_revision");
+    let state = row.run_state.clone();
+    let revision = row.run_revision;
     if name == "merchant.run.status" {
         let mut value = project(&row);
         if state == "running"
-            && value["conversationId"].is_string()
+            && row.conversation_id.is_some()
             && h.principal.agent_key.is_none()
-            && let Some(views) = row.get::<Value, _>("run_checkpoint").get("app-views")
+            && let Some(views) = row.run_checkpoint.get("app-views")
         {
             value["appViews"] = views.clone();
         }
@@ -366,11 +383,11 @@ pub async fn operate(a: &State, h: &RequestContext, name: &str, v: &Value) -> Re
         "queued"
     };
     if next == "queued"
-        && let Some(c) = row.get::<Option<String>, _>("conversation_id")
+        && let Some(c) = &row.conversation_id
     {
-        claim_conversation(&mut tx, &t, &c, &row.get::<String, _>("id")).await?;
+        claim_conversation(&mut tx, &t, c, &row.id).await?;
     }
-    if next == "queued" && row.get::<bool, _>("run_personal") != h.principal.personal_session {
+    if next == "queued" && row.run_personal != h.principal.personal_session {
         return Err(Error(
             StatusCode::FORBIDDEN,
             "Use the original personal or integration credential kind to continue".into(),
@@ -382,29 +399,27 @@ pub async fn operate(a: &State, h: &RequestContext, name: &str, v: &Value) -> Re
     if actor != "bootstrap" && credential.is_none() {
         return Err(bad("Current run credential required"));
     }
-    sqlx::query("UPDATE tasks SET run_state=$3,run_error=NULL,run_pending=NULL,run_lease=NULL,run_until=NULL,run_credential=$4,run_personal=$5,run_revision=run_revision+1,run_updated=now() WHERE tenant=$1 AND id=$2")
-   .bind(&t).bind(row.get::<String,_>("id")).bind(next).bind(credential).bind(h.principal.personal_session).execute(&mut *tx).await?;
-    sqlx::query("UPDATE tasks SET run_after=now() WHERE tenant=$1 AND id=$2")
-        .bind(&t)
-        .bind(row.get::<String, _>("id"))
-        .execute(&mut *tx)
-        .await?;
-    sqlx::query("UPDATE translation_jobs SET status=$3,error=NULL,error_code=NULL,lease=NULL,lease_until=NULL WHERE tenant=$1 AND run_task=$2 AND status IN ('queued','processing','failed')")
-        .bind(&t).bind(row.get::<String,_>("id")).bind(if next=="cancelled" {"cancelled"} else {"queued"}).execute(&mut *tx).await?;
+    store::transition(
+        &mut tx,
+        &t,
+        &row.id,
+        next,
+        credential.as_deref(),
+        h.principal.personal_session,
+    )
+    .await?;
     if next == "cancelled" {
-        sqlx::query("UPDATE conversations SET turn_owner=NULL,turn_until=NULL WHERE tenant=$1 AND id=$2 AND turn_owner=$3").bind(&t).bind(row.get::<Option<String>,_>("conversation_id")).bind(row.get::<String,_>("id")).execute(&mut *tx).await?;
+        store::release_turn(&mut *tx, &t, row.conversation_id.as_deref(), &row.id).await?;
     }
     tx.commit().await?;
-    Ok(
-        json!({"taskId":row.get::<String,_>("id"),"state":next,"revision":revision+1,"approvalRequired":true}),
-    )
+    Ok(json!({"taskId":row.id,"state":next,"revision":revision+1,"approvalRequired":true}))
 }
 /// Compatibility wait is only a transport: dropping it never deletes the persisted run.
 pub async fn wait(a: &State, h: &RequestContext, id: &str) -> Result<Value> {
     let start = std::time::Instant::now();
     loop {
         let value = operate(a, h, "merchant.run.status", &json!({"id":id})).await?;
-        if ![Some("queued"), Some("running")].contains(&value["state"].as_str())
+        if ![Some("queued"), Some("running")].contains(&view::<RunStatus>(&value).state.as_deref())
             || start.elapsed().as_secs() >= 185
         {
             return Ok(value);
@@ -416,11 +431,27 @@ pub async fn wait(a: &State, h: &RequestContext, id: &str) -> Result<Value> {
 /// The caller's latest run in a conversation.
 pub async fn conversation_run(a: &State, h: &RequestContext, conversation: &str) -> Result<Value> {
     let t = merchant(h)?;
-    let id:Option<String>=sqlx::query_scalar("SELECT id FROM tasks WHERE tenant=$1 AND conversation_id=$2 AND run_actor=$3 AND ($4::boolean OR (run_request->>'agentId') IS NOT DISTINCT FROM $5) ORDER BY created_at DESC LIMIT 1").bind(t).bind(conversation).bind(header(h,"x-rac-user")).bind(h.principal.personal_session).bind(&h.principal.agent_key).fetch_optional(&a.db).await?;
+    let id = store::latest_in_conversation(
+        &a.db,
+        &t,
+        conversation,
+        header(h, "x-rac-user"),
+        h.principal.personal_session,
+        h.principal.agent_key.as_deref(),
+    )
+    .await?;
     match id {
         Some(id) => operate(a, h, "merchant.run.status", &json!({"id":id})).await,
         None => Ok(Value::Null),
     }
+}
+
+/// The state of a saved run.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct RunStatus {
+    #[serde(deserialize_with = "lenient")]
+    state: Option<String>,
 }
 
 #[cfg(test)]

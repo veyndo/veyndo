@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM knowledge_relations WHERE tenant=$1 AND kind='REFERENCES_PRODUCT' AND data->>'app'=$2 AND ($3='' OR data->>'sourceId'=$3)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "c63b3d443e920e61b61d0c104a6f091ec1471553e8f167bdf3cdc77f353be8e2"
+}

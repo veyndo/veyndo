@@ -1,8 +1,10 @@
 //! Explicit, additive Qdrant namespace migration and alias-aware projection deletion.
 use super::vectors::request;
 use reqwest::Method;
-use serde_json::json;
+use serde::Deserialize;
+use serde_json::{Value, json};
 use std::collections::{BTreeMap, BTreeSet};
+use veyndo_core::document::{lenient, view};
 
 fn namespace(value: &str) -> bool {
     !value.is_empty()
@@ -33,34 +35,30 @@ fn mapped(name: &str, from: &str) -> Option<(String, usize)> {
 }
 async fn collections() -> Result<BTreeSet<String>, String> {
     let data = request(Method::GET, "/collections", None).await?;
-    data["result"]["collections"]
-        .as_array()
+    view::<Listing>(&data)
+        .result
+        .collections
         .ok_or("Invalid Qdrant collections")?
         .iter()
         .map(|c| {
-            c["name"]
-                .as_str()
-                .map(str::to_owned)
+            view::<Collection>(c)
+                .name
                 .ok_or_else(|| "Invalid Qdrant collection name".into())
         })
         .collect()
 }
 async fn aliases() -> Result<BTreeMap<String, String>, String> {
     let data = request(Method::GET, "/aliases", None).await?;
-    data["result"]["aliases"]
-        .as_array()
+    view::<Listing>(&data)
+        .result
+        .aliases
         .ok_or("Invalid Qdrant aliases")?
         .iter()
         .map(|a| {
+            let a = view::<Alias>(a);
             Ok((
-                a["alias_name"]
-                    .as_str()
-                    .ok_or("Invalid Qdrant alias name")?
-                    .into(),
-                a["collection_name"]
-                    .as_str()
-                    .ok_or("Invalid Qdrant alias target")?
-                    .into(),
+                a.alias_name.ok_or("Invalid Qdrant alias name")?,
+                a.collection_name.ok_or("Invalid Qdrant alias target")?,
             ))
         })
         .collect()
@@ -91,8 +89,8 @@ pub async fn migrate_configured() -> Result<usize, String> {
             return Err("Qdrant namespace collision; no aliases changed".into());
         }
         let info = request(Method::GET, &format!("/collections/{old}"), None).await?;
-        let shape = &info["result"]["config"]["params"]["vectors"]["text"];
-        if shape["size"] != dimensions || shape["distance"] != "Cosine" {
+        let shape = vector_shape(&info);
+        if shape.size != dimensions || shape.distance != "Cosine" {
             return Err("Prior Qdrant collection shape mismatch; no aliases changed".into());
         }
         if !current_aliases.contains_key(&new) {
@@ -133,6 +131,100 @@ pub(super) async fn names(kind: &str) -> Result<BTreeSet<String>, String> {
     });
     Ok(result)
 }
+/// A Qdrant listing response.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct Listing {
+    #[serde(deserialize_with = "lenient")]
+    result: ListingResult,
+}
+
+/// Collections or aliases of a listing.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct ListingResult {
+    #[serde(deserialize_with = "lenient")]
+    collections: Option<Vec<Value>>,
+    #[serde(deserialize_with = "lenient")]
+    aliases: Option<Vec<Value>>,
+}
+
+/// One listed collection.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct Collection {
+    #[serde(deserialize_with = "lenient")]
+    name: Option<String>,
+}
+
+/// One listed alias.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct Alias {
+    #[serde(deserialize_with = "lenient")]
+    alias_name: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    collection_name: Option<String>,
+}
+
+/// A collection's description, down to its text vector geometry.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct CollectionInfo {
+    #[serde(deserialize_with = "lenient")]
+    result: InfoResult,
+}
+
+/// The collection result.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct InfoResult {
+    #[serde(deserialize_with = "lenient")]
+    config: InfoConfig,
+}
+
+/// The collection configuration.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct InfoConfig {
+    #[serde(deserialize_with = "lenient")]
+    params: InfoParams,
+}
+
+/// The collection parameters.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct InfoParams {
+    #[serde(deserialize_with = "lenient")]
+    vectors: InfoVectors,
+}
+
+/// The named vectors.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct InfoVectors {
+    #[serde(deserialize_with = "lenient")]
+    text: VectorShape,
+}
+
+/// The size and distance of the text vector.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+pub(super) struct VectorShape {
+    pub size: Value,
+    pub distance: Value,
+}
+
+/// The text vector geometry of a collection description.
+pub(super) fn vector_shape(info: &Value) -> VectorShape {
+    view::<CollectionInfo>(info)
+        .result
+        .config
+        .params
+        .vectors
+        .text
+}
+
 #[cfg(test)]
 mod tests {
     use super::{mapped, namespace};

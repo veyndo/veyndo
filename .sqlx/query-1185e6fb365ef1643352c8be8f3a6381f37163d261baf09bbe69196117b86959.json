@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO embedding_jobs(tenant,kind,object_id) SELECT p.tenant,'product',p.id FROM products p LEFT JOIN semantic_products s ON s.tenant=p.tenant AND s.product_id=p.id WHERE p.tenant=$1 AND ($2::text IS NULL) AND (s.product_id IS NULL OR s.embedding_model<>$3 OR s.content_hash<>encode(sha256(convert_to(p.name||E'\\n'||p.category||E'\\n'||p.description,'UTF8')),'hex') OR EXISTS(SELECT 1 FROM embedding_jobs j WHERE j.tenant=p.tenant AND j.kind='product' AND j.object_id=p.id)) ON CONFLICT(tenant,kind,object_id) DO UPDATE SET available_at=now(),attempts=0,error_code=NULL",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "1185e6fb365ef1643352c8be8f3a6381f37163d261baf09bbe69196117b86959"
+}

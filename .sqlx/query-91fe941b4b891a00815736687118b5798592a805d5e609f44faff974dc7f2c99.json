@@ -1,0 +1,18 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO knowledge_relations(tenant,kind,source_id,target_id,data) VALUES($1,$2,$3,$4,$5) ON CONFLICT(tenant,kind,source_id,target_id) DO UPDATE SET data=EXCLUDED.data",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text",
+        "Text",
+        "Jsonb"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "91fe941b4b891a00815736687118b5798592a805d5e609f44faff974dc7f2c99"
+}

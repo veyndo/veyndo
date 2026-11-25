@@ -3,10 +3,79 @@ use super::run_journal::{app_views, load, model, save};
 use crate::domain::prompt_context::{SOURCE_POLICY, snapshot};
 use crate::domain::tool_trace::{attachment_references, attachments};
 use crate::ports::AgentHost;
+use serde::Deserialize;
 use serde_json::{Value, json};
 use veyndo_cognition::inference::{Choice, Output};
+use veyndo_core::document::{lenient, view};
 use veyndo_core::model_contract::validate;
 use veyndo_core::{RequestContext, Result, bad, conflict, hash};
+/// The fields of an app tool declaration the read rounds use.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ToolView {
+    name: Value,
+    input_schema: Value,
+    #[serde(deserialize_with = "lenient")]
+    description: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    annotations: ToolAnnotations,
+    #[serde(rename = "_meta", deserialize_with = "lenient")]
+    meta: ToolMeta,
+}
+
+/// A tool's behaviour hints.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ToolAnnotations {
+    read_only_hint: Value,
+}
+
+/// A tool's host metadata.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct ToolMeta {
+    #[serde(deserialize_with = "lenient")]
+    ui: ToolUi,
+}
+
+/// The interactive view a tool returns.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ToolUi {
+    #[serde(deserialize_with = "lenient")]
+    resource_uri: Option<String>,
+}
+
+impl ToolView {
+    /// Whether the tool declares itself read-only.
+    fn read_only(&self) -> bool {
+        self.annotations.read_only_hint == true
+    }
+    /// The interactive view the tool returns, if any.
+    fn view_uri(&self) -> Option<&str> {
+        self.meta.ui.resource_uri.as_deref()
+    }
+}
+
+/// One tool call the model requested.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct ToolCall {
+    #[serde(deserialize_with = "lenient")]
+    name: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    arguments_json: Option<String>,
+    id: Value,
+    alias: Value,
+}
+
+/// The provider state a tool round continues from.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct Continuation {
+    tool_continuation: Value,
+}
+
 /// One admitted merchant read: an authorized read-only app tool or a declared native read operation.
 pub async fn read<H: AgentHost>(
     host: &H,
@@ -21,21 +90,21 @@ pub async fn read<H: AgentHost>(
         let tools = host.app_tools(h, false).await?;
         let tool = tools
             .iter()
-            .find(|v| v["name"] == name && v["annotations"]["readOnlyHint"] == true)
+            .map(view::<ToolView>)
+            .find(|v| v.name == name && v.read_only())
             .ok_or(bad(
                 "Agent app tool is not currently authorized and read-only",
             ))?;
-        validate(&tool["inputSchema"], input)?;
+        validate(&tool.input_schema, input)?;
         return Ok(bound(
-            &Box::pin(host.app_read(h, name, input, tool["_meta"]["ui"]["resourceUri"].as_str()))
-                .await?,
+            &Box::pin(host.app_read(h, name, input, tool.view_uri())).await?,
             0,
         ));
     }
     if !host
         .reads(h)
         .iter()
-        .any(|operation| operation["name"] == name)
+        .any(|operation| view::<ToolView>(operation).name == name)
     {
         return Err(bad("Agent tool is not a declared read operation"));
     }
@@ -101,18 +170,19 @@ pub async fn rounds_for<H: AgentHost>(
     let app_tools: Vec<_> = app_tools
         .into_iter()
         .filter(|tool| {
-            tool["annotations"]["readOnlyHint"] == true
-                && (!public || tool["_meta"]["ui"]["resourceUri"].is_string())
+            let tool = view::<ToolView>(tool);
+            tool.read_only() && (!public || tool.view_uri().is_some())
         })
         .take(24)
         .collect();
-    tools.extend(app_tools.iter().map(|tool| {
+    let app_views_of = app_tools.iter().map(view::<ToolView>).collect::<Vec<_>>();
+    tools.extend(app_tools.iter().zip(&app_views_of).map(|(tool, declared)| {
         let mut exposed = tool.clone();
         exposed.as_object_mut().unwrap().remove("_meta");
-        if tool["_meta"]["ui"]["resourceUri"].is_string() {
+        if declared.view_uri().is_some() {
             exposed["description"] = json!(format!(
                 "{} Returns an interactive app view in this conversation.",
-                tool["description"].as_str().unwrap_or_default()
+                declared.description.as_deref().unwrap_or_default()
             ));
         }
         exposed
@@ -152,9 +222,11 @@ pub async fn rounds_for<H: AgentHost>(
         }
         let mut native_results = Vec::new();
         for call in calls {
-            let name = call["name"].as_str().ok_or(bad("Invalid tool name"))?;
-            let raw = call["arguments_json"]
-                .as_str()
+            let requested = view::<ToolCall>(&call);
+            let name = requested.name.as_deref().ok_or(bad("Invalid tool name"))?;
+            let raw = requested
+                .arguments_json
+                .as_deref()
                 .filter(|s| s.len() <= 8192)
                 .ok_or(bad("Invalid tool arguments"))?;
             let input: Value =
@@ -162,17 +234,11 @@ pub async fn rounds_for<H: AgentHost>(
             let step_key = format!("read-{turn}-{}", hash(&call.to_string()));
             let cached = load(host, &step_key).await?;
             // Completed read results retain evidence, not permanent authorization to withdrawn sources.
-            let app_tool = app_tools.iter().find(|tool| tool["name"] == name);
+            let app_tool = app_views_of.iter().find(|tool| tool.name == name);
             let result = if let Some(tool) = app_tool {
-                validate(&tool["inputSchema"], &input)?;
+                validate(&tool.input_schema, &input)?;
                 bound(
-                    &Box::pin(host.app_read(
-                        h,
-                        name,
-                        &input,
-                        tool["_meta"]["ui"]["resourceUri"].as_str(),
-                    ))
-                    .await?,
+                    &Box::pin(host.app_read(h, name, &input, tool.view_uri())).await?,
                     0,
                 )
             } else if public {
@@ -195,16 +261,16 @@ pub async fn rounds_for<H: AgentHost>(
             } else {
                 save(host, &step_key, &result).await?;
             }
-            native_results.push(json!({"id":call["id"],"alias":call["alias"],"result":result}));
+            native_results.push(json!({"id":requested.id,"alias":requested.alias,"result":result}));
             let mut entry = json!({"tool":name,"input":input,"result":result});
-            if let Some(uri) = app_tool.and_then(|tool| tool["_meta"]["ui"]["resourceUri"].as_str())
-            {
+            let uri = app_tool.and_then(ToolView::view_uri);
+            if let Some(uri) = uri {
                 entry["appView"] = json!(uri);
             }
             if json!(transcript).to_string().len() + entry.to_string().len() > 32768 {
                 return Err(bad("Agent evidence budget exhausted"));
             }
-            let has_view = entry["appView"].is_string();
+            let has_view = uri.is_some();
             transcript.push(entry);
             if has_view {
                 if public {
@@ -216,7 +282,7 @@ pub async fn rounds_for<H: AgentHost>(
                 }
             }
         }
-        native_history.push(json!({"provider":output.provider,"assistant":output.usage["toolContinuation"],"results":native_results}));
+        native_history.push(json!({"provider":output.provider,"assistant":view::<Continuation>(&output.usage).tool_continuation,"results":native_results}));
         if json!(native_history).to_string().len() > 131072 {
             return Err(bad("Native tool continuation budget exceeded"));
         }

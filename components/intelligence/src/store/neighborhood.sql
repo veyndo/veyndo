@@ -8,7 +8,7 @@ WITH RECURSIVE connected(id,depth) AS (
  AND r.valid_from<=now() AND (r.valid_until IS NULL OR r.valid_until>now()) ORDER BY r.source_id,r.target_id LIMIT 8) r ON true
  WHERE c.depth<2
 ), bounded AS (SELECT DISTINCT id FROM connected ORDER BY id LIMIT 48)
-SELECT jsonb_build_object('kind',r.kind,'sourceId',r.source_id,'targetId',r.target_id,'evidence',r.data)
+SELECT jsonb_build_object('kind',r.kind,'sourceId',r.source_id,'targetId',r.target_id,'evidence',r.data) AS "edge!"
 FROM knowledge_relations r LEFT JOIN knowledge_documents d ON d.tenant=r.tenant AND d.id=r.data->>'sourceId'
 WHERE r.tenant=$1 AND r.state='confirmed' AND r.valid_from<=now() AND (r.valid_until IS NULL OR r.valid_until>now())
 AND (r.source_id IN(SELECT id FROM bounded) OR r.target_id IN(SELECT id FROM bounded))

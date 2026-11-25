@@ -5,6 +5,8 @@ use super::super::run_journal as checkpoint;
 use super::admit;
 use super::{evidence, shopper, source};
 use crate::ports::AgentHost;
+use crate::store::agent_runs::{Lease, complete_scenario, step_pending};
+use crate::store::scenario_reports::extension_digest;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use serde_json::json;
@@ -131,8 +133,11 @@ pub async fn execute<H: AgentHost>(
         .ok_or(bad("Invalid customer profile"))?
         .remove("budgetMinor");
     customer["budgetAmount"] = json!(
-        veyndo_pricing::money::Money::new(profile["budgetMinor"].as_i64().unwrap_or(0), currency)
-            .decimal()
+        veyndo_pricing::money::Money::new(
+            view::<Profile>(profile).budget_minor.unwrap_or(0),
+            currency,
+        )
+        .decimal()
     );
     customer["budgetCurrency"] = req.scenario.currency.clone();
     let choice = choice(request)?;
@@ -151,8 +156,7 @@ pub async fn execute<H: AgentHost>(
         let products = shopper::products(host, &guest, "").await?;
         let (settings, revision) =
             scoped_config(a, t, req.channel.as_str().unwrap_or("default")).await?;
-        let extensions: String = sqlx::query_scalar("SELECT md5(coalesce(string_agg(stamp,'|' ORDER BY stamp),'')) FROM (SELECT 'app:'||id||':'||digest||':'||revision||':'||active AS stamp FROM app_packages WHERE tenant=$1 UNION ALL SELECT 'rule:'||id||':'||revision FROM commerce_rules WHERE tenant=$1 UNION ALL SELECT 'flow:'||id||':'||revision FROM commerce_flows WHERE tenant=$1 UNION ALL SELECT 'promotion:'||id||':'||revision FROM commerce_promotions WHERE tenant=$1 UNION ALL SELECT 'channel:'||id||':'||revision FROM sales_channels WHERE tenant=$1) versions")
-            .bind(t).fetch_one(&a.db).await?;
+        let extensions = extension_digest(&a.db, t).await?;
         let state = JourneyState {
             token: cart.get("token").cloned().unwrap_or_default(),
             snapshot_digest: json!(hash(&json!({"products":products,"settings":settings,"revision":revision,"extensions":extensions}).to_string())),
@@ -201,9 +205,12 @@ pub async fn execute<H: AgentHost>(
         let run = CURRENT
             .try_with(Clone::clone)
             .map_err(|_| bad("Scenario requires worker admission"))?;
-        let admitted = sqlx::query("UPDATE tasks SET run_pending=$4 WHERE tenant=$1 AND id=$2 AND run_state='running' AND run_lease=$3 AND run_until>now()")
-            .bind(t).bind(id).bind(&run.lease).bind(format!("scenario-step-{index}")).execute(&a.db).await?.rows_affected();
-        if admitted != 1 {
+        let lease = Lease {
+            tenant: t,
+            id,
+            lease: &run.lease,
+        };
+        if !step_pending(a, lease, &format!("scenario-step-{index}")).await? {
             return Err(conflict("Customer simulation stopped"));
         }
         let result = perform(
@@ -232,9 +239,12 @@ pub async fn execute<H: AgentHost>(
     let run = CURRENT
         .try_with(Clone::clone)
         .map_err(|_| bad("Scenario requires worker admission"))?;
-    let changed = sqlx::query("UPDATE tasks SET proposal=$4,applied=true,run_state='ready',run_pending=NULL,run_lease=NULL,run_until=NULL,run_revision=run_revision+1,run_updated=now() WHERE tenant=$1 AND id=$2 AND run_state='running' AND run_lease=$3 AND run_until>now()")
-        .bind(t).bind(id).bind(&run.lease).bind(&report).execute(&a.db).await?.rows_affected();
-    if changed != 1 {
+    let lease = Lease {
+        tenant: t,
+        id,
+        lease: &run.lease,
+    };
+    if !complete_scenario(a, lease, &report).await? {
         return Err(conflict("Scenario completion lost its lease"));
     }
     Ok(report)
@@ -259,19 +269,21 @@ async fn perform<H: AgentHost>(
         Some("detail") => {
             let value =
                 shopper::call(host, h, "catalog.detail", &json!({"productId":product})).await?;
+            let found = view::<Detail>(&value).product;
             Ok(
-                json!({"id":product,"name":value["product"]["name"],"description":value["product"]["description"].as_str().unwrap_or("").chars().take(800).collect::<String>(),"price":value["product"]["price"]}),
+                json!({"id":product,"name":found.name,"description":found.description.as_deref().unwrap_or("").chars().take(800).collect::<String>(),"price":found.price}),
             )
         }
         Some("add") => {
             let cart = load_cart(a, h).await?;
             let quote = shopper::call(host, h, "cart.quote", &json!({})).await?;
-            let mut items: Vec<Value> = quote["lineItems"]
-                .as_array()
+            let mut items: Vec<Value> = view::<Basket>(&quote)
+                .line_items
                 .into_iter()
                 .flatten()
-                .filter(|p| p["id"].as_str() != Some(product))
-                .map(|p| json!({"id":p["id"],"quantity":p["quantity"]}))
+                .map(|p| view::<BasketLine>(&p))
+                .filter(|p| p.id.as_str() != Some(product))
+                .map(|p| json!({"id":p.id,"quantity":p.quantity}))
                 .collect();
             // Set this product's exact quantity while retaining the rest of the
             // basket. A lost acknowledgement cannot increment it a second time.
@@ -290,7 +302,7 @@ async fn perform<H: AgentHost>(
             let cart = load_cart(a, h).await?;
             let q = cart.data.order.as_ref().unwrap_or(&order);
             Ok(
-                json!({"orderId":order["id"],"totalMinor":q["cart"]["price"]["totalMinor"].as_str().and_then(|s|s.parse::<i64>().ok()),"simulated":true}),
+                json!({"orderId":view::<BasketLine>(&order).id,"totalMinor":view::<PlacedOrder>(q).cart.price.total_minor.as_deref().and_then(|s|s.parse::<i64>().ok()),"simulated":true}),
             )
         }
         Some("finish") => Ok(json!({"stopped":true})),
@@ -394,4 +406,70 @@ mod tests {
         assert_eq!(blocked.outcome, "blocked");
         assert_eq!(step["error"], json!({"status":409,"detail":"stop"}));
     }
+}
+
+/// The budget of a simulated customer profile.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct Profile {
+    #[serde(deserialize_with = "lenient")]
+    budget_minor: Option<i64>,
+}
+
+/// A product detail read.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct Detail {
+    #[serde(deserialize_with = "lenient")]
+    product: DetailProduct,
+}
+
+/// The product fields a simulated customer sees.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct DetailProduct {
+    name: Value,
+    #[serde(deserialize_with = "lenient")]
+    description: Option<String>,
+    price: Value,
+}
+
+/// A cart quote's line items.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct Basket {
+    #[serde(deserialize_with = "lenient")]
+    line_items: Option<Vec<Value>>,
+}
+
+/// A quoted line, or a placed order's ID.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct BasketLine {
+    id: Value,
+    quantity: Value,
+}
+
+/// The total of a placed order.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct PlacedOrder {
+    #[serde(deserialize_with = "lenient")]
+    cart: PlacedCart,
+}
+
+/// The order's cart price.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct PlacedCart {
+    #[serde(deserialize_with = "lenient")]
+    price: PlacedPrice,
+}
+
+/// The order's total in minor units, as a decimal string.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct PlacedPrice {
+    #[serde(deserialize_with = "lenient")]
+    total_minor: Option<String>,
 }

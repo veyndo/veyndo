@@ -1,0 +1,19 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO pair_evidence(tenant,left_id,right_id,order_id,event_id,simulated) VALUES($1,$2,$3,$4,$5,$6) ON CONFLICT DO NOTHING",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text",
+        "Text",
+        "Int8",
+        "Bool"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "66c082cb45c9c9eae494d4ca83044eb4bf85c4a3fb0ef3714e67c67d8e787d2f"
+}

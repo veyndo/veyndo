@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT jsonb_build_object('products',(SELECT count(*) FROM products WHERE tenant=$1),'sources',(SELECT count(*) FROM knowledge_documents WHERE tenant=$1 AND NOT archived),'published',(SELECT count(*) FROM knowledge_documents WHERE tenant=$1 AND visibility='public' AND NOT archived),'archived',(SELECT count(*) FROM knowledge_documents WHERE tenant=$1 AND archived),'chunks',(SELECT count(*) FROM knowledge_chunks c JOIN knowledge_documents d ON d.tenant=c.tenant AND d.id=c.document_id WHERE c.tenant=$1 AND NOT d.archived),'indexedChunks',(SELECT count(*) FROM knowledge_chunks c JOIN knowledge_documents d ON d.tenant=c.tenant AND d.id=c.document_id WHERE c.tenant=$1 AND NOT d.archived AND embedding IS NOT NULL),'external',(SELECT count(*) FROM app_evidence e JOIN app_packages p ON p.tenant=e.tenant AND p.id=e.app WHERE e.tenant=$1 AND p.active),'observedPairs',(SELECT count(*) FROM observed_pairs WHERE tenant=$1),'processedEvents',(SELECT count(*) FROM knowledge_receipts WHERE tenant=$1),'approvedSuggestions',(SELECT count(*) FROM knowledge_hypotheses WHERE tenant=$1 AND state='published'),'productViews',(SELECT coalesce(sum(views),0) FROM session_signals WHERE tenant=$1),'cartAdds',(SELECT coalesce(sum(cart_adds),0) FROM session_signals WHERE tenant=$1),'reviews',(SELECT count(*) FROM product_reviews WHERE tenant=$1 AND approved)) AS \"totals!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "totals!",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "f9124a4bb0af59ffe11d6469c007cdc627cf049b97690ceb361d0976f462e078"
+}

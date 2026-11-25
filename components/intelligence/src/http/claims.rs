@@ -1,9 +1,10 @@
 //! Public claim intake and compilation: bounded batches under the current channel admission, without one request per product.
-use crate::domain::claim_batch::{Compile, Intake};
+use crate::domain::claim_batch::{Compile, CurrentClaim, Intake};
 use crate::service::claims::facts;
 use axum::Json;
 use axum::extract::State as Shared;
 use serde_json::{Value, json};
+use veyndo_core::document::view;
 use veyndo_core::{RequestContext, Result, State};
 
 /// The current statements of each requested product.
@@ -14,7 +15,7 @@ pub async fn intake(
 ) -> Result<Json<Value>> {
     let current = facts(&a, &h, &v.product_ids).await?;
     Ok(Json(
-        json!({"products":v.product_ids.iter().map(|id|json!({"productId":id,"statements":current.iter().filter(|c|c["productId"]==*id).collect::<Vec<_>>()})).collect::<Vec<_>>() }),
+        json!({"products":v.product_ids.iter().map(|id|json!({"productId":id,"statements":current.iter().filter(|c|view::<CurrentClaim>(c).product_id==*id).collect::<Vec<_>>()})).collect::<Vec<_>>() }),
     ))
 }
 

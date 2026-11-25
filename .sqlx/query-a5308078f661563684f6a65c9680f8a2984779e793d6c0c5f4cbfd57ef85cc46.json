@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE embedding_generations SET cursor=$2,updated_at=now() WHERE tenant=$1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "a5308078f661563684f6a65c9680f8a2984779e793d6c0c5f4cbfd57ef85cc46"
+}

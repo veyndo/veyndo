@@ -1,0 +1,30 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT arm FROM intelligence_assignments WHERE tenant=$1 AND experiment_id=$2 AND cart_id=$3",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "arm",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "intelligence_assignments",
+            "name": "arm"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "8ff6f6df1f0b46e555998da4cd44572d2a84d2ef9a07a4a087cf698748bb8ffb"
+}

@@ -983,7 +983,7 @@ behavioral coverage is implied.
 ### Forced-RLS lexical candidates
 
 `migrations/079-knowledge-lexical-indexes.sql` owns transactional word projection
-backfill/triggers and composite source containment. `components/intelligence/src/knowledge/search.sql`
+backfill/triggers and composite source containment. `components/intelligence/src/store/search.sql`
 and `components/intelligence/src/store/source_search.sql` narrow candidates, then hydrate/rank/admit current
 native records. `components/intelligence/src/service/retrieval.rs` remains the public/private
 retrieval owner; product questions, the no-model preview and the product knowledge view use it

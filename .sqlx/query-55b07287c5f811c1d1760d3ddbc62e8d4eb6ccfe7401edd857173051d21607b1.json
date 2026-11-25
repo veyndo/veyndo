@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "WITH held AS MATERIALIZED (SELECT state,lease_until FROM flow_jobs WHERE tenant=$1 AND id=$2 FOR UPDATE) SELECT state='running' AND lease_until>clock_timestamp() AS \"held!\" FROM held",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "held!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "55b07287c5f811c1d1760d3ddbc62e8d4eb6ccfe7401edd857173051d21607b1"
+}

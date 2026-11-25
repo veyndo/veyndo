@@ -3,10 +3,10 @@ use crate::domain::behavior_input::{Event, browser};
 use crate::domain::trusted_geography::country;
 use crate::service::consent::require_locked;
 use crate::store::behavior as store;
+use crate::store::product_reads::{cart_locked, customer_by_email};
 use axum::Json;
 use axum::extract::State as Shared;
 use serde_json::{Value, json};
-use sqlx::Row;
 use veyndo_checkout::store::cart_load::load as load_cart;
 use veyndo_core::shop_scope::{header, session_digest, tenant};
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad, conflict};
@@ -37,11 +37,7 @@ pub async fn capture(
     }
     let customer = if header(&h, "x-customer-token").is_some() {
         let email = identify(&a, &tenant(&h)?, &session_digest(&h)?).await?;
-        sqlx::query_scalar::<_, String>("SELECT id FROM customers WHERE tenant=$1 AND email=$2")
-            .bind(&c.tenant)
-            .bind(email)
-            .fetch_optional(&a.db)
-            .await?
+        customer_by_email(&a.db, &c.tenant, &email).await?
     } else {
         None
     };
@@ -51,15 +47,11 @@ pub async fn capture(
     }
     let mut tx = a.db.begin().await?;
     // Same lock order as consent withdrawal: cart -> settings -> receipt.
-    let row = sqlx::query("SELECT data,status FROM carts WHERE tenant=$1 AND id=$2 FOR UPDATE")
-        .bind(&c.tenant)
-        .bind(&c.id)
-        .fetch_one(&mut *tx)
-        .await?;
-    if row.get::<String, _>("status") != "open" {
+    let row = cart_locked(&mut *tx, &c.tenant, &c.id).await?;
+    if row.status != "open" {
         return Err(conflict("Behavioral events require an open cart context"));
     }
-    let current: Cart = serde_json::from_value(row.get("data")).map_err(|e| bad(e.to_string()))?;
+    let current: Cart = serde_json::from_value(row.data).map_err(|e| bad(e.to_string()))?;
     require_locked(&mut tx, &c, "analytics").await?;
     let (settings, _) = scoped_locked(
         &mut tx,

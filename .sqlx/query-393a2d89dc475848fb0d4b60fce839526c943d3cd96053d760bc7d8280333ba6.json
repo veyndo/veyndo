@@ -1,0 +1,25 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT EXISTS(SELECT 1 FROM embedding_generations\n                     WHERE tenant=coalesce((SELECT live_tenant FROM shop_environments WHERE tenant=$1),$1)\n                       AND model=$2 AND model_revision=$3 FOR SHARE) AS \"current!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "current!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "393a2d89dc475848fb0d4b60fce839526c943d3cd96053d760bc7d8280333ba6"
+}

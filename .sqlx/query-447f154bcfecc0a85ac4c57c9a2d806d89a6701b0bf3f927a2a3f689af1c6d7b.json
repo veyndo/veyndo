@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM knowledge_relations WHERE tenant=$1 AND kind='HAS_DOCUMENT' AND target_id=$2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "447f154bcfecc0a85ac4c57c9a2d806d89a6701b0bf3f927a2a3f689af1c6d7b"
+}

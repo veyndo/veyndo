@@ -1,0 +1,19 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO semantic_products(tenant,product_id,revision,embedding,embedding_model,content_hash) SELECT tenant,id,revision,$3,$4,$5 FROM products WHERE tenant=$1 AND id=$2 AND name||E'\\n'||category||E'\\n'||description=$6 ON CONFLICT(tenant,product_id) DO UPDATE SET revision=EXCLUDED.revision,embedding=EXCLUDED.embedding,embedding_model=EXCLUDED.embedding_model,content_hash=EXCLUDED.content_hash,updated_at=now()",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Float4Array",
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "741ac5ed6a10b1660703c0c87a68e52795973def6de5c875d0b5163fb4c3eaab"
+}

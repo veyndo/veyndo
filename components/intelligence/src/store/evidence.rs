@@ -1,7 +1,7 @@
 //! Source-bound claim lifecycle on the knowledge relation ledger; no model text becomes a confirmed fact automatically.
 use serde::Deserialize;
 use serde_json::{Value, json};
-use sqlx::{Postgres, Row, Transaction};
+use sqlx::{Postgres, Transaction};
 use veyndo_core::document::{lenient, view};
 use veyndo_core::{Error, Result, State, StatusCode, bad, conflict, uid};
 use veyndo_kernel::verified_kernel;
@@ -25,20 +25,21 @@ pub const NODE_TYPES: &[&str] = &[
 ];
 /// The claims of a product; `public` keeps only confirmed ones on current public sources.
 pub async fn claims(a: &State, t: &str, id: &str, public: bool) -> Result<Value> {
-    let rows: Vec<Value> = sqlx::query_scalar(include_str!("evidence_read.sql"))
-        .bind(t)
-        .bind(id)
-        .bind(public)
-        .fetch_all(&a.db)
-        .await?;
+    let rows = claim_rows(a, t, id, public).await?;
     Ok(json!({"productId":id,"claims":rows,"nodeTypes":NODE_TYPES,"modelWeightsUpdated":false}))
+}
+
+/// The claim records of a product, newest first (at most 100).
+pub async fn claim_rows(a: &State, t: &str, id: &str, public: bool) -> Result<Vec<Value>> {
+    Ok(
+        sqlx::query_file_scalar!("src/store/evidence_read.sql", t, id, public)
+            .fetch_all(&a.db)
+            .await?,
+    )
 }
 /// The current confirmed public claims of several products in one language, in one bounded read.
 pub async fn claim_facts(a: &State, t: &str, ids: &[String], locale: &str) -> Result<Vec<Value>> {
-    let rows: Vec<Value> = sqlx::query_scalar(include_str!("claim_batch.sql"))
-        .bind(t)
-        .bind(ids)
-        .bind(locale)
+    let rows = sqlx::query_file_scalar!("src/store/claim_batch.sql", t, ids, locale)
         .fetch_all(&a.db)
         .await?;
     Ok(rows)
@@ -77,6 +78,18 @@ struct ClaimDecision {
     revision: Option<u64>,
 }
 
+/// The source a stored claim was extracted from.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ClaimSource {
+    #[serde(deserialize_with = "lenient")]
+    source_id: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    content_hash: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    source_revision: Option<i64>,
+}
+
 /// Records a proposed claim whose quote is present in the current source; a merchant decides on it later.
 pub async fn propose_in(
     tx: &mut Transaction<'_, Postgres>,
@@ -105,20 +118,23 @@ pub async fn propose_in(
         return Err(bad("Claim language must be enabled"));
     }
 
-    let exists: bool =
-        sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM products WHERE tenant=$1 AND id=$2)")
-            .bind(t)
-            .bind(product)
-            .fetch_one(&mut **tx)
-            .await?;
+    let exists = sqlx::query_scalar!(
+        r#"SELECT EXISTS(SELECT 1 FROM products WHERE tenant=$1 AND id=$2) AS "exists!""#,
+        t,
+        product
+    )
+    .fetch_one(&mut **tx)
+    .await?;
     if !exists {
         return Err(Error(StatusCode::NOT_FOUND, "Product not found".into()));
     }
-    let row=sqlx::query("SELECT content_hash,revision FROM knowledge_documents WHERE tenant=$1 AND id=$2 AND NOT archived AND (product_id IS NULL OR product_id=$3) FOR SHARE").bind(t).bind(source).bind(product).fetch_optional(&mut **tx).await?.ok_or(Error(StatusCode::NOT_FOUND,"Source not found for product".into()))?;
-    if input.content_hash.as_deref() != Some(row.get::<&str, _>("content_hash")) {
+    let row = sqlx::query!("SELECT content_hash,revision FROM knowledge_documents WHERE tenant=$1 AND id=$2 AND NOT archived AND (product_id IS NULL OR product_id=$3) FOR SHARE",
+        t, source, product).fetch_optional(&mut **tx).await?.ok_or(Error(StatusCode::NOT_FOUND,"Source not found for product".into()))?;
+    if input.content_hash.as_deref() != Some(row.content_hash.as_str()) {
         return Err(conflict("Source changed; retrieve current evidence"));
     }
-    let sourced:bool=sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM knowledge_chunks WHERE tenant=$1 AND document_id=$2 AND locale=$3 AND position($4 in text)>0)").bind(t).bind(source).bind(locale).bind(quote).fetch_one(&mut **tx).await?;
+    let sourced = sqlx::query_scalar!(r#"SELECT EXISTS(SELECT 1 FROM knowledge_chunks WHERE tenant=$1 AND document_id=$2 AND locale=$3 AND position($4 in text)>0) AS "sourced!""#,
+        t, source, locale, quote).fetch_one(&mut **tx).await?;
     if !sourced {
         return Err(bad("Quote is absent from this source/language"));
     }
@@ -127,8 +143,9 @@ pub async fn propose_in(
     if !NODE_TYPES.contains(&node_type) {
         return Err(bad("Unknown fact node type"));
     }
-    let data = json!({"text":text,"quote":quote,"locale":locale,"sourceId":source,"sourceRevision":row.get::<i64,_>("revision"),"contentHash":input.content_hash,"sourceType":"document","truthVerified":false,"nodeType":node_type});
-    sqlx::query("INSERT INTO knowledge_relations(tenant,kind,source_id,target_id,target_kind,state,data,actor,confidence) VALUES($1,'CLAIMS',$2,$3,$7,'proposed',$4,$5,$6)").bind(t).bind(product).bind(&id).bind(data).bind(actor).bind(confidence).bind(node_type).execute(&mut **tx).await?;
+    let data = json!({"text":text,"quote":quote,"locale":locale,"sourceId":source,"sourceRevision":row.revision,"contentHash":input.content_hash,"sourceType":"document","truthVerified":false,"nodeType":node_type});
+    sqlx::query!("INSERT INTO knowledge_relations(tenant,kind,source_id,target_id,target_kind,state,data,actor,confidence) VALUES($1,'CLAIMS',$2,$3,$7,'proposed',$4,$5,$6::float8)",
+        t, product, id, data, actor, confidence, node_type).execute(&mut **tx).await?;
 
     Ok(json!({"id":id,"revision":1,"state":"proposed","approvalRequired":true}))
 }
@@ -157,17 +174,20 @@ pub async fn decide(a: &State, t: &str, actor: Option<&str>, v: &Value) -> Resul
         .ok_or(bad("Invalid evidence state"))?;
     let id = input.id.as_deref().ok_or(bad("Claim ID required"))?;
     let mut tx = a.db.begin().await?;
-    let row=sqlx::query("SELECT source_id,data,revision FROM knowledge_relations WHERE tenant=$1 AND kind='CLAIMS' AND target_id=$2 FOR UPDATE").bind(t).bind(id).fetch_optional(&mut *tx).await?.ok_or(Error(StatusCode::NOT_FOUND,"Claim not found".into()))?;
-    let revision = row.get::<i64, _>("revision");
+    let row = sqlx::query!("SELECT source_id,data,revision FROM knowledge_relations WHERE tenant=$1 AND kind='CLAIMS' AND target_id=$2 FOR UPDATE",
+        t, id).fetch_optional(&mut *tx).await?.ok_or(Error(StatusCode::NOT_FOUND,"Claim not found".into()))?;
+    let revision = row.revision;
     if !verified_kernel::revision_admissible(revision as u64, input.revision.unwrap_or(0)) {
         return Err(conflict("Claim revision changed"));
     }
-    let data: Value = row.get("data");
-    let fresh:bool=sqlx::query_scalar("SELECT true FROM knowledge_documents WHERE tenant=$1 AND id=$2 AND content_hash=$3 AND revision=$4 AND NOT archived FOR SHARE").bind(t).bind(data["sourceId"].as_str()).bind(data["contentHash"].as_str()).bind(data["sourceRevision"].as_i64()).fetch_optional(&mut *tx).await?.unwrap_or(false);
+    let data: ClaimSource = view(&row.data);
+    let fresh = sqlx::query_scalar!(r#"SELECT true AS "fresh!" FROM knowledge_documents WHERE tenant=$1 AND id=$2 AND content_hash=$3 AND revision=$4 AND NOT archived FOR SHARE"#,
+        t, data.source_id, data.content_hash, data.source_revision).fetch_optional(&mut *tx).await?.unwrap_or(false);
     if !fresh && state != "rejected" {
         return Err(conflict("Source changed or archived; extract again"));
     }
-    sqlx::query("UPDATE knowledge_relations SET state=$1,actor=$2 WHERE tenant=$3 AND kind='CLAIMS' AND target_id=$4").bind(state).bind(actor.unwrap_or("integration")).bind(t).bind(id).execute(&mut *tx).await?;
+    sqlx::query!("UPDATE knowledge_relations SET state=$1,actor=$2 WHERE tenant=$3 AND kind='CLAIMS' AND target_id=$4",
+        state, actor.unwrap_or("integration"), t, id).execute(&mut *tx).await?;
     veyndo_core::store::outbox::publish_on(
         &mut *tx,
         t,

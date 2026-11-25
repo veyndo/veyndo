@@ -3,7 +3,6 @@ use super::models::{Models, embedding_model as model};
 use crate::knowledge;
 use crate::store::embedding_generations::{advance, model_revision};
 use crate::store::embedding_jobs as store;
-use sqlx::Row;
 use veyndo_cognition::inference::budget::is_budgeted;
 use veyndo_core::store::lease::Lease;
 use veyndo_core::{Result, State, bad};
@@ -38,7 +37,7 @@ pub async fn index_once(m: Models<'_>) -> Result<bool> {
     if jobs.is_empty() {
         return Ok(advanced);
     }
-    let tenant: String = jobs[0].get("tenant");
+    let tenant = jobs[0].tenant.clone();
     let sources = store::sources(m.core, &tenant, &jobs).await?;
     if sources.is_empty() {
         return Ok(true);

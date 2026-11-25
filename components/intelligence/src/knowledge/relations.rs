@@ -1,21 +1,11 @@
 //! Keep knowledge provenance and relations in the same transaction as canonical commerce data.
 use super::PgPool;
+use crate::store::relations as store;
+use crate::store::relations::edge;
 use serde::Deserialize;
 use serde_json::{Value, json};
 use sqlx::PgConnection;
 use veyndo_core::document::{lenient, view};
-async fn edge(
-    conn: &mut PgConnection,
-    tenant: &str,
-    kind: &str,
-    left: &str,
-    right: &str,
-    data: Value,
-) -> Result<(), sqlx::Error> {
-    sqlx::query("INSERT INTO knowledge_relations(tenant,kind,source_id,target_id,data) VALUES($1,$2,$3,$4,$5) ON CONFLICT(tenant,kind,source_id,target_id) DO UPDATE SET data=EXCLUDED.data")
-        .bind(tenant).bind(kind).bind(left).bind(right).bind(data).execute(conn).await?;
-    Ok(())
-}
 /// The JSON fields `sync_product` reads, typed as it reads them.
 #[derive(Deserialize, Default)]
 #[serde(default, rename_all = "camelCase")]
@@ -31,16 +21,11 @@ pub async fn sync_product(
 ) -> Result<(), sqlx::Error> {
     let input: SyncProductInput = view(product);
     // Preserve canonical-product locking used by order observation transactions.
-    sqlx::query("SELECT id FROM products WHERE tenant=$1 AND id=$2 FOR UPDATE")
-        .bind(tenant)
-        .bind(input.id.as_deref())
-        .fetch_one(conn)
-        .await?;
-    Ok(())
+    store::lock_product(conn, tenant, input.id.as_deref()).await
 }
 pub async fn seed_relations(db: &PgPool, tenant: &str) -> Result<(), sqlx::Error> {
     let mut tx = db.begin().await?;
-    let fashion: bool = sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM products WHERE tenant=$1 AND id='coat' AND extra->'demo'->>'catalogVersion'='nord-atelier-v1')").bind(tenant).fetch_one(&mut *tx).await?;
+    let fashion = store::fashion_demo(&mut *tx, tenant).await?;
     let needs = if fashion {
         vec![
             ("coat", vec!["layering", "cold-weather"]),
@@ -69,7 +54,7 @@ pub async fn seed_relations(db: &PgPool, tenant: &str) -> Result<(), sqlx::Error
     for (id, needs) in needs {
         for need in needs {
             edge(
-                &mut tx,
+                &mut *tx,
                 tenant,
                 "SERVES",
                 id,
@@ -101,7 +86,7 @@ pub async fn seed_relations(db: &PgPool, tenant: &str) -> Result<(), sqlx::Error
     };
     for (left, right) in pairs {
         edge(
-            &mut tx,
+            &mut *tx,
             tenant,
             "PAIRS_WITH",
             left,
@@ -113,10 +98,12 @@ pub async fn seed_relations(db: &PgPool, tenant: &str) -> Result<(), sqlx::Error
     tx.commit().await
 }
 pub async fn graph(db: &PgPool, tenant: &str) -> Result<Value, sqlx::Error> {
-    let needs:Vec<Value>=sqlx::query_scalar("SELECT jsonb_build_object('product_id',r.source_id,'need',r.target_id,'source',r.data->'source','confidence',r.data->'confidence') FROM knowledge_relations r JOIN products p ON p.tenant=r.tenant AND p.id=r.source_id WHERE r.tenant=$1 AND r.kind='SERVES' ORDER BY r.source_id,r.target_id LIMIT 48").bind(tenant).fetch_all(db).await?;
-    let pairs:Vec<Value>=sqlx::query_scalar("SELECT jsonb_build_object('left',r.source_id,'right',r.target_id,'source',r.data->'source') FROM knowledge_relations r JOIN products p ON p.tenant=r.tenant AND p.id=r.source_id JOIN products q ON q.tenant=r.tenant AND q.id=r.target_id WHERE r.tenant=$1 AND r.kind='PAIRS_WITH' ORDER BY r.source_id,r.target_id LIMIT 48").bind(tenant).fetch_all(db).await?;
-    let observed:Vec<Value>=sqlx::query_scalar("SELECT jsonb_build_object('left',r.source_id,'right',r.target_id,'orders',r.data->'orders','source',r.data->'source','lastEvent',r.data->'event_id') FROM knowledge_relations r JOIN products p ON p.tenant=r.tenant AND p.id=r.source_id JOIN products q ON q.tenant=r.tenant AND q.id=r.target_id WHERE r.tenant=$1 AND r.kind='CO_PURCHASED' ORDER BY (r.data->>'orders')::bigint DESC,r.source_id,r.target_id LIMIT 24").bind(tenant).fetch_all(db).await?;
-    let documents:Vec<Value>=sqlx::query_scalar("SELECT jsonb_build_object('product_id',r.source_id,'document_id',d.id,'title',d.title,'source','merchant-document') FROM knowledge_relations r JOIN products p ON p.tenant=r.tenant AND p.id=r.source_id JOIN knowledge_documents d ON d.tenant=r.tenant AND d.id=r.target_id AND d.visibility='public' AND NOT d.archived WHERE r.tenant=$1 AND r.kind='HAS_DOCUMENT' ORDER BY r.source_id,d.id LIMIT 100").bind(tenant).fetch_all(db).await?;
+    let store::Graph {
+        needs,
+        pairs,
+        observed,
+        documents,
+    } = store::graph(db, tenant).await?;
     Ok(
         json!({"engine":"PostgreSQL","tenant":tenant,"needs":needs,"pairs":pairs,"observedPairs":observed,"documents":documents,"facts":"SERVES/PAIRS_WITH are curated; CO_PURCHASED are order observations with evidence, not causal claims"}),
     )
@@ -129,13 +116,7 @@ pub async fn sync_document(
     _title: &str,
     _digest: &str,
 ) -> Result<(), sqlx::Error> {
-    sqlx::query(
-        "DELETE FROM knowledge_relations WHERE tenant=$1 AND kind='HAS_DOCUMENT' AND target_id=$2",
-    )
-    .bind(tenant)
-    .bind(id)
-    .execute(&mut *conn)
-    .await?;
+    store::unlink_document(&mut *conn, tenant, id).await?;
     if let Some(product) = product {
         edge(
             conn,
@@ -192,11 +173,11 @@ pub async fn sync_integration(
 ) -> Result<(), sqlx::Error> {
     // JSON tuple identity avoids ambiguity from separators in provider IDs.
     let key = json!([app, id]).to_string();
-    sqlx::query("DELETE FROM knowledge_relations WHERE tenant=$1 AND kind='REFERENCES_PRODUCT' AND data->>'app'=$2 AND ($3='' OR data->>'sourceId'=$3)").bind(tenant).bind(app).bind(id).execute(&mut *conn).await?;
+    store::unlink_integration(&mut *conn, tenant, app, id).await?;
     if !deleted && let Some(ids) = view::<IntegrationSource>(source).metadata.product_ids {
         for product in ids.iter().filter_map(Value::as_str).take(30) {
             edge(
-                conn,
+                &mut *conn,
                 tenant,
                 "REFERENCES_PRODUCT",
                 &key,

@@ -13,19 +13,18 @@ use veyndo_core::shop_scope::channel as channel_id;
 
 pub async fn resolve(a: &State, h: &RequestContext, id: &str) -> Result<Value> {
     let run = Box::pin(operate(a, h, "merchant.run.status", &json!({"id":id}))).await?;
-    if run["state"] != "ready" || run["approvalRequired"] != false || !run["scenario"].is_null() {
+    let run: SourceRun = view(&run);
+    if run.state != "ready" || run.approval_required != false || !run.scenario.is_null() {
         return Err(conflict(
             "Apply the completed agent proposal in this sandbox before testing it",
         ));
     }
-    if run["channel"].as_str().unwrap_or("default") != channel_id(h) {
+    if run.channel.as_str().unwrap_or("default") != channel_id(h) {
         return Err(conflict(
             "Open the source proposal's sales channel before testing it",
         ));
     }
-    Ok(
-        json!({"taskId":id,"revision":run["revision"],"proposalDigest":hash(&run["preview"].to_string())}),
-    )
+    Ok(json!({"taskId":id,"revision":run.revision,"proposalDigest":hash(&run.preview.to_string())}))
 }
 
 /// The JSON fields `recheck` reads, typed as it reads them.
@@ -46,4 +45,16 @@ pub async fn recheck(a: &State, h: &RequestContext, source: &Value) -> Result<()
         ));
     }
     Ok(())
+}
+
+/// The status of the proposal a customer test references.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct SourceRun {
+    state: Value,
+    approval_required: Value,
+    scenario: Value,
+    channel: Value,
+    revision: Value,
+    preview: Value,
 }

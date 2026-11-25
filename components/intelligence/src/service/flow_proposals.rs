@@ -1,4 +1,5 @@
 //! Scheduled Flow results become native reviewable tasks; only personal approval supplies execution authority.
+use crate::store::flow_proposals as store;
 use serde::Deserialize;
 use serde_json::{Value, json};
 use veyndo_core::document::{lenient, view};
@@ -54,8 +55,7 @@ pub async fn persist(
     }
     // Serialize with recovery. A late provider response cannot publish a ready
     // task once the original worker lost its lease, even before recovery runs.
-    let held:Option<bool>=sqlx::query_scalar("WITH held AS MATERIALIZED (SELECT state,lease_until FROM flow_jobs WHERE tenant=$1 AND id=$2 FOR UPDATE) SELECT state='running' AND lease_until>clock_timestamp() FROM held")
-        .bind(t).bind(job).fetch_optional(&mut *tx).await?;
+    let held = store::lease_held(&mut *tx, t, job).await?;
     if held != Some(true) {
         return Err(conflict("Flow worker lost its lease"));
     }
@@ -65,16 +65,14 @@ pub async fn persist(
         if !(1..=100).contains(&limit) {
             return Err(bad("Invalid template limit"));
         }
-        let count:i64=sqlx::query_scalar("SELECT count(*) FROM tasks task JOIN flow_jobs source ON source.tenant=task.tenant AND source.id=task.run_request->>'sourceJobId' WHERE task.tenant=$1 AND source.flow=(SELECT flow FROM flow_jobs WHERE tenant=$1 AND id=$2) AND task.created_at>=date_trunc('day',now() AT TIME ZONE 'UTC') AT TIME ZONE 'UTC'")
-            .bind(t).bind(job).fetch_one(&mut *tx).await?;
+        let count = store::flow_proposals_today(&mut *tx, t, job).await?;
         if count >= limit as i64 {
             return Err(Error(
                 StatusCode::TOO_MANY_REQUESTS,
                 "Flow review limit reached for today (UTC)".into(),
             ));
         }
-        let pending:i64=sqlx::query_scalar("SELECT count(*) FROM tasks WHERE tenant=$1 AND proposal ? 'templateSource' AND created_at>=date_trunc('day',now() AT TIME ZONE 'UTC') AT TIME ZONE 'UTC'")
-            .bind(t).fetch_one(&mut *tx).await?;
+        let pending = store::template_proposals_today(&mut *tx, t).await?;
         if pending >= 100 {
             return Err(Error(
                 StatusCode::TOO_MANY_REQUESTS,
@@ -84,8 +82,7 @@ pub async fn persist(
     }
     // No credential, queued state or execution is manufactured. The existing
     // approval owner binds a real current personal session before any worker write.
-    sqlx::query("INSERT INTO tasks(id,tenant,proposal,run_state,run_actor,run_scopes,run_request) VALUES($1,$2,$3,'ready',$4,$5,$6)")
-        .bind(id).bind(t).bind(evidence).bind(actor).bind(json!(scopes)).bind(request).execute(&mut *tx).await?;
+    store::insert_ready(&mut *tx, id, t, evidence, actor, &json!(scopes), &request).await?;
     tx.commit().await?;
     Ok(())
 }

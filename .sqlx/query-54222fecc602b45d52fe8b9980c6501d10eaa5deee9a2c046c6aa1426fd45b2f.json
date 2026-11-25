@@ -1,0 +1,18 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO intelligence_experiments(tenant,id,channel,data,state,actor) VALUES($1,$2,$3,$4,'draft',$5)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text",
+        "Jsonb",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "54222fecc602b45d52fe8b9980c6501d10eaa5deee9a2c046c6aa1426fd45b2f"
+}

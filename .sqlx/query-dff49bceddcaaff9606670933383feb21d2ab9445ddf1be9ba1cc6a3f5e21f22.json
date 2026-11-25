@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE intelligence_experiments SET state='stopped',revision=revision+1 WHERE tenant=$1 AND id=$2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "dff49bceddcaaff9606670933383feb21d2ab9445ddf1be9ba1cc6a3f5e21f22"
+}

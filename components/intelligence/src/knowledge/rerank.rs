@@ -1,7 +1,18 @@
 //! Optional TEI cross-encoder reranking on at most 24 tenant-hydrated texts; malformed or unavailable providers retain fused ordering.
 use super::PgPool;
+use crate::store::product_reads::texts;
+use serde::Deserialize;
 use serde_json::{Value, json};
-use sqlx::Row;
+use veyndo_core::document::{lenient, view};
+
+/// The product a search hit names.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct Hit {
+    #[serde(deserialize_with = "lenient")]
+    id: Option<String>,
+}
+
 pub async fn apply(tenant: &str, query: &str, hits: &mut [Value], db: &PgPool) -> bool {
     let Ok(url) = std::env::var("RERANKER_URL") else {
         return false;
@@ -11,31 +22,21 @@ pub async fn apply(tenant: &str, query: &str, hits: &mut [Value], db: &PgPool) -
     }
     let ids = hits
         .iter()
-        .filter_map(|v| v["id"].as_str())
+        .filter_map(|v| view::<Hit>(v).id)
         .collect::<Vec<_>>();
-    let Ok(rows) =
-        sqlx::query("SELECT id,name,description FROM products WHERE tenant=$1 AND id=ANY($2)")
-            .bind(tenant)
-            .bind(ids)
-            .fetch_all(db)
-            .await
-    else {
+    let Ok(rows) = texts(db, tenant, &ids).await else {
         return false;
     };
     let texts = hits
         .iter()
         .map(|hit| {
             rows.iter()
-                .find(|r| Some(r.get::<&str, _>("id")) == hit["id"].as_str())
+                .find(|r| Some(&r.id) == view::<Hit>(hit).id.as_ref())
                 .map(|r| {
-                    format!(
-                        "{} {}",
-                        r.get::<&str, _>("name"),
-                        r.get::<&str, _>("description")
-                    )
-                    .chars()
-                    .take(4000)
-                    .collect::<String>()
+                    format!("{} {}", r.name, r.description)
+                        .chars()
+                        .take(4000)
+                        .collect::<String>()
                 })
                 .unwrap_or_default()
         })
@@ -66,23 +67,24 @@ pub async fn apply(tenant: &str, query: &str, hits: &mut [Value], db: &PgPool) -
     let Ok(scores) = validate(&value, hits.len()) else {
         return false;
     };
-    for (hit, score) in hits.iter_mut().zip(scores) {
+    let mut scored = scores
+        .into_iter()
+        .zip(hits.iter().cloned())
+        .collect::<Vec<_>>();
+    scored.sort_by(|a, b| b.0.total_cmp(&a.0));
+    for (slot, (score, mut hit)) in hits.iter_mut().zip(scored) {
         hit["rerankScore"] = json!(score);
+        *slot = hit;
     }
-    hits.sort_by(|a, b| {
-        b["rerankScore"]
-            .as_f64()
-            .unwrap()
-            .total_cmp(&a["rerankScore"].as_f64().unwrap())
-    });
     true
 }
 fn validate(value: &Value, count: usize) -> Result<Vec<f64>, ()> {
     let rows = value.as_array().filter(|v| v.len() == count).ok_or(())?;
     let mut scores = vec![None; count];
     for row in rows {
-        let i = row["index"].as_u64().ok_or(())? as usize;
-        let score = row["score"].as_f64().filter(|v| v.is_finite()).ok_or(())?;
+        let row = view::<Scored>(row);
+        let i = row.index.ok_or(())? as usize;
+        let score = row.score.filter(|v| v.is_finite()).ok_or(())?;
         if i >= count || scores[i].is_some() {
             return Err(());
         }
@@ -90,6 +92,16 @@ fn validate(value: &Value, count: usize) -> Result<Vec<f64>, ()> {
     }
     scores.into_iter().map(|v| v.ok_or(())).collect()
 }
+/// One reranker score for the text at `index`.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct Scored {
+    #[serde(deserialize_with = "lenient")]
+    index: Option<u64>,
+    #[serde(deserialize_with = "lenient")]
+    score: Option<f64>,
+}
+
 #[cfg(test)]
 mod tests {
     use super::validate;

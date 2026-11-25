@@ -7,7 +7,7 @@ use veyndo_checkout::store::cart_load::load as load_cart;
 use veyndo_core::RequestContext;
 use veyndo_core::Result;
 use veyndo_core::bad;
-use veyndo_core::document::{lenient, view};
+use veyndo_core::document::{lenient, lenient_list, view};
 use veyndo_shipping::domain::geography::catalogue;
 use veyndo_shop::service::read_cache::settings as scoped_config;
 /// The language, channel and currency a fictional shopper uses.
@@ -85,7 +85,7 @@ pub fn observation(v: &Value) -> Value {
     // Positive projection: nested customer/configuration payloads and capabilities
     // never enter model input or reports, including after a completed checkout.
     json!({"revision":args.revision,"status":args.status,"price":args.price,"selectionNeedsConfirmation":args.selection_needs_confirmation,
-        "items":args.line_items.as_array().map(|items|items.iter().map(|i|json!({"id":i["id"],"name":i["label"],"quantity":i["quantity"],"price":i["price"],"stock":i["stock"]})).collect::<Vec<_>>())})
+        "items":args.line_items.as_array().map(|items|items.iter().map(|i|{let i=view::<ObservedLine>(i);json!({"id":i.id,"name":i.label,"quantity":i.quantity,"price":i.price,"stock":i.stock})}).collect::<Vec<_>>())})
 }
 /// The JSON fields `purchase` reads, typed as it reads them.
 #[derive(Deserialize, Default)]
@@ -154,11 +154,14 @@ pub async fn review<H: AgentHost>(
         .unwrap_or_default();
     let address = json!({"firstName":"Scenario","lastName":"Shopper","street":"Teststrasse 1","zipcode":"10115","city":"Test City","country":country,"countryStateId":region});
     let quote = call(host,h,"checkout.select",&json!({"revision":cart.revision,"checkout":{"country":country,"shippingMethodId":shipping.id,"paymentMethodId":payment.id,"address":address,"billingAddress":address,"customerEmail":"scenario@example.test"}})).await?;
-    let minor = quote["price"]["totalMinor"]
-        .as_str()
+    let quote: Reviewed = view(&quote);
+    let minor = quote
+        .price
+        .total_minor
+        .as_deref()
         .and_then(|s| s.parse::<i64>().ok())
         .ok_or(bad("Native quote has no exact total"))?;
-    Ok((quote["revision"].clone(), minor))
+    Ok((quote.revision, minor))
 }
 pub async fn accept<H: AgentHost>(host: &H, h: &RequestContext) -> Result<()> {
     let policy = call(host, h, "privacy.policy", &json!({})).await?;
@@ -166,7 +169,7 @@ pub async fn accept<H: AgentHost>(host: &H, h: &RequestContext) -> Result<()> {
         host,
         h,
         "legal.accept",
-        &json!({"policyVersion":policy["policyVersion"],"terms":true,"digitalImmediate":true}),
+        &json!({"policyVersion":view::<Policy>(&policy).policy_version,"terms":true,"digitalImmediate":true}),
     )
     .await?;
     Ok(())
@@ -210,8 +213,107 @@ pub async fn products<H: AgentHost>(host: &H, h: &RequestContext, query: &str) -
         &json!({"query":query,"limit":12}),
     )
     .await?;
-    let rows = found["elements"]
-        .as_array()
-        .or_else(|| found["products"].as_array());
-    Ok(json!(rows.into_iter().flatten().map(|p|json!({"id":p["id"],"name":p["name"],"description":p["description"].as_str().unwrap_or("").chars().take(800).collect::<String>(),"price":p["price"],"stock":p["stock"]})).collect::<Vec<_>>()))
+    let found: Found = view(&found);
+    let rows = found.elements.or(found.products);
+    Ok(json!(rows.into_iter().flatten().map(|p|{let p=view::<Listed>(&p);json!({"id":p.id,"name":p.name,"description":p.description.as_deref().unwrap_or("").chars().take(800).collect::<String>(),"price":p.price,"stock":p.stock})}).collect::<Vec<_>>()))
+}
+
+/// A quoted cart line as a simulated customer observes it.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct ObservedLine {
+    id: Value,
+    label: Value,
+    quantity: Value,
+    price: Value,
+    stock: Value,
+}
+
+/// A reviewed checkout quote.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct Reviewed {
+    revision: Value,
+    #[serde(deserialize_with = "lenient")]
+    price: ReviewedPrice,
+}
+
+/// The exact total of a reviewed quote.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ReviewedPrice {
+    #[serde(deserialize_with = "lenient")]
+    total_minor: Option<String>,
+}
+
+/// The privacy policy version a customer accepts.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct Policy {
+    policy_version: Value,
+}
+
+/// A catalogue search result in either list shape.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct Found {
+    #[serde(deserialize_with = "lenient")]
+    elements: Option<Vec<Value>>,
+    #[serde(deserialize_with = "lenient")]
+    products: Option<Vec<Value>>,
+}
+
+/// A listed product as a simulated customer sees it.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct Listed {
+    id: Value,
+    name: Value,
+    #[serde(deserialize_with = "lenient")]
+    description: Option<String>,
+    price: Value,
+    stock: Value,
+}
+
+/// A product of the observed catalogue, as probes pick one.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+pub struct Stocked {
+    #[serde(deserialize_with = "lenient")]
+    pub id: Option<String>,
+    pub name: Value,
+    #[serde(deserialize_with = "lenient")]
+    pub stock: Option<i64>,
+}
+
+/// A cart line's quantity after a change.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+pub struct ChangedLine {
+    #[serde(deserialize_with = "lenient")]
+    pub quantity: Option<i64>,
+}
+
+/// A changed cart's lines.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+pub struct Changed {
+    #[serde(deserialize_with = "lenient_list")]
+    pub line_items: Vec<ChangedLine>,
+}
+
+/// A created cart's capability, or a placed order's ID.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+pub struct Created {
+    #[serde(deserialize_with = "lenient")]
+    pub token: Option<String>,
+    pub id: Value,
+}
+
+/// The outcome of one probe.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+pub struct Outcome {
+    pub outcome: Value,
 }

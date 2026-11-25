@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO embedding_generations(tenant,model,model_revision)\n         SELECT t.id,$1,$2 FROM tenants t LEFT JOIN embedding_generations g ON g.tenant=t.id\n         WHERE t.status='active' AND (g.tenant IS NULL OR g.model_revision<$2)\n         ORDER BY t.id LIMIT 1\n         ON CONFLICT(tenant) DO UPDATE SET model=EXCLUDED.model,model_revision=EXCLUDED.model_revision,\n             phase='product',cursor='',updated_at=now()\n         WHERE embedding_generations.model_revision<EXCLUDED.model_revision",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Int8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "1fdd45f3f2f2dca4eec65c34fa8b9e0820ded13b48a2eefd0d5872e438962ab4"
+}

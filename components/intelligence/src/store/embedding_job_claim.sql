@@ -12,4 +12,4 @@ WITH candidate AS (
  ORDER BY j.available_at,j.kind,j.object_id LIMIT 32 FOR UPDATE OF j SKIP LOCKED
 )
 UPDATE embedding_jobs j SET attempts=attempts+CASE WHEN j.lease IS NULL THEN 0 ELSE 1 END,lease=$1,lease_until=now()+interval '90 seconds'
-FROM picked p WHERE j.tenant=p.tenant AND j.kind=p.kind AND j.object_id=p.object_id RETURNING j.*;
+FROM picked p WHERE j.tenant=p.tenant AND j.kind=p.kind AND j.object_id=p.object_id RETURNING j.tenant,j.kind,j.object_id,j.revision,j.lease AS "lease!";

@@ -18,8 +18,8 @@ pub async fn fence_commit(a: &State, tx: &mut sqlx::Transaction<'_, sqlx::Postgr
     let Some(run) = CURRENT.try_with(Clone::clone).ok() else {
         return Ok(());
     };
-    let row = sqlx::query("SELECT * FROM tasks WHERE tenant=$1 AND id=$2 AND run_state='running' AND run_lease=$3 AND run_until>statement_timestamp() FOR UPDATE")
-        .bind(&run.tenant).bind(&run.id).bind(&run.lease).fetch_optional(&mut **tx).await?
+    let row = store::running_locked(tx, lease(&run))
+        .await?
         .ok_or(conflict("Agent run stopped before commerce commit"))?;
     if a.db.has_separate_authority() {
         // The signed runtime has a separate, restricted system pool. Never
@@ -28,32 +28,27 @@ pub async fn fence_commit(a: &State, tx: &mut sqlx::Transaction<'_, sqlx::Postgr
     } else {
         // Legacy development uses one pool. Reuse the connection under the
         // native owner's legacy scope; signed tickets are never changed here.
-        let previous: String = sqlx::query_scalar("SELECT current_setting('rac.system',true)")
-            .fetch_one(&mut **tx)
-            .await?;
-        sqlx::query("SELECT set_config('rac.system','on',true)")
-            .execute(&mut **tx)
-            .await?;
+        let previous = store::system_setting(tx).await?;
+        store::set_system_setting(tx, "on").await?;
         let result = headers_on(&mut *tx, &row).await;
-        sqlx::query("SELECT set_config('rac.system',$1,true)")
-            .bind(previous)
-            .execute(&mut **tx)
-            .await?;
+        store::set_system_setting(tx, &previous).await?;
         result?;
     }
     // Row-lock and authority waits may cross the lease deadline. A fresh
     // statement checks time after those waits while we still own the task lock.
-    let current: bool = sqlx::query_scalar(
-        "SELECT run_until>statement_timestamp() FROM tasks WHERE tenant=$1 AND id=$2",
-    )
-    .bind(&run.tenant)
-    .bind(&run.id)
-    .fetch_one(&mut **tx)
-    .await?;
+    let current = store::lease_current(tx, &run.tenant, &run.id).await?;
     if !current {
         return Err(conflict("Agent lease expired before commerce commit"));
     }
     Ok(())
+}
+/// The lease of a run.
+fn lease(run: &super::agent_runs::Run) -> store::Lease<'_> {
+    store::Lease {
+        tenant: &run.tenant,
+        id: &run.id,
+        lease: &run.lease,
+    }
 }
 /// Rechecks the running lease, the saved credential and the saved context's sources.
 pub async fn authorize<H: AgentHost>(host: &H) -> Result<()> {
@@ -61,8 +56,9 @@ pub async fn authorize<H: AgentHost>(host: &H) -> Result<()> {
     let Some(run) = CURRENT.try_with(Clone::clone).ok() else {
         return Ok(());
     };
-    let row=sqlx::query("SELECT * FROM tasks WHERE tenant=$1 AND id=$2 AND run_state='running' AND run_lease=$3 AND run_until>now()")
-        .bind(&run.tenant).bind(&run.id).bind(&run.lease).fetch_optional(&a.db).await?.ok_or(conflict("Agent run cancelled or lease lost"))?;
+    let row = store::running(a, lease(&run))
+        .await?
+        .ok_or(conflict("Agent run cancelled or lease lost"))?;
     let h = headers(a, &row).await?;
     let saved: Value = row.get("run_checkpoint");
     if let Some(context) = saved.get("context") {

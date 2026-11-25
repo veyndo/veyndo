@@ -1,0 +1,31 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT count(*) AS \"payments!\",coalesce(percentile_cont(0.95) WITHIN GROUP (ORDER BY p.amount_minor),0)::bigint AS \"p95!\" FROM payment_attempts p WHERE p.tenant=$1 AND p.currency=$2 AND p.environment='live' AND p.state IN ('captured','captured_late') AND p.capture_confirmed_at>now()-interval '30 days'",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "payments!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "p95!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null,
+      null
+    ]
+  },
+  "hash": "b71487b677014df29bd7ecff70c9a26a0874f1e1702a28ae21a2b620394f5685"
+}

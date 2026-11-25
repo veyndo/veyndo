@@ -64,11 +64,6 @@
       "category": "in-place-edit"
     },
     {
-      "file": "components/intelligence/src/service/platform_ai.rs",
-      "function": "save",
-      "category": "keyed-lookup"
-    },
-    {
       "file": "components/marketing/src/domain/rule_comparison.rs",
       "function": "bounded",
       "category": "keyed-lookup"

@@ -1,6 +1,7 @@
 //! One explicit sandbox-only product creation delegates to native CAS/history/outbox; stable IDs reconcile retries without overwrites.
 use super::{Draft, public_client};
 use crate::ports::IntakeHost;
+use crate::store::product_reads::extra;
 use serde::Deserialize;
 use serde_json::{Value, json};
 use uuid::Uuid;
@@ -65,14 +66,9 @@ pub(super) async fn save(
         .filter(|r| r.is_finite() && (0.0..=50.0).contains(r))
         .ok_or(bad("Review the product tax rate"))?;
     let digest = hash(&v.to_string());
-    let existing: Option<Value> =
-        sqlx::query_scalar("SELECT extra FROM products WHERE tenant=$1 AND id=$2")
-            .bind(t)
-            .bind(id)
-            .fetch_optional(&a.db)
-            .await?;
+    let existing = extra(&a.db, t, id).await?;
     if let Some(extra) = existing {
-        if extra["identity"]["catalogIntakeDigest"] == digest {
+        if view::<IntakeExtra>(&extra).identity.catalog_intake_digest == digest {
             return Ok(json!({"id":id,"saved":true,"replayed":true}));
         }
         return Err(conflict(
@@ -92,4 +88,19 @@ pub(super) async fn save(
     };
     let payload = json!({"id":id,"revision":0,"settingsRevision":input.settings_revision,"translations":{locale:{"name":draft.name,"description":draft.description}},"extra":{"priceCurrency":s.currencies.base_currency,"demo":input.demo,"identity":{"catalogIntakeDigest":digest,"importSource":draft.source}},"catalog":{"active":true,"productNumber":if draft.product_number.is_empty(){format!("IMPORT-{id}")}else{draft.product_number},"categoryIds":["catalog-root"],"options":{}},"commerce":{"price":draft.price,"taxRate":rate,"stock":if input.demo==true{20}else{0},"minPurchase":1,"purchaseSteps":1,"maxPurchase":null,"deliveryDays":0,"listPrice":null,"advancedPrices":[],"media":media,"properties":{}}});
     host.create(h, payload).await
+}
+
+/// The intake identity a saved product carries in its `extra` document.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct IntakeExtra {
+    #[serde(deserialize_with = "lenient")]
+    identity: IntakeIdentity,
+}
+
+/// The digest of the intake request that created the product.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct IntakeIdentity {
+    catalog_intake_digest: Value,
 }

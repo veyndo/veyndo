@@ -1,4 +1,5 @@
 //! Merchant-owned AI price guardrails: corridors, margins, discounts and the autonomy limit, measured in native currency amounts.
+use super::prompt_context::price_currency;
 use serde::{Deserialize, Serialize};
 use veyndo_core::{Result, bad, conflict};
 use veyndo_kernel::verified_kernel;
@@ -23,9 +24,8 @@ pub fn check(s: &Settings, p: &Product, c: &Change, autonomous: bool) -> Result<
     let Some(price) = c.price else {
         return Ok(());
     };
-    let code = p.extra["priceCurrency"]
-        .as_str()
-        .unwrap_or(&s.currencies.pricing_currency);
+    let own = price_currency(&p.extra);
+    let code = own.as_deref().unwrap_or(&s.currencies.pricing_currency);
     let scale = s
         .currencies
         .definitions

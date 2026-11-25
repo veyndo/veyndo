@@ -1,0 +1,29 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT content FROM product_assets WHERE tenant=$1 AND id=$2 AND mime IN ('image/png','image/jpeg','image/webp') AND octet_length(content)<=8388608",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "content",
+        "type_info": "Bytea",
+        "origin": {
+          "Table": {
+            "table": "product_assets",
+            "name": "content"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "173069dcc8c5cdf998344b769258dc7622ba64422b227a44762a98f606c017c4"
+}

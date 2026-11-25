@@ -1,0 +1,29 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT (to_jsonb(d)-'tenant'-'content'-'translations') || jsonb_build_object('title',COALESCE(d.translations->$6->>'title',d.translations->$7->>'title',d.title),'chunkCount',(SELECT count(*) FROM knowledge_chunks c WHERE c.tenant=d.tenant AND c.document_id=d.id),'indexedChunks',(SELECT count(*) FROM knowledge_chunks c WHERE c.tenant=d.tenant AND c.document_id=d.id AND embedding IS NOT NULL),'translationLocales',(SELECT coalesce(jsonb_agg(key),'[]') FROM jsonb_object_keys(d.translations) AS key)) AS \"source!\" FROM knowledge_documents d WHERE tenant=$1 AND id>$2 AND archived=$3 AND ($4='' OR title ILIKE '%' || $4 || '%' OR content ILIKE '%' || $4 || '%' OR translations::text ILIKE '%' || $4 || '%') AND ($5='' OR kind=$5) ORDER BY id LIMIT 51",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "source!",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Bool",
+        "Text",
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "de4c02c06659934537d9c9e4db98efbb76d7f2151bb681ef758a3267ee7d54e6"
+}

@@ -1,0 +1,18 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE tasks SET run_state=$3,run_error=NULL,run_pending=NULL,run_lease=NULL,run_until=NULL,run_credential=$4,run_personal=$5,run_revision=run_revision+1,run_updated=now() WHERE tenant=$1 AND id=$2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text",
+        "Text",
+        "Bool"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "607cb9aaca815368ab18d3dc0ce649115948224e3de4a2594de5404ac7e50999"
+}

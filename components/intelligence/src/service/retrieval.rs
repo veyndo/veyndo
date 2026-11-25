@@ -4,9 +4,11 @@ use super::models::{Models, embedding_model};
 use crate::knowledge;
 use crate::store::context_products::localized_products;
 use crate::store::documents as sources;
+use crate::store::vectors as store;
+use serde::Deserialize;
 use serde_json::{Value, json};
-use sqlx::Row;
 use veyndo_cognition::inference::budget::is_budgeted;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::store::lease::Lease;
 use veyndo_core::{Result, State, bad};
 use veyndo_pricing::domain::catalog::Product;
@@ -18,13 +20,7 @@ pub async fn retrieve(m: Models<'_>, t: &str, q: &str) -> Result<Value> {
         return Err(bad("Query must contain 1..2000 characters"));
     }
     let model = embedding_model();
-    let indexed: bool = sqlx::query_scalar(
-        "SELECT EXISTS(SELECT 1 FROM semantic_products WHERE tenant=$1 AND embedding_model=$2)",
-    )
-    .bind(t)
-    .bind(&model)
-    .fetch_one(&m.core.db)
-    .await?;
+    let indexed = store::indexed(&m.core.db, t, &model).await?;
     let vector = if indexed {
         query_embedding(
             m,
@@ -41,7 +37,7 @@ pub async fn retrieve(m: Models<'_>, t: &str, q: &str) -> Result<Value> {
         && m.inference.admit_endpoint(&reranker).await.is_ok()
         && let Ok(_slot) = m.slot()
         && let Ok(_lease) = Lease::acquire(m.core, t, "reranker", 1).await
-        && let Some(hits) = result["hits"].as_array_mut()
+        && let Some(hits) = result.get_mut("hits").and_then(Value::as_array_mut)
     {
         let reranked = knowledge::rerank::apply(t, q, hits, &m.core.db).await;
         result["reranked"] = json!(reranked);
@@ -58,11 +54,11 @@ pub async fn context_retrieval(
     query: &str,
 ) -> Result<(Vec<Product>, Value)> {
     let search = retrieve(m, t, query).await?;
-    let ids = search["hits"]
-        .as_array()
+    let ids = view::<Search>(&search)
+        .hits
         .into_iter()
         .flatten()
-        .filter_map(|v| v["id"].as_str().map(str::to_owned))
+        .filter_map(|v| view::<Hit>(&v).id)
         .collect::<Vec<_>>();
     Ok((
         localized_products(m.core, t, chain, &ids, true).await?,
@@ -109,16 +105,26 @@ pub async fn search_in(m: Models<'_>, t: &str, q: SourceQuery<'_>) -> Result<Val
 }
 /// The shop's index progress, its error counts and the first indexed products.
 pub async fn knowledge_status(a: &State, t: &str) -> Result<Value> {
-    let rows = sqlx::query("SELECT product_id,embedding_model,content_hash,vector_digest FROM semantic_products WHERE tenant=$1 ORDER BY product_id LIMIT 200")
-        .bind(t).fetch_all(&a.db).await?;
-    let status = sqlx::query(
-        "SELECT indexed_products,pending_jobs FROM knowledge_index_status WHERE tenant=$1",
-    )
-    .bind(t)
-    .fetch_optional(&a.db)
-    .await?;
-    let errors:Vec<Value>=sqlx::query_scalar("SELECT jsonb_build_object('code',e.key,'count',e.value) FROM knowledge_index_status s CROSS JOIN LATERAL jsonb_each(s.errors) e WHERE tenant=$1 ORDER BY e.key LIMIT 16").bind(t).fetch_all(&a.db).await?;
+    let rows = store::indexed_products(&a.db, t).await?;
+    let status = store::index_status(&a.db, t).await?;
+    let errors = store::index_errors(&a.db, t).await?;
     Ok(
-        json!({"indexedProducts":status.as_ref().map(|r|r.get::<i64,_>("indexed_products")).unwrap_or(0),"pending":status.as_ref().map(|r|r.get::<i64,_>("pending_jobs")).unwrap_or(0),"errors":errors,"documentsLimit":200,"documents":rows.iter().map(|r|json!({"productId":r.get::<String,_>("product_id"),"model":r.get::<String,_>("embedding_model"),"contentHash":r.get::<String,_>("content_hash"),"vectorDigest":r.get::<String,_>("vector_digest")})).collect::<Vec<_>>()}),
+        json!({"indexedProducts":status.as_ref().map(|r|r.indexed_products).unwrap_or(0),"pending":status.as_ref().map(|r|r.pending_jobs).unwrap_or(0),"errors":errors,"documentsLimit":200,"documents":rows.iter().map(|r|json!({"productId":r.product_id,"model":r.embedding_model,"contentHash":r.content_hash,"vectorDigest":r.vector_digest})).collect::<Vec<_>>()}),
     )
+}
+
+/// The hits of a product search.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct Search {
+    #[serde(deserialize_with = "lenient")]
+    hits: Option<Vec<Value>>,
+}
+
+/// The product a hit names.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct Hit {
+    #[serde(deserialize_with = "lenient")]
+    id: Option<String>,
 }

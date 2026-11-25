@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT jsonb_build_object('id',id,'kind',kind,'time',created_at,'sourceId',data->'documentId','hypothesisId',data->'hypothesisId') AS \"event!\" FROM outbox WHERE tenant=$1 AND (kind LIKE 'knowledge.%' OR kind LIKE 'intelligence.%' OR kind='merchant.change.applied') ORDER BY id DESC LIMIT 20",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "event!",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "b392ea1d2bbd56a93a140e0bfea347d9bc0cdc515ee69a127a928e738eec7849"
+}

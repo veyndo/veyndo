@@ -1,0 +1,78 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "-- One ready tenant per batch; expired claims are retried, live claims never stolen.\nWITH candidate AS (\n SELECT j.tenant FROM embedding_jobs j\n JOIN tenants t ON t.id=coalesce((SELECT live_tenant FROM shop_environments WHERE tenant=j.tenant),j.tenant)\n JOIN embedding_generations g ON g.tenant=t.id\n WHERE j.attempts<8 AND j.available_at<=now() AND (j.lease_until IS NULL OR j.lease_until<now())\n   AND t.status='active' AND g.model=$2 AND g.model_revision=$3\n ORDER BY j.available_at,j.tenant LIMIT 1\n), picked AS (\n SELECT j.tenant,j.kind,j.object_id FROM embedding_jobs j JOIN candidate c ON c.tenant=j.tenant\n WHERE j.attempts<8 AND j.available_at<=now() AND (j.lease_until IS NULL OR j.lease_until<now())\n ORDER BY j.available_at,j.kind,j.object_id LIMIT 32 FOR UPDATE OF j SKIP LOCKED\n)\nUPDATE embedding_jobs j SET attempts=attempts+CASE WHEN j.lease IS NULL THEN 0 ELSE 1 END,lease=$1,lease_until=now()+interval '90 seconds'\nFROM picked p WHERE j.tenant=p.tenant AND j.kind=p.kind AND j.object_id=p.object_id RETURNING j.tenant,j.kind,j.object_id,j.revision,j.lease AS \"lease!\";\n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "tenant",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "embedding_jobs",
+            "name": "tenant"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "kind",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "embedding_jobs",
+            "name": "kind"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "object_id",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "embedding_jobs",
+            "name": "object_id"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "revision",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "embedding_jobs",
+            "name": "revision"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "lease!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "embedding_jobs",
+            "name": "lease"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "809dc8c1dfda591b001a28bbf18bd30c74290061c90cc7f2d7caa6424de4be65"
+}

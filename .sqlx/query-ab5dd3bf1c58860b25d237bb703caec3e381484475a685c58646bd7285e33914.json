@@ -1,0 +1,40 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT indexed_products,pending_jobs FROM knowledge_index_status WHERE tenant=$1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "indexed_products",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "knowledge_index_status",
+            "name": "indexed_products"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "pending_jobs",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "knowledge_index_status",
+            "name": "pending_jobs"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "ab5dd3bf1c58860b25d237bb703caec3e381484475a685c58646bd7285e33914"
+}

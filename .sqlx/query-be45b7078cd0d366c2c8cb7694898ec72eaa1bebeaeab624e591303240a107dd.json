@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO privacy_consents(tenant,cart_id,channel_id,policy_version,data,expires_at,source_cart_id) VALUES($1,$2,$3,'','{\"choices\":{},\"decided\":false}',now(),$4) ON CONFLICT(tenant,cart_id,channel_id) DO NOTHING",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "be45b7078cd0d366c2c8cb7694898ec72eaa1bebeaeab624e591303240a107dd"
+}

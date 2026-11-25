@@ -1,0 +1,27 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT NOT EXISTS(SELECT 1 FROM tasks k WHERE k.tenant=c.tenant AND k.conversation_id=c.id AND k.run_scopes IS NOT NULL AND NOT(k.run_scopes <@ $5)) AS \"allowed!\" FROM conversations c WHERE tenant=$1 AND id=$2 AND (owner_id=$3 OR (owner_id IS NULL AND $4))",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "allowed!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text",
+        "Bool",
+        "Jsonb"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "b6bed5822e62324ed06f6f108e4a04fdaf5ae1767fa113d3e928b31a645a182f"
+}

@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT EXISTS(SELECT 1 FROM semantic_products WHERE tenant=$1 AND embedding_model=$2) AS \"indexed!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "indexed!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "aff9ce3338d032a07b8b8ad1fe54ef9244d4b8e0e285c86f8d90214201b81f50"
+}

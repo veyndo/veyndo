@@ -1,4 +1,5 @@
 //! Model navigation names native views, never URLs or authority. Admission rechecks current rights and tenant-owned records.
+use crate::store::product_reads::entity_exists;
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 use veyndo_core::{RequestContext, Result, State, bad};
@@ -79,17 +80,12 @@ pub async fn admit(a: &State, h: &RequestContext, target: &Navigation) -> Result
         if id.is_empty() || id.len() > 160 {
             return Err(bad("Invalid navigation reference"));
         }
-        let query = match target.view.as_str() {
-            "productData" => "SELECT EXISTS(SELECT 1 FROM products WHERE tenant=$1 AND id=$2)",
-            "orders" => "SELECT EXISTS(SELECT 1 FROM orders WHERE tenant=$1 AND id=$2)",
-            "customers" => "SELECT EXISTS(SELECT 1 FROM customers WHERE tenant=$1 AND id=$2)",
-            _ => return Err(bad("This native view does not accept an entity reference")),
-        };
-        let exists: bool = sqlx::query_scalar(query)
-            .bind(merchant(h)?)
-            .bind(id)
-            .fetch_one(&a.db)
-            .await?;
+        if !["productData", "orders", "customers"].contains(&target.view.as_str()) {
+            return Err(bad("This native view does not accept an entity reference"));
+        }
+        let exists = entity_exists(&a.db, &target.view, &merchant(h)?, id)
+            .await?
+            .ok_or(bad("This native view does not accept an entity reference"))?;
         if !exists {
             return Err(bad("Navigation reference is unavailable in this shop"));
         }

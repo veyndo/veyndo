@@ -20,7 +20,7 @@ def sql(statement, rejected=None):
         assert result.returncode == 0, result.stderr
     return result.stdout.strip()
 
-product_query = (root / 'components/intelligence/src/knowledge/search.sql').read_text()
+product_query = (root / 'components/intelligence/src/store/search.sql').read_text()
 source_query = (root / 'components/intelligence/src/store/source_search.sql').read_text().strip().rstrip(';')
 def scope(tenant):
     return f"SET LOCAL ROLE {role}; SET LOCAL rac.tenant='{tenant}'; SET LOCAL rac.system='off';"

@@ -2,9 +2,9 @@
 use super::agent_controls::conversation_actor;
 use super::agent_runs::{conversation_run, enqueue, wait};
 use super::models::choice;
+use crate::store::conversations as store;
 use serde::Deserialize;
 use serde_json::{Value, json};
-use sqlx::Row;
 use veyndo_core::document::{lenient, view};
 use veyndo_core::shop_scope::{channel as channel_id, header};
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad, uid};
@@ -19,21 +19,35 @@ fn held_scopes(h: &RequestContext) -> Value {
 pub async fn list(a: &State, h: &RequestContext) -> Result<Value> {
     assistant_access(h)?;
     let t = merchant(h)?;
-    let rows=sqlx::query("SELECT id,title,created_at::text AS created_at FROM conversations WHERE tenant=$1 AND (owner_id=$2 OR (owner_id IS NULL AND $3)) AND NOT EXISTS(SELECT 1 FROM tasks k WHERE k.tenant=conversations.tenant AND k.conversation_id=conversations.id AND k.run_scopes IS NOT NULL AND NOT(k.run_scopes <@ $4)) ORDER BY created_at DESC LIMIT 40").bind(&t).bind(conversation_actor(h)).bind(header(h,"x-rac-role")==Some("owner")).bind(held_scopes(h)).fetch_all(&a.db).await?;
+    let rows = store::list(
+        &a.db,
+        &t,
+        conversation_actor(h).as_deref(),
+        header(h, "x-rac-role") == Some("owner"),
+        &held_scopes(h),
+    )
+    .await?;
     Ok(
-        json!({"conversations":rows.iter().map(|r|json!({"id":r.get::<String,_>("id"),"title":r.get::<String,_>("title"),"createdAt":r.get::<String,_>("created_at")})).collect::<Vec<_>>()}),
+        json!({"conversations":rows.iter().map(|r|json!({"id":r.id,"title":r.title,"createdAt":r.created_at})).collect::<Vec<_>>()}),
     )
 }
 /// The last 200 messages of a conversation with the approval state of their tasks.
 async fn messages(a: &State, t: &str, id: &str) -> Result<Vec<Value>> {
     // Task state is joined on read so approval remains visible after reload.
-    let rows=sqlx::query("SELECT m.id,m.role,m.content,m.data,coalesce(k.applied,false) AS applied FROM (SELECT * FROM chat_messages WHERE tenant=$1 AND conversation_id=$2 ORDER BY id DESC LIMIT 200) m LEFT JOIN tasks k ON k.tenant=m.tenant AND k.id=m.data->>'taskId' WHERE m.tenant=$1 AND m.conversation_id=$2 ORDER BY m.id LIMIT 200").bind(t).bind(id).fetch_all(&a.db).await?;
-    Ok(rows.iter().map(|r|json!({"id":r.get::<i64,_>("id"),"role":r.get::<String,_>("role"),"content":r.get::<String,_>("content"),"data":r.get::<Value,_>("data"),"applied":r.get::<bool,_>("applied")})).collect())
+    let rows = store::messages(&a.db, t, id).await?;
+    Ok(rows.iter().map(|r|json!({"id":r.id,"role":r.role,"content":r.content,"data":r.data,"applied":r.applied})).collect())
 }
 /// Reading and continuing share the same owner and original-rights admission before any history is read.
 async fn admit(a: &State, t: &str, id: &str, h: &RequestContext) -> Result<()> {
-    let allowed:Option<bool>=sqlx::query_scalar("SELECT NOT EXISTS(SELECT 1 FROM tasks k WHERE k.tenant=c.tenant AND k.conversation_id=c.id AND k.run_scopes IS NOT NULL AND NOT(k.run_scopes <@ $5)) FROM conversations c WHERE tenant=$1 AND id=$2 AND (owner_id=$3 OR (owner_id IS NULL AND $4))")
-        .bind(t).bind(id).bind(conversation_actor(h)).bind(header(h,"x-rac-role")==Some("owner")).bind(held_scopes(h)).fetch_optional(&a.db).await?;
+    let allowed = store::admitted(
+        &a.db,
+        t,
+        id,
+        conversation_actor(h).as_deref(),
+        header(h, "x-rac-role") == Some("owner"),
+        &held_scopes(h),
+    )
+    .await?;
     match allowed {
         None => Err(Error(
             StatusCode::NOT_FOUND,
@@ -59,10 +73,11 @@ fn history(previous: &[Value]) -> String {
     previous[previous.len().saturating_sub(16)..]
         .iter()
         .map(|v| {
+            let m = view::<HistoryMessage>(v);
             format!(
                 "{}: {}",
-                v["role"].as_str().unwrap_or(""),
-                v["content"].as_str().unwrap_or("")
+                m.role.as_deref().unwrap_or(""),
+                m.content.as_deref().unwrap_or("")
             )
         })
         .collect::<Vec<_>>()
@@ -101,7 +116,7 @@ pub async fn chat(a: &State, h: &RequestContext, v: &Value) -> Result<Value> {
     };
     let history = history(&messages(a, &t, &id).await?);
     let queued=enqueue(a,h,json!({"instruction":instruction,"inference":selection,"history":history,"locale":language_context(a,h).await?.0,"channel":channel_id(h),"workspaceContext":input.workspace_context,"requestId":input.request_id,"newConversation":input.conversation_id.is_null(),"requestedConversation":input.conversation_id}),Some(&id)).await?;
-    let id = queued["conversationId"].as_str().unwrap_or(&id).to_string();
+    let id = view::<Queued>(&queued).conversation_id.unwrap_or(id);
     admit(a, &t, &id, h).await?;
     if input.background == Some(true) {
         return Ok(json!({"conversationId":id,"messages":messages(a,&t,&id).await?,"run":queued}));
@@ -111,17 +126,39 @@ pub async fn chat(a: &State, h: &RequestContext, v: &Value) -> Result<Value> {
 /// Waits for a queued turn and returns the conversation with its run.
 pub async fn complete(a: &State, h: &RequestContext, queued: Value) -> Result<Value> {
     let t = merchant(h)?;
-    let id = queued["conversationId"]
-        .as_str()
+    let turn: Queued = view(&queued);
+    let id = turn
+        .conversation_id
+        .as_deref()
         .ok_or(bad("Saved conversation required"))?;
     let run = wait(
         a,
         h,
-        queued["taskId"].as_str().ok_or(bad("Saved run required"))?,
+        turn.task_id.as_deref().ok_or(bad("Saved run required"))?,
     )
     .await?;
     admit(a, &t, id, h).await?;
     Ok(json!({"conversationId":id,"messages":messages(a,&t,id).await?,"run":run}))
+}
+
+/// A stored message as prompt history reads it.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct HistoryMessage {
+    #[serde(deserialize_with = "lenient")]
+    role: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    content: Option<String>,
+}
+
+/// A queued conversation turn.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct Queued {
+    #[serde(deserialize_with = "lenient")]
+    conversation_id: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    task_id: Option<String>,
 }
 
 #[cfg(test)]

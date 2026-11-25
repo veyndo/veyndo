@@ -1,6 +1,7 @@
 //! Legal storefront and merchant operations: document acknowledgement, consent, withdrawal and data-rights requests, shared by HTTP and MCP.
 use crate::service::consent::{policy, write};
 use crate::service::run_journal::fence_commit;
+use crate::store::product_reads::accept_legal;
 use axum::Json;
 use axum::extract::{Path, State as Shared};
 use serde::Deserialize;
@@ -45,8 +46,7 @@ pub async fn accept(
         data["source"] = json!("merchantRecordedCustomerAcknowledgement");
         data["actor"] = json!(actor);
     }
-    sqlx::query("INSERT INTO legal_acceptances(tenant,cart_id,data) VALUES($1,$2,$3) ON CONFLICT(tenant,cart_id) DO UPDATE SET data=EXCLUDED.data")
-      .bind(&c.tenant).bind(&c.id).bind(&data).execute(&mut *tx).await?;
+    accept_legal(&mut *tx, &c.tenant, &c.id, &data).await?;
     fence_commit(&a, &mut tx).await?;
     tx.commit().await?;
     Ok(Json(data))

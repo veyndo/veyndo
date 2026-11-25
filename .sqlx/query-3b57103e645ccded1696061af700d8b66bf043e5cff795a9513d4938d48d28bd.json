@@ -1,0 +1,53 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT c.embedding AS \"embedding!\",c.embedding_model AS \"model!\",d.content_hash AS digest FROM knowledge_chunks c JOIN knowledge_documents d ON d.tenant=c.tenant AND d.id=c.document_id WHERE c.tenant=$1 AND c.document_id||':'||c.position=$2 AND c.embedding IS NOT NULL",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "embedding!",
+        "type_info": "Float4Array",
+        "origin": {
+          "Table": {
+            "table": "knowledge_chunks",
+            "name": "embedding"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "model!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "knowledge_chunks",
+            "name": "embedding_model"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "digest",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "knowledge_documents",
+            "name": "content_hash"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      true,
+      true,
+      false
+    ]
+  },
+  "hash": "3b57103e645ccded1696061af700d8b66bf043e5cff795a9513d4938d48d28bd"
+}

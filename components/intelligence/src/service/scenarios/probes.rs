@@ -1,4 +1,5 @@
 //! Scripted hostile shoppers probe native cart and checkout fences in a private sandbox; no model call, no live effect.
+use super::shopper::{Changed, Created, Outcome, Stocked};
 use super::{catalogue, evidence, shopper};
 use crate::ports::AgentHost;
 use serde::Deserialize;
@@ -48,7 +49,7 @@ async fn fresh<H: AgentHost>(
         &json!({"session":format!("probe-{run}-{n}")}),
     )
     .await?;
-    let h = shopper::headers(t, request, cart["token"].as_str())?;
+    let h = shopper::headers(t, request, view::<Created>(&cart).token.as_deref())?;
     let revision = load_cart(a, &h).await?.revision;
     Ok((h, revision))
 }
@@ -71,16 +72,16 @@ struct ProbedPrice {
     total_minor: Option<String>,
 }
 /// The product with this ID, or the first one that has stock.
-fn stocked(products: &Value, id: Option<&str>) -> Option<Value> {
+fn stocked(products: &Value, id: Option<&str>) -> Option<Stocked> {
     products
         .as_array()
         .into_iter()
         .flatten()
+        .map(view::<Stocked>)
         .find(|p| match id {
-            Some(id) => p["id"].as_str() == Some(id),
-            None => p["stock"].as_i64().is_some_and(|s| s > 0),
+            Some(id) => p.id.as_deref() == Some(id),
+            None => p.stock.is_some_and(|s| s > 0),
         })
-        .cloned()
 }
 /// Forged total, stale review and replayed order against one honestly reviewed basket.
 async fn checkout_probes<H: AgentHost>(
@@ -128,20 +129,22 @@ async fn checkout_probes<H: AgentHost>(
             let first = shopper::complete(host, c, &revision, minor, &key).await;
             let second = shopper::complete(host, c, &revision, minor, &key).await;
             let after = stocked(&shopper::products(host, guest, "").await?, Some(id))
-                .and_then(|p| p["stock"].as_i64())
+                .and_then(|p| p.stock)
                 .unwrap_or(stock);
             probes.push(match (first, second) {
-                (Ok(first), Ok(second)) if first["id"] != second["id"] => {
+                (Ok(first), Ok(second))
+                    if view::<Created>(&first).id != view::<Created>(&second).id =>
+                {
                     json!({"id":"replayed_order","outcome":"breached","finding":"duplicate_order"})
                 }
                 (Ok(_), Ok(_)) if stock - after > 1 => {
                     json!({"id":"replayed_order","outcome":"breached","finding":"stock_double"})
                 }
                 (Ok(first), Ok(_)) => {
-                    json!({"id":"replayed_order","outcome":"held","finding":"same_order","orderId":first["id"]})
+                    json!({"id":"replayed_order","outcome":"held","finding":"same_order","orderId":view::<Created>(&first).id})
                 }
                 (Ok(first), Err(_)) => {
-                    json!({"id":"replayed_order","outcome":"held","finding":"replay_refused","orderId":first["id"]})
+                    json!({"id":"replayed_order","outcome":"held","finding":"replay_refused","orderId":view::<Created>(&first).id})
                 }
                 (Err(e), _) => {
                     json!({"id":"replayed_order","outcome":"review","finding":"checkout_unavailable","status":e.0.as_u16(),"detail":e.1.chars().take(300).collect::<String>()})
@@ -171,8 +174,8 @@ pub async fn run<H: AgentHost>(host: &H, h: &RequestContext, t: &str) -> Result<
     let target = stocked(&shopper::products(host, &guest, "").await?, None).ok_or(conflict(
         "Add a product with stock to this sandbox before running attack tests",
     ))?;
-    let id = target["id"].as_str().ok_or(bad("Product unavailable"))?;
-    let stock = target["stock"].as_i64().unwrap_or(0);
+    let id = target.id.as_deref().ok_or(bad("Product unavailable"))?;
+    let stock = target.stock.unwrap_or(0);
     let run = uid();
     let one = |extra: Value| {
         let mut item = json!({"id":id,"quantity":1});
@@ -214,8 +217,10 @@ pub async fn run<H: AgentHost>(host: &H, h: &RequestContext, t: &str) -> Result<
     )
     .await;
     let over = excess.as_ref().is_ok_and(|v| {
-        v["lineItems"][0]["quantity"]
-            .as_i64()
+        view::<Changed>(v)
+            .line_items
+            .first()
+            .and_then(|l| l.quantity)
             .is_none_or(|q| q > stock)
     });
     probes.push(if over {
@@ -225,15 +230,15 @@ pub async fn run<H: AgentHost>(host: &H, h: &RequestContext, t: &str) -> Result<
             shopper::complete(host, &c, &revision, minor, &format!("probe-{run}-excess")).await
         }
         .await;
-        verdict("excess_quantity", bought, |_| ("review", "over_stock"))
-            .as_object()
-            .map_or(Value::Null, |o| {
-                let mut o = o.clone();
-                if o["outcome"] == "held" {
-                    o.insert("finding".into(), json!("refused_at_checkout"));
-                }
-                Value::Object(o)
-            })
+        let found = verdict("excess_quantity", bought, |_| ("review", "over_stock"));
+        let held = view::<Outcome>(&found).outcome == "held";
+        found.as_object().map_or(Value::Null, |o| {
+            let mut o = o.clone();
+            if held {
+                o.insert("finding".into(), json!("refused_at_checkout"));
+            }
+            Value::Object(o)
+        })
     } else {
         verdict("excess_quantity", excess, |_| ("held", "limited"))
     });
@@ -275,10 +280,15 @@ pub async fn run<H: AgentHost>(host: &H, h: &RequestContext, t: &str) -> Result<
         |_| ("breached", "accepted"),
     ));
     probes.extend(checkout_probes(host, &c, &guest, country, &run, id, stock).await?);
-    let count = |outcome: &str| probes.iter().filter(|p| p["outcome"] == outcome).count();
+    let count = |outcome: &str| {
+        probes
+            .iter()
+            .filter(|p| view::<Outcome>(p).outcome == outcome)
+            .count()
+    };
     Ok(
         json!({"id":run,"synthetic":true,"execution":"native-commerce-api","channel":channel_id(h),
-        "product":{"id":id,"name":target["name"]},"configurationDigest":evidence::capture(host, t).await,
+        "product":{"id":id,"name":target.name},"configurationDigest":evidence::capture(host, t).await,
         "summary":{"held":count("held"),"breached":count("breached"),"review":count("review")},"probes":probes}),
     )
 }

@@ -1,0 +1,18 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE vector_index_queue SET attempts=attempts+1,lease=NULL,lease_until=NULL,error_code='vector_publication_unavailable',available_at=now()+least(300,power(2,least(attempts+1,8))::int)*interval '1 second' WHERE tenant=$1 AND kind=$2 AND object_id=$3 AND revision=$4 AND lease=$5",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text",
+        "Int8",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "0811ad0702fc5bff46c7e45e8c7ba582ab7f7b833ffe4a2e5560af57ff4579d4"
+}

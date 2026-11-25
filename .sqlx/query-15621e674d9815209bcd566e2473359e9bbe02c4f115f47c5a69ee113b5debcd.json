@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT document_id||':'||position AS \"key!\" FROM knowledge_chunks WHERE tenant=$1 AND document_id||':'||position>$2 ORDER BY document_id||':'||position LIMIT 256",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "key!",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "15621e674d9815209bcd566e2473359e9bbe02c4f115f47c5a69ee113b5debcd"
+}

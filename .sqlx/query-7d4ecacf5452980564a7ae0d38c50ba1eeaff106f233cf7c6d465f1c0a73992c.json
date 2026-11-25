@@ -1,0 +1,64 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT product_id,embedding_model,content_hash,vector_digest AS \"vector_digest!\" FROM semantic_products WHERE tenant=$1 ORDER BY product_id LIMIT 200",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "product_id",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "semantic_products",
+            "name": "product_id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "embedding_model",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "semantic_products",
+            "name": "embedding_model"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "content_hash",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "semantic_products",
+            "name": "content_hash"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "vector_digest!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "semantic_products",
+            "name": "vector_digest"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "7d4ecacf5452980564a7ae0d38c50ba1eeaff106f233cf7c6d465f1c0a73992c"
+}
