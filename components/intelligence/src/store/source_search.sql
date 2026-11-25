@@ -26,6 +26,6 @@ WITH terms AS MATERIALIZED (SELECT unnest(tsvector_to_array(to_tsvector('simple'
 ), ranks AS (
  SELECT id,position,sum(score) AS score
  FROM (SELECT * FROM lexical UNION ALL SELECT * FROM semantic) v GROUP BY id,position)
-SELECT s.id AS "id!",s.title AS "title!",s.product_id,s.source_type AS "source_type!",s.content_hash AS "content_hash!",s.revision AS "revision!",s.position AS "position!",s.text AS "text!",s.locale AS "locale!"
+SELECT s.id,s.title,s.product_id,s.source_type,s.content_hash,s.revision,s.position,s.text,s.locale
  FROM scope s JOIN ranks r ON r.id=s.id AND r.position=s.position
  ORDER BY r.score DESC,s.id,s.position LIMIT 8;

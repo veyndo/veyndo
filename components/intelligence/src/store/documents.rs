@@ -376,7 +376,7 @@ pub async fn search(a: &State, t: &str, f: Search<'_>, vector: Option<Vec<f32>>)
         .map(|p| p.digest.as_str().unwrap_or_default().to_string())
         .collect::<Vec<_>>();
     let rows = sqlx::query_file_as!(
-        Passage,
+        Retrieved,
         "src/store/source_search.sql",
         t,
         product,
@@ -389,7 +389,10 @@ pub async fn search(a: &State, t: &str, f: Search<'_>, vector: Option<Vec<f32>>)
         main_locale
     )
     .fetch_all(&a.db)
-    .await?;
+    .await?
+    .into_iter()
+    .map(Passage::try_from)
+    .collect::<std::result::Result<Vec<_>, _>>()?;
     Ok(json!(rows.iter().map(|r|json!({"sourceId":format!("{}:{}",r.id,r.position),"documentId":r.id,"title":r.title,"locale":r.locale,"productId":r.product_id,"appliesToProductId":product,"association":if r.product_id.is_none(){"shop"}else if product.is_none() || r.product_id.as_deref()==product{"product"}else{"product-family"},"sourceType":r.source_type,"contentHash":r.content_hash,"revision":r.revision,"text":r.text})).collect::<Vec<_>>()))
 }
 
@@ -422,6 +425,38 @@ struct Passage {
     position: i32,
     text: String,
     locale: String,
+}
+
+/// A retrieved passage as the query returns it; columns of the ranked CTE read as nullable.
+struct Retrieved {
+    id: Option<String>,
+    title: Option<String>,
+    product_id: Option<String>,
+    source_type: Option<String>,
+    content_hash: Option<String>,
+    revision: Option<i64>,
+    position: Option<i32>,
+    text: Option<String>,
+    locale: Option<String>,
+}
+
+impl TryFrom<Retrieved> for Passage {
+    type Error = sqlx::Error;
+    /// A NULL in a column the source tables declare NOT NULL is a decode error, as for a typed column read.
+    fn try_from(r: Retrieved) -> std::result::Result<Self, sqlx::Error> {
+        let null = || sqlx::Error::Decode("unexpected null in retrieved passage".into());
+        Ok(Passage {
+            id: r.id.ok_or_else(null)?,
+            title: r.title.ok_or_else(null)?,
+            product_id: r.product_id,
+            source_type: r.source_type.ok_or_else(null)?,
+            content_hash: r.content_hash.ok_or_else(null)?,
+            revision: r.revision.ok_or_else(null)?,
+            position: r.position.ok_or_else(null)?,
+            text: r.text.ok_or_else(null)?,
+            locale: r.locale.ok_or_else(null)?,
+        })
+    }
 }
 
 /// Whether the source exists in this shop.
