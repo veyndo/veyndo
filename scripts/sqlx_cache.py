@@ -70,12 +70,20 @@ def migration_binary():
 def generate(target, url):
     """Expand every query macro against `url`, writing one data file per query into `target`."""
     target.mkdir(parents=True, exist_ok=True)
+    touched = {}
     for crate in sources_using_macros():
         for lib in ('src/lib.rs', 'src/main.rs'):
             if (crate / lib).exists():
+                touched[crate / lib] = (crate / lib).stat()
                 (crate / lib).touch()
     env = {**os.environ, 'SQLX_OFFLINE': 'false', 'SQLX_OFFLINE_DIR': str(target), 'DATABASE_URL': url}
-    subprocess.run(['cargo', 'check', '--offline', '--workspace', '--all-targets'], cwd=ROOT, env=env, check=True)
+    try:
+        subprocess.run(['cargo', 'check', '--offline', '--workspace', '--all-targets'], cwd=ROOT, env=env, check=True)
+    finally:
+        # The crate roots did not change: restoring their times keeps a fresh server binary fresh for
+        # the suites that run after this check.
+        for path, before in touched.items():
+            os.utime(path, ns=(before.st_atime_ns, before.st_mtime_ns))
 
 
 def main():
