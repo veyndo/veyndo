@@ -602,6 +602,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/apps/src/store/tool_catalogue.rs](../components/apps/src/store/tool_catalogue.rs) | Installed app tools share native wire metadata and validate declared results without disclosing provider payloads. |
 | [components/apps/src/store/webhook_receipts.rs](../components/apps/src/store/webhook_receipts.rs) | Receipts of incoming app webhooks: one outbox event per (app, webhook, sender event ID), replayed on repeats. |
 | [components/apps/src/store.rs](../components/apps/src/store.rs) | SQL of the apps component. |
+| [components/apps/tests/port_adapters.rs](../components/apps/tests/port_adapters.rs) | Test adapters for the app platform ports (`RecordRules`, `CommerceInstall`, `HostActions`, `HostedInstall`), so the apps mirror builds and tests without the server. |
 | [components/apps/ui/admin/apps/AppAccess.tsx](../components/apps/ui/admin/apps/AppAccess.tsx) | Explicit consent for digest-bound server callback keys; plaintext is shown once and never persisted in the browser. |
 | [components/apps/ui/admin/apps/AppActivity.tsx](../components/apps/ui/admin/apps/AppActivity.tsx) | API-backed per-app call metadata, storage budgets and explicitly approved durable replay. |
 | [components/apps/ui/admin/apps/AppArtwork.tsx](../components/apps/ui/admin/apps/AppArtwork.tsx) | Passive app artwork with independent failed-image fallbacks and deterministic local category covers. |
@@ -774,6 +775,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/b2b/src/store.rs](../components/b2b/src/store.rs) | store of this component. |
 | [components/b2b/src/types/model.rs](../components/b2b/src/types/model.rs) | Bounded typed native company, purchasing-unit and employee policies. Money is currency-bound minor units. |
 | [components/b2b/src/types.rs](../components/b2b/src/types.rs) | types of this component. |
+| [components/b2b/tests/port_adapters.rs](../components/b2b/tests/port_adapters.rs) | Test adapters for the b2b ports (`QuoteLifecycle`, `ListCarts`, `Procurement`), so the b2b mirror builds and tests without the server. |
 | [components/b2b/ui/admin/b2b/B2BRoute.tsx](../components/b2b/ui/admin/b2b/B2BRoute.tsx) | B2B route: companies or quotes in the current stage, or the disabled notice when the shop has not enabled them. |
 | [components/b2b/ui/admin/b2b/B2BWorkspace.tsx](../components/b2b/ui/admin/b2b/B2BWorkspace.tsx) | Tenant-scoped company workspace; canonical API operations are also exposed through MCP. |
 | [components/b2b/ui/admin/b2b/CompanyCreate.tsx](../components/b2b/ui/admin/b2b/CompanyCreate.tsx) | Guided company creation is one atomic native API command; the main-language name is always visible. |
@@ -854,6 +856,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/catalog/src/types/review.rs](../components/catalog/src/types/review.rs) | A review as a shopper submits it and as a migration imports it; both arrive unpublished. |
 | [components/catalog/src/types/translation.rs](../components/catalog/src/types/translation.rs) | The translated texts of a product in one language; `None` inherits along the language chain. |
 | [components/catalog/src/types.rs](../components/catalog/src/types.rs) | Typed payloads and rows of the catalog component. |
+| [components/catalog/tests/port_adapters.rs](../components/catalog/tests/port_adapters.rs) | Test adapters for the catalog ports (`Shoppers`, `Shop`, `Images`), so the catalog mirror builds and tests without the server. |
 | [components/catalog/ui/admin/catalog/AiImageStudio.tsx](../components/catalog/ui/admin/catalog/AiImageStudio.tsx) | Optional image-provider jobs create private previews; applying a reviewed image is explicit and revision checked. |
 | [components/catalog/ui/admin/catalog/CanvasCommerceEditor.tsx](../components/catalog/ui/admin/catalog/CanvasCommerceEditor.tsx) | Canvas handoff reuses native product/category editors without unmounting or copying the page designer. |
 | [components/catalog/ui/admin/catalog/CatalogDirectory.tsx](../components/catalog/ui/admin/catalog/CatalogDirectory.tsx) | Product columns and native catalog criteria over the shared grid; media/price/content stay domain-owned. |
@@ -985,6 +988,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/checkout/src/store/session.rs](../components/checkout/src/store/session.rs) | What a checkout session reads under the checkout transaction: the channel it may sell on and the order it already placed. |
 | [components/checkout/src/store/tax_conditions.rs](../components/checkout/src/store/tax_conditions.rs) | Tax rules with conditions read private pre-tax cart facts; the quote they are measured on carries no taxes of its own conditions. |
 | [components/checkout/src/store.rs](../components/checkout/src/store.rs) | Reads of the checkout transaction. |
+| [components/checkout/tests/port_adapters.rs](../components/checkout/tests/port_adapters.rs) | Test adapters for the checkout ports (`Quotes`, `CartEdits`, `Purchase`), so the checkout mirror builds and tests without the server. |
 | [components/checkout/ui/storefront/checkout/CheckoutApproval.tsx](../components/checkout/ui/storefront/checkout/CheckoutApproval.tsx) | Request approval only after native checkout review, then refresh that exact cart without changing its revision. |
 | [components/checkout/ui/storefront/checkout/CheckoutDetails.tsx](../components/checkout/ui/storefront/checkout/CheckoutDetails.tsx) | Address book, guest contact and delivery/payment selection share the authoritative cart context API. |
 | [components/checkout/ui/storefront/checkout/CheckoutIdentity.tsx](../components/checkout/ui/storefront/checkout/CheckoutIdentity.tsx) | Inline guest/login/registration step rotates the cart on authentication and refreshes owning defaults. |
@@ -1067,6 +1071,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/customers/src/store/sessions.rs](../components/customers/src/store/sessions.rs) | Customer sessions, stored by the digest of their token. Columns checked at compile time. |
 | [components/customers/src/store/sign_in.rs](../components/customers/src/store/sign_in.rs) | Buyer sign-in records: the active account with its credential and defaults, the open cart it binds and the login times. Columns checked at compile time. |
 | [components/customers/src/store.rs](../components/customers/src/store.rs) | SQL of the customers component. |
+| [components/customers/tests/port_adapters.rs](../components/customers/tests/port_adapters.rs) | Test adapter for the customers port `SignIn`, so the customers mirror builds and tests without the server. |
 | [components/customers/ui/admin/customers/CustomerCreate.tsx](../components/customers/ui/admin/customers/CustomerCreate.tsx) | Native CRM creation with explicit address defaults, inline validation and unsaved-change recovery. |
 | [components/customers/ui/admin/customers/CustomerDirectory.tsx](../components/customers/ui/admin/customers/CustomerDirectory.tsx) | Registered and guest contacts share native directory filters and permission-aware grid controls. |
 | [components/customers/ui/admin/customers/CustomersManager.tsx](../components/customers/ui/admin/customers/CustomersManager.tsx) | CRM list and editable customer profile with linked order history. |
@@ -1131,6 +1136,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/identity/src/store.rs](../components/identity/src/store.rs) | SQL of the identity component. |
 | [components/identity/src/types/envelopes.rs](../components/identity/src/types/envelopes.rs) | Stable typed authentication envelopes; field validation remains in the shared credential owner. |
 | [components/identity/src/types.rs](../components/identity/src/types.rs) | Typed request shapes of the identity component. |
+| [components/identity/tests/port_adapters.rs](../components/identity/tests/port_adapters.rs) | Test adapter for the identity port `RoleLanguages`, so the identity mirror builds and tests without the server. |
 | [components/identity/ui/admin/team/AccessManager.tsx](../components/identity/ui/admin/team/AccessManager.tsx) | Fine-grained team overrides, revocable invitations and personal session inventory. |
 | [components/identity/ui/admin/team/AgentBudgetFields.tsx](../components/identity/ui/admin/team/AgentBudgetFields.tsx) | Explicit delegation limits; empty or invalid fields never create unbounded agent authority. |
 | [components/identity/ui/admin/team/CreateWorkspace.tsx](../components/identity/ui/admin/team/CreateWorkspace.tsx) | Visible native shop creation keeps identifiers editable and submits only through its account owner. |
@@ -1339,6 +1345,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/inventory/src/store/reservations.rs](../components/inventory/src/store/reservations.rs) | All-checkout allocation ledger; release is idempotent and always uses persisted quantities, never edited order JSON. |
 | [components/inventory/src/store/test_stock.rs](../components/inventory/src/store/test_stock.rs) | Stock writes for empty purchasable products, in bounded batches. |
 | [components/inventory/src/store.rs](../components/inventory/src/store.rs) | SQL of the inventory component. |
+| [components/inventory/tests/port_adapters.rs](../components/inventory/tests/port_adapters.rs) | Test adapters for the inventory ports (`Environments`, `ProductIndex`), so the inventory mirror builds and tests without the server. |
 | [components/marketing/src/domain/channel_admission.rs](../components/marketing/src/domain/channel_admission.rs) | Who may open a sales channel, which locales it serves and which products its selection holds. |
 | [components/marketing/src/domain/condition_import.rs](../components/marketing/src/domain/condition_import.rs) | Source-compatible condition import: converts original payloads without guessing identifiers or dropping configuration. |
 | [components/marketing/src/domain/configuration_kinds.rs](../components/marketing/src/domain/configuration_kinds.rs) | The kinds of marketing configuration: the right each needs and the table each lives in. |
@@ -1399,6 +1406,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/marketing/src/types/promotion.rs](../components/marketing/src/types/promotion.rs) | Coupons and automatic campaigns as stored records, with the provenance an imported promotion keeps. |
 | [components/marketing/src/types/work_template.rs](../components/marketing/src/types/work_template.rs) | Bounded copies of reviewed native work: event values replace explicit scalar fields, never executable text. |
 | [components/marketing/src/types.rs](../components/marketing/src/types.rs) | Stored records of the marketing component. |
+| [components/marketing/tests/port_adapters.rs](../components/marketing/tests/port_adapters.rs) | Test adapters for the marketing ports (`FlowEffects`, `ConfigurationHost`), so the marketing mirror builds and tests without the server. |
 | [components/marketing/ui/admin/automation/AutomationDefinitions.tsx](../components/marketing/ui/admin/automation/AutomationDefinitions.tsx) | Searchable, explicitly editable definitions with visible active state and version. |
 | [components/marketing/ui/admin/automation/AutomationDelete.tsx](../components/marketing/ui/admin/automation/AutomationDelete.tsx) | One confirmation and a server recheck; stale versions and used definitions never disappear silently. |
 | [components/marketing/ui/admin/automation/AutomationEditor.tsx](../components/marketing/ui/admin/automation/AutomationEditor.tsx) | AutomationEditor: focused form view with explicit typed inputs and callbacks. |
@@ -1494,6 +1502,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/orders/src/types/order_document.rs](../components/orders/src/types/order_document.rs) | Typed read views of the stored order document and of an issued receipt snapshot; open subtrees (prices, line items) stay JSON where they are copied verbatim. |
 | [components/orders/src/types/source_record.rs](../components/orders/src/types/source_record.rs) | One versioned record of a source system as an adapter hands it over; its identity is stable per tenant. |
 | [components/orders/src/types.rs](../components/orders/src/types.rs) | Stored and exchanged records of the orders component. |
+| [components/orders/tests/port_adapters.rs](../components/orders/tests/port_adapters.rs) | Test adapter for the orders port `Payments`, so the orders mirror builds and tests without the server. |
 | [components/orders/ui/admin/orders/OrderCreate.tsx](../components/orders/ui/admin/orders/OrderCreate.tsx) | Manual orders remain actor-private drafts until explicit native quote review and idempotent completion. |
 | [components/orders/ui/admin/orders/OrderDetail.tsx](../components/orders/ui/admin/orders/OrderDetail.tsx) | Order workspace: server actions, exact-once commands, provider progress and visible event history. |
 | [components/orders/ui/admin/orders/OrderDirectory.tsx](../components/orders/ui/admin/orders/OrderDirectory.tsx) | Native server-paged order directory supplies the reusable grid with fulfillment columns and current rights. |
@@ -1561,6 +1570,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/payments/src/store/saved_instruments.rs](../components/payments/src/store/saved_instruments.rs) | Customer-owned saved instruments expose only redacted metadata; immediate revocation and provider cleanup share payment jobs. |
 | [components/payments/src/store/settlements.rs](../components/payments/src/store/settlements.rs) | Capture settlement admission: receipt claims, native job matching and the captured total in one transaction. |
 | [components/payments/src/store.rs](../components/payments/src/store.rs) | SQL of the payment ledger; admissions run inside the caller's transaction. |
+| [components/payments/tests/port_adapters.rs](../components/payments/tests/port_adapters.rs) | Test adapter for the payments port `Gateway`, so the payments mirror builds and tests without the server. |
 | [components/payments/ui/admin/payments/OrderPayment.tsx](../components/payments/ui/admin/payments/OrderPayment.tsx) | One order's payment ledger in Studio: provider commands with exact-once keys, job progress and details; contributed to the order page. |
 | [components/payments/ui/admin/payments/PaymentActions.tsx](../components/payments/ui/admin/payments/PaymentActions.tsx) | Shared native order/provider controls; an accepted job is observed before another financial action. |
 | [components/payments/ui/admin/payments/PaymentDetails.tsx](../components/payments/ui/admin/payments/PaymentDetails.tsx) | Read-only transaction observation and native financial history, shared across Studio views. |
@@ -1585,6 +1595,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/pos/src/store/customers.rs](../components/pos/src/store/customers.rs) | Customer rows as the cashier sees them: a bounded search and the account behind a selection. |
 | [components/pos/src/store/register.rs](../components/pos/src/store/register.rs) | What the register lists besides carts: the shop's POS channels, recent channel sales and barcode lookups. Columns checked at compile time. |
 | [components/pos/src/store.rs](../components/pos/src/store.rs) | Reads the cashier workspace needs from the shop's own tables. |
+| [components/pos/tests/port_adapters.rs](../components/pos/tests/port_adapters.rs) | Test adapter for the POS port `Register`, so the pos mirror builds and tests without the server. |
 | [components/pos/ui/admin/pos/POSRoute.tsx](../components/pos/ui/admin/pos/POSRoute.tsx) | POS route: the register for the current shop or stage, with order links and authenticated receipt downloads. |
 | [components/pos/ui/admin/pos/POSWorkspace.tsx](../components/pos/ui/admin/pos/POSWorkspace.tsx) | Native Studio register; all reads and writes use authenticated, tenant-scoped shared commerce operations. |
 | [components/pos/ui/admin/pos/ReceiptPrinter.tsx](../components/pos/ui/admin/pos/ReceiptPrinter.tsx) | OS-installed receipt printers receive the issued immutable invoice projection; no USB access, credentials or duplicate ledger. |
@@ -1708,6 +1719,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/shop/src/types/legal.rs](../components/shop/src/types/legal.rs) | Bounded multilingual legal configuration; policy changes invalidate optional-purpose consent. |
 | [components/shop/src/types/settings.rs](../components/shop/src/types/settings.rs) | Checkout selection and configuration data contracts. |
 | [components/shop/src/types.rs](../components/shop/src/types.rs) | The configuration a shop stores. |
+| [components/shop/tests/port_adapters.rs](../components/shop/tests/port_adapters.rs) | Test adapters for the shop ports (`Carts`, `SettingsGuards`), so the shop mirror builds and tests without the server. |
 | [components/shop/ui/admin/legal/ConsumerRequests.tsx](../components/shop/ui/admin/legal/ConsumerRequests.tsx) | Permission-scoped consumer request queue and optimistic, recorded review actions. |
 | [components/shop/ui/admin/legal/LegalServices.tsx](../components/shop/ui/admin/legal/LegalServices.tsx) | Purpose inventory and provider disclosures edited in the selected content language. |
 | [components/shop/ui/admin/legal/LegalSettings.tsx](../components/shop/ui/admin/legal/LegalSettings.tsx) | Central revisioned legal workspace, inherited channel settings, source-backed sector guidance and request review. |
@@ -2882,6 +2894,7 @@ This lists every checked-in source module in these roots, including files with n
 | [scripts/cognitive_experiments.py](../scripts/cognitive_experiments.py) | Real native consent/layout/payment paths with synthetic live-receipt fixtures, not a measured commerce experiment. |
 | [scripts/commerce.py](../scripts/commerce.py) | Real HTTP/PG tests for SKUs, moderated reviews, tax/shipping/payment and deliveries. |
 | [scripts/company_settings.py](../scripts/company_settings.py) | Real HTTP company basis/channel inheritance, immutable issuer snapshots, bounded logos and private staging. No external services. |
+| [scripts/component_mirrors.py](../scripts/component_mirrors.py) | .rs')) |
 | [scripts/component_sources.py](../scripts/component_sources.py) | Verify pinned component source snapshots; explicit imports use clean, reviewed Git commits, never mutable branches. |
 | [scripts/components.py](../scripts/components.py) | ', i): |
 | [scripts/composition_release.py](../scripts/composition_release.py) | Validate the Lumen release lock and optionally compare it with Northflank. |
@@ -3002,6 +3015,7 @@ This lists every checked-in source module in these roots, including files with n
 | [scripts/testing/ci_gate.py](../scripts/testing/ci_gate.py) | Fail-closed required CI result and same-source coverage transfer between runners. |
 | [scripts/testing/ci_scope.py](../scripts/testing/ci_scope.py) | Choose prototype CI by the complete Git diff; unknown or sensitive changes retain full verification. |
 | [scripts/testing/collection_work.py](../scripts/testing/collection_work.py) | Exercise one reviewed collection task through native categories, pages and durable translation drafts. |
+| [scripts/testing/component_mirrors_check.py](../scripts/testing/component_mirrors_check.py) | Tooling suite: every component mirror builds and tests alone; negative controls for the mirror rules first. |
 | [scripts/testing/component_sources_test.py](../scripts/testing/component_sources_test.py) | Mutation checks for the exact upstream component snapshot consumed by the Veyndo composition. |
 | [scripts/testing/composition_release_test.py](../scripts/testing/composition_release_test.py) | Reject drift and incomplete evidence in the hosted composition preflight. |
 | [scripts/testing/connected_contracts/__init__.py](../scripts/testing/connected_contracts/__init__.py) | OAuth, private retrieval and Slack-flow regression modules using local provider fixtures. |
