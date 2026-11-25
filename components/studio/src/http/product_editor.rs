@@ -1,4 +1,5 @@
 //! The merchant product editor: revision-bound multilingual content, identity, commerce fields, channels and categories, checked against the shop settings, compliance rules, automation metadata and app extensions.
+use crate::domain::views::Visibility;
 use crate::store::products as studio_products;
 use axum::Json;
 use axum::extract::{Path, State as Shared};
@@ -13,6 +14,7 @@ use veyndo_catalog::store::product_edit as store;
 use veyndo_catalog::store::product_fields::editable;
 use veyndo_catalog::store::{categories, channels, products};
 use veyndo_catalog::types::product_edit::Edit;
+use veyndo_core::document::view;
 use veyndo_core::store::history_context::context;
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad, conflict};
 use veyndo_identity::{merchant, permit};
@@ -212,8 +214,9 @@ pub async fn product_editor(
         .as_array()
         .unwrap()
         .iter()
-        .filter(|c| c["visible"] == true)
-        .map(|c| c["id"].clone())
+        .map(view::<Visibility>)
+        .filter(|c| c.visible == true)
+        .map(|c| c.id)
         .collect::<Vec<_>>();
     let category_ids = categories::of_product(&a, &t, &id).await?;
     let mut value = json!({"id":id,"mainLocale":settings.main_locale,"availableLocales":settings.locales,"channels":channels,"catalog":{"salesChannelIds":selected_channels,"active":r.get::<bool,_>("active"),"productNumber":r.get::<Option<String>,_>("product_number").unwrap_or_else(||id.clone()),"categoryIds":category_ids,"parentId":r.get::<Option<String>,_>("parent_id"),"options":r.get::<Value,_>("options")},"revision":r.get::<i64,_>("revision"),"contentRevision":r.get::<i64,_>("content_revision"),"translations":translations,"extra":({let mut extra=r.get::<Value,_>("extra");if extra["priceCurrency"].is_null(){extra["priceCurrency"]=json!(settings.currencies.pricing_currency);}extra}),"commerce":editable(&r)});

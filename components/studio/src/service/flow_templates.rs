@@ -1,9 +1,12 @@
 //! Flow work templates: bounded copies of reviewed native work whose event values replace explicit scalar fields, never executable text.
 use super::work_plan::bind;
 use crate::domain::proposal::Step;
+use crate::domain::views::{Evidence, ProposalParts};
 use crate::ports::WorkHost;
 use crate::store::tasks;
+use serde::Deserialize;
 use serde_json::{Value, json};
+use veyndo_core::document::{lenient, view};
 use veyndo_core::shop_scope::header;
 use veyndo_core::{Error, RequestContext, Result, StatusCode, bad, hash, uid};
 use veyndo_identity::allowed;
@@ -14,6 +17,13 @@ use veyndo_marketing::types::flow::Flow;
 use veyndo_marketing::types::work_template::WorkTemplate;
 use veyndo_shop::service::read_cache::config;
 
+/// The event context a flow run carries.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct FlowEvent {
+    #[serde(deserialize_with = "lenient")]
+    event_context: serde_json::Map<String, Value>,
+}
 /// Binds event values and stable run references into the reviewed steps; only explicit scalar fields change, never executable text.
 pub fn resolve(
     template: &WorkTemplate,
@@ -45,7 +55,11 @@ pub fn resolve(
                 json!(format!("work_{}", &hash(&format!("{job}:{key}"))[..24]))
             } else {
                 let key = binding.source.strip_prefix("event.").unwrap();
-                let value = definition["eventContext"][key].clone();
+                let value = view::<FlowEvent>(definition)
+                    .event_context
+                    .get(key)
+                    .cloned()
+                    .unwrap_or(Value::Null);
                 if key == "revision" {
                     if value.as_i64().is_none_or(|v| v < 0) {
                         return Err(bad("Event has no valid revision for this template"));
@@ -100,8 +114,10 @@ pub async fn load(
             "Source task requires its original permissions".into(),
         ));
     }
-    let mut steps: Vec<Step> = serde_json::from_value(evidence["proposal"]["operations"].clone())
-        .map_err(|_| bad("Source task has no native work"))?;
+    let mut steps: Vec<Step> = serde_json::from_value(
+        view::<ProposalParts>(&view::<Evidence>(&evidence).proposal).operations,
+    )
+    .map_err(|_| bad("Source task has no native work"))?;
     if steps.is_empty() || steps.len() > 12 {
         return Err(bad("Source task needs 1..12 reviewed steps"));
     }

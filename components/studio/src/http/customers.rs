@@ -1,5 +1,6 @@
 //! Tenant-scoped paged CRM with admitted app filters and revision-checked merchant changes; credentials never leave storage.
 use super::orders::validate_criteria;
+use crate::domain::views::{CustomerVersion, EmailKey};
 use crate::store::customer_directory as directory;
 use axum::Json;
 use axum::extract::{Path, Query, State as Shared};
@@ -7,6 +8,7 @@ use serde_json::{Value, json};
 use veyndo_app_model::Object;
 use veyndo_app_platform::store::extension_filter::admit as admit_filters;
 use veyndo_app_platform::store::extension_projection::attach;
+use veyndo_core::document::view;
 use veyndo_core::{RequestContext, Result, State};
 use veyndo_customers::service::address_entries::address_list;
 use veyndo_customers::service::directory::{decorate, guest};
@@ -29,7 +31,7 @@ pub async fn list(
     let more = rows.len() > n as usize;
     let mut elements = rows.into_iter().take(n as usize).collect::<Vec<_>>();
     attach(&a, &h, Object::Customer, &mut elements).await?;
-    let after = elements.last().map(|v| v["email"].clone());
+    let after = elements.last().map(|v| view::<EmailKey>(v).email);
     Ok(Json(
         json!({"elements":elements,"hasMore":more,"nextCursor":if more{after}else{None}}),
     ))
@@ -79,7 +81,8 @@ pub async fn restore_customer(
     state: Value,
     revision: i64,
 ) -> Result<Json<Value>> {
-    let value = json!({"revision":revision,"profile":state["profile"],"company":state["company"],"customerGroup":state["customerGroup"],"active":state["active"]});
+    let recorded: CustomerVersion = view(&state);
+    let value = json!({"revision":revision,"profile":recorded.profile,"company":recorded.company,"customerGroup":recorded.customer_group,"active":recorded.active});
     save_domain(a, h, email, value, Some(state)).await
 }
 /// The shared merchant save of a customer.

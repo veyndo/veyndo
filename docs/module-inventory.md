@@ -1689,6 +1689,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/studio/src/domain/report_period.rs](../components/studio/src/domain/report_period.rs) | Calendar periods are resolved once in the requested IANA timezone, with exclusive ends and bounded buckets. |
 | [components/studio/src/domain/staging_access.rs](../components/studio/src/domain/staging_access.rs) | Selective publication checks every selected domain's current rights before writing any live row; diffs show only what the caller may read. |
 | [components/studio/src/domain/view_components.rs](../components/studio/src/domain/view_components.rs) | The parts a composed record view may show: always the records, at most three, and only what fits the entity. |
+| [components/studio/src/domain/views.rs](../components/studio/src/domain/views.rs) | Typed read views of the JSON documents studio reads repeatedly: unit IDs, saved proposal evidence, grid criteria, quotes and model outputs. |
 | [components/studio/src/domain/workspace.rs](../components/studio/src/domain/workspace.rs) | Bounded personal layouts contain references, never delegated rights or executable agent instructions. |
 | [components/studio/src/domain.rs](../components/studio/src/domain.rs) | domain of this component. |
 | [components/studio/src/http/customers.rs](../components/studio/src/http/customers.rs) | Tenant-scoped paged CRM with admitted app filters and revision-checked merchant changes; credentials never leave storage. |

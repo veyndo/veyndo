@@ -1,21 +1,88 @@
 //! Rebuilds a product edit from a recorded version; stock stays current and associations pass the normal product admission afterwards.
-use serde_json::{Value, json};
+use serde::Deserialize;
+use serde_json::{Map, Value, json};
+use veyndo_core::document::{lenient, lenient_list, view};
 
-/// The commerce fields of the editor and the recorded columns they are restored from.
-const FIELDS: [(&str, &str); 12] = [
-    ("price", "price"),
-    ("taxRate", "tax_rate"),
-    ("minPurchase", "min_purchase"),
-    ("purchaseSteps", "purchase_steps"),
-    ("maxPurchase", "max_purchase"),
-    ("deliveryDays", "delivery_days"),
-    ("listPrice", "list_price"),
-    ("regulationPrice", "regulation_price"),
-    ("referencePrice", "reference_price"),
-    ("advancedPrices", "advanced_prices"),
-    ("media", "media"),
-    ("properties", "properties"),
-];
+/// The recorded product columns a restoration reads.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct Recorded {
+    price: Value,
+    tax_rate: Value,
+    min_purchase: Value,
+    purchase_steps: Value,
+    max_purchase: Value,
+    delivery_days: Value,
+    list_price: Value,
+    regulation_price: Value,
+    reference_price: Value,
+    advanced_prices: Value,
+    media: Value,
+    properties: Value,
+    extra: Value,
+    name: Value,
+    description: Value,
+    active: Value,
+    product_number: Value,
+    parent_id: Value,
+    options: Value,
+}
+
+impl Recorded {
+    /// The commerce fields of the editor and the recorded columns they are restored from.
+    fn commerce(self) -> [(&'static str, Value); 12] {
+        [
+            ("price", self.price),
+            ("taxRate", self.tax_rate),
+            ("minPurchase", self.min_purchase),
+            ("purchaseSteps", self.purchase_steps),
+            ("maxPurchase", self.max_purchase),
+            ("deliveryDays", self.delivery_days),
+            ("listPrice", self.list_price),
+            ("regulationPrice", self.regulation_price),
+            ("referencePrice", self.reference_price),
+            ("advancedPrices", self.advanced_prices),
+            ("media", self.media),
+            ("properties", self.properties),
+        ]
+    }
+}
+
+/// A channel's recorded or current visibility.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct Channel {
+    id: Value,
+    visible: Value,
+}
+
+/// A recorded product version: its row, translations by locale, categories and channels.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct Version {
+    #[serde(deserialize_with = "lenient")]
+    record: Recorded,
+    #[serde(deserialize_with = "lenient")]
+    translations: Map<String, Value>,
+    categories: Value,
+    #[serde(deserialize_with = "lenient_list")]
+    channels: Vec<Channel>,
+}
+
+/// The channels of the current editor document.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct Editor {
+    #[serde(deserialize_with = "lenient_list")]
+    channels: Vec<Channel>,
+}
+
+/// A translation's name, the only field a restoration inspects.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct Translation {
+    name: Value,
+}
 
 /// The key the editor uses for a content language: the bare language while it is unambiguous in the shop.
 fn editor_key<'a>(locale: &'a str, locales: &[String]) -> &'a str {
@@ -34,42 +101,50 @@ fn editor_key<'a>(locale: &'a str, locales: &[String]) -> &'a str {
 
 /// Writes a recorded version over the current editor document. The stock quantity is removed, so a restoration never replays one.
 pub fn edit(current: &mut Value, state: &Value, id: &str, locales: &[String], main: &str) {
-    let r = &state["record"];
-    for (key, column) in FIELDS {
-        current["commerce"][key] = r[column].clone();
+    let version: Version = view(state);
+    let editor: Editor = view(current);
+    let r = version.record;
+    let catalog = json!({"active":r.active,"productNumber":r.product_number.as_str().unwrap_or(id),"parentId":r.parent_id,"options":r.options,"categoryIds":version.categories});
+    let main_fallback = json!({"name":r.name,"description":r.description});
+    current["extra"] = r.extra.clone();
+    for (key, value) in r.commerce() {
+        current["commerce"][key] = value;
     }
     if let Some(commerce) = current["commerce"].as_object_mut() {
         commerce.remove("stock");
     }
-    current["extra"] = r["extra"].clone();
     let mut tr = json!({});
     for locale in locales {
         let key = editor_key(locale, locales);
-        tr[key] = state["translations"][locale].clone();
-        if tr[key].is_null() {
-            tr[key] = json!({"name":null,"description":null});
+        let mut value = version
+            .translations
+            .get(locale)
+            .cloned()
+            .unwrap_or(Value::Null);
+        if value.is_null() {
+            value = json!({"name":null,"description":null});
         }
-        if locale == main && tr[key]["name"].is_null() {
-            tr[key] = json!({"name":r["name"],"description":r["description"]});
+        if locale == main && view::<Translation>(&value).name.is_null() {
+            value = main_fallback.clone();
         }
+        tr[key] = value;
     }
     current["translations"] = tr;
-    let hidden = |channel: &Value| {
-        state["channels"].as_array().is_some_and(|old| {
-            old.iter()
-                .any(|v| v["id"] == channel["id"] && v["visible"] == false)
-        })
+    let hidden = |channel: &Channel| {
+        version
+            .channels
+            .iter()
+            .any(|v| v.id == channel.id && v.visible == false)
     };
-    let channels = current["channels"]
-        .as_array()
-        .map(|list| {
-            list.iter()
-                .filter(|channel| !hidden(channel))
-                .map(|c| c["id"].clone())
-                .collect::<Vec<_>>()
-        })
-        .unwrap_or_default();
-    current["catalog"] = json!({"active":r["active"],"productNumber":r["product_number"].as_str().unwrap_or(id),"parentId":r["parent_id"],"options":r["options"],"categoryIds":state["categories"],"salesChannelIds":channels});
+    let channels = editor
+        .channels
+        .iter()
+        .filter(|channel| !hidden(channel))
+        .map(|c| c.id.clone())
+        .collect::<Vec<_>>();
+    let mut catalog = catalog;
+    catalog["salesChannelIds"] = json!(channels);
+    current["catalog"] = catalog;
 }
 
 #[cfg(test)]

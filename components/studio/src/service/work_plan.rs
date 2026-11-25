@@ -1,13 +1,16 @@
 //! Reviewed work binds bounded native configuration commands and managed app saves before any worker effect; approval re-binds and queues it.
 use super::work_execution::validate_translation;
 use crate::domain::proposal::{NATIVE, Step};
+use crate::domain::views::{Evidence, ProposalParts};
 use crate::ports::WorkHost;
 use crate::store::{products, tasks};
+use serde::Deserialize;
 use serde_json::{Value, json};
 use veyndo_app_model::declarations::identifier;
 use veyndo_app_platform::domain::planning::AppChange;
 use veyndo_catalog::domain::product_admission::{admit_product_write, product_write_guidance};
 use veyndo_catalog::service::categories::admit as admit_category;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::model_contract::validate_native;
 use veyndo_core::shop_scope::header;
 use veyndo_core::store::environments::parent;
@@ -28,6 +31,26 @@ pub fn catalogue<H: WorkHost>(host: &H, h: &RequestContext) -> Vec<Value> {
             entry
         })
         .collect()
+}
+/// The native targets and revision of a reviewed work step's arguments.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct WorkArguments {
+    product: Value,
+    category: Value,
+    #[serde(deserialize_with = "lenient")]
+    revision: Option<i64>,
+}
+/// A product or category target's identity and revisions.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct Target {
+    #[serde(deserialize_with = "lenient")]
+    id: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    revision: Option<i64>,
+    #[serde(deserialize_with = "lenient")]
+    content_revision: Option<i64>,
 }
 /// Binds reviewed work to its current targets: app saves to their revision, native steps to their admitted schema and stable targets.
 pub async fn bind<H: WorkHost>(
@@ -77,8 +100,9 @@ pub async fn bind<H: WorkHost>(
                     "Operation is not admitted for private configuration work",
                 ))?;
             validate_native(&schema, &args)?;
+            let work: WorkArguments = view(&args);
             if step.name.starts_with("merchant.product.") {
-                admit_product_write(&args["product"], step.name.ends_with(".create"))?;
+                admit_product_write(&work.product, step.name.ends_with(".create"))?;
             }
             if step.name == "merchant.translations.create" {
                 validate_translation(host, t, &args, &created_products).await?;
@@ -88,7 +112,7 @@ pub async fn bind<H: WorkHost>(
                 admit_category(
                     &host.catalog(),
                     t,
-                    &args["category"],
+                    &work.category,
                     step.name.ends_with(".create"),
                 )
                 .await?;
@@ -99,8 +123,14 @@ pub async fn bind<H: WorkHost>(
                 } else {
                     "category"
                 };
-                let id = args[key]["id"]
-                    .as_str()
+                let target: Target = view(if key == "product" {
+                    &work.product
+                } else {
+                    &work.category
+                });
+                let id = target
+                    .id
+                    .as_deref()
                     .filter(|id| identifier(id) || uuid::Uuid::parse_str(id).is_ok())
                     .ok_or(bad("Work creation needs an explicit stable identifier"))?;
                 let exists = if key == "product" {
@@ -118,16 +148,15 @@ pub async fn bind<H: WorkHost>(
                     return Err(conflict("Planned create target already exists"));
                 }
             } else if step.name == "merchant.product.save" {
-                if args["product"]["revision"].as_i64().is_none()
-                    && args["product"]["contentRevision"].as_i64().is_none()
-                {
+                let product: Target = view(&work.product);
+                if product.revision.is_none() && product.content_revision.is_none() {
                     return Err(bad("Planned product edit needs its original revision"));
                 }
             } else if step.name == "merchant.category.save" {
-                if args["category"]["revision"].as_i64().is_none() {
+                if view::<Target>(&work.category).revision.is_none() {
                     return Err(bad("Planned category edit needs its original revision"));
                 }
-            } else if args["revision"].as_i64().is_none() {
+            } else if work.revision.is_none() {
                 return Err(bad("Planned edit needs its original revision"));
             }
         }
@@ -188,8 +217,10 @@ pub async fn approve<H: WorkHost>(
         return Err(conflict("Work proposal is not ready"));
     }
     let evidence = row.proposal;
-    let mut steps: Vec<Step> = serde_json::from_value(evidence["proposal"]["operations"].clone())
-        .map_err(|_| bad("Invalid saved work plan"))?;
+    let mut steps: Vec<Step> = serde_json::from_value(
+        view::<ProposalParts>(&view::<Evidence>(&evidence).proposal).operations,
+    )
+    .map_err(|_| bad("Invalid saved work plan"))?;
     if steps.is_empty() {
         return Err(bad("Work plan has no steps"));
     }

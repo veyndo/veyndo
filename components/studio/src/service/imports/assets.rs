@@ -5,10 +5,45 @@ use crate::ports::ImportHost;
 use axum::Json;
 use axum::extract::{Path, State as Shared};
 use base64::{Engine as _, engine::general_purpose::STANDARD};
-use serde_json::{Value, json};
+use serde::Deserialize;
+use serde_json::{Map, Value, json};
+use veyndo_core::document::{lenient, view};
 use veyndo_core::store::environments::parent;
 use veyndo_core::{RequestContext, Result, bad, conflict, hash};
 use veyndo_identity::{merchant, permit};
+/// The reviewed fields of a source image record.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ImageSource {
+    #[serde(deserialize_with = "lenient")]
+    byte_length: Option<u64>,
+    digest: Value,
+    product_source_id: Value,
+    #[serde(deserialize_with = "lenient")]
+    position: Option<u64>,
+}
+/// The product editor document an image edit resubmits.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct EditorDocument {
+    revision: Value,
+    content_revision: Value,
+    translations: Value,
+    extra: Value,
+    catalog: Value,
+    #[serde(deserialize_with = "lenient")]
+    commerce: Map<String, Value>,
+}
+/// A media slot's identity and import placement.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct MediaSlot {
+    id: Value,
+    import_group: Value,
+    #[serde(deserialize_with = "lenient")]
+    import_position: Option<u64>,
+}
+/// Imports one reviewed source image into its product's media.
 pub async fn import<H: ImportHost>(
     host: &H,
     h: &RequestContext,
@@ -40,10 +75,11 @@ pub async fn import<H: ImportHost>(
     let bytes = STANDARD
         .decode(encoded)
         .map_err(|_| bad("Invalid asset encoding"))?;
+    let source: ImageSource = view(&r.data);
     if bytes.is_empty()
         || bytes.len() > 8 * 1024 * 1024
-        || r.data["byteLength"].as_u64() != Some(bytes.len() as u64)
-        || r.data["digest"] != hash_bytes(&bytes)
+        || source.byte_length != Some(bytes.len() as u64)
+        || source.digest != hash_bytes(&bytes)
     {
         return Err(bad("Image bytes differ from reviewed source digest"));
     }
@@ -52,25 +88,28 @@ pub async fn import<H: ImportHost>(
         r,
         &namespace,
         "products",
-        r.data["productSourceId"]
+        source
+            .product_source_id
             .as_str()
             .ok_or(bad("Source product required"))?,
     )?;
     let id = r.identity(&namespace);
-    let position = r.data["position"]
-        .as_u64()
+    let position = source
+        .position
         .filter(|p| *p < 20)
         .ok_or(bad("Reviewed source image position must be 0..19"))?;
-    let group = hash(&json!([r.source, r.source_shop, r.data["productSourceId"]]).to_string());
+    let group = hash(&json!([r.source, r.source_shop, source.product_source_id]).to_string());
     let mut media = host.import_image(h, &product, &id, &r.data, bytes).await?;
     media["importGroup"] = json!(group);
     media["importPosition"] = json!(position);
-    let Json(mut editor) =
-        product_editor(Shared(a.clone()), h.clone(), Path(product.clone())).await?;
-    let items = editor["commerce"]["media"]
-        .as_array_mut()
+    let Json(editor) = product_editor(Shared(a.clone()), h.clone(), Path(product.clone())).await?;
+    let mut editor: EditorDocument = view(&editor);
+    let items = editor
+        .commerce
+        .get_mut("media")
+        .and_then(Value::as_array_mut)
         .ok_or(bad("Native media unavailable"))?;
-    if let Some(existing) = items.iter().find(|x| x["id"] == id) {
+    if let Some(existing) = items.iter().find(|x| view::<MediaSlot>(x).id == id) {
         if existing != &media {
             return Err(conflict(
                 "Imported media association was edited; review it before continuing",
@@ -82,17 +121,20 @@ pub async fn import<H: ImportHost>(
     // Reorder only this source group's slots. Manual media retain their positions and content.
     let mut imported = items
         .iter()
-        .filter(|m| m["importGroup"] == group)
+        .filter(|m| view::<MediaSlot>(m).import_group == group)
         .cloned()
         .collect::<Vec<_>>();
-    imported.sort_by_key(|m| m["importPosition"].as_u64().unwrap_or(u64::MAX));
+    imported.sort_by_key(|m| view::<MediaSlot>(m).import_position.unwrap_or(u64::MAX));
     let mut ordered = imported.into_iter();
-    for item in items.iter_mut().filter(|m| m["importGroup"] == group) {
+    for item in items
+        .iter_mut()
+        .filter(|m| view::<MediaSlot>(m).import_group == group)
+    {
         *item = ordered.next().unwrap();
     }
     // Omit stock so adding an image never restores a quantity observed before a concurrent native writer.
-    editor["commerce"].as_object_mut().unwrap().remove("stock");
-    let payload = json!({"revision":editor["revision"],"contentRevision":editor["contentRevision"],"translations":editor["translations"],"extra":editor["extra"],"catalog":editor["catalog"],"commerce":editor["commerce"]});
+    editor.commerce.remove("stock");
+    let payload = json!({"revision":editor.revision,"contentRevision":editor.content_revision,"translations":editor.translations,"extra":editor.extra,"catalog":editor.catalog,"commerce":editor.commerce});
     let _ = edit_product(Shared(a.clone()), h.clone(), Path(product), Json(payload)).await?;
     Ok(json!({"id":id,"replayed":false}))
 }

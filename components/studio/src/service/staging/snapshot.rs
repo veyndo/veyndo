@@ -4,12 +4,14 @@ use crate::store::staging_snapshot as db;
 use crate::store::{
     staging_assets as assets, staging_categories as categories, staging_documents as documents,
 };
+use serde::Deserialize;
 use serde_json::{Value, json};
 use veyndo_app_model::manifest::Manifest;
 use veyndo_app_platform::domain::core_extensions::configuration;
 use veyndo_app_platform::store::records::rows as record_rows;
 use veyndo_b2b::store::staging as b2b;
 use veyndo_catalog::service::product_identity::assign_categories;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::{Result, bad, conflict};
 use veyndo_intelligence::knowledge::sync_product;
 use veyndo_orders::domain::order_machine::default_machine;
@@ -26,7 +28,7 @@ pub async fn snapshot(tx: &mut Tx<'_>, t: &str) -> Result<Value> {
     company::snapshot(tx, t, &mut result).await?;
     snapshot_scopes(tx, t, &mut result).await?;
     for value in db::products(tx, t).await? {
-        let id = value["id"].as_str().unwrap().to_string();
+        let id = view::<Identified>(&value).id.unwrap();
         result.insert(
             format!("product:{id}"),
             product_projection(tx, t, value).await?,
@@ -66,7 +68,11 @@ pub async fn snapshot(tx: &mut Tx<'_>, t: &str) -> Result<Value> {
                 let mut data = r;
                 data.as_object_mut().unwrap().remove("revision");
                 result.insert(
-                    format!("appdata:{app}:{}:{}", e.name, data["id"].as_str().unwrap()),
+                    format!(
+                        "appdata:{app}:{}:{}",
+                        e.name,
+                        view::<Identified>(&data).id.unwrap()
+                    ),
                     data,
                 );
             }
@@ -85,24 +91,83 @@ pub async fn snapshot(tx: &mut Tx<'_>, t: &str) -> Result<Value> {
     documents::snapshot(tx, t, &mut result).await?;
     Ok(Value::Object(result))
 }
+/// A document's string ID.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct Identified {
+    #[serde(deserialize_with = "lenient")]
+    id: Option<String>,
+}
+
+/// The fields of a staged product document that publication reads; the full document feeds the column allowlist.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct StagedProduct {
+    #[serde(deserialize_with = "lenient")]
+    id: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    name: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    category: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    description: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    price: Option<f64>,
+    #[serde(deserialize_with = "lenient")]
+    tax_rate: Option<f64>,
+    #[serde(deserialize_with = "lenient")]
+    active: Option<bool>,
+    #[serde(deserialize_with = "lenient")]
+    product_number: Option<String>,
+    #[serde(rename = "categoryIds", deserialize_with = "lenient")]
+    category_ids: Option<Vec<Value>>,
+    #[serde(rename = "channelVisibility", deserialize_with = "lenient")]
+    channel_visibility: Option<Vec<Value>>,
+    #[serde(deserialize_with = "lenient")]
+    translations: Option<Vec<Value>>,
+}
+
+/// A staged channel visibility entry.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct StagedChannel {
+    #[serde(deserialize_with = "lenient")]
+    id: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    visible: Option<bool>,
+}
+
+/// A staged product translation.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct StagedTranslation {
+    #[serde(deserialize_with = "lenient")]
+    language_id: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    name: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    description: Option<String>,
+}
+
 pub async fn product_content(tx: &mut Tx<'_>, t: &str, value: &Value) -> Result<()> {
     let mut published = value.clone();
     live_asset_urls(&mut published, t);
     let value = &published;
-    let id = value["id"].as_str().ok_or(bad("Product ID required"))?;
+    let staged: StagedProduct = view(value);
+    let id = staged.id.as_deref().ok_or(bad("Product ID required"))?;
     // A new staged product enters live with zero inventory; stock remains an independent operational write.
     db::insert_product(
         tx,
         t,
         id,
         &db::NewProduct {
-            name: value["name"].as_str(),
-            category: value["category"].as_str(),
-            description: value["description"].as_str(),
-            price: value["price"].as_f64(),
-            tax_rate: value["tax_rate"].as_f64(),
-            active: value["active"].as_bool().unwrap_or(true),
-            product_number: value["product_number"].as_str(),
+            name: staged.name.as_deref(),
+            category: staged.category.as_deref(),
+            description: staged.description.as_deref(),
+            price: staged.price,
+            tax_rate: staged.tax_rate,
+            active: staged.active.unwrap_or(true),
+            product_number: staged.product_number.as_deref(),
         },
     )
     .await?;
@@ -113,7 +178,7 @@ pub async fn product_content(tx: &mut Tx<'_>, t: &str, value: &Value) -> Result<
             "Product creation/deletion needs an explicit catalog migration",
         ));
     }
-    if let Some(ids) = value["categoryIds"].as_array() {
+    if let Some(ids) = &staged.category_ids {
         assign_categories(
             tx,
             t,
@@ -124,40 +189,37 @@ pub async fn product_content(tx: &mut Tx<'_>, t: &str, value: &Value) -> Result<
         )
         .await?;
     }
-    if let Some(channels) = value["channelVisibility"].as_array() {
+    if let Some(channels) = &staged.channel_visibility {
         db::clear_channel_visibility(tx, t, id).await?;
         for channel in channels {
-            db::insert_channel_visibility(
-                tx,
-                t,
-                id,
-                channel["id"].as_str(),
-                channel["visible"].as_bool(),
-            )
-            .await?;
+            let channel: StagedChannel = view(channel);
+            db::insert_channel_visibility(tx, t, id, channel.id.as_deref(), channel.visible)
+                .await?;
         }
     }
-    for tr in value["translations"]
-        .as_array()
+    for tr in staged
+        .translations
+        .as_ref()
         .ok_or(bad("Translations required"))?
     {
+        let tr: StagedTranslation = view(tr);
         db::upsert_translation(
             tx,
             t,
             id,
-            tr["language_id"].as_str(),
-            tr["name"].as_str(),
-            tr["description"].as_str(),
+            tr.language_id.as_deref(),
+            tr.name.as_deref(),
+            tr.description.as_deref(),
         )
         .await?;
     }
-    let published = crate::store::products::get(tx, t, id).await?;
-    sync_product(tx, t, &json!(published)).await?;
+    let stored = crate::store::products::get(tx, t, id).await?;
+    sync_product(tx, t, &json!(stored)).await?;
     veyndo_core::store::outbox::publish_on(
         &mut **tx,
         t,
         "product.published",
-        &json!({"productId":id,"revision":published.revision}),
+        &json!({"productId":id,"revision":stored.revision}),
     )
     .await?;
     Ok(())
@@ -199,7 +261,7 @@ pub async fn product_snapshot(tx: &mut Tx<'_>, t: &str, id: &str) -> Result<Valu
     product_projection(tx, t, value).await
 }
 async fn product_projection(tx: &mut Tx<'_>, t: &str, mut value: Value) -> Result<Value> {
-    let id = value["id"].as_str().unwrap().to_string();
+    let id = view::<Identified>(&value).id.unwrap();
     let trs = db::translations(tx, t, &id).await?;
     value["translations"] = json!(
         trs.into_iter()

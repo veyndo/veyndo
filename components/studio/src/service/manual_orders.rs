@@ -1,4 +1,5 @@
 //! Actor-private manual-order quotes reuse native cart, legal, pricing, inventory and checkout through the assisted-selling register port; no second order ledger.
+use crate::domain::views::Quote;
 use crate::store::manual_orders as db;
 use serde::Deserialize;
 use serde_json::{Value, json};
@@ -113,7 +114,7 @@ async fn review(reg: &dyn Register, a: &State, mut h: RequestContext, v: &Value)
         .await?
     };
     if !matches!(
-        quote["paymentMethod"]["mode"].as_str(),
+        view::<Quote>(&quote).payment_method.mode.as_deref(),
         Some("simulated" | "manual")
     ) {
         return Err(bad(
@@ -218,7 +219,7 @@ pub async fn invoke(
     if c.status == "open" {
         let quote = reg.carts().view(&c).await?;
         if !matches!(
-            quote["paymentMethod"]["mode"].as_str(),
+            view::<Quote>(&quote).payment_method.mode.as_deref(),
             Some("simulated" | "manual")
         ) {
             return Err(bad("Buyer payment required for this provider"));

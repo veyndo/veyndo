@@ -27,7 +27,7 @@ pub async fn import(
     let id = r.identity(&namespace);
     let digest = hash(&json!({"record":r,"options":options}).to_string());
     if let Some(extra) = crate::store::imports::product_extra(a, &t, &id).await? {
-        if extra["identity"]["migrationDigest"] == digest {
+        if view::<Migrated>(&extra).identity.migration_digest == digest {
             return Ok(json!({"id":id,"replayed":true}));
         }
         return Err(conflict(
@@ -36,9 +36,49 @@ pub async fn import(
     }
     let payload = mapped(a, &t, r, options).await?;
     let Json(result) = create_product(Shared(a.clone()), h.clone(), Json(payload)).await?;
-    Ok(json!({"id":result["id"],"replayed":false,"stockActivated":false}))
+    Ok(json!({"id":view::<Created>(&result).id,"replayed":false,"stockActivated":false}))
 }
 
+/// A stored product's migration identity.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct Migrated {
+    #[serde(deserialize_with = "lenient")]
+    identity: MigrationIdentity,
+}
+/// The digest of the reviewed source snapshot a product was migrated from.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct MigrationIdentity {
+    migration_digest: Value,
+}
+/// The ID of a created product.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct Created {
+    id: Value,
+}
+/// The reviewed fields of a source product.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct ProductSource {
+    price: Value,
+    #[serde(deserialize_with = "lenient")]
+    name: Option<serde_json::Map<String, Value>>,
+    description: Value,
+    #[serde(deserialize_with = "lenient")]
+    sku: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    stock: Option<i64>,
+}
+/// A product's native catalogue relations.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct Relations {
+    category_ids: Value,
+    parent_id: Value,
+    options: Value,
+}
 /// The JSON fields `mapped` reads, typed as it reads them.
 #[derive(Deserialize, Default)]
 #[serde(default, rename_all = "camelCase")]
@@ -65,16 +105,19 @@ pub async fn mapped(a: &State, t: &str, r: &SourceRecord, options: &Value) -> Re
         .tax_rate
         .filter(|n| n.is_finite() && (0.0..=50.0).contains(n))
         .ok_or(bad("Explicitly review the native tax rate"))?;
-    let amount = &r.data["price"];
-    let code = amount["currency"]
-        .as_str()
+    let source: ProductSource = view(&r.data);
+    let amount = &source.price;
+    let price_source: super::SourceAmount = view(amount);
+    let code = price_source
+        .currency
+        .as_deref()
         .ok_or(bad("Source price currency required"))?;
-    let minor = amount["minor"]
-        .as_i64()
+    let minor = price_source
+        .minor
         .filter(|n| *n >= 0)
         .ok_or(bad("Exact source price required"))?;
-    let scale = amount["scale"]
-        .as_u64()
+    let scale = price_source
+        .scale
         .and_then(|n| u8::try_from(n).ok())
         .ok_or(bad("Currency scale required"))?;
     let currency = settings.currencies.selected(code)?;
@@ -118,15 +161,16 @@ pub async fn mapped(a: &State, t: &str, r: &SourceRecord, options: &Value) -> Re
             ));
         }
     }
-    let names = r.data["name"]
-        .as_object()
+    let names = source
+        .name
+        .as_ref()
         .ok_or(bad("Translated source names required"))?;
     let translations: serde_json::Map<String, Value> = names
         .iter()
         .map(|(locale, name)| {
             (
                 settings.languages().key(locale),
-                json!({"name":name,"description":r.data["description"][locale]}),
+                json!({"name":name,"description":source.description.get(locale).cloned().unwrap_or(Value::Null)}),
             )
         })
         .collect();
@@ -139,13 +183,14 @@ pub async fn mapped(a: &State, t: &str, r: &SourceRecord, options: &Value) -> Re
             rich.insert(settings.languages().key(locale), blocks.clone());
         }
     }
-    let sku = r.data["sku"]
-        .as_str()
+    let sku = source
+        .sku
+        .as_deref()
         .filter(|s| !s.is_empty())
         .map(str::to_owned)
         .unwrap_or_else(|| format!("IMPORT-{id}"));
-    let relations = super::relations::product(r, &namespace)?;
-    let mut payload = json!({"id":id,"revision":0,"settingsRevision":revision,"translations":translations,"extra":{"priceCurrency":code,"identity":{"migrationDigest":digest,"importSource":{"system":r.source,"shop":r.source_shop,"id":r.source_id},"sourceRecordVersion":r.version,"sourceRecordDigest":hash(&json!(r).to_string()),"sourceStock":r.data["stock"].as_i64(),"sourcePriceBasis":basis,"sourcePrice":amount}},"catalog":{"active":active,"productNumber":sku,"categoryIds":relations["categoryIds"],"parentId":relations["parentId"],"options":relations["options"]},"commerce":{"price":price,"taxRate":tax,"stock":0,"minPurchase":1,"purchaseSteps":1,"maxPurchase":null,"deliveryDays":0,"listPrice":null,"advancedPrices":[],"media":[],"properties":{}}});
+    let relations: Relations = view(&super::relations::product(r, &namespace)?);
+    let mut payload = json!({"id":id,"revision":0,"settingsRevision":revision,"translations":translations,"extra":{"priceCurrency":code,"identity":{"migrationDigest":digest,"importSource":{"system":r.source,"shop":r.source_shop,"id":r.source_id},"sourceRecordVersion":r.version,"sourceRecordDigest":hash(&json!(r).to_string()),"sourceStock":source.stock,"sourcePriceBasis":basis,"sourcePrice":amount}},"catalog":{"active":active,"productNumber":sku,"categoryIds":relations.category_ids,"parentId":relations.parent_id,"options":relations.options},"commerce":{"price":price,"taxRate":tax,"stock":0,"minPurchase":1,"purchaseSteps":1,"maxPurchase":null,"deliveryDays":0,"listPrice":null,"advancedPrices":[],"media":[],"properties":{}}});
     if !rich.is_empty() {
         payload["extra"]["richDescription"] = json!(rich);
     }

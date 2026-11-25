@@ -1,8 +1,18 @@
 //! Selected products publish before their image assets and in native parent-before-variant order, without copying stock.
 use super::snapshot::{Tx, product_content};
 use crate::store::staging_snapshot::product_exists;
+use serde::Deserialize;
 use serde_json::Value;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::{Result, conflict};
+/// A product's parent.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct Parented {
+    #[serde(deserialize_with = "lenient")]
+    parent_id: Option<String>,
+}
+/// Publishes the selected products parents first.
 pub async fn publish(tx: &mut Tx<'_>, live: &str, current: &Value, keys: &[String]) -> Result<()> {
     let mut remaining = keys
         .iter()
@@ -13,7 +23,7 @@ pub async fn publish(tx: &mut Tx<'_>, live: &str, current: &Value, keys: &[Strin
         let mut progressed = false;
         for key in remaining.clone() {
             let value = &current[&key];
-            if let Some(parent) = value["parent_id"].as_str() {
+            if let Some(parent) = view::<Parented>(value).parent_id.as_deref() {
                 if remaining.iter().any(|k| k == &format!("product:{parent}")) {
                     continue;
                 }

@@ -1,6 +1,9 @@
 //! Binary assets are immutable, staged independently through metadata/digest units; paid entitlements never clone.
 use super::staging_documents::Tx;
+use crate::domain::views::Identified;
+use crate::domain::views::MediaUrl;
 use serde_json::{Map, Value};
+use veyndo_core::document::view;
 use veyndo_core::{Result, bad, conflict};
 
 /// Adds every asset as a release unit by metadata and digest, never by content.
@@ -11,7 +14,7 @@ pub async fn snapshot_assets(
 ) -> Result<()> {
     let rows=sqlx::query_scalar!(r#"SELECT to_jsonb(a)-'tenant'-'content'-'created_at' AS "data!" FROM product_assets a WHERE tenant=$1 ORDER BY id FOR UPDATE"#, t).fetch_all(&mut **tx).await?;
     for v in rows {
-        result.insert(format!("asset:{}", v["id"].as_str().unwrap()), v);
+        result.insert(format!("asset:{}", view::<Identified>(&v).id.unwrap()), v);
     }
     Ok(())
 }
@@ -39,8 +42,8 @@ pub async fn validate_product_media(tx: &mut Tx<'_>, live: &str, keys: &[String]
             .as_array()
             .ok_or(bad("Product media must be an array"))?
         {
-            let Some(url) = item["url"]
-                .as_str()
+            let Some(url) = view::<MediaUrl>(item)
+                .url
                 .filter(|s| s.starts_with("/store-api/assets/"))
             else {
                 continue;

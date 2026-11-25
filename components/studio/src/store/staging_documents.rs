@@ -1,4 +1,5 @@
 //! Knowledge documents/chunks clone and publish with their source provenance; publication visibility is a reviewed unit.
+use crate::domain::views::Identified;
 use serde::Deserialize;
 use serde_json::{Map, Value, json};
 use veyndo_catalog::store::products;
@@ -48,7 +49,10 @@ pub async fn snapshot(
 ) -> Result<()> {
     let rows=sqlx::query_scalar!(r#"SELECT to_jsonb(d)-'tenant'-'revision'-'created_at' AS "data!" FROM knowledge_documents d WHERE tenant=$1 ORDER BY id FOR UPDATE"#, tenant).fetch_all(&mut **tx).await?;
     for data in rows {
-        result.insert(format!("document:{}", data["id"].as_str().unwrap()), data);
+        result.insert(
+            format!("document:{}", view::<Identified>(&data).id.unwrap()),
+            data,
+        );
     }
     Ok(())
 }

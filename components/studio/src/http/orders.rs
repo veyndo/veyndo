@@ -1,4 +1,5 @@
 //! Merchant order search with admitted app filters, token-redacted detail with the effective workflow, and append-only operational notes.
+use crate::domain::views::IdValue;
 use axum::Json;
 use axum::extract::{Path, Query, State as Shared};
 use serde_json::{Value, json};
@@ -7,6 +8,7 @@ use veyndo_app_model::Object;
 use veyndo_app_platform::domain::native_lifecycle::order_machine;
 use veyndo_app_platform::store::extension_filter::{admit as admit_filters, predicate};
 use veyndo_app_platform::store::extension_projection::attach;
+use veyndo_core::document::view;
 use veyndo_core::{RequestContext, Result, State};
 use veyndo_identity::{merchant, permit};
 use veyndo_orders::domain::order_fields::order_fields;
@@ -49,7 +51,7 @@ pub async fn list(
         })
         .collect::<Vec<_>>();
     attach(&a, &h, Object::Order, &mut elements).await?;
-    let after = elements.last().map(|v| v["id"].clone());
+    let after = elements.last().map(|v| view::<IdValue>(v).id);
     Ok(Json(
         json!({"elements":elements,"hasMore":more,"nextCursor":if more{after}else{None}}),
     ))

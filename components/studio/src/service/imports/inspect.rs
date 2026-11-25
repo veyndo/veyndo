@@ -25,6 +25,79 @@ struct InspectRequest {
     details: Option<bool>,
 }
 
+/// The source-owned fields of a mapped product payload.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct MappedProduct {
+    catalog: Value,
+    translations: Value,
+    #[serde(deserialize_with = "lenient")]
+    extra: MappedExtra,
+    #[serde(deserialize_with = "lenient")]
+    commerce: MappedCommerce,
+}
+/// A mapped product's currency, migration identity and optional rich description.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct MappedExtra {
+    price_currency: Value,
+    #[serde(deserialize_with = "lenient")]
+    identity: MappedIdentity,
+    #[serde(deserialize_with = "present")]
+    rich_description: Option<Value>,
+}
+/// A mapped product's migration digest.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct MappedIdentity {
+    migration_digest: Value,
+}
+/// A mapped product's price and tax rate.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct MappedCommerce {
+    price: Value,
+    tax_rate: Value,
+}
+/// A mapped category.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct MappedCategory {
+    parent_id: Value,
+    data: Value,
+}
+/// A source record's reviewed destination mapping.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct Destination {
+    destination: Value,
+}
+/// The reviewed digest of a page destination.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct PageOptions {
+    #[serde(deserialize_with = "lenient")]
+    destination_digest: Option<String>,
+}
+/// A product document's price currency.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct Priced {
+    #[serde(deserialize_with = "lenient")]
+    extra: PriceCurrency,
+}
+/// The currency key of a product's extra fields.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct PriceCurrency {
+    #[serde(deserialize_with = "lenient")]
+    price_currency: Option<String>,
+}
+/// A present field, including an explicit null.
+fn present<'de, D: serde::Deserializer<'de>>(d: D) -> std::result::Result<Option<Value>, D::Error> {
+    Value::deserialize(d).map(Some)
+}
+
 pub async fn inspect<H: ImportHost>(host: &H, h: &RequestContext, v: &Value) -> Result<Value> {
     let input: InspectRequest = view(v);
     let a = host.core();
@@ -48,28 +121,30 @@ pub async fn inspect<H: ImportHost>(host: &H, h: &RequestContext, v: &Value) -> 
             };
             // Inventory, new merchant metadata and later media have independent native owners.
             // Only source-owned fields are asserted by this product record; assets get their own comparison.
-            let mut catalog = mapped["catalog"].clone();
+            let mapped: MappedProduct = view(&mapped);
+            let mut catalog = mapped.catalog;
             if let Some(categories) = catalog["categoryIds"].as_array_mut() {
                 categories.sort_by_key(Value::to_string);
             }
-            let mut translations = mapped["translations"].clone();
+            let mut translations = mapped.translations;
             let settings = config(a, &t).await?.0;
             let main = settings.languages().key(&settings.main_locale);
             if translations[&main].is_object() && translations[&main]["description"].is_null() {
                 translations[&main]["description"] = json!("");
             }
-            let mut expected = json!({"translations":translations,"catalog":catalog,"extra":{"priceCurrency":mapped["extra"]["priceCurrency"],"identity":{"migrationDigest":mapped["extra"]["identity"]["migrationDigest"]}},"commerce":{"price":mapped["commerce"]["price"],"taxRate":mapped["commerce"]["taxRate"]}});
-            if let Some(rich) = mapped["extra"].get("richDescription") {
-                expected["extra"]["richDescription"] = rich.clone();
+            let mut expected = json!({"translations":translations,"catalog":catalog,"extra":{"priceCurrency":mapped.extra.price_currency,"identity":{"migrationDigest":mapped.extra.identity.migration_digest}},"commerce":{"price":mapped.commerce.price,"taxRate":mapped.commerce.tax_rate}});
+            if let Some(rich) = mapped.extra.rich_description {
+                expected["extra"]["richDescription"] = rich;
             }
             (expected, actual)
         }
         "categories" => {
             permit(h, "catalog.read")?;
-            let mapped = categories::mapped(a, &t, &r, &input.options).await?;
+            let mapped: MappedCategory =
+                view(&categories::mapped(a, &t, &r, &input.options).await?);
             let actual = db::category(a, &t, &id).await?;
             (
-                json!({"parentId":mapped["parentId"],"data":mapped["data"]}),
+                json!({"parentId":mapped.parent_id,"data":mapped.data}),
                 actual,
             )
         }
@@ -78,9 +153,10 @@ pub async fn inspect<H: ImportHost>(host: &H, h: &RequestContext, v: &Value) -> 
             host.inspect_record(
                 h,
                 &id,
-                &r.data["destination"],
-                input.options["destinationDigest"]
-                    .as_str()
+                &view::<Destination>(&r.data).destination,
+                view::<PageOptions>(&input.options)
+                    .destination_digest
+                    .as_deref()
                     .ok_or(bad("Reviewed destination digest required"))?,
             )
             .await?
@@ -89,7 +165,7 @@ pub async fn inspect<H: ImportHost>(host: &H, h: &RequestContext, v: &Value) -> 
             permit(h, "automation.read")?;
             id = coupons::configuration_id(&r.identity(&t));
             let actual = db::promotion(a, &t, &id).await?;
-            let mut expected = r.data["destination"].clone();
+            let mut expected = view::<Destination>(&r.data).destination;
             if !expected.is_object() {
                 return Err(bad("Reviewed coupon mapping required"));
             }
@@ -111,12 +187,14 @@ pub async fn inspect<H: ImportHost>(host: &H, h: &RequestContext, v: &Value) -> 
         let scale = settings
             .currencies
             .selected(
-                expected["extra"]["priceCurrency"]
-                    .as_str()
+                view::<Priced>(&expected)
+                    .extra
+                    .price_currency
+                    .as_deref()
                     .ok_or(bad("Product currency required"))?,
             )?
             .scale;
-        result["preview"] = json!({"expected":product::projection(&expected, scale)?,"actual":actual.as_ref().map(|value| product::projection(value, settings.currencies.selected(value["extra"]["priceCurrency"].as_str().ok_or(bad("Product currency required"))?)?.scale)).transpose()?,"limits":{"locales":16,"textCharacters":4000,"images":8},"publication":"private-preview-not-publication"});
+        result["preview"] = json!({"expected":product::projection(&expected, scale)?,"actual":actual.as_ref().map(|value| product::projection(value, settings.currencies.selected(view::<Priced>(value).extra.price_currency.as_deref().ok_or(bad("Product currency required"))?)?.scale)).transpose()?,"limits":{"locales":16,"textCharacters":4000,"images":8},"publication":"private-preview-not-publication"});
     }
     Ok(result)
 }

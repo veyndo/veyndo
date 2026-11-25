@@ -1,11 +1,23 @@
 //! Generic coupon import delegates a reviewed native promotion definition, without pretending original usage is a new purchase.
 use super::SourceRecord;
 use crate::ports::ImportHost;
+use serde::Deserialize;
 use serde_json::{Value, json};
+use veyndo_core::document::{lenient, view};
 use veyndo_core::{RequestContext, Result, bad, hash};
 use veyndo_identity::merchant;
 use veyndo_pricing::types::currency::scale;
 use veyndo_shop::service::read_cache::config;
+/// The reviewed fields of a source coupon.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct CouponSource {
+    currency: Value,
+    #[serde(deserialize_with = "lenient")]
+    scale: Option<u64>,
+    destination: Value,
+}
+/// Imports one reviewed source coupon as a native promotion definition.
 pub async fn import<H: ImportHost>(
     host: &H,
     h: &RequestContext,
@@ -14,18 +26,19 @@ pub async fn import<H: ImportHost>(
     let a = host.core();
     let t = merchant(h)?;
     let settings = config(a, &t).await?.0;
-    if r.data["currency"] != settings.currencies.pricing_currency
-        || r.data["scale"].as_u64() != scale(&settings.currencies.pricing_currency).map(u64::from)
+    let source: CouponSource = view(&r.data);
+    if source.currency != settings.currencies.pricing_currency
+        || source.scale != scale(&settings.currencies.pricing_currency).map(u64::from)
     {
         return Err(bad(
             "Map source coupon amounts to the shop pricing currency before import",
         ));
     }
-    let mut destination = r.data["destination"].clone();
+    let mut destination = source.destination;
     if !destination.is_object() {
         return Err(bad("Reviewed native coupon mapping required"));
     }
-    destination["sourceImport"] = json!({"version":r.version,"source":r.source,"sourceShop":r.source_shop,"sourceId":r.source_id,"currency":r.data["currency"],"recordDigest":hash(&json!(r).to_string()),"activationReviewed":false});
+    destination["sourceImport"] = json!({"version":r.version,"source":r.source,"sourceShop":r.source_shop,"sourceId":r.source_id,"currency":source.currency,"recordDigest":hash(&json!(r).to_string()),"activationReviewed":false});
     host.import_promotion(h, &configuration_id(&r.identity(&t)), &destination)
         .await
 }

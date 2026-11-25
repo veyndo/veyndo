@@ -4,16 +4,32 @@ use super::snapshot::{Tx, snapshot};
 use crate::ports::ReleaseHost;
 use crate::store::staging_clone as clone;
 use crate::store::staging_documents as documents;
+use serde::Deserialize;
 use serde_json::{Value, json};
 use veyndo_app_model::manifest::Manifest;
 use veyndo_app_platform::domain::core_extensions::configuration;
 use veyndo_app_platform::domain::entity_access::entity_access;
 use veyndo_app_platform::store::records::{get as get_record, rows as record_rows};
 use veyndo_b2b::store::staging as b2b;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::store::history_context::context;
 use veyndo_core::{RequestContext, Result, bad, hash, uid};
 use veyndo_identity::permit;
 use veyndo_orders::store::company::lock as lock_company;
+/// The request fields an environment clone reads.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct CreateInput {
+    #[serde(deserialize_with = "lenient")]
+    name: Option<String>,
+}
+/// A record's revision.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct Revisioned {
+    #[serde(deserialize_with = "lenient")]
+    revision: Option<i64>,
+}
 /// Clones the live shop's catalogue and configuration into a new private environment.
 pub async fn create<H: ReleaseHost>(host: &H, h: RequestContext, v: Value) -> Result<Value> {
     create_inner(host, h, v, None).await
@@ -66,7 +82,7 @@ async fn clone_apps<H: ReleaseHost>(
                         false,
                     )
                     .await?
-                    .and_then(|value| value["revision"].as_i64())
+                    .and_then(|value| view::<Revisioned>(&value).revision)
                     .unwrap_or(0);
                     host.save_record(
                         tx,
@@ -99,8 +115,10 @@ async fn create_inner<H: ReleaseHost>(
         },
     )?;
     let t = live(a, &h).await?;
-    let name = v["name"]
-        .as_str()
+    let input: CreateInput = view(&v);
+    let name = input
+        .name
+        .as_deref()
         .filter(|s| !s.trim().is_empty() && s.len() <= 80)
         .ok_or(bad("Environment name required, maximum 80 bytes"))?;
     let id = format!("stage-{}", &uid()[..20]);

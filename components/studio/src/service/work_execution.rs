@@ -1,5 +1,6 @@
 //! Approved work runs under the existing task lease; each native write is fenced against cancellation and recorded before advancing. Translation steps reuse native draft storage and yield the worker while drafts are prepared.
 use crate::domain::proposal::Step;
+use crate::domain::views::{Provider, Providers};
 use crate::ports::WorkHost;
 use crate::store::work_runs as db;
 use serde::Deserialize;
@@ -40,11 +41,15 @@ pub async fn enqueue_translation(
 /// A translation provider must be centrally configured before a backend is taken.
 pub async fn admit_provider(inference: &Inference, choice: &Choice) -> Result<()> {
     let available = inference.public_providers().await.map_err(bad)?;
-    if !available["providers"].as_array().is_some_and(|providers| {
-        providers
-            .iter()
-            .any(|p| p["id"] == json!(choice.provider) && p["configured"] == true)
-    }) {
+    if !view::<Providers>(&available)
+        .providers
+        .is_some_and(|providers| {
+            providers
+                .iter()
+                .map(view::<Provider>)
+                .any(|p| p.id == json!(choice.provider) && p.configured == true)
+        })
+    {
         return Err(bad("Translation provider is not configured"));
     }
     Ok(())

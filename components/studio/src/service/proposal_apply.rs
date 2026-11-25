@@ -2,6 +2,7 @@
 use super::work_execution::{admit_provider, enqueue_translation};
 use super::work_plan::approve;
 use crate::domain::proposal::{Change, Proposal, validate_proposal};
+use crate::domain::views::{Evidence, ProposalParts};
 use crate::ports::WorkHost;
 use crate::store::{products, tasks};
 use serde::Deserialize;
@@ -115,11 +116,13 @@ pub async fn apply_mode<H: WorkHost>(
 ) -> Result<Value> {
     let a = host.models().core;
     let evidence = tasks::unapplied_proposal(a, t, id).await?;
-    if let Some(evidence) = evidence
-        && evidence["proposal"]["translation"].is_string()
+    if let Some(evidence) = evidence.as_ref().map(view::<Evidence>)
+        && view::<ProposalParts>(&evidence.proposal)
+            .translation
+            .is_string()
     {
         permit(h, "catalog.write")?;
-        let choice: Choice = serde_json::from_value(evidence["translationInference"].clone())
+        let choice: Choice = serde_json::from_value(evidence.translation_inference)
             .map_err(|_| bad("Invalid translation provider"))?;
         admit_provider(host.models().inference, &choice).await?;
     }
@@ -141,9 +144,9 @@ pub async fn apply_mode<H: WorkHost>(
         return Err(conflict("Agent run has no completed proposal to approve"));
     }
     admit_actor(h, &r, &r.proposal, autonomous)?;
-    let v = &r.proposal;
+    let saved: Evidence = view(&r.proposal);
     let p: Proposal =
-        serde_json::from_value(v["proposal"].clone()).map_err(|e| bad(e.to_string()))?;
+        serde_json::from_value(saved.proposal.clone()).map_err(|e| bad(e.to_string()))?;
     admit_proposal(h, &p, autonomous)?;
     if r.applied {
         return Ok(
@@ -153,7 +156,7 @@ pub async fn apply_mode<H: WorkHost>(
     let (settings_data, settings_revision) = products::lock_settings(&mut tx, t).await?;
     let settings: Settings =
         serde_json::from_value(settings_data).map_err(|_| bad("Invalid commerce settings"))?;
-    if let Some(revision) = v["policyRevision"].as_i64()
+    if let Some(revision) = saved.policy_revision
         && revision != settings_revision
     {
         return Err(conflict(
@@ -187,7 +190,7 @@ pub async fn apply_mode<H: WorkHost>(
         reserve(&mut tx, t, h, &settings, request, &products).await?;
     }
     if let Some(target) = &p.translation {
-        let choice: Choice = serde_json::from_value(v["translationInference"].clone())
+        let choice: Choice = serde_json::from_value(saved.translation_inference.clone())
             .map_err(|_| bad("Invalid translation provider"))?;
         enqueue_translation(
             &mut tx,

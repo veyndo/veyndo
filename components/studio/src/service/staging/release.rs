@@ -16,7 +16,7 @@ use veyndo_app_platform::domain::core_extensions::configuration;
 use veyndo_app_platform::domain::entity_access::entity_access;
 use veyndo_app_platform::store::records::{get as get_record, lock_key};
 use veyndo_b2b::store::staging as b2b;
-use veyndo_core::document::view;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::shop_scope::header;
 use veyndo_core::store::history_context::context;
 use veyndo_core::{RequestContext, Result, bad, conflict, hash, uid};
@@ -39,6 +39,37 @@ struct Selection {
 struct Release {
     approve: bool,
     selections: Vec<Selection>,
+}
+/// A channel unit's operational kind.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct ChannelUnit {
+    #[serde(deserialize_with = "lenient")]
+    kind: Option<String>,
+}
+/// An app package unit.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct AppUnit {
+    manifest: Value,
+    #[serde(deserialize_with = "lenient")]
+    active: Option<bool>,
+}
+/// A record's revision.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct Revisioned {
+    #[serde(deserialize_with = "lenient")]
+    revision: Option<i64>,
+}
+/// A rule unit.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct RuleUnit {
+    name: Value,
+    condition: Value,
+    #[serde(deserialize_with = "lenient")]
+    active: Option<bool>,
 }
 /// Takes every lock of a release in the order native writers take them.
 async fn lock_units<H: ReleaseHost>(
@@ -109,8 +140,9 @@ fn admit_selections(
     // Validate against the current live operational type before it can be overwritten.
     // The complete aggregate (including jointly selected categories/settings) is checked below.
     for key in keys.iter().filter(|k| k.starts_with("channel:")) {
-        let old = actual.get(key).and_then(|v| v["kind"].as_str());
-        let new = current[key]["kind"].as_str();
+        let old = actual.get(key).and_then(|v| view::<ChannelUnit>(v).kind);
+        let new = current.get(key).and_then(|v| view::<ChannelUnit>(v).kind);
+        let (old, new) = (old.as_deref(), new.as_deref());
         if old.is_some_and(|old| {
             (old == "pos") != (new == Some("pos"))
                 || (old == "marketplace") != (new == Some("marketplace"))
@@ -158,14 +190,15 @@ async fn publish_unit<H: ReleaseHost>(
     } else if key.starts_with("product:") {
         // Product parents and content were published above, before dependent assets.
     } else if let Some(app) = key.strip_prefix("app:") {
-        let m: Manifest = serde_json::from_value(value["manifest"].clone())
-            .map_err(|_| bad("Invalid app package"))?;
+        let unit: AppUnit = view(value);
+        let m: Manifest =
+            serde_json::from_value(unit.manifest).map_err(|_| bad("Invalid app package"))?;
         if m.runtime != "declarative" {
             return Err(bad("External services need a separate deployment"));
         }
         actor_permissions(h, &m)?;
         host.install_app(tx, t, m).await?;
-        db::set_app_active(tx, t, app, value["active"].as_bool()).await?;
+        db::set_app_active(tx, t, app, unit.active).await?;
     } else if key.starts_with("appdata:") {
         let parts = key.splitn(4, ':').collect::<Vec<_>>();
         let manifest = db::manifest(tx, t, parts[1])
@@ -184,7 +217,7 @@ async fn publish_unit<H: ReleaseHost>(
         }
         let revision = get_record(tx, t, &m.id, &e.name, parts[3], false)
             .await?
-            .and_then(|r| r["revision"].as_i64())
+            .and_then(|r| view::<Revisioned>(&r).revision)
             .unwrap_or(0);
         let mut fields = value.clone();
         fields.as_object_mut().unwrap().remove("id");
@@ -209,15 +242,8 @@ async fn publish_unit<H: ReleaseHost>(
             preserve_import(&actual[key], value)?;
         }
         if kind == "rule" {
-            db::upsert_rule(
-                tx,
-                t,
-                unit,
-                &value["name"],
-                &value["condition"],
-                value["active"].as_bool(),
-            )
-            .await?;
+            let rule: RuleUnit = view(value);
+            db::upsert_rule(tx, t, unit, &rule.name, &rule.condition, rule.active).await?;
         } else {
             let data = if kind == "flow" {
                 let mut flow = value.clone();

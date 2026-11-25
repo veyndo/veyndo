@@ -1,4 +1,5 @@
 //! The merchant product list: catalogue filters from the catalog component, app filters and extensions from the app host, and the opt-in preparation projection.
+use crate::domain::views::Identified;
 use axum::Json;
 use axum::extract::{Query, State as Shared};
 use serde_json::{Value, json};
@@ -10,6 +11,7 @@ use veyndo_catalog::ports::Catalog;
 use veyndo_catalog::service::catalog_reads::localize;
 use veyndo_catalog::store::{media_jobs, product_list, translations};
 use veyndo_catalog::types::product_list::ProductCriteria;
+use veyndo_core::document::view;
 use veyndo_core::{RequestContext, Result, State};
 use veyndo_identity::{merchant, permit};
 use veyndo_shop::service::language::language_context;
@@ -86,7 +88,7 @@ async fn preparation(
     }
     let ids = products
         .iter()
-        .filter_map(|p| p["id"].as_str().map(str::to_owned))
+        .filter_map(|p| view::<Identified>(p).id)
         .collect::<Vec<_>>();
     // Fetch only the already-authorized page, never the whole shop or binary media.
     let texts = translations::all_for_products(a, tenant, &ids).await?;
@@ -100,7 +102,7 @@ async fn preparation(
             .map(|l| l.id.clone())
     };
     for product in products {
-        let id = product["id"].as_str().unwrap_or_default().to_owned();
+        let id = view::<Identified>(product).id.unwrap_or_default();
         let source = sources
             .iter()
             .find(|(product, _, _)| *product == id)

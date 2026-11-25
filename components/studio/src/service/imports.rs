@@ -63,6 +63,25 @@ struct ImportOptions {
     destination_digest: Option<String>,
 }
 
+/// A source record's reviewed destination mapping.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct RecordDestination {
+    destination: Value,
+}
+
+/// An exact source amount: minor units, currency code and scale.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct SourceAmount {
+    #[serde(deserialize_with = "lenient")]
+    minor: Option<i64>,
+    #[serde(deserialize_with = "lenient")]
+    currency: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    scale: Option<u64>,
+}
+
 /// Imports one reviewed source record into its native owner.
 pub async fn invoke<H: ImportHost>(host: &H, h: &RequestContext, v: &Value) -> Result<Value> {
     let a = host.core();
@@ -97,7 +116,7 @@ pub async fn invoke<H: ImportHost>(host: &H, h: &RequestContext, v: &Value) -> R
             host.import_record(
                 h,
                 &record.identity(&identity_namespace(a, &merchant(h)?).await?),
-                &record.data["destination"],
+                &view::<RecordDestination>(&record.data).destination,
                 input
                     .options
                     .destination_digest

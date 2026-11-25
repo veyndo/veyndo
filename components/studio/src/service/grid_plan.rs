@@ -1,15 +1,25 @@
 //! Read-only filter planning through the central provider and fleet leases; execution remains native list APIs.
 use crate::domain::grid_criteria::{schema as criteria_schema, validate};
+use crate::domain::views::Criteria;
 use serde::Deserialize;
 use serde_json::{Value, json};
 use veyndo_app_model::Object;
 use veyndo_app_platform::store::extension_filter::admit;
 use veyndo_app_platform::store::extension_projection::descriptions;
 use veyndo_cognition::inference::InferenceError;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::store::lease::Lease;
 use veyndo_core::{Error, RequestContext, Result, StatusCode, bad};
 use veyndo_identity::{allowed, merchant, permit};
 use veyndo_intelligence::service::models::Models;
+/// The grid model's structured answer.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct GridResult {
+    #[serde(deserialize_with = "lenient")]
+    supported: Option<bool>,
+    criteria: Value,
+}
 /// A grid filter request.
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -80,11 +90,10 @@ pub async fn plan(m: Models<'_>, h: &RequestContext, v: Value) -> Result<Value> 
                 "Grid model service unavailable; use manual filters or retry".into(),
             ),
         })?;
-    let supported = output.value["supported"]
-        .as_bool()
-        .ok_or(bad("Invalid grid model result"))?;
-    let criteria = validate(&input.entity, &output.value["criteria"])?;
-    if let Some(filter) = criteria["appFilter"].as_str() {
+    let result: GridResult = view(&output.value);
+    let supported = result.supported.ok_or(bad("Invalid grid model result"))?;
+    let criteria = validate(&input.entity, &result.criteria)?;
+    if let Some(filter) = view::<Criteria>(&criteria).app_filter.as_deref() {
         admit(a, h, object, filter).await?;
     }
     if supported && criteria.as_object().unwrap().is_empty() {

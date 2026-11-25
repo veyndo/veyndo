@@ -1,5 +1,7 @@
 //! Which entities keep a history, the rights their versions need, and what a restoration request must state.
+use serde::Deserialize;
 use serde_json::{Value, json};
+use veyndo_core::document::{lenient, view};
 use veyndo_core::{RequestContext, Result, bad};
 use veyndo_identity::domain::permissions::allowed;
 
@@ -99,18 +101,29 @@ pub fn schema(name: &str) -> Option<Value> {
 }
 
 /// The current revision and the side of a version an approved restoration names.
-pub fn restoration(v: &Value) -> Result<(i64, &str)> {
-    if v["approve"] != true {
+pub fn restoration(v: &Value) -> Result<(i64, &'static str)> {
+    let input: Restoration = view(v);
+    if input.approve != true {
         return Err(bad("Explicit restoration approval required"));
     }
-    let revision = v["revision"]
-        .as_i64()
-        .ok_or(bad("Current revision required"))?;
-    let side = v["side"]
-        .as_str()
-        .filter(|s| ["before", "after"].contains(s))
-        .ok_or(bad("Version side required"))?;
+    let revision = input.revision.ok_or(bad("Current revision required"))?;
+    let side = match input.side.as_deref() {
+        Some("before") => "before",
+        Some("after") => "after",
+        _ => return Err(bad("Version side required")),
+    };
     Ok((revision, side))
+}
+
+/// The fields of an approved restoration request.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct Restoration {
+    approve: Value,
+    #[serde(deserialize_with = "lenient")]
+    revision: Option<i64>,
+    #[serde(deserialize_with = "lenient")]
+    side: Option<String>,
 }
 
 #[cfg(test)]

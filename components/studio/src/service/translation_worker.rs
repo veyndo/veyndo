@@ -1,10 +1,12 @@
 //! The catalogue translation worker: one leased product per step, keyset traversal, bounded inference and resumable provider errors.
+use crate::domain::views::Usage;
 use crate::service::work_execution::{task_context, task_headers};
 use crate::store::translation_runs as db;
 use serde_json::{Value, json};
 use uuid::Uuid;
 use veyndo_catalog::domain::translation_fields::{Source, source, texts, translated};
 use veyndo_cognition::inference::{Choice, budget};
+use veyndo_core::document::view;
 use veyndo_core::store::lease::Lease;
 use veyndo_core::{Result, bad, conflict};
 use veyndo_intelligence::service::agent_controls::model_authority;
@@ -131,7 +133,8 @@ async fn step(m: Models<'_>, job: &db::Job, lease: &str) -> Result<()> {
             )
             .await
             .map_err(bad)?;
-        let evidence = json!({"provider":output.provider,"model":output.model,"prompt":output.usage["prompt"],"inputTokens":output.usage["input_tokens"].as_u64(),"outputTokens":output.usage["output_tokens"].as_u64()});
+        let usage: Usage = view(&output.usage);
+        let evidence = json!({"provider":output.provider,"model":output.model,"prompt":usage.prompt,"inputTokens":usage.input_tokens,"outputTokens":usage.output_tokens});
         (translated(&src, &output.value)?, Some(evidence))
     };
     if let Some(task) = &job.run_task {

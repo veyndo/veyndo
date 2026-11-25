@@ -1,7 +1,9 @@
 //! Shared native commerce reports for Studio, workspace, API and agent reads; no second analytics ledger.
+use crate::domain::views::ReportScale;
 use crate::domain::{report_config, report_period};
 use serde_json::{Value, json};
 use sqlx::{Postgres, Transaction};
+use veyndo_core::document::view;
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad};
 use veyndo_identity::allowed;
 use veyndo_pricing::types::currency::scale;
@@ -105,8 +107,8 @@ pub async fn run(
     };
     tx.commit().await?;
     data["traffic"] = traffic;
-    let scale = data["currencyScale"]
-        .as_i64()
+    let scale = view::<ReportScale>(&data)
+        .currency_scale
         .unwrap_or(scale(currency).unwrap_or(2) as i64);
     data["filters"] = json!({"from":p.from,"toExclusive":p.to,"previousFrom":p.previous,"interval":p.interval,"timezone":q.timezone,"currency":currency,"currencyScale":scale,"channels":channels,"currencies":currencies});
     data["permissions"] =

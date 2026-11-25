@@ -1,4 +1,5 @@
 //! HTTP proposal planning and the caller's reviewable task list.
+use crate::domain::views::Queued;
 use crate::store::tasks;
 use axum::Json;
 use axum::extract::State as Shared;
@@ -38,7 +39,7 @@ pub async fn agent_plan(
     if input.background == Some(true) {
         return Ok(Json(queued));
     }
-    let run = wait(&a, &h, queued["taskId"].as_str().unwrap()).await?;
+    let run = wait(&a, &h, &view::<Queued>(&queued).task_id.unwrap()).await?;
     Ok(Json(plan_result(run)?))
 }
 /// The caller's recent reviewable tasks that their current rights still cover.

@@ -3,6 +3,7 @@ use super::work_plan::bind;
 use crate::domain::grid_criteria::validate as validate_criteria;
 use crate::domain::proposal::{Proposal, View, validate_proposal};
 use crate::domain::view_components::validate as validate_components;
+use crate::domain::views::Criteria;
 use crate::ports::WorkHost;
 use crate::store::products;
 use serde::Deserialize;
@@ -39,7 +40,10 @@ pub async fn admit_view(a: &State, h: &RequestContext, view: &mut View) -> Resul
             .retain(|component| component != "shippingPolicy");
     }
     view.criteria = validate_criteria(&view.entity, &view.criteria)?;
-    if let Some(filter) = view.criteria["appFilter"].as_str() {
+    if let Some(filter) = veyndo_core::document::view::<Criteria>(&view.criteria)
+        .app_filter
+        .as_deref()
+    {
         let object = match view.entity.as_str() {
             "orders" => Object::Order,
             "customers" => Object::Customer,
