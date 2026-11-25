@@ -972,6 +972,18 @@ moved with the code, proof bindings updated.
       (compared by a schema dump in the suite).
 - [ ] 5.4 Mirrors: every component repository is generated from the monorepo,
       builds and tests alone, and `components.lock.json` records the released commit.
+      State (25 Nov): `scripts/component_mirrors.py` generates all 19 components with
+      a crate of their own into `target/mirrors/` (monorepo paths and bytes kept, a
+      generated workspace of only the component's crates, no server crate), and
+      `--check` (tooling suite `testing/component_mirrors_check`) shows all 19 build
+      (`cargo check --all-targets`) and test alone, offline. Twelve components gained
+      test adapters for ports only the server implemented; intelligence and studio
+      still list three host ports each. The released commit is recorded in a new
+      `components.release.json`, not in `components.lock.json`, which stays the inbound
+      lock of vendored imports (its `apps` key already names another repository).
+      host, protocols and connectors have no crate to mirror. Open: publishing to the
+      component repositories, adapters for the six host ports. See
+      [component mirrors](../component-mirrors.md).
 - [ ] 5.5 Acceptance of the whole system: all registered suites, the two-replica
       purchase and cancellation regression, a rolling upgrade (old and new binary
       on one database), and the hot-path benchmark compared with the starting point.

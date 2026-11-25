@@ -429,7 +429,9 @@ internal. `commerce/` and `auth/` group their types, validation and operations.
 `structure.py` keeps `main.rs` under 120 lines and requires a responsibility
 comment at the top of every Rust source. File length is not limited; clippy limits
 the length of a single function, and [the component map](component-dependencies.md)
-limits which component may use which code and tables.
+limits which component may use which code and tables. Each component with a crate is
+also generated as a standalone mirror that must build and test alone; see
+[component mirrors](component-mirrors.md).
 
 A component reads or changes another component's table only through that owner's
 store. When it already depends on the owner it calls the owner's store function on
