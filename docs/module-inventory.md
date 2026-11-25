@@ -2780,6 +2780,7 @@ This lists every checked-in source module in these roots, including files with n
 | [scripts/behavior_intelligence.py](../scripts/behavior_intelligence.py) | Real native event, consent, order, graph, MCP and tenant/PII regression; synthetic buyers only. |
 | [scripts/benchmark.py](../scripts/benchmark.py) | Reproducible local HTTP + PostgreSQL benchmark, with response validation. |
 | [scripts/branding.py](../scripts/branding.py) | Keep the public Veyndo identity, shared vector assets and executable package/deployment paths consistent. |
+| [scripts/browser_journeys.py](../scripts/browser_journeys.py) | Real-browser journeys through Studio and storefront: purchase, refund, product edit while orders arrive, app installation and a non-English main language. |
 | [scripts/browser_sessions.py](../scripts/browser_sessions.py) | Real HTTP personal-cookie transport, current ledger, origin/CSRF/session fences and legacy bearer compatibility. |
 | [scripts/build_app_ui.py](../scripts/build_app_ui.py) | Export deterministic example HTML and its operator uiDigests entry; never fetch remote resources. |
 | [scripts/build_site.py](../scripts/build_site.py) | Build marketing pages and the complete Markdown documentation for GitHub Pages. |

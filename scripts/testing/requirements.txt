@@ -3,3 +3,6 @@ coverage==7.13.5
 
 # Offline legacy migration and differential reference only; never a runtime service dependency.
 cryptography==46.0.4
+
+# Real-browser journeys (scripts/browser_journeys.py); its bundled Node drives Chromium.
+playwright==1.65.1

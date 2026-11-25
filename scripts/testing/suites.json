@@ -100,7 +100,8 @@
     "marketplaces",
     "shipping_contract",
     "grid_directory",
-    "visual_workspace"
+    "visual_workspace",
+    "browser_journeys"
   ],
   "browser_contracts": [
     "analytics",

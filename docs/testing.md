@@ -548,6 +548,26 @@ than this machine and never prints the password. Sign in at
 `http://127.0.0.1:8787/?shop=dev-shop#login`. After a frontend rebuild, run
 `node scripts/precompress.mjs` too: the server prefers the precompressed sidecars.
 
+## Browser journeys
+
+`browser_journeys` (provider suite group) drives Studio and storefront in a real
+Chromium: a guest purchase that then appears in Studio, a Studio refund of a
+captured provider payment (local provider fixture), a product content edit saved
+while another shopper's order changes stock (the stock decrement survives), an app
+installation through its permission review, and a Spanish main language with Italian
+as a fifth content language (the merchant's Italian name reaches the storefront;
+untouched fields inherit Spanish and are not saved as translations). It starts its own
+server on a free loopback port and registers one disposable shop per journey;
+setup goes through the API, every step under test through the browser.
+
+The driver is the pinned `playwright` package from `scripts/testing/requirements.txt`
+plus `python3 -m playwright install chromium-headless-shell`; its bundled Node runs
+`scripts/testing/browser_journeys.mjs`, so a working system Node is not needed.
+`BROWSER_NODE` and `BROWSER_MODULE` select another Node and Playwright module. Run it
+alone with `python3 scripts/verify_integration.py --container <postgres> --only
+browser_journeys` after `cargo build --workspace --bins` and a frontend build. A
+failing journey leaves a screenshot in `artifacts/browser-journeys/`.
+
 ## Repeatable checks
 
 From the repository root:

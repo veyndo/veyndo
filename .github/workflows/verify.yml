@@ -161,6 +161,7 @@ jobs:
         run: |
           python3 -m pip install -r scripts/testing/requirements.txt
           sudo apt-get update && sudo apt-get install -y pgbouncer
+          python3 -m playwright install --with-deps chromium-headless-shell
       - run: cargo fmt --all --check && cargo clippy --locked --workspace --all-targets -- -D warnings -W clippy::too_many_lines
       - name: Instrument the real Rust unit and HTTP paths
         run: |
