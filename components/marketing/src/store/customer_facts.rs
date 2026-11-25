@@ -1,6 +1,8 @@
-//! Customer rule authority is loaded by tenant and stable customer ID, with aggregate history and calendar age.
+//! Customer rule authority is loaded by tenant and stable customer ID, with aggregate history and calendar age. Accounts and orders come through the records port, reviews from the catalog store, on the caller's connection.
+use crate::ports::records;
 use serde::Deserialize;
 use serde_json::{Value, json};
+use veyndo_catalog::store::rule_products;
 use veyndo_core::Result;
 use veyndo_core::document::view;
 use veyndo_shop::types::cart::StoredCart;
@@ -18,7 +20,9 @@ pub async fn customer(
     facts: &Value,
 ) -> Result<Value> {
     let input: CustomerInput = view(facts);
-    let row=sqlx::query!("SELECT active,email,group_name,customer_number,profile,automation,company,extract(year FROM age(current_date,(profile->>'birthday')::date))::double precision AS age,abs(current_date-first_login::date)::double precision AS first_days,abs(current_date-last_login::date)::double precision AS last_days FROM customers WHERE tenant=$1 AND id=$2", &c.tenant, c.data.customer_id.as_deref()).fetch_optional(&mut *conn).await?;
+    let records = records()?;
+    let customer_id = c.data.customer_id.as_deref();
+    let row = records.rule_customer(conn, &c.tenant, customer_id).await?;
     let Some(r) = row else {
         return Ok(
             json!({"loggedIn":false,"guest":true,"email":null,"active":false,"group":c.data.group,"tags":[],"salutationId":null,"lastName":null,"customerNumber":null,"affiliateCode":null,"campaignCode":null,"requestedGroupId":null,"age":null,"orderCount":null,"orderTotalAmount":null,"reviewCount":null,"daysSinceFirstLogin":null,"daysSinceLastLogin":null,"daysSinceLastOrder":null,"isCompany":false,"newsletter":false,"createdByAdmin":false,"differentAddresses":false}),
@@ -26,10 +30,10 @@ pub async fn customer(
     };
     let profile: Profile = view(&r.profile);
     let a: Automation = view(&r.automation);
-    let stats=sqlx::query!(r#"SELECT count(*) AS "count!",coalesce(sum((data->'cart'->'price'->>'totalPrice')::numeric),0)::double precision AS "amount!",abs(current_date-max(created_at)::date)::double precision AS days FROM orders WHERE tenant=$1 AND data->'orderCustomer'->>'customerId'=$2"#, &c.tenant, c.data.customer_id.as_deref()).fetch_one(&mut *conn).await?;
-    let reviews: i64 = sqlx::query_scalar!(r#"SELECT count(*) AS "reviews!" FROM product_reviews WHERE tenant=$1 AND session='customer:'||$2"#, &c.tenant, c.data.customer_id.as_deref())
-    .fetch_one(&mut *conn)
-    .await?;
+    let stats = records
+        .customer_orders(conn, &c.tenant, customer_id)
+        .await?;
+    let reviews = rule_products::customer_reviews(conn, &c.tenant, customer_id).await?;
     Ok(
         json!({"loggedIn":true,"guest":false,"active":r.active.clone(),"email":r.email.clone(),"group":r.group_name.clone(),"customerNumber":r.customer_number.clone(),"salutationId":profile.salutation_id,"lastName":profile.last_name,"age":r.age.clone(),"birthday":profile.birthday,"tags":a.tags.as_array().cloned().unwrap_or_default(),"customFields":a.custom_fields.as_object().cloned().unwrap_or_default(),"affiliateCode":a.affiliate_code,"campaignCode":a.campaign_code,"requestedGroupId":a.requested_group_id,"newsletter":a.newsletter.as_bool().unwrap_or(false),"createdByAdmin":a.created_by_admin.as_bool().unwrap_or(false),"isCompany":r.company.clone().is_some_and(|s|!s.is_empty()),"differentAddresses":input.billing!=input.shipping,"orderCount":stats.count.clone(),"orderTotalAmount":stats.amount.clone(),"reviewCount":reviews,"daysSinceFirstLogin":r.first_days.clone(),"daysSinceLastLogin":r.last_days.clone(),"daysSinceLastOrder":stats.days.clone()}),
     )

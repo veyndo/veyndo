@@ -12,6 +12,7 @@ pub mod embedding_jobs;
 pub mod evidence;
 pub mod experiments;
 pub mod flow_proposals;
+pub mod flow_tasks;
 pub mod observations;
 pub mod personalization;
 pub mod platform_ai;

@@ -9,4 +9,5 @@ pub mod lease;
 pub mod outbox;
 pub mod pool;
 pub mod row_security;
+pub mod shop_activity;
 pub mod tenants;

@@ -1,12 +1,14 @@
-//! Every queued flow step rehydrates current membership; stored definitions never preserve revoked privileges.
+//! Every queued flow step rehydrates current membership; stored definitions never preserve revoked privileges. A stage's live shop and the shop's activity are resolved by core.
 use serde_json::Value;
+use sqlx::PgConnection;
+use veyndo_core::store::{environments, shop_activity};
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad};
 pub async fn headers(a: &State, t: &str, actor: Option<&str>) -> Result<RequestContext> {
-    headers_on(&a.db, t, actor).await
+    headers_on(&mut *a.db.begin().await?, t, actor).await
 }
 /// App admission already holds configuration locks; reuse that connection for current grants.
-pub async fn headers_on<'e>(
-    db: impl sqlx::Executor<'e, Database = sqlx::Postgres>,
+pub async fn headers_on(
+    conn: &mut PgConnection,
     t: &str,
     actor: Option<&str>,
 ) -> Result<RequestContext> {
@@ -24,7 +26,8 @@ pub async fn headers_on<'e>(
     if actor == "bootstrap" {
         h.insert("x-rac-role", "owner".parse().unwrap());
     } else {
-        let r=sqlx::query!(r#"SELECT role AS "role!",permissions AS "permissions!" FROM membership_grants WHERE tenant=COALESCE((SELECT live_tenant FROM shop_environments WHERE tenant=$1),$1) AND user_id=$2 AND active"#, t, actor).fetch_optional(db).await?.ok_or(Error(StatusCode::FORBIDDEN,"Flow owner lost access".into()))?;
+        let live = environments::live_parent(&mut *conn, t).await?;
+        let r=sqlx::query!(r#"SELECT role AS "role!",permissions AS "permissions!" FROM membership_grants WHERE tenant=$1 AND user_id=$2 AND active"#, live.as_deref().unwrap_or(t), actor).fetch_optional(conn).await?.ok_or(Error(StatusCode::FORBIDDEN,"Flow owner lost access".into()))?;
         h.insert(
             "x-rac-role",
             r.role
@@ -62,7 +65,7 @@ pub async fn proposal_headers(
     veyndo_identity::assistant_access(&h)?;
     veyndo_identity::permit(&h, "catalog.write")?;
     veyndo_identity::permit(&h, "knowledge.read")?;
-    let row=sqlx::query!("SELECT t.status,t.agents_stopped,e.preview_owner,e.preview_until>now() AS valid FROM tenants t LEFT JOIN shop_environments e ON e.tenant=$1 WHERE t.id=coalesce(e.live_tenant,$1)", t).fetch_one(&a.db).await?;
+    let row = shop_activity::activity(a, t).await?;
     if row.agents_stopped
         || row.status.clone() != "active"
         || row

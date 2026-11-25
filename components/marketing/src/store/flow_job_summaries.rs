@@ -1,4 +1,5 @@
 //! Bounded flow execution summaries of a shop; a restricted reader never sees action output.
+use crate::ports::records;
 use serde::Deserialize;
 use serde_json::{Value, json};
 use veyndo_core::document::{lenient, lenient_list, view};
@@ -6,8 +7,18 @@ use veyndo_core::{Result, State};
 
 /// The newest fifty jobs; `full` is true only for a reader holding every scope.
 pub async fn values(a: &State, t: &str, full: bool) -> Result<Value> {
-    let jobs=sqlx::query!("SELECT j.id,j.flow,j.state,j.result,j.error,j.cursor,j.execution,to_char(j.available_at AT TIME ZONE 'UTC','YYYY-MM-DD\"T\"HH24:MI:SS\"Z\"') AS available_at,COALESCE(t.applied,false) AS applied,COALESCE(t.run_request ? 'execution',false) AS execution_started FROM flow_jobs j LEFT JOIN tasks t ON t.tenant=j.tenant AND t.id=j.result->>'taskId' WHERE j.tenant=$1 ORDER BY j.event_id DESC,j.id LIMIT 50", t).fetch_all(&a.db).await?;
-    let value=json!(jobs.iter().map(|r|json!({"id":r.id.clone(),"flow":r.flow.clone(),"state":r.state.clone(),"result":r.result.clone(),"error":r.error.clone(),"cursor":r.cursor.clone(),"execution":r.execution.clone(),"availableAt":r.available_at.clone(),"applied":r.applied.clone(),"executionStarted":r.execution_started.clone()})).collect::<Vec<_>>());
+    let jobs=sqlx::query!("SELECT j.id,j.flow,j.state,j.result,j.error,j.cursor,j.execution,to_char(j.available_at AT TIME ZONE 'UTC','YYYY-MM-DD\"T\"HH24:MI:SS\"Z\"') AS available_at,j.result->>'taskId' AS task FROM flow_jobs j WHERE j.tenant=$1 ORDER BY j.event_id DESC,j.id LIMIT 50", t).fetch_all(&a.db).await?;
+    // The work task a job created belongs to intelligence; a job without a task shows neither applied nor started.
+    let ids = jobs
+        .iter()
+        .filter_map(|r| r.task.clone())
+        .collect::<Vec<_>>();
+    let tasks = if ids.is_empty() {
+        vec![]
+    } else {
+        records()?.task_states(a, t, &ids).await?
+    };
+    let value=json!(jobs.iter().map(|r|{let task=tasks.iter().find(|task|Some(&task.id)==r.task.as_ref());json!({"id":r.id.clone(),"flow":r.flow.clone(),"state":r.state.clone(),"result":r.result.clone(),"error":r.error.clone(),"cursor":r.cursor.clone(),"execution":r.execution.clone(),"availableAt":r.available_at.clone(),"applied":task.is_some_and(|task|task.applied),"executionStarted":task.is_some_and(|task|task.execution_started)})}).collect::<Vec<_>>());
     Ok(project(value, full))
 }
 

@@ -1,8 +1,11 @@
-//! Inspect tenant-owned definition references and durable uses before configuration deletion.
+//! Inspect tenant-owned definition references and durable uses before configuration deletion. Settings, frontend bindings and product visibility come from their owners' stores; orders, carts and customers through the records port, all on the caller's connection.
+use crate::ports::records;
 use serde::Deserialize;
 use serde_json::{Value, json};
+use veyndo_catalog::store::rule_products;
 use veyndo_core::Result;
 use veyndo_core::document::view;
+use veyndo_shop::store::channel_settings;
 
 pub fn references(v: &Value, kind: &str, id: &str) -> bool {
     match v {
@@ -76,23 +79,11 @@ pub async fn inspect(
         let settings = [
             (
                 "settings",
-                sqlx::query_as!(
-                    Definition,
-                    r#"SELECT 'default' AS "id!",data FROM commerce_settings WHERE tenant=$1"#,
-                    t
-                )
-                .fetch_all(&mut *conn)
-                .await?,
+                channel_settings::basis_documents(conn, t).await?,
             ),
             (
                 "channel_settings",
-                sqlx::query_as!(
-                    Definition,
-                    "SELECT channel_id AS id,data FROM commerce_overrides WHERE tenant=$1",
-                    t
-                )
-                .fetch_all(&mut *conn)
-                .await?,
+                channel_settings::override_documents(conn, t).await?,
             ),
         ];
         for (scope, rows) in settings {
@@ -112,36 +103,28 @@ pub async fn inspect(
             "pending_jobs",
             sqlx::query_scalar!(r#"SELECT count(*) AS "count!" FROM flow_jobs WHERE tenant=$1 AND flow=$2 AND state IN ('queued','running','uncertain')"#, t, id).fetch_one(&mut *conn).await?,
         )],
-        "channels" => vec![
-            (
-                "frontends",
-                sqlx::query_scalar!(r#"SELECT count(*) AS "count!" FROM hosted_frontends WHERE tenant=$1 AND channel=$2"#, t, id).fetch_one(&mut *conn).await?,
-            ),
-            (
-                "orders",
-                sqlx::query_scalar!(r#"SELECT count(*) AS "count!" FROM orders WHERE tenant=$1 AND data->>'salesChannelId'=$2"#, t, id).fetch_one(&mut *conn).await?,
-            ),
-            (
-                "carts",
-                sqlx::query_scalar!(r#"SELECT count(*) AS "count!" FROM carts WHERE tenant=$1 AND sales_channel_id=$2"#, t, id).fetch_one(&mut *conn).await?,
-            ),
-            (
-                "customers",
-                sqlx::query_scalar!(r#"SELECT count(*) AS "count!" FROM customers WHERE tenant=$1 AND sales_channel_id=$2"#, t, id).fetch_one(&mut *conn).await?,
-            ),
-            (
-                "product_visibility",
-                sqlx::query_scalar!(r#"SELECT count(*) AS "count!" FROM product_channel_visibility WHERE tenant=$1 AND channel_id=$2"#, t, id).fetch_one(&mut *conn).await?,
-            ),
-            (
-                "company_settings",
-                sqlx::query_scalar!(r#"SELECT count(*) AS "count!" FROM company_overrides WHERE tenant=$1 AND channel_id=$2"#, t, id).fetch_one(&mut *conn).await?,
-            ),
-            (
-                "channel_settings",
-                sqlx::query_scalar!(r#"SELECT count(*) AS "count!" FROM commerce_overrides WHERE tenant=$1 AND channel_id=$2"#, t, id).fetch_one(&mut *conn).await?,
-            ),
-        ],
+        "channels" => {
+            let frontends = channel_settings::frontend_count(conn, t, id).await?;
+            let [orders, carts, customers] = records()?.channel_usage(conn, t, id).await?;
+            vec![
+                ("frontends", frontends),
+                orders,
+                carts,
+                customers,
+                (
+                    "product_visibility",
+                    rule_products::visibility_count(conn, t, id).await?,
+                ),
+                (
+                    "company_settings",
+                    channel_settings::company_override_count(conn, t, id).await?,
+                ),
+                (
+                    "channel_settings",
+                    channel_settings::override_count(conn, t, id).await?,
+                ),
+            ]
+        }
         _ => vec![],
     };
     for (scope, count) in counts {

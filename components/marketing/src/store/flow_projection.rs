@@ -2,6 +2,7 @@
 use crate::domain::flow_projection::{
     job_definition, orderless, projected, public_event, rule_context,
 };
+use crate::ports::records;
 use crate::store::{facts, rule_snapshot};
 use crate::types::flow::Flow;
 use serde::Deserialize;
@@ -55,19 +56,9 @@ pub async fn project(
     }
     let subject: EventOrder = view(data);
     let order_id = subject.order_id.as_str().unwrap_or("");
-    let order=sqlx::query!("SELECT c.id,c.tenant,c.token,c.data,c.revision,c.status,o.data AS order_data FROM orders o JOIN carts c ON c.id=o.cart_id WHERE o.tenant=$1 AND o.id=$2", t, order_id).fetch_optional(&mut *tx).await?;
-    let (cart, q) = if let Some(order) = order {
-        (
-            super::carts::hydrate(
-                order.id,
-                order.tenant,
-                order.token,
-                (order.data, order.revision, order.status),
-            )?,
-            data.get("order")
-                .cloned()
-                .unwrap_or_else(|| order.order_data.clone()),
-        )
+    let order = records()?.order_cart(tx, t, order_id).await?;
+    let (cart, q) = if let Some((cart, order_data)) = order {
+        (cart, data.get("order").cloned().unwrap_or(order_data))
     } else {
         if !orderless(kind) {
             return Ok(());

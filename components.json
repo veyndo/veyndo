@@ -415,36 +415,11 @@
         "pricing",
         "shop"
       ],
-      "foreign_tables": {
-        "app_packages": "read: reads installed package manifests and their active flag to admit app-provided actions, tools or providers in the same transaction (catalog.rs)",
-        "b2b_catalog": "read: reads the private unit catalogue scope inside the catalogue/rule query so pagination stays correct (channels.rs)",
-        "carts": "write: coupon selection updates the cart at its revision; flow logout effects rotate the cart token (coupons.rs, dependencies.rs, flow_mutations.rs, flow_projection.rs)",
-        "categories": "read: reads category identity for rule conditions and channel scope (channel_config.rs)",
-        "commerce_customer_groups": "write: flow actions assign customer groups (flow_mutations.rs)",
-        "commerce_overrides": "read: reads the per-channel settings override that the scoped settings view merges (dependencies.rs)",
-        "commerce_settings": "read: reads the shop settings document under the basis row lock so the change and the settings it was checked against stay consistent (configuration_writes.rs, dependencies.rs)",
-        "company_overrides": "read: reads per-channel company master data for rule facts (dependencies.rs)",
-        "customer_sessions": "write: flow actions end customer sessions (flow_mutations.rs)",
-        "customers": "write: flow actions update customer flags and groups (customer_facts.rs, dependencies.rs, flow_mutations.rs, rule_entities.rs)",
-        "hosted_frontends": "read: reads the hosted frontend binding (alias, origin, channel) to admit hosted requests or build links (channel_preview.rs, dependencies.rs)",
-        "memberships": "read: reads membership rows to check the actor still belongs to the shop (channel_preview.rs)",
-        "order_activity": "write: flow actions append to the order activity (flow_mutations.rs)",
-        "order_downloads": "write: flow actions grant download access (flow_mutations.rs)",
-        "order_receipts": "read: reads issued receipt rows of an order for the buyer or flow projection (facts.rs)",
-        "orders": "write: flow actions update the order automation state (customer_facts.rs, dependencies.rs, flow_mutations.rs, flow_projection.rs)",
-        "product_assets": "read: reads product asset metadata in the same statement as product rows (flow_mutations.rs)",
-        "product_channel_visibility": "read: reads channel visibility so a product hidden in the channel is excluded inside the query (channels.rs, dependencies.rs)",
-        "product_reviews": "read: reads published reviews as product facts in the same statement (customer_facts.rs)",
-        "products": "write: rule evaluation stores its automation flags on the product, like on customers and orders (channel_config.rs, channels.rs, facts.rs, rule_entities.rs)",
-        "shop_environments": "read: reads the environment row (live shop, preview owner) to scope sandbox and preview requests to their live shop (flow_access.rs, flow_jobs.rs)",
-        "tasks": "read: reads work task state that a flow or proposal references (flow_job_summaries.rs)",
-        "tenants": "read: reads shop existence, status or the agent stop switch inside a larger claim or join; simple reads go through veyndo_core::tenants (flow_access.rs, flow_jobs.rs)",
-        "user_sessions": "read: reads merchant sessions to resolve the actor of a flow (channel_preview.rs)"
-      },
+      "foreign_tables": {},
       "glob_imports": 0,
       "untyped_access": 4,
       "sql_outside_store": 0,
-      "runtime_sql": 2
+      "runtime_sql": 0
     },
     "b2b": {
       "title": "Company procurement: organisations, budgets, approvals and quotes",

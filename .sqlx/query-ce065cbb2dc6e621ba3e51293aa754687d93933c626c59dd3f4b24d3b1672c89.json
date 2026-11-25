@@ -1,0 +1,43 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id,COALESCE(applied,false) AS \"applied!\",COALESCE(run_request ? 'execution',false) AS \"execution_started!\" FROM tasks WHERE tenant=$1 AND id=ANY($2)",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "tasks",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "applied!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "execution_started!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "TextArray"
+      ]
+    },
+    "nullable": [
+      false,
+      null,
+      null
+    ]
+  },
+  "hash": "ce065cbb2dc6e621ba3e51293aa754687d93933c626c59dd3f4b24d3b1672c89"
+}

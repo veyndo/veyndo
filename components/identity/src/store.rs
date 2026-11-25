@@ -9,5 +9,6 @@ pub mod invitations;
 pub mod members;
 pub mod merchant_accounts;
 pub mod mfa;
+pub mod preview_sessions;
 pub mod roles;
 pub mod sessions;

@@ -1,7 +1,8 @@
-//! Shared transactional channel validation for merchant edits, history restoration and selective release.
+//! Shared transactional channel validation for merchant edits, history restoration and selective release. Category and product existence come from the catalog store on the same transaction.
 use crate::types::channel::{Channel, validate_pos};
 use serde::Deserialize;
 use serde_json::Value;
+use veyndo_catalog::store::{categories, products};
 use veyndo_core::document::view;
 use veyndo_core::{Result, bad, conflict};
 use veyndo_shop::types::settings::Settings;
@@ -38,25 +39,13 @@ pub async fn validate_channel_config(
     }
     validate_pos(&c, settings)?;
     if let Some(root) = &c.navigation_category_id {
-        let exists: bool = sqlx::query_scalar!(
-            r#"SELECT EXISTS(SELECT 1 FROM categories WHERE tenant=$1 AND id=$2) AS "v!""#,
-            t,
-            root
-        )
-        .fetch_one(&mut **tx)
-        .await?;
+        let exists = categories::exists(tx, t, root).await?;
         if !exists {
             return Err(bad("Unknown channel navigation category"));
         }
     }
     for product in &c.product_ids {
-        let exists: bool = sqlx::query_scalar!(
-            r#"SELECT EXISTS(SELECT 1 FROM products WHERE tenant=$1 AND id=$2) AS "v!""#,
-            t,
-            product
-        )
-        .fetch_one(&mut **tx)
-        .await?;
+        let exists = products::exists(tx, t, product).await?;
         if !exists {
             return Err(bad("Unknown channel product"));
         }

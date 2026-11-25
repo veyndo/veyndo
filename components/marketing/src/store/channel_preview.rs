@@ -1,16 +1,12 @@
-//! One-use channel preview tickets and the grants they rotate into, bound to a live merchant session and an exact channel revision. Columns checked at compile time.
+//! One-use channel preview tickets and the grants they rotate into, bound to a live merchant session and an exact channel revision. Ticket columns are checked at compile time; sessions and memberships come from the identity store, hosted frontend bindings from the shop store.
 use serde_json::Value;
 use veyndo_core::{Result, State};
+use veyndo_identity::store::preview_sessions;
+use veyndo_shop::store::channel_settings;
 
 /// Whether `digest` is a live session of `user`; the caller runs it in the system scope.
 pub async fn session_alive(a: &State, digest: &str, user: Option<&str>) -> Result<bool> {
-    Ok(sqlx::query_scalar!(
-        r#"SELECT EXISTS(SELECT 1 FROM user_sessions WHERE digest=$1 AND user_id=$2 AND expires_at>now()) AS "alive!""#,
-        digest,
-        user
-    )
-    .fetch_one(&a.db)
-    .await?)
+    preview_sessions::alive(a, digest, user).await
 }
 
 /// The channel's current revision, if it exists.
@@ -26,14 +22,7 @@ pub async fn channel_revision(a: &State, tenant: &str, id: &str) -> Result<Optio
 
 /// Whether the hosted frontend `alias` serves this channel.
 pub async fn frontend_of_channel(a: &State, tenant: &str, id: &str, alias: &str) -> Result<bool> {
-    Ok(sqlx::query_scalar!(
-        r#"SELECT EXISTS(SELECT 1 FROM hosted_frontends WHERE tenant=$1 AND channel=$2 AND alias=$3) AS "own!""#,
-        tenant,
-        id,
-        alias
-    )
-    .fetch_one(&a.db)
-    .await?)
+    channel_settings::frontend_serves(a, tenant, id, alias).await
 }
 
 /// A new sixty-second ticket; expired tickets of the shop are removed first.
@@ -94,8 +83,18 @@ pub async fn grant(
     grant_digest: &str,
     (tenant, channel, revision): (&str, &str, i64),
 ) -> Result<Option<Grant>> {
-    Ok(sqlx::query_as!(Grant, "SELECT p.alias,m.role,m.permissions FROM channel_previews p JOIN user_sessions s ON s.digest=p.session_digest JOIN memberships m ON m.user_id=s.user_id AND m.tenant=p.tenant WHERE p.digest=$1 AND p.tenant=$2 AND p.channel=$3 AND p.channel_revision=$4 AND p.redeemed AND p.expires_at>now() AND s.expires_at>now() AND m.active",
+    let Some(ticket) = sqlx::query!("SELECT alias,session_digest FROM channel_previews WHERE digest=$1 AND tenant=$2 AND channel=$3 AND channel_revision=$4 AND redeemed AND expires_at>now()",
         grant_digest, tenant, channel, revision)
     .fetch_optional(&a.db)
-    .await?)
+    .await?
+    else {
+        return Ok(None);
+    };
+    Ok(preview_sessions::member(a, &ticket.session_digest, tenant)
+        .await?
+        .map(|m| Grant {
+            alias: ticket.alias,
+            role: m.role,
+            permissions: m.permissions,
+        }))
 }

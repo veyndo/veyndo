@@ -1,5 +1,6 @@
 //! Reads of the checkout transaction.
 pub mod admin_order;
+pub mod automation_carts;
 pub mod buyer_sessions;
 pub mod cart_create;
 pub mod cart_edit;

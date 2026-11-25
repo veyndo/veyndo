@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT j.id,j.flow,j.state,j.result,j.error,j.cursor,j.execution,to_char(j.available_at AT TIME ZONE 'UTC','YYYY-MM-DD\"T\"HH24:MI:SS\"Z\"') AS available_at,COALESCE(t.applied,false) AS applied,COALESCE(t.run_request ? 'execution',false) AS execution_started FROM flow_jobs j LEFT JOIN tasks t ON t.tenant=j.tenant AND t.id=j.result->>'taskId' WHERE j.tenant=$1 ORDER BY j.event_id DESC,j.id LIMIT 50",
+  "query": "SELECT j.id,j.flow,j.state,j.result,j.error,j.cursor,j.execution,to_char(j.available_at AT TIME ZONE 'UTC','YYYY-MM-DD\"T\"HH24:MI:SS\"Z\"') AS available_at,j.result->>'taskId' AS task FROM flow_jobs j WHERE j.tenant=$1 ORDER BY j.event_id DESC,j.id LIMIT 50",
   "describe": {
     "columns": [
       {
@@ -88,14 +88,8 @@
       },
       {
         "ordinal": 8,
-        "name": "applied",
-        "type_info": "Bool",
-        "origin": "Expression"
-      },
-      {
-        "ordinal": 9,
-        "name": "execution_started",
-        "type_info": "Bool",
+        "name": "task",
+        "type_info": "Text",
         "origin": "Expression"
       }
     ],
@@ -113,9 +107,8 @@
       true,
       false,
       null,
-      null,
       null
     ]
   },
-  "hash": "20ef1f5315ae698a33cdda5402cc5aa18e8fbeb1ea308305cceb58de4fa0928b"
+  "hash": "3667f03fa85931b98e61ce6d7cce4cd38454f2073ad5becc02ea8dddc6b24186"
 }

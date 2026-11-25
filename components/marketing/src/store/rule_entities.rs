@@ -1,5 +1,7 @@
-//! Writes rule metadata onto the product, customer or order it describes, bound to the revision the merchant read.
+//! Writes rule metadata onto the product, customer or order it describes, bound to the revision the merchant read. Products are written by the catalog store, customers and orders through the records port.
+use crate::ports::{RuleEntity, records};
 use serde_json::Value;
+use veyndo_catalog::store::rule_products;
 use veyndo_core::{Result, State, conflict};
 
 pub async fn save(
@@ -10,10 +12,18 @@ pub async fn save(
     data: &Value,
     rev: i64,
 ) -> Result<()> {
-    let n=match entity{
-        "products"=>sqlx::query!("UPDATE products SET extra=jsonb_set(extra,'{automation}',$1),revision=revision+1 WHERE tenant=$2 AND id=$3 AND revision=$4", data, t, id, rev).execute(&a.db).await?.rows_affected(),
-        "customers"=>sqlx::query!("UPDATE customers SET automation=$1,revision=revision+1 WHERE tenant=$2 AND id=$3 AND revision=$4", data, t, id, rev).execute(&a.db).await?.rows_affected(),
-        _=>sqlx::query!("UPDATE orders SET data=jsonb_set(jsonb_set(data,'{automation}',$1),'{revision}',to_jsonb($4::bigint+1)) WHERE tenant=$2 AND id=$3 AND (data->>'revision')::bigint=$4", data, t, id, rev).execute(&a.db).await?.rows_affected(),
+    let n = match entity {
+        "products" => rule_products::save_automation_at(a, t, id, data, rev).await?,
+        "customers" => {
+            records()?
+                .save_automation_at(a, RuleEntity::Customer, (t, id), data, rev)
+                .await?
+        }
+        _ => {
+            records()?
+                .save_automation_at(a, RuleEntity::Order, (t, id), data, rev)
+                .await?
+        }
     };
     if n != 1 {
         return Err(conflict("Rule entity revision changed"));

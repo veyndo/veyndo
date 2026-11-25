@@ -1,11 +1,11 @@
 //! Assemble private server-owned rule context once per quote/event; never publish customer facts in cart responses.
 use crate::domain::line_facts::line;
+use crate::ports::records;
 use crate::store::customer_facts::customer;
 use serde::Deserialize;
 use serde_json::{Value, json};
-use sqlx::Row;
 use veyndo_catalog::domain::family::inherited_extra;
-use veyndo_catalog::store::products::product;
+use veyndo_catalog::store::rule_products;
 use veyndo_core::Result;
 use veyndo_core::document::{Raw, lenient, merge, view};
 use veyndo_shop::types::cart::{StoredCart, selection};
@@ -44,36 +44,26 @@ pub async fn rule_facts(conn: &mut sqlx::PgConnection, c: &StoredCart, q: &Value
         .iter()
         .map(|i| i.id.clone())
         .collect::<Vec<_>>();
-    // dynamic SQL: complete product rows feed the catalog's shared hydrator `product(&PgRow)`, which owns the column list.
-    let rows = sqlx::query("SELECT * FROM products WHERE tenant=$1 AND id=ANY($2)")
-        .bind(&c.tenant)
-        .bind(&ids)
-        .fetch_all(&mut *conn)
-        .await?;
+    let rows = rule_products::by_ids(conn, &c.tenant, &ids).await?;
     let parent_ids = rows
         .iter()
-        .filter_map(|r| r.get::<Option<String>, _>("parent_id"))
+        .filter_map(|p| p.parent_id.clone())
         .collect::<Vec<_>>();
-    // dynamic SQL: complete product rows feed the catalog's shared hydrator `product(&PgRow)`, which owns the column list.
-    let parents = sqlx::query("SELECT * FROM products WHERE tenant=$1 AND id=ANY($2)")
-        .bind(&c.tenant)
-        .bind(parent_ids)
-        .fetch_all(&mut *conn)
-        .await?;
+    let parents = rule_products::by_ids(conn, &c.tenant, &parent_ids).await?;
     let mut lines = vec![];
     let quote: FactsQuote = view(q);
     for item in quote.line_items.iter().flatten() {
         let referenced = view::<ItemReference>(item).referenced_id;
         if let Some(r) = rows
             .iter()
-            .find(|r| Some(r.get::<String, _>("id").as_str()) == referenced.as_deref())
+            .find(|r| Some(r.id.as_str()) == referenced.as_deref())
         {
-            let mut p = product(r);
+            let mut p = r.clone();
             if let Some(parent) = parents
                 .iter()
-                .find(|r| Some(r.get::<String, _>("id").as_str()) == p.parent_id.as_deref())
+                .find(|r| Some(r.id.as_str()) == p.parent_id.as_deref())
             {
-                p.extra = inherited_extra(&product(parent).extra, &p.extra);
+                p.extra = inherited_extra(&parent.extra, &p.extra);
             }
             lines.push(line(&p, item));
         }
@@ -159,13 +149,7 @@ pub async fn order_facts(
     q: &Value,
     facts: &mut Value,
 ) -> Result<()> {
-    let receipts = sqlx::query_scalar!(
-        "SELECT kind FROM order_receipts WHERE tenant=$1 AND order_id=$2",
-        t,
-        id
-    )
-    .fetch_all(&mut *conn)
-    .await?;
+    let receipts = records()?.receipt_kinds(conn, t, id).await?;
     let q: OrderFacts = view(q);
     let deliveries = q
         .deliveries

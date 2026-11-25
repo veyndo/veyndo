@@ -12,6 +12,7 @@ pub mod product_fields;
 pub mod product_list;
 pub mod products;
 pub mod reviews;
+pub mod rule_products;
 pub mod translation_jobs;
 pub mod translations;
 pub mod unit_scope;

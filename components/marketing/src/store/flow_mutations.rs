@@ -1,9 +1,12 @@
-//! Local flow mutations journal the effect in the same transaction; customer authority changes revoke existing sessions.
+//! Local flow mutations journal the effect in the same transaction; customer authority changes revoke existing sessions. Orders, customers and carts are changed through the records port, customer groups and download grants by their owners' stores, all in this transaction.
 use crate::domain::flow_text::effective;
+use crate::ports::{Records, records};
 use serde::Deserialize;
 use serde_json::{Value, json};
+use veyndo_catalog::store::rule_products;
 use veyndo_core::document::{lenient, merge, view};
 use veyndo_core::{Result, State, bad, uid};
+use veyndo_pricing::store::group_automation;
 use veyndo_shop::store::settings::scoped_locked;
 
 /// One flow step: who it runs as, the language of its note, its idempotency key and its action.
@@ -14,47 +17,28 @@ pub struct Step<'a> {
     pub action: &'a str,
 }
 
-/// The automation data a flow action changes: the customer's group, the customer or the order, locked for the change.
+/// The automation data a flow action changes: the customer's group, the customer or the order, locked for the change; with the group's id when it is the group's data.
 async fn automation_target(
     tx: &mut sqlx::Transaction<'_, sqlx::Postgres>,
-    t: &str,
+    (records, t): (&dyn Records, &str),
     customer_id: Option<&str>,
     order: &Value,
     (group, customer): (bool, bool),
-) -> Result<Value> {
+) -> Result<(Value, Option<String>)> {
     Ok(if group {
-        let row = sqlx::query_scalar!(
-            "SELECT group_name FROM customers WHERE tenant=$1 AND id=$2 FOR UPDATE",
-            t,
-            customer_id
-        )
-        .fetch_one(&mut **tx)
-        .await?;
-        sqlx::query!(
-            "INSERT INTO commerce_customer_groups(tenant,id) VALUES($1,$2) ON CONFLICT DO NOTHING",
-            t,
-            &row
-        )
-        .execute(&mut **tx)
-        .await?;
-        sqlx::query_scalar!(
-            "SELECT data FROM commerce_customer_groups WHERE tenant=$1 AND id=$2 FOR UPDATE",
-            t,
-            row
-        )
-        .fetch_one(&mut **tx)
-        .await?
+        // The customer row stays locked, so its group cannot change before the group's data is stored.
+        let row = records.lock_customer_group(tx, t, customer_id).await?;
+        (group_automation::lock(tx, t, &row).await?, Some(row))
     } else if customer {
-        sqlx::query_scalar!(
-            "SELECT automation FROM customers WHERE tenant=$1 AND id=$2 FOR UPDATE",
-            t,
-            customer_id
+        (
+            records
+                .lock_customer_automation(tx, t, customer_id)
+                .await?
+                .ok_or(bad("Flow customer unavailable"))?,
+            None,
         )
-        .fetch_optional(&mut **tx)
-        .await?
-        .ok_or(bad("Flow customer unavailable"))?
     } else {
-        order.get("automation").cloned().unwrap_or(json!({}))
+        (order.get("automation").cloned().unwrap_or(json!({})), None)
     })
 }
 
@@ -87,6 +71,7 @@ pub async fn execute(
 ) -> Result<Value> {
     let (actor, locale, key, action) = (f.actor, f.locale, f.key, f.action);
     let step: FlowConfig = view(config);
+    let records = records()?;
     let mut tx = a.db.begin().await?;
     sqlx::query!("SELECT set_config('veyndo.actor',$1,true) AS actor,set_config('veyndo.source','flow',true) AS source,set_config('veyndo.reason',$2,true) AS reason", actor, format!("flow:{key}:{action}")).fetch_one(&mut *tx).await?;
     let (settings, _) = scoped_locked(&mut tx, t, "default", conditions).await?;
@@ -104,24 +89,10 @@ pub async fn execute(
     )
     .execute(&mut *tx)
     .await?;
-    if let Some(v) = sqlx::query_scalar!(
-        "SELECT data FROM order_activity WHERE tenant=$1 AND order_id=$2 AND data->>'flowKey'=$3",
-        t,
-        id,
-        key
-    )
-    .fetch_optional(&mut *tx)
-    .await?
-    {
+    if let Some(v) = records.flow_activity(&mut tx, (t, id), key).await? {
         return Ok(v);
     }
-    let mut order: Value = sqlx::query_scalar!(
-        "SELECT data FROM orders WHERE tenant=$1 AND id=$2 FOR UPDATE",
-        t,
-        id
-    )
-    .fetch_one(&mut *tx)
-    .await?;
+    let mut order = records.lock_order(&mut tx, t, id).await?;
     let customer_id = view::<OrderRefs>(&order)
         .order_customer
         .customer_id
@@ -129,9 +100,9 @@ pub async fn execute(
         .map(String::from);
     let customer = action.contains("customer");
     let group = action == "action.set.customer.group.custom.field";
-    let mut data = automation_target(
+    let (mut data, group_id) = automation_target(
         &mut tx,
-        t,
+        (records, t),
         customer_id.as_deref(),
         &order,
         (group, customer),
@@ -171,67 +142,54 @@ pub async fn execute(
         }
     } else if action == "action.grant.download.access" {
         if step.value == false {
-            sqlx::query!(
-                "DELETE FROM order_downloads WHERE tenant=$1 AND order_id=$2",
-                t,
-                id
-            )
-            .execute(&mut *tx)
-            .await?;
+            rule_products::revoke_downloads(&mut tx, t, id).await?;
         } else {
-            sqlx::query!("INSERT INTO order_downloads(tenant,order_id,asset_id) SELECT $1,$2,a.id FROM product_assets a WHERE a.tenant=$1 AND a.kind='download' AND EXISTS(SELECT 1 FROM jsonb_array_elements($3::jsonb->'cart'->'lineItems') l WHERE l->>'referencedId'=a.product_id) ON CONFLICT DO NOTHING", t, id, &order).execute(&mut *tx).await?;
+            rule_products::grant_downloads(&mut tx, t, id, &order).await?;
         }
     } else if action == "action.change.customer.group" || action == "action.change.customer.status"
     {
-        let n=sqlx::query!("UPDATE customers SET group_name=COALESCE($1,group_name),active=COALESCE($2,active),revision=revision+1 WHERE tenant=$3 AND id=$4", step.group_id.as_deref(), step.active, t, customer_id.as_deref()).execute(&mut *tx).await?.rows_affected();
+        let n = records
+            .set_customer_group_and_status(
+                &mut tx,
+                (step.group_id.as_deref(), step.active),
+                t,
+                customer_id.as_deref(),
+            )
+            .await?;
         if n != 1 {
             return Err(bad("Flow customer unavailable"));
         }
-        sqlx::query!("DELETE FROM customer_sessions WHERE tenant=$1 AND email=(SELECT email FROM customers WHERE tenant=$1 AND id=$2)", t, customer_id.as_deref()).execute(&mut *tx).await?;
-        sqlx::query!("UPDATE carts SET token=md5(id||$1),data=jsonb_set(jsonb_set(jsonb_set(jsonb_set(data,'{email}','null'),'{customer_id}','null'),'{group}','\"consumer\"'),'{company}','null'),revision=revision+1 WHERE tenant=$2 AND data->>'customer_id'=$3 AND status='open'", uid(), t, customer_id.as_deref()).execute(&mut *tx).await?;
+        records
+            .end_customer_sessions(&mut tx, t, customer_id.as_deref())
+            .await?;
+        records
+            .sign_out_carts(&mut tx, &uid(), t, customer_id.as_deref())
+            .await?;
     } else if action != "note" {
         return Err(bad("Unsupported local action"));
     }
-    if group {
-        sqlx::query!("UPDATE commerce_customer_groups SET data=$1,revision=revision+1 WHERE tenant=$2 AND id=(SELECT group_name FROM customers WHERE tenant=$2 AND id=$3)", data, t, customer_id.as_deref()).execute(&mut *tx).await?;
+    if let Some(group_id) = &group_id {
+        group_automation::save(&mut tx, &data, t, group_id).await?;
     } else if customer
         && action != "action.change.customer.group"
         && action != "action.change.customer.status"
     {
-        sqlx::query!(
-            "UPDATE customers SET automation=$1,revision=revision+1 WHERE tenant=$2 AND id=$3",
-            data,
-            t,
-            customer_id.as_deref()
-        )
-        .execute(&mut *tx)
-        .await?;
+        records
+            .save_customer_automation(&mut tx, &data, t, customer_id.as_deref())
+            .await?;
     } else if !customer && action != "note" && action != "action.grant.download.access" {
         let revision = view::<OrderRefs>(&order).revision.as_i64().unwrap_or(1);
         merge(
             &mut order,
             json!({ "automation": data, "revision": revision + 1 }),
         )?;
-        sqlx::query!(
-            "UPDATE orders SET data=$1 WHERE tenant=$2 AND id=$3",
-            &order,
-            t,
-            id
-        )
-        .execute(&mut *tx)
-        .await?;
+        records.save_order(&mut tx, &order, t, id).await?;
     }
 
     let result = json!({"flowKey":key,"action":action,"orderId":id,"text":effective(&step.instruction, locale, &settings.main_locale),"config":config});
-    sqlx::query!(
-        "INSERT INTO order_activity(tenant,order_id,actor,kind,data) VALUES($1,$2,$3,'flow',$4)",
-        t,
-        id,
-        actor,
-        &result
-    )
-    .execute(&mut *tx)
-    .await?;
+    records
+        .add_flow_activity(&mut tx, (t, id), actor, &result)
+        .await?;
     tx.commit().await?;
     Ok(result)
 }
