@@ -29,11 +29,6 @@
       "category": "model-output-repair"
     },
     {
-      "file": "components/apps/src/domain/field_values.rs",
-      "function": "money",
-      "category": "structural-validation"
-    },
-    {
       "file": "components/apps/src/domain/generation_brief.rs",
       "function": "apply",
       "category": "model-output-repair"
@@ -57,11 +52,6 @@
       "file": "components/apps/src/domain/generation_edits.rs",
       "function": "apply",
       "category": "model-output-repair"
-    },
-    {
-      "file": "components/apps/src/domain/surface_grant.rs",
-      "function": "bind_input",
-      "category": "keyed-lookup"
     },
     {
       "file": "components/b2b/src/service/quotes.rs",
