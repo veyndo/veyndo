@@ -92,41 +92,6 @@
       "file": "components/studio/src/service/staging/final_config.rs",
       "function": "validate",
       "category": "keyed-lookup"
-    },
-    {
-      "file": "src/mcp/protocol.rs",
-      "function": "call",
-      "category": "protocol-adapter"
-    },
-    {
-      "file": "src/mcp/protocol.rs",
-      "function": "envelope",
-      "category": "protocol-adapter"
-    },
-    {
-      "file": "src/ucp/consent.rs",
-      "function": "project",
-      "category": "protocol-adapter"
-    },
-    {
-      "file": "src/ucp/document.rs",
-      "function": "ucp_document",
-      "category": "protocol-adapter"
-    },
-    {
-      "file": "src/ucp/negotiation.rs",
-      "function": "blocker",
-      "category": "protocol-adapter"
-    },
-    {
-      "file": "src/ucp/profile.rs",
-      "function": "intersect",
-      "category": "protocol-adapter"
-    },
-    {
-      "file": "src/ucp/profile.rs",
-      "function": "supports",
-      "category": "protocol-adapter"
     }
   ]
 }

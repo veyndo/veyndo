@@ -1,9 +1,10 @@
 //! UCP B2B commands route to native RFQ/CAS/approval owners; a checkout token alone never identifies an employee.
+use super::document::{UcpCapability, UcpDocument, UcpMessage, UcpNegotiation};
+use super::views::{CheckoutHandoff, OrderSnapshot, PricedCart, Purchasing, QuotePage, ShopLinks};
 use super::{consent, profile, ucp_document, ucp_load};
 use crate::cart_price::cart_json;
 use crate::foundation::App;
-use crate::ucp::messages;
-use crate::{accounts, b2b, checkout_handoff, shop_domains};
+use crate::{accounts, b2b, checkout_handoff};
 use axum::Json;
 use axum::extract::Path;
 use axum::extract::State;
@@ -92,96 +93,101 @@ pub(crate) async fn command(
     let current = ucp_load(&a, &h, &id).await?;
     let mut doc = response(&a, &h, &current, profile::select(&h, false).await?).await?;
     if name == "checkout.handoff" {
-        let origin = shop_domains::links(&c.tenant)["studioUrl"]
-            .as_str()
-            .unwrap()
-            .to_owned();
-        let url = reqwest::Url::parse(&origin)
-            .and_then(|u| u.join(result["checkoutPath"].as_str().unwrap()))
+        let handoff: CheckoutHandoff = view(&result);
+        let url = reqwest::Url::parse(ShopLinks::of(&c.tenant).studio())
+            .and_then(|u| u.join(handoff.checkout_path.as_deref().unwrap()))
             .map_err(|_| bad("Invalid checkout continuation URL"))?;
-        doc["continue_url"] = json!(url.as_str());
+        doc.continue_url = Some(url.as_str().to_owned());
     }
-    doc["b2b_negotiation"]["result"] = result;
-    Ok(Json(doc))
+    doc.b2b_negotiation.get_or_insert_default().result = Some(result);
+    Ok(Json(doc.json()))
 }
 pub(super) async fn response(
     a: &App,
     h: &RequestContext,
     c: &StoredCart,
     selected: profile::Selection,
-) -> Result<Value> {
+) -> Result<UcpDocument> {
     let mut quote = cart_json(a, c).await?;
     // Completed price snapshots stay immutable; purchasing metadata describes current policy.
-    if selected.b2b && c.data.b2b.is_some() && quote["b2b"].is_null() {
+    if selected.b2b && c.data.b2b.is_some() && view::<PricedCart>(&quote).b2b.is_null() {
         b2b::preview(a, c, &mut quote).await?;
     }
     let mut doc = ucp_document(c, &quote);
     if selected.consent {
         consent::project(a, h, c, &mut doc).await?;
-    } else if let Some(buyer) = doc.get_mut("buyer").and_then(Value::as_object_mut) {
+    } else if let Some(buyer) = doc.buyer.as_mut().and_then(Value::as_object_mut) {
         buyer.remove("consent");
     }
     // Keep canonical tenant/channel links instead of localhost-only continuation URLs.
-    let mut url = reqwest::Url::parse(
-        shop_domains::links(&c.tenant)["storefrontUrl"]
-            .as_str()
-            .unwrap(),
-    )
-    .map_err(|_| bad("Invalid shop origin"))?;
+    let mut url = reqwest::Url::parse(ShopLinks::of(&c.tenant).storefront())
+        .map_err(|_| bad("Invalid shop origin"))?;
     url.query_pairs_mut()
         .append_pair("channel", &c.data.sales_channel);
     url.set_fragment(Some("checkout"));
-    doc["continue_url"] = json!(url.as_str());
-    if let Some(order) = c.data.order.as_ref() {
+    doc.continue_url = Some(url.as_str().to_owned());
+    if let Some(order) = c.data.order.as_ref().map(view::<OrderSnapshot>) {
         url.set_fragment(Some(&format!(
             "order/{}",
-            order["id"].as_str().unwrap_or_default()
+            order.id.as_str().unwrap_or_default()
         )));
-        doc["order"]["permalink_url"] = json!(url.as_str());
-        if let Some(attempt) = order["payment"]["attemptId"].as_str()
-            && doc["status"] == "requires_escalation"
+        if let Some(link) = doc.order.as_mut() {
+            link.permalink_url = Some(url.as_str().to_owned());
+        }
+        if let Some(attempt) = &order.payment.attempt_id
+            && doc.status == Some("requires_escalation")
         {
             url.set_fragment(Some(&format!("payment/{attempt}")));
-            doc["continue_url"] = json!(url.as_str());
+            doc.continue_url = Some(url.as_str().to_owned());
         }
     }
     if !selected.b2b {
         return Ok(doc);
     }
-    doc["ucp"]["capabilities"][profile::B2B] = json!([{"version":profile::VERSION}]);
-    let procurement = &quote["b2b"];
-    doc["b2b_negotiation"] =
-        json!({"checkout_revision":c.revision,"purchasing":procurement,"quotes":[]});
-    if c.data.b2b.is_some() && procurement["quotesAllowed"] == true {
-        let quotes = Box::pin(b2b::invoke(a, h, "b2b.quote.current", &json!({}))).await?;
-        doc["b2b_negotiation"]["quotes"] = quotes["elements"].clone();
-        doc["b2b_negotiation"]["quote_limit"] = quotes["limit"].clone();
+    doc.ucp
+        .capabilities
+        .insert(profile::B2B, UcpCapability::version(profile::VERSION));
+    let quote: PricedCart = view(&quote);
+    let procurement = quote.b2b;
+    let purchasing: Purchasing = view(&procurement);
+    let mut negotiation = UcpNegotiation {
+        checkout_revision: Some(c.revision),
+        purchasing: Some(procurement.clone()),
+        quotes: Some(json!([])),
+        ..UcpNegotiation::default()
+    };
+    if c.data.b2b.is_some() && purchasing.quotes_allowed == Some(true) {
+        let quotes: QuotePage =
+            view(&Box::pin(b2b::invoke(a, h, "b2b.quote.current", &json!({}))).await?);
+        negotiation.quotes = Some(quotes.elements);
+        negotiation.quote_limit = Some(quotes.limit);
     }
+    doc.b2b_negotiation = Some(negotiation);
     if c.status == "open"
-        && let Some((code, _)) = blocker(procurement)
+        && let Some((code, _)) = blocker(&procurement)
     {
-        doc["status"] = json!("requires_escalation");
-        doc["messages"] =
-            json!([{"type":"info","code":code,"content":messages::content(code,&c.data.locale)}]);
+        doc.status = Some("requires_escalation");
+        doc.messages = vec![UcpMessage::info(code, &c.data.locale)];
     }
     Ok(doc)
 }
 fn blocker(p: &Value) -> Option<(&'static str, &'static str)> {
-    if p["budgetAvailable"] == false {
+    let p: Purchasing = view(p);
+    if p.budget_available == Some(false) {
         Some((
             "b2b_budget_exceeded",
             "Purchasing budget exceeded. Ask your company administrator.",
         ))
-    } else if p["purchaseOrderRequired"] == true
-        && p["purchaseOrder"]
-            .as_str()
+    } else if p.purchase_order_required == Some(true)
+        && p.purchase_order
+            .as_deref()
             .is_none_or(|v| v.trim().is_empty())
     {
         Some((
             "b2b_purchase_order_required",
             "Enter the purchase-order reference required by your company.",
         ))
-    } else if p["approvalRequired"] == true && p["approval"]["state"] != "approved" {
+    } else if p.approval_required == Some(true) && p.approval.state.as_deref() != Some("approved") {
         Some((
             "b2b_approval_required",
             "The current negotiated checkout requires a separate authorized purchasing approver.",
@@ -193,6 +199,29 @@ fn blocker(p: &Value) -> Option<(&'static str, &'static str)> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn negotiation_block_matches_the_indexed_shape() {
+        let purchasing = json!({"quotesAllowed":true});
+        let mut block = UcpNegotiation {
+            checkout_revision: Some(3),
+            purchasing: Some(purchasing.clone()),
+            quotes: Some(json!([])),
+            ..UcpNegotiation::default()
+        };
+        let mut indexed = json!({"checkout_revision":3,"purchasing":purchasing,"quotes":[]});
+        assert_eq!(serde_json::to_value(&block).unwrap(), indexed);
+        let page: QuotePage = view(&json!({"elements":[{"id":"q"}]}));
+        block.quotes = Some(page.elements);
+        block.quote_limit = Some(page.limit);
+        block.result = Some(json!({"ok":true}));
+        indexed["quotes"] = json!([{"id":"q"}]);
+        indexed["quote_limit"] = Value::Null;
+        indexed["result"] = json!({"ok":true});
+        assert_eq!(serde_json::to_value(&block).unwrap(), indexed);
+        let mut fresh: Option<UcpNegotiation> = None;
+        fresh.get_or_insert_default().result = Some(json!(1));
+        assert_eq!(serde_json::to_value(fresh).unwrap(), json!({"result":1}));
+    }
     #[test]
     fn buyer_protocol_cannot_offer_or_self_grant_merchant_authority() {
         assert!(operation("quote.request").is_ok());

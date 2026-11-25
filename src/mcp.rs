@@ -7,9 +7,10 @@ use axum::extract::State;
 use axum::http::StatusCode;
 use axum::response::IntoResponse;
 use axum::response::Response;
-use serde::Deserialize;
-use serde_json::Value;
+use serde::{Deserialize, Serialize};
 use serde_json::json;
+use serde_json::{Map, Value};
+use std::collections::BTreeMap;
 use std::env;
 use veyndo_core::Error;
 use veyndo_core::document::{Raw, lenient, view};
@@ -43,6 +44,15 @@ struct RpcParams {
 struct ClientCapabilities {
     #[serde(deserialize_with = "lenient")]
     extensions: serde_json::Map<String, Value>,
+}
+
+/// The server capabilities `initialize` announces.
+#[derive(Serialize, Default)]
+struct ServerCapabilities {
+    tools: Map<String, Value>,
+    resources: Map<String, Value>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    extensions: Option<BTreeMap<&'static str, Map<String, Value>>>,
 }
 
 /// The configured public HTTPS origin of this deployment, if any.
@@ -87,9 +97,9 @@ pub(crate) async fn mcp(State(a): State<App>, h: RequestContext, Json(v): Json<V
     }
     let request: RpcRequest = view(&v);
     let params = &request.params;
-    let result = match method {
+    let result = match method.as_str() {
         "initialize" => {
-            let mut capabilities = json!({"tools":{},"resources":{}});
+            let mut capabilities = ServerCapabilities::default();
             if params
                 .capabilities
                 .extensions
@@ -98,7 +108,8 @@ pub(crate) async fn mcp(State(a): State<App>, h: RequestContext, Json(v): Json<V
                 .and_then(Value::as_array)
                 .is_some_and(|types| types.iter().any(|mime| mime == apps::mcp_views::MIME))
             {
-                capabilities["extensions"] = json!({apps::mcp_views::EXTENSION:{}});
+                capabilities.extensions =
+                    Some(BTreeMap::from([(apps::mcp_views::EXTENSION, Map::new())]));
             }
             Ok(json!({"protocolVersion":if params.protocol_version=="2025-11-25"{"2025-11-25"}else{"2026-07-28"},"capabilities":capabilities,"serverInfo":{"name":"veyndo","version":env!("CARGO_PKG_VERSION")}}))
         }
@@ -159,4 +170,18 @@ pub(crate) async fn mcp(State(a): State<App>, h: RequestContext, Json(v): Json<V
         Err(e) => e.response(id),
     })
     .into_response()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn server_capabilities_match_the_indexed_shape() {
+        let mut capabilities = ServerCapabilities::default();
+        let mut indexed = json!({"tools":{},"resources":{}});
+        assert_eq!(serde_json::to_value(&capabilities).unwrap(), indexed);
+        capabilities.extensions = Some(BTreeMap::from([(apps::mcp_views::EXTENSION, Map::new())]));
+        indexed["extensions"] = json!({apps::mcp_views::EXTENSION:{}});
+        assert_eq!(serde_json::to_value(&capabilities).unwrap(), indexed);
+    }
 }
