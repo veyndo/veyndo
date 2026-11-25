@@ -179,19 +179,9 @@
       "category": "in-place-edit"
     },
     {
-      "file": "components/studio/src/domain/history_access.rs",
-      "function": "restoration",
-      "category": "in-place-edit"
-    },
-    {
       "file": "components/studio/src/domain/product_restore.rs",
       "function": "edit",
       "category": "in-place-edit"
-    },
-    {
-      "file": "components/studio/src/service/flow_templates.rs",
-      "function": "resolve",
-      "category": "keyed-lookup"
     },
     {
       "file": "components/studio/src/service/staging/final_config.rs",
