@@ -6,7 +6,8 @@ again, and `useMutation(write, {invalidates})` makes every reader of the given k
 prefixes reload after a successful write.
 
 The cache lives in memory only and belongs to a `QueryProvider` scope: Studio keys it
-by shop and stage, so changing either drops all cached data. Loads that started before
+by shop, stage and person, so changing any of them drops all cached data. Outside a
+provider each component gets a private cache, so isolated views work without sharing. Loads that started before
 an invalidation or a scope change never overwrite newer state. Nothing is written to
 browser storage; credentials stay with the transport the loader uses.
 

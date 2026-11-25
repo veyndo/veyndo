@@ -1,4 +1,5 @@
 /** Reviewed native quote and explicit customer-authorisation acknowledgements precede the idempotent order command. */
+import { Button } from "../../kit/ui";
 import type { RequestFn } from "../../shared/api/types";
 import type { OrderCreation } from "./useOrderCreation";
 export default function OrderReview({
@@ -46,7 +47,7 @@ export default function OrderReview({
           language}{" "}
         · {channels.find((c) => c.id === channel)?.name ?? channel}
       </p>
-      <div className="admin-review-addresses">
+      <div className="orders-review-addresses">
         {addresses.map(
           (a, index) =>
             a && (
@@ -68,9 +69,9 @@ export default function OrderReview({
             ),
         )}
       </div>
-      <div className="admin-order-review">
+      <div className="orders-review">
         {review.cart.lineItems.map((item) => (
-          <div className="admin-order-line" key={item.id}>
+          <div className="orders-line" key={item.id}>
             <strong>{item.label}</strong>
             <span>{item.quantity}</span>
             <strong>{money(item.price.totalPrice)}</strong>
@@ -83,8 +84,8 @@ export default function OrderReview({
           <dd>{money(review.cart.shippingCosts.totalPrice)}</dd>
           <dt>{n("tax")}</dt>
           <dd>{money(review.cart.price.tax)}</dd>
-          <dt className="admin-order-total">{n("total")}</dt>
-          <dd className="admin-order-total">
+          <dt className="orders-grand-total">{n("total")}</dt>
+          <dd className="orders-grand-total">
             {money(review.cart.price.totalPrice)}
           </dd>
         </dl>
@@ -120,17 +121,16 @@ export default function OrderReview({
         </label>
       )}
       <div className="settings-save-bar">
-        <button
+        <Button
           type="button"
-          className="studio-secondary"
           disabled={busy}
           onClick={() => setReview(undefined)}
         >
           {n("edit")}
-        </button>
-        <button
+        </Button>
+        <Button
+          tone="primary"
           type="button"
-          className="studio-primary"
           disabled={
             busy ||
             !authorization ||
@@ -166,7 +166,7 @@ export default function OrderReview({
           }}
         >
           {n(busy ? "busy" : "newOrder")}
-        </button>
+        </Button>
       </div>
     </div>
   );

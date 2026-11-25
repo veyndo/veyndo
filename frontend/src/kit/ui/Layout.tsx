@@ -37,18 +37,22 @@ export function Card({
   title,
   actions,
   children,
+  level = 3,
   as: Tag = "section",
 }: {
   title?: ReactNode;
   actions?: ReactNode;
   children?: ReactNode;
+  /** Heading level of the title, so the card fits the page outline. */
+  level?: 2 | 3 | 4;
   as?: ElementType;
 }) {
+  const Heading = `h${level}` as const;
   return (
     <Tag className="vy-card">
       {(title || actions) && (
         <header>
-          {title && <h3>{title}</h3>}
+          {title && <Heading>{title}</Heading>}
           {actions}
         </header>
       )}

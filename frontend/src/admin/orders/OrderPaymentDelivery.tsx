@@ -10,6 +10,8 @@ import { useOperationsText } from "../../shared/i18n/operations-i18n";
 import ShipmentSplit, { type ShipmentPosition } from "./ShipmentSplit";
 import { useShipmentText } from "../../shared/i18n/shipment-i18n";
 import "./shipments.css";
+import "./orders.css";
+import { Badge, Button, Card, Field, TextInput } from "../../kit/ui";
 import type { OrderAction } from "./OrderWorkflow";
 export default function OrderPaymentDelivery({
   order,
@@ -51,24 +53,24 @@ export default function OrderPaymentDelivery({
           : "markDelivered",
     );
   return (
-    <section className="studio-card order-fulfillment">
-      <div className="section-heading">
-        <h2>{o("payment")}</h2>
-        <span className="operation-status">{o(order.payment.state)}</span>
-      </div>
+    <Card
+      level={2}
+      title={o("payment")}
+      actions={<Badge>{o(order.payment.state)}</Badge>}
+    >
       <p>{o(order.payment.provider)}</p>
       {rights.includes("orders.write") &&
         actions
           .filter((a: OrderAction) => a.kind === "payment")
           .map((a: OrderAction) => (
-            <button
+            <Button
               key={a.id}
+              tone="primary"
               disabled={busy || !a.enabled}
-              className="studio-primary"
               onClick={() => onAction(a)}
             >
               {label(a)}
-            </button>
+            </Button>
           ))}
       {rights.includes("payments.manage") && order.payment.attemptId && (
         <PaymentActions
@@ -93,17 +95,17 @@ export default function OrderPaymentDelivery({
           request={request}
         />
       )}
-      <div className="delivery-divider" />
+      <div className="orders-divider" />
       <h2>{o("delivery")}</h2>
       {order.deliveries.length ? (
         order.deliveries.map((d: any, index: number) => (
-          <div className="delivery-card" key={index}>
+          <div className="orders-package" key={index}>
             <div className="section-heading">
               <strong>
                 {shipmentText("package")} {index + 1} ·{" "}
                 {o(d.shippingMethod.name)}
               </strong>
-              <span className="operation-status">{o(d.state)}</span>
+              <Badge>{o(d.state)}</Badge>
             </div>
             <ul className="shipment-positions">
               {(d.positions ?? []).map((p: ShipmentPosition) => (
@@ -159,9 +161,8 @@ export default function OrderPaymentDelivery({
                   <div key={a.id}>
                     {a.state === "shipped" && (
                       <>
-                        <label>
-                          {o("tracking")}
-                          <input
+                        <Field label={o("tracking")}>
+                          <TextInput
                             value={tracking[index] ?? ""}
                             onChange={(e) =>
                               setTracking({
@@ -171,10 +172,9 @@ export default function OrderPaymentDelivery({
                             }
                             maxLength={100}
                           />
-                        </label>
-                        <label>
-                          {accountText("trackingUrl")}
-                          <input
+                        </Field>
+                        <Field label={accountText("trackingUrl")}>
+                          <TextInput
                             type="url"
                             maxLength={2000}
                             value={links[index] ?? ""}
@@ -182,12 +182,12 @@ export default function OrderPaymentDelivery({
                               setLinks({ ...links, [index]: e.target.value })
                             }
                           />
-                        </label>
+                        </Field>
                       </>
                     )}
-                    <button
+                    <Button
+                      tone="primary"
                       disabled={busy || !a.enabled}
-                      className="studio-primary"
                       onClick={() =>
                         onAction(
                           a,
@@ -197,7 +197,7 @@ export default function OrderPaymentDelivery({
                       }
                     >
                       {label(a)}
-                    </button>
+                    </Button>
                     {a.reason && <small>{o(a.reason)}</small>}
                   </div>
                 ))}
@@ -206,6 +206,6 @@ export default function OrderPaymentDelivery({
       ) : (
         <p>{o("digital")}</p>
       )}
-    </section>
+    </Card>
   );
 }

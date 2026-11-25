@@ -194,9 +194,12 @@ describe("hooks", () => {
     await waitFor(() => expect(load).toHaveBeenCalledTimes(2));
   });
 
-  it("requires a provider", () => {
-    expect(() => renderHook(() => useQuery(["k"], async () => 1))).toThrow(
-      "useQuery requires a QueryProvider",
-    );
+  it("gives each component a private cache outside a provider", async () => {
+    const load = vi.fn(async () => 1);
+    const first = renderHook(() => useQuery(["k"], load));
+    const second = renderHook(() => useQuery(["k"], load));
+    await waitFor(() => expect(first.result.current.data).toBe(1));
+    await waitFor(() => expect(second.result.current.data).toBe(1));
+    expect(load).toHaveBeenCalledTimes(2);
   });
 });

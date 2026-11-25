@@ -59,7 +59,7 @@ export default function OrderProductPicker({
         />
       </label>
       {error && <p role="alert">{error}</p>}
-      <div className="admin-product-results">
+      <div className="orders-product-results">
         {products.map((p) => (
           <button
             type="button"

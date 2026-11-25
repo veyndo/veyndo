@@ -1,10 +1,12 @@
-/** Seller configuration and version-bound receipt creation/download. */
+/** Seller configuration and version-bound receipt creation/download; reads go through the query layer. */
 import { useCustomerText } from "../../shared/i18n/customer-i18n";
 
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
 import { useShipmentText } from "../../shared/i18n/shipment-i18n";
 import { useOperationsText } from "../../shared/i18n/operations-i18n";
 import type { RequestFn } from "../shell/studio-types";
+import { useMutation, useQuery } from "../../kit/query";
+import { Button, Card, Field, Notice, Select } from "../../kit/ui";
 export default function ReceiptPanel({
   order,
   request,
@@ -20,39 +22,42 @@ export default function ReceiptPanel({
   const shipmentText = useShipmentText();
   const [deliveryIndex, setDeliveryIndex] = useState(0);
   const { c } = useCustomerText();
-  const [ready, setReady] = useState(false);
-  const [receipts, setReceipts] = useState<any[]>([]),
-    [kind, setKind] = useState("invoice"),
+  const [kind, setKind] = useState("invoice"),
     [reference, setReference] = useState(""),
-    [error, setError] = useState(""),
-    [busy, setBusy] = useState(false);
-  const load = useCallback(async () => {
-    const settings = await request("/api/merchant/receipts/settings");
-    setReady(!!settings.data.name);
-    setReceipts(
-      (await request(`/api/merchant/orders/${order.id}/receipts`)).elements,
-    );
-  }, [request, order.id]);
-  useEffect(() => {
-    void load().catch((e) => setError(e.message));
-  }, [load]);
-  const run = async (fn: () => Promise<unknown>) => {
-    setBusy(true);
-    setError("");
-    try {
-      await fn();
-      await load();
-    } catch (e) {
-      setError((e as Error).message);
-    } finally {
-      setBusy(false);
-    }
-  };
+    [downloadError, setDownloadError] = useState(""),
+    [downloading, setDownloading] = useState(false);
+  const settings = useQuery(["receipts", "settings"], () =>
+    request("/api/merchant/receipts/settings"),
+  );
+  const listing = useQuery(["orders", order.id, "receipts"], () =>
+    request(`/api/merchant/orders/${order.id}/receipts`),
+  );
+  const create = useMutation(
+    () =>
+      request(`/api/merchant/orders/${order.id}/receipts`, {
+        revision: order.revision,
+        kind,
+        locale: locale.slice(0, 2),
+        requestKey: crypto.randomUUID(),
+        ...(kind === "delivery_note" && order.deliveries.length
+          ? { deliveryIndex }
+          : {}),
+        ...(kind === "cancellation" ? { referenceId: reference } : {}),
+      }),
+    { invalidates: [["orders", order.id, "receipts"]] },
+  );
+  const ready = !!settings.data?.data?.name;
+  const receipts: any[] = listing.data?.elements ?? [];
+  const busy = create.status === "running" || downloading;
+  const error =
+    downloadError ||
+    (create.status === "error" && (create.error as Error).message) ||
+    (settings.error as Error | undefined)?.message ||
+    (listing.error as Error | undefined)?.message;
   return (
-    <section className="studio-card">
-      <h2>{o("documents")}</h2>
+    <Card level={2} title={o("documents")}>
       <p>{o("documentHint")}</p>
-      {error && <p role="alert">{error}</p>}
+      {error && <Notice tone="danger">{error}</Notice>}
       {canCreate && (
         <>
           <p>{c("sellerSettings")}</p>
@@ -60,36 +65,22 @@ export default function ReceiptPanel({
             className="commerce-fields"
             onSubmit={(e) => {
               e.preventDefault();
-              void run(() =>
-                request(`/api/merchant/orders/${order.id}/receipts`, {
-                  revision: order.revision,
-                  kind,
-                  locale: locale.slice(0, 2),
-                  requestKey: crypto.randomUUID(),
-                  ...(kind === "delivery_note" && order.deliveries.length
-                    ? { deliveryIndex }
-                    : {}),
-                  ...(kind === "cancellation"
-                    ? { referenceId: reference }
-                    : {}),
-                }),
-              );
+              setDownloadError("");
+              void create.run(undefined).catch(() => {});
             }}
           >
-            <label>
-              {o("documents")}
-              <select value={kind} onChange={(e) => setKind(e.target.value)}>
+            <Field label={o("documents")}>
+              <Select value={kind} onChange={(e) => setKind(e.target.value)}>
                 {["invoice", "delivery_note", "cancellation"].map((k) => (
                   <option key={k} value={k}>
                     {o(k)}
                   </option>
                 ))}
-              </select>
-            </label>
+              </Select>
+            </Field>
             {kind === "delivery_note" && order.deliveries.length > 0 && (
-              <label>
-                {shipmentText("package")}
-                <select
+              <Field label={shipmentText("package")}>
+                <Select
                   value={deliveryIndex}
                   onChange={(e) => setDeliveryIndex(Number(e.target.value))}
                 >
@@ -98,13 +89,12 @@ export default function ReceiptPanel({
                       {shipmentText("package")} {index + 1}
                     </option>
                   ))}
-                </select>
-              </label>
+                </Select>
+              </Field>
             )}
             {kind === "cancellation" && (
-              <label>
-                {o("reference")}
-                <select
+              <Field label={o("reference")}>
+                <Select
                   required
                   value={reference}
                   onChange={(e) => setReference(e.target.value)}
@@ -117,12 +107,12 @@ export default function ReceiptPanel({
                         {r.number}
                       </option>
                     ))}
-                </select>
-              </label>
+                </Select>
+              </Field>
             )}
-            <button disabled={busy || !ready} className="studio-primary">
+            <Button type="submit" tone="primary" disabled={busy || !ready}>
               {o("generate")}
-            </button>
+            </Button>
           </form>
         </>
       )}
@@ -132,14 +122,24 @@ export default function ReceiptPanel({
           <span>
             {o(r.kind)} · {r.locale.toUpperCase()}
           </span>
-          <button
-            className="studio-secondary"
-            onClick={() => run(() => download(r.pdfPath))}
+          <Button
+            onClick={async () => {
+              setDownloading(true);
+              setDownloadError("");
+              try {
+                await download(r.pdfPath);
+              } catch (e) {
+                setDownloadError((e as Error).message);
+              } finally {
+                setDownloading(false);
+              }
+              void listing.refetch();
+            }}
           >
             {o("pdf")}
-          </button>
+          </Button>
         </div>
       ))}
-    </section>
+    </Card>
   );
 }

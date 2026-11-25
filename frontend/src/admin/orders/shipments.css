@@ -9,7 +9,7 @@
   justify-content: space-between;
   gap: 1rem;
   padding: 0.5rem 0;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--vy-color-border);
 }
 .shipment-split {
   margin: 1rem 0;
@@ -19,8 +19,8 @@
   gap: 1rem;
   padding: 1rem;
   margin-top: 0.75rem;
-  background: var(--panel);
-  border: 1px solid var(--border);
+  background: var(--vy-color-panel);
+  border: 1px solid var(--vy-color-border);
   border-radius: 1rem;
 }
 .shipment-split-editor > label {

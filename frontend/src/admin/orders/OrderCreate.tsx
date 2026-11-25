@@ -1,4 +1,5 @@
 /** Manual orders remain actor-private drafts until explicit native quote review and idempotent completion. */
+import { Button } from "../../kit/ui";
 import OrderReview from "./OrderReview";
 import useOrderCreation from "./useOrderCreation";
 import type { RequestFn } from "../../shared/api/types";
@@ -95,14 +96,13 @@ export default function OrderCreate({
           <h2>{n("newOrder")}</h2>
           <p>{n("orderHint")}</p>
         </div>
-        <button
+        <Button
           type="button"
-          className="studio-secondary"
           disabled={busy}
           onClick={() => (dirty ? setDiscard(true) : onBack())}
         >
           {n("cancel")}
-        </button>
+        </Button>
       </header>
       {error && (
         <p className="settings-error" role="alert">
@@ -211,14 +211,13 @@ export default function OrderCreate({
               disabled={busy}
             />
             {rights.includes("customers.write") && (
-              <button
+              <Button
                 type="button"
-                className="studio-secondary"
                 disabled={busy}
                 onClick={() => setCreatingCustomer(true)}
               >
                 {n("newCustomer")}
-              </button>
+              </Button>
             )}
           </section>
           <section className="admin-create-section">
@@ -229,7 +228,7 @@ export default function OrderCreate({
               onAdd={addProduct}
             />
             {items.map((i) => (
-              <div className="admin-order-line" key={i.id}>
+              <div className="orders-line" key={i.id}>
                 <strong>{i.name}</strong>
                 <label>
                   {n("quantity")}
@@ -251,16 +250,15 @@ export default function OrderCreate({
                     }
                   />
                 </label>
-                <button
+                <Button
                   type="button"
-                  className="studio-secondary"
                   disabled={busy}
                   onClick={() =>
                     setItems((old) => old.filter((p) => p.id !== i.id))
                   }
                 >
                   {n("remove")}
-                </button>
+                </Button>
               </div>
             ))}
           </section>
@@ -361,9 +359,9 @@ export default function OrderCreate({
           </fieldset>
           <footer className="settings-save-bar">
             <span>{n("orderHint")}</span>
-            <button className="studio-primary" disabled={busy || !context}>
+            <Button tone="primary" type="submit" disabled={busy || !context}>
               {n(busy ? "loading" : "review")}
-            </button>
+            </Button>
           </footer>
         </form>
       ) : (

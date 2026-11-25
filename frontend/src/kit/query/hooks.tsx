@@ -32,10 +32,16 @@ export function QueryProvider({
   );
 }
 
+/**
+ * The provider's cache, or outside a provider a cache private to the calling
+ * component, so isolated views work without ever sharing data.
+ */
 export function useQueryCache() {
-  const cache = useContext(CacheContext);
-  if (!cache) throw new Error("useQuery requires a QueryProvider");
-  return cache;
+  const shared = useContext(CacheContext);
+  const own = useRef<QueryCache | null>(null);
+  if (shared) return shared;
+  own.current ??= new QueryCache();
+  return own.current;
 }
 
 export type QueryResult<T> = QueryState<T> & {

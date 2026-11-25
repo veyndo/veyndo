@@ -1,4 +1,5 @@
 /** Explicit subset editor uses server admission, parent command fencing and immutable order quantities. */
+import { Button } from "../../kit/ui";
 import { useState } from "react";
 import { useShipmentText } from "../../shared/i18n/shipment-i18n";
 export type ShipmentPosition = { id: string; quantity: number };
@@ -84,9 +85,9 @@ export default function ShipmentSplit({
           ))}
           {error && <p role="alert">{error}</p>}
           <div className="studio-actions">
-            <button className="studio-primary" disabled={busy}>
+            <Button tone="primary" type="submit" disabled={busy}>
               {text("create")}
-            </button>
+            </Button>
             <button
               type="button"
               disabled={busy}

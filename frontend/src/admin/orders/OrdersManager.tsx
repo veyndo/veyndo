@@ -2,6 +2,8 @@
 import type { GridCriteria } from "../../shared/grid/types";
 import StudioSlot from "../shell/registry/StudioSlot";
 import { useEffect, useState } from "react";
+import { useQuery } from "../../kit/query";
+import { Button, Notice } from "../../kit/ui";
 import { downloadFile } from "../../shared/api/download";
 import OrderCreate from "./OrderCreate";
 import { useAdminCreationText } from "../../shared/i18n/admin-creation-i18n";
@@ -30,24 +32,13 @@ export default function OrdersManager({
   const [gridCursor, setGridCursor] = useState("");
   const [gridCriteria, setGridCriteria] = useState<GridCriteria>({});
   const { o } = useOperationsText();
-  const [selected, setSelected] = useState<string>(),
-    [rights, setRights] = useState<string[]>([]),
-    [error, setError] = useState("");
+  const [selected, setSelected] = useState<string>();
   useEffect(() => setSelected(initialId), [initialId]);
-  useEffect(() => {
-    let current = true;
-    setRights([]);
-    request("/api/auth/access")
-      .then((v) => {
-        if (current) setRights(v.permissions);
-      })
-      .catch((e) => {
-        if (current) setError(e.message);
-      });
-    return () => {
-      current = false;
-    };
-  }, [request]);
+  const access = useQuery(["auth", "access"], () =>
+    request("/api/auth/access"),
+  );
+  const rights: string[] = access.data?.permissions ?? [];
+  const error = (access.error as Error | undefined)?.message;
   return (
     <div className="studio-page workbench operations">
       <div className="page-intro">
@@ -61,15 +52,12 @@ export default function OrdersManager({
             "customers.pii",
             "catalog.read",
           ].every((right) => rights.includes(right)) && (
-            <button
-              className="studio-primary"
-              onClick={() => setCreating(true)}
-            >
+            <Button tone="primary" onClick={() => setCreating(true)}>
               {n("newOrder")}
-            </button>
+            </Button>
           )}
       </div>
-      {error && <p role="alert">{error}</p>}
+      {error && <Notice tone="danger">{error}</Notice>}
       {creating ? (
         <OrderCreate
           request={request}

@@ -126,9 +126,7 @@
   display: block;
   margin-top: 10px;
 }
-.order-address {
-  margin-top: 24px;
-}
+
 .shop-bag:not(.veyndo-checkout) {
   width: min(780px, calc(100vw - 32px)) !important;
 }

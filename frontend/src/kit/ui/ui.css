@@ -357,7 +357,7 @@
   justify-content: space-between;
   gap: var(--vy-space-3);
 }
-.vy-card > header h3 {
+.vy-card > header :is(h2, h3, h4) {
   margin: 0;
   font-size: var(--vy-font-size-lg);
 }

@@ -1557,8 +1557,9 @@ This lists every checked-in source module in these roots, including files with n
 | [frontend/src/admin/orders/OrderWorkflow.tsx](../frontend/src/admin/orders/OrderWorkflow.tsx) | Server-owned transitions: one source for permitted actions, labels and business guards. |
 | [frontend/src/admin/orders/OrdersManager.tsx](../frontend/src/admin/orders/OrdersManager.tsx) | Order operations and native detail navigation; the shared grid owns only list presentation. |
 | [frontend/src/admin/orders/OrdersRoute.tsx](../frontend/src/admin/orders/OrdersRoute.tsx) | Orders route: order operations with deep-linked order entities in the current shop or stage. |
-| [frontend/src/admin/orders/ReceiptPanel.tsx](../frontend/src/admin/orders/ReceiptPanel.tsx) | Seller configuration and version-bound receipt creation/download. |
+| [frontend/src/admin/orders/ReceiptPanel.tsx](../frontend/src/admin/orders/ReceiptPanel.tsx) | Seller configuration and version-bound receipt creation/download; reads go through the query layer. |
 | [frontend/src/admin/orders/ShipmentSplit.tsx](../frontend/src/admin/orders/ShipmentSplit.tsx) | Explicit subset editor uses server admission, parent command fencing and immutable order quantities. |
+| [frontend/src/admin/orders/orders.css](../frontend/src/admin/orders/orders.css) | Order workspace layout on design tokens: heading and total, workflow, detail grid, packages and the activity timeline. |
 | [frontend/src/admin/orders/shipments.css](../frontend/src/admin/orders/shipments.css) | Package allocation stays compact on desktop and touch-friendly on narrow order workspaces. |
 | [frontend/src/admin/orders/studio-extension.ts](../frontend/src/admin/orders/studio-extension.ts) | Studio extension of order operations. |
 | [frontend/src/admin/orders/useOrderCreation.ts](../frontend/src/admin/orders/useOrderCreation.ts) | Draft controller loads admitted choices, fences async reads and keeps review state separate from the editable input. |

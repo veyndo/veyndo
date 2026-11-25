@@ -1,4 +1,5 @@
 /** Server-owned transitions: one source for permitted actions, labels and business guards. */
+import { Button } from "../../kit/ui";
 import { contentText } from "../../shared/i18n/content-language";
 import { useOperationsText } from "../../shared/i18n/operations-i18n";
 export type OrderAction = {
@@ -32,32 +33,28 @@ export default function OrderWorkflow({
     contentText(label ?? {}, locale, workflow?.mainLocale ?? "en-GB") ||
     o(fallback);
   return (
-    <section className="order-workflow studio-card">
-      <div className="workflow-current">
-        <small>{o("currentStatus")}</small>
+    <section className="orders-workflow">
+      <div>
+        <small className="orders-eyebrow">{o("currentStatus")}</small>
         <h2>
-          <span className="status-orbit" />
+          <span className="orders-status-dot" aria-hidden="true" />
           {title(state?.label, order.state)}
         </h2>
         <p>{o("workflowHint")}</p>
       </div>
-      <div className="workflow-next">
-        <small>{o("nextStep")}</small>
+      <div className="orders-next">
+        <small className="orders-eyebrow">{o("nextStep")}</small>
         {actions.length ? (
           actions.map((action) => (
-            <div className="workflow-choice" key={action.id}>
-              <button
-                className={
-                  action.state === "cancelled"
-                    ? "workflow-cancel"
-                    : "studio-primary"
-                }
+            <div key={action.id}>
+              <Button
+                tone={action.state === "cancelled" ? "danger" : "primary"}
                 disabled={busy || !canEdit || !action.enabled}
                 onClick={() => onAction(action)}
               >
                 {title(action.label, action.state)}{" "}
                 <span aria-hidden="true">→</span>
-              </button>
+              </Button>
               {action.reason && <small>{o(action.reason)}</small>}
             </div>
           ))

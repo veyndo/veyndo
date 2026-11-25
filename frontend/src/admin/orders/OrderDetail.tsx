@@ -22,6 +22,16 @@ import ReceiptPanel from "./ReceiptPanel";
 import ConfigurationSummary from "../../shared/apps/ConfigurationSummary";
 import { configurationSnapshots } from "../../shared/api/configuration-types";
 import { useUnsavedWorkspace } from "../../shared/ui/useUnsavedWorkspace";
+import {
+  Badge,
+  Button,
+  Card,
+  Field,
+  Notice,
+  Spinner,
+  TextArea,
+} from "../../kit/ui";
+import "./orders.css";
 export default function OrderDetail({
   id,
   request,
@@ -166,17 +176,14 @@ export default function OrderDetail({
   if (!order) return <p role="status">{error || o("processing")}</p>;
   return (
     <>
-      <div className="order-toolbar">
-        <button className="studio-secondary" onClick={onBack}>
-          ← {r("back")}
-        </button>
-        <button
-          className="studio-secondary"
+      <div className="orders-toolbar">
+        <Button onClick={onBack}>← {r("back")}</Button>
+        <Button
           disabled={busy}
           onClick={() => void run(() => load().then(() => true))}
         >
           {o("refresh")}
-        </button>
+        </Button>
       </div>
       <CoreExtensions
         objectId={id}
@@ -184,9 +191,9 @@ export default function OrderDetail({
         omittedExtensions={order.omittedExtensions}
         request={request}
       />
-      <div className="order-heading">
+      <div className="orders-heading">
         <div>
-          <small>{o("order")}</small>
+          <small className="orders-eyebrow">{o("order")}</small>
           <h2>{order.orderNumber}</h2>
           <p>
             {order.customerEmail &&
@@ -207,25 +214,22 @@ export default function OrderDetail({
             · {new Date(order.createdAt).toLocaleString(locale)}
           </p>
         </div>
-        <div className="order-amount">
-          <small>{o("orderTotal")}</small>
+        <div className="orders-total">
+          <small className="orders-eyebrow">{o("orderTotal")}</small>
           <strong>{money(order.cart.price.totalPrice)}</strong>
         </div>
       </div>
-      {error && (
-        <p className="operation-feedback is-error" role="alert">
-          {error}
-        </p>
-      )}
+      {error && <Notice tone="danger">{error}</Notice>}
       {feedback && (
-        <p
-          className={`operation-feedback ${busy ? "is-working" : ""}`}
-          role="status"
-          aria-live="polite"
-        >
-          {busy && <span className="operation-spinner" />}
-          {feedback}
-        </p>
+        <Notice tone={busy ? "accent" : "positive"}>
+          {busy ? (
+            <>
+              <Spinner decorative /> {feedback}
+            </>
+          ) : (
+            feedback
+          )}
+        </Notice>
       )}
       <OrderWorkflow
         order={order}
@@ -233,12 +237,12 @@ export default function OrderDetail({
         canEdit={rights.includes("orders.write")}
         onAction={transition}
       />
-      <div className="operations-detail-grid">
-        <section className="studio-card">
-          <div className="section-heading">
-            <h2>{o("items")}</h2>
-            <span>{order.cart.lineItems.length}</span>
-          </div>
+      <div className="orders-detail-grid">
+        <Card
+          level={2}
+          title={o("items")}
+          actions={<Badge>{order.cart.lineItems.length}</Badge>}
+        >
           <div className="operations-table">
             {order.cart.lineItems.map((item: any) => (
               <div className="operation-row" key={item.id}>
@@ -268,9 +272,9 @@ export default function OrderDetail({
               </div>
             ))}
           </div>
-          <div className="customer-address-grid order-address">
+          <div className="customer-address-grid orders-addresses">
             <div>
-              <small>{c("billingAddress")}</small>
+              <small className="orders-eyebrow">{c("billingAddress")}</small>
               <AddressCard
                 address={
                   order.billingAddress ?? order.cart.checkout?.billingAddress
@@ -278,14 +282,14 @@ export default function OrderDetail({
               />
             </div>
             <div>
-              <small>{c("shippingAddress")}</small>
+              <small className="orders-eyebrow">{c("shippingAddress")}</small>
               <AddressCard
                 address={order.shippingAddress ?? order.cart.checkout?.address}
               />
             </div>
           </div>
           <small>{c("snapshotHint")}</small>
-        </section>
+        </Card>
         <OrderPaymentDelivery
           request={request}
           order={order}
@@ -337,11 +341,10 @@ export default function OrderDetail({
         id={id}
         revision={order.revision}
       />
-      <section className="studio-card order-activity">
-        <h2>{o("activity")}</h2>
+      <Card level={2} title={o("activity")}>
         {rights.includes("orders.write") && (
           <form
-            className="order-note"
+            className="orders-note"
             onSubmit={(e) => {
               e.preventDefault();
               void run(async () => {
@@ -353,24 +356,23 @@ export default function OrderDetail({
               });
             }}
           >
-            <label>
-              {o("note")}
-              <textarea
+            <Field label={o("note")}>
+              <TextArea
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
                 required
                 maxLength={4000}
               />
-            </label>
-            <button disabled={busy} className="studio-primary">
+            </Field>
+            <Button type="submit" tone="primary" disabled={busy}>
               {o("addNote")}
-            </button>
+            </Button>
           </form>
         )}
-        <div className="order-timeline">
+        <div className="orders-timeline">
           {order.activity.map((event: any) => (
-            <div className="operation-event" key={event.id}>
-              <span className="timeline-dot" />
+            <div className="orders-event" key={event.id}>
+              <span className="orders-event-dot" aria-hidden="true" />
               <div>
                 <small>
                   {new Date(event.createdAt).toLocaleString(locale)} ·{" "}
@@ -386,15 +388,15 @@ export default function OrderDetail({
                         : `${o(event.data.kind)} → ${contentText(order.workflow.states.find((s: any) => s.id === event.data.state)?.label ?? {}, locale, order.workflow.mainLocale ?? "en-GB") || o(event.data.state)}`}
                 </p>
                 {event.kind === "flow" && (
-                  <span className="operation-status">
+                  <Badge>
                     {o("flow")} · {event.data.event}
-                  </span>
+                  </Badge>
                 )}
               </div>
             </div>
           ))}
         </div>
-      </section>
+      </Card>
     </>
   );
 }

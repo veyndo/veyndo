@@ -12,14 +12,19 @@ Files and their individual responsibilities are listed in [the generated source 
 - [`OrdersManager.tsx`](OrdersManager.tsx): Order operations UI. All changes call the same domain endpoints exposed through MCP.
 - [`ReceiptPanel.tsx`](ReceiptPanel.tsx): Seller configuration and version-bound receipt creation/download.
 - [`ShipmentSplit.tsx`](ShipmentSplit.tsx): Server-admitted package quantity editor with explicit subset validation and parent command fencing.
-- [`shipments.css`](shipments.css): Responsive package rows and quantity form using the Studio theme.
+- [`shipments.css`](shipments.css): Responsive package rows and quantity form on design tokens.
+- [`orders.css`](orders.css): Order heading, workflow, detail grid, packages, timeline and creation review on design tokens; replaces the order rules formerly in `admin/styles`.
 
 See [shipping workflows](../../../../docs/shipping-workflows.md) for native API/MCP,
 event, fiscal-snapshot and direct-carrier boundaries.
 
+## Shared parts
+
+The area is built on [`kit/ui`](../../../kit/ui/README.md) (buttons, cards, fields, notices, badges) and reads access rights and receipts through [`kit/query`](../../../kit/query/README.md); generating a receipt invalidates the order's receipt list. Order detail keeps its own exact-once command flow (request keys, revision, payment job observation).
+
 ## Studio registration
 
-[`studio-extension.ts`](studio-extension.ts) declares this area's Studio routes and slot contributions for [the registry](../shell/registry/README.md); [`OrdersRoute.tsx`](OrdersRoute.tsx) adapt the Studio context to the area's views.
+[`studio-extension.ts`](studio-extension.ts) declares this area's Studio routes and slot contributions for [the registry](../shell/registry/README.md); [`OrdersRoute.tsx`](OrdersRoute.tsx) adapts the Studio context to the area's views.
 
 ## Verification
 
