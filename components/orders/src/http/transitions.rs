@@ -2,7 +2,7 @@
 use crate::domain::order_fields::order_fields;
 use crate::domain::order_machine::{MachineEdge, OrderMachine};
 use crate::domain::order_transitions::{cancellation_blocker, delivery, payment};
-use crate::domain::order_workflow::{guard, workflow};
+use crate::domain::order_workflow::{admitted_edge, guard, workflow};
 use crate::store::machine::machine;
 use crate::store::order_mutation;
 use crate::types::order_document::OrderControl;
@@ -92,14 +92,7 @@ pub async fn transition_order(
     match kind {
         "order" => {
             let current = before.state.as_str().unwrap_or("placed");
-            let edge = machine
-                .transitions
-                .iter()
-                .find(|e| {
-                    e.from == current
-                        && e.to == target
-                        && input.action.as_deref().is_none_or(|id| id == e.id)
-                })
+            let edge = admitted_edge(&machine, current, target, input.action.as_deref())
                 .ok_or(conflict("Invalid order transition"))?;
             let native = guard(&o, &machine, kind, target);
             let policy = reason(&h, edge, &o);

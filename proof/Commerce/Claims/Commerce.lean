@@ -397,4 +397,80 @@ theorem reservation_release_restores (ordered : Nat) (s : Nat × Nat) (events : 
   simp only [reservationRun, List.foldl_append, List.foldl_cons, List.foldl_nil, reservationStep] at h ⊢
   exact ⟨h, trivial⟩
 
+/-! ### Payment and revision rules over sequences -/
+
+/-- Refund requests applied in order; refused requests change nothing. -/
+def refundRun (captured refunded : Nat) (requests : List Nat) : Nat :=
+  requests.foldl (fun r q => if refund_admissible captured r q then r + q else r) refunded
+
+/-- However many refunds are requested, the refunded total never exceeds the captured amount. -/
+theorem refund_run_bounded (captured : Nat) (requests : List Nat) :
+    ∀ refunded, refunded ≤ captured → refundRun captured refunded requests ≤ captured := by
+  induction requests with
+  | nil => intro r h; simpa [refundRun] using h
+  | cons q rest ih =>
+    intro r h
+    apply ih
+    dsimp only
+    split
+    · rename_i hq
+      have := (refund_exact captured r q).mp hq
+      omega
+    · exact h
+
+/-- Capture requests applied in order without in-flight reservations. -/
+def captureRun (authorized captured : Nat) (requests : List Nat) : Nat :=
+  requests.foldl (fun c q => if capture_admissible authorized c 0 q then c + q else c) captured
+
+/-- However many captures are requested, the captured total never exceeds the authorization. -/
+theorem capture_run_bounded (authorized : Nat) (requests : List Nat) :
+    ∀ captured, captured ≤ authorized → captureRun authorized captured requests ≤ authorized := by
+  induction requests with
+  | nil => intro c h; simpa [captureRun] using h
+  | cons q rest ih =>
+    intro c h
+    apply ih
+    dsimp only
+    split
+    · rename_i hq
+      simp only [capture_admissible, Bool.and_eq_true, decide_eq_true_eq] at hq
+      omega
+    · exact h
+
+/-- Revision-checked writes applied in order: an admitted write advances the revision by one. -/
+def revisionStep (current expected : Nat) : Nat :=
+  if revision_admissible current expected then current + 1 else current
+
+/-- Revision-checked writes applied in order: an admitted write advances the revision by one. -/
+def revisionRun (current : Nat) (expected : List Nat) : Nat :=
+  expected.foldl revisionStep current
+
+/-- Revisions never move backwards over any sequence of writes. -/
+theorem revision_run_monotone (expected : List Nat) :
+    ∀ current, current ≤ revisionRun current expected := by
+  induction expected with
+  | nil => intro c; simp [revisionRun]
+  | cons e rest ih =>
+    intro c
+    have step : c ≤ revisionStep c e := by
+      unfold revisionStep; split <;> omega
+    exact Nat.le_trans step (ih (revisionStep c e))
+
+/-- A revision that is already behind is refused after any later sequence of writes: no lost update. -/
+theorem revision_reuse_denied (current stale : Nat) (expected : List Nat) (h : stale < current) :
+    revision_admissible (revisionRun current expected) stale = false := by
+  have := revision_run_monotone expected current
+  cases hr : revision_admissible (revisionRun current expected) stale
+  · rfl
+  · have := (revision_exact_behavior _ _).mp hr
+    omega
+
+/-- A checkout review taken at an older cart revision is refused after any later cart writes. -/
+theorem checkout_review_stale_denied (current stale expectedTotal actualTotal : Nat) (methods : Bool)
+    (edits : List Nat) (h : stale < current) :
+    checkout_review_admissible (decide (revisionRun current edits = stale)) expectedTotal actualTotal methods = false := by
+  have := revision_run_monotone edits current
+  have hne : revisionRun current edits ≠ stale := by omega
+  simp [checkout_review_admissible, hne]
+
 end CommerceKernel

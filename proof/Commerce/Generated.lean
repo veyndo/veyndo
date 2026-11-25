@@ -174,6 +174,9 @@ def net_amount (gross : Nat) (tax : Nat) : Nat :=
 def order_edit_admissible (terminal : Bool) : Bool :=
   (!terminal)
 
+def order_transition_admissible (edge_listed : Bool) (target_listed : Bool) (source_terminal : Bool) : Bool :=
+  ((edge_listed && target_listed) && (!source_terminal))
+
 def completion_admissible (terminal : Bool) (payment_ready : Bool) (deliveries_ready : Bool) : Bool :=
   (((!terminal) && payment_ready) && deliveries_ready)
 

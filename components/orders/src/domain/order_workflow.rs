@@ -1,16 +1,42 @@
 //! One server-derived action catalogue drives UI, HTTP and MCP; built-in business guards cannot be bypassed.
-use crate::domain::order_machine::OrderMachine;
+use crate::domain::order_machine::{MachineEdge, OrderMachine};
 use serde::Deserialize;
 use serde_json::{Value, json};
 use veyndo_core::RequestContext;
 use veyndo_core::document::{lenient, view};
 use veyndo_identity::permit;
 use veyndo_pricing::verified_kernel;
+/// Whether an order in `state` accepts no further change: a terminal state of its machine or a
+/// payment review state the ledger sets (`expired`, `payment_review`).
+pub fn terminal(m: &OrderMachine, state: &str) -> bool {
+    m.states.iter().any(|s| s.id == state && s.terminal)
+        || ["expired", "payment_review"].contains(&state)
+}
+
+/// The listed edge that moves an order from `current` to `target` (and, when given, has the
+/// requested action id), if the proved `order_transition_admissible` rule admits the move:
+/// the edge is listed, its target is a listed state and `current` is not terminal. Over any
+/// request sequence this keeps every reachable state listed and terminal orders unchanged
+/// (`order_run_listed`, `order_run_terminal_absorbing`).
+pub fn admitted_edge<'m>(
+    m: &'m OrderMachine,
+    current: &str,
+    target: &str,
+    action: Option<&str>,
+) -> Option<&'m MachineEdge> {
+    let edge = m.transitions.iter().find(|e| {
+        e.from == current && e.to == target && action.is_none_or(|id| id == e.id)
+    });
+    let listed = m.states.iter().any(|s| s.id == target);
+    verified_kernel::order_transition_admissible(edge.is_some(), listed, terminal(m, current))
+        .then_some(edge)
+        .flatten()
+}
+
 pub fn guard(o: &Value, m: &OrderMachine, kind: &str, target: &str) -> Option<&'static str> {
     let order: WorkflowOrder = view(o);
     let state = order.state.as_deref().unwrap_or("");
-    let terminal = m.states.iter().any(|s| s.id == state && s.terminal)
-        || ["expired", "payment_review"].contains(&state);
+    let terminal = terminal(m, state);
     if !verified_kernel::order_edit_admissible(terminal) {
         return Some("terminalOrder");
     }
@@ -171,7 +197,7 @@ struct Position {
 
 #[cfg(test)]
 mod tests {
-    use super::{external, guard, workflow};
+    use super::{admitted_edge, external, guard, workflow};
     use crate::domain::order_machine::default_machine;
     use serde_json::{Value, json};
     use veyndo_core::RequestContext;
@@ -356,6 +382,25 @@ mod tests {
             (json!(false), json!("carrierBooking"))
         );
         assert_eq!(w["shipmentSplits"][0]["enabled"], false);
+    }
+
+    #[test]
+    fn only_listed_edges_into_listed_states_leave_a_nonterminal_state() {
+        let mut m = default_machine();
+        assert_eq!(
+            admitted_edge(&m, "placed", "in_progress", None).map(|e| e.id.as_str()),
+            Some("start")
+        );
+        assert!(admitted_edge(&m, "placed", "in_progress", Some("complete")).is_none());
+        assert!(admitted_edge(&m, "placed", "completed", None).is_none());
+        // A stored snapshot that bypassed validation still cannot leave a terminal state
+        // or move an order into a state its machine does not list.
+        m.transitions[0].from = "completed".into();
+        assert!(admitted_edge(&m, "completed", "in_progress", None).is_none());
+        m.transitions[1].to = "unlisted".into();
+        assert!(admitted_edge(&m, "in_progress", "unlisted", None).is_none());
+        m.transitions[2].from = "expired".into();
+        assert!(admitted_edge(&m, "expired", "cancelled", None).is_none());
     }
 
     #[test]

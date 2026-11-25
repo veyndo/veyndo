@@ -69,6 +69,7 @@ pub use fulfillment::delivery_split_admissible;
 pub use fulfillment::download_admissible;
 pub use fulfillment::manual_payment_admissible;
 pub use fulfillment::order_edit_admissible;
+pub use fulfillment::order_transition_admissible;
 pub use fulfillment::payment_transition_admissible;
 pub use fulfillment::receipt_admissible;
 pub use fulfillment::reservation_release_admissible;

@@ -71,6 +71,7 @@ pub(super) fn eval(j: &Value) -> Result<Value, String> {
         | Some("download_admissible")
         | Some("manual_payment_admissible")
         | Some("order_edit_admissible")
+        | Some("order_transition_admissible")
         | Some("payment_transition_admissible")
         | Some("receipt_admissible")
         | Some("reservation_release_admissible") => fulfillment::eval(j),

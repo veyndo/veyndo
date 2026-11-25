@@ -63,6 +63,7 @@ def evalRequest (j : Json) : Except String Json := do
   | "amount_sum" => pure (toJson (amount_sum ((← (args.getObjVal? "left") >>= Json.getNat?)) ((← (args.getObjVal? "right") >>= Json.getNat?))))
   | "net_amount" => pure (toJson (net_amount ((← (args.getObjVal? "gross") >>= Json.getNat?)) ((← (args.getObjVal? "tax") >>= Json.getNat?))))
   | "order_edit_admissible" => pure (toJson (order_edit_admissible ((← (args.getObjVal? "terminal") >>= Json.getBool?))))
+  | "order_transition_admissible" => pure (toJson (order_transition_admissible ((← (args.getObjVal? "edge_listed") >>= Json.getBool?)) ((← (args.getObjVal? "target_listed") >>= Json.getBool?)) ((← (args.getObjVal? "source_terminal") >>= Json.getBool?))))
   | "completion_admissible" => pure (toJson (completion_admissible ((← (args.getObjVal? "terminal") >>= Json.getBool?)) ((← (args.getObjVal? "payment_ready") >>= Json.getBool?)) ((← (args.getObjVal? "deliveries_ready") >>= Json.getBool?))))
   | "cancellation_admissible" => pure (toJson (cancellation_admissible ((← (args.getObjVal? "terminal") >>= Json.getBool?)) ((← (args.getObjVal? "external_payment") >>= Json.getBool?)) ((← (args.getObjVal? "refund_required") >>= Json.getBool?)) ((← (args.getObjVal? "deliveries_open") >>= Json.getBool?))))
   | "manual_payment_admissible" => pure (toJson (manual_payment_admissible ((← (args.getObjVal? "terminal") >>= Json.getBool?)) ((← (args.getObjVal? "external_payment") >>= Json.getBool?)) ((← (args.getObjVal? "current_pending") >>= Json.getBool?)) ((← (args.getObjVal? "target_paid") >>= Json.getBool?))))

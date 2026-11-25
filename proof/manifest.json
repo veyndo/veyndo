@@ -38,7 +38,8 @@
         "refund_zero_denied",
         "refund_exact",
         "refund_sequence_bounded",
-        "refund_lowered_capture_denied"
+        "refund_lowered_capture_denied",
+        "refund_run_bounded"
       ]
     },
     "revision_admissible": {
@@ -54,7 +55,9 @@
       ],
       "theorems": [
         "revision_exact",
-        "revision_exact_behavior"
+        "revision_exact_behavior",
+        "revision_run_monotone",
+        "revision_reuse_denied"
       ]
     },
     "replay_admissible": {
@@ -83,7 +86,8 @@
       ],
       "theorems": [
         "terminal_edit_denied",
-        "order_edit_exact"
+        "order_edit_exact",
+        "order_run_fulfilment_denied"
       ]
     },
     "completion_admissible": {
@@ -246,7 +250,8 @@
         "components/checkout/src/domain/review_binding.rs"
       ],
       "theorems": [
-        "checkout_review_exact"
+        "checkout_review_exact",
+        "checkout_review_stale_denied"
       ]
     },
     "shop_request_admissible": {
@@ -284,7 +289,10 @@
       "theorems": [
         "payment_transition_exact",
         "payment_refunded_terminal",
-        "payment_pending_capture"
+        "payment_pending_capture",
+        "payment_run_listed",
+        "payment_run_captured_kept",
+        "payment_run_refunded_final"
       ]
     },
     "resource_quota_admissible": {
@@ -620,7 +628,8 @@
       "theorems": [
         "capture_exact",
         "capture_bounded",
-        "capture_zero_denied"
+        "capture_zero_denied",
+        "capture_run_bounded"
       ]
     },
     "amount_sum": {
@@ -698,6 +707,20 @@
         "reservation_run_conserves",
         "reservation_release_idempotent",
         "reservation_release_restores"
+      ]
+    },
+    "order_transition_admissible": {
+      "bindings": [
+        "components/orders/src/domain/order_workflow.rs"
+      ],
+      "theorems": [
+        "order_transition_exact",
+        "order_transition_terminal_denied",
+        "order_step_listed",
+        "order_run_listed",
+        "order_step_terminal",
+        "order_run_terminal_absorbing",
+        "order_run_terminal_final"
       ]
     }
   },
