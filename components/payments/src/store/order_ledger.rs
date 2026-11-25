@@ -3,11 +3,14 @@ use crate::domain::attempt::Attempt;
 use crate::domain::{settlements, state};
 use crate::ports::Host;
 use crate::store::attempts;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
-use veyndo_core::document::{lenient, view};
+use veyndo_core::document::{lenient, merge, view};
+use veyndo_core::document_slot::field;
 use veyndo_core::{Result, conflict};
+use veyndo_inventory::store::attempt_reservations::release_attempt;
 use veyndo_orders::domain::order_fields::order_fields;
+use veyndo_orders::domain::order_patches::{Revised, Stated, strip_cart_token};
 use veyndo_pricing::verified_kernel;
 
 /// The order document of a payment (a missing row is a database error).
@@ -41,6 +44,13 @@ struct LedgerCart {
     id: Value,
 }
 
+/// Whether live money was charged for the order's payment.
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct RealMoney {
+    real_money_charged: bool,
+}
+
 pub async fn update_order(
     host: &dyn Host,
     tx: &mut sqlx::Transaction<'_, sqlx::Postgres>,
@@ -54,29 +64,39 @@ pub async fn update_order(
     )
     .fetch_one(&mut **tx)
     .await?;
-    o["payment"]["state"] = json!(state);
+    merge(field(&mut o, "payment")?, Stated { state })?;
     let current = attempts::get(&mut **tx, &p.tenant, &p.id).await?;
     let summary = settlements::summary(&current);
-    if let (Some(payment), Some(fields)) = (o["payment"].as_object_mut(), summary.as_object()) {
+    let payment = field(&mut o, "payment")?;
+    if let (Some(payment), Some(fields)) = (payment.as_object_mut(), summary.as_object()) {
         payment.extend(fields.clone());
     }
-    o["payment"]["realMoneyCharged"] = json!(
-        p.environment == "live"
-            && [
-                "captured",
-                "partially_captured",
-                "captured_late",
-                "partially_refunded",
-                "refunded"
-            ]
-            .contains(&state)
-    );
-    o["revision"] = json!(view::<LedgerOrder>(&o).revision.as_i64().unwrap_or(1) + 1);
+    merge(
+        payment,
+        RealMoney {
+            real_money_charged: p.environment == "live"
+                && [
+                    "captured",
+                    "partially_captured",
+                    "captured_late",
+                    "partially_refunded",
+                    "refunded",
+                ]
+                .contains(&state),
+        },
+    )?;
+    let revision = view::<LedgerOrder>(&o).revision.as_i64().unwrap_or(1) + 1;
+    merge(&mut o, Revised { revision })?;
     if state == "captured_late" {
-        o["state"] = json!("payment_review");
+        merge(
+            &mut o,
+            Stated {
+                state: "payment_review",
+            },
+        )?;
     }
     if ["cancelled", "expired"].contains(&state) {
-        o["state"] = json!(state);
+        merge(&mut o, Stated { state })?;
     }
     host.captured(tx, &p.tenant, &mut o, state).await?;
     order_fields(&mut o);
@@ -90,34 +110,17 @@ pub async fn update_order(
     )
     .execute(&mut **tx)
     .await?;
-    sqlx::query!(
-        "UPDATE carts SET data=jsonb_set(data,'{order}',$1) WHERE tenant=$2 AND id=$3",
-        o,
-        p.tenant,
-        cart
-    )
-    .execute(&mut **tx)
-    .await?;
+    host.mirror_cart_order(tx, &p.tenant, cart, &o).await?;
     let mut event_order = o.clone();
-    if let Some(cart) = event_order["cart"].as_object_mut() {
-        cart.remove("token");
-    }
+    strip_cart_token(&mut event_order)?;
     let kind = if state == "captured" && p.state != "captured" {
         "payment.captured"
     } else {
         "payment.updated"
     };
     veyndo_core::store::outbox::publish_on(&mut **tx, &p.tenant, kind, &json!({"orderId":p.order,"attemptId":p.id,"state":state,"provider":p.provider,"environment":p.environment,"realMoneyCharged":p.environment=="live" && state=="captured","order":event_order})).await?;
-    if state == "captured"
-        && let Some(variant) = sqlx::query_scalar!("UPDATE exposures SET rewarded=true WHERE tenant=$1 AND session=(SELECT data->>'session' FROM carts WHERE tenant=$1 AND id=$2) AND rewarded=false RETURNING variant", p.tenant, cart).fetch_optional(&mut **tx).await?
-    {
-        sqlx::query!(
-            "UPDATE policy SET purchases=purchases+1 WHERE tenant=$1 AND variant=$2",
-            p.tenant,
-            variant
-        )
-        .execute(&mut **tx)
-        .await?;
+    if state == "captured" {
+        host.reward_capture(tx, &p.tenant, cart).await?;
     }
     Ok(())
 }
@@ -139,7 +142,7 @@ pub async fn release_stock(
     }
     state::transition(&p.state, state)?;
     veyndo_inventory::store::reservations::release(tx, &p.tenant, &p.order).await?;
-    sqlx::query!("UPDATE inventory_reservations SET released=true WHERE tenant=$1 AND attempt_id=$2 AND NOT released", p.tenant, p.id).execute(&mut **tx).await?;
+    release_attempt(tx, &p.tenant, &p.id).await?;
     sqlx::query!(
         "UPDATE payment_attempts SET state=$1,revision=revision+1 WHERE tenant=$2 AND id=$3",
         state,
@@ -149,4 +152,64 @@ pub async fn release_stock(
     .execute(&mut **tx)
     .await?;
     update_order(host, tx, p, state).await
+}
+
+#[cfg(test)]
+mod tests {
+    use super::RealMoney;
+    use serde_json::json;
+    use veyndo_core::document::merge;
+    use veyndo_core::document_slot::field;
+    use veyndo_orders::domain::order_patches::{Revised, Stated};
+
+    /// The typed ledger patches write exactly the order document the indexed assignments wrote.
+    #[test]
+    fn typed_ledger_patches_match_the_indexed_writes() {
+        let summary = json!({"capturedMinor":1000,"refundedMinor":0});
+        for state in ["captured", "captured_late", "cancelled", "pending"] {
+            let base = json!({"id":"o1","state":"placed","revision":3,"payment":{"state":"pending","attemptId":"a1"}});
+            let mut indexed = base.clone();
+            indexed["payment"]["state"] = json!(state);
+            if let (Some(payment), Some(fields)) =
+                (indexed["payment"].as_object_mut(), summary.as_object())
+            {
+                payment.extend(fields.clone());
+            }
+            indexed["payment"]["realMoneyCharged"] = json!(state == "captured");
+            indexed["revision"] = json!(4);
+            if state == "captured_late" {
+                indexed["state"] = json!("payment_review");
+            }
+            if state == "cancelled" {
+                indexed["state"] = json!(state);
+            }
+            let mut typed = base.clone();
+            merge(field(&mut typed, "payment").unwrap(), Stated { state }).unwrap();
+            let payment = field(&mut typed, "payment").unwrap();
+            if let (Some(payment), Some(fields)) = (payment.as_object_mut(), summary.as_object()) {
+                payment.extend(fields.clone());
+            }
+            merge(
+                payment,
+                RealMoney {
+                    real_money_charged: state == "captured",
+                },
+            )
+            .unwrap();
+            merge(&mut typed, Revised { revision: 4_i64 }).unwrap();
+            if state == "captured_late" {
+                merge(
+                    &mut typed,
+                    Stated {
+                        state: "payment_review",
+                    },
+                )
+                .unwrap();
+            }
+            if state == "cancelled" {
+                merge(&mut typed, Stated { state }).unwrap();
+            }
+            assert_eq!(typed, indexed, "{state}");
+        }
+    }
 }

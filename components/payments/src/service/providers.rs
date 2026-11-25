@@ -4,9 +4,9 @@ use crate::domain::service_config::approval_url;
 use crate::domain::settlements::summary;
 use crate::ports::{Gateway, Host};
 use crate::store::{attempts, jobs, provider_accounts};
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
-use veyndo_core::document::{lenient, view};
+use veyndo_core::document::{lenient, merge, view};
 use veyndo_core::{
     Error, RequestContext, Result, State, StatusCode, bad, conflict, process_config,
 };
@@ -52,7 +52,7 @@ pub async fn onboarding(
         return Err(bad("Supported onboarding operation and approval required"));
     }
     let channel = args.channel.as_deref().unwrap_or("default");
-    if !provider_accounts::channel_exists(&a.db, &t, channel).await? {
+    if !gateway.channel_exists(&t, channel).await? {
         return Err(Error(
             StatusCode::NOT_FOUND,
             "Sales channel not found".into(),
@@ -100,7 +100,12 @@ pub async fn onboarding(
     let mut response = json!({"provider":id,"channel":channel,"accountRef":account,"ready":ready,"environment":environment,"status":receipt.status});
     if let Some(url) = &receipt.onboarding_url {
         let p = onboarding_attempt(id, &t, &m.version, environment);
-        response["onboardingUrl"] = json!(approval_url(host, &p, &json!(url))?);
+        merge(
+            &mut response,
+            Onboarding {
+                onboarding_url: approval_url(host, &p, &json!(url))?,
+            },
+        )?;
     }
     let methods = receipt
         .methods
@@ -116,7 +121,7 @@ pub async fn onboarding(
     if ready && methods.is_empty() {
         return Err(bad("Ready account requires enabled methods"));
     }
-    response["methods"] = json!(methods);
+    merge(&mut response, EnabledMethods { methods })?;
     let public = json!({"accountRef":account,"ready":ready,"environment":environment,"methods":methods,"status":receipt.status});
     bind_account(
         a,
@@ -235,12 +240,12 @@ pub fn configured_environments(c: &Value) -> Value {
 }
 
 /// Installed adapter providers, their channel accounts and public environment metadata.
-pub async fn providers(a: &State, h: &RequestContext) -> Result<Value> {
+pub async fn providers(gateway: &dyn Gateway, a: &State, h: &RequestContext) -> Result<Value> {
     let t = merchant(h)?;
     permit(h, "payments.read")?;
     let rows = provider_accounts::packages(&a.db, &t).await?;
     let accounts = provider_accounts::accounts(&a.db, &t).await?;
-    let channels = provider_accounts::channels(&a.db, &t).await?;
+    let channels = gateway.channel_ids(&t).await?;
     let services = &process_config::get().payment_services;
     let providers: Vec<_> = rows
         .iter()
@@ -271,6 +276,25 @@ struct Listed {
     ready: Value,
 }
 
+/// Whether an adapter provider is active with a ready channel account.
+#[derive(Serialize)]
+struct Configured {
+    configured: bool,
+}
+
+/// The approval URL a provider returned to finish onboarding.
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct Onboarding {
+    onboarding_url: Option<String>,
+}
+
+/// The methods a provider account enabled.
+#[derive(Serialize)]
+struct EnabledMethods<'a> {
+    methods: &'a Vec<Value>,
+}
+
 /// An adapter provider is configured once it is active and one of its channel accounts is ready.
 pub fn mark_configured(generic: &Value) -> Vec<Value> {
     let input: MarkConfiguredInput = view(generic);
@@ -283,13 +307,15 @@ pub fn mark_configured(generic: &Value) -> Vec<Value> {
         .map(|p| {
             let mut p = p.clone();
             let listed: Listed = view(&p);
-            p["configured"] = json!(
-                listed.active == true
+            let configured = Configured {
+                configured: listed.active == true
                     && accounts
                         .iter()
                         .map(view::<Listed>)
-                        .any(|c| c.provider == listed.id && c.ready == true)
-            );
+                        .any(|c| c.provider == listed.id && c.ready == true),
+            };
+            // A listed provider is an object, so the merge cannot fail.
+            let _ = merge(&mut p, configured);
             p
         })
         .collect()
@@ -302,7 +328,7 @@ pub async fn status(gateway: &dyn Gateway, a: &State, h: &RequestContext) -> Res
     let rows = attempts::latest(&a.db, &t).await?;
     let jobs = jobs::latest(&a.db, &t).await?;
     let mut list = vec![gateway.builtin(&t)];
-    list.extend(mark_configured(&providers(a, h).await?));
+    list.extend(mark_configured(&providers(gateway, a, h).await?));
     if !list
         .iter()
         .any(|p| view::<Listed>(p).id == "shopware_payments")
@@ -321,6 +347,29 @@ pub fn onboarding_action() -> Value {
 
 #[cfg(test)]
 mod tests {
+    /// The typed onboarding and listing patches write exactly what the indexed assignments wrote.
+    #[test]
+    fn typed_provider_patches_match_the_indexed_writes() {
+        use super::{Configured, EnabledMethods, Onboarding};
+        use veyndo_core::document::merge;
+        let methods = vec![serde_json::json!("card")];
+        let mut indexed = serde_json::json!({"provider":"p"});
+        indexed["onboardingUrl"] = serde_json::json!(Some("https://pay.example/on"));
+        indexed["methods"] = serde_json::json!(methods);
+        indexed["configured"] = serde_json::json!(true);
+        let mut typed = serde_json::json!({"provider":"p"});
+        merge(
+            &mut typed,
+            Onboarding {
+                onboarding_url: Some("https://pay.example/on".into()),
+            },
+        )
+        .unwrap();
+        merge(&mut typed, EnabledMethods { methods: &methods }).unwrap();
+        merge(&mut typed, Configured { configured: true }).unwrap();
+        assert_eq!(typed, indexed);
+    }
+
     use super::{OnboardingReceipt, configured_environments, mark_configured, onboarding_action};
     use serde_json::{Value, json};
     use veyndo_core::document::view;

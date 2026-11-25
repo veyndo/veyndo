@@ -6,6 +6,7 @@ use veyndo_core::document::view;
 use veyndo_core::shop_scope::{channel as channel_id, header, session_digest, tenant};
 use veyndo_core::{RequestContext, Result, State, bad, uid};
 use veyndo_customers::service::{address_book, sessions};
+use veyndo_customers::store::purchase_customers::cart_defaults;
 use veyndo_marketing::service::channels;
 use veyndo_shop::domain::checkout_selection::resolve_selection;
 use veyndo_shop::service::language::language_context;
@@ -128,9 +129,7 @@ pub async fn new_cart_context(
         &settings,
     ));
     if let Some(email) = identity {
-        let r = sqlx::query!("SELECT id,group_name,company,default_billing_address_id,default_shipping_address_id,profile FROM customers WHERE tenant=$1 AND email=$2", t, email)
-            .fetch_one(&a.db)
-            .await?;
+        let r = cart_defaults(&a.db, &t, &email).await?;
         c.data.email = Some(email.clone());
         c.data.customer_id = Some(r.id);
         c.data.group = r.group_name;

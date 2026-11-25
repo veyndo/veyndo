@@ -3,6 +3,7 @@ pub mod app_channels;
 pub mod behavior_channels;
 pub mod carts;
 pub mod catalog;
+pub mod channel_admission;
 pub mod channel_config;
 pub mod channel_ids;
 pub mod channel_preview;

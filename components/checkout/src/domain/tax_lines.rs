@@ -2,6 +2,7 @@
 use crate::domain::quote_view::flags;
 use serde_json::json;
 use std::collections::HashMap;
+use veyndo_core::document_slot::field;
 use veyndo_core::{Result, bad};
 use veyndo_pricing::catalog::Product;
 use veyndo_pricing::service::conversion::amount;
@@ -40,7 +41,7 @@ pub fn tax_products(ps: &[Product], c: &CheckoutSelection, s: &Settings) -> Resu
             };
             let factor = (1. + rate / 100.) / (1. + p.tax_rate / 100.);
             if factor != 1.
-                && let Some(prices) = p.extra["currencyPrices"].as_object_mut()
+                && let Some(prices) = field(&mut p.extra, "currencyPrices")?.as_object_mut()
             {
                 for (code, entry) in prices {
                     if let Some(d) = s.currencies.definitions.iter().find(|d| d.code == *code) {

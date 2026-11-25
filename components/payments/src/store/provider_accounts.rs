@@ -3,21 +3,6 @@ use serde_json::Value;
 use sqlx::{Executor, PgConnection, Postgres};
 use veyndo_core::Result;
 
-/// The sales channel exists in the shop.
-pub async fn channel_exists<'e>(
-    db: impl Executor<'e, Database = Postgres>,
-    tenant: &str,
-    channel: &str,
-) -> Result<bool> {
-    Ok(sqlx::query_scalar!(
-        r#"SELECT EXISTS(SELECT 1 FROM sales_channels WHERE tenant=$1 AND id=$2) AS "owned!""#,
-        tenant,
-        channel
-    )
-    .fetch_one(db)
-    .await?)
-}
-
 /// The package version is still installed and active; share-locked so an uninstall waits for the binding.
 pub async fn share_package_active(
     tx: &mut PgConnection,
@@ -107,19 +92,6 @@ pub async fn accounts<'e>(
     Ok(sqlx::query_as!(
         Account,
         r#"SELECT app,channel,account_ref,environment,ready,updated_at::text AS "updated_at!" FROM payment_provider_accounts WHERE tenant=$1 ORDER BY app,channel"#,
-        tenant
-    )
-    .fetch_all(db)
-    .await?)
-}
-
-/// The ids of the shop's sales channels.
-pub async fn channels<'e>(
-    db: impl Executor<'e, Database = Postgres>,
-    tenant: &str,
-) -> Result<Vec<String>> {
-    Ok(sqlx::query_scalar!(
-        "SELECT id FROM sales_channels WHERE tenant=$1 ORDER BY id",
         tenant
     )
     .fetch_all(db)

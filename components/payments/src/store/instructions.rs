@@ -5,6 +5,7 @@ use serde::Deserialize;
 use serde_json::{Value, json};
 use veyndo_core::Result;
 use veyndo_core::document::view;
+use veyndo_orders::domain::order_patches::strip_cart_token;
 
 /// The JSON fields `publish` reads, typed as it reads them.
 #[derive(Deserialize, Default)]
@@ -26,9 +27,7 @@ pub async fn publish(
     )
     .fetch_one(&mut **tx)
     .await?;
-    if let Some(cart) = order["cart"].as_object_mut() {
-        cart.remove("token");
-    }
+    strip_cart_token(&mut order)?;
     let data = json!({"orderId":p.order,"attemptId":p.id,"order":order,"paymentInstructions":snapshot(p,&input.recipient_instructions)?});
     veyndo_core::store::outbox::publish_on(
         &mut **tx,

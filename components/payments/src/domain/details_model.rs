@@ -106,4 +106,4 @@ impl Details {
 }
 
 #[cfg(test)]
-mod tests;
+mod model_tests;

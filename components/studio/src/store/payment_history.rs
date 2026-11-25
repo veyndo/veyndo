@@ -1,9 +1,9 @@
-//! The payment-only projection of an order's native entity history; full snapshots with customer PII stay behind their own permissions. Columns checked at compile time.
+//! The payment changes of an order in the native entity history, on the caller's read snapshot. Columns checked at compile time.
 use serde_json::Value;
-use sqlx::{Executor, Postgres};
+use sqlx::PgConnection;
 use veyndo_core::Result;
 
-/// One finalized order change that touched the payment.
+/// One finalized change of the order's payment.
 pub struct PaymentChange {
     pub id: i64,
     pub created_at: String,
@@ -12,9 +12,9 @@ pub struct PaymentChange {
     pub refunded: Option<Value>,
 }
 
-/// The latest 100 payment changes of an order, newest first.
-pub async fn payment_history<'e>(
-    db: impl Executor<'e, Database = Postgres>,
+/// The latest 100 finalized changes of the order's payment, newest first.
+pub async fn changes(
+    conn: &mut PgConnection,
     tenant: &str,
     order: &str,
 ) -> Result<Vec<PaymentChange>> {
@@ -24,6 +24,6 @@ pub async fn payment_history<'e>(
         tenant,
         order
     )
-    .fetch_all(db)
+    .fetch_all(conn)
     .await?)
 }

@@ -7,12 +7,11 @@ use crate::ports::{LockedQuote, Purchase};
 use crate::service::delivery::{dates_conn, enrich};
 use crate::store::admin_order::admit_products;
 use crate::store::legal_snapshot::snapshot as legal_snapshot;
-use crate::store::product_locks;
 use crate::store::product_snapshot::snapshot as product_snapshot;
 use crate::store::selected_customer::check as check_customer;
 use crate::store::tax_conditions::tax_settings_for_cart;
-use sqlx::Row;
 use veyndo_b2b::service::quote_contract::prices as contract_prices;
+use veyndo_catalog::store::purchase_products as product_locks;
 use veyndo_core::shop_scope::{channel, header};
 use veyndo_core::{Error, RequestContext, Result, StatusCode, bad, conflict};
 use veyndo_marketing::service::conditions::validate_condition;
@@ -29,7 +28,7 @@ async fn locked_products(
     tx: &mut sqlx::Transaction<'static, sqlx::Postgres>,
     h: &RequestContext,
     c: &StoredCart,
-) -> Result<Vec<sqlx::postgres::PgRow>> {
+) -> Result<Vec<Product>> {
     let ids: Vec<String> = c.data.items.iter().map(|i| i.id.clone()).collect();
     let parents = product_locks::parents(tx, &c.tenant, &ids).await?;
     let mut locks = ids;
@@ -39,10 +38,10 @@ async fn locked_products(
     let rows = product_locks::lock(tx, &c.tenant, &locks).await?;
     // Recheck the new catalog admission under product locks: edits cannot deactivate/hide a SKU
     // between the initial request check and the authoritative inventory/price snapshot.
-    if rows.iter().any(|r| !r.get::<bool, _>("active")) {
+    if rows.iter().any(|r| !r.active) {
         return Err(Error(StatusCode::NOT_FOUND, "Product unavailable".into()));
     }
-    let locked: Vec<String> = rows.iter().map(|r| r.get::<String, _>("id")).collect();
+    let locked: Vec<String> = rows.iter().map(|r| r.product.id.clone()).collect();
     let hidden = product_locks::hidden(tx, &c.tenant, &locked, channel(h)).await?;
     if hidden {
         return Err(Error(
@@ -50,7 +49,7 @@ async fn locked_products(
             "Product hidden in this sales channel".into(),
         ));
     }
-    Ok(rows)
+    Ok(rows.into_iter().map(|r| r.product).collect())
 }
 
 /// Every line still has the stock it asks for.

@@ -1,10 +1,11 @@
 //! Account-authorized funding choice, immutable consent and saved-instrument admission; cart possession is insufficient.
 use crate::domain::attempt::Attempt;
+use crate::ports::Buyers;
 use crate::store::attempts;
 use crate::store::funding;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
-use veyndo_core::document::{lenient, view};
+use veyndo_core::document::{lenient, merge, view};
 use veyndo_core::shop_scope::header;
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad, conflict, hash, uid};
 use veyndo_shop::types::cart::StoredCart;
@@ -23,7 +24,16 @@ struct FundedPayment {
     attempt_id: Value,
 }
 
+/// The saved instrument a funding choice reuses.
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct SavedFunding<'a> {
+    reference: &'a str,
+    instrument_id: &'a str,
+}
+
 pub async fn prepare(
+    buyers: &dyn Buyers,
     tx: &mut sqlx::Transaction<'_, sqlx::Postgres>,
     h: &RequestContext,
     c: &StoredCart,
@@ -49,7 +59,7 @@ pub async fn prepare(
         StatusCode::UNAUTHORIZED,
         "Customer login required to save or use a payment method".into(),
     ))?;
-    let customer = funding::session_customer(tx, &c.tenant, &hash(token)).await?;
+    let customer = buyers.session_customer(tx, &c.tenant, &hash(token)).await?;
     let customer = customer
         .filter(|id| Some(id) == c.data.customer_id.as_ref())
         .ok_or(Error(
@@ -86,8 +96,13 @@ pub async fn prepare(
                 "Saved payment method belongs to another payment account or method",
             ));
         }
-        funding["reference"] = json!(r.reference);
-        funding["instrumentId"] = json!(saved);
+        merge(
+            &mut funding,
+            SavedFunding {
+                reference: &r.reference,
+                instrument_id: saved,
+            },
+        )?;
     }
     funding::bind(tx, &c.tenant, id, &funding).await?;
     Ok(())
@@ -111,4 +126,30 @@ pub async fn dispatch_check(a: &State, p: &Attempt, op: &str) -> Result<()> {
         }
     }
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::SavedFunding;
+    use serde_json::json;
+    use veyndo_core::document::merge;
+
+    /// The typed saved-instrument patch writes exactly the funding the indexed assignments wrote.
+    #[test]
+    fn the_typed_saved_funding_matches_the_indexed_write() {
+        let base = json!({"customerId":"c1","save":false,"consentId":"x","consentVersion":"save-payment@1"});
+        let mut indexed = base.clone();
+        indexed["reference"] = json!("ref-1");
+        indexed["instrumentId"] = json!("i1");
+        let mut typed = base.clone();
+        merge(
+            &mut typed,
+            SavedFunding {
+                reference: "ref-1",
+                instrument_id: "i1",
+            },
+        )
+        .unwrap();
+        assert_eq!(typed, indexed);
+    }
 }

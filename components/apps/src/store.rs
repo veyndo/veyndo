@@ -35,6 +35,7 @@ pub mod package_fence;
 pub mod package_install;
 pub mod packages;
 pub mod planning;
+pub mod policy_lock;
 pub mod provisioning;
 pub mod queue_health;
 pub mod record_restore;

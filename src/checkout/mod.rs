@@ -8,7 +8,7 @@ use veyndo_core::request_context::RequestContext;
 
 pub(crate) mod buyer_identity;
 mod private_browser;
-mod purchase;
+pub(crate) mod purchase;
 mod session_order;
 mod session_quote;
 

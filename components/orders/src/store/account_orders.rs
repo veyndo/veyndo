@@ -1,6 +1,7 @@
 //! Orders and receipts as their owning customer account reads them; matching a guest's email never grants access.
 use serde_json::Value;
 use veyndo_core::{Error, Result, State, StatusCode};
+use veyndo_customers::store::purchase_customers::id_by_email;
 
 /// Raw orders of the account with their creation time, newest first: one by `id`, or a page of 101 after a cursor.
 pub async fn owned(
@@ -10,12 +11,15 @@ pub async fn owned(
     id: Option<&str>,
     after: Option<&str>,
 ) -> Result<Vec<(Value, String)>> {
-    // The account binding: `$2` is the authenticated account email; it resolves its tenant-owned stable ID.
+    // The account binding: the authenticated account email resolves its tenant-owned stable ID (`$2`).
     // Matching a legacy guest's contact email alone never establishes ownership.
+    let Some(customer) = id_by_email(&a.db, t, email).await? else {
+        return Ok(Vec::new());
+    };
     let rows = sqlx::query!(
-        r#"SELECT o.data, o.created_at::text AS "time!" FROM orders o JOIN carts c ON c.id=o.cart_id AND c.tenant=o.tenant WHERE o.tenant=$1 AND ($3::text IS NULL OR o.id=$3) AND (o.data->'orderCustomer'->>'customerId')=(SELECT id FROM customers WHERE tenant=o.tenant AND email=$2) AND ($4::text IS NULL OR (o.created_at,o.id)<(SELECT created_at,id FROM orders WHERE tenant=$1 AND id=$4)) ORDER BY o.created_at DESC,o.id DESC LIMIT 101"#,
+        r#"SELECT o.data, o.created_at::text AS "time!" FROM orders o JOIN carts c ON c.id=o.cart_id AND c.tenant=o.tenant WHERE o.tenant=$1 AND ($3::text IS NULL OR o.id=$3) AND (o.data->'orderCustomer'->>'customerId')=$2 AND ($4::text IS NULL OR (o.created_at,o.id)<(SELECT created_at,id FROM orders WHERE tenant=$1 AND id=$4)) ORDER BY o.created_at DESC,o.id DESC LIMIT 101"#,
         t,
-        email,
+        customer,
         id,
         after
     )

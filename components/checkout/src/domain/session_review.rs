@@ -1,8 +1,8 @@
 //! The purchase a buyer explicitly reviewed in a checkout session, and the checks that bind the order to exactly that review.
 use crate::domain::session_payment;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
-use veyndo_core::document::{Raw, lenient, view};
+use veyndo_core::document::{Raw, lenient, merge, view};
 use veyndo_core::{Error, Result, StatusCode, bad, conflict};
 use veyndo_shop::types::cart::StoredCart;
 
@@ -122,6 +122,13 @@ struct MethodFacts {
     id: Value,
 }
 
+/// The sandbox payment attempt a receipt names.
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct SandboxAttempt<'a> {
+    payment_attempt_id: &'a Value,
+}
+
 /// What the session service learns about its order; `strict` excludes the contract fixture as a test environment.
 pub fn receipt(
     order: &Value,
@@ -156,7 +163,12 @@ pub fn receipt(
         "totalMinor": order.cart.price.total_minor,
     });
     if sandbox_attempt {
-        result["paymentAttemptId"] = payment.attempt_id.clone();
+        merge(
+            &mut result,
+            SandboxAttempt {
+                payment_attempt_id: &payment.attempt_id,
+            },
+        )?;
     }
     Ok(result)
 }

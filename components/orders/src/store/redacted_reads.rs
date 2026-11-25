@@ -1,8 +1,10 @@
 //! Explicit non-PII domain read views for separately scoped app callbacks; never elevate an identity.
-use serde::Deserialize;
+use crate::domain::order_patches::CreatedAt;
+use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
-use veyndo_core::document::view;
+use veyndo_core::document::{merge, view};
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad};
+use veyndo_customers::store::purchase_customers::redacted;
 fn projection(value: &Value, keys: &[&str]) -> Value {
     json!(
         keys.iter()
@@ -26,13 +28,19 @@ pub async fn redacted_read(a: &State, h: &RequestContext, kind: &str, id: &str) 
             .ok_or(Error(StatusCode::NOT_FOUND, "Order not found".into()))?;
             let mut value: Value = row.data;
             crate::domain::order_fields::order_fields(&mut value);
-            value["createdAt"] = json!(row.created);
+            merge(
+                &mut value,
+                CreatedAt {
+                    created_at: &row.created,
+                },
+            )?;
             Ok(order_view(&value))
         }
         "customer" => {
             veyndo_identity::permit(h, "customers.read")?;
-            let row = sqlx::query!("SELECT id,active,group_name,created_at::text AS created FROM customers WHERE tenant=$1 AND email=$2", tenant, id).fetch_optional(&a.db).await?
-                .ok_or(Error(StatusCode::NOT_FOUND,"Customer not found".into()))?;
+            let row = redacted(&a.db, &tenant, id)
+                .await?
+                .ok_or(Error(StatusCode::NOT_FOUND, "Customer not found".into()))?;
             Ok(
                 json!({"id":row.id,"active":row.active,"guest":false,"groupId":row.group_name,"createdAt":row.created}),
             )
@@ -45,6 +53,12 @@ pub async fn redacted_read(a: &State, h: &RequestContext, kind: &str, id: &str) 
 #[serde(default, rename_all = "camelCase")]
 struct OrderViewInput {
     line_items: Value,
+}
+
+/// The redacted line items of an order.
+#[derive(Serialize)]
+struct Items {
+    items: Vec<Value>,
 }
 
 fn order_view(value: &Value) -> Value {
@@ -65,26 +79,30 @@ fn order_view(value: &Value) -> Value {
             "createdAt",
         ],
     );
-    clean["items"] = json!(
-        input
-            .line_items
-            .as_array()
-            .map(|items| items
+    let items = input
+        .line_items
+        .as_array()
+        .map(|items| {
+            items
                 .iter()
                 .take(100)
-                .map(|item| projection(
-                    item,
-                    &[
-                        "referencedId",
-                        "quantity",
-                        "price",
-                        "unitPrice",
-                        "totalPrice"
-                    ]
-                ))
-                .collect::<Vec<_>>())
-            .unwrap_or_default()
-    );
+                .map(|item| {
+                    projection(
+                        item,
+                        &[
+                            "referencedId",
+                            "quantity",
+                            "price",
+                            "unitPrice",
+                            "totalPrice",
+                        ],
+                    )
+                })
+                .collect::<Vec<_>>()
+        })
+        .unwrap_or_default();
+    // The projection is an object, so the merge cannot fail.
+    let _ = merge(&mut clean, Items { items });
     clean
 }
 #[cfg(test)]

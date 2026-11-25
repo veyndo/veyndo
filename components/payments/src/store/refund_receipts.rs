@@ -4,10 +4,20 @@ use crate::domain::receipt_ref::{RefundReceipt, is, reference};
 use crate::domain::refunds::{self, checked_total};
 use crate::domain::settlements;
 use crate::store::receipt_claims::claim;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 use veyndo_core::document::view;
+use veyndo_core::document_slot::field;
 use veyndo_core::{Result, bad, conflict};
+
+/// One provider refund receipt of an attempt, keyed by its provider id.
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct ProviderRefund<'a> {
+    amount_minor: i64,
+    job_key: &'a str,
+    capture_id: &'a str,
+}
 
 pub async fn apply(
     tx: &mut sqlx::Transaction<'_, sqlx::Postgres>,
@@ -75,7 +85,7 @@ pub async fn apply(
     checked_total(capture_amount, refunds::used(p, context, &capture), amount)?;
     claim(tx, p, "refund", id, key).await?;
     if !context_of(context).provider_refunds.is_object() {
-        context["providerRefunds"] = json!({});
+        *field(context, "providerRefunds")? = Value::Object(serde_json::Map::new());
     }
     if context_of(context)
         .provider_refunds
@@ -84,7 +94,11 @@ pub async fn apply(
     {
         return Err(bad("Too many refund receipts for one payment"));
     }
-    context["providerRefunds"][id] = json!({"amountMinor":amount,"jobKey":key,"captureId":capture});
+    *field(field(context, "providerRefunds")?, id)? = json!(ProviderRefund {
+        amount_minor: amount,
+        job_key: key,
+        capture_id: &capture,
+    });
     if let Some(key) = native {
         finish_native(tx, p, key, id, amount, &capture).await?;
     }
@@ -140,4 +154,40 @@ pub async fn reconcile(
         total = checked_total(captured, total, apply(tx, p, context, refund, None).await?)?;
     }
     Ok(total)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::ProviderRefund;
+    use serde_json::{Value, json};
+    use veyndo_core::document_slot::field;
+
+    /// The typed refund receipt writes exactly the provider context the indexed assignments wrote.
+    #[test]
+    fn the_typed_refund_receipt_matches_the_indexed_write() {
+        for base in [
+            json!({"method":"card"}),
+            json!({"providerRefunds":null}),
+            json!({"providerRefunds":{"r0":{}}}),
+        ] {
+            let mut indexed = base.clone();
+            if !indexed["providerRefunds"].is_object() {
+                indexed["providerRefunds"] = json!({});
+            }
+            indexed["providerRefunds"]["r1"] =
+                json!({"amountMinor":250,"jobKey":"job","captureId":"c1"});
+            let mut typed = base.clone();
+            if !typed.get("providerRefunds").is_some_and(Value::is_object) {
+                *field(&mut typed, "providerRefunds").unwrap() =
+                    Value::Object(serde_json::Map::new());
+            }
+            *field(field(&mut typed, "providerRefunds").unwrap(), "r1").unwrap() =
+                json!(ProviderRefund {
+                    amount_minor: 250,
+                    job_key: "job",
+                    capture_id: "c1"
+                });
+            assert_eq!(typed, indexed);
+        }
+    }
 }

@@ -3,21 +3,6 @@ use serde_json::Value;
 use sqlx::{Executor, PgConnection, Postgres};
 use veyndo_core::Result;
 
-/// The active customer of a live session (by token digest), inside the purchase transaction.
-pub async fn session_customer(
-    tx: &mut PgConnection,
-    tenant: &str,
-    digest: &str,
-) -> Result<Option<String>> {
-    Ok(sqlx::query_scalar!(
-        "SELECT c.id FROM customer_sessions s JOIN customers c ON c.tenant=s.tenant AND c.email=s.email WHERE s.tenant=$1 AND s.digest=$2 AND s.expires_at>now() AND c.active",
-        tenant,
-        digest
-    )
-    .fetch_optional(tx)
-    .await?)
-}
-
 /// The provider binding of a saved instrument.
 pub struct SavedInstrument {
     pub reference: String,

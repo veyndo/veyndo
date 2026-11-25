@@ -1,8 +1,9 @@
 //! Shipping costs, proportional taxes and calendar delivery windows.
 use crate::domain::quote_view::{DeliveryView, digital, flags};
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
-use veyndo_core::document::{lenient, view};
+use veyndo_core::document::{lenient, merge, view};
+use veyndo_core::document_slot::field;
 use veyndo_core::{Error, Result, StatusCode, bad};
 use veyndo_pricing::catalog::Product;
 use veyndo_pricing::pricing::{
@@ -10,6 +11,7 @@ use veyndo_pricing::pricing::{
 };
 use veyndo_pricing::quote::QuoteTax;
 use veyndo_pricing::service::conversion as currencies;
+use veyndo_pricing::types::currency::Definition;
 use veyndo_shop::domain::method_text;
 use veyndo_shop::types::cart::StoredCart;
 use veyndo_shop::types::settings::{CheckoutSelection, Settings, Shipping};
@@ -108,47 +110,146 @@ fn method_options(
     view: &dyn Fn(&Shipping) -> Result<Value>,
 ) -> Result<()> {
     // Candidates support country edits on one page. They are not an admission decision.
-    q["shippingMethodOptions"] = json!(
-        s.shipping
-            .iter()
-            .filter(|v| v.active)
-            .map(view)
-            .collect::<Result<Vec<_>>>()?
-    );
-    q["paymentMethodOptions"] = json!(
-        s.payments
-            .iter()
-            .filter(|v| v.active && (!v.business_only || s.is_business(&c.data.group)))
-            .map(|v| {
-                let mut method = method_text::localized_payment(v, &c.data.locale, s);
-                method["countries"] = json!(
-                    s.countries
+    let shipping_method_options = s
+        .shipping
+        .iter()
+        .filter(|v| v.active)
+        .map(view)
+        .collect::<Result<Vec<_>>>()?;
+    let payment_method_options = s
+        .payments
+        .iter()
+        .filter(|v| v.active && (!v.business_only || s.is_business(&c.data.group)))
+        .map(|v| {
+            let mut method = method_text::localized_payment(v, &c.data.locale, s);
+            merge(
+                &mut method,
+                PaymentCountries {
+                    countries: s
+                        .countries
                         .iter()
                         .filter(|country| v.available_in(country))
-                        .collect::<Vec<_>>()
-                );
-                method["restrictedCountries"] = json!(true);
-                method
-            })
-            .collect::<Vec<_>>()
-    );
-    q["availableShippingMethods"] = json!(
-        s.shipping
-            .iter()
-            .filter(|v| v.active && v.countries.contains(&selected.country))
-            .map(view)
-            .collect::<Result<Vec<_>>>()?
-    );
-    q["availablePaymentMethods"] = json!(
-        s.payments
-            .iter()
-            .filter(|v| v.active
+                        .collect(),
+                    restricted_countries: true,
+                },
+            )?;
+            Ok(method)
+        })
+        .collect::<Result<Vec<_>>>()?;
+    let available_shipping_methods = s
+        .shipping
+        .iter()
+        .filter(|v| v.active && v.countries.contains(&selected.country))
+        .map(view)
+        .collect::<Result<Vec<_>>>()?;
+    let available_payment_methods = s
+        .payments
+        .iter()
+        .filter(|v| {
+            v.active
                 && (!v.business_only || s.is_business(&c.data.group))
-                && v.available_in(&selected.country))
-            .map(|v| method_text::localized_payment(v, &c.data.locale, s))
-            .collect::<Vec<_>>()
-    );
-    Ok(())
+                && v.available_in(&selected.country)
+        })
+        .map(|v| method_text::localized_payment(v, &c.data.locale, s))
+        .collect();
+    merge(
+        q,
+        MethodOptions {
+            shipping_method_options,
+            payment_method_options,
+            available_shipping_methods,
+            available_payment_methods,
+        },
+    )
+}
+
+/// The countries a payment method candidate may be chosen in.
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct PaymentCountries<'a> {
+    countries: Vec<&'a String>,
+    restricted_countries: bool,
+}
+
+/// Every active method as a candidate, and the methods available in the selected country.
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct MethodOptions {
+    shipping_method_options: Vec<Value>,
+    payment_method_options: Vec<Value>,
+    available_shipping_methods: Vec<Value>,
+    available_payment_methods: Vec<Value>,
+}
+
+/// A shipping method's price and free-shipping threshold in the cart currency.
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct ShippingPrice {
+    price: f64,
+    free_above: Option<f64>,
+}
+
+/// A shipping method localized for the buyer, with its price and free-shipping threshold in the currency.
+pub fn priced_shipping(
+    v: &Shipping,
+    locale: &str,
+    s: &Settings,
+    currency: &Definition,
+) -> Result<Value> {
+    let mut result = method_text::localized_shipping(v, locale, s);
+    merge(
+        &mut result,
+        ShippingPrice {
+            price: currencies::convert(v.price, &s.currencies, currency)?,
+            free_above: v
+                .free_above
+                .map(|v| currencies::convert(v, &s.currencies, currency))
+                .transpose()?,
+        },
+    )?;
+    Ok(result)
+}
+
+/// The quote totals with the delivery cost.
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct DeliveredTotals {
+    total_price: f64,
+    net_price: f64,
+    tax: f64,
+}
+
+/// The delivery terms a quote was priced under.
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct DeliveryTerms<'a> {
+    shipping_costs: &'a Value,
+    checkout: &'a CheckoutSelection,
+    configuration_revision: i64,
+    available_countries: &'a [String],
+}
+
+/// The deliveries of a quote and its localized payment method.
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct DeliveriesAndPayment {
+    deliveries: Value,
+    payment_method: Value,
+}
+
+/// The calendar window of a delivery.
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct DatedDelivery {
+    delivery_date: DateWindow,
+}
+
+/// The earliest and latest delivery day counted in calendar days.
+#[derive(Serialize)]
+struct DateWindow {
+    earliest: String,
+    latest: String,
+    basis: &'static str,
 }
 pub fn enrich(
     mut q: Value,
@@ -159,16 +260,8 @@ pub fn enrich(
 ) -> Result<Value> {
     let currency = s.currencies.selected(&c.data.currency)?;
     let decimals = currency.scale as i32;
-    let shipping_view = |v: &Shipping| -> Result<Value> {
-        let mut result = method_text::localized_shipping(v, &c.data.locale, s);
-        result["price"] = json!(currencies::convert(v.price, &s.currencies, currency)?);
-        result["freeAbove"] = json!(
-            v.free_above
-                .map(|v| currencies::convert(v, &s.currencies, currency))
-                .transpose()?
-        );
-        Ok(result)
-    };
+    let shipping_view =
+        |v: &Shipping| -> Result<Value> { priced_shipping(v, &c.data.locale, s, currency) };
     let selected = selection(&c.data);
     let shipping = s
         .shipping
@@ -233,13 +326,23 @@ pub fn enrich(
     let shipping_net = math_round(gross - gross_calc.tax, decimals);
     // Native method prices are gross amounts; explicit net component for B2B display.
     let cost = json!({"unitPrice":if s.is_business(&c.data.group){shipping_net}else{gross},"totalPrice":gross,"netPrice":shipping_net,"tax":gross_calc.tax,"calculatedTaxes":gross_calc.calculated_taxes});
-    q["price"]["totalPrice"] = json!(math_round(gross_items + gross, decimals));
-    q["price"]["netPrice"] = json!(math_round(priced.price.net_price + shipping_net, decimals));
-    q["price"]["tax"] = json!(math_round(priced.price.tax + gross_calc.tax, decimals));
-    q["shippingCosts"] = cost.clone();
-    q["checkout"] = json!(selected);
-    q["configurationRevision"] = json!(revision);
-    q["availableCountries"] = json!(s.countries);
+    merge(
+        field(&mut q, "price")?,
+        DeliveredTotals {
+            total_price: math_round(gross_items + gross, decimals),
+            net_price: math_round(priced.price.net_price + shipping_net, decimals),
+            tax: math_round(priced.price.tax + gross_calc.tax, decimals),
+        },
+    )?;
+    merge(
+        &mut q,
+        DeliveryTerms {
+            shipping_costs: &cost,
+            checkout: &selected,
+            configuration_revision: revision,
+            available_countries: &s.countries,
+        },
+    )?;
     method_options(&mut q, c, s, &selected, &shipping_view)?;
     let lead = c
         .data
@@ -254,7 +357,7 @@ pub fn enrich(
     } else {
         (lead.max(shipping.min_days), lead.max(shipping.max_days))
     };
-    q["deliveries"] = if c.data.items.is_empty()
+    let deliveries = if c.data.items.is_empty()
         || c.data
             .items
             .iter()
@@ -264,17 +367,35 @@ pub fn enrich(
     } else {
         json!([{"shippingMethod":shipping_view(shipping)?,"shippingCosts":cost,"shippingLocation":{"country":selected.country,"address":selected.address},"positions":c.data.items.iter().filter(|i|!ps.iter().any(|p|p.id==i.id&&digital(&p.extra))).collect::<Vec<_>>(),"state":"open","deliveryTime":{"minDays":min,"maxDays":max}}])
     };
-    q["paymentMethod"] = method_text::localized_payment(payment, &c.data.locale, s);
+    merge(
+        &mut q,
+        DeliveriesAndPayment {
+            deliveries,
+            payment_method: method_text::localized_payment(payment, &c.data.locale, s),
+        },
+    )?;
     Ok(q)
 }
 pub async fn dates_conn(conn: &mut sqlx::PgConnection, q: &mut Value) -> Result<()> {
-    if let Some(d) = q["deliveries"].as_array_mut().and_then(|d| d.first_mut()) {
+    if let Some(d) = field(q, "deliveries")?
+        .as_array_mut()
+        .and_then(|d| d.first_mut())
+    {
         let time = view::<DeliveryView>(d).delivery_time;
         let min = time.min_days.as_i64().unwrap() as i32;
         let max = time.max_days.as_i64().unwrap() as i32;
         let (earliest, latest) =
             veyndo_shipping::store::delivery_dates::window(conn, min, max).await?;
-        d["deliveryDate"] = json!({"earliest":earliest,"latest":latest,"basis":"calendar-days"});
+        merge(
+            d,
+            DatedDelivery {
+                delivery_date: DateWindow {
+                    earliest,
+                    latest,
+                    basis: "calendar-days",
+                },
+            },
+        )?;
     }
     Ok(())
 }
@@ -347,5 +468,99 @@ mod tests {
         ] {
             assert!(PricedQuote::read(&broken).is_err());
         }
+    }
+
+    /// The typed quote patches write exactly what the indexed assignments wrote.
+    #[test]
+    fn typed_quote_patches_match_the_indexed_writes() {
+        use super::{
+            DateWindow, DatedDelivery, DeliveredTotals, DeliveriesAndPayment, MethodOptions,
+            PaymentCountries, ShippingPrice,
+        };
+        use veyndo_core::document::merge;
+        use veyndo_core::document_slot::field;
+        let base = json!({"id":"cart","price":{"totalPrice":10.0,"positionPrice":10.0},"deliveries":[{"deliveryTime":{"minDays":1,"maxDays":2}}]});
+        let mut indexed = base.clone();
+        indexed["price"]["totalPrice"] = json!(14.9);
+        indexed["price"]["netPrice"] = json!(12.52);
+        indexed["price"]["tax"] = json!(2.38);
+        indexed["shippingMethodOptions"] = json!([{"id":"s"}]);
+        indexed["paymentMethodOptions"] =
+            json!([{"id":"p","countries":["DE"],"restrictedCountries":true}]);
+        indexed["availableShippingMethods"] = json!([]);
+        indexed["availablePaymentMethods"] = json!([{"id":"p"}]);
+        indexed["deliveries"] = json!([{"state":"open"}]);
+        indexed["paymentMethod"] = json!({"id":"p"});
+        indexed["deliveries"][0]["deliveryDate"] =
+            json!({"earliest":"2026-01-01","latest":"2026-01-03","basis":"calendar-days"});
+        let mut typed = base.clone();
+        merge(
+            field(&mut typed, "price").unwrap(),
+            DeliveredTotals {
+                total_price: 14.9,
+                net_price: 12.52,
+                tax: 2.38,
+            },
+        )
+        .unwrap();
+        let de = "DE".to_string();
+        let mut method = json!({"id":"p"});
+        merge(
+            &mut method,
+            PaymentCountries {
+                countries: vec![&de],
+                restricted_countries: true,
+            },
+        )
+        .unwrap();
+        merge(
+            &mut typed,
+            MethodOptions {
+                shipping_method_options: vec![json!({"id":"s"})],
+                payment_method_options: vec![method],
+                available_shipping_methods: vec![],
+                available_payment_methods: vec![json!({"id":"p"})],
+            },
+        )
+        .unwrap();
+        merge(
+            &mut typed,
+            DeliveriesAndPayment {
+                deliveries: json!([{"state":"open"}]),
+                payment_method: json!({"id":"p"}),
+            },
+        )
+        .unwrap();
+        let first = field(&mut typed, "deliveries")
+            .unwrap()
+            .as_array_mut()
+            .unwrap()
+            .first_mut()
+            .unwrap();
+        merge(
+            first,
+            DatedDelivery {
+                delivery_date: DateWindow {
+                    earliest: "2026-01-01".into(),
+                    latest: "2026-01-03".into(),
+                    basis: "calendar-days",
+                },
+            },
+        )
+        .unwrap();
+        assert_eq!(typed, indexed);
+        let mut shipping = json!({"id":"s","name":"Post"});
+        let mut indexed = shipping.clone();
+        indexed["price"] = json!(4.9);
+        indexed["freeAbove"] = json!(Option::<f64>::None);
+        merge(
+            &mut shipping,
+            ShippingPrice {
+                price: 4.9,
+                free_above: None,
+            },
+        )
+        .unwrap();
+        assert_eq!(shipping, indexed);
     }
 }

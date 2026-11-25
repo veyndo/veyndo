@@ -55,7 +55,7 @@ pub async fn invoke(
     match name {
         "merchant.payment.instructions" => instructions::merchant_read(ports.1, a, h, id()?).await,
         "merchant.payment.details" => details(ports.1, a, h, id()?).await,
-        "merchant.payment.providers" => providers::providers(a, h).await,
+        "merchant.payment.providers" => providers::providers(ports.1, a, h).await,
         "merchant.payment.onboarding" => providers::onboarding(ports, a, h, id()?, v).await,
         "merchant.payment" => {
             let op = input

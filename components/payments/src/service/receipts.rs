@@ -10,9 +10,9 @@ use crate::store::order_ledger::{release_stock, update_order};
 use crate::store::receipt_claims::claim;
 use crate::store::settlements as store_settlements;
 use crate::store::{instructions as store_instructions, instruments, refund_receipts};
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
-use veyndo_core::document::{lenient, view};
+use veyndo_core::document::{lenient, merge, view};
 use veyndo_core::{Error, Result, StatusCode, bad, conflict};
 
 /// The JSON fields `persist` reads, typed as it reads them.
@@ -25,6 +25,13 @@ struct PersistInput {
     ledger_job_key: Option<String>,
     #[serde(deserialize_with = "lenient")]
     expiry: Option<bool>,
+}
+
+/// The authorization a provider confirmed for the attempt.
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct Authorized<'a> {
+    authorization_id: &'a str,
 }
 
 pub async fn persist(
@@ -96,7 +103,12 @@ pub async fn persist(
         }
         let id = reference(&r.authorization_id)?;
         claim(tx, p, "authorization", id, "").await?;
-        context["authorizationId"] = json!(id);
+        merge(
+            &mut context,
+            Authorized {
+                authorization_id: id,
+            },
+        )?;
         if ["pending", "ready", "approved"].contains(&p.state.as_str()) {
             state = "authorized".into();
         }
@@ -204,6 +216,23 @@ async fn follow(
 
 #[cfg(test)]
 mod tests {
+    /// The typed authorization patch writes exactly the provider context the indexed assignment wrote.
+    #[test]
+    fn the_typed_authorization_matches_the_indexed_write() {
+        use super::Authorized;
+        use veyndo_core::document::merge;
+        let mut indexed = serde_json::json!({"method":"card"});
+        indexed["authorizationId"] = serde_json::json!("auth-1");
+        let mut typed = serde_json::json!({"method":"card"});
+        merge(
+            &mut typed,
+            Authorized {
+                authorization_id: "auth-1",
+            },
+        )
+        .unwrap();
+        assert_eq!(typed, indexed);
+    }
 
     use crate::domain::attempt::Attempt;
     use crate::domain::receipt_ref::{identity, reference};

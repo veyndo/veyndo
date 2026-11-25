@@ -1,11 +1,13 @@
 //! Revision-free order transition rules: manual payment marks, delivery dispatch and the cancellation preconditions.
 use crate::domain::order_machine::OrderMachine;
+use crate::domain::order_patches::{Stated, TrackingCode, TrackingUrl};
 use crate::domain::order_workflow::external;
 use crate::types::order_document::DeliveryControl;
 use serde::Deserialize;
-use serde_json::{Value, json};
+use serde_json::Value;
 use veyndo_catalog::domain::rich_document::safe_url;
-use veyndo_core::document::{lenient, view};
+use veyndo_core::document::{lenient, merge, view};
+use veyndo_core::document_slot::field;
 use veyndo_core::{Result, bad, conflict};
 use veyndo_kernel::verified_kernel;
 
@@ -49,8 +51,7 @@ pub fn payment(o: &mut Value, machine: &OrderMachine, target: &str) -> Result<()
     ) {
         return Err(conflict("Invalid payment transition"));
     }
-    o["payment"]["state"] = json!(target);
-    Ok(())
+    merge(field(o, "payment")?, Stated { state: target })
 }
 /// A requested delivery transition: the shipment and its tracking details.
 #[derive(Deserialize, Default)]
@@ -68,7 +69,7 @@ struct DeliveryTransition {
 pub fn delivery(o: &mut Value, v: &Value, target: &str) -> Result<()> {
     let input: DeliveryTransition = view(v);
     let index = input.delivery_index.unwrap_or(0) as usize;
-    let d = o["deliveries"]
+    let d = field(o, "deliveries")?
         .as_array_mut()
         .and_then(|v| v.get_mut(index))
         .ok_or(bad("Order has no delivery"))?;
@@ -89,20 +90,20 @@ pub fn delivery(o: &mut Value, v: &Value, target: &str) -> Result<()> {
         if track.len() > 100 {
             return Err(bad("Tracking code too long"));
         }
-        d["trackingCode"] = json!(track);
+        merge(
+            &mut *d,
+            TrackingCode {
+                tracking_code: track,
+            },
+        )?;
     }
     if let Some(url) = input.tracking_url.as_deref() {
         if !url.is_empty() && (!url.starts_with("https://") || !safe_url(url)) {
             return Err(bad("Tracking link must be a safe HTTPS URL"));
         }
-        d["trackingUrl"] = if url.is_empty() {
-            Value::Null
-        } else {
-            json!(url)
-        };
+        merge(&mut *d, TrackingUrl::of(url))?;
     }
-    d["state"] = json!(target);
-    Ok(())
+    merge(d, Stated { state: target })
 }
 
 /// Why an order cannot be cancelled natively yet: captured money or shipped deliveries.

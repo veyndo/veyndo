@@ -5,9 +5,9 @@ use crate::ports::{Gateway, Host};
 use crate::store::attempts;
 use crate::store::jobs::{self, enqueue_tx};
 use crate::store::order_ledger::release_stock;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
-use veyndo_core::document::{lenient, view};
+use veyndo_core::document::{lenient, merge, view};
 use veyndo_core::{Result, State, StatusCode, bad, conflict};
 
 /// The provider answer fields the worker reads.
@@ -40,6 +40,13 @@ struct JobInput {
     reference: Value,
 }
 
+/// The ledger job a provider operation runs for.
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct LedgerJob<'a> {
+    ledger_job_key: &'a str,
+}
+
 pub async fn payment_once(host: &dyn Host, gateway: &dyn Gateway, a: &State) -> Result<bool> {
     let (tenants, providers) = gateway.scope();
     if tenants.is_empty() && providers.is_empty() {
@@ -60,7 +67,12 @@ pub async fn payment_once(host: &dyn Host, gateway: &dyn Gateway, a: &State) -> 
     let id = job.id;
     let op = job.operation;
     let mut input = job.request;
-    input["ledgerJobKey"] = json!(id);
+    merge(
+        &mut input,
+        LedgerJob {
+            ledger_job_key: &id,
+        },
+    )?;
     let generation = job.attempts + 1;
     jobs::lease(&mut tx, &id, generation).await?;
     let p = attempts::get_claimed(&mut *tx, &job.attempt_id).await?;
@@ -203,4 +215,29 @@ async fn expire_one(a: &State, tenants: &[String], providers: &[String]) -> Resu
     }
     tx.commit().await?;
     Ok(worked)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::LedgerJob;
+    use serde_json::json;
+    use veyndo_core::document::merge;
+
+    /// The typed job key writes exactly the operation input the indexed assignment wrote.
+    #[test]
+    fn the_typed_job_key_matches_the_indexed_write() {
+        for base in [json!({"amountMinor":5}), json!(null)] {
+            let mut indexed = base.clone();
+            indexed["ledgerJobKey"] = json!("job-1");
+            let mut typed = base.clone();
+            merge(
+                &mut typed,
+                LedgerJob {
+                    ledger_job_key: "job-1",
+                },
+            )
+            .unwrap();
+            assert_eq!(typed, indexed);
+        }
+    }
 }

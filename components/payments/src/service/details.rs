@@ -5,7 +5,6 @@ use crate::domain::{diagnostics, settlements};
 use crate::ports::Gateway;
 use crate::service::remote::execute;
 use crate::store::attempts;
-use crate::store::history::payment_history;
 use crate::store::jobs;
 use serde::Deserialize;
 use serde_json::{Value, json};
@@ -46,7 +45,7 @@ pub async fn read(gateway: &dyn Gateway, a: &State, tenant: &str, id: &str) -> R
     let mut tx = a.db.begin_read_snapshot().await?;
     let p = attempts::get(&mut *tx, tenant, id).await?;
     // Financial projection only. Full order snapshots contain customer PII and keep their original history permissions.
-    let history = payment_history(&mut *tx, tenant, &p.order).await?;
+    let history = gateway.payment_history(&mut tx, tenant, &p.order).await?;
     let jobs = jobs::of_attempt(&mut *tx, tenant, id).await?;
     tx.commit().await?;
     Ok(

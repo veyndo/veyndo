@@ -2,7 +2,7 @@
 
 mod accounts;
 mod app_commands;
-mod host;
+pub(crate) mod host;
 pub(crate) mod instruments;
 pub(crate) use accounts::*;
 pub(crate) use app_commands::{app_command, command_action};

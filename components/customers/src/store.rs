@@ -8,6 +8,7 @@ pub mod customers;
 pub mod imports;
 pub mod manual_orders;
 pub mod provisioning;
+pub mod purchase_customers;
 pub mod references;
 pub mod sessions;
 pub mod sign_in;

@@ -1,6 +1,7 @@
 //! The downloadable files of paid orders: a customer's list, and one file for its customer or its guest cart. Columns checked at compile time.
 use serde_json::Value;
 use veyndo_core::{Result, State};
+use veyndo_customers::store::purchase_customers::id_by_email;
 
 /// A file of one of the customer's orders.
 pub struct OwnedDownload {
@@ -14,11 +15,14 @@ pub struct OwnedDownload {
 
 /// The files of the customer's orders, newest order first (at most 200).
 pub async fn owned(a: &State, tenant: &str, email: &str) -> Result<Vec<OwnedDownload>> {
+    let Some(customer) = id_by_email(&a.db, tenant, email).await? else {
+        return Ok(Vec::new());
+    };
     Ok(sqlx::query_as!(
         OwnedDownload,
-        r#"SELECT a.id,a.title,a.filename,o.id AS order_id,o.data FROM order_downloads d JOIN product_assets a ON a.tenant=d.tenant AND a.id=d.asset_id JOIN orders o ON o.tenant=d.tenant AND o.id=d.order_id WHERE d.tenant=$1 AND (o.data->'orderCustomer'->>'customerId')=(SELECT id FROM customers WHERE tenant=o.tenant AND email=$2) ORDER BY o.created_at DESC LIMIT 200"#,
+        r#"SELECT a.id,a.title,a.filename,o.id AS order_id,o.data FROM order_downloads d JOIN product_assets a ON a.tenant=d.tenant AND a.id=d.asset_id JOIN orders o ON o.tenant=d.tenant AND o.id=d.order_id WHERE d.tenant=$1 AND (o.data->'orderCustomer'->>'customerId')=$2 ORDER BY o.created_at DESC LIMIT 200"#,
         tenant,
-        email
+        customer
     )
     .fetch_all(&a.db)
     .await?)
@@ -41,11 +45,16 @@ pub async fn file(
     asset: &str,
     cart_token: &str,
 ) -> Result<Option<DownloadFile>> {
+    // The signed-in email resolves its tenant-owned stable account ID (`$2`); a guest has none.
+    let customer = match email {
+        Some(email) => id_by_email(&a.db, tenant, email).await?,
+        None => None,
+    };
     Ok(sqlx::query_as!(
         DownloadFile,
-        r#"SELECT a.mime,a.filename,a.content,o.data FROM order_downloads d JOIN product_assets a ON a.tenant=d.tenant AND a.id=d.asset_id JOIN orders o ON o.tenant=d.tenant AND o.id=d.order_id JOIN carts c ON c.id=o.cart_id AND c.tenant=o.tenant WHERE d.tenant=$1 AND d.order_id=$3 AND d.asset_id=$4 AND (($2::text IS NOT NULL AND (o.data->'orderCustomer'->>'customerId')=(SELECT id FROM customers WHERE tenant=o.tenant AND email=$2)) OR (length($5)>0 AND c.token=$5 AND c.data->>'admin_actor' IS NULL AND c.data->>'pos_actor' IS NULL))"#,
+        r#"SELECT a.mime,a.filename,a.content,o.data FROM order_downloads d JOIN product_assets a ON a.tenant=d.tenant AND a.id=d.asset_id JOIN orders o ON o.tenant=d.tenant AND o.id=d.order_id JOIN carts c ON c.id=o.cart_id AND c.tenant=o.tenant WHERE d.tenant=$1 AND d.order_id=$3 AND d.asset_id=$4 AND (($2::text IS NOT NULL AND (o.data->'orderCustomer'->>'customerId')=$2) OR (length($5)>0 AND c.token=$5 AND c.data->>'admin_actor' IS NULL AND c.data->>'pos_actor' IS NULL))"#,
         tenant,
-        email,
+        customer,
         order,
         asset,
         cart_token

@@ -3,9 +3,9 @@ use crate::domain::attempt::{Attempt, context_of};
 use crate::domain::receipt_ref::{ProviderReceipt, is, reference};
 use crate::domain::settlements::{captured, closed, multi};
 use crate::store::receipt_claims::claim;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
-use veyndo_core::document::view;
+use veyndo_core::document::{merge, view};
 use veyndo_core::{Result, bad, conflict};
 
 /// One provider capture receipt or stored capture: its id, amount and currency.
@@ -15,6 +15,22 @@ struct CaptureRecord {
     id: Value,
     amount_minor: Value,
     currency: Value,
+}
+
+/// The authorization a partial capture settles against.
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct Authorized<'a> {
+    authorization_id: &'a str,
+}
+
+/// The capture receipts of an attempt with their total and whether the capture is closed.
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct Settled<'a> {
+    capture_receipts: &'a serde_json::Map<String, Value>,
+    captured_amount_minor: i64,
+    capture_closed: bool,
 }
 
 pub async fn admit(
@@ -140,7 +156,12 @@ pub async fn admit(
             return Err(bad("Partial capture authorization changed"));
         }
         claim(tx, p, "authorization", &authorization, "").await?;
-        context["authorizationId"] = json!(authorization);
+        merge(
+            context,
+            Authorized {
+                authorization_id: &authorization,
+            },
+        )?;
     }
     if snapshot < p.amount && !is(&r.status, "partially_captured") {
         return Err(bad("Partial settlement cannot report a full capture"));
@@ -153,8 +174,53 @@ pub async fn admit(
             .unwrap()
             .to_owned()
     });
-    context["captureReceipts"] = json!(receipts);
-    context["capturedAmountMinor"] = json!(total);
-    context["captureClosed"] = json!(closed);
+    merge(
+        context,
+        Settled {
+            capture_receipts: &receipts,
+            captured_amount_minor: total,
+            capture_closed: closed,
+        },
+    )?;
     Ok((total, first, closed))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{Authorized, Settled};
+    use serde_json::json;
+    use veyndo_core::document::merge;
+
+    /// The typed settlement patches write exactly the provider context the indexed assignments wrote.
+    #[test]
+    fn typed_settlement_patches_match_the_indexed_writes() {
+        let receipts = json!({"c1":{"amountMinor":600,"currency":"EUR"}})
+            .as_object()
+            .cloned()
+            .unwrap();
+        let base = json!({"method":"card","captureReceipts":{}});
+        let mut indexed = base.clone();
+        indexed["authorizationId"] = json!("auth-1");
+        indexed["captureReceipts"] = json!(receipts);
+        indexed["capturedAmountMinor"] = json!(600_i64);
+        indexed["captureClosed"] = json!(false);
+        let mut typed = base.clone();
+        merge(
+            &mut typed,
+            Authorized {
+                authorization_id: "auth-1",
+            },
+        )
+        .unwrap();
+        merge(
+            &mut typed,
+            Settled {
+                capture_receipts: &receipts,
+                captured_amount_minor: 600,
+                capture_closed: false,
+            },
+        )
+        .unwrap();
+        assert_eq!(typed, indexed);
+    }
 }

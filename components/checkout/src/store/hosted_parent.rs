@@ -1,6 +1,7 @@
 //! The storefront origin that may frame the hosted checkout: exactly the mounted shop and sales channel, over plain HTTPS.
 use veyndo_core::host_names::configured_alias;
 use veyndo_core::{Error, Result, StatusCode, bad, validate_tenant};
+use veyndo_shop::store::hosted_bindings::bound;
 
 /// Admits the parent origin when it is a hosted frontend of this shop and channel.
 pub async fn registered_parent(
@@ -27,9 +28,7 @@ pub async fn registered_parent(
     {
         return Err(bad("Invalid checkout parent"));
     }
-    let allowed: bool = sqlx::query_scalar!(r#"SELECT EXISTS(SELECT 1 FROM hosted_frontends WHERE tenant=$1 AND channel=$2 AND alias=$3) AS "exists!""#, t, channel, alias)
-    .fetch_one(conn)
-    .await?;
+    let allowed = bound(conn, t, channel, alias).await?;
     if !allowed {
         return Err(Error(
             StatusCode::FORBIDDEN,

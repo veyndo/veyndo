@@ -9,11 +9,6 @@
   },
   "functions": [
     {
-      "file": "components/checkout/src/service/delivery.rs",
-      "function": "dates_conn",
-      "category": "in-place-edit"
-    },
-    {
       "file": "components/marketing/src/domain/rule_comparison.rs",
       "function": "bounded",
       "category": "keyed-lookup"
@@ -27,16 +22,6 @@
       "file": "components/marketing/src/domain/rule_match.rs",
       "function": "matches",
       "category": "keyed-lookup"
-    },
-    {
-      "file": "components/orders/src/domain/order_transitions.rs",
-      "function": "delivery",
-      "category": "in-place-edit"
-    },
-    {
-      "file": "components/payments/src/store/refund_receipts.rs",
-      "function": "apply",
-      "category": "attempt-context"
     }
   ]
 }

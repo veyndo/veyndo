@@ -81,8 +81,6 @@
       "tables": [
         "commerce_overrides",
         "commerce_settings",
-        "company_logos",
-        "company_overrides",
         "consumer_request_reviews",
         "consumer_requests",
         "hosted_frontends",
@@ -228,26 +226,15 @@
         "shop"
       ],
       "foreign_tables": {
-        "commerce_settings": "read: reads the shop settings document under the basis row lock so the change and the settings it was checked against stay consistent (customer_snapshot.rs)",
         "customer_sessions": "read: reads the customer session to bind a buyer request to its account inside the same statement (buyer_identity.rs)",
         "customers": "read: reads customer identity, group and company in the same statement as its own records to admit or project them (admin_order.rs, buyer_identity.rs, cart_create.rs, customer_snapshot.rs)",
-        "extensions": "read: reads the tenant business policy module digest to prepare the purchase sandbox (commit.rs)",
-        "hosted_frontends": "read: reads the hosted frontend binding (alias, origin, channel) to admit hosted requests or build links (hosted_parent.rs)",
-        "legal_acceptances": "read: reads the cart legal acceptance in the purchase transaction (legal_snapshot.rs)",
-        "orders": "write: the purchase transaction creates the order with the cart and inventory changes it depends on (commit.rs, lock.rs, session.rs)",
-        "policy": "write: the purchase records the experiment policy outcome atomically with the order (commit.rs)",
-        "privacy_consents": "read: reads the buyer privacy consent in the purchase transaction (legal_snapshot.rs)",
-        "product_channel_visibility": "read: reads channel visibility so a product hidden in the channel is excluded inside the query (price.rs)",
-        "product_reviews": "read: reads published reviews as product facts in the same statement (product_detail.rs)",
-        "products": "read: reads product rows in the same statement as its own data (prices, stock, visibility) (admin_order.rs, price.rs, product_detail.rs)",
-        "sales_channels": "read: reads the sales channel document (kind, activity, catalogue scope) to admit the request channel inside the same statement (admin_order.rs, session.rs)",
         "shop_environments": "read: reads the environment row (live shop, preview owner) to scope sandbox and preview requests to their live shop (buyer_identity.rs)",
         "tenants": "read: reads shop existence, status or the agent stop switch inside a larger claim or join; simple reads go through veyndo_core::tenants (buyer_identity.rs)"
       },
       "glob_imports": 0,
-      "untyped_access": 54,
+      "untyped_access": 0,
       "sql_outside_store": 0,
-      "runtime_sql": 1
+      "runtime_sql": 0
     },
     "customers": {
       "title": "Customer accounts, sessions, addresses and the merchant customer directory",
@@ -279,6 +266,8 @@
         "components/orders"
       ],
       "tables": [
+        "company_logos",
+        "company_overrides",
         "order_activity",
         "order_receipts",
         "order_state_machines",
@@ -300,16 +289,12 @@
       ],
       "foreign_tables": {
         "carts": "write: order mutations and notes mirror the order into the cart order snapshot the buyer reads (account_orders.rs, downloads.rs, order_list.rs, order_mutation.rs)",
-        "commerce_settings": "read: reads the shop settings document under the basis row lock so the change and the settings it was checked against stay consistent (company.rs)",
-        "company_logos": "write: company master data releases write the company logo (company.rs, company_logos.rs, company_release.rs)",
-        "company_overrides": "write: company master data releases write per-channel company data (company.rs, company_release.rs)",
-        "customers": "read: reads customer identity, group and company in the same statement as its own records to admit or project them (account_orders.rs, redacted_reads.rs)",
         "order_downloads": "read: reads download grants to project an order for the buyer (downloads.rs)",
         "product_assets": "read: reads product asset metadata in the same statement as product rows (downloads.rs)",
         "sales_channels": "read: reads the sales channel document (kind, activity, catalogue scope) to admit the request channel inside the same statement (company.rs, company_logos.rs)"
       },
       "glob_imports": 0,
-      "untyped_access": 41,
+      "untyped_access": 0,
       "sql_outside_store": 0,
       "runtime_sql": 0
     },
@@ -338,20 +323,10 @@
       "foreign_tables": {
         "app_packages": "read: reads installed package manifests and their active flag to admit app-provided actions, tools or providers in the same transaction (capture_configuration.rs, provider_registry.rs, providers.rs, saved_instruments.rs)",
         "carts": "write: payment commands and the ledger update the cart payment state under its lock (commands.rs, order_ledger.rs)",
-        "commerce_overrides": "read: reads the per-channel settings override that the scoped settings view merges (provider_registry.rs)",
-        "commerce_settings": "write: payment provider installation adds its methods to the settings document (provider_registry.rs)",
-        "customer_sessions": "read: reads the customer session to bind a buyer request to its account inside the same statement (funding.rs)",
-        "customers": "read: reads customer identity, group and company in the same statement as its own records to admit or project them (funding.rs)",
-        "entity_history": "read: reads native entity history for payment detail provenance (details.rs)",
-        "exposures": "write: a captured payment completes the experiment exposure (order_ledger.rs)",
-        "hosted_frontends": "read: reads the hosted frontend binding (alias, origin, channel) to admit hosted requests or build links (sessions.rs)",
-        "inventory_reservations": "write: a pending provider attempt reserves inventory; the ledger releases the reservation when the attempt fails (order_ledger.rs, provider_registry.rs)",
-        "orders": "write: the payment ledger updates the order payment state (commands.rs, instructions.rs, order_ledger.rs, remote.rs)",
-        "policy": "write: a captured payment updates the experiment policy outcome (order_ledger.rs)",
-        "sales_channels": "read: reads the sales channel document (kind, activity, catalogue scope) to admit the request channel inside the same statement (providers.rs)"
+        "orders": "write: the payment ledger updates the order payment state (commands.rs, instructions.rs, order_ledger.rs, remote.rs)"
       },
       "glob_imports": 0,
-      "untyped_access": 32,
+      "untyped_access": 0,
       "sql_outside_store": 0,
       "runtime_sql": 0
     },

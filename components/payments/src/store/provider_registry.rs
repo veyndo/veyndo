@@ -2,15 +2,17 @@
 use crate::domain::capture_intent::intent;
 use crate::domain::service_config::validate_service;
 use crate::store::jobs::enqueue_tx;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 use std::collections::{HashMap, HashSet};
 use veyndo_app_model::manifest::Manifest;
-use veyndo_core::document::{Raw, lenient, view};
+use veyndo_core::document::{Raw, lenient, merge, view};
 use veyndo_core::{Result, State, bad, conflict, process_config, uid};
+use veyndo_inventory::store::attempt_reservations::reserve;
 use veyndo_shop::domain::patch::resolve;
 use veyndo_shop::domain::validation::validate;
 use veyndo_shop::service::read_cache::conditions;
+use veyndo_shop::store::settings::{basis_for_update, overrides, replace_basis};
 use veyndo_shop::types::cart::StoredCart;
 use veyndo_shop::types::settings::{Payment, Settings};
 
@@ -65,19 +67,11 @@ pub async fn install_methods(
     if m.payment_provider.is_none() && old.as_ref().is_none_or(|p| p.payment_provider.is_none()) {
         return Ok(());
     }
-    let data = sqlx::query_scalar!(
-        "SELECT data FROM commerce_settings WHERE tenant=$1 FOR UPDATE",
-        t
-    )
-    .fetch_one(&mut **tx)
-    .await?;
+    let data = basis_for_update(tx, t).await?;
     let mut s: Settings = serde_json::from_value(data).map_err(|_| bad("Invalid settings"))?;
     // Basis locking serializes channel overrides. Check the actual resolved settings,
     // including an enabled channel method whose shared-basis counterpart is disabled.
-    let patches: Vec<Value> =
-        sqlx::query_scalar!("SELECT data FROM commerce_overrides WHERE tenant=$1", t)
-            .fetch_all(&mut **tx)
-            .await?;
+    let patches = overrides(tx, t).await?;
     let mut scopes = vec![s.clone()];
     for patch in patches {
         scopes.push(resolve(&s, patch, &conditions)?);
@@ -168,14 +162,7 @@ pub async fn install_methods(
         });
     }
     validate(&s, &conditions)?;
-    sqlx::query!(
-        "UPDATE commerce_settings SET data=$1,revision=revision+1 WHERE tenant=$2",
-        json!(s),
-        t
-    )
-    .execute(&mut **tx)
-    .await?;
-    Ok(())
+    replace_basis(tx, t, &json!(s)).await
 }
 /// Records the pending provider payment attempt of an order with its reservations and enqueues its creation.
 /// The placed order facts a provider payment is prepared from.
@@ -223,6 +210,24 @@ struct PlacedPrice {
 struct PlacedCheckout {
     #[serde(deserialize_with = "lenient")]
     country: Option<String>,
+}
+
+/// The pending provider payment an order names.
+#[derive(Serialize)]
+struct PendingPayment<'a> {
+    payment: ProviderPayment<'a>,
+}
+
+/// The selected method, provider, attempt and environment of a pending provider payment; no money is charged yet.
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct ProviderPayment<'a> {
+    method: &'a Value,
+    provider: &'a str,
+    state: &'a str,
+    attempt_id: &'a str,
+    environment: &'a str,
+    real_money_charged: bool,
 }
 
 pub async fn prepare_remote(
@@ -288,10 +293,22 @@ pub async fn prepare_remote(
     config(provider, &m.version, &environment)?;
     let context = json!({"apiVersion":"1","accountRef":r.account_ref,"method":method.id,"capabilities":method.capabilities,"checkout":method.checkout,"intent":intent,"channel":channel,"returnOrigin":return_origin,"currencyScale":order.cart.price.currency_scale});
     let id = uid();
-    o["payment"] = json!({"method":selected.raw,"provider":provider,"state":"pending","attemptId":id,"environment":environment,"realMoneyCharged":false});
+    merge(
+        o,
+        PendingPayment {
+            payment: ProviderPayment {
+                method: &selected.raw,
+                provider,
+                state: "pending",
+                attempt_id: &id,
+                environment: &environment,
+                real_money_charged: false,
+            },
+        },
+    )?;
     sqlx::query!("INSERT INTO payment_attempts(id,tenant,order_id,provider,adapter_version,amount_minor,currency,environment,bn_code,provider_context,currency_scale) VALUES($1,$2,$3,$4,$5,$6,$9,$7,'',$8,$10)", id, c.tenant, order.id.as_deref().ok_or(bad("Order ID required"))?, provider, m.version, minor, environment, context, currency, order.cart.price.currency_scale.as_i64().unwrap_or(2) as i16).execute(&mut **tx).await?;
     for item in &c.data.items {
-        sqlx::query!("INSERT INTO inventory_reservations(tenant,attempt_id,product_id,quantity) VALUES($1,$2,$3,$4)", c.tenant, id, item.id, item.quantity as i32).execute(&mut **tx).await?;
+        reserve(tx, &c.tenant, &id, &item.id, item.quantity as i32).await?;
     }
     enqueue_tx(
         tx,
@@ -400,4 +417,37 @@ pub async fn currency_methods_conn(
 ) -> Result<Settings> {
     let rows=sqlx::query_as!(ProviderRow, "SELECT DISTINCT ON (p.id) p.id,p.version,p.manifest,a.ready,a.data,a.environment FROM app_packages p JOIN payment_provider_accounts a ON a.tenant=p.tenant AND a.app=p.id WHERE p.tenant=$1 AND p.active AND a.channel IN ($2,'default') ORDER BY p.id,(a.channel=$2) DESC", t, channel).fetch_all(conn).await?;
     Ok(filter_methods(&enabled_rows(rows, code)?, code, s))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{PendingPayment, ProviderPayment};
+    use serde_json::json;
+    use veyndo_core::document::merge;
+
+    /// The typed pending payment writes exactly the order document the indexed assignment wrote.
+    #[test]
+    fn the_typed_pending_payment_matches_the_indexed_write() {
+        let method = json!({"id":"paypal","mode":"app"});
+        let base =
+            json!({"id":"o1","payment":{"method":"old","provider":"manual","state":"pending"}});
+        let mut indexed = base.clone();
+        indexed["payment"] = json!({"method":method,"provider":"paypal","state":"pending","attemptId":"a1","environment":"sandbox","realMoneyCharged":false});
+        let mut typed = base.clone();
+        merge(
+            &mut typed,
+            PendingPayment {
+                payment: ProviderPayment {
+                    method: &method,
+                    provider: "paypal",
+                    state: "pending",
+                    attempt_id: "a1",
+                    environment: "sandbox",
+                    real_money_charged: false,
+                },
+            },
+        )
+        .unwrap();
+        assert_eq!(typed, indexed);
+    }
 }

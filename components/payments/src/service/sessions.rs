@@ -5,7 +5,6 @@ use crate::ports::{Gateway, Host};
 use crate::service::remote::execute;
 use crate::store::attempts;
 use crate::store::commands::customer;
-use crate::store::origins::hosted_alias;
 use serde::Deserialize;
 use serde_json::{Value, json};
 use std::env;
@@ -13,6 +12,7 @@ use veyndo_core::document::view;
 use veyndo_core::host_names::{configured_alias, same_origin_family};
 use veyndo_core::shop_scope::tenant;
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad, conflict, uid};
+use veyndo_shop::store::hosted_bindings::bound as hosted_alias;
 
 /// The provider's embedded checkout session.
 #[derive(Deserialize, Default)]

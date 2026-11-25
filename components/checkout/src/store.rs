@@ -14,6 +14,7 @@ pub mod handoffs;
 pub mod hosted_parent;
 pub mod legal_snapshot;
 pub mod manual_orders;
+pub mod order_snapshot;
 pub mod product_locks;
 pub mod product_reviews;
 pub mod product_snapshot;
