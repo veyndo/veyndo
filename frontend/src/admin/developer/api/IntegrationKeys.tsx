@@ -1,4 +1,5 @@
 /** Personal, expiring, least-privilege integration keys; plaintext stays in component memory and is never reloaded. */
+import { useRead, useSetRead } from "../../shell/useRead";
 import {
   Button,
   Card,
@@ -41,8 +42,7 @@ export default function IntegrationKeys({ request }: { request: RequestFn }) {
     }).format(n / 1_000_000);
   const current = useRef(request);
   current.current = request;
-  const secretOwner = useRef<RequestFn | null>(null),
-    keyOwner = useRef<RequestFn | null>(null);
+  const secretOwner = useRef<RequestFn | null>(null);
   const [purpose, setPurpose] = useState("api"),
     [budgetFields, setBudgetFields] = useState<BudgetFields>({
       provider: "",
@@ -53,55 +53,40 @@ export default function IntegrationKeys({ request }: { request: RequestFn }) {
     });
   const budget = agentBudget(budgetFields);
   const pt = usePermissionText();
-  const [keys, setKeys] = useState<Key[]>([]),
-    [access, setAccess] = useState<string[]>([]),
-    [name, setName] = useState(""),
+  const accessRead = useRead(request, "/api/auth/access");
+  const access: string[] = accessRead.data?.permissions ?? [];
+  const personal = accessRead.data?.personalSession === true;
+  const integrations = useRead(
+    request,
+    access.includes("team.manage") ? "/api/workspace/integrations" : null,
+  );
+  const setRead = useSetRead(request);
+  const keys: Key[] = integrations.data?.elements ?? [];
+  const [name, setName] = useState(""),
     [days, setDays] = useState(30),
     [permanent, setPermanent] = useState(false),
-    [personal, setPersonal] = useState(false),
     [scopes, setScopes] = useState<string[]>([]),
     [secret, setSecret] = useState(""),
-    [error, setError] = useState(""),
+    [actionError, setError] = useState(""),
     [busy, setBusy] = useState(false),
     [revoke, setRevoke] = useState<Key | null>(null),
     [copied, setCopied] = useState(false);
   const manage = access.includes("team.manage");
+  const error =
+    actionError ||
+    (accessRead.error as Error | undefined)?.message ||
+    (integrations.error as Error | undefined)?.message ||
+    "";
   const load = async () => {
     const result = await request("/api/workspace/integrations");
-    if (current.current === request) {
-      keyOwner.current = request;
-      setKeys(result.elements);
-    }
+    setRead("/api/workspace/integrations", result);
   };
   useEffect(() => {
-    let active = true;
-    setKeys([]);
     setSecret("");
-    setAccess([]);
     setScopes([]);
-    setPersonal(false);
     setBusy(false);
     setRevoke(null);
     setError("");
-    request("/api/auth/access")
-      .then(async (v) => {
-        if (!active) return;
-        setAccess(v.permissions);
-        setPersonal(v.personalSession === true);
-        if (v.permissions.includes("team.manage")) {
-          const result = await request("/api/workspace/integrations");
-          if (active) {
-            keyOwner.current = request;
-            setKeys(result.elements);
-          }
-        }
-      })
-      .catch((e) => {
-        if (active) setError(e.message);
-      });
-    return () => {
-      active = false;
-    };
   }, [request]);
   return (
     <Card className="api-key-panel">
@@ -244,7 +229,7 @@ export default function IntegrationKeys({ request }: { request: RequestFn }) {
           </Button>
         </div>
       )}
-      {(keyOwner.current === request ? keys : []).map((key) => (
+      {keys.map((key) => (
         <article className="api-key-row" key={key.id}>
           <div>
             <strong>{key.name}</strong>

@@ -1,4 +1,6 @@
 /** Search-based channel product assignment, preserving selected IDs across server-filtered result pages. */
+import { useDebouncedValue } from "../../kit/query";
+import { useRead } from "../shell/useRead";
 import { Button, Field, Notice, TextInput } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import type { RequestFn } from "../shell/studio-types";
@@ -14,34 +16,24 @@ export default function ChannelProducts({
 }) {
   const t = useChannelText(),
     [search, setSearch] = useState(""),
-    [items, setItems] = useState<any[]>([]),
     [names, setNames] = useState<Record<string, string>>({}),
-    [error, setError] = useState("");
+    term = useDebouncedValue(search, 200);
+  const products = useRead(
+    request,
+    `/api/merchant/products?limit=25&search=${encodeURIComponent(term)}`,
+  );
+  const items: any[] = products.data?.elements ?? [];
+  const error = (products.error as Error | undefined)?.message ?? "";
+  // Names of every product seen stay known for the chosen list.
   useEffect(() => {
-    let active = true;
-    const timer = setTimeout(() => {
-      request(
-        `/api/merchant/products?limit=25&search=${encodeURIComponent(search)}`,
-      )
-        .then((v) => {
-          if (active) {
-            setItems(v.elements);
-            setNames((old) => ({
-              ...old,
-              ...Object.fromEntries(v.elements.map((p: any) => [p.id, p.name])),
-            }));
-            setError("");
-          }
-        })
-        .catch((e) => {
-          if (active) setError(e.message);
-        });
-    }, 200);
-    return () => {
-      active = false;
-      clearTimeout(timer);
-    };
-  }, [request, search]);
+    if (!products.data) return;
+    setNames((old) => ({
+      ...old,
+      ...Object.fromEntries(
+        products.data.elements.map((p: any) => [p.id, p.name]),
+      ),
+    }));
+  }, [products.data]);
   return (
     <div>
       <Field label={t("search")}>

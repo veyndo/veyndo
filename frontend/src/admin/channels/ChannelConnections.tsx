@@ -1,4 +1,5 @@
 /** Uses the existing tenant-owned frontend registry, not a parallel domain or Experience store. */
+import { useInvalidateRead, useRead } from "../shell/useRead";
 import {
   Button,
   Field,
@@ -7,7 +8,7 @@ import {
   Select,
   TextInput,
 } from "../../kit/ui";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type { RequestFn } from "../shell/studio-types";
 import {
   connectionUrl,
@@ -31,44 +32,24 @@ export default function ChannelConnections({
 }) {
   const t = useConnectionText(),
     { locale } = useLocale();
-  const [rows, setRows] = useState<FrontendConnection[]>([]),
-    [channels, setChannels] = useState<Channel[]>([]),
-    [loaded, setLoaded] = useState(false),
-    [error, setError] = useState(""),
+  const frontends = useRead(request, "/api/settings/frontends");
+  const automation = useRead(request, "/api/automation");
+  const invalidate = useInvalidateRead(request);
+  const rows: FrontendConnection[] = frontends.data?.frontends ?? [];
+  const channels: Channel[] = automation.data?.channels ?? [];
+  const loaded = !!frontends.data && !!automation.data;
+  const [actionError, setError] = useState(""),
     [busy, setBusy] = useState(false),
     [notice, setNotice] = useState(false),
     [remove, setRemove] = useState<FrontendConnection | null>(null),
     [alias, setAlias] = useState(""),
     [experience, setExperience] = useState("");
+  const error =
+    actionError || (frontends.error || automation.error ? t("error") : "");
   const refresh = async () => {
-    const [f, a] = await Promise.all([
-      request("/api/settings/frontends"),
-      request("/api/automation"),
-    ]);
-    setRows(f.frontends ?? []);
-    setChannels(a.channels ?? []);
-    setLoaded(true);
+    invalidate("/api/settings/frontends");
+    invalidate("/api/automation");
   };
-  useEffect(() => {
-    let active = true;
-    Promise.all([
-      request("/api/settings/frontends"),
-      request("/api/automation"),
-    ])
-      .then(([f, a]) => {
-        if (active) {
-          setRows(f.frontends ?? []);
-          setChannels(a.channels ?? []);
-          setLoaded(true);
-        }
-      })
-      .catch(() => {
-        if (active) setError(t("error"));
-      });
-    return () => {
-      active = false;
-    };
-  }, [request, channel]);
   const save = async (
     data: object,
     method = "PUT",

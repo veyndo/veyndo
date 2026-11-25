@@ -1,4 +1,5 @@
 /** Actor-private server autosaves serialize writes and preserve optimistic revisions across app switches. */
+import { useRead } from "../shell/useRead";
 import { useEffect, useRef, useState } from "react";
 import type { RequestFn } from "../shell/studio-types";
 import type { Manifest } from "../../shared/apps/native/types";
@@ -25,41 +26,45 @@ export function useDraftStorage(
     revisions = useRef(new Map<string, number>()),
     snapshots = useRef(new Map<string, string>()),
     writing = useRef<number | null>(null);
+  const stored = useRead<{ drafts: Draft[] }>(request, "/api/developer/drafts");
   useEffect(() => {
-    const epoch = ++generation.current;
+    ++generation.current;
     revisions.current.clear();
     snapshots.current.clear();
     setReady(false);
     setRestored(false);
-    request("/api/developer/drafts")
-      .then((v: { drafts: Draft[] }) => {
-        if (generation.current !== epoch) return;
-        for (const d of v.drafts) {
-          revisions.current.set(d.id, d.revision);
-          snapshots.current.set(
-            d.id,
-            JSON.stringify({
-              manifest: d.manifest,
-              environment: d.environment ?? "",
-            }),
-          );
-        }
-        const draft = v.drafts[0];
-        if (draft && !latest.current.edited) {
-          latest.current.restore(draft.manifest, draft.environment ?? "");
-          setRestored(true);
-        }
-        setReady(true);
-      })
-      .catch((e: Error) => {
-        if (generation.current === epoch) setError(e.message);
-      });
     return () => {
       generation.current++;
     };
   }, [request]);
+  // Each answer records revisions and snapshots; the newest draft is restored
+  // unless the person already edited.
+  useEffect(() => {
+    if (!stored.data) return;
+    const drafts = Array.isArray(stored.data.drafts) ? stored.data.drafts : [];
+    for (const d of drafts) {
+      revisions.current.set(d.id, d.revision);
+      snapshots.current.set(
+        d.id,
+        JSON.stringify({
+          manifest: d.manifest,
+          environment: d.environment ?? "",
+        }),
+      );
+    }
+    const draft = drafts[0];
+    if (draft && !latest.current.edited) {
+      latest.current.restore(draft.manifest, draft.environment ?? "");
+      setRestored(true);
+    }
+    setReady(true);
+  }, [stored.data]);
+  useEffect(() => {
+    if (stored.error) setError((stored.error as Error).message);
+  }, [stored.error]);
   const serialized = JSON.stringify({ manifest, environment });
   useEffect(() => {
+    // write-effect: debounced autosave of the edited draft (a write, not a read).
     if (!ready || !edited || snapshots.current.get(manifest.id) === serialized)
       return;
     setPending(true);

@@ -1,6 +1,6 @@
 /** Visual payment contracts use the same manifest as coding agents; onboarding uses the protected API. */
+import { useRead } from "../shell/useRead";
 import { Button, Field, Select, TextInput } from "../../kit/ui";
-import { useEffect, useState } from "react";
 import type { Manifest } from "../../shared/apps/native/types";
 import type { RequestFn } from "../shell/studio-types";
 import type { CountryCatalogue } from "../../shared/geography/geography-types";
@@ -19,19 +19,8 @@ export default function AppPayments({
   onChange: (m: Manifest) => void;
   request: RequestFn;
 }) {
-  const t = usePaymentProviderText(),
-    [geo, setGeo] = useState<CountryCatalogue>();
-  useEffect(() => {
-    let active = true;
-    void request("/store-api/countries")
-      .then((v) => {
-        if (active) setGeo(v);
-      })
-      .catch(() => {});
-    return () => {
-      active = false;
-    };
-  }, [request]);
+  const t = usePaymentProviderText();
+  const geo = useRead<CountryCatalogue>(request, "/store-api/countries").data;
   const patch = (
     methods: NonNullable<Manifest["paymentProvider"]>["methods"],
   ) => onChange({ ...m, paymentProvider: { apiVersion: "1", methods } });

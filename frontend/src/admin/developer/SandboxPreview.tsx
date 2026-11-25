@@ -1,4 +1,5 @@
 /** Preview resolves the installed registry first; a newer staged package cannot masquerade as an older build. */
+import { useRead } from "../shell/useRead";
 import { Notice } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import SandboxContextPicker from "./SandboxContextPicker";
@@ -22,37 +23,31 @@ export default function SandboxPreview({
 }) {
   const { a } = useAppStudioText();
   const [context, setContext] = useState<Record<string, unknown>>({});
-  const [surface, setSurface] = useState<AppSurface | null>(null),
-    [error, setError] = useState("");
+  const admin = useRead(request, "/api/apps/surfaces");
+  const store = useRead(request, "/store-api/apps/surfaces");
+  const loaded = !!admin.data && !!store.data;
+  const surface: AppSurface | null = loaded
+    ? ([...admin.data.surfaces, ...store.data.surfaces].find(
+        (s: AppSurface) =>
+          s.app === app &&
+          s.version === version &&
+          s.surface.id === view &&
+          !!s.native,
+      ) ?? null)
+    : null;
+  const error =
+    (admin.error as Error | undefined)?.message ??
+    (store.error as Error | undefined)?.message ??
+    (loaded && !surface ? a("notStaged") : "");
+  useEffect(() => setContext({}), [request, app, version, view]);
+  // The staged view's languages are reported once it is found.
   useEffect(() => {
-    let active = true;
-    setSurface(null);
-    setContext({});
-    setError("");
-    Promise.all([
-      request("/api/apps/surfaces"),
-      request("/store-api/apps/surfaces"),
-    ])
-      .then((v) => ({ surfaces: [...v[0].surfaces, ...v[1].surfaces] }))
-      .then((v) => {
-        const s = v.surfaces.find(
-          (s: AppSurface) =>
-            s.app === app && s.version === version && s.surface.id === view,
-        );
-        if (active) {
-          if (s?.native) {
-            setSurface(s);
-            onLanguages?.(s.mainLocale ?? "en-GB", s.locales ?? ["en-GB"]);
-          } else setError(a("notStaged"));
-        }
-      })
-      .catch((e) => {
-        if (active) setError(e.message);
-      });
-    return () => {
-      active = false;
-    };
-  }, [request, app, version, view]);
+    if (surface)
+      onLanguages?.(
+        surface.mainLocale ?? "en-GB",
+        surface.locales ?? ["en-GB"],
+      );
+  }, [surface?.app, surface?.version, surface?.surface.id]);
   const scoped = useSurfaceGateway(
     request,
     app,

@@ -1,6 +1,6 @@
 /** Channel kind and POS presentation editor use the existing channel/content-language contract. */
+import { useRead } from "../shell/useRead";
 import { Field, Select } from "../../kit/ui";
-import { useEffect, useState } from "react";
 import CountryPicker from "../../shared/geography/CountryPicker";
 import type { Country } from "../../shared/geography/geography-types";
 import type { RequestFn } from "../shell/studio-types";
@@ -24,18 +24,8 @@ export default function ChannelType({
 }) {
   const t = useChannelText();
   const p = usePosText();
-  const [world, setWorld] = useState<Country[]>([]);
-  useEffect(() => {
-    let active = true;
-    void request("/store-api/countries")
-      .then((v) => {
-        if (active && Array.isArray(v.countries)) setWorld(v.countries);
-      })
-      .catch(() => {});
-    return () => {
-      active = false;
-    };
-  }, [request]);
+  const catalogue = useRead(request, "/store-api/countries").data?.countries;
+  const world: Country[] = Array.isArray(catalogue) ? catalogue : [];
   const config = draft.data.pos ?? {
     country: countries[0] ?? "",
     columns: 4,

@@ -1,4 +1,5 @@
 /** Personal current-rights stop control; operational revisions cannot be published from a sandbox. */
+import { useRead, useSetRead } from "../../shell/useRead";
 import { Button, Card, Notice } from "../../../kit/ui";
 import { useEffect, useRef, useState } from "react";
 import type { RequestFn } from "../../shell/studio-types";
@@ -14,32 +15,27 @@ export default function AgentControls({ request }: { request: RequestFn }) {
   const t = useAgentControlText();
   const current = useRef(request);
   current.current = request;
-  const [state, setState] = useState<Control | null>(null),
-    [confirm, setConfirm] = useState(false),
+  const [confirm, setConfirm] = useState(false),
     [busy, setBusy] = useState(false),
-    [error, setError] = useState("");
+    [actionError, setError] = useState("");
+  const access = useRead(request, "/api/auth/access");
+  const allowed =
+    access.data?.personalSession === true &&
+    !!access.data?.permissions?.includes("ai.manage");
+  const control = useRead(request, allowed ? "/api/agent/control" : null);
+  const setRead = useSetRead(request);
+  const state: Control | null = control.data
+    ? { ...control.data, owner: request }
+    : null;
+  const error =
+    actionError ||
+    (access.error as Error | undefined)?.message ||
+    (control.error as Error | undefined)?.message ||
+    "";
   useEffect(() => {
-    let active = true;
-    setState(null);
     setConfirm(false);
     setBusy(false);
     setError("");
-    request("/api/auth/access")
-      .then(async (access) => {
-        if (
-          !access.personalSession ||
-          !access.permissions.includes("ai.manage")
-        )
-          return;
-        const value = await request("/api/agent/control");
-        if (active) setState({ ...value, owner: request });
-      })
-      .catch((e) => {
-        if (active) setError(e.message);
-      });
-    return () => {
-      active = false;
-    };
   }, [request]);
   if (state?.owner !== request && !error) return null;
   return (
@@ -78,7 +74,7 @@ export default function AgentControls({ request }: { request: RequestFn }) {
                 "POST",
               );
               if (current.current === request) {
-                setState({ ...next, owner: request });
+                setRead("/api/agent/control", next);
                 setConfirm(false);
               }
             } catch (e) {

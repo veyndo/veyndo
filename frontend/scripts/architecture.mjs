@@ -288,10 +288,11 @@ if (!process.argv[2]) {
         else if (text[index] === "}") depth--;
         index++;
       }
+      const body = text.slice(match.index, index);
+      // Writes such as autosave are effects by nature; they say so and why.
       if (
-        /\b(?:request|liveRequest|requestJson)\(/.test(
-          text.slice(match.index, index),
-        )
+        /\b(?:request|liveRequest|requestJson)\(/.test(body) &&
+        !/write-effect: \S/.test(body)
       )
         effectReads++;
     }

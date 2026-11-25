@@ -1,6 +1,7 @@
 /** One merchant entry for inbound shops and native agent checkout; technical support never masquerades as external approval. */
+import { useRead } from "../shell/useRead";
 import { Button, Card, Field, Notice, Select } from "../../kit/ui";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type { RequestFn } from "../shell/studio-types";
 import type { IntakeMode } from "../catalog/catalog-intake-model";
 import type { Channel } from "./channel-model";
@@ -47,29 +48,15 @@ export default function AgenticChannels({
 }) {
   const t = useAgenticChannelText(),
     { locale } = useLocale();
-  const [localChannel, setLocalChannel] = useState("default"),
-    [readiness, setReadiness] = useState<Readiness>(),
-    [error, setError] = useState("");
+  const [localChannel, setLocalChannel] = useState("default");
   const channel = selectedChannel ?? localChannel;
+  const intake = useRead(request, "/api/merchant/catalog/intake", {
+    options: { salesChannel: channel },
+    enabled: canRead,
+  });
+  const readiness: Readiness | undefined = intake.data?.agentic;
+  const error = (intake.error as Error | undefined)?.message ?? "";
   const setChannel = onChannel ?? setLocalChannel;
-  useEffect(() => {
-    let active = true;
-    setReadiness(undefined);
-    setError("");
-    if (canRead)
-      request("/api/merchant/catalog/intake", undefined, undefined, {
-        salesChannel: channel,
-      })
-        .then((v) => {
-          if (active) setReadiness(v.agentic);
-        })
-        .catch((e) => {
-          if (active) setError(e.message);
-        });
-    return () => {
-      active = false;
-    };
-  }, [request, channel, canRead]);
   const cards = [
     {
       id: "shopify",

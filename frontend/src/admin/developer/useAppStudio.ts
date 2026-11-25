@@ -1,4 +1,5 @@
 /** Tenant-scoped build lifecycle; immutable saved snapshots gate sandbox previews and selected app-only releases. */
+import { useRead, useSetRead } from "../shell/useRead";
 import { useEffect, useReducer, useRef, useState } from "react";
 import type { RequestFn, Provider } from "../shell/studio-types";
 import type { Manifest } from "../../shared/apps/native/types";
@@ -46,14 +47,21 @@ export function useAppStudio(
     past: [],
     future: [],
   }));
-  const [env, setEnv] = useState(initialEnvironment),
-    [builds, setBuilds] = useState<Build[]>([]),
-    [providers, setProviders] = useState<Provider[]>([]),
-    [archivedBuilds, setArchivedBuilds] = useState<Build[]>([]);
-  const [locales, setLocales] = useState(["en-GB", "de-DE", "fr-FR", "es-ES"]),
-    [mainLocale, setMainLocale] = useState("en-GB");
+  const [env, setEnv] = useState(initialEnvironment);
+  const developer = useRead(request, "/api/developer");
+  const setRead = useSetRead(request);
+  const builds: Build[] = developer.data?.builds ?? [];
+  const archivedBuilds: Build[] = developer.data?.archivedBuilds ?? [];
+  const providers: Provider[] = developer.data?.providers.providers ?? [];
+  const locales: string[] = developer.data?.locales ?? [
+    "en-GB",
+    "de-DE",
+    "fr-FR",
+    "es-ES",
+  ];
+  const mainLocale: string = developer.data?.mainLocale ?? "en-GB";
   const [busy, setBusy] = useState(false),
-    [error, setError] = useState(""),
+    [actionError, setError] = useState(""),
     [notice, setNotice] = useState("");
   const [saved, setSaved] = useState<Build | null>(null),
     [baseline, setBaseline] = useState("");
@@ -65,31 +73,13 @@ export function useAppStudio(
   } | null>(null);
   const epoch = useRef(0),
     running = useRef(false);
+  const error =
+    actionError || (developer.error as Error | undefined)?.message || "";
   const load = async () => {
-    const v = await request("/api/developer");
-    setBuilds(v.builds);
-    setArchivedBuilds(v.archivedBuilds ?? []);
-    setProviders(v.providers.providers);
-    setLocales(v.locales);
-    setMainLocale(v.mainLocale);
+    setRead("/api/developer", await request("/api/developer"));
   };
   useEffect(() => {
-    let active = true;
-    request("/api/developer")
-      .then((v) => {
-        if (active) {
-          setBuilds(v.builds);
-          setArchivedBuilds(v.archivedBuilds ?? []);
-          setProviders(v.providers.providers);
-          setLocales(v.locales);
-          setMainLocale(v.mainLocale);
-        }
-      })
-      .catch((e) => {
-        if (active) setError(e.message);
-      });
     return () => {
-      active = false;
       epoch.current++;
     };
   }, [request]);

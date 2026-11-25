@@ -1,4 +1,5 @@
 /** Discover and create channels separately from rules; shared settings and independent SaaS shops remain explicit. */
+import { useRead, useSetRead } from "../shell/useRead";
 import { Badge, Button, Card, Notice } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import type { RequestFn } from "../shell/studio-types";
@@ -47,52 +48,38 @@ export default function SalesChannelsWorkspace({
     [intake, setIntake] = useState<IntakeMode>();
   const t = useChannelText(),
     { locale } = useLocale();
-  const [channels, setChannels] = useState<Channel[]>([]),
-    [selected, setSelected] = useState<Channel | null>(null),
-    [settings, setSettings] = useState<{
-      locales: string[];
-      mainLocale: string;
-      countries: string[];
-    }>(),
-    [categories, setCategories] = useState<Category[]>([]),
-    [manage, setManage] = useState(false),
-    [rights, setRights] = useState<string[]>([]),
-    [marketplace, setMarketplace] = useState(false),
-    [error, setError] = useState("");
+  const [selected, setSelected] = useState<Channel | null>(null),
+    [marketplace, setMarketplace] = useState(false);
+  const automation = useRead(request, "/api/automation");
+  const commerce = useRead(request, "/api/merchant/commerce");
+  const categoryRead = useRead(request, "/api/merchant/categories");
+  const access = useRead(request, "/api/auth/access");
+  const setRead = useSetRead(request);
+  const channels: Channel[] = automation.data?.channels ?? [];
+  const setChannels = (next: (old: Channel[]) => Channel[]) =>
+    automation.data &&
+    setRead("/api/automation", {
+      ...automation.data,
+      channels: next(automation.data.channels ?? []),
+    });
+  const settings:
+    { locales: string[]; mainLocale: string; countries: string[] } | undefined =
+    commerce.data?.data;
+  const categories: Category[] = categoryRead.data?.elements ?? [];
+  const rights: string[] = access.data?.permissions ?? [];
+  const manage =
+    rights.includes("channels.manage") || rights.includes("settings.write");
+  const error =
+    [automation, commerce, categoryRead, access]
+      .map((read) => (read.error as Error | undefined)?.message)
+      .find(Boolean) ?? "";
   useEffect(() => {
-    let active = true;
     setSelected(null);
     setAgentic(false);
     setAgenticChannel("default");
     setIntake(undefined);
     setMarketplace(false);
     setMigration(false);
-    setManage(false);
-    setError("");
-    Promise.all([
-      request("/api/automation"),
-      request("/api/merchant/commerce"),
-      request("/api/merchant/categories"),
-      request("/api/auth/access"),
-    ])
-      .then(([a, c, k, p]) => {
-        if (active) {
-          setChannels(a.channels);
-          setRights(p.permissions);
-          setSettings(c.data);
-          setCategories(k.elements);
-          setManage(
-            p.permissions.includes("channels.manage") ||
-              p.permissions.includes("settings.write"),
-          );
-        }
-      })
-      .catch((e) => {
-        if (active) setError(e.message);
-      });
-    return () => {
-      active = false;
-    };
   }, [request, workspace]);
   const save = (channel: Channel) => {
     setChannels((old) => [...old.filter((c) => c.id !== channel.id), channel]);
