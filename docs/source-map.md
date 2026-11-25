@@ -429,7 +429,9 @@ internal. `commerce/` and `auth/` group their types, validation and operations.
 `structure.py` keeps `main.rs` under 120 lines and requires a responsibility
 comment at the top of every Rust source. File length is not limited; clippy limits
 the length of a single function, and [the component map](component-dependencies.md)
-limits which component may use which code and tables.
+limits which component may use which code and tables. Each component with a crate is
+also generated as a standalone mirror that must build and test alone; see
+[component mirrors](component-mirrors.md).
 
 The five domain crates (`kernel`, `commerce`, `apps`, `cognition`, `runtime`) have
 explicit dependency boundaries checked against real Cargo metadata. New helper
