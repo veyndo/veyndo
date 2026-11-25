@@ -1054,11 +1054,11 @@ This lists every checked-in source module in these roots, including files with n
 | [components/customers/src/service/sessions.rs](../components/customers/src/service/sessions.rs) | Independent customer sessions: a random token whose digest alone is stored. |
 | [components/customers/src/service/sign_in.rs](../components/customers/src/service/sign_in.rs) | Buyer sign-in: credential verification, binding the open cart to the account and context rotation. |
 | [components/customers/src/service.rs](../components/customers/src/service.rs) | Operations of the customers component. |
-| [components/customers/src/store/accounts.rs](../components/customers/src/store/accounts.rs) | Writes a customer makes to the own account: registration, the contact profile and the password. |
+| [components/customers/src/store/accounts.rs](../components/customers/src/store/accounts.rs) | Writes a customer makes to the own account: registration, the contact profile and the password. Columns checked at compile time. |
 | [components/customers/src/store/address_restore.rs](../components/customers/src/store/address_restore.rs) | Atomic restoration of the owning customer's address aggregate; geography, references and immutable order snapshots remain guarded. |
-| [components/customers/src/store/addresses.rs](../components/customers/src/store/addresses.rs) | Tenant-owned address persistence, optimistic revisions and atomic default assignment. |
+| [components/customers/src/store/addresses.rs](../components/customers/src/store/addresses.rs) | Tenant-owned address persistence, optimistic revisions and atomic default assignment. Columns checked at compile time. |
 | [components/customers/src/store/crm.rs](../components/customers/src/store/crm.rs) | Merchant CRM writes: creation on native contact and address storage, and revision-checked changes; credentials never leave storage. |
-| [components/customers/src/store/customers.rs](../components/customers/src/store/customers.rs) | Customer rows as the merchant and the account see them, with order metrics from authoritative records. |
+| [components/customers/src/store/customers.rs](../components/customers/src/store/customers.rs) | Customer rows as the merchant and the account see them, with order metrics from authoritative records. Columns checked at compile time. |
 | [components/customers/src/store/sessions.rs](../components/customers/src/store/sessions.rs) | Customer sessions, stored by the digest of their token. Columns checked at compile time. |
 | [components/customers/src/store/sign_in.rs](../components/customers/src/store/sign_in.rs) | Buyer sign-in records: the active account with its credential and defaults, the open cart it binds and the login times. Columns checked at compile time. |
 | [components/customers/src/store.rs](../components/customers/src/store.rs) | SQL of the customers component. |
@@ -1692,7 +1692,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/shop/src/store/group_usage.rs](../components/shop/src/store/group_usage.rs) | Removing a customer group rejects live customer, price and native/source-rule dependencies under the settings lock. |
 | [components/shop/src/store/operator_control.rs](../components/shop/src/store/operator_control.rs) | Operator control-plane records: per-shop AI limits, the shop lifecycle status, the audit trail, the operator's account and the shop dossier. Columns checked at compile time. |
 | [components/shop/src/store/operator_metrics.rs](../components/shop/src/store/operator_metrics.rs) | Aggregate control-plane reads across live shops (sandboxes excluded): totals, amounts per currency, shop pages and daily order timelines. Columns checked at compile time. |
-| [components/shop/src/store/operators.rs](../components/shop/src/store/operators.rs) | Platform operator grants and the control-plane database probe. |
+| [components/shop/src/store/operators.rs](../components/shop/src/store/operators.rs) | Platform operator grants and the control-plane database probe. Columns checked at compile time. |
 | [components/shop/src/store/settings.rs](../components/shop/src/store/settings.rs) | The shop settings basis and its channel overrides: locked reads, revision-checked writes, the language registration and the dependency probes of a save. Columns checked at compile time. |
 | [components/shop/src/store/settings_snapshot.sql](../components/shop/src/store/settings_snapshot.sql) | Atomic read snapshot: deletion/recreation and unchanged revision numbers cannot reuse an old UUID. |
 | [components/shop/src/store/settings_view.rs](../components/shop/src/store/settings_view.rs) | The recent reviews and orders shown beside the merchant settings. Columns checked at compile time. |
