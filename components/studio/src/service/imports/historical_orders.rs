@@ -1,8 +1,8 @@
 //! Immutable native historical orders preserve exact amounts and provenance without purchase, stock, account or payment effects.
 use super::SourceRecord;
+use crate::store::imports as db;
 use serde::Deserialize;
 use serde_json::{Value, json};
-use sqlx::Row;
 use veyndo_app_platform::store::package_fence::lock_package_write;
 use veyndo_app_platform::store::packages::package;
 use veyndo_core::document::{lenient, view};
@@ -12,6 +12,30 @@ use veyndo_core::{RequestContext, Result, State, bad, conflict, hash};
 use veyndo_identity::{merchant, permit};
 use veyndo_orders::domain::order_fields::order_fields;
 /// The JSON fields `import` reads, typed as it reads them.
+/// The reviewed fields of a historical source order.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct HistoricalSource {
+    #[serde(deserialize_with = "lenient")]
+    total: super::SourceAmount,
+    #[serde(deserialize_with = "lenient")]
+    created_at: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    number: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    lines: Option<Vec<Value>>,
+    billing_address: Value,
+    shipping_address: Value,
+}
+/// A historical line's original label and quantity.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct SourceLine {
+    #[serde(deserialize_with = "lenient")]
+    label: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    quantity: Option<u64>,
+}
 #[derive(Deserialize, Default)]
 #[serde(default, rename_all = "camelCase")]
 struct ImportInput {
@@ -36,41 +60,48 @@ pub async fn import(
             "Historical orders require a live migration target; they are never configuration release units",
         ));
     }
-    let amount = &r.data["total"];
-    let minor = amount["minor"]
-        .as_i64()
+    let source: HistoricalSource = view(&r.data);
+    let amount = &source.total;
+    let minor = amount
+        .minor
         .filter(|n| *n >= 0)
         .ok_or(bad("Exact nonnegative historical total required"))?;
-    let code = amount["currency"]
-        .as_str()
+    let code = amount
+        .currency
+        .as_deref()
         .ok_or(bad("Historical currency required"))?;
-    let scale = amount["scale"]
-        .as_u64()
+    let scale = amount
+        .scale
         .and_then(|n| u8::try_from(n).ok())
         .ok_or(bad("Historical currency scale required"))?;
     let currency = veyndo_pricing::money::Currency::new(code, scale)
         .map_err(|_| bad("Invalid historical currency"))?;
     let exact = veyndo_pricing::money::Money::new(minor, currency);
-    let created = r.data["createdAt"]
-        .as_str()
+    let created = source
+        .created_at
+        .as_deref()
         .and_then(|s| chrono::DateTime::parse_from_rfc3339(s).ok())
         .ok_or(bad("Historical date needs an explicit timezone"))?;
-    let number = r.data["number"]
-        .as_str()
+    let number = source
+        .number
+        .as_deref()
         .filter(|s| !s.is_empty() && s.len() <= 100 && !s.chars().any(char::is_control))
         .ok_or(bad("Original order number required"))?;
-    let source_lines = r.data["lines"]
-        .as_array()
+    let source_lines = source
+        .lines
+        .as_ref()
         .filter(|xs| !xs.is_empty() && xs.len() <= 1000)
         .ok_or(bad("Historical line items required, maximum 1000"))?;
     let mut lines = vec![];
     for (index, line) in source_lines.iter().enumerate() {
-        let name = line["label"]
-            .as_str()
+        let source_line: SourceLine = view(line);
+        let name = source_line
+            .label
+            .as_deref()
             .filter(|s| !s.is_empty() && s.len() <= 1000)
             .ok_or(bad("Original line name required"))?;
-        let quantity = line["quantity"]
-            .as_u64()
+        let quantity = source_line
+            .quantity
             .filter(|n| *n > 0 && *n <= 1_000_000)
             .ok_or(bad("Original positive integer line quantity required"))?;
         lines.push(json!({"id":format!("historical-{index}"),"label":name,"quantity":quantity,"type":"historical","sourceSnapshot":line}));
@@ -85,30 +116,18 @@ pub async fn import(
     let key = format!("historical:{id}");
     let mut tx = a.db.begin().await?;
     context(&mut tx, h, "historical_import").await?;
-    sqlx::query("SELECT pg_advisory_xact_lock(hashtextextended($1,28))")
-        .bind(format!("{t}:{key}"))
-        .execute(&mut *tx)
-        .await?;
-    if let Some(old) =
-        sqlx::query("SELECT data,fingerprint FROM orders WHERE tenant=$1 AND idempotency_key=$2")
-            .bind(&t)
-            .bind(&key)
-            .fetch_optional(&mut *tx)
-            .await?
-    {
-        if old.get::<String, _>("fingerprint") != fingerprint {
+    db::lock_historical(&mut tx, &format!("{t}:{key}")).await?;
+    if let Some(old) = db::imported_fingerprint(&mut tx, &t, &key).await? {
+        if old != fingerprint {
             return Err(conflict(
                 "Historical source identity already has a different immutable snapshot",
             ));
         }
         return Ok(json!({"id":id,"replayed":true,"historical":true}));
     }
-    sqlx::query("SELECT id FROM sales_channels WHERE tenant=$1 AND id=$2 FOR SHARE")
-        .bind(&t)
-        .bind(channel)
-        .fetch_optional(&mut *tx)
-        .await?
-        .ok_or(bad("Target sales channel unavailable"))?;
+    if !db::share_channel(&mut tx, &t, channel).await? {
+        return Err(bad("Target sales channel unavailable"));
+    }
     if let Some(app) = h.principal.app.as_deref() {
         let m = package(a, &t, app, true).await?;
         lock_package_write(&mut tx, &t, &m).await?;
@@ -120,20 +139,28 @@ pub async fn import(
         .map_err(|_| bad("Historical display amount unavailable"))?;
     let quote = json!({"lineItems":lines,"price":{"totalPrice":display,"netPrice":null,"totalMinor":minor,"currency":code,"currencyScale":scale,"taxStatus":"historical","calculatedTaxes":[]},"shippingCosts":{"totalPrice":null},"locale":input.locale.as_deref().unwrap_or("en-GB"),"salesChannelId":channel});
     let mut order = json!({"id":id,"orderNumber":number,"revision":1,"state":"historical","salesChannelId":channel,"channel":"historical_import","cart":quote,"deliveries":[],"payment":{"state":"historical","provider":"historical_import","realMoneyCharged":false},"money":{"minor":minor,"currency":{"code":code,"scale":scale}},"historicalImport":{"source":r.source,"sourceShop":r.source_shop,"sourceId":r.source_id,"snapshot":r.data,"fingerprint":fingerprint,"importedAt":chrono::Utc::now().to_rfc3339(),"sourceAmount":exact.decimal()}});
-    order["billingAddress"] = r.data["billingAddress"].clone();
-    order["shippingAddress"] = r.data["shippingAddress"].clone();
+    order["billingAddress"] = source.billing_address.clone();
+    order["shippingAddress"] = source.shipping_address.clone();
     order_fields(&mut order);
     let cart_id = format!("history-{id}");
     let token = format!("history-private-{}", veyndo_core::uid());
-    sqlx::query("INSERT INTO carts(id,tenant,token,data,status) VALUES($1,$2,$3,$4,'completed')")
-        .bind(&cart_id)
-        .bind(&t)
-        .bind(token)
-        .bind(json!({"items":[],"locale":"en-GB","salesChannel":channel,"order":order}))
-        .execute(&mut *tx)
-        .await?;
-    sqlx::query("INSERT INTO orders(id,tenant,cart_id,idempotency_key,fingerprint,data,created_at) VALUES($1,$2,$3,$4,$5,$6,$7::text::timestamptz)").bind(&id).bind(&t).bind(cart_id).bind(key).bind(fingerprint).bind(&order).bind(created.to_rfc3339()).execute(&mut *tx).await?;
-    sqlx::query("INSERT INTO order_activity(tenant,order_id,actor,kind,data) VALUES($1,$2,$3,'historical_import',$4)").bind(&t).bind(&id).bind(h.principal.user.as_deref().unwrap_or("unknown")).bind(json!({"source":r.source,"sourceShop":r.source_shop,"sourceId":r.source_id})).execute(&mut *tx).await?;
+    db::insert_historical(
+        &mut tx,
+        &t,
+        db::HistoricalOrder {
+            id: &id,
+            cart_id: &cart_id,
+            token,
+            cart: json!({"items":[],"locale":"en-GB","salesChannel":channel,"order":order}),
+            key: &key,
+            fingerprint: &fingerprint,
+            order: &order,
+            created: created.to_rfc3339(),
+            actor: h.principal.user.as_deref().unwrap_or("unknown"),
+            activity: json!({"source":r.source,"sourceShop":r.source_shop,"sourceId":r.source_id}),
+        },
+    )
+    .await?;
     veyndo_core::store::outbox::publish_on(
         &mut *tx,
         &t,

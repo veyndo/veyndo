@@ -1,13 +1,16 @@
 //! Reviewed work binds bounded native configuration commands and managed app saves before any worker effect; approval re-binds and queues it.
 use super::work_execution::validate_translation;
 use crate::domain::proposal::{NATIVE, Step};
+use crate::domain::views::{Evidence, ProposalParts};
 use crate::ports::WorkHost;
+use crate::store::{products, tasks};
+use serde::Deserialize;
 use serde_json::{Value, json};
-use sqlx::Row;
 use veyndo_app_model::declarations::identifier;
 use veyndo_app_platform::domain::planning::AppChange;
 use veyndo_catalog::domain::product_admission::{admit_product_write, product_write_guidance};
 use veyndo_catalog::service::categories::admit as admit_category;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::model_contract::validate_native;
 use veyndo_core::shop_scope::header;
 use veyndo_core::store::environments::parent;
@@ -28,6 +31,26 @@ pub fn catalogue<H: WorkHost>(host: &H, h: &RequestContext) -> Vec<Value> {
             entry
         })
         .collect()
+}
+/// The native targets and revision of a reviewed work step's arguments.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct WorkArguments {
+    product: Value,
+    category: Value,
+    #[serde(deserialize_with = "lenient")]
+    revision: Option<i64>,
+}
+/// A product or category target's identity and revisions.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct Target {
+    #[serde(deserialize_with = "lenient")]
+    id: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    revision: Option<i64>,
+    #[serde(deserialize_with = "lenient")]
+    content_revision: Option<i64>,
 }
 /// Binds reviewed work to its current targets: app saves to their revision, native steps to their admitted schema and stable targets.
 pub async fn bind<H: WorkHost>(
@@ -77,8 +100,9 @@ pub async fn bind<H: WorkHost>(
                     "Operation is not admitted for private configuration work",
                 ))?;
             validate_native(&schema, &args)?;
+            let work: WorkArguments = view(&args);
             if step.name.starts_with("merchant.product.") {
-                admit_product_write(&args["product"], step.name.ends_with(".create"))?;
+                admit_product_write(&work.product, step.name.ends_with(".create"))?;
             }
             if step.name == "merchant.translations.create" {
                 validate_translation(host, t, &args, &created_products).await?;
@@ -88,7 +112,7 @@ pub async fn bind<H: WorkHost>(
                 admit_category(
                     &host.catalog(),
                     t,
-                    &args["category"],
+                    &work.category,
                     step.name.ends_with(".create"),
                 )
                 .await?;
@@ -99,26 +123,20 @@ pub async fn bind<H: WorkHost>(
                 } else {
                     "category"
                 };
-                let id = args[key]["id"]
-                    .as_str()
+                let target: Target = view(if key == "product" {
+                    &work.product
+                } else {
+                    &work.category
+                });
+                let id = target
+                    .id
+                    .as_deref()
                     .filter(|id| identifier(id) || uuid::Uuid::parse_str(id).is_ok())
                     .ok_or(bad("Work creation needs an explicit stable identifier"))?;
-                let exists: bool = if key == "product" {
-                    sqlx::query_scalar(
-                        "SELECT EXISTS(SELECT 1 FROM products WHERE tenant=$1 AND id=$2)",
-                    )
-                    .bind(t)
-                    .bind(id)
-                    .fetch_one(&a.db)
-                    .await?
+                let exists = if key == "product" {
+                    products::exists(a, t, id).await?
                 } else {
-                    sqlx::query_scalar(
-                        "SELECT EXISTS(SELECT 1 FROM categories WHERE tenant=$1 AND id=$2)",
-                    )
-                    .bind(t)
-                    .bind(id)
-                    .fetch_one(&a.db)
-                    .await?
+                    products::category_exists(a, t, id).await?
                 };
                 if key == "product" {
                     if created_products.iter().any(|existing| existing == id) {
@@ -130,16 +148,15 @@ pub async fn bind<H: WorkHost>(
                     return Err(conflict("Planned create target already exists"));
                 }
             } else if step.name == "merchant.product.save" {
-                if args["product"]["revision"].as_i64().is_none()
-                    && args["product"]["contentRevision"].as_i64().is_none()
-                {
+                let product: Target = view(&work.product);
+                if product.revision.is_none() && product.content_revision.is_none() {
                     return Err(bad("Planned product edit needs its original revision"));
                 }
             } else if step.name == "merchant.category.save" {
-                if args["category"]["revision"].as_i64().is_none() {
+                if view::<Target>(&work.category).revision.is_none() {
                     return Err(bad("Planned category edit needs its original revision"));
                 }
-            } else if args["revision"].as_i64().is_none() {
+            } else if work.revision.is_none() {
                 return Err(bad("Planned edit needs its original revision"));
             }
         }
@@ -165,21 +182,17 @@ pub async fn approve<H: WorkHost>(
     }
     // Rebinding uses native owners which acquire their own connection. Do not hold
     // a transaction while calling them: transaction poolers may have one backend.
-    let row = sqlx::query("SELECT * FROM tasks WHERE tenant=$1 AND id=$2")
-        .bind(t)
-        .bind(id)
-        .fetch_one(&a.db)
-        .await?;
-    if row.get::<bool, _>("applied") {
+    let row = tasks::get(a, t, id).await?;
+    if row.applied {
         return Ok(json!({"taskId":id,"applied":true,"replayed":true}));
     }
-    if row.get::<String, _>("run_actor") != header(h, "x-rac-user").unwrap_or("") {
+    if row.run_actor != header(h, "x-rac-user").unwrap_or("") {
         return Err(Error(
             StatusCode::FORBIDDEN,
             "Only the original actor may approve work".into(),
         ));
     }
-    let ceiling: Value = row.get("run_scopes");
+    let ceiling = row.run_scopes;
     if ceiling.as_array().is_none_or(|scopes| {
         scopes
             .iter()
@@ -190,9 +203,9 @@ pub async fn approve<H: WorkHost>(
             "Current permissions no longer cover the reviewed work".into(),
         ));
     }
-    let mut request: Value = row.get("run_request");
+    let mut request = row.run_request;
     if request.get("execution").is_some() {
-        let state: String = row.get("run_state");
+        let state = row.run_state.unwrap_or_default();
         if !["queued", "running"].contains(&state.as_str()) {
             return Err(conflict(
                 "Work is stopped; use its explicit continuation or cancellation controls",
@@ -200,12 +213,14 @@ pub async fn approve<H: WorkHost>(
         }
         return Ok(json!({"taskId":id,"applied":false,"queued":true,"replayed":true}));
     }
-    if row.get::<Option<String>, _>("run_state").as_deref() != Some("ready") {
+    if row.run_state.as_deref() != Some("ready") {
         return Err(conflict("Work proposal is not ready"));
     }
-    let evidence: Value = row.get("proposal");
-    let mut steps: Vec<Step> = serde_json::from_value(evidence["proposal"]["operations"].clone())
-        .map_err(|_| bad("Invalid saved work plan"))?;
+    let evidence = row.proposal;
+    let mut steps: Vec<Step> = serde_json::from_value(
+        view::<ProposalParts>(&view::<Evidence>(&evidence).proposal).operations,
+    )
+    .map_err(|_| bad("Invalid saved work plan"))?;
     if steps.is_empty() {
         return Err(bad("Work plan has no steps"));
     }
@@ -227,18 +242,13 @@ pub async fn approve<H: WorkHost>(
             "Shop agents are stopped by an administrator".into(),
         ));
     }
-    let revision: i64 =
-        sqlx::query_scalar("SELECT run_revision FROM tasks WHERE tenant=$1 AND id=$2 FOR UPDATE")
-            .bind(t)
-            .bind(id)
-            .fetch_one(&mut *tx)
-            .await?;
-    if revision != row.get::<i64, _>("run_revision") {
+    let revision = tasks::lock_revision(&mut tx, t, id).await?;
+    if revision != row.run_revision {
         return Err(conflict(
             "Work changed while checking approval; reload its current state",
         ));
     }
-    if let Some(conversation) = row.get::<Option<String>, _>("conversation_id") {
+    if let Some(conversation) = row.conversation_id {
         claim_conversation(&mut tx, t, &conversation, id).await?;
     }
     request["execution"] = json!(steps);
@@ -246,7 +256,15 @@ pub async fn approve<H: WorkHost>(
     let credential = header(h, "authorization")
         .and_then(|s| s.strip_prefix("Bearer "))
         .map(hash);
-    sqlx::query("UPDATE tasks SET run_request=$3,run_credential=$4,run_personal=$5,run_checkpoint='{}',run_state='queued',run_revision=run_revision+1,run_updated=now(),run_lease=NULL,run_until=NULL WHERE tenant=$1 AND id=$2").bind(t).bind(id).bind(request).bind(credential).bind(h.principal.personal_session).execute(&mut *tx).await?;
+    tasks::queue_execution(
+        &mut tx,
+        t,
+        id,
+        &request,
+        credential,
+        h.principal.personal_session,
+    )
+    .await?;
     tx.commit().await?;
     Ok(json!({"taskId":id,"applied":false,"queued":true}))
 }

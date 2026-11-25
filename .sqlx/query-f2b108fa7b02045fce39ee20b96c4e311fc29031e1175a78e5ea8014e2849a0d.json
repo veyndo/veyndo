@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO policy(tenant,variant) VALUES($1,'discovery'),($1,'comparison')",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "f2b108fa7b02045fce39ee20b96c4e311fc29031e1175a78e5ea8014e2849a0d"
+}

@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT to_jsonb(a)-'tenant'-'content'-'created_at' AS \"data!\" FROM product_assets a WHERE tenant=$1 ORDER BY id FOR UPDATE",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "data!",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "8efee039cd817a2540a70baa64173b8674926a5c1a36a4da7f5b3c08d44ad3e9"
+}

@@ -1,0 +1,77 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT run_state,proposal,run_actor,run_scopes,applied FROM tasks WHERE tenant=$1 AND id=$2 FOR UPDATE",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "run_state",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "tasks",
+            "name": "run_state"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "proposal",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "tasks",
+            "name": "proposal"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "run_actor",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "tasks",
+            "name": "run_actor"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "run_scopes",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "tasks",
+            "name": "run_scopes"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "applied",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "tasks",
+            "name": "applied"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      true,
+      false,
+      true,
+      true,
+      false
+    ]
+  },
+  "hash": "ffc329279dc756d322a769b21c6c58c65fd4962fb831d574ddb4d0d0b1057278"
+}

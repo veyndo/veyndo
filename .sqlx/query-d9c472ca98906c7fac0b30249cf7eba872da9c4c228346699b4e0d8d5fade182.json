@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO product_categories SELECT $2,product_id,category_id FROM product_categories WHERE tenant=$1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "d9c472ca98906c7fac0b30249cf7eba872da9c4c228346699b4e0d8d5fade182"
+}

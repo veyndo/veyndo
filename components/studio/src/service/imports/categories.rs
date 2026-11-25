@@ -2,8 +2,10 @@
 use super::SourceRecord;
 use crate::ports::ImportHost;
 use axum::Json;
+use serde::Deserialize;
 use serde_json::{Value, json};
 use veyndo_catalog::service::categories::write as write_category;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::store::environments::parent;
 use veyndo_core::{RequestContext, Result, State, bad, conflict, hash};
 use veyndo_identity::{merchant, permit};
@@ -23,14 +25,8 @@ pub async fn import<H: ImportHost>(
     let namespace = super::identity_namespace(a, &t).await?;
     let id = r.identity(&namespace);
     let digest = hash(&json!({"record":r,"options":options}).to_string());
-    if let Some(data) =
-        sqlx::query_scalar::<_, Value>("SELECT data FROM categories WHERE tenant=$1 AND id=$2")
-            .bind(&t)
-            .bind(&id)
-            .fetch_optional(&a.db)
-            .await?
-    {
-        if data["importSource"]["digest"] == digest {
+    if let Some(data) = crate::store::imports::category_data(a, &t, &id).await? {
+        if view::<Imported>(&data).import_source.digest == digest {
             return Ok(json!({"id":id,"replayed":true}));
         }
         return Err(conflict(
@@ -39,18 +35,48 @@ pub async fn import<H: ImportHost>(
     }
     let payload = mapped(a, &t, r, options).await?;
     let Json(value) = Json(write_category(&host.catalog(), h, &id, payload, true).await?);
-    Ok(json!({"id":value["id"],"replayed":false}))
+    Ok(json!({"id":view::<Created>(&value).id,"replayed":false}))
 }
 
+/// A stored category's import provenance.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct Imported {
+    #[serde(deserialize_with = "lenient")]
+    import_source: ImportDigest,
+}
+/// The digest of the reviewed source snapshot.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct ImportDigest {
+    digest: Value,
+}
+/// The ID of a written category.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct Created {
+    id: Value,
+}
+/// The translated fields of a source category.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct CategorySource {
+    #[serde(deserialize_with = "lenient")]
+    title: Option<serde_json::Map<String, Value>>,
+    body: Value,
+    slug: Value,
+}
 /// Read-only inspection and creation share this native hierarchy/translation mapping.
 pub async fn mapped(a: &State, t: &str, r: &SourceRecord, options: &Value) -> Result<Value> {
     let namespace = super::identity_namespace(a, t).await?;
     let digest = hash(&json!({"record":r,"options":options}).to_string());
     let (settings, _) = config(a, t).await?;
-    let names = r.data["title"]
-        .as_object()
+    let source: CategorySource = view(&r.data);
+    let names = source
+        .title
+        .as_ref()
         .ok_or(bad("Translated category names required"))?;
-    let translations:serde_json::Map<String,Value>=names.iter().map(|(locale,name)|(settings.languages().key(locale),json!({"name":name,"description":r.data["body"][locale],"slug":r.data["slug"][locale]}))).collect();
+    let translations:serde_json::Map<String,Value>=names.iter().map(|(locale,name)|(settings.languages().key(locale),json!({"name":name,"description":source.body.get(locale).cloned().unwrap_or(Value::Null),"slug":source.slug.get(locale).cloned().unwrap_or(Value::Null)}))).collect();
     let parent = r
         .data
         .get("parentSourceId")

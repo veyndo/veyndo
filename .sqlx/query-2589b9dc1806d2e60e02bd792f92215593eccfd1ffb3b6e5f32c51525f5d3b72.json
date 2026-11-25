@@ -1,0 +1,59 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id,environment,selections,created_at::text AS \"created_at!\" FROM shop_releases WHERE live_tenant=$1 ORDER BY created_at DESC LIMIT 30",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "shop_releases",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "environment",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "shop_releases",
+            "name": "environment"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "selections",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "shop_releases",
+            "name": "selections"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "created_at!",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      null
+    ]
+  },
+  "hash": "2589b9dc1806d2e60e02bd792f92215593eccfd1ffb3b6e5f32c51525f5d3b72"
+}

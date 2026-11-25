@@ -1,6 +1,8 @@
 //! Approved work runs under the existing task lease; each native write is fenced against cancellation and recorded before advancing. Translation steps reuse native draft storage and yield the worker while drafts are prepared.
 use crate::domain::proposal::Step;
+use crate::domain::views::{Provider, Providers};
 use crate::ports::WorkHost;
+use crate::store::work_runs as db;
 use serde::Deserialize;
 use serde_json::{Value, json};
 use sqlx::Row;
@@ -39,11 +41,15 @@ pub async fn enqueue_translation(
 /// A translation provider must be centrally configured before a backend is taken.
 pub async fn admit_provider(inference: &Inference, choice: &Choice) -> Result<()> {
     let available = inference.public_providers().await.map_err(bad)?;
-    if !available["providers"].as_array().is_some_and(|providers| {
-        providers
-            .iter()
-            .any(|p| p["id"] == json!(choice.provider) && p["configured"] == true)
-    }) {
+    if !view::<Providers>(&available)
+        .providers
+        .is_some_and(|providers| {
+            providers
+                .iter()
+                .map(view::<Provider>)
+                .any(|p| p.id == json!(choice.provider) && p.configured == true)
+        })
+    {
         return Err(bad("Translation provider is not configured"));
     }
     Ok(())
@@ -82,15 +88,15 @@ pub async fn execute<H: WorkHost>(
             }
             continue;
         }
-        let changed=sqlx::query("UPDATE tasks SET run_pending=$4,run_revision=run_revision+1 WHERE tenant=$1 AND id=$2 AND run_state='running' AND run_lease=$3 AND run_until>now()").bind(t).bind(id).bind(&run.lease).bind(&key).execute(&a.db).await?.rows_affected();
+        let changed = db::mark_pending(a, t, id, &run.lease, &key).await?;
         if changed != 1 {
             return Err(conflict("Work cancelled before operation"));
         }
         let mut tx = a.db.begin().await?;
         // This transaction admits one operation. Managed saves and their receipts
         // commit together; native owners keep their own transaction below.
-        let locked=sqlx::query("SELECT id FROM tasks WHERE tenant=$1 AND id=$2 AND run_state='running' AND run_lease=$3 AND run_until>now() FOR UPDATE").bind(t).bind(id).bind(&run.lease).fetch_optional(&mut *tx).await?;
-        if locked.is_none() {
+        let locked = db::lock_leased(&mut tx, t, id, &run.lease).await?;
+        if !locked {
             return Err(conflict("Work lost its operation lease"));
         }
         let args: Value = serde_json::from_str(&step.arguments_json)
@@ -103,8 +109,15 @@ pub async fn execute<H: WorkHost>(
             // Do not hold a backend while a native owner acquires its own one.
             // Retain an admission token across cancellation so an admitted native
             // effect can truthfully finish its receipt without reviving the task.
-            let admitted = sqlx::query("UPDATE tasks SET run_checkpoint=jsonb_set(run_checkpoint,ARRAY[$3],$4,true) WHERE tenant=$1 AND id=$2 AND run_state='running' AND run_lease=$5 AND run_until>now()")
-                .bind(t).bind(id).bind(&admission).bind(json!({"lease":run.lease})).bind(&run.lease).execute(&mut *tx).await?.rows_affected();
+            let admitted = db::admit_operation(
+                &mut tx,
+                t,
+                id,
+                &admission,
+                &json!({"lease":run.lease}),
+                &run.lease,
+            )
+            .await?;
             if admitted != 1 {
                 return Err(conflict("Native work admission lost its lease"));
             }
@@ -114,17 +127,30 @@ pub async fn execute<H: WorkHost>(
         }
         // Keep only outcome metadata; domain data stays in its existing authorized owner.
         let receipt = json!({"index":index,"name":step.name,"label":step.label,"completed":true});
-        let recorded = sqlx::query("UPDATE tasks SET run_checkpoint=jsonb_set(run_checkpoint-$6::text,ARRAY[$4],$5,true),run_pending=CASE WHEN run_state='running' THEN NULL ELSE run_pending END,run_revision=run_revision+1,run_updated=now(),run_until=CASE WHEN run_state='running' AND run_until>now() THEN now()+interval '240 seconds' ELSE run_until END WHERE tenant=$1 AND id=$2 AND ((run_lease=$3 AND run_state='running' AND run_until>now()) OR ($7 AND run_checkpoint->$6=jsonb_build_object('lease',$3::text) AND ((run_state IN ('cancelled','uncertain') AND run_lease IS NULL) OR (run_state='running' AND run_lease=$3))))")
-            .bind(t).bind(id).bind(&run.lease).bind(&key).bind(receipt).bind(&admission).bind(step.binding.is_none()).execute(&mut *tx).await?.rows_affected();
+        let recorded = db::record_receipt(
+            &mut tx,
+            t,
+            id,
+            db::Receipt {
+                lease: &run.lease,
+                key: &key,
+                receipt,
+                admission: &admission,
+                native: step.binding.is_none(),
+            },
+        )
+        .await?;
         if recorded != 1 {
             return Err(conflict("Work lost its completion lease"));
         }
         tx.commit().await?;
     }
     let mut tx = a.db.begin().await?;
-    let row=sqlx::query("UPDATE tasks SET applied=true,run_state='ready',run_pending=NULL,run_lease=NULL,run_until=NULL,run_revision=run_revision+1,run_updated=now() WHERE tenant=$1 AND id=$2 AND run_state='running' AND run_lease=$3 AND run_until>now() RETURNING conversation_id").bind(t).bind(id).bind(&run.lease).fetch_optional(&mut *tx).await?.ok_or(conflict("Work completion lost its lease"))?;
-    if let Some(c) = row.get::<Option<String>, _>("conversation_id") {
-        sqlx::query("UPDATE conversations SET turn_owner=NULL,turn_until=NULL WHERE tenant=$1 AND id=$2 AND turn_owner=$3").bind(t).bind(c).bind(id).execute(&mut *tx).await?;
+    let conversation = db::complete(&mut tx, t, id, &run.lease)
+        .await?
+        .ok_or(conflict("Work completion lost its lease"))?;
+    if let Some(c) = conversation {
+        db::release_turn(&mut tx, t, &c, id).await?;
     }
     tx.commit().await?;
     Ok(json!({"taskId":id,"applied":true}))
@@ -197,8 +223,9 @@ pub async fn task_headers(a: &State, t: &str, task: &str) -> Result<RequestConte
 }
 /// The saved authority and trace of a work task with a running translation step.
 pub async fn task_context(a: &State, t: &str, task: &str) -> Result<(RequestContext, String)> {
-    let row = sqlx::query("SELECT * FROM tasks WHERE tenant=$1 AND id=$2 AND run_state IN ('queued','running') AND run_request ? 'execution'")
-        .bind(t).bind(task).fetch_optional(&a.db).await?.ok_or(conflict("Parent work is stopped"))?;
+    let row = db::work_task(a, t, task)
+        .await?
+        .ok_or(conflict("Parent work is stopped"))?;
     let h = authority(a, &row).await?;
     permit(&h, "catalog.write")?;
     Ok((h, row.get("run_trace")))
@@ -221,24 +248,15 @@ async fn advance<H: WorkHost>(
     let (target, choice, overwrite, products) = request(&v)?;
     let (settings, _) = config(a, t).await?;
     let mut tx = a.db.begin().await?;
-    let locked = sqlx::query("SELECT id FROM tasks WHERE tenant=$1 AND id=$2 AND run_state='running' AND run_lease=$3 AND run_until>now() FOR UPDATE")
-        .bind(t).bind(task).bind(&run.lease).fetch_optional(&mut *tx).await?;
-    if locked.is_none() {
+    let locked = db::lock_leased(&mut tx, t, task, &run.lease).await?;
+    if !locked {
         return Err(conflict("Translation work lost its task lease"));
     }
-    let job = sqlx::query("SELECT status,error,error_code FROM translation_jobs WHERE tenant=$1 AND id=$2 AND run_task=$3 FOR UPDATE")
-        .bind(t).bind(&job_id).bind(task).fetch_optional(&mut *tx).await?;
+    let job = db::step_job(&mut tx, t, &job_id, task).await?;
     let status = if let Some(job) = job {
-        let state: String = job.get("status");
-        if state == "failed"
-            && job.get::<Option<String>, _>("error_code").as_deref() == Some("call_interrupted")
-        {
-            sqlx::query("UPDATE tasks SET run_pending=$3 WHERE tenant=$1 AND id=$2")
-                .bind(t)
-                .bind(task)
-                .bind(format!("translation-{index}"))
-                .execute(&mut *tx)
-                .await?;
+        let state = job.status;
+        if state == "failed" && job.error_code.as_deref() == Some("call_interrupted") {
+            db::set_pending(&mut tx, t, task, &format!("translation-{index}")).await?;
             tx.commit().await?;
             return Err(conflict(
                 "Translation call may already have been processed or charged; review before explicitly continuing",
@@ -260,24 +278,23 @@ async fn advance<H: WorkHost>(
             (&target, &choice, overwrite, products.as_deref()),
         )
         .await?;
-        sqlx::query("UPDATE translation_jobs SET run_task=$3 WHERE tenant=$1 AND id=$2")
-            .bind(t)
-            .bind(&job_id)
-            .bind(task)
-            .execute(&mut *tx)
-            .await?;
+        db::link_job(&mut tx, t, &job_id, task).await?;
         "queued".into()
     };
-    sqlx::query("UPDATE tasks SET run_checkpoint=jsonb_set(run_checkpoint,ARRAY[$3],$4,true) WHERE tenant=$1 AND id=$2")
-        .bind(t).bind(task).bind(format!("translation-{index}")).bind(json!(job_id)).execute(&mut *tx).await?;
+    db::checkpoint(
+        &mut tx,
+        t,
+        task,
+        &format!("translation-{index}"),
+        &json!(job_id),
+    )
+    .await?;
     if status == "ready" {
         let receipt = json!({"index":index,"name":step.name,"label":step.label,"completed":true,"translationJobId":job_id});
-        sqlx::query("UPDATE tasks SET run_checkpoint=jsonb_set(run_checkpoint,ARRAY[$3],$4,true),run_revision=run_revision+1,run_updated=now(),run_until=now()+interval '240 seconds' WHERE tenant=$1 AND id=$2 AND run_state='running' AND run_until>now() AND run_lease=$5")
-            .bind(t).bind(task).bind(&key).bind(receipt).bind(&run.lease).execute(&mut *tx).await?;
+        db::record_step(&mut tx, t, task, &key, &receipt, &run.lease).await?;
     } else {
         // Yield the existing worker instead of holding a connection or busy-waiting.
-        sqlx::query("UPDATE tasks SET run_state='queued',run_after=now()+interval '5 seconds',run_lease=NULL,run_until=NULL,run_revision=run_revision+1,run_updated=now() WHERE tenant=$1 AND id=$2 AND run_state='running' AND run_until>now() AND run_lease=$3")
-            .bind(t).bind(task).bind(&run.lease).execute(&mut *tx).await?;
+        db::yield_run(&mut tx, t, task, &run.lease).await?;
     }
     tx.commit().await?;
     Ok(status == "ready")

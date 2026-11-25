@@ -1,9 +1,12 @@
 //! Flow work templates: bounded copies of reviewed native work whose event values replace explicit scalar fields, never executable text.
 use super::work_plan::bind;
 use crate::domain::proposal::Step;
+use crate::domain::views::{Evidence, ProposalParts};
 use crate::ports::WorkHost;
+use crate::store::tasks;
+use serde::Deserialize;
 use serde_json::{Value, json};
-use sqlx::Row;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::shop_scope::header;
 use veyndo_core::{Error, RequestContext, Result, StatusCode, bad, hash, uid};
 use veyndo_identity::allowed;
@@ -14,6 +17,13 @@ use veyndo_marketing::types::flow::Flow;
 use veyndo_marketing::types::work_template::WorkTemplate;
 use veyndo_shop::service::read_cache::config;
 
+/// The event context a flow run carries.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct FlowEvent {
+    #[serde(deserialize_with = "lenient")]
+    event_context: serde_json::Map<String, Value>,
+}
 /// Binds event values and stable run references into the reviewed steps; only explicit scalar fields change, never executable text.
 pub fn resolve(
     template: &WorkTemplate,
@@ -45,7 +55,11 @@ pub fn resolve(
                 json!(format!("work_{}", &hash(&format!("{job}:{key}"))[..24]))
             } else {
                 let key = binding.source.strip_prefix("event.").unwrap();
-                let value = definition["eventContext"][key].clone();
+                let value = view::<FlowEvent>(definition)
+                    .event_context
+                    .get(key)
+                    .cloned()
+                    .unwrap_or(Value::Null);
                 if key == "revision" {
                     if value.as_i64().is_none_or(|v| v < 0) {
                         return Err(bad("Event has no valid revision for this template"));
@@ -86,10 +100,10 @@ pub async fn load(
             "Personal task access required".into(),
         ));
     }
-    let row = sqlx::query("SELECT task.proposal,task.run_scopes FROM tasks task JOIN shop_environments e ON e.tenant=task.tenant WHERE task.tenant=$1 AND task.id=$2 AND task.run_actor=$3 AND task.applied AND task.run_state='ready' AND task.run_request ? 'execution' AND (e.preview_owner IS NULL OR (e.preview_owner=$3 AND e.preview_until>now()))")
-        .bind(t).bind(&template.task_id).bind(actor).fetch_optional(&mut **tx).await?
+    let (evidence, scopes) = tasks::completed_work(tx, t, &template.task_id, actor)
+        .await?
         .ok_or(Error(StatusCode::FORBIDDEN, "Choose your completed work in this private workspace; source tasks cannot be published or copied across workspaces".into()))?;
-    let scopes: Value = row.get("run_scopes");
+    let scopes = scopes.unwrap_or_default();
     if scopes.as_array().is_none_or(|values| {
         values
             .iter()
@@ -100,9 +114,10 @@ pub async fn load(
             "Source task requires its original permissions".into(),
         ));
     }
-    let evidence: Value = row.get("proposal");
-    let mut steps: Vec<Step> = serde_json::from_value(evidence["proposal"]["operations"].clone())
-        .map_err(|_| bad("Source task has no native work"))?;
+    let mut steps: Vec<Step> = serde_json::from_value(
+        view::<ProposalParts>(&view::<Evidence>(&evidence).proposal).operations,
+    )
+    .map_err(|_| bad("Source task has no native work"))?;
     if steps.is_empty() || steps.len() > 12 {
         return Err(bad("Source task needs 1..12 reviewed steps"));
     }

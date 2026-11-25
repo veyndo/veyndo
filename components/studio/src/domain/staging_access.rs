@@ -1,7 +1,9 @@
 //! Selective publication checks every selected domain's current rights before writing any live row; diffs show only what the caller may read.
+use crate::domain::views::IdValue;
 use serde_json::Value;
 use veyndo_app_model::manifest::Manifest;
 use veyndo_app_platform::domain::entity_access::entity_access;
+use veyndo_core::document::view;
 use veyndo_core::{RequestContext, Result, bad};
 use veyndo_identity::{allowed, permit as require};
 /// Requires the write right of every selected release unit.
@@ -107,7 +109,7 @@ pub fn before(h: &RequestContext, key: &str, baseline: &Value, current: &Value) 
     .ok()?;
     let entity = new.entities.iter().find(|e| e.name == parts[2])?;
     let mut projection = serde_json::Map::new();
-    projection.insert("id".into(), value["id"].clone());
+    projection.insert("id".into(), view::<IdValue>(value).id);
     for field in &entity.fields {
         if let Some(v) = value.get(&field.name) {
             projection.insert(field.name.clone(), v.clone());

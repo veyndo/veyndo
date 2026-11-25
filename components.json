@@ -771,6 +771,7 @@
         "product_translations": "write: proposal application and staging write product translations (clone.rs, product_editor.rs, snapshot.rs, translation_worker.rs)",
         "products": "write: proposal application and the product editor write products (clone.rs, inspect_media.rs, product_editor.rs, products.rs)",
         "projections": "read: reads projection checkpoints for the outbox operator view (outbox_control.rs)",
+        "receipt_settings": "write: staging clone copies receipt settings into the sandbox shop in one transaction (staging_clone.rs)",
         "sales_channels": "read: reads the sales channel document (kind, activity, catalogue scope) to admit the request channel inside the same statement (historical_orders.rs, manual_orders.rs, reports.rs, source.sql)",
         "semantic_products": "read: reads semantic product index state for reports (overview.sql)",
         "session_signal_events": "read: reads session signals for reports (reports.rs)",
@@ -780,9 +781,9 @@
         "translation_jobs": "write: the translation worker leases and advances translation jobs (translation_worker.rs, work_execution.rs, work_items.rs)"
       },
       "glob_imports": 0,
-      "untyped_access": 298,
-      "sql_outside_store": 23,
-      "runtime_sql": 180
+      "untyped_access": 70,
+      "sql_outside_store": 0,
+      "runtime_sql": 10
     },
     "protocols": {
       "title": "MCP, UCP and the shared capability dispatch; adapters without business rules",

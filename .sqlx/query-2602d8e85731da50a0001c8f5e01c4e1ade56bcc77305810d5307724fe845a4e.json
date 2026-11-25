@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO receipt_settings(tenant,data) SELECT $2,data FROM receipt_settings WHERE tenant=$1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "2602d8e85731da50a0001c8f5e01c4e1ade56bcc77305810d5307724fe845a4e"
+}

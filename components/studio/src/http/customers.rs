@@ -1,13 +1,15 @@
 //! Tenant-scoped paged CRM with admitted app filters and revision-checked merchant changes; credentials never leave storage.
 use super::orders::validate_criteria;
+use crate::domain::views::{CustomerVersion, EmailKey};
+use crate::store::customer_directory as directory;
 use axum::Json;
 use axum::extract::{Path, Query, State as Shared};
 use serde_json::{Value, json};
-use sqlx::Row;
 use veyndo_app_model::Object;
-use veyndo_app_platform::store::extension_filter::{admit as admit_filters, predicate};
+use veyndo_app_platform::store::extension_filter::admit as admit_filters;
 use veyndo_app_platform::store::extension_projection::attach;
-use veyndo_core::{RequestContext, Result, State, bad};
+use veyndo_core::document::view;
+use veyndo_core::{RequestContext, Result, State};
 use veyndo_customers::service::address_entries::address_list;
 use veyndo_customers::service::directory::{decorate, guest};
 use veyndo_identity::{merchant, permit};
@@ -25,61 +27,11 @@ pub async fn list(
     let n = validate_criteria(&c)?;
     let (sort, direction) = c.sort_for("customers")?;
     let filters = admit_filters(&a, &h, Object::Customer, &c.app_filter).await?;
-    let rows = if filters.is_empty()
-        && (c.sort.is_empty() || c.sort == "email")
-        && direction == "ASC"
-        && c.guest.is_none()
-        && c.active.is_none()
-        && c.group.is_empty()
-    {
-        sqlx::query_scalar::<_, Value>(include_str!("../store/customer_directory_default.sql"))
-            .bind(&t)
-            .bind(c.after)
-            .bind(c.query)
-            .bind(n + 1)
-            .fetch_all(&a.db)
-            .await?
-    } else {
-        use sqlx::Arguments;
-        let mut arguments = sqlx::postgres::PgArguments::default();
-        arguments
-            .add(t.clone())
-            .map_err(|_| bad("Invalid tenant binding"))?;
-        let mut q = sqlx::QueryBuilder::<sqlx::Postgres>::with_arguments(
-            include_str!("../store/customer_directory.sql"),
-            arguments,
-        );
-        if !c.after.is_empty() {
-            q.push(format!(
-                " AND ({sort},email) {} (SELECT {sort},email FROM contacts WHERE email=",
-                if direction == "ASC" { ">" } else { "<" }
-            ))
-            .push_bind(c.after)
-            .push(")");
-        }
-        if !c.query.is_empty() {
-            q.push(" AND strpos(lower(email||' '||coalesce(contact->'profile'->>'name','')||' '||coalesce(contact->>'company','')),lower(").push_bind(c.query).push("))>0");
-        }
-        if let Some(guest) = c.guest {
-            q.push(" AND (contact->>'guest')::bool=").push_bind(guest);
-        }
-        if let Some(active) = c.active {
-            q.push(" AND (contact->>'active')::bool=").push_bind(active);
-        }
-        if !c.group.is_empty() {
-            q.push(" AND contact->>'customerGroup'=").push_bind(c.group);
-        }
-        predicate(&mut q, Object::Customer, &t, &filters);
-        q.push(format!(
-            " ORDER BY {sort} {direction},email {direction} LIMIT "
-        ))
-        .push_bind(n + 1);
-        q.build_query_scalar::<Value>().fetch_all(&a.db).await?
-    };
+    let rows = directory::page(&a, &t, c, (sort, direction), &filters, n).await?;
     let more = rows.len() > n as usize;
     let mut elements = rows.into_iter().take(n as usize).collect::<Vec<_>>();
     attach(&a, &h, Object::Customer, &mut elements).await?;
-    let after = elements.last().map(|v| v["email"].clone());
+    let after = elements.last().map(|v| view::<EmailKey>(v).email);
     Ok(Json(
         json!({"elements":elements,"hasMore":more,"nextCursor":if more{after}else{None}}),
     ))
@@ -97,13 +49,7 @@ pub async fn detail(
     let t = merchant(&h)?;
     permit(&h, "customers.read")?;
     permit(&h, "customers.pii")?;
-    let r = sqlx::query(
-        "SELECT *,created_at::text AS created FROM customers WHERE tenant=$1 AND email=$2",
-    )
-    .bind(&t)
-    .bind(&email)
-    .fetch_optional(&a.db)
-    .await?;
+    let r = directory::customer(&a, &t, &email).await?;
     let mut v = if let Some(r) = r {
         let mut v = value(&r);
         decorate(&a, &t, &email, &mut v).await?;
@@ -113,16 +59,7 @@ pub async fn detail(
         guest(&a, &t, &email).await?
     };
     if permit(&h, "orders.read").is_ok() {
-        let rows=sqlx::query("SELECT o.data #- '{cart,token}' AS data,o.created_at::text AS created FROM orders o JOIN carts c ON c.id=o.cart_id AND c.tenant=o.tenant WHERE o.tenant=$1 AND ((o.data->'orderCustomer'->>'customerId')=(SELECT id FROM customers WHERE tenant=o.tenant AND email=$2) OR (o.data->'orderCustomer'->>'guest'='true' AND o.data->'orderCustomer'->>'email'=$2) OR (NOT o.data ? 'orderCustomer' AND c.data->>'email'=$2)) ORDER BY o.created_at DESC LIMIT 100").bind(t).bind(email).fetch_all(&a.db).await?;
-        v["orders"] = json!(
-            rows.iter()
-                .map(|r| {
-                    let mut o: Value = r.get("data");
-                    o["createdAt"] = json!(r.get::<String, _>("created"));
-                    o
-                })
-                .collect::<Vec<_>>()
-        );
+        v["orders"] = json!(directory::orders(&a, &t, &email).await?);
     }
     attach(&a, &h, Object::Customer, std::slice::from_mut(&mut v)).await?;
     Ok(Json(v))
@@ -144,7 +81,8 @@ pub async fn restore_customer(
     state: Value,
     revision: i64,
 ) -> Result<Json<Value>> {
-    let value = json!({"revision":revision,"profile":state["profile"],"company":state["company"],"customerGroup":state["customerGroup"],"active":state["active"]});
+    let recorded: CustomerVersion = view(&state);
+    let value = json!({"revision":revision,"profile":recorded.profile,"company":recorded.company,"customerGroup":recorded.customer_group,"active":recorded.active});
     save_domain(a, h, email, value, Some(state)).await
 }
 /// The shared merchant save of a customer.

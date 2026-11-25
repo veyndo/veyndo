@@ -7,16 +7,16 @@ use crate::ports::ReleaseHost;
 use crate::store::{
     staging_assets as assets, staging_categories as categories, staging_documents as documents,
 };
+use crate::store::{staging_clone as clone, staging_release as db};
 use serde::Deserialize;
 use serde_json::{Value, json};
-use sqlx::Row;
 use veyndo_app_model::manifest::Manifest;
 use veyndo_app_platform::domain::consent::actor_permissions;
 use veyndo_app_platform::domain::core_extensions::configuration;
 use veyndo_app_platform::domain::entity_access::entity_access;
 use veyndo_app_platform::store::records::{get as get_record, lock_key};
 use veyndo_b2b::store::staging as b2b;
-use veyndo_core::document::view;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::shop_scope::header;
 use veyndo_core::store::history_context::context;
 use veyndo_core::{RequestContext, Result, bad, conflict, hash, uid};
@@ -40,6 +40,37 @@ struct Release {
     approve: bool,
     selections: Vec<Selection>,
 }
+/// A channel unit's operational kind.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct ChannelUnit {
+    #[serde(deserialize_with = "lenient")]
+    kind: Option<String>,
+}
+/// An app package unit.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct AppUnit {
+    manifest: Value,
+    #[serde(deserialize_with = "lenient")]
+    active: Option<bool>,
+}
+/// A record's revision.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct Revisioned {
+    #[serde(deserialize_with = "lenient")]
+    revision: Option<i64>,
+}
+/// A rule unit.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct RuleUnit {
+    name: Value,
+    condition: Value,
+    #[serde(deserialize_with = "lenient")]
+    active: Option<bool>,
+}
 /// Takes every lock of a release in the order native writers take them.
 async fn lock_units<H: ReleaseHost>(
     host: &H,
@@ -51,17 +82,8 @@ async fn lock_units<H: ReleaseHost>(
     host.settings_guards().lock(tx, t).await?;
     lock_company(tx, t).await?;
     lock_company(tx, id).await?;
-    sqlx::query("SELECT pg_advisory_xact_lock(hashtextextended($1,16))")
-        .bind(t)
-        .execute(&mut **tx)
-        .await?;
-    for lock in [726, 727] {
-        sqlx::query("SELECT pg_advisory_xact_lock(hashtextextended($1,$2))")
-            .bind(t)
-            .bind(lock as i64)
-            .execute(&mut **tx)
-            .await?;
-    }
+    clone::lock_environments(tx, t).await?;
+    db::lock_configuration(tx, t).await?;
     // The package fence precedes record locks, exactly as in native app writes.
     // Otherwise a concurrent save could hold package SHARE while release holds its record.
     let mut package_locks = std::collections::BTreeSet::new();
@@ -78,20 +100,14 @@ async fn lock_units<H: ReleaseHost>(
         }
     }
     for lock in package_locks {
-        sqlx::query("SELECT pg_advisory_xact_lock(hashtextextended($1,7))")
-            .bind(lock)
-            .execute(&mut **tx)
-            .await?;
+        db::lock_package(tx, &lock).await?;
     }
     for key in keys.iter().filter(|k| k.starts_with("appdata:")) {
         let parts = key.splitn(4, ':').collect::<Vec<_>>();
         if parts.len() != 4 {
             return Err(bad("Invalid app data selection"));
         }
-        sqlx::query("SELECT pg_advisory_xact_lock(hashtextextended($1,8))")
-            .bind(lock_key(t, parts[1], parts[2], parts[3]))
-            .execute(&mut **tx)
-            .await?;
+        db::lock_record(tx, &lock_key(t, parts[1], parts[2], parts[3])).await?;
     }
     Ok(())
 }
@@ -124,8 +140,9 @@ fn admit_selections(
     // Validate against the current live operational type before it can be overwritten.
     // The complete aggregate (including jointly selected categories/settings) is checked below.
     for key in keys.iter().filter(|k| k.starts_with("channel:")) {
-        let old = actual.get(key).and_then(|v| v["kind"].as_str());
-        let new = current[key]["kind"].as_str();
+        let old = actual.get(key).and_then(|v| view::<ChannelUnit>(v).kind);
+        let new = current.get(key).and_then(|v| view::<ChannelUnit>(v).kind);
+        let (old, new) = (old.as_deref(), new.as_deref());
         if old.is_some_and(|old| {
             (old == "pos") != (new == Some("pos"))
                 || (old == "marketplace") != (new == Some("marketplace"))
@@ -161,11 +178,11 @@ async fn publish_unit<H: ReleaseHost>(
             serde_json::from_value(value.clone()).map_err(|_| bad("Invalid workflow"))?;
         m.validate()?;
         let ids = m.states.iter().map(|s| s.id.clone()).collect::<Vec<_>>();
-        let stranded:bool=sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM orders WHERE tenant=$1 AND NOT(data->>'state'=ANY($2)) AND data->>'state' NOT IN ('expired','payment_review'))").bind(t).bind(ids).fetch_one(&mut **tx).await?;
+        let stranded = db::stranded_orders(tx, t, ids).await?;
         if stranded {
             return Err(conflict("Workflow removes an active order state"));
         }
-        sqlx::query("INSERT INTO order_state_machines(tenant,data) VALUES($1,$2) ON CONFLICT(tenant) DO UPDATE SET data=EXCLUDED.data,revision=order_state_machines.revision+1").bind(t).bind(value).execute(&mut **tx).await?;
+        crate::store::order_workflow::save(tx, t, value).await?;
     } else if let Some(asset) = key.strip_prefix("asset:") {
         assets::publish_asset(tx, t, id, asset).await?;
     } else if let Some(document) = key.strip_prefix("document:") {
@@ -173,29 +190,21 @@ async fn publish_unit<H: ReleaseHost>(
     } else if key.starts_with("product:") {
         // Product parents and content were published above, before dependent assets.
     } else if let Some(app) = key.strip_prefix("app:") {
-        let m: Manifest = serde_json::from_value(value["manifest"].clone())
-            .map_err(|_| bad("Invalid app package"))?;
+        let unit: AppUnit = view(value);
+        let m: Manifest =
+            serde_json::from_value(unit.manifest).map_err(|_| bad("Invalid app package"))?;
         if m.runtime != "declarative" {
             return Err(bad("External services need a separate deployment"));
         }
         actor_permissions(h, &m)?;
         host.install_app(tx, t, m).await?;
-        sqlx::query("UPDATE app_packages SET active=$1 WHERE tenant=$2 AND id=$3")
-            .bind(value["active"].as_bool())
-            .bind(t)
-            .bind(app)
-            .execute(&mut **tx)
-            .await?;
+        db::set_app_active(tx, t, app, unit.active).await?;
     } else if key.starts_with("appdata:") {
         let parts = key.splitn(4, ':').collect::<Vec<_>>();
-        let row = sqlx::query("SELECT manifest FROM app_packages WHERE tenant=$1 AND id=$2")
-            .bind(t)
-            .bind(parts[1])
-            .fetch_optional(&mut **tx)
+        let manifest = db::manifest(tx, t, parts[1])
             .await?
             .ok_or(bad("Publish the app package before its data"))?;
-        let m: Manifest =
-            serde_json::from_value(row.get("manifest")).map_err(|_| bad("Invalid app"))?;
+        let m: Manifest = serde_json::from_value(manifest).map_err(|_| bad("Invalid app"))?;
         let e = m
             .entities
             .iter()
@@ -208,7 +217,7 @@ async fn publish_unit<H: ReleaseHost>(
         }
         let revision = get_record(tx, t, &m.id, &e.name, parts[3], false)
             .await?
-            .and_then(|r| r["revision"].as_i64())
+            .and_then(|r| view::<Revisioned>(&r).revision)
             .unwrap_or(0);
         let mut fields = value.clone();
         fields.as_object_mut().unwrap().remove("id");
@@ -233,23 +242,17 @@ async fn publish_unit<H: ReleaseHost>(
             preserve_import(&actual[key], value)?;
         }
         if kind == "rule" {
-            sqlx::query("INSERT INTO commerce_rules(tenant,id,name,condition,active) VALUES($1,$2,$3,$4,$5) ON CONFLICT(tenant,id) DO UPDATE SET name=EXCLUDED.name,condition=EXCLUDED.condition,active=EXCLUDED.active,revision=commerce_rules.revision+1").bind(t).bind(unit).bind(&value["name"]).bind(&value["condition"]).bind(value["active"].as_bool()).execute(&mut **tx).await?;
+            let rule: RuleUnit = view(value);
+            db::upsert_rule(tx, t, unit, &rule.name, &rule.condition, rule.active).await?;
         } else {
-            let sql = format!(
-                "INSERT INTO {table}(tenant,id,data) VALUES($1,$2,$3) ON CONFLICT(tenant,id) DO UPDATE SET data=EXCLUDED.data,revision={table}.revision+1"
-            );
-            sqlx::query(sqlx::AssertSqlSafe(sql.as_str()))
-                .bind(t)
-                .bind(unit)
-                .bind(if kind == "flow" {
-                    let mut flow = value.clone();
-                    flow["actor"] = json!(header(h, "x-rac-user").unwrap_or("unknown"));
-                    flow
-                } else {
-                    value.clone()
-                })
-                .execute(&mut **tx)
-                .await?;
+            let data = if kind == "flow" {
+                let mut flow = value.clone();
+                flow["actor"] = json!(header(h, "x-rac-user").unwrap_or("unknown"));
+                flow
+            } else {
+                value.clone()
+            };
+            db::upsert_unit(tx, table, t, unit, &data).await?;
         }
     } else {
         let table = match key {
@@ -257,12 +260,7 @@ async fn publish_unit<H: ReleaseHost>(
             "experience" => "experiences",
             _ => return Err(bad("Unsupported release unit")),
         };
-        let sql = format!("UPDATE {table} SET data=$1,revision=revision+1 WHERE tenant=$2");
-        sqlx::query(sqlx::AssertSqlSafe(sql.as_str()))
-            .bind(value)
-            .bind(t)
-            .execute(&mut **tx)
-            .await?;
+        db::replace_document(tx, table, t, value).await?;
     }
     Ok(())
 }
@@ -273,11 +271,7 @@ async fn live_value(tx: &mut Tx<'_>, t: &str, key: &str, value: &Value) -> Resul
     } else if key == "company" || key.starts_with("company-channel:") {
         company::live_value(tx, t, key).await?
     } else if let Some(flow) = key.strip_prefix("flow:") {
-        sqlx::query_scalar("SELECT data FROM commerce_flows WHERE tenant=$1 AND id=$2")
-            .bind(t)
-            .bind(flow)
-            .fetch_one(&mut **tx)
-            .await?
+        db::flow(tx, t, flow).await?
     } else {
         value.clone()
     })
@@ -311,13 +305,7 @@ pub async fn release<H: ReleaseHost>(
     let mut tx = a.db.begin().await?;
     context(&mut tx, &h, "staging.release").await?;
     lock_units(host, &mut tx, &t, &id, &keys).await?;
-    let mut base: Value = sqlx::query_scalar(
-        "SELECT baseline FROM shop_environments WHERE tenant=$1 AND live_tenant=$2 FOR UPDATE",
-    )
-    .bind(&id)
-    .bind(&t)
-    .fetch_one(&mut *tx)
-    .await?;
+    let mut base = db::baseline(&mut tx, &id, &t).await?;
     let current = snapshot(&mut tx, &id).await?;
     let actual = snapshot(&mut tx, &t).await?;
     for key in keys.iter().filter(|k| k.starts_with("flow:")) {
@@ -343,12 +331,16 @@ pub async fn release<H: ReleaseHost>(
     final_config::validate(host, &mut tx, &t, &h, &keys, (&current, &actual), &mut base).await?;
     let release = uid();
     let selected = json!(keys);
-    sqlx::query("UPDATE shop_environments SET baseline=$1 WHERE tenant=$2")
-        .bind(base)
-        .bind(&id)
-        .execute(&mut *tx)
-        .await?;
-    sqlx::query("INSERT INTO shop_releases(id,live_tenant,environment,selections,actor) VALUES($1,$2,$3,$4,$5)").bind(&release).bind(&t).bind(&id).bind(&selected).bind(header(&h,"x-rac-user").unwrap_or("unknown")).execute(&mut *tx).await?;
+    clone::set_baseline(&mut tx, &id, &base).await?;
+    db::insert_release(
+        &mut tx,
+        &release,
+        &t,
+        &id,
+        &selected,
+        header(&h, "x-rac-user").unwrap_or("unknown"),
+    )
+    .await?;
     veyndo_core::store::outbox::publish_on(
         &mut *tx,
         &t,

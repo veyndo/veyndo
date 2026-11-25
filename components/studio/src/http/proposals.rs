@@ -1,9 +1,10 @@
 //! HTTP proposal planning and the caller's reviewable task list.
+use crate::domain::views::Queued;
+use crate::store::tasks;
 use axum::Json;
 use axum::extract::State as Shared;
 use serde::Deserialize;
 use serde_json::{Value, json};
-use sqlx::Row;
 use veyndo_core::document::{lenient, view};
 use veyndo_core::shop_scope::{channel as channel_id, header};
 use veyndo_core::{RequestContext, Result, State};
@@ -38,22 +39,21 @@ pub async fn agent_plan(
     if input.background == Some(true) {
         return Ok(Json(queued));
     }
-    let run = wait(&a, &h, queued["taskId"].as_str().unwrap()).await?;
+    let run = wait(&a, &h, &view::<Queued>(&queued).task_id.unwrap()).await?;
     Ok(Json(plan_result(run)?))
 }
 /// The caller's recent reviewable tasks that their current rights still cover.
 pub async fn tasks(Shared(a): Shared<State>, h: RequestContext) -> Result<Json<Value>> {
     assistant_access(&h)?;
     let t = merchant(&h)?;
-    let rs = sqlx::query(
-        "SELECT id,proposal,applied,coalesce(run_request ? 'execution',false) AS execution_started FROM tasks WHERE tenant=$1 AND (run_state IS NULL OR run_state='ready' OR run_request ? 'execution') AND coalesce(run_actor,proposal->>'actor')=$2 AND (run_scopes IS NULL OR run_scopes <@ $3) ORDER BY created_at DESC LIMIT 30",
+    let rs = tasks::reviewable(
+        &a,
+        &t,
+        header(&h, "x-rac-user"),
+        &json!(SCOPES.iter().filter(|s| allowed(&h, s)).collect::<Vec<_>>()),
     )
-    .bind(t)
-    .bind(header(&h,"x-rac-user"))
-    .bind(json!(SCOPES.iter().filter(|s|allowed(&h,s)).collect::<Vec<_>>()))
-    .fetch_all(&a.db)
     .await?;
     Ok(Json(
-        json!({"tasks":rs.iter().map(|r|json!({"id":r.get::<String,_>("id"),"preview":r.get::<Value,_>("proposal"),"applied":r.get::<bool,_>("applied"),"executionStarted":r.get::<bool,_>("execution_started")})).collect::<Vec<_>>()}),
+        json!({"tasks":rs.iter().map(|r|json!({"id":r.id,"preview":r.proposal,"applied":r.applied,"executionStarted":r.execution_started})).collect::<Vec<_>>()}),
     ))
 }

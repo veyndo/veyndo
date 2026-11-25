@@ -1,0 +1,29 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT baseline FROM shop_environments WHERE tenant=$1 AND live_tenant=$2 FOR UPDATE",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "baseline",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "shop_environments",
+            "name": "baseline"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "7ab5417d56578623a279d4f42bf8fc8642580eb6159787b201e495e1f6406681"
+}

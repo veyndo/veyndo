@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO sales_channels(tenant,id,data) SELECT $2,id,data FROM sales_channels WHERE tenant=$1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "ab7932da351d719a890ea0d25bc6b737870dc1dc20df4c307e26b3faa3e4cb75"
+}

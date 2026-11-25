@@ -1,0 +1,25 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT EXISTS(SELECT 1 FROM product_translations WHERE tenant=$1 AND product_id=$2 AND language_id=(SELECT id FROM languages WHERE locale=$3) AND description IS NOT NULL) AS \"exists!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "exists!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "f6d43d1547238a8a34e26ce7e12f8df921ef6e97383e5c21d45f3e3c28ff65d8"
+}

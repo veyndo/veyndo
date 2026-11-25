@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO experiences(tenant,data) SELECT $2,data FROM experiences WHERE tenant=$1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "b083c8bada8b7714e2b14d65820cd7b00ad58445952d68b385213e7bc6e59e11"
+}

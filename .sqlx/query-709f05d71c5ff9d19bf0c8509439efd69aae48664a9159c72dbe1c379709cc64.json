@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE shop_environments SET baseline=$1 WHERE tenant=$2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Jsonb",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "709f05d71c5ff9d19bf0c8509439efd69aae48664a9159c72dbe1c379709cc64"
+}

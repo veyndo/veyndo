@@ -1,10 +1,12 @@
 //! History transport: bounded, permission-filtered version listings and single versions of the owning shop.
 use crate::domain::history_access::{requires_pii, rights};
+use crate::domain::views::IdValue;
 use crate::store::history::{record, versions};
 use axum::Json;
 use axum::extract::{Path, Query, State as Shared};
 use serde::Deserialize;
 use serde_json::{Value, json};
+use veyndo_core::document::view;
 use veyndo_core::{RequestContext, Result, State, bad};
 use veyndo_identity::{merchant, permit};
 
@@ -34,7 +36,7 @@ pub async fn list(
     }
     let (elements, more) = versions(&a, &t, &entity, &id, p.before).await?;
     Ok(Json(
-        json!({"elements":elements,"nextCursor":if more{elements.last().map(|e|e["id"].clone())}else{None},"canRestore":write.is_some_and(|w|permit(&h,w).is_ok()),"entity":entity,"entityId":id,"captureFrom":"034-entity-history","restoresAsNewRevision":true}),
+        json!({"elements":elements,"nextCursor":if more{elements.last().map(|e|view::<IdValue>(e).id)}else{None},"canRestore":write.is_some_and(|w|permit(&h,w).is_ok()),"entity":entity,"entityId":id,"captureFrom":"034-entity-history","restoresAsNewRevision":true}),
     ))
 }
 

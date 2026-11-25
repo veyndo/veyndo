@@ -1,0 +1,160 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE translation_jobs SET status='processing',lease=$1,lease_until=now()+interval '15 minutes' WHERE (tenant,id)=(SELECT tenant,id FROM translation_jobs WHERE (status='queued' OR (status='processing' AND run_task IS NULL AND lease_until<now())) AND EXISTS(SELECT 1 FROM tenants t WHERE t.id=coalesce((SELECT live_tenant FROM shop_environments WHERE tenant=translation_jobs.tenant),translation_jobs.tenant) AND t.status='active') ORDER BY created_at FOR UPDATE SKIP LOCKED LIMIT 1) RETURNING tenant,id,source_locale,target_locale,choice,overwrite,cursor,highwater,total,processed,product_ids,run_task",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "tenant",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "translation_jobs",
+            "name": "tenant"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "id",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "translation_jobs",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "source_locale",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "translation_jobs",
+            "name": "source_locale"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "target_locale",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "translation_jobs",
+            "name": "target_locale"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "choice",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "translation_jobs",
+            "name": "choice"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "overwrite",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "translation_jobs",
+            "name": "overwrite"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "cursor",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "translation_jobs",
+            "name": "cursor"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "highwater",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "translation_jobs",
+            "name": "highwater"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "total",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "translation_jobs",
+            "name": "total"
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "processed",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "translation_jobs",
+            "name": "processed"
+          }
+        }
+      },
+      {
+        "ordinal": 10,
+        "name": "product_ids",
+        "type_info": "TextArray",
+        "origin": {
+          "Table": {
+            "table": "translation_jobs",
+            "name": "product_ids"
+          }
+        }
+      },
+      {
+        "ordinal": 11,
+        "name": "run_task",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "translation_jobs",
+            "name": "run_task"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      true
+    ]
+  },
+  "hash": "ec7c74cfb258f16bb54025dc0b2ff5d11937aa3856acd5aa3ef80fba4c5dcdb4"
+}

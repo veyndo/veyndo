@@ -1,0 +1,29 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT lease FROM translation_jobs WHERE tenant=$1 AND id=$2 AND status='processing' FOR UPDATE",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "lease",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "translation_jobs",
+            "name": "lease"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      true
+    ]
+  },
+  "hash": "a7b16c78a00eba5faaaa1c5d9799700c5a22e0704d2e3023bde7dbaba43cd919"
+}

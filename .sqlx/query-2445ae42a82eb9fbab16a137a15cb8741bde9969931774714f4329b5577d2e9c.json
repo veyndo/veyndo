@@ -1,0 +1,44 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT (SELECT count(*) FROM outbox WHERE tenant=$1 AND delivered_at IS NULL AND dead_letter_at IS NULL) AS \"pending!\",(SELECT count(*) FROM outbox WHERE tenant=$1 AND dead_letter_at IS NOT NULL) AS \"quarantined!\",(SELECT count(*) FROM outbox WHERE tenant=$1 AND delivered_at IS NULL AND attempts>0 AND dead_letter_at IS NULL) AS \"retrying!\",(SELECT count(*) FROM projections WHERE tenant=$1) AS \"consumed!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "pending!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "quarantined!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "retrying!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 3,
+        "name": "consumed!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "2445ae42a82eb9fbab16a137a15cb8741bde9969931774714f4329b5577d2e9c"
+}

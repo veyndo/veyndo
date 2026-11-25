@@ -3,14 +3,15 @@ use super::work_plan::bind;
 use crate::domain::grid_criteria::validate as validate_criteria;
 use crate::domain::proposal::{Proposal, View, validate_proposal};
 use crate::domain::view_components::validate as validate_components;
+use crate::domain::views::Criteria;
 use crate::ports::WorkHost;
+use crate::store::products;
 use serde::Deserialize;
 use serde_json::Value;
 use serde_json::json;
 use veyndo_app_model::Object;
 use veyndo_app_platform::store::extension_filter::admit as admit_filter;
 use veyndo_catalog::service::translation_apply::admit_selection;
-use veyndo_catalog::store::products::product;
 use veyndo_core::document::{lenient, view};
 use veyndo_core::{RequestContext, Result, State, bad};
 use veyndo_identity::{allowed, permit};
@@ -39,7 +40,10 @@ pub async fn admit_view(a: &State, h: &RequestContext, view: &mut View) -> Resul
             .retain(|component| component != "shippingPolicy");
     }
     view.criteria = validate_criteria(&view.entity, &view.criteria)?;
-    if let Some(filter) = view.criteria["appFilter"].as_str() {
+    if let Some(filter) = veyndo_core::document::view::<Criteria>(&view.criteria)
+        .app_filter
+        .as_deref()
+    {
         let object = match view.entity.as_str() {
             "orders" => Object::Order,
             "customers" => Object::Customer,
@@ -128,14 +132,7 @@ pub async fn admit<H: WorkHost>(
     if requested.len() > 100 {
         return Err(bad("Proposal product budget exceeded"));
     }
-    for row in
-        sqlx::query("SELECT * FROM products WHERE tenant=$1 AND id=ANY($2) ORDER BY id LIMIT 100")
-            .bind(t)
-            .bind(&requested)
-            .fetch_all(&a.db)
-            .await?
-    {
-        let item = product(&row);
+    for item in products::requested(a, t, &requested).await? {
         if !ps.iter().any(|p| p.id == item.id) {
             ps.push(item);
         }

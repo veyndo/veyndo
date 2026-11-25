@@ -1,0 +1,29 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT media FROM products WHERE tenant=$1 AND id=$2",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "media",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "products",
+            "name": "media"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "01ae1ef262d0bd923570d9b1baeb4b6ec99e784e3277693714c9a0386179d728"
+}

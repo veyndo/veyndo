@@ -26,5 +26,5 @@ WITH contacts AS (
   WHERE $3='' OR strpos(lower(email||' '||coalesce(contact->'profile'->>'name','')||' '||coalesce(contact->>'company','')),lower($3))>0
   ORDER BY email LIMIT $4)
 )
-SELECT contact FROM contacts
+SELECT contact AS "contact!" FROM contacts
 ORDER BY email LIMIT $4;
