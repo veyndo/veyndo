@@ -129,12 +129,8 @@ export default function NativeCategoryPreview({
                 <ProductTile
                   key={p.id}
                   product={p}
-                  money={(n) =>
-                    new Intl.NumberFormat(locale, {
-                      style: "currency",
-                      currency: p.currency ?? "EUR",
-                    }).format(n)
-                  }
+                  currency={p.currency ?? "EUR"}
+                  locale={locale}
                 />
               ))}
             </div>

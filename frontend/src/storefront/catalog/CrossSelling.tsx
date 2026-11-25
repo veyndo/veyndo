@@ -20,7 +20,7 @@ export default function CrossSelling({
   sourceId: string;
   cart?: Cart | null;
 }) {
-  const { money, locale, currency } = useShopText(),
+  const { locale, currency } = useShopText(),
     { a } = useAppText();
   const selected = [...new Set(ids)]
     .filter((id) => typeof id === "string" && id !== sourceId)
@@ -84,7 +84,6 @@ export default function CrossSelling({
               calculated_price:
                 d.calculatedPrices[0]?.price ?? d.product.calculated_price,
             }}
-            money={money}
             business={d.taxStatus === "net"}
           />
         ))}

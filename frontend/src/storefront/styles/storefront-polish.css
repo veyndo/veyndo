@@ -137,25 +137,25 @@
 .shop-grid {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
-.shop-product-image {
+.vy-sf-card .vy-sf-card-media {
   border-radius: 18px;
   background: var(--shop-surface);
 }
-.shop-product-image img {
+.vy-sf-card .vy-sf-card-media img {
   aspect-ratio: 1;
   object-fit: cover;
 }
-.shop-product-info h3 {
+.vy-sf-card .vy-sf-card-body h3 {
   font-size: 22px;
 }
-.shop-product-info > p:not(.shop-kicker) {
+.vy-sf-card .vy-sf-card-body > p:not(.vy-sf-kicker, .vy-sf-price) {
   font-size: 15px;
 }
-.shop-product-info small,
-.shop-product-link {
+.vy-sf-card .vy-sf-price small,
+.vy-sf-card .vy-sf-card-link {
   font-size: 13px;
 }
-.shop-product-link {
+.vy-sf-card .vy-sf-card-link {
   min-height: 48px;
 }
 .shop-footer {
@@ -268,18 +268,18 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 28px 14px;
   }
-  .shop-product-info h3 {
+  .vy-sf-card .vy-sf-card-body h3 {
     font-size: 18px;
     line-height: 1.3;
   }
-  .shop-product-info > p:not(.shop-kicker) {
+  .vy-sf-card .vy-sf-card-body > p:not(.vy-sf-kicker, .vy-sf-price) {
     font-size: 14px;
   }
-  .shop-product-info .shop-kicker {
+  .vy-sf-card .vy-sf-kicker {
     font-size: 11px;
   }
-  .shop-product-info small,
-  .shop-product-link {
+  .vy-sf-card .vy-sf-price small,
+  .vy-sf-card .vy-sf-card-link {
     font-size: 12px;
   }
   .shop-footer {

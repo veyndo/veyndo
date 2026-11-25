@@ -15,6 +15,7 @@ export default function ConciergeSelection({
   onRestore,
   products,
   money,
+  currency,
   business = false,
   compareInitially = false,
 }: {
@@ -24,6 +25,8 @@ export default function ConciergeSelection({
   onRestore: () => void;
   products: Product[];
   money: (n: number) => string;
+  /** Display currency of the cards, matching `money`. */
+  currency?: string;
   business?: boolean;
   compareInitially?: boolean;
 }) {
@@ -139,7 +142,7 @@ export default function ConciergeSelection({
               {product ? (
                 <ProductTile
                   product={product}
-                  money={money}
+                  currency={currency}
                   business={business}
                 />
               ) : (

@@ -1,6 +1,11 @@
 /** Vocabulary of the storefront parts in English, German, French and Spanish; hosts pass only the locale. */
 const words = {
-  details: ["Details", "Details", "Détails", "Detalles"],
+  details: [
+    "View product",
+    "Produkt ansehen",
+    "Voir le produit",
+    "Ver producto",
+  ],
   available: ["available", "verfügbar", "disponibles", "disponibles"],
   soldOut: ["Sold out", "Ausverkauft", "Épuisé", "Agotado"],
   noImage: ["No image", "Kein Bild", "Pas d’image", "Sin imagen"],
@@ -35,9 +40,9 @@ const words = {
     "Étapes de commande",
     "Pasos del pedido",
   ],
-  details_step: ["Details", "Angaben", "Coordonnées", "Datos"],
+  details_step: ["Your details", "Deine Daten", "Vos coordonnées", "Tus datos"],
   review_step: ["Review", "Prüfen", "Vérification", "Revisión"],
-  complete_step: ["Done", "Fertig", "Terminé", "Listo"],
+  complete_step: ["Complete", "Abschluss", "Confirmation", "Confirmación"],
   account: ["Your account", "Dein Konto", "Votre compte", "Tu cuenta"],
   orders: [
     "Recent orders",

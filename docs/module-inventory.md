@@ -2126,7 +2126,7 @@ This lists every checked-in source module in these roots, including files with n
 | [frontend/src/storefront/checkout/CheckoutIdentity.tsx](../frontend/src/storefront/checkout/CheckoutIdentity.tsx) | Inline guest/login/registration step rotates the cart on authentication and refreshes owning defaults. |
 | [frontend/src/storefront/checkout/CheckoutMethods.tsx](../frontend/src/storefront/checkout/CheckoutMethods.tsx) | Method cards keep delivery and payment discoverable without concealing country restrictions. |
 | [frontend/src/storefront/checkout/CheckoutPanel.tsx](../frontend/src/storefront/checkout/CheckoutPanel.tsx) | One-page checkout: server-reviewed selection, explicit purchase and durable provider handoff. |
-| [frontend/src/storefront/checkout/CheckoutProgress.tsx](../frontend/src/storefront/checkout/CheckoutProgress.tsx) | Readable checkout progress reflects reviewed server state; it never implies payment confirmation. |
+| [frontend/src/storefront/checkout/CheckoutProgress.tsx](../frontend/src/storefront/checkout/CheckoutProgress.tsx) | Readable checkout progress (kit checkout-steps part) reflects reviewed server state; it never implies payment confirmation. |
 | [frontend/src/storefront/checkout/CheckoutPurchase.tsx](../frontend/src/storefront/checkout/CheckoutPurchase.tsx) | Shared explicit purchase button: mobile dock and desktop review use the same form and server-review state. |
 | [frontend/src/storefront/checkout/CheckoutSummary.tsx](../frontend/src/storefront/checkout/CheckoutSummary.tsx) | Sticky order review presents authoritative totals and discounts beside the purchase action. |
 | [frontend/src/storefront/checkout/EmbeddedPayment.tsx](../frontend/src/storefront/checkout/EmbeddedPayment.tsx) | A scoped provider frame receives a short-lived token; messages only trigger server reconciliation. |
@@ -2155,7 +2155,7 @@ This lists every checked-in source module in these roots, including files with n
 | [frontend/src/storefront/shell/ConciergeView.tsx](../frontend/src/storefront/shell/ConciergeView.tsx) | ConciergeView: storefront view composed from the scoped cart/controller. |
 | [frontend/src/storefront/shell/ConversationPurchase.tsx](../frontend/src/storefront/shell/ConversationPurchase.tsx) | Review and confirm an app-linked variant using the current native cart. |
 | [frontend/src/storefront/shell/HomeHero.tsx](../frontend/src/storefront/shell/HomeHero.tsx) | Shared native home hero for the storefront and visual preview; no commerce commands. |
-| [frontend/src/storefront/shell/ProductTile.tsx](../frontend/src/storefront/shell/ProductTile.tsx) | Single native product card, reused by the storefront and read-only visual preview. |
+| [frontend/src/storefront/shell/ProductTile.tsx](../frontend/src/storefront/shell/ProductTile.tsx) | Storefront adapter of the kit product card: maps a shop product to the part contract, keeps native URLs and texts. |
 | [frontend/src/storefront/shell/Storefront.tsx](../frontend/src/storefront/shell/Storefront.tsx) | Storefront composition root: cart context, routes, customer account and checkout. |
 | [frontend/src/storefront/shell/StorefrontContext.ts](../frontend/src/storefront/shell/StorefrontContext.ts) | Local storefront context, scoped to the mounted tenant and sales channel. |
 | [frontend/src/storefront/shell/StorefrontCurrency.tsx](../frontend/src/storefront/shell/StorefrontCurrency.tsx) | Currency switching is a revision-bound server re-quote, scoped to tenant and sales channel. |
@@ -2189,7 +2189,7 @@ This lists every checked-in source module in these roots, including files with n
 | [frontend/src/storefront/styles/payment-instructions.css](../frontend/src/storefront/styles/payment-instructions.css) | Recipient details use the same payment surface, with wrapping for small embedded checkouts. |
 | [frontend/src/storefront/styles/saved-payments.css](../frontend/src/storefront/styles/saved-payments.css) | Saved-method choices and account revocation retain the storefront's shared tokens and native form controls. |
 | [frontend/src/storefront/styles/shop/01--root.css](../frontend/src/storefront/styles/shop/01--root.css) | shop: -root styles. Source order is preserved by the entry stylesheet. |
-| [frontend/src/storefront/styles/shop/02-shop-product-image.css](../frontend/src/storefront/styles/shop/02-shop-product-image.css) | shop: shop-product-image styles. Source order is preserved by the entry stylesheet. |
+| [frontend/src/storefront/styles/shop/02-shop-product-image.css](../frontend/src/storefront/styles/shop/02-shop-product-image.css) | shop: storefront theme of the kit product card image. Source order is preserved by the entry stylesheet. |
 | [frontend/src/storefront/styles/shop/03-availability-span.css](../frontend/src/storefront/styles/shop/03-availability-span.css) | shop: availability-span styles. Source order is preserved by the entry stylesheet. |
 | [frontend/src/storefront/styles/shop/04-shop-stepper.css](../frontend/src/storefront/styles/shop/04-shop-stepper.css) | shop: shop-stepper styles. Source order is preserved by the entry stylesheet. |
 | [frontend/src/storefront/styles/shop/05-shop-grid-comparison.css](../frontend/src/storefront/styles/shop/05-shop-grid-comparison.css) | shop: shop-grid-comparison styles. Source order is preserved by the entry stylesheet. |

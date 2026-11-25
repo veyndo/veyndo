@@ -68,30 +68,30 @@
     grid-template-columns: 1fr 1fr;
     gap: 25px 12px;
   }
-  .shop-product-info h3 {
+  .vy-sf-card .vy-sf-card-body h3 {
     font-size: 16px;
   }
-  .shop-product-info p:not(.shop-kicker) {
+  .vy-sf-card .vy-sf-card-body p:not(.vy-sf-kicker, .vy-sf-price) {
     font-size: 11px;
     min-height: 50px;
   }
-  .shop-product-info .shop-kicker {
+  .vy-sf-card .vy-sf-kicker {
     font-size: 9px;
     letter-spacing: 1px;
   }
-  .shop-product-info strong {
+  .vy-sf-card .vy-sf-price strong {
     font-size: 17px;
     margin-bottom: 5px;
   }
-  .shop-product-info small {
+  .vy-sf-card .vy-sf-price small {
     display: block;
     margin-bottom: 12px;
     font-size: 10px;
   }
-  .shop-product-link {
+  .vy-sf-card .vy-sf-card-link {
     font-size: 11px;
   }
-  .shop-product-image span {
+  .vy-sf-card .vy-sf-card-media .vy-sf-stock {
     font-size: 8px;
     padding: 5px;
     bottom: 7px;
@@ -156,7 +156,7 @@
 .shop-grid.comparison {
   grid-template-columns: 1fr;
 }
-.comparison .shop-product {
+.comparison article.vy-sf-card {
   display: grid;
   grid-template-columns: 220px 1fr 170px;
   align-items: center;
@@ -164,31 +164,31 @@
   border-bottom: 1px solid var(--line);
   padding-bottom: 20px;
 }
-.comparison .shop-product-image span {
+.comparison .vy-sf-card .vy-sf-card-media .vy-sf-stock {
   display: none;
 }
-.comparison .shop-product-info > p:not(.shop-kicker) {
+.comparison .vy-sf-card .vy-sf-card-body > p:not(.vy-sf-kicker, .vy-sf-price) {
   min-height: 0;
 }
-.comparison .shop-product-link {
+.comparison .vy-sf-card .vy-sf-card-link {
   border: 1px solid var(--line);
   padding: 16px;
   border-radius: 6px;
 }
 @media (max-width: 680px) {
-  .comparison .shop-product {
+  .comparison article.vy-sf-card {
     grid-template-columns: 100px 1fr;
     gap: 15px;
   }
-  .comparison .shop-product-link {
+  .comparison .vy-sf-card .vy-sf-card-link {
     grid-column: 2;
     padding: 10px;
     min-height: 44px;
   }
-  .comparison .shop-product-info p:not(.shop-kicker) {
+  .comparison .vy-sf-card .vy-sf-card-body p:not(.vy-sf-kicker, .vy-sf-price) {
     min-height: 0;
   }
-  .comparison .shop-product-info .shop-kicker {
+  .comparison .vy-sf-card .vy-sf-kicker {
     display: none;
   }
 }

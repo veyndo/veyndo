@@ -20,7 +20,6 @@ export default function CollectionView() {
     catalogLoading,
     list,
     setViewed,
-    money,
     cart,
     pageCursor,
     busy,
@@ -77,7 +76,7 @@ export default function CollectionView() {
                   <ProductTile
                     key={p.id}
                     product={p}
-                    money={money}
+                    currency={cart?.price.currency ?? "EUR"}
                     business={cart?.customerGroup === "business"}
                     onViewed={() =>
                       setViewed((v) => ({

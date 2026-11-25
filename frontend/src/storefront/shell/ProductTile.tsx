@@ -1,10 +1,9 @@
-/** Single native product card, reused by the storefront and read-only visual preview. */
+/** Storefront adapter of the kit product card: maps a shop product to the part contract, keeps native URLs and texts. */
 import { mediaImage } from "../../shared/media/product-media";
 import { productURL } from "../catalog/product-url";
-import ImagePlaceholder from "../catalog/ImagePlaceholder";
-import Icon from "../../shared/ui/Icon";
 import { useShopText } from "../../shared/i18n/shop-i18n";
 import type { Product } from "../../shared/api/shop-api";
+import { productCard } from "../../kit/storefront";
 export type TileProduct = Pick<Product, "id" | "name" | "price" | "media"> &
   Partial<
     Pick<
@@ -12,51 +11,41 @@ export type TileProduct = Pick<Product, "id" | "name" | "price" | "media"> &
       "description" | "stock" | "category" | "calculated_price" | "extra"
     >
   >;
+const Card = productCard.Component;
 export default function ProductTile({
   product: p,
-  money,
+  currency,
+  locale,
   business = false,
   onViewed,
 }: {
   product: TileProduct;
-  money: (amount: number) => string;
+  /** Display currency of the price; defaults to the shop's current currency. */
+  currency?: string;
+  /** Display language; defaults to the shop's current language. */
+  locale?: string;
   business?: boolean;
   onViewed?: () => void;
 }) {
-  const { s } = useShopText();
+  const shop = useShopText();
+  const category = p.category ? shop.s(p.category) : undefined;
   return (
-    <article className="shop-product" onMouseEnter={onViewed}>
-      <a
-        className="shop-product-image"
-        href={productURL(p)}
-        aria-label={`${s("details")}: ${p.name}`}
-      >
-        {mediaImage(p.media) ? (
-          <img
-            src={mediaImage(p.media)}
-            alt={p.name}
-            loading="lazy"
-            width="400"
-            height="320"
-          />
-        ) : (
-          <ImagePlaceholder label={s("noImage")} />
-        )}
-        <span>{p.stock ? `${p.stock} ${s("available")}` : s("sold")}</span>
-      </a>
-      <div className="shop-product-info">
-        <p className="shop-kicker">{s(p.category ?? "")}</p>
-        <a href={productURL(p)}>
-          <h3>{p.name}</h3>
-        </a>
-        <p>{p.description}</p>
-        <strong>{money(p.calculated_price?.unitPrice ?? p.price)}</strong>
-        <small>{s(business ? "net" : "gross")}</small>
-      </div>
-      <a className="shop-product-link" href={productURL(p)}>
-        {s("details")}
-        <Icon name="arrow" size={18} />
-      </a>
-    </article>
+    <div className="shop-tile" onMouseEnter={onViewed}>
+      <Card
+        locale={locale ?? shop.locale}
+        priceKind={business ? "net" : "gross"}
+        product={{
+          id: p.id,
+          name: p.name,
+          url: productURL(p),
+          image: mediaImage(p.media) || undefined,
+          description: p.description || undefined,
+          category: category || undefined,
+          price: p.calculated_price?.unitPrice ?? p.price,
+          currency: currency ?? shop.currency,
+          stock: p.stock ?? 0,
+        }}
+      />
+    </div>
   );
 }

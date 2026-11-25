@@ -206,6 +206,7 @@ export default function ConciergeView() {
               onRestore={shortlist.restore}
               products={products}
               money={money}
+              currency={cart?.price.currency ?? "EUR"}
               compareInitially={advice.layout === "comparison"}
               business={cart?.price.taxStatus === "net"}
             />

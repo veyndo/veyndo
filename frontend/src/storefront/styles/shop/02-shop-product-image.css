@@ -1,21 +1,21 @@
-/* shop: shop-product-image styles. Source order is preserved by the entry stylesheet. */
-.shop-product-image {
+/* shop: storefront theme of the kit product card image. Source order is preserved by the entry stylesheet. */
+.vy-sf-card .vy-sf-card-media {
   display: block;
   position: relative;
   border-radius: 8px;
   overflow: hidden;
   background: #edf2f4;
 }
-.shop-product-image img {
+.vy-sf-card .vy-sf-card-media img {
   width: 100%;
   height: auto;
   display: block;
   transition: transform 0.25s;
 }
-.shop-product-image:hover img {
+.vy-sf-card .vy-sf-card-media:hover img {
   transform: scale(1.04);
 }
-.shop-product-image span {
+.vy-sf-card .vy-sf-card-media .vy-sf-stock {
   position: absolute;
   right: 12px;
   bottom: 12px;
@@ -25,28 +25,28 @@
   font-size: 10px;
   color: #566671;
 }
-.shop-product-info h3 {
+.vy-sf-card .vy-sf-card-body h3 {
   margin: 8px 0;
   font-size: 21px;
   letter-spacing: -0.4px;
   font-weight: 550;
 }
-.shop-product-info > p:not(.shop-kicker) {
+.vy-sf-card .vy-sf-card-body > p:not(.vy-sf-kicker, .vy-sf-price) {
   color: var(--muted);
   font-size: 13px;
   min-height: 38px;
   line-height: 1.6;
 }
-.shop-product-info strong {
+.vy-sf-card .vy-sf-price strong {
   font-size: 19px;
   display: inline-block;
   margin: 8px 8px 16px 0;
 }
-.shop-product-info small {
+.vy-sf-card .vy-sf-price small {
   font-size: 11px;
   color: var(--muted);
 }
-.shop-product-link {
+.vy-sf-card .vy-sf-card-link {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -54,7 +54,7 @@
   padding: 14px 0;
   font-size: 13px;
 }
-.shop-product-link:hover {
+.vy-sf-card .vy-sf-card-link:hover {
   color: var(--blue);
 }
 .shop-footer {

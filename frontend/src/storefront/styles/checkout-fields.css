@@ -59,7 +59,7 @@
   margin: 0 0 8px !important;
   font-weight: 650;
 }
-.checkout-progress {
+ol.vy-sf-steps {
   display: flex;
   margin: 0;
   padding: 16px 32px;
@@ -69,22 +69,25 @@
   background: white;
   flex-shrink: 0;
 }
-.checkout-progress li {
+ol.vy-sf-steps li {
   display: flex;
   align-items: center;
   gap: 8px;
+  padding: 0;
+  border-radius: 0;
+  background: none;
   color: var(--muted);
   font-size: 13px;
   flex: 1;
 }
-.checkout-progress li:not(:last-child)::after {
+ol.vy-sf-steps li:not(:last-child)::after {
   content: "";
   height: 1px;
   background: var(--line);
   flex: 1;
   margin-left: 8px;
 }
-.checkout-progress li span {
+ol.vy-sf-steps li span {
   display: grid;
   place-items: center;
   width: 26px;
@@ -94,11 +97,12 @@
   flex-shrink: 0;
   font-size: 12px;
 }
-.checkout-progress li.active {
+ol.vy-sf-steps li[data-active] {
+  background: none;
   color: var(--blue);
   font-weight: 600;
 }
-.checkout-progress li.active span {
+ol.vy-sf-steps li[data-active] span {
   background: var(--blue);
   border-color: var(--blue);
   color: white;
@@ -135,15 +139,15 @@
   .veyndo-checkout .customer-field-grid label {
     font-size: 14px;
   }
-  .checkout-progress {
+  ol.vy-sf-steps {
     padding: 14px 20px;
     gap: 8px;
   }
-  .checkout-progress li {
+  ol.vy-sf-steps li {
     font-size: 12px;
     gap: 6px;
   }
-  .checkout-progress li:not(:last-child)::after {
+  ol.vy-sf-steps li:not(:last-child)::after {
     margin-left: 0;
   }
 }
@@ -156,7 +160,7 @@
       background 180ms ease,
       border-color 180ms ease;
   }
-  .checkout-progress li span {
+  ol.vy-sf-steps li span {
     transition:
       background 180ms ease,
       color 180ms ease;
