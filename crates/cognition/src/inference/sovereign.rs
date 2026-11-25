@@ -86,6 +86,11 @@ impl Inference {
         self.resolved().await?.admit("ollama", endpoint)
     }
     fn routes(&self) -> Vec<Value> {
+        /// The admission flag of a route a sovereign platform withholds.
+        #[derive(serde::Serialize)]
+        struct Admission {
+            admitted: bool,
+        }
         let embedding = env::var("EMBEDDING_BASE_URL")
             .ok()
             .or(Some(self.ollama.clone()));
@@ -94,7 +99,8 @@ impl Inference {
         .then(|| self.openai_url.clone());
         let mut image = route("images", images, self.sovereign);
         if self.sovereign {
-            image["admitted"] = json!(false);
+            veyndo_core::document::merge(&mut image, Admission { admitted: false })
+                .expect("a route is an object");
         }
         vec![
             route("text", Some(self.ollama.clone()), self.sovereign),

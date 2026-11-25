@@ -13,6 +13,15 @@ use veyndo_core::shop_scope::tenant;
 use veyndo_core::{RequestContext, Result, bad};
 use veyndo_identity::{merchant, permit};
 
+/// A record list request built from the query string; `filter` only when one is given.
+#[derive(serde::Serialize)]
+struct ListInput<'a> {
+    limit: Option<i64>,
+    after: Option<&'a String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    filter: Option<Value>,
+}
+
 /// Runs one app action for the caller.
 pub async fn app_action(
     Shared(a): Shared<Platform>,
@@ -43,10 +52,15 @@ pub async fn entity_list(
         .transpose()
         .map_err(|_| bad("Invalid app filter"))?
         .filter(|f| !f.is_null());
-    let mut input = json!({"limit":q.get("limit").map(|s| s.parse::<i64>()).transpose().map_err(|_| bad("Invalid app limit"))?,"after":q.get("after")});
-    if let Some(filter) = filter {
-        input["filter"] = filter;
-    }
+    let input = json!(ListInput {
+        limit: q
+            .get("limit")
+            .map(|s| s.parse::<i64>())
+            .transpose()
+            .map_err(|_| bad("Invalid app limit"))?,
+        after: q.get("after"),
+        filter,
+    });
     Ok(Json(managed_data::list_page(&a, &t, &m, e, &input).await?))
 }
 /// Saves one record of an entity from a merchant editor.

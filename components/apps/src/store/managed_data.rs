@@ -14,6 +14,12 @@ use veyndo_core::document::view;
 use veyndo_core::store::history_context::context;
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad};
 
+/// The ontology projection a record page carries.
+#[derive(serde::Serialize)]
+struct Ontology {
+    ontology: Value,
+}
+
 /// Keyset pages and indexed equality filters never hydrate an app's entire table.
 pub async fn list_page(
     a: &State,
@@ -55,7 +61,7 @@ pub async fn list_scoped(
     let mut result = veyndo_app_storage::record_query::response(e, plan.limit, page);
     let page: records::RecordPage = view(&result);
     if let Some(graph) = ontology::project(t, m, e, &page.elements) {
-        result["ontology"] = graph;
+        veyndo_core::document::merge(&mut result, Ontology { ontology: graph })?;
     }
     Ok(result)
 }

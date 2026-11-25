@@ -53,19 +53,18 @@ pub fn new_app_assets(value: &mut Value) -> Result<()> {
                 m.permissions.push(permission.into());
             }
         }
-        let contracts: Vec<Value> = serde_json::from_str(include_str!(
+        let contracts: Vec<veyndo_app_model::Action> = serde_json::from_str(include_str!(
             "../../../../extensions/sdk/native-asset-actions.json"
         ))
         .expect("native asset action contracts");
         for contract in contracts {
-            if !m.actions.iter().any(|a| a.handler == contract["handler"]) {
-                if m.actions.iter().any(|a| a.name == contract["name"]) {
+            if !m.actions.iter().any(|a| a.handler == contract.handler) {
+                if m.actions.iter().any(|a| a.name == contract.name) {
                     return Err(bad(
                         "Native asset action name conflicts with an existing action",
                     ));
                 }
-                m.actions
-                    .push(serde_json::from_value(contract).expect("native asset action"));
+                m.actions.push(contract);
             }
         }
     }

@@ -49,13 +49,8 @@ impl<'db> shared::StateHooks<'db> for Host<'_> {
         'db: 'a,
     {
         Box::pin(async move {
-            let used = sqlx::query_scalar!(
-                r#"SELECT EXISTS(SELECT 1 FROM hosted_frontends WHERE tenant=$1 AND app_id=$2) AS "used!""#,
-                self.tenant,
-                self.app
-            )
-            .fetch_one(&mut **tx)
-            .await?;
+            let used =
+                veyndo_shop::store::app_frontends::app_in_use(tx, self.tenant, self.app).await?;
             if used {
                 return Err(conflict(
                     "App is required by connected frontends; disconnect them first",

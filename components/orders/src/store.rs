@@ -1,5 +1,6 @@
 //! SQL of the orders component.
 pub mod account_orders;
+pub mod app_orders;
 pub mod carrier_documents;
 pub mod company;
 pub mod company_logos;

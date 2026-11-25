@@ -1,11 +1,11 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT coalesce(data->>'mainLocale','en-GB') AS \"main!\" FROM commerce_settings WHERE tenant=$1",
+  "query": "SELECT coalesce((SELECT live_tenant FROM shop_environments WHERE tenant=$1),$1) AS \"id!\"",
   "describe": {
     "columns": [
       {
         "ordinal": 0,
-        "name": "main!",
+        "name": "id!",
         "type_info": "Text",
         "origin": "Expression"
       }
@@ -19,5 +19,5 @@
       null
     ]
   },
-  "hash": "7b298e7ea706c862839593c9735c58c1f9f951eafad183d0cbfacb8a158bfd09"
+  "hash": "a52de474d247da98601d899801749ec58358e7507b77f41eb8353bc5977e3963"
 }

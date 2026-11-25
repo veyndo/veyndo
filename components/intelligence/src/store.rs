@@ -1,6 +1,7 @@
 //! SQL of the intelligence component.
 pub mod agent_controls;
 pub mod agent_runs;
+pub mod app_relations;
 pub mod autonomy;
 pub mod behavior;
 pub mod consent;

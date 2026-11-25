@@ -2,7 +2,28 @@
 use super::super::{Provider, Value, env, json};
 use super::{alias, definitions};
 use serde::Deserialize;
-use veyndo_core::document::{lenient, view};
+use veyndo_core::document::{lenient, merge, view};
+
+/// The native tools a provider request offers.
+#[derive(serde::Serialize)]
+struct NativeTools {
+    tools: Vec<Value>,
+}
+
+/// The user input of an OpenAI Responses request before tool continuation wraps it.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct WireInput {
+    input: Value,
+}
+
+/// The Responses members tool continuation sets: the wrapped input and opaque reasoning carry-over.
+#[derive(serde::Serialize)]
+struct ResponsesContinuation {
+    input: Value,
+    include: [&'static str; 1],
+    parallel_tool_calls: bool,
+}
 
 /// A host tool definition, typed as a provider request reads it.
 #[derive(Deserialize, Default)]
@@ -64,14 +85,21 @@ pub(in crate::inference) fn request(
             _ => json!({"type":"function","function":{"name":name,"description":description,"parameters":t.input_schema}})
         }
     }).collect();
-    request["tools"] = json!(tools);
+    merge(request, NativeTools { tools }).map_err(|e| e.1)?;
     for key in ["format", "response_format", "output_config", "text"] {
-        request.as_object_mut().unwrap().remove(key);
+        request
+            .as_object_mut()
+            .ok_or("Invalid provider request")?
+            .remove(key);
     }
     if responses {
-        request["input"] = json!([{"role":"user","content":request["input"]}]);
-        request["include"] = json!(["reasoning.encrypted_content"]);
-        request["parallel_tool_calls"] = json!(true);
+        let prompt = view::<WireInput>(request).input;
+        let continued = ResponsesContinuation {
+            input: json!([{"role":"user","content":prompt}]),
+            include: ["reasoning.encrypted_content"],
+            parallel_tool_calls: true,
+        };
+        merge(request, continued).map_err(|e| e.1)?;
     }
     let history = view::<Continuation>(schema)
         .history
@@ -89,7 +117,10 @@ pub(in crate::inference) fn request(
             .map(view)
             .collect();
         if responses {
-            let input = request["input"].as_array_mut().unwrap();
+            let input = request
+                .get_mut("input")
+                .and_then(Value::as_array_mut)
+                .expect("a responses request input is the list set above");
             input.extend(
                 turn.assistant
                     .as_array()
@@ -101,8 +132,9 @@ pub(in crate::inference) fn request(
                 input.push(json!({"type":"function_call_output","call_id":result.id,"output":result.result.to_string()}));
             }
         } else {
-            let messages = request["messages"]
-                .as_array_mut()
+            let messages = request
+                .get_mut("messages")
+                .and_then(Value::as_array_mut)
                 .ok_or("Missing tool messages")?;
             match provider {
                 Provider::Anthropic => {

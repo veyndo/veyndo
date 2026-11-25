@@ -42,21 +42,34 @@ pub(super) fn chat_response(raw: &Value) -> Result<Value, String> {
     )
     .map_err(|_| "Invalid structured chat response".into())
 }
+/// The cacheable system block of an Anthropic request.
+#[derive(serde::Serialize)]
+struct CachedSystem {
+    system: Value,
+}
+
+/// The prompt cache key of an OpenAI Responses request.
+#[derive(serde::Serialize)]
+struct PromptCacheKey {
+    prompt_cache_key: String,
+}
+
 pub(super) fn prompt_cache(provider: &Provider, request: &mut Value, system: &str) {
     if env::var("INFERENCE_PROMPT_CACHE").as_deref() != Ok("true") {
         return;
     }
     match provider {
         Provider::Anthropic => {
-            request["system"] =
-                json!([{"type":"text","text":system,"cache_control":{"type":"ephemeral"}}])
+            let system =
+                json!([{"type":"text","text":system,"cache_control":{"type":"ephemeral"}}]);
+            veyndo_core::document::merge(request, CachedSystem { system })
+                .expect("provider requests are objects");
         }
         Provider::Openai if env::var("OPENAI_PROTOCOL").as_deref() != Ok("chat") => {
             use sha2::{Digest, Sha256};
-            request["prompt_cache_key"] = json!(format!(
-                "veyndo-system-{:x}",
-                Sha256::digest(system.as_bytes())
-            ));
+            let prompt_cache_key = format!("veyndo-system-{:x}", Sha256::digest(system.as_bytes()));
+            veyndo_core::document::merge(request, PromptCacheKey { prompt_cache_key })
+                .expect("provider requests are objects");
         }
         _ => {}
     }

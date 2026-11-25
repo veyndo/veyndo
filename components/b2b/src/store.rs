@@ -1,5 +1,6 @@
 //! store of this component.
 pub mod access;
+pub mod app_references;
 pub mod approvals;
 pub mod carts;
 pub mod catalog;

@@ -65,16 +65,9 @@ pub async fn backfill(
     commerce: &dyn CommerceInstall,
     tx: &mut Transaction<'_, Postgres>,
 ) -> Result<()> {
-    let tenants: Vec<String> = sqlx::query_scalar!(
-        "SELECT DISTINCT tenant FROM hosted_frontends WHERE app_id='storyfront' ORDER BY tenant"
-    )
-    .fetch_all(&mut **tx)
-    .await?;
+    let tenants = veyndo_shop::store::app_frontends::storyfront_tenants(tx).await?;
     for tenant in tenants {
         ensure(rules, commerce, tx, &tenant, "storyfront").await?;
     }
-    sqlx::query!("ALTER TABLE hosted_frontends VALIDATE CONSTRAINT hosted_frontends_app_fk")
-        .execute(&mut **tx)
-        .await?;
-    Ok(())
+    veyndo_shop::store::app_frontends::validate_app_reference(tx).await
 }

@@ -30,10 +30,33 @@ pub async fn private_graph(a: &State, t: &str) -> Result<Value> {
     )
     .fetch_all(&a.db)
     .await?;
+    // The knowledge graph (intelligence) supplies the edges and the catalogue the products that still exist;
+    // the join with this app's own sources, its order and bound stay in one statement.
+    let edges = veyndo_intelligence::store::app_relations::product_references(&a.db, t, &active)
+        .await?
+        .into_iter()
+        .filter_map(|e| Some((e.app?, e.source_id?, e.product_id)))
+        .collect::<Vec<_>>();
+    let named: Vec<String> = edges.iter().map(|e| e.2.clone()).collect();
+    let existing: std::collections::HashSet<String> =
+        veyndo_catalog::store::app_references::existing_products(&a.db, t, &named)
+            .await?
+            .into_iter()
+            .collect();
+    let mut apps = Vec::new();
+    let mut source_ids = Vec::new();
+    let mut product_ids = Vec::new();
+    for (app, source, product) in edges.into_iter().filter(|e| existing.contains(&e.2)) {
+        apps.push(app);
+        source_ids.push(source);
+        product_ids.push(product);
+    }
     let products: Vec<Value> = sqlx::query_scalar!(
-        r#"SELECT jsonb_build_object('app',r.data->>'app','sourceId',r.data->>'sourceId','productId',p.id) AS "relation!" FROM knowledge_relations r JOIN products p ON p.tenant=r.tenant AND p.id=r.target_id JOIN app_evidence e ON e.tenant=r.tenant AND e.app=r.data->>'app' AND e.source_id=r.data->>'sourceId' WHERE r.tenant=$1 AND r.kind='REFERENCES_PRODUCT' AND e.app=ANY($2) ORDER BY e.app,e.source_id,p.id LIMIT 100"#,
+        r#"SELECT jsonb_build_object('app',r.app,'sourceId',r.source,'productId',r.product) AS "relation!" FROM unnest($2::text[],$3::text[],$4::text[]) AS r(app,source,product) JOIN app_evidence e ON e.tenant=$1 AND e.app=r.app AND e.source_id=r.source ORDER BY e.app,e.source_id,r.product LIMIT 100"#,
         t,
-        &active
+        &apps,
+        &source_ids,
+        &product_ids
     )
     .fetch_all(&a.db)
     .await?;

@@ -1,7 +1,24 @@
-//! Core records an app field names must belong to the same shop; no app alters core tables.
+//! Core records an app field names must belong to the same shop; the owners answer, no app alters core tables.
 use serde_json::Value;
 use veyndo_app_model::Entity;
 use veyndo_core::{Result, bad};
+
+/// Whether a core object of the given reference kind belongs to the shop, asked of its owner on the caller's connection.
+pub async fn owned(conn: &mut sqlx::PgConnection, kind: &str, t: &str, id: &str) -> Result<bool> {
+    match kind {
+        "product" => veyndo_catalog::store::app_references::product_exists(conn, t, id).await,
+        "customer" => {
+            crate::ports::directory()?
+                .customer_exists(conn, t, id)
+                .await
+        }
+        "salesChannel" => veyndo_marketing::store::app_channels::exists(conn, t, id).await,
+        "order" => veyndo_orders::store::app_orders::exists(conn, t, id).await,
+        "b2bCompany" => veyndo_b2b::store::app_references::company_exists(conn, t, id).await,
+        "b2bUnit" => veyndo_b2b::store::app_references::unit_exists(conn, t, id).await,
+        _ => Err(bad("Unknown core reference")),
+    }
+}
 
 /// Requires every core reference of a record to name an object of the same shop.
 pub async fn validate_references(
@@ -14,55 +31,10 @@ pub async fn validate_references(
         let Some(kind) = f.core_reference.as_deref() else {
             continue;
         };
-        let Some(id) = fields[&f.name].as_str() else {
+        let Some(id) = fields.get(&f.name).and_then(Value::as_str) else {
             continue;
         };
-        let owned = match kind {
-            "product" => sqlx::query_scalar!(
-                r#"SELECT EXISTS(SELECT 1 FROM products WHERE tenant=$1 AND id=$2) AS "owned!""#,
-                t,
-                id
-            )
-            .fetch_one(&mut **tx)
-            .await?,
-            "customer" => sqlx::query_scalar!(
-                r#"SELECT EXISTS(SELECT 1 FROM customers WHERE tenant=$1 AND id=$2) AS "owned!""#,
-                t,
-                id
-            )
-            .fetch_one(&mut **tx)
-            .await?,
-            "salesChannel" => sqlx::query_scalar!(
-                r#"SELECT EXISTS(SELECT 1 FROM sales_channels WHERE tenant=$1 AND id=$2) AS "owned!""#,
-                t,
-                id
-            )
-            .fetch_one(&mut **tx)
-            .await?,
-            "order" => sqlx::query_scalar!(
-                r#"SELECT EXISTS(SELECT 1 FROM orders WHERE tenant=$1 AND id=$2) AS "owned!""#,
-                t,
-                id
-            )
-            .fetch_one(&mut **tx)
-            .await?,
-            "b2bCompany" => sqlx::query_scalar!(
-                r#"SELECT EXISTS(SELECT 1 FROM b2b_companies WHERE tenant=$1 AND id=$2) AS "owned!""#,
-                t,
-                id
-            )
-            .fetch_one(&mut **tx)
-            .await?,
-            "b2bUnit" => sqlx::query_scalar!(
-                r#"SELECT EXISTS(SELECT 1 FROM b2b_units WHERE tenant=$1 AND id=$2) AS "owned!""#,
-                t,
-                id
-            )
-            .fetch_one(&mut **tx)
-            .await?,
-            _ => return Err(bad("Unknown core reference")),
-        };
-        if !owned {
+        if !owned(tx, kind, t, id).await? {
             return Err(bad("Referenced core object does not belong to this shop"));
         }
     }

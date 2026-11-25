@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT agent_budget AS \"agent_budget!\" FROM integration_keys WHERE tenant=coalesce((SELECT live_tenant FROM shop_environments WHERE tenant=$1),$1) AND id=$2 AND expires_at>now()",
+  "query": "SELECT agent_budget AS \"agent_budget!\" FROM integration_keys WHERE tenant=$1 AND id=$2 AND expires_at>now()",
   "describe": {
     "columns": [
       {
@@ -25,5 +25,5 @@
       true
     ]
   },
-  "hash": "b675da1c5a3ab56d245a0495d0cdbfe94f86cc9564a2005fc9401e74ee875f31"
+  "hash": "23d3cc23fca61fbf7630e0c8944ba892126cf29f1d2f7aee715ec279c9311413"
 }

@@ -12,6 +12,28 @@ use veyndo_core::document::view;
 struct LocalUsage {
     eval_count: Value,
 }
+/// The properties a response schema declares, as local token budgeting reads them.
+#[derive(serde::Deserialize, Default)]
+#[serde(default)]
+struct DeclaredProperties {
+    #[serde(deserialize_with = "veyndo_core::document::lenient")]
+    properties: serde_json::Map<String, Value>,
+}
+impl DeclaredProperties {
+    /// Whether the answer is a whole app document or an app patch, which needs the larger budget.
+    fn declares_app_document(&self) -> bool {
+        self.properties.contains_key("manifest") || self.properties.contains_key("patch")
+    }
+}
+
+/// The host evidence a model usage record carries beside the provider's own counts.
+#[derive(serde::Serialize)]
+#[serde(rename_all = "camelCase")]
+struct UsageEvidence {
+    prompt: Value,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    tool_continuation: Option<Value>,
+}
 impl Inference {
     /// The request body in the provider's own wire format and the URL it goes to.
     fn wire_request(
@@ -41,7 +63,7 @@ impl Inference {
         Ok(match provider {
             Provider::Platform => return Err("Invalid platform provider".into()),
             Provider::Ollama => (
-                json!({"model":model,"stream":false,"think":false,"format":schema,"options":{"temperature":0,"num_predict":if schema["properties"].get("manifest").is_some() || schema["properties"].get("patch").is_some(){8192}else{2000}},"messages":[{"role":"system","content":system},{"role":"user","content":user,"images":images.iter().filter_map(|s|s.split_once(";base64,").map(|(_,b)|b)).collect::<Vec<_>>()}]}),
+                json!({"model":model,"stream":false,"think":false,"format":schema,"options":{"temperature":0,"num_predict":if view::<DeclaredProperties>(schema).declares_app_document(){8192}else{2000}},"messages":[{"role":"system","content":system},{"role":"user","content":user,"images":images.iter().filter_map(|s|s.split_once(";base64,").map(|(_,b)|b)).collect::<Vec<_>>()}]}),
                 format!("{}/api/chat", self.ollama.trim_end_matches('/')),
             ),
             Provider::Openai if env::var("OPENAI_PROTOCOL").as_deref() == Ok("chat") => (
@@ -187,10 +209,14 @@ impl Inference {
             .filter(|v| v.is_object())
             .cloned()
             .unwrap_or_else(|| json!({"output_tokens":view::<LocalUsage>(&raw).eval_count}));
-        usage["prompt"] = crate::prompts::evidence(system);
-        if let Some(continuation) = continuation {
-            usage["toolContinuation"] = continuation;
-        }
+        veyndo_core::document::merge(
+            &mut usage,
+            UsageEvidence {
+                prompt: crate::prompts::evidence(system),
+                tool_continuation: continuation,
+            },
+        )
+        .expect("usage is an object");
         Ok(Output {
             value,
             model: model.clone(),

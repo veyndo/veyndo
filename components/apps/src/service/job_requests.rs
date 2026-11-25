@@ -19,14 +19,33 @@ struct ExecuteInput {
     input: Value,
 }
 
+/// The bundled host exchange contract, as far as job requests read it.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct HostExchange {
+    operations: HostOperations,
+}
+
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct HostOperations {
+    job_enqueue: HostOperation,
+}
+
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct HostOperation {
+    input_schema: Value,
+}
+
 /// Queues a declared job for a service that asks with its own request key.
 pub async fn execute(a: &State, h: &RequestContext, m: &Manifest, v: &Value) -> Result<Value> {
     let args: ExecuteInput = view(v);
-    let contract: Value = serde_json::from_str(include_str!(
+    let contract: HostExchange = serde_json::from_str(include_str!(
         "../../../../extensions/sdk/host-exchange-v1.json"
     ))
     .expect("bundled host exchange contract");
-    input_schema::validate(&contract["operations"]["job_enqueue"]["inputSchema"], v)?;
+    input_schema::validate(&contract.operations.job_enqueue.input_schema, v)?;
     if !m.permissions.iter().any(|p| p == "jobs.write") {
         return Err(Error(
             StatusCode::FORBIDDEN,

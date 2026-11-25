@@ -5,6 +5,12 @@ use serde::Deserialize;
 use serde_json::{Value, json};
 use std::collections::HashMap;
 use veyndo_core::document::{lenient, view};
+
+/// The imported order the cart that backs it records.
+#[derive(serde::Serialize)]
+struct CartOrder<'a> {
+    order: &'a Value,
+}
 use veyndo_core::{
     RequestContext, Result, State, bad, conflict, hash, store::history_context, uid,
 };
@@ -239,7 +245,8 @@ pub async fn import_external(
     let totals = json!({"currency":currency.code,"currencyScale":currency.scale,"totalMinor":input.total_minor.to_string(),"totalPrice":input.total_minor as f64/factor,"netPrice":(input.total_minor-tax) as f64/factor,"taxStatus":"gross","tax":tax as f64/factor,"taxMinor":tax.to_string()});
     let method = json!({"id":"external-marketplace","mode":"external_recorded","name":{"en":"Marketplace payment","de":"Marktplatz-Zahlung","fr":"Paiement marketplace","es":"Pago marketplace"}});
     let delivery = json!({"id":uid(),"state":"open","shippingMethodId":"external-marketplace","trackingCodes":[],"shippingCosts":source_price(&input.shipping,currency.scale,1)});
-    let quote = json!({"lineItems":lines,"price":totals,"shippingCosts":source_price(&input.shipping,currency.scale,1),"paymentMethod":method,"deliveries":[delivery],"currencyContext":{"code":currency.code,"scale":currency.scale,"factor":currency.rate,"strategy":"external_snapshot"}});
+    let currency_context = json!({"code":currency.code,"scale":currency.scale,"factor":currency.rate,"strategy":"external_snapshot"});
+    let quote = json!({"lineItems":lines,"price":totals,"shippingCosts":source_price(&input.shipping,currency.scale,1),"paymentMethod":method,"deliveries":[delivery],"currencyContext":currency_context});
     let data:Cart=serde_json::from_value(json!({"items":ids.iter().zip(&input.lines).map(|(id,l)|json!({"id":id,"quantity":l.quantity})).collect::<Vec<_>>(),"group":"retail","email":input.email,"company":null,"session":key,"buyer":null,"order":null,"currency":currency.code,"sales_channel":input.sales_channel_id,"locale":input.locale,"channel":"marketplace"})).map_err(|_|bad("Invalid external cart"))?;
     let c = StoredCart {
         id: uid(),
@@ -253,7 +260,7 @@ pub async fn import_external(
     let customer =
         veyndo_checkout::store::customer_snapshot::snapshot(&mut tx, &c, &selection).await?;
     let id = uid();
-    let mut order = json!({"id":id,"orderNumber":format!("RAC-{}",&id[..8]),"cart":quote,"state":"placed","revision":1,"channel":"marketplace","customerGroup":"retail","deliveries":[delivery],"payment":{"method":method,"provider":"external_marketplace","state":"captured","realMoneyCharged":false,"externallyPaid":true},"money":{"minor":input.total_minor,"currency":{"code":currency.code,"scale":currency.scale}},"external":{"appId":app,"orderId":input.external_id},"currencyContext":quote["currencyContext"]});
+    let mut order = json!({"id":id,"orderNumber":format!("RAC-{}",&id[..8]),"cart":quote,"state":"placed","revision":1,"channel":"marketplace","customerGroup":"retail","deliveries":[delivery],"payment":{"method":method,"provider":"external_marketplace","state":"captured","realMoneyCharged":false,"externallyPaid":true},"money":{"minor":input.total_minor,"currency":{"code":currency.code,"scale":currency.scale}},"external":{"appId":app,"orderId":input.external_id},"currencyContext":currency_context});
     order
         .as_object_mut()
         .unwrap()
@@ -261,15 +268,15 @@ pub async fn import_external(
     crate::store::native_lifecycle::bind_order(&mut tx, &t, &mut order).await?;
     veyndo_orders::domain::order_fields::order_fields(&mut order);
     let mut cart = json!(c.data);
-    cart["order"] = order.clone();
+    veyndo_core::document::merge(&mut cart, CartOrder { order: &order })?;
     stored::insert_cart(&mut tx, &c.id, &t, &c.token, &cart).await?;
     stored::insert_order(
         &mut tx,
         stored::NewOrder {
             id: &id,
             tenant: &t,
-            cart_id: &c.id,
-            idempotency_key: &key,
+            cart: &c.id,
+            key: &key,
             fingerprint: &fingerprint,
             data: &order,
         },

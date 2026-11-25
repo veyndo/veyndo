@@ -13,62 +13,12 @@ use veyndo_core::{Error, RequestContext, Result, StatusCode, bad, hash};
 use veyndo_identity::{merchant, permit};
 use veyndo_kernel::verified_kernel;
 
-/// Whether a core object of the named table belongs to the shop.
-async fn owned(a: &Platform, table: &str, t: &str, id: &str) -> Result<bool> {
-    let db = &a.db;
-    Ok(match table {
-        "products" => {
-            sqlx::query_scalar!(
-                r#"SELECT EXISTS(SELECT 1 FROM products WHERE tenant=$1 AND id=$2) AS "owned!""#,
-                t,
-                id
-            )
-            .fetch_one(db)
-            .await?
-        }
-        "customers" => {
-            sqlx::query_scalar!(
-                r#"SELECT EXISTS(SELECT 1 FROM customers WHERE tenant=$1 AND id=$2) AS "owned!""#,
-                t,
-                id
-            )
-            .fetch_one(db)
-            .await?
-        }
-        "b2b_companies" => sqlx::query_scalar!(
-            r#"SELECT EXISTS(SELECT 1 FROM b2b_companies WHERE tenant=$1 AND id=$2) AS "owned!""#,
-            t,
-            id
-        )
-        .fetch_one(db)
-        .await?,
-        "b2b_units" => {
-            sqlx::query_scalar!(
-                r#"SELECT EXISTS(SELECT 1 FROM b2b_units WHERE tenant=$1 AND id=$2) AS "owned!""#,
-                t,
-                id
-            )
-            .fetch_one(db)
-            .await?
-        }
-        "orders" => {
-            sqlx::query_scalar!(
-                r#"SELECT EXISTS(SELECT 1 FROM orders WHERE tenant=$1 AND id=$2) AS "owned!""#,
-                t,
-                id
-            )
-            .fetch_one(db)
-            .await?
-        }
-        "sales_channels" => sqlx::query_scalar!(
-            r#"SELECT EXISTS(SELECT 1 FROM sales_channels WHERE tenant=$1 AND id=$2) AS "owned!""#,
-            t,
-            id
-        )
-        .fetch_one(db)
-        .await?,
-        _ => false,
-    })
+/// Whether a core object of the named reference kind belongs to the shop, read by its owner in one short transaction.
+async fn owned(a: &Platform, kind: &str, t: &str, id: &str) -> Result<bool> {
+    let mut tx = a.db.begin().await?;
+    let owned = crate::store::core_references::owned(&mut tx, kind, t, id).await?;
+    tx.commit().await?;
+    Ok(owned)
 }
 /// Checks every object a surface context names: it exists in this shop and the caller may see it.
 pub async fn context(a: &Platform, h: &RequestContext, v: &Value) -> Result<()> {
@@ -85,13 +35,13 @@ pub async fn context(a: &Platform, h: &RequestContext, v: &Value) -> Result<()> 
             }
             continue;
         }
-        let (table, scope) = match key.as_str() {
-            "productId" => ("products", "catalog.read"),
-            "customerId" => ("customers", "customers.read"),
-            "companyId" => ("b2b_companies", "b2b.read"),
-            "unitId" => ("b2b_units", "b2b.read"),
-            "orderId" => ("orders", "orders.read"),
-            "salesChannelId" | "salesChannel" => ("sales_channels", "catalog.read"),
+        let (kind, scope) = match key.as_str() {
+            "productId" => ("product", "catalog.read"),
+            "customerId" => ("customer", "customers.read"),
+            "companyId" => ("b2bCompany", "b2b.read"),
+            "unitId" => ("b2bUnit", "b2b.read"),
+            "orderId" => ("order", "orders.read"),
+            "salesChannelId" | "salesChannel" => ("salesChannel", "catalog.read"),
             _ => return Err(bad("Unknown surface context field")),
         };
         let id = value
@@ -108,7 +58,7 @@ pub async fn context(a: &Platform, h: &RequestContext, v: &Value) -> Result<()> 
         } else {
             permit(h, scope)?;
         }
-        if !owned(a, table, &tenant(h)?, id).await? {
+        if !owned(a, kind, &tenant(h)?, id).await? {
             return Err(bad("Surface object does not belong to this shop"));
         }
     }

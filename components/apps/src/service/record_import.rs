@@ -114,10 +114,14 @@ pub async fn inspect_import_record(
         managed_data::list_page(a, &t, &m, entity, &json!({"id":id,"limit":1})).await?["elements"]
             .as_array()
             .and_then(|xs| xs.first().cloned());
+    let submitted = crate::store::records::RecordMeta::of(&input).fields;
     let expected: serde_json::Map<String, Value> = entity
         .fields
         .iter()
-        .map(|f| (f.name.clone(), input["fields"][&f.name].clone()))
+        .map(|f| {
+            let value = submitted.get(&f.name).cloned().unwrap_or(Value::Null);
+            (f.name.clone(), value)
+        })
         .collect();
     Ok((json!(expected), actual))
 }

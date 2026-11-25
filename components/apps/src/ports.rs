@@ -111,3 +111,38 @@ pub trait HostedInstall: Send + Sync {
         id: &'a str,
     ) -> veyndo_core::PortFuture<'a, ()>;
 }
+
+/// What the app platform reads or writes at owners it may not depend on: customers (which reach apps through
+/// their own dependencies) and the preview registry of the studio (which depends on apps).
+pub trait Directory: Send + Sync {
+    /// Whether the shop has the customer.
+    fn customer_exists<'a>(
+        &'a self,
+        conn: &'a mut sqlx::PgConnection,
+        t: &'a str,
+        id: &'a str,
+    ) -> veyndo_core::PortFuture<'a, bool>;
+    /// Keeps a personal preview environment for another hour.
+    fn extend_preview<'a>(
+        &'a self,
+        conn: &'a mut sqlx::PgConnection,
+        environment: &'a str,
+    ) -> veyndo_core::PortFuture<'a, ()>;
+}
+
+static DIRECTORY: std::sync::OnceLock<Box<dyn Directory>> = std::sync::OnceLock::new();
+
+/// Registers the server's directory once at startup; a second registration is ignored.
+pub fn install_directory(directory: Box<dyn Directory>) {
+    let _ = DIRECTORY.set(directory);
+}
+
+/// The registered directory; unavailable in processes that did not register one.
+pub fn directory() -> Result<&'static dyn Directory> {
+    DIRECTORY.get().map(Box::as_ref).ok_or_else(|| {
+        veyndo_core::Error(
+            veyndo_core::StatusCode::SERVICE_UNAVAILABLE,
+            "App directory unavailable".into(),
+        )
+    })
+}

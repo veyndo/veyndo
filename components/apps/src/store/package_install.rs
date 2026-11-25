@@ -168,12 +168,7 @@ pub async fn install_preview(
     t: &str,
     m: Manifest,
 ) -> Result<Value> {
-    let private = sqlx::query_scalar!(
-        r#"SELECT EXISTS(SELECT 1 FROM shop_environments WHERE tenant=$1 AND preview_owner IS NOT NULL) AS "private!""#,
-        t
-    )
-    .fetch_one(&mut **tx)
-    .await?;
+    let private = veyndo_core::store::previews::is_personal(tx, t).await?;
     if !private {
         return Err(bad(
             "Mutable app preview requires a personal preview environment",

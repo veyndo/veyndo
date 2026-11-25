@@ -99,34 +99,14 @@ pub async fn prepare_configurations(
 
 /// Locks a cart by its token for a configuration change; older stored shapes are upgraded on the way.
 pub async fn lock_cart(conn: &mut sqlx::PgConnection, t: &str, token: &str) -> Result<StoredCart> {
-    let r = sqlx::query!(
-        "SELECT id,tenant,token,data,revision,status FROM carts WHERE tenant=$1 AND token=$2 FOR UPDATE",
-        t,
-        token
-    )
-    .fetch_one(conn)
-    .await?;
-    let mut data = r.data;
-    veyndo_shop::types::cart::upgrade_cart(&mut data);
-    Ok(StoredCart {
-        id: r.id,
-        tenant: r.tenant,
-        token: r.token,
-        data: serde_json::from_value(data).map_err(|e| bad(e.to_string()))?,
-        revision: r.revision,
-        status: r.status,
-    })
+    veyndo_checkout::store::carts::lock_by_token(conn, t, token)
+        .await?
+        .ok_or(sqlx::Error::RowNotFound)?
+        .into_cart()
 }
 
 /// Stores the changed document and revision of a locked cart.
 pub async fn save_cart(conn: &mut sqlx::PgConnection, c: &StoredCart) -> Result<()> {
-    sqlx::query!(
-        "UPDATE carts SET data=$1,revision=$2 WHERE id=$3",
-        serde_json::json!(c.data),
-        c.revision,
-        c.id
-    )
-    .execute(conn)
-    .await?;
-    Ok(())
+    veyndo_checkout::store::app_carts::save(conn, &c.id, &serde_json::json!(c.data), c.revision)
+        .await
 }

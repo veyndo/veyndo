@@ -1,12 +1,12 @@
 //! Durable conservative model allocations use existing agent keys and the live shop stop switch.
 //! Counters reserve full envelopes before egress and never refund uncertain calls.
 use super::Admission;
-use crate::store::budget as stored;
-use crate::{scoped_pool::ScopedPool, tenant_scope};
+use crate::{ports, scoped_pool::ScopedPool, tenant_scope};
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 use std::future::Future;
 use veyndo_core::document::{lenient, view};
+use veyndo_core::store::{live_shop, outbox};
 
 #[derive(Clone, Debug)]
 pub struct Authority {
@@ -38,10 +38,12 @@ pub async fn choice(
         return Ok(requested.cloned());
     };
     let db = db.ok_or("Agent model admission requires durable storage")?;
-    let value: Value = tenant_scope::scoped(
-        tenant_scope::Scope::System,
-        stored::approved(db, &authority.tenant, authority.key_id.as_deref()),
-    )
+    let host = ports::host().ok_or("Agent model admission requires durable storage")?;
+    let value: Value = tenant_scope::scoped(tenant_scope::Scope::System, async {
+        let live = live_shop::resolve(db, &authority.tenant).await?;
+        host.approved_budget(db, &live, authority.key_id.as_deref())
+            .await
+    })
     .await
     .map_err(|_| "Agent model admission unavailable")?
     .ok_or(Admission::Denied("Agent key expired or revoked"))?;
@@ -167,6 +169,7 @@ pub async fn reserve(
         return Ok(());
     }
     let db = db.ok_or("Agent model admission requires durable storage")?;
+    let host = ports::host().ok_or("Agent model admission requires durable storage")?;
     tenant_scope::scoped(tenant_scope::Scope::System, async {
         let mut tx = db
             .begin()
@@ -174,7 +177,7 @@ pub async fn reserve(
             .map_err(|_| "Agent admission unavailable")?;
         // Same order as stop/key lifecycle: live tenant first, then key. No lock
         // survives the provider call. A stop affects subsequent calls, not past egress.
-        let shop = stored::lock_shop(&mut tx, &authority.tenant)
+        let shop = live_shop::lock(&mut tx, &authority.tenant)
             .await
             .map_err(|_| "Agent shop unavailable")?;
         let live = shop.id;
@@ -192,7 +195,8 @@ pub async fn reserve(
             }
             return Ok(());
         };
-        let row = stored::lock_key(&mut tx, &live, id)
+        let row = host
+            .lock_key(&mut tx, &live, id)
             .await
             .map_err(|_| "Agent admission unavailable")?
             .ok_or(Admission::Denied(
@@ -222,13 +226,14 @@ pub async fn reserve(
         ) {
             return Err(Admission::Exhausted);
         }
-        stored::allocate(&mut tx, &live, id, tokens as i64, cost as i64)
+        host.allocate(&mut tx, &live, id, tokens as i64, cost as i64)
             .await
             .map_err(|_| "Agent usage could not be reserved")?;
-        stored::audit(
+        outbox::publish(
             &mut tx,
             &live,
-            &json!({"agentId":id,"tokens":tokens,"costMicros":cost,"currency":"USD"}),
+            "intelligence.agent.allocated",
+            json!({"agentId":id,"tokens":tokens,"costMicros":cost,"currency":"USD"}),
         )
         .await
         .map_err(|_| "Agent audit could not be saved")?;

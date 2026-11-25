@@ -9,51 +9,6 @@
   },
   "functions": [
     {
-      "file": "components/apps/src/domain/app_generation.rs",
-      "function": "default_actions",
-      "category": "model-output-repair"
-    },
-    {
-      "file": "components/apps/src/domain/app_generation.rs",
-      "function": "preserve_access",
-      "category": "model-output-repair"
-    },
-    {
-      "file": "components/apps/src/domain/app_generation.rs",
-      "function": "walk",
-      "category": "model-output-repair"
-    },
-    {
-      "file": "components/apps/src/domain/design_context.rs",
-      "function": "validate",
-      "category": "model-output-repair"
-    },
-    {
-      "file": "components/apps/src/domain/generation_brief.rs",
-      "function": "apply",
-      "category": "model-output-repair"
-    },
-    {
-      "file": "components/apps/src/domain/generation_brief.rs",
-      "function": "empty",
-      "category": "model-output-repair"
-    },
-    {
-      "file": "components/apps/src/domain/generation_contract.rs",
-      "function": "retain",
-      "category": "model-output-repair"
-    },
-    {
-      "file": "components/apps/src/domain/generation_contract.rs",
-      "function": "retain_lifecycles",
-      "category": "model-output-repair"
-    },
-    {
-      "file": "components/apps/src/domain/generation_edits.rs",
-      "function": "apply",
-      "category": "model-output-repair"
-    },
-    {
       "file": "components/checkout/src/service/delivery.rs",
       "function": "dates_conn",
       "category": "in-place-edit"

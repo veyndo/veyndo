@@ -1,4 +1,4 @@
-//! Assets an app record refers to must belong to the same shop and fit the field.
+//! Assets an app record refers to must belong to the same shop and fit the field; the catalogue answers.
 use serde_json::Value;
 use veyndo_app_model::Entity;
 use veyndo_core::{Result, bad};
@@ -15,17 +15,16 @@ pub async fn references(
         .iter()
         .filter(|f| matches!(f.kind.as_str(), "image" | "file"))
     {
-        let Some(id) = v[&f.name].as_str() else {
+        let Some(id) = v.get(&f.name).and_then(Value::as_str) else {
             continue;
         };
-        let owned = sqlx::query_scalar!(
-            r#"SELECT EXISTS(SELECT 1 FROM product_assets WHERE tenant=$1 AND id=$2 AND ($3::text<> 'image' OR mime LIKE 'image/%') AND (NOT $4::bool OR public AND kind='attachment')) AS "owned!""#,
+        let owned = veyndo_catalog::store::app_references::asset_fits(
+            &mut **tx,
             t,
             id,
-            f.kind,
-            e.public_read
+            &f.kind,
+            e.public_read,
         )
-        .fetch_one(&mut **tx)
         .await?;
         if !owned {
             return Err(bad(

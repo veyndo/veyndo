@@ -34,6 +34,12 @@ struct StoredRevision {
     revision: Option<u64>,
 }
 
+/// The order revision a booking writes.
+#[derive(serde::Serialize)]
+struct NextRevision {
+    revision: u64,
+}
+
 /// The JSON fields `booking_intent` reads, typed as it reads them.
 #[derive(Deserialize, Default)]
 #[serde(default, rename_all = "camelCase")]
@@ -93,8 +99,9 @@ pub async fn booking_intent(
     }
     let closed =
         operation == "delivery_reserve" && guard(&order, &machine, "delivery", "shipped").is_some();
-    let parcel = order["deliveries"]
-        .as_array_mut()
+    let parcel = order
+        .get_mut("deliveries")
+        .and_then(Value::as_array_mut)
         .and_then(|ds| ds.get_mut(index))
         .ok_or(bad("Shipment unavailable"))?;
     let event = match booking::transition(parcel, operation == "delivery_reserve", closed, &intent)?
@@ -103,7 +110,12 @@ pub async fn booking_intent(
         booking::Step::Changed(event) => event,
     };
     let stored: StoredRevision = view(&order);
-    order["revision"] = json!(stored.revision.unwrap_or(1) + 1);
+    veyndo_core::document::merge(
+        &mut order,
+        NextRevision {
+            revision: stored.revision.unwrap_or(1) + 1,
+        },
+    )?;
     order_mutation::persist(&mut tx,&t,h,&mut order,order_mutation::Audit{
         kind:event,data:json!({"kind":"delivery","state":operation,"deliveryIndex":index,"sourceApp":m.id}),
         event_kind:event,event:json!({"orderId":id,"deliveryIndex":index,"sourceApp":m.id}),

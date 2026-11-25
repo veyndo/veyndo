@@ -32,8 +32,15 @@ struct Installed {
     digest: Value,
 }
 
+/// A preview request: the app's open manifest document.
+#[derive(serde::Deserialize, Default)]
+#[serde(default)]
+struct PreviewRequest {
+    manifest: Value,
+}
+
 /// Previews a package in the merchant's personal environment; the request's `manifest` is the app's open manifest document.
-pub async fn run(a: &Platform, h: &RequestContext, mut v: Value) -> Result<Value> {
+pub async fn run(a: &Platform, h: &RequestContext, v: Value) -> Result<Value> {
     let t = live(a, h).await?;
     let actor = h
         .principal
@@ -41,12 +48,12 @@ pub async fn run(a: &Platform, h: &RequestContext, mut v: Value) -> Result<Value
         .as_deref()
         .filter(|v| *v != "bootstrap")
         .ok_or(bad("Personal preview needs a personal session"))?;
-    if v["manifest"].to_string().len() > 65536 {
+    let mut manifest = view::<PreviewRequest>(&v).manifest;
+    if manifest.to_string().len() > 65536 {
         return Err(bad("Preview app exceeds 64 KiB"));
     }
-    default_actions(&mut v["manifest"], &[])?;
-    let m: Manifest =
-        serde_json::from_value(v["manifest"].clone()).map_err(|e| bad(e.to_string()))?;
+    default_actions(&mut manifest, &[])?;
+    let m: Manifest = serde_json::from_value(manifest).map_err(|e| bad(e.to_string()))?;
     build_admission::validate(&m, &process_config::get().publishers)?;
     if !immediate(&m) {
         return Err(bad(

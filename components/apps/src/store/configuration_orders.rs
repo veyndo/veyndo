@@ -43,16 +43,9 @@ pub async fn configurations(a: &State, t: &str, id: &str, input: &Value) -> Resu
     }
     let legacy = json!({"cart":{"lineItems":[{"configuration":{"app":id}}]}});
     let multiple = json!({"cart":{"lineItems":[{"appConfigurations":[{"app":id}]}]}});
-    let rows = sqlx::query!(
-        "SELECT id,data->>'orderNumber' AS number,data->'cart'->'lineItems' AS items FROM orders WHERE tenant=$1 AND (data @> $2::jsonb OR data @> $3::jsonb) AND ($4::text='' OR (created_at,id)<(SELECT created_at,id FROM orders WHERE tenant=$1 AND id=$4)) ORDER BY created_at DESC,id DESC LIMIT $5",
-        t,
-        legacy,
-        multiple,
-        after,
-        limit + 1
-    )
-    .fetch_all(&a.db)
-    .await?;
+    let rows =
+        veyndo_orders::store::app_orders::configured(a, t, (&legacy, &multiple), after, limit + 1)
+            .await?;
     let has_more = rows.len() > limit as usize;
     let mut orders = vec![];
     let mut last = None;

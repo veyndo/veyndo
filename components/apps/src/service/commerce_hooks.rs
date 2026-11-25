@@ -21,6 +21,13 @@ use veyndo_pricing::service::conversion as currencies;
 use veyndo_shop::Settings;
 use veyndo_shop::types::cart::StoredCart;
 
+/// The audit of app hook outcomes a quote carries.
+#[derive(serde::Serialize)]
+#[serde(rename_all = "camelCase")]
+struct HookOutcomes {
+    app_hook_outcomes: Vec<Value>,
+}
+
 /// The compiled hook modules of a shop's active packages, keyed by their source digest.
 pub struct Prepared {
     /// The sandboxes by source digest.
@@ -243,6 +250,11 @@ pub async fn apply(
             audit.push(json!({"app":m.id,"version":m.version,"digest":approval::canonical_digest(&m),"hook":kind,"minor":out.adjustment.minor,"currency":out.adjustment.currency,"scale":out.adjustment.scale,"reasonCode":out.reason_code,"recordRevisions":record_revisions}));
         }
     }
-    q["appHookOutcomes"] = json!(audit);
+    veyndo_core::document::merge(
+        &mut q,
+        HookOutcomes {
+            app_hook_outcomes: audit,
+        },
+    )?;
     Ok(q)
 }

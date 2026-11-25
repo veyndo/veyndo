@@ -64,6 +64,20 @@ struct PlatformAi {
     sovereign: Value,
 }
 
+/// The provider entries of the stored platform AI document, rewritten when keys are opened.
+#[derive(serde::Deserialize, serde::Serialize, Default)]
+#[serde(default)]
+struct StoredProviders {
+    #[serde(deserialize_with = "lenient")]
+    providers: serde_json::Map<String, Value>,
+}
+
+/// A provider key opened from its sealed secret.
+#[derive(serde::Serialize)]
+struct OpenedKey {
+    key: String,
+}
+
 /// One provider entry of the platform AI document.
 #[derive(serde::Deserialize, Default)]
 #[serde(default)]
@@ -96,16 +110,24 @@ impl Inference {
             .as_ref()
             .is_none_or(|(at, _)| at.elapsed().as_secs() >= 5)
         {
-            let row = crate::tenant_scope::scoped(
-                crate::tenant_scope::Scope::System,
-                crate::store::settings::platform(db),
-            )
+            let row = crate::tenant_scope::scoped(crate::tenant_scope::Scope::System, async {
+                let host = crate::ports::host().ok_or("Platform AI configuration unavailable")?;
+                host.platform_ai(db).await.map_err(|e| e.1)
+            })
             .await
             .map_err(|_| "Platform AI configuration unavailable")?;
             let mut data = row.data;
             for id in ["ollama", "openai", "anthropic"] {
-                if let Some(secret) = row.secrets[id].as_str() {
-                    data["providers"][id]["key"] = json!(open(id, secret)?);
+                if let Some(secret) = row.secrets.get(id).and_then(Value::as_str) {
+                    // The opened key joins the provider entry; other provider members stay as stored.
+                    let mut stored: StoredProviders = view(&data);
+                    let mut entry = stored.providers.remove(id).unwrap_or(Value::Null);
+                    let key = OpenedKey {
+                        key: open(id, secret)?,
+                    };
+                    veyndo_core::document::merge(&mut entry, key).map_err(|e| e.1)?;
+                    stored.providers.insert(id.into(), entry);
+                    veyndo_core::document::merge(&mut data, stored).map_err(|e| e.1)?;
                 }
             }
             *cache = Some((std::time::Instant::now(), data));
