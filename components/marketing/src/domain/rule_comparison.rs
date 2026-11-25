@@ -30,10 +30,13 @@ pub fn evaluate(t: &str, d: &Value, before: &Condition, after: &Condition) -> Va
         return unavailable("not_order_placed");
     }
     let q = &input.rule_context;
-    if !q["ruleFacts"].is_object()
-        || !q["price"]["totalPrice"].is_number()
-        || !q["lineItems"].is_array()
-        || !q["ruleFacts"]["currentTime"].is_string()
+    let snapshot: FrozenQuote = view(q);
+    if !snapshot.rule_facts.is_object()
+        || !snapshot.price.total_price.is_number()
+        || !snapshot.line_items.is_array()
+        || !view::<CapturedAt>(&snapshot.rule_facts)
+            .current_time
+            .is_string()
         || input.order_id.as_deref().is_none_or(str::is_empty)
     {
         return unavailable("incomplete_snapshot");
@@ -59,7 +62,7 @@ pub fn evaluate(t: &str, d: &Value, before: &Condition, after: &Condition) -> Va
         after.checked_matches(&cart, q),
     ) {
         (Ok(a), Ok(b)) => json!({"status":"evaluated","before":a,"after":b,
-            "capturedAt":q["ruleFacts"]["currentTime"],
+            "capturedAt":view::<CapturedAt>(&snapshot.rule_facts).current_time,
             "snapshotDigest":digest(&json!({"cartData":input.cart_data,"ruleContext":q}))}),
         _ => unavailable("required_facts_unavailable"),
     }
@@ -83,6 +86,29 @@ fn bounded(c: &Condition, q: &Value, depth: usize, remaining: &mut usize) -> boo
         .is_ok_and(|rule| rule.validate(0).is_ok() && bounded(&rule, q, depth + 1, remaining)),
         _ => true,
     }
+}
+
+/// The parts of a frozen order quote a comparison needs before it evaluates anything.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct FrozenQuote {
+    rule_facts: Value,
+    #[serde(deserialize_with = "lenient")]
+    price: FrozenPrice,
+    line_items: Value,
+}
+
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct FrozenPrice {
+    total_price: Value,
+}
+
+/// When the rule facts were captured.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct CapturedAt {
+    current_time: Value,
 }
 
 #[cfg(test)]

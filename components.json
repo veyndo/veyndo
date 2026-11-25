@@ -442,7 +442,7 @@
         "user_sessions": "read: reads merchant sessions to resolve the actor of a flow (channel_preview.rs)"
       },
       "glob_imports": 0,
-      "untyped_access": 122,
+      "untyped_access": 52,
       "sql_outside_store": 0,
       "runtime_sql": 2
     },
@@ -477,7 +477,7 @@
         "products": "read: reads product rows in the same statement as its own data (prices, stock, visibility) (access.rs, catalog.rs, lists.rs, quick_order.rs)"
       },
       "glob_imports": 0,
-      "untyped_access": 38,
+      "untyped_access": 12,
       "sql_outside_store": 0,
       "runtime_sql": 0
     },
@@ -510,7 +510,7 @@
         "sales_channels": "read: reads the sales channel document (kind, activity, catalogue scope) to admit the request channel inside the same statement (register.rs, settlement.rs)"
       },
       "glob_imports": 0,
-      "untyped_access": 42,
+      "untyped_access": 34,
       "sql_outside_store": 0,
       "runtime_sql": 0
     },

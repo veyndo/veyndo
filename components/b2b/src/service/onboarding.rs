@@ -59,8 +59,15 @@ pub async fn create(a: &State, h: &RequestContext, v: &Value) -> Result<Value> {
     }
     tx.commit().await?;
     Ok(
-        json!({"id":id,"revision":company["revision"],"unitId":unit,"customerLinked":customer.is_some()}),
+        json!({"id":id,"revision":view::<Saved>(&company).revision,"unitId":unit,"customerLinked":customer.is_some()}),
     )
+}
+
+/// The revision a save returned.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct Saved {
+    revision: Value,
 }
 
 #[cfg(test)]

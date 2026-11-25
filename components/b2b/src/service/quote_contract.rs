@@ -58,12 +58,12 @@ pub async fn select(
                 "Quote not found in this cart".into(),
             ));
         }
-        let data = &row.data;
+        let data: QuoteTerms = view(&row.data);
         if row.state != "offered"
             || input.revision != Some(row.revision)
             || !row.valid.unwrap_or(false)
-            || data["currency"] != c.data.currency
-            || data["items"] != json!(c.data.items)
+            || data.currency != c.data.currency
+            || data.items != json!(c.data.items)
         {
             return Err(conflict(
                 "Offer changed, expired or no longer matches this cart",
@@ -102,21 +102,21 @@ pub async fn prices(
     let r = quotes::shared(conn, &c.tenant, id)
         .await?
         .ok_or(conflict("Accepted quote is missing"))?;
-    let data = &r.data;
+    let data: QuoteTerms = view(&r.data);
     if r.state != "accepted"
         || r.buyer_id != context.customer_id
         || r.unit_id != context.unit_id
         || r.cart_id != c.id
         || !r.valid.unwrap_or(false)
-        || data["currency"] != c.data.currency
-        || data["items"] != json!(c.data.items)
+        || data.currency != c.data.currency
+        || data.items != json!(c.data.items)
     {
         return Err(conflict(
             "Accepted offer expired or changed; release it before editing the cart",
         ));
     }
     let lines: Vec<crate::types::model::OfferLine> =
-        serde_json::from_value(data["lines"].clone()).map_err(|_| bad("Invalid accepted offer"))?;
+        serde_json::from_value(data.lines).map_err(|_| bad("Invalid accepted offer"))?;
     let scale = veyndo_pricing::types::currency::scale(&c.data.currency)
         .ok_or(bad("Unknown offer currency"))?;
     for p in ps {
@@ -138,4 +138,13 @@ pub async fn consume(conn: &mut sqlx::PgConnection, c: &StoredCart, order: &str)
         return Err(conflict("Offer has already been purchased"));
     }
     Ok(())
+}
+
+/// The terms of a quote that bind it to its cart: currency, requested items and offered lines.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct QuoteTerms {
+    currency: Value,
+    items: Value,
+    lines: Value,
 }

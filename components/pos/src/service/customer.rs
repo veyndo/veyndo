@@ -2,7 +2,9 @@
 use crate::service::guard;
 use crate::store::carts as cart_rows;
 use crate::store::customers;
+use serde::Deserialize;
 use serde_json::{Value, json};
+use veyndo_core::document::view;
 use veyndo_core::shop_scope::{tenant, token};
 use veyndo_core::{RequestContext, Result, State, bad, conflict};
 use veyndo_customers::service::address_book;
@@ -18,6 +20,13 @@ pub async fn find(a: &State, h: &RequestContext, query: &str, card: Option<&str>
     }
     Ok(json!({"elements":customers::search(a, &tenant(h)?, query, card).await?}))
 }
+/// Whether the priced cart still asks for its checkout selection to be confirmed.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct SelectionReview {
+    selection_needs_confirmation: Value,
+}
+
 pub async fn select(
     carts: &dyn Carts,
     a: &State,
@@ -63,7 +72,7 @@ pub async fn select(
     c.data.checkout = Some(selection);
     c.revision += 1;
     let quote = carts.view(&c).await?;
-    if quote["selectionNeedsConfirmation"] == true {
+    if view::<SelectionReview>(&quote).selection_needs_confirmation == true {
         return Err(bad(
             "Customer pricing requires a different available payment; change payment first",
         ));

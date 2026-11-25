@@ -303,9 +303,17 @@ pub async fn record_uses(
 ) -> Result<()> {
     let input: RecordUsesInput = view(q);
     for d in input.discounts.as_array().unwrap_or(&vec![]) {
-        sqlx::query!("INSERT INTO promotion_uses(tenant,promotion,order_id) VALUES($1,$2,$3) ON CONFLICT DO NOTHING", t, d["id"].as_str(), order).execute(&mut *tx).await?;
+        let used: Used = view(d);
+        sqlx::query!("INSERT INTO promotion_uses(tenant,promotion,order_id) VALUES($1,$2,$3) ON CONFLICT DO NOTHING", t, used.id.as_str(), order).execute(&mut *tx).await?;
     }
     Ok(())
+}
+
+/// The promotion a quote discount came from.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct Used {
+    id: Value,
 }
 
 #[cfg(test)]

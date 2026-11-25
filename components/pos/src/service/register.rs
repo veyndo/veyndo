@@ -3,11 +3,13 @@ use crate::domain::input::Input;
 use crate::ports::Register;
 use crate::service::{customer, discount};
 use crate::store::{carts, register};
+use serde::Deserialize;
 use serde_json::{Value, json};
 use veyndo_app_model::declarations::identifier;
 use veyndo_catalog::types::catalog_page::CatalogCriteria;
 use veyndo_checkout::service::checkout_options;
 use veyndo_checkout::store::cart_create::new_cart_context;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::request_context::PosAdmission as Admission;
 use veyndo_core::shop_scope::header;
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad};
@@ -131,7 +133,10 @@ pub async fn invoke(
         "payment" | "reconcile" => {
             let c = reg.carts().load(&h).await?;
             let order = c.data.order.as_ref().ok_or(bad("POS sale not completed"))?;
-            let id = order["payment"]["attemptId"]
+            let sale: SaleAttempt = view(order);
+            let id = sale
+                .payment
+                .attempt_id
                 .as_str()
                 .ok_or(bad("Sale has no provider attempt"))?;
             commands::customer(a, &h, id).await?;
@@ -389,18 +394,47 @@ async fn workspace(
                     input.receipt_id.as_deref().ok_or(bad("Receipt required"))?,
                 )
                 .await?;
-            if snapshot["order"]["salesChannelId"] != channel
-                || !snapshot["order"]["pos"].is_object()
-            {
+            let receipt: ReceiptSnapshot = view(&snapshot);
+            if receipt.order.sales_channel_id != channel || !receipt.order.pos.is_object() {
                 return Err(Error(
                     StatusCode::NOT_FOUND,
                     "POS receipt unavailable".into(),
                 ));
             }
-            Ok(json!({"number":snapshot["number"],"lines":receipt_text::lines(&snapshot)}))
+            Ok(json!({"number":receipt.number,"lines":receipt_text::lines(&snapshot)}))
         }
         _ => Err(bad("Unknown cashier operation")),
     }
+}
+
+/// The provider attempt of a completed sale.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct SaleAttempt {
+    #[serde(deserialize_with = "lenient")]
+    payment: AttemptRef,
+}
+
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct AttemptRef {
+    attempt_id: Value,
+}
+
+/// The receipt fields that bind it to a POS channel.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct ReceiptSnapshot {
+    number: Value,
+    #[serde(deserialize_with = "lenient")]
+    order: ReceiptOrder,
+}
+
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ReceiptOrder {
+    sales_channel_id: Value,
+    pos: Value,
 }
 
 #[cfg(test)]

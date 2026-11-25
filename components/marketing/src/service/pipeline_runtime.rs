@@ -4,7 +4,9 @@ use crate::store::flow_access::headers;
 use crate::store::flow_jobs::Claim;
 use crate::store::flow_steps;
 use crate::types::flow::Flow;
+use serde::Deserialize;
 use serde_json::{Value, json};
+use veyndo_core::document::view;
 use veyndo_core::{Result, State, bad};
 use veyndo_flow_graph::execution::Directive;
 use veyndo_shop::types::cart::{Cart, StoredCart};
@@ -20,10 +22,12 @@ pub enum Outcome {
 /// Runs the pipeline from the job's cursor: every action is recorded before dispatch and an uncertain step is never repeated.
 pub async fn run(a: &State, effects: &dyn FlowEffects, job: &Claim, f: &Flow) -> Result<Outcome> {
     let (t, id, definition) = (&job.tenant, &job.id, &job.definition);
+    let context: PipelineContext = view(definition);
     let p = f.pipeline.as_ref().ok_or(bad("Pipeline required"))?;
     let graph = p.graph()?;
     let mut next = Some(job.cursor.as_deref().unwrap_or(&p.entry));
-    let mut trace = job.execution["trace"]
+    let mut trace = view::<Execution>(&job.execution)
+        .trace
         .as_array()
         .cloned()
         .unwrap_or_default();
@@ -35,7 +39,7 @@ pub async fn run(a: &State, effects: &dyn FlowEffects, job: &Claim, f: &Flow) ->
                 condition,
                 branches,
             } => {
-                let data: Cart = serde_json::from_value(definition["cartData"].clone())
+                let data: Cart = serde_json::from_value(context.cart_data.clone())
                     .map_err(|_| bad("Missing flow cart context"))?;
                 let cart = StoredCart {
                     id: String::new(),
@@ -45,7 +49,7 @@ pub async fn run(a: &State, effects: &dyn FlowEffects, job: &Claim, f: &Flow) ->
                     revision: 0,
                     status: "event".into(),
                 };
-                let matched = condition.checked_matches(&cart, &definition["ruleContext"])?;
+                let matched = condition.checked_matches(&cart, &context.rule_context)?;
                 next = branches.select(matched);
                 trace.push(json!({"node":node_id,"matched":matched}));
             }
@@ -103,4 +107,19 @@ pub async fn run(a: &State, effects: &dyn FlowEffects, job: &Claim, f: &Flow) ->
         job.checkpoint(a, next, json!({"trace":trace})).await?;
     }
     Ok(Outcome::Finished(json!({"completed":true,"trace":trace})))
+}
+
+/// The event context a queued pipeline evaluates its branches against.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct PipelineContext {
+    cart_data: Value,
+    rule_context: Value,
+}
+
+/// The trace a pipeline checkpointed so far.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct Execution {
+    trace: Value,
 }

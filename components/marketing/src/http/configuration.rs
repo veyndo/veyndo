@@ -52,7 +52,7 @@ pub async fn delete(
         return Err(conflict("Configuration revision changed"));
     }
     let deps = inspect(&mut tx, &t, &kind, &id).await?;
-    if deps["blocked"] == true {
+    if view::<Blocked>(&deps).blocked == true {
         return Err(conflict(
             "Configuration is in use; remove references or deactivate it first",
         ));
@@ -60,4 +60,11 @@ pub async fn delete(
     rows::delete(&mut tx, &t, &kind, &id, rev).await?;
     tx.commit().await?;
     Ok(Json(json!({"deleted":true,"id":id,"revision":rev})))
+}
+
+/// Whether something still uses a definition.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct Blocked {
+    blocked: Value,
 }

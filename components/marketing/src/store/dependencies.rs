@@ -1,6 +1,8 @@
 //! Inspect tenant-owned definition references and durable uses before configuration deletion.
+use serde::Deserialize;
 use serde_json::{Value, json};
 use veyndo_core::Result;
+use veyndo_core::document::view;
 
 pub fn references(v: &Value, kind: &str, id: &str) -> bool {
     match v {
@@ -67,7 +69,7 @@ pub async fn inspect(
         for (other, rows) in definitions {
             for row in rows {
                 if !(other == kind && row.id == id) && references(&row.data, kind, id) {
-                    deps.push(json!({"kind":other,"id":row.id,"name":row.data["name"],"count":1}));
+                    deps.push(json!({"kind":other,"id":row.id,"name":view::<Named>(&row.data).name,"count":1}));
                 }
             }
         }
@@ -149,6 +151,14 @@ pub async fn inspect(
     }
     Ok(json!({"blocked":!deps.is_empty(),"dependencies":deps}))
 }
+
+/// The name a referencing definition shows.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct Named {
+    name: Value,
+}
+
 #[cfg(test)]
 mod tests {
     use super::references;

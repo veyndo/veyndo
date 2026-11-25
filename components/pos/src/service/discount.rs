@@ -1,8 +1,10 @@
 //! Audited cashier discounts use exact minor units and the existing native tax allocator in both quote and commit.
 use crate::service::guard;
 use crate::store::carts as cart_rows;
+use serde::Deserialize;
 use serde_json::{Value, json};
 use veyndo_checkout::service::{app_adjustments, delivery};
+use veyndo_core::document::{lenient, view};
 use veyndo_core::shop_scope::{tenant, token};
 use veyndo_core::{RequestContext, Result, State, bad, conflict};
 use veyndo_identity::permit;
@@ -54,6 +56,22 @@ pub async fn save(
     tx.commit().await?;
     Ok(quote)
 }
+/// The quote's goods price a cashier discount is taken from.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct QuotedGoods {
+    #[serde(deserialize_with = "lenient")]
+    price: GoodsPrice,
+}
+
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct GoodsPrice {
+    currency: Value,
+    currency_scale: Value,
+    position_price: Value,
+}
+
 pub fn apply(
     c: &StoredCart,
     mut q: Value,
@@ -65,14 +83,15 @@ pub fn apply(
         if c.data.pos_actor.as_deref() != Some(&d.actor) {
             return Err(bad("Cashier discount requires its admitted POS cart"));
         }
-        let currency = q["price"]["currency"]
-            .as_str()
-            .ok_or(bad("Currency missing"))?;
-        let scale = q["price"]["currencyScale"]
+        let price = view::<QuotedGoods>(&q).price;
+        let currency = price.currency.as_str().ok_or(bad("Currency missing"))?;
+        let scale = price
+            .currency_scale
             .as_u64()
             .ok_or(bad("Currency scale missing"))? as u8;
         let goods = currencies::amount(
-            q["price"]["positionPrice"]
+            price
+                .position_price
                 .as_f64()
                 .ok_or(bad("Goods total missing"))?,
             currency,

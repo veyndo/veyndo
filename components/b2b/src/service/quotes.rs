@@ -266,7 +266,7 @@ async fn offer(tx: &mut Tx<'_>, v: &Value, data: &mut Value, state: &str) -> Res
     let input: QuoteInput = view(v);
     let lines: Vec<OfferLine> = serde_json::from_value(input.data.lines)
         .map_err(|_| bad("Expected offer lines with grossMinor in the quote currency"))?;
-    let original: Vec<Item> = serde_json::from_value(data["items"].clone())
+    let original: Vec<Item> = serde_json::from_value(view::<RequestedItems>(data).items)
         .map_err(|_| bad("Invalid requested items"))?;
     if lines.len() != original.len()
         || lines.len() > 100
@@ -325,4 +325,11 @@ fn wire(r: &quotes::QuoteRow, h: &RequestContext, admin: bool) -> Value {
         }
     }
     json!({"id":r.id,"unitId":r.unit_id,"buyerId":r.buyer_id,"state":state,"revision":r.revision,"data":data,"workflow":workflow})
+}
+
+/// The items a quote request asked for.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct RequestedItems {
+    items: Value,
 }

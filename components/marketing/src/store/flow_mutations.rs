@@ -122,7 +122,9 @@ pub async fn execute(
     )
     .fetch_one(&mut *tx)
     .await?;
-    let customer_id = order["orderCustomer"]["customerId"]
+    let customer_id = view::<OrderRefs>(&order)
+        .order_customer
+        .customer_id
         .as_str()
         .map(String::from);
     let customer = action.contains("customer");
@@ -136,7 +138,11 @@ pub async fn execute(
     )
     .await?;
     if action.ends_with(".tag") {
-        let mut tags = data["tags"].as_array().cloned().unwrap_or_default();
+        let mut tags = view::<AutomationFields>(&data)
+            .tags
+            .as_array()
+            .cloned()
+            .unwrap_or_default();
         for tag in step.tags.as_ref().ok_or(bad("Flow tags required"))? {
             if action.contains(".remove.") {
                 tags.retain(|v| v != tag)
@@ -146,7 +152,7 @@ pub async fn execute(
         }
         data["tags"] = json!(tags);
     } else if action.contains("custom.field") {
-        if !data["customFields"].is_object() {
+        if !view::<AutomationFields>(&data).custom_fields.is_object() {
             data["customFields"] = json!({})
         }
         let field = step.field.as_deref().ok_or(bad("Flow field required"))?;
@@ -197,7 +203,8 @@ pub async fn execute(
         .await?;
     } else if !customer && action != "note" && action != "action.grant.download.access" {
         order["automation"] = data;
-        order["revision"] = json!(order["revision"].as_i64().unwrap_or(1) + 1);
+        let revision = view::<OrderRefs>(&order).revision.as_i64().unwrap_or(1);
+        order["revision"] = json!(revision + 1);
         sqlx::query!(
             "UPDATE orders SET data=$1 WHERE tenant=$2 AND id=$3",
             &order,
@@ -220,4 +227,27 @@ pub async fn execute(
     .await?;
     tx.commit().await?;
     Ok(result)
+}
+
+/// The order fields a flow action reads: its customer and revision.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct OrderRefs {
+    #[serde(deserialize_with = "lenient")]
+    order_customer: CustomerRef,
+    revision: Value,
+}
+
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct CustomerRef {
+    customer_id: Value,
+}
+
+/// The tags and custom fields of automation data.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct AutomationFields {
+    tags: Value,
+    custom_fields: Value,
 }

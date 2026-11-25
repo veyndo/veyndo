@@ -1,5 +1,7 @@
 //! Clone and publish purchasing configuration only; employees, orders, approvals and spending remain live-only.
+use serde::Deserialize;
 use serde_json::{Value, json};
+use veyndo_core::document::view;
 use veyndo_core::{Result, bad};
 pub async fn clone_configuration(
     conn: &mut sqlx::PgConnection,
@@ -94,13 +96,31 @@ pub async fn publish_configuration(
         )
         .fetch_optional(&mut *conn)
         .await?;
-        let saved=crate::store::organization::save_tx(conn,t,"unit.save",&json!({"id":id,"revision":revision.unwrap_or(0),"companyId":value["companyId"],"parentId":value["parentId"],"data":value["data"]})).await?;
+        let unit: StagedUnit = view(value);
+        let saved=crate::store::organization::save_tx(conn,t,"unit.save",&json!({"id":id,"revision":revision.unwrap_or(0),"companyId":unit.company_id,"parentId":unit.parent_id,"data":unit.data})).await?;
         crate::store::catalog::save_tx(
             conn,
             t,
-            &json!({"unitId":id,"revision":saved["revision"],"productIds":value["catalogIds"]}),
+            &json!({"unitId":id,"revision":view::<Saved>(&saved).revision,"productIds":unit.catalog_ids}),
         )
         .await?;
     }
     Ok(())
+}
+
+/// A staged unit as the snapshot stores it.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct StagedUnit {
+    company_id: Value,
+    parent_id: Value,
+    data: Value,
+    catalog_ids: Value,
+}
+
+/// The revision a save returned.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct Saved {
+    revision: Value,
 }

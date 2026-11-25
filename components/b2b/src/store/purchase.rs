@@ -144,8 +144,9 @@ pub async fn check_locked(
     let approval = if needs_approval(&policy, total) {
         let digest = fingerprint(c, q, &policy.version);
         let r=sqlx::query!("SELECT id,data FROM b2b_approvals WHERE tenant=$1 AND cart_id=$2 AND fingerprint=$3 AND state='approved' FOR UPDATE", &c.tenant, &c.id, digest).fetch_optional(&mut *conn).await?.ok_or(conflict("Purchase requires approval for this current cart and company policy"))?;
-        let data: Value = r.data.clone();
-        let approver = data["approverId"]
+        let decision: Decision = view(&r.data);
+        let approver = decision
+            .approver_id
             .as_str()
             .ok_or(bad("Missing purchase approver"))?;
         let approver_policy = access(conn, &c.tenant, &context.unit_id, approver).await?;
@@ -256,4 +257,11 @@ pub async fn lock_unit(conn: &mut sqlx::PgConnection, c: &StoredCart) -> Result<
         .await?;
     }
     Ok(())
+}
+
+/// Who approved a purchase.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct Decision {
+    approver_id: Value,
 }

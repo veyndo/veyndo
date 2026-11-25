@@ -4,7 +4,9 @@ use crate::domain::flow_projection::{
 };
 use crate::store::{facts, rule_snapshot};
 use crate::types::flow::Flow;
+use serde::Deserialize;
 use serde_json::{Value, json};
+use veyndo_core::document::view;
 use veyndo_core::{Result, bad, uid};
 use veyndo_shop::types::cart::StoredCart;
 
@@ -51,7 +53,8 @@ pub async fn project(
     if rows.is_empty() {
         return Ok(());
     }
-    let order_id = data["orderId"].as_str().unwrap_or("");
+    let subject: EventOrder = view(data);
+    let order_id = subject.order_id.as_str().unwrap_or("");
     let order=sqlx::query!("SELECT c.id,c.tenant,c.token,c.data,c.revision,c.status,o.data AS order_data FROM orders o JOIN carts c ON c.id=o.cart_id WHERE o.tenant=$1 AND o.id=$2", t, order_id).fetch_optional(&mut *tx).await?;
     let (cart, q) = if let Some(order) = order {
         (
@@ -117,4 +120,11 @@ pub async fn project(
         }
     }
     Ok(())
+}
+
+/// The order an outbox event is about.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct EventOrder {
+    order_id: Value,
 }

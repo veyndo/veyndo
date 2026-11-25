@@ -55,7 +55,10 @@ pub async fn list(a: &State, h: &RequestContext) -> Result<Value> {
     }
     let settings = config(a, &t).await?.0;
     if let Some(channels) = result["channels"].as_array_mut() {
-        for channel in channels.iter_mut().filter(|c| c["id"] == "default") {
+        for channel in channels
+            .iter_mut()
+            .filter(|c| view::<Identified>(c).id == "default")
+        {
             channel["data"]["locales"] = json!(settings.locales);
         }
     }
@@ -226,7 +229,16 @@ async fn admit(a: &State, kind: &str, id: &str, data: &mut Value, t: &str) -> Re
         "channels" => normalize_channel(data, id, &settings),
         _ => unreachable!(),
     }
-    settings.languages().validate_names(&data["name"], 100)
+    settings
+        .languages()
+        .validate_names(&view::<Named>(data).name, 100)
+}
+
+/// The localized name every definition carries.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct Named {
+    name: Value,
 }
 
 /// The JSON fields `save` reads, typed as it reads them.
@@ -406,10 +418,11 @@ pub async fn import_promotion<H: ConfigurationHost>(
     }
     let previous = rows::promotion(&a.db, &t, id).await?;
     if let Some(previous) = previous {
-        let incoming = &imported.source_import.raw;
-        let stored = &previous["sourceImport"];
+        let incoming: ImportDigest = view(&imported.source_import.raw);
+        let stored = view::<StoredImport>(&previous).source_import;
         preserve_import(&previous, data)?;
-        if stored.is_null() || stored["recordDigest"] != incoming["recordDigest"] {
+        if stored.is_null() || view::<ImportDigest>(&stored).record_digest != incoming.record_digest
+        {
             return Err(conflict(
                 "Imported coupon source changed; review its conflict",
             ));
@@ -424,4 +437,25 @@ pub async fn import_promotion<H: ConfigurationHost>(
     )
     .await?;
     Ok(json!({"id":id,"replayed":false,"active":false}))
+}
+
+/// The provenance a stored imported promotion keeps.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct StoredImport {
+    source_import: Value,
+}
+
+/// The digest of the source record an imported promotion came from.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ImportDigest {
+    record_digest: Value,
+}
+
+/// The id of a listed definition.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct Identified {
+    id: Value,
 }

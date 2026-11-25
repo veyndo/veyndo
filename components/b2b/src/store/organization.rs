@@ -22,9 +22,9 @@ pub async fn detail(a: &State, t: &str, id: &str) -> Result<Value> {
     .ok_or(Error(StatusCode::NOT_FOUND, "Company not found".into()))?;
     let units=sqlx::query!("SELECT id,parent_id,data,revision FROM b2b_units WHERE tenant=$1 AND company_id=$2 ORDER BY id LIMIT 100", t, id).fetch_all(&a.db).await?;
     let members=sqlx::query!("SELECT m.unit_id,m.customer_id,m.data,m.revision,c.email,c.profile FROM b2b_members m JOIN b2b_units u ON u.tenant=m.tenant AND u.id=m.unit_id JOIN customers c ON c.tenant=m.tenant AND c.id=m.customer_id WHERE m.tenant=$1 AND u.company_id=$2 ORDER BY m.unit_id,m.customer_id LIMIT 500", t, id).fetch_all(&a.db).await?;
-    let catalog:Vec<Value>=sqlx::query_scalar!(r#"SELECT jsonb_build_object('unit',b.unit_id,'id',b.product_id) AS "entry!" FROM b2b_catalog b JOIN b2b_units u ON u.tenant=b.tenant AND u.id=b.unit_id WHERE b.tenant=$1 AND u.company_id=$2 ORDER BY b.unit_id,b.product_id LIMIT 100000"#, t, id).fetch_all(&a.db).await?;
+    let catalog=sqlx::query!("SELECT b.unit_id,b.product_id FROM b2b_catalog b JOIN b2b_units u ON u.tenant=b.tenant AND u.id=b.unit_id WHERE b.tenant=$1 AND u.company_id=$2 ORDER BY b.unit_id,b.product_id LIMIT 100000", t, id).fetch_all(&a.db).await?;
     Ok(
-        json!({"id":id,"data":company.data.clone(),"revision":company.revision.clone(),"units":units.iter().map(|r|json!({"id":r.id.clone(),"parentId":r.parent_id.clone(),"catalogIds":catalog.iter().filter(|c|c["unit"]==r.id.clone()).map(|c|c["id"].clone()).collect::<Vec<_>>(),"data":r.data.clone(),"revision":r.revision.clone()})).collect::<Vec<_>>(),"members":members.iter().map(|r|json!({"unitId":r.unit_id.clone(),"customerId":r.customer_id.clone(),"data":r.data.clone(),"revision":r.revision.clone(),"email":r.email.clone(),"profile":r.profile.clone()})).collect::<Vec<_>>()}),
+        json!({"id":id,"data":company.data.clone(),"revision":company.revision.clone(),"units":units.iter().map(|r|json!({"id":r.id.clone(),"parentId":r.parent_id.clone(),"catalogIds":catalog.iter().filter(|c|c.unit_id==r.id).map(|c|c.product_id.clone()).collect::<Vec<_>>(),"data":r.data.clone(),"revision":r.revision.clone()})).collect::<Vec<_>>(),"members":members.iter().map(|r|json!({"unitId":r.unit_id.clone(),"customerId":r.customer_id.clone(),"data":r.data.clone(),"revision":r.revision.clone(),"email":r.email.clone(),"profile":r.profile.clone()})).collect::<Vec<_>>()}),
     )
 }
 pub fn name(
@@ -201,7 +201,8 @@ pub async fn save_tx(conn: &mut sqlx::PgConnection, t: &str, op: &str, v: &Value
             }
         }
         // Currency/period changes cannot erase already reserved spending. Cancel/release or use a new unit.
-        let locked:bool=sqlx::query_scalar!(r#"SELECT EXISTS(SELECT 1 FROM b2b_units u WHERE u.tenant=$1 AND u.id=$2 AND (u.data->>'currency' IS DISTINCT FROM $3::text OR u.data->>'budgetPeriod' IS DISTINCT FROM $4::text) AND EXISTS(SELECT 1 FROM b2b_budget_allocations b WHERE b.tenant=u.tenant AND b.unit_id=u.id AND NOT b.released)) AS "v!""#, t, id, data["currency"].as_str(), data["budgetPeriod"].as_str()).fetch_one(&mut *conn).await?;
+        let budget: BudgetTerms = view(&data);
+        let locked:bool=sqlx::query_scalar!(r#"SELECT EXISTS(SELECT 1 FROM b2b_units u WHERE u.tenant=$1 AND u.id=$2 AND (u.data->>'currency' IS DISTINCT FROM $3::text OR u.data->>'budgetPeriod' IS DISTINCT FROM $4::text) AND EXISTS(SELECT 1 FROM b2b_budget_allocations b WHERE b.tenant=u.tenant AND b.unit_id=u.id AND NOT b.released)) AS "v!""#, t, id, budget.currency.as_str(), budget.budget_period.as_str()).fetch_one(&mut *conn).await?;
         if locked {
             return Err(conflict(
                 "Currency and budget period cannot change while spending allocations remain active",
@@ -287,4 +288,12 @@ pub async fn member_tx(conn: &mut sqlx::PgConnection, t: &str, v: &Value) -> Res
 pub async fn event(conn: &mut sqlx::PgConnection, t: &str, kind: &str, data: Value) -> Result<()> {
     veyndo_core::store::outbox::publish_on(conn, t, kind, &data).await?;
     Ok(())
+}
+
+/// The budget terms of a unit that reserved spending fixes.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct BudgetTerms {
+    currency: Value,
+    budget_period: Value,
 }

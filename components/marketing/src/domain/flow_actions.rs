@@ -1,7 +1,9 @@
 //! Native action schema and permissions use original Core names; no arbitrary SQL, shell or unguarded payment transitions.
 use crate::domain::flow_text;
+use serde::Deserialize;
 use serde_json::{Value, json};
 use veyndo_app_model::declarations::identifier;
+use veyndo_core::document::view;
 use veyndo_core::{Result, bad};
 use veyndo_flow_graph::catalog::PIPELINE_ACTIONS;
 pub fn permission(action: &str) -> &'static str {
@@ -18,6 +20,23 @@ pub fn permission(action: &str) -> &'static str {
         }
     }
 }
+/// The fields of a flow action's configuration that validation and app steps read.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+pub struct ActionConfig {
+    pub instruction: Value,
+    pub tags: Value,
+    pub field: Value,
+    pub group_id: Value,
+    pub active: Value,
+    pub value: Value,
+    pub kind: Value,
+    pub app: Value,
+    pub action: Value,
+    pub arguments: Value,
+    pub template_id: Value,
+}
+
 pub fn normalize(action: &str, config: &Value) -> Value {
     let mut c = config.clone();
     for (source, native) in [
@@ -37,12 +56,13 @@ pub fn normalize(action: &str, config: &Value) -> Value {
 pub fn validate(action: &str, config: &Value) -> Result<()> {
     let normalized = normalize(action, config);
     let config = &normalized;
+    let fields: ActionConfig = view(config);
     if !PIPELINE_ACTIONS.contains(&action) || !config.is_object() || config.to_string().len() > 8000
     {
         return Err(bad("Unknown flow action or invalid configuration"));
     }
     if matches!(action, "note" | "ai_proposal") {
-        flow_text::shape(&config["instruction"])?;
+        flow_text::shape(&fields.instruction)?;
     }
     if action == "knowledge.extract"
         && config.as_object().unwrap().iter().any(|(key, v)| {
@@ -61,7 +81,7 @@ pub fn validate(action: &str, config: &Value) -> Result<()> {
             .ok_or(bad(format!("Flow action requires {key}")))
     };
     if action.ends_with(".tag")
-        && config["tags"].as_array().is_none_or(|a| {
+        && fields.tags.as_array().is_none_or(|a| {
             a.is_empty()
                 || a.len() > 50
                 || a.iter()
@@ -72,7 +92,8 @@ pub fn validate(action: &str, config: &Value) -> Result<()> {
     }
     if action.contains("custom.field") {
         require("field")?;
-        if config["field"]
+        if fields
+            .field
             .as_str()
             .unwrap()
             .contains(['.', '/', '[', ']'])
@@ -83,14 +104,14 @@ pub fn validate(action: &str, config: &Value) -> Result<()> {
     }
     if action == "action.change.customer.group" {
         require("groupId")?;
-        if !identifier(config["groupId"].as_str().unwrap()) {
+        if !identifier(fields.group_id.as_str().unwrap()) {
             return Err(bad("Unknown native customer group"));
         }
     }
-    if action == "action.change.customer.status" && !config["active"].is_boolean() {
+    if action == "action.change.customer.status" && !fields.active.is_boolean() {
         return Err(bad("Customer active flag required"));
     }
-    if action == "action.grant.download.access" && !config["value"].is_boolean() {
+    if action == "action.grant.download.access" && !fields.value.is_boolean() {
         return Err(bad("Download access boolean required"));
     }
     if action == "action.set.order.state" {
@@ -99,20 +120,20 @@ pub fn validate(action: &str, config: &Value) -> Result<()> {
     }
     if action == "action.generate.document" {
         require("kind")?;
-        if !["invoice", "delivery_note"].contains(&config["kind"].as_str().unwrap()) {
+        if !["invoice", "delivery_note"].contains(&fields.kind.as_str().unwrap()) {
             return Err(bad("Unsupported automatic document kind"));
         }
     }
     if action == "app_action" {
         require("app")?;
         require("action")?;
-        if !config["arguments"].is_object() {
+        if !fields.arguments.is_object() {
             return Err(bad("App arguments object required"));
         }
     }
     if action == "action.mail.send" {
         require("templateId")?;
-        if config["templateId"] != "order_confirmation" {
+        if fields.template_id != "order_confirmation" {
             return Err(bad("Unknown installed email template"));
         }
     }

@@ -10,7 +10,7 @@ use crate::store::{catalog, organization};
 use crate::types::model::Context;
 use serde::Deserialize;
 use serde_json::{Value, json};
-use veyndo_core::document::{lenient, view};
+use veyndo_core::document::{lenient, lenient_list, view};
 use veyndo_core::shop_scope::tenant;
 use veyndo_core::store::history_context::customer_context;
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad, conflict};
@@ -102,12 +102,12 @@ pub async fn invoke(
     {
         "settings.save" => save_features(host, h, &settings, v).await,
         "configuration" => {
-            let s = json!(settings);
-            let methods = |key: &str| {
-                json!(s[key].as_array().map(|v|v.iter().map(|m|json!({"id":m["id"],"name":m["name"],"translations":m["translations"],"active":m["active"]})).collect::<Vec<_>>()).unwrap_or_default())
+            let s: ProcurementSettings = view(&json!(settings));
+            let methods = |list: &[MethodSummary]| {
+                json!(list.iter().map(|m|json!({"id":m.id,"name":m.name,"translations":m.translations,"active":m.active})).collect::<Vec<_>>())
             };
             Ok(
-                json!({"features":s["b2b"],"revision":revision,"mainLocale":s["mainLocale"],"locales":s["locales"],"currencies":{"defaultCurrency":s["currencies"]["defaultCurrency"],"enabled":s["currencies"]["enabled"]},"shipping":methods("shipping"),"payments":methods("payments")}),
+                json!({"features":s.b2b,"revision":revision,"mainLocale":s.main_locale,"locales":s.locales,"currencies":{"defaultCurrency":s.currencies.default_currency,"enabled":s.currencies.enabled},"shipping":methods(&s.shipping),"payments":methods(&s.payments)}),
             )
         }
         "company.create" => onboarding::create(a, h, v).await,
@@ -277,6 +277,38 @@ pub async fn unit_orders(
     };
     let elements:Vec<Value>=elements.into_iter().map(|mut p|{p["stateLabels"]=labels.clone();if let Some(id)=id {p["receipts"]=json!(receipts.iter().map(|r|json!({"id":r.id,"kind":r.kind,"number":r.number,"locale":r.locale,"createdAt":r.created,"pdfPath":format!("/store-api/b2b/units/{unit}/orders/{id}/receipts/{}/pdf",r.id)})).collect::<Vec<_>>());}p}).collect();
     Ok(json!({"elements":elements}))
+}
+
+/// The settings a company configuration screen shows.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ProcurementSettings {
+    b2b: Value,
+    main_locale: Value,
+    locales: Value,
+    #[serde(deserialize_with = "lenient")]
+    currencies: CurrencySummary,
+    #[serde(deserialize_with = "lenient_list")]
+    shipping: Vec<MethodSummary>,
+    #[serde(deserialize_with = "lenient_list")]
+    payments: Vec<MethodSummary>,
+}
+
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct CurrencySummary {
+    default_currency: Value,
+    enabled: Value,
+}
+
+/// A shipping or payment method as the company configuration lists it.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct MethodSummary {
+    id: Value,
+    name: Value,
+    translations: Value,
+    active: Value,
 }
 
 #[cfg(test)]

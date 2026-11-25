@@ -4,6 +4,7 @@ use crate::domain::rules;
 use serde::Deserialize;
 use serde_json::{Value, json};
 use veyndo_app_model::declarations::identifier;
+use veyndo_core::document::view;
 use veyndo_core::{Error, Result, State, StatusCode, bad, conflict};
 
 #[derive(Deserialize)]
@@ -60,13 +61,11 @@ pub async fn compare(a: &State, t: &str, v: Value) -> Result<Value> {
             result
         })
         .collect();
-    let evaluated = results
+    let outcomes = results.iter().map(view::<Outcome>).collect::<Vec<_>>();
+    let evaluated = outcomes.iter().filter(|r| r.status == "evaluated").count();
+    let changed = outcomes
         .iter()
-        .filter(|r| r["status"] == "evaluated")
-        .count();
-    let changed = results
-        .iter()
-        .filter(|r| r["status"] == "evaluated" && r["before"] != r["after"])
+        .filter(|r| r.status == "evaluated" && r.before != r.after)
         .count();
     Ok(
         json!({"sideEffects":false,"comparisonVersion":1,"ruleId":input.rule_id,
@@ -75,4 +74,13 @@ pub async fn compare(a: &State, t: &str, v: Value) -> Result<Value> {
         "sampled":results.len(),"evaluated":evaluated,"changed":changed,
         "unavailable":results.len()-evaluated,"results":results}),
     )
+}
+
+/// Whether one sampled event was evaluated and how its match changed.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct Outcome {
+    status: Value,
+    before: Value,
+    after: Value,
 }
