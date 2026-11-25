@@ -1,6 +1,24 @@
 //! Pure startup validation of the native provider origin; no live credentials or provider calls.
 use crate::domain::service_config::validate_service;
+use serde::Deserialize;
+use serde_json::Value;
 use std::env;
+use veyndo_core::document::view;
+
+/// The partner attribution code of a configured PayPal account.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct Attribution {
+    bn_code: Value,
+}
+
+/// The address and environment of one configured adapter service version.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct ServiceEntry {
+    url: Value,
+    environment: Value,
+}
 /// The provider origin for the configured environment; anything else stops the start.
 pub fn paypal_base() -> String {
     let live = env::var("PAYPAL_ENVIRONMENT").unwrap_or("sandbox".into());
@@ -52,7 +70,8 @@ pub fn validate_accounts(accounts: &serde_json::Value, services: &serde_json::Va
             );
         }
         assert!(
-            account["bnCode"]
+            view::<Attribution>(account)
+                .bn_code
                 .as_str()
                 .unwrap()
                 .bytes()
@@ -70,10 +89,12 @@ pub fn validate_accounts(accounts: &serde_json::Value, services: &serde_json::Va
             .expect("Payment service versions object")
             .values()
         {
-            if version["url"].is_string() {
+            let service: ServiceEntry = view(version);
+            if service.url.is_string() {
                 validate_service(
                     version,
-                    version["environment"]
+                    service
+                        .environment
                         .as_str()
                         .expect("Payment environment required"),
                 )

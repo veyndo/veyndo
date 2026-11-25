@@ -23,18 +23,19 @@ pub async fn execute(
     if let Some(c) = order["cart"].as_object_mut() {
         c.remove("token");
     }
-    let (return_url, cancel_url) = if let Some(origin) = p.context["returnOrigin"].as_str() {
+    let ctx = p.ctx();
+    let (return_url, cancel_url) = if let Some(origin) = ctx.return_origin.as_str() {
         return_urls::build(
             origin,
             &p.tenant,
-            p.context["channel"].as_str().unwrap_or("default"),
+            ctx.channel.as_str().unwrap_or("default"),
             &p.id,
             p.environment == "live",
         )?
     } else {
         return_urls::urls(
             &p.tenant,
-            p.context["channel"].as_str().unwrap_or("default"),
+            ctx.channel.as_str().unwrap_or("default"),
             &p.id,
             p.environment == "live",
         )?
@@ -48,7 +49,7 @@ pub async fn execute(
         .get("captureId")
         .cloned()
         .unwrap_or_else(|| json!(p.capture));
-    let mut body = json!({"apiVersion":"1","provider":p.provider,"adapterVersion":p.adapter_version,"tenant":p.tenant,"attemptId":p.id,"orderId":p.order,"environment":p.environment,"accountRef":p.context["accountRef"],"method":p.context["method"],"intent":p.context["intent"],"amountMinor":p.amount,"currency":p.currency,"currencyScale":p.currency_scale,"reference":p.provider_order,"captureId":capture_id,"context":context,"operation":op,"requestKey":key,"input":input,"order":order,"returnUrl":return_url,"cancelUrl":cancel_url});
+    let mut body = json!({"apiVersion":"1","provider":p.provider,"adapterVersion":p.adapter_version,"tenant":p.tenant,"attemptId":p.id,"orderId":p.order,"environment":p.environment,"accountRef":ctx.account_ref,"method":ctx.method,"intent":ctx.intent,"amountMinor":p.amount,"currency":p.currency,"currencyScale":p.currency_scale,"reference":p.provider_order,"captureId":capture_id,"context":context,"operation":op,"requestKey":key,"input":input,"order":order,"returnUrl":return_url,"cancelUrl":cancel_url});
     if let Some(funding) = p.context.get("funding") {
         body["funding"] = funding.clone();
     }

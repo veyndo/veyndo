@@ -7,26 +7,33 @@ use crate::service::remote::execute;
 use crate::store::attempts;
 use crate::store::history::payment_history;
 use crate::store::jobs;
+use serde::Deserialize;
 use serde_json::{Value, json};
+use veyndo_core::document::view;
 use veyndo_core::{Error, Result, State, StatusCode, bad, uid};
+
+/// The transaction details a provider inspection returns.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct Inspected {
+    details: Value,
+}
 
 pub async fn read(gateway: &dyn Gateway, a: &State, tenant: &str, id: &str) -> Result<Value> {
     let initial = attempts::find(&a.db, tenant, id)
         .await?
         .ok_or(Error(StatusCode::NOT_FOUND, "Payment not found".into()))?;
     let mut provider = json!({"status":"unsupported"});
-    if initial.context["capabilities"]
-        .as_array()
-        .is_some_and(|cs| cs.iter().any(|c| c == "details"))
-    {
+    if initial.ctx().can("details") {
         if initial.provider_order.is_none() {
             provider = json!({"status":"not_created"});
         } else {
             match execute(gateway, a, &initial, "inspect", &uid(), &json!({})).await {
                 Ok(result) => {
                     identity(&initial, &result)?;
-                    let details: Details = serde_json::from_value(result["details"].clone())
-                        .map_err(|_| bad("Invalid provider transaction details"))?;
+                    let details: Details =
+                        serde_json::from_value(view::<Inspected>(&result).details)
+                            .map_err(|_| bad("Invalid provider transaction details"))?;
                     details.validate(&initial)?;
                     provider = json!({"status":"available","transaction":details});
                 }

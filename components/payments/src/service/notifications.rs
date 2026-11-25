@@ -4,11 +4,19 @@ use crate::ports::Host;
 use crate::store::attempts;
 use crate::store::jobs::{enqueue_tx, record_inbox};
 use hmac::{Hmac, Mac};
+use serde::Deserialize;
 use serde_json::{Value, json};
 use sha2::Sha256;
 use veyndo_core::document::view;
 use veyndo_core::shop_scope::header;
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad, hash};
+
+/// The notification key of a pinned adapter service.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct ServiceToken {
+    token: Value,
+}
 
 /// Verifies a signed provider notification of one tenant and queues a reconciliation once per event.
 pub async fn accept(
@@ -44,8 +52,9 @@ pub async fn accept(
         .map(|i| u8::from_str_radix(&signature[i..i + 2], 16))
         .collect::<std::result::Result<Vec<_>, _>>()
         .map_err(|_| bad("Invalid signature encoding"))?;
-    let mut mac = Hmac::<Sha256>::new_from_slice(c["token"].as_str().unwrap().as_bytes())
-        .map_err(|_| bad("Invalid notification key"))?;
+    let mut mac =
+        Hmac::<Sha256>::new_from_slice(view::<ServiceToken>(&c).token.as_str().unwrap().as_bytes())
+            .map_err(|_| bad("Invalid notification key"))?;
     mac.update(stamp.to_string().as_bytes());
     mac.update(b".");
     mac.update(bytes);
@@ -60,7 +69,7 @@ pub async fn accept(
         || !is(&r.provider, &p.provider)
         || !is(&r.adapter_version, &p.adapter_version)
         || !is(&r.environment, &p.environment)
-        || r.account_ref != p.context["accountRef"]
+        || r.account_ref != p.ctx().account_ref
         || r.reference.as_str() != p.provider_order.as_deref()
     {
         return Err(bad("Provider event identity mismatch"));

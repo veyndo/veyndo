@@ -1,5 +1,5 @@
 //! Provider-neutral receipt admission and atomic allocation; verified evidence owns ledger transitions.
-use crate::domain::attempt::Attempt;
+use crate::domain::attempt::{Attempt, context_of};
 use crate::domain::receipt_ref::{ProviderReceipt, identity, is, reference};
 use crate::domain::service_config::approval_url;
 use crate::domain::{instructions, refunds, settlements, state};
@@ -91,10 +91,7 @@ pub async fn persist(
         if !r.confirmed() || r.authorized_amount_minor != Some(p.amount) {
             return Err(bad("Authorization receipt mismatch"));
         }
-        if !p.context["capabilities"]
-            .as_array()
-            .is_some_and(|cs| cs.iter().any(|c| c == "authorize"))
-        {
+        if !p.ctx().can("authorize") {
             return Err(bad("Method does not support authorization"));
         }
         let id = reference(&r.authorization_id)?;
@@ -139,11 +136,12 @@ pub async fn persist(
     if ["captured", "partially_captured"].contains(&status) && r.confirmed() {
         refunded = refund_receipts::reconcile(tx, p, &mut context, v).await?;
         if refunded > 0 {
+            let settled = context_of(&context);
             let next = settlements::state(
                 p,
-                context["capturedAmountMinor"].as_i64().unwrap_or(p.amount),
+                settled.captured_amount_minor.as_i64().unwrap_or(p.amount),
                 refunded,
-                context["captureClosed"] == true,
+                settled.capture_closed == true,
             );
             state::transition(&state, next)?;
             state = next.into();
@@ -165,8 +163,8 @@ pub async fn persist(
     if state != p.state
         || capture != p.capture
         || refunded != p.refunded
-        || context["capturedAmountMinor"] != p.context["capturedAmountMinor"]
-        || context["captureClosed"] != p.context["captureClosed"]
+        || context_of(&context).captured_amount_minor != p.ctx().captured_amount_minor
+        || context_of(&context).capture_closed != p.ctx().capture_closed
     {
         follow(host, tx, p, &state).await?;
     }
@@ -184,8 +182,9 @@ async fn follow(
     p: &Attempt,
     state: &str,
 ) -> Result<()> {
-    if state == "approved" || (state == "authorized" && p.context["intent"] == "capture") {
-        let op = if p.context["intent"] == "authorize" {
+    let intent = p.ctx().intent;
+    if state == "approved" || (state == "authorized" && intent == "capture") {
+        let op = if intent == "authorize" {
             "authorize"
         } else {
             "capture"

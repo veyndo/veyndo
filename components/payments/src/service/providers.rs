@@ -59,11 +59,12 @@ pub async fn onboarding(
         ));
     }
     let configured = &process_config::get().payment_services[id][&m.version];
+    let configured_service: ConfiguredService = view(configured);
     let environment = args
         .environment
         .as_deref()
-        .or_else(|| configured["defaultEnvironment"].as_str())
-        .or_else(|| configured["environment"].as_str())
+        .or_else(|| configured_service.default_environment.as_str())
+        .or_else(|| configured_service.environment.as_str())
         .ok_or(Error(
             StatusCode::SERVICE_UNAVAILABLE,
             "Payment service not configured".into(),
@@ -205,6 +206,14 @@ async fn bind_account(
     Ok(())
 }
 
+/// The environments of a configured adapter service version.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ConfiguredService {
+    default_environment: Value,
+    environment: Value,
+}
+
 /// The JSON fields `configured_environments` reads, typed as it reads them.
 #[derive(Deserialize, Default)]
 #[serde(default, rename_all = "camelCase")]
@@ -252,6 +261,16 @@ struct MarkConfiguredInput {
     providers: Value,
 }
 
+/// The fields of a listed provider or channel account that decide whether a provider is configured.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct Listed {
+    id: Value,
+    active: Value,
+    provider: Value,
+    ready: Value,
+}
+
 /// An adapter provider is configured once it is active and one of its channel accounts is ready.
 pub fn mark_configured(generic: &Value) -> Vec<Value> {
     let input: MarkConfiguredInput = view(generic);
@@ -263,11 +282,13 @@ pub fn mark_configured(generic: &Value) -> Vec<Value> {
         .flatten()
         .map(|p| {
             let mut p = p.clone();
+            let listed: Listed = view(&p);
             p["configured"] = json!(
-                p["active"] == true
+                listed.active == true
                     && accounts
                         .iter()
-                        .any(|c| c["provider"] == p["id"] && c["ready"] == true)
+                        .map(view::<Listed>)
+                        .any(|c| c.provider == listed.id && c.ready == true)
             );
             p
         })
@@ -282,7 +303,10 @@ pub async fn status(gateway: &dyn Gateway, a: &State, h: &RequestContext) -> Res
     let jobs = jobs::latest(&a.db, &t).await?;
     let mut list = vec![gateway.builtin(&t)];
     list.extend(mark_configured(&providers(a, h).await?));
-    if !list.iter().any(|p| p["id"] == "shopware_payments") {
+    if !list
+        .iter()
+        .any(|p| view::<Listed>(p).id == "shopware_payments")
+    {
         list.push(json!({"id":"shopware_payments","configured":false,"status":"private-adapter-required"}));
     }
     Ok(

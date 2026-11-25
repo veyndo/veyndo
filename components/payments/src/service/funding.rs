@@ -2,10 +2,27 @@
 use crate::domain::attempt::Attempt;
 use crate::store::attempts;
 use crate::store::funding;
+use serde::Deserialize;
 use serde_json::{Value, json};
+use veyndo_core::document::{lenient, view};
 use veyndo_core::shop_scope::header;
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad, conflict, hash, uid};
 use veyndo_shop::types::cart::StoredCart;
+/// The provider payment an order names.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct FundedOrder {
+    #[serde(deserialize_with = "lenient")]
+    payment: FundedPayment,
+}
+
+/// The attempt of an order's provider payment.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct FundedPayment {
+    attempt_id: Value,
+}
+
 pub async fn prepare(
     tx: &mut sqlx::Transaction<'_, sqlx::Postgres>,
     h: &RequestContext,
@@ -39,14 +56,15 @@ pub async fn prepare(
             StatusCode::UNAUTHORIZED,
             "Payment method needs the current owning customer session".into(),
         ))?;
-    let id = o["payment"]["attemptId"]
+    let order: FundedOrder = view(o);
+    let id = order
+        .payment
+        .attempt_id
         .as_str()
         .ok_or(bad("Saved payment requires a provider payment"))?;
     let p = attempts::get(&mut **tx, &c.tenant, id).await?;
-    if !p.context["capabilities"]
-        .as_array()
-        .is_some_and(|v| v.iter().any(|s| s == "vault"))
-    {
+    let ctx = p.ctx();
+    if !ctx.can("vault") {
         return Err(bad(
             "This payment method does not support saved instruments",
         ));
@@ -60,8 +78,8 @@ pub async fn prepare(
                 "Saved payment method unavailable".into(),
             ))?;
         if r.provider != p.provider
-            || r.method != p.context["method"]
-            || r.account_ref != p.context["accountRef"]
+            || r.method != ctx.method
+            || r.account_ref != ctx.account_ref
             || r.environment != p.environment
         {
             return Err(bad(
@@ -79,12 +97,13 @@ pub async fn dispatch_check(a: &State, p: &Attempt, op: &str) -> Result<()> {
     if op != "create" {
         return Ok(());
     }
-    if let Some(id) = p.context["funding"]["instrumentId"].as_str() {
+    let funding = p.ctx().funding;
+    if let Some(id) = funding.instrument_id.as_str() {
         let active = funding::instrument_active(
             &a.db,
             &p.tenant,
             id,
-            p.context["funding"]["customerId"].as_str().unwrap_or(""),
+            funding.customer_id.as_str().unwrap_or(""),
         )
         .await?;
         if !active {

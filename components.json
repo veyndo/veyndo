@@ -386,7 +386,7 @@
         "sales_channels": "read: reads the sales channel document (kind, activity, catalogue scope) to admit the request channel inside the same statement (providers.rs)"
       },
       "glob_imports": 0,
-      "untyped_access": 150,
+      "untyped_access": 32,
       "sql_outside_store": 0,
       "runtime_sql": 0
     },

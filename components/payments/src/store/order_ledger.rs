@@ -3,7 +3,9 @@ use crate::domain::attempt::Attempt;
 use crate::domain::{settlements, state};
 use crate::ports::Host;
 use crate::store::attempts;
+use serde::Deserialize;
 use serde_json::{Value, json};
+use veyndo_core::document::{lenient, view};
 use veyndo_core::{Result, conflict};
 use veyndo_orders::domain::order_fields::order_fields;
 use veyndo_pricing::verified_kernel;
@@ -21,6 +23,22 @@ pub async fn order_document<'e>(
     )
     .fetch_one(db)
     .await?)
+}
+
+/// The order fields the ledger reads back while updating the payment state.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct LedgerOrder {
+    revision: Value,
+    #[serde(deserialize_with = "lenient")]
+    cart: LedgerCart,
+}
+
+/// The cart an order was placed from.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct LedgerCart {
+    id: Value,
 }
 
 pub async fn update_order(
@@ -53,7 +71,7 @@ pub async fn update_order(
             ]
             .contains(&state)
     );
-    o["revision"] = json!(o["revision"].as_i64().unwrap_or(1) + 1);
+    o["revision"] = json!(view::<LedgerOrder>(&o).revision.as_i64().unwrap_or(1) + 1);
     if state == "captured_late" {
         o["state"] = json!("payment_review");
     }
@@ -62,6 +80,8 @@ pub async fn update_order(
     }
     host.captured(tx, &p.tenant, &mut o, state).await?;
     order_fields(&mut o);
+    let cart = view::<LedgerOrder>(&o).cart.id;
+    let cart = cart.as_str().unwrap();
     sqlx::query!(
         "UPDATE orders SET data=$1 WHERE tenant=$2 AND id=$3",
         o,
@@ -74,7 +94,7 @@ pub async fn update_order(
         "UPDATE carts SET data=jsonb_set(data,'{order}',$1) WHERE tenant=$2 AND id=$3",
         o,
         p.tenant,
-        o["cart"]["id"].as_str().unwrap()
+        cart
     )
     .execute(&mut **tx)
     .await?;
@@ -89,7 +109,7 @@ pub async fn update_order(
     };
     veyndo_core::store::outbox::publish_on(&mut **tx, &p.tenant, kind, &json!({"orderId":p.order,"attemptId":p.id,"state":state,"provider":p.provider,"environment":p.environment,"realMoneyCharged":p.environment=="live" && state=="captured","order":event_order})).await?;
     if state == "captured"
-        && let Some(variant) = sqlx::query_scalar!("UPDATE exposures SET rewarded=true WHERE tenant=$1 AND session=(SELECT data->>'session' FROM carts WHERE tenant=$1 AND id=$2) AND rewarded=false RETURNING variant", p.tenant, o["cart"]["id"].as_str().unwrap()).fetch_optional(&mut **tx).await?
+        && let Some(variant) = sqlx::query_scalar!("UPDATE exposures SET rewarded=true WHERE tenant=$1 AND session=(SELECT data->>'session' FROM carts WHERE tenant=$1 AND id=$2) AND rewarded=false RETURNING variant", p.tenant, cart).fetch_optional(&mut **tx).await?
     {
         sqlx::query!(
             "UPDATE policy SET purchases=purchases+1 WHERE tenant=$1 AND variant=$2",

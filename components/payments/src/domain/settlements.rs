@@ -1,29 +1,39 @@
 //! Immutable capture receipts and exact cumulative settlement for native partial/multiple captures.
 use crate::domain::attempt::Attempt;
 use crate::domain::refunds;
+use serde::Deserialize;
 use serde_json::{Value, json};
+use veyndo_core::document::view;
+
+/// The amount of one stored capture receipt.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct CaptureReceipt {
+    amount_minor: Value,
+}
 
 pub fn captured(p: &Attempt) -> i64 {
-    p.context["capturedAmountMinor"]
+    p.ctx()
+        .captured_amount_minor
         .as_i64()
         .unwrap_or_else(|| if p.capture.is_some() { p.amount } else { 0 })
 }
 pub fn closed(p: &Attempt) -> bool {
-    p.context["captureClosed"]
+    p.ctx()
+        .capture_closed
         .as_bool()
         .unwrap_or_else(|| captured(p) == p.amount)
 }
 pub fn multi(p: &Attempt) -> bool {
-    p.provider != "paypal"
-        && p.context["intent"] == "authorize"
-        && p.context["capabilities"]
-            .as_array()
-            .is_some_and(|cs| cs.iter().any(|c| c == "multi_capture"))
+    let ctx = p.ctx();
+    p.provider != "paypal" && ctx.intent == "authorize" && ctx.can("multi_capture")
 }
 pub fn summary(p: &Attempt) -> Value {
     let captured = captured(p);
     let closed = closed(p);
-    let mut receipts = p.context["captureReceipts"]
+    let ctx = p.ctx();
+    let mut receipts = ctx
+        .capture_receipts
         .as_object()
         .cloned()
         .unwrap_or_default();
@@ -35,10 +45,10 @@ pub fn summary(p: &Attempt) -> Value {
             json!({"amountMinor":captured,"currency":p.currency}),
         );
     }
-    let captures: Vec<Value> = receipts.iter().map(|(id, value)| json!({"id":id,"amountMinor":value["amountMinor"],"currency":p.currency,"refundedMinor":refunds::used(p,&p.context,id)})).collect();
+    let captures: Vec<Value> = receipts.iter().map(|(id, value)| json!({"id":id,"amountMinor":view::<CaptureReceipt>(value).amount_minor,"currency":p.currency,"refundedMinor":refunds::used(p,&p.context,id)})).collect();
     json!({"capturedMinor":captured,"refundedMinor":p.refunded,"captureClosed":closed,
         "remainingAuthorizationMinor":if closed {0}else{p.amount.saturating_sub(captured)},
-        "multipleCapture":multi(p),"canCaptureMore":!closed && ["authorized","partially_captured","partially_refunded"].contains(&p.state.as_str()) && (p.context["authorizationId"].is_string() || p.state == "authorized")
+        "multipleCapture":multi(p),"canCaptureMore":!closed && ["authorized","partially_captured","partially_refunded"].contains(&p.state.as_str()) && (ctx.authorization_id.is_string() || p.state == "authorized")
             && (captured==0 || multi(p)),"captures":captures})
 }
 pub fn state(p: &Attempt, settled: i64, refunded: i64, closed: bool) -> &'static str {

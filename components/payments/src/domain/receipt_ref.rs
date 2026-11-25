@@ -86,7 +86,7 @@ pub fn identity(p: &Attempt, v: &Value) -> Result<()> {
         || !is(&r.attempt_id, &p.id)
         || !is(&r.order_id, &p.order)
         || !is(&r.environment, &p.environment)
-        || r.account_ref != p.context["accountRef"]
+        || r.account_ref != p.ctx().account_ref
         || !is(&r.currency, &p.currency)
         || r.amount_minor != Some(p.amount)
         || p.provider_order.as_ref().is_some_and(|x| r.reference != *x)

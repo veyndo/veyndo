@@ -12,14 +12,19 @@ use veyndo_core::shop_scope::tenant;
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad, conflict, uid};
 use veyndo_identity::{merchant, permit};
 
+/// The provider's answer to an instructions request.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct InstructionsAnswer {
+    status: Value,
+    instructions: Value,
+}
+
 pub async fn read(gateway: &dyn Gateway, a: &State, t: &str, id: &str) -> Result<Value> {
     let p = attempts::find(&a.db, t, id)
         .await?
         .ok_or(Error(StatusCode::NOT_FOUND, "Payment not found".into()))?;
-    if !p.context["capabilities"]
-        .as_array()
-        .is_some_and(|cs| cs.iter().any(|c| c == "instructions"))
-    {
+    if !p.ctx().can("instructions") {
         return Ok(json!({"status":"unsupported","instructions":null}));
     }
     if let Some(saved) = p.context.get("recipientInstructions") {
@@ -29,10 +34,11 @@ pub async fn read(gateway: &dyn Gateway, a: &State, t: &str, id: &str) -> Result
     }
     let v = execute(gateway, a, &p, "instructions", &uid(), &json!({})).await?;
     identity(&p, &v)?;
-    let instructions = match v["status"].as_str() {
-        Some("pending") if v["instructions"].is_null() => None,
+    let answer: InstructionsAnswer = view(&v);
+    let instructions = match answer.status.as_str() {
+        Some("pending") if answer.instructions.is_null() => None,
         Some("available") => {
-            let i: Instructions = serde_json::from_value(v["instructions"].clone())
+            let i: Instructions = serde_json::from_value(answer.instructions.clone())
                 .map_err(|_| bad("Invalid recipient instructions response"))?;
             i.validate()?;
             Some(i)
@@ -40,7 +46,7 @@ pub async fn read(gateway: &dyn Gateway, a: &State, t: &str, id: &str) -> Result
         _ => return Err(bad("Invalid recipient instructions state")),
     };
     Ok(
-        json!({"status":v["status"],"instructions":instructions,"amountMinor":p.amount,"currency":p.currency,"currencyScale":p.currency_scale,"simulated":p.environment!="live"}),
+        json!({"status":answer.status,"instructions":instructions,"amountMinor":p.amount,"currency":p.currency,"currencyScale":p.currency_scale,"simulated":p.environment!="live"}),
     )
 }
 
@@ -105,10 +111,7 @@ pub async fn for_document(
     let p = attempts::find_for_order(tx, t, id, order.id.as_deref().unwrap_or(""))
         .await?
         .ok_or(bad("Document payment is not bound to this order"))?;
-    if !p.context["capabilities"]
-        .as_array()
-        .is_some_and(|caps| caps.iter().any(|cap| cap == "instructions"))
-    {
+    if !p.ctx().can("instructions") {
         return Ok(None);
     }
     let value=p.context.get("recipientInstructions").ok_or(conflict("Invoice payment instructions are still pending; check the payment before issuing the invoice"))?;

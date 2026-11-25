@@ -20,6 +20,14 @@ struct StatusContext {
     capabilities: Value,
 }
 
+/// The settlement summary fields the status projection repeats.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct Settled {
+    captured_minor: Value,
+    capture_closed: Value,
+}
+
 /// One attempt with its latest job, and the sale when a cart is given.
 async fn status_row(a: &State, t: &str, id: &str, cart: Option<&str>) -> Result<Status> {
     attempts::status(&a.db, t, id, cart)
@@ -30,8 +38,8 @@ async fn status_row(a: &State, t: &str, id: &str, cart: Option<&str>) -> Result<
 fn payment_status(r: &Status, id: &str) -> Value {
     let p = &r.listed.attempt;
     let context: StatusContext = view(&p.context);
-    let settled = summary(p);
-    json!({"provider":p.provider,"capturedMinor":settled["capturedMinor"],"captureClosed":settled["captureClosed"],"checkout":context.checkout,"intent":context.intent,"job":r.job,"id":id,"state":p.state,"approvalUrl":r.listed.approval_url,"amountMinor":p.amount,"currency":p.currency,"currencyScale":p.currency_scale,"refundedMinor":p.refunded,"revision":r.listed.revision,"environment":p.environment,"savedPaymentMethodStatus":context.vault_status,"instructionsAvailable":context.capabilities.as_array().is_some_and(|cs|cs.iter().any(|c|c=="instructions")),"realMoneyCharged":p.environment=="live" && ["captured","partially_captured","captured_late","partially_refunded","refunded"].contains(&p.state.as_str())})
+    let settled: Settled = view(&summary(p));
+    json!({"provider":p.provider,"capturedMinor":settled.captured_minor,"captureClosed":settled.capture_closed,"checkout":context.checkout,"intent":context.intent,"job":r.job,"id":id,"state":p.state,"approvalUrl":r.listed.approval_url,"amountMinor":p.amount,"currency":p.currency,"currencyScale":p.currency_scale,"refundedMinor":p.refunded,"revision":r.listed.revision,"environment":p.environment,"savedPaymentMethodStatus":context.vault_status,"instructionsAvailable":context.capabilities.as_array().is_some_and(|cs|cs.iter().any(|c|c=="instructions")),"realMoneyCharged":p.environment=="live" && ["captured","partially_captured","captured_late","partially_refunded","refunded"].contains(&p.state.as_str())})
 }
 /// The status of one payment attempt.
 pub async fn read(a: &State, t: &str, id: &str) -> Result<Value> {

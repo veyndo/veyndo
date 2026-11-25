@@ -49,7 +49,8 @@ pub async fn validate(
             "Partial capture requires a multi-capture authorization",
         ));
     }
-    if p.context["intent"] == "authorize" && p.context["authorizationId"].as_str().is_none() {
+    let ctx = p.ctx();
+    if ctx.intent == "authorize" && ctx.authorization_id.as_str().is_none() {
         return Err(conflict("Wait for confirmed authorization before capture"));
     }
     let reserved: i64 = sqlx::query_scalar!(r#"SELECT coalesce(sum(coalesce((request->>'amountMinor')::bigint,$3)),0)::bigint AS "reserved!" FROM payment_jobs WHERE tenant=$1 AND attempt_id=$2 AND operation='capture' AND state IN ('queued','running','uncertain')"#, p.tenant, p.id, p.amount).fetch_one(&mut **tx).await?;

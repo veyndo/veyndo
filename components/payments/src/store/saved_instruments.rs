@@ -1,30 +1,61 @@
 //! Customer-owned saved instruments expose only redacted metadata; immediate revocation and provider cleanup share payment jobs.
 use crate::store::jobs::enqueue_tx;
+use serde::Deserialize;
 use serde_json::{Value, json};
+use veyndo_core::document::{lenient, view};
 use veyndo_core::{Error, Result, State, StatusCode};
+
+/// The provider methods of an installed manifest.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct VaultManifest {
+    id: Value,
+    #[serde(deserialize_with = "lenient")]
+    payment_provider: VaultProvider,
+}
+
+/// The methods of a payment provider contract.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct VaultProvider {
+    methods: Value,
+}
+
+/// A provider method and its capabilities.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct VaultMethod {
+    id: Value,
+    capabilities: Value,
+}
 
 pub async fn list(a: &State, t: &str, customer: &str) -> Result<Value> {
     let rows=sqlx::query!("SELECT id,provider,method,environment,metadata,created_at::text FROM payment_instruments WHERE tenant=$1 AND customer_id=$2 AND state='active' ORDER BY created_at DESC LIMIT 32", t, customer).fetch_all(&a.db).await?;
     let manifests:Vec<Value>=sqlx::query_scalar!("SELECT manifest FROM app_packages WHERE tenant=$1 AND active AND manifest->'paymentProvider' IS NOT NULL", t).fetch_all(&a.db).await?;
     let methods: Vec<String> = manifests
         .iter()
+        .map(view::<VaultManifest>)
         .flat_map(|m| {
-            m["paymentProvider"]["methods"]
+            m.payment_provider
+                .methods
                 .as_array()
                 .into_iter()
                 .flatten()
+                .map(view::<VaultMethod>)
                 .filter(|method| {
-                    method["capabilities"]
+                    method
+                        .capabilities
                         .as_array()
                         .is_some_and(|v| v.iter().any(|c| c == "vault"))
                 })
                 .filter_map(|method| {
                     Some(format!(
                         "{}-{}",
-                        m["id"].as_str()?.replace('_', "-"),
-                        method["id"].as_str()?.replace('_', "-")
+                        m.id.as_str()?.replace('_', "-"),
+                        method.id.as_str()?.replace('_', "-")
                     ))
                 })
+                .collect::<Vec<_>>()
         })
         .collect();
     Ok(

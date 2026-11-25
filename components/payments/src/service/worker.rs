@@ -5,8 +5,40 @@ use crate::ports::{Gateway, Host};
 use crate::store::attempts;
 use crate::store::jobs::{self, enqueue_tx};
 use crate::store::order_ledger::release_stock;
-use serde_json::json;
+use serde::Deserialize;
+use serde_json::{Value, json};
+use veyndo_core::document::{lenient, view};
 use veyndo_core::{Result, State, StatusCode, bad, conflict};
+
+/// The provider answer fields the worker reads.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct Answer {
+    status: Value,
+    id: Value,
+    #[serde(deserialize_with = "lenient")]
+    amount: AnswerAmount,
+    not_created: Value,
+    vault_revoked: Value,
+    vault_reference: Value,
+}
+
+/// A provider money amount.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct AnswerAmount {
+    currency_code: Value,
+    value: Value,
+}
+
+/// The job request fields the worker reads.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct JobInput {
+    amount_minor: Value,
+    expiry: Value,
+    reference: Value,
+}
 
 pub async fn payment_once(host: &dyn Host, gateway: &dyn Gateway, a: &State) -> Result<bool> {
     let (tenants, providers) = gateway.scope();
@@ -63,16 +95,20 @@ pub async fn payment_once(host: &dyn Host, gateway: &dyn Gateway, a: &State) -> 
     }
     match outcome {
         Ok(v) => {
-            if op == "refund" && p.provider == "paypal" && v["status"] == "PENDING" {
-                let remote = v["id"]
+            let answer: Answer = view(&v);
+            let job: JobInput = view(&input);
+            if op == "refund" && p.provider == "paypal" && answer.status == "PENDING" {
+                let remote = answer
+                    .id
                     .as_str()
                     .filter(|s| s.bytes().all(|c| c.is_ascii_alphanumeric() || c == b'-'))
                     .ok_or(bad("Refund ID missing"))?;
-                let amount = input["amountMinor"]
+                let amount = job
+                    .amount_minor
                     .as_i64()
                     .ok_or(bad("Refund amount missing"))?;
-                if v["amount"]["currency_code"] != current.currency
-                    || parse_amount(v["amount"]["value"].as_str().unwrap_or(""), &p.currency)?
+                if answer.amount.currency_code != current.currency
+                    || parse_amount(answer.amount.value.as_str().unwrap_or(""), &p.currency)?
                         != amount
                 {
                     return Err(bad("Pending refund amount mismatch"));
@@ -86,8 +122,8 @@ pub async fn payment_once(host: &dyn Host, gateway: &dyn Gateway, a: &State) -> 
             // SAVEPOINT keeps a rejected/malformed remote receipt from partially mutating local state.
             jobs::begin_receipt(&mut tx).await?;
             let result =
-                if op == "cancel" && current.provider == "paypal" && v["status"] != "COMPLETED" {
-                    let validation = if v["notCreated"] == true {
+                if op == "cancel" && current.provider == "paypal" && answer.status != "COMPLETED" {
+                    let validation = if answer.not_created == true {
                         Ok(())
                     } else {
                         gateway.cancellable(&current, &v)
@@ -99,7 +135,7 @@ pub async fn payment_once(host: &dyn Host, gateway: &dyn Gateway, a: &State) -> 
                             host,
                             &mut tx,
                             &current,
-                            if input["expiry"] == true {
+                            if job.expiry == true {
                                 "expired"
                             } else {
                                 "cancelled"
@@ -110,7 +146,7 @@ pub async fn payment_once(host: &dyn Host, gateway: &dyn Gateway, a: &State) -> 
                     }
                 } else if op == "vault_revoke" {
                     identity(&current, &v).and_then(|_| {
-                        if v["vaultRevoked"] == true && v["vaultReference"] == input["reference"] {
+                        if answer.vault_revoked == true && answer.vault_reference == job.reference {
                             Ok(())
                         } else {
                             Err(bad("Provider did not confirm instrument revocation"))
