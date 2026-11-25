@@ -97,10 +97,10 @@
   background: var(--blue);
 }
 .order-confetti i:nth-child(3n) {
-  background: #c9a271;
+  background: var(--vy-color-amber);
 }
 .order-confetti i:nth-child(3n + 1) {
-  background: #97a6b0;
+  background: var(--vy-color-accent-border);
   border-radius: 50%;
 }
 @media (prefers-reduced-motion: no-preference) {

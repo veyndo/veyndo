@@ -13,7 +13,7 @@
     order: 4;
     width: 100%;
     justify-content: space-between;
-    border-top: 1px solid #edf1f5;
+    border-top: 1px solid var(--vy-color-surface);
     padding-top: 5px;
   }
   .shop-nav nav a,

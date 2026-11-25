@@ -39,12 +39,12 @@
   align-items: center;
   justify-content: center;
   gap: 12px;
-  background: #ecf0f2;
-  color: #5e6367;
+  background: var(--vy-color-panel);
+  color: var(--vy-color-muted);
 }
 .shop-image-placeholder > span {
   font-size: 80px;
-  color: #8c9499;
+  color: var(--vy-color-muted);
 }
 .shop-image-placeholder > small {
   font-size: 13px;

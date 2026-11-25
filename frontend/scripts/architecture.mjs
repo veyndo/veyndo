@@ -73,14 +73,16 @@ for (const file of files) {
     errors.push(`${relative(file)} needs a leading responsibility comment`);
   if (path.dirname(file) === source && path.basename(file) !== "main.tsx")
     errors.push(`${relative(file)} belongs in a feature folder`);
-  // Studio areas style with design tokens and kit parts only (F4).
+  // Studio, storefront, shared and console style with design tokens only (F4, F5).
   if (
     file.endsWith(".css") &&
-    owner(file) === "admin" &&
+    ["admin", "storefront", "shared", "platform", "application"].includes(
+      owner(file),
+    ) &&
     colourLiteral.test(text.replace(/\/\*[\s\S]*?\*\//g, ""))
   )
     errors.push(
-      `${relative(file)} uses a colour literal; Studio styles use var(--vy-color-*)`,
+      `${relative(file)} uses a colour literal; frontend styles use var(--vy-color-*)`,
     );
   if (
     /\.tsx?$/.test(file) &&

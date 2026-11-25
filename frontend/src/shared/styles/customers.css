@@ -26,21 +26,21 @@
 .customer-address-fields summary {
   cursor: pointer;
   padding: 12px 0;
-  color: var(--accent, #1689ed);
+  color: var(--accent, var(--vy-color-accent-strong));
 }
 .customer-address-fields details .customer-field-grid {
   margin-top: 12px;
 }
 .customer-address-book {
-  border-top: 1px solid var(--line, #dce6ee);
+  border-top: 1px solid var(--line, var(--vy-color-border));
   margin-top: 24px;
   padding-top: 20px;
 }
 .customer-address-grid article {
   padding: 20px;
-  border: 1px solid var(--line, #dce6ee);
+  border: 1px solid var(--line, var(--vy-color-border));
   border-radius: 16px;
-  background: var(--surface, #f6faff);
+  background: var(--surface, var(--vy-color-bg));
 }
 .customer-address-card {
   font-style: normal;
@@ -57,9 +57,9 @@
 }
 .customer-address-badges span,
 .customer-connected {
-  color: #067aad;
-  background: #e5f7ff;
-  border: 1px solid #bee9fa;
+  color: var(--vy-color-teal);
+  background: var(--vy-color-hover);
+  border: 1px solid var(--vy-color-border);
   border-radius: 8px;
   padding: 5px 8px;
   font-size: 12px;
@@ -103,7 +103,7 @@
 }
 .checkout-identity {
   padding-bottom: 20px;
-  border-bottom: 1px solid var(--line, #dce6ee);
+  border-bottom: 1px solid var(--line, var(--vy-color-border));
 }
 .checkout-details h3 {
   font-size: 17px;

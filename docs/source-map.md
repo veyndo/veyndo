@@ -641,7 +641,7 @@ work; do not infer those from screenshots or typechecking.
 
 App frontend modules: `AppsManager`/`AppEntity` manage lifecycle/data;
 `AppFrame` provides the constrained iframe SDK bridge; `AppSlot` personalizes
-products; `PaymentSession`/`PaymentManager` display customer/provider state;
+products; `PaymentSession` and `admin/payments` display customer/provider state;
 `admin/intelligence/KnowledgeView` and `MemoryRecommendations` connect
 evidence to approved suggestions.
 `app-i18n` supplies four-language host vocabulary; `apps.css` scopes their layout.

@@ -38,7 +38,8 @@
   border: 1px solid var(--border);
   border-radius: 12px;
   background: var(--surface);
-  box-shadow: 0 4px 18px #112b4810;
+  box-shadow: 0 4px 18px
+    color-mix(in srgb, var(--vy-color-text) 6%, transparent);
 }
 .studio .intl-language-switcher label {
   display: grid;

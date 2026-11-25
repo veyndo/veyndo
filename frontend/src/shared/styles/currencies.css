@@ -8,7 +8,7 @@
 .currency-settings label small,
 .currency-settings p {
   font-size: 0.86rem;
-  color: var(--muted, #61718c);
+  color: var(--muted, var(--vy-color-muted));
   font-weight: 400;
   line-height: 1.6;
 }
@@ -31,9 +31,9 @@
 .currency-rate-cards article,
 .currency-feed {
   padding: 24px;
-  border: 1px solid var(--border, #dce5f3);
+  border: 1px solid var(--border, var(--vy-color-border));
   border-radius: 18px;
-  background: var(--surface, #fff);
+  background: var(--surface, var(--vy-color-surface));
   display: grid;
   gap: 16px;
 }
@@ -52,14 +52,14 @@
 .currency-chips button {
   padding: 10px 16px;
   border-radius: 24px;
-  border: 1px solid #dce5f3;
+  border: 1px solid var(--vy-color-border);
   background: transparent;
   color: inherit;
 }
 .currency-chips button[aria-pressed="true"] {
-  color: #155eef;
-  border-color: #99baff;
-  background: #edf4ff;
+  color: var(--vy-color-accent-strong);
+  border-color: var(--vy-color-accent-border);
+  background: var(--vy-color-panel);
 }
 .currency-add {
   display: flex;
@@ -81,11 +81,11 @@
 }
 .currency-job {
   padding: 16px 0;
-  border-bottom: 1px solid #dce5f3;
+  border-bottom: 1px solid var(--vy-color-border);
 }
 .shop-currency-picker select {
   min-height: 38px;
-  border: 1px solid #dce5f3;
+  border: 1px solid var(--vy-color-border);
   border-radius: 20px;
   padding: 0 10px;
   background: transparent;

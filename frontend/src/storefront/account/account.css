@@ -2,9 +2,9 @@
 @import "./account-fields.css";
 @import "./account-purchases.css";
 .customer-account {
-  --account-ink: #20292f;
-  --account-muted: #666e74;
-  --account-line: #dfe3e6;
+  --account-ink: var(--vy-color-text);
+  --account-muted: var(--vy-color-muted);
+  --account-line: var(--vy-color-border);
   --account-accent: var(--veyndo-blue-text);
   width: min(1100px, calc(100vw - 48px));
   max-width: none;
@@ -13,11 +13,12 @@
   margin: auto;
   inset: 0;
   padding: 0;
-  border: 1px solid #fff9;
+  border: 1px solid color-mix(in srgb, var(--vy-color-surface) 60%, transparent);
   border-radius: 24px;
   color: var(--account-ink);
-  background: #fff;
-  box-shadow: 0 28px 100px #162b3144;
+  background: var(--vy-color-surface);
+  box-shadow: 0 28px 100px
+    color-mix(in srgb, var(--vy-color-text) 27%, transparent);
   font: inherit;
   overflow: hidden;
 }
@@ -27,14 +28,14 @@
   animation: account-enter 0.22s ease-out;
 }
 .customer-account::backdrop {
-  background: #172f3b88;
+  background: color-mix(in srgb, var(--vy-color-text) 53%, transparent);
   backdrop-filter: blur(7px);
 }
 .customer-account * {
   box-sizing: border-box;
 }
 .customer-account :focus-visible {
-  outline: 3px solid #7895a9;
+  outline: 3px solid var(--vy-color-muted);
   outline-offset: 3px;
 }
 .customer-account h1,
@@ -88,7 +89,7 @@
   padding: 0;
   border: 1px solid var(--account-line);
   border-radius: 50%;
-  background: #f8f9fa;
+  background: var(--vy-color-bg);
   color: var(--account-ink);
   font-size: 28px;
 }
@@ -100,7 +101,7 @@
 .account-sidebar {
   width: 230px;
   flex-shrink: 0;
-  background: #f4f6f7;
+  background: var(--vy-color-bg);
   border-right: 1px solid var(--account-line);
   padding: 28px 18px;
   display: flex;
@@ -119,8 +120,8 @@
   place-items: center;
   width: 48px;
   height: 48px;
-  background: #e1e7ec;
-  border: 1px solid #cdd7de;
+  background: var(--vy-color-border);
+  border: 1px solid var(--vy-color-border);
   color: var(--account-accent);
   border-radius: 16px;
   font-size: 22px;
@@ -139,15 +140,15 @@
   border: 0;
   background: transparent;
   border-radius: 10px;
-  color: #596167;
+  color: var(--vy-color-muted);
   font-size: 13px;
 }
 .customer-account .account-sidebar nav button:hover {
-  background: #e8ecee;
+  background: var(--vy-color-positive-soft);
 }
 .customer-account .account-sidebar nav button[aria-current] {
   color: var(--account-accent);
-  background: #e1e6ea;
+  background: var(--vy-color-border);
   font-weight: 650;
 }
 .customer-account .account-logout {
@@ -205,22 +206,22 @@
 .account-spinner {
   width: 20px;
   height: 20px;
-  border: 2px solid #dfe5e9;
+  border: 2px solid var(--vy-color-border);
   border-top-color: var(--account-accent);
   border-radius: 50%;
   animation: account-spin 0.8s linear infinite;
 }
 .account-feedback {
   padding: 14px 18px;
-  border: 1px solid #cfd9e0;
+  border: 1px solid var(--vy-color-border);
   border-radius: 12px;
-  background: #edf3f7;
-  color: #284458;
+  background: var(--vy-color-panel);
+  color: var(--vy-color-text);
 }
 .account-feedback.is-error {
-  background: #fff1ef;
-  border-color: #efd1c9;
-  color: #9d3728;
+  background: var(--vy-color-danger-soft);
+  border-color: var(--vy-color-border);
+  color: var(--vy-color-danger);
 }
 .customer-account.is-auth {
   width: min(570px, calc(100vw - 40px));
@@ -359,8 +360,9 @@
   color: var(--account-ink);
 }
 .customer-account .vy-sf-order:hover {
-  border-color: #94a8b6;
-  box-shadow: 0 5px 22px #203b4e10;
+  border-color: var(--vy-color-accent-border);
+  box-shadow: 0 5px 22px
+    color-mix(in srgb, var(--vy-color-text) 6%, transparent);
 }
 .customer-account .vy-sf-order-footer,
 .customer-account .vy-sf-link-button {

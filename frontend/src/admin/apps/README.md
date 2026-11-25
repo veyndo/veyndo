@@ -15,7 +15,6 @@ Files and their individual responsibilities are listed in [the generated source 
 - [`ConnectorPanel.tsx`](ConnectorPanel.tsx): Native app workspace: OAuth, provider settings, durable jobs and private sources.
 - [`EmailPanel.tsx`](../../../../extensions/apps/email/studio/EmailPanel.tsx): Native email app settings, localized templates, safe previews and durable delivery receipts.
 - [`EmailProviderFields.tsx`](../../../../extensions/apps/email/studio/EmailProviderFields.tsx): EmailProviderFields: focused connector-settings view with explicit typed inputs and callbacks.
-- [`PaymentManager.tsx`](PaymentManager.tsx): Payment ledger, adapter readiness and explicit refund approval.
 - [`app-types.ts`](app-types.ts): Installed package metadata used by app administration views.
 - [`email-languages.ts`](../../../../extensions/apps/email/studio/email-languages.ts): Supported transactional email template languages.
 - [`library-model.ts`](library-model.ts): Shared app discovery metadata, safe artwork sources and localized search independent of rendering.

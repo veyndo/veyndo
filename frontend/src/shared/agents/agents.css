@@ -8,9 +8,9 @@
   display: flex;
   gap: 4px;
   padding: 4px;
-  border: 1px solid #d5e3ef;
+  border: 1px solid var(--vy-color-border);
   border-radius: 12px;
-  background: var(--studio-bg, #f5f8fc);
+  background: var(--studio-bg, var(--vy-color-bg));
 }
 .agent-composer .agent-engine-picker button {
   display: flex;
@@ -25,12 +25,13 @@
   border-radius: 8px;
   font-size: 11px;
   background: transparent;
-  color: var(--studio-muted, #5f7386);
+  color: var(--studio-muted, var(--vy-color-muted));
 }
 .agent-composer .agent-engine-picker button[aria-pressed="true"] {
-  background: var(--studio-card, #fff);
-  color: #0767b2;
-  box-shadow: 0 2px 8px #1b497d12;
+  background: var(--studio-card, var(--vy-color-surface));
+  color: var(--vy-color-accent);
+  box-shadow: 0 2px 8px
+    color-mix(in srgb, var(--vy-color-accent) 7%, transparent);
 }
 .agent-prompt-label {
   display: grid;
@@ -45,7 +46,7 @@
   line-height: 1.65;
   resize: vertical;
   box-sizing: border-box;
-  border: 1px solid #cbddeb;
+  border: 1px solid var(--vy-color-border);
   border-radius: 12px;
 }
 .agent-submit {
@@ -58,7 +59,7 @@
 .agent-composer-note {
   font-size: 11px;
   line-height: 1.6;
-  color: var(--studio-muted, #60758a);
+  color: var(--studio-muted, var(--vy-color-muted));
 }
 .agent-transfer {
   display: grid;
@@ -67,7 +68,7 @@
   gap: 12px;
   margin-top: 20px;
   padding-top: 18px;
-  border-top: 1px solid #dbe6ef;
+  border-top: 1px solid var(--vy-color-border);
 }
 .agent-transfer h3 {
   font-size: 14px;

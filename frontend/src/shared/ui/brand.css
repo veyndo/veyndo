@@ -1,11 +1,10 @@
-/** Shared Veyndo brand palette and vector sizing; light UI text uses the contrast-safe blue. */
+/** Shared Veyndo brand palette names over the design tokens, and vector sizing. */
 :root {
-  --veyndo-blue: #189eff;
-  --veyndo-blue-deep: #0176ff;
-  --veyndo-blue-text: #0b539b;
-  --veyndo-blue-ink: #06325f;
-  --veyndo-blue-soft: #e3f3ff;
-  --veyndo-blue-hover: #d4ebff;
+  --veyndo-blue-deep: var(--vy-color-focus);
+  --veyndo-blue-text: var(--vy-color-accent);
+  --veyndo-blue-ink: var(--vy-color-text);
+  --veyndo-blue-soft: var(--vy-color-accent-soft);
+  --veyndo-blue-hover: var(--vy-color-hover);
 }
 
 .veyndo-brand {
@@ -35,7 +34,7 @@
   letter-spacing: 1.6px;
   text-transform: uppercase;
   margin-top: 3px;
-  color: var(--muted, #65738a);
+  color: var(--muted, var(--vy-color-muted));
 }
 .platform-brand .veyndo-mark {
   width: 44px;

@@ -1258,7 +1258,6 @@ This lists every checked-in source module in these roots, including files with n
 | [frontend/src/admin/apps/AppsRoute.tsx](../frontend/src/admin/apps/AppsRoute.tsx) | Apps route: the app manager for the current stage, with order links. |
 | [frontend/src/admin/apps/ConnectorPanel.tsx](../frontend/src/admin/apps/ConnectorPanel.tsx) | Native app workspace: OAuth, provider settings, durable jobs and private sources. |
 | [frontend/src/admin/apps/IntegrationDirectory.tsx](../frontend/src/admin/apps/IntegrationDirectory.tsx) | Ten explicit service routes reuse native app consent or the documented HTTP setup; no fake connected state. |
-| [frontend/src/admin/apps/PaymentManager.tsx](../frontend/src/admin/apps/PaymentManager.tsx) | Native payment balances and observed financial jobs, shared with the order detail controls. |
 | [frontend/src/admin/apps/ProviderAccount.tsx](../frontend/src/admin/apps/ProviderAccount.tsx) | Shared installed-provider onboarding and channel connection controls for merchant Apps and App Studio. |
 | [frontend/src/admin/apps/ServiceIntegrationPanel.tsx](../frontend/src/admin/apps/ServiceIntegrationPanel.tsx) | Revisioned encrypted connection forms and bounded operations on the existing app action gateway. |
 | [frontend/src/admin/apps/StoryfrontsRoute.tsx](../frontend/src/admin/apps/StoryfrontsRoute.tsx) | Storyfronts route: the Storyfront app's Studio view for the current stage. |
@@ -2094,7 +2093,7 @@ This lists every checked-in source module in these roots, including files with n
 | [frontend/src/shared/ui/Icon.tsx](../frontend/src/shared/ui/Icon.tsx) | Icon: Presentational icons and catalogue artwork with explicit inputs.. |
 | [frontend/src/shared/ui/ProductArt.tsx](../frontend/src/shared/ui/ProductArt.tsx) | Product Art: Presentational icons and catalogue artwork with explicit inputs.. |
 | [frontend/src/shared/ui/WorkspaceBoundary.tsx](../frontend/src/shared/ui/WorkspaceBoundary.tsx) | Contain a workspace render failure and let the user retry without losing the application shell. |
-| [frontend/src/shared/ui/brand.css](../frontend/src/shared/ui/brand.css) | Shared Veyndo brand palette and vector sizing; light UI text uses the contrast-safe blue. |
+| [frontend/src/shared/ui/brand.css](../frontend/src/shared/ui/brand.css) | Shared Veyndo brand palette names over the design tokens, and vector sizing. |
 | [frontend/src/shared/ui/confirm-dialog.css](../frontend/src/shared/ui/confirm-dialog.css) | Summary lists inside confirmations; the dialog surface itself comes from kit/ui. |
 | [frontend/src/shared/ui/useUnsavedWorkspace.ts](../frontend/src/shared/ui/useUnsavedWorkspace.ts) | Native dirty state protects reloads and informs an optional embedded host without owning editor data. |
 | [frontend/src/storefront/account/AccountDownloads.tsx](../frontend/src/storefront/account/AccountDownloads.tsx) | Paid download entitlements are fetched by the server and retrieved with customer headers, never URL tokens. |

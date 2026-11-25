@@ -22,7 +22,6 @@
       "frontend/src/admin/apps/AppDetails.tsx",
       "frontend/src/admin/apps/AppEntity.tsx",
       "frontend/src/admin/apps/ConnectorPanel.tsx",
-      "frontend/src/admin/apps/PaymentManager.tsx",
       "frontend/src/admin/assistant/MessageText.tsx",
       "frontend/src/admin/assistant/ProposalCard.tsx",
       "frontend/src/admin/assistant/SettingsDialog.tsx",

@@ -1,13 +1,14 @@
 /** Reusable blue Studio grid surfaces, restrained motion, contained overflow and light/dark tokens. */
 .agent-grid {
-  --grid-line: var(--border, #dce4ef);
-  background: var(--surface, #fff);
+  --grid-line: var(--border, var(--vy-color-border));
+  background: var(--surface, var(--vy-color-surface));
   border: 1px solid var(--grid-line);
   border-radius: 20px;
-  box-shadow: 0 8px 28px rgb(20 40 70 / 4%);
+  box-shadow: 0 8px 28px
+    color-mix(in srgb, var(--vy-color-text) 4%, transparent);
   min-width: 0;
   overflow: visible;
-  color: var(--text, #1a2c3e);
+  color: var(--text, var(--vy-color-text));
 }
 .agent-grid-toolbar {
   display: flex;
@@ -23,7 +24,7 @@
   align-items: center;
   gap: 10px;
   flex: 1 1 260px;
-  background: var(--bg, #f5f8fc);
+  background: var(--bg, var(--vy-color-bg));
   border: 1px solid var(--grid-line);
   border-radius: 12px;
   padding: 0 14px;
@@ -57,22 +58,22 @@
   border: 1px solid var(--grid-line);
   border-radius: 10px;
   min-height: 44px;
-  background: var(--surface, #fff);
+  background: var(--surface, var(--vy-color-surface));
   cursor: pointer;
   color: inherit;
   font-size: 13px;
   font-weight: 600;
 }
 .agent-grid-ask {
-  color: var(--accent, #0874be);
-  background: var(--accent-soft, #edf6ff);
-  border-color: var(--accent-soft, #d6ebff);
+  color: var(--accent, var(--vy-color-teal));
+  background: var(--accent-soft, var(--vy-color-panel));
+  border-color: var(--accent-soft, var(--vy-color-border));
 }
 .agent-grid-count {
   border-radius: 6px;
   padding: 1px 5px;
-  color: var(--accent, #0874be);
-  background: var(--accent-soft, #edf6ff);
+  color: var(--accent, var(--vy-color-teal));
+  background: var(--accent-soft, var(--vy-color-panel));
 }
 .agent-grid-column-menu {
   position: relative;
@@ -85,16 +86,17 @@
   right: 0;
   top: calc(100% + 8px);
   width: min(330px, 80vw);
-  background: var(--surface, #fff);
+  background: var(--surface, var(--vy-color-surface));
   border: 1px solid var(--grid-line);
   padding: 18px;
   border-radius: 16px;
   z-index: 30;
-  box-shadow: 0 16px 48px rgb(20 40 70 / 15%);
+  box-shadow: 0 16px 48px
+    color-mix(in srgb, var(--vy-color-text) 15%, transparent);
 }
 .agent-grid-column-panel p {
   font-size: 12px;
-  color: var(--muted, #5e738b);
+  color: var(--muted, var(--vy-color-muted));
   margin: 8px 0 14px;
 }
 .agent-grid-column-option {
@@ -136,7 +138,7 @@
   gap: 7px;
   font-size: 12px;
   font-weight: 600;
-  color: var(--muted, #5e738b);
+  color: var(--muted, var(--vy-color-muted));
 }
 .agent-grid-filters input,
 .agent-grid-filters select {
@@ -144,7 +146,7 @@
   width: 100%;
   margin: 0 !important;
   min-height: 44px;
-  color: var(--text, #1a2c3e);
+  color: var(--text, var(--vy-color-text));
 }
 .agent-grid-chips {
   display: flex;
@@ -161,8 +163,8 @@
   border-radius: 8px;
   padding: 6px 10px;
   font-size: 12px;
-  color: var(--text, #1a2c3e);
-  background: var(--bg, #f5f8fc);
+  color: var(--text, var(--vy-color-text));
+  background: var(--bg, var(--vy-color-bg));
 }
 @media (max-width: 680px) {
   .agent-grid-column-panel {

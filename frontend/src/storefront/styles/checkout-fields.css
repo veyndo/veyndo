@@ -48,8 +48,8 @@
   accent-color: var(--blue);
 }
 .veyndo-checkout input:user-invalid {
-  border-color: #a43830;
-  outline-color: #f3d4cf;
+  border-color: var(--vy-color-danger);
+  outline-color: var(--vy-color-border);
 }
 .veyndo-checkout .checkout-security {
   text-transform: uppercase;

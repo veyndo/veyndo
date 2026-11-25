@@ -9,11 +9,12 @@
   max-height: none;
   margin: auto;
   inset: 0;
-  border: 1px solid #dfe5ee;
+  border: 1px solid var(--vy-color-border);
   border-radius: 24px;
-  box-shadow: 0 32px 100px #15284433;
+  box-shadow: 0 32px 100px
+    color-mix(in srgb, var(--vy-color-text) 20%, transparent);
   color: var(--ink);
-  background: #fff;
+  background: var(--vy-color-surface);
 }
 .veyndo-checkout[open] {
   display: flex;
@@ -21,13 +22,13 @@
   overflow: hidden;
 }
 .veyndo-checkout::backdrop {
-  background: #15243b77;
+  background: color-mix(in srgb, var(--vy-color-text) 47%, transparent);
   backdrop-filter: blur(5px);
 }
 .veyndo-checkout .bag-heading {
   flex-shrink: 0;
   padding: 26px 32px;
-  background: #fff;
+  background: var(--vy-color-surface);
   border-bottom: 1px solid var(--line);
 }
 .veyndo-checkout .bag-heading h2 {
@@ -95,7 +96,7 @@
   min-width: 0;
   max-width: 100%;
   min-height: 54px;
-  background: #fff;
+  background: var(--vy-color-surface);
   border: 1px solid var(--line);
   border-radius: 12px;
   font-size: 16px;
@@ -285,9 +286,9 @@
 .veyndo-checkout .checkout-b2b {
   padding: 1.25rem;
   margin-block: 1rem;
-  border: 1px solid var(--shop-border, #d6dbdf);
+  border: 1px solid var(--shop-border, var(--vy-color-border));
   border-radius: 1rem;
-  background: var(--shop-surface, #fff);
+  background: var(--shop-surface, var(--vy-color-surface));
 }
 .veyndo-checkout .checkout-b2b p {
   margin-block: 0.75rem;

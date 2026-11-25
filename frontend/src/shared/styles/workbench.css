@@ -75,19 +75,19 @@
 }
 
 .sandbox-banner {
-  background: #e7f2ff;
-  color: #185da0;
+  background: var(--vy-color-hover);
+  color: var(--vy-color-accent);
   padding: 10px 26px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   font-size: 13px;
-  border-bottom: 1px solid #c7def6;
+  border-bottom: 1px solid var(--vy-color-border);
 }
 .product-question {
   margin: 32px 0;
-  border: 1px solid #d8e6f4;
-  background: #f4f9ff;
+  border: 1px solid var(--vy-color-border);
+  background: var(--vy-color-bg);
   border-radius: 18px;
   padding: 26px;
 }
@@ -100,7 +100,7 @@
   flex: 1;
   min-width: 0;
   padding: 12px;
-  border: 1px solid #cbdced;
+  border: 1px solid var(--vy-color-border);
   border-radius: 8px;
 }
 @media (max-width: 850px) {
@@ -144,15 +144,15 @@
   }
 }
 .rule-node {
-  border: 1px solid #d5e3f1;
-  background: #fff;
+  border: 1px solid var(--vy-color-border);
+  background: var(--vy-color-surface);
   border-radius: 16px;
   padding: 16px;
   min-width: 0;
 }
 .rule-group {
-  background: #f3f8ff;
-  border-color: #b7d2f0;
+  background: var(--vy-color-bg);
+  border-color: var(--vy-color-border);
 }
 .rule-node-head {
   display: flex;
@@ -170,19 +170,20 @@
 .rule-node-dot {
   width: 9px;
   height: 9px;
-  background: #2697ed;
+  background: var(--vy-color-accent-strong);
   border-radius: 50%;
-  box-shadow: 0 0 0 5px #2697ed15;
+  box-shadow: 0 0 0 5px
+    color-mix(in srgb, var(--vy-color-accent-strong) 8%, transparent);
   flex-shrink: 0;
 }
 .rule-depth {
   font-size: 11px;
-  color: #63829e;
+  color: var(--vy-color-muted);
 }
 .rule-children {
   margin: 8px 0 18px 10px;
   padding-left: 18px;
-  border-left: 2px solid #b7d2f0;
+  border-left: 2px solid var(--vy-color-border);
   display: grid;
   gap: 14px;
 }
@@ -196,15 +197,15 @@
   top: 26px;
   width: 18px;
   height: 2px;
-  background: #b7d2f0;
+  background: var(--vy-color-border);
 }
 .rule-remove {
   position: absolute;
   right: 10px;
   top: 12px;
   border: 0;
-  background: #fff;
-  color: #637e99;
+  background: var(--vy-color-surface);
+  color: var(--vy-color-muted);
   border-radius: 50%;
   font-size: 20px;
   cursor: pointer;
@@ -230,31 +231,35 @@
   width: 100%;
 }
 .rule-tokens button {
-  border: 1px solid #c4dcf4;
+  border: 1px solid var(--vy-color-border);
   border-radius: 20px;
-  background: #edf6ff;
+  background: var(--vy-color-panel);
   padding: 6px 12px;
-  color: #28699e;
+  color: var(--vy-color-accent);
 }
 .flow-canvas {
-  background: radial-gradient(#afcbe344 1px, transparent 1px);
+  background: radial-gradient(
+    color-mix(in srgb, var(--vy-color-accent-border) 27%, transparent) 1px,
+    transparent 1px
+  );
   background-size: 18px 18px;
   border-radius: 20px;
   padding: 20px;
-  border: 1px solid #d2e2f1;
+  border: 1px solid var(--vy-color-border);
   margin: 20px 0;
 }
 .flow-stage {
   padding: 18px 20px;
-  background: #fff;
-  border: 1px solid #c6dcf0;
+  background: var(--vy-color-surface);
+  border: 1px solid var(--vy-color-border);
   border-radius: 16px;
-  box-shadow: 0 4px 15px #24578007;
+  box-shadow: 0 4px 15px
+    color-mix(in srgb, var(--vy-color-accent) 3%, transparent);
 }
 .flow-step {
   font-size: 11px;
   letter-spacing: 2px;
-  color: #3a8cd0;
+  color: var(--vy-color-teal);
 }
 .flow-stage h3 {
   margin: 7px 0 14px;
@@ -262,6 +267,6 @@
 .flow-edge {
   text-align: center;
   font-size: 25px;
-  color: #4896d2;
+  color: var(--vy-color-teal);
   height: 40px;
 }

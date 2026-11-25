@@ -14,13 +14,13 @@
   width: auto;
   border: 1px solid var(--account-accent);
   background: var(--account-accent);
-  color: #fff;
+  color: var(--vy-color-accent-text);
   border-radius: 10px;
   font-size: 13px;
   font-weight: 600;
 }
 .customer-account .shop-primary:hover:not(:disabled) {
-  background: #173245;
+  background: var(--vy-color-text);
 }
 .customer-account .shop-secondary,
 .customer-account :is(.studio-secondary, [data-tone="secondary"]) {
@@ -29,14 +29,14 @@
   border: 1px solid var(--account-line);
   border-radius: 10px;
   color: var(--account-ink);
-  background: #fff;
+  background: var(--vy-color-surface);
   font-size: 12px;
 }
 .customer-account .shop-secondary:hover:not(:disabled),
 .customer-account
   :is(.studio-secondary, [data-tone="secondary"]):hover:not(:disabled) {
-  border-color: #a3b3bf;
-  background: #f5f8fa;
+  border-color: var(--vy-color-accent-border);
+  background: var(--vy-color-bg);
 }
 .customer-account fieldset {
   border: 0;
@@ -51,7 +51,7 @@
   margin: 0 0 19px;
   font-size: 12px;
   font-weight: 550;
-  color: #4a545b;
+  color: var(--vy-color-muted);
   min-width: 0;
 }
 .customer-account input:not([type="checkbox"]),
@@ -61,26 +61,26 @@
   min-width: 0;
   min-height: 48px;
   padding: 12px 14px;
-  border: 1px solid #d5dade;
+  border: 1px solid var(--vy-color-border);
   border-radius: 9px;
   color: var(--account-ink);
-  background: #fff;
+  background: var(--vy-color-surface);
   font: inherit;
   font-size: 14px;
-  box-shadow: 0 1px 3px #17283505;
+  box-shadow: 0 1px 3px color-mix(in srgb, var(--vy-color-text) 2%, transparent);
 }
 .customer-account input:hover,
 .customer-account select:hover {
-  border-color: #9dadb8;
+  border-color: var(--vy-color-accent-border);
 }
 .customer-account input:focus,
 .customer-account select:focus,
 .customer-account textarea:focus {
-  border-color: #718695;
+  border-color: var(--vy-color-muted);
 }
 .customer-account input:disabled {
-  background: #f4f6f7;
-  color: #778086;
+  background: var(--vy-color-bg);
+  color: var(--vy-color-muted);
 }
 .customer-account form > small,
 .customer-account fieldset > small {
@@ -144,7 +144,7 @@
   margin: 0;
 }
 .customer-account .customer-address-grid article {
-  background: #fff;
+  background: var(--vy-color-surface);
   border-color: var(--account-line);
   border-radius: 14px;
 }
@@ -156,9 +156,9 @@
   gap: 6px;
 }
 .customer-account .customer-address-badges span {
-  color: #314b5e;
-  background: #ecf0f3;
-  border-color: #d8e0e5;
+  color: var(--vy-color-text);
+  background: var(--vy-color-panel);
+  border-color: var(--vy-color-border);
   font-size: 10px;
 }
 .customer-account .customer-actions {
@@ -172,7 +172,7 @@
   padding: 20px;
   border: 1px solid var(--account-line);
   border-radius: 14px;
-  background: #f7f9fb;
+  background: var(--vy-color-bg);
 }
 .customer-account .customer-address-fields details {
   margin-top: 0;
@@ -213,8 +213,8 @@
   display: flex;
   padding: 4px;
   border-radius: 12px;
-  background: #eff2f4;
-  border: 1px solid #e0e5e9;
+  background: var(--vy-color-panel);
+  border: 1px solid var(--vy-color-border);
   gap: 4px;
 }
 .customer-account .account-auth-tabs button {
@@ -223,12 +223,12 @@
   border: 0;
   border-radius: 8px;
   background: transparent;
-  color: #687075;
+  color: var(--vy-color-muted);
   font-size: 13px;
 }
 .customer-account .account-auth-tabs button[aria-current] {
-  background: #fff;
+  background: var(--vy-color-surface);
   color: var(--account-accent);
-  box-shadow: 0 2px 8px #1e2b3411;
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--vy-color-text) 7%, transparent);
   font-weight: 650;
 }

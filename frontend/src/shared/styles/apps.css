@@ -72,12 +72,12 @@
   border-top: 1px solid var(--line);
 }
 .app-slot {
-  border: 1px solid #d4e4f3;
-  background: #f4f9fe;
+  border: 1px solid var(--vy-color-border);
+  background: var(--vy-color-bg);
   border-radius: 16px;
   padding: 20px;
   margin: 20px 0;
-  color: #253b50;
+  color: var(--vy-color-text);
 }
 .app-slot h3 {
   margin: 0 0 10px;
@@ -94,10 +94,10 @@
 .app-slot input,
 .app-slot select {
   padding: 12px;
-  border: 1px solid #c7d8e8;
+  border: 1px solid var(--vy-color-border);
   border-radius: 9px;
   background: white;
-  color: #253b50;
+  color: var(--vy-color-text);
   width: 100%;
   box-sizing: border-box;
 }
@@ -107,8 +107,8 @@
 }
 
 .studio[data-theme="dark"] .app-slot {
-  background: #1c2938;
-  color: #e6f0fa;
+  background: var(--vy-color-surface);
+  color: var(--vy-color-text);
 }
 
 .app-frame {
@@ -117,12 +117,12 @@
   border: 1px solid var(--line);
   border-radius: 12px;
   margin: 18px 0;
-  background: #f4f9ff;
+  background: var(--vy-color-bg);
 }
 
 .pdp-recommendations {
   padding: 32px 0;
-  border-top: 1px solid #d4e4f3;
+  border-top: 1px solid var(--vy-color-border);
 }
 .pdp-recommendations > div {
   display: flex;
@@ -132,19 +132,23 @@
 .pdp-recommendations a {
   display: grid;
   gap: 8px;
-  background: #f4f9fe;
+  background: var(--vy-color-bg);
   padding: 18px;
   border-radius: 14px;
-  color: #253b50;
+  color: var(--vy-color-text);
   text-decoration: none;
 }
 .connector-panel {
   margin-top: 24px;
   padding: 24px;
-  border: 1px solid var(--border, #dce5ee);
+  border: 1px solid var(--border, var(--vy-color-border));
   border-radius: 20px;
-  background: linear-gradient(130deg, #f2f8ff, #fff);
-  color: #20314d;
+  background: linear-gradient(
+    130deg,
+    var(--vy-color-bg),
+    var(--vy-color-surface)
+  );
+  color: var(--vy-color-text);
 }
 .connector-panel header {
   display: flex;
@@ -166,7 +170,7 @@
   display: flex;
   justify-content: space-between;
   padding: 12px 0;
-  border-bottom: 1px solid #dae4f0;
+  border-bottom: 1px solid var(--vy-color-border);
   gap: 12px;
   flex-wrap: wrap;
 }
@@ -200,7 +204,7 @@
 }
 
 .app-configured-orders article {
-  border: 1px solid var(--studio-border, #d4e4f3);
+  border: 1px solid var(--studio-border, var(--vy-color-border));
   border-radius: 12px;
   padding: 20px;
   margin-block: 16px;
@@ -219,7 +223,7 @@
 }
 .app-configured-orders dt {
   font-size: 13px;
-  color: var(--studio-muted, #60758b);
+  color: var(--studio-muted, var(--vy-color-muted));
 }
 .app-configured-orders dd {
   margin: 4px 0;
