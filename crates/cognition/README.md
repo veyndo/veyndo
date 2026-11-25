@@ -4,6 +4,18 @@
 provenance and image generation. It has no commerce write capability; see
 [the source map](../../docs/source-map.md).
 
+## Owner tables
+
+The inference crate has no tables of its own and no SQL. The live shop and its
+agent stop switch come from `veyndo_core::store::live_shop`, the allocation audit
+event from `veyndo_core::store::outbox`. Identity depends on this crate, so agent
+key budgets and the operator configuration (`platform_ai`, owned by shop) are
+reached through the `InferenceHost` port (`src/ports.rs`), implemented in the
+server (`src/ports/inference.rs`, backed by `veyndo_identity::store::agent_budgets`
+and `veyndo_shop::store::platform_ai`) and registered at startup. A process
+without the registered host has no durable model admission, exactly as one
+without a database.
+
 ## Open JSON
 
 Provider responses and host documents are read through typed serde views; the

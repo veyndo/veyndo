@@ -5,6 +5,24 @@ extensions and the app builder. Module ownership is listed in
 [the source map](../../docs/source-map.md); the shared app/action contract is in
 [the app platform guide](../../docs/app-platform.md).
 
+## Owner tables
+
+The app platform writes only its own tables. Reads and writes of other owners go
+through their store functions (`veyndo_catalog::store::app_references`,
+`imported_lines`, `veyndo_orders::store::app_orders`,
+`veyndo_checkout::store::app_carts`, `veyndo_marketing::store::app_channels`,
+`veyndo_b2b::store::app_references`, `veyndo_shop::store::app_frontends`,
+`app_languages`, `veyndo_identity::store::app_credentials`, `job_members`,
+`veyndo_intelligence::store::app_relations`, `veyndo_core::store::outbox_reads`,
+`previews`, `tenants`) in the caller's transaction. Owners the app crate may not
+depend on are reached through the `Directory` port (`src/ports.rs`), implemented
+in the server (`src/ports/apps.rs`) and registered at startup: customer existence
+and the preview expiry of the studio.
+
+Two statements still read `tenants` and `shop_environments`: the event delivery
+and schedule claims lock the owning shop row or check its status inside one
+`FOR UPDATE … SKIP LOCKED` claim, which a separate call cannot reproduce.
+
 ## Open JSON
 
 The host reads every field it acts on through typed serde views

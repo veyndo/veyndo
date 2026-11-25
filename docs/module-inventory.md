@@ -340,6 +340,9 @@ This lists every checked-in source module in these roots, including files with n
 | [src/platform/quotas.rs](../src/platform/quotas.rs) | Operator-only per-shop daily interactive AI limits, optimistic revisions and durable audit. |
 | [src/platform/resources.rs](../src/platform/resources.rs) | Linux container resource readings; unavailable fields stay null on other hosts and the first CPU sample. |
 | [src/platform/shop_detail.rs](../src/platform/shop_detail.rs) | Operator shop dossier: registration, business identity, access roster, channels and measured HTTP activity. |
+| [src/ports/apps.rs](../src/ports/apps.rs) | The app platform's directory: customer existence (customers) and personal preview expiry (studio), owners the app crate may not depend on. |
+| [src/ports/inference.rs](../src/ports/inference.rs) | The inference component's host: agent key budgets from identity and the operator configuration, read for model admission. |
+| [src/ports.rs](../src/ports.rs) | Server implementations of component ports whose owners a component may not depend on, registered once at startup. |
 | [src/pos/config.rs](../src/pos/config.rs) | POS channel setup lives in the POS component. |
 | [src/pos/gateway.rs](../src/pos/gateway.rs) | HTTP/MCP POS routes; the POS component owns the cashier gateway behind the register port. |
 | [src/pos/mod.rs](../src/pos/mod.rs) | Authenticated POS adapters reuse the native catalog/cart/checkout/receipt and durable event owners. |
@@ -421,10 +424,8 @@ This lists every checked-in source module in these roots, including files with n
 | [crates/cognition/src/inference/tools.rs](../crates/cognition/src/inference/tools.rs) | Native provider read-tool transport; normalization grants no execution authority. |
 | [crates/cognition/src/inference.rs](../crates/cognition/src/inference.rs) | Provider adapters. Credentials stay on the server; domain validation is separate. |
 | [crates/cognition/src/lib.rs](../crates/cognition/src/lib.rs) | Provider protocol adapters and prompt evidence; no commerce write capability. |
+| [crates/cognition/src/ports.rs](../crates/cognition/src/ports.rs) | What the inference component needs from the server without depending on the owners: agent key budgets |
 | [crates/cognition/src/prompts.rs](../crates/cognition/src/prompts.rs) | Versioned system-prompt provenance; no prompt text or private context is exposed in evidence. |
-| [crates/cognition/src/store/budget.rs](../crates/cognition/src/store/budget.rs) | Agent key budgets: the approved model of a key, the live shop's stop switch and the reservation of tokens and cost with its audit event. |
-| [crates/cognition/src/store/settings.rs](../crates/cognition/src/store/settings.rs) | The operator inference configuration every model call inherits, read with its sealed provider secrets. |
-| [crates/cognition/src/store.rs](../crates/cognition/src/store.rs) | SQL of the inference component: the operator model configuration and agent key budgets. |
 | [crates/flow-graph/src/catalog.rs](../crates/flow-graph/src/catalog.rs) | Stable built-in Flow identifiers shared by discovery and native admission. |
 | [crates/flow-graph/src/execution.rs](../crates/flow-graph/src/execution.rs) | Typed instructions from a validated graph. The host evaluates facts and performs effects. |
 | [crates/flow-graph/src/lib.rs](../crates/flow-graph/src/lib.rs) | Dependency-free validation and indexed lookup for bounded commerce flow graphs. |
@@ -558,29 +559,28 @@ This lists every checked-in source module in these roots, including files with n
 | [components/apps/src/store/activation.rs](../components/apps/src/store/activation.rs) | Native current-actor/trust/connected-frontend/commerce admission for the shared package-state transaction; original configuration lock order retained. |
 | [components/apps/src/store/activity.rs](../components/apps/src/store/activity.rs) | The operator view of an app (latest calls, deliveries, storage use) and the replay of outbox events into its delivery queue. |
 | [components/apps/src/store/app_host_reads.rs](../components/apps/src/store/app_host_reads.rs) | Reads and guarded writes the server's app host needs: connected frontends, the package listing, submission throttling and the locked checks of a native job import. |
-| [components/apps/src/store/asset_references.rs](../components/apps/src/store/asset_references.rs) | Assets an app record refers to must belong to the same shop and fit the field. |
+| [components/apps/src/store/asset_references.rs](../components/apps/src/store/asset_references.rs) | Assets an app record refers to must belong to the same shop and fit the field; the catalogue answers. |
 | [components/apps/src/store/business_policy.rs](../components/apps/src/store/business_policy.rs) | The persisted business approval policy of a shop: its Wasm text source, digest and revision. |
 | [components/apps/src/store/cart_configurations.rs](../components/apps/src/store/cart_configurations.rs) | Cart configurations stay bound to the package, rule revision and price they were made with. |
 | [components/apps/src/store/catalog_evidence.rs](../components/apps/src/store/catalog_evidence.rs) | Product-only app callback projects current catalog text and enabled translations in one snapshot. |
 | [components/apps/src/store/commerce_hooks.rs](../components/apps/src/store/commerce_hooks.rs) | Which commerce hook packages a shop admits and checkout evaluates. |
 | [components/apps/src/store/configuration_events.rs](../components/apps/src/store/configuration_events.rs) | Configuration mutations publish minimized identifiers through the native outbox/Flows; no cart capability or shopper text is disclosed. |
 | [components/apps/src/store/configuration_orders.rs](../components/apps/src/store/configuration_orders.rs) | Paginated app-specific immutable purchase projections; filtering happens before LIMIT and never exposes buyer PII. |
-| [components/apps/src/store/core_references.rs](../components/apps/src/store/core_references.rs) | Core records an app field names must belong to the same shop; no app alters core tables. |
-| [components/apps/src/store/credentials.rs](../components/apps/src/store/credentials.rs) | App callback keys in the core integration-key table: list, count, issue and revoke; never a key value. |
+| [components/apps/src/store/core_references.rs](../components/apps/src/store/core_references.rs) | Core records an app field names must belong to the same shop; the owners answer, no app alters core tables. |
+| [components/apps/src/store/credentials.rs](../components/apps/src/store/credentials.rs) | App callback keys are identity integration keys; the identity store owns their SQL. |
 | [components/apps/src/store/dependencies.rs](../components/apps/src/store/dependencies.rs) | Tenant-local dependency and version gates of a signed package, read under the installing transaction. |
 | [components/apps/src/store/developer_builds.rs](../components/apps/src/store/developer_builds.rs) | The developer builds of a shop: the latest app versions a generation must not repeat. |
-| [components/apps/src/store/environments.rs](../components/apps/src/store/environments.rs) | The shop environments apps preview in: ownership by a live shop and the personal preview of one merchant. |
+| [components/apps/src/store/environments.rs](../components/apps/src/store/environments.rs) | The shop environments apps preview in: ownership by a live shop and the personal preview of one merchant, read from the core registry; the preview expiry is the studio's. |
 | [components/apps/src/store/event_deliveries.rs](../components/apps/src/store/event_deliveries.rs) | Outbox events become queued deliveries for every active package that may receive them. |
 | [components/apps/src/store/evidence.rs](../components/apps/src/store/evidence.rs) | Private provenance-bearing app sources for merchant retrieval; never public PDP answers. |
 | [components/apps/src/store/extension_filter.rs](../components/apps/src/store/extension_filter.rs) | Admitted app-field predicates applied before native pagination. |
 | [components/apps/src/store/extension_projection.rs](../components/apps/src/store/extension_projection.rs) | Bounded native-object read projection from existing app models, references and current package permissions. |
-| [components/apps/src/store/external_orders/labels.sql](../components/apps/src/store/external_orders/labels.sql) | Bounded imported-order names: locale first, then child before parent. |
-| [components/apps/src/store/external_orders.rs](../components/apps/src/store/external_orders.rs) | Storage of the external order import: replay by idempotency key, the locked product lines and their labels, and the imported cart and order rows. |
-| [components/apps/src/store/flows.rs](../components/apps/src/store/flows.rs) | The active commerce flows an app upgrade must keep valid; read only. |
-| [components/apps/src/store/frontend_bindings.rs](../components/apps/src/store/frontend_bindings.rs) | The global hosted-frontend address registry: collisions with other shops, the owning shop's binding and its revisioned writes. |
+| [components/apps/src/store/external_orders.rs](../components/apps/src/store/external_orders.rs) | Storage of the external order import through its owners: replay by idempotency key (orders), the locked product lines and their labels (catalog), the share-locked channel (marketing) and the imported cart and order rows (checkout). |
+| [components/apps/src/store/flows.rs](../components/apps/src/store/flows.rs) | The active commerce flows an app upgrade must keep valid; the marketing store owns the read. |
+| [components/apps/src/store/frontend_bindings.rs](../components/apps/src/store/frontend_bindings.rs) | The global hosted-frontend address registry through its owners: collisions with other shops (core), the bound channel (marketing) and the shop's revisioned bindings (shop). |
 | [components/apps/src/store/hosted_apps.rs](../components/apps/src/store/hosted_apps.rs) | Persist hosted-app dependencies through the existing package installer; no private renderer or parallel registry. |
 | [components/apps/src/store/job_control.rs](../components/apps/src/store/job_control.rs) | Native current-action/right/input admission for the shared job-control transaction; no duplicate transition or outbox engine. |
-| [components/apps/src/store/job_creators.rs](../components/apps/src/store/job_creators.rs) | The current membership of the member who created a long job, share-locked so its rights cannot change mid-callback. |
+| [components/apps/src/store/job_creators.rs](../components/apps/src/store/job_creators.rs) | The current membership of the member who created a long job; the identity store owns the share-locked reads. |
 | [components/apps/src/store/jobs.rs](../components/apps/src/store/jobs.rs) | Durable long actions piggyback on the existing outbox. Apps claim a fenced lease; unknown side effects are never retried automatically. |
 | [components/apps/src/store/languages.rs](../components/apps/src/store/languages.rs) | App record translations use configured shop languages and field-level main-language inheritance. |
 | [components/apps/src/store/locks.rs](../components/apps/src/store/locks.rs) | Transaction-local settings of app writes: advisory locks, the tenant row scope, review timeouts and deferred constraints. |
@@ -764,6 +764,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/b2b/src/service/requisition.rs](../components/b2b/src/service/requisition.rs) | Explicit integration permission imports requisitions into native lists; it never impersonates checkout buyers. |
 | [components/b2b/src/service.rs](../components/b2b/src/service.rs) | Procurement operations on the buyer cart; the server supplies the cart through the shop port. |
 | [components/b2b/src/store/access.rs](../components/b2b/src/store/access.rs) | Re-resolves active customer sessions, company policy and unit membership at every procurement boundary. |
+| [components/b2b/src/store/app_references.rs](../components/b2b/src/store/app_references.rs) | Whether a company or purchasing unit an app record or surface context names belongs to the shop. |
 | [components/b2b/src/store/approvals.rs](../components/b2b/src/store/approvals.rs) | Spending approvals of company units: one per cart and quote fingerprint, listed for buyers and approvers, decided once at a revision under the unit lock. Columns checked at compile time. |
 | [components/b2b/src/store/carts.rs](../components/b2b/src/store/carts.rs) | The cart rows procurement reads and changes: by token or id (optionally locked), the open revision, and the revisioned document write. Columns checked at compile time. |
 | [components/b2b/src/store/catalog.rs](../components/b2b/src/store/catalog.rs) | Private unit catalog scope is derived from the current employee/cart, never caller criteria; indexed before pagination. |
@@ -829,6 +830,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/catalog/src/service/reviews.rs](../components/catalog/src/service/reviews.rs) | Review submission with server-derived purchase verification, and the import of historical reviews with their provenance. |
 | [components/catalog/src/service/translation_apply.rs](../components/catalog/src/service/translation_apply.rs) | Apply at most 50 reviewed drafts per request; stale products become conflicts rather than being overwritten. |
 | [components/catalog/src/service.rs](../components/catalog/src/service.rs) | Catalogue operations that combine rules and stored state. |
+| [components/catalog/src/store/app_references.rs](../components/catalog/src/store/app_references.rs) | Catalogue reads of the app platform: whether a product or asset an app record or surface names belongs to the shop, and a product's evidence text. |
 | [components/catalog/src/store/assets.rs](../components/catalog/src/store/assets.rs) | Reads of stored product assets. |
 | [components/catalog/src/store/catalog_channel.sql](../components/catalog/src/store/catalog_channel.sql) | Bounded explicit channel IDs, with effective-language search before pagination. |
 | [components/catalog/src/store/catalog_reads.rs](../components/catalog/src/store/catalog_reads.rs) | Storefront catalogue reads: the keyset-paged listing with its specialised queries, and bounded product lookups. |
@@ -837,6 +839,8 @@ This lists every checked-in source module in these roots, including files with n
 | [components/catalog/src/store/category_listing.sql](../components/catalog/src/store/category_listing.sql) | Static assignments and saved current-public-fact queries share category/channel pagination. |
 | [components/catalog/src/store/channels.rs](../components/catalog/src/store/channels.rs) | Per-product channel visibility overrides remain indexed even when an open catalog contains millions of products. |
 | [components/catalog/src/store/demo_template.rs](../components/catalog/src/store/demo_template.rs) | Demo template rows: the products and translations of a bundled catalogue template, and the template's category translations. |
+| [components/catalog/src/store/imported_lines/labels.sql](../components/catalog/src/store/imported_lines/labels.sql) | Bounded imported-order names: locale first, then child before parent. |
+| [components/catalog/src/store/imported_lines.rs](../components/catalog/src/store/imported_lines.rs) | Products of an external order import: their parents, the locked lines, channel visibility and translated labels. |
 | [components/catalog/src/store/media_jobs.rs](../components/catalog/src/store/media_jobs.rs) | Image jobs: admission counts, the queue, private results and their publication. |
 | [components/catalog/src/store/order_downloads.rs](../components/catalog/src/store/order_downloads.rs) | Order downloads: a purchased digital product (or its parent) grants its published download assets to the order. |
 | [components/catalog/src/store/product_edit.rs](../components/catalog/src/store/product_edit.rs) | Writes of one product edit inside its transaction: allocation lock, creation, clocks, identity, content and translations. |
@@ -969,6 +973,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/checkout/src/service/purchase.rs](../components/checkout/src/service/purchase.rs) | The purchase transaction: native preparation, ordered locks with replay admission, the authoritative locked quote, and one atomic order commit; no external provider call. |
 | [components/checkout/src/service.rs](../components/checkout/src/service.rs) | service of this component. |
 | [components/checkout/src/store/admin_order.rs](../components/checkout/src/store/admin_order.rs) | Locked checkout guards of an order a merchant places: channel policy, the selected customer and the channel's product selection. |
+| [components/checkout/src/store/app_carts.rs](../components/checkout/src/store/app_carts.rs) | Cart writes of the app platform: a configuration change at its revision and the completed cart behind an imported order. |
 | [components/checkout/src/store/buyer_sessions.rs](../components/checkout/src/store/buyer_sessions.rs) | The buyer a checkout grant stands for: an active customer of a live, active shop with a current session. Checked at compile time. |
 | [components/checkout/src/store/cart_create.rs](../components/checkout/src/store/cart_create.rs) | A new buyer cart: inserted with the shop defaults, then bound to the request's language, channel, currency and signed-in customer. |
 | [components/checkout/src/store/cart_edit.rs](../components/checkout/src/store/cart_edit.rs) | Optimistic cart edits: normalized quantities, the expected revision, an optional review fingerprint and the locked write. |
@@ -1034,11 +1039,14 @@ This lists every checked-in source module in these roots, including files with n
 | [components/core/src/store/environments.rs](../components/core/src/store/environments.rs) | Reads of the staging registry (`shop_environments`): the live parent of a stage and a stage's baseline. |
 | [components/core/src/store/history_context.rs](../components/core/src/store/history_context.rs) | Transaction-local actor, source and reason that the history triggers record with every change. |
 | [components/core/src/store/lease.rs](../components/core/src/store/lease.rs) | Cluster-wide tenant resource leases. DB serialization protects admission; cancellation releases the fenced lease. |
+| [components/core/src/store/live_shop.rs](../components/core/src/store/live_shop.rs) | The live shop behind a shop or one of its staging/preview environments: its ID and agent stop switch. |
 | [components/core/src/store/outbox/next_tenant.sql](../components/core/src/store/outbox/next_tenant.sql) | Lock only this subscriber schedule. A failed event does not block later work. |
 | [components/core/src/store/outbox/retention.rs](../components/core/src/store/outbox/retention.rs) | Bounded retirement of duplicate delivered payloads; provenance IDs and unsettled app/flow work survive. |
 | [components/core/src/store/outbox/retention.sql](../components/core/src/store/outbox/retention.sql) | Remove only unreferenced delivered metadata after its separate audit window. |
 | [components/core/src/store/outbox.rs](../components/core/src/store/outbox.rs) | The transactional outbox consumer: each subscriber lane acknowledges an event and commits its effects in one transaction. |
+| [components/core/src/store/outbox_reads.rs](../components/core/src/store/outbox_reads.rs) | Reads of the outbox for its consumers: events after a cursor, events and kinds by ID, one event's data and recent submission counts. |
 | [components/core/src/store/pool.rs](../components/core/src/store/pool.rs) | Explicit per-process database budgets and bounded queue waits; invalid deployment values fail fast. |
+| [components/core/src/store/previews.rs](../components/core/src/store/previews.rs) | Reads of the staging registry (`shop_environments`) for environments apps preview and install in: ownership, personal previews and private targets. |
 | [components/core/src/store/row_security.rs](../components/core/src/store/row_security.rs) | Bind each borrowed PostgreSQL connection to task scope, and reject unsafe strict-runtime roles. |
 | [components/core/src/store/tenants.rs](../components/core/src/store/tenants.rs) | Reads and locks of the shop registry every component shares: existence, name, lifecycle status, the lifecycle lock and the agent stop switch of the live shop. |
 | [components/core/src/store.rs](../components/core/src/store.rs) | The core store: deployment values, connection pools, row security, cluster-wide leases, the outbox, the shop registry and history attribution. Core SQL lives only here. |
@@ -1064,6 +1072,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/customers/src/store/accounts.rs](../components/customers/src/store/accounts.rs) | Writes a customer makes to the own account: registration, the contact profile and the password. Columns checked at compile time. |
 | [components/customers/src/store/address_restore.rs](../components/customers/src/store/address_restore.rs) | Atomic restoration of the owning customer's address aggregate; geography, references and immutable order snapshots remain guarded. |
 | [components/customers/src/store/addresses.rs](../components/customers/src/store/addresses.rs) | Tenant-owned address persistence, optimistic revisions and atomic default assignment. Columns checked at compile time. |
+| [components/customers/src/store/app_references.rs](../components/customers/src/store/app_references.rs) | Whether a customer an app record or surface context names belongs to the shop. |
 | [components/customers/src/store/crm.rs](../components/customers/src/store/crm.rs) | Merchant CRM writes: creation on native contact and address storage, and revision-checked changes; credentials never leave storage. |
 | [components/customers/src/store/customers.rs](../components/customers/src/store/customers.rs) | Customer rows as the merchant and the account see them, with order metrics from authoritative records. Columns checked at compile time. |
 | [components/customers/src/store/sessions.rs](../components/customers/src/store/sessions.rs) | Customer sessions, stored by the digest of their token. Columns checked at compile time. |
@@ -1118,6 +1127,8 @@ This lists every checked-in source module in these roots, including files with n
 | [components/identity/src/service/roles.rs](../components/identity/src/service/roles.rs) | Tenant-owned roles: current grants, revisioned edits, dependency-checked removal and shared history. |
 | [components/identity/src/service.rs](../components/identity/src/service.rs) | service of this component. |
 | [components/identity/src/store/agent_authority.rs](../components/identity/src/store/agent_authority.rs) | Saved agent runs retain an upper authority bound; every continuation rechecks credential, membership and private stage admission. |
+| [components/identity/src/store/agent_budgets.rs](../components/identity/src/store/agent_budgets.rs) | Model budgets of agent keys: the approved budget of an unexpired key, the locked allocation counters and their increase. |
+| [components/identity/src/store/app_credentials.rs](../components/identity/src/store/app_credentials.rs) | App callback keys in the integration-key table: list, count, issue and revoke; never a key value. |
 | [components/identity/src/store/attempts.rs](../components/identity/src/store/attempts.rs) | Sign-in attempt buckets shared by all replicas: one counted attempt per call and an escalating block after failures. Columns checked at compile time. |
 | [components/identity/src/store/broker.rs](../components/identity/src/store/broker.rs) | Trusted identity broker: assertions (signature binds route, audience, expiry and a one-use nonce) and the account recovery, linking and workspace reads they unlock. |
 | [components/identity/src/store/credentials.rs](../components/identity/src/store/credentials.rs) | Resolves a bearer credential once: the person or app behind it, its workspace memberships and the selected shop. |
@@ -1125,6 +1136,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/identity/src/store/identity.sql](../components/identity/src/store/identity.sql) | One authoritative snapshot: credential, all active grants, selected environment and current shop status. |
 | [components/identity/src/store/integrations.rs](../components/identity/src/store/integrations.rs) | Workspace integration (API/MCP) keys: the list, the active-key count, creation with a bounded or infinite lifetime and revocation. Columns checked at compile time. |
 | [components/identity/src/store/invitations.rs](../components/identity/src/store/invitations.rs) | Single-use, expiring workspace invitations: creation, the pending list, locked redemption and revocation. Columns checked at compile time. |
+| [components/identity/src/store/job_members.rs](../components/identity/src/store/job_members.rs) | The current membership of a member who started long app work, share-locked so its rights cannot change mid-callback. |
 | [components/identity/src/store/members.rs](../components/identity/src/store/members.rs) | Workspace memberships: the member list, the active grant of a person, role/activity changes and owner counting. Columns checked at compile time. |
 | [components/identity/src/store/merchant_accounts.rs](../components/identity/src/store/merchant_accounts.rs) | Merchant accounts: creation for self-registration, invitations and the trusted identity broker, password lookups, the account lock and the daily allowance of broker inference. |
 | [components/identity/src/store/mfa.rs](../components/identity/src/store/mfa.rs) | Personal second factor: encrypted TOTP secrets, one-use recovery digests, revisioned enrolment and one-use sign-in challenges. Columns checked at compile time. |
@@ -1234,6 +1246,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/intelligence/src/service.rs](../components/intelligence/src/service.rs) | Operations of the intelligence component that call out of process. |
 | [components/intelligence/src/store/agent_controls.rs](../components/intelligence/src/store/agent_controls.rs) | The live shop's agent stop switch and integration-key admission in storage. Columns checked at compile time. |
 | [components/intelligence/src/store/agent_runs.rs](../components/intelligence/src/store/agent_runs.rs) | Durable agent runs in storage: the caller projection, the conversation turn fence, publication under the run lease and the checkpoint journal. |
+| [components/intelligence/src/store/app_relations.rs](../components/intelligence/src/store/app_relations.rs) | Knowledge-graph edges from private app sources to the products they reference. |
 | [components/intelligence/src/store/autonomy.rs](../components/intelligence/src/store/autonomy.rs) | The autonomous price budget in storage: today's baselines, exposure rows, reservations and the reverting price write. Columns checked at compile time. |
 | [components/intelligence/src/store/behavior.rs](../components/intelligence/src/store/behavior.rs) | Consent-bound behaviour observations: the bounded write, a shopper's export and erasure, the channel report with its derived graph and the private journey. |
 | [components/intelligence/src/store/behavior_eligible.sql](../components/intelligence/src/store/behavior_eligible.sql) | One native owner, one channel and a current affirmative receipt; expired observations never contribute. |
@@ -1375,6 +1388,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/marketing/src/service/pipeline_runtime.rs](../components/marketing/src/service/pipeline_runtime.rs) | Durable sequence execution records each action before dispatch, persists delay cursors and reports uncertain effects. |
 | [components/marketing/src/service/rule_preview.rs](../components/marketing/src/service/rule_preview.rs) | Rule preview: a condition evaluated against the merchant's own priced cart with its rule facts; it changes nothing. |
 | [components/marketing/src/service.rs](../components/marketing/src/service.rs) | Operations of the marketing component. |
+| [components/marketing/src/store/app_channels.rs](../components/marketing/src/store/app_channels.rs) | Sales channel and flow reads app records, surfaces, frontends and upgrades check: existence, the share-locked channel document and active flows. |
 | [components/marketing/src/store/carts.rs](../components/marketing/src/store/carts.rs) | The cart rows coupon selection changes: the token-locked read and the revision bump. Columns checked at compile time. |
 | [components/marketing/src/store/catalog.rs](../components/marketing/src/store/catalog.rs) | What the automation catalogue lists from the shop: active app manifests and active rules. Columns checked at compile time. |
 | [components/marketing/src/store/channel_config.rs](../components/marketing/src/store/channel_config.rs) | Shared transactional channel validation for merchant edits, history restoration and selective release. |
@@ -1480,6 +1494,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/orders/src/lib.rs](../components/orders/src/lib.rs) | Orders component: the order state machine, derived fields, audited mutations and receipts. |
 | [components/orders/src/ports.rs](../components/orders/src/ports.rs) | What the orders component needs from the server. |
 | [components/orders/src/store/account_orders.rs](../components/orders/src/store/account_orders.rs) | Orders and receipts as their owning customer account reads them; matching a guest's email never grants access. |
+| [components/orders/src/store/app_orders.rs](../components/orders/src/store/app_orders.rs) | Order reads of the app platform: whether an order belongs to the shop, an imported order by idempotency key and orders carrying an app's configuration. |
 | [components/orders/src/store/carrier_documents.rs](../components/orders/src/store/carrier_documents.rs) | Immutable private carrier documents belong to the existing order receipt store, never product assets. |
 | [components/orders/src/store/company.rs](../components/orders/src/store/company.rs) | Revisioned tenant company basis and sparse channel overrides, serialized with receipt issuance. |
 | [components/orders/src/store/company_logos.rs](../components/orders/src/store/company_logos.rs) | Tenant-owned company logos: deduplicated immutable PNGs, delivered publicly only while a channel links them. |
@@ -1695,11 +1710,14 @@ This lists every checked-in source module in these roots, including files with n
 | [components/shop/src/service.rs](../components/shop/src/service.rs) | Services of the shop component. |
 | [components/shop/src/store/access_snapshot.rs](../components/shop/src/store/access_snapshot.rs) | One fresh admission read per request: the hosted mount, the addressed shop, its live environment status and the sales channel. Columns checked at compile time. |
 | [components/shop/src/store/access_snapshot.sql](../components/shop/src/store/access_snapshot.sql) | Per-request MVCC snapshot; never cached between requests. Hosted bindings cannot be replaced by headers. |
+| [components/shop/src/store/app_frontends.rs](../components/shop/src/store/app_frontends.rs) | The hosted-frontend address registry as the app platform uses it: the apps frontends depend on, the owning shop's bindings and their revisioned writes. |
+| [components/shop/src/store/app_languages.rs](../components/shop/src/store/app_languages.rs) | The language members of the shop settings that app lifecycles and extension projections read. |
 | [components/shop/src/store/consumer_requests.rs](../components/shop/src/store/consumer_requests.rs) | Durable withdrawal and data-rights intake, tenant-scoped operator review and customer-held receipt access. |
 | [components/shop/src/store/group_usage.rs](../components/shop/src/store/group_usage.rs) | Removing a customer group rejects live customer, price and native/source-rule dependencies under the settings lock. |
 | [components/shop/src/store/operator_control.rs](../components/shop/src/store/operator_control.rs) | Operator control-plane records: per-shop AI limits, the shop lifecycle status, the audit trail, the operator's account and the shop dossier. Columns checked at compile time. |
 | [components/shop/src/store/operator_metrics.rs](../components/shop/src/store/operator_metrics.rs) | Aggregate control-plane reads across live shops (sandboxes excluded): totals, amounts per currency, shop pages and daily order timelines. Columns checked at compile time. |
 | [components/shop/src/store/operators.rs](../components/shop/src/store/operators.rs) | Platform operator grants and the control-plane database probe. Columns checked at compile time. |
+| [components/shop/src/store/platform_ai.rs](../components/shop/src/store/platform_ai.rs) | The singleton operator inference configuration (`platform_ai`) with its sealed provider secrets, as model calls inherit it. |
 | [components/shop/src/store/settings.rs](../components/shop/src/store/settings.rs) | The shop settings basis and its channel overrides: locked reads, revision-checked writes, the language registration and the dependency probes of a save. Columns checked at compile time. |
 | [components/shop/src/store/settings_snapshot.sql](../components/shop/src/store/settings_snapshot.sql) | Atomic read snapshot: deletion/recreation and unchanged revision numbers cannot reuse an old UUID. |
 | [components/shop/src/store/settings_view.rs](../components/shop/src/store/settings_view.rs) | The recent reviews and orders shown beside the merchant settings. Columns checked at compile time. |
@@ -1800,6 +1818,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/studio/src/service/work_execution.rs](../components/studio/src/service/work_execution.rs) | Approved work runs under the existing task lease; each native write is fenced against cancellation and recorded before advancing. Translation steps reuse native draft storage and yield the worker while drafts are prepared. |
 | [components/studio/src/service/work_plan.rs](../components/studio/src/service/work_plan.rs) | Reviewed work binds bounded native configuration commands and managed app saves before any worker effect; approval re-binds and queues it. |
 | [components/studio/src/service.rs](../components/studio/src/service.rs) | Operations of the studio component. |
+| [components/studio/src/store/app_previews.rs](../components/studio/src/store/app_previews.rs) | The expiry of personal preview environments that app previews keep alive. |
 | [components/studio/src/store/customer_directory.rs](../components/studio/src/store/customer_directory.rs) | SQL of the merchant CRM directory: one keyset page of customer contacts with optional filters and app extension predicates. |
 | [components/studio/src/store/customer_directory.sql](../components/studio/src/store/customer_directory.sql) | One tenant-scoped CRM entry per email, including historical guest checkouts. |
 | [components/studio/src/store/customer_directory_default.sql](../components/studio/src/store/customer_directory_default.sql) | One tenant-scoped CRM entry per email, including historical guest checkouts. |

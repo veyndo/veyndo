@@ -66,12 +66,7 @@ pub async fn attach(
         tx.commit().await?;
         return Ok(());
     }
-    let language: Value = sqlx::query_scalar!(
-        r#"SELECT jsonb_build_object('mainLocale',data->'mainLocale','locales',data->'locales') AS "language!" FROM commerce_settings WHERE tenant=$1"#,
-        t
-    )
-    .fetch_one(&mut *tx)
-    .await?;
+    let language = veyndo_shop::store::app_languages::languages(&mut tx, &t).await?;
     let column = match object {
         Object::Product => "product_id",
         Object::Customer => "customer_id",

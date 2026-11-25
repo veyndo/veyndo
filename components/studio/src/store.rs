@@ -1,4 +1,5 @@
 //! SQL of the studio component.
+pub mod app_previews;
 pub mod customer_directory;
 pub mod history;
 pub mod imports;

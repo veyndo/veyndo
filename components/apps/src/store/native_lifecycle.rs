@@ -38,12 +38,7 @@ pub async fn admission(conn: &mut sqlx::PgConnection, t: &str, m: &Manifest) -> 
     if m.lifecycles.is_empty() {
         return Ok(());
     }
-    let main: Option<String> = sqlx::query_scalar!(
-        r#"SELECT coalesce(data->>'mainLocale','en-GB') AS "main!" FROM commerce_settings WHERE tenant=$1"#,
-        t
-    )
-    .fetch_optional(&mut *conn)
-    .await?;
+    let main = veyndo_shop::store::app_languages::main_locale(conn, t).await?;
     validate_locale(m, main.as_deref().unwrap_or("en-GB"))?;
     let mut apps = packages(conn, t).await?;
     apps.retain(|old| old.id != m.id);
@@ -72,13 +67,7 @@ pub async fn capture(conn: &mut sqlx::PgConnection, t: &str, object: &str) -> Re
         (quote_machine(), 0)
     };
     let machine = compile(base, &apps, object)?;
-    let main_locale: Option<String> = sqlx::query_scalar!(
-        "SELECT data->>'mainLocale' AS main FROM commerce_settings WHERE tenant=$1",
-        t
-    )
-    .fetch_optional(&mut *conn)
-    .await?
-    .flatten();
+    let main_locale = veyndo_shop::store::app_languages::main_locale(conn, t).await?;
     let main_locale = main_locale.unwrap_or_else(|| "en-GB".into());
     Ok(json!(Snapshot {
         version: 1,

@@ -21,6 +21,7 @@ pub(crate) async fn bootstrap() -> App {
         .with_env_filter(env::var("RUST_LOG").unwrap_or("info".into()))
         .init();
     let _configuration = runtime_config::get();
+    crate::ports::install();
     let mode = env::var("BOOTSTRAP_MODE").unwrap_or("auto".into());
     assert!(
         ["auto", "serve", "migrate"].contains(&mode.as_str()),
@@ -128,6 +129,7 @@ pub(crate) async fn run() {
         // Migrations install hosted app packages through component code that reads the
         // validated process configuration, so it is installed before the first migration.
         let _configuration = runtime_config::get();
+        crate::ports::install();
         let database_url = env::var("DATABASE_URL").expect("DATABASE_URL required");
         let db = PgPoolOptions::new()
             .max_connections(1)

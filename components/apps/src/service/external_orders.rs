@@ -275,8 +275,8 @@ pub async fn import_external(
         stored::NewOrder {
             id: &id,
             tenant: &t,
-            cart_id: &c.id,
-            idempotency_key: &key,
+            cart: &c.id,
+            key: &key,
             fingerprint: &fingerprint,
             data: &order,
         },

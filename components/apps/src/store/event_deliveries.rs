@@ -17,10 +17,7 @@ pub async fn project_events(
     )
     .fetch_all(&mut **tx)
     .await?;
-    let data: Value =
-        sqlx::query_scalar!("SELECT data FROM outbox WHERE tenant=$1 AND id=$2", t, id)
-            .fetch_one(&mut **tx)
-            .await?;
+    let data: Value = veyndo_core::store::outbox_reads::data(tx, t, id).await?;
     for row in rows {
         let m: Manifest =
             serde_json::from_value(row).map_err(|_| bad("Invalid app event package"))?;
@@ -98,15 +95,31 @@ pub async fn leased_events(
     app: &str,
     lease: uuid::Uuid,
 ) -> Result<Vec<LeasedEvent>> {
-    Ok(sqlx::query_as!(
-        LeasedEvent,
-        "SELECT o.id,o.kind,o.data,o.trace_id,d.attempts FROM app_deliveries d JOIN outbox o ON o.tenant=d.tenant AND o.id=d.event_id WHERE d.tenant=$1 AND d.app=$2 AND d.lease_token=$3 ORDER BY o.id",
+    // Every delivery references its outbox event (foreign key); the outbox owner supplies the events of the lease.
+    let leased = sqlx::query!(
+        "SELECT event_id,attempts FROM app_deliveries WHERE tenant=$1 AND app=$2 AND lease_token=$3",
         t,
         app,
         lease
     )
-    .fetch_all(conn)
-    .await?)
+    .fetch_all(&mut *conn)
+    .await?;
+    let attempts: std::collections::HashMap<i64, i32> =
+        leased.iter().map(|r| (r.event_id, r.attempts)).collect();
+    let ids: Vec<i64> = leased.iter().map(|r| r.event_id).collect();
+    Ok(veyndo_core::store::outbox_reads::traced(conn, t, &ids)
+        .await?
+        .into_iter()
+        .filter_map(|e| {
+            Some(LeasedEvent {
+                attempts: *attempts.get(&e.id)?,
+                id: e.id,
+                kind: e.kind,
+                data: e.data,
+                trace_id: e.trace_id,
+            })
+        })
+        .collect())
 }
 
 /// The outcome of one leased delivery.

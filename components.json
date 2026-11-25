@@ -560,27 +560,8 @@
         "shop"
       ],
       "foreign_tables": {
-        "b2b_companies": "read: reads company identity to resolve app callbacks and references on company records (core_references.rs, surface_grants.rs)",
-        "b2b_units": "read: reads purchasing unit currency, limits and catalogue scope inside the pricing or shipping query of the cart (core_references.rs, surface_grants.rs)",
-        "carts": "write: cart contributions update the cart at its revision; external order import creates the cart that backs the imported order (cart_contributions.rs, external_orders.rs)",
-        "commerce_flows": "read: reads flow definitions and revisions to resolve dependencies, staging snapshots or projections (flow_apps.rs)",
-        "commerce_settings": "read: reads the shop settings document under the basis row lock so the change and the settings it was checked against stay consistent (extension_projection.rs, languages.rs, native_lifecycle.rs)",
-        "customers": "read: reads customer identity, group and company in the same statement as its own records to admit or project them (core_references.rs, surface_grants.rs)",
-        "hosted_frontends": "write: hosted frontend binding and managed-app activation write the frontend registry row in the install transaction (activation.rs, app_host_reads.rs, frontend_bindings.rs, hosted_apps.rs)",
-        "integration_keys": "write: app credentials are integration keys bound to the package digest; issued in the app credential transaction (credentials.rs)",
-        "knowledge_relations": "read: reads product relations from the knowledge graph for catalogue and app views (evidence.rs)",
-        "languages": "read: reads the global language registry to map locales to language IDs (catalog_evidence.rs, labels.sql)",
-        "memberships": "read: reads membership rows to check the actor still belongs to the shop (app_host_reads.rs, job_callbacks.rs)",
-        "orders": "write: external order import creates the imported order together with its cart in one transaction (carrier_booking.rs, configuration_orders.rs, core_references.rs, external_orders.rs)",
-        "outbox": "read: reads outbox events or counts (throttling, cursors, operator view); writes go through veyndo_core::outbox (activity.rs, app_host_reads.rs, event_deliveries.rs, event_delivery.rs)",
-        "product_assets": "read: reads product asset metadata in the same statement as product rows (asset_references.rs)",
-        "product_channel_visibility": "read: reads channel visibility so a product hidden in the channel is excluded inside the query (external_orders.rs)",
-        "product_translations": "read: reads product translations along the language chain inside the query (catalog_evidence.rs, labels.sql)",
-        "products": "read: reads product rows in the same statement as its own data (prices, stock, visibility) (catalog_evidence.rs, core_references.rs, evidence.rs, external_orders.rs)",
-        "sales_channels": "read: reads the sales channel document (kind, activity, catalogue scope) to admit the request channel inside the same statement (core_references.rs, external_orders.rs, frontend_bindings.rs, surface_grants.rs)",
-        "shop_environments": "write: app previews extend the expiry of a personal preview environment (app_host_reads.rs, app_preview.rs, app_studio.rs, event_delivery.rs)",
-        "tenants": "read: reads shop existence, status or the agent stop switch inside a larger claim or join; simple reads go through veyndo_core::tenants (event_delivery.rs, frontend_bindings.rs, schedules.rs)",
-        "workspace_roles": "read: reads role definitions to recheck the job creator rights (app_host_reads.rs, job_callbacks.rs)"
+        "shop_environments": "read: the delivery and schedule claims exclude staging environments and resolve the live shop inside their single SKIP LOCKED claim statement (event_deliveries.rs, schedules.rs); other environment reads go through veyndo_core::store::previews, the preview expiry through the Directory port",
+        "tenants": "read: the delivery claim locks the owning shop row (FOR UPDATE OF d,owner SKIP LOCKED) and the schedule claim checks the live shop status inside the same claim statement (event_deliveries.rs, schedules.rs); other shop reads go through veyndo_core::store::tenants"
       },
       "glob_imports": 0,
       "untyped_access": 0,
@@ -612,13 +593,7 @@
         "core"
       ],
       "tables": [],
-      "foreign_tables": {
-        "integration_keys": "write: agent model budgets are charged to the integration key that started the run (budget.rs)",
-        "outbox": "write: the model budget emits its exhaustion event in the charging transaction (budget.rs)",
-        "platform_ai": "read: reads the operator inference configuration that every model call inherits (settings.rs)",
-        "shop_environments": "read: reads the environment row (live shop, preview owner) to scope sandbox and preview requests to their live shop (budget.rs)",
-        "tenants": "read: reads shop existence, status or the agent stop switch inside a larger claim or join; simple reads go through veyndo_core::tenants (budget.rs)"
-      },
+      "foreign_tables": {},
       "glob_imports": 0,
       "untyped_access": 0,
       "sql_outside_store": 0,
@@ -898,6 +873,8 @@
         "src/performance/delivery.rs",
         "src/planner.rs",
         "src/platform",
+        "src/ports",
+        "src/ports.rs",
         "src/pos",
         "src/proposal_apply.rs",
         "src/proposal_routes.rs",

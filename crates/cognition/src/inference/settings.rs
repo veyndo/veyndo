@@ -110,10 +110,10 @@ impl Inference {
             .as_ref()
             .is_none_or(|(at, _)| at.elapsed().as_secs() >= 5)
         {
-            let row = crate::tenant_scope::scoped(
-                crate::tenant_scope::Scope::System,
-                crate::store::settings::platform(db),
-            )
+            let row = crate::tenant_scope::scoped(crate::tenant_scope::Scope::System, async {
+                let host = crate::ports::host().ok_or("Platform AI configuration unavailable")?;
+                host.platform_ai(db).await.map_err(|e| e.1)
+            })
             .await
             .map_err(|_| "Platform AI configuration unavailable")?;
             let mut data = row.data;

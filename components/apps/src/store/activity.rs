@@ -14,15 +14,30 @@ pub async fn calls(a: &State, t: &str, app: &str) -> Result<Vec<Value>> {
     .await?)
 }
 
-/// The latest 50 event deliveries of an app as metadata objects.
+/// The latest 50 event deliveries of an app as metadata objects. Every delivery references its outbox
+/// event (foreign key), so the event kinds come from the outbox owner for exactly these deliveries.
 pub async fn deliveries(a: &State, t: &str, app: &str) -> Result<Vec<Value>> {
-    Ok(sqlx::query_scalar!(
-        r#"SELECT jsonb_build_object('eventId',d.event_id,'kind',o.kind,'state',d.state,'attempts',d.attempts,'error',d.error,'lastAttemptAt',d.last_attempt_at) AS "delivery!" FROM app_deliveries d JOIN outbox o ON o.tenant=d.tenant AND o.id=d.event_id WHERE d.tenant=$1 AND d.app=$2 ORDER BY d.event_id DESC LIMIT 50"#,
+    let rows = sqlx::query!(
+        r#"SELECT event_id,state,attempts,error,jsonb_build_object('lastAttemptAt',last_attempt_at) AS "at!" FROM app_deliveries WHERE tenant=$1 AND app=$2 ORDER BY event_id DESC LIMIT 50"#,
         t,
         app
     )
     .fetch_all(&a.db)
-    .await?)
+    .await?;
+    let ids: Vec<i64> = rows.iter().map(|r| r.event_id).collect();
+    let kinds: std::collections::HashMap<i64, String> =
+        veyndo_core::store::outbox_reads::kinds(&a.db, t, &ids)
+            .await?
+            .into_iter()
+            .map(|k| (k.id, k.kind))
+            .collect();
+    Ok(rows
+        .into_iter()
+        .filter_map(|r| {
+            let kind = kinds.get(&r.event_id)?;
+            Some(serde_json::json!({"eventId":r.event_id,"kind":kind,"state":r.state,"attempts":r.attempts,"error":r.error,"lastAttemptAt":r.at.get("lastAttemptAt")}))
+        })
+        .collect())
 }
 
 /// The storage use of an app with its limits, when it stored anything.
@@ -36,30 +51,7 @@ pub async fn usage(a: &State, t: &str, app: &str) -> Result<Option<Value>> {
     .await?)
 }
 
-/// One outbox event considered for replay.
-pub struct OutboxEvent {
-    pub id: i64,
-    pub kind: String,
-    pub data: Value,
-}
-
-/// The shop's outbox events after a cursor, oldest first.
-pub async fn events_after(
-    conn: &mut PgConnection,
-    t: &str,
-    after: i64,
-    limit: i64,
-) -> Result<Vec<OutboxEvent>> {
-    Ok(sqlx::query_as!(
-        OutboxEvent,
-        "SELECT id,kind,data FROM outbox WHERE tenant=$1 AND id>$2 ORDER BY id LIMIT $3",
-        t,
-        after,
-        limit
-    )
-    .fetch_all(conn)
-    .await?)
-}
+pub use veyndo_core::store::outbox_reads::{Event as OutboxEvent, after as events_after};
 
 /// Queues one event for an app again; a pending or running delivery is left alone. Returns the rows queued.
 pub async fn requeue(conn: &mut PgConnection, t: &str, app: &str, event: i64) -> Result<u64> {

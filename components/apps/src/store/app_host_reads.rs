@@ -3,25 +3,7 @@ use crate::store::{job_creators, locks};
 use serde_json::{Value, json};
 use veyndo_core::{Error, Result, State, StatusCode, conflict};
 
-/// One connected hosted frontend of the shop.
-pub struct Connection {
-    pub alias: String,
-    pub channel: String,
-    pub experience: String,
-    pub revision: i64,
-    pub app: Option<String>,
-}
-
-/// The hosted frontends of the shop, by alias.
-pub async fn connections(a: &State, t: &str) -> Result<Vec<Connection>> {
-    Ok(sqlx::query_as!(
-        Connection,
-        r#"SELECT alias,channel,experience_alias AS experience,revision,app_id AS app FROM hosted_frontends WHERE tenant=$1 ORDER BY alias"#,
-        t
-    )
-    .fetch_all(&a.db)
-    .await?)
-}
+pub use veyndo_shop::store::app_frontends::{Connection, connections};
 
 /// Every installed package of the shop with version, manifest, state, revision and digest.
 pub async fn packages(a: &State, t: &str) -> Result<Vec<Value>> {
@@ -52,21 +34,9 @@ pub async fn submission_window(
     .fetch_one(&mut *tx)
     .await?;
     locks::advisory(tx, t, 946).await?;
-    let count = sqlx::query_scalar!(
-        r#"SELECT count(*) AS "count!" FROM outbox WHERE tenant=$1 AND kind=$2 AND created_at>now()-interval '1 minute'"#,
-        t,
-        kind
-    )
-    .fetch_one(&mut *tx)
-    .await?;
-    let personal = sqlx::query_scalar!(
-        r#"SELECT count(*) AS "count!" FROM outbox WHERE tenant=$1 AND kind=$2 AND data->>'intakeKey'=$3 AND created_at>now()-interval '1 minute'"#,
-        t,
-        kind,
-        intake_key
-    )
-    .fetch_one(&mut *tx)
-    .await?;
+    let count = veyndo_core::store::outbox_reads::last_minute(tx, t, kind).await?;
+    let personal =
+        veyndo_core::store::outbox_reads::last_minute_for_intake(tx, t, kind, intake_key).await?;
     Ok((count, personal))
 }
 
@@ -124,16 +94,11 @@ pub async fn creator_grants(
 
 /// Locks the reviewed target as an admitted private environment of the live shop.
 pub async fn private_target(tx: &mut sqlx::PgConnection, target: &str, live: &str) -> Result<()> {
-    sqlx::query_scalar!(
-        "SELECT tenant FROM shop_environments WHERE tenant=$1 AND live_tenant=$2 AND preview_owner IS NULL FOR SHARE",
-        target,
-        live
-    )
-    .fetch_optional(tx)
-    .await?
-    .ok_or(Error(
-        StatusCode::FORBIDDEN,
-        "Job target is not an admitted private environment".into(),
-    ))?;
+    if !veyndo_core::store::previews::lock_shared(tx, target, live).await? {
+        return Err(Error(
+            StatusCode::FORBIDDEN,
+            "Job target is not an admitted private environment".into(),
+        ));
+    }
     Ok(())
 }

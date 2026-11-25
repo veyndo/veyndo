@@ -1,4 +1,5 @@
 //! SQL reads of the marketing component.
+pub mod app_channels;
 pub mod carts;
 pub mod catalog;
 pub mod channel_config;
