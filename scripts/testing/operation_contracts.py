@@ -52,13 +52,13 @@ def outputs():
         group=ops[index:index+12];part=str(index//12)
         text=prefix+'/** Native input DTOs; opaque JSON fields remain explicit. */\nimport type { JsonValue } from "./value";\n'
         text+='export interface Inputs'+part+' {\n'+''.join('  '+json.dumps(o['name'])+': '+ts(o['inputSchema'])+';\n' for o in group)+'}\n'
-        out['frontend/src/shared/operations/inputs-'+part+'.ts']=text;chunks.append(part)
-    out['frontend/src/shared/operations/value.ts']=prefix+'/** JSON values for deliberately open operation fields. */\nexport type JsonValue = null | boolean | number | string | JsonValue[] | { [key: string]: JsonValue };\n'
-    out['frontend/src/shared/operations/index.ts']=prefix+'/** The registry determines operation names, requests and declared results. */\n'+''.join('import type { Inputs'+n+' } from "./inputs-'+n+'";\n' for n in chunks)+'export type OperationInputs = '+' & '.join('Inputs'+n for n in chunks)+';\nexport type OperationName = keyof OperationInputs;\nexport type OperationCall<N extends OperationName> = { name: N; arguments: OperationInputs[N] };\n'
+        out['frontend/src/kit/api/generated/operations/inputs-'+part+'.ts']=text;chunks.append(part)
+    out['frontend/src/kit/api/generated/operations/value.ts']=prefix+'/** JSON values for deliberately open operation fields. */\nexport type JsonValue = null | boolean | number | string | JsonValue[] | { [key: string]: JsonValue };\n'
+    out['frontend/src/kit/api/generated/operations/index.ts']=prefix+'/** The registry determines operation names, requests and declared results. */\n'+''.join('import type { Inputs'+n+' } from "./inputs-'+n+'";\n' for n in chunks)+'export type OperationInputs = '+' & '.join('Inputs'+n for n in chunks)+';\nexport type OperationName = keyof OperationInputs;\nexport type OperationCall<N extends OperationName> = { name: N; arguments: OperationInputs[N] };\n'
     declarations=''.join('  '+json.dumps(name)+': '+ts(schema)+';\n' for name,schema in declared_outputs.items())
     if 'JsonValue' in declarations:
-        out['frontend/src/shared/operations/index.ts']+='import type { JsonValue } from "./value";\n'
-    out['frontend/src/shared/operations/index.ts']+='export interface OperationOutputs {\n'+declarations+'}\n'
+        out['frontend/src/kit/api/generated/operations/index.ts']+='import type { JsonValue } from "./value";\n'
+    out['frontend/src/kit/api/generated/operations/index.ts']+='export interface OperationOutputs {\n'+declarations+'}\n'
     for o in ops:
         name=o['name'].replace('.','-').replace('_','-');typ=w.type(o['inputSchema'],name+'-input')
         functions.append('  '+name+': func(input: '+typ+') -> result<string, string>;')

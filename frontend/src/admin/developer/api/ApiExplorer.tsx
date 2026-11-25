@@ -1,18 +1,15 @@
 /** Source-derived static route explorer, runtime app discovery and isolated same-origin read tests. */
 import { useEffect, useState } from "react";
-import routes from "./routes.json";
+import { fillPath, routes, type Route } from "../../../kit/api";
 import type { RequestFn } from "../../shell/studio-types";
 import { createStudioRequest } from "../../shell/requests";
 import { useLocale } from "../../../shared/i18n/i18n";
 import { useApiText } from "./api-i18n";
-type Route = { path: string; method: string; source: string };
-export function routePath(route: Route, params: Record<string, string>) {
-  return route.path.replace(/\{([^}]+)\}/g, (_, key) => {
-    const value = params[key]?.trim();
-    if (!value || value === "." || value === ".." || /[\/\\?#]/.test(value))
-      throw Error(`Invalid parameter: ${key}`);
-    return encodeURIComponent(value);
-  });
+export function routePath(
+  route: Pick<Route, "path">,
+  params: Record<string, string>,
+) {
+  return fillPath(route.path, params);
 }
 const reads = (r: Route) =>
   r.method === "GET" &&
@@ -109,7 +106,7 @@ export default function ApiExplorer({
                 type="button"
                 className="api-route"
                 aria-label={`${r.method} ${r.path}`}
-                key={r.method + r.path}
+                key={r.key}
                 aria-pressed={r === selected}
                 onClick={() => {
                   setSelected(r);
