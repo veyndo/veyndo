@@ -7,7 +7,7 @@ use serde_json::{Value, json};
 use sqlx::Row;
 use veyndo_app_model::manifest::Manifest;
 use veyndo_app_model::{Entity, Object};
-use veyndo_core::document::{lenient, view};
+use veyndo_core::document::{lenient, merge, view};
 use veyndo_core::{RequestContext, Result, State, bad};
 
 /// The immutable ID of a native list row, the object an extension binds to.
@@ -18,6 +18,21 @@ struct NativeRow {
     id: Option<String>,
 }
 use veyndo_identity::merchant;
+
+/// The host identity a projected app record carries beside its app-declared fields.
+#[derive(serde::Serialize)]
+struct RecordIdentity {
+    id: String,
+    revision: i64,
+}
+
+/// The extensions attached to one native row.
+#[derive(serde::Serialize)]
+#[serde(rename_all = "camelCase")]
+struct Extensions {
+    extensions: Vec<Value>,
+    omitted_extensions: usize,
+}
 
 /// Attaches the readable app extensions of up to 100 native objects in one indexed lookup.
 pub async fn attach(
@@ -76,16 +91,21 @@ pub async fn attach(
         .map(|r| {
             let mut v: Value = r.get::<Option<Value>, _>("fields").unwrap_or(Value::Null);
             if v.is_null() {
-                return (
+                return Ok((
                     (r.get("app"), r.get("entity"), r.get("native_id")),
                     Value::Null,
-                );
+                ));
             }
-            v["id"] = json!(r.get::<String, _>("id"));
-            v["revision"] = json!(r.get::<i64, _>("revision"));
-            ((r.get("app"), r.get("entity"), r.get("native_id")), v)
+            merge(
+                &mut v,
+                RecordIdentity {
+                    id: r.get("id"),
+                    revision: r.get("revision"),
+                },
+            )?;
+            Ok(((r.get("app"), r.get("entity"), r.get("native_id")), v))
         })
-        .collect();
+        .collect::<Result<_>>()?;
     tx.commit().await?;
     for row in rows {
         let Some(id) = view::<NativeRow>(row).id else {
@@ -117,8 +137,13 @@ pub async fn attach(
             bytes += size;
             projections.push(out);
         }
-        row["extensions"] = json!(projections);
-        row["omittedExtensions"] = json!(skipped);
+        merge(
+            row,
+            Extensions {
+                extensions: projections,
+                omitted_extensions: skipped,
+            },
+        )?;
     }
     Ok(())
 }

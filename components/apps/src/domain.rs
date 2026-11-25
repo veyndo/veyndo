@@ -1,5 +1,6 @@
 //! Pure package rules: no database, no transport.
 pub mod action_admission;
+pub mod action_inputs;
 pub mod action_policy;
 pub mod app_generation;
 pub mod approval;
@@ -18,6 +19,7 @@ pub mod core_extensions;
 pub mod design_context;
 pub mod discovery;
 pub mod distribution;
+pub mod draft_document;
 pub mod entity_access;
 pub mod event_batch;
 pub mod event_destination;

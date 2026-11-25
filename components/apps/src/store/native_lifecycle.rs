@@ -106,11 +106,22 @@ pub async fn current_order(db: &ScopedPool, t: &str) -> Result<OrderMachine> {
     let (base, _) = machine_conn(&mut conn, t).await?;
     compile(base, &apps, "order")
 }
+/// The lifecycle snapshot a placed order carries.
+#[derive(serde::Serialize)]
+#[serde(rename_all = "camelCase")]
+struct CapturedLifecycle {
+    native_lifecycle: Value,
+}
 /// Stores the captured lifecycle on an order that is being placed.
 pub async fn bind_order(conn: &mut sqlx::PgConnection, t: &str, order: &mut Value) -> Result<()> {
     let lifecycle = capture(conn, t, "order").await?;
     if !lifecycle.is_null() {
-        order["nativeLifecycle"] = lifecycle;
+        veyndo_core::document::merge(
+            order,
+            CapturedLifecycle {
+                native_lifecycle: lifecycle,
+            },
+        )?;
     }
     Ok(())
 }

@@ -12,6 +12,18 @@ use veyndo_core::shop_scope::channel;
 use veyndo_core::{RequestContext, Result, State, bad, conflict};
 use veyndo_identity::permit;
 
+/// The bounded record sample a planner sees in place of the full page.
+#[derive(serde::Serialize)]
+struct PlannedRecords {
+    elements: Vec<Value>,
+}
+
+/// The record revision a proposed save is bound to.
+#[derive(serde::Serialize)]
+struct ExpectedRevision {
+    revision: i64,
+}
+
 /// The installed apps a planner may use for a request: their selected tools and a bounded sample of records.
 pub async fn planning_context(
     a: &State,
@@ -89,7 +101,7 @@ pub async fn planning_context(
                     .take(12)
                     .map(|row| bounded_context(row, 0))
                     .collect::<Vec<_>>();
-                data["elements"] = json!(elements);
+                veyndo_core::document::merge(&mut data, PlannedRecords { elements })?;
                 entities.push(e.name.clone());
                 records.push(json!({"entity":e.name,"records":data}));
             }
@@ -170,7 +182,7 @@ pub async fn bind_change(
         .filter(|s| !s.is_empty() && s.len() <= 100)
         .ok_or(bad("App record ID required"))?;
     let revision = managed_data::record_revision(a, t, &m, e, id).await?;
-    args["revision"] = json!(revision);
+    veyndo_core::document::merge(&mut args, ExpectedRevision { revision })?;
     c.arguments_json = args.to_string();
     c.expected_app_revision = row.revision;
     Ok(())

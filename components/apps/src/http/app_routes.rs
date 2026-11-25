@@ -66,9 +66,10 @@ pub async fn read_route(
         .iter()
         .find(|a| a.name == r.action)
         .ok_or(bad("Unknown app action"))?;
+    let declared = crate::domain::action_inputs::InputProperties::of(&action.input_schema);
     let mut input = serde_json::Map::new();
     for (key, value) in query {
-        let v = if action.input_schema["properties"][&key]["type"] == "string" {
+        let v = if declared.kind(&key) == "string" {
             json!(value)
         } else {
             serde_json::from_str(&value).map_err(|_| bad("Invalid typed query argument"))?

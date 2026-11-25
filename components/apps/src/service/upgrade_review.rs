@@ -8,6 +8,12 @@ use veyndo_app_model::manifest::Manifest;
 use veyndo_core::store::environments::owned_stage;
 use veyndo_core::{Result, bad};
 
+/// The problem detail an installation review reports.
+#[derive(serde::Serialize)]
+struct ProblemDetail<'a> {
+    detail: &'a str,
+}
+
 /// What installing a package would change, probed with the real installer and rolled back.
 pub async fn inspect(
     a: &Platform,
@@ -69,7 +75,7 @@ pub async fn inspect(
         Err(e) if e.0.is_server_error() => return Err(e),
         Err(e) => {
             let mut p = e.problem();
-            p["detail"] = json!(e.1);
+            veyndo_core::document::merge(&mut p, ProblemDetail { detail: &e.1 })?;
             p
         }
     };

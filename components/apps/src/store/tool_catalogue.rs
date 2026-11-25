@@ -10,6 +10,13 @@ use veyndo_core::tool_contract::ToolContract;
 use veyndo_core::{RequestContext, Result, State};
 use veyndo_kernel::verified_kernel;
 
+/// The MCP metadata of a tool that opens an app view.
+#[derive(serde::Serialize)]
+struct ToolMeta {
+    #[serde(rename = "_meta")]
+    meta: Value,
+}
+
 /// The tools of the installed apps a caller may see, with the view each one opens.
 pub async fn app_tools_for(a: &State, h: &RequestContext, public_only: bool) -> Result<Vec<Value>> {
     if h.principal.agent_key.is_some() {
@@ -55,7 +62,12 @@ pub async fn app_tools_for(a: &State, h: &RequestContext, public_only: bool) -> 
                         .iter()
                         .find(|s| s.actions.first() == Some(&action.name) && available(h, &m, s))
                 {
-                    tool["_meta"] = json!({"ui":{"resourceUri":uri(&tenant(h)?, &m, s, digest)}});
+                    veyndo_core::document::merge(
+                        &mut tool,
+                        ToolMeta {
+                            meta: json!({"ui":{"resourceUri":uri(&tenant(h)?, &m, s, digest)}}),
+                        },
+                    )?;
                 }
                 tools.push(tool);
             }

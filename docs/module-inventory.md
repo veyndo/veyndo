@@ -410,14 +410,14 @@ This lists every checked-in source module in these roots, including files with n
 | [crates/cognition/src/inference/budget.rs](../crates/cognition/src/inference/budget.rs) | Durable conservative model allocations use existing agent keys and the live shop stop switch. |
 | [crates/cognition/src/inference/error.rs](../crates/cognition/src/inference/error.rs) | Typed admission failures survive provider adapters; HTTP status never depends on parsing message text. |
 | [crates/cognition/src/inference/protocol.rs](../crates/cognition/src/inference/protocol.rs) | Self-hosted chat-completions adapter and opt-in provider prompt caching; neither caches private commerce responses. |
+| [crates/cognition/src/inference/provider_tests.rs](../crates/cognition/src/inference/provider_tests.rs) | Provider response contracts, strict schemas and truncation rejection. |
 | [crates/cognition/src/inference/request.rs](../crates/cognition/src/inference/request.rs) | One provider request owns native wire translation, bounded model admission and network egress. |
 | [crates/cognition/src/inference/schema.rs](../crates/cognition/src/inference/schema.rs) | Provider wire adaptation for strict fixed-object schemas; dynamic JSON is encoded only on the model wire and restored before domain validation. |
 | [crates/cognition/src/inference/settings.rs](../crates/cognition/src/inference/settings.rs) | Shared operator settings; AES-GCM secrets are never part of merchant/operator read responses. |
 | [crates/cognition/src/inference/sovereign.rs](../crates/cognition/src/inference/sovereign.rs) | Sovereign mode: one switch that admits only the self-operated model route and reports where each model call goes. |
-| [crates/cognition/src/inference/tests.rs](../crates/cognition/src/inference/tests.rs) | Provider response contracts, strict schemas and truncation rejection. |
 | [crates/cognition/src/inference/tools/request.rs](../crates/cognition/src/inference/tools/request.rs) | Provider-native messages and correlated tool results, including opaque reasoning continuation. |
 | [crates/cognition/src/inference/tools/response.rs](../crates/cognition/src/inference/tools/response.rs) | Fail-closed normalization of bounded calls; malformed, truncated or unknown operations never execute. |
-| [crates/cognition/src/inference/tools/tests.rs](../crates/cognition/src/inference/tools/tests.rs) | Native wire and injection negative cases exercise the same parser used before dispatch. |
+| [crates/cognition/src/inference/tools/wire_tests.rs](../crates/cognition/src/inference/tools/wire_tests.rs) | Native wire and injection negative cases exercise the same parser used before dispatch. |
 | [crates/cognition/src/inference/tools.rs](../crates/cognition/src/inference/tools.rs) | Native provider read-tool transport; normalization grants no execution authority. |
 | [crates/cognition/src/inference.rs](../crates/cognition/src/inference.rs) | Provider adapters. Credentials stay on the server; domain validation is separate. |
 | [crates/cognition/src/lib.rs](../crates/cognition/src/lib.rs) | Provider protocol adapters and prompt evidence; no commerce write capability. |
@@ -454,6 +454,7 @@ This lists every checked-in source module in these roots, including files with n
 | Module | Responsibility |
 |---|---|
 | [components/apps/src/domain/action_admission.rs](../components/apps/src/domain/action_admission.rs) | Native authenticated-current-rights adapter for the shared action and callback grant rules. |
+| [components/apps/src/domain/action_inputs.rs](../components/apps/src/domain/action_inputs.rs) | Typed reads of an app action input schema: the declared `properties` the host binds and filters by. |
 | [components/apps/src/domain/action_policy.rs](../components/apps/src/domain/action_policy.rs) | Which declared actions only read: the distinction every surface, grant and GET route relies on. |
 | [components/apps/src/domain/app_generation.rs](../components/apps/src/domain/app_generation.rs) | The manifest schema a model answers in, specialised to the shop's languages, and the access a regeneration keeps. |
 | [components/apps/src/domain/approval.rs](../components/apps/src/domain/approval.rs) | Operator service authority is bound to immutable package content, never to a merchant-chosen ID. |
@@ -469,6 +470,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/apps/src/domain/design_context.rs](../components/apps/src/domain/design_context.rs) | Editor context is validated against the supplied Manifest; references are untrusted evidence, never authority. |
 | [components/apps/src/domain/discovery.rs](../components/apps/src/domain/discovery.rs) | Search over installed app capabilities with current rights: operations, their schemas and relevance. |
 | [components/apps/src/domain/distribution.rs](../components/apps/src/domain/distribution.rs) | Signed publisher namespaces and tenant-local dependency/version gates. Operator service access still requires its separate exact digest pin. |
+| [components/apps/src/domain/draft_document.rs](../components/apps/src/domain/draft_document.rs) | Typed reads and key-preserving writes for model-facing manifest drafts and their JSON Schema. |
 | [components/apps/src/domain/entity_access.rs](../components/apps/src/domain/entity_access.rs) | Editor access to an app entity: the generic endpoint needs every right its declared actions need. |
 | [components/apps/src/domain/event_batch.rs](../components/apps/src/domain/event_batch.rs) | How many events one delivery to an app may carry. |
 | [components/apps/src/domain/event_destination.rs](../components/apps/src/domain/event_destination.rs) | Where a package may have its events delivered: public HTTPS only. |

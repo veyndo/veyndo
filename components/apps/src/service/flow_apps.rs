@@ -1,12 +1,13 @@
 //! App steps of flows use the same permission and schema gateway as HTTP and MCP: admission, installed-package checks, upgrade safety and argument binding.
 //! Action input schemas and step arguments are app-declared open JSON; native schema validation types them.
+use crate::domain::action_inputs::InputProperties;
 use crate::domain::{action_admission, core_extensions, field_values};
 use crate::store::{flows, locks, packages};
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 use veyndo_app_model::Action;
 use veyndo_app_model::manifest::Manifest;
-use veyndo_core::document::{lenient, view};
+use veyndo_core::document::{lenient, merge, view};
 use veyndo_core::model_contract::validate as validate_input;
 use veyndo_core::{RequestContext, Result, bad, conflict};
 use veyndo_identity::permit;
@@ -37,7 +38,7 @@ pub fn validate_step(h: &RequestContext, f: &Flow, m: &Manifest) -> Result<()> {
         .ok_or(bad("Unknown flow app action"))?;
     eligible(act)?;
     if f.event == "payment.instructions.available"
-        && act.input_schema["properties"].get("event").is_some()
+        && InputProperties::of(&act.input_schema).declares("event")
     {
         for scope in ["payments.read", "orders.read", "customers.pii"] {
             permit(h, scope)?;
@@ -104,7 +105,7 @@ fn validate_contract(f: &Flow, m: &Manifest) -> Result<()> {
             .iter()
             .find(|e| Some(&e.name) == act.entity.as_ref())
             .ok_or(bad("Flow app model missing"))?;
-        field_values::validate(entity, &args["fields"])?;
+        field_values::validate(entity, &view::<SaveArguments>(&args).fields)?;
     }
     Ok(())
 }
@@ -170,6 +171,37 @@ struct ArgumentsInput {
     order_id: Option<String>,
 }
 
+/// The record a save step writes, as its arguments carry it.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct SaveArguments {
+    fields: Value,
+}
+
+/// The step arguments `arguments` reads before binding.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct StepArguments {
+    #[serde(deserialize_with = "lenient")]
+    order_id: Option<String>,
+}
+
+/// The inputs the host binds into step arguments; unset ones keep the merchant's value.
+#[derive(Serialize, Default)]
+#[serde(rename_all = "camelCase")]
+struct BoundArguments<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    order_id: Option<&'a str>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    kind: Option<&'a str>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    request_key: Option<&'a str>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    event: Option<&'a Value>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    template: Option<&'a str>,
+}
+
 /// Binds the declared inputs of an app action: the canonical order ID of order-bound events, kind, request key, event and template.
 pub fn arguments(
     action: &Action,
@@ -180,26 +212,38 @@ pub fn arguments(
 ) -> Value {
     let input: ArgumentsInput = view(event);
     let mut args = base.clone();
-    let props = &action.input_schema["properties"];
+    let props = InputProperties::of(&action.input_schema);
+    let mut bound = BoundArguments::default();
     // Native order-bound events supply their canonical ID; explicit non-empty
     // merchant arguments remain unchanged. No string interpolation or AI identity.
-    if props.get("orderId").is_some()
-        && args["orderId"].as_str().is_none_or(str::is_empty)
-        && let Some(id) = input.order_id.as_deref().filter(|id| !id.is_empty())
+    if props.declares("orderId")
+        && view::<StepArguments>(&args)
+            .order_id
+            .as_deref()
+            .is_none_or(str::is_empty)
     {
-        args["orderId"] = json!(id);
+        bound.order_id = input.order_id.as_deref().filter(|id| !id.is_empty());
     }
-    if props.get("kind").is_some() {
-        args["kind"] = json!(kind);
+    if props.declares("kind") {
+        bound.kind = Some(kind);
     }
-    if props.get("requestKey").is_some() {
-        args["requestKey"] = json!(key);
+    if props.declares("requestKey") {
+        bound.request_key = Some(key);
     }
-    if props.get("event").is_some() {
-        args["event"] = event.clone();
+    if props.declares("event") {
+        bound.event = Some(event);
     }
-    if props.get("template").is_some() && args.get("template").is_none() {
-        args["template"] = json!(instruction);
+    if props.declares("template") && args.get("template").is_none() {
+        bound.template = Some(instruction);
+    }
+    let binds = bound.order_id.is_some()
+        || bound.kind.is_some()
+        || bound.request_key.is_some()
+        || bound.event.is_some()
+        || bound.template.is_some();
+    // Arguments that are not an object stay as they are; input validation rejects them afterwards.
+    if binds && merge(&mut args, bound).is_err() {
+        return base.clone();
     }
     args
 }

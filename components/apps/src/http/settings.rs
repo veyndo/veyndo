@@ -44,9 +44,21 @@ pub async fn read(
     .await
     .map_err(settings_error)?;
     tx.commit().await?;
-    value["canManage"] = json!(parent(&a, &t).await?.is_none());
-    value["encryptionReady"] = json!(veyndo_cognition::inference::settings::encryption_ready());
+    veyndo_core::document::merge(
+        &mut value,
+        SettingsAccess {
+            can_manage: parent(&a, &t).await?.is_none(),
+            encryption_ready: veyndo_cognition::inference::settings::encryption_ready(),
+        },
+    )?;
     Ok(Json(value))
+}
+/// What the caller may do with the settings it reads.
+#[derive(serde::Serialize)]
+#[serde(rename_all = "camelCase")]
+struct SettingsAccess {
+    can_manage: bool,
+    encryption_ready: bool,
 }
 /// An app settings save for the approved package digest at its revision.
 #[derive(Deserialize, Default)]

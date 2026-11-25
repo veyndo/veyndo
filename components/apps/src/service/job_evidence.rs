@@ -105,19 +105,25 @@ pub async fn save(
             "Evidence destination differs from the reviewed job",
         ));
     }
-    if input["fields"]["result"] != report.result {
+    let submitted: EvidenceRecord = view(&input);
+    if view::<EvidenceFields>(&submitted.fields).result != report.result {
         return Err(conflict("Evidence result differs from the completed job"));
     }
-    let fields = input["fields"]
-        .as_object_mut()
+    // Record fields are app-declared; only the host-owned `evidence` member is replaced.
+    let fields = input
+        .get_mut("fields")
+        .and_then(Value::as_object_mut)
         .ok_or(bad("Evidence fields required"))?;
     fields.remove("evidence");
-    let proof = json!({"v":1,"job":report.id,"actor":job.get::<String,_>("actor"),"action":job.get::<String,_>("action"),"inputHash":hash(&frozen.to_string()),"fieldsHash":hash(&document(entity,&input["fields"]).to_string()),"at":chrono::Utc::now().to_rfc3339()});
-    input["fields"]["evidence"] = json!(
-        seal(&binding(t, m, &entity.name, &id), &proof.to_string()).map_err(|_| Error(
-            StatusCode::SERVICE_UNAVAILABLE,
-            "Job evidence encryption unavailable".into()
-        ))?
+    let proof = json!({"v":1,"job":report.id,"actor":job.get::<String,_>("actor"),"action":job.get::<String,_>("action"),"inputHash":hash(&frozen.to_string()),"fieldsHash":hash(&document(entity,&Value::Object(fields.clone())).to_string()),"at":chrono::Utc::now().to_rfc3339()});
+    fields.insert(
+        "evidence".into(),
+        json!(
+            seal(&binding(t, m, &entity.name, &id), &proof.to_string()).map_err(|_| Error(
+                StatusCode::SERVICE_UNAVAILABLE,
+                "Job evidence encryption unavailable".into()
+            ))?
+        ),
     );
     input_schema::validate_native(&action.input_schema, &input)?;
     context(tx, identity, "app.job.completed").await?;
@@ -131,6 +137,20 @@ struct EvidenceSave {
     #[serde(deserialize_with = "lenient")]
     action: Option<String>,
     input: Value,
+}
+
+/// The submitted evidence record, as the completion check reads it.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct EvidenceRecord {
+    fields: Value,
+}
+
+/// The record field the completed job result must match.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct EvidenceFields {
+    result: Value,
 }
 
 /// The reviewed job input fields evidence is checked against.

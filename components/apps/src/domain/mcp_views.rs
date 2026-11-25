@@ -1,6 +1,7 @@
 //! Revision-bound native MCP App views: which tools and views a caller may reach, and the view document.
 //! View documents and action input schemas are app-declared open JSON (JSON Schema and manifest views).
 use crate::domain::action_admission::authorized;
+use crate::domain::action_inputs::InputProperties;
 use crate::domain::action_policy::readonly;
 use crate::domain::{approval, native_views};
 use serde::Deserialize;
@@ -111,13 +112,14 @@ pub fn resource(
     main: &str,
 ) -> Result<Value> {
     let view = native_views::payload(m, s).ok_or(bad("App view unavailable"))?;
+    let projected: ViewPayload = veyndo_core::document::view(&view);
     let locale_chain = [
         locale,
         locale.split('-').next().unwrap_or(locale),
         main,
         main.split('-').next().unwrap_or(main),
     ];
-    let definition = json!({"label":s.label,"view":view["view"],"entities":view["entities"],
+    let definition = json!({"label":s.label,"view":projected.view,"entities":projected.entities,
         "localeChain":locale_chain,"toolName":format!("app.{}.{}",m.id,s.actions[0]),
         "filter": choice_filter(m, s, &view),
         "productReference": (s.location == "storefront.assistant").then(|| {
@@ -132,11 +134,29 @@ pub fn resource(
     )
 }
 
+/// The native view payload members an MCP view definition carries.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct ViewPayload {
+    view: Value,
+    entities: Value,
+}
+
 /// The JSON fields `view_entity` reads, typed as it reads them.
 #[derive(Deserialize, Default)]
 #[serde(default, rename_all = "camelCase")]
 struct ViewEntityInput {
-    entities: Value,
+    #[serde(deserialize_with = "veyndo_core::document::lenient_list")]
+    entities: Vec<crate::domain::draft_document::Named>,
+}
+
+/// The `filter` input an action declares, as a JSON Schema object node.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct FilterSchema {
+    #[serde(rename = "type")]
+    kind: Value,
+    additional_properties: Value,
 }
 
 fn view_entity<'a>(m: &'a Manifest, s: &Surface, view: &Value) -> Option<&'a Entity> {
@@ -148,18 +168,24 @@ fn view_entity<'a>(m: &'a Manifest, s: &Surface, view: &Value) -> Option<&'a Ent
         .find(|e| Some(&e.name) == action.entity.as_ref())?;
     input
         .entities
-        .as_array()?
         .iter()
-        .any(|e| e["name"] == entity.name)
+        .any(|e| e.name == entity.name)
         .then_some(entity)
 }
 
 fn choice_filter(m: &Manifest, s: &Surface, view: &Value) -> Option<Value> {
     let action = m.actions.iter().find(|a| a.name == s.actions[0])?;
-    let schema = &action.input_schema["properties"]["filter"];
-    if schema["type"] != "object" {
+    let declared = InputProperties::of(&action.input_schema);
+    let filter = declared
+        .properties
+        .get("filter")
+        .cloned()
+        .unwrap_or_default();
+    let schema: FilterSchema = veyndo_core::document::view(&filter);
+    if schema.kind != "object" {
         return None;
     }
+    let filters = InputProperties::of(&filter);
     let entity = view_entity(m, s, view)?;
     let field = entity.fields.iter().find(|f| {
         f.indexed
@@ -168,8 +194,7 @@ fn choice_filter(m: &Manifest, s: &Surface, view: &Value) -> Option<Value> {
             && !f.choices.is_empty()
             && f.references.is_none()
             && f.core_reference.is_none()
-            && (schema["additionalProperties"] != false
-                || schema["properties"][&f.name]["type"] == "string")
+            && (schema.additional_properties != false || filters.kind(&f.name) == "string")
     })?;
     Some(json!({"name":field.name,"label":field.label,"choices":field.choices}))
 }

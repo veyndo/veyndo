@@ -1,185 +1,553 @@
 //! Generated revisions preserve existing storage and access boundaries; destructive changes require manual schema review.
-//! Manifest drafts stay open JSON here: the revision is compared and patched key by key so unknown model output survives until native `Manifest` validation.
+//! The accepted manifest is read through typed views; the generated draft stays open JSON and is patched member by
+//! member, so unknown model output survives until native `Manifest` validation.
+use crate::domain::draft_document::{Identified, Named, copy, elements, member, present, write};
+use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
+use veyndo_core::document::{Raw, lenient_list, view};
 use veyndo_core::{Result, bad};
+
+/// The accepted manifest members a regeneration keeps, typed as `retain` reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct Prior {
+    id: Value,
+    #[serde(deserialize_with = "lenient_list")]
+    entities: Vec<PriorEntity>,
+    #[serde(deserialize_with = "present")]
+    lifecycles: Option<Value>,
+    #[serde(deserialize_with = "present")]
+    settings: Option<Value>,
+    #[serde(deserialize_with = "present")]
+    runtime: Option<Value>,
+    #[serde(deserialize_with = "present")]
+    category: Option<Value>,
+    #[serde(deserialize_with = "present")]
+    payment_provider: Option<Value>,
+    #[serde(deserialize_with = "lenient_list")]
+    actions: Vec<Raw<Named>>,
+    #[serde(deserialize_with = "lenient_list")]
+    surfaces: Vec<PriorSurface>,
+    #[serde(deserialize_with = "lenient_list")]
+    views: Vec<PriorView>,
+    #[serde(deserialize_with = "present")]
+    commerce_hooks: Option<Value>,
+    #[serde(deserialize_with = "present")]
+    capability: Option<Value>,
+    #[serde(deserialize_with = "present")]
+    distribution: Option<Value>,
+    #[serde(deserialize_with = "present")]
+    configuration: Option<Value>,
+    #[serde(deserialize_with = "present")]
+    events: Option<Value>,
+    #[serde(deserialize_with = "present")]
+    event_filters: Option<Value>,
+    #[serde(deserialize_with = "present")]
+    event_delivery: Option<Value>,
+    #[serde(deserialize_with = "present")]
+    schedules: Option<Value>,
+    #[serde(deserialize_with = "present")]
+    webhooks: Option<Value>,
+}
+
+impl Prior {
+    /// Advanced/manual integrations the generation schema intentionally does not own.
+    fn manual(&self) -> [(&'static str, Option<&Value>); 9] {
+        [
+            ("commerceHooks", self.commerce_hooks.as_ref()),
+            ("capability", self.capability.as_ref()),
+            ("distribution", self.distribution.as_ref()),
+            ("configuration", self.configuration.as_ref()),
+            ("events", self.events.as_ref()),
+            ("eventFilters", self.event_filters.as_ref()),
+            ("eventDelivery", self.event_delivery.as_ref()),
+            ("schedules", self.schedules.as_ref()),
+            ("webhooks", self.webhooks.as_ref()),
+        ]
+    }
+}
+
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct PriorEntity {
+    name: Value,
+    #[serde(deserialize_with = "present")]
+    public_read: Option<Value>,
+    #[serde(deserialize_with = "present")]
+    extends: Option<Value>,
+    #[serde(deserialize_with = "present")]
+    workflow: Option<Value>,
+    #[serde(deserialize_with = "lenient_list")]
+    fields: Vec<PriorField>,
+}
+
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct PriorField {
+    name: Value,
+    kind: Value,
+    #[serde(deserialize_with = "present")]
+    core_reference: Option<Value>,
+    #[serde(deserialize_with = "present")]
+    references: Option<Value>,
+    #[serde(deserialize_with = "present")]
+    indexed: Option<Value>,
+    #[serde(deserialize_with = "present")]
+    unique: Option<Value>,
+    #[serde(deserialize_with = "present")]
+    required: Option<Value>,
+    #[serde(deserialize_with = "present")]
+    translatable: Option<Value>,
+    #[serde(deserialize_with = "present")]
+    validation: Option<Value>,
+}
+
+impl PriorField {
+    /// Storage and access attributes a model cannot change on an existing field.
+    fn storage(&self) -> [(&'static str, Option<&Value>); 7] {
+        [
+            ("coreReference", self.core_reference.as_ref()),
+            ("references", self.references.as_ref()),
+            ("indexed", self.indexed.as_ref()),
+            ("unique", self.unique.as_ref()),
+            ("required", self.required.as_ref()),
+            ("translatable", self.translatable.as_ref()),
+            ("validation", self.validation.as_ref()),
+        ]
+    }
+}
+
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct PriorSurface {
+    id: Value,
+    #[serde(deserialize_with = "present")]
+    permission: Option<Value>,
+    #[serde(deserialize_with = "present")]
+    location: Option<Value>,
+}
+
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct PriorView {
+    id: Value,
+    blocks: Value,
+}
+
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct PriorBlock {
+    id: Value,
+    #[serde(deserialize_with = "present")]
+    handlers: Option<Value>,
+    child_blocks: Value,
+}
+
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct Keyed {
+    key: Value,
+}
+
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct Kind {
+    kind: Value,
+}
+
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct Lifecycle {
+    object: Value,
+}
+
+/// The generated draft members `retain` reads before patching them.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct Generated {
+    #[serde(deserialize_with = "present")]
+    settings: Option<Value>,
+    #[serde(deserialize_with = "present")]
+    lifecycles: Option<Value>,
+}
+
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct PublicRead {
+    public_read: Value,
+}
+
+#[derive(Serialize)]
+struct Settings {
+    settings: Value,
+}
+
+#[derive(Serialize)]
+struct Lifecycles {
+    lifecycles: Value,
+}
+
 /// Models may add fields and change presentation but never drop persisted schemas or broaden old exposure.
 pub fn retain(old: &Value, next: &mut Value) -> Result<()> {
     if old.is_null() {
         return Ok(());
     }
-    if old["id"] != next["id"] {
+    let prior: Prior = view(old);
+    if prior.id != view::<Identified>(next).id {
         return Err(bad("AI must preserve the current app ID"));
     }
-    retain_lifecycles(old, next)?;
-    for entity in old["entities"].as_array().into_iter().flatten() {
-        let candidate = next["entities"]
+    retain_lifecycles(&prior, next)?;
+    for entity in &prior.entities {
+        let candidate = member(next, "entities")?
             .as_array_mut()
-            .and_then(|es| es.iter_mut().find(|e| e["name"] == entity["name"]))
+            .and_then(|es| es.iter_mut().find(|e| view::<Named>(e).name == entity.name))
             .ok_or(bad(
                 "AI cannot remove existing data models; use explicit schema migration",
             ))?;
-        candidate["publicRead"] = entity.get("publicRead").cloned().unwrap_or(json!(false));
-        if let Some(binding) = entity.get("extends") {
-            candidate["extends"] = binding.clone();
-        } else if let Some(object) = candidate.as_object_mut() {
-            object.remove("extends");
-        }
+        write(
+            candidate,
+            PublicRead {
+                public_read: entity.public_read.clone().unwrap_or(json!(false)),
+            },
+        )?;
+        copy(candidate, "extends", entity.extends.as_ref())?;
         // Generated presentation edits must not silently remove an existing business lifecycle.
-        if let Some(workflow) = entity.get("workflow") {
-            candidate["workflow"] = workflow.clone();
+        if let Some(workflow) = &entity.workflow {
+            copy(candidate, "workflow", Some(workflow))?;
         }
-        for field in entity["fields"].as_array().into_iter().flatten() {
-            let target = candidate["fields"]
+        for field in &entity.fields {
+            let target = member(candidate, "fields")?
                 .as_array_mut()
-                .and_then(|fs| fs.iter_mut().find(|f| f["name"] == field["name"]))
+                .and_then(|fs| fs.iter_mut().find(|f| view::<Named>(f).name == field.name))
                 .ok_or(bad(
                     "AI cannot remove existing fields; use explicit schema migration",
                 ))?;
-            if target["kind"] != field["kind"] {
+            if view::<Kind>(target).kind != field.kind {
                 return Err(bad(
                     "AI cannot change existing field types; use explicit schema migration",
                 ));
             }
-            for key in [
-                "coreReference",
-                "references",
-                "indexed",
-                "unique",
-                "required",
-                "translatable",
-                "validation",
-            ] {
-                if let Some(value) = field.get(key) {
-                    target[key] = value.clone();
-                } else if let Some(object) = target.as_object_mut() {
-                    object.remove(key);
-                }
+            for (key, value) in field.storage() {
+                copy(target, key, value)?;
             }
         }
     }
-    if let Some(settings) = old.get("settings") {
-        let mut combined = next.get("settings").cloned().unwrap_or(json!([]));
+    if let Some(settings) = &prior.settings {
+        let mut combined = view::<Generated>(next).settings.unwrap_or(json!([]));
         let rows = combined
             .as_array_mut()
             .ok_or(bad("App settings must be an array"))?;
-        for prior in settings.as_array().into_iter().flatten() {
-            if let Some(row) = rows.iter_mut().find(|row| row["key"] == prior["key"]) {
-                *row = prior.clone();
+        for prior in elements::<Raw<Keyed>>(settings) {
+            if let Some(row) = rows
+                .iter_mut()
+                .find(|row| view::<Keyed>(row).key == prior.key)
+            {
+                *row = prior.raw;
             } else {
-                rows.push(prior.clone());
+                rows.push(prior.raw);
             }
         }
-        next["settings"] = combined;
+        write(next, Settings { settings: combined })?;
     }
-    if old["runtime"] == "service" {
-        for key in ["runtime", "category", "paymentProvider"] {
-            if let Some(value) = old.get(key) {
-                next[key] = value.clone();
+    if prior
+        .runtime
+        .as_ref()
+        .is_some_and(|runtime| runtime == "service")
+    {
+        for (key, value) in [
+            ("runtime", &prior.runtime),
+            ("category", &prior.category),
+            ("paymentProvider", &prior.payment_provider),
+        ] {
+            if value.is_some() {
+                copy(next, key, value.as_ref())?;
             }
         }
     }
     // Manual service and event actions are outside the generation schema; retaining them prevents broken integrations.
     if let Some(actions) = next.get_mut("actions").and_then(Value::as_array_mut) {
-        for prior in old["actions"].as_array().into_iter().flatten() {
+        for prior in &prior.actions {
             if let Some(action) = actions
                 .iter_mut()
-                .find(|action| action["name"] == prior["name"])
+                .find(|action| view::<Named>(action).name == prior.name)
             {
-                *action = prior.clone();
+                *action = prior.raw.clone();
             } else {
-                actions.push(prior.clone());
+                actions.push(prior.raw.clone());
             }
         }
     }
-    for surface in next["surfaces"].as_array_mut().into_iter().flatten() {
-        if let Some(prior) = old["surfaces"]
-            .as_array()
-            .and_then(|ss| ss.iter().find(|s| s["id"] == surface["id"]))
-        {
-            for key in ["permission", "location"] {
-                if let Some(value) = prior.get(key) {
-                    surface[key] = value.clone();
-                } else if let Some(object) = surface.as_object_mut() {
-                    object.remove(key);
-                }
-            }
+    for surface in member(next, "surfaces")?
+        .as_array_mut()
+        .into_iter()
+        .flatten()
+    {
+        let id = view::<Identified>(surface).id;
+        if let Some(before) = prior.surfaces.iter().find(|s| s.id == id) {
+            copy(surface, "permission", before.permission.as_ref())?;
+            copy(surface, "location", before.location.as_ref())?;
         }
     }
     // The generation schema intentionally does not own these advanced/manual integrations.
-    for key in [
-        "commerceHooks",
-        "capability",
-        "distribution",
-        "configuration",
-        "events",
-        "eventFilters",
-        "eventDelivery",
-        "schedules",
-        "webhooks",
-    ] {
-        if let Some(value) = old.get(key) {
-            next[key] = value.clone();
+    for (key, value) in prior.manual() {
+        if value.is_some() {
+            copy(next, key, value)?;
         }
     }
-    for view in next["views"].as_array_mut().into_iter().flatten() {
-        if let Some(prior) = old["views"]
-            .as_array()
-            .and_then(|vs| vs.iter().find(|v| v["id"] == view["id"]))
-        {
-            retain_handlers(&prior["blocks"], &mut view["blocks"]);
+    for draft in member(next, "views")?.as_array_mut().into_iter().flatten() {
+        let id = view::<Identified>(draft).id;
+        if let Some(before) = prior.views.iter().find(|v| v.id == id) {
+            retain_handlers(&before.blocks, member(draft, "blocks")?)?;
         }
     }
     Ok(())
 }
 /// A normal AI edit may add a missing native domain, but cannot rewrite an accepted contract.
-fn retain_lifecycles(old: &Value, next: &mut Value) -> Result<()> {
-    if old.get("lifecycles").is_none() && next.get("lifecycles").is_none() {
+fn retain_lifecycles(prior: &Prior, next: &mut Value) -> Result<()> {
+    let generated = view::<Generated>(next).lifecycles;
+    if prior.lifecycles.is_none() && generated.is_none() {
         return Ok(());
     }
-    let mut contracts = next.get("lifecycles").cloned().unwrap_or(json!([]));
+    let mut contracts = generated.unwrap_or(json!([]));
     let candidates = contracts
         .as_array_mut()
         .ok_or(bad("AI native workflows must be an array"))?;
-    for prior in old["lifecycles"].as_array().into_iter().flatten() {
-        if let Some(candidate) = candidates.iter().find(|c| c["object"] == prior["object"]) {
-            if candidate != prior {
+    for before in elements::<Raw<Lifecycle>>(prior.lifecycles.as_ref().unwrap_or(&Value::Null)) {
+        if let Some(candidate) = candidates
+            .iter()
+            .find(|c| view::<Lifecycle>(c).object == before.object)
+        {
+            if *candidate != before.raw {
                 return Err(bad(
                     "AI cannot change an existing native workflow; use its versioned workflow editor",
                 ));
             }
         } else {
-            candidates.push(prior.clone());
+            candidates.push(before.raw);
         }
     }
-    if candidates.is_empty() && old.get("lifecycles").is_none() {
+    if candidates.is_empty() && prior.lifecycles.is_none() {
         next.as_object_mut()
             .ok_or(bad("AI requires an app object"))?
             .remove("lifecycles");
     } else {
         if !candidates.is_empty() {
-            let permissions = next["permissions"]
+            let permissions = member(next, "permissions")?
                 .as_array_mut()
                 .ok_or(bad("AI native workflow requires an app permission list"))?;
             if !permissions.iter().any(|p| p == "commerce.lifecycle") {
                 permissions.push(json!("commerce.lifecycle"));
             }
         }
-        next["lifecycles"] = contracts;
+        write(
+            next,
+            Lifecycles {
+                lifecycles: contracts,
+            },
+        )?;
     }
     Ok(())
 }
 /// Nested frames and tabs use the same handler contract as top-level controls.
-fn retain_handlers(old: &Value, next: &mut Value) {
+fn retain_handlers(old: &Value, next: &mut Value) -> Result<()> {
+    let before = elements::<PriorBlock>(old);
     for block in next.as_array_mut().into_iter().flatten() {
-        if let Some(before) = old
-            .as_array()
-            .and_then(|blocks| blocks.iter().find(|b| b["id"] == block["id"]))
-        {
-            if let Some(handlers) = before.get("handlers") {
-                block["handlers"] = handlers.clone();
+        let id = view::<Identified>(block).id;
+        if let Some(prior) = before.iter().find(|b| b.id == id) {
+            if let Some(handlers) = &prior.handlers {
+                copy(block, "handlers", Some(handlers))?;
             }
             if let Some(children) = block.get_mut("childBlocks") {
-                retain_handlers(&before["childBlocks"], children);
+                retain_handlers(&prior.child_blocks, children)?;
+            }
+        }
+    }
+    Ok(())
+}
+#[cfg(test)]
+/// The untyped implementation this module replaced, kept as the oracle for the JSON equivalence test.
+mod legacy {
+    use serde_json::{Value, json};
+    use veyndo_core::{Result, bad};
+    /// Models may add fields and change presentation but never drop persisted schemas or broaden old exposure.
+    pub fn retain(old: &Value, next: &mut Value) -> Result<()> {
+        if old.is_null() {
+            return Ok(());
+        }
+        if old["id"] != next["id"] {
+            return Err(bad("AI must preserve the current app ID"));
+        }
+        retain_lifecycles(old, next)?;
+        for entity in old["entities"].as_array().into_iter().flatten() {
+            let candidate = next["entities"]
+                .as_array_mut()
+                .and_then(|es| es.iter_mut().find(|e| e["name"] == entity["name"]))
+                .ok_or(bad(
+                    "AI cannot remove existing data models; use explicit schema migration",
+                ))?;
+            candidate["publicRead"] = entity.get("publicRead").cloned().unwrap_or(json!(false));
+            if let Some(binding) = entity.get("extends") {
+                candidate["extends"] = binding.clone();
+            } else if let Some(object) = candidate.as_object_mut() {
+                object.remove("extends");
+            }
+            // Generated presentation edits must not silently remove an existing business lifecycle.
+            if let Some(workflow) = entity.get("workflow") {
+                candidate["workflow"] = workflow.clone();
+            }
+            for field in entity["fields"].as_array().into_iter().flatten() {
+                let target = candidate["fields"]
+                    .as_array_mut()
+                    .and_then(|fs| fs.iter_mut().find(|f| f["name"] == field["name"]))
+                    .ok_or(bad(
+                        "AI cannot remove existing fields; use explicit schema migration",
+                    ))?;
+                if target["kind"] != field["kind"] {
+                    return Err(bad(
+                        "AI cannot change existing field types; use explicit schema migration",
+                    ));
+                }
+                for key in [
+                    "coreReference",
+                    "references",
+                    "indexed",
+                    "unique",
+                    "required",
+                    "translatable",
+                    "validation",
+                ] {
+                    if let Some(value) = field.get(key) {
+                        target[key] = value.clone();
+                    } else if let Some(object) = target.as_object_mut() {
+                        object.remove(key);
+                    }
+                }
+            }
+        }
+        if let Some(settings) = old.get("settings") {
+            let mut combined = next.get("settings").cloned().unwrap_or(json!([]));
+            let rows = combined
+                .as_array_mut()
+                .ok_or(bad("App settings must be an array"))?;
+            for prior in settings.as_array().into_iter().flatten() {
+                if let Some(row) = rows.iter_mut().find(|row| row["key"] == prior["key"]) {
+                    *row = prior.clone();
+                } else {
+                    rows.push(prior.clone());
+                }
+            }
+            next["settings"] = combined;
+        }
+        if old["runtime"] == "service" {
+            for key in ["runtime", "category", "paymentProvider"] {
+                if let Some(value) = old.get(key) {
+                    next[key] = value.clone();
+                }
+            }
+        }
+        // Manual service and event actions are outside the generation schema; retaining them prevents broken integrations.
+        if let Some(actions) = next.get_mut("actions").and_then(Value::as_array_mut) {
+            for prior in old["actions"].as_array().into_iter().flatten() {
+                if let Some(action) = actions
+                    .iter_mut()
+                    .find(|action| action["name"] == prior["name"])
+                {
+                    *action = prior.clone();
+                } else {
+                    actions.push(prior.clone());
+                }
+            }
+        }
+        for surface in next["surfaces"].as_array_mut().into_iter().flatten() {
+            if let Some(prior) = old["surfaces"]
+                .as_array()
+                .and_then(|ss| ss.iter().find(|s| s["id"] == surface["id"]))
+            {
+                for key in ["permission", "location"] {
+                    if let Some(value) = prior.get(key) {
+                        surface[key] = value.clone();
+                    } else if let Some(object) = surface.as_object_mut() {
+                        object.remove(key);
+                    }
+                }
+            }
+        }
+        // The generation schema intentionally does not own these advanced/manual integrations.
+        for key in [
+            "commerceHooks",
+            "capability",
+            "distribution",
+            "configuration",
+            "events",
+            "eventFilters",
+            "eventDelivery",
+            "schedules",
+            "webhooks",
+        ] {
+            if let Some(value) = old.get(key) {
+                next[key] = value.clone();
+            }
+        }
+        for view in next["views"].as_array_mut().into_iter().flatten() {
+            if let Some(prior) = old["views"]
+                .as_array()
+                .and_then(|vs| vs.iter().find(|v| v["id"] == view["id"]))
+            {
+                retain_handlers(&prior["blocks"], &mut view["blocks"]);
+            }
+        }
+        Ok(())
+    }
+    /// A normal AI edit may add a missing native domain, but cannot rewrite an accepted contract.
+    fn retain_lifecycles(old: &Value, next: &mut Value) -> Result<()> {
+        if old.get("lifecycles").is_none() && next.get("lifecycles").is_none() {
+            return Ok(());
+        }
+        let mut contracts = next.get("lifecycles").cloned().unwrap_or(json!([]));
+        let candidates = contracts
+            .as_array_mut()
+            .ok_or(bad("AI native workflows must be an array"))?;
+        for prior in old["lifecycles"].as_array().into_iter().flatten() {
+            if let Some(candidate) = candidates.iter().find(|c| c["object"] == prior["object"]) {
+                if candidate != prior {
+                    return Err(bad(
+                        "AI cannot change an existing native workflow; use its versioned workflow editor",
+                    ));
+                }
+            } else {
+                candidates.push(prior.clone());
+            }
+        }
+        if candidates.is_empty() && old.get("lifecycles").is_none() {
+            next.as_object_mut()
+                .ok_or(bad("AI requires an app object"))?
+                .remove("lifecycles");
+        } else {
+            if !candidates.is_empty() {
+                let permissions = next["permissions"]
+                    .as_array_mut()
+                    .ok_or(bad("AI native workflow requires an app permission list"))?;
+                if !permissions.iter().any(|p| p == "commerce.lifecycle") {
+                    permissions.push(json!("commerce.lifecycle"));
+                }
+            }
+            next["lifecycles"] = contracts;
+        }
+        Ok(())
+    }
+    /// Nested frames and tabs use the same handler contract as top-level controls.
+    fn retain_handlers(old: &Value, next: &mut Value) {
+        for block in next.as_array_mut().into_iter().flatten() {
+            if let Some(before) = old
+                .as_array()
+                .and_then(|blocks| blocks.iter().find(|b| b["id"] == block["id"]))
+            {
+                if let Some(handlers) = before.get("handlers") {
+                    block["handlers"] = handlers.clone();
+                }
+                if let Some(children) = block.get_mut("childBlocks") {
+                    retain_handlers(&before["childBlocks"], children);
+                }
             }
         }
     }
@@ -307,6 +675,119 @@ mod tests {
                 _ => v["entities"][0]["fields"][0]["kind"] = json!("integer"),
             };
             assert!(retain(&old(), &mut v).is_err());
+        }
+    }
+}
+#[cfg(test)]
+mod equivalence {
+    use serde_json::{Value, json};
+    use std::panic::{AssertUnwindSafe, catch_unwind};
+
+    fn prior() -> Value {
+        json!({"id":"app","runtime":"service","category":"integration","paymentProvider":null,
+            "entities":[{"name":"cases","publicRead":null,"extends":{"object":"order"},"workflow":{"field":"status"},
+                "fields":[{"name":"order_id","kind":"string","coreReference":"order","indexed":true,"validation":null},"loose"]},
+                {"name":"notes","fields":[]}],
+            "lifecycles":[{"object":"order","states":[]}],"permissions":[],
+            "settings":[{"key":"token","kind":"secret"},7],
+            "actions":[{"name":"sync","handler":"service"},"bare"],
+            "surfaces":[{"id":"editor","location":"admin.order"},{"id":"nav","permission":null}],
+            "events":["order.placed"],"schedules":null,"webhooks":[{"id":"in","action":"sync"}],
+            "views":[{"id":"main","blocks":[{"id":"save","handlers":{"click":[]},"childBlocks":[{"id":"inner","handlers":null}]},{"id":"plain"}]}]})
+    }
+
+    fn drafts() -> Vec<Value> {
+        let full = prior();
+        let mut variants = vec![
+            full.clone(),
+            json!({"id":"app"}),
+            json!({"id":"other"}),
+            Value::Null,
+            json!([1]),
+        ];
+        for (pointer, value) in [
+            ("/entities/0/publicRead", json!(true)),
+            ("/entities/0/fields/0/kind", json!("integer")),
+            ("/entities/0/fields/0/indexed", json!(false)),
+            (
+                "/entities/1",
+                json!({"name":"notes","fields":[{"name":"new","kind":"string"}]}),
+            ),
+            ("/lifecycles", json!([{"object":"quote"}])),
+            ("/lifecycles", json!("invalid")),
+            ("/lifecycles", json!([{"object":"order","states":[1]}])),
+            (
+                "/settings",
+                json!([{"key":"token","kind":"string"},{"key":"region"}]),
+            ),
+            ("/settings", json!({"not":"a list"})),
+            (
+                "/actions",
+                json!([{"name":"sync","handler":"list"},{"name":"other"}]),
+            ),
+            (
+                "/surfaces",
+                json!([{"id":"editor","location":"storefront.page","permission":"x"},{"id":"nav"}]),
+            ),
+            (
+                "/views",
+                json!([{"id":"main","blocks":[{"id":"save","childBlocks":[{"id":"inner"}]}]},{"id":"main"}]),
+            ),
+            ("/permissions", json!(null)),
+        ] {
+            let mut draft = full.clone();
+            *draft.pointer_mut(pointer).unwrap() = value;
+            variants.push(draft);
+        }
+        for key in [
+            "surfaces",
+            "views",
+            "actions",
+            "settings",
+            "lifecycles",
+            "permissions",
+            "entities",
+        ] {
+            let mut draft = full.clone();
+            draft.as_object_mut().unwrap().remove(key);
+            variants.push(draft);
+        }
+        variants
+    }
+
+    /// The typed implementation returns the same result and leaves the same JSON as the untyped one;
+    /// where the untyped one panicked on a malformed draft, the typed one returns an error.
+    #[test]
+    fn typed_retain_matches_the_untyped_contract() {
+        let mut priors = vec![
+            prior(),
+            Value::Null,
+            json!({"id":"app"}),
+            json!({"id":"app","settings":null,"lifecycles":null}),
+        ];
+        let mut stripped = prior();
+        stripped.as_object_mut().unwrap().remove("lifecycles");
+        priors.push(stripped);
+        for old in &priors {
+            for draft in drafts() {
+                let mut typed = draft.clone();
+                let mut untyped = draft.clone();
+                let outcome = super::retain(old, &mut typed);
+                match catch_unwind(AssertUnwindSafe(|| {
+                    super::legacy::retain(old, &mut untyped)
+                })) {
+                    Ok(expected) => {
+                        assert_eq!(outcome.is_ok(), expected.is_ok(), "{old} {draft}");
+                        if let (Err(a), Err(b)) = (&outcome, &expected) {
+                            assert_eq!(a.1, b.1);
+                        }
+                        if outcome.is_ok() {
+                            assert_eq!(typed, untyped, "{old} {draft}");
+                        }
+                    }
+                    Err(_) => assert!(outcome.is_err(), "{old} {draft}"),
+                }
+            }
         }
     }
 }
