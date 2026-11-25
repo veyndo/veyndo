@@ -2,6 +2,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import ts from "typescript";
+import { tokenDrift } from "./tokens.mjs";
 const root = path.resolve(import.meta.dirname, "..");
 const source = path.resolve(root, process.argv[2] ?? "src");
 const walk = (dir) =>
@@ -23,8 +24,25 @@ const files = [
 const relative = (f) => path.relative(source, f).replaceAll("\\", "/");
 const errors = [];
 const edges = new Map();
-const owners = ["admin", "storefront", "platform", "shared", "application"];
+const owners = [
+  "admin",
+  "storefront",
+  "platform",
+  "shared",
+  "application",
+  "kit",
+];
 const owner = (f) => relative(f).split("/")[0];
+// kit packages: a package imports only the packages listed here; outsiders import only its index.
+const kitLayers = {
+  tokens: [],
+  ui: ["tokens"],
+  api: [],
+  storefront: ["tokens", "ui", "api"],
+};
+const kitPackage = (f) =>
+  owner(f) === "kit" ? relative(f).split("/")[1] : undefined;
+const colourLiteral = /#[0-9a-fA-F]{3,8}\b|\b(?:rgb|rgba|hsl|hsla)\(/;
 const resolve = (from, spec) => {
   const base = path.resolve(path.dirname(from), spec);
   return [
@@ -40,6 +58,15 @@ for (const file of files) {
     errors.push(`${relative(file)} needs a leading responsibility comment`);
   if (path.dirname(file) === source && path.basename(file) !== "main.tsx")
     errors.push(`${relative(file)} belongs in a feature folder`);
+  if (
+    file.endsWith(".css") &&
+    kitPackage(file) &&
+    !file.endsWith("/tokens.css") &&
+    colourLiteral.test(text.replace(/\/\*[\s\S]*?\*\//g, ""))
+  )
+    errors.push(
+      `${relative(file)} uses a colour literal; use var(--vy-color-*)`,
+    );
   if (file.endsWith(".css")) continue;
   const ast = ts.createSourceFile(
     file,
@@ -91,7 +118,21 @@ for (const file of files) {
     }
     const a = owner(file),
       b = owner(target);
-    if (a === "shared" && owners.includes(b) && b !== "shared")
+    if (a === "kit" && b !== "kit" && owners.includes(b))
+      errors.push(
+        `${relative(file)} imports outside kit via ${relative(target)}`,
+      );
+    const from = kitPackage(file),
+      to = kitPackage(target);
+    if (from && to && from !== to && !(kitLayers[from] ?? []).includes(to))
+      errors.push(
+        `${relative(file)} breaks the kit layering (${from} may not import ${to})`,
+      );
+    if (to && from !== to && !/\/kit\/[^/]+\/index\.tsx?$/.test(target))
+      errors.push(
+        `${relative(file)} imports kit/${to} internals; import its index`,
+      );
+    if (a === "shared" && owners.includes(b) && !["shared", "kit"].includes(b))
       errors.push(
         `${relative(file)} violates shared boundary via ${relative(target)}`,
       );
@@ -99,7 +140,8 @@ for (const file of files) {
       ["admin", "storefront", "platform"].includes(a) &&
       owners.includes(b) &&
       a !== b &&
-      b !== "shared"
+      b !== "shared" &&
+      b !== "kit"
     )
       errors.push(
         `${relative(file)} crosses application boundary via ${relative(target)}`,
@@ -167,6 +209,28 @@ function check(file) {
   done.add(file);
 }
 for (const file of edges.keys()) check(file);
+if (!process.argv[2]) {
+  const drift = tokenDrift();
+  if (drift) errors.push(drift);
+  // The handwritten admin stylesheet folder only shrinks; screens move to kit/ui instead.
+  const budgetFile = path.join(root, "scripts/admin-styles-budget.json");
+  const budget = JSON.parse(fs.readFileSync(budgetFile, "utf8"));
+  const sheets = walk(path.join(source, "admin/styles")).filter((f) =>
+    f.endsWith(".css"),
+  );
+  const lines = sheets.reduce(
+    (sum, f) => sum + fs.readFileSync(f, "utf8").split("\n").length - 1,
+    0,
+  );
+  if (sheets.length > budget.files || lines > budget.lines)
+    errors.push(
+      `admin/styles grew to ${sheets.length} files / ${lines} lines (budget ${budget.files} / ${budget.lines}); new screens use kit/ui`,
+    );
+  else if (sheets.length < budget.files || lines < budget.lines)
+    errors.push(
+      `admin/styles shrank to ${sheets.length} files / ${lines} lines; lower scripts/admin-styles-budget.json to match`,
+    );
+}
 if (errors.length) {
   console.error(errors.join("\n"));
   process.exit(1);

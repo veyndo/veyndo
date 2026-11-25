@@ -23,6 +23,21 @@ try{
  file('shared/api/base.ts',`/** Other SDK implementation remains outside the boundary. */\nimport client from ${JSON.stringify(path.relative(path.join(directory,'shared/api'),path.join(sdk,'browser.js')))};\nexport const actions=client;\n`);
  assert.match(check().stderr,/outside the source ownership tree/);
  file('shared/api/base.ts','/** Documented fixture. */\nexport const value=1;\n');
+ file('kit/tokens/index.ts','/** Token fixture. */\nexport const space=4;\n');
+ file('kit/ui/index.ts','/** Kit fixture. */\nimport {space} from "../tokens";\nexport const gap=space;\n');
+ file('kit/ui/ui.css','/* Kit fixture styles. */\n.vy-a { color: var(--vy-color-text); }\n');
+ file('admin/orders/view.ts','/** Consumer fixture. */\nimport {gap} from "../../kit/ui";\nexport const read=()=>gap;\n');
+ assert.equal(check().status,0,check().stderr);
+ file('kit/ui/ui.css','/* Kit fixture styles. */\n.vy-a { color: #fff; }\n');assert.match(check().stderr,/colour literal/);
+ file('kit/ui/ui.css','/* Kit fixture styles. */\n.vy-a { color: rgb(0 0 0); }\n');assert.match(check().stderr,/colour literal/);
+ file('kit/ui/ui.css','/* Kit fixture styles. */\n.vy-a { color: var(--vy-color-text); }\n');
+ file('kit/ui/Button.ts','/** Kit internal. */\nexport const b=1;\n');
+ file('admin/orders/view.ts','/** Consumer fixture. */\nimport {b} from "../../kit/ui/Button";\nexport const read=()=>b;\n');assert.match(check().stderr,/internals; import its index/);
+ file('admin/orders/view.ts','/** Consumer fixture. */\nexport const read=()=>1;\n');
+ file('kit/tokens/index.ts','/** Token fixture importing upward. */\nimport {gap} from "../ui";\nexport const space=gap;\n');assert.match(check().stderr,/kit layering/);
+ file('kit/tokens/index.ts','/** Token fixture importing the app. */\nimport {value} from "../../shared/api/base";\nexport const space=value;\n');assert.match(check().stderr,/imports outside kit/);
+ file('kit/tokens/index.ts','/** Token fixture. */\nexport const space=4;\n');
+ assert.equal(check().status,0,check().stderr);
  fs.unlinkSync(path.join(directory,'shared/api/README.md'));assert.match(check().stderr,/folder contract/);
- console.log('PASS source ownership, runtime-cycle, missing-import, comment and documentation negative controls');
+ console.log('PASS source ownership, runtime-cycle, missing-import, comment, documentation and kit layering/token negative controls');
 }finally{fs.rmSync(directory,{recursive:true,force:true});}

@@ -4,18 +4,7 @@ body:has(.studio) {
   overflow: hidden;
 }
 .studio {
-  --danger: #b32942;
-  font-family:
-    Inter,
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    sans-serif;
   grid-template-columns: 228px minmax(0, 1fr);
-}
-.studio[data-theme="dark"] {
-  --danger: #ffa0ae;
 }
 .studio .studio-sidebar {
   padding: 22px 14px 14px;

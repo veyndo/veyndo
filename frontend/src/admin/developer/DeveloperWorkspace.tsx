@@ -1,17 +1,20 @@
 /** Dedicated app and API workspaces retain App Studio state while switching the developer console. */
-import { useState } from "react";
+import { lazy, Suspense, useState } from "react";
 import type { ComponentProps } from "react";
 import DeveloperView from "./DeveloperView";
 import IntegrationKeys from "./api/IntegrationKeys";
 import AgentControls from "./api/AgentControls";
 import ApiExplorer from "./api/ApiExplorer";
 import { useApiText } from "./api/api-i18n";
+import { useCatalogueText } from "./catalogue/catalogue-i18n";
+const UICatalogue = lazy(() => import("./catalogue/UICatalogue"));
 import "../styles/api-console.css";
 export default function DeveloperWorkspace(
   props: ComponentProps<typeof DeveloperView> & { workspace: string },
 ) {
   const t = useApiText(),
-    [tab, setTab] = useState<"studio" | "console">(
+    c = useCatalogueText(),
+    [tab, setTab] = useState<"studio" | "console" | "components">(
       props.rights && !props.rights.includes("developer.read")
         ? "console"
         : "studio",
@@ -20,8 +23,8 @@ export default function DeveloperWorkspace(
   const tabs = (
     props.rights && !props.rights.includes("developer.read")
       ? ["console"]
-      : ["studio", "console"]
-  ) as ("studio" | "console")[];
+      : ["studio", "console", "components"]
+  ) as ("studio" | "console" | "components")[];
   return (
     <>
       <nav className="developer-workspace-tabs workbench-row">
@@ -35,7 +38,7 @@ export default function DeveloperWorkspace(
               if (k === "studio") setHomeRevision((v) => v + 1);
             }}
           >
-            {t(k)}
+            {k === "components" ? c("tab") : t(k)}
           </button>
         ))}
       </nav>
@@ -54,6 +57,11 @@ export default function DeveloperWorkspace(
           <AgentControls request={props.request} />
           <ApiExplorer request={props.request} workspace={props.workspace} />
         </div>
+      )}
+      {tab === "components" && (
+        <Suspense fallback={<div role="status">…</div>}>
+          <UICatalogue />
+        </Suspense>
       )}
     </>
   );

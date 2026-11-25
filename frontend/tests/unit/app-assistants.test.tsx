@@ -292,7 +292,10 @@ it("renders localized choice labels in public product cards without exposing the
 });
 
 it("keeps app action and editor rights aligned with the native registry including B2B and POS", async () => {
-  const native = readFileSync("../src/auth/permissions.rs", "utf8");
+  const native = readFileSync(
+    "../components/identity/src/domain/permissions.rs",
+    "utf8",
+  );
   const registry = native.match(/const SCOPES:[\s\S]*?= &\[([\s\S]*?)\];/)![1];
   const scopes = [...registry.matchAll(/"([a-z0-9.]+)"/g)].map((x) => x[1]);
   expect([...appScopes].sort()).toEqual(scopes.sort());

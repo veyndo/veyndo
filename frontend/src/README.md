@@ -1,6 +1,6 @@
 # Frontend application entry
 
-Only the application entry lives here; merchant, store and operator roots load independently.
+Only the application entry lives here; merchant, store and operator roots load independently. Shared design packages (tokens, UI components) live in [`kit/`](kit/README.md).
 
 Files and their individual responsibilities are listed in [the generated source inventory](../../docs/module-inventory.md). Each file starts with its contract summary.
 

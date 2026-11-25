@@ -2,6 +2,7 @@
 import { lazy, Suspense, useEffect, useState } from "react";
 import { useLocale } from "../shared/i18n/i18n";
 import WorkspaceBoundary from "../shared/ui/WorkspaceBoundary";
+import "../kit/tokens";
 import {
   shopScope,
   storefrontURL,

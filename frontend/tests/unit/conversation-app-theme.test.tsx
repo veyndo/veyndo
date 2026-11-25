@@ -101,7 +101,7 @@ it("advertises the actual host theme and forwards changes without another tool c
 
 it("pairs foreground and background and accepts theme updates only from its initialized parent", () => {
   const document = readFileSync(
-    resolve(process.cwd(), "../src/apps/mcp_view.html"),
+    resolve(process.cwd(), "../components/apps/src/domain/mcp_view.html"),
     "utf8",
   );
   expect(document).toContain("color:CanvasText;background:Canvas");
