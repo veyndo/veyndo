@@ -1831,7 +1831,7 @@ This lists every checked-in source module in these roots, including files with n
 | [frontend/src/kit/query/cache.ts](../frontend/src/kit/query/cache.ts) | In-memory query cache: one entry per key, shared in-flight loads, prefix invalidation and subscribers; nothing is persisted. |
 | [frontend/src/kit/query/hooks.tsx](../frontend/src/kit/query/hooks.tsx) | React bindings of the query cache: a provider per scope, useQuery for reads and useMutation for writes that invalidate. |
 | [frontend/src/kit/query/index.ts](../frontend/src/kit/query/index.ts) | Public interface of kit/query: the scoped in-memory query cache and its React hooks. |
-| [frontend/src/kit/storefront/AccountOverview.tsx](../frontend/src/kit/storefront/AccountOverview.tsx) | Account overview part: the signed-in buyer's name and recent orders, linking to their details. |
+| [frontend/src/kit/storefront/AccountOverview.tsx](../frontend/src/kit/storefront/AccountOverview.tsx) | Account parts: the account home (greeting, counts, recent orders) and the order list with live server states. |
 | [frontend/src/kit/storefront/CartSummary.tsx](../frontend/src/kit/storefront/CartSummary.tsx) | Cart summary part: priced lines with quantity controls, discounts, taxes and totals from the server cart. |
 | [frontend/src/kit/storefront/CheckoutSteps.tsx](../frontend/src/kit/storefront/CheckoutSteps.tsx) | Checkout steps part: where the buyer is; it never implies that a payment is confirmed. |
 | [frontend/src/kit/storefront/PartForm.tsx](../frontend/src/kit/storefront/PartForm.tsx) | Builder form of a part's configuration, generated from its JSON Schema; hosts supply labels and special pickers. |
@@ -2095,8 +2095,8 @@ This lists every checked-in source module in these roots, including files with n
 | [frontend/src/shared/ui/useUnsavedWorkspace.ts](../frontend/src/shared/ui/useUnsavedWorkspace.ts) | Native dirty state protects reloads and informs an optional embedded host without owning editor data. |
 | [frontend/src/storefront/account/AccountDownloads.tsx](../frontend/src/storefront/account/AccountDownloads.tsx) | Paid download entitlements are fetched by the server and retrieved with customer headers, never URL tokens. |
 | [frontend/src/storefront/account/AccountOrderDetail.tsx](../frontend/src/storefront/account/AccountOrderDetail.tsx) | Purchase detail uses immutable addresses, current fulfillment, issued PDFs and paid order entitlements. |
-| [frontend/src/storefront/account/AccountOrderList.tsx](../frontend/src/storefront/account/AccountOrderList.tsx) | Clickable purchase cards show the live server status and lead to a protected order detail. |
-| [frontend/src/storefront/account/AccountOverview.tsx](../frontend/src/storefront/account/AccountOverview.tsx) | Account home connects recent purchases and default addresses to their dedicated management views. |
+| [frontend/src/storefront/account/AccountOrderList.tsx](../frontend/src/storefront/account/AccountOrderList.tsx) | Storefront adapter of the kit order-list part: live server states lead to a protected order detail. |
+| [frontend/src/storefront/account/AccountOverview.tsx](../frontend/src/storefront/account/AccountOverview.tsx) | Account home (kit account-overview part) connects recent purchases and default addresses to their management views. |
 | [frontend/src/storefront/account/AccountProfile.tsx](../frontend/src/storefront/account/AccountProfile.tsx) | Focused profile and password forms report persistence and keep account identity outside editable contact data. |
 | [frontend/src/storefront/account/CompanyLists.tsx](../frontend/src/storefront/account/CompanyLists.tsx) | Owned/shared order lists use one content-language editor, native cart CAS and shared deletion confirmation. |
 | [frontend/src/storefront/account/CompanyOrders.tsx](../frontend/src/storefront/account/CompanyOrders.tsx) | Explicit unit-history permission shares the existing customer order detail component. |

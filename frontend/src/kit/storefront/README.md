@@ -16,10 +16,10 @@ locale and data, and receive buyer intents as callbacks (`onAddToCart`,
 - [`storefront-i18n.ts`](storefront-i18n.ts): Part vocabulary in English, German, French and Spanish; money formatting.
 - [`ProductCard.tsx`](ProductCard.tsx): Product card.
 - [`ProductSummary.tsx`](ProductSummary.tsx): Purchase area of a product page.
-- [`CartSummary.tsx`](CartSummary.tsx): Cart lines and totals from the priced server cart.
+- [`CartSummary.tsx`](CartSummary.tsx): Priced cart lines with quantity controls, discounts, taxes, totals and delivery window from the server cart.
 - [`CheckoutSteps.tsx`](CheckoutSteps.tsx): Checkout progress; never implies a confirmed payment.
-- [`AccountOverview.tsx`](AccountOverview.tsx): Buyer name and recent orders.
-- [`elements.tsx`](elements.tsx): `registerPartElements` defines `<veyndo-<id>>` web elements that validate their `props` attribute, upgrade server-rendered fallback markup (islands) and emit `veyndo:add-to-cart` / `veyndo:checkout` events.
+- [`AccountOverview.tsx`](AccountOverview.tsx): The account home (greeting, counts, recent orders) and the order list part.
+- [`elements.tsx`](elements.tsx): `registerPartElements` defines `<veyndo-<id>>` web elements that validate their `props` attribute, upgrade server-rendered fallback markup (islands) and emit `veyndo:add-to-cart`, `veyndo:checkout`, `veyndo:quantity` and `veyndo:open` events.
 - [`PartForm.tsx`](PartForm.tsx): The Visual Builder form of a part's configuration, generated from its configuration JSON Schema; hosts supply localized labels and pickers for special formats such as `product-id`.
 - [`embed.ts`](embed.ts): The standalone entry built as `/assets/elements.js`: it injects the token, ui and part styles once and defines every part element.
 - [`storefront.css`](storefront.css): Part styles; the architecture check refuses colour literals here.
@@ -44,8 +44,8 @@ Prices, stock and totals always come from the server; parts only show them.
   `<script type="module" src="https://<shop>/assets/elements.js">` and writes
   `<veyndo-product-card props='{"product":{…}}' locale="de-DE">`. The element
   validates the attribute with the part schema (invalid props keep the fallback
-  and set `data-invalid`) and emits `veyndo:add-to-cart` and `veyndo:checkout`
-  events; the host decides what they do. Cross-origin hosts need the shop to serve
+  and set `data-invalid`) and emits `veyndo:add-to-cart`, `veyndo:checkout`,
+  `veyndo:quantity` and `veyndo:open` events; the host decides what they do. Cross-origin hosts need the shop to serve
   the script with CORS.
 
 ## Verification

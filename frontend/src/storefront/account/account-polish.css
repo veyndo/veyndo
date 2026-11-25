@@ -152,18 +152,6 @@
     grid-column: 1 / -1;
   }
 }
-@media (max-width: 380px) {
-  .customer-account .account-metrics {
-    grid-template-columns: 1fr;
-  }
-  .customer-account .account-metrics button {
-    grid-template-columns: auto 1fr auto;
-    align-items: center;
-  }
-  .account-metrics strong {
-    grid-column: auto;
-  }
-}
 
 .account-preferences {
   margin-top: 32px;

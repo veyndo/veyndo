@@ -5,7 +5,7 @@ import { productCard } from "./ProductCard";
 import { productSummary } from "./ProductSummary";
 import { cartSummary } from "./CartSummary";
 import { checkoutSteps } from "./CheckoutSteps";
-import { accountOverview } from "./AccountOverview";
+import { accountOverview, orderList } from "./AccountOverview";
 import type { AnyPart } from "./contract";
 export { definePart } from "./contract";
 export type { AnyPart, Part, PartDefinition, PartEvents } from "./contract";
@@ -14,6 +14,8 @@ export {
   registerPartElements,
   addToCartEvent,
   checkoutEvent,
+  quantityEvent,
+  openEvent,
 } from "./elements";
 export { PartForm } from "./PartForm";
 export type { PartFormProps } from "./PartForm";
@@ -23,6 +25,7 @@ export {
   cartSummary,
   checkoutSteps,
   accountOverview,
+  orderList,
 };
 /** Every storefront part, in builder order. */
 export const parts = [
@@ -31,6 +34,7 @@ export const parts = [
   cartSummary,
   checkoutSteps,
   accountOverview,
+  orderList,
 ] as const;
 export type PartId = (typeof parts)[number]["id"];
 /** The part with `id`, if it exists. */

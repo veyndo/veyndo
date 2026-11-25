@@ -12,7 +12,7 @@ export type PartEvents = {
    * coupon forms). Web elements and MCP hosts leave them out.
    */
   renderLineDetail?: (lineId: string) => ReactNode;
-  slot?: (name: "beforeTotals" | "afterTotals") => ReactNode;
+  slot?: (name: "beforeTotals" | "afterTotals" | "end") => ReactNode;
   /** A buyer asked to add a product; hosts decide how (cart API, chat, app). */
   onAddToCart?: (detail: { productId: string; quantity: number }) => void;
   /** A buyer asked to continue to checkout. */

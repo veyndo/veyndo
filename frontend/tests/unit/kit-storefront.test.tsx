@@ -1,4 +1,5 @@
 /** kit/storefront contracts: one schema per part validates props, yields JSON Schemas, web elements and builder forms. */
+import { readFileSync, readdirSync } from "node:fs";
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import {
@@ -8,6 +9,7 @@ import {
   cartSummary,
   checkoutEvent,
   checkoutSteps,
+  orderList,
   partById,
   parts,
   productCard,
@@ -60,7 +62,7 @@ describe("part contracts", () => {
       config: { productId: "p-1", priceKind: "gross" },
     });
     expect(productCard.parseConfig({}).ok).toBe(false);
-    expect(accountOverview.parseConfig({ orders: 99 }).ok).toBe(false);
+    expect(accountOverview.parseConfig({ recent: 99 }).ok).toBe(false);
     expect(checkoutSteps.parseConfig({})).toEqual({
       ok: true,
       config: { current: "details" },
@@ -203,25 +205,80 @@ describe("part components", () => {
     expect(current).toHaveLength(1);
   });
 
-  it("lists account orders", () => {
+  it("shows the account home and opens orders and pages", () => {
     const P = accountOverview.Component;
+    const parsed = accountOverview.parse({
+      locale: "de-DE",
+      name: "Ada",
+      counts: { orders: 3, addresses: 1, downloads: 0 },
+      orders: [
+        {
+          id: "o1",
+          number: "10001",
+          date: "2026-11-01",
+          state: "Bezahlt",
+          total: 20,
+          currency: "EUR",
+          items: [{ label: "Mantel", quantity: 1 }],
+        },
+        {
+          id: "o2",
+          number: "10002",
+          state: "Offen",
+          total: 5,
+          currency: "EUR",
+        },
+        {
+          id: "o3",
+          number: "10003",
+          state: "Offen",
+          total: 5,
+          currency: "EUR",
+        },
+      ],
+    });
+    if (!parsed.ok) throw Error(parsed.issues.join());
+    const onOpen = vi.fn();
     render(
-      <P
-        locale="en-GB"
-        name="Ada"
-        orders={[
-          {
-            id: "o1",
-            number: "10001",
-            date: "2026-11-01",
-            state: "paid",
-            total: 20,
-            currency: "EUR",
-          },
-        ]}
-      />,
+      <P {...parsed.props} onOpen={onOpen} slot={(name) => <p>{name}</p>} />,
     );
-    expect(screen.getByText(/10001/)).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Ada" })).toBeInTheDocument();
+    expect(screen.getByText("1. November 2026")).toBeInTheDocument();
+    expect(screen.queryByText("10003")).toBeNull(); // two recent orders
+    fireEvent.click(
+      screen.getByRole("button", { name: "Bestellung ansehen 10001" }),
+    );
+    expect(onOpen).toHaveBeenLastCalledWith({ kind: "order", id: "o1" });
+    fireEvent.click(screen.getByRole("button", { name: /Adressen/ }));
+    expect(onOpen).toHaveBeenLastCalledWith({ kind: "page", id: "addresses" });
+    expect(screen.getByText("end")).toBeInTheDocument();
+  });
+
+  it("invites a first purchase when there are no orders", () => {
+    const P = orderList.Component;
+    const onOpen = vi.fn();
+    render(<P locale="en-GB" orders={[]} onOpen={onOpen} />);
+    fireEvent.click(screen.getByRole("button", { name: "Continue shopping" }));
+    expect(onOpen).toHaveBeenCalledWith({ kind: "page", id: "shop" });
+  });
+
+  it("styles every kit class its components use", () => {
+    const css = readFileSync("src/kit/storefront/storefront.css", "utf8");
+    const used = new Set<string>();
+    for (const file of readdirSync("src/kit/storefront").filter((f) =>
+      f.endsWith(".tsx"),
+    ))
+      for (const match of readFileSync(
+        `src/kit/storefront/${file}`,
+        "utf8",
+      ).matchAll(/className="([^"]+)"/g))
+        match[1]
+          .split(/\s+/)
+          .filter((c) => c.startsWith("vy-sf-"))
+          .forEach((c) => used.add(c));
+    expect(used.size).toBeGreaterThan(20);
+    for (const name of used)
+      expect(css, name).toMatch(new RegExp(`\\.${name}(?![\\w-])`));
   });
 });
 
@@ -264,7 +321,11 @@ describe("web elements", () => {
       }),
     );
     await act(async () => host.append(cart));
-    fireEvent.click(cart.querySelector("button")!);
+    fireEvent.click(
+      [...cart.querySelectorAll("button")].find(
+        (b) => b.textContent === "Go to checkout",
+      )!,
+    );
     expect(checkout).toHaveBeenCalledOnce();
     await act(async () => host.remove());
   });
@@ -322,9 +383,9 @@ describe("builder form", () => {
         label={(field) => field}
       />,
     );
-    fireEvent.change(screen.getByRole("spinbutton", { name: /orders/ }), {
+    fireEvent.change(screen.getByRole("spinbutton", { name: /recent/ }), {
       target: { value: "7" },
     });
-    expect(onChange).toHaveBeenLastCalledWith({ orders: 7 });
+    expect(onChange).toHaveBeenLastCalledWith({ recent: 7 });
   });
 });

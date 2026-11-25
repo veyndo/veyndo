@@ -1,9 +1,34 @@
-/** Clickable purchase cards show the live server status and lead to a protected order detail. */
+/** Storefront adapter of the kit order-list part: live server states lead to a protected order detail. */
 import { mediaImage } from "../../shared/media/product-media";
 import { contentText } from "../../shared/i18n/content-language";
 import { useAccountText } from "../../shared/i18n/account-i18n";
 import { useOperationsText } from "../../shared/i18n/operations-i18n";
+import { orderList } from "../../kit/storefront";
 import type { CustomerOrder } from "./account-types";
+const List = orderList.Component;
+/** A customer order as kit order data, with its state label in the buyer's language. */
+export function usePartOrders(orders: CustomerOrder[]) {
+  const { locale } = useAccountText(),
+    { o } = useOperationsText();
+  return orders.map((order) => ({
+    id: order.id,
+    number: order.orderNumber,
+    date: order.createdAt,
+    state:
+      contentText(
+        order.stateLabels?.[order.state] ?? {},
+        locale,
+        order.stateMainLocale ?? "en-GB",
+      ) || o(order.state),
+    total: order.cart.price.totalPrice,
+    currency: order.cart.price.currency ?? "EUR",
+    items: order.cart.lineItems.slice(0, 3).map((item) => ({
+      label: item.label,
+      quantity: item.quantity,
+      image: mediaImage(item.media) || undefined,
+    })),
+  }));
+}
 export default function AccountOrderList({
   orders,
   onSelect,
@@ -13,73 +38,12 @@ export default function AccountOrderList({
   onSelect: (id: string) => void;
   onShop: () => void;
 }) {
-  const { a, locale } = useAccountText(),
-    { o } = useOperationsText();
-  if (!orders.length)
-    return (
-      <div className="account-empty">
-        <span aria-hidden="true">◇</span>
-        <h3>{a("emptyOrders")}</h3>
-        <p>{a("emptyOrdersHint")}</p>
-        <button className="shop-primary" onClick={onShop}>
-          {a("continueShopping")}
-        </button>
-      </div>
-    );
+  const { locale } = useAccountText();
   return (
-    <div className="account-orders">
-      {orders.map((order) => (
-        <button
-          className="account-order-card"
-          key={order.id}
-          onClick={() => onSelect(order.id)}
-          aria-label={`${a("viewOrder")} ${order.orderNumber}`}
-        >
-          <div className="account-order-heading">
-            <div>
-              <strong>{order.orderNumber}</strong>
-              <small>
-                {order.createdAt &&
-                  new Date(order.createdAt).toLocaleDateString(locale, {
-                    day: "numeric",
-                    month: "long",
-                    year: "numeric",
-                  })}
-              </small>
-            </div>
-            <strong>
-              {new Intl.NumberFormat(locale, {
-                style: "currency",
-                currency: order.cart.price.currency ?? "EUR",
-              }).format(order.cart.price.totalPrice)}
-            </strong>
-          </div>
-          <div className="account-order-products">
-            {order.cart.lineItems.slice(0, 3).map((item) => (
-              <span key={item.id}>
-                {mediaImage(item.media) && (
-                  <img src={mediaImage(item.media)} alt="" loading="lazy" />
-                )}
-                <span>
-                  {item.quantity} × {item.label}
-                </span>
-              </span>
-            ))}
-          </div>
-          <div className="account-order-footer">
-            <span className="account-badge">
-              {contentText(
-                order.stateLabels?.[order.state] ?? {},
-                locale,
-                order.stateMainLocale ?? "en-GB",
-              ) || o(order.state)}
-            </span>
-            <span>
-              {a("viewOrder")} <span aria-hidden="true">↗</span>
-            </span>
-          </div>
-        </button>
-      ))}
-    </div>
+    <List
+      locale={locale}
+      orders={usePartOrders(orders)}
+      onOpen={({ kind, id }) => (kind === "order" ? onSelect(id) : onShop())}
+    />
   );
 }

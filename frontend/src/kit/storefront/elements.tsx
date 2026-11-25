@@ -4,6 +4,8 @@ import type { AnyPart, PartEvents } from "./contract";
 
 export const addToCartEvent = "veyndo:add-to-cart";
 export const checkoutEvent = "veyndo:checkout";
+export const quantityEvent = "veyndo:quantity";
+export const openEvent = "veyndo:open";
 
 /**
  * Defines `<veyndo-<id>>` for each part. The element reads JSON from its `props`
@@ -65,6 +67,12 @@ export function registerPartElements(
                 detail: Parameters<NonNullable<PartEvents["onAddToCart"]>>[0],
               ) => emit(addToCartEvent, detail)}
               onCheckout={() => emit(checkoutEvent)}
+              onQuantity={(
+                detail: Parameters<NonNullable<PartEvents["onQuantity"]>>[0],
+              ) => emit(quantityEvent, detail)}
+              onOpen={(
+                detail: Parameters<NonNullable<PartEvents["onOpen"]>>[0],
+              ) => emit(openEvent, detail)}
             />,
           );
         }
