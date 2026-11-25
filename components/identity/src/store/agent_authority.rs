@@ -1,10 +1,21 @@
 //! Saved agent runs retain an upper authority bound; every continuation rechecks credential, membership and private stage admission.
 use crate::{allowed, assistant_access};
+use serde::Deserialize;
 use serde_json::Value;
 use sqlx::Row;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad};
 use veyndo_kernel::verified_kernel;
 
+/// The saved request of an agent run, as the rebuilt context reads it.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct RunRequest {
+    #[serde(deserialize_with = "lenient")]
+    locale: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    channel: Option<String>,
+}
 /// Rebuilds the request context of a saved run in its own privileged transaction.
 pub async fn headers(a: &State, row: &sqlx::postgres::PgRow) -> Result<RequestContext> {
     let mut tx = a.db.begin_privileged().await?;
@@ -94,16 +105,17 @@ pub async fn headers_on(
         }
         h.principal.role = Some("admin".into());
         h.principal.permissions = Some(row.get::<Value, _>("run_scopes").to_string());
-        let request: Value = row.get("run_request");
+        let request: RunRequest = view(&row.get::<Value, _>("run_request"));
         h.insert(
             "x-commerce-locale",
-            request["locale"]
-                .as_str()
+            request
+                .locale
+                .as_deref()
                 .unwrap_or("en-GB")
                 .parse()
                 .map_err(|_| bad("Invalid saved locale"))?,
         );
-        if let Some(channel) = request["channel"].as_str() {
+        if let Some(channel) = request.channel.as_deref() {
             h.insert(
                 "sw-sales-channel-id",
                 channel.parse().map_err(|_| bad("Invalid saved channel"))?,

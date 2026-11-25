@@ -6,7 +6,7 @@ use crate::{merchant, permit};
 use serde::Deserialize;
 use serde_json::{Value, json};
 use veyndo_app_model::declarations::identifier;
-use veyndo_core::document::{lenient, view};
+use veyndo_core::document::{lenient, merge, view};
 use veyndo_core::shop_scope::header;
 use veyndo_core::store::history_context::context;
 use veyndo_core::{RequestContext, Result, State, bad, conflict};
@@ -44,6 +44,14 @@ struct RoleChange {
     revision: Option<i64>,
     #[serde(deserialize_with = "lenient")]
     approve: Option<bool>,
+}
+/// A role definition as `invoke` checks it: the shape of each field is validated before use.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct RoleDefinition {
+    name: Value,
+    permissions: Value,
+    active: Value,
 }
 /// The JSON fields `invoke` reads, typed as it reads them.
 #[derive(Deserialize, Default)]
@@ -90,7 +98,10 @@ pub async fn invoke(
     let row = roles::lock(&mut tx, &t, id).await?;
     if name == "team.role.dependencies" {
         let mut d = usage(&mut tx, &t, id).await?;
-        d["revision"] = json!(row.ok_or(bad("Role not found"))?.revision);
+        merge(
+            &mut d,
+            json!({"revision":row.ok_or(bad("Role not found"))?.revision}),
+        )?;
         return Ok(d);
     }
     if id == "owner" {
@@ -112,19 +123,20 @@ pub async fn invoke(
         roles::delete(&mut tx, &t, id).await?;
     } else {
         let d = &args.data;
+        let definition: RoleDefinition = view(d);
         if d.as_object().is_none_or(|o| {
             o.len() != 3
                 || o.keys()
                     .any(|k| !["name", "permissions", "active"].contains(&k.as_str()))
-        }) || !d["active"].is_boolean()
-            || !d["permissions"].is_array()
+        }) || !definition.active.is_boolean()
+            || !definition.permissions.is_array()
         {
             return Err(bad("Invalid role definition"));
         }
-        validate_permissions(&actor, &d["permissions"])?;
+        validate_permissions(&actor, &definition.permissions)?;
         // Keep locale validation on the acquired connection and fence concurrent
         // settings edits until this role commits; a cached/pool read can deadlock.
-        languages.check_names(&mut tx, &t, &d["name"]).await?;
+        languages.check_names(&mut tx, &t, &definition.name).await?;
         if row.is_none() {
             let count = roles::count(&mut tx, &t).await?;
             if count >= 100 {

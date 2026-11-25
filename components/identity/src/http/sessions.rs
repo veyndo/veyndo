@@ -6,6 +6,7 @@ use crate::types::envelopes::Login;
 use axum::Json;
 use axum::extract::State;
 use serde_json::{Value, json};
+use veyndo_core::document::merge;
 use veyndo_core::shop_scope::{header, tenant};
 use veyndo_core::{Error, RequestContext, Result, StatusCode, bad, hash};
 
@@ -15,7 +16,7 @@ pub async fn user_login(
 ) -> Result<Json<Value>> {
     let v = json!(input);
     let email = email(&v)?;
-    let p = v["password"].as_str().unwrap_or("");
+    let p = input.password.as_str();
     if p.len() > 128 {
         return Err(bad("Invalid credential"));
     }
@@ -48,7 +49,7 @@ pub async fn user_session(
         ));
     }
     let mut data = user_data(&a, user).await?;
-    data["workspace"] = json!(tenant(&h)?);
+    merge(&mut data, json!({"workspace":tenant(&h)?}))?;
     Ok(Json(data))
 }
 pub async fn user_logout(

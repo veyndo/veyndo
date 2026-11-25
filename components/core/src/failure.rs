@@ -108,9 +108,11 @@ impl Failure {
     }
     pub fn problem(&self) -> Value {
         let mut problem = json!(self.2);
-        problem["code"] = json!(self.0.as_u16().to_string());
-        problem["status"] = json!(self.0.as_u16());
-        problem["detail"] = json!(self.1);
+        if let Value::Object(fields) = &mut problem {
+            fields.insert("code".into(), json!(self.0.as_u16().to_string()));
+            fields.insert("status".into(), json!(self.0.as_u16()));
+            fields.insert("detail".into(), json!(self.1));
+        }
         problem
     }
     pub fn tool_result(&self) -> Value {

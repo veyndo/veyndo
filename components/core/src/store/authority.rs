@@ -1,7 +1,16 @@
 //! Connect separately admitted SQL roles within one process budget; rotate authenticated transaction scopes.
+use crate::document::view;
 use serde_json::Value;
 use std::env;
 use veyndo_runtime::{database_scope::Signer, scoped_pool::ScopedPool};
+
+/// The field of the database scope status this check reads.
+#[derive(serde::Deserialize, Default)]
+#[serde(default)]
+struct ScopeStatus {
+    #[serde(deserialize_with = "crate::document::lenient")]
+    enforced: Option<bool>,
+}
 
 pub async fn connect(fallback: &str) -> ScopedPool {
     let system_url = env::var("DATABASE_RUNTIME_URL").unwrap_or_else(|_| fallback.to_owned());
@@ -79,7 +88,8 @@ pub async fn connect(fallback: &str) -> ScopedPool {
         .await
         .expect("database scope status");
     assert!(
-        status["enforced"] == true || env::var("DB_SCOPE_STAGED").as_deref() == Ok("true"),
+        view::<ScopeStatus>(&status).enforced == Some(true)
+            || env::var("DB_SCOPE_STAGED").as_deref() == Ok("true"),
         "Database scope is not enforced; staged rollout must be explicit"
     );
     let signer = Signer::load(&system, &tenant_role)

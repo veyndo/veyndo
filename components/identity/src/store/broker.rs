@@ -20,6 +20,47 @@ struct AssertionInput {
     signature: Option<String>,
 }
 
+/// The signed claims of a broker assertion, typed as their readers use them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+pub struct Claims {
+    #[serde(deserialize_with = "lenient")]
+    pub iss: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    pub sub: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    pub aud: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    pub verified: Option<bool>,
+    #[serde(deserialize_with = "lenient")]
+    pub exp: Option<i64>,
+    #[serde(deserialize_with = "lenient")]
+    pub iat: Option<i64>,
+    #[serde(deserialize_with = "lenient")]
+    pub nonce: Option<String>,
+    /// The broker's personal session, which proves a second factor already passed.
+    #[serde(deserialize_with = "lenient")]
+    pub session_token: Option<String>,
+    /// The credential action (`set-password`, `verify-password`).
+    #[serde(deserialize_with = "lenient")]
+    pub action: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    pub workspace_id: Option<String>,
+    /// The credential revision a recovery link was issued for.
+    #[serde(deserialize_with = "lenient")]
+    pub credential_revision: Option<i64>,
+}
+
+impl Claims {
+    /// The verified (issuer, subject) pair; `assertion` admits only claims that carry both.
+    pub fn subject(&self) -> (&str, &str) {
+        (
+            self.iss.as_deref().unwrap_or_default(),
+            self.sub.as_deref().unwrap_or_default(),
+        )
+    }
+}
+
 /// Verifies a broker assertion for `route` and consumes its nonce; returns the signed claims.
 pub async fn assertion(a: &State, route: &str, v: &Value) -> Result<Value> {
     let input: AssertionInput = view(v);
@@ -61,17 +102,15 @@ pub async fn assertion(a: &State, route: &str, v: &Value) -> Result<Value> {
     )
     .map_err(|_| bad("Invalid identity payload"))?;
     let now = now();
-    if claims["iss"] != issuer
-        || claims["aud"] != "veyndo-identity"
-        || claims["verified"] != true
-        || !claims["exp"]
-            .as_i64()
-            .is_some_and(|e| e > now && e <= now + 60)
-        || !claims["iat"]
-            .as_i64()
-            .is_some_and(|i| i <= now + 5 && i >= now - 60)
-        || !claims["nonce"]
-            .as_str()
+    let typed: Claims = view(&claims);
+    if typed.iss.as_deref() != Some(issuer.as_str())
+        || typed.aud.as_deref() != Some("veyndo-identity")
+        || typed.verified != Some(true)
+        || !typed.exp.is_some_and(|e| e > now && e <= now + 60)
+        || !typed.iat.is_some_and(|i| i <= now + 5 && i >= now - 60)
+        || !typed
+            .nonce
+            .as_deref()
             .is_some_and(|n| n.len() == 64 && n.bytes().all(|c| c.is_ascii_hexdigit()))
     {
         return Err(Error(
@@ -86,7 +125,7 @@ pub async fn assertion(a: &State, route: &str, v: &Value) -> Result<Value> {
             && row.required
         {
             let mut tx = a.db.begin().await?;
-            if !trusted_session_tx(&mut tx, &row.id, claims["sessionToken"].as_str()).await? {
+            if !trusted_session_tx(&mut tx, &row.id, typed.session_token.as_deref()).await? {
                 return Err(Error(
                     StatusCode::UNAUTHORIZED,
                     "Second factor required".into(),
@@ -94,8 +133,9 @@ pub async fn assertion(a: &State, route: &str, v: &Value) -> Result<Value> {
             }
         }
     }
-    if !claims["sub"]
-        .as_str()
+    if !typed
+        .sub
+        .as_deref()
         .is_some_and(|s| !s.is_empty() && s.len() <= 200)
     {
         return Err(bad("Identity subject required"));
@@ -103,7 +143,7 @@ pub async fn assertion(a: &State, route: &str, v: &Value) -> Result<Value> {
     sqlx::query!("DELETE FROM identity_nonces WHERE expires_at<now()")
         .execute(&a.db)
         .await?;
-    let used=sqlx::query!("INSERT INTO identity_nonces(digest,expires_at) VALUES($1,now()+interval '2 minutes') ON CONFLICT DO NOTHING", hash(&format!("{}:{}",issuer,claims["nonce"].as_str().unwrap()))).execute(&a.db).await?.rows_affected();
+    let used=sqlx::query!("INSERT INTO identity_nonces(digest,expires_at) VALUES($1,now()+interval '2 minutes') ON CONFLICT DO NOTHING", hash(&format!("{}:{}",issuer,typed.nonce.as_deref().unwrap_or_default()))).execute(&a.db).await?.rows_affected();
     if used == 0 {
         return Err(Error(
             StatusCode::UNAUTHORIZED,

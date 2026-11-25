@@ -1,12 +1,13 @@
 //! Password setup, recovery discovery and session requests from the trusted, verified-email identity broker.
 //! No public reset-by-email endpoint: assertions bind route, identity, shop, action, expiry and one-use nonce.
 use crate::domain::credentials::{email, hash_password, password, verify_password};
-use crate::store::broker::{self, assertion};
+use crate::store::broker::{self, Claims, assertion};
 use crate::store::merchant_accounts;
 use crate::store::sessions::{self, issue_session, issue_session_with_proof};
 use axum::Json;
 use axum::extract::State;
 use serde_json::{Value, json};
+use veyndo_core::document::view;
 use veyndo_core::{Error, Result, StatusCode, bad, conflict, validate_tenant};
 
 /// Sets or recovers a password, or verifies the existing one, for a broker-verified identity.
@@ -15,28 +16,28 @@ pub async fn credentials(
     Json(v): Json<Value>,
 ) -> Result<Json<Value>> {
     let c = assertion(&a, "/api/identity/credentials", &v).await?;
-    let action = c["action"]
-        .as_str()
+    let claims: Claims = view(&c);
+    let action = claims
+        .action
+        .as_deref()
         .ok_or(bad("Credential action required"))?;
     if !["set-password", "verify-password"].contains(&action) {
         return Err(bad("Unsupported credential action"));
     }
     let secret = password(&c)?;
-    let shop = c["workspaceId"].as_str().ok_or(bad("Shop ID required"))?;
+    let shop = claims
+        .workspace_id
+        .as_deref()
+        .ok_or(bad("Shop ID required"))?;
     validate_tenant(shop)?;
     let mut tx = a.db.begin().await?;
     // Personal recovery changes credentials, never the linked account's existing role.
-    let row = broker::recoverable(
-        &mut tx,
-        (c["iss"].as_str().unwrap(), c["sub"].as_str().unwrap()),
-        &email(&c)?,
-        shop,
-    )
-    .await?
-    .ok_or(Error(
-        StatusCode::UNAUTHORIZED,
-        "Merchant identity unavailable".into(),
-    ))?;
+    let row = broker::recoverable(&mut tx, claims.subject(), &email(&c)?, shop)
+        .await?
+        .ok_or(Error(
+            StatusCode::UNAUTHORIZED,
+            "Merchant identity unavailable".into(),
+        ))?;
     let user = row.id.clone();
     if action == "verify-password" {
         if !verify_password(secret, row.password_hash).await? {
@@ -46,9 +47,7 @@ pub async fn credentials(
             ));
         }
     } else {
-        if row.password_initialized
-            && c["credentialRevision"].as_i64() != Some(row.credential_revision)
-        {
+        if row.password_initialized && claims.credential_revision != Some(row.credential_revision) {
             return Err(conflict(
                 "Account credentials changed; request a fresh recovery link",
             ));
@@ -76,7 +75,8 @@ pub async fn lookup(
     };
     let user = row.id;
     let revision = row.credential_revision;
-    let subject = (c["iss"].as_str().unwrap(), c["sub"].as_str().unwrap());
+    let claims: Claims = view(&c);
+    let subject = claims.subject();
     merchant_accounts::link(&mut tx, subject, &user).await?;
     let linked = broker::linked(&mut tx, subject, &user).await?;
     if !linked {
@@ -105,6 +105,12 @@ pub async fn session(
     };
     broker::mark_verified_once(&a, &row.id).await?;
     Ok(Json(
-        issue_session_with_proof(&a, &row.id, &row.tenant, c["sessionToken"].as_str()).await?,
+        issue_session_with_proof(
+            &a,
+            &row.id,
+            &row.tenant,
+            view::<Claims>(&c).session_token.as_deref(),
+        )
+        .await?,
     ))
 }

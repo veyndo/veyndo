@@ -6,8 +6,10 @@ use axum::{
     middleware::Next,
     response::{IntoResponse, Response},
 };
+use serde::Deserialize;
 use std::net::{IpAddr, SocketAddr};
 use veyndo_core::admission::run as admit_request;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::request_context::HeaderReader;
 use veyndo_core::{Error, Result, State, StatusCode, bad, hash, process_config};
 use veyndo_runtime::tenant_scope::{Scope, scoped};
@@ -57,6 +59,17 @@ async fn reserve(a: &State, key: &str, limit: i32) -> Result<()> {
     }
     Ok(())
 }
+/// The fields of an authentication payload that name the account a throttle bucket counts against.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct AccountInput {
+    #[serde(deserialize_with = "lenient")]
+    email: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    invitation_token: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    token: Option<String>,
+}
 /// Throttles sign-in, registration and redemption by peer prefix and account before the request is admitted.
 pub async fn run(a: &State, request: Request, next: Next) -> Response {
     let path = request.uri().path().to_owned();
@@ -87,13 +100,16 @@ pub async fn run(a: &State, request: Request, next: Next) -> Response {
         Err(_) => return bad("Authentication payload exceeds 64 KiB").into_response(),
     };
     let value: serde_json::Value = serde_json::from_slice(&body).unwrap_or_default();
-    let account = value["email"]
-        .as_str()
+    let input: AccountInput = view(&value);
+    let account = input
+        .email
+        .as_deref()
         .map(|s| s.trim().to_lowercase())
         .or_else(|| {
-            value["invitationToken"]
-                .as_str()
-                .or(value["token"].as_str())
+            input
+                .invitation_token
+                .as_deref()
+                .or(input.token.as_deref())
                 .map(|s| format!("token:{}", hash(s)))
         });
     let tenant = if path.starts_with("/store-api/") {

@@ -1,5 +1,6 @@
 //! Personal merchant sessions: only hashed opaque tokens persist, a second factor is honoured before one is issued, and sessions are listed and revoked here.
 use serde_json::{Value, json};
+use veyndo_core::document::merge;
 use veyndo_core::host_names::links;
 use veyndo_core::{Error, Result, State, StatusCode, hash, uid};
 use veyndo_kernel::verified_kernel;
@@ -63,8 +64,7 @@ pub async fn issue_verified_tx(
     .execute(&mut **tx)
     .await?;
     let mut value = user_data_connection(tx, user).await?;
-    value["token"] = json!(token);
-    value["workspace"] = json!(tenant);
+    merge(&mut value, json!({"token":token,"workspace":tenant}))?;
     Ok(value)
 }
 pub async fn user_data(a: &State, user: &str) -> Result<Value> {

@@ -26,7 +26,6 @@ pub async fn integration_create(
     h: RequestContext,
     Json(input): Json<Integration>,
 ) -> Result<Json<Value>> {
-    let v = json!(input);
     if let Some(budget) = &input.agent_budget {
         budget.validate().map_err(bad)?;
         if h.access
@@ -49,15 +48,14 @@ pub async fn integration_create(
     if header(&h, "x-rac-user") == Some("bootstrap") {
         return Err(bad("Personal account required for an integration key"));
     }
-    let permissions = validate_permissions(&h, &v["permissions"])?;
+    let permissions = validate_permissions(&h, &json!(input.permissions))?;
     if input.agent_budget.is_some() && input.permissions.iter().any(|s| !planning_scope(s)) {
         return Err(Error(StatusCode::FORBIDDEN,"Budgeted planning agents require explicit read scopes; business writes retain personal approval".into()));
     }
     if permissions.as_array().is_none_or(|v| v.is_empty()) {
         return Err(bad("Explicit integration permissions required"));
     }
-    let name = v["name"]
-        .as_str()
+    let name = Some(input.name.as_str())
         .filter(|s| !s.trim().is_empty() && s.len() <= 100)
         .ok_or(bad("Integration name required"))?;
     if input.non_expiring
@@ -71,8 +69,7 @@ pub async fn integration_create(
             "A personal administrator session is required for a non-expiring key".into(),
         ));
     }
-    let days = v["expiresInDays"]
-        .as_i64()
+    let days = Some(i64::from(input.expires_in_days))
         .filter(|v| (1..=90).contains(v))
         .ok_or(bad("Integration expiry must be 1..90 days"))?;
     let mut tx = a.db.begin().await?;

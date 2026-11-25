@@ -5,9 +5,11 @@ use axum::extract::{Request, State};
 use axum::middleware::Next;
 use axum::response::{IntoResponse, Response};
 use hmac::{Hmac, Mac};
+use serde::Deserialize;
 use serde_json::{Value, json};
 use sha2::Sha256;
 use std::env;
+use veyndo_core::document::{lenient, merge, view};
 use veyndo_core::{Error, StatusCode, bad, hash, process_config};
 
 const MARKER: &str = "browser-session";
@@ -215,6 +217,22 @@ pub async fn apply(
     )
     .await
 }
+/// The fields of a sign-in answer (or its nested `session`) that the browser binding reads.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct IssuedSession {
+    #[serde(deserialize_with = "lenient")]
+    token: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    user: SessionUser,
+}
+/// The signed-in person of a sign-in answer.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct SessionUser {
+    #[serde(deserialize_with = "lenient")]
+    id: Option<String>,
+}
 /// Replaces the session token of a successful sign-in answer by the cookie marker and sets the host-only cookies.
 async fn bind_session(
     a: &veyndo_core::State,
@@ -230,17 +248,18 @@ async fn bind_session(
     let Ok(mut value) = serde_json::from_slice::<Value>(&bytes) else {
         return Response::from_parts(parts, Body::from(bytes));
     };
-    let session = if value.get("session").is_some_and(Value::is_object) {
-        &mut value["session"]
-    } else {
-        &mut value
+    let nested = value.get("session").is_some_and(Value::is_object);
+    let session = match value.get_mut("session") {
+        Some(session) if nested => session,
+        _ => &mut value,
     };
-    let issued = session["token"].as_str().is_some_and(token);
+    let issued_view: IssuedSession = view(session);
+    let issued = issued_view.token.as_deref().is_some_and(token);
     // Passive bearer/session reads must not overwrite a later explicit browser login.
     if !issued && !using_cookie {
         return Response::from_parts(parts, Body::from(bytes));
     }
-    let candidate = session["token"].as_str().map(str::to_owned).or_else(|| {
+    let candidate = issued_view.token.clone().or_else(|| {
         (path == "/api/auth/session")
             .then(|| {
                 if using_cookie {
@@ -254,13 +273,9 @@ async fn bind_session(
     let Some(candidate) = candidate.filter(|s| token(s)) else {
         return Response::from_parts(parts, Body::from(bytes));
     };
-    if session["user"]["id"].as_str().is_none() {
+    let Some(user) = issued_view.user.id else {
         return bad("Invalid browser authentication response").into_response();
-    }
-    let user = session["user"]["id"]
-        .as_str()
-        .unwrap_or_default()
-        .to_owned();
+    };
     let valid = veyndo_runtime::tenant_scope::scoped(
         veyndo_runtime::tenant_scope::Scope::System,
         crate::store::sessions::live(a, &hash(&candidate), &user),
@@ -273,9 +288,12 @@ async fn bind_session(
         )
         .into_response();
     }
-    session["token"] = json!(MARKER);
-    session["browserSession"] = json!(true);
-    session["browserCsrf"] = json!(csrf(&candidate));
+    if let Err(error) = merge(
+        session,
+        json!({"token":MARKER,"browserSession":true,"browserCsrf":csrf(&candidate)}),
+    ) {
+        return error.into_response();
+    }
     let mut response = Response::from_parts(parts, Body::from(value.to_string()));
     response.headers_mut().remove("content-length");
     if issued || !using_cookie {
