@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT jsonb_build_object('variants',(SELECT count(*) FROM products WHERE tenant=$1 AND parent_id=$2),'reviews',(SELECT count(*) FROM product_reviews WHERE tenant=$1 AND product_id=$2 AND approved),'averageRating',(SELECT coalesce(avg(rating),0) FROM product_reviews WHERE tenant=$1 AND product_id=$2 AND approved)) AS \"stats!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "stats!",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "844ab1aa07ca6c9464e027b39786c768fe13a1255f81c66f3deac0d01dc9748b"
+}

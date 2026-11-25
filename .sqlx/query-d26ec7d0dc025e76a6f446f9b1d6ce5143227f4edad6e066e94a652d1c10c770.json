@@ -1,0 +1,18 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO intelligence_assignments(tenant,experiment_id,cart_id,arm,baseline) VALUES($1,$2,$3,$4,$5)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text",
+        "Int4",
+        "Float8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "d26ec7d0dc025e76a6f446f9b1d6ce5143227f4edad6e066e94a652d1c10c770"
+}

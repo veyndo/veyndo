@@ -1,0 +1,31 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO observed_pairs(tenant,left_id,right_id,orders,last_event) VALUES($1,$2,$3,1,$4) ON CONFLICT(tenant,left_id,right_id) DO UPDATE SET orders=observed_pairs.orders+1,last_event=EXCLUDED.last_event,updated_at=now() RETURNING orders",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "orders",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "observed_pairs",
+            "name": "orders"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "ff383465557e7b4c3a9edfeef7f240c5c85c170c9c65124700453ac89f7c5b87"
+}

@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM knowledge_chunks WHERE tenant=$1 AND document_id=$2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "e55d51249d42dbee204027a5fe990bb0c1091c1fcf0ee010564bfa5bf747b2ae"
+}

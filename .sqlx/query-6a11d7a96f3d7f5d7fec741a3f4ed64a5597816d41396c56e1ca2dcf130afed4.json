@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT name||E'\\n'||category||E'\\n'||description AS \"text!\" FROM products WHERE tenant=$1 AND id=$2",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "text!",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "6a11d7a96f3d7f5d7fec741a3f4ed64a5597816d41396c56e1ca2dcf130afed4"
+}

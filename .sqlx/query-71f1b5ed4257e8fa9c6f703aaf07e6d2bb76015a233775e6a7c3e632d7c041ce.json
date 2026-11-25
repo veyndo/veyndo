@@ -1,0 +1,26 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT EXISTS(SELECT 1 FROM knowledge_chunks WHERE tenant=$1 AND document_id=$2 AND locale=$3 AND position($4 in text)>0) AS \"sourced!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "sourced!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "71f1b5ed4257e8fa9c6f703aaf07e6d2bb76015a233775e6a7c3e632d7c041ce"
+}

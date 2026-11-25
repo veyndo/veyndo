@@ -1,0 +1,26 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT true AS \"fresh!\" FROM knowledge_documents WHERE tenant=$1 AND id=$2 AND content_hash=$3 AND revision=$4 AND NOT archived FOR SHARE",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "fresh!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "7ca7e1c95dfd83444a93d26a86bfe3e8cef8f1f6788f0f46efc085b29c823103"
+}

@@ -1,0 +1,78 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT p.left_id,p.right_id,p.orders,p.last_event,p.updated_at::text AS \"updated_at!\",(SELECT count(*) FROM pair_evidence e WHERE e.tenant=p.tenant AND e.left_id=p.left_id AND e.right_id=p.right_id AND e.simulated) AS \"simulated!\" FROM observed_pairs p WHERE tenant=$1 ORDER BY orders DESC,left_id,right_id LIMIT 24",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "left_id",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "observed_pairs",
+            "name": "left_id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "right_id",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "observed_pairs",
+            "name": "right_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "orders",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "observed_pairs",
+            "name": "orders"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "last_event",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "observed_pairs",
+            "name": "last_event"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "updated_at!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 5,
+        "name": "simulated!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      null,
+      null
+    ]
+  },
+  "hash": "ce6576eec781cfafff210d80eb5738917a15fb613e87ea4f9778fc6d8e217cda"
+}

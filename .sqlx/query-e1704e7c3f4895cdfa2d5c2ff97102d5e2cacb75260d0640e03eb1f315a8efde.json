@@ -1,0 +1,72 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT data,state,withdrawn,final_report,(now()>=ends_at+((data->>'settlementDays')::integer*interval '1 day')) AS settled FROM intelligence_experiments WHERE tenant=$1 AND id=$2 FOR UPDATE",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "data",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "intelligence_experiments",
+            "name": "data"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "state",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "intelligence_experiments",
+            "name": "state"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "withdrawn",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "intelligence_experiments",
+            "name": "withdrawn"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "final_report",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "intelligence_experiments",
+            "name": "final_report"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "settled",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true,
+      null
+    ]
+  },
+  "hash": "e1704e7c3f4895cdfa2d5c2ff97102d5e2cacb75260d0640e03eb1f315a8efde"
+}

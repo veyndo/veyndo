@@ -1,5 +1,5 @@
 -- One bounded read retains the evidence ledger's current/public/valid-time admission; no historical claim cache.
-SELECT claim FROM (
+SELECT claim AS "claim!" FROM (
  SELECT jsonb_build_object('id',r.target_id,'productId',r.source_id,'text',r.data->>'text',
   'locale',r.data->>'locale','sourceId',d.id,'contentHash',d.content_hash) AS claim,
  row_number() OVER(PARTITION BY r.source_id ORDER BY r.recorded_from DESC,r.target_id) AS n

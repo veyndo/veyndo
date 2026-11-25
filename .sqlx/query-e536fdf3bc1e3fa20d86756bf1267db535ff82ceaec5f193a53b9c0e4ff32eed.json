@@ -1,0 +1,77 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT session,purpose,kind,product_id,dimensions FROM session_signal_events WHERE tenant=$1 AND id=$2",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "session",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "session_signal_events",
+            "name": "session"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "purpose",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "session_signal_events",
+            "name": "purpose"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "kind",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "session_signal_events",
+            "name": "kind"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "product_id",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "session_signal_events",
+            "name": "product_id"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "dimensions",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "session_signal_events",
+            "name": "dimensions"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true,
+      false
+    ]
+  },
+  "hash": "e536fdf3bc1e3fa20d86756bf1267db535ff82ceaec5f193a53b9c0e4ff32eed"
+}

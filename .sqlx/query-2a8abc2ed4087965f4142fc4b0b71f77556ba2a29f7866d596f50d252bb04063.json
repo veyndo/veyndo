@@ -1,0 +1,42 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT product_id,name AS \"name!\" FROM product_translations WHERE tenant=$1 AND product_id=ANY($2) AND language_id=ANY($3) AND name IS NOT NULL ORDER BY array_position($3,language_id)",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "product_id",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "product_translations",
+            "name": "product_id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "name!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "product_translations",
+            "name": "name"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "TextArray",
+        "TextArray"
+      ]
+    },
+    "nullable": [
+      false,
+      true
+    ]
+  },
+  "hash": "2a8abc2ed4087965f4142fc4b0b71f77556ba2a29f7866d596f50d252bb04063"
+}

@@ -1,0 +1,127 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "-- Current public/private source hydration and RRF; lexical candidates use the RLS-safe word projection.\nWITH terms AS MATERIALIZED (SELECT unnest(tsvector_to_array(to_tsvector('simple',$3))) AS word\n), matches AS MATERIALIZED (SELECT DISTINCT l.document_id,l.position\n FROM terms q JOIN knowledge_chunk_lexemes l ON l.tenant=$1 AND l.lexeme=q.word\n), semantic_keys AS MATERIALIZED (\n SELECT split[1] AS document_id,split[2] AS position,digest,rank\n FROM unnest($5::text[],$6::text[]) WITH ORDINALITY AS v(object_id,digest,rank)\n CROSS JOIN LATERAL regexp_match(v.object_id,'^(.*):([0-9]+)$') AS split\n), candidates AS (\n SELECT document_id,position::text FROM matches\n UNION SELECT document_id,position FROM semantic_keys\n), scope AS MATERIALIZED (\n SELECT d.id,COALESCE(d.translations->$8->>'title',d.translations->$9->>'title',d.title) AS title,d.product_id,d.source_type,d.content_hash,d.revision,c.position,c.text,c.locale,c.embedding_model\n FROM candidates k\n CROSS JOIN LATERAL (SELECT * FROM knowledge_documents WHERE tenant=$1 AND id=k.document_id OFFSET 0) d\n CROSS JOIN LATERAL (SELECT * FROM knowledge_chunks WHERE tenant=$1 AND document_id=k.document_id AND position::text=k.position OFFSET 0) c\n WHERE NOT d.archived AND c.locale IN (CASE WHEN jsonb_typeof(d.translations->$8->'content')='string' THEN $8 WHEN jsonb_typeof(d.translations->$9->'content')='string' THEN $9 ELSE d.locale END,'') AND (NOT $4 OR d.visibility='public') AND ($2::text IS NULL OR d.product_id IS NULL OR d.product_id=$2 OR d.product_id=(SELECT parent_id FROM products WHERE tenant=$1 AND id=$2))\n), lexical AS (\n SELECT s.id,s.position,1.0/(60+row_number() OVER(ORDER BY ts_rank_cd(to_tsvector('simple',text),replace(plainto_tsquery('simple',$3)::text,' & ',' | ')::tsquery) DESC)) AS score\n FROM matches m JOIN scope s ON s.id=m.document_id AND s.position=m.position\n WHERE to_tsvector('simple',text) @@ replace(plainto_tsquery('simple',$3)::text,' & ',' | ')::tsquery\n ORDER BY score DESC LIMIT 8\n), semantic AS (\n SELECT s.id,s.position,1.0/(60+v.rank) AS score\n FROM semantic_keys v JOIN scope s ON s.id=v.document_id AND s.position::text=v.position AND s.content_hash=v.digest AND s.embedding_model=$7\n), ranks AS (\n SELECT id,position,sum(score) AS score\n FROM (SELECT * FROM lexical UNION ALL SELECT * FROM semantic) v GROUP BY id,position)\nSELECT s.id AS \"id!\",s.title AS \"title!\",s.product_id,s.source_type AS \"source_type!\",s.content_hash AS \"content_hash!\",s.revision AS \"revision!\",s.position AS \"position!\",s.text AS \"text!\",s.locale AS \"locale!\"\n FROM scope s JOIN ranks r ON r.id=s.id AND r.position=s.position\n ORDER BY r.score DESC,s.id,s.position LIMIT 8;\n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "knowledge_documents",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "title!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 2,
+        "name": "product_id",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "knowledge_documents",
+            "name": "product_id"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "source_type!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "knowledge_documents",
+            "name": "source_type"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "content_hash!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "knowledge_documents",
+            "name": "content_hash"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "revision!",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "knowledge_documents",
+            "name": "revision"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "position!",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "knowledge_chunks",
+            "name": "position"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "text!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "knowledge_chunks",
+            "name": "text"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "locale!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "knowledge_chunks",
+            "name": "locale"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text",
+        "Bool",
+        "TextArray",
+        "TextArray",
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      null,
+      true,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "57bf34fe965c3269d3a384af595980f16b055bb2d0c3abe95ce41bead4a66f9f"
+}

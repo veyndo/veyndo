@@ -1,0 +1,27 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT jsonb_build_object('id',id,'title',COALESCE(translations->$4->>'title',translations->$5->>'title',title),'kind',kind,'visibility',visibility,'productId',product_id) AS \"source!\" FROM knowledge_documents WHERE tenant=$1 AND NOT archived AND (product_id=$2 OR product_id IS NULL OR product_id=$3) ORDER BY id LIMIT 50",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "source!",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "1f6752abd44011b4e6d2779e3573d7c0a206360700e08c9321ad59d5e782dc80"
+}

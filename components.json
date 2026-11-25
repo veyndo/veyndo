@@ -703,9 +703,9 @@
         "translation_jobs": "write: agent runs cancel translation jobs they started (agent_runs.rs)"
       },
       "glob_imports": 0,
-      "untyped_access": 328,
+      "untyped_access": 311,
       "sql_outside_store": 0,
-      "runtime_sql": 129
+      "runtime_sql": 16
     },
     "studio": {
       "title": "Merchant overview, reports, private staging shops and history",

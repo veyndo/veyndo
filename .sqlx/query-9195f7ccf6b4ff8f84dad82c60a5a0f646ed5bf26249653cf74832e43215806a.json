@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT EXISTS(SELECT 1 FROM intelligence_experiments WHERE tenant=$1 AND channel=$2 AND state='running') AS \"running!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "running!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "9195f7ccf6b4ff8f84dad82c60a5a0f646ed5bf26249653cf74832e43215806a"
+}

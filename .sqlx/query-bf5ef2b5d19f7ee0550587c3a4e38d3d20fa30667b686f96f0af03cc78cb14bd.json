@@ -1,0 +1,18 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE knowledge_chunks SET embedding=$3,embedding_model=$4 WHERE tenant=$1 AND document_id||':'||position=$2 AND text=$5",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Float4Array",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "bf5ef2b5d19f7ee0550587c3a4e38d3d20fa30667b686f96f0af03cc78cb14bd"
+}

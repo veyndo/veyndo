@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM private_preferences WHERE tenant=$1 AND cart_id=ANY($2)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "TextArray"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "0e46918d313c462322bc6fe7078be83e94ca6bef909f1e7091c6f99114190547"
+}

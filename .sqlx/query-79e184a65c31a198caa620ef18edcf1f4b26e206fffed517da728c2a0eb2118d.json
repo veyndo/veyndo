@@ -1,0 +1,30 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT evidence->>'left' AS \"left_id!\",evidence->>'right' AS \"right_id!\" FROM knowledge_hypotheses WHERE tenant=$1 AND state='published' ORDER BY updated_at DESC LIMIT 24",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "left_id!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "right_id!",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      null,
+      null
+    ]
+  },
+  "hash": "79e184a65c31a198caa620ef18edcf1f4b26e206fffed517da728c2a0eb2118d"
+}

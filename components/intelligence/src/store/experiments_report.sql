@@ -1,4 +1,4 @@
-SELECT x.arm,x.baseline,coalesce(p.net_minor,0)::bigint AS net_minor,coalesce(p.invalid_currency,false) AS invalid_currency
+SELECT x.arm,x.baseline,coalesce(p.net_minor,0)::bigint AS "net_minor!",coalesce(p.invalid_currency,false) AS "invalid_currency!"
 FROM intelligence_assignments x
 JOIN intelligence_experiments e ON e.tenant=x.tenant AND e.id=x.experiment_id
 LEFT JOIN LATERAL (

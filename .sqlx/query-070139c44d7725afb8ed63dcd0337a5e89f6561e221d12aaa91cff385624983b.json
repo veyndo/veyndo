@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "WITH removed AS (DELETE FROM intelligence_assignments WHERE tenant=$1 AND cart_id=ANY($2) RETURNING experiment_id) UPDATE intelligence_experiments e SET withdrawn=e.withdrawn+r.count FROM (SELECT experiment_id,count(*)::int AS count FROM removed GROUP BY experiment_id) r WHERE e.tenant=$1 AND e.id=r.experiment_id",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "TextArray"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "070139c44d7725afb8ed63dcd0337a5e89f6561e221d12aaa91cff385624983b"
+}

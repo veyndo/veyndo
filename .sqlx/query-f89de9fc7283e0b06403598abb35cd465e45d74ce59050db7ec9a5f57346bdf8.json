@@ -1,0 +1,72 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id,kind,product_id,dimensions,created_at::text AS \"time!\" FROM session_signal_events WHERE tenant=$1 AND session=$2 AND purpose='analytics' AND expires_at>now() ORDER BY created_at DESC,id LIMIT 101",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "session_signal_events",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "kind",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "session_signal_events",
+            "name": "kind"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "product_id",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "session_signal_events",
+            "name": "product_id"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "dimensions",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "session_signal_events",
+            "name": "dimensions"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "time!",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true,
+      false,
+      null
+    ]
+  },
+  "hash": "f89de9fc7283e0b06403598abb35cd465e45d74ce59050db7ec9a5f57346bdf8"
+}

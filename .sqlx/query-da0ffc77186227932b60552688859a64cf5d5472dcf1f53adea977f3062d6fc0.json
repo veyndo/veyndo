@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO knowledge_hypotheses(tenant,id,kind,evidence) VALUES($1,$2,'bundle-experiment',$3) ON CONFLICT(tenant,id) DO UPDATE SET evidence=EXCLUDED.evidence,updated_at=now(),revision=knowledge_hypotheses.revision+1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Jsonb"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "da0ffc77186227932b60552688859a64cf5d5472dcf1f53adea977f3062d6fc0"
+}
