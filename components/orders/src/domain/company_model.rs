@@ -70,7 +70,8 @@ pub fn resolve(base: &Value, overrides: &Value) -> Value {
             }
         }
     }
-    if value["street"]
+    if view::<CompanyFields>(&value)
+        .street
         .as_str()
         .is_some_and(|s| !s.trim().is_empty())
     {
@@ -262,6 +263,25 @@ pub fn public(
         ));
     }
     public
+}
+
+/// The company fields the master data checks read.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+pub struct CompanyFields {
+    pub logo_id: Value,
+    pub name: Value,
+    pub street: Value,
+}
+
+/// A stored company record with its revisions, as a save request sends it back or `records` returns it.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+pub struct CompanyRecord {
+    pub revision: Value,
+    pub base_revision: Value,
+    pub data: Value,
+    pub inherited: Value,
 }
 
 #[cfg(test)]

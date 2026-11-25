@@ -1,4 +1,5 @@
 //! Selective company identity release copies only linked immutable logo bytes and validates the final company aggregate.
+use crate::domain::company_model::CompanyFields;
 use crate::store::order_mutation::Tx;
 use serde::Deserialize;
 use serde_json::{Value, json};
@@ -25,8 +26,9 @@ pub async fn snapshot(
     Ok(())
 }
 async fn profile(tx: &mut Tx<'_>, t: &str, data: Value) -> Result<Value> {
+    let logo = view::<CompanyFields>(&data).logo_id;
     let mut result = json!({"data":data});
-    if let Some(id) = result["data"]["logoId"].as_str().filter(|s| !s.is_empty()) {
+    if let Some(id) = logo.as_str().filter(|s| !s.is_empty()) {
         let digest: String = sqlx::query_scalar!(
             "SELECT digest FROM company_logos WHERE tenant=$1 AND id=$2",
             t,
@@ -56,7 +58,8 @@ pub async fn publish(
 ) -> Result<()> {
     let input: PublishInput = view(value);
     let mut data = input.data.clone();
-    if let Some(id) = data["logoId"]
+    if let Some(id) = view::<CompanyFields>(&data)
+        .logo_id
         .as_str()
         .filter(|s| !s.is_empty())
         .map(str::to_string)

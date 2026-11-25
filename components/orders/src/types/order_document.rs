@@ -230,3 +230,71 @@ pub struct DeliveryPosition {
 #[derive(Deserialize, Default)]
 #[serde(transparent)]
 pub struct Lines(#[serde(deserialize_with = "lenient_list")] pub Vec<Line>);
+
+/// The lifecycle fields of an order that transitions, carrier documents and receipts read.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+pub struct OrderControl {
+    pub revision: Value,
+    pub state: Value,
+    #[serde(deserialize_with = "lenient")]
+    pub payment: PaymentState,
+    pub deliveries: Value,
+    pub historical_import: Value,
+    pub sales_channel_id: Value,
+}
+
+/// The payment state of an order.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+pub struct PaymentState {
+    pub state: Value,
+}
+
+/// The fields of one delivery that its transitions and carrier documents check.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+pub struct DeliveryControl {
+    pub state: Value,
+    pub label: Value,
+    pub booking: Value,
+}
+
+impl OrderControl {
+    /// The delivery at `index`; a missing one reads as all `null`, as indexing did.
+    pub fn delivery(&self, index: usize) -> DeliveryControl {
+        self.deliveries
+            .get(index)
+            .map(veyndo_core::document::view)
+            .unwrap_or_default()
+    }
+}
+
+#[cfg(test)]
+mod control_tests {
+    use super::OrderControl;
+    use serde_json::json;
+    use veyndo_core::document::view;
+
+    #[test]
+    fn the_typed_order_control_reads_exactly_what_indexing_read() {
+        for o in [
+            json!({"revision":3,"state":"placed","payment":{"state":"paid"},"deliveries":[{"state":"open","booking":{"sourceApp":"dhl"}},{"state":"shipped","label":{"id":"d"}}],"historicalImport":null,"salesChannelId":"b2b"}),
+            json!({"revision":"3","payment":null,"deliveries":{"0":{}}}),
+            json!(null),
+        ] {
+            let c: OrderControl = view(&o);
+            assert_eq!(c.revision, o["revision"]);
+            assert_eq!(c.state, o["state"]);
+            assert_eq!(c.payment.state, o["payment"]["state"]);
+            assert_eq!(c.historical_import, o["historicalImport"]);
+            assert_eq!(c.sales_channel_id, o["salesChannelId"]);
+            for i in 0..3 {
+                let d = c.delivery(i);
+                assert_eq!(d.state, o["deliveries"][i]["state"]);
+                assert_eq!(d.label, o["deliveries"][i]["label"]);
+                assert_eq!(d.booking, o["deliveries"][i]["booking"]);
+            }
+        }
+    }
+}

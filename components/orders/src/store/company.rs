@@ -1,7 +1,8 @@
 //! Revisioned tenant company basis and sparse channel overrides, serialized with receipt issuance.
-use crate::domain::company_model;
+use crate::domain::company_model::{self, CompanyFields, CompanyRecord};
 use serde_json::{Value, json};
 use sqlx::{Postgres, Transaction};
+use veyndo_core::document::view;
 use veyndo_core::{
     Error, RequestContext, Result, State, StatusCode, bad, conflict, store::history_context,
 };
@@ -75,7 +76,9 @@ pub async fn save(
     v: Value,
     channel: Option<&str>,
 ) -> Result<Value> {
-    let expected = v["revision"]
+    let request: CompanyRecord = view(&v);
+    let expected = request
+        .revision
         .as_i64()
         .filter(|n| *n >= 0)
         .ok_or(bad("revision required"))?;
@@ -89,20 +92,20 @@ pub async fn save(
     .fetch_one(&mut *tx)
     .await?;
     let settings = decode(raw)?;
-    company_model::validate(&v["data"], &settings, channel.is_some())?;
-    let current = records(&mut tx, t, channel).await?;
-    if current["revision"].as_i64() != Some(expected)
-        || channel.is_some() && current["baseRevision"] != v["baseRevision"]
+    company_model::validate(&request.data, &settings, channel.is_some())?;
+    let current: CompanyRecord = view(&records(&mut tx, t, channel).await?);
+    if current.revision.as_i64() != Some(expected)
+        || channel.is_some() && current.base_revision != request.base_revision
     {
         return Err(conflict("Company settings changed; reload before saving"));
     }
     let data = if channel.is_some() {
-        v["data"].clone()
+        request.data.clone()
     } else {
-        company_model::resolve(&v["data"], &json!({}))
+        company_model::resolve(&request.data, &json!({}))
     };
     let effective = if channel.is_some() {
-        company_model::resolve(&current["inherited"], &data)
+        company_model::resolve(&current.inherited, &data)
     } else {
         data.clone()
     };
@@ -117,7 +120,8 @@ pub async fn save(
             company_model::validate(&company_model::resolve(&data, &patch), &settings, false)?;
         }
     }
-    if let Some(logo) = effective["logoId"].as_str().filter(|s| !s.is_empty()) {
+    let effective_logo = view::<CompanyFields>(&effective).logo_id;
+    if let Some(logo) = effective_logo.as_str().filter(|s| !s.is_empty()) {
         let owned: bool = sqlx::query_scalar!(
             r#"SELECT EXISTS(SELECT 1 FROM company_logos WHERE tenant=$1 AND id=$2) AS "exists!""#,
             t,
@@ -147,8 +151,8 @@ pub async fn save(
 }
 pub async fn seller(tx: &mut Transaction<'_, Postgres>, t: &str, channel: &str) -> Result<Value> {
     lock(tx, t).await?;
-    let basis = records(tx, t, None).await?;
-    if basis["revision"] == 0 {
+    let basis: CompanyRecord = view(&records(tx, t, None).await?);
+    if basis.revision == 0 {
         return Err(bad("Configure seller details before creating receipts"));
     }
     let patch: Option<Value> = sqlx::query_scalar!(
@@ -159,7 +163,7 @@ pub async fn seller(tx: &mut Transaction<'_, Postgres>, t: &str, channel: &str) 
     .fetch_optional(&mut **tx)
     .await?;
     Ok(company_model::resolve(
-        &basis["data"],
+        &basis.data,
         &patch.unwrap_or(json!({})),
     ))
 }
@@ -187,7 +191,8 @@ pub async fn validate_release(tx: &mut Transaction<'_, Postgres>, t: &str) -> Re
         );
         for value in values {
             company_model::validate(&value, &settings, false)?;
-            if let Some(id) = value["logoId"].as_str().filter(|s| !s.is_empty()) {
+            let logo = view::<CompanyFields>(&value).logo_id;
+            if let Some(id) = logo.as_str().filter(|s| !s.is_empty()) {
                 let exists: bool = sqlx::query_scalar!(r#"SELECT EXISTS(SELECT 1 FROM company_logos WHERE tenant=$1 AND id=$2) AS "exists!""#, t, id)
                 .fetch_one(&mut **tx)
                 .await?;
@@ -207,7 +212,7 @@ pub async fn public_source(
     channel: &str,
 ) -> Result<(Value, Option<String>)> {
     lock(tx, t).await?;
-    let base = records(tx, t, None).await?;
+    let base: CompanyRecord = view(&records(tx, t, None).await?);
     let patch: Option<Value> = sqlx::query_scalar!(
         "SELECT data FROM company_overrides WHERE tenant=$1 AND channel_id=$2",
         t,
@@ -215,10 +220,11 @@ pub async fn public_source(
     )
     .fetch_optional(&mut **tx)
     .await?;
-    let data = company_model::resolve(&base["data"], &patch.unwrap_or(json!({})));
+    let data = company_model::resolve(&base.data, &patch.unwrap_or(json!({})));
     // Unconfigured shop presentation uses its chosen name, never a fabricated legal issuer.
     let default_brand: Option<String> = if data.get("brandName").is_none_or(Value::is_null)
-        && data["name"]
+        && view::<CompanyFields>(&data)
+            .name
             .as_str()
             .is_none_or(|name| name.trim().is_empty())
     {

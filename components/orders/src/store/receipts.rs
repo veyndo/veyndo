@@ -1,6 +1,7 @@
 //! Idempotent immutable invoices/delivery notes with transactional per-shop number ranges.
 use crate::ports::Payments;
 use crate::store::company;
+use crate::types::order_document::OrderControl;
 use serde::Deserialize;
 use serde_json::{Value, json};
 use veyndo_core::document::{lenient, view};
@@ -30,6 +31,15 @@ struct ListedReceipt {
     locale: String,
     created: String,
 }
+/// The parts of an original invoice a cancellation repeats.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct OriginalInvoice {
+    seller: Value,
+    order: Value,
+    number: Value,
+}
+
 /// A receipt request: its idempotency key, kind, language, the order revision it was shown and what it refers to.
 #[derive(Deserialize, Default)]
 #[serde(default, rename_all = "camelCase")]
@@ -103,12 +113,13 @@ pub async fn create(
     }
     let r=sqlx::query!(r#"SELECT data #- '{cart,token}' AS "data!",created_at::text AS created FROM orders WHERE tenant=$1 AND id=$2 FOR UPDATE"#, t, id).fetch_optional(&mut *tx).await?.ok_or(Error(StatusCode::NOT_FOUND,"Order not found".into()))?;
     let order: Value = r.data;
-    if !order["historicalImport"].is_null() {
+    let control: OrderControl = view(&order);
+    if !control.historical_import.is_null() {
         return Err(conflict(
             "Historical invoices must be imported as original documents; no new invoice may be issued",
         ));
     }
-    if order["revision"] != input.revision {
+    if control.revision != input.revision {
         return Err(conflict("Order revision changed"));
     }
     let package = if let Some(index) = v.get("deliveryIndex") {
@@ -120,7 +131,8 @@ pub async fn create(
             .and_then(|n| usize::try_from(n).ok())
             .ok_or(bad("Invalid delivery note package"))?;
         Some(
-            order["deliveries"]
+            control
+                .deliveries
                 .as_array()
                 .and_then(|v| v.get(index))
                 .ok_or(bad("Delivery note package unavailable"))?
@@ -132,7 +144,7 @@ pub async fn create(
     let seller = company::seller(
         &mut tx,
         t,
-        order["salesChannelId"].as_str().unwrap_or("default"),
+        control.sales_channel_id.as_str().unwrap_or("default"),
     )
     .await?;
     let reference = if kind == "cancellation" {
@@ -145,7 +157,7 @@ pub async fn create(
         if exists {
             return Err(conflict("Invoice already cancelled"));
         }
-        Some(original)
+        Some(view::<OriginalInvoice>(&original))
     } else {
         None
     };
@@ -169,7 +181,7 @@ pub async fn create(
     };
     let number = format!("{prefix}-{number:08}");
     let receipt = uid();
-    let mut snapshot = json!({"number":number,"kind":kind,"locale":locale,"seller":if let Some(ref original)=reference{original["seller"].clone()}else{seller},"order":if let Some(ref original)=reference{original["order"].clone()}else{order.clone()},"issuedAt":sqlx::query_scalar!("SELECT now()::text").fetch_one(&mut *tx).await?,"referenceId":input.reference_id,"referenceNumber":reference.map(|s|s["number"].clone())});
+    let mut snapshot = json!({"number":number,"kind":kind,"locale":locale,"seller":if let Some(ref original)=reference{original.seller.clone()}else{seller},"order":if let Some(ref original)=reference{original.order.clone()}else{order.clone()},"issuedAt":sqlx::query_scalar!("SELECT now()::text").fetch_one(&mut *tx).await?,"referenceId":input.reference_id,"referenceNumber":reference.map(|s|s.number.clone())});
     if let Some(instructions) = payment_instructions {
         snapshot["paymentInstructions"] = instructions;
     }

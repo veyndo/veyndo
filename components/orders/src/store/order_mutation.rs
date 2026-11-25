@@ -38,6 +38,14 @@ pub struct Audit<'a> {
     pub event: Value,
 }
 
+/// The change kind and target state an audit entry records.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct AuditFields {
+    kind: Value,
+    state: Value,
+}
+
 /// The identity, revision and import origin of an order being persisted.
 #[derive(Deserialize, Default)]
 #[serde(default, rename_all = "camelCase")]
@@ -84,7 +92,7 @@ pub async fn persist(
     .execute(&mut **tx)
     .await?;
     sqlx::query!("UPDATE carts SET data=jsonb_set(carts.data,'{order}',$1) FROM orders o WHERE carts.tenant=$2 AND carts.id=o.cart_id AND o.tenant=$2 AND o.id=$3", &*o, t, id).execute(&mut **tx).await?;
-    veyndo_core::store::outbox::publish_on(&mut **tx, t, "order.updated", &json!({"orderId":id,"kind":audit.data["kind"],"state":audit.data["state"],"revision":stored.revision})).await?;
+    veyndo_core::store::outbox::publish_on(&mut **tx, t, "order.updated", &json!({"orderId":id,"kind":view::<AuditFields>(&audit.data).kind,"state":view::<AuditFields>(&audit.data).state,"revision":stored.revision})).await?;
     veyndo_core::store::outbox::publish_on(&mut **tx, t, audit.event_kind, &audit.event).await?;
     Ok(())
 }

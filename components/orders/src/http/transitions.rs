@@ -5,6 +5,7 @@ use crate::domain::order_transitions::{cancellation_blocker, delivery, payment};
 use crate::domain::order_workflow::{guard, workflow};
 use crate::store::machine::machine;
 use crate::store::order_mutation;
+use crate::types::order_document::OrderControl;
 use axum::Json;
 use axum::extract::{Path, State as Shared};
 use serde::Deserialize;
@@ -77,8 +78,9 @@ pub async fn transition_order(
         .ok_or(Error(StatusCode::NOT_FOUND, "Order not found".into()))?;
     // The stored order before this transition, for history and events.
     let from = o.clone();
+    let before: OrderControl = view(&from);
     let (machine, machine_revision) = accepted_machine(&o, machine, machine_revision)?;
-    let revision = o["revision"].as_i64().unwrap_or(1);
+    let revision = before.revision.as_i64().unwrap_or(1);
     if !verified_kernel::revision_admissible(
         u64::try_from(revision).unwrap_or(0),
         input.revision.unwrap_or(0),
@@ -89,7 +91,7 @@ pub async fn transition_order(
     let kind = input.kind.as_deref().ok_or(bad("Kind required"))?;
     match kind {
         "order" => {
-            let current = o["state"].as_str().unwrap_or("placed");
+            let current = before.state.as_str().unwrap_or("placed");
             let edge = machine
                 .transitions
                 .iter()
@@ -157,9 +159,9 @@ pub async fn transition_order(
     }
     order_mutation::persist(&mut tx, &t, &h, &mut o, order_mutation::Audit {
         kind:"transition",
-        data:json!({"kind":kind,"state":target,"revision":revision+1,"trackingCode":input.tracking_code,"trackingUrl":input.tracking_url,"deliveryIndex":input.delivery_index,"requestKey":request_key,"lifecycle":if kind=="order" {machine.transitions.iter().find(|e|e.to==target && e.from==from["state"]).and_then(|e|e.policy.as_ref())} else {None}}),
+        data:json!({"kind":kind,"state":target,"revision":revision+1,"trackingCode":input.tracking_code,"trackingUrl":input.tracking_url,"deliveryIndex":input.delivery_index,"requestKey":request_key,"lifecycle":if kind=="order" {machine.transitions.iter().find(|e|e.to==target && e.from==before.state).and_then(|e|e.policy.as_ref())} else {None}}),
         event_kind,
-        event:json!({"orderId":id,"kind":kind,"from":if kind=="order" {from["state"].clone()} else if kind=="payment" {from["payment"]["state"].clone()} else {from["deliveries"][input.delivery_index.as_u64().unwrap_or(0) as usize]["state"].clone()},"state":target,"revision":revision+1,"requestKey":request_key,"order":event_order}),
+        event:json!({"orderId":id,"kind":kind,"from":if kind=="order" {before.state.clone()} else if kind=="payment" {before.payment.state.clone()} else {before.delivery(input.delivery_index.as_u64().unwrap_or(0) as usize).state},"state":target,"revision":revision+1,"requestKey":request_key,"order":event_order}),
     }).await?;
     let mut response = o.clone();
     if let Some(cart) = response["cart"].as_object_mut() {

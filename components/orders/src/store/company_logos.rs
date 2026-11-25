@@ -1,5 +1,7 @@
 //! Tenant-owned company logos: deduplicated immutable PNGs, delivered publicly only while a channel links them.
+use crate::domain::company_model;
 use crate::store::company;
+use veyndo_core::document::view;
 use veyndo_core::{Error, Result, State, StatusCode, bad, uid};
 
 /// Stores a normalized logo once per content digest and returns its ID; a shop keeps at most 50.
@@ -68,7 +70,7 @@ pub async fn admit_public(a: &State, t: &str, channel: &str, id: &str) -> Result
     let mut tx = a.db.begin().await?;
     let effective = company::seller(&mut tx, t, channel).await?;
     tx.commit().await?;
-    if effective["logoId"] != id {
+    if view::<company_model::CompanyFields>(&effective).logo_id != id {
         return Err(Error(
             StatusCode::NOT_FOUND,
             "Company logo is not linked to this channel".into(),
