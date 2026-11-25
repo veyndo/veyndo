@@ -3,7 +3,7 @@ use crate::store::access::{access, catalog_guard, guard_conn, require};
 use crate::types::model::{Access, Context};
 use serde::Deserialize;
 use serde_json::{Value, json};
-use veyndo_core::document::{lenient, view};
+use veyndo_core::document::{lenient, merge, view};
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad, conflict, hash};
 use veyndo_kernel::verified_kernel;
 use veyndo_shop::types::cart::StoredCart;
@@ -233,7 +233,10 @@ pub async fn preview(a: &State, c: &StoredCart, q: &mut Value) -> Result<()> {
     )
     .fetch_optional(&mut *tx)
     .await?;
-    q["b2b"] = json!({"companyId":policy.company_id,"company":policy.company.name,"unitId":context.unit_id,"unit":policy.unit.name,"purchaseOrder":context.purchase_order,"purchaseOrderRequired":policy.unit.require_purchase_order,"quoteId":context.quote_id,"costCenter":policy.unit.cost_center,"currency":policy.unit.currency,"budgetPeriod":period,"budgetMinor":policy.unit.budget_minor,"spentMinor":spent,"quotesAllowed":policy.member.allows("quotes"),"approvalRequired":needs_approval(&policy,total),"approval":approval.map(|r|json!({"id":r.id.clone(),"state":r.state.clone()})),"budgetAvailable":policy.unit.budget_minor.is_none_or(|limit|verified_kernel::b2b_budget_admissible(limit,spent,total))});
+    merge(
+        q,
+        json!({"b2b":{"companyId":policy.company_id,"company":policy.company.name,"unitId":context.unit_id,"unit":policy.unit.name,"purchaseOrder":context.purchase_order,"purchaseOrderRequired":policy.unit.require_purchase_order,"quoteId":context.quote_id,"costCenter":policy.unit.cost_center,"currency":policy.unit.currency,"budgetPeriod":period,"budgetMinor":policy.unit.budget_minor,"spentMinor":spent,"quotesAllowed":policy.member.allows("quotes"),"approvalRequired":needs_approval(&policy,total),"approval":approval.map(|r|json!({"id":r.id.clone(),"state":r.state.clone()})),"budgetAvailable":policy.unit.budget_minor.is_none_or(|limit|verified_kernel::b2b_budget_admissible(limit,spent,total))}}),
+    )?;
     Ok(())
 }
 

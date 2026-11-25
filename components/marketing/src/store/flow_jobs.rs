@@ -1,5 +1,6 @@
 //! PostgreSQL ownership of Flow claims, cursor checkpoints and terminal results.
 use serde_json::Value;
+use veyndo_core::store::shop_activity;
 use veyndo_core::{Result, State, conflict};
 
 pub struct Claim {
@@ -14,19 +15,27 @@ pub struct Claim {
 pub async fn claim(a: &State) -> Result<Option<Claim>> {
     // An expired claim can have dispatched an effect. Preserve uncertainty.
     sqlx::query!("UPDATE flow_jobs SET state='uncertain',error='Worker stopped before result confirmation' WHERE state='running' AND lease_until<now()").execute(&a.db).await?;
+    // Only shops whose live shop is active run flows; the shops with ready jobs are checked by core first.
+    let ready: Vec<String> = sqlx::query_scalar!(
+        "SELECT DISTINCT tenant FROM flow_jobs WHERE state='queued' AND available_at<=now()"
+    )
+    .fetch_all(&a.db)
+    .await?;
+    if ready.is_empty() {
+        return Ok(None);
+    }
+    let active = shop_activity::active(a, &ready).await?;
     let row = sqlx::query!(
         "WITH ready AS (
            SELECT id FROM flow_jobs
-           WHERE state='queued' AND available_at<=now()
-             AND EXISTS(SELECT 1 FROM tenants t WHERE t.id=coalesce(
-               (SELECT live_tenant FROM shop_environments WHERE tenant=flow_jobs.tenant),
-               flow_jobs.tenant) AND t.status='active')
+           WHERE state='queued' AND available_at<=now() AND tenant=ANY($1)
            ORDER BY available_at,event_id LIMIT 1 FOR UPDATE SKIP LOCKED
          )
          UPDATE flow_jobs j SET state='running',attempts=j.attempts+1,
            lease_until=now()+interval '5 minutes'
          FROM ready WHERE j.id=ready.id
-         RETURNING j.id,j.tenant,j.definition,j.cursor,j.execution,j.attempts"
+         RETURNING j.id,j.tenant,j.definition,j.cursor,j.execution,j.attempts",
+        &active
     )
     .fetch_optional(&a.db)
     .await?;

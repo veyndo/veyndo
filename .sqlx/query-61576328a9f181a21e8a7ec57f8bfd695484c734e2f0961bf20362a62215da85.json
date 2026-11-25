@@ -1,26 +1,26 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT role AS \"role!\",permissions AS \"permissions!\" FROM membership_grants WHERE tenant=COALESCE((SELECT live_tenant FROM shop_environments WHERE tenant=$1),$1) AND user_id=$2 AND active",
+  "query": "SELECT m.role,m.permissions FROM user_sessions s JOIN memberships m ON m.user_id=s.user_id WHERE s.digest=$1 AND m.tenant=$2 AND s.expires_at>now() AND m.active",
   "describe": {
     "columns": [
       {
         "ordinal": 0,
-        "name": "role!",
+        "name": "role",
         "type_info": "Text",
         "origin": {
           "Table": {
-            "table": "membership_grants",
+            "table": "memberships",
             "name": "role"
           }
         }
       },
       {
         "ordinal": 1,
-        "name": "permissions!",
+        "name": "permissions",
         "type_info": "Jsonb",
         "origin": {
           "Table": {
-            "table": "membership_grants",
+            "table": "memberships",
             "name": "permissions"
           }
         }
@@ -33,9 +33,9 @@
       ]
     },
     "nullable": [
-      true,
-      true
+      false,
+      false
     ]
   },
-  "hash": "eb12228f29de914301136d9e87a72a709ecbaa3ff4453f96da001b6061139a69"
+  "hash": "61576328a9f181a21e8a7ec57f8bfd695484c734e2f0961bf20362a62215da85"
 }

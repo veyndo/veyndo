@@ -1,5 +1,6 @@
 //! Resolve only referenced tenant rule IDs with indexed batched reads; freeze active definitions and revisions into the event snapshot.
 use serde_json::{Value, json};
+use veyndo_core::document::merge;
 use veyndo_core::{Result, bad};
 pub async fn attach(
     conn: &mut sqlx::PgConnection,
@@ -51,6 +52,6 @@ pub async fn attach(
             snapshot[&id] = json!({"condition":condition,"active":row.active.clone(),"revision":row.revision.clone()});
         }
     }
-    facts["rules"] = snapshot;
+    merge(facts, json!({ "rules": snapshot }))?;
     Ok(())
 }

@@ -431,6 +431,15 @@ comment at the top of every Rust source. File length is not limited; clippy limi
 the length of a single function, and [the component map](component-dependencies.md)
 limits which component may use which code and tables.
 
+A component reads or changes another component's table only through that owner's
+store. When it already depends on the owner it calls the owner's store function on
+its own connection. Otherwise it declares a records port in its `ports.rs` (for
+example `veyndo_b2b::ports::Records` and `veyndo_marketing::ports::Records`), the
+server implements it in `src/ports/<component>.rs` by calling the owners' store
+functions, and `bootstrap.rs` installs it once before any request or worker runs.
+Port methods take the caller's connection, so a statement keeps its transaction
+and locks.
+
 The five domain crates (`kernel`, `commerce`, `apps`, `cognition`, `runtime`) have
 explicit dependency boundaries checked against real Cargo metadata. New helper
 packages, external dependencies and build scripts require review; renaming a

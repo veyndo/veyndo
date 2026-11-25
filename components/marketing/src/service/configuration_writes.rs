@@ -16,7 +16,7 @@ use serde::Deserialize;
 use serde_json::{Value, json};
 use sqlx::{Postgres, Transaction};
 use veyndo_app_model::declarations::identifier;
-use veyndo_core::document::{Raw, lenient, view};
+use veyndo_core::document::{Raw, lenient, merge, view};
 use veyndo_core::shop_scope::header;
 use veyndo_core::store::environments::parent;
 use veyndo_core::{RequestContext, Result, State, bad, conflict, store::history_context};
@@ -40,34 +40,42 @@ pub async fn list(a: &State, h: &RequestContext) -> Result<Value> {
     {
         permit(h, "automation.read")?;
     }
-    let mut result = json!({});
+    let mut result = serde_json::Map::new();
     for kind in ["rules", "promotions", "flows", "channels"] {
         if !allowed(h, configuration_right(kind, false)?) {
-            result[kind] = json!([]);
+            result.insert(kind.into(), json!([]));
             continue;
         }
         let rows = rows::list(a, &t, kind).await?;
-        result[kind] = json!(
-            rows.into_iter()
-                .map(|r| json!({"id":r.id,"data":r.data,"revision":r.revision}))
-                .collect::<Vec<_>>()
+        result.insert(
+            kind.into(),
+            json!(
+                rows.into_iter()
+                    .map(|r| json!({"id":r.id,"data":r.data,"revision":r.revision}))
+                    .collect::<Vec<_>>()
+            ),
         );
     }
     let settings = config(a, &t).await?.0;
-    if let Some(channels) = result["channels"].as_array_mut() {
+    if let Some(channels) = result.get_mut("channels").and_then(Value::as_array_mut) {
         for channel in channels
             .iter_mut()
             .filter(|c| view::<Identified>(c).id == "default")
         {
-            channel["data"]["locales"] = json!(settings.locales);
+            // A channel row is an object; its document slot is created when missing, as indexing did.
+            if let Some(row) = channel.as_object_mut() {
+                let data = row.entry("data").or_insert(Value::Null);
+                merge(data, json!({ "locales": settings.locales }))?;
+            }
         }
     }
-    result["jobs"] = if allowed(h, "automation.read") {
+    let jobs = if allowed(h, "automation.read") {
         job_values(a, &t, h).await?
     } else {
         json!([])
     };
-    Ok(result)
+    result.insert("jobs".into(), jobs);
+    Ok(Value::Object(result))
 }
 
 /// Records the publishing actor; queued work rechecks that actor's current rights.
@@ -226,7 +234,7 @@ async fn admit(a: &State, kind: &str, id: &str, data: &mut Value, t: &str) -> Re
             }
         }
         "flows" => {}
-        "channels" => normalize_channel(data, id, &settings),
+        "channels" => normalize_channel(data, id, &settings)?,
         _ => unreachable!(),
     }
     settings

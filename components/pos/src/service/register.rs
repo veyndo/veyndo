@@ -2,22 +2,25 @@
 use crate::domain::input::Input;
 use crate::ports::Register;
 use crate::service::{customer, discount};
-use crate::store::{carts, register};
 use serde::Deserialize;
 use serde_json::{Value, json};
 use veyndo_app_model::declarations::identifier;
+use veyndo_catalog::store::barcodes;
 use veyndo_catalog::types::catalog_page::CatalogCriteria;
 use veyndo_checkout::service::checkout_options;
 use veyndo_checkout::store::cart_create::new_cart_context;
-use veyndo_core::document::{lenient, view};
+use veyndo_checkout::store::register_carts;
+use veyndo_core::document::{lenient, merge, view};
 use veyndo_core::request_context::PosAdmission as Admission;
 use veyndo_core::shop_scope::header;
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad};
 use veyndo_identity::{merchant, permit};
 use veyndo_intelligence::http::legal;
 use veyndo_marketing::service::{channels, coupons};
+use veyndo_marketing::store::pos_channels;
 use veyndo_marketing::types::channel::Channel;
 use veyndo_orders::domain::receipt_text;
+use veyndo_orders::store::channel_sales;
 use veyndo_payments::http::status::read_sale;
 use veyndo_payments::store::commands;
 use veyndo_shop::service::language::language_context;
@@ -27,7 +30,7 @@ use veyndo_shop::service::read_cache::settings;
 pub async fn channels(a: &State, h: &RequestContext) -> Result<Value> {
     let t = merchant(h)?;
     permit(h, "pos.use")?;
-    let rows = register::channels(a, &t).await?;
+    let rows = pos_channels::channels(a, &t).await?;
     let config = settings(a, &t, "default").await?.0;
     Ok(
         json!({"channels":rows.iter().map(|r|json!({"id":r.id,"data":r.data,"revision":r.revision})).collect::<Vec<_>>(),"mainLocale":config.main_locale}),
@@ -159,7 +162,7 @@ pub async fn invoke(
         }
         "context" => {
             let mut v = register_context(reg, a, &h).await?;
-            v["channel"] = json!(data);
+            merge(&mut v, json!({"channel":data}))?;
             Ok(v)
         }
         "detail" => {
@@ -205,10 +208,10 @@ async fn cart_operation(
                 .clone();
             selection.shipping_method_id = "pickup".into();
             selection.payment_method_id = "pos-cash".into();
-            carts::set_data(a, &json!(c.data), t, &c.id).await?;
+            register_carts::set_data(a, &json!(c.data), t, &c.id).await?;
             let mut v = register_context(reg, a, &h).await?;
-            v["cart"] = reg.carts().view(&c).await?;
-            v["channel"] = json!(data);
+            let cart = reg.carts().view(&c).await?;
+            merge(&mut v, json!({"cart":cart,"channel":data}))?;
             Ok(v)
         }
         "cart" => reg.carts().view(&reg.carts().load(&h).await?).await,
@@ -301,14 +304,14 @@ async fn listing(
         .ok_or(bad("Cashier identity required"))?;
     match op {
         "held" => {
-            let rows = carts::held(a, t, channel, &actor).await?;
+            let rows = register_carts::held(a, t, channel, &actor).await?;
             Ok(
                 json!({"elements":rows.iter().map(|r|json!({"token":r.token,"revision":r.revision,"items":r.items})).collect::<Vec<_>>() }),
             )
         }
         "sales" => {
             permit(&h, "orders.read")?;
-            let rows = register::sales(a, t, channel).await?;
+            let rows = channel_sales::sales(a, t, channel).await?;
             Ok(
                 json!({"elements":rows.iter().map(|r|json!({"id":r.id,"number":r.number,"money":r.money,"paymentState":r.payment,"pos":r.pos,"createdAt":r.created})).collect::<Vec<_>>() }),
             )
@@ -324,7 +327,7 @@ async fn listing(
                 if barcode.is_empty() || barcode.len() > 100 {
                     return Err(bad("Invalid barcode"));
                 }
-                let ids = register::barcode(a, t, &barcode).await?;
+                let ids = barcodes::barcode(a, t, &barcode).await?;
                 if ids.len() != 1 {
                     return Err(bad("Barcode is missing or ambiguous in this shop"));
                 }

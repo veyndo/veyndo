@@ -1,13 +1,13 @@
 //! Assemble private server-owned rule context once per quote/event; never publish customer facts in cart responses.
 use crate::domain::line_facts::line;
+use crate::ports::records;
 use crate::store::customer_facts::customer;
 use serde::Deserialize;
 use serde_json::{Value, json};
-use sqlx::Row;
 use veyndo_catalog::domain::family::inherited_extra;
-use veyndo_catalog::store::products::product;
+use veyndo_catalog::store::rule_products;
 use veyndo_core::Result;
-use veyndo_core::document::{Raw, lenient, view};
+use veyndo_core::document::{Raw, lenient, merge, view};
 use veyndo_shop::types::cart::{StoredCart, selection};
 /// The quote fields rule facts are assembled from.
 #[derive(Deserialize, Default)]
@@ -44,36 +44,26 @@ pub async fn rule_facts(conn: &mut sqlx::PgConnection, c: &StoredCart, q: &Value
         .iter()
         .map(|i| i.id.clone())
         .collect::<Vec<_>>();
-    // dynamic SQL: complete product rows feed the catalog's shared hydrator `product(&PgRow)`, which owns the column list.
-    let rows = sqlx::query("SELECT * FROM products WHERE tenant=$1 AND id=ANY($2)")
-        .bind(&c.tenant)
-        .bind(&ids)
-        .fetch_all(&mut *conn)
-        .await?;
+    let rows = rule_products::by_ids(conn, &c.tenant, &ids).await?;
     let parent_ids = rows
         .iter()
-        .filter_map(|r| r.get::<Option<String>, _>("parent_id"))
+        .filter_map(|p| p.parent_id.clone())
         .collect::<Vec<_>>();
-    // dynamic SQL: complete product rows feed the catalog's shared hydrator `product(&PgRow)`, which owns the column list.
-    let parents = sqlx::query("SELECT * FROM products WHERE tenant=$1 AND id=ANY($2)")
-        .bind(&c.tenant)
-        .bind(parent_ids)
-        .fetch_all(&mut *conn)
-        .await?;
+    let parents = rule_products::by_ids(conn, &c.tenant, &parent_ids).await?;
     let mut lines = vec![];
     let quote: FactsQuote = view(q);
     for item in quote.line_items.iter().flatten() {
         let referenced = view::<ItemReference>(item).referenced_id;
         if let Some(r) = rows
             .iter()
-            .find(|r| Some(r.get::<String, _>("id").as_str()) == referenced.as_deref())
+            .find(|r| Some(r.id.as_str()) == referenced.as_deref())
         {
-            let mut p = product(r);
+            let mut p = r.clone();
             if let Some(parent) = parents
                 .iter()
-                .find(|r| Some(r.get::<String, _>("id").as_str()) == p.parent_id.as_deref())
+                .find(|r| Some(r.id.as_str()) == p.parent_id.as_deref())
             {
-                p.extra = inherited_extra(&product(parent).extra, &p.extra);
+                p.extra = inherited_extra(&parent.extra, &p.extra);
             }
             lines.push(line(&p, item));
         }
@@ -81,20 +71,35 @@ pub async fn rule_facts(conn: &mut sqlx::PgConnection, c: &StoredCart, q: &Value
     let selected = selection(&c.data);
     let totals = lines.iter().map(view::<LineTotals>).collect::<Vec<_>>();
     let mut facts = json!({"lines":lines,"price":quote.price.raw,"shippingCosts":quote.shipping_costs,"checkout":selected,"salesChannel":c.data.sales_channel,"currency":quote.price.currency,"language":if c.data.locale.is_empty(){"en-GB"}else{&c.data.locale},"adminSource":false,"goodsCount":lines.len(),"lineCount":lines.len(),"goodsPrice":totals.iter().map(|l|l.total_price.as_f64().unwrap_or(0.)).sum::<f64>(),"weight":totals.iter().map(|l|l.weight.as_f64().unwrap_or(0.)*l.quantity.as_f64().unwrap_or(0.)).sum::<f64>(),"volume":totals.iter().map(|l|l.volume.as_f64().unwrap_or(0.)*l.quantity.as_f64().unwrap_or(0.)).sum::<f64>(),"hasDeliveryFreeItem":totals.iter().any(|l|l.shipping_free==true),"promotionCount":quote.discounts.as_ref().map(Vec::len).unwrap_or(0),"promotionValue":quote.discount_total.unwrap_or(0.)});
+    let mut addresses = serde_json::Map::new();
     for (key, address) in [
         ("billing", selected.billing_address),
         ("shipping", selected.address),
     ] {
-        facts[key]=address.map(|a|{let mut v=json!(a);v["zipcode"]=view::<PostalCode>(&v).postal_code;v}).unwrap_or(json!({"country":if key=="shipping"{json!(selected.country.clone())}else{Value::Null},"city":null,"street":null,"zipcode":null,"countryStateId":null}));
+        let value = match address {
+            Some(a) => {
+                let mut v = json!(a);
+                let postal = view::<PostalCode>(&v).postal_code;
+                merge(&mut v, json!({ "zipcode": postal }))?;
+                v
+            }
+            None => {
+                json!({"country":if key=="shipping"{json!(selected.country.clone())}else{Value::Null},"city":null,"street":null,"zipcode":null,"countryStateId":null})
+            }
+        };
+        addresses.insert(key.into(), value);
     }
-    facts["customer"] = customer(conn, c, &facts).await?;
-    facts["currentTime"] = json!(
-        sqlx::query_scalar!(
-            r#"SELECT to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD"T"HH24:MI:SS"Z"') AS "now!""#
-        )
-        .fetch_one(&mut *conn)
-        .await?
-    );
+    merge(&mut facts, addresses)?;
+    let customer = customer(conn, c, &facts).await?;
+    let now = sqlx::query_scalar!(
+        r#"SELECT to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD"T"HH24:MI:SS"Z"') AS "now!""#
+    )
+    .fetch_one(&mut *conn)
+    .await?;
+    merge(
+        &mut facts,
+        json!({ "customer": customer, "currentTime": now }),
+    )?;
     Ok(facts)
 }
 /// The order fields order rules read.
@@ -144,13 +149,7 @@ pub async fn order_facts(
     q: &Value,
     facts: &mut Value,
 ) -> Result<()> {
-    let receipts = sqlx::query_scalar!(
-        "SELECT kind FROM order_receipts WHERE tenant=$1 AND order_id=$2",
-        t,
-        id
-    )
-    .fetch_all(&mut *conn)
-    .await?;
+    let receipts = records()?.receipt_kinds(conn, t, id).await?;
     let q: OrderFacts = view(q);
     let deliveries = q
         .deliveries
@@ -158,7 +157,10 @@ pub async fn order_facts(
         .flatten()
         .map(view::<DeliveryFacts>)
         .collect::<Vec<_>>();
-    facts["order"] = json!({"state":q.state,"tags":q.automation.tags.unwrap_or_default(),"customFields":q.automation.custom_fields.unwrap_or_default(),"affiliateCode":q.affiliate_code,"campaignCode":q.campaign_code,"createdByAdmin":q.created_by_admin.unwrap_or(false),"documentTypes":receipts,"sentDocumentTypes":[],"deliveryStates":deliveries.iter().map(|d|d.state.clone()).collect::<Vec<_>>(),"paymentStates":[q.payment.state],"trackingSet":deliveries.iter().any(|d|d.tracking_code.as_deref().is_some_and(|s|!s.is_empty()))});
+    merge(
+        facts,
+        json!({"order":{"state":q.state,"tags":q.automation.tags.unwrap_or_default(),"customFields":q.automation.custom_fields.unwrap_or_default(),"affiliateCode":q.affiliate_code,"campaignCode":q.campaign_code,"createdByAdmin":q.created_by_admin.unwrap_or(false),"documentTypes":receipts,"sentDocumentTypes":[],"deliveryStates":deliveries.iter().map(|d|d.state.clone()).collect::<Vec<_>>(),"paymentStates":[q.payment.state],"trackingSet":deliveries.iter().any(|d|d.tracking_code.as_deref().is_some_and(|s|!s.is_empty()))}}),
+    )?;
     Ok(())
 }
 

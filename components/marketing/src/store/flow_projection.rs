@@ -2,11 +2,12 @@
 use crate::domain::flow_projection::{
     job_definition, orderless, projected, public_event, rule_context,
 };
+use crate::ports::records;
 use crate::store::{facts, rule_snapshot};
 use crate::types::flow::Flow;
 use serde::Deserialize;
 use serde_json::{Value, json};
-use veyndo_core::document::view;
+use veyndo_core::document::{merge, view};
 use veyndo_core::{Result, bad, uid};
 use veyndo_shop::types::cart::StoredCart;
 
@@ -55,19 +56,9 @@ pub async fn project(
     }
     let subject: EventOrder = view(data);
     let order_id = subject.order_id.as_str().unwrap_or("");
-    let order=sqlx::query!("SELECT c.id,c.tenant,c.token,c.data,c.revision,c.status,o.data AS order_data FROM orders o JOIN carts c ON c.id=o.cart_id WHERE o.tenant=$1 AND o.id=$2", t, order_id).fetch_optional(&mut *tx).await?;
-    let (cart, q) = if let Some(order) = order {
-        (
-            super::carts::hydrate(
-                order.id,
-                order.tenant,
-                order.token,
-                (order.data, order.revision, order.status),
-            )?,
-            data.get("order")
-                .cloned()
-                .unwrap_or_else(|| order.order_data.clone()),
-        )
+    let order = records()?.order_cart(tx, t, order_id).await?;
+    let (cart, q) = if let Some((cart, order_data)) = order {
+        (cart, data.get("order").cloned().unwrap_or(order_data))
     } else {
         if !orderless(kind) {
             return Ok(());
@@ -75,10 +66,11 @@ pub async fn project(
         (event_cart(t)?, json!({"cart":{}}))
     };
     let mut context = rule_context(kind, data, &q);
-    context["ruleFacts"] = facts::rule_facts(tx, &cart, &context).await?;
+    let mut rule_facts = facts::rule_facts(tx, &cart, &context).await?;
     if !order_id.is_empty() {
-        facts::order_facts(tx, t, order_id, &q, &mut context["ruleFacts"]).await?;
+        facts::order_facts(tx, t, order_id, &q, &mut rule_facts).await?;
     }
+    merge(&mut context, json!({ "ruleFacts": rule_facts }))?;
     for row in rows {
         let id: String = row.id.clone();
         let raw: Value = row.data.clone();
@@ -94,8 +86,11 @@ pub async fn project(
             continue;
         }
         // Reference limits and malformed definitions belong to this flow, not to the whole outbox event.
+        let mut frozen_facts = rule_facts.clone();
+        let attached = rule_snapshot::attach(tx, t, &raw, &mut frozen_facts).await;
         let mut frozen = context.clone();
-        let matched = match rule_snapshot::attach(tx, t, &raw, &mut frozen["ruleFacts"]).await {
+        merge(&mut frozen, json!({ "ruleFacts": frozen_facts }))?;
+        let matched = match attached {
             Ok(()) => f.condition.checked_matches(&cart, &frozen),
             Err(error) => Err(error),
         };

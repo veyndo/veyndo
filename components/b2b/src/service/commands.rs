@@ -10,7 +10,7 @@ use crate::store::{catalog, organization};
 use crate::types::model::Context;
 use serde::Deserialize;
 use serde_json::{Value, json};
-use veyndo_core::document::{lenient, lenient_list, view};
+use veyndo_core::document::{lenient, lenient_list, merge, view};
 use veyndo_core::shop_scope::tenant;
 use veyndo_core::store::history_context::customer_context;
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad, conflict};
@@ -57,9 +57,15 @@ async fn save_features(
     let input: CommandInput = view(v);
     let config: Config =
         serde_json::from_value(input.data).map_err(|_| bad("Invalid B2B feature configuration"))?;
-    data["b2b"] = json!(config);
+    merge(&mut data, B2bFeatures { b2b: &config })?;
     host.save(h, json!({"revision":input.revision,"data":data}))
         .await
+}
+
+/// The B2B feature configuration a settings save replaces.
+#[derive(serde::Serialize)]
+struct B2bFeatures<'a> {
+    b2b: &'a Config,
 }
 
 /// The input of a procurement command: configuration, company, unit, purchase order and expected revision.
@@ -112,11 +118,9 @@ pub async fn invoke(
         }
         "company.create" => onboarding::create(a, h, v).await,
         "companies" => {
-            let mut value = organization::list(a, &tenant(h)?).await?;
-            if let Some(rows) = value["companies"].as_array_mut() {
-                host.companies(h, rows).await?;
-            }
-            Ok(value)
+            let mut rows = organization::list(a, &tenant(h)?).await?;
+            host.companies(h, &mut rows).await?;
+            Ok(json!({ "companies": rows }))
         }
         "company" => {
             permit(h, "customers.pii")?;
@@ -266,16 +270,16 @@ pub async fn unit_orders(
         .iter()
         .map(|r| {
             let mut p = host.order(&r.data, &r.created);
-            p["b2b"] = r.b2b.clone().unwrap_or(Value::Null);
-            p
+            merge(&mut p, json!({"b2b":r.b2b.clone().unwrap_or(Value::Null)}))?;
+            Ok(p)
         })
-        .collect();
+        .collect::<Result<_>>()?;
     let receipts = if let Some(id) = id {
         units::receipts(&mut tx, &t, id).await?
     } else {
         vec![]
     };
-    let elements:Vec<Value>=elements.into_iter().map(|mut p|{p["stateLabels"]=labels.clone();if let Some(id)=id {p["receipts"]=json!(receipts.iter().map(|r|json!({"id":r.id,"kind":r.kind,"number":r.number,"locale":r.locale,"createdAt":r.created,"pdfPath":format!("/store-api/b2b/units/{unit}/orders/{id}/receipts/{}/pdf",r.id)})).collect::<Vec<_>>());}p}).collect();
+    let elements:Vec<Value>=elements.into_iter().map(|mut p|{merge(&mut p,json!({"stateLabels":labels}))?;if let Some(id)=id {merge(&mut p,json!({"receipts":receipts.iter().map(|r|json!({"id":r.id,"kind":r.kind,"number":r.number,"locale":r.locale,"createdAt":r.created,"pdfPath":format!("/store-api/b2b/units/{unit}/orders/{id}/receipts/{}/pdf",r.id)})).collect::<Vec<_>>()}))?;}Ok(p)}).collect::<Result<_>>()?;
     Ok(json!({"elements":elements}))
 }
 
@@ -313,8 +317,22 @@ struct MethodSummary {
 
 #[cfg(test)]
 mod tests {
+    use super::B2bFeatures;
     use super::bounded;
     use serde_json::json;
+    use veyndo_core::document::merge;
+    use veyndo_shop::types::b2b::Config;
+
+    #[test]
+    fn the_feature_save_replaces_only_the_b2b_section() {
+        let config = Config::default();
+        let settings = json!({"mainLocale":"de-DE","b2b":{"stale":true}});
+        let mut old = settings.clone();
+        old["b2b"] = json!(config);
+        let mut new = settings;
+        merge(&mut new, B2bFeatures { b2b: &config }).unwrap();
+        assert_eq!(new, old);
+    }
 
     #[test]
     fn commands_admit_only_bounded_known_fields() {

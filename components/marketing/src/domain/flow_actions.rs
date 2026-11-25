@@ -48,8 +48,11 @@ pub fn normalize(action: &str, config: &Value) -> Value {
             c[native] = c[source].clone();
         }
     }
-    if action == "action.grant.download.access" && c.get("value").is_none() {
-        c["value"] = json!(true);
+    if action == "action.grant.download.access"
+        && c.get("value").is_none()
+        && let Some(fields) = c.as_object_mut()
+    {
+        fields.insert("value".into(), json!(true));
     }
     c
 }

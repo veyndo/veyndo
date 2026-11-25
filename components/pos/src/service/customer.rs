@@ -1,13 +1,14 @@
 //! Cashier-only customer lookup/card resolution and revision-checked account attachment; never issues customer credentials.
 use crate::service::guard;
-use crate::store::carts as cart_rows;
-use crate::store::customers;
 use serde::Deserialize;
 use serde_json::{Value, json};
+use veyndo_checkout::store::carts::{self, CartRow};
+use veyndo_checkout::store::register_carts;
 use veyndo_core::document::view;
 use veyndo_core::shop_scope::{tenant, token};
 use veyndo_core::{RequestContext, Result, State, bad, conflict};
 use veyndo_customers::service::address_book;
+use veyndo_customers::store::cashier as customers;
 use veyndo_identity::permit;
 use veyndo_shop::ports::Carts;
 use veyndo_shop::types::cart::selection;
@@ -38,8 +39,10 @@ pub async fn select(
     permit(h, "customers.pii")?;
     permit(h, "orders.write")?;
     let mut tx = a.db.begin().await?;
-    let mut c = cart_rows::lock(&mut tx, &tenant(h)?, token(h)?)
+    let mut c = carts::lock_by_token(&mut tx, &tenant(h)?, token(h)?)
         .await?
+        .map(CartRow::into_cart)
+        .transpose()?
         .ok_or(bad("Cart unavailable"))?;
     guard::cart(h, &c)?;
     if c.data.pos_actor.is_none() || c.status != "open" || c.revision != revision {
@@ -77,7 +80,7 @@ pub async fn select(
             "Customer pricing requires a different available payment; change payment first",
         ));
     }
-    cart_rows::save(&mut tx, &json!(c.data), c.revision, &c.tenant, &c.id).await?;
+    register_carts::save(&mut tx, &json!(c.data), c.revision, &c.tenant, &c.id).await?;
     veyndo_core::store::outbox::publish_on(&mut *tx, &c.tenant, "pos.customer_selected", &json!({"cartId":c.id,"customerId":id,"cashierId":h.pos.as_ref().map(|p|&p.actor),"salesChannelId":c.data.sales_channel})).await?;
     tx.commit().await?;
     Ok(quote)

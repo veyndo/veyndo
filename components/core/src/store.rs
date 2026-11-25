@@ -20,4 +20,5 @@ pub mod read_context;
 pub mod resource_limits;
 pub mod row_security;
 pub mod sandbox;
+pub mod shop_activity;
 pub mod tenants;

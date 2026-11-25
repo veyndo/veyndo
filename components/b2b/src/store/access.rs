@@ -1,12 +1,19 @@
-//! Re-resolves active customer sessions, company policy and unit membership at every procurement boundary.
+//! Re-resolves active customer sessions, company policy and unit membership at every procurement boundary. Sessions and products are read through the records port, settings through the shop store, on the caller's connection.
+use crate::ports::records;
 use crate::types::model::{Access, Company, Member, Unit};
-use serde_json::Value;
 use veyndo_core::shop_scope::tenant;
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad, hash};
+use veyndo_shop::store::settings;
 use veyndo_shop::types::cart::StoredCart;
 pub async fn identity(conn: &mut sqlx::PgConnection, h: &RequestContext) -> Result<String> {
     let digest = veyndo_core::shop_scope::session_digest(h)?;
-    let id = sqlx::query_scalar!("SELECT c.id FROM customer_sessions s JOIN customers c ON c.tenant=s.tenant AND c.email=s.email WHERE s.tenant=$1 AND s.digest=$2 AND s.expires_at>now() AND c.active FOR SHARE OF c,s", tenant(h)?, digest).fetch_optional(conn).await?.ok_or(Error(StatusCode::UNAUTHORIZED,"Customer session expired".into()))?;
+    let id = records()?
+        .session_customer(conn, &tenant(h)?, &digest)
+        .await?
+        .ok_or(Error(
+            StatusCode::UNAUTHORIZED,
+            "Customer session expired".into(),
+        ))?;
     if h.checkout_buyer
         .as_ref()
         .is_some_and(|buyer| buyer.buyer_hash != hash(&id))
@@ -24,13 +31,7 @@ pub async fn access(
     unit: &str,
     customer: &str,
 ) -> Result<Access> {
-    let config: Value = sqlx::query_scalar!(
-        "SELECT data FROM commerce_settings WHERE tenant=$1 FOR SHARE",
-        t
-    )
-    .fetch_one(&mut *conn)
-    .await?;
-    let features = veyndo_shop::domain::defaults::decode(config)?.b2b;
+    let features = settings::shared(conn, t).await?.b2b;
     features.admit("select")?;
     let r=sqlx::query!("SELECT u.company_id,u.data AS unit,u.revision AS ur,c.data AS company,c.revision AS cr,m.data AS member,m.revision AS mr FROM b2b_units u JOIN b2b_companies c ON c.tenant=u.tenant AND c.id=u.company_id JOIN b2b_members m ON m.tenant=u.tenant AND m.unit_id=u.id WHERE u.tenant=$1 AND u.id=$2 AND m.customer_id=$3 FOR SHARE OF u,c,m", t, unit, customer).fetch_optional(conn).await?.ok_or(Error(StatusCode::FORBIDDEN,"Company unit membership required".into()))?;
     let company: Company =
@@ -71,13 +72,7 @@ pub async fn guard_conn(
     let policy = access(conn, &c.tenant, &context.unit_id, &customer).await?;
     require(&policy, "buy")?;
     if context.quote_id.is_some() {
-        let raw: Value = sqlx::query_scalar!(
-            "SELECT data FROM commerce_settings WHERE tenant=$1",
-            &c.tenant
-        )
-        .fetch_one(&mut *conn)
-        .await?;
-        veyndo_shop::domain::defaults::decode(raw)?
+        veyndo_shop::domain::defaults::decode(settings::basis(conn, &c.tenant).await?)?
             .b2b
             .admit("quote.accept")?;
     }
@@ -112,7 +107,12 @@ pub async fn catalog_guard(
             .iter()
             .map(|i| i.id.clone())
             .collect::<Vec<_>>();
-        let denied:bool=sqlx::query_scalar!(r#"SELECT EXISTS(SELECT 1 FROM products p WHERE p.tenant=$1 AND p.id=ANY($3) AND NOT EXISTS(SELECT 1 FROM b2b_catalog b WHERE b.tenant=p.tenant AND b.unit_id=$2 AND (b.product_id=p.id OR b.product_id=p.parent_id))) AS "v!""#, &c.tenant, &context.unit_id, &ids).fetch_one(conn).await?;
+        let listed = super::catalog::listed(conn, &c.tenant, &context.unit_id).await?;
+        let denied = records()?
+            .catalog_products(conn, &c.tenant, &ids, &listed)
+            .await?
+            .iter()
+            .any(|p| !super::catalog::listed_directly(p, &listed));
         if denied {
             return Err(Error(
                 StatusCode::NOT_FOUND,

@@ -1,4 +1,5 @@
-//! Saved purchase lists and requisitions of a company unit, serialized per list by an advisory lock, and the product reads that resolve or admit their lines. Columns checked at compile time.
+//! Saved purchase lists and requisitions of a company unit, serialized per list by an advisory lock (checked columns), and the product reads that resolve or admit their lines through the records port.
+use crate::ports::records;
 use serde_json::Value;
 use sqlx::PgConnection;
 use veyndo_core::Result;
@@ -66,13 +67,7 @@ pub async fn delete(conn: &mut PgConnection, tenant: &str, id: &str) -> Result<(
 
 /// How many of `ids` are products of the shop.
 pub async fn products_found(conn: &mut PgConnection, tenant: &str, ids: &[String]) -> Result<i64> {
-    Ok(sqlx::query_scalar!(
-        r#"SELECT count(*) AS "count!" FROM products WHERE tenant=$1 AND id=ANY($2)"#,
-        tenant,
-        ids
-    )
-    .fetch_one(conn)
-    .await?)
+    records()?.products_found(conn, tenant, ids).await
 }
 
 /// Who a list belongs to.
@@ -125,7 +120,5 @@ pub struct Sku {
 
 /// The products whose numbers are among `skus`.
 pub async fn by_sku(conn: &mut PgConnection, tenant: &str, skus: &[String]) -> Result<Vec<Sku>> {
-    Ok(sqlx::query_as!(Sku, r#"SELECT id,product_number AS "product_number!" FROM products WHERE tenant=$1 AND product_number=ANY($2)"#, tenant, skus)
-        .fetch_all(conn)
-        .await?)
+    records()?.products_by_sku(conn, tenant, skus).await
 }

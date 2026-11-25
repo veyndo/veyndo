@@ -2,9 +2,13 @@
 use crate::foundation::App;
 
 pub(crate) mod apps;
+mod b2b;
 mod catalog;
+mod checkout;
 mod customers;
 pub(crate) mod inference;
+mod marketing;
+mod payments;
 mod pricing;
 mod shipping;
 mod shop;
@@ -20,4 +24,6 @@ pub(crate) fn register(a: &App) {
 pub(crate) fn install() {
     veyndo_cognition::ports::install(Box::new(inference::Host));
     veyndo_app_platform::ports::install_directory(Box::new(apps::Directory));
+    veyndo_b2b::ports::install(Box::new(b2b::ProcurementRecords));
+    veyndo_marketing::ports::install(Box::new(marketing::AutomationRecords));
 }

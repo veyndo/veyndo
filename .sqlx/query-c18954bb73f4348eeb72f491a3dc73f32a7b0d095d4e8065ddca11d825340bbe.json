@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT c.id,c.tenant,c.token,c.data,c.revision,c.status,o.data AS order_data FROM orders o JOIN carts c ON c.id=o.cart_id WHERE o.tenant=$1 AND o.id=$2",
+  "query": "SELECT id,tenant,token,data,revision,status FROM carts WHERE id=$1",
   "describe": {
     "columns": [
       {
@@ -68,22 +68,10 @@
             "name": "status"
           }
         }
-      },
-      {
-        "ordinal": 6,
-        "name": "order_data",
-        "type_info": "Jsonb",
-        "origin": {
-          "Table": {
-            "table": "orders",
-            "name": "data"
-          }
-        }
       }
     ],
     "parameters": {
       "Left": [
-        "Text",
         "Text"
       ]
     },
@@ -93,9 +81,8 @@
       false,
       false,
       false,
-      false,
       false
     ]
   },
-  "hash": "45496a76b4abe66d345cd068b9f5e1e84130238326643b9e68817003c79f86d3"
+  "hash": "c18954bb73f4348eeb72f491a3dc73f32a7b0d095d4e8065ddca11d825340bbe"
 }

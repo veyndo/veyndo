@@ -2,6 +2,7 @@
 use serde_json::Value;
 use sqlx::{PgConnection, Postgres, Transaction};
 use veyndo_core::{Result, State, bad, conflict};
+use veyndo_shop::store::{channel_settings, settings};
 
 /// One definition with its document and revision.
 pub struct ConfigurationRow {
@@ -118,29 +119,16 @@ pub async fn advisory_lock(conn: &mut PgConnection, key: &str) -> Result<()> {
 
 /// The shop settings document, `FOR UPDATE` when `locked`.
 pub async fn settings(conn: &mut PgConnection, tenant: &str, locked: bool) -> Result<Value> {
-    Ok(if locked {
-        sqlx::query_scalar!(
-            "SELECT data FROM commerce_settings WHERE tenant=$1 FOR UPDATE",
-            tenant
-        )
-        .fetch_one(conn)
-        .await?
+    if locked {
+        settings::basis_for_update(conn, tenant).await
     } else {
-        sqlx::query_scalar!("SELECT data FROM commerce_settings WHERE tenant=$1", tenant)
-            .fetch_one(conn)
-            .await?
-    })
+        settings::basis(conn, tenant).await
+    }
 }
 
 /// Locks the shop settings row so a channel save and checkout see the same settings.
 pub async fn lock_settings(conn: &mut PgConnection, tenant: &str) -> Result<()> {
-    sqlx::query_scalar!(
-        "SELECT revision FROM commerce_settings WHERE tenant=$1 FOR UPDATE",
-        tenant
-    )
-    .fetch_one(conn)
-    .await?;
-    Ok(())
+    channel_settings::lock_basis(conn, tenant).await
 }
 
 /// Whether PostgreSQL reads `date` as a timestamp.

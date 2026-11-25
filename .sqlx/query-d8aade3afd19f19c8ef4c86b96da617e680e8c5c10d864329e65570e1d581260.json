@@ -1,0 +1,26 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT DISTINCT tenant FROM flow_jobs WHERE state='queued' AND available_at<=now()",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "tenant",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "flow_jobs",
+            "name": "tenant"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "d8aade3afd19f19c8ef4c86b96da617e680e8c5c10d864329e65570e1d581260"
+}

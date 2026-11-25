@@ -23,6 +23,7 @@ pub mod flow_proposal_reads;
 pub mod flow_steps;
 pub mod imports;
 pub mod manual_orders;
+pub mod pos_channels;
 pub mod promotions;
 pub mod queue_health;
 pub mod references;

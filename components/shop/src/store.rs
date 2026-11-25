@@ -2,6 +2,7 @@
 pub mod access_snapshot;
 pub mod app_frontends;
 pub mod app_languages;
+pub mod channel_settings;
 pub mod consent_log;
 pub mod consumer_requests;
 pub mod group_usage;

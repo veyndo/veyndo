@@ -8,15 +8,9 @@ pub struct ActiveApp {
     pub manifest: Value,
 }
 
-/// The shop's active app packages by id.
+/// The shop's active app packages by id; the packages belong to the app platform and are read through the records port.
 pub async fn active_apps(a: &State, tenant: &str) -> Result<Vec<ActiveApp>> {
-    Ok(sqlx::query_as!(
-        ActiveApp,
-        "SELECT id,manifest FROM app_packages WHERE tenant=$1 AND active ORDER BY id",
-        tenant
-    )
-    .fetch_all(&a.db)
-    .await?)
+    crate::ports::records()?.active_apps(a, tenant).await
 }
 
 /// An active rule a condition may reference.

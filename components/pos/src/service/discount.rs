@@ -1,10 +1,11 @@
 //! Audited cashier discounts use exact minor units and the existing native tax allocator in both quote and commit.
 use crate::service::guard;
-use crate::store::carts as cart_rows;
 use serde::Deserialize;
 use serde_json::{Value, json};
 use veyndo_checkout::service::{app_adjustments, delivery};
-use veyndo_core::document::{lenient, view};
+use veyndo_checkout::store::carts::{self, CartRow};
+use veyndo_checkout::store::register_carts;
+use veyndo_core::document::{lenient, merge, view};
 use veyndo_core::shop_scope::{tenant, token};
 use veyndo_core::{RequestContext, Result, State, bad, conflict};
 use veyndo_identity::permit;
@@ -23,8 +24,10 @@ pub async fn save(
     permit(h, "orders.write")?;
     permit(h, "payments.manage")?;
     let mut tx = a.db.begin().await?;
-    let mut c = cart_rows::lock(&mut tx, &tenant(h)?, token(h)?)
+    let mut c = carts::lock_by_token(&mut tx, &tenant(h)?, token(h)?)
         .await?
+        .map(CartRow::into_cart)
+        .transpose()?
         .ok_or(bad("Cart unavailable"))?;
     guard::cart(h, &c)?;
     if c.data.pos_actor.is_none() || c.status != "open" || revision != c.revision {
@@ -38,7 +41,12 @@ pub async fn save(
             return Err(bad("Cashier discount must be an object or null"));
         }
         let mut value = v.clone();
-        value["actor"] = json!(h.pos.as_ref().ok_or(bad("Cashier required"))?.actor);
+        merge(
+            &mut value,
+            Actor {
+                actor: &h.pos.as_ref().ok_or(bad("Cashier required"))?.actor,
+            },
+        )?;
         let d: Discount =
             serde_json::from_value(value).map_err(|_| bad("Invalid cashier discount"))?;
         if d.reason.trim().is_empty()
@@ -51,7 +59,7 @@ pub async fn save(
     };
     c.revision += 1;
     let quote = carts.view(&c).await?;
-    cart_rows::save(&mut tx, &json!(c.data), c.revision, &c.tenant, &c.id).await?;
+    register_carts::save(&mut tx, &json!(c.data), c.revision, &c.tenant, &c.id).await?;
     veyndo_core::store::outbox::publish_on(&mut *tx, &c.tenant, "pos.discount_changed", &json!({"cartId":c.id,"salesChannelId":c.data.sales_channel,"cashierId":h.pos.as_ref().map(|p|&p.actor),"previous":previous,"discount":c.data.pos_discount,"revision":c.revision})).await?;
     tx.commit().await?;
     Ok(quote)
@@ -105,13 +113,36 @@ pub fn apply(
         )?;
         app_adjustments::apply(&mut q, "discount", minor)?;
         q = delivery::enrich(q, c, ps, settings, revision)?;
-        q["posDiscount"] = json!({"kind":d.kind,"value":d.value,"currency":d.currency,"reason":d.reason,"actor":d.actor,"minor":minor.to_string()});
+        merge(
+            &mut q,
+            json!({"posDiscount":{"kind":d.kind,"value":d.value,"currency":d.currency,"reason":d.reason,"actor":d.actor,"minor":minor.to_string()}}),
+        )?;
     }
     Ok(q)
 }
+/// The cashier a discount is recorded for.
+#[derive(serde::Serialize)]
+struct Actor<'a> {
+    actor: &'a str,
+}
+
 #[cfg(test)]
 mod tests {
+    use super::Actor;
+    use serde_json::json;
+    use veyndo_core::document::merge;
     use veyndo_shop::types::cart::Discount;
+
+    #[test]
+    fn the_cashier_is_recorded_as_indexing_recorded_it() {
+        let value =
+            json!({"kind":"fixed","value":100,"currency":"EUR","reason":"r","actor":"spoofed"});
+        let mut old = value.clone();
+        old["actor"] = json!("cashier");
+        let mut new = value;
+        merge(&mut new, Actor { actor: "cashier" }).unwrap();
+        assert_eq!(new, old);
+    }
     fn d(kind: &str, value: u64) -> Discount {
         Discount {
             kind: kind.into(),

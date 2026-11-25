@@ -4,7 +4,7 @@ use crate::domain::rules;
 use serde::Deserialize;
 use serde_json::{Value, json};
 use veyndo_app_model::declarations::identifier;
-use veyndo_core::document::view;
+use veyndo_core::document::{merge, view};
 use veyndo_core::{Error, Result, State, StatusCode, bad, conflict};
 
 #[derive(Deserialize)]
@@ -56,11 +56,13 @@ pub async fn compare(a: &State, t: &str, v: Value) -> Result<Value> {
                 Some(d) => evaluate(t, &d, &baseline, &input.condition),
                 None => json!({"status":"unavailable","reason":"snapshot_too_large"}),
             };
-            result["jobId"] = json!(r.id.clone());
-            result["eventId"] = json!(r.event_id.clone());
-            result
+            merge(
+                &mut result,
+                json!({"jobId":r.id.clone(),"eventId":r.event_id.clone()}),
+            )?;
+            Ok(result)
         })
-        .collect();
+        .collect::<Result<_>>()?;
     let outcomes = results.iter().map(view::<Outcome>).collect::<Vec<_>>();
     let evaluated = outcomes.iter().filter(|r| r.status == "evaluated").count();
     let changed = outcomes

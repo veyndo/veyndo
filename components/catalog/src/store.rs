@@ -1,6 +1,7 @@
 //! The only place of the catalog component that contains SQL.
 pub mod app_references;
 pub mod assets;
+pub mod barcodes;
 pub mod catalog_reads;
 pub mod categories;
 pub mod channels;
@@ -17,10 +18,12 @@ pub mod products;
 pub mod purchase_products;
 pub mod references;
 pub mod reviews;
+pub mod rule_products;
 pub mod shop_reads;
 pub mod staging;
 pub mod stock;
 pub mod translation_jobs;
 pub mod translation_runs;
 pub mod translations;
+pub mod unit_scope;
 pub mod workspace;

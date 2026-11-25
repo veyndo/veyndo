@@ -1,5 +1,2 @@
-//! Reads the cashier workspace needs from the shop's own tables.
-pub mod carts;
+//! POS channel setup inside the channel save; the rows it changes belong to the shop settings owner.
 pub mod channel_setup;
-pub mod customers;
-pub mod register;

@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE commerce_customer_groups SET data=$1,revision=revision+1 WHERE tenant=$2 AND id=$3",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Jsonb",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "66619bb5ec177cd4c04c957970172909f41d96c16cf0935f9535f03c5075bff0"
+}
