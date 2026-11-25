@@ -21,6 +21,7 @@ pub(crate) async fn bootstrap() -> App {
         .with_env_filter(env::var("RUST_LOG").unwrap_or("info".into()))
         .init();
     let _configuration = runtime_config::get();
+    crate::ports::install();
     let mode = env::var("BOOTSTRAP_MODE").unwrap_or("auto".into());
     assert!(
         ["auto", "serve", "migrate"].contains(&mode.as_str()),

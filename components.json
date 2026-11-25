@@ -467,15 +467,7 @@
         "pricing",
         "shop"
       ],
-      "foreign_tables": {
-        "carts": "write: procurement (approval, quotes, quick order, unit selection) changes the cart under its lock in the same transaction (approval.rs, catalog.rs, commands.rs, quote_contract.rs)",
-        "commerce_settings": "read: reads the shop settings document under the basis row lock so the change and the settings it was checked against stay consistent (access.rs, organization.rs)",
-        "customer_sessions": "read: reads the customer session to bind a buyer request to its account inside the same statement (access.rs)",
-        "customers": "read: reads customer identity, group and company in the same statement as its own records to admit or project them (access.rs, organization.rs)",
-        "order_receipts": "read: reads issued receipt rows of an order for the buyer or flow projection (commands.rs)",
-        "orders": "read: reads order documents in the same statement as its own records to project or admit them (commands.rs)",
-        "products": "read: reads product rows in the same statement as its own data (prices, stock, visibility) (access.rs, catalog.rs, lists.rs, quick_order.rs)"
-      },
+      "foreign_tables": {},
       "glob_imports": 0,
       "untyped_access": 0,
       "sql_outside_store": 0,
@@ -500,15 +492,7 @@
         "pricing",
         "shop"
       ],
-      "foreign_tables": {
-        "carts": "write: cashier commands (customer, discount, cart) update the POS cart under its lock (customer.rs, discount.rs, register.rs)",
-        "commerce_overrides": "write: POS channel setup writes the channel settings override (channel_setup.rs)",
-        "commerce_settings": "read: reads the shop settings document under the basis row lock so the change and the settings it was checked against stay consistent (channel_setup.rs, settlement.rs)",
-        "customers": "read: reads customer identity, group and company in the same statement as its own records to admit or project them (customers.rs)",
-        "orders": "read: reads order documents in the same statement as its own records to project or admit them (register.rs)",
-        "products": "read: reads product rows in the same statement as its own data (prices, stock, visibility) (register.rs)",
-        "sales_channels": "read: reads the sales channel document (kind, activity, catalogue scope) to admit the request channel inside the same statement (register.rs, settlement.rs)"
-      },
+      "foreign_tables": {},
       "glob_imports": 0,
       "untyped_access": 0,
       "sql_outside_store": 0,
@@ -898,6 +882,7 @@
         "src/performance/delivery.rs",
         "src/planner.rs",
         "src/platform",
+        "src/ports",
         "src/pos",
         "src/proposal_apply.rs",
         "src/proposal_routes.rs",
@@ -925,6 +910,7 @@
       ],
       "uses": [
         "apps",
+        "b2b",
         "catalog",
         "checkout",
         "core",

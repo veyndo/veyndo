@@ -1,4 +1,5 @@
-//! Merchant-managed firms, unit hierarchies, employee grants and tenant-bound catalogs with optimistic revisions.
+//! Merchant-managed firms, unit hierarchies, employee grants and tenant-bound catalogs with optimistic revisions. Member contacts and customer existence come from the records port, settings from the shop store.
+use crate::ports::records;
 use crate::types::model::{Company, Member, Unit};
 use serde::Deserialize;
 use serde_json::{Value, json};
@@ -20,10 +21,23 @@ pub async fn detail(a: &State, t: &str, id: &str) -> Result<Value> {
     .await?
     .ok_or(Error(StatusCode::NOT_FOUND, "Company not found".into()))?;
     let units=sqlx::query!("SELECT id,parent_id,data,revision FROM b2b_units WHERE tenant=$1 AND company_id=$2 ORDER BY id LIMIT 100", t, id).fetch_all(&a.db).await?;
-    let members=sqlx::query!("SELECT m.unit_id,m.customer_id,m.data,m.revision,c.email,c.profile FROM b2b_members m JOIN b2b_units u ON u.tenant=m.tenant AND u.id=m.unit_id JOIN customers c ON c.tenant=m.tenant AND c.id=m.customer_id WHERE m.tenant=$1 AND u.company_id=$2 ORDER BY m.unit_id,m.customer_id LIMIT 500", t, id).fetch_all(&a.db).await?;
+    // Every member references an existing customer (foreign key), so joining the contacts afterwards keeps the joined rows.
+    let members=sqlx::query!("SELECT m.unit_id,m.customer_id,m.data,m.revision FROM b2b_members m JOIN b2b_units u ON u.tenant=m.tenant AND u.id=m.unit_id WHERE m.tenant=$1 AND u.company_id=$2 ORDER BY m.unit_id,m.customer_id LIMIT 500", t, id).fetch_all(&a.db).await?;
+    let ids = members
+        .iter()
+        .map(|m| m.customer_id.clone())
+        .collect::<Vec<_>>();
+    let contacts = records()?.contacts(a, t, &ids).await?;
+    let members = members
+        .into_iter()
+        .filter_map(|m| {
+            let contact = contacts.iter().find(|c| c.id == m.customer_id)?;
+            Some(json!({"unitId":m.unit_id,"customerId":m.customer_id,"data":m.data,"revision":m.revision,"email":contact.email,"profile":contact.profile}))
+        })
+        .collect::<Vec<_>>();
     let catalog=sqlx::query!("SELECT b.unit_id,b.product_id FROM b2b_catalog b JOIN b2b_units u ON u.tenant=b.tenant AND u.id=b.unit_id WHERE b.tenant=$1 AND u.company_id=$2 ORDER BY b.unit_id,b.product_id LIMIT 100000", t, id).fetch_all(&a.db).await?;
     Ok(
-        json!({"id":id,"data":company.data.clone(),"revision":company.revision.clone(),"units":units.iter().map(|r|json!({"id":r.id.clone(),"parentId":r.parent_id.clone(),"catalogIds":catalog.iter().filter(|c|c.unit_id==r.id).map(|c|c.product_id.clone()).collect::<Vec<_>>(),"data":r.data.clone(),"revision":r.revision.clone()})).collect::<Vec<_>>(),"members":members.iter().map(|r|json!({"unitId":r.unit_id.clone(),"customerId":r.customer_id.clone(),"data":r.data.clone(),"revision":r.revision.clone(),"email":r.email.clone(),"profile":r.profile.clone()})).collect::<Vec<_>>()}),
+        json!({"id":id,"data":company.data.clone(),"revision":company.revision.clone(),"units":units.iter().map(|r|json!({"id":r.id.clone(),"parentId":r.parent_id.clone(),"catalogIds":catalog.iter().filter(|c|c.unit_id==r.id).map(|c|c.product_id.clone()).collect::<Vec<_>>(),"data":r.data.clone(),"revision":r.revision.clone()})).collect::<Vec<_>>(),"members":members}),
     )
 }
 pub fn name(
@@ -100,12 +114,7 @@ pub async fn save_tx(conn: &mut sqlx::PgConnection, t: &str, op: &str, v: &Value
         .filter(|n| *n >= 0)
         .ok_or(bad("Expected revision required (zero creates)"))?;
     let settings = veyndo_shop::domain::defaults::decode(
-        sqlx::query_scalar!(
-            "SELECT data FROM commerce_settings WHERE tenant=$1 FOR UPDATE",
-            t
-        )
-        .fetch_one(&mut *conn)
-        .await?,
+        veyndo_shop::store::settings::basis_for_update(conn, t).await?,
     )?;
     let data = if op == "company.save" {
         let company: Company = serde_json::from_value(input.data.clone())
@@ -257,13 +266,7 @@ pub async fn member_tx(conn: &mut sqlx::PgConnection, t: &str, v: &Value) -> Res
     )
     .fetch_optional(&mut *conn)
     .await?;
-    let exists: bool = sqlx::query_scalar!(
-        r#"SELECT EXISTS(SELECT 1 FROM customers WHERE tenant=$1 AND id=$2) AS "v!""#,
-        t,
-        customer
-    )
-    .fetch_one(&mut *conn)
-    .await?;
+    let exists = records()?.customer_exists(conn, t, customer).await?;
     if found.is_none() || !exists {
         return Err(Error(
             StatusCode::NOT_FOUND,

@@ -1,6 +1,5 @@
 //! Exact cash admission and order annotation execute in the existing checkout transaction.
 use crate::service::guard;
-use crate::store::register;
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 use veyndo_checkout::store::selected_customer;
@@ -9,7 +8,9 @@ use veyndo_core::request_context::PosAdmission;
 use veyndo_core::store::environments::live_parent;
 use veyndo_core::{Error, RequestContext, Result, StatusCode, bad};
 use veyndo_identity::permit;
+use veyndo_marketing::store::pos_channels;
 use veyndo_pricing::verified_kernel;
+use veyndo_shop::store::channel_settings;
 use veyndo_shop::types::cart::{StoredCart, selection};
 use veyndo_shop::types::settings::Settings;
 pub fn validate_settlement(
@@ -67,8 +68,9 @@ pub async fn settle(
     let Some(p) = &h.pos else {
         return Ok(());
     };
-    let main_locale = register::main_locale(tx, &c.tenant).await?;
-    let receipt_message = register::receipt_message(tx, &c.tenant, &c.data.sales_channel).await?;
+    let main_locale = channel_settings::main_locale(tx, &c.tenant).await?;
+    let receipt_message =
+        pos_channels::receipt_message(tx, &c.tenant, &c.data.sales_channel).await?;
     let cash = annotate(
         order,
         p,
@@ -256,7 +258,7 @@ pub async fn check_locked(
     if c.data.pos_discount.is_some() {
         permit(h, "payments.manage")?;
     }
-    let data = register::channel_for_share(tx, &c.tenant, &c.data.sales_channel).await?;
+    let data = pos_channels::channel_for_share(tx, &c.tenant, &c.data.sales_channel).await?;
     let channel: PosChannel = view(&data);
     if channel.kind.as_deref() != Some("pos")
         || channel.active != Some(true)

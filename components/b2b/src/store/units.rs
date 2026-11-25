@@ -1,4 +1,5 @@
-//! What an employee sees of their purchasing units: active memberships with unit and company, and the unit's orders with their issued receipts. Columns checked at compile time.
+//! What an employee sees of their purchasing units: active memberships with unit and company (checked columns), and the unit's orders with their issued receipts, which belong to orders and are read through the records port.
+use crate::ports::records;
 use serde_json::Value;
 use sqlx::PgConnection;
 use veyndo_core::Result;
@@ -38,10 +39,7 @@ pub async fn orders(
     unit: &str,
     id: Option<&str>,
 ) -> Result<Vec<UnitOrder>> {
-    Ok(sqlx::query_as!(UnitOrder, r#"SELECT data,data->'b2b' AS b2b,created_at::text AS "created!" FROM orders WHERE tenant=$1 AND data->'b2b'->>'unitId'=$2 AND ($3::text IS NULL OR id=$3) ORDER BY created_at DESC,id DESC LIMIT 100"#,
-        tenant, unit, id)
-    .fetch_all(conn)
-    .await?)
+    records()?.unit_orders(conn, tenant, unit, id).await
 }
 
 /// An issued receipt of an order.
@@ -55,8 +53,5 @@ pub struct Receipt {
 
 /// The receipts issued for order `id`, newest first (at most 100).
 pub async fn receipts(conn: &mut PgConnection, tenant: &str, id: &str) -> Result<Vec<Receipt>> {
-    Ok(sqlx::query_as!(Receipt, r#"SELECT id,kind,number,locale,created_at::text AS "created!" FROM order_receipts WHERE tenant=$1 AND order_id=$2 ORDER BY created_at DESC LIMIT 100"#,
-        tenant, id)
-    .fetch_all(conn)
-    .await?)
+    records()?.receipts(conn, tenant, id).await
 }

@@ -1,4 +1,5 @@
-//! Private unit catalog scope is derived from the current employee/cart, never caller criteria; indexed before pagination.
+//! Private unit catalog scope is derived from the current employee/cart, never caller criteria; indexed before pagination. The unit's listed product ids are read here and checked against product identity from the records port in the same transaction.
+use crate::ports::{CatalogProduct, records};
 use crate::store::access::guard_conn;
 use crate::types::model::Access;
 use serde::Deserialize;
@@ -28,7 +29,14 @@ pub async fn admit(a: &State, h: &RequestContext, ids: &[String]) -> Result<()> 
     let Some(unit) = scope(a, h).await? else {
         return Ok(());
     };
-    let denied:bool=sqlx::query_scalar!(r#"SELECT EXISTS(SELECT 1 FROM products p WHERE p.tenant=$1 AND p.id=ANY($3) AND NOT EXISTS(SELECT 1 FROM b2b_catalog b WHERE b.tenant=p.tenant AND b.unit_id=$2 AND (b.product_id=p.id OR b.product_id=p.parent_id OR EXISTS(SELECT 1 FROM products child WHERE child.tenant=p.tenant AND child.parent_id=p.id AND child.id=b.product_id)))) AS "v!""#, tenant(h)?, unit, &ids).fetch_one(&a.db).await?;
+    let t = tenant(h)?;
+    let mut tx = a.db.begin().await?;
+    let listed = listed(&mut tx, &t, &unit).await?;
+    let denied = records()?
+        .catalog_products(&mut tx, &t, ids, &listed)
+        .await?
+        .iter()
+        .any(|p| !listed_directly(p, &listed) && !p.variant_listed);
     if denied {
         return Err(Error(
             StatusCode::NOT_FOUND,
@@ -78,13 +86,7 @@ pub async fn save_tx(conn: &mut sqlx::PgConnection, t: &str, v: &Value) -> Resul
     if input.revision != Some(revision) {
         return Err(conflict("Unit catalog changed; reload before saving"));
     }
-    let count: i64 = sqlx::query_scalar!(
-        r#"SELECT count(*) AS "count!" FROM products WHERE tenant=$1 AND id=ANY($2)"#,
-        t,
-        &ids
-    )
-    .fetch_one(&mut *conn)
-    .await?;
+    let count = records()?.products_found(conn, t, &ids).await?;
     if count != ids.len() as i64 {
         return Err(bad("Catalog references missing or foreign products"));
     }
@@ -130,7 +132,12 @@ pub async fn admit_unit(
     if !policy.unit.restricted_catalog {
         return Ok(());
     }
-    let admitted:bool=sqlx::query_scalar!(r#"SELECT EXISTS(SELECT 1 FROM products p JOIN b2b_catalog b ON b.tenant=p.tenant AND (b.product_id=p.id OR b.product_id=p.parent_id) WHERE p.tenant=$1 AND p.id=$2 AND b.unit_id=$3) AS "v!""#, t, product, unit).fetch_one(conn).await?;
+    let listed = listed(conn, t, unit).await?;
+    let admitted = records()?
+        .catalog_products(conn, t, &[product.to_string()], &listed)
+        .await?
+        .iter()
+        .any(|p| listed_directly(p, &listed));
     if !admitted {
         return Err(Error(
             StatusCode::NOT_FOUND,
@@ -138,4 +145,23 @@ pub async fn admit_unit(
         ));
     }
     Ok(())
+}
+
+/// The product ids listed in the private catalogue of unit `unit`.
+pub async fn listed(conn: &mut sqlx::PgConnection, t: &str, unit: &str) -> Result<Vec<String>> {
+    Ok(sqlx::query_scalar!(
+        "SELECT product_id FROM b2b_catalog WHERE tenant=$1 AND unit_id=$2",
+        t,
+        unit
+    )
+    .fetch_all(conn)
+    .await?)
+}
+
+/// Whether the product or its parent is listed.
+pub fn listed_directly(p: &CatalogProduct, listed: &[String]) -> bool {
+    listed.contains(&p.id)
+        || p.parent_id
+            .as_ref()
+            .is_some_and(|parent| listed.contains(parent))
 }

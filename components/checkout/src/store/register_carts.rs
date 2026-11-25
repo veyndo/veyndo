@@ -1,36 +1,7 @@
-//! The cashier's cart rows: the token-locked read and the revisioned writes of discount, customer and new-sale setup. Columns checked at compile time.
+//! The POS register's cart rows: the revisioned document writes of a cashier sale and the cashier's held carts. Columns checked at compile time.
 use serde_json::Value;
 use sqlx::PgConnection;
-use veyndo_core::{Result, State, bad};
-use veyndo_shop::types::cart::{StoredCart, upgrade_cart};
-
-/// The cart behind `token`, locked for this transaction; older stored shapes are upgraded on the way.
-pub async fn lock(
-    conn: &mut PgConnection,
-    tenant: &str,
-    token: &str,
-) -> Result<Option<StoredCart>> {
-    let Some(row) = sqlx::query!(
-        "SELECT id,tenant,token,data,revision,status FROM carts WHERE tenant=$1 AND token=$2 FOR UPDATE",
-        tenant,
-        token
-    )
-    .fetch_optional(conn)
-    .await?
-    else {
-        return Ok(None);
-    };
-    let mut data = row.data;
-    upgrade_cart(&mut data);
-    Ok(Some(StoredCart {
-        id: row.id,
-        tenant: row.tenant,
-        token: row.token,
-        data: serde_json::from_value(data).map_err(|e| bad(e.to_string()))?,
-        revision: row.revision,
-        status: row.status,
-    }))
-}
+use veyndo_core::{Result, State};
 
 /// Stores the cart document at its new revision.
 pub async fn save(

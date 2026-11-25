@@ -1,9 +1,10 @@
 //! Audited cashier discounts use exact minor units and the existing native tax allocator in both quote and commit.
 use crate::service::guard;
-use crate::store::carts as cart_rows;
 use serde::Deserialize;
 use serde_json::{Value, json};
 use veyndo_checkout::service::{app_adjustments, delivery};
+use veyndo_checkout::store::carts::{self, CartRow};
+use veyndo_checkout::store::register_carts;
 use veyndo_core::document::{lenient, merge, view};
 use veyndo_core::shop_scope::{tenant, token};
 use veyndo_core::{RequestContext, Result, State, bad, conflict};
@@ -23,8 +24,10 @@ pub async fn save(
     permit(h, "orders.write")?;
     permit(h, "payments.manage")?;
     let mut tx = a.db.begin().await?;
-    let mut c = cart_rows::lock(&mut tx, &tenant(h)?, token(h)?)
+    let mut c = carts::lock_by_token(&mut tx, &tenant(h)?, token(h)?)
         .await?
+        .map(CartRow::into_cart)
+        .transpose()?
         .ok_or(bad("Cart unavailable"))?;
     guard::cart(h, &c)?;
     if c.data.pos_actor.is_none() || c.status != "open" || revision != c.revision {
@@ -56,7 +59,7 @@ pub async fn save(
     };
     c.revision += 1;
     let quote = carts.view(&c).await?;
-    cart_rows::save(&mut tx, &json!(c.data), c.revision, &c.tenant, &c.id).await?;
+    register_carts::save(&mut tx, &json!(c.data), c.revision, &c.tenant, &c.id).await?;
     veyndo_core::store::outbox::publish_on(&mut *tx, &c.tenant, "pos.discount_changed", &json!({"cartId":c.id,"salesChannelId":c.data.sales_channel,"cashierId":h.pos.as_ref().map(|p|&p.actor),"previous":previous,"discount":c.data.pos_discount,"revision":c.revision})).await?;
     tx.commit().await?;
     Ok(quote)
