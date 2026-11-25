@@ -344,3 +344,88 @@ DO $fn$ BEGIN
   GRANT USAGE,SELECT ON SEQUENCE outbox_dispatch_sequence TO veyndo_runtime;
  END IF;
 END $fn$;
+
+-- shop_environments (owner core)
+
+CREATE TABLE public.shop_environments (
+    tenant text NOT NULL,
+    live_tenant text NOT NULL,
+    name text NOT NULL,
+    baseline jsonb NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    preview_owner text,
+    preview_until timestamp with time zone,
+    CONSTRAINT preview_owner_expiry CHECK (((preview_owner IS NULL) = (preview_until IS NULL))),
+    CONSTRAINT shop_environments_check CHECK ((tenant <> live_tenant))
+);
+
+ALTER TABLE ONLY public.shop_environments FORCE ROW LEVEL SECURITY;
+
+ALTER TABLE ONLY public.shop_environments
+    ADD CONSTRAINT environments_live_tenant_key UNIQUE (live_tenant, tenant);
+
+ALTER TABLE ONLY public.shop_environments
+    ADD CONSTRAINT shop_environments_pkey PRIMARY KEY (tenant);
+
+CREATE UNIQUE INDEX app_preview_owner ON public.shop_environments USING btree (live_tenant, preview_owner) WHERE (preview_owner IS NOT NULL);
+
+CREATE INDEX environments_live ON public.shop_environments USING btree (live_tenant);
+
+ALTER TABLE ONLY public.shop_environments
+    ADD CONSTRAINT shop_environments_live_tenant_fkey FOREIGN KEY (live_tenant) REFERENCES public.tenants(id);
+
+ALTER TABLE ONLY public.shop_environments
+    ADD CONSTRAINT shop_environments_tenant_fkey FOREIGN KEY (tenant) REFERENCES public.tenants(id);
+
+CREATE POLICY authenticated_scope ON public.shop_environments AS RESTRICTIVE USING ((COALESCE(( SELECT ((public.veyndo_scope_guard() ->> 'system'::text))::boolean AS bool), false) OR (tenant = ( SELECT (public.veyndo_scope_guard() ->> 'tenant'::text))))) WITH CHECK ((COALESCE(( SELECT ((public.veyndo_scope_guard() ->> 'system'::text))::boolean AS bool), false) OR (tenant = ( SELECT (public.veyndo_scope_guard() ->> 'tenant'::text)))));
+
+CREATE POLICY core_tenant_scope ON public.shop_environments USING (((current_setting('rac.system'::text, true) = 'on'::text) OR (tenant = NULLIF(current_setting('rac.tenant'::text, true), ''::text)))) WITH CHECK (((current_setting('rac.system'::text, true) = 'on'::text) OR (tenant = NULLIF(current_setting('rac.tenant'::text, true), ''::text))));
+
+ALTER TABLE public.shop_environments ENABLE ROW LEVEL SECURITY;
+
+-- tenant_ai_usage (owner core)
+
+CREATE TABLE public.tenant_ai_usage (
+    tenant text NOT NULL,
+    day date NOT NULL,
+    attempts bigint NOT NULL,
+    CONSTRAINT tenant_ai_usage_attempts_check CHECK ((attempts > 0))
+);
+
+ALTER TABLE ONLY public.tenant_ai_usage FORCE ROW LEVEL SECURITY;
+
+ALTER TABLE ONLY public.tenant_ai_usage
+    ADD CONSTRAINT tenant_ai_usage_pkey PRIMARY KEY (tenant, day);
+
+ALTER TABLE ONLY public.tenant_ai_usage
+    ADD CONSTRAINT tenant_ai_usage_tenant_fkey FOREIGN KEY (tenant) REFERENCES public.tenants(id);
+
+CREATE POLICY authenticated_scope ON public.tenant_ai_usage AS RESTRICTIVE USING ((COALESCE(( SELECT ((public.veyndo_scope_guard() ->> 'system'::text))::boolean AS bool), false) OR (tenant = ( SELECT (public.veyndo_scope_guard() ->> 'tenant'::text))))) WITH CHECK ((COALESCE(( SELECT ((public.veyndo_scope_guard() ->> 'system'::text))::boolean AS bool), false) OR (tenant = ( SELECT (public.veyndo_scope_guard() ->> 'tenant'::text)))));
+
+CREATE POLICY core_tenant_scope ON public.tenant_ai_usage USING (((current_setting('rac.system'::text, true) = 'on'::text) OR (tenant = NULLIF(current_setting('rac.tenant'::text, true), ''::text)))) WITH CHECK (((current_setting('rac.system'::text, true) = 'on'::text) OR (tenant = NULLIF(current_setting('rac.tenant'::text, true), ''::text))));
+
+ALTER TABLE public.tenant_ai_usage ENABLE ROW LEVEL SECURITY;
+
+-- tenant_resource_limits (owner core)
+
+CREATE TABLE public.tenant_resource_limits (
+    tenant text NOT NULL,
+    daily_ai bigint NOT NULL,
+    revision bigint DEFAULT 1 NOT NULL,
+    CONSTRAINT tenant_resource_limits_daily_ai_check CHECK (((daily_ai >= 1) AND (daily_ai <= 1000000))),
+    CONSTRAINT tenant_resource_limits_revision_check CHECK ((revision > 0))
+);
+
+ALTER TABLE ONLY public.tenant_resource_limits FORCE ROW LEVEL SECURITY;
+
+ALTER TABLE ONLY public.tenant_resource_limits
+    ADD CONSTRAINT tenant_resource_limits_pkey PRIMARY KEY (tenant);
+
+ALTER TABLE ONLY public.tenant_resource_limits
+    ADD CONSTRAINT tenant_resource_limits_tenant_fkey FOREIGN KEY (tenant) REFERENCES public.tenants(id);
+
+CREATE POLICY authenticated_scope ON public.tenant_resource_limits AS RESTRICTIVE USING ((COALESCE(( SELECT ((public.veyndo_scope_guard() ->> 'system'::text))::boolean AS bool), false) OR (tenant = ( SELECT (public.veyndo_scope_guard() ->> 'tenant'::text))))) WITH CHECK ((COALESCE(( SELECT ((public.veyndo_scope_guard() ->> 'system'::text))::boolean AS bool), false) OR (tenant = ( SELECT (public.veyndo_scope_guard() ->> 'tenant'::text)))));
+
+CREATE POLICY core_tenant_scope ON public.tenant_resource_limits USING (((current_setting('rac.system'::text, true) = 'on'::text) OR (tenant = NULLIF(current_setting('rac.tenant'::text, true), ''::text)))) WITH CHECK ((current_setting('rac.system'::text, true) = 'on'::text));
+
+ALTER TABLE public.tenant_resource_limits ENABLE ROW LEVEL SECURITY;

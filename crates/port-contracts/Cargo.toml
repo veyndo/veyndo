@@ -11,6 +11,8 @@ reqwest.workspace = true
 sqlx.workspace = true
 veyndo-core = { path = "../../components/core" }
 veyndo-shop = { path = "../../components/shop" }
+veyndo-pricing = { path = "../../components/pricing" }
+veyndo-shipping = { path = "../../components/shipping" }
 veyndo-payments = { path = "../../components/payments" }
 veyndo-intelligence = { path = "../../components/intelligence" }
 veyndo-app-platform = { path = "../../components/apps" }

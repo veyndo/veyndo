@@ -203,3 +203,24 @@ fn approval_urls_refuse_credentials_in_the_url() {
     assert!(url("https://user@pay.example.test/approve").is_err());
     assert!(url("https://:pw@pay.example.test/approve").is_err());
 }
+
+/// Carts mirror no order snapshot and no experiment is rewarded.
+impl veyndo_payments::ports::LedgerRecords for Origins {
+    fn mirror_cart_order<'a>(
+        &'a self,
+        _: &'a mut sqlx::PgConnection,
+        _: &'a str,
+        _: &'a str,
+        _: &'a serde_json::Value,
+    ) -> PortFuture<'a, ()> {
+        Box::pin(async { Ok(()) })
+    }
+    fn reward_capture<'a>(
+        &'a self,
+        _: &'a mut sqlx::PgConnection,
+        _: &'a str,
+        _: &'a str,
+    ) -> PortFuture<'a, ()> {
+        Box::pin(async { Ok(()) })
+    }
+}

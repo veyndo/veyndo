@@ -101,6 +101,8 @@
         "shipping"
       ],
       "foreign_tables": {
+        "company_logos": "write: stays: the sandbox copy and release copy company logos with the settings they belong to inside the staging transaction (staging.rs)",
+        "company_overrides": "write: stays: the sandbox copy and release copy per-channel company data with the channel settings inside the staging transaction; channel deletion counts them under the same lock (staging.rs, channel_settings.rs)",
         "sales_channels": "read: stays: access_snapshot.sql and settings_snapshot.sql admit the request channel inside one statement with the shop status and settings; the operator list counts active channels with each shop page (access_snapshot.sql, operator_control.rs, operator_metrics.rs, settings.rs, settings_snapshot.sql)",
         "shop_environments": "read: stays: access_snapshot.sql scopes a stage or preview to its live shop inside the request snapshot; operator views exclude sandboxes from live shops (access_snapshot.rs, access_snapshot.sql, operator_control.rs, operator_metrics.rs)",
         "tenants": "write: stays: the access snapshot reads the live shop status in one statement; operator lifecycle locks and changes the status and status revision of a live shop next to the sandbox check (access_snapshot.rs, access_snapshot.sql, operator_control.rs, operator_metrics.rs)"
@@ -137,6 +139,7 @@
         "b2b_catalog": "read: stays: the private unit catalogue scope filters inside the paginated catalogue, search and category queries so cursors and limits stay correct (catalog_channel.sql, catalog_reads.rs, catalog_search.sql, category_listing.sql)",
         "knowledge_documents": "read: stays: category pages with a saved fact query select confirmed public claims inside the paginated listing (category_listing.sql)",
         "knowledge_relations": "read: stays: category pages with a saved fact query select confirmed public claims inside the paginated listing (category_listing.sql)",
+        "languages": "read: stays: product translation reads join the global language registry to map locales inside the paginated or locked catalogue statement (app_references.rs, translation_runs.rs, workspace.rs, imported_lines/labels.sql)",
         "shop_environments": "read: stays: the media job claim admits only jobs of active live shops inside its SKIP LOCKED claim statement (media_jobs.rs)",
         "tenants": "read: stays: the media job claim admits only jobs of active live shops inside its SKIP LOCKED claim statement (media_jobs.rs)"
       },
@@ -254,7 +257,10 @@
         "shipping",
         "shop"
       ],
-      "foreign_tables": {},
+      "foreign_tables": {
+        "carts": "read: stays: the customer's recent orders join their carts in one statement to match guest orders by the cart email (manual_orders.rs)",
+        "orders": "read: stays: the CRM detail and manual-order drafts read the customer's recent orders with the customer row in one statement (manual_orders.rs)"
+      },
       "glob_imports": 0,
       "untyped_access": 0,
       "sql_outside_store": 0,
@@ -355,7 +361,11 @@
         "pricing",
         "shop"
       ],
-      "foreign_tables": {},
+      "foreign_tables": {
+        "app_packages": "read: stays: the configuration digest covers every installed app revision in one statement with rules, flows and promotions (configuration_digest.rs)",
+        "commerce_overrides": "read: stays: merchant reports read channel settings overrides inside the report snapshot transaction (report_channels.rs)",
+        "tasks": "read: stays: flow-template proposals check the task their flow job created, in one statement with the job lease (flow_proposal_reads.rs)"
+      },
       "glob_imports": 0,
       "untyped_access": 4,
       "sql_outside_store": 0,

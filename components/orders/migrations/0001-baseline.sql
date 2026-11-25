@@ -253,3 +253,62 @@ ALTER TABLE public.orders ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.receipt_counters ENABLE ROW LEVEL SECURITY;
 
 ALTER TABLE public.receipt_settings ENABLE ROW LEVEL SECURITY;
+
+-- company_logos (owner orders)
+
+CREATE TABLE public.company_logos (
+    tenant text NOT NULL,
+    id text NOT NULL,
+    content bytea NOT NULL,
+    digest text NOT NULL,
+    mime text NOT NULL,
+    width integer NOT NULL,
+    height integer NOT NULL,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    -- Written with BETWEEN as in its original definition, so the stored expression tree is identical.
+    CONSTRAINT company_logos_check CHECK (width BETWEEN 1 AND 4096 AND height BETWEEN 1 AND 4096),
+    CONSTRAINT company_logos_content_check CHECK (((octet_length(content) >= 1) AND (octet_length(content) <= 2097152))),
+    CONSTRAINT company_logos_mime_check CHECK ((mime = 'image/png'::text))
+);
+
+ALTER TABLE ONLY public.company_logos FORCE ROW LEVEL SECURITY;
+
+ALTER TABLE ONLY public.company_logos
+    ADD CONSTRAINT company_logos_pkey PRIMARY KEY (tenant, id);
+
+ALTER TABLE ONLY public.company_logos
+    ADD CONSTRAINT company_logos_tenant_digest_key UNIQUE (tenant, digest);
+
+ALTER TABLE ONLY public.company_logos
+    ADD CONSTRAINT company_logos_tenant_fkey FOREIGN KEY (tenant) REFERENCES public.tenants(id);
+
+CREATE POLICY authenticated_scope ON public.company_logos AS RESTRICTIVE USING ((COALESCE(( SELECT ((public.veyndo_scope_guard() ->> 'system'::text))::boolean AS bool), false) OR (tenant = ( SELECT (public.veyndo_scope_guard() ->> 'tenant'::text))))) WITH CHECK ((COALESCE(( SELECT ((public.veyndo_scope_guard() ->> 'system'::text))::boolean AS bool), false) OR (tenant = ( SELECT (public.veyndo_scope_guard() ->> 'tenant'::text)))));
+
+ALTER TABLE public.company_logos ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY core_tenant_scope ON public.company_logos USING (((current_setting('rac.system'::text, true) = 'on'::text) OR (tenant = NULLIF(current_setting('rac.tenant'::text, true), ''::text)))) WITH CHECK (((current_setting('rac.system'::text, true) = 'on'::text) OR (tenant = NULLIF(current_setting('rac.tenant'::text, true), ''::text))));
+
+-- company_overrides (owner orders)
+
+CREATE TABLE public.company_overrides (
+    tenant text NOT NULL,
+    channel_id text NOT NULL,
+    data jsonb DEFAULT '{}'::jsonb NOT NULL,
+    revision bigint DEFAULT 1 NOT NULL,
+    CONSTRAINT company_overrides_data_check CHECK ((jsonb_typeof(data) = 'object'::text))
+);
+
+ALTER TABLE ONLY public.company_overrides FORCE ROW LEVEL SECURITY;
+
+ALTER TABLE ONLY public.company_overrides
+    ADD CONSTRAINT company_overrides_pkey PRIMARY KEY (tenant, channel_id);
+
+CREATE CONSTRAINT TRIGGER history_after AFTER INSERT OR DELETE OR UPDATE ON public.company_overrides DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION public.capture_entity_history('companyChannel', 'channel_id');
+
+CREATE TRIGGER history_before BEFORE INSERT OR DELETE OR UPDATE ON public.company_overrides FOR EACH ROW EXECUTE FUNCTION public.capture_entity_history('companyChannel', 'channel_id');
+
+CREATE POLICY authenticated_scope ON public.company_overrides AS RESTRICTIVE USING ((COALESCE(( SELECT ((public.veyndo_scope_guard() ->> 'system'::text))::boolean AS bool), false) OR (tenant = ( SELECT (public.veyndo_scope_guard() ->> 'tenant'::text))))) WITH CHECK ((COALESCE(( SELECT ((public.veyndo_scope_guard() ->> 'system'::text))::boolean AS bool), false) OR (tenant = ( SELECT (public.veyndo_scope_guard() ->> 'tenant'::text)))));
+
+ALTER TABLE public.company_overrides ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY core_tenant_scope ON public.company_overrides USING (((current_setting('rac.system'::text, true) = 'on'::text) OR (tenant = NULLIF(current_setting('rac.tenant'::text, true), ''::text)))) WITH CHECK (((current_setting('rac.system'::text, true) = 'on'::text) OR (tenant = NULLIF(current_setting('rac.tenant'::text, true), ''::text))));

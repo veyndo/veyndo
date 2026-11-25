@@ -459,15 +459,6 @@ CREATE TABLE public.tasks (
 
 ALTER TABLE ONLY public.tasks FORCE ROW LEVEL SECURITY;
 
-CREATE TABLE public.tenant_ai_usage (
-    tenant text NOT NULL,
-    day date NOT NULL,
-    attempts bigint NOT NULL,
-    CONSTRAINT tenant_ai_usage_attempts_check CHECK ((attempts > 0))
-);
-
-ALTER TABLE ONLY public.tenant_ai_usage FORCE ROW LEVEL SECURITY;
-
 CREATE TABLE public.vector_index_queue (
     tenant text NOT NULL,
     kind text NOT NULL,
@@ -573,9 +564,6 @@ ALTER TABLE ONLY public.tasks
 
 ALTER TABLE ONLY public.tasks
     ADD CONSTRAINT tasks_tenant_id_key UNIQUE (tenant, id);
-
-ALTER TABLE ONLY public.tenant_ai_usage
-    ADD CONSTRAINT tenant_ai_usage_pkey PRIMARY KEY (tenant, day);
 
 ALTER TABLE ONLY public.vector_index_queue
     ADD CONSTRAINT vector_index_queue_pkey PRIMARY KEY (tenant, kind, object_id);
@@ -764,9 +752,6 @@ ALTER TABLE ONLY public.session_signals
 ALTER TABLE ONLY public.tasks
     ADD CONSTRAINT tasks_conversation_scope FOREIGN KEY (tenant, conversation_id) REFERENCES public.conversations(tenant, id);
 
-ALTER TABLE ONLY public.tenant_ai_usage
-    ADD CONSTRAINT tenant_ai_usage_tenant_fkey FOREIGN KEY (tenant) REFERENCES public.tenants(id);
-
 ALTER TABLE ONLY public.translation_jobs
     ADD CONSTRAINT translation_run_tenant_fk FOREIGN KEY (tenant, run_task) REFERENCES public.tasks(tenant, id);
 
@@ -823,8 +808,6 @@ CREATE POLICY authenticated_scope ON public.session_signal_events AS RESTRICTIVE
 CREATE POLICY authenticated_scope ON public.session_signals AS RESTRICTIVE USING ((COALESCE(( SELECT ((public.veyndo_scope_guard() ->> 'system'::text))::boolean AS bool), false) OR (tenant = ( SELECT (public.veyndo_scope_guard() ->> 'tenant'::text))))) WITH CHECK ((COALESCE(( SELECT ((public.veyndo_scope_guard() ->> 'system'::text))::boolean AS bool), false) OR (tenant = ( SELECT (public.veyndo_scope_guard() ->> 'tenant'::text)))));
 
 CREATE POLICY authenticated_scope ON public.tasks AS RESTRICTIVE USING ((COALESCE(( SELECT ((public.veyndo_scope_guard() ->> 'system'::text))::boolean AS bool), false) OR (tenant = ( SELECT (public.veyndo_scope_guard() ->> 'tenant'::text))))) WITH CHECK ((COALESCE(( SELECT ((public.veyndo_scope_guard() ->> 'system'::text))::boolean AS bool), false) OR (tenant = ( SELECT (public.veyndo_scope_guard() ->> 'tenant'::text)))));
-
-CREATE POLICY authenticated_scope ON public.tenant_ai_usage AS RESTRICTIVE USING ((COALESCE(( SELECT ((public.veyndo_scope_guard() ->> 'system'::text))::boolean AS bool), false) OR (tenant = ( SELECT (public.veyndo_scope_guard() ->> 'tenant'::text))))) WITH CHECK ((COALESCE(( SELECT ((public.veyndo_scope_guard() ->> 'system'::text))::boolean AS bool), false) OR (tenant = ( SELECT (public.veyndo_scope_guard() ->> 'tenant'::text)))));
 
 CREATE POLICY authenticated_scope ON public.vector_index_queue AS RESTRICTIVE USING ((COALESCE(( SELECT ((public.veyndo_scope_guard() ->> 'system'::text))::boolean AS bool), false) OR (tenant = ( SELECT (public.veyndo_scope_guard() ->> 'tenant'::text))))) WITH CHECK ((COALESCE(( SELECT ((public.veyndo_scope_guard() ->> 'system'::text))::boolean AS bool), false) OR (tenant = ( SELECT (public.veyndo_scope_guard() ->> 'tenant'::text)))));
 
@@ -884,8 +867,6 @@ CREATE POLICY core_tenant_scope ON public.session_signals USING (((current_setti
 
 CREATE POLICY core_tenant_scope ON public.tasks USING (((current_setting('rac.system'::text, true) = 'on'::text) OR (tenant = NULLIF(current_setting('rac.tenant'::text, true), ''::text)))) WITH CHECK (((current_setting('rac.system'::text, true) = 'on'::text) OR (tenant = NULLIF(current_setting('rac.tenant'::text, true), ''::text))));
 
-CREATE POLICY core_tenant_scope ON public.tenant_ai_usage USING (((current_setting('rac.system'::text, true) = 'on'::text) OR (tenant = NULLIF(current_setting('rac.tenant'::text, true), ''::text)))) WITH CHECK (((current_setting('rac.system'::text, true) = 'on'::text) OR (tenant = NULLIF(current_setting('rac.tenant'::text, true), ''::text))));
-
 CREATE POLICY core_tenant_scope ON public.vector_index_queue USING (((current_setting('rac.system'::text, true) = 'on'::text) OR (tenant = NULLIF(current_setting('rac.tenant'::text, true), ''::text)))) WITH CHECK (((current_setting('rac.system'::text, true) = 'on'::text) OR (tenant = NULLIF(current_setting('rac.tenant'::text, true), ''::text))));
 
 ALTER TABLE public.embedding_generations ENABLE ROW LEVEL SECURITY;
@@ -933,7 +914,5 @@ ALTER TABLE public.session_signal_events ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.session_signals ENABLE ROW LEVEL SECURITY;
 
 ALTER TABLE public.tasks ENABLE ROW LEVEL SECURITY;
-
-ALTER TABLE public.tenant_ai_usage ENABLE ROW LEVEL SECURITY;
 
 ALTER TABLE public.vector_index_queue ENABLE ROW LEVEL SECURITY;

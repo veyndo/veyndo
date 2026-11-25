@@ -76,6 +76,80 @@ impl SettingsGuards for Conditions {
     }
 }
 
+/// No document of a component above pricing refers to a currency or bounds a price job.
+impl veyndo_pricing::ports::References for Conditions {
+    fn product_ceiling<'a>(
+        &'a self,
+        _: &'a mut sqlx::PgConnection,
+        _: &'a str,
+    ) -> PortFuture<'a, String> {
+        Box::pin(async { Ok(String::new()) })
+    }
+    fn products_use<'a>(
+        &'a self,
+        _: &'a mut sqlx::PgConnection,
+        _: &'a str,
+        _: &'a [String],
+    ) -> PortFuture<'a, bool> {
+        Box::pin(async { Ok(false) })
+    }
+    fn carts_use<'a>(
+        &'a self,
+        _: &'a mut sqlx::PgConnection,
+        _: &'a str,
+        _: &'a [String],
+    ) -> PortFuture<'a, bool> {
+        Box::pin(async { Ok(false) })
+    }
+    fn units_use<'a>(
+        &'a self,
+        _: &'a mut sqlx::PgConnection,
+        _: &'a str,
+        _: &'a [String],
+    ) -> PortFuture<'a, bool> {
+        Box::pin(async { Ok(false) })
+    }
+}
+
+/// No document refers to a shipping or payment method.
+impl veyndo_shipping::ports::MethodReferences for Conditions {
+    fn orders<'a>(
+        &'a self,
+        _: &'a mut sqlx::PgConnection,
+        _: &'a veyndo_shipping::ports::MethodReference<'a>,
+    ) -> PortFuture<'a, i64> {
+        Box::pin(async { Ok(0) })
+    }
+    fn carts<'a>(
+        &'a self,
+        _: &'a mut sqlx::PgConnection,
+        _: &'a veyndo_shipping::ports::MethodReference<'a>,
+    ) -> PortFuture<'a, i64> {
+        Box::pin(async { Ok(0) })
+    }
+    fn overrides<'a>(
+        &'a self,
+        _: &'a mut sqlx::PgConnection,
+        _: &'a veyndo_shipping::ports::MethodReference<'a>,
+    ) -> PortFuture<'a, i64> {
+        Box::pin(async { Ok(0) })
+    }
+    fn rules<'a>(
+        &'a self,
+        _: &'a mut sqlx::PgConnection,
+        _: &'a veyndo_shipping::ports::MethodReference<'a>,
+    ) -> PortFuture<'a, i64> {
+        Box::pin(async { Ok(0) })
+    }
+    fn units<'a>(
+        &'a self,
+        _: &'a mut sqlx::PgConnection,
+        _: &'a veyndo_shipping::ports::MethodReference<'a>,
+    ) -> PortFuture<'a, i64> {
+        Box::pin(async { Ok(0) })
+    }
+}
+
 #[cfg(test)]
 mod tests {
     #[test]

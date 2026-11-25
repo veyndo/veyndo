@@ -333,8 +333,8 @@ async fn pricing_and_shop(f: &Fixture) {
 /// Customers and their sessions, read by customers and payments.
 async fn customers_and_payments(f: &Fixture) {
     use veyndo_customers::store::addresses::lock_customer;
+    use veyndo_customers::store::purchase_customers::session_customer;
     use veyndo_customers::store::sessions::{delete, insert, valid};
-    use veyndo_payments::store::funding::session_customer;
     let (a, b) = (f.a.as_str(), f.b.as_str());
     let digest = format!("digest-{}", f.run);
     scoped(shop(a), insert(&f.state, &digest, a, &f.email))
@@ -388,7 +388,7 @@ async fn customers_and_payments(f: &Fixture) {
     assert!(paying.is_some());
 }
 
-/// Carts as checkout, B2B, POS and marketing lock them; orders, roles, settings and exposures.
+/// Carts as checkout, B2B, customer sign-in and marketing lock them; orders, roles, settings and exposures.
 async fn carts_orders_and_reads(f: &Fixture) {
     let (a, b) = (f.a.as_str(), f.b.as_str());
     for (scope, visible) in [(shop(b), false), (shop(a), true)] {
@@ -402,10 +402,9 @@ async fn carts_orders_and_reads(f: &Fixture) {
                     .await
                     .expect("b2b cart")
                     .is_some(),
-                veyndo_pos::store::carts::lock(&mut *c, a, &f.token)
+                veyndo_checkout::store::customer_carts::lock_by_token(&mut *c, a, &f.token)
                     .await
-                    .expect("pos cart")
-                    .is_some(),
+                    .is_ok(),
                 veyndo_marketing::store::carts::lock(&mut *c, a, &f.token)
                     .await
                     .is_ok(),
@@ -414,7 +413,7 @@ async fn carts_orders_and_reads(f: &Fixture) {
         .await;
         assert_eq!(
             seen, [visible; 4],
-            "checkout/b2b/pos/marketing carts: visible to A only"
+            "checkout/b2b/customer/marketing carts: visible to A only"
         );
         let reads = within(
             &f.runtime,
@@ -425,7 +424,7 @@ async fn carts_orders_and_reads(f: &Fixture) {
                     veyndo_identity::store::roles::count(&mut *c, a)
                         .await
                         .expect("roles"),
-                    veyndo_pos::store::register::main_locale(&mut *c, a)
+                    veyndo_shop::store::channel_settings::main_locale(&mut *c, a)
                         .await
                         .is_ok(),
                     veyndo_marketing::store::configuration_writes::settings(&mut *c, a, false)
@@ -438,7 +437,7 @@ async fn carts_orders_and_reads(f: &Fixture) {
         assert_eq!(
             (reads.0 > 0, reads.1, reads.2),
             (visible, visible, visible),
-            "identity/pos/marketing reads: visible to A only"
+            "identity/shop/marketing reads: visible to A only"
         );
         let tenant = if visible { a } else { b };
         let orders = scoped(
@@ -478,6 +477,6 @@ async fn component_stores_keep_shops_apart() {
     println!("PASS customers, payments: sessions and customers");
     carts_orders_and_reads(&f).await;
     println!(
-        "PASS checkout, b2b, pos, marketing, orders, identity, intelligence: carts, orders, roles, settings and exposures"
+        "PASS checkout, b2b, customers, shop, marketing, orders, identity, intelligence: carts, orders, roles, settings and exposures"
     );
 }

@@ -62,33 +62,6 @@ CREATE TABLE public.commerce_settings (
 
 ALTER TABLE ONLY public.commerce_settings FORCE ROW LEVEL SECURITY;
 
-CREATE TABLE public.company_logos (
-    tenant text NOT NULL,
-    id text NOT NULL,
-    content bytea NOT NULL,
-    digest text NOT NULL,
-    mime text NOT NULL,
-    width integer NOT NULL,
-    height integer NOT NULL,
-    created_at timestamp with time zone DEFAULT now() NOT NULL,
-    -- Written with BETWEEN as in its original definition, so the stored expression tree is identical.
-    CONSTRAINT company_logos_check CHECK (width BETWEEN 1 AND 4096 AND height BETWEEN 1 AND 4096),
-    CONSTRAINT company_logos_content_check CHECK (((octet_length(content) >= 1) AND (octet_length(content) <= 2097152))),
-    CONSTRAINT company_logos_mime_check CHECK ((mime = 'image/png'::text))
-);
-
-ALTER TABLE ONLY public.company_logos FORCE ROW LEVEL SECURITY;
-
-CREATE TABLE public.company_overrides (
-    tenant text NOT NULL,
-    channel_id text NOT NULL,
-    data jsonb DEFAULT '{}'::jsonb NOT NULL,
-    revision bigint DEFAULT 1 NOT NULL,
-    CONSTRAINT company_overrides_data_check CHECK ((jsonb_typeof(data) = 'object'::text))
-);
-
-ALTER TABLE ONLY public.company_overrides FORCE ROW LEVEL SECURITY;
-
 CREATE TABLE public.consumer_request_reviews (
     tenant text NOT NULL,
     request_id text NOT NULL,
@@ -213,16 +186,6 @@ CREATE TABLE public.privacy_consents (
 
 ALTER TABLE ONLY public.privacy_consents FORCE ROW LEVEL SECURITY;
 
-CREATE TABLE public.tenant_resource_limits (
-    tenant text NOT NULL,
-    daily_ai bigint NOT NULL,
-    revision bigint DEFAULT 1 NOT NULL,
-    CONSTRAINT tenant_resource_limits_daily_ai_check CHECK (((daily_ai >= 1) AND (daily_ai <= 1000000))),
-    CONSTRAINT tenant_resource_limits_revision_check CHECK ((revision > 0))
-);
-
-ALTER TABLE ONLY public.tenant_resource_limits FORCE ROW LEVEL SECURITY;
-
 ALTER TABLE ONLY public.platform_audit ALTER COLUMN id SET DEFAULT nextval('public.platform_audit_id_seq'::regclass);
 
 -- Rows every fresh installation starts with.
@@ -241,15 +204,6 @@ ALTER TABLE ONLY public.commerce_overrides
 
 ALTER TABLE ONLY public.commerce_settings
     ADD CONSTRAINT commerce_settings_pkey PRIMARY KEY (tenant);
-
-ALTER TABLE ONLY public.company_logos
-    ADD CONSTRAINT company_logos_pkey PRIMARY KEY (tenant, id);
-
-ALTER TABLE ONLY public.company_logos
-    ADD CONSTRAINT company_logos_tenant_digest_key UNIQUE (tenant, digest);
-
-ALTER TABLE ONLY public.company_overrides
-    ADD CONSTRAINT company_overrides_pkey PRIMARY KEY (tenant, channel_id);
 
 ALTER TABLE ONLY public.consumer_request_reviews
     ADD CONSTRAINT consumer_request_reviews_pkey PRIMARY KEY (tenant, request_id, revision);
@@ -284,9 +238,6 @@ ALTER TABLE ONLY public.privacy_consent_log
 ALTER TABLE ONLY public.privacy_consents
     ADD CONSTRAINT privacy_consents_pkey PRIMARY KEY (tenant, cart_id, channel_id);
 
-ALTER TABLE ONLY public.tenant_resource_limits
-    ADD CONSTRAINT tenant_resource_limits_pkey PRIMARY KEY (tenant);
-
 CREATE INDEX consumer_requests_scope ON public.consumer_requests USING btree (tenant, created_at DESC, id);
 
 CREATE INDEX hosted_frontends_app ON public.hosted_frontends USING btree (tenant, app_id) WHERE (app_id IS NOT NULL);
@@ -307,13 +258,9 @@ CREATE CONSTRAINT TRIGGER history_after AFTER INSERT OR DELETE OR UPDATE ON publ
 
 CREATE CONSTRAINT TRIGGER history_after AFTER INSERT OR DELETE OR UPDATE ON public.commerce_settings DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION public.capture_entity_history('settings', 'tenant');
 
-CREATE CONSTRAINT TRIGGER history_after AFTER INSERT OR DELETE OR UPDATE ON public.company_overrides DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION public.capture_entity_history('companyChannel', 'channel_id');
-
 CREATE TRIGGER history_before BEFORE INSERT OR DELETE OR UPDATE ON public.commerce_overrides FOR EACH ROW EXECUTE FUNCTION public.capture_entity_history('checkoutChannel', 'channel_id');
 
 CREATE TRIGGER history_before BEFORE INSERT OR DELETE OR UPDATE ON public.commerce_settings FOR EACH ROW EXECUTE FUNCTION public.capture_entity_history('settings', 'tenant');
-
-CREATE TRIGGER history_before BEFORE INSERT OR DELETE OR UPDATE ON public.company_overrides FOR EACH ROW EXECUTE FUNCTION public.capture_entity_history('companyChannel', 'channel_id');
 
 CREATE TRIGGER languages_cache_version AFTER DELETE OR UPDATE OR TRUNCATE ON public.languages FOR EACH STATEMENT EXECUTE FUNCTION public.stamp_language_registry();
 
@@ -322,9 +269,6 @@ CREATE TRIGGER languages_insert_cache_version AFTER INSERT ON public.languages R
 CREATE TRIGGER overrides_cache_event AFTER INSERT OR UPDATE ON public.commerce_overrides FOR EACH ROW EXECUTE FUNCTION public.emit_read_cache_event();
 
 CREATE TRIGGER settings_cache_event AFTER INSERT OR UPDATE ON public.commerce_settings FOR EACH ROW EXECUTE FUNCTION public.emit_read_cache_event();
-
-ALTER TABLE ONLY public.company_logos
-    ADD CONSTRAINT company_logos_tenant_fkey FOREIGN KEY (tenant) REFERENCES public.tenants(id);
 
 ALTER TABLE ONLY public.consumer_request_reviews
     ADD CONSTRAINT consumer_request_reviews_tenant_request_id_fkey FOREIGN KEY (tenant, request_id) REFERENCES public.consumer_requests(tenant, id);
@@ -359,16 +303,9 @@ ALTER TABLE ONLY public.privacy_consents
 ALTER TABLE ONLY public.product_translations
     ADD CONSTRAINT product_translations_language_id_fkey FOREIGN KEY (language_id) REFERENCES public.languages(id);
 
-ALTER TABLE ONLY public.tenant_resource_limits
-    ADD CONSTRAINT tenant_resource_limits_tenant_fkey FOREIGN KEY (tenant) REFERENCES public.tenants(id);
-
 CREATE POLICY authenticated_scope ON public.commerce_overrides AS RESTRICTIVE USING ((COALESCE(( SELECT ((public.veyndo_scope_guard() ->> 'system'::text))::boolean AS bool), false) OR (tenant = ( SELECT (public.veyndo_scope_guard() ->> 'tenant'::text))))) WITH CHECK ((COALESCE(( SELECT ((public.veyndo_scope_guard() ->> 'system'::text))::boolean AS bool), false) OR (tenant = ( SELECT (public.veyndo_scope_guard() ->> 'tenant'::text)))));
 
 CREATE POLICY authenticated_scope ON public.commerce_settings AS RESTRICTIVE USING ((COALESCE(( SELECT ((public.veyndo_scope_guard() ->> 'system'::text))::boolean AS bool), false) OR (tenant = ( SELECT (public.veyndo_scope_guard() ->> 'tenant'::text))))) WITH CHECK ((COALESCE(( SELECT ((public.veyndo_scope_guard() ->> 'system'::text))::boolean AS bool), false) OR (tenant = ( SELECT (public.veyndo_scope_guard() ->> 'tenant'::text)))));
-
-CREATE POLICY authenticated_scope ON public.company_logos AS RESTRICTIVE USING ((COALESCE(( SELECT ((public.veyndo_scope_guard() ->> 'system'::text))::boolean AS bool), false) OR (tenant = ( SELECT (public.veyndo_scope_guard() ->> 'tenant'::text))))) WITH CHECK ((COALESCE(( SELECT ((public.veyndo_scope_guard() ->> 'system'::text))::boolean AS bool), false) OR (tenant = ( SELECT (public.veyndo_scope_guard() ->> 'tenant'::text)))));
-
-CREATE POLICY authenticated_scope ON public.company_overrides AS RESTRICTIVE USING ((COALESCE(( SELECT ((public.veyndo_scope_guard() ->> 'system'::text))::boolean AS bool), false) OR (tenant = ( SELECT (public.veyndo_scope_guard() ->> 'tenant'::text))))) WITH CHECK ((COALESCE(( SELECT ((public.veyndo_scope_guard() ->> 'system'::text))::boolean AS bool), false) OR (tenant = ( SELECT (public.veyndo_scope_guard() ->> 'tenant'::text)))));
 
 CREATE POLICY authenticated_scope ON public.consumer_request_reviews AS RESTRICTIVE USING ((COALESCE(( SELECT ((public.veyndo_scope_guard() ->> 'system'::text))::boolean AS bool), false) OR (tenant = ( SELECT (public.veyndo_scope_guard() ->> 'tenant'::text))))) WITH CHECK ((COALESCE(( SELECT ((public.veyndo_scope_guard() ->> 'system'::text))::boolean AS bool), false) OR (tenant = ( SELECT (public.veyndo_scope_guard() ->> 'tenant'::text)))));
 
@@ -384,15 +321,9 @@ CREATE POLICY authenticated_scope ON public.privacy_consent_log AS RESTRICTIVE U
 
 CREATE POLICY authenticated_scope ON public.privacy_consents AS RESTRICTIVE USING ((COALESCE(( SELECT ((public.veyndo_scope_guard() ->> 'system'::text))::boolean AS bool), false) OR (tenant = ( SELECT (public.veyndo_scope_guard() ->> 'tenant'::text))))) WITH CHECK ((COALESCE(( SELECT ((public.veyndo_scope_guard() ->> 'system'::text))::boolean AS bool), false) OR (tenant = ( SELECT (public.veyndo_scope_guard() ->> 'tenant'::text)))));
 
-CREATE POLICY authenticated_scope ON public.tenant_resource_limits AS RESTRICTIVE USING ((COALESCE(( SELECT ((public.veyndo_scope_guard() ->> 'system'::text))::boolean AS bool), false) OR (tenant = ( SELECT (public.veyndo_scope_guard() ->> 'tenant'::text))))) WITH CHECK ((COALESCE(( SELECT ((public.veyndo_scope_guard() ->> 'system'::text))::boolean AS bool), false) OR (tenant = ( SELECT (public.veyndo_scope_guard() ->> 'tenant'::text)))));
-
 ALTER TABLE public.commerce_overrides ENABLE ROW LEVEL SECURITY;
 
 ALTER TABLE public.commerce_settings ENABLE ROW LEVEL SECURITY;
-
-ALTER TABLE public.company_logos ENABLE ROW LEVEL SECURITY;
-
-ALTER TABLE public.company_overrides ENABLE ROW LEVEL SECURITY;
 
 ALTER TABLE public.consumer_request_reviews ENABLE ROW LEVEL SECURITY;
 
@@ -401,10 +332,6 @@ ALTER TABLE public.consumer_requests ENABLE ROW LEVEL SECURITY;
 CREATE POLICY core_tenant_scope ON public.commerce_overrides USING (((current_setting('rac.system'::text, true) = 'on'::text) OR (tenant = NULLIF(current_setting('rac.tenant'::text, true), ''::text)))) WITH CHECK (((current_setting('rac.system'::text, true) = 'on'::text) OR (tenant = NULLIF(current_setting('rac.tenant'::text, true), ''::text))));
 
 CREATE POLICY core_tenant_scope ON public.commerce_settings USING (((current_setting('rac.system'::text, true) = 'on'::text) OR (tenant = NULLIF(current_setting('rac.tenant'::text, true), ''::text)))) WITH CHECK (((current_setting('rac.system'::text, true) = 'on'::text) OR (tenant = NULLIF(current_setting('rac.tenant'::text, true), ''::text))));
-
-CREATE POLICY core_tenant_scope ON public.company_logos USING (((current_setting('rac.system'::text, true) = 'on'::text) OR (tenant = NULLIF(current_setting('rac.tenant'::text, true), ''::text)))) WITH CHECK (((current_setting('rac.system'::text, true) = 'on'::text) OR (tenant = NULLIF(current_setting('rac.tenant'::text, true), ''::text))));
-
-CREATE POLICY core_tenant_scope ON public.company_overrides USING (((current_setting('rac.system'::text, true) = 'on'::text) OR (tenant = NULLIF(current_setting('rac.tenant'::text, true), ''::text)))) WITH CHECK (((current_setting('rac.system'::text, true) = 'on'::text) OR (tenant = NULLIF(current_setting('rac.tenant'::text, true), ''::text))));
 
 CREATE POLICY core_tenant_scope ON public.consumer_request_reviews USING (((current_setting('rac.system'::text, true) = 'on'::text) OR (tenant = NULLIF(current_setting('rac.tenant'::text, true), ''::text)))) WITH CHECK (((current_setting('rac.system'::text, true) = 'on'::text) OR (tenant = NULLIF(current_setting('rac.tenant'::text, true), ''::text))));
 
@@ -420,8 +347,6 @@ CREATE POLICY core_tenant_scope ON public.privacy_consent_log USING (((current_s
 
 CREATE POLICY core_tenant_scope ON public.privacy_consents USING (((current_setting('rac.system'::text, true) = 'on'::text) OR (tenant = NULLIF(current_setting('rac.tenant'::text, true), ''::text)))) WITH CHECK (((current_setting('rac.system'::text, true) = 'on'::text) OR (tenant = NULLIF(current_setting('rac.tenant'::text, true), ''::text))));
 
-CREATE POLICY core_tenant_scope ON public.tenant_resource_limits USING (((current_setting('rac.system'::text, true) = 'on'::text) OR (tenant = NULLIF(current_setting('rac.tenant'::text, true), ''::text)))) WITH CHECK ((current_setting('rac.system'::text, true) = 'on'::text));
-
 ALTER TABLE public.hosted_frontends ENABLE ROW LEVEL SECURITY;
 
 ALTER TABLE public.legal_acceptances ENABLE ROW LEVEL SECURITY;
@@ -431,5 +356,3 @@ ALTER TABLE public.platform_audit ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.privacy_consent_log ENABLE ROW LEVEL SECURITY;
 
 ALTER TABLE public.privacy_consents ENABLE ROW LEVEL SECURITY;
-
-ALTER TABLE public.tenant_resource_limits ENABLE ROW LEVEL SECURITY;

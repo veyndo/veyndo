@@ -102,20 +102,6 @@ CREATE SEQUENCE public.entity_history_id_seq
 
 ALTER SEQUENCE public.entity_history_id_seq OWNED BY public.entity_history.id;
 
-CREATE TABLE public.shop_environments (
-    tenant text NOT NULL,
-    live_tenant text NOT NULL,
-    name text NOT NULL,
-    baseline jsonb NOT NULL,
-    created_at timestamp with time zone DEFAULT now() NOT NULL,
-    preview_owner text,
-    preview_until timestamp with time zone,
-    CONSTRAINT preview_owner_expiry CHECK (((preview_owner IS NULL) = (preview_until IS NULL))),
-    CONSTRAINT shop_environments_check CHECK ((tenant <> live_tenant))
-);
-
-ALTER TABLE ONLY public.shop_environments FORCE ROW LEVEL SECURITY;
-
 CREATE TABLE public.shop_releases (
     id text NOT NULL,
     live_tenant text NOT NULL,
@@ -155,12 +141,6 @@ ALTER TABLE ONLY public.entity_history
 ALTER TABLE ONLY public.entity_history
     ADD CONSTRAINT entity_history_tenant_entity_entity_id_transaction_id_key UNIQUE (tenant, entity, entity_id, transaction_id);
 
-ALTER TABLE ONLY public.shop_environments
-    ADD CONSTRAINT environments_live_tenant_key UNIQUE (live_tenant, tenant);
-
-ALTER TABLE ONLY public.shop_environments
-    ADD CONSTRAINT shop_environments_pkey PRIMARY KEY (tenant);
-
 ALTER TABLE ONLY public.shop_releases
     ADD CONSTRAINT shop_releases_pkey PRIMARY KEY (id);
 
@@ -170,11 +150,7 @@ ALTER TABLE ONLY public.studio_workspace_versions
 ALTER TABLE ONLY public.studio_workspaces
     ADD CONSTRAINT studio_workspaces_pkey PRIMARY KEY (tenant, user_id);
 
-CREATE UNIQUE INDEX app_preview_owner ON public.shop_environments USING btree (live_tenant, preview_owner) WHERE (preview_owner IS NOT NULL);
-
 CREATE INDEX entity_history_lookup ON public.entity_history USING btree (tenant, entity, entity_id, id DESC);
-
-CREATE INDEX environments_live ON public.shop_environments USING btree (live_tenant);
 
 ALTER TABLE ONLY public.developer_builds
     ADD CONSTRAINT builds_environment_scope FOREIGN KEY (tenant, environment) REFERENCES public.shop_environments(live_tenant, tenant);
@@ -189,13 +165,7 @@ ALTER TABLE ONLY public.shop_releases
     ADD CONSTRAINT releases_environment_scope FOREIGN KEY (live_tenant, environment) REFERENCES public.shop_environments(live_tenant, tenant);
 
 ALTER TABLE ONLY public.shop_environments
-    ADD CONSTRAINT shop_environments_live_tenant_fkey FOREIGN KEY (live_tenant) REFERENCES public.tenants(id);
-
-ALTER TABLE ONLY public.shop_environments
     ADD CONSTRAINT shop_environments_preview_owner_fkey FOREIGN KEY (preview_owner) REFERENCES public.merchant_users(id);
-
-ALTER TABLE ONLY public.shop_environments
-    ADD CONSTRAINT shop_environments_tenant_fkey FOREIGN KEY (tenant) REFERENCES public.tenants(id);
 
 ALTER TABLE ONLY public.shop_releases
     ADD CONSTRAINT shop_releases_environment_fkey FOREIGN KEY (environment) REFERENCES public.shop_environments(tenant);
@@ -208,23 +178,17 @@ ALTER TABLE ONLY public.studio_workspaces
 
 CREATE POLICY authenticated_scope ON public.entity_history AS RESTRICTIVE USING ((COALESCE(( SELECT ((public.veyndo_scope_guard() ->> 'system'::text))::boolean AS bool), false) OR (tenant = ( SELECT (public.veyndo_scope_guard() ->> 'tenant'::text))))) WITH CHECK ((COALESCE(( SELECT ((public.veyndo_scope_guard() ->> 'system'::text))::boolean AS bool), false) OR (tenant = ( SELECT (public.veyndo_scope_guard() ->> 'tenant'::text)))));
 
-CREATE POLICY authenticated_scope ON public.shop_environments AS RESTRICTIVE USING ((COALESCE(( SELECT ((public.veyndo_scope_guard() ->> 'system'::text))::boolean AS bool), false) OR (tenant = ( SELECT (public.veyndo_scope_guard() ->> 'tenant'::text))))) WITH CHECK ((COALESCE(( SELECT ((public.veyndo_scope_guard() ->> 'system'::text))::boolean AS bool), false) OR (tenant = ( SELECT (public.veyndo_scope_guard() ->> 'tenant'::text)))));
-
 CREATE POLICY authenticated_scope ON public.studio_workspace_versions AS RESTRICTIVE USING ((COALESCE(( SELECT ((public.veyndo_scope_guard() ->> 'system'::text))::boolean AS bool), false) OR ((tenant = ( SELECT (public.veyndo_scope_guard() ->> 'tenant'::text))) AND (user_id = ( SELECT (public.veyndo_scope_guard() ->> 'personalActor'::text)))))) WITH CHECK ((COALESCE(( SELECT ((public.veyndo_scope_guard() ->> 'system'::text))::boolean AS bool), false) OR ((tenant = ( SELECT (public.veyndo_scope_guard() ->> 'tenant'::text))) AND (user_id = ( SELECT (public.veyndo_scope_guard() ->> 'personalActor'::text))))));
 
 CREATE POLICY authenticated_scope ON public.studio_workspaces AS RESTRICTIVE USING ((COALESCE(( SELECT ((public.veyndo_scope_guard() ->> 'system'::text))::boolean AS bool), false) OR ((tenant = ( SELECT (public.veyndo_scope_guard() ->> 'tenant'::text))) AND (user_id = ( SELECT (public.veyndo_scope_guard() ->> 'personalActor'::text)))))) WITH CHECK ((COALESCE(( SELECT ((public.veyndo_scope_guard() ->> 'system'::text))::boolean AS bool), false) OR ((tenant = ( SELECT (public.veyndo_scope_guard() ->> 'tenant'::text))) AND (user_id = ( SELECT (public.veyndo_scope_guard() ->> 'personalActor'::text))))));
 
 CREATE POLICY core_tenant_scope ON public.entity_history USING (((current_setting('rac.system'::text, true) = 'on'::text) OR (tenant = NULLIF(current_setting('rac.tenant'::text, true), ''::text)))) WITH CHECK (((current_setting('rac.system'::text, true) = 'on'::text) OR (tenant = NULLIF(current_setting('rac.tenant'::text, true), ''::text))));
 
-CREATE POLICY core_tenant_scope ON public.shop_environments USING (((current_setting('rac.system'::text, true) = 'on'::text) OR (tenant = NULLIF(current_setting('rac.tenant'::text, true), ''::text)))) WITH CHECK (((current_setting('rac.system'::text, true) = 'on'::text) OR (tenant = NULLIF(current_setting('rac.tenant'::text, true), ''::text))));
-
 ALTER TABLE public.entity_history ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY personal_workspace ON public.studio_workspaces USING (((tenant = NULLIF(current_setting('rac.tenant'::text, true), ''::text)) AND (user_id = NULLIF(current_setting('rac.actor'::text, true), ''::text)))) WITH CHECK (((tenant = NULLIF(current_setting('rac.tenant'::text, true), ''::text)) AND (user_id = NULLIF(current_setting('rac.actor'::text, true), ''::text))));
 
 CREATE POLICY personal_workspace_version ON public.studio_workspace_versions USING (((tenant = NULLIF(current_setting('rac.tenant'::text, true), ''::text)) AND (user_id = NULLIF(current_setting('rac.actor'::text, true), ''::text)))) WITH CHECK (((tenant = NULLIF(current_setting('rac.tenant'::text, true), ''::text)) AND (user_id = NULLIF(current_setting('rac.actor'::text, true), ''::text))));
-
-ALTER TABLE public.shop_environments ENABLE ROW LEVEL SECURITY;
 
 ALTER TABLE public.studio_workspace_versions ENABLE ROW LEVEL SECURITY;
 

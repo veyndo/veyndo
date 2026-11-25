@@ -4064,6 +4064,8 @@ dependencies = [
  "veyndo-core",
  "veyndo-intelligence",
  "veyndo-payments",
+ "veyndo-pricing",
+ "veyndo-shipping",
  "veyndo-shop",
 ]
 

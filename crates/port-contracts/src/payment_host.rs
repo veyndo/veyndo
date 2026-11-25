@@ -52,6 +52,27 @@ impl Host for Services {
     }
 }
 
+/// The test host keeps no cart snapshots or experiments.
+impl veyndo_payments::ports::LedgerRecords for Services {
+    fn mirror_cart_order<'a>(
+        &'a self,
+        _: &'a mut sqlx::PgConnection,
+        _: &'a str,
+        _: &'a str,
+        _: &'a serde_json::Value,
+    ) -> PortFuture<'a, ()> {
+        Box::pin(async { Ok(()) })
+    }
+    fn reward_capture<'a>(
+        &'a self,
+        _: &'a mut sqlx::PgConnection,
+        _: &'a str,
+        _: &'a str,
+    ) -> PortFuture<'a, ()> {
+        Box::pin(async { Ok(()) })
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::{Services, service};
