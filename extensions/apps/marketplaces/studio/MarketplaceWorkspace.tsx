@@ -1,5 +1,4 @@
 /** Channel-scoped entry to the existing app-owned seller UI; installation uses native reviewed consent. */
-import { Button, Card } from "../../../../frontend/src/kit/ui";
 import { useEffect, useState } from "react";
 import type { RequestFn } from "../../../../frontend/src/shared/api/types";
 import AppConsent from "../../../../frontend/src/admin/apps/AppConsent";
@@ -66,9 +65,9 @@ export default function MarketplaceWorkspace({
   return (
     <div className="studio-page marketplace-workspace">
       <header className="page-intro">
-        <Button type="submit" onClick={onBack}>
+        <button className="studio-secondary" onClick={onBack}>
           ← {c("back")}
-        </Button>
+        </button>
         <span className="kicker">{name}</span>
         <h1>{t("studio")}</h1>
         <p>{t("intro")}</p>
@@ -86,7 +85,7 @@ export default function MarketplaceWorkspace({
           channel={channel}
         />
       ) : (
-        <Card className="market-launch-card">
+        <section className="studio-card market-launch-card">
           <Icon name="layers" size={32} />
           <h2>{t("connect")}</h2>
           <p>{t("setup")}</p>
@@ -96,9 +95,8 @@ export default function MarketplaceWorkspace({
             <li>{t("step3")}</li>
           </ol>
           {!manage && <p>{t("rights")}</p>}
-          <Button
-            tone="primary"
-            type="submit"
+          <button
+            className="studio-primary"
             disabled={!manage || busy || !!error}
             onClick={async () => {
               if (!app) {
@@ -122,8 +120,8 @@ export default function MarketplaceWorkspace({
             }}
           >
             {t(app ? "activate" : "install")}
-          </Button>
-        </Card>
+          </button>
+        </section>
       )}
       {install && (
         <AppConsent

@@ -1,5 +1,4 @@
 /** Connection and offer cards with explicit prepare/submit controls and channel-specific preview. */
-import { Button } from "../../../../frontend/src/kit/ui";
 import { contentText } from "../../../../frontend/src/shared/i18n/content-language";
 import type { RequestFn } from "../../../../frontend/src/shared/api/types";
 import {
@@ -47,16 +46,15 @@ export default function MarketplaceOffers({
     <>
       {kind === "connections" && (
         <>
-          <Button
-            tone="primary"
-            type="submit"
+          <button
+            className="studio-primary"
             disabled={!manage || busy}
             onClick={() =>
               setEditor({ entity: "connections", row: freshConnection() })
             }
           >
             {t("newConnection")}
-          </Button>
+          </button>
           <div className="market-cards">
             {connections.map((c) => (
               <article key={c.id} data-provider={c.provider}>
@@ -71,21 +69,20 @@ export default function MarketplaceOffers({
                   {c.active ? t("active") : t("cancelled")}
                 </span>
                 <footer>
-                  <Button
-                    type="submit"
+                  <button
+                    className="studio-secondary"
                     disabled={!manage || busy}
                     onClick={() => setEditor({ entity: "connections", row: c })}
                   >
                     {t("edit")}
-                  </Button>
-                  <Button
-                    tone="primary"
-                    type="submit"
+                  </button>
+                  <button
+                    className="studio-primary"
                     disabled={!manage || busy || !c.active}
                     onClick={() => void run(() => sync(c, "orders"))}
                   >
                     {t("retrieve")}
-                  </Button>
+                  </button>
                 </footer>
               </article>
             ))}
@@ -95,9 +92,8 @@ export default function MarketplaceOffers({
       )}
       {kind === "offers" && (
         <>
-          <Button
-            tone="primary"
-            type="submit"
+          <button
+            className="studio-primary"
             disabled={!manage || busy || !connections.length}
             onClick={() =>
               setEditor({
@@ -107,7 +103,7 @@ export default function MarketplaceOffers({
             }
           >
             {t("newOffer")}
-          </Button>
+          </button>
           <div className="market-cards">
             {offers.map((o) => {
               const connection = connections.find(
@@ -130,15 +126,15 @@ export default function MarketplaceOffers({
                     {status(o.state)}
                   </span>
                   <footer>
-                    <Button
-                      type="submit"
+                    <button
+                      className="studio-secondary"
                       disabled={!manage || busy}
                       onClick={() => setEditor({ entity: "listings", row: o })}
                     >
                       {t("edit")}
-                    </Button>
-                    <Button
-                      type="submit"
+                    </button>
+                    <button
+                      className="studio-secondary"
                       disabled={!manage || busy || o.state === "uncertain"}
                       onClick={() =>
                         void run(async () =>
@@ -151,10 +147,9 @@ export default function MarketplaceOffers({
                       }
                     >
                       {t("prepare")}
-                    </Button>
-                    <Button
-                      tone="primary"
-                      type="submit"
+                    </button>
+                    <button
+                      className="studio-primary"
                       disabled={
                         !manage ||
                         busy ||
@@ -163,7 +158,7 @@ export default function MarketplaceOffers({
                       onClick={() => setConfirm(o)}
                     >
                       {t("publish")}
-                    </Button>
+                    </button>
                   </footer>
                 </article>
               );

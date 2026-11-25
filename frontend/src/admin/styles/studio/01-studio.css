@@ -111,6 +111,32 @@
 .studio-dialog .icon-button:hover {
   background: var(--hover);
 }
+/* Hash-locked vendored app views (marketplaces) keep the former Studio classes. */
+.studio :is(.studio-primary, .studio-secondary) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 10px 16px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel);
+  color: var(--text);
+  font-size: 13px;
+}
+.studio .studio-primary {
+  border-color: transparent;
+  background: var(--accent);
+  color: var(--accent-text);
+  font-weight: 600;
+}
+.studio .studio-card {
+  padding: 22px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+}
 .studio input,
 .studio select,
 .studio textarea,

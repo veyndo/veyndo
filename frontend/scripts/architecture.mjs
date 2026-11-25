@@ -43,6 +43,14 @@ const kitLayers = {
 };
 const kitPackage = (f) =>
   owner(f) === "kit" ? relative(f).split("/")[1] : undefined;
+// Hash-locked vendored components (components.lock.json) change only by explicit import.
+const lockedRoots = Object.values(
+  JSON.parse(
+    fs.readFileSync(path.resolve(root, "../components.lock.json"), "utf8"),
+  ).components,
+).map((row) => path.resolve(root, "..", row.path) + path.sep);
+const vendored = (file) =>
+  lockedRoots.some((prefix) => file.startsWith(prefix));
 const colourLiteral = /#[0-9a-fA-F]{3,8}\b|\b(?:rgb|rgba|hsl|hsla)\(/;
 const resolve = (from, spec) => {
   const base = path.resolve(path.dirname(from), spec);
@@ -70,6 +78,7 @@ for (const file of files) {
     );
   if (
     /\.tsx?$/.test(file) &&
+    !vendored(file) &&
     (["admin", "shared"].includes(owner(file)) ||
       (file.startsWith(appRoot + path.sep) &&
         file.includes(`${path.sep}studio${path.sep}`))) &&

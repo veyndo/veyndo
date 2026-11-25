@@ -1,5 +1,4 @@
 /** App-owned marketplace workspace uses generated entity actions, native job queue and commerce callbacks. */
-import { Button, LinkButton } from "../../../../frontend/src/kit/ui";
 import { useEffect, useRef, useState } from "react";
 import type { RequestFn } from "../../../../frontend/src/shared/api/types";
 import { useLocale } from "../../../../frontend/src/shared/i18n/i18n";
@@ -159,9 +158,8 @@ export default function MarketplacePanel({
       </div>
       <nav aria-label={t("heading")}>
         {(["connections", "offers", "inbox", "jobs"] as const).map((k) => (
-          <Button
-            tone={tab === k ? "primary" : "secondary"}
-            type="submit"
+          <button
+            className={tab === k ? "studio-primary" : "studio-secondary"}
             key={k}
             aria-pressed={tab === k}
             onClick={() => {
@@ -188,12 +186,16 @@ export default function MarketplacePanel({
               }
             />
             {t(k)}
-          </Button>
+          </button>
         ))}
-        <Button type="submit" disabled={busy} onClick={() => void run(refresh)}>
+        <button
+          className="studio-secondary"
+          disabled={busy}
+          onClick={() => void run(refresh)}
+        >
           <Icon name="refresh" />
           {t("refresh")}
-        </Button>
+        </button>
       </nav>
       {error && <p role="alert">{error}</p>}
       {editor?.entity === "connections" ? (
@@ -279,18 +281,20 @@ export default function MarketplacePanel({
                   <span className="market-state">{status(row.state)}</span>
                   <footer>
                     {row.order_id ? (
-                      <LinkButton href={orderLink(row.order_id)}>
+                      <a
+                        className="studio-secondary"
+                        href={orderLink(row.order_id)}
+                      >
                         {t("openOrder")}
-                      </LinkButton>
+                      </a>
                     ) : (
-                      <Button
-                        tone="primary"
-                        type="submit"
+                      <button
+                        className="studio-primary"
                         disabled={!manage || busy}
                         onClick={() => setReview(row)}
                       >
                         {t("review")}
-                      </Button>
+                      </button>
                     )}
                   </footer>
                 </article>
@@ -305,8 +309,8 @@ export default function MarketplacePanel({
                   <progress value={j.progress} max={100} />
                   <p>{contentText(j.message, locale, "en")}</p>
                   {j.result?.nextCursor && (
-                    <Button
-                      type="submit"
+                    <button
+                      className="studio-secondary"
                       disabled={busy}
                       onClick={() =>
                         void run(async () => {
@@ -325,7 +329,7 @@ export default function MarketplacePanel({
                       }
                     >
                       {t("next")}
-                    </Button>
+                    </button>
                   )}
                   <details>
                     <summary>{t("result")}</summary>

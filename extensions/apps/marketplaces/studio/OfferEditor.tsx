@@ -1,5 +1,4 @@
 /** Channel-specific offer overrides and explicit data-only attribute mappings. No copied catalog or provider secrets. */
-import { Button } from "../../../../frontend/src/kit/ui";
 import { useEffect, useState } from "react";
 import { useLocale } from "../../../../frontend/src/shared/i18n/i18n";
 import { contentText } from "../../../../frontend/src/shared/i18n/content-language";
@@ -255,16 +254,20 @@ export default function OfferEditor({
         </fieldset>
         {error && <p role="alert">{error}</p>}
         <footer>
-          <Button type="button" disabled={busy} onClick={cancel}>
+          <button
+            type="button"
+            className="studio-secondary"
+            disabled={busy}
+            onClick={cancel}
+          >
             {t("cancel")}
-          </Button>
-          <Button
-            tone="primary"
-            type="submit"
+          </button>
+          <button
+            className="studio-primary"
             disabled={busy || !row.product_id || !row.sku}
           >
             {t("save")}
-          </Button>
+          </button>
         </footer>
       </form>
     </ContentLanguage>

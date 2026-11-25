@@ -1,5 +1,4 @@
 /** Source-derived review uses visible addresses, SKU matches and exact amounts; no invented products or taxes. */
-import { Button } from "../../../../frontend/src/kit/ui";
 import { useEffect, useState } from "react";
 import type { RequestFn } from "../../../../frontend/src/shared/api/types";
 import { type Row, actionPath } from "./marketplace-model";
@@ -221,12 +220,16 @@ export default function OrderReview({
       )}
       {error && <p role="alert">{error}</p>}
       <footer>
-        <Button type="button" disabled={saving} onClick={cancel}>
+        <button
+          className="studio-secondary"
+          type="button"
+          disabled={saving}
+          onClick={cancel}
+        >
           {t("cancel")}
-        </Button>
-        <Button
-          tone="primary"
-          type="submit"
+        </button>
+        <button
+          className="studio-primary"
           disabled={
             !snapshot ||
             !approved ||
@@ -237,7 +240,7 @@ export default function OrderReview({
           }
         >
           {t("import")}
-        </Button>
+        </button>
       </footer>
     </form>
   );
