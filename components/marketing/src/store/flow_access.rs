@@ -1,6 +1,5 @@
 //! Every queued flow step rehydrates current membership; stored definitions never preserve revoked privileges.
 use serde_json::Value;
-use sqlx::Row;
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad};
 pub async fn headers(a: &State, t: &str, actor: Option<&str>) -> Result<RequestContext> {
     headers_on(&a.db, t, actor).await
@@ -25,14 +24,15 @@ pub async fn headers_on<'e>(
     if actor == "bootstrap" {
         h.insert("x-rac-role", "owner".parse().unwrap());
     } else {
-        let r=sqlx::query("SELECT role,permissions FROM membership_grants WHERE tenant=COALESCE((SELECT live_tenant FROM shop_environments WHERE tenant=$1),$1) AND user_id=$2 AND active").bind(t).bind(actor).fetch_optional(db).await?.ok_or(Error(StatusCode::FORBIDDEN,"Flow owner lost access".into()))?;
+        let r=sqlx::query!(r#"SELECT role AS "role!",permissions AS "permissions!" FROM membership_grants WHERE tenant=COALESCE((SELECT live_tenant FROM shop_environments WHERE tenant=$1),$1) AND user_id=$2 AND active"#, t, actor).fetch_optional(db).await?.ok_or(Error(StatusCode::FORBIDDEN,"Flow owner lost access".into()))?;
         h.insert(
             "x-rac-role",
-            r.get::<String, _>("role")
+            r.role
+                .clone()
                 .parse()
                 .map_err(|_| bad("Invalid flow role"))?,
         );
-        let permissions: Value = r.get("permissions");
+        let permissions: Value = r.permissions.clone();
         if !permissions.is_null() {
             h.insert(
                 "x-rac-permissions",
@@ -62,15 +62,13 @@ pub async fn proposal_headers(
     veyndo_identity::assistant_access(&h)?;
     veyndo_identity::permit(&h, "catalog.write")?;
     veyndo_identity::permit(&h, "knowledge.read")?;
-    let row=sqlx::query("SELECT t.status,t.agents_stopped,e.preview_owner,e.preview_until>now() AS valid FROM tenants t LEFT JOIN shop_environments e ON e.tenant=$1 WHERE t.id=coalesce(e.live_tenant,$1)")
-        .bind(t).fetch_one(&a.db).await?;
-    if row.get::<bool, _>("agents_stopped")
-        || row.get::<String, _>("status") != "active"
+    let row=sqlx::query!("SELECT t.status,t.agents_stopped,e.preview_owner,e.preview_until>now() AS valid FROM tenants t LEFT JOIN shop_environments e ON e.tenant=$1 WHERE t.id=coalesce(e.live_tenant,$1)", t).fetch_one(&a.db).await?;
+    if row.agents_stopped
+        || row.status.clone() != "active"
         || row
-            .get::<Option<String>, _>("preview_owner")
-            .is_some_and(|owner| {
-                Some(owner.as_str()) != actor || row.get::<Option<bool>, _>("valid") != Some(true)
-            })
+            .preview_owner
+            .clone()
+            .is_some_and(|owner| Some(owner.as_str()) != actor || row.valid != Some(true))
     {
         return Err(Error(
             StatusCode::FORBIDDEN,

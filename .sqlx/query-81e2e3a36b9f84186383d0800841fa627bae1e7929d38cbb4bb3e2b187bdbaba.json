@@ -1,0 +1,53 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT condition,revision,active FROM commerce_rules WHERE tenant=$1 AND id=$2",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "condition",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "commerce_rules",
+            "name": "condition"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "revision",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "commerce_rules",
+            "name": "revision"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "active",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "commerce_rules",
+            "name": "active"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "81e2e3a36b9f84186383d0800841fa627bae1e7929d38cbb4bb3e2b187bdbaba"
+}

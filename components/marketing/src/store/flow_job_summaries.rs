@@ -1,12 +1,11 @@
 //! Bounded flow execution summaries of a shop; a restricted reader never sees action output.
 use serde_json::{Value, json};
-use sqlx::Row;
 use veyndo_core::{Result, State};
 
 /// The newest fifty jobs; `full` is true only for a reader holding every scope.
 pub async fn values(a: &State, t: &str, full: bool) -> Result<Value> {
-    let jobs=sqlx::query("SELECT j.id,j.flow,j.state,j.result,j.error,j.cursor,j.execution,to_char(j.available_at AT TIME ZONE 'UTC','YYYY-MM-DD\"T\"HH24:MI:SS\"Z\"') AS available_at,COALESCE(t.applied,false) AS applied,COALESCE(t.run_request ? 'execution',false) AS execution_started FROM flow_jobs j LEFT JOIN tasks t ON t.tenant=j.tenant AND t.id=j.result->>'taskId' WHERE j.tenant=$1 ORDER BY j.event_id DESC,j.id LIMIT 50").bind(t).fetch_all(&a.db).await?;
-    let value=json!(jobs.iter().map(|r|json!({"id":r.get::<String,_>("id"),"flow":r.get::<String,_>("flow"),"state":r.get::<String,_>("state"),"result":r.get::<Option<Value>,_>("result"),"error":r.get::<Option<String>,_>("error"),"cursor":r.get::<Option<String>,_>("cursor"),"execution":r.get::<Value,_>("execution"),"availableAt":r.get::<String,_>("available_at"),"applied":r.get::<bool,_>("applied"),"executionStarted":r.get::<bool,_>("execution_started")})).collect::<Vec<_>>());
+    let jobs=sqlx::query!("SELECT j.id,j.flow,j.state,j.result,j.error,j.cursor,j.execution,to_char(j.available_at AT TIME ZONE 'UTC','YYYY-MM-DD\"T\"HH24:MI:SS\"Z\"') AS available_at,COALESCE(t.applied,false) AS applied,COALESCE(t.run_request ? 'execution',false) AS execution_started FROM flow_jobs j LEFT JOIN tasks t ON t.tenant=j.tenant AND t.id=j.result->>'taskId' WHERE j.tenant=$1 ORDER BY j.event_id DESC,j.id LIMIT 50", t).fetch_all(&a.db).await?;
+    let value=json!(jobs.iter().map(|r|json!({"id":r.id.clone(),"flow":r.flow.clone(),"state":r.state.clone(),"result":r.result.clone(),"error":r.error.clone(),"cursor":r.cursor.clone(),"execution":r.execution.clone(),"availableAt":r.available_at.clone(),"applied":r.applied.clone(),"executionStarted":r.execution_started.clone()})).collect::<Vec<_>>());
     Ok(project(value, full))
 }
 

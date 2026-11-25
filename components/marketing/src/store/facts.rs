@@ -44,6 +44,7 @@ pub async fn rule_facts(conn: &mut sqlx::PgConnection, c: &StoredCart, q: &Value
         .iter()
         .map(|i| i.id.clone())
         .collect::<Vec<_>>();
+    // dynamic SQL: complete product rows feed the catalog's shared hydrator `product(&PgRow)`, which owns the column list.
     let rows = sqlx::query("SELECT * FROM products WHERE tenant=$1 AND id=ANY($2)")
         .bind(&c.tenant)
         .bind(&ids)
@@ -53,6 +54,7 @@ pub async fn rule_facts(conn: &mut sqlx::PgConnection, c: &StoredCart, q: &Value
         .iter()
         .filter_map(|r| r.get::<Option<String>, _>("parent_id"))
         .collect::<Vec<_>>();
+    // dynamic SQL: complete product rows feed the catalog's shared hydrator `product(&PgRow)`, which owns the column list.
     let parents = sqlx::query("SELECT * FROM products WHERE tenant=$1 AND id=ANY($2)")
         .bind(&c.tenant)
         .bind(parent_ids)
@@ -86,8 +88,8 @@ pub async fn rule_facts(conn: &mut sqlx::PgConnection, c: &StoredCart, q: &Value
     }
     facts["customer"] = customer(conn, c, &facts).await?;
     facts["currentTime"] = json!(
-        sqlx::query_scalar::<_, String>(
-            "SELECT to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD\"T\"HH24:MI:SS\"Z\"')"
+        sqlx::query_scalar!(
+            r#"SELECT to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD"T"HH24:MI:SS"Z"') AS "now!""#
         )
         .fetch_one(&mut *conn)
         .await?
@@ -141,11 +143,11 @@ pub async fn order_facts(
     q: &Value,
     facts: &mut Value,
 ) -> Result<()> {
-    let receipts = sqlx::query_scalar::<_, String>(
+    let receipts = sqlx::query_scalar!(
         "SELECT kind FROM order_receipts WHERE tenant=$1 AND order_id=$2",
+        t,
+        id
     )
-    .bind(t)
-    .bind(id)
     .fetch_all(&mut *conn)
     .await?;
     let q: OrderFacts = view(q);

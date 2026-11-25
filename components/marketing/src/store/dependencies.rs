@@ -1,6 +1,5 @@
 //! Inspect tenant-owned definition references and durable uses before configuration deletion.
 use serde_json::{Value, json};
-use sqlx::Row;
 use veyndo_core::Result;
 
 pub fn references(v: &Value, kind: &str, id: &str) -> bool {
@@ -28,6 +27,12 @@ pub fn references(v: &Value, kind: &str, id: &str) -> bool {
         _ => false,
     }
 }
+/// A definition or settings document and its id.
+struct Definition {
+    id: String,
+    data: Value,
+}
+
 pub async fn inspect(
     conn: &mut sqlx::PgConnection,
     t: &str,
@@ -39,93 +44,105 @@ pub async fn inspect(
         deps.push(json!({"kind":"default_channel","id":id,"count":1}));
     }
     if kind == "rules" || kind == "channels" {
-        for (other, table) in [
-            ("rules", "commerce_rules"),
-            ("promotions", "commerce_promotions"),
-            ("flows", "commerce_flows"),
-        ] {
-            let data = if other == "rules" {
-                "jsonb_build_object('name',name,'condition',condition)"
-            } else {
-                "data"
-            };
-            let sql = format!("SELECT id,{data} AS data FROM {table} WHERE tenant=$1");
-            for row in sqlx::query(sqlx::AssertSqlSafe(sql.as_str()))
-                .bind(t)
-                .fetch_all(&mut *conn)
-                .await?
-            {
-                let other_id: String = row.get("id");
-                let data: Value = row.get("data");
-                if !(other == kind && other_id == id) && references(&data, kind, id) {
-                    deps.push(json!({"kind":other,"id":other_id,"name":data["name"],"count":1}));
+        let definitions = [
+            (
+                "rules",
+                sqlx::query_as!(Definition, r#"SELECT id,jsonb_build_object('name',name,'condition',condition) AS "data!" FROM commerce_rules WHERE tenant=$1"#, t)
+                    .fetch_all(&mut *conn)
+                    .await?,
+            ),
+            (
+                "promotions",
+                sqlx::query_as!(Definition, "SELECT id,data FROM commerce_promotions WHERE tenant=$1", t)
+                    .fetch_all(&mut *conn)
+                    .await?,
+            ),
+            (
+                "flows",
+                sqlx::query_as!(Definition, "SELECT id,data FROM commerce_flows WHERE tenant=$1", t)
+                    .fetch_all(&mut *conn)
+                    .await?,
+            ),
+        ];
+        for (other, rows) in definitions {
+            for row in rows {
+                if !(other == kind && row.id == id) && references(&row.data, kind, id) {
+                    deps.push(json!({"kind":other,"id":row.id,"name":row.data["name"],"count":1}));
                 }
             }
         }
-        for (scope, sql) in [
+        let settings = [
             (
                 "settings",
-                "SELECT 'default' AS id,data FROM commerce_settings WHERE tenant=$1",
+                sqlx::query_as!(
+                    Definition,
+                    r#"SELECT 'default' AS "id!",data FROM commerce_settings WHERE tenant=$1"#,
+                    t
+                )
+                .fetch_all(&mut *conn)
+                .await?,
             ),
             (
                 "channel_settings",
-                "SELECT channel_id AS id,data FROM commerce_overrides WHERE tenant=$1",
+                sqlx::query_as!(
+                    Definition,
+                    "SELECT channel_id AS id,data FROM commerce_overrides WHERE tenant=$1",
+                    t
+                )
+                .fetch_all(&mut *conn)
+                .await?,
             ),
-        ] {
-            for row in sqlx::query(sql).bind(t).fetch_all(&mut *conn).await? {
-                if references(&row.get::<Value, _>("data"), kind, id) {
-                    deps.push(json!({"kind":scope,"id":row.get::<String,_>("id"),"count":1}));
+        ];
+        for (scope, rows) in settings {
+            for row in rows {
+                if references(&row.data, kind, id) {
+                    deps.push(json!({"kind":scope,"id":row.id,"count":1}));
                 }
             }
         }
     }
-    let counts: &[(&str, &str)] = match kind {
-        "promotions" => &[(
+    let counts: Vec<(&str, i64)> = match kind {
+        "promotions" => vec![(
             "orders",
-            "SELECT count(*) FROM promotion_uses WHERE tenant=$1 AND promotion=$2",
+            sqlx::query_scalar!(r#"SELECT count(*) AS "count!" FROM promotion_uses WHERE tenant=$1 AND promotion=$2"#, t, id).fetch_one(&mut *conn).await?,
         )],
-        "flows" => &[(
+        "flows" => vec![(
             "pending_jobs",
-            "SELECT count(*) FROM flow_jobs WHERE tenant=$1 AND flow=$2 AND state IN ('queued','running','uncertain')",
+            sqlx::query_scalar!(r#"SELECT count(*) AS "count!" FROM flow_jobs WHERE tenant=$1 AND flow=$2 AND state IN ('queued','running','uncertain')"#, t, id).fetch_one(&mut *conn).await?,
         )],
-        "channels" => &[
+        "channels" => vec![
             (
                 "frontends",
-                "SELECT count(*) FROM hosted_frontends WHERE tenant=$1 AND channel=$2",
+                sqlx::query_scalar!(r#"SELECT count(*) AS "count!" FROM hosted_frontends WHERE tenant=$1 AND channel=$2"#, t, id).fetch_one(&mut *conn).await?,
             ),
             (
                 "orders",
-                "SELECT count(*) FROM orders WHERE tenant=$1 AND data->>'salesChannelId'=$2",
+                sqlx::query_scalar!(r#"SELECT count(*) AS "count!" FROM orders WHERE tenant=$1 AND data->>'salesChannelId'=$2"#, t, id).fetch_one(&mut *conn).await?,
             ),
             (
                 "carts",
-                "SELECT count(*) FROM carts WHERE tenant=$1 AND sales_channel_id=$2",
+                sqlx::query_scalar!(r#"SELECT count(*) AS "count!" FROM carts WHERE tenant=$1 AND sales_channel_id=$2"#, t, id).fetch_one(&mut *conn).await?,
             ),
             (
                 "customers",
-                "SELECT count(*) FROM customers WHERE tenant=$1 AND sales_channel_id=$2",
+                sqlx::query_scalar!(r#"SELECT count(*) AS "count!" FROM customers WHERE tenant=$1 AND sales_channel_id=$2"#, t, id).fetch_one(&mut *conn).await?,
             ),
             (
                 "product_visibility",
-                "SELECT count(*) FROM product_channel_visibility WHERE tenant=$1 AND channel_id=$2",
+                sqlx::query_scalar!(r#"SELECT count(*) AS "count!" FROM product_channel_visibility WHERE tenant=$1 AND channel_id=$2"#, t, id).fetch_one(&mut *conn).await?,
             ),
             (
                 "company_settings",
-                "SELECT count(*) FROM company_overrides WHERE tenant=$1 AND channel_id=$2",
+                sqlx::query_scalar!(r#"SELECT count(*) AS "count!" FROM company_overrides WHERE tenant=$1 AND channel_id=$2"#, t, id).fetch_one(&mut *conn).await?,
             ),
             (
                 "channel_settings",
-                "SELECT count(*) FROM commerce_overrides WHERE tenant=$1 AND channel_id=$2",
+                sqlx::query_scalar!(r#"SELECT count(*) AS "count!" FROM commerce_overrides WHERE tenant=$1 AND channel_id=$2"#, t, id).fetch_one(&mut *conn).await?,
             ),
         ],
-        _ => &[],
+        _ => vec![],
     };
-    for (scope, sql) in counts {
-        let count: i64 = sqlx::query_scalar(*sql)
-            .bind(t)
-            .bind(id)
-            .fetch_one(&mut *conn)
-            .await?;
+    for (scope, count) in counts {
         if count > 0 {
             deps.push(json!({"kind":scope,"id":id,"count":count}));
         }

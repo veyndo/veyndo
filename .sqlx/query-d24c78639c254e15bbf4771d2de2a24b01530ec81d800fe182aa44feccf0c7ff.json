@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM order_downloads WHERE tenant=$1 AND order_id=$2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "d24c78639c254e15bbf4771d2de2a24b01530ec81d800fe182aa44feccf0c7ff"
+}

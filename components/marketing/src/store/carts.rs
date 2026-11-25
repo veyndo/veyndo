@@ -13,15 +13,29 @@ pub async fn lock(conn: &mut PgConnection, tenant: &str, token: &str) -> Result<
     )
     .fetch_one(conn)
     .await?;
-    let mut data = row.data;
+    hydrate(
+        row.id,
+        row.tenant,
+        row.token,
+        (row.data, row.revision, row.status),
+    )
+}
+
+/// Types a cart row's document; older stored shapes are upgraded on the way.
+pub fn hydrate(
+    id: String,
+    tenant: String,
+    token: String,
+    (mut data, revision, status): (Value, i64, String),
+) -> Result<StoredCart> {
     upgrade_cart(&mut data);
     Ok(StoredCart {
-        id: row.id,
-        tenant: row.tenant,
-        token: row.token,
+        id,
+        tenant,
+        token,
         data: serde_json::from_value(data).map_err(|e| bad(e.to_string()))?,
-        revision: row.revision,
-        status: row.status,
+        revision,
+        status,
     })
 }
 

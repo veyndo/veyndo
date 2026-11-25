@@ -1,0 +1,25 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT EXISTS(SELECT 1 FROM products p JOIN b2b_catalog b ON b.tenant=p.tenant AND (b.product_id=p.id OR b.product_id=p.parent_id) WHERE p.tenant=$1 AND p.id=$2 AND b.unit_id=$3) AS \"v!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "v!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "409b3e31c938606d93c86d6b0dd53efbbf4c72fbeee0b1d580feded252e07710"
+}

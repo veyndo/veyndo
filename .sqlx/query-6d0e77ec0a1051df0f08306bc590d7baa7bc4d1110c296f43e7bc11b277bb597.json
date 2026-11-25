@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO promotion_uses(tenant,promotion,order_id) VALUES($1,$2,$3) ON CONFLICT DO NOTHING",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "6d0e77ec0a1051df0f08306bc590d7baa7bc4d1110c296f43e7bc11b277bb597"
+}

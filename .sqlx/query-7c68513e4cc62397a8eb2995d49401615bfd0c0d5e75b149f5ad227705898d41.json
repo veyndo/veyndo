@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM b2b_catalog WHERE tenant=$1 AND unit_id=$2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "7c68513e4cc62397a8eb2995d49401615bfd0c0d5e75b149f5ad227705898d41"
+}
