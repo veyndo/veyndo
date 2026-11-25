@@ -14,27 +14,27 @@ run SQL without being in a `store` folder; "Runtime SQL" counts queries the comp
 
 | Component | Lines of Rust | Glob imports | Untyped accesses | SQL outside store | Runtime SQL | Tables | Uses | Foreign tables |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | --- | ---: |
-| core | 4530 | 0 | 0 | 0 | 2 | 10 | none | 10 |
-| identity | 3989 | 0 | 0 | 0 | 0 | 13 | core (108), inference (2) | 4 |
-| shop | 4762 | 0 | 0 | 0 | 0 | 15 | catalog (1), core (98), identity (3), inventory (1), pricing (21), shipping (4) | 19 |
-| catalog | 6523 | 0 | 0 | 0 | 1 | 11 | core (88), identity (10), pricing (13) | 7 |
-| inventory | 407 | 0 | 0 | 0 | 0 | 2 | catalog (1), core (8), pricing (2) | 1 |
-| pricing | 3363 | 0 | 0 | 0 | 0 | 2 | core (31), identity (1) | 3 |
-| shipping | 569 | 0 | 0 | 0 | 0 | 0 | core (10), identity (1), pricing (2) | 6 |
-| checkout | 5562 | 0 | 54 | 0 | 1 | 3 | b2b (13), catalog (10), core (87), customers (2), identity (2), inventory (2), marketing (11), orders (1), payments (2), pricing (43), shipping (3), shop (81) | 15 |
-| customers | 2212 | 0 | 0 | 0 | 0 | 3 | core (42), identity (6), marketing (3), pricing (6), shipping (3), shop (10) | 2 |
-| orders | 5333 | 0 | 41 | 0 | 0 | 7 | b2b (1), catalog (4), core (70), customers (2), identity (8), inventory (1), pricing (3), shipping (2), shop (4) | 8 |
-| payments | 5810 | 0 | 32 | 0 | 0 | 7 | core (82), identity (4), inventory (1), orders (1), pricing (8), shop (7) | 13 |
-| marketing | 7198 | 0 | 52 | 0 | 2 | 8 | automation (19), b2b (2), catalog (3), core (105), identity (16), inference (1), pricing (16), shop (24) | 24 |
-| b2b | 3503 | 0 | 12 | 0 | 0 | 8 | core (56), identity (12), pricing (6), shop (33) | 7 |
-| pos | 1667 | 0 | 34 | 0 | 0 | 0 | catalog (2), checkout (5), core (28), customers (1), identity (4), intelligence (1), marketing (3), orders (1), payments (2), pricing (4), shop (20) | 7 |
-| apps | 15355 | 0 | 188 | 0 | 2 | 22 | b2b (1), catalog (2), checkout (5), core (277), identity (41), inference (4), intelligence (2), inventory (2), marketing (5), orders (10), pricing (6), shipping (2), shop (22) | 21 |
+| core | 5112 | 0 | 0 | 0 | 2 | 13 | none | 7 |
+| identity | 4357 | 0 | 0 | 0 | 0 | 13 | core (116), inference (2) | 4 |
+| shop | 5784 | 0 | 0 | 0 | 0 | 12 | catalog (7), core (122), identity (7), inventory (1), pricing (24), shipping (11) | 5 |
+| catalog | 7949 | 0 | 0 | 0 | 1 | 11 | core (106), identity (10), pricing (16) | 6 |
+| inventory | 680 | 0 | 0 | 0 | 0 | 2 | catalog (4), core (10), pricing (5) | 0 |
+| pricing | 4114 | 0 | 0 | 0 | 0 | 2 | core (32), identity (1) | 0 |
+| shipping | 639 | 0 | 0 | 0 | 0 | 0 | core (11), identity (1), pricing (2) | 0 |
+| checkout | 7134 | 0 | 0 | 0 | 0 | 3 | b2b (13), catalog (12), core (108), customers (6), identity (2), inventory (2), marketing (13), orders (4), payments (4), pricing (50), shipping (3), shop (94) | 4 |
+| customers | 2759 | 0 | 0 | 0 | 0 | 3 | core (55), identity (6), marketing (3), pricing (6), shipping (3), shop (10) | 2 |
+| orders | 7042 | 0 | 0 | 0 | 0 | 9 | b2b (1), catalog (4), core (100), customers (6), identity (8), inventory (1), pricing (3), shipping (2), shop (10) | 4 |
+| payments | 6697 | 0 | 0 | 0 | 0 | 7 | core (97), identity (4), inventory (3), orders (6), pricing (9), shop (9) | 3 |
+| marketing | 8154 | 0 | 4 | 0 | 0 | 8 | automation (19), b2b (3), catalog (10), core (130), identity (17), inference (1), pricing (18), shop (29) | 3 |
+| b2b | 3895 | 0 | 0 | 0 | 0 | 8 | core (64), identity (12), pricing (7), shop (40) | 0 |
+| pos | 1808 | 0 | 0 | 0 | 0 | 0 | catalog (4), checkout (11), core (27), customers (2), identity (4), intelligence (1), marketing (5), orders (2), payments (2), pricing (6), shop (25) | 0 |
+| apps | 17210 | 0 | 0 | 0 | 2 | 22 | b2b (3), catalog (7), checkout (8), core (326), identity (44), inference (4), intelligence (3), inventory (2), marketing (9), orders (15), pricing (6), shipping (2), shop (28) | 2 |
 | automation | 1443 | 8 | 97 | 0 | 0 | 0 | core (2) | 0 |
-| inference | 2458 | 0 | 44 | 0 | 0 | 0 | core (22) | 5 |
-| intelligence | 15167 | 0 | 49 | 0 | 16 | 28 | catalog (10), checkout (10), core (260), customers (1), identity (29), inference (10), inventory (1), marketing (13), pricing (22), shipping (3), shop (52) | 28 |
-| studio | 9501 | 0 | 70 | 0 | 10 | 5 | apps (32), b2b (3), catalog (27), checkout (2), core (157), customers (7), identity (40), inference (4), intelligence (23), marketing (12), orders (21), pos (2), pricing (13), shop (30) | 43 |
-| protocols | 3311 | 0 | 111 | 0 | 0 | 0 | catalog (1), checkout (2), core (116), host (217), inference (1), intelligence (2), pricing (2), shop (5) | 0 |
-| host | 17783 | 0 | 215 | 0 | 0 | 1 | apps (48), catalog (56), checkout (10), core (1479), identity (8), inference (2), intelligence (32), inventory (4), marketing (8), orders (2), payments (8), pricing (44), shipping (1), shop (65), studio (20) | 13 |
+| inference | 2620 | 0 | 0 | 0 | 0 | 0 | core (31) | 0 |
+| intelligence | 15896 | 0 | 0 | 0 | 16 | 27 | catalog (14), checkout (15), core (272), customers (1), identity (30), inference (10), inventory (1), marketing (19), pricing (23), shipping (3), shop (56) | 14 |
+| studio | 9240 | 0 | 0 | 0 | 3 | 4 | apps (40), b2b (3), catalog (65), checkout (3), core (168), customers (14), identity (40), inference (4), intelligence (56), marketing (23), orders (33), pos (2), pricing (13), shop (41) | 7 |
+| protocols | 4491 | 0 | 0 | 0 | 0 | 0 | catalog (1), checkout (2), core (150), host (213), inference (1), intelligence (2), pricing (2), shop (7) | 0 |
+| host | 19959 | 0 | 0 | 0 | 0 | 1 | apps (49), b2b (3), catalog (41), checkout (11), core (1590), customers (2), identity (8), inference (7), intelligence (24), inventory (4), marketing (14), orders (2), payments (11), pricing (45), shipping (15), shop (80), studio (20) | 0 |
 | connectors | 0 | 0 | 0 | 0 | 0 | 6 | none | 0 |
 
 ## Cycles
@@ -48,100 +48,62 @@ those pairs close when the server files that still hold their logic move into th
 
 | From | To | Item | References |
 | --- | --- | --- | ---: |
-| host | core | `State` | 409 |
-| host | core | `Result` | 404 |
-| host | core | `RequestContext` | 329 |
-| apps | core | `veyndo_core::` | 254 |
-| intelligence | core | `veyndo_core::` | 243 |
-| studio | core | `veyndo_core::` | 155 |
-| marketing | core | `veyndo_core::` | 102 |
-| identity | core | `veyndo_core::` | 96 |
-| shop | core | `veyndo_core::` | 95 |
-| catalog | core | `veyndo_core::` | 88 |
-| checkout | core | `veyndo_core::` | 85 |
-| host | core | `PortFuture` | 83 |
-| payments | core | `veyndo_core::` | 81 |
-| checkout | shop | `veyndo_shop::` | 81 |
-| orders | core | `veyndo_core::` | 65 |
+| host | core | `State` | 415 |
+| host | core | `Result` | 397 |
+| host | core | `RequestContext` | 330 |
+| apps | core | `veyndo_core::` | 303 |
+| intelligence | core | `veyndo_core::` | 255 |
+| studio | core | `veyndo_core::` | 166 |
+| host | core | `PortFuture` | 159 |
+| marketing | core | `veyndo_core::` | 127 |
+| shop | core | `veyndo_core::` | 119 |
+| checkout | core | `veyndo_core::` | 106 |
+| catalog | core | `veyndo_core::` | 106 |
+| identity | core | `veyndo_core::` | 104 |
+| payments | core | `veyndo_core::` | 96 |
+| orders | core | `veyndo_core::` | 95 |
+| checkout | shop | `veyndo_shop::` | 94 |
+| studio | catalog | `veyndo_catalog::` | 65 |
 | host | core | `Error` | 63 |
-| b2b | core | `veyndo_core::` | 53 |
-| intelligence | shop | `veyndo_shop::` | 52 |
-| checkout | pricing | `veyndo_pricing::` | 43 |
-| apps | identity | `veyndo_identity::` | 41 |
+| b2b | core | `veyndo_core::` | 61 |
+| studio | intelligence | `veyndo_intelligence::` | 56 |
+| intelligence | shop | `veyndo_shop::` | 56 |
+| customers | core | `veyndo_core::` | 53 |
+| checkout | pricing | `veyndo_pricing::` | 50 |
+| apps | identity | `veyndo_identity::` | 44 |
+| host | shop | `StoredCart` | 42 |
+| studio | shop | `veyndo_shop::` | 41 |
 | studio | identity | `veyndo_identity::` | 40 |
-| customers | core | `veyndo_core::` | 40 |
-| host | shop | `StoredCart` | 36 |
+| studio | apps | `veyndo_app_platform::` | 40 |
+| protocols | core | `view` | 40 |
+| b2b | shop | `veyndo_shop::` | 40 |
 | host | core | `header` | 35 |
-| b2b | shop | `veyndo_shop::` | 33 |
-| studio | apps | `veyndo_app_platform::` | 32 |
+| studio | orders | `veyndo_orders::` | 33 |
 | protocols | host | `auth::` | 32 |
-| studio | shop | `veyndo_shop::` | 30 |
-| intelligence | identity | `veyndo_identity::` | 29 |
-| pos | core | `veyndo_core::` | 28 |
-| studio | catalog | `veyndo_catalog::` | 27 |
-| pricing | core | `veyndo_core::` | 27 |
-| protocols | core | `State` | 26 |
-| protocols | core | `Result` | 26 |
-| protocols | core | `RequestContext` | 25 |
-| host | core | `tenant` | 25 |
-| protocols | host | `apps::` | 24 |
-| marketing | shop | `veyndo_shop::` | 24 |
-| studio | intelligence | `veyndo_intelligence::` | 23 |
-| intelligence | pricing | `veyndo_pricing::` | 22 |
+| intelligence | identity | `veyndo_identity::` | 30 |
+| marketing | shop | `veyndo_shop::` | 29 |
+| pricing | core | `veyndo_core::` | 28 |
+| host | core | `merge` | 28 |
+| apps | shop | `veyndo_shop::` | 28 |
+| protocols | core | `Result` | 27 |
+| pos | core | `veyndo_core::` | 27 |
+| protocols | host | `apps::` | 26 |
 
 ## Foreign table access
 
 | Component | Table | Owner | Access |
 | --- | --- | --- | --- |
-| apps | `b2b_companies` | b2b | read |
-| apps | `b2b_units` | b2b | read |
-| apps | `carts` | checkout | write |
-| apps | `commerce_flows` | marketing | read |
-| apps | `commerce_settings` | shop | read |
-| apps | `customers` | customers | read |
-| apps | `hosted_frontends` | shop | write |
-| apps | `integration_keys` | identity | write |
-| apps | `knowledge_relations` | intelligence | read |
-| apps | `languages` | shop | read |
-| apps | `memberships` | identity | read |
-| apps | `orders` | orders | write |
-| apps | `outbox` | core | read |
-| apps | `product_assets` | catalog | read |
-| apps | `product_channel_visibility` | catalog | read |
-| apps | `product_translations` | catalog | read |
-| apps | `products` | catalog | read |
-| apps | `sales_channels` | marketing | read |
-| apps | `shop_environments` | studio | write |
+| apps | `shop_environments` | core | read |
 | apps | `tenants` | core | read |
-| apps | `workspace_roles` | identity | read |
-| b2b | `carts` | checkout | write |
-| b2b | `commerce_settings` | shop | read |
-| b2b | `customer_sessions` | customers | read |
-| b2b | `customers` | customers | read |
-| b2b | `order_receipts` | orders | read |
-| b2b | `orders` | orders | read |
-| b2b | `products` | catalog | read |
 | catalog | `b2b_catalog` | b2b | read |
 | catalog | `knowledge_documents` | intelligence | read |
 | catalog | `knowledge_relations` | intelligence | read |
 | catalog | `languages` | shop | read |
-| catalog | `sales_channels` | marketing | read |
-| catalog | `shop_environments` | studio | read |
+| catalog | `shop_environments` | core | read |
 | catalog | `tenants` | core | read |
-| checkout | `commerce_settings` | shop | read |
 | checkout | `customer_sessions` | customers | read |
 | checkout | `customers` | customers | read |
-| checkout | `extensions` | apps | read |
-| checkout | `hosted_frontends` | shop | read |
-| checkout | `legal_acceptances` | shop | read |
-| checkout | `orders` | orders | write |
-| checkout | `policy` | intelligence | write |
-| checkout | `privacy_consents` | shop | read |
-| checkout | `product_channel_visibility` | catalog | read |
-| checkout | `product_reviews` | catalog | read |
-| checkout | `products` | catalog | read |
-| checkout | `sales_channels` | marketing | read |
-| checkout | `shop_environments` | studio | read |
+| checkout | `shop_environments` | core | read |
 | checkout | `tenants` | core | read |
 | core | `app_deliveries` | apps | read |
 | core | `app_schedule_runs` | apps | read |
@@ -150,182 +112,45 @@ those pairs close when the server files that still hold their logic move into th
 | core | `knowledge_receipts` | intelligence | read |
 | core | `observed_pairs` | intelligence | read |
 | core | `pair_evidence` | intelligence | read |
-| core | `shop_environments` | studio | read |
-| core | `tenant_ai_usage` | intelligence | write |
-| core | `tenant_resource_limits` | shop | read |
-| customers | `carts` | checkout | write |
+| customers | `carts` | checkout | read |
 | customers | `orders` | orders | read |
-| host | `app_deliveries` | apps | read |
-| host | `commerce_settings` | shop | write |
-| host | `customers` | customers | write |
-| host | `experiences` | intelligence | write |
-| host | `extensions` | apps | write |
-| host | `flow_jobs` | marketing | read |
-| host | `hosted_frontends` | shop | read |
-| host | `memberships` | identity | write |
-| host | `merchant_users` | identity | write |
-| host | `platform_audit` | shop | write |
-| host | `platform_operators` | shop | write |
-| host | `policy` | intelligence | write |
-| host | `tenants` | core | write |
 | identity | `app_packages` | apps | read |
 | identity | `sales_channels` | marketing | read |
-| identity | `shop_environments` | studio | read |
+| identity | `shop_environments` | core | read |
 | identity | `tenants` | core | read |
-| inference | `integration_keys` | identity | write |
-| inference | `outbox` | core | write |
-| inference | `platform_ai` | shop | read |
-| inference | `shop_environments` | studio | read |
-| inference | `tenants` | core | read |
 | intelligence | `app_evidence` | apps | read |
 | intelligence | `app_packages` | apps | read |
-| intelligence | `carts` | checkout | read |
 | intelligence | `channel_metrics` | core | read |
-| intelligence | `commerce_flows` | marketing | read |
-| intelligence | `commerce_promotions` | marketing | read |
-| intelligence | `commerce_rules` | marketing | read |
 | intelligence | `commerce_settings` | shop | read |
 | intelligence | `customers` | customers | read |
 | intelligence | `exposures` | checkout | write |
-| intelligence | `flow_jobs` | marketing | read |
-| intelligence | `integration_keys` | identity | read |
-| intelligence | `legal_acceptances` | shop | write |
 | intelligence | `orders` | orders | read |
-| intelligence | `outbox` | core | read |
 | intelligence | `payment_attempts` | payments | read |
-| intelligence | `platform_ai` | shop | write |
-| intelligence | `platform_audit` | shop | write |
-| intelligence | `privacy_consent_log` | shop | write |
 | intelligence | `privacy_consents` | shop | write |
-| intelligence | `product_assets` | catalog | read |
 | intelligence | `product_reviews` | catalog | read |
-| intelligence | `product_translations` | catalog | read |
 | intelligence | `products` | catalog | write |
-| intelligence | `sales_channels` | marketing | read |
-| intelligence | `shop_environments` | studio | read |
-| intelligence | `tenants` | core | write |
+| intelligence | `shop_environments` | core | read |
+| intelligence | `tenants` | core | read |
 | intelligence | `translation_jobs` | catalog | write |
-| inventory | `products` | catalog | write |
 | marketing | `app_packages` | apps | read |
-| marketing | `b2b_catalog` | b2b | read |
-| marketing | `carts` | checkout | write |
-| marketing | `categories` | catalog | read |
-| marketing | `commerce_customer_groups` | pricing | write |
 | marketing | `commerce_overrides` | shop | read |
-| marketing | `commerce_settings` | shop | read |
-| marketing | `company_overrides` | shop | read |
-| marketing | `customer_sessions` | customers | write |
-| marketing | `customers` | customers | write |
-| marketing | `hosted_frontends` | shop | read |
-| marketing | `memberships` | identity | read |
-| marketing | `order_activity` | orders | write |
-| marketing | `order_downloads` | catalog | write |
-| marketing | `order_receipts` | orders | read |
-| marketing | `orders` | orders | write |
-| marketing | `product_assets` | catalog | read |
-| marketing | `product_channel_visibility` | catalog | read |
-| marketing | `product_reviews` | catalog | read |
-| marketing | `products` | catalog | write |
-| marketing | `shop_environments` | studio | read |
 | marketing | `tasks` | intelligence | read |
-| marketing | `tenants` | core | read |
-| marketing | `user_sessions` | identity | read |
 | orders | `carts` | checkout | write |
-| orders | `commerce_settings` | shop | read |
-| orders | `company_logos` | shop | write |
-| orders | `company_overrides` | shop | write |
-| orders | `customers` | customers | read |
 | orders | `order_downloads` | catalog | read |
 | orders | `product_assets` | catalog | read |
 | orders | `sales_channels` | marketing | read |
 | payments | `app_packages` | apps | read |
-| payments | `carts` | checkout | write |
-| payments | `commerce_overrides` | shop | read |
-| payments | `commerce_settings` | shop | write |
-| payments | `customer_sessions` | customers | read |
-| payments | `customers` | customers | read |
-| payments | `entity_history` | studio | read |
-| payments | `exposures` | checkout | write |
-| payments | `hosted_frontends` | shop | read |
-| payments | `inventory_reservations` | inventory | write |
+| payments | `carts` | checkout | read |
 | payments | `orders` | orders | write |
-| payments | `policy` | intelligence | write |
-| payments | `sales_channels` | marketing | read |
-| pos | `carts` | checkout | write |
-| pos | `commerce_overrides` | shop | write |
-| pos | `commerce_settings` | shop | read |
-| pos | `customers` | customers | read |
-| pos | `orders` | orders | read |
-| pos | `products` | catalog | read |
-| pos | `sales_channels` | marketing | read |
-| pricing | `b2b_units` | b2b | read |
-| pricing | `carts` | checkout | read |
-| pricing | `products` | catalog | read |
-| shipping | `b2b_units` | b2b | read |
-| shipping | `carts` | checkout | read |
-| shipping | `commerce_flows` | marketing | read |
-| shipping | `commerce_overrides` | shop | read |
-| shipping | `commerce_rules` | marketing | read |
-| shipping | `orders` | orders | read |
-| shop | `app_evidence` | apps | read |
-| shop | `app_packages` | apps | read |
-| shop | `carts` | checkout | read |
-| shop | `commerce_flows` | marketing | read |
-| shop | `commerce_promotions` | marketing | read |
-| shop | `commerce_rules` | marketing | read |
-| shop | `customers` | customers | read |
-| shop | `memberships` | identity | read |
-| shop | `merchant_users` | identity | read |
-| shop | `orders` | orders | read |
-| shop | `outbox` | core | read |
-| shop | `product_reviews` | catalog | read |
-| shop | `products` | catalog | read |
-| shop | `read_context_versions` | core | read |
-| shop | `receipt_settings` | orders | read |
+| shop | `company_logos` | orders | write |
+| shop | `company_overrides` | orders | write |
 | shop | `sales_channels` | marketing | read |
-| shop | `shop_environments` | studio | read |
-| shop | `tenant_ai_usage` | intelligence | read |
+| shop | `shop_environments` | core | read |
 | shop | `tenants` | core | write |
-| studio | `app_jobs` | apps | read |
-| studio | `app_packages` | apps | write |
-| studio | `carts` | checkout | write |
-| studio | `categories` | catalog | write |
-| studio | `channel_metrics` | core | read |
-| studio | `commerce_flows` | marketing | write |
-| studio | `commerce_overrides` | shop | write |
-| studio | `commerce_promotions` | marketing | write |
-| studio | `commerce_rules` | marketing | write |
-| studio | `commerce_settings` | shop | write |
-| studio | `company_logos` | shop | write |
-| studio | `company_overrides` | shop | write |
-| studio | `conversations` | intelligence | write |
+| studio | `carts` | checkout | read |
 | studio | `customers` | customers | read |
-| studio | `experiences` | intelligence | write |
-| studio | `exposures` | checkout | read |
-| studio | `extensions` | apps | write |
-| studio | `knowledge_chunks` | intelligence | write |
-| studio | `knowledge_documents` | intelligence | write |
-| studio | `languages` | shop | read |
 | studio | `merchant_users` | identity | read |
-| studio | `order_activity` | orders | write |
-| studio | `order_state_machines` | orders | write |
-| studio | `orders` | orders | write |
-| studio | `outbox` | core | write |
-| studio | `outbox_subscriber_failures` | core | write |
+| studio | `orders` | orders | read |
 | studio | `payment_attempts` | payments | read |
-| studio | `policy` | intelligence | write |
-| studio | `product_assets` | catalog | write |
-| studio | `product_categories` | catalog | write |
-| studio | `product_channel_visibility` | catalog | write |
-| studio | `product_reviews` | catalog | read |
-| studio | `product_translations` | catalog | write |
-| studio | `products` | catalog | write |
-| studio | `projections` | core | read |
-| studio | `receipt_settings` | orders | write |
-| studio | `sales_channels` | marketing | write |
-| studio | `semantic_products` | intelligence | read |
-| studio | `session_signal_events` | intelligence | read |
-| studio | `tasks` | intelligence | write |
-| studio | `tenants` | core | write |
-| studio | `translation_items` | catalog | write |
-| studio | `translation_jobs` | catalog | write |
+| studio | `sales_channels` | marketing | read |
+| studio | `shop_environments` | core | write |

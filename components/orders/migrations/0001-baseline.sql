@@ -312,3 +312,6 @@ CREATE POLICY authenticated_scope ON public.company_overrides AS RESTRICTIVE USI
 ALTER TABLE public.company_overrides ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY core_tenant_scope ON public.company_overrides USING (((current_setting('rac.system'::text, true) = 'on'::text) OR (tenant = NULLIF(current_setting('rac.tenant'::text, true), ''::text)))) WITH CHECK (((current_setting('rac.system'::text, true) = 'on'::text) OR (tenant = NULLIF(current_setting('rac.tenant'::text, true), ''::text))));
+
+ALTER TABLE ONLY public.company_overrides
+    ADD CONSTRAINT company_overrides_tenant_channel_id_fkey FOREIGN KEY (tenant, channel_id) REFERENCES public.sales_channels(tenant, id);

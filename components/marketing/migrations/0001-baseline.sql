@@ -154,8 +154,6 @@ ALTER TABLE ONLY public.channel_previews
 ALTER TABLE ONLY public.commerce_overrides
     ADD CONSTRAINT commerce_overrides_tenant_channel_id_fkey FOREIGN KEY (tenant, channel_id) REFERENCES public.sales_channels(tenant, id) ON DELETE CASCADE;
 
-ALTER TABLE ONLY public.company_overrides
-    ADD CONSTRAINT company_overrides_tenant_channel_id_fkey FOREIGN KEY (tenant, channel_id) REFERENCES public.sales_channels(tenant, id);
 
 ALTER TABLE ONLY public.consumer_requests
     ADD CONSTRAINT consumer_requests_tenant_channel_id_fkey FOREIGN KEY (tenant, channel_id) REFERENCES public.sales_channels(tenant, id);
