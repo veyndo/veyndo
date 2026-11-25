@@ -64,11 +64,6 @@
       "category": "keyed-lookup"
     },
     {
-      "file": "components/b2b/src/service/quotes.rs",
-      "function": "offer",
-      "category": "in-place-edit"
-    },
-    {
       "file": "components/catalog/src/domain/image_job.rs",
       "function": "parse",
       "category": "structural-validation"
@@ -127,11 +122,6 @@
       "file": "components/marketing/src/domain/rule_match.rs",
       "function": "matches",
       "category": "keyed-lookup"
-    },
-    {
-      "file": "components/marketing/src/service/configuration_writes.rs",
-      "function": "admit",
-      "category": "in-place-edit"
     },
     {
       "file": "components/orders/src/domain/order_transitions.rs",
