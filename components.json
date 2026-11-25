@@ -35,7 +35,8 @@
       },
       "glob_imports": 0,
       "untyped_access": 4,
-      "sql_outside_store": 0
+      "sql_outside_store": 0,
+      "runtime_sql": 53
     },
     "identity": {
       "title": "Merchant accounts, memberships, sessions, roles and route policy",
@@ -69,7 +70,8 @@
       },
       "glob_imports": 0,
       "untyped_access": 44,
-      "sql_outside_store": 11
+      "sql_outside_store": 11,
+      "runtime_sql": 98
     },
     "shop": {
       "title": "Shop configuration, domains, legal texts and the operator control plane",
@@ -124,7 +126,8 @@
       },
       "glob_imports": 0,
       "untyped_access": 44,
-      "sql_outside_store": 9
+      "sql_outside_store": 9,
+      "runtime_sql": 65
     },
     "catalog": {
       "title": "Products, categories, media, reviews, translations and catalogue reads",
@@ -160,7 +163,8 @@
       },
       "glob_imports": 0,
       "untyped_access": 77,
-      "sql_outside_store": 2
+      "sql_outside_store": 2,
+      "runtime_sql": 109
     },
     "inventory": {
       "title": "Stock, reservations and supply",
@@ -181,7 +185,8 @@
       },
       "glob_imports": 0,
       "untyped_access": 0,
-      "sql_outside_store": 0
+      "sql_outside_store": 0,
+      "runtime_sql": 5
     },
     "pricing": {
       "title": "Money, price calculation, discounts, currencies, taxes and customer groups",
@@ -203,7 +208,8 @@
       },
       "glob_imports": 0,
       "untyped_access": 10,
-      "sql_outside_store": 1
+      "sql_outside_store": 0,
+      "runtime_sql": 9
     },
     "shipping": {
       "title": "Delivery methods, destinations, delivery splits and carrier booking",
@@ -226,7 +232,8 @@
       },
       "glob_imports": 0,
       "untyped_access": 10,
-      "sql_outside_store": 0
+      "sql_outside_store": 0,
+      "runtime_sql": 6
     },
     "checkout": {
       "title": "Cart, quote, checkout transaction and order placement",
@@ -271,7 +278,8 @@
       },
       "glob_imports": 0,
       "untyped_access": 102,
-      "sql_outside_store": 6
+      "sql_outside_store": 6,
+      "runtime_sql": 48
     },
     "customers": {
       "title": "Customer accounts, sessions, addresses and the merchant customer directory",
@@ -297,7 +305,8 @@
       },
       "glob_imports": 0,
       "untyped_access": 32,
-      "sql_outside_store": 2
+      "sql_outside_store": 2,
+      "runtime_sql": 46
     },
     "orders": {
       "title": "Order state, fulfilment, receipts, documents and merchant order work",
@@ -336,7 +345,8 @@
       },
       "glob_imports": 0,
       "untyped_access": 95,
-      "sql_outside_store": 3
+      "sql_outside_store": 0,
+      "runtime_sql": 67
     },
     "payments": {
       "title": "Provider-independent payment ledger, captures, refunds and provider workers",
@@ -377,7 +387,8 @@
       },
       "glob_imports": 0,
       "untyped_access": 151,
-      "sql_outside_store": 11
+      "sql_outside_store": 11,
+      "runtime_sql": 95
     },
     "marketing": {
       "title": "Rules, coupons, promotions, flows and sales channels",
@@ -432,7 +443,8 @@
       },
       "glob_imports": 0,
       "untyped_access": 122,
-      "sql_outside_store": 9
+      "sql_outside_store": 9,
+      "runtime_sql": 92
     },
     "b2b": {
       "title": "Company procurement: organisations, budgets, approvals and quotes",
@@ -466,7 +478,8 @@
       },
       "glob_imports": 0,
       "untyped_access": 39,
-      "sql_outside_store": 7
+      "sql_outside_store": 7,
+      "runtime_sql": 89
     },
     "pos": {
       "title": "Point-of-sale register adapters",
@@ -498,7 +511,8 @@
       },
       "glob_imports": 0,
       "untyped_access": 42,
-      "sql_outside_store": 4
+      "sql_outside_store": 4,
+      "runtime_sql": 16
     },
     "apps": {
       "title": "App packages, managed data, UI surfaces, Wasm extensions and the app builder",
@@ -570,7 +584,8 @@
       },
       "glob_imports": 0,
       "untyped_access": 261,
-      "sql_outside_store": 18
+      "sql_outside_store": 18,
+      "runtime_sql": 138
     },
     "automation": {
       "title": "Deterministic rule evaluation and flow graphs",
@@ -585,7 +600,8 @@
       "foreign_tables": {},
       "glob_imports": 8,
       "untyped_access": 97,
-      "sql_outside_store": 0
+      "sql_outside_store": 0,
+      "runtime_sql": 0
     },
     "inference": {
       "title": "Model provider adapters, inference budgets, prompt provenance and image generation; no commerce write capability",
@@ -605,7 +621,8 @@
       },
       "glob_imports": 0,
       "untyped_access": 108,
-      "sql_outside_store": 2
+      "sql_outside_store": 2,
+      "runtime_sql": 5
     },
     "intelligence": {
       "title": "Shop memory, knowledge retrieval, agents, proposals and model inference",
@@ -687,7 +704,8 @@
       },
       "glob_imports": 0,
       "untyped_access": 346,
-      "sql_outside_store": 29
+      "sql_outside_store": 29,
+      "runtime_sql": 267
     },
     "studio": {
       "title": "Merchant overview, reports, private staging shops and history",
@@ -763,7 +781,8 @@
       },
       "glob_imports": 0,
       "untyped_access": 298,
-      "sql_outside_store": 23
+      "sql_outside_store": 23,
+      "runtime_sql": 180
     },
     "protocols": {
       "title": "MCP, UCP and the shared capability dispatch; adapters without business rules",
@@ -791,7 +810,8 @@
       },
       "glob_imports": 0,
       "untyped_access": 111,
-      "sql_outside_store": 2
+      "sql_outside_store": 2,
+      "runtime_sql": 2
     },
     "host": {
       "title": "Process entry, route registry, worker roles, migrations and command-line tools",
@@ -939,7 +959,8 @@
       },
       "glob_imports": 0,
       "untyped_access": 215,
-      "sql_outside_store": 11
+      "sql_outside_store": 11,
+      "runtime_sql": 45
     },
     "connectors": {
       "title": "Standard provider services and their delivery queue; hosted by the separate connector binary in extensions/services/connectors",
@@ -956,7 +977,8 @@
       "foreign_tables": {},
       "glob_imports": 0,
       "untyped_access": 0,
-      "sql_outside_store": 0
+      "sql_outside_store": 0,
+      "runtime_sql": 0
     }
   }
 }

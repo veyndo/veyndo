@@ -1,0 +1,12 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "ROLLBACK TO SAVEPOINT price_batch",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": []
+  },
+  "hash": "0ebecf03c5abfac7a2f65049b8aa63b8a332fec0e220d138f91ee8da43cb7400"
+}

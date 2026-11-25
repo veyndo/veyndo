@@ -1,11 +1,10 @@
 //! Downloads require a paid, owned order snapshot; public attachments are served by the catalog component.
-use crate::store::account_orders::ACCOUNT_SCOPE;
+use crate::store::downloads;
 use axum::Json;
 use axum::extract::{Path, State as Shared};
 use axum::response::Response;
 use serde::Deserialize;
 use serde_json::{Value, json};
-use sqlx::Row;
 use veyndo_catalog::domain::content::translated_string;
 use veyndo_core::document::{lenient, view};
 use veyndo_core::shop_scope::{header, session_digest, tenant};
@@ -21,12 +20,12 @@ async fn customer(a: &State, h: &RequestContext) -> Result<(String, String)> {
     Ok((t, email))
 }
 /// The file as an attachment response.
-fn response(r: &sqlx::postgres::PgRow) -> Response {
+fn response(r: downloads::DownloadFile) -> Response {
     veyndo_catalog::http::downloads::response(veyndo_catalog::types::asset::StoredFile {
         product_id: String::new(),
-        mime: r.get("mime"),
-        filename: r.get("filename"),
-        content: r.get("content"),
+        mime: r.mime,
+        filename: r.filename,
+        content: r.content,
     })
 }
 /// Whether the order's payment unlocks its downloads.
@@ -60,15 +59,9 @@ pub async fn owned(Shared(a): Shared<State>, h: RequestContext) -> Result<Json<V
     let (t, email) = customer(&a, &h).await?;
     let (settings, _) = settings(&a, &t, "default").await?;
     let locale = header(&h, "x-commerce-locale").unwrap_or(&settings.main_locale);
-    let mut query = sqlx::QueryBuilder::<sqlx::Postgres>::new(
-        "SELECT a.id,a.title,a.filename,o.id AS order_id,o.data FROM order_downloads d JOIN product_assets a ON a.tenant=d.tenant AND a.id=d.asset_id JOIN orders o ON o.tenant=d.tenant AND o.id=d.order_id WHERE d.tenant=$1 AND ",
-    );
-    query
-        .push(ACCOUNT_SCOPE)
-        .push(" ORDER BY o.created_at DESC LIMIT 200");
-    let rows = query.build().bind(t).bind(email).fetch_all(&a.db).await?;
+    let rows = downloads::owned(&a, &t, &email).await?;
     Ok(Json(
-        json!({"elements":rows.iter().filter(|r|paid(&r.get::<Value,_>("data"))).map(|r|json!({"id":r.get::<String,_>("id"),"title":r.get::<Value,_>("title"),"name":translated_string(&r.get::<Value,_>("title"),locale,&settings.main_locale),"filename":r.get::<String,_>("filename"),"orderId":r.get::<String,_>("order_id")})).collect::<Vec<_>>()}),
+        json!({"elements":rows.iter().filter(|r|paid(&r.data)).map(|r|json!({"id":r.id,"title":r.title,"name":translated_string(&r.title,locale,&settings.main_locale),"filename":r.filename,"orderId":r.order_id})).collect::<Vec<_>>()}),
     ))
 }
 /// `GET /store-api/orders/{order}/downloads/{asset}`: one file of a paid order, for its customer or its guest cart.
@@ -84,29 +77,16 @@ pub async fn file(
         None
     };
     let token = header(&h, "sw-context-token").unwrap_or("");
-    let mut query = sqlx::QueryBuilder::<sqlx::Postgres>::new(
-        "SELECT a.mime,a.filename,a.content,o.data FROM order_downloads d JOIN product_assets a ON a.tenant=d.tenant AND a.id=d.asset_id JOIN orders o ON o.tenant=d.tenant AND o.id=d.order_id JOIN carts c ON c.id=o.cart_id AND c.tenant=o.tenant WHERE d.tenant=$1 AND d.order_id=$3 AND d.asset_id=$4 AND (($2::text IS NOT NULL AND ",
-    );
-    query
-        .push(ACCOUNT_SCOPE)
-        .push(") OR (length($5)>0 AND c.token=$5 AND c.data->>'admin_actor' IS NULL AND c.data->>'pos_actor' IS NULL))");
-    let r = query
-        .build()
-        .bind(t)
-        .bind(email)
-        .bind(order)
-        .bind(asset)
-        .bind(token)
-        .fetch_optional(&a.db)
+    let r = downloads::file(&a, &t, email.as_deref(), &order, &asset, token)
         .await?
         .ok_or(Error(StatusCode::NOT_FOUND, "Download not found".into()))?;
-    if !paid(&r.get::<Value, _>("data")) {
+    if !paid(&r.data) {
         return Err(Error(
             StatusCode::FORBIDDEN,
             "Download requires a confirmed payment".into(),
         ));
     }
-    Ok(response(&r))
+    Ok(response(r))
 }
 #[cfg(test)]
 mod tests {

@@ -89,3 +89,17 @@ pub async fn fail(tx: &mut PgConnection, job: &QueuedJob, error: &str) -> Result
         .await?;
     Ok(())
 }
+
+/// Marks the start of one batch inside the claiming transaction.
+pub async fn begin_batch(tx: &mut PgConnection) -> Result<()> {
+    sqlx::query!("SAVEPOINT price_batch").execute(tx).await?;
+    Ok(())
+}
+
+/// Discards everything a rejected batch wrote, keeping the claim.
+pub async fn discard_batch(tx: &mut PgConnection) -> Result<()> {
+    sqlx::query!("ROLLBACK TO SAVEPOINT price_batch")
+        .execute(tx)
+        .await?;
+    Ok(())
+}

@@ -75,16 +75,12 @@ pub async fn batch(p: &Pricing) -> Result<bool> {
     let Some(job) = price_jobs::claim(&mut tx).await? else {
         return Ok(false);
     };
-    sqlx::query("SAVEPOINT price_batch")
-        .execute(&mut *tx)
-        .await?;
+    price_jobs::begin_batch(&mut tx).await?;
     if let Err(error) = step(p, &mut tx, &job).await {
         if error.0.is_server_error() {
             return Err(error);
         }
-        sqlx::query("ROLLBACK TO SAVEPOINT price_batch")
-            .execute(&mut *tx)
-            .await?;
+        price_jobs::discard_batch(&mut tx).await?;
         price_jobs::fail(&mut tx, &job, &error.1).await?;
     }
     tx.commit().await?;

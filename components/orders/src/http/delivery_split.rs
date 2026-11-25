@@ -57,13 +57,9 @@ pub async fn split_delivery(
     if let Some(response) = order_mutation::replay(&mut tx, &t, key, &fingerprint).await? {
         return Ok(Json(response));
     }
-    let mut o: Value =
-        sqlx::query_scalar("SELECT data FROM orders WHERE tenant=$1 AND id=$2 FOR UPDATE")
-            .bind(&t)
-            .bind(&id)
-            .fetch_optional(&mut *tx)
-            .await?
-            .ok_or(Error(StatusCode::NOT_FOUND, "Order not found".into()))?;
+    let mut o: Value = order_mutation::lock_data(&mut tx, &t, &id)
+        .await?
+        .ok_or(Error(StatusCode::NOT_FOUND, "Order not found".into()))?;
     let (m, mr) = accepted_machine(&o, m, mr)?;
     let revision = o["revision"].as_u64().unwrap_or(1);
     if !verified_kernel::revision_admissible(revision, input.revision.unwrap_or(0)) {

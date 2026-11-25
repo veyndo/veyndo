@@ -100,3 +100,18 @@ pub async fn remember(
         .bind(t).bind(key).bind(id).bind(fingerprint).bind(response).execute(&mut **tx).await?;
     Ok(())
 }
+
+/// The order's document, locked for this transaction; `None` when the shop has no such order.
+pub async fn lock_data(
+    conn: &mut sqlx::PgConnection,
+    tenant: &str,
+    id: &str,
+) -> Result<Option<Value>> {
+    Ok(sqlx::query_scalar!(
+        "SELECT data FROM orders WHERE tenant=$1 AND id=$2 FOR UPDATE",
+        tenant,
+        id
+    )
+    .fetch_optional(conn)
+    .await?)
+}

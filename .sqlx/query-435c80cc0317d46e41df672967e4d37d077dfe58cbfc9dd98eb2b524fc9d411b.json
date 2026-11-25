@@ -1,0 +1,12 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SAVEPOINT price_batch",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": []
+  },
+  "hash": "435c80cc0317d46e41df672967e4d37d077dfe58cbfc9dd98eb2b524fc9d411b"
+}

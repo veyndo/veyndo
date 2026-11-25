@@ -9,7 +9,6 @@ use axum::Json;
 use axum::extract::{Path, State as Shared};
 use serde::Deserialize;
 use serde_json::{Value, json};
-use sqlx::Row;
 use veyndo_core::document::{lenient, view};
 use veyndo_core::{
     Error, RequestContext, Result, State, StatusCode, bad, conflict, hash, shop_scope::header,
@@ -73,13 +72,11 @@ pub async fn transition_order(
     {
         return Ok(Json(response));
     }
-    let r = sqlx::query("SELECT data FROM orders WHERE tenant=$1 AND id=$2 FOR UPDATE")
-        .bind(&t)
-        .bind(&id)
-        .fetch_optional(&mut *tx)
+    let mut o: Value = order_mutation::lock_data(&mut tx, &t, &id)
         .await?
         .ok_or(Error(StatusCode::NOT_FOUND, "Order not found".into()))?;
-    let mut o: Value = r.get("data");
+    // The stored order before this transition, for history and events.
+    let from = o.clone();
     let (machine, machine_revision) = accepted_machine(&o, machine, machine_revision)?;
     let revision = o["revision"].as_i64().unwrap_or(1);
     if !verified_kernel::revision_admissible(
@@ -154,7 +151,6 @@ pub async fn transition_order(
         "payment" => "payment.state_changed",
         _ => "delivery.state_changed",
     };
-    let from = r.get::<Value, _>("data");
     let mut event_order = o.clone();
     if let Some(cart) = event_order["cart"].as_object_mut() {
         cart.remove("token");

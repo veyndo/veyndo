@@ -1428,6 +1428,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/orders/src/store/company.rs](../components/orders/src/store/company.rs) | Revisioned tenant company basis and sparse channel overrides, serialized with receipt issuance. |
 | [components/orders/src/store/company_logos.rs](../components/orders/src/store/company_logos.rs) | Tenant-owned company logos: deduplicated immutable PNGs, delivered publicly only while a channel links them. |
 | [components/orders/src/store/company_release.rs](../components/orders/src/store/company_release.rs) | Selective company identity release copies only linked immutable logo bytes and validates the final company aggregate. |
+| [components/orders/src/store/downloads.rs](../components/orders/src/store/downloads.rs) | The downloadable files of paid orders: a customer's list, and one file for its customer or its guest cart. Columns checked at compile time. |
 | [components/orders/src/store/machine.rs](../components/orders/src/store/machine.rs) | The shop's stored order state machine; a shop without one uses the default. |
 | [components/orders/src/store/order_list.rs](../components/orders/src/store/order_list.rs) | Parameter-bound global order filters and stable tuple cursors; query text never becomes SQL. |
 | [components/orders/src/store/order_mutation.rs](../components/orders/src/store/order_mutation.rs) | Shared operational order writes: one replay ledger, immutable quote, audit, cart projection and outbox. |

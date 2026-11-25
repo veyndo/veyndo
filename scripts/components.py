@@ -20,6 +20,8 @@ GLOB = re.compile(r'(?m)^(?:pub(?:\(crate\))? )?use (?:super|crate)::\*;')
 # `value["key"]` reads a field without a type; a struct at the component interface replaces it.
 UNTYPED = re.compile(r'\b\w+(?:\["[^"\n]+"\])+')
 SQL_CALL = re.compile(r'\bsqlx::(?:query|query_as|query_scalar|QueryBuilder)\b')
+# A query whose SQL the compiler does not check: a runtime string or a dynamic QueryBuilder.
+RUNTIME_SQL = re.compile(r'\bsqlx::(?:(?:query|query_as|query_scalar)(?:::<[^>()]*>)?\(|QueryBuilder\b)')
 READ = r'(?i)\b(?:FROM|JOIN)\s+(?:ONLY\s+)?(?:public\.)?'
 
 
@@ -157,17 +159,18 @@ class Tree:
         return counts
 
     def budgets(self):
-        """Per component: untyped field accesses, and files with SQL outside a `store` folder. Tests are not counted."""
-        untyped, scattered = Counter(), Counter()
+        """Per component: untyped field accesses, files with SQL outside a `store` folder and runtime SQL calls. Tests are not counted."""
+        untyped, scattered, runtime = Counter(), Counter(), Counter()
         for file, (code, _) in self.parsed.items():
             if not file.endswith('.rs') or 'tests' in file.split('/') or file.endswith('_tests.rs'):
                 continue
             # Strings were replaced by "" when the source was split; count the accesses in the original text.
             text = re.sub(r'(?m)^\s*//.*$', '', self.files[file].read_text()).split('#[cfg(test)]')[0]
             untyped[self.owner[file]] += len(UNTYPED.findall(text))
+            runtime[self.owner[file]] += len(RUNTIME_SQL.findall(text))
             if SQL_CALL.search(code) and 'store' not in file.split('/') and not file.endswith('/store.rs'):
                 scattered[self.owner[file]] += 1
-        return untyped, scattered
+        return untyped, scattered, runtime
 
     def tables(self):
         names = set()
@@ -220,10 +223,11 @@ def findings(tree):
             problems.append(f'{name} has {globs[name]} files with a glob import, {declared_globs} are recorded; name the imports instead')
         if globs[name] < declared_globs:
             problems.append(f'{name} has only {globs[name]} files with a glob import left; lower "glob_imports" from {declared_globs}')
-    untyped, scattered = tree.budgets()
+    untyped, scattered, runtime = tree.budgets()
     for name, row in components.items():
         for label, key, actual_count in (('untyped field accesses', 'untyped_access', untyped[name]),
-                                         ('files with SQL outside store/', 'sql_outside_store', scattered[name])):
+                                         ('files with SQL outside store/', 'sql_outside_store', scattered[name]),
+                                         ('runtime SQL calls (not compile-checked)', 'runtime_sql', runtime[name])):
             recorded = row.get(key, 0)
             if actual_count > recorded:
                 problems.append(f'{name} has {actual_count} {label}, {recorded} are recorded; the number only falls')
@@ -273,11 +277,12 @@ def bootstrap(tree):
         declared[table] = ranking.most_common(1)[0][0] if ranking else 'core'
     use = tree.table_use(tables)
     globs = tree.glob_imports()
-    untyped, scattered = tree.budgets()
+    untyped, scattered, runtime = tree.budgets()
     for name, row in components.items():
         row['glob_imports'] = globs[name]
         row['untyped_access'] = untyped[name]
         row['sql_outside_store'] = scattered[name]
+        row['runtime_sql'] = runtime[name]
         row['tables'] = sorted(table for table, owner in declared.items() if owner == name and table in tables)
         row['uses'] = sorted({target for (source, target) in edges if source == name})
         kept = dict(row.get('foreign_tables', {})) if isinstance(row.get('foreign_tables'), dict) else {}
@@ -299,13 +304,14 @@ def report(tree, edges, use, table_owner):
              'required structure check refuses a new one, and a removed one has to be deleted from',
              '`components.json`. The counts come from a text scan and are an estimate, not a compiler result.',
              '"Untyped accesses" counts `value["key"]` reads outside tests; "SQL outside store" counts files that',
-             'run SQL without being in a `store` folder. Both numbers only fall.',
+             'run SQL without being in a `store` folder; "Runtime SQL" counts queries the compiler does not check',
+             '(runtime strings and dynamic `QueryBuilder` queries instead of `sqlx::query!`/`query_as!`). All three only fall.',
              '"Glob imports" counts files that start with `use super::*` or `use crate::*`; the number only falls.', '',
-             '| Component | Lines of Rust | Glob imports | Untyped accesses | SQL outside store | Tables | Uses | Foreign tables |',
-             '| --- | ---: | ---: | ---: | ---: | ---: | --- | ---: |']
+             '| Component | Lines of Rust | Glob imports | Untyped accesses | SQL outside store | Runtime SQL | Tables | Uses | Foreign tables |',
+             '| --- | ---: | ---: | ---: | ---: | ---: | ---: | --- | ---: |']
     for name, row in components.items():
         uses = ', '.join(f'{target} ({sum(edges[name, target].values())})' for target in row.get('uses', [])) or 'none'
-        lines.append(f'| {name} | {sizes[name]} | {row.get("glob_imports", 0)} | {row.get("untyped_access", 0)} | {row.get("sql_outside_store", 0)} | {len(row.get("tables", []))} | {uses} | {len(row.get("foreign_tables", []))} |')
+        lines.append(f'| {name} | {sizes[name]} | {row.get("glob_imports", 0)} | {row.get("untyped_access", 0)} | {row.get("sql_outside_store", 0)} | {row.get("runtime_sql", 0)} | {len(row.get("tables", []))} | {uses} | {len(row.get("foreign_tables", []))} |')
     pairs = sorted({tuple(sorted(pair)) for pair in edges if (pair[1], pair[0]) in edges})
     crate_pairs = sorted(crate_cycles(tree))
     lines += ['', '## Cycles', '', f'{len(crate_pairs)} pairs of component crates depend on each other (the required check keeps this at zero).',
