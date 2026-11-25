@@ -1,0 +1,54 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT operation,request,state FROM payment_jobs WHERE tenant=$1 AND attempt_id=$2 AND id=$3 FOR UPDATE",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "operation",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "payment_jobs",
+            "name": "operation"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "request",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "payment_jobs",
+            "name": "request"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "state",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "payment_jobs",
+            "name": "state"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "7e91a00e71b7c53077434ac163c4f326fa38cad3503c768b207d457e3110856a"
+}

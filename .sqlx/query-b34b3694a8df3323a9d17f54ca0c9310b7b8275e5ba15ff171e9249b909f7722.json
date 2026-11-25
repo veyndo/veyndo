@@ -1,0 +1,38 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT o.data, o.created_at::text AS \"time!\" FROM orders o JOIN carts c ON c.id=o.cart_id AND c.tenant=o.tenant WHERE o.tenant=$1 AND ($3::text IS NULL OR o.id=$3) AND (o.data->'orderCustomer'->>'customerId')=(SELECT id FROM customers WHERE tenant=o.tenant AND email=$2) AND ($4::text IS NULL OR (o.created_at,o.id)<(SELECT created_at,id FROM orders WHERE tenant=$1 AND id=$4)) ORDER BY o.created_at DESC,o.id DESC LIMIT 101",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "data",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "orders",
+            "name": "data"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "time!",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      null
+    ]
+  },
+  "hash": "b34b3694a8df3323a9d17f54ca0c9310b7b8275e5ba15ff171e9249b909f7722"
+}

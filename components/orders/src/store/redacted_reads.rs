@@ -1,7 +1,6 @@
 //! Explicit non-PII domain read views for separately scoped app callbacks; never elevate an identity.
 use serde::Deserialize;
 use serde_json::{Value, json};
-use sqlx::Row;
 use veyndo_core::document::view;
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad};
 fn projection(value: &Value, keys: &[&str]) -> Value {
@@ -17,26 +16,25 @@ pub async fn redacted_read(a: &State, h: &RequestContext, kind: &str, id: &str) 
     match kind {
         "order" => {
             veyndo_identity::permit(h, "orders.read")?;
-            let row = sqlx::query(
+            let row = sqlx::query!(
                 "SELECT data,created_at::text AS created FROM orders WHERE tenant=$1 AND id=$2",
+                tenant,
+                id
             )
-            .bind(&tenant)
-            .bind(id)
             .fetch_optional(&a.db)
             .await?
             .ok_or(Error(StatusCode::NOT_FOUND, "Order not found".into()))?;
-            let mut value: Value = row.get("data");
+            let mut value: Value = row.data;
             crate::domain::order_fields::order_fields(&mut value);
-            value["createdAt"] = json!(row.get::<String, _>("created"));
+            value["createdAt"] = json!(row.created);
             Ok(order_view(&value))
         }
         "customer" => {
             veyndo_identity::permit(h, "customers.read")?;
-            let row = sqlx::query("SELECT id,active,group_name,created_at::text AS created FROM customers WHERE tenant=$1 AND email=$2")
-                .bind(&tenant).bind(id).fetch_optional(&a.db).await?
+            let row = sqlx::query!("SELECT id,active,group_name,created_at::text AS created FROM customers WHERE tenant=$1 AND email=$2", tenant, id).fetch_optional(&a.db).await?
                 .ok_or(Error(StatusCode::NOT_FOUND,"Customer not found".into()))?;
             Ok(
-                json!({"id":row.get::<String,_>("id"),"active":row.get::<bool,_>("active"),"guest":false,"groupId":row.get::<String,_>("group_name"),"createdAt":row.get::<String,_>("created")}),
+                json!({"id":row.id,"active":row.active,"guest":false,"groupId":row.group_name,"createdAt":row.created}),
             )
         }
         _ => Err(bad("Unknown redacted read")),

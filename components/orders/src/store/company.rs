@@ -1,14 +1,13 @@
 //! Revisioned tenant company basis and sparse channel overrides, serialized with receipt issuance.
 use crate::domain::company_model;
 use serde_json::{Value, json};
-use sqlx::{Postgres, Row, Transaction};
+use sqlx::{Postgres, Transaction};
 use veyndo_core::{
     Error, RequestContext, Result, State, StatusCode, bad, conflict, store::history_context,
 };
 use veyndo_shop::domain::defaults::decode;
 pub async fn lock(tx: &mut Transaction<'_, Postgres>, t: &str) -> Result<()> {
-    sqlx::query("SELECT pg_advisory_xact_lock(hashtextextended($1,731))")
-        .bind(t)
+    sqlx::query!("SELECT pg_advisory_xact_lock(hashtextextended($1,731))", t)
         .execute(&mut **tx)
         .await?;
     Ok(())
@@ -18,24 +17,23 @@ pub async fn records(
     t: &str,
     channel: Option<&str>,
 ) -> Result<Value> {
-    let row = sqlx::query("SELECT data,revision FROM receipt_settings WHERE tenant=$1")
-        .bind(t)
-        .fetch_optional(&mut **tx)
-        .await?;
-    let base = row
-        .as_ref()
-        .map(|r| r.get::<Value, _>("data"))
-        .unwrap_or(json!({}));
-    let rev = row.map(|r| r.get::<i64, _>("revision")).unwrap_or(0);
+    let row = sqlx::query!(
+        "SELECT data,revision FROM receipt_settings WHERE tenant=$1",
+        t
+    )
+    .fetch_optional(&mut **tx)
+    .await?;
+    let base = row.as_ref().map(|r| r.data.clone()).unwrap_or(json!({}));
+    let rev = row.map(|r| r.revision).unwrap_or(0);
     if let Some(channel) = channel {
         if channel == "default" {
             return Err(bad("Default channel uses the shared company basis"));
         }
-        let exists: bool = sqlx::query_scalar(
-            "SELECT EXISTS(SELECT 1 FROM sales_channels WHERE tenant=$1 AND id=$2)",
+        let exists: bool = sqlx::query_scalar!(
+            r#"SELECT EXISTS(SELECT 1 FROM sales_channels WHERE tenant=$1 AND id=$2) AS "exists!""#,
+            t,
+            channel
         )
-        .bind(t)
-        .bind(channel)
         .fetch_one(&mut **tx)
         .await?;
         if !exists {
@@ -44,18 +42,15 @@ pub async fn records(
                 "Sales channel not found".into(),
             ));
         }
-        let patch = sqlx::query(
+        let patch = sqlx::query!(
             "SELECT data,revision FROM company_overrides WHERE tenant=$1 AND channel_id=$2",
+            t,
+            channel
         )
-        .bind(t)
-        .bind(channel)
         .fetch_optional(&mut **tx)
         .await?;
-        let data = patch
-            .as_ref()
-            .map(|r| r.get::<Value, _>("data"))
-            .unwrap_or(json!({}));
-        let revision = patch.map(|r| r.get::<i64, _>("revision")).unwrap_or(0);
+        let data = patch.as_ref().map(|r| r.data.clone()).unwrap_or(json!({}));
+        let revision = patch.map(|r| r.revision).unwrap_or(0);
         Ok(
             json!({"data":data,"revision":revision,"baseRevision":rev,"inherited":base,"effective":company_model::resolve(&base,&data),"channelId":channel}),
         )
@@ -87,11 +82,12 @@ pub async fn save(
     let mut tx = a.db.begin().await?;
     history_context::context(&mut tx, h, "merchant").await?;
     lock(&mut tx, t).await?;
-    let raw: Value =
-        sqlx::query_scalar("SELECT data FROM commerce_settings WHERE tenant=$1 FOR SHARE")
-            .bind(t)
-            .fetch_one(&mut *tx)
-            .await?;
+    let raw: Value = sqlx::query_scalar!(
+        "SELECT data FROM commerce_settings WHERE tenant=$1 FOR SHARE",
+        t
+    )
+    .fetch_one(&mut *tx)
+    .await?;
     let settings = decode(raw)?;
     company_model::validate(&v["data"], &settings, channel.is_some())?;
     let current = records(&mut tx, t, channel).await?;
@@ -114,8 +110,7 @@ pub async fn save(
     // A basis edit also checks all dependants: inherited country changes cannot leave a foreign subdivision.
     if channel.is_none() {
         let patches: Vec<Value> =
-            sqlx::query_scalar("SELECT data FROM company_overrides WHERE tenant=$1")
-                .bind(t)
+            sqlx::query_scalar!("SELECT data FROM company_overrides WHERE tenant=$1", t)
                 .fetch_all(&mut *tx)
                 .await?;
         for patch in patches {
@@ -123,11 +118,11 @@ pub async fn save(
         }
     }
     if let Some(logo) = effective["logoId"].as_str().filter(|s| !s.is_empty()) {
-        let owned: bool = sqlx::query_scalar(
-            "SELECT EXISTS(SELECT 1 FROM company_logos WHERE tenant=$1 AND id=$2)",
+        let owned: bool = sqlx::query_scalar!(
+            r#"SELECT EXISTS(SELECT 1 FROM company_logos WHERE tenant=$1 AND id=$2) AS "exists!""#,
+            t,
+            logo
         )
-        .bind(t)
-        .bind(logo)
         .fetch_one(&mut *tx)
         .await?;
         if !owned {
@@ -135,9 +130,9 @@ pub async fn save(
         }
     }
     if let Some(channel) = channel {
-        sqlx::query("INSERT INTO company_overrides(tenant,channel_id,data) VALUES($1,$2,$3) ON CONFLICT(tenant,channel_id) DO UPDATE SET data=EXCLUDED.data,revision=company_overrides.revision+1").bind(t).bind(channel).bind(&data).execute(&mut *tx).await?;
+        sqlx::query!("INSERT INTO company_overrides(tenant,channel_id,data) VALUES($1,$2,$3) ON CONFLICT(tenant,channel_id) DO UPDATE SET data=EXCLUDED.data,revision=company_overrides.revision+1", t, channel, data).execute(&mut *tx).await?;
     } else {
-        sqlx::query("INSERT INTO receipt_settings(tenant,data) VALUES($1,$2) ON CONFLICT(tenant) DO UPDATE SET data=EXCLUDED.data,revision=receipt_settings.revision+1").bind(t).bind(&data).execute(&mut *tx).await?;
+        sqlx::query!("INSERT INTO receipt_settings(tenant,data) VALUES($1,$2) ON CONFLICT(tenant) DO UPDATE SET data=EXCLUDED.data,revision=receipt_settings.revision+1", t, data).execute(&mut *tx).await?;
     }
     veyndo_core::store::outbox::publish_on(
         &mut *tx,
@@ -156,12 +151,13 @@ pub async fn seller(tx: &mut Transaction<'_, Postgres>, t: &str, channel: &str) 
     if basis["revision"] == 0 {
         return Err(bad("Configure seller details before creating receipts"));
     }
-    let patch: Option<Value> =
-        sqlx::query_scalar("SELECT data FROM company_overrides WHERE tenant=$1 AND channel_id=$2")
-            .bind(t)
-            .bind(channel)
-            .fetch_optional(&mut **tx)
-            .await?;
+    let patch: Option<Value> = sqlx::query_scalar!(
+        "SELECT data FROM company_overrides WHERE tenant=$1 AND channel_id=$2",
+        t,
+        channel
+    )
+    .fetch_optional(&mut **tx)
+    .await?;
     Ok(company_model::resolve(
         &basis["data"],
         &patch.unwrap_or(json!({})),
@@ -170,21 +166,18 @@ pub async fn seller(tx: &mut Transaction<'_, Postgres>, t: &str, channel: &str) 
 
 /// Atomic release validates the resulting basis, all channel dependants and tenant-owned logo references.
 pub async fn validate_release(tx: &mut Transaction<'_, Postgres>, t: &str) -> Result<()> {
-    let raw: Value = sqlx::query_scalar("SELECT data FROM commerce_settings WHERE tenant=$1")
-        .bind(t)
+    let raw: Value = sqlx::query_scalar!("SELECT data FROM commerce_settings WHERE tenant=$1", t)
         .fetch_one(&mut **tx)
         .await?;
     let settings = decode(raw)?;
     let base: Option<Value> =
-        sqlx::query_scalar("SELECT data FROM receipt_settings WHERE tenant=$1")
-            .bind(t)
+        sqlx::query_scalar!("SELECT data FROM receipt_settings WHERE tenant=$1", t)
             .fetch_optional(&mut **tx)
             .await?;
     if let Some(base) = base {
         let mut values = vec![base.clone()];
         let patches: Vec<Value> =
-            sqlx::query_scalar("SELECT data FROM company_overrides WHERE tenant=$1")
-                .bind(t)
+            sqlx::query_scalar!("SELECT data FROM company_overrides WHERE tenant=$1", t)
                 .fetch_all(&mut **tx)
                 .await?;
         values.extend(
@@ -195,11 +188,7 @@ pub async fn validate_release(tx: &mut Transaction<'_, Postgres>, t: &str) -> Re
         for value in values {
             company_model::validate(&value, &settings, false)?;
             if let Some(id) = value["logoId"].as_str().filter(|s| !s.is_empty()) {
-                let exists: bool = sqlx::query_scalar(
-                    "SELECT EXISTS(SELECT 1 FROM company_logos WHERE tenant=$1 AND id=$2)",
-                )
-                .bind(t)
-                .bind(id)
+                let exists: bool = sqlx::query_scalar!(r#"SELECT EXISTS(SELECT 1 FROM company_logos WHERE tenant=$1 AND id=$2) AS "exists!""#, t, id)
                 .fetch_one(&mut **tx)
                 .await?;
                 if !exists {
@@ -219,12 +208,13 @@ pub async fn public_source(
 ) -> Result<(Value, Option<String>)> {
     lock(tx, t).await?;
     let base = records(tx, t, None).await?;
-    let patch: Option<Value> =
-        sqlx::query_scalar("SELECT data FROM company_overrides WHERE tenant=$1 AND channel_id=$2")
-            .bind(t)
-            .bind(channel)
-            .fetch_optional(&mut **tx)
-            .await?;
+    let patch: Option<Value> = sqlx::query_scalar!(
+        "SELECT data FROM company_overrides WHERE tenant=$1 AND channel_id=$2",
+        t,
+        channel
+    )
+    .fetch_optional(&mut **tx)
+    .await?;
     let data = company_model::resolve(&base["data"], &patch.unwrap_or(json!({})));
     // Unconfigured shop presentation uses its chosen name, never a fabricated legal issuer.
     let default_brand: Option<String> = if data.get("brandName").is_none_or(Value::is_null)

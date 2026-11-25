@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT manifest FROM app_packages WHERE tenant=$1 AND active AND manifest->'paymentProvider' IS NOT NULL",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "manifest",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "app_packages",
+            "name": "manifest"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "eb97d89457289767ecd0e8c2200aabcd5d2dc89ef4fc735f5da60176e4e63968"
+}

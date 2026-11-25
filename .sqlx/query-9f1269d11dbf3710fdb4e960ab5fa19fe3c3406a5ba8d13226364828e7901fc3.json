@@ -1,0 +1,12 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "RELEASE SAVEPOINT vault_metadata",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": []
+  },
+  "hash": "9f1269d11dbf3710fdb4e960ab5fa19fe3c3406a5ba8d13226364828e7901fc3"
+}

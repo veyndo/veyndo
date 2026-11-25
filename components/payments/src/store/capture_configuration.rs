@@ -11,10 +11,10 @@ pub async fn validate(
     tenant: &str,
     settings: &Settings,
 ) -> Result<()> {
-    let rows: Vec<Value> = sqlx::query_scalar(
+    let rows: Vec<Value> = sqlx::query_scalar!(
         "SELECT manifest FROM app_packages WHERE tenant=$1 AND manifest ? 'paymentProvider'",
+        tenant
     )
-    .bind(tenant)
     .fetch_all(&mut **tx)
     .await?;
     let manifests: Vec<Manifest> = rows

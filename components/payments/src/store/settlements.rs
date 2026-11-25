@@ -4,7 +4,6 @@ use crate::domain::receipt_ref::{ProviderReceipt, is, reference};
 use crate::domain::settlements::{captured, closed, multi};
 use crate::store::receipt_claims::claim;
 use serde_json::{Value, json};
-use sqlx::Row;
 use veyndo_core::document::view;
 use veyndo_core::{Result, bad, conflict};
 
@@ -66,11 +65,10 @@ pub async fn admit(
         claim(tx, p, "capture", id, "").await?;
         if let Some(key) = record.get("requestKey") {
             let key = reference(key)?;
-            let row = sqlx::query("SELECT operation,request,state FROM payment_jobs WHERE tenant=$1 AND attempt_id=$2 AND id=$3 FOR UPDATE")
-                .bind(&p.tenant).bind(&p.id).bind(key).fetch_optional(&mut **tx).await?
+            let row = sqlx::query!("SELECT operation,request,state FROM payment_jobs WHERE tenant=$1 AND attempt_id=$2 AND id=$3 FOR UPDATE", p.tenant, p.id, key).fetch_optional(&mut **tx).await?
                 .ok_or(bad("Capture has no matching native request"))?;
-            let request: Value = row.get("request");
-            if row.get::<String, _>("operation") != "capture"
+            let request: Value = row.request;
+            if row.operation != "capture"
                 || request
                     .get("amountMinor")
                     .map(|n| n.as_i64())
@@ -80,8 +78,7 @@ pub async fn admit(
                 return Err(conflict("Capture changed its native requested amount"));
             }
             claim(tx, p, "capture-job", key, id).await?;
-            sqlx::query("UPDATE payment_jobs SET state='succeeded',response=$1,error=NULL,lease_until=NULL WHERE tenant=$2 AND attempt_id=$3 AND id=$4 AND state IN ('queued','running','uncertain')")
-                .bind(v).bind(&p.tenant).bind(&p.id).bind(key).execute(&mut **tx).await?;
+            sqlx::query!("UPDATE payment_jobs SET state='succeeded',response=$1,error=NULL,lease_until=NULL WHERE tenant=$2 AND attempt_id=$3 AND id=$4 AND state IN ('queued','running','uncertain')", v, p.tenant, p.id, key).execute(&mut **tx).await?;
         }
         receipts.insert(
             id.into(),

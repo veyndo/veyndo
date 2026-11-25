@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT manifest FROM app_packages WHERE tenant=$1 AND manifest ? 'paymentProvider'",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "manifest",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "app_packages",
+            "name": "manifest"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "1360bf87a3926acb5bce67653d679d841e117122d4883abb61f5dbb32ae805e9"
+}

@@ -3,7 +3,6 @@ use crate::ports::Payments;
 use crate::store::company;
 use serde::Deserialize;
 use serde_json::{Value, json};
-use sqlx::Row;
 use veyndo_core::document::{lenient, view};
 use veyndo_core::shop_scope::header;
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad, conflict, hash, uid};
@@ -83,25 +82,27 @@ pub async fn create(
         input.revision, reference
     ));
     let mut tx = a.db.begin().await?;
-    sqlx::query("SELECT pg_advisory_xact_lock(hashtextextended($1,0))")
-        .bind(format!("receipt:{t}:{key}"))
-        .execute(&mut *tx)
-        .await?;
-    if let Some(r) = sqlx::query(
-        "SELECT id,number,fingerprint FROM order_receipts WHERE tenant=$1 AND request_key=$2",
+    sqlx::query!(
+        "SELECT pg_advisory_xact_lock(hashtextextended($1,0))",
+        format!("receipt:{t}:{key}")
     )
-    .bind(t)
-    .bind(key)
+    .execute(&mut *tx)
+    .await?;
+    if let Some(r) = sqlx::query!(
+        "SELECT id,number,fingerprint FROM order_receipts WHERE tenant=$1 AND request_key=$2",
+        t,
+        key
+    )
     .fetch_optional(&mut *tx)
     .await?
     {
-        if r.get::<String, _>("fingerprint") != fingerprint {
+        if r.fingerprint != fingerprint {
             return Err(conflict("Receipt request key reused"));
         }
-        return Ok(json!({"id":r.get::<String,_>("id"),"number":r.get::<String,_>("number")}));
+        return Ok(json!({"id":r.id,"number":r.number}));
     }
-    let r=sqlx::query("SELECT data #- '{cart,token}' AS data,created_at::text AS created FROM orders WHERE tenant=$1 AND id=$2 FOR UPDATE").bind(t).bind(id).fetch_optional(&mut *tx).await?.ok_or(Error(StatusCode::NOT_FOUND,"Order not found".into()))?;
-    let order: Value = r.get("data");
+    let r=sqlx::query!(r#"SELECT data #- '{cart,token}' AS "data!",created_at::text AS created FROM orders WHERE tenant=$1 AND id=$2 FOR UPDATE"#, t, id).fetch_optional(&mut *tx).await?.ok_or(Error(StatusCode::NOT_FOUND,"Order not found".into()))?;
+    let order: Value = r.data;
     if !order["historicalImport"].is_null() {
         return Err(conflict(
             "Historical invoices must be imported as original documents; no new invoice may be issued",
@@ -139,8 +140,8 @@ pub async fn create(
             .reference_id
             .as_str()
             .ok_or(bad("Original invoice reference required"))?;
-        let original:Value=sqlx::query_scalar("SELECT snapshot FROM order_receipts WHERE tenant=$1 AND order_id=$2 AND id=$3 AND kind='invoice'").bind(t).bind(id).bind(ref_id).fetch_optional(&mut *tx).await?.ok_or(bad("Original invoice unavailable"))?;
-        let exists:bool=sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM order_receipts WHERE tenant=$1 AND snapshot->>'referenceId'=$2 AND kind='cancellation')").bind(t).bind(ref_id).fetch_one(&mut *tx).await?;
+        let original:Value=sqlx::query_scalar!("SELECT snapshot FROM order_receipts WHERE tenant=$1 AND order_id=$2 AND id=$3 AND kind='invoice'", t, id, ref_id).fetch_optional(&mut *tx).await?.ok_or(bad("Original invoice unavailable"))?;
+        let exists:bool=sqlx::query_scalar!(r#"SELECT EXISTS(SELECT 1 FROM order_receipts WHERE tenant=$1 AND snapshot->>'referenceId'=$2 AND kind='cancellation') AS "exists!""#, t, ref_id).fetch_one(&mut *tx).await?;
         if exists {
             return Err(conflict("Invoice already cancelled"));
         }
@@ -150,7 +151,7 @@ pub async fn create(
     };
     // A single original invoice per order; cancellation does not initiate a provider refund.
     if kind == "invoice" {
-        let exists:bool=sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM order_receipts WHERE tenant=$1 AND order_id=$2 AND kind='invoice')").bind(t).bind(id).fetch_one(&mut *tx).await?;
+        let exists:bool=sqlx::query_scalar!(r#"SELECT EXISTS(SELECT 1 FROM order_receipts WHERE tenant=$1 AND order_id=$2 AND kind='invoice') AS "exists!""#, t, id).fetch_one(&mut *tx).await?;
         if exists {
             return Err(conflict("Invoice already exists"));
         }
@@ -160,7 +161,7 @@ pub async fn create(
     } else {
         None
     };
-    let number:i64=sqlx::query_scalar("INSERT INTO receipt_counters(tenant,kind,next_number) VALUES($1,$2,2) ON CONFLICT(tenant,kind) DO UPDATE SET next_number=receipt_counters.next_number+1 RETURNING next_number-1").bind(t).bind(kind).fetch_one(&mut *tx).await?;
+    let number:i64=sqlx::query_scalar!(r#"INSERT INTO receipt_counters(tenant,kind,next_number) VALUES($1,$2,2) ON CONFLICT(tenant,kind) DO UPDATE SET next_number=receipt_counters.next_number+1 RETURNING next_number-1 AS "number!""#, t, kind).fetch_one(&mut *tx).await?;
     let prefix = match kind {
         "invoice" => "INV",
         "delivery_note" => "DEL",
@@ -168,7 +169,7 @@ pub async fn create(
     };
     let number = format!("{prefix}-{number:08}");
     let receipt = uid();
-    let mut snapshot = json!({"number":number,"kind":kind,"locale":locale,"seller":if let Some(ref original)=reference{original["seller"].clone()}else{seller},"order":if let Some(ref original)=reference{original["order"].clone()}else{order.clone()},"issuedAt":sqlx::query_scalar::<_,String>("SELECT now()::text").fetch_one(&mut *tx).await?,"referenceId":input.reference_id,"referenceNumber":reference.map(|s|s["number"].clone())});
+    let mut snapshot = json!({"number":number,"kind":kind,"locale":locale,"seller":if let Some(ref original)=reference{original["seller"].clone()}else{seller},"order":if let Some(ref original)=reference{original["order"].clone()}else{order.clone()},"issuedAt":sqlx::query_scalar!("SELECT now()::text").fetch_one(&mut *tx).await?,"referenceId":input.reference_id,"referenceNumber":reference.map(|s|s["number"].clone())});
     if let Some(instructions) = payment_instructions {
         snapshot["paymentInstructions"] = instructions;
     }
@@ -176,14 +177,14 @@ pub async fn create(
         snapshot["deliveryIndex"] = input.delivery_index.clone();
         snapshot["delivery"] = package;
     }
-    sqlx::query("INSERT INTO order_receipts(id,tenant,order_id,kind,number,locale,snapshot,request_key,fingerprint) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9)").bind(&receipt).bind(t).bind(id).bind(kind).bind(&number).bind(locale).bind(snapshot).bind(key).bind(fingerprint).execute(&mut *tx).await?;
-    sqlx::query(
+    sqlx::query!("INSERT INTO order_receipts(id,tenant,order_id,kind,number,locale,snapshot,request_key,fingerprint) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9)", receipt, t, id, kind, number, locale, snapshot, key, fingerprint).execute(&mut *tx).await?;
+    sqlx::query!(
         "INSERT INTO order_activity(tenant,order_id,actor,kind,data) VALUES($1,$2,$3,'receipt',$4)",
+        t,
+        id,
+        header(h, "x-rac-user").unwrap(),
+        json!({"id":receipt,"number":number,"kind":kind})
     )
-    .bind(t)
-    .bind(id)
-    .bind(header(h, "x-rac-user").unwrap())
-    .bind(json!({"id":receipt,"number":number,"kind":kind}))
     .execute(&mut *tx)
     .await?;
     veyndo_core::store::outbox::publish_on(
@@ -201,23 +202,25 @@ pub async fn create(
 
 /// The frozen snapshot of a receipt and, for an imported original, its stored document.
 pub async fn stored(a: &State, t: &str, id: &str) -> Result<(Value, Option<Vec<u8>>)> {
-    let r = sqlx::query("SELECT snapshot,content FROM order_receipts WHERE tenant=$1 AND id=$2")
-        .bind(t)
-        .bind(id)
-        .fetch_optional(&a.db)
-        .await?
-        .ok_or(Error(StatusCode::NOT_FOUND, "Receipt not found".into()))?;
-    Ok((r.get("snapshot"), r.get("content")))
+    let r = sqlx::query!(
+        "SELECT snapshot,content FROM order_receipts WHERE tenant=$1 AND id=$2",
+        t,
+        id
+    )
+    .fetch_optional(&a.db)
+    .await?
+    .ok_or(Error(StatusCode::NOT_FOUND, "Receipt not found".into()))?;
+    Ok((r.snapshot, r.content))
 }
 
 /// Scoped immutable document export for separately consented adapters; never creates a new fiscal document.
 pub async fn snapshot(a: &State, t: &str, order: &str, id: &str) -> Result<Value> {
-    let mut v: Value = sqlx::query_scalar(
+    let mut v: Value = sqlx::query_scalar!(
         "SELECT snapshot FROM order_receipts WHERE tenant=$1 AND order_id=$2 AND id=$3",
+        t,
+        order,
+        id
     )
-    .bind(t)
-    .bind(order)
-    .bind(id)
     .fetch_optional(&a.db)
     .await?
     .ok_or(Error(
@@ -232,12 +235,12 @@ pub async fn snapshot(a: &State, t: &str, order: &str, id: &str) -> Result<Value
 
 /// The stored snapshot of one receipt of an order, as the document renderer receives it.
 pub async fn stored_snapshot(a: &State, t: &str, order: &str, id: &str) -> Result<Value> {
-    sqlx::query_scalar(
+    sqlx::query_scalar!(
         "SELECT snapshot FROM order_receipts WHERE tenant=$1 AND order_id=$2 AND id=$3",
+        t,
+        order,
+        id
     )
-    .bind(t)
-    .bind(order)
-    .bind(id)
     .fetch_optional(&a.db)
     .await?
     .ok_or(Error(StatusCode::NOT_FOUND, "Receipt not found".into()))
@@ -246,8 +249,7 @@ pub async fn stored_snapshot(a: &State, t: &str, order: &str, id: &str) -> Resul
 /// The current revision of the shop's receipt settings.
 pub async fn settings_revision(a: &State, t: &str) -> Result<i64> {
     Ok(
-        sqlx::query_scalar("SELECT revision FROM receipt_settings WHERE tenant=$1")
-            .bind(t)
+        sqlx::query_scalar!("SELECT revision FROM receipt_settings WHERE tenant=$1", t)
             .fetch_one(&a.db)
             .await?,
     )

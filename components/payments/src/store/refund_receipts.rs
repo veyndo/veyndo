@@ -5,7 +5,6 @@ use crate::domain::refunds::{self, checked_total};
 use crate::domain::settlements;
 use crate::store::receipt_claims::claim;
 use serde_json::{Value, json};
-use sqlx::Row;
 use veyndo_core::document::view;
 use veyndo_core::{Result, bad, conflict};
 
@@ -28,8 +27,7 @@ pub async fn apply(
     }
     let key = native_key.or(receipt.request_key.as_deref());
     if let Some(key) = key {
-        let expected: Option<Value> = sqlx::query_scalar("SELECT request FROM payment_jobs WHERE tenant=$1 AND attempt_id=$2 AND id=$3 AND operation='refund'")
-            .bind(&p.tenant).bind(&p.id).bind(key).fetch_optional(&mut **tx).await?;
+        let expected: Option<Value> = sqlx::query_scalar!("SELECT request FROM payment_jobs WHERE tenant=$1 AND attempt_id=$2 AND id=$3 AND operation='refund'", p.tenant, p.id, key).fetch_optional(&mut **tx).await?;
         if expected
             .map(|v| view::<RefundReceipt>(&v))
             .is_none_or(|job| {
@@ -39,21 +37,18 @@ pub async fn apply(
             return Err(bad("Provider refund does not match its native job"));
         }
     }
-    let old = sqlx::query("SELECT tenant,attempt_id,job_key FROM payment_receipt_claims WHERE provider=$1 AND environment=$2 AND account_ref=$3 AND kind='refund' AND receipt_ref=$4 FOR UPDATE")
-        .bind(&p.provider).bind(&p.environment).bind(p.context["accountRef"].as_str().unwrap_or(""))
-        .bind(id).fetch_optional(&mut **tx).await?;
+    let old = sqlx::query!("SELECT tenant,attempt_id,job_key FROM payment_receipt_claims WHERE provider=$1 AND environment=$2 AND account_ref=$3 AND kind='refund' AND receipt_ref=$4 FOR UPDATE", p.provider, p.environment, p.context["accountRef"].as_str().unwrap_or(""), id).fetch_optional(&mut **tx).await?;
     if let Some(old) = old {
-        let saved_key: String = old.get("job_key");
-        if old.get::<String, _>("tenant") != p.tenant
-            || old.get::<String, _>("attempt_id") != p.id
+        let saved_key: String = old.job_key;
+        if old.tenant != p.tenant
+            || old.attempt_id != p.id
             || key.is_some_and(|key| key != saved_key)
         {
             return Err(conflict("Provider refund receipt already allocated"));
         }
         let saved = context["providerRefunds"][id]["amountMinor"].as_i64();
         let historical: Option<i64> = if saved.is_none() {
-            sqlx::query_scalar("SELECT (request->>'amountMinor')::bigint FROM payment_jobs WHERE tenant=$1 AND attempt_id=$2 AND id=$3 AND operation='refund'")
-                .bind(&p.tenant).bind(&p.id).bind(&saved_key).fetch_optional(&mut **tx).await?
+            sqlx::query_scalar!(r#"SELECT (request->>'amountMinor')::bigint AS "amount!" FROM payment_jobs WHERE tenant=$1 AND attempt_id=$2 AND id=$3 AND operation='refund'"#, p.tenant, p.id, saved_key).fetch_optional(&mut **tx).await?
         } else {
             None
         };
@@ -98,9 +93,7 @@ async fn finish_native(
     amount: i64,
     capture: &str,
 ) -> Result<()> {
-    sqlx::query("UPDATE payment_jobs SET state='succeeded',response=$1,error=NULL,lease_until=NULL WHERE tenant=$2 AND attempt_id=$3 AND id=$4 AND operation='refund' AND state IN ('queued','running','uncertain')")
-        .bind(json!({"confirmed":true,"refund":{"id":id,"amountMinor":amount,"currency":p.currency,"captureId":capture}}))
-        .bind(&p.tenant).bind(&p.id).bind(key).execute(&mut **tx).await?;
+    sqlx::query!("UPDATE payment_jobs SET state='succeeded',response=$1,error=NULL,lease_until=NULL WHERE tenant=$2 AND attempt_id=$3 AND id=$4 AND operation='refund' AND state IN ('queued','running','uncertain')", json!({"confirmed":true,"refund":{"id":id,"amountMinor":amount,"currency":p.currency,"captureId":capture}}), p.tenant, p.id, key).execute(&mut **tx).await?;
     Ok(())
 }
 

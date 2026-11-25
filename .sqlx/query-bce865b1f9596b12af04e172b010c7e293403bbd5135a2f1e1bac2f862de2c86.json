@@ -1,0 +1,26 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT EXISTS(SELECT 1 FROM orders o WHERE o.tenant=$1 AND (o.cart_id=$2 OR ($3::text IS NOT NULL AND o.data->'orderCustomer'->>'customerId'=$3)) AND EXISTS(SELECT 1 FROM jsonb_array_elements(o.data->'cart'->'lineItems') i WHERE i->>'id'=$4)) AS \"exists!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "exists!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "bce865b1f9596b12af04e172b010c7e293403bbd5135a2f1e1bac2f862de2c86"
+}

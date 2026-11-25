@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO receipt_counters(tenant,kind,next_number) VALUES($1,$2,2) ON CONFLICT(tenant,kind) DO UPDATE SET next_number=receipt_counters.next_number+1 RETURNING next_number-1 AS \"number!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "number!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "a02195ea2c758ded14c27869adda41161feff623b1a5dcc0bc97858d10c16d67"
+}

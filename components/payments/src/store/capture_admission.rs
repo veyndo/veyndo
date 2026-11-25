@@ -52,8 +52,7 @@ pub async fn validate(
     if p.context["intent"] == "authorize" && p.context["authorizationId"].as_str().is_none() {
         return Err(conflict("Wait for confirmed authorization before capture"));
     }
-    let reserved: i64 = sqlx::query_scalar("SELECT coalesce(sum(coalesce((request->>'amountMinor')::bigint,$3)),0)::bigint FROM payment_jobs WHERE tenant=$1 AND attempt_id=$2 AND operation='capture' AND state IN ('queued','running','uncertain')")
-        .bind(&p.tenant).bind(&p.id).bind(p.amount).fetch_one(&mut **tx).await?;
+    let reserved: i64 = sqlx::query_scalar!(r#"SELECT coalesce(sum(coalesce((request->>'amountMinor')::bigint,$3)),0)::bigint AS "reserved!" FROM payment_jobs WHERE tenant=$1 AND attempt_id=$2 AND operation='capture' AND state IN ('queued','running','uncertain')"#, p.tenant, p.id, p.amount).fetch_one(&mut **tx).await?;
     let valid = u64::try_from(p.amount)
         .ok()
         .zip(u64::try_from(captured).ok())

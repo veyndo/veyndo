@@ -1,0 +1,12 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SAVEPOINT vault_metadata",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": []
+  },
+  "hash": "1784dfb425ad85e02612a44a538f3a2a0f04240b26f91e8763eedd04edf94bdf"
+}

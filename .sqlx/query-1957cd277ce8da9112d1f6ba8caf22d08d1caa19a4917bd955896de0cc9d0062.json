@@ -1,0 +1,42 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT snapshot,content FROM order_receipts WHERE tenant=$1 AND order_id=$2 AND id=$3 AND customer_visible",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "snapshot",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "order_receipts",
+            "name": "snapshot"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "content",
+        "type_info": "Bytea",
+        "origin": {
+          "Table": {
+            "table": "order_receipts",
+            "name": "content"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      true
+    ]
+  },
+  "hash": "1957cd277ce8da9112d1f6ba8caf22d08d1caa19a4917bd955896de0cc9d0062"
+}

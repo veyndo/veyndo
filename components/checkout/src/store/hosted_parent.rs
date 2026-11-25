@@ -27,12 +27,7 @@ pub async fn registered_parent(
     {
         return Err(bad("Invalid checkout parent"));
     }
-    let allowed: bool = sqlx::query_scalar(
-        "SELECT EXISTS(SELECT 1 FROM hosted_frontends WHERE tenant=$1 AND channel=$2 AND alias=$3)",
-    )
-    .bind(t)
-    .bind(channel)
-    .bind(alias)
+    let allowed: bool = sqlx::query_scalar!(r#"SELECT EXISTS(SELECT 1 FROM hosted_frontends WHERE tenant=$1 AND channel=$2 AND alias=$3) AS "exists!""#, t, channel, alias)
     .fetch_one(conn)
     .await?;
     if !allowed {

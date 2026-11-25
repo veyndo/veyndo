@@ -279,7 +279,7 @@
       "glob_imports": 0,
       "untyped_access": 102,
       "sql_outside_store": 0,
-      "runtime_sql": 24
+      "runtime_sql": 1
     },
     "customers": {
       "title": "Customer accounts, sessions, addresses and the merchant customer directory",
@@ -346,7 +346,7 @@
       "glob_imports": 0,
       "untyped_access": 95,
       "sql_outside_store": 0,
-      "runtime_sql": 67
+      "runtime_sql": 0
     },
     "payments": {
       "title": "Provider-independent payment ledger, captures, refunds and provider workers",
@@ -386,9 +386,9 @@
         "sales_channels": "read: reads the sales channel document (kind, activity, catalogue scope) to admit the request channel inside the same statement (providers.rs)"
       },
       "glob_imports": 0,
-      "untyped_access": 151,
+      "untyped_access": 150,
       "sql_outside_store": 0,
-      "runtime_sql": 36
+      "runtime_sql": 0
     },
     "marketing": {
       "title": "Rules, coupons, promotions, flows and sales channels",

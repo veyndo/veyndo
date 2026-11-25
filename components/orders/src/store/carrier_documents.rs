@@ -2,7 +2,6 @@
 use crate::store::order_mutation::{self, Audit, Tx};
 use serde::Deserialize;
 use serde_json::{Value, json};
-use sqlx::Row;
 use veyndo_core::document::{lenient, view};
 use veyndo_core::{Error, RequestContext, Result, StatusCode, bad, conflict, hash, uid};
 
@@ -127,21 +126,24 @@ pub async fn record(
         fingerprint,
         metadata,
     } = document;
-    sqlx::query("SELECT pg_advisory_xact_lock(hashtextextended($1,0))")
-        .bind(format!("receipt:{t}:{key}"))
-        .execute(&mut **tx)
-        .await?;
-    if let Some(r)=sqlx::query("SELECT id,number,fingerprint,source_app FROM order_receipts WHERE tenant=$1 AND request_key=$2").bind(t).bind(key).fetch_optional(&mut **tx).await? {
-        if r.get::<String,_>("fingerprint")!=fingerprint || r.get::<Option<String>,_>("source_app").as_deref()!=Some(app) {return Err(conflict("Document request key reused"));}
-        return Ok(json!({"id":r.get::<String,_>("id"),"number":r.get::<String,_>("number")}));
+    sqlx::query!(
+        "SELECT pg_advisory_xact_lock(hashtextextended($1,0))",
+        format!("receipt:{t}:{key}")
+    )
+    .execute(&mut **tx)
+    .await?;
+    if let Some(r)=sqlx::query!("SELECT id,number,fingerprint,source_app FROM order_receipts WHERE tenant=$1 AND request_key=$2", t, key).fetch_optional(&mut **tx).await? {
+        if r.fingerprint!=fingerprint || r.source_app.as_deref()!=Some(app) {return Err(conflict("Document request key reused"));}
+        return Ok(json!({"id":r.id,"number":r.number}));
     }
-    let mut order: Value =
-        sqlx::query_scalar("SELECT data FROM orders WHERE tenant=$1 AND id=$2 FOR UPDATE")
-            .bind(t)
-            .bind(id)
-            .fetch_optional(&mut **tx)
-            .await?
-            .ok_or(Error(StatusCode::NOT_FOUND, "Order not found".into()))?;
+    let mut order: Value = sqlx::query_scalar!(
+        "SELECT data FROM orders WHERE tenant=$1 AND id=$2 FOR UPDATE",
+        t,
+        id
+    )
+    .fetch_optional(&mut **tx)
+    .await?
+    .ok_or(Error(StatusCode::NOT_FOUND, "Order not found".into()))?;
     if metadata["allocationDigest"] != allocation_digest(&order, index) {
         return Err(conflict(
             "Package allocation changed; reconcile the provider result before booking again",
@@ -167,7 +169,7 @@ pub async fn record(
     let number = format!("DOC-{document}");
     let snapshot = json!({"id":document,"number":number,"kind":kind,"sourceApp":app,"packageVersion":version,"deliveryIndex":index,"allocationDigest":metadata["allocationDigest"],"trackingCode":tracking,"trackingUrl":url});
     // Outbound labels contain recipient data and are merchant-only. Return labels are available solely to the owning account.
-    sqlx::query("INSERT INTO order_receipts(id,tenant,order_id,kind,number,locale,snapshot,request_key,fingerprint,content,source_app,customer_visible) VALUES($1,$2,$3,$4,$5,'en',$6,$7,$8,$9,$10,$11)").bind(&document).bind(t).bind(id).bind(kind).bind(&number).bind(&snapshot).bind(key).bind(fingerprint).bind(content).bind(app).bind(kind=="return_label").execute(&mut **tx).await?;
+    sqlx::query!("INSERT INTO order_receipts(id,tenant,order_id,kind,number,locale,snapshot,request_key,fingerprint,content,source_app,customer_visible) VALUES($1,$2,$3,$4,$5,'en',$6,$7,$8,$9,$10,$11)", document, t, id, kind, number, snapshot, key, fingerprint, content, app, kind=="return_label").execute(&mut **tx).await?;
     if kind == "shipping_label" {
         d.as_object_mut().unwrap().remove("booking");
         d["label"] = json!({"id":document,"sourceApp":app});

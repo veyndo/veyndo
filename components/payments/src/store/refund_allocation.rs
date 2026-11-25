@@ -21,8 +21,7 @@ pub async fn validate(
 ) -> Result<()> {
     let input: ValidateInput = view(v);
     let (id, total) = capture(p, &p.context, v)?;
-    let pending: i64 = sqlx::query_scalar("SELECT coalesce(sum((request->>'amountMinor')::bigint),0)::bigint FROM payment_jobs WHERE tenant=$1 AND attempt_id=$2 AND operation='refund' AND state IN ('queued','running','uncertain') AND coalesce(request->>'captureId',$3)=$3")
-        .bind(&p.tenant).bind(&p.id).bind(&id).fetch_one(&mut **tx).await?;
+    let pending: i64 = sqlx::query_scalar!(r#"SELECT coalesce(sum((request->>'amountMinor')::bigint),0)::bigint AS "pending!" FROM payment_jobs WHERE tenant=$1 AND attempt_id=$2 AND operation='refund' AND state IN ('queued','running','uncertain') AND coalesce(request->>'captureId',$3)=$3"#, p.tenant, p.id, id).fetch_one(&mut **tx).await?;
     let requested = input.amount_minor.ok_or(bad("Refund amount required"))?;
     checked_total(
         total,
