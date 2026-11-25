@@ -4,6 +4,7 @@ from extract import Parser,generated,kernel_source
 from registry import check
 from axioms import source_check,dependency_check
 from layout_tests import controls
+import domain_inventory
 
 MUTANTS=[
  ("planning_request_admissible", "read_only || planning_post", "true"),
@@ -225,7 +226,8 @@ def axiom_failures():
 def run(root):
     result={'brokenPoliciesRejectedByLean':proof_failures(root),'unsupportedSyntaxRejected':closed_grammar(),
             'staleUnclassifiedDisconnectedBindingsRejected':registry_failures(root),
-            'proofShortcutsUnexpectedAxiomsMissingAuditsRejected':axiom_failures(),'baselineAccepted':True,'proofAndModuleLayoutBypassesRejected':controls(root)}
+            'proofShortcutsUnexpectedAxiomsMissingAuditsRejected':axiom_failures(),
+            'domainInventoryThirdStatesRejected':domain_inventory.controls(root,set(json.loads((root/'proof/manifest.json').read_text())['policies'])),'baselineAccepted':True,'proofAndModuleLayoutBypassesRejected':controls(root)}
     report=root/'artifacts/formal-mutations.json';report.parent.mkdir(parents=True,exist_ok=True);report.write_text(json.dumps(result,indent=2)+'\n')
     print(json.dumps(result,indent=2));return result
 if __name__=='__main__':run(pathlib.Path(__file__).resolve().parents[2])

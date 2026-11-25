@@ -1,0 +1,625 @@
+{
+  "format": 1,
+  "notes": [
+    "`components/core` has no `domain/` module; its functions are infrastructure (store, cache, HTTP limits) and are not counted here. A `domain/` module added to it is checked like the others.",
+    "Open after the money refactor (another session): order total = lines + shipping + tax, money scaling and rounding, and extractor multiplication. The functions they concern are listed under `money-representation` and `float-calculation`."
+  ],
+  "functions": {
+    "components/checkout/src/domain/admin_order.rs::admit_payment": {
+      "status": "binds-proved-rule",
+      "rules": [
+        "admin_payment_admissible"
+      ]
+    },
+    "components/checkout/src/domain/admin_order.rs::order": {
+      "status": "unproved",
+      "reason": "document-shape"
+    },
+    "components/checkout/src/domain/admin_order.rs::purchase": {
+      "status": "unproved",
+      "reason": "document-shape"
+    },
+    "components/checkout/src/domain/cart_quote.rs::configuration_price": {
+      "status": "unproved",
+      "reason": "float-calculation"
+    },
+    "components/checkout/src/domain/cart_quote.rs::normalized_quantity": {
+      "status": "unproved",
+      "reason": "decision-outside-subset"
+    },
+    "components/checkout/src/domain/cart_quote.rs::quote": {
+      "status": "binds-proved-rule",
+      "rules": [
+        "amount_sum",
+        "net_amount"
+      ],
+      "note": "Line totals still come from the floating-point calculator; only minor-unit addition and net/gross are proved here (money refactor pending)."
+    },
+    "components/checkout/src/domain/quote_view.rs::QuoteView::first_line": {
+      "status": "unproved",
+      "reason": "document-shape"
+    },
+    "components/checkout/src/domain/quote_view.rs::QuoteView::method": {
+      "status": "unproved",
+      "reason": "document-shape"
+    },
+    "components/checkout/src/domain/quote_view.rs::digital": {
+      "status": "unproved",
+      "reason": "document-shape"
+    },
+    "components/checkout/src/domain/quote_view.rs::flags": {
+      "status": "unproved",
+      "reason": "document-shape"
+    },
+    "components/checkout/src/domain/quote_view.rs::quote_view": {
+      "status": "unproved",
+      "reason": "document-shape"
+    },
+    "components/checkout/src/domain/review_binding.rs::validate": {
+      "status": "binds-proved-rule",
+      "rules": [
+        "checkout_review_admissible",
+        "revision_admissible"
+      ]
+    },
+    "components/checkout/src/domain/session_payment.rs::attempt": {
+      "status": "unproved",
+      "reason": "decision-outside-subset"
+    },
+    "components/checkout/src/domain/session_payment.rs::has_saved_funding": {
+      "status": "unproved",
+      "reason": "decision-outside-subset"
+    },
+    "components/checkout/src/domain/session_payment.rs::provider": {
+      "status": "unproved",
+      "reason": "decision-outside-subset"
+    },
+    "components/checkout/src/domain/session_payment.rs::test_environment": {
+      "status": "unproved",
+      "reason": "decision-outside-subset"
+    },
+    "components/checkout/src/domain/session_review.rs::Review::admit_cart": {
+      "status": "unproved",
+      "reason": "decision-outside-subset"
+    },
+    "components/checkout/src/domain/session_review.rs::Review::check_prepared_payment": {
+      "status": "unproved",
+      "reason": "decision-outside-subset"
+    },
+    "components/checkout/src/domain/session_review.rs::Review::check_quote": {
+      "status": "unproved",
+      "reason": "decision-outside-subset"
+    },
+    "components/checkout/src/domain/session_review.rs::Review::check_replay": {
+      "status": "unproved",
+      "reason": "decision-outside-subset"
+    },
+    "components/checkout/src/domain/session_review.rs::Review::session": {
+      "status": "unproved",
+      "reason": "constructor-or-accessor"
+    },
+    "components/checkout/src/domain/session_review.rs::key": {
+      "status": "unproved",
+      "reason": "validation-of-strings"
+    },
+    "components/checkout/src/domain/session_review.rs::receipt": {
+      "status": "unproved",
+      "reason": "decision-outside-subset"
+    },
+    "components/checkout/src/domain/tax_lines.rs::tax_products": {
+      "status": "unproved",
+      "reason": "float-calculation"
+    },
+    "components/inventory/src/domain/lines.rs::InventoryLines::ids": {
+      "status": "unproved",
+      "reason": "constructor-or-accessor"
+    },
+    "components/inventory/src/domain/lines.rs::InventoryLines::new": {
+      "status": "binds-proved-rule",
+      "rules": [
+        "reservation_admissible"
+      ],
+      "note": "The new order holds nothing yet (held = 0); the reservation run theorems cover any later reserve/release sequence gated by the same rule."
+    },
+    "components/inventory/src/domain/lines.rs::InventoryLines::quantities": {
+      "status": "unproved",
+      "reason": "constructor-or-accessor"
+    },
+    "components/inventory/src/domain/reorder.rs::admit": {
+      "status": "unproved",
+      "reason": "decision-outside-subset"
+    },
+    "components/inventory/src/domain/reorder.rs::within_ceiling": {
+      "status": "unproved",
+      "reason": "decision-outside-subset"
+    },
+    "components/inventory/src/domain/supply.rs::Config::validate": {
+      "status": "unproved",
+      "reason": "validation-of-strings"
+    },
+    "components/orders/src/domain/company_model.rs::address": {
+      "status": "unproved",
+      "reason": "text-and-locale"
+    },
+    "components/orders/src/domain/company_model.rs::public": {
+      "status": "unproved",
+      "reason": "document-shape"
+    },
+    "components/orders/src/domain/company_model.rs::resolve": {
+      "status": "unproved",
+      "reason": "document-shape"
+    },
+    "components/orders/src/domain/company_model.rs::validate": {
+      "status": "unproved",
+      "reason": "validation-of-strings"
+    },
+    "components/orders/src/domain/creation_schema.rs::schema": {
+      "status": "unproved",
+      "reason": "catalogue-data"
+    },
+    "components/orders/src/domain/import_product.rs::projection": {
+      "status": "unproved",
+      "reason": "document-shape"
+    },
+    "components/orders/src/domain/import_product.rs::text": {
+      "status": "unproved",
+      "reason": "text-and-locale"
+    },
+    "components/orders/src/domain/import_relations.rs::identity": {
+      "status": "unproved",
+      "reason": "document-shape"
+    },
+    "components/orders/src/domain/import_relations.rs::product": {
+      "status": "unproved",
+      "reason": "document-shape"
+    },
+    "components/orders/src/domain/logo_image.rs::normalize": {
+      "status": "unproved",
+      "reason": "rendering"
+    },
+    "components/orders/src/domain/order_fields.rs::order_fields": {
+      "status": "unproved",
+      "reason": "document-shape"
+    },
+    "components/orders/src/domain/order_machine.rs::OrderMachine::validate": {
+      "status": "unproved",
+      "reason": "decision-outside-subset",
+      "note": "Graph validation of a configured machine (identifiers, labels, no edge out of a terminal state, reachability). The order run theorems do not rely on it: admitted_edge rechecks the listed target and the terminal source."
+    },
+    "components/orders/src/domain/order_machine.rs::default_machine": {
+      "status": "unproved",
+      "reason": "catalogue-data"
+    },
+    "components/orders/src/domain/order_machine.rs::labels": {
+      "status": "unproved",
+      "reason": "text-and-locale"
+    },
+    "components/orders/src/domain/order_transitions.rs::cancellation_blocker": {
+      "status": "unproved",
+      "reason": "decision-outside-subset"
+    },
+    "components/orders/src/domain/order_transitions.rs::delivery": {
+      "status": "unproved",
+      "reason": "decision-outside-subset",
+      "note": "Delivery state strings; terminal orders are refused before it runs by guard (order_edit_admissible)."
+    },
+    "components/orders/src/domain/order_transitions.rs::payment": {
+      "status": "binds-proved-rule",
+      "rules": [
+        "manual_payment_admissible"
+      ]
+    },
+    "components/orders/src/domain/order_workflow.rs::WorkflowOrder::deliveries": {
+      "status": "unproved",
+      "reason": "document-shape"
+    },
+    "components/orders/src/domain/order_workflow.rs::WorkflowOrder::external": {
+      "status": "unproved",
+      "reason": "decision-outside-subset"
+    },
+    "components/orders/src/domain/order_workflow.rs::admitted_edge": {
+      "status": "binds-proved-rule",
+      "rules": [
+        "order_transition_admissible"
+      ]
+    },
+    "components/orders/src/domain/order_workflow.rs::external": {
+      "status": "unproved",
+      "reason": "decision-outside-subset"
+    },
+    "components/orders/src/domain/order_workflow.rs::guard": {
+      "status": "binds-proved-rule",
+      "rules": [
+        "cancellation_admissible",
+        "completion_admissible",
+        "order_edit_admissible"
+      ]
+    },
+    "components/orders/src/domain/order_workflow.rs::terminal": {
+      "status": "unproved",
+      "reason": "decision-outside-subset",
+      "note": "String membership; its result is the terminal input of the proved order_edit_admissible and order_transition_admissible."
+    },
+    "components/orders/src/domain/order_workflow.rs::workflow": {
+      "status": "binds-proved-rule",
+      "rules": [
+        "delivery_split_admissible"
+      ]
+    },
+    "components/orders/src/domain/receipt_instructions.rs::lines": {
+      "status": "unproved",
+      "reason": "rendering"
+    },
+    "components/orders/src/domain/receipt_pdf.rs::render": {
+      "status": "unproved",
+      "reason": "rendering"
+    },
+    "components/orders/src/domain/receipt_pdf.rs::winansi": {
+      "status": "unproved",
+      "reason": "rendering"
+    },
+    "components/orders/src/domain/receipt_text.rs::lines": {
+      "status": "unproved",
+      "reason": "rendering"
+    },
+    "components/orders/src/domain/receipt_text.rs::pos_message": {
+      "status": "unproved",
+      "reason": "rendering"
+    },
+    "components/orders/src/domain/receipt_text.rs::positions": {
+      "status": "unproved",
+      "reason": "rendering"
+    },
+    "components/orders/src/domain/receipt_text.rs::seller_details": {
+      "status": "unproved",
+      "reason": "rendering"
+    },
+    "components/orders/src/domain/receipt_text.rs::text": {
+      "status": "unproved",
+      "reason": "rendering"
+    },
+    "components/orders/src/domain/receipt_text.rs::totals": {
+      "status": "unproved",
+      "reason": "rendering"
+    },
+    "components/payments/src/domain/amounts.rs::format_amount": {
+      "status": "unproved",
+      "reason": "money-representation"
+    },
+    "components/payments/src/domain/amounts.rs::parse_amount": {
+      "status": "unproved",
+      "reason": "money-representation"
+    },
+    "components/payments/src/domain/amounts.rs::wire_currency": {
+      "status": "unproved",
+      "reason": "validation-of-strings"
+    },
+    "components/payments/src/domain/attempt.rs::Attempt::ctx": {
+      "status": "unproved",
+      "reason": "document-shape"
+    },
+    "components/payments/src/domain/attempt.rs::AttemptContext::can": {
+      "status": "unproved",
+      "reason": "decision-outside-subset"
+    },
+    "components/payments/src/domain/attempt.rs::context_of": {
+      "status": "unproved",
+      "reason": "document-shape"
+    },
+    "components/payments/src/domain/capture_intent.rs::intent": {
+      "status": "unproved",
+      "reason": "decision-outside-subset"
+    },
+    "components/payments/src/domain/details_model.rs::Amount::validate": {
+      "status": "unproved",
+      "reason": "validation-of-strings"
+    },
+    "components/payments/src/domain/details_model.rs::Details::validate": {
+      "status": "unproved",
+      "reason": "validation-of-strings"
+    },
+    "components/payments/src/domain/details_model.rs::date": {
+      "status": "unproved",
+      "reason": "validation-of-strings"
+    },
+    "components/payments/src/domain/details_model.rs::status": {
+      "status": "unproved",
+      "reason": "validation-of-strings"
+    },
+    "components/payments/src/domain/diagnostics.rs::code": {
+      "status": "unproved",
+      "reason": "text-and-locale"
+    },
+    "components/payments/src/domain/diagnostics.rs::response": {
+      "status": "unproved",
+      "reason": "text-and-locale"
+    },
+    "components/payments/src/domain/instructions.rs::Instructions::validate": {
+      "status": "unproved",
+      "reason": "validation-of-strings"
+    },
+    "components/payments/src/domain/instructions.rs::admit": {
+      "status": "unproved",
+      "reason": "decision-outside-subset"
+    },
+    "components/payments/src/domain/instructions.rs::snapshot": {
+      "status": "unproved",
+      "reason": "document-shape"
+    },
+    "components/payments/src/domain/instructions.rs::validated": {
+      "status": "unproved",
+      "reason": "validation-of-strings"
+    },
+    "components/payments/src/domain/receipt_guard.rs::receipt_matches": {
+      "status": "binds-proved-rule",
+      "rules": [
+        "receipt_admissible"
+      ]
+    },
+    "components/payments/src/domain/receipt_ref.rs::ProviderReceipt::confirmed": {
+      "status": "unproved",
+      "reason": "decision-outside-subset"
+    },
+    "components/payments/src/domain/receipt_ref.rs::identity": {
+      "status": "unproved",
+      "reason": "decision-outside-subset"
+    },
+    "components/payments/src/domain/receipt_ref.rs::is": {
+      "status": "unproved",
+      "reason": "decision-outside-subset"
+    },
+    "components/payments/src/domain/receipt_ref.rs::reference": {
+      "status": "unproved",
+      "reason": "document-shape"
+    },
+    "components/payments/src/domain/refunds.rs::capture": {
+      "status": "unproved",
+      "reason": "decision-outside-subset"
+    },
+    "components/payments/src/domain/refunds.rs::checked_total": {
+      "status": "binds-proved-rule",
+      "rules": [
+        "refund_admissible"
+      ]
+    },
+    "components/payments/src/domain/refunds.rs::used": {
+      "status": "unproved",
+      "reason": "money-representation"
+    },
+    "components/payments/src/domain/return_urls.rs::build": {
+      "status": "unproved",
+      "reason": "validation-of-strings"
+    },
+    "components/payments/src/domain/return_urls.rs::urls": {
+      "status": "unproved",
+      "reason": "validation-of-strings"
+    },
+    "components/payments/src/domain/service_config.rs::approval_transport": {
+      "status": "unproved",
+      "reason": "validation-of-strings"
+    },
+    "components/payments/src/domain/service_config.rs::approval_url": {
+      "status": "unproved",
+      "reason": "validation-of-strings"
+    },
+    "components/payments/src/domain/service_config.rs::validate_service": {
+      "status": "unproved",
+      "reason": "validation-of-strings"
+    },
+    "components/payments/src/domain/settlements.rs::captured": {
+      "status": "unproved",
+      "reason": "money-representation"
+    },
+    "components/payments/src/domain/settlements.rs::closed": {
+      "status": "unproved",
+      "reason": "decision-outside-subset"
+    },
+    "components/payments/src/domain/settlements.rs::multi": {
+      "status": "unproved",
+      "reason": "decision-outside-subset"
+    },
+    "components/payments/src/domain/settlements.rs::state": {
+      "status": "unproved",
+      "reason": "signed-arithmetic"
+    },
+    "components/payments/src/domain/settlements.rs::summary": {
+      "status": "unproved",
+      "reason": "document-shape"
+    },
+    "components/payments/src/domain/state.rs::code": {
+      "status": "unproved",
+      "reason": "catalogue-data"
+    },
+    "components/payments/src/domain/state.rs::transition": {
+      "status": "binds-proved-rule",
+      "rules": [
+        "payment_transition_admissible"
+      ]
+    },
+    "components/pricing/src/domain/cart.rs::default_channel": {
+      "status": "unproved",
+      "reason": "constructor-or-accessor"
+    },
+    "components/pricing/src/domain/catalog.rs::public_extra": {
+      "status": "unproved",
+      "reason": "document-shape"
+    },
+    "components/pricing/src/domain/context.rs::fix_quantity": {
+      "status": "unproved",
+      "reason": "signed-arithmetic"
+    },
+    "components/pricing/src/domain/context.rs::language_chain": {
+      "status": "unproved",
+      "reason": "decision-outside-subset"
+    },
+    "components/pricing/src/domain/context.rs::select_tier": {
+      "status": "unproved",
+      "reason": "decision-outside-subset"
+    },
+    "components/pricing/src/domain/customer/address.rs::Address::validate": {
+      "status": "unproved",
+      "reason": "validation-of-strings"
+    },
+    "components/pricing/src/domain/customer/contact.rs::Contact::validate": {
+      "status": "unproved",
+      "reason": "validation-of-strings"
+    },
+    "components/pricing/src/domain/customer/contact.rs::valid_birthday": {
+      "status": "unproved",
+      "reason": "validation-of-strings"
+    },
+    "components/pricing/src/domain/customer/mod.rs::country_default": {
+      "status": "unproved",
+      "reason": "constructor-or-accessor"
+    },
+    "components/pricing/src/domain/discount.rs::allocate": {
+      "status": "binds-proved-rule",
+      "rules": [
+        "discount_cap"
+      ],
+      "note": "The cap is proved; the proportional integer allocation loop and its rounding are unit tested, not proved."
+    },
+    "components/pricing/src/domain/external_order.rs::PaidOrder::validate": {
+      "status": "binds-proved-rule",
+      "rules": [
+        "external_paid_total_admissible"
+      ]
+    },
+    "components/pricing/src/domain/external_order.rs::SourceAmount::valid": {
+      "status": "binds-proved-rule",
+      "rules": [
+        "external_amount_admissible"
+      ]
+    },
+    "components/pricing/src/domain/money.rs::Currency::code": {
+      "status": "unproved",
+      "reason": "constructor-or-accessor"
+    },
+    "components/pricing/src/domain/money.rs::Currency::eur": {
+      "status": "unproved",
+      "reason": "constructor-or-accessor"
+    },
+    "components/pricing/src/domain/money.rs::Currency::factor": {
+      "status": "unproved",
+      "reason": "money-representation"
+    },
+    "components/pricing/src/domain/money.rs::Currency::new": {
+      "status": "binds-proved-rule",
+      "rules": [
+        "currency_scale_admissible"
+      ]
+    },
+    "components/pricing/src/domain/money.rs::Currency::scale": {
+      "status": "unproved",
+      "reason": "constructor-or-accessor"
+    },
+    "components/pricing/src/domain/money.rs::Currency::try_from": {
+      "status": "unproved",
+      "reason": "constructor-or-accessor"
+    },
+    "components/pricing/src/domain/money.rs::Money::checked_add": {
+      "status": "unproved",
+      "reason": "money-representation"
+    },
+    "components/pricing/src/domain/money.rs::Money::currency": {
+      "status": "unproved",
+      "reason": "constructor-or-accessor"
+    },
+    "components/pricing/src/domain/money.rs::Money::decimal": {
+      "status": "unproved",
+      "reason": "money-representation"
+    },
+    "components/pricing/src/domain/money.rs::Money::from_legacy_eur": {
+      "status": "unproved",
+      "reason": "money-representation"
+    },
+    "components/pricing/src/domain/money.rs::Money::minor": {
+      "status": "unproved",
+      "reason": "constructor-or-accessor"
+    },
+    "components/pricing/src/domain/money.rs::Money::new": {
+      "status": "unproved",
+      "reason": "money-representation"
+    },
+    "components/pricing/src/domain/money.rs::Money::parse": {
+      "status": "unproved",
+      "reason": "money-representation"
+    },
+    "components/pricing/src/domain/money.rs::Money::rounded": {
+      "status": "unproved",
+      "reason": "money-representation"
+    },
+    "components/pricing/src/domain/money.rs::from_minor": {
+      "status": "unproved",
+      "reason": "money-representation"
+    },
+    "components/pricing/src/domain/money.rs::to_minor": {
+      "status": "unproved",
+      "reason": "money-representation"
+    },
+    "components/pricing/src/domain/pricing.rs::PriceInput::default": {
+      "status": "unproved",
+      "reason": "constructor-or-accessor"
+    },
+    "components/pricing/src/domain/pricing.rs::calculate": {
+      "status": "unproved",
+      "reason": "float-calculation"
+    },
+    "components/pricing/src/domain/pricing.rs::cash_round": {
+      "status": "unproved",
+      "reason": "float-calculation"
+    },
+    "components/pricing/src/domain/pricing.rs::cast": {
+      "status": "unproved",
+      "reason": "float-calculation"
+    },
+    "components/pricing/src/domain/pricing.rs::decimals": {
+      "status": "unproved",
+      "reason": "constructor-or-accessor"
+    },
+    "components/pricing/src/domain/pricing.rs::interval": {
+      "status": "unproved",
+      "reason": "constructor-or-accessor"
+    },
+    "components/pricing/src/domain/pricing.rs::math_round": {
+      "status": "unproved",
+      "reason": "float-calculation"
+    },
+    "components/pricing/src/domain/pricing.rs::proportional_tax_rules": {
+      "status": "unproved",
+      "reason": "float-calculation"
+    },
+    "components/pricing/src/domain/pricing.rs::sum": {
+      "status": "unproved",
+      "reason": "float-calculation"
+    },
+    "components/pricing/src/domain/pricing.rs::yes": {
+      "status": "unproved",
+      "reason": "constructor-or-accessor"
+    },
+    "components/pricing/src/domain/quote.rs::CalculatedTax::from": {
+      "status": "unproved",
+      "reason": "document-shape"
+    },
+    "components/pricing/src/domain/quote.rs::LinePriceUpdate::new": {
+      "status": "unproved",
+      "reason": "float-calculation"
+    },
+    "components/pricing/src/domain/quote.rs::QuoteTax::from": {
+      "status": "unproved",
+      "reason": "document-shape"
+    },
+    "components/pricing/src/domain/quote.rs::QuoteTotals::new": {
+      "status": "unproved",
+      "reason": "float-calculation"
+    },
+    "components/pricing/src/domain/validation.rs::ValidationError::fmt": {
+      "status": "unproved",
+      "reason": "text-and-locale"
+    },
+    "components/pricing/src/domain/validation.rs::ValidationError::new": {
+      "status": "unproved",
+      "reason": "constructor-or-accessor"
+    }
+  }
+}

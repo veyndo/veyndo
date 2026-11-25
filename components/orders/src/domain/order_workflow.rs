@@ -24,9 +24,10 @@ pub fn admitted_edge<'m>(
     target: &str,
     action: Option<&str>,
 ) -> Option<&'m MachineEdge> {
-    let edge = m.transitions.iter().find(|e| {
-        e.from == current && e.to == target && action.is_none_or(|id| id == e.id)
-    });
+    let edge = m
+        .transitions
+        .iter()
+        .find(|e| e.from == current && e.to == target && action.is_none_or(|id| id == e.id));
     let listed = m.states.iter().any(|s| s.id == target);
     verified_kernel::order_transition_admissible(edge.is_some(), listed, terminal(m, current))
         .then_some(edge)

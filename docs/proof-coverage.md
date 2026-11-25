@@ -6,19 +6,19 @@ This page answers one question per source file of the commerce core: is its
 rule proved by machine, does it call a proved rule, or neither? It is
 generated from the same manifest the proof check uses, so it cannot say more
 than the check verifies. **It is not a claim that the shop is free of errors:**
-93.6 % of the Rust source files are unproved.
+93.9 % of the Rust source files are unproved.
 
 ## In numbers
 
 | | Count | Share of source files | Meaning |
 | --- | ---: | ---: | --- |
-| **Proved rules** | 70 | | Small pure decisions, translated from the production Rust source to Lean and proved there |
-| **Proved properties** | 172 | | Statements about those rules that hold for every possible input |
+| **Proved rules** | 72 | | Small pure decisions, translated from the production Rust source to Lean and proved there |
+| **Proved properties** | 197 | | Statements about those rules that hold for every possible input |
 | Rule files | 8 | 0.5 % | The files that contain the proved rules |
-| Reviewed callers | 79 | 5.3 % | Files that call a proved rule; a person reviewed how the rule is fed, the surrounding code is not proved |
+| Reviewed callers | 80 | 5.1 % | Files that call a proved rule; a person reviewed how the rule is fed, the surrounding code is not proved |
 | Comparison drivers | 9 | 0.6 % | Test programs that compare the compiled Rust rules with the Lean versions |
-| **Unproved files** | 1404 | 93.6 % | Everything else: database access, HTTP, providers, the user interface server |
-| All Rust source files | 1500 | 100 % | |
+| **Unproved files** | 1486 | 93.9 % | Everything else: database access, HTTP, providers, the user interface server |
+| All Rust source files | 1583 | 100 % | |
 
 A proved rule looks like this one, which caps a discount at the amount it is
 taken from:
@@ -62,7 +62,7 @@ that call it.
 
 ### Prices, stock, payments and refunds
 
-20 rules, 60 proved properties.
+21 rules, 74 proved properties.
 [Source](https://github.com/veyndo/veyndo/blob/main/crates/kernel/src/verified_kernel/commerce.rs).
 
 | Rule | What the source says about it | Proved properties | Used in |
@@ -71,9 +71,9 @@ that call it.
 | `amount_sum` | The sum of two amounts in minor units; it never wraps around. | 4: `amount_sum_exact`, `amount_sum_bounded`, `amount_sum_not_below`, `amount_sum_comm` | `components/checkout/src/domain/cart_quote.rs` |
 | `b2b_approval_admissible` | An approval requires a different employee, current authority, pending state and exact revision. | 2: `b2b_approval_exact`, `b2b_self_approval_denied` | `components/b2b/src/store/purchase.rs`, `components/b2b/src/service/approval.rs` |
 | `b2b_budget_admissible` | Spending cannot exceed a currency-bound unit budget, including existing allocations. | 6: `b2b_budget_exact`, `b2b_budget_conserves`, `budget_sequence_bounded`, `budget_sequence_conservation`, `budget_lowered_limit_denied`, `budget_zero_at_exhaustion` | `components/b2b/src/store/purchase.rs`, `crates/cognition/src/inference/budget.rs` |
-| `capture_admissible` | Captures and in-flight reservations together cannot exceed the original authorization. | 3: `capture_exact`, `capture_bounded`, `capture_zero_denied` | `components/payments/src/store/capture_admission.rs` |
+| `capture_admissible` | Captures and in-flight reservations together cannot exceed the original authorization. | 4: `capture_exact`, `capture_bounded`, `capture_zero_denied`, `capture_run_bounded` | `components/payments/src/store/capture_admission.rs` |
 | `checkout_contact_admissible` | No comment in the source | 2: `financial_contact_required`, `checkout_contact_exact` | `components/checkout/src/service/purchase/commit.rs` |
-| `checkout_review_admissible` | No comment in the source | 1: `checkout_review_exact` | `components/checkout/src/domain/review_binding.rs` |
+| `checkout_review_admissible` | No comment in the source | 2: `checkout_review_exact`, `checkout_review_stale_denied` | `components/checkout/src/domain/review_binding.rs` |
 | `currency_context_admissible` | A quoted currency must be enabled, configured and have an admissible rate. | 2: `currency_context_exact`, `currency_context_stale_denied` | `components/pricing/src/types/currency.rs` |
 | `currency_scale_admissible` | No comment in the source | 2: `currency_scale_exact`, `currency_scale_overflow_denied` | `components/pricing/src/domain/money.rs` |
 | `discount_cap` | No comment in the source | 6: `discount_bounded`, `discount_requested`, `discount_conservation`, `discount_exact`, `discount_monotone_requested`, `discount_idempotent` | `components/pricing/src/domain/discount.rs` |
@@ -83,14 +83,15 @@ that call it.
 | `offer_honoured` | A signed offer is honoured only before it expires and only for the same cart, revision and total. | 4: `offer_honoured_exact`, `offer_expired_denied`, `offer_changed_total_denied`, `offer_changed_revision_denied` | `components/intelligence/src/service/signed_offer.rs` |
 | `pos_cash_admissible` | Cash change is bounded and nonnegative only under cashier authorization and a reviewed total. | 3: `pos_cash_exact`, `pos_cash_conserves`, `pos_cash_unauthorized_denied` | `components/pos/src/service/settlement.rs` |
 | `pos_discount_admissible` | No comment in the source | 2: `pos_discount_exact`, `pos_discount_exceeds_denied` | `components/shop/src/types/cart.rs` |
-| `refund_admissible` | No comment in the source | 5: `refund_bounded`, `refund_zero_denied`, `refund_exact`, `refund_sequence_bounded`, `refund_lowered_capture_denied` | `components/payments/src/store/commands.rs`, `components/payments/src/domain/refunds.rs` |
+| `refund_admissible` | No comment in the source | 6: `refund_bounded`, `refund_zero_denied`, `refund_exact`, `refund_sequence_bounded`, `refund_lowered_capture_denied`, `refund_run_bounded` | `components/payments/src/store/commands.rs`, `components/payments/src/domain/refunds.rs` |
 | `replay_admissible` | No comment in the source | 3: `replay_same_cart`, `replay_open_fingerprint`, `replay_exact` | `components/checkout/src/service/purchase/lock.rs` |
-| `revision_admissible` | No comment in the source | 2: `revision_exact`, `revision_exact_behavior` | `components/orders/src/http/transitions.rs`, `components/catalog/src/service/translation_apply.rs`, `components/intelligence/src/service/platform_ai.rs`, `components/shop/src/http/operator_quotas.rs`, `components/shop/src/http/operator_lifecycle.rs`, `components/orders/src/http/delivery_split.rs`, `components/intelligence/src/store/evidence.rs`, `components/checkout/src/domain/review_binding.rs` |
+| `reservation_admissible` | An order holds at most what it ordered: what it already holds plus a new reservation stays within the ordered quantity. | 9: `reservation_exact`, `reservation_zero_denied`, `reservation_over_denied`, `reservation_step_bounded`, `reservation_run_bounded`, `reservation_step_conserves`, `reservation_run_conserves`, `reservation_release_idempotent`, `reservation_release_restores` | `components/inventory/src/domain/lines.rs` |
+| `revision_admissible` | No comment in the source | 4: `revision_exact`, `revision_exact_behavior`, `revision_run_monotone`, `revision_reuse_denied` | `components/orders/src/http/transitions.rs`, `components/catalog/src/service/translation_apply.rs`, `components/intelligence/src/service/platform_ai.rs`, `components/shop/src/http/operator_quotas.rs`, `components/shop/src/http/operator_lifecycle.rs`, `components/orders/src/http/delivery_split.rs`, `components/intelligence/src/store/evidence.rs`, `components/checkout/src/domain/review_binding.rs` |
 | `stock_admissible` | No comment in the source | 5: `stock_positive_bounded`, `stock_conservation`, `stock_exact`, `stock_sequence_bounded`, `stock_sequence_conservation` | `components/checkout/src/service/purchase/price.rs`, `components/apps/src/service/external_orders.rs` |
 
 ### Orders, delivery and returns
 
-10 rules, 24 proved properties.
+11 rules, 35 proved properties.
 [Source](https://github.com/veyndo/veyndo/blob/main/crates/kernel/src/verified_kernel/fulfillment.rs).
 
 | Rule | What the source says about it | Proved properties | Used in |
@@ -101,8 +102,9 @@ that call it.
 | `delivery_split_admissible` | Package splitting moves a strict positive subset of an open, nonterminal allocation. | 3: `delivery_split_exact`, `delivery_split_closed_denied`, `delivery_split_all_denied` | `components/shipping/src/domain/split.rs`, `components/orders/src/domain/order_workflow.rs` |
 | `download_admissible` | No comment in the source | 3: `download_blocked_denied`, `download_payment_required`, `download_exact` | `components/orders/src/http/downloads.rs` |
 | `manual_payment_admissible` | No comment in the source | 2: `manual_payment_safe`, `manual_payment_exact` | `components/orders/src/domain/order_transitions.rs` |
-| `order_edit_admissible` | No comment in the source | 2: `terminal_edit_denied`, `order_edit_exact` | `components/orders/src/domain/order_workflow.rs` |
-| `payment_transition_admissible` | No comment in the source | 3: `payment_transition_exact`, `payment_refunded_terminal`, `payment_pending_capture` | `components/payments/src/domain/state.rs` |
+| `order_edit_admissible` | No comment in the source | 3: `terminal_edit_denied`, `order_edit_exact`, `order_run_fulfilment_denied` | `components/orders/src/domain/order_workflow.rs` |
+| `order_transition_admissible` | An order moves only along a listed edge of its machine into a listed state, never out of a terminal state. | 7: `order_transition_exact`, `order_transition_terminal_denied`, `order_step_listed`, `order_run_listed`, `order_step_terminal`, `order_run_terminal_absorbing`, `order_run_terminal_final` | `components/orders/src/domain/order_workflow.rs` |
+| `payment_transition_admissible` | No comment in the source | 6: `payment_transition_exact`, `payment_refunded_terminal`, `payment_pending_capture`, `payment_run_listed`, `payment_run_captured_kept`, `payment_run_refunded_final` | `components/payments/src/domain/state.rs` |
 | `receipt_admissible` | No comment in the source | 2: `receipt_exact`, `receipt_exact_behavior` | `components/payments/src/domain/receipt_guard.rs` |
 | `reservation_release_admissible` | Uncaptured stock can be restored; an authorization requires provider-confirmed void evidence. | 3: `reservation_release_exact`, `reservation_authorized_unvoided`, `reservation_captured_denied` | `components/payments/src/store/order_ledger.rs` |
 
