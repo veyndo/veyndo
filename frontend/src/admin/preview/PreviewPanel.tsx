@@ -1,8 +1,9 @@
 /** PreviewPanel renders verified shop state and typed user actions. */
+import { useDebouncedValue } from "../../kit/query";
 import { useRead } from "../shell/useRead";
 import { Button, Field, Notice, Select } from "../../kit/ui";
 import { mediaImage } from "../../shared/media/product-media";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocale } from "../../shared/i18n/i18n";
 import { inheritedText } from "../../shared/geography/geography-types";
 import type { CustomerGroup } from "../../shared/customer/customer-types";
@@ -33,49 +34,23 @@ export function PreviewPanel({
   useEffect(() => {
     if (groupRead.data) setGroup("consumer");
   }, [groupRead.data]);
-  const [quote, setQuote] = useState<any>();
-  const [error, setError] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const generation = useRef(0);
   useEffect(() => {
     setQuantity(product?.min_purchase || 1);
-    setQuote(undefined);
   }, [product?.id]);
-  useEffect(() => {
-    if (!product || !connected) return;
-    const version = ++generation.current;
-    setLoading(true);
-    setQuote(undefined);
-    setError(false);
-    const timer = setTimeout(() => {
-      request("/api/merchant/quote", {
-        productId: product.id,
-        quantity,
-        customerGroup: group,
-      })
-        .then((v) => {
-          if (version === generation.current) setQuote(v);
-        })
-        .catch(() => {
-          if (version === generation.current) setError(true);
-        })
-        .finally(() => {
-          if (version === generation.current) setLoading(false);
-        });
-    }, 200);
-    return () => {
-      clearTimeout(timer);
-      generation.current++;
-    };
-  }, [
-    product?.id,
-    product?.revision,
-    quantity,
-    group,
-    locale,
-    request,
-    connected,
-  ]);
+  // The quote follows product, quantity and group 200 ms after they settle.
+  const wanted =
+    product && connected
+      ? { productId: product.id, quantity, customerGroup: group }
+      : undefined;
+  const settled = useDebouncedValue(wanted, 200);
+  const current = JSON.stringify(wanted) === JSON.stringify(settled);
+  const quoteRead = useRead(request, settled ? "/api/merchant/quote" : null, {
+    body: settled,
+    version: [product?.revision, locale],
+  });
+  const loading = !!wanted && (!current || quoteRead.fetching);
+  const quote = current && !quoteRead.fetching ? quoteRead.data : undefined;
+  const error = current && quoteRead.status === "error";
   const line = quote?.quote.lineItems[0];
   return (
     <aside className="studio-preview">

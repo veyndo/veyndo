@@ -1,6 +1,7 @@
 /** Observe the original task worker; an accepted command is not a completed write. */
 import { useEffect, useRef, useState } from "react";
 import type { RequestFn } from "./studio-types";
+import { useRead } from "./useRead";
 import type { SavedRun } from "./useChatTurns";
 type Scope = { id: string; request: RequestFn };
 type Progress = {
@@ -40,33 +41,32 @@ export function useTaskExecution(
         ...patch,
       }));
   };
+  // An accepted command is followed until its run settles (every 1.5 seconds).
+  const [following, setFollowing] = useState(true);
+  const runRead = useRead<SavedRun>(
+    request,
+    accepted ? `/api/agent/runs/${encodeURIComponent(id)}` : null,
+    { refetchMs: following ? 1500 : undefined },
+  );
   useEffect(() => {
-    if (!accepted) return;
-    let cancelled = false;
-    let timer: ReturnType<typeof setTimeout> | undefined;
-    const poll = async () => {
-      try {
-        const run: SavedRun = await request(
-          `/api/agent/runs/${encodeURIComponent(id)}`,
-        );
-        if (cancelled || scope.current !== owner) return;
-        update({
-          run,
-          applied: run.state === "ready" && run.approvalRequired === false,
-          error: "",
-        });
-        if (run.state === "queued" || run.state === "running")
-          timer = setTimeout(poll, 1500);
-      } catch (e) {
-        if (!cancelled) update({ error: (e as Error).message });
-      }
-    };
-    void poll();
-    return () => {
-      cancelled = true;
-      clearTimeout(timer);
-    };
-  }, [owner, accepted, state.refresh]);
+    const run = runRead.data;
+    if (!run) return;
+    update({
+      run,
+      applied: run.state === "ready" && run.approvalRequired === false,
+      error: "",
+    });
+    setFollowing(run.state === "queued" || run.state === "running");
+  }, [runRead.data]);
+  useEffect(() => {
+    if (runRead.error) update({ error: (runRead.error as Error).message });
+  }, [runRead.error]);
+  useEffect(() => {
+    if (state.refresh && accepted) {
+      setFollowing(true);
+      void runRead.refetch();
+    }
+  }, [state.refresh]);
   const approve = async () => {
     if (state.busy || accepted || state.applied || applied) return;
     update({ busy: true, error: "" });

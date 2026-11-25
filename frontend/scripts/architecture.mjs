@@ -289,10 +289,11 @@ if (!process.argv[2]) {
         index++;
       }
       const body = text.slice(match.index, index);
-      // Writes such as autosave are effects by nature; they say so and why.
+      // Writes (autosave), liveness probes and shell orchestration are effects by
+      // nature; they carry a marker with the reason. Area reads use useRead.
       if (
         /\b(?:request|liveRequest|requestJson)\(/.test(body) &&
-        !/write-effect: \S/.test(body)
+        !/(?:write|probe|shell)-effect: \S/.test(body)
       )
         effectReads++;
     }

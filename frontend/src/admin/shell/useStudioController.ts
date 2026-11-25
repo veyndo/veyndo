@@ -189,6 +189,8 @@ export function useStudioController({
       setConnectionPending(false);
       return;
     }
+    // shell-effect: the connection handshake verifies access first and only then
+    // loads the shell's own state, deciding together whether Studio is connected.
     // Refresh translated context without unmounting open editors. Auth and
     // tenant/environment changes still require a newly verified connection.
     if (connectionScope.current !== scope) setConnected(false);

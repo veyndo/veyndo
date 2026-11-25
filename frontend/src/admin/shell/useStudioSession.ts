@@ -10,6 +10,7 @@ export function useStudioSession(
   onInvalid: (detail: string) => void,
 ) {
   useEffect(() => {
+    // probe-effect: a liveness check of the session; its answer is discarded.
     if (!token) return;
     let active = true;
     let pending = false;

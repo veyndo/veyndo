@@ -2,6 +2,7 @@
 import { useEffect, useRef } from "react";
 import type { Dispatch, SetStateAction } from "react";
 import type { RequestFn } from "./studio-types";
+import { useRead } from "./useRead";
 export function useStudioPermissions(
   active: boolean,
   paused: boolean,
@@ -19,6 +20,20 @@ export function useStudioPermissions(
     if (previous.current && previous.current !== key) callback.current();
     previous.current = connected ? key : "";
   }, [rights, connected]);
+  // Current grants are read again every 30 seconds and on focus while visible.
+  const access = useRead(
+    request,
+    active && !paused ? "/api/auth/access" : null,
+    { refetchMs: 30_000, staleMs: 30_000 },
+  );
+  useEffect(() => {
+    if (!active || paused) return;
+    const refresh = () => {
+      if (document.visibilityState !== "hidden") void access.refetch();
+    };
+    window.addEventListener("focus", refresh);
+    return () => window.removeEventListener("focus", refresh);
+  }, [active, paused, access.refetch]);
   useEffect(() => {
     if (!active) {
       setRights([]);
@@ -26,28 +41,12 @@ export function useStudioPermissions(
       return;
     }
     if (paused) return;
-    let mounted = true;
-    const refresh = () => {
-      if (document.visibilityState !== "hidden")
-        void request("/api/auth/access")
-          .then((v) => {
-            if (mounted)
-              setRights((old) =>
-                JSON.stringify(old) === JSON.stringify(v.permissions)
-                  ? old
-                  : v.permissions,
-              );
-          })
-          .catch(() => {
-            if (mounted) setRights([]);
-          });
-    };
-    const timer = setInterval(refresh, 30_000);
-    window.addEventListener("focus", refresh);
-    return () => {
-      mounted = false;
-      clearInterval(timer);
-      window.removeEventListener("focus", refresh);
-    };
-  }, [active, paused, request, setRights]);
+    if (access.status === "error") setRights([]);
+    else if (access.data)
+      setRights((old) =>
+        JSON.stringify(old) === JSON.stringify(access.data.permissions)
+          ? old
+          : access.data.permissions,
+      );
+  }, [active, paused, access.data, access.status, setRights]);
 }

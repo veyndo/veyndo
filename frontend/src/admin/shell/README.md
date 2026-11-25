@@ -34,12 +34,13 @@ expiry dialog. Old-token replies cannot expire a new session.
 - [`StudioSidebar.tsx`](StudioSidebar.tsx): StudioSidebar: focused Studio view; state and commands come from the session-scoped controller.
 - [`StudioSignIn.tsx`](StudioSignIn.tsx): Dedicated login page and blocking reauthentication dialog preserve mounted private editors.
 - [`navigation.ts`](navigation.ts): Typed built-in Studio navigation and locale-specific labels.
-- [`requests.ts`](requests.ts): Authenticated Studio transport; staging changes only the tenant, never the principal.
+- [`requests.ts`](requests.ts): Authenticated Studio transport; staging changes only the tenant, never the principal. It also records which tenant each request function sends to, for cache keys.
 - [`studio-types.ts`](studio-types.ts): studio types: Studio layout, session/workspace controller, authenticated transport and lazy workspace navigation.
 - [`useEntityNavigation.ts`](useEntityNavigation.ts): Linked entity navigation keeps native editors, browser deep links and back paths in the same tenant scope.
 - [`useServerHealth.ts`](useServerHealth.ts): Public server health is independent of the personal Studio session.
 - [`useStudioAccess.ts`](useStudioAccess.ts): Central Studio identity boundary: initial login, expiry suspension and same-account resume.
 - [`useStudioController.ts`](useStudioController.ts): Studio session/controller: authentication context, tenant/staging state and chat commands.
+- [`useRead.ts`](useRead.ts): Server reads of Studio areas through `kit/query`, keyed by the request's tenant (live shop or stage), path, body, transport options and an optional version; `useSetRead` writes a response into the cache and `useInvalidateRead` reloads a path. Areas never call the request function from an effect to read: the architecture check counts such effects and allows only `write-effect:`, `probe-effect:` and `shell-effect:` with a written reason.
 - [`useStudioSession.ts`](useStudioSession.ts): Revalidate visible Studio sessions and route authenticated failures to the active controller.
 
 ## Verification

@@ -1310,8 +1310,8 @@ This lists every checked-in source module in these roots, including files with n
 | [frontend/src/admin/automation/rule-history.css](../frontend/src/admin/automation/rule-history.css) | Contained comparison controls/results inside the existing rule editor. |
 | [frontend/src/admin/automation/source-rules.ts](../frontend/src/admin/automation/source-rules.ts) | Convert source condition nodes for the graphical editor without losing original payload fields. |
 | [frontend/src/admin/automation/studio-extension.ts](../frontend/src/admin/automation/studio-extension.ts) | Studio extension of automation flows. |
-| [frontend/src/admin/automation/useAutomationAccess.ts](../frontend/src/admin/automation/useAutomationAccess.ts) | Current native automation grants, cleared immediately when the workspace changes. |
-| [frontend/src/admin/automation/useAutomationLanguages.ts](../frontend/src/admin/automation/useAutomationLanguages.ts) | Load the current shop's content-language context and ignore replies after the workspace changes. |
+| [frontend/src/admin/automation/useAutomationAccess.ts](../frontend/src/admin/automation/useAutomationAccess.ts) | Current native automation grants of the workspace; nothing is granted while they load or fail. |
+| [frontend/src/admin/automation/useAutomationLanguages.ts](../frontend/src/admin/automation/useAutomationLanguages.ts) | The current shop's content-language context; a failed read reports its message once. |
 | [frontend/src/admin/automation/work-template-i18n.ts](../frontend/src/admin/automation/work-template-i18n.ts) | Reviewed-work Flow vocabulary in every Studio interface language. |
 | [frontend/src/admin/automation/work-template.ts](../frontend/src/admin/automation/work-template.ts) | Keep only a protected task reference in Flow configuration; operation inputs stay in actor-private evidence. |
 | [frontend/src/admin/b2b/B2BRoute.tsx](../frontend/src/admin/b2b/B2BRoute.tsx) | B2B route: companies or quotes in the current stage, or the disabled notice when the shop has not enabled them. |
