@@ -119,6 +119,17 @@ struct SnapshotInput {
     delivery_index: Option<u64>,
 }
 
+/// The order parts a shipment snapshot passes to a carrier app, each exactly as read.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ShippedOrder {
+    id: Value,
+    order_number: Value,
+    revision: Value,
+    deliveries: Value,
+    shipping_address: Value,
+}
+
 pub(super) async fn snapshot(
     a: &App,
     h: &RequestContext,
@@ -136,12 +147,14 @@ pub(super) async fn snapshot(
         .delivery_index
         .and_then(|n| usize::try_from(n).ok())
         .ok_or(bad("Shipment index required"))?;
-    let delivery = order["deliveries"]
+    let shipped: ShippedOrder = view(&order);
+    let delivery = shipped
+        .deliveries
         .as_array()
         .and_then(|v| v.get(index))
         .ok_or(bad("Shipment unavailable"))?;
     Ok(
-        json!({"orderId":order["id"],"orderNumber":order["orderNumber"],"orderRevision":order["revision"],"deliveryIndex":index,"allocationDigest":crate::operations::allocation_digest(&order,index),"delivery":delivery,"address":order["shippingAddress"]}),
+        json!({"orderId":shipped.id,"orderNumber":shipped.order_number,"orderRevision":shipped.revision,"deliveryIndex":index,"allocationDigest":crate::operations::allocation_digest(&order,index),"delivery":delivery,"address":shipped.shipping_address}),
     )
 }
 pub(super) async fn booking(

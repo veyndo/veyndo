@@ -4,14 +4,14 @@ use crate::foundation::App;
 use crate::localization::language_context;
 use crate::{assets, commerce, staging};
 use axum::http::StatusCode;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use serde_json::json;
 use veyndo_cognition::inference::Choice;
 use veyndo_core::Error;
 use veyndo_core::Result;
 use veyndo_core::bad;
-use veyndo_core::document::{lenient, view};
+use veyndo_core::document::{lenient, merge, view};
 use veyndo_core::request_context::RequestContext;
 /// An App Studio generation request: the private environment, the task, the model and the current definition.
 #[derive(Deserialize, Default)]
@@ -26,6 +26,21 @@ struct GenerationRequest {
     #[serde(deserialize_with = "lenient")]
     mode: Option<String>,
     manifest: Value,
+}
+
+/// The generated app definition inside a model result.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct GeneratedBuild {
+    manifest: Value,
+}
+
+/// The repaired definition and its request context, written into the saved build.
+#[derive(Serialize)]
+struct BuildRecord<'a> {
+    manifest: Value,
+    environment: &'a str,
+    prompt: &'a str,
 }
 
 /// Generates, repairs and saves one reviewable app build from the provider's structured output.
@@ -114,14 +129,21 @@ pub(super) async fn generate(a: &App, t: &str, h: &RequestContext, v: &Value) ->
             } else {
                 out.value
             };
-            routes::actions(&mut result["manifest"])?;
-            app_generation::preserve_access(&input.manifest, &mut result["manifest"]);
+            let mut manifest = view::<GeneratedBuild>(&result).manifest;
+            routes::actions(&mut manifest)?;
+            app_generation::preserve_access(&input.manifest, &mut manifest);
             veyndo_app_platform::domain::generation_contract::retain(
                 &input.manifest,
-                &mut result["manifest"],
+                &mut manifest,
             )?;
-            result["environment"] = json!(stage);
-            result["prompt"] = json!(prompt);
+            merge(
+                &mut result,
+                BuildRecord {
+                    manifest,
+                    environment: stage,
+                    prompt,
+                },
+            )?;
             builds::save(
                 a,
                 t,
@@ -151,4 +173,37 @@ pub(super) async fn generate(a: &App, t: &str, h: &RequestContext, v: &Value) ->
         }
     }
     unreachable!("bounded generation returns a validated draft or an error")
+}
+
+#[cfg(test)]
+mod typed_tests {
+    use super::{BuildRecord, GeneratedBuild};
+    use serde_json::json;
+    use veyndo_core::document::{merge, view};
+
+    #[test]
+    fn build_record_keeps_the_indexed_shape() {
+        for result in [
+            json!({"manifest":{"id":"app","actions":[]},"notes":"n"}),
+            json!({"notes":"n"}),
+        ] {
+            let mut old = result.clone();
+            old["manifest"]["checked"] = json!(true);
+            old["environment"] = json!("stage-1");
+            old["prompt"] = json!("Build a label app");
+            let mut manifest = view::<GeneratedBuild>(&result).manifest;
+            manifest["checked"] = json!(true);
+            let mut new = result;
+            merge(
+                &mut new,
+                BuildRecord {
+                    manifest,
+                    environment: "stage-1",
+                    prompt: "Build a label app",
+                },
+            )
+            .unwrap();
+            assert_eq!(new, old);
+        }
+    }
 }

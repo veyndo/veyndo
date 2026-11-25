@@ -8,10 +8,11 @@ use axum::http::StatusCode;
 use axum::http::header::CACHE_CONTROL;
 use axum::response::IntoResponse;
 use serde::Deserialize;
-use serde_json::json;
+use serde_json::{Value, json};
 use veyndo_core::Error;
 use veyndo_core::Result;
 use veyndo_core::conflict;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::request_context::RequestContext;
 use veyndo_shop::types::cart::StoredCart;
 
@@ -21,6 +22,55 @@ pub(crate) struct QuoteInput {
     cart_id: String,
     cart_revision: i64,
     customer_id: String,
+}
+
+/// The parts of the projected cart quote the session service receives; each passes on exactly as projected.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct Quote {
+    locale: Value,
+    #[serde(deserialize_with = "lenient")]
+    price: QuotePrice,
+    #[serde(deserialize_with = "lenient")]
+    checkout: QuoteCheckout,
+    selection_needs_confirmation: Value,
+    #[serde(deserialize_with = "lenient")]
+    legal: QuoteLegal,
+    #[serde(deserialize_with = "lenient")]
+    payment_method: QuotePayment,
+}
+
+/// The quote total.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct QuotePrice {
+    currency: Value,
+    total_minor: Value,
+    currency_scale: Value,
+}
+
+/// The checkout destination of the quote.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct QuoteCheckout {
+    country: Value,
+}
+
+/// The legal requirements of the quote.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct QuoteLegal {
+    strict_checkout: Value,
+    requires_digital: Value,
+    policy_version: Value,
+}
+
+/// The selected payment method of the quote.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct QuotePayment {
+    id: Value,
+    mode: Value,
 }
 
 async fn owned_cart(
@@ -67,7 +117,7 @@ pub(crate) async fn quote_session(
     for batch in ids.chunks(24) {
         marketing::admit_products(&a, &h, batch).await?;
     }
-    let q = cart_price::project_cart(&a, &c, true).await?;
+    let q: Quote = view(&cart_price::project_cart(&a, &c, true).await?);
     Ok((
         [(CACHE_CONTROL, "no-store")],
         Json(json!({
@@ -77,19 +127,19 @@ pub(crate) async fn quote_session(
             "cartRevision": c.revision,
             "salesChannel": c.data.sales_channel,
             "environment": "live",
-            "locale": q["locale"],
-            "currency": q["price"]["currency"],
-            "country": q["checkout"]["country"],
-            "totalMinor": q["price"]["totalMinor"],
-            "currencyScale": q["price"]["currencyScale"],
-            "selectionNeedsConfirmation": q["selectionNeedsConfirmation"],
+            "locale": q.locale,
+            "currency": q.price.currency,
+            "country": q.checkout.country,
+            "totalMinor": q.price.total_minor,
+            "currencyScale": q.price.currency_scale,
+            "selectionNeedsConfirmation": q.selection_needs_confirmation,
             "legal": {
-                "strictCheckout":q["legal"]["strictCheckout"],
-                "requiresDigital":q["legal"]["requiresDigital"],
+                "strictCheckout":q.legal.strict_checkout,
+                "requiresDigital":q.legal.requires_digital,
             },
-            "legalPolicyVersion": q["legal"]["policyVersion"],
-            "paymentMethod": q["paymentMethod"]["id"],
-            "paymentMode": q["paymentMethod"]["mode"],
+            "legalPolicyVersion": q.legal.policy_version,
+            "paymentMethod": q.payment_method.id,
+            "paymentMode": q.payment_method.mode,
         })),
     ))
 }

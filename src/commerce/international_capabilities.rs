@@ -5,7 +5,7 @@ use crate::{auth, translations};
 use axum::Json;
 use axum::extract::Path;
 use axum::extract::State;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use serde_json::json;
 use std::collections::HashMap;
@@ -145,38 +145,93 @@ pub(crate) async fn international_invoke(
 #[derive(Deserialize, Default)]
 #[serde(default, rename_all = "camelCase")]
 struct PricePolicyViewInput {
-    data: Value,
+    #[serde(deserialize_with = "lenient")]
+    data: PolicyData,
     revision: Value,
+}
+
+/// The settings parts the price policy view projects.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct PolicyData {
+    #[serde(deserialize_with = "lenient")]
+    ai_policy: AiPolicy,
+    #[serde(deserialize_with = "lenient")]
+    currencies: PolicyCurrencies,
+}
+
+/// The AI price policy: autonomy passes through, corridors are paged.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct AiPolicy {
+    autonomy: Value,
+    #[serde(deserialize_with = "lenient")]
+    corridors: Vec<Value>,
+}
+
+/// The currency settings the view needs; values compare exactly as stored.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct PolicyCurrencies {
+    pricing_currency: Value,
+    #[serde(deserialize_with = "lenient")]
+    definitions: Vec<Value>,
+}
+
+/// The fields of one corridor the view sorts, pages and matches by.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct Corridor {
+    product_id: Value,
+    currency: Value,
+}
+
+/// The fields of one currency definition the view keeps.
+#[derive(Deserialize, Default, Serialize)]
+#[serde(default)]
+struct Definition {
+    code: Value,
+    scale: Value,
 }
 
 /// Small native projection for the existing MCP/planner read, preserving exact amounts and pagination.
 fn price_policy_view(snapshot: &Value, after: Option<&str>) -> Value {
     let input: PricePolicyViewInput = view(snapshot);
-    let data = &input.data;
-    let mut rows = data["aiPolicy"]["corridors"]
-        .as_array()
-        .cloned()
-        .unwrap_or_default();
-    rows.sort_by(|a, b| a["productId"].as_str().cmp(&b["productId"].as_str()));
+    let PolicyData {
+        ai_policy,
+        currencies,
+    } = input.data;
+    let mut rows = ai_policy
+        .corridors
+        .into_iter()
+        .map(|row| (view::<Corridor>(&row), row))
+        .collect::<Vec<_>>();
+    rows.sort_by(|a, b| a.0.product_id.as_str().cmp(&b.0.product_id.as_str()));
     let total = rows.len();
     let remaining = rows
         .iter()
-        .filter(|r| {
-            after.is_none_or(|cursor| r["productId"].as_str().is_some_and(|id| id > cursor))
+        .filter(|(r, _)| {
+            after.is_none_or(|cursor| r.product_id.as_str().is_some_and(|id| id > cursor))
         })
         .collect::<Vec<_>>();
     let page = remaining.iter().take(8).copied().collect::<Vec<_>>();
-    let definitions = data["currencies"]["definitions"]
-        .as_array()
-        .into_iter()
-        .flatten()
+    let definitions = currencies
+        .definitions
+        .iter()
+        .map(view::<Definition>)
         .filter(|c| {
-            page.iter().any(|r| r["currency"] == c["code"])
-                || c["code"] == data["currencies"]["pricingCurrency"]
+            page.iter().any(|(r, _)| r.currency == c.code) || c.code == currencies.pricing_currency
         })
-        .map(|c| json!({"code":c["code"],"scale":c["scale"]}))
         .collect::<Vec<_>>();
-    json!({"revision":input.revision,"data":{"aiPolicy":{"autonomy":data["aiPolicy"]["autonomy"],"corridors":page},"currencies":{"pricingCurrency":data["currencies"]["pricingCurrency"],"definitions":definitions}},"totalCorridors":total,"nextAfterProductId":if remaining.len()>8 {page.last().map(|r|r["productId"].clone()).unwrap_or(Value::Null)} else {Value::Null}})
+    let next = if remaining.len() > 8 {
+        page.last()
+            .map(|(r, _)| r.product_id.clone())
+            .unwrap_or(Value::Null)
+    } else {
+        Value::Null
+    };
+    let corridors = page.iter().map(|(_, row)| row).collect::<Vec<_>>();
+    json!({"revision":input.revision,"data":{"aiPolicy":{"autonomy":ai_policy.autonomy,"corridors":corridors},"currencies":{"pricingCurrency":currencies.pricing_currency,"definitions":definitions}},"totalCorridors":total,"nextAfterProductId":next})
 }
 
 #[cfg(test)]

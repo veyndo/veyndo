@@ -6,13 +6,22 @@ use crate::foundation::App;
 use crate::foundation::merchant;
 use crate::localization::language_context;
 use crate::{assets, auth, marketing, staging};
+use serde::Deserialize;
 use serde_json::Value;
 use veyndo_app_platform::ports::{
     ActionFuture, EnvironmentFuture, HostActions, HostCall, HostedFuture, RuleFuture,
 };
 use veyndo_core::Result;
 use veyndo_core::bad;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::request_context::RequestContext;
+/// The id of a newly created preview environment.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct Created {
+    #[serde(deserialize_with = "lenient")]
+    id: Option<String>,
+}
 pub(crate) fn validate_native_input(schema: &Value, v: &Value) -> Result<()> {
     input_schema::validate_native(schema, v)
 }
@@ -85,9 +94,8 @@ impl HostActions for ServerActions {
     ) -> EnvironmentFuture<'a> {
         Box::pin(async move {
             let created = staging::create_preview(&self.0, h, "App Studio", actor).await?;
-            created["id"]
-                .as_str()
-                .map(str::to_owned)
+            view::<Created>(&created)
+                .id
                 .ok_or(bad("Preview environment unavailable"))
         })
     }

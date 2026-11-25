@@ -4,16 +4,33 @@ use crate::foundation::App;
 use crate::foundation::merchant;
 use crate::{commerce, currencies};
 use axum::http::StatusCode;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use serde_json::json;
 use veyndo_core::Error;
 use veyndo_core::Result;
 use veyndo_core::bad;
 use veyndo_core::conflict;
-use veyndo_core::document::{lenient, view};
+use veyndo_core::document::{lenient, merge, view};
 use veyndo_core::request_context::RequestContext;
 /// The record, channel and currency a core exchange names.
+/// The stored channel fields a marketplace exchange checks, compared exactly as stored.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct MarketplaceChannel {
+    kind: Value,
+    active: Value,
+    visibility: Value,
+    product_ids: Value,
+}
+
+/// The product content and price a channel product read adds to the channel document.
+#[derive(Serialize)]
+struct ChannelProduct {
+    product: Value,
+    money: Value,
+}
+
 #[derive(Deserialize, Default)]
 #[serde(default, rename_all = "camelCase")]
 struct ExchangeArgs {
@@ -65,7 +82,8 @@ pub(super) async fn execute(
     let (c, channel_revision) = veyndo_marketing::store::channel_config::stored(a, &t, id)
         .await?
         .ok_or(Error(StatusCode::NOT_FOUND, "Channel unavailable".into()))?;
-    if c["kind"] != "marketplace" || c["active"] != true || c["visibility"] == "private" {
+    let channel: MarketplaceChannel = view(&c);
+    if channel.kind != "marketplace" || channel.active != true || channel.visibility == "private" {
         return Err(conflict("Marketplace channel must be active and public"));
     }
     let (cfg, rev) = commerce::scoped_config(a, &t, id).await?;
@@ -75,7 +93,8 @@ pub(super) async fn execute(
         let (p, visible) = veyndo_catalog::store::products::in_channel(a, &t, pid, id)
             .await?
             .ok_or(Error(StatusCode::NOT_FOUND, "Product unavailable".into()))?;
-        let selected = c["productIds"]
+        let selected = channel
+            .product_ids
             .as_array()
             .ok_or(bad("Invalid channel catalog"))?;
         if !visible
@@ -89,13 +108,34 @@ pub(super) async fn execute(
         let currency = cfg
             .currencies
             .selected(input.currency.as_deref().unwrap_or(""))?;
-        result["product"] =
+        let product =
             crate::operations::invoke(a, h, "merchant.product.content", &json!({"id":pid})).await?;
-        result["money"] = json!(currencies::amount(
+        let money = json!(currencies::amount(
             currencies::product_price(&p, &cfg.currencies, currency)?,
             &currency.code,
             currency.scale
         )?);
+        merge(&mut result, ChannelProduct { product, money })?;
     }
     Ok(result)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::ChannelProduct;
+    use serde_json::json;
+    use veyndo_core::document::merge;
+
+    #[test]
+    fn channel_product_keeps_the_indexed_shape() {
+        let result = json!({"id":"amazon","revision":3,"data":{"kind":"marketplace"},"mainLocale":"de-DE","currencies":{},"settingsRevision":9});
+        let product = json!({"id":"p-1","name":{"de-DE":"Tasse"}});
+        let money = json!({"amount":"12.50","currency":"EUR","minor":1250});
+        let mut old = result.clone();
+        old["product"] = product.clone();
+        old["money"] = money.clone();
+        let mut new = result;
+        merge(&mut new, ChannelProduct { product, money }).unwrap();
+        assert_eq!(new, old);
+    }
 }

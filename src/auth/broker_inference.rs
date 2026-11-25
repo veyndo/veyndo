@@ -12,15 +12,29 @@ use veyndo_core::Result;
 use veyndo_core::bad;
 use veyndo_core::document::{lenient, view};
 
+/// The signed prompt parts of a trusted inference request.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct InferenceClaims {
+    #[serde(deserialize_with = "lenient")]
+    system: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    input: Option<String>,
+    schema: Value,
+}
+
 pub(crate) async fn generate(State(a): State<App>, Json(v): Json<Value>) -> Result<Json<Value>> {
     let c = super::broker::assertion(&a, "/api/identity/inference", &v).await?;
     let email = email(&c)?;
-    let system = c["system"]
-        .as_str()
+    let claims: InferenceClaims = view(&c);
+    let system = claims
+        .system
+        .as_deref()
         .filter(|s| s.len() <= 24000)
         .ok_or(bad("Invalid system prompt"))?;
-    let user = c["input"]
-        .as_str()
+    let user = claims
+        .input
+        .as_deref()
         .filter(|s| s.len() <= 24000)
         .ok_or(bad("Invalid model input"))?;
     let images: Vec<String> = serde_json::from_value(c.get("images").cloned().unwrap_or(json!([])))
@@ -39,7 +53,7 @@ pub(crate) async fn generate(State(a): State<App>, Json(v): Json<Value>) -> Resu
     {
         return Err(bad("At most four bounded PNG/JPEG/WebP images"));
     }
-    if !schema_valid(&c["schema"], 0) {
+    if !schema_valid(&claims.schema, 0) {
         return Err(bad("Invalid bounded JSON schema"));
     }
     let _permit = a
@@ -60,7 +74,7 @@ pub(crate) async fn generate(State(a): State<App>, Json(v): Json<Value>) -> Resu
     let output = a
         .models
         .inference
-        .structured_with_images(None, system, user, &c["schema"], &images)
+        .structured_with_images(None, system, user, &claims.schema, &images)
         .await
         .map_err(|_| {
             Error(

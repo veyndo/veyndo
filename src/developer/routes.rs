@@ -8,15 +8,22 @@ use axum::Router;
 use axum::extract::State;
 use axum::routing::get;
 use axum::routing::post;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use serde_json::json;
 use veyndo_app_platform::http::app_studio;
 use veyndo_app_platform::service::app_builds;
 use veyndo_core::Result;
 use veyndo_core::bad;
-use veyndo_core::document::{lenient, view};
+use veyndo_core::document::{lenient, merge, view};
 use veyndo_core::request_context::RequestContext;
+/// The app definition of an imported build, completed with default actions before it is saved.
+#[derive(Deserialize, Default, Serialize)]
+#[serde(default)]
+struct Imported {
+    manifest: Value,
+}
+
 pub(crate) fn router() -> Router<App> {
     Router::new()
         .secure_route(
@@ -114,7 +121,9 @@ pub(crate) async fn import(
 ) -> Result<Json<Value>> {
     auth::permit(&h, "developer.manage")?;
     let t = staging::live(&a, &h).await?;
-    actions(&mut v["manifest"])?;
+    let mut manifest = view::<Imported>(&v).manifest;
+    actions(&mut manifest)?;
+    merge(&mut v, Imported { manifest })?;
     Ok(Json(
         builds::save(&a, &t, &v, "external-agent", None, None).await?,
     ))

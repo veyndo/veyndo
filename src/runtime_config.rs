@@ -1,7 +1,19 @@
 //! Immutable process configuration, validated once at startup. Mutable shop/provider settings remain in PostgreSQL.
+use serde::Deserialize;
 use serde_json::Value;
 use std::env;
+use veyndo_core::document::{lenient, view};
 pub(crate) use veyndo_core::process_config::Config;
+
+/// The addresses of one configured app service.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ServiceAddress {
+    #[serde(deserialize_with = "lenient")]
+    url: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    ui_url: Option<String>,
+}
 pub(crate) fn get() -> &'static Config {
     veyndo_core::process_config::init(|| {
         let strict = flag("DB_RLS_REQUIRED", false);
@@ -29,14 +41,15 @@ pub(crate) fn get() -> &'static Config {
         assert!(services.is_object(), "APP_SERVICES must be an object");
         let private_service_origins = env::var("APP_SERVICE_PRIVATE_ORIGINS").unwrap_or_default();
         for (_, service) in services.as_object().unwrap() {
+            let service: ServiceAddress = view(service);
             let parsed =
-                reqwest::Url::parse(service["url"].as_str().expect("App service URL required"))
+                reqwest::Url::parse(service.url.as_deref().expect("App service URL required"))
                     .expect("Invalid app service URL");
             assert!(
                 crate::apps::service_origin_allowed(&parsed, &private_service_origins),
                 "App service origin not approved"
             );
-            if let Some(ui) = service["uiUrl"].as_str() {
+            if let Some(ui) = service.ui_url.as_deref() {
                 let ui = reqwest::Url::parse(ui).expect("Invalid app UI URL");
                 assert!(
                     ui.username().is_empty()

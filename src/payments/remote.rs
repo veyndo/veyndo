@@ -2,11 +2,22 @@
 use super::Attempt;
 use crate::foundation::App;
 use axum::http::StatusCode;
+use serde::Deserialize;
 use serde_json::Value;
 use veyndo_core::Error;
 use veyndo_core::Result;
 use veyndo_core::bad;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::http_limits;
+/// The configured payment service address and its bearer credential.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct Endpoint {
+    #[serde(deserialize_with = "lenient")]
+    url: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    token: Option<String>,
+}
 
 pub(crate) use veyndo_payments::store::provider_registry::config;
 pub(crate) async fn call(
@@ -24,7 +35,7 @@ pub(crate) async fn call(
     {
         return Err(bad("External payments are disabled in private sandboxes"));
     }
-    let c = config(provider, version, environment)?;
+    let c: Endpoint = view(&config(provider, version, environment)?);
     let _cluster =
         crate::performance::cluster_lease::Lease::acquire(a, t, "payment-provider", 8).await?;
     let _admission = crate::apps::service_limits::admit(a, t, provider).await?;
@@ -36,10 +47,10 @@ pub(crate) async fn call(
         .http
         .post(format!(
             "{}/v1/{path}",
-            c["url"].as_str().unwrap().trim_end_matches('/')
+            c.url.as_deref().unwrap().trim_end_matches('/')
         ))
         .timeout(std::time::Duration::from_secs(15))
-        .bearer_auth(c["token"].as_str().unwrap())
+        .bearer_auth(c.token.as_deref().unwrap())
         .header("x-tenant", t)
         .json(body)
         .send()

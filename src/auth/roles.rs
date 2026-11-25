@@ -7,11 +7,19 @@ use axum::Router;
 use axum::extract::Path;
 use axum::extract::State;
 use axum::routing::get;
+use serde::Serialize;
 use serde_json::Value;
 use serde_json::json;
 use veyndo_core::Result;
+use veyndo_core::document::merge;
 use veyndo_core::request_context::RequestContext;
 pub(crate) use veyndo_identity::service::roles::schema;
+/// The role named by the route, written over any id in the request body.
+#[derive(Serialize)]
+struct RoleId {
+    id: String,
+}
+
 pub(crate) fn router() -> Router<App> {
     Router::new()
         .secure_route("/api/workspace/roles", &[("GET", "team.manage")], get(list))
@@ -35,7 +43,7 @@ async fn save(
     Path(id): Path<String>,
     Json(mut v): Json<Value>,
 ) -> Result<Json<Value>> {
-    v["id"] = json!(id);
+    merge(&mut v, RoleId { id })?;
     Ok(Json(invoke(&a, &h, "team.role.save", &v).await?))
 }
 async fn remove(
@@ -44,7 +52,7 @@ async fn remove(
     Path(id): Path<String>,
     Json(mut v): Json<Value>,
 ) -> Result<Json<Value>> {
-    v["id"] = json!(id);
+    merge(&mut v, RoleId { id })?;
     Ok(Json(invoke(&a, &h, "team.role.delete", &v).await?))
 }
 async fn dependencies(
@@ -82,5 +90,32 @@ impl veyndo_identity::ports::RoleLanguages for Languages<'_> {
             let (settings, _) = commerce::scoped_locked(tx, tenant, "default").await?;
             commerce::validate_names(names, &settings, 100)
         })
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::RoleId;
+    use serde_json::json;
+    use veyndo_core::document::merge;
+
+    #[test]
+    fn route_id_keeps_the_indexed_body_shape() {
+        for body in [
+            json!({"id":"other","name":"Support","permissions":["orders.read"]}),
+            json!(null),
+        ] {
+            let mut old = body.clone();
+            old["id"] = json!("role-1");
+            let mut new = body;
+            merge(
+                &mut new,
+                RoleId {
+                    id: "role-1".into(),
+                },
+            )
+            .unwrap();
+            assert_eq!(new, old);
+        }
     }
 }
