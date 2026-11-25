@@ -1,4 +1,5 @@
 /** Shop-today presentation is saved in the existing actor-private revisioned workspace, never in shop configuration. */
+import { useRead, useSetRead } from "../shell/useRead";
 import { Button } from "../../kit/ui";
 import { useEffect, useRef, useState } from "react";
 import { useStudio } from "../shell/StudioContext";
@@ -9,38 +10,36 @@ import ReportBoard from "./ReportBoard";
 export default function TodayReports() {
   const { request, liveRequest, workspace, access } = useStudio(),
     t = useReportText();
-  const [record, setRecord] = useState<{
-      request: typeof liveRequest;
-      record: WorkspaceRecord;
-    }>(),
-    [layout, setLayout] = useState<ReportLayout>(defaultReports),
-    [error, setError] = useState(false),
+  const [layout, setLayout] = useState<ReportLayout>(defaultReports),
+    [saveError, setError] = useState(false),
     [busy, setBusy] = useState(false),
     [saved, setSaved] = useState(false),
     [attempt, setAttempt] = useState(0);
   const scope = useRef(0);
+  const recordRead = useRead<WorkspaceRecord>(
+    liveRequest,
+    "/api/studio/workspace",
+    {
+      version: attempt,
+    },
+  );
+  const setRead = useSetRead(liveRequest);
+  const current = recordRead.data;
+  const error = saveError || recordRead.status === "error";
   useEffect(() => {
     const generation = ++scope.current;
-    let active = true;
     setError(false);
     setBusy(false);
     setSaved(false);
-    void liveRequest("/api/studio/workspace")
-      .then((record: WorkspaceRecord) => {
-        if (active) {
-          setRecord({ request: liveRequest, record });
-          setLayout(record.data.todayReports ?? defaultReports());
-        }
-      })
-      .catch(() => {
-        if (active) setError(true);
-      });
     return () => {
-      active = false;
       if (scope.current === generation) scope.current++;
     };
   }, [workspace, liveRequest, attempt]);
-  const current = record?.request === liveRequest ? record.record : undefined;
+  // The stored layout replaces the board whenever the record is (re)loaded.
+  const loadedLayout = recordRead.data?.data.todayReports;
+  useEffect(() => {
+    if (recordRead.data) setLayout(loadedLayout ?? defaultReports());
+  }, [recordRead.data]);
   const save = async () => {
     if (!current || busy) return;
     const generation = scope.current;
@@ -57,7 +56,7 @@ export default function TodayReports() {
         "PUT",
       );
       if (generation === scope.current) {
-        setRecord({ request: liveRequest, record: next });
+        setRead("/api/studio/workspace", next, undefined);
         setSaved(true);
       }
     } catch {

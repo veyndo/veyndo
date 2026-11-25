@@ -1,4 +1,6 @@
 /** Shared configurable reporting canvas; late data is fenced by request identity, filters and current rights. */
+import { useDebouncedValue } from "../../kit/query";
+import { useRead } from "../shell/useRead";
 import { Button, Field, Select } from "../../kit/ui";
 import { useEffect, useRef, useState } from "react";
 import type { RequestFn } from "../../shared/api/types";
@@ -36,43 +38,34 @@ export default function ReportBoard({
     [editing, setEditing] = useState(false),
     [adding, setAdding] = useState(false),
     [attempt, setAttempt] = useState(0),
-    [error, setError] = useState(false),
     [drop, setDrop] = useState<string | null>(null);
-  const [result, setResult] = useState<{
-    key: string;
-    authority: string;
-    request: RequestFn;
-    data: ReportData;
-  }>();
   const drag = useRef<string | null>(null);
   const authority = JSON.stringify([...rights].sort());
-  const key = JSON.stringify([layout.query, authority]),
-    allowed =
-      rights.includes("overview.read") || rights.includes("orders.read");
-  useEffect(() => {
-    let active = true;
-    setError(false);
-    if (!allowed) return;
-    const timer = setTimeout(() => {
-      void request("/api/merchant/reports", layout.query)
-        .then((data: ReportData) => {
-          if (active) setResult({ key, authority, request, data });
-        })
-        .catch(() => {
-          if (active) setError(true);
-        });
-    }, 200);
-    return () => {
-      active = false;
-      clearTimeout(timer);
-    };
-  }, [request, key, allowed, attempt, rights.join(",")]);
-  const metadata =
-    result?.request === request && result.authority === authority
-      ? result.data
+  const allowed =
+    rights.includes("overview.read") || rights.includes("orders.read");
+  // Reads wait until the filters stop changing; the last answer for the same
+  // rights stays as metadata while the next one loads.
+  const query = useDebouncedValue(layout.query, 200);
+  const report = useRead<ReportData>(request, "/api/merchant/reports", {
+    body: query,
+    version: [authority, attempt],
+    enabled: allowed,
+  });
+  // Only an answer shaped like a report is shown.
+  const answer =
+    report.data?.filters && Array.isArray(report.data.totals)
+      ? report.data
       : undefined;
+  const error = report.status === "error";
+  const [last, setLast] = useState<{ authority: string; data: ReportData }>();
+  useEffect(() => {
+    if (answer) setLast({ authority, data: answer });
+  }, [answer]);
+  const metadata = last?.authority === authority ? last.data : undefined;
   const data =
-    result?.request === request && result.key === key ? result.data : undefined;
+    report.fetching || JSON.stringify(query) !== JSON.stringify(layout.query)
+      ? undefined
+      : answer;
   if (!allowed) return null;
   const widgets = layout.widgets.filter(
     (w) =>

@@ -1,4 +1,5 @@
 /** Native Studio register; all reads and writes use authenticated, tenant-scoped shared commerce operations. */
+import { useRead } from "../shell/useRead";
 import { Button, Field, Select } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import type { RequestFn } from "../../shared/api/types";
@@ -24,49 +25,33 @@ export default function POSWorkspace(props: POSProps) {
   const t = usePosText();
   const { locale } = useLocale();
   const focus = useCashierFocus();
-  const [rights, setRights] = useState<string[]>([]);
-  const [channels, setChannels] = useState<Channel[]>([]);
-  const [main, setMain] = useState("");
   const [selected, setSelected] = useState(
     new URLSearchParams(location.search).get("posChannel") ?? "",
   );
-  const [error, setError] = useState("");
-  const [ready, setReady] = useState(false);
+  const posChannels = useRead(props.request, "/api/pos/channels");
+  const access = useRead(props.request, "/api/auth/access");
+  const permitted =
+    !!access.data?.permissions?.includes("pos.use") &&
+    !!access.data?.permissions?.includes("orders.write");
+  const ready = !!posChannels.data && permitted;
+  const rights: string[] = ready ? access.data.permissions : [];
+  const channels: Channel[] = ready
+    ? posChannels.data.channels.filter((v: Channel) => v.data.kind === "pos")
+    : [];
+  const main: string = ready ? posChannels.data.mainLocale : "";
+  const error =
+    (posChannels.error as Error | undefined)?.message ||
+    (access.error as Error | undefined)?.message ||
+    (access.data && !permitted ? t("permission") : "");
+  // A listed channel stays selected; otherwise the first active one is chosen.
   useEffect(() => {
-    let active = true;
-    void Promise.all([
-      props.request("/api/pos/channels"),
-      props.request("/api/auth/access"),
-    ])
-      .then(([v, p]) => {
-        if (!active) return;
-        if (
-          !p.permissions.includes("pos.use") ||
-          !p.permissions.includes("orders.write")
-        ) {
-          setError(t("permission"));
-          return;
-        }
-        const channels = v.channels.filter(
-          (v: Channel) => v.data.kind === "pos",
-        );
-        setRights(p.permissions);
-        setChannels(channels);
-        setMain(v.mainLocale);
-        setSelected((old) =>
-          channels.some((c: Channel) => c.id === old)
-            ? old
-            : (channels.find((c: Channel) => c.data.active)?.id ?? ""),
-        );
-        setReady(true);
-      })
-      .catch((e) => {
-        if (active) setError(e.message);
-      });
-    return () => {
-      active = false;
-    };
-  }, [props.request]);
+    if (!ready) return;
+    setSelected((old) =>
+      channels.some((c) => c.id === old)
+        ? old
+        : (channels.find((c) => c.data.active)?.id ?? ""),
+    );
+  }, [ready, posChannels.data]);
   const channel = channels.find((c) => c.id === selected && c.data.active);
   return (
     <div className="studio-page pos-workspace" data-focus={focus.active}>

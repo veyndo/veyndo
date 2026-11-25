@@ -1,4 +1,5 @@
 /** PreviewPanel renders verified shop state and typed user actions. */
+import { useRead } from "../shell/useRead";
 import { Button, Field, Notice, Select } from "../../kit/ui";
 import { mediaImage } from "../../shared/media/product-media";
 import { useEffect, useRef, useState } from "react";
@@ -23,27 +24,15 @@ export function PreviewPanel({
   const { t, money, locale } = useLocale();
   const [quantity, setQuantity] = useState(1);
   const [group, setGroup] = useState("consumer");
-  const [groups, setGroups] = useState<CustomerGroup[]>([]);
-  const [mainLocale, setMainLocale] = useState("en-GB");
+  const groupRead = useRead(
+    request,
+    connected ? "/api/merchant/customer-groups" : null,
+  );
+  const groups: CustomerGroup[] = groupRead.data?.elements ?? [];
+  const mainLocale: string = groupRead.data?.mainLocale ?? "en-GB";
   useEffect(() => {
-    let active = true;
-    setGroups([]);
-    if (connected)
-      request("/api/merchant/customer-groups")
-        .then((v) => {
-          if (active) {
-            setGroups(v.elements);
-            setMainLocale(v.mainLocale);
-            setGroup("consumer");
-          }
-        })
-        .catch(() => {
-          if (active) setError(true);
-        });
-    return () => {
-      active = false;
-    };
-  }, [request, connected]);
+    if (groupRead.data) setGroup("consumer");
+  }, [groupRead.data]);
   const [quote, setQuote] = useState<any>();
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false);
