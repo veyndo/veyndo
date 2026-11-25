@@ -56,6 +56,16 @@ const words = {
     "Pas encore de commande.",
     "Aún no hay pedidos.",
   ],
+  summary: ["Your order", "Deine Bestellung", "Votre commande", "Tu pedido"],
+  remove: ["Remove", "Entfernen", "Retirer", "Eliminar"],
+  tax: ["VAT", "Mehrwertsteuer", "TVA", "IVA"],
+  discount: ["Discount", "Rabatt", "Remise", "Descuento"],
+  deliveryWindow: [
+    "Delivery: {from} — {to}",
+    "Lieferung: {from} — {to}",
+    "Livraison : {from} — {to}",
+    "Entrega: {from} — {to}",
+  ],
   delivery: [
     "Delivery in {days} days",
     "Lieferung in {days} Tagen",

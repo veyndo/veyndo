@@ -1,10 +1,12 @@
-/** Sticky order review presents authoritative totals and discounts beside the purchase action. */
+/** Sticky order review (kit cart-summary part) presents authoritative totals and discounts beside the purchase action. */
 import { mediaImage } from "../../shared/media/product-media";
 import type { Cart } from "../../shared/api/shop-api";
 import { useShopText } from "../../shared/i18n/shop-i18n";
 import { useWorkbenchText } from "../../shared/i18n/workbench-i18n";
 import { useCheckoutText } from "../../shared/i18n/checkout-i18n";
 import { useState } from "react";
+import { cartSummary } from "../../kit/storefront";
+const Summary = cartSummary.Component;
 import ConfigurationSummary from "../../shared/apps/ConfigurationSummary";
 import { configurationSnapshots } from "../../shared/api/configuration-types";
 export default function CheckoutSummary({
@@ -22,82 +24,14 @@ export default function CheckoutSummary({
   onQuantity: (id: string, q: number) => void;
   onClose: () => void;
 }) {
-  const { s, money, locale } = useShopText();
+  const { locale, currency } = useShopText();
   const { w } = useWorkbenchText();
   const { x } = useCheckoutText();
   const [coupon, setCoupon] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
-  return (
-    <aside className="checkout-summary">
-      <h3>
-        {x("summary")}{" "}
-        <span>{cart.lineItems.reduce((n, i) => n + i.quantity, 0)}</span>
-      </h3>
-      <div className="checkout-items">
-        {cart.lineItems.map((item) => (
-          <article className="checkout-item" key={item.id}>
-            <a
-              href={`#product/${encodeURIComponent(item.id)}`}
-              onClick={onClose}
-            >
-              {mediaImage(item.media) && (
-                <img
-                  src={mediaImage(item.media)}
-                  alt=""
-                  width="48"
-                  height="48"
-                  loading="lazy"
-                />
-              )}
-              <strong>{item.label}</strong>
-              <small>
-                {money(item.price.unitPrice)} ·{" "}
-                {s(cart.price.taxStatus === "net" ? "net" : "gross")}
-              </small>
-              <ConfigurationSummary
-                configurations={configurationSnapshots(item)}
-              />
-            </a>
-            <strong>{money(item.price.totalPrice)}</strong>
-            <div className="shop-stepper">
-              <button
-                type="button"
-                disabled={busy || item.quantity <= item.minPurchase}
-                aria-label={`${s("quantity")} − ${item.label}`}
-                onClick={() =>
-                  onQuantity(item.id, item.quantity - item.purchaseSteps)
-                }
-              >
-                −
-              </button>
-              <span>{item.quantity}</span>
-              <button
-                type="button"
-                disabled={
-                  busy ||
-                  (item.maxPurchase != null &&
-                    item.quantity + item.purchaseSteps > item.maxPurchase)
-                }
-                aria-label={`${s("quantity")} + ${item.label}`}
-                onClick={() =>
-                  onQuantity(item.id, item.quantity + item.purchaseSteps)
-                }
-              >
-                +
-              </button>
-            </div>
-            <button
-              type="button"
-              className="shop-text-button"
-              disabled={busy}
-              onClick={() => onQuantity(item.id, 0)}
-            >
-              {s("remove")}
-            </button>
-          </article>
-        ))}
-      </div>
+  const coupons = (
+    <>
       <details className="checkout-coupon">
         <summary>{w("coupon")}</summary>
         <form
@@ -137,36 +71,49 @@ export default function CheckoutSummary({
             : w("couponNotApplicable")}
         </small>
       ) : null}
-      <dl className="bag-totals">
-        <div>
-          <dt>{s("subtotal")}</dt>
-          <dd>{money(cart.price.positionPrice)}</dd>
-        </div>
-        {cart.discounts?.map((d) => (
-          <div key={d.id}>
-            <dt>{d.name[locale.slice(0, 2)] ?? d.id}</dt>
-            <dd>−{money(d.amount)}</dd>
-          </div>
-        ))}
-        <div>
-          <dt>{s("shipping")}</dt>
-          <dd>{money(cart.shippingCosts.totalPrice)}</dd>
-        </div>
-        <div>
-          <dt>{s("tax")}</dt>
-          <dd>{money(cart.price.tax)}</dd>
-        </div>
-        <div className="grand-total">
-          <dt>{s("total")}</dt>
-          <dd>{money(cart.price.totalPrice)}</dd>
-        </div>
-      </dl>
-      {cart.deliveries[0] && (
-        <p className="delivery-estimate">
-          {s("delivery")}: {cart.deliveries[0].deliveryDate.earliest} —{" "}
-          {cart.deliveries[0].deliveryDate.latest}
-        </p>
-      )}
+    </>
+  );
+  return (
+    <aside className="checkout-summary">
+      <Summary
+        locale={locale}
+        currency={currency}
+        priceKind={cart.price.taxStatus === "net" ? "net" : "gross"}
+        busy={busy}
+        lines={cart.lineItems.map((item) => ({
+          id: item.id,
+          label: item.label,
+          quantity: item.quantity,
+          unitPrice: item.price.unitPrice,
+          total: item.price.totalPrice,
+          url: `#product/${encodeURIComponent(item.id)}`,
+          image: mediaImage(item.media) || undefined,
+          minPurchase: item.minPurchase,
+          purchaseSteps: item.purchaseSteps,
+          maxPurchase: item.maxPurchase ?? undefined,
+        }))}
+        subtotal={cart.price.positionPrice}
+        discounts={(cart.discounts ?? []).map((d) => ({
+          id: d.id,
+          label: d.name[locale.slice(0, 2)] ?? d.id,
+          amount: d.amount,
+        }))}
+        shipping={cart.shippingCosts.totalPrice}
+        tax={cart.price.tax}
+        total={cart.price.totalPrice}
+        delivery={cart.deliveries[0]?.deliveryDate}
+        onQuantity={({ lineId, quantity }) => onQuantity(lineId, quantity)}
+        onOpen={onClose}
+        renderLineDetail={(id) => {
+          const item = cart.lineItems.find((line) => line.id === id);
+          return item ? (
+            <ConfigurationSummary
+              configurations={configurationSnapshots(item)}
+            />
+          ) : null;
+        }}
+        slot={(name) => (name === "beforeTotals" ? coupons : null)}
+      />
       <p className="checkout-note" role="status">
         {x(reviewed ? "reviewed" : "quoteHint")}
       </p>

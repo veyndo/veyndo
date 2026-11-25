@@ -169,53 +169,7 @@
   min-width: 0;
   border-left: 1px solid var(--line);
 }
-.checkout-summary h3 {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin: 0 0 22px;
-  font-size: 18px;
-}
-.checkout-summary h3 span {
-  border-radius: 20px;
-  padding: 4px 10px;
-  background: #e7edf7;
-  font-size: 12px;
-}
-.checkout-items {
-  display: grid;
-  gap: 16px;
-}
-.checkout-item {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 12px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid #e0e6ef;
-}
-.checkout-item a {
-  overflow-wrap: anywhere;
-  display: grid;
-  gap: 6px;
-  text-decoration: none;
-  color: inherit;
-}
-.checkout-item a:hover strong {
-  color: var(--blue);
-}
-.checkout-item small {
-  color: var(--muted);
-  font-size: 12px;
-}
-.checkout-item .shop-stepper {
-  width: fit-content;
-  border-radius: 9px;
-  background: #fff;
-}
-.checkout-item .shop-stepper button {
-  min-height: 44px;
-  min-width: 44px;
-}
+
 .checkout-coupon {
   margin: 20px 0;
   font-size: 14px;
@@ -234,18 +188,7 @@
   display: grid;
   gap: 8px;
 }
-.checkout-summary .bag-totals {
-  margin-top: 24px;
-}
-.checkout-summary .bag-totals div {
-  padding: 8px 0;
-}
-.checkout-summary .grand-total {
-  padding-top: 18px;
-  margin-top: 8px;
-  border-top: 1px solid var(--line);
-  font-size: 21px;
-}
+
 .checkout-summary .checkout-purchase {
   width: 100%;
   min-height: 54px;
@@ -329,15 +272,7 @@
   font-size: 13px;
   border-radius: 10px;
 }
-.checkout-item img {
-  grid-row: 1 / 3;
-  border-radius: 10px;
-  object-fit: cover;
-}
-.checkout-item a:has(img) {
-  grid-template-columns: 48px 1fr;
-  column-gap: 10px;
-}
+
 .veyndo-checkout .checkout-details form > label:not(.customer-checkbox) {
   display: grid;
   gap: 8px;
@@ -360,4 +295,32 @@
 }
 .veyndo-checkout .checkout-b2b button {
   margin: 0.5rem 0.5rem 0.5rem 0;
+}
+/* The storefront theme on the kit cart summary (kit/storefront) in checkout and order completion. */
+.checkout-summary .vy-sf-cart,
+.completion-card .vy-sf-cart {
+  display: block;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+}
+.checkout-summary .vy-sf-cart-title,
+.completion-card .vy-sf-cart-title {
+  margin: 0 0 22px;
+  font-size: 18px;
+}
+.checkout-summary .vy-sf-cart-line a:hover strong {
+  color: var(--blue);
+}
+.checkout-summary .vy-sf-totals,
+.completion-card .vy-sf-totals {
+  margin-top: 24px;
+}
+.checkout-summary .vy-sf-totals .vy-sf-total {
+  font-size: 21px;
+}
+.checkout-summary .vy-sf-text-button {
+  justify-self: end;
+  font-size: 11px;
 }

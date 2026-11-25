@@ -69,27 +69,7 @@
 .completion-card h2:not(:first-child) {
   margin-top: 28px;
 }
-.completion-item {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 16px 0;
-  border-bottom: 1px solid var(--line);
-  font-size: 14px;
-}
-.completion-item img {
-  object-fit: cover;
-  border-radius: 12px;
-  background: var(--shop-surface);
-}
-.completion-item > div {
-  display: grid;
-  gap: 8px;
-  flex: 1;
-}
-.completion-item small {
-  color: var(--muted);
-}
+
 .completion-back {
   display: flex;
   margin: 28px auto 0;

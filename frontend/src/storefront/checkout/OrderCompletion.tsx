@@ -13,6 +13,8 @@ import CheckoutProgress from "./CheckoutProgress";
 import OrderConfetti from "./OrderConfetti";
 import ConfigurationSummary from "../../shared/apps/ConfigurationSummary";
 import { configurationSnapshots } from "../../shared/api/configuration-types";
+import { cartSummary } from "../../kit/storefront";
+const Summary = cartSummary.Component;
 export default function OrderCompletion({
   order,
   onBack,
@@ -25,11 +27,6 @@ export default function OrderCompletion({
     { c } = useCustomerText();
   const heading = useRef<HTMLHeadingElement>(null);
   const snapshot = order.cart;
-  const money = (n: number) =>
-    new Intl.NumberFormat(locale, {
-      style: "currency",
-      currency: snapshot.price.currency ?? "EUR",
-    }).format(n);
   useEffect(() => {
     notifyCheckout(order);
     heading.current?.focus();
@@ -55,49 +52,43 @@ export default function OrderCompletion({
       </div>
       <div className="order-completion-grid">
         <section className="completion-card">
-          <h2>{x("summary")}</h2>
-          {snapshot.lineItems.map((item) => (
-            <article className="completion-item" key={item.id}>
-              {mediaImage(item.media) && (
-                <img
-                  src={mediaImage(item.media)}
-                  width={64}
-                  height={80}
-                  alt=""
-                />
-              )}
-              <div>
-                <strong>{item.label}</strong>
-                <small>
-                  {s("quantity")}: {item.quantity}
-                </small>
+          <Summary
+            locale={locale}
+            currency={snapshot.price.currency ?? "EUR"}
+            priceKind={snapshot.price.taxStatus === "net" ? "net" : "gross"}
+            busy={false}
+            lines={snapshot.lineItems.map((item) => ({
+              id: item.id,
+              label: item.label,
+              quantity: item.quantity,
+              total: item.price.totalPrice,
+              image: mediaImage(item.media) || undefined,
+              minPurchase: 1,
+              purchaseSteps: 1,
+            }))}
+            discounts={
+              snapshot.discountTotal
+                ? [
+                    {
+                      id: "discount",
+                      label: "",
+                      amount: snapshot.discountTotal,
+                    },
+                  ]
+                : []
+            }
+            shipping={snapshot.shippingCosts.totalPrice}
+            tax={snapshot.price.tax}
+            total={snapshot.price.totalPrice}
+            renderLineDetail={(id) => {
+              const item = snapshot.lineItems.find((line) => line.id === id);
+              return item ? (
                 <ConfigurationSummary
                   configurations={configurationSnapshots(item)}
                 />
-              </div>
-              <strong>{money(item.price.totalPrice)}</strong>
-            </article>
-          ))}
-          <dl className="bag-totals">
-            <div>
-              <dt>{s("shipping")}</dt>
-              <dd>{money(snapshot.shippingCosts.totalPrice)}</dd>
-            </div>
-            <div>
-              <dt>{s("tax")}</dt>
-              <dd>{money(snapshot.price.tax)}</dd>
-            </div>
-            {!!snapshot.discountTotal && (
-              <div>
-                <dt>{s("discount")}</dt>
-                <dd>−{money(snapshot.discountTotal)}</dd>
-              </div>
-            )}
-            <div className="grand-total">
-              <dt>{s("total")}</dt>
-              <dd>{money(snapshot.price.totalPrice)}</dd>
-            </div>
-          </dl>
+              ) : null;
+            }}
+          />
         </section>
         <section className="completion-card">
           <h2>{c("shippingAddress")}</h2>

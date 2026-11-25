@@ -1832,7 +1832,7 @@ This lists every checked-in source module in these roots, including files with n
 | [frontend/src/kit/query/hooks.tsx](../frontend/src/kit/query/hooks.tsx) | React bindings of the query cache: a provider per scope, useQuery for reads and useMutation for writes that invalidate. |
 | [frontend/src/kit/query/index.ts](../frontend/src/kit/query/index.ts) | Public interface of kit/query: the scoped in-memory query cache and its React hooks. |
 | [frontend/src/kit/storefront/AccountOverview.tsx](../frontend/src/kit/storefront/AccountOverview.tsx) | Account overview part: the signed-in buyer's name and recent orders, linking to their details. |
-| [frontend/src/kit/storefront/CartSummary.tsx](../frontend/src/kit/storefront/CartSummary.tsx) | Cart summary part: lines, subtotal, shipping and total from the server's priced cart. |
+| [frontend/src/kit/storefront/CartSummary.tsx](../frontend/src/kit/storefront/CartSummary.tsx) | Cart summary part: priced lines with quantity controls, discounts, taxes and totals from the server cart. |
 | [frontend/src/kit/storefront/CheckoutSteps.tsx](../frontend/src/kit/storefront/CheckoutSteps.tsx) | Checkout steps part: where the buyer is; it never implies that a payment is confirmed. |
 | [frontend/src/kit/storefront/PartForm.tsx](../frontend/src/kit/storefront/PartForm.tsx) | Builder form of a part's configuration, generated from its JSON Schema; hosts supply labels and special pickers. |
 | [frontend/src/kit/storefront/ProductCard.tsx](../frontend/src/kit/storefront/ProductCard.tsx) | Product card part: image, name, price with tax note and stock, linking to the product page. |
@@ -2130,7 +2130,7 @@ This lists every checked-in source module in these roots, including files with n
 | [frontend/src/storefront/checkout/CheckoutPanel.tsx](../frontend/src/storefront/checkout/CheckoutPanel.tsx) | One-page checkout: server-reviewed selection, explicit purchase and durable provider handoff. |
 | [frontend/src/storefront/checkout/CheckoutProgress.tsx](../frontend/src/storefront/checkout/CheckoutProgress.tsx) | Readable checkout progress (kit checkout-steps part) reflects reviewed server state; it never implies payment confirmation. |
 | [frontend/src/storefront/checkout/CheckoutPurchase.tsx](../frontend/src/storefront/checkout/CheckoutPurchase.tsx) | Shared explicit purchase button: mobile dock and desktop review use the same form and server-review state. |
-| [frontend/src/storefront/checkout/CheckoutSummary.tsx](../frontend/src/storefront/checkout/CheckoutSummary.tsx) | Sticky order review presents authoritative totals and discounts beside the purchase action. |
+| [frontend/src/storefront/checkout/CheckoutSummary.tsx](../frontend/src/storefront/checkout/CheckoutSummary.tsx) | Sticky order review (kit cart-summary part) presents authoritative totals and discounts beside the purchase action. |
 | [frontend/src/storefront/checkout/EmbeddedPayment.tsx](../frontend/src/storefront/checkout/EmbeddedPayment.tsx) | A scoped provider frame receives a short-lived token; messages only trigger server reconciliation. |
 | [frontend/src/storefront/checkout/OrderCompletion.tsx](../frontend/src/storefront/checkout/OrderCompletion.tsx) | Dedicated completion page renders the accepted order snapshot and honest provider state, with no ID-only reads. |
 | [frontend/src/storefront/checkout/OrderConfetti.tsx](../frontend/src/storefront/checkout/OrderConfetti.tsx) | Finite CSS celebration after an accepted order; no timers, libraries or motion for reduced-motion users. |
@@ -2193,7 +2193,7 @@ This lists every checked-in source module in these roots, including files with n
 | [frontend/src/storefront/styles/shop/01--root.css](../frontend/src/storefront/styles/shop/01--root.css) | shop: -root styles. Source order is preserved by the entry stylesheet. |
 | [frontend/src/storefront/styles/shop/02-shop-product-image.css](../frontend/src/storefront/styles/shop/02-shop-product-image.css) | shop: storefront theme of the kit product card image. Source order is preserved by the entry stylesheet. |
 | [frontend/src/storefront/styles/shop/03-availability-span.css](../frontend/src/storefront/styles/shop/03-availability-span.css) | shop: availability-span styles. Source order is preserved by the entry stylesheet. |
-| [frontend/src/storefront/styles/shop/04-shop-stepper.css](../frontend/src/storefront/styles/shop/04-shop-stepper.css) | shop: shop-stepper styles. Source order is preserved by the entry stylesheet. |
+| [frontend/src/storefront/styles/shop/04-shop-stepper.css](../frontend/src/storefront/styles/shop/04-shop-stepper.css) | shop: text buttons, checkout selection and disclosures. Source order is preserved by the entry stylesheet. |
 | [frontend/src/storefront/styles/shop/05-shop-grid-comparison.css](../frontend/src/storefront/styles/shop/05-shop-grid-comparison.css) | shop: shop-grid-comparison styles. Source order is preserved by the entry stylesheet. |
 | [frontend/src/storefront/styles/shop.css](../frontend/src/storefront/styles/shop.css) | Ordered shop stylesheet entry; domain rules live in the adjacent folder. |
 | [frontend/src/storefront/styles/storefront-polish.css](../frontend/src/storefront/styles/storefront-polish.css) | Warm editorial surfaces and responsive navigation, catalogue and product pages. |

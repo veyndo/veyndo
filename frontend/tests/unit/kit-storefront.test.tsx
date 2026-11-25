@@ -122,24 +122,76 @@ describe("part components", () => {
 
   it("summarizes a cart and offers checkout only with a handler", () => {
     const P = cartSummary.Component;
-    const cart = {
+    const parsed = cartSummary.parse({
       locale: "es-ES",
       currency: "EUR",
       lines: [{ id: "l1", label: "Linen shirt", quantity: 2, total: 99.8 }],
       subtotal: 99.8,
       shipping: 4.9,
       total: 104.7,
-      priceKind: "gross" as const,
-    };
+    });
+    if (!parsed.ok) throw Error(parsed.issues.join());
+    const cart = parsed.props;
     const { rerender } = render(<P {...cart} />);
-    expect(screen.getByRole("region", { name: "Carrito" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("region", { name: "Tu pedido" }),
+    ).toBeInTheDocument();
     expect(screen.queryByRole("button")).toBeNull();
     const onCheckout = vi.fn();
     rerender(<P {...cart} onCheckout={onCheckout} />);
     fireEvent.click(screen.getByRole("button", { name: "Ir a la caja" }));
     expect(onCheckout).toHaveBeenCalledOnce();
-    rerender(<P {...cart} lines={[]} />);
+    rerender(<P {...cart} lines={[]} onCheckout={onCheckout} />);
     expect(screen.getByText("Tu carrito está vacío.")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Ir a la caja" })).toBeNull();
+  });
+
+  it("changes quantities within the purchase rules and shows host additions", () => {
+    const P = cartSummary.Component;
+    const parsed = cartSummary.parse({
+      locale: "en-GB",
+      currency: "EUR",
+      lines: [
+        {
+          id: "l1",
+          label: "Socks",
+          quantity: 2,
+          unitPrice: 5,
+          total: 10,
+          minPurchase: 2,
+          purchaseSteps: 2,
+          maxPurchase: 4,
+        },
+      ],
+      discounts: [{ id: "d", label: "", amount: 1 }],
+      tax: 1.6,
+      total: 9,
+      delivery: { earliest: "2026-12-01", latest: "2026-12-03" },
+    });
+    if (!parsed.ok) throw Error(parsed.issues.join());
+    const onQuantity = vi.fn();
+    render(
+      <P
+        {...parsed.props}
+        onQuantity={onQuantity}
+        renderLineDetail={(id) => <em>detail {id}</em>}
+        slot={(name) => <aside>{name}</aside>}
+      />,
+    );
+    expect(
+      screen.getByRole("button", { name: "Quantity − Socks" }),
+    ).toBeDisabled();
+    fireEvent.click(screen.getByRole("button", { name: "Quantity + Socks" }));
+    expect(onQuantity).toHaveBeenLastCalledWith({ lineId: "l1", quantity: 4 });
+    fireEvent.click(screen.getByRole("button", { name: "Remove" }));
+    expect(onQuantity).toHaveBeenLastCalledWith({ lineId: "l1", quantity: 0 });
+    expect(screen.getByText("detail l1")).toBeInTheDocument();
+    expect(screen.getByText("beforeTotals")).toBeInTheDocument();
+    expect(screen.getByText("Discount")).toBeInTheDocument();
+    expect(screen.getByText("VAT")).toBeInTheDocument();
+    expect(
+      screen.getByText("Delivery: 2026-12-01 — 2026-12-03"),
+    ).toBeInTheDocument();
   });
 
   it("marks the current checkout step", () => {

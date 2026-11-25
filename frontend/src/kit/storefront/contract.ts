@@ -1,8 +1,18 @@
 /** Part contracts: one typed schema per storefront part yields its React component, element, builder form and server checks. */
 import { z } from "zod";
-import type { ComponentType } from "react";
+import type { ComponentType, ReactNode } from "react";
 
 export type PartEvents = {
+  /** A buyer changed a cart line's quantity (0 removes it); the server reprices. */
+  onQuantity?: (detail: { lineId: string; quantity: number }) => void;
+  /** A buyer opened a line, order or link inside the part. */
+  onOpen?: (detail: { kind: "line" | "order" | "page"; id: string }) => void;
+  /**
+   * Host-rendered additions that are not data (app configuration summaries,
+   * coupon forms). Web elements and MCP hosts leave them out.
+   */
+  renderLineDetail?: (lineId: string) => ReactNode;
+  slot?: (name: "beforeTotals" | "afterTotals") => ReactNode;
   /** A buyer asked to add a product; hosts decide how (cart API, chat, app). */
   onAddToCart?: (detail: { productId: string; quantity: number }) => void;
   /** A buyer asked to continue to checkout. */

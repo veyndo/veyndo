@@ -1,22 +1,5 @@
-/* shop: shop-stepper styles. Source order is preserved by the entry stylesheet. */
-.shop-stepper {
-  border: 1px solid #dfe7ee;
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-}
-.shop-stepper button {
-  border: 0;
-  background: none;
-  min-height: 44px;
-  width: 44px;
-  font-size: 18px;
-}
-.shop-stepper span {
-  min-width: 30px;
-  text-align: center;
-  font-size: 13px;
-}
+/* shop: text buttons, checkout selection and disclosures. Source order is preserved by the entry stylesheet. */
+
 .shop-text-button {
   border: 0;
   background: none;
@@ -61,24 +44,7 @@
   color: #87632b;
   line-height: 1.5;
 }
-.bag-totals > div {
-  display: flex;
-  justify-content: space-between;
-  padding: 9px 0;
-  font-size: 13px;
-  color: var(--muted);
-}
-.bag-totals dd {
-  margin: 0;
-}
-.bag-totals .grand-total {
-  padding: 18px 0;
-  border-top: 1px solid #dfe7ee;
-  margin-top: 12px;
-  font-size: 20px;
-  color: var(--ink);
-  font-weight: 600;
-}
+
 .bag-body > .shop-primary {
   width: 100%;
 }
