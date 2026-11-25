@@ -1,5 +1,7 @@
 //! What a merchant may ask of an image job, and the instruction the image model receives.
+use serde::Deserialize;
 use serde_json::Value;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::{Result, bad};
 
 #[derive(Debug, PartialEq, Clone, Copy)]
@@ -17,19 +19,32 @@ impl Mode {
     }
 }
 
-pub struct Request<'a> {
-    pub prompt: &'a str,
+pub struct Request {
+    pub prompt: String,
     pub mode: Mode,
     /// The uploaded image an optimization starts from.
-    pub source: Option<&'a str>,
+    pub source: Option<String>,
 }
 
-pub fn parse(v: &Value) -> Result<Request<'_>> {
-    let prompt = v["prompt"]
-        .as_str()
+/// The fields of an image job request, as sent.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct RequestInput {
+    #[serde(deserialize_with = "lenient")]
+    prompt: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    mode: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    source_id: Option<String>,
+}
+
+pub fn parse(v: &Value) -> Result<Request> {
+    let input: RequestInput = view(v);
+    let prompt = input
+        .prompt
         .filter(|s| !s.trim().is_empty() && s.len() <= 2000)
         .ok_or(bad("Image instructions required (up to 2000 bytes)"))?;
-    let mode = match v["mode"].as_str() {
+    let mode = match input.mode.as_deref() {
         Some("generate") => Mode::Generate,
         Some("optimize") => Mode::Optimize,
         _ => return Err(bad("Invalid image mode")),
@@ -37,7 +52,7 @@ pub fn parse(v: &Value) -> Result<Request<'_>> {
     Ok(Request {
         prompt,
         mode,
-        source: v["sourceId"].as_str(),
+        source: input.source_id,
     })
 }
 
@@ -58,7 +73,7 @@ mod tests {
         let ok = json!({"prompt":"White background","mode":"optimize","sourceId":"a1"});
         let request = parse(&ok).unwrap();
         assert_eq!(request.mode, Mode::Optimize);
-        assert_eq!(request.source, Some("a1"));
+        assert_eq!(request.source.as_deref(), Some("a1"));
         for value in [
             json!({"prompt":" ","mode":"generate"}),
             json!({"prompt":"x".repeat(2001),"mode":"generate"}),

@@ -2,6 +2,7 @@
 use crate::catalog::Product;
 use crate::money::{Currency, Money};
 use crate::types::currency::{Config, Definition, rate_units, scale};
+use crate::types::product_currency::ProductCurrencies;
 use serde_json::{Value, json};
 use veyndo_core::{Result, bad};
 pub fn amount(value: f64, code: &str, precision: u8) -> Result<Money> {
@@ -44,7 +45,9 @@ pub fn convert_from(value: f64, code: &str, cfg: &Config, d: &Definition) -> Res
 }
 pub fn product_price(p: &Product, cfg: &Config, d: &Definition) -> Result<f64> {
     if d.strategy == "fixed"
-        && let Some(s) = p.extra["currencyPrices"][&d.code]["price"].as_str()
+        && let Some(s) = ProductCurrencies::of(&p.extra)
+            .fixed(&d.code)
+            .field("price")
     {
         return Ok(
             Money::parse(s, Currency::new(&d.code, d.scale).map_err(bad)?)
@@ -55,8 +58,9 @@ pub fn product_price(p: &Product, cfg: &Config, d: &Definition) -> Result<f64> {
     }
     convert_from(
         p.price,
-        p.extra["priceCurrency"]
-            .as_str()
+        ProductCurrencies::of(&p.extra)
+            .price_currency
+            .as_deref()
             .unwrap_or(&cfg.pricing_currency),
         cfg,
         d,
@@ -70,7 +74,7 @@ pub fn ancillary(
     d: &Definition,
 ) -> Result<Option<f64>> {
     if d.strategy == "fixed"
-        && let Some(s) = p.extra["currencyPrices"][&d.code][field].as_str()
+        && let Some(s) = ProductCurrencies::of(&p.extra).fixed(&d.code).field(field)
     {
         return Ok(Some(
             Money::parse(s, Currency::new(&d.code, d.scale).map_err(bad)?)
@@ -83,8 +87,9 @@ pub fn ancillary(
         .map(|v| {
             convert_from(
                 v,
-                p.extra["priceCurrency"]
-                    .as_str()
+                ProductCurrencies::of(&p.extra)
+                    .price_currency
+                    .as_deref()
                     .unwrap_or(&cfg.pricing_currency),
                 cfg,
                 d,

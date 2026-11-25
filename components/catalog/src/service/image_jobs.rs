@@ -6,7 +6,7 @@ use base64::{Engine, engine::general_purpose::STANDARD};
 use serde::Deserialize;
 use serde_json::{Value, json};
 use sha2::{Digest, Sha256};
-use veyndo_core::document::{lenient, view};
+use veyndo_core::document::{lenient, merge, view};
 use veyndo_core::{Error, RequestContext, Result, StatusCode, bad, conflict, uid};
 use veyndo_identity::{merchant, permit};
 
@@ -53,7 +53,10 @@ pub async fn enqueue(c: &Catalog, h: &RequestContext, product: &str, v: &Value) 
         return Err(conflict("Product changed; save or reload first"));
     }
     if request.mode == Mode::Optimize {
-        let source = request.source.ok_or(bad("Source asset required"))?;
+        let source = request
+            .source
+            .as_deref()
+            .ok_or(bad("Source asset required"))?;
         if !media_jobs::is_product_image(&mut tx, &t, product, source).await? {
             return Err(bad(
                 "Optimization needs an uploaded image belonging to this product",
@@ -70,7 +73,7 @@ pub async fn enqueue(c: &Catalog, h: &RequestContext, product: &str, v: &Value) 
         return Err(bad("Maximum 10 pending image jobs per shop"));
     }
     let id = uid();
-    let instruction = image_job::instruction(&p.name, &p.description, request.prompt);
+    let instruction = image_job::instruction(&p.name, &p.description, &request.prompt);
     media_jobs::insert(
         &mut tx,
         &t,
@@ -99,7 +102,8 @@ pub async fn detail(c: &Catalog, h: &RequestContext, id: &str) -> Result<Value> 
     let mut v = json!({"id":id,"state":job.state,"error":job.error,"assetId":job.asset_id});
     if let Some(asset) = job.asset_id {
         let bytes = media_jobs::asset_content(&c.core, &t, &asset).await?;
-        v["preview"] = json!(format!("data:image/png;base64,{}", STANDARD.encode(bytes)));
+        let preview = format!("data:image/png;base64,{}", STANDARD.encode(bytes));
+        merge(&mut v, json!({ "preview": preview }))?;
     }
     Ok(v)
 }

@@ -1,8 +1,8 @@
 //! Translate only human-readable text; preserve identifiers, URLs, rich structure and source specification keys.
 use crate::domain::rich::validate_rich;
 use serde::Deserialize;
-use serde_json::{Value, json};
-use veyndo_core::document::view;
+use serde_json::{Map, Value, json};
+use veyndo_core::document::{lenient, view};
 use veyndo_core::{Result, bad};
 
 /// The texts of a product in the source language, as far as they are stored.
@@ -39,8 +39,9 @@ pub fn merge_metadata(extra: &mut Value, result: &Value, key: &str) -> Result<()
         }
     }
     // Persist through the same safe rich-content validator used by manual edits.
-    if !extra["richDescription"].is_null() {
-        validate_rich(&extra["richDescription"])?;
+    let merged: Metadata = view(extra);
+    if !merged.rich_description.is_null() {
+        validate_rich(&merged.rich_description)?;
     }
     Ok(())
 }
@@ -78,6 +79,39 @@ pub fn texts(value: &Value) -> Vec<(String, String)> {
     visit(value, "", &mut out);
     out
 }
+/// One translated text of a model response, addressed by its JSON pointer.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct TranslatedEntry {
+    #[serde(deserialize_with = "lenient")]
+    path: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    text: Option<String>,
+}
+
+/// The translatable metadata of a product whose limits are checked.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct Metadata {
+    #[serde(deserialize_with = "lenient")]
+    name: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    seo: Seo,
+    #[serde(deserialize_with = "lenient")]
+    specifications: Option<Map<String, Value>>,
+    rich_description: Value,
+}
+
+/// The search engine texts of a product.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct Seo {
+    #[serde(deserialize_with = "lenient")]
+    title: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    description: Option<String>,
+}
+
 /// The JSON fields `translated` reads, typed as it reads them.
 #[derive(Deserialize, Default)]
 #[serde(default, rename_all = "camelCase")]
@@ -97,14 +131,17 @@ pub fn translated(source: &Value, response: &Value) -> Result<Value> {
     if entries.len() != original.len() {
         return Err(bad("Incomplete translation response"));
     }
+    let entries: Vec<TranslatedEntry> = entries.iter().map(view).collect();
     let mut seen = std::collections::HashSet::new();
     let mut result = source.clone();
-    for entry in entries {
-        let path = entry["path"]
-            .as_str()
+    for entry in &entries {
+        let path = entry
+            .path
+            .as_deref()
             .ok_or(bad("Translation path missing"))?;
-        let text = entry["text"]
-            .as_str()
+        let text = entry
+            .text
+            .as_deref()
             .ok_or(bad("Translation text missing"))?;
         if !seen.insert(path)
             || !original.iter().any(|(p, _)| p == path)
@@ -117,24 +154,30 @@ pub fn translated(source: &Value, response: &Value) -> Result<Value> {
             .pointer_mut(path)
             .ok_or(bad("Unknown translation field"))? = json!(text);
     }
-    if result["name"]
-        .as_str()
+    let translated: Metadata = view(&result);
+    if translated
+        .name
+        .as_deref()
         .is_none_or(|n| n.is_empty() || n.len() > 200)
-        || result["seo"]["title"]
-            .as_str()
+        || translated
+            .seo
+            .title
+            .as_deref()
             .is_some_and(|s| s.len() > 200)
-        || result["seo"]["description"]
-            .as_str()
+        || translated
+            .seo
+            .description
+            .as_deref()
             .is_some_and(|s| s.len() > 500)
-        || result["specifications"].as_object().is_some_and(|m| {
+        || translated.specifications.as_ref().is_some_and(|m| {
             m.values()
                 .any(|v| v.as_str().is_some_and(|s| s.len() > 1000))
         })
     {
         return Err(bad("Translated metadata exceeds product limits"));
     }
-    if !result["richDescription"].is_null() {
-        validate_rich(&json!({"en":result["richDescription"]}))?;
+    if !translated.rich_description.is_null() {
+        validate_rich(&json!({"en":translated.rich_description}))?;
     }
     Ok(result)
 }

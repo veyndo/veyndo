@@ -11,6 +11,16 @@ use veyndo_core::{RequestContext, Result, bad, conflict, store::outbox};
 use veyndo_identity::{merchant, permit};
 use veyndo_pricing::verified_kernel;
 
+/// The translated main texts of a draft.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct DraftTexts {
+    #[serde(deserialize_with = "lenient")]
+    name: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    description: Option<String>,
+}
+
 /// An explicit selection must consist of products of this shop.
 pub async fn admit_selection(
     tx: &mut PgConnection,
@@ -65,13 +75,14 @@ pub async fn apply(c: &Catalog, h: &RequestContext, id: &str, v: &Value) -> Resu
             product.filter(|(revision, _)| current(*revision, draft.revision))
         {
             merge_metadata(&mut extra, &draft.result, &key)?;
+            let texts: DraftTexts = view(&draft.result);
             product_edit::upsert_translation(
                 &mut tx,
                 &tenant,
                 &draft.product_id,
                 &job.target_locale,
-                draft.result["name"].as_str().map(str::to_owned),
-                draft.result["description"].as_str().map(str::to_owned),
+                texts.name,
+                texts.description,
             )
             .await?;
             translation_jobs::update_metadata(&mut tx, &tenant, &draft.product_id, extra).await?;

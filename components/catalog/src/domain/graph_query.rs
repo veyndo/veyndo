@@ -1,7 +1,7 @@
 //! Saved category predicates select only current confirmed public source claims; no inference at browse time.
 use serde::Deserialize;
-use serde_json::Value;
-use veyndo_core::document::view;
+use serde_json::{Map, Value};
+use veyndo_core::document::{lenient, view};
 use veyndo_core::localized::Languages;
 use veyndo_core::{Result, bad};
 
@@ -16,6 +16,18 @@ struct ValidateInput {
     r#type: Value,
 }
 
+/// The fields of a saved fact query, typed as `validate` reads them.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct FactQuery {
+    #[serde(deserialize_with = "lenient")]
+    node_type: Option<String>,
+    #[serde(deserialize_with = "lenient")]
+    minimum_confidence: Option<f64>,
+    #[serde(deserialize_with = "lenient")]
+    text: Option<Map<String, Value>>,
+}
+
 /// A saved fact query belongs to a listing, names a supported node type and has text in the main language.
 pub fn validate(data: &Value, languages: Languages) -> Result<()> {
     let input: ValidateInput = view(data);
@@ -23,22 +35,24 @@ pub fn validate(data: &Value, languages: Languages) -> Result<()> {
         return Ok(());
     };
     let object = query.as_object().ok_or(bad("Invalid saved fact query"))?;
+    let fact: FactQuery = view(query);
     if input.r#type != "page"
         || object.len() != 3
         || object
             .keys()
             .any(|key| !["nodeType", "minimumConfidence", "text"].contains(&key.as_str()))
-        || !TYPES.contains(&query["nodeType"].as_str().unwrap_or(""))
-        || !query["minimumConfidence"]
-            .as_f64()
+        || !TYPES.contains(&fact.node_type.as_deref().unwrap_or(""))
+        || !fact
+            .minimum_confidence
             .is_some_and(|n| n.is_finite() && (0.0..=1.0).contains(&n))
     {
         return Err(bad(
             "Saved fact query requires a listing, supported node type and confidence 0..1",
         ));
     }
-    let text = query["text"]
-        .as_object()
+    let text = fact
+        .text
+        .as_ref()
         .filter(|m| !m.is_empty() && m.len() <= 100)
         .ok_or(bad("Localized fact query required"))?;
     for (locale, value) in text {

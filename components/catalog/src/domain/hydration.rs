@@ -1,8 +1,10 @@
 //! Translated product hydration: each field is resolved on its own along the language chain.
 use crate::domain::content::localize_extra;
 use crate::types::translation::ProductText;
-use serde_json::json;
+use serde::Deserialize;
+use serde_json::{Map, Value, json};
 use std::collections::HashMap;
+use veyndo_core::document::{lenient, view};
 use veyndo_pricing::catalog::Product;
 
 /// Hydrate locked rows using the same field-level inheritance as catalog reads.
@@ -26,25 +28,7 @@ pub fn hydrate(
         localize_extra(&mut p.extra, locale_chain);
         if let Some(media) = p.media.as_array_mut() {
             for m in media {
-                if m["caption"].is_object() {
-                    m["caption"] = json!(
-                        locale_chain
-                            .iter()
-                            .flat_map(|l| [l.as_str(), l.split('-').next().unwrap_or(l)])
-                            .find_map(|l| m["caption"][l].as_str())
-                            .unwrap_or("")
-                    );
-                }
-                if m["alt"].is_object() {
-                    let text = locale_chain
-                        .iter()
-                        .flat_map(|l| [l.as_str(), l.split('-').next().unwrap_or(l)])
-                        .find_map(|l| m["alt"][l].as_str())
-                        .map(str::to_owned);
-                    if let Some(text) = text {
-                        m["view"] = json!(text);
-                    }
-                }
+                localize_media(m, locale_chain);
             }
         }
         if let Some(values) = translations.get(&p.id) {
@@ -75,6 +59,43 @@ fn translated_field<'a>(
             }
         })
     })
+}
+
+/// The localized texts of a media item.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct MediaTexts {
+    #[serde(deserialize_with = "lenient")]
+    caption: Option<Map<String, Value>>,
+    #[serde(deserialize_with = "lenient")]
+    alt: Option<Map<String, Value>>,
+}
+
+/// The first text along the locale chain, trying each locale and then its language.
+fn along_chain<'a>(texts: &'a Map<String, Value>, locale_chain: &[String]) -> Option<&'a str> {
+    locale_chain
+        .iter()
+        .flat_map(|l| [l.as_str(), l.split('-').next().unwrap_or(l)])
+        .find_map(|l| texts.get(l).and_then(Value::as_str))
+}
+
+/// Replaces a localized caption by its text along the chain, and takes the localized alt text as the media `view`.
+fn localize_media(m: &mut Value, locale_chain: &[String]) {
+    let texts: MediaTexts = view(m);
+    let Some(item) = m.as_object_mut() else {
+        return;
+    };
+    if let Some(caption) = &texts.caption {
+        let text = along_chain(caption, locale_chain).unwrap_or("");
+        item.insert("caption".into(), json!(text));
+    }
+    if let Some(text) = texts
+        .alt
+        .as_ref()
+        .and_then(|alt| along_chain(alt, locale_chain))
+    {
+        item.insert("view".into(), json!(text));
+    }
 }
 
 #[cfg(test)]

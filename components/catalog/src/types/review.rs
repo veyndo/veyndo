@@ -1,7 +1,18 @@
 //! A review as a shopper submits it and as a migration imports it; both arrive unpublished.
 use chrono::{DateTime, FixedOffset};
+use serde::Deserialize;
 use serde_json::Value;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::{Result, bad};
+
+/// The rating of a submitted or imported review and the purchase claim of an imported one.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ReviewFields {
+    #[serde(deserialize_with = "lenient")]
+    rating: Option<i64>,
+    verified_purchase: Value,
+}
 
 /// A review written in the storefront.
 #[derive(Debug, PartialEq)]
@@ -14,8 +25,9 @@ pub struct NewReview {
 
 impl NewReview {
     pub fn parse(v: &Value) -> Result<Self> {
-        let rating = v["rating"]
-            .as_i64()
+        let fields: ReviewFields = view(v);
+        let rating = fields
+            .rating
             .filter(|v| (1..=5).contains(v))
             .ok_or(bad("Rating must be 1..5"))?;
         let text = |key: &str, max: usize| -> Result<String> {
@@ -55,15 +67,16 @@ impl<'a> ImportedReview<'a> {
         let author = field("sourceAuthor", 80)?;
         let title = field("title", 120)?;
         let content = field("text", 3000)?;
-        let rating = data["rating"]
-            .as_i64()
+        let fields: ReviewFields = view(data);
+        let rating = fields
+            .rating
             .filter(|n| (1..=5).contains(n))
             .ok_or(bad("Review rating must be 1..5"))?;
         let created = field("createdAt", 100).and_then(|s| {
             DateTime::parse_from_rfc3339(s)
                 .map_err(|_| bad("Original review date requires an explicit timezone"))
         })?;
-        if data["verifiedPurchase"] != false {
+        if fields.verified_purchase != false {
             return Err(bad(
                 "Imported purchase claims are not native verified-purchase evidence",
             ));

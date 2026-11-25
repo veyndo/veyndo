@@ -31,7 +31,11 @@ pub async fn grant(
         } else {
             json!({})
         };
-        let digital = extra.get("digital").unwrap_or(&parent_extra["digital"]) == true;
+        // The product's own flag decides when present, even when it is not a boolean; otherwise its parent's.
+        let digital = extra
+            .get("digital")
+            .or_else(|| parent_extra.get("digital"))
+            .is_some_and(|flag| *flag == true);
         if digital {
             let n=sqlx::query!(r#"INSERT INTO order_downloads(tenant,order_id,asset_id) SELECT tenant,$1,id FROM product_assets WHERE tenant=$2 AND product_id=ANY($3) AND kind='download' AND public ON CONFLICT DO NOTHING"#, order, tenant, &[product.clone(), parent.unwrap_or_default()] as &[String]).execute(&mut *tx).await?.rows_affected();
             if n == 0 {
