@@ -24,14 +24,14 @@
       ],
       "uses": [],
       "foreign_tables": {
-        "app_deliveries": "read: reads app event delivery state for outbox fan-out and the operator view, inside the same statement as the event rows (retention.rs, retention.sql)",
-        "app_schedule_runs": "read: reads schedule run bookkeeping for the shared outbox cleanup (retention.sql)",
-        "app_webhook_receipts": "read: reads webhook receipt rows for the shared outbox cleanup (retention.sql)",
-        "flow_jobs": "read: reads flow job state for cleanup, retention or agent run status (retention.rs, retention.sql)",
-        "knowledge_receipts": "read: reads knowledge receipts for the shared retention cleanup (retention.sql)",
-        "observed_pairs": "read: reads observed product pairs for the shared retention cleanup (retention.sql)",
-        "pair_evidence": "read: reads pair evidence for the shared retention cleanup (retention.sql)",
-        "shop_environments": "read: reads the environment row (live shop, preview owner) to scope sandbox and preview requests to their live shop (admission.rs, next_tenant.sql, reads.rs, shop_scope.rs)"
+        "app_deliveries": "read: stays: the payload retirement and metadata expiry select unreferenced outbox events in the same locked (SKIP LOCKED) statement that retires or deletes them; the referencing rows hold foreign keys to outbox installed by their owner, so a separate read could race a new reference; unsettled deliveries also keep a payload (retention.rs, retention.sql)",
+        "app_schedule_runs": "read: stays: the payload retirement and metadata expiry select unreferenced outbox events in the same locked (SKIP LOCKED) statement that retires or deletes them; the referencing rows hold foreign keys to outbox installed by their owner, so a separate read could race a new reference (retention.sql)",
+        "app_webhook_receipts": "read: stays: the payload retirement and metadata expiry select unreferenced outbox events in the same locked (SKIP LOCKED) statement that retires or deletes them; the referencing rows hold foreign keys to outbox installed by their owner, so a separate read could race a new reference (retention.sql)",
+        "flow_jobs": "read: stays: the payload retirement and metadata expiry select unreferenced outbox events in the same locked (SKIP LOCKED) statement that retires or deletes them; the referencing rows hold foreign keys to outbox installed by their owner, so a separate read could race a new reference; unsettled flow jobs also keep a payload (retention.rs, retention.sql)",
+        "knowledge_receipts": "read: stays: the payload retirement and metadata expiry select unreferenced outbox events in the same locked (SKIP LOCKED) statement that retires or deletes them; the referencing rows hold foreign keys to outbox installed by their owner, so a separate read could race a new reference (retention.sql)",
+        "observed_pairs": "read: stays: the payload retirement and metadata expiry select unreferenced outbox events in the same locked (SKIP LOCKED) statement that retires or deletes them; the referencing rows hold foreign keys to outbox installed by their owner, so a separate read could race a new reference (retention.sql)",
+        "pair_evidence": "read: stays: the payload retirement and metadata expiry select unreferenced outbox events in the same locked (SKIP LOCKED) statement that retires or deletes them; the referencing rows hold foreign keys to outbox installed by their owner, so a separate read could race a new reference (retention.sql)",
+        "shop_environments": "read: resolves a preview or stage to its live shop inside the tenant registry statements (agent stop switch, AI quota, stage baseline, channel metrics, outbox tenant fairness); stays because core is the lowest layer every component calls with only a connection, and the owner (studio) sits above it (ai_usage.rs, channel_metrics.rs, environments.rs, next_tenant.sql, tenants.rs)"
       },
       "glob_imports": 0,
       "untyped_access": 0,
@@ -63,10 +63,10 @@
         "inference"
       ],
       "foreign_tables": {
-        "app_packages": "read: reads installed package manifests and their active flag to admit app-provided actions, tools or providers in the same transaction (identity.sql)",
-        "sales_channels": "read: reads the sales channel document (kind, activity, catalogue scope) to admit the request channel inside the same statement (identity.sql)",
-        "shop_environments": "read: reads the environment row (live shop, preview owner) to scope sandbox and preview requests to their live shop (agent_authority.rs, identity.sql, mfa.rs)",
-        "tenants": "read: reads shop existence, status or the agent stop switch inside a larger claim or join; simple reads go through veyndo_core::tenants (agent_authority.rs, broker.rs, identity.sql, sessions.rs)"
+        "app_packages": "read: stays: identity.sql admits an app integration key only while its package is active with the same digest, inside the one authoritative credential snapshot (identity.sql)",
+        "sales_channels": "read: stays: identity.sql reads the request channel document inside the one authoritative credential snapshot (identity.sql)",
+        "shop_environments": "read: stays: identity.sql scopes the selected stage or preview to its live shop inside the one authoritative credential snapshot; agent authority and MFA resolve the live shop the same way (agent_authority.rs, identity.sql, mfa.rs)",
+        "tenants": "read: stays: identity.sql reads the live shop status inside the one authoritative credential snapshot; workspace lists and agent authority join shop status and names to memberships (agent_authority.rs, broker.rs, identity.sql, sessions.rs)"
       },
       "glob_imports": 0,
       "untyped_access": 0,
@@ -103,9 +103,9 @@
         "shipping"
       ],
       "foreign_tables": {
-        "sales_channels": "read: reads the sales channel document (kind, activity, catalogue scope) to admit the request channel inside the same statement (access_snapshot.sql, operator_metrics.rs, operator_shop.rs, read_cache_settings.sql)",
-        "shop_environments": "read: reads the environment row (live shop, preview owner) to scope sandbox and preview requests to their live shop (access_snapshot.sql, availability.rs, operator_lifecycle.rs, operator_metrics.rs)",
-        "tenants": "write: operator lifecycle changes the shop status and status revision (access_snapshot.sql, availability.rs, operator_lifecycle.rs, operator_metrics.rs)"
+        "sales_channels": "read: stays: access_snapshot.sql and settings_snapshot.sql admit the request channel inside one statement with the shop status and settings; the operator list counts active channels with each shop page (access_snapshot.sql, operator_control.rs, operator_metrics.rs, settings.rs, settings_snapshot.sql)",
+        "shop_environments": "read: stays: access_snapshot.sql scopes a stage or preview to its live shop inside the request snapshot; operator views exclude sandboxes from live shops (access_snapshot.rs, access_snapshot.sql, operator_control.rs, operator_metrics.rs)",
+        "tenants": "write: stays: the access snapshot reads the live shop status in one statement; operator lifecycle locks and changes the status and status revision of a live shop next to the sandbox check (access_snapshot.rs, access_snapshot.sql, operator_control.rs, operator_metrics.rs)"
       },
       "glob_imports": 0,
       "untyped_access": 0,
@@ -136,11 +136,11 @@
         "pricing"
       ],
       "foreign_tables": {
-        "b2b_catalog": "read: reads the private unit catalogue scope inside the catalogue/rule query so pagination stays correct (catalog_channel.sql, catalog_reads.rs, catalog_search.sql, category_listing.sql)",
-        "knowledge_documents": "read: reads published knowledge documents linked to products for catalogue views (category_listing.sql)",
-        "knowledge_relations": "read: reads product relations from the knowledge graph for catalogue and app views (category_listing.sql)",
-        "shop_environments": "read: reads the environment row (live shop, preview owner) to scope sandbox and preview requests to their live shop (media_jobs.rs)",
-        "tenants": "read: reads shop existence, status or the agent stop switch inside a larger claim or join; simple reads go through veyndo_core::tenants (media_jobs.rs)"
+        "b2b_catalog": "read: stays: the private unit catalogue scope filters inside the paginated catalogue, search and category queries so cursors and limits stay correct (catalog_channel.sql, catalog_reads.rs, catalog_search.sql, category_listing.sql)",
+        "knowledge_documents": "read: stays: category pages with a saved fact query select confirmed public claims inside the paginated listing (category_listing.sql)",
+        "knowledge_relations": "read: stays: category pages with a saved fact query select confirmed public claims inside the paginated listing (category_listing.sql)",
+        "shop_environments": "read: stays: the media job claim admits only jobs of active live shops inside its SKIP LOCKED claim statement (media_jobs.rs)",
+        "tenants": "read: stays: the media job claim admits only jobs of active live shops inside its SKIP LOCKED claim statement (media_jobs.rs)"
       },
       "glob_imports": 0,
       "untyped_access": 0,

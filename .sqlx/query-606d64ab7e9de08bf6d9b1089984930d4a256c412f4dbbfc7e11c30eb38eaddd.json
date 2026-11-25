@@ -1,0 +1,35 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT tenant,count(*) AS \"count!\" FROM app_evidence WHERE tenant=ANY($1) GROUP BY tenant",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "tenant",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "app_evidence",
+            "name": "tenant"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "count!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "TextArray"
+      ]
+    },
+    "nullable": [
+      false,
+      null
+    ]
+  },
+  "hash": "606d64ab7e9de08bf6d9b1089984930d4a256c412f4dbbfc7e11c30eb38eaddd"
+}

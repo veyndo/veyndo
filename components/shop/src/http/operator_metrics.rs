@@ -39,7 +39,7 @@ pub async fn overview(
     let days = window(&c)?;
     let mut tx = a.db.begin_read_snapshot().await?;
     let row = operator_metrics::totals(&mut tx, days).await?;
-    let money = operator_metrics::amounts(&mut *tx, days, None).await?;
+    let money = operator_metrics::amounts(&mut tx, days, None).await?;
     tx.commit().await?;
     let channels = traffic(&a.db, None, true).await?;
     Ok(Json(

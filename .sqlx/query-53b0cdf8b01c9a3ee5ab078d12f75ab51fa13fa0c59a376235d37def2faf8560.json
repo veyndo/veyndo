@@ -1,0 +1,21 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT coalesce(jsonb_agg(to_jsonb(l) ORDER BY locale),'[]'::jsonb) AS \"data!\" FROM (SELECT id,locale,parent_id FROM languages) l",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "data!",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "53b0cdf8b01c9a3ee5ab078d12f75ab51fa13fa0c59a376235d37def2faf8560"
+}
