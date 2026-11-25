@@ -1,0 +1,21 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT (has_column_privilege(current_user,'merchant_users','password_hash','SELECT') OR has_column_privilege(current_user,'merchant_users','password_hash','UPDATE') OR has_table_privilege(current_user,'merchant_users','INSERT') OR has_table_privilege(current_user,'merchant_users','DELETE')) AS \"secret!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "secret!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "30ccead33078038b76cc192083705e525b134a8f1da6a629b9641b13dabf2ba3"
+}

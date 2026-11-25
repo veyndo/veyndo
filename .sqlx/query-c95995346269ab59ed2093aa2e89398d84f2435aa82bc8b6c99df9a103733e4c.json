@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO merchant_mfa_challenges(digest,user_id,tenant) VALUES($1,$2,$3)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "c95995346269ab59ed2093aa2e89398d84f2435aa82bc8b6c99df9a103733e4c"
+}

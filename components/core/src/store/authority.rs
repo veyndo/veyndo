@@ -31,11 +31,11 @@ pub async fn connect(fallback: &str) -> ScopedPool {
     let tenant = super::pool::connect(super::pool::options(budget - system_max, 0), &tenant_url)
         .await
         .expect("tenant runtime connection");
-    let tenant_role: String = sqlx::query_scalar("SELECT session_user::text")
+    let tenant_role: String = sqlx::query_scalar!(r#"SELECT session_user::text AS "role!""#)
         .fetch_one(&tenant)
         .await
         .expect("tenant database role");
-    let system_role: String = sqlx::query_scalar("SELECT session_user::text")
+    let system_role: String = sqlx::query_scalar!(r#"SELECT session_user::text AS "role!""#)
         .fetch_one(&system)
         .await
         .expect("system database role");
@@ -43,7 +43,7 @@ pub async fn connect(fallback: &str) -> ScopedPool {
         tenant_role, system_role,
         "Tenant and system database logins must differ"
     );
-    let unsafe_role:bool=sqlx::query_scalar("SELECT r.rolsuper OR r.rolbypassrls OR r.rolcreaterole OR r.rolcreatedb OR r.rolreplication OR EXISTS(SELECT 1 FROM pg_roles other WHERE other.oid<>r.oid AND pg_has_role(r.oid,other.oid,'MEMBER')) OR has_schema_privilege(current_user,'public','CREATE') OR has_database_privilege(current_user,current_database(),'CREATE') OR has_database_privilege(current_user,current_database(),'TEMPORARY') OR EXISTS(SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname='public' AND (pg_has_role(current_user,c.relowner,'MEMBER') OR has_table_privilege(current_user,c.oid,'TRUNCATE'))) FROM pg_roles r WHERE r.rolname=session_user")
+    let unsafe_role:bool=sqlx::query_scalar!(r#"SELECT (r.rolsuper OR r.rolbypassrls OR r.rolcreaterole OR r.rolcreatedb OR r.rolreplication OR EXISTS(SELECT 1 FROM pg_roles other WHERE other.oid<>r.oid AND pg_has_role(r.oid,other.oid,'MEMBER')) OR has_schema_privilege(current_user,'public','CREATE') OR has_database_privilege(current_user,current_database(),'CREATE') OR has_database_privilege(current_user,current_database(),'TEMPORARY') OR EXISTS(SELECT 1 FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname='public' AND (pg_has_role(current_user,c.relowner,'MEMBER') OR has_table_privilege(current_user,c.oid,'TRUNCATE')))) AS "unsafe!" FROM pg_roles r WHERE r.rolname=session_user"#)
         .fetch_one(&tenant).await.expect("tenant authority audit");
     assert!(
         !unsafe_role,
@@ -56,26 +56,25 @@ pub async fn connect(fallback: &str) -> ScopedPool {
         "platform_ai",
         "platform_operators",
     ] {
-        let exposed: bool=sqlx::query_scalar("SELECT has_table_privilege(current_user,$1,'SELECT') OR has_table_privilege(current_user,$1,'INSERT') OR has_table_privilege(current_user,$1,'UPDATE') OR has_table_privilege(current_user,$1,'DELETE')")
-            .bind(table).fetch_one(&tenant).await.expect("identity authority audit");
+        let exposed: bool=sqlx::query_scalar!(r#"SELECT (has_table_privilege(current_user,$1,'SELECT') OR has_table_privilege(current_user,$1,'INSERT') OR has_table_privilege(current_user,$1,'UPDATE') OR has_table_privilege(current_user,$1,'DELETE')) AS "exposed!""#, table).fetch_one(&tenant).await.expect("identity authority audit");
         assert!(
             !exposed,
             "Tenant connection has privileged identity table access"
         );
     }
-    let identity_secret:bool=sqlx::query_scalar("SELECT has_column_privilege(current_user,'merchant_users','password_hash','SELECT') OR has_column_privilege(current_user,'merchant_users','password_hash','UPDATE') OR has_table_privilege(current_user,'merchant_users','INSERT') OR has_table_privilege(current_user,'merchant_users','DELETE')")
+    let identity_secret:bool=sqlx::query_scalar!(r#"SELECT (has_column_privilege(current_user,'merchant_users','password_hash','SELECT') OR has_column_privilege(current_user,'merchant_users','password_hash','UPDATE') OR has_table_privilege(current_user,'merchant_users','INSERT') OR has_table_privilege(current_user,'merchant_users','DELETE')) AS "secret!""#)
         .fetch_one(&tenant).await.expect("identity column authority audit");
     assert!(
         !identity_secret,
         "Tenant connection has credential column or identity mutation access"
     );
-    let coverage:i64=sqlx::query_scalar("SELECT count(*) FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname='public' AND c.relkind='r' AND c.relname NOT LIKE 'connector_%' AND EXISTS(SELECT 1 FROM pg_attribute a WHERE a.attrelid=c.oid AND a.attname='tenant' AND NOT a.attisdropped) AND (NOT c.relrowsecurity OR NOT c.relforcerowsecurity OR NOT EXISTS(SELECT 1 FROM pg_policy p WHERE p.polrelid=c.oid AND p.polname='authenticated_scope' AND NOT p.polpermissive))")
+    let coverage:i64=sqlx::query_scalar!(r#"SELECT count(*) AS "count!" FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname='public' AND c.relkind='r' AND c.relname NOT LIKE 'connector_%' AND EXISTS(SELECT 1 FROM pg_attribute a WHERE a.attrelid=c.oid AND a.attname='tenant' AND NOT a.attisdropped) AND (NOT c.relrowsecurity OR NOT c.relforcerowsecurity OR NOT EXISTS(SELECT 1 FROM pg_policy p WHERE p.polrelid=c.oid AND p.polname='authenticated_scope' AND NOT p.polpermissive))"#)
         .fetch_one(&system).await.expect("authenticated scope coverage audit");
     assert_eq!(
         coverage, 0,
         "Tenant table missing authenticated restrictive scope policy"
     );
-    let status: Value = sqlx::query_scalar("SELECT public.veyndo_scope_status()")
+    let status: Value = sqlx::query_scalar!(r#"SELECT public.veyndo_scope_status() AS "status!""#)
         .fetch_one(&system)
         .await
         .expect("database scope status");

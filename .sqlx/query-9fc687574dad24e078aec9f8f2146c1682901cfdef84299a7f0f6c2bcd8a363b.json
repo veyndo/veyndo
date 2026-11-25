@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT password_initialized FROM merchant_users WHERE id=$1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "password_initialized",
+        "type_info": "Bool",
+        "origin": {
+          "Table": {
+            "table": "merchant_users",
+            "name": "password_initialized"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "9fc687574dad24e078aec9f8f2146c1682901cfdef84299a7f0f6c2bcd8a363b"
+}

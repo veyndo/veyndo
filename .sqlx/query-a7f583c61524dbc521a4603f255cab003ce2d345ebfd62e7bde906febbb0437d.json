@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE outbox_checkpoints SET served_order=nextval('public.outbox_dispatch_sequence') WHERE tenant=$1 AND subscriber=$2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "a7f583c61524dbc521a4603f255cab003ce2d345ebfd62e7bde906febbb0437d"
+}

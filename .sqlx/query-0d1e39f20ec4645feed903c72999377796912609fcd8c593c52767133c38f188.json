@@ -1,0 +1,31 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT (SELECT count(*) FROM memberships WHERE tenant=$1 AND role=$2) AS \"members!\",(SELECT count(*) FROM user_invites WHERE tenant=$1 AND role=$2) AS \"invitations!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "members!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "invitations!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null,
+      null
+    ]
+  },
+  "hash": "0d1e39f20ec4645feed903c72999377796912609fcd8c593c52767133c38f188"
+}

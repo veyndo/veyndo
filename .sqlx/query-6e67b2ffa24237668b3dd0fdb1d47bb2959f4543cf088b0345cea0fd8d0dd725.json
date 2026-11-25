@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM outbox_subscriber_failures WHERE tenant=$1 AND event_id=$2 AND subscriber=$3",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Int8",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "6e67b2ffa24237668b3dd0fdb1d47bb2959f4543cf088b0345cea0fd8d0dd725"
+}

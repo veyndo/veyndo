@@ -7,7 +7,6 @@ use hmac::{Hmac, Mac};
 use serde::Deserialize;
 use serde_json::Value;
 use sha2::Sha256;
-use sqlx::Row;
 use veyndo_core::document::{lenient, view};
 use veyndo_core::{Error, Result, State, StatusCode, bad, hash};
 
@@ -82,18 +81,12 @@ pub async fn assertion(a: &State, route: &str, v: &Value) -> Result<Value> {
     }
     email(&claims)?;
     if route == "/api/identity/inference" {
-        let row=sqlx::query("SELECT u.id,coalesce(m.enabled,false) AS required FROM merchant_users u LEFT JOIN merchant_mfa m ON m.user_id=u.id WHERE u.email=$1").bind(email(&claims)?).fetch_optional(&a.db).await?;
+        let row=sqlx::query!(r#"SELECT u.id,coalesce(m.enabled,false) AS "required!" FROM merchant_users u LEFT JOIN merchant_mfa m ON m.user_id=u.id WHERE u.email=$1"#, email(&claims)?).fetch_optional(&a.db).await?;
         if let Some(row) = row
-            && row.get::<bool, _>("required")
+            && row.required
         {
             let mut tx = a.db.begin().await?;
-            if !trusted_session_tx(
-                &mut tx,
-                &row.get::<String, _>("id"),
-                claims["sessionToken"].as_str(),
-            )
-            .await?
-            {
+            if !trusted_session_tx(&mut tx, &row.id, claims["sessionToken"].as_str()).await? {
                 return Err(Error(
                     StatusCode::UNAUTHORIZED,
                     "Second factor required".into(),
@@ -107,11 +100,10 @@ pub async fn assertion(a: &State, route: &str, v: &Value) -> Result<Value> {
     {
         return Err(bad("Identity subject required"));
     }
-    sqlx::query("DELETE FROM identity_nonces WHERE expires_at<now()")
+    sqlx::query!("DELETE FROM identity_nonces WHERE expires_at<now()")
         .execute(&a.db)
         .await?;
-    let used=sqlx::query("INSERT INTO identity_nonces(digest,expires_at) VALUES($1,now()+interval '2 minutes') ON CONFLICT DO NOTHING")
-        .bind(hash(&format!("{}:{}",issuer,claims["nonce"].as_str().unwrap()))).execute(&a.db).await?.rows_affected();
+    let used=sqlx::query!("INSERT INTO identity_nonces(digest,expires_at) VALUES($1,now()+interval '2 minutes') ON CONFLICT DO NOTHING", hash(&format!("{}:{}",issuer,claims["nonce"].as_str().unwrap()))).execute(&a.db).await?.rows_affected();
     if used == 0 {
         return Err(Error(
             StatusCode::UNAUTHORIZED,

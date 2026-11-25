@@ -1,0 +1,12 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM merchant_handoffs WHERE expires_at<now()",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": []
+  },
+  "hash": "529bdfce9863e1698f733255d36e03e9cf21884674b717ac98bd948c4cfcf65c"
+}

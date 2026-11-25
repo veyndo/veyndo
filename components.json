@@ -36,7 +36,7 @@
       "glob_imports": 0,
       "untyped_access": 4,
       "sql_outside_store": 0,
-      "runtime_sql": 53
+      "runtime_sql": 2
     },
     "identity": {
       "title": "Merchant accounts, memberships, sessions, roles and route policy",
@@ -71,7 +71,7 @@
       "glob_imports": 0,
       "untyped_access": 42,
       "sql_outside_store": 0,
-      "runtime_sql": 33
+      "runtime_sql": 0
     },
     "shop": {
       "title": "Shop configuration, domains, legal texts and the operator control plane",

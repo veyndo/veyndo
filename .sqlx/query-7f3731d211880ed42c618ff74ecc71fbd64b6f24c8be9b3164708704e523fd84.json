@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT coalesce((SELECT enabled FROM merchant_mfa WHERE user_id=$1),false) AS \"required!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "required!",
+        "type_info": "Bool",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "7f3731d211880ed42c618ff74ecc71fbd64b6f24c8be9b3164708704e523fd84"
+}

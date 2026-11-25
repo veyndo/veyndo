@@ -9,11 +9,7 @@ pub async fn register(
     (email, name): (&str, &str),
     password_hash: String,
 ) -> Result<bool> {
-    let changed = sqlx::query("INSERT INTO merchant_users(id,email,name,password_hash) VALUES($1,$2,$3,$4) ON CONFLICT(email) DO NOTHING")
-        .bind(user)
-        .bind(email)
-        .bind(name)
-        .bind(password_hash)
+    let changed = sqlx::query!("INSERT INTO merchant_users(id,email,name,password_hash) VALUES($1,$2,$3,$4) ON CONFLICT(email) DO NOTHING", user, email, name, password_hash)
         .execute(tx)
         .await?;
     Ok(changed.rows_affected() == 1)
@@ -27,18 +23,19 @@ pub async fn broker_account(
     (email, name): (&str, &str),
     random_password: String,
 ) -> Result<(String, Option<String>)> {
-    sqlx::query("SELECT pg_advisory_xact_lock(hashtextextended($1,42))")
-        .bind(email)
-        .execute(&mut *tx)
-        .await?;
-    // Only the configured broker can assert verified ownership of this email; arbitrary clients cannot link accounts.
-    let user: String=sqlx::query_scalar("INSERT INTO merchant_users(id,email,name,password_hash,password_initialized,email_verified_at) VALUES($1,$2,$3,$4,false,now()) ON CONFLICT(email) DO UPDATE SET email=EXCLUDED.email,email_verified_at=COALESCE(merchant_users.email_verified_at,now()) RETURNING id")
-        .bind(uid()).bind(email).bind(name).bind(random_password).fetch_one(&mut *tx).await?;
-    let linked: Option<String> = sqlx::query_scalar(
-        "SELECT user_id FROM merchant_identities WHERE issuer=$1 AND subject=$2",
+    sqlx::query!(
+        "SELECT pg_advisory_xact_lock(hashtextextended($1,42))",
+        email
     )
-    .bind(issuer)
-    .bind(subject)
+    .execute(&mut *tx)
+    .await?;
+    // Only the configured broker can assert verified ownership of this email; arbitrary clients cannot link accounts.
+    let user: String=sqlx::query_scalar!("INSERT INTO merchant_users(id,email,name,password_hash,password_initialized,email_verified_at) VALUES($1,$2,$3,$4,false,now()) ON CONFLICT(email) DO UPDATE SET email=EXCLUDED.email,email_verified_at=COALESCE(merchant_users.email_verified_at,now()) RETURNING id", uid(), email, name, random_password).fetch_one(&mut *tx).await?;
+    let linked: Option<String> = sqlx::query_scalar!(
+        "SELECT user_id FROM merchant_identities WHERE issuer=$1 AND subject=$2",
+        issuer,
+        subject
+    )
     .fetch_optional(&mut *tx)
     .await?;
     Ok((user, linked))
@@ -50,7 +47,7 @@ pub async fn link(
     (issuer, subject): (&str, &str),
     user: &str,
 ) -> Result<()> {
-    sqlx::query("INSERT INTO merchant_identities(issuer,subject,user_id) VALUES($1,$2,$3) ON CONFLICT DO NOTHING").bind(issuer).bind(subject).bind(user).execute(tx).await?;
+    sqlx::query!("INSERT INTO merchant_identities(issuer,subject,user_id) VALUES($1,$2,$3) ON CONFLICT DO NOTHING", issuer, subject, user).execute(tx).await?;
     Ok(())
 }
 
@@ -59,10 +56,10 @@ pub async fn first_shop<'e>(
     db: impl Executor<'e, Database = Postgres>,
     user: &str,
 ) -> Result<Option<String>> {
-    Ok(sqlx::query_scalar(
-        "SELECT tenant FROM membership_grants WHERE user_id=$1 AND active ORDER BY tenant LIMIT 1",
+    Ok(sqlx::query_scalar!(
+        r#"SELECT tenant AS "tenant!" FROM membership_grants WHERE user_id=$1 AND active ORDER BY tenant LIMIT 1"#,
+        user
     )
-    .bind(user)
     .fetch_optional(db)
     .await?)
 }
@@ -74,13 +71,13 @@ pub async fn ownership(
     user: &str,
 ) -> Result<(bool, bool)> {
     let exists: bool = veyndo_core::store::tenants::exists(&mut *tx, shop).await?;
-    let owned:bool=sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM membership_grants WHERE tenant=$1 AND user_id=$2 AND role='owner' AND active)").bind(shop).bind(user).fetch_one(&mut *tx).await?;
+    let owned:bool=sqlx::query_scalar!(r#"SELECT EXISTS(SELECT 1 FROM membership_grants WHERE tenant=$1 AND user_id=$2 AND role='owner' AND active) AS "owned!""#, shop, user).fetch_one(&mut *tx).await?;
     Ok((exists, owned))
 }
 
 /// Counts one broker inference call of the email today and returns the day's count.
 pub async fn count_inference(a: &State, email: &str) -> Result<i32> {
-    Ok(sqlx::query_scalar("INSERT INTO identity_inference_daily(email,day,calls) VALUES($1,current_date,1) ON CONFLICT(email,day) DO UPDATE SET calls=identity_inference_daily.calls+1 RETURNING calls").bind(email).fetch_one(&a.db).await?)
+    Ok(sqlx::query_scalar!("INSERT INTO identity_inference_daily(email,day,calls) VALUES($1,current_date,1) ON CONFLICT(email,day) DO UPDATE SET calls=identity_inference_daily.calls+1 RETURNING calls", email).fetch_one(&a.db).await?)
 }
 
 /// The id and password hash of the account behind an email.

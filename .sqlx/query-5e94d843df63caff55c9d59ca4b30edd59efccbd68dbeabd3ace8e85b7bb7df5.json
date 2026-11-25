@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT tenant AS \"tenant!\" FROM membership_grants WHERE user_id=$1 AND active ORDER BY tenant LIMIT 1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "tenant!",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "membership_grants",
+            "name": "tenant"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      true
+    ]
+  },
+  "hash": "5e94d843df63caff55c9d59ca4b30edd59efccbd68dbeabd3ace8e85b7bb7df5"
+}
