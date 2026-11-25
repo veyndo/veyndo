@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT coalesce((SELECT cursor FROM app_export_cursors WHERE tenant=$1 AND app=$2),0) AS \"cursor!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "cursor!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "f301fc2f4340ed96c713e3c47793c7a7d44f74013f3ede9c6f99116c991e3412"
+}

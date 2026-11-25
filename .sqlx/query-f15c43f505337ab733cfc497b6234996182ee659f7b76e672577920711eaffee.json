@@ -1,0 +1,67 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT actor,action,package_digest,input FROM app_jobs WHERE tenant=$1 AND app=$2 AND id=$3 AND status='running' AND lease=$4 AND lease_until>now() AND now()<started_at+interval '30 minutes' FOR SHARE",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "actor",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "app_jobs",
+            "name": "actor"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "action",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "app_jobs",
+            "name": "action"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "package_digest",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "app_jobs",
+            "name": "package_digest"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "input",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "app_jobs",
+            "name": "input"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "f15c43f505337ab733cfc497b6234996182ee659f7b76e672577920711eaffee"
+}

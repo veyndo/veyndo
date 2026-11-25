@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM app_evidence WHERE tenant=$1 AND app=$2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "448abfeb061361fe24a042cdf4d065dfc197e333f64c4ef53d282922393cc5b7"
+}

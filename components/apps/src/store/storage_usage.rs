@@ -8,10 +8,12 @@ pub async fn attach(
     t: &str,
     m: &Manifest,
 ) -> Result<()> {
-    sqlx::query("INSERT INTO app_storage_usage(tenant,app) VALUES($1,$2) ON CONFLICT DO NOTHING")
-        .bind(t)
-        .bind(&m.id)
-        .execute(&mut **tx)
-        .await?;
+    sqlx::query!(
+        "INSERT INTO app_storage_usage(tenant,app) VALUES($1,$2) ON CONFLICT DO NOTHING",
+        t,
+        m.id
+    )
+    .execute(&mut **tx)
+    .await?;
     Ok(())
 }

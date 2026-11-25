@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM app_action_log WHERE tenant=$1 AND app=$2 AND id<(SELECT id FROM app_action_log WHERE tenant=$1 AND app=$2 ORDER BY id DESC OFFSET 999 LIMIT 1)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "a53b3bc328836bc4e5d75b254bd6be92707b847c89b4f00c3ec5c24e9eec18fb"
+}

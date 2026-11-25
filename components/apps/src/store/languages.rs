@@ -11,8 +11,7 @@ pub async fn validate_languages(
     e: &Entity,
     fields: &Value,
 ) -> Result<()> {
-    let data: Value = sqlx::query_scalar("SELECT data FROM commerce_settings WHERE tenant=$1")
-        .bind(t)
+    let data: Value = sqlx::query_scalar!("SELECT data FROM commerce_settings WHERE tenant=$1", t)
         .fetch_one(&mut **tx)
         .await?;
     let settings = veyndo_shop::domain::defaults::decode(data)?;

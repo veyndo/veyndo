@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM app_schedules WHERE tenant=$1 AND app=$2 AND NOT(id=ANY($3))",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "TextArray"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "b9cacd55f4b16e0866c2d5ffc36d4d7cb0f8e01603f5ce50b5be9c66568f82a6"
+}

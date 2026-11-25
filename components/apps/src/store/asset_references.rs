@@ -18,7 +18,15 @@ pub async fn references(
         let Some(id) = v[&f.name].as_str() else {
             continue;
         };
-        let owned:bool=sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM product_assets WHERE tenant=$1 AND id=$2 AND ($3<> 'image' OR mime LIKE 'image/%') AND (NOT $4 OR public AND kind='attachment'))").bind(t).bind(id).bind(&f.kind).bind(e.public_read).fetch_one(&mut **tx).await?;
+        let owned = sqlx::query_scalar!(
+            r#"SELECT EXISTS(SELECT 1 FROM product_assets WHERE tenant=$1 AND id=$2 AND ($3::text<> 'image' OR mime LIKE 'image/%') AND (NOT $4::bool OR public AND kind='attachment')) AS "owned!""#,
+            t,
+            id,
+            f.kind,
+            e.public_read
+        )
+        .fetch_one(&mut **tx)
+        .await?;
         if !owned {
             return Err(bad(
                 "App asset is missing, private, or belongs to another shop",

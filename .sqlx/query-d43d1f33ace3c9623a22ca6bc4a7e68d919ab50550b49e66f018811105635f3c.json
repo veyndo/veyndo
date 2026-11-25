@@ -1,0 +1,26 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT jsonb_build_object(\n          'id',p.id,'active',p.active,'locale',$3::text,\n          'relationships',jsonb_build_object('parentId',p.parent_id,\n            'crossSellingIds',CASE WHEN jsonb_typeof(p.extra->'crossSelling')='array'\n              THEN p.extra->'crossSelling' ELSE '[]'::jsonb END),\n          'title',coalesce(main.name,p.name),'content',coalesce(main.description,p.description),\n          'translations',coalesce((SELECT jsonb_object_agg(l.locale,jsonb_build_object('title',tr.name,'content',tr.description))\n           FROM product_translations tr JOIN languages l ON l.id=tr.language_id\n           WHERE tr.tenant=p.tenant AND tr.product_id=p.id AND l.locale=ANY($4)\n             AND l.locale<>$3 AND (tr.name IS NOT NULL OR tr.description IS NOT NULL)), '{}'::jsonb)) AS \"product!\"\n         FROM products p\n         LEFT JOIN languages lang ON lang.locale=$3\n         LEFT JOIN product_translations main ON main.tenant=p.tenant AND main.product_id=p.id AND main.language_id=lang.id\n         WHERE p.tenant=$1 AND p.id=$2",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "product!",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text",
+        "TextArray"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "d43d1f33ace3c9623a22ca6bc4a7e68d919ab50550b49e66f018811105635f3c"
+}

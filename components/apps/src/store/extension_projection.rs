@@ -42,7 +42,12 @@ pub async fn attach(
         tx.commit().await?;
         return Ok(());
     }
-    let language: Value = sqlx::query_scalar("SELECT jsonb_build_object('mainLocale',data->'mainLocale','locales',data->'locales') FROM commerce_settings WHERE tenant=$1").bind(&t).fetch_one(&mut *tx).await?;
+    let language: Value = sqlx::query_scalar!(
+        r#"SELECT jsonb_build_object('mainLocale',data->'mainLocale','locales',data->'locales') AS "language!" FROM commerce_settings WHERE tenant=$1"#,
+        t
+    )
+    .fetch_one(&mut *tx)
+    .await?;
     let column = match object {
         Object::Product => "product_id",
         Object::Customer => "customer_id",
@@ -51,6 +56,7 @@ pub async fn attach(
     };
     let allowed = json!(models.iter().map(|(app,_,e,_,_,_,_)|json!({"app":app,"entity":e.name,"field":e.extends.as_ref().unwrap().field})).collect::<Vec<_>>());
     // One indexed lookup for the entire page; SQL identifiers come exclusively from Object above.
+    // dynamic SQL: the reference column is chosen per native object type.
     let mut query = sqlx::QueryBuilder::<sqlx::Postgres>::new(
         "WITH selected AS MATERIALIZED (SELECT r.app,r.entity,r.id,r.revision,r.fields,octet_length(r.fields::text) AS bytes,x.",
     );
@@ -124,11 +130,17 @@ async fn models(
     t: &str,
     object: Object,
 ) -> Result<Vec<Model>> {
-    let packages = sqlx::query("SELECT id,manifest FROM app_packages WHERE tenant=$1 AND active AND EXISTS(SELECT 1 FROM app_models m WHERE m.tenant=app_packages.tenant AND m.app=app_packages.id AND m.definition->'extends'->>'object'=$2) ORDER BY id FOR SHARE")
-        .bind(t).bind(json!(object).as_str().unwrap()).fetch_all(&mut *tx).await?;
+    let kind = json!(object);
+    let packages = sqlx::query!(
+        "SELECT id,manifest FROM app_packages WHERE tenant=$1 AND active AND EXISTS(SELECT 1 FROM app_models m WHERE m.tenant=app_packages.tenant AND m.app=app_packages.id AND m.definition->'extends'->>'object'=$2) ORDER BY id FOR SHARE",
+        t,
+        kind.as_str().unwrap()
+    )
+    .fetch_all(&mut *tx)
+    .await?;
     let mut models = Vec::new();
     for p in packages {
-        let m: Manifest = serde_json::from_value(p.get("manifest"))
+        let m: Manifest = serde_json::from_value(p.manifest)
             .map_err(|_| bad("Invalid active extension package"))?;
         let m = std::sync::Arc::new(m);
         for e in &m.entities {

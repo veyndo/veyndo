@@ -8,8 +8,12 @@ use veyndo_orders::store::machine::machine_conn;
 use veyndo_runtime::scoped_pool::ScopedPool;
 
 async fn packages(conn: &mut sqlx::PgConnection, t: &str) -> Result<Vec<Manifest>> {
-    let rows: Vec<Value> = sqlx::query_scalar("SELECT manifest FROM app_packages WHERE tenant=$1 AND active AND jsonb_array_length(coalesce(manifest->'lifecycles','[]'))>0 ORDER BY id LIMIT 9 FOR SHARE")
-        .bind(t).fetch_all(conn).await?;
+    let rows: Vec<Value> = sqlx::query_scalar!(
+        "SELECT manifest FROM app_packages WHERE tenant=$1 AND active AND jsonb_array_length(coalesce(manifest->'lifecycles','[]'))>0 ORDER BY id LIMIT 9 FOR SHARE",
+        t
+    )
+    .fetch_all(conn)
+    .await?;
     if rows.len() > 8 {
         return Err(bad("At most eight native lifecycle apps per shop"));
     }
@@ -34,10 +38,10 @@ pub async fn admission(conn: &mut sqlx::PgConnection, t: &str, m: &Manifest) -> 
     if m.lifecycles.is_empty() {
         return Ok(());
     }
-    let main: Option<String> = sqlx::query_scalar(
-        "SELECT coalesce(data->>'mainLocale','en-GB') FROM commerce_settings WHERE tenant=$1",
+    let main: Option<String> = sqlx::query_scalar!(
+        r#"SELECT coalesce(data->>'mainLocale','en-GB') AS "main!" FROM commerce_settings WHERE tenant=$1"#,
+        t
     )
-    .bind(t)
     .fetch_optional(&mut *conn)
     .await?;
     validate_locale(m, main.as_deref().unwrap_or("en-GB"))?;
@@ -68,12 +72,13 @@ pub async fn capture(conn: &mut sqlx::PgConnection, t: &str, object: &str) -> Re
         (quote_machine(), 0)
     };
     let machine = compile(base, &apps, object)?;
-    let main_locale: Option<String> =
-        sqlx::query_scalar("SELECT data->>'mainLocale' FROM commerce_settings WHERE tenant=$1")
-            .bind(t)
-            .fetch_optional(&mut *conn)
-            .await?
-            .flatten();
+    let main_locale: Option<String> = sqlx::query_scalar!(
+        "SELECT data->>'mainLocale' AS main FROM commerce_settings WHERE tenant=$1",
+        t
+    )
+    .fetch_optional(&mut *conn)
+    .await?
+    .flatten();
     let main_locale = main_locale.unwrap_or_else(|| "en-GB".into());
     Ok(json!(Snapshot {
         version: 1,

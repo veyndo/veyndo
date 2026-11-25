@@ -6,7 +6,6 @@ use crate::domain::{core_extensions, field_values};
 use crate::ports::{Platform, RecordRules};
 use crate::store::managed_data;
 use serde_json::{Value, json};
-use sqlx::Row;
 use veyndo_app_model::declarations::identifier;
 use veyndo_app_model::manifest::Manifest;
 use veyndo_core::shop_scope::channel;
@@ -20,17 +19,10 @@ pub async fn planning_context(
     h: &RequestContext,
     query: &str,
 ) -> Result<Value> {
-    let rows =
-        sqlx::query("SELECT manifest FROM app_packages WHERE tenant=$1 AND active ORDER BY id")
-            .bind(t)
-            .fetch_all(&a.db)
-            .await?;
+    let rows = crate::store::packages::active_manifest_values(a, t).await?;
     let mut manifests = rows
         .into_iter()
-        .map(|r| {
-            serde_json::from_value::<Manifest>(r.get("manifest"))
-                .map_err(|_| bad("Invalid app package"))
-        })
+        .map(|r| serde_json::from_value::<Manifest>(r).map_err(|_| bad("Invalid app package")))
         .collect::<Result<Vec<_>>>()?;
     manifests.retain(|m| {
         m.actions.iter().any(|act| {
@@ -148,16 +140,16 @@ pub async fn bind_change(
     if c.arguments_json.len() > 32768 {
         return Err(bad("App change too large"));
     }
-    let row = sqlx::query(
+    let row = sqlx::query!(
         "SELECT manifest,revision FROM app_packages WHERE tenant=$1 AND id=$2 AND active",
+        t,
+        c.app
     )
-    .bind(t)
-    .bind(&c.app)
     .fetch_optional(&a.db)
     .await?
     .ok_or(bad("Unknown active app in proposal"))?;
     let m: Manifest =
-        serde_json::from_value(row.get("manifest")).map_err(|_| bad("Invalid app package"))?;
+        serde_json::from_value(row.manifest.clone()).map_err(|_| bad("Invalid app package"))?;
     let action = m
         .actions
         .iter()
@@ -180,7 +172,7 @@ pub async fn bind_change(
     let revision = managed_data::record_revision(a, t, &m, e, id).await?;
     args["revision"] = json!(revision);
     c.arguments_json = args.to_string();
-    c.expected_app_revision = row.get("revision");
+    c.expected_app_revision = row.revision;
     Ok(())
 }
 /// Applies an approved proposal through the ordinary managed save, if the package is unchanged.
@@ -191,19 +183,19 @@ pub async fn apply_change(
     c: &AppChange,
     h: &RequestContext,
 ) -> Result<()> {
-    let row = sqlx::query(
+    let row = sqlx::query!(
         "SELECT manifest,revision FROM app_packages WHERE tenant=$1 AND id=$2 AND active FOR SHARE",
+        t,
+        c.app
     )
-    .bind(t)
-    .bind(&c.app)
     .fetch_optional(&mut **tx)
     .await?
     .ok_or(conflict("App is not active"))?;
-    if row.get::<i64, _>("revision") != c.expected_app_revision {
+    if row.revision != c.expected_app_revision {
         return Err(conflict("App changed since proposal"));
     }
     let m: Manifest =
-        serde_json::from_value(row.get("manifest")).map_err(|_| bad("Invalid app package"))?;
+        serde_json::from_value(row.manifest.clone()).map_err(|_| bad("Invalid app package"))?;
     let action = m
         .actions
         .iter()
@@ -230,12 +222,17 @@ pub async fn contracts(a: &Platform, t: &str, h: &RequestContext, ids: &[String]
     if ids.len() > 12 || ids.iter().any(|id| !identifier(id)) {
         return Err(bad("App contract selection exceeds the planning limit"));
     }
-    let rows = sqlx::query("SELECT manifest,revision FROM app_packages WHERE tenant=$1 AND id=ANY($2) AND active ORDER BY id")
-        .bind(t).bind(ids).fetch_all(&a.db).await?;
+    let rows = sqlx::query!(
+        "SELECT manifest,revision FROM app_packages WHERE tenant=$1 AND id=ANY($2) AND active ORDER BY id",
+        t,
+        ids
+    )
+    .fetch_all(&a.db)
+    .await?;
     let mut result = Vec::new();
     for row in rows {
         let m: Manifest =
-            serde_json::from_value(row.get("manifest")).map_err(|_| bad("Invalid app package"))?;
+            serde_json::from_value(row.manifest.clone()).map_err(|_| bad("Invalid app package"))?;
         for action in m.actions.iter().filter(|action| action.handler == "save") {
             if authorize_planned_action(&m, action, h).is_err() {
                 continue;
@@ -248,7 +245,7 @@ pub async fn contracts(a: &Platform, t: &str, h: &RequestContext, ids: &[String]
             if core_extensions::access(e, h, true).is_err() {
                 continue;
             }
-            let entry = json!({"app":m.id,"version":m.version,"revision":row.get::<i64,_>("revision"),"action":action.name,"inputSchema":action.input_schema,"entity":e.name,"fields":e.fields,"nestedFormat":a.rules.planning_format(&m)});
+            let entry = json!({"app":m.id,"version":m.version,"revision":row.revision,"action":action.name,"inputSchema":action.input_schema,"entity":e.name,"fields":e.fields,"nestedFormat":a.rules.planning_format(&m)});
             if json!(result).to_string().len() + entry.to_string().len() > 32768 {
                 return Err(bad(
                     "App contracts exceed the planning context; select fewer apps",

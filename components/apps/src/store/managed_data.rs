@@ -6,7 +6,7 @@ use crate::store::asset_references::references;
 use crate::store::core_references::validate_references;
 use crate::store::languages::validate_languages;
 use crate::store::package_fence::lock_package_write;
-use crate::store::{record_write, records};
+use crate::store::{locks, record_write, records};
 use serde_json::Value;
 use veyndo_app_model::Entity;
 use veyndo_app_model::manifest::Manifest;
@@ -38,10 +38,7 @@ pub async fn list_scoped(
     let plan = veyndo_app_storage::record_query::prepare(&m.permissions, e, input, public_channel)
         .map_err(persistence::error)?;
     let mut tx = a.db.begin().await?;
-    sqlx::query("SELECT set_config('rac.tenant',$1,true)")
-        .bind(t)
-        .execute(&mut *tx)
-        .await?;
+    locks::tenant_scope(&mut tx, t).await?;
     let page = veyndo_app_storage::queries::list(
         &mut tx,
         veyndo_app_storage::Scope {
@@ -72,10 +69,7 @@ pub async fn record_revision(
         return Err(Error(StatusCode::FORBIDDEN, "App needs data.read".into()));
     }
     let mut tx = a.db.begin().await?;
-    sqlx::query("SELECT set_config('rac.tenant',$1,true)")
-        .bind(t)
-        .execute(&mut *tx)
-        .await?;
+    locks::tenant_scope(&mut tx, t).await?;
     let revision = records::get(&mut tx, t, &m.id, &e.name, id, false)
         .await?
         .and_then(|row| row["revision"].as_i64());
@@ -156,9 +150,6 @@ async fn write_tx(
         .as_str()
         .filter(|s| !s.is_empty() && s.len() <= 100)
         .ok_or(bad("Record id required"))?;
-    sqlx::query("SELECT set_config('rac.tenant',$1,true)")
-        .bind(t)
-        .execute(&mut **tx)
-        .await?;
+    locks::tenant_scope(tx, t).await?;
     record_write::apply(tx, t, m, e, id, v, replay).await
 }

@@ -53,6 +53,7 @@ pub async fn admit(
 }
 
 /// Adds one EXISTS predicate per admitted filter to a native list query.
+// dynamic SQL: appends a variable number of filter predicates to the caller's native list query builder.
 pub fn predicate(
     q: &mut sqlx::QueryBuilder<sqlx::Postgres>,
     object: Object,

@@ -17,10 +17,27 @@ pub async fn record(
         return;
     };
     let actor = h.principal.user.as_deref().unwrap_or("anonymous");
-    let inserted=sqlx::query("INSERT INTO app_action_log(tenant,app,action,actor,status,duration_ms,input_digest) SELECT $1,$2,$3,$4,$5,$6,$7 WHERE EXISTS(SELECT 1 FROM app_packages WHERE tenant=$1 AND id=$2)").bind(&t).bind(id).bind(name).bind(actor).bind(status.as_u16() as i32).bind(elapsed.min(i64::MAX as u128) as i64).bind(hash(&v.to_string())).execute(&a.db).await;
+    let inserted = sqlx::query!(
+        "INSERT INTO app_action_log(tenant,app,action,actor,status,duration_ms,input_digest) SELECT $1::text,$2::text,$3::text,$4::text,$5::int4,$6::int8,$7::text WHERE EXISTS(SELECT 1 FROM app_packages WHERE tenant=$1 AND id=$2)",
+        t,
+        id,
+        name,
+        actor,
+        status.as_u16() as i32,
+        elapsed.min(i64::MAX as u128) as i64,
+        hash(&v.to_string())
+    )
+    .execute(&a.db)
+    .await;
     if inserted.is_err() {
         eprintln!("App action metadata could not be recorded");
     }
     // Keyset retention is bounded and never stores payloads; keep the latest 1000 calls per app.
-    let _=sqlx::query("DELETE FROM app_action_log WHERE tenant=$1 AND app=$2 AND id<(SELECT id FROM app_action_log WHERE tenant=$1 AND app=$2 ORDER BY id DESC OFFSET 999 LIMIT 1)").bind(t).bind(id).execute(&a.db).await;
+    let _ = sqlx::query!(
+        "DELETE FROM app_action_log WHERE tenant=$1 AND app=$2 AND id<(SELECT id FROM app_action_log WHERE tenant=$1 AND app=$2 ORDER BY id DESC OFFSET 999 LIMIT 1)",
+        t,
+        id
+    )
+    .execute(&a.db)
+    .await;
 }

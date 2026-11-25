@@ -5,7 +5,6 @@ use crate::store::commerce_hooks::rows;
 use crate::store::records;
 use serde::Deserialize;
 use serde_json::{Value, json};
-use sqlx::Row;
 use std::collections::HashMap;
 use std::sync::Arc;
 use veyndo_app_model::manifest::Manifest;
@@ -34,8 +33,7 @@ pub async fn prepare(a: &State, t: &str) -> Result<Prepared> {
     conn.rollback().await?;
     let mut modules = HashMap::new();
     for row in ms {
-        let m: Manifest =
-            serde_json::from_value(row.get("manifest")).map_err(|_| bad("Invalid hook package"))?;
+        let m: Manifest = serde_json::from_value(row).map_err(|_| bad("Invalid hook package"))?;
         let c = m.commerce_hooks.unwrap();
         modules.insert(hash(&c.source), prepare_source(c.source).await?);
     }
@@ -155,8 +153,7 @@ pub async fn apply(
     let ms = rows(conn, &c.tenant).await?;
     let mut audit = vec![];
     for row in ms {
-        let m: Manifest =
-            serde_json::from_value(row.get("manifest")).map_err(|_| bad("Invalid hook package"))?;
+        let m: Manifest = serde_json::from_value(row).map_err(|_| bad("Invalid hook package"))?;
         let contract = m
             .commerce_hooks
             .as_ref()
