@@ -125,9 +125,9 @@
         "tenants": "write: operator lifecycle changes the shop status and status revision (access_snapshot.sql, availability.rs, operator_lifecycle.rs, operator_metrics.rs)"
       },
       "glob_imports": 0,
-      "untyped_access": 35,
+      "untyped_access": 27,
       "sql_outside_store": 0,
-      "runtime_sql": 13
+      "runtime_sql": 0
     },
     "catalog": {
       "title": "Products, categories, media, reviews, translations and catalogue reads",
@@ -306,7 +306,7 @@
       "glob_imports": 0,
       "untyped_access": 31,
       "sql_outside_store": 0,
-      "runtime_sql": 38
+      "runtime_sql": 0
     },
     "orders": {
       "title": "Order state, fulfilment, receipts, documents and merchant order work",

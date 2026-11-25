@@ -57,11 +57,11 @@ pub async fn guard(
         .iter()
         .map(|g| g.id.clone())
         .collect::<Vec<_>>();
-    let used: bool = sqlx::query_scalar(
-        "SELECT EXISTS(SELECT 1 FROM customers WHERE tenant=$1 AND NOT(group_name=ANY($2)))",
+    let used = sqlx::query_scalar!(
+        r#"SELECT EXISTS(SELECT 1 FROM customers WHERE tenant=$1 AND NOT(group_name=ANY($2))) AS "used!""#,
+        t,
+        &ids
     )
-    .bind(t)
-    .bind(&ids)
     .fetch_one(&mut *tx)
     .await?;
     if used {
@@ -76,11 +76,11 @@ pub async fn guard(
     if removed.is_empty() {
         return Ok(());
     }
-    let price:bool=sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM products p CROSS JOIN LATERAL jsonb_array_elements(p.advanced_prices) x WHERE tenant=$1 AND x->>'rule_id'=ANY($2))").bind(t).bind(&removed).fetch_one(&mut *tx).await?;
+    let price = sqlx::query_scalar!(r#"SELECT EXISTS(SELECT 1 FROM products p CROSS JOIN LATERAL jsonb_array_elements(p.advanced_prices) x WHERE tenant=$1 AND x->>'rule_id'=ANY($2)) AS "price!""#, t, &removed).fetch_one(&mut *tx).await?;
     if price {
         return Err(bad("Customer group is assigned to advanced prices"));
     }
-    let rows:Vec<Value>=sqlx::query_scalar("SELECT condition AS data FROM commerce_rules WHERE tenant=$1 UNION ALL SELECT data FROM commerce_flows WHERE tenant=$1 UNION ALL SELECT data FROM commerce_promotions WHERE tenant=$1 UNION ALL SELECT data FROM commerce_overrides WHERE tenant=$1").bind(t).fetch_all(&mut *tx).await?;
+    let rows = sqlx::query_scalar!(r#"SELECT condition AS "data!" FROM commerce_rules WHERE tenant=$1 UNION ALL SELECT data FROM commerce_flows WHERE tenant=$1 UNION ALL SELECT data FROM commerce_promotions WHERE tenant=$1 UNION ALL SELECT data FROM commerce_overrides WHERE tenant=$1"#, t).fetch_all(&mut *tx).await?;
     if rows.iter().any(|v| references(v, &removed)) || references(&json!(next.taxes), &removed) {
         return Err(bad("Customer group is used by a rule or flow"));
     }

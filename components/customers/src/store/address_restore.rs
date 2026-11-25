@@ -43,25 +43,27 @@ pub async fn restore(
             .map_err(|_| bad("Invalid historical address"))?;
         address.validate()?;
         admit(&address)?;
-        let owner: Option<String> = sqlx::query_scalar(
+        let owner = sqlx::query_scalar!(
             "SELECT email FROM customer_addresses WHERE tenant=$1 AND id=$2 FOR UPDATE",
+            t,
+            id
         )
-        .bind(t)
-        .bind(id)
         .fetch_optional(&mut *conn)
         .await?;
         if owner.as_ref().is_some_and(|owner| owner != email) {
             return Err(bad("Historical address belongs to another customer"));
         }
-        sqlx::query("INSERT INTO customer_addresses(tenant,email,id,data) VALUES($1,$2,$3,$4) ON CONFLICT(tenant,id) DO UPDATE SET data=EXCLUDED.data,revision=customer_addresses.revision+1,updated_at=now() WHERE customer_addresses.email=EXCLUDED.email").bind(t).bind(email).bind(id).bind(json!(address)).execute(&mut *conn).await?;
+        sqlx::query!("INSERT INTO customer_addresses(tenant,email,id,data) VALUES($1,$2,$3,$4) ON CONFLICT(tenant,id) DO UPDATE SET data=EXCLUDED.data,revision=customer_addresses.revision+1,updated_at=now() WHERE customer_addresses.email=EXCLUDED.email", t, email, id, json!(address)).execute(&mut *conn).await?;
         ids.push(id.to_string());
     }
-    sqlx::query("DELETE FROM customer_addresses WHERE tenant=$1 AND email=$2 AND NOT(id=ANY($3))")
-        .bind(t)
-        .bind(email)
-        .bind(&ids)
-        .execute(&mut *conn)
-        .await?;
+    sqlx::query!(
+        "DELETE FROM customer_addresses WHERE tenant=$1 AND email=$2 AND NOT(id=ANY($3))",
+        t,
+        email,
+        &ids
+    )
+    .execute(&mut *conn)
+    .await?;
     let bill = input.default_billing_address_id.as_deref();
     let ship = input.default_shipping_address_id.as_deref();
     if [bill, ship]
@@ -71,6 +73,6 @@ pub async fn restore(
     {
         return Err(bad("Historical default address is missing"));
     }
-    sqlx::query("UPDATE customers SET default_billing_address_id=$3,default_shipping_address_id=$4,revision=revision+1 WHERE tenant=$1 AND email=$2").bind(t).bind(email).bind(bill).bind(ship).execute(conn).await?;
+    sqlx::query!("UPDATE customers SET default_billing_address_id=$3,default_shipping_address_id=$4,revision=revision+1 WHERE tenant=$1 AND email=$2", t, email, bill, ship).execute(conn).await?;
     Ok(())
 }

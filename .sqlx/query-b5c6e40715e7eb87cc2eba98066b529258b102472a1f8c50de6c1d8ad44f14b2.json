@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO customer_addresses(tenant,email,id,data) VALUES($1,$2,$3,$4) ON CONFLICT(tenant,id) DO UPDATE SET data=EXCLUDED.data,revision=customer_addresses.revision+1,updated_at=now() WHERE customer_addresses.email=EXCLUDED.email",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text",
+        "Jsonb"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "b5c6e40715e7eb87cc2eba98066b529258b102472a1f8c50de6c1d8ad44f14b2"
+}

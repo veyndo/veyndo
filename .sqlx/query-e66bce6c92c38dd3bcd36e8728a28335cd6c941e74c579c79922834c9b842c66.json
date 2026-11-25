@@ -1,0 +1,67 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT sales_channel_id,language_id,first_login::text AS first_login,last_login::text AS last_login,last_payment_method_id FROM customers WHERE tenant=$1 AND email=$2",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "sales_channel_id",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "customers",
+            "name": "sales_channel_id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "language_id",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "customers",
+            "name": "language_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "first_login",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 3,
+        "name": "last_login",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 4,
+        "name": "last_payment_method_id",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "customers",
+            "name": "last_payment_method_id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      null,
+      null,
+      true
+    ]
+  },
+  "hash": "e66bce6c92c38dd3bcd36e8728a28335cd6c941e74c579c79922834c9b842c66"
+}
