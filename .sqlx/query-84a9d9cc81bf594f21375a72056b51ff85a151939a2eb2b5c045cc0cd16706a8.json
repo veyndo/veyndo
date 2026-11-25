@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO product_channel_visibility VALUES($1,$2,$3,$4) ON CONFLICT(tenant,product_id,channel_id) DO UPDATE SET visible=EXCLUDED.visible",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text",
+        "Bool"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "84a9d9cc81bf594f21375a72056b51ff85a151939a2eb2b5c045cc0cd16706a8"
+}

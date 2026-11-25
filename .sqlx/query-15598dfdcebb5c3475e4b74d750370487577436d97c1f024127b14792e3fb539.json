@@ -1,0 +1,31 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT (current_date+$1::int)::text AS \"earliest!\",(current_date+$2::int)::text AS \"latest!\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "earliest!",
+        "type_info": "Text",
+        "origin": "Expression"
+      },
+      {
+        "ordinal": 1,
+        "name": "latest!",
+        "type_info": "Text",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int4"
+      ]
+    },
+    "nullable": [
+      null,
+      null
+    ]
+  },
+  "hash": "15598dfdcebb5c3475e4b74d750370487577436d97c1f024127b14792e3fb539"
+}

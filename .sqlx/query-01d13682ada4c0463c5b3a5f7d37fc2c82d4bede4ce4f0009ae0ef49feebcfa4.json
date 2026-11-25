@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE products SET product_number=id WHERE tenant=$1 AND product_number IS NULL",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "01d13682ada4c0463c5b3a5f7d37fc2c82d4bede4ce4f0009ae0ef49feebcfa4"
+}

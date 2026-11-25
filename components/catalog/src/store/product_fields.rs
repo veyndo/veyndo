@@ -12,14 +12,14 @@ pub async fn save(
     id: &str,
     fields: &ProductFields,
 ) -> Result<()> {
-    sqlx::query("UPDATE products SET price=$1,tax_rate=$2,stock=coalesce($3,stock),min_purchase=$4,purchase_steps=$5,max_purchase=$6,delivery_days=$7,list_price=$8,advanced_prices=$9,media=$10,properties=$11 WHERE tenant=$12 AND id=$13").bind(fields.price).bind(fields.tax_rate).bind(fields.stock).bind(fields.min_purchase as i32).bind(fields.purchase_steps as i32).bind(fields.max_purchase.map(|n|n as i32)).bind(fields.delivery_days).bind(fields.list_price).bind(json!(fields.advanced_prices)).bind(&fields.media).bind(json!(fields.properties)).bind(tenant).bind(id).execute(&mut *tx).await?;
-    sqlx::query(
-        "UPDATE products SET regulation_price=$1,reference_price=$2 WHERE tenant=$3 AND id=$4",
+    sqlx::query!(r#"UPDATE products SET price=$1,tax_rate=$2,stock=coalesce($3,stock),min_purchase=$4,purchase_steps=$5,max_purchase=$6,delivery_days=$7,list_price=$8,advanced_prices=$9,media=$10,properties=$11 WHERE tenant=$12 AND id=$13"#, fields.price, fields.tax_rate, fields.stock, fields.min_purchase as i32, fields.purchase_steps as i32, fields.max_purchase.map(|n|n as i32), fields.delivery_days, fields.list_price, json!(fields.advanced_prices), &fields.media, json!(fields.properties), tenant, id).execute(&mut *tx).await?;
+    sqlx::query!(
+        r#"UPDATE products SET regulation_price=$1,reference_price=$2 WHERE tenant=$3 AND id=$4"#,
+        fields.regulation_price,
+        fields.reference_price.as_ref().map(|p| json!(p)),
+        tenant,
+        id
     )
-    .bind(fields.regulation_price)
-    .bind(fields.reference_price.as_ref().map(|p| json!(p)))
-    .bind(tenant)
-    .bind(id)
     .execute(&mut *tx)
     .await?;
     Ok(())

@@ -1,26 +1,24 @@
 //! Writes of one product edit inside its transaction: allocation lock, creation, clocks, identity, content and translations.
-use crate::store::products::product;
+use crate::store::products::ProductRow;
 use crate::types::product_edit::CatalogFields;
 use serde_json::{Value, json};
-use sqlx::{PgConnection, Row};
+use sqlx::PgConnection;
 use veyndo_core::Result;
 use veyndo_pricing::catalog::Product;
 
 /// Serializes product number allocation for this shop, not globally.
 pub async fn lock_numbers(tx: &mut PgConnection, tenant: &str) -> Result<()> {
-    sqlx::query("SELECT pg_advisory_xact_lock(hashtextextended($1,727))")
-        .bind(tenant)
-        .execute(tx)
-        .await?;
+    sqlx::query!(
+        r#"SELECT pg_advisory_xact_lock(hashtextextended($1,727))"#,
+        tenant
+    )
+    .execute(tx)
+    .await?;
     Ok(())
 }
 
 pub async fn is_main_product(tx: &mut PgConnection, tenant: &str, id: &str) -> Result<bool> {
-    Ok(sqlx::query_scalar(
-        "SELECT EXISTS(SELECT 1 FROM products WHERE tenant=$1 AND id=$2 AND parent_id IS NULL)",
-    )
-    .bind(tenant)
-    .bind(id)
+    Ok(sqlx::query_scalar!(r#"SELECT EXISTS(SELECT 1 FROM products WHERE tenant=$1 AND id=$2 AND parent_id IS NULL) AS "exists!""#, tenant, id)
     .fetch_one(tx)
     .await?)
 }
@@ -34,12 +32,7 @@ pub async fn insert(
     description: &str,
     parent: Option<&str>,
 ) -> Result<bool> {
-    Ok(sqlx::query("INSERT INTO products(tenant,id,name,description,category,price,tax_rate,stock,revision,content_revision,parent_id) VALUES($1,$2,$3,$4,'objects',0,19,0,0,0,$5) ON CONFLICT(tenant,id) DO NOTHING")
-        .bind(tenant)
-        .bind(id)
-        .bind(name)
-        .bind(description)
-        .bind(parent)
+    Ok(sqlx::query!(r#"INSERT INTO products(tenant,id,name,description,category,price,tax_rate,stock,revision,content_revision,parent_id) VALUES($1,$2,$3,$4,'objects',0,19,0,0,0,$5) ON CONFLICT(tenant,id) DO NOTHING"#, tenant, id, name, description, parent)
         .execute(tx)
         .await?
         .rows_affected()
@@ -54,18 +47,9 @@ pub struct Clocks {
 }
 
 pub async fn lock_clocks(tx: &mut PgConnection, tenant: &str, id: &str) -> Result<Option<Clocks>> {
-    Ok(sqlx::query(
-        "SELECT revision,content_revision,parent_id FROM products WHERE tenant=$1 AND id=$2 FOR UPDATE",
-    )
-    .bind(tenant)
-    .bind(id)
+    Ok(sqlx::query_as!(Clocks, r#"SELECT revision,content_revision,parent_id FROM products WHERE tenant=$1 AND id=$2 FOR UPDATE"#, tenant, id)
     .fetch_optional(tx)
-    .await?
-    .map(|row| Clocks {
-        revision: row.get("revision"),
-        content_revision: row.get("content_revision"),
-        parent_id: row.get("parent_id"),
-    }))
+    .await?)
 }
 
 pub async fn number_taken(
@@ -74,12 +58,7 @@ pub async fn number_taken(
     id: &str,
     number: &str,
 ) -> Result<bool> {
-    Ok(sqlx::query_scalar(
-        "SELECT EXISTS(SELECT 1 FROM products WHERE tenant=$1 AND product_number=$2 AND id<>$3)",
-    )
-    .bind(tenant)
-    .bind(number)
-    .bind(id)
+    Ok(sqlx::query_scalar!(r#"SELECT EXISTS(SELECT 1 FROM products WHERE tenant=$1 AND product_number=$2 AND id<>$3) AS "exists!""#, tenant, number, id)
     .fetch_one(tx)
     .await?)
 }
@@ -92,11 +71,7 @@ pub async fn options_taken(
     parent: &str,
     options: &Value,
 ) -> Result<bool> {
-    Ok(sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM products WHERE tenant=$1 AND parent_id=$2 AND id<>$3 AND options=$4)")
-        .bind(tenant)
-        .bind(parent)
-        .bind(id)
-        .bind(options)
+    Ok(sqlx::query_scalar!(r#"SELECT EXISTS(SELECT 1 FROM products WHERE tenant=$1 AND parent_id=$2 AND id<>$3 AND options=$4) AS "exists!""#, tenant, parent, id, options)
         .fetch_one(tx)
         .await?)
 }
@@ -107,14 +82,14 @@ pub async fn update_identity(
     id: &str,
     fields: &CatalogFields,
 ) -> Result<()> {
-    sqlx::query(
-        "UPDATE products SET active=$1,product_number=$2,options=$3 WHERE tenant=$4 AND id=$5",
+    sqlx::query!(
+        r#"UPDATE products SET active=$1,product_number=$2,options=$3 WHERE tenant=$4 AND id=$5"#,
+        fields.active,
+        &fields.product_number,
+        json!(fields.options),
+        tenant,
+        id
     )
-    .bind(fields.active)
-    .bind(&fields.product_number)
-    .bind(json!(fields.options))
-    .bind(tenant)
-    .bind(id)
     .execute(tx)
     .await?;
     Ok(())
@@ -130,13 +105,7 @@ pub async fn update_content(
     description: &str,
     revision: i64,
 ) -> Result<bool> {
-    Ok(sqlx::query("UPDATE products SET extra=$1,name=$2,description=$3,revision=revision+1 WHERE tenant=$4 AND id=$5 AND revision=$6")
-        .bind(extra)
-        .bind(name)
-        .bind(description)
-        .bind(tenant)
-        .bind(id)
-        .bind(revision)
+    Ok(sqlx::query!(r#"UPDATE products SET extra=$1,name=$2,description=$3,revision=revision+1 WHERE tenant=$4 AND id=$5 AND revision=$6"#, extra, name, description, tenant, id, revision)
         .execute(tx)
         .await?
         .rows_affected()
@@ -152,12 +121,7 @@ pub async fn upsert_translation(
     name: Option<String>,
     description: Option<String>,
 ) -> Result<()> {
-    sqlx::query("INSERT INTO product_translations(tenant,product_id,language_id,name,description) SELECT $1,$2,id,$3,$4 FROM languages WHERE locale=$5 ON CONFLICT(tenant,product_id,language_id) DO UPDATE SET name=EXCLUDED.name,description=EXCLUDED.description")
-        .bind(tenant)
-        .bind(id)
-        .bind(name)
-        .bind(description)
-        .bind(locale)
+    sqlx::query!(r#"INSERT INTO product_translations(tenant,product_id,language_id,name,description) SELECT $1,$2,id,$3,$4 FROM languages WHERE locale=$5 ON CONFLICT(tenant,product_id,language_id) DO UPDATE SET name=EXCLUDED.name,description=EXCLUDED.description"#, tenant, id, name, description, locale)
         .execute(tx)
         .await?;
     Ok(())
@@ -165,10 +129,32 @@ pub async fn upsert_translation(
 
 /// The product as stored after the edit, with its content clock.
 pub async fn saved(tx: &mut PgConnection, tenant: &str, id: &str) -> Result<(Product, i64)> {
-    let row = sqlx::query("SELECT * FROM products WHERE tenant=$1 AND id=$2")
-        .bind(tenant)
-        .bind(id)
+    let row = sqlx::query!(r#"SELECT id,name,category,description,price,tax_rate,stock,revision,list_price,regulation_price,reference_price,advanced_prices,min_purchase,purchase_steps,max_purchase,parent_id,options,media,properties,delivery_days,extra,product_number,content_revision FROM products WHERE tenant=$1 AND id=$2"#, tenant, id)
         .fetch_one(tx)
         .await?;
-    Ok((product(&row), row.get("content_revision")))
+    let product = ProductRow {
+        id: row.id,
+        name: row.name,
+        category: row.category,
+        description: row.description,
+        price: row.price,
+        tax_rate: row.tax_rate,
+        stock: row.stock,
+        revision: row.revision,
+        list_price: row.list_price,
+        regulation_price: row.regulation_price,
+        reference_price: row.reference_price,
+        advanced_prices: row.advanced_prices,
+        min_purchase: row.min_purchase,
+        purchase_steps: row.purchase_steps,
+        max_purchase: row.max_purchase,
+        parent_id: row.parent_id,
+        options: row.options,
+        media: row.media,
+        properties: row.properties,
+        delivery_days: row.delivery_days,
+        extra: row.extra,
+        product_number: row.product_number,
+    };
+    Ok((product.into(), row.content_revision))
 }

@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT count(*) AS \"count!\" FROM media_jobs WHERE tenant=$1 AND ($2::text IS NULL OR product_id=$2) AND state IN ('queued','processing')",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "count!",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "c442c98f8f9c7e977fac2e88f50b6f8f4ba0976ac3bd80dbd03219b746a0b4f5"
+}

@@ -6,12 +6,12 @@ use veyndo_core::{Result, State};
 
 /// The IDs of all sales channels of the shop, locked so visibility is written against a stable set.
 pub async fn lock_all(tx: &mut PgConnection, tenant: &str) -> Result<Vec<String>> {
-    Ok(
-        sqlx::query_scalar("SELECT id FROM sales_channels WHERE tenant=$1 ORDER BY id FOR UPDATE")
-            .bind(tenant)
-            .fetch_all(tx)
-            .await?,
+    Ok(sqlx::query_scalar!(
+        r#"SELECT id FROM sales_channels WHERE tenant=$1 ORDER BY id FOR UPDATE"#,
+        tenant
     )
+    .fetch_all(tx)
+    .await?)
 }
 
 pub async fn set_visible(
@@ -21,11 +21,7 @@ pub async fn set_visible(
     channel: &str,
     visible: bool,
 ) -> Result<()> {
-    sqlx::query("INSERT INTO product_channel_visibility VALUES($1,$2,$3,$4) ON CONFLICT(tenant,product_id,channel_id) DO UPDATE SET visible=EXCLUDED.visible")
-        .bind(tenant)
-        .bind(product)
-        .bind(channel)
-        .bind(visible)
+    sqlx::query!(r#"INSERT INTO product_channel_visibility VALUES($1,$2,$3,$4) ON CONFLICT(tenant,product_id,channel_id) DO UPDATE SET visible=EXCLUDED.visible"#, tenant, product, channel, visible)
         .execute(tx)
         .await?;
     Ok(())
@@ -41,9 +37,7 @@ pub struct Visibility {
 
 /// Up to 101 channels, so the caller can refuse shops beyond the editor's limit of 100.
 pub async fn visibility(a: &State, tenant: &str, product: &str) -> Result<Vec<Visibility>> {
-    Ok(sqlx::query_as::<_, Visibility>("SELECT c.id,c.data,coalesce(v.visible,true) AS visible FROM sales_channels c LEFT JOIN product_channel_visibility v ON v.tenant=c.tenant AND v.channel_id=c.id AND v.product_id=$2 WHERE c.tenant=$1 ORDER BY c.id LIMIT 101")
-        .bind(tenant)
-        .bind(product)
+    Ok(sqlx::query_as!(Visibility, r#"SELECT c.id,c.data,coalesce(v.visible,true) AS "visible!" FROM sales_channels c LEFT JOIN product_channel_visibility v ON v.tenant=c.tenant AND v.channel_id=c.id AND v.product_id=$2 WHERE c.tenant=$1 ORDER BY c.id LIMIT 101"#, tenant, product)
         .fetch_all(&a.db)
         .await?)
 }

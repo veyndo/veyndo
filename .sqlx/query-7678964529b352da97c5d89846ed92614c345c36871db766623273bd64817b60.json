@@ -1,0 +1,41 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT source_locale,target_locale FROM translation_jobs WHERE tenant=$1 AND id=$2 AND status='ready' FOR UPDATE",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "source_locale",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "translation_jobs",
+            "name": "source_locale"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "target_locale",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "translation_jobs",
+            "name": "target_locale"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "7678964529b352da97c5d89846ed92614c345c36871db766623273bd64817b60"
+}

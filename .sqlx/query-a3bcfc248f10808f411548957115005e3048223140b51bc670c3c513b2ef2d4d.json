@@ -1,0 +1,288 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "-- Bounded explicit channel IDs, with effective-language search before pagination.\nSELECT p.id,p.name,p.category,p.description,p.price,p.tax_rate,p.stock,p.revision,p.list_price,p.regulation_price,p.reference_price,p.advanced_prices,p.min_purchase,p.purchase_steps,p.max_purchase,p.parent_id,p.options,p.media,p.properties,p.delivery_days,p.extra,p.product_number FROM products p WHERE p.tenant=$1 AND p.parent_id IS NULL AND p.active AND ($9::text IS NULL OR EXISTS(SELECT 1 FROM b2b_catalog b WHERE b.tenant=p.tenant AND b.unit_id=$9 AND (b.product_id=p.id OR EXISTS(SELECT 1 FROM products child WHERE child.tenant=p.tenant AND child.parent_id=p.id AND child.id=b.product_id)))) AND NOT EXISTS(SELECT 1 FROM product_channel_visibility v WHERE v.tenant=p.tenant AND v.product_id=p.id AND v.channel_id=$8 AND NOT v.visible)\nAND p.id=ANY($2) AND p.id>$3 AND ($4::text IS NULL OR p.category=$4)\nAND ($6::text IS NULL OR lower(\n coalesce((SELECT tr.name FROM product_translations tr WHERE tr.tenant=p.tenant\n AND tr.product_id=p.id AND tr.language_id=ANY($5) AND tr.name IS NOT NULL\n ORDER BY array_position($5,tr.language_id) LIMIT 1),p.name)\n ||' '||coalesce((SELECT tr.description FROM product_translations tr WHERE tr.tenant=p.tenant\n AND tr.product_id=p.id AND tr.language_id=ANY($5) AND tr.description IS NOT NULL\n ORDER BY array_position($5,tr.language_id) LIMIT 1),p.description)) LIKE $6)\nORDER BY p.id LIMIT $7;\n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "products",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "name",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "products",
+            "name": "name"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "category",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "products",
+            "name": "category"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "description",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "products",
+            "name": "description"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "price",
+        "type_info": "Float8",
+        "origin": {
+          "Table": {
+            "table": "products",
+            "name": "price"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "tax_rate",
+        "type_info": "Float8",
+        "origin": {
+          "Table": {
+            "table": "products",
+            "name": "tax_rate"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "stock",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "products",
+            "name": "stock"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "revision",
+        "type_info": "Int8",
+        "origin": {
+          "Table": {
+            "table": "products",
+            "name": "revision"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "list_price",
+        "type_info": "Float8",
+        "origin": {
+          "Table": {
+            "table": "products",
+            "name": "list_price"
+          }
+        }
+      },
+      {
+        "ordinal": 9,
+        "name": "regulation_price",
+        "type_info": "Float8",
+        "origin": {
+          "Table": {
+            "table": "products",
+            "name": "regulation_price"
+          }
+        }
+      },
+      {
+        "ordinal": 10,
+        "name": "reference_price",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "products",
+            "name": "reference_price"
+          }
+        }
+      },
+      {
+        "ordinal": 11,
+        "name": "advanced_prices",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "products",
+            "name": "advanced_prices"
+          }
+        }
+      },
+      {
+        "ordinal": 12,
+        "name": "min_purchase",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "products",
+            "name": "min_purchase"
+          }
+        }
+      },
+      {
+        "ordinal": 13,
+        "name": "purchase_steps",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "products",
+            "name": "purchase_steps"
+          }
+        }
+      },
+      {
+        "ordinal": 14,
+        "name": "max_purchase",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "products",
+            "name": "max_purchase"
+          }
+        }
+      },
+      {
+        "ordinal": 15,
+        "name": "parent_id",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "products",
+            "name": "parent_id"
+          }
+        }
+      },
+      {
+        "ordinal": 16,
+        "name": "options",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "products",
+            "name": "options"
+          }
+        }
+      },
+      {
+        "ordinal": 17,
+        "name": "media",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "products",
+            "name": "media"
+          }
+        }
+      },
+      {
+        "ordinal": 18,
+        "name": "properties",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "products",
+            "name": "properties"
+          }
+        }
+      },
+      {
+        "ordinal": 19,
+        "name": "delivery_days",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "products",
+            "name": "delivery_days"
+          }
+        }
+      },
+      {
+        "ordinal": 20,
+        "name": "extra",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "products",
+            "name": "extra"
+          }
+        }
+      },
+      {
+        "ordinal": 21,
+        "name": "product_number",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "products",
+            "name": "product_number"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "TextArray",
+        "Text",
+        "Text",
+        "TextArray",
+        "Text",
+        "Int8",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      true,
+      false,
+      false,
+      false,
+      true,
+      true,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "a3bcfc248f10808f411548957115005e3048223140b51bc670c3c513b2ef2d4d"
+}

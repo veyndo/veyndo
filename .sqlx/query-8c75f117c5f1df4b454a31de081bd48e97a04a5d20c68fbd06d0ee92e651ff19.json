@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE products SET regulation_price=$1,reference_price=$2 WHERE tenant=$3 AND id=$4",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Float8",
+        "Jsonb",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "8c75f117c5f1df4b454a31de081bd48e97a04a5d20c68fbd06d0ee92e651ff19"
+}

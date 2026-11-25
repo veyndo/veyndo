@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO currency_price_jobs(tenant,id,data,ceiling) VALUES($1,$2,$3,$4)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Jsonb",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "33838d1463b974d0932b16de7fe4e3b3cca4b61c7b05b694c1c3f7e7681aae27"
+}

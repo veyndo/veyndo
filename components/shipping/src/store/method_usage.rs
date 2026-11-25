@@ -58,43 +58,23 @@ pub async fn usage(
             "allowedPayments",
         ),
     };
-    let orders: i64 = sqlx::query_scalar("SELECT count(*) FROM orders o JOIN carts c ON c.id=o.cart_id WHERE o.tenant=$1 AND ($4::text IS NULL OR COALESCE(c.data->>'sales_channel','default')=$4) AND (o.data #>> $2::text[]=$3 OR o.data->'cart'->'checkout'->>$5=$3)")
-        .bind(t)
-        .bind(snapshot)
-        .bind(id)
-        .bind(channel)
-        .bind(selection)
+    let orders: i64 = sqlx::query_scalar!(r#"SELECT count(*) AS "count!" FROM orders o JOIN carts c ON c.id=o.cart_id WHERE o.tenant=$1 AND ($4::text IS NULL OR COALESCE(c.data->>'sales_channel','default')=$4) AND (o.data #>> $2::text[]=$3 OR o.data->'cart'->'checkout'->>$5=$3)"#, t, &snapshot as &[&str], id, channel, selection)
         .fetch_one(&mut *tx)
         .await?;
-    let carts: i64 = sqlx::query_scalar("SELECT count(*) FROM carts WHERE tenant=$1 AND status='open' AND ($4::text IS NULL OR COALESCE(data->>'sales_channel','default')=$4) AND (data->'checkout'->>$2=$3 OR data->'checkout'->>$5=$3)")
-        .bind(t)
-        .bind(selection)
-        .bind(id)
-        .bind(channel)
-        .bind(legacy)
+    let carts: i64 = sqlx::query_scalar!(r#"SELECT count(*) AS "count!" FROM carts WHERE tenant=$1 AND status='open' AND ($4::text IS NULL OR COALESCE(data->>'sales_channel','default')=$4) AND (data->'checkout'->>$2=$3 OR data->'checkout'->>$5=$3)"#, t, selection, id, channel, legacy)
         .fetch_one(&mut *tx)
         .await?;
     let overrides: i64 = if channel.is_none() {
-        sqlx::query_scalar("SELECT count(*) FROM commerce_overrides WHERE tenant=$1 AND EXISTS(SELECT 1 FROM jsonb_array_elements(data) p WHERE p->'path'->>0=$2 AND p->'path'->>1=$3)")
-            .bind(t)
-            .bind(area.name())
-            .bind(id)
+        sqlx::query_scalar!(r#"SELECT count(*) AS "count!" FROM commerce_overrides WHERE tenant=$1 AND EXISTS(SELECT 1 FROM jsonb_array_elements(data) p WHERE p->'path'->>0=$2 AND p->'path'->>1=$3)"#, t, area.name(), id)
             .fetch_one(&mut *tx)
             .await?
     } else {
         0
     };
-    let rules: i64 = sqlx::query_scalar("SELECT (SELECT count(*) FROM commerce_rules WHERE tenant=$1 AND jsonb_path_exists(condition,'$.** ? (@ == $id)',jsonb_build_object('id',$2::text))) + (SELECT count(*) FROM commerce_flows WHERE tenant=$1 AND jsonb_path_exists(data,'$.** ? (@ == $id)',jsonb_build_object('id',$2::text)))")
-        .bind(t)
-        .bind(id)
+    let rules: i64 = sqlx::query_scalar!(r#"SELECT (SELECT count(*) FROM commerce_rules WHERE tenant=$1 AND jsonb_path_exists(condition,'$.** ? (@ == $id)',jsonb_build_object('id',$2::text))) + (SELECT count(*) FROM commerce_flows WHERE tenant=$1 AND jsonb_path_exists(data,'$.** ? (@ == $id)',jsonb_build_object('id',$2::text))) AS "count!""#, t, id)
         .fetch_one(&mut *tx)
         .await?;
-    let b2b_units: i64 = sqlx::query_scalar(
-        "SELECT count(*) FROM b2b_units WHERE tenant=$1 AND COALESCE(data->$2,'[]'::jsonb) ? $3",
-    )
-    .bind(t)
-    .bind(allowed)
-    .bind(id)
+    let b2b_units: i64 = sqlx::query_scalar!(r#"SELECT count(*) AS "count!" FROM b2b_units WHERE tenant=$1 AND COALESCE(data->$2,'[]'::jsonb) ? $3"#, t, allowed, id)
     .fetch_one(tx)
     .await?;
     Ok(Usage {

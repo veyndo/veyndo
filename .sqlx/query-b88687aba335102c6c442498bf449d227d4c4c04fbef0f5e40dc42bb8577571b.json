@@ -1,0 +1,25 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT jsonb_build_object('id',id,'productId',product_id,'title',title,'filename',filename,'mime',mime,'kind',kind,'public',public,'digest',digest,'bytes',octet_length(content)) AS \"file!\" FROM product_assets WHERE tenant=$1 AND ($2::text IS NULL OR product_id=$2) AND id>$3 ORDER BY id LIMIT 51",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "file!",
+        "type_info": "Jsonb",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "b88687aba335102c6c442498bf449d227d4c4c04fbef0f5e40dc42bb8577571b"
+}

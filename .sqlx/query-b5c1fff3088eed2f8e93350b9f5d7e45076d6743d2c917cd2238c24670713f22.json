@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM product_categories WHERE tenant=$1 AND product_id=$2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "b5c1fff3088eed2f8e93350b9f5d7e45076d6743d2c917cd2238c24670713f22"
+}
