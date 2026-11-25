@@ -1,4 +1,4 @@
-//! Process-level statements: the readiness ping and the short lock wait of a background digest.
+//! Process-level statements: the readiness ping, the short lock wait of a background digest and the queue ages of the app worker sample.
 use sqlx::PgConnection;
 use veyndo_core::Result;
 
@@ -16,20 +16,11 @@ pub(crate) async fn short_lock_timeout(conn: &mut PgConnection) -> Result<()> {
     Ok(())
 }
 
-/// Seconds since the oldest due flow job and app delivery became available; `None` when none is due.
-pub(crate) async fn oldest_due<'e>(
-    db: impl sqlx::PgExecutor<'e>,
+/// Seconds since the oldest due flow job (marketing) and app delivery (apps) became available; `None` when none is due.
+pub(crate) async fn oldest_due<'e, E: sqlx::PgExecutor<'e> + Copy>(
+    db: E,
 ) -> Result<(Option<i64>, Option<i64>)> {
-    let r = sqlx::query!(
-        r#"SELECT
-      (SELECT floor(extract(epoch FROM now() - available_at))::bigint
-       FROM flow_jobs WHERE state='queued' AND available_at<=now()
-       ORDER BY available_at LIMIT 1) AS "flow?",
-      (SELECT floor(extract(epoch FROM now() - available_at))::bigint
-       FROM app_deliveries WHERE state='queued' AND available_at<=now()
-       ORDER BY available_at LIMIT 1) AS "delivery?""#
-    )
-    .fetch_one(db)
-    .await?;
-    Ok((r.flow, r.delivery))
+    let flow = veyndo_marketing::store::queue_health::oldest_due_flow(db).await?;
+    let delivery = veyndo_app_platform::store::queue_health::oldest_due_delivery(db).await?;
+    Ok((flow, delivery))
 }

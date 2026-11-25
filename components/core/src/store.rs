@@ -8,5 +8,6 @@ pub mod history_context;
 pub mod lease;
 pub mod outbox;
 pub mod pool;
+pub mod provisioning;
 pub mod row_security;
 pub mod tenants;

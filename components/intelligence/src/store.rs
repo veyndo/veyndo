@@ -17,6 +17,7 @@ pub mod personalization;
 pub mod platform_ai;
 pub mod preferences;
 pub mod product_reads;
+pub mod provisioning;
 pub mod relations;
 pub mod scenario_reports;
 pub mod search;

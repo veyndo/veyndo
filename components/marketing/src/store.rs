@@ -16,6 +16,7 @@ pub mod flow_mutations;
 pub mod flow_projection;
 pub mod flow_steps;
 pub mod promotions;
+pub mod queue_health;
 pub mod rule_entities;
 pub mod rule_history;
 pub mod rule_snapshot;
