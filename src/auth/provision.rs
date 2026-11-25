@@ -2,6 +2,7 @@
 use super::hash_password;
 use crate::catalog_model::prototype_products;
 use crate::foundation::App;
+use crate::store::{platform, shops};
 use crate::{accounts, auth, categories, demo_catalog};
 use axum::Json;
 use axum::extract::State;
@@ -61,71 +62,38 @@ pub(crate) async fn provision_shop(
     {
         return Err(bad("Reserved shop ID"));
     }
-    sqlx::query("SELECT pg_advisory_xact_lock(hashtextextended($1,43))")
-        .bind(slug)
-        .execute(&mut **tx)
-        .await?;
-    let alias_exists: bool =
-        sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM hosted_frontends WHERE alias=$1)")
-            .bind(slug)
-            .fetch_one(&mut **tx)
-            .await?;
-    if alias_exists {
+    shops::lock_id(tx, slug).await?;
+    if shops::alias_taken(tx, slug).await? {
         return Err(conflict("Shop address is already used by a frontend"));
     }
-    if sqlx::query("INSERT INTO tenants(id,name) VALUES($1,$2) ON CONFLICT DO NOTHING")
-        .bind(slug)
-        .bind(shop_name)
-        .execute(&mut **tx)
-        .await?
-        .rows_affected()
-        == 0
-    {
+    if !shops::create(tx, slug, shop_name).await? {
         return Err(conflict("Workspace ID already exists"));
     }
-    sqlx::query("INSERT INTO memberships(user_id,tenant,role) VALUES($1,$2,'owner')")
-        .bind(user)
-        .bind(slug)
-        .execute(&mut **tx)
-        .await?;
+    shops::add_owner(tx, user, slug).await?;
     if seed_catalog {
         demo_catalog::insert(tx, slug).await?;
     }
     let settings: Value =
         serde_json::from_str(include_str!("../../fixtures/demo-settings.json")).unwrap();
-    sqlx::query("INSERT INTO commerce_settings(tenant,data) VALUES($1,$2)")
-        .bind(slug)
-        .bind(settings)
-        .execute(&mut **tx)
-        .await?;
-    sqlx::query("INSERT INTO experiences(tenant,data) VALUES($1,$2)")
-        .bind(slug)
-        .bind(json!({"mode":"balanced","headline":"A considered wardrobe. Made for everyday."}))
-        .execute(&mut **tx)
-        .await?;
+    shops::insert_settings(tx, slug, settings).await?;
+    shops::insert_experience(
+        &mut **tx,
+        slug,
+        json!({"mode":"balanced","headline":"A considered wardrobe. Made for everyday."}),
+        false,
+    )
+    .await?;
     for variant in ["discovery", "comparison"] {
-        sqlx::query("INSERT INTO policy(tenant,variant) VALUES($1,$2)")
-            .bind(slug)
-            .bind(variant)
-            .execute(&mut **tx)
-            .await?;
+        shops::insert_policy(&mut **tx, slug, variant, false).await?;
     }
-    sqlx::query("SELECT public.seed_shop_automation($1)")
-        .bind(slug)
-        .execute(&mut **tx)
-        .await?;
+    shops::seed_automation(&mut **tx, slug).await?;
     if demo_customer {
-        sqlx::query("INSERT INTO customers(tenant,email,password_hash,company,group_name) VALUES($1,'buyer@example.test',$2,'Example Studio','business')").bind(slug).bind(demo_password).execute(&mut **tx).await?;
+        shops::insert_demo_customer(&mut **tx, slug, &demo_password, false).await?;
         accounts::seed_demo_address(tx, slug).await?;
     }
     let wat = include_str!("../../extensions/company-limit.wat");
     let sandbox = Sandbox::new(wat).map_err(bad)?;
-    sqlx::query("INSERT INTO extensions(tenant,wat,digest) VALUES($1,$2,$3)")
-        .bind(slug)
-        .bind(wat)
-        .bind(hash(wat))
-        .execute(&mut **tx)
-        .await?;
+    shops::insert_extension(&mut **tx, slug, wat, &hash(wat), false).await?;
     categories::seed(tx, slug).await?;
     if seed_catalog {
         demo_catalog::categories(tx, slug).await?;
@@ -167,10 +135,7 @@ pub(crate) async fn create_workspace(
     let demo = hash_password("demo-business".into()).await?;
     let mut tx = a.db.begin().await?;
     let token = header(&h, "authorization").and_then(|v| v.strip_prefix("Bearer "));
-    sqlx::query("SELECT id FROM merchant_users WHERE id=$1 FOR UPDATE")
-        .bind(user)
-        .fetch_one(&mut *tx)
-        .await?;
+    platform::lock_account(&mut tx, user).await?;
     if !super::mfa::trusted_session_tx(&mut tx, user, token).await? {
         return Err(veyndo_core::Error(
             axum::http::StatusCode::UNAUTHORIZED,

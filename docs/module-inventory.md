@@ -360,6 +360,11 @@ This lists every checked-in source module in these roots, including files with n
 | [src/shop_domains.rs](../src/shop_domains.rs) | Resolve configured shop subdomains before authentication; reject unknown hosts and conflicting scopes. |
 | [src/staging/mod.rs](../src/staging/mod.rs) | Private cloned shops live in the studio component; the server registers their routes and lends the release port. |
 | [src/staging/release_host.rs](../src/staging/release_host.rs) | The server side of the release port: app installation and managed record saves with the bundled rules, flow checks, settings guards and the sandbox policy cache. |
+| [src/store/migrations.rs](../src/store/migrations.rs) | The migration ledger and runner statements: trusted context, the session lock, ledger reads and writes, applying a migration script and the demo-seed marker. Static statements are checked at compile time. |
+| [src/store/platform.rs](../src/store/platform.rs) | Operator and merchant-account writes of the control plane: operator bootstrap, shop creation audit and account lookups. Columns checked at compile time. |
+| [src/store/process.rs](../src/store/process.rs) | Process-level statements: the readiness ping and the short lock wait of a background digest. |
+| [src/store/shops.rs](../src/store/shops.rs) | Shop provisioning writes: the registry row, the owner membership and the starter rows of every component a new shop needs. The server composes them; columns checked at compile time. |
+| [src/store.rs](../src/store.rs) | The server's own SQL: shop provisioning across components, the operator control plane, the migration runner and process-level checks. Components keep theirs in their own store modules. |
 | [src/storefront_islands.rs](../src/storefront_islands.rs) | Server-rendered storefront-kit islands for deep-linked product pages. |
 | [src/storefront_pages.rs](../src/storefront_pages.rs) | Deep-link HTML transport for stable SKU URLs with optional localized SEO slugs. |
 | [src/studio/facts.rs](../src/studio/facts.rs) | Dashboard facts are owned by the studio component. |

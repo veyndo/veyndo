@@ -64,9 +64,7 @@ pub(crate) async fn discovery(State(a): State<App>, request: axum::extract::Requ
     // The display name is public shop identity; a failed read falls back to the alias instead of failing discovery.
     let name = veyndo::tenant_scope::scoped(
         veyndo::tenant_scope::Scope::Tenant(shop.access.tenant.clone()),
-        sqlx::query_scalar::<_, String>("SELECT name FROM tenants WHERE id=$1")
-            .bind(&shop.access.tenant)
-            .fetch_optional(&a.db),
+        veyndo_core::store::tenants::name(&a.db, &shop.access.tenant),
     )
     .await
     .ok()

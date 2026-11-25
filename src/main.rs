@@ -56,6 +56,7 @@ mod security_headers;
 mod seed;
 mod shop_domains;
 mod staging;
+mod store;
 mod storefront_islands;
 mod storefront_pages;
 mod studio;

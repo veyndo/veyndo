@@ -1,6 +1,7 @@
 //! Public synthetic fashion template; provisioning copies only this versioned fixture into a new tenant.
 use crate::catalog_model::prototype_products;
 use crate::foundation::App;
+use crate::store::shops;
 use serde_json::Value;
 use serde_json::json;
 use std::env;
@@ -27,37 +28,26 @@ pub(crate) async fn insert(tx: &mut sqlx::PgConnection, tenant: &str) -> Result<
 /// An opt-in built-in demo is added once; subsequent starts never replace merchant edits or orders.
 pub(crate) async fn seed_builtin(a: &App) -> Result<()> {
     let mut tx = a.db.begin().await?;
-    let created = sqlx::query(
-        "INSERT INTO tenants(id,name) VALUES('nord-atelier','Nord Atelier') ON CONFLICT DO NOTHING",
-    )
-    .execute(&mut *tx)
-    .await?
-    .rows_affected();
-    if created == 0 {
+    if !shops::create(&mut tx, "nord-atelier", "Nord Atelier").await? {
         return Ok(());
     }
     veyndo_catalog::store::demo_template::insert_template(&mut tx, "nord-atelier", template())
         .await?;
     let settings: Value =
         serde_json::from_str(include_str!("../fixtures/demo-settings.json")).unwrap();
-    sqlx::query("INSERT INTO commerce_settings(tenant,data) VALUES('nord-atelier',$1)")
-        .bind(settings)
-        .execute(&mut *tx)
-        .await?;
-    sqlx::query("SELECT public.seed_shop_automation('nord-atelier')")
-        .execute(&mut *tx)
-        .await?;
+    shops::insert_settings(&mut tx, "nord-atelier", settings).await?;
+    shops::seed_automation(&mut *tx, "nord-atelier").await?;
     crate::categories::seed(&mut tx, "nord-atelier").await?;
     categories(&mut tx, "nord-atelier").await?;
-    sqlx::query("INSERT INTO experiences(tenant,data) VALUES('nord-atelier',$1)")
-        .bind(json!({"mode":"balanced","headline":"A considered wardrobe. Made for everyday."}))
-        .execute(&mut *tx)
-        .await?;
+    shops::insert_experience(
+        &mut *tx,
+        "nord-atelier",
+        json!({"mode":"balanced","headline":"A considered wardrobe. Made for everyday."}),
+        false,
+    )
+    .await?;
     for variant in ["discovery", "comparison"] {
-        sqlx::query("INSERT INTO policy(tenant,variant) VALUES('nord-atelier',$1)")
-            .bind(variant)
-            .execute(&mut *tx)
-            .await?;
+        shops::insert_policy(&mut *tx, "nord-atelier", variant, false).await?;
     }
     tx.commit().await?;
     for p in prototype_products(a, "nord-atelier").await? {

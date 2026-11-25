@@ -100,12 +100,9 @@ pub(crate) async fn bootstrap() -> App {
         }
         setup.close().await;
     }
-    let seeded: bool = sqlx::query_scalar(
-        "SELECT EXISTS(SELECT 1 FROM public.commerce_migrations WHERE version='demo-v1')",
-    )
-    .fetch_one(&a.db)
-    .await
-    .expect("completed setup");
+    let seeded = crate::store::migrations::demo_seeded(&a.db)
+        .await
+        .expect("completed setup");
     assert!(
         seeded || env::var("SEED_DEMO").as_deref() == Ok("false"),
         "Setup is incomplete: run BOOTSTRAP_MODE=migrate"
@@ -113,12 +110,9 @@ pub(crate) async fn bootstrap() -> App {
     // Only the two built-in demo policies are eager. Other tenant policies are
     // validated lazily against their persisted source in the existing checkout path.
     for t in ["atelier", "workshop"] {
-        if let Some(wat) =
-            sqlx::query_scalar::<_, String>("SELECT wat FROM extensions WHERE tenant=$1")
-                .bind(t)
-                .fetch_optional(&a.db)
-                .await
-                .expect("persisted extension")
+        if let Some(wat) = crate::store::shops::extension(&a.db, t)
+            .await
+            .expect("persisted extension")
         {
             a.apps.sandboxes.insert(
                 t.into(),

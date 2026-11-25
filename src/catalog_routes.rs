@@ -21,7 +21,7 @@ use veyndo_shop::types::cart::Item;
 use veyndo_shop::types::cart::StoredCart;
 
 pub(crate) async fn health(State(a): State<App>) -> Result<Json<Value>> {
-    sqlx::query("SELECT 1").execute(&a.db).await?;
+    crate::store::process::ping(&a.db).await?;
     Ok(Json(
         json!({"status":"ok","database":"postgresql","knowledge":"PostgreSQL relations + Qdrant","model":*a.models.model,"payment":"simulated","version":env!("CARGO_PKG_VERSION")}),
     ))

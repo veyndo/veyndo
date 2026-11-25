@@ -97,9 +97,7 @@ impl AgentHost for Host<'_> {
     fn configuration_digest<'a>(&'a self, t: &'a str) -> PortFuture<'a, String> {
         Box::pin(async move {
             let mut tx = self.0.db.begin().await?;
-            sqlx::query("SET LOCAL lock_timeout='250ms'")
-                .execute(&mut *tx)
-                .await?;
+            crate::store::process::short_lock_timeout(&mut tx).await?;
             operations::lock_company(&mut tx, t).await?;
             let configuration = staging::snapshot(&mut tx, t).await?;
             // Keep only the digest in the actor-private task, not a second configuration store.

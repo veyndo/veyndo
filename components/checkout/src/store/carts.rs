@@ -81,3 +81,14 @@ pub async fn rotate_token_returning(
     .fetch_one(tx)
     .await?)
 }
+
+/// Cancels an open cart; the number of carts changed (0 when it is no longer open).
+pub async fn cancel_open(a: &veyndo_core::State, id: &str) -> veyndo_core::Result<u64> {
+    Ok(sqlx::query!(
+        "UPDATE carts SET status='cancelled',revision=revision+1 WHERE id=$1 AND status='open'",
+        id
+    )
+    .execute(&a.db)
+    .await?
+    .rows_affected())
+}

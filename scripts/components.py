@@ -21,7 +21,7 @@ GLOB = re.compile(r'(?m)^(?:pub(?:\(crate\))? )?use (?:super|crate)::\*;')
 UNTYPED = re.compile(r'\b\w+(?:\["[^"\n]+"\])+')
 SQL_CALL = re.compile(r'\bsqlx::(?:query|query_as|query_scalar|QueryBuilder)\b')
 # A query whose SQL the compiler does not check: a runtime string or a dynamic QueryBuilder.
-RUNTIME_SQL = re.compile(r'\bsqlx::(?:(?:query|query_as|query_scalar)(?:::<[^>()]*>)?\(|QueryBuilder\b)')
+RUNTIME_SQL = re.compile(r'\bsqlx::(?:(?:query|query_as|query_scalar)(?:::<|\()|QueryBuilder\b)')
 READ = r'(?i)\b(?:FROM|JOIN)\s+(?:ONLY\s+)?(?:public\.)?'
 
 

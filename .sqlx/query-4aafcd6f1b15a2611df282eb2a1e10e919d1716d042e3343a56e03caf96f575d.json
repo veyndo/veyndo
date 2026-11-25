@@ -1,0 +1,12 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SET LOCAL search_path=public",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": []
+    },
+    "nullable": []
+  },
+  "hash": "4aafcd6f1b15a2611df282eb2a1e10e919d1716d042e3343a56e03caf96f575d"
+}

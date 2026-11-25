@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT wat FROM extensions WHERE tenant=$1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "wat",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "extensions",
+            "name": "wat"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "c2a9092a6257a47fbb53aae5c85e5eef4e6d69675ba071788ed8b14cc2b6eefd"
+}

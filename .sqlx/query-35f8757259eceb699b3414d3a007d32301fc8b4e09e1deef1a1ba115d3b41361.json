@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO platform_audit(actor,action,data) VALUES($1,'operator.bootstrap',jsonb_build_object('userId',$1::text))",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "35f8757259eceb699b3414d3a007d32301fc8b4e09e1deef1a1ba115d3b41361"
+}

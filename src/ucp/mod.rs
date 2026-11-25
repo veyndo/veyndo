@@ -205,13 +205,7 @@ pub(crate) async fn ucp_cancel(
 ) -> Result<Json<Value>> {
     let selected = profile::select(&h, false).await?;
     let c = ucp_load(&a, &h, &id).await?;
-    let n = sqlx::query(
-        "UPDATE carts SET status='cancelled',revision=revision+1 WHERE id=$1 AND status='open'",
-    )
-    .bind(&c.id)
-    .execute(&a.db)
-    .await?
-    .rows_affected();
+    let n = veyndo_checkout::store::carts::cancel_open(&a.core, &c.id).await?;
     if n != 1 && c.status != "cancelled" {
         return Err(conflict("Completed checkout cannot be cancelled"));
     }

@@ -1,6 +1,7 @@
 //! Idempotent synthetic template catalogue initialization.
 use crate::accounts;
 use crate::foundation::App;
+use crate::store::shops;
 use argon2::Argon2;
 use argon2::PasswordHasher;
 use argon2::password_hash::SaltString;
@@ -80,21 +81,19 @@ pub(crate) async fn seed(a: &App) -> Result<()> {
             .hash_password(b"demo-business", &salt)
             .unwrap()
             .to_string();
-        sqlx::query("INSERT INTO customers(tenant,email,password_hash,company,group_name) VALUES($1,'buyer@example.test',$2,'Example Studio','business') ON CONFLICT DO NOTHING").bind(t).bind(password_hash).execute(&a.db).await?;
+        shops::insert_demo_customer(&a.db, t, &password_hash, true).await?;
         let mut address_tx = a.db.begin().await?;
         accounts::seed_demo_address(&mut address_tx, t).await?;
         address_tx.commit().await?;
-        sqlx::query("INSERT INTO experiences(tenant,data) VALUES($1,$2) ON CONFLICT DO NOTHING")
-            .bind(t)
-            .bind(json!({"mode":"balanced","headline":"Objects for a more considered everyday."}))
-            .execute(&a.db)
-            .await?;
+        shops::insert_experience(
+            &a.db,
+            t,
+            json!({"mode":"balanced","headline":"Objects for a more considered everyday."}),
+            true,
+        )
+        .await?;
         for v in ["discovery", "comparison"] {
-            sqlx::query("INSERT INTO policy(tenant,variant) VALUES($1,$2) ON CONFLICT DO NOTHING")
-                .bind(t)
-                .bind(v)
-                .execute(&a.db)
-                .await?;
+            shops::insert_policy(&a.db, t, v, true).await?;
         }
     }
     Ok(())

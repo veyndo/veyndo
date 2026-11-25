@@ -101,6 +101,16 @@ pub async fn prototype(a: &State, tenant: &str) -> Result<Vec<Product>> {
     .collect())
 }
 
+/// The main products of `tenant` among `ids` (the bounded built-in demo set), in no particular order.
+pub async fn main_by_ids(a: &State, tenant: &str, ids: &[String]) -> Result<Vec<Product>> {
+    Ok(sqlx::query_as!(ProductRow, r#"SELECT id,name,category,description,price,tax_rate,stock,revision,list_price,regulation_price,reference_price,advanced_prices,min_purchase,purchase_steps,max_purchase,parent_id,options,media,properties,delivery_days,extra,product_number FROM products WHERE tenant=$1 AND id=ANY($2) AND parent_id IS NULL"#, tenant, ids)
+    .fetch_all(&a.db)
+    .await?
+    .into_iter()
+    .map(Product::from)
+    .collect())
+}
+
 /// Up to 100 products after `cursor` up to `ceiling` that existed at `snapshot`, in ID order and locked.
 pub async fn lock_range(
     tx: &mut PgConnection,

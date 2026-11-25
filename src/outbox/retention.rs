@@ -5,9 +5,7 @@ pub(super) async fn once(a: &App) -> Result<()> {
     if !veyndo_core::store::outbox::retention::due() {
         return Ok(());
     }
-    sqlx::query("DELETE FROM auth_attempt_buckets WHERE updated_at < now()-interval '1 day'")
-        .execute(&a.db)
-        .await?;
+    veyndo_identity::store::attempts::retire(&a.core).await?;
     crate::cognition::behavior::retire(a).await?;
     let config = crate::runtime_config::get();
     veyndo_core::store::outbox::retention::retire(

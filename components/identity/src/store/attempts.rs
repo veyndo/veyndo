@@ -22,3 +22,11 @@ pub async fn block(a: &State, key: &str) -> Result<()> {
     .await?;
     Ok(())
 }
+
+/// Retires sign-in throttle buckets untouched for a day.
+pub async fn retire(a: &State) -> Result<()> {
+    sqlx::query!("DELETE FROM auth_attempt_buckets WHERE updated_at < now()-interval '1 day'")
+        .execute(&a.db)
+        .await?;
+    Ok(())
+}
