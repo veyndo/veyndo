@@ -82,7 +82,7 @@ IDs, one-parent fallback, duplicate system-language entries, missing rules,
 priority order, unsorted tiers, gaps, open ends, beyond-last quantities and
 floor rounding below a minimum.
 
-`src/context.rs` supplies the shared ports. Native locale hydration falls back
+`components/pricing/src/domain/context.rs` supplies the shared ports. Native locale hydration falls back
 field-by-field and is used by the catalog, persisted carts, merchant overview
 and actual model input. It is not a port of the complete DAL translation loader.
 The demo makes all seeded languages available to both tenants; production

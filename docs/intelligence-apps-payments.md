@@ -78,7 +78,7 @@ no bearer token and a source-window/nonce-bound message bridge. The SDK can invo
 only the current app's declared actions through normal server authorization.
 Own UI bundles now mount at declared admin/storefront surfaces, with namespaced API aliases and selected AI context; see [app-platform.md](app-platform.md). They cannot inject code into the parent document. A resource-limited example container is provided; Canonical package signing and bounded read-only WIT commerce hooks are implemented. MicroVM isolation and automatic PHP transpilation remain absent. See [security boundaries](app-security.md). Deployment network/runner boundaries remain the operator's responsibility.
 
-App-specific engraving validation lives in `extensions/apps/engraving/configuration.wat` and its manifest. The generic host in `src/apps/cart_contributions.rs` binds revisions and applies the result; `src/apps/runtime.rs` executes the package ABI. An independent gift-message package uses the same contract with different rules and input fields.
+App-specific engraving validation lives in `extensions/apps/engraving/configuration.wat` and its manifest. The generic host in `src/apps/cart_contributions.rs` binds revisions and applies the result; `extensions/apps/marketplaces/service/runtime.rs` executes the package ABI. An independent gift-message package uses the same contract with different rules and input fields.
 
 The engraving example is genuinely connected: product slot → authoritative
 configuration → taxed cart surcharge per unit → revision check → immutable order

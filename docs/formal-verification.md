@@ -108,12 +108,12 @@ verified separately by native integration tests rather than proved by Lean.
 | `receipt_admissible` | Accepted provider receipts match amount and currency and confirm the outcome | `components/payments/src/domain/receipt_guard.rs` |
 | `platform_admissible` | Operator access requires a personal identity, active grant and account | `src/platform/auth.rs` |
 | `app_read_admissible` | Read aliases admit declared read-only, non-mutating handlers | `src/apps/surfaces.rs` |
-| `rule_authenticated` | A guest cannot satisfy the authenticated-customer condition; both Boolean branches match exactly | `src/marketing/rule_match.rs` |
+| `rule_authenticated` | A guest cannot satisfy the authenticated-customer condition; both Boolean branches match exactly | `components/marketing/src/domain/rule_match.rs` |
 | `rule_boolean_comparison` | Equality, inequality and emptiness select the exact Boolean result | `crates/automation/src/rule_comparison.rs` |
 | `app_flow_admissible` | Only explicitly eligible private mutation actions can be flow targets | `components/apps/src/service/flow_apps.rs` |
 | `rule_xor_count` | XOR matches exactly one child; no matches cannot satisfy it | `crates/automation/src/rules/evaluation.rs` |
 | `flow_delay_admissible` | Durable delays are positive and at most thirty days | `components/marketing/src/domain/pipeline.rs` |
-| `destination_tax_admissible` | Condition, country, state, postcode and date guards must all match | `src/commerce/tax_rules.rs` |
+| `destination_tax_admissible` | Condition, country, state, postcode and date guards must all match | `components/shop/src/domain/tax_rules.rs` |
 | `customer_group_net` | Net basis requires a configured business group; unknown groups cannot claim it | `src/commerce/customer_groups.rs` |
 | `app_tool_admissible` | Tool admission requires explicit enablement and current authorization | `src/apps/gateway.rs` |
 | `app_core_reference_admissible` | Product references may be public; customer/order references require private data | `components/apps/src/domain/entity_access.rs` |
@@ -331,7 +331,7 @@ for the private hosting configuration.
 
 ## Multi-currency admission (2026-10-07)
 
-`currency_context_admissible` is consumed by `src/currencies/model.rs`: only a
+`currency_context_admissible` is consumed by `components/pricing/src/types/currency.rs`: only a
 configured, channel-enabled currency with an admitted saved rate may be selected.
 Exact Boolean equivalence and stale-rate rejection brought the then-reviewed manifest to
 35 policies and 74 named properties. Explicit mutations bypassing availability

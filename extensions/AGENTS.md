@@ -5,7 +5,7 @@ Root AGENTS.md also applies. Rules below were moved from the root, not weakened.
 ## App lifecycle and independent reference services
 
 Native record lifecycle declarations are generic Manifest contracts implemented
-by `src/apps/record_lifecycle.rs`; application-specific states/edges belong only
+by `components/apps/src/domain/record_lifecycle.rs`; application-specific states/edges belong only
 to their package. AI edits must preserve existing lifecycle/identity constraints.
 Record writes must retain the installed-package advisory fence and transactional
 digest check; do not replace it with cached approval or a second write API.

@@ -30,7 +30,7 @@ The native
 rejects a supplied tenant field; generated operation schemas share that contract.
 No provider configuration, automatic publication or parallel onboarding executor.
 
-The state is bounded and validated by `src/studio/personal/model.rs`; existing
+The state is bounded and validated by `components/studio/src/domain/workspace.rs`; existing
 workspace RLS, revisions and history apply. No tables or new API operations.
 UI vocabulary is in `setup-i18n.ts` and `step-i18n.ts` (EN/DE/FR/ES).
 

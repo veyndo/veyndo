@@ -122,7 +122,7 @@ IDs, so subsequent releases continue to compare against actual live state.
 | --- | --- |
 | `src/operations/company_model.rs` | Field whitelist, locale/country validation, sparse inheritance, address projection |
 | `src/operations/master_data.rs` | Shared/channel persistence, revision/transaction boundaries and issuer resolution |
-| `src/operations/company_logo.rs` | Decoder limits, immutable storage, authenticated preview and linked public bytes |
+| `components/orders/src/http/company_logo.rs` | Decoder limits, immutable storage, authenticated preview and linked public bytes |
 | `src/operations/company_public.rs` | Deliberate public projection without private banking/tax fields |
 | `components/orders/src/store/company_release.rs` | Selective company/override/logo release and canonical baseline |
 | `components/shop/ui/admin/settings/Company*.tsx` | Modular factual fields, logo, content-language editor |

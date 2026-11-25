@@ -84,7 +84,7 @@ not evidence of a successful live provider payment.
 | `shop_domains.rs`, `shop_domains/frontends.rs` | Authoritative domain scope, guarded registration, public proxy |
 | `commerce/product_create.rs`, `product_edit.rs` | Validated stable import IDs, duplicate conflict and normal revision-bound product saves |
 | `migrations/042-identity-frontends.sql` | Identity, nonce, handoff, hosted frontend and daily inference persistence |
-| `migrations/055-hosted-frontend-apps.sql`, `src/apps/hosted.rs` | Idempotent Experience integration ownership and dependency checks |
+| `migrations/055-hosted-apps.sql`, `src/apps/hosted.rs` | Idempotent Experience integration ownership and dependency checks |
 | `scripts/identity_broker.py` | Real HTTP/PostgreSQL signatures, foreign ownership, empty/fashion provisioning, handoff, mounts, paused shop and restart regressions |
 
 Hermetic provider tests and these integration checks do not demonstrate Google/Apple production OAuth or actual email delivery. The [8 October release review](current-release.md) separately records the observed public deployment, owned app/domain connection and retained editor; it makes no live-provider acceptance claim. New adapters remain explicitly unproved in the formal inventory; existing extracted policies retain their checks.

@@ -80,7 +80,7 @@ Create the dedicated `veyndo` Vercel project from this GitHub repository.
 Select `frontend` as root, Vite, `npm run build`, and `dist`. **Enable including
 source files outside the root directory**: the frontend imports the shared
 `extensions/sdk/analytics` module. This is also covered by the corrected Docker
-build. Keep the generated `frontend/vercel.json` in the deployment checkout or
+build. Keep the generated `extensions/apps/vercel/frontend/vercel.json` in the deployment checkout or
 configure the same rewrites in the deployment's committed environment-specific
 configuration; it is ignored by this generic source repository and must be
 supplied before a Git-based build. Do not import a project with placeholder

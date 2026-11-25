@@ -147,7 +147,7 @@ does not certify the private Shopware Payments adapter for every currency.
 - `src/commerce/`, `components/checkout/src/service/cart_projection.rs`,
   `src/order_checkout.rs`, `src/ucp/`: catalog, destination taxes, shipping,
   checkout and protocol consumers.
-- `src/payments/`, `src/operations/receipt_text.rs`, `src/studio/revenue.rs`:
+- `src/payments/`, `src/operations/receipt_text.rs`, `components/studio/src/service/reports.rs`:
   provider ledger, documents and separated invoice-currency reporting.
 - `extensions/apps/email/src/templates.rs`: order emails use the frozen exact money snapshot;
   zero- and three-decimal totals are preserved in all supplied languages.

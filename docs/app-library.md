@@ -87,7 +87,7 @@ does not mutate installed source code in place.
 | `components/apps/ui/admin/apps/AppDetails.tsx` | Detail tabs and confirmation-based activation |
 | `components/apps/ui/admin/apps/AppInterfaces.tsx` | Registered native/external admin surfaces |
 | `frontend/src/shared/i18n/app-library-i18n.ts` | English/German/French/Spanish UI and summaries |
-| `src/apps/presentation.rs` | Passive metadata bounds and safe asset validation |
+| `components/apps/src/domain/presentation.rs` | Passive metadata bounds and safe asset validation |
 | `fixtures/app-studio-schema.json` | Shared optional package-generation schema |
 
 Styles are divided between app catalog, artwork and detail modules. The generated

@@ -140,8 +140,8 @@ reported.
 |---|---|
 | `components/apps/ui/admin/developer/app-recipes.ts`, `AppRecipes.tsx` | Patterns compiled through the existing wizard; UI tests exercise an owned order-bound save without refund calls |
 | `AppProposalReview.tsx`, `app-proposal.ts`, `useAppStudio.ts` | Explicit review, staleness protection and same native version lifecycle; frontend interaction tests |
-| `src/developer/generation_edits.rs` | Bounded JSON Patch model wire, atomic Manifest edits and host-assigned versions; no app runtime |
-| `src/developer/generation_contract.rs` | Existing schema/access/integration preservation; rejected removal/type-change unit cases |
+| `components/apps/src/domain/generation_edits.rs` | Bounded JSON Patch model wire, atomic Manifest edits and host-assigned versions; no app runtime |
+| `components/apps/src/domain/generation_contract.rs` | Existing schema/access/integration preservation; rejected removal/type-change unit cases |
 | `src/planner.rs`, `proposal_apply.rs`, `translations/routes.rs` | One approved translation job owner; actual Rust/PostgreSQL planner/approval/restart/isolation suite |
 | `components/intelligence/src/http/experience.rs`, `usePersonalization.ts` | Explainable category ordering and scope/consent boundaries; existing controlled experiment suite and late-response UI regression |
 | Private Experience `onboarding-catalog.ts`, `job-lease.ts` | Actual worker import loop checkpoint/retry and real leased PostgreSQL progress tests |

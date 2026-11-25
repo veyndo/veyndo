@@ -161,7 +161,7 @@ hostile-code containment or local worker limits as fleet-wide admission.
 ### App ontology ownership
 
 Optional `intelligence.ontology` belongs to the canonical native app manifest.
-`src/apps/ontology.rs` adapts the shared model graph projector using fields/current
+`components/apps/src/domain/ontology.rs` adapts the shared model graph projector using fields/current
 revisions from the existing permission- and tenant-scoped native list. API, MCP and planner context
 consume this same view; App Studio and coding agents edit the same schema.
 Namespace app-owned node/edge types. Keep graph labels in `LocalizedField` and the

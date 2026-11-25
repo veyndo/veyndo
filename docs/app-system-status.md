@@ -150,7 +150,7 @@ fixtures for its own commerce calculations.
 | Pricing and order truth | `src/apps/cart_contributions.rs`, `commerce_hooks.rs`, `src/commerce/`, `src/order_checkout.rs` | [Checkout](checkout.md), [app components](app-platform.md#pure-commerce-components) |
 | B2B buying | `src/b2b/`, existing account and Studio consumers | [Company purchasing and explicit remaining scope](b2b-commerce.md) |
 | Saved agent work | `src/agent_runs/`, existing tasks/conversations and central inference | [Worker-kill/provider-fixture and hosted reload acceptance](durable-agent-runs.md) |
-| Security | `src/database_scope.rs`, `src/database_scope/provision.rs`, `src/scoped_pool.rs`, native auth and session owners | [Hosted enforced database receipt](evidence/database-enforcement-2026-10-15.json), [browser release](evidence/browser-release-2026-10-15.json) |
+| Security | `crates/runtime/src/database_scope.rs`, `crates/runtime/src/database_scope/provision.rs`, `crates/runtime/src/scoped_pool.rs`, native auth and session owners | [Hosted enforced database receipt](evidence/database-enforcement-2026-10-15.json), [browser release](evidence/browser-release-2026-10-15.json) |
 
 The 15 October shared-storage cutover retired eight verified legacy app tables.
 After new installations the hosted audit still found four fixed forced-RLS tables,

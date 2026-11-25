@@ -51,7 +51,7 @@ issuer is introduced. Its non-root runtime image contains no Python or compiler.
 | Runtime `crypto.rs`, `store.rs` (`extensions/services/connector-runtime/src/`) | Authenticated encryption and transaction-local RLS/configuration context |
 | Runtime `queue.rs`, service `worker.rs` | PostgreSQL idempotency, tenant admission, fair claims, leases and outcome handling |
 | App `extensions/apps/email/src/smtp.rs`, runtime `network.rs` | Pinned SMTP addresses, verified TLS, fixed HTTP endpoints, bounded responses |
-| Runtime `oauth.rs`, app `src/actions.rs` | Shared single-use state/token fencing over the policy the app declares; app-owned OAuth scope, protocol and field admission |
+| Runtime `oauth.rs`, app `extensions/apps/<app>/src/actions.rs` | Shared single-use state/token fencing over the policy the app declares; app-owned OAuth scope, protocol and field admission |
 | `extensions/apps/{gmail,google-analytics,slack}/src/`, runtime `exports.rs` | Gmail incremental cursors, exact GA4 rows, Slack notification and bounded exports |
 | `legacy.rs` | Explicit atomic offline migration; no automatic import during normal serving |
 | Migration 049 | Six private tenant-scoped tables and forced RLS |
@@ -199,8 +199,8 @@ bot tokens, unrestricted mailbox backfill or measured provider throughput are cl
 
 - `components/core/src/request_context.rs`, `components/identity/src/route_policy.rs`, `src/auth/{identity,abuse}.rs`, `components/identity/src/types/envelopes.rs` and `components/identity/src/store/identity.sql`: trusted Principal, explicit method rights, one current grant lookup, persistent login admission and typed auth requests.
 - `crates/runtime/src/scoped_pool.rs`, `src/performance/{pool,row_security,cluster_lease}.rs`, `src/runtime_config.rs`: local transaction scope, guarded session borrows, validated startup contracts and shared resource/connection budgets.
-- `components/apps/src/service/{sandbox_cache,business_policy}.rs`, `src/apps/runtime.rs`, `crates/cognition/src/images.rs`: bounded Wasm compilation/execution cache and blocking-pool image processing.
-- `src/work_signal.rs`, `src/outbox.rs`, `src/outbox/{control,retention}.rs`, `retention.sql` and migration 057: commit hints, isolated retries/quarantine, permission-checked recovery and bounded retention.
+- `components/apps/src/service/{sandbox_cache,business_policy}.rs`, `extensions/apps/marketplaces/service/runtime.rs`, `crates/cognition/src/images.rs`: bounded Wasm compilation/execution cache and blocking-pool image processing.
+- `components/core/src/work_signal.rs`, `src/outbox.rs`, `src/outbox/{control,retention}.rs`, `retention.sql` and migration 057: commit hints, isolated retries/quarantine, permission-checked recovery and bounded retention.
 - `deploy/sql/provision-runtime.sh`, `scripts/security/core_hardening.py`, `scripts/testing/pooler.py`, `scripts/transaction_pooler.py`: least-privilege provisioning and actual two-replica/one-backend PgBouncer regression paths.
 
 [All eighteen findings, shared architecture and exact limits](core-hardening.md).

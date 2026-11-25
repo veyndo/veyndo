@@ -113,7 +113,7 @@ invoice creation. Category writes, product storage and the standalone
 catalog hosting boundary remain with their current owners.
 [Hosted rollout](status.md#shared-product-contract-on-northflank).
 
-**App package installation service:** Pinned Apps `src/models.rs` owns the original
+**App package installation service:** Pinned Apps `extensions/services/app-storage/src/models.rs` owns the original
 model install/rebuild sequence and required compatibility port. Native
 `components/apps/src/store/records.rs` delegates with actual core-extension compatibility on its
 existing transaction. Apps `data-service/src/installer.rs`, `install_hooks.rs` and
@@ -122,7 +122,7 @@ shared installer for portable private data packages; they own no native resource
 resolver. Schema-4 provisioning stays outside the serving image.
 [Operator guide](app-package-installation-service.md).
 
-**App job supervision:** Apps `src/job_projection.rs` owns the original job
+**App job supervision:** Apps `extensions/services/app-storage/src/job_projection.rs` owns the original job
 history result redaction and queued-event selection, shared with native
 `src/apps/jobs.rs` through its current authenticated authority adapter. The
 independent `data-service/src/job_service.rs` and `job_host.rs` compose bounded
@@ -137,7 +137,7 @@ snapshot in `extensions/services/app-storage/` is verified by
 use its record/job SQL through the same scoped transaction. Native admission,
 field/reference validation, evidence and publication admission remain in Core.
 Record history storage/restoration now uses Apps 0.21.0 as described below. Apps 0.2.0 also owns record CAS/replay and page/filter/window SQL;
-`src/apps/record_write.rs` supplies native lifecycle and history hooks to that
+`components/apps/src/store/record_write.rs` supplies native lifecycle and history hooks to that
 shared mutation engine.
 The trusted storage crate is distinct from no-SQL `veyndo-app-runtime` and its native `veyndo-apps` adapter;
 Cargo boundary controls prohibit guest/domain imports of the storage package.
@@ -151,15 +151,15 @@ financial writer. Native Core keeps its existing in-process runtime adapter and
 full commerce admission. [Operation and setup](app-runtime-service.md).
 [Runtime service acceptance](evidence/app-runtime-service-component-2026-11-06.md).
 
-**Managed record state/history:** Pinned Apps `src/managed_hooks.rs` owns the
+**Managed record state/history:** Pinned Apps `extensions/services/app-storage/src/managed_hooks.rs` owns the
 original native workflow admission and before/after bounded history capture.
-Native `src/apps/record_write.rs` passes its original key/manifest/entity on the
+Native `components/apps/src/store/record_write.rs` passes its original key/manifest/entity on the
 same transaction; `data.rs` retains complete field/reference/language/package
 admission. Independent `data-service/` adds an explicitly enabled portable write
 profile and deliberately narrow schema/grants. Unsupported native policies deny.
 [Write/history guide](app-data-writes.md).
 
-**Shared declared settings and vault:** Pinned Apps `src/settings.rs` owns the
+**Shared declared settings and vault:** Pinned Apps `extensions/services/app-storage/src/settings.rs` owns the
 original encrypted settings read/projection/partial-update sequence. Native
 `src/apps/settings.rs` retains its verified personal/live administrator admission,
 package approval, response flags and caller transaction. Independent `data-service/`
@@ -171,7 +171,7 @@ new provider/key issuer or plaintext secret endpoint. [Guide](app-settings-servi
 **App Data reader and shared authority:** Apps `data-service/` owns independent
 read-only HTTP/MCP composition and the explicit reader-schema installer.
 `authority/` owns the original role-bound scope protocol and fixed current OAuth
-adapter, with network/database feature separation. `src/record_query.rs` owns
+adapter, with network/database feature separation. `extensions/services/app-storage/src/record_query.rs` owns
 original bounded page/filter preparation and declared-field projection. Native
 `crates/runtime` retains task scope, pools and provisioning; `src/apps/data.rs`
 retains caller transactions and native entity/privacy admission. No new native
@@ -184,7 +184,7 @@ The [independent checkout target](checkout-component.md) keeps transactional com
 and payment authority explicit. These are implementation designs; no new shared
 UI runtime or standalone Checkout service is claimed.
 
-**App Studio versions:** Pinned Apps `src/build_versions.rs` owns immutable
+**App Studio versions:** Pinned Apps `extensions/services/app-storage/src/build_versions.rs` owns immutable
 snapshot persistence and original digest, bounded active/archive queries,
 recoverable archive/restore and row-fenced staging. Native `src/developer/builds.rs`
 retains full validation and minimized design-context retention; `routes.rs` and
@@ -194,41 +194,41 @@ installer admission on the original privileged transaction. Final selective live
 release retains its native owner.
 [Evidence](evidence/app-studio-versions-component-2026-11-06.md).
 
-**Package state:** Pinned Apps `src/activation.rs` owns configuration-hook/lifecycle
+**Package state:** Pinned Apps `extensions/services/app-storage/src/activation.rs` owns configuration-hook/lifecycle
 fence ordering, active-dependant check and revision CAS. Native
-`src/apps/activation.rs` supplies actual configuration, package/current actor/
+`components/apps/src/store/activation.rs` supplies actual configuration, package/current actor/
 consent/trust/dependencies/commerce/lifecycle and connected-frontend admission;
 `routes.rs` retains current management/merchant scope, input and caller transaction.
 The duplicate deactivation dependency query is removed from native distribution.
 [Evidence](evidence/app-activation-component-2026-11-06.md).
 
-**App record history:** Pinned Apps `src/record_history.rs` owns immutable capture,
+**App record history:** Pinned Apps `extensions/services/app-storage/src/record_history.rs` owns immutable capture,
 original historical read scopes/actor/source, bounded list and restore lookup/
-read admission. Native `src/apps/history_storage.rs` supplies current rights and
+read admission. Native `components/apps/src/http/record_history.rs` supplies current rights and
 actual `data::save_tx` on the same transaction. `src/apps/record_history.rs` retains
 current entity/declared-field projection, explicit review and API/MCP transport.
 Native write hooks call shared capture before/after the normal CAS writer. The
 existing signed scope, package/reference/lifecycle/outbox and caller transaction
 remain authoritative. [Evidence](evidence/app-record-history-component-2026-11-06.md).
 
-**Private Studio autosaves:** Pinned Apps `src/drafts.rs` owns strict shared-wire
+**Private Studio autosaves:** Pinned Apps `extensions/services/app-storage/src/drafts.rs` owns strict shared-wire
 save, bounded per-actor history, actor advisory lock/row CAS/quota and scoped delete.
-Native `src/developer/drafts.rs` supplies the current authenticated actor/developer
+Native `components/apps/src/http/app_studio.rs` supplies the current authenticated actor/developer
 scope and required actual private-environment query on the same connection. The
 caller retains commit/rollback; drafts do not install or publish anything.
 [Evidence](evidence/app-private-drafts-component-2026-11-06.md).
 
-**Encrypted app configuration:** Pinned Apps `src/secrets.rs` owns metadata-only
+**Encrypted app configuration:** Pinned Apps `extensions/services/app-storage/src/secrets.rs` owns metadata-only
 reads, digest-bound internal resolution and encrypted rotation with original
 binding/lock/CAS/package/outbox order and required host crypto. Native
-`src/apps/secret_storage.rs` delegates seal/open to the actual existing platform
+`components/apps/src/http/secrets.rs` delegates seal/open to the actual existing platform
 key owner and preserves errors. `settings.rs` and `secrets.rs` retain personal/live
 administrator and declared-kind/consent rules, safe projections and thin transaction
 adapters; webhook intake uses shared locked resolution in its original transaction.
 [Evidence](evidence/app-encrypted-configuration-component-2026-11-06.md).
 
-**App job workflows:** Pinned Apps `src/job_history.rs` owns bounded scoped keyset
-history/detail queries. `src/job_control.rs` owns original merchant transitions,
+**App job workflows:** Pinned Apps `extensions/services/app-storage/src/job_history.rs` owns bounded scoped keyset
+history/detail queries. `extensions/services/app-storage/src/job_control.rs` owns original merchant transitions,
 row/revision locks, explicit outcome review, retry actor/package reset and atomic
 outbox events in the caller transaction. Native `src/apps/jobs.rs` keeps route,
 identity/package admission and result redaction; `job_control.rs` provides the
@@ -311,9 +311,9 @@ consumers. [Evidence](evidence/app-package-compiler-2026-11-05.md).
 setting declarations, bounded value preparation and secret-safe projections;
 `model/src/evolution.rs` owns explicit migration types, model compatibility and
 exact conversion. Native `settings.rs`, `schema_changes.rs` and `core_extensions.rs`
-adapt these same rules. Pinned storage `src/schema_upgrade.rs` now owns actual
+adapt these same rules. Pinned storage `extensions/services/app-storage/src/schema_upgrade.rs` now owns actual
 conversion, old declared-field projection, bounded recovery snapshots, model/record
-updates and schema outbox. Native `src/apps/schema_upgrade.rs` supplies required
+updates and schema outbox. Native `components/apps/src/store/schema_upgrade.rs` supplies required
 field/content-language validation on the original transaction. The complete
 installer retains tenant/package fences and final reference/projection admission;
 `upgrade_review.rs` retains actual installation, deferred constraint checking and
@@ -355,7 +355,7 @@ and direct verified public-read predicate. Original compiler order, current
 surface grants, renderer/interpreter, action gateway and release remain native.
 [Evidence](evidence/app-native-views-component-2026-11-05.md).
 
-**App installation:** Pinned Apps `src/installation.rs` owns tenant/package locks,
+**App installation:** Pinned Apps `extensions/services/app-storage/src/installation.rs` owns tenant/package locks,
 quota, immutable version checks, package/version writes and installation outbox.
 Native `package_install.rs` supplies mandatory compiler/trust, commerce/dependency,
 checked migration, model, default and schedule hooks on the original transaction.
@@ -366,7 +366,7 @@ ownership. No second installer or transaction is introduced.
 **App authority ports:** Apps `model/src/admission.rs` owns the shared action and
 callback-scope rules. Native `action_admission.rs` adapts current authenticated
 rights; `credentials.rs` retains key issuance/revocation and the verified callback
-predicate. Component `src/packages.rs` owns canonical fingerprints and the original
+predicate. Component `extensions/services/app-storage/src/packages.rs` owns canonical fingerprints and the original
 scoped active-package shared lock/read. Native `approval.rs` and `package_fence.rs`
 retain reserved/provider trust and full typed installed-digest comparison.
 [Evidence](evidence/app-admission-component-2026-11-05.md).
@@ -456,7 +456,7 @@ compares both published assets to that bundle. [Extraction evidence](evidence/fo
 contracts. The independent SDK derives its host TypeScript inputs and closed
 operation names from that source, with an exact provenance pin. The structure
 check compares exported order/address fields to the existing native Rust DTOs.
-`src/apps/job_enqueue.rs` admits only declared job actions with `jobs.write`,
+`components/apps/src/service/job_requests.rs` admits only declared job actions with `jobs.write`,
 preserves the authenticated actor and admitted job type through enqueue.
 `action_admission.rs` shares ordinary actor/compound-right/schema checks with the
 app gateway, avoiding a second authorization implementation.
@@ -505,7 +505,7 @@ The [illustrated architecture guide](production-architecture.md) connects ingres
 tenant scope, stock/money/payment transactions, outbox projections, AI and deployment.
 New boundaries live in `money.rs`, `tenant_scope.rs`, `performance/{row_security,
 admission,invalidation}.rs`, `commerce/inventory.rs`, `components/payments/src/domain/state.rs`,
-`platform/quotas.rs` and `migrations/schema.rs`. Unit tests, the strict
+`platform/quotas.rs` and `src/migrations/schema.rs`. Unit tests, the strict
 `production_foundations` suite, payment fixtures and original-Shopware money boundary
 comparison cover their effects; asynchronous SQL and provider code remain unproved.
 
@@ -552,8 +552,8 @@ See [international commerce](international-commerce.md) for the exact contract.
 | [`src/commerce/detail.rs`](../src/commerce/detail.rs) | Product family, context prices, gallery, properties and review aggregates. | `commerce.py + Rust settings/recovery tests + delivery_differential.py` |
 | [`src/commerce/fulfillment.rs`](../src/commerce/fulfillment.rs) | Revision-checked payment and delivery state transitions. | `commerce.py + Rust settings/recovery tests + delivery_differential.py` |
 | [`src/commerce/mod.rs`](../src/commerce/mod.rs) | Native catalogue and checkout domains; pricing ports remain in the library. | `commerce.py + Rust settings/recovery tests + delivery_differential.py` |
-| [`src/commerce/review_moderation.rs`](../src/commerce/review_moderation.rs) | Merchant authorization and review publication. | `commerce.py + Rust settings/recovery tests + delivery_differential.py` |
-| [`src/commerce/reviews.rs`](../src/commerce/reviews.rs) | Customer review submission with server-derived purchase verification. | `commerce.py + Rust settings/recovery tests + delivery_differential.py` |
+| [`components/catalog/src/http/reviews.rs`](../components/catalog/src/http/reviews.rs) | Merchant authorization and review publication. | `commerce.py + Rust settings/recovery tests + delivery_differential.py` |
+| [`components/catalog/src/service/reviews.rs`](../components/catalog/src/service/reviews.rs) | Customer review submission with server-derived purchase verification. | `commerce.py + Rust settings/recovery tests + delivery_differential.py` |
 | [`src/commerce/selection.rs`](../src/commerce/selection.rs) | Recover a quote after configuration changes without losing items or silently committing new choices. | `commerce.py + Rust settings/recovery tests + delivery_differential.py` |
 | [`components/shop/src/service/settings_writes.rs`](../components/shop/src/service/settings_writes.rs), [`src/commerce/settings_guards.rs`](../src/commerce/settings_guards.rs) | Optimistic settings persistence, channel overrides, release checks and audit event; the server supplies the cross-component guards through the settings port. | `commerce.py + Rust settings/recovery tests + delivery_differential.py` |
 | [`components/shop/src/service/settings_writes.rs`](../components/shop/src/service/settings_writes.rs) (`merchant_config`) | Tenant configuration and operational read model. | `commerce.py + Rust settings/recovery tests + delivery_differential.py` |
@@ -561,7 +561,7 @@ See [international commerce](international-commerce.md) for the exact contract.
 | [`src/commerce/tax.rs`](../src/commerce/tax.rs) | Destination tax-class resolution and net-preserving price conversion. | `commerce.py + Rust settings/recovery tests + delivery_differential.py` |
 | [`src/commerce/types.rs`](../src/commerce/types.rs) | Checkout selection and configuration data contracts. | `commerce.py + Rust settings/recovery tests + delivery_differential.py` |
 | [`src/concierge.rs`](../src/concierge.rs) | Read-only storefront shopping advisor. | `providers.py + live intelligence.py/studio.py + protocols.py` |
-| [`src/context.rs`](../src/context.rs) | Bounded behavioral ports of Shopware 6.7.14.2 context and product-cart selection. | `context_differential.py + Rust selectors + studio.py` |
+| [`components/pricing/src/domain/context.rs`](../components/pricing/src/domain/context.rs) | Bounded behavioral ports of Shopware 6.7.14.2 context and product-cart selection. | `context_differential.py + Rust selectors + studio.py` |
 | [`src/customer.rs`](../src/customer.rs) | Buyer sign-in route; `components/customers/src/service/sign_in.rs` owns credential verification, cart binding and context rotation. | `server startup/build + integration.py + structure.py` |
 | [`components/intelligence/src/http/experience.rs`](../components/intelligence/src/http/experience.rs) | Persisted storefront layout policy and observed synthetic rewards. | `integration.py + protocols.py + studio.py + restart.py` |
 | [`src/extensions.rs`](../src/extensions.rs) | Merchant catalogue route and business policy routes; `components/apps/src/service/business_policy.rs` owns activation, state and preparation. | `integration.py + users.py + extensions.py + restart.py` |
@@ -616,7 +616,7 @@ See [international commerce](international-commerce.md) for the exact contract.
 | [`src/workers.rs`](../src/workers.rs) | Process role selection and the combined Core app worker switch. | `services.py + payments.py` |
 | [`src/workers/app_lane.rs`](../src/workers/app_lane.rs) | Flow, app scheduler and delivery tasks with bounded shutdown. | `services.py + worker unit tests` |
 | [`src/workers/app_lane/queue_health.rs`](../src/workers/app_lane/queue_health.rs) | Bounded worker-only queue age read and private aggregate logging. | `services.py` |
-| [`src/http_limits.rs`](../src/http_limits.rs) | Bounded streaming responses for extension services and payment providers. | `services.py + payments.py + build` |
+| [`components/core/src/http_limits.rs`](../components/core/src/http_limits.rs) | Bounded streaming responses for extension services and payment providers. | `services.py + payments.py + build` |
 
 ## Frontend
 
@@ -693,8 +693,8 @@ Shopware compatibility claim is made.
 
 | File | Responsibility | Verification |
 |---|---|---|
-| [`src/apps/runtime.rs`](../src/apps/runtime.rs) | Generic cached Wasm ABI execution; no app business rules. | Rust Wasm boundary tests + `apps.py` |
-| [`src/apps/compatibility.rs`](../src/apps/compatibility.rs) | Explicit adapter for pre-1.1 engraving cart records; completed snapshots stay immutable. | Rust compatibility regression |
+| [`extensions/apps/marketplaces/service/runtime.rs`](../extensions/apps/marketplaces/service/runtime.rs) | Generic cached Wasm ABI execution; no app business rules. | Rust Wasm boundary tests + `apps.py` |
+| [`extensions/apps/paypal/src/compatibility.rs`](../extensions/apps/paypal/src/compatibility.rs) | Explicit adapter for pre-1.1 engraving cart records; completed snapshots stay immutable. | Rust compatibility regression |
 | [`extensions/apps/engraving/configuration.wat`](../extensions/apps/engraving/configuration.wat) | App-owned text-length and fee acceptance rules. | Rust guest tests + `apps.py` |
 | [`extensions/apps/gift-message/configuration.wat`](../extensions/apps/gift-message/configuration.wat) | Independent app with its own length/fee limits and input field. | `apps.py` real taxed checkout |
 
@@ -732,7 +732,7 @@ starts with its responsibility comment.
 | File | Responsibility | Behavioral verification |
 |---|---|---|
 | [`src/catalog_page.rs`](../src/catalog_page.rs), [`components/catalog/src/store/catalog_search.sql`, `catalog_channel.sql`](../components/catalog/src/store/catalog_search.sql) | Tenant cursor pages, literal localized server search and enforced limits. | `scalability.py`: complete traversal, later-page search, mixed-field language fallback, wildcards, tenant boundaries; million-product HTTP benchmark |
-| [`src/channel_metrics.rs`](../src/channel_metrics.rs) | Capped best-effort diagnostic buffer and bounded bulk writes. | Rust buffer-bound test + persisted counters in `scalability.py` |
+| [`components/core/src/channel_metrics.rs`](../components/core/src/channel_metrics.rs) | Capped best-effort diagnostic buffer and bounded bulk writes. | Rust buffer-bound test + persisted counters in `scalability.py` |
 | [`src/performance/`](../src/performance/README.md), [`migrations/037-read-context-cache.sql`](../migrations/037-read-context-cache.sql) | Atomic settings/override/registry version probes, bounded decoded LRU, explicit read memoization, pool budgets and cache policies. | `read_performance.py`: two real Rust replicas, direct writes, override/delete/recreate/rollback, languages, revocation, restart, overload/recovery; Rust eviction/policy tests |
 | [`frontend/src/shared/api/request-json.ts`](../frontend/src/shared/api/request-json.ts) | Same in-flight read shared by scoped Studio/storefront transports, immutable per-caller result and mutation barriers. | `request-json.test.ts`: actual transports, tenant/user/locale/channel/cart/customer keys, failures and pre-write-read barriers |
 | [`src/migrations.rs`](../src/migrations.rs) | Serialized checksummed setup and fixed demo seed; no catalog-wide restart scan. | Fresh database full suites; manual serve/migrate/readiness and independent-worker restart checks |
@@ -892,11 +892,11 @@ App assistants compile the shared Manifest in `components/apps/ui/admin/develope
 | `crates/cognition/src/inference/{settings,tests}.rs` | Replica cache, authenticated encryption, inherited provider readiness and native protocol contracts | Rust tests + two-shop/fresh-process local provider fixture + provider/document/image/translation suites |
 | `frontend/src/platform/{AdminHub,PlatformAI,PlatformShopDetail,PlatformInfrastructure}.tsx` | Public service directory and independent operator workspaces | `platform-control.test.tsx`, real browser review, build/architecture/localization |
 | `src/shop_domains.rs`, `frontend/src/shared/api/shop-scope.ts` | Canonical shop links and actual hostname admission; protected URLs retain origin | HTTP Host regressions + `shop-scope.test.ts` |
-| `src/channel_metrics.rs`, `src/studio.rs` | Bounded diagnostic counters and measured HTTP timings | Rust unit tests + actual persisted timing fixture |
+| `components/core/src/channel_metrics.rs`, `src/studio.rs` | Bounded diagnostic counters and measured HTTP timings | Rust unit tests + actual persisted timing fixture |
 
 ## Default fashion fixture
 
-`src/demo_catalog.rs` copies the public Nord Atelier fixture into newly provisioned tenants and seeds an opt-in built-in demo once. `src/auth/provision.rs` controls whether catalog insertion is requested. `src/knowledge/relations.rs` chooses catalog-specific curated links. `scripts/fashion_demo.py` checks signup, localized names/navigation, actual images, all three coat sizes, tenant-separated stock, simulated checkout and a fresh-process restart. See [the complete demo contract](fashion-demo.md).
+`src/demo_catalog.rs` copies the public Nord Atelier fixture into newly provisioned tenants and seeds an opt-in built-in demo once. `src/auth/provision.rs` controls whether catalog insertion is requested. `components/intelligence/src/knowledge/relations.rs` chooses catalog-specific curated links. `scripts/fashion_demo.py` checks signup, localized names/navigation, actual images, all three coat sizes, tenant-separated stock, simulated checkout and a fresh-process restart. See [the complete demo contract](fashion-demo.md).
 
 ## Trusted private experience boundary
 
@@ -913,7 +913,7 @@ App assistants compile the shared Manifest in `components/apps/ui/admin/develope
 
 ### Hosted frontend transport
 
-`src/shop_domains/frontend_transport.rs` streams the fixed, authenticated external frontend response with backpressure and an 8 MB cumulative body limit. SSE starts before upstream EOF; a body failure closes the stream. `HOSTED_FRONTEND_COOKIE_NAMES` defaults empty and optionally permits at most eight opaque anonymous shopper cookies. Login credentials remain stripped. Cookies returned to the browser must be host-only, Secure, HttpOnly and SameSite=Lax; redirects must be relative. This generic adapter contains no private Storyfront implementation. `identity_broker` exercises routing, foreign-shop denial, cookie filtering, paused shops and streaming through the real HTTP service. The network adapter remains outside the Lean proof boundary.
+`components/shop/src/http/frontend_transport.rs` streams the fixed, authenticated external frontend response with backpressure and an 8 MB cumulative body limit. SSE starts before upstream EOF; a body failure closes the stream. `HOSTED_FRONTEND_COOKIE_NAMES` defaults empty and optionally permits at most eight opaque anonymous shopper cookies. Login credentials remain stripped. Cookies returned to the browser must be host-only, Secure, HttpOnly and SameSite=Lax; redirects must be relative. This generic adapter contains no private Storyfront implementation. `identity_broker` exercises routing, foreign-shop denial, cookie filtering, paused shops and streaming through the real HTTP service. The network adapter remains outside the Lean proof boundary.
 
 `src/auth/broker_credentials.rs` owns explicit trusted-email password enrollment/recovery
 and existing-password verification. Migration 052 marks new broker accounts pending;
@@ -927,8 +927,8 @@ See [merchant password enrollment](experience-integration.md#merchant-password-e
 
 ## HTTP failure diagnostics
 
-`src/channel_metrics.rs` owns the bounded interval buffer and single bulk flush;
-`src/channel_metrics/reads.rs` shares exact status aggregation across operator
+`components/core/src/channel_metrics.rs` owns the bounded interval buffer and single bulk flush;
+`components/core/src/channel_metrics/reads.rs` shares exact status aggregation across operator
 overview, shop dossiers and infrastructure. `src/studio.rs` supplies status and
 sanitized route-template logs after authentication admission. Migration 056
 preserves historical totals and adds only a bounded status-code histogram.
@@ -942,8 +942,8 @@ reads, historical preservation and display. See [the measurement boundary](platf
 
 - `components/core/src/request_context.rs`, `components/identity/src/route_policy.rs`, `src/auth/{identity,abuse}.rs`, `components/identity/src/types/envelopes.rs` and `components/identity/src/store/identity.sql`: trusted Principal, explicit method rights, one current grant lookup, persistent login admission and typed auth requests.
 - `crates/runtime/src/scoped_pool.rs`, `src/performance/{pool,row_security,cluster_lease}.rs`, `src/runtime_config.rs`: local transaction scope, guarded session borrows, validated startup contracts and shared resource/connection budgets.
-- `components/apps/src/service/{sandbox_cache,business_policy}.rs`, `src/apps/runtime.rs`, `crates/cognition/src/images.rs`: bounded Wasm compilation/execution cache and blocking-pool image processing.
-- `src/work_signal.rs`, `src/outbox.rs`, `src/outbox/{control,retention}.rs`, `retention.sql` and migration 057: commit hints, isolated retries/quarantine, permission-checked recovery and bounded retention.
+- `components/apps/src/service/{sandbox_cache,business_policy}.rs`, `extensions/apps/marketplaces/service/runtime.rs`, `crates/cognition/src/images.rs`: bounded Wasm compilation/execution cache and blocking-pool image processing.
+- `components/core/src/work_signal.rs`, `src/outbox.rs`, `src/outbox/{control,retention}.rs`, `retention.sql` and migration 057: commit hints, isolated retries/quarantine, permission-checked recovery and bounded retention.
 - `deploy/sql/provision-runtime.sh`, `scripts/security/core_hardening.py`, `scripts/testing/pooler.py`, `scripts/transaction_pooler.py`: least-privilege provisioning and actual two-replica/one-backend PgBouncer regression paths.
 
 [All eighteen findings, shared architecture and exact limits](core-hardening.md).
@@ -992,7 +992,7 @@ registry, checks real non-owner plans, native edits, withdrawal, source deletion
 and foreign-context rejection. These are rebuildable indexes, not another source
 registry. See [the performance and migration boundary](cognitive-commerce.md#lexical-candidates-under-forced-row-security).
 
-- `src/apps/ontology.rs`: validated namespaced app-node/edge metadata and bounded projections of current authorized native records; no second graph fact store.
+- `components/apps/src/domain/ontology.rs`: validated namespaced app-node/edge metadata and bounded projections of current authorized native records; no second graph fact store.
 - `components/apps/ui/admin/developer/AppOntology.tsx`: shared-language mapping controls over the exact human/agent app manifest.
 - `scripts/app_ontology.py`: real API/MCP tenant, permission, reference and revision regression.
 
@@ -1005,7 +1005,7 @@ registry. See [the performance and migration boundary](cognitive-commerce.md#lex
 | `components/checkout/ui/storefront/checkout/embedded-checkout.ts` | Exact-origin shopper completion and close messages | Frontend embedded-checkout unit tests |
 | Private original Storyfront bag and runtime client | Verify completed Core cart; remove only purchased quantities once; keep cancellation intact | Original cart-store and rust-commerce tests, live acceptance recorded separately |
 
-App generation edits are adapted by `src/developer/generation_edits.rs` as bounded JSON Patch into the existing Manifest; `generation_contract.rs` and `builds.rs` remain the storage/access and validation owners.
+App generation edits are adapted by `components/apps/src/domain/generation_edits.rs` as bounded JSON Patch into the existing Manifest; `generation_contract.rs` and `builds.rs` remain the storage/access and validation owners.
 
 ## App lifecycle and ERP reference ownership — 12 October 2026
 

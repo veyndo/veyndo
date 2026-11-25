@@ -288,7 +288,7 @@ content-review decision, not a mechanism for sharing an entire mailbox.
 
 ## Source ownership and verification
 
-- `src/documents/workspace.rs`, `product_knowledge.rs`: census, cursor source list,
+- `components/intelligence/src/http/workspace.rs`, `product_knowledge.rs`: census, cursor source list,
   activity and canonical/product-specific evidence read models.
 - `content.rs`, `ingestion.rs`, `lifecycle.rs`: bounded enabled-language admission,
   source hashes/chunks, optimistic edits and recoverable publication lifecycle.
