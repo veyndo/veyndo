@@ -156,8 +156,6 @@
         "b2b_catalog": "read: reads the private unit catalogue scope inside the catalogue/rule query so pagination stays correct (catalog_channel.sql, catalog_reads.rs, catalog_search.sql, category_listing.sql)",
         "knowledge_documents": "read: reads published knowledge documents linked to products for catalogue views (category_listing.sql)",
         "knowledge_relations": "read: reads product relations from the knowledge graph for catalogue and app views (category_listing.sql)",
-        "languages": "read: reads the global language registry to map locales to language IDs (product_edit.rs)",
-        "sales_channels": "read: reads the sales channel document (kind, activity, catalogue scope) to admit the request channel inside the same statement (channels.rs)",
         "shop_environments": "read: reads the environment row (live shop, preview owner) to scope sandbox and preview requests to their live shop (media_jobs.rs)",
         "tenants": "read: reads shop existence, status or the agent stop switch inside a larger claim or join; simple reads go through veyndo_core::tenants (media_jobs.rs)"
       },

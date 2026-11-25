@@ -2,6 +2,7 @@
 pub mod carts;
 pub mod catalog;
 pub mod channel_config;
+pub mod channel_ids;
 pub mod channel_preview;
 pub mod channels;
 pub mod configuration_lifecycle;

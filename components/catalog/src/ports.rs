@@ -97,3 +97,42 @@ pub struct Catalog {
     pub shop: Arc<dyn Shop>,
     pub images: Arc<dyn Images>,
 }
+
+/// The shop-wide registries the catalogue writes against: content languages and sales channels.
+pub trait Registries: Send + Sync {
+    /// The ID of a registered locale.
+    fn language_id<'a>(
+        &'a self,
+        conn: &'a mut PgConnection,
+        locale: &'a str,
+    ) -> PortFuture<'a, Option<String>>;
+    /// The IDs of all sales channels of the shop, locked until the transaction ends.
+    fn lock_channels<'a>(
+        &'a self,
+        tx: &'a mut PgConnection,
+        tenant: &'a str,
+    ) -> PortFuture<'a, Vec<String>>;
+    /// Up to `limit` sales channels with their documents, in ID order.
+    fn channels<'a>(
+        &'a self,
+        tenant: &'a str,
+        limit: i64,
+    ) -> PortFuture<'a, Vec<(String, serde_json::Value)>>;
+}
+
+static REGISTRIES: std::sync::OnceLock<Arc<dyn Registries>> = std::sync::OnceLock::new();
+
+/// Registers the server's registries at startup; the first registration wins.
+pub fn register_registries(registries: Arc<dyn Registries>) {
+    let _ = REGISTRIES.set(registries);
+}
+
+/// The registered registries; before registration every call fails.
+pub fn registries() -> veyndo_core::Result<&'static dyn Registries> {
+    REGISTRIES.get().map(|r| &**r).ok_or_else(|| {
+        veyndo_core::Error(
+            veyndo_core::StatusCode::SERVICE_UNAVAILABLE,
+            "Languages and sales channels are unavailable".into(),
+        )
+    })
+}
