@@ -23,7 +23,7 @@ pub async fn detail(
     let channels = operator_control::channels(&a, &id).await?;
     let traffic = traffic(&a.db, Some(&id), false).await?;
     // Receipt settings use the validated company schema, distinct from connector configuration.
-    let settings = operator_control::receipt_settings(&a, &id).await?;
+    let settings = operator_control::receipt_settings(&id).await?;
     if let Some(dossier) = data.as_object_mut() {
         dossier.extend([
             ("createdAt".to_owned(), json!(registration.registered)),

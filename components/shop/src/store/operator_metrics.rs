@@ -1,4 +1,5 @@
-//! Aggregate control-plane reads across live shops (sandboxes excluded): totals, amounts per currency, shop pages and daily order timelines. Columns checked at compile time.
+//! Aggregate control-plane reads across live shops (sandboxes excluded): totals, amounts per currency, shop pages and daily order timelines. Products and accounts come from the catalog and identity stores, the rest through the dependants port.
+use crate::ports::dependants;
 use sqlx::PgConnection;
 use veyndo_core::{Result, State};
 
@@ -16,13 +17,36 @@ pub struct Totals {
 
 /// The platform totals inside the caller's read snapshot.
 pub async fn totals(conn: &mut PgConnection, days: i64) -> Result<Totals> {
-    Ok(sqlx::query_as!(
-        Totals,
-        r#"SELECT (SELECT count(*) FROM tenants t WHERE NOT EXISTS(SELECT 1 FROM shop_environments e WHERE e.tenant=t.id)) AS "shops!",(SELECT count(*) FROM shop_environments) AS "sandboxes!",(SELECT count(*) FROM merchant_users) AS "users!",(SELECT count(*) FROM products p WHERE NOT EXISTS(SELECT 1 FROM shop_environments e WHERE e.tenant=p.tenant)) AS "products!",(SELECT count(*) FROM customers c WHERE NOT EXISTS(SELECT 1 FROM shop_environments e WHERE e.tenant=c.tenant)) AS "customers!",(SELECT count(*) FROM orders o WHERE created_at>=current_date-($1::integer-1)*interval '1 day' AND NOT EXISTS(SELECT 1 FROM shop_environments e WHERE e.tenant=o.tenant)) AS "orders!",(SELECT count(*) FROM outbox o WHERE delivered_at IS NULL AND NOT EXISTS(SELECT 1 FROM shop_environments e WHERE e.tenant=o.tenant)) AS "pending_events!",now()::text AS "generated!""#,
-        days as i32
+    let shops = sqlx::query!(
+        r#"SELECT (SELECT count(*) FROM tenants t WHERE NOT EXISTS(SELECT 1 FROM shop_environments e WHERE e.tenant=t.id)) AS "shops!",array(SELECT tenant FROM shop_environments) AS "sandboxes!",now()::text AS "generated!""#
     )
-    .fetch_one(conn)
-    .await?)
+    .fetch_one(&mut *conn)
+    .await?;
+    let sandboxes = shops.sandboxes;
+    Ok(Totals {
+        shops: shops.shops,
+        sandboxes: sandboxes.len() as i64,
+        users: veyndo_identity::store::shop_reads::user_count(&mut *conn).await?,
+        products: veyndo_catalog::store::shop_reads::count_outside(&mut *conn, &sandboxes).await?,
+        customers: dependants()?
+            .customers_outside(&mut *conn, &sandboxes)
+            .await?,
+        orders: dependants()?
+            .orders_outside(&mut *conn, days, &sandboxes)
+            .await?,
+        pending_events: veyndo_core::store::outbox::pending::outside(&mut *conn, &sandboxes)
+            .await?,
+        generated: shops.generated,
+    })
+}
+
+/// The tenants of all sandboxes, on the caller's connection.
+async fn sandboxes(conn: &mut PgConnection) -> Result<Vec<String>> {
+    Ok(
+        sqlx::query_scalar!(r#"SELECT tenant AS "tenant!" FROM shop_environments"#)
+            .fetch_all(conn)
+            .await?,
+    )
 }
 
 /// Recorded, simulated and confirmed captured amounts of one currency, as decimal text.
@@ -35,19 +59,13 @@ pub struct Amounts {
 }
 
 /// The amounts per currency of all live shops, or of `tenant`, for a window of `days`.
-pub async fn amounts<'e>(
-    db: impl sqlx::PgExecutor<'e>,
+pub async fn amounts(
+    conn: &mut PgConnection,
     days: i64,
     tenant: Option<&str>,
 ) -> Result<Vec<Amounts>> {
-    Ok(sqlx::query_as!(
-        Amounts,
-        r#"SELECT coalesce(data->'cart'->'price'->>'currency','EUR') AS "currency!", count(*) AS "orders!", coalesce(sum((data->'cart'->'price'->>'totalPrice')::numeric) FILTER(WHERE data->>'state' NOT IN ('cancelled','canceled')),0)::text AS "booked!", coalesce(sum((data->'cart'->'price'->>'totalPrice')::numeric) FILTER(WHERE data->'payment'->>'provider'='simulated' AND data->>'state' NOT IN ('cancelled','canceled')),0)::text AS "simulated!", coalesce(sum(CASE WHEN data#>>'{payment,capturedMinor}' IS NOT NULL THEN (data#>>'{payment,capturedMinor}')::numeric/power(10::numeric,coalesce((data#>>'{cart,price,currencyScale}')::int,2)) ELSE (data->'cart'->'price'->>'totalPrice')::numeric END) FILTER(WHERE data->'payment'->>'realMoneyCharged'='true' AND data->'payment'->>'state' IN ('captured','partially_captured','captured_late','partially_refunded','refunded')),0)::text AS "captured!" FROM orders o WHERE created_at>=current_date-($1::integer-1)*interval '1 day' AND NOT EXISTS(SELECT 1 FROM shop_environments e WHERE e.tenant=o.tenant) AND ($2::text IS NULL OR tenant=$2) GROUP BY 1 ORDER BY 1"#,
-        days as i32,
-        tenant
-    )
-    .fetch_all(db)
-    .await?)
+    let excluded = sandboxes(&mut *conn).await?;
+    dependants()?.amounts(conn, days, tenant, &excluded).await
 }
 
 /// One live shop of the operator list with its counts.
@@ -74,16 +92,46 @@ pub async fn shops(
     limit: i64,
     days: i64,
 ) -> Result<Vec<ShopRow>> {
-    Ok(sqlx::query_as!(
-        ShopRow,
-        r#"SELECT t.id,t.name,t.status,t.status_revision,t.created_at::text AS "created!",(SELECT count(*) FROM products WHERE tenant=t.id) AS "products!",(SELECT count(*) FROM customers WHERE tenant=t.id) AS "customers!",(SELECT count(*) FROM memberships WHERE tenant=t.id AND active) AS "members!",(SELECT count(*) FROM orders WHERE tenant=t.id AND created_at>=current_date-($4::integer-1)*interval '1 day') AS "orders!",(SELECT count(*) FROM app_packages WHERE tenant=t.id AND active) AS "apps!",(SELECT count(*) FROM sales_channels WHERE tenant=t.id AND coalesce((data->>'active')::boolean,true)) AS "channels!",(SELECT count(*) FROM app_evidence WHERE tenant=t.id) AS "sources!" FROM tenants t WHERE t.id>$1 AND (strpos(lower(t.name),lower($2))>0 OR strpos(t.id,lower($2))>0) AND NOT EXISTS(SELECT 1 FROM shop_environments e WHERE e.tenant=t.id) ORDER BY t.id LIMIT $3"#,
+    let shops = sqlx::query!(
+        r#"SELECT t.id,t.name,t.status,t.status_revision,t.created_at::text AS "created!",(SELECT count(*) FROM sales_channels WHERE tenant=t.id AND coalesce((data->>'active')::boolean,true)) AS "channels!" FROM tenants t WHERE t.id>$1 AND (strpos(lower(t.name),lower($2))>0 OR strpos(t.id,lower($2))>0) AND NOT EXISTS(SELECT 1 FROM shop_environments e WHERE e.tenant=t.id) ORDER BY t.id LIMIT $3"#,
         after,
         search,
-        limit,
-        days as i32
+        limit
     )
     .fetch_all(&a.db)
-    .await?)
+    .await?;
+    let ids: Vec<String> = shops.iter().map(|s| s.id.clone()).collect();
+    let products: std::collections::HashMap<String, i64> =
+        veyndo_catalog::store::shop_reads::count_by_shop(a, &ids)
+            .await?
+            .into_iter()
+            .collect();
+    let members: std::collections::HashMap<String, i64> =
+        veyndo_identity::store::shop_reads::members_by_shop(a, &ids)
+            .await?
+            .into_iter()
+            .collect();
+    let activity = dependants()?.activity(&ids, days).await?;
+    Ok(shops
+        .into_iter()
+        .map(|s| {
+            let held = activity.get(&s.id).copied().unwrap_or_default();
+            ShopRow {
+                products: products.get(&s.id).copied().unwrap_or(0),
+                members: members.get(&s.id).copied().unwrap_or(0),
+                customers: held.customers,
+                orders: held.orders,
+                apps: held.apps,
+                sources: held.sources,
+                channels: s.channels,
+                id: s.id,
+                name: s.name,
+                status: s.status,
+                status_revision: s.status_revision,
+                created: s.created,
+            }
+        })
+        .collect())
 }
 
 /// The name of a live shop; none for an unknown shop or a sandbox.
@@ -103,13 +151,6 @@ pub struct Day {
 }
 
 /// The orders of a shop per day for the last `days` days, oldest first.
-pub async fn timeline(a: &State, id: &str, days: i64) -> Result<Vec<Day>> {
-    Ok(sqlx::query_as!(
-        Day,
-        r#"SELECT d::date::text AS "day!",count(o.id) AS "orders!" FROM generate_series(current_date-($2::integer-1)*interval '1 day',current_date,interval '1 day') d LEFT JOIN orders o ON o.tenant=$1 AND o.created_at>=d AND o.created_at<d+interval '1 day' GROUP BY d ORDER BY d"#,
-        id,
-        days as i32
-    )
-    .fetch_all(&a.db)
-    .await?)
+pub async fn timeline(id: &str, days: i64) -> Result<Vec<Day>> {
+    dependants()?.timeline(id, days).await
 }

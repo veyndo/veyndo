@@ -5,9 +5,11 @@ mod catalog;
 mod customers;
 mod pricing;
 mod shipping;
+mod shop;
 
 /// Registers the ports that lower components look up at run time instead of receiving them from their caller.
 pub(crate) fn register(a: &App) {
     catalog::register(a);
     customers::register(a);
+    shop::register(a);
 }

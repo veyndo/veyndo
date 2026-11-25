@@ -1,4 +1,4 @@
-//! Where open carts refer to a method or a currency, for the guards of the shipping and pricing components.
+//! Where open carts refer to a method or a currency, and the cart lock of a consumer request, for the shipping, pricing and shop components.
 use sqlx::PgConnection;
 use veyndo_core::Result;
 
@@ -21,4 +21,16 @@ pub async fn currency_carts(tx: &mut PgConnection, tenant: &str, codes: &[String
     Ok(sqlx::query_scalar!(r#"SELECT EXISTS(SELECT 1 FROM carts WHERE tenant=$1 AND status='open' AND data->>'currency'=ANY($2)) AS "used!""#, tenant, codes)
         .fetch_one(tx)
         .await?)
+}
+
+/// Locks a cart of the shop until the transaction ends; an unknown cart is an error.
+pub async fn lock(tx: &mut PgConnection, tenant: &str, id: &str) -> Result<()> {
+    sqlx::query_scalar!(
+        "SELECT id FROM carts WHERE tenant=$1 AND id=$2 FOR UPDATE",
+        tenant,
+        id
+    )
+    .fetch_one(tx)
+    .await?;
+    Ok(())
 }

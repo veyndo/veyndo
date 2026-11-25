@@ -272,7 +272,7 @@ pub async fn merchant_config(
     )
     .await?;
     let os = if permit(&h, "orders.read").is_ok() && permit(&h, "customers.pii").is_ok() {
-        settings_view::orders(a, &t).await?
+        settings_view::orders(&t).await?
     } else {
         Vec::new()
     };

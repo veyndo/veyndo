@@ -48,13 +48,9 @@ pub async fn create(a: &State, c: &StoredCart, v: Intake) -> Result<Value> {
     let data = json!({"name":v.name,"email":v.email,"reference":v.reference,"message":v.message,"receivedAt":chrono::Utc::now().to_rfc3339(),"identityVerified":false,"automaticRefund":false,"locale":c.data.locale});
     let mut tx = a.db.begin().await?;
     // Cart lock serializes rate admission and retry; a reference is a declaration, never an order-access grant.
-    sqlx::query_scalar!(
-        "SELECT id FROM carts WHERE tenant=$1 AND id=$2 FOR UPDATE",
-        c.tenant,
-        c.id
-    )
-    .fetch_one(&mut *tx)
-    .await?;
+    crate::ports::dependants()?
+        .lock_cart(&mut tx, &c.tenant, &c.id)
+        .await?;
     if let Some(r) = sqlx::query!(
         "SELECT data,kind,state FROM consumer_requests WHERE tenant=$1 AND id=$2",
         c.tenant,

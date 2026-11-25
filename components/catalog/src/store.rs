@@ -12,6 +12,7 @@ pub mod product_list;
 pub mod products;
 pub mod references;
 pub mod reviews;
+pub mod shop_reads;
 pub mod stock;
 pub mod translation_jobs;
 pub mod translations;

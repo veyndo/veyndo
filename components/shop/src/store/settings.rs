@@ -159,13 +159,7 @@ pub async fn tax_class_stranded(
     t: &str,
     tax_ids: &[String],
 ) -> Result<bool> {
-    Ok(sqlx::query_scalar!(
-        r#"SELECT EXISTS(SELECT 1 FROM products WHERE tenant=$1 AND extra->>'taxClassId' IS NOT NULL AND NOT(extra->>'taxClassId'=ANY($2))) AS "stranded!""#,
-        t,
-        tax_ids
-    )
-    .fetch_one(tx)
-    .await?)
+    veyndo_catalog::store::shop_reads::tax_class_stranded(tx, t, tax_ids).await
 }
 
 /// The override documents of every channel of the shop.
@@ -280,11 +274,18 @@ pub struct Registry {
 
 /// The global language registry, versioned in the same transaction as every registry change.
 pub async fn language_registry(a: &veyndo_core::State, known: Option<&str>) -> Result<Registry> {
-    Ok(sqlx::query_as!(
-        Registry,
-        r#"SELECT version::text AS "version!",CASE WHEN version::text IS DISTINCT FROM $1 THEN (SELECT coalesce(jsonb_agg(to_jsonb(l) ORDER BY locale),'[]'::jsonb) FROM (SELECT id,locale,parent_id FROM languages) l) END AS data FROM read_context_versions WHERE namespace='languages'"#,
-        known
-    )
-    .fetch_one(&a.db)
-    .await?)
+    // One read snapshot keeps the version and the rows of the same registry state.
+    let mut tx = a.db.begin_read_snapshot().await?;
+    let version = veyndo_core::store::read_context::version(&mut tx, "languages").await?;
+    let data = if known != Some(version.as_str()) {
+        Some(sqlx::query_scalar!(
+            r#"SELECT coalesce(jsonb_agg(to_jsonb(l) ORDER BY locale),'[]'::jsonb) AS "data!" FROM (SELECT id,locale,parent_id FROM languages) l"#
+        )
+        .fetch_one(&mut *tx)
+        .await?)
+    } else {
+        None
+    };
+    tx.commit().await?;
+    Ok(Registry { version, data })
 }

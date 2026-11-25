@@ -15,11 +15,7 @@ pub async fn grant(a: &State, user: &str) -> Result<Option<bool>> {
 /// Database size, version, active connections, commits and the undelivered outbox events.
 pub async fn database_probe(a: &State) -> Result<(Value, i64)> {
     let database = sqlx::query!(r#"SELECT pg_database_size(current_database()) AS "bytes!",version() AS "version!",(SELECT count(*) FROM pg_stat_activity WHERE datname=current_database() AND state='active') AS "active_connections!",(SELECT sum(xact_commit)::text FROM pg_stat_database WHERE datname=current_database()) AS commits"#).fetch_one(&a.db).await?;
-    let pending = sqlx::query_scalar!(
-        r#"SELECT count(*) FILTER(WHERE delivered_at IS NULL) AS "pending!" FROM outbox"#
-    )
-    .fetch_one(&a.db)
-    .await?;
+    let pending = veyndo_core::store::outbox::pending::all(&a.db).await?;
     Ok((
         json!({"bytes":database.bytes,"version":database.version,"activeConnections":database.active_connections,"commits":database.commits}),
         pending,

@@ -78,8 +78,10 @@ pub async fn detail(
     let name = operator_metrics::live_name(&a, &id)
         .await?
         .ok_or(Error(StatusCode::NOT_FOUND, "Shop not found".into()))?;
-    let money = operator_metrics::amounts(&a.db, days, Some(&id)).await?;
-    let daily = operator_metrics::timeline(&a, &id, days).await?;
+    let mut tx = a.db.begin_read_snapshot().await?;
+    let money = operator_metrics::amounts(&mut tx, days, Some(&id)).await?;
+    tx.commit().await?;
+    let daily = operator_metrics::timeline(&id, days).await?;
     Ok(Json(
         json!({"id":id,"name":name,"days":days,"amounts":amounts(&money),"timeline":daily.iter().map(|r|json!({"day":r.day,"orders":r.orders})).collect::<Vec<_>>()}),
     ))

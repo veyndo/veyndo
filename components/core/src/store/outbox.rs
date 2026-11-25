@@ -4,6 +4,7 @@ use serde_json::Value;
 use sqlx::{Postgres, Row, Transaction};
 use std::{future::Future, pin::Pin};
 use tracing::Instrument;
+pub mod pending;
 pub mod retention;
 
 pub type Projection<'a> = Pin<Box<dyn Future<Output = Result<()>> + Send + 'a>>;
