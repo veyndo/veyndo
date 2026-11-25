@@ -1,4 +1,5 @@
 /** Restore and reconcile native image jobs across request/locale changes; only explicit merchant actions create provider work. */
+import type { ApiPath } from "../../kit/api";
 import { useRead } from "../shell/useRead";
 import { useEffect, useRef, useState } from "react";
 import type { RequestFn } from "../shell/studio-types";
@@ -77,7 +78,7 @@ export function useImageJob(
     if (running && polled.error) setError((polled.error as Error).message);
   }, [polled.error]);
   const mutate = async (
-    path: string,
+    path: ApiPath,
     payload: unknown,
     accept: (value: any) => void,
   ) => {

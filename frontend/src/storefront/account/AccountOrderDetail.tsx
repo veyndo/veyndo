@@ -1,4 +1,5 @@
 /** Purchase detail uses immutable addresses, current fulfillment, issued PDFs and paid order entitlements. */
+import type { ApiPath } from "../../kit/api";
 import { mediaImage } from "../../shared/media/product-media";
 import { useEffect, useState } from "react";
 import { contentText } from "../../shared/i18n/content-language";
@@ -49,7 +50,7 @@ export default function AccountOrderDetail({
       currency: order?.cart.price.currency ?? "EUR",
     }).format(n);
   const [loading, setLoading] = useState(true);
-  const path = `/store-api/account/orders/${encodeURIComponent(id)}`;
+  const path: ApiPath = `/store-api/account/orders/${encodeURIComponent(id)}`;
   useEffect(() => {
     let active = true;
     setOrder(undefined);

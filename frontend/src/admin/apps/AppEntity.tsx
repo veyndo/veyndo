@@ -1,4 +1,5 @@
 /** Managed entity editor renders fields from the installed app contract. */
+import type { ApiPath } from "../../kit/api";
 import { Button, Field, Notice, TextInput } from "../../kit/ui";
 import { useEffect, useRef, useState } from "react";
 import { useAppText } from "../../shared/i18n/app-i18n";
@@ -42,7 +43,7 @@ export default function AppEntity({
   const [fields, setFields] = useState<Record<string, unknown>>({});
   const [actionError, setError] = useState("");
   const [busy, setBusy] = useState(false);
-  const recordsPath = `/api/apps/${app}/entities/${entity.name}`;
+  const recordsPath: ApiPath = `/api/apps/${app}/entities/${entity.name}`;
   const recordsRead = useRead(request, recordsPath);
   const setRead = useSetRead(request);
   const records: Record<string, unknown>[] = recordsRead.data?.elements ?? [];

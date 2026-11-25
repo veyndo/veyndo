@@ -1,7 +1,7 @@
 /** Guided company creation is one atomic native API command; the main-language name is always visible. */
 import { Field, Notice, TextInput } from "../../kit/ui";
 import { useState } from "react";
-import type { RequestFn } from "../../shared/api/types";
+import type { ApiRequestFn as RequestFn } from "../../shared/api/types";
 import { ContentLanguage } from "../../shared/i18n/ContentLanguage";
 import ContentLanguagePicker from "../../shared/i18n/ContentLanguagePicker";
 import LocalizedField from "../../shared/i18n/LocalizedField";

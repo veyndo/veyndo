@@ -3,7 +3,7 @@ import { useRead, useSetRead } from "../shell/useRead";
 import { Button, Notice } from "../../kit/ui";
 import "./canvas-commerce-editor.css";
 import { lazy, Suspense, useCallback, useEffect, useState } from "react";
-import type { RequestFn } from "../../shared/api/types";
+import type { ApiRequestFn as RequestFn } from "../../shared/api/types";
 import type { Category } from "./catalog-model";
 import { useCanvasText } from "../../shared/canvas/canvas-i18n";
 import { useCatalogText } from "../../shared/i18n/catalog-i18n";

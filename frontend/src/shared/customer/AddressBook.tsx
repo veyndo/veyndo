@@ -1,7 +1,8 @@
 /** Tenant-owned address cards, defaults and revision-aware CRUD shared by account and CRM. */
+import { childPath, type ApiRoutePath } from "../../kit/api";
 import { Button } from "../../kit/ui";
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { RequestFn } from "../api/types";
+import type { ApiRequestFn as RequestFn } from "../api/types";
 import { useCustomerText } from "../i18n/customer-i18n";
 import { useCrmText } from "../i18n/crm-i18n";
 import ConfirmDialog from "../ui/ConfirmDialog";
@@ -23,7 +24,7 @@ export default function AddressBook({
   onDirtyChange,
 }: {
   request: RequestFn;
-  path: string;
+  path: ApiRoutePath;
   countries: string[];
   canEdit?: boolean;
   onChange?: () => void;
@@ -109,7 +110,7 @@ export default function AddressBook({
             e.preventDefault();
             void run(async () => {
               await request(
-                editing ? `${path}/${editing.id}` : path,
+                editing ? childPath(path, editing.id) : path,
                 {
                   address: draft,
                   ...(editing ? { revision: editing.revision } : {}),
@@ -214,7 +215,7 @@ export default function AddressBook({
                           onClick={() =>
                             void run(async () => {
                               await request(
-                                `${path}/${entry.id}`,
+                                childPath(path, entry.id),
                                 {
                                   address: entry.address,
                                   revision: entry.revision,
@@ -248,7 +249,7 @@ export default function AddressBook({
           onConfirm={() =>
             void run(async () => {
               await request(
-                `${path}/${deleting.id}`,
+                childPath(path, deleting.id),
                 { revision: deleting.revision },
                 "DELETE",
               );

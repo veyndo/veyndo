@@ -1,4 +1,5 @@
 /** Shop currency registry and inherited channel availability. Actions use saved revisions and native job APIs. */
+import type { ApiPath } from "../../kit/api";
 import { useRead, useSetRead } from "../shell/useRead";
 import { Button, Field, Notice, Select, TextInput } from "../../kit/ui";
 import { useState } from "react";
@@ -65,7 +66,7 @@ export default function CurrencySettings({
     (currencies.error as Error | undefined)?.message ||
     (jobRead.error as Error | undefined)?.message ||
     "";
-  const action = async (path: string, body: unknown, refresh = false) => {
+  const action = async (path: ApiPath, body: unknown, refresh = false) => {
     if (dirty) {
       setError(c("saveFirst"));
       return;

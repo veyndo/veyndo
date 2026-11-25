@@ -1,4 +1,5 @@
 /** Accessible click-to-add canvas with selectable blocks and keyboard-accessible ordering controls. */
+import { forApps } from "../../shared/api/types";
 import { useState } from "react";
 import AppElementActions from "./AppElementActions";
 import { useCanvasText } from "../../shared/canvas/canvas-i18n";
@@ -191,7 +192,7 @@ export default function AppCanvas({
           <NativeAppView
             app={manifest.id}
             native={{ view, entities: manifest.entities }}
-            request={previewRequest}
+            request={forApps(previewRequest)}
             allowedActions={
               manifest.surfaces?.find((s) => s.uiPath === `native/${view.id}`)
                 ?.actions ?? []

@@ -1,4 +1,5 @@
 /** Revisioned encrypted connection forms and bounded operations on the existing app action gateway. */
+import type { ApiPath } from "../../kit/api";
 import { Button, Field, Notice, TextInput } from "../../kit/ui";
 import { useEffect, useRef, useState } from "react";
 import type { RequestFn } from "../shell/studio-types";
@@ -41,8 +42,10 @@ export default function ServiceIntegrationPanel({
   const generation = useRef(0);
   const fileRead = useRef(0);
   const path = `/api/apps/${app}/actions/`;
+  const actionPath = (action: string): ApiPath =>
+    `/api/apps/${app}/actions/${action}`;
   // The status action is a read; only managers load it.
-  const statusRead = useRead<Status>(request, path + "status", {
+  const statusRead = useRead<Status>(request, actionPath("status"), {
     body: {},
     enabled: manage,
   });
@@ -78,10 +81,10 @@ export default function ServiceIntegrationPanel({
     setBusy(true);
     setError("");
     try {
-      await request(path + action, value);
-      const v = await request(path + "status", {});
+      await request(actionPath(action), value);
+      const v = await request(actionPath("status"), {});
       if (g === generation.current) {
-        setRead(path + "status", v, {});
+        setRead(actionPath("status"), v, {});
         if (replace) {
           setSettings({ enabled: false, ...v.settings });
           setCredential("");

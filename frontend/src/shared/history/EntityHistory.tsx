@@ -1,7 +1,8 @@
 /** On-demand entity history, field comparisons and explicitly confirmed revision-checked restoration. */
+import { childPath, withQuery, type ApiRoutePath } from "../../kit/api";
 import { Button } from "../../kit/ui";
 import { useEffect, useRef, useState } from "react";
-import type { RequestFn } from "../api/types";
+import type { ApiRequestFn as RequestFn } from "../api/types";
 import { useCrmText } from "../i18n/crm-i18n";
 import ConfirmDialog from "../ui/ConfirmDialog";
 import { changes, printable } from "./history-model";
@@ -46,10 +47,10 @@ export default function EntityHistory({
   current.current = request;
   const scope = useRef(0),
     inflight = useRef(false);
-  const path = `/api/history/${entity}/${encodeURIComponent(id)}`;
+  const path: ApiRoutePath = `/api/history/${entity}/${encodeURIComponent(id)}`;
   const load = async (before?: number, generation = scope.current) => {
     const v = await current.current(
-      `${path}${before ? `?before=${before}` : ""}`,
+      withQuery(path, { before: before || undefined }),
     );
     if (generation !== scope.current) return;
     setEntries((old) => (before ? [...old, ...v.elements] : v.elements));
@@ -114,7 +115,7 @@ export default function EntityHistory({
                 onClick={() =>
                   void run(async () => {
                     const generation = scope.current,
-                      next = await current.current(`${path}/${entry.id}`);
+                      next = await current.current(childPath(path, entry.id));
                     if (generation === scope.current) {
                       setDetail(next);
                       setPending(undefined);
@@ -212,7 +213,7 @@ export default function EntityHistory({
           onConfirm={() =>
             void run(async () => {
               if (dirty || revision == null || !onRestored) return;
-              await current.current(`${path}/${detail.id}/restore`, {
+              await current.current(childPath(path, detail.id, "restore"), {
                 approve: true,
                 revision,
                 side: pending,

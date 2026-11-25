@@ -25,7 +25,7 @@ export default function CompanyQuotes({
     [quotes, setQuotes] = useState<Quote[]>([]),
     [message, setMessage] = useState("");
   const command = <T,>(op: string, v: unknown = {}) =>
-    shopApi<T>("/store-api/b2b/" + op, v, cart?.token);
+    shopApi<T>(`/store-api/b2b/${op}`, v, cart?.token);
   const reload = async () => {
     const current = ++generation.current;
     const v = await command<{ elements: Quote[] }>("quotes", { unitId: unit });

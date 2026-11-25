@@ -75,7 +75,9 @@ export default function SourceEditor({
         await request("/api/knowledge/documents/upload", form);
       } else {
         await request(
-          `/api/knowledge/documents${source ? `/${source.id}` : ""}`,
+          source
+            ? `/api/knowledge/documents/${source.id}`
+            : "/api/knowledge/documents",
           {
             title: title[base],
             content: content[base],

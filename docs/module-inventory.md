@@ -1892,7 +1892,7 @@ This lists every checked-in source module in these roots, including files with n
 | [frontend/src/shared/api/request-json.ts](../frontend/src/shared/api/request-json.ts) | Coalesce simultaneous identical core reads with complete identity; no persisted response cache. |
 | [frontend/src/shared/api/shop-api.ts](../frontend/src/shared/api/shop-api.ts) | shop api: Typed commerce contracts, merchant/store transports and binary download helper. |
 | [frontend/src/shared/api/shop-scope.ts](../frontend/src/shared/api/shop-scope.ts) | Canonical shop hosts; Studio identity remains on the shared origin. Reserved service hosts never become tenant IDs. |
-| [frontend/src/shared/api/types.ts](../frontend/src/shared/api/types.ts) | Common JSON/multipart request contract for app surfaces and merchant operations. |
+| [frontend/src/shared/api/types.ts](../frontend/src/shared/api/types.ts) | Request contracts: the open one app surfaces receive and the catalogue-checked one first-party screens use. |
 | [frontend/src/shared/api/vite-env.d.ts](../frontend/src/shared/api/vite-env.d.ts) | Typed public build configuration; browser-visible values never contain server credentials. |
 | [frontend/src/shared/apps/AppFrame.tsx](../frontend/src/shared/apps/AppFrame.tsx) | Opaque-origin app UI. Its SDK can invoke only this app's declared, server-authorized actions. |
 | [frontend/src/shared/apps/AppSlot.tsx](../frontend/src/shared/apps/AppSlot.tsx) | Generic registered product configuration slot. App packages own labels, input names and business rules. |

@@ -1,4 +1,5 @@
 /** One confirmation and a server recheck; stale versions and used definitions never disappear silently. */
+import type { ApiPath } from "../../kit/api";
 import { Button, Notice } from "../../kit/ui";
 import { useState } from "react";
 import type { RequestFn } from "../shell/studio-types";
@@ -38,12 +39,13 @@ export default function AutomationDelete({
   const [busy, setBusy] = useState(false),
     [error, setError] = useState("");
   if (!revision || (kind === "channels" && id === "default")) return null;
-  const path = `/api/automation/${kind}/${encodeURIComponent(id)}`;
+  const path: ApiPath = `/api/automation/${kind}/${encodeURIComponent(id)}`;
+  const dependenciesPath: ApiPath = `/api/automation/${kind}/${encodeURIComponent(id)}/dependencies`;
   const inspect = async () => {
     setBusy(true);
     setError("");
     try {
-      const v = await request(`${path}/dependencies`);
+      const v = await request(dependenciesPath);
       setDependencies(v.dependencies);
     } catch (e) {
       setError((e as Error).message);
@@ -60,7 +62,7 @@ export default function AutomationDelete({
       await onDeleted();
     } catch (e) {
       setError((e as Error).message);
-      const v = await request(`${path}/dependencies`).catch(() => null);
+      const v = await request(dependenciesPath).catch(() => null);
       if (v) setDependencies(v.dependencies);
     } finally {
       setBusy(false);

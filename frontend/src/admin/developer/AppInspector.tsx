@@ -1,7 +1,7 @@
 /** One content language edits app/view/block metadata; changing bindings updates the actual manifest. */
 import { Badge, Field, Select, TextInput } from "../../kit/ui";
 import MediaCaptionEditor from "../../shared/media/MediaCaptionEditor";
-import type { RequestFn } from "../../shared/api/types";
+import type { ApiRequestFn as RequestFn } from "../../shared/api/types";
 import AppControlProperties from "./AppControlProperties";
 import { useAppWorkspaceText } from "../../shared/i18n/app-workspace-i18n";
 import AppFormFields from "./AppFormFields";

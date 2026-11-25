@@ -11,7 +11,7 @@ import { useAdminCreationText } from "../../shared/i18n/admin-creation-i18n";
 import { useCustomerText } from "../../shared/i18n/customer-i18n";
 import { useOperationsText } from "../../shared/i18n/operations-i18n";
 import ConfirmDialog from "../../shared/ui/ConfirmDialog";
-import type { RequestFn } from "../../shared/api/types";
+import type { ApiRequestFn as RequestFn } from "../../shared/api/types";
 import "../styles/creation.css";
 export default function CustomerCreate({
   request,

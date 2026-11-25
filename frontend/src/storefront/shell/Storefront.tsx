@@ -1,4 +1,5 @@
 /** Storefront composition root: cart context, routes, customer account and checkout. */
+import { forApps } from "../../shared/api/types";
 import {
   checkoutParent,
   returnFromCheckout,
@@ -72,7 +73,7 @@ export default function Storefront(props: { onMerchant: () => void }) {
         <PrivacyProvider token={cart?.token}>
           <AppSurfaceProvider
             public
-            request={(path, body) => shopApi(path, body, cart?.token)}
+            request={forApps((path, body) => shopApi(path, body, cart?.token))}
             scopeKey={`${shopTenant}:${salesChannel}`}
           >
             <PublishedSite>

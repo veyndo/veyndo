@@ -1,4 +1,5 @@
 /** Tenant-scoped account loading and mutation lifecycle; expired sessions clear private data and reopen sign-in. */
+import type { ApiPath } from "../../kit/api";
 import {
   customerCredential,
   customerSessionHeaders,
@@ -81,7 +82,7 @@ export function useCustomerAccount(
   };
   const expiredMessage = a("sessionExpired");
   const request = useCallback(
-    async (path: string, body?: unknown, method?: string) => {
+    async (path: ApiPath, body?: unknown, method?: string) => {
       const session = customerSessionGeneration(scope);
       try {
         const value = await shopApi<any>(path, body, undefined, method);

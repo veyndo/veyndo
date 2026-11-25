@@ -1,4 +1,5 @@
 /** CRM list and editable customer profile with linked order history. */
+import { forApps } from "../../shared/api/types";
 import type { GridCriteria } from "../../shared/grid/types";
 import CoreExtensions from "../../shared/apps/CoreExtensions";
 import StudioSlot from "../shell/registry/StudioSlot";
@@ -302,7 +303,7 @@ export default function CustomersManager({
                 objectId={customer.id}
                 extensions={customer.extensions}
                 omittedExtensions={customer.omittedExtensions}
-                request={request}
+                request={forApps(request)}
               />
             )}
             {!customer.guest && (

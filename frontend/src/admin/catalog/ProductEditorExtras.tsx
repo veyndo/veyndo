@@ -1,4 +1,5 @@
 /** Permission-filtered extension slots retain the current product context. */
+import { forApps } from "../../shared/api/types";
 import CoreExtensions, {
   type CoreExtensionData,
 } from "../../shared/apps/CoreExtensions";
@@ -21,7 +22,11 @@ export default function ProductEditorExtras({
   return (
     <>
       {id && tab === "general" && (
-        <CoreExtensions objectId={id} {...extensions} request={request} />
+        <CoreExtensions
+          objectId={id}
+          {...extensions}
+          request={forApps(request)}
+        />
       )}
       {id && tab === "general" && (
         <StudioSlot

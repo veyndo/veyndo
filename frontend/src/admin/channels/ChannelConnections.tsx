@@ -1,4 +1,5 @@
 /** Uses the existing tenant-owned frontend registry, not a parallel domain or Experience store. */
+import type { ApiPath } from "../../kit/api";
 import { useInvalidateRead, useRead } from "../shell/useRead";
 import {
   Button,
@@ -53,7 +54,7 @@ export default function ChannelConnections({
   const save = async (
     data: object,
     method = "PUT",
-    path = "/api/settings/frontends",
+    path: ApiPath = "/api/settings/frontends",
   ) => {
     setBusy(true);
     setError("");

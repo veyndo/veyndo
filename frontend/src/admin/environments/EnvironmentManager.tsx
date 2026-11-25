@@ -1,4 +1,5 @@
 /** Private environment creation and digest-bound selective release. */
+import type { ApiPath } from "../../kit/api";
 import { useRead, useSetRead } from "../shell/useRead";
 import {
   Button,
@@ -61,7 +62,7 @@ export default function EnvironmentManager({
   const scope = useMemo(() => ({}), [request, id]);
   const currentScope = useRef(scope);
   currentScope.current = scope;
-  const diffPath = id ? `/api/environments/${id}/diff` : null;
+  const diffPath: ApiPath | null = id ? `/api/environments/${id}/diff` : null;
   const releases = useRead(request, "/api/environments");
   const diff = useRead(request, diffPath);
   const setRead = useSetRead(request);

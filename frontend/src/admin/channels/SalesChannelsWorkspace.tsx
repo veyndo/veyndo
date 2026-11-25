@@ -1,4 +1,5 @@
 /** Discover and create channels separately from rules; shared settings and independent SaaS shops remain explicit. */
+import { forApps } from "../../shared/api/types";
 import { useRead, useSetRead } from "../shell/useRead";
 import { Badge, Button, Card, Notice } from "../../kit/ui";
 import { useEffect, useState } from "react";
@@ -90,8 +91,10 @@ export default function SalesChannelsWorkspace({
       <MigrationWorkspace
         onTest={onTest}
         key={workspace}
-        request={request}
-        scopedRequest={scopedRequest}
+        request={forApps(request)}
+        scopedRequest={
+          scopedRequest && ((target: string) => forApps(scopedRequest(target)))
+        }
         workspace={workspace}
         rights={rights}
         mainLocale={settings?.mainLocale ?? locale}
@@ -129,7 +132,7 @@ export default function SalesChannelsWorkspace({
   if (marketplace && selected && settings)
     return (
       <MarketplaceWorkspace
-        request={request}
+        request={forApps(request)}
         channel={selected.id}
         name={contentText(selected.data.name, locale, settings.mainLocale)}
         mainLocale={settings.mainLocale}

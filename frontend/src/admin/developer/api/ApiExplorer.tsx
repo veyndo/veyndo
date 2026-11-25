@@ -2,7 +2,7 @@
 import { Badge, Button, Card, Field, TextInput } from "../../../kit/ui";
 import { useState } from "react";
 import { useQuery } from "../../../kit/query";
-import { fillPath, routes, type Route } from "../../../kit/api";
+import { fillPath, routes, type ApiPath, type Route } from "../../../kit/api";
 import type { RequestFn } from "../../shell/studio-types";
 import { createStudioRequest } from "../../shell/requests";
 import { useLocale } from "../../../shared/i18n/i18n";
@@ -10,8 +10,9 @@ import { useApiText } from "./api-i18n";
 export function routePath(
   route: Pick<Route, "path">,
   params: Record<string, string>,
-) {
-  return fillPath(route.path, params);
+): ApiPath {
+  // A catalogue route with its parameters filled is a catalogued path.
+  return fillPath(route.path, params) as ApiPath;
 }
 const reads = (r: Route) =>
   r.method === "GET" &&

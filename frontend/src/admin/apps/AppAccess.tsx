@@ -1,4 +1,5 @@
 /** Explicit consent for digest-bound server callback keys; plaintext is shown once and never persisted in the browser. */
+import type { ApiPath } from "../../kit/api";
 import { Button, Field, Notice, TextInput } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import type { RequestFn } from "../shell/studio-types";
@@ -27,7 +28,7 @@ export default function AppAccess({
   request: RequestFn;
 }) {
   const t = useAppAccessText();
-  const path = `/api/apps/${app}/credentials`;
+  const path: ApiPath = `/api/apps/${app}/credentials`;
   const access = useRead<Access>(request, path);
   const setRead = useSetRead(request);
   const data = access.data ?? null;

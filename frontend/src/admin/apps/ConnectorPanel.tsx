@@ -1,4 +1,5 @@
 /** Native app workspace: OAuth, provider settings, durable jobs and private sources. */
+import type { ApiPath } from "../../kit/api";
 import { Button, Field, Notice, TextInput } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import { useConnectedText } from "../../shared/i18n/connected-i18n";
@@ -24,7 +25,7 @@ export default function ConnectorPanel({
   const call = (name: string, value: unknown = {}) =>
     request(`/api/apps/${app}/actions/${name}`, value);
   // The status action is a read; it polls while a connector job runs.
-  const statusPath = `/api/apps/${app}/actions/status`;
+  const statusPath: ApiPath = `/api/apps/${app}/actions/status`;
   const [running, setRunning] = useState(false);
   const statusRead = useRead(request, statusPath, {
     body: {},

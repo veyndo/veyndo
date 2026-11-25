@@ -1,4 +1,5 @@
 /** AppDetails: Installed app details, activation, version, data and isolated interface. */
+import { forApps } from "../../shared/api/types";
 import { Button, Card } from "../../kit/ui";
 import { useAppText } from "../../shared/i18n/app-i18n";
 import { useCustomerText } from "../../shared/i18n/customer-i18n";
@@ -152,7 +153,7 @@ export default function AppDetails({
           )}
         {detailTab === "appDetails" && p.active && p.id === "marketplaces" && (
           <MarketplacePanel
-            request={request}
+            request={forApps(request)}
             manage={manage}
             mainLocale={mainLocale}
             channel={

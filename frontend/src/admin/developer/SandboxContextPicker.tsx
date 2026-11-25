@@ -1,7 +1,7 @@
 /** Bounded server search selects an owned object for testing editor-bound apps in a private sandbox. */
 import { Field, Notice, Select, TextInput } from "../../kit/ui";
 import { useEffect, useRef, useState } from "react";
-import type { RequestFn } from "../../shared/api/types";
+import type { ApiRequestFn as RequestFn } from "../../shared/api/types";
 import type { Block } from "../../shared/apps/native/types";
 import { useAssistantText } from "../../shared/i18n/app-assistant-i18n";
 import { contentText } from "../../shared/i18n/content-language";

@@ -1,4 +1,5 @@
 /** Ordered recommendations retain selected native records across cursor-paginated searches, content-language changes and read-only inspection. */
+import { withQuery } from "../../kit/api";
 import { useDebouncedValue } from "../../kit/query";
 import { useRead } from "../shell/useRead";
 import { Button, Field, TextInput } from "../../kit/ui";
@@ -34,10 +35,13 @@ export default function RelatedProducts({
     [search, setSearch] = useState(""),
     [cursor, setCursor] = useState(""),
     term = useDebouncedValue(search, 200);
-  const first = `/api/merchant/products?limit=25&search=${encodeURIComponent(term)}`;
   const page = useRead(
     request,
-    cursor ? `${first}&after=${encodeURIComponent(cursor)}` : first,
+    withQuery("/api/merchant/products", {
+      limit: 25,
+      search: term,
+      after: cursor || undefined,
+    }),
     { options: { locale: language } },
   );
   // Later pages append to the earlier ones of the same search and language.

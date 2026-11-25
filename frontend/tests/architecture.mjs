@@ -60,6 +60,11 @@ try{
  file('shared/api/base.ts','/** Documented fixture. */\nexport const value=1;\n');
  file('admin/orders/view.ts','/** Consumer fixture. */\nexport const read=()=>1;\n');
  assert.equal(check().status,0,check().stderr);
+ file('shared/api/types.ts','/** Request fixture. */\nexport type RequestFn=(p:string)=>void;\nexport type ApiPath=string;\n');
+ file('admin/orders/view.ts','/** Consumer fixture. */\nimport type { RequestFn } from "../../shared/api/types";\nexport const read=(r:RequestFn)=>r("/x");\n');assert.match(check().stderr,/open app request contract/);
+ file('admin/orders/view.ts','/** Consumer fixture. */\nimport type { ApiPath } from "../../shared/api/types";\nexport const p="/x" as ApiPath;\n');assert.match(check().stderr,/casts a path to ApiPath/);
+ file('admin/orders/view.ts','/** Consumer fixture. */\nexport const read=()=>1;\n');
+ assert.equal(check().status,0,check().stderr);
  fs.unlinkSync(path.join(directory,'shared/api/README.md'));assert.match(check().stderr,/folder contract/);
- console.log('PASS source ownership, runtime-cycle, missing-import, comment, documentation, kit layering/token, lazy-registration and Studio kit-only negative controls');
+ console.log('PASS source ownership, runtime-cycle, missing-import, comment, documentation, kit layering/token, lazy-registration, Studio kit-only and catalogued-path negative controls');
 }finally{fs.rmSync(directory,{recursive:true,force:true});}

@@ -1,4 +1,5 @@
 /** One paged native projection connects saved content and durable image jobs to their existing editors. */
+import type { ApiPath } from "../../kit/api";
 import { Button } from "../../kit/ui";
 import { useContext, useEffect, useMemo } from "react";
 import AgenticGrid from "../../shared/grid/AgenticGrid";
@@ -21,7 +22,7 @@ export default function CatalogPreparation({
       (path, ...args) =>
         request(
           path.startsWith("/api/merchant/products?")
-            ? `${path}&preparation=true`
+            ? (`${path}&preparation=true` as ApiPath)
             : path,
           ...args,
         ),

@@ -1,7 +1,7 @@
 /** Register commands share authenticated Studio transport and persist only the cart capability locally. */
 import { useCallback, useEffect, useRef, useState } from "react";
 import { usePosText } from "./pos-i18n";
-import type { RequestFn } from "../../shared/api/types";
+import type { ApiRequestFn as RequestFn } from "../../shared/api/types";
 import type { Channel } from "../channels/channel-model";
 import type { PosCart, PosOrder, PosProduct } from "./pos-model";
 export function useRegister(

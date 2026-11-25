@@ -1,7 +1,7 @@
 /** Native GLB upload, parent reuse and material binding stay inside the existing revisioned product draft. */
 import { Button, Notice } from "../../kit/ui";
 import { useRef, useState } from "react";
-import type { RequestFn } from "../../shared/api/types";
+import type { ApiRequestFn as RequestFn } from "../../shared/api/types";
 import { useContentLanguage } from "../../shared/i18n/ContentLanguage";
 import { useModelText } from "../../shared/media/model-i18n";
 import { isModel } from "../../shared/media/product-media";

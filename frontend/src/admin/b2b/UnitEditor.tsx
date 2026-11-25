@@ -1,7 +1,7 @@
 /** Purchasing unit policies, hierarchy, catalogs and customer grants share current revision checks. */
 import { Button, Field, Select, TextInput } from "../../kit/ui";
 import { useState } from "react";
-import type { RequestFn } from "../../shared/api/types";
+import type { ApiRequestFn as RequestFn } from "../../shared/api/types";
 import LocalizedField from "../../shared/i18n/LocalizedField";
 import { contentText } from "../../shared/i18n/content-language";
 import { useLocale } from "../../shared/i18n/i18n";

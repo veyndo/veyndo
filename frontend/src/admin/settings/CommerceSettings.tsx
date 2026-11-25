@@ -1,4 +1,5 @@
 /** One revisioned international settings aggregate: drafts survive navigation between countries, taxes, methods and languages. */
+import type { ApiPath } from "../../kit/api";
 import { Badge, Button, Card, Field, Notice, Select } from "../../kit/ui";
 import CurrencySettings from "./CurrencySettings";
 import { useCurrencyText } from "../../shared/i18n/currency-i18n";
@@ -58,7 +59,7 @@ export default function CommerceSettings({
   const [contentLanguage, setContentLanguage] = useState<string>();
   const [scopeError, setScopeError] = useState("");
   const context = useCompanyContext(request);
-  const path = channel
+  const path: ApiPath = channel
     ? `/api/merchant/commerce/channels/${encodeURIComponent(channel)}`
     : "/api/merchant/commerce";
   const state = useSettingsDraft<

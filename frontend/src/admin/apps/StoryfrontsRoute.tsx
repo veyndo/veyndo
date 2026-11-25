@@ -1,4 +1,5 @@
 /** Storyfronts route: the Storyfront app's Studio view for the current stage. */
+import { forApps } from "../../shared/api/types";
 import { lazy } from "react";
 import { useStudio } from "../shell/StudioContext";
 
@@ -10,7 +11,7 @@ export default function StoryfrontsRoute() {
   const { request, environment, workspace, access } = useStudio();
   return (
     <StoryfrontView
-      request={request}
+      request={forApps(request)}
       workspace={environment || workspace}
       rights={access}
     />

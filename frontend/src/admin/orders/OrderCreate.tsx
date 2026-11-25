@@ -2,7 +2,7 @@
 import { Button, Card, Field, Notice, Select, TextInput } from "../../kit/ui";
 import OrderReview from "./OrderReview";
 import useOrderCreation from "./useOrderCreation";
-import type { RequestFn } from "../../shared/api/types";
+import type { ApiRequestFn as RequestFn } from "../../shared/api/types";
 import { addressComplete } from "../../shared/customer/customer-types";
 import AddressFields from "../../shared/customer/AddressFields";
 import CustomerPicker from "../../shared/customer/CustomerPicker";

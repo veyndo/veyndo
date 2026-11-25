@@ -1,9 +1,10 @@
 /** Tenant-scoped company workspace; canonical API operations are also exposed through MCP. */
+import { forApps } from "../../shared/api/types";
 import { Button, Card, Field, TextInput } from "../../kit/ui";
 import CompanyCreate from "./CompanyCreate";
 import { useB2BExperienceText } from "./experience-i18n";
 import { useEffect, useState } from "react";
-import type { RequestFn } from "../../shared/api/types";
+import type { ApiRequestFn as RequestFn } from "../../shared/api/types";
 import { ContentLanguage } from "../../shared/i18n/ContentLanguage";
 import ContentLanguagePicker from "../../shared/i18n/ContentLanguagePicker";
 import LocalizedField from "../../shared/i18n/LocalizedField";
@@ -56,7 +57,7 @@ export default function B2BWorkspace({
     onCompanies ? onCompanies() : setTab("companies");
   const canManage = !rights || rights.includes("b2b.manage"),
     canPII = !rights || rights.includes("customers.pii");
-  const command = (op: string, v: unknown = {}) => request("/api/b2b/" + op, v);
+  const command = (op: string, v: unknown = {}) => request(`/api/b2b/${op}`, v);
   const load = async () => {
     const [v, c] = await Promise.all([
       command("companies"),
@@ -377,7 +378,7 @@ export default function B2BWorkspace({
                   objectId={draft.id}
                   extensions={detail?.extensions}
                   omittedExtensions={detail?.omittedExtensions}
-                  request={request}
+                  request={forApps(request)}
                 />
               )}
               {draft.revision > 0 && (

@@ -1,4 +1,5 @@
 /** Native variant family browser with cursor pagination, explicit editing and a bounded creation wizard. */
+import type { ApiPath } from "../../kit/api";
 import { useInvalidateRead, useRead } from "../shell/useRead";
 import { Button, Notice } from "../../kit/ui";
 import { useEffect, useState } from "react";
@@ -27,7 +28,7 @@ export default function ProductVariants({
 }) {
   const { c, money } = useCatalogText(),
     v = useVariantText();
-  const firstPath = `/api/merchant/products?limit=50&parentId=${encodeURIComponent(draft.id!)}`;
+  const firstPath: ApiPath = `/api/merchant/products?limit=50&parentId=${encodeURIComponent(draft.id!)}`;
   const first = useRead(request, draft.catalog.parentId ? null : firstPath);
   const invalidate = useInvalidateRead(request);
   // Later pages append to the first page until it is loaded again.

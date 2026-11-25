@@ -7,7 +7,9 @@ import Icon from "../../shared/ui/Icon";
 import { useShopText } from "../../shared/i18n/shop-i18n";
 import { useConnectedText } from "../../shared/i18n/connected-i18n";
 import { locales } from "../../shared/i18n/i18n";
-import PersonalAccountForm from "../team/PersonalAccountForm";
+import PersonalAccountForm, {
+  type AccountMode,
+} from "../team/PersonalAccountForm";
 import AuthenticationChallenge from "../../shared/auth/AuthenticationChallenge";
 import type { useStudioAccess } from "./useStudioAccess";
 import "../styles/studio-sign-in.css";
@@ -22,7 +24,7 @@ export default function StudioSignIn({
 }) {
   const { s, t, locale, setLocale } = useShopText();
   const { x } = useConnectedText();
-  const [mode, setMode] = useState("login"),
+  const [mode, setMode] = useState<AccountMode>("login"),
     [busy, setBusy] = useState(false),
     [error, setError] = useState("");
   const dialog = useRef<HTMLDialogElement>(null);
@@ -81,7 +83,7 @@ export default function StudioSignIn({
       )}
       {!overlay && (
         <div className="account-tabs">
-          {["login", "register", "join"].map((m) => (
+          {(["login", "register", "join"] as const).map((m) => (
             <Button
               key={m}
               type="button"

@@ -1,7 +1,7 @@
 /** Search the canonical merchant catalog; unit permissions persist through the native revision-bound catalog API. */
 import { Field, Notice, TextInput } from "../../kit/ui";
 import { useState } from "react";
-import type { RequestFn } from "../../shared/api/types";
+import type { ApiRequestFn as RequestFn } from "../../shared/api/types";
 import { useRead } from "../shell/useRead";
 import { useDebouncedValue } from "../../kit/query";
 import { useB2BText } from "../../shared/i18n/b2b-i18n";
@@ -21,7 +21,7 @@ export default function UnitCatalog({
     search = useDebouncedValue(query, 180);
   const products = useRead(
     request,
-    "/api/merchant/products?limit=20&search=" + encodeURIComponent(search),
+    `/api/merchant/products?limit=20&search=${encodeURIComponent(search)}`,
   );
   const rows: { id: string; name: string; productNumber?: string }[] =
     products.data?.elements ?? [];

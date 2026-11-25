@@ -11,7 +11,7 @@ import { useCallback, useEffect, useState } from "react";
 import { shopApi } from "../../shared/api/shop-api";
 import { useShopText } from "../../shared/i18n/shop-i18n";
 import "./commerce-manager.css";
-import PersonalAccountForm from "./PersonalAccountForm";
+import PersonalAccountForm, { type AccountMode } from "./PersonalAccountForm";
 import AccountSecurity from "../../shared/auth/AccountSecurity";
 import type { Session } from "../../shared/api/account-types";
 export type { Session } from "../../shared/api/account-types";
@@ -47,7 +47,7 @@ export default function UsersManager({
       locale,
       main,
     ) || s(id);
-  const [mode, setMode] = useState("login");
+  const [mode, setMode] = useState<AccountMode>("login");
   const [creating, setCreating] = useState(false);
   const [createdShop, setCreatedShop] = useState<{
     id: string;
@@ -206,7 +206,7 @@ export default function UsersManager({
         <section className="commerce-card">
           <p>{s("personalAccess")}</p>
           <div className="account-tabs">
-            {["login", "register", "join"].map((m) => (
+            {(["login", "register", "join"] as const).map((m) => (
               <Button
                 type="submit"
                 key={m}

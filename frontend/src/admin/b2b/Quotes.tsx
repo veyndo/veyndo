@@ -1,7 +1,7 @@
 /** Native RFQ inbox and merchant offers use the same versioned contract as buyer API/MCP operations. */
 import { Field, Notice, TextArea, TextInput } from "../../kit/ui";
 import { useEffect, useState } from "react";
-import type { RequestFn } from "../../shared/api/types";
+import type { ApiRequestFn as RequestFn } from "../../shared/api/types";
 import { useB2BQuoteText } from "../../shared/i18n/b2b-quotes-i18n";
 import { useOperationsText } from "../../shared/i18n/operations-i18n";
 import { contentText } from "../../shared/i18n/content-language";

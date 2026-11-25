@@ -12,8 +12,21 @@ drift-checked by the structure gate:
 
 - [`index.ts`](index.ts): The public interface; import only this file from outside `kit/`.
 - [`client.ts`](client.ts): `createApiClient(transport)` with `route(key, {params, query, body})` and `call(operation, arguments)`; operation failures throw `OperationError`.
-- [`routes.ts`](routes.ts): The catalogue as records, path-parameter types and `fillPath`, which refuses parameters that could escape their segment.
+- [`routes.ts`](routes.ts): The catalogue as records, path-parameter types, `fillPath` (refuses parameters that could escape their segment), the `ApiPath` type and the `childPath`/`withQuery` builders.
 - [`generated/`](generated/): Generated sources; do not edit.
+
+## Catalogued paths
+
+`ApiPath` is every catalogued path with its `{parameters}` as any text, optionally
+followed by a query string. The request functions of the Studio (`request`,
+`useRead`), the storefront (`shopApi`) and the operator console (`platformRequest`)
+take an `ApiPath`, so a path the server does not mount does not compile; template
+literals such as `` `/api/merchant/orders/${id}` `` are checked against
+`/api/merchant/orders/{id}`. Building blocks that receive a base path (address
+book, history, grids) extend it with `childPath` and `withQuery`, which encode each
+segment. App surfaces receive the open `RequestFn` through `forApps`, because app
+routes are discovered per shop at run time. The architecture check refuses the open
+contract and `as ApiPath` casts in screens, with negative controls.
 
 The client grants nothing: the server checks shop, identity and current rights for
 every route and operation. Request and response bodies of plain routes are not typed

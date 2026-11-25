@@ -1,4 +1,5 @@
 /** ConciergeView: storefront view composed from the scoped cart/controller. */
+import { forApps } from "../../shared/api/types";
 import { mediaImage } from "../../shared/media/product-media";
 import ConversationAppViews, {
   type ConversationAppView,
@@ -39,7 +40,7 @@ export default function ConciergeView() {
     shortlist,
   } = useStorefront();
   const appRequest = useCallback(
-    (path: string, body?: unknown) => shopApi(path, body, cart?.token),
+    forApps((path, body) => shopApi(path, body, cart?.token)),
     [cart?.token, scope],
   );
   const active = useRef<AbortController>(null);

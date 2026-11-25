@@ -1,4 +1,5 @@
 /** Studio server reads through the query layer, keyed by the request's tenant and path so live and stage data never mix. */
+import type { ApiPath } from "../../kit/api";
 import { useCallback } from "react";
 import { useQuery, useQueryCache, type QueryKey } from "../../kit/query";
 import type { RequestFn } from "./studio-types";
@@ -27,7 +28,7 @@ export const readKey = (
  */
 export function useRead<T = any>(
   request: RequestFn | undefined,
-  path: string | null | undefined,
+  path: ApiPath | null | undefined,
   {
     body,
     method,

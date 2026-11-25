@@ -1,4 +1,5 @@
 /** StudioConversation: focused Studio view; state and commands come from the session-scoped controller. */
+import { forApps } from "../../shared/api/types";
 import { useCatalogIntakeText } from "../../shared/i18n/catalog-intake-i18n";
 import { useScenarioNavigation } from "../scenarios/useScenarioNavigation";
 import { canTestCustomers } from "../scenarios/scenario-access";
@@ -225,7 +226,7 @@ export default function StudioConversation({
                   <ConversationAppViews
                     views={m.id === -1 ? activeViews : m.data.preview?.appViews}
                     readCurrent
-                    request={request}
+                    request={forApps(request)}
                     onUseFilter={(filter, previous) => {
                       const next = draftWithAppFilter(
                         draft,

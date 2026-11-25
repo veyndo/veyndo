@@ -52,9 +52,7 @@ export function useSavedPaymentMethods(customerId?: string | null) {
     setFailed(false);
     try {
       await shopApi(
-        "/store-api/account/payment-methods/" +
-          encodeURIComponent(id) +
-          "/revoke",
+        `/store-api/account/payment-methods/${encodeURIComponent(id)}/revoke`,
         { requestKey: crypto.randomUUID() },
       );
       if (customerSessionGeneration(scope) === generation)

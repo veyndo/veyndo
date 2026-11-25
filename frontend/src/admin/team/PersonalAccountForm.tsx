@@ -1,4 +1,5 @@
 /** PersonalAccountForm: focused account-form view with explicit typed inputs and callbacks. */
+import type { ApiPath } from "../../kit/api";
 import { Button, Field, TextInput } from "../../kit/ui";
 import { useShopText } from "../../shared/i18n/shop-i18n";
 import type { Session } from "./UsersManager";
@@ -13,12 +14,19 @@ import AuthenticationChallenge, {
 import RecoveryLink from "../../shared/auth/RecoveryLink";
 export type PersonalAccountFormProps = {
   run: (fn: () => Promise<void>) => Promise<void>;
-  mode: string;
+  mode: AccountMode;
   onSession: (s: import("./UsersManager").Session) => void | Promise<void>;
   s: ReturnType<typeof useShopText>["s"];
   busy: boolean;
   email?: string;
 };
+/** The sign-in forms of a personal Studio account. */
+export type AccountMode = "login" | "register" | "join";
+const endpoints = {
+  login: "/api/auth/login",
+  register: "/api/auth/register",
+  join: "/api/auth/accept",
+} as const satisfies Record<AccountMode, ApiPath>;
 export default function PersonalAccountForm({
   run,
   mode,
@@ -46,7 +54,7 @@ export default function PersonalAccountForm({
         const body = Object.fromEntries(form);
         run(async () => {
           const session = await shopApi<Session | MfaChallenge>(
-            `/api/auth/${mode === "join" ? "accept" : mode}`,
+            endpoints[mode],
             body,
           );
           if (isMfaChallenge(session)) {

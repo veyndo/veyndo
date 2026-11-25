@@ -3,7 +3,7 @@ import { useDebouncedValue } from "../../kit/query";
 import { useRead } from "../shell/useRead";
 import { Button, Field, Select } from "../../kit/ui";
 import { useEffect, useRef, useState } from "react";
-import type { RequestFn } from "../../shared/api/types";
+import type { ApiRequestFn as RequestFn } from "../../shared/api/types";
 import Icon from "../../shared/ui/Icon";
 import { useReportText } from "./report-i18n";
 import {

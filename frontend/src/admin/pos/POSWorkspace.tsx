@@ -2,7 +2,7 @@
 import { useRead } from "../shell/useRead";
 import { Button, Field, Select } from "../../kit/ui";
 import { useEffect, useState } from "react";
-import type { RequestFn } from "../../shared/api/types";
+import type { ApiRequestFn as RequestFn } from "../../shared/api/types";
 import type { Channel } from "../channels/channel-model";
 import { useLocale } from "../../shared/i18n/i18n";
 import { contentText } from "../../shared/i18n/content-language";

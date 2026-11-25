@@ -1,4 +1,5 @@
 /** Metadata-only credentials screen; rotation sends plaintext once to the encrypted server store. */
+import type { ApiPath } from "../../kit/api";
 import { Button, Field, Notice, Select, TextInput } from "../../kit/ui";
 import { useEffect, useState } from "react";
 import type { RequestFn } from "../shell/studio-types";
@@ -32,7 +33,7 @@ export default function AppSecrets({
     [confirm, setConfirm] = useState(false),
     [actionError, setError] = useState(""),
     [notice, setNotice] = useState(false);
-  const secretsPath = `/api/apps/${app}/secrets`;
+  const secretsPath: ApiPath = `/api/apps/${app}/secrets`;
   const secretsRead = useRead<Secrets>(request, secretsPath);
   const setRead = useSetRead(request);
   const data = secretsRead.data ?? null;

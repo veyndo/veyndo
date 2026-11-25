@@ -1,7 +1,7 @@
 /** Display business navigation only after the active workspace confirms its feature switches. */
 import { useEffect } from "react";
 import { useRead } from "./useRead";
-import type { RequestFn } from "../../shared/api/types";
+import type { ApiRequestFn as RequestFn } from "../../shared/api/types";
 
 type Features = { enabled: boolean; quotes: boolean; edi: boolean };
 export const b2bChanged = "commerce.b2b.changed";

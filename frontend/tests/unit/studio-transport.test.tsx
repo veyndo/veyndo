@@ -10,6 +10,10 @@ import { useStudioNavigation } from "../../src/admin/shell/navigation";
 import { LocaleProvider, locales, useLocale } from "../../src/shared/i18n/i18n";
 import { useStudio } from "../../src/admin/shell/StudioContext";
 import { useStorefront } from "../../src/storefront/shell/StorefrontContext";
+import type { ApiPath } from "../../src/kit/api";
+// Transport tests use synthetic paths; the catalogue check is for screens.
+const items = "/api/items" as ApiPath;
+const upload = "/api/upload" as ApiPath;
 describe("Studio transport", () => {
   it("preserves tenant, principal, locale and explicit method", async () => {
     const fetcher = vi
@@ -17,9 +21,9 @@ describe("Studio transport", () => {
       .mockResolvedValue({ ok: true, json: async () => ({ revision: 7 }) });
     vi.stubGlobal("fetch", fetcher);
     const api = createStudioRequest("token-fixture", "tenant-a", "de-DE");
-    expect(await api("/api/items")).toEqual({ revision: 7 });
-    await api("/api/items", { revision: 6 });
-    await api("/api/items", null, "DELETE");
+    expect(await api(items)).toEqual({ revision: 7 });
+    await api(items, { revision: 6 });
+    await api(items, null, "DELETE");
     expect(fetcher.mock.calls.map((c) => c[1].method)).toEqual([
       "GET",
       "POST",
@@ -74,7 +78,7 @@ describe("Studio transport", () => {
     vi.stubGlobal("fetch", fetcher);
     const form = new FormData();
     form.append("file", new Blob(["test"]), "datasheet.txt");
-    await createStudioRequest("t", "a", "en-GB")("/api/upload", form);
+    await createStudioRequest("t", "a", "en-GB")(upload, form);
     expect(fetcher.mock.calls[0][1].body).toBe(form);
     expect(
       new Headers(fetcher.mock.calls[0][1].headers).has("content-type"),
@@ -93,7 +97,7 @@ describe("Studio transport", () => {
         }),
       );
       await expect(
-        createStudioRequest("t", "a", "en-GB")("/api/items"),
+        createStudioRequest("t", "a", "en-GB")(items),
       ).rejects.toMatchObject({
         status: 401,
         diagnostic: body.errors?.[0]?.detail ?? "Unauthorized",
@@ -111,10 +115,10 @@ describe("Studio transport", () => {
     );
     expect(result.current.request).toBe(result.current.liveRequest);
     rerender({ stage: "stage" });
-    await result.current.request("/api/items", { revision: 1 }, "POST", {
+    await result.current.request(items, { revision: 1 }, "POST", {
       idempotencyKey: "stage-fixture",
     });
-    await result.current.liveRequest("/api/items");
+    await result.current.liveRequest(items);
     expect(
       new Headers(fetcher.mock.calls[0][1].headers).get("idempotency-key"),
     ).toBe("stage-fixture");

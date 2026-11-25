@@ -1,4 +1,5 @@
 /** Order workspace: server actions, exact-once commands, provider progress and visible event history. */
+import { forApps } from "../../shared/api/types";
 import { paymentCommand } from "../payments/payment-command";
 import { usePaymentDiagnosticText } from "../../shared/i18n/payment-diagnostic-i18n";
 import type { PaymentOptions } from "../payments/payment-amount";
@@ -189,7 +190,7 @@ export default function OrderDetail({
         objectId={id}
         extensions={order.extensions}
         omittedExtensions={order.omittedExtensions}
-        request={request}
+        request={forApps(request)}
       />
       <div className="orders-heading">
         <div>

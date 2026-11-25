@@ -1,6 +1,6 @@
 /** Current Studio rights only control presentation; each native list/model operation rechecks server authority. */
 import { useEffect, useState } from "react";
-import type { RequestFn } from "../api/types";
+import type { ApiRequestFn as RequestFn } from "../api/types";
 export function useGridAccess(request: RequestFn) {
   const [admission, setAdmission] = useState<{
     request: RequestFn;

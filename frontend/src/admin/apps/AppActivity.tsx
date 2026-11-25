@@ -1,4 +1,5 @@
 /** API-backed per-app call metadata, storage budgets and explicitly approved durable replay. */
+import type { ApiPath } from "../../kit/api";
 import { useRead, useSetRead } from "../shell/useRead";
 import { Button, Field, Notice, TextInput } from "../../kit/ui";
 import AppJobs from "./AppJobs";
@@ -42,7 +43,7 @@ export default function AppActivity({
     [confirm, setConfirm] = useState(false),
     [busy, setBusy] = useState(false),
     [queued, setQueued] = useState<number | null>(null);
-  const dataPath = `/api/apps/${app}/activity`;
+  const dataPath: ApiPath = `/api/apps/${app}/activity`;
   const dataRead = useRead<Activity | null>(request, dataPath);
   const setReadData = useSetRead(request);
   const data = dataRead.data ?? null;

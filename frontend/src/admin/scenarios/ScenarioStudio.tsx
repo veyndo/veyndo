@@ -1,4 +1,5 @@
 /** A compact private customer lab on the existing Studio scope and durable run controls. */
+import type { ApiPath } from "../../kit/api";
 import { useRead, useSetRead } from "../shell/useRead";
 import { Button } from "../../kit/ui";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -60,7 +61,7 @@ export default function ScenarioStudio({
   const currentSelection = useRef(selected);
   currentSelection.current = selected;
   const open = !!environment && allowed;
-  const scenarioPath = (id: string) =>
+  const scenarioPath = (id: string): ApiPath =>
     `/api/agent/scenarios/${encodeURIComponent(id)}`;
   const listRead = useRead(request, open ? "/api/agent/scenarios" : null);
   const setRead = useSetRead(request);

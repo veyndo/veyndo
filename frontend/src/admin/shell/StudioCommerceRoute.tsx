@@ -1,4 +1,5 @@
 /** Installed app surfaces (including the marketplace workspace) stay within the active Studio workspace. */
+import { forApps } from "../../shared/api/types";
 import { lazy } from "react";
 import { AppSurfaceView, useAppRegistry } from "../../shared/apps/AppSurfaces";
 import { useCommerceNavText } from "./commerce-nav-i18n";
@@ -29,7 +30,7 @@ export default function StudioCommerceRoute() {
           <p>{t("marketplaceHint")}</p>
         </header>
         <MarketplacePanel
-          request={request}
+          request={forApps(request)}
           manage
           mainLocale={market.mainLocale ?? registry.mainLocale}
         />

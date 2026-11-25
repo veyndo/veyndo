@@ -6,7 +6,7 @@ import {
   useAppSurfaces,
 } from "../../../../frontend/src/shared/apps/AppSurfaces";
 import { useWorkbenchText } from "../../../../frontend/src/shared/i18n/workbench-i18n";
-import type { RequestFn } from "../../../../frontend/src/admin/shell/studio-types";
+import type { RequestFn } from "../../../../frontend/src/shared/api/types";
 import Icon from "../../../../frontend/src/shared/ui/Icon";
 import AppConsent from "../../../../frontend/src/admin/apps/AppConsent";
 import StoryfrontConnections from "./StoryfrontConnections";

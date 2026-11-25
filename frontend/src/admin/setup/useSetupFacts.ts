@@ -7,7 +7,7 @@ import type { Config } from "../../shared/api/shop-api";
 export function useSetupFacts(enabled = true, changed = 0) {
   const { request, access } = useStudio();
   const [revision, setRevision] = useState(0);
-  const path = (right: string, value: string) =>
+  const path = <T extends string>(right: string, value: T) =>
     enabled && access.includes(right) ? value : null;
   const company = useRead(
     request,

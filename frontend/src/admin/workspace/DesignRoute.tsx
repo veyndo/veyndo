@@ -1,4 +1,5 @@
 /** Design route: opens the site builder designer with the design reference that belongs to the current shop and stage. */
+import { forApps } from "../../shared/api/types";
 import { lazy } from "react";
 import { useScenarioNavigation } from "../scenarios/useScenarioNavigation";
 import { useStudio } from "../shell/StudioContext";
@@ -22,7 +23,7 @@ export default function DesignRoute() {
   const openScenarios = useScenarioNavigation();
   return (
     <ShopDesigner
-      request={request}
+      request={forApps(request)}
       workspace={environment || workspace}
       shopName={workspaceName}
       rights={access}

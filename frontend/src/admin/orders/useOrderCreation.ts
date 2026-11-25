@@ -1,7 +1,7 @@
 /** Draft controller loads admitted choices, fences async reads and keeps review state separate from the editable input. */
 import { useRead } from "../shell/useRead";
 import { useEffect, useRef, useState } from "react";
-import type { RequestFn } from "../../shared/api/types";
+import type { ApiRequestFn as RequestFn } from "../../shared/api/types";
 import type {
   Cart,
   Product,

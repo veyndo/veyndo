@@ -1,6 +1,6 @@
 /** Reviewed native quote and explicit customer-authorisation acknowledgements precede the idempotent order command. */
 import { Button } from "../../kit/ui";
-import type { RequestFn } from "../../shared/api/types";
+import type { ApiRequestFn as RequestFn } from "../../shared/api/types";
 import type { OrderCreation } from "./useOrderCreation";
 export default function OrderReview({
   state,

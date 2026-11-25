@@ -4,7 +4,7 @@ import { useRead } from "../shell/useRead";
 import { Field, Notice, TextInput } from "../../kit/ui";
 import { mediaImage } from "../../shared/media/product-media";
 import { useState } from "react";
-import type { RequestFn } from "../../shared/api/types";
+import type { ApiRequestFn as RequestFn } from "../../shared/api/types";
 import type { Product } from "../../shared/api/shop-api";
 import { useAdminCreationText } from "../../shared/i18n/admin-creation-i18n";
 export default function OrderProductPicker({

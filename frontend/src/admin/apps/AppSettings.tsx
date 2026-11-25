@@ -1,4 +1,5 @@
 /** Installed settings use the existing encrypted secret owner; secret inputs are write-only and cleared after save. */
+import type { ApiPath } from "../../kit/api";
 import { Button, Notice } from "../../kit/ui";
 import "./app-settings.css";
 import { useEffect, useState } from "react";
@@ -34,7 +35,7 @@ export default function AppSettings({
     [actionError, setError] = useState(""),
     [busy, setBusy] = useState(false),
     [saved, setSaved] = useState(false);
-  const settingsPath = `/api/apps/${encodeURIComponent(app)}/settings`;
+  const settingsPath: ApiPath = `/api/apps/${encodeURIComponent(app)}/settings`;
   const settings = useRead<State>(request, settingsPath);
   const setRead = useSetRead(request);
   const state = settings.data ?? null;

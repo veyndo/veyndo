@@ -1,4 +1,5 @@
 /** shop api: Typed commerce contracts, merchant/store transports and binary download helper. */
+import type { ApiPath } from "../../kit/api";
 import type { AgentStreamEvent } from "./agent-stream";
 import { requestJson } from "./request-json";
 import { shopScope } from "./shop-scope";
@@ -258,7 +259,7 @@ export function getContentLocale() {
   return new URLSearchParams(location.search).get("language") ?? getLocale();
 }
 export async function shopApi<T = unknown>(
-  path: string,
+  path: ApiPath,
   body?: unknown,
   token?: string,
   method?: string,

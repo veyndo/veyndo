@@ -147,7 +147,8 @@ export type Provider = {
   model: string;
   configured: boolean;
 };
-export type { RequestFn } from "../../shared/api/types";
+/** Studio's request function: only catalogued paths compile (`ApiRequestFn`). */
+export type { ApiRequestFn as RequestFn } from "../../shared/api/types";
 
 export type StudioNotice = {
   key:

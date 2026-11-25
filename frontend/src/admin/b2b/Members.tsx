@@ -2,7 +2,7 @@
 import { Field, TextInput } from "../../kit/ui";
 import CustomerPicker from "./CustomerPicker";
 import { useEffect, useState } from "react";
-import type { RequestFn } from "../../shared/api/types";
+import type { ApiRequestFn as RequestFn } from "../../shared/api/types";
 import { useB2BText, type B2BWord } from "../../shared/i18n/b2b-i18n";
 import { memberPermissions, type Member } from "../../shared/b2b/types";
 export default function Members({

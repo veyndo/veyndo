@@ -1,7 +1,7 @@
 /** Receipt creation and PDF download reuse merchant documents and immutable order revision/idempotency. */
 import { Notice } from "../../kit/ui";
 import { useEffect, useState } from "react";
-import type { RequestFn } from "../../shared/api/types";
+import type { ApiRequestFn as RequestFn } from "../../shared/api/types";
 import { useLocale } from "../../shared/i18n/i18n";
 import { usePosText } from "./pos-i18n";
 import type { useRegister } from "./useRegister";

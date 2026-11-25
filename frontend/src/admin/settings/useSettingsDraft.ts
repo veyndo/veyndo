@@ -1,9 +1,10 @@
 /** Revisioned settings drafts survive locale refreshes, reject late loads and keep failed saves editable. */
+import type { ApiPath } from "../../kit/api";
 import { useEffect, useRef, useState } from "react";
 import type { RequestFn } from "../shell/studio-types";
 export function useSettingsDraft<T, M extends object = object>(
   request: RequestFn,
-  path: string,
+  path: ApiPath,
 ) {
   const currentRequest = useRef(request);
   currentRequest.current = request;

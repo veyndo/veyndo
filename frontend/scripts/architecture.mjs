@@ -51,6 +51,11 @@ const lockedRoots = Object.values(
 ).map((row) => path.resolve(root, "..", row.path) + path.sep);
 const vendored = (file) =>
   lockedRoots.some((prefix) => file.startsWith(prefix));
+/** Screens that fill a catalogued route generically (the API explorer, the preparation filter). */
+const pathCasts = new Set([
+  "admin/developer/api/ApiExplorer.tsx",
+  "admin/catalog/CatalogPreparation.tsx",
+]);
 const colourLiteral = /#[0-9a-fA-F]{3,8}\b|\b(?:rgb|rgba|hsl|hsla)\(/;
 const resolve = (from, spec) => {
   // Vite asset queries (`?inline`, `?url`) name the same file.
@@ -87,6 +92,30 @@ for (const file of files) {
   )
     errors.push(
       `${relative(file)} uses a retired Studio class; use kit Button, LinkButton or Card`,
+    );
+  // Screens call only catalogued paths (5.2): the generated route catalogue types
+  // their request functions; the open request contract is for app surfaces.
+  const screen =
+    /\.tsx?$/.test(file) &&
+    !vendored(file) &&
+    (["admin", "storefront"].includes(owner(file)) ||
+      /^shared\/(customer|grid|history|media|geography)\//.test(
+        relative(file),
+      ));
+  if (
+    screen &&
+    /import type \{\s*RequestFn\s*\}\s*from\s*"[^"]*api\/types"/.test(text)
+  )
+    errors.push(
+      `${relative(file)} uses the open app request contract; screens use ApiRequestFn (catalogued paths)`,
+    );
+  if (
+    screen &&
+    !pathCasts.has(relative(file)) &&
+    /\bas\s+Api(?:Route)?Path\b/.test(text)
+  )
+    errors.push(
+      `${relative(file)} casts a path to ApiPath; write a catalogued path or use childPath/withQuery`,
     );
   if (
     file.endsWith(".css") &&

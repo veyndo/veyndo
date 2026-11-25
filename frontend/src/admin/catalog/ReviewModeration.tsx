@@ -2,7 +2,7 @@
 import { useRead, useSetRead } from "../shell/useRead";
 import { Button, Card, Notice } from "../../kit/ui";
 import { useState } from "react";
-import type { RequestFn } from "../../shared/api/types";
+import type { ApiRequestFn as RequestFn } from "../../shared/api/types";
 import Icon from "../../shared/ui/Icon";
 import { useProductEditorText } from "./product-editor-i18n";
 import { useShopText } from "../../shared/i18n/shop-i18n";

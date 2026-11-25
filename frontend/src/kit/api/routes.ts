@@ -49,3 +49,47 @@ export function fillPath(
     return encodeURIComponent(value);
   });
 }
+
+/** A path template with each `{parameter}` as any string. */
+type Pattern<P extends string> =
+  P extends `${infer Head}{${string}}${infer Rest}`
+    ? `${Head}${string}${Pattern<Rest>}`
+    : P;
+/** Every path the server mounts, with filled parameters. */
+export type ApiRoutePath = Pattern<RoutePathOf<RouteKey>>;
+/**
+ * A request path the route catalogue knows, optionally with a query string.
+ * Request functions take this type, so a path the server does not mount does
+ * not compile.
+ */
+export type ApiPath = ApiRoutePath | `${ApiRoutePath}?${string}`;
+
+/**
+ * A child of a catalogued path: each segment is encoded and may not escape it.
+ * For building blocks (address book, history, grids) whose base path a screen
+ * passes in; the base is checked where the screen writes it.
+ */
+export function childPath(
+  base: ApiRoutePath,
+  ...segments: (string | number)[]
+): ApiRoutePath {
+  const tail = segments.map((segment) => fillPath("{s}", { s: segment }));
+  return [base, ...tail].join("/") as ApiRoutePath;
+}
+
+/** A catalogued path with a query string; empty parameters add nothing. */
+export function withQuery(
+  path: ApiRoutePath,
+  query: URLSearchParams | Record<string, string | number | undefined>,
+): ApiPath {
+  const params =
+    query instanceof URLSearchParams
+      ? query
+      : new URLSearchParams(
+          Object.entries(query).flatMap(([key, value]) =>
+            value === undefined ? [] : [[key, String(value)]],
+          ),
+        );
+  const text = params.toString();
+  return text ? `${path}?${text}` : path;
+}

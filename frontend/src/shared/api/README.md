@@ -12,7 +12,7 @@ Each file starts with its responsibility. See [the source inventory](../../../..
 - [`request-json.ts`](request-json.ts): Coalesce simultaneous identical core reads with complete identity; no persisted response cache.
 - [`shop-api.ts`](shop-api.ts): shop api: Typed commerce contracts, merchant/store transports and binary download helper.
 - [`shop-scope.ts`](shop-scope.ts): Canonical browser shop scope for storefront URLs and tenant-isolated customer storage.
-- [`types.ts`](types.ts): Common JSON/multipart request contract for app surfaces and merchant operations.
+- [`types.ts`](types.ts): The request contracts: `ApiRequestFn` for screens (catalogued paths only), the open `RequestFn` app surfaces receive, and `forApps`, which hands a screen's transport to an app surface.
 
 ## Verification
 

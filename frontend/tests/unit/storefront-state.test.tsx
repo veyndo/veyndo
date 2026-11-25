@@ -6,6 +6,7 @@ import { useCatalog } from "../../src/storefront/shell/useCatalog";
 import { usePersonalization } from "../../src/storefront/shell/usePersonalization";
 import { publishConsent } from "../../src/shared/legal/consent-store";
 import { cart, product } from "./fixtures";
+import type { ApiPath } from "../../src/kit/api";
 const response = (value: unknown, status = 200) => ({
   ok: status < 400,
   status,
@@ -40,7 +41,13 @@ describe("Storefront API isolation", () => {
     expect(
       new Headers(fetcher.mock.calls[1][1].headers).get("authorization"),
     ).toBe("Bearer owner-a");
-    await shopApi("/api/admin", undefined, undefined, "DELETE", "explicit-a");
+    await shopApi(
+      "/api/admin" as ApiPath,
+      undefined,
+      undefined,
+      "DELETE",
+      "explicit-a",
+    );
     expect(fetcher.mock.calls[2][1]).toMatchObject({
       method: "DELETE",
     });
@@ -79,7 +86,7 @@ describe("Storefront API isolation", () => {
         );
       vi.stubGlobal("fetch", fetcher);
       await expect(
-        shopApi(path, body, undefined, method),
+        shopApi(path as ApiPath, body, undefined, method),
       ).rejects.toMatchObject({ status: 401 });
       expect(fetcher).toHaveBeenCalledTimes(1);
     },
@@ -87,7 +94,9 @@ describe("Storefront API isolation", () => {
   it("rejects non-session errors without dropping a valid login", async () => {
     localStorage.setItem("rac-customer:unit-shop", "valid");
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(response({}, 403)));
-    await expect(shopApi("/store-api/account")).rejects.toMatchObject({
+    await expect(
+      shopApi("/store-api/account" as ApiPath),
+    ).rejects.toMatchObject({
       status: 403,
     });
     expect(localStorage.getItem("rac-customer:unit-shop")).toBeNull();

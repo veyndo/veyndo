@@ -1,7 +1,7 @@
 /** Shared localized caption edits and explicit AI proposal review; native owners retain persistence and publication. */
 import { Button } from "../../kit/ui";
 import { useEffect, useRef, useState } from "react";
-import type { RequestFn } from "../api/types";
+import type { ApiRequestFn as RequestFn } from "../api/types";
 import { useContentLanguage } from "../i18n/ContentLanguage";
 import {
   contentKey,

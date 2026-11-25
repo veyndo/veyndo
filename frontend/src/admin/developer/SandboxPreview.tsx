@@ -1,4 +1,5 @@
 /** Preview resolves the installed registry first; a newer staged package cannot masquerade as an older build. */
+import { forApps } from "../../shared/api/types";
 import { useRead } from "../shell/useRead";
 import { Notice } from "../../kit/ui";
 import { useEffect, useState } from "react";
@@ -49,7 +50,7 @@ export default function SandboxPreview({
       );
   }, [surface?.app, surface?.version, surface?.surface.id]);
   const scoped = useSurfaceGateway(
-    request,
+    forApps(request),
     app,
     view,
     context,

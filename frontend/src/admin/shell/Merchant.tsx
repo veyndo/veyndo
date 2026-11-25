@@ -1,4 +1,5 @@
 /** Studio composition root: layout, scoped controller and modular workspace views. */
+import { forApps } from "../../shared/api/types";
 import { Button } from "../../kit/ui";
 import { SetupProvider } from "../setup/SetupProvider";
 import SetupBanner from "../setup/SetupBanner";
@@ -84,7 +85,7 @@ export default function Merchant(props: {
         scope={`${workspace}:${environment}:${controller.auth.identity.user.id}`}
       >
         <AppSurfaceProvider
-          request={request}
+          request={forApps(request)}
           scopeKey={`${workspace}:${environment}:${controller.auth.identity.user.id}`}
         >
           <SetupProvider
