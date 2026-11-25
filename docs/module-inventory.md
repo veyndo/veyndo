@@ -992,6 +992,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/checkout/src/store/session.rs](../components/checkout/src/store/session.rs) | What a checkout session reads under the checkout transaction: the channel it may sell on and the order it already placed. |
 | [components/checkout/src/store/tax_conditions.rs](../components/checkout/src/store/tax_conditions.rs) | Tax rules with conditions read private pre-tax cart facts; the quote they are measured on carries no taxes of its own conditions. |
 | [components/checkout/src/store.rs](../components/checkout/src/store.rs) | Reads of the checkout transaction. |
+| [components/checkout/tests/domain_mutants.rs](../components/checkout/tests/domain_mutants.rs) | Tests that kill the mutants `cargo-mutants` found surviving in checkout `domain/`: exact quote amounts for consumer and business carts, tiers, list/regulation/reference prices, app fees, and the review and tax-line rules. |
 | [components/checkout/tests/properties.rs](../components/checkout/tests/properties.rs) | Property tests for the cart quote: totals are the sum of line totals plus tax in whole minor units, and the same cart always gives the same quote. |
 | [components/checkout/ui/storefront/checkout/CheckoutApproval.tsx](../components/checkout/ui/storefront/checkout/CheckoutApproval.tsx) | Request approval only after native checkout review, then refresh that exact cart without changing its revision. |
 | [components/checkout/ui/storefront/checkout/CheckoutDetails.tsx](../components/checkout/ui/storefront/checkout/CheckoutDetails.tsx) | Address book, guest contact and delivery/payment selection share the authoritative cart context API. |
@@ -1347,6 +1348,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/inventory/src/store/reservations.rs](../components/inventory/src/store/reservations.rs) | All-checkout allocation ledger; release is idempotent and always uses persisted quantities, never edited order JSON. |
 | [components/inventory/src/store/test_stock.rs](../components/inventory/src/store/test_stock.rs) | Stock writes for empty purchasable products, in bounded batches. |
 | [components/inventory/src/store.rs](../components/inventory/src/store.rs) | SQL of the inventory component. |
+| [components/inventory/tests/domain_mutants.rs](../components/inventory/tests/domain_mutants.rs) | Tests that kill the mutants `cargo-mutants` found surviving in inventory `domain/`: each pins one boundary or clause of the supplier link rules. |
 | [components/inventory/tests/properties.rs](../components/inventory/tests/properties.rs) | Property tests for stock: reservations against the proved stock rule, checked inventory batches and the reorder ceiling. |
 | [components/marketing/src/domain/channel_admission.rs](../components/marketing/src/domain/channel_admission.rs) | Who may open a sales channel, which locales it serves and which products its selection holds. |
 | [components/marketing/src/domain/condition_import.rs](../components/marketing/src/domain/condition_import.rs) | Source-compatible condition import: converts original payloads without guessing identifiers or dropping configuration. |
@@ -1504,6 +1506,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/orders/src/types/order_document.rs](../components/orders/src/types/order_document.rs) | Typed read views of the stored order document and of an issued receipt snapshot; open subtrees (prices, line items) stay JSON where they are copied verbatim. |
 | [components/orders/src/types/source_record.rs](../components/orders/src/types/source_record.rs) | One versioned record of a source system as an adapter hands it over; its identity is stable per tenant. |
 | [components/orders/src/types.rs](../components/orders/src/types.rs) | Stored and exchanged records of the orders component. |
+| [components/orders/tests/domain_mutants.rs](../components/orders/tests/domain_mutants.rs) | Tests that kill the mutants `cargo-mutants` found surviving in orders `domain/`: machine limits and per-clause validation, company data, logo bounds, delivery tracking and import identities. |
 | [components/orders/tests/properties.rs](../components/orders/tests/properties.rs) | Property tests for the order state machine: reachable states are listed, terminal states take no transition, payment or fulfilment. |
 | [components/orders/ui/admin/orders/OrderCreate.tsx](../components/orders/ui/admin/orders/OrderCreate.tsx) | Manual orders remain actor-private drafts until explicit native quote review and idempotent completion. |
 | [components/orders/ui/admin/orders/OrderDetail.tsx](../components/orders/ui/admin/orders/OrderDetail.tsx) | Order workspace: server actions, exact-once commands, provider progress and visible event history. |
@@ -1572,6 +1575,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/payments/src/store/saved_instruments.rs](../components/payments/src/store/saved_instruments.rs) | Customer-owned saved instruments expose only redacted metadata; immediate revocation and provider cleanup share payment jobs. |
 | [components/payments/src/store/settlements.rs](../components/payments/src/store/settlements.rs) | Capture settlement admission: receipt claims, native job matching and the captured total in one transaction. |
 | [components/payments/src/store.rs](../components/payments/src/store.rs) | SQL of the payment ledger; admissions run inside the caller's transaction. |
+| [components/payments/tests/domain_mutants.rs](../components/payments/tests/domain_mutants.rs) | Tests that kill the mutants `cargo-mutants` found surviving in payments `domain/`: each pins one boundary or clause of amounts, transaction details, instructions, receipts and provider URLs. |
 | [components/payments/tests/properties.rs](../components/payments/tests/properties.rs) | Property tests for the payment ledger: listed transitions only, no backward monetary step, captures and refunds within their bounds. |
 | [components/payments/ui/admin/payments/OrderPayment.tsx](../components/payments/ui/admin/payments/OrderPayment.tsx) | One order's payment ledger in Studio: provider commands with exact-once keys, job progress and details; contributed to the order page. |
 | [components/payments/ui/admin/payments/PaymentActions.tsx](../components/payments/ui/admin/payments/PaymentActions.tsx) | Shared native order/provider controls; an accepted job is observed before another financial action. |
@@ -1660,6 +1664,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/pricing/src/types/product_currency.rs](../components/pricing/src/types/product_currency.rs) | The currency fields of a product's `extra` document: the currency its base prices are stated in and the fixed prices per currency as exact decimal strings. |
 | [components/pricing/src/types/tax.rs](../components/pricing/src/types/tax.rs) | Tax classes and their destination rules; current tax law is merchant configuration, not bundled tax advice. |
 | [components/pricing/src/types.rs](../components/pricing/src/types.rs) | The data contracts of the pricing component. |
+| [components/pricing/tests/domain_mutants.rs](../components/pricing/tests/domain_mutants.rs) | Tests that kill the mutants `cargo-mutants` found surviving in pricing `domain/`: each pins one boundary or clause. |
 | [components/pricing/tests/properties.rs](../components/pricing/tests/properties.rs) | Property tests for money, rounding, discounts and the proved commerce sums: generated inputs against independent integer models. |
 | [components/shipping/src/domain/booking.rs](../components/shipping/src/domain/booking.rs) | A carrier booking occupies one open package; only the intent that reserved it can release it. |
 | [components/shipping/src/domain/geography.rs](../components/shipping/src/domain/geography.rs) | Bundled MIT country catalogue, tenant-owned overrides and typed region admission. |
@@ -3053,6 +3058,7 @@ This lists every checked-in source module in these roots, including files with n
 | [scripts/testing/media_caption_checks.py](../scripts/testing/media_caption_checks.py) | Actual caption proposal, ownership, locale persistence and selected page-release regressions; synthetic provider only. |
 | [scripts/testing/merchant_guidance.py](../scripts/testing/merchant_guidance.py) | Explicit versioned merchant guidance reaches actual model input and is withdrawn by the native archive path. |
 | [scripts/testing/model_fixture.py](../scripts/testing/model_fixture.py) | Original compact GLB furniture fixture with embedded geometry and two material variants; no external assets. |
+| [scripts/testing/mutation_domain.py](../scripts/testing/mutation_domain.py) | ` against that crate's own tests, in parallel |
 | [scripts/testing/native_lifecycle_race.py](../scripts/testing/native_lifecycle_race.py) | Force native workflow editing against app installation at the real database boundary. |
 | [scripts/testing/native_tools.py](../scripts/testing/native_tools.py) | Synthetic provider-native wire responses shared by real HTTP integration fixtures; not a model implementation. |
 | [scripts/testing/operation_contracts.py](../scripts/testing/operation_contracts.py) | Generated native operation input contracts; do not edit. |

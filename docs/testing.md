@@ -664,8 +664,8 @@ running server on two disposable shops (session-ending routes last):
   refused with 4xx; an invalid credential gets 4xx on every `/api/` route; every invalid
   MCP input is refused (JSON-RPC -32602 or a tool error with a 4xx problem).
 
-25 November run: 350 routes (valid: 92 2xx, 251 4xx, 7 offline 503 from checkout identity
-and PayPal webhooks without configuration; invalid: 348 refused with 4xx), 212 tools (all
+25 November run: 350 routes (valid: 92 2xx, 251 4xx, 7 offline 503 from the unconfigured
+identity broker, checkout identity and PayPal webhooks; invalid: 348 refused with 4xx), 212 tools (all
 212 invalid inputs refused; of the valid inputs 50 succeed, 160 are refused for unknown
 probe IDs or missing setup, 2 report the offline model service). No unexplained server error.
 
@@ -701,6 +701,49 @@ measures more; frontend: vitest over this tree):
 
 Low Rust values (customers, B2B, host) are code reached only through the HTTP suites;
 the nightly measurement covers it, and its first run should be ratcheted.
+
+### Mutation testing of `domain/` (on demand)
+
+`scripts/testing/mutation_domain.py` runs `cargo-mutants` (27.1.0, installed with
+`cargo install --locked --root target/tools cargo-mutants`) on `src/domain/**` of pricing,
+inventory, checkout, payments and orders against each crate's own tests, in parallel
+copies of the tree (`--jobs`, default 8; about 20 minutes for all five on 32 cores).
+Every surviving mutant must be listed with its reason in
+`scripts/testing/mutation-survivors.json`; an unlisted survivor fails and so does a listed
+one that is now caught. It is too slow for every run and, like the coverage audit, is
+not in the suite registry: run it after changing `domain/` code.
+
+```sh
+python3 scripts/testing/mutation_domain.py [--crates pricing ...] [--jobs 12]
+python3 scripts/testing/mutation_domain.py --check-only   # evaluate artifacts/mutants again
+```
+
+Run of 25 November 2026 (1,137 mutants):
+
+| Crate | Mutants | First run: caught / survived | After the new tests: caught / survived | Unviable |
+| --- | --- | --- | --- | --- |
+| pricing | 341 | 227 / 101 | 325 / 3 | 13 |
+| inventory | 51 | 45 / 6 | 51 / 0 | 0 |
+| checkout | 192 | 123 / 67 | 186 / 4 | 2 |
+| payments | 293 | 255 / 35 | 289 / 1 | 3 |
+| orders | 260 | 224 / 34 | 256 / 2 | 2 |
+
+The killing tests are `components/<crate>/tests/domain_mutants.rs` (52 tests). They pin
+what the first run showed untested: inclusive limits of every validator, each clause of
+`||`/`&&` chains on its own, `calculate`'s net input, duplicate tax rates and
+list/regulation/reference prices, exact consumer and business quote amounts with app fees,
+tiers, a 7 % product and a zero-decimal currency, IBAN bounds with valid checksums, and
+order-machine limits. The ten remaining survivors, with reasons in the survivor list:
+
+- pricing `math_round` (3): equivalent; the exact-hit correction is redundant because the
+  half-unit check after it adds the same unit.
+- checkout `cart_quote` (4): equivalent; `calculated: true` and `round_for_net: false` equal
+  the defaults, and the cash interval `10^-decimals` never changes an amount already
+  rounded to the decimals (line price and app fee).
+- payments IBAN checksum (1): equivalent; adding 97 instead of reducing keeps the residue,
+  and a reducing digit step always follows.
+- orders (2): a re-encoded logo of exactly 2 MiB cannot be constructed; the NUL arm of the
+  PDF text encoder is defensive (NUL is refused upstream) and observable only in a PDF.
 
 ## Repeatable checks
 

@@ -1,0 +1,23 @@
+{
+  "note": "Surviving mutants of domain/ that have no killing test, each with the reason. A surviving mutant is a missing test: add the test instead of a line here when the behaviour matters.",
+  "survivors": {
+    "pricing": {
+      "components/pricing/src/domain/pricing.rs:112:15: replace + with - in math_round": "Equivalent: the exact-hit correction in math_round is redundant; when it would add the missing unit, the half-unit check that follows adds it instead, so every mutation of this line yields the same result.",
+      "components/pricing/src/domain/pricing.rs:112:22: replace / with * in math_round": "Equivalent: the exact-hit correction in math_round is redundant; when it would add the missing unit, the half-unit check that follows adds it instead, so every mutation of this line yields the same result.",
+      "components/pricing/src/domain/pricing.rs:113:15: replace += with *= in math_round": "Equivalent: the exact-hit correction in math_round is redundant; when it would add the missing unit, the half-unit check that follows adds it instead, so every mutation of this line yields the same result."
+    },
+    "checkout": {
+      "components/checkout/src/domain/cart_quote.rs:66:13: delete field calculated from struct PriceInput expression in quote": "Equivalent: the field is set to true, which is also PriceInput's default.",
+      "components/checkout/src/domain/cart_quote.rs:69:13: delete field round_for_net from struct PriceInput expression in quote": "Equivalent: the field is set to false, which is also PriceInput's default.",
+      "components/checkout/src/domain/cart_quote.rs:68:13: delete field interval from struct PriceInput expression in quote": "Equivalent: the interval is 10^-decimals; cash rounding first rounds to the decimals, so the default 0.01 (finer or equal for 0-2 decimals, ignored above 2) never changes the result.",
+      "components/checkout/src/domain/cart_quote.rs:92:17: delete field interval from struct PriceInput expression in quote": "Equivalent: as for the line price, the app fee's interval is 10^-decimals and the default never changes the rounded result."
+    },
+    "payments": {
+      "components/payments/src/domain/instructions.rs:53:62: replace % with + in Instructions::validate": "Equivalent: adding 97 instead of reducing modulo 97 after a letter keeps the residue; every letter is followed by a digit step that reduces modulo 97 (the rearranged IBAN always ends in the two check digits), and the value stays far below u32 overflow."
+    },
+    "orders": {
+      "components/orders/src/domain/logo_image.rs:28:31: replace > with >= in normalize": "Boundary not constructible: it needs a PNG re-encoding of exactly 2,097,152 bytes; the 1 MiB and above-2 MiB sides are tested.",
+      "components/orders/src/domain/receipt_pdf.rs:132:9: delete match arm '\\0' in winansi": "Defensive: without the arm a NUL maps to the undefined 0x81 slot instead of '?'; NUL never reaches receipts because company and order texts refuse it, and the private encoder is only observable through a rendered PDF."
+    }
+  }
+}

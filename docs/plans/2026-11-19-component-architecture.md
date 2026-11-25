@@ -1101,7 +1101,11 @@ Each component carries its own tests; the suite runner composes them.
 - [ ] Concurrency: two replicas, repeated delivery, lease loss, uncertain sends.
 - [ ] Migration tests: fresh, upgrade, and the explicit legacy import.
       Upgrade and legacy import dropped (25 Nov: the release replaces the old system).
-- [ ] Mutation testing on `domain/`; a surviving mutant is a missing test.
+- [x] Mutation testing on `domain/`; a surviving mutant is a missing test.
+      R2 (25 Nov): `scripts/testing/mutation_domain.py` (on demand, `cargo-mutants`) on
+      pricing, inventory, checkout, payments and orders: 1,137 mutants; the first run left
+      243 survivors, 52 new tests kill all but 10, which are listed with reasons
+      (equivalent or not constructible) in `scripts/testing/mutation-survivors.json`.
 - [x] Coverage floors per component instead of one global floor.
       R2 (25 Nov): `coverage_report.py` enforces line floors per component (Rust and
       component UI, mapped through `components.json`) beside the global floors, with
