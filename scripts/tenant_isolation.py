@@ -159,6 +159,6 @@ report = {'suite': 'tenant-isolation', 'passed': len(checks), 'checks': checks, 
 report['measuredAt'] = datetime.datetime.now(datetime.timezone.utc).isoformat()
 report['sourceCommit'] = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip()
 report['workingTreeChanged'] = bool(subprocess.check_output(['git', 'status', '--porcelain'], cwd=ROOT, text=True).strip())
-report['sourceHashes'] = {name: hashlib.sha256((ROOT / name).read_bytes()).hexdigest() for name in ('src/migrations.rs', 'migrations/038-tenant-references.sql', 'scripts/tenant_isolation.py', 'scripts/security/tenant_schema.py')}
+report['sourceHashes'] = {name: hashlib.sha256((ROOT / name).read_bytes()).hexdigest() for name in ('src/migrations.rs', 'fixtures/schema/reference.sql', 'scripts/tenant_isolation.py', 'scripts/security/tenant_schema.py')}
 artifact_path('tenant-isolation.json').write_text(json.dumps(report, indent=2) + '\n')
 print(json.dumps(report))

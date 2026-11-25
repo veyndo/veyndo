@@ -19,7 +19,6 @@ COPY .sqlx/ .sqlx/
 COPY src/ src/
 COPY crates/ crates/
 COPY components/ components/
-COPY migrations/ migrations/
 COPY extensions/ extensions/
 COPY fixtures/ fixtures/
 COPY reference/app-manifests/ reference/app-manifests/

@@ -169,12 +169,15 @@ pub async fn run() -> Result<()> {
     };
     let mut tx = store.system().await?;
     let ready: bool = sqlx::query_scalar(
-        "SELECT EXISTS(SELECT 1 FROM commerce_migrations WHERE version='049-rust-connectors')",
+        "SELECT EXISTS(SELECT 1 FROM commerce_migrations WHERE version='connectors/0001-baseline')",
     )
     .fetch_one(&mut *tx)
     .await?;
     drop(tx);
-    checked(ready, "Run commerce migration 049 first")?;
+    checked(
+        ready,
+        "Run the commerce setup (BOOTSTRAP_MODE=migrate) first",
+    )?;
     store.verify_runtime().await?;
     if env::args().any(|s| s == "--import-legacy") {
         return super::legacy::import(&store).await;

@@ -58,23 +58,3 @@ pub async fn ensure(
     }
     Ok(())
 }
-
-/// Runs after shared-storage consolidation under the migration lock; normal reads never install apps.
-pub async fn backfill(
-    rules: &dyn RecordRules,
-    commerce: &dyn CommerceInstall,
-    tx: &mut Transaction<'_, Postgres>,
-) -> Result<()> {
-    let tenants: Vec<String> = sqlx::query_scalar!(
-        "SELECT DISTINCT tenant FROM hosted_frontends WHERE app_id='storyfront' ORDER BY tenant"
-    )
-    .fetch_all(&mut **tx)
-    .await?;
-    for tenant in tenants {
-        ensure(rules, commerce, tx, &tenant, "storyfront").await?;
-    }
-    sqlx::query!("ALTER TABLE hosted_frontends VALIDATE CONSTRAINT hosted_frontends_app_fk")
-        .execute(&mut **tx)
-        .await?;
-    Ok(())
-}

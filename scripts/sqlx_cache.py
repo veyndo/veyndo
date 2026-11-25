@@ -54,7 +54,8 @@ def migration_binary():
                            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     if built.returncode == 0:
         return ROOT / 'target/debug/veyndo', None
-    changed = subprocess.run(['git', 'diff', '--quiet', 'HEAD', '--', 'migrations', 'src/migrations.rs', 'src/migrations'],
+    changed = subprocess.run(['git', 'diff', '--quiet', 'HEAD', '--', ':(glob)components/*/migrations',
+                              'extensions/services/connectors/migrations', 'src/migrations.rs', 'src/migrations'],
                              cwd=ROOT).returncode
     if changed:
         raise SystemExit('New query macros and changed migrations together: commit the migrations first, then regenerate')

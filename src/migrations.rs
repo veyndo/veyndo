@@ -1,5 +1,6 @@
-//! Versioned setup is separate from serving; no catalog-wide startup repair.
-use crate::apps;
+//! Fresh-installation setup, separate from serving: applies the component schema baselines in their
+//! global order and records each one in the ledger. There is no upgrade path from a database that an
+//! earlier release set up with incremental migrations; such a database is refused.
 use crate::foundation::App;
 use crate::seed::seed;
 use crate::store::migrations as store;
@@ -10,12 +11,10 @@ use sqlx::PgPool;
 use veyndo_core::hash;
 use veyndo_intelligence::knowledge;
 
-mod identity_checksums;
-mod recent_schema;
 mod schema;
-fn sources() -> impl Iterator<Item = &'static (&'static str, &'static str)> {
-    schema::SCHEMA.iter().chain(recent_schema::SCHEMA.iter())
-}
+
+/// The first migration every database of an earlier release recorded.
+const EARLIER_RELEASE: &str = "001";
 
 pub(crate) async fn apply(pool: &PgPool) {
     store::enter_trusted(pool)
@@ -25,30 +24,22 @@ pub(crate) async fn apply(pool: &PgPool) {
     // session lock through schema setup and the bounded demo seed.
     store::lock(pool).await.expect("migration lock");
     store::ensure_ledger(pool).await.expect("migration ledger");
-    // Historical AGE databases keep their original checksum contract; fresh installs use managed variants.
-    for (version, source) in [
-        ("002", include_str!("../migrations/002.sql")),
-        (
-            "011-documents",
-            include_str!("../migrations/011-documents.sql"),
-        ),
-    ] {
-        let applied = store::applied_checksum(pool, version)
-            .await
-            .expect("legacy migration ledger");
-        if let Some(applied) = applied {
-            assert_eq!(applied, hash(source), "Legacy migration drift: {version}");
-        }
-    }
-    for (version, source) in sources() {
+    let earlier = store::applied_checksum(pool, EARLIER_RELEASE)
+        .await
+        .expect("migration status");
+    assert!(
+        earlier.is_none(),
+        "This database was set up by an earlier release; there is no upgrade path. Set up a new database"
+    );
+    for (version, source) in schema::BASELINES {
         let checksum = hash(source);
         let applied = store::applied_checksum(pool, version)
             .await
             .expect("migration status");
         if let Some(applied) = applied {
-            assert!(
-                identity_checksums::matches(version, source, &applied),
-                "Applied migration changed: {version}"
+            assert_eq!(
+                applied, checksum,
+                "Baseline {version} changed after this database was set up; set up a new database"
             );
             continue;
         }
@@ -56,11 +47,6 @@ pub(crate) async fn apply(pool: &PgPool) {
         store::run_script(&mut tx, source)
             .await
             .unwrap_or_else(|e| panic!("Migration {version}: {}", e.1));
-        if *version == "102-consolidate-app-tables" {
-            apps::hosted::backfill(&mut tx)
-                .await
-                .expect("hosted app migration");
-        }
         store::record(&mut tx, version, &checksum)
             .await
             .expect("record migration");
@@ -87,10 +73,10 @@ pub(crate) async fn seed_demo(a: &App, setup: &PgPool) {
     }
     seed(a).await.expect("demo seed");
     for source in [
-        include_str!("../migrations/003-seed.sql"),
-        include_str!("../migrations/005-context-seed.sql"),
-        include_str!("../migrations/007-commerce-seed.sql"),
-        include_str!("../migrations/009-variant-properties.sql"),
+        include_str!("../fixtures/demo/01-merchandising.sql"),
+        include_str!("../fixtures/demo/02-context.sql"),
+        include_str!("../fixtures/demo/03-commerce.sql"),
+        include_str!("../fixtures/demo/04-variant-properties.sql"),
     ] {
         store::run_fixture(&a.db, source)
             .await
@@ -119,16 +105,14 @@ pub(crate) async fn seed_demo(a: &App, setup: &PgPool) {
         .expect("record completed seed");
 }
 
-/// Every required schema must match, including domain schemas introduced after bounded reads.
+/// Every baseline must be recorded with the checksum of the shipped file.
 pub(crate) async fn ready(db: &veyndo::scoped_pool::ScopedPool) {
-    for (version, source) in sources() {
+    for (version, source) in schema::BASELINES {
         let current = store::applied_checksum(db, version)
             .await
             .expect("Run BOOTSTRAP_MODE=migrate before serving");
         assert!(
-            current
-                .as_deref()
-                .is_some_and(|applied| identity_checksums::matches(version, source, applied)),
+            current.as_deref() == Some(hash(source).as_str()),
             "Schema not ready: {version}; run BOOTSTRAP_MODE=migrate"
         );
     }
