@@ -1,6 +1,8 @@
 //! A new buyer cart: inserted with the shop defaults, then bound to the request's language, channel, currency and signed-in customer.
+use serde::Deserialize;
 use serde_json::{Value, json};
 use std::collections::HashMap;
+use veyndo_core::document::view;
 use veyndo_core::shop_scope::{channel as channel_id, header, session_digest, tenant};
 use veyndo_core::{RequestContext, Result, State, bad, uid};
 use veyndo_customers::service::{address_book, sessions};
@@ -10,6 +12,13 @@ use veyndo_shop::service::language::language_context;
 use veyndo_shop::service::read_cache::settings as scoped;
 use veyndo_shop::types::cart::{Cart, StoredCart, selection};
 use veyndo_shop::types::settings::CheckoutSelection;
+
+/// The customer profile default a new cart starts from.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ProfileDefaults {
+    default_payment_method_id: Value,
+}
 
 /// Inserts an empty open cart with the shop's default delivery country, shipping and consumer payment.
 pub async fn new_cart(
@@ -141,7 +150,10 @@ pub async fn new_cart_context(
             }
             drop(conn);
             let p: Value = r.profile;
-            if let Some(id) = p["defaultPaymentMethodId"].as_str() {
+            if let Some(id) = view::<ProfileDefaults>(&p)
+                .default_payment_method_id
+                .as_str()
+            {
                 checkout.payment_method_id = id.into();
             }
             let (settings, _) = scoped(a, &t, channel).await?;

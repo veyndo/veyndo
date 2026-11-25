@@ -1,10 +1,21 @@
 //! Locked checkout guards of an order a merchant places: channel policy, the selected customer and the channel's product selection.
 use crate::store::selected_customer;
+use serde::Deserialize;
 use serde_json::Value;
 use sqlx::{Postgres, Transaction};
+use veyndo_core::document::view;
 use veyndo_core::{Error, Result, StatusCode, bad};
 use veyndo_shop::store::settings::scoped_locked;
 use veyndo_shop::types::cart::StoredCart;
+
+/// The sales channel fields that admit a merchant order.
+#[derive(Deserialize, Default)]
+#[serde(default)]
+struct ChannelAdmission {
+    active: Value,
+    visibility: Value,
+    kind: Value,
+}
 
 /// Freeze channel policy in the existing checkout transaction before acquiring customer/cart locks.
 pub async fn lock_checkout(
@@ -24,9 +35,10 @@ pub async fn lock_checkout(
     .fetch_optional(&mut **conn)
     .await?
     .ok_or(bad("Sales channel unavailable"))?;
-    if data["active"] != true
-        || data["visibility"] == "private"
-        || !matches!(data["kind"].as_str(), Some("storefront" | "headless"))
+    let channel: ChannelAdmission = view(&data);
+    if channel.active != true
+        || channel.visibility == "private"
+        || !matches!(channel.kind.as_str(), Some("storefront" | "headless"))
     {
         return Err(Error(
             StatusCode::FORBIDDEN,

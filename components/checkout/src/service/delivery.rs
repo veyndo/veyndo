@@ -1,7 +1,8 @@
 //! Shipping costs, proportional taxes and calendar delivery windows.
+use crate::domain::quote_view::{DeliveryView, digital, flags};
 use serde::Deserialize;
 use serde_json::{Value, json};
-use veyndo_core::document::lenient;
+use veyndo_core::document::{lenient, view};
 use veyndo_core::{Error, Result, StatusCode, bad};
 use veyndo_pricing::catalog::Product;
 use veyndo_pricing::pricing::{
@@ -200,7 +201,7 @@ pub fn enrich(
         && c.data.items.iter().all(|i| {
             ps.iter()
                 .find(|p| p.id == i.id)
-                .is_some_and(|p| p.extra["shippingFree"] == true || p.extra["digital"] == true)
+                .is_some_and(|p| flags(&p.extra).shipping_free == true || digital(&p.extra))
         });
     let gross = if c.data.items.is_empty()
         || free
@@ -254,21 +255,23 @@ pub fn enrich(
         (lead.max(shipping.min_days), lead.max(shipping.max_days))
     };
     q["deliveries"] = if c.data.items.is_empty()
-        || c.data.items.iter().all(|i| {
-            ps.iter()
-                .any(|p| p.id == i.id && p.extra["digital"] == true)
-        }) {
+        || c.data
+            .items
+            .iter()
+            .all(|i| ps.iter().any(|p| p.id == i.id && digital(&p.extra)))
+    {
         json!([])
     } else {
-        json!([{"shippingMethod":shipping_view(shipping)?,"shippingCosts":cost,"shippingLocation":{"country":selected.country,"address":selected.address},"positions":c.data.items.iter().filter(|i|!ps.iter().any(|p|p.id==i.id&&p.extra["digital"]==true)).collect::<Vec<_>>(),"state":"open","deliveryTime":{"minDays":min,"maxDays":max}}])
+        json!([{"shippingMethod":shipping_view(shipping)?,"shippingCosts":cost,"shippingLocation":{"country":selected.country,"address":selected.address},"positions":c.data.items.iter().filter(|i|!ps.iter().any(|p|p.id==i.id&&digital(&p.extra))).collect::<Vec<_>>(),"state":"open","deliveryTime":{"minDays":min,"maxDays":max}}])
     };
     q["paymentMethod"] = method_text::localized_payment(payment, &c.data.locale, s);
     Ok(q)
 }
 pub async fn dates_conn(conn: &mut sqlx::PgConnection, q: &mut Value) -> Result<()> {
     if let Some(d) = q["deliveries"].as_array_mut().and_then(|d| d.first_mut()) {
-        let min = d["deliveryTime"]["minDays"].as_i64().unwrap() as i32;
-        let max = d["deliveryTime"]["maxDays"].as_i64().unwrap() as i32;
+        let time = view::<DeliveryView>(d).delivery_time;
+        let min = time.min_days.as_i64().unwrap() as i32;
+        let max = time.max_days.as_i64().unwrap() as i32;
         let (earliest, latest) =
             veyndo_shipping::store::delivery_dates::window(conn, min, max).await?;
         d["deliveryDate"] = json!({"earliest":earliest,"latest":latest,"basis":"calendar-days"});

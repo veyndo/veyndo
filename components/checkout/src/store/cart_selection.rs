@@ -1,4 +1,5 @@
 //! The checkout choices of a cart: country, methods, contact email and addresses, priced as a candidate and written at the reviewed revision.
+use crate::domain::quote_view::quote_view;
 use crate::ports::CartEdits;
 use crate::store::cart_load;
 use serde::Deserialize;
@@ -124,7 +125,7 @@ pub async fn select(
     c.data.checkout = Some(requested);
     c.revision += 1;
     let q = edits.view(&c).await?;
-    if q["selectionNeedsConfirmation"] == true {
+    if quote_view(&q).selection_needs_confirmation == true {
         return Err(bad("Selected country, shipping or payment is unavailable"));
     }
     let mut tx = a.db.begin().await?;

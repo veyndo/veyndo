@@ -1,6 +1,9 @@
 //! Explicit document and digital acknowledgement, checked under the purchase locks and frozen into the order.
+use crate::domain::quote_view::digital as is_digital;
+use serde::Deserialize;
 use serde_json::{Value, json};
 use veyndo_catalog::domain::content::translated_string;
+use veyndo_core::document::view;
 use veyndo_core::{Result, bad};
 use veyndo_pricing::catalog::Product;
 use veyndo_pricing::verified_kernel;
@@ -12,6 +15,15 @@ use veyndo_shop::types::settings::Settings;
 
 // Aliases are server-created, one hop and immutable; both sides are tenant/channel scoped.
 pub const RECEIPT_SQL: &str = "SELECT root.cart_id,root.policy_version,root.data,root.expires_at>now() AS fresh FROM privacy_consents own JOIN privacy_consents root ON root.tenant=own.tenant AND root.channel_id=own.channel_id AND root.cart_id=coalesce(own.source_cart_id,own.cart_id) AND root.source_cart_id IS NULL WHERE own.tenant=$1 AND own.cart_id=$2 AND own.channel_id=$3 FOR SHARE OF root";
+
+/// The cart's legal acknowledgement.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct Acceptance {
+    policy_version: Value,
+    terms: Value,
+    digital_immediate: Value,
+}
 
 /// The root consent receipt a cart's consent resolves to (`RECEIPT_SQL`), share-locked.
 pub struct ConsentReceipt {
@@ -56,13 +68,14 @@ pub async fn snapshot(
     .await?
     .unwrap_or(json!({}));
     let consumer = !s.is_business(&c.data.group);
-    let digital = consumer && products.iter().any(|p| p.extra["digital"] == true);
+    let digital = consumer && products.iter().any(|p| is_digital(&p.extra));
+    let accepted: Acceptance = view(&acceptance);
     if !verified_kernel::legal_checkout_admissible(
         s.legal.strict_checkout,
-        acceptance["policyVersion"] == version(&s.legal),
-        acceptance["terms"] == true,
+        accepted.policy_version == version(&s.legal),
+        accepted.terms == true,
         digital,
-        acceptance["digitalImmediate"] == true,
+        accepted.digital_immediate == true,
     ) {
         return Err(bad("Current legal acknowledgement required"));
     }

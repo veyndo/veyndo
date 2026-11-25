@@ -1,16 +1,19 @@
 //! Final admission and one atomic order, stock, cart, payment-attempt and outbox commit; no external provider call.
 use super::{Locked, Placed, Priced};
 use crate::domain::admin_order::{admit_payment, order as admin_order};
+use crate::domain::quote_view::{OrderRef, quote_view};
 use crate::domain::review_binding::validate as validate_review;
 use crate::domain::session_review::Review;
 use crate::ports::Purchase;
 use crate::store::customer_snapshot::snapshot as customer_snapshot;
 use crate::store::purchase::{self, NewOrder};
 use crate::store::session::admit_channel;
+use serde::Deserialize;
 use serde_json::{Value, json};
 use veyndo_b2b::service::quote_contract::consume as consume_quote;
 use veyndo_b2b::store::purchase::{check_locked, record};
 use veyndo_catalog::store::order_downloads::grant;
+use veyndo_core::document::view;
 use veyndo_core::shop_scope::header;
 use veyndo_core::store::environments::live_parent;
 use veyndo_core::{RequestContext, Result, bad, process_config, uid};
@@ -23,6 +26,13 @@ use veyndo_payments::service::sessions::origin_conn;
 use veyndo_pricing::verified_kernel;
 use veyndo_shop::types::cart::StoredCart;
 
+/// The legal policy version a purchase froze.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct LegalSnapshot {
+    policy_version: Value,
+}
+
 /// Prepares the provider payment of an external order and stores the order with it.
 async fn prepare_external<P: Purchase>(
     port: &P,
@@ -34,7 +44,7 @@ async fn prepare_external<P: Purchase>(
     review: Option<&Review>,
 ) -> Result<()> {
     let return_origin = match header(h, "origin") {
-        Some(origin) if q["paymentMethod"]["provider"].is_string() => {
+        Some(origin) if quote_view(q).method().provider.is_string() => {
             Some(origin_conn(tx, &c.tenant, &c.data.sales_channel, Some(origin)).await?)
         }
         _ => None,
@@ -42,11 +52,15 @@ async fn prepare_external<P: Purchase>(
     port.prepare_payment(tx, c, order, minor, return_origin.as_deref())
         .await?;
     if let Some(review) = review {
-        review.check_prepared_payment(&order["payment"], process_config::get().strict)?;
+        review.check_prepared_payment(
+            &view::<OrderRef>(order).payment,
+            process_config::get().strict,
+        )?;
     }
     prepare_funding(tx, h, c, order).await?;
     order_fields(order);
-    purchase::update_order(tx, order["id"].as_str(), order).await?;
+    let id = view::<OrderRef>(order).id;
+    purchase::update_order(tx, id.as_str(), order).await?;
     Ok(())
 }
 
@@ -64,7 +78,11 @@ async fn admit<P: Purchase>(
     validate_review(h, c, q, minor)?;
     if let Some(review) = review {
         admit_channel(tx, c).await?;
-        review.check_quote(q, &priced.legal_snapshot["policyVersion"], minor)?;
+        review.check_quote(
+            q,
+            &view::<LegalSnapshot>(&priced.legal_snapshot).policy_version,
+            minor,
+        )?;
     }
     if priced.config.is_business(&c.data.group) {
         let digest = purchase::policy_digest(tx, &c.tenant).await?;
@@ -83,19 +101,19 @@ async fn admit_payment_contact<P: Purchase>(
 ) -> Result<bool> {
     let (q, minor) = (&priced.q, priced.minor);
     admit_payment(c, q)?;
-    let external = q["paymentMethod"]["mode"] == "app";
+    let method = quote_view(q).method();
+    let external = method.mode == "app";
     if external && live_parent(tx, &c.tenant).await?.is_some() {
         return Err(bad("External payments are disabled in private sandboxes"));
     }
-    if external && q["paymentMethod"]["provider"].is_null() {
+    if external && method.provider.is_null() {
         port.provider_ready(&c.tenant, &priced.selected.payment_method_id)?;
     }
     // Financial providers/manual invoices require usable contact and billing data.
     // The explicit simulated demo method keeps legacy headless fixture carts compatible.
     port.settlement(h, c, q, &priced.config, minor)?;
     if !verified_kernel::checkout_contact_admissible(
-        q["paymentMethod"]["mode"] == "simulated"
-            || (q["paymentMethod"]["mode"] == "cash" && h.pos.is_some()),
+        method.mode == "simulated" || (method.mode == "cash" && h.pos.is_some()),
         c.data.email.is_some(),
         priced.selected.billing_address.is_some(),
     ) {
@@ -113,7 +131,9 @@ fn order_document(
     review: Option<&Review>,
 ) -> Value {
     let q = &priced.q;
-    let mut order = json!({"id":id,"orderNumber":format!("RAC-{}",&id[..8]),"cart":q,"state":"placed","channel":c.data.channel,"revision":1,"deliveries":q["deliveries"],"payment":{"method":q["paymentMethod"],"provider":if q["paymentMethod"]["mode"]=="simulated"{"simulated"}else{"manual"},"state":if q["paymentMethod"]["mode"]=="simulated"{"authorized"}else{"pending"},"realMoneyCharged":false},"customerGroup":c.data.group});
+    let quoted = quote_view(q);
+    let simulated = quoted.method().mode == "simulated";
+    let mut order = json!({"id":id,"orderNumber":format!("RAC-{}",&id[..8]),"cart":q,"state":"placed","channel":c.data.channel,"revision":1,"deliveries":quoted.deliveries,"payment":{"method":quoted.payment_method,"provider":if simulated{"simulated"}else{"manual"},"state":if simulated{"authorized"}else{"pending"},"realMoneyCharged":false},"customerGroup":c.data.group});
     if let Some(review) = review {
         order["checkoutSessionId"] = json!(review.session());
     }
@@ -155,7 +175,7 @@ pub(super) async fn run<P: Purchase>(
     port.bind_order(&mut tx, &c.tenant, &mut order).await?;
     admin_order(&c, &mut order);
     order["money"] = json!(priced.money);
-    order["currencyContext"] = priced.q["currencyContext"].clone();
+    order["currencyContext"] = quote_view(&priced.q).currency_context;
     order["legal"] = priced.legal_snapshot.clone();
     if let Some(p) = &procurement {
         order["b2b"] = json!({"companyId":p.company_id,"unitId":p.context.unit_id,"purchaseOrder":p.context.purchase_order,"approvalId":p.approval,"quoteId":p.context.quote_id});

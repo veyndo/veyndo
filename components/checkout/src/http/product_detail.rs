@@ -1,5 +1,6 @@
 //! Storefront product detail: family, context prices per quantity tier, gallery, properties, delivery window and review aggregates.
 use crate::domain::cart_quote::{normalized_quantity, quote};
+use crate::domain::quote_view::quote_view;
 use crate::domain::tax_lines::tax_products;
 use crate::store::cart_load;
 use crate::store::product_reviews;
@@ -121,7 +122,10 @@ fn price_tiers(
         let qty = normalized_quantity(p, requested)?;
         let preview = preview_cart(t, &p.id, qty, group, currency, cart);
         let q = quote(&preview, priced, config)?;
-        tiers.push(json!({"quantity":qty,"price":q["lineItems"][0]["price"],"discountPercent":q["lineItems"][0]["discountPercent"]}));
+        let line = quote_view(&q).first_line();
+        tiers.push(
+            json!({"quantity":qty,"price":line.price,"discountPercent":line.discount_percent}),
+        );
     }
     Ok(tiers)
 }

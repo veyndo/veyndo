@@ -1,6 +1,7 @@
 //! The authoritative locked quote: product locks and channel admission, contract prices, locked settings, taxes, promotions, app hooks, the cashier discount and stock.
 use super::{Locked, Priced};
 use crate::domain::cart_quote::quote;
+use crate::domain::quote_view::{digital, quote_view};
 use crate::domain::tax_lines::tax_products;
 use crate::ports::{LockedQuote, Purchase};
 use crate::service::delivery::{dates_conn, enrich};
@@ -119,7 +120,7 @@ pub(super) async fn run<P: Purchase>(
         .await?;
     if selected.shipping_method_id != "pickup"
         && selected.address.is_none()
-        && !ps.iter().all(|p| p.extra["digital"] == true)
+        && !ps.iter().all(|p| digital(&p.extra))
     {
         return Err(bad("Delivery address required"));
     }
@@ -151,7 +152,9 @@ pub(super) async fn run<P: Purchase>(
     check_stock(c, &ps)?;
     let currency = config.currencies.selected(&c.data.currency)?;
     let money = amount(
-        q["price"]["totalPrice"]
+        quote_view(&q)
+            .price
+            .total_price
             .as_f64()
             .ok_or(bad("Invalid total"))?,
         &currency.code,

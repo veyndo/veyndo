@@ -1,5 +1,6 @@
 //! The priced cart as storefront, Studio and agents receive it: native quote, promotions, app hooks, taxes, legal flags, delivery dates and exact minor totals.
 use crate::domain::cart_quote::quote;
+use crate::domain::quote_view::{OrderRef, digital, quote_view};
 use crate::domain::session_payment::{has_saved_funding, provider, test_environment};
 use crate::domain::tax_lines::tax_products;
 use crate::http::buyer_identity::browser_checkout_transport;
@@ -7,6 +8,7 @@ use crate::ports::Quotes;
 use crate::service::delivery::{dates_conn, enrich};
 use crate::store::tax_conditions::tax_settings_for_cart;
 use serde_json::{Value, json};
+use veyndo_core::document::view;
 use veyndo_core::{RequestContext, Result, State, bad, process_config};
 use veyndo_pricing::service::conversion as currencies;
 use veyndo_shop::Settings;
@@ -46,7 +48,7 @@ pub async fn project(
     if c.status == "completed"
         && let Some(order) = &c.data.order
     {
-        let mut result = order["cart"].clone();
+        let mut result = view::<OrderRef>(order).cart;
         result["status"] = json!(c.status);
         result["order"] = order.clone();
         return Ok(result);
@@ -87,7 +89,7 @@ pub async fn project(
         .adjust(c, &preview, &ps, result, &config, revision)
         .await?;
     result["selectionNeedsConfirmation"] = json!(changed);
-    result["legal"] = json!({"requiresDigital":!config.is_business(&c.data.group) && ps.iter().any(|p|p.extra["digital"]==true),"strictCheckout":config.legal.strict_checkout});
+    result["legal"] = json!({"requiresDigital":!config.is_business(&c.data.group) && ps.iter().any(|p|digital(&p.extra)),"strictCheckout":config.legal.strict_checkout});
     if include_policy_version {
         result["legal"]["policyVersion"] = json!(policy_version(&config.legal));
     }
@@ -114,9 +116,10 @@ fn checkout_service(
         return;
     };
     let process = process_config::get();
-    let simulated = result["paymentMethod"]["mode"] == "simulated";
+    let quoted = quote_view(result);
+    let simulated = quoted.method().mode == "simulated";
     let paypal_sandbox = process.checkout_paypal_sandbox
-        && provider(&result["paymentMethod"]) == Some("shopware_payments")
+        && provider(&quoted.payment_method) == Some("shopware_payments")
         && paypal_environment.is_some_and(|e| test_environment(e, process.strict))
         && !has_saved_funding(c);
     if simulated || paypal_sandbox {
@@ -141,7 +144,9 @@ async fn finish(
     let currency = config.currencies.selected(&c.data.currency)?;
     result["price"]["totalMinor"] = json!(
         currencies::amount(
-            result["price"]["totalPrice"]
+            quote_view(&result)
+                .price
+                .total_price
                 .as_f64()
                 .ok_or(bad("Invalid total"))?,
             &currency.code,

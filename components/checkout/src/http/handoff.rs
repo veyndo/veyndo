@@ -1,4 +1,5 @@
 //! Single-use checkout transfer for independent storefronts; no app-specific catalog or checkout rules.
+use crate::domain::quote_view::OrderRef;
 use crate::store::cart_load;
 use crate::store::carts::{lock_by_token, rotate_token, rotate_token_returning};
 use crate::store::handoffs::{self, RecoveryKey, Ticket};
@@ -147,7 +148,8 @@ pub async fn recover(
             .data
             .order
             .as_ref()
-            .and_then(|o| o["id"].as_str())
+            .map(view::<OrderRef>)
+            .and_then(|o| o.id.as_str().map(str::to_owned))
             .ok_or_else(unavailable)?;
         json!({"state":"ordered","completion":{"cartId":c.id,"token":c.token,"orderId":order}})
     } else if c.status == "open" && input.reopen {

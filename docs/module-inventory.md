@@ -920,6 +920,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/catalog/ui/storefront/catalog/product-url.ts](../components/catalog/ui/storefront/catalog/product-url.ts) | Stable, collision-free product addresses: SKU identity plus the inherited localized SEO slug. |
 | [components/checkout/src/domain/admin_order.rs](../components/checkout/src/domain/admin_order.rs) | Orders a merchant places for a customer: only manual or simulated payment, and the actor is kept on the record. |
 | [components/checkout/src/domain/cart_quote.rs](../components/checkout/src/domain/cart_quote.rs) | The authoritative cart quote: quantity pricing, app configuration fees and localized totals. Totals are added as whole minor units. |
+| [components/checkout/src/domain/quote_view.rs](../components/checkout/src/domain/quote_view.rs) | Typed read views of the cart quote, the placed order and product extras that checkout reads back; every field keeps the JSON value indexing returned. |
 | [components/checkout/src/domain/review_binding.rs](../components/checkout/src/domain/review_binding.rs) | Bind the reviewed revision and exact total for every checkout transport. |
 | [components/checkout/src/domain/session_payment.rs](../components/checkout/src/domain/session_payment.rs) | Classify the opt-in Checkout test payment without introducing a second payment ledger. |
 | [components/checkout/src/domain/session_review.rs](../components/checkout/src/domain/session_review.rs) | The purchase a buyer explicitly reviewed in a checkout session, and the checks that bind the order to exactly that review. |
@@ -1462,7 +1463,7 @@ This lists every checked-in source module in these roots, including files with n
 | [components/orders/ui/admin/orders/studio-extension.ts](../components/orders/ui/admin/orders/studio-extension.ts) | Studio extension of order operations. |
 | [components/orders/ui/admin/orders/useOrderCreation.ts](../components/orders/ui/admin/orders/useOrderCreation.ts) | Draft controller loads admitted choices, fences async reads and keeps review state separate from the editable input. |
 | [components/payments/src/domain/amounts.rs](../components/payments/src/domain/amounts.rs) | Provider wire amounts: decimal strings at the ISO precision of their currency, exact in minor units. |
-| [components/payments/src/domain/attempt.rs](../components/payments/src/domain/attempt.rs) | One payment attempt of an order as the ledger stores it. |
+| [components/payments/src/domain/attempt.rs](../components/payments/src/domain/attempt.rs) | One payment attempt of an order as the ledger stores it, with the typed view of its provider context. |
 | [components/payments/src/domain/capture_intent.rs](../components/payments/src/domain/capture_intent.rs) | Capture timing of a payment method: capture at once or authorize first, as configured and as the provider method supports. |
 | [components/payments/src/domain/catalog.rs](../components/payments/src/domain/catalog.rs) | Native payment operation descriptions, composed by the canonical operation registry. |
 | [components/payments/src/domain/details_model/tests.rs](../components/payments/src/domain/details_model/tests.rs) | Transaction observations reject untyped and foreign evidence without touching payment state. |
