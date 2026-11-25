@@ -72,16 +72,13 @@ impl Inference {
         {
             let row = crate::tenant_scope::scoped(
                 crate::tenant_scope::Scope::System,
-                sqlx::query_as::<_, (Value, Value)>(
-                    "SELECT data,secrets FROM platform_ai WHERE id=true",
-                )
-                .fetch_one(db),
+                crate::store::settings::platform(db),
             )
             .await
             .map_err(|_| "Platform AI configuration unavailable")?;
-            let mut data = row.0;
+            let mut data = row.data;
             for id in ["ollama", "openai", "anthropic"] {
-                if let Some(secret) = row.1[id].as_str() {
+                if let Some(secret) = row.secrets[id].as_str() {
                     data["providers"][id]["key"] = json!(open(id, secret)?);
                 }
             }

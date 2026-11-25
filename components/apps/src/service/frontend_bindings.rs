@@ -1,8 +1,9 @@
 //! Revisioned hosted frontend addresses point to an existing tenant-owned Experience; origin selection remains operator-only.
 use crate::ports::HostedInstall;
+use crate::store::frontend_bindings as stored;
+use crate::store::locks;
 use serde::Deserialize;
 use serde_json::{Value, json};
-use sqlx::Row;
 use veyndo_app_model::declarations::identifier;
 use veyndo_core::document::{lenient, view};
 use veyndo_core::host_names::{links, valid_origin};
@@ -89,56 +90,36 @@ pub async fn bind(
     // Every subsequent read/write retains the already admitted owning tenant.
     let mut tx = a.db.begin_privileged().await?;
     lock(&mut tx, &t).await?;
-    sqlx::query("SELECT pg_advisory_xact_lock(hashtextextended($1,43))")
-        .bind(alias)
-        .execute(&mut *tx)
-        .await?;
-    let occupied: bool =
-        sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM tenants WHERE id=$1 AND id<>$2)")
-            .bind(alias)
-            .bind(&t)
-            .fetch_one(&mut *tx)
-            .await?;
+    locks::advisory(&mut tx, alias, 43).await?;
+    let occupied = stored::names_other_shop(&mut tx, alias, &t).await?;
     if occupied {
         return Err(conflict("Address belongs to another shop"));
     }
-    let available: bool =
-        sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM sales_channels WHERE tenant=$1 AND id=$2)")
-            .bind(&t)
-            .bind(channel)
-            .fetch_one(&mut *tx)
-            .await?;
+    let available = stored::channel_exists(&mut tx, &t, channel).await?;
     if !available {
         return Err(bad("Channel required in this shop"));
     }
     // Additional domains can only select an Experience already mounted by this same tenant.
     if experience != alias {
-        let own = sqlx::query(
-            "SELECT app_id FROM hosted_frontends WHERE tenant=$1 AND experience_alias=$2 ORDER BY alias LIMIT 1",
-        )
-        .bind(&t)
-        .bind(experience)
-        .fetch_optional(&mut *tx)
-        .await?;
+        let own = stored::experience_app(&mut tx, &t, experience).await?;
         let Some(own) = own else {
             return Err(bad("Experience is not connected to this shop"));
         };
         if app_id.is_none() {
-            app_id = own.get("app_id");
+            app_id = own;
         }
     }
-    let row=sqlx::query("SELECT tenant,channel,experience_alias,revision,app_id FROM hosted_frontends WHERE alias=$1 FOR UPDATE").bind(alias).fetch_optional(&mut *tx).await?;
+    let row = stored::lock(&mut tx, alias).await?;
     if let Some(row) = &row {
-        if row.get::<String, _>("tenant") != t {
+        if row.tenant != t {
             return Err(conflict("Address belongs to another shop"));
         }
         if app_id.is_none() {
-            app_id = row.get("app_id");
+            app_id = row.app_id.clone();
         }
-        let unchanged = row.get::<String, _>("channel") == channel
-            && row.get::<String, _>("experience_alias") == experience
-            && row.get::<Option<String>, _>("app_id") == app_id;
-        if !unchanged && args.revision != Some(row.get("revision")) {
+        let unchanged =
+            row.channel == channel && row.experience_alias == experience && row.app_id == app_id;
+        if !unchanged && args.revision != Some(row.revision) {
             return Err(conflict("Frontend revision changed"));
         }
         if unchanged {
@@ -147,7 +128,7 @@ pub async fn bind(
             }
             tx.commit().await?;
             return Ok(
-                json!({"alias":alias,"channel":channel,"revision":row.get::<i64,_>("revision"),"urls":links(alias)}),
+                json!({"alias":alias,"channel":channel,"revision":row.revision,"urls":links(alias)}),
             );
         }
     } else if args.revision.is_some_and(|r| r != 0) {
@@ -156,8 +137,18 @@ pub async fn bind(
     if let Some(id) = &app_id {
         install.ensure(&mut tx, &t, id).await?;
     }
-    let revision:i64=sqlx::query_scalar("INSERT INTO hosted_frontends(alias,tenant,channel,origin,experience_alias,app_id) VALUES($1,$2,$3,$4,$5,$6) ON CONFLICT(alias) DO UPDATE SET channel=excluded.channel,origin=excluded.origin,experience_alias=excluded.experience_alias,app_id=excluded.app_id,revision=hosted_frontends.revision+1 WHERE hosted_frontends.tenant=excluded.tenant RETURNING revision")
-        .bind(alias).bind(&t).bind(channel).bind(origin).bind(experience).bind(&app_id).fetch_one(&mut *tx).await?;
+    let revision = stored::save(
+        &mut tx,
+        stored::NewBinding {
+            alias,
+            tenant: &t,
+            channel,
+            origin: &origin,
+            experience,
+            app_id: app_id.as_deref(),
+        },
+    )
+    .await?;
     veyndo_core::store::outbox::publish_on(&mut *tx, &t, "frontend.configured", &json!({"alias":alias,"channel":channel,"revision":revision,"actor":header(h,"x-rac-user")})).await?;
     tx.commit().await?;
     Ok(json!({"alias":alias,"channel":channel,"revision":revision,"urls":links(alias)}))
@@ -179,14 +170,7 @@ pub async fn remove(a: &State, h: &RequestContext, alias: &str, v: &Value) -> Re
     let revision = input.revision.ok_or(bad("Frontend revision required"))?;
     let mut tx = a.db.begin().await?;
     lock(&mut tx, &t).await?;
-    let n =
-        sqlx::query("DELETE FROM hosted_frontends WHERE tenant=$1 AND alias=$2 AND revision=$3")
-            .bind(&t)
-            .bind(alias)
-            .bind(revision)
-            .execute(&mut *tx)
-            .await?
-            .rows_affected();
+    let n = stored::remove(&mut tx, &t, alias, revision).await?;
     if n == 0 {
         return Err(conflict("Frontend absent or revision changed"));
     }

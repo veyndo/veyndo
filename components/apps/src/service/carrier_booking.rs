@@ -75,13 +75,9 @@ pub async fn booking_intent(
     let mut tx = a.db.begin().await?;
     history_context::context(&mut tx, h, "app").await?;
     lock_package_write(&mut tx, &t, m).await?;
-    let mut order: Value =
-        sqlx::query_scalar("SELECT data FROM orders WHERE tenant=$1 AND id=$2 FOR UPDATE")
-            .bind(&t)
-            .bind(id)
-            .fetch_optional(&mut *tx)
-            .await?
-            .ok_or(Error(StatusCode::NOT_FOUND, "Order not found".into()))?;
+    let mut order: Value = order_mutation::lock_data(&mut tx, &t, id)
+        .await?
+        .ok_or(Error(StatusCode::NOT_FOUND, "Order not found".into()))?;
     if args.allocation_digest != allocation_digest(&order, index) {
         return Err(conflict(
             "Package allocation changed; no carrier booking admitted",

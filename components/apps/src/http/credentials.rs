@@ -1,5 +1,6 @@
 //! App keys reuse the core integration-key store, current creator rights, expiry and immutable package digest.
 use crate::domain::{action_admission, approval};
+use crate::store::credentials;
 use crate::store::packages::package;
 use axum::Json;
 use axum::extract::{Path, State as Shared};
@@ -19,7 +20,7 @@ pub async fn list(
 ) -> Result<Json<Value>> {
     let t = merchant(&h)?;
     let m = package(&a, &t, &id, false).await?;
-    let rows:Vec<Value>=sqlx::query_scalar("SELECT jsonb_build_object('id',id,'permissions',app_permissions,'createdAt',created_at,'expiresAt',expires_at,'creator',user_id,'packageDigest',package_digest) FROM integration_keys WHERE tenant=$1 AND app_id=$2 ORDER BY created_at DESC LIMIT 100").bind(&t).bind(id).fetch_all(&a.db).await?;
+    let rows = credentials::list(&a, &t, &id).await?;
     Ok(Json(
         json!({"canManage":permit(&h,"team.manage").is_ok() && h.principal.user.as_deref().is_some_and(|u|u!="bootstrap") && parent(&a,&t).await?.is_none(),"keys":rows,"digest":approval::canonical_digest(&m),"permissions":m.permissions.iter().filter(|p|callback_scope(p).is_some()).collect::<Vec<_>>()}),
     ))
@@ -75,18 +76,28 @@ pub async fn create(
         .ok_or(bad("Expiry must be 1..90 days"))?;
     let mut tx = a.db.begin().await?;
     veyndo_core::store::tenants::lock(&mut *tx, &t).await?;
-    let count: i64 = sqlx::query_scalar(
-        "SELECT count(*) FROM integration_keys WHERE tenant=$1 AND expires_at>now()",
-    )
-    .bind(&t)
-    .fetch_one(&mut *tx)
-    .await?;
+    let count = credentials::active_count(&mut tx, &t).await?;
     if count >= 32 {
         return Err(bad("Maximum 32 active integration keys"));
     }
     let key = format!("rac_{}{}", uid(), uid());
     let key_id = uid();
-    sqlx::query("INSERT INTO integration_keys(id,tenant,user_id,digest,name,permissions,app_id,package_digest,app_permissions,expires_at) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$10,now()+$9*interval '1 day')").bind(&key_id).bind(&t).bind(user).bind(hash(&key)).bind(format!("App {id}" )).bind(json!(scopes)).bind(&id).bind(&digest).bind(days as i32).bind(json!(requested)).execute(&mut *tx).await?;
+    credentials::issue(
+        &mut tx,
+        credentials::NewKey {
+            id: &key_id,
+            tenant: &t,
+            user,
+            digest: &hash(&key),
+            name: &format!("App {id}"),
+            scopes: &json!(scopes),
+            app: &id,
+            package_digest: &digest,
+            days: days as i32,
+            app_permissions: &json!(requested),
+        },
+    )
+    .await?;
     veyndo_core::store::outbox::publish_on(
         &mut *tx,
         &t,
@@ -107,11 +118,6 @@ pub async fn revoke(
 ) -> Result<Json<Value>> {
     let t = merchant(&h)?;
     permit(&h, "team.manage")?;
-    sqlx::query("DELETE FROM integration_keys WHERE tenant=$1 AND app_id=$2 AND id=$3")
-        .bind(t)
-        .bind(id)
-        .bind(key)
-        .execute(&a.db)
-        .await?;
+    credentials::revoke(&a, &t, &id, &key).await?;
     Ok(Json(json!({"revoked":true})))
 }

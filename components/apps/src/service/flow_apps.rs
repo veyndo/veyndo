@@ -1,8 +1,8 @@
 //! App steps of flows use the same permission and schema gateway as HTTP and MCP: admission, installed-package checks, upgrade safety and argument binding.
 use crate::domain::{action_admission, core_extensions, field_values};
+use crate::store::{flows, locks, packages};
 use serde::Deserialize;
 use serde_json::{Value, json};
-use sqlx::Row;
 use veyndo_app_model::Action;
 use veyndo_app_model::manifest::Manifest;
 use veyndo_core::document::{lenient, view};
@@ -122,22 +122,16 @@ pub async fn validate_installed(
             .as_ref()
             .ok_or(bad("Flow app action required"))?;
         if lock {
-            sqlx::query("SELECT pg_advisory_xact_lock(hashtextextended($1,7))")
-                .bind(format!("{t}:{}", target.app))
-                .execute(&mut **tx)
-                .await?;
+            locks::advisory(tx, &format!("{t}:{}", target.app), 7).await?;
         }
-        let row = sqlx::query("SELECT manifest,active FROM app_packages WHERE tenant=$1 AND id=$2")
-            .bind(t)
-            .bind(&target.app)
-            .fetch_optional(&mut **tx)
+        let row = packages::stored_package(tx, t, &target.app)
             .await?
             .ok_or(bad("Flow app is not installed"))?;
-        if !row.get::<bool, _>("active") {
+        if !row.active {
             return Err(conflict("Flow app is inactive"));
         }
-        let m: Manifest = serde_json::from_value(row.get("manifest"))
-            .map_err(|_| bad("Invalid installed manifest"))?;
+        let m: Manifest =
+            serde_json::from_value(row.manifest).map_err(|_| bad("Invalid installed manifest"))?;
         validate_step(h, &step, &m)?;
     }
     Ok(())
@@ -149,17 +143,12 @@ pub async fn validate_replacement(
     t: &str,
     m: &Manifest,
 ) -> Result<()> {
-    let rows =
-        sqlx::query("SELECT data FROM commerce_flows WHERE tenant=$1 AND data->>'active'='true'")
-            .bind(t)
-            .fetch_all(&mut *conn)
-            .await?;
+    let rows = flows::active(conn, t).await?;
     let invalid = || {
         conflict("Upgrade would invalidate an active flow; update its action and arguments first")
     };
     for row in rows {
-        let f: Flow =
-            serde_json::from_value(row.get("data")).map_err(|_| bad("Invalid stored flow"))?;
+        let f: Flow = serde_json::from_value(row).map_err(|_| bad("Invalid stored flow"))?;
         for step in app_steps(&f) {
             if step.app_action.as_ref().is_some_and(|a| a.app == m.id) {
                 let h = headers_on(&mut *conn, t, f.actor.as_deref())

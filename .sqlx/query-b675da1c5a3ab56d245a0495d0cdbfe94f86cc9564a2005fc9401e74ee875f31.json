@@ -1,0 +1,29 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT agent_budget AS \"agent_budget!\" FROM integration_keys WHERE tenant=coalesce((SELECT live_tenant FROM shop_environments WHERE tenant=$1),$1) AND id=$2 AND expires_at>now()",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "agent_budget!",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "integration_keys",
+            "name": "agent_budget"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      true
+    ]
+  },
+  "hash": "b675da1c5a3ab56d245a0495d0cdbfe94f86cc9564a2005fc9401e74ee875f31"
+}

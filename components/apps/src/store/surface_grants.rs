@@ -135,3 +135,62 @@ pub async fn load(
     context(a, h, &ctx).await?;
     Ok((m, s, ctx, row.get("actions")))
 }
+
+/// Drops the expired surface grants of an app.
+pub async fn expire(conn: &mut sqlx::PgConnection, t: &str, app: &str) -> Result<()> {
+    sqlx::query!(
+        "DELETE FROM app_surface_grants WHERE tenant=$1 AND app=$2 AND expires_at<=now()",
+        t,
+        app
+    )
+    .execute(conn)
+    .await?;
+    Ok(())
+}
+
+/// How many live surface grants one actor holds for an app.
+pub async fn actor_count(
+    conn: &mut sqlx::PgConnection,
+    t: &str,
+    app: &str,
+    actor: &str,
+) -> Result<i64> {
+    Ok(sqlx::query_scalar!(
+        r#"SELECT count(*) AS "count!" FROM app_surface_grants WHERE tenant=$1 AND app=$2 AND actor_hash=$3"#,
+        t,
+        app,
+        actor
+    )
+    .fetch_one(conn)
+    .await?)
+}
+
+/// A surface grant to store for five minutes.
+pub struct NewGrant<'a> {
+    pub tenant: &'a str,
+    pub token_hash: &'a str,
+    pub app: &'a str,
+    pub surface: &'a str,
+    pub actor: &'a str,
+    pub package_digest: &'a str,
+    pub actions: &'a Value,
+    pub context: &'a Value,
+}
+
+/// Stores a surface grant that expires after five minutes.
+pub async fn grant(conn: &mut sqlx::PgConnection, g: NewGrant<'_>) -> Result<()> {
+    sqlx::query!(
+        "INSERT INTO app_surface_grants(tenant,token_hash,app,surface,actor_hash,package_digest,actions,context,expires_at) VALUES($1,$2,$3,$4,$5,$6,$7,$8,now()+interval '5 minutes')",
+        g.tenant,
+        g.token_hash,
+        g.app,
+        g.surface,
+        g.actor,
+        g.package_digest,
+        g.actions,
+        g.context
+    )
+    .execute(conn)
+    .await?;
+    Ok(())
+}

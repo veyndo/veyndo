@@ -1,6 +1,6 @@
 -- Bounded imported-order names: locale first, then child before parent.
 -- Keep SQL blank-name filtering and the caller's final Rust trim fallback.
-SELECT DISTINCT ON (product.id) product.id, translation.name
+SELECT DISTINCT ON (product.id) product.id, translation.name AS "name!"
 FROM products product
 JOIN product_translations translation
   ON translation.tenant = product.tenant

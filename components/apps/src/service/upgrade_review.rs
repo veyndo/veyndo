@@ -2,8 +2,8 @@
 use crate::domain::schema_changes;
 use crate::ports::Platform;
 use crate::store::package_install::install_tx;
+use crate::store::{locks, packages};
 use serde_json::{Value, json};
-use sqlx::Row;
 use veyndo_app_model::manifest::Manifest;
 use veyndo_core::store::environments::owned_stage;
 use veyndo_core::{Result, bad};
@@ -16,11 +16,7 @@ pub async fn inspect(
     m: &Manifest,
 ) -> Result<(Option<Manifest>, Value)> {
     let mut tx = a.db.begin_privileged().await?;
-    sqlx::query(
-        "SELECT set_config('lock_timeout','2s',true),set_config('statement_timeout','10s',true)",
-    )
-    .execute(&mut *tx)
-    .await?;
+    locks::review_timeouts(&mut tx).await?;
     // Child ownership is system metadata: retain the exact parent/private-stage guard in this bounded transaction.
     let t = if let Some(environment) = environment {
         owned_stage(&mut *tx, live, environment).await?;
@@ -29,12 +25,7 @@ pub async fn inspect(
         live
     };
     a.commerce.lock(&mut tx, t).await?;
-    let previous: Option<Value> =
-        sqlx::query_scalar("SELECT manifest FROM app_packages WHERE tenant=$1 AND id=$2")
-            .bind(t)
-            .bind(&m.id)
-            .fetch_optional(&mut *tx)
-            .await?;
+    let previous: Option<Value> = packages::manifest_value(&mut tx, t, &m.id).await?;
     let old = previous
         .as_ref()
         .map(|v| serde_json::from_value::<Manifest>(v.clone()))
@@ -59,19 +50,16 @@ pub async fn inspect(
                     })
             })
     });
-    let rows = sqlx::query("SELECT entity,count(*)::bigint AS records FROM app_records WHERE tenant=$1 AND app=$2 GROUP BY entity ORDER BY entity")
-        .bind(t).bind(&m.id).fetch_all(&mut *tx).await?;
+    let rows = packages::model_records(&mut tx, t, &m.id).await?;
     let models = rows
         .iter()
-        .map(|r| json!({"name":r.get::<String,_>("entity"),"records":r.get::<i64,_>("records")}))
+        .map(|r| json!({"name":r.entity,"records":r.records}))
         .collect::<Vec<_>>();
     // This owner only writes through this transaction. It does not send events or execute services.
     let result: Result<()> = async {
         install_tx(a.rules, a.commerce, &mut tx, t, m.clone()).await?;
         // The real commit also checks deferred relational constraints; rollback alone would miss them.
-        sqlx::query("SET CONSTRAINTS ALL IMMEDIATE")
-            .execute(&mut *tx)
-            .await?;
+        locks::constraints_immediate(&mut tx).await?;
         Ok(())
     }
     .await;

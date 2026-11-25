@@ -1,7 +1,8 @@
 //! Generic authorized external order intake reuses native stock, customer snapshots, documents, history and outbox.
+use crate::store::external_orders as stored;
+use crate::store::{locks, packages};
 use serde::Deserialize;
 use serde_json::{Value, json};
-use sqlx::Row;
 use std::collections::HashMap;
 use veyndo_core::document::view;
 use veyndo_core::{
@@ -42,31 +43,17 @@ async fn replayed(
     fingerprint: &str,
 ) -> Result<Option<Value>> {
     // Lock the native package to preserve callback authorization across uninstall/upgrade races.
-    let current: Option<String> = sqlx::query_scalar(
-        "SELECT digest FROM app_packages WHERE tenant=$1 AND id=$2 AND active FOR SHARE",
-    )
-    .bind(t)
-    .bind(app)
-    .fetch_optional(&mut **tx)
-    .await?;
+    let current = packages::active_digest_for_share(tx, t, app).await?;
     if current.as_deref() != Some(digest) {
         return Err(conflict("App package changed during import"));
     }
-    if let Some(r) =
-        sqlx::query("SELECT data,fingerprint FROM orders WHERE tenant=$1 AND idempotency_key=$2")
-            .bind(t)
-            .bind(key)
-            .fetch_optional(&mut **tx)
-            .await?
-    {
-        if r.get::<String, _>("fingerprint") != fingerprint {
+    if let Some(r) = stored::imported(tx, t, key).await? {
+        if r.fingerprint != fingerprint {
             return Err(conflict(
                 "External order already imported with another snapshot",
             ));
         }
-        return Ok(Some(
-            json!({"order":r.get::<Value,_>("data"),"replayed":true}),
-        ));
+        return Ok(Some(json!({"order":r.data,"replayed":true})));
     }
     Ok(None)
 }
@@ -88,20 +75,15 @@ async fn order_lines(
     scale: u8,
 ) -> Result<Vec<Value>> {
     let args: OrderLinesInput = view(channel);
-    let mut locks:Vec<String>=sqlx::query_scalar("SELECT DISTINCT parent_id FROM products WHERE tenant=$1 AND id=ANY($2) AND parent_id IS NOT NULL").bind(t).bind(ids).fetch_all(&mut **tx).await?;
+    let mut locks = stored::parents(tx, t, ids).await?;
     locks.extend(ids.to_vec());
     locks.sort();
     locks.dedup();
-    let rows =
-        sqlx::query("SELECT * FROM products WHERE tenant=$1 AND id=ANY($2) ORDER BY id FOR UPDATE")
-            .bind(t)
-            .bind(&locks)
-            .fetch_all(&mut **tx)
-            .await?;
-    if rows.iter().any(|r| !r.get::<bool, _>("active")) {
+    let rows = stored::lock_products(tx, t, &locks).await?;
+    if rows.iter().any(|r| !r.active) {
         return Err(bad("Inactive imported product"));
     }
-    let hidden:bool=sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM product_channel_visibility WHERE tenant=$1 AND channel_id=$2 AND product_id=ANY($3) AND NOT visible)").bind(t).bind(&input.sales_channel_id).bind(&locks).fetch_one(&mut **tx).await?;
+    let hidden = stored::hidden_in_channel(tx, t, &input.sales_channel_id, &locks).await?;
     if hidden {
         return Err(bad("Imported product is hidden in this channel"));
     }
@@ -126,22 +108,18 @@ async fn order_lines(
     ];
     // Products and parents are already locked. Resolve all admitted lines in one
     // read, retaining the external snapshot's locale-before-variant precedence.
-    let mut names: HashMap<String, String> =
-        sqlx::query_as::<_, (String, String)>(include_str!("external_orders/labels.sql"))
-            .bind(t)
-            .bind(ids)
-            .bind(&chain)
-            .fetch_all(&mut **tx)
-            .await?
-            .into_iter()
-            .collect();
-    let products: HashMap<String, _> = rows.iter().map(|r| (r.get("id"), r)).collect();
+    let mut names: HashMap<String, String> = stored::labels(tx, t, ids, &chain)
+        .await?
+        .into_iter()
+        .map(|l| (l.id, l.name))
+        .collect();
+    let products: HashMap<&str, _> = rows.iter().map(|r| (r.id.as_str(), r)).collect();
     let mut lines = Vec::new();
     for l in &input.lines {
         let r = products
-            .get(&l.product_id)
+            .get(l.product_id.as_str())
             .ok_or(bad("Imported product does not belong to this shop"))?;
-        let parent = r.get::<Option<String>, _>("parent_id");
+        let parent = &r.parent_id;
         if !selected.is_empty()
             && !selected
                 .iter()
@@ -149,7 +127,7 @@ async fn order_lines(
         {
             return Err(bad("Imported product is outside channel catalog"));
         }
-        if !u64::try_from(r.get::<i32, _>("stock"))
+        if !u64::try_from(r.stock)
             .is_ok_and(|stock| verified_kernel::stock_admissible(stock, u64::from(l.quantity)))
         {
             return Err(conflict(
@@ -159,8 +137,8 @@ async fn order_lines(
         let label = names
             .remove(&l.product_id)
             .filter(|s| !s.trim().is_empty())
-            .unwrap_or_else(|| r.get("name"));
-        lines.push(json!({"id":l.product_id,"referencedId":l.product_id,"label":label,"quantity":l.quantity,"productNumber":r.get::<Option<String>,_>("product_number"),"price":source_price(&l.amount,scale,l.quantity)}));
+            .unwrap_or_else(|| r.name.clone());
+        lines.push(json!({"id":l.product_id,"referencedId":l.product_id,"label":label,"quantity":l.quantity,"productNumber":r.product_number,"price":source_price(&l.amount,scale,l.quantity)}));
     }
     Ok(lines)
 }
@@ -195,20 +173,13 @@ pub async fn import_external(
     let fingerprint = hash(&json!(input).to_string());
     let mut tx = a.db.begin().await?;
     history_context::context(&mut tx, h, "external_order").await?;
-    sqlx::query("SELECT pg_advisory_xact_lock(hashtextextended($1,0))")
-        .bind(format!("{t}:{key}"))
-        .execute(&mut *tx)
-        .await?;
+    locks::advisory(&mut tx, &format!("{t}:{key}"), 0).await?;
     if let Some(replay) = replayed(&mut tx, &t, (app, digest), &key, &fingerprint).await? {
         return Ok(replay);
     }
-    let channel: Value =
-        sqlx::query_scalar("SELECT data FROM sales_channels WHERE tenant=$1 AND id=$2 FOR SHARE")
-            .bind(&t)
-            .bind(&input.sales_channel_id)
-            .fetch_optional(&mut *tx)
-            .await?
-            .ok_or(bad("Unknown external sales channel"))?;
+    let channel: Value = stored::lock_channel(&mut tx, &t, &input.sales_channel_id)
+        .await?
+        .ok_or(bad("Unknown external sales channel"))?;
     if channel["kind"] != "marketplace"
         || channel["active"] != true
         || channel["visibility"] == "private"
@@ -275,14 +246,19 @@ pub async fn import_external(
     veyndo_orders::domain::order_fields::order_fields(&mut order);
     let mut cart = json!(c.data);
     cart["order"] = order.clone();
-    sqlx::query("INSERT INTO carts(id,tenant,token,data,status) VALUES($1,$2,$3,$4,'completed')")
-        .bind(&c.id)
-        .bind(&t)
-        .bind(&c.token)
-        .bind(cart)
-        .execute(&mut *tx)
-        .await?;
-    sqlx::query("INSERT INTO orders(id,tenant,cart_id,idempotency_key,fingerprint,data) VALUES($1,$2,$3,$4,$5,$6)").bind(&id).bind(&t).bind(&c.id).bind(key).bind(fingerprint).bind(&order).execute(&mut *tx).await?;
+    stored::insert_cart(&mut tx, &c.id, &t, &c.token, &cart).await?;
+    stored::insert_order(
+        &mut tx,
+        stored::NewOrder {
+            id: &id,
+            tenant: &t,
+            cart_id: &c.id,
+            idempotency_key: &key,
+            fingerprint: &fingerprint,
+            data: &order,
+        },
+    )
+    .await?;
     let inventory = InventoryLines::new(
         input
             .lines

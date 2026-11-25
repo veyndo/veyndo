@@ -2,6 +2,7 @@
 use crate::domain::{action_admission, approval, input_schema};
 use crate::ports::Platform;
 use crate::service::job_evidence;
+use crate::store::job_creators;
 use crate::store::package_fence::lock_package_write;
 use serde::Deserialize;
 use serde_json::{Value, json};
@@ -21,24 +22,20 @@ async fn creator(
 ) -> Result<RequestContext> {
     // Lock the scoped base rows, then read the canonical current projection.
     // FOR SHARE on the read-only view would require a needless UPDATE grant on it.
-    sqlx::query("SELECT m.user_id FROM memberships m JOIN workspace_roles r ON r.tenant=m.tenant AND r.id=m.role WHERE m.tenant=$1 AND m.user_id=$2 FOR SHARE OF m,r")
-        .bind(t).bind(&actor).fetch_optional(&mut **tx).await?
-        .ok_or(Error(StatusCode::FORBIDDEN,"Job creator no longer has access".into()))?;
-    let membership = sqlx::query(
-        "SELECT role,permissions FROM membership_grants WHERE tenant=$1 AND user_id=$2 AND active",
-    )
-    .bind(t)
-    .bind(&actor)
-    .fetch_optional(&mut **tx)
-    .await?
-    .ok_or(Error(
+    if !job_creators::lock_member(tx, t, &actor).await? {
+        return Err(Error(
+            StatusCode::FORBIDDEN,
+            "Job creator no longer has access".into(),
+        ));
+    }
+    let membership = job_creators::membership(tx, t, &actor).await?.ok_or(Error(
         StatusCode::FORBIDDEN,
         "Job creator no longer has access".into(),
     ))?;
     let mut identity = RequestContext::new();
     identity.principal.user = Some(actor);
-    identity.principal.role = Some(membership.get("role"));
-    let rights: Value = membership.get("permissions");
+    identity.principal.role = Some(membership.role);
+    let rights = membership.permissions;
     identity.principal.permissions = (!rights.is_null()).then(|| rights.to_string());
     Ok(identity)
 }

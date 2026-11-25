@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "DELETE FROM hosted_frontends WHERE tenant=$1 AND alias=$2 AND revision=$3",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Int8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "a9b8bd3aad75efd3cf027d66fb06e503dca6446d3de681fa2d65959168fb85f8"
+}

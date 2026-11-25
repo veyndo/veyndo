@@ -3,10 +3,9 @@ use crate::domain::discovery::{admitted, relevant, schema};
 use crate::domain::input_schema::validate_native;
 use crate::ports::Platform;
 use crate::service::gateway;
-use crate::store::packages::package;
+use crate::store::packages::{self, package};
 use serde::Deserialize;
 use serde_json::{Value, json};
-use sqlx::Row;
 use veyndo_app_model::manifest::Manifest;
 use veyndo_core::document::{lenient, view};
 use veyndo_core::{RequestContext, Result, bad, conflict};
@@ -89,16 +88,11 @@ pub async fn invoke(a: &Platform, h: &RequestContext, name: &str, v: &Value) -> 
         ))
         .await;
     }
-    let rows =
-        sqlx::query("SELECT manifest FROM app_packages WHERE tenant=$1 AND active ORDER BY id")
-            .bind(&t)
-            .fetch_all(&a.db)
-            .await?;
+    let rows = packages::active_manifest_values(a, &t).await?;
     let query = input.query.as_deref().unwrap_or("");
     let mut apps = vec![];
     for row in rows {
-        let m: Manifest = serde_json::from_value(row.get("manifest"))
-            .map_err(|_| bad("Invalid installed app"))?;
+        let m: Manifest = serde_json::from_value(row).map_err(|_| bad("Invalid installed app"))?;
         let actions=m.actions.iter().filter(|act|admitted(h,&m,act) && READS.contains(&act.handler.as_str()))
             .map(|act|json!({"action":act.name,"description":act.description,"inputSchema":act.input_schema})).take(12).collect::<Vec<_>>();
         let proposals=m.actions.iter().filter(|act|admitted(h,&m,act) && act.handler=="save").map(|act|json!({"name":format!("app.{}.{}",m.id,act.name),"description":act.description,"inputSchema":act.input_schema,"reviewRequired":true})).take(12).collect::<Vec<_>>();

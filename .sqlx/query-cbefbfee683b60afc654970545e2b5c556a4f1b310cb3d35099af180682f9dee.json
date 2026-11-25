@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO carts(id,tenant,token,data,status) VALUES($1,$2,$3,$4,'completed')",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Text",
+        "Jsonb"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "cbefbfee683b60afc654970545e2b5c556a4f1b310cb3d35099af180682f9dee"
+}

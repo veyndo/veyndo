@@ -1,10 +1,12 @@
 //! Generic app contributions: configure a cart, bind package/data revisions and persist audited pricing inputs.
 use crate::domain::configuration_budget::configuration_budget;
 use crate::service::configuration_selection::resolve_selection;
-use crate::store::cart_configurations::{prepare_configurations, validate_configurations};
+use crate::store::cart_configurations::{
+    lock_cart, prepare_configurations, save_cart, validate_configurations,
+};
 use crate::store::configuration_events::configuration_events;
 use serde::Deserialize;
-use serde_json::{Value, json};
+use serde_json::Value;
 use veyndo_b2b::store::access::guard_conn;
 use veyndo_checkout::domain::cart_quote::configuration_price;
 use veyndo_checkout::store::cart_load::load;
@@ -14,7 +16,7 @@ use veyndo_marketing::service::channels::admit_product;
 use veyndo_shop::domain::cart_admission::request;
 use veyndo_shop::domain::configuration_selection::Selection;
 use veyndo_shop::service::read_cache::settings;
-use veyndo_shop::types::cart::{Item, StoredCart, stored};
+use veyndo_shop::types::cart::{Item, StoredCart};
 
 /// The JSON fields `configure` reads, typed as it reads them.
 #[derive(Deserialize, Default)]
@@ -61,12 +63,7 @@ pub async fn configure(a: &State, h: &RequestContext, id: &str, v: &Value) -> Re
     }
     let modules = prepare_configurations(a, &candidate).await?;
     let mut tx = a.db.begin().await?;
-    let row = sqlx::query("SELECT * FROM carts WHERE tenant=$1 AND token=$2 FOR UPDATE")
-        .bind(&initial.tenant)
-        .bind(&initial.token)
-        .fetch_one(&mut *tx)
-        .await?;
-    let mut cart = stored(&row)?;
+    let mut cart = lock_cart(&mut tx, &initial.tenant, &initial.token).await?;
     request(h, &cart)?;
     guard_conn(&mut tx, h, &cart).await?;
     if cart.status != "open" || cart.revision != initial.revision {
@@ -84,12 +81,7 @@ pub async fn configure(a: &State, h: &RequestContext, id: &str, v: &Value) -> Re
     }
     validate_configurations(&mut tx, &checked, &modules).await?;
     cart.revision += 1;
-    sqlx::query("UPDATE carts SET data=$1,revision=$2 WHERE id=$3")
-        .bind(json!(cart.data))
-        .bind(cart.revision)
-        .bind(&cart.id)
-        .execute(&mut *tx)
-        .await?;
+    save_cart(&mut tx, &cart).await?;
     configuration_events(&mut tx, &cart, &before).await?;
     tx.commit().await?;
     Ok(cart)

@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO outbox(tenant,kind,data) VALUES($1,'intelligence.agent.allocated',$2)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Jsonb"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "fd4490c2e7359f6b2f83a5cdb02a29568c252d186ba836d7ea32d6c397cb29bc"
+}
