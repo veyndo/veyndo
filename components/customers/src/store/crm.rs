@@ -330,7 +330,9 @@ pub async fn save(
     )
     .execute(&mut *tx)
     .await?;
-    sqlx::query!(r#"UPDATE carts SET token=md5(id||$1),data=jsonb_set(jsonb_set(jsonb_set(jsonb_set(data,'{email}','null'),'{customer_id}','null'),'{group}','"consumer"'),'{company}','null'),revision=revision+1 WHERE tenant=$2 AND data->>'email'=$3 AND status='open'"#, uid(), t, email).execute(&mut *tx).await?;
+    crate::ports::purchases()?
+        .detach_carts(&mut tx, t, email, &uid())
+        .await?;
     veyndo_core::store::outbox::publish_on(&mut *tx, t, "customer.updated", &json!({"actor":header(h,"x-rac-user"),"email":email,"revision":saved_revision,"active":e.active})).await?;
     tx.commit().await?;
     Ok(json!({"saved":true,"revision":saved_revision}))

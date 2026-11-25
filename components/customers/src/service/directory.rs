@@ -1,5 +1,6 @@
 //! The merchant's view of customers: standard read fields, the bounded lookup and guest contacts.
 use crate::domain::{profile, search};
+use crate::ports::purchases;
 use crate::store::customers;
 use serde::Deserialize;
 use serde_json::{Value, json};
@@ -15,7 +16,7 @@ pub async fn decorate(a: &State, t: &str, email: &str, v: &mut Value) -> Result<
         v,
         json!({"salesChannelId":usage.sales_channel_id,"languageId":usage.language_id,"firstLogin":usage.first_login,"lastLogin":usage.last_login,"lastPaymentMethodId":usage.last_payment_method_id,"groupId":account.customer_group,"guest":false}),
     )?;
-    let totals = customers::order_totals(a, t, account.id.as_deref()).await?;
+    let totals = purchases()?.order_totals(t, account.id.as_deref()).await?;
     merge(
         v,
         json!({"orderCount":totals.count,"orderTotalAmount":totals.amount,"lastOrderDate":totals.last_order}),
@@ -46,8 +47,9 @@ pub async fn lookup(a: &State, t: &str, after: &str, query: &str, limit: i64) ->
 }
 
 /// A guest as the merchant sees them: the newest order snapshot, never an account.
-pub async fn guest(a: &State, t: &str, email: &str) -> Result<Value> {
-    let (data, created) = customers::latest_guest_order(a, t, email)
+pub async fn guest(_a: &State, t: &str, email: &str) -> Result<Value> {
+    let (data, created) = purchases()?
+        .latest_guest_order(t, email)
         .await?
         .ok_or(Error(StatusCode::NOT_FOUND, "Customer not found".into()))?;
     let order: GuestOrder = view(&data);

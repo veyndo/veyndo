@@ -6,6 +6,7 @@ pub mod cart_edit;
 pub mod cart_load;
 pub mod cart_selection;
 pub mod carts;
+pub mod customer_carts;
 pub mod customer_snapshot;
 pub mod handoffs;
 pub mod hosted_parent;

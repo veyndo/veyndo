@@ -91,6 +91,7 @@ pub(crate) async fn bootstrap() -> App {
         apps: veyndo_app_platform::service::runtime_state::AppRuntime::default(),
     };
     veyndo_shop::service::read_cache::register_conditions(marketing::validate_condition);
+    crate::ports::register(&a);
     if let Some(setup) = setup {
         if env::var("SEED_DEMO").as_deref() != Ok("false") {
             migrations::seed_demo(&a, &setup).await;

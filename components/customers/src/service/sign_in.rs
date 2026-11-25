@@ -1,5 +1,5 @@
 //! Buyer sign-in: credential verification, binding the open cart to the account and context rotation.
-use crate::ports::SignIn;
+use crate::ports::{SignIn, purchases};
 use crate::service::address_entries::address_get;
 use crate::service::sessions;
 use crate::store::sign_in as store;
@@ -49,7 +49,7 @@ pub async fn login(host: &dyn SignIn, a: &State, h: &RequestContext, v: &Value) 
         ));
     }
     let mut tx = a.db.begin().await?;
-    let mut c = store::lock_cart(&mut tx, &t, token(h)?).await?;
+    let mut c = purchases()?.lock_cart(&mut tx, &t, token(h)?).await?;
     host.cashier(h, &c)?;
     if c.data.b2b.is_some() {
         return Err(bad(
@@ -81,7 +81,9 @@ pub async fn login(host: &dyn SignIn, a: &State, h: &RequestContext, v: &Value) 
     c.data.group = r.group_name;
     c.data.company = r.company;
     let new_token = uid(); // Rotate the context after authentication.
-    store::bind_cart(&mut tx, &c.id, &json!(c.data), &new_token).await?;
+    purchases()?
+        .bind_cart(&mut tx, &c.id, &json!(c.data), &new_token)
+        .await?;
     store::record_login(&mut tx, &t, email).await?;
     tx.commit().await?;
     c.token = new_token;

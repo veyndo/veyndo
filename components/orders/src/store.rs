@@ -4,6 +4,7 @@ pub mod carrier_documents;
 pub mod company;
 pub mod company_logos;
 pub mod company_release;
+pub mod customer_orders;
 pub mod downloads;
 pub mod machine;
 pub mod order_list;

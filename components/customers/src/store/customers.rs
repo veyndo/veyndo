@@ -76,18 +76,6 @@ pub struct OrderTotals {
     pub last_order: Option<String>,
 }
 
-/// Orders bound to the account's stable ID; a guest order with the same email does not count.
-pub async fn order_totals(a: &State, t: &str, customer: Option<&str>) -> Result<OrderTotals> {
-    Ok(sqlx::query_as!(
-        OrderTotals,
-        r#"SELECT count(*) AS "count!",coalesce(sum((data->'cart'->'price'->>'totalPrice')::numeric),0)::double precision AS "amount!",max(created_at)::text AS last_order FROM orders WHERE tenant=$1 AND data->'orderCustomer'->>'customerId'=$2"#,
-        t,
-        customer
-    )
-    .fetch_one(&a.db)
-    .await?)
-}
-
 pub struct Found {
     pub id: String,
     pub email: String,
@@ -115,22 +103,6 @@ pub async fn search(
     )
     .fetch_all(&a.db)
     .await?)
-}
-
-/// The newest guest order of an email: its snapshot and creation time.
-pub async fn latest_guest_order(
-    a: &State,
-    t: &str,
-    email: &str,
-) -> Result<Option<(Value, String)>> {
-    Ok(sqlx::query!(
-        r#"SELECT data,created_at::text AS "created!" FROM orders WHERE tenant=$1 AND data->'orderCustomer'->>'email'=$2 AND data->'orderCustomer'->>'guest'='true' ORDER BY created_at DESC,id DESC LIMIT 1"#,
-        t,
-        email
-    )
-    .fetch_optional(&a.db)
-    .await?
-    .map(|r| (r.data, r.created)))
 }
 
 /// Remembers the payment method an active customer used last.
