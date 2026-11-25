@@ -139,3 +139,77 @@ fn settings_guards_port_checks_conditions() {
     assert!(guards.condition(&json!({"field": "country"})).is_ok());
     assert!(guards.condition(&json!("country")).is_err());
 }
+
+/// No document of a component above pricing refers to a currency or bounds a price job.
+impl veyndo_pricing::ports::References for AdmitObjects {
+    fn product_ceiling<'a>(
+        &'a self,
+        _: &'a mut PgConnection,
+        _: &'a str,
+    ) -> PortFuture<'a, String> {
+        Box::pin(async { Ok(String::new()) })
+    }
+    fn products_use<'a>(
+        &'a self,
+        _: &'a mut PgConnection,
+        _: &'a str,
+        _: &'a [String],
+    ) -> PortFuture<'a, bool> {
+        Box::pin(async { Ok(false) })
+    }
+    fn carts_use<'a>(
+        &'a self,
+        _: &'a mut PgConnection,
+        _: &'a str,
+        _: &'a [String],
+    ) -> PortFuture<'a, bool> {
+        Box::pin(async { Ok(false) })
+    }
+    fn units_use<'a>(
+        &'a self,
+        _: &'a mut PgConnection,
+        _: &'a str,
+        _: &'a [String],
+    ) -> PortFuture<'a, bool> {
+        Box::pin(async { Ok(false) })
+    }
+}
+
+/// No document refers to a shipping or payment method.
+impl veyndo_shipping::ports::MethodReferences for AdmitObjects {
+    fn orders<'a>(
+        &'a self,
+        _: &'a mut PgConnection,
+        _: &'a veyndo_shipping::ports::MethodReference<'a>,
+    ) -> PortFuture<'a, i64> {
+        Box::pin(async { Ok(0) })
+    }
+    fn carts<'a>(
+        &'a self,
+        _: &'a mut PgConnection,
+        _: &'a veyndo_shipping::ports::MethodReference<'a>,
+    ) -> PortFuture<'a, i64> {
+        Box::pin(async { Ok(0) })
+    }
+    fn overrides<'a>(
+        &'a self,
+        _: &'a mut PgConnection,
+        _: &'a veyndo_shipping::ports::MethodReference<'a>,
+    ) -> PortFuture<'a, i64> {
+        Box::pin(async { Ok(0) })
+    }
+    fn rules<'a>(
+        &'a self,
+        _: &'a mut PgConnection,
+        _: &'a veyndo_shipping::ports::MethodReference<'a>,
+    ) -> PortFuture<'a, i64> {
+        Box::pin(async { Ok(0) })
+    }
+    fn units<'a>(
+        &'a self,
+        _: &'a mut PgConnection,
+        _: &'a veyndo_shipping::ports::MethodReference<'a>,
+    ) -> PortFuture<'a, i64> {
+        Box::pin(async { Ok(0) })
+    }
+}

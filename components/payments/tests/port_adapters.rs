@@ -85,3 +85,21 @@ fn gateway_port_answers_without_the_server() {
     assert!(ready(gateway.package("shop-a", "unknown")).is_err());
     assert_eq!(gateway.builtin("shop-a")["configured"], false);
 }
+
+/// A shop without payment history and with one sales channel, `storefront`.
+impl veyndo_payments::ports::MerchantRecords for FixtureProvider {
+    fn payment_history<'a>(
+        &'a self,
+        _: &'a mut sqlx::PgConnection,
+        _: &'a str,
+        _: &'a str,
+    ) -> PortFuture<'a, Vec<veyndo_payments::ports::PaymentChange>> {
+        Box::pin(async { Ok(Vec::new()) })
+    }
+    fn channel_exists<'a>(&'a self, _: &'a str, channel: &'a str) -> PortFuture<'a, bool> {
+        Box::pin(async move { Ok(channel == "storefront") })
+    }
+    fn channel_ids<'a>(&'a self, _: &'a str) -> PortFuture<'a, Vec<String>> {
+        Box::pin(async { Ok(vec!["storefront".to_string()]) })
+    }
+}

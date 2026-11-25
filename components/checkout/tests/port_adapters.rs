@@ -219,3 +219,34 @@ fn checkout_ports_answer_without_the_server() {
     assert!(purchase.provider_ready("shop-a", "card").is_err());
     assert!(purchase.approve(&(), "digest", 100).is_err());
 }
+
+/// A shop without apps or experiments: an empty policy digest and no counted exposure.
+impl veyndo_checkout::ports::PurchaseRecords for PlainShop {
+    fn policy_digest<'a>(
+        &'a self,
+        _: &'a mut sqlx::PgConnection,
+        _: &'a str,
+    ) -> PortFuture<'a, String> {
+        Box::pin(async { Ok(String::new()) })
+    }
+    fn count_purchase<'a>(
+        &'a self,
+        _: &'a mut sqlx::PgConnection,
+        _: &'a str,
+        _: &'a str,
+    ) -> PortFuture<'a, ()> {
+        Box::pin(async { Ok(()) })
+    }
+}
+
+/// No buyer session is known to this shop.
+impl veyndo_payments::ports::Buyers for PlainShop {
+    fn session_customer<'a>(
+        &'a self,
+        _: &'a mut sqlx::PgConnection,
+        _: &'a str,
+        _: &'a str,
+    ) -> PortFuture<'a, Option<String>> {
+        Box::pin(async { Ok(None) })
+    }
+}
