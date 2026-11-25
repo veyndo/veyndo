@@ -1,5 +1,6 @@
 //! SQL of the identity component.
 pub mod agent_authority;
+pub mod agent_keys;
 pub mod attempts;
 pub mod broker;
 pub mod credentials;

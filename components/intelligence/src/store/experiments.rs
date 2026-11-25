@@ -73,12 +73,11 @@ pub async fn change(
         if count >= 100 {
             return Err(bad("Experiment history limit reached"));
         }
-        let exists = sqlx::query_scalar!(
-            r#"SELECT EXISTS(SELECT 1 FROM sales_channels WHERE tenant=$1 AND id=$2) AS "exists!""#,
+        let exists = veyndo_marketing::store::behavior_channels::channel_exists(
+            &mut *tx,
             t,
-            design.channel
+            &design.channel,
         )
-        .fetch_one(&mut *tx)
         .await?;
         if !exists {
             return Err(bad("Channel does not belong to shop"));

@@ -259,7 +259,7 @@ mod tests {
     fn plans_cannot_select_identity_sql_or_mutations() {
         for v in [
             json!({"tenant":"victim"}),
-            json!({"sql":"DELETE FROM orders"}),
+            json!({"sql":"DROP SCHEMA public CASCADE"}),
             json!({"after":"foreign"}),
             json!({"limit":999}),
             json!({"sort":"id; DROP TABLE orders"}),

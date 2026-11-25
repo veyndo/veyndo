@@ -37,8 +37,8 @@ pub async fn list(
     ))
 }
 /// The native customer projection of a row.
-fn value(r: &sqlx::postgres::PgRow) -> Value {
-    json!(veyndo_customers::store::customers::customer(r))
+fn value(r: &veyndo_customers::store::customers::Customer) -> Value {
+    json!(r)
 }
 /// One customer with addresses, orders and app extensions.
 pub async fn detail(

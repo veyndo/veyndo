@@ -1,6 +1,5 @@
 //! Operator-only platform inference administration: optimistic revision, encrypted write-only keys and an audit without secrets.
 use crate::service::models::Models;
-use crate::store::platform_ai as store;
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 use veyndo_cognition::inference::{settings, sovereign};
@@ -8,6 +7,7 @@ use veyndo_core::document::{lenient, merge, view};
 use veyndo_core::{Error, RequestContext, Result, StatusCode, bad, conflict};
 use veyndo_kernel::verified_kernel;
 use veyndo_shop::http::operator::actor;
+use veyndo_shop::store::platform_ai as store;
 
 /// The platform inference configuration as operators see it: stored overrides on the environment defaults, which keys are stored, and the effective providers.
 pub async fn get(m: Models<'_>, h: &RequestContext) -> Result<Value> {

@@ -60,7 +60,7 @@ pub async fn lock_record(tx: &mut Tx<'_>, key: &str) -> Result<()> {
 
 /// Whether an active order is in a state outside the given workflow states.
 pub async fn stranded_orders(tx: &mut Tx<'_>, t: &str, states: Vec<String>) -> Result<bool> {
-    Ok(sqlx::query_scalar!(r#"SELECT EXISTS(SELECT 1 FROM orders WHERE tenant=$1 AND NOT(data->>'state'=ANY($2)) AND data->>'state' NOT IN ('expired','payment_review')) AS "exists!""#, t, &states).fetch_one(&mut **tx).await?)
+    veyndo_orders::store::staging::stranded_orders(tx, t, states).await
 }
 
 /// Sets whether an installed app package is active.
@@ -70,26 +70,12 @@ pub async fn set_app_active(
     app: &str,
     active: Option<bool>,
 ) -> Result<()> {
-    sqlx::query!(
-        "UPDATE app_packages SET active=$1 WHERE tenant=$2 AND id=$3",
-        active,
-        t,
-        app
-    )
-    .execute(&mut **tx)
-    .await?;
-    Ok(())
+    veyndo_app_platform::store::staging::set_app_active(tx, t, app, active).await
 }
 
 /// The manifest of an installed app package.
 pub async fn manifest(tx: &mut Tx<'_>, t: &str, app: &str) -> Result<Option<Value>> {
-    Ok(sqlx::query_scalar!(
-        "SELECT manifest FROM app_packages WHERE tenant=$1 AND id=$2",
-        t,
-        app
-    )
-    .fetch_optional(&mut **tx)
-    .await?)
+    veyndo_app_platform::store::staging::manifest(tx, t, app).await
 }
 
 /// Inserts or replaces a rule.
@@ -101,8 +87,7 @@ pub async fn upsert_rule(
     condition: &Value,
     active: Option<bool>,
 ) -> Result<()> {
-    sqlx::query!("INSERT INTO commerce_rules(tenant,id,name,condition,active) VALUES($1,$2,$3,$4,$5) ON CONFLICT(tenant,id) DO UPDATE SET name=EXCLUDED.name,condition=EXCLUDED.condition,active=EXCLUDED.active,revision=commerce_rules.revision+1", t, id, name, condition, active).execute(&mut **tx).await?;
-    Ok(())
+    veyndo_marketing::store::staging::upsert_rule(tx, t, id, name, condition, active).await
 }
 
 /// Inserts or replaces a promotion, flow or channel document (`table` is one of their fixed tables).
@@ -113,71 +98,21 @@ pub async fn upsert_unit(
     id: &str,
     data: &Value,
 ) -> Result<()> {
-    match table {
-        "commerce_promotions" => sqlx::query!(
-            "INSERT INTO commerce_promotions(tenant,id,data) VALUES($1,$2,$3) ON CONFLICT(tenant,id) DO UPDATE SET data=EXCLUDED.data,revision=commerce_promotions.revision+1",
-            t,
-            id,
-            data
-        )
-        .execute(&mut **tx)
-        .await?,
-        "commerce_flows" => sqlx::query!(
-            "INSERT INTO commerce_flows(tenant,id,data) VALUES($1,$2,$3) ON CONFLICT(tenant,id) DO UPDATE SET data=EXCLUDED.data,revision=commerce_flows.revision+1",
-            t,
-            id,
-            data
-        )
-        .execute(&mut **tx)
-        .await?,
-        "sales_channels" => sqlx::query!(
-            "INSERT INTO sales_channels(tenant,id,data) VALUES($1,$2,$3) ON CONFLICT(tenant,id) DO UPDATE SET data=EXCLUDED.data,revision=sales_channels.revision+1",
-            t,
-            id,
-            data
-        )
-        .execute(&mut **tx)
-        .await?,
-        _ => return Err(bad("Unsupported release unit")),
-    };
-    Ok(())
+    veyndo_marketing::store::staging::upsert_unit(tx, table, t, id, data).await
 }
 
 /// Replaces the settings or experience document (`table` is one of their fixed tables).
 pub async fn replace_document(tx: &mut Tx<'_>, table: &str, t: &str, data: &Value) -> Result<()> {
     match table {
-        "commerce_settings" => {
-            sqlx::query!(
-                "UPDATE commerce_settings SET data=$1,revision=revision+1 WHERE tenant=$2",
-                data,
-                t
-            )
-            .execute(&mut **tx)
-            .await?
-        }
-        "experiences" => {
-            sqlx::query!(
-                "UPDATE experiences SET data=$1,revision=revision+1 WHERE tenant=$2",
-                data,
-                t
-            )
-            .execute(&mut **tx)
-            .await?
-        }
-        _ => return Err(bad("Unsupported release unit")),
-    };
-    Ok(())
+        "commerce_settings" => veyndo_shop::store::staging::replace_settings(tx, t, data).await,
+        "experiences" => veyndo_intelligence::store::staging::replace_experience(tx, t, data).await,
+        _ => Err(bad("Unsupported release unit")),
+    }
 }
 
 /// A flow document.
 pub async fn flow(tx: &mut Tx<'_>, t: &str, id: &str) -> Result<Value> {
-    Ok(sqlx::query_scalar!(
-        "SELECT data FROM commerce_flows WHERE tenant=$1 AND id=$2",
-        t,
-        id
-    )
-    .fetch_one(&mut **tx)
-    .await?)
+    veyndo_marketing::store::staging::flow(tx, t, id).await
 }
 
 /// The environment's baseline, locked; fails when the environment does not belong to the live shop.
@@ -206,27 +141,15 @@ pub async fn insert_release(
 
 /// The live settings document.
 pub async fn settings(tx: &mut Tx<'_>, t: &str) -> Result<Value> {
-    Ok(
-        sqlx::query_scalar!("SELECT data FROM commerce_settings WHERE tenant=$1", t)
-            .fetch_one(&mut **tx)
-            .await?,
-    )
+    veyndo_shop::store::staging::settings(tx, t).await
 }
 
 /// Whether a channel has its own settings overrides.
 pub async fn channel_configured(tx: &mut Tx<'_>, t: &str, channel: &str) -> Result<bool> {
-    Ok(sqlx::query_scalar!(r#"SELECT EXISTS(SELECT 1 FROM commerce_overrides WHERE tenant=$1 AND channel_id=$2) AS "exists!""#, t, channel)
-    .fetch_one(&mut **tx)
-    .await?)
+    veyndo_shop::store::staging::channel_configured(tx, t, channel).await
 }
 
 /// A channel's settings overrides.
 pub async fn channel_overrides(tx: &mut Tx<'_>, t: &str, channel: &str) -> Result<Value> {
-    Ok(sqlx::query_scalar!(
-        "SELECT data FROM commerce_overrides WHERE tenant=$1 AND channel_id=$2",
-        t,
-        channel
-    )
-    .fetch_one(&mut **tx)
-    .await?)
+    veyndo_shop::store::staging::channel_overrides(tx, t, channel).await
 }

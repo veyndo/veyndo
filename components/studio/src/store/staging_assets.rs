@@ -3,6 +3,7 @@ use super::staging_documents::Tx;
 use crate::domain::views::Identified;
 use crate::domain::views::MediaUrl;
 use serde_json::{Map, Value};
+use veyndo_catalog::store::staging as catalog;
 use veyndo_core::document::view;
 use veyndo_core::{Result, bad, conflict};
 
@@ -12,7 +13,7 @@ pub async fn snapshot_assets(
     t: &str,
     result: &mut Map<String, Value>,
 ) -> Result<()> {
-    let rows=sqlx::query_scalar!(r#"SELECT to_jsonb(a)-'tenant'-'content'-'created_at' AS "data!" FROM product_assets a WHERE tenant=$1 ORDER BY id FOR UPDATE"#, t).fetch_all(&mut **tx).await?;
+    let rows = catalog::assets(tx, t).await?;
     for v in rows {
         result.insert(format!("asset:{}", view::<Identified>(&v).id.unwrap()), v);
     }
@@ -20,24 +21,18 @@ pub async fn snapshot_assets(
 }
 /// Publishes one asset; its product must already exist in the live shop.
 pub async fn publish_asset(tx: &mut Tx<'_>, live: &str, stage: &str, id: &str) -> Result<()> {
-    let product:Option<String>=sqlx::query_scalar!("SELECT p.id FROM product_assets a JOIN products p ON p.tenant=$1 AND p.id=a.product_id WHERE a.tenant=$2 AND a.id=$3 FOR SHARE OF p", live, stage, id).fetch_optional(&mut **tx).await?;
+    let product = catalog::asset_product(tx, live, stage, id).await?;
     if product.is_none() {
         return Err(conflict("Publish this asset together with its product"));
     }
-    sqlx::query!("INSERT INTO product_assets(tenant,id,product_id,title,filename,mime,kind,public,content,digest) SELECT $1,id,product_id,title,filename,mime,kind,public,content,digest FROM product_assets WHERE tenant=$2 AND id=$3 ON CONFLICT(tenant,id) DO UPDATE SET public=EXCLUDED.public,title=EXCLUDED.title", live, stage, id).execute(&mut **tx).await?;
+    catalog::publish_asset(tx, live, stage, id).await?;
     Ok(())
 }
 
 /// A selected product must not publish an image URL whose private bytes were omitted from the same release.
 pub async fn validate_product_media(tx: &mut Tx<'_>, live: &str, keys: &[String]) -> Result<()> {
     for id in keys.iter().filter_map(|s| s.strip_prefix("product:")) {
-        let media: Value = sqlx::query_scalar!(
-            "SELECT media FROM products WHERE tenant=$1 AND id=$2",
-            live,
-            id
-        )
-        .fetch_one(&mut **tx)
-        .await?;
+        let media = catalog::product_media(tx, live, id).await?;
         for item in media
             .as_array()
             .ok_or(bad("Product media must be an array"))?
@@ -55,9 +50,7 @@ pub async fn validate_product_media(tx: &mut Tx<'_>, live: &str, keys: &[String]
                 .strip_prefix("/store-api/assets/")
                 .filter(|s| !s.is_empty() && s.len() <= 100)
                 .ok_or(bad("Invalid local asset identity"))?;
-            let exists: Option<bool> = sqlx::query_scalar!(r#"SELECT true AS "found!" FROM product_assets WHERE tenant=$1 AND id=$2 AND public AND kind='attachment' FOR SHARE"#, live, asset)
-            .fetch_optional(&mut **tx)
-            .await?;
+            let exists = catalog::public_attachment(tx, live, asset).await?;
             if exists != Some(true) {
                 return Err(conflict(&format!(
                     "Product {id} needs its image asset {asset}; include that asset in this release"

@@ -1,6 +1,7 @@
 //! Facts beside the intelligence component's own data: products (existence, intake identity, images, texts, stock), customers, carts, sandboxes, scenario runs, knowledge sources, hypotheses and legal acknowledgements. Columns checked at compile time where the row is not handed to another component.
 use serde_json::Value;
 use sqlx::PgExecutor;
+pub use veyndo_checkout::store::cart_signals::CartState;
 use veyndo_core::Result;
 
 /// Whether the entity a native view names exists in the shop; None for a view without entity references.
@@ -59,8 +60,7 @@ pub async fn owned_image(
     tenant: &str,
     id: &str,
 ) -> Result<Option<Vec<u8>>> {
-    Ok(sqlx::query_scalar!("SELECT content FROM product_assets WHERE tenant=$1 AND id=$2 AND mime IN ('image/png','image/jpeg','image/webp') AND octet_length(content)<=8388608",
-        tenant, id).fetch_optional(e).await?)
+    veyndo_catalog::store::intelligence_reads::owned_image(e, tenant, id).await
 }
 
 /// The name and description of a product.
@@ -105,9 +105,7 @@ pub async fn accept_legal(
     cart: &str,
     data: &Value,
 ) -> Result<()> {
-    sqlx::query!("INSERT INTO legal_acceptances(tenant,cart_id,data) VALUES($1,$2,$3) ON CONFLICT(tenant,cart_id) DO UPDATE SET data=EXCLUDED.data",
-        tenant, cart, data).execute(e).await?;
-    Ok(())
+    veyndo_shop::store::consent_log::accept_legal(e, tenant, cart, data).await
 }
 
 /// A product as the catalog maps it, with its parent.
@@ -164,22 +162,9 @@ pub async fn customer_by_email(
     .await?)
 }
 
-/// The stored cart document and status.
-pub struct CartState {
-    pub data: Value,
-    pub status: String,
-}
-
 /// The stored cart, row-locked.
 pub async fn cart_locked(e: impl PgExecutor<'_>, tenant: &str, id: &str) -> Result<CartState> {
-    Ok(sqlx::query_as!(
-        CartState,
-        "SELECT data,status FROM carts WHERE tenant=$1 AND id=$2 FOR UPDATE",
-        tenant,
-        id
-    )
-    .fetch_one(e)
-    .await?)
+    veyndo_checkout::store::cart_signals::cart_locked(e, tenant, id).await
 }
 
 /// Whether the shop is a private sandbox (an environment without a preview owner).
