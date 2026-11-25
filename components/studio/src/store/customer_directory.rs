@@ -1,10 +1,10 @@
 //! SQL of the merchant CRM directory: one keyset page of customer contacts with optional filters and app extension predicates.
-use serde_json::{Value, json};
-use sqlx::postgres::PgRow;
+use serde_json::Value;
 use veyndo_app_model::Object;
 use veyndo_app_platform::domain::extension_filter::Filter;
 use veyndo_app_platform::store::extension_filter::predicate;
 use veyndo_core::{Result, State, bad};
+use veyndo_customers::store::customers::Customer;
 use veyndo_orders::types::list_criteria::Criteria;
 
 /// One page (`n + 1` rows) of contacts; the default email order without filters takes the plain prepared query.
@@ -74,27 +74,12 @@ pub async fn page(
     )
 }
 
-/// The full customer row with its creation time, decoded by the customers' shared row mapper.
-pub async fn customer(a: &State, t: &str, email: &str) -> Result<Option<PgRow>> {
-    // dynamic SQL: the whole row is decoded by the customers' shared `customer(&PgRow)` mapper.
-    Ok(sqlx::query(
-        "SELECT *,created_at::text AS created FROM customers WHERE tenant=$1 AND email=$2",
-    )
-    .bind(t)
-    .bind(email)
-    .fetch_optional(&a.db)
-    .await?)
+/// A customer by email with its creation time; `None` for a guest.
+pub async fn customer(a: &State, t: &str, email: &str) -> Result<Option<Customer>> {
+    veyndo_customers::store::manual_orders::find_by_email(a, t, email).await
 }
 
 /// The customer's 100 most recent orders (without cart tokens), each with `createdAt`.
 pub async fn orders(a: &State, t: &str, email: &str) -> Result<Vec<Value>> {
-    let rows=sqlx::query!(r#"SELECT o.data #- '{cart,token}' AS "data!",o.created_at::text AS "created!" FROM orders o JOIN carts c ON c.id=o.cart_id AND c.tenant=o.tenant WHERE o.tenant=$1 AND ((o.data->'orderCustomer'->>'customerId')=(SELECT id FROM customers WHERE tenant=o.tenant AND email=$2) OR (o.data->'orderCustomer'->>'guest'='true' AND o.data->'orderCustomer'->>'email'=$2) OR (NOT o.data ? 'orderCustomer' AND c.data->>'email'=$2)) ORDER BY o.created_at DESC LIMIT 100"#, t, email).fetch_all(&a.db).await?;
-    Ok(rows
-        .into_iter()
-        .map(|r| {
-            let mut o = r.data;
-            o["createdAt"] = json!(r.created);
-            o
-        })
-        .collect())
+    veyndo_customers::store::manual_orders::orders(a, t, email).await
 }

@@ -5,14 +5,12 @@ use veyndo_core::Result;
 
 /// Whether the flow job is still running under an unexpired lease, row-locked; None when the job is gone.
 pub async fn lease_held(e: impl PgExecutor<'_>, tenant: &str, job: &str) -> Result<Option<bool>> {
-    Ok(sqlx::query_scalar!(r#"WITH held AS MATERIALIZED (SELECT state,lease_until FROM flow_jobs WHERE tenant=$1 AND id=$2 FOR UPDATE) SELECT state='running' AND lease_until>clock_timestamp() AS "held!" FROM held"#,
-        tenant, job).fetch_optional(e).await?)
+    veyndo_marketing::store::flow_proposal_reads::lease_held(e, tenant, job).await
 }
 
 /// Proposals the job's flow created today (UTC).
 pub async fn flow_proposals_today(e: impl PgExecutor<'_>, tenant: &str, job: &str) -> Result<i64> {
-    Ok(sqlx::query_scalar!(r#"SELECT count(*) AS "count!" FROM tasks task JOIN flow_jobs source ON source.tenant=task.tenant AND source.id=task.run_request->>'sourceJobId' WHERE task.tenant=$1 AND source.flow=(SELECT flow FROM flow_jobs WHERE tenant=$1 AND id=$2) AND task.created_at>=date_trunc('day',now() AT TIME ZONE 'UTC') AT TIME ZONE 'UTC'"#,
-        tenant, job).fetch_one(e).await?)
+    veyndo_marketing::store::flow_proposal_reads::flow_proposals_today(e, tenant, job).await
 }
 
 /// Template proposals of the shop created today (UTC).

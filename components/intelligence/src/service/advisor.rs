@@ -5,7 +5,7 @@ use crate::store::context_products::localized_products;
 use crate::store::observations::public_pairs;
 use serde::Deserialize;
 use serde_json::{Value, json};
-use veyndo_core::document::view;
+use veyndo_core::document::{merge, view};
 use veyndo_core::shop_scope::tenant;
 use veyndo_core::{RequestContext, Result, State, conflict};
 use veyndo_marketing::service::channels::filter_channel;
@@ -32,10 +32,11 @@ pub async fn graph(a: &State, h: &RequestContext, ps: &[Product]) -> Result<Valu
             ps.iter().any(|p| e.left == p.id) && ps.iter().any(|p| e.right == p.id)
         });
     }
-    graph["observedPairs"] = pairs;
-    graph["facts"] = json!(
-        "Curated product relationships and merchant-approved observed associations; no causal effect proven"
-    );
+    merge(&mut graph, json!({ "observedPairs": pairs }))?;
+    merge(
+        &mut graph,
+        json!({ "facts": "Curated product relationships and merchant-approved observed associations; no causal effect proven" }),
+    )?;
     Ok(graph)
 }
 

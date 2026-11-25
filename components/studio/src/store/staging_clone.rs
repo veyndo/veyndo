@@ -5,12 +5,7 @@ use veyndo_core::Result;
 
 /// Manifests of the live shop's active apps, by ID.
 pub async fn active_manifests(tx: &mut Tx<'_>, t: &str) -> Result<Vec<Value>> {
-    Ok(sqlx::query_scalar!(
-        "SELECT manifest FROM app_packages WHERE tenant=$1 AND active ORDER BY id",
-        t
-    )
-    .fetch_all(&mut **tx)
-    .await?)
+    veyndo_app_platform::store::staging::active_manifests(tx, t).await
 }
 
 /// Scopes app record row-level security to a shop for the rest of the transaction.
@@ -47,99 +42,36 @@ pub async fn insert_environment(
     name: &str,
     baseline: &Value,
 ) -> Result<()> {
-    sqlx::query!("INSERT INTO tenants(id,name) VALUES($1,$2)", id, name)
-        .execute(&mut **tx)
-        .await?;
+    veyndo_core::store::sandbox::insert_shop(tx, id, name).await?;
     veyndo_core::store::environments_write::register(tx, id, live, name, baseline).await
 }
 
 /// Copies the live catalogue (products, translations, assets, categories) into the sandbox.
 pub async fn copy_catalog(tx: &mut Tx<'_>, t: &str, id: &str) -> Result<()> {
-    sqlx::query!("INSERT INTO products SELECT (jsonb_populate_record(NULL::products,to_jsonb(p)||jsonb_build_object('tenant',$2::text))).* FROM products p WHERE tenant=$1", t, id).execute(&mut **tx).await?;
-    sqlx::query!("INSERT INTO product_translations SELECT $2,product_id,language_id,name,description FROM product_translations WHERE tenant=$1", t, id).execute(&mut **tx).await?;
-    sqlx::query!("INSERT INTO product_assets SELECT (jsonb_populate_record(NULL::product_assets,to_jsonb(a)||jsonb_build_object('tenant',$2::text))).* FROM product_assets a WHERE tenant=$1", t, id).execute(&mut **tx).await?;
-    sqlx::query!("INSERT INTO categories SELECT $2,id,parent_id,position,data,revision FROM categories WHERE tenant=$1", t, id).execute(&mut **tx).await?;
-    sqlx::query!("INSERT INTO product_categories SELECT $2,product_id,category_id FROM product_categories WHERE tenant=$1", t, id).execute(&mut **tx).await?;
-    Ok(())
+    veyndo_catalog::store::staging::copy_catalog(tx, t, id).await
 }
 
 /// Copies settings, experience, receipts and the order workflow; app payment methods are dropped.
 pub async fn copy_settings(tx: &mut Tx<'_>, t: &str, id: &str) -> Result<()> {
-    sqlx::query!(
-        "INSERT INTO commerce_settings(tenant,data) SELECT $2,data FROM commerce_settings WHERE tenant=$1",
-        t,
-        id
-    )
-    .execute(&mut **tx)
-    .await?;
-    sqlx::query!(
-        "INSERT INTO experiences(tenant,data) SELECT $2,data FROM experiences WHERE tenant=$1",
-        t,
-        id
-    )
-    .execute(&mut **tx)
-    .await?;
-    sqlx::query!(
-        "INSERT INTO receipt_settings(tenant,data) SELECT $2,data FROM receipt_settings WHERE tenant=$1",
-        t,
-        id
-    )
-    .execute(&mut **tx)
-    .await?;
-    sqlx::query!("INSERT INTO order_state_machines(tenant,data) SELECT $2,data FROM order_state_machines WHERE tenant=$1", t, id).execute(&mut **tx).await?;
+    veyndo_shop::store::staging::copy_settings(tx, t, id).await?;
+    veyndo_intelligence::store::staging::copy_experience(tx, t, id).await?;
+    veyndo_orders::store::staging::copy_receipts_and_workflow(tx, t, id).await?;
     // No external services or PSP configurations are registered for a sandbox tenant.
-    sqlx::query!("UPDATE commerce_settings SET data=jsonb_set(data,'{payments}',COALESCE((SELECT jsonb_agg(p) FROM jsonb_array_elements(data->'payments') p WHERE p->>'mode'<>'app'),'[]')) WHERE tenant=$1", id).execute(&mut **tx).await?;
-    sqlx::query!(
-        "INSERT INTO commerce_promotions(tenant,id,data) SELECT $2,id,data FROM commerce_promotions WHERE tenant=$1",
-        t,
-        id
-    )
-    .execute(&mut **tx)
-    .await?;
-    sqlx::query!(
-        "INSERT INTO commerce_flows(tenant,id,data) SELECT $2,id,data FROM commerce_flows WHERE tenant=$1",
-        t,
-        id
-    )
-    .execute(&mut **tx)
-    .await?;
-    sqlx::query!(
-        "INSERT INTO sales_channels(tenant,id,data) SELECT $2,id,data FROM sales_channels WHERE tenant=$1",
-        t,
-        id
-    )
-    .execute(&mut **tx)
-    .await?;
-    Ok(())
+    veyndo_shop::store::staging::drop_app_payments(tx, id).await?;
+    veyndo_marketing::store::staging::copy_promotions_flows_channels(tx, t, id).await
 }
 
 /// The sandbox's discovery/comparison policies and its company-limit extension.
 pub async fn insert_defaults(tx: &mut Tx<'_>, id: &str, wat: &str, digest: &str) -> Result<()> {
-    sqlx::query!(
-        "INSERT INTO policy(tenant,variant) VALUES($1,'discovery'),($1,'comparison')",
-        id
-    )
-    .execute(&mut **tx)
-    .await?;
-    sqlx::query!(
-        "INSERT INTO extensions(tenant,wat,digest) VALUES($1,$2,$3)",
-        id,
-        wat,
-        digest
-    )
-    .execute(&mut **tx)
-    .await?;
-    Ok(())
+    veyndo_intelligence::store::staging::insert_policies(tx, id).await?;
+    veyndo_app_platform::store::staging::insert_extension(tx, id, wat, digest).await
 }
 
 /// Copies rules, channel visibility, company logos/overrides and channel overrides.
 pub async fn copy_channel_configuration(tx: &mut Tx<'_>, t: &str, id: &str) -> Result<()> {
-    sqlx::query!("INSERT INTO commerce_rules(tenant,id,name,condition,active) SELECT $2,id,name,condition,active FROM commerce_rules WHERE tenant=$1", t, id).execute(&mut **tx).await?;
-    sqlx::query!("INSERT INTO product_channel_visibility SELECT $2,product_id,channel_id,visible FROM product_channel_visibility WHERE tenant=$1", t, id).execute(&mut **tx).await?;
-    sqlx::query!("INSERT INTO company_logos(tenant,id,content,digest,mime,width,height) SELECT $2,id,content,digest,mime,width,height FROM company_logos WHERE tenant=$1", t, id).execute(&mut **tx).await?;
-    sqlx::query!("INSERT INTO company_overrides(tenant,channel_id,data) SELECT $2,channel_id,data FROM company_overrides WHERE tenant=$1", t, id).execute(&mut **tx).await?;
-    sqlx::query!("INSERT INTO commerce_overrides(tenant,channel_id,data) SELECT $2,channel_id,data FROM commerce_overrides WHERE tenant=$1", t, id).execute(&mut **tx).await?;
-    Ok(())
+    veyndo_marketing::store::staging::copy_rules(tx, t, id).await?;
+    veyndo_catalog::store::staging::copy_channel_visibility(tx, t, id).await?;
+    veyndo_shop::store::staging::copy_company_and_overrides(tx, t, id).await
 }
 
 /// Replaces the environment's baseline.

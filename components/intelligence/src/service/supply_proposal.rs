@@ -8,7 +8,7 @@ use serde::Deserialize;
 use serde_json::{Value, json};
 use veyndo_checkout::http::handoff;
 use veyndo_checkout::store::cart_create::new_cart_context;
-use veyndo_core::document::{lenient, lenient_list, view};
+use veyndo_core::document::{lenient, lenient_list, merge, view};
 use veyndo_core::shop_scope::header;
 use veyndo_core::{RequestContext, Result, State, bad, conflict, uid};
 use veyndo_identity::{merchant, permit};
@@ -101,13 +101,16 @@ pub async fn propose(a: &State, carts: &dyn Carts, h: &RequestContext) -> Result
                     .as_deref()
                     .and_then(|v| v.parse::<u64>().ok());
                 let same = terms.currency.as_deref() == Some(currency.as_str());
-                line["offer"] = found;
-                line["sameCurrency"] = json!(same);
-                line["withinCeiling"] = json!(reorder::within_ceiling(same, total, ceiling));
+                merge(
+                    &mut line,
+                    json!({"offer":found,"sameCurrency":same,"withinCeiling":reorder::within_ceiling(same, total, ceiling)}),
+                )?;
             }
             Err(e) => {
-                line["error"] = json!("supplier_refused");
-                line["detail"] = json!(e.1.chars().take(200).collect::<String>());
+                merge(
+                    &mut line,
+                    json!({"error":"supplier_refused","detail":e.1.chars().take(200).collect::<String>()}),
+                )?;
             }
         }
         lines.push(line);

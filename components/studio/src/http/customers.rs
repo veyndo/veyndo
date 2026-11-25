@@ -8,7 +8,7 @@ use serde_json::{Value, json};
 use veyndo_app_model::Object;
 use veyndo_app_platform::store::extension_filter::admit as admit_filters;
 use veyndo_app_platform::store::extension_projection::attach;
-use veyndo_core::document::view;
+use veyndo_core::document::{merge, view};
 use veyndo_core::{RequestContext, Result, State};
 use veyndo_customers::service::address_entries::address_list;
 use veyndo_customers::service::directory::{decorate, guest};
@@ -37,8 +37,8 @@ pub async fn list(
     ))
 }
 /// The native customer projection of a row.
-fn value(r: &sqlx::postgres::PgRow) -> Value {
-    json!(veyndo_customers::store::customers::customer(r))
+fn value(r: &veyndo_customers::store::customers::Customer) -> Value {
+    json!(r)
 }
 /// One customer with addresses, orders and app extensions.
 pub async fn detail(
@@ -53,13 +53,19 @@ pub async fn detail(
     let mut v = if let Some(r) = r {
         let mut v = value(&r);
         decorate(&a, &t, &email, &mut v).await?;
-        v["addresses"] = address_list(&a, &t, &email).await?;
+        merge(
+            &mut v,
+            json!({ "addresses": address_list(&a, &t, &email).await? }),
+        )?;
         v
     } else {
         guest(&a, &t, &email).await?
     };
     if permit(&h, "orders.read").is_ok() {
-        v["orders"] = json!(directory::orders(&a, &t, &email).await?);
+        merge(
+            &mut v,
+            json!({ "orders": directory::orders(&a, &t, &email).await? }),
+        )?;
     }
     attach(&a, &h, Object::Customer, std::slice::from_mut(&mut v)).await?;
     Ok(Json(v))

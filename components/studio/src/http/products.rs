@@ -11,7 +11,7 @@ use veyndo_catalog::ports::Catalog;
 use veyndo_catalog::service::catalog_reads::localize;
 use veyndo_catalog::store::{media_jobs, product_list, translations};
 use veyndo_catalog::types::product_list::ProductCriteria;
-use veyndo_core::document::view;
+use veyndo_core::document::{merge, view};
 use veyndo_core::{RequestContext, Result, State};
 use veyndo_identity::{merchant, permit};
 use veyndo_shop::service::language::language_context;
@@ -61,10 +61,10 @@ pub async fn list_products(
     let mut elements = vec![];
     for (l, p) in listed.iter().zip(translated.iter()) {
         let mut v = json!(p);
-        v["active"] = json!(l.active);
-        v["productNumber"] = json!(l.product_number);
-        v["variantCount"] = json!(l.variant_count);
-        v["categoryIds"] = json!(l.category_ids);
+        merge(&mut v, json!({ "active": l.active }))?;
+        merge(&mut v, json!({ "productNumber": l.product_number }))?;
+        merge(&mut v, json!({ "variantCount": l.variant_count }))?;
+        merge(&mut v, json!({ "categoryIds": l.category_ids }))?;
         elements.push(v);
     }
     attach(a, &h, Object::Product, &mut elements).await?;
@@ -118,10 +118,13 @@ async fn preparation(
             )
         };
         let job = jobs.iter().find(|job| job.product_id == id);
-        product["preparation"] = json!({
+        merge(
+            product,
+            json!({ "preparation": {
             "namedLocales":locales(false),"describedLocales":locales(true),
             "locales":settings.locales,"mainLocale":settings.main_locale,"imageJob":job
-        });
+        } }),
+        )?;
     }
     Ok(())
 }

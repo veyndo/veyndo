@@ -14,7 +14,7 @@
 ), channels AS (
  SELECT channel,kind,count(*) AS orders,sum(amount)::text AS revenue,sum(refunds)::text AS refunds
  FROM scoped WHERE created_at>=($3::date::timestamp AT TIME ZONE $6) GROUP BY channel,kind ORDER BY sum(amount) DESC,channel LIMIT 100
-), products AS (
+), product_sales AS (
  SELECT coalesce(l->>'referencedId',l->>'id') AS id,min(l->>'label') AS name,sum((l->>'quantity')::bigint)::text AS quantity,
  sum(coalesce((l#>>'{price,totalPrice}')::numeric,0))::text AS revenue,count(DISTINCT s.id) AS orders
  FROM scoped s CROSS JOIN LATERAL jsonb_array_elements(coalesce(s.data#>'{cart,lineItems}','[]')) l
@@ -24,4 +24,4 @@
 SELECT jsonb_build_object('currencyScale',(SELECT max(scale) FROM scoped),'totals',coalesce((SELECT jsonb_agg(to_jsonb(t)) FROM totals t),'[]'),
  'trend',coalesce((SELECT jsonb_agg(to_jsonb(t)) FROM trend t),'[]'),
  'channels',coalesce((SELECT jsonb_agg(to_jsonb(t)) FROM channels t),'[]'),
- 'products',coalesce((SELECT jsonb_agg(to_jsonb(t)) FROM products t),'[]'))
+ 'products',coalesce((SELECT jsonb_agg(to_jsonb(t)) FROM product_sales t),'[]'))

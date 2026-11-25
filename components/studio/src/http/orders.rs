@@ -8,7 +8,7 @@ use veyndo_app_model::Object;
 use veyndo_app_platform::domain::native_lifecycle::order_machine;
 use veyndo_app_platform::store::extension_filter::{admit as admit_filters, predicate};
 use veyndo_app_platform::store::extension_projection::attach;
-use veyndo_core::document::view;
+use veyndo_core::document::{merge, view};
 use veyndo_core::{RequestContext, Result, State};
 use veyndo_identity::{merchant, permit};
 use veyndo_orders::domain::order_fields::order_fields;
@@ -45,11 +45,17 @@ pub async fn list(
         .map(|r| {
             let mut o: Value = r.get("data");
             order_fields(&mut o);
-            o["createdAt"] = json!(r.get::<String, _>("created"));
-            o["customerEmail"] = json!(r.get::<Option<String>, _>("email"));
-            o
+            merge(
+                &mut o,
+                json!({ "createdAt": r.get::<String, _>("created") }),
+            )?;
+            merge(
+                &mut o,
+                json!({ "customerEmail": r.get::<Option<String>, _>("email") }),
+            )?;
+            Ok(o)
         })
-        .collect::<Vec<_>>();
+        .collect::<Result<Vec<_>>>()?;
     attach(&a, &h, Object::Order, &mut elements).await?;
     let after = elements.last().map(|v| view::<IdValue>(v).id);
     Ok(Json(
@@ -68,7 +74,8 @@ pub async fn detail(
     let mut v = order_reads::detail(&a, &t, &id).await?;
     let (machine, revision) = machine(&a.db, &t).await?;
     let (machine, revision) = order_machine(&v, machine, revision)?;
-    v["workflow"] = workflow(&v, &machine, revision, &h);
+    let workflow = workflow(&v, &machine, revision, &h);
+    merge(&mut v, json!({ "workflow": workflow }))?;
     attach(&a, &h, Object::Order, std::slice::from_mut(&mut v)).await?;
     Ok(Json(v))
 }

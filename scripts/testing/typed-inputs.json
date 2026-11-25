@@ -37,16 +37,6 @@
       "file": "components/payments/src/store/refund_receipts.rs",
       "function": "apply",
       "category": "attempt-context"
-    },
-    {
-      "file": "components/studio/src/domain/product_restore.rs",
-      "function": "edit",
-      "category": "in-place-edit"
-    },
-    {
-      "file": "components/studio/src/service/staging/final_config.rs",
-      "function": "validate",
-      "category": "keyed-lookup"
     }
   ]
 }

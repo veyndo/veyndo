@@ -1,0 +1,30 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id FROM tasks WHERE tenant=$1 AND run_actor=$2 AND run_state IN ('failed','uncertain') AND run_scopes <@ $3 ORDER BY run_updated DESC LIMIT 3",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "tasks",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Jsonb"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "9d8c6a0fb432decbbfec0a3b515202c87082d4646c1e1484b5475d79638a0122"
+}

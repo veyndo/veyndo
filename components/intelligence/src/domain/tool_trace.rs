@@ -1,5 +1,5 @@
 //! Conversation attachments come only from the server's executed tool trace, never from model prose or record claims.
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 use veyndo_core::document::{lenient, view};
 
@@ -11,6 +11,24 @@ struct TraceEntry {
     app_view: Option<String>,
     input: Value,
     result: Value,
+}
+
+/// A conversation attachment: the app view a read returned, its arguments and, for a live answer, its result.
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct Attachment {
+    attachment_id: usize,
+    resource_uri: String,
+    arguments: Value,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    result: Option<StructuredResult>,
+}
+
+/// An app tool result as the conversation view consumes it.
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct StructuredResult {
+    structured_content: Value,
 }
 
 /// Only the server's executed tool trace can produce a conversation attachment.
@@ -30,15 +48,14 @@ fn attachment_views(trace: &[Value], include_result: bool) -> Vec<Value> {
         .rev()
         .filter_map(|(index, entry)| {
             let entry = view::<TraceEntry>(entry);
-            let mut attachment = json!({
-                "attachmentId":index,
-                "resourceUri":entry.app_view?,
-                "arguments":entry.input,
-            });
-            if include_result {
-                attachment["result"] = json!({"structuredContent":entry.result});
-            }
-            Some(attachment)
+            Some(json!(Attachment {
+                attachment_id: index,
+                resource_uri: entry.app_view?,
+                arguments: entry.input,
+                result: include_result.then_some(StructuredResult {
+                    structured_content: entry.result,
+                }),
+            }))
         })
         .take(3)
         .collect()
@@ -61,5 +78,17 @@ mod tests {
         assert_eq!(references.len(), 3);
         assert!(references[0].get("result").is_none());
         assert!(attachments(&[json!({"input": {}})]).is_empty());
+    }
+    #[test]
+    fn attachments_keep_the_indexed_shape() {
+        let trace = vec![json!({"appView": "ui://a", "input": {"q": 1}, "result": {"x": [1]}})];
+        let mut old = json!({"attachmentId": 0, "resourceUri": "ui://a", "arguments": {"q": 1}});
+        let reference = old.clone();
+        old["result"] = json!({"structuredContent": {"x": [1]}});
+        assert_eq!(attachments(&trace)[0].to_string(), old.to_string());
+        assert_eq!(
+            attachment_references(&trace)[0].to_string(),
+            reference.to_string()
+        );
     }
 }

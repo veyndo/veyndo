@@ -7,7 +7,7 @@ use axum::extract::{Path, State as Shared};
 use serde::Deserialize;
 use serde_json::{Value, json};
 use veyndo_checkout::store::cart_load::load as load_cart;
-use veyndo_core::document::{lenient, view};
+use veyndo_core::document::{lenient, merge, view};
 use veyndo_core::{RequestContext, Result, State, bad, conflict};
 use veyndo_identity::{merchant, permit};
 use veyndo_marketing::service::conditions::validate_condition;
@@ -43,8 +43,11 @@ pub async fn accept(
     }
     let mut data = json!({"policyVersion":v.policy_version,"terms":v.terms,"digitalImmediate":v.digital_immediate,"locale":c.data.locale,"recordedAt":chrono::Utc::now().to_rfc3339()});
     if let Some(actor) = &h.admin_order {
-        data["source"] = json!("merchantRecordedCustomerAcknowledgement");
-        data["actor"] = json!(actor);
+        merge(
+            &mut data,
+            json!({ "source": "merchantRecordedCustomerAcknowledgement" }),
+        )?;
+        merge(&mut data, json!({ "actor": actor }))?;
     }
     accept_legal(&mut *tx, &c.tenant, &c.id, &data).await?;
     fence_commit(&a, &mut tx).await?;

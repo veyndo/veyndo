@@ -2,6 +2,7 @@
 pub mod access_snapshot;
 pub mod app_frontends;
 pub mod app_languages;
+pub mod consent_log;
 pub mod consumer_requests;
 pub mod group_usage;
 pub mod languages;
@@ -13,3 +14,5 @@ pub mod provisioning;
 pub mod references;
 pub mod settings;
 pub mod settings_view;
+pub mod staging;
+pub mod workspace;

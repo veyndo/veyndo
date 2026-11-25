@@ -16,7 +16,7 @@ use veyndo_core::RequestContext;
 use veyndo_core::Result;
 use veyndo_core::bad;
 use veyndo_core::conflict;
-use veyndo_core::document::{lenient, view};
+use veyndo_core::document::{lenient, merge, view};
 use veyndo_core::hash;
 use veyndo_core::model_contract::validate_native;
 use veyndo_shop::service::read_cache::settings as scoped_config;
@@ -72,10 +72,10 @@ fn record(
     step: &mut Value,
     action: &ShopperAction,
     result: Result<Value>,
-) -> bool {
-    match result {
+) -> Result<bool> {
+    Ok(match result {
         Ok(value) => {
-            step["observation"] = value.clone();
+            merge(step, json!({ "observation": value.clone() }))?;
             match action.action.as_deref() {
                 Some("search") => {
                     for product in value.as_array().into_iter().flatten() {
@@ -104,11 +104,14 @@ fn record(
             }
         }
         Err(error) => {
-            step["error"] = json!({"status":error.0.as_u16(),"detail":error.1.chars().take(300).collect::<String>()});
+            merge(
+                step,
+                json!({ "error": {"status":error.0.as_u16(),"detail":error.1.chars().take(300).collect::<String>()} }),
+            )?;
             state.outcome = "blocked".into();
             true
         }
-    }
+    })
 }
 pub async fn execute<H: AgentHost>(
     host: &H,
@@ -132,14 +135,18 @@ pub async fn execute<H: AgentHost>(
         .as_object_mut()
         .ok_or(bad("Invalid customer profile"))?
         .remove("budgetMinor");
-    customer["budgetAmount"] = json!(
-        veyndo_pricing::money::Money::new(
+    merge(
+        &mut customer,
+        json!({ "budgetAmount": veyndo_pricing::money::Money::new(
             view::<Profile>(profile).budget_minor.unwrap_or(0),
             currency,
         )
-        .decimal()
-    );
-    customer["budgetCurrency"] = req.scenario.currency.clone();
+        .decimal() }),
+    )?;
+    merge(
+        &mut customer,
+        json!({ "budgetCurrency": req.scenario.currency.clone() }),
+    )?;
     let choice = choice(request)?;
     let mut state = if let Some(saved) = checkpoint::load(host, "scenario-state").await? {
         JourneyState::load(saved)?
@@ -225,7 +232,7 @@ pub async fn execute<H: AgentHost>(
         // Do not publish late evidence after cancellation or a permission change.
         checkpoint::authorize(host).await?;
         let mut step = json!({"index":index,"action":action.action,"reason":action.reason,"model":output.model,"provider":output.provider});
-        let done = record(&mut state, &mut step, &action, result);
+        let done = record(&mut state, &mut step, &action, result)?;
         state.steps.push(step);
         checkpoint::save(host, "scenario-state", &json!(state)).await?;
         if done {
@@ -370,12 +377,15 @@ mod tests {
         let mut state = fresh();
         let mut step = json!({});
         let found = json!([{"id":"p1","name":"Lamp 2"},{"id":"p2"},"odd"]);
-        assert!(!record(
-            &mut state,
-            &mut step,
-            &action(json!({"action":"search"})),
-            Ok(found.clone())
-        ));
+        assert!(
+            !record(
+                &mut state,
+                &mut step,
+                &action(json!({"action":"search"})),
+                Ok(found.clone())
+            )
+            .unwrap()
+        );
         assert_eq!(
             state.products,
             vec![
@@ -386,23 +396,29 @@ mod tests {
         );
         assert_eq!(step["observation"], found);
         assert!(state.knows("p2") && !state.knows("p3"));
-        assert!(record(
-            &mut state,
-            &mut step,
-            &action(json!({"action":"checkout"})),
-            Ok(json!({"orderId":"o1","totalMinor":1200}))
-        ));
+        assert!(
+            record(
+                &mut state,
+                &mut step,
+                &action(json!({"action":"checkout"})),
+                Ok(json!({"orderId":"o1","totalMinor":1200}))
+            )
+            .unwrap()
+        );
         assert_eq!(
             (state.outcome.as_str(), &state.order_id, &state.total_minor),
             ("purchased", &json!("o1"), &json!(1200))
         );
         let mut blocked = fresh();
-        assert!(record(
-            &mut blocked,
-            &mut step,
-            &action(json!({"action":7})),
-            Err(Error(StatusCode::CONFLICT, "stop".into()))
-        ));
+        assert!(
+            record(
+                &mut blocked,
+                &mut step,
+                &action(json!({"action":7})),
+                Err(Error(StatusCode::CONFLICT, "stop".into()))
+            )
+            .unwrap()
+        );
         assert_eq!(blocked.outcome, "blocked");
         assert_eq!(step["error"], json!({"status":409,"detail":"stop"}));
     }

@@ -38,6 +38,6 @@ pub(super) async fn restore(
         &id,
         &settings.locales,
         &settings.main_locale,
-    );
+    )?;
     commerce::edit_product(State(a.core.clone()), h, Path(id), Json(current)).await
 }

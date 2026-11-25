@@ -515,8 +515,7 @@ pub async fn inventory(
     } else {
         Value::Null
     };
-    let activity=sqlx::query_scalar!(r#"SELECT jsonb_build_object('id',id,'kind',kind,'time',created_at,'sourceId',data->'documentId','hypothesisId',data->'hypothesisId') AS "event!" FROM outbox WHERE tenant=$1 AND (kind LIKE 'knowledge.%' OR kind LIKE 'intelligence.%' OR kind='merchant.change.applied') ORDER BY id DESC LIMIT 20"#,
-        t).fetch_all(&a.db).await?;
+    let activity = veyndo_core::store::outbox_activity::knowledge(a, t).await?;
     Ok((totals, rows, next, activity))
 }
 

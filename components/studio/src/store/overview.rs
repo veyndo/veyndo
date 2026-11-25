@@ -65,9 +65,7 @@ fn totals(amounts: &[Value]) -> (Option<f64>, Option<Value>) {
 
 /// The overview facts of a shop: summary, timeline and experiment variants.
 pub async fn load(a: &State, tenant: &str) -> Result<Value> {
-    let facts: Value = sqlx::query_file_scalar!("src/store/overview.sql", tenant)
-        .fetch_one(&a.db)
-        .await?;
+    let facts = veyndo_intelligence::store::overview::facts(a, tenant).await?;
     let mut facts: Facts = serde_json::from_value(facts).expect("SQL overview document");
     let (total, currency) = totals(&facts.revenue);
     facts.summary.insert("revenue".into(), json!(total));

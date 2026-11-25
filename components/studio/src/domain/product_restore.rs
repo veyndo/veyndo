@@ -1,7 +1,8 @@
 //! Rebuilds a product edit from a recorded version; stock stays current and associations pass the normal product admission afterwards.
 use serde::Deserialize;
 use serde_json::{Map, Value, json};
-use veyndo_core::document::{lenient, lenient_list, view};
+use veyndo_core::Result;
+use veyndo_core::document::{lenient, lenient_list, merge, view};
 
 /// The recorded product columns a restoration reads.
 #[derive(Deserialize, Default)]
@@ -100,20 +101,31 @@ fn editor_key<'a>(locale: &'a str, locales: &[String]) -> &'a str {
 }
 
 /// Writes a recorded version over the current editor document. The stock quantity is removed, so a restoration never replays one.
-pub fn edit(current: &mut Value, state: &Value, id: &str, locales: &[String], main: &str) {
+pub fn edit(
+    current: &mut Value,
+    state: &Value,
+    id: &str,
+    locales: &[String],
+    main: &str,
+) -> Result<()> {
     let version: Version = view(state);
     let editor: Editor = view(current);
     let r = version.record;
-    let catalog = json!({"active":r.active,"productNumber":r.product_number.as_str().unwrap_or(id),"parentId":r.parent_id,"options":r.options,"categoryIds":version.categories});
+    let mut catalog = json!({"active":r.active,"productNumber":r.product_number.as_str().unwrap_or(id),"parentId":r.parent_id,"options":r.options,"categoryIds":version.categories});
     let main_fallback = json!({"name":r.name,"description":r.description});
-    current["extra"] = r.extra.clone();
-    for (key, value) in r.commerce() {
-        current["commerce"][key] = value;
-    }
-    if let Some(commerce) = current["commerce"].as_object_mut() {
+    let extra = r.extra.clone();
+    let mut commerce = current.get("commerce").cloned().unwrap_or(Value::Null);
+    merge(
+        &mut commerce,
+        r.commerce()
+            .into_iter()
+            .map(|(key, value)| (key.to_owned(), value))
+            .collect::<Map<_, _>>(),
+    )?;
+    if let Some(commerce) = commerce.as_object_mut() {
         commerce.remove("stock");
     }
-    let mut tr = json!({});
+    let mut tr = Map::new();
     for locale in locales {
         let key = editor_key(locale, locales);
         let mut value = version
@@ -127,9 +139,8 @@ pub fn edit(current: &mut Value, state: &Value, id: &str, locales: &[String], ma
         if locale == main && view::<Translation>(&value).name.is_null() {
             value = main_fallback.clone();
         }
-        tr[key] = value;
+        tr.insert(key.to_owned(), value);
     }
-    current["translations"] = tr;
     let hidden = |channel: &Channel| {
         version
             .channels
@@ -142,9 +153,11 @@ pub fn edit(current: &mut Value, state: &Value, id: &str, locales: &[String], ma
         .filter(|channel| !hidden(channel))
         .map(|c| c.id.clone())
         .collect::<Vec<_>>();
-    let mut catalog = catalog;
-    catalog["salesChannelIds"] = json!(channels);
-    current["catalog"] = catalog;
+    merge(&mut catalog, json!({ "salesChannelIds": channels }))?;
+    merge(
+        current,
+        json!({"extra": extra, "commerce": commerce, "translations": tr, "catalog": catalog}),
+    )
 }
 
 #[cfg(test)]
@@ -178,7 +191,7 @@ mod tests {
             "channels":[{"id":"pos","visible":false},{"id":"web","visible":true}],
         });
         let locales = ["de-DE".to_string(), "en-GB".to_string()];
-        edit(&mut current, &state, "lamp-1", &locales, "de-DE");
+        edit(&mut current, &state, "lamp-1", &locales, "de-DE").unwrap();
         assert_eq!(current["commerce"]["price"], 25);
         assert_eq!(current["commerce"]["taxRate"], 19);
         assert!(current["commerce"].get("stock").is_none());
@@ -198,7 +211,8 @@ mod tests {
             "lamp-1",
             &["fr-FR".to_string()],
             "de-DE",
-        );
+        )
+        .unwrap();
         assert_eq!(
             inherited["translations"]["fr"],
             json!({"name":null,"description":null})

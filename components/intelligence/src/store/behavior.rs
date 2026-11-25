@@ -47,13 +47,7 @@ pub async fn record(tx: &mut Transaction<'_, Postgres>, e: Observation<'_>) -> R
 /// Erases the observations of one cart; serialized with capture through the cart lock.
 pub async fn forget(a: &State, tenant: &str, cart: &str) -> Result<u64> {
     let mut tx = a.db.begin().await?;
-    sqlx::query_scalar!(
-        "SELECT id FROM carts WHERE tenant=$1 AND id=$2 FOR UPDATE",
-        tenant,
-        cart
-    )
-    .fetch_one(&mut *tx)
-    .await?;
+    veyndo_checkout::store::cart_signals::lock_cart(&mut *tx, tenant, cart).await?;
     let n = sqlx::query!(
         "DELETE FROM session_signal_events WHERE tenant=$1 AND session=$2 AND purpose='analytics'",
         tenant,
@@ -137,13 +131,8 @@ pub struct Report<'a> {
 // SQL composition uses only bundled static clauses; every request value remains a bind parameter.
 /// Indexed channel report and a derived semantic graph; observations never imply causation or model learning.
 pub async fn report(a: &State, t: &str, r: Report<'_>) -> Result<Value> {
-    let exists = sqlx::query_scalar!(
-        r#"SELECT EXISTS(SELECT 1 FROM sales_channels WHERE tenant=$1 AND id=$2) AS "exists!""#,
-        t,
-        r.channel
-    )
-    .fetch_one(&a.db)
-    .await?;
+    let exists =
+        veyndo_marketing::store::behavior_channels::channel_exists(&a.db, t, r.channel).await?;
     if !exists {
         return Err(Error(
             StatusCode::NOT_FOUND,
@@ -206,8 +195,8 @@ pub async fn report(a: &State, t: &str, r: Report<'_>) -> Result<Value> {
         })
         .collect::<Vec<_>>();
     let ids = products.iter().map(|p| p.id.clone()).collect::<Vec<_>>();
-    let translations=sqlx::query!(r#"SELECT product_id,name AS "name!" FROM product_translations WHERE tenant=$1 AND product_id=ANY($2) AND language_id=ANY($3) AND name IS NOT NULL ORDER BY array_position($3,language_id)"#,
-        t, &ids, chain).fetch_all(&mut *tx).await?;
+    let translations =
+        veyndo_catalog::store::intelligence_reads::chain_names(&mut *tx, t, &ids, chain).await?;
     for product in &mut products {
         if let Some(r) = translations.iter().find(|r| r.product_id == product.id) {
             product.name.clone_from(&r.name);
@@ -228,12 +217,22 @@ pub async fn report(a: &State, t: &str, r: Report<'_>) -> Result<Value> {
         // dynamic SQL: composed with the shared ELIGIBLE consent clause.
         journeys=sqlx::query(sqlx::AssertSqlSafe(q.as_str())).bind(t).bind(channel).bind(days).bind(version).fetch_all(&mut *tx).await?.iter().map(|r|json!({"session":r.get::<String,_>("session"),"last":r.get::<String,_>("last"),"events":r.get::<i64,_>("events"),"identified":r.get::<bool,_>("identified")})).collect();
     }
-    let channels = sqlx::query!(r#"SELECT id,data->'name' AS "name!" FROM sales_channels WHERE tenant=$1 ORDER BY id LIMIT 100"#,
-        t).fetch_all(&mut *tx).await?.iter().map(|r| {
+    let channels = veyndo_marketing::store::behavior_channels::channel_names(&mut *tx, t)
+        .await?
+        .iter()
+        .map(|r| {
             let names = &r.name;
-            let name = [locale, locale.split('-').next().unwrap_or(locale), main, main.split('-').next().unwrap_or(main)].iter().find_map(|key| names[*key].as_str());
+            let name = [
+                locale,
+                locale.split('-').next().unwrap_or(locale),
+                main,
+                main.split('-').next().unwrap_or(main),
+            ]
+            .iter()
+            .find_map(|key| names[*key].as_str());
             json!({"id":r.id,"name":name.unwrap_or(r.id.as_str())})
-        }).collect::<Vec<_>>();
+        })
+        .collect::<Vec<_>>();
     tx.commit().await?;
     Ok(
         json!({"salesChannelId":channel,"channels":channels,"days":days,"retentionDays":r.retention_days,"enabled":r.enabled,"eventsPerHour":r.events_per_hour,"totals":totals,"dimensions":dimensions,"daily":daily,"products":products,"graph":{"observations":edges,"semantic":relations},"journeys":journeys,"canInspectJourneys":r.pii,"basis":"consent-bound cart contexts; client observations, native orders; not unique humans or causal attribution","modelLearning":false,"geoConfigured":r.geo_configured}),

@@ -1,6 +1,7 @@
 //! SQL of the identity component.
 pub mod agent_authority;
 pub mod agent_budgets;
+pub mod agent_keys;
 pub mod app_credentials;
 pub mod attempts;
 pub mod broker;

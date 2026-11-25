@@ -11,7 +11,7 @@ use veyndo_app_platform::domain::core_extensions::configuration;
 use veyndo_app_platform::store::records::rows as record_rows;
 use veyndo_b2b::store::staging as b2b;
 use veyndo_catalog::service::product_identity::assign_categories;
-use veyndo_core::document::{lenient, view};
+use veyndo_core::document::{lenient, merge, view};
 use veyndo_core::{Result, bad, conflict};
 use veyndo_intelligence::knowledge::sync_product;
 use veyndo_orders::domain::order_machine::default_machine;
@@ -263,19 +263,20 @@ pub async fn product_snapshot(tx: &mut Tx<'_>, t: &str, id: &str) -> Result<Valu
 async fn product_projection(tx: &mut Tx<'_>, t: &str, mut value: Value) -> Result<Value> {
     let id = view::<Identified>(&value).id.unwrap();
     let trs = db::translations(tx, t, &id).await?;
-    value["translations"] = json!(
-        trs.into_iter()
-            .map(|(language_id, name, description)| json!({"language_id":language_id,"name":name,"description":description}))
-            .collect::<Vec<_>>()
-    );
-    value["categoryIds"] = json!(db::category_ids(tx, t, &id).await?);
-    value["channelVisibility"] = json!(
-        db::channel_visibility(tx, t, &id)
-            .await?
-            .into_iter()
-            .map(|(id, visible)| json!({"id":id,"visible":visible}))
-            .collect::<Vec<_>>()
-    );
+    let translations = trs
+        .into_iter()
+        .map(|(language_id, name, description)| json!({"language_id":language_id,"name":name,"description":description}))
+        .collect::<Vec<_>>();
+    let category_ids = db::category_ids(tx, t, &id).await?;
+    let channel_visibility = db::channel_visibility(tx, t, &id)
+        .await?
+        .into_iter()
+        .map(|(id, visible)| json!({"id":id,"visible":visible}))
+        .collect::<Vec<_>>();
+    merge(
+        &mut value,
+        json!({"translations":translations,"categoryIds":category_ids,"channelVisibility":channel_visibility}),
+    )?;
     Ok(value)
 }
 #[cfg(test)]

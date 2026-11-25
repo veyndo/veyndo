@@ -3,7 +3,7 @@ use super::SourceRecord;
 use crate::ports::ImportHost;
 use serde::Deserialize;
 use serde_json::{Value, json};
-use veyndo_core::document::{lenient, view};
+use veyndo_core::document::{lenient, merge, view};
 use veyndo_core::{RequestContext, Result, bad, hash};
 use veyndo_identity::merchant;
 use veyndo_pricing::types::currency::scale;
@@ -38,7 +38,10 @@ pub async fn import<H: ImportHost>(
     if !destination.is_object() {
         return Err(bad("Reviewed native coupon mapping required"));
     }
-    destination["sourceImport"] = json!({"version":r.version,"source":r.source,"sourceShop":r.source_shop,"sourceId":r.source_id,"currency":source.currency,"recordDigest":hash(&json!(r).to_string()),"activationReviewed":false});
+    merge(
+        &mut destination,
+        json!({ "sourceImport": {"version":r.version,"source":r.source,"sourceShop":r.source_shop,"sourceId":r.source_id,"currency":source.currency,"recordDigest":hash(&json!(r).to_string()),"activationReviewed":false} }),
+    )?;
     host.import_promotion(h, &configuration_id(&r.identity(&t)), &destination)
         .await
 }

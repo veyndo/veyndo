@@ -32,7 +32,7 @@ pub async fn invoke(a: &State, h: &RequestContext, v: &Value) -> Result<Value> {
             settings: &settings,
             locale: &locale,
             chain: &chain,
-            eligible: veyndo_intelligence::store::behavior::ELIGIBLE,
+            eligible: &veyndo_intelligence::store::behavior_policies::eligible_per_channel(),
             conditions: &veyndo_marketing::service::conditions::validate_condition,
         },
     )

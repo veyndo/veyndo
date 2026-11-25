@@ -4,17 +4,15 @@ use crate::store::products as studio_products;
 use axum::Json;
 use axum::extract::{Path, State as Shared};
 use serde_json::{Value, json};
-use sqlx::Row;
 use veyndo_app_model::Object;
 use veyndo_app_model::declarations::identifier;
 use veyndo_app_platform::store::extension_projection::attach;
 use veyndo_catalog::domain::product_admission::{category_assignment, category_edit};
 use veyndo_catalog::service::{product_fields, product_identity};
 use veyndo_catalog::store::product_edit as store;
-use veyndo_catalog::store::product_fields::editable;
 use veyndo_catalog::store::{categories, channels, products};
 use veyndo_catalog::types::product_edit::Edit;
-use veyndo_core::document::view;
+use veyndo_core::document::{merge, view};
 use veyndo_core::store::history_context::context;
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad, conflict};
 use veyndo_identity::{merchant, permit};
@@ -82,10 +80,11 @@ pub async fn save_product(
     validate_metadata("products", &edit.extra.automation)?;
     edit.validate_fields(languages)?;
     if let Some(c) = &edit.catalog {
-        if edit.extra.automation.is_null() {
-            edit.extra.automation = json!({});
-        }
-        edit.extra.automation["categoryIds"] = json!(c.category_ids);
+        // A missing automation document becomes an object, as before.
+        merge(
+            &mut edit.extra.automation,
+            json!({ "categoryIds": c.category_ids }),
+        )?;
     }
     store::lock_numbers(&mut tx, &t).await?;
     if create {
@@ -204,10 +203,10 @@ pub async fn product_editor(
     // field in the editable response; other languages remain NULL (inherit).
     let main = language_key(&settings.main_locale, &settings);
     if translations[&main]["name"].is_null() {
-        translations[&main]["name"] = json!(r.get::<String, _>("name"));
+        translations[&main]["name"] = json!(r.name);
     }
     if translations[&main]["description"].is_null() {
-        translations[&main]["description"] = json!(r.get::<String, _>("description"));
+        translations[&main]["description"] = json!(r.description);
     }
     let channels = product_channels(&a, &t, &id).await?;
     let selected_channels = channels
@@ -219,7 +218,7 @@ pub async fn product_editor(
         .map(|c| c.id)
         .collect::<Vec<_>>();
     let category_ids = categories::of_product(&a, &t, &id).await?;
-    let mut value = json!({"id":id,"mainLocale":settings.main_locale,"availableLocales":settings.locales,"channels":channels,"catalog":{"salesChannelIds":selected_channels,"active":r.get::<bool,_>("active"),"productNumber":r.get::<Option<String>,_>("product_number").unwrap_or_else(||id.clone()),"categoryIds":category_ids,"parentId":r.get::<Option<String>,_>("parent_id"),"options":r.get::<Value,_>("options")},"revision":r.get::<i64,_>("revision"),"contentRevision":r.get::<i64,_>("content_revision"),"translations":translations,"extra":({let mut extra=r.get::<Value,_>("extra");if extra["priceCurrency"].is_null(){extra["priceCurrency"]=json!(settings.currencies.pricing_currency);}extra}),"commerce":editable(&r)});
+    let mut value = json!({"id":id,"mainLocale":settings.main_locale,"availableLocales":settings.locales,"channels":channels,"catalog":{"salesChannelIds":selected_channels,"active":r.active,"productNumber":r.product_number.clone().unwrap_or_else(||id.clone()),"categoryIds":category_ids,"parentId":r.parent_id,"options":r.options},"revision":r.revision,"contentRevision":r.content_revision,"translations":translations,"extra":({let mut extra=r.extra.clone();if extra.get("priceCurrency").is_none_or(Value::is_null){merge(&mut extra,json!({"priceCurrency":settings.currencies.pricing_currency}))?;}extra}),"commerce":r.commerce()});
     attach(&a, &h, Object::Product, std::slice::from_mut(&mut value)).await?;
     Ok(Json(value))
 }

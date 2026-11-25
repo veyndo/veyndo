@@ -7,7 +7,7 @@ use axum::Json;
 use axum::extract::{Multipart, Path, State as Shared};
 use serde::Deserialize;
 use serde_json::{Value, json};
-use veyndo_core::document::view;
+use veyndo_core::document::{merge, view};
 use veyndo_core::shop_scope::tenant;
 use veyndo_core::{RequestContext, Result, State, bad};
 use veyndo_identity::{merchant, permit};
@@ -74,7 +74,7 @@ pub async fn upload(
         }
     }
     let (bytes, pdf) = file.ok_or(bad("File required"))?;
-    v["content"] = json!(text(bytes, pdf).await?);
+    merge(&mut v, json!({ "content": text(bytes, pdf).await? }))?;
     Ok(Json(
         save(&a, &h, &t, &v, if pdf { "pdf" } else { "upload-text" }).await?,
     ))

@@ -1,4 +1,5 @@
 //! Validate the final published channel/automation aggregate and initialize native POS defaults.
+use super::Baseline;
 use super::snapshot::Tx;
 use crate::ports::ReleaseHost;
 use crate::store::staging_release as db;
@@ -16,7 +17,7 @@ pub async fn validate<H: ReleaseHost>(
     h: &RequestContext,
     keys: &[String],
     (current, actual): (&Value, &Value),
-    base: &mut Value,
+    base: &mut Baseline,
 ) -> Result<()> {
     if keys.iter().any(|key| key == "settings") {
         let settings = decode(db::settings(tx, t).await?)?;
@@ -65,7 +66,7 @@ pub async fn validate<H: ReleaseHost>(
                 .await?;
                 if current[key]["kind"] == "pos" && !configured {
                     let patch = db::channel_overrides(tx, t, unit).await?;
-                    base["live"][format!("settings-channel:{unit}")] = patch;
+                    base.record(&format!("settings-channel:{unit}"), None, Some(patch))?;
                 }
             }
         }

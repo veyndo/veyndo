@@ -7,12 +7,7 @@ use veyndo_identity::{SCOPES, allowed};
 pub async fn load(a: &State, h: &RequestContext, t: &str, actor: &str) -> Result<Value> {
     let mut items = vec![];
     if allowed(h, "catalog.read") {
-        let ids: Vec<String> = sqlx::query_scalar!(
-            "SELECT id FROM products WHERE tenant=$1 AND stock<=0 ORDER BY id LIMIT 4",
-            t
-        )
-        .fetch_all(&a.db)
-        .await?;
+        let ids = veyndo_catalog::store::workspace::out_of_stock(a, t).await?;
         for id in ids.into_iter().take(3) {
             items.push(
                 json!({"id":format!("stock:{id}"),"kind":"stock","tab":"productData","entity":id}),
@@ -21,21 +16,20 @@ pub async fn load(a: &State, h: &RequestContext, t: &str, actor: &str) -> Result
     }
     if allowed(h, "assistant.use") && allowed(h, "knowledge.read") {
         let scopes = json!(SCOPES.iter().filter(|s| allowed(h, s)).collect::<Vec<_>>());
-        let rows=sqlx::query!("SELECT id,run_state FROM tasks WHERE tenant=$1 AND run_actor=$2 AND run_state IN ('failed','uncertain') AND run_scopes <@ $3 ORDER BY run_updated DESC LIMIT 3", t, actor, scopes).fetch_all(&a.db).await?;
-        for r in rows {
-            items.push(
-                json!({"id":format!("run:{}",r.id),"kind":"run","tab":"assistant","runId":r.id}),
-            );
+        let ids =
+            veyndo_intelligence::store::workspace::unsettled_runs(a, t, actor, &scopes).await?;
+        for id in ids {
+            items.push(json!({"id":format!("run:{id}"),"kind":"run","tab":"assistant","runId":id}));
         }
     }
     if allowed(h, "catalog.write") {
-        let ids:Vec<String>=sqlx::query_scalar!("SELECT id FROM translation_jobs WHERE tenant=$1 AND EXISTS(SELECT 1 FROM translation_items i WHERE i.tenant=translation_jobs.tenant AND i.job_id=translation_jobs.id AND i.status='ready') ORDER BY created_at DESC LIMIT 3", t).fetch_all(&a.db).await?;
+        let ids = veyndo_catalog::store::workspace::reviewable_translations(a, t).await?;
         for id in ids {
             items.push(json!({"id":format!("translation:{id}"),"kind":"translation","tab":"commerce","translationJob":id}));
         }
     }
     if allowed(h, "apps.manage") {
-        let ids: Vec<String> = sqlx::query_scalar!("SELECT DISTINCT j.app FROM app_jobs j JOIN app_packages p ON p.tenant=j.tenant AND p.id=j.app WHERE j.tenant=$1 AND j.status='failed' AND p.active ORDER BY j.app LIMIT 3", t).fetch_all(&a.db).await?;
+        let ids = veyndo_app_platform::store::workspace::failed_job_apps(a, t).await?;
         for id in ids {
             items.push(json!({"id":format!("app:{id}"),"kind":"app","tab":"apps","app":id}));
         }

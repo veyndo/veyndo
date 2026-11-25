@@ -1,7 +1,7 @@
 //! Which entities keep a history, the rights their versions need, and what a restoration request must state.
 use serde::Deserialize;
 use serde_json::{Value, json};
-use veyndo_core::document::{lenient, view};
+use veyndo_core::document::{lenient, merge, view};
 use veyndo_core::{RequestContext, Result, bad};
 use veyndo_identity::domain::permissions::allowed;
 
@@ -84,15 +84,31 @@ pub fn schema(name: &str) -> Option<Value> {
     let mut props = json!({"entity":{"type":"string","enum":ENTITIES},"id":{"type":"string","minLength":1,"maxLength":254}});
     let mut required = vec!["entity", "id"];
     if name == "merchant.history" {
-        props["before"] = json!({"type":"integer"});
+        merge(&mut props, json!({ "before": {"type":"integer"} })).ok()?;
     } else {
-        props["version"] = json!({"type":"integer","minimum":1});
+        merge(
+            &mut props,
+            json!({ "version": {"type":"integer","minimum":1} }),
+        )
+        .ok()?;
         required.push("version");
     }
     if name == "merchant.history.restore" {
-        props["approve"] = json!({"type":"boolean","const":true});
-        props["revision"] = json!({"type":"integer","minimum":0});
-        props["side"] = json!({"type":"string","enum":["before","after"]});
+        merge(
+            &mut props,
+            json!({ "approve": {"type":"boolean","const":true} }),
+        )
+        .ok()?;
+        merge(
+            &mut props,
+            json!({ "revision": {"type":"integer","minimum":0} }),
+        )
+        .ok()?;
+        merge(
+            &mut props,
+            json!({ "side": {"type":"string","enum":["before","after"]} }),
+        )
+        .ok()?;
         required.extend(["approve", "revision", "side"]);
     }
     Some(

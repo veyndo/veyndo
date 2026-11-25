@@ -49,25 +49,12 @@ pub async fn receipt(
 
 /// Locks the cart row so consent changes of one cart serialize.
 pub async fn lock_cart(e: impl PgExecutor<'_>, tenant: &str, cart: &str) -> Result<()> {
-    sqlx::query_scalar!(
-        "SELECT revision FROM carts WHERE tenant=$1 AND id=$2 FOR UPDATE",
-        tenant,
-        cart
-    )
-    .fetch_one(e)
-    .await?;
-    Ok(())
+    veyndo_checkout::store::cart_signals::lock_cart(e, tenant, cart).await
 }
 
 /// Consent changes of a receipt during the last day.
 pub async fn changes_today(e: impl PgExecutor<'_>, tenant: &str, owner: &str) -> Result<i64> {
-    Ok(sqlx::query_scalar!(
-        r#"SELECT count(*) AS "count!" FROM privacy_consent_log WHERE tenant=$1 AND cart_id=$2 AND created_at>now()-interval '1 day'"#,
-        tenant,
-        owner
-    )
-    .fetch_one(e)
-    .await?)
+    veyndo_shop::store::consent_log::changes_today(e, tenant, owner).await
 }
 
 /// The unexpired receipt document of the owner under `policy`, row-locked.
@@ -121,28 +108,12 @@ pub async fn log(
     channel: &str,
     entry: &Value,
 ) -> Result<()> {
-    sqlx::query!(
-        "INSERT INTO privacy_consent_log(tenant,cart_id,channel_id,data) VALUES($1,$2,$3,$4)",
-        tenant,
-        cart,
-        channel,
-        entry
-    )
-    .execute(e)
-    .await?;
-    Ok(())
+    veyndo_shop::store::consent_log::log(e, tenant, cart, channel, entry).await
 }
 
 /// Deletes the experiment exposure of a session.
 pub async fn forget_exposure(e: impl PgExecutor<'_>, tenant: &str, session: &str) -> Result<()> {
-    sqlx::query!(
-        "DELETE FROM exposures WHERE tenant=$1 AND session=$2",
-        tenant,
-        session
-    )
-    .execute(e)
-    .await?;
-    Ok(())
+    veyndo_checkout::store::cart_signals::forget_exposure(e, tenant, session).await
 }
 
 /// Deletes the personalization signals of the sessions.

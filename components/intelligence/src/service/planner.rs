@@ -13,7 +13,7 @@ use crate::store::personalization as signals;
 use serde::Deserialize;
 use serde_json::{Value, json};
 use veyndo_cognition::inference::{Choice, Output, Provider};
-use veyndo_core::document::{lenient, view};
+use veyndo_core::document::{lenient, merge, view};
 use veyndo_core::shop_scope::header;
 use veyndo_core::store::environments::parent;
 use veyndo_core::store::lease::Lease;
@@ -153,20 +153,21 @@ async fn prepare<H: AgentHost>(
     let (_, chain) = language_context(a, &language_headers).await?;
     let ps = context_retrieval(m, t, &chain, instruction).await?.0;
     let er = signals::experience(&a.db, t).await?;
-    let mut schema = json!({"type":"object","properties":{"summary":{"type":"string","maxLength":1200},"changes":{"type":"array","items":{"type":"object","properties":{"product_id":{"type":"string"},"price":{"type":"number"},"stock":{"type":"integer"}},"required":["product_id"],"additionalProperties":false}},"experience":{"type":"object","properties":{"mode":{"type":"string","enum":["balanced","discovery","comparison"]},"headline":{"type":"string"}},"required":["mode","headline"],"additionalProperties":false},"expected_experience_revision":{"type":"integer"}},"required":["summary","changes"],"additionalProperties":false});
-    schema["properties"]["app_action"] = json!({"type":["object","null"],"properties":{"app":{"type":"string"},"action":{"type":"string"},"arguments_json":{"type":"string","maxLength":32768}},"required":["app","action","arguments_json"],"additionalProperties":false});
     let work = host.work_schemas(authority);
-    schema["properties"]["navigation"] = work.navigation;
-    schema["properties"]["view"] = work.view;
-    schema["properties"]["operations"] = work.operations;
     let app_context = if allowed(authority, "apps.read") {
         host.planning_context(t, authority, instruction).await?
     } else {
         json!([])
     };
     let (commerce_settings, _) = config(a, t).await?;
-    schema["properties"]["translation"] = json!({"type":["string","null"],"enum":commerce_settings.locales.iter().filter(|l|*l!=&commerce_settings.main_locale).map(|l|json!(l)).chain(std::iter::once(Value::Null)).collect::<Vec<_>>()});
-    schema["properties"]["translation_products"] = json!({"type":["array","null"],"minItems":1,"maxItems":1000,"uniqueItems":true,"items":{"type":"string","minLength":1,"maxLength":160}});
+    let translation_locales = commerce_settings
+        .locales
+        .iter()
+        .filter(|l| *l != &commerce_settings.main_locale)
+        .map(|l| json!(l))
+        .chain(std::iter::once(Value::Null))
+        .collect::<Vec<_>>();
+    let schema = planning_schema(work, translation_locales);
     let system = include_str!("../../../../crates/cognition/prompts/merchant-planner.v6.txt");
     let sandbox = parent(a, t).await?.is_some();
     let system = format!(
@@ -268,13 +269,23 @@ async fn prepare<H: AgentHost>(
         .iter()
         .map(|p| {
             let mut v = json!(p);
-            v["extra"] = p.extra.clone();
-            v
+            merge(&mut v, json!({ "extra": p.extra }))?;
+            Ok(v)
         })
-        .collect::<Vec<_>>();
+        .collect::<Result<Vec<_>>>()?;
     Ok(
         json!({"products":products,"experience":er.data,"experienceRevision":er.revision,"schema":schema,"system":system,"prompt":prompt,"graph":graph,"facts":facts,"memory":memory,"appNames":app_names,"appContext":app_context,"modelAppContext":model_app_context,"documentSources":document_sources,"privateSources":private_sources}),
     )
+}
+
+/// The response schema of a planning turn: the native proposal fields plus the server's work schemas and the shop's translation locales.
+fn planning_schema(work: crate::ports::WorkSchemas, translation_locales: Vec<Value>) -> Value {
+    json!({"type":"object","properties":{"summary":{"type":"string","maxLength":1200},"changes":{"type":"array","items":{"type":"object","properties":{"product_id":{"type":"string"},"price":{"type":"number"},"stock":{"type":"integer"}},"required":["product_id"],"additionalProperties":false}},"experience":{"type":"object","properties":{"mode":{"type":"string","enum":["balanced","discovery","comparison"]},"headline":{"type":"string"}},"required":["mode","headline"],"additionalProperties":false},"expected_experience_revision":{"type":"integer"},
+        "app_action":{"type":["object","null"],"properties":{"app":{"type":"string"},"action":{"type":"string"},"arguments_json":{"type":"string","maxLength":32768}},"required":["app","action","arguments_json"],"additionalProperties":false},
+        "navigation":work.navigation,"view":work.view,"operations":work.operations,
+        "translation":{"type":["string","null"],"enum":translation_locales},
+        "translation_products":{"type":["array","null"],"minItems":1,"maxItems":1000,"uniqueItems":true,"items":{"type":"string","minLength":1,"maxLength":160}}},
+        "required":["summary","changes"],"additionalProperties":false})
 }
 
 /// The saved planning context a turn runs on.
@@ -470,4 +481,35 @@ async fn repair<H: AgentHost>(
         false,
     )
     .await
+}
+
+#[cfg(test)]
+mod tests {
+    use super::planning_schema;
+    use crate::ports::WorkSchemas;
+    use serde_json::{Value, json};
+
+    #[test]
+    fn planning_schema_keeps_the_indexed_shape() {
+        let work = || WorkSchemas {
+            navigation: json!({"type": "object", "n": 1}),
+            view: json!({"type": "object", "v": 2}),
+            operations: json!({"type": "array", "o": 3}),
+        };
+        let locales = vec![json!("de-DE"), json!("es-ES"), Value::Null];
+        let w = work();
+        let mut old = json!({"type":"object","properties":{"summary":{"type":"string","maxLength":1200},"changes":{"type":"array","items":{"type":"object","properties":{"product_id":{"type":"string"},"price":{"type":"number"},"stock":{"type":"integer"}},"required":["product_id"],"additionalProperties":false}},"experience":{"type":"object","properties":{"mode":{"type":"string","enum":["balanced","discovery","comparison"]},"headline":{"type":"string"}},"required":["mode","headline"],"additionalProperties":false},"expected_experience_revision":{"type":"integer"}},"required":["summary","changes"],"additionalProperties":false});
+        old["properties"]["app_action"] = json!({"type":["object","null"],"properties":{"app":{"type":"string"},"action":{"type":"string"},"arguments_json":{"type":"string","maxLength":32768}},"required":["app","action","arguments_json"],"additionalProperties":false});
+        old["properties"]["navigation"] = w.navigation;
+        old["properties"]["view"] = w.view;
+        old["properties"]["operations"] = w.operations;
+        old["properties"]["translation"] = json!({"type":["string","null"],"enum":locales.clone()});
+        old["properties"]["translation_products"] = json!({"type":["array","null"],"minItems":1,"maxItems":1000,"uniqueItems":true,"items":{"type":"string","minLength":1,"maxLength":160}});
+        let new = planning_schema(work(), locales);
+        assert_eq!(new, old);
+        assert_eq!(
+            serde_json::to_string(&new).unwrap(),
+            serde_json::to_string(&old).unwrap()
+        );
+    }
 }

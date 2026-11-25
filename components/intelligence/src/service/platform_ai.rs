@@ -1,13 +1,13 @@
 //! Operator-only platform inference administration: optimistic revision, encrypted write-only keys and an audit without secrets.
 use crate::service::models::Models;
-use crate::store::platform_ai as store;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 use veyndo_cognition::inference::{settings, sovereign};
-use veyndo_core::document::{lenient, view};
+use veyndo_core::document::{lenient, merge, view};
 use veyndo_core::{Error, RequestContext, Result, StatusCode, bad, conflict};
 use veyndo_kernel::verified_kernel;
 use veyndo_shop::http::operator::actor;
+use veyndo_shop::store::platform_ai as store;
 
 /// The platform inference configuration as operators see it: stored overrides on the environment defaults, which keys are stored, and the effective providers.
 pub async fn get(m: Models<'_>, h: &RequestContext) -> Result<Value> {
@@ -19,20 +19,29 @@ async fn snapshot(m: Models<'_>) -> Result<Value> {
     let row = store::read(&a.db).await?;
     let secrets = &row.secrets;
     let stored = &row.data;
-    let mut visible = m.inference.environment_configuration();
-    if let Some(provider) = stored.get("defaultProvider") {
-        visible["defaultProvider"] = provider.clone();
-    }
-    for id in ["ollama", "openai", "anthropic"] {
-        if let Some(provider) = view::<Configuration>(stored).providers.get(id) {
-            visible["providers"][id] = provider.clone();
-        }
-    }
-    visible["sovereign"] = json!(view::<Configuration>(stored).sovereign == true);
+    let visible = visible(m.inference.environment_configuration(), stored)?;
     Ok(json!({"revision":row.revision,"settings":visible,
         "updatedAt":row.updated,"encryptedStorageReady":settings::encryption_ready(),
         "keyStored":{"ollama":secrets.get("ollama").is_some(),"openai":secrets.get("openai").is_some(),"anthropic":secrets.get("anthropic").is_some()},
         "effective":m.inference.public_providers().await.ok(),"inheritance":"all tenants; replica refresh within 5 seconds"}))
+}
+/// The environment configuration with the stored default provider, provider routes and sovereignty switch laid over it.
+fn visible(mut visible: Value, stored: &Value) -> Result<Value> {
+    if let Some(provider) = stored.get("defaultProvider") {
+        merge(&mut visible, json!({ "defaultProvider": provider }))?;
+    }
+    let configured = view::<Configuration>(stored);
+    let mut providers = view::<Configuration>(&visible).providers;
+    for id in ["ollama", "openai", "anthropic"] {
+        if let Some(provider) = configured.providers.get(id) {
+            providers.insert(id.to_owned(), provider.clone());
+        }
+    }
+    merge(
+        &mut visible,
+        json!({ "providers": providers, "sovereign": configured.sovereign == true }),
+    )?;
+    Ok(visible)
 }
 /// A platform inference configuration save.
 #[derive(Deserialize, Default)]
@@ -56,6 +65,31 @@ struct Configuration {
     #[serde(deserialize_with = "lenient")]
     providers: serde_json::Map<String, Value>,
     sovereign: Value,
+}
+
+/// The saved platform configuration document.
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct StoredConfiguration<'a> {
+    default_provider: &'a str,
+    providers: StoredRoutes,
+    sovereign: bool,
+}
+
+/// The saved route of every supported provider, in the order the operator form lists them.
+#[derive(Serialize)]
+struct StoredRoutes {
+    ollama: StoredRoute,
+    openai: StoredRoute,
+    anthropic: StoredRoute,
+}
+
+/// One saved provider route.
+#[derive(Serialize)]
+struct StoredRoute {
+    model: String,
+    endpoint: String,
+    enabled: bool,
 }
 
 /// The submitted settings: default provider, per-provider routes and the sovereignty switch.
@@ -93,7 +127,7 @@ pub async fn save(m: Models<'_>, h: &RequestContext, v: &Value) -> Result<Value>
         .as_deref()
         .filter(|v| ["ollama", "openai", "anthropic"].contains(v))
         .ok_or(bad("Choose a supported default provider"))?;
-    let mut data = json!({"defaultProvider":provider,"providers":{}});
+    let mut routes = Vec::with_capacity(3);
     let mut ollama_endpoint = String::new();
     for id in ["ollama", "openai", "anthropic"] {
         let row: ProviderSettings = input
@@ -133,10 +167,25 @@ pub async fn save(m: Models<'_>, h: &RequestContext, v: &Value) -> Result<Value>
         if id == "ollama" {
             ollama_endpoint = endpoint.to_owned();
         }
-        data["providers"][id] = json!({"model":model,"endpoint":endpoint,"enabled":enabled});
+        routes.push(StoredRoute {
+            model: model.to_owned(),
+            endpoint: endpoint.to_owned(),
+            enabled,
+        });
     }
     let sovereign = input.settings.sovereign.unwrap_or(false);
-    data["sovereign"] = json!(sovereign);
+    let [ollama, openai, anthropic]: [StoredRoute; 3] = routes
+        .try_into()
+        .map_err(|_| bad("Provider routes required"))?;
+    let data = json!(StoredConfiguration {
+        default_provider: provider,
+        providers: StoredRoutes {
+            ollama,
+            openai,
+            anthropic
+        },
+        sovereign,
+    });
     // Refuse a switch that would only fail closed later: every configured model route must be self-operated.
     if sovereign || sovereign::locked() {
         let blockers = m.inference.sovereign_blockers(&ollama_endpoint);
@@ -175,7 +224,10 @@ pub async fn save(m: Models<'_>, h: &RequestContext, v: &Value) -> Result<Value>
             if key.len() > 4096 || key.chars().any(char::is_control) {
                 return Err(bad("Invalid provider key"));
             }
-            secrets[id] = json!(settings::seal(id, key).map_err(bad)?);
+            merge(
+                &mut secrets,
+                json!({ id: settings::seal(id, key).map_err(bad)? }),
+            )?;
         }
     }
     store::save(
@@ -189,4 +241,64 @@ pub async fn save(m: Models<'_>, h: &RequestContext, v: &Value) -> Result<Value>
     tx.commit().await?;
     m.inference.invalidate().await;
     snapshot(m).await
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{StoredConfiguration, StoredRoute, StoredRoutes, visible};
+    use serde_json::json;
+
+    fn route(model: &str, endpoint: &str, enabled: bool) -> StoredRoute {
+        StoredRoute {
+            model: model.into(),
+            endpoint: endpoint.into(),
+            enabled,
+        }
+    }
+
+    #[test]
+    fn stored_configuration_keeps_the_indexed_shape() {
+        let mut old = json!({"defaultProvider":"openai","providers":{}});
+        old["providers"]["ollama"] = json!({"model":"m1","endpoint":"http://o","enabled":true});
+        old["providers"]["openai"] = json!({"model":"m2","endpoint":"https://a","enabled":true});
+        old["providers"]["anthropic"] =
+            json!({"model":"m3","endpoint":"https://b","enabled":false});
+        old["sovereign"] = json!(false);
+        let new = json!(StoredConfiguration {
+            default_provider: "openai",
+            providers: StoredRoutes {
+                ollama: route("m1", "http://o", true),
+                openai: route("m2", "https://a", true),
+                anthropic: route("m3", "https://b", false),
+            },
+            sovereign: false,
+        });
+        assert_eq!(new.to_string(), old.to_string());
+    }
+
+    #[test]
+    fn visible_configuration_keeps_the_indexed_shape() {
+        let environment = json!({"defaultProvider":"ollama","providers":{
+            "ollama":{"endpoint":"http://o","model":"l","enabled":true},
+            "openai":{"endpoint":"https://a","model":"g","enabled":true},
+            "anthropic":{"endpoint":"https://b","model":"c","enabled":true}}});
+        for stored in [
+            json!({}),
+            json!({"defaultProvider":"openai","providers":{"openai":{"model":"x"}},"sovereign":true}),
+            json!({"providers":{"anthropic":{"enabled":false},"other":{}},"sovereign":"yes"}),
+        ] {
+            let mut old = environment.clone();
+            if let Some(provider) = stored.get("defaultProvider") {
+                old["defaultProvider"] = provider.clone();
+            }
+            for id in ["ollama", "openai", "anthropic"] {
+                if let Some(provider) = stored["providers"].get(id) {
+                    old["providers"][id] = provider.clone();
+                }
+            }
+            old["sovereign"] = json!(stored["sovereign"] == true);
+            let new = visible(environment.clone(), &stored).unwrap();
+            assert_eq!(new.to_string(), old.to_string());
+        }
+    }
 }
