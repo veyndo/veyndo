@@ -2,6 +2,7 @@
 use super::work_execution::validate_translation;
 use crate::domain::proposal::{NATIVE, Step};
 use crate::ports::WorkHost;
+use crate::store::{products, tasks};
 use serde_json::{Value, json};
 use sqlx::Row;
 use veyndo_app_model::declarations::identifier;
@@ -103,22 +104,10 @@ pub async fn bind<H: WorkHost>(
                     .as_str()
                     .filter(|id| identifier(id) || uuid::Uuid::parse_str(id).is_ok())
                     .ok_or(bad("Work creation needs an explicit stable identifier"))?;
-                let exists: bool = if key == "product" {
-                    sqlx::query_scalar(
-                        "SELECT EXISTS(SELECT 1 FROM products WHERE tenant=$1 AND id=$2)",
-                    )
-                    .bind(t)
-                    .bind(id)
-                    .fetch_one(&a.db)
-                    .await?
+                let exists = if key == "product" {
+                    products::exists(a, t, id).await?
                 } else {
-                    sqlx::query_scalar(
-                        "SELECT EXISTS(SELECT 1 FROM categories WHERE tenant=$1 AND id=$2)",
-                    )
-                    .bind(t)
-                    .bind(id)
-                    .fetch_one(&a.db)
-                    .await?
+                    products::category_exists(a, t, id).await?
                 };
                 if key == "product" {
                     if created_products.iter().any(|existing| existing == id) {
@@ -165,11 +154,7 @@ pub async fn approve<H: WorkHost>(
     }
     // Rebinding uses native owners which acquire their own connection. Do not hold
     // a transaction while calling them: transaction poolers may have one backend.
-    let row = sqlx::query("SELECT * FROM tasks WHERE tenant=$1 AND id=$2")
-        .bind(t)
-        .bind(id)
-        .fetch_one(&a.db)
-        .await?;
+    let row = tasks::get(a, t, id).await?;
     if row.get::<bool, _>("applied") {
         return Ok(json!({"taskId":id,"applied":true,"replayed":true}));
     }
@@ -227,12 +212,7 @@ pub async fn approve<H: WorkHost>(
             "Shop agents are stopped by an administrator".into(),
         ));
     }
-    let revision: i64 =
-        sqlx::query_scalar("SELECT run_revision FROM tasks WHERE tenant=$1 AND id=$2 FOR UPDATE")
-            .bind(t)
-            .bind(id)
-            .fetch_one(&mut *tx)
-            .await?;
+    let revision = tasks::lock_revision(&mut tx, t, id).await?;
     if revision != row.get::<i64, _>("run_revision") {
         return Err(conflict(
             "Work changed while checking approval; reload its current state",
@@ -246,7 +226,15 @@ pub async fn approve<H: WorkHost>(
     let credential = header(h, "authorization")
         .and_then(|s| s.strip_prefix("Bearer "))
         .map(hash);
-    sqlx::query("UPDATE tasks SET run_request=$3,run_credential=$4,run_personal=$5,run_checkpoint='{}',run_state='queued',run_revision=run_revision+1,run_updated=now(),run_lease=NULL,run_until=NULL WHERE tenant=$1 AND id=$2").bind(t).bind(id).bind(request).bind(credential).bind(h.principal.personal_session).execute(&mut *tx).await?;
+    tasks::queue_execution(
+        &mut tx,
+        t,
+        id,
+        &request,
+        credential,
+        h.principal.personal_session,
+    )
+    .await?;
     tx.commit().await?;
     Ok(json!({"taskId":id,"applied":false,"queued":true}))
 }

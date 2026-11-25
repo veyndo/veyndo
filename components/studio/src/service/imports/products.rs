@@ -26,13 +26,7 @@ pub async fn import(
     let namespace = super::identity_namespace(a, &t).await?;
     let id = r.identity(&namespace);
     let digest = hash(&json!({"record":r,"options":options}).to_string());
-    if let Some(extra) =
-        sqlx::query_scalar::<_, Value>("SELECT extra FROM products WHERE tenant=$1 AND id=$2")
-            .bind(&t)
-            .bind(&id)
-            .fetch_optional(&a.db)
-            .await?
-    {
+    if let Some(extra) = crate::store::imports::product_extra(a, &t, &id).await? {
         if extra["identity"]["migrationDigest"] == digest {
             return Ok(json!({"id":id,"replayed":true}));
         }

@@ -1,8 +1,8 @@
 //! Immutable native historical orders preserve exact amounts and provenance without purchase, stock, account or payment effects.
 use super::SourceRecord;
+use crate::store::imports as db;
 use serde::Deserialize;
 use serde_json::{Value, json};
-use sqlx::Row;
 use veyndo_app_platform::store::package_fence::lock_package_write;
 use veyndo_app_platform::store::packages::package;
 use veyndo_core::document::{lenient, view};
@@ -85,30 +85,18 @@ pub async fn import(
     let key = format!("historical:{id}");
     let mut tx = a.db.begin().await?;
     context(&mut tx, h, "historical_import").await?;
-    sqlx::query("SELECT pg_advisory_xact_lock(hashtextextended($1,28))")
-        .bind(format!("{t}:{key}"))
-        .execute(&mut *tx)
-        .await?;
-    if let Some(old) =
-        sqlx::query("SELECT data,fingerprint FROM orders WHERE tenant=$1 AND idempotency_key=$2")
-            .bind(&t)
-            .bind(&key)
-            .fetch_optional(&mut *tx)
-            .await?
-    {
-        if old.get::<String, _>("fingerprint") != fingerprint {
+    db::lock_historical(&mut tx, &format!("{t}:{key}")).await?;
+    if let Some(old) = db::imported_fingerprint(&mut tx, &t, &key).await? {
+        if old != fingerprint {
             return Err(conflict(
                 "Historical source identity already has a different immutable snapshot",
             ));
         }
         return Ok(json!({"id":id,"replayed":true,"historical":true}));
     }
-    sqlx::query("SELECT id FROM sales_channels WHERE tenant=$1 AND id=$2 FOR SHARE")
-        .bind(&t)
-        .bind(channel)
-        .fetch_optional(&mut *tx)
-        .await?
-        .ok_or(bad("Target sales channel unavailable"))?;
+    if !db::share_channel(&mut tx, &t, channel).await? {
+        return Err(bad("Target sales channel unavailable"));
+    }
     if let Some(app) = h.principal.app.as_deref() {
         let m = package(a, &t, app, true).await?;
         lock_package_write(&mut tx, &t, &m).await?;
@@ -125,15 +113,23 @@ pub async fn import(
     order_fields(&mut order);
     let cart_id = format!("history-{id}");
     let token = format!("history-private-{}", veyndo_core::uid());
-    sqlx::query("INSERT INTO carts(id,tenant,token,data,status) VALUES($1,$2,$3,$4,'completed')")
-        .bind(&cart_id)
-        .bind(&t)
-        .bind(token)
-        .bind(json!({"items":[],"locale":"en-GB","salesChannel":channel,"order":order}))
-        .execute(&mut *tx)
-        .await?;
-    sqlx::query("INSERT INTO orders(id,tenant,cart_id,idempotency_key,fingerprint,data,created_at) VALUES($1,$2,$3,$4,$5,$6,$7::text::timestamptz)").bind(&id).bind(&t).bind(cart_id).bind(key).bind(fingerprint).bind(&order).bind(created.to_rfc3339()).execute(&mut *tx).await?;
-    sqlx::query("INSERT INTO order_activity(tenant,order_id,actor,kind,data) VALUES($1,$2,$3,'historical_import',$4)").bind(&t).bind(&id).bind(h.principal.user.as_deref().unwrap_or("unknown")).bind(json!({"source":r.source,"sourceShop":r.source_shop,"sourceId":r.source_id})).execute(&mut *tx).await?;
+    db::insert_historical(
+        &mut tx,
+        &t,
+        db::HistoricalOrder {
+            id: &id,
+            cart_id: &cart_id,
+            token,
+            cart: json!({"items":[],"locale":"en-GB","salesChannel":channel,"order":order}),
+            key: &key,
+            fingerprint: &fingerprint,
+            order: &order,
+            created: created.to_rfc3339(),
+            actor: h.principal.user.as_deref().unwrap_or("unknown"),
+            activity: json!({"source":r.source,"sourceShop":r.source_shop,"sourceId":r.source_id}),
+        },
+    )
+    .await?;
     veyndo_core::store::outbox::publish_on(
         &mut *tx,
         &t,

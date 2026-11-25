@@ -23,13 +23,7 @@ pub async fn import<H: ImportHost>(
     let namespace = super::identity_namespace(a, &t).await?;
     let id = r.identity(&namespace);
     let digest = hash(&json!({"record":r,"options":options}).to_string());
-    if let Some(data) =
-        sqlx::query_scalar::<_, Value>("SELECT data FROM categories WHERE tenant=$1 AND id=$2")
-            .bind(&t)
-            .bind(&id)
-            .fetch_optional(&a.db)
-            .await?
-    {
+    if let Some(data) = crate::store::imports::category_data(a, &t, &id).await? {
         if data["importSource"]["digest"] == digest {
             return Ok(json!({"id":id,"replayed":true}));
         }

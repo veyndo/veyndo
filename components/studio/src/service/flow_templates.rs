@@ -2,8 +2,8 @@
 use super::work_plan::bind;
 use crate::domain::proposal::Step;
 use crate::ports::WorkHost;
+use crate::store::tasks;
 use serde_json::{Value, json};
-use sqlx::Row;
 use veyndo_core::shop_scope::header;
 use veyndo_core::{Error, RequestContext, Result, StatusCode, bad, hash, uid};
 use veyndo_identity::allowed;
@@ -86,10 +86,9 @@ pub async fn load(
             "Personal task access required".into(),
         ));
     }
-    let row = sqlx::query("SELECT task.proposal,task.run_scopes FROM tasks task JOIN shop_environments e ON e.tenant=task.tenant WHERE task.tenant=$1 AND task.id=$2 AND task.run_actor=$3 AND task.applied AND task.run_state='ready' AND task.run_request ? 'execution' AND (e.preview_owner IS NULL OR (e.preview_owner=$3 AND e.preview_until>now()))")
-        .bind(t).bind(&template.task_id).bind(actor).fetch_optional(&mut **tx).await?
+    let (evidence, scopes) = tasks::completed_work(tx, t, &template.task_id, actor)
+        .await?
         .ok_or(Error(StatusCode::FORBIDDEN, "Choose your completed work in this private workspace; source tasks cannot be published or copied across workspaces".into()))?;
-    let scopes: Value = row.get("run_scopes");
     if scopes.as_array().is_none_or(|values| {
         values
             .iter()
@@ -100,7 +99,6 @@ pub async fn load(
             "Source task requires its original permissions".into(),
         ));
     }
-    let evidence: Value = row.get("proposal");
     let mut steps: Vec<Step> = serde_json::from_value(evidence["proposal"]["operations"].clone())
         .map_err(|_| bad("Source task has no native work"))?;
     if steps.is_empty() || steps.len() > 12 {

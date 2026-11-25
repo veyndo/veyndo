@@ -1,7 +1,7 @@
 //! Actor-private manual-order quotes reuse native cart, legal, pricing, inventory and checkout through the assisted-selling register port; no second order ledger.
+use crate::store::manual_orders as db;
 use serde::Deserialize;
 use serde_json::{Value, json};
-use sqlx::Row;
 use veyndo_app_model::declarations::identifier;
 use veyndo_checkout::service::checkout_options;
 use veyndo_checkout::store::cart_create::new_cart_context;
@@ -72,29 +72,19 @@ async fn review(reg: &dyn Register, a: &State, mut h: RequestContext, v: &Value)
             .parse()
             .map_err(|_| bad("Invalid currency"))?,
     );
-    let row = sqlx::query(
-        "SELECT id,email,group_name,company FROM customers WHERE tenant=$1 AND id=$2 AND active",
-    )
-    .bind(tenant(&h)?)
-    .bind(&draft.customer_id)
-    .fetch_optional(&a.db)
-    .await?
-    .ok_or(Error(
-        StatusCode::NOT_FOUND,
-        "Active customer unavailable".into(),
-    ))?;
+    let row = db::active_customer(a, &tenant(&h)?, &draft.customer_id)
+        .await?
+        .ok_or(Error(
+            StatusCode::NOT_FOUND,
+            "Active customer unavailable".into(),
+        ))?;
     let mut c = new_cart_context(a, &h, "", "admin").await?;
     c.data.admin_actor = h.admin_order.clone();
-    c.data.customer_id = Some(row.get("id"));
-    c.data.email = Some(row.get("email"));
-    c.data.group = row.get("group_name");
-    c.data.company = row.get("company");
-    sqlx::query("UPDATE carts SET data=$1 WHERE tenant=$2 AND id=$3")
-        .bind(json!(c.data))
-        .bind(&c.tenant)
-        .bind(&c.id)
-        .execute(&a.db)
-        .await?;
+    c.data.customer_id = Some(row.id);
+    c.data.email = Some(row.email);
+    c.data.group = row.group;
+    c.data.company = row.company;
+    db::set_cart_data(a, &c.tenant, &c.id, &json!(c.data)).await?;
     h.insert("sw-context-token", c.token.parse().unwrap());
     c = reg
         .carts()
@@ -198,7 +188,7 @@ pub async fn invoke(
         ));
     }
     if operation == "context" {
-        let channels: Vec<Value> = sqlx::query_scalar("SELECT jsonb_build_object('id',id,'name',data->'name') FROM sales_channels WHERE tenant=$1 AND data->>'kind' IN ('storefront','headless') AND data->>'active'='true' AND coalesce(data->>'visibility','public')='public' ORDER BY id LIMIT 100").bind(tenant(&h)?).fetch_all(&a.db).await?;
+        let channels = db::channels(a, &tenant(&h)?).await?;
         return Ok(
             json!({"options":checkout_options::options(a,reg.quotes(),&h).await?,"currencies":reg.currency(&h,"currency.list",&json!({})).await?,"policy":legal::invoke(a,&h,"privacy.policy",&json!({})).await?,"channels":channels,"customerGroups":cfg.customer_groups,"mainLocale":cfg.main_locale}),
         );

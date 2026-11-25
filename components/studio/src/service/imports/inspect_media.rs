@@ -1,5 +1,6 @@
 //! Current immutable image bytes and the independently editable native media association are both inspected.
 use super::{SourceRecord, relations};
+use crate::store::imports as db;
 use serde_json::{Value, json};
 use veyndo_core::{RequestContext, Result, State, bad, hash};
 use veyndo_identity::{merchant, permit};
@@ -20,14 +21,9 @@ pub async fn inspect(
             .as_str()
             .ok_or(bad("Source product required"))?,
     )?;
-    let mut actual=sqlx::query_scalar::<_,Value>("SELECT jsonb_build_object('productId',product_id,'digest',encode(sha256(content),'hex'),'byteLength',octet_length(content),'mime',mime,'filename',filename,'title',title,'public',public) FROM product_assets WHERE tenant=$1 AND id=$2").bind(&t).bind(id).fetch_optional(&a.db).await?;
+    let mut actual = db::asset(a, &t, id).await?;
     if let Some(value) = &mut actual {
-        let media: Option<Value> =
-            sqlx::query_scalar("SELECT media FROM products WHERE tenant=$1 AND id=$2")
-                .bind(&t)
-                .bind(&product)
-                .fetch_optional(&a.db)
-                .await?;
+        let media = db::product_media(a, &t, &product).await?;
         value["association"] = media
             .and_then(|xs| {
                 xs.as_array()

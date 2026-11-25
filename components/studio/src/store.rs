@@ -1,10 +1,21 @@
 //! SQL of the studio component.
+pub mod customer_directory;
 pub mod history;
+pub mod imports;
+pub mod manual_orders;
+pub mod order_workflow;
 pub mod outbox_control;
 pub mod overview;
+pub mod products;
 pub mod reports;
 pub mod staging_assets;
 pub mod staging_categories;
+pub mod staging_clone;
 pub mod staging_documents;
+pub mod staging_release;
+pub mod staging_snapshot;
+pub mod tasks;
+pub mod translation_runs;
 pub mod work_items;
+pub mod work_runs;
 pub mod workspaces;

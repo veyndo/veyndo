@@ -1,4 +1,6 @@
 //! Fixed publishable units: product content/translations, settings, experience and app packages.
+use crate::store::staging_clone::scope_app_records;
+use crate::store::staging_snapshot as db;
 use crate::store::{
     staging_assets as assets, staging_categories as categories, staging_documents as documents,
 };
@@ -20,17 +22,12 @@ pub type Tx<'a> = sqlx::Transaction<'a, sqlx::Postgres>;
 pub async fn snapshot(tx: &mut Tx<'_>, t: &str) -> Result<Value> {
     let mut result = serde_json::Map::new();
     // Same settings-before-purchasing-policy lock order as native organization writes.
-    sqlx::query("SELECT revision FROM commerce_settings WHERE tenant=$1 FOR UPDATE")
-        .bind(t)
-        .fetch_optional(&mut **tx)
-        .await?;
+    db::lock_settings(tx, t).await?;
     b2b::snapshot_configuration(tx, t, &mut result).await?;
     assets::snapshot_assets(tx, t, &mut result).await?;
     company::snapshot(tx, t, &mut result).await?;
     snapshot_scopes(tx, t, &mut result).await?;
-    let rows=sqlx::query("SELECT to_jsonb(p)-'tenant'-'stock'-'revision'-'content_revision' AS data FROM products p WHERE tenant=$1 ORDER BY id FOR UPDATE").bind(t).fetch_all(&mut **tx).await?;
-    for r in rows {
-        let value: Value = r.get("data");
+    for value in db::products(tx, t).await? {
         let id = value["id"].as_str().unwrap().to_string();
         result.insert(
             format!("product:{id}"),
@@ -38,38 +35,22 @@ pub async fn snapshot(tx: &mut Tx<'_>, t: &str) -> Result<Value> {
         );
     }
     categories::snapshot(tx, t, &mut result).await?;
-    for (key, table) in [
-        ("settings", "commerce_settings"),
-        ("experience", "experiences"),
-    ] {
-        let sql = format!("SELECT data FROM {table} WHERE tenant=$1 FOR UPDATE");
-        if let Some(data) = sqlx::query_scalar::<_, Value>(sqlx::AssertSqlSafe(sql.as_str()))
-            .bind(t)
-            .fetch_optional(&mut **tx)
-            .await?
-        {
-            result.insert(key.into(), data);
-        }
+    if let Some(data) = db::settings(tx, t).await? {
+        result.insert("settings".into(), data);
     }
-    for r in sqlx::query(
-        "SELECT id,manifest,active FROM app_packages WHERE tenant=$1 ORDER BY id FOR UPDATE",
-    )
-    .bind(t)
-    .fetch_all(&mut **tx)
-    .await?
-    {
-        let app: String = r.get("id");
-        let manifest: Value = r.get("manifest");
+    if let Some(data) = db::experience(tx, t).await? {
+        result.insert("experience".into(), data);
+    }
+    for package in db::packages(tx, t).await? {
+        let app = package.id;
+        let manifest = package.manifest;
         let m: Manifest =
             serde_json::from_value(manifest.clone()).map_err(|_| bad("Invalid app"))?;
         result.insert(
             format!("app:{app}"),
-            json!({"manifest":manifest,"active":r.get::<bool,_>("active")}),
+            json!({"manifest":manifest,"active":package.active}),
         );
-        sqlx::query("SELECT set_config('rac.tenant',$1,true)")
-            .bind(t)
-            .execute(&mut **tx)
-            .await?;
+        scope_app_records(tx, t).await?;
         for e in m.entities.iter().filter(|e| {
             configuration(e)
                 && !m
@@ -93,35 +74,12 @@ pub async fn snapshot(tx: &mut Tx<'_>, t: &str) -> Result<Value> {
             }
         }
     }
-    for (kind, table) in [
-        ("rule", "commerce_rules"),
-        ("promotion", "commerce_promotions"),
-        ("flow", "commerce_flows"),
-        ("channel", "sales_channels"),
-    ] {
-        let sql = if kind == "rule" {
-            format!(
-                "SELECT id,jsonb_build_object('name',name,'condition',condition,'active',active) AS data FROM {table} WHERE tenant=$1 ORDER BY id FOR UPDATE"
-            )
-        } else {
-            format!("SELECT id,data FROM {table} WHERE tenant=$1 ORDER BY id FOR UPDATE")
-        };
-        for r in sqlx::query(sqlx::AssertSqlSafe(sql.as_str()))
-            .bind(t)
-            .fetch_all(&mut **tx)
-            .await?
-        {
-            result.insert(
-                format!("{kind}:{}", r.get::<String, _>("id")),
-                r.get::<Value, _>("data"),
-            );
+    for kind in ["rule", "promotion", "flow", "channel"] {
+        for (id, data) in db::units(tx, t, kind).await? {
+            result.insert(format!("{kind}:{id}"), data);
         }
     }
-    let data: Option<Value> =
-        sqlx::query_scalar("SELECT data FROM order_state_machines WHERE tenant=$1 FOR UPDATE")
-            .bind(t)
-            .fetch_optional(&mut **tx)
-            .await?;
+    let data = db::order_workflow(tx, t).await?;
     result.insert(
         "order-workflow".into(),
         data.unwrap_or_else(|| json!(default_machine())),
@@ -135,9 +93,23 @@ pub async fn product_content(tx: &mut Tx<'_>, t: &str, value: &Value) -> Result<
     let value = &published;
     let id = value["id"].as_str().ok_or(bad("Product ID required"))?;
     // A new staged product enters live with zero inventory; stock remains an independent operational write.
-    sqlx::query("INSERT INTO products(tenant,id,name,category,description,price,tax_rate,stock,active,product_number) VALUES($1,$2,$3,$4,$5,$6,$7,0,$8,$9) ON CONFLICT(tenant,id) DO NOTHING").bind(t).bind(id).bind(value["name"].as_str()).bind(value["category"].as_str()).bind(value["description"].as_str()).bind(value["price"].as_f64()).bind(value["tax_rate"].as_f64()).bind(value["active"].as_bool().unwrap_or(true)).bind(value["product_number"].as_str()).execute(&mut **tx).await?;
+    db::insert_product(
+        tx,
+        t,
+        id,
+        &db::NewProduct {
+            name: value["name"].as_str(),
+            category: value["category"].as_str(),
+            description: value["description"].as_str(),
+            price: value["price"].as_f64(),
+            tax_rate: value["tax_rate"].as_f64(),
+            active: value["active"].as_bool().unwrap_or(true),
+            product_number: value["product_number"].as_str(),
+        },
+    )
+    .await?;
     // Explicit allowlist preserves independently changing stock and never copies tenant keys.
-    let n=sqlx::query("UPDATE products SET (name,category,description,price,tax_rate,list_price,regulation_price,reference_price,advanced_prices,min_purchase,purchase_steps,max_purchase,parent_id,options,media,properties,delivery_days,extra,active,product_number)=(SELECT x.name,x.category,x.description,x.price,x.tax_rate,x.list_price,x.regulation_price,x.reference_price,x.advanced_prices,x.min_purchase,x.purchase_steps,x.max_purchase,x.parent_id,x.options,x.media,x.properties,x.delivery_days,x.extra,x.active,x.product_number FROM jsonb_populate_record(NULL::products,$1) x),revision=revision+1 WHERE tenant=$2 AND id=$3").bind(value).bind(t).bind(id).execute(&mut **tx).await?.rows_affected();
+    let n = db::update_product_content(tx, t, id, value).await?;
     if n != 1 {
         return Err(conflict(
             "Product creation/deletion needs an explicit catalog migration",
@@ -155,33 +127,33 @@ pub async fn product_content(tx: &mut Tx<'_>, t: &str, value: &Value) -> Result<
         .await?;
     }
     if let Some(channels) = value["channelVisibility"].as_array() {
-        sqlx::query("DELETE FROM product_channel_visibility WHERE tenant=$1 AND product_id=$2")
-            .bind(t)
-            .bind(id)
-            .execute(&mut **tx)
-            .await?;
+        db::clear_channel_visibility(tx, t, id).await?;
         for channel in channels {
-            sqlx::query("INSERT INTO product_channel_visibility VALUES($1,$2,$3,$4)")
-                .bind(t)
-                .bind(id)
-                .bind(channel["id"].as_str())
-                .bind(channel["visible"].as_bool())
-                .execute(&mut **tx)
-                .await?;
+            db::insert_channel_visibility(
+                tx,
+                t,
+                id,
+                channel["id"].as_str(),
+                channel["visible"].as_bool(),
+            )
+            .await?;
         }
     }
     for tr in value["translations"]
         .as_array()
         .ok_or(bad("Translations required"))?
     {
-        sqlx::query("INSERT INTO product_translations(tenant,product_id,language_id,name,description) VALUES($1,$2,$3,$4,$5) ON CONFLICT(tenant,product_id,language_id) DO UPDATE SET name=EXCLUDED.name,description=EXCLUDED.description")
-            .bind(t).bind(id).bind(tr["language_id"].as_str()).bind(tr["name"].as_str()).bind(tr["description"].as_str()).execute(&mut **tx).await?;
-    }
-    let r = sqlx::query("SELECT * FROM products WHERE tenant=$1 AND id=$2")
-        .bind(t)
-        .bind(id)
-        .fetch_one(&mut **tx)
+        db::upsert_translation(
+            tx,
+            t,
+            id,
+            tr["language_id"].as_str(),
+            tr["name"].as_str(),
+            tr["description"].as_str(),
+        )
         .await?;
+    }
+    let r = db::product_row(tx, t, id).await?;
     sync_product(tx, t, &json!(product(&r))).await?;
     veyndo_core::store::outbox::publish_on(
         &mut **tx,
@@ -225,15 +197,25 @@ fn live_asset_urls(value: &mut Value, tenant: &str) {
 }
 /// Exact selected-product readback includes database defaults and the live asset delivery URLs, without a whole-shop rescan.
 pub async fn product_snapshot(tx: &mut Tx<'_>, t: &str, id: &str) -> Result<Value> {
-    let value:Value=sqlx::query_scalar("SELECT to_jsonb(p)-'tenant'-'stock'-'revision'-'content_revision' FROM products p WHERE tenant=$1 AND id=$2 FOR UPDATE").bind(t).bind(id).fetch_one(&mut **tx).await?;
+    let value = db::product(tx, t, id).await?;
     product_projection(tx, t, value).await
 }
 async fn product_projection(tx: &mut Tx<'_>, t: &str, mut value: Value) -> Result<Value> {
     let id = value["id"].as_str().unwrap().to_string();
-    let trs=sqlx::query("SELECT language_id,name,description FROM product_translations WHERE tenant=$1 AND product_id=$2 ORDER BY language_id FOR UPDATE").bind(t).bind(&id).fetch_all(&mut **tx).await?;
-    value["translations"]=json!(trs.iter().map(|r|json!({"language_id":r.get::<String,_>("language_id"),"name":r.get::<Option<String>,_>("name"),"description":r.get::<Option<String>,_>("description")})).collect::<Vec<_>>());
-    value["categoryIds"]=json!(sqlx::query_scalar::<_,String>("SELECT category_id FROM product_categories WHERE tenant=$1 AND product_id=$2 ORDER BY category_id").bind(t).bind(&id).fetch_all(&mut **tx).await?);
-    value["channelVisibility"]=json!(sqlx::query("SELECT channel_id,visible FROM product_channel_visibility WHERE tenant=$1 AND product_id=$2 ORDER BY channel_id").bind(t).bind(&id).fetch_all(&mut **tx).await?.iter().map(|r|json!({"id":r.get::<String,_>("channel_id"),"visible":r.get::<bool,_>("visible")})).collect::<Vec<_>>());
+    let trs = db::translations(tx, t, &id).await?;
+    value["translations"] = json!(
+        trs.into_iter()
+            .map(|(language_id, name, description)| json!({"language_id":language_id,"name":name,"description":description}))
+            .collect::<Vec<_>>()
+    );
+    value["categoryIds"] = json!(db::category_ids(tx, t, &id).await?);
+    value["channelVisibility"] = json!(
+        db::channel_visibility(tx, t, &id)
+            .await?
+            .into_iter()
+            .map(|(id, visible)| json!({"id":id,"visible":visible}))
+            .collect::<Vec<_>>()
+    );
     Ok(value)
 }
 #[cfg(test)]

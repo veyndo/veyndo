@@ -3,10 +3,10 @@ use super::work_execution::{admit_provider, enqueue_translation};
 use super::work_plan::approve;
 use crate::domain::proposal::{Change, Proposal, validate_proposal};
 use crate::ports::WorkHost;
+use crate::store::{products, tasks};
 use serde::Deserialize;
 use serde_json::{Value, json};
 use sqlx::Row;
-use veyndo_catalog::store::products::product;
 use veyndo_cognition::inference::Choice;
 use veyndo_core::document::{lenient, view};
 use veyndo_core::shop_scope::header;
@@ -21,7 +21,7 @@ use veyndo_shop::Settings;
 /// Applies an approved proposal; work plans go through their own approval.
 pub async fn apply<H: WorkHost>(host: &H, t: &str, id: &str, h: &RequestContext) -> Result<Value> {
     let a = host.models().core;
-    let work:bool=sqlx::query_scalar("SELECT coalesce(jsonb_array_length(proposal->'proposal'->'operations'),0)>0 FROM tasks WHERE tenant=$1 AND id=$2").bind(t).bind(id).fetch_optional(&a.db).await?.unwrap_or(false);
+    let work = tasks::has_operations(a, t, id).await?;
     if work {
         return approve(host, t, id, h).await;
     }
@@ -96,27 +96,15 @@ async fn write_changes(
 ) -> Result<()> {
     for c in changes {
         let product_id = c.product_id.clone();
-        let n=sqlx::query("UPDATE products SET price=COALESCE($1,price),stock=COALESCE($2,stock),revision=revision+1 WHERE tenant=$3 AND id=$4 AND revision=$5").bind(c.price).bind(c.stock).bind(t).bind(c.product_id).bind(c.expected_revision).execute(&mut **tx).await?.rows_affected();
+        let n = products::apply_change(tx, t, &c).await?;
         if n != 1 {
             return Err(conflict("Product changed since preview; create a new plan"));
         }
-        let row = sqlx::query("SELECT * FROM products WHERE tenant=$1 AND id=$2")
-            .bind(t)
-            .bind(product_id)
-            .fetch_one(&mut **tx)
-            .await?;
-        sync_product(tx, t, &serde_json::to_value(product(&row)).unwrap()).await?;
+        let row = products::get(tx, t, &product_id).await?;
+        sync_product(tx, t, &serde_json::to_value(row).unwrap()).await?;
     }
     if let Some(e) = experience {
-        let n = sqlx::query(
-            "UPDATE experiences SET data=$1,revision=revision+1 WHERE tenant=$2 AND revision=$3",
-        )
-        .bind(e)
-        .bind(t)
-        .bind(expected)
-        .execute(&mut **tx)
-        .await?
-        .rows_affected();
+        let n = products::replace_experience(tx, t, e, expected).await?;
         if n != 1 {
             return Err(conflict("Experience changed since preview"));
         }
@@ -132,12 +120,7 @@ pub async fn apply_mode<H: WorkHost>(
     autonomous: bool,
 ) -> Result<Value> {
     let a = host.models().core;
-    let evidence: Option<Value> =
-        sqlx::query_scalar("SELECT proposal FROM tasks WHERE tenant=$1 AND id=$2 AND NOT applied")
-            .bind(t)
-            .bind(id)
-            .fetch_optional(&a.db)
-            .await?;
+    let evidence = tasks::unapplied_proposal(a, t, id).await?;
     if let Some(evidence) = evidence
         && evidence["proposal"]["translation"].is_string()
     {
@@ -157,10 +140,7 @@ pub async fn apply_mode<H: WorkHost>(
         },
     )
     .await?;
-    let r = sqlx::query("SELECT * FROM tasks WHERE tenant=$1 AND id=$2 FOR UPDATE")
-        .bind(t)
-        .bind(id)
-        .fetch_optional(&mut *tx)
+    let r = tasks::lock(&mut tx, t, id)
         .await?
         .ok_or(Error(StatusCode::NOT_FOUND, "Task not found".into()))?;
     if r.get::<Option<String>, _>("run_state")
@@ -178,15 +158,11 @@ pub async fn apply_mode<H: WorkHost>(
             json!({"taskId":id,"applied":true,"replayed":true,"translationJobId":p.translation.as_ref().map(|_|id)}),
         );
     }
-    let settings_row =
-        sqlx::query("SELECT data,revision FROM commerce_settings WHERE tenant=$1 FOR UPDATE")
-            .bind(t)
-            .fetch_one(&mut *tx)
-            .await?;
-    let settings: Settings = serde_json::from_value(settings_row.get("data"))
-        .map_err(|_| bad("Invalid commerce settings"))?;
+    let (settings_data, settings_revision) = products::lock_settings(&mut tx, t).await?;
+    let settings: Settings =
+        serde_json::from_value(settings_data).map_err(|_| bad("Invalid commerce settings"))?;
     if let Some(revision) = v["policyRevision"].as_i64()
-        && revision != settings_row.get::<i64, _>("revision")
+        && revision != settings_revision
     {
         return Err(conflict(
             "Merchant guardrails/settings changed after preview",
@@ -197,15 +173,7 @@ pub async fn apply_mode<H: WorkHost>(
         .iter()
         .map(|c| c.product_id.clone())
         .collect::<Vec<_>>();
-    let products =
-        sqlx::query("SELECT * FROM products WHERE tenant=$1 AND id=ANY($2) ORDER BY id FOR UPDATE")
-            .bind(t)
-            .bind(ids)
-            .fetch_all(&mut *tx)
-            .await?
-            .iter()
-            .map(product)
-            .collect::<Vec<_>>();
+    let products = products::lock(&mut tx, t, ids).await?;
     validate_proposal(&p, &products)?;
     for c in &p.changes {
         check(
@@ -248,11 +216,7 @@ pub async fn apply_mode<H: WorkHost>(
         (p.experience, p.expected_experience_revision),
     )
     .await?;
-    sqlx::query("UPDATE tasks SET applied=true,applied_at=now() WHERE tenant=$2 AND id=$1")
-        .bind(id)
-        .bind(t)
-        .execute(&mut *tx)
-        .await?;
+    tasks::mark_applied(&mut tx, t, id).await?;
     veyndo_core::store::outbox::publish_on(
         &mut *tx,
         t,

@@ -1,5 +1,6 @@
 //! Selected products publish before their image assets and in native parent-before-variant order, without copying stock.
 use super::snapshot::{Tx, product_content};
+use crate::store::staging_snapshot::product_exists;
 use serde_json::Value;
 use veyndo_core::{Result, conflict};
 pub async fn publish(tx: &mut Tx<'_>, live: &str, current: &Value, keys: &[String]) -> Result<()> {
@@ -16,13 +17,7 @@ pub async fn publish(tx: &mut Tx<'_>, live: &str, current: &Value, keys: &[Strin
                 if remaining.iter().any(|k| k == &format!("product:{parent}")) {
                     continue;
                 }
-                let exists: bool = sqlx::query_scalar(
-                    "SELECT EXISTS(SELECT 1 FROM products WHERE tenant=$1 AND id=$2)",
-                )
-                .bind(live)
-                .bind(parent)
-                .fetch_one(&mut **tx)
-                .await?;
+                let exists = product_exists(tx, live, parent).await?;
                 if !exists {
                     return Err(conflict(
                         "Publish the variant's parent product in the same release first",

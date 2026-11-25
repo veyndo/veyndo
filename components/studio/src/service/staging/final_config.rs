@@ -1,6 +1,7 @@
 //! Validate the final published channel/automation aggregate and initialize native POS defaults.
 use super::snapshot::Tx;
 use crate::ports::ReleaseHost;
+use crate::store::staging_release as db;
 use serde_json::Value;
 use veyndo_core::{RequestContext, Result, bad};
 use veyndo_marketing::store::channel_config::validate_channel_config;
@@ -18,12 +19,7 @@ pub async fn validate<H: ReleaseHost>(
     base: &mut Value,
 ) -> Result<()> {
     if keys.iter().any(|key| key == "settings") {
-        let settings = decode(
-            sqlx::query_scalar("SELECT data FROM commerce_settings WHERE tenant=$1")
-                .bind(t)
-                .fetch_one(&mut **tx)
-                .await?,
-        )?;
+        let settings = decode(db::settings(tx, t).await?)?;
         host.settings_guards()
             .locale(tx, t, &settings.main_locale)
             .await?;
@@ -56,14 +52,9 @@ pub async fn validate<H: ReleaseHost>(
                 return Err(bad("Main channel must remain storefront"));
             }
             if kind == "channel" {
-                let settings = decode(
-                    sqlx::query_scalar("SELECT data FROM commerce_settings WHERE tenant=$1")
-                        .bind(t)
-                        .fetch_one(&mut **tx)
-                        .await?,
-                )?;
+                let settings = decode(db::settings(tx, t).await?)?;
                 validate_channel_config(tx, t, unit, &current[key], &settings).await?;
-                let configured: bool = sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM commerce_overrides WHERE tenant=$1 AND channel_id=$2)").bind(t).bind(unit).fetch_one(&mut **tx).await?;
+                let configured = db::channel_configured(tx, t, unit).await?;
                 configure_pos(
                     tx,
                     t,
@@ -73,13 +64,7 @@ pub async fn validate<H: ReleaseHost>(
                 )
                 .await?;
                 if current[key]["kind"] == "pos" && !configured {
-                    let patch: Value = sqlx::query_scalar(
-                        "SELECT data FROM commerce_overrides WHERE tenant=$1 AND channel_id=$2",
-                    )
-                    .bind(t)
-                    .bind(unit)
-                    .fetch_one(&mut **tx)
-                    .await?;
+                    let patch = db::channel_overrides(tx, t, unit).await?;
                     base["live"][format!("settings-channel:{unit}")] = patch;
                 }
             }

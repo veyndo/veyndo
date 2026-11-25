@@ -1,4 +1,5 @@
 //! Revision-bound order workflow configuration used by installed apps and selective sandbox releases.
+use crate::store::order_workflow as workflow;
 use axum::Json;
 use axum::extract::State as Shared;
 use serde::Deserialize;
@@ -52,40 +53,27 @@ pub async fn save(
     let revision = input.revision.ok_or(bad("revision required"))?;
     let mut tx = a.db.begin().await?;
     lock_config(&mut tx, &t).await?;
-    sqlx::query("SELECT pg_advisory_xact_lock(hashtextextended($1,27))")
-        .bind(&t)
-        .execute(&mut *tx)
-        .await?;
+    workflow::lock(&mut tx, &t).await?;
     if let Some(app) = &m.source_app {
         permit(&h, "apps.manage")?;
-        let active: bool = sqlx::query_scalar(
-            "SELECT EXISTS(SELECT 1 FROM app_packages WHERE tenant=$1 AND id=$2 AND active)",
-        )
-        .bind(&t)
-        .bind(app)
-        .fetch_one(&mut *tx)
-        .await?;
+        let active = workflow::app_active(&mut tx, &t, app).await?;
         if !active {
             return Err(bad("Workflow source app is not installed"));
         }
     }
     validate_order_base(&mut tx, &t, m.clone()).await?;
-    let old: Option<i64> =
-        sqlx::query_scalar("SELECT revision FROM order_state_machines WHERE tenant=$1 FOR UPDATE")
-            .bind(&t)
-            .fetch_optional(&mut *tx)
-            .await?;
+    let old = workflow::revision(&mut tx, &t).await?;
     if old.unwrap_or(0) != revision {
         return Err(conflict("Workflow revision changed"));
     }
     // Accepted snapshots retain their original state graph. Legacy orders still need representation.
     // Keep every persisted state represented so changing a definition cannot strand existing orders.
     let states = m.states.iter().map(|s| s.id.clone()).collect::<Vec<_>>();
-    let stranded:bool=sqlx::query_scalar("SELECT EXISTS(SELECT 1 FROM orders WHERE tenant=$1 AND NOT (data ? 'nativeLifecycle') AND NOT (data->>'state'=ANY($2)) AND data->>'state' NOT IN ('expired','payment_review'))").bind(&t).bind(&states).fetch_one(&mut *tx).await?;
+    let stranded = workflow::strands_legacy_orders(&mut tx, &t, &states).await?;
     if stranded {
         return Err(conflict("Workflow removes an active order state"));
     }
-    sqlx::query("INSERT INTO order_state_machines(tenant,data) VALUES($1,$2) ON CONFLICT(tenant) DO UPDATE SET data=EXCLUDED.data,revision=order_state_machines.revision+1").bind(&t).bind(json!(m)).execute(&mut *tx).await?;
+    workflow::save(&mut tx, &t, &json!(m)).await?;
     veyndo_core::store::outbox::publish_on(
         &mut *tx,
         &t,

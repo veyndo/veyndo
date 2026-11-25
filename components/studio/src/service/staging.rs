@@ -1,9 +1,9 @@
 //! Private cloned shops: clone, snapshot, reviewed diff and selective atomic release of changes. The server lends app installation, record saves, flow checks and settings guards through the release port.
 use crate::domain::staging_access as access;
+use crate::store::staging_release as db;
 use axum::Json;
 use axum::extract::{Path, State as Shared};
 use serde_json::{Value, json};
-use sqlx::Row;
 use veyndo_core::store::environments::{owned_stage as owned_on, parent};
 use veyndo_core::{RequestContext, Result, State, bad, hash};
 use veyndo_identity::merchant;
@@ -33,10 +33,10 @@ pub async fn owned(a: &State, live: &str, stage: &str) -> Result<Value> {
 /// The live shop's environments and recent releases.
 pub async fn list(Shared(a): Shared<State>, h: RequestContext) -> Result<Json<Value>> {
     let t = live(&a, &h).await?;
-    let rows=sqlx::query("SELECT tenant,name,created_at::text AS created_at FROM shop_environments WHERE live_tenant=$1 AND preview_owner IS NULL ORDER BY created_at DESC").bind(&t).fetch_all(&a.db).await?;
-    let history=sqlx::query("SELECT id,environment,selections,created_at::text AS created_at FROM shop_releases WHERE live_tenant=$1 ORDER BY created_at DESC LIMIT 30").bind(&t).fetch_all(&a.db).await?;
+    let rows = db::environments(&a, &t).await?;
+    let history = db::releases(&a, &t).await?;
     Ok(Json(
-        json!({"live":t,"environments":rows.iter().map(|r|json!({"id":r.get::<String,_>("tenant"),"name":r.get::<String,_>("name"),"createdAt":r.get::<String,_>("created_at")})).collect::<Vec<_>>(),"releases":history.iter().map(|r|json!({"id":r.get::<String,_>("id"),"environment":r.get::<String,_>("environment"),"selections":r.get::<Value,_>("selections"),"createdAt":r.get::<String,_>("created_at")})).collect::<Vec<_>>() }),
+        json!({"live":t,"environments":rows.iter().map(|r|json!({"id":r.tenant,"name":r.name,"createdAt":r.created_at})).collect::<Vec<_>>(),"releases":history.iter().map(|r|json!({"id":r.id,"environment":r.environment,"selections":r.selections,"createdAt":r.created_at})).collect::<Vec<_>>() }),
     ))
 }
 /// The readable changes of a sandbox against its baseline, with live conflicts.

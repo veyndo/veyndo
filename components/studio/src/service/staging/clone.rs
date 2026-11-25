@@ -2,9 +2,9 @@
 use super::live;
 use super::snapshot::{Tx, snapshot};
 use crate::ports::ReleaseHost;
+use crate::store::staging_clone as clone;
 use crate::store::staging_documents as documents;
 use serde_json::{Value, json};
-use sqlx::Row;
 use veyndo_app_model::manifest::Manifest;
 use veyndo_app_platform::domain::core_extensions::configuration;
 use veyndo_app_platform::domain::entity_access::entity_access;
@@ -35,14 +35,8 @@ async fn clone_apps<H: ReleaseHost>(
     t: &str,
     id: &str,
 ) -> Result<()> {
-    let rows =
-        sqlx::query("SELECT manifest FROM app_packages WHERE tenant=$1 AND active ORDER BY id")
-            .bind(t)
-            .fetch_all(&mut **tx)
-            .await?;
-    for r in rows {
-        let m: Manifest =
-            serde_json::from_value(r.get("manifest")).map_err(|_| bad("Invalid app"))?;
+    for manifest in clone::active_manifests(tx, t).await? {
+        let m: Manifest = serde_json::from_value(manifest).map_err(|_| bad("Invalid app"))?;
         if m.runtime == "declarative" {
             host.install_app(tx, id, m.clone()).await?;
             for entity in m.entities.iter().filter(|e| {
@@ -50,10 +44,7 @@ async fn clone_apps<H: ReleaseHost>(
                     && (e.public_read
                         || (e.extends.is_some() && entity_access(&m, e, h, "list").is_ok()))
             }) {
-                sqlx::query("SELECT set_config('rac.tenant',$1,true)")
-                    .bind(t)
-                    .execute(&mut **tx)
-                    .await?;
+                clone::scope_app_records(tx, t).await?;
                 let records = record_rows(tx, t, &m.id, entity, 1001).await?;
                 if records.len() > 1000 {
                     return Err(bad(
@@ -115,90 +106,28 @@ async fn create_inner<H: ReleaseHost>(
     let id = format!("stage-{}", &uid()[..20]);
     let mut tx = a.db.begin().await?;
     context(&mut tx, &h, "staging.clone").await?;
-    sqlx::query("SELECT pg_advisory_xact_lock(hashtextextended($1,16))")
-        .bind(&t)
-        .execute(&mut *tx)
-        .await?;
-    let count: i64 =
-        sqlx::query_scalar("SELECT count(*) FROM shop_environments WHERE live_tenant=$1")
-            .bind(&t)
-            .fetch_one(&mut *tx)
-            .await?;
+    clone::lock_environments(&mut tx, &t).await?;
+    let count = clone::environment_count(&mut tx, &t).await?;
     if count >= 10 {
         return Err(bad("Maximum 10 private environments per shop"));
     }
     lock_company(&mut tx, &t).await?;
     let base = snapshot(&mut tx, &t).await?;
-    sqlx::query("INSERT INTO tenants(id,name) VALUES($1,$2)")
-        .bind(&id)
-        .bind(name)
-        .execute(&mut *tx)
-        .await?;
-    sqlx::query(
-        "INSERT INTO shop_environments(tenant,live_tenant,name,baseline) VALUES($1,$2,$3,$4)",
-    )
-    .bind(&id)
-    .bind(&t)
-    .bind(name)
-    .bind(base)
-    .execute(&mut *tx)
-    .await?;
-    sqlx::query("INSERT INTO products SELECT (jsonb_populate_record(NULL::products,to_jsonb(p)||jsonb_build_object('tenant',$2::text))).* FROM products p WHERE tenant=$1").bind(&t).bind(&id).execute(&mut *tx).await?;
-    sqlx::query("INSERT INTO product_translations SELECT $2,product_id,language_id,name,description FROM product_translations WHERE tenant=$1").bind(&t).bind(&id).execute(&mut *tx).await?;
-    sqlx::query("INSERT INTO product_assets SELECT (jsonb_populate_record(NULL::product_assets,to_jsonb(a)||jsonb_build_object('tenant',$2::text))).* FROM product_assets a WHERE tenant=$1").bind(&t).bind(&id).execute(&mut *tx).await?;
-    sqlx::query("INSERT INTO categories SELECT $2,id,parent_id,position,data,revision FROM categories WHERE tenant=$1").bind(&t).bind(&id).execute(&mut *tx).await?;
-    sqlx::query("INSERT INTO product_categories SELECT $2,product_id,category_id FROM product_categories WHERE tenant=$1").bind(&t).bind(&id).execute(&mut *tx).await?;
-    for table in ["commerce_settings", "experiences", "receipt_settings"] {
-        let sql =
-            format!("INSERT INTO {table}(tenant,data) SELECT $2,data FROM {table} WHERE tenant=$1");
-        sqlx::query(sqlx::AssertSqlSafe(sql.as_str()))
-            .bind(&t)
-            .bind(&id)
-            .execute(&mut *tx)
-            .await?;
-    }
-    sqlx::query("INSERT INTO order_state_machines(tenant,data) SELECT $2,data FROM order_state_machines WHERE tenant=$1").bind(&t).bind(&id).execute(&mut *tx).await?;
-    // No external services or PSP configurations are registered for a sandbox tenant.
-    sqlx::query("UPDATE commerce_settings SET data=jsonb_set(data,'{payments}',COALESCE((SELECT jsonb_agg(p) FROM jsonb_array_elements(data->'payments') p WHERE p->>'mode'<>'app'),'[]')) WHERE tenant=$1").bind(&id).execute(&mut *tx).await?;
-    for table in ["commerce_promotions", "commerce_flows", "sales_channels"] {
-        let sql = format!(
-            "INSERT INTO {table}(tenant,id,data) SELECT $2,id,data FROM {table} WHERE tenant=$1"
-        );
-        sqlx::query(sqlx::AssertSqlSafe(sql.as_str()))
-            .bind(&t)
-            .bind(&id)
-            .execute(&mut *tx)
-            .await?;
-    }
+    clone::insert_environment(&mut tx, &t, &id, name, &base).await?;
+    clone::copy_catalog(&mut tx, &t, &id).await?;
+    clone::copy_settings(&mut tx, &t, &id).await?;
     b2b::clone_configuration(&mut tx, &t, &id).await?;
     clone_apps(host, &mut tx, &h, &t, &id).await?;
-    sqlx::query("INSERT INTO policy(tenant,variant) VALUES($1,'discovery'),($1,'comparison')")
-        .bind(&id)
-        .execute(&mut *tx)
-        .await?;
     let wat = include_str!("../../../../../extensions/company-limit.wat");
-    sqlx::query("INSERT INTO extensions(tenant,wat,digest) VALUES($1,$2,$3)")
-        .bind(&id)
-        .bind(wat)
-        .bind(hash(wat))
-        .execute(&mut *tx)
-        .await?;
-    sqlx::query("INSERT INTO commerce_rules(tenant,id,name,condition,active) SELECT $2,id,name,condition,active FROM commerce_rules WHERE tenant=$1").bind(&t).bind(&id).execute(&mut *tx).await?;
-    sqlx::query("INSERT INTO product_channel_visibility SELECT $2,product_id,channel_id,visible FROM product_channel_visibility WHERE tenant=$1").bind(&t).bind(&id).execute(&mut *tx).await?;
-    sqlx::query("INSERT INTO company_logos(tenant,id,content,digest,mime,width,height) SELECT $2,id,content,digest,mime,width,height FROM company_logos WHERE tenant=$1").bind(&t).bind(&id).execute(&mut *tx).await?;
-    sqlx::query("INSERT INTO company_overrides(tenant,channel_id,data) SELECT $2,channel_id,data FROM company_overrides WHERE tenant=$1").bind(&t).bind(&id).execute(&mut *tx).await?;
-    sqlx::query("INSERT INTO commerce_overrides(tenant,channel_id,data) SELECT $2,channel_id,data FROM commerce_overrides WHERE tenant=$1").bind(&t).bind(&id).execute(&mut *tx).await?;
+    clone::insert_defaults(&mut tx, &id, wat, &hash(wat)).await?;
+    clone::copy_channel_configuration(&mut tx, &t, &id).await?;
     documents::clone_sources(&mut tx, &t, &id).await?;
     // Sandbox baseline is the actual sanitized clone, so disabled integrations aren't release changes.
     let stagebase = snapshot(&mut tx, &id).await?;
     let livebase = snapshot(&mut tx, &t).await?;
-    sqlx::query("UPDATE shop_environments SET baseline=$1 WHERE tenant=$2")
-        .bind(json!({"stage":stagebase,"live":livebase}))
-        .bind(&id)
-        .execute(&mut *tx)
-        .await?;
+    clone::set_baseline(&mut tx, &id, &json!({"stage":stagebase,"live":livebase})).await?;
     if let Some(owner) = preview_owner {
-        sqlx::query("UPDATE shop_environments SET preview_owner=$1,preview_until=now()+interval '1 hour' WHERE tenant=$2").bind(owner).bind(&id).execute(&mut *tx).await?;
+        clone::mark_preview(&mut tx, &id, &owner).await?;
     }
     tx.commit().await?;
     host.register_sandbox(&id, wat)?;

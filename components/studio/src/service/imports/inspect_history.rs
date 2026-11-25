@@ -1,8 +1,8 @@
 //! Operational history comparison reads actual CRM/address/order/review values with paired current PII rights.
 use super::{SourceRecord, relations};
+use crate::store::imports as db;
 use serde::Deserialize;
 use serde_json::{Value, json};
-use sqlx::Row;
 use veyndo_core::document::view;
 use veyndo_core::{RequestContext, Result, State, bad, hash};
 use veyndo_customers::service::address_entries::address_list;
@@ -10,6 +10,19 @@ use veyndo_customers::store::crm::address_plan;
 use veyndo_identity::domain::credentials::email;
 use veyndo_identity::{merchant, permit};
 /// The JSON fields `inspect` reads, typed as it reads them.
+/// The import source a customer's automation document records.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct CustomerAutomation {
+    import_source: ImportSource,
+}
+/// The fingerprint of the imported source record.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct ImportSource {
+    fingerprint: Value,
+}
+
 #[derive(Deserialize, Default)]
 #[serde(default, rename_all = "camelCase")]
 struct InspectInput {
@@ -30,10 +43,10 @@ pub async fn inspect(
     match r.kind.as_str() {
         "customers" => {
             permit(h, "customers.read")?;
-            let row=sqlx::query("SELECT email,profile,group_name,automation FROM customers WHERE tenant=$1 AND id=$2").bind(&t).bind(id).fetch_optional(&a.db).await?;
+            let row = db::customer(a, &t, id).await?;
             let mut actual = None;
             if let Some(row) = row {
-                let email: String = row.get("email");
+                let email = row.email;
                 let book = address_list(a, &t, &email).await?;
                 let elements = book["elements"]
                     .as_array()
@@ -51,7 +64,7 @@ pub async fn inspect(
                     .collect::<Vec<_>>();
                 addresses.sort_by_key(Value::to_string);
                 actual = Some(
-                    json!({"email":email,"profile":row.get::<Value,_>("profile"),"customerGroup":row.get::<String,_>("group_name"),"sourceDigest":row.get::<Value,_>("automation")["importSource"]["fingerprint"],"billingAddress":default("defaultBillingAddressId"),"shippingAddress":default("defaultShippingAddressId"),"addresses":addresses}),
+                    json!({"email":email,"profile":row.profile,"customerGroup":row.group,"sourceDigest":view::<CustomerAutomation>(&row.automation).import_source.fingerprint,"billingAddress":default("defaultBillingAddressId"),"shippingAddress":default("defaultShippingAddressId"),"addresses":addresses}),
                 );
             }
             let first = r.data["firstName"].as_str().unwrap_or("");
@@ -78,7 +91,7 @@ pub async fn inspect(
         }
         "orders" => {
             permit(h, "orders.read")?;
-            let actual=sqlx::query_scalar::<_,Value>("SELECT data||jsonb_build_object('sourceCreatedAt',to_char(created_at AT TIME ZONE 'UTC','YYYY-MM-DD\"T\"HH24:MI:SS.US\"Z\"')) FROM orders WHERE tenant=$1 AND id=$2").bind(&t).bind(id).fetch_optional(&a.db).await?;
+            let actual = db::order(a, &t, id).await?;
             let created = chrono::DateTime::parse_from_rfc3339(
                 r.data["createdAt"]
                     .as_str()
@@ -95,7 +108,7 @@ pub async fn inspect(
         }
         "reviews" => {
             permit(h, "catalog.read")?;
-            let actual=sqlx::query_scalar::<_,Value>("SELECT jsonb_build_object('productId',product_id,'sourceAuthor',author,'rating',rating,'title',title,'text',content,'verifiedPurchase',verified,'sourceDigest',source_import->>'recordDigest','createdAt',to_char(created_at AT TIME ZONE 'UTC','YYYY-MM-DD\"T\"HH24:MI:SS.US\"Z\"')) FROM product_reviews WHERE tenant=$1 AND id=$2").bind(&t).bind(id).fetch_optional(&a.db).await?;
+            let actual = db::review(a, &t, id).await?;
             let created = chrono::DateTime::parse_from_rfc3339(
                 r.data["createdAt"]
                     .as_str()

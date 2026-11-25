@@ -5,6 +5,7 @@ use super::inspect_product as product;
 use super::{SourceRecord, categories, coupons, identity_namespace, products, schema};
 use crate::http::product_editor::product_editor;
 use crate::ports::ImportHost;
+use crate::store::imports as db;
 use axum::Json;
 use axum::extract::{Path, State as Shared};
 use serde::Deserialize;
@@ -66,7 +67,7 @@ pub async fn inspect<H: ImportHost>(host: &H, h: &RequestContext, v: &Value) -> 
         "categories" => {
             permit(h, "catalog.read")?;
             let mapped = categories::mapped(a, &t, &r, &input.options).await?;
-            let actual = sqlx::query_scalar::<_,Value>("SELECT jsonb_build_object('parentId',parent_id,'data',data) FROM categories WHERE tenant=$1 AND id=$2").bind(&t).bind(&id).fetch_optional(&a.db).await?;
+            let actual = db::category(a, &t, &id).await?;
             (
                 json!({"parentId":mapped["parentId"],"data":mapped["data"]}),
                 actual,
@@ -87,13 +88,7 @@ pub async fn inspect<H: ImportHost>(host: &H, h: &RequestContext, v: &Value) -> 
         "coupons" => {
             permit(h, "automation.read")?;
             id = coupons::configuration_id(&r.identity(&t));
-            let actual = sqlx::query_scalar::<_, Value>(
-                "SELECT data FROM commerce_promotions WHERE tenant=$1 AND id=$2",
-            )
-            .bind(&t)
-            .bind(&id)
-            .fetch_optional(&a.db)
-            .await?;
+            let actual = db::promotion(a, &t, &id).await?;
             let mut expected = r.data["destination"].clone();
             if !expected.is_object() {
                 return Err(bad("Reviewed coupon mapping required"));
