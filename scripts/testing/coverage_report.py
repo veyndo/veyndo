@@ -3,9 +3,12 @@
 
 The --require-full audit rejects gaps and unmeasured runtime scopes. Normal CI
 uses the checked-in regression floors; passing those floors never means 100%.
+Each component also has its own line floors (Rust sources and component UI), mapped
+through components.json; --ratchet raises them to the measured values, never lowers them.
 """
 import argparse
 import json
+import math
 import re
 from pathlib import Path
 
@@ -79,6 +82,79 @@ def read_reports(root):
     return metrics, modules, missing
 
 
+def owners(root):
+    """(source prefix, component) pairs from components.json, longest prefix first."""
+    mapping = json.loads((root / 'components.json').read_text())['components']
+    pairs = [(source.rstrip('/'), name) for name, row in mapping.items() for source in row['sources']]
+    return sorted(pairs, key=lambda pair: -len(pair[0]))
+
+
+def component_of(relative, pairs):
+    """The component a repository-relative source file belongs to, or None."""
+    ui = re.match(r'components/([a-z0-9_-]+)/ui/', relative)
+    if ui:
+        return ui.group(1)
+    return next((name for prefix, name in pairs if relative == prefix or relative.startswith(prefix + '/')), None)
+
+
+def relative_to_root(filename, root):
+    """A report path relative to the repository: reports may come from another checkout or CI runner."""
+    marker = next((m for m in ('/components/', '/crates/', '/src/', '/frontend/', '/extensions/') if m in filename), None)
+    if filename.startswith(str(root) + '/'):
+        return filename[len(str(root)) + 1:]
+    return filename[filename.index(marker) + 1:] if marker else filename
+
+
+def component_coverage(root, rust_files=(), frontend=None):
+    """Line coverage per component and scope: {component: {'rust': pct, 'frontend': pct}}."""
+    pairs = owners(root)
+    totals = {}
+    rows = [('rust', f['filename'], f['summary']['lines']['covered'], f['summary']['lines']['count']) for f in rust_files]
+    rows += [('frontend', name, data['lines']['covered'], data['lines']['total'])
+             for name, data in (frontend or {}).items() if name != 'total']
+    for scope, filename, covered, count in rows:
+        component = component_of(relative_to_root(filename, root), pairs)
+        if component is None or not count:
+            continue
+        seen = totals.setdefault(component, {}).setdefault(scope, [0, 0])
+        seen[0] += covered
+        seen[1] += count
+    return {c: {scope: covered / count * 100 for scope, (covered, count) in scopes.items()}
+            for c, scopes in totals.items()}
+
+
+def component_violations(measured, policy, scopes):
+    """A measured component without a floor, a floor without a measurement, or a value below its floor."""
+    floors = policy.get('components', {})
+    errors = []
+    for component, values in sorted(measured.items()):
+        for scope in scopes:
+            if scope in values and scope not in floors.get(component, {}):
+                errors.append(f'component {component} {scope} lines: measured {values[scope]:.2f}% but no floor; run --ratchet')
+    for component, values in sorted(floors.items()):
+        for scope, minimum in values.items():
+            if scope not in scopes:
+                continue
+            value = measured.get(component, {}).get(scope)
+            if value is None:
+                errors.append(f'component {component} {scope} lines: floor {minimum}% but nothing measured')
+            elif value + 0.001 < minimum:
+                errors.append(f'component {component} {scope} lines: {value:.2f}% < {minimum}%')
+    return errors
+
+
+def ratchet(measured, policy, scopes):
+    """Floors raised to the measured values (rounded down to 0.01); a floor never falls."""
+    floors = {c: dict(v) for c, v in policy.get('components', {}).items()}
+    for component, values in measured.items():
+        for scope in scopes:
+            if scope in values:
+                value = math.floor(values[scope] * 100) / 100
+                current = floors.setdefault(component, {}).get(scope, 0)
+                floors[component][scope] = max(current, value)
+    return {**policy, 'components': {c: dict(sorted(v.items())) for c, v in sorted(floors.items())}}
+
+
 def violations(metrics, modules, policy, require_full=False):
     errors = []
     for scope, values in metrics.items():
@@ -99,12 +175,19 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--require-full', action='store_true')
     parser.add_argument('--frontend-only', action='store_true', help='Enforce unchanged frontend floors without claiming Rust/Python measurements')
+    parser.add_argument('--ratchet', action='store_true', help='Raise per-component floors to the measured values first; floors never fall')
     args = parser.parse_args()
     if args.frontend_only:
         if args.require_full:
             parser.error('--require-full cannot be combined with --frontend-only')
         metrics, modules, missing = read_frontend(ROOT)
-        errors = violations(metrics, modules, json.loads(POLICY.read_text()))
+        policy = json.loads(POLICY.read_text())
+        summary = json.loads((ROOT / 'frontend/coverage/coverage-summary.json').read_text())
+        measured = component_coverage(ROOT, frontend=summary)
+        if args.ratchet:
+            POLICY.write_text(json.dumps(ratchet(measured, policy, ['frontend']), indent=2) + '\n')
+            policy = json.loads(POLICY.read_text())
+        errors = violations(metrics, modules, policy) + component_violations(measured, policy, ['frontend'])
         output = ROOT / 'artifacts/coverage'
         output.mkdir(exist_ok=True, parents=True)
         (output / 'frontend-summary.json').write_text(json.dumps({'metrics': metrics,
@@ -116,10 +199,16 @@ def main():
         print('PASS unchanged frontend coverage floors and full-module gates; Rust/Python not measured')
         return
     metrics, modules, missing = read_reports(ROOT)
-    errors = violations(metrics, modules, json.loads(POLICY.read_text()), args.require_full)
+    policy = json.loads(POLICY.read_text())
+    rust_files = json.loads((ROOT / 'artifacts/coverage/rust.json').read_text())['data'][0]['files']
+    measured = component_coverage(ROOT, rust_files, json.loads((ROOT / 'frontend/coverage/coverage-summary.json').read_text()))
+    if args.ratchet:
+        POLICY.write_text(json.dumps(ratchet(measured, policy, ['rust', 'frontend']), indent=2) + '\n')
+        policy = json.loads(POLICY.read_text())
+    errors = violations(metrics, modules, policy, args.require_full) + component_violations(measured, policy, ['rust', 'frontend'])
     output = ROOT / 'artifacts/coverage'
     output.mkdir(exist_ok=True)
-    result = {'metrics': metrics, 'zero_hit_modules': missing, 'unmeasured': UNMEASURED,
+    result = {'metrics': metrics, 'components': measured, 'zero_hit_modules': missing, 'unmeasured': UNMEASURED,
               'errors': errors, 'entireSystemFullyCovered': False}
     rust_report = json.loads((ROOT / 'artifacts/coverage/rust.json').read_text())['data'][0]
     result['rust_not_emitted_by_compiler'] = rust_gaps(ROOT, rust_report['files'])
@@ -129,6 +218,8 @@ def main():
              '| Scope | Metric | Coverage |', '|---|---|---|']
     for scope, values in metrics.items():
         lines += [f'| {scope} | {key} | {value:.2f}% |' for key, value in values.items()]
+    lines += ['', '## Line coverage per component', '', '| Component | Rust | Frontend |', '|---|---|---|']
+    lines += [f"| {c} | {v.get('rust', float('nan')):.2f}% | {v.get('frontend', float('nan')):.2f}% |" for c, v in sorted(measured.items())]
     lines += ['', '## Unmeasured scopes', ''] + ['- ' + s for s in UNMEASURED]
     lines += ['', '## Rust files without emitted coverage regions', '',
               'These include import registries and test-only modules. Their absence is reported, not treated as a covered module.']

@@ -12,7 +12,7 @@ from unittest.mock import patch
 import runtime
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from coverage_report import read_frontend, read_reports, violations
+from coverage_report import component_coverage, component_of, component_violations, ratchet, read_frontend, read_reports, violations
 from source_inventory import responsibility
 
 
@@ -60,6 +60,54 @@ class OwnedRuntime(unittest.TestCase):
                 with self.assertRaisesRegex(RuntimeError,'already occupied'):
                     runtime.serve({},f'http://127.0.0.1:{listener.getsockname()[1]}',None)
                 spawn.assert_not_called()
+
+
+class ComponentCoverageFloors(unittest.TestCase):
+    """Per-component floors: files map to their component, floors only rise, and each gap is refused."""
+    def setUp(self):
+        self.directory = tempfile.TemporaryDirectory()
+        self.root = Path(self.directory.name)
+        (self.root / 'components.json').write_text(json.dumps({'components': {
+            'pricing': {'sources': ['components/pricing']}, 'core': {'sources': ['crates/kernel', 'components/core']},
+            'host': {'sources': ['src/main.rs', 'src/apps']}}}))
+        rust = lambda name, covered, count: {'filename': str(self.root / name), 'summary': {'lines': {'covered': covered, 'count': count}}}
+        self.rust = [rust('components/pricing/src/money.rs', 8, 10), rust('components/pricing/src/discount.rs', 2, 10),
+                     rust('crates/kernel/src/lib.rs', 5, 5), rust('src/apps/data.rs', 0, 4), rust('vendor/other.rs', 1, 9)]
+        self.frontend = {'total': {}, '/elsewhere/checkout/components/pricing/ui/admin/Prices.tsx': {'lines': {'covered': 3, 'total': 4}}}
+        self.measured = component_coverage(self.root, self.rust, self.frontend)
+
+    def tearDown(self):
+        self.directory.cleanup()
+
+    def test_files_are_attributed_to_their_component(self):
+        pairs = [('components/pricing', 'pricing'), ('src/apps', 'host')]
+        self.assertEqual(component_of('components/pricing/src/money.rs', pairs), 'pricing')
+        self.assertEqual(component_of('components/checkout/ui/storefront/Cart.tsx', pairs), 'checkout')
+        self.assertEqual(component_of('src/apps_extra.rs', pairs), None)
+        self.assertEqual(self.measured, {'pricing': {'rust': 50.0, 'frontend': 75.0}, 'core': {'rust': 100.0}, 'host': {'rust': 0.0}})
+
+    def test_measured_values_pass_and_each_regression_fails(self):
+        policy = ratchet(self.measured, {}, ['rust', 'frontend'])
+        self.assertEqual(component_violations(self.measured, policy, ['rust', 'frontend']), [])
+        for component, scope in [('pricing', 'rust'), ('pricing', 'frontend'), ('core', 'rust')]:
+            lower = copy.deepcopy(self.measured)
+            lower[component][scope] -= 0.5
+            self.assertTrue(component_violations(lower, policy, ['rust', 'frontend']), (component, scope))
+
+    def test_a_missing_floor_or_measurement_fails(self):
+        policy = ratchet(self.measured, {}, ['rust', 'frontend'])
+        del policy['components']['core']
+        self.assertTrue(any('no floor' in e for e in component_violations(self.measured, policy, ['rust'])))
+        policy = ratchet(self.measured, {}, ['rust', 'frontend'])
+        gone = {k: v for k, v in self.measured.items() if k != 'host'}
+        self.assertTrue(any('nothing measured' in e for e in component_violations(gone, policy, ['rust'])))
+
+    def test_the_ratchet_never_lowers_a_floor(self):
+        policy = ratchet(self.measured, {'components': {'pricing': {'rust': 90.0}}}, ['rust'])
+        self.assertEqual(policy['components']['pricing']['rust'], 90.0)
+        self.assertEqual(policy['components']['core']['rust'], 100.0)
+        self.assertNotIn('frontend', policy['components']['pricing'])
+        self.assertTrue(component_violations(self.measured, policy, ['rust']))
 
 
 class CoverageGates(unittest.TestCase):

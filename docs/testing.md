@@ -669,6 +669,39 @@ and PayPal webhooks without configuration; invalid: 348 refused with 4xx), 212 t
 212 invalid inputs refused; of the valid inputs 50 succeed, 160 are refused for unknown
 probe IDs or missing setup, 2 report the offline model service). No unexplained server error.
 
+### Coverage floors per component
+
+`coverage_report.py` maps every measured file to its component through `components.json`
+(component UI under `components/<name>/ui/` counts for that component) and enforces a
+line floor per component and scope (`components` in `coverage-policy.json`), beside the
+global floors. A component measured without a floor, a floor with nothing measured, and
+a value below its floor each fail; `--ratchet` raises floors to the measured values and
+never lowers one. `--frontend-only` (every PR) enforces the frontend floors; the full
+report (nightly) enforces both. Tests with negative controls are in
+`scripts/testing/tooling_tests.py` (`ComponentCoverageFloors`); on the real policy,
+dropping one POS module to zero hits fails the gate.
+
+Floors of 25 November (Rust: workspace unit, property and contract tests instrumented
+with `-C instrument-coverage` and LLVM 23, so the nightly run with the integration suites
+measures more; frontend: vitest over this tree):
+
+| Component | Rust lines | UI lines | | Component | Rust lines | UI lines |
+| --- | --- | --- | --- | --- | --- | --- |
+| apps | 41.70 | 69.53 | | inventory | 70.90 | – |
+| automation | 75.13 | – | | marketing | 47.77 | 66.80 |
+| b2b | 8.02 | 54.25 | | orders | 59.90 | 63.14 |
+| catalog | 47.36 | 83.19 | | payments | 32.85 | 85.27 |
+| checkout | 34.33 | 81.91 | | pos | 28.56 | 46.93 |
+| core | 60.92 | – | | pricing | 81.57 | – |
+| customers | 2.81 | 73.50 | | protocols | 42.34 | – |
+| host | 10.56 | – | | shipping | 75.58 | – |
+| identity | 21.52 | 73.59 | | shop | 52.92 | 61.79 |
+| inference | 59.80 | – | | studio | 21.43 | 74.71 |
+| intelligence | 18.68 | 79.27 | | | | |
+
+Low Rust values (customers, B2B, host) are code reached only through the HTTP suites;
+the nightly measurement covers it, and its first run should be ratcheted.
+
 ## Repeatable checks
 
 From the repository root:
