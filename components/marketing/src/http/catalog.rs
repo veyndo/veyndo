@@ -47,21 +47,11 @@ pub async fn catalog(Shared(a): Shared<State>, h: RequestContext) -> Result<Json
     permit(&h, "automation.read")?;
     let t = merchant(&h)?;
     let rows = catalog::active_apps(&a, &t).await?;
-    let mut result = json!({"upstream":"shopware/core 6.7.14.2","conditions":conditions(),"fields":FIELDS,"events":builtin::EVENTS,"apps":rows.iter().map(|r|json!({"id":r.id,"manifest":r.manifest})).collect::<Vec<_>>(),"completeUpstreamConditionCatalog":false});
     let rules = catalog::active_rules(&a, &t).await?;
-    result["rules"] = json!(
-        rules
-            .iter()
-            .map(|r| json!({"id":r.id,"name":r.name,"revision":r.revision}))
-            .collect::<Vec<_>>()
-    );
     let source: SourceCatalog = view(automation_rules::catalog());
-    result["sourceConditions"] = source.conditions;
-    result["actions"] = json!(builtin::PIPELINE_ACTIONS);
-    result["sourceActions"] = source.actions;
-    result["flowCatalogVersion"] = json!(builtin::VERSION);
-    result["pipelineContract"] = json!({"nodes":["condition","action","delay","stop"],"maxNodes":veyndo_flow_graph::MAX_NODES,"maxDelaySeconds":2592000,"cyclicGraphs":false});
-    Ok(Json(result))
+    Ok(Json(
+        json!({"upstream":"shopware/core 6.7.14.2","conditions":conditions(),"fields":FIELDS,"events":builtin::EVENTS,"apps":rows.iter().map(|r|json!({"id":r.id,"manifest":r.manifest})).collect::<Vec<_>>(),"completeUpstreamConditionCatalog":false,"rules":rules.iter().map(|r|json!({"id":r.id,"name":r.name,"revision":r.revision})).collect::<Vec<_>>(),"sourceConditions":source.conditions,"actions":builtin::PIPELINE_ACTIONS,"sourceActions":source.actions,"flowCatalogVersion":builtin::VERSION,"pipelineContract":{"nodes":["condition","action","delay","stop"],"maxNodes":veyndo_flow_graph::MAX_NODES,"maxDelaySeconds":2592000,"cyclicGraphs":false}}),
+    ))
 }
 
 /// `POST /api/automation/import-condition`: normalizes a source condition and checks it, without saving it.

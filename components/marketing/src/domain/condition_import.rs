@@ -1,7 +1,7 @@
 //! Source-compatible condition import: converts original payloads without guessing identifiers or dropping configuration.
 use serde::Deserialize;
 use serde_json::{Value, json};
-use veyndo_core::document::{lenient, view};
+use veyndo_core::document::{lenient, merge, view};
 use veyndo_core::{Result, bad};
 
 /// The JSON fields `normalize` reads, typed as it reads them.
@@ -78,9 +78,9 @@ pub fn normalize(v: &Value, depth: usize) -> Result<Value> {
     if let Some(key) = alias
         && let Some(value) = result.as_object_mut().and_then(|v| v.remove(key))
     {
-        result["values"] = value;
+        merge(&mut result, json!({ "values": value }))?;
     }
-    result["type"] = json!(typ);
+    merge(&mut result, json!({ "type": typ }))?;
     Ok(result)
 }
 
@@ -118,14 +118,13 @@ fn source_node(v: &Value, depth: usize) -> Result<Value> {
         .or_else(|| config.get("children"))
         .cloned()
     {
-        config["children"] = json!(
-            children
-                .as_array()
-                .ok_or(bad("Children array required"))?
-                .iter()
-                .map(|c| source_node(c, depth + 1))
-                .collect::<Result<Vec<_>>>()?
-        );
+        let children = children
+            .as_array()
+            .ok_or(bad("Children array required"))?
+            .iter()
+            .map(|c| source_node(c, depth + 1))
+            .collect::<Result<Vec<_>>>()?;
+        merge(&mut config, json!({ "children": children }))?;
     }
     for key in ["container", "filter"] {
         if let Some(child) = config.get(key).filter(|c| !c.is_null()).cloned() {

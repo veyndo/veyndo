@@ -16,18 +16,23 @@ fn project(mut value: Value, full: bool) -> Value {
     if !full && let Some(jobs) = value.as_array_mut() {
         for j in jobs {
             let job: JobTrace = view(j);
-            j["result"] = Value::Null;
-            if !job.error.is_null() {
-                j["error"] =
-                    json!("Flow action failed; detailed output requires source permissions");
-            }
             let trace = job
                 .execution
                 .trace
                 .iter()
                 .map(|r| json!({"node":r.node,"action":r.action,"matched":r.matched}))
                 .collect::<Vec<_>>();
-            j["execution"] = json!({"trace":trace});
+            // Every summary row is an object built by `values`.
+            if let Some(row) = j.as_object_mut() {
+                row.insert("result".into(), Value::Null);
+                if !job.error.is_null() {
+                    row.insert(
+                        "error".into(),
+                        json!("Flow action failed; detailed output requires source permissions"),
+                    );
+                }
+                row.insert("execution".into(), json!({ "trace": trace }));
+            }
         }
     }
     value
@@ -60,8 +65,45 @@ struct TraceStep {
 
 #[cfg(test)]
 mod tests {
+    use super::JobTrace;
     use super::project;
+    use serde_json::Value;
     use serde_json::json;
+    use veyndo_core::document::view;
+
+    /// The projection before it wrote through the row map; shapes must stay identical.
+    fn old_project(mut value: Value, full: bool) -> Value {
+        if !full && let Some(jobs) = value.as_array_mut() {
+            for j in jobs {
+                let job: JobTrace = view(j);
+                j["result"] = Value::Null;
+                if !job.error.is_null() {
+                    j["error"] =
+                        json!("Flow action failed; detailed output requires source permissions");
+                }
+                let trace = job
+                    .execution
+                    .trace
+                    .iter()
+                    .map(|r| json!({"node":r.node,"action":r.action,"matched":r.matched}))
+                    .collect::<Vec<_>>();
+                j["execution"] = json!({"trace":trace});
+            }
+        }
+        value
+    }
+
+    #[test]
+    fn the_restricted_projection_keeps_its_shape() {
+        let jobs = json!([
+            {"id":"a","result":{"x":1},"error":"detail","execution":{"trace":[{"node":"n","action":"a","matched":true,"result":1}]}},
+            {"id":"b","result":null,"error":null,"execution":null},
+            {"id":"c"}
+        ]);
+        for full in [false, true] {
+            assert_eq!(project(jobs.clone(), full), old_project(jobs.clone(), full));
+        }
+    }
     #[test]
     fn restricted_trace_never_contains_action_output() {
         let jobs = json!([{"result":{"customerEmail":"private@example.test"},"error":"private detail","execution":{"trace":[{"node":"one","action":"app","result":{"secret":"private"}}]}}]);

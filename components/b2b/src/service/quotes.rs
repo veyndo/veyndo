@@ -7,7 +7,7 @@ use crate::store::{carts as cart_rows, quotes};
 use crate::types::model::OfferLine;
 use serde::Deserialize;
 use serde_json::{Value, json};
-use veyndo_core::document::{lenient, view};
+use veyndo_core::document::{lenient, merge, view};
 use veyndo_core::shop_scope::{header, tenant};
 use veyndo_core::store::history_context::{context, customer_context};
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad, conflict, uid};
@@ -131,8 +131,9 @@ pub async fn invoke(
         }
         _ => return Err(bad("Unknown quote operation")),
     };
-    let messages = data["messages"]
-        .as_array_mut()
+    let messages = data
+        .get_mut("messages")
+        .and_then(Value::as_array_mut)
         .ok_or(bad("Invalid quote conversation"))?;
     if messages.len() >= 100 {
         return Err(bad("Quote conversation is full"));
@@ -258,6 +259,14 @@ struct OfferInput {
     valid_until: Option<String>,
 }
 
+/// The offer fields a merchant offer writes into the quote document.
+#[derive(serde::Serialize)]
+#[serde(rename_all = "camelCase")]
+struct Offer<'a> {
+    lines: &'a [OfferLine],
+    valid_until: &'a str,
+}
+
 /// Admits a merchant offer: exact requested items and quantities, bounded prices and an expiry within a year.
 async fn offer(tx: &mut Tx<'_>, v: &Value, data: &mut Value, state: &str) -> Result<()> {
     if !["requested", "offered"].contains(&state) {
@@ -294,8 +303,13 @@ async fn offer(tx: &mut Tx<'_>, v: &Value, data: &mut Value, state: &str) -> Res
     if !valid {
         return Err(bad("Offer expires within the next year"));
     }
-    data["lines"] = json!(lines);
-    data["validUntil"] = json!(until);
+    merge(
+        data,
+        Offer {
+            lines: &lines,
+            valid_until: &until,
+        },
+    )?;
     Ok(())
 }
 /// The buyer's or merchant's bounded message.
@@ -318,7 +332,12 @@ fn wire(r: &quotes::QuoteRow, h: &RequestContext, admin: bool) -> Value {
         if let Some(object) = data.as_object_mut() {
             object.remove("nativeLifecycle");
         }
-        for message in data["messages"].as_array_mut().into_iter().flatten() {
+        for message in data
+            .get_mut("messages")
+            .and_then(Value::as_array_mut)
+            .into_iter()
+            .flatten()
+        {
             if let Some(object) = message.as_object_mut() {
                 object.remove("lifecycle");
             }
@@ -332,4 +351,32 @@ fn wire(r: &quotes::QuoteRow, h: &RequestContext, admin: bool) -> Value {
 #[serde(default)]
 struct RequestedItems {
     items: Value,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::Offer;
+    use crate::types::model::OfferLine;
+    use serde_json::json;
+    use veyndo_core::document::merge;
+
+    #[test]
+    fn a_merchant_offer_writes_the_fields_indexing_wrote() {
+        let lines: Vec<OfferLine> =
+            serde_json::from_value(json!([{"id":"p","quantity":2,"grossMinor":1999}])).unwrap();
+        let data = json!({"items":[{"id":"p","quantity":2}],"messages":[],"validUntil":"old"});
+        let mut old = data.clone();
+        old["lines"] = json!(lines);
+        old["validUntil"] = json!("2027-01-01T00:00:00Z");
+        let mut new = data;
+        merge(
+            &mut new,
+            Offer {
+                lines: &lines,
+                valid_until: "2027-01-01T00:00:00Z",
+            },
+        )
+        .unwrap();
+        assert_eq!(new, old);
+    }
 }

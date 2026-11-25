@@ -23,14 +23,15 @@ async fn applicable(
     .await?;
     let mut evaluated = q.clone();
     if !rows.is_empty() {
-        evaluated["ruleFacts"] = facts::rule_facts(tx, c, q).await?;
+        let mut rule_facts = facts::rule_facts(tx, c, q).await?;
         rule_snapshot::attach(
             tx,
             &c.tenant,
             &json!(rows.iter().map(|r| r.data.clone()).collect::<Vec<_>>()),
-            &mut evaluated["ruleFacts"],
+            &mut rule_facts,
         )
         .await?;
+        merge(&mut evaluated, json!({ "ruleFacts": rule_facts }))?;
     }
     let quote_currency = view::<QuotePriceOnly>(q).price.currency;
     let mut applicable = vec![];

@@ -2,6 +2,7 @@
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 use std::collections::HashMap;
+use veyndo_core::document::merge;
 use veyndo_core::{Result, bad};
 use veyndo_shop::types::settings::Settings;
 #[derive(Clone, Deserialize, Serialize)]
@@ -53,8 +54,36 @@ pub fn validate_pos(c: &Channel, s: &Settings) -> Result<()> {
     }
     Ok(())
 }
-pub fn normalize_channel(data: &mut Value, id: &str, settings: &Settings) {
+/// The main channel always inherits the shop languages.
+pub fn normalize_channel(data: &mut Value, id: &str, settings: &Settings) -> Result<()> {
     if id == "default" {
-        data["locales"] = json!(settings.locales);
+        merge(data, json!({ "locales": settings.locales }))?;
+    }
+    Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::normalize_channel;
+    use serde_json::json;
+    use veyndo_shop::types::settings::Settings;
+
+    #[test]
+    fn the_main_channel_takes_the_shop_languages_as_indexing_wrote_them() {
+        let settings: Settings =
+            serde_json::from_str(include_str!("../../../../fixtures/demo-settings.json")).unwrap();
+        for (id, data) in [
+            ("default", json!({"name":{"en":"Main"},"locales":["xx"]})),
+            ("default", json!(null)),
+            ("other", json!({"locales":["xx"]})),
+        ] {
+            let mut old = data.clone();
+            if id == "default" {
+                old["locales"] = json!(settings.locales);
+            }
+            let mut new = data;
+            normalize_channel(&mut new, id, &settings).unwrap();
+            assert_eq!(new, old, "{id}");
+        }
     }
 }

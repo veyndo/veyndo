@@ -4,7 +4,7 @@ use crate::store::purchase;
 use crate::store::{carts as cart_rows, quotes};
 use serde::Deserialize;
 use serde_json::{Value, json};
-use veyndo_core::document::{lenient, view};
+use veyndo_core::document::{lenient, merge, view};
 use veyndo_core::store::history_context as history;
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad, conflict};
 use veyndo_shop::ports::Carts;
@@ -124,9 +124,11 @@ pub async fn prices(
             let price = line.gross_minor as f64 / 10_f64.powi(scale as i32);
             p.price = price;
             p.advanced_prices.clear();
-            p.extra["priceCurrency"] = json!(c.data.currency);
             // Both fixed-currency and automatic-FX strategies resolve through their existing owner.
-            p.extra["currencyPrices"] = json!({&c.data.currency:{"price":format!("{price:.precision$}",precision=scale as usize)}});
+            merge(
+                &mut p.extra,
+                json!({"priceCurrency":c.data.currency,"currencyPrices":{&c.data.currency:{"price":format!("{price:.precision$}",precision=scale as usize)}}}),
+            )?;
         }
     }
     Ok(())

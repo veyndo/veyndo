@@ -5,11 +5,10 @@ use serde_json::{Value, json};
 use std::collections::HashMap;
 use veyndo_core::document::{lenient, view};
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad, conflict};
-pub async fn list(a: &State, t: &str) -> Result<Value> {
+/// The shop's companies by id as list rows (at most 100).
+pub async fn list(a: &State, t: &str) -> Result<Vec<Value>> {
     let companies=sqlx::query!("SELECT id,data,revision,created_at::text AS created FROM b2b_companies WHERE tenant=$1 ORDER BY id LIMIT 100", t).fetch_all(&a.db).await?;
-    Ok(
-        json!({"companies":companies.iter().map(|r|json!({"id":r.id.clone(),"data":r.data.clone(),"revision":r.revision.clone(),"createdAt":r.created.clone()})).collect::<Vec<_>>()}),
-    )
+    Ok(companies.iter().map(|r|json!({"id":r.id.clone(),"data":r.data.clone(),"revision":r.revision.clone(),"createdAt":r.created.clone()})).collect())
 }
 pub async fn detail(a: &State, t: &str, id: &str) -> Result<Value> {
     let company = sqlx::query!(

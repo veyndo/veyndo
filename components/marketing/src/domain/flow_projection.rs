@@ -34,21 +34,40 @@ pub fn public_event(kind: &str, data: &Value) -> Value {
 /// The rule context of an event: the order's cart with the event, its kind and the order, payment and delivery states.
 pub fn rule_context(kind: &str, event: &Value, order: &Value) -> Value {
     let order: ContextOrder = view(order);
-    let mut context = order.cart;
-    context["event"] = event.clone();
-    context["eventKind"] = json!(kind);
-    context["orderState"] = order.state;
-    context["paymentState"] = order.payment.state;
-    context["deliveryStates"] = json!(
-        order
+    // A cart without an object shape starts empty, as assigning through JSON indexing turned null into an object.
+    let mut context = match order.cart {
+        Value::Object(fields) => fields,
+        _ => serde_json::Map::new(),
+    };
+    let states = EventStates {
+        event,
+        event_kind: kind,
+        order_state: order.state,
+        payment_state: order.payment.state,
+        delivery_states: order
             .deliveries
-            .map(|ds| ds
-                .iter()
-                .map(|d| view::<StateField>(d).state)
-                .collect::<Vec<_>>())
-            .unwrap_or_default()
-    );
-    context
+            .map(|ds| {
+                ds.iter()
+                    .map(|d| view::<StateField>(d).state)
+                    .collect::<Vec<_>>()
+            })
+            .unwrap_or_default(),
+    };
+    if let Ok(Value::Object(fields)) = serde_json::to_value(states) {
+        context.extend(fields);
+    }
+    Value::Object(context)
+}
+
+/// The event and order states a rule context adds to the order's cart.
+#[derive(serde::Serialize)]
+#[serde(rename_all = "camelCase")]
+struct EventStates<'a> {
+    event: &'a Value,
+    event_kind: &'a str,
+    order_state: Value,
+    payment_state: Value,
+    delivery_states: Vec<Value>,
 }
 
 /// The order fields a flow's rule context is built from.
@@ -109,8 +128,47 @@ struct FlowCart {
 
 #[cfg(test)]
 mod tests {
+    use super::{ContextOrder, StateField};
     use super::{job_definition, orderless, projected, public_event, rule_context};
+    use serde_json::Value;
     use serde_json::json;
+    use veyndo_core::document::view;
+
+    /// The rule context before it was built from a typed patch; shapes must stay identical.
+    fn old_rule_context(kind: &str, event: &Value, order: &Value) -> Value {
+        let order: ContextOrder = view(order);
+        let mut context = order.cart;
+        context["event"] = event.clone();
+        context["eventKind"] = json!(kind);
+        context["orderState"] = order.state;
+        context["paymentState"] = order.payment.state;
+        context["deliveryStates"] = json!(
+            order
+                .deliveries
+                .map(|ds| ds
+                    .iter()
+                    .map(|d| view::<StateField>(d).state)
+                    .collect::<Vec<_>>())
+                .unwrap_or_default()
+        );
+        context
+    }
+
+    #[test]
+    fn the_rule_context_keeps_the_shape_it_had_with_indexed_writes() {
+        let event = json!({"orderId":"o1","nested":{"a":1}});
+        for order in [
+            json!({"cart":{"price":{"totalPrice":42},"event":"stale"},"state":"open","payment":{"state":"paid"},"deliveries":[{"state":"shipped"}]}),
+            json!({"state":"open"}),
+            json!({"cart":null,"deliveries":"broken"}),
+            json!({}),
+        ] {
+            assert_eq!(
+                rule_context("order.placed", &event, &order),
+                old_rule_context("order.placed", &event, &order)
+            );
+        }
+    }
 
     #[test]
     fn only_catalogued_and_app_events_start_flows() {

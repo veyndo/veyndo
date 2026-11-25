@@ -7,7 +7,7 @@ use axum::Json;
 use axum::extract::{Path, State};
 use serde::Deserialize;
 use serde_json::{Value, json};
-use veyndo_core::document::{lenient, view};
+use veyndo_core::document::{lenient, merge, view};
 use veyndo_core::{RequestContext, Result, bad, conflict, store::history_context};
 use veyndo_identity::{merchant, permit};
 
@@ -22,7 +22,7 @@ pub async fn dependencies(
     let mut conn = a.db.begin().await?;
     let rev = revision(&mut conn, &t, &kind, &id, false).await?;
     let mut v = inspect(&mut conn, &t, &kind, &id).await?;
-    v["revision"] = json!(rev);
+    merge(&mut v, json!({ "revision": rev }))?;
     Ok(Json(v))
 }
 /// The JSON fields `delete` reads, typed as it reads them.

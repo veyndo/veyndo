@@ -9,7 +9,7 @@ use veyndo_app_model::declarations::identifier;
 use veyndo_catalog::types::catalog_page::CatalogCriteria;
 use veyndo_checkout::service::checkout_options;
 use veyndo_checkout::store::cart_create::new_cart_context;
-use veyndo_core::document::{lenient, view};
+use veyndo_core::document::{lenient, merge, view};
 use veyndo_core::request_context::PosAdmission as Admission;
 use veyndo_core::shop_scope::header;
 use veyndo_core::{Error, RequestContext, Result, State, StatusCode, bad};
@@ -159,7 +159,7 @@ pub async fn invoke(
         }
         "context" => {
             let mut v = register_context(reg, a, &h).await?;
-            v["channel"] = json!(data);
+            merge(&mut v, json!({"channel":data}))?;
             Ok(v)
         }
         "detail" => {
@@ -207,8 +207,8 @@ async fn cart_operation(
             selection.payment_method_id = "pos-cash".into();
             carts::set_data(a, &json!(c.data), t, &c.id).await?;
             let mut v = register_context(reg, a, &h).await?;
-            v["cart"] = reg.carts().view(&c).await?;
-            v["channel"] = json!(data);
+            let cart = reg.carts().view(&c).await?;
+            merge(&mut v, json!({"cart":cart,"channel":data}))?;
             Ok(v)
         }
         "cart" => reg.carts().view(&reg.carts().load(&h).await?).await,

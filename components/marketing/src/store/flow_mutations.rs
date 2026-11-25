@@ -2,7 +2,7 @@
 use crate::domain::flow_text::effective;
 use serde::Deserialize;
 use serde_json::{Value, json};
-use veyndo_core::document::{lenient, view};
+use veyndo_core::document::{lenient, merge, view};
 use veyndo_core::{Result, State, bad, uid};
 use veyndo_shop::store::settings::scoped_locked;
 
@@ -150,19 +150,24 @@ pub async fn execute(
                 tags.push(tag.clone())
             }
         }
-        data["tags"] = json!(tags);
+        merge(&mut data, json!({ "tags": tags }))?;
     } else if action.contains("custom.field") {
         if !view::<AutomationFields>(&data).custom_fields.is_object() {
-            data["customFields"] = json!({})
+            merge(&mut data, json!({ "customFields": {} }))?;
         }
         let field = step.field.as_deref().ok_or(bad("Flow field required"))?;
-        data["customFields"][field] = step.value.clone();
+        data.get_mut("customFields")
+            .and_then(Value::as_object_mut)
+            .ok_or(bad("Flow custom fields unavailable"))?
+            .insert(field.into(), step.value.clone());
     } else if action.ends_with("affiliate.and.campaign.code") {
-        data["affiliateCode"] = step.affiliate_code.clone();
-        data["campaignCode"] = step.campaign_code.clone();
+        let codes = Codes {
+            affiliate_code: &step.affiliate_code,
+            campaign_code: &step.campaign_code,
+        };
+        merge(&mut data, &codes)?;
         if !customer {
-            order["affiliateCode"] = step.affiliate_code.clone();
-            order["campaignCode"] = step.campaign_code.clone();
+            merge(&mut order, &codes)?;
         }
     } else if action == "action.grant.download.access" {
         if step.value == false {
@@ -202,9 +207,11 @@ pub async fn execute(
         .execute(&mut *tx)
         .await?;
     } else if !customer && action != "note" && action != "action.grant.download.access" {
-        order["automation"] = data;
         let revision = view::<OrderRefs>(&order).revision.as_i64().unwrap_or(1);
-        order["revision"] = json!(revision + 1);
+        merge(
+            &mut order,
+            json!({ "automation": data, "revision": revision + 1 }),
+        )?;
         sqlx::query!(
             "UPDATE orders SET data=$1 WHERE tenant=$2 AND id=$3",
             &order,
@@ -229,6 +236,14 @@ pub async fn execute(
     Ok(result)
 }
 
+/// The affiliate and campaign codes a flow action writes onto automation data and the order.
+#[derive(serde::Serialize)]
+#[serde(rename_all = "camelCase")]
+struct Codes<'a> {
+    affiliate_code: &'a Value,
+    campaign_code: &'a Value,
+}
+
 /// The order fields a flow action reads: its customer and revision.
 #[derive(Deserialize, Default)]
 #[serde(default, rename_all = "camelCase")]
@@ -250,4 +265,49 @@ struct CustomerRef {
 struct AutomationFields {
     tags: Value,
     custom_fields: Value,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::Codes;
+    use serde_json::{Value, json};
+    use veyndo_core::document::merge;
+
+    #[test]
+    fn flow_codes_and_order_automation_keep_the_indexed_shape() {
+        let (affiliate, campaign) = (json!("aff"), json!(null));
+        for data in [json!(null), json!({"tags":["a"],"affiliateCode":"old"})] {
+            let mut old = data.clone();
+            old["affiliateCode"] = affiliate.clone();
+            old["campaignCode"] = campaign.clone();
+            let mut new = data;
+            merge(
+                &mut new,
+                &Codes {
+                    affiliate_code: &affiliate,
+                    campaign_code: &campaign,
+                },
+            )
+            .unwrap();
+            assert_eq!(new, old);
+        }
+        let order = json!({"id":"o","revision":3,"automation":{"tags":[]}});
+        let mut old = order.clone();
+        old["automation"] = json!({"tags":["x"]});
+        old["revision"] = json!(4);
+        let mut new = order;
+        merge(&mut new, json!({"automation":{"tags":["x"]},"revision":4})).unwrap();
+        assert_eq!(new, old);
+        let mut fields = json!({"customFields":"broken"});
+        let mut old_fields = fields.clone();
+        old_fields["customFields"] = json!({});
+        old_fields["customFields"]["size"] = json!("L");
+        merge(&mut fields, json!({"customFields":{}})).unwrap();
+        fields
+            .get_mut("customFields")
+            .and_then(Value::as_object_mut)
+            .unwrap()
+            .insert("size".into(), json!("L"));
+        assert_eq!(fields, old_fields);
+    }
 }

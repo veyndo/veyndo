@@ -1,7 +1,8 @@
 //! Shared rule admission and authoritative context for tax and other native consumers.
 use crate::domain::rules;
 use crate::store::{facts, rule_snapshot};
-use serde_json::Value;
+use serde_json::{Value, json};
+use veyndo_core::document::merge;
 use veyndo_core::{Result, bad};
 use veyndo_shop::types::cart::StoredCart;
 pub fn validate_condition(v: &Value) -> Result<()> {
@@ -16,8 +17,9 @@ pub async fn condition_context(
     definitions: &Value,
 ) -> Result<Value> {
     let mut result = q.clone();
-    result["ruleFacts"] = facts::rule_facts(conn, c, q).await?;
-    rule_snapshot::attach(conn, &c.tenant, definitions, &mut result["ruleFacts"]).await?;
+    let mut rule_facts = facts::rule_facts(conn, c, q).await?;
+    rule_snapshot::attach(conn, &c.tenant, definitions, &mut rule_facts).await?;
+    merge(&mut result, json!({ "ruleFacts": rule_facts }))?;
     Ok(result)
 }
 pub fn match_condition(v: &Value, c: &StoredCart, q: &Value) -> Result<bool> {
