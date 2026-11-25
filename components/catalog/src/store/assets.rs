@@ -1,7 +1,8 @@
 //! Reads of stored product assets.
 use crate::types::asset::Upload;
 use crate::types::asset::{Asset, Attachment, StoredFile};
-use sqlx::PgConnection;
+use serde_json::Value;
+use sqlx::{PgConnection, Row};
 use veyndo_core::{Result, State};
 
 /// The first bytes (header and metadata) of a published GLB that belongs to the product or its parent.
@@ -119,4 +120,103 @@ pub async fn model(a: &State, tenant: &str, id: &str) -> Result<Option<StoredFil
         .bind(id)
         .fetch_optional(&a.db)
         .await?)
+}
+
+/// The stored identity of an imported image: its product, bytes digest, format, file name, title and publication.
+pub struct ImportedIdentity {
+    pub product_id: String,
+    pub digest: String,
+    pub mime: String,
+    pub filename: String,
+    pub title: Value,
+    pub public: bool,
+}
+
+pub async fn imported_identity(
+    tx: &mut PgConnection,
+    tenant: &str,
+    id: &str,
+) -> Result<Option<ImportedIdentity>> {
+    Ok(sqlx::query("SELECT product_id,digest,mime,filename,title,public FROM product_assets WHERE tenant=$1 AND id=$2")
+        .bind(tenant)
+        .bind(id)
+        .fetch_optional(tx)
+        .await?
+        .map(|row| ImportedIdentity {
+            product_id: row.get("product_id"),
+            digest: row.get("digest"),
+            mime: row.get("mime"),
+            filename: row.get("filename"),
+            title: row.get("title"),
+            public: row.get("public"),
+        }))
+}
+
+/// An imported product image, stored published as an attachment.
+pub struct NewImport<'a> {
+    pub id: &'a str,
+    pub product: &'a str,
+    pub title: &'a Value,
+    pub filename: &'a str,
+    pub mime: &'a str,
+    pub bytes: Vec<u8>,
+    pub digest: String,
+}
+
+pub async fn insert_imported(
+    tx: &mut PgConnection,
+    tenant: &str,
+    image: NewImport<'_>,
+) -> Result<()> {
+    sqlx::query("INSERT INTO product_assets(tenant,id,product_id,title,filename,mime,kind,public,content,digest) VALUES($1,$2,$3,$4,$5,$6,'attachment',true,$7,$8)")
+        .bind(tenant)
+        .bind(image.id)
+        .bind(image.product)
+        .bind(image.title)
+        .bind(image.filename)
+        .bind(image.mime)
+        .bind(image.bytes)
+        .bind(image.digest)
+        .execute(tx)
+        .await?;
+    Ok(())
+}
+
+/// Up to 51 file descriptions after the ID cursor, optionally of one product, for apps.
+pub async fn app_page(
+    a: &State,
+    tenant: &str,
+    product: Option<&str>,
+    after: &str,
+) -> Result<Vec<Value>> {
+    Ok(sqlx::query_scalar("SELECT jsonb_build_object('id',id,'productId',product_id,'title',title,'filename',filename,'mime',mime,'kind',kind,'public',public,'digest',digest,'bytes',octet_length(content)) FROM product_assets WHERE tenant=$1 AND ($2::text IS NULL OR product_id=$2) AND id>$3 ORDER BY id LIMIT 51")
+        .bind(tenant)
+        .bind(product)
+        .bind(after)
+        .fetch_all(&a.db)
+        .await?)
+}
+
+/// One file with its content, for apps.
+pub struct AppFile {
+    pub content: Vec<u8>,
+    pub mime: String,
+    pub digest: String,
+    pub filename: String,
+    pub product_id: String,
+}
+
+pub async fn app_file(a: &State, tenant: &str, id: &str) -> Result<Option<AppFile>> {
+    Ok(sqlx::query("SELECT content,mime,digest,filename,product_id FROM product_assets WHERE tenant=$1 AND id=$2")
+        .bind(tenant)
+        .bind(id)
+        .fetch_optional(&a.db)
+        .await?
+        .map(|row| AppFile {
+            content: row.get("content"),
+            mime: row.get("mime"),
+            digest: row.get("digest"),
+            filename: row.get("filename"),
+            product_id: row.get("product_id"),
+        }))
 }
