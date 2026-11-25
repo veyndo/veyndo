@@ -1,12 +1,19 @@
 //! Explicit UCP consent reuses native cart-bound privacy receipts; source documents never define consent policy or authority.
 use crate::foundation::App;
 use crate::ucp::UCP_VERSION;
+use crate::ucp::document::{UcpCapability, UcpDocument, UcpMessage};
 use crate::ucp::messages;
+use crate::ucp::views::{
+    BuyerConsent, ConsentDecision, ConsentReceipt, ConsentSlot, OrderSnapshot, SessionInput,
+    keep_present,
+};
 use crate::{commerce, legal, marketing};
 use axum::extract::State;
 use serde::Deserialize;
+use serde::Serialize;
 use serde_json::Value;
 use serde_json::json;
+use std::collections::BTreeMap;
 use std::collections::HashMap;
 use veyndo_core::Result;
 use veyndo_core::bad;
@@ -42,19 +49,21 @@ pub(super) fn admit(v: &Value, negotiated: bool) -> Result<()> {
     Ok(())
 }
 pub(super) fn buyer(v: &Value, current: Option<&Value>) -> Result<Option<Value>> {
-    let Some(incoming) = v.get("buyer") else {
-        return Ok(current
-            .and_then(|buyer| buyer.get("consent"))
-            .map(|consent| json!({"consent":consent})));
+    let previous = current.and_then(|b| view::<ConsentSlot>(b).consent);
+    let Some(incoming) = view::<SessionInput>(v).buyer else {
+        return Ok(previous.map(|consent| json!({"consent":consent})));
     };
     if incoming.is_null() {
         return Ok(None);
     }
-    if !incoming.is_object() || incoming.to_string().len() > 16000 {
+    let Some(fields) = incoming
+        .as_object()
+        .filter(|_| incoming.to_string().len() <= 16000)
+    else {
         return Err(bad("Buyer must be a bounded object"));
-    }
-    let mut buyer = incoming.clone();
-    if let Some(choices) = incoming.get("consent") {
+    };
+    let mut buyer = fields.clone();
+    if let Some(choices) = view::<ConsentSlot>(&incoming).consent {
         let choices = choices
             .as_object()
             .filter(|v| v.len() <= 4)
@@ -65,19 +74,15 @@ pub(super) fn buyer(v: &Value, current: Option<&Value>) -> Result<Option<Value>>
             }
             validate(decision, purpose == MARKETING)?;
         }
-        let mut merged = current
-            .and_then(|b| b.get("consent"))
-            .filter(|v| v.is_object())
-            .cloned()
-            .unwrap_or(json!({}));
-        for (purpose, decision) in choices {
-            merged[purpose] = decision.clone();
-        }
-        buyer["consent"] = merged;
-    } else if let Some(previous) = current.and_then(|b| b.get("consent")) {
-        buyer["consent"] = previous.clone();
+        let mut merged = previous
+            .and_then(|v| v.as_object().cloned())
+            .unwrap_or_default();
+        merged.extend(choices.clone());
+        buyer.insert("consent".into(), Value::Object(merged));
+    } else if let Some(previous) = previous {
+        buyer.insert("consent".into(), previous);
     }
-    Ok(Some(buyer))
+    Ok(Some(Value::Object(buyer)))
 }
 /// The JSON fields `validate` reads, typed as it reads them.
 #[derive(Deserialize, Default)]
@@ -86,6 +91,8 @@ struct ValidateInput {
     #[serde(deserialize_with = "lenient")]
     granted: Option<bool>,
     source: Value,
+    #[serde(deserialize_with = "keep_present")]
+    segments: Option<Value>,
 }
 
 fn validate(v: &Value, segments: bool) -> Result<()> {
@@ -101,7 +108,7 @@ fn validate(v: &Value, segments: bool) -> Result<()> {
             "Consent requires an explicit platform choice; policy metadata is server-owned",
         ));
     }
-    if let Some(values) = v.get("segments") {
+    if let Some(values) = &input.segments {
         let values = values
             .as_object()
             .filter(|v| segments && v.len() <= 2)
@@ -124,75 +131,220 @@ pub(super) async fn prepare(
     h: &RequestContext,
     v: &Value,
 ) -> Result<Option<(String, HashMap<String, bool>)>> {
-    let Some(buyer) = v.get("buyer") else {
+    let Some(buyer) = view::<SessionInput>(v).buyer else {
         return Ok(None);
     };
     let explicit = buyer.is_null();
-    let Some(choices) = buyer.get("consent").or(explicit.then_some(&Value::Null)) else {
+    let Some(choices) = view::<ConsentSlot>(&buyer)
+        .consent
+        .or(explicit.then_some(Value::Null))
+    else {
         return Ok(None);
     };
+    let choices = choices.as_object().cloned().unwrap_or_default();
     let (s, _) = commerce::scoped_config(a, &tenant(h)?, marketing::channel_id(h)).await?;
     let patch = PURPOSES
         .iter()
         .filter(|(id, native)| {
-            *native != "saleOrSharing" && (explicit || choices.get(*id).is_some())
+            *native != "saleOrSharing" && (explicit || choices.contains_key(*id))
         })
         .map(|(id, native)| {
-            let decision = &choices[*id];
-            let granted = decision["granted"] == true
+            let decision = ConsentDecision::of(choices.get(*id));
+            let granted = decision.granted()
                 || (*id == MARKETING
                     && [EMAIL, SMS]
                         .iter()
-                        .any(|segment| decision["segments"][*segment]["granted"] == true));
+                        .any(|segment| decision.segment(segment).granted()));
             ((*native).to_owned(), granted)
         })
         .collect();
     Ok(Some((legal::policy_version(&s.legal), patch)))
 }
+/// One projected consent choice.
+#[derive(Serialize)]
+struct ConsentChoice {
+    granted: bool,
+    source: &'static str,
+    description: &'static str,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    segments: Option<BTreeMap<&'static str, ConsentChoice>>,
+}
+/// Projects the consent choices from the native receipt and the buyer's decisions.
+fn projected_choices(
+    receipt: &ConsentReceipt,
+    original: &BuyerConsent,
+    locale: &str,
+) -> BTreeMap<&'static str, ConsentChoice> {
+    let mut consent = BTreeMap::new();
+    for (id, native) in PURPOSES {
+        let decision = original.decision(id);
+        let active = receipt.active(native);
+        let source = if decision.source == "platform" && receipt.decided == Some(true) {
+            "platform"
+        } else {
+            "business"
+        };
+        let mut choice = ConsentChoice {
+            granted: active && decision.granted(),
+            source,
+            description: messages::consent(native, locale),
+            segments: None,
+        };
+        if *id == MARKETING {
+            let segments = [(EMAIL, "email"), (SMS, "sms")].map(|(segment, contact)| {
+                let granted = decision
+                    .segment(segment)
+                    .granted
+                    .unwrap_or(decision.granted());
+                (
+                    segment,
+                    ConsentChoice {
+                        granted: active && granted,
+                        source,
+                        description: messages::consent(contact, locale),
+                        segments: None,
+                    },
+                )
+            });
+            choice.segments = Some(BTreeMap::from(segments));
+        }
+        consent.insert(*id, choice);
+    }
+    consent
+}
 pub(super) async fn project(
     a: &App,
     h: &RequestContext,
     c: &StoredCart,
-    doc: &mut Value,
+    doc: &mut UcpDocument,
 ) -> Result<()> {
-    let snapshot = c.data.order.as_ref().map(|order| &order["legal"]);
-    let receipt = if let Some(snapshot) = snapshot {
-        snapshot["consent"].clone()
+    let snapshot = c
+        .data
+        .order
+        .as_ref()
+        .map(|order| view::<OrderSnapshot>(order).legal);
+    let (receipt, original): (ConsentReceipt, BuyerConsent) = if let Some(snapshot) = snapshot {
+        (
+            view(&snapshot.consent),
+            view(&json!({"consent":snapshot.buyer_consent})),
+        )
     } else {
-        legal::consent_receipt(State(a.core.clone()), h.clone())
-            .await?
-            .0
+        (
+            view(
+                &legal::consent_receipt(State(a.core.clone()), h.clone())
+                    .await?
+                    .0,
+            ),
+            c.data.buyer.as_ref().map(view).unwrap_or_default(),
+        )
     };
-    let saved_buyer = json!({"consent":snapshot.map(|s|s["buyerConsent"].clone())});
-    let original = if snapshot.is_some() {
-        &saved_buyer
-    } else {
-        c.data.buyer.as_ref().unwrap_or(&Value::Null)
-    };
-    let mut consent = json!({});
-    for (id, native) in PURPOSES {
-        let decision = &original["consent"][*id];
-        let active = receipt["decided"] == true && receipt["choices"][*native] == true;
-        let explicit = decision["source"] == "platform" && receipt["decided"] == true;
-        let mut choice = json!({"granted":active && decision["granted"]==true,"source":if explicit{"platform"}else{"business"},"description":messages::consent(native,&c.data.locale)});
-        if *id == MARKETING {
-            for (segment, contact) in [(EMAIL, "email"), (SMS, "sms")] {
-                let granted = decision["segments"][segment]["granted"]
-                    .as_bool()
-                    .unwrap_or(decision["granted"] == true);
-                choice["segments"][segment] = json!({"granted":active && granted,"source":if explicit{"platform"}else{"business"},"description":messages::consent(contact,&c.data.locale)});
-            }
-        }
-        consent[*id] = choice;
+    let consent = serde_json::to_value(projected_choices(&receipt, &original, &c.data.locale))
+        .expect("Consent choices serialize");
+    let buyer = doc.buyer.get_or_insert(Value::Null);
+    if !buyer.is_object() {
+        *buyer = json!({});
     }
-    if !doc["buyer"].is_object() {
-        doc["buyer"] = json!({});
+    if let Some(fields) = buyer.as_object_mut() {
+        fields.insert("consent".into(), consent);
     }
-    doc["buyer"]["consent"] = consent;
-    doc["ucp"]["capabilities"][CAPABILITY] = json!([{"version":UCP_VERSION}]);
-    if c.status == "open" && missing(&doc["buyer"]) {
-        doc["status"] = json!("incomplete");
-        doc["messages"].as_array_mut().unwrap().push(json!({"type":"warning","code":"missing_consent_data","content":messages::consent("missing",&c.data.locale)}));
+    doc.ucp
+        .capabilities
+        .insert(CAPABILITY, UcpCapability::version(UCP_VERSION));
+    if c.status == "open" && missing(buyer) {
+        doc.status = Some("incomplete");
+        doc.messages.push(UcpMessage {
+            kind: "warning",
+            code: "missing_consent_data",
+            content: messages::consent("missing", &c.data.locale),
+        });
     }
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// The projection as it was built from indexed JSON before the typed choices.
+    fn legacy(receipt: &Value, original: &Value, locale: &str) -> Value {
+        let mut consent = json!({});
+        for (id, native) in PURPOSES {
+            let decision = &original["consent"][*id];
+            let active = receipt["decided"] == true && receipt["choices"][*native] == true;
+            let explicit = decision["source"] == "platform" && receipt["decided"] == true;
+            let mut choice = json!({"granted":active && decision["granted"]==true,"source":if explicit{"platform"}else{"business"},"description":messages::consent(native,locale)});
+            if *id == MARKETING {
+                for (segment, contact) in [(EMAIL, "email"), (SMS, "sms")] {
+                    let granted = decision["segments"][segment]["granted"]
+                        .as_bool()
+                        .unwrap_or(decision["granted"] == true);
+                    choice["segments"][segment] = json!({"granted":active && granted,"source":if explicit{"platform"}else{"business"},"description":messages::consent(contact,locale)});
+                }
+            }
+            consent[*id] = choice;
+        }
+        consent
+    }
+
+    #[test]
+    fn typed_choices_match_the_indexed_projection() {
+        let receipts = [
+            json!(null),
+            json!({"decided":true,"choices":{"analytics":true,"marketing":true,"personalization":false}}),
+            json!({"decided":false,"choices":{"analytics":true}}),
+            json!({"decided":true,"choices":"all"}),
+        ];
+        let buyers = [
+            json!(null),
+            json!({"consent":null}),
+            json!({"consent":{"dev.ucp.consent.analytics":{"granted":true,"source":"platform"}}}),
+            json!({"consent":{MARKETING:{"granted":false,"source":"platform","segments":{EMAIL:{"granted":true,"source":"platform"}}}}}),
+            json!({"consent":{MARKETING:{"granted":true,"segments":{SMS:{"granted":false},EMAIL:"x"}},"dev.ucp.consent.preferences":7}}),
+        ];
+        for receipt in &receipts {
+            for buyer in &buyers {
+                for locale in ["en-GB", "de-DE"] {
+                    let typed = projected_choices(&view(receipt), &view(buyer), locale);
+                    assert_eq!(
+                        serde_json::to_value(typed).unwrap(),
+                        legacy(receipt, buyer, locale)
+                    );
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn buyer_merges_choices_like_indexed_assignment() {
+        let current = json!({"email":"a@b.c","consent":{"dev.ucp.consent.analytics":{"granted":true,"source":"platform"}}});
+        let merged = buyer(
+            &json!({"buyer":{"name":"B","consent":{"dev.ucp.consent.preferences":{"granted":false,"source":"platform"}}}}),
+            Some(&current),
+        )
+        .unwrap();
+        assert_eq!(
+            merged,
+            Some(
+                json!({"name":"B","consent":{"dev.ucp.consent.analytics":{"granted":true,"source":"platform"},"dev.ucp.consent.preferences":{"granted":false,"source":"platform"}}})
+            )
+        );
+        assert_eq!(
+            buyer(&json!({}), Some(&current)).unwrap(),
+            Some(json!({"consent":current["consent"]}))
+        );
+        assert_eq!(
+            buyer(&json!({"buyer":{"name":"C"}}), Some(&current)).unwrap(),
+            Some(json!({"name":"C","consent":current["consent"]}))
+        );
+        assert_eq!(buyer(&json!({"buyer":null}), Some(&current)).unwrap(), None);
+        assert!(buyer(&json!({"buyer":"x"}), None).is_err());
+        assert!(buyer(&json!({"buyer":{"consent":null}}), None).is_err());
+        assert!(
+            buyer(
+                &json!({"buyer":{"consent":{MARKETING:{"granted":true,"source":"platform","segments":{EMAIL:{"granted":true,"source":"platform"}}}}}}),
+                None
+            )
+            .is_ok()
+        );
+    }
 }

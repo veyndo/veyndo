@@ -3,6 +3,7 @@ use super::{admission, catalog, dispatch, schema};
 use crate::apps;
 use crate::foundation::App;
 use dispatch::Owner;
+use serde::Serialize;
 use serde_json::Value;
 use serde_json::json;
 use std::sync::LazyLock;
@@ -146,17 +147,27 @@ impl Operation {
         )
     }
 }
+/// One operation in the offline contract export.
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct ExportedOperation<'a> {
+    name: &'a str,
+    description: &'a str,
+    input_schema: &'a Value,
+    read_only: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    output_schema: Option<&'a Value>,
+}
 /// Build-time contract export is offline and includes no actor credentials or records.
 pub(crate) fn export() -> Value {
     let operations = OPERATIONS
         .iter()
-        .map(|operation| {
-            let mut value = json!({"name":operation.name,"description":operation.description,
-            "inputSchema":operation.input,"readOnly":operation.effect==Effect::Read});
-            if let Some(schema) = &operation.output {
-                value["outputSchema"] = schema.clone();
-            }
-            value
+        .map(|operation| ExportedOperation {
+            name: operation.name,
+            description: operation.description,
+            input_schema: &operation.input,
+            read_only: operation.effect == Effect::Read,
+            output_schema: operation.output.as_ref(),
         })
         .collect::<Vec<_>>();
     json!({"version":1,"operations":operations})
@@ -167,6 +178,46 @@ mod tests {
     use super::*;
     use crate::marketing;
     use veyndo_catalog::types::catalog_page::CatalogCriteria;
+    #[test]
+    fn export_matches_the_indexed_shape() {
+        let indexed = OPERATIONS
+            .iter()
+            .map(|operation| {
+                let mut value = json!({"name":operation.name,"description":operation.description,
+                "inputSchema":operation.input,"readOnly":operation.effect==Effect::Read});
+                if let Some(schema) = &operation.output {
+                    value["outputSchema"] = schema.clone();
+                }
+                value
+            })
+            .collect::<Vec<_>>();
+        assert!(
+            OPERATIONS
+                .iter()
+                .any(|operation| operation.output.is_some())
+        );
+        assert_eq!(export(), json!({"version":1,"operations":indexed}));
+    }
+    #[test]
+    fn grid_properties_match_the_indexed_shape() {
+        let mut products = crate::operations::grid_fields("products").unwrap();
+        products["preparation"] = json!({"type":"boolean"});
+        products["after"] = json!({"type":"string"});
+        products["limit"] = json!({"type":"integer","minimum":1,"maximum":100});
+        assert_eq!(
+            find("merchant.products").unwrap().input["properties"],
+            products
+        );
+        for (name, grid) in [
+            ("merchant.orders", "orders"),
+            ("merchant.customers", "customers"),
+        ] {
+            let mut p = crate::operations::grid_fields(grid).unwrap();
+            p["after"] = json!({"type":"string"});
+            p["limit"] = json!({"type":"integer","minimum":1,"maximum":100});
+            assert_eq!(find(name).unwrap().input["properties"], p);
+        }
+    }
     #[test]
     fn catalog_contract_preserves_native_categories_and_search_alias() {
         let schema = tool_schema("catalog.search");

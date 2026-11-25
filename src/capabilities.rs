@@ -94,6 +94,13 @@ pub(crate) fn invoke<'a>(
 }
 
 /// The arguments a shopper or merchant capability takes from its call.
+/// The queued durable agent run `merchant.plan` waits for.
+#[derive(Deserialize, Default)]
+#[serde(default, rename_all = "camelCase")]
+struct QueuedRun {
+    #[serde(deserialize_with = "lenient")]
+    task_id: Option<String>,
+}
 #[derive(Deserialize, Default)]
 #[serde(default, rename_all = "camelCase")]
 struct CapabilityArgs {
@@ -203,7 +210,8 @@ pub(super) async fn invoke_native(
                 return Err(bad("Instruction must contain 1..4000 characters"));
             }
             let queued=agent_runs::enqueue(a,h,json!({"instruction":instruction,"locale":locale,"channel":marketing::channel_id(h)}),None).await?;
-            let run = agent_runs::wait(a, h, queued["taskId"].as_str().unwrap()).await?;
+            let queued: QueuedRun = view(&queued);
+            let run = agent_runs::wait(a, h, queued.task_id.as_deref().unwrap()).await?;
             agent_runs::plan_result(run)
         }
         "merchant.apply" => {

@@ -6,6 +6,7 @@ use crate::{
 };
 use serde_json::Value;
 use serde_json::json;
+use veyndo_core::document::merge;
 /// Start with operations whose domain owners guarantee a stable result shape.
 pub(super) fn output(name: &str) -> Option<Value> {
     if name != marketing::DRAFT_CAPABILITY.0 {
@@ -129,9 +130,11 @@ fn merchant_properties(name: &str) -> Option<Value> {
         }
         "merchant.products" => {
             let mut p = operations::grid_fields("products").unwrap();
-            p["preparation"] = json!({"type":"boolean"});
-            p["after"] = json!({"type":"string"});
-            p["limit"] = json!({"type":"integer","minimum":1,"maximum":100});
+            merge(
+                &mut p,
+                json!({"preparation":{"type":"boolean"},"after":{"type":"string"},"limit":{"type":"integer","minimum":1,"maximum":100}}),
+            )
+            .expect("Grid fields are an object");
             p
         }
         "merchant.categories" => json!({}),
@@ -176,8 +179,11 @@ fn merchant_properties(name: &str) -> Option<Value> {
                 "customers"
             })
             .unwrap();
-            p["after"] = json!({"type":"string"});
-            p["limit"] = json!({"type":"integer","minimum":1,"maximum":100});
+            merge(
+                &mut p,
+                json!({"after":{"type":"string"},"limit":{"type":"integer","minimum":1,"maximum":100}}),
+            )
+            .expect("Grid fields are an object");
             p
         }
         "merchant.customer" | "merchant.order" | "merchant.receipts" => {
